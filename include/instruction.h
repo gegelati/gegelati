@@ -1,6 +1,7 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include <typeinfo>
 #include <vector> 
 
 /**
@@ -13,9 +14,28 @@
 * before executing it.
 */
 class Instruction {
+
+public:
+	/**
+	* \brief Get a const_iterator on the operand types nedded by the Instruction. 
+	* 
+	*`\return a const_iterator on the list of operand type_info of the Instruction.
+	*/
+	std::vector<std::reference_wrapper<const std::type_info>>::const_iterator getOperandTypes() const;
+
+	/**
+	* \brief Get the number of parameters required to execute the Instruction.
+	*
+	* \return an Int value corresponding to the number of parameters required by the Instruction.
+	*/
+	int getNbParameters() const;
+	
 protected:
 	/**
 	* \brief Protected constructor to force the class abstract nature.
+	*
+	* The definition of this constructor initialize an empty operandType list and 
+	* sets the number of required parameters to 0.
 	*/
 	Instruction();
 	
@@ -27,7 +47,7 @@ protected:
 	/**
 	* \brief List of the types of the operands needed to execute the instruction.
 	*/
-	std::vector<std::type_info> operandTypes;
+	std::vector<std::reference_wrapper<const std::type_info>> operandTypes;
 };
 
 #endif
