@@ -8,6 +8,5 @@ int main() {
 
 	Instruction* i = new InstructionAdd<double>();
 
-	system("PAUSE");
 	return 0;
 }
