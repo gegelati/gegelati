@@ -59,8 +59,8 @@ TEST(InstructionAdd, CheckParameters) {
 
 TEST(InstructionAdd, Execute) {
 	Instruction* i = new InstructionAdd<double>();
-	PrimitiveType<double> a{ 2.5 };
-	PrimitiveType<double> b = 5.6;
+	PrimitiveType<double> a{ 2.6 };
+	PrimitiveType<double> b = 5.5;
 	PrimitiveType<int> c = 3;
 
 	std::vector<std::reference_wrapper<SupportedType>> vect;
@@ -73,4 +73,10 @@ TEST(InstructionAdd, Execute) {
 	ASSERT_EQ(i->execute({}, vect), 0.0) << "Execute method of InstructionAdd<double> returns an incorrect value with invalid operands.";
 
 	delete i;
+	i = new InstructionMultByConstParam<double, int>();
+	vect.pop_back();
+	Parameter p = 2;
+	ASSERT_EQ(i->execute({ p }, vect), 5.2) << "Execute method of InstructionMultByConstParam<double,int> returns an incorrect value with valid operands.";
+	ASSERT_EQ(i->execute({ }, vect), 0.0) << "Execute method of InstructionMultByConstParam<double,int> returns an incorrect value with invalid params.";
+
 }

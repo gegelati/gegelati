@@ -12,11 +12,27 @@ public:
 	*  \brief Constructor for the InstructionMultByConstParam class.
 	*/
 	InstructionMultByConstParam();
+
+	double execute(
+		const std::vector<std::reference_wrapper<Parameter>>& params,
+		const std::vector<std::reference_wrapper<SupportedType>>& args) const;
 };
 
 template <class T, class U> InstructionMultByConstParam<T, U>::InstructionMultByConstParam() {
 	this->operandTypes.push_back(typeid(PrimitiveType<T>));
 	this->nbParameters = 1;
-};
+}
+
+template<class T, class U> double InstructionMultByConstParam<T, U>::execute(
+	const std::vector<std::reference_wrapper<Parameter>>& params, 
+	const std::vector<std::reference_wrapper<SupportedType>>& args) const
+{
+	if (Instruction::execute(params, args) != 1.0) {
+		return 0.0;
+	}
+
+	return dynamic_cast<PrimitiveType<T>&>(args.at(0).get()) * (U)params.at(0).get() ;
+}
+;
 
 #endif
