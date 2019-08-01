@@ -4,6 +4,7 @@
 #include <typeinfo>
 #include <vector> 
 
+#include "parameter.h"
 #include "supportedTypes.h"
 
 
@@ -40,6 +41,13 @@ public:
 	*/
 	bool checkOperandTypes(const std::vector<std::reference_wrapper<SupportedType>>& arguments) const;
 	
+	/**
+	* \brief Check if a given vector contains the right number of parameters for the Instruction.
+	*
+	* \param[in] params a const list of reference_wrapper to Parameters.
+	*/
+	bool checkParameters(const std::vector<std::reference_wrapper<Parameter>>& params) const;
+
 protected:
 	/**
 	* \brief Protected constructor to force the class abstract nature.

@@ -27,3 +27,8 @@ bool Instruction::checkOperandTypes(const std::vector<std::reference_wrapper<Sup
 	}
 	return true;
 }
+
+bool Instruction::checkParameters(const std::vector<std::reference_wrapper<Parameter>>& params) const
+{
+	return (params.size() == this->nbParameters);
+}

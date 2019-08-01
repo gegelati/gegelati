@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "instructionAdd.h"
+#include "instructionMultByConstParam.h"
 
 TEST(InstructionAdd, ConstructorDestructorCall) {
 	Instruction* i = new InstructionAdd<double>();
@@ -37,5 +38,21 @@ TEST(InstructionAdd, CheckArgumentTypes) {
 	vect.pop_back();
 	vect.push_back(d);
 	ASSERT_FALSE(i->checkOperandTypes(vect)) << "Operands of invalid types wrongfully classified as valid";
+	delete i;
+}
+
+TEST(InstructionAdd, CheckParameters) {
+	Instruction* i = new InstructionAdd<int>();
+	std::vector<std::reference_wrapper<Parameter>> v;
+	Parameter a = 2;
+	Parameter b = 3.2f;
+	v.push_back(a);
+	v.push_back(b);
+	ASSERT_FALSE(i->checkParameters(v)) << "Parameter list of wrong size not detected as such.";
+	delete i;
+
+	i = new InstructionMultByConstParam<double, int>();
+	v.pop_back();
+	ASSERT_TRUE(i->checkParameters(v))  << "Parameter list of right size not detected as such.";
 	delete i;
 }
