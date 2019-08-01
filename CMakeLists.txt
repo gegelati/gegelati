@@ -8,6 +8,10 @@ cmake_minimum_required(VERSION 2.8)
 # Programs
 #  - tpg
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # IDE dependent config
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
 	MESSAGE("Add definition for ${CMAKE_GENERATOR}")

@@ -4,6 +4,9 @@
 #include <typeinfo>
 #include <vector> 
 
+#include "supportedTypes.h"
+
+
 /**
 * \brief This abstract class is the base class for any instruction to be used in a Program.
 *
@@ -17,11 +20,11 @@ class Instruction {
 
 public:
 	/**
-	* \brief Get a const_iterator on the operand types nedded by the Instruction. 
+	* \brief Get the list of operand types needed by the Instruction. 
 	* 
-	*`\return a const_iterator on the list of operand type_info of the Instruction.
+	*`\return a const reference on the list of operand type_info of the Instruction.
 	*/
-	std::vector<std::reference_wrapper<const std::type_info>>::const_iterator getOperandTypes() const;
+	const std::vector<std::reference_wrapper<const std::type_info>>& getOperandTypes() const;
 
 	/**
 	* \brief Get the number of parameters required to execute the Instruction.
@@ -29,6 +32,13 @@ public:
 	* \return an Int value corresponding to the number of parameters required by the Instruction.
 	*/
 	int getNbParameters() const;
+
+	/**
+	* \brief Check if a given vector contains elements whose types corresponds to the types of the Instruction operands.
+	*
+	* \param[in] arguments a const list of reference_wrapper to any type of object. (not doable at compile time)
+	*/
+	bool checkOperandTypes(const std::vector<std::reference_wrapper<SupportedType>>& arguments) const;
 	
 protected:
 	/**

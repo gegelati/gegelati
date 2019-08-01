@@ -22,8 +22,8 @@ public:
 
 
 template <class T> InstructionAdd<T>::InstructionAdd(){
-	this->operandTypes.push_back(typeid(T));
-	this->operandTypes.push_back(typeid(T));
+	this->operandTypes.push_back(typeid(PrimitiveType<T>));
+	this->operandTypes.push_back(typeid(PrimitiveType<T>));
 }
 
 #endif
