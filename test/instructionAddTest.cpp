@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
+#include "instructions/set.h"
 
 TEST(Instructions, ConstructorDestructorCall) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
@@ -79,4 +80,16 @@ TEST(Instructions, Execute) {
 	ASSERT_EQ(i->execute({ p }, vect), 5.2) << "Execute method of MultByConstParam<double,int> returns an incorrect value with valid operands.";
 	ASSERT_EQ(i->execute({ }, vect), 0.0) << "Execute method of MultByConstParam<double,int> returns an incorrect value with invalid params.";
 	delete i;
+}
+
+TEST(Instructions, InstructionsSetAdd) {
+	Instructions::Set s;
+	
+	Instructions::MultByConstParam<int, float> iMult;
+	Instructions::MultByConstParam<int, float> iMult2;
+	Instructions::MultByConstParam<int, int> iMult3;
+
+	ASSERT_TRUE(s.add(iMult)) << "Add of instruction to empty Instructions::Set failed.";
+	ASSERT_FALSE(s.add(iMult2)) << "Add of instruction already present in an Instructions::Set did not fail.";
+	ASSERT_TRUE(s.add(iMult3)) << "Add of instruction to non empty Instructions::Set failed. (with a template instruction with different template param than an already present one";
 }
