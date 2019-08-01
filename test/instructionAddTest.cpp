@@ -56,3 +56,21 @@ TEST(InstructionAdd, CheckParameters) {
 	ASSERT_TRUE(i->checkParameters(v))  << "Parameter list of right size not detected as such.";
 	delete i;
 }
+
+TEST(InstructionAdd, Execute) {
+	Instruction* i = new InstructionAdd<double>();
+	PrimitiveType<double> a{ 2.5 };
+	PrimitiveType<double> b = 5.6;
+	PrimitiveType<int> c = 3;
+
+	std::vector<std::reference_wrapper<SupportedType>> vect;
+	vect.push_back(a);
+	vect.push_back(b);	
+	ASSERT_EQ(i->execute({} , vect), 8.1) << "Execute method of InstructionAdd<double> returns an incorrect value with valid operands.";
+
+	vect.pop_back();
+	vect.push_back(c);
+	ASSERT_EQ(i->execute({}, vect), 0.0) << "Execute method of InstructionAdd<double> returns an incorrect value with invalid operands.";
+
+	delete i;
+}

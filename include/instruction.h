@@ -48,6 +48,22 @@ public:
 	*/
 	bool checkParameters(const std::vector<std::reference_wrapper<Parameter>>& params) const;
 
+	/**
+	* \brief Execute the Instruction for the given parameters and arguments.
+	*
+	* Derived class should implement their own behavior for this method. In cas 
+	* of invalid argument or parameters, for type or number or value reason, this 
+	* method should always return 0.0.
+	* 
+	* \param[in] params the vector of reference_wrapper to the Parameter passed to the Instruction.
+	* \param[in] args the vector of reference_wrapper to the SupportedType passed to the Instruction.
+	* \return the default implementation of the Intruction class returns 0.0 if the given params or arguments are not valid.
+	*         Otherwise, 1.0 is returned.
+	*/
+	virtual double execute(
+		const std::vector<std::reference_wrapper<Parameter>>& params,
+		const std::vector<std::reference_wrapper<SupportedType>>& args) const;
+
 protected:
 	/**
 	* \brief Protected constructor to force the class abstract nature.

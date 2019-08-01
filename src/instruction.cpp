@@ -32,3 +32,13 @@ bool Instruction::checkParameters(const std::vector<std::reference_wrapper<Param
 {
 	return (params.size() == this->nbParameters);
 }
+
+double Instruction::execute(const std::vector<std::reference_wrapper<Parameter>>& params, const std::vector<std::reference_wrapper<SupportedType>>& arguments) const
+{
+	if (!this->checkParameters(params) || !this->checkOperandTypes(arguments)) {
+		return 0.0;
+	}
+	else {
+		return 1.0;
+	}
+}

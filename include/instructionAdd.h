@@ -18,12 +18,28 @@ public:
 	*  \brief Constructor for the InstructionAdd class.
 	*/
 	InstructionAdd();
+
+	double execute(
+		const std::vector<std::reference_wrapper<Parameter>>& params,
+		const std::vector<std::reference_wrapper<SupportedType>>& args) const;
 };
 
 
 template <class T> InstructionAdd<T>::InstructionAdd(){
 	this->operandTypes.push_back(typeid(PrimitiveType<T>));
 	this->operandTypes.push_back(typeid(PrimitiveType<T>));
+}
+
+
+template <class T> double InstructionAdd<T>::execute(
+	const std::vector<std::reference_wrapper<Parameter>>& params,
+	const std::vector<std::reference_wrapper<SupportedType>>& args) const {
+
+	if (Instruction::execute(params, args) != 1.0) {
+		return 0.0;
+	} 
+
+	return dynamic_cast<PrimitiveType<T>&>(args.at(0).get()) + dynamic_cast<PrimitiveType<T>&>(args.at(1).get());;
 }
 
 #endif
