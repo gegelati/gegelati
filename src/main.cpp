@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "instruction.h"
-#include "instructionAdd.h"
+#include "instructions/instruction.h"
+#include "instructions/addPrimitiveType.h"
 
 int main() {
 	std::cout << "Hello TPG World" << std::endl ;

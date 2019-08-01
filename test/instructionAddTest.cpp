@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "instructionAdd.h"
-#include "instructionMultByConstParam.h"
+#include "instructions/addPrimitiveType.h"
+#include "instructions/multByConstParam.h"
 
 TEST(Instructions, ConstructorDestructorCall) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
