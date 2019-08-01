@@ -6,7 +6,7 @@
 int main() {
 	std::cout << "Hello TPG World" << std::endl ;
 
-	Instruction* i = new InstructionAdd<double>();
+	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
 
 	return 0;
 }

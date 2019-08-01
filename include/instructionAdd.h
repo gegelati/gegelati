@@ -6,40 +6,43 @@
 
 #include "instruction.h"
 
-/**
-* \brief Template class for add instruction on all types of data: double, int, ...
-*/
-template <class T> class InstructionAdd : public Instruction {
+namespace Instructions {
 
-	static_assert(std::is_fundamental<T>::value, "Template class InstructionAdd<T> can only be used for primitive types.");
-
-public:
 	/**
-	*  \brief Constructor for the InstructionAdd class.
+	* \brief Template class for add instruction on all types of data: double, int, ...
 	*/
-	InstructionAdd();
+	template <class T> class AddPrimitiveType : public Instruction {
 
-	double execute(
+		static_assert(std::is_fundamental<T>::value, "Template class AddPrimitiveType<T> can only be used for primitive types.");
+
+	public:
+		/**
+		*  \brief Constructor for the AddPrimitiveType class.
+		*/
+		AddPrimitiveType();
+
+		double execute(
+			const std::vector<std::reference_wrapper<Parameter>>& params,
+			const std::vector<std::reference_wrapper<SupportedType>>& args) const;
+	};
+
+
+	template <class T> AddPrimitiveType<T>::AddPrimitiveType() {
+		this->operandTypes.push_back(typeid(PrimitiveType<T>));
+		this->operandTypes.push_back(typeid(PrimitiveType<T>));
+	}
+
+
+	template <class T> double AddPrimitiveType<T>::execute(
 		const std::vector<std::reference_wrapper<Parameter>>& params,
-		const std::vector<std::reference_wrapper<SupportedType>>& args) const;
-};
+		const std::vector<std::reference_wrapper<SupportedType>>& args) const {
 
+		if (Instruction::execute(params, args) != 1.0) {
+			return 0.0;
+		}
 
-template <class T> InstructionAdd<T>::InstructionAdd(){
-	this->operandTypes.push_back(typeid(PrimitiveType<T>));
-	this->operandTypes.push_back(typeid(PrimitiveType<T>));
-}
-
-
-template <class T> double InstructionAdd<T>::execute(
-	const std::vector<std::reference_wrapper<Parameter>>& params,
-	const std::vector<std::reference_wrapper<SupportedType>>& args) const {
-
-	if (Instruction::execute(params, args) != 1.0) {
-		return 0.0;
-	} 
-
-	return dynamic_cast<PrimitiveType<T>&>(args.at(0).get()) + dynamic_cast<PrimitiveType<T>&>(args.at(1).get());;
+		return dynamic_cast<PrimitiveType<T>&>(args.at(0).get()) + dynamic_cast<PrimitiveType<T>&>(args.at(1).get());;
+	}
 }
 
 #endif

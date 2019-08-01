@@ -16,7 +16,7 @@ public:
 * \brief Template class to simplify creation of SupportedType derivate for primitive types.
 */
 template <class T> class PrimitiveType : public SupportedType {
-	static_assert(std::is_fundamental<T>::value, "Template class InstructionAdd<T> can only be used for primitive types.");
+	static_assert(std::is_fundamental<T>::value, "Template class AddPrimitiveType<T> can only be used for primitive types.");
 
 protected:
 	/// copied value of the primitive object.

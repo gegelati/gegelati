@@ -1,7 +1,8 @@
 #include "instruction.h"
 
-#
 #include <iostream>
+
+using namespace Instructions;
 
 Instruction::Instruction() : operandTypes(), nbParameters(0) {
 }
