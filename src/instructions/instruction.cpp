@@ -11,7 +11,12 @@ const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::ge
 	return this->operandTypes;
 }
 
-int Instruction::getNbParameters() const {
+unsigned int Instructions::Instruction::getNbOperands() const
+{
+	return (unsigned int)this->operandTypes.size();
+}
+
+unsigned int Instruction::getNbParameters() const {
 	return this->nbParameters;
 }
 

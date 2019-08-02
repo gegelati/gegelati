@@ -28,11 +28,19 @@ namespace Instructions {
 		const std::vector<std::reference_wrapper<const std::type_info>>& getOperandTypes() const;
 
 		/**
+		* \brief Get the number of operands required to execute the Instruction.
+		*
+		* \return an unsigned int value corresponding to the number of operands required by the Instruction.
+		*/
+		unsigned int getNbOperands() const;
+
+
+		/**
 		* \brief Get the number of parameters required to execute the Instruction.
 		*
-		* \return an Int value corresponding to the number of parameters required by the Instruction.
+		* \return an unsigned int value corresponding to the number of parameters required by the Instruction.
 		*/
-		int getNbParameters() const;
+		unsigned int getNbParameters() const;
 
 		/**
 		* \brief Check if a given vector contains elements whose types corresponds to the types of the Instruction operands.
@@ -76,7 +84,7 @@ namespace Instructions {
 		/**
 		* \brief Number of parameters required when calling the instruction.
 		*/
-		int nbParameters;
+		unsigned int nbParameters;
 
 		/**
 		* \brief List of the types of the operands needed to execute the instruction.

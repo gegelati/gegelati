@@ -14,6 +14,7 @@ TEST(Instructions, ConstructorDestructorCall) {
 
 TEST(Instructions, OperandListAndNbParam) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
+	ASSERT_EQ(i->getNbOperands(), 2) << "Number of operands of Instructions::AddPrimitiveType<double> is different from 2";
 	auto operands = i->getOperandTypes();
 	ASSERT_EQ(operands.size(), 2) << "Operand list of AddPrimitiveType<double> is different from 2";
 	ASSERT_STREQ(operands.at(0).get().name(), typeid(PrimitiveType<double>).name()) << "First operand of AddPrimitiveType<double> is not\"" << typeid(PrimitiveType<double>).name() << "\".";
@@ -82,7 +83,7 @@ TEST(Instructions, Execute) {
 	delete i;
 }
 
-TEST(Instructions, InstructionsSetAdd) {
+TEST(Instructions, SetAdd) {
 	Instructions::Set s;
 	
 	Instructions::MultByConstParam<int, float> iMult;
@@ -92,4 +93,45 @@ TEST(Instructions, InstructionsSetAdd) {
 	ASSERT_TRUE(s.add(iMult)) << "Add of instruction to empty Instructions::Set failed.";
 	ASSERT_FALSE(s.add(iMult2)) << "Add of instruction already present in an Instructions::Set did not fail.";
 	ASSERT_TRUE(s.add(iMult3)) << "Add of instruction to non empty Instructions::Set failed. (with a template instruction with different template param than an already present one";
+}
+
+TEST(Instructions, SetGetNbInstruction) {
+	Instructions::Set s;
+
+	ASSERT_EQ(s.getNbInstructions(), 0) << "Incorrect number of instructions in an empty Set.";
+
+	Instructions::MultByConstParam<int, float> iMult;
+	Instructions::MultByConstParam<int, int> iMult2;
+	s.add(iMult);
+	s.add(iMult2);
+	ASSERT_EQ(s.getNbInstructions(), 2) << "Incorrect number of instructions in a non-empty Set.";
+}
+
+TEST(Instructions, SetGetInstruction) {
+	Instructions::Set s;
+
+	Instructions::AddPrimitiveType<float> iAdd;
+	Instructions::MultByConstParam<double, float> iMult;
+	s.add(iAdd);
+	s.add(iMult);
+	
+	const Instructions::Instruction* res;
+	ASSERT_NO_THROW(res = &s.getInstruction(1)) << "Exception was thrown unexpectedly when calling Set::getInstruction with a valid index.";
+		
+	// Compare that the returned reference points to the right object.
+	ASSERT_EQ(res , &iMult) << "Incorrect Instruction was returned by valid Set::getInstruction.";
+		
+	// Check that exception is thrown when an invalid index is given.
+	ASSERT_THROW(res = &s.getInstruction(2), std::out_of_range) << "Exception was not thrown when calling Set::getInstruction with an invalid index.";
+}
+
+TEST(Instructions, SetGetNbMaxOperands) {
+	Instructions::Set s;
+
+	Instructions::AddPrimitiveType<float> iAdd; // Two operands
+	Instructions::MultByConstParam<double, float> iMult; // One operand
+	s.add(iAdd);
+	s.add(iMult);
+
+	ASSERT_EQ(s.getMaxNbOperands(), 2) << "Max number of operands returned by the Instructions::Set is incorrect.";
 }

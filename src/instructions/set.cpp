@@ -17,3 +17,23 @@ bool Instructions::Set::add(const Instruction& instruction)
 
 	return true;
 }
+
+unsigned int Instructions::Set::getNbInstructions() const
+{
+	return (unsigned int)instructions.size();
+}
+
+const Instructions::Instruction& Instructions::Set::getInstruction(const unsigned int i) const
+{
+	return instructions.at(i).get();
+}
+
+unsigned int Instructions::Set::getMaxNbOperands() const
+{
+	unsigned int res = 0;
+	for (auto instruction : this->instructions) {
+		unsigned int nb = instruction.get().getNbOperands();
+		res = (nb > res)? nb : res;
+	}
+	return res;
+}
