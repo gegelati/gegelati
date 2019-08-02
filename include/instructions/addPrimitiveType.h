@@ -10,6 +10,9 @@ namespace Instructions {
 
 	/**
 	* \brief Template class for add instruction on all types of data: double, int, ...
+	*
+	* Although the given template parameter T is a primitive type, the 
+	* SupportedType actually used by the instruction will be from the PrimitiveType<T> type.
 	*/
 	template <class T> class AddPrimitiveType : public Instruction {
 

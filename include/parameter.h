@@ -1,8 +1,6 @@
 #ifndef PARAMETER_H
 #define PARAMETER_H
 
-#include <variant>
-
 /**
 * \brief The parameter type is an union of 4 byte primitive types.
 *
