@@ -2,6 +2,7 @@
 #include <unordered_set>
 
 #include "dataHandlers/dataHandler.h"
+#include "dataHandlers/primitiveTypeArray.h"
 #include "instructions/instruction.h"
 #include "instructions/addPrimitiveType.h"
 #include "supportedTypes.h"
@@ -17,7 +18,8 @@ int main() {
 	SupportedType* t1 = new PrimitiveType<double>();
 	set.insert(*t1);
 
-	 DataHandlers::DataHandler* dh = new DataHandlers::DataHandler();
+	DataHandlers::DataHandler* dh = new DataHandlers::PrimitiveTypeArray<double>();
+	//dh->getHandledTypes();
 
 	return 0;
 }

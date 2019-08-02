@@ -1,24 +1,19 @@
 #ifndef DATA_HANDLER_H
 #define DATA_HANDLER_H
 
-#include <functional>
 #include <typeinfo>
-#include <unordered_set>
+#include <vector>
 
 #include "supportedTypes.h"
 
+namespace std {
+	/*
+	* \brief  Equality operator to std to enable use of standard algorithm on vectors of reference_wrapper of const std::type_info.
+	*/
+	bool operator==(const std::reference_wrapper<const std::type_info>& r0, const std::reference_wrapper<const std::type_info>& r1);
+}
+
 namespace DataHandlers {
-
-	/**
-	* \brief Hashing lambda expression used to enable creation of std::unordered_set of SupportedType.
-	*/
-	auto hash = [](const std::reference_wrapper<const std::type_info>& n) { return typeid(n.get()).hash_code(); };
-	
-	/**
-	* \brief Equality test lambda expression used to enable creation of std::unordered_set of SupportedType.
-	*/
-	auto equal = [](const  std::reference_wrapper<const std::type_info>& n1, const  std::reference_wrapper<const std::type_info>& n2) { return n1.get() == n2.get(); };
-
 	/**
 	* \brief Base class for all sources of data to be accessed by a TPG Instruction executed within a Program.
 	*/
@@ -27,14 +22,17 @@ namespace DataHandlers {
 	protected:
 		/**
 		* \brief List of the types of the operands needed to execute the instruction.
+		*
+		* Because std::unordered_set was too complex to use (because it does not support std::reference_wrapper easily), std::vector is used instead.*
+		* Adding the same type several type to the list of providedType will lead to undefined behavior.
 		*/
-		std::unordered_set<std::reference_wrapper<const std::type_info>, decltype(hash), decltype(equal) > handledTypes;
+		std::vector<std::reference_wrapper<const std::type_info>> providedTypes;
 
 	public:
 		/**
 		* \brief Default constructor of the DataHandler class.
 		*/
-		DataHandler() : handledTypes(8, hash ,equal) {}
+		DataHandler() : providedTypes() {}
 
 		/**
 		* \brief Check a given DataHandler can provide data for the given data type.
@@ -43,6 +41,13 @@ namespace DataHandlers {
 		* \return true if the DataHandler can provide data for the given data type, and false otherwise.
 		*/
 		bool canProvide(const std::type_info& type) const;
+
+		/**
+		* \brief Retrieve the set of types provided by the DataHandler.
+		*
+		* \return a const reference to the data type set provided by the DataHandler.
+		*/
+		const std::vector<std::reference_wrapper<const std::type_info>>& getHandledTypes() const;
 	};
 }
 

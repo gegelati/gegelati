@@ -36,7 +36,7 @@ namespace DataHandlers {
 	};
 
 	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(unsigned int size) : nbElements{size}, data(size) {
-		this->handledTypes.insert(typeid(PrimitiveType<T>));
+		this->providedTypes.push_back(typeid(PrimitiveType<T>));
 	}
 }
 
