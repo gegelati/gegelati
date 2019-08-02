@@ -4,11 +4,17 @@
 #include "instructions/set.h"
 
 TEST(Instructions, ConstructorDestructorCall) {
-	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
-	ASSERT_NE(i, nullptr) << "Call to constructor for AddPrimitiveType<double> failed.";
+	Instructions::Instruction* i = nullptr;
+	ASSERT_NO_THROW({
+		i = new Instructions::AddPrimitiveType<double>();
+		}) << "Call to constructor for AddPrimitiveType<double> failed.";
+
 	delete i;
+
+	ASSERT_NO_THROW({
 	i = new Instructions::AddPrimitiveType<int>();
-	ASSERT_NE(i, nullptr) << "Call to constructor for AddPrimitiveType<int> failed.";
+		}) << "Call to constructor for AddPrimitiveType<int> failed.";
+
 	delete i;
 }
 
@@ -55,7 +61,7 @@ TEST(Instructions, CheckParameters) {
 
 	i = new Instructions::MultByConstParam<double, int>();
 	v.pop_back();
-	ASSERT_TRUE(i->checkParameters(v))  << "Parameter list of right size not detected as such.";
+	ASSERT_TRUE(i->checkParameters(v)) << "Parameter list of right size not detected as such.";
 	delete i;
 }
 
@@ -67,8 +73,8 @@ TEST(Instructions, Execute) {
 
 	std::vector<std::reference_wrapper<SupportedType>> vect;
 	vect.push_back(a);
-	vect.push_back(b);	
-	ASSERT_EQ(i->execute({} , vect), 8.1) << "Execute method of AddPrimitiveType<double> returns an incorrect value with valid operands.";
+	vect.push_back(b);
+	ASSERT_EQ(i->execute({}, vect), 8.1) << "Execute method of AddPrimitiveType<double> returns an incorrect value with valid operands.";
 
 	vect.pop_back();
 	vect.push_back(c);
@@ -85,7 +91,7 @@ TEST(Instructions, Execute) {
 
 TEST(Instructions, SetAdd) {
 	Instructions::Set s;
-	
+
 	Instructions::MultByConstParam<int, float> iMult;
 	Instructions::MultByConstParam<int, float> iMult2;
 	Instructions::MultByConstParam<int, int> iMult3;
@@ -114,13 +120,13 @@ TEST(Instructions, SetGetInstruction) {
 	Instructions::MultByConstParam<double, float> iMult;
 	s.add(iAdd);
 	s.add(iMult);
-	
+
 	const Instructions::Instruction* res;
 	ASSERT_NO_THROW(res = &s.getInstruction(1)) << "Exception was thrown unexpectedly when calling Set::getInstruction with a valid index.";
-		
+
 	// Compare that the returned reference points to the right object.
-	ASSERT_EQ(res , &iMult) << "Incorrect Instruction was returned by valid Set::getInstruction.";
-		
+	ASSERT_EQ(res, &iMult) << "Incorrect Instruction was returned by valid Set::getInstruction.";
+
 	// Check that exception is thrown when an invalid index is given.
 	ASSERT_THROW(res = &s.getInstruction(2), std::out_of_range) << "Exception was not thrown when calling Set::getInstruction with an invalid index.";
 }

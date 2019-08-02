@@ -23,7 +23,7 @@ namespace Instructions {
 		/**
 		* \brief Get the list of operand types needed by the Instruction.
 		*
-		*`\return a const reference on the list of operand type_info of the Instruction.
+		* \return a const reference on the list of operand type_info of the Instruction.
 		*/
 		const std::vector<std::reference_wrapper<const std::type_info>>& getOperandTypes() const;
 

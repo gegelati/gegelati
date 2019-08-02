@@ -1,6 +1,8 @@
 #ifndef SUPPORTED_TYPES_H
 #define SUPPORTED_TYPES_H
 
+#include <typeinfo>
+
 /**
 * \brief Base class to declare all types of Instruction operands, and provided by HandlerData.
 */
@@ -10,6 +12,15 @@ public:
 	* \brief Virtual destructor to force class polymorphism.
 	*/
 	virtual ~SupportedType() {};
+
+	/**
+	* \brief equalilty operator for SupportedType.
+	*
+	* Two SupportedType are equal if they share the same typeid, regardless of anything else.
+	*/
+	bool operator ==(const SupportedType& other) const {
+		return (typeid(*this) == typeid(other));
+	}	
 };
 
 /**
@@ -25,13 +36,13 @@ protected:
 public:
 	/// Default constructor
 	PrimitiveType() = default;
-	
+
 	/// Cast operator back to the primitive type for convenient use.
 	operator T() { return value; }
-	
+
 	/// Assignment operator from primitive type.
 	T& operator =(const T& other) { value = other;  return *this; };
-	
+
 	/// Copy constructor.
 	PrimitiveType(const T& other) :value{ other } {};
 };
