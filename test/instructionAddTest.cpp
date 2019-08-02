@@ -128,10 +128,25 @@ TEST(Instructions, SetGetInstruction) {
 TEST(Instructions, SetGetNbMaxOperands) {
 	Instructions::Set s;
 
+	ASSERT_EQ(s.getMaxNbOperands(), 0) << "Max number of operands returned by the empty Instructions::Set is incorrect.";
+
 	Instructions::AddPrimitiveType<float> iAdd; // Two operands
 	Instructions::MultByConstParam<double, float> iMult; // One operand
 	s.add(iAdd);
 	s.add(iMult);
 
 	ASSERT_EQ(s.getMaxNbOperands(), 2) << "Max number of operands returned by the Instructions::Set is incorrect.";
+}
+
+TEST(Instructions, SetGetNbMaxParameters) {
+	Instructions::Set s;
+
+	ASSERT_EQ(s.getMaxNbParameters(), 0) << "Max number of parameters returned by the empty Instructions::Set is incorrect.";
+
+	Instructions::AddPrimitiveType<float> iAdd; // Two operands
+	Instructions::MultByConstParam<double, float> iMult; // One operand
+	s.add(iAdd);
+	s.add(iMult);
+
+	ASSERT_EQ(s.getMaxNbParameters(), 1) << "Max number of parameters returned by the Instructions::Set is incorrect.";
 }

@@ -37,3 +37,13 @@ unsigned int Instructions::Set::getMaxNbOperands() const
 	}
 	return res;
 }
+
+unsigned int Instructions::Set::getMaxNbParameters() const
+{
+	unsigned int res = 0;
+	for (auto instruction : this->instructions) {
+		unsigned int nb = instruction.get().getNbParameters();
+		res = (nb > res) ? nb : res;
+	}
+	return res;
+}

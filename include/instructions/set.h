@@ -58,6 +58,14 @@ namespace Instructions {
 		* of operands needed to execute an Instruction in the Set.
 		*/
 		unsigned int getMaxNbOperands() const;
+
+		/**
+		* \brief Get the maximum number of parameters for Instruction currently contained in the Set.
+		*
+		* \return the unsigned int value corresponding to the largest number 
+		* of parameters needed to execute an Instruction in the Set.
+		*/
+		unsigned int getMaxNbParameters() const;
 	};
 }
 
