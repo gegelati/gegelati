@@ -33,10 +33,21 @@ namespace DataHandlers {
 		*/
 		PrimitiveTypeArray(unsigned int size = 8);
 
+		size_t getAddressSpace(const std::type_info & type)  const;
+
 	};
 
 	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(unsigned int size) : nbElements{size}, data(size) {
 		this->providedTypes.push_back(typeid(PrimitiveType<T>));
+	}
+
+	template<class T> size_t PrimitiveTypeArray<T>::getAddressSpace(const std::type_info & type) const
+	{
+		if (type == typeid(PrimitiveType<T>)) {
+			return this->nbElements;
+		}
+		// Default case
+		return 0;
 	}
 }
 

@@ -48,6 +48,17 @@ namespace DataHandlers {
 		* \return a const reference to the data type set provided by the DataHandler.
 		*/
 		const std::vector<std::reference_wrapper<const std::type_info>>& getHandledTypes() const;
+
+		/**
+		* \brief Get the getAddressSpace size for the given data type.
+		*
+		* Since a single DataHandler may be able to provide data of different types, the addressable space may vary depending
+		* on the accessed data type. This method returns the size of addressable data for each type of data.
+		*
+		* \param[in] type the std::type_info of data whose address space is retrieved.
+		* \return the size of the retrieved address space, or 0 if the data type is not handled by the DataHandler.
+		*/
+		virtual size_t getAddressSpace(const std::type_info & type) const = 0;
 	};
 }
 
