@@ -14,9 +14,9 @@ TEST(DataHandlers, Constructor) {
 TEST(DataHandlers, PrimitiveDataArrayCanProvide) {
 	DataHandlers::DataHandler * d = new DataHandlers::PrimitiveTypeArray<double>();
 
-	ASSERT_TRUE(d->canProvide(typeid(PrimitiveType<double>))) << "PrimitiveTypeArray<double>() wrongfully say it can not provide PrimitiveType<double> data.";
-	ASSERT_FALSE(d->canProvide(typeid(PrimitiveType<int>))) << "PrimitiveTypeArray<double>() wrongfully say it can provide PrimitiveType<int> data.";
-	ASSERT_FALSE(d->canProvide(typeid(SupportedType))) << "PrimitiveTypeArray<double>() wrongfully say it can provide SupportedType data.";
+	ASSERT_TRUE(d->canHandle(typeid(PrimitiveType<double>))) << "PrimitiveTypeArray<double>() wrongfully say it can not provide PrimitiveType<double> data.";
+	ASSERT_FALSE(d->canHandle(typeid(PrimitiveType<int>))) << "PrimitiveTypeArray<double>() wrongfully say it can provide PrimitiveType<int> data.";
+	ASSERT_FALSE(d->canHandle(typeid(SupportedType))) << "PrimitiveTypeArray<double>() wrongfully say it can provide SupportedType data.";
 
 	delete d;
 }

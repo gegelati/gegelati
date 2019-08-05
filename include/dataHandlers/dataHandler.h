@@ -35,12 +35,12 @@ namespace DataHandlers {
 		DataHandler() : providedTypes() {}
 
 		/**
-		* \brief Check a given DataHandler can provide data for the given data type.
+		* \brief Check a given DataHandler can handle data for the given data type.
 		*
 		* \param[in] type the std::type_info whose availability in the DataHandler is being tested.
-		* \return true if the DataHandler can provide data for the given data type, and false otherwise.
+		* \return true if the DataHandler can handle data for the given data type, and false otherwise.
 		*/
-		bool canProvide(const std::type_info& type) const;
+		bool canHandle(const std::type_info& type) const;
 
 		/**
 		* \brief Retrieve the set of types provided by the DataHandler.

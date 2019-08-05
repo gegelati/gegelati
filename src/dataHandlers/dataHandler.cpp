@@ -1,7 +1,7 @@
 #include <algorithm>
 #include "dataHandlers/dataHandler.h"
 
-bool DataHandlers::DataHandler::canProvide(const std::type_info& type) const
+bool DataHandlers::DataHandler::canHandle(const std::type_info& type) const
 {
 	for (auto t : this->providedTypes) {
 		if (t.get() == type)
