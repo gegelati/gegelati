@@ -35,13 +35,13 @@ protected:
 
 public:
 	/// Default constructor
-	PrimitiveType() = default;
+	PrimitiveType() : value{ 0 } {};
 
 	/// Cast operator back to the primitive type for convenient use.
 	operator T() { return value; }
 
 	/// Assignment operator from primitive type.
-	T& operator =(const T& other) { value = other;  return *this; };
+	T& operator =(const T& other) { value = other;  return this->value; };
 
 	/// Copy constructor.
 	PrimitiveType(const T& other) :value{ other } {};

@@ -44,7 +44,7 @@ namespace Instructions {
 			return 0.0;
 		}
 
-		return dynamic_cast<PrimitiveType<T>&>(args.at(0).get()) + dynamic_cast<PrimitiveType<T>&>(args.at(1).get());;
+		return dynamic_cast<PrimitiveType<T>&>(args.at(0).get()) +(double) dynamic_cast<PrimitiveType<T>&>(args.at(1).get());;
 	}
 }
 

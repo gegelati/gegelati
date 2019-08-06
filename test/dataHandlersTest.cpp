@@ -38,3 +38,18 @@ TEST(DataHandlers, PrimitiveDataArrayAddressSpace) {
 
 	delete d;
 }
+
+TEST(DataHandlers, PrimitiveDataArrayGetDataAt) {
+	const size_t size{ 32 };
+	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<float>(size);
+
+	d->resetData();
+	for (int i = 0; i < size; i++) {
+		ASSERT_EQ(d->getDataAt(typeid(PrimitiveType<float>), i), PrimitiveType<float>(0)) << "Data at valid address and type can not be accessed.";
+	}
+
+	ASSERT_THROW(d->getDataAt(typeid(PrimitiveType<float>), size), std::out_of_range) << "Address exceeding the addressSpace should cause an exception.";
+	ASSERT_THROW(d->getDataAt(typeid(PrimitiveType<double>), 0), std::invalid_argument) << "Requesting a non-handled type, even at a valid location, should cause an exception.";
+
+	delete d;
+}

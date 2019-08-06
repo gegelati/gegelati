@@ -4,18 +4,19 @@
 #include "instructions/set.h"
 
 TEST(Instructions, ConstructorDestructorCall) {
-	Instructions::Instruction* i = nullptr;
 	ASSERT_NO_THROW({
-		i = new Instructions::AddPrimitiveType<double>();
+		Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
+	delete i;
 		}) << "Call to constructor for AddPrimitiveType<double> failed.";
 
-	delete i;
+
 
 	ASSERT_NO_THROW({
-	i = new Instructions::AddPrimitiveType<int>();
+	Instructions::Instruction* i = new Instructions::AddPrimitiveType<int>();
+	delete i;
 		}) << "Call to constructor for AddPrimitiveType<int> failed.";
 
-	delete i;
+
 }
 
 TEST(Instructions, OperandListAndNbParam) {
