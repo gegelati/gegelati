@@ -58,12 +58,21 @@ namespace DataHandlers {
 		* \param[in] type the std::type_info of data whose address space is retrieved.
 		* \return the size of the retrieved address space, or 0 if the data type is not handled by the DataHandler.
 		*/
-		virtual size_t getAddressSpace(const std::type_info & type) const = 0;
+		virtual size_t getAddressSpace(const std::type_info& type) const = 0;
+
+		/**
+		* \brief Get the largest AddressSpace for all data types handled by the DataHandler.
+		*
+		* This method relies on the getAddressSpace and getHandledTypes methods
+		* to compute the size of the largest addressSpace required by the dataHandler.
+		* \return the size of the largest addressSpace.
+		*/
+		size_t getLargestAddressSpace() const;
 
 		/**
 		* \brief Generic method for DataHandler to reset their data.
 		*
-		* Method used to reset the data handled by a DataHandler. Each 
+		* Method used to reset the data handled by a DataHandler. Each
 		* DataHandler can implement a custom behavior, or even no behavior at all for this method.
 
 		*/
