@@ -38,7 +38,7 @@ public:
 	PrimitiveType() : value{ 0 } {};
 
 	/// Cast operator back to the primitive type for convenient use.
-	operator T() { return value; }
+	operator T() const { return value; } ;
 
 	/// Assignment operator from primitive type.
 	T& operator =(const T& other) { value = other;  return this->value; };

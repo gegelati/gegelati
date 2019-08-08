@@ -5,7 +5,7 @@
 
 TEST(DataHandlers, Constructor) {
 	ASSERT_NO_THROW({
-		DataHandlers::DataHandler *d = new DataHandlers::PrimitiveTypeArray<double>();
+		DataHandlers::DataHandler * d = new DataHandlers::PrimitiveTypeArray<double>();
 		delete d;
 		}) << "Call to PrimitiveTypeArray constructor failed.";
 }
@@ -32,7 +32,7 @@ TEST(DataHandlers, PrimitiveDataArrayGetHandledTypes) {
 
 TEST(DataHandlers, PrimitiveDataArrayAddressSpace) {
 	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<long>(64); // Array of 64 long
-	ASSERT_EQ(d->getAddressSpace(typeid(PrimitiveType<long>)), 64) << "Address space size for type PrimitiveType<long> in PrimitiveTypeArray<long>(64) is not 64" ;
+	ASSERT_EQ(d->getAddressSpace(typeid(PrimitiveType<long>)), 64) << "Address space size for type PrimitiveType<long> in PrimitiveTypeArray<long>(64) is not 64";
 	ASSERT_EQ(d->getAddressSpace(typeid(PrimitiveType<int>)), 0) << "Address space size for type PrimitiveType<int> in PrimitiveTypeArray<long>(64) is not 0";
 
 	delete d;
@@ -51,11 +51,28 @@ TEST(DataHandlers, PrimitiveDataArrayGetDataAt) {
 
 	d->resetData();
 	for (int i = 0; i < size; i++) {
-		ASSERT_EQ(d->getDataAt(typeid(PrimitiveType<float>), i), PrimitiveType<float>(0)) << "Data at valid address and type can not be accessed.";
+		const PrimitiveType<float>& a = (const PrimitiveType<float>&)d->getDataAt(typeid(PrimitiveType<float>), i);
+		ASSERT_EQ((float)a, 0.0f) << "Data at valid address and type can not be accessed.";
 	}
 
 	ASSERT_THROW(d->getDataAt(typeid(PrimitiveType<float>), size), std::out_of_range) << "Address exceeding the addressSpace should cause an exception.";
 	ASSERT_THROW(d->getDataAt(typeid(PrimitiveType<double>), 0), std::invalid_argument) << "Requesting a non-handled type, even at a valid location, should cause an exception.";
+
+	delete d;
+}
+
+TEST(DataHandlers, PrimitiveDataArraySetDataAt) {
+	const size_t size{ 8 };
+	const size_t address{ 3 };
+	const double doubleValue{ 42.0 };
+	DataHandlers::PrimitiveTypeArray<double>* d = new DataHandlers::PrimitiveTypeArray<double>(size);
+
+	d->resetData();
+	PrimitiveType<double> value(doubleValue);
+	ASSERT_NO_THROW(d->setDataAt(typeid(value), address, value)) << "Setting data with valid Address and type failed.";
+
+	// Check that data was indeed updated.
+	ASSERT_EQ((double)((const PrimitiveType<double>&)d->getDataAt(typeid(PrimitiveType<double>), address)), doubleValue) << "Previously set data did not persist.";
 
 	delete d;
 }
