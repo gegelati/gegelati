@@ -12,15 +12,6 @@ public:
 	* \brief Virtual destructor to force class polymorphism.
 	*/
 	virtual ~SupportedType() {};
-
-	/**
-	* \brief equalilty operator for SupportedType.
-	*
-	* Two SupportedType are equal if they share the same typeid, regardless of anything else.
-	*/
-	bool operator ==(const SupportedType& other) const {
-		return (typeid(*this) == typeid(other));
-	}	
 };
 
 /**
@@ -38,7 +29,7 @@ public:
 	PrimitiveType() : value{ 0 } {};
 
 	/// Cast operator back to the primitive type for convenient use.
-	operator T() const { return value; } ;
+	operator T() const { return value; };
 
 	/// Assignment operator from primitive type.
 	T& operator =(const T& other) { value = other;  return this->value; };
