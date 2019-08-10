@@ -42,7 +42,7 @@ protected:
 	const size_t largestAddressSpace;
 
 	/**
-	* \brief Static method used when constructing a new Environment to compute 
+	* \brief Static method used when constructing a new Environment to compute
 	* the largest AddressSpace of a set of DataHandler.
 	*
 	* \param[in] dHandlers reference to the set of DataHandler whose largest largestAddressSpace is searched.
@@ -67,10 +67,51 @@ public:
 	*/
 	Environment(const Instructions::Set& iSet,
 		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers,
-		const unsigned int nbRegs) : instructionSet{ iSet }, dataSources{ dHandlers }, nbRegisters{ nbRegs }, 
-		nbInstructions{ iSet.getNbInstructions() }, maxNbOperands{ iSet.getMaxNbOperands() }, 
-		maxNbParameters{ iSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{computeLargestAddressSpace(dHandlers)} {};
+		const unsigned int nbRegs) : instructionSet{ iSet }, dataSources{ dHandlers }, nbRegisters{ nbRegs },
+		nbInstructions{ iSet.getNbInstructions() }, maxNbOperands{ iSet.getMaxNbOperands() },
+		maxNbParameters{ iSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(dHandlers) } {};
 
+	/**
+	* \brief Get the size of the number of registers of this Environment.
+	*
+	* \return the value of the nbRegisters attribute.
+	*/
+	size_t getNbRegisters() const;
+
+	/**
+	* \brief Get the size of the number of Instruction within the Instructions::Set.
+	*
+	* \return the value of the nbInstructions attribute.
+	*/
+	size_t getNbInstructions() const;
+
+	/**
+	* \brief Get the size of the maximum number of operands of Instructions::Set.
+	*
+	* \return the value of the maxNbOperands attribute.
+	*/
+	size_t getMaxNbOperands() const;
+
+	/**
+	* \brief Get the size of the maximum number of Parameter of Instructions::Set.
+	*
+	* \return the value of the maxNbParamaters attribute.
+	*/
+	size_t getMaxNbParameters() const;
+
+	/**
+	* \brief Get the size of the number of DataHandlers.
+	*
+	* \return the value of the nbDataSources attribute.
+	*/
+	size_t getNbDataSources() const;
+
+	/**
+	* \brief Get the size of the largestAddressSpace of DataHandlers.
+	*
+	* \return the value otf the LargestAddressSpace attribute.
+	*/
+	size_t getLargestAddressSpace() const;
 
 };
 

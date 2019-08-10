@@ -9,3 +9,33 @@ size_t Environment::computeLargestAddressSpace(const std::vector<std::reference_
 	}
 	return res;
 }
+
+size_t Environment::getNbRegisters() const
+{
+	return this->nbRegisters;
+}
+
+size_t Environment::getNbInstructions() const
+{
+	return this->nbInstructions;
+}
+
+size_t Environment::getMaxNbOperands() const
+{
+	return this->maxNbOperands;
+}
+
+size_t Environment::getMaxNbParameters() const
+{
+	return this->maxNbParameters;
+}
+
+size_t Environment::getNbDataSources() const
+{
+	return this->nbDataSources;
+}
+
+size_t Environment::getLargestAddressSpace() const
+{
+	return this->largestAddressSpace;
+}
