@@ -39,3 +39,13 @@ size_t Environment::getLargestAddressSpace() const
 {
 	return this->largestAddressSpace;
 }
+
+const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& Environment::getDataSources() const
+{
+	return this->dataSources;
+}
+
+const Instructions::Set& Environment::getInstructionSet() const
+{
+	return this->instructionSet;
+}

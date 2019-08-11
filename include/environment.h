@@ -109,9 +109,23 @@ public:
 	/**
 	* \brief Get the size of the largestAddressSpace of DataHandlers.
 	*
-	* \return the value otf the LargestAddressSpace attribute.
+	* \return the value of the LargestAddressSpace attribute.
 	*/
 	size_t getLargestAddressSpace() const;
+
+	/**
+	* \brief Get the DataHandler of the Environment.
+	*
+	* \return a const reference to the dataSources attribute of this Environment.
+	*/
+	const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& getDataSources() const;
+	
+	/**
+	* \brief Get the Instruction Set of the Environment.
+	*
+	* \return a const reference to the instructionSet attribute of this Environment.
+	*/
+	const Instructions::Set& getInstructionSet() const;
 
 };
 
