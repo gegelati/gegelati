@@ -3,14 +3,14 @@
 #include "dataHandlers/dataHandler.h"
 #include "dataHandlers/primitiveTypeArray.h"
 
-TEST(DataHandlers, Constructor) {
+TEST(DataHandlersTest, Constructor) {
 	ASSERT_NO_THROW({
 		DataHandlers::DataHandler * d = new DataHandlers::PrimitiveTypeArray<double>();
 		delete d;
 		}) << "Call to PrimitiveTypeArray constructor failed.";
 }
 
-TEST(DataHandlers, PrimitiveDataArrayCanProvide) {
+TEST(DataHandlersTest, PrimitiveDataArrayCanProvide) {
 	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<double>();
 
 	ASSERT_TRUE(d->canHandle(typeid(PrimitiveType<double>))) << "PrimitiveTypeArray<double>() wrongfully say it can not provide PrimitiveType<double> data.";
@@ -20,7 +20,7 @@ TEST(DataHandlers, PrimitiveDataArrayCanProvide) {
 	delete d;
 }
 
-TEST(DataHandlers, PrimitiveDataArrayGetHandledTypes) {
+TEST(DataHandlersTest, PrimitiveDataArrayGetHandledTypes) {
 	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<int>();
 
 	auto vect = d->getHandledTypes();
@@ -30,7 +30,7 @@ TEST(DataHandlers, PrimitiveDataArrayGetHandledTypes) {
 	delete d;
 }
 
-TEST(DataHandlers, PrimitiveDataArrayAddressSpace) {
+TEST(DataHandlersTest, PrimitiveDataArrayAddressSpace) {
 	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<long>(64); // Array of 64 long
 	ASSERT_EQ(d->getAddressSpace(typeid(PrimitiveType<long>)), 64) << "Address space size for type PrimitiveType<long> in PrimitiveTypeArray<long>(64) is not 64";
 	ASSERT_EQ(d->getAddressSpace(typeid(PrimitiveType<int>)), 0) << "Address space size for type PrimitiveType<int> in PrimitiveTypeArray<long>(64) is not 0";
@@ -38,14 +38,14 @@ TEST(DataHandlers, PrimitiveDataArrayAddressSpace) {
 	delete d;
 }
 
-TEST(DataHandlers, PrimitiveDataArrayLargestAddressSpace) {
+TEST(DataHandlersTest, PrimitiveDataArrayLargestAddressSpace) {
 	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<float>(20); // Array of 64 long
 	ASSERT_EQ(d->getLargestAddressSpace(), 20) << "Largest address space size for type in PrimitiveTypeArray<float>(20) is not 20 as expected.";
 
 	delete d;
 }
 
-TEST(DataHandlers, PrimitiveDataArrayGetDataAt) {
+TEST(DataHandlersTest, PrimitiveDataArrayGetDataAt) {
 	const size_t size{ 32 };
 	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<float>(size);
 
@@ -61,7 +61,7 @@ TEST(DataHandlers, PrimitiveDataArrayGetDataAt) {
 	delete d;
 }
 
-TEST(DataHandlers, PrimitiveDataArraySetDataAt) {
+TEST(DataHandlersTest, PrimitiveDataArraySetDataAt) {
 	const size_t size{ 8 };
 	const size_t address{ 3 };
 	const double doubleValue{ 42.0 };

@@ -8,7 +8,7 @@
 #include "instructions/multByConstParam.h"
 #include "environment.h"
 
-TEST(Environment, Constructor){
+TEST(EnvironmentTest, Constructor){
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
 	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
@@ -25,7 +25,7 @@ TEST(Environment, Constructor){
 	});
 }
 
-TEST(Environment, Size_tAttributeAccessors) {
+TEST(EnvironmentTest, Size_tAttributeAccessors) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
 	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
@@ -53,7 +53,7 @@ TEST(Environment, Size_tAttributeAccessors) {
 	ASSERT_EQ(e.getLargestAddressSpace(), size2) << "Largest address space of the Environment does not corresponds to the dataHandlers or registers given during construction.";
 }
 
-TEST(Environment, InstructionSetAccessor) {
+TEST(EnvironmentTest, InstructionSetAccessor) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
 	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
@@ -81,7 +81,7 @@ TEST(Environment, InstructionSetAccessor) {
 	}
 }
 
-TEST(Environment, DataSourceAccessor) {
+TEST(EnvironmentTest, DataSourceAccessor) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
 	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;

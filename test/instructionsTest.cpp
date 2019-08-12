@@ -3,7 +3,7 @@
 #include "instructions/multByConstParam.h"
 #include "instructions/set.h"
 
-TEST(Instructions, ConstructorDestructorCall) {
+TEST(InstructionsTest, ConstructorDestructorCall) {
 	ASSERT_NO_THROW({
 		Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
 	delete i;
@@ -19,7 +19,7 @@ TEST(Instructions, ConstructorDestructorCall) {
 
 }
 
-TEST(Instructions, OperandListAndNbParam) {
+TEST(InstructionsTest, OperandListAndNbParam) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
 	ASSERT_EQ(i->getNbOperands(), 2) << "Number of operands of Instructions::AddPrimitiveType<double> is different from 2";
 	auto operands = i->getOperandTypes();
@@ -30,7 +30,7 @@ TEST(Instructions, OperandListAndNbParam) {
 	delete i;
 }
 
-TEST(Instructions, CheckArgumentTypes) {
+TEST(InstructionsTest, CheckArgumentTypes) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
 	PrimitiveType<double> a{ 2.5 };
 	PrimitiveType<double> b = 5.6;
@@ -50,7 +50,7 @@ TEST(Instructions, CheckArgumentTypes) {
 	delete i;
 }
 
-TEST(Instructions, CheckParameters) {
+TEST(InstructionsTest, CheckParameters) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<int>();
 	std::vector<std::reference_wrapper<Parameter>> v;
 	Parameter a = 2;
@@ -66,7 +66,7 @@ TEST(Instructions, CheckParameters) {
 	delete i;
 }
 
-TEST(Instructions, Execute) {
+TEST(InstructionsTest, Execute) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
 	PrimitiveType<double> a{ 2.6 };
 	PrimitiveType<double> b = 5.5;
@@ -90,7 +90,7 @@ TEST(Instructions, Execute) {
 	delete i;
 }
 
-TEST(Instructions, SetAdd) {
+TEST(InstructionsTest, SetAdd) {
 	Instructions::Set s;
 
 	Instructions::MultByConstParam<int, float> iMult;
@@ -102,7 +102,7 @@ TEST(Instructions, SetAdd) {
 	ASSERT_TRUE(s.add(iMult3)) << "Add of instruction to non empty Instructions::Set failed. (with a template instruction with different template param than an already present one";
 }
 
-TEST(Instructions, SetGetNbInstruction) {
+TEST(InstructionsTest, SetGetNbInstruction) {
 	Instructions::Set s;
 
 	ASSERT_EQ(s.getNbInstructions(), 0) << "Incorrect number of instructions in an empty Set.";
@@ -114,7 +114,7 @@ TEST(Instructions, SetGetNbInstruction) {
 	ASSERT_EQ(s.getNbInstructions(), 2) << "Incorrect number of instructions in a non-empty Set.";
 }
 
-TEST(Instructions, SetGetInstruction) {
+TEST(InstructionsTest, SetGetInstruction) {
 	Instructions::Set s;
 
 	Instructions::AddPrimitiveType<float> iAdd;
@@ -132,7 +132,7 @@ TEST(Instructions, SetGetInstruction) {
 	ASSERT_THROW(res = &s.getInstruction(2), std::out_of_range) << "Exception was not thrown when calling Set::getInstruction with an invalid index.";
 }
 
-TEST(Instructions, SetGetNbMaxOperands) {
+TEST(InstructionsTest, SetGetNbMaxOperands) {
 	Instructions::Set s;
 
 	ASSERT_EQ(s.getMaxNbOperands(), 0) << "Max number of operands returned by the empty Instructions::Set is incorrect.";
@@ -145,7 +145,7 @@ TEST(Instructions, SetGetNbMaxOperands) {
 	ASSERT_EQ(s.getMaxNbOperands(), 2) << "Max number of operands returned by the Instructions::Set is incorrect.";
 }
 
-TEST(Instructions, SetGetNbMaxParameters) {
+TEST(InstructionsTest, SetGetNbMaxParameters) {
 	Instructions::Set s;
 
 	ASSERT_EQ(s.getMaxNbParameters(), 0) << "Max number of parameters returned by the empty Instructions::Set is incorrect.";
