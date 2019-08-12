@@ -45,10 +45,11 @@ protected:
 	* \brief Static method used when constructing a new Environment to compute
 	* the largest AddressSpace of a set of DataHandler.
 	*
+	* \param[in] nbRegisters the number of registers of the environment.
 	* \param[in] dHandlers reference to the set of DataHandler whose largest largestAddressSpace is searched.
 	* \return the found value, or 0 default value if the given std::vector was empty.
 	*/
-	static size_t computeLargestAddressSpace(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers);
+	static size_t computeLargestAddressSpace(const size_t nbRegisters, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers);
 
 private:
 	/// Default constructor deleted for its uselessness.
@@ -69,7 +70,7 @@ public:
 		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers,
 		const unsigned int nbRegs) : instructionSet{ iSet }, dataSources{ dHandlers }, nbRegisters{ nbRegs },
 		nbInstructions{ iSet.getNbInstructions() }, maxNbOperands{ iSet.getMaxNbOperands() },
-		maxNbParameters{ iSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(dHandlers) } {};
+		maxNbParameters{ iSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(nbRegs, dHandlers) } {};
 
 	/**
 	* \brief Get the size of the number of registers of this Environment.
