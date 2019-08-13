@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <new>
 
 #include "parameter.h"
 #include "program.h"
@@ -42,4 +43,16 @@ Program::~Program() {
 size_t Program::getLineSize() const
 {
 	return this->lineSize;
+}
+
+void Program::addNewLine()
+{
+	// Allocate the zero-filled memory 
+	char* newLine= new char[this->actualLineSize]{0}; // may throw std::bad_alloc
+	this->lines.push_back(newLine);
+}
+
+size_t Program::getNbLines() const
+{
+	return this->lines.size();
 }

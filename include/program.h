@@ -14,8 +14,11 @@ protected:
 	/// Environment within which the Program will be executed.
 	const Environment& environment;
 
-	/// Size of the lines
+	/// Size of the lines (in bits)
 	const size_t lineSize;
+
+	/// Actual line size (in bytes). Only the lineSize first bits will be used.
+	const size_t actualLineSize;
 
 	/// Lines of the program stored as raw bits.
 	std::vector<char*> lines;
@@ -44,7 +47,8 @@ public:
 	*
 	* \param[in] e the reference to the Environment that will be referenced in the Program attributes.
 	*/
-	Program(const Environment& e) : environment{ e }, lineSize{ computeLineSize(e) } {};
+	Program(const Environment& e) : environment{ e }, lineSize{ computeLineSize(e) }, 
+		actualLineSize{ (size_t)ceill(((long double)computeLineSize(e)/8.0l)) }{};
 
 	/**
 	* \brief Destructor for the Program class.
@@ -60,7 +64,19 @@ public:
 	*/
 	size_t getLineSize() const;
 
+	/**
+	* \brief Add a new line to the Program with only 0 bits.
+	*
+	* \throw std::bad_alloc in case the new line allocation failed.
+	*/
+	void addNewLine();
 
+	/**
+	* \brief Get the number of lines in the Program.
+	*
+	* \return the number of line contained in the Program.
+	*/
+	size_t getNbLines() const;
 };
 
 #endif
