@@ -21,7 +21,7 @@ namespace Program {
 		uint64_t destination;
 
 		/// Array storing the parameters for this instruction.
-		const Parameter* parameters;
+		Parameter* const parameters;
 
 		/// Array storing the operands pair (each with a source and an address)
 		const std::pair<uint64_t, uint64_t>* operands;
@@ -53,6 +53,72 @@ namespace Program {
 			free((void*)this->parameters);
 			free((void*)this->operands);
 		}
+
+		/**
+		* \brief Getter for the destination of this Line.
+		*
+		* \return the value of the destination attribute.
+		*/
+		uint64_t getDestination() const;
+
+		/**
+		* \brief Setter for the destination of this Line.
+		*
+		* Optionnaly, the validity of the given value can be checked with
+		* regards to the Environment of the Line. If the given value is not
+		* valid (i.e. it exceeds the number of available destinations) the
+		* attribute will not be overwritten.
+		*
+		* \param[in] dest the new value for the destination attribute.
+		* \param[in] check whether the validity of the given new value.
+		*
+		* \return true if checks are not activated, otherwise, return whether
+		* the value was valid and thus the writing was performed or not.
+		*/
+		bool setDestination(const uint64_t dest, const bool check = true);
+
+		/**
+		* \brief Getter for the instruction of this Line.
+		*
+		* \return the value of the instruction attribute.
+		*/
+		uint64_t getInstruction() const;
+
+		/**
+		* \brief Setter for the instruction of this Line.
+		*
+		* Optionnaly, the validity of the given value can be checked with
+		* regards to the Environment of the Line. If the given value is not
+		* valid (i.e. it exceeds the number of available instructions) the
+		* attribute will not be overwritten.
+		*
+		* \param[in] instr the new value for the instruction attribute.
+		* \param[in] check whether the validity of the given new value.
+		*
+		* \return true if checks are not activated, otherwise, return whether
+		* the value was valid and thus the writing was performed or not.
+		*/
+		bool setInstruction(const uint64_t instr, const bool check = true);
+
+		/**
+		* \brief Getter for the parameters of this Line.
+		*
+		* \param[in] idx the index of the accessed Parameter.
+		* \return the value of the parameter at the given index.
+		* \throw std::range_error if the given index exceeds the number of
+		* Parameter of the Line.
+		*/
+		Parameter getParameter(const uint64_t idx) const;
+
+		/**
+		* \brief Setter for the parameters of this Line.
+		*
+		* \param[in] idx the index of the set Parameter.
+		* \param[in] p the new value for the parameter.
+		* \throw std::range_error if the given index exceeds the number of
+		* Parameter of the Line.
+		*/
+		void setParameter(const uint64_t idx, const Parameter p);
 	};
 };
 

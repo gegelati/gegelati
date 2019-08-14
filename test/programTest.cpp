@@ -47,6 +47,37 @@ TEST_F(ProgramTest, LineConstructor) {
 		}) << "Something went wrong when destructing a Line with a valid Environment.";
 }
 
+TEST_F(ProgramTest, LineDestinatioInstructionSetters) {
+	Program::Line l(*e);
+
+	ASSERT_TRUE(l.setDestination(UINT64_MAX, false)) << "With checks deactivated, destination should be successfully settable to abberant value.";
+	ASSERT_FALSE(l.setDestination(UINT64_MAX)) << "With checks activated, destination should not be successfully settable to abberant value.";
+	ASSERT_TRUE(l.setDestination(5)) << "Set destination to valid value failed.";
+
+	ASSERT_TRUE(l.setInstruction(UINT64_MAX, false)) << "With checks deactivated, instruction should be successfully settable to abberant value.";
+	ASSERT_FALSE(l.setInstruction(UINT64_MAX)) << "With checks activated, instruction should not be successfully settable to abberant value.";
+	ASSERT_TRUE(l.setInstruction(1)) << "Set destination to valid value failed.";
+}
+
+TEST_F(ProgramTest, LineDestinationInstructionGetters) {
+	Program::Line l(*e);
+
+	l.setDestination(5, false);
+	ASSERT_EQ(l.getDestination(), 5) << "Get after set returned the wrong value.";
+
+	l.setInstruction(1, false);
+	ASSERT_EQ(l.getInstruction(), 1) << "Get after set returned the wrong value.";
+}
+
+TEST_F(ProgramTest, LineParameterAccessors) {
+	Program::Line l(*e); // with the given environment, there is a single Parameter per line.
+	ASSERT_NO_THROW(l.setParameter(0, 0.2f)) << "Setting value of a correctly indexed parameter failed.";
+	ASSERT_THROW(l.setParameter(1, 0.3f), std::range_error) << "Setting value of an incorrectly indexed parameter did not fail.";
+
+	ASSERT_EQ((float)l.getParameter(0), 0.2f) << "Getting a previously set parameter failed.";
+	ASSERT_THROW(l.getParameter(1), std::range_error) << "Getting value of an incorrectly indexed parameter did not fail.";
+}
+
 TEST_F(ProgramTest, ProgramConstructor) {
 	Program::Program* p;
 	ASSERT_NO_THROW({
