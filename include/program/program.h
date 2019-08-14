@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "environment.h"
+#include "program/line.h"
 
 namespace Program {
 	/**
@@ -15,17 +16,29 @@ namespace Program {
 		/// Environment within which the Program will be executed.
 		const Environment& environment;
 
-		/// Size of the lines (in bits)
-		const size_t lineSize;
-
-		/// Actual line size (in bytes). Only the lineSize first bits will be used.
-		const size_t actualLineSize;
-
 		/// Lines of the program stored as raw bits.
-		std::vector<char*> lines;
+		std::vector<Line*> lines;
 
 		/// Delete the default constructor.
 		Program() = delete;
+
+	public:
+		/**
+		* \brief Main constructor of the Program.
+		*
+		* \param[in] e the reference to the Environment that will be referenced in the Program attributes.
+		*/
+		Program(const Environment& e) : environment{ e } {
+			// Call the computeLineSize() function to check the validity of the environment.
+			computeLineSize(this->environment);
+		};
+
+		/**
+		* \brief Destructor for the Program class.
+		*
+		* This destructor deallocates all memory allocated for Program lines (if any).
+		*/
+		~Program();
 
 		/**
 		* \brief Static method used to compute the size of Program lines based on information from the Enviroment.
@@ -42,33 +55,8 @@ namespace Program {
 		*/
 		static const size_t computeLineSize(const Environment& env);
 
-	public:
-		/**
-		* \brief Main constructor of the Program.
-		*
-		* \param[in] e the reference to the Environment that will be referenced in the Program attributes.
-		*/
-		Program(const Environment& e) : environment{ e }, lineSize{ computeLineSize(e) },
-			actualLineSize{ (size_t)ceill(((long double)computeLineSize(e) / 8.0l)) }{};
-
-		/**
-		* \brief Destructor for the Program class.
-		*
-		* This destructor deallocates all memory allocated for Program lines (if any).
-		*/
-		~Program();
-
-		/**
-		* \brief Get the value of the lineSize attribute.
-		*
-		* \return the value computed at construction time.
-		*/
-		size_t getLineSize() const;
-
 		/**
 		* \brief Add a new line to the Program with only 0 bits.
-		*
-		* \throw std::bad_alloc in case the new line allocation failed.
 		*/
 		void addNewLine();
 

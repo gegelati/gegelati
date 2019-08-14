@@ -34,21 +34,17 @@ const size_t Program::Program::computeLineSize(const Environment& env)
 
 Program::Program::~Program() {
 	while (!lines.empty()) {
-		char* line = lines.back();
+		Line* line = lines.back();
 		free(line);
 		lines.pop_back();
 	}
 }
 
-size_t Program::Program::getLineSize() const
-{
-	return this->lineSize;
-}
 
 void Program::Program::addNewLine()
 {
 	// Allocate the zero-filled memory 
-	char* newLine= new char[this->actualLineSize]{0}; // may throw std::bad_alloc
+	Line* newLine = new Line(this->environment);
 	this->lines.push_back(newLine);
 }
 
