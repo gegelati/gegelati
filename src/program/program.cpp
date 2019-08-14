@@ -2,9 +2,9 @@
 #include <new>
 
 #include "parameter.h"
-#include "program.h"
+#include "program/program.h"
 
-const size_t Program::computeLineSize(const Environment& env)
+const size_t Program::Program::computeLineSize(const Environment& env)
 {
 	// $ceil(log2(n)) + ceil(log2(i)) + m * (ceil(log2(nb_{ src })) + ceil(log2(largestAddressSpace)) + p * sizeof(Param)_{inByte} * 8$
 	const size_t n = env.getNbRegisters();
@@ -32,7 +32,7 @@ const size_t Program::computeLineSize(const Environment& env)
 		+ p * sizeof(Parameter) * 8);
 }
 
-Program::~Program() {
+Program::Program::~Program() {
 	while (!lines.empty()) {
 		char* line = lines.back();
 		free(line);
@@ -40,19 +40,19 @@ Program::~Program() {
 	}
 }
 
-size_t Program::getLineSize() const
+size_t Program::Program::getLineSize() const
 {
 	return this->lineSize;
 }
 
-void Program::addNewLine()
+void Program::Program::addNewLine()
 {
 	// Allocate the zero-filled memory 
 	char* newLine= new char[this->actualLineSize]{0}; // may throw std::bad_alloc
 	this->lines.push_back(newLine);
 }
 
-size_t Program::getNbLines() const
+size_t Program::Program::getNbLines() const
 {
 	return this->lines.size();
 }

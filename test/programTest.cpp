@@ -6,7 +6,7 @@
 #include "instructions/multByConstParam.h"
 #include "dataHandlers/dataHandler.h"
 #include "dataHandlers/primitiveTypeArray.h"
-#include "program.h"
+#include "program/program.h"
 
 class ProgramTest : public ::testing::Test {
 protected:
@@ -36,9 +36,9 @@ protected:
 };
 
 TEST_F(ProgramTest, Constructor) {
-	Program* p;
+	Program::Program* p;
 	ASSERT_NO_THROW({
-		p = new Program(*e); }) << "Something went wrong when constructing a Program with a valid Environment.";
+		p = new Program::Program(*e); }) << "Something went wrong when constructing a Program with a valid Environment.";
 
 	ASSERT_NO_THROW({
 		delete p;
@@ -46,19 +46,19 @@ TEST_F(ProgramTest, Constructor) {
 
 	Environment e2(set, {}, 8); // empty dataHandler should be a problem.
 	ASSERT_THROW({
-		p = new Program(e2); }, std::domain_error) << "Something went unexpectedly right when constructing a Program with an invalid Environment.";
+		p = new Program::Program(e2); }, std::domain_error) << "Something went unexpectedly right when constructing a Program with an invalid Environment.";
 
 }
 
 TEST_F(ProgramTest, AddEmptyLineAndDestruction) {
-	Program* p = new Program(*e);
+	Program::Program* p = new Program::Program(*e);
 	ASSERT_NO_THROW(p->addNewLine();) << "Inserting a single empty line in an empty program should not be an issue at insertion.";
 
 	ASSERT_NO_THROW(delete p;) << "Destructing a non empty program should not be an issue.";
 }
 
 TEST_F(ProgramTest, basicAccessor) {
-	Program p(*e);
+	Program::Program p(*e);
 	// Expected answer:
 	// n = 8
 	// i = 2
@@ -73,7 +73,7 @@ TEST_F(ProgramTest, basicAccessor) {
 }
 
 TEST_F(ProgramTest, getProgramNbLines) {
-	Program p(*e);
+	Program::Program p(*e);
 	ASSERT_EQ(p.getNbLines(), 0) << "Empty program nb lines should be 0.";
 	p.addNewLine();
 	ASSERT_EQ(p.getNbLines(), 1) << "A single line was just added to the Program.";
