@@ -23,8 +23,8 @@ const size_t Program::Program::computeLineSize(const Environment& env)
 	// cannot be 1, as it would mean an environment with only registers.
 	if (n == 0 || i == 0 || m == 0 || nbSrc <= 1 || largestAddressSpace == 0) {
 		throw std::domain_error("Environment given to the computeLineSize is invalid for building a program." \
-			 "It is parameterized with no or only registers, contains no Instruction, Instruction" \
-			 " with no operands, no DataHandler or DataHandler with no addressable Space.");
+			"It is parameterized with no or only registers, contains no Instruction, Instruction" \
+			" with no operands, no DataHandler or DataHandler with no addressable Space.");
 	}
 
 	return (size_t)(ceill(log2l((long double)n)) + ceill(log2l((long double)i))
@@ -40,15 +40,26 @@ Program::Program::~Program() {
 	}
 }
 
-
-void Program::Program::addNewLine()
+Program::Line& Program::Program::addNewLine()
 {
 	// Allocate the zero-filled memory 
 	Line* newLine = new Line(this->environment);
 	this->lines.push_back(newLine);
+
+	return *newLine;
 }
 
 size_t Program::Program::getNbLines() const
 {
 	return this->lines.size();
 }
+
+const Program::Line& Program::Program::getLine(uint64_t index) const
+{
+	if (index >= this->lines.size()) {
+		throw std::range_error("Accessing line outside of a Program.");
+	}
+
+	return *this->lines.at(index);
+}
+

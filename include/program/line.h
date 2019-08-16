@@ -153,10 +153,6 @@ namespace Program {
 		* Operands of the Line.
 		*/
 		bool setOperand(const uint64_t idx, const uint64_t dataIndex, const uint64_t location, const bool check = true);
-
-		// TODO: Check operand validity with regards to the environment. 
-		// i.e. Do the operands exists? 
-		// i.e. do they have the right type?
 	};
 };
 

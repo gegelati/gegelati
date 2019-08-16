@@ -57,8 +57,10 @@ namespace Program {
 
 		/**
 		* \brief Add a new line to the Program with only 0 bits.
+		*
+		* \return a non-const reference to the newly added Line.
 		*/
-		void addNewLine();
+		Line & addNewLine();
 
 		/**
 		* \brief Get the number of lines in the Program.
@@ -66,6 +68,15 @@ namespace Program {
 		* \return the number of line contained in the Program.
 		*/
 		size_t getNbLines() const;
+
+		/**
+		* \brief Get a given Line of the Program.
+		*
+		* \param[in] index The integer index of the retrieved Line within the Program.
+		* \return a const reference to the indexed Line of the Program.
+		* \throw std::range_error if the index is too large.
+		*/
+		const Line & getLine(uint64_t index) const;
 	};
 }
 #endif
