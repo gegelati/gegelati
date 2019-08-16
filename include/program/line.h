@@ -23,8 +23,9 @@ namespace Program {
 		/// Array storing the parameters for this instruction.
 		Parameter* const parameters;
 
-		/// Array storing the operands pair (each with a source and an address)
-		const std::pair<uint64_t, uint64_t>* operands;
+		/// Array storing the operands pair (each with an index for the 
+		/// DataHandlers of the Environment, and a location within it.)
+		std::pair<uint64_t, uint64_t>* const operands;
 
 		/// Delete the default constructor.
 		Line() = delete;
@@ -119,6 +120,43 @@ namespace Program {
 		* Parameter of the Line.
 		*/
 		void setParameter(const uint64_t idx, const Parameter p);
+
+		/**
+		* 
+		* \brief Getter for the operands of this Line.
+		*
+		* \param[in] idx the index of the accessed operand.
+		* \return the value of the operand pair at the given index.
+		* \throw std::range_error if the given index exceeds the number of
+		* Operands of the Line.
+		*/
+		const std::pair<uint64_t, uint64_t>& getOperand(const uint64_t idx) const;
+
+		/**
+		* \brief Setter for the operands of this Line.
+		*
+		* Optionnaly, the validity of the given values can be checked with
+		* regards to the Environment of the Line. If the given values is not
+		* valid (i.e. the dataHandler index exceeds the number of DataHandler 
+		* of the Environment, or the location exceeds the largestAddressSpace 
+		* of the indexed DataHandler) the attribute will not be overwritten.
+		*
+		* \param[in] idx the index of the Operand to write.
+		* \param[in] dataIndex index of a DataHandler.
+		* \param[in] location the location of the operand value within the 
+		*            DataHandler.
+		* \param[in] check whether the validity of the given new value. 
+		*
+		* \return true if checks are not activated, otherwise, return whether
+		* the value was valid and thus the writing was performed or not.
+		* \throw std::range_error if the given index exceeds the number of
+		* Operands of the Line.
+		*/
+		bool setOperand(const uint64_t idx, const uint64_t dataIndex, const uint64_t location, const bool check = true);
+
+		// TODO: Check operand validity with regards to the environment. 
+		// i.e. Do the operands exists? 
+		// i.e. do they have the right type?
 	};
 };
 

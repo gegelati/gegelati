@@ -78,6 +78,30 @@ TEST_F(ProgramTest, LineParameterAccessors) {
 	ASSERT_THROW(l.getParameter(1), std::range_error) << "Getting value of an incorrectly indexed parameter did not fail.";
 }
 
+TEST_F(ProgramTest, LineOperandAccessors) {
+	Program::Line l(*e); // with the given environment, there are two operands per line and 3 data sources.
+
+	// There are only 2 operands
+	ASSERT_THROW(l.setOperand(2, 0, 0), std::range_error) << "Setting value of an incorrectly indexed operand did not fail.";
+	// There are only 3 data Sources
+	ASSERT_FALSE(l.setOperand(0, 3, 0)) << "Setting value of a correctly indexed operand with invalid dataSource index did not fail as expected.";
+	// There are only 8 registers
+	ASSERT_FALSE(l.setOperand(0, 0, 9)) << "Setting value of a correctly indexed operand with valid dataSource (registers) but invalid location did not fail as expected.";
+	// There are only 24 places in dataSource 1
+	ASSERT_FALSE(l.setOperand(1, 1, 24)) << "Setting value of a correctly indexed operand with valid dataSource (not registers) but invalid location did not fail as expected.";
+	// Deactivate checks
+	ASSERT_TRUE(l.setOperand(1, 1, 24, false)) << "Setting value of a correctly indexed operand with valid dataSource (not registers) but invalid location failed, although checks were deactivated.";
+
+	// Valid Set
+	ASSERT_TRUE(l.setOperand(1, 1, 12)) << "Setting value of a correctly indexed operand (with valid dataSource index and location) failed.";
+
+	ASSERT_EQ(l.getOperand(1).first, 1) << "Get after valid set of operand dataSource index failed.";
+	ASSERT_EQ(l.getOperand(1).second, 12) << "Get after valid set of operand location failed.";
+
+	// There are only 2 operands
+	ASSERT_THROW(l.getOperand(2), std::range_error) << "Getting value of an incorrectly indexed operand did not fail.";
+}
+
 TEST_F(ProgramTest, ProgramConstructor) {
 	Program::Program* p;
 	ASSERT_NO_THROW({
