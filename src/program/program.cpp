@@ -62,19 +62,11 @@ size_t Program::Program::getNbLines() const
 
 const Program::Line& Program::Program::getLine(uint64_t index) const
 {
-	if (index >= this->lines.size()) {
-		throw std::range_error("Accessing line outside of a Program.");
-	}
-
-	return *this->lines.at(index);
+	return *this->lines.at(index); // throws std::range_error on bad index.
 }
 
 Program::Line& Program::Program::getLine(uint64_t index)
 {
-	if (index >= this->lines.size()) {
-		throw std::range_error("Accessing line outside of a Program.");
-	}
-
-	return *this->lines.at(index);
+	return *this->lines.at(index); // throws std::range_error on bad index.
 }
 
