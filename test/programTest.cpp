@@ -164,7 +164,13 @@ TEST_F(ProgramTest, GetProgramLine) {
 	Program::Line& l2 = p.addNewLine();
 	Program::Line& l3 = p.addNewLine();
 	
-	ASSERT_EQ(&p.getLine(1), &l2) << "Line retrieved is not the right one (based on pointer comparison).";
+	Program::Line& l4 = p.getLine(0);
+	ASSERT_EQ(&l4, &l1) << "Line retrieved is not the right one (based on pointer comparison).";
 
+	const Program::Program& constP = p;
+	const Program::Line& l5 = constP.getLine(1);
+	ASSERT_EQ(&l5, &l2) << "Line retrieved is not the right one (based on pointer comparison).";
+	
 	ASSERT_THROW(p.getLine(3), std::range_error) << "Getting line outside of the Program did not fail as expected.";
+	ASSERT_THROW(constP.getLine(3), std::range_error) << "Getting line outside of the Program did not fail as expected.";
 }

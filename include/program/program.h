@@ -70,13 +70,22 @@ namespace Program {
 		size_t getNbLines() const;
 
 		/**
-		* \brief Get a given Line of the Program.
+		* \brief Get a const ref to a Line of the Program.
 		*
 		* \param[in] index The integer index of the retrieved Line within the Program.
 		* \return a const reference to the indexed Line of the Program.
 		* \throw std::range_error if the index is too large.
 		*/
 		const Line & getLine(uint64_t index) const;
+
+		/**
+		* \brief Get a non-const ref to a Line of the Program.
+		*
+		* \param[in] index The integer index of the retrieved Line within the Program.
+		* \return a const reference to the indexed Line of the Program.
+		* \throw std::range_error if the index is too large.
+		*/
+		Line& getLine(uint64_t index);
 	};
 }
 #endif

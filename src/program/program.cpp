@@ -63,3 +63,12 @@ const Program::Line& Program::Program::getLine(uint64_t index) const
 	return *this->lines.at(index);
 }
 
+Program::Line& Program::Program::getLine(uint64_t index)
+{
+	if (index >= this->lines.size()) {
+		throw std::range_error("Accessing line outside of a Program.");
+	}
+
+	return *this->lines.at(index);
+}
+
