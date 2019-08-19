@@ -39,7 +39,45 @@ const void Program::ProgramExecutionEngine::fetchCurrentParameters(std::vector<s
 	const Instructions::Instruction& instruction = this->getCurrentInstruction(); // throw std::out_of_range
 
 	for (uint64_t i = 0; i < instruction.getNbParameters(); i++) {
-		const Parameter & p = line.getParameter(i); // throw std::out_of_range
+		const Parameter& p = line.getParameter(i); // throw std::out_of_range
 		parameters.push_back(p);
 	}
+}
+
+void Program::ProgramExecutionEngine::executeCurrentLine()
+{
+	std::vector<std::reference_wrapper<const SupportedType>> operands;
+	std::vector<std::reference_wrapper<const Parameter>> parameters;
+
+	// Get everything needed (may throw)
+	const Line& line = this->getCurrentLine();
+	const Instructions::Instruction& instruction = this->getCurrentInstruction();
+	this->fetchCurrentOperands(operands);
+	this->fetchCurrentParameters(parameters);
+
+	double result = instruction.execute(parameters, operands);
+
+	this->registers.setDataAt(typeid(PrimitiveType<double>), line.getDestination(), result);
+}
+
+double Program::ProgramExecutionEngine::executeProgram(const bool ignoreException)
+{
+	// Reset registers and programCounter
+	this->registers.resetData();
+	this->programCounter = 0;
+
+	// Iterate over the lines of the Program
+	bool hasNext = this->programCounter < this->program.getNbLines();
+	while (hasNext) {
+
+		// Execute the current line
+		this->executeCurrentLine();
+
+		// Increment the programCounter.
+		hasNext = this->next();
+	};
+
+	// Returns the 0-indexed register. 
+	// cast to primitiveType<double> to enable cast to double.
+	return (const PrimitiveType<double>&)this->registers.getDataAt(typeid(PrimitiveType<double>), 0);
 }

@@ -37,11 +37,13 @@ protected:
 		l0.setInstruction(0); // Instruction is addPrimitiveType<double>.
 		l0.setOperand(0, 0, 5); // 1st operand: 6th register.
 		l0.setOperand(1, 2, 25); // 2nd operand: 26th double in the PrimitiveTypeArray of double.
+		l0.setDestination(1); // Destination is resgister at index 1
 
 		Program::Line& l1 = p->addNewLine();
 		l1.setInstruction(1); // Instruction is MultByConstParam<double, float>.
-		l1.setOperand(0, 0, 0); // 1st operand: 0th register.
+		l1.setOperand(0, 0, 1); // 1st operand: 1th register.
 		l1.setParameter(0, value1); // Parameter is set to value1 (=4.2f)
+		l1.setDestination(0); // Destination is resgister at index 0
 	}
 
 	virtual void TearDown() {
@@ -116,4 +118,23 @@ TEST_F(ProgramExecutionEngineTest, fetchParameters) {
 	ASSERT_EQ(parameters.size(), 1) << "Incorrect number of operands were fetched by previous call.";
 	// Check parameter value (set in fixture). value1: 4.2f
 	ASSERT_EQ((float&)parameters.at(0).get(), value1) << "Value of fetched parameter is incorrect.";
+}
+
+TEST_F(ProgramExecutionEngineTest, executeCurrentLine) {
+	Program::ProgramExecutionEngine progExecEng(*p);
+
+	ASSERT_NO_THROW(progExecEng.executeCurrentLine()) << "Execution of the first line of the program from Fixture should not fail.";
+	progExecEng.next();
+	ASSERT_NO_THROW(progExecEng.executeCurrentLine()) << "Execution of the second line of the program from Fixture should not fail.";
+	progExecEng.next();
+	ASSERT_THROW(progExecEng.executeCurrentLine(), std::out_of_range) << "Execution of a non-existing line of the program should fail.";
+
+}
+
+TEST_F(ProgramExecutionEngineTest, execute) {
+	Program::ProgramExecutionEngine progExecEng(*p);
+	double result;
+
+	ASSERT_NO_THROW(result = progExecEng.executeProgram()) << "Program from fixture failed to execute. (Indivitual execution of its line in executeCurrentLine test).";
+	ASSERT_EQ(result, (value0 + 0) * value1);
 }
