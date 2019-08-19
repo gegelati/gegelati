@@ -42,6 +42,14 @@ namespace Program {
 		};
 
 		/**
+		* \brief Increments the programCounter and checks for the end of the Program.
+		*
+		* \return true if the Program of the ProgramExecutionEngine has a Line 
+		* for the new programCounter value, and false otherwise.
+		*/
+		const bool next();
+
+		/**
 		* \brief Get the Program Line corresponding to the current programCounter.
 		*
 		* \return a const ref to the Line from the Program indexed by the
@@ -78,6 +86,16 @@ namespace Program {
 		*         DataHandler does not exist.
 		*/
 		const void fetchCurrentOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const;
+
+		/**
+		* \brief Get the parameters for the current Instruction.
+		*
+		* This method retrieves the number of Parameter required by the 
+		* current Instruction and stores them into the given vector.
+		*
+		* \param[in,out] parameters std::vector where the fetched Parameter will be inserted.
+		*/
+		const void fetchCurrentParameters(std::vector<std::reference_wrapper<const Parameter>>& parameters) const;
 	};
 };
 #endif
