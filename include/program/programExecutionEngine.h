@@ -44,7 +44,7 @@ namespace Program {
 		/**
 		* \brief Get the Program Line corresponding to the current programCounter.
 		*
-		* \return a const ref to the Line from the Program indexed by the 
+		* \return a const ref to the Line from the Program indexed by the
 		* current programCounter.
 		* \throw std::out_of_range if the programCounter exceeds the number of
 		* lines of the program.
@@ -57,11 +57,27 @@ namespace Program {
 		* \return the Instruction from the Environment Instruction::Set for
 		* the Line of the Program indexed by the current programCounter.
 		* \throw std::out_of_range if the programCounter exceeds the number of
-		* lines of the program or if the instruction index contained in the 
-		* current Line exceeds the number of Instruction in the Environment 
+		* lines of the program or if the instruction index contained in the
+		* current Line exceeds the number of Instruction in the Environment
 		* Instructions::Set.
 		*/
 		const Instructions::Instruction& getCurrentInstruction() const;
+
+		/**
+		* \brief Get the operands for the current Instruction.
+		*
+		* This method fetches from the dataSources the operands indexed in
+		* the current Line of the Program. To get the correct data, the method
+		* Uses the data types of the current Instruction of the program.
+		*
+		* \param[in,out] operands std::vector where the fetched operands will be inserted.
+		* \throws std::invalid_argument if the data type of the current Instruction
+		*         is not provided by the indexed DataHandler.
+		* \throws std::out_of_range if the given address is invalid for the indexed
+		*         DataHandler, with the given data type, or if the indexed
+		*         DataHandler does not exist.
+		*/
+		const void fetchOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const;
 	};
 };
 #endif
