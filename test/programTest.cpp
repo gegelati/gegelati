@@ -174,3 +174,14 @@ TEST_F(ProgramTest, GetProgramLine) {
 	ASSERT_THROW(p.getLine(3), std::range_error) << "Getting line outside of the Program did not fail as expected.";
 	ASSERT_THROW(constP.getLine(3), std::range_error) << "Getting line outside of the Program did not fail as expected.";
 }
+
+TEST_F(ProgramTest, RemoveProgramLine) {
+	Program::Program p(*e);
+	Program::Line& l1 = p.addNewLine();
+	Program::Line& l2 = p.addNewLine();
+	Program::Line& l3 = p.addNewLine();
+
+	ASSERT_NO_THROW(p.removeLine(1)) << "Could not remove a line with a valid index.";
+	ASSERT_EQ(p.getNbLines(), 2) << "Program length after removal of a line is incorrect.";	
+	ASSERT_THROW(p.removeLine(2), std::out_of_range) << "Removing a non-existing line should throw an exception.";
+}

@@ -49,6 +49,12 @@ Program::Line& Program::Program::addNewLine()
 	return *newLine;
 }
 
+void Program::Program::removeLine(const uint64_t idx)
+{
+	free(this->lines.at(idx)); // throws std::range_error on bad index.
+	this->lines.erase(this->lines.begin() + idx);
+}
+
 size_t Program::Program::getNbLines() const
 {
 	return this->lines.size();

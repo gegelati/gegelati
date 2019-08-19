@@ -63,6 +63,17 @@ namespace Program {
 		Line & addNewLine();
 
 		/**
+		* \brief Remove a Line from the Program.
+		*
+		* Remove the Line at the given index from the Program and free the 
+		* associated memory.
+		*
+		* \param[in] idx the integer index of the Program Line to remove.
+		* \throw std::range_error if the index is too large.
+		*/
+		void removeLine(const uint64_t idx);
+
+		/**
 		* \brief Get the number of lines in the Program.
 		*
 		* \return the number of line contained in the Program.
