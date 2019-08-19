@@ -20,7 +20,7 @@ namespace DataHandlers {
 		* make it possible to check whether the size of the data vector was modified throughout
 		* the lifetime of the PrimitiveTypeArray. (Which should not be possible.)
 		*/
-		const unsigned int nbElements;
+		const size_t nbElements;
 
 		/**
 		* \brief Array storing the data of the PrimitiveTypeArray.
@@ -43,7 +43,7 @@ namespace DataHandlers {
 		*
 		* \param[in] size the fixed number of elements of primitive type T contained in the PrimitiveTypeArray.
 		*/
-		PrimitiveTypeArray(unsigned int size = 8);
+		PrimitiveTypeArray(size_t size = 8);
 
 		size_t getAddressSpace(const std::type_info& type)  const;
 
@@ -72,7 +72,7 @@ namespace DataHandlers {
 		void setDataAt(const std::type_info& type, const size_t address, const PrimitiveType<T>& value);
 	};
 
-	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(unsigned int size) : nbElements{ size }, data(size) {
+	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size) : nbElements{ size }, data(size) {
 		this->providedTypes.push_back(typeid(PrimitiveType<T>));
 	}
 
