@@ -30,7 +30,7 @@ bool Program::Line::setInstruction(uint64_t instr, bool check)
 	return true;
 }
 
-Parameter Program::Line::getParameter(uint64_t idx) const
+const Parameter & Program::Line::getParameter(uint64_t idx) const
 {
 	if (idx >= this->environment.getMaxNbParameters()) {
 		throw std::range_error("Attempting to access an non-existing Parameter.");

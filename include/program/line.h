@@ -105,11 +105,11 @@ namespace Program {
 		* \brief Getter for the parameters of this Line.
 		*
 		* \param[in] idx the index of the accessed Parameter.
-		* \return the value of the parameter at the given index.
+		* \return the const reference of the parameter at the given index.
 		* \throw std::range_error if the given index exceeds the number of
 		* Parameter of the Line.
 		*/
-		Parameter getParameter(const uint64_t idx) const;
+		const Parameter& getParameter(const uint64_t idx) const;
 
 		/**
 		* \brief Setter for the parameters of this Line.
@@ -122,7 +122,7 @@ namespace Program {
 		void setParameter(const uint64_t idx, const Parameter p);
 
 		/**
-		* 
+		*
 		* \brief Getter for the operands of this Line.
 		*
 		* \param[in] idx the index of the accessed operand.
@@ -137,15 +137,15 @@ namespace Program {
 		*
 		* Optionnaly, the validity of the given values can be checked with
 		* regards to the Environment of the Line. If the given values is not
-		* valid (i.e. the dataHandler index exceeds the number of DataHandler 
-		* of the Environment, or the location exceeds the largestAddressSpace 
+		* valid (i.e. the dataHandler index exceeds the number of DataHandler
+		* of the Environment, or the location exceeds the largestAddressSpace
 		* of the indexed DataHandler) the attribute will not be overwritten.
 		*
 		* \param[in] idx the index of the Operand to write.
 		* \param[in] dataIndex index of a DataHandler.
-		* \param[in] location the location of the operand value within the 
+		* \param[in] location the location of the operand value within the
 		*            DataHandler.
-		* \param[in] check whether the validity of the given new value. 
+		* \param[in] check whether the validity of the given new value.
 		*
 		* \return true if checks are not activated, otherwise, return whether
 		* the value was valid and thus the writing was performed or not.
