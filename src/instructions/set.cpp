@@ -23,7 +23,7 @@ unsigned int Instructions::Set::getNbInstructions() const
 	return (unsigned int)instructions.size();
 }
 
-const Instructions::Instruction& Instructions::Set::getInstruction(const unsigned int i) const
+const Instructions::Instruction& Instructions::Set::getInstruction(const uint64_t i) const
 {
 	return instructions.at(i).get();
 }

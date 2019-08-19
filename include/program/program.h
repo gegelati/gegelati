@@ -69,7 +69,7 @@ namespace Program {
 		* associated memory.
 		*
 		* \param[in] idx the integer index of the Program Line to remove.
-		* \throw std::range_error if the index is too large.
+		* \throw std::out_of_range if the index is too large.
 		*/
 		void removeLine(const uint64_t idx);
 
@@ -93,7 +93,7 @@ namespace Program {
 		*
 		* \param[in] index The integer index of the retrieved Line within the Program.
 		* \return a const reference to the indexed Line of the Program.
-		* \throw std::range_error if the index is too large.
+		* \throw std::out_of_range if the index is too large.
 		*/
 		const Line & getLine(uint64_t index) const;
 
@@ -102,7 +102,7 @@ namespace Program {
 		*
 		* \param[in] index The integer index of the retrieved Line within the Program.
 		* \return a const reference to the indexed Line of the Program.
-		* \throw std::range_error if the index is too large.
+		* \throw std::out_of_range if the index is too large.
 		*/
 		Line& getLine(uint64_t index);
 	};

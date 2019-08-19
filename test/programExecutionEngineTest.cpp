@@ -28,6 +28,8 @@ protected:
 
 		e = new Environment(set, vect, 8);
 		p = new Program::Program(*e);
+
+		p->addNewLine();
 	}
 
 	virtual void TearDown() {
@@ -40,10 +42,26 @@ protected:
 	}
 };
 
-TEST_F(ProgramExecutionEngineTest, Constructor) {
-
+TEST_F(ProgramExecutionEngineTest, ConstructorDestructor) {
 	Program::ProgramExecutionEngine* progExecEng;
 	ASSERT_NO_THROW(progExecEng = new Program::ProgramExecutionEngine(*p)) << "Construction failed.";
 
 	ASSERT_NO_THROW(delete progExecEng) << "Destruction failed.";
+}
+
+TEST_F(ProgramExecutionEngineTest, getCurrentLine) {
+	Program::ProgramExecutionEngine progExecEng(*p);
+
+	// Valid since the program has more than 0 line and program counter is initialized to 0.
+	ASSERT_EQ(&progExecEng.getCurrentLine(), &p->getLine(0)) << "First line of the Program not accessible from the ProgramExecutionEngine.";
+}
+
+TEST_F(ProgramExecutionEngineTest, getCurrentInstruction) {
+	Program::ProgramExecutionEngine progExecEng(*p);
+
+	// Valid since the program has more than 0 line and program counter is initialized to 0.
+	const Instructions::Instruction& instr = progExecEng.getCurrentInstruction();
+	// First Instruction of the set (from Fixture) is Instructions::AddPrimitiveType<float>.
+	// Since the Line was initialized to 0, its instruction index is 0.
+	ASSERT_EQ(typeid(instr), typeid(Instructions::AddPrimitiveType<float>)) << "The type of the instruction does not correspond to the Set of the Environment.";
 }

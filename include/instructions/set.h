@@ -49,7 +49,7 @@ namespace Instructions {
 		* \throws std::out_of_range if the given index exceeds the number of Instruction in the Set.
 		* \return a reference to the Instruction at the given index.
 		*/
-		const Instruction& getInstruction(const unsigned int i) const;
+		const Instruction& getInstruction(const uint64_t i) const;
 
 		/**
 		* \brief Get the maximum number of operands for Instruction currently contained in the Set.
