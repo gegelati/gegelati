@@ -117,6 +117,12 @@ TEST_F(ProgramTest, ProgramConstructor) {
 
 }
 
+TEST_F(ProgramTest, ProgramGetEnvironment) {
+	Program::Program p(*e);
+
+	ASSERT_EQ(&p.getEnvironment(), e) << "Environment of a Program differs from the one given at construction. (pointer comparison)";
+}
+
 TEST_F(ProgramTest, AddEmptyLineAndDestruction) {
 	Program::Program* p = new Program::Program(*e);
 	Program::Line* l;
@@ -171,8 +177,8 @@ TEST_F(ProgramTest, GetProgramLine) {
 	const Program::Line& l5 = constP.getLine(1);
 	ASSERT_EQ(&l5, &l2) << "Line retrieved is not the right one (based on pointer comparison).";
 	
-	ASSERT_THROW(p.getLine(3), std::range_error) << "Getting line outside of the Program did not fail as expected.";
-	ASSERT_THROW(constP.getLine(3), std::range_error) << "Getting line outside of the Program did not fail as expected.";
+	ASSERT_THROW(p.getLine(3), std::out_of_range) << "Getting line outside of the Program did not fail as expected.";
+	ASSERT_THROW(constP.getLine(3), std::out_of_range) << "Getting line outside of the Program did not fail as expected.";
 }
 
 TEST_F(ProgramTest, RemoveProgramLine) {

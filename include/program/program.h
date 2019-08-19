@@ -74,6 +74,14 @@ namespace Program {
 		void removeLine(const uint64_t idx);
 
 		/**
+		* \brief Get the environment associated to the Program at construction.
+		* 
+		* \return a const reference to the Environment of the Program and all its 
+		** Line.
+		*/
+		const Environment& getEnvironment() const;
+
+		/**
 		* \brief Get the number of lines in the Program.
 		*
 		* \return the number of line contained in the Program.

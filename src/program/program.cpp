@@ -51,8 +51,12 @@ Program::Line& Program::Program::addNewLine()
 
 void Program::Program::removeLine(const uint64_t idx)
 {
-	free(this->lines.at(idx)); // throws std::range_error on bad index.
+	free(this->lines.at(idx)); // throws std::out_of_range on bad index.
 	this->lines.erase(this->lines.begin() + idx);
+}
+
+const Environment& Program::Program::getEnvironment() const {
+	return this->environment;
 }
 
 size_t Program::Program::getNbLines() const
@@ -62,11 +66,11 @@ size_t Program::Program::getNbLines() const
 
 const Program::Line& Program::Program::getLine(uint64_t index) const
 {
-	return *this->lines.at(index); // throws std::range_error on bad index.
+	return *this->lines.at(index); // throws std::out_of_range on bad index.
 }
 
 Program::Line& Program::Program::getLine(uint64_t index)
 {
-	return *this->lines.at(index); // throws std::range_error on bad index.
+	return *this->lines.at(index); // throws std::out_of_range on bad index.
 }
 
