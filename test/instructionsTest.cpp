@@ -37,7 +37,7 @@ TEST(InstructionsTest, CheckArgumentTypes) {
 	PrimitiveType<double> c = 3.7;
 	PrimitiveType<int> d = 5;
 
-	std::vector<std::reference_wrapper<SupportedType>> vect;
+	std::vector<std::reference_wrapper<const SupportedType>> vect;
 	vect.push_back(a);
 	vect.push_back(b);
 	ASSERT_TRUE(i->checkOperandTypes(vect)) << "Operands of valid types wrongfully classified as invalid.";
@@ -52,7 +52,7 @@ TEST(InstructionsTest, CheckArgumentTypes) {
 
 TEST(InstructionsTest, CheckParameters) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<int>();
-	std::vector<std::reference_wrapper<Parameter>> v;
+	std::vector<std::reference_wrapper<const Parameter>> v;
 	Parameter a = 2;
 	Parameter b = 3.2f;
 	v.push_back(a);
@@ -72,7 +72,7 @@ TEST(InstructionsTest, Execute) {
 	PrimitiveType<double> b = 5.5;
 	PrimitiveType<int> c = 3;
 
-	std::vector<std::reference_wrapper<SupportedType>> vect;
+	std::vector<std::reference_wrapper<const SupportedType>> vect;
 	vect.push_back(a);
 	vect.push_back(b);
 	ASSERT_EQ(i->execute({}, vect), 8.1) << "Execute method of AddPrimitiveType<double> returns an incorrect value with valid operands.";

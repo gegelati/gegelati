@@ -79,7 +79,7 @@ TEST_F(ProgramExecutionEngineTest, fetchOperands) {
 	// Program line 0
 	// Instruction is AddPrimitiveType<double>.
 	// Operands are: 6th (index = 5) register and 26th (index = 25) element of an double array.
-	ASSERT_NO_THROW(progExecEng.fetchOperands(operands)) << "Fetching the operands of a valid Program from fixtures failed.";
+	ASSERT_NO_THROW(progExecEng.fetchCurrentOperands(operands)) << "Fetching the operands of a valid Program from fixtures failed.";
 	// Check number of operands
 	ASSERT_EQ(operands.size(), 2) << "Insufficient number of operands were fetched by previous call.";
 	// Check operand value. Register is 0.0, array element is value0: 2.3

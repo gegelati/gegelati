@@ -47,14 +47,14 @@ namespace Instructions {
 		*
 		* \param[in] arguments a const list of reference_wrapper to any type of object. (not doable at compile time)
 		*/
-		bool checkOperandTypes(const std::vector<std::reference_wrapper<SupportedType>>& arguments) const;
+		bool checkOperandTypes(const std::vector<std::reference_wrapper<const SupportedType>>& arguments) const;
 
 		/**
 		* \brief Check if a given vector contains the right number of parameters for the Instruction.
 		*
 		* \param[in] params a const list of reference_wrapper to Parameters.
 		*/
-		bool checkParameters(const std::vector<std::reference_wrapper<Parameter>>& params) const;
+		bool checkParameters(const std::vector<std::reference_wrapper<const Parameter>>& params) const;
 
 		/**
 		* \brief Execute the Instruction for the given parameters and arguments.
@@ -69,8 +69,8 @@ namespace Instructions {
 		*         Otherwise, 1.0 is returned.
 		*/
 		virtual double execute(
-			const std::vector<std::reference_wrapper<Parameter>>& params,
-			const std::vector<std::reference_wrapper<SupportedType>>& args) const;
+			const std::vector<std::reference_wrapper<const Parameter>>& params,
+			const std::vector<std::reference_wrapper<const SupportedType>>& args) const;
 
 	protected:
 		/**

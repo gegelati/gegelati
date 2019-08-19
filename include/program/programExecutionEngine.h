@@ -77,7 +77,7 @@ namespace Program {
 		*         DataHandler, with the given data type, or if the indexed
 		*         DataHandler does not exist.
 		*/
-		const void fetchOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const;
+		const void fetchCurrentOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const;
 	};
 };
 #endif

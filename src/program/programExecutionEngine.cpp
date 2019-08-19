@@ -13,7 +13,7 @@ const Instructions::Instruction& Program::ProgramExecutionEngine::getCurrentInst
 	return this->program.getEnvironment().getInstructionSet().getInstruction(instructionIndex); // throw std::out_of_range if the index of the line is too large.
 }
 
-const void Program::ProgramExecutionEngine::fetchOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const
+const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const
 {
 	const Instructions::Instruction& instruction = this->getCurrentInstruction(); // throw std::out_of_range
 	const Line& line = this->getCurrentLine();

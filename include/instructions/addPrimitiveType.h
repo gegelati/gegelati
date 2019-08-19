@@ -25,8 +25,8 @@ namespace Instructions {
 		AddPrimitiveType();
 
 		double execute(
-			const std::vector<std::reference_wrapper<Parameter>>& params,
-			const std::vector<std::reference_wrapper<SupportedType>>& args) const;
+			const std::vector<std::reference_wrapper<const Parameter>>& params,
+			const std::vector<std::reference_wrapper<const SupportedType>>& args) const;
 	};
 
 
@@ -37,14 +37,14 @@ namespace Instructions {
 
 
 	template <class T> double AddPrimitiveType<T>::execute(
-		const std::vector<std::reference_wrapper<Parameter>>& params,
-		const std::vector<std::reference_wrapper<SupportedType>>& args) const {
+		const std::vector<std::reference_wrapper<const Parameter>>& params,
+		const std::vector<std::reference_wrapper<const SupportedType>>& args) const {
 
 		if (Instruction::execute(params, args) != 1.0) {
 			return 0.0;
 		}
 
-		return dynamic_cast<PrimitiveType<T>&>(args.at(0).get()) +(double) dynamic_cast<PrimitiveType<T>&>(args.at(1).get());;
+		return dynamic_cast<const PrimitiveType<T>&>(args.at(0).get()) +(double) dynamic_cast<const PrimitiveType<T>&>(args.at(1).get());;
 	}
 }
 

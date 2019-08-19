@@ -20,7 +20,7 @@ unsigned int Instruction::getNbParameters() const {
 	return this->nbParameters;
 }
 
-bool Instruction::checkOperandTypes(const std::vector<std::reference_wrapper<SupportedType>> & arguments) const
+bool Instruction::checkOperandTypes(const std::vector<std::reference_wrapper<const SupportedType>> & arguments) const
 {
 	if(arguments.size() != this->operandTypes.size()){
 		return false;
@@ -34,12 +34,12 @@ bool Instruction::checkOperandTypes(const std::vector<std::reference_wrapper<Sup
 	return true;
 }
 
-bool Instruction::checkParameters(const std::vector<std::reference_wrapper<Parameter>>& params) const
+bool Instruction::checkParameters(const std::vector<std::reference_wrapper<const Parameter>>& params) const
 {
 	return (params.size() == this->nbParameters);
 }
 
-double Instruction::execute(const std::vector<std::reference_wrapper<Parameter>>& params, const std::vector<std::reference_wrapper<SupportedType>>& arguments) const
+double Instruction::execute(const std::vector<std::reference_wrapper<const Parameter>>& params, const std::vector<std::reference_wrapper<const SupportedType>>& arguments) const
 {
 	if (!this->checkParameters(params) || !this->checkOperandTypes(arguments)) {
 		return 0.0;

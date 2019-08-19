@@ -17,8 +17,8 @@ namespace Instructions {
 		MultByConstParam();
 
 		double execute(
-			const std::vector<std::reference_wrapper<Parameter>>& params,
-			const std::vector<std::reference_wrapper<SupportedType>>& args) const;
+			const std::vector<std::reference_wrapper<const Parameter>>& params,
+			const std::vector<std::reference_wrapper<const SupportedType>>& args) const;
 	};
 
 	template <class T, class U> MultByConstParam<T, U>::MultByConstParam() {
@@ -27,14 +27,14 @@ namespace Instructions {
 	}
 
 	template<class T, class U> double MultByConstParam<T, U>::execute(
-		const std::vector<std::reference_wrapper<Parameter>>& params,
-		const std::vector<std::reference_wrapper<SupportedType>>& args) const
+		const std::vector<std::reference_wrapper<const Parameter>>& params,
+		const std::vector<std::reference_wrapper<const SupportedType>>& args) const
 	{
 		if (Instruction::execute(params, args) != 1.0) {
 			return 0.0;
 		}
 
-		return dynamic_cast<PrimitiveType<T>&>(args.at(0).get()) *(double) (U)params.at(0).get();
+		return dynamic_cast<const PrimitiveType<T>&>(args.at(0).get()) *(double) (const U&)params.at(0).get();
 	}
 	;
 }
