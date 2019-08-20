@@ -136,5 +136,15 @@ TEST_F(ProgramExecutionEngineTest, execute) {
 	double result;
 
 	ASSERT_NO_THROW(result = progExecEng.executeProgram()) << "Program from fixture failed to execute. (Indivitual execution of its line in executeCurrentLine test).";
-	ASSERT_EQ(result, (value0 + 0) * value1);
+	ASSERT_EQ(result, (value0 + 0) * value1) << "Result of the program from Fixture is not as expected.";
+
+	// Introduce a new line in the program to test the throw
+	Program::Line& l2 = p->addNewLine();
+	// Instruction 2 does not exist. Must deactivate checks to write this destination
+	l2.setInstruction(2, false); 
+	ASSERT_THROW(progExecEng.executeProgram(), std::out_of_range)<< "Program line using a incorrect Instruction index should throw an exception.";
+
+	// Now ignoring the exceptions
+	ASSERT_NO_THROW(result = progExecEng.executeProgram(true)) << "Program line using a incorrect Instruction index should not interrupt the Execution when ignored.";
+	ASSERT_EQ(result, (value0 + 0) * value1) << "Result of the program from Fixture, with an additional ignored line, is not as expected.";
 }

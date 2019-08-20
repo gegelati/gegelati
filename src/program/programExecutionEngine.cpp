@@ -70,8 +70,15 @@ double Program::ProgramExecutionEngine::executeProgram(const bool ignoreExceptio
 	bool hasNext = this->programCounter < this->program.getNbLines();
 	while (hasNext) {
 
-		// Execute the current line
-		this->executeCurrentLine();
+		try {
+			// Execute the current line
+			this->executeCurrentLine();
+		}
+		catch (std::out_of_range e) {
+			if (!ignoreException) {
+				throw; // rethrow
+			}
+		}
 
 		// Increment the programCounter.
 		hasNext = this->next();
