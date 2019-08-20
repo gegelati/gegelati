@@ -47,6 +47,12 @@ TEST_F(LineTest, LineConstructor) {
 		}) << "Something went wrong when destructing a Line with a valid Environment.";
 }
 
+TEST_F(LineTest, LineGetEnvironment) {
+	Program::Line l(*e);
+
+	ASSERT_EQ(&l.getEnvironment(), e) << "Environment of the Line does not corresponds to the one given at creation (pointer comparison)";
+}
+
 TEST_F(LineTest, LineDestinatioInstructionSetters) {
 	Program::Line l(*e);
 

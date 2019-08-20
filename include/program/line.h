@@ -55,6 +55,14 @@ namespace Program {
 			free((void*)this->operands);
 		}
 
+
+		/**
+		* \brief Get the environment within which the Line was created.
+		*
+		* \return a const reference to the Environment of the Line.
+		*/
+		const Environment& getEnvironment() const;
+
 		/**
 		* \brief Getter for the destinationIndex of this Line.
 		*
