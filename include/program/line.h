@@ -15,10 +15,10 @@ namespace Program {
 		const Environment& environment;
 
 		/// index of the Instruction of the Set of the Environment.
-		uint64_t instruction;
+		uint64_t instructionIndex;
 
 		/// index of the register to which the result of this line should be written.
-		uint64_t destination;
+		uint64_t destinationIndex;
 
 		/// Array storing the parameters for this instruction.
 		Parameter* const parameters;
@@ -40,8 +40,8 @@ namespace Program {
 		*/
 		Line(const Environment& env) :
 			environment{ env },
-			instruction{ 0 },
-			destination{ 0 },
+			instructionIndex{ 0 },
+			destinationIndex{ 0 },
 			parameters{ (Parameter*)calloc(env.getMaxNbParameters(), sizeof(Parameter)) },
 			operands{ (std::pair<uint64_t, uint64_t>*)calloc(env.getMaxNbOperands(), sizeof(std::pair<uint64_t, uint64_t>)) }{};
 
@@ -56,50 +56,50 @@ namespace Program {
 		}
 
 		/**
-		* \brief Getter for the destination of this Line.
+		* \brief Getter for the destinationIndex of this Line.
 		*
-		* \return the value of the destination attribute.
+		* \return the value of the destinationIndex attribute.
 		*/
-		uint64_t getDestination() const;
+		uint64_t getDestinationIndex() const;
 
 		/**
-		* \brief Setter for the destination of this Line.
+		* \brief Setter for the destinationIndex of this Line.
 		*
 		* Optionnaly, the validity of the given value can be checked with
 		* regards to the Environment of the Line. If the given value is not
 		* valid (i.e. it exceeds the number of available destinations) the
 		* attribute will not be overwritten.
 		*
-		* \param[in] dest the new value for the destination attribute.
+		* \param[in] dest the new value for the destinationIndex attribute.
 		* \param[in] check whether the validity of the given new value.
 		*
 		* \return true if checks are not activated, otherwise, return whether
 		* the value was valid and thus the writing was performed or not.
 		*/
-		bool setDestination(const uint64_t dest, const bool check = true);
+		bool setDestinationIndex(const uint64_t dest, const bool check = true);
 
 		/**
-		* \brief Getter for the instruction of this Line.
+		* \brief Getter for the instructionIndex of this Line.
 		*
-		* \return the value of the instruction attribute.
+		* \return the value of the instructionIndex attribute.
 		*/
-		uint64_t getInstruction() const;
+		uint64_t getInstructionIndex() const;
 
 		/**
-		* \brief Setter for the instruction of this Line.
+		* \brief Setter for the instructionIndex of this Line.
 		*
 		* Optionnaly, the validity of the given value can be checked with
 		* regards to the Environment of the Line. If the given value is not
 		* valid (i.e. it exceeds the number of available instructions) the
 		* attribute will not be overwritten.
 		*
-		* \param[in] instr the new value for the instruction attribute.
+		* \param[in] instr the new value for the instructionIndex attribute.
 		* \param[in] check whether the validity of the given new value.
 		*
 		* \return true if checks are not activated, otherwise, return whether
 		* the value was valid and thus the writing was performed or not.
 		*/
-		bool setInstruction(const uint64_t instr, const bool check = true);
+		bool setInstructionIndex(const uint64_t instr, const bool check = true);
 
 		/**
 		* \brief Getter for the parameters of this Line.

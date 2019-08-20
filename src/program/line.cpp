@@ -2,31 +2,31 @@
 
 #include "program\line.h"
 
-uint64_t Program::Line::getDestination() const
+uint64_t Program::Line::getDestinationIndex() const
 {
-	return this->destination;
+	return this->destinationIndex;
 }
 
-bool Program::Line::setDestination(uint64_t dest, bool check)
+bool Program::Line::setDestinationIndex(uint64_t dest, bool check)
 {
 	if (check && dest >= this->environment.getNbRegisters()) {
 		return false;
 	}
-	this->destination = dest;
+	this->destinationIndex = dest;
 	return true;
 }
 
-uint64_t Program::Line::getInstruction() const
+uint64_t Program::Line::getInstructionIndex() const
 {
-	return this->instruction;
+	return this->instructionIndex;
 }
 
-bool Program::Line::setInstruction(uint64_t instr, bool check)
+bool Program::Line::setInstructionIndex(uint64_t instr, bool check)
 {
 	if (check && instr >= this->environment.getNbInstructions()) {
 		return false;
 	}
-	this->instruction = instr;
+	this->instructionIndex = instr;
 	return true;
 }
 

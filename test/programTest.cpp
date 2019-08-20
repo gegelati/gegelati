@@ -63,8 +63,8 @@ TEST_F(ProgramTest, AddEmptyLineAndDestruction) {
 	ASSERT_NO_THROW(l = &p->addNewLine();) << "Inserting a single empty line in an empty program should not be an issue at insertion.";
 
 	// Check that line is set to only zero values.
-	ASSERT_EQ(l->getDestination(), 0) << "New line Destination is not set to 0.";
-	ASSERT_EQ(l->getInstruction(), 0) << "New line Instruction is not set to 0.";
+	ASSERT_EQ(l->getDestinationIndex(), 0) << "New line Destination is not set to 0.";
+	ASSERT_EQ(l->getInstructionIndex(), 0) << "New line Instruction is not set to 0.";
 	for (int i = 0; i < e->getMaxNbParameters(); i++) {
 		ASSERT_EQ(l->getParameter(i).i, 0) << "New line parameter is not set to 0.";
 	}

@@ -50,23 +50,23 @@ TEST_F(LineTest, LineConstructor) {
 TEST_F(LineTest, LineDestinatioInstructionSetters) {
 	Program::Line l(*e);
 
-	ASSERT_TRUE(l.setDestination(UINT64_MAX, false)) << "With checks deactivated, destination should be successfully settable to abberant value.";
-	ASSERT_FALSE(l.setDestination(UINT64_MAX)) << "With checks activated, destination should not be successfully settable to abberant value.";
-	ASSERT_TRUE(l.setDestination(5)) << "Set destination to valid value failed.";
+	ASSERT_TRUE(l.setDestinationIndex(UINT64_MAX, false)) << "With checks deactivated, destinationIndex should be successfully settable to abberant value.";
+	ASSERT_FALSE(l.setDestinationIndex(UINT64_MAX)) << "With checks activated, destinationIndex should not be successfully settable to abberant value.";
+	ASSERT_TRUE(l.setDestinationIndex(5)) << "Set destinationIndex to valid value failed.";
 
-	ASSERT_TRUE(l.setInstruction(UINT64_MAX, false)) << "With checks deactivated, instruction should be successfully settable to abberant value.";
-	ASSERT_FALSE(l.setInstruction(UINT64_MAX)) << "With checks activated, instruction should not be successfully settable to abberant value.";
-	ASSERT_TRUE(l.setInstruction(1)) << "Set destination to valid value failed.";
+	ASSERT_TRUE(l.setInstructionIndex(UINT64_MAX, false)) << "With checks deactivated, instructionIndex should be successfully settable to abberant value.";
+	ASSERT_FALSE(l.setInstructionIndex(UINT64_MAX)) << "With checks activated, instructionIndex should not be successfully settable to abberant value.";
+	ASSERT_TRUE(l.setInstructionIndex(1)) << "Set destinationIndex to valid value failed.";
 }
 
 TEST_F(LineTest, LineDestinationInstructionGetters) {
 	Program::Line l(*e);
 
-	l.setDestination(5, false);
-	ASSERT_EQ(l.getDestination(), 5) << "Get after set returned the wrong value.";
+	l.setDestinationIndex(5, false);
+	ASSERT_EQ(l.getDestinationIndex(), 5) << "Get after set returned the wrong value.";
 
-	l.setInstruction(1, false);
-	ASSERT_EQ(l.getInstruction(), 1) << "Get after set returned the wrong value.";
+	l.setInstructionIndex(1, false);
+	ASSERT_EQ(l.getInstructionIndex(), 1) << "Get after set returned the wrong value.";
 }
 
 TEST_F(LineTest, LineParameterAccessors) {

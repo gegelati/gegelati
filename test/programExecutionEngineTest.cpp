@@ -34,16 +34,16 @@ protected:
 		p = new Program::Program(*e);
 
 		Program::Line& l0 = p->addNewLine();
-		l0.setInstruction(0); // Instruction is addPrimitiveType<double>.
+		l0.setInstructionIndex(0); // Instruction is addPrimitiveType<double>.
 		l0.setOperand(0, 0, 5); // 1st operand: 6th register.
 		l0.setOperand(1, 2, 25); // 2nd operand: 26th double in the PrimitiveTypeArray of double.
-		l0.setDestination(1); // Destination is resgister at index 1
+		l0.setDestinationIndex(1); // Destination is resgister at index 1
 
 		Program::Line& l1 = p->addNewLine();
-		l1.setInstruction(1); // Instruction is MultByConstParam<double, float>.
+		l1.setInstructionIndex(1); // Instruction is MultByConstParam<double, float>.
 		l1.setOperand(0, 0, 1); // 1st operand: 1th register.
 		l1.setParameter(0, value1); // Parameter is set to value1 (=4.2f)
-		l1.setDestination(0); // Destination is resgister at index 0
+		l1.setDestinationIndex(0); // Destination is resgister at index 0
 	}
 
 	virtual void TearDown() {
@@ -140,8 +140,8 @@ TEST_F(ProgramExecutionEngineTest, execute) {
 
 	// Introduce a new line in the program to test the throw
 	Program::Line& l2 = p->addNewLine();
-	// Instruction 2 does not exist. Must deactivate checks to write this destination
-	l2.setInstruction(2, false); 
+	// Instruction 2 does not exist. Must deactivate checks to write this instruction
+	l2.setInstructionIndex(2, false); 
 	ASSERT_THROW(progExecEng.executeProgram(), std::out_of_range)<< "Program line using a incorrect Instruction index should throw an exception.";
 
 	// Now ignoring the exceptions

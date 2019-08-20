@@ -15,7 +15,7 @@ const Program::Line& Program::ProgramExecutionEngine::getCurrentLine() const
 const Instructions::Instruction& Program::ProgramExecutionEngine::getCurrentInstruction() const
 {
 	const Line& currentLine = this->getCurrentLine(); // throw std::out_of_range if the program counter is too large.
-	uint64_t instructionIndex = currentLine.getInstruction();
+	uint64_t instructionIndex = currentLine.getInstructionIndex();
 	return this->program.getEnvironment().getInstructionSet().getInstruction(instructionIndex); // throw std::out_of_range if the index of the line is too large.
 }
 
@@ -57,7 +57,7 @@ void Program::ProgramExecutionEngine::executeCurrentLine()
 
 	double result = instruction.execute(parameters, operands);
 
-	this->registers.setDataAt(typeid(PrimitiveType<double>), line.getDestination(), result);
+	this->registers.setDataAt(typeid(PrimitiveType<double>), line.getDestinationIndex(), result);
 }
 
 double Program::ProgramExecutionEngine::executeProgram(const bool ignoreException)
