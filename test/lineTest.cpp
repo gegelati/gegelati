@@ -36,20 +36,6 @@ protected:
 	}
 };
 
-TEST_F(LineTest, computeLineSize) {
-	// Expected answer:
-	// n = 8
-	// i = 2
-	// p = 1
-	// nbSrc = 3
-	// largestAddressSpace = 32
-	// m = 2
-	// ceil(log2(n)) + ceil(log2(i)) + m * (ceil(log2(nb_{ src })) + ceil(log2(largestAddressSpace)) + p * sizeof(Param) * 8
-	// ceil(log2(8)) + ceil(log2(2)) + 2 * (ceil(log2(3)) + ceil(log2(32)) + 1 * 4 * 8
-	//            3  +             1 + 2 * (            2 +             5) +  32 
-	ASSERT_EQ(Program::Line::computeLineSize(*e), 50) << "Program Line size is incorrect. Expected value is 50 for (n=8,i=2,p=1,nbSrc=3,largAddrSpace=32,m=2). ";
-}
-
 TEST_F(LineTest, LineConstructor) {
 	Program::Line* l;
 

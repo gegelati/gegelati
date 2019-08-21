@@ -44,11 +44,6 @@ TEST_F(ProgramTest, ProgramConstructor) {
 	ASSERT_NO_THROW({
 		delete p;
 		}) << "Something went wrong when destructing a Program with a valid Environment and empty lines.";
-
-	Environment e2(set, {}, 8); // empty dataHandler should be a problem.
-	ASSERT_THROW({
-		p = new Program::Program(e2); }, std::domain_error) << "Something went unexpectedly right when constructing a Program with an invalid Environment.";
-
 }
 
 TEST_F(ProgramTest, ProgramGetEnvironment) {
@@ -89,14 +84,14 @@ TEST_F(ProgramTest, GetProgramLine) {
 	Program::Line& l1 = p.addNewLine();
 	Program::Line& l2 = p.addNewLine();
 	Program::Line& l3 = p.addNewLine();
-	
+
 	Program::Line& l4 = p.getLine(0);
 	ASSERT_EQ(&l4, &l1) << "Line retrieved is not the right one (based on pointer comparison).";
 
 	const Program::Program& constP = p;
 	const Program::Line& l5 = constP.getLine(1);
 	ASSERT_EQ(&l5, &l2) << "Line retrieved is not the right one (based on pointer comparison).";
-	
+
 	ASSERT_THROW(p.getLine(3), std::out_of_range) << "Getting line outside of the Program did not fail as expected.";
 	ASSERT_THROW(constP.getLine(3), std::out_of_range) << "Getting line outside of the Program did not fail as expected.";
 }
@@ -108,6 +103,6 @@ TEST_F(ProgramTest, RemoveProgramLine) {
 	Program::Line& l3 = p.addNewLine();
 
 	ASSERT_NO_THROW(p.removeLine(1)) << "Could not remove a line with a valid index.";
-	ASSERT_EQ(p.getNbLines(), 2) << "Program length after removal of a line is incorrect.";	
+	ASSERT_EQ(p.getNbLines(), 2) << "Program length after removal of a line is incorrect.";
 	ASSERT_THROW(p.removeLine(2), std::out_of_range) << "Removing a non-existing line should throw an exception.";
 }

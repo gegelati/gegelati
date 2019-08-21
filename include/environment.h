@@ -41,6 +41,9 @@ protected:
 	/// Size of the largestAddressSpace of DataHandlers
 	const size_t largestAddressSpace;
 
+	/// Size of lines within this Environment
+	const size_t lineSize;
+
 	/**
 	* \brief Static method used when constructing a new Environment to compute
 	* the largest AddressSpace of a set of DataHandler.
@@ -50,6 +53,21 @@ protected:
 	* \return the found value, or 0 default value if the given std::vector was empty.
 	*/
 	static size_t computeLargestAddressSpace(const size_t nbRegisters, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers);
+
+	/**
+	* \brief Static method used to compute the size of Program lines based on information from the Enviroment.
+	*
+	* The Program line size, expressed in bits, is computed with the following formula:
+	* $ceil(log2(n)) + ceil(log2(i)) + m*(ceil(log2(nb_{src}))+ceil(log2(largestAddressSpace)) + p*32$
+	* See PROJECT/doc/instructions.md for more details.
+	*
+	* \param[in] env The Environment whose information is used.
+	* \return the computed line size.
+	* \throw std::domain_error in cases where the given Environment is
+	* parameterized with no registers, contains no Instruction, Instruction
+	* with no operands, no DataHandler or DataHandler with no addressable Space.
+	*/
+	static const size_t computeLineSize(const Environment& env);
 
 private:
 	/// Default constructor deleted for its uselessness.
@@ -70,7 +88,8 @@ public:
 		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers,
 		const unsigned int nbRegs) : instructionSet{ iSet }, dataSources{ dHandlers }, nbRegisters{ nbRegs },
 		nbInstructions{ iSet.getNbInstructions() }, maxNbOperands{ iSet.getMaxNbOperands() },
-		maxNbParameters{ iSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(nbRegs, dHandlers) } {};
+		maxNbParameters{ iSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(nbRegs, dHandlers) },
+		lineSize{ computeLineSize(*this) } {};
 
 	/**
 	* \brief Get the size of the number of registers of this Environment.
@@ -115,12 +134,19 @@ public:
 	size_t getLargestAddressSpace() const;
 
 	/**
+	* \brief Get the size of the line for this environment (in bits).
+	*
+	* \return the value of the lineSize attribute.
+	*/
+	size_t getLineSize() const;
+
+	/**
 	* \brief Get the DataHandler of the Environment.
 	*
 	* \return a const reference to the dataSources attribute of this Environment.
 	*/
 	const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& getDataSources() const;
-	
+
 	/**
 	* \brief Get the Instruction Set of the Environment.
 	*

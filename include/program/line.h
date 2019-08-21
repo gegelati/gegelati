@@ -56,21 +56,6 @@ namespace Program {
 		}
 
 		/**
-		* \brief Static method used to compute the size of Program lines based on information from the Enviroment.
-		*
-		* The Program line size, expressed in bits, is computed with the following formula:
-		* $ceil(log2(n)) + ceil(log2(i)) + m*(ceil(log2(nb_{src}))+ceil(log2(largestAddressSpace)) + p*32$
-		* See PROJECT/doc/instructions.md for more details.
-		*
-		* \param[in] env The Environment whose information is used.
-		* \return the computed line size.
-		* \throw std::domain_error in cases where the given Environment is
-		* parameterized with no registers, contains no Instruction, Instruction
-		* with no operands, no DataHandler or DataHandler with no addressable Space.
-		*/
-		static const size_t computeLineSize(const Environment& env);
-
-		/**
 		* \brief Get the environment within which the Line was created.
 		*
 		* \return a const reference to the Environment of the Line.

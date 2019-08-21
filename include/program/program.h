@@ -28,10 +28,7 @@ namespace Program {
 		*
 		* \param[in] e the reference to the Environment that will be referenced in the Program attributes.
 		*/
-		Program(const Environment& e) : environment{ e } {
-			// Call the computeLineSize() function to check the validity of the environment.
-			Line::computeLineSize(this->environment);
-		};
+		Program(const Environment& e) : environment{ e } {};
 
 		/**
 		* \brief Destructor for the Program class.
