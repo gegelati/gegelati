@@ -55,6 +55,20 @@ namespace Program {
 			free((void*)this->operands);
 		}
 
+		/**
+		* \brief Static method used to compute the size of Program lines based on information from the Enviroment.
+		*
+		* The Program line size, expressed in bits, is computed with the following formula:
+		* $ceil(log2(n)) + ceil(log2(i)) + m*(ceil(log2(nb_{src}))+ceil(log2(largestAddressSpace)) + p*32$
+		* See PROJECT/doc/instructions.md for more details.
+		*
+		* \param[in] env The Environment whose information is used.
+		* \return the computed line size.
+		* \throw std::domain_error in cases where the given Environment is
+		* parameterized with no registers, contains no Instruction, Instruction
+		* with no operands, no DataHandler or DataHandler with no addressable Space.
+		*/
+		static const size_t computeLineSize(const Environment& env);
 
 		/**
 		* \brief Get the environment within which the Line was created.
@@ -145,10 +159,10 @@ namespace Program {
 		*
 		* Optionnaly, the validity of the given values can be checked with
 		* regards to the Environment of the Line. If the given dataIndex
-		* value is not valid (i.e. the dataHandler index exceeds the number 
-		* of DataHandler of the Environment) the attribute will not be 
+		* value is not valid (i.e. the dataHandler index exceeds the number
+		* of DataHandler of the Environment) the attribute will not be
 		* overwritten. The location may exceeds the largestAddressSpace
-		* of the indexed DataHandler, since it will be scaled by the 
+		* of the indexed DataHandler, since it will be scaled by the
 		* programExecutionEngine when fetching the operands, however it.
 		* may not exceed the largestAddressSpace of the environment to make
 		* it possible to store it with the right number of bits.
