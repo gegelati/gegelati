@@ -8,7 +8,6 @@ namespace Mutator {
 	* Namespace containing all functions to apply randomness to a Program::Line
 	*/
 	namespace Line {
-		
 		/**
 		* \brief Randomly initializes a Program::Line.
 		*

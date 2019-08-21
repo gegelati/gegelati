@@ -5,6 +5,71 @@
 #include "mutator/rng.h"
 #include "mutator/lineMutator.h"
 
+/**
+* \brief Function to initialize a single operand of a Program::Line.
+*
+* This function uses the Mutator::RNG to set (if possible) the nth operand
+* pair of a given Line to a valid value according to the provided Environment
+* and the selected Instruction.
+*
+* \param[in] instruction the selected Instruction for this line.
+* \param[in,out] line the Program::Line to initialize.
+* \param[in] operandIdx the index of the operand of the Line to initialize.
+* \return true if the operand was successfully initialized, false if no valid
+* data source could be found for this Instruction and operandIdx couple.
+*/
+static bool initRandomCorrectLineOperand(const Instructions::Instruction& instruction, Program::Line& line, const uint64_t& operandIdx)
+{
+	const Environment& env = line.getEnvironment();
+
+	// Select an operand 
+	// The type of operand needed
+	const type_info& operandType = instruction.getOperandTypes().at(operandIdx).get();
+
+	// keep a record of tested indexes
+	std::set<uint64_t> operandDataSourceIndexes;
+
+	bool operandFound = false;
+	while (!operandFound && operandDataSourceIndexes.size() < env.getNbDataSources()) {
+		// Select an operandDataSourceIndex
+		uint64_t operandDataSourceIndex = Mutator::RNG::getUnsignedInt64(0, (env.getNbDataSources() - 1) - operandDataSourceIndexes.size());
+		// Correct the index with the number of already tested ones inferior to it.
+		// This works because the set is ordered
+		std::for_each(operandDataSourceIndexes.begin(), operandDataSourceIndexes.end(),
+			[&operandDataSourceIndex](uint64_t index) { if (index <= operandDataSourceIndex) operandDataSourceIndex++; });
+		// Add the index to the set
+		operandDataSourceIndexes.insert(operandDataSourceIndex);
+
+		// check if the selected dataSource can provide the type requested by the instruction
+		// and if so get the addressable space
+		size_t addressableSpace = 0;
+		if (operandDataSourceIndex == 0) {
+			// Data Source is the registers
+			if (operandType == typeid(PrimitiveType<double>)) {
+				operandFound = true;
+				addressableSpace = env.getNbRegisters();
+			}
+		}
+		else {
+			// Data source is a dataHandler
+			if (env.getDataSources().at(operandDataSourceIndex - 1).get().canHandle(operandType)) {
+				operandFound = true;
+				addressableSpace = env.getDataSources().at(operandDataSourceIndex - 1).get().getAddressSpace(operandType);
+			}
+		}
+
+		// The data source can provide the required data type
+		if (operandFound) {
+			// Select a location
+			uint64_t operandLocation = Mutator::RNG::getUnsignedInt64(0, addressableSpace - 1);
+			// set line operand info
+			line.setOperand(operandIdx, operandDataSourceIndex, operandLocation);
+		}
+	}
+
+	return operandFound;
+}
+
 void Mutator::Line::initRandomCorrectLine(Program::Line& line)
 {
 	const Environment& env = line.getEnvironment();
@@ -18,7 +83,6 @@ void Mutator::Line::initRandomCorrectLine(Program::Line& line)
 		Parameter param((int32_t)(Mutator::RNG::getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX - (int64_t)PARAM_INT_MIN)) + (int64_t)PARAM_INT_MIN));
 		line.setParameter(paramIdx, param);
 	}
-
 
 	// Detecting impossible combination may imply reversing some random choice
 	// and making sure not to re-select the same option again. The following 
@@ -48,51 +112,9 @@ void Mutator::Line::initRandomCorrectLine(Program::Line& line)
 		// Select operands needed by the instruction
 		uint64_t operandIdx = 0;
 		for (; operandIdx < instruction.getNbOperands(); operandIdx++) {
-			// Select an operand 
-			// The type of operand needed
-			const type_info& operandType = instruction.getOperandTypes().at(operandIdx).get();
-
-			// keep a record of tested indexes
-			std::set<uint64_t> operandIndexes;
 
 			// Check if all operands were tested (and none were valid)
-			bool operandFound = false;
-			while (!operandFound && operandIndexes.size() < env.getNbDataSources()) {
-				// Select an operandDataSourceIndex
-				uint64_t operandDataSourceIndex = Mutator::RNG::getUnsignedInt64(0, (env.getNbDataSources() - 1) - operandIndexes.size());
-				// Correct the index with the number of already tested ones inferior to it.
-				// This works because the set is ordered
-				std::for_each(operandIndexes.begin(), operandIndexes.end(),
-					[&operandDataSourceIndex](uint64_t index) { if (index <= operandDataSourceIndex) operandDataSourceIndex++; });
-				// Add the index to the set
-				operandIndexes.insert(operandDataSourceIndex);
-
-				// check if the selected dataSource can provide the type requested by the instruction
-				// and if so get the addressable space
-				size_t addressableSpace = 0;
-				if (operandDataSourceIndex == 0) {
-					// Data Source is the registers
-					if (operandType == typeid(PrimitiveType<double>)) {
-						operandFound = true;
-						addressableSpace = env.getNbRegisters();
-					}
-				}
-				else {
-					// Data source is a dataHandler
-					if (env.getDataSources().at(operandDataSourceIndex - 1).get().canHandle(operandType)) {
-						operandFound = true;
-						addressableSpace = env.getDataSources().at(operandDataSourceIndex - 1).get().getAddressSpace(operandType);
-					}
-				}
-
-				// The data source can provide the required data type
-				if (operandFound) {
-					// Select a location
-					uint64_t operandLocation = Mutator::RNG::getUnsignedInt64(0, addressableSpace - 1);
-					// set line operand info
-					line.setOperand(operandIdx, operandDataSourceIndex, operandLocation);
-				}
-			}
+			bool operandFound = initRandomCorrectLineOperand(instruction, line, operandIdx);
 
 			if (!operandFound) {
 				// If the algorithm failed to find a dataSource providing the right type of data
