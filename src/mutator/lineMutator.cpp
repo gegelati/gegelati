@@ -41,7 +41,7 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 		operandDataSourceIndexes.insert(operandDataSourceIndex);
 
 		// check if the selected dataSource can provide the type requested by the instruction
-		// and if so get the addressable space
+		// and if so get the addressable space 
 		size_t addressableSpace = 0;
 		if (operandDataSourceIndex == 0) {
 			// Data Source is the registers
@@ -61,6 +61,9 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 		// The data source can provide the required data type
 		if (operandFound) {
 			// Select a location
+			// (setting a location within the addressableSpace of the 
+			//  dataHandler for the needed type is not strictly needed since
+			//  locations are scaled anyway. Maybe this should be removed.)
 			uint64_t operandLocation = Mutator::RNG::getUnsignedInt64(0, addressableSpace - 1);
 			// set line operand info
 			line.setOperand(operandIdx, operandDataSourceIndex, operandLocation);
@@ -142,6 +145,9 @@ void Mutator::Line::initRandomCorrectLine(Program::Line& line)
 				// Data source is not a register
 				operandLocation = Mutator::RNG::getUnsignedInt64(0, env.getDataSources().at(operandDataSourceIndex - 1).get().getLargestAddressSpace() - 1);
 			}
+			// (setting a location within the addressableSpace of the 
+			//  dataHandler is not strictly needed since locations are scaled 
+			//  anyway. Maybe this should be removed.)
 			line.setOperand(operandIdx, operandDataSourceIndex, operandLocation);
 		}
 
