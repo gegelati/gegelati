@@ -23,6 +23,8 @@ protected:
 	Environment* e;
 	Program::Program* p;
 
+	MutatorTest() : e{ nullptr }, p{ nullptr }{};
+
 	virtual void SetUp() {
 		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size1)));
 		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
@@ -115,4 +117,30 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine2) {
 	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l0)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
 
 	delete (&set.getInstruction(2));
+}
+
+TEST_F(MutatorTest, LineMutatorInitRandomCorrectLineExceptionTest) {
+	// Create a new set only with only non-usable instructions.
+	Instructions::Set faultySet;
+
+	// Add a new instruction for which no data can be found in the environment DataHandler
+	faultySet.add(*(new Instructions::AddPrimitiveType<unsigned char>()));
+	faultySet.add(*(new Instructions::MultByConstParam<float, int>()));
+
+	// Recreate the environment and program with the new faulty set
+	delete p;
+	delete e;
+	e = new Environment(faultySet, vect, 8);
+	p = new Program::Program(*e);
+
+	// Set seed 
+	Mutator::RNG::setSeed(0);
+
+	// Add a pseudo-random lines to the program
+	Program::Line& l0 = p->addNewLine();
+	ASSERT_THROW(Mutator::Line::initRandomCorrectLine(l0), std::runtime_error) << "Pseudo-Random correct line initialization did not fail within an environment where failure should always happen because instruction set and data sources have no compatible types.";
+
+	// cleanup
+	delete (&faultySet.getInstruction(0));
+	delete (&faultySet.getInstruction(1));
 }

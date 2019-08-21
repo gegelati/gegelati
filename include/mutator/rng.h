@@ -24,7 +24,7 @@ namespace Mutator {
 		/**
 		* \brief Set the seed of the random number generator.
 		*
-		* \param[in] the seed value for generating random numbers.
+		* \param[in] seed integer value for generating random numbers.
 		*/
 		static void setSeed(uint64_t seed);
 
