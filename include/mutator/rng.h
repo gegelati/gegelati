@@ -35,7 +35,7 @@ namespace Mutator {
 		* \param[in] max the upper bound.
 		* \return an uniformely selected value between min and max includes.
 		*/
-		static uint64_t getInt(uint64_t min, uint64_t max);
+		static uint64_t getUnsignedInt64(uint64_t min, uint64_t max);
 	};
 };
 

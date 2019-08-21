@@ -1,11 +1,118 @@
 #include <gtest/gtest.h>
 
+#include "environment.h"
+#include "instructions/instruction.h"
+#include "instructions/addPrimitiveType.h"
+#include "instructions/multByConstParam.h"
+#include "dataHandlers/dataHandler.h"
+#include "dataHandlers/primitiveTypeArray.h"
+#include "program/program.h"
+#include "program/line.h"
+#include "program/programExecutionEngine.h"
 #include "mutator/rng.h"
+#include "mutator/lineMutator.h"
 
-TEST(MutatorTest, RNG){
+class MutatorTest : public ::testing::Test {
+protected:
+	const size_t size1{ 24 };
+	const size_t size2{ 32 };
+	const double value0{ 2.3 };
+	const float value1{ 4.2f };
+	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	Instructions::Set set;
+	Environment* e;
+	Program::Program* p;
+
+	virtual void SetUp() {
+		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size1)));
+		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
+
+		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(PrimitiveType<double>), 25, value0);
+
+		set.add(*(new Instructions::AddPrimitiveType<double>()));
+		set.add(*(new Instructions::MultByConstParam<double, float>()));
+
+		e = new Environment(set, vect, 8);
+		p = new Program::Program(*e);
+	}
+
+	virtual void TearDown() {
+		delete p;
+		delete e;
+		delete (&(vect.at(0).get()));
+		delete (&(vect.at(1).get()));
+		delete (&set.getInstruction(0));
+		delete (&set.getInstruction(1));
+	}
+};
+
+TEST_F(MutatorTest, RNG) {
 	Mutator::RNG::setSeed(0);
 
 	// With this seed, the current pseudo-random number generator returns 24 
 	// on its first use
-	ASSERT_EQ(Mutator::RNG::getInt(0, 100), 24) << "Returned pseudo-random value changed with a known seed.";
+	ASSERT_EQ(Mutator::RNG::getUnsignedInt64(0, 100), 24) << "Returned pseudo-random value changed with a known seed.";
+}
+
+TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1) {
+	Mutator::RNG::setSeed(0);
+
+	// Add a pseudo-random lines to the program
+	Program::Line& l0 = p->addNewLine();
+	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l0)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	// With this known seed
+	// InstructionIndex=1 > MultByConst<double, float>
+	// DestinationIndex=6
+	// Operand 0= (0, 4) => 5th register
+	// Covers: correct instruction, correct operand type (register), additional uneeded operand (not register)
+	ASSERT_EQ(l0.getInstructionIndex(), 1) << "Selected pseudo-random instructionIndex changed with a known seed.";
+	ASSERT_EQ(l0.getDestinationIndex(), 6) << "Selected pseudo-random destinationIndex changed with a known seed.";
+	ASSERT_EQ(l0.getOperand(0).first, 0) << "Selected pseudo-random operand data source index changed with a known seed.";
+	ASSERT_EQ(l0.getOperand(0).second, 4) << "Selected pseudo-random operand location changed with a known seed.";
+
+	// Add another pseudo-random lines to the program
+	Program::Line& l1 = p->addNewLine();
+	// Additionally covers correct operand type from data source
+	// Instruction if MultByConst<double, float>
+	// first operand is PrimitiveTypeArray<double>
+	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l1)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	ASSERT_EQ(l1.getInstructionIndex(), 1) << "Selected pseudo-random instructionIndex changed with a known seed.";
+	ASSERT_EQ(l1.getOperand(0).first, 2) << "Selected pseudo-random operand data source index changed with a known seed.";
+
+	// Add another pseudo-random lines to the program
+	// Additionally covers nothing 
+	Program::Line& l2 = p->addNewLine();
+	Program::Line& l3 = p->addNewLine();
+	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l2)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l3)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+
+	// Add another pseudo-random lines to the program
+	Program::Line& l4 = p->addNewLine();
+	// Additionally covers additional uneeded operand (register) 
+	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l4)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	ASSERT_EQ(l4.getInstructionIndex(), 1) << "Selected pseudo-random instructionIndex changed with a known seed.";
+	ASSERT_EQ(l4.getOperand(1).first, 0) << "Selected pseudo-random operand data source index changed with a known seed.";
+
+	Program::ProgramExecutionEngine progEngine(*p);
+	ASSERT_NO_THROW(progEngine.executeProgram(false)) << "Program with only correct random lines is unexpectedly not correct.";
+}
+
+TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine2) {
+	// Add a new instruction for which no data can be found in the environment DataHandler
+	set.add(*(new Instructions::AddPrimitiveType<unsigned char>()));
+
+	// Recreate the environment and program with the new set
+	delete p;
+	delete e;
+	e = new Environment(set, vect, 8);
+	p = new Program::Program(*e);
+
+	// Set seed to cover the case where the instruction with no compatible dataSource is selected.
+	Mutator::RNG::setSeed(5);
+
+	// Add a pseudo-random lines to the program
+	Program::Line& l0 = p->addNewLine();
+	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l0)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+
+	delete (&set.getInstruction(2));
 }

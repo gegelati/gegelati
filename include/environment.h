@@ -17,7 +17,7 @@
 */
 class Environment {
 protected:
-	/// Reference to the set of Instruction used by Program running within this Environment.
+	/// Set of Instruction used by Program running within this Environment.
 	const Instructions::Set instructionSet;
 
 	/// List of DataHandler that can be accessed within this Environment.

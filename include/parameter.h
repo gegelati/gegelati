@@ -9,7 +9,7 @@
 */
 union Parameter {
 	/// Integer value of the union.
-	int i;
+	int32_t i;
 	/// Float value of the union.
 	float f;
 
@@ -27,5 +27,11 @@ union Parameter {
 	/// Cast to float
 	operator float() { return this->f; };
 };
+
+/// Maximum int value for an integral Parameter
+#define PARAM_INT_MAX INT32_MAX
+
+/// Minimum int value for an integral Parameter
+#define PARAM_INT_MIN INT32_MIN
 
 #endif
