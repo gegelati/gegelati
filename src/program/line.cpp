@@ -73,14 +73,8 @@ bool Program::Line::setOperand(const uint64_t idx, const uint64_t dataIndex, con
 		if (dataIndex >= this->environment.getNbDataSources()) {
 			return false;
 		}
-
 		// Check location
-		const bool isRegister = (dataIndex == 0);
-		if (isRegister && location >= this->environment.getNbRegisters()) {
-			return false;
-		}
-
-		if (!isRegister && location >= this->environment.getDataSources().at(dataIndex - 1).get().getLargestAddressSpace()) {
+		if (location >= this->environment.getLargestAddressSpace()) {
 			return false;
 		}
 	}

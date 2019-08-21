@@ -12,6 +12,11 @@ const Program::Line& Program::ProgramExecutionEngine::getCurrentLine() const
 	return this->program.getLine(this->programCounter);
 }
 
+uint64_t Program::ProgramExecutionEngine::scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const type_info& type) const
+{
+	return rawLocation % dataHandler.getAddressSpace(type);
+}
+
 const Instructions::Instruction& Program::ProgramExecutionEngine::getCurrentInstruction() const
 {
 	const Line& currentLine = this->getCurrentLine(); // throw std::out_of_range if the program counter is too large.
@@ -28,7 +33,9 @@ const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std
 	for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
 		const std::pair<uint64_t, uint64_t>& operandIndexes = line.getOperand(i);
 		const DataHandlers::DataHandler& dataSource = this->dataSources.at(operandIndexes.first); // Throws std::out_of_range
-		const SupportedType& data = dataSource.getDataAt(instruction.getOperandTypes().at(i).get(), operandIndexes.second); // throw out of range and invalid argument
+		const type_info& operandType = instruction.getOperandTypes().at(i).get();
+		const uint64_t operandLocation = this->scaleLocation(operandIndexes.second, dataSource, operandType);
+		const SupportedType& data = dataSource.getDataAt(operandType, operandLocation);
 		operands.push_back(data);
 	}
 }

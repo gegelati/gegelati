@@ -63,6 +63,28 @@ namespace Program {
 		const Line& getCurrentLine() const;
 
 		/**
+		* \brief Scale a location from the Environment largestAddressSpace to the
+		*        largestAddressSpace of the given dataHandler, for the given data
+		*        type.
+		*
+		* This function computes a valid location for the givenDataHandler,
+		* with the givenDataType. This location is computed from the given
+		* rawLocation with a simple modulo. The choice of the Modulo was made
+		* for simplicity and faster execution, but may introduce a bias
+		* towards low values. If this becomes a problem, a proper scaling with
+		* a division would be needed.
+		*
+		* \param[in] rawLocation integer number between 0 and the environment
+		*            largestAddressSpace.
+		* \param[in] dataHandler the dataHandler whose data is being accessed.
+		* \param[in] type the type of data accessed.
+		* \return (rawLocation % dataHandler.largestAddressSpace(type))
+		* \throw std::domain_error if the data type is not supported by the
+		*        data handler.
+		*/
+		uint64_t scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const type_info& type) const;
+
+		/**
 		* \brief Get the Instruction corresponding to the current programCounter.
 		*
 		* \return the Instruction from the Environment Instruction::Set for

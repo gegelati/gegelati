@@ -144,10 +144,14 @@ namespace Program {
 		* \brief Setter for the operands of this Line.
 		*
 		* Optionnaly, the validity of the given values can be checked with
-		* regards to the Environment of the Line. If the given values is not
-		* valid (i.e. the dataHandler index exceeds the number of DataHandler
-		* of the Environment, or the location exceeds the largestAddressSpace
-		* of the indexed DataHandler) the attribute will not be overwritten.
+		* regards to the Environment of the Line. If the given dataIndex
+		* value is not valid (i.e. the dataHandler index exceeds the number 
+		* of DataHandler of the Environment) the attribute will not be 
+		* overwritten. The location may exceeds the largestAddressSpace
+		* of the indexed DataHandler, since it will be scaled by the 
+		* programExecutionEngine when fetching the operands, however it.
+		* may not exceed the largestAddressSpace of the environment to make
+		* it possible to store it with the right number of bits.
 		*
 		* \param[in] idx the index of the Operand to write.
 		* \param[in] dataIndex index of a DataHandler.
