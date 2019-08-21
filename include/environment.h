@@ -11,8 +11,12 @@ typedef struct LineSize {
 	size_t nbInstructionBits;
 	/// Number of bits used to encode the destinationIndex
 	size_t nbDestinationBits;
-	/// Number of bits used to encode the operands info
+	/// Total number of bits used to encode the operands info
 	size_t nbOperandsBits;
+	/// Number of bits used for each operand pair, to encode dataSourceIndex
+	size_t nbOperandDataSourceIndexBits;
+	/// Number of bits used for each operand pair, to encode location
+	size_t nbOperandLocationBits;
 	/// Number of bits used to encode the parameters
 	size_t nbParametersBits;
 	/// Total number of bits to encode a program line.
@@ -75,7 +79,9 @@ protected:
 	* \brief Static method used to compute the size of Program lines based on information from the Enviroment.
 	*
 	* The Program line size, expressed in bits, is computed with the following formula:
-	* $ceil(log2(n)) + ceil(log2(i)) + m*(ceil(log2(nb_{src}))+ceil(log2(largestAddressSpace)) + p*32$
+	* $ ceil(log2(i)) + ceil(log2(n))+ m*(ceil(log2(nb_{src}))+ceil(log2(largestAddressSpace)) + p*32$
+	* With bits organised (theoretically) in the same order as in the equation
+	* | Instruction | destination | operands | parameters |
 	* See PROJECT/doc/instructions.md for more details.
 	*
 	* \param[in] env The Environment whose information is used.
@@ -155,7 +161,7 @@ public:
 	*
 	* \return the value of the lineSize attribute.
 	*/
-	size_t getLineSize() const;
+	const LineSize& getLineSize() const;
 
 	/**
 	* \brief Get the DataHandler of the Environment.

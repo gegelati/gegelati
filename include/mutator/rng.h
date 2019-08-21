@@ -36,6 +36,15 @@ namespace Mutator {
 		* \return an uniformely selected value between min and max includes.
 		*/
 		static uint64_t getUnsignedInt64(uint64_t min, uint64_t max);
+
+		/**
+		* \brief Get a pseudo random double number between two bounds (included).
+		*
+		* \param[in] min the lower bound.
+		* \param[in] max the upper bound.
+		* \return an uniformely selected value between min and max includes.
+		*/
+		static double getDouble(double min, double max);
 	};
 };
 

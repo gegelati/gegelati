@@ -15,6 +15,7 @@ TEST(EnvironmentTest, Constructor) {
 	Instructions::Set set;
 
 	set.add(*(new Instructions::AddPrimitiveType<float>()));
+	set.add(*(new Instructions::AddPrimitiveType<double>()));
 
 	DataHandlers::PrimitiveTypeArray<double> d1(size1);
 	DataHandlers::PrimitiveTypeArray<int> d2(size2);

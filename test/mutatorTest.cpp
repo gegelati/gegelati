@@ -70,7 +70,7 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1) {
 	ASSERT_EQ(l0.getInstructionIndex(), 1) << "Selected pseudo-random instructionIndex changed with a known seed.";
 	ASSERT_EQ(l0.getDestinationIndex(), 6) << "Selected pseudo-random destinationIndex changed with a known seed.";
 	ASSERT_EQ(l0.getOperand(0).first, 0) << "Selected pseudo-random operand data source index changed with a known seed.";
-	ASSERT_EQ(l0.getOperand(0).second, 4) << "Selected pseudo-random operand location changed with a known seed.";
+	ASSERT_EQ(l0.getOperand(0).second, 12) << "Selected pseudo-random operand location changed with a known seed.";
 
 	// Add another pseudo-random lines to the program
 	Program::Line& l1 = p->addNewLine();
@@ -119,7 +119,7 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine2) {
 	delete (&set.getInstruction(2));
 }
 
-TEST_F(MutatorTest, LineMutatorInitRandomCorrectLineExceptionTest) {
+TEST_F(MutatorTest, LineMutatorInitRandomCorrectLineException) {
 	// Create a new set only with only non-usable instructions.
 	Instructions::Set faultySet;
 
@@ -143,4 +143,23 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLineExceptionTest) {
 	// cleanup
 	delete (&faultySet.getInstruction(0));
 	delete (&faultySet.getInstruction(1));
+}
+
+TEST_F(MutatorTest, LineMutatorAlterLine) {
+	Mutator::RNG::setSeed(0);
+
+	// Add a pseudo-random lines to the program
+	Program::Line& l0 = p->addNewLine();
+	Mutator::Line::initRandomCorrectLine(l0);
+	// Alter it (several time to increase coverage : to be controlled later)
+	for (int i = 0; i < 230; i++) {
+		Mutator::Line::alterCorrectLine(l0);
+		Program::ProgramExecutionEngine pee(*p);
+		try {
+			pee.executeProgram(false); // I think it should pose a problem with the current setup since an instruction may have a second operand of invalid type
+		}
+		catch (std::exception e) {
+			std::cout << e.what();
+		}
+	}
 }
