@@ -12,7 +12,7 @@ size_t Environment::computeLargestAddressSpace(const size_t nbRegisters, const s
 	return res;
 }
 
-const size_t Environment::computeLineSize(const Environment& env)
+const LineSize Environment::computeLineSize(const Environment& env)
 {
 	// $ceil(log2(n)) + ceil(log2(i)) + m * (ceil(log2(nb_{ src })) + ceil(log2(largestAddressSpace)) + p * sizeof(Param)_{inByte} * 8$
 	const size_t n = env.getNbRegisters();
@@ -34,10 +34,16 @@ const size_t Environment::computeLineSize(const Environment& env)
 			"It is parameterized with no or only registers, contains no Instruction, Instruction" \
 			" with no operands, no DataHandler or DataHandler with no addressable Space.");
 	}
+	LineSize result;
+	result.nbInstructionBits = (size_t)(ceill(log2l((long double)n)));
+	result.nbDestinationBits = (size_t)ceill(log2l((long double)i));
+	result.nbOperandsBits = (size_t)(m * (ceill(log2l((long double)nbSrc) + ceill(log2l((long double)largestAddressSpace)))));
+	result.nbParametersBits = (size_t)(p * sizeof(Parameter) * 8);
 
-	return (size_t)(ceill(log2l((long double)n)) + ceill(log2l((long double)i))
-		+ m * (ceill(log2l((long double)nbSrc) + ceill(log2l((long double)largestAddressSpace))))
-		+ p * sizeof(Parameter) * 8);
+	result.totalNbBits = result.nbInstructionBits + result.nbDestinationBits + result.nbOperandsBits + result.nbParametersBits;
+
+	return result;
+
 }
 
 size_t Environment::getNbRegisters() const

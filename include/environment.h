@@ -5,6 +5,23 @@
 #include "instructions/instruction.h"
 #include "instructions/set.h"
 
+/// LineSize structure to be used within the Environment.
+typedef struct LineSize {
+	/// Number of bits used to encode the instructionIndex
+	size_t nbInstructionBits;
+	/// Number of bits used to encode the destinationIndex
+	size_t nbDestinationBits;
+	/// Number of bits used to encode the operands info
+	size_t nbOperandsBits;
+	/// Number of bits used to encode the parameters
+	size_t nbParametersBits;
+	/// Total number of bits to encode a program line.
+	size_t totalNbBits;
+
+	/// Default cast to uint64_t returns the total number of bits.
+	operator size_t() const { return totalNbBits; }
+} LineSize;
+
 /**
 * \brief The Environment class contains all information needed to execute a Program.
 *
@@ -42,7 +59,7 @@ protected:
 	const size_t largestAddressSpace;
 
 	/// Size of lines within this Environment
-	const size_t lineSize;
+	const LineSize lineSize;
 
 	/**
 	* \brief Static method used when constructing a new Environment to compute
@@ -67,7 +84,7 @@ protected:
 	* parameterized with no registers, contains no Instruction, Instruction
 	* with no operands, no DataHandler or DataHandler with no addressable Space.
 	*/
-	static const size_t computeLineSize(const Environment& env);
+	static const LineSize computeLineSize(const Environment& env);
 
 private:
 	/// Default constructor deleted for its uselessness.
