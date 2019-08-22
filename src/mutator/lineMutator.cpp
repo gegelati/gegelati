@@ -172,8 +172,28 @@ void Mutator::Line::alterCorrectLine(Program::Line& line)
 		newInstructionIndex += (newInstructionIndex >= currentInstructionIndex) ? 1 : 0;
 		line.setInstructionIndex(newInstructionIndex);
 
-		// TODO: Check if operands are compatible with the new instruction.
+		// Check if operands are compatible with the new instruction.
 		// If not: mutate them
+		const Instructions::Instruction& instruction = line.getEnvironment().getInstructionSet().getInstruction(newInstructionIndex);
+		for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
+			const type_info& type = instruction.getOperandTypes().at(i).get();
+			uint64_t dataSourceIndex = line.getOperand(i).first;
+			bool isValid = false;
+			if (dataSourceIndex == 0) {
+				// regsister
+				isValid = (type == typeid(PrimitiveType<double>));
+			}
+			else {
+				// not register
+				const DataHandlers::DataHandler& dataSource = line.getEnvironment().getDataSources().at(dataSourceIndex - 1).get();
+				isValid = dataSource.canHandle(type);
+			}
+			// Alter the operator if needed
+			if (!isValid) {
+				// Force only the change of data source (location can remain unchanged thanks to scaling).
+				initRandomCorrectLineOperand(instruction, line, i, true, false, true);
+			}
+		}
 	}
 	else if (selectedBit < lineSize.nbInstructionBits + lineSize.nbDestinationBits) {
 		// DestinationIndex
@@ -189,17 +209,18 @@ void Mutator::Line::alterCorrectLine(Program::Line& line)
 		const uint64_t operandIndex = (selectedBit - (lineSize.nbInstructionBits + lineSize.nbDestinationBits)) / (lineSize.nbOperandDataSourceIndexBits + lineSize.nbOperandLocationBits);
 		const uint64_t currentOperandDataSourceIndex = line.getOperand(operandIndex).first;
 		const uint64_t currentOperandLocation = line.getOperand(operandIndex).second;
+		const Instructions::Instruction& instruction = line.getEnvironment().getInstructionSet().getInstruction(line.getInstructionIndex());
 
 		// Operands dataSourceIndex or Location
 		// Same as before, but with modulo instead of division.
 		// Result of modulo is compared with the number of bits per operand for the operandSourceIndex encoding 
 		if (((selectedBit - (lineSize.nbInstructionBits + lineSize.nbDestinationBits)) % (lineSize.nbOperandDataSourceIndexBits + lineSize.nbOperandLocationBits)) < lineSize.nbOperandDataSourceIndexBits) {
 			// Operand data source index
-			initRandomCorrectLineOperand(line.getEnvironment().getInstructionSet().getInstruction(line.getInstructionIndex()), line, operandIndex, true, false, true);
+			initRandomCorrectLineOperand(instruction, line, operandIndex, true, false, true);
 		}
 		else {
 			// Location (no fail thanks to scaling)
-			initRandomCorrectLineOperand(line.getEnvironment().getInstructionSet().getInstruction(line.getInstructionIndex()), line, operandIndex, false, true, true);
+			initRandomCorrectLineOperand(instruction, line, operandIndex, false, true, true);
 		}
 	}
 	else {

@@ -152,14 +152,12 @@ TEST_F(MutatorTest, LineMutatorAlterLine) {
 	Program::Line& l0 = p->addNewLine();
 	Mutator::Line::initRandomCorrectLine(l0);
 	// Alter it (several time to increase coverage : to be controlled later)
-	for (int i = 0; i < 230; i++) {
-		Mutator::Line::alterCorrectLine(l0);
-		Program::ProgramExecutionEngine pee(*p);
-		try {
+	ASSERT_NO_THROW({
+		for (int i = 0; i < 500; i++) {
+			Mutator::Line::alterCorrectLine(l0);
+			Program::ProgramExecutionEngine pee(*p);
 			pee.executeProgram(false); // I think it should pose a problem with the current setup since an instruction may have a second operand of invalid type
 		}
-		catch (std::exception e) {
-			std::cout << e.what();
 		}
-	}
+	);
 }
