@@ -146,18 +146,57 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLineException) {
 }
 
 TEST_F(MutatorTest, LineMutatorAlterLine) {
-	Mutator::RNG::setSeed(0);
 
-	// Add a pseudo-random lines to the program
+	// Add a 0 lines to the program
+	// i=0, d=0, op0=(0,0), op1=(0,0),  param=0
 	Program::Line& l0 = p->addNewLine();
-	Mutator::Line::initRandomCorrectLine(l0);
-	// Alter it (several time to increase coverage : to be controlled later)
-	ASSERT_NO_THROW({
-		for (int i = 0; i < 500; i++) {
-			Mutator::Line::alterCorrectLine(l0);
-			Program::ProgramExecutionEngine pee(*p);
-			pee.executeProgram(false); // I think it should pose a problem with the current setup since an instruction may have a second operand of invalid type
-		}
-		}
-	);
+	
+	// Alter instruction
+	// i=1, d=0, op0=(0,0), op1=(0,0),  param=0
+	Mutator::RNG::setSeed(31);
+	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getInstructionIndex(), 1);
+
+	// Alter destination
+	// i=1, d=6, op0=(0,0), op1=(0,0),  param=0
+	Mutator::RNG::setSeed(51);
+	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getDestinationIndex(), 6);
+
+	// Alter operand 0 data source 
+	// i=1, d=6, op0=(2,0), op1=(0,0),  param=0
+	Mutator::RNG::setSeed(60);
+	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getOperand(0).first, 2);
+
+	// Alter operand 0 location
+	// i=1, d=6, op0=(2,18), op1=(0,0),  param=0
+	Mutator::RNG::setSeed(17);
+	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getOperand(0).second, 18);
+
+	// Alter operand 1 data source
+	// i=1, d=6, op0=(2,18), op1=(1,0),  param=0
+	Mutator::RNG::setSeed(45);
+	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getOperand(1).first, 1);
+
+	// Alter operand 1 location
+	// i=1, d=6, op0=(2,18), op1=(1,24),  param=0
+	Mutator::RNG::setSeed(3);
+	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getOperand(1).second, 24);
+
+	// Alter parameter 0
+	// i=1, d=6, op0=(2,18), op1=(1,24),  param=-1103038069
+	Mutator::RNG::setSeed(0);
+	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getParameter(0).i, -1103038069);
+
+	// Alter instruction (causing an alteration of op1 data source)
+	// i=0, d=6, op0=(2,18), op1=(2,24),  param=-1103038069
+	Mutator::RNG::setSeed(31);
+	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getInstructionIndex(), 0);
+	ASSERT_EQ(l0.getOperand(1).first, 2);
 }
