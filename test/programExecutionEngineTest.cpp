@@ -15,7 +15,7 @@ protected:
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
 	const double value0{ 2.3 };
-	const float value1{ 4.2f };
+	const float value1{ 0.2f };
 	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
@@ -116,8 +116,8 @@ TEST_F(ProgramExecutionEngineTest, fetchParameters) {
 	ASSERT_NO_THROW(progExecEng.fetchCurrentParameters(parameters)) << "Fetching the parameters of a valid Program from fixtures failed.";
 	// Check number of parameters
 	ASSERT_EQ(parameters.size(), 1) << "Incorrect number of operands were fetched by previous call.";
-	// Check parameter value (set in fixture). value1: 4.2f
-	ASSERT_EQ((float&)parameters.at(0).get(), value1) << "Value of fetched parameter is incorrect.";
+	// Check parameter value (set in fixture). value1: 0.2f (+/- the parameter floating precision)
+	ASSERT_TRUE((float)parameters.at(0).get() < value1 + PARAM_FLOAT_PRECISION && (float)parameters.at(0).get() > value1 - PARAM_FLOAT_PRECISION) << "Value of fetched parameter is incorrect.";
 }
 
 TEST_F(ProgramExecutionEngineTest, executeCurrentLine) {
@@ -136,15 +136,15 @@ TEST_F(ProgramExecutionEngineTest, execute) {
 	double result;
 
 	ASSERT_NO_THROW(result = progExecEng.executeProgram()) << "Program from fixture failed to execute. (Indivitual execution of its line in executeCurrentLine test).";
-	ASSERT_EQ(result, (value0 + 0) * value1) << "Result of the program from Fixture is not as expected.";
+	ASSERT_EQ(result, (value0 + 0) * (Parameter(value1)).operator float()) << "Result of the program from Fixture is not as expected.";
 
 	// Introduce a new line in the program to test the throw
 	Program::Line& l2 = p->addNewLine();
 	// Instruction 2 does not exist. Must deactivate checks to write this instruction
-	l2.setInstructionIndex(2, false); 
-	ASSERT_THROW(progExecEng.executeProgram(), std::out_of_range)<< "Program line using a incorrect Instruction index should throw an exception.";
+	l2.setInstructionIndex(2, false);
+	ASSERT_THROW(progExecEng.executeProgram(), std::out_of_range) << "Program line using a incorrect Instruction index should throw an exception.";
 
 	// Now ignoring the exceptions
 	ASSERT_NO_THROW(result = progExecEng.executeProgram(true)) << "Program line using a incorrect Instruction index should not interrupt the Execution when ignored.";
-	ASSERT_EQ(result, (value0 + 0) * value1) << "Result of the program from Fixture, with an additional ignored line, is not as expected.";
+	ASSERT_EQ(result, (value0 + 0) * Parameter(value1).operator float()) << "Result of the program from Fixture, with an additional ignored line, is not as expected.";
 }

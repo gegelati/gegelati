@@ -10,6 +10,7 @@ namespace Instructions {
 	*/
 	template <class T, class U> class MultByConstParam : public Instruction {
 		static_assert(std::is_fundamental<T>::value&& std::is_fundamental<U>::value, "Template class MultByConstParam<T,U> can only be used for primitive types.");
+		static_assert(std::is_same<int16_t, U>() || std::is_same<float, U>(), "Param type can either be int16_t or float.");
 	public:
 		/**
 		*  \brief Constructor for the MultByConstParam class.
@@ -34,7 +35,8 @@ namespace Instructions {
 			return 0.0;
 		}
 
-		return dynamic_cast<const PrimitiveType<T>&>(args.at(0).get()) *(double) (const U&)params.at(0).get();
+		const U pValue = (const U&)params.at(0).get();
+		return dynamic_cast<const PrimitiveType<T>&>(args.at(0).get()) *(double)pValue ;
 	}
 	;
 }

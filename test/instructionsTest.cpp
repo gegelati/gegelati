@@ -53,14 +53,14 @@ TEST(InstructionsTest, CheckArgumentTypes) {
 TEST(InstructionsTest, CheckParameters) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<int>();
 	std::vector<std::reference_wrapper<const Parameter>> v;
-	Parameter a = 2;
+	Parameter a = (int16_t)2;
 	Parameter b = 3.2f;
 	v.push_back(a);
 	v.push_back(b);
 	ASSERT_FALSE(i->checkParameters(v)) << "Parameter list of wrong size not detected as such.";
 	delete i;
 
-	i = new Instructions::MultByConstParam<double, int>();
+	i = new Instructions::MultByConstParam<double, int16_t>();
 	v.pop_back();
 	ASSERT_TRUE(i->checkParameters(v)) << "Parameter list of right size not detected as such.";
 	delete i;
@@ -82,9 +82,9 @@ TEST(InstructionsTest, Execute) {
 	ASSERT_EQ(i->execute({}, vect), 0.0) << "Execute method of AddPrimitiveType<double> returns an incorrect value with invalid operands.";
 
 	delete i;
-	i = new Instructions::MultByConstParam<double, int>();
+	i = new Instructions::MultByConstParam<double, int16_t>();
 	vect.pop_back();
-	Parameter p = 2;
+	Parameter p = (int16_t)2;
 	ASSERT_EQ(i->execute({ p }, vect), 5.2) << "Execute method of MultByConstParam<double,int> returns an incorrect value with valid operands.";
 	ASSERT_EQ(i->execute({ }, vect), 0.0) << "Execute method of MultByConstParam<double,int> returns an incorrect value with invalid params.";
 	delete i;
@@ -95,7 +95,7 @@ TEST(InstructionsTest, SetAdd) {
 
 	Instructions::MultByConstParam<int, float> iMult;
 	Instructions::MultByConstParam<int, float> iMult2;
-	Instructions::MultByConstParam<int, int> iMult3;
+	Instructions::MultByConstParam<int, int16_t> iMult3;
 
 	ASSERT_TRUE(s.add(iMult)) << "Add of instruction to empty Instructions::Set failed.";
 	ASSERT_FALSE(s.add(iMult2)) << "Add of instruction already present in an Instructions::Set did not fail.";
@@ -108,7 +108,7 @@ TEST(InstructionsTest, SetGetNbInstruction) {
 	ASSERT_EQ(s.getNbInstructions(), 0) << "Incorrect number of instructions in an empty Set.";
 
 	Instructions::MultByConstParam<int, float> iMult;
-	Instructions::MultByConstParam<int, int> iMult2;
+	Instructions::MultByConstParam<int, int16_t> iMult2;
 	s.add(iMult);
 	s.add(iMult2);
 	ASSERT_EQ(s.getNbInstructions(), 2) << "Incorrect number of instructions in a non-empty Set.";

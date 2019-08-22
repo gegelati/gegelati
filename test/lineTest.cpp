@@ -79,8 +79,9 @@ TEST_F(LineTest, LineParameterAccessors) {
 	Program::Line l(*e); // with the given environment, there is a single Parameter per line.
 	ASSERT_NO_THROW(l.setParameter(0, 0.2f)) << "Setting value of a correctly indexed parameter failed.";
 	ASSERT_THROW(l.setParameter(1, 0.3f), std::range_error) << "Setting value of an incorrectly indexed parameter did not fail.";
-
-	ASSERT_EQ((const float&)l.getParameter(0), 0.2f) << "Getting a previously set parameter failed.";
+	
+	// Is it equal (to the Parameter float precision)
+	ASSERT_TRUE(fabs((float)l.getParameter(0) -  0.2f) <= PARAM_FLOAT_PRECISION) << "Getting a previously set parameter failed.";
 	ASSERT_THROW(l.getParameter(1), std::range_error) << "Getting value of an incorrectly indexed parameter did not fail.";
 }
 

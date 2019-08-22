@@ -103,7 +103,7 @@ void Mutator::Line::initRandomCorrectLine(Program::Line& line)
 
 	// Select and set all parameter values. (can not fail)
 	for (uint64_t paramIdx = 0; paramIdx < env.getMaxNbParameters(); paramIdx++) {
-		Parameter param((int32_t)(Mutator::RNG::getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX - (int64_t)PARAM_INT_MIN)) + (int64_t)PARAM_INT_MIN));
+		Parameter param((int16_t)(Mutator::RNG::getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX - (int64_t)PARAM_INT_MIN)) + (int64_t)PARAM_INT_MIN));
 		line.setParameter(paramIdx, param);
 	}
 
@@ -232,7 +232,7 @@ void Mutator::Line::alterCorrectLine(Program::Line& line)
 		// Select a random parameterValue 
 		// (do not bother to make it different the probability is too low and 
 		// it will be detected through neutrality tests)
-		Parameter newParameter = (int32_t)(Mutator::RNG::getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX - (int64_t)PARAM_INT_MIN)) + (int64_t)PARAM_INT_MIN);
+		Parameter newParameter = (int16_t)(Mutator::RNG::getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX - (int64_t)PARAM_INT_MIN)) + (int64_t)PARAM_INT_MIN);
 		line.setParameter(parameterIndex, newParameter);
 	}
 }
