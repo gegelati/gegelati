@@ -96,6 +96,18 @@ TEST_F(ProgramTest, AddEmptyLineAndDestruction) {
 	ASSERT_NO_THROW(delete p;) << "Destructing a non empty program should not be an issue.";
 }
 
+TEST_F(ProgramTest, ProgramSwapLines) {
+	Program::Program p(*e);
+	
+	std::vector<Program::Line*> lines;
+	for (auto i = 0; i < 10; i++) {
+		lines.push_back(&p.addNewLine());
+	}
+	
+	ASSERT_NO_THROW(p.swapLines(2, 7)) << "Swapping line with valid indexes failed.";
+	ASSERT_EQ(lines.at(7), &p.getLine(2)) << "Swapping line did not give the expected result. (pointer comparison)";
+	ASSERT_EQ(lines.at(2), &p.getLine(7)) << "Swapping line did not give the expected result. (pointer comparison)";
+}
 
 TEST_F(ProgramTest, getProgramNbLines) {
 	Program::Program p(*e);

@@ -278,3 +278,43 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine) {
 	ASSERT_EQ((int16_t)p->getLine(2).getParameter(0), -17304);
 	ASSERT_EQ((int16_t)p->getLine(3).getParameter(0), -14950);
 }
+
+TEST_F(MutatorTest, ProgramMutatorSwapRandomLines) {
+	Mutator::RNG::setSeed(0);
+
+	std::vector<Program::Line*> lines;
+	// Nothing on empty program
+	ASSERT_FALSE(Mutator::ProgramMutator::swapRandomLines(*p));
+
+	// Add a first line
+	lines.push_back(&p->addNewLine());
+	
+	// Nothing on program with one line.
+	ASSERT_FALSE(Mutator::ProgramMutator::swapRandomLines(*p));
+
+	// Add a second line
+	lines.push_back(&p->addNewLine());
+
+	// Exchanges the two line.
+	ASSERT_TRUE(Mutator::ProgramMutator::swapRandomLines(*p));
+	ASSERT_EQ(lines.at(0), &p->getLine(1));
+	ASSERT_EQ(lines.at(1), &p->getLine(0));
+
+	// Add 8 lines
+	for (auto i = 0; i < 8; i++) {
+		lines.push_back(&p->addNewLine());
+	}
+	// Swap two random lines (with a known seed)
+	ASSERT_TRUE(Mutator::ProgramMutator::swapRandomLines(*p));
+	// Only lines 4 and 7 are swapped
+	ASSERT_EQ(lines.at(0), &p->getLine(1));
+	ASSERT_EQ(lines.at(1), &p->getLine(0));
+	ASSERT_EQ(lines.at(2), &p->getLine(2));
+	ASSERT_EQ(lines.at(3), &p->getLine(3));
+	ASSERT_EQ(lines.at(4), &p->getLine(7));
+	ASSERT_EQ(lines.at(5), &p->getLine(5));
+	ASSERT_EQ(lines.at(6), &p->getLine(6));
+	ASSERT_EQ(lines.at(7), &p->getLine(4));
+	ASSERT_EQ(lines.at(8), &p->getLine(8));
+	ASSERT_EQ(lines.at(9), &p->getLine(9));
+}

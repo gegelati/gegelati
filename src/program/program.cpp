@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <new>
+#include <algorithm>
 
 #include "parameter.h"
 #include "program/program.h"
@@ -32,6 +33,15 @@ void Program::Program::removeLine(const uint64_t idx)
 {
 	free(this->lines.at(idx)); // throws std::out_of_range on bad index.
 	this->lines.erase(this->lines.begin() + idx);
+}
+
+void Program::Program::swapLines(const uint64_t idx0, const uint64_t idx1)
+{
+	if (idx0 > this->getNbLines() || idx1 > this->getNbLines()) {
+		throw std::out_of_range("Attempting to swap a line beyond the program end.");
+	}
+
+	std::iter_swap(this->lines.begin() + idx0, this->lines.begin() + idx1);
 }
 
 const Environment& Program::Program::getEnvironment() const {

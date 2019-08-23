@@ -35,6 +35,20 @@ namespace Mutator {
 		*
 		*/
 		void insertRandomLine(Program::Program& p);
+
+		/**
+		* \brief Swap two randomly selected instructions within the given 
+		* Program.
+		*
+		* This function selects two lines of the program randomly and swaps
+		* them. If the given Program has less than two lines, nothing happens.
+		* Random selection is based on the Mutator::RNG.
+		*
+		* \param[in,out] p the Program whose lines will be swapped.
+		* \return true if the lines where successfully swapped, false if the 
+		*         Program has less than two lines.
+		*/
+		bool swapRandomLines(Program::Program& p);
 	};
 };
 

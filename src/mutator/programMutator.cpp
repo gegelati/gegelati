@@ -19,3 +19,18 @@ void Mutator::ProgramMutator::insertRandomLine(Program::Program& p)
 	Program::Line& line = p.addNewLine(lineIndex);
 	Mutator::LineMutator::initRandomCorrectLine(line);
 }
+
+bool Mutator::ProgramMutator::swapRandomLines(Program::Program& p)
+{
+	if (p.getNbLines() < 2) {
+		return false;
+	}
+	// Select two distinct random index.
+	const uint64_t lineIndex0 = Mutator::RNG::getUnsignedInt64(0, p.getNbLines() - 1);
+	uint64_t lineIndex1 = Mutator::RNG::getUnsignedInt64(0, p.getNbLines() - 2);
+	lineIndex1 += (lineIndex1 >= lineIndex0)? 1 : 0;
+
+	p.swapLines(lineIndex0, lineIndex1);
+
+	return true;
+}

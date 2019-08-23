@@ -70,6 +70,15 @@ namespace Program {
 		void removeLine(const uint64_t idx);
 
 		/**
+		* \brief Swap two existing lines from the Program.
+		* 
+		* \param[in] idx0 the index of the first line to swap.
+		* \param[in] idx1 the index of the second line to swap.
+		* \throw std::out_of_range if any of the two index is too large.
+		*/
+		void swapLines(const uint64_t idx0, const uint64_t idx1);
+
+		/**
 		* \brief Get the environment associated to the Program at construction.
 		*
 		* \return a const reference to the Environment of the Program and all its
