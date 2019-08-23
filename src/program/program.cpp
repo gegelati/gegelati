@@ -12,11 +12,15 @@ Program::Program::~Program() {
 	}
 }
 
-Program::Line& Program::Program::addNewLine()
+Program::Line& Program::Program::addNewLine() {
+	return this->addNewLine(this->getNbLines());
+}
+
+Program::Line& Program::Program::addNewLine(const uint64_t idx)
 {
 	// Allocate the zero-filled memory 
 	Line* newLine = new Line(this->environment);
-	this->lines.push_back(newLine);
+	this->lines.insert(lines.begin() + idx, newLine);
 
 	return *newLine;
 }

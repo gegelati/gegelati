@@ -40,14 +40,28 @@ namespace Program {
 		/**
 		* \brief Add a new line to the Program with only 0 bits.
 		*
+		* The new line is inserted at the end of the program.
+		*
 		* \return a non-const reference to the newly added Line.
 		*/
-		Line & addNewLine();
+		Line& addNewLine();
+
+		/**
+		* \brief Add a new line to the Program with only 0 bits.
+		*
+		* The new line is inserted at the given position of the program.
+		*
+		* \param[in] idx the position at which the line should be inserted.
+		* \return a non-const reference to the newly added Line.
+		* \throw std::out_of_range if the given position is beyond the end of
+		* the Program.
+		*/
+		Line& addNewLine(const uint64_t idx);
 
 		/**
 		* \brief Remove a Line from the Program.
 		*
-		* Remove the Line at the given index from the Program and free the 
+		* Remove the Line at the given index from the Program and free the
 		* associated memory.
 		*
 		* \param[in] idx the integer index of the Program Line to remove.
@@ -57,8 +71,8 @@ namespace Program {
 
 		/**
 		* \brief Get the environment associated to the Program at construction.
-		* 
-		* \return a const reference to the Environment of the Program and all its 
+		*
+		* \return a const reference to the Environment of the Program and all its
 		** Line.
 		*/
 		const Environment& getEnvironment() const;
@@ -77,7 +91,7 @@ namespace Program {
 		* \return a const reference to the indexed Line of the Program.
 		* \throw std::out_of_range if the index is too large.
 		*/
-		const Line & getLine(uint64_t index) const;
+		const Line& getLine(uint64_t index) const;
 
 		/**
 		* \brief Get a non-const ref to a Line of the Program.

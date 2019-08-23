@@ -220,14 +220,14 @@ TEST_F(MutatorTest, LineMutatorAlterLine) {
 
 TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine) {
 	const uint64_t nbLines = 10;
-	
+
 	// Attempt removing on an empty program
-	ASSERT_NO_THROW(Mutator::ProgramMutator::deleteRandomLine(*p));
+	ASSERT_FALSE(Mutator::ProgramMutator::deleteRandomLine(*p));
 	ASSERT_EQ(p->getNbLines(), 0);
 
 	// Attempt removing on a program with a single line
 	p->addNewLine();
-	ASSERT_NO_THROW(Mutator::ProgramMutator::deleteRandomLine(*p));
+	ASSERT_FALSE(Mutator::ProgramMutator::deleteRandomLine(*p));
 	ASSERT_EQ(p->getNbLines(), 1);
 
 	// Insert lines
@@ -236,6 +236,45 @@ TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine) {
 	}
 
 	// Delete a random line
-	ASSERT_NO_THROW(Mutator::ProgramMutator::deleteRandomLine(*p));
+	ASSERT_TRUE(Mutator::ProgramMutator::deleteRandomLine(*p));
 	ASSERT_EQ(p->getNbLines(), nbLines - 1);
+}
+
+TEST_F(MutatorTest, ProgramMutatorInsertRandomLine) {
+	Mutator::RNG::setSeed(0);
+
+	// Insert in empty program
+	ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p));
+	ASSERT_EQ(p->getNbLines(), 1) << "Line insertion in an empty program failed.";
+	ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 31115) << "Inserted random line is not random. (with a known seed).";
+
+	// Insert in non empty program
+	// in first position (with known seed)
+	Mutator::RNG::setSeed(0);
+	ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p));
+	ASSERT_EQ(p->getNbLines(), 2) << "Line insertion in a non-empty program failed.";
+	// Just to ensure the position of the inserted line is the first
+	ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 26809);
+	ASSERT_EQ((int16_t)p->getLine(1).getParameter(0), 31115);
+
+	// Insert in non empty program
+	// After last position (with known seed)
+	Mutator::RNG::setSeed(1);
+	ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p));
+	ASSERT_EQ(p->getNbLines(), 3) << "Line insertion in a non-empty program failed.";
+	// Just to ensure the position of the inserted line is after the last
+	ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 26809);
+	ASSERT_EQ((int16_t)p->getLine(1).getParameter(0), 31115);
+	ASSERT_EQ((int16_t)p->getLine(2).getParameter(0), -14950);
+
+	// Insert in non empty program
+	// In the middle position (with known seed)
+	Mutator::RNG::setSeed(5);
+	ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p));
+	ASSERT_EQ(p->getNbLines(), 4) << "Line insertion in a non-empty program failed.";
+	// Just to ensure the position of the inserted line is after the last
+	ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 26809);
+	ASSERT_EQ((int16_t)p->getLine(1).getParameter(0), 31115);
+	ASSERT_EQ((int16_t)p->getLine(2).getParameter(0), -17304);
+	ASSERT_EQ((int16_t)p->getLine(3).getParameter(0), -14950);
 }

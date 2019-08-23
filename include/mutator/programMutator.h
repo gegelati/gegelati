@@ -18,9 +18,23 @@ namespace Mutator {
 		* Random selection is based on the Mutator::RNG.
 		*
 		* \param[in,out] p the Program whose lines will be altered.
+		* \return true if a line could be added, false otherwise.
 		*
 		*/
-		void deleteRandomLine(Program::Program & p);
+		bool deleteRandomLine(Program::Program & p);
+
+		/**
+		* \brief Insert a new Line at a randomly selected position within the given Program.
+		*
+		* This function randomly selects a position in the Program.lines and
+		* insert a randomly initialized line (using Mutator::Line::
+		* initRandomCorrectLine).
+		* Random selection is based on the Mutator::RNG.
+		*
+		* \param[in,out] p the Program whose lines will be altered.
+		*
+		*/
+		void insertRandomLine(Program::Program& p);
 	};
 };
 
