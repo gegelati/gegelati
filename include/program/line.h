@@ -46,6 +46,30 @@ namespace Program {
 			operands{ (std::pair<uint64_t, uint64_t>*)calloc(env.getMaxNbOperands(), sizeof(std::pair<uint64_t, uint64_t>)) }{};
 
 		/**
+		* \brief Copy constructor of a Line performing a deep copy.
+		*
+		* Contrary to the default copy constructor, this one duplicates
+		* all pointer based attributes.
+		*
+		* \param[in] other the const reference to the copied Program::Line.
+		*/
+		Line(const Line& other) :
+			environment{ other.environment },
+			instructionIndex{ other.instructionIndex },
+			destinationIndex{ other.destinationIndex },
+			parameters{ (Parameter*)calloc(other.environment.getMaxNbParameters(), sizeof(Parameter)) },
+			operands{ (std::pair<uint64_t, uint64_t>*)calloc(other.environment.getMaxNbOperands(), sizeof(std::pair<uint64_t, uint64_t>)) }{
+			// Check needed to avoid compilation warnings
+			if (this->parameters != NULL && this->operands != NULL) {
+				// Copy parameter values
+				memcpy(this->parameters, other.parameters, this->environment.getMaxNbParameters() * sizeof(Parameter));
+
+				// Copy operand values
+				memcpy(this->operands, other.operands, this->environment.getMaxNbOperands() * sizeof(std::pair<uint64_t, uint64_t>));
+			}
+		};
+
+		/**
 		* Destructor of a Program::Line.
 		*
 		* Dealocates the memory allocated for attributes.

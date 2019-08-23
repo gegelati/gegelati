@@ -47,6 +47,30 @@ TEST_F(LineTest, LineConstructor) {
 		}) << "Something went wrong when destructing a Line with a valid Environment.";
 }
 
+TEST_F(LineTest, CopyConstructor) {
+	Program::Line* l0 = new Program::Line(*e);
+
+	// Create a copy
+	Program::Line* l1;
+	ASSERT_NO_THROW(
+		l1 = new Program::Line(*l0);
+	) << "Copy constructor fails.";
+
+	// Check duplication of instructionIndex
+	l0->setInstructionIndex(1);
+	l0->setDestinationIndex(1);
+	l0->setOperand(0, 1, 1);
+	l0->setParameter(0, 1i16);
+	ASSERT_EQ(l1->getInstructionIndex(), 0) << "The Line instructionIndex was not deeply copied.";
+	ASSERT_EQ(l1->getDestinationIndex(), 0) << "The Line destinationIndex was not deeply copied.";
+	ASSERT_EQ(l1->getOperand(0).first, 0) << "The Line operand 0 dataSource index was not deeply copied.";
+	ASSERT_EQ(l1->getOperand(0).second, 0) << "The Line operand 0 location was not deeply copied.";
+	ASSERT_EQ((int16_t)l1->getParameter(0), 0i16) << "The Line parameter was not deeply copied.";
+
+	ASSERT_NO_THROW(delete l0;) << "Destructing a copied line failed.";
+	ASSERT_NO_THROW(delete l1;) << "Destructing a line copy failed.";
+}
+
 TEST_F(LineTest, LineGetEnvironment) {
 	Program::Line l(*e);
 
@@ -79,9 +103,9 @@ TEST_F(LineTest, LineParameterAccessors) {
 	Program::Line l(*e); // with the given environment, there is a single Parameter per line.
 	ASSERT_NO_THROW(l.setParameter(0, 0.2f)) << "Setting value of a correctly indexed parameter failed.";
 	ASSERT_THROW(l.setParameter(1, 0.3f), std::range_error) << "Setting value of an incorrectly indexed parameter did not fail.";
-	
+
 	// Is it equal (to the Parameter float precision)
-	ASSERT_TRUE(fabs((float)l.getParameter(0) -  0.2f) <= PARAM_FLOAT_PRECISION) << "Getting a previously set parameter failed.";
+	ASSERT_TRUE(fabs((float)l.getParameter(0) - 0.2f) <= PARAM_FLOAT_PRECISION) << "Getting a previously set parameter failed.";
 	ASSERT_THROW(l.getParameter(1), std::range_error) << "Getting value of an incorrectly indexed parameter did not fail.";
 }
 

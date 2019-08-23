@@ -2,6 +2,7 @@
 #define PROGRAM_H
 
 #include <vector>
+#include <algorithm>
 
 #include "environment.h"
 #include "program/line.h"
@@ -29,6 +30,20 @@ namespace Program {
 		* \param[in] e the reference to the Environment that will be referenced in the Program attributes.
 		*/
 		Program(const Environment& e) : environment{ e } {};
+
+		/**
+		* \brief Copy constructor of the Program.
+		*
+		* This copy constructor realises a deep copy of the Line of the given
+		* Program, instead of the default shallow copy.
+		*
+		* \param[in] other a const reference the the copied Program.
+		*/
+		Program(const Program& other) : environment{ other.environment }, lines{ other.lines } {
+			// Replace lines with their copy
+			std::transform(lines.begin(), lines.end(), lines.begin(),
+				[](Line* otherLine) -> Line* {return new Line(*otherLine); });
+		};
 
 		/**
 		* \brief Destructor for the Program class.
@@ -71,7 +86,7 @@ namespace Program {
 
 		/**
 		* \brief Swap two existing lines from the Program.
-		* 
+		*
 		* \param[in] idx0 the index of the first line to swap.
 		* \param[in] idx1 the index of the second line to swap.
 		* \throw std::out_of_range if any of the two index is too large.

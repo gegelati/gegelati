@@ -96,14 +96,47 @@ TEST_F(ProgramTest, AddEmptyLineAndDestruction) {
 	ASSERT_NO_THROW(delete p;) << "Destructing a non empty program should not be an issue.";
 }
 
+TEST_F(ProgramTest, CopyConstructor) {
+	Program::Program * p0 = new Program::Program(*e);
+	Program::Line& l = p0->addNewLine();
+
+	// Initialize some line attributes
+	l.setDestinationIndex(1);
+	l.setInstructionIndex(1);
+	l.setOperand(0, 2, 24);
+	l.setParameter(0, 0.3f);
+
+	// Create a copy of p0.
+	Program::Program p1(*p0);
+
+	//Check that environment of the program are the same (pointer)
+	ASSERT_EQ(&p0->getEnvironment(), &p1.getEnvironment()) << "Environment reference was not copied on Program copy construction (pointer comparison).";
+	//Check that line in the program are not the same (pointer)
+	ASSERT_NE(&p0->getLine(0), &p1.getLine(0)) << "Line in the program was not duplicated on Program copy construction (pointer comparison).";
+
+	// Change the original program to make sure accessed values are duplicates and not pointers to the same data
+	l.setDestinationIndex(0);
+	l.setInstructionIndex(0);
+	l.setOperand(0, 0, 0);
+	l.setParameter(0, 0i16);
+
+	// Check that line attributes have been duplicated
+	// May be redundant with lineTest...?
+	ASSERT_EQ(p1.getLine(0).getDestinationIndex(), 1) << "Line destinationIndex value was not copied on Program copy.";
+	ASSERT_EQ(p1.getLine(0).getInstructionIndex(), 1) << "Line instructionIndex value was not copied on Program copy.";
+	ASSERT_EQ(p1.getLine(0).getOperand(0).first, 2) << "Line operand.dataSource index value was not copied on Program copy.";
+	ASSERT_EQ(p1.getLine(0).getOperand(0).second, 24) << "Line operand.location value was not copied on Program copy.";
+	ASSERT_TRUE(fabs((float)p1.getLine(0).getParameter(0) - 0.3f) <= PARAM_FLOAT_PRECISION) << "Line parameter value was not copied on Program copy.";
+}
+
 TEST_F(ProgramTest, ProgramSwapLines) {
 	Program::Program p(*e);
-	
+
 	std::vector<Program::Line*> lines;
 	for (auto i = 0; i < 10; i++) {
 		lines.push_back(&p.addNewLine());
 	}
-	
+
 	ASSERT_NO_THROW(p.swapLines(2, 7)) << "Swapping line with valid indexes failed.";
 	ASSERT_EQ(lines.at(7), &p.getLine(2)) << "Swapping line did not give the expected result. (pointer comparison)";
 	ASSERT_EQ(lines.at(2), &p.getLine(7)) << "Swapping line did not give the expected result. (pointer comparison)";
