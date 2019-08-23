@@ -52,6 +52,31 @@ TEST_F(ProgramTest, ProgramGetEnvironment) {
 	ASSERT_EQ(&p.getEnvironment(), e) << "Environment of a Program differs from the one given at construction. (pointer comparison)";
 }
 
+TEST_F(ProgramTest, AddEmptyLineAtKnownPosition) {
+	Program::Program* p = new Program::Program(*e);
+	Program::Line* l;
+	ASSERT_NO_THROW(l = &p->addNewLine(0);) << "Inserting a single empty line at position 0 in an empty program should not be an issue at insertion.";
+
+	// Check that line is set to only zero values.
+	ASSERT_EQ(l->getDestinationIndex(), 0) << "New line Destination is not set to 0.";
+	ASSERT_EQ(l->getInstructionIndex(), 0) << "New line Instruction is not set to 0.";
+	for (int i = 0; i < e->getMaxNbParameters(); i++) {
+		ASSERT_EQ(l->getParameter(i).i, 0) << "New line parameter is not set to 0.";
+	}
+	for (int i = 0; i < e->getMaxNbOperands(); i++) {
+		ASSERT_EQ(l->getOperand(i).first, 0) << "New line operand source index is not set to 0.";
+		ASSERT_EQ(l->getOperand(i).second, 0) << "New line operand location is not set to 0.";
+	}
+
+	ASSERT_THROW(p->addNewLine(2), std::out_of_range) << "Insertion of a line beyond the program end should fail.";
+
+	ASSERT_NO_THROW(p->addNewLine(0);) << "Inserting a single empty line at position 0 in a nonempty program should not be an issue at insertion.";
+	ASSERT_NO_THROW(p->addNewLine(p->getNbLines());) << "Inserting a single empty line at the end of a nonempty program should not be an issue at insertion.";
+	ASSERT_NO_THROW(p->addNewLine(1);) << "Inserting a single empty line in the middle of a nonempty program should not be an issue at insertion.";
+
+	ASSERT_NO_THROW(delete p;) << "Destructing a non empty program should not be an issue.";
+}
+
 TEST_F(ProgramTest, AddEmptyLineAndDestruction) {
 	Program::Program* p = new Program::Program(*e);
 	Program::Line* l;

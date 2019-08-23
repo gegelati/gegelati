@@ -18,6 +18,9 @@ Program::Line& Program::Program::addNewLine() {
 
 Program::Line& Program::Program::addNewLine(const uint64_t idx)
 {
+	if (idx > this->getNbLines()) {
+		throw std::out_of_range("Attempting to insert a line beyond the program end.");
+	}
 	// Allocate the zero-filled memory 
 	Line* newLine = new Line(this->environment);
 	this->lines.insert(lines.begin() + idx, newLine);
