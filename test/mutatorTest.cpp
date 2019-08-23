@@ -11,6 +11,7 @@
 #include "program/programExecutionEngine.h"
 #include "mutator/rng.h"
 #include "mutator/lineMutator.h"
+#include "mutator/programMutator.h"
 
 class MutatorTest : public ::testing::Test {
 protected:
@@ -61,7 +62,7 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1) {
 
 	// Add a pseudo-random lines to the program
 	Program::Line& l0 = p->addNewLine();
-	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l0)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l0)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
 	// With this known seed
 	// InstructionIndex=1 > MultByConst<double, float>
 	// DestinationIndex=6
@@ -77,7 +78,7 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1) {
 	// Additionally covers correct operand type from data source
 	// Instruction if MultByConst<double, float>
 	// first operand is PrimitiveTypeArray<double>
-	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l1)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l1)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
 	ASSERT_EQ(l1.getInstructionIndex(), 1) << "Selected pseudo-random instructionIndex changed with a known seed.";
 	ASSERT_EQ(l1.getOperand(0).first, 2) << "Selected pseudo-random operand data source index changed with a known seed.";
 
@@ -85,13 +86,13 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1) {
 	// Additionally covers nothing 
 	Program::Line& l2 = p->addNewLine();
 	Program::Line& l3 = p->addNewLine();
-	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l2)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
-	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l3)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l2)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l3)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
 
 	// Add another pseudo-random lines to the program
 	Program::Line& l4 = p->addNewLine();
 	// Additionally covers additional uneeded operand (register) 
-	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l4)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l4)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
 	ASSERT_EQ(l4.getInstructionIndex(), 1) << "Selected pseudo-random instructionIndex changed with a known seed.";
 	ASSERT_EQ(l4.getOperand(1).first, 0) << "Selected pseudo-random operand data source index changed with a known seed.";
 
@@ -114,7 +115,7 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine2) {
 
 	// Add a pseudo-random lines to the program
 	Program::Line& l0 = p->addNewLine();
-	ASSERT_NO_THROW(Mutator::Line::initRandomCorrectLine(l0)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
+	ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l0)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
 
 	delete (&set.getInstruction(2));
 }
@@ -138,7 +139,7 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLineException) {
 
 	// Add a pseudo-random lines to the program
 	Program::Line& l0 = p->addNewLine();
-	ASSERT_THROW(Mutator::Line::initRandomCorrectLine(l0), std::runtime_error) << "Pseudo-Random correct line initialization did not fail within an environment where failure should always happen because instruction set and data sources have no compatible types.";
+	ASSERT_THROW(Mutator::LineMutator::initRandomCorrectLine(l0), std::runtime_error) << "Pseudo-Random correct line initialization did not fail within an environment where failure should always happen because instruction set and data sources have no compatible types.";
 
 	// cleanup
 	delete (&faultySet.getInstruction(0));
@@ -155,28 +156,28 @@ TEST_F(MutatorTest, LineMutatorAlterLine) {
 	// Alter instruction
 	// i=1, d=0, op0=(0,0), op1=(0,0),  param=0
 	Mutator::RNG::setSeed(5);
-	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
 	ASSERT_EQ(l0.getInstructionIndex(), 1) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
 	// Alter destination
 	// i=1, d=3, op0=(0,0), op1=(0,0),  param=0
 	Mutator::RNG::setSeed(33);
-	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
 	ASSERT_EQ(l0.getDestinationIndex(), 3) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
 	// Alter operand 0 data source 
 	// i=1, d=3, op0=(2,0), op1=(0,0),  param=0
 	Mutator::RNG::setSeed(12);
-	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
 	ASSERT_EQ(l0.getOperand(0).first, 2) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
 	// Alter operand 0 location
 	// i=1, d=3, op0=(2,14), op1=(0,0),  param=0
 	Mutator::RNG::setSeed(7);
-	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
 	ASSERT_EQ(l0.getOperand(0).second, 14) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
@@ -184,7 +185,7 @@ TEST_F(MutatorTest, LineMutatorAlterLine) {
 	// Alter operand 1 data source
 	// i=1, d=3, op0=(2,14), op1=(1,0),  param=0
 	Mutator::RNG::setSeed(323);
-	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
 	ASSERT_EQ(l0.getOperand(1).first, 1) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
@@ -192,21 +193,21 @@ TEST_F(MutatorTest, LineMutatorAlterLine) {
 	// Alter operand 1 location
 	// i=1, d=6, op0=(2,14), op1=(1,28),  param=0
 	Mutator::RNG::setSeed(2);
-	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
 	ASSERT_EQ(l0.getOperand(1).second, 28) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
 	// Alter parameter 0
 	// i=1, d=6, op0=(2,14), op1=(1,28),  param=31115
 	Mutator::RNG::setSeed(0);
-	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
 	ASSERT_EQ((int16_t)l0.getParameter(0), 31115) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
 	// Alter instruction (causing an alteration of op1 data source)
 	// i=0, d=6, op0=(2,14), op1=(0,28),  param=31115
 	Mutator::RNG::setSeed(5);
-	ASSERT_NO_THROW(Mutator::Line::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0)) << "Line mutation of a correct instruction should not throw.";
 	ASSERT_EQ(l0.getInstructionIndex(), 0) << "Alteration with known seed changed its result.";
 	ASSERT_EQ(l0.getDestinationIndex(), 3) << "Alteration with known seed changed its result.";
 	ASSERT_EQ(l0.getOperand(0).first, 2) << "Alteration with known seed changed its result.";

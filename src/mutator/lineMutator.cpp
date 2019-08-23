@@ -93,7 +93,7 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 	return operandFound;
 }
 
-void Mutator::Line::initRandomCorrectLine(Program::Line& line)
+void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line)
 {
 	const Environment& env = line.getEnvironment();
 
@@ -156,7 +156,7 @@ void Mutator::Line::initRandomCorrectLine(Program::Line& line)
 	}
 }
 
-void Mutator::Line::alterCorrectLine(Program::Line& line)
+void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
 {
 	// Generate a random int to select the modified part of the line
 	const LineSize lineSize = line.getEnvironment().getLineSize();
