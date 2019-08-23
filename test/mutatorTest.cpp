@@ -217,3 +217,25 @@ TEST_F(MutatorTest, LineMutatorAlterLine) {
 	ASSERT_EQ((int16_t)l0.getParameter(0), 31115) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 }
+
+TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine) {
+	const uint64_t nbLines = 10;
+	
+	// Attempt removing on an empty program
+	ASSERT_NO_THROW(Mutator::ProgramMutator::deleteRandomLine(*p));
+	ASSERT_EQ(p->getNbLines(), 0);
+
+	// Attempt removing on a program with a single line
+	p->addNewLine();
+	ASSERT_NO_THROW(Mutator::ProgramMutator::deleteRandomLine(*p));
+	ASSERT_EQ(p->getNbLines(), 1);
+
+	// Insert lines
+	for (auto i = 0; i < nbLines - 1; i++) {
+		p->addNewLine();
+	}
+
+	// Delete a random line
+	ASSERT_NO_THROW(Mutator::ProgramMutator::deleteRandomLine(*p));
+	ASSERT_EQ(p->getNbLines(), nbLines - 1);
+}
