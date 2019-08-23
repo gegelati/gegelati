@@ -49,6 +49,21 @@ namespace Mutator {
 		*         Program has less than two lines.
 		*/
 		bool swapRandomLines(Program::Program& p);
+
+		/**
+		* \brief Alter a randomly selected Line in a given Program.
+		*
+		* If the given Program has more than 0 Line, this function selects a 
+		* Line (pseudo)-randomly in a given Program and calls the 
+		* Mutator::LineMutator:AlterCorrectLine function on it.
+		* Random selection is based on the Mutator::RNG.
+		*
+		* \param[in,out] p the Program whose line will be altered.
+		* \return true if a line was successfully altered, false if the 
+		*         Program has less than one line.
+		*/
+		bool alterRandomLine(Program::Program& p);
+
 	};
 };
 

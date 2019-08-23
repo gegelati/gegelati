@@ -288,7 +288,7 @@ TEST_F(MutatorTest, ProgramMutatorSwapRandomLines) {
 
 	// Add a first line
 	lines.push_back(&p->addNewLine());
-	
+
 	// Nothing on program with one line.
 	ASSERT_FALSE(Mutator::ProgramMutator::swapRandomLines(*p));
 
@@ -317,4 +317,19 @@ TEST_F(MutatorTest, ProgramMutatorSwapRandomLines) {
 	ASSERT_EQ(lines.at(7), &p->getLine(4));
 	ASSERT_EQ(lines.at(8), &p->getLine(8));
 	ASSERT_EQ(lines.at(9), &p->getLine(9));
+}
+
+TEST_F(MutatorTest, ProgramMutatorAlterRandomLine) {
+	Mutator::RNG::setSeed(0);
+
+	// Nothing on empty program
+	ASSERT_FALSE(Mutator::ProgramMutator::alterRandomLine(*p));
+	// Add 10 lines
+	for (auto i = 0; i < 10; i++) {
+		p->addNewLine();
+	}
+	// Alter a randomly selected line (with a known seed)
+	// Parameter of Line 4 is altered.
+	ASSERT_TRUE(Mutator::ProgramMutator::alterRandomLine(*p));
+	ASSERT_EQ((int16_t)p->getLine(4).getParameter(0), 26809);
 }

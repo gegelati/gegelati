@@ -34,3 +34,14 @@ bool Mutator::ProgramMutator::swapRandomLines(Program::Program& p)
 
 	return true;
 }
+
+bool Mutator::ProgramMutator::alterRandomLine(Program::Program& p)
+{
+	if (p.getNbLines() < 1) {
+		return false;
+	}
+	// Select a random index.
+	const uint64_t lineIndex = Mutator::RNG::getUnsignedInt64(0, p.getNbLines() - 1);
+	Mutator::LineMutator::alterCorrectLine(p.getLine(lineIndex));
+	return true;
+}
