@@ -97,7 +97,7 @@ TEST_F(ProgramTest, AddEmptyLineAndDestruction) {
 }
 
 TEST_F(ProgramTest, CopyConstructor) {
-	Program::Program * p0 = new Program::Program(*e);
+	Program::Program* p0 = new Program::Program(*e);
 	Program::Line& l = p0->addNewLine();
 
 	// Initialize some line attributes
@@ -140,6 +140,8 @@ TEST_F(ProgramTest, ProgramSwapLines) {
 	ASSERT_NO_THROW(p.swapLines(2, 7)) << "Swapping line with valid indexes failed.";
 	ASSERT_EQ(lines.at(7), &p.getLine(2)) << "Swapping line did not give the expected result. (pointer comparison)";
 	ASSERT_EQ(lines.at(2), &p.getLine(7)) << "Swapping line did not give the expected result. (pointer comparison)";
+
+	ASSERT_THROW(p.swapLines(3, 10), std::out_of_range) << "Swapping lines beyond the program length should throw an exception.";
 }
 
 TEST_F(ProgramTest, getProgramNbLines) {

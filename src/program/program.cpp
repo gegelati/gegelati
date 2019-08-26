@@ -37,7 +37,7 @@ void Program::Program::removeLine(const uint64_t idx)
 
 void Program::Program::swapLines(const uint64_t idx0, const uint64_t idx1)
 {
-	if (idx0 > this->getNbLines() || idx1 > this->getNbLines()) {
+	if (idx0 >= this->getNbLines() || idx1 >= this->getNbLines()) {
 		throw std::out_of_range("Attempting to swap a line beyond the program end.");
 	}
 
