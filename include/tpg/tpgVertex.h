@@ -36,6 +36,17 @@ namespace TPG {
 		virtual void addIncomingEdge(TPG::TPGEdge* edge);
 
 		/**
+		* \brief Removes the given incoming edge from the TPGVertex.
+		*
+		* If the given pointer is NULL or if the given edge is not in the
+		* set of the TPGVertex, nothing happens. Otherwise, the edge is
+		* removed.
+		*
+		* \param[in] edge the TPGEdge to remove.
+		*/
+		virtual void removeIncomingEdge(TPG::TPGEdge* edge);
+
+		/**
 		* \brief Method to add an outgoing TPGEdge to the TPGVertex.
 		*
 		* Since the outgoingEdges set is a std::set, the same TPGEdge pointer
@@ -47,6 +58,17 @@ namespace TPG {
 		*                 Set.
 		*/
 		virtual void addOutgoingEdge(TPG::TPGEdge* edge);
+
+		/**
+		* \brief Removes the given outgoing edge from the TPGVertex.
+		*
+		* If the given pointer is NULL or if the given edge is not in the
+		* set of the TPGVertex, nothing happens. Otherwise, the edge is
+		* removed.
+		*
+		* \param[in] edge the TPGEdge to remove.
+		*/
+		virtual void removeOutgoingEdge(TPG::TPGEdge* edge);
 
 	protected:
 		/**

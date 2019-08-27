@@ -1,4 +1,4 @@
-#include "..\..\include\tpg\tpgAction.h"
+#include "tpg/tpgAction.h"
 #include <stdexcept>
 
 void TPG::TPGAction::addOutgoingEdge(TPGEdge* edge)

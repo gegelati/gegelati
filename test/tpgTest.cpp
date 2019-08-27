@@ -85,6 +85,17 @@ TEST_F(TPGTest, TPGVertexEdgesSettersGetters) {
 
 	ASSERT_EQ(action.getIncomingEdges().size(), 1) << "Size of the outgoing edges of the node is incorrect.";
 	ASSERT_EQ(action.getIncomingEdges().count(&edge), 1) << "TPGEdge pointer contained in the outgoingEdges is incorrect.";
+
+	// Remove edges
+	ASSERT_NO_THROW(team.removeOutgoingEdge(&edge)) << "Removing an outgoing edge failed.";
+	ASSERT_EQ(team.getOutgoingEdges().size(), 0) << "Size of the outgoing edges of the node is incorrect.";
+
+	ASSERT_NO_THROW(action.removeIncomingEdge(&edge)) << "Removing an outgoing edge to an Action vertex failed.";
+	ASSERT_EQ(action.getIncomingEdges().size(), 0) << "Size of the outgoing edges of the node is incorrect.";
+
+	// Remove Null or non existing edge.
+	ASSERT_NO_THROW(team.removeOutgoingEdge(NULL)) << "Removing an NULL edge failed, while it should just do nothing.";
+	ASSERT_NO_THROW(action.removeIncomingEdge(&edge)) << "Removing an edge no longer in the set should do nothing, but not fail.";
 }
 
 TEST_F(TPGTest, TPGEdgeGetSetProgram) {

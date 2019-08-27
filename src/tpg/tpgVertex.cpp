@@ -18,10 +18,22 @@ void TPG::TPGVertex::addIncomingEdge(TPG::TPGEdge* edge)
 	}
 }
 
+void TPG::TPGVertex::removeIncomingEdge(TPG::TPGEdge* edge)
+{
+	// No need to do special checks on the given pointer.
+	// at worse, nothing happens.
+	this->incomingEdges.erase(edge);
+}
+
 void TPG::TPGVertex::addOutgoingEdge(TPG::TPGEdge* edge)
 {
 	// Do nothing on NULL pointer
 	if (edge != NULL) {
 		this->outgoingEdges.insert(edge);
 	}
+}
+
+void TPG::TPGVertex::removeOutgoingEdge(TPG::TPGEdge* edge)
+{
+	this->outgoingEdges.erase(edge);
 }
