@@ -10,6 +10,7 @@
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
+#include "tpg/tpgGraph.h"
 
 class TPGTest : public ::testing::Test {
 protected:
@@ -131,3 +132,34 @@ TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination) {
 	ASSERT_EQ(&action1, edge.getDestination()) << "Destination of the TPGEdge differs from the one set right before.";
 }
 
+TEST_F(TPGTest, TPGGraphAddTPGVertex) {
+	TPG::TPGGraph tpg;
+	const TPG::TPGTeam* t;
+	const TPG::TPGAction* a;
+	ASSERT_NO_THROW(t = &tpg.addNewTeam()) << "Adding a new Team to a TPGGraph failed.";
+	ASSERT_NO_THROW(a = &tpg.addNewAction()) << "Adding a new Action to a TPGGraph failed.";
+
+}
+
+TEST_F(TPGTest, TPGGraphGetVertices) {
+	TPG::TPGGraph tpg;
+	const TPG::TPGVertex& vertex = tpg.addNewTeam();
+	const std::list<TPG::TPGVertex>& vertices = tpg.getVertices();
+	ASSERT_EQ(vertices.size(), 1) << "Size of the retrievd std::vector<TPGVertex> is incorrect.";
+	ASSERT_EQ(&vertices.front(), &vertex) << "Vertex in the retrieved vertices list does not correspond to the one added to the TPGGrapg (pointer comparison)";
+}
+
+TEST_F(TPGTest, TPGGraphRemoveVertex) {
+	TPG::TPGGraph tpg;
+	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+
+	ASSERT_NO_THROW(tpg.removeVertex(vertex0)) << "Removing a vertex from the graph failed.";
+	ASSERT_EQ(tpg.getVertices().size(), 1) << "Number of vertices of the TPG is incorrect after removing a TPGVertex.";
+	ASSERT_EQ(&tpg.getVertices().front(), &vertex1) << "Remaining vertex after removal is not correct.";
+
+	// Try to remove a vertex not from the graph
+	TPG::TPGAction vertex2;
+	ASSERT_NO_THROW(tpg.removeVertex(vertex2)) << "Removing a vertex from the graph (although it is not inside) throwed an exception.";
+	ASSERT_EQ(tpg.getVertices().size(), 1) << "Number of vertices of the TPG is incorrect after removing a TPGVertex not from the graph.";
+}
