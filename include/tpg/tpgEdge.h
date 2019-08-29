@@ -9,6 +9,9 @@ namespace TPG {
 	// Declare class to make it usable as an attribute.
 	class TPGVertex;
 
+	/**
+	* \brief Class representing edges of the Tangled Program Graphs.
+	*/
 	class TPGEdge {
 	public:
 		/**
