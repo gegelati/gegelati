@@ -107,13 +107,10 @@ TEST_F(TPGTest, TPGEdgeGetSetProgram) {
 	const Program::Program& constProg = constEdge.getProgram();
 	ASSERT_EQ(&constProg, progPointer.get()) << "Program accessor on const TPGEdge returns a Program different from the one given at construction.";
 
-	TPG::TPGEdge edge(&team, &action, progPointer);
-	Program::Program& prog = edge.getProgram();
-	ASSERT_EQ(&prog, progPointer.get()) << "Program accessor on TPGEdge returns a Program different from the one given at construction.";
-
+	// program is a mutable attribute of the Edge.
 	std::shared_ptr<Program::Program> progPointer2(new Program::Program(*e));
-	edge.setProgram(progPointer2);
-	ASSERT_EQ(&edge.getProgram(), progPointer2.get()) << "Program accessor on TPGEdge returns a Program different from the one set before.";
+	constEdge.setProgram(progPointer2);
+	ASSERT_EQ(&constEdge.getProgram(), progPointer2.get()) << "Program accessor on TPGEdge returns a Program different from the one set before.";
 }
 
 TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination) {
@@ -183,7 +180,7 @@ TEST_F(TPGTest, TPGGraphGetEdges) {
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
 	const TPG::TPGAction& vertex1 = tpg.addNewAction();
 
-	TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 	ASSERT_EQ(tpg.getEdges().size(), 1) << "Edges of the graph have incorrect size after successful add.";
 
 	// Attempt an impossible add.

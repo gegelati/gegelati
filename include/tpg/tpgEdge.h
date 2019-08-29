@@ -34,21 +34,14 @@ namespace TPG {
 		*
 		* \return a const reference to the Program of the TPGEdge.
 		*/
-		const Program::Program& getProgram() const;
-
-		/**
-		* \brief Get a reference to the Program of the TPGEdge.
-		*
-		* \return a reference to the Program of the TPGEdge.
-		*/
-		Program::Program& getProgram();
+		Program::Program& getProgram() const;
 
 		/**
 		* \brief Set a new Program for the TPGEdge.
 		*
 		* \param[in] prog the new shared pointer to a Program.
 		*/
-		void setProgram(const std::shared_ptr<Program::Program> prog);
+		void setProgram(const std::shared_ptr<Program::Program> prog) const;
 
 		/**
 		* \brief Get the source TPGVertex of the TPGEdge.
@@ -87,7 +80,7 @@ namespace TPG {
 
 		/// Shared pointer to the Program to execute when evaluating the bid 
 		/// of this TPGEdge.
-		std::shared_ptr<Program::Program> program;
+		mutable std::shared_ptr<Program::Program> program;
 
 		/// Delete the default constructor.
 		TPGEdge() = delete;

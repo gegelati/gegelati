@@ -40,7 +40,7 @@ void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 	}
 }
 
-TPG::TPGEdge& TPG::TPGGraph::addNewEdge(const TPGVertex& src, const TPGVertex& dest, const std::shared_ptr<Program::Program> prog)
+const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(const TPGVertex& src, const TPGVertex& dest, const std::shared_ptr<Program::Program> prog)
 {
 	// Check the TPGVertex existence within the graph.
 	auto srcVertex = std::find_if(this->vertices.begin(), this->vertices.end(),

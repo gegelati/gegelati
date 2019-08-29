@@ -1,16 +1,11 @@
 #include "tpg/tpgEdge.h"
 
-const Program::Program& TPG::TPGEdge::getProgram() const
+Program::Program& TPG::TPGEdge::getProgram() const
 {
 	return *this->program;
 }
 
-Program::Program& TPG::TPGEdge::getProgram()
-{
-	return *this->program;
-}
-
-void TPG::TPGEdge::setProgram(const std::shared_ptr<Program::Program> prog)
+void TPG::TPGEdge::setProgram(const std::shared_ptr<Program::Program> prog) const
 {
 	this->program = prog;
 }

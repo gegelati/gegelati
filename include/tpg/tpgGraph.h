@@ -63,12 +63,12 @@ namespace TPG {
 		* inserted in the incoming and outgoing edges lists of the connected
 		* TPGVertex.
 		*
-		* \return a reference to the created TPGEdge.
+		* \return a const reference to the created TPGEdge.
 		* \throw std::runtime_error In case one of the TPGVertex does not 
 		*                           exist in the TPGGraph, or if the 
 		*							destination is a TPGAction. 
 		*/
-		TPGEdge& addNewEdge(const TPGVertex& src, const TPGVertex& dest,
+		const TPGEdge& addNewEdge(const TPGVertex& src, const TPGVertex& dest,
 			const std::shared_ptr<Program::Program> prog);
 
 		/**
