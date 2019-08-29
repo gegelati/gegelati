@@ -144,9 +144,9 @@ TEST_F(TPGTest, TPGGraphAddTPGVertex) {
 TEST_F(TPGTest, TPGGraphGetVertices) {
 	TPG::TPGGraph tpg;
 	const TPG::TPGVertex& vertex = tpg.addNewTeam();
-	const std::list<TPG::TPGVertex>& vertices = tpg.getVertices();
+	const std::vector<const TPG::TPGVertex *> vertices = tpg.getVertices();
 	ASSERT_EQ(vertices.size(), 1) << "Size of the retrievd std::vector<TPGVertex> is incorrect.";
-	ASSERT_EQ(&vertices.front(), &vertex) << "Vertex in the retrieved vertices list does not correspond to the one added to the TPGGrapg (pointer comparison)";
+	ASSERT_EQ(vertices.front(), &vertex) << "Vertex in the retrieved vertices list does not correspond to the one added to the TPGGrapg (pointer comparison)";
 }
 
 TEST_F(TPGTest, TPGGraphRemoveVertex) {
@@ -156,10 +156,40 @@ TEST_F(TPGTest, TPGGraphRemoveVertex) {
 
 	ASSERT_NO_THROW(tpg.removeVertex(vertex0)) << "Removing a vertex from the graph failed.";
 	ASSERT_EQ(tpg.getVertices().size(), 1) << "Number of vertices of the TPG is incorrect after removing a TPGVertex.";
-	ASSERT_EQ(&tpg.getVertices().front(), &vertex1) << "Remaining vertex after removal is not correct.";
+	ASSERT_EQ(tpg.getVertices().front(), &vertex1) << "Remaining vertex after removal is not correct.";
 
 	// Try to remove a vertex not from the graph
 	TPG::TPGAction vertex2;
 	ASSERT_NO_THROW(tpg.removeVertex(vertex2)) << "Removing a vertex from the graph (although it is not inside) throwed an exception.";
 	ASSERT_EQ(tpg.getVertices().size(), 1) << "Number of vertices of the TPG is incorrect after removing a TPGVertex not from the graph.";
+}
+
+TEST_F(TPGTest, TPGGraphAddEdge) {
+	TPG::TPGGraph tpg;
+	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+
+	ASSERT_NO_THROW(tpg.addNewEdge(vertex0, vertex1, progPointer)) << "Adding an edge between a team and an action failed.";
+	// Add with a vertex not in the graph.
+	TPG::TPGAction vertex2;
+	ASSERT_THROW(tpg.addNewEdge(vertex0, vertex2, progPointer), std::runtime_error) << "Adding an edge with a vertex not from the graph should have failed.";
+
+	// Add the edge from the action
+	ASSERT_THROW(tpg.addNewEdge(vertex1, vertex0, progPointer), std::runtime_error) << "Adding an edge from an Action should have failed.";
+}
+
+TEST_F(TPGTest, TPGGraphGetEdges) {
+	TPG::TPGGraph tpg;
+	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+
+	TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+	ASSERT_EQ(tpg.getEdges().size(), 1) << "Edges of the graph have incorrect size after successful add.";
+
+	// Attempt an impossible add.
+	try { tpg.addNewEdge(vertex1, vertex0, progPointer); }
+	catch (std::runtime_error e) {
+		// do nothing
+	}
+	ASSERT_EQ(tpg.getEdges().size(), 1) << "Edges of the graph have incorrect size after unsuccessful add.";
 }

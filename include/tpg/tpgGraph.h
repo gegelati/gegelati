@@ -16,6 +16,13 @@ namespace TPG {
 	public:
 
 		/**
+		* \brief Destructor for the TPGGraph.
+		*
+		* Free the memory allocated for TPGVertices.
+		*/
+		~TPGGraph();
+
+		/**
 		* \brief Create a new TPGTeam and add it to the vertices of the
 		* TPGGraph.
 		*
@@ -32,11 +39,14 @@ namespace TPG {
 		const TPGAction& addNewAction();
 
 		/**
-		* Get a const reference to the vertices of the TPGGraph.
+		* Get vector of const pointer to the vertices of the TPGGraph.
 		*
-		* \return a const reference to the vertices attribute.
+		* Content of the retrieved vector is valid only as long as no non-const
+		* method is called on the TPG. 
+		*
+		* \return a vector containing pointers to the vertices of the graph.
 		*/
-		const std::list<TPGVertex>& getVertices() const;
+		const std::vector<const TPGVertex*> getVertices() const;
 
 		/**
 		* Remove a TPGVertex from the TPGGraph and destroy it.
@@ -45,11 +55,34 @@ namespace TPG {
 		*/
 		void removeVertex(const TPGVertex& vertex);
 
+		/**
+		* \brief Add a new TPGEdge to the TPGGraph.
+		*
+		* Add a new TPGEdge to the TPGGraph, between the two given TPGVertex
+		* and associated with the given Program. The newly created TPGEdge is 
+		* inserted in the incoming and outgoing edges lists of the connected
+		* TPGVertex.
+		*
+		* \return a reference to the created TPGEdge.
+		* \throw std::runtime_error In case one of the TPGVertex does not 
+		*                           exist in the TPGGraph, or if the 
+		*							destination is a TPGAction. 
+		*/
+		TPGEdge& addNewEdge(const TPGVertex& src, const TPGVertex& dest,
+			const std::shared_ptr<Program::Program> prog);
+
+		/**
+		* Get a const reference to the edges of the TPGGraph.
+		*
+		* \return a const reference to the edges attribute.
+		*/
+		const std::list<TPGEdge>& getEdges() const;
+
 	protected:
 		/**
 		* \brief Set of TPGVertex composing the TPGGraph.
 		*/
-		std::list<TPGVertex> vertices;
+		std::list<TPGVertex*> vertices;
 
 		/**
 		* \brief Set of TPGEdge composing the TPGGraph.
