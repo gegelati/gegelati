@@ -42,14 +42,28 @@ namespace TPG {
 		* Get vector of const pointer to the vertices of the TPGGraph.
 		*
 		* Content of the retrieved vector is valid only as long as no non-const
-		* method is called on the TPG. 
+		* method is called on the TPG.
 		*
 		* \return a vector containing pointers to the vertices of the graph.
 		*/
 		const std::vector<const TPGVertex*> getVertices() const;
 
 		/**
+		* Get vector of const pointer to the root vertices of the TPGGraph.
+		*
+		* Content of the retrieved vector is valid only as long as no non-const
+		* method is called on the TPG.
+		*
+		* \return a vector containing pointers to the root vertices of the
+		* graph.
+		*/
+		const std::vector<const TPGVertex*> getRootVertices() const;
+
+		/**
 		* Remove a TPGVertex from the TPGGraph and destroy it.
+		*
+		* If the edge is connected to TPGEdges within the graph, they are also
+		* removed and destroyed.
 		*
 		* \param[in] vertex a const reference to the TPGVertex to remove.
 		*/
@@ -59,14 +73,14 @@ namespace TPG {
 		* \brief Add a new TPGEdge to the TPGGraph.
 		*
 		* Add a new TPGEdge to the TPGGraph, between the two given TPGVertex
-		* and associated with the given Program. The newly created TPGEdge is 
+		* and associated with the given Program. The newly created TPGEdge is
 		* inserted in the incoming and outgoing edges lists of the connected
 		* TPGVertex.
 		*
 		* \return a const reference to the created TPGEdge.
-		* \throw std::runtime_error In case one of the TPGVertex does not 
-		*                           exist in the TPGGraph, or if the 
-		*							destination is a TPGAction. 
+		* \throw std::runtime_error In case one of the TPGVertex does not
+		*                           exist in the TPGGraph, or if the
+		*							destination is a TPGAction.
 		*/
 		const TPGEdge& addNewEdge(const TPGVertex& src, const TPGVertex& dest,
 			const std::shared_ptr<Program::Program> prog);
@@ -77,6 +91,16 @@ namespace TPG {
 		* \return a const reference to the edges attribute.
 		*/
 		const std::list<TPGEdge>& getEdges() const;
+
+		/**
+		* Remove a TPGEdge from the TPGGraph.
+		*
+		* If the edge is connected to TPGVertex within the graph, they are 
+		* updated.
+		*
+		* \param[in] edge a const reference to the TPGEdge to remove.
+		*/
+		void removeEdge(const TPGEdge& edge);
 
 	protected:
 		/**

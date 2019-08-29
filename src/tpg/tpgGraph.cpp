@@ -21,10 +21,20 @@ const TPG::TPGAction& TPG::TPGGraph::addNewAction()
 	return (const TPGAction&)(*this->vertices.back());
 }
 
-const std::vector<const TPG::TPGVertex *> TPG::TPGGraph::getVertices() const
+const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getVertices() const
 {
 	std::vector<const TPG::TPGVertex*> result(this->vertices.size());
 	std::copy(this->vertices.begin(), this->vertices.end(), result.begin());
+	return result;
+}
+
+const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
+{
+	std::vector<const TPG::TPGVertex*> result;
+	std::copy_if(this->vertices.begin(), this->vertices.end(), std::back_inserter(result),
+		[](TPGVertex* vertex) {
+			return vertex->getIncomingEdges().size() == 0;
+		});
 	return result;
 }
 
@@ -36,6 +46,22 @@ void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 			return other == &vertex;
 		});
 	if (iterator != this->vertices.end()) {
+		// Remove all connected edges.
+		// copy inEdges set for removal 
+		// (because iterating on the modified set is not a good idea). 
+		std::set<TPGEdge*> inEdgesToRemove = (*iterator)->getIncomingEdges();
+		for (auto inEdge : inEdgesToRemove) {
+			this->removeEdge(*inEdge);
+		}
+		// copy outEdges set for removal 
+		std::set<TPGEdge*> outEdgesToRemove = (*iterator)->getOutgoingEdges();
+		for (auto outEdge : outEdgesToRemove) {
+			this->removeEdge(*outEdge);
+		}
+
+		// Free the memory of the vertex
+		delete* iterator;
+		// Remove the pointer from the list.
 		this->vertices.erase(iterator);
 	}
 }
@@ -78,4 +104,26 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(const TPGVertex& src, const TPGVer
 const std::list<TPG::TPGEdge>& TPG::TPGGraph::getEdges() const
 {
 	return this->edges;
+}
+
+void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
+{
+	// Get the edge (if it is in the graph)
+	auto iterator = std::find_if(this->edges.begin(), this->edges.end(),
+		[&edge](TPG::TPGEdge& other) {
+			return &edge == &other; 
+		});
+	// Disconnect the edge from the vertices
+	if (iterator != this->edges.end()) {
+		// Find vertex 
+		// Lambda expression for finding a non-const vertex in the graph (from 
+		// its const equivalent)
+		auto findVertex = [this](const TPG::TPGVertex* vert) {
+			return *std::find(this->vertices.begin(), this->vertices.end(), vert);
+		};
+		findVertex(iterator->getSource())->removeOutgoingEdge(&(*iterator));
+		findVertex(iterator->getDestination())->removeIncomingEdge(&(*iterator));
+	}
+	// Remove the edge
+	this->edges.erase(iterator);
 }

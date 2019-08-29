@@ -141,24 +141,9 @@ TEST_F(TPGTest, TPGGraphAddTPGVertex) {
 TEST_F(TPGTest, TPGGraphGetVertices) {
 	TPG::TPGGraph tpg;
 	const TPG::TPGVertex& vertex = tpg.addNewTeam();
-	const std::vector<const TPG::TPGVertex *> vertices = tpg.getVertices();
+	const std::vector<const TPG::TPGVertex*> vertices = tpg.getVertices();
 	ASSERT_EQ(vertices.size(), 1) << "Size of the retrievd std::vector<TPGVertex> is incorrect.";
 	ASSERT_EQ(vertices.front(), &vertex) << "Vertex in the retrieved vertices list does not correspond to the one added to the TPGGrapg (pointer comparison)";
-}
-
-TEST_F(TPGTest, TPGGraphRemoveVertex) {
-	TPG::TPGGraph tpg;
-	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
-	const TPG::TPGAction& vertex1 = tpg.addNewAction();
-
-	ASSERT_NO_THROW(tpg.removeVertex(vertex0)) << "Removing a vertex from the graph failed.";
-	ASSERT_EQ(tpg.getVertices().size(), 1) << "Number of vertices of the TPG is incorrect after removing a TPGVertex.";
-	ASSERT_EQ(tpg.getVertices().front(), &vertex1) << "Remaining vertex after removal is not correct.";
-
-	// Try to remove a vertex not from the graph
-	TPG::TPGAction vertex2;
-	ASSERT_NO_THROW(tpg.removeVertex(vertex2)) << "Removing a vertex from the graph (although it is not inside) throwed an exception.";
-	ASSERT_EQ(tpg.getVertices().size(), 1) << "Number of vertices of the TPG is incorrect after removing a TPGVertex not from the graph.";
 }
 
 TEST_F(TPGTest, TPGGraphAddEdge) {
@@ -183,10 +168,90 @@ TEST_F(TPGTest, TPGGraphGetEdges) {
 	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 	ASSERT_EQ(tpg.getEdges().size(), 1) << "Edges of the graph have incorrect size after successful add.";
 
+	// Check that connection were added
+	// To the source
+	ASSERT_EQ(vertex0.getOutgoingEdges().size(), 1);
+	ASSERT_EQ(std::count_if(vertex0.getOutgoingEdges().begin(), vertex0.getOutgoingEdges().end(),
+		[&edge](const TPG::TPGEdge* other) {
+			return other == &edge;
+		}), 1);
+
+	// To the destination
+	ASSERT_EQ(vertex1.getIncomingEdges().size(), 1);
+	ASSERT_EQ(std::count_if(vertex1.getIncomingEdges().begin(), vertex1.getIncomingEdges().end(),
+		[&edge](const TPG::TPGEdge* other) {
+			return other == &edge;
+		}), 1);
+
 	// Attempt an impossible add.
 	try { tpg.addNewEdge(vertex1, vertex0, progPointer); }
 	catch (std::runtime_error e) {
 		// do nothing
 	}
 	ASSERT_EQ(tpg.getEdges().size(), 1) << "Edges of the graph have incorrect size after unsuccessful add.";
+}
+
+TEST_F(TPGTest, TPGGraphRemoveEdge) {
+	TPG::TPGGraph tpg;
+	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+
+	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+
+	// Remove the edge
+	ASSERT_NO_THROW(tpg.removeEdge(edge)) << "Edge from the graph could not be removed successfully.";
+	// Check that the edge is no longer in the graph
+	ASSERT_EQ(tpg.getEdges().size(), 0) << "Edge was not effectively removed from the graph.";
+	// Check that vertices were disconnected from the removed edge.
+	ASSERT_EQ(vertex0.getOutgoingEdges().size(), 0) << "Source vertex was not disconnected from the removed Edge.";
+	// and from the destination
+	ASSERT_EQ(vertex1.getIncomingEdges().size(), 0) << "Destination vertex was not disconnected from the removed Edge.";
+	// Check that the edge was successfully deleted
+	ASSERT_EQ(progPointer.use_count(), 1) << "Edge was not properly deleted, its shared pointer is still active.";
+}
+
+TEST_F(TPGTest, TPGGraphRemoveVertex) {
+	TPG::TPGGraph tpg;
+	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+	const TPG::TPGTeam& vertex2 = tpg.addNewTeam();
+
+
+	ASSERT_NO_THROW(tpg.removeVertex(vertex0)) << "Removing a vertex from the graph failed.";
+	ASSERT_EQ(tpg.getVertices().size(), 2) << "Number of vertices of the TPG is incorrect after removing a TPGVertex.";
+	ASSERT_EQ(tpg.getVertices().front(), &vertex1) << "Remaining vertex after removal is not correct.";
+	ASSERT_EQ(tpg.getVertices().back(), &vertex2) << "Remaining vertex after removal is not correct.";
+
+	// Try to remove a vertex not from the graph
+	TPG::TPGAction vertex3;
+	ASSERT_NO_THROW(tpg.removeVertex(vertex3)) << "Removing a vertex from the graph (although it is not inside) throwed an exception.";
+	ASSERT_EQ(tpg.getVertices().size(), 2) << "Number of vertices of the TPG is incorrect after removing a TPGVertex not from the graph.";
+
+	// Add a new edge to test removal of vertex connectet to an edge.
+	tpg.addNewEdge(vertex2, vertex1, progPointer);
+	ASSERT_NO_THROW(tpg.removeVertex(vertex2)) << "Removing a vertex from the graph failed.";
+	// Check that edge was removed from the graph
+	ASSERT_EQ(tpg.getEdges().size(), 0) << "Edge connected to the removed vertex was not removed from the graph.";
+	// And disconnected from vertex1
+	ASSERT_EQ(vertex1.getIncomingEdges().size(), 0) << "Edge connected to the vertex removed from the graph was not disconnected from its destination.";
+
+	// For code coverage, test when the destination vertex of an edge is removed
+	// Add a new edge to test removal of vertex connectet to an edge.
+	const TPG::TPGTeam& vertex4 = tpg.addNewTeam();
+	tpg.addNewEdge(vertex4, vertex1, progPointer);
+	ASSERT_NO_THROW(tpg.removeVertex(vertex1)) << "Removing a vertex from the graph failed.";
+	// Check that edge was removed from the graph
+	ASSERT_EQ(tpg.getEdges().size(), 0) << "Edge connected to the removed vertex was not removed from the graph.";
+	// And disconnected from vertex1
+	ASSERT_EQ(vertex4.getOutgoingEdges().size(), 0) << "Edge connected to the vertex removed from the graph was not disconnected from its destination.";
+}
+
+TEST_F(TPGTest, TPGGraphGetRootVertices) {
+	TPG::TPGGraph tpg;
+	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+
+	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+	ASSERT_EQ(tpg.getRootVertices().size(), 1) << "Number of roots of the TPG is incorrect.";
+	ASSERT_EQ(tpg.getRootVertices().at(0), &vertex0) << "Vertex classified as root is incorrect.";
 }

@@ -5,6 +5,7 @@ Program::Program& TPG::TPGEdge::getProgram() const
 	return *this->program;
 }
 
+
 void TPG::TPGEdge::setProgram(const std::shared_ptr<Program::Program> prog) const
 {
 	this->program = prog;
