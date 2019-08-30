@@ -41,10 +41,7 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
 void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 {
 	// Remove the vertex based on a pointer comparison.
-	auto iterator = std::find_if(this->vertices.begin(), this->vertices.end(),
-		[&vertex](TPG::TPGVertex* other) {
-			return other == &vertex;
-		});
+	auto iterator = this->findVertex(&vertex);
 	if (iterator != this->vertices.end()) {
 		// Remove all connected edges.
 		// copy inEdges set for removal 
@@ -111,19 +108,17 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 	// Get the edge (if it is in the graph)
 	auto iterator = std::find_if(this->edges.begin(), this->edges.end(),
 		[&edge](TPG::TPGEdge& other) {
-			return &edge == &other; 
+			return &edge == &other;
 		});
 	// Disconnect the edge from the vertices
 	if (iterator != this->edges.end()) {
-		// Find vertex 
-		// Lambda expression for finding a non-const vertex in the graph (from 
-		// its const equivalent)
-		auto findVertex = [this](const TPG::TPGVertex* vert) {
-			return *std::find(this->vertices.begin(), this->vertices.end(), vert);
-		};
-		findVertex(iterator->getSource())->removeOutgoingEdge(&(*iterator));
-		findVertex(iterator->getDestination())->removeIncomingEdge(&(*iterator));
+		(*this->findVertex(iterator->getSource()))->removeOutgoingEdge(&(*iterator));
+		(*this->findVertex(iterator->getDestination()))->removeIncomingEdge(&(*iterator));
 	}
 	// Remove the edge
 	this->edges.erase(iterator);
+}
+
+std::list<TPG::TPGVertex*>::iterator TPG::TPGGraph::findVertex(const TPG::TPGVertex* vertex) {
+	return std::find(this->vertices.begin(), this->vertices.end(), vertex);
 }

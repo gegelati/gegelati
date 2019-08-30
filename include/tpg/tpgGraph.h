@@ -39,7 +39,7 @@ namespace TPG {
 		const TPGAction& addNewAction();
 
 		/**
-		* Get vector of const pointer to the vertices of the TPGGraph.
+		* \brief Get vector of const pointer to the vertices of the TPGGraph.
 		*
 		* Content of the retrieved vector is valid only as long as no non-const
 		* method is called on the TPG.
@@ -49,7 +49,7 @@ namespace TPG {
 		const std::vector<const TPGVertex*> getVertices() const;
 
 		/**
-		* Get vector of const pointer to the root vertices of the TPGGraph.
+		* \brief Get vector of const pointer to the root vertices of the TPGGraph.
 		*
 		* Content of the retrieved vector is valid only as long as no non-const
 		* method is called on the TPG.
@@ -60,7 +60,7 @@ namespace TPG {
 		const std::vector<const TPGVertex*> getRootVertices() const;
 
 		/**
-		* Remove a TPGVertex from the TPGGraph and destroy it.
+		* \brief Remove a TPGVertex from the TPGGraph and destroy it.
 		*
 		* If the edge is connected to TPGEdges within the graph, they are also
 		* removed and destroyed.
@@ -86,16 +86,16 @@ namespace TPG {
 			const std::shared_ptr<Program::Program> prog);
 
 		/**
-		* Get a const reference to the edges of the TPGGraph.
+		* \brief Get a const reference to the edges of the TPGGraph.
 		*
 		* \return a const reference to the edges attribute.
 		*/
 		const std::list<TPGEdge>& getEdges() const;
 
 		/**
-		* Remove a TPGEdge from the TPGGraph.
+		* \brief Remove a TPGEdge from the TPGGraph.
 		*
-		* If the edge is connected to TPGVertex within the graph, they are 
+		* If the edge is connected to TPGVertex within the graph, they are
 		* updated.
 		*
 		* \param[in] edge a const reference to the TPGEdge to remove.
@@ -112,6 +112,17 @@ namespace TPG {
 		* \brief Set of TPGEdge composing the TPGGraph.
 		*/
 		std::list<TPGEdge> edges;
+
+		/**
+		* \brief Find the non-const iterator to a vertex of the graph from
+		* its const pointer.
+		*
+		* \param[in] vertex the const pointer to the TPGVertex.
+		* \return the iterator on the vertices attribute, at the position of
+		*         the searched vertex pointer. If the given vertex pointer is
+		*         not in the vertices, then vertices.end() is returned.
+		*/
+		std::list<TPGVertex*>::iterator findVertex(const TPGVertex* vertex);
 	};
 };
 
