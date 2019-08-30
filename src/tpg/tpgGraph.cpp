@@ -80,10 +80,7 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
 	else if (typeid(vertex) == typeid(TPGAction)) {
 		this->addNewAction();
 	}
-	else {
-		// A more generic code would be possible by using a polymorphic copy method of the vertex.
-		throw std::runtime_error("The TPGVertex to duplicate is neither a Team nor an Action, and thus, cannot be cloned.");
-	}
+
 	// Get the new vertex
 	TPGVertex* newVertex = this->vertices.back();
 

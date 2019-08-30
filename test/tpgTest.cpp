@@ -282,4 +282,8 @@ TEST_F(TPGTest, TPGGraphCloneVertex) {
 	ASSERT_NO_THROW(tpg.cloneVertex(vertex1));
 	// Check that the type is correct
 	ASSERT_EQ(typeid(vertex1).name(), typeid(*tpg.getVertices().at(3)).name());
+
+	// Clone a vertex not from the graph
+	TPG::TPGVertex * vertex2 = new TPG::TPGAction();
+	ASSERT_THROW(tpg.cloneVertex(*vertex2), std::runtime_error) << "Cloning a vertex that does not belong to the TPGGraph should not be possible.";
 }
