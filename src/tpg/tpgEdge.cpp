@@ -11,6 +11,11 @@ void TPG::TPGEdge::setProgram(const std::shared_ptr<Program::Program> prog) cons
 	this->program = prog;
 }
 
+std::shared_ptr<Program::Program> TPG::TPGEdge::getProgramSharedPointer()
+{
+	return this->program;
+}
+
 const TPG::TPGVertex* TPG::TPGEdge::getSource() const
 {
 	return this->source;

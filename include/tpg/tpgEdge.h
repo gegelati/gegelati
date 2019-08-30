@@ -44,6 +44,16 @@ namespace TPG {
 		void setProgram(const std::shared_ptr<Program::Program> prog) const;
 
 		/**
+		* \brief Get the shared_pointer to the Program.
+		*
+		* This method is voluntarily non-const to make sure that only the 
+		* TPGGraph containing the edge can use it.
+		*
+		* \return a copy of the program attribute.
+		*/
+		std::shared_ptr<Program::Program> getProgramSharedPointer();
+
+		/**
 		* \brief Get the source TPGVertex of the TPGEdge.
 		*
 		* \return a const pointer to the source TPGVertex.

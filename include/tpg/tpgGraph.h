@@ -26,6 +26,8 @@ namespace TPG {
 		* \brief Create a new TPGTeam and add it to the vertices of the
 		* TPGGraph.
 		*
+		* The new TPGTeam is added to the back of the vertices list.
+		*
 		* \return a const reference to the newly created TPGTeam.
 		*/
 		const TPGTeam& addNewTeam();
@@ -33,6 +35,8 @@ namespace TPG {
 		/**
 		* \brief Create a new TPGAction and add it to the vertices of the
 		* TPGGraph.
+		*
+		* The new TPGAction is added to the back of the vertices list.
 		*
 		* \return a const reference to the newly created TPGAction.
 		*/
@@ -68,6 +72,16 @@ namespace TPG {
 		* \param[in] vertex a const reference to the TPGVertex to remove.
 		*/
 		void removeVertex(const TPGVertex& vertex);
+
+		/**
+		* \brief Clone a TPGVertex of the graph and all its outgoing TPGEdge.
+		*
+		* \param[in] vertex the const reference to the TPGVertex to clone.
+		* \return a const reference to the new TPGVertex.
+		* \throw std::runtime_error if the given vertex does not belong to the
+		* TPGGraph.
+		*/
+		const TPGVertex& cloneVertex(const TPGVertex&);
 
 		/**
 		* \brief Add a new TPGEdge to the TPGGraph.

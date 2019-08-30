@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <stdexcept>
+#include <type_traits>
 
 #include "tpg/tpgGraph.h"
 
@@ -61,6 +62,37 @@ void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 		// Remove the pointer from the list.
 		this->vertices.erase(iterator);
 	}
+}
+
+const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
+{
+	// Check that the vertex to clone exists in the graph
+	auto vertexIterator = this->findVertex(&vertex);
+	if (vertexIterator == this->vertices.end()) {
+		throw std::runtime_error("The vertex to clone does not exist in the TPGGraph.");
+	}
+
+	// Create a new Vertex
+	// (at the end of the vertices list)
+	if (typeid(vertex) == typeid(TPGTeam)) {
+		this->addNewTeam();
+	}
+	else if (typeid(vertex) == typeid(TPGAction)) {
+		this->addNewAction();
+	}
+	else {
+		// A more generic code would be possible by using a polymorphic copy method of the vertex.
+		throw std::runtime_error("The TPGVertex to duplicate is neither a Team nor an Action, and thus, cannot be cloned.");
+	}
+	// Get the new vertex
+	TPGVertex* newVertex = this->vertices.back();
+
+	// Copy the outgoing edges (if any).
+	for (auto edge : vertex.getOutgoingEdges()) {
+		this->addNewEdge(*newVertex, *(edge->getDestination()), edge->getProgramSharedPointer());
+	}
+
+	return *newVertex;
 }
 
 const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(const TPGVertex& src, const TPGVertex& dest, const std::shared_ptr<Program::Program> prog)

@@ -255,3 +255,31 @@ TEST_F(TPGTest, TPGGraphGetRootVertices) {
 	ASSERT_EQ(tpg.getRootVertices().size(), 1) << "Number of roots of the TPG is incorrect.";
 	ASSERT_EQ(tpg.getRootVertices().at(0), &vertex0) << "Vertex classified as root is incorrect.";
 }
+
+TEST_F(TPGTest, TPGGraphCloneVertex) {
+	TPG::TPGGraph tpg;
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+
+	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+
+	// Clone the team
+	const TPG::TPGVertex* cloneVertex;
+	ASSERT_NO_THROW(cloneVertex = &tpg.cloneVertex(vertex0)) << "Cloning a TPGTeamVertex of the TPGGraph failed.";
+	// Check that the clone vertex is in the graph
+	ASSERT_EQ(tpg.getVertices().size(), 3) << "Number of vertices of the graph after clone is incorrect.";
+	ASSERT_EQ(tpg.getVertices().at(2), cloneVertex) << "CloneVertex is not the last of the graph vertices as it should be.";
+	cloneVertex = tpg.getVertices().at(2); // to remove a compilation warning.
+	// Check that the type is correct
+	ASSERT_EQ(typeid(vertex0), typeid(*cloneVertex));
+	ASSERT_EQ(tpg.getEdges().size(), 2) << "Number of edges of the graph after clone is incorrect.";
+	auto destinationVertex = ((*cloneVertex->getOutgoingEdges().begin())->getDestination());
+	ASSERT_EQ(destinationVertex, &vertex1) << "Cloned vertex is not connected to the correct other vertex in the Graph.";
+	// Check pointer usage was increased.
+	ASSERT_EQ(progPointer.use_count(), 3) << "Shared pointer use count should increase after cloning a vertex connected with an edge using it.";
+
+	// Duplicate the action (to increase code coverage)
+	ASSERT_NO_THROW(tpg.cloneVertex(vertex1));
+	// Check that the type is correct
+	ASSERT_EQ(typeid(vertex1).name(), typeid(*tpg.getVertices().at(3)).name());
+}
