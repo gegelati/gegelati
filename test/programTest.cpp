@@ -126,7 +126,7 @@ TEST_F(ProgramTest, CopyConstructor) {
 	ASSERT_EQ(p1.getLine(0).getInstructionIndex(), 1) << "Line instructionIndex value was not copied on Program copy.";
 	ASSERT_EQ(p1.getLine(0).getOperand(0).first, 2) << "Line operand.dataSource index value was not copied on Program copy.";
 	ASSERT_EQ(p1.getLine(0).getOperand(0).second, 24) << "Line operand.location value was not copied on Program copy.";
-	ASSERT_TRUE(fabs((float)p1.getLine(0).getParameter(0) - 0.3f) <= PARAM_FLOAT_PRECISION) << "Line parameter value was not copied on Program copy.";
+	ASSERT_NEAR((float)p1.getLine(0).getParameter(0), 0.3f, PARAM_FLOAT_PRECISION) << "Line parameter value was not copied on Program copy.";
 }
 
 TEST_F(ProgramTest, ProgramSwapLines) {

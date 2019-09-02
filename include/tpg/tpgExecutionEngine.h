@@ -71,7 +71,8 @@ namespace TPG {
 		*
 		* \param[in] root the TPGVertex from which the execution will start.
 		* \return a vector containing all the TPGVertex traversed during the
-		*         evaluation of the TPGGraph.
+		*         evaluation of the TPGGraph. The TPGAction resulting from the 
+		*         TPGGraph execution is at the end of the returned vector.
 		*/
 		const std::vector<const TPGVertex*> executeFromRoot(const TPGVertex& root);
 	};

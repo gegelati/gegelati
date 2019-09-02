@@ -105,7 +105,7 @@ TEST_F(LineTest, LineParameterAccessors) {
 	ASSERT_THROW(l.setParameter(1, 0.3f), std::range_error) << "Setting value of an incorrectly indexed parameter did not fail.";
 
 	// Is it equal (to the Parameter float precision)
-	ASSERT_TRUE(fabs((float)l.getParameter(0) - 0.2f) <= PARAM_FLOAT_PRECISION) << "Getting a previously set parameter failed.";
+	ASSERT_NEAR((float)l.getParameter(0), 0.2f, PARAM_FLOAT_PRECISION) << "Getting a previously set parameter failed.";
 	ASSERT_THROW(l.getParameter(1), std::range_error) << "Getting value of an incorrectly indexed parameter did not fail.";
 }
 

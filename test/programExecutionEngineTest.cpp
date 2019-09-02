@@ -117,7 +117,7 @@ TEST_F(ProgramExecutionEngineTest, fetchParameters) {
 	// Check number of parameters
 	ASSERT_EQ(parameters.size(), 1) << "Incorrect number of operands were fetched by previous call.";
 	// Check parameter value (set in fixture). value1: 0.2f (+/- the parameter floating precision)
-	ASSERT_TRUE((float)parameters.at(0).get() < value1 + PARAM_FLOAT_PRECISION && (float)parameters.at(0).get() > value1 - PARAM_FLOAT_PRECISION) << "Value of fetched parameter is incorrect.";
+	ASSERT_NEAR((float)parameters.at(0).get(), value1, PARAM_FLOAT_PRECISION) << "Value of fetched parameter is incorrect.";
 }
 
 TEST_F(ProgramExecutionEngineTest, executeCurrentLine) {
