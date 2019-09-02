@@ -31,7 +31,7 @@ protected:
 	* \param[in] value a double valut between -1.0 and 1.0.
 	*/
 	void makeProgramReturn(Program::Program& prog, double value) {
-		auto & line = prog.addNewLine();
+		auto& line = prog.addNewLine();
 		// do an multby constant with DHandler 0
 		line.setInstructionIndex(1);
 		line.setOperand(0, 1, 0); // Dhandler 0 location 0
@@ -87,6 +87,17 @@ protected:
 		edges.push_back(&tpg.addNewEdge(*tpg.getVertices().at(1), *tpg.getVertices().at(4), progPointers.at(7)));
 		edges.push_back(&tpg.addNewEdge(*tpg.getVertices().at(1), *tpg.getVertices().at(6), progPointers.at(8)));
 
+		// Put a weight on edges
+		makeProgramReturn(*progPointers.at(0), 0.5); // T0->A0
+		makeProgramReturn(*progPointers.at(1), 0.5); // T1->A1
+		makeProgramReturn(*progPointers.at(2), 0.3); // T2->A2
+		makeProgramReturn(*progPointers.at(3), 0.0); // T3->A3
+		makeProgramReturn(*progPointers.at(4), 0.8); // T0->T1
+		makeProgramReturn(*progPointers.at(5), 0.9); // T1->T2
+		makeProgramReturn(*progPointers.at(6), 0.7); // T2->T1
+		makeProgramReturn(*progPointers.at(7), 0.6); // T1->A0
+		makeProgramReturn(*progPointers.at(8), 0.3); // T1->A2
+
 		// Check the characteristics
 		ASSERT_EQ(tpg.getVertices().size(), 8);
 		ASSERT_EQ(tpg.getEdges().size(), 9);
@@ -112,7 +123,23 @@ TEST_F(TPGExecutionEngineTest, ConstructorDestructor) {
 
 TEST_F(TPGExecutionEngineTest, EvaluateEdge) {
 	TPG::TPGExecutionEngine tpee(tpg);
-	makeProgramReturn(*progPointers.at(0), 0.5);
-	
-	ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION);
+
+	ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION) << "Evaluation of the program of an Edge failed.";
+}
+
+TEST_F(TPGExecutionEngineTest, EvaluateTeam) {
+	TPG::TPGExecutionEngine tpee(tpg);
+
+	const TPG::TPGEdge* result = NULL;
+	ASSERT_NO_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg.getVertices().at(1)), {});) << "Evaluation of a valid TPGTeam with no exclusion failed.";
+	// Expected result is edge between T1 -> T2 (with 0.9)
+	ASSERT_EQ(result, edges.at(5)) << "Edge selected during team evaluation is incorrect.";
+
+	// Exclude an edge
+	ASSERT_NO_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg.getVertices().at(1)), { tpg.getVertices().at(2) });) << "Evaluation of a valid TPGTeam with one exclusion failed.";
+	// Expected result is edge between T1 -> A0 (with 0.6)
+	ASSERT_EQ(result, edges.at(7)) << "Edge selected during team evaluation is incorrect.";
+
+	// Exclude all edges
+	ASSERT_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg.getVertices().at(0)), { tpg.getVertices().at(1),  tpg.getVertices().at(4) }), std::runtime_error) << "Evaluation of a TPGTeam with all edges excluded did not fail as expected.";
 }
