@@ -143,3 +143,17 @@ TEST_F(TPGExecutionEngineTest, EvaluateTeam) {
 	// Exclude all edges
 	ASSERT_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg.getVertices().at(0)), { tpg.getVertices().at(1),  tpg.getVertices().at(4) }), std::runtime_error) << "Evaluation of a TPGTeam with all edges excluded did not fail as expected.";
 }
+
+TEST_F(TPGExecutionEngineTest, EvaluateFromRoot) {
+	TPG::TPGExecutionEngine tpee(tpg);
+
+	std::vector<const TPG::TPGVertex*> result;
+
+	ASSERT_NO_THROW(result = tpee.executeFromRoot(*tpg.getRootVertices().at(0))) << "Execution of a TPGGraph from a valid root failed.";
+	// Check the traversed path
+	ASSERT_EQ(result.size(), 4) << "Size of the traversed path during the execution of the TPGGraph is not as expected.";
+	ASSERT_EQ(result.at(0), tpg.getVertices().at(0)) << "0th element (i.e. the root) of the traversed path during execution is incorrect.";
+	ASSERT_EQ(result.at(1), tpg.getVertices().at(1)) << "1st element of the traversed path during execution is incorrect.";
+	ASSERT_EQ(result.at(2), tpg.getVertices().at(2)) << "2nd element of the traversed path during execution is incorrect.";
+	ASSERT_EQ(result.at(3), tpg.getVertices().at(6)) << "2nd element of the traversed path during execution is incorrect.";
+}

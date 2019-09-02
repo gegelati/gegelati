@@ -2,6 +2,7 @@
 #define TPG_EXECUTION_ENGINE_H
 
 #include <set>
+#include <vector>
 
 #include "tpgGraph.h"
 
@@ -60,7 +61,19 @@ namespace TPG {
 		*        at least one TPGAction, to ensure that all cycles have an 
 		*        exit.
 		*/
-		const TPG::TPGEdge& evaluateTeam(const TPGTeam& team, const std::set<const TPGVertex*>& excluded);
+		const TPG::TPGEdge& evaluateTeam(const TPGTeam& team, const std::vector<const TPGVertex*>& excluded);
+
+		/**
+		* \brief Execute the TPGGraph starting from the given TPGVertex.
+		*
+		* This method browse the graph by successively evaluating Teams and
+		* following the TPGEdge proposing the best bids.
+		*
+		* \param[in] root the TPGVertex from which the execution will start.
+		* \return a vector containing all the TPGVertex traversed during the
+		*         evaluation of the TPGGraph.
+		*/
+		const std::vector<const TPGVertex*> executeFromRoot(const TPGVertex& root);
 	};
 };
 

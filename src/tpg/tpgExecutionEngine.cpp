@@ -1,4 +1,5 @@
 #include <set>
+#include <vector>
 #include <algorithm>
 
 #include "tpg/tpgEdge.h"
@@ -18,7 +19,7 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
 	return pee.executeProgram();
 }
 
-const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team, const std::set<const TPGVertex*>& excluded)
+const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team, const std::vector<const TPGVertex*>& excluded)
 {
 	// Copy outgoing edge list 
 	std::set<TPG::TPGEdge*> outgoingEdges = team.getOutgoingEdges();
@@ -26,7 +27,7 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team, c
 	// Remove all edges leading to excluded TPGTeam
 	std::set<TPG::TPGEdge*>::iterator iter = outgoingEdges.begin();
 	while (iter != outgoingEdges.end()) {
-		if (excluded.count((*iter)->getDestination()) > 0) {
+		if (std::find(excluded.begin(), excluded.end(), (*iter)->getDestination()) != excluded.end()) {
 			outgoingEdges.erase(iter++);
 		}
 		else {
@@ -57,4 +58,23 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team, c
 	}
 
 	return *bestEdge;
+}
+
+const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngine::executeFromRoot(const TPGVertex& root)
+{
+	const TPGVertex* currentVertex = &root;
+
+	std::vector<const TPGVertex*> visitedVertices;
+	visitedVertices.push_back(currentVertex);
+
+	// Browse the TPG until a TPGAction is reached.
+	while (typeid(*currentVertex) == typeid(TPG::TPGTeam)) {
+		// Get the next edge
+		const TPGEdge & edge = this->evaluateTeam(*(TPGTeam*)currentVertex, visitedVertices);
+		// update currentVertex and backup in visitedVertex.
+		currentVertex = edge.getDestination();
+		visitedVertices.push_back(currentVertex);
+	}
+
+	return visitedVertices;
 }
