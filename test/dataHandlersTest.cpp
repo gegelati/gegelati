@@ -76,3 +76,21 @@ TEST(DataHandlersTest, PrimitiveDataArraySetDataAt) {
 
 	delete d;
 }
+
+
+TEST(DataHandlersTest, PrimitiveDataArrayHash) {
+	// Create a DataHandler
+	const size_t size{ 8 };
+	const size_t address{ 3 };
+	const double doubleValue{ 42.0 };
+
+	DataHandlers::PrimitiveTypeArray<double> d(size);
+
+	// Get hash
+	size_t hash = 0;
+	ASSERT_NO_THROW(hash = d.updateHash());
+	// change the content of the array
+	d.setDataAt(typeid(PrimitiveType<double>), address, PrimitiveType<double>(doubleValue));
+	ASSERT_NO_THROW(d.updateHash());
+	ASSERT_NE(hash, d.getHash());
+}

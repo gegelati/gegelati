@@ -1,6 +1,11 @@
 #include <algorithm>
 #include "dataHandlers/dataHandler.h"
 
+size_t DataHandlers::DataHandler::getHash() const
+{
+	return this->cachedHash;
+}
+
 bool DataHandlers::DataHandler::canHandle(const std::type_info& type) const
 {
 	for (auto t : this->providedTypes) {

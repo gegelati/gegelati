@@ -28,11 +28,40 @@ namespace DataHandlers {
 		*/
 		std::vector<std::reference_wrapper<const std::type_info>> providedTypes;
 
+		/**
+		* \brief Cached value returned by the getHash() function.
+		*
+		* The value of the hash is updated whenever the updateHash function is called.
+		*/
+		mutable size_t cachedHash;
+
 	public:
 		/**
 		* \brief Default constructor of the DataHandler class.
 		*/
-		DataHandler() : providedTypes() {}
+		DataHandler() : providedTypes(), cachedHash() {}
+
+		/**
+		* \brief Get the current value of the hash for this DataHandler.
+		* 
+		* It is important to note that the returned value is a cached value
+		* which may not have been updated since the last change of the data
+		* contained in the DataHandler. To make sure the data is up to date,
+		* call the updateHash method.
+		*
+		* \return the cached value of the Hash.
+		*/
+		size_t getHash() const;
+
+		/**
+		* \brief Update the cachedHash value.
+		*
+		* This methods trigger an update of the cachedHash value and 
+		* returns the new value.
+		*
+		* \return the new value of the cachedhash attribute.
+		*/
+		virtual size_t updateHash() const = 0;
 
 		/**
 		* \brief Check a given DataHandler can handle data for the given data type.

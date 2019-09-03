@@ -2,6 +2,7 @@
 #define PRIMITIVE_TYPE_ARRAY
 
 #include <sstream>
+#include <functional>
 
 #include "dataHandler.h"
 
@@ -70,6 +71,11 @@ namespace DataHandlers {
 		* \throws std::out_of_range if the given address is invalid for the given data type.
 		*/
 		void setDataAt(const std::type_info& type, const size_t address, const PrimitiveType<T>& value);
+
+		/**
+		* \brief Implementation of the updateHash method.
+		*/
+		virtual size_t updateHash() const;
 	};
 
 	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size) : nbElements{ size }, data(size) {
@@ -127,6 +133,21 @@ namespace DataHandlers {
 		checkAddressAndType(type, address);
 
 		this->data[address] = value;
+	}
+	template<class T>
+	inline size_t PrimitiveTypeArray<T>::updateHash() const
+	{
+		// reset
+		this->cachedHash = 0;
+
+		// hasher
+		std::hash<T> hasher;
+
+		for (PrimitiveType<T> dataElement : this->data) {
+			this->cachedHash ^= hasher((T)dataElement);
+		}
+
+		return this->cachedHash;
 	}
 }
 
