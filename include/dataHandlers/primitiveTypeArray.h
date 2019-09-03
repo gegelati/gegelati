@@ -138,7 +138,7 @@ namespace DataHandlers {
 	inline size_t PrimitiveTypeArray<T>::updateHash() const
 	{
 		// reset
-		this->cachedHash = 0;
+		this->cachedHash = std::hash<size_t>()(this->id);
 
 		// hasher
 		std::hash<T> hasher;

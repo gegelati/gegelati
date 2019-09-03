@@ -1,6 +1,8 @@
 #include <algorithm>
 #include "dataHandlers/dataHandler.h"
 
+size_t DataHandlers::DataHandler::count = 0;
+
 size_t DataHandlers::DataHandler::getHash() const
 {
 	return this->cachedHash;

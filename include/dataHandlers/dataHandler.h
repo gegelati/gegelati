@@ -20,6 +20,21 @@ namespace DataHandlers {
 	class DataHandler {
 
 	protected:
+
+		/**
+		* \brief Static count used to initialize the id of each DataHandler.
+		*/
+		static size_t count;
+
+		/**
+		* \brief Identifier of each DataHandler.
+		*
+		* This identifier should be used as a seed for the initialization
+		* of the hash calculation.
+		* Two DataHandler resulting from a copy should thus have the same id.
+		*/
+		const size_t id;
+
 		/**
 		* \brief List of the types of the operands needed to execute the instruction.
 		*
@@ -39,11 +54,11 @@ namespace DataHandlers {
 		/**
 		* \brief Default constructor of the DataHandler class.
 		*/
-		DataHandler() : providedTypes(), cachedHash() {}
+		DataHandler() : id{count++}, providedTypes(), cachedHash() {}
 
 		/**
 		* \brief Get the current value of the hash for this DataHandler.
-		* 
+		*
 		* It is important to note that the returned value is a cached value
 		* which may not have been updated since the last change of the data
 		* contained in the DataHandler. To make sure the data is up to date,
@@ -56,7 +71,7 @@ namespace DataHandlers {
 		/**
 		* \brief Update the cachedHash value.
 		*
-		* This methods trigger an update of the cachedHash value and 
+		* This methods trigger an update of the cachedHash value and
 		* returns the new value.
 		*
 		* \return the new value of the cachedhash attribute.
