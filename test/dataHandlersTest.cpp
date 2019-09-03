@@ -86,6 +86,9 @@ TEST(DataHandlersTest, PrimitiveDataArrayHash) {
 
 	DataHandlers::PrimitiveTypeArray<double> d(size);
 
+	// Check Hash value before update.
+	ASSERT_EQ(d.getHash(), 0) << "Default, non-computed hash should be 0.";
+
 	// Get hash
 	size_t hash = 0;
 	ASSERT_NO_THROW(hash = d.updateHash());
@@ -93,4 +96,33 @@ TEST(DataHandlersTest, PrimitiveDataArrayHash) {
 	d.setDataAt(typeid(PrimitiveType<double>), address, PrimitiveType<double>(doubleValue));
 	ASSERT_NO_THROW(d.updateHash());
 	ASSERT_NE(hash, d.getHash());
+}
+
+TEST(DataHandlersTest, PrimitiveDataArrayClone) {
+	// Create a DataHandler
+	const size_t size{ 8 };
+	const size_t address{ 3 };
+	const double doubleValue{ 42.0 };
+
+	// create a first one to increase the DataHandler::count
+	DataHandlers::PrimitiveTypeArray<int> d0(12);
+	DataHandlers::PrimitiveTypeArray<double> d(size);
+	// change the content of the array
+	d.setDataAt(typeid(PrimitiveType<double>), address, PrimitiveType<double>(doubleValue));
+	// Hash was voluntarily not computed before clone.
+
+	// Create a clone
+	DataHandlers::DataHandler* dClone = NULL;
+	ASSERT_NO_THROW(dClone = d.clone();) << "Cloning a PrimitiTypeArray<double> failed.";
+	// Check the polymorphic type.
+	ASSERT_EQ(typeid(*dClone), typeid(DataHandlers::PrimitiveTypeArray<double>)) << "Type of clone DataHandler differes from the original one.";
+	// Compute the hashes
+	size_t hash = dClone->updateHash();
+	d.updateHash();
+	ASSERT_EQ(dClone->getHash(), d.getHash()) << "Hash of clone and original DataHandler differ.";
+
+	// Change data in the original to make sure the two dHandlers are decoupled.
+	d.resetData();
+	ASSERT_NE(dClone->updateHash(), d.updateHash()) << "Hash of clone and original DataHandler should differ after modification of data in the original.";
+	ASSERT_EQ(dClone->getHash(), hash) << "Hash of the clone dataHandler should remain unchanged after modification of data within the original DataHandler.";
 }

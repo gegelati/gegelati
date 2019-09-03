@@ -46,6 +46,8 @@ namespace DataHandlers {
 		*/
 		PrimitiveTypeArray(size_t size = 8);
 
+		virtual DataHandler* clone() const;
+
 		size_t getAddressSpace(const std::type_info& type)  const;
 
 		/**
@@ -80,6 +82,15 @@ namespace DataHandlers {
 
 	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size) : nbElements{ size }, data(size) {
 		this->providedTypes.push_back(typeid(PrimitiveType<T>));
+	}
+
+	template<class T>
+	inline DataHandler* PrimitiveTypeArray<T>::clone() const
+	{
+		// Default copy construtor should do the deep copy.
+		DataHandler* result = new PrimitiveTypeArray<T>(*this);
+
+		return result;
 	}
 
 	template<class T> size_t PrimitiveTypeArray<T>::getAddressSpace(const std::type_info& type) const

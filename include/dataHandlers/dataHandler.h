@@ -57,6 +57,22 @@ namespace DataHandlers {
 		DataHandler() : id{count++}, providedTypes(), cachedHash() {}
 
 		/**
+		* \brief Default copy constructor.
+		*/
+		DataHandler(const DataHandler& other) = default;
+
+		/**
+		* \brief Return a copy of the DataHandler (with all its content).
+		*
+		* The returned copy shuold always have the same polymorphic type
+		* as the original object, and give the same hash and data until
+		* the original or the copy is modified.
+		*
+		* \return a pointer to the clone.
+		*/
+		virtual DataHandler* clone() const = 0;
+
+		/**
 		* \brief Get the current value of the hash for this DataHandler.
 		*
 		* It is important to note that the returned value is a cached value
