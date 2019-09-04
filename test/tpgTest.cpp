@@ -46,7 +46,7 @@ TEST_F(TPGTest, TPGTeamAndTPGActionConstructorsDestructors) {
 	TPG::TPGVertex* action;
 
 	ASSERT_NO_THROW(team = new TPG::TPGTeam());
-	ASSERT_NO_THROW(action = new TPG::TPGAction());
+	ASSERT_NO_THROW(action = new TPG::TPGAction(0));
 
 	ASSERT_NO_THROW(delete team);
 	ASSERT_NO_THROW(delete action);
@@ -54,7 +54,7 @@ TEST_F(TPGTest, TPGTeamAndTPGActionConstructorsDestructors) {
 
 TEST_F(TPGTest, TPGEdgeConstructorDestructor) {
 	TPG::TPGTeam team;
-	TPG::TPGAction action;
+	TPG::TPGAction action(0);
 
 	TPG::TPGEdge* edge;
 
@@ -65,7 +65,7 @@ TEST_F(TPGTest, TPGEdgeConstructorDestructor) {
 
 TEST_F(TPGTest, TPGVertexEdgesSettersGetters) {
 	TPG::TPGTeam team;
-	TPG::TPGAction action;
+	TPG::TPGAction action(0);
 
 	TPG::TPGEdge edge(&team, &action, progPointer);
 
@@ -101,7 +101,7 @@ TEST_F(TPGTest, TPGVertexEdgesSettersGetters) {
 
 TEST_F(TPGTest, TPGEdgeGetSetProgram) {
 	TPG::TPGTeam team;
-	TPG::TPGAction action;
+	TPG::TPGAction action(0);
 
 	const TPG::TPGEdge constEdge(&team, &action, progPointer);
 	const Program::Program& constProg = constEdge.getProgram();
@@ -115,7 +115,7 @@ TEST_F(TPGTest, TPGEdgeGetSetProgram) {
 
 TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination) {
 	TPG::TPGTeam team0, team1;
-	TPG::TPGAction action0, action1;
+	TPG::TPGAction action0(0), action1(1);
 
 	TPG::TPGEdge edge(&team0, &action0, progPointer);
 
@@ -134,7 +134,7 @@ TEST_F(TPGTest, TPGGraphAddTPGVertex) {
 	const TPG::TPGTeam* t;
 	const TPG::TPGAction* a;
 	ASSERT_NO_THROW(t = &tpg.addNewTeam()) << "Adding a new Team to a TPGGraph failed.";
-	ASSERT_NO_THROW(a = &tpg.addNewAction()) << "Adding a new Action to a TPGGraph failed.";
+	ASSERT_NO_THROW(a = &tpg.addNewAction(0)) << "Adding a new Action to a TPGGraph failed.";
 
 }
 
@@ -149,11 +149,11 @@ TEST_F(TPGTest, TPGGraphGetVertices) {
 TEST_F(TPGTest, TPGGraphAddEdge) {
 	TPG::TPGGraph tpg;
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
-	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 
 	ASSERT_NO_THROW(tpg.addNewEdge(vertex0, vertex1, progPointer)) << "Adding an edge between a team and an action failed.";
 	// Add with a vertex not in the graph.
-	TPG::TPGAction vertex2;
+	TPG::TPGAction vertex2(2);
 	ASSERT_THROW(tpg.addNewEdge(vertex0, vertex2, progPointer), std::runtime_error) << "Adding an edge with a vertex not from the graph should have failed.";
 
 	// Add the edge from the action
@@ -163,7 +163,7 @@ TEST_F(TPGTest, TPGGraphAddEdge) {
 TEST_F(TPGTest, TPGGraphGetEdges) {
 	TPG::TPGGraph tpg;
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
-	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 
 	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 	ASSERT_EQ(tpg.getEdges().size(), 1) << "Edges of the graph have incorrect size after successful add.";
@@ -194,7 +194,7 @@ TEST_F(TPGTest, TPGGraphGetEdges) {
 TEST_F(TPGTest, TPGGraphRemoveEdge) {
 	TPG::TPGGraph tpg;
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
-	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 
 	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
@@ -213,7 +213,7 @@ TEST_F(TPGTest, TPGGraphRemoveEdge) {
 TEST_F(TPGTest, TPGGraphRemoveVertex) {
 	TPG::TPGGraph tpg;
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
-	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 	const TPG::TPGTeam& vertex2 = tpg.addNewTeam();
 
 
@@ -223,7 +223,7 @@ TEST_F(TPGTest, TPGGraphRemoveVertex) {
 	ASSERT_EQ(tpg.getVertices().back(), &vertex2) << "Remaining vertex after removal is not correct.";
 
 	// Try to remove a vertex not from the graph
-	TPG::TPGAction vertex3;
+	TPG::TPGAction vertex3(3);
 	ASSERT_NO_THROW(tpg.removeVertex(vertex3)) << "Removing a vertex from the graph (although it is not inside) throwed an exception.";
 	ASSERT_EQ(tpg.getVertices().size(), 2) << "Number of vertices of the TPG is incorrect after removing a TPGVertex not from the graph.";
 
@@ -249,7 +249,7 @@ TEST_F(TPGTest, TPGGraphRemoveVertex) {
 TEST_F(TPGTest, TPGGraphGetRootVertices) {
 	TPG::TPGGraph tpg;
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
-	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 
 	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 	ASSERT_EQ(tpg.getRootVertices().size(), 1) << "Number of roots of the TPG is incorrect.";
@@ -259,7 +259,7 @@ TEST_F(TPGTest, TPGGraphGetRootVertices) {
 TEST_F(TPGTest, TPGGraphCloneVertex) {
 	TPG::TPGGraph tpg;
 	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
-	const TPG::TPGAction& vertex1 = tpg.addNewAction();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(4);
 
 	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
@@ -282,8 +282,9 @@ TEST_F(TPGTest, TPGGraphCloneVertex) {
 	ASSERT_NO_THROW(tpg.cloneVertex(vertex1));
 	// Check that the type is correct
 	ASSERT_EQ(typeid(vertex1).name(), typeid(*tpg.getVertices().at(3)).name());
+	ASSERT_EQ(vertex1.getActioID(), ((TPG::TPGAction*)tpg.getVertices().at(3))->getActioID());
 
 	// Clone a vertex not from the graph
-	TPG::TPGVertex * vertex2 = new TPG::TPGAction();
+	TPG::TPGVertex * vertex2 = new TPG::TPGAction(1);
 	ASSERT_THROW(tpg.cloneVertex(*vertex2), std::runtime_error) << "Cloning a vertex that does not belong to the TPGGraph should not be possible.";
 }

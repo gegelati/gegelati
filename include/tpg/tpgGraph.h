@@ -38,9 +38,10 @@ namespace TPG {
 		*
 		* The new TPGAction is added to the back of the vertices list.
 		*
+		* \param[in] actioID the identifier to associate to the TPGAction.
 		* \return a const reference to the newly created TPGAction.
 		*/
-		const TPGAction& addNewAction();
+		const TPGAction& addNewAction(uint64_t actionID);
 
 		/**
 		* \brief Get vector of const pointer to the vertices of the TPGGraph.

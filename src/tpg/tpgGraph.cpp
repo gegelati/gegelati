@@ -16,9 +16,9 @@ const TPG::TPGTeam& TPG::TPGGraph::addNewTeam() {
 	return (const TPGTeam&)(*this->vertices.back());
 }
 
-const TPG::TPGAction& TPG::TPGGraph::addNewAction()
+const TPG::TPGAction& TPG::TPGGraph::addNewAction(uint64_t actionID)
 {
-	this->vertices.push_back(new TPG::TPGAction());
+	this->vertices.push_back(new TPG::TPGAction(actionID));
 	return (const TPGAction&)(*this->vertices.back());
 }
 
@@ -78,7 +78,7 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
 		this->addNewTeam();
 	}
 	else if (typeid(vertex) == typeid(TPGAction)) {
-		this->addNewAction();
+		this->addNewAction(((TPGAction&)vertex).getActioID());
 	}
 
 	// Get the new vertex

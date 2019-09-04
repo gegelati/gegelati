@@ -73,7 +73,7 @@ protected:
 		}
 		for (int i = 0; i < 4; i++) {
 			// Each action is linked to a team (and vice-versa)
-			tpg.addNewAction();
+			tpg.addNewAction(i);
 			edges.push_back(&tpg.addNewEdge(*tpg.getVertices().at(i), *tpg.getVertices().back(), progPointers.at(i)));
 		}
 
