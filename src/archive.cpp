@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "archive.h"
 
 Archive::~Archive()
@@ -56,13 +58,31 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 		if (!stillUsed) {
 			// Free memory of DataHandlers within the archive
 			for (std::reference_wrapper<DataHandlers::DataHandler> toErase : this->dataHandlers.at(rec.dataHash)) {
-				delete &toErase.get();
+				delete& toErase.get();
 			}
 
 			// Remove the entry from the map
 			this->dataHandlers.erase(rec.dataHash);
 		}
 	}
+}
+
+bool Archive::isUnique(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result, double tau) const
+{
+	size_t hash = getCombinedHash(dHandler);
+	// If the hash does not exist, the result is unique since no recordings 
+	// correspond to it.
+	if (this->dataHandlers.count(hash) == 0) {
+		return false;
+	}
+
+	// Else, check the recordings with this hash.
+	auto equalityTester = [&hash, &result, &tau](const ArchiveRecording& rec) {
+		return hash == rec.dataHash && fabs(rec.result - result) <= tau;
+	};
+
+	std::deque<ArchiveRecording>::const_iterator position = std::find_if(this->recordings.begin(), this->recordings.end(), equalityTester);
+	return  position == this->recordings.end();
 }
 
 size_t Archive::getNbRecordings() const

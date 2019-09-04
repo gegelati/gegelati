@@ -65,7 +65,7 @@ public:
 	/**
 	* \brief Destructor of the class.
 	*
-	* In addition to default behavior, free all the memory associated to the 
+	* In addition to default behavior, free all the memory associated to the
 	* referenced DataHandler in the dataHandlers attribute.
 	*/
 	~Archive();
@@ -73,7 +73,7 @@ public:
 	/**
 	* \brief Combien the hash of a set of dataHandlers into a single one.
 	*
-	* This method assumes that the cached hash value of all DataHandler is up 
+	* This method assumes that the cached hash value of all DataHandler is up
 	* to date and simply accesses it using the DataHandler::getHash() method.
 	*
 	* \return the hash resulting from the combination.
@@ -98,6 +98,23 @@ public:
 		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
 		double result);
 
+	/**
+	* \brief Check if a recording exists for the given DataHandler and result.
+	*
+	* Check if there exists a recording in the archive that produces the same 
+	* result for the same DataHandler. The result is considered to be equal
+	* if its absolute difference with one stored in the archive is below the 
+	* given tau value.
+	*
+	* \param[in] dHandler the DataHandlers associated to the checked result.
+	* \param[in] result the checked result
+	* \param[in] tau the double value for testing the approximate equality.
+	* \return whether the check was successful or not.
+	*/
+	bool isUnique(
+		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
+		double result,
+		double tau = 0.0) const;
 
 	/**
 	* \brief Get the number of recordings currently held in the Archive.
@@ -107,7 +124,7 @@ public:
 	size_t getNbRecordings() const;
 
 	/**
-	* \brief Get the number of different vector of DataHandler associated to 
+	* \brief Get the number of different vector of DataHandler associated to
 	* recordings.
 	*
 	* \return the size of the dataHandlers attribute.

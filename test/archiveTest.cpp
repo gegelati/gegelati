@@ -100,3 +100,22 @@ TEST_F(ArchiveTest, AddRecordingTests) {
 	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect.";
 	ASSERT_EQ(archive.getNbDataHandlers(), 1) << "Number or dataHandlers copied in the archive is incorrect.";
 }
+
+TEST_F(ArchiveTest, IsUnique) {
+	Archive archive(4);
+	vect.at(0).get().updateHash();
+	vect.at(1).get().updateHash();
+
+	// Add a few fictive recordings
+	archive.addRecording(p, vect, 1.0);
+	archive.addRecording(p, vect, 1.5);
+	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
+	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
+	vect.at(1).get().updateHash();
+	archive.addRecording(p, vect, 2.0);
+	archive.addRecording(p, vect, 2.3);
+
+	ASSERT_FALSE(archive.isUnique(vect, 2.0)) << "Values corresponding to a recording within the Archive is not detected as such.";
+	ASSERT_TRUE(archive.isUnique(vect, 2.5)) << "Values corresponding to a recording not within the Archive is not detected as such.";
+	ASSERT_FALSE(archive.isUnique(vect, 2.5, 0.21)) << "Values corresponding to a recording not in the Archive, but within the error margin tau, is not detected as such.";
+}
