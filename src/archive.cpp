@@ -24,6 +24,12 @@ size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHan
 
 void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result)
 {
+	// Check is an identical recording (same hash, same result) already exists.
+	// Program may be different
+	if (!this->isUnique(dHandler, result)) {
+		return;
+	}
+
 	// get the combined hash
 	size_t hash = getCombinedHash(dHandler);
 
@@ -75,11 +81,10 @@ bool Archive::hasDataHandlers(const std::vector<std::reference_wrapper<DataHandl
 
 bool Archive::isUnique(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result, double tau) const
 {
-
 	// If the hash does not exist, the result is unique since no recordings 
 	// correspond to it.
 	if (!hasDataHandlers(dHandler)) {
-		return false;
+		return true;
 	}
 
 	size_t hash = getCombinedHash(dHandler);

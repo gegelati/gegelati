@@ -88,6 +88,8 @@ public:
 	* If this is the first time this set of DataHandler is stored in the
 	* Archive according to its DataHandler::getHash() method, a copy of the
 	* dataHandler will be created.
+	* If an identical recording is already in the Archive (same hash, same
+	* result, possibly different Program), the recording is not added.
 	*
 	* \param[in] program the Program associated to this recording.
 	* \param[in] dHandler the set of dataHandler the Program worked on to

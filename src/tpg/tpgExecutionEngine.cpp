@@ -15,8 +15,15 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
 	// Create the execution environment
 	Program::ProgramExecutionEngine pee(prog);
 
-	// Execute the program and returns the result.
-	return pee.executeProgram();
+	// Execute the program.
+	double result = pee.executeProgram();
+
+	// Put the result in the archive before returning it.
+	if (this->archive != NULL) {
+		this->archive->addRecording(&prog, prog.getEnvironment().getDataSources(), result);
+	}
+
+	return result;
 }
 
 const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team, const std::vector<const TPGVertex*>& excluded)
@@ -70,7 +77,7 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngine::executeFromRoo
 	// Browse the TPG until a TPGAction is reached.
 	while (typeid(*currentVertex) == typeid(TPG::TPGTeam)) {
 		// Get the next edge
-		const TPGEdge & edge = this->evaluateTeam(*(TPGTeam*)currentVertex, visitedVertices);
+		const TPGEdge& edge = this->evaluateTeam(*(TPGTeam*)currentVertex, visitedVertices);
 		// update currentVertex and backup in visitedVertex.
 		currentVertex = edge.getDestination();
 		visitedVertices.push_back(currentVertex);

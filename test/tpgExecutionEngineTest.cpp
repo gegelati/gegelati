@@ -24,6 +24,7 @@ protected:
 
 	TPG::TPGGraph tpg;
 	std::vector<const TPG::TPGEdge*> edges;
+	Archive a;
 
 	/**
 	* Populate the program instructions so that it returns the given value.
@@ -125,6 +126,13 @@ TEST_F(TPGExecutionEngineTest, EvaluateEdge) {
 	TPG::TPGExecutionEngine tpee(tpg);
 
 	ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION) << "Evaluation of the program of an Edge failed.";
+}
+
+TEST_F(TPGExecutionEngineTest, ArchiveUsage) {
+	TPG::TPGExecutionEngine tpee(tpg, &a);
+
+	ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION) << "Evaluation of the program of an Edge failed when result is archived.";
+	ASSERT_EQ(a.getNbRecordings(), 1) << "No recording was added to the archive.";
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateTeam) {
