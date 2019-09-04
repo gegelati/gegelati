@@ -99,22 +99,32 @@ public:
 		double result);
 
 	/**
+	* \brief Check whether the given set of DataHandler is already in the archive.
+	*
+	* \param[in] dHandler the DataHandlers whose hash presence will be tested.
+	* \return true if the hash of the given dataHandlers is already in the
+	*         Archive, false otherwise.
+	*/
+	bool hasDataHandlers(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler) const;
+
+	/**
 	* \brief Check if a recording exists for the given DataHandler and result.
 	*
-	* Check if there exists a recording in the archive that produces the same 
+	* Check if there exists a recording in the archive that produces the same
 	* result for the same DataHandler. The result is considered to be equal
-	* if its absolute difference with one stored in the archive is below the 
+	* if its absolute difference with one stored in the archive is below the
 	* given tau value.
 	*
 	* \param[in] dHandler the DataHandlers associated to the checked result.
 	* \param[in] result the checked result
 	* \param[in] tau the double value for testing the approximate equality.
+				(default is 10e-4)
 	* \return whether the check was successful or not.
 	*/
 	bool isUnique(
 		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
 		double result,
-		double tau = 0.0) const;
+		double tau = 10e-4) const;
 
 	/**
 	* \brief Get the number of recordings currently held in the Archive.
@@ -130,6 +140,18 @@ public:
 	* \return the size of the dataHandlers attribute.
 	*/
 	size_t getNbDataHandlers() const;
+
+	/**
+	* \brief Const accessor to the dataHandlers attribute.
+	*
+	* In order to test the unicity of a Program value, this Program must be
+	* executed on all DataHandlers contained in an Archive to assess the
+	* uniqueness of the results it produces.
+	*
+	* \return a const reference to the dataHandlers attribute.
+	*/
+	const std::map < size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>>& getDataHandlers() const;
+
 };
 
 #endif

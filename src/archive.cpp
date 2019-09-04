@@ -67,15 +67,22 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 	}
 }
 
-bool Archive::isUnique(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result, double tau) const
+bool Archive::hasDataHandlers(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler) const
 {
 	size_t hash = getCombinedHash(dHandler);
+	return this->dataHandlers.count(hash) != 0;
+}
+
+bool Archive::isUnique(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result, double tau) const
+{
+
 	// If the hash does not exist, the result is unique since no recordings 
 	// correspond to it.
-	if (this->dataHandlers.count(hash) == 0) {
+	if (!hasDataHandlers(dHandler)) {
 		return false;
 	}
 
+	size_t hash = getCombinedHash(dHandler);
 	// Else, check the recordings with this hash.
 	auto equalityTester = [&hash, &result, &tau](const ArchiveRecording& rec) {
 		return hash == rec.dataHash && fabs(rec.result - result) <= tau;
@@ -93,4 +100,9 @@ size_t Archive::getNbRecordings() const
 size_t Archive::getNbDataHandlers() const
 {
 	return this->dataHandlers.size();
+}
+
+const std::map<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>>& Archive::getDataHandlers() const
+{
+	return this->dataHandlers;
 }
