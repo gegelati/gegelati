@@ -55,6 +55,8 @@ TEST_F(MutatorTest, RNG) {
 	// With this seed, the current pseudo-random number generator returns 24 
 	// on its first use
 	ASSERT_EQ(Mutator::RNG::getUnsignedInt64(0, 100), 24) << "Returned pseudo-random value changed with a known seed.";
+
+	ASSERT_EQ(Mutator::RNG::getDouble(0, 1.0), 0.99214520962982877) << "Returned pseudo-random value changed with a known seed.";
 }
 
 TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1) {
@@ -332,4 +334,26 @@ TEST_F(MutatorTest, ProgramMutatorAlterRandomLine) {
 	// Parameter of Line 4 is altered.
 	ASSERT_TRUE(Mutator::ProgramMutator::alterRandomLine(*p));
 	ASSERT_EQ((int16_t)p->getLine(4).getParameter(0), 26809);
+}
+
+TEST_F(MutatorTest, ProgramMutateBehaviorTest) {
+
+	// Add 3 lines
+	p->addNewLine();
+	p->addNewLine();
+	p->addNewLine();
+
+	Mutator::RNG::setSeed(0);
+	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.5, 0.0, 15, 0.0, 0.0)) << "Mutation did not occur with known seed.";
+	ASSERT_EQ(p->getNbLines(), 2) << "Wrong program mutation occured. Expected: Line deletion.";
+
+	Mutator::RNG::setSeed(1);
+	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.0, 0.5, 15, 0.0, 0.0)) << "Mutation did not occur with known seed.";
+	ASSERT_EQ(p->getNbLines(), 3) << "Wrong program mutation occured. Expected: Line insertion.";
+
+	Mutator::RNG::setSeed(86);
+	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.0, 0.0, 15, 0.01, 0.0)) << "Mutation did not occur with known seed.";
+
+	Mutator::RNG::setSeed(1);
+	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.0, 0.0, 15, 0.00, 0.1)) << "Mutation did not occur with known seed.";
 }

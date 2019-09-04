@@ -64,6 +64,29 @@ namespace Mutator {
 		*/
 		bool alterRandomLine(Program::Program& p);
 
+
+		/**
+		* \brief Mutate the behavior of the Program with given probabilities.
+		*
+		* Following the probabilities given as arguments to the function, the
+		* Program may be modified by deleting a random line, adding a new line
+		* at a random position, modifying the line behavior, or swapping 
+		* instructions within the Program.
+		*
+		* Because of the probabilistic nature of this function, it may happen 
+		* that no alteration is peformed. 
+		* 
+		* \param[in,out] p the Program whose line will be altered.
+		* \param[in] pDelete probability of deleting a line of the Program.
+		* \param[in] pAdd probability of inserting a line in the Program
+		* \param[in] maxProgramSize maximum number of lines of the Program.
+		* \param[in] pMutate probability of altering a line of the Program.
+		* \param[in] pSwap probability of swapping two lines of the Program.
+		* \return true if a modification was performed, false otherwise.
+		*/
+		bool mutateProgram(Program::Program& p, double pDelete, double pAdd, size_t maxProgramSize, double pMutate, double pSwap);
+
+
 	};
 };
 
