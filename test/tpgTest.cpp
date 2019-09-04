@@ -130,7 +130,7 @@ TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination) {
 }
 
 TEST_F(TPGTest, TPGGraphAddTPGVertex) {
-	TPG::TPGGraph tpg;
+	TPG::TPGGraph tpg(*e);
 	const TPG::TPGTeam* t;
 	const TPG::TPGAction* a;
 	ASSERT_NO_THROW(t = &tpg.addNewTeam()) << "Adding a new Team to a TPGGraph failed.";
@@ -139,7 +139,7 @@ TEST_F(TPGTest, TPGGraphAddTPGVertex) {
 }
 
 TEST_F(TPGTest, TPGGraphGetVertices) {
-	TPG::TPGGraph tpg;
+	TPG::TPGGraph tpg(*e);
 	const TPG::TPGVertex& vertex = tpg.addNewTeam();
 	const std::vector<const TPG::TPGVertex*> vertices = tpg.getVertices();
 	ASSERT_EQ(vertices.size(), 1) << "Size of the retrievd std::vector<TPGVertex> is incorrect.";
@@ -147,7 +147,7 @@ TEST_F(TPGTest, TPGGraphGetVertices) {
 }
 
 TEST_F(TPGTest, TPGGraphAddEdge) {
-	TPG::TPGGraph tpg;
+	TPG::TPGGraph tpg(*e);
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
 	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 
@@ -161,7 +161,7 @@ TEST_F(TPGTest, TPGGraphAddEdge) {
 }
 
 TEST_F(TPGTest, TPGGraphGetEdges) {
-	TPG::TPGGraph tpg;
+	TPG::TPGGraph tpg(*e);
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
 	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 
@@ -192,7 +192,7 @@ TEST_F(TPGTest, TPGGraphGetEdges) {
 }
 
 TEST_F(TPGTest, TPGGraphRemoveEdge) {
-	TPG::TPGGraph tpg;
+	TPG::TPGGraph tpg(*e);
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
 	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 
@@ -211,7 +211,7 @@ TEST_F(TPGTest, TPGGraphRemoveEdge) {
 }
 
 TEST_F(TPGTest, TPGGraphRemoveVertex) {
-	TPG::TPGGraph tpg;
+	TPG::TPGGraph tpg(*e);
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
 	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 	const TPG::TPGTeam& vertex2 = tpg.addNewTeam();
@@ -247,7 +247,7 @@ TEST_F(TPGTest, TPGGraphRemoveVertex) {
 }
 
 TEST_F(TPGTest, TPGGraphGetRootVertices) {
-	TPG::TPGGraph tpg;
+	TPG::TPGGraph tpg(*e);
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
 	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
 
@@ -257,7 +257,7 @@ TEST_F(TPGTest, TPGGraphGetRootVertices) {
 }
 
 TEST_F(TPGTest, TPGGraphCloneVertex) {
-	TPG::TPGGraph tpg;
+	TPG::TPGGraph tpg(*e);
 	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
 	const TPG::TPGAction& vertex1 = tpg.addNewAction(4);
 
@@ -282,7 +282,7 @@ TEST_F(TPGTest, TPGGraphCloneVertex) {
 	ASSERT_NO_THROW(tpg.cloneVertex(vertex1));
 	// Check that the type is correct
 	ASSERT_EQ(typeid(vertex1).name(), typeid(*tpg.getVertices().at(3)).name());
-	ASSERT_EQ(vertex1.getActioID(), ((TPG::TPGAction*)tpg.getVertices().at(3))->getActioID());
+	ASSERT_EQ(vertex1.getActionID(), ((TPG::TPGAction*)tpg.getVertices().at(3))->getActionID());
 
 	// Clone a vertex not from the graph
 	TPG::TPGVertex * vertex2 = new TPG::TPGAction(1);

@@ -22,7 +22,7 @@ protected:
 	Environment* e = NULL;
 	std::vector<std::shared_ptr<Program::Program>> progPointers;
 
-	TPG::TPGGraph tpg;
+	TPG::TPGGraph * tpg;
 	std::vector<const TPG::TPGEdge*> edges;
 	Archive a;
 
@@ -51,6 +51,7 @@ protected:
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
 		e = new Environment(set, vect, 8);
+		tpg = new TPG::TPGGraph(*e);
 
 		// Create 10 programs
 		for (int i = 0; i < 10; i++) {
@@ -69,24 +70,24 @@ protected:
 		// 
 		// With four action and four teams
 		for (int i = 0; i < 4; i++) {
-			tpg.addNewTeam();
+			tpg->addNewTeam();
 		}
 		for (int i = 0; i < 4; i++) {
 			// Each action is linked to a team (and vice-versa)
-			tpg.addNewAction(i);
-			edges.push_back(&tpg.addNewEdge(*tpg.getVertices().at(i), *tpg.getVertices().back(), progPointers.at(i)));
+			tpg->addNewAction(i);
+			edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(i), *tpg->getVertices().back(), progPointers.at(i)));
 		}
 
 		// Add new Edges between teams
-		edges.push_back(&tpg.addNewEdge(*tpg.getVertices().at(0), *tpg.getVertices().at(1), progPointers.at(4)));
-		edges.push_back(&tpg.addNewEdge(*tpg.getVertices().at(1), *tpg.getVertices().at(2), progPointers.at(5)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(0), *tpg->getVertices().at(1), progPointers.at(4)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(2), progPointers.at(5)));
 
 		// Add a cyclic edge
-		edges.push_back(&tpg.addNewEdge(*tpg.getVertices().at(2), *tpg.getVertices().at(1), progPointers.at(6)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2), *tpg->getVertices().at(1), progPointers.at(6)));
 
 		// Add new outgoing edge to one team
-		edges.push_back(&tpg.addNewEdge(*tpg.getVertices().at(1), *tpg.getVertices().at(4), progPointers.at(7)));
-		edges.push_back(&tpg.addNewEdge(*tpg.getVertices().at(1), *tpg.getVertices().at(6), progPointers.at(8)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(4), progPointers.at(7)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(6), progPointers.at(8)));
 
 		// Put a weight on edges
 		makeProgramReturn(*progPointers.at(0), 0.5); // T0->A0
@@ -100,12 +101,13 @@ protected:
 		makeProgramReturn(*progPointers.at(8), 0.3); // T1->A2
 
 		// Check the characteristics
-		ASSERT_EQ(tpg.getVertices().size(), 8);
-		ASSERT_EQ(tpg.getEdges().size(), 9);
-		ASSERT_EQ(tpg.getRootVertices().size(), 2);
+		ASSERT_EQ(tpg->getVertices().size(), 8);
+		ASSERT_EQ(tpg->getEdges().size(), 9);
+		ASSERT_EQ(tpg->getRootVertices().size(), 2);
 	}
 
 	virtual void TearDown() {
+		delete tpg;
 		delete e;
 		delete (&(vect.at(0).get()));
 		delete (&(vect.at(1).get()));
@@ -117,51 +119,51 @@ protected:
 TEST_F(TPGExecutionEngineTest, ConstructorDestructor) {
 	TPG::TPGExecutionEngine* tpee;
 
-	ASSERT_NO_THROW(tpee = new TPG::TPGExecutionEngine(tpg)) << "Construction of a TPGExecutionEngine failed.";
+	ASSERT_NO_THROW(tpee = new TPG::TPGExecutionEngine(*tpg)) << "Construction of a TPGExecutionEngine failed.";
 
 	ASSERT_NO_THROW(delete tpee) << "Deletion of a TPGExecutionEngine failed.";
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateEdge) {
-	TPG::TPGExecutionEngine tpee(tpg);
+	TPG::TPGExecutionEngine tpee(*tpg);
 
 	ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION) << "Evaluation of the program of an Edge failed.";
 }
 
 TEST_F(TPGExecutionEngineTest, ArchiveUsage) {
-	TPG::TPGExecutionEngine tpee(tpg, &a);
+	TPG::TPGExecutionEngine tpee(*tpg, &a);
 
 	ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION) << "Evaluation of the program of an Edge failed when result is archived.";
 	ASSERT_EQ(a.getNbRecordings(), 1) << "No recording was added to the archive.";
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateTeam) {
-	TPG::TPGExecutionEngine tpee(tpg);
+	TPG::TPGExecutionEngine tpee(*tpg);
 
 	const TPG::TPGEdge* result = NULL;
-	ASSERT_NO_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg.getVertices().at(1)), {});) << "Evaluation of a valid TPGTeam with no exclusion failed.";
+	ASSERT_NO_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg->getVertices().at(1)), {});) << "Evaluation of a valid TPGTeam with no exclusion failed.";
 	// Expected result is edge between T1 -> T2 (with 0.9)
 	ASSERT_EQ(result, edges.at(5)) << "Edge selected during team evaluation is incorrect.";
 
 	// Exclude an edge
-	ASSERT_NO_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg.getVertices().at(1)), { tpg.getVertices().at(2) });) << "Evaluation of a valid TPGTeam with one exclusion failed.";
+	ASSERT_NO_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg->getVertices().at(1)), { tpg->getVertices().at(2) });) << "Evaluation of a valid TPGTeam with one exclusion failed.";
 	// Expected result is edge between T1 -> A0 (with 0.6)
 	ASSERT_EQ(result, edges.at(7)) << "Edge selected during team evaluation is incorrect.";
 
 	// Exclude all edges
-	ASSERT_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg.getVertices().at(0)), { tpg.getVertices().at(1),  tpg.getVertices().at(4) }), std::runtime_error) << "Evaluation of a TPGTeam with all edges excluded did not fail as expected.";
+	ASSERT_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg->getVertices().at(0)), { tpg->getVertices().at(1),  tpg->getVertices().at(4) }), std::runtime_error) << "Evaluation of a TPGTeam with all edges excluded did not fail as expected.";
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateFromRoot) {
-	TPG::TPGExecutionEngine tpee(tpg);
+	TPG::TPGExecutionEngine tpee(*tpg);
 
 	std::vector<const TPG::TPGVertex*> result;
 
-	ASSERT_NO_THROW(result = tpee.executeFromRoot(*tpg.getRootVertices().at(0))) << "Execution of a TPGGraph from a valid root failed.";
+	ASSERT_NO_THROW(result = tpee.executeFromRoot(*tpg->getRootVertices().at(0))) << "Execution of a TPGGraph from a valid root failed.";
 	// Check the traversed path
 	ASSERT_EQ(result.size(), 4) << "Size of the traversed path during the execution of the TPGGraph is not as expected.";
-	ASSERT_EQ(result.at(0), tpg.getVertices().at(0)) << "0th element (i.e. the root) of the traversed path during execution is incorrect.";
-	ASSERT_EQ(result.at(1), tpg.getVertices().at(1)) << "1st element of the traversed path during execution is incorrect.";
-	ASSERT_EQ(result.at(2), tpg.getVertices().at(2)) << "2nd element of the traversed path during execution is incorrect.";
-	ASSERT_EQ(result.at(3), tpg.getVertices().at(6)) << "2nd element of the traversed path during execution is incorrect.";
+	ASSERT_EQ(result.at(0), tpg->getVertices().at(0)) << "0th element (i.e. the root) of the traversed path during execution is incorrect.";
+	ASSERT_EQ(result.at(1), tpg->getVertices().at(1)) << "1st element of the traversed path during execution is incorrect.";
+	ASSERT_EQ(result.at(2), tpg->getVertices().at(2)) << "2nd element of the traversed path during execution is incorrect.";
+	ASSERT_EQ(result.at(3), tpg->getVertices().at(6)) << "2nd element of the traversed path during execution is incorrect.";
 }

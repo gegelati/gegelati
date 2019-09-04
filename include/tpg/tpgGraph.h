@@ -3,6 +3,7 @@
 
 #include <list>
 
+#include "environment.h"
 #include "tpg/tpgVertex.h"
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgAction.h"
@@ -14,6 +15,13 @@ namespace TPG {
 	*/
 	class TPGGraph {
 	public:
+
+		/**
+		* \brief Main TPGGraph constructor.
+		*
+		* \param[in] e the Environment for the TPGGraph.
+		*/
+		TPGGraph(const Environment& e) : env{ e } {};
 
 		/**
 		* \brief Destructor for the TPGGraph.
@@ -118,6 +126,10 @@ namespace TPG {
 		void removeEdge(const TPGEdge& edge);
 
 	protected:
+
+		/// Environment of the TPGGraph
+		const Environment& env;
+
 		/**
 		* \brief Set of TPGVertex composing the TPGGraph.
 		*/

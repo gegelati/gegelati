@@ -78,7 +78,7 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
 		this->addNewTeam();
 	}
 	else if (typeid(vertex) == typeid(TPGAction)) {
-		this->addNewAction(((TPGAction&)vertex).getActioID());
+		this->addNewAction(((TPGAction&)vertex).getActionID());
 	}
 
 	// Get the new vertex
