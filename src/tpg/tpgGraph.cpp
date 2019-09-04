@@ -11,6 +11,11 @@ TPG::TPGGraph::~TPGGraph()
 	}
 }
 
+const Environment& TPG::TPGGraph::getEnvironment() const
+{
+	return this->env;
+}
+
 const TPG::TPGTeam& TPG::TPGGraph::addNewTeam() {
 	this->vertices.push_back(new TPG::TPGTeam());
 	return (const TPGTeam&)(*this->vertices.back());

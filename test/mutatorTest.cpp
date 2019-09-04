@@ -9,9 +9,11 @@
 #include "program/program.h"
 #include "program/line.h"
 #include "program/programExecutionEngine.h"
+#include "tpg/tpgGraph.h"
 #include "mutator/rng.h"
 #include "mutator/lineMutator.h"
 #include "mutator/programMutator.h"
+#include "mutator/tpgMutator.h"
 
 class MutatorTest : public ::testing::Test {
 protected:
@@ -366,4 +368,10 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior) {
 
 	Mutator::RNG::setSeed(1);
 	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.0, 0.0, 15, 0.00, 0.1)) << "Mutation did not occur with known seed.";
+}
+
+TEST_F(MutatorTest, TPGMutatorInitProgram) {
+	TPG::TPGGraph tpg(*e);
+
+	ASSERT_NO_THROW(Mutator::TPGMutator::initRandomTPG(tpg, 5, 4, 96));
 }
