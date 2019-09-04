@@ -336,7 +336,17 @@ TEST_F(MutatorTest, ProgramMutatorAlterRandomLine) {
 	ASSERT_EQ((int16_t)p->getLine(4).getParameter(0), 26809);
 }
 
-TEST_F(MutatorTest, ProgramMutateBehaviorTest) {
+TEST_F(MutatorTest, ProgramMutatorInitProgram) {
+	Mutator::RNG::setSeed(0);
+
+	ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, 96)) << "Empty Program Random init failed";
+	ASSERT_EQ(p->getNbLines(), 31) << "Random number of line is not as expected (with known seed).";
+
+	ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, 96)) << "Non-Empty Program Random init failed";
+	ASSERT_EQ(p->getNbLines(), 53) << "Random number of line is not as expected (with known seed).";
+}
+
+TEST_F(MutatorTest, ProgramMutatorMutateBehavior) {
 
 	// Add 3 lines
 	p->addNewLine();

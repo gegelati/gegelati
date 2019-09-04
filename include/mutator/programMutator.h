@@ -10,6 +10,20 @@ namespace Mutator {
 	* Namespace containing all functions to apply randomness to a Program::Program
 	*/
 	namespace ProgramMutator {
+
+		/**
+		* \brief (Re)Initialize a program randomly.
+		*
+		* Initialise a Program with a random number or Line, below the given
+		* limit. If the Program already contains lines, they will be entirely
+		* deleted by this function.
+		*
+		* \param[in,out] p the Program to initialize.
+		* \param[in] maxProgSize the maximum number of Line after
+		*            initialization.
+		*/
+		void initRandomProgram(Program::Program& p, size_t maxProgSize);
+
 		/**
 		* \brief Deletes a randomly selected Line of the given Program.
 		*
@@ -21,7 +35,7 @@ namespace Mutator {
 		* \return true if a line could be added, false otherwise.
 		*
 		*/
-		bool deleteRandomLine(Program::Program & p);
+		bool deleteRandomLine(Program::Program& p);
 
 		/**
 		* \brief Insert a new Line at a randomly selected position within the given Program.
@@ -37,7 +51,7 @@ namespace Mutator {
 		void insertRandomLine(Program::Program& p);
 
 		/**
-		* \brief Swap two randomly selected instructions within the given 
+		* \brief Swap two randomly selected instructions within the given
 		* Program.
 		*
 		* This function selects two lines of the program randomly and swaps
@@ -45,7 +59,7 @@ namespace Mutator {
 		* Random selection is based on the Mutator::RNG.
 		*
 		* \param[in,out] p the Program whose lines will be swapped.
-		* \return true if the lines where successfully swapped, false if the 
+		* \return true if the lines where successfully swapped, false if the
 		*         Program has less than two lines.
 		*/
 		bool swapRandomLines(Program::Program& p);
@@ -53,13 +67,13 @@ namespace Mutator {
 		/**
 		* \brief Alter a randomly selected Line in a given Program.
 		*
-		* If the given Program has more than 0 Line, this function selects a 
-		* Line (pseudo)-randomly in a given Program and calls the 
+		* If the given Program has more than 0 Line, this function selects a
+		* Line (pseudo)-randomly in a given Program and calls the
 		* Mutator::LineMutator:AlterCorrectLine function on it.
 		* Random selection is based on the Mutator::RNG.
 		*
 		* \param[in,out] p the Program whose line will be altered.
-		* \return true if a line was successfully altered, false if the 
+		* \return true if a line was successfully altered, false if the
 		*         Program has less than one line.
 		*/
 		bool alterRandomLine(Program::Program& p);
@@ -70,12 +84,12 @@ namespace Mutator {
 		*
 		* Following the probabilities given as arguments to the function, the
 		* Program may be modified by deleting a random line, adding a new line
-		* at a random position, modifying the line behavior, or swapping 
+		* at a random position, modifying the line behavior, or swapping
 		* instructions within the Program.
 		*
-		* Because of the probabilistic nature of this function, it may happen 
-		* that no alteration is peformed. 
-		* 
+		* Because of the probabilistic nature of this function, it may happen
+		* that no alteration is peformed.
+		*
 		* \param[in,out] p the Program whose line will be altered.
 		* \param[in] pDelete probability of deleting a line of the Program.
 		* \param[in] pAdd probability of inserting a line in the Program

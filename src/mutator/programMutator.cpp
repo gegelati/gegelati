@@ -1,6 +1,21 @@
 #include "mutator/rng.h"
 #include "mutator/programMutator.h"
 
+void Mutator::ProgramMutator::initRandomProgram(Program::Program& p, size_t maxProgSize)
+{
+	// Empty the program
+	while (p.getNbLines() > 0) {
+		p.removeLine(0);
+	}
+
+	// Select the number of line randomly
+	const uint64_t nbLine = Mutator::RNG::getUnsignedInt64(1, maxProgSize);
+	// Insert them
+	while (p.getNbLines() < nbLine) {
+		insertRandomLine(p);
+	}
+}
+
 bool Mutator::ProgramMutator::deleteRandomLine(Program::Program& p)
 {
 	// Line cannot be removed from a program with a single line.
