@@ -17,6 +17,7 @@ protected:
 	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
+	Program::Program* p;
 
 	virtual void SetUp() {
 		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
@@ -26,9 +27,11 @@ protected:
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
 
 		e = new Environment(set, vect, 8);
+		p = new Program::Program(*e);
 	}
 
 	virtual void TearDown() {
+		delete p;
 		delete e;
 		delete (&(vect.at(0).get()));
 		delete (&(vect.at(1).get()));
@@ -60,4 +63,40 @@ TEST_F(ArchiveTest, CombineHash) {
 	vect.at(1).get().updateHash();
 	// Compare hashes.
 	ASSERT_NE(Archive::getCombinedHash(vect), hash);
+}
+
+TEST_F(ArchiveTest, AddRecordingTests) {
+	Archive archive(3);
+	vect.at(0).get().updateHash();
+	vect.at(1).get().updateHash();
+
+	// Add a fictive recording
+	ASSERT_NO_THROW(archive.addRecording(p, vect, 1.3)) << "Adding a recording to the empty archive failed.";
+
+	ASSERT_EQ(archive.getNbRecordings(), 1) << "Number or recordings in the archive is incorrect.";
+	ASSERT_EQ(archive.getNbDataHandlers(), 1) << "Number or dataHandlers copied in the archive is incorrect.";
+
+	// Add other recordings with the same DataHandlers
+	ASSERT_NO_THROW(archive.addRecording(p, vect, 0.3)) << "Adding a recording to the non-empty archive failed.";
+	ASSERT_EQ(archive.getNbRecordings(), 2) << "Number or recordings in the archive is incorrect.";
+	ASSERT_EQ(archive.getNbDataHandlers(), 1) << "Number or dataHandlers copied in the archive is incorrect.";
+
+	// Add another recording with a new environment
+	// change data in one dataHandler
+	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
+	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
+	vect.at(1).get().updateHash();
+	ASSERT_NO_THROW(archive.addRecording(p, vect, 0.2)) << "Adding a recording to the non-empty archive failed.";
+	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect.";
+	ASSERT_EQ(archive.getNbDataHandlers(), 2) << "Number or dataHandlers copied in the archive is incorrect.";
+
+	// Reach the archive size limit.
+	ASSERT_NO_THROW(archive.addRecording(p, vect, 0.5)) << "Adding a recording to the full archive failed.";
+	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect.";
+	ASSERT_EQ(archive.getNbDataHandlers(), 2) << "Number or dataHandlers copied in the archive is incorrect.";
+
+	// Evict a recording again, and its DataHandler copy.
+	ASSERT_NO_THROW(archive.addRecording(p, vect, 1.5)) << "Adding a recording to the full archive failed.";
+	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect.";
+	ASSERT_EQ(archive.getNbDataHandlers(), 1) << "Number or dataHandlers copied in the archive is incorrect.";
 }

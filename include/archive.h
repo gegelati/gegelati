@@ -49,7 +49,7 @@ protected:
 	* recordings to associate each recording to the right copy of the
 	* DataHandler.
 	*/
-	std::map<size_t, std::vector<DataHandlers::DataHandler>> dataHandlers;
+	std::map<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>> dataHandlers;
 
 	/// Recordings of the Archive
 	std::deque<ArchiveRecording> recordings;
@@ -61,6 +61,14 @@ public:
 	* \param[in] size maximum number of recordings kept in the Archive.
 	*/
 	Archive(size_t size = 50) : maxSize{ size }, recordings() {};
+
+	/**
+	* \brief Destructor of the class.
+	*
+	* In addition to default behavior, free all the memory associated to the 
+	* referenced DataHandler in the dataHandlers attribute.
+	*/
+	~Archive();
 
 	/**
 	* \brief Combien the hash of a set of dataHandlers into a single one.
@@ -89,6 +97,22 @@ public:
 	void addRecording(const Program::Program* const program,
 		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
 		double result);
+
+
+	/**
+	* \brief Get the number of recordings currently held in the Archive.
+	*
+	* \return the size of the recordings attribute.
+	*/
+	size_t getNbRecordings() const;
+
+	/**
+	* \brief Get the number of different vector of DataHandler associated to 
+	* recordings.
+	*
+	* \return the size of the dataHandlers attribute.
+	*/
+	size_t getNbDataHandlers() const;
 };
 
 #endif

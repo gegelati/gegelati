@@ -1,5 +1,16 @@
 #include "archive.h"
 
+Archive::~Archive()
+{
+	for (auto dHandlerAndHash : this->dataHandlers) {
+		for (auto dHandler : dHandlerAndHash.second) {
+			// Free memory of DataHandlers within the archive
+			delete& dHandler.get();
+		}
+	}
+
+}
+
 size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers)
 {
 	size_t hash = 0;
@@ -11,6 +22,55 @@ size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHan
 
 void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result)
 {
-	size_t hash = 0;
+	// get the combined hash
+	size_t hash = getCombinedHash(dHandler);
+
+	// Check if dataHandler copy is needed.
+	if (this->dataHandlers.find(hash) == this->dataHandlers.end()) {
+		// Store a copy of data handlers.
+		std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dHandlersCpy;
+		for (std::reference_wrapper<DataHandlers::DataHandler> dh : dHandler) {
+			DataHandlers::DataHandler* dhCopy = dh.get().clone();
+			dHandlersCpy.push_back(*dhCopy);
+		}
+		// Create the map entry
+		this->dataHandlers.emplace(hash, std::move(dHandlersCpy));
+	}
+
+	// Create and stores the recording
 	this->recordings.push_back({ program, hash, result });
+
+	// Check if Archive max size was reached (or exceeded)
+	while (this->recordings.size() > this->maxSize) {
+
+		// Get the recording (copy)
+		ArchiveRecording rec = this->recordings.front();
+		// Remove the first recording
+		this->recordings.pop_front();
+
+		// Check if this DataHandler (hash) is still used in other recordings
+		bool stillUsed = (std::find_if(this->recordings.begin(), this->recordings.end(),
+			[&rec](ArchiveRecording r) {return r.dataHash == rec.dataHash; })) != this->recordings.end();
+
+		// if not, remove it from the Archive also
+		if (!stillUsed) {
+			// Free memory of DataHandlers within the archive
+			for (std::reference_wrapper<DataHandlers::DataHandler> toErase : this->dataHandlers.at(rec.dataHash)) {
+				delete &toErase.get();
+			}
+
+			// Remove the entry from the map
+			this->dataHandlers.erase(rec.dataHash);
+		}
+	}
+}
+
+size_t Archive::getNbRecordings() const
+{
+	return this->recordings.size();
+}
+
+size_t Archive::getNbDataHandlers() const
+{
+	return this->dataHandlers.size();
 }
