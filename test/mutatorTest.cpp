@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <set>
+#include <algorithm>
+
 #include "environment.h"
 #include "instructions/instruction.h"
 #include "instructions/addPrimitiveType.h"
@@ -373,5 +376,39 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior) {
 TEST_F(MutatorTest, TPGMutatorInitProgram) {
 	TPG::TPGGraph tpg(*e);
 
-	ASSERT_NO_THROW(Mutator::TPGMutator::initRandomTPG(tpg, 5, 4, 96));
+	size_t nbActions = 5;
+	size_t maxNbOutEdge = 4;
+
+	ASSERT_NO_THROW(Mutator::TPGMutator::initRandomTPG(tpg, nbActions, maxNbOutEdge, 96)) << "TPG Initialization failed.";
+	auto vertexSet = tpg.getVertices();
+	// Check number or vertex, roots, actions, teams, edges
+	ASSERT_EQ(vertexSet.size(), 2 * nbActions) << "Number of vertices after initialization is incorrect.";
+	ASSERT_EQ(tpg.getRootVertices().size(), nbActions) << "Number of root vertices after initialization is incorrect.";
+	ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
+		[](const TPG::TPGVertex* vert) {
+			return typeid(*vert) == typeid(TPG::TPGAction);
+		}), nbActions) << "Number of action vertex in the graph is incorrect.";
+	ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
+		[](const TPG::TPGVertex* vert) {
+			return typeid(*vert) == typeid(TPG::TPGTeam);
+		}), nbActions) << "Number of team vertex in the graph is incorrect.";
+	ASSERT_GE(tpg.getEdges().size(), 2 * nbActions) << "Insufficient number of edges in the initialized TPG.";
+	ASSERT_LE(tpg.getEdges().size(), nbActions * maxNbOutEdge) << "Too many edges in the initialized TPG.";
+
+	// Check number of Programs.
+	std::set<Program::Program*> programs;
+	std::for_each(tpg.getEdges().begin(), tpg.getEdges().end(),
+		[&programs](const TPG::TPGEdge& edge) {
+			programs.insert(&edge.getProgram());
+		});
+	ASSERT_EQ(programs.size(), nbActions * 2) << "Number of distinct program in the TPG is incorrect.";
+	// Check that no team has the same program twice
+	for (auto team : tpg.getRootVertices()) {
+		std::set<Program::Program*> teamPrograms;
+		std::for_each(team->getOutgoingEdges().begin(), team->getOutgoingEdges().end(),
+			[&teamPrograms](const TPG::TPGEdge* edge) {
+				teamPrograms.insert(&edge->getProgram());
+			});
+		ASSERT_EQ(teamPrograms.size(), team->getOutgoingEdges().size()) << "A team is connected to the same program twice.";
+	}
 }

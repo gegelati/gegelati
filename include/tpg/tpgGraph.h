@@ -62,7 +62,8 @@ namespace TPG {
 		* \brief Get vector of const pointer to the vertices of the TPGGraph.
 		*
 		* Content of the retrieved vector is valid only as long as no non-const
-		* method is called on the TPG.
+		* method is called on the TPG. The returned vector is a copy of the 
+		* current set of vertices.
 		*
 		* \return a vector containing pointers to the vertices of the graph.
 		*/
@@ -72,7 +73,8 @@ namespace TPG {
 		* \brief Get vector of const pointer to the root vertices of the TPGGraph.
 		*
 		* Content of the retrieved vector is valid only as long as no non-const
-		* method is called on the TPG.
+		* method is called on the TPG. The returned vector is a copy of the 
+		* current set of vertices.
 		*
 		* \return a vector containing pointers to the root vertices of the
 		* graph.
