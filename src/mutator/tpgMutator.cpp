@@ -20,6 +20,9 @@ void Mutator::TPGMutator::initRandomTPG(TPG::TPGGraph& graph, size_t nbAction, s
 	if (nbAction < 2) {
 		throw std::runtime_error("A TPG with a single action makes no sense.");
 	}
+	// Empty graph
+	graph.clear();
+
 	// Create teams, programs and Actions
 	std::vector<const TPG::TPGAction*> actions;
 	std::vector<const TPG::TPGTeam*> teams;

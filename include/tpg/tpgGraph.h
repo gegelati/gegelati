@@ -31,6 +31,11 @@ namespace TPG {
 		~TPGGraph();
 
 		/**
+		* \brief Empty the TPGGraph of all its content.
+		*/
+		void clear();
+
+		/**
 		* \brief Accessor to the Environment of the TPGGraph.
 		*
 		* \return the const reference to the env attribute.

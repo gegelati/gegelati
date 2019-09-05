@@ -6,8 +6,18 @@
 
 TPG::TPGGraph::~TPGGraph()
 {
+	// Just delete the vertices.
+	// Edges will be deleted during their container destruction.
 	for (TPG::TPGVertex* vertex : this->vertices) {
 		delete vertex;
+	}
+}
+
+void TPG::TPGGraph::clear()
+{
+	// Remove all vertices
+	while (this->vertices.size() > 0) {
+		this->removeVertex(*this->vertices.front());
 	}
 }
 
