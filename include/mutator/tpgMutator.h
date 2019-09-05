@@ -20,8 +20,19 @@ namespace Mutator {
 		*   - Each Program is used at most once per TPGTeam.
 		*   - Each Program always leads to the same TPGAction.
 		*   - Each Program is approximately used the same number of time.
-		* Hence, the maxInitOutgoingEdges value can not be greater than nbAction.
+		* Hence, the maxInitOutgoingEdges value can not be greater than 
+		* nbAction.
 		*
+		* If the TPGGraph is not empty, all its vertices (and hence all its 
+		* edges) are removed before initialization.
+		*
+		* \param[in,out] graph the initialized TPGGraph.
+		* \param[in] nbAction the number of TPGAction vertex of the 
+		*            initialized TPGGraph.
+		* \param[in] maxInitOutgoingEdges maximum number of TPGEdge connected 
+		*            to each TPGTeam of the TPGGraph.
+		* \param[in] maxProgramSize maximum number of Line within the Program 
+		*            of the TPGGraph.
 		* \throw std::runtime_error if maxInitOutgoingEdges exceeds nbAction.
 		*        Or if nbAction is smaller than 1.
 		*/
