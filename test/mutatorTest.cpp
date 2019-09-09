@@ -375,25 +375,27 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior) {
 
 TEST_F(MutatorTest, TPGMutatorInitProgram) {
 	TPG::TPGGraph tpg(*e);
+	Mutator::MutationParameters params;
 
-	size_t nbActions = 5;
-	size_t maxNbOutEdge = 4;
+	params.tpg.nbActions = 5;
+	params.tpg.maxInitOutgoingEdges = 4;
+	params.prog.maxProgramSize = 96;
 
-	ASSERT_NO_THROW(Mutator::TPGMutator::initRandomTPG(tpg, nbActions, maxNbOutEdge, 96)) << "TPG Initialization failed.";
+	ASSERT_NO_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params)) << "TPG Initialization failed.";
 	auto vertexSet = tpg.getVertices();
 	// Check number or vertex, roots, actions, teams, edges
-	ASSERT_EQ(vertexSet.size(), 2 * nbActions) << "Number of vertices after initialization is incorrect.";
-	ASSERT_EQ(tpg.getRootVertices().size(), nbActions) << "Number of root vertices after initialization is incorrect.";
+	ASSERT_EQ(vertexSet.size(), 2 * params.tpg.nbActions) << "Number of vertices after initialization is incorrect.";
+	ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbActions) << "Number of root vertices after initialization is incorrect.";
 	ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
 		[](const TPG::TPGVertex* vert) {
 			return typeid(*vert) == typeid(TPG::TPGAction);
-		}), nbActions) << "Number of action vertex in the graph is incorrect.";
+		}), params.tpg.nbActions) << "Number of action vertex in the graph is incorrect.";
 	ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
 		[](const TPG::TPGVertex* vert) {
 			return typeid(*vert) == typeid(TPG::TPGTeam);
-		}), nbActions) << "Number of team vertex in the graph is incorrect.";
-	ASSERT_GE(tpg.getEdges().size(), 2 * nbActions) << "Insufficient number of edges in the initialized TPG.";
-	ASSERT_LE(tpg.getEdges().size(), nbActions * maxNbOutEdge) << "Too many edges in the initialized TPG.";
+		}), params.tpg.nbActions) << "Number of team vertex in the graph is incorrect.";
+	ASSERT_GE(tpg.getEdges().size(), 2 * params.tpg.nbActions) << "Insufficient number of edges in the initialized TPG.";
+	ASSERT_LE(tpg.getEdges().size(), params.tpg.nbActions * params.tpg.maxInitOutgoingEdges) << "Too many edges in the initialized TPG.";
 
 	// Check number of Programs.
 	std::set<Program::Program*> programs;
@@ -401,7 +403,7 @@ TEST_F(MutatorTest, TPGMutatorInitProgram) {
 		[&programs](const TPG::TPGEdge& edge) {
 			programs.insert(&edge.getProgram());
 		});
-	ASSERT_EQ(programs.size(), nbActions * 2) << "Number of distinct program in the TPG is incorrect.";
+	ASSERT_EQ(programs.size(), params.tpg.nbActions * 2) << "Number of distinct program in the TPG is incorrect.";
 	// Check that no team has the same program twice
 	for (auto team : tpg.getRootVertices()) {
 		std::set<Program::Program*> teamPrograms;
