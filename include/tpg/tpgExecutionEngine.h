@@ -18,11 +18,6 @@ namespace TPG {
 	class TPGExecutionEngine {
 	protected:
 		/**
-		* \brief TPGGraph executed by the Execution Engine.
-		*/
-		const TPGGraph& graph;
-
-		/**
 		*  \brief Archive for recording Program results.
 		*/
 		Archive* archive;
@@ -33,7 +28,7 @@ namespace TPG {
 		*
 		* \param[in] tpgGraph a const reference to the TPGGraph to execute.
 		*/
-		TPGExecutionEngine(const TPGGraph& tpgGraph, Archive * arch = NULL) : graph{ tpgGraph }, archive{ arch } {};
+		TPGExecutionEngine(Archive * arch = NULL) : archive{ arch } {};
 
 		/**
 		* \brief Execute the Program associated to an Edge and returns the
