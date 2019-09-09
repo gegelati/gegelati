@@ -28,6 +28,7 @@ protected:
 	Instructions::Set set;
 	Environment* e;
 	Program::Program* p;
+	std::shared_ptr<Program::Program> progPointer;
 
 	MutatorTest() : e{ nullptr }, p{ nullptr }{};
 
@@ -42,6 +43,7 @@ protected:
 
 		e = new Environment(set, vect, 8);
 		p = new Program::Program(*e);
+		progPointer = std::shared_ptr<Program::Program>(new Program::Program(*e));
 	}
 
 	virtual void TearDown() {
@@ -413,4 +415,46 @@ TEST_F(MutatorTest, TPGMutatorInitProgram) {
 			});
 		ASSERT_EQ(teamPrograms.size(), team->getOutgoingEdges().size()) << "A team is connected to the same program twice.";
 	}
+}
+
+
+TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge) {
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+	const TPG::TPGTeam& vertex2 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex3 = tpg.addNewAction(1);
+	const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+	const TPG::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex2, progPointer);
+	const TPG::TPGEdge& edge2 = tpg.addNewEdge(vertex0, vertex3, progPointer);
+
+	Mutator::RNG::setSeed(0);
+	ASSERT_NO_THROW(Mutator::TPGMutator::removeRandomEdge(tpg, vertex0)) << "Removing a random edge failed unexpectedly.";
+	// Check properties of the tpg
+	ASSERT_EQ(tpg.getEdges().size(), 2) << "No edge was removed from the TPG.";
+	// With known seed edge 0 was removed
+	std::cout << std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+		[&edge0](const TPG::TPGEdge& other) {return &edge0 == &other; }) << "-"
+		<< std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+			[&edge1](const TPG::TPGEdge& other) {return &edge1 == &other; }) << "-"
+		<< std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+			[&edge2](const TPG::TPGEdge& other) {return &edge2 == &other; });
+
+	ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+		[&edge0](const TPG::TPGEdge& other) {return &edge0 == &other; }), 0) << "With a known seed, edge0 should be removed from the TPG.";
+	ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+		[&edge1](const TPG::TPGEdge& other) {return &edge1 == &other; }), 1) << "With a known seed, edge1 should not be removed from the TPG.";
+	ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+		[&edge2](const TPG::TPGEdge& other) {return &edge2 == &other; }), 1) << "With a known seed, edge2 should not be removed from the TPG.";
+
+	// Remove again to cover the "1 action remaining" code.
+	ASSERT_NO_THROW(Mutator::TPGMutator::removeRandomEdge(tpg, vertex0)) << "Removing a random edge failed unexpectedly.";
+	// Check properties of the tpg
+	ASSERT_EQ(tpg.getEdges().size(), 1) << "No edge was removed from the TPG.";
+	// Edge 1 was removed
+	ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+		[&edge1](const TPG::TPGEdge& other) {return &edge1 == &other; }), 0) << "With a known seed, edge1 should be removed from the TPG.";
+	ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+		[&edge2](const TPG::TPGEdge& other) {return &edge2 == &other; }), 1) << "With a known seed, edge2 should not be removed from the TPG.";
+}
 }

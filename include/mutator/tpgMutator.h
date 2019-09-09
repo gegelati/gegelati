@@ -33,6 +33,19 @@ namespace Mutator {
 		*        Or if nbAction is smaller than 1.
 		*/
 		void initRandomTPG(TPG::TPGGraph& graph, const MutationParameters& params);
+
+		/**
+		* \brief Select a random outgoingEdge of the given TPGTeam and removes
+		* it from the TPGGraph.
+		*
+		* If there is a unique TPGAction among the destination of the available
+		* outgoing TPGEdge of the TPGTeam, this edge will be avoided during the
+		* random selection of the TPGEdge to remove.
+		*
+		*`\param[in] graph the TPGGraph within which the team is stored.
+		* \param[in] team the TPGTeam whose outgoingEdges will be altered.
+		*/
+		void removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team);
 	};
 };
 

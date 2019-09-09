@@ -95,3 +95,31 @@ void Mutator::TPGMutator::initRandomTPG(TPG::TPGGraph& graph, const Mutator::Mut
 		}
 	}
 }
+
+void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team) {
+	// Pick an outgoing edge randomly, 
+	// Copy the set 
+	std::list<TPG::TPGEdge*> pickableEdges = team.getOutgoingEdges();
+	auto isTPGAction = [](const TPG::TPGEdge* edge)->bool {
+		return typeid(*edge->getDestination()) == typeid(TPG::TPGAction);
+	};
+
+	// if there is a unique TPGAction among the edges, exclude it from the pickable edges
+	if (std::count_if(pickableEdges.begin(), pickableEdges.end(), isTPGAction) == 1) {
+		for (auto iter = pickableEdges.begin(); iter != pickableEdges.end();) {
+			if (isTPGAction(*iter)) {
+				iter = pickableEdges.erase(iter);
+			}
+			else {
+				iter++;
+			}
+		}
+	}
+
+	// Pick a random edge
+	auto iterSet = pickableEdges.begin();
+	std::advance(iterSet, Mutator::RNG::getUnsignedInt64(0, pickableEdges.size() - 1));
+	const TPG::TPGEdge* removedEdge = *iterSet;
+	graph.removeEdge(*removedEdge);
+}
+
