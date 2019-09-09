@@ -3,6 +3,11 @@
 
 size_t DataHandlers::DataHandler::count = 0;
 
+size_t DataHandlers::DataHandler::getId() const
+{
+	return this->id;
+}
+
 size_t DataHandlers::DataHandler::getHash() const
 {
 	return this->cachedHash;

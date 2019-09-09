@@ -73,6 +73,17 @@ namespace DataHandlers {
 		virtual DataHandler* clone() const = 0;
 
 		/**
+		* \brief Get the ID of the DataHandler.
+		* 
+		* Two DataHandler should have the same ID only if the are copy
+		* from each other, possibly holding different data. 
+		* This property will be used to simplify check that two different
+		* DataHandler have the exact same characteristics (handled types,
+		* addressSpace, ..)
+		*/
+		size_t getId() const;
+
+		/**
 		* \brief Get the current value of the hash for this DataHandler.
 		*
 		* It is important to note that the returned value is a cached value

@@ -10,6 +10,13 @@ TEST(DataHandlersTest, Constructor) {
 		}) << "Call to PrimitiveTypeArray constructor failed.";
 }
 
+TEST(DataHandlersTest, ID) {
+	DataHandlers::PrimitiveTypeArray<double> d0;
+	DataHandlers::PrimitiveTypeArray<int> d1;
+
+	ASSERT_NE(d0.getId(), d1.getId()) << "Id of two DataHandlers created one after the other should not be equal.";
+}
+
 TEST(DataHandlersTest, PrimitiveDataArrayCanProvide) {
 	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<double>();
 
@@ -114,6 +121,8 @@ TEST(DataHandlersTest, PrimitiveDataArrayClone) {
 	// Create a clone
 	DataHandlers::DataHandler* dClone = NULL;
 	ASSERT_NO_THROW(dClone = d.clone();) << "Cloning a PrimitiTypeArray<double> failed.";
+	// Check ID
+	ASSERT_EQ(dClone->getId(), d.getId()) << "Cloned and original dataHandler do not have the same ID as expected.";
 	// Check the polymorphic type.
 	ASSERT_EQ(typeid(*dClone), typeid(DataHandlers::PrimitiveTypeArray<double>)) << "Type of clone DataHandler differes from the original one.";
 	// Compute the hashes
