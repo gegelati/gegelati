@@ -299,3 +299,87 @@ TEST_F(TPGTest, TPGGraphCloneVertex) {
 	TPG::TPGVertex* vertex2 = new TPG::TPGAction(1);
 	ASSERT_THROW(tpg.cloneVertex(*vertex2), std::runtime_error) << "Cloning a vertex that does not belong to the TPGGraph should not be possible.";
 }
+
+TEST_F(TPGTest, TPGGraphCloneEdge) {
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(4);
+	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+
+	const TPG::TPGEdge* clone = NULL;
+	ASSERT_NO_THROW(clone = &tpg.cloneEdge(edge)) << "Cloning an existing edge failed.";
+	// Check that the new edge is correctly added to the graph
+	ASSERT_EQ(tpg.getEdges().size(), 2) << "Incorrect number of edges in the graph after clone.";
+	// Check the program use 
+	ASSERT_EQ(progPointer.use_count(), 3) << "Program pointer was not correctly registered to the edge clone.";
+	// Check the edge source and destination
+	ASSERT_EQ(clone->getSource(), &vertex0) << "Clone edge has an incorrect source.";
+	ASSERT_EQ(clone->getDestination(), &vertex1) << "Clone edge has an incorrect destination.";
+	// Check that the edge was correctly registered 
+	ASSERT_EQ(std::count_if(vertex0.getOutgoingEdges().begin(), vertex0.getOutgoingEdges().end(),
+		[&clone](const TPG::TPGEdge* other) {return other == clone; }), 1) << "Clone edge is not registered within its source vertex outgoing edges.";
+	ASSERT_EQ(std::count_if(vertex1.getIncomingEdges().begin(), vertex1.getIncomingEdges().end(),
+		[&clone](const TPG::TPGEdge* other) {return other == clone; }), 1) << "Clone edge is not registered within its destination vertex incoming edges.";
+
+	// Check throw behavior
+	TPG::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
+	ASSERT_THROW(tpg.cloneEdge(newEdge), std::runtime_error) << "Cloning an edge not from the graph should not succeed.";
+}
+
+TEST_F(TPGTest, TPGGraphSetEdgeDestination) {
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(4);
+	const TPG::TPGAction& vertex2 = tpg.addNewAction(4);
+	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+
+	// Change the destination of the edge
+	ASSERT_TRUE(tpg.setEdgeDestination(edge, vertex2)) << "Changing the destination of an Edge to a valid new destination should not fail.";
+	// Check the graph size
+	ASSERT_EQ(tpg.getEdges().size(), 1) << "Incorrect number of edges in the graph after edge setDestination.";
+	// Check the program use 
+	ASSERT_EQ(progPointer.use_count(), 2) << "Program pointer use should not be affected by edge destination change.";
+	// Check the edge source and destination
+	ASSERT_EQ(edge.getSource(), &vertex0) << "Updated edge has an incorrect source.";
+	ASSERT_EQ(edge.getDestination(), &vertex2) << "Updated edge has an incorrect destination.";
+	// Check that the edge was correctly registered 
+	ASSERT_EQ(std::count_if(vertex0.getOutgoingEdges().begin(), vertex0.getOutgoingEdges().end(),
+		[&edge](const TPG::TPGEdge* other) {return other == &edge; }), 1) << "Updated edge is no longer registered within its source vertex outgoing edges.";
+	ASSERT_EQ(std::count_if(vertex2.getIncomingEdges().begin(), vertex2.getIncomingEdges().end(),
+		[&edge](const TPG::TPGEdge* other) {return other == &edge; }), 1) << "Updated edge is not registered within its new destination vertex incoming edges.";
+	// Check that the edge was unregistered
+	ASSERT_EQ(vertex1.getIncomingEdges().size(), 0) << "This vertex should not have incomingEdge after destination change.";
+
+	// Check failure 
+	TPG::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
+	ASSERT_FALSE(tpg.setEdgeDestination(newEdge, vertex2)) << "Changing destination of an edge not within the graph should not succeed.";
+}
+
+TEST_F(TPGTest, TPGGraphSetEdgeSource) {
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(4);
+	const TPG::TPGTeam& vertex2 = tpg.addNewTeam();
+	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+
+	// Change the destination of the edge
+	ASSERT_TRUE(tpg.setEdgeSource(edge, vertex2)) << "Changing the destination of an Edge to a valid new destination should not fail.";
+	// Check the graph size
+	ASSERT_EQ(tpg.getEdges().size(), 1) << "Incorrect number of edges in the graph after edge setDestination.";
+	// Check the program use 
+	ASSERT_EQ(progPointer.use_count(), 2) << "Program pointer use should not be affected by edge source change.";
+	// Check the edge source and destination
+	ASSERT_EQ(edge.getSource(), &vertex2) << "Updated edge has an incorrect source.";
+	ASSERT_EQ(edge.getDestination(), &vertex1) << "Updated edge has an incorrect destination.";
+	// Check that the edge was correctly registered 
+	ASSERT_EQ(std::count_if(vertex2.getOutgoingEdges().begin(), vertex2.getOutgoingEdges().end(),
+		[&edge](const TPG::TPGEdge* other) {return other == &edge; }), 1) << "Updated edge is no longer registered within its new source vertex outgoing edges.";
+	ASSERT_EQ(std::count_if(vertex1.getIncomingEdges().begin(), vertex1.getIncomingEdges().end(),
+		[&edge](const TPG::TPGEdge* other) {return other == &edge; }), 1) << "Updated edge is not registered within its destination vertex incoming edges.";
+	// Check that the edge was unregistered
+	ASSERT_EQ(vertex0.getOutgoingEdges().size(), 0) << "This vertex should not have incomingEdge after source change.";
+
+	// Check failure 
+	TPG::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
+	ASSERT_FALSE(tpg.setEdgeSource(newEdge, vertex2)) << "Changing source of an edge not within the graph should not succeed.";
+}

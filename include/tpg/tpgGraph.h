@@ -139,6 +139,46 @@ namespace TPG {
 		*/
 		void removeEdge(const TPGEdge& edge);
 
+		/**
+		* Duplicate a TPGEdge from the TPGGraph.
+		*
+		* This method creates a perfecte copy of the given TPGEdge, that is
+		* a TPGEdge with the same source, destination and program shared 
+		* pointer.
+		*
+		* \param[in] edge a const reference to the TPGedge to duplicate.
+		* \return a const reference to the newly created TPGEdge.
+		* \throw std::runtime_error if the given TPGEdge does not belong to 
+		* the TPGGraph.
+		*/
+		const TPGEdge& cloneEdge(const TPGEdge& edge);
+
+		/**
+		* \brief Change the destination of the Edge to the given target.
+		*
+		* Change the destination TPGVertex of a TPGEdge to a given TPGVertex.
+		* This function updates the TPGEdge attributes as well as those of all
+		* impacted TPGVertex.
+		* \param[in] edge a const reference to the modified TPGEdge.
+		* \param[in] newDest a const reference to the destination TPGVertex.
+		* \return true if the given edge and vertex are part of the graph, and 
+		* the operation was successful, false otherwise.
+		*/
+		bool setEdgeDestination(const TPGEdge& edge, const TPGVertex& newDest);
+
+		/**
+		* \brief Change the source of the TPGEdge to the given vertex.
+		*
+		* Change the source TPGVertex of a TPGEdge to a given TPGVertex.
+		* This function updates the TPGEdge attributes as well as those of all
+		* impacted TPGVertex.
+		* \param[in] edge a const reference to the modified TPGEdge.
+		* \param[in] newDest a const reference to the new source TPGVertex.
+		* \return true if the given edge and vertex are part of the graph, and
+		* the operation was successful, false otherwise.
+		*/
+		bool setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc);
+
 	protected:
 
 		/// Environment of the TPGGraph
@@ -164,6 +204,17 @@ namespace TPG {
 		*         not in the vertices, then vertices.end() is returned.
 		*/
 		std::list<TPGVertex*>::iterator findVertex(const TPGVertex* vertex);
+
+		/**
+		* \brief Find the non-const iterator to an edge of the graph from
+		* its const pointer.
+		*
+		* \param[in] edge the const pointer to the TPGEdge.
+		* \return the iterator on the edges attribute, at the position of
+		*         the searched edge pointer. If the given vertex pointer is
+		*         not in the vertices, then vertices.end() is returned.
+		*/
+		std::list<TPGEdge>::iterator findEdge(const TPGEdge* vertex);
 	};
 };
 

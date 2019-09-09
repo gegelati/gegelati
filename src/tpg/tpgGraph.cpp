@@ -163,6 +163,72 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 	this->edges.erase(iterator);
 }
 
+const TPG::TPGEdge& TPG::TPGGraph::cloneEdge(const TPGEdge& edge)
+{
+	auto iterEdge = findEdge(&edge);
+	if (iterEdge == this->edges.end()) {
+		throw std::runtime_error("Cannot duplicate an Edge not belonging to the graph.");
+	}
+	else {
+		return this->addNewEdge(*iterEdge->getSource(), *iterEdge->getDestination(), iterEdge->getProgramSharedPointer());
+	}
+}
+
+bool TPG::TPGGraph::setEdgeDestination(const TPGEdge& edge, const TPGVertex& newDest)
+{
+	// Find the edge and vertex
+	auto iterNewDestination = findVertex(&newDest);
+	auto iterEdge = findEdge(&edge);
+	if (iterNewDestination != this->vertices.end() && iterEdge != this->edges.end()) {
+		// Unregister the edge from the old destination
+		const TPG::TPGVertex* oldDestination = iterEdge->getDestination();
+		auto iterOldDest = findVertex(oldDestination);
+		// finding the vertex should not fail. Otherwise, the exception for 
+		// next line would be well deserved since it means an edge in the 
+		// graph is connected to a vertex not in the graph.
+		(*iterOldDest)->removeIncomingEdge(&*iterEdge);
+		// Register the edge to the new destination
+		(*iterNewDestination)->addIncomingEdge(&*iterEdge);
+		// Set the destination
+		iterEdge->setDestination(*iterNewDestination);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool TPG::TPGGraph::setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc)
+{
+	// Find the edge and vertex
+	auto iterNewSrc = findVertex(&newSrc);
+	auto iterEdge = findEdge(&edge);
+	if (iterNewSrc != this->vertices.end() && iterEdge != this->edges.end()) {
+		// Unregister the edge from the old source
+		const TPG::TPGVertex* oldSrc = iterEdge->getSource();
+		auto iterOldSrc = findVertex(oldSrc);
+		// finding the vertex should not fail. Otherwise, the exception for 
+		// next line would be well deserved since it means an edge in the 
+		// graph is connected to a vertex not in the graph.
+		(*iterOldSrc)->removeOutgoingEdge(&*iterEdge);
+		// Register the edge to the new source
+		(*iterNewSrc)->addOutgoingEdge(&*iterEdge);
+		// Set the destination
+		iterEdge->setSource(*(iterNewSrc));
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 std::list<TPG::TPGVertex*>::iterator TPG::TPGGraph::findVertex(const TPG::TPGVertex* vertex) {
 	return std::find(this->vertices.begin(), this->vertices.end(), vertex);
+}
+
+std::list<TPG::TPGEdge>::iterator TPG::TPGGraph::findEdge(const TPGEdge* edge)
+{
+	return std::find_if(this->edges.begin(), this->edges.end(),
+		[&edge](TPG::TPGEdge& other) {return &other == edge; }
+	);
 }
