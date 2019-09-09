@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <algorithm>
 
 #include "dataHandlers/dataHandler.h"
 #include "dataHandlers/primitiveTypeArray.h"
@@ -74,7 +75,7 @@ TEST_F(TPGTest, TPGVertexEdgesSettersGetters) {
 	ASSERT_NO_THROW(action.addIncomingEdge(&edge)) << "Adding an outgoing edge to an Action vertex failed.";
 
 	ASSERT_EQ(team.getOutgoingEdges().size(), 1) << "Size of the outgoing edges of the node is incorrect.";
-	ASSERT_EQ(team.getOutgoingEdges().count(&edge), 1) << "TPGEdge pointer contained in the outgoingEdges is incorrect.";
+	ASSERT_EQ(std::count(team.getOutgoingEdges().begin(), team.getOutgoingEdges().end(), (const TPG::TPGEdge*)&edge), 1) << "TPGEdge pointer contained in the outgoingEdges is incorrect.";
 
 	// Add the same edge again.. Nothing should happen, but it should not fail.
 	ASSERT_NO_THROW(team.addOutgoingEdge(&edge)) << "Adding an outgoing edge to a Team vertex, even though it is already there, failed unexpectedly.";
@@ -85,7 +86,7 @@ TEST_F(TPGTest, TPGVertexEdgesSettersGetters) {
 	ASSERT_EQ(team.getOutgoingEdges().size(), 1) << "Size of the outgoing edges of the node is incorrect.";
 
 	ASSERT_EQ(action.getIncomingEdges().size(), 1) << "Size of the outgoing edges of the node is incorrect.";
-	ASSERT_EQ(action.getIncomingEdges().count(&edge), 1) << "TPGEdge pointer contained in the outgoingEdges is incorrect.";
+	ASSERT_EQ(std::count(action.getIncomingEdges().begin(), action.getIncomingEdges().end(), &edge), 1) << "TPGEdge pointer contained in the outgoingEdges is incorrect.";
 
 	// Remove edges
 	ASSERT_NO_THROW(team.removeOutgoingEdge(&edge)) << "Removing an outgoing edge failed.";

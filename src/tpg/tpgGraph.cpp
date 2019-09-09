@@ -62,12 +62,12 @@ void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 		// Remove all connected edges.
 		// copy inEdges set for removal 
 		// (because iterating on the modified set is not a good idea). 
-		std::set<TPGEdge*> inEdgesToRemove = (*iterator)->getIncomingEdges();
+		std::list<TPGEdge*> inEdgesToRemove = (*iterator)->getIncomingEdges();
 		for (auto inEdge : inEdgesToRemove) {
 			this->removeEdge(*inEdge);
 		}
 		// copy outEdges set for removal 
-		std::set<TPGEdge*> outEdgesToRemove = (*iterator)->getOutgoingEdges();
+		std::list<TPGEdge*> outEdgesToRemove = (*iterator)->getOutgoingEdges();
 		for (auto outEdge : outEdgesToRemove) {
 			this->removeEdge(*outEdge);
 		}

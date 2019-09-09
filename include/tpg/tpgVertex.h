@@ -1,7 +1,7 @@
 #ifndef TPG_VERTEX_H
 #define TPG_VERTEX_H
 
-#include <set>
+#include <list>
 
 namespace TPG {
 	// Declare class to make it usable as an attribute.
@@ -15,12 +15,12 @@ namespace TPG {
 		/**
 		* \brief Get a const reference to incoming edges of this TPGVertex.
 		*/
-		const std::set<TPGEdge*>& getIncomingEdges() const;
+		const std::list<TPGEdge*>& getIncomingEdges() const;
 
 		/**
 		* \brief Get a const reference to incoming edges of this TPGVertex.
 		*/
-		const std::set<TPGEdge*>& getOutgoingEdges() const;
+		const std::list<TPGEdge*>& getOutgoingEdges() const;
 
 		/**
 		* \brief Method to add an incoming TPGEdge to the TPGVertex.
@@ -80,12 +80,12 @@ namespace TPG {
 		/**
 		* \brief Set of incoming TPGEdge of the TPGVertex.
 		*/
-		std::set<TPG::TPGEdge*> incomingEdges;
+		std::list<TPG::TPGEdge*> incomingEdges;
 
 		/**
 		* \brief Set of outgoing TPGEdge of the TPGVertex.
 		*/
-		std::set<TPG::TPGEdge*> outgoingEdges;
+		std::list<TPG::TPGEdge*> outgoingEdges;
 	};
 };
 

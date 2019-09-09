@@ -29,10 +29,10 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
 const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team, const std::vector<const TPGVertex*>& excluded)
 {
 	// Copy outgoing edge list 
-	std::set<TPG::TPGEdge*> outgoingEdges = team.getOutgoingEdges();
+	std::list<TPG::TPGEdge*> outgoingEdges = team.getOutgoingEdges();
 
 	// Remove all edges leading to excluded TPGTeam
-	std::set<TPG::TPGEdge*>::iterator iter = outgoingEdges.begin();
+	std::list<TPG::TPGEdge*>::iterator iter = outgoingEdges.begin();
 	while (iter != outgoingEdges.end()) {
 		if (std::find(excluded.begin(), excluded.end(), (*iter)->getDestination()) != excluded.end()) {
 			outgoingEdges.erase(iter++);
