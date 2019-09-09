@@ -61,6 +61,24 @@ TEST_F(ProgramExecutionEngineTest, ConstructorDestructor) {
 	ASSERT_NO_THROW(progExecEng = new Program::ProgramExecutionEngine(*p)) << "Construction failed.";
 
 	ASSERT_NO_THROW(delete progExecEng) << "Destruction failed.";
+	
+	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect2;
+	vect2.push_back(*vect.at(0).get().clone());
+	ASSERT_THROW(progExecEng = new Program::ProgramExecutionEngine(*p, vect2), std::runtime_error) << "Construction should faile with data sources differing in number from those of the Environment.";
+	vect2.push_back(*vect.at(1).get().clone());
+
+	ASSERT_NO_THROW(progExecEng = new Program::ProgramExecutionEngine(*p)) << "Construction failed with a perfect copy of the environment data source.";
+	ASSERT_NO_THROW(delete progExecEng) << "Destruction failed.";
+
+	// Push a new dataHandler instead.
+	// Because its id is different, it will not be accepted by the PEE.
+	delete (&(vect2.at(1).get()));
+	vect2.pop_back();
+	vect2.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
+	ASSERT_THROW(progExecEng = new Program::ProgramExecutionEngine(*p, vect2), std::runtime_error) << "Construction should fail with data sources differing in id from those of the Environment.";
+
+	delete (&(vect2.at(0).get()));
+	delete (&(vect2.at(1).get()));
 }
 
 TEST_F(ProgramExecutionEngineTest, next) {

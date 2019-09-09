@@ -26,6 +26,49 @@ namespace Program {
 		uint64_t programCounter;
 
 	public:
+
+		/**
+		* \brief Constructor of the class.
+		*
+		* The constructor initialize the number of registers accordingly
+		* with the Environment given as a parameter instead of that of the
+		* Program.
+		*
+		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
+		* \param[in] dataSources DataHandler for executing the Program.
+
+		*/
+		ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dataSrc) : program{ prog }, registers(prog.getEnvironment().getNbRegisters()), programCounter{ 0 } {
+			// Check dataSource are similar in all point to the program environment
+			if (dataSrc.size() != prog.getEnvironment().getDataSources().size()) {
+				throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
+			}
+			for (auto i = 0; i < dataSrc.size(); i++) {
+				// check data source characteristics
+				auto& iDataSrc = dataSrc.at(i).get();
+				auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
+				// Assume that dataSource must be (at least) a copy of each other to simplify the comparison
+				// This is characterise by the two data sources having the same id
+				if (iDataSrc.getId() != envDataSrc.getId()) {
+					throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
+					// If this pose a problem one day, an additional more 
+					// complex check could be used as a last resort when ids 
+					// of DataHandlers are different: checking equality of the 
+					// lists of provided data types and the equality address 
+					// space size for each data type.
+				}
+				
+			}
+
+
+			// Reset Registers (in case it is not done when they are constructed)
+			this->registers.resetData();
+
+			// Setup the data sources
+			dataSources.push_back(this->registers);
+			dataSources.insert(dataSources.end(), dataSrc.begin(), dataSrc.end());
+		};
+
 		/**
 		* \brief Constructor of the class.
 		*
@@ -34,15 +77,7 @@ namespace Program {
 		*
 		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
 		*/
-		ProgramExecutionEngine(const Program& prog) : program{ prog }, registers(prog.getEnvironment().getNbRegisters()), programCounter{ 0 } {
-			// Reset Registers (in case it is not done when they are constructed)
-			this->registers.resetData();
-
-			// Setup the data sources
-			dataSources.push_back(this->registers);
-			std::vector<std::reference_wrapper<DataHandlers::DataHandler>> environmentDataSources = this->program.getEnvironment().getDataSources();
-			dataSources.insert(dataSources.end(), environmentDataSources.begin(), environmentDataSources.end());
-		};
+		ProgramExecutionEngine(const Program& prog) : ProgramExecutionEngine(prog, prog.getEnvironment().getDataSources()) {};
 
 		/**
 		* \brief Increments the programCounter and checks for the end of the Program.
