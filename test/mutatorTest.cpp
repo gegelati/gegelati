@@ -433,13 +433,6 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge) {
 	// Check properties of the tpg
 	ASSERT_EQ(tpg.getEdges().size(), 2) << "No edge was removed from the TPG.";
 	// With known seed edge 0 was removed
-	std::cout << std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-		[&edge0](const TPG::TPGEdge& other) {return &edge0 == &other; }) << "-"
-		<< std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-			[&edge1](const TPG::TPGEdge& other) {return &edge1 == &other; }) << "-"
-		<< std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-			[&edge2](const TPG::TPGEdge& other) {return &edge2 == &other; });
-
 	ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
 		[&edge0](const TPG::TPGEdge& other) {return &edge0 == &other; }), 0) << "With a known seed, edge0 should be removed from the TPG.";
 	ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
@@ -456,5 +449,36 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge) {
 		[&edge1](const TPG::TPGEdge& other) {return &edge1 == &other; }), 0) << "With a known seed, edge1 should be removed from the TPG.";
 	ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
 		[&edge2](const TPG::TPGEdge& other) {return &edge2 == &other; }), 1) << "With a known seed, edge2 should not be removed from the TPG.";
+}
+
+TEST_F(MutatorTest, TPGMutatorAddRandomEdge) {
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+	const TPG::TPGTeam& vertex2 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex3 = tpg.addNewAction(1);
+	const TPG::TPGAction& vertex4 = tpg.addNewAction(2);
+	std::list<const TPG::TPGEdge*> edges;
+
+	edges.push_back(&tpg.addNewEdge(vertex0, vertex1, progPointer));
+	edges.push_back(&tpg.addNewEdge(vertex0, vertex2, progPointer));
+	edges.push_back(&tpg.addNewEdge(vertex0, vertex3, progPointer));
+	edges.push_back(&tpg.addNewEdge(vertex2, vertex4, progPointer));
+
+
+	Mutator::RNG::setSeed(0);
+	// Run the add
+	ASSERT_NO_THROW(Mutator::TPGMutator::addRandomEdge(tpg, vertex2, edges)) << "Adding an edge to the TPG should succeed.";
+
+	// Check properties of the tpg
+	ASSERT_EQ(tpg.getEdges().size(), 5) << "No edge was added from the TPG.";
+	ASSERT_EQ(vertex2.getOutgoingEdges().size(), 2) << "The random edge was not added to the right team.";
+
+	// Edge was added with vertex1 (with known seed)
+	ASSERT_EQ(vertex1.getIncomingEdges().size(), 2) << "The random edge was not added with the right (pseudo)random destination.";
+
+	// Force a failure
+	TPG::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
+	ASSERT_THROW(Mutator::TPGMutator::addRandomEdge(tpg, vertex2, { &newEdge }), std::runtime_error) << "Picking an edge not belonging to the graph should fail.";
 }
 }

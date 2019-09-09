@@ -123,3 +123,25 @@ void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGT
 	graph.removeEdge(*removedEdge);
 }
 
+void Mutator::TPGMutator::addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team,
+	const std::list<const TPG::TPGEdge*>& preExistingEdges) {
+	// Pick an edge (excluding ones from the team and edges with the team as a destination)
+	auto pickableEdges(preExistingEdges);
+	// cf erase-remove idiom
+	pickableEdges.erase(std::remove_if(pickableEdges.begin(), pickableEdges.end(),
+		[&team](const TPG::TPGEdge* edge)-> bool {
+			return edge->getSource() == &team || edge->getDestination() == &team;
+		}), pickableEdges.end());
+
+	// Pick a pickable Edge
+	std::list<const TPG::TPGEdge*>::iterator iter = pickableEdges.begin();
+	std::advance(iter, Mutator::RNG::getUnsignedInt64(0, pickableEdges.size() - 1));
+	const TPG::TPGEdge* pickedEdge = *iter;
+
+	// Create new edge from team and with the same ProgramSharedPointer
+	// But with the team as its source
+	// throw std::runtime_error if the edge is not from the graph;
+	const TPG::TPGEdge& newEdge = graph.cloneEdge(*pickedEdge);
+	graph.setEdgeSource(newEdge, team);
+}
+

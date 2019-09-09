@@ -42,10 +42,29 @@ namespace Mutator {
 		* outgoing TPGEdge of the TPGTeam, this edge will be avoided during the
 		* random selection of the TPGEdge to remove.
 		*
-		*`\param[in] graph the TPGGraph within which the team is stored.
+		* \param[in,out] graph the TPGGraph within which the team is stored.
 		* \param[in] team the TPGTeam whose outgoingEdges will be altered.
 		*/
 		void removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team);
+
+		/**
+		* \brief Add a new outgoing TPGEdge to the TPGTeam within the TPGGraph.
+		* 
+		* This function adds a new outgoing TPGEdge to the TPGTeam by cloning
+		* a preExisting TPGEdge of the TPGGraph. Since the graph may contain
+		* TPGEdge from previous mutations, the function receives a list of 
+		* preExisting TPGEdge from which the TPGEdge to copy should be chosen
+		* randomly. Any TPGEdge already connected to the TPGTeam is also 
+		* excluded from the candidates.
+		* The new TPGEdge will have the same destination TPGVertex and Program
+		* as the cloned one, but its source will be the give TPGTeam.
+		* 
+		* \param[in,out] graph the TPGGraph within which the team is stored.
+		* \param[in] team the TPGTeam whose outgoingEdges will be altered.
+		* \param[in] preExistingEdge the TPGEdge candidates for cloning.
+		*/
+		void addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team,
+			const std::list<const TPG::TPGEdge*>& preExistingEdges);
 	};
 };
 
