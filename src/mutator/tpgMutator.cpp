@@ -273,3 +273,68 @@ void Mutator::TPGMutator::mutateTPGTeam(TPG::TPGGraph& graph,
 	}
 }
 
+
+void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params)
+{
+	// Get current vertex set (copy)
+	auto vertices(graph.getVertices());
+	// Get current root teams (copy)
+	auto rootVertices(graph.getRootVertices());
+	// Get root Teams
+	std::vector<const TPG::TPGTeam*> rootTeams;
+	std::for_each(rootVertices.begin(), rootVertices.end(),
+		[&rootTeams](const TPG::TPGVertex* vertex) {
+			if (typeid(*vertex) == typeid(TPG::TPGTeam)) {
+				rootTeams.push_back((const TPG::TPGTeam*)vertex);
+			}
+		});
+
+	// If the graph doesn't contain any root teams, call the init procedure.
+	// (note that execution of this code is not a very good sign.. maybe an 
+	// exception would be more appropriate?)
+	if (rootTeams.size() == 0) {
+		initRandomTPG(graph, params);
+		vertices = graph.getVertices();
+		rootVertices = graph.getRootVertices();
+		rootTeams.clear();
+		std::for_each(rootVertices.begin(), rootVertices.end(),
+			[&rootTeams](const TPG::TPGVertex* vertex) {
+				rootTeams.push_back((const TPG::TPGTeam*)vertex);
+			});
+	}
+
+	// Pre compute liste of available TPGTeam and TPGActions
+	std::vector<const TPG::TPGTeam*> preExistingTeams;
+	std::vector<const TPG::TPGAction*> preExistingActions;
+
+	std::for_each(vertices.begin(), vertices.end(),
+		[&preExistingActions, &preExistingTeams](const TPG::TPGVertex* target) {
+			if (typeid(*target) == typeid(TPG::TPGAction)) {
+				preExistingActions.push_back((const TPG::TPGAction*)target);
+			}
+			else {
+				preExistingTeams.push_back((const TPG::TPGTeam*)target);
+			}
+		});
+
+	// Get a list of pre existing edges before mutations (copy)
+	std::list<const TPG::TPGEdge*> preExistingEdges;
+	std::for_each(graph.getEdges().begin(), graph.getEdges().end(),
+		[&preExistingEdges](const TPG::TPGEdge& edge) {
+			preExistingEdges.push_back(&edge);
+		});
+
+	// While the target is not reached, add new teams
+	uint64_t currentNumberOfRoot = rootVertices.size();
+	while ( params.tpg.nbRoots > currentNumberOfRoot) {
+		// Select a random existing root
+		uint64_t clonedRootIndex = RNG::getUnsignedInt64(0, rootTeams.size() - 1);
+		// clone it (the vertex and all its outgoing edges)
+		const TPG::TPGTeam& newRoot = (const TPG::TPGTeam&)graph.cloneVertex(*rootTeams.at(clonedRootIndex));
+		// Apply mutations to the root
+		mutateTPGTeam(graph, archive, newRoot, preExistingTeams, preExistingActions, preExistingEdges, params);
+		// Check the new number of roots
+		// Needed since preExisting root may be subsumed by new ones.
+		currentNumberOfRoot = graph.getNbRootVertices();
+	}
+}

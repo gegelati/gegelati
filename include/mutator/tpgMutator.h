@@ -159,6 +159,29 @@ namespace Mutator {
 			const std::vector<const TPG::TPGAction*>& preExistingActions,
 			const std::list<const TPG::TPGEdge*>& preExistingEdges,
 			const Mutator::MutationParameters& params);
+
+		/**
+		* \brief Create new root TPGTeam within the TPGGraph.
+		*
+		* This function create and add new root TPGTeam to the TPGGraph
+		* until the targetted number of roots is reached. To create new root
+		* TPGTeam, the function uses mutation operators on duplicates of
+		* existing root TPGTeams of the TPGGraph.
+		*
+		* A few special cases are handled:
+		* If the set of root vertices of the TPGGraph contains any TPGAction,
+		* this TPGAction is ignored when selecting a candidate for duplication.
+		* If the TPGGraph does not have any root TPGTeam, it is reinitialized
+		* entirely with the initRandomTPG function.
+		* If the given TPGGraph already has more root TPGVertex than the
+		* targetted number of root teams, nothing happens.
+		*
+		* \param[in,out] graph the TPGGraph to mutate.
+		* \param[in] archive Archive used to assess the uniqueness of the
+		*            mutated Program behavior.
+		* \param[in] params Probability parameters for the mutation.
+		*/
+		void populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params);
 	};
 };
 

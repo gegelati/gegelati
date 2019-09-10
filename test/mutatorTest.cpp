@@ -579,4 +579,41 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam) {
 
 	// No other check really needed since individual mutation functions are already covered in other unit tests.
 }
+
+TEST_F(MutatorTest, TPGMutatorPopulate) {
+	TPG::TPGGraph tpg(*e);
+
+	Mutator::MutationParameters params;
+
+	params.tpg.nbActions = 4;
+	params.tpg.maxInitOutgoingEdges = 3;
+	params.prog.maxProgramSize = 96;
+	params.tpg.nbRoots = 7;
+	// Proba as in Kelly's paper
+	params.tpg.pEdgeDeletion = 0.7;
+	params.tpg.pEdgeAddition = 0.7;
+	params.tpg.pProgramMutation = 0.2;
+	params.tpg.pEdgeDestinationChange = 0.1;
+	params.tpg.pEdgeDestinationIsAction = 0.5;
+	params.prog.pAdd = 0.5;
+	params.prog.pDelete = 0.5;
+	params.prog.pMutate = 1.0;
+	params.prog.pSwap = 1.0;
+	Archive arch;
+
+	Mutator::TPGMutator::initRandomTPG(tpg, params);
+	// fill the archive before populating to test uniqueness of new prog
+	TPG::TPGExecutionEngine tee(&arch);
+	for (auto rootVertex : tpg.getRootVertices()) {
+		tee.executeFromRoot(*rootVertex);
+	}
+
+	// Check the correct execution
+	ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(tpg, arch, params)) << "Populating a TPG failed.";
+	// Check the number of roots
+	ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots);
+
+	// Increase coverage with a TPG that has no root team
+	TPG::TPGGraph tpg2(*e);
+	ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(tpg2, arch, params)) << "Populating an empty TPG failed.";
 }
