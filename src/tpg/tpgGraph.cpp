@@ -44,6 +44,14 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getVertices() const
 	return result;
 }
 
+uint64_t TPG::TPGGraph::getNbRootVertices() const
+{
+	return std::count_if(this->vertices.begin(), this->vertices.end(),
+		[](const TPGVertex* vertex) {
+			return vertex->getIncomingEdges().size() == 0;
+		});
+}
+
 const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
 {
 	std::vector<const TPG::TPGVertex*> result;

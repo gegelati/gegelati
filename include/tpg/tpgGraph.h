@@ -67,7 +67,7 @@ namespace TPG {
 		* \brief Get vector of const pointer to the vertices of the TPGGraph.
 		*
 		* Content of the retrieved vector is valid only as long as no non-const
-		* method is called on the TPG. The returned vector is a copy of the 
+		* method is called on the TPG. The returned vector is a copy of the
 		* current set of vertices.
 		*
 		* \return a vector containing pointers to the vertices of the graph.
@@ -75,10 +75,17 @@ namespace TPG {
 		const std::vector<const TPGVertex*> getVertices() const;
 
 		/**
+		* \brief Get the number of rootVertices of the TPGGraph.
+		*
+		* \return the number of TPGVertex in the graph with no incomingEdge.
+		*/
+		uint64_t getNbRootVertices() const;
+
+		/**
 		* \brief Get vector of const pointer to the root vertices of the TPGGraph.
 		*
 		* Content of the retrieved vector is valid only as long as no non-const
-		* method is called on the TPG. The returned vector is a copy of the 
+		* method is called on the TPG. The returned vector is a copy of the
 		* current set of vertices.
 		*
 		* \return a vector containing pointers to the root vertices of the
@@ -143,12 +150,12 @@ namespace TPG {
 		* Duplicate a TPGEdge from the TPGGraph.
 		*
 		* This method creates a perfecte copy of the given TPGEdge, that is
-		* a TPGEdge with the same source, destination and program shared 
+		* a TPGEdge with the same source, destination and program shared
 		* pointer.
 		*
 		* \param[in] edge a const reference to the TPGedge to duplicate.
 		* \return a const reference to the newly created TPGEdge.
-		* \throw std::runtime_error if the given TPGEdge does not belong to 
+		* \throw std::runtime_error if the given TPGEdge does not belong to
 		* the TPGGraph.
 		*/
 		const TPGEdge& cloneEdge(const TPGEdge& edge);
@@ -161,7 +168,7 @@ namespace TPG {
 		* impacted TPGVertex.
 		* \param[in] edge a const reference to the modified TPGEdge.
 		* \param[in] newDest a const reference to the destination TPGVertex.
-		* \return true if the given edge and vertex are part of the graph, and 
+		* \return true if the given edge and vertex are part of the graph, and
 		* the operation was successful, false otherwise.
 		*/
 		bool setEdgeDestination(const TPGEdge& edge, const TPGVertex& newDest);

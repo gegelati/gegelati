@@ -258,6 +258,15 @@ TEST_F(TPGTest, TPGGraphClear) {
 	ASSERT_EQ(tpg.getEdges().size(), 0) << "Cleared graph is not empty of edges as expected.";
 }
 
+TEST_F(TPGTest, TPGGraphGetNbRootVertices) {
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+
+	ASSERT_EQ(tpg.getNbRootVertices(), 1) << "Number of roots of the TPG is incorrect.";
+}
+
 TEST_F(TPGTest, TPGGraphGetRootVertices) {
 	TPG::TPGGraph tpg(*e);
 	const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
