@@ -38,7 +38,7 @@ void Mutator::TPGMutator::initRandomTPG(TPG::TPGGraph& graph, const Mutator::Mut
 	for (size_t i = 0; i < 2 * params.tpg.nbActions; i++) {
 		programs.emplace_back(new Program::Program(graph.getEnvironment()));
 		// RandomInit the Programs
-		Mutator::ProgramMutator::initRandomProgram(*programs.back(), params.prog.maxProgramSize);
+		Mutator::ProgramMutator::initRandomProgram(*programs.back(), params);
 	}
 
 	// Connect each team with two distinct actions, through two distinct programs
@@ -197,7 +197,7 @@ void Mutator::TPGMutator::mutateOutgoingEdge(TPG::TPGGraph& graph,
 		allUnique = true;
 
 		// Mutate until something is mutated (i.e. the function returns true)
-		while (!Mutator::ProgramMutator::mutateProgram(*newProg, params.prog.pDelete, params.prog.pAdd, params.prog.maxProgramSize, params.prog.pMutate, params.prog.pSwap));
+		while (!Mutator::ProgramMutator::mutateProgram(*newProg, params));
 		// Check for uniqueness in archive
 		auto archivedDataHandlers = archive.getDataHandlers();
 		for (std::pair<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>> archiveDatahandler : archivedDataHandlers) {

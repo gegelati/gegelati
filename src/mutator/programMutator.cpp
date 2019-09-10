@@ -1,7 +1,8 @@
+#include "mutator/mutationParameters.h"
 #include "mutator/rng.h"
 #include "mutator/programMutator.h"
 
-void Mutator::ProgramMutator::initRandomProgram(Program::Program& p, size_t maxProgSize)
+void Mutator::ProgramMutator::initRandomProgram(Program::Program& p, const MutationParameters& params)
 {
 	// Empty the program
 	while (p.getNbLines() > 0) {
@@ -9,7 +10,7 @@ void Mutator::ProgramMutator::initRandomProgram(Program::Program& p, size_t maxP
 	}
 
 	// Select the number of line randomly
-	const uint64_t nbLine = Mutator::RNG::getUnsignedInt64(1, maxProgSize);
+	const uint64_t nbLine = Mutator::RNG::getUnsignedInt64(1, params.prog.maxProgramSize);
 	// Insert them
 	while (p.getNbLines() < nbLine) {
 		insertRandomLine(p);
@@ -61,25 +62,25 @@ bool Mutator::ProgramMutator::alterRandomLine(Program::Program& p)
 	return true;
 }
 
-bool Mutator::ProgramMutator::mutateProgram(Program::Program& p, double pDelete, double pAdd, size_t maxProgramSize, double pMutate, double pSwap)
+bool Mutator::ProgramMutator::mutateProgram(Program::Program& p, const MutationParameters& params)
 {
 	bool anyMutation = false;
-	if (p.getNbLines() > 1 && Mutator::RNG::getDouble(0.0, 1.0) < pDelete) {
+	if (p.getNbLines() > 1 && Mutator::RNG::getDouble(0.0, 1.0) < params.prog.pDelete) {
 		anyMutation = true;
 		deleteRandomLine(p);
 	}
 
-	if (p.getNbLines() < maxProgramSize && Mutator::RNG::getDouble(0.0, 1.0) < pAdd) {
+	if (p.getNbLines() < params.prog.maxProgramSize && Mutator::RNG::getDouble(0.0, 1.0) < params.prog.pAdd) {
 		anyMutation = true;
 		insertRandomLine(p);
 	}
 
-	if (Mutator::RNG::getDouble(0.0, 1.0) < pMutate) {
+	if (Mutator::RNG::getDouble(0.0, 1.0) < params.prog.pMutate) {
 		anyMutation = true;
 		alterRandomLine(p);
 	}
 
-	if (Mutator::RNG::getDouble(0.0, 1.0) < pSwap) {
+	if (Mutator::RNG::getDouble(0.0, 1.0) < params.prog.pSwap) {
 		anyMutation = true;
 		swapRandomLines(p);
 	}

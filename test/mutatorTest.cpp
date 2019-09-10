@@ -348,10 +348,13 @@ TEST_F(MutatorTest, ProgramMutatorAlterRandomLine) {
 TEST_F(MutatorTest, ProgramMutatorInitProgram) {
 	Mutator::RNG::setSeed(0);
 
-	ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, 96)) << "Empty Program Random init failed";
+	Mutator::MutationParameters params;
+	params.prog.maxProgramSize = 96;
+
+	ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, params)) << "Empty Program Random init failed";
 	ASSERT_EQ(p->getNbLines(), 31) << "Random number of line is not as expected (with known seed).";
 
-	ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, 96)) << "Non-Empty Program Random init failed";
+	ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, params)) << "Non-Empty Program Random init failed";
 	ASSERT_EQ(p->getNbLines(), 53) << "Random number of line is not as expected (with known seed).";
 }
 
@@ -362,19 +365,32 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior) {
 	p->addNewLine();
 	p->addNewLine();
 
+	Mutator::MutationParameters params;
+	params.prog.maxProgramSize = 15;
+	params.prog.pDelete = 0.5;
+	params.prog.pAdd = 0.0;
+	params.prog.pMutate = 0.0;
+	params.prog.pSwap = 0.0;
+
 	Mutator::RNG::setSeed(0);
-	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.5, 0.0, 15, 0.0, 0.0)) << "Mutation did not occur with known seed.";
+	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, params)) << "Mutation did not occur with known seed.";
 	ASSERT_EQ(p->getNbLines(), 2) << "Wrong program mutation occured. Expected: Line deletion.";
 
+	params.prog.pDelete = 0.0;
+	params.prog.pAdd = 0.5;
 	Mutator::RNG::setSeed(1);
-	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.0, 0.5, 15, 0.0, 0.0)) << "Mutation did not occur with known seed.";
+	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, params)) << "Mutation did not occur with known seed.";
 	ASSERT_EQ(p->getNbLines(), 3) << "Wrong program mutation occured. Expected: Line insertion.";
 
+	params.prog.pAdd = 0.0;
+	params.prog.pMutate = 0.01;
 	Mutator::RNG::setSeed(86);
-	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.0, 0.0, 15, 0.01, 0.0)) << "Mutation did not occur with known seed.";
+	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, params)) << "Mutation did not occur with known seed.";
 
+	params.prog.pMutate = 0.00;
+	params.prog.pSwap = 0.1;
 	Mutator::RNG::setSeed(1);
-	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.0, 0.0, 15, 0.00, 0.1)) << "Mutation did not occur with known seed.";
+	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, params)) << "Mutation did not occur with known seed.";
 }
 
 TEST_F(MutatorTest, TPGMutatorInitRandomTPG) {
@@ -530,7 +546,7 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge) {
 	Archive arch;
 	TPG::TPGExecutionEngine tee(&arch);
 	params.prog.maxProgramSize = 96;
-	Mutator::ProgramMutator::initRandomProgram(*progPointer, params.prog.maxProgramSize);
+	Mutator::ProgramMutator::initRandomProgram(*progPointer, params);
 	tee.executeFromRoot(vertex0);
 
 	// Mutate (params selected for code coverage)
@@ -577,7 +593,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam) {
 	// Init its program and fill the archive
 	Archive arch;
 	TPG::TPGExecutionEngine tee(&arch);
-	Mutator::ProgramMutator::initRandomProgram(*progPointer, params.prog.maxProgramSize);
+	Mutator::ProgramMutator::initRandomProgram(*progPointer, params);
 	tee.executeFromRoot(vertex0);
 
 	// Test the function in normal conditions

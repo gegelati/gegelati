@@ -3,6 +3,7 @@
 
 #include "program/program.h"
 #include "program/line.h"
+#include "mutator/mutationParameters.h"
 #include "mutator/lineMutator.h"
 
 namespace Mutator {
@@ -22,7 +23,7 @@ namespace Mutator {
 		* \param[in] maxProgSize the maximum number of Line after
 		*            initialization.
 		*/
-		void initRandomProgram(Program::Program& p, size_t maxProgSize);
+		void initRandomProgram(Program::Program& p, const MutationParameters& params);
 
 		/**
 		* \brief Deletes a randomly selected Line of the given Program.
@@ -98,7 +99,7 @@ namespace Mutator {
 		* \param[in] pSwap probability of swapping two lines of the Program.
 		* \return true if a modification was performed, false otherwise.
 		*/
-		bool mutateProgram(Program::Program& p, double pDelete, double pAdd, size_t maxProgramSize, double pMutate, double pSwap);
+		bool mutateProgram(Program::Program& p, const MutationParameters& params);
 
 
 	};
