@@ -49,22 +49,55 @@ namespace Mutator {
 
 		/**
 		* \brief Add a new outgoing TPGEdge to the TPGTeam within the TPGGraph.
-		* 
+		*
 		* This function adds a new outgoing TPGEdge to the TPGTeam by cloning
 		* a preExisting TPGEdge of the TPGGraph. Since the graph may contain
-		* TPGEdge from previous mutations, the function receives a list of 
+		* TPGEdge from previous mutations, the function receives a list of
 		* preExisting TPGEdge from which the TPGEdge to copy should be chosen
-		* randomly. Any TPGEdge already connected to the TPGTeam is also 
+		* randomly. Any TPGEdge already connected to the TPGTeam is also
 		* excluded from the candidates.
 		* The new TPGEdge will have the same destination TPGVertex and Program
 		* as the cloned one, but its source will be the give TPGTeam.
-		* 
+		*
 		* \param[in,out] graph the TPGGraph within which the team is stored.
 		* \param[in] team the TPGTeam whose outgoingEdges will be altered.
 		* \param[in] preExistingEdge the TPGEdge candidates for cloning.
 		*/
 		void addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team,
 			const std::list<const TPG::TPGEdge*>& preExistingEdges);
+
+		/**
+		* \brief Change the destination of a TPGEdge to an randomly chosen
+		* target.
+		*
+		* This function selects a random TPGVertex among given pre-existing
+		* vector of TPGTeam and TPGAction.
+		* If the edge is the only one within the team targetting a TPGAction,
+		* then, the new destination will be a TPGAction also. Otherwise, the
+		* function randomly choses between a TPGAction and a TPGTeam, with the
+		* probabilities within the given MutationParameters.
+		* No verification is made on the content of pre-existing TPGVertex 
+		* list. If one of this list contains the team itself, a self-loop may 
+		* be created. A TPGVertex not belonging to the graph in these lists
+		* will cause an exception within the TPGGraph class tough.
+		* If the current destination of the edge is among the candidates, the 
+		* new destination may be the same as the old.
+		*
+		* \param[in,out] graph the TPGGraph within which the team and edge are
+		*                stored.
+		* \param[in] team the source TPGTeam of the edge.
+		* \param[in] edge the TPGEdge whose destination will be altered.
+		* \param[in] preExistingTeams the TPGTeam candidates for destination.
+		* \param[in] preExistingActions the TPGAction candidates for
+		*            destination.
+		* \param[in] params Probability parameters for the mutation.
+		*/
+		void mutateEdgeDestination(TPG::TPGGraph& graph,
+			const TPG::TPGTeam& team,
+			const TPG::TPGEdge* edge,
+			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
+			const std::vector<const TPG::TPGAction*>& preExistingActions,
+			const Mutator::MutationParameters& params);
 	};
 };
 

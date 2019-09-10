@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <set>
+#include <vector>
 #include <algorithm>
 
 #include "environment.h"
@@ -465,7 +466,6 @@ TEST_F(MutatorTest, TPGMutatorAddRandomEdge) {
 	edges.push_back(&tpg.addNewEdge(vertex0, vertex3, progPointer));
 	edges.push_back(&tpg.addNewEdge(vertex2, vertex4, progPointer));
 
-
 	Mutator::RNG::setSeed(0);
 	// Run the add
 	ASSERT_NO_THROW(Mutator::TPGMutator::addRandomEdge(tpg, vertex2, edges)) << "Adding an edge to the TPG should succeed.";
@@ -480,5 +480,33 @@ TEST_F(MutatorTest, TPGMutatorAddRandomEdge) {
 	// Force a failure
 	TPG::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
 	ASSERT_THROW(Mutator::TPGMutator::addRandomEdge(tpg, vertex2, { &newEdge }), std::runtime_error) << "Picking an edge not belonging to the graph should fail.";
+}
+
+TEST_F(MutatorTest, TPGMutatorMutateEdgeDestination) {
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+	const TPG::TPGAction& vertex2 = tpg.addNewAction(1);
+	const TPG::TPGTeam& vertex3 = tpg.addNewTeam();
+	const TPG::TPGTeam& vertex4 = tpg.addNewTeam();
+
+	const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+	const TPG::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex3, progPointer);
+
+	Mutator::MutationParameters params;
+	params.tpg.pEdgeDestinationIsAction = 0.5;
+
+	Mutator::RNG::setSeed(2);
+	ASSERT_NO_THROW(Mutator::TPGMutator::mutateEdgeDestination(tpg, vertex0, &edge1, { &vertex3, &vertex4 }, { &vertex1, &vertex2 }, params));
+	// Check properties of the tpg
+	ASSERT_EQ(tpg.getEdges().size(), 2) << "Number of edge should remain unchanged after destination change.";
+	ASSERT_EQ(vertex0.getOutgoingEdges().size(), 2) << "The edge source should not be altered.";
+	ASSERT_EQ(vertex3.getIncomingEdges().size(), 0) << "The edge Destination should be vertex4 (with known seed).";
+	ASSERT_EQ(vertex4.getIncomingEdges().size(), 1) << "The edge Destination should be vertex4 (with known seed).";
+
+	// Cover the only action case
+	params.tpg.pEdgeDestinationIsAction = 0.0; // even with a probability of 0.
+	ASSERT_NO_THROW(Mutator::TPGMutator::mutateEdgeDestination(tpg, vertex0, &edge0, { &vertex3, &vertex4 }, { &vertex2 }, params));
+	ASSERT_EQ(vertex2.getIncomingEdges().size(), 1) << "The only choice of action given to the mutation should have been used.";
 }
 }

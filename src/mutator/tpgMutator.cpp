@@ -145,3 +145,33 @@ void Mutator::TPGMutator::addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam
 	graph.setEdgeSource(newEdge, team);
 }
 
+void Mutator::TPGMutator::mutateEdgeDestination(TPG::TPGGraph& graph,
+	const TPG::TPGTeam& team,
+	const TPG::TPGEdge* edge,
+	const std::vector<const TPG::TPGTeam*>& preExistingTeams,
+	const std::vector<const TPG::TPGAction*>& preExistingActions,
+	const Mutator::MutationParameters& params)
+{
+	// Pick an edge among preexisting vertices
+	const TPG::TPGVertex* target = NULL;
+	// Should the new target be an action or a team
+	bool targetAction = Mutator::RNG::getDouble(0, 1) < params.tpg.pEdgeDestinationIsAction;
+
+	// Check if the edge is the only of the team connected to an action.
+	// in which case, selecting an action is mandatory.
+	if (targetAction || (typeid(*edge->getDestination()) == typeid(TPG::TPGAction)
+		&& std::count_if(team.getOutgoingEdges().begin(), team.getOutgoingEdges().end(),
+			[](const TPG::TPGEdge* other) {
+				return typeid(*other->getDestination()) == typeid(TPG::TPGAction);
+			}) == 1)) {
+		// Pick an Action target
+		target = preExistingActions.at(Mutator::RNG::getUnsignedInt64(0, preExistingActions.size() - 1));
+	}
+	else {
+		// Pick any target
+		target = preExistingTeams.at(Mutator::RNG::getUnsignedInt64(0, preExistingTeams.size() - 1));
+	}
+	// Change the target
+	// Changing the target should not fail.
+	graph.setEdgeDestination(*edge, *target);
+}
