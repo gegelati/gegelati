@@ -377,7 +377,7 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior) {
 	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, 0.0, 0.0, 15, 0.00, 0.1)) << "Mutation did not occur with known seed.";
 }
 
-TEST_F(MutatorTest, TPGMutatorInitProgram) {
+TEST_F(MutatorTest, TPGMutatorInitRandomTPG) {
 	TPG::TPGGraph tpg(*e);
 	Mutator::MutationParameters params;
 
@@ -417,6 +417,13 @@ TEST_F(MutatorTest, TPGMutatorInitProgram) {
 			});
 		ASSERT_EQ(teamPrograms.size(), team->getOutgoingEdges().size()) << "A team is connected to the same program twice.";
 	}
+
+	// Cover bad parameterization error
+	params.tpg.maxInitOutgoingEdges = 6;
+	ASSERT_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params), std::runtime_error) << "TPG Initialization should fail with bad parameters.";
+	params.tpg.maxInitOutgoingEdges = 0;
+	params.tpg.nbActions = 1;
+	ASSERT_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params), std::runtime_error) << "TPG Initialization should fail with bad parameters.";
 }
 
 
