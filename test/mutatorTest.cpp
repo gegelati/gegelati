@@ -526,11 +526,13 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge) {
 	Mutator::ProgramMutator::initRandomProgram(*progPointer, params.prog.maxProgramSize);
 	tee.executeFromRoot(vertex0);
 
-	// Mutate
+	// Mutate (params selected for code coverage)
 	params.prog.pAdd = 0.5;
 	params.prog.pDelete = 0.5;
 	params.prog.pMutate = 1.0;
 	params.prog.pSwap = 1.0;
+	params.tpg.pEdgeDestinationChange = 1.0;
+
 	ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(tpg, arch, vertex0, &edge0, { &vertex0 }, { &vertex1 }, params));
 	// Check that progPointer use count was decreased since the mutated program is a copy of the original
 	ASSERT_EQ(progPointer.use_count(), 1) << "Shared pointer should no longer be used inside the TPG after mutation.";
@@ -538,6 +540,43 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge) {
 	Program::ProgramExecutionEngine pee(edge0.getProgram());
 	double result = pee.executeProgram();
 	ASSERT_TRUE(arch.isUnique(e->getDataSources(), result)) << "Mutated program associated to the edge should return a unique bid on the environment.";
+}
 
+TEST_F(MutatorTest, TPGMutatorMutateTeam) {
+	// Create a TPG
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+	const TPG::TPGAction& vertex2 = tpg.addNewAction(1);
+	const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+	const TPG::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex2, progPointer);
+	const TPG::TPGAction& vertex3 = tpg.addNewAction(2);
+	const TPG::TPGTeam& vertex4 = tpg.addNewTeam();
+	const TPG::TPGEdge& edge2 = tpg.addNewEdge(vertex4, vertex3, progPointer);
+	const TPG::TPGEdge& edge3 = tpg.addNewEdge(vertex0, vertex3, progPointer);
+
+	Mutator::MutationParameters params;
+	params.prog.maxProgramSize = 96;
+	params.tpg.pEdgeDeletion = 0.7;
+	params.tpg.pEdgeAddition = 0.7;
+	params.tpg.pProgramMutation = 0.2;
+	params.tpg.pEdgeDestinationChange = 0.1;
+	params.tpg.pEdgeDestinationIsAction = 0.5;
+	params.prog.pAdd = 0.5;
+	params.prog.pDelete = 0.5;
+	params.prog.pMutate = 1.0;
+	params.prog.pSwap = 1.0;
+
+	// Init its program and fill the archive
+	Archive arch;
+	TPG::TPGExecutionEngine tee(&arch);
+	Mutator::ProgramMutator::initRandomProgram(*progPointer, params.prog.maxProgramSize);
+	tee.executeFromRoot(vertex0);
+
+	// Test the function in normal conditions
+	Mutator::RNG::setSeed(0);
+	ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGTeam(tpg, arch, vertex0, { &vertex0, &vertex4 }, { &vertex1, &vertex2, &vertex3 }, { &edge0, &edge1, &edge2, &edge3 }, params)) << "Mutate team should not fail in these conditions.";
+
+	// No other check really needed since individual mutation functions are already covered in other unit tests.
 }
 }

@@ -136,7 +136,10 @@ void Mutator::TPGMutator::addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam
 			return edge->getSource() == &team || edge->getDestination() == &team;
 		}), pickableEdges.end());
 
-	// Pick a pickable Edge
+	// Pick a pickable Edge 
+	// (This code assumes that the set of pickable edge is never empty.. 
+	// otherwise it will throw an exception. Possible solution if needed
+	// initialize an entirely new program and pick a random target.) 
 	std::list<const TPG::TPGEdge*>::iterator iter = pickableEdges.begin();
 	std::advance(iter, Mutator::RNG::getUnsignedInt64(0, pickableEdges.size() - 1));
 	const TPG::TPGEdge* pickedEdge = *iter;
@@ -219,3 +222,54 @@ void Mutator::TPGMutator::mutateOutgoingEdge(TPG::TPGGraph& graph,
 		mutateEdgeDestination(graph, team, edge, preExistingTeams, preExistingActions, params);
 	}
 }
+
+void Mutator::TPGMutator::mutateTPGTeam(TPG::TPGGraph& graph,
+	const Archive& archive,
+	const TPG::TPGTeam& team,
+	const std::vector<const TPG::TPGTeam*>& preExistingTeams,
+	const std::vector<const TPG::TPGAction*>& preExistingActions,
+	const std::list<const TPG::TPGEdge*>& preExistingEdges,
+	const Mutator::MutationParameters& params)
+{
+	// 1. Remove randomly selected edges
+	{
+		double proba = 1.0;
+		while (team.getOutgoingEdges().size() > 2 && proba > Mutator::RNG::getDouble(0.0, 1.0)) {
+			removeRandomEdge(graph, team);
+
+			// Decrement the proba of removing another edge
+			proba *= params.tpg.pEdgeDeletion;
+		}
+	}
+
+	// 2. Add random duplicated edge with the team as its source
+	{
+		double proba = 1.0;
+		while (team.getOutgoingEdges().size() < params.tpg.maxOutgoingEdges
+			&& proba > Mutator::RNG::getDouble(0.0, 1.0)) {
+			// Add an edge (by duplication of an existing one)
+			addRandomEdge(graph, team, preExistingEdges);
+
+			// Decrement the proba of adding another edge
+			proba *= params.tpg.pEdgeAddition;
+		}
+	}
+
+	// 3. Mutate program of the team
+	{
+		bool anyMutationDone = false;
+		do {
+			// Process edge-by-edge
+			// And possibly modify their behavior and their target
+			for (TPG::TPGEdge* edge : team.getOutgoingEdges()) {
+				// Edge->Program bid modification
+				if (Mutator::RNG::getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
+					// Mutate the edge
+					mutateOutgoingEdge(graph, archive, team, edge, preExistingTeams, preExistingActions, params);
+					anyMutationDone = true;
+				}
+			}
+		} while (!anyMutationDone);
+	}
+}
+

@@ -56,7 +56,8 @@ namespace Mutator {
 		* TPGEdge from previous mutations, the function receives a list of
 		* preExisting TPGEdge from which the TPGEdge to copy should be chosen
 		* randomly. Any TPGEdge already connected to the TPGTeam is also
-		* excluded from the candidates.
+		* excluded from the candidates. If there is no valid TPGEdge candidate
+		* this function will throw an exception (check code for more details).
 		* The new TPGEdge will have the same destination TPGVertex and Program
 		* as the cloned one, but its source will be the give TPGTeam.
 		*
@@ -127,6 +128,36 @@ namespace Mutator {
 			const TPG::TPGEdge* edge,
 			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
 			const std::vector<const TPG::TPGAction*>& preExistingActions,
+			const Mutator::MutationParameters& params);
+
+		/**
+		* \brief Mutates a TPGTeam by stochastically adding, deleting, and 
+		* mutating the Program and destination of outgoing TPGEdge.
+		*
+		* This function successively:
+		* - removes outgoing TPGEdge from the TPGTeam,
+		* - adds outgoing TPGEdge to the TPGTeam
+		* - mutates the Program and destination of outgoing TPGEdge.
+		* Probabilities in given MutationParameters are used to control
+		* the application of previous mutations.
+		* 
+		* \param[in,out] graph the TPGGraph within which the team and edge are
+		*                stored.
+		* \param[in] archive Archive used to assess the uniqueness of the
+		*            mutated Program behavior.
+		* \param[in] team the source TPGTeam of the edge.
+		* \param[in] edge the TPGEdge whose destination will be altered.
+		* \param[in] preExistingTeams the TPGTeam candidates for destination.
+		* \param[in] preExistingActions the TPGAction candidates for
+		*            destination.
+		* \param[in] params Probability parameters for the mutation.
+		*/
+		void mutateTPGTeam(TPG::TPGGraph& graph,
+			const Archive& archive,
+			const TPG::TPGTeam& team,
+			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
+			const std::vector<const TPG::TPGAction*>& preExistingActions,
+			const std::list<const TPG::TPGEdge*>& preExistingEdges,
 			const Mutator::MutationParameters& params);
 	};
 };
