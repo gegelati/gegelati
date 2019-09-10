@@ -14,6 +14,7 @@
 #include "program/line.h"
 #include "program/programExecutionEngine.h"
 #include "tpg/tpgGraph.h"
+#include "tpg/tpgExecutionEngine.h"
 #include "mutator/rng.h"
 #include "mutator/lineMutator.h"
 #include "mutator/programMutator.h"
@@ -508,5 +509,35 @@ TEST_F(MutatorTest, TPGMutatorMutateEdgeDestination) {
 	params.tpg.pEdgeDestinationIsAction = 0.0; // even with a probability of 0.
 	ASSERT_NO_THROW(Mutator::TPGMutator::mutateEdgeDestination(tpg, vertex0, &edge0, { &vertex3, &vertex4 }, { &vertex2 }, params));
 	ASSERT_EQ(vertex2.getIncomingEdges().size(), 1) << "The only choice of action given to the mutation should have been used.";
+}
+
+TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge) {
+	// Init a TPG
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+	const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+
+	// Init its program and fill the archive
+	Mutator::MutationParameters params;
+	Archive arch;
+	TPG::TPGExecutionEngine tee(&arch);
+	params.prog.maxProgramSize = 96;
+	Mutator::ProgramMutator::initRandomProgram(*progPointer, params.prog.maxProgramSize);
+	tee.executeFromRoot(vertex0);
+
+	// Mutate
+	params.prog.pAdd = 0.5;
+	params.prog.pDelete = 0.5;
+	params.prog.pMutate = 1.0;
+	params.prog.pSwap = 1.0;
+	ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(tpg, arch, vertex0, &edge0, { &vertex0 }, { &vertex1 }, params));
+	// Check that progPointer use count was decreased since the mutated program is a copy of the original
+	ASSERT_EQ(progPointer.use_count(), 1) << "Shared pointer should no longer be used inside the TPG after mutation.";
+	// Verify new program uniqueness
+	Program::ProgramExecutionEngine pee(edge0.getProgram());
+	double result = pee.executeProgram();
+	ASSERT_TRUE(arch.isUnique(e->getDataSources(), result)) << "Mutated program associated to the edge should return a unique bid on the environment.";
+
 }
 }

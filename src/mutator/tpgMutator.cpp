@@ -3,10 +3,13 @@
 #include <numeric>
 #include <vector>
 
+#include "archive.h"
+
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgGraph.h"
+#include "program/programExecutionEngine.h"
 
 #include "mutator/mutationParameters.h"
 #include "mutator/rng.h"
@@ -174,4 +177,45 @@ void Mutator::TPGMutator::mutateEdgeDestination(TPG::TPGGraph& graph,
 	// Change the target
 	// Changing the target should not fail.
 	graph.setEdgeDestination(*edge, *target);
+}
+
+void Mutator::TPGMutator::mutateOutgoingEdge(TPG::TPGGraph& graph,
+	const Archive& archive,
+	const TPG::TPGTeam& team,
+	const TPG::TPGEdge* edge,
+	const std::vector<const TPG::TPGTeam*>& preExistingTeams,
+	const std::vector<const TPG::TPGAction*>& preExistingActions,
+	const Mutator::MutationParameters& params) {
+	// copy program
+	std::shared_ptr<Program::Program> newProg(new Program::Program(edge->getProgram()));
+	// Mutate its behavior until it changes (against the archive).
+	bool allUnique;
+	do {
+		allUnique = true;
+
+		// Mutate until something is mutated (i.e. the function returns true)
+		while (!Mutator::ProgramMutator::mutateProgram(*newProg, params.prog.pDelete, params.prog.pAdd, params.prog.maxProgramSize, params.prog.pMutate, params.prog.pSwap));
+		// Check for uniqueness in archive
+		auto archivedDataHandlers = archive.getDataHandlers();
+		for (std::pair<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>> archiveDatahandler : archivedDataHandlers) {
+			// Execute the mutated program on the archive data handlers
+			Program::ProgramExecutionEngine pee(*newProg, archiveDatahandler.second);
+			double result = pee.executeProgram();
+			// If the result is not unique, go directly to next mutation.
+			if (!archive.isUnique(archiveDatahandler.second, result)) {
+				allUnique = false;
+				break;
+			}
+		}
+	} while (!allUnique);
+
+	// Set the mutated program to the edge
+	edge->setProgram(newProg);
+
+	// Edge target modification
+	// As it Stephen kelly's work, Edge target modification is conditionned
+	// to the modification of the prealable Edge.Program behavior.
+	if (Mutator::RNG::getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationChange) {
+		mutateEdgeDestination(graph, team, edge, preExistingTeams, preExistingActions, params);
+	}
 }

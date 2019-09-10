@@ -2,6 +2,7 @@
 #define TPG_MUTATOR_H
 
 #include "mutator/mutationParameters.h"
+#include "archive.h"
 #include "tpg/tpgGraph.h"
 
 namespace Mutator {
@@ -93,6 +94,35 @@ namespace Mutator {
 		* \param[in] params Probability parameters for the mutation.
 		*/
 		void mutateEdgeDestination(TPG::TPGGraph& graph,
+			const TPG::TPGTeam& team,
+			const TPG::TPGEdge* edge,
+			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
+			const std::vector<const TPG::TPGAction*>& preExistingActions,
+			const Mutator::MutationParameters& params);
+
+		/**
+		* \brief Mutate the Program and the Destination of the given TPGEdge.
+		*
+		* This function mutates the behavior of the given TPGEdge Program, 
+		* using the ProgramMutator functions, until the Program behavior is 
+		* unique according to recordings held in the given Archive.
+		* The Program mutation is applid systematically, and a call to 
+		* MutateEdgeDestination is also made with a probability from the 
+		* given MutationParameters.
+		* 
+		* \param[in,out] graph the TPGGraph within which the team and edge are
+		*                stored.
+		* \param[in] archive Archive used to assess the uniqueness of the 
+		*            mutated Program behavior.
+		* \param[in] team the source TPGTeam of the edge.
+		* \param[in] edge the TPGEdge whose destination will be altered.
+		* \param[in] preExistingTeams the TPGTeam candidates for destination.
+		* \param[in] preExistingActions the TPGAction candidates for
+		*            destination.
+		* \param[in] params Probability parameters for the mutation.
+		*/
+		void mutateOutgoingEdge(TPG::TPGGraph& graph,
+			const Archive& archive,
 			const TPG::TPGTeam& team,
 			const TPG::TPGEdge* edge,
 			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
