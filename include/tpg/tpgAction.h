@@ -37,6 +37,11 @@ namespace TPG {
 		*/
 		virtual void addOutgoingEdge(TPGEdge* edge);
 
+		/**
+		* \brief Get the action ID associated to the TPGAction.
+		*
+		* \return the integer ID of the TPGAction.
+		*/
 		uint64_t getActionID() const { return this->actionID; };
 	};
 };

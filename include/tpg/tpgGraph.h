@@ -58,7 +58,7 @@ namespace TPG {
 		*
 		* The new TPGAction is added to the back of the vertices list.
 		*
-		* \param[in] actioID the identifier to associate to the TPGAction.
+		* \param[in] actionID the identifier to associate to the TPGAction.
 		* \return a const reference to the newly created TPGAction.
 		*/
 		const TPGAction& addNewAction(uint64_t actionID);
@@ -111,7 +111,7 @@ namespace TPG {
 		* \throw std::runtime_error if the given vertex does not belong to the
 		* TPGGraph.
 		*/
-		const TPGVertex& cloneVertex(const TPGVertex&);
+		const TPGVertex& cloneVertex(const TPGVertex& vertex);
 
 		/**
 		* \brief Add a new TPGEdge to the TPGGraph.
@@ -121,6 +121,11 @@ namespace TPG {
 		* inserted in the incoming and outgoing edges lists of the connected
 		* TPGVertex.
 		*
+		* \param[in] src the source TPGVertex of the newly created TPGEdge.
+		* \param[in] dest the destination TPGVertex of the newly created 
+		*                TPGEdge.
+		* \param[in] prog shared pointer to the Program associated to the newly
+		*                 created TPGEdge.
 		* \return a const reference to the created TPGEdge.
 		* \throw std::runtime_error In case one of the TPGVertex does not
 		*                           exist in the TPGGraph, or if the
@@ -180,7 +185,7 @@ namespace TPG {
 		* This function updates the TPGEdge attributes as well as those of all
 		* impacted TPGVertex.
 		* \param[in] edge a const reference to the modified TPGEdge.
-		* \param[in] newDest a const reference to the new source TPGVertex.
+		* \param[in] newSrc a const reference to the new source TPGVertex.
 		* \return true if the given edge and vertex are part of the graph, and
 		* the operation was successful, false otherwise.
 		*/
@@ -221,7 +226,7 @@ namespace TPG {
 		*         the searched edge pointer. If the given vertex pointer is
 		*         not in the vertices, then vertices.end() is returned.
 		*/
-		std::list<TPGEdge>::iterator findEdge(const TPGEdge* vertex);
+		std::list<TPGEdge>::iterator findEdge(const TPGEdge* edge);
 	};
 };
 

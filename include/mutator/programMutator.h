@@ -20,8 +20,7 @@ namespace Mutator {
 		* deleted by this function.
 		*
 		* \param[in,out] p the Program to initialize.
-		* \param[in] maxProgSize the maximum number of Line after
-		*            initialization.
+		* \param[in] params MutationParameters for the mutation.
 		*/
 		void initRandomProgram(Program::Program& p, const MutationParameters& params);
 
@@ -92,11 +91,7 @@ namespace Mutator {
 		* that no alteration is peformed.
 		*
 		* \param[in,out] p the Program whose line will be altered.
-		* \param[in] pDelete probability of deleting a line of the Program.
-		* \param[in] pAdd probability of inserting a line in the Program
-		* \param[in] maxProgramSize maximum number of lines of the Program.
-		* \param[in] pMutate probability of altering a line of the Program.
-		* \param[in] pSwap probability of swapping two lines of the Program.
+		* \param[in] params MutationParameters for the mutation.
 		* \return true if a modification was performed, false otherwise.
 		*/
 		bool mutateProgram(Program::Program& p, const MutationParameters& params);

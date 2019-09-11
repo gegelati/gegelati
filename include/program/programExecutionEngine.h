@@ -35,7 +35,7 @@ namespace Program {
 		* Program.
 		*
 		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
-		* \param[in] dataSources DataHandler for executing the Program.
+		* \param[in] dataSrc DataHandler for executing the Program.
 
 		*/
 		ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dataSrc) : program{ prog }, registers(prog.getEnvironment().getNbRegisters()), programCounter{ 0 } {

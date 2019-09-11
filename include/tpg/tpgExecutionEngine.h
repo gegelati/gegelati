@@ -26,9 +26,12 @@ namespace TPG {
 		/**
 		* \brief Main constructor of the class.
 		*
-		* \param[in] tpgGraph a const reference to the TPGGraph to execute.
+		* \param[in] arch pointer to the Archive for storing recordings of
+		*                 the Program Execution. By default, a NULL pointer is
+		*                 given, meaning that no recording of the execution
+		*                 will be made.
 		*/
-		TPGExecutionEngine(Archive * arch = NULL) : archive{ arch } {};
+		TPGExecutionEngine(Archive* arch = NULL) : archive{ arch } {};
 
 		/**
 		* \brief Execute the Program associated to an Edge and returns the
