@@ -141,3 +141,19 @@ TEST_F(ArchiveTest, DataHandlersAccessors) {
 	auto dhandlers = archive.getDataHandlers();
 	ASSERT_EQ(dhandlers.size(), 2);
 }
+
+TEST_F(ArchiveTest, Clear) {
+	Archive archive(4);
+
+	ASSERT_NO_THROW(archive.clear()) << "Clearing an empty archive should not fail.";
+
+	// Add a few fictive recordings
+	vect.at(0).get().updateHash();
+	vect.at(1).get().updateHash();
+	archive.addRecording(p, vect, 1.0);
+	archive.addRecording(p, vect, 1.5);
+
+	ASSERT_NO_THROW(archive.clear()) << "Clearing a non-empty archive should not fail.";
+	ASSERT_EQ(archive.getNbRecordings(), 0) << "Number or recordings in the archive is incorrect.";
+	ASSERT_EQ(archive.getNbDataHandlers(), 0) << "Number or dataHandlers copied in the archive is incorrect.";
+}

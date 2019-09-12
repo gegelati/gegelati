@@ -154,6 +154,11 @@ public:
 	*/
 	const std::map < size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>>& getDataHandlers() const;
 
+	/**
+	* \brief Clear all content from the Archive.
+	*/
+	void clear();
+
 };
 
 #endif

@@ -111,3 +111,16 @@ const std::map<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHand
 {
 	return this->dataHandlers;
 }
+
+void Archive::clear()
+{
+	for (auto dHandlerAndHash : this->dataHandlers) {
+		for (auto dHandler : dHandlerAndHash.second) {
+			// Free memory of DataHandlers within the archive
+			delete& dHandler.get();
+		}
+	}
+
+	this->dataHandlers.clear();
+	this->recordings.clear();
+}
