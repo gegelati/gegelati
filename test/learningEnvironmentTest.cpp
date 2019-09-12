@@ -72,9 +72,7 @@ TEST(LearningEnvironmentTest, getScoreAndIsTerminal) {
 	actions = { 0, 1, 2 , 2, 0, 0 };
 	for (auto action : actions) {
 		ASSERT_FALSE(le.isTerminal()) << "With a known seed and action sequence, the game should not be over.";
-		std::cout << (int)nbSticks << " - " << (action + 1) << " - ";
 		le.doAction(action);
-		std::cout << (int)nbSticks << std::endl;
 	}
 	ASSERT_TRUE(le.isTerminal()) << "With a known seed and action sequence, the game should be over.";
 	ASSERT_EQ(le.getScore(), 1.0) << "Score when winning the game should be 1.0.";

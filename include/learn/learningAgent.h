@@ -1,6 +1,8 @@
 #ifndef LEARNING_AGENT_H
 #define LEARNING_AGENT_H
 
+#include <map>
+
 #include "instructions/set.h"
 #include "environment.h"
 #include "archive.h"
@@ -68,12 +70,18 @@ namespace Learn {
 		* TPGVertex is evaluated nbIteration times. The generationNumber is 
 		* combined with the current iteration number to generate a set of 
 		* seeds for evaluating the policy.
-		* The method returns the average score for this policy, and the 
-		* average number of actions for each evaluation.
+		* The method returns the average score for this policy.
 		*/
-		std::pair<double, double> evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval);
+		double evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval);
 
-
+		/**
+		* \brief Evaluate all root TPGVertex of the TPGGraph.
+		*
+		* This method calls the evaluateRoot method for every root TPGVertex
+		* of the TPGGraph. The method returns a sorted map associating each root 
+		* vertex to its average score.
+		*/
+		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval);
 	};
 };
 

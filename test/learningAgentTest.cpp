@@ -56,7 +56,16 @@ TEST_F(LearningAgentTest, EvalRoot) {
 	Learn::LearningAgent la(le, set, params);
 
 	la.init();
-	std::pair<double, double> result;
+	double result;
 	ASSERT_NO_THROW(result = la.evaluateRoot(*la.getTPGGraph().getRootVertices().at(0), 0, 10, 11)) << "Evaluation from a root failed.";
-	ASSERT_LE(result.second, 11) << "Average number of actions should not exceed the given limit.";
+	ASSERT_LE(result, 1.0) << "Average score should not exceed the score of a perfect player.";
+}
+
+TEST_F(LearningAgentTest, EvalAllRoots) {
+	Learn::LearningAgent la(le, set, params);
+
+	la.init();
+	std::multimap<double, const TPG::TPGVertex*> result;
+	ASSERT_NO_THROW(result = la.evaluateAllRoots(0, 10, 11)) << "Evaluation from a root failed.";
+	ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }

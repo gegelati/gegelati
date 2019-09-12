@@ -20,10 +20,10 @@ void Learn::LearningAgent::init(uint64_t seed) {
 	this->archive.clear();
 }
 
-std::pair<double, double> Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval)
+double Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval)
 {
 	// Init results
-	std::pair<double, double> result = { 0.0,0.0 };
+	double result = 0.0;
 
 	// Create the exec engine
 	TPG::TPGExecutionEngine tee(&this->archive);
@@ -48,8 +48,19 @@ std::pair<double, double> Learn::LearningAgent::evaluateRoot(const TPG::TPGVerte
 		}
 
 		// Update results
-		result.first += this->learningEnvironment.getScore() / (double)nbIterations;
-		result.second += (double)nbActions / (double)nbIterations;
+		result += this->learningEnvironment.getScore() / (double)nbIterations;
 	}
+	return result;
+}
+
+std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval)
+{
+	std::multimap<double, const TPG::TPGVertex*> result;
+
+	for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
+		double avgScore = this->evaluateRoot(*root, generationNumber, nbIterations, maxNbActionsPerEval);
+		result.insert({ avgScore, root });
+	}
+
 	return result;
 }
