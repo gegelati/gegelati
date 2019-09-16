@@ -79,3 +79,44 @@ void Learn::LearningAgent::trainOneGeneration(double ratioDeletedRoots, uint64_t
 		results.erase(results.begin());
 	}
 }
+
+uint64_t Learn::LearningAgent::train(volatile bool& altTraining, bool printProgressBar, double ratioDeletedRoots, uint64_t nbGenerations, uint64_t nbIterations, uint64_t maxNbActionsPerEval)
+{
+	const int barLength = 50;
+	uint64_t generationNumber = 0;
+
+	while (!altTraining && generationNumber < nbGenerations) {
+		// Train one generation
+		trainOneGeneration(ratioDeletedRoots, generationNumber, nbIterations, maxNbActionsPerEval);
+		generationNumber++;
+
+		// Print progressBar (homemade, probably not ideal)
+		if (printProgressBar) {
+			printf("\rTraining ["); // back
+			// filling ratio
+			double ratio = (double)generationNumber / (double)nbGenerations;
+			int filledPart = (int)((double)ratio * (double)barLength);
+			// filled part 
+			for (int i = 0; i < filledPart; i++) {
+				printf("%c", (char)219);
+			}
+
+			// empty part 
+			for (int i = filledPart; i < barLength; i++) {
+				printf(" ");
+			}
+
+			printf("] %4.2f%%", ratio * 100.00);
+		}
+	}
+
+	if (printProgressBar) {
+		if (!altTraining) {
+			printf("\nTraining completed\n");
+		}
+		else {
+			printf("\nTraining alted at generation %lld.\n", generationNumber);
+		}
+	}
+	return generationNumber;
+}

@@ -48,7 +48,7 @@ namespace Learn {
 
 		/**
 		* \brief Getter for the TPGGraph built by the LearningAgent.
-		* 
+		*
 		* \return Get a reference to the TPGGraph.
 		*/
 		TPG::TPGGraph& getTPGGraph();
@@ -66,9 +66,9 @@ namespace Learn {
 		/**
 		* \brief Evaluates policy starting from the given root.
 		*
-		* The policy, that is, the TPGGraph execution starting from the given 
-		* TPGVertex is evaluated nbIteration times. The generationNumber is 
-		* combined with the current iteration number to generate a set of 
+		* The policy, that is, the TPGGraph execution starting from the given
+		* TPGVertex is evaluated nbIteration times. The generationNumber is
+		* combined with the current iteration number to generate a set of
 		* seeds for evaluating the policy.
 		* The method returns the average score for this policy.
 		*/
@@ -78,7 +78,7 @@ namespace Learn {
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
 		*
 		* This method calls the evaluateRoot method for every root TPGVertex
-		* of the TPGGraph. The method returns a sorted map associating each root 
+		* of the TPGGraph. The method returns a sorted map associating each root
 		* vertex to its average score, in ascending order or score.
 		*/
 		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval);
@@ -92,6 +92,19 @@ namespace Learn {
 		* - Removing from tge TPGGraph the worst performing root TPGVertex.
 		*/
 		void trainOneGeneration(double ratioDeletedRoots, uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval);
+
+		/**
+		* \brief Train the TPGGraph for a given number of generation.
+		*
+		* The method trains the TPGGraph for a given number of generation,
+		* unless the referenced boolean value becomes false (evaluated at each
+		* generation).
+		* Optionally, a simple progress bar can be printed within the terminal.
+		*
+		* \return the number of completed generations.
+		*/
+		uint64_t train(volatile bool& altTraining, bool printProgressBar, double ratioDeletedRoots, uint64_t nbGenerations, uint64_t nbIterations, uint64_t maxNbActionsPerEval);
+
 	};
 };
 

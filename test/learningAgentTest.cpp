@@ -77,3 +77,14 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 	ASSERT_NO_THROW(la.trainOneGeneration(0.2, 0, 3, 11)) << "Training for one generation failed.";
 	ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), params.tpg.nbRoots - ceil(0.2 * params.tpg.nbRoots)) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }
+
+TEST_F(LearningAgentTest, Train) {
+	Learn::LearningAgent la(le, set, params);
+
+	la.init();
+	bool alt = false;
+
+	ASSERT_NO_THROW(la.train(alt, true, 0.2, 3, 3, 11)) << "Training a TPG for several generation should not fail.";
+	alt = true;
+	ASSERT_NO_THROW(la.train(alt, true, 0.2, 3, 3, 11)) << "Using the boolean reference to stop the training should not fail.";
+}
