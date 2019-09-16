@@ -50,8 +50,8 @@ TEST(LearningEnvironmentTest, getScoreAndIsTerminal) {
 	const PrimitiveType<int>& nbSticks = (const PrimitiveType<int>&)le.getDataSources().at(1).get().getDataAt(typeid(PrimitiveType<int>), 0);
 
 	// Play the full game and lose with known seed (0)
-	auto actions = { 0, 1, 2 , 2, 2, 0 };
-	for (auto action : actions) {
+	std::vector<int> actions = { 0, 1, 2, 2, 2, 0 };
+	for (auto& action : actions) {
 		ASSERT_FALSE(le.isTerminal()) << "With a known seed and action sequence, the game should not be over.";
 		le.doAction(action);
 	}
@@ -60,8 +60,8 @@ TEST(LearningEnvironmentTest, getScoreAndIsTerminal) {
 	ASSERT_EQ(le.getScore(), 0.0) << "Score when losing the game should be 0.";
 
 	le.reset(0);
-	actions = { 0, 1, 2 , 2, 2, 1 };
-	for (auto action : actions) {
+	actions = { 0, 1, 2, 2, 2, 1 };
+	for (auto& action : actions) {
 		ASSERT_FALSE(le.isTerminal()) << "With a known seed and action sequence, the game should not be over.";
 		le.doAction(action);
 	}

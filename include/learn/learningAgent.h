@@ -79,9 +79,19 @@ namespace Learn {
 		*
 		* This method calls the evaluateRoot method for every root TPGVertex
 		* of the TPGGraph. The method returns a sorted map associating each root 
-		* vertex to its average score.
+		* vertex to its average score, in ascending order or score.
 		*/
 		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval);
+
+		/**
+		* \brief Train the TPGGraph for one generation.
+		*
+		* Training for one generation includes:
+		* - Populating the TPGGraph according to given MutationParameters.
+		* - Evaluating all roots of the TPGGraph. (call to evaluateAllRoots)
+		* - Removing from tge TPGGraph the worst performing root TPGVertex.
+		*/
+		void trainOneGeneration(double ratioDeletedRoots, uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval);
 	};
 };
 

@@ -20,7 +20,7 @@ protected:
 		// Proba as in Kelly's paper
 		params.tpg.maxInitOutgoingEdges = 3;
 		params.prog.maxProgramSize = 96;
-		params.tpg.nbRoots = 7;
+		params.tpg.nbRoots = 15;
 		params.tpg.pEdgeDeletion = 0.7;
 		params.tpg.pEdgeAddition = 0.7;
 		params.tpg.pProgramMutation = 0.2;
@@ -68,4 +68,12 @@ TEST_F(LearningAgentTest, EvalAllRoots) {
 	std::multimap<double, const TPG::TPGVertex*> result;
 	ASSERT_NO_THROW(result = la.evaluateAllRoots(0, 10, 11)) << "Evaluation from a root failed.";
 	ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
+}
+
+TEST_F(LearningAgentTest, TrainOnegeneration) {
+	Learn::LearningAgent la(le, set, params);
+
+	la.init();
+	ASSERT_NO_THROW(la.trainOneGeneration(0.2, 0, 3, 11)) << "Training for one generation failed.";
+	ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), params.tpg.nbRoots - ceil(0.2 * params.tpg.nbRoots)) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }

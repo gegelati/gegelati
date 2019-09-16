@@ -64,3 +64,18 @@ std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRo
 
 	return result;
 }
+
+void Learn::LearningAgent::trainOneGeneration(double ratioDeletedRoots, uint64_t generationNumber, uint64_t nbIterations, uint64_t maxNbActionsPerEval)
+{
+	// Populate
+	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params);
+
+	// Evaluate
+	auto results = this->evaluateAllRoots(generationNumber, nbIterations, maxNbActionsPerEval);
+
+	// Remove worst performing roots
+	for (auto i = 0; i < floor(ratioDeletedRoots * params.tpg.nbRoots); i++) {
+		tpg.removeVertex(*results.begin()->second);
+		results.erase(results.begin());
+	}
+}
