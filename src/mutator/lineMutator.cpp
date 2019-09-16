@@ -88,7 +88,9 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 	}
 
 	// set line operand info
-	line.setOperand(operandIdx, operandDataSourceIndex, operandLocation);
+	if (operandFound) {
+		line.setOperand(operandIdx, operandDataSourceIndex, operandLocation);
+	}
 
 	return operandFound;
 }
@@ -191,7 +193,13 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
 			// Alter the operator if needed
 			if (!isValid) {
 				// Force only the change of data source (location can remain unchanged thanks to scaling).
-				initRandomCorrectLineOperand(instruction, line, i, true, false, true);
+				bool forcedChangeWorked = initRandomCorrectLineOperand(instruction, line, i, true, false, true);
+				if (!forcedChangeWorked) {
+					// in case the forced change didn't work, the only data source providing data 
+					// for the instruction IS the one already used. In such a case, switch to a location
+					// change to have a mutation.
+					initRandomCorrectLineOperand(instruction, line, i, false, true, true);
+				}
 			}
 		}
 	}
