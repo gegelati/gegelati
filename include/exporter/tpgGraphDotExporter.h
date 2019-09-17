@@ -22,13 +22,19 @@ namespace Exporter {
 
 		std::map<const TPG::TPGVertex*, uint64_t> vertexID;
 
+		std::map<const Program::Program*, uint64_t> programID;
+
+		uint64_t nbActions;
+
 		uint64_t findVertexID(const TPG::TPGVertex&);
+
+		bool findProgramID(const Program::Program& prog, uint64_t& id);
 
 		void printTPGVertex(const TPG::TPGVertex& vertex);
 
 		void printTPGTeam(const TPG::TPGTeam& team);
 
-		void printTPGAction(const TPG::TPGAction& action);
+		uint64_t printTPGAction(const TPG::TPGAction& action);
 
 		void printTPGEdge(const TPG::TPGEdge& edge);
 
@@ -40,7 +46,7 @@ namespace Exporter {
 		/**
 		* \brief Constructor for the exporter.
 		*/
-		TPGGraphDotExporter(const char* filePath, const TPG::TPGGraph& graph) : pFile{ NULL }, tpg{ graph }, offset{ "" } {
+		TPGGraphDotExporter(const char* filePath, const TPG::TPGGraph& graph) : pFile{ NULL }, tpg{ graph }, offset{ "" }, nbActions{0} {
 			if ((pFile = fopen(filePath, "w")) == NULL) {
 				throw std::runtime_error("Could not open file " + std::string(filePath));
 			}
