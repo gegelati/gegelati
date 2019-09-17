@@ -75,7 +75,13 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
 	// Remove worst performing roots
 	for (auto i = 0; i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots); i++) {
-		tpg.removeVertex(*results.begin()->second);
+		// If the root is an action, do not remove it!
+		if (typeid(*results.begin()->second) != typeid(TPG::TPGAction)) {
+			tpg.removeVertex(*results.begin()->second);
+		}
+		else {
+			i--; // no vertex was actually removed
+		}
 		results.erase(results.begin());
 	}
 }
