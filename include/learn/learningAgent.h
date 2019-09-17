@@ -112,6 +112,12 @@ namespace Learn {
 		*/
 		uint64_t train(volatile bool& altTraining, bool printProgressBar);
 
+		/**
+		* \brief This method evaluates all roots and only keeps the one
+		* leading to the best average score in the TPGGraph.
+		*/
+		void keepBestPolicy();
+
 	};
 };
 

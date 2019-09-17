@@ -126,3 +126,22 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining, bool printProgr
 	}
 	return generationNumber;
 }
+
+void Learn::LearningAgent::keepBestPolicy()
+{
+	// Evaluate all roots
+	auto results = this->evaluateAllRoots(0);
+	auto iterResults = results.begin();
+	std::advance(iterResults, results.size() - 1);
+	auto bestRoot = iterResults->second;
+
+	// Remove all but the best root from the tpg
+	while (this->tpg.getNbRootVertices() != 1) {
+		auto roots = this->tpg.getRootVertices();
+		for (auto root : roots) {
+			if (root != bestRoot) {
+				tpg.removeVertex(*root);
+			}
+		}
+	}
+}

@@ -124,3 +124,19 @@ TEST_F(LearningAgentTest, Train) {
 	alt = true;
 	ASSERT_NO_THROW(la.train(alt, true)) << "Using the boolean reference to stop the training should not fail.";
 }
+
+TEST_F(LearningAgentTest, KeepBestPolicy) {
+	params.archiveSize = 50;
+	params.maxNbActionsPerEval = 11;
+	params.nbIterationsPerPolicyEvaluation = 1;
+	params.ratioDeletedRoots = 0.2;
+	params.nbGenerations = 5;
+
+	Learn::LearningAgent la(le, set, params);
+	la.init();
+	bool alt = false;
+	la.train(alt, true);
+
+	ASSERT_NO_THROW(la.keepBestPolicy()) << "Keeping the best policy after training should not fail.";
+	ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), 1) << "A single root TPGVertex should remain in the TPGGraph when keeping the best policy only";
+}
