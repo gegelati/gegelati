@@ -1,3 +1,6 @@
+#ifndef STICK_GAME_WITH_OPPONENT_H
+#define STICK_GAME_WITH_OPPONENT_H
+
 #include <random>
 
 #include "dataHandlers/primitiveTypeArray.h"
@@ -57,3 +60,5 @@ public:
 	virtual bool isTerminal() const override;
 
 };
+
+#endif
