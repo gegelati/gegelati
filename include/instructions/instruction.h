@@ -70,7 +70,7 @@ namespace Instructions {
 		*/
 		virtual double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::reference_wrapper<const SupportedType>>& args) const;
+			const std::vector<std::reference_wrapper<const SupportedType>>& args) const = 0;
 
 	protected:
 		/**

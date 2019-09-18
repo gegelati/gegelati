@@ -1,18 +1,20 @@
 #include <gtest/gtest.h>
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
+#include "instructionsTest.h"
 
 TEST(InstructionsTest, ConstructorDestructorCall) {
 	ASSERT_NO_THROW({
-		Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
+		Instructions::Instruction * i = new Instructions::AddPrimitiveType<double>();
 	delete i;
 		}) << "Call to constructor for AddPrimitiveType<double> failed.";
 
 
 
 	ASSERT_NO_THROW({
-	Instructions::Instruction* i = new Instructions::AddPrimitiveType<int>();
+	Instructions::Instruction * i = new Instructions::AddPrimitiveType<int>();
 	delete i;
 		}) << "Call to constructor for AddPrimitiveType<int> failed.";
 
@@ -88,6 +90,25 @@ TEST(InstructionsTest, Execute) {
 	ASSERT_EQ(i->execute({ p }, vect), 5.2) << "Execute method of MultByConstParam<double,int> returns an incorrect value with valid operands.";
 	ASSERT_EQ(i->execute({ }, vect), 0.0) << "Execute method of MultByConstParam<double,int> returns an incorrect value with invalid params.";
 	delete i;
+}
+
+TEST(InstructionsTest, LambdaInstruction) {
+	PrimitiveType<double> a{ 2.6 };
+	PrimitiveType<double> b = 5.5;
+	PrimitiveType<int> c = 3;
+
+	std::vector<std::reference_wrapper<const SupportedType>> vect;
+	vect.push_back(a);
+	vect.push_back(b);
+
+	auto minus = [](double a, double b) {return a - b; };
+
+	Instructions::LambdaInstruction<double>* instruction;
+	ASSERT_NO_THROW(instruction = new Instructions::LambdaInstruction<double>(minus)) << "Constructing a new lambdaInstruction failed.";
+
+	ASSERT_EQ(instruction->execute({}, vect), -2.9) << "Result returned by the instruction is not as expected.";
+
+	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";
 }
 
 TEST(InstructionsTest, SetAdd) {
