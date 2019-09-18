@@ -111,7 +111,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 TEST_F(LearningAgentTest, Train) {
 	params.archiveSize = 50;
 	params.maxNbActionsPerEval = 11;
-	params.nbIterationsPerPolicyEvaluation = 3;
+	params.nbIterationsPerPolicyEvaluation = 5;
 	params.ratioDeletedRoots = 0.2;
 	params.nbGenerations = 3;
 
