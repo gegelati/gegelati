@@ -31,14 +31,14 @@ namespace Instructions {
 		* Instruction added to the set are stored and indexed in the order in which they are added.
 		*
 		* \param[in] instruction the Instruction to be added to the Set.
-		* \return true if the instruction was successfully added, false if it was already present in the set.
+		* \return true if the instruction was successfully added.
 		*/
 		bool add(const Instruction& instruction);
 
 		/**
-		* \brief Get the number of unique Instruction contained in the Set.
+		* \brief Get the number of Instruction contained in the Set.
 		*
-		* \return the int corresponding to the number of unique Instruction in the Set.
+		* \return the int corresponding to the number of Instruction in the Set.
 		*/ 
 		unsigned int getNbInstructions() const;
 

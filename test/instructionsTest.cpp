@@ -119,7 +119,8 @@ TEST(InstructionsTest, SetAdd) {
 	Instructions::MultByConstParam<int, int16_t> iMult3;
 
 	ASSERT_TRUE(s.add(iMult)) << "Add of instruction to empty Instructions::Set failed.";
-	ASSERT_FALSE(s.add(iMult2)) << "Add of instruction already present in an Instructions::Set did not fail.";
+	// Adding equivalent instructions is no longer forbidden.
+	ASSERT_TRUE(s.add(iMult2)) << "Add of instruction already present in an Instructions::Set should not fail.";
 	ASSERT_TRUE(s.add(iMult3)) << "Add of instruction to non empty Instructions::Set failed. (with a template instruction with different template param than an already present one";
 }
 
