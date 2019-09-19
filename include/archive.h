@@ -51,6 +51,18 @@ protected:
 	*/
 	std::map<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>> dataHandlers;
 
+	/**
+	* \brief Map storing the Program pointers referenced in recordings the 
+	* associated recording.
+	*
+	* The Map is filled in the addRecording method, and elements are removed 
+	* whenever the las ArchiveRecording referencing a Program is removed from 
+	* the Archive.
+	*
+	* The Map is used to speed the unicity tests.
+	*/
+	std::map<const Program::Program*, std::deque<ArchiveRecording>> recordingsPerProgram;
+
 	/// Recordings of the Archive
 	std::deque<ArchiveRecording> recordings;
 
@@ -88,8 +100,8 @@ public:
 	* If this is the first time this set of DataHandler is stored in the
 	* Archive according to its DataHandler::getHash() method, a copy of the
 	* dataHandler will be created.
-	* If an identical recording is already in the Archive (same hash, same
-	* result, possibly different Program), the recording is not added.
+	* If an identical recording is already in the Archive (same hash, same 
+	* Program), the recording is not added.
 	*
 	* \param[in] program the Program associated to this recording.
 	* \param[in] dHandler the set of dataHandler the Program worked on to
@@ -123,6 +135,20 @@ public:
 	bool isRecordingExisting(
 		size_t hash,
 		const Program::Program* prog) const;
+
+	/**
+	* Check if the given hash-results pairs are unique compared to Program in 
+	* the Archive.
+	*
+	* This method will return false is there exist any Program in the Archive
+	* for which all recordings with hashes contained in the given map, are 
+	* associated to results equal to those of the given map (within tau 
+	* margin).
+	*/
+	bool areProgramResultsUnique(
+		std::map<size_t, double> hashesAndResults,
+		double tau = 1e-4
+	) const;
 
 	/**
 	* \brief Get the number of recordings currently held in the Archive.

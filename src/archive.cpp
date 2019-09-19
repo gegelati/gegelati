@@ -23,11 +23,11 @@ size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHan
 }
 
 void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result)
-{	
+{
 	// get the combined hash
 	size_t hash = getCombinedHash(dHandler);
 
-	// Check is an identical recording (same hash, same result) already exists.
+	// Check is an identical recording (same hash, same program) already exists.
 	// Program may be different
 	if (this->isRecordingExisting(hash, program)) {
 		return;
@@ -46,7 +46,17 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 	}
 
 	// Create and stores the recording
-	this->recordings.push_back({ program, hash, result });
+	ArchiveRecording recording{ program, hash, result };
+	this->recordings.push_back(recording);
+
+	// Update the recordings per Program
+	auto iterNbRecordings = this->recordingsPerProgram.find(program);
+	if (iterNbRecordings != this->recordingsPerProgram.end()) {
+		iterNbRecordings->second.push_back(recording);
+	}
+	else {
+		this->recordingsPerProgram.insert({ program, {recording} });
+	}
 
 	// Check if Archive max size was reached (or exceeded)
 	while (this->recordings.size() > this->maxSize) {
@@ -69,6 +79,14 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 
 			// Remove the entry from the map
 			this->dataHandlers.erase(rec.dataHash);
+		}
+
+		// Update the recordingsPerProgram of the corresponding Program,
+		// and remove it if it was the last.
+		auto iter = this->recordingsPerProgram.find(rec.prog);
+		iter->second.pop_front();
+		if (iter->second.size() == 0) {
+			this->recordingsPerProgram.erase(iter);
 		}
 	}
 }
@@ -97,6 +115,11 @@ bool Archive::isRecordingExisting(
 	return  position != this->recordings.end();
 }
 
+bool Archive::areProgramResultsUnique(std::map<size_t, double> hashesAndResults, double tau) const
+{
+	return false;
+}
+
 size_t Archive::getNbRecordings() const
 {
 	return this->recordings.size();
@@ -123,4 +146,5 @@ void Archive::clear()
 
 	this->dataHandlers.clear();
 	this->recordings.clear();
+	this->recordingsPerProgram.clear();
 }
