@@ -77,7 +77,8 @@ TEST_F(ArchiveTest, AddRecordingTests) {
 	ASSERT_EQ(archive.getNbDataHandlers(), 1) << "Number or dataHandlers copied in the archive is incorrect.";
 
 	// Add other recordings with the same DataHandlers
-	ASSERT_NO_THROW(archive.addRecording(p, vect, 0.3)) << "Adding a recording to the non-empty archive failed.";
+	Program::Program p2(*e);
+	ASSERT_NO_THROW(archive.addRecording(&p2, vect, 0.3)) << "Adding a recording to the non-empty archive failed.";
 	ASSERT_EQ(archive.getNbRecordings(), 2) << "Number or recordings in the archive is incorrect.";
 	ASSERT_EQ(archive.getNbDataHandlers(), 1) << "Number or dataHandlers copied in the archive is incorrect.";
 
@@ -91,12 +92,13 @@ TEST_F(ArchiveTest, AddRecordingTests) {
 	ASSERT_EQ(archive.getNbDataHandlers(), 2) << "Number or dataHandlers copied in the archive is incorrect.";
 
 	// Reach the archive size limit.
-	ASSERT_NO_THROW(archive.addRecording(p, vect, 0.5)) << "Adding a recording to the full archive failed.";
+	ASSERT_NO_THROW(archive.addRecording(&p2, vect, 0.5)) << "Adding a recording to the full archive failed.";
 	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect.";
 	ASSERT_EQ(archive.getNbDataHandlers(), 2) << "Number or dataHandlers copied in the archive is incorrect.";
 
 	// Evict a recording again, and its DataHandler copy.
-	ASSERT_NO_THROW(archive.addRecording(p, vect, 1.5)) << "Adding a recording to the full archive failed.";
+	Program::Program p3(*e);
+	ASSERT_NO_THROW(archive.addRecording(&p3, vect, 1.5)) << "Adding a recording to the full archive failed.";
 	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect.";
 	ASSERT_EQ(archive.getNbDataHandlers(), 1) << "Number or dataHandlers copied in the archive is incorrect.";
 }
@@ -115,9 +117,9 @@ TEST_F(ArchiveTest, IsUnique) {
 	archive.addRecording(p, vect, 2.0);
 	archive.addRecording(p, vect, 2.3);
 
-	ASSERT_FALSE(archive.isUnique(vect, 2.0)) << "Values corresponding to a recording within the Archive is not detected as such.";
-	ASSERT_TRUE(archive.isUnique(vect, 2.5)) << "Values corresponding to a recording not within the Archive is not detected as such.";
-	ASSERT_FALSE(archive.isUnique(vect, 2.5, 0.21)) << "Values corresponding to a recording not in the Archive, but within the error margin tau, is not detected as such.";
+	ASSERT_TRUE(archive.isRecordingExisting(archive.getCombinedHash(vect) , p)) << "Values corresponding to a recording within the Archive is not detected as such.";
+	//ASSERT_FALSE(archive.isRecordingExisting(vect, 2.5)) << "Values corresponding to a recording not within the Archive is not detected as such.";
+	//ASSERT_TRUE(archive.isRecordingExisting(vect, 2.5, 0.21)) << "Values corresponding to a recording not in the Archive, but within the error margin tau, is not detected as such.";
 }
 
 TEST_F(ArchiveTest, DataHandlersAccessors) {
@@ -134,10 +136,10 @@ TEST_F(ArchiveTest, DataHandlersAccessors) {
 	archive.addRecording(p, vect, 2.0);
 	archive.addRecording(p, vect, 2.3);
 
-	ASSERT_TRUE(archive.hasDataHandlers(vect)) << "Data handler should be detected as present within the archive.";
+	ASSERT_TRUE(archive.hasDataHandlers(archive.getCombinedHash(vect))) << "Data handler should be detected as present within the archive.";
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(666));
 	vect.at(1).get().updateHash();
-	ASSERT_FALSE(archive.hasDataHandlers(vect)) << "Data handler should be detected as not present within the archive.";
+	ASSERT_FALSE(archive.hasDataHandlers(archive.getCombinedHash(vect))) << "Data handler should be detected as not present within the archive.";
 	auto dhandlers = archive.getDataHandlers();
 	ASSERT_EQ(dhandlers.size(), 2);
 }

@@ -205,7 +205,8 @@ void Mutator::TPGMutator::mutateOutgoingEdge(TPG::TPGGraph& graph,
 			Program::ProgramExecutionEngine pee(*newProg, archiveDatahandler.second);
 			double result = pee.executeProgram();
 			// If the result is not unique, go directly to next mutation.
-			if (!archive.isUnique(archiveDatahandler.second, result)) {
+			throw std::runtime_error("TODO: UPDATE WITh NEW UNICITY TEST");
+			if (/*!archive.isUnique(archiveDatahandler.second, result)*/ true) {
 				allUnique = false;
 				break;
 			}

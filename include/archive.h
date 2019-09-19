@@ -101,32 +101,28 @@ public:
 		double result);
 
 	/**
-	* \brief Check whether the given set of DataHandler is already in the archive.
+	* \brief Check whether the given hash is already in the archive.
 	*
-	* \param[in] dHandler the DataHandlers whose hash presence will be tested.
-	* \return true if the hash of the given dataHandlers is already in the
+	* \param[in] hash the DataHandler hash whose presence will be tested.
+	* \return true if the given hash is already in the
 	*         Archive, false otherwise.
 	*/
-	bool hasDataHandlers(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler) const;
+	bool hasDataHandlers(const size_t& hash) const;
+
 
 	/**
-	* \brief Check if a recording exists for the given DataHandler and result.
+	* \brief Check if a recording exists for the given Program and DataHandler.
 	*
-	* Check if there exists a recording in the archive that produces the same
-	* result for the same DataHandler. The result is considered to be equal
-	* if its absolute difference with one stored in the archive is below the
-	* given tau value.
+	* Check if there exists a recording in the Archive for the pair of DataHandler hash
+	* and the given Program.
 	*
-	* \param[in] dHandler the DataHandlers associated to the checked result.
-	* \param[in] result the checked result
-	* \param[in] tau the double value for testing the approximate equality.
-				(default is 10e-4)
+	* \param[in] hash The hash of the set of DataHandler for the searched recording.
+	* \param[in] prog the Program of the searched Recording.
 	* \return whether the check was successful or not.
 	*/
-	bool isUnique(
-		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
-		double result,
-		double tau = 10e-4) const;
+	bool isRecordingExisting(
+		size_t hash,
+		const Program::Program* prog) const;
 
 	/**
 	* \brief Get the number of recordings currently held in the Archive.

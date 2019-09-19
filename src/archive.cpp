@@ -23,15 +23,15 @@ size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHan
 }
 
 void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result)
-{
-	// Check is an identical recording (same hash, same result) already exists.
-	// Program may be different
-	if (!this->isUnique(dHandler, result)) {
-		return;
-	}
-
+{	
 	// get the combined hash
 	size_t hash = getCombinedHash(dHandler);
+
+	// Check is an identical recording (same hash, same result) already exists.
+	// Program may be different
+	if (this->isRecordingExisting(hash, program)) {
+		return;
+	}
 
 	// Check if dataHandler copy is needed.
 	if (this->dataHandlers.find(hash) == this->dataHandlers.end()) {
@@ -73,28 +73,28 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 	}
 }
 
-bool Archive::hasDataHandlers(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler) const
+bool Archive::hasDataHandlers(const size_t& hash) const
 {
-	size_t hash = getCombinedHash(dHandler);
 	return this->dataHandlers.count(hash) != 0;
 }
 
-bool Archive::isUnique(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result, double tau) const
+bool Archive::isRecordingExisting(
+	size_t hash,
+	const Program::Program* prog) const
 {
 	// If the hash does not exist, the result is unique since no recordings 
 	// correspond to it.
-	if (!hasDataHandlers(dHandler)) {
-		return true;
+	if (!hasDataHandlers(hash)) {
+		return false;
 	}
 
-	size_t hash = getCombinedHash(dHandler);
 	// Else, check the recordings with this hash.
-	auto equalityTester = [&hash, &result, &tau](const ArchiveRecording& rec) {
-		return hash == rec.dataHash && fabs(rec.result - result) <= tau;
+	auto equalityTester = [&hash, &prog](const ArchiveRecording& rec) {
+		return hash == rec.dataHash && prog == rec.prog;
 	};
 
 	std::deque<ArchiveRecording>::const_iterator position = std::find_if(this->recordings.begin(), this->recordings.end(), equalityTester);
-	return  position == this->recordings.end();
+	return  position != this->recordings.end();
 }
 
 size_t Archive::getNbRecordings() const
