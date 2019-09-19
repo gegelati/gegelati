@@ -31,7 +31,7 @@ Program::Line& Program::Program::addNewLine(const uint64_t idx)
 
 void Program::Program::removeLine(const uint64_t idx)
 {
-	free(this->lines.at(idx)); // throws std::out_of_range on bad index.
+	delete this->lines.at(idx); // throws std::out_of_range on bad index.
 	this->lines.erase(this->lines.begin() + idx);
 }
 
