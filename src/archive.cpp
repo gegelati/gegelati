@@ -117,7 +117,43 @@ bool Archive::isRecordingExisting(
 
 bool Archive::areProgramResultsUnique(std::map<size_t, double> hashesAndResults, double tau) const
 {
-	return false;
+	// Check programs until one is equivalent or until all have been checked.
+	for (auto programRecordings : this->recordingsPerProgram) {
+		// check all recordings "presence" within the hashesAndResults map.
+		bool isIdentical = false;
+		for (const auto& recording : programRecordings.second) {
+			// For each recording there are three possibilities
+			// 1- there is no result for this hash in the Map
+			//    > Nothing to do for this recording
+			// 2- there is a different result in the Map
+			//    > Put isIdentical to false and stop browsing the recordings for this program.
+			// 3- there is an "identical" (within tau margin) result in the Map
+			//    > Put the isIdentical to true. If at the end of all recordings the isIdentical is true
+			//    > The program bid behavior is marked as equivalent.
+			auto iter = hashesAndResults.find(recording.dataHash);
+			if (iter != hashesAndResults.end()) {
+				// Cases 2 & 3
+				if (std::abs(iter->second - recording.result) <= tau) {
+					// results are equivalent
+					isIdentical = true;
+				}
+				else {
+					isIdentical = false;
+					break; // break for recordings loop
+				}
+			}
+			else {
+				// Case 1 > do nothing
+			}
+		}
+
+		// If isIdentical is 1 => Programs have equivalent bidding behaviour
+		if (isIdentical) {
+			return false;
+		} // else, go to the next Program comparison
+	}
+
+	return true;
 }
 
 size_t Archive::getNbRecordings() const

@@ -117,9 +117,39 @@ TEST_F(ArchiveTest, IsUnique) {
 	archive.addRecording(p, vect, 2.0);
 	archive.addRecording(p, vect, 2.3);
 
-	ASSERT_TRUE(archive.isRecordingExisting(archive.getCombinedHash(vect) , p)) << "Values corresponding to a recording within the Archive is not detected as such.";
-	//ASSERT_FALSE(archive.isRecordingExisting(vect, 2.5)) << "Values corresponding to a recording not within the Archive is not detected as such.";
-	//ASSERT_TRUE(archive.isRecordingExisting(vect, 2.5, 0.21)) << "Values corresponding to a recording not in the Archive, but within the error margin tau, is not detected as such.";
+	ASSERT_TRUE(archive.isRecordingExisting(archive.getCombinedHash(vect), p)) << "Values corresponding to a recording within the Archive is not detected as such.";
+	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(42));
+	vect.at(1).get().updateHash();
+	ASSERT_FALSE(archive.isRecordingExisting(archive.getCombinedHash(vect), p)) << "Values corresponding to a recording not within the Archive is not detected as such.";
+}
+
+TEST_F(ArchiveTest, areProgramResultsUnique) {
+	Archive archive(4);
+	vect.at(0).get().updateHash();
+	vect.at(1).get().updateHash();
+	size_t hash1 = archive.getCombinedHash(vect);
+	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
+
+	// Add a few fictive recordings with p
+	archive.addRecording(p, vect, 1.0);
+	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
+	vect.at(1).get().updateHash();
+	size_t hash2 = archive.getCombinedHash(vect);
+	archive.addRecording(p, vect, 1.5);
+
+	// Add a few fictive recordings with p2
+	Program::Program p2(*e);
+	archive.addRecording(&p2, vect, 2.0);
+	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
+	vect.at(1).get().updateHash();
+	size_t hash3 = archive.getCombinedHash(vect);
+	archive.addRecording(&p2, vect, 2.5);
+
+	// results are entirely different
+	ASSERT_TRUE(archive.areProgramResultsUnique({ {hash1, 3.0}, {hash2, 3.5} })) << "Unique fake program bidding behavior not detected as such.";
+	ASSERT_FALSE(archive.areProgramResultsUnique({ {hash1, 0.0}, {hash2, 2.0}, {hash3, 2.5} })) << "Equal fake program bidding behavior not detected as such.";
+	ASSERT_FALSE(archive.areProgramResultsUnique({ {hash1, 1.2}, {hash2, 1.3}, {hash3, 3.5} }, 0.21)) << "Within margin fake program bidding behavior not detected as such.";
+
 }
 
 TEST_F(ArchiveTest, DataHandlersAccessors) {
