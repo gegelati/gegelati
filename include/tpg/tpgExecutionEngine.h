@@ -37,6 +37,9 @@ namespace TPG {
 		* \brief Execute the Program associated to an Edge and returns the
 		* obtained double.
 		*
+		* If an Archive is associated to the TPGExecutionEngine, the Program result
+		* is recorded in it.
+		*
 		* \param[in] edge the const ref to the TPGEdge whose Program will be
 		* evaluated.
 		* \return the double value returned by the Program of the TPGEdge.

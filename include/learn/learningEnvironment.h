@@ -53,6 +53,8 @@ namespace Learn {
 		* an actionId comprised between 0 and nbActions - 1.
 		* The LearningEnvironment implementation only checks that the given
 		* actionID is comprised between 0 and nbActions - 1.
+		* It is the responsibility of this method to call the updateHash 
+		* method on dataSources whose content have been affected by the action.
 		*
 		* \param[in] actionID the integer number representing the action to
 		* execute.
