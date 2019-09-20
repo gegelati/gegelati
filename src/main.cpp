@@ -117,7 +117,7 @@ int main() {
 	params.mutation.prog.pDelete = 0.5;
 	params.mutation.prog.pMutate = 1.0;
 	params.mutation.prog.pSwap = 1.0;
-	params.archiveSize = 0;
+	params.archiveSize = 50;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 100;
 	params.ratioDeletedRoots = 0.5;
