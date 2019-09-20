@@ -194,23 +194,20 @@ void Mutator::TPGMutator::mutateOutgoingEdge(TPG::TPGGraph& graph,
 	// Mutate its behavior until it changes (against the archive).
 	bool allUnique;
 	do {
-		allUnique = true;
-
 		// Mutate until something is mutated (i.e. the function returns true)
 		while (!Mutator::ProgramMutator::mutateProgram(*newProg, params));
 		// Check for uniqueness in archive
 		auto archivedDataHandlers = archive.getDataHandlers();
+		std::map<size_t, double> hashesAndResults;
 		for (std::pair<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>> archiveDatahandler : archivedDataHandlers) {
 			// Execute the mutated program on the archive data handlers
 			Program::ProgramExecutionEngine pee(*newProg, archiveDatahandler.second);
 			double result = pee.executeProgram();
-			// If the result is not unique, go directly to next mutation.
-			throw std::runtime_error("TODO: UPDATE WITh NEW UNICITY TEST");
-			if (/*!archive.isUnique(archiveDatahandler.second, result)*/ true) {
-				allUnique = false;
-				break;
-			}
+			hashesAndResults.insert({ archiveDatahandler.first, result });
 		}
+
+		// If the result is not unique, do another mutation.
+		allUnique = archive.areProgramResultsUnique(hashesAndResults);
 	} while (!allUnique);
 
 	// Set the mutated program to the edge
@@ -327,7 +324,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archi
 
 	// While the target is not reached, add new teams
 	uint64_t currentNumberOfRoot = rootVertices.size();
-	while ( params.tpg.nbRoots > currentNumberOfRoot) {
+	while (params.tpg.nbRoots > currentNumberOfRoot) {
 		// Select a random existing root
 		uint64_t clonedRootIndex = RNG::getUnsignedInt64(0, rootTeams.size() - 1);
 		// clone it (the vertex and all its outgoing edges)
