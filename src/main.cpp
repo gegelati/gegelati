@@ -113,6 +113,7 @@ int main() {
 	params.mutation.tpg.pProgramMutation = 0.2;
 	params.mutation.tpg.pEdgeDestinationChange = 0.1;
 	params.mutation.tpg.pEdgeDestinationIsAction = 0.5;
+	params.mutation.tpg.maxOutgoingEdges = 5;
 	params.mutation.prog.pAdd = 0.5;
 	params.mutation.prog.pDelete = 0.5;
 	params.mutation.prog.pMutate = 1.0;
