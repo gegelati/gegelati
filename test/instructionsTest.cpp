@@ -3,7 +3,6 @@
 #include "instructions/multByConstParam.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
-#include "instructionsTest.h"
 
 TEST(InstructionsTest, ConstructorDestructorCall) {
 	ASSERT_NO_THROW({

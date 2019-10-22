@@ -40,6 +40,13 @@ namespace Learn {
 		* \brief Constructor for LearningAgent.
 		*
 		* \param[in] le The LearningEnvironment for the TPG.
+		* \param[in] iSet Set of Instruction used to compose Programs in the
+		*            learning process.
+		* \param[in] p The LearningParameters for the LearningAgent.
+		* \param[in] nbRegs The number of registers for the execution
+		*                   environment of Program.
+		* \param[in] archiveSize The number of recordings stored in the
+		*                        Archive during the learning process.
 		*/
 		LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8, const size_t archiveSize = 50) :
 			learningEnvironment{ le },

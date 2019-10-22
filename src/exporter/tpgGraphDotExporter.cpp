@@ -32,10 +32,6 @@ bool Exporter::TPGGraphDotExporter::findProgramID(const Program::Program& prog, 
 	}
 }
 
-void Exporter::TPGGraphDotExporter::printTPGVertex(const TPG::TPGVertex& vertex)
-{
-}
-
 void Exporter::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 {
 	uint64_t name = this->findVertexID(team);

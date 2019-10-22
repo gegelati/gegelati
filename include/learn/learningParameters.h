@@ -7,10 +7,12 @@
 
 namespace Learn {
 	/**
-	* \brief Structure for simplifying the transmission of LearningParameters 
+	* \brief Structure for simplifying the transmission of LearningParameters
 	* to functions.
-	*/	
+	*/
 	typedef struct LearningParameters {
+		/// MutationParameters for controlling stochastic aspects of the learning 
+		/// process.
 		Mutator::MutationParameters mutation;
 		/// Number of recordings held in the Archive.
 		size_t archiveSize;
