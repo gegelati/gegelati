@@ -107,6 +107,11 @@ TEST(InstructionsTest, LambdaInstruction) {
 
 	ASSERT_EQ(instruction->execute({}, vect), -2.9) << "Result returned by the instruction is not as expected.";
 
+	// Execute with wrong types of operands.
+	vect.pop_back();
+	vect.push_back(c);
+	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
+
 	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";
 }
 
