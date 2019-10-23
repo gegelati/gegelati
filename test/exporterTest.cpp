@@ -75,7 +75,7 @@ protected:
 		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(6), progPointers.at(8)));
 
 		// Check the characteristics
-		ASSERT_EQ(tpg->getVertices().size(), 8);
+		ASSERT_EQ(tpg->getNbVertices(), 8);
 		ASSERT_EQ(tpg->getEdges().size(), 9);
 		ASSERT_EQ(tpg->getRootVertices().size(), 2);
 	}

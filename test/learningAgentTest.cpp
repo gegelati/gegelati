@@ -93,11 +93,11 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 	// Do the populate call to keep know the number of initial vertex
 	Archive a(0);
 	Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation );
-	int initialNbVertex = la.getTPGGraph().getVertices().size();
+	int initialNbVertex = la.getTPGGraph().getNbVertices();
 	ASSERT_NO_THROW(la.trainOneGeneration(0)) << "Training for one generation failed.";
 	// Check the number of vertex in the graph.
 	// Must be initial number of vertex - number of root removed
-	ASSERT_EQ(la.getTPGGraph().getVertices().size(), initialNbVertex - floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots)) << "Number of remaining is under the number of roots from the TPGGraph.";
+	ASSERT_EQ(la.getTPGGraph().getNbVertices(), initialNbVertex - floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots)) << "Number of remaining is under the number of roots from the TPGGraph.";
 	// Train a second generation, because most roots were removed, a root actions have appeared
 	// and the training algorithm will attempt to remove them.
 	ASSERT_NO_THROW(la.trainOneGeneration(0)) << "Training for one generation failed.";

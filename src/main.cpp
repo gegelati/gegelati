@@ -143,7 +143,7 @@ int main() {
 		double avg = std::accumulate(result.begin(), result.end(), 0.0,
 			[](double acc, std::pair<double, const TPG::TPGVertex*> pair)->double {return acc + pair.first; });
 		avg /= result.size();
-		printf("%2d\t%lld\t%1.2lf\t%1.2lf\t%1.2lf\n", i, la.getTPGGraph().getVertices().size(), min, avg, max);
+		printf("%2d\t%lld\t%1.2lf\t%1.2lf\t%1.2lf\n", i, la.getTPGGraph().getNbVertices(), min, avg, max);
 		//std::cout << i << "\t" << min << "\t" << avg << "\t" << max << std::endl;
 		la.trainOneGeneration(i);
 

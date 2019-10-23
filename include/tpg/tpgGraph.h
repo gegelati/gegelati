@@ -64,6 +64,13 @@ namespace TPG {
 		const TPGAction& addNewAction(uint64_t actionID);
 
 		/**
+		* \brief Get the number of TPGVertex contained in the TPGGraph.
+		*
+		* \return the size of the vertices attribute.
+		*/
+		size_t getNbVertices() const;
+
+		/**
 		* \brief Get vector of const pointer to the vertices of the TPGGraph.
 		*
 		* Content of the retrieved vector is valid only as long as no non-const

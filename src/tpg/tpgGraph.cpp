@@ -37,6 +37,11 @@ const TPG::TPGAction& TPG::TPGGraph::addNewAction(uint64_t actionID)
 	return (const TPGAction&)(*this->vertices.back());
 }
 
+size_t TPG::TPGGraph::getNbVertices() const
+{
+	return this->vertices.size();
+}
+
 const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getVertices() const
 {
 	std::vector<const TPG::TPGVertex*> result(this->vertices.size());

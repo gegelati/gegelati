@@ -139,6 +139,13 @@ TEST_F(TPGTest, TPGGraphAddTPGVertex) {
 
 }
 
+TEST_F(TPGTest, TPGGraphGetNbVertices) {
+	TPG::TPGGraph tpg(*e);
+	tpg.addNewTeam();
+	tpg.addNewAction(0);
+	ASSERT_EQ(tpg.getNbVertices(), 2) << "Number of vertices in the TPGGraph is incorrect.";
+}
+
 TEST_F(TPGTest, TPGGraphGetVertices) {
 	TPG::TPGGraph tpg(*e);
 	const TPG::TPGVertex& vertex = tpg.addNewTeam();
@@ -219,14 +226,14 @@ TEST_F(TPGTest, TPGGraphRemoveVertex) {
 
 
 	ASSERT_NO_THROW(tpg.removeVertex(vertex0)) << "Removing a vertex from the graph failed.";
-	ASSERT_EQ(tpg.getVertices().size(), 2) << "Number of vertices of the TPG is incorrect after removing a TPGVertex.";
+	ASSERT_EQ(tpg.getNbVertices(), 2) << "Number of vertices of the TPG is incorrect after removing a TPGVertex.";
 	ASSERT_EQ(tpg.getVertices().front(), &vertex1) << "Remaining vertex after removal is not correct.";
 	ASSERT_EQ(tpg.getVertices().back(), &vertex2) << "Remaining vertex after removal is not correct.";
 
 	// Try to remove a vertex not from the graph
 	TPG::TPGAction vertex3(3);
 	ASSERT_NO_THROW(tpg.removeVertex(vertex3)) << "Removing a vertex from the graph (although it is not inside) throwed an exception.";
-	ASSERT_EQ(tpg.getVertices().size(), 2) << "Number of vertices of the TPG is incorrect after removing a TPGVertex not from the graph.";
+	ASSERT_EQ(tpg.getNbVertices(), 2) << "Number of vertices of the TPG is incorrect after removing a TPGVertex not from the graph.";
 
 	// Add a new edge to test removal of vertex connectet to an edge.
 	tpg.addNewEdge(vertex2, vertex1, progPointer);
@@ -254,7 +261,7 @@ TEST_F(TPGTest, TPGGraphClear) {
 	const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
 	ASSERT_NO_THROW(tpg.clear()) << "Clearing a non empty graph failed.";
-	ASSERT_EQ(tpg.getVertices().size(), 0) << "Cleared graph is not empty of vertices as expected.";
+	ASSERT_EQ(tpg.getNbVertices(), 0) << "Cleared graph is not empty of vertices as expected.";
 	ASSERT_EQ(tpg.getEdges().size(), 0) << "Cleared graph is not empty of edges as expected.";
 }
 
@@ -288,7 +295,7 @@ TEST_F(TPGTest, TPGGraphCloneVertex) {
 	const TPG::TPGVertex* cloneVertex;
 	ASSERT_NO_THROW(cloneVertex = &tpg.cloneVertex(vertex0)) << "Cloning a TPGTeamVertex of the TPGGraph failed.";
 	// Check that the clone vertex is in the graph
-	ASSERT_EQ(tpg.getVertices().size(), 3) << "Number of vertices of the graph after clone is incorrect.";
+	ASSERT_EQ(tpg.getNbVertices(), 3) << "Number of vertices of the graph after clone is incorrect.";
 	ASSERT_EQ(tpg.getVertices().at(2), cloneVertex) << "CloneVertex is not the last of the graph vertices as it should be.";
 	cloneVertex = tpg.getVertices().at(2); // to remove a compilation warning.
 	// Check that the type is correct

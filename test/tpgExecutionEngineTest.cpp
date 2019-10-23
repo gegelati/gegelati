@@ -101,7 +101,7 @@ protected:
 		makeProgramReturn(*progPointers.at(8), 0.3); // T1->A2
 
 		// Check the characteristics
-		ASSERT_EQ(tpg->getVertices().size(), 8);
+		ASSERT_EQ(tpg->getNbVertices(), 8);
 		ASSERT_EQ(tpg->getEdges().size(), 9);
 		ASSERT_EQ(tpg->getRootVertices().size(), 2);
 	}
