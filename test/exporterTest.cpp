@@ -39,7 +39,7 @@ protected:
 		tpg = new TPG::TPGGraph(*e);
 
 		// Create 10 programs
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 8; i++) {
 			progPointers.push_back(std::shared_ptr<Program::Program>(new Program::Program(*e)));
 		}
 
@@ -51,9 +51,11 @@ protected:
 		// T0---->T1---->T2     T4
 		// |     /| \    |      |
 		// v    / v  \   v      v
-		// A0<-'  A1  `->A2     A3
+		// A0<-'  A1  `->A2     A3   A4
 		// 
 		// With four action and four teams
+		// All Edges have a unique Program, except T1->A0 and T0->A0 which 
+		// share the same program: progPointers.at(0)
 		for (int i = 0; i < 4; i++) {
 			tpg->addNewTeam();
 		}
@@ -63,6 +65,9 @@ protected:
 			edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(i), *tpg->getVertices().back(), progPointers.at(i)));
 		}
 
+		// Add an additional Root Action
+		tpg->addNewAction(4);
+
 		// Add new Edges between teams
 		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(0), *tpg->getVertices().at(1), progPointers.at(4)));
 		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(2), progPointers.at(5)));
@@ -71,13 +76,13 @@ protected:
 		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2), *tpg->getVertices().at(1), progPointers.at(6)));
 
 		// Add new outgoing edge to one team
-		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(4), progPointers.at(7)));
-		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(6), progPointers.at(8)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(4), progPointers.at(0)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(6), progPointers.at(7)));
 
 		// Check the characteristics
-		ASSERT_EQ(tpg->getNbVertices(), 8);
+		ASSERT_EQ(tpg->getNbVertices(), 9);
 		ASSERT_EQ(tpg->getEdges().size(), 9);
-		ASSERT_EQ(tpg->getRootVertices().size(), 2);
+		ASSERT_EQ(tpg->getRootVertices().size(), 3);
 	}
 
 	virtual void TearDown() {
