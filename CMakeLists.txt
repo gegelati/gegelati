@@ -78,8 +78,6 @@ file(
 	./include/*.h
 )
 
-add_executable(tpg ${source_files})
-
 # Download and unpack googletest at configure time
 # from https://github.com/google/googletest/tree/master/googletest#incorporating-into-an-existing-cmake-project
 configure_file(test/CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -120,14 +118,6 @@ file(GLOB_RECURSE
      ./test/*.cpp
 	 ./test/*.h)
 
-message("${source_files}")
-
-list(REMOVE_ITEM
-     source_files
-	 "${CMAKE_CURRENT_SOURCE_DIR}/./src/main.cpp"
-	 )
-
-message("${source_files}")
 add_executable(runTests ${test_files} ${source_files})
 target_link_libraries(runTests gtest_main)
 add_test(NAME tpgTest COMMAND runTests)
