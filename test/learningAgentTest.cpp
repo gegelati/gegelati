@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
+#include "mutator/tpgMutator.h"
 #include "instructions/addPrimitiveType.h"
 
 #include "learn/learningEnvironment.h"
@@ -84,28 +85,22 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 	params.archiveSize = 50;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 3;
-	params.ratioDeletedRoots = 0.2;
+	params.ratioDeletedRoots = 0.90; // high number to force the apparition of root action.
 
 	Learn::LearningAgent la(le, set, params);
 
 	la.init();
+	// Do the populate call to keep know the number of initial vertex
+	Archive a(0);
+	Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation );
+	int initialNbVertex = la.getTPGGraph().getVertices().size();
 	ASSERT_NO_THROW(la.trainOneGeneration(0)) << "Training for one generation failed.";
-	ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), params.mutation.tpg.nbRoots - ceil(0.2 * params.mutation.tpg.nbRoots)) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
-
-	/*for (int i = 0; i < 20; i++) {
-		std::multimap<double, const TPG::TPGVertex*> result;
-		result = la.evaluateAllRoots(0, 3, 11);
-		auto iter = result.begin();
-		double min = iter->first;
-		std::advance(iter, result.size() - 1);
-		double max = iter->first;
-
-		double avg = std::accumulate(result.begin(), result.end(), 0.0,
-			[](double acc, std::pair<double, const TPG::TPGVertex*> pair)->double {return acc + pair.first; });
-		avg /= params.tpg.nbRoots - ceil(0.2 * params.tpg.nbRoots);
-		std::cout << min << "\t" << avg << "\t" << max << std::endl;
-		la.trainOneGeneration(0.2, 0, 3, 11);
-	}*/
+	// Check the number of vertex in the graph.
+	// Must be initial number of vertex - number of root removed
+	ASSERT_EQ(la.getTPGGraph().getVertices().size(), initialNbVertex - floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots)) << "Number of remaining is under the number of roots from the TPGGraph.";
+	// Train a second generation, because most roots were removed, a root actions have appeared
+	// and the training algorithm will attempt to remove them.
+	ASSERT_NO_THROW(la.trainOneGeneration(0)) << "Training for one generation failed.";
 }
 
 TEST_F(LearningAgentTest, Train) {
