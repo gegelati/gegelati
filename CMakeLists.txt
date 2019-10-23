@@ -68,7 +68,7 @@ endif (DOXYGEN_FOUND)
 
 
 # *******************************************
-# **************** tpg.exe  ****************
+# **************** tpglib * ****************
 # *******************************************
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 file(
@@ -77,6 +77,12 @@ file(
 	./src/*.cpp
 	./include/*.h
 )
+
+add_library(tpglib ${source_files})
+
+# *******************************************
+# **************** runTest.exe  *************
+# *******************************************
 
 # Download and unpack googletest at configure time
 # from https://github.com/google/googletest/tree/master/googletest#incorporating-into-an-existing-cmake-project
@@ -118,6 +124,6 @@ file(GLOB_RECURSE
      ./test/*.cpp
 	 ./test/*.h)
 
-add_executable(runTests ${test_files} ${source_files})
-target_link_libraries(runTests gtest_main)
+add_executable(runTests ${test_files})
+target_link_libraries(runTests gtest_main tpglib)
 add_test(NAME tpgTest COMMAND runTests)
