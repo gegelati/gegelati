@@ -93,7 +93,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 	// Do the populate call to keep know the number of initial vertex
 	Archive a(0);
 	Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation );
-	int initialNbVertex = la.getTPGGraph().getNbVertices();
+	size_t initialNbVertex = la.getTPGGraph().getNbVertices();
 	ASSERT_NO_THROW(la.trainOneGeneration(0)) << "Training for one generation failed.";
 	// Check the number of vertex in the graph.
 	// Must be initial number of vertex - number of root removed

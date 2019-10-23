@@ -121,6 +121,10 @@ TEST(DataHandlersTest, PrimitiveDataArrayClone) {
 	// Create a clone
 	DataHandlers::DataHandler* dClone = NULL;
 	ASSERT_NO_THROW(dClone = d.clone();) << "Cloning a PrimitiTypeArray<double> failed.";
+
+	// Extra if to remove warnings on further use of dClone.
+	if (dClone == NULL) FAIL() << "Cloning of DataHandler returned a NULL Pointer.";
+
 	// Check ID
 	ASSERT_EQ(dClone->getId(), d.getId()) << "Cloned and original dataHandler do not have the same ID as expected.";
 	// Check the polymorphic type.

@@ -15,6 +15,9 @@
 
 
 class ExporterTest : public ::testing::Test {
+public:
+	ExporterTest() : tpg(NULL) {};
+
 protected:
 	const size_t size1{ 24 };
 	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
@@ -24,7 +27,6 @@ protected:
 
 	TPG::TPGGraph* tpg;
 	std::vector<const TPG::TPGEdge*> edges;
-
 
 	virtual void SetUp() {
 		// Setup environment
