@@ -16,8 +16,6 @@ TEST(InstructionsTest, ConstructorDestructorCall) {
 	Instructions::Instruction * i = new Instructions::AddPrimitiveType<int>();
 	delete i;
 		}) << "Call to constructor for AddPrimitiveType<int> failed.";
-
-
 }
 
 TEST(InstructionsTest, OperandListAndNbParam) {
@@ -56,12 +54,15 @@ TEST(InstructionsTest, CheckParameters) {
 	std::vector<std::reference_wrapper<const Parameter>> v;
 	Parameter a = (int16_t)2;
 	Parameter b = 3.2f;
+	Parameter c = -2.0f; // To cover init from negative float in Parameter.
 	v.push_back(a);
 	v.push_back(b);
+	v.push_back(c);
 	ASSERT_FALSE(i->checkParameters(v)) << "Parameter list of wrong size not detected as such.";
 	delete i;
 
 	i = new Instructions::MultByConstParam<double, int16_t>();
+	v.pop_back();
 	v.pop_back();
 	ASSERT_TRUE(i->checkParameters(v)) << "Parameter list of right size not detected as such.";
 	delete i;
