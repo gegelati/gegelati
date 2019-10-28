@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.15)
 
 # *******************************************
 # ************* CMake Content ***************
@@ -6,7 +6,22 @@ cmake_minimum_required(VERSION 2.8)
 # This CMake create a workspace containing the following projects
 #
 # Programs
-#  - tpg
+#  - runTest
+#  - tpglib
+
+# *******************************************
+# ************ Project Naming ***************
+# *******************************************
+set (PROJECT_NAME tpg)
+set (LIB_NAME tpglib)
+set (PROJECT_VERSION "0.0.0")
+
+
+project(${PROJECT_NAME} VERSION ${PROJECT_VERSION})
+
+# *******************************************
+# ************ Configurations ***************
+# *******************************************
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,7 +36,10 @@ endif()
 # Add definition for relative path into project
 add_definitions( -DPROJECT_ROOT_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
 
-project(tpg)
+# To build shared libraries in Windows, we set CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS to TRUE.
+# See https://cmake.org/cmake/help/v3.4/variable/CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS.html
+# See https://blog.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # Set to 1 to activate debug compilation (0 for release)
 if(NOT ${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
@@ -70,15 +88,67 @@ endif (DOXYGEN_FOUND)
 # *******************************************
 # **************** tpglib * ****************
 # *******************************************
+set(include_dir ./include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 file(
 	GLOB_RECURSE
 	source_files
 	./src/*.cpp
+)
+
+file(
+	GLOB_RECURSE
+	header_files
 	./include/*.h
 )
 
-add_library(tpglib ${source_files})
+
+add_library(${LIB_NAME} SHARED)
+
+target_sources(${LIB_NAME} PUBLIC ${source_files})
+
+set_target_properties(${LIB_NAME}
+PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION}
+)
+
+# Defines the CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_BINDIR and many other useful macros.
+# See https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
+include(GNUInstallDirs)
+
+# Let's set compiler-specific flags
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # G++
+    target_compile_options(${LIB_NAME} PRIVATE -Wall -Wextra)	
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	# Install in dedicated subfolder
+	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/${LIB_NAME}-${PROJECT_VERSION})
+    # MSVC
+    target_compile_options(${LIB_NAME} PRIVATE /EHsc /MTd /W2 /c)
+    # Set the DLLEXPORT variable to export symbols
+    target_compile_definitions(${LIB_NAME} PRIVATE WIN_EXPORT)
+	# Under MSVC, we set CMAKE_DEBUG_POSTFIX to "d" to add a trailing "d" to library
+	# built in debug mode. In this Windows user can compile, build and install the
+	# library in both Release and Debug configuration avoiding naming clashes in the
+	# installation directories.
+	set(CMAKE_DEBUG_POSTFIX "d")
+	
+	set_target_properties(${LIB_NAME}
+	PROPERTIES
+		DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
+	)
+endif()
+
+install(TARGETS ${LIB_NAME}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	)
+	
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/include" # source directory
+		DESTINATION "." # Destination is CMAKE_BINARY_DIR
+        FILES_MATCHING # install only matched files
+        PATTERN "*.h" # select header files
+)
 
 # *******************************************
 # **************** runTest.exe  *************
@@ -125,5 +195,5 @@ file(GLOB_RECURSE
 	 ./test/*.h)
 
 add_executable(runTests ${test_files})
-target_link_libraries(runTests gtest_main tpglib)
+target_link_libraries(runTests gtest_main ${LIB_NAME})
 add_test(NAME tpgTest COMMAND runTests)

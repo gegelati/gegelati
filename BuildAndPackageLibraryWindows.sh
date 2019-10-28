@@ -5,12 +5,16 @@
 # Delete previous bin content.
 rm -rf bin
 
-# Call CMake
-./CMakeVS2019.bat
+# Call CMake (pipe to skip the pause)
+true | ./CMakeVS2019.bat
 
 # Build the library
-cmake --build ./bin --clean-first --config Debug --target tpglib
-cmake --build ./bin --clean-first --config Release --target tpglib
+cmake --build ./bin --config Debug --target tpglib
+cmake --build ./bin --config Release --target tpglib
+
+# Install the library
+cmake --build ./bin --config Release --target INSTALL
+cmake --build ./bin --config Debug --target INSTALL
 
 # Package into zip
 #cd ..
