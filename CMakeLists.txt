@@ -1,23 +1,36 @@
 cmake_minimum_required(VERSION 3.5)
 
-### CUSTOMIZATION STEPS
-# 1. Change the argument to project() with the name of your library/package
-#    (it will be the one used for find_package() call)
-# 2. Change version information
-# 3. Add your library source files in the subdirectories
-#    - src/"LibName"/include
-#    - src/"LibName"/src
-# 4. Add your executable source files in the subdirectories
-#    - src/"ExecName"
-# 5. Update src/CMakeLists.txt
-# 6. Add the tests to your library in /test subdirectory and modify
-#    test/CMakeLists.txt accordingly.
-###
+# This CMakeLists was freely adapted by Karol Desnos from 
+# https://github.com/robotology/how-to-export-cpp-library
+# Which is available under the following license :
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2014 Silvio Traversaro, Claudio Fantacci
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy 
+# of this software and associated documentation files (the "Software"), to 
+# deal in the Software without restriction, including without limitation the 
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+# sell copies of the Software, and to permit persons to whom the Software is 
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in 
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+# THE SOFTWARE.
+
 
 # This sets the PROJECT_NAME, PROJECT_VERSION as well as other variable
 # listed here: https://cmake.org/cmake/help/latest/command/project.html.
 # We use this name to export all the files such that is then possible to use
-# find_package(LibTemplateCMake) in third party projects.
+# find_package(<libName>) in third party projects.
 # LANGUAGES specifies which languages your project supports. To have a broad
 # support with external libraries, it is good practice to list both CXX and C.
 # Infact, some legacy Find<package>.cmake files that require the C language to
