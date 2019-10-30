@@ -158,4 +158,4 @@ if(BUILD_TESTING)
 endif()
 
 # Add targets related to doxygen documention generation
-# add_subdirectory(doc)
+add_subdirectory(doc)
