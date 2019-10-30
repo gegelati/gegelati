@@ -36,9 +36,13 @@ cmake_minimum_required(VERSION 3.5)
 # Infact, some legacy Find<package>.cmake files that require the C language to
 # be enabled and thus using only CXX may cause issues. Note that by default when
 # LANGUAGES is not specified CMake enables both CXX and C.
-project(tpglib
+set(PROJECT_NAME GEGELATI)
+
+project(${PROJECT_NAME}
         LANGUAGES CXX
         VERSION 0.0.0)
+string(TOLOWER ${PROJECT_NAME} project_name)
+set(LIB_SOURCE_DIRECTORY ${project_name}lib)
 
 # Defines the CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_BINDIR and many other useful macros.
 # See https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
@@ -68,7 +72,7 @@ if(MSVC)
     set(CMAKE_DEBUG_POSTFIX "d")
 	add_definitions( -D_CRT_SECURE_NO_WARNINGS )
 	# Install in dedicated subfolder
-	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${PROJECT_VERSION})
+	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/${LIB_SOURCE_DIRECTORY}-${PROJECT_VERSION})
 endif()
 
 # Build position independent code.
@@ -135,7 +139,7 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 ### Compile- and install-related commands.
-add_subdirectory(tpglib)
+add_subdirectory(${LIB_SOURCE_DIRECTORY})
 
 # Create and install CMake configuration files for your project that are
 # necessary to for other projects to call find_package(LibTemplateCMake).
