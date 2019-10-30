@@ -3,6 +3,9 @@
 
 size_t DataHandlers::DataHandler::count = 0;
 
+DataHandlers::DataHandler::DataHandler() : id{ count++ }, providedTypes(), cachedHash() {
+};
+
 size_t DataHandlers::DataHandler::getId() const
 {
 	return this->id;

@@ -54,7 +54,7 @@ namespace DataHandlers {
 		/**
 		* \brief Default constructor of the DataHandler class.
 		*/
-		DataHandler() : id{count++}, providedTypes(), cachedHash() {}
+		DataHandler();
 
 		/**
 		* \brief Default copy constructor.
