@@ -4,10 +4,10 @@ _Generic Evolvable Graphs for Efficient Learning of Artificial Tangled Intellige
 GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framework for training artificial intelligence based on [Tangled Program Graphs (TPGs)](http://stephenkelly.ca/research_files/Kelly-Stephen-PhD-CSCI-June-2018.pdf). The purpose of this framework, developed as a C++ shared library, is to make it as easy and as fast as possible and to train an agent on a new learning environment. The C++ library is developed to be portable, fully documented, and thoroughly unit tested to ensure its maintainability. GEGELATI is developed at the Institute of Electronics and Telecommunications-Rennes (IETR).
 
 ## Overview
-* [Continuous Integration](#-continuous-integration)
-* [Build and Install the Library](#-build-and-install-the-library)
-* [How to Use the GEGELATI Library](#-how-to-use-the-gegelati-library)
-* [License](#-license)
+* [Continuous Integration](#continuous-integration)
+* [Build and Install the Library](#build-and-install-the-library)
+* [How to Use the GEGELATI Library](#how-to-use-the-gegelati-library)
+* [License](#license)
 
 ## Continuous Integration
 _(coming soon...)_
