@@ -9,13 +9,16 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="61.388142mm"
-   height="68.175064mm"
-   viewBox="0 0 61.388141 68.175065"
+   width="66.325073mm"
+   height="66.325066mm"
+   viewBox="0 0 66.325073 66.325066"
    version="1.1"
    id="svg4742"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="logo-compact.svg">
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="logo-compact.svg"
+   inkscape:export-filename="D:\Git\gegelati\doc\img\logo-compact.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs4736">
     <clipPath
@@ -60,21 +63,22 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.71626487"
-     inkscape:cx="130.91623"
-     inkscape:cy="130.27092"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="-4.3830994"
+     inkscape:cy="101.55674"
      inkscape:document-units="mm"
      inkscape:current-layer="g6314"
      showgrid="false"
-     inkscape:window-width="1680"
-     inkscape:window-height="988"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
      inkscape:window-maximized="1"
-     fit-margin-top="0"
-     fit-margin-left="0"
-     fit-margin-right="0"
-     fit-margin-bottom="0" />
+     fit-margin-top="-1.85"
+     fit-margin-left="2.468465"
+     fit-margin-right="2.468465"
+     fit-margin-bottom="0"
+     inkscape:pagecheckerboard="true" />
   <metadata
      id="metadata4739">
     <rdf:RDF>
@@ -91,7 +95,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-216.96641,-308.06402)">
+     transform="translate(-214.49794,-309.91402)">
     <g
        id="g6342"
        transform="matrix(0.31105237,0.20495375,-0.20495375,0.31105237,190.53975,173.78586)"
