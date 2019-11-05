@@ -4,7 +4,7 @@ os: windows
 
 script: 
     - cd bin
-    - cmake .. -G "Visual Studio 16 2019"
+    - cmake ..
     - cmake --build . --target GEGELATI --config Debug
     - cmake --build . --target GEGELATI --config Release
     - cmake --build . --target Doc
