@@ -7,7 +7,7 @@ script:
     - cmake ..
     - cmake --build . --target GEGELATI --config Debug
     - cmake --build . --target GEGELATI --config Release
-    - cmake --build . --target Doc
+    - cmake --build . --target doc
     - cmake --build . --target INSTALL --config Debug
     - cmake --build . --target INSTALL --config Release
     - cmake --build . --target runTests --config Debug
