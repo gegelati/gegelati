@@ -1,0 +1,8 @@
+language: cpp
+
+os: windows
+
+script: 
+    - cd bin
+    - cmake .. 
+    - cmake --build . 
