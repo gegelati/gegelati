@@ -2,6 +2,13 @@ language: cpp
 
 os: windows
 
+install:
+    - mkdir doxygen && cd doxygen
+    - curl -o doxygen.zip http://doxygen.nl/files/doxygen-1.8.16.windows.x64.bin.zip
+    - unzip doxygen.zip
+    - export PATH=$PATH:$PWD
+    - cd ..
+
 script: 
     - cd bin
     - cmake ..
