@@ -18,3 +18,4 @@ script:
     - cmake --build . --target INSTALL --config Debug
     - cmake --build . --target INSTALL --config Release
     - cmake --build . --target runTests --config Debug
+    - ./bin/Debug/runTests.exe
