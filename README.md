@@ -11,10 +11,10 @@ GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framew
 
 ## Continuous Integration
 
-| All branches | [Travis Status](https://travis-ci.org/gegelati/gegelati) | 
+| All branches | [Travis Status](https://travis-ci.com/gegelati/gegelati) | 
 | ------------- |  ------------- |    -------------  |
-| master  |  [![Build Status](https://travis-ci.org/gegelati/gegelati.svg?branch=master)](https://travis-ci.org/gegelati/gegelati/branches)  |
-| develop  | [![Build Status](https://travis-ci.org/gegelati/gegelati.svg?branch=develop)](https://travis-ci.org/gegelati/gegelati/branches) | 
+| master  |  [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=master)](https://travis-ci.com/gegelati/gegelati/branches)  |
+| develop  | [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=develop)](https://travis-ci.com/gegelati/gegelati/branches) | 
 
 ## Build and Install the Library
 ### Binaries
