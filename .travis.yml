@@ -1,13 +1,12 @@
 language: cpp
 
 os: windows
+env: GENERATOR="Visual Studio 16 2019"
+compiler: msvc19
 
 before_install:
     - choco install visualstudio2019buildtools --package-parameters "--includeRecommended --includeOptional"
     - choco install visualstudio2019-workload-vctools
-    - find /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/ -name cl.exe
-   #- /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2019/Community/VC/Auxiliary/Build/vcvarsall.bat x86_amd64
-
 
 install:
     - mkdir doxygen && cd doxygen
@@ -18,7 +17,7 @@ install:
 
 script: 
     - cd bin
-    - cmake .. -G "Visual Studio 16 2019"
+    - cmake ..
     - cmake --build . --target GEGELATI --config Debug
     - cmake --build . --target GEGELATI --config Release
     - cmake --build . --target doc
