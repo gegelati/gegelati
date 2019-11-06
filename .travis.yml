@@ -4,6 +4,8 @@ os: windows
 
 before_install:
     - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Product.Community --includeRecommended --includeOptional --passive --locale en-US"
+    - ls -al /c/Program\ Files\ \(x86\)/
+    - ls -al /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio
 
 install:
     - mkdir doxygen && cd doxygen
