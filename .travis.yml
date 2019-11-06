@@ -1,0 +1,21 @@
+language: cpp
+
+os: windows
+
+install:
+    - mkdir doxygen && cd doxygen
+    - curl -o doxygen.zip http://doxygen.nl/files/doxygen-1.8.16.windows.x64.bin.zip
+    - unzip doxygen.zip
+    - export PATH=$PATH:$PWD
+    - cd ..
+
+script: 
+    - cd bin
+    - cmake ..
+    - cmake --build . --target GEGELATI --config Debug
+    - cmake --build . --target GEGELATI --config Release
+    - cmake --build . --target doc
+    - cmake --build . --target INSTALL --config Debug
+    - cmake --build . --target INSTALL --config Release
+    - cmake --build . --target runTests --config Debug
+    - ./bin/Debug/runTests.exe
