@@ -14,7 +14,7 @@ install:
 
 script: 
     - cd bin
-    - cmake ..
+    - cmake .. -G "Visual Studio 16 2019"
     - cmake --build . --target GEGELATI --config Debug
     - cmake --build . --target GEGELATI --config Release
     - cmake --build . --target doc
