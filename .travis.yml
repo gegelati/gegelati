@@ -2,6 +2,9 @@ language: cpp
 
 os: windows
 
+before_install:
+    - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Product.Community --includeRecommended --includeOptional --passive --locale en-US"
+
 install:
     - mkdir doxygen && cd doxygen
     - curl -o doxygen.zip http://doxygen.nl/files/doxygen-1.8.16.windows.x64.bin.zip
