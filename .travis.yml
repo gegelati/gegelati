@@ -3,7 +3,8 @@ language: cpp
 os: windows
 
 before_install:
-    - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Product.Community --includeRecommended --includeOptional --passive --locale en-US"
+    - choco install visualstudio2019buildtools --package-parameters "--includeRecommended --includeOptional"
+    - choco install visualstudio2019-workload-vctools
     - find /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/ -name cl.exe
    #- /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2019/Community/VC/Auxiliary/Build/vcvarsall.bat x86_amd64
 
