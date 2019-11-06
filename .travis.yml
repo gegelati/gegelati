@@ -1,6 +1,12 @@
 language: cpp
 
 os: windows
+env: GENERATOR="Visual Studio 16 2019"
+compiler: msvc19
+
+before_install:
+    - choco install visualstudio2019buildtools --package-parameters "--includeRecommended --includeOptional"
+    - choco install visualstudio2019-workload-vctools
 
 install:
     - mkdir doxygen && cd doxygen
