@@ -60,11 +60,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.35813244"
-     inkscape:cx="29.739893"
-     inkscape:cy="381.24366"
+     inkscape:zoom="2.025903"
+     inkscape:cx="391.82468"
+     inkscape:cy="136.29759"
      inkscape:document-units="mm"
-     inkscape:current-layer="g6314"
+     inkscape:current-layer="text5435"
      showgrid="false"
      inkscape:window-width="1680"
      inkscape:window-height="988"
@@ -407,19 +407,51 @@
        sodipodi:nodetypes="ccc" />
     <g
        id="g6314">
-      <text
-         id="text5435"
-         y="278.78427"
-         x="271.78497"
+      <g
+         aria-label="GEGELATI"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:39.31712723px;line-height:125%;font-family:'Bauhaus 93';-inkscape-font-specification:'Bauhaus 93, ';letter-spacing:0px;word-spacing:0px;fill:#ffa2f8;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         xml:space="preserve"><tspan
+         id="text5435">
+        <path
+           d="m 285.51141,264.09794 h 7.42956 q 2.39972,2.97566 2.39972,6.27769 0,3.83956 -2.82208,6.45046 -2.80288,2.61091 -6.91121,2.61091 -5.33699,0 -9.06137,-4.05074 -3.72437,-4.05074 -3.72437,-9.86768 0,-5.83614 3.78196,-9.71409 3.80117,-3.87796 9.48373,-3.87796 1.93898,0 4.30031,0.78711 v 7.79431 q -1.84299,-0.8639 -3.35962,-0.8639 -2.74529,0 -4.49229,1.7086 -1.7278,1.70861 -1.7278,4.4347 0,2.78368 1.61261,4.4155 1.61262,1.63181 4.35791,1.63181 1.747,0 1.747,-1.01748 0,-0.76792 -1.15187,-0.76792 h -1.86219 z"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Bauhaus 93';-inkscape-font-specification:'Bauhaus 93, ';fill:#ffa2f8;fill-opacity:1;stroke-width:0.26458332px"
-           y="278.78427"
-           x="271.78497"
-           id="tspan5433"
-           sodipodi:role="line">G<tspan
-   id="tspan5431"
-   style="font-size:32.59452438px;fill:#ffa2f8;fill-opacity:1;stroke-width:0.26458332px">EGELATI</tspan></tspan></text>
+           id="path876"
+           inkscape:connector-curvature="0" />
+        <path
+           d="m 309.66416,265.51092 v 4.83824 h -4.21755 q -0.85943,0 -1.22548,0.25465 -0.35014,0.25464 -0.35014,0.85943 0,0.68435 0.36606,0.90717 0.36605,0.2069 1.49603,0.2069 h 4.34488 v 6.20696 h -5.07698 q -3.58094,0 -5.47486,-1.70294 -1.89392,-1.71885 -1.89392,-4.94965 V 263.617 q 0,-3.1194 1.78251,-4.83825 1.79843,-1.71886 5.04515,-1.71886 h 5.6181 v 6.2388 h -4.12206 q -1.67111,0 -1.67111,1.08224 0,0.63661 0.39788,0.89126 0.39789,0.23873 1.41646,0.23873 z"
+           style="font-size:32.59452438px;fill:#ffa2f8;fill-opacity:1;stroke-width:0.26458332px"
+           id="path878"
+           inkscape:connector-curvature="0" />
+        <path
+           d="m 323.00118,266.60907 h 6.15922 q 1.98941,2.46687 1.98941,5.2043 0,3.18306 -2.33955,5.34754 -2.32363,2.16448 -5.72951,2.16448 -4.42445,0 -7.51201,-3.35813 -3.08757,-3.35812 -3.08757,-8.18046 0,-4.83825 3.13531,-8.05314 3.15123,-3.21489 7.86216,-3.21489 1.60744,0 3.56502,0.65253 v 6.46161 q -1.52787,-0.71619 -2.78517,-0.71619 -2.27589,0 -3.72418,1.41646 -1.43238,1.41646 -1.43238,3.67644 0,2.30771 1.33689,3.66051 1.33688,1.3528 3.61277,1.3528 1.44829,0 1.44829,-0.84351 0,-0.63661 -0.95492,-0.63661 h -1.54378 z"
+           style="font-size:32.59452438px;fill:#ffa2f8;fill-opacity:1;stroke-width:0.26458332px"
+           id="path880"
+           inkscape:connector-curvature="0" />
+        <path
+           d="m 345.37808,265.51092 v 4.83824 h -4.21755 q -0.85943,0 -1.22548,0.25465 -0.35014,0.25464 -0.35014,0.85943 0,0.68435 0.36606,0.90717 0.36605,0.2069 1.49603,0.2069 h 4.34488 v 6.20696 h -5.07698 q -3.58094,0 -5.47486,-1.70294 -1.89392,-1.71885 -1.89392,-4.94965 V 263.617 q 0,-3.1194 1.78251,-4.83825 1.79843,-1.71886 5.04515,-1.71886 h 5.6181 v 6.2388 h -4.12206 q -1.67111,0 -1.67111,1.08224 0,0.63661 0.39788,0.89126 0.39789,0.23873 1.41647,0.23873 z"
+           style="font-size:32.59452438px;fill:#ffa2f8;fill-opacity:1;stroke-width:0.26458332px"
+           id="path882"
+           inkscape:connector-curvature="0" />
+        <path
+           d="m 349.07043,257.05989 h 6.46161 v 12.90731 q 0,1.51195 0.47746,2.02124 0.49337,0.49337 1.92575,0.49337 h 0.33422 v 6.30246 h -1.71885 q -3.5332,0 -5.50669,-2.05307 -1.9735,-2.06899 -1.9735,-5.72951 z"
+           style="font-size:32.59452438px;fill:#ffa2f8;fill-opacity:1;stroke-width:0.26458332px"
+           id="path884"
+           inkscape:connector-curvature="0" />
+        <path
+           d="m 368.34385,267.88229 v 5.72951 h -1.86209 v 5.17247 h -6.46161 V 264.9698 q 0,-4.01066 2.1804,-6.22289 2.19631,-2.22814 6.15922,-2.22814 3.81967,0 5.64993,2.02125 1.83026,2.00532 1.83026,6.20696 v 14.03729 h -6.46161 v -13.60758 q 0,-1.27322 -0.30239,-1.76659 -0.3024,-0.49338 -1.08224,-0.49338 -1.51196,0 -1.51196,2.25997 v 2.7056 z"
+           style="font-size:32.59452438px;fill:#ffa2f8;fill-opacity:1;stroke-width:0.26458332px"
+           id="path886"
+           inkscape:connector-curvature="0" />
+        <path
+           d="m 389.2088,263.29869 v 15.48558 h -6.46161 v -15.48558 h -4.94965 v -6.2388 h 16.345 v 6.2388 z"
+           style="font-size:32.59452438px;fill:#ffa2f8;fill-opacity:1;stroke-width:0.26458332px"
+           id="path888"
+           inkscape:connector-curvature="0" />
+        <path
+           d="m 403.02328,257.05989 v 21.72438 h -6.46161 v -21.72438 z"
+           style="font-size:32.59452438px;fill:#ffa2f8;fill-opacity:1;stroke-width:0.26458332px"
+           id="path890"
+           inkscape:connector-curvature="0" />
+      </g>
       <path
          style="fill:#ffbafa;fill-opacity:1;stroke:none;stroke-width:1.46500003;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
          d="m 284.8548,253.18181 c 0.31667,0.53952 -1.37254,2.16083 -3.77291,3.62126 -2.40035,1.46043 -4.60292,2.20695 -4.91955,1.66742 -0.31668,-0.53952 1.07295,-2.68303 3.47333,-4.14347 2.40035,-1.46043 4.9025,-1.68474 5.21913,-1.14521 z"
