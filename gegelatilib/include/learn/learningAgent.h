@@ -45,15 +45,13 @@ namespace Learn {
 		* \param[in] p The LearningParameters for the LearningAgent.
 		* \param[in] nbRegs The number of registers for the execution
 		*                   environment of Program.
-		* \param[in] archiveSize The number of recordings stored in the
-		*                        Archive during the learning process.
 		*/
-		LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8, const size_t archiveSize = 50) :
+		LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8) :
 			learningEnvironment{ le },
 			env(iSet, le.getDataSources(), nbRegs),
 			tpg(this->env),
 			params{ p },
-			archive(archiveSize)
+			archive(p.archiveSize)
 		{
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
