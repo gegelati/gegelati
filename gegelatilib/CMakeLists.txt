@@ -98,11 +98,18 @@ install(TARGETS ${LIBRARY_TARGET_NAME}
         # Removed line for preserving header folder hierarchy.
 		# PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME}" COMPONENT dev)
 		
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
+if(WIN32)
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
 		DESTINATION "." # Destination is CMAKE_BINARY_DIR
-        FILES_MATCHING # install only matched files
-        PATTERN "*.h" # select header files
-)		
-
+	        FILES_MATCHING # install only matched files
+	        PATTERN "*.h" # select header files
+	)
+else()
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
+			DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME} 
+	        FILES_MATCHING # install only matched files
+	        PATTERN "*.h" # select header files
+	)
+endif()
 
 message(STATUS "Created target ${LIBRARY_TARGET_NAME} for export ${PROJECT_NAME}.")
