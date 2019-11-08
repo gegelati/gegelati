@@ -41,9 +41,11 @@ void StickGameWithOpponent::doAction(uint64_t actionID)
 	}
 }
 
-void StickGameWithOpponent::reset(size_t seed)
+void StickGameWithOpponent::reset(size_t seed, Learn::LearningMode mode)
 {
-	this->engine.seed(seed);
+	// Create seed from seed and mode
+	size_t hash_seed = std::hash<size_t>()(seed) ^ std::hash<Learn::LearningMode>()(mode);
+	this->engine.seed(hash_seed);
 	this->remainingSticks.setDataAt(typeid(PrimitiveType<int>), 0, 21);
 	this->win = false;
 	this->forbiddenMove = false;

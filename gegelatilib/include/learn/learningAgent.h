@@ -45,15 +45,13 @@ namespace Learn {
 		* \param[in] p The LearningParameters for the LearningAgent.
 		* \param[in] nbRegs The number of registers for the execution
 		*                   environment of Program.
-		* \param[in] archiveSize The number of recordings stored in the
-		*                        Archive during the learning process.
 		*/
-		LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8, const size_t archiveSize = 50) :
+		LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8) :
 			learningEnvironment{ le },
 			env(iSet, le.getDataSources(), nbRegs),
 			tpg(this->env),
 			params{ p },
-			archive(archiveSize)
+			archive(p.archiveSize)
 		{
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
@@ -73,6 +71,7 @@ namespace Learn {
 		* Initialize the Mutator::RNG with the given seed.
 		* Clears the Archive.
 		*
+		* \param[in] seed the seed given to the TPGMutator.
 		*/
 		void init(uint64_t seed = 0);
 
@@ -84,8 +83,12 @@ namespace Learn {
 		* combined with the current iteration number to generate a set of
 		* seeds for evaluating the policy.
 		* The method returns the average score for this policy.
+		*
+		* \param[in] root the TPGVertex from which the policy evaluation starts.
+		* \param[in] generationNumber the integer number of the current generation.
+		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
-		double evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber);
+		double evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode);
 
 		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
@@ -93,8 +96,11 @@ namespace Learn {
 		* This method calls the evaluateRoot method for every root TPGVertex
 		* of the TPGGraph. The method returns a sorted map associating each root
 		* vertex to its average score, in ascending order or score.
+		*
+		* \param[in] generationNumber the integer number of the current generation.
+		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
-		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber);
+		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
 
 		/**
 		* \brief Train the TPGGraph for one generation.
@@ -103,6 +109,8 @@ namespace Learn {
 		* - Populating the TPGGraph according to given MutationParameters.
 		* - Evaluating all roots of the TPGGraph. (call to evaluateAllRoots)
 		* - Removing from tge TPGGraph the worst performing root TPGVertex.
+		*
+		* \param[in] generationNumber the integer number of the current generation.
 		*/
 		void trainOneGeneration(uint64_t generationNumber);
 
@@ -115,6 +123,10 @@ namespace Learn {
 		* Optionally, a simple progress bar can be printed within the terminal.
 		* The TPGGraph is NOT (re)initialized before starting the training.
 		*
+		* \param[in] altTraining a reference to a boolean value that can be
+		* used to halt the training process before its completion.
+		* \param[in] printProgressBar select whether a progress bar will be printed
+		* in the console.
 		* \return the number of completed generations.
 		*/
 		uint64_t train(volatile bool& altTraining, bool printProgressBar);
@@ -122,6 +134,8 @@ namespace Learn {
 		/**
 		* \brief This method evaluates all roots and only keeps the one
 		* leading to the best average score in the TPGGraph.
+		*
+		* The LearningMode::VALIDATION is used to select the best root.
 		*/
 		void keepBestPolicy();
 

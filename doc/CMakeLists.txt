@@ -32,5 +32,6 @@ if(DOXYGEN_FOUND)
 
     install(DIRECTORY ${DOXYGEN_BUILD_DIR}/html
             DESTINATION ${DOXYGEN_INSTALL_DIR})
-
+else()
+	message(FATAL_ERROR "Could not find doxygen.")
 endif()

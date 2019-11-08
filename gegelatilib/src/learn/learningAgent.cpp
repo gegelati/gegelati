@@ -23,7 +23,7 @@ void Learn::LearningAgent::init(uint64_t seed) {
 	this->archive.clear();
 }
 
-double Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber)
+double Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode)
 {
 	// Init results
 	double result = 0.0;
@@ -38,7 +38,7 @@ double Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t g
 		uint64_t hash = hasher(generationNumber) ^ hasher(i);
 
 		// Reset the learning Environment
-		this->learningEnvironment.reset(hash);
+		this->learningEnvironment.reset(hash, mode);
 
 		uint64_t nbActions = 0;
 		while (!this->learningEnvironment.isTerminal() && nbActions < params.maxNbActionsPerEval) {
@@ -56,12 +56,12 @@ double Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t g
 	return result;
 }
 
-std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber)
+std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
 {
 	std::multimap<double, const TPG::TPGVertex*> result;
 
 	for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
-		double avgScore = this->evaluateRoot(*root, generationNumber);
+		double avgScore = this->evaluateRoot(*root, generationNumber, mode);
 		result.insert({ avgScore, root });
 	}
 
@@ -74,7 +74,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation);
 
 	// Evaluate
-	auto results = this->evaluateAllRoots(generationNumber);
+	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
 
 	// Remove worst performing roots
 	for (auto i = 0; i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots); i++) {
@@ -133,7 +133,7 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining, bool printProgr
 void Learn::LearningAgent::keepBestPolicy()
 {
 	// Evaluate all roots
-	auto results = this->evaluateAllRoots(0);
+	auto results = this->evaluateAllRoots(0, LearningMode::VALIDATION);
 	auto iterResults = results.begin();
 	std::advance(iterResults, results.size() - 1);
 	auto bestRoot = iterResults->second;

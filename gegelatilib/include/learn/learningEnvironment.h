@@ -6,6 +6,25 @@
 #include "dataHandlers/dataHandler.h"
 
 namespace Learn {
+
+	/**
+	* \brief Different modes in which the LearningEnvironment can be reset.
+	*
+	* Each of the following mode corresponds to a classical phase of a learning
+	* process. These mode usually refer to different parts of the data set used
+	* throughout the learning process. Classically, the TRAINING mode is used to
+	* effectively train an agent. The VALIDATION mode is used to evaluate the
+	* efficiency of the learning process during the training phase, but on data
+	* differring from the one used for training, in order to avoid biased
+	* evaluation. TESTING mode is used at the end of all training activity to
+	* evaluate the efficiency of the agent on completely new data.
+	*/
+	typedef enum LearningMode {
+		TRAINING,
+		VALIDATION,
+		TESTING
+	} LearningMode;
+
 	/**
 	* \brief Interface for creating a Learning Environment.
 	*
@@ -53,7 +72,7 @@ namespace Learn {
 		* an actionId comprised between 0 and nbActions - 1.
 		* The LearningEnvironment implementation only checks that the given
 		* actionID is comprised between 0 and nbActions - 1.
-		* It is the responsibility of this method to call the updateHash 
+		* It is the responsibility of this method to call the updateHash
 		* method on dataSources whose content have been affected by the action.
 		*
 		* \param[in] actionID the integer number representing the action to
@@ -75,8 +94,10 @@ namespace Learn {
 		*
 		* \param[in] seed the integer value for controlling the randomness of
 		* the LearningEnvironment.
+		* \param[in] mode LearningMode in which the Environment should be
+		* reset for the next set of actions.
 		*/
-		virtual void reset(size_t seed = 0) = 0;
+		virtual void reset(size_t seed = 0, LearningMode mode = TRAINING) = 0;
 
 		/**
 		* \brief Get the data sources for this LearningEnvironment.

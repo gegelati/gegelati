@@ -64,7 +64,7 @@ TEST_F(LearningAgentTest, EvalRoot) {
 
 	la.init();
 	double result;
-	ASSERT_NO_THROW(result = la.evaluateRoot(*la.getTPGGraph().getRootVertices().at(0), 0)) << "Evaluation from a root failed.";
+	ASSERT_NO_THROW(result = la.evaluateRoot(*la.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
 	ASSERT_LE(result, 1.0) << "Average score should not exceed the score of a perfect player.";
 }
 
@@ -77,7 +77,7 @@ TEST_F(LearningAgentTest, EvalAllRoots) {
 
 	la.init();
 	std::multimap<double, const TPG::TPGVertex*> result;
-	ASSERT_NO_THROW(result = la.evaluateAllRoots(0)) << "Evaluation from a root failed.";
+	ASSERT_NO_THROW(result = la.evaluateAllRoots(0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
 	ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }
 
@@ -85,16 +85,17 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 	params.archiveSize = 50;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 3;
-	params.ratioDeletedRoots = 0.90; // high number to force the apparition of root action.
+	params.ratioDeletedRoots = 0.95; // high number to force the apparition of root action.
 
 	Learn::LearningAgent la(le, set, params);
 
 	la.init();
 	// Do the populate call to keep know the number of initial vertex
 	Archive a(0);
-	Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation );
+	Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation);
 	size_t initialNbVertex = la.getTPGGraph().getNbVertices();
-	ASSERT_NO_THROW(la.trainOneGeneration(0)) << "Training for one generation failed.";
+	// Seed selected so that an action becomes a root during next generation
+	ASSERT_NO_THROW(la.trainOneGeneration(4)) << "Training for one generation failed.";
 	// Check the number of vertex in the graph.
 	// Must be initial number of vertex - number of root removed
 	ASSERT_EQ(la.getTPGGraph().getNbVertices(), initialNbVertex - floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots)) << "Number of remaining is under the number of roots from the TPGGraph.";
