@@ -1,6 +1,8 @@
 #ifndef PARAMETER_H
 #define PARAMETER_H
 
+#include <cstdint>
+#include <cmath>
 /**
 * \brief The parameter type is an 2 byte primitive type.
 *
@@ -45,6 +47,6 @@ public:
 #define PARAM_INT_MIN INT16_MIN
 
 /// Precision in float point set/get
-#define PARAM_FLOAT_PRECISION (float)(1i16 / (float)(-INT16_MIN))
+#define PARAM_FLOAT_PRECISION (float)(int16_t(1) / (float)(-INT16_MIN))
 
 #endif

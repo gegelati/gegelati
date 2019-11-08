@@ -1,6 +1,8 @@
 #ifndef MUTATION_PARAMETERS_H
 #define MUTATION_PARAMETERS_H
 
+#include <cstddef>
+
 namespace Mutator {
 	/**
 	* \brief Structure holding all parameters affecting mutations of TPGGraph.

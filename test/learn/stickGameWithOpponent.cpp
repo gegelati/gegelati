@@ -1,7 +1,5 @@
 #include "stickGameWithOpponent.h"
 
-
-
 void StickGameWithOpponent::doAction(uint64_t actionID)
 {
 	LearningEnvironment::doAction(actionID);

@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.5)
+# Minimum version for CXX17 support.
+cmake_minimum_required(VERSION 3.8)
 
 # This CMakeLists was freely adapted by Karol Desnos from 
 # https://github.com/robotology/how-to-export-cpp-library
@@ -73,6 +74,11 @@ if(MSVC)
 	add_definitions( -D_CRT_SECURE_NO_WARNINGS )
 	# Install in dedicated subfolder
 	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/${LIB_SOURCE_DIRECTORY}-${PROJECT_VERSION})
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # Require gcc 8 at least.
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
+        message(FATAL_ERROR "GCC version cannot be lower than 8.0 to build this lib!")
+    endif()
 endif()
 
 # Build position independent code.

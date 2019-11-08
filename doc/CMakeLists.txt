@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.5)
 
 # This variable should contain the argument of the project call in the main CMakeLists.txt
 set(ORIGINAL_PROJECT_NAME ${PROJECT_NAME})
+set(ORIGINAL_PROJECT_VERSION ${PROJECT_VERSION})
 project(${ORIGINAL_PROJECT_NAME}Docs)
 
 include(GNUInstallDirs)
@@ -14,7 +15,13 @@ find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
     # This variables are used inside the Doxyfile.in template
     set(DOXYGEN_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" CACHE STRING "Build directory for Doxygen html output (absolute).")
-    set(DOXYGEN_INSTALL_DIR "doc" CACHE STRING "Installation directory for Doxygen html output (relative to CMAKE_INSTALL_PREFIX).")
+    if(WIN32)
+        set(DOXYGEN_INSTALL_DIR "doc" CACHE STRING "Installation directory for Doxygen html output (relative to CMAKE_INSTALL_PREFIX).")
+    else()
+        set(DOXYGEN_INSTALL_DIR "share/doc/${ORIGINAL_PROJECT_NAME}-${ORIGINAL_PROJECT_VERSION}" CACHE STRING "Installation directory for Doxygen html output (relative to CMAKE_INSTALL_PREFIX).")
+    endif()
+
+    
     get_filename_component(ORIGINAL_PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY)
     set(DOXYGEN_SOURCE_DIR "${ORIGINAL_PROJECT_DIR}/${LIB_SOURCE_DIRECTORY}")
     set(DOXYGEN_DOC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")

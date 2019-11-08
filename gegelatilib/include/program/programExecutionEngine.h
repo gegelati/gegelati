@@ -57,16 +57,20 @@ namespace Program {
 					// lists of provided data types and the equality address 
 					// space size for each data type.
 				}
-				
-			}
 
+			}
 
 			// Reset Registers (in case it is not done when they are constructed)
 			this->registers.resetData();
 
 			// Setup the data sources
 			dataSources.push_back(this->registers);
-			dataSources.insert(dataSources.end(), dataSrc.begin(), dataSrc.end());
+
+			// Cannot use insert here because it dataSources requires 
+			// constnessand dataSrc data are not const...
+			for (auto data : dataSrc) {
+				dataSources.push_back(data.get());
+			}
 		};
 
 		/**
@@ -117,7 +121,7 @@ namespace Program {
 		* \throw std::domain_error if the data type is not supported by the
 		*        data handler.
 		*/
-		uint64_t scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const type_info& type) const;
+		uint64_t scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const std::type_info& type) const;
 
 		/**
 		* \brief Get the Instruction corresponding to the current programCounter.

@@ -1,3 +1,5 @@
+#include <inttypes.h>
+
 #include "tpg/tpgExecutionEngine.h"
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
@@ -121,7 +123,7 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining, bool printProgr
 			printf("\nTraining completed\n");
 		}
 		else {
-			printf("\nTraining alted at generation %lld.\n", generationNumber);
+			printf("\nTraining alted at generation %" PRIu64 ".\n", generationNumber);
 		}
 	}
 	return generationNumber;

@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <functional>
+#include <typeinfo>
 
 #include "dataHandler.h"
 
@@ -36,7 +37,7 @@ namespace DataHandlers {
 		* \throws std::invalid_argument if the given data type is not provided by the DataHandler.
 		* \throws std::out_of_range if the given address is invalid for the given data type.
 		*/
-		void checkAddressAndType(const type_info& type, const size_t& address) const;
+		void checkAddressAndType(const std::type_info& type, const size_t& address) const;
 
 	public:
 		/**
@@ -110,7 +111,7 @@ namespace DataHandlers {
 	}
 
 	template<class T>
-	void PrimitiveTypeArray<T>::checkAddressAndType(const type_info& type, const size_t& address) const
+	void PrimitiveTypeArray<T>::checkAddressAndType(const std::type_info& type, const size_t& address) const
 	{
 		size_t addressSpace = this->getAddressSpace(type);
 		// check type

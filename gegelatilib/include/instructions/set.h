@@ -1,6 +1,8 @@
 #ifndef SET_H
 #define SET_H
 
+#include <functional>
+
 #include "instruction.h"
 
 namespace Instructions {
@@ -39,7 +41,7 @@ namespace Instructions {
 		* \brief Get the number of Instruction contained in the Set.
 		*
 		* \return the int corresponding to the number of Instruction in the Set.
-		*/ 
+		*/
 		unsigned int getNbInstructions() const;
 
 		/**
@@ -54,7 +56,7 @@ namespace Instructions {
 		/**
 		* \brief Get the maximum number of operands for Instruction currently contained in the Set.
 		*
-		* \return the unsigned int value corresponding to the largest number 
+		* \return the unsigned int value corresponding to the largest number
 		* of operands needed to execute an Instruction in the Set.
 		*/
 		unsigned int getMaxNbOperands() const;
@@ -62,7 +64,7 @@ namespace Instructions {
 		/**
 		* \brief Get the maximum number of parameters for Instruction currently contained in the Set.
 		*
-		* \return the unsigned int value corresponding to the largest number 
+		* \return the unsigned int value corresponding to the largest number
 		* of parameters needed to execute an Instruction in the Set.
 		*/
 		unsigned int getMaxNbParameters() const;

@@ -77,8 +77,13 @@ set_target_properties(${LIBRARY_TARGET_NAME} PROPERTIES VERSION       ${${PROJEC
 # Specify include directories for both compilation and installation process.
 # The $<INSTALL_PREFIX> generator expression is useful to ensure to create
 # relocatable configuration files, see https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-relocatable-packages
-target_include_directories(${LIBRARY_TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+if(WIN32)
+    target_include_directories(${LIBRARY_TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                                          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+else()
+    target_include_directories(${LIBRARY_TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                                         "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME}/include/>")
+endif()
 
 # If you used find_package() you need to use target_include_directories() and/or
 # target_link_libraries(). As explained previously, depending on the imported
@@ -98,11 +103,18 @@ install(TARGETS ${LIBRARY_TARGET_NAME}
         # Removed line for preserving header folder hierarchy.
 		# PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME}" COMPONENT dev)
 		
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
+if(WIN32)
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
 		DESTINATION "." # Destination is CMAKE_BINARY_DIR
-        FILES_MATCHING # install only matched files
-        PATTERN "*.h" # select header files
-)		
-
+	        FILES_MATCHING # install only matched files
+	        PATTERN "*.h" # select header files
+	)
+else()
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
+			DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME} 
+	        FILES_MATCHING # install only matched files
+	        PATTERN "*.h" # select header files
+	)
+endif()
 
 message(STATUS "Created target ${LIBRARY_TARGET_NAME} for export ${PROJECT_NAME}.")

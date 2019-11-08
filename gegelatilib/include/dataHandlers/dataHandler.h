@@ -3,6 +3,7 @@
 
 #include <typeinfo>
 #include <vector>
+#include <functional>
 
 #include "supportedTypes.h"
 
