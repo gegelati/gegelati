@@ -18,7 +18,7 @@ if(DOXYGEN_FOUND)
     if(WIN32)
         set(DOXYGEN_INSTALL_DIR "doc" CACHE STRING "Installation directory for Doxygen html output (relative to CMAKE_INSTALL_PREFIX).")
     else()
-        set(DOXYGEN_INSTALL_DIR "share/doc/${ORIGINAL_PROJECT_NAME}-${ORIGINAL_ROJECT_VERSION}" CACHE STRING "Installation directory for Doxygen html output (relative to CMAKE_INSTALL_PREFIX).")
+        set(DOXYGEN_INSTALL_DIR "share/doc/${ORIGINAL_PROJECT_NAME}-${ORIGINAL_PROJECT_VERSION}" CACHE STRING "Installation directory for Doxygen html output (relative to CMAKE_INSTALL_PREFIX).")
     endif()
 
     
