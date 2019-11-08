@@ -44,12 +44,12 @@ void Exporter::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 		color = "#66ddff";
 	}
 
-	fprintf(pFile, "%sT%ld [fillcolor=\"%s\"]\n", this->offset.c_str(), name, color.c_str());
+	fprintf(pFile, "%sT%lu [fillcolor=\"%s\"]\n", this->offset.c_str(), name, color.c_str());
 }
 
 uint64_t Exporter::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 {
-	fprintf(pFile, "%sA%ld [fillcolor=\"#ff3366\" shape=box margin=0.03 width=0 height=0 label = \"%ld\"]\n", this->offset.c_str(), nbActions++, action.getActionID());
+	fprintf(pFile, "%sA%lu [fillcolor=\"#ff3366\" shape=box margin=0.03 width=0 height=0 label = \"%lu\"]\n", this->offset.c_str(), nbActions++, action.getActionID());
 	return nbActions - 1;
 }
 
@@ -60,19 +60,19 @@ void Exporter::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 	uint64_t progID;
 	if (this->findProgramID(edge.getProgram(), progID)) {
 		// First time thie Program is encountered
-		fprintf(pFile, "%sP%ld [fillcolor=\"#cccccc\" shape=point]\n", this->offset.c_str(), progID);
+		fprintf(pFile, "%sP%lu [fillcolor=\"#cccccc\" shape=point]\n", this->offset.c_str(), progID);
 
 		if (typeid(*edge.getDestination()) == typeid(TPG::TPGAction)) {
 			uint64_t actionID = printTPGAction(*(const TPG::TPGAction*)edge.getDestination());
-			fprintf(pFile, "%sP%ld -> A%ld\n", this->offset.c_str(), progID, actionID);
+			fprintf(pFile, "%sP%lu -> A%lu\n", this->offset.c_str(), progID, actionID);
 		}
 		else {
 			uint64_t destID = findVertexID(*edge.getDestination());
-			fprintf(pFile, "%sP%ld -> T%ld\n", this->offset.c_str(), progID, destID);
+			fprintf(pFile, "%sP%lu -> T%lu\n", this->offset.c_str(), progID, destID);
 		}
 	}
 
-	fprintf(pFile, "%sT%ld -> P%ld\n", this->offset.c_str(), srcID, progID);
+	fprintf(pFile, "%sT%lu -> P%lu\n", this->offset.c_str(), srcID, progID);
 }
 
 void Exporter::TPGGraphDotExporter::printTPGGraphHeader()
@@ -105,12 +105,12 @@ void Exporter::TPGGraphDotExporter::printTPGGraphFooter()
 	// Team root ids
 	for (const TPG::TPGVertex* rootVertex : rootVertices) {
 		if (typeid(*rootVertex) == typeid(TPG::TPGTeam)) {
-			fprintf(pFile, "T%ld ", this->findVertexID(*rootVertex));
+			fprintf(pFile, "T%lu ", this->findVertexID(*rootVertex));
 		}
 	}
 	// Action root
 	for (auto rootActionId : rootActionIDs) {
-		fprintf(pFile, "A%ld ", rootActionId);
+		fprintf(pFile, "A%lu ", rootActionId);
 	}
 	fprintf(pFile, "}\n");
 	this->offset = "";
