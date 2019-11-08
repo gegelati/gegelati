@@ -1,6 +1,6 @@
 #include "exporter/tpgGraphDotExporter.h"
-
-uint64_t Exporter::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
+#include <inttypes.h>
+	uint64_t Exporter::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
 {
 	static uint64_t nbVertex = 0;
 	auto iter = this->vertexID.find(&vertex);
@@ -44,12 +44,12 @@ void Exporter::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 		color = "#66ddff";
 	}
 
-	fprintf(pFile, "%sT%lu [fillcolor=\"%s\"]\n", this->offset.c_str(), name, color.c_str());
+	fprintf(pFile, "%sT%" PRIu64 " [fillcolor=\"%s\"]\n", this->offset.c_str(), name, color.c_str());
 }
 
 uint64_t Exporter::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 {
-	fprintf(pFile, "%sA%lu [fillcolor=\"#ff3366\" shape=box margin=0.03 width=0 height=0 label = \"%lu\"]\n", this->offset.c_str(), nbActions++, action.getActionID());
+	fprintf(pFile, "%sA%" PRIu64 " [fillcolor=\"#ff3366\" shape=box margin=0.03 width=0 height=0 label = \"%" PRIu64 "\"]\n", this->offset.c_str(), nbActions++, action.getActionID());
 	return nbActions - 1;
 }
 
@@ -60,19 +60,19 @@ void Exporter::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 	uint64_t progID;
 	if (this->findProgramID(edge.getProgram(), progID)) {
 		// First time thie Program is encountered
-		fprintf(pFile, "%sP%lu [fillcolor=\"#cccccc\" shape=point]\n", this->offset.c_str(), progID);
+		fprintf(pFile, "%sP%" PRIu64 " [fillcolor=\"#cccccc\" shape=point]\n", this->offset.c_str(), progID);
 
 		if (typeid(*edge.getDestination()) == typeid(TPG::TPGAction)) {
 			uint64_t actionID = printTPGAction(*(const TPG::TPGAction*)edge.getDestination());
-			fprintf(pFile, "%sP%lu -> A%lu\n", this->offset.c_str(), progID, actionID);
+			fprintf(pFile, "%sP%" PRIu64 " -> A%" PRIu64 "\n", this->offset.c_str(), progID, actionID);
 		}
 		else {
 			uint64_t destID = findVertexID(*edge.getDestination());
-			fprintf(pFile, "%sP%lu -> T%lu\n", this->offset.c_str(), progID, destID);
+			fprintf(pFile, "%sP%" PRIu64 " -> T%" PRIu64 "\n", this->offset.c_str(), progID, destID);
 		}
 	}
 
-	fprintf(pFile, "%sT%lu -> P%lu\n", this->offset.c_str(), srcID, progID);
+	fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 "\n", this->offset.c_str(), srcID, progID);
 }
 
 void Exporter::TPGGraphDotExporter::printTPGGraphHeader()
@@ -105,12 +105,12 @@ void Exporter::TPGGraphDotExporter::printTPGGraphFooter()
 	// Team root ids
 	for (const TPG::TPGVertex* rootVertex : rootVertices) {
 		if (typeid(*rootVertex) == typeid(TPG::TPGTeam)) {
-			fprintf(pFile, "T%lu ", this->findVertexID(*rootVertex));
+			fprintf(pFile, "T%" PRIu64 " ", this->findVertexID(*rootVertex));
 		}
 	}
 	// Action root
 	for (auto rootActionId : rootActionIDs) {
-		fprintf(pFile, "A%lu ", rootActionId);
+		fprintf(pFile, "A%" PRIu64 " ", rootActionId);
 	}
 	fprintf(pFile, "}\n");
 	this->offset = "";
