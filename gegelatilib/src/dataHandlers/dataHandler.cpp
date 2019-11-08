@@ -18,7 +18,7 @@ size_t DataHandlers::DataHandler::getHash() const
 
 bool DataHandlers::DataHandler::canHandle(const std::type_info& type) const
 {
-	for (auto t : this->providedTypes) {
+	for (auto & t : this->providedTypes) {
 		if (t.get() == type)
 			return true;
 	}

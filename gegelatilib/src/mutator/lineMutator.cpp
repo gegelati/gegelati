@@ -32,7 +32,7 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 	if (initOperandDataSource && operandIdx < instruction.getNbOperands()) {
 		// Select an operand 
 		// The type of operand needed
-		const type_info& operandType = instruction.getOperandTypes().at(operandIdx).get();
+		const std::type_info& operandType = instruction.getOperandTypes().at(operandIdx).get();
 
 		// keep a record of tested indexes
 		std::set<uint64_t> operandDataSourceIndexes;
@@ -178,7 +178,7 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
 		// If not: mutate them
 		const Instructions::Instruction& instruction = line.getEnvironment().getInstructionSet().getInstruction(newInstructionIndex);
 		for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
-			const type_info& type = instruction.getOperandTypes().at(i).get();
+			const std::type_info& type = instruction.getOperandTypes().at(i).get();
 			uint64_t dataSourceIndex = line.getOperand(i).first;
 			bool isValid = false;
 			if (dataSourceIndex == 0) {

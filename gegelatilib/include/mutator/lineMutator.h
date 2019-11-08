@@ -2,6 +2,7 @@
 #define LINE_MUTATOR_H
 
 #include "program/line.h"
+#include <typeinfo>
 
 namespace Mutator {
 	/**

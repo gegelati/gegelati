@@ -2,6 +2,7 @@
 #define SET_H
 
 #include "instruction.h"
+#include <functional>
 
 namespace Instructions {
 	/**

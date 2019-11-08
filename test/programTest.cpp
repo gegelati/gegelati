@@ -118,7 +118,7 @@ TEST_F(ProgramTest, CopyConstructor) {
 	l.setDestinationIndex(0);
 	l.setInstructionIndex(0);
 	l.setOperand(0, 0, 0);
-	l.setParameter(0, 0i16);
+	l.setParameter(0, int16_t(0));
 
 	// Check that line attributes have been duplicated
 	// May be redundant with lineTest...?

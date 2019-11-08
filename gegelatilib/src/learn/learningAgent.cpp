@@ -121,7 +121,7 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining, bool printProgr
 			printf("\nTraining completed\n");
 		}
 		else {
-			printf("\nTraining alted at generation %lld.\n", generationNumber);
+			printf("\nTraining alted at generation %ld.\n", generationNumber);
 		}
 	}
 	return generationNumber;

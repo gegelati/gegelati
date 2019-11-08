@@ -60,12 +60,12 @@ TEST_F(LineTest, CopyConstructor) {
 	l0->setInstructionIndex(1);
 	l0->setDestinationIndex(1);
 	l0->setOperand(0, 1, 1);
-	l0->setParameter(0, 1i16);
+	l0->setParameter(0, int16_t(1));
 	ASSERT_EQ(l1->getInstructionIndex(), 0) << "The Line instructionIndex was not deeply copied.";
 	ASSERT_EQ(l1->getDestinationIndex(), 0) << "The Line destinationIndex was not deeply copied.";
 	ASSERT_EQ(l1->getOperand(0).first, 0) << "The Line operand 0 dataSource index was not deeply copied.";
 	ASSERT_EQ(l1->getOperand(0).second, 0) << "The Line operand 0 location was not deeply copied.";
-	ASSERT_EQ((int16_t)l1->getParameter(0), 0i16) << "The Line parameter was not deeply copied.";
+	ASSERT_EQ((int16_t)l1->getParameter(0), int16_t(0)) << "The Line parameter was not deeply copied.";
 
 	ASSERT_NO_THROW(delete l0;) << "Destructing a copied line failed.";
 	ASSERT_NO_THROW(delete l1;) << "Destructing a line copy failed.";

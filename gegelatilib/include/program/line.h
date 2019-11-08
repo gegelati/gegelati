@@ -3,6 +3,7 @@
 
 #include "environment.h"
 #include "parameter.h"
+#include <cstring>
 
 namespace Program {
 	/**
