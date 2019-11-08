@@ -1,8 +1,9 @@
 #ifndef LINE_MUTATOR_H
 #define LINE_MUTATOR_H
 
-#include "program/line.h"
 #include <typeinfo>
+
+#include "program/line.h"
 
 namespace Mutator {
 	/**
@@ -35,21 +36,21 @@ namespace Mutator {
 		* \brief This function randomly modifies the behavior of a
 		* Program::Line.
 		*
-		* Probability of altering the different attributes of the Line is 
-		* computed as if the given Program::Line was encoded with a word of 
-		* Program::Program::computeLineSize() bits, and a single bit must be 
-		* flipped. This means that if the instructions represents n bits over 
+		* Probability of altering the different attributes of the Line is
+		* computed as if the given Program::Line was encoded with a word of
+		* Program::Program::computeLineSize() bits, and a single bit must be
+		* flipped. This means that if the instructions represents n bits over
 		* m, then there is a probability of n/m that the instruction of the
 		* line is altered.
-		* To avoid non-executable line, the alteration of instruction, 
-		* destination, or operands dataSource index are based on a uniform 
+		* To avoid non-executable line, the alteration of instruction,
+		* destination, or operands dataSource index are based on a uniform
 		* probability within acceptable values.
-		* If the selected Instruction is no longer compatible with types 
-		* provided by the line operands, or vice versa, then the function 
+		* If the selected Instruction is no longer compatible with types
+		* provided by the line operands, or vice versa, then the function
 		* will set things right by selecting new valid operands randomly.
-		* Although this is biased toward operands volatility, this is the 
-		* a controlled complexity, and yet random, way to ensure that a valid 
-		* line is obtained. The alternative (from TPG reference PhD) would be 
+		* Although this is biased toward operands volatility, this is the
+		* a controlled complexity, and yet random, way to ensure that a valid
+		* line is obtained. The alternative (from TPG reference PhD) would be
 		* to repeatedly alter the line until a valid one is obtained.
 		*/
 		void alterCorrectLine(Program::Line& line);

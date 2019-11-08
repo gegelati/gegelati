@@ -1,11 +1,10 @@
+#include <inttypes.h>
+
 #include "tpg/tpgExecutionEngine.h"
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 
 #include "learn/learningAgent.h"
-
-#include <inttypes.h>
-
 
 TPG::TPGGraph& Learn::LearningAgent::getTPGGraph()
 {

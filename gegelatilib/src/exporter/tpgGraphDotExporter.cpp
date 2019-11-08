@@ -1,6 +1,8 @@
-#include "exporter/tpgGraphDotExporter.h"
 #include <inttypes.h>
-	uint64_t Exporter::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
+
+#include "exporter/tpgGraphDotExporter.h"
+
+uint64_t Exporter::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
 {
 	static uint64_t nbVertex = 0;
 	auto iter = this->vertexID.find(&vertex);

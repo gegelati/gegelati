@@ -1,9 +1,9 @@
 #ifndef TPG_ACTION_H
 #define TPG_ACTION_H
 
-#include "tpg/tpgVertex.h"
 #include <cstdint>
 
+#include "tpg/tpgVertex.h"
 
 namespace TPG {
 	/**
