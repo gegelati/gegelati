@@ -33,6 +33,7 @@ jobs:
                     - ubuntu-toolchain-r-test
                 packages:
                     - g++-7
+                    - doxygen
           env:
             - GENERATOR="Unix Makefile"
           script:
