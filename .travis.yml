@@ -26,9 +26,18 @@ jobs:
             - ./bin/Debug/runTests.exe
             
         - os: linux
-          env: GENERATOR="Unix Makefile"
-          compiler: gcc
+          compiler: gcc-7
+          addons:
+            apt:
+                sources:
+                    - ubuntu-toolchain-r-test
+                packages:
+                    - g++-7
+          env:
+            - GENERATOR="Unix Makefile"
           script:
+            - export CC=gcc-7
+            - export CXX=g++-7
             - cd bin
             - cmake ..
             - make GEGELATI

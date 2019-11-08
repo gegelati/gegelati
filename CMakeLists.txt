@@ -75,9 +75,9 @@ if(MSVC)
 	# Install in dedicated subfolder
 	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/${LIB_SOURCE_DIRECTORY}-${PROJECT_VERSION})
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    # Require gcc 8 at least.
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
-        message(FATAL_ERROR "GCC version cannot be lower than 8.0 to build this lib!")
+    # Require gcc 7 at least.
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
+        message(FATAL_ERROR "GCC version cannot be lower than 7.0 to build this lib!")
     endif()
 endif()
 
