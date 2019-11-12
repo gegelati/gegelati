@@ -33,9 +33,6 @@ void StickGameWithOpponent::doAction(uint64_t actionID)
 				this->win = true;
 			}
 		}
-
-		// Update hash
-		this->remainingSticks.updateHash();
 	}
 }
 

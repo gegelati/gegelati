@@ -50,25 +50,18 @@ TEST_F(ArchiveTest, ConstructorDestructor) {
 TEST_F(ArchiveTest, CombineHash) {
 	size_t hash;
 
-	vect.at(0).get().updateHash();
-	vect.at(1).get().updateHash();
 	ASSERT_NO_THROW(hash = Archive::getCombinedHash(vect)) << "Combination of several DataHandler hash failed.";
 
 	// change data in one dataHandler
 	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
 
-	// Update both hash (only one is needed)
-	vect.at(0).get().updateHash();
-	vect.at(1).get().updateHash();
 	// Compare hashes.
 	ASSERT_NE(Archive::getCombinedHash(vect), hash);
 }
 
 TEST_F(ArchiveTest, AddRecordingTests) {
 	Archive archive(3);
-	vect.at(0).get().updateHash();
-	vect.at(1).get().updateHash();
 
 	// Add a fictive recording
 	ASSERT_NO_THROW(archive.addRecording(p, vect, 1.3)) << "Adding a recording to the empty archive failed.";
@@ -86,7 +79,6 @@ TEST_F(ArchiveTest, AddRecordingTests) {
 	// change data in one dataHandler
 	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
-	vect.at(1).get().updateHash();
 	ASSERT_NO_THROW(archive.addRecording(p, vect, 0.2)) << "Adding a recording to the non-empty archive failed.";
 	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect.";
 	ASSERT_EQ(archive.getNbDataHandlers(), 2) << "Number or dataHandlers copied in the archive is incorrect.";
@@ -105,35 +97,28 @@ TEST_F(ArchiveTest, AddRecordingTests) {
 
 TEST_F(ArchiveTest, IsUnique) {
 	Archive archive(4);
-	vect.at(0).get().updateHash();
-	vect.at(1).get().updateHash();
 
 	// Add a few fictive recordings
 	archive.addRecording(p, vect, 1.0);
 	archive.addRecording(p, vect, 1.5);
 	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
-	vect.at(1).get().updateHash();
 	archive.addRecording(p, vect, 2.0);
 	archive.addRecording(p, vect, 2.3);
 
 	ASSERT_TRUE(archive.isRecordingExisting(archive.getCombinedHash(vect), p)) << "Values corresponding to a recording within the Archive is not detected as such.";
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(42));
-	vect.at(1).get().updateHash();
 	ASSERT_FALSE(archive.isRecordingExisting(archive.getCombinedHash(vect), p)) << "Values corresponding to a recording not within the Archive is not detected as such.";
 }
 
 TEST_F(ArchiveTest, areProgramResultsUnique) {
 	Archive archive(4);
-	vect.at(0).get().updateHash();
-	vect.at(1).get().updateHash();
 	size_t hash1 = archive.getCombinedHash(vect);
 	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
 
 	// Add a few fictive recordings with p
 	archive.addRecording(p, vect, 1.0);
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
-	vect.at(1).get().updateHash();
 	size_t hash2 = archive.getCombinedHash(vect);
 	archive.addRecording(p, vect, 1.5);
 
@@ -141,7 +126,6 @@ TEST_F(ArchiveTest, areProgramResultsUnique) {
 	Program::Program p2(*e);
 	archive.addRecording(&p2, vect, 2.0);
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
-	vect.at(1).get().updateHash();
 	size_t hash3 = archive.getCombinedHash(vect);
 	archive.addRecording(&p2, vect, 2.5);
 
@@ -154,21 +138,17 @@ TEST_F(ArchiveTest, areProgramResultsUnique) {
 
 TEST_F(ArchiveTest, DataHandlersAccessors) {
 	Archive archive(4);
-	vect.at(0).get().updateHash();
-	vect.at(1).get().updateHash();
 
 	// Add a few fictive recordings
 	archive.addRecording(p, vect, 1.0);
 	archive.addRecording(p, vect, 1.5);
 	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
-	vect.at(1).get().updateHash();
 	archive.addRecording(p, vect, 2.0);
 	archive.addRecording(p, vect, 2.3);
 
 	ASSERT_TRUE(archive.hasDataHandlers(archive.getCombinedHash(vect))) << "Data handler should be detected as present within the archive.";
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(666));
-	vect.at(1).get().updateHash();
 	ASSERT_FALSE(archive.hasDataHandlers(archive.getCombinedHash(vect))) << "Data handler should be detected as not present within the archive.";
 	auto dhandlers = archive.getDataHandlers();
 	ASSERT_EQ(dhandlers.size(), 2);
@@ -180,8 +160,6 @@ TEST_F(ArchiveTest, Clear) {
 	ASSERT_NO_THROW(archive.clear()) << "Clearing an empty archive should not fail.";
 
 	// Add a few fictive recordings
-	vect.at(0).get().updateHash();
-	vect.at(1).get().updateHash();
 	archive.addRecording(p, vect, 1.0);
 	archive.addRecording(p, vect, 1.5);
 

@@ -39,24 +39,34 @@ namespace DataHandlers {
 		*/
 		void checkAddressAndType(const std::type_info& type, const size_t& address) const;
 
+		/**
+		* \brief Implementation of the updateHash method.
+		*/
+		virtual size_t updateHash() const override;
+
 	public:
 		/**
 		*  \brief Constructor for the PrimitiveTypeArray class.
 		*
-		* \param[in] size the fixed number of elements of primitive type T contained in the PrimitiveTypeArray.
+		* \param[in] size the fixed number of elements of primitive type T
+		* contained in the PrimitiveTypeArray.
 		*/
 		PrimitiveTypeArray(size_t size = 8);
 
-		virtual DataHandler* clone() const;
+		// Inherited from DataHandler
+		virtual DataHandler* clone() const override;
 
-		size_t getAddressSpace(const std::type_info& type)  const;
+		// Inherited from DataHandler
+		size_t getAddressSpace(const std::type_info& type)  const override;
 
 		/**
-		* \brief Sets all elements of the Array to 0 (or its equivalent for the given template param.
+		* \brief Sets all elements of the Array to 0 (or its equivalent for
+		* the given template param.)
 		*/
 		void resetData();
 
-		const SupportedType& getDataAt(const std::type_info& type, const size_t address) const;
+		// Inherited from DataHandler
+		const SupportedType& getDataAt(const std::type_info& type, const size_t address) const override;
 
 		/**
 		* \brief Set the data at the given address to the given value.
@@ -66,6 +76,8 @@ namespace DataHandlers {
 		* the one used as registers, which are managed with a
 		* PrimitiveTypeArray<double>.
 		*
+		* Invalidates the cache.
+		*
 		* \param[in] type the std::type_info of data set.
 		* \param[in] address the location of the data to set.
 		* \param[in] value a const reference to the PrimitiveType holding a
@@ -74,11 +86,6 @@ namespace DataHandlers {
 		* \throws std::out_of_range if the given address is invalid for the given data type.
 		*/
 		void setDataAt(const std::type_info& type, const size_t address, const PrimitiveType<T>& value);
-
-		/**
-		* \brief Implementation of the updateHash method.
-		*/
-		virtual size_t updateHash() const;
 	};
 
 	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size) : nbElements{ size }, data(size) {
@@ -108,6 +115,9 @@ namespace DataHandlers {
 		for (PrimitiveType<T>& elt : this->data) {
 			elt = 0;
 		}
+
+		// Invalidate the cached hash
+		this->invalidCachedHash = true;
 	}
 
 	template<class T>
@@ -145,6 +155,9 @@ namespace DataHandlers {
 		checkAddressAndType(type, address);
 
 		this->data[address] = value;
+
+		// Invalidate the cached hash.
+		this->invalidCachedHash = true;
 	}
 	template<class T>
 	inline size_t PrimitiveTypeArray<T>::updateHash() const
@@ -158,6 +171,9 @@ namespace DataHandlers {
 		for (PrimitiveType<T> dataElement : this->data) {
 			this->cachedHash ^= hasher((T)dataElement);
 		}
+
+		// Validate the cached hash value
+		this->invalidCachedHash = false;
 
 		return this->cachedHash;
 	}

@@ -51,6 +51,28 @@ namespace DataHandlers {
 		*/
 		mutable size_t cachedHash;
 
+		/**
+		* \brief Boolean value indicating whether the current cachedValue is
+		* valid, or not.
+		*
+		* When getting the value of the hash, it shall be automatically updated
+		* when invalidCachedHash is set to true. Whenever the data contained in
+		* a DataHandler is modifier, the invalidCachedHash attribute shall be
+		* set to true.
+		*
+		*/
+		mutable bool invalidCachedHash;
+
+		/**
+		* \brief Update the cachedHash value.
+		*
+		* This methods trigger an update of the cachedHash value and
+		* returns the new value.
+		*
+		* \return the new value of the cachedhash attribute.
+		*/
+		virtual size_t updateHash() const = 0;
+
 	public:
 		/**
 		* \brief Default constructor of the DataHandler class.
@@ -75,9 +97,9 @@ namespace DataHandlers {
 
 		/**
 		* \brief Get the ID of the DataHandler.
-		* 
+		*
 		* Two DataHandler should have the same ID only if the are copy
-		* from each other, possibly holding different data. 
+		* from each other, possibly holding different data.
 		* This property will be used to simplify check that two different
 		* DataHandler have the exact same characteristics (handled types,
 		* addressSpace, ..)
@@ -87,24 +109,12 @@ namespace DataHandlers {
 		/**
 		* \brief Get the current value of the hash for this DataHandler.
 		*
-		* It is important to note that the returned value is a cached value
-		* which may not have been updated since the last change of the data
-		* contained in the DataHandler. To make sure the data is up to date,
-		* call the updateHash method.
+		* This method returns the value of the hash, and updates it if
+		* necessary.
 		*
 		* \return the cached value of the Hash.
 		*/
 		size_t getHash() const;
-
-		/**
-		* \brief Update the cachedHash value.
-		*
-		* This methods trigger an update of the cachedHash value and
-		* returns the new value.
-		*
-		* \return the new value of the cachedhash attribute.
-		*/
-		virtual size_t updateHash() const = 0;
 
 		/**
 		* \brief Check a given DataHandler can handle data for the given data type.
@@ -145,8 +155,11 @@ namespace DataHandlers {
 		* \brief Generic method for DataHandler to reset their data.
 		*
 		* Method used to reset the data handled by a DataHandler. Each
-		* DataHandler can implement a custom behavior, or even no behavior at all for this method.
-
+		* DataHandler can implement a custom behavior, or even no behavior at
+		* all for this method.
+		*
+		* This method shall invalidate the cachedHash.
+		*
 		*/
 		virtual void resetData() = 0;
 

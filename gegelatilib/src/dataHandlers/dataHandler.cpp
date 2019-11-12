@@ -3,7 +3,7 @@
 
 size_t DataHandlers::DataHandler::count = 0;
 
-DataHandlers::DataHandler::DataHandler() : id{ count++ }, providedTypes(), cachedHash() {
+DataHandlers::DataHandler::DataHandler() : id{ count++ }, providedTypes(), cachedHash(), invalidCachedHash(true) {
 };
 
 size_t DataHandlers::DataHandler::getId() const
@@ -13,6 +13,10 @@ size_t DataHandlers::DataHandler::getId() const
 
 size_t DataHandlers::DataHandler::getHash() const
 {
+	if (this->invalidCachedHash) {
+		this->updateHash();
+	}
+
 	return this->cachedHash;
 }
 

@@ -52,11 +52,11 @@ protected:
 	std::map<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>> dataHandlers;
 
 	/**
-	* \brief Map storing the Program pointers referenced in recordings the 
+	* \brief Map storing the Program pointers referenced in recordings the
 	* associated recording.
 	*
-	* The Map is filled in the addRecording method, and elements are removed 
-	* whenever the las ArchiveRecording referencing a Program is removed from 
+	* The Map is filled in the addRecording method, and elements are removed
+	* whenever the las ArchiveRecording referencing a Program is removed from
 	* the Archive.
 	*
 	* The Map is used to speed the unicity tests.
@@ -85,8 +85,8 @@ public:
 	/**
 	* \brief Combien the hash of a set of dataHandlers into a single one.
 	*
-	* This method assumes that the cached hash value of all DataHandler is up
-	* to date and simply accesses it using the DataHandler::getHash() method.
+	* Hashes of each DataHandler is accessed with the
+	* DataHandler::getHash() method.
 	*
 	* \return the hash resulting from the combination.
 	*/
@@ -100,7 +100,7 @@ public:
 	* If this is the first time this set of DataHandler is stored in the
 	* Archive according to its DataHandler::getHash() method, a copy of the
 	* dataHandler will be created.
-	* If an identical recording is already in the Archive (same hash, same 
+	* If an identical recording is already in the Archive (same hash, same
 	* Program), the recording is not added.
 	*
 	* \param[in] program the Program associated to this recording.
@@ -137,12 +137,12 @@ public:
 		const Program::Program* prog) const;
 
 	/**
-	* Check if the given hash-results pairs are unique compared to Program in 
+	* Check if the given hash-results pairs are unique compared to Program in
 	* the Archive.
 	*
 	* This method will return false is there exist any Program in the Archive
-	* for which all recordings with hashes contained in the given map, are 
-	* associated to results equal to those of the given map (within tau 
+	* for which all recordings with hashes contained in the given map, are
+	* associated to results equal to those of the given map (within tau
 	* margin).
 	*/
 	bool areProgramResultsUnique(
