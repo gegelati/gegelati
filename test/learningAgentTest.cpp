@@ -50,6 +50,7 @@ TEST_F(LearningAgentTest, Constructor) {
 
 TEST_F(LearningAgentTest, Init) {
 	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
 	Learn::LearningAgent la(le, set, params);
 
 	ASSERT_NO_THROW(la.init()) << "Initialization of the LearningAgent should not fail.";
@@ -57,6 +58,7 @@ TEST_F(LearningAgentTest, Init) {
 
 TEST_F(LearningAgentTest, EvalRoot) {
 	params.archiveSize = 50;
+	params.archivingProbability = 1.0;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 10;
 
@@ -70,6 +72,7 @@ TEST_F(LearningAgentTest, EvalRoot) {
 
 TEST_F(LearningAgentTest, EvalAllRoots) {
 	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 10;
 
@@ -83,6 +86,7 @@ TEST_F(LearningAgentTest, EvalAllRoots) {
 
 TEST_F(LearningAgentTest, TrainOnegeneration) {
 	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 3;
 	params.ratioDeletedRoots = 0.95; // high number to force the apparition of root action.
@@ -106,6 +110,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 
 TEST_F(LearningAgentTest, Train) {
 	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 5;
 	params.ratioDeletedRoots = 0.2;
@@ -123,6 +128,7 @@ TEST_F(LearningAgentTest, Train) {
 
 TEST_F(LearningAgentTest, KeepBestPolicy) {
 	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 1;
 	params.ratioDeletedRoots = 0.2;

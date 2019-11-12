@@ -66,13 +66,20 @@ protected:
 	/// Recordings of the Archive
 	std::deque<ArchiveRecording> recordings;
 
+	/**
+	* \brief Probability of adding any program execution to the archive.
+	*/
+	const double archivingProbability;
+
 public:
 	/**
 	* \brief Main constructor for Archive.
 	*
+	* \param[in] archivingProbability probability for each call to
+	* addRecording to actually lead to a new recodring in the Archive.
 	* \param[in] size maximum number of recordings kept in the Archive.
 	*/
-	Archive(size_t size = 50) : maxSize{ size }, recordings() {};
+	Archive(size_t size = 50, double archivingProbability = 1.0) : archivingProbability{ archivingProbability }, maxSize{ size }, recordings() {};
 
 	/**
 	* \brief Destructor of the class.
@@ -95,6 +102,8 @@ public:
 	/**
 	* \brief Add a new recording to the Archive.
 	*
+	* A call to this function adds an ArchiveRecording to the archive with the
+	* probability specified by the archivingProbability attribute.
 	* If the maximum number of recordings held in the archive is reached, the
 	* oldest recording will be removed.
 	* If this is the first time this set of DataHandler is stored in the

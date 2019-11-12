@@ -16,6 +16,8 @@ namespace Learn {
 		Mutator::MutationParameters mutation;
 		/// Number of recordings held in the Archive.
 		size_t archiveSize;
+		/// Probability of archiving each Program execution.
+		double archivingProbability;
 		/// Number of evaluation of each policy per generation.
 		uint64_t nbIterationsPerPolicyEvaluation;
 		/// Maximum number of action per evaluation of a policy. 

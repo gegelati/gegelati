@@ -7,6 +7,7 @@
 #include "dataHandlers/primitiveTypeArray.h"
 #include "program/program.h"
 #include "program/line.h"
+#include "mutator/rng.h"
 
 #include "archive.h"
 
@@ -61,7 +62,8 @@ TEST_F(ArchiveTest, CombineHash) {
 }
 
 TEST_F(ArchiveTest, AddRecordingTests) {
-	Archive archive(3);
+	// For these test, force archivingProbability to 1
+	Archive archive(3, 1.0);
 
 	// Add a fictive recording
 	ASSERT_NO_THROW(archive.addRecording(p, vect, 1.3)) << "Adding a recording to the empty archive failed.";
@@ -93,6 +95,21 @@ TEST_F(ArchiveTest, AddRecordingTests) {
 	ASSERT_NO_THROW(archive.addRecording(&p3, vect, 1.5)) << "Adding a recording to the full archive failed.";
 	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect.";
 	ASSERT_EQ(archive.getNbDataHandlers(), 1) << "Number or dataHandlers copied in the archive is incorrect.";
+}
+
+TEST_F(ArchiveTest, AddRecordingWithProbabilityTests) {
+	// For these test, force archivingProbability to 0.5
+	Archive archive(10, 0.5);
+
+	// Use a known seed
+	Mutator::RNG::setSeed(0);
+
+	// Add a few fictive recording
+	for (int i = 0; i < 10; i++) {
+		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
+		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
+	}
+	ASSERT_EQ(archive.getNbRecordings(), 6) << "Number or recordings in the archive is incorrect with a known seed.";
 }
 
 TEST_F(ArchiveTest, IsUnique) {
