@@ -79,6 +79,9 @@ namespace DataHandlers {
 		*/
 		DataHandler();
 
+		/// Default destructor
+		virtual ~DataHandler() = default;
+
 		/**
 		* \brief Default copy constructor.
 		*/

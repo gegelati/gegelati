@@ -53,6 +53,9 @@ namespace DataHandlers {
 		*/
 		PrimitiveTypeArray(size_t size = 8);
 
+		/// Default destructor.
+		virtual ~PrimitiveTypeArray() = default;
+
 		// Inherited from DataHandler
 		virtual DataHandler* clone() const override;
 
