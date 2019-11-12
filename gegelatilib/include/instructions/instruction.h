@@ -21,6 +21,10 @@ namespace Instructions {
 	class Instruction {
 
 	public:
+
+		/// Default virtual destructor for polyphormism.
+		virtual ~Instruction() = default;
+
 		/**
 		* \brief Get the list of operand types needed by the Instruction.
 		*

@@ -11,7 +11,7 @@ public:
 	/**
 	* \brief Virtual destructor to force class polymorphism.
 	*/
-	virtual ~SupportedType() {};
+	virtual ~SupportedType() = default;
 };
 
 /**

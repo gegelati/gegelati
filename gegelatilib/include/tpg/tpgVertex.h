@@ -12,6 +12,10 @@ namespace TPG {
 	*/
 	class TPGVertex {
 	public:
+
+		/// Default polymorphic destructor
+		virtual ~TPGVertex() = default;
+
 		/**
 		* \brief Get a const reference to incoming edges of this TPGVertex.
 		*/
