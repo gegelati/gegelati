@@ -14,7 +14,7 @@ TEST(EnvironmentTest, Constructor) {
 	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 
-	set.add(*(new Instructions::AddPrimitiveType<float>()));
+	set.add(*(new Instructions::AddPrimitiveType<int>()));
 	set.add(*(new Instructions::AddPrimitiveType<double>()));
 
 	DataHandlers::PrimitiveTypeArray<double> d1(size1);
@@ -29,7 +29,33 @@ TEST(EnvironmentTest, Constructor) {
 
 	ASSERT_THROW(
 		// Empty dataHandlers
-		Environment e2(set, {}, 8);, std::domain_error) << "Something went unexpectedly right when constructing an Environment with an invalid Environment.";
+		Environment e2(set, {}, 8); , std::domain_error) << "Something went unexpectedly right when constructing an Environment with an invalid Environment.";
+}
+
+TEST(EnvironmentTest, ConstructorWithInvalidInstruction) {
+	const size_t size1{ 24 };
+	const size_t size2{ 32 };
+	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	Instructions::Set set;
+
+	set.add(*(new Instructions::AddPrimitiveType<int>()));
+	set.add(*(new Instructions::AddPrimitiveType<double>()));
+
+	DataHandlers::PrimitiveTypeArray<double> d1(size1);
+	DataHandlers::PrimitiveTypeArray<int> d2(size2);
+
+	vect.push_back(d1);
+	vect.push_back(d2);
+
+	// Add an invalid instruction to the set to test the filtering mechanism
+	set.add(*(new Instructions::AddPrimitiveType<bool>()));
+
+	Environment* e3 = NULL;
+	ASSERT_NO_THROW(e3 = new Environment(set, vect, 8)) << "Constructing an Environemnt with an invalid Instruction should not throw an exception.";
+	if (e3 != NULL) {
+		ASSERT_EQ(e3->getInstructionSet().getNbInstructions(), 2) << "After removing the non-usable instruction, only 2 instructions should remain.";
+		delete e3;
+	}
 }
 
 TEST(EnvironmentTest, computeLineSize) {
@@ -39,7 +65,7 @@ TEST(EnvironmentTest, computeLineSize) {
 	Instructions::Set set;
 	Environment* e;
 	vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
-	vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size2)));
+	vect.push_back(*(new DataHandlers::PrimitiveTypeArray<float>((unsigned int)size2)));
 
 	set.add(*(new Instructions::AddPrimitiveType<float>()));
 	set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -67,7 +93,7 @@ TEST(EnvironmentTest, Size_tAttributeAccessors) {
 	DataHandlers::PrimitiveTypeArray<double> d1(size1);
 	DataHandlers::PrimitiveTypeArray<int> d2(size2);
 
-	Instructions::AddPrimitiveType<float> iAdd; // Two operands, No Parameter 
+	Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter 
 	Instructions::MultByConstParam<double, float> iMult; // One operand, One parameter
 
 	set.add(iAdd);
@@ -93,7 +119,7 @@ TEST(EnvironmentTest, InstructionSetAccessor) {
 	Instructions::Set set;
 
 	DataHandlers::PrimitiveTypeArray<double> d1(size1);
-	DataHandlers::PrimitiveTypeArray<int> d2(size2);
+	DataHandlers::PrimitiveTypeArray<float> d2(size2);
 
 	Instructions::AddPrimitiveType<float> iAdd; // Two operands, No Parameter 
 	Instructions::MultByConstParam<double, float> iMult; // One operand, One parameter
@@ -123,7 +149,7 @@ TEST(EnvironmentTest, DataSourceAccessor) {
 	DataHandlers::PrimitiveTypeArray<double> d1(size1);
 	DataHandlers::PrimitiveTypeArray<int> d2(size2);
 
-	Instructions::AddPrimitiveType<float> iAdd; // Two operands, No Parameter 
+	Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter 
 	Instructions::MultByConstParam<double, float> iMult; // One operand, One parameter
 
 	set.add(iAdd);

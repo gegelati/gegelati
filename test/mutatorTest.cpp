@@ -131,32 +131,6 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine2) {
 	delete (&set.getInstruction(2));
 }
 
-TEST_F(MutatorTest, LineMutatorInitRandomCorrectLineException) {
-	// Create a new set only with only non-usable instructions.
-	Instructions::Set faultySet;
-
-	// Add a new instruction for which no data can be found in the environment DataHandler
-	faultySet.add(*(new Instructions::AddPrimitiveType<unsigned char>()));
-	faultySet.add(*(new Instructions::MultByConstParam<float, int16_t>()));
-
-	// Recreate the environment and program with the new faulty set
-	delete p;
-	delete e;
-	e = new Environment(faultySet, vect, 8);
-	p = new Program::Program(*e);
-
-	// Set seed 
-	Mutator::RNG::setSeed(0);
-
-	// Add a pseudo-random lines to the program
-	Program::Line& l0 = p->addNewLine();
-	ASSERT_THROW(Mutator::LineMutator::initRandomCorrectLine(l0), std::runtime_error) << "Pseudo-Random correct line initialization did not fail within an environment where failure should always happen because instruction set and data sources have no compatible types.";
-
-	// cleanup
-	delete (&faultySet.getInstruction(0));
-	delete (&faultySet.getInstruction(1));
-}
-
 TEST_F(MutatorTest, LineMutatorAlterLine) {
 	Program::ProgramExecutionEngine pEE(*p);
 
@@ -227,40 +201,6 @@ TEST_F(MutatorTest, LineMutatorAlterLine) {
 	ASSERT_EQ(l0.getOperand(1).second, 28) << "Alteration with known seed changed its result.";
 	ASSERT_EQ((int16_t)l0.getParameter(0), 31115) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
-}
-
-TEST_F(MutatorTest, LineMutatorAlterLineSpecificCase) {
-	// Test the case where an instruction is altered and
-	// Its operand data source is changed, but no data source 
-	// is available for this instruction data type, 
-	// and thus, an errod should occur.
-
-	// Add a new instruction working on int
-	set.add(*(new Instructions::MultByConstParam<float, int16_t>()));
-
-
-	// Recreate the environment and program with the new set
-	delete p;
-	delete e;
-	e = new Environment(set, vect, 8);
-	p = new Program::Program(*e);
-
-	// Add a 0 lines to the program
-	// i=0, d=0, op0=(0,0), op1=(0,0),  param=0
-	Program::Line& l0 = p->addNewLine();
-
-	// Set its op0 to the new addInstruction
-	// i=2, d=0, op0=(0,0), op1=(0,0),  param=0
-	ASSERT_TRUE(l0.setInstructionIndex(0, true)) << "Could not set the instruction to the desired index.";
-
-
-	// With a known seed, the random number will alter operand 0 data source, 
-	// but since no other data source can provide data of this type, it'll change the
-	// location instead.
-	Mutator::RNG::setSeed(6);
-	ASSERT_THROW(Mutator::LineMutator::alterCorrectLine(l0), std::runtime_error) << "Line mutation selecting an instruction compatible with no data source should fail.";
-
-	delete& set.getInstruction(2);
 }
 
 TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine) {

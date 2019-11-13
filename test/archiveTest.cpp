@@ -24,7 +24,7 @@ protected:
 		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
 		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size2)));
 
-		set.add(*(new Instructions::AddPrimitiveType<float>()));
+		set.add(*(new Instructions::AddPrimitiveType<int>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
 
 		e = new Environment(set, vect, 8);

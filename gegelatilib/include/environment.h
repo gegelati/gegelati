@@ -1,6 +1,8 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
+#include <iostream>
+
 #include "dataHandlers/dataHandler.h"
 #include "instructions/instruction.h"
 #include "instructions/set.h"
@@ -92,6 +94,17 @@ protected:
 	*/
 	static const LineSize computeLineSize(const Environment& env);
 
+	/**
+	* \brief Filter an InstructionSet to keep only Instruction with operand
+	* types provided by the given DataHandler.
+	*
+	* \param[in] iSet the Instructions::Set to filter.
+	* \param[in] dataSources a set of DataHandler providing data.
+	* \return a new Instructions:Set where only Instruction whose operands
+	* can be provided by at least one DataHandler are kept.
+	*/
+	static Instructions::Set filterInstructionSet(const Instructions::Set& iSet, const std::vector < std::reference_wrapper<DataHandlers::DataHandler>>& dataSources);
+
 private:
 	/// Default constructor deleted for its uselessness.
 	Environment() = delete;
@@ -109,9 +122,9 @@ public:
 	*/
 	Environment(const Instructions::Set& iSet,
 		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers,
-		const unsigned int nbRegs) : instructionSet{ iSet }, dataSources{ dHandlers }, nbRegisters{ nbRegs },
-		nbInstructions{ iSet.getNbInstructions() }, maxNbOperands{ iSet.getMaxNbOperands() },
-		maxNbParameters{ iSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(nbRegs, dHandlers) },
+		const unsigned int nbRegs) : instructionSet{ filterInstructionSet(iSet, dHandlers) }, dataSources{ dHandlers }, nbRegisters{ nbRegs },
+		nbInstructions{ instructionSet.getNbInstructions() }, maxNbOperands{ instructionSet.getMaxNbOperands() },
+		maxNbParameters{ instructionSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(nbRegs, dHandlers) },
 		lineSize{ computeLineSize(*this) } {};
 
 	/**

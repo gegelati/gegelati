@@ -24,7 +24,7 @@ protected:
 
 	virtual void SetUp() {
 		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size2)));
+		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<float>((unsigned int)size2)));
 
 		set.add(*(new Instructions::AddPrimitiveType<float>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
