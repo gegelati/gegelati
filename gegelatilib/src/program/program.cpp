@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <new>
 #include <algorithm>
+#include <set>
 
 #include "parameter.h"
 #include "program/program.h"
@@ -62,5 +63,48 @@ const Program::Line& Program::Program::getLine(uint64_t index) const
 Program::Line& Program::Program::getLine(uint64_t index)
 {
 	return *this->lines.at(index).first; // throws std::out_of_range on bad index.
+}
+
+void Program::Program::identifyIntrons()
+{
+	// Set of useful register
+	std::set<uint64_t> registers;
+	// Start with only register 0
+	registers.insert(0);
+
+	// Scan program lines backward
+	auto backIter = this->lines.rbegin();
+	while (backIter != this->lines.rend()) {
+		// Check if the currentLine output is within registers
+		Line* currentLine = backIter->first;
+		uint64_t destinationIndex = currentLine->getDestinationIndex();
+		auto destinationRegister = registers.find(destinationIndex);
+		if (destinationRegister != registers.end()) {
+			// The Line is useful (i.e. not an introns)
+			backIter->second = false;
+
+			// Remove the destination register from the list of useful operands
+			registers.erase(*destinationRegister);
+
+			// Add register operands to the list of usefull registers
+			size_t nbOperands = this->environment.getInstructionSet().getInstruction(currentLine->getInstructionIndex()).getNbOperands();
+			for (auto idxOperand = 0; idxOperand < nbOperands; idxOperand++) {
+				// Is the operand a register (i.e. its index is 0)
+				if (currentLine->getOperand(idxOperand).first == 0) {
+					// The operand is a register, add this register to
+					// the list of useful registers.
+					uint64_t location = currentLine->getOperand(idxOperand).second;
+					uint64_t registerIdx = location % this->environment.getNbRegisters();
+					registers.insert(registerIdx);
+				}
+			}
+		}
+		else {
+			// The destination of the line is not within useful registers
+			// the line does not contribute to the result of the Program
+			// it is an intron.
+			backIter->second = true;
+		}
+	}
 }
 

@@ -137,6 +137,14 @@ namespace Program {
 		* \throw std::out_of_range if the index is too large.
 		*/
 		Line& getLine(uint64_t index);
+
+		/**
+		* \brief Scan the Line of the Program to identify introns.
+		*
+		* This method update the boolean value associated to each Line of the
+		* Program to indicate if this Line is an intron or not.
+		*/
+		void identifyIntrons();
 	};
 }
 #endif
