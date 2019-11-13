@@ -7,8 +7,8 @@
 
 Program::Program::~Program() {
 	while (!lines.empty()) {
-		Line* line = lines.back();
-		free(line);
+		Line* line = lines.back().first;
+		delete line;
 		lines.pop_back();
 	}
 }
@@ -24,14 +24,15 @@ Program::Line& Program::Program::addNewLine(const uint64_t idx)
 	}
 	// Allocate the zero-filled memory 
 	Line* newLine = new Line(this->environment);
-	this->lines.insert(lines.begin() + idx, newLine);
+	// new line is not marked as an intron by default
+	this->lines.insert(lines.begin() + idx, { newLine, false });
 
 	return *newLine;
 }
 
 void Program::Program::removeLine(const uint64_t idx)
 {
-	delete this->lines.at(idx); // throws std::out_of_range on bad index.
+	delete this->lines.at(idx).first; // throws std::out_of_range on bad index.
 	this->lines.erase(this->lines.begin() + idx);
 }
 
@@ -55,11 +56,11 @@ size_t Program::Program::getNbLines() const
 
 const Program::Line& Program::Program::getLine(uint64_t index) const
 {
-	return *this->lines.at(index); // throws std::out_of_range on bad index.
+	return *this->lines.at(index).first; // throws std::out_of_range on bad index.
 }
 
 Program::Line& Program::Program::getLine(uint64_t index)
 {
-	return *this->lines.at(index); // throws std::out_of_range on bad index.
+	return *this->lines.at(index).first; // throws std::out_of_range on bad index.
 }
 
