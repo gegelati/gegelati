@@ -102,7 +102,13 @@ install(TARGETS ${LIBRARY_TARGET_NAME}
         RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}"                            COMPONENT bin)
         # Removed line for preserving header folder hierarchy.
 		# PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME}" COMPONENT dev)
-		
+
+# PDB fow windows visual
+if(MSVC)
+	install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> CONFIGURATIONS "Debug" "RelWithDebInfo" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+endif()
+
+# Doc installation
 if(WIN32)
 	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
 		DESTINATION "." # Destination is CMAKE_BINARY_DIR
