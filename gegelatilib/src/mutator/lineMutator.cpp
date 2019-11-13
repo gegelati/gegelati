@@ -109,52 +109,22 @@ void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line)
 		line.setParameter(paramIdx, param);
 	}
 
-	// Detecting impossible combination may imply reversing some random choice
-	// and making sure not to re-select the same option again. The following 
-	// vectors are used to check that.
-	std::set<uint64_t> instructionIndexes;
+	// Select an instruction.
+	uint64_t instructionIndex = RNG::getUnsignedInt64(0, (env.getNbInstructions() - 1));
+	// Get the instruction
+	const Instructions::Instruction& instruction = env.getInstructionSet().getInstruction(instructionIndex);
+	// Set the instructionIndex
+	line.setInstructionIndex(instructionIndex); // Should never throw.. but I did not deactivate the check anyway.
 
-	// Boolean value set to true only when all attributes of the line have been successfully initialized.
-	bool allGood = false;
-	while (!allGood) {
-		// Check if all instructions have already been tested.
-		if (instructionIndexes.size() == env.getNbInstructions()) {
-			throw std::runtime_error("No instruction of the environment can be called with valid data.");
-		}
+	// Select operands needed by the instruction
+	uint64_t operandIdx = 0;
+	for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
 
-		// Select an instruction within remaining ones.
-		uint64_t instructionIndex = RNG::getUnsignedInt64(0, (env.getNbInstructions() - 1) - instructionIndexes.size());
-		// Correct the index with the number of already tested ones inferior to it.
-		std::for_each(instructionIndexes.begin(), instructionIndexes.end(),
-			[&instructionIndex](uint64_t index) { if (index <= instructionIndex) instructionIndex++; });
-		// Get the instruction
-		const Instructions::Instruction& instruction = env.getInstructionSet().getInstruction(instructionIndex);
-		// Set the instructionIndex
-		line.setInstructionIndex(instructionIndex); // Should never throw.. but I did not deactivate the check anyway.
-		// Add the index to the set
-		instructionIndexes.insert(instructionIndex);
+		// Check if all operands were tested (and none were valid)
+		initRandomCorrectLineOperand(instruction, line, operandIdx, true, true, false);
 
-		// Select operands needed by the instruction
-		uint64_t operandIdx = 0;
-		for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
-
-			// Check if all operands were tested (and none were valid)
-			bool operandFound = initRandomCorrectLineOperand(instruction, line, operandIdx, true, true, false);
-
-			if (!operandFound) {
-				// If the algorithm failed to find a dataSource providing the right type of data
-				// stop the search for more operand and try a new instruction.
-				break; // for(operandIdx)-loop
-			}
-		}
-
-		// If not all operands of the instruction were successfully chosen
-		if (operandIdx < env.getMaxNbOperands()) {
-			continue; // Next iteration of the while(allGood) loop to search for a new instruction.
-		}
-
-		// If all went well during operand selection.
-		allGood = true;
+		// This operation can (no longer) fail since commit abd7cd since 
+		// all Instruction are vetted when building the Environment
 	}
 }
 
