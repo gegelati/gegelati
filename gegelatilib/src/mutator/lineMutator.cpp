@@ -163,14 +163,9 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
 			// Alter the operand if needed
 			if (!isValid) {
 				// Force only the change of data source (location can remain unchanged thanks to scaling).
-				bool forcedChangeWorked = initRandomCorrectLineOperand(instruction, line, i, true, false, true);
-				if (!forcedChangeWorked) {
-					// in case the forced change didn't work, no data source has the right type
-					// for the given instruction. fail.
-					// This should never happen if there is a check for Instructions viability in the Environment
-					// Construction.
-					throw std::runtime_error("An Instruction has no valid dataSource in the DataHandlers.");
-				}
+				// This can never fail since there is a check for Instructions viability during the Environment
+				// Construction. Hence, eithed isValid is true, OR a valid dataSource will be found among other data sources.
+				initRandomCorrectLineOperand(instruction, line, i, true, false, true);
 			}
 		}
 	}
