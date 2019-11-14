@@ -3,7 +3,11 @@
 
 const bool Program::ProgramExecutionEngine::next()
 {
-	this->programCounter++;
+	// While the next line is an intron
+	// increment the program counter.
+	do {
+		this->programCounter++;
+	} while (this->programCounter < this->program.getNbLines() && this->program.isIntron(this->programCounter));
 	return this->programCounter < this->program.getNbLines();
 }
 
