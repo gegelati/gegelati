@@ -10,6 +10,8 @@
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
+#include "program/program.h"
+#include "program/line.h"
 
 namespace Exporter {
 	/**
@@ -124,6 +126,13 @@ namespace Exporter {
 		* \param[in] edge the TPGEdge being printed.
 		*/
 		void printTPGEdge(const TPG::TPGEdge& edge);
+
+		/**
+		* \brief Prints the dot content for the given Program.
+		*
+		* \param[in] program the Program to be printed
+		*/
+		void printProgram(const Program::Program& program);
 
 		/**
 		* \brief Prints header content in the dot file.

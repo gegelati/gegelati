@@ -58,12 +58,15 @@ uint64_t Exporter::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& act
 void Exporter::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 {
 	uint64_t srcID = this->findVertexID(*edge.getSource());
-
 	uint64_t progID;
+
+	Program::Program & p = edge.getProgram();
 	if (this->findProgramID(edge.getProgram(), progID)) {
 		// First time thie Program is encountered
 		fprintf(pFile, "%sP%" PRIu64 " [fillcolor=\"#cccccc\" shape=point]\n", this->offset.c_str(), progID);
-
+		//print the program content : 
+		printProgram(p);
+		fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n", this->offset.c_str(), progID, progID);
 		if (typeid(*edge.getDestination()) == typeid(TPG::TPGAction)) {
 			uint64_t actionID = printTPGAction(*(const TPG::TPGAction*)edge.getDestination());
 			fprintf(pFile, "%sP%" PRIu64 " -> A%" PRIu64 "\n", this->offset.c_str(), progID, actionID);
@@ -75,6 +78,62 @@ void Exporter::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 	}
 
 	fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 "\n", this->offset.c_str(), srcID, progID);
+}
+
+void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program)
+{
+	uint64_t progID;
+	this->findProgramID(program, progID);
+	std::string programContent = "";
+	for(int i = 0; i < program.getNbLines(); i++)
+	{	
+		const Program::Line & l = program.getLine(i);
+		//instruction index
+		programContent += std::to_string(l.getInstructionIndex());
+		programContent += "|";
+		//instruction destination index
+		programContent += std::to_string(l.getDestinationIndex());
+		programContent += "|{";
+		//instruction parameters
+		for(int j =0; j < l.getEnvironment().getMaxNbParameters(); j++)
+		{
+			try
+			{
+				const Parameter & p = l.getParameter(j);
+				programContent += std::to_string(p.i);
+			}
+			catch(std::range_error)
+			{
+				//the exception thrown means that we try to acces non existing parameters and thus we can end the loop..
+				break; 
+			}
+		}
+		programContent += "}|{";
+		//instruction operands
+		for(int j =0; j < l.getEnvironment().getMaxNbOperands(); j++)
+		{
+			try
+			{
+				std::pair<uint64_t, uint64_t> p = l.getOperand(j);
+				if(j != 0)
+					programContent += "|";
+				programContent += "{";
+				programContent += std::to_string(p.first);
+				programContent += "|";
+				programContent += std::to_string(p.second);
+				programContent += "}";
+			}
+			catch(std::range_error)
+			{
+				//the exception thrown means that we try to acces non existing parameters and thus we can end the loop..
+				break; 
+			}
+		}
+
+		programContent += "}&#92;n";
+			
+	}
+	fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"]\n", this->offset.c_str(), progID, programContent.c_str());
 }
 
 void Exporter::TPGGraphDotExporter::printTPGGraphHeader()
@@ -139,6 +198,8 @@ void Exporter::TPGGraphDotExporter::print()
 	auto edges = this->tpg.getEdges();
 	for (const TPG::TPGEdge& edge : edges) {
 		this->printTPGEdge(edge);
+		//print the edge's program
+
 	}
 
 	// Print footer
