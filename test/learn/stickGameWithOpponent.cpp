@@ -1,5 +1,16 @@
 #include "stickGameWithOpponent.h"
 
+bool StickGameWithOpponent::isCopyable() const
+{
+	return true;
+}
+
+Learn::LearningEnvironment* StickGameWithOpponent::clone() const
+{
+	// Default copy constructor does the trick.
+	return (Learn::LearningEnvironment*) new StickGameWithOpponent(*this);
+}
+
 void StickGameWithOpponent::doAction(uint64_t actionID)
 {
 	LearningEnvironment::doAction(actionID);

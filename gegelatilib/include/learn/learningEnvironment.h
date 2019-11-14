@@ -40,9 +40,14 @@ namespace Learn {
 	* affect.
 	*/
 	class LearningEnvironment {
+	protected:
 		/// Number of actions available for interacting with this 
 		/// LearningEnvironment
 		const uint64_t nbActions;
+
+		/// Make the default copy constructor protected.
+		LearningEnvironment(const LearningEnvironment& other) = default;
+
 	public:
 		/**
 		* \brief Delete the default constructor of a LearningEnvironment.
@@ -56,6 +61,25 @@ namespace Learn {
 		* interacting with this LearningEnviromnent.
 		*/
 		LearningEnvironment(uint64_t nbAct) : nbActions{ nbAct } {};
+
+		/**
+		* \brief Get a copy of the LearningEnvironment.
+		*
+		* Default implementation returns a null pointer.
+		*
+		* \return a copy of the LearningEnvironment if it is copyable,
+		* otherwise this method returns a NULL pointer.
+		*/
+		virtual LearningEnvironment* clone() const;
+
+		/**
+		* \brief Can the LearningEnvironment be copy constructed to evaluate
+		* several LearningAgent in parallel.
+		*
+		* \return true if the LearningEnvironment can be copied and run in
+		* parallel. Default implementation returns false.
+		*/
+		virtual bool isCopyable() const;
 
 		/**
 		* \brief Get the number of actions available for this

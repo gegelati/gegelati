@@ -43,6 +43,12 @@ public:
 	~StickGameWithOpponent() {};
 
 	// Inherited via LearningEnvironment
+	virtual bool isCopyable() const override;
+
+	// Inherited via LearningEnvironment
+	virtual LearningEnvironment* clone() const override;
+
+	// Inherited via LearningEnvironment
 	virtual void doAction(uint64_t actionID) override;
 
 	// Inherited via LearningEnvironment
