@@ -17,8 +17,19 @@ namespace Program {
 		/// Environment within which the Program will be executed.
 		const Environment& environment;
 
-		/// Lines of the program stored as raw bits.
-		std::vector<Line*> lines;
+
+		/**
+		* \brief Lines of the program and intron property.
+		*
+		* Each element of this vector stores a pointer to a Line, and a
+		* boolean value indicating whether this Line is an Intron whithin the
+		* program.
+		*
+		* Introns are Lines of the program that do not contribute to its final
+		* result, stored in the first register. Hence, skipping these lines
+		* during a program execution can speed up the Program execution.
+		*/
+		std::vector<std::pair<Line*, bool>> lines;
 
 		/// Delete the default constructor.
 		Program() = delete;
@@ -41,8 +52,9 @@ namespace Program {
 		*/
 		Program(const Program& other) : environment{ other.environment }, lines{ other.lines } {
 			// Replace lines with their copy
+			// Keep intro info
 			std::transform(lines.begin(), lines.end(), lines.begin(),
-				[](Line* otherLine) -> Line* {return new Line(*otherLine); });
+				[](std::pair<Line*, bool>& otherLine) -> std::pair<Line*, bool> {return { new Line(*(otherLine.first)), otherLine.second }; });
 		};
 
 		/**
@@ -125,6 +137,26 @@ namespace Program {
 		* \throw std::out_of_range if the index is too large.
 		*/
 		Line& getLine(uint64_t index);
+
+		/**
+		* \brief Checks whether a Line at the given index is an intron.
+		*
+		* \param[in] index The integer index of the checked Line within the
+		* Program.
+		* \return true if the Line is an intron, false otherwise.
+		* \throw std::out_of_range if the index is too large.
+		*/
+		bool isIntron(uint64_t index) const;
+
+		/**
+		* \brief Scan the Line of the Program to identify introns.
+		*
+		* This method update the boolean value associated to each Line of the
+		* Program to indicate if this Line is an intron or not.
+		*
+		* \return the number of intron Lines idendified.
+		*/
+		uint64_t identifyIntrons();
 	};
 }
 #endif

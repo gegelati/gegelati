@@ -86,6 +86,9 @@ namespace Program {
 		/**
 		* \brief Increments the programCounter and checks for the end of the Program.
 		*
+		* This method will automatically skip intron lines of the Program when
+		* searching for the next Line to execute.
+		*
 		* \return true if the Program of the ProgramExecutionEngine has a Line
 		* for the new programCounter value, and false otherwise.
 		*/
