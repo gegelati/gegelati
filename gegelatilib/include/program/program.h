@@ -139,12 +139,24 @@ namespace Program {
 		Line& getLine(uint64_t index);
 
 		/**
+		* \brief Checks whether a Line at the given index is an intron.
+		*
+		* \param[in] index The integer index of the checked Line within the
+		* Program.
+		* \return true if the Line is an intron, false otherwise.
+		* \throw std::out_of_range if the index is too large.
+		*/
+		bool isIntron(uint64_t index) const;
+
+		/**
 		* \brief Scan the Line of the Program to identify introns.
 		*
 		* This method update the boolean value associated to each Line of the
 		* Program to indicate if this Line is an intron or not.
+		*
+		* \return the number of intron Lines idendified.
 		*/
-		void identifyIntrons();
+		uint64_t identifyIntrons();
 	};
 }
 #endif
