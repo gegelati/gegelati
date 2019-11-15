@@ -2,6 +2,8 @@
 #define PARALLEL_LEARNING_AGENT
 
 #include <thread>
+#include <mutex>
+#include <queue>
 
 #include "instructions/set.h"
 #include "learn/learningParameters.h"
@@ -23,6 +25,28 @@ namespace Learn {
 	protected:
 		/// Control the maximum number of threads when running in parallel.
 		const uint64_t maxNbThreads;
+
+		/**
+		* \brief Method for evaluating all roots with parallelism.
+		*
+		* \param[in] generationNumber the integer number of the current generation.
+		* \param[in] mode the LearningMode to use during the policy evaluation.
+		* \param[in] results Map to store the resulting score of evaluated roots.
+		*/
+		void evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<double, const TPG::TPGVertex*>& results);
+
+		/**
+		* \brief Function implementing the behavior of slave threads during
+		* parallel evaluation of roots.
+		*/
+		void slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
+			std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>& rootsToProcess, std::mutex& rootsToProcessMutex,
+			std::multimap<double, const TPG::TPGVertex*>& results, std::mutex& resultsMutex,
+			std::map<uint64_t, ExhaustiveArchive*>& archiveMap, std::mutex& archiveMapMutex,
+			uint64_t& nextArchiveToMerge, std::mutex& archiveMergingMutex);
+
+
+		void mergeArchiveMap(std::mutex& archiveMergingMutex, std::mutex& archiveMapMutex, uint64_t& nextArchiveToMerge, std::map<uint64_t, ExhaustiveArchive*>& archiveMap);
 
 	public:
 		/**
@@ -73,6 +97,10 @@ namespace Learn {
 		*
 		* **Replaces the function from the base class LearningAgent.**
 		*
+		* This method must always the same results as the evaluateAllRoots for
+		* a sequential execution. The Archive should also be updated in the
+		* exact same manner.
+		*
 		* This method calls the evaluateRoot method for every root TPGVertex
 		* of the TPGGraph. The method returns a sorted map associating each root
 		* vertex to its average score, in ascending order or score.
@@ -80,7 +108,7 @@ namespace Learn {
 		* \param[in] generationNumber the integer number of the current generation.
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
-		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
+		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
 	};
 }
 #endif 

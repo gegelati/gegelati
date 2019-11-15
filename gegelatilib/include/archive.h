@@ -117,7 +117,7 @@ public:
 	*                     generate the associated result.
 	* \param[in] result double value produced by the Program.
 	*/
-	void addRecording(const Program::Program* const program,
+	virtual void addRecording(const Program::Program* const program,
 		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
 		double result);
 
@@ -141,7 +141,7 @@ public:
 	* \param[in] prog the Program of the searched Recording.
 	* \return whether the check was successful or not.
 	*/
-	bool isRecordingExisting(
+	virtual bool isRecordingExisting(
 		size_t hash,
 		const Program::Program* prog) const;
 
@@ -154,7 +154,7 @@ public:
 	* associated to results equal to those of the given map (within tau
 	* margin).
 	*/
-	bool areProgramResultsUnique(
+	virtual bool areProgramResultsUnique(
 		std::map<size_t, double> hashesAndResults,
 		double tau = 1e-4
 	) const;
@@ -190,6 +190,72 @@ public:
 	*/
 	void clear();
 
+};
+
+/**
+* \brief This class is used to store all recordings encountered during an
+* execution.
+*
+* This ExhaustiveArchive differs from the the Archive in several ways:
+* - Its size is not limited.
+* - It stores every single ArchiveRecording without any stochastic process.
+* - It does not store anything in the recordingsPerProgram map.
+*
+* This class is mainly meant to be used for enforcing determinism parallel
+* learning process where the order in which ArchiveRecording are creates in
+* parallel is not deterministic. In such a case, the ExhaustiveArchive can be
+* used to store these recordings temporarily, to merge them in the correct
+* (i.e. deterministic) order within a classical Archive afterwards.
+*
+* Because it lacks the recordingPerProgram map, this ExhaustiveArchive is not
+* meant to be used for testing the unicity of mutated Program. Methods serving
+* this purpose will throw an exception.
+*/
+class ExhaustiveArchive : public Archive {
+
+public:
+	/**
+	* \brief Main constructor for ExhaustiveArchive.
+	*
+	* Archive with probability 1.0.
+	*/
+	ExhaustiveArchive() : Archive(0, 1.0) {};
+
+	/// Inherited from Archive
+	virtual void addRecording(const Program::Program* const program,
+		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
+		double result) override;
+
+	/**
+	* \brief Method inserting all recordings into another Archive.
+	*
+	* The recordings from the caller object will be sequentially inserted into 
+	* the argument object using its addRecording method.
+	*
+	* \param[in,out] other The Archive in which all recordings will be inserted.
+	*/
+	void insertAllRecordings(Archive& other) const;
+
+	/**
+	* Inherited from Archive
+	* \throws std::runtime_error
+	*/
+	virtual bool isRecordingExisting(
+		size_t hash,
+		const Program::Program* prog) const override {
+		throw std::runtime_error("RecordingExistence test not supported in ExhaustiveArchive.");
+	}
+
+	/**
+	* Inherited from Archive
+	* \throws std::runtime_error
+	*/
+	bool areProgramResultsUnique(
+		std::map<size_t, double> hashesAndResults,
+		double tau = 1e-4
+	) const override {
+		throw std::runtime_error("Program uniqueness tests not supported in ExhaustiveArchive.");
+	}
 };
 
 #endif

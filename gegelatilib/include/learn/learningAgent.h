@@ -100,7 +100,7 @@ namespace Learn {
 		* \param[in] generationNumber the integer number of the current generation.
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
-		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
+		virtual std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
 
 		/**
 		* \brief Train the TPGGraph for one generation.

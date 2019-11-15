@@ -202,6 +202,20 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential) {
 	ASSERT_EQ(result.size(), pla.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }
 
+TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel) {
+	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
+	params.maxNbActionsPerEval = 11;
+	params.nbIterationsPerPolicyEvaluation = 10;
+
+	Learn::ParallelLearningAgent pla(le, set, params, 4);
+
+	pla.init();
+	std::multimap<double, const TPG::TPGVertex*> result;
+	ASSERT_NO_THROW(result = pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
+	ASSERT_EQ(result.size(), pla.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
+}
+
 TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential) {
 	params.archiveSize = 50;
 	params.archivingProbability = 0.5;
@@ -210,6 +224,30 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential) {
 	params.ratioDeletedRoots = 0.95; // high number to force the apparition of root action.
 
 	Learn::ParallelLearningAgent pla(le, set, params, 1);
+
+	pla.init();
+	// Do the populate call to keep know the number of initial vertex
+	Archive a(0);
+	Mutator::TPGMutator::populateTPG(pla.getTPGGraph(), a, params.mutation);
+	size_t initialNbVertex = pla.getTPGGraph().getNbVertices();
+	// Seed selected so that an action becomes a root during next generation
+	ASSERT_NO_THROW(pla.trainOneGeneration(4)) << "Training for one generation failed.";
+	// Check the number of vertex in the graph.
+	// Must be initial number of vertex - number of root removed
+	ASSERT_EQ(pla.getTPGGraph().getNbVertices(), initialNbVertex - floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots)) << "Number of remaining is under the number of roots from the TPGGraph.";
+	// Train a second generation, because most roots were removed, a root actions have appeared
+	// and the training algorithm will attempt to remove them.
+	ASSERT_NO_THROW(pla.trainOneGeneration(0)) << "Training for one generation failed.";
+}
+
+TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel) {
+	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
+	params.maxNbActionsPerEval = 11;
+	params.nbIterationsPerPolicyEvaluation = 3;
+	params.ratioDeletedRoots = 0.95; // high number to force the apparition of root action.
+
+	Learn::ParallelLearningAgent pla(le, set, params, 4);
 
 	pla.init();
 	// Do the populate call to keep know the number of initial vertex
@@ -235,6 +273,24 @@ TEST_F(ParallelLearningAgentTest, TrainSequential) {
 	params.nbGenerations = 3;
 
 	Learn::ParallelLearningAgent pla(le, set, params, 1);
+
+	pla.init();
+	bool alt = false;
+
+	ASSERT_NO_THROW(pla.train(alt, true)) << "Training a TPG for several generation should not fail.";
+	alt = true;
+	ASSERT_NO_THROW(pla.train(alt, true)) << "Using the boolean reference to stop the training should not fail.";
+}
+
+TEST_F(ParallelLearningAgentTest, TrainParallel) {
+	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
+	params.maxNbActionsPerEval = 11;
+	params.nbIterationsPerPolicyEvaluation = 5;
+	params.ratioDeletedRoots = 0.2;
+	params.nbGenerations = 3;
+
+	Learn::ParallelLearningAgent pla(le, set, params, std::thread::hardware_concurrency());
 
 	pla.init();
 	bool alt = false;
