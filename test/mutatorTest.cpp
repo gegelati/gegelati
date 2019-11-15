@@ -111,26 +111,6 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1) {
 	ASSERT_NO_THROW(progEngine.executeProgram(false)) << "Program with only correct random lines is unexpectedly not correct.";
 }
 
-TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine2) {
-	// Add a new instruction for which no data can be found in the environment DataHandler
-	set.add(*(new Instructions::AddPrimitiveType<unsigned char>()));
-
-	// Recreate the environment and program with the new set
-	delete p;
-	delete e;
-	e = new Environment(set, vect, 8);
-	p = new Program::Program(*e);
-
-	// Set seed to cover the case where the instruction with no compatible dataSource is selected.
-	Mutator::RNG::setSeed(5);
-
-	// Add a pseudo-random lines to the program
-	Program::Line& l0 = p->addNewLine();
-	ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l0)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
-
-	delete (&set.getInstruction(2));
-}
-
 TEST_F(MutatorTest, LineMutatorAlterLine) {
 	Program::ProgramExecutionEngine pEE(*p);
 

@@ -38,6 +38,22 @@ namespace Learn {
 		/**
 		* \brief Function implementing the behavior of slave threads during
 		* parallel evaluation of roots.
+		*
+		* \param[in] generationNumber the integer number of the current generation.
+		* \param[in] mode the LearningMode to use during the policy evaluation.
+		* \param[in,out] rootsToProcess Ordered list of root TPGVertex to
+		* process, stored as a pair with an id filling the archiveMap.
+		* \param[in] rootsToProcessMutex Mutex protecting the rootsToProcess
+		* \param[in] results Map to store the resulting score of evaluated roots.
+		* \param[in] resultsMutex Mutex protecting the results.
+		* \param[in,out] archiveMap Map storing the exhaustiveArchive to be merged.
+		* \param[in] archiveMapMutex Mutex protecting the archiveMap.
+		* \param[in,out] nextArchiveToMerge Integer indicating the next
+		* identifier of the archive (within the archiveMap) to merge. This
+		* integer is used to ensure that ExhaustiveArchive are merged in a 
+		* stricly deterministic order.
+		* \param[in] archiveMergingMutex Mutex protecting the whole archive 
+		* merging process.
 		*/
 		void slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
 			std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>& rootsToProcess, std::mutex& rootsToProcessMutex,
@@ -45,7 +61,23 @@ namespace Learn {
 			std::map<uint64_t, ExhaustiveArchive*>& archiveMap, std::mutex& archiveMapMutex,
 			uint64_t& nextArchiveToMerge, std::mutex& archiveMergingMutex);
 
-
+		/**
+		* \brief Method to merge several ExhaustiveArchive created in parallel
+		* threads.
+		*
+		* The purpose of this method is to merhe several ExhaustiveArchive
+		* into the archive attribute of this ParallelLearningAgent. This
+		* method is the key to obtain deterministic Archive even in a parallel
+		* context.
+		*
+		* \param[in] archiveMergingMutex Mutex protecting the whole merging process.
+		* \param[in] archiveMapMutex Mutex protecting the archiveMap.
+		* \param[in,out] nextArchiveToMerge Integer indicating the next
+		* identifier of the archive (within the archiveMap) to merge. This
+		* integer is used to ensure that ExhaustiveArchive are merged in a stricly
+		* deterministic order.
+		* \param[in,out] archiveMap Map storing the exhaustiveArchive to be merged.
+		*/
 		void mergeArchiveMap(std::mutex& archiveMergingMutex, std::mutex& archiveMapMutex, uint64_t& nextArchiveToMerge, std::map<uint64_t, ExhaustiveArchive*>& archiveMap);
 
 	public:
