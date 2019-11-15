@@ -330,6 +330,17 @@ TEST_F(MutatorTest, ProgramMutatorInitProgram) {
 
 	ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, params)) << "Non-Empty Program Random init failed";
 	ASSERT_EQ(p->getNbLines(), 53) << "Random number of line is not as expected (with known seed).";
+
+	// Count lines marked as introns (with a known seed).
+	uint64_t nbIntrons = 0;
+	for (auto i = 0; i < p->getNbLines(); i++) {
+		if (p->isIntron(i)) {
+			nbIntrons++;
+		}
+	}
+
+	// Check nb intron lines with a known seed.
+	ASSERT_EQ(nbIntrons, 51);
 }
 
 TEST_F(MutatorTest, ProgramMutatorMutateBehavior) {

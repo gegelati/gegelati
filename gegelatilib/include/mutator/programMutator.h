@@ -19,6 +19,9 @@ namespace Mutator {
 		* limit. If the Program already contains lines, they will be entirely
 		* deleted by this function.
 		*
+		* After altering the Program, its intron Line are identified with a
+		* call to Program::identifyIntrons().
+		*
 		* \param[in,out] p the Program to initialize.
 		* \param[in] params MutationParameters for the mutation.
 		*/
@@ -30,6 +33,10 @@ namespace Mutator {
 		* Unless a single Line (or less) remains in the given Progeam, this
 		* function randomly selects a line of the Program and deletes it.
 		* Random selection is based on the Mutator::RNG.
+		*
+		* This method does NOT update automatically the intron property of the
+		* Lines of the Program. Hence, the resulting Program may not execute
+		* correctly until Program::identifyIntrons() method is called.
 		*
 		* \param[in,out] p the Program whose lines will be altered.
 		* \return true if a line could be added, false otherwise.
@@ -45,6 +52,10 @@ namespace Mutator {
 		* initRandomCorrectLine).
 		* Random selection is based on the Mutator::RNG.
 		*
+		* This method does NOT update automatically the intron property of the
+		* Lines of the Program. Hence, the resulting Program may not execute
+		* correctly until Program::identifyIntrons() method is called.
+		*
 		* \param[in,out] p the Program whose lines will be altered.
 		*
 		*/
@@ -57,6 +68,10 @@ namespace Mutator {
 		* This function selects two lines of the program randomly and swaps
 		* them. If the given Program has less than two lines, nothing happens.
 		* Random selection is based on the Mutator::RNG.
+		*
+		* This method does NOT update automatically the intron property of the
+		* Lines of the Program. Hence, the resulting Program may not execute
+		* correctly until Program::identifyIntrons() method is called.
 		*
 		* \param[in,out] p the Program whose lines will be swapped.
 		* \return true if the lines where successfully swapped, false if the
@@ -71,6 +86,10 @@ namespace Mutator {
 		* Line (pseudo)-randomly in a given Program and calls the
 		* Mutator::LineMutator:AlterCorrectLine function on it.
 		* Random selection is based on the Mutator::RNG.
+		*
+		* This method does NOT update automatically the intron property of the
+		* Lines of the Program. Hence, the resulting Program may not execute
+		* correctly until Program::identifyIntrons() method is called.
 		*
 		* \param[in,out] p the Program whose line will be altered.
 		* \return true if a line was successfully altered, false if the
@@ -90,13 +109,14 @@ namespace Mutator {
 		* Because of the probabilistic nature of this function, it may happen
 		* that no alteration is peformed.
 		*
+		* After altering the Program, its intron Line are identified with a
+		* call to Program::identifyIntrons().
+		*
 		* \param[in,out] p the Program whose line will be altered.
 		* \param[in] params MutationParameters for the mutation.
 		* \return true if a modification was performed, false otherwise.
 		*/
 		bool mutateProgram(Program::Program& p, const MutationParameters& params);
-
-
 	};
 };
 

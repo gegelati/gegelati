@@ -39,11 +39,21 @@ protected:
 		l0.setOperand(1, 2, 25); // 2nd operand: 26th double in the PrimitiveTypeArray of double.
 		l0.setDestinationIndex(1); // Destination is resgister at index 1
 
+		// Intron line
 		Program::Line& l1 = p->addNewLine();
 		l1.setInstructionIndex(1); // Instruction is MultByConstParam<double, float>.
-		l1.setOperand(0, 0, 1); // 1st operand: 1th register.
-		l1.setParameter(0, value1); // Parameter is set to value1 (=4.2f)
-		l1.setDestinationIndex(0); // Destination is resgister at index 0
+		l1.setOperand(0, 0, 3); // 1st operand: 3rd register.
+		l1.setParameter(0, (float)value0); // Parameter is set to value1 (=2.3f)
+		l1.setDestinationIndex(0); // Destination is register at index 0
+
+		Program::Line& l2 = p->addNewLine();
+		l2.setInstructionIndex(1); // Instruction is MultByConstParam<double, float>.
+		l2.setOperand(0, 0, 1); // 1st operand: 1th register.
+		l2.setParameter(0, value1); // Parameter is set to value1 (=0.2f)
+		l2.setDestinationIndex(0); // Destination is register at index 0
+
+		// Mark intron lines
+		ASSERT_EQ(p->identifyIntrons(), 1);
 	}
 
 	virtual void TearDown() {
@@ -61,7 +71,7 @@ TEST_F(ProgramExecutionEngineTest, ConstructorDestructor) {
 	ASSERT_NO_THROW(progExecEng = new Program::ProgramExecutionEngine(*p)) << "Construction failed.";
 
 	ASSERT_NO_THROW(delete progExecEng) << "Destruction failed.";
-	
+
 	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect2;
 	vect2.push_back(*vect.at(0).get().clone());
 	ASSERT_THROW(progExecEng = new Program::ProgramExecutionEngine(*p, vect2), std::runtime_error) << "Construction should faile with data sources differing in number from those of the Environment.";
@@ -93,8 +103,8 @@ TEST_F(ProgramExecutionEngineTest, getCurrentLine) {
 
 	// Valid since the program has more than 0 line and program counter is initialized to 0.
 	ASSERT_EQ(&progExecEng.getCurrentLine(), &p->getLine(0)) << "First line of the Program not accessible from the ProgramExecutionEngine.";
-	progExecEng.next();
-	ASSERT_EQ(&progExecEng.getCurrentLine(), &p->getLine(1)) << "Second line of the Program not accessible from the ProgramExecutionEngine.";
+	progExecEng.next(); // Skips the intron automatically
+	ASSERT_EQ(&progExecEng.getCurrentLine(), &p->getLine(2)) << "Second line of the Program not accessible from the ProgramExecutionEngine.";
 }
 
 TEST_F(ProgramExecutionEngineTest, getCurrentInstruction) {
@@ -142,7 +152,7 @@ TEST_F(ProgramExecutionEngineTest, executeCurrentLine) {
 	Program::ProgramExecutionEngine progExecEng(*p);
 
 	ASSERT_NO_THROW(progExecEng.executeCurrentLine()) << "Execution of the first line of the program from Fixture should not fail.";
-	progExecEng.next();
+	progExecEng.next(); // Skips the intron automatically
 	ASSERT_NO_THROW(progExecEng.executeCurrentLine()) << "Execution of the second line of the program from Fixture should not fail.";
 	progExecEng.next();
 	ASSERT_THROW(progExecEng.executeCurrentLine(), std::out_of_range) << "Execution of a non-existing line of the program should fail.";

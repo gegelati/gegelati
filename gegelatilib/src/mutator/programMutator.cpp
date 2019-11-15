@@ -15,6 +15,9 @@ void Mutator::ProgramMutator::initRandomProgram(Program::Program& p, const Mutat
 	while (p.getNbLines() < nbLine) {
 		insertRandomLine(p);
 	}
+
+	// Identify Introns
+	p.identifyIntrons();
 }
 
 bool Mutator::ProgramMutator::deleteRandomLine(Program::Program& p)
@@ -83,6 +86,11 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p, const MutationP
 	if (Mutator::RNG::getDouble(0.0, 1.0) < params.prog.pSwap) {
 		anyMutation = true;
 		swapRandomLines(p);
+	}
+
+	// Identify introns
+	if (anyMutation) {
+		p.identifyIntrons();
 	}
 
 	return anyMutation;
