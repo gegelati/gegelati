@@ -1,19 +1,51 @@
 #include "program/line.h"
 #include "program/programExecutionEngine.h"
 
+void Program::ProgramExecutionEngine::setProgram(const Program& prog) {
+	// Check dataSource are similar in all point to the program environment
+	// '-1' on this->dataSources is to ignore registers
+	if (this->dataSources.size() - 1 != prog.getEnvironment().getDataSources().size()) {
+		throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
+	}
+	for (auto i = 0; i < this->dataSources.size() - 1; i++) {
+		// check data source characteristics
+		auto& iDataSrc = this->dataSources.at(i + 1).get();
+		auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
+		// Assume that dataSource must be (at least) a copy of each other to simplify the comparison
+		// This is characterise by the two data sources having the same id
+		if (iDataSrc.getId() != envDataSrc.getId()) {
+			throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
+			// If this pose a problem one day, an additional more 
+			// complex check could be used as a last resort when ids 
+			// of DataHandlers are different: checking equality of the 
+			// lists of provided data types and the equality address 
+			// space size for each data type.
+		}
+	}
+
+	// Set the program
+	this->program = &prog;
+
+	// Reset Registers (in case it is not done when they are constructed)
+	this->registers.resetData();
+
+	// Reset the counters
+	this->programCounter = 0;
+}
+
 const bool Program::ProgramExecutionEngine::next()
 {
 	// While the next line is an intron
 	// increment the program counter.
 	do {
 		this->programCounter++;
-	} while (this->programCounter < this->program.getNbLines() && this->program.isIntron(this->programCounter));
-	return this->programCounter < this->program.getNbLines();
+	} while (this->programCounter < this->program->getNbLines() && this->program->isIntron(this->programCounter));
+	return this->programCounter < this->program->getNbLines();
 }
 
 const Program::Line& Program::ProgramExecutionEngine::getCurrentLine() const
 {
-	return this->program.getLine(this->programCounter);
+	return this->program->getLine(this->programCounter);
 }
 
 uint64_t Program::ProgramExecutionEngine::scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const std::type_info& type) const
@@ -25,7 +57,7 @@ const Instructions::Instruction& Program::ProgramExecutionEngine::getCurrentInst
 {
 	const Line& currentLine = this->getCurrentLine(); // throw std::out_of_range if the program counter is too large.
 	uint64_t instructionIndex = currentLine.getInstructionIndex();
-	return this->program.getEnvironment().getInstructionSet().getInstruction(instructionIndex); // throw std::out_of_range if the index of the line is too large.
+	return this->program->getEnvironment().getInstructionSet().getInstruction(instructionIndex); // throw std::out_of_range if the index of the line is too large.
 }
 
 const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const
@@ -78,7 +110,7 @@ double Program::ProgramExecutionEngine::executeProgram(const bool ignoreExceptio
 	this->programCounter = 0;
 
 	// Iterate over the lines of the Program
-	bool hasNext = this->programCounter < this->program.getNbLines();
+	bool hasNext = this->programCounter < this->program->getNbLines();
 	while (hasNext) {
 
 		try {

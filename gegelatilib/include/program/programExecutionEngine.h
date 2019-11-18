@@ -10,8 +10,8 @@ namespace Program {
 	*/
 	class ProgramExecutionEngine {
 	protected:
-		/// The program executed by the ProgramExecutionEngine instance.
-		const Program& program;
+		/// The program currently executed by the ProgramExecutionEngine instance.
+		const Program* program;
 
 		/// Default constructor is deleted.
 		ProgramExecutionEngine() = delete;
@@ -19,7 +19,7 @@ namespace Program {
 		/// Registers used for the Program execution.
 		DataHandlers::PrimitiveTypeArray<double> registers;
 
-		/// Data sources used in the Program. (retrieved from the environment at construction time)
+		/// Data sources used in the Program.
 		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSources;
 
 		/// Program counter of the execution engine.
@@ -31,46 +31,47 @@ namespace Program {
 		* \brief Constructor of the class.
 		*
 		* The constructor initialize the number of registers accordingly
-		* with the Environment given as a parameter instead of that of the
-		* Program.
+		* with the Environment given as a parameter.
 		*
-		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
-		* \param[in] dataSrc DataHandler for executing the Program.
-
+		* \param[in] env The Environment in which the Program will be executed.
 		*/
-		ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dataSrc) : program{ prog }, registers(prog.getEnvironment().getNbRegisters()), programCounter{ 0 } {
-			// Check dataSource are similar in all point to the program environment
-			if (dataSrc.size() != prog.getEnvironment().getDataSources().size()) {
-				throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
-			}
-			for (auto i = 0; i < dataSrc.size(); i++) {
-				// check data source characteristics
-				auto& iDataSrc = dataSrc.at(i).get();
-				auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
-				// Assume that dataSource must be (at least) a copy of each other to simplify the comparison
-				// This is characterise by the two data sources having the same id
-				if (iDataSrc.getId() != envDataSrc.getId()) {
-					throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
-					// If this pose a problem one day, an additional more 
-					// complex check could be used as a last resort when ids 
-					// of DataHandlers are different: checking equality of the 
-					// lists of provided data types and the equality address 
-					// space size for each data type.
-				}
-
-			}
-
-			// Reset Registers (in case it is not done when they are constructed)
-			this->registers.resetData();
-
+		ProgramExecutionEngine(Environment& env) : programCounter{ 0 }, registers{ env.getNbRegisters() }, program{ NULL } {
 			// Setup the data sources
 			dataSources.push_back(this->registers);
 
 			// Cannot use insert here because it dataSources requires 
 			// constnessand dataSrc data are not const...
-			for (auto data : dataSrc) {
+			for (auto data : env.getDataSources()) {
 				dataSources.push_back(data.get());
 			}
+		}
+
+
+		/**
+		* \brief Constructor of the class.
+		*
+		* The constructor initialize the number of registers accordingly
+		* with the Environment given as a parameter instead of that of the
+		* Program or its Environment.
+		*
+		* This constructor is useful for testing a Program on a different
+		* Environment than its own.
+		*
+		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
+		* \param[in] env The Environment in which the Program will be executed.
+		*/
+		ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dataSrc) : programCounter{ 0 }, registers{ prog.getEnvironment().getNbRegisters() }, program{ NULL } {
+			// Setup the data sources
+			this->dataSources.push_back(this->registers);
+
+			// Cannot use insert here because it dataSources requires 
+			// constnessand dataSrc data are not const...
+			for (auto data : dataSrc) {
+				this->dataSources.push_back(data.get());
+			}
+
+			// Set the Program
+			this->setProgram(prog);
 		};
 
 		/**
@@ -82,6 +83,15 @@ namespace Program {
 		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
 		*/
 		ProgramExecutionEngine(const Program& prog) : ProgramExecutionEngine(prog, prog.getEnvironment().getDataSources()) {};
+
+		/**
+		* \brief Method for changing the Program executed by a ProgramExecutionEngin.
+		*
+		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
+		* \throws std::runtime_error if the Environment references by the
+		* Program is incompatible with the dataSources of the ProgramExecutionEngine.
+		*/
+		void setProgram(const Program& prog);
 
 		/**
 		* \brief Increments the programCounter and checks for the end of the Program.
