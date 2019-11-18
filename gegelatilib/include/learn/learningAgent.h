@@ -115,6 +115,15 @@ namespace Learn {
 		void trainOneGeneration(uint64_t generationNumber);
 
 		/**
+		* \brief Removes from the TPGGraph the root TPGVertex with the worst 
+		* results.
+		*
+		* \param[in] results a multimap containing root TPGVertex associated 
+		* to their score during an evaluation.
+		*/
+		void decimateWorstRoots(std::multimap<double, const TPG::TPGVertex*>& results);
+
+		/**
 		* \brief Train the TPGGraph for a given number of generation.
 		*
 		* The method trains the TPGGraph for a given number of generation,

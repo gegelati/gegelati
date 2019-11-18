@@ -76,6 +76,11 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
 
 	// Remove worst performing roots
+	decimateWorstRoots(results);
+}
+
+void Learn::LearningAgent::decimateWorstRoots(std::multimap<double, const TPG::TPGVertex*>& results)
+{
 	for (auto i = 0; i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots); i++) {
 		// If the root is an action, do not remove it!
 		if (typeid(*results.begin()->second) != typeid(TPG::TPGAction)) {
