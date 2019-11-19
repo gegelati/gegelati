@@ -1,6 +1,7 @@
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
 
+#include <random>
 #include <map>
 #include <deque>
 
@@ -42,6 +43,19 @@ protected:
 	const size_t maxSize;
 
 	/**
+	* \brief Randomness engine for archiving.
+	*
+	* This randomness engine is used to ensure determinism of the archiving
+	* process even in parallel execution context.
+	* The randomness engine should be reset with a new seed before entering a
+	* parallelizable part of the computations (even if these computations are
+	* done sequentially). As a more concrete example, if each policy starting
+	* from a root TPGVertex in a TPGGraph is evaluated in parallel, the
+	* randomEngine should be reset before each root.
+	*/
+	std::mt19937_64 randomEngine;
+
+	/**
 	* \brief Storage for DataHandler copies used in recordings.
 	*
 	* This map associates a hash values with the corresonding copy of the set
@@ -78,8 +92,9 @@ public:
 	* \param[in] archivingProbability probability for each call to
 	* addRecording to actually lead to a new recodring in the Archive.
 	* \param[in] size maximum number of recordings kept in the Archive.
+	* \param[in] initialSeed Seed value for the randomEngine.
 	*/
-	Archive(size_t size = 50, double archivingProbability = 1.0) : archivingProbability{ archivingProbability }, maxSize{ size }, recordings() {};
+	Archive(size_t size = 50, double archivingProbability = 1.0, size_t initialSeed = 0) : archivingProbability{ archivingProbability }, maxSize{ size }, recordings(), randomEngine(initialSeed) {};
 
 	/**
 	* \brief Destructor of the class.
@@ -98,6 +113,13 @@ public:
 	* \return the hash resulting from the combination.
 	*/
 	static size_t getCombinedHash(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler);
+
+	/**
+	* \brief Set a new seed for the randomEngine.
+	*
+	* \param[in] newSeed Set a new seed for the random engine.
+	*/
+	void setRandomSeed(size_t newSeed);
 
 	/**
 	* \brief Add a new recording to the Archive.
@@ -129,7 +151,6 @@ public:
 	*         Archive, false otherwise.
 	*/
 	bool hasDataHandlers(const size_t& hash) const;
-
 
 	/**
 	* \brief Check if a recording exists for the given Program and DataHandler.

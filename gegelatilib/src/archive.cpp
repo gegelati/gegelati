@@ -23,10 +23,15 @@ size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHan
 	return hash;
 }
 
+void Archive::setRandomSeed(size_t newSeed)
+{
+	this->randomEngine.seed(newSeed);
+}
+
 void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result)
 {
 	// Archive according to probability
-	if (this->archivingProbability == 1.0 || this->archivingProbability <= Mutator::RNG::getDouble(0.0, 1.0)) {
+	if (this->archivingProbability == 1.0 || this->archivingProbability <= std::uniform_real_distribution<double>(0.0, 1.0)(this->randomEngine)) {
 		// get the combined hash
 		size_t hash = getCombinedHash(dHandler);
 

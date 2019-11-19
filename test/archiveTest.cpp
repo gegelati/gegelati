@@ -101,10 +101,8 @@ TEST_F(ArchiveTest, AddRecordingTests) {
 
 TEST_F(ArchiveTest, AddRecordingWithProbabilityTests) {
 	// For these test, force archivingProbability to 0.5
-	Archive archive(10, 0.5);
-
 	// Use a known seed
-	Mutator::RNG::setSeed(0);
+	Archive archive(10, 0.5, 0);
 
 	// Add a few fictive recording
 	for (int i = 0; i < 10; i++) {
@@ -112,6 +110,21 @@ TEST_F(ArchiveTest, AddRecordingWithProbabilityTests) {
 		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
 	}
 	ASSERT_EQ(archive.getNbRecordings(), 6) << "Number or recordings in the archive is incorrect with a known seed.";
+}
+
+TEST_F(ArchiveTest, SetSeed) {
+	// For these test, force archivingProbability to 0.5
+	// Use a known seed
+	Archive archive(10, 0.5);
+
+	ASSERT_NO_THROW(archive.setRandomSeed(1)) << "Setting a new seed failed unexpectedly.";
+
+	// Add a few fictive recording
+	for (int i = 0; i < 10; i++) {
+		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
+		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
+	}
+	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect with a known seed.";
 }
 
 TEST_F(ArchiveTest, IsUnique) {
