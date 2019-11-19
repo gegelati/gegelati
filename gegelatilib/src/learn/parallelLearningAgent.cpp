@@ -63,7 +63,7 @@ std::multimap<double, const TPG::TPGVertex*> Learn::ParallelLearningAgent::evalu
 void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
 	std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>& rootsToProcess, std::mutex& rootsToProcessMutex,
 	std::multimap<double, const TPG::TPGVertex*>& results, std::mutex& resultsMutex,
-	std::map<uint64_t, ExhaustiveArchive*>& archiveMap, std::mutex& archiveMapMutex,
+	std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex,
 	uint64_t& nextArchiveToMerge, std::mutex& archiveMergingMutex) {
 
 	// Clone learningEnvironment
@@ -88,8 +88,8 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
 		// Processing to do?
 		if (doProcess) {
 			doProcess = false;
-			//Dedicated archive of infinite size
-			ExhaustiveArchive* temporaryArchive = new ExhaustiveArchive();
+			//Dedicated archive for the root
+			Archive* temporaryArchive = new Archive(params.archiveSize, params.archivingProbability);
 			double avgScore = evaluateRoot(tee, *rootToProcess.second, generationNumber, mode, *privateLearningEnvironment, this->params);
 
 			{	// Store result Mutual exclusion zone
@@ -119,7 +119,7 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generatio
 	}
 
 	// Create Archive Map
-	std::map<uint64_t, ExhaustiveArchive*> archiveMap;
+	std::map<uint64_t, Archive*> archiveMap;
 
 	// Create counter of root for which the archive was updated
 	uint64_t nextArchiveToMerge = 0;

@@ -59,7 +59,7 @@ namespace Learn {
 		void slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
 			std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>& rootsToProcess, std::mutex& rootsToProcessMutex,
 			std::multimap<double, const TPG::TPGVertex*>& results, std::mutex& resultsMutex,
-			std::map<uint64_t, ExhaustiveArchive*>& archiveMap, std::mutex& archiveMapMutex,
+			std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex,
 			uint64_t& nextArchiveToMerge, std::mutex& archiveMergingMutex);
 
 		/**
@@ -79,7 +79,7 @@ namespace Learn {
 		* deterministic order.
 		* \param[in,out] archiveMap Map storing the exhaustiveArchive to be merged.
 		*/
-		void mergeArchiveMap(std::mutex& archiveMergingMutex, std::mutex& archiveMapMutex, uint64_t& nextArchiveToMerge, std::map<uint64_t, ExhaustiveArchive*>& archiveMap);
+		void mergeArchiveMap(std::mutex& archiveMergingMutex, std::mutex& archiveMapMutex, uint64_t& nextArchiveToMerge, std::map<uint64_t, Archive*>& archiveMap);
 
 	public:
 		/**
