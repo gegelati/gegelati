@@ -170,7 +170,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential) {
 	params.nbIterationsPerPolicyEvaluation = 10;
 	params.mutation.tpg.nbActions = le.getNbActions();
 
-	Environment env(set,le.getDataSources(),8);
+	Environment env(set, le.getDataSources(), 8);
 
 	TPG::TPGGraph tpg(env);
 
@@ -183,8 +183,11 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential) {
 	// create the archive
 	Archive archive;
 
+	// The TPGExecutionEngine
+	TPG::TPGExecutionEngine tee(env, &archive);
+
 	double result;
-	ASSERT_NO_THROW(result = Learn::ParallelLearningAgent::evaluateRoot(*tpg.getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, le, archive, params)) << "Evaluation from a root failed.";
+	ASSERT_NO_THROW(result = Learn::ParallelLearningAgent::evaluateRoot(tee, *tpg.getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, le, params)) << "Evaluation from a root failed.";
 	ASSERT_LE(result, 1.0) << "Average score should not exceed the score of a perfect player.";
 }
 

@@ -58,7 +58,7 @@ namespace Program {
 		* Environment than its own.
 		*
 		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
-		* \param[in] env The Environment in which the Program will be executed.
+		* \param[in] dataSrc The DataHandler with which the Program will be executed.
 		*/
 		ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dataSrc) : programCounter{ 0 }, registers{ prog.getEnvironment().getNbRegisters() }, program{ NULL } {
 			// Setup the data sources

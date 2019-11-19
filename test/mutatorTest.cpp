@@ -509,7 +509,7 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge) {
 	// Init its program and fill the archive
 	Mutator::MutationParameters params;
 	Archive arch;
-	TPG::TPGExecutionEngine tee(&arch);
+	TPG::TPGExecutionEngine tee(*e, &arch);
 	params.prog.maxProgramSize = 96;
 	Mutator::ProgramMutator::initRandomProgram(*progPointer, params);
 	tee.executeFromRoot(vertex0);
@@ -557,7 +557,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam) {
 
 	// Init its program and fill the archive
 	Archive arch;
-	TPG::TPGExecutionEngine tee(&arch);
+	TPG::TPGExecutionEngine tee(*e, &arch);
 	Mutator::ProgramMutator::initRandomProgram(*progPointer, params);
 	tee.executeFromRoot(vertex0);
 
@@ -591,7 +591,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate) {
 
 	Mutator::TPGMutator::initRandomTPG(tpg, params);
 	// fill the archive before populating to test uniqueness of new prog
-	TPG::TPGExecutionEngine tee(&arch);
+	TPG::TPGExecutionEngine tee(*e, &arch);
 	for (auto rootVertex : tpg.getRootVertices()) {
 		tee.executeFromRoot(*rootVertex);
 	}

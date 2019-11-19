@@ -12,11 +12,11 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
 	// Get the program
 	Program::Program& prog = edge.getProgram();
 
-	// Create the execution environment
-	Program::ProgramExecutionEngine pee(prog);
+	// Set the progExecutionEngine to the program
+	this->progExecutionEngine.setProgram(prog);
 
 	// Execute the program.
-	double result = pee.executeProgram();
+	double result = this->progExecutionEngine.executeProgram();
 
 	// Put the result in the archive before returning it.
 	if (this->archive != NULL) {

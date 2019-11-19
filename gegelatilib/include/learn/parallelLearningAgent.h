@@ -6,6 +6,7 @@
 #include <queue>
 
 #include "instructions/set.h"
+#include "tpg/tpgExecutionEngine.h"
 #include "learn/learningParameters.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningAgent.h"
@@ -50,9 +51,9 @@ namespace Learn {
 		* \param[in] archiveMapMutex Mutex protecting the archiveMap.
 		* \param[in,out] nextArchiveToMerge Integer indicating the next
 		* identifier of the archive (within the archiveMap) to merge. This
-		* integer is used to ensure that ExhaustiveArchive are merged in a 
+		* integer is used to ensure that ExhaustiveArchive are merged in a
 		* stricly deterministic order.
-		* \param[in] archiveMergingMutex Mutex protecting the whole archive 
+		* \param[in] archiveMergingMutex Mutex protecting the whole archive
 		* merging process.
 		*/
 		void slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
@@ -113,16 +114,15 @@ namespace Learn {
 		* seeds for evaluating the policy.
 		* The method returns the average score for this policy.
 		*
+		* \param[in] tee the TPGExecutionEngine to use for evaluating the root.
 		* \param[in] root the TPGVertex from which the policy evaluation starts.
 		* \param[in] generationNumber the integer number of the current generation.
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		* \param[in] le Reference to the LearningEnvironment to use during the
 		* policy evaluation.
-		* \param[in,out] archive Reference to the Archive to use during the policy
-		* evaluation.
 		* \param[in] params Reference to the LearningParameters.
 		*/
-		static double evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le, Archive& archive, const Learn::LearningParameters& params);
+		static double evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le, const Learn::LearningParameters& params);
 
 		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.

@@ -8,13 +8,10 @@
 
 #include "learn/parallelLearningAgent.h"
 
-double Learn::ParallelLearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode, Learn::LearningEnvironment& le, Archive& archive, const Learn::LearningParameters& params)
+double Learn::ParallelLearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode, Learn::LearningEnvironment& le, const Learn::LearningParameters& params)
 {
 	// Init results
 	double result = 0.0;
-
-	// Create the exec engine
-	TPG::TPGExecutionEngine tee(&archive);
 
 	// Evaluate nbIteration times
 	for (auto i = 0; i < params.nbIterationsPerPolicyEvaluation; i++) {
@@ -47,8 +44,11 @@ std::multimap<double, const TPG::TPGVertex*> Learn::ParallelLearningAgent::evalu
 
 	if (this->maxNbThreads <= 1 || !this->learningEnvironment.isCopyable()) {
 		// Sequential mode
+
+		// Create the TPGExecutionEngine
+		TPG::TPGExecutionEngine tee(this->env, &this->archive);
 		for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
-			double avgScore = ParallelLearningAgent::evaluateRoot(*root, generationNumber, mode, this->learningEnvironment, this->archive, this->params);
+			double avgScore = ParallelLearningAgent::evaluateRoot(tee, *root, generationNumber, mode, this->learningEnvironment, this->params);
 			results.insert({ avgScore, root });
 		}
 	}
@@ -69,6 +69,9 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
 	// Clone learningEnvironment
 	LearningEnvironment* privateLearningEnvironment = this->learningEnvironment.clone();
 
+	// Create a TPGExecutionEngine
+	TPG::TPGExecutionEngine tee(this->env, new Archive(params.archiveSize, params.archivingProbability));
+
 	// Pop a job
 	while (!rootsToProcess.empty()) { // Thread safe access to size
 		bool doProcess = false;
@@ -87,7 +90,7 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
 			doProcess = false;
 			//Dedicated archive of infinite size
 			ExhaustiveArchive* temporaryArchive = new ExhaustiveArchive();
-			double avgScore = evaluateRoot(*rootToProcess.second, generationNumber, mode, *privateLearningEnvironment, *temporaryArchive, this->params);
+			double avgScore = evaluateRoot(tee, *rootToProcess.second, generationNumber, mode, *privateLearningEnvironment, this->params);
 
 			{	// Store result Mutual exclusion zone
 				std::lock_guard<std::mutex> lock(resultsMutex);
@@ -99,49 +102,10 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
 				archiveMap.insert({ rootToProcess.first, temporaryArchive });
 			}
 		}
-
-		// Archive merging (if it seems interesting
-		this->mergeArchiveMap(archiveMergingMutex, archiveMapMutex, nextArchiveToMerge, archiveMap);
 	}
 
 	// Clean up
 	delete privateLearningEnvironment;
-}
-
-void Learn::ParallelLearningAgent::mergeArchiveMap(std::mutex& archiveMergingMutex, std::mutex& archiveMapMutex, uint64_t& nextArchiveToMerge, std::map<uint64_t, ExhaustiveArchive*>& archiveMap) {
-	// Try to lock
-	std::unique_lock<std::mutex> lockMerging(archiveMergingMutex, std::try_to_lock);
-	if (lockMerging.owns_lock()) {
-		bool hasDoneSomething;
-		do {
-			hasDoneSomething = false;
-			std::vector<ExhaustiveArchive*> archivesToMerge;
-			{
-				// Check if there are archives to merge (exclusion zone)
-				std::lock_guard<std::mutex> lock_map(archiveMapMutex);
-				while (!archiveMap.empty() && nextArchiveToMerge == archiveMap.begin()->first) {
-					archivesToMerge.push_back(archiveMap.begin()->second);
-					archiveMap.erase(nextArchiveToMerge);
-					nextArchiveToMerge++;
-				}
-			}
-
-			// If an archive (or more) can be merged
-			if (!archivesToMerge.empty()) {
-				// The merging is going to happen
-				hasDoneSomething = true;
-
-				// Merge archives one by one
-				for (ExhaustiveArchive* archiveToMerge : archivesToMerge) {
-					// Do the merge
-					archiveToMerge->insertAllRecordings(this->archive);
-
-					// Delete the merged archive
-					delete archiveToMerge;
-				}
-			}
-		} while (hasDoneSomething);
-	}
 }
 
 void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<double, const TPG::TPGVertex*>& results) {

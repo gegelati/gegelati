@@ -22,7 +22,7 @@ protected:
 	Environment* e = NULL;
 	std::vector<std::shared_ptr<Program::Program>> progPointers;
 
-	TPG::TPGGraph * tpg;
+	TPG::TPGGraph* tpg;
 	std::vector<const TPG::TPGEdge*> edges;
 	Archive a;
 
@@ -119,26 +119,26 @@ protected:
 TEST_F(TPGExecutionEngineTest, ConstructorDestructor) {
 	TPG::TPGExecutionEngine* tpee;
 
-	ASSERT_NO_THROW(tpee = new TPG::TPGExecutionEngine()) << "Construction of a TPGExecutionEngine failed.";
+	ASSERT_NO_THROW(tpee = new TPG::TPGExecutionEngine(*e)) << "Construction of a TPGExecutionEngine failed.";
 
 	ASSERT_NO_THROW(delete tpee) << "Deletion of a TPGExecutionEngine failed.";
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateEdge) {
-	TPG::TPGExecutionEngine tpee;
+	TPG::TPGExecutionEngine tpee(*e);
 
 	ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION) << "Evaluation of the program of an Edge failed.";
 }
 
 TEST_F(TPGExecutionEngineTest, ArchiveUsage) {
-	TPG::TPGExecutionEngine tpee(&a);
+	TPG::TPGExecutionEngine tpee(*e, &a);
 
 	ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION) << "Evaluation of the program of an Edge failed when result is archived.";
 	ASSERT_EQ(a.getNbRecordings(), 1) << "No recording was added to the archive.";
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateTeam) {
-	TPG::TPGExecutionEngine tpee;
+	TPG::TPGExecutionEngine tpee(*e);
 
 	const TPG::TPGEdge* result = NULL;
 	ASSERT_NO_THROW(result = &tpee.evaluateTeam(*(const TPG::TPGTeam*)(tpg->getVertices().at(1)), {});) << "Evaluation of a valid TPGTeam with no exclusion failed.";
@@ -155,7 +155,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateTeam) {
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateFromRoot) {
-	TPG::TPGExecutionEngine tpee;
+	TPG::TPGExecutionEngine tpee(*e);
 
 	std::vector<const TPG::TPGVertex*> result;
 

@@ -28,7 +28,7 @@ double Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t g
 	double result = 0.0;
 
 	// Create the exec engine
-	TPG::TPGExecutionEngine tee(&this->archive);
+	TPG::TPGExecutionEngine tee(this->env, &this->archive);
 
 	// Evaluate nbIteration times
 	for (auto i = 0; i < params.nbIterationsPerPolicyEvaluation; i++) {
