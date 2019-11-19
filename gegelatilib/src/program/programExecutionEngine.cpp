@@ -7,9 +7,9 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog) {
 	if (this->dataSources.size() - 1 != prog.getEnvironment().getDataSources().size()) {
 		throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
 	}
-	for (auto i = 0; i < this->dataSources.size() - 1; i++) {
+	for (size_t i = 0; i < this->dataSources.size() - 1; i++) {
 		// check data source characteristics
-		auto& iDataSrc = this->dataSources.at(i + 1).get();
+		auto& iDataSrc = this->dataSources.at(i + (size_t)1).get();
 		auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
 		// Assume that dataSource must be (at least) a copy of each other to simplify the comparison
 		// This is characterise by the two data sources having the same id
