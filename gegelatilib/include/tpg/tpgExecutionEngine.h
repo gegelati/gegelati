@@ -45,6 +45,13 @@ namespace TPG {
 		TPGExecutionEngine(const Environment& env, Archive* arch = NULL) : progExecutionEngine(env), archive{ arch } {};
 
 		/**
+		* \brief Set a new Archive for storing Program results.
+		*
+		* \param[in] newArchive A pointer (possibly NULL) to an Archive.
+		*/
+		void setArchive(Archive* newArchive);
+
+		/**
 		* \brief Execute the Program associated to an Edge and returns the
 		* obtained double.
 		*

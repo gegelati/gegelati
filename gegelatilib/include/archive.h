@@ -115,6 +115,15 @@ public:
 	static size_t getCombinedHash(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler);
 
 	/**
+	* \brief Access the nth ArchiveRecording within the Archive.
+	*
+	* \param[in] n The index of the retrieved ArchiveRecording.
+	* \return a const reference to the indexed ArchiveRecording.
+	* \throws std::out_of_range if the given index is out of bounds.
+	*/
+	const ArchiveRecording& at(uint64_t n) const;
+
+	/**
 	* \brief Set a new seed for the randomEngine.
 	*
 	* \param[in] newSeed Set a new seed for the random engine.
@@ -125,7 +134,8 @@ public:
 	* \brief Add a new recording to the Archive.
 	*
 	* A call to this function adds an ArchiveRecording to the archive with the
-	* probability specified by the archivingProbability attribute.
+	* probability specified by the archivingProbability attribute unless it is 
+	* forced, in which case the recording is added without randomness.
 	* If the maximum number of recordings held in the archive is reached, the
 	* oldest recording will be removed.
 	* If this is the first time this set of DataHandler is stored in the
@@ -138,10 +148,13 @@ public:
 	* \param[in] dHandler the set of dataHandler the Program worked on to
 	*                     generate the associated result.
 	* \param[in] result double value produced by the Program.
+	* \param[in] forced Boolean for bypassing the stochastic process during 
+	*                   insertion.
 	*/
 	virtual void addRecording(const Program::Program* const program,
 		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
-		double result);
+		double result,
+		bool forced = false);
 
 	/**
 	* \brief Check whether the given hash is already in the archive.
@@ -151,20 +164,6 @@ public:
 	*         Archive, false otherwise.
 	*/
 	bool hasDataHandlers(const size_t& hash) const;
-
-	/**
-	* \brief Check if a recording exists for the given Program and DataHandler.
-	*
-	* Check if there exists a recording in the Archive for the pair of DataHandler hash
-	* and the given Program.
-	*
-	* \param[in] hash The hash of the set of DataHandler for the searched recording.
-	* \param[in] prog the Program of the searched Recording.
-	* \return whether the check was successful or not.
-	*/
-	virtual bool isRecordingExisting(
-		size_t hash,
-		const Program::Program* prog) const;
 
 	/**
 	* Check if the given hash-results pairs are unique compared to Program in

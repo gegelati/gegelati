@@ -112,6 +112,24 @@ TEST_F(ArchiveTest, AddRecordingWithProbabilityTests) {
 	ASSERT_EQ(archive.getNbRecordings(), 6) << "Number or recordings in the archive is incorrect with a known seed.";
 }
 
+TEST_F(ArchiveTest, At) {
+	// For these test, force archivingProbability to 0.5
+	// Use a known seed
+	Archive archive(10, 1.0);
+
+	// Add a few fictive recording
+	for (int i = 0; i < 5; i++) {
+		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
+		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
+	}
+
+	// Access the 1st recording
+	ASSERT_NO_THROW(archive.at(1)) << "Accessing an existing ArchiveRecording should not fail.";
+
+	// Access the 7th (non existing) recording
+	ASSERT_THROW(archive.at(7), std::out_of_range) << "Accessing an ArchiveRecording outside the number of recordings should fail.";
+}
+
 TEST_F(ArchiveTest, SetSeed) {
 	// For these test, force archivingProbability to 0.5
 	// Use a known seed
@@ -125,22 +143,6 @@ TEST_F(ArchiveTest, SetSeed) {
 		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
 	}
 	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect with a known seed.";
-}
-
-TEST_F(ArchiveTest, IsUnique) {
-	Archive archive(4);
-
-	// Add a few fictive recordings
-	archive.addRecording(p, vect, 1.0);
-	archive.addRecording(p, vect, 1.5);
-	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
-	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
-	archive.addRecording(p, vect, 2.0);
-	archive.addRecording(p, vect, 2.3);
-
-	ASSERT_TRUE(archive.isRecordingExisting(archive.getCombinedHash(vect), p)) << "Values corresponding to a recording within the Archive is not detected as such.";
-	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(42));
-	ASSERT_FALSE(archive.isRecordingExisting(archive.getCombinedHash(vect), p)) << "Values corresponding to a recording not within the Archive is not detected as such.";
 }
 
 TEST_F(ArchiveTest, areProgramResultsUnique) {
@@ -157,7 +159,7 @@ TEST_F(ArchiveTest, areProgramResultsUnique) {
 	// Add a few fictive recordings with p2
 	Program::Program p2(*e);
 	archive.addRecording(&p2, vect, 2.0);
-	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
+	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(42));
 	size_t hash3 = archive.getCombinedHash(vect);
 	archive.addRecording(&p2, vect, 2.5);
 

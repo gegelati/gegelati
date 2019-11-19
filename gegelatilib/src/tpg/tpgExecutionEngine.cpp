@@ -7,6 +7,11 @@
 
 #include "tpg/tpgExecutionEngine.h"
 
+void TPG::TPGExecutionEngine::setArchive(Archive* newArchive)
+{
+	this->archive = newArchive;
+}
+
 double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
 {
 	// Get the program

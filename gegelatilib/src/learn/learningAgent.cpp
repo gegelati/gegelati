@@ -11,6 +11,11 @@ TPG::TPGGraph& Learn::LearningAgent::getTPGGraph()
 	return this->tpg;
 }
 
+const Archive& Learn::LearningAgent::getArchive() const
+{
+	return this->archive;
+}
+
 void Learn::LearningAgent::init(uint64_t seed) {
 	// Initialize Randomness
 	Mutator::RNG::setSeed(seed);
@@ -22,13 +27,10 @@ void Learn::LearningAgent::init(uint64_t seed) {
 	this->archive.clear();
 }
 
-double Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode)
+double Learn::LearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode)
 {
 	// Init results
 	double result = 0.0;
-
-	// Create the exec engine
-	TPG::TPGExecutionEngine tee(this->env, &this->archive);
 
 	// Evaluate nbIteration times
 	for (auto i = 0; i < params.nbIterationsPerPolicyEvaluation; i++) {
@@ -50,17 +52,27 @@ double Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t g
 		}
 
 		// Update results
-		result += this->learningEnvironment.getScore() / (double)params.nbIterationsPerPolicyEvaluation;
+		result += this->learningEnvironment.getScore();
 	}
-	return result;
+	return result / (double)params.nbIterationsPerPolicyEvaluation;
 }
 
 std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
 {
 	std::multimap<double, const TPG::TPGVertex*> result;
 
+	// Create the TPGExecutionEngine for this evaluation.
+	// The engine uses the Archive only in training mode.
+	TPG::TPGExecutionEngine tee(this->env, (mode == LearningMode::TRAINING) ? &this->archive : NULL);
+
 	for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
-		double avgScore = this->evaluateRoot(*root, generationNumber, mode);
+		// Before each root evaluation, set a new seed for the archive in TRAINING Mode
+		// Else, archiving should be deactivate anyway
+		if (mode == LearningMode::TRAINING) {
+			this->archive.setRandomSeed(Mutator::RNG::getUnsignedInt64(0, UINT64_MAX));
+		}
+
+		double avgScore = this->evaluateRoot(tee, *root, generationNumber, mode);
 		result.insert({ avgScore, root });
 	}
 

@@ -1,6 +1,5 @@
 #include <math.h>
 
-#include "mutator/rng.h"
 #include "archive.h"
 
 Archive::~Archive()
@@ -11,7 +10,6 @@ Archive::~Archive()
 			delete& dHandler.get();
 		}
 	}
-
 }
 
 size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers)
@@ -23,23 +21,22 @@ size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHan
 	return hash;
 }
 
+const ArchiveRecording& Archive::at(uint64_t n) const
+{
+	return this->recordings.at(n);
+}
+
 void Archive::setRandomSeed(size_t newSeed)
 {
 	this->randomEngine.seed(newSeed);
 }
 
-void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result)
+void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result, bool forced)
 {
 	// Archive according to probability
-	if (this->archivingProbability == 1.0 || this->archivingProbability <= std::uniform_real_distribution<double>(0.0, 1.0)(this->randomEngine)) {
+	if (forced || this->archivingProbability == 1.0 || this->archivingProbability <= std::uniform_real_distribution<double>(0.0, 1.0)(this->randomEngine)) {
 		// get the combined hash
 		size_t hash = getCombinedHash(dHandler);
-
-		// Check is an identical recording (same hash, same program) already exists.
-		// Program may be different
-		if (this->isRecordingExisting(hash, program)) {
-			return;
-		}
 
 		// Check if dataHandler copy is needed.
 		if (this->dataHandlers.find(hash) == this->dataHandlers.end()) {
@@ -103,25 +100,6 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 bool Archive::hasDataHandlers(const size_t& hash) const
 {
 	return this->dataHandlers.count(hash) != 0;
-}
-
-bool Archive::isRecordingExisting(
-	size_t hash,
-	const Program::Program* prog) const
-{
-	// If the hash does not exist, the result is unique since no recordings 
-	// correspond to it.
-	if (!hasDataHandlers(hash)) {
-		return false;
-	}
-
-	// Else, check the recordings with this hash.
-	auto equalityTester = [&hash, &prog](const ArchiveRecording& rec) {
-		return hash == rec.dataHash && prog == rec.prog;
-	};
-
-	std::deque<ArchiveRecording>::const_iterator position = std::find_if(this->recordings.begin(), this->recordings.end(), equalityTester);
-	return  position != this->recordings.end();
 }
 
 bool Archive::areProgramResultsUnique(std::map<size_t, double> hashesAndResults, double tau) const
