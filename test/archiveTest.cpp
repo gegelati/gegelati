@@ -15,7 +15,7 @@ class ArchiveTest : public ::testing::Test {
 protected:
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 	Program::Program* p;
@@ -109,7 +109,7 @@ TEST_F(ArchiveTest, AddRecordingWithProbabilityTests) {
 		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
 		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
 	}
-	ASSERT_EQ(archive.getNbRecordings(), 6) << "Number or recordings in the archive is incorrect with a known seed.";
+	ASSERT_EQ(archive.getNbRecordings(), 4) << "Number or recordings in the archive is incorrect with a known seed.";
 }
 
 TEST_F(ArchiveTest, At) {
@@ -142,7 +142,8 @@ TEST_F(ArchiveTest, SetSeed) {
 		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
 		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
 	}
-	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect with a known seed.";
+	// With a seed set to 0, result is available in AddRecordingWithProbabilityTests
+	ASSERT_EQ(archive.getNbRecordings(), 7) << "Number or recordings in the archive is incorrect with a known seed.";
 }
 
 TEST_F(ArchiveTest, areProgramResultsUnique) {

@@ -1,6 +1,8 @@
 #ifndef PROGRAM_EXECUTION_ENGINE_H
 #define PROGRAM_EXECUTION_ENGINE_H
 
+#include <type_traits>
+
 #include "dataHandlers/primitiveTypeArray.h"
 #include "program/program.h"
 
@@ -22,6 +24,9 @@ namespace Program {
 		/// Data sources used in the Program.
 		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSources;
 
+		/// Data sources (including registers) used in the Program.
+		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSourcesAndRegisters;
+
 		/// Program counter of the execution engine.
 		uint64_t programCounter;
 
@@ -35,14 +40,14 @@ namespace Program {
 		*
 		* \param[in] env The Environment in which the Program will be executed.
 		*/
-		ProgramExecutionEngine(Environment& env) : programCounter{ 0 }, registers{ env.getNbRegisters() }, program{ NULL } {
+		ProgramExecutionEngine(Environment& env) : programCounter{ 0 }, registers{ env.getNbRegisters() }, program{ NULL }, dataSources{ env.getDataSources() } {
 			// Setup the data sources
-			dataSources.push_back(this->registers);
+			dataSourcesAndRegisters.push_back(this->registers);
 
-			// Cannot use insert here because it dataSources requires 
+			// Cannot use insert here because it dataSourcesAndRegisters requires 
 			// constnessand dataSrc data are not const...
 			for (auto data : env.getDataSources()) {
-				dataSources.push_back(data.get());
+				dataSourcesAndRegisters.push_back(data.get());
 			}
 		}
 
@@ -60,13 +65,16 @@ namespace Program {
 		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
 		* \param[in] dataSrc The DataHandler with which the Program will be executed.
 		*/
-		ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dataSrc) : programCounter{ 0 }, registers{ prog.getEnvironment().getNbRegisters() }, program{ NULL } {
+		template <class T> ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<T>>& dataSrc) : programCounter{ 0 }, registers{ prog.getEnvironment().getNbRegisters() }, program{ NULL } {
+			// Check that T is either convertible to a const DataHandler
+			static_assert(std::is_convertible<T&, const DataHandlers::DataHandler&>::value);
 			// Setup the data sources
-			this->dataSources.push_back(this->registers);
+			this->dataSourcesAndRegisters.push_back(this->registers);
 
-			// Cannot use insert here because it dataSources requires 
+			// Cannot use insert here because it dataSourcesAndRegisters requires 
 			// constnessand dataSrc data are not const...
-			for (auto data : dataSrc) {
+			for (std::reference_wrapper <T> data : dataSrc) {
+				this->dataSourcesAndRegisters.push_back(data.get());
 				this->dataSources.push_back(data.get());
 			}
 
@@ -92,6 +100,14 @@ namespace Program {
 		* Program is incompatible with the dataSources of the ProgramExecutionEngine.
 		*/
 		void setProgram(const Program& prog);
+
+		/**
+		* \brief Get the DataHandler of the ProgramExecutionEngine.
+		*
+		* \return a vector containing references to the dataHandlers of the
+		* dataSourses attribute (i.e. without the registers)
+		*/
+		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& getDataSources() const;
 
 		/**
 		* \brief Increments the programCounter and checks for the end of the Program.
@@ -151,7 +167,7 @@ namespace Program {
 		/**
 		* \brief Get the operands for the current Instruction.
 		*
-		* This method fetches from the dataSources the operands indexed in
+		* This method fetches from the dataSourcesAndRegisters the operands indexed in
 		* the current Line of the Program. To get the correct data, the method
 		* Uses the data types of the current Instruction of the program.
 		*

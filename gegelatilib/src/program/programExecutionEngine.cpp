@@ -4,12 +4,12 @@
 void Program::ProgramExecutionEngine::setProgram(const Program& prog) {
 	// Check dataSource are similar in all point to the program environment
 	// '-1' on this->dataSources is to ignore registers
-	if (this->dataSources.size() - 1 != prog.getEnvironment().getDataSources().size()) {
+	if (this->dataSourcesAndRegisters.size() - 1 != prog.getEnvironment().getDataSources().size()) {
 		throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
 	}
-	for (size_t i = 0; i < this->dataSources.size() - 1; i++) {
+	for (size_t i = 0; i < this->dataSourcesAndRegisters.size() - 1; i++) {
 		// check data source characteristics
-		auto& iDataSrc = this->dataSources.at(i + (size_t)1).get();
+		auto& iDataSrc = this->dataSourcesAndRegisters.at(i + (size_t)1).get();
 		auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
 		// Assume that dataSource must be (at least) a copy of each other to simplify the comparison
 		// This is characterise by the two data sources having the same id
@@ -31,6 +31,11 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog) {
 
 	// Reset the counters
 	this->programCounter = 0;
+}
+
+const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& Program::ProgramExecutionEngine::getDataSources() const
+{
+	return this->dataSources;
 }
 
 const bool Program::ProgramExecutionEngine::next()
@@ -68,7 +73,7 @@ const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std
 	// Get as many operands as required by the instruction.
 	for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
 		const std::pair<uint64_t, uint64_t>& operandIndexes = line.getOperand(i);
-		const DataHandlers::DataHandler& dataSource = this->dataSources.at(operandIndexes.first); // Throws std::out_of_range
+		const DataHandlers::DataHandler& dataSource = this->dataSourcesAndRegisters.at(operandIndexes.first); // Throws std::out_of_range
 		const std::type_info& operandType = instruction.getOperandTypes().at(i).get();
 		const uint64_t operandLocation = this->scaleLocation(operandIndexes.second, dataSource, operandType);
 		const SupportedType& data = dataSource.getDataAt(operandType, operandLocation);

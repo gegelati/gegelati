@@ -63,7 +63,7 @@ protected:
 	* recordings to associate each recording to the right copy of the
 	* DataHandler.
 	*/
-	std::map<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>> dataHandlers;
+	std::map<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>> dataHandlers;
 
 	/**
 	* \brief Map storing the Program pointers referenced in recordings the
@@ -112,7 +112,7 @@ public:
 	*
 	* \return the hash resulting from the combination.
 	*/
-	static size_t getCombinedHash(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler);
+	static size_t getCombinedHash(const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler);
 
 	/**
 	* \brief Access the nth ArchiveRecording within the Archive.
@@ -134,7 +134,7 @@ public:
 	* \brief Add a new recording to the Archive.
 	*
 	* A call to this function adds an ArchiveRecording to the archive with the
-	* probability specified by the archivingProbability attribute unless it is 
+	* probability specified by the archivingProbability attribute unless it is
 	* forced, in which case the recording is added without randomness.
 	* If the maximum number of recordings held in the archive is reached, the
 	* oldest recording will be removed.
@@ -148,11 +148,11 @@ public:
 	* \param[in] dHandler the set of dataHandler the Program worked on to
 	*                     generate the associated result.
 	* \param[in] result double value produced by the Program.
-	* \param[in] forced Boolean for bypassing the stochastic process during 
+	* \param[in] forced Boolean for bypassing the stochastic process during
 	*                   insertion.
 	*/
 	virtual void addRecording(const Program::Program* const program,
-		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
+		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler,
 		double result,
 		bool forced = false);
 
@@ -203,7 +203,7 @@ public:
 	*
 	* \return a const reference to the dataHandlers attribute.
 	*/
-	const std::map < size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>>& getDataHandlers() const;
+	const std::map < size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>>& getDataHandlers() const;
 
 	/**
 	* \brief Clear all content from the Archive.

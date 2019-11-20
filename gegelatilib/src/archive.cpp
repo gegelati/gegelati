@@ -12,10 +12,10 @@ Archive::~Archive()
 	}
 }
 
-size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers)
+size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandlers)
 {
 	size_t hash = 0;
-	for (const std::reference_wrapper<DataHandlers::DataHandler> dHandler : dHandlers) {
+	for (const std::reference_wrapper<const DataHandlers::DataHandler> dHandler : dHandlers) {
 		hash ^= dHandler.get().getHash();
 	}
 	return hash;
@@ -31,18 +31,18 @@ void Archive::setRandomSeed(size_t newSeed)
 	this->randomEngine.seed(newSeed);
 }
 
-void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result, bool forced)
+void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler, double result, bool forced)
 {
 	// Archive according to probability
-	if (forced || this->archivingProbability == 1.0 || this->archivingProbability <= std::uniform_real_distribution<double>(0.0, 1.0)(this->randomEngine)) {
+	if (forced || this->archivingProbability == 1.0 || std::uniform_real_distribution<double>(0.0, 1.0)(this->randomEngine) <= this->archivingProbability) {
 		// get the combined hash
 		size_t hash = getCombinedHash(dHandler);
 
 		// Check if dataHandler copy is needed.
 		if (this->dataHandlers.find(hash) == this->dataHandlers.end()) {
 			// Store a copy of data handlers.
-			std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dHandlersCpy;
-			for (std::reference_wrapper<DataHandlers::DataHandler> dh : dHandler) {
+			std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> dHandlersCpy;
+			for (std::reference_wrapper<const DataHandlers::DataHandler> dh : dHandler) {
 				DataHandlers::DataHandler* dhCopy = dh.get().clone();
 				dHandlersCpy.push_back(*dhCopy);
 			}
@@ -78,7 +78,7 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 			// if not, remove it from the Archive also
 			if (!stillUsed) {
 				// Free memory of DataHandlers within the archive
-				for (std::reference_wrapper<DataHandlers::DataHandler> toErase : this->dataHandlers.at(rec.dataHash)) {
+				for (std::reference_wrapper<const DataHandlers::DataHandler> toErase : this->dataHandlers.at(rec.dataHash)) {
 					delete& toErase.get();
 				}
 
@@ -153,7 +153,7 @@ size_t Archive::getNbDataHandlers() const
 	return this->dataHandlers.size();
 }
 
-const std::map<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>>& Archive::getDataHandlers() const
+const std::map<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>>& Archive::getDataHandlers() const
 {
 	return this->dataHandlers;
 }

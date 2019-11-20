@@ -11,7 +11,7 @@
 TEST(EnvironmentTest, Constructor) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 
 	set.add(*(new Instructions::AddPrimitiveType<int>()));
@@ -35,7 +35,7 @@ TEST(EnvironmentTest, Constructor) {
 TEST(EnvironmentTest, ConstructorWithInvalidInstruction) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 
 	set.add(*(new Instructions::AddPrimitiveType<int>()));
@@ -61,7 +61,7 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction) {
 TEST(EnvironmentTest, computeLineSize) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 	vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
@@ -87,7 +87,7 @@ TEST(EnvironmentTest, computeLineSize) {
 TEST(EnvironmentTest, Size_tAttributeAccessors) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 
 	DataHandlers::PrimitiveTypeArray<double> d1(size1);
@@ -115,7 +115,7 @@ TEST(EnvironmentTest, Size_tAttributeAccessors) {
 TEST(EnvironmentTest, InstructionSetAccessor) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 
 	DataHandlers::PrimitiveTypeArray<double> d1(size1);
@@ -143,7 +143,7 @@ TEST(EnvironmentTest, InstructionSetAccessor) {
 TEST(EnvironmentTest, DataSourceAccessor) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 
 	DataHandlers::PrimitiveTypeArray<double> d1(size1);

@@ -77,7 +77,8 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
 	LearningEnvironment* privateLearningEnvironment = this->learningEnvironment.clone();
 
 	// Create a TPGExecutionEngine
-	TPG::TPGExecutionEngine tee(this->env, NULL);
+	Environment privateEnv(this->env.getInstructionSet(), privateLearningEnvironment->getDataSources(), this->env.getNbRegisters());
+	TPG::TPGExecutionEngine tee(privateEnv, NULL);
 
 	// Pop a job
 	while (!rootsToProcess.empty()) { // Thread safe access to size
@@ -149,8 +150,8 @@ void Learn::ParallelLearningAgent::mergeArchiveMap(std::map<uint64_t, Archive*>&
 
 		// Insert remaining recordings
 		while (recordingIdx < reverseIterator->second->getNbRecordings()) {
-			// Access in reverse order (because deque)
-			const ArchiveRecording& recording = reverseIterator->second->at((reverseIterator->second->getNbRecordings() - 1) - recordingIdx);
+			// Access in reverse order
+			const ArchiveRecording& recording = reverseIterator->second->at(recordingIdx);
 			// forced Insertion
 			this->archive.addRecording(recording.prog, reverseIterator->second->getDataHandlers().at(recording.dataHash), recording.result, true);
 			recordingIdx++;

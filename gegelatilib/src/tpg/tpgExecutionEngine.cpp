@@ -25,7 +25,7 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
 
 	// Put the result in the archive before returning it.
 	if (this->archive != NULL) {
-		this->archive->addRecording(&prog, prog.getEnvironment().getDataSources(), result);
+		this->archive->addRecording(&prog, progExecutionEngine.getDataSources(), result);
 	}
 
 	return result;

@@ -16,8 +16,8 @@ class FakeLearningEnvironment : public Learn::LearningEnvironment {
 public:
 	FakeLearningEnvironment() : LearningEnvironment(2) {};
 	void reset(size_t seed, Learn::LearningMode mode) {};
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> getDataSources() {
-		return std::vector<std::reference_wrapper<DataHandlers::DataHandler>>();
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
+		return std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>();
 	}
 	double getScore() const { return 0.0; }
 	bool isTerminal() const { return false; }
@@ -47,7 +47,7 @@ TEST(LearningEnvironmentTest, getNbAction) {
 TEST(LearningEnvironmentTest, getDataSource) {
 	StickGameWithOpponent le;
 
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dataSrc;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> dataSrc;
 	ASSERT_NO_THROW(dataSrc = le.getDataSources()) << "Getting data sources should not fail";
 	ASSERT_EQ(dataSrc.size(), 2) << "Number of dataSource is incorrect";
 

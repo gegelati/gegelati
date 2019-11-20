@@ -242,7 +242,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism) {
 	// Check that parallel execution leads to the exact same results as 
 	// sequential
 	params.archiveSize = 50;
-	params.archivingProbability = 0.5;
+	params.archivingProbability = 0.1;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 10;
 
@@ -277,6 +277,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism) {
 	ASSERT_EQ(nextInt, nextIntSequential) << "Mutator::RNG was called a different number of time in parallel and sequential execution.";
 
 	// Check archives
+	ASSERT_GT(la.getArchive().getNbRecordings(), 0) << "For the archive determinism tests to be meaningful, Archive should not be empty.";
 	ASSERT_EQ(la.getArchive().getNbRecordings(), plaSequential.getArchive().getNbRecordings()) << "Archives have different sizes.";
 	for (auto i = 0; i < la.getArchive().getNbRecordings(); i++) {
 		ASSERT_EQ(la.getArchive().at(i).dataHash, plaSequential.getArchive().at(i).dataHash) << "Archives have different content.";
@@ -308,7 +309,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism) {
 	// Check that parallel execution leads to the exact same results as 
 	// sequential
 	params.archiveSize = 50;
-	params.archivingProbability = 0.5;
+	params.archivingProbability = 0.1;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 10;
 
@@ -342,6 +343,10 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism) {
 	// Check determinism of the number of RNG calls.
 	ASSERT_EQ(nextInt, nextIntSequential) << "Mutator::RNG was called a different number of time in parallel and sequential execution.";
 
+	// Check archives
+	ASSERT_EQ(la.getArchive().getNbRecordings(), 0) << "Archives should be empty in Validation mode.";
+	ASSERT_EQ(plaSequential.getArchive().getNbRecordings(), 0) << "Archives should be empty in Validation mode.";
+
 	// Check equality between ParallelLearningAgent in parallel and sequential mode
 	ASSERT_EQ(resultsParallel.size(), resultsParallel.size()) << "Result maps have a different size.";
 	iterSequential = resultsSequential.begin();
@@ -354,6 +359,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism) {
 
 	// Check determinism of the number of RNG calls.
 	ASSERT_EQ(nextIntSequential, nextIntParallel) << "Mutator::RNG was called a different number of time in parallel and sequential execution.";
+
+	// Check archives
+	ASSERT_EQ(plaParallel.getArchive().getNbRecordings(), 0) << "Archives should be empty in Validation mode.";
 }
 
 TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential) {
