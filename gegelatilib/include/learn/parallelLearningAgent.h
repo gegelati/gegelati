@@ -45,15 +45,15 @@ namespace Learn {
 		* \param[in,out] rootsToProcess Ordered list of root TPGVertex to
 		* process, stored as a pair with an id filling the archiveMap.
 		* \param[in] rootsToProcessMutex Mutex protecting the rootsToProcess
-		* \param[in] results Map to store the resulting score of evaluated roots.
-		* \param[in] resultsMutex Mutex protecting the results.
+		* \param[in] resultsPerRootMap Map to store the resulting score of evaluated roots.
+		* \param[in] resultsPerRootMapMutex Mutex protecting the results.
 		* \param[in] archiveSeeds Seed values for the archiving process of each root.
 		* \param[in,out] archiveMap Map storing the exhaustiveArchive to be merged.
 		* \param[in] archiveMapMutex Mutex protecting the archiveMap.
 		*/
 		void slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
 			std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>& rootsToProcess, std::mutex& rootsToProcessMutex,
-			std::multimap<double, const TPG::TPGVertex*>& results, std::mutex& resultsMutex,
+			std::map<uint64_t, std::pair<double, const TPG::TPGVertex*>>& resultsPerRootMap, std::mutex& resultsPerRootMapMutex,
 			std::map<uint64_t, size_t>& archiveSeeds,
 			std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex);
 

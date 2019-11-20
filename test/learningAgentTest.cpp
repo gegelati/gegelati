@@ -448,6 +448,38 @@ TEST_F(ParallelLearningAgentTest, TrainParallel) {
 	ASSERT_NO_THROW(pla.train(alt, true)) << "Using the boolean reference to stop the training should not fail.";
 }
 
+TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism) {
+	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
+	params.maxNbActionsPerEval = 11;
+	params.nbIterationsPerPolicyEvaluation = 5;
+	params.ratioDeletedRoots = 0.2;
+	// Set a large number of generations and roots 
+	// so that the chances of something going wrong is higher.
+	params.nbGenerations = 20;
+	params.mutation.tpg.nbRoots = 30;
+
+	Learn::LearningAgent la(le, set, params);
+
+	la.init();
+
+	// Train for several generation
+	bool alt = false;
+	la.train(alt, false);
+
+	Learn::ParallelLearningAgent pla(le, set, params, 4);
+
+	pla.init();
+
+	// Train for several generation
+	pla.train(alt, false);
+
+	// Check number of vertex in graphs
+	// Non-zero to avoid false positive.
+	ASSERT_GT(la.getTPGGraph().getNbVertices(), 0) << "Number of vertex in the trained graph should not be 0.";
+	ASSERT_EQ(la.getTPGGraph().getNbVertices(), pla.getTPGGraph().getNbVertices()) << "LearningAgent and ParallelLearning agent result in different TPGGraphs.";
+}
+
 TEST_F(ParallelLearningAgentTest, KeepBestPolicy) {
 	params.archiveSize = 50;
 	params.archivingProbability = 0.5;

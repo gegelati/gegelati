@@ -69,7 +69,7 @@ std::multimap<double, const TPG::TPGVertex*> Learn::ParallelLearningAgent::evalu
 
 void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
 	std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>& rootsToProcess, std::mutex& rootsToProcessMutex,
-	std::multimap<double, const TPG::TPGVertex*>& results, std::mutex& resultsMutex,
+	std::map<uint64_t, std::pair<double, const TPG::TPGVertex*>>& resultsPerRootMap, std::mutex& resultsPerRootMapMutex,
 	std::map<uint64_t, size_t>& archiveSeeds,
 	std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex) {
 
@@ -106,8 +106,8 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
 			double avgScore = evaluateRoot(tee, *rootToProcess.second, generationNumber, mode, *privateLearningEnvironment, this->params);
 
 			{	// Store result Mutual exclusion zone
-				std::lock_guard<std::mutex> lock(resultsMutex);
-				results.insert({ avgScore, rootToProcess.second });
+				std::lock_guard<std::mutex> lock(resultsPerRootMapMutex);
+				resultsPerRootMap.insert({ rootToProcess.first, { avgScore, rootToProcess.second } });
 			}
 
 			if (mode == LearningMode::TRAINING) {
@@ -179,16 +179,19 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generatio
 	for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
 		rootsToProcess.push({ idx , root });
 		if (mode == LearningMode::TRAINING) {
-			archiveSeeds.insert({ idx++, Mutator::RNG::getUnsignedInt64(0, UINT64_MAX) });
+			archiveSeeds.insert({ idx, Mutator::RNG::getUnsignedInt64(0, UINT64_MAX) });
 		}
+		idx++;
 	}
 
 	// Create Archive Map
 	std::map<uint64_t, Archive*> archiveMap;
+	// Create Map for results
+	std::map<uint64_t, std::pair<double, const TPG::TPGVertex*>> resultsPerRootMap;
 
 	// Create mutexes
 	std::mutex rootsToProcessMutex;
-	std::mutex resultsMutex;
+	std::mutex resultsPerRootMutex;
 	std::mutex archiveMapMutex;
 
 	// Create the threads
@@ -197,7 +200,7 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generatio
 		threads.emplace_back(std::thread(&ParallelLearningAgent::slaveEvalRootThread, this,
 			generationNumber, mode,
 			std::ref(rootsToProcess), std::ref(rootsToProcessMutex),
-			std::ref(results), std::ref(resultsMutex),
+			std::ref(resultsPerRootMap), std::ref(resultsPerRootMutex),
 			std::ref(archiveSeeds),
 			std::ref(archiveMap), std::ref(archiveMapMutex)
 		));
@@ -206,13 +209,18 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generatio
 	// Work in the main thread also
 	this->slaveEvalRootThread(generationNumber, mode,
 		rootsToProcess, rootsToProcessMutex,
-		results, resultsMutex,
+		resultsPerRootMap, resultsPerRootMutex,
 		archiveSeeds,
 		archiveMap, archiveMapMutex);
 
 	// Join the threads
 	for (auto& thread : threads) {
 		thread.join();
+	}
+
+	// Merge the results
+	for (auto resultPerRoot : resultsPerRootMap) {
+		results.insert(resultPerRoot.second);
 	}
 
 	// Merge the archives
