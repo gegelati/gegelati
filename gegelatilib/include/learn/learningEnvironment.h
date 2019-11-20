@@ -54,6 +54,9 @@ namespace Learn {
 		*/
 		LearningEnvironment() = delete;
 
+		/// Default virtual destructor
+		virtual ~LearningEnvironment() = default;
+
 		/**
 		* \brief Constructor for LearningEnviroment.
 		*
