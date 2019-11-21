@@ -102,7 +102,7 @@ bool Archive::hasDataHandlers(const size_t& hash) const
 	return this->dataHandlers.count(hash) != 0;
 }
 
-bool Archive::areProgramResultsUnique(std::map<size_t, double> hashesAndResults, double tau) const
+bool Archive::areProgramResultsUnique(const std::map<size_t, double>& hashesAndResults, double tau) const
 {
 	// Check programs until one is equivalent or until all have been checked.
 	for (auto programRecordings : this->recordingsPerProgram) {

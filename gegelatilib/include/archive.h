@@ -175,7 +175,7 @@ public:
 	* margin).
 	*/
 	virtual bool areProgramResultsUnique(
-		std::map<size_t, double> hashesAndResults,
+		const std::map<size_t, double>& hashesAndResults,
 		double tau = 1e-4
 	) const;
 

@@ -165,10 +165,12 @@ TEST_F(ArchiveTest, areProgramResultsUnique) {
 	archive.addRecording(&p2, vect, 2.5);
 
 	// results are entirely different
-	ASSERT_TRUE(archive.areProgramResultsUnique({ {hash1, 3.0}, {hash2, 3.5} })) << "Unique fake program bidding behavior not detected as such.";
-	ASSERT_FALSE(archive.areProgramResultsUnique({ {hash1, 0.0}, {hash2, 2.0}, {hash3, 2.5} })) << "Equal fake program bidding behavior not detected as such.";
-	ASSERT_FALSE(archive.areProgramResultsUnique({ {hash1, 1.2}, {hash2, 1.3}, {hash3, 3.5} }, 0.21)) << "Within margin fake program bidding behavior not detected as such.";
-
+	std::map<size_t, double> hashesAndResults1 = { {hash1, 3.0}, {hash2, 3.5} };
+	ASSERT_TRUE(archive.areProgramResultsUnique(hashesAndResults1)) << "Unique fake program bidding behavior not detected as such.";
+	std::map<size_t, double> hashesAndResults2 = { {hash1, 0.0}, {hash2, 2.0}, {hash3, 2.5} };
+	ASSERT_FALSE(archive.areProgramResultsUnique(hashesAndResults2)) << "Equal fake program bidding behavior not detected as such.";
+	std::map<size_t, double> hashesAndResults3 = { {hash1, 1.2}, {hash2, 1.3}, {hash3, 3.5} };
+	ASSERT_FALSE(archive.areProgramResultsUnique(hashesAndResults3, 0.21)) << "Within margin fake program bidding behavior not detected as such.";
 }
 
 TEST_F(ArchiveTest, DataHandlersAccessors) {

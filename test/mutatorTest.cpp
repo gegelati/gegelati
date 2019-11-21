@@ -527,7 +527,8 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge) {
 	// Verify new program uniqueness
 	Program::ProgramExecutionEngine pee(edge0.getProgram());
 	double result = pee.executeProgram();
-	ASSERT_TRUE(arch.areProgramResultsUnique({ { arch.getCombinedHash(e->getDataSources()), result } })) << "Mutated program associated to the edge should return a unique bid on the environment.";
+	std::map<size_t,double> hashesAndResults = { { arch.getCombinedHash(e->getDataSources()), result } };
+	ASSERT_TRUE(arch.areProgramResultsUnique(hashesAndResults)) << "Mutated program associated to the edge should return a unique bid on the environment.";
 }
 
 TEST_F(MutatorTest, TPGMutatorMutateTeam) {
