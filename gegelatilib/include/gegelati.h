@@ -11,6 +11,8 @@
 
 #include <exporter/tpgGraphDotExporter.h>
 
+#include <importer/tpgGraphDotImporter.h>
+
 #include <instructions/addPrimitiveType.h>  
 #include <instructions/instruction.h>
 #include <instructions/lambdaInstruction.h>

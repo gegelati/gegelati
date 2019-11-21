@@ -11,6 +11,11 @@ TPG::TPGGraph& Learn::LearningAgent::getTPGGraph()
 	return this->tpg;
 }
 
+void Learn::LearningAgent::setTPGGraph(TPG::TPGGraph & model)
+{
+	this->tpg = model;
+}
+
 void Learn::LearningAgent::init(uint64_t seed) {
 	// Initialize Randomness
 	Mutator::RNG::setSeed(seed);
@@ -58,7 +63,6 @@ double Learn::LearningAgent::evaluateRoot(const TPG::TPGVertex& root, uint64_t g
 std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
 {
 	std::multimap<double, const TPG::TPGVertex*> result;
-
 	for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
 		double avgScore = this->evaluateRoot(*root, generationNumber, mode);
 		result.insert({ avgScore, root });

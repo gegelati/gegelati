@@ -13,6 +13,14 @@ TPG::TPGGraph::~TPGGraph()
 	}
 }
 
+TPG::TPGGraph & TPG::TPGGraph::operator=(TPG::TPGGraph & model)
+{
+	this->clear();
+	this->vertices = model.vertices;
+	this->edges = model.edges;
+	return *this;
+};
+
 void TPG::TPGGraph::clear()
 {
 	// Remove all vertices

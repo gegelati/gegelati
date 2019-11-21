@@ -24,6 +24,13 @@ namespace TPG {
 		TPGGraph(const Environment& e) : env{ e } {};
 
 		/**
+		* \brief TPGGraph affectation operator
+		*
+		* \param[in] model the TPGGraph to assign
+		*/
+		TPGGraph & operator=(TPGGraph & model);
+
+		/**
 		* \brief Destructor for the TPGGraph.
 		*
 		* Free the memory allocated for TPGVertices.

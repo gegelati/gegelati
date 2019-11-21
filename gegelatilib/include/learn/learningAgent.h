@@ -65,6 +65,13 @@ namespace Learn {
 		TPG::TPGGraph& getTPGGraph();
 
 		/**
+		* \brief Setter for the TPGGraph when loaded from file
+		*
+		* \param[in] a reference to the TPGGraph to import
+		*/
+		void setTPGGraph(TPG::TPGGraph & model);
+
+		/**
 		* \brief Initialize the LearningAgent.
 		*
 		* Calls the TPGMutator::initRandomTPG function.

@@ -51,7 +51,7 @@ void Exporter::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 
 uint64_t Exporter::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 {
-	fprintf(pFile, "%sA%" PRIu64 " [fillcolor=\"#ff3366\" shape=box margin=0.03 width=0 height=0 label = \"%" PRIu64 "\"]\n", this->offset.c_str(), nbActions++, action.getActionID());
+	fprintf(pFile, "%sA%" PRIu64 " [fillcolor=\"#ff3366\" shape=box margin=0.03 width=0 height=0 label=\"%" PRIu64 "\"]\n", this->offset.c_str(), nbActions++, action.getActionID());
 	return nbActions - 1;
 }
 
@@ -69,15 +69,26 @@ void Exporter::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 		fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n", this->offset.c_str(), progID, progID);
 		if (typeid(*edge.getDestination()) == typeid(TPG::TPGAction)) {
 			uint64_t actionID = printTPGAction(*(const TPG::TPGAction*)edge.getDestination());
-			fprintf(pFile, "%sP%" PRIu64 " -> A%" PRIu64 "\n", this->offset.c_str(), progID, actionID);
+			fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n", this->offset.c_str(), srcID, progID, actionID);
 		}
 		else {
 			uint64_t destID = findVertexID(*edge.getDestination());
-			fprintf(pFile, "%sP%" PRIu64 " -> T%" PRIu64 "\n", this->offset.c_str(), progID, destID);
+			fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> T%" PRIu64 "\n", this->offset.c_str(), srcID, progID, destID);
 		}
 	}
-
-	fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 "\n", this->offset.c_str(), srcID, progID);
+	else
+	{
+		if(dynamic_cast<const TPG::TPGAction *>(edge.getDestination()))
+		{	
+			uint64_t actionID = findVertexID(*edge.getDestination());
+			fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n", this->offset.c_str(), srcID, progID, actionID);
+		}
+		else
+		{
+			uint64_t destID = findVertexID(*edge.getDestination());
+			fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> T%" PRIu64 "\n", this->offset.c_str(), srcID, progID, destID);
+		}
+	}
 }
 
 void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program)
@@ -93,7 +104,7 @@ void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program
 		programContent += "|";
 		//instruction destination index
 		programContent += std::to_string(l.getDestinationIndex());
-		programContent += "|{";
+		programContent += "&";
 		//instruction parameters
 		for(int j =0; j < l.getEnvironment().getMaxNbParameters(); j++)
 		{
@@ -101,6 +112,7 @@ void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program
 			{
 				const Parameter & p = l.getParameter(j);
 				programContent += std::to_string(p.i);
+				programContent += "|";
 			}
 			catch(std::range_error)
 			{
@@ -108,7 +120,7 @@ void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program
 				break; 
 			}
 		}
-		programContent += "}|{";
+		programContent += "$";
 		//instruction operands
 		for(int j =0; j < l.getEnvironment().getMaxNbOperands(); j++)
 		{
@@ -116,12 +128,10 @@ void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program
 			{
 				std::pair<uint64_t, uint64_t> p = l.getOperand(j);
 				if(j != 0)
-					programContent += "|";
-				programContent += "{";
+					programContent += "#";
 				programContent += std::to_string(p.first);
 				programContent += "|";
 				programContent += std::to_string(p.second);
-				programContent += "}";
 			}
 			catch(std::range_error)
 			{
@@ -130,7 +140,7 @@ void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program
 			}
 		}
 
-		programContent += "}&#92;n";
+		programContent += "&#92;n";
 			
 	}
 	fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"]\n", this->offset.c_str(), progID, programContent.c_str());
@@ -199,7 +209,6 @@ void Exporter::TPGGraphDotExporter::print()
 	for (const TPG::TPGEdge& edge : edges) {
 		this->printTPGEdge(edge);
 		//print the edge's program
-
 	}
 
 	// Print footer
