@@ -2,7 +2,7 @@
 
 #include "environment.h"
 
-size_t Environment::computeLargestAddressSpace(const size_t nbRegisters, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers)
+size_t Environment::computeLargestAddressSpace(const size_t nbRegisters, const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandlers)
 {
 	size_t res{ nbRegisters };
 	for (auto dHandler : dHandlers) {
@@ -12,7 +12,7 @@ size_t Environment::computeLargestAddressSpace(const size_t nbRegisters, const s
 	return res;
 }
 
-Instructions::Set Environment::filterInstructionSet(const Instructions::Set& iSet, const std::vector < std::reference_wrapper<DataHandlers::DataHandler>>& dataSources) {
+Instructions::Set Environment::filterInstructionSet(const Instructions::Set& iSet, const std::vector < std::reference_wrapper<const DataHandlers::DataHandler>>& dataSources) {
 	Instructions::Set filteredSet;
 
 	// Check if all instructions can be used for the given DataHandlers
@@ -134,7 +134,7 @@ const LineSize& Environment::getLineSize() const
 	return this->lineSize;
 }
 
-const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& Environment::getDataSources() const
+const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& Environment::getDataSources() const
 {
 	return this->dataSources;
 }

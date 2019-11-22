@@ -26,7 +26,7 @@ protected:
 	const size_t size2{ 32 };
 	const double value0{ 2.3 };
 	const float value1{ 4.2f };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 	Program::Program* p;
@@ -109,26 +109,6 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1) {
 
 	Program::ProgramExecutionEngine progEngine(*p);
 	ASSERT_NO_THROW(progEngine.executeProgram(false)) << "Program with only correct random lines is unexpectedly not correct.";
-}
-
-TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine2) {
-	// Add a new instruction for which no data can be found in the environment DataHandler
-	set.add(*(new Instructions::AddPrimitiveType<unsigned char>()));
-
-	// Recreate the environment and program with the new set
-	delete p;
-	delete e;
-	e = new Environment(set, vect, 8);
-	p = new Program::Program(*e);
-
-	// Set seed to cover the case where the instruction with no compatible dataSource is selected.
-	Mutator::RNG::setSeed(5);
-
-	// Add a pseudo-random lines to the program
-	Program::Line& l0 = p->addNewLine();
-	ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l0)) << "Pseudo-Random correct line initialization failed within an environment where failure should not be possible.";
-
-	delete (&set.getInstruction(2));
 }
 
 TEST_F(MutatorTest, LineMutatorAlterLine) {
@@ -529,7 +509,7 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge) {
 	// Init its program and fill the archive
 	Mutator::MutationParameters params;
 	Archive arch;
-	TPG::TPGExecutionEngine tee(&arch);
+	TPG::TPGExecutionEngine tee(*e, &arch);
 	params.prog.maxProgramSize = 96;
 	Mutator::ProgramMutator::initRandomProgram(*progPointer, params);
 	tee.executeFromRoot(vertex0);
@@ -547,7 +527,8 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge) {
 	// Verify new program uniqueness
 	Program::ProgramExecutionEngine pee(edge0.getProgram());
 	double result = pee.executeProgram();
-	ASSERT_TRUE(arch.areProgramResultsUnique({ { arch.getCombinedHash(e->getDataSources()), result } })) << "Mutated program associated to the edge should return a unique bid on the environment.";
+	std::map<size_t,double> hashesAndResults = { { arch.getCombinedHash(e->getDataSources()), result } };
+	ASSERT_TRUE(arch.areProgramResultsUnique(hashesAndResults)) << "Mutated program associated to the edge should return a unique bid on the environment.";
 }
 
 TEST_F(MutatorTest, TPGMutatorMutateTeam) {
@@ -577,7 +558,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam) {
 
 	// Init its program and fill the archive
 	Archive arch;
-	TPG::TPGExecutionEngine tee(&arch);
+	TPG::TPGExecutionEngine tee(*e, &arch);
 	Mutator::ProgramMutator::initRandomProgram(*progPointer, params);
 	tee.executeFromRoot(vertex0);
 
@@ -611,7 +592,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate) {
 
 	Mutator::TPGMutator::initRandomTPG(tpg, params);
 	// fill the archive before populating to test uniqueness of new prog
-	TPG::TPGExecutionEngine tee(&arch);
+	TPG::TPGExecutionEngine tee(*e, &arch);
 	for (auto rootVertex : tpg.getRootVertices()) {
 		tee.executeFromRoot(*rootVertex);
 	}

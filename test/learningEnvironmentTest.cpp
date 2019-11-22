@@ -11,6 +11,33 @@ TEST(LearningEnvironmentTest, Constructor) {
 	ASSERT_NO_THROW(delete le) << "Destruction of the Learning Environment failed";
 }
 
+// Create a fake LearningEnvironment for testing purpose.
+class FakeLearningEnvironment : public Learn::LearningEnvironment {
+public:
+	FakeLearningEnvironment() : LearningEnvironment(2) {};
+	void reset(size_t seed, Learn::LearningMode mode) {};
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
+		return std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>();
+	}
+	double getScore() const { return 0.0; }
+	bool isTerminal() const { return false; }
+};
+
+TEST(LearningEnvironmentTest, Clonable) {
+	Learn::LearningEnvironment* le = new FakeLearningEnvironment();
+
+	ASSERT_FALSE(le->isCopyable()) << "Default behavior of isCopyable is false.";
+	ASSERT_EQ(le->clone(), (Learn::LearningEnvironment*)NULL) << "Default behavior of clone is NULL.";
+
+	// for code coverage
+	le->reset();
+	le->getDataSources();
+	le->getScore();
+	le->isTerminal();
+
+	delete le;
+}
+
 TEST(LearningEnvironmentTest, getNbAction) {
 	StickGameWithOpponent le;
 
@@ -20,7 +47,7 @@ TEST(LearningEnvironmentTest, getNbAction) {
 TEST(LearningEnvironmentTest, getDataSource) {
 	StickGameWithOpponent le;
 
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dataSrc;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> dataSrc;
 	ASSERT_NO_THROW(dataSrc = le.getDataSources()) << "Getting data sources should not fail";
 	ASSERT_EQ(dataSrc.size(), 2) << "Number of dataSource is incorrect";
 
