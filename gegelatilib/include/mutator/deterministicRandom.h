@@ -1,6 +1,8 @@
 #ifndef DETERMINISTIC_RANDOM_H
 #define DETERMINISTIC_RANDOM_H
 
+#include <assert.h> 
+
 #define _NODISCARD [[nodiscard]]
 
 namespace Mutator {
