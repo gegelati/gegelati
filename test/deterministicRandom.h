@@ -13,7 +13,7 @@ namespace Mutator {
 
 		using _Udiff = std::conditional_t < sizeof(_Ty1) < sizeof(_Ty0), _Ty0, _Ty1 > ;
 
-		explicit _Rng_from_urng(_Urng& _Func) : _Ref(_Func), _Bits(CHAR_BIT * sizeof(_Udiff)), _Bmask(_Udiff(-1)) {
+		explicit _Rng_from_urng(_Urng& _Func) : _Ref(_Func), _Bits(sizeof(char) * sizeof(_Udiff)), _Bmask(_Udiff(-1)) {
 			for (; (_Urng::max)() - (_Urng::min)() < _Bmask; _Bmask >>= 1) {
 				--_Bits;
 			}
@@ -43,7 +43,7 @@ namespace Mutator {
 		_Udiff _Get_all_bits() { // return a random value
 			_Udiff _Ret = 0;
 
-			for (size_t _Num = 0; _Num < CHAR_BIT * sizeof(_Udiff); _Num += _Bits) { // don't mask away any bits
+			for (size_t _Num = 0; _Num < sizeof(char) * sizeof(_Udiff); _Num += _Bits) { // don't mask away any bits
 				_Ret <<= _Bits - 1; // avoid full shift
 				_Ret <<= 1;
 				_Ret |= _Get_bits();
@@ -101,7 +101,7 @@ namespace Mutator {
 			}
 
 			void _Init(_Ty _Min0, _Ty _Max0) { // set internal state
-				_STL_ASSERT(_Min0 <= _Max0, "invalid min and max arguments for uniform_int");
+				assert(_Min0 <= _Max0);//, "invalid min and max arguments for uniform_int");
 				_Min = _Min0;
 				_Max = _Max0;
 			}
