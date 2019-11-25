@@ -102,7 +102,7 @@ TEST_F(ExporterTest, Constructor) {
 
 	ASSERT_NO_THROW(delete dotExporter;) << "TPGGraphDotExporter could not be deleted.";
 
-	ASSERT_THROW(dotExporter = new Exporter::TPGGraphDotExporter("XXX:\\INVALID_PATH", *tpg), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
+	ASSERT_THROW(dotExporter = new Exporter::TPGGraphDotExporter("XXX://INVALID_PATH", *tpg), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
 }
 
 TEST_F(ExporterTest, print) {
