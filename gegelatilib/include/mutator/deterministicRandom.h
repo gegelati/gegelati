@@ -6,6 +6,9 @@
 #define _NODISCARD [[nodiscard]]
 
 namespace Mutator {
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
 	// CLASS TEMPLATE _Rng_from_urng
 	template <class _Diff, class _Urng>
 	class _Rng_from_urng { // wrap a URNG as an RNG
@@ -271,5 +274,6 @@ namespace Mutator {
 		const uniform_int_distribution<_Ty>& _Right) { // test for inequality
 		return !(_Left == _Right);
 	}
+#endif
 }
 #endif 
