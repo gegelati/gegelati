@@ -43,6 +43,7 @@ jobs:
             - cmake ..
             - cmake --build . --target GEGELATI
             - cmake --build . --target doc
+            - sudo make install
             - cmake --build . --target runTests
             - ./bin/runTests
             
