@@ -41,5 +41,8 @@ jobs:
             - export CXX=g++-7
             - cd bin
             - cmake ..
-            - make GEGELATI
+            - cmake --build . --target GEGELATI
+            - cmake --build . --target doc
+            - cmake --build . --target runTests
+            - ./bin/runTests
             
