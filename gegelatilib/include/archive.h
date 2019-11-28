@@ -1,6 +1,7 @@
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
 
+#include <random>
 #include <map>
 #include <deque>
 
@@ -42,6 +43,19 @@ protected:
 	const size_t maxSize;
 
 	/**
+	* \brief Randomness engine for archiving.
+	*
+	* This randomness engine is used to ensure determinism of the archiving
+	* process even in parallel execution context.
+	* The randomness engine should be reset with a new seed before entering a
+	* parallelizable part of the computations (even if these computations are
+	* done sequentially). As a more concrete example, if each policy starting
+	* from a root TPGVertex in a TPGGraph is evaluated in parallel, the
+	* randomEngine should be reset before each root.
+	*/
+	std::mt19937_64 randomEngine;
+
+	/**
 	* \brief Storage for DataHandler copies used in recordings.
 	*
 	* This map associates a hash values with the corresonding copy of the set
@@ -49,7 +63,7 @@ protected:
 	* recordings to associate each recording to the right copy of the
 	* DataHandler.
 	*/
-	std::map<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>> dataHandlers;
+	std::map<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>> dataHandlers;
 
 	/**
 	* \brief Map storing the Program pointers referenced in recordings the
@@ -78,8 +92,9 @@ public:
 	* \param[in] archivingProbability probability for each call to
 	* addRecording to actually lead to a new recodring in the Archive.
 	* \param[in] size maximum number of recordings kept in the Archive.
+	* \param[in] initialSeed Seed value for the randomEngine.
 	*/
-	Archive(size_t size = 50, double archivingProbability = 1.0) : archivingProbability{ archivingProbability }, maxSize{ size }, recordings() {};
+	Archive(size_t size = 50, double archivingProbability = 1.0, size_t initialSeed = 0) : archivingProbability{ archivingProbability }, maxSize{ size }, recordings(), randomEngine(initialSeed) {};
 
 	/**
 	* \brief Destructor of the class.
@@ -97,13 +112,30 @@ public:
 	*
 	* \return the hash resulting from the combination.
 	*/
-	static size_t getCombinedHash(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler);
+	static size_t getCombinedHash(const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler);
+
+	/**
+	* \brief Access the nth ArchiveRecording within the Archive.
+	*
+	* \param[in] n The index of the retrieved ArchiveRecording.
+	* \return a const reference to the indexed ArchiveRecording.
+	* \throws std::out_of_range if the given index is out of bounds.
+	*/
+	const ArchiveRecording& at(uint64_t n) const;
+
+	/**
+	* \brief Set a new seed for the randomEngine.
+	*
+	* \param[in] newSeed Set a new seed for the random engine.
+	*/
+	void setRandomSeed(size_t newSeed);
 
 	/**
 	* \brief Add a new recording to the Archive.
 	*
 	* A call to this function adds an ArchiveRecording to the archive with the
-	* probability specified by the archivingProbability attribute.
+	* probability specified by the archivingProbability attribute unless it is
+	* forced, in which case the recording is added without randomness.
 	* If the maximum number of recordings held in the archive is reached, the
 	* oldest recording will be removed.
 	* If this is the first time this set of DataHandler is stored in the
@@ -116,10 +148,13 @@ public:
 	* \param[in] dHandler the set of dataHandler the Program worked on to
 	*                     generate the associated result.
 	* \param[in] result double value produced by the Program.
+	* \param[in] forced Boolean for bypassing the stochastic process during
+	*                   insertion.
 	*/
-	void addRecording(const Program::Program* const program,
-		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler,
-		double result);
+	virtual void addRecording(const Program::Program* const program,
+		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler,
+		double result,
+		bool forced = false);
 
 	/**
 	* \brief Check whether the given hash is already in the archive.
@@ -130,21 +165,6 @@ public:
 	*/
 	bool hasDataHandlers(const size_t& hash) const;
 
-
-	/**
-	* \brief Check if a recording exists for the given Program and DataHandler.
-	*
-	* Check if there exists a recording in the Archive for the pair of DataHandler hash
-	* and the given Program.
-	*
-	* \param[in] hash The hash of the set of DataHandler for the searched recording.
-	* \param[in] prog the Program of the searched Recording.
-	* \return whether the check was successful or not.
-	*/
-	bool isRecordingExisting(
-		size_t hash,
-		const Program::Program* prog) const;
-
 	/**
 	* Check if the given hash-results pairs are unique compared to Program in
 	* the Archive.
@@ -154,8 +174,8 @@ public:
 	* associated to results equal to those of the given map (within tau
 	* margin).
 	*/
-	bool areProgramResultsUnique(
-		std::map<size_t, double> hashesAndResults,
+	virtual bool areProgramResultsUnique(
+		const std::map<size_t, double>& hashesAndResults,
 		double tau = 1e-4
 	) const;
 
@@ -183,7 +203,7 @@ public:
 	*
 	* \return a const reference to the dataHandlers attribute.
 	*/
-	const std::map < size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>>& getDataHandlers() const;
+	const std::map < size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>>& getDataHandlers() const;
 
 	/**
 	* \brief Clear all content from the Archive.

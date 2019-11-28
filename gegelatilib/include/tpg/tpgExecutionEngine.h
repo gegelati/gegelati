@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "archive.h"
+#include "program/programExecutionEngine.h"
 
 #include "tpgGraph.h"
 
@@ -22,16 +23,33 @@ namespace TPG {
 		*/
 		Archive* archive;
 
+		/**
+		* \brief ProgramExecutionEngine for executing Programs of edges.
+		*
+		* Keeping this ProgramExecutionEngine as an attribute avoids wasting time
+		* rebuilding a new one for each edge.
+		*/
+		Program::ProgramExecutionEngine progExecutionEngine;
+
 	public:
 		/**
 		* \brief Main constructor of the class.
 		*
+		* \param[in] env Environment in which the Program of the TPGGraph will
+		*                be executed.
 		* \param[in] arch pointer to the Archive for storing recordings of
 		*                 the Program Execution. By default, a NULL pointer is
 		*                 given, meaning that no recording of the execution
 		*                 will be made.
 		*/
-		TPGExecutionEngine(Archive* arch = NULL) : archive{ arch } {};
+		TPGExecutionEngine(const Environment& env, Archive* arch = NULL) : progExecutionEngine(env), archive{ arch } {};
+
+		/**
+		* \brief Set a new Archive for storing Program results.
+		*
+		* \param[in] newArchive A pointer (possibly NULL) to an Archive.
+		*/
+		void setArchive(Archive* newArchive);
 
 		/**
 		* \brief Execute the Program associated to an Edge and returns the

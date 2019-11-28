@@ -20,7 +20,7 @@ public:
 
 protected:
 	const size_t size1{ 24 };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e = NULL;
 	std::vector<std::shared_ptr<Program::Program>> progPointers;
@@ -102,7 +102,7 @@ TEST_F(ExporterTest, Constructor) {
 
 	ASSERT_NO_THROW(delete dotExporter;) << "TPGGraphDotExporter could not be deleted.";
 
-	ASSERT_THROW(dotExporter = new Exporter::TPGGraphDotExporter("XXX:\\INVALID_PATH", *tpg), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
+	ASSERT_THROW(dotExporter = new Exporter::TPGGraphDotExporter("XXX://INVALID_PATH", *tpg), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
 }
 
 TEST_F(ExporterTest, print) {

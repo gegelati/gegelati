@@ -1,5 +1,16 @@
 #include "stickGameWithOpponent.h"
 
+bool StickGameWithOpponent::isCopyable() const
+{
+	return true;
+}
+
+Learn::LearningEnvironment* StickGameWithOpponent::clone() const
+{
+	// Default copy constructor does the trick.
+	return (Learn::LearningEnvironment*) new StickGameWithOpponent(*this);
+}
+
 void StickGameWithOpponent::doAction(uint64_t actionID)
 {
 	LearningEnvironment::doAction(actionID);
@@ -46,9 +57,9 @@ void StickGameWithOpponent::reset(size_t seed, Learn::LearningMode mode)
 	this->forbiddenMove = false;
 }
 
-std::vector<std::reference_wrapper<DataHandlers::DataHandler>> StickGameWithOpponent::getDataSources()
+std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> StickGameWithOpponent::getDataSources()
 {
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> res = { this->hints, this->remainingSticks };
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> res = { this->hints, this->remainingSticks };
 
 	return res;
 }

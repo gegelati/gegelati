@@ -1,6 +1,8 @@
 #ifndef PROGRAM_EXECUTION_ENGINE_H
 #define PROGRAM_EXECUTION_ENGINE_H
 
+#include <type_traits>
+
 #include "dataHandlers/primitiveTypeArray.h"
 #include "program/program.h"
 
@@ -10,8 +12,8 @@ namespace Program {
 	*/
 	class ProgramExecutionEngine {
 	protected:
-		/// The program executed by the ProgramExecutionEngine instance.
-		const Program& program;
+		/// The program currently executed by the ProgramExecutionEngine instance.
+		const Program* program;
 
 		/// Default constructor is deleted.
 		ProgramExecutionEngine() = delete;
@@ -19,8 +21,11 @@ namespace Program {
 		/// Registers used for the Program execution.
 		DataHandlers::PrimitiveTypeArray<double> registers;
 
-		/// Data sources used in the Program. (retrieved from the environment at construction time)
+		/// Data sources used in the Program.
 		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSources;
+
+		/// Data sources (including registers) used in the Program.
+		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSourcesAndRegisters;
 
 		/// Program counter of the execution engine.
 		uint64_t programCounter;
@@ -31,46 +36,50 @@ namespace Program {
 		* \brief Constructor of the class.
 		*
 		* The constructor initialize the number of registers accordingly
+		* with the Environment given as a parameter.
+		*
+		* \param[in] env The Environment in which the Program will be executed.
+		*/
+		ProgramExecutionEngine(Environment& env) : programCounter{ 0 }, registers{ env.getNbRegisters() }, program{ NULL }, dataSources{ env.getDataSources() } {
+			// Setup the data sources
+			dataSourcesAndRegisters.push_back(this->registers);
+
+			// Cannot use insert here because it dataSourcesAndRegisters requires 
+			// constnessand dataSrc data are not const...
+			for (auto data : env.getDataSources()) {
+				dataSourcesAndRegisters.push_back(data.get());
+			}
+		}
+
+
+		/**
+		* \brief Constructor of the class.
+		*
+		* The constructor initialize the number of registers accordingly
 		* with the Environment given as a parameter instead of that of the
-		* Program.
+		* Program or its Environment.
+		*
+		* This constructor is useful for testing a Program on a different
+		* Environment than its own.
 		*
 		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
-		* \param[in] dataSrc DataHandler for executing the Program.
-
+		* \param[in] dataSrc The DataHandler with which the Program will be executed.
 		*/
-		ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dataSrc) : program{ prog }, registers(prog.getEnvironment().getNbRegisters()), programCounter{ 0 } {
-			// Check dataSource are similar in all point to the program environment
-			if (dataSrc.size() != prog.getEnvironment().getDataSources().size()) {
-				throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
-			}
-			for (auto i = 0; i < dataSrc.size(); i++) {
-				// check data source characteristics
-				auto& iDataSrc = dataSrc.at(i).get();
-				auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
-				// Assume that dataSource must be (at least) a copy of each other to simplify the comparison
-				// This is characterise by the two data sources having the same id
-				if (iDataSrc.getId() != envDataSrc.getId()) {
-					throw std::runtime_error("Data sources characteristics for Program Execution differ from Program reference Environment.");
-					// If this pose a problem one day, an additional more 
-					// complex check could be used as a last resort when ids 
-					// of DataHandlers are different: checking equality of the 
-					// lists of provided data types and the equality address 
-					// space size for each data type.
-				}
-
-			}
-
-			// Reset Registers (in case it is not done when they are constructed)
-			this->registers.resetData();
-
+		template <class T> ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<T>>& dataSrc) : programCounter{ 0 }, registers{ prog.getEnvironment().getNbRegisters() }, program{ NULL } {
+			// Check that T is either convertible to a const DataHandler
+			static_assert(std::is_convertible<T&, const DataHandlers::DataHandler&>::value);
 			// Setup the data sources
-			dataSources.push_back(this->registers);
+			this->dataSourcesAndRegisters.push_back(this->registers);
 
-			// Cannot use insert here because it dataSources requires 
+			// Cannot use insert here because it dataSourcesAndRegisters requires 
 			// constnessand dataSrc data are not const...
-			for (auto data : dataSrc) {
-				dataSources.push_back(data.get());
+			for (std::reference_wrapper <T> data : dataSrc) {
+				this->dataSourcesAndRegisters.push_back(data.get());
+				this->dataSources.push_back(data.get());
 			}
+
+			// Set the Program
+			this->setProgram(prog);
 		};
 
 		/**
@@ -82,6 +91,23 @@ namespace Program {
 		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
 		*/
 		ProgramExecutionEngine(const Program& prog) : ProgramExecutionEngine(prog, prog.getEnvironment().getDataSources()) {};
+
+		/**
+		* \brief Method for changing the Program executed by a ProgramExecutionEngin.
+		*
+		* \param[in] prog the const Program that will be executed by the ProgramExecutionEngine.
+		* \throws std::runtime_error if the Environment references by the
+		* Program is incompatible with the dataSources of the ProgramExecutionEngine.
+		*/
+		void setProgram(const Program& prog);
+
+		/**
+		* \brief Get the DataHandler of the ProgramExecutionEngine.
+		*
+		* \return a vector containing references to the dataHandlers of the
+		* dataSourses attribute (i.e. without the registers)
+		*/
+		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& getDataSources() const;
 
 		/**
 		* \brief Increments the programCounter and checks for the end of the Program.
@@ -141,7 +167,7 @@ namespace Program {
 		/**
 		* \brief Get the operands for the current Instruction.
 		*
-		* This method fetches from the dataSources the operands indexed in
+		* This method fetches from the dataSourcesAndRegisters the operands indexed in
 		* the current Line of the Program. To get the correct data, the method
 		* Uses the data types of the current Instruction of the program.
 		*

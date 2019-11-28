@@ -199,7 +199,7 @@ void Mutator::TPGMutator::mutateOutgoingEdge(TPG::TPGGraph& graph,
 		// Check for uniqueness in archive
 		auto archivedDataHandlers = archive.getDataHandlers();
 		std::map<size_t, double> hashesAndResults;
-		for (std::pair<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>> archiveDatahandler : archivedDataHandlers) {
+		for (std::pair<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>> archiveDatahandler : archivedDataHandlers) {
 			// Execute the mutated program on the archive data handlers
 			Program::ProgramExecutionEngine pee(*newProg, archiveDatahandler.second);
 			double result = pee.executeProgram();

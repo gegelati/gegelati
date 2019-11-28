@@ -172,6 +172,8 @@ namespace DataHandlers {
 		std::hash<T> hasher;
 
 		for (PrimitiveType<T> dataElement : this->data) {
+			// Rotate by 1 because otherwise, xor is comutative.
+			this->cachedHash = (this->cachedHash >> 1) | (this->cachedHash << 63);
 			this->cachedHash ^= hasher((T)dataElement);
 		}
 

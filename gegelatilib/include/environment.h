@@ -44,7 +44,7 @@ protected:
 	const Instructions::Set instructionSet;
 
 	/// List of DataHandler that can be accessed within this Environment.
-	const std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dataSources;
+	const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> dataSources;
 
 	/// Number of registers
 	const size_t nbRegisters;
@@ -75,7 +75,7 @@ protected:
 	* \param[in] dHandlers reference to the set of DataHandler whose largest largestAddressSpace is searched.
 	* \return the found value, or 0 default value if the given std::vector was empty.
 	*/
-	static size_t computeLargestAddressSpace(const size_t nbRegisters, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers);
+	static size_t computeLargestAddressSpace(const size_t nbRegisters, const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandlers);
 
 	/**
 	* \brief Static method used to compute the size of Program lines based on information from the Enviroment.
@@ -103,7 +103,7 @@ protected:
 	* \return a new Instructions:Set where only Instruction whose operands
 	* can be provided by at least one DataHandler are kept.
 	*/
-	static Instructions::Set filterInstructionSet(const Instructions::Set& iSet, const std::vector < std::reference_wrapper<DataHandlers::DataHandler>>& dataSources);
+	static Instructions::Set filterInstructionSet(const Instructions::Set& iSet, const std::vector < std::reference_wrapper<const DataHandlers::DataHandler>>& dataSources);
 
 private:
 	/// Default constructor deleted for its uselessness.
@@ -121,8 +121,8 @@ public:
 	* \param[in] nbRegs the number of double registers in this Environment.
 	*/
 	Environment(const Instructions::Set& iSet,
-		const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers,
-		const unsigned int nbRegs) : instructionSet{ filterInstructionSet(iSet, dHandlers) }, dataSources{ dHandlers }, nbRegisters{ nbRegs },
+		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandlers,
+		const size_t nbRegs) : instructionSet{ filterInstructionSet(iSet, dHandlers) }, dataSources{ dHandlers }, nbRegisters{ nbRegs },
 		nbInstructions{ instructionSet.getNbInstructions() }, maxNbOperands{ instructionSet.getMaxNbOperands() },
 		maxNbParameters{ instructionSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(nbRegs, dHandlers) },
 		lineSize{ computeLineSize(*this) } {};
@@ -181,7 +181,7 @@ public:
 	*
 	* \return a const reference to the dataSources attribute of this Environment.
 	*/
-	const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& getDataSources() const;
+	const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& getDataSources() const;
 
 	/**
 	* \brief Get the Instruction Set of the Environment.

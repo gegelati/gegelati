@@ -15,7 +15,7 @@ class ArchiveTest : public ::testing::Test {
 protected:
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 	Program::Program* p;
@@ -40,6 +40,8 @@ protected:
 		delete (&set.getInstruction(1));
 	}
 };
+
+class ExhaustiveArchiveTest : public ArchiveTest {};
 
 TEST_F(ArchiveTest, ConstructorDestructor) {
 	Archive* a;
@@ -99,33 +101,49 @@ TEST_F(ArchiveTest, AddRecordingTests) {
 
 TEST_F(ArchiveTest, AddRecordingWithProbabilityTests) {
 	// For these test, force archivingProbability to 0.5
-	Archive archive(10, 0.5);
-
 	// Use a known seed
-	Mutator::RNG::setSeed(0);
+	Archive archive(10, 0.5, 0);
 
 	// Add a few fictive recording
 	for (int i = 0; i < 10; i++) {
 		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
 		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
 	}
-	ASSERT_EQ(archive.getNbRecordings(), 6) << "Number or recordings in the archive is incorrect with a known seed.";
+	ASSERT_EQ(archive.getNbRecordings(), 4) << "Number or recordings in the archive is incorrect with a known seed.";
 }
 
-TEST_F(ArchiveTest, IsUnique) {
-	Archive archive(4);
+TEST_F(ArchiveTest, At) {
+	// For these test, force archivingProbability to 0.5
+	// Use a known seed
+	Archive archive(10, 1.0);
 
-	// Add a few fictive recordings
-	archive.addRecording(p, vect, 1.0);
-	archive.addRecording(p, vect, 1.5);
-	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
-	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
-	archive.addRecording(p, vect, 2.0);
-	archive.addRecording(p, vect, 2.3);
+	// Add a few fictive recording
+	for (int i = 0; i < 5; i++) {
+		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
+		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
+	}
 
-	ASSERT_TRUE(archive.isRecordingExisting(archive.getCombinedHash(vect), p)) << "Values corresponding to a recording within the Archive is not detected as such.";
-	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(42));
-	ASSERT_FALSE(archive.isRecordingExisting(archive.getCombinedHash(vect), p)) << "Values corresponding to a recording not within the Archive is not detected as such.";
+	// Access the 1st recording
+	ASSERT_NO_THROW(archive.at(1)) << "Accessing an existing ArchiveRecording should not fail.";
+
+	// Access the 7th (non existing) recording
+	ASSERT_THROW(archive.at(7), std::out_of_range) << "Accessing an ArchiveRecording outside the number of recordings should fail.";
+}
+
+TEST_F(ArchiveTest, SetSeed) {
+	// For these test, force archivingProbability to 0.5
+	// Use a known seed
+	Archive archive(10, 0.5);
+
+	ASSERT_NO_THROW(archive.setRandomSeed(1)) << "Setting a new seed failed unexpectedly.";
+
+	// Add a few fictive recording
+	for (int i = 0; i < 10; i++) {
+		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
+		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
+	}
+	// With a seed set to 0, result is available in AddRecordingWithProbabilityTests
+	ASSERT_EQ(archive.getNbRecordings(), 7) << "Number or recordings in the archive is incorrect with a known seed.";
 }
 
 TEST_F(ArchiveTest, areProgramResultsUnique) {
@@ -142,15 +160,17 @@ TEST_F(ArchiveTest, areProgramResultsUnique) {
 	// Add a few fictive recordings with p2
 	Program::Program p2(*e);
 	archive.addRecording(&p2, vect, 2.0);
-	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
+	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(42));
 	size_t hash3 = archive.getCombinedHash(vect);
 	archive.addRecording(&p2, vect, 2.5);
 
 	// results are entirely different
-	ASSERT_TRUE(archive.areProgramResultsUnique({ {hash1, 3.0}, {hash2, 3.5} })) << "Unique fake program bidding behavior not detected as such.";
-	ASSERT_FALSE(archive.areProgramResultsUnique({ {hash1, 0.0}, {hash2, 2.0}, {hash3, 2.5} })) << "Equal fake program bidding behavior not detected as such.";
-	ASSERT_FALSE(archive.areProgramResultsUnique({ {hash1, 1.2}, {hash2, 1.3}, {hash3, 3.5} }, 0.21)) << "Within margin fake program bidding behavior not detected as such.";
-
+	std::map<size_t, double> hashesAndResults1 = { {hash1, 3.0}, {hash2, 3.5} };
+	ASSERT_TRUE(archive.areProgramResultsUnique(hashesAndResults1)) << "Unique fake program bidding behavior not detected as such.";
+	std::map<size_t, double> hashesAndResults2 = { {hash1, 0.0}, {hash2, 2.0}, {hash3, 2.5} };
+	ASSERT_FALSE(archive.areProgramResultsUnique(hashesAndResults2)) << "Equal fake program bidding behavior not detected as such.";
+	std::map<size_t, double> hashesAndResults3 = { {hash1, 1.2}, {hash2, 1.3}, {hash3, 3.5} };
+	ASSERT_FALSE(archive.areProgramResultsUnique(hashesAndResults3, 0.21)) << "Within margin fake program bidding behavior not detected as such.";
 }
 
 TEST_F(ArchiveTest, DataHandlersAccessors) {

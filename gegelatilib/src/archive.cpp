@@ -1,6 +1,5 @@
 #include <math.h>
 
-#include "mutator/rng.h"
 #include "archive.h"
 
 Archive::~Archive()
@@ -11,36 +10,39 @@ Archive::~Archive()
 			delete& dHandler.get();
 		}
 	}
-
 }
 
-size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandlers)
+size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandlers)
 {
 	size_t hash = 0;
-	for (const std::reference_wrapper<DataHandlers::DataHandler> dHandler : dHandlers) {
+	for (const std::reference_wrapper<const DataHandlers::DataHandler> dHandler : dHandlers) {
 		hash ^= dHandler.get().getHash();
 	}
 	return hash;
 }
 
-void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<DataHandlers::DataHandler>>& dHandler, double result)
+const ArchiveRecording& Archive::at(uint64_t n) const
+{
+	return this->recordings.at(n);
+}
+
+void Archive::setRandomSeed(size_t newSeed)
+{
+	this->randomEngine.seed(newSeed);
+}
+
+void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler, double result, bool forced)
 {
 	// Archive according to probability
-	if (this->archivingProbability == 1.0 || this->archivingProbability <= Mutator::RNG::getDouble(0.0, 1.0)) {
+	if (forced || this->archivingProbability == 1.0 || std::uniform_real_distribution<double>(0.0, 1.0)(this->randomEngine) <= this->archivingProbability) {
 		// get the combined hash
 		size_t hash = getCombinedHash(dHandler);
-
-		// Check is an identical recording (same hash, same program) already exists.
-		// Program may be different
-		if (this->isRecordingExisting(hash, program)) {
-			return;
-		}
 
 		// Check if dataHandler copy is needed.
 		if (this->dataHandlers.find(hash) == this->dataHandlers.end()) {
 			// Store a copy of data handlers.
-			std::vector<std::reference_wrapper<DataHandlers::DataHandler>> dHandlersCpy;
-			for (std::reference_wrapper<DataHandlers::DataHandler> dh : dHandler) {
+			std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> dHandlersCpy;
+			for (std::reference_wrapper<const DataHandlers::DataHandler> dh : dHandler) {
 				DataHandlers::DataHandler* dhCopy = dh.get().clone();
 				dHandlersCpy.push_back(*dhCopy);
 			}
@@ -76,7 +78,7 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 			// if not, remove it from the Archive also
 			if (!stillUsed) {
 				// Free memory of DataHandlers within the archive
-				for (std::reference_wrapper<DataHandlers::DataHandler> toErase : this->dataHandlers.at(rec.dataHash)) {
+				for (std::reference_wrapper<const DataHandlers::DataHandler> toErase : this->dataHandlers.at(rec.dataHash)) {
 					delete& toErase.get();
 				}
 
@@ -100,26 +102,7 @@ bool Archive::hasDataHandlers(const size_t& hash) const
 	return this->dataHandlers.count(hash) != 0;
 }
 
-bool Archive::isRecordingExisting(
-	size_t hash,
-	const Program::Program* prog) const
-{
-	// If the hash does not exist, the result is unique since no recordings 
-	// correspond to it.
-	if (!hasDataHandlers(hash)) {
-		return false;
-	}
-
-	// Else, check the recordings with this hash.
-	auto equalityTester = [&hash, &prog](const ArchiveRecording& rec) {
-		return hash == rec.dataHash && prog == rec.prog;
-	};
-
-	std::deque<ArchiveRecording>::const_iterator position = std::find_if(this->recordings.begin(), this->recordings.end(), equalityTester);
-	return  position != this->recordings.end();
-}
-
-bool Archive::areProgramResultsUnique(std::map<size_t, double> hashesAndResults, double tau) const
+bool Archive::areProgramResultsUnique(const std::map<size_t, double>& hashesAndResults, double tau) const
 {
 	// Check programs until one is equivalent or until all have been checked.
 	for (auto programRecordings : this->recordingsPerProgram) {
@@ -170,7 +153,7 @@ size_t Archive::getNbDataHandlers() const
 	return this->dataHandlers.size();
 }
 
-const std::map<size_t, std::vector<std::reference_wrapper<DataHandlers::DataHandler>>>& Archive::getDataHandlers() const
+const std::map<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>>& Archive::getDataHandlers() const
 {
 	return this->dataHandlers;
 }
