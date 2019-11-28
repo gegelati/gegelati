@@ -78,16 +78,7 @@ void Exporter::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 	}
 	else
 	{
-		if(dynamic_cast<const TPG::TPGAction *>(edge.getDestination()))
-		{	
-			uint64_t actionID = findVertexID(*edge.getDestination());
-			fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n", this->offset.c_str(), srcID, progID, actionID);
-		}
-		else
-		{
-			uint64_t destID = findVertexID(*edge.getDestination());
-			fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> T%" PRIu64 "\n", this->offset.c_str(), srcID, progID, destID);
-		}
+		fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 "\n", this->offset.c_str(), srcID, progID);
 	}
 }
 

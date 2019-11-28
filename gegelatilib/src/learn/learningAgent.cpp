@@ -11,11 +11,6 @@ TPG::TPGGraph& Learn::LearningAgent::getTPGGraph()
 	return this->tpg;
 }
 
-void Learn::LearningAgent::setTPGGraph(TPG::TPGGraph & model)
-{
-	this->tpg = model;
-}
-
 void Learn::LearningAgent::init(uint64_t seed) {
 	// Initialize Randomness
 	Mutator::RNG::setSeed(seed);
@@ -75,14 +70,13 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 {
 	// Populate
 	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation);
-
 	// Evaluate
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
-
 	// Remove worst performing roots
 	for (auto i = 0; i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots); i++) {
 		// If the root is an action, do not remove it!
 		if (typeid(*results.begin()->second) != typeid(TPG::TPGAction)) {
+
 			tpg.removeVertex(*results.begin()->second);
 		}
 		else {

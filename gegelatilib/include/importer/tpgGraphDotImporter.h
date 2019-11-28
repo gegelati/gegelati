@@ -22,7 +22,6 @@ namespace Importer {
 	* It should be able to import a whole Learning agent object.
 	*/
 	class TPGGraphDotImporter {
-	friend TPG::TPGGraph;
 	protected:
 		/**
 		* \brief File in which the dot content is read during import.
@@ -52,7 +51,7 @@ namespace Importer {
 		* This map is used to associate an unique id to a tpg vertex and to 
 		* keep track of the pointers while restoring the TPGGraph described in a dot file
 		*/
-		std::map<uint64_t, const TPG::TPGVertex&> vertexID;
+		std::map<uint64_t, const TPG::TPGVertex*> vertexID;
 
 		/**
 		* \brief Map associating pointers to Program to an integer ID.
@@ -69,7 +68,7 @@ namespace Importer {
 		* This map is used to ensure that identical actions are not created
 		* moore than once.
 		*/
-		std::map<uint64_t, const TPG::TPGVertex&> actionID;
+		std::map<uint64_t, const TPG::TPGVertex*> actionID;
 
 		/**
 		* \brief Map associating actions to the corresponding action ID
@@ -77,22 +76,6 @@ namespace Importer {
 		* This map is here is used to access the correct TPGVertex while linking an action.
 		*/
 		std::map<uint64_t, uint64_t> actionLabel;
-
-		/**
-		* \brief Map associating actions to the corresponding team ID
-		*
-		* This map is here is used to access the correct TPGVertex while linking a team.
-		*/
-		std::map<uint64_t, uint64_t> teamLabel;
-
-		/**
-		* \brief Integer number used during import to associate a unique
-		* integer identifier to each TPGAction.
-		*
-		* Identifier associated to TPGAction are NOT preserved during multiple
-		* reading of a TPGGraph.
-		*/
-		uint64_t nbActions;
 
 		/**
 		*	\brief string used to spot the end of a line in the program description.
@@ -103,13 +86,13 @@ namespace Importer {
 		/**
 		*	\brief contains the regex to identify a team declaration
 		*
-		*	this regex values "\t\tT[0-9]+.*\n"
+		*	this regex values "T([0-9]+)\\x20\\x5B.*\\x5D"
 		*
 		*	Explanation :
 		*
-		*	\t\t     looks for two consecutives tabulations
-		*	T[0-9]+  looks for the Letter T followed by 1 or more digits
-		*	.*\n	 indicates that there will be several characters before the end of the line
+		*	T([0-9]+)     looks for a T followed by a number. the number will be stored in a group
+		*	\\x20\\x5B    looks for a succession of a whitespace and an opening bracket ('[')
+		*	.*\\x5D		  the following can be any sequence of character terminated by ]
 		*
 		*   Example:
 		*	T10 [fillcolor="#1199bb"]				Should pass
@@ -120,13 +103,13 @@ namespace Importer {
 		/**
 		*	\brief contains the regex to identify a program declaration
 		*
-		*	this regex values "\t\tP[0-9]+.*\n"
+		*	this regex values "P([0-9]+)\\x20\\x5B.*\\x5D"
 		*
 		*	Explanation :
 		*
-		*	\t\t     looks for two consecutives tabulations
-		*	P[0-9]+  looks for the Letter P followed by 1 or more digits
-		*	.*\n	 indicates that there will be several characters before the end of the line
+		*	P([0-9]+)     looks for a P followed by a number. the number will be stored in a group
+		*	\\x20\\x5B    looks for a succession of a whitespace and an opening bracket ('[')
+		*	.*\\x5D			  the following can be any sequence of character terminated by ]
 		*
 		*   Example:
 		*	P0 [fillcolor="#cccccc" shape=point]	Should pass
@@ -137,13 +120,15 @@ namespace Importer {
 		/**
 		*	\brief contains the regex to identify an instruction declaration
 		*
-		*	this regex values "\t\tI[0-9]+.*\n"
+		*	this regex values "I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D"
 		*
 		*	Explanation :
 		*
-		*	\t\t     looks for two consecutives tabulations
-		*	I[0-9]+  looks for the Letter I followed by 1 or more digits
-		*	.*\n	 indicates that there will be several characters before the end of the line
+		*	I([0-9]+)     looks for a I followed by a number. the number will be stored in a group
+		*	\\x20\\x5B    looks for a succession of a whitespace and an opening bracket ('[')
+		*	.*			  the following can be any sequence of character
+		*	label=\"	  looks for the label declaration sequence.
+		*	(.*)\"\x5D	  stores the content of the label in a group and  look for the ending sequence : "]
 		*
 		*   Example:
 		*	I0 [shape=box style=invis]				Should pass
@@ -154,13 +139,15 @@ namespace Importer {
 		/**
 		*	\brief contains the regex to identify an action declaration
 		*
-		*	this regex values "\t\tA[0-9]+.*\n"
+		*	this regex values "A([0-9]+)\\x20\\x5B.*=\"([0-9]+)\"\x5D"
 		*
 		*	Explanation :
 		*
-		*	\t\t     looks for two consecutives tabulations
-		*	A[0-9]+  looks for the Letter A followed by 1 or more digits
-		*	.*\n	 indicates that there will be several characters before the end of the line
+		*	A([0-9]+)     looks for a A followed by a number. the number will be stored in a group
+		*	\\x20\\x5B    looks for a succession of a whitespace and an opening bracket ('[')
+		*	.*=\"	      the following can be any sequence of character ending with ="		  
+		*	([0-9]+)	  looks for a number and stores it into the next group
+		*	\"\x5D 		  the end of the sequence is made of "]
 		*
 		*   Example:
 		*	A0 [shape=box style=invis]				Should pass
@@ -168,7 +155,103 @@ namespace Importer {
 		*/
 		const std::string actionRegex;
 
+		/**
+		*	\brief contains the regex to identify a Program -> Instruction Link
+		*
+		*	this regex values "P([0-9]+)\\x20->\\x20I([0-9]+).*"
+		*
+		*	Explanation :
+		*
+		*	P[0-9]+       looks for a P followed by a number. the number will be stored in a group
+		*	\\x20	      looks for a whitespace 
+		*	->			  looxs for the sequence '->'
+		*	\\x20	      looks for a whitespace 
+		*	I[0-9]+       looks for a I followed by a number. the number will be stored in a group
+		*	.*			  the following can be any sequence of character
+		*
+		*   Example:
+		*	P22 -> I22[style=invis]				Should pass
+		*	T0 -> P22 -> A11					Should not pass
+		*/
+		const std::string linkProgramInstructionRegex;
 
+		/**
+		*	\brief contains the regex to identify a Team -> Program -> Action Link
+		*
+		*	this regex values "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20A([0-9]+).*"
+		*
+		*	Explanation :
+		*
+		*	T[0-9]+       looks for a T followed by a number. the number will be stored in a group
+		*	\\x20	      looks for a whitespace 
+		*	->			  looxs for the sequence '->'
+		*	\\x20	      looks for a whitespace 
+		*	P[0-9]+       looks for a P followed by a number. the number will be stored in a group
+		*	\\x20	      looks for a whitespace 
+		*	->			  looxs for the sequence '->'
+		*	\\x20	      looks for a whitespace 
+		*	A[0-9]+       looks for a A followed by a number. the number will be stored in a group
+		*	.*			  the following can be any sequence of character
+		*
+		*   Example:
+		*	P22 -> I22[style=invis]				Should not pass
+		*	T0 -> P22 -> A11					Should pass
+		*/
+		const std::string linkProgramActionRegex;
+
+		/**
+		*	\brief contains the regex to identify a Team -> Program -> Team Link
+		*
+		*	this regex values "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*"
+		*
+		*	Explanation :
+		*
+		*	T[0-9]+       looks for a T followed by a number. the number will be stored in a group
+		*	\\x20	      looks for a whitespace 
+		*	->			  looxs for the sequence '->'
+		*	\\x20	      looks for a whitespace 
+		*	P[0-9]+       looks for a P followed by a number. the number will be stored in a group
+		*	\\x20	      looks for a whitespace 
+		*	->			  looxs for the sequence '->'
+		*	\\x20	      looks for a whitespace 
+		*	T[0-9]+       looks for a T followed by a number. the number will be stored in a group
+		*	.*			  the following can be any sequence of character
+		*
+		*   Example:
+		*	P22 -> I22[style=invis]				Should not pass
+		*	T0 -> P22 -> T11					Should pass
+		*/
+		const std::string linkProgramTeamRegex;
+
+		/**
+		*	\brief contains the regex to identify a Team -> Program Link
+		*	the outgoing program vertex must already have been linked
+		*
+		*	this regex values "T([0-9]+)\\x20->\\x20P([0-9]+)\n"
+		*
+		*	Explanation :
+		*
+		*	T[0-9]+       looks for a T followed by a number. the number will be stored in a group
+		*	\\x20	      looks for a whitespace 
+		*	->			  looxs for the sequence '->'
+		*	\\x20	      looks for a whitespace 
+		*	P[0-9]+       looks for a P followed by a number. the number will be stored in a group
+		*	\n   		  the following must be a line termination character
+		*
+		*   Example:
+		*	P22 -> I22[style=invis]				Should not pass
+		*	T0 -> P22 -> T11					Should pass
+		*/
+		const std::string addLinkProgramRegex;
+
+
+		/*
+		*	\brief used to pass the group that match from the previously executed regex
+		*	from one function to another
+		*/
+		std::smatch matches;
+
+		
 		/**
 		* \brief Reads the content of the parameters in a string and puts it in the line
 		* passed in parameter
@@ -192,27 +275,14 @@ namespace Importer {
 		/**
 		* \brief Reads the content of a line and puts it in the line
 		* passed in parameter
-		*
-		* \param[in] str the string to parse
-		*
-		* \param[in] line the line to fill with the parsed informations
 		*/ 
-		void readLine(std::string & str, Program::Line & line);
-
-
-		/**
-		* \brief Reads the content of a program and puts it in the program
-		* passed in parameter
-		*
-		* \param[in] program the program to fill with the read instructions
-		*/
-		void fillWithLines(std::shared_ptr<Program::Program> & program);
+		void readLine();
 
 
 		/**
 		* \brief Create a program from its dot content.
 		*/
-		void readPrograms();
+		void readProgram();
 
 		/**
 		* \brief dumps the header of the dot file
@@ -222,14 +292,37 @@ namespace Importer {
 		void dumpTPGGraphHeader();
 
 		/**
-		* \brief create as much teams as there are in the file
+		* \brief reads and creates a TPGTeam.
 		*/
-		void readNumberOfTeams();
+		void readTeam();
+
+		/**
+		* \brief reads and creates a TPGAction.
+		*/
+		void readAction();
+
+		/*
+		* \brief reads a link declaration and link objects together
+		*/
+		void readLinkTeamProgramAction();
+
+		/*
+		* \brief reads a link declaration and link objects together
+		*/
+		void readLinkTeamProgramTeam();
+
+		/*
+		* \brief reads a link declaration and link objects together
+		*/
+		void readLinkTeamProgram();
+
 
 		/**
 		*	\brief reads a single line of the file
+		*   
+		*	\return true if the line read matched any of the line characteristics specified as regexs.
 		*/
-		void readLineFromFile();
+		bool readLineFromFile();
 
 
 	public:
@@ -247,12 +340,15 @@ namespace Importer {
 			pFile{ NULL }, 
 			env{iSet, le.getDataSources(), nbRegs}, 
 			tpg(env), 
-			nbActions{ 0 }, 
 			lineSeparator("&#92;n"),
-			teamRegex("\t\tT[0-9]+.*\n"), 
-			programRegex("\t\tP[0-9]+.*\n"), 
-			instructionRegex("\t\tI[0-9]+.*\n"),
-			actionRegex("\t\tA[0-9]+.*\n")
+			teamRegex("T([0-9]+)\\x20\\x5B.*\\x5D"), 
+			programRegex("P([0-9]+)\\x20\\x5B.*\\x5D"), 
+			instructionRegex("I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D"),
+			actionRegex("A([0-9]+)\\x20\\x5B.*=\"([0-9]+)\"\\x5D"),
+			linkProgramInstructionRegex("P([0-9]+)\\x20->\\x20I([0-9]+).*"),
+			linkProgramActionRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20A([0-9]+).*"),
+			linkProgramTeamRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*"),
+			addLinkProgramRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\n")
 		{
 			if ((pFile = fopen(filePath, "r")) == NULL) {
 				throw std::runtime_error("Could not open file " + std::string(filePath));

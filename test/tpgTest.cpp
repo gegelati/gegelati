@@ -216,6 +216,8 @@ TEST_F(TPGTest, TPGGraphRemoveEdge) {
 	ASSERT_EQ(vertex1.getIncomingEdges().size(), 0) << "Destination vertex was not disconnected from the removed Edge.";
 	// Check that the edge was successfully deleted
 	ASSERT_EQ(progPointer.use_count(), 1) << "Edge was not properly deleted, its shared pointer is still active.";
+	// Remove an edge that does not exist anymore
+	ASSERT_THROW(tpg.removeEdge(edge), std::runtime_error) << "Edge not in the graph should not be removable";
 }
 
 TEST_F(TPGTest, TPGGraphRemoveVertex) {

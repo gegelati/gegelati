@@ -24,11 +24,37 @@ namespace TPG {
 		TPGGraph(const Environment& e) : env{ e } {};
 
 		/**
-		* \brief TPGGraph affectation operator
-		*
-		* \param[in] model the TPGGraph to assign
+		* \brief delete copy constructor
 		*/
-		TPGGraph & operator=(TPGGraph & model);
+		TPGGraph(const TPGGraph & model) = delete;
+
+		/**
+		* \brief TPGGraph move assignment operator
+		*
+		* \param[in] model the TPGGraph to copy
+		*/
+		TPGGraph(TPGGraph && model) noexcept : env{model.getEnvironment()}
+		{
+			swap(*this, model);
+		}
+
+		/**
+		*	\brief Helper function for move constructor.
+		*
+		*	Swaps the TPGGraphs objects.
+		*/
+		friend inline void swap(TPGGraph &a, TPGGraph &b)
+		{
+			using std::swap;
+			swap(a.vertices, b.vertices);
+			swap(a.edges, b.edges);
+		}
+
+
+		/**
+		*	\brief assignement operator for class TPGGraph
+		*/
+		TPGGraph & operator=(TPGGraph model);
 
 		/**
 		* \brief Destructor for the TPGGraph.
@@ -162,6 +188,9 @@ namespace TPG {
 		* updated.
 		*
 		* \param[in] edge a const reference to the TPGEdge to remove.
+		*
+		* \throw std::runtime_error In case one of the TPGEdges does not
+		*                           exist in the TPGGraph.
 		*/
 		void removeEdge(const TPGEdge& edge);
 
