@@ -106,6 +106,8 @@ install(TARGETS ${LIBRARY_TARGET_NAME}
 # PDB fow windows visual
 if(MSVC)
 	install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> CONFIGURATIONS "Debug" "RelWithDebInfo" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage -fprofile-arcs -ftest-coverage")
 endif()
 
 # Doc installation
@@ -124,3 +126,4 @@ else()
 endif()
 
 message(STATUS "Created target ${LIBRARY_TARGET_NAME} for export ${PROJECT_NAME}.")
+
