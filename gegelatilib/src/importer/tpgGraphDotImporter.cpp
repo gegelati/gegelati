@@ -28,8 +28,6 @@ void Importer::TPGGraphDotImporter::readOperands(std::string & str, Program::Lin
 	uint64_t o_idx = 0;
 	uint64_t dataIndex = 0;
 	uint64_t location = 0;
-	
-	int16_t p_value;
 
 	for(int i = 0; i < this->tpg.getEnvironment().getMaxNbOperands(); ++i )
 	{
@@ -132,9 +130,9 @@ void Importer::TPGGraphDotImporter::dumpTPGGraphHeader()
 	int32_t read_status = 0;
 	size_t line_buf_size = 0;
 	char * buffer;
-	read_status = getline(&buffer,&line_buf_size,pFile);
-	read_status = getline(&buffer,&line_buf_size,pFile);
-	read_status = getline(&buffer,&line_buf_size,pFile);
+	read_status = std::getline(&buffer,&line_buf_size,pFile);
+	read_status = std::getline(&buffer,&line_buf_size,pFile);
+	read_status = std::getline(&buffer,&line_buf_size,pFile);
 }
 
 void Importer::TPGGraphDotImporter::readTeam()
@@ -277,7 +275,7 @@ bool Importer::TPGGraphDotImporter::readLineFromFile()
 	int32_t read_status = 0;
 	size_t line_buf_size = 0;
 	char * buffer = NULL;
-	read_status = getline(&buffer,&line_buf_size,pFile);
+	read_status = std::getline(&buffer,&line_buf_size,pFile);
 
 	std::regex testActionDeclare(this->actionRegex);
 	std::regex testTeamDeclare(this->teamRegex);
