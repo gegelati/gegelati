@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <map>
 #include <string>
+#include <stdio.h>
 #include <memory>
 #include <inttypes.h>
 #include <regex>
