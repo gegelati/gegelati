@@ -302,17 +302,17 @@ namespace Importer {
 		void readAction();
 
 		/**
-		* \brief reads a link declaration and link objects together
+		* \brief reads a link declaration and creates a team to action edge
 		*/
 		void readLinkTeamProgramAction();
 
 		/**
-		* \brief reads a link declaration and link objects together
+		* \brief reads a link declaration and creates a team to team edge
 		*/
 		void readLinkTeamProgramTeam();
 
 		/**
-		* \brief reads a link declaration and link objects together
+		* \brief reads a link declaration and creates a team to program's destination edge.
 		*/
 		void readLinkTeamProgram();
 
