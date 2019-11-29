@@ -1,5 +1,7 @@
 #include "importer/tpgGraphDotImporter.h"
 
+
+
 void Importer::TPGGraphDotImporter::readParameters(std::string & str, Program::Line & l)
 {
 	std::string::size_type pos = 0;
@@ -127,12 +129,10 @@ void Importer::TPGGraphDotImporter::readProgram()
 void Importer::TPGGraphDotImporter::dumpTPGGraphHeader()
 {
 	//skips the three first lines of the file
-	int32_t read_status = 0;
-	size_t line_buf_size = 0;
-	char * buffer;
-	read_status = getline(&buffer,&line_buf_size,pFile);
-	read_status = getline(&buffer,&line_buf_size,pFile);
-	read_status = getline(&buffer,&line_buf_size,pFile);
+	char buffer[MAX_READ_SIZE];
+	pFile.getline(buffer, MAX_READ_SIZE);
+	pFile.getline(buffer, MAX_READ_SIZE);
+	pFile.getline(buffer, MAX_READ_SIZE);
 }
 
 void Importer::TPGGraphDotImporter::readTeam()
@@ -250,7 +250,7 @@ void Importer::TPGGraphDotImporter::readLinkTeamProgram()
 TPG::TPGGraph& Importer::TPGGraphDotImporter::importGraph()
 {
 	//force seek at the beginning of file.
-	fseek ( pFile , 0 , SEEK_SET );
+	pFile.seekg(0);
 
 	//clear every storing objects
 	this->tpg.clear();
@@ -272,10 +272,7 @@ TPG::TPGGraph& Importer::TPGGraphDotImporter::importGraph()
 
 bool Importer::TPGGraphDotImporter::readLineFromFile()
 {
-	int32_t read_status = 0;
-	size_t line_buf_size = 0;
-	char * buffer = NULL;
-	read_status = getline(&buffer,&line_buf_size,pFile);
+	char buffer[MAX_READ_SIZE];
 
 	std::regex testActionDeclare(this->actionRegex);
 	std::regex testTeamDeclare(this->teamRegex);
@@ -286,11 +283,12 @@ bool Importer::TPGGraphDotImporter::readLineFromFile()
 	std::regex testLinkTPT(this->linkProgramTeamRegex);
 	std::regex testLinkTP(this->addLinkProgramRegex);
 
-	if (read_status <= 0)
+	if (!pFile.getline(buffer, MAX_READ_SIZE))
 		throw std::ifstream::failure("Couldn't read in the given file");
 	else
 	{
 		this->lastLine = buffer;
+		std::cout << lastLine << std::endl;
 	}
 
 	// check the line shape and parse it 

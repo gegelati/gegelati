@@ -4,11 +4,11 @@
 #include <stdexcept>
 #include <map>
 #include <string>
-#include <stdio.h>
 #include <memory>
 #include <inttypes.h>
 #include <regex>
 #include <fstream>
+#include <cstdio>
 
 #include "learn/learningEnvironment.h"
 #include "tpg/tpgVertex.h"
@@ -16,6 +16,11 @@
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
+
+/**
+*	\brief Maximum number of characters that can be read in a single line.
+*/
+#define MAX_READ_SIZE 1024
 
 namespace Importer {
 	/**
@@ -27,7 +32,7 @@ namespace Importer {
 		/**
 		* \brief File in which the dot content is read during import.
 		*/
-		FILE* pFile;
+		std::ifstream pFile;
 
 		/**
 		* \brief last Line read from file 
@@ -228,7 +233,7 @@ namespace Importer {
 		*	\brief contains the regex to identify a Team -> Program Link
 		*	the outgoing program vertex must already have been linked
 		*
-		*	this regex values "T([0-9]+)\\x20->\\x20P([0-9]+)\n"
+		*	this regex values "T([0-9]+)\\x20->\\x20P([0-9]+)"
 		*
 		*	Explanation :
 		*
@@ -237,7 +242,6 @@ namespace Importer {
 		*	->			  looxs for the sequence '->'
 		*	\\x20	      looks for a whitespace 
 		*	P[0-9]+       looks for a P followed by a number. the number will be stored in a group
-		*	\n   		  the following must be a line termination character
 		*
 		*   Example:
 		*	P22 -> I22[style=invis]				Should not pass
@@ -337,7 +341,6 @@ namespace Importer {
 		* given filePath.
 		*/
 		TPGGraphDotImporter(const char* filePath, Environment environment) : 
-			pFile{ NULL }, 
 			env{environment}, 
 			tpg(env), 
 			lineSeparator("&#92;n"),
@@ -348,9 +351,10 @@ namespace Importer {
 			linkProgramInstructionRegex("P([0-9]+)\\x20->\\x20I([0-9]+).*"),
 			linkProgramActionRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20A([0-9]+).*"),
 			linkProgramTeamRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*"),
-			addLinkProgramRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\n")
+			addLinkProgramRegex("T([0-9]+)\\x20->\\x20P([0-9]+)")
 		{
-			if ((pFile = fopen(filePath, "r")) == NULL) {
+			pFile.open(filePath);
+			if (!pFile.is_open()) {
 				throw std::runtime_error("Could not open file " + std::string(filePath));
 			}
 		};
@@ -361,8 +365,8 @@ namespace Importer {
 		* Closes the file.
 		*/
 		~TPGGraphDotImporter() {
-			if (pFile != NULL) {
-				fclose(pFile);
+			if (pFile.is_open()) {
+				pFile.close();
 			}
 		}
 
@@ -376,11 +380,11 @@ namespace Importer {
 		*/
 		void setNewFilePath(const char* newFilePath) {
 			//  Close previous file
-			fclose(pFile);
+			pFile.close();
 
 			// open new one;
-			if ((pFile = fopen(newFilePath, "r")) == NULL) {
-				pFile = NULL;
+			pFile.open(newFilePath);
+			if (!pFile.is_open()) {
 				throw std::runtime_error("Could not open file " + std::string(newFilePath));
 			}
 		}
