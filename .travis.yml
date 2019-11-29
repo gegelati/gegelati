@@ -34,16 +34,20 @@ jobs:
                 packages:
                     - g++-7
                     - doxygen
+                    - gcovr
           env:
             - GENERATOR="Unix Makefile"
           script:
             - export CC=gcc-7
             - export CXX=g++-7
             - cd bin
-            - cmake ..
+            - cmake .. -DCMAKE_BUILD_TYPE=Debug
             - cmake --build . --target GEGELATI
             - cmake --build . --target doc
             - sudo make install
             - cmake --build . --target runTests
             - ./bin/runTests
+            - cd ..
+            - ./RunCoverageLinux.sh
+		
             
