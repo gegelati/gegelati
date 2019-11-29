@@ -49,5 +49,4 @@ jobs:
             - ./bin/runTests
             - cd ..
             - ./RunCoverageLinux.sh
-		
             
