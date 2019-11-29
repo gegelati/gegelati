@@ -54,7 +54,7 @@ void Importer::TPGGraphDotImporter::readLine()
 		std::string label = matches[2];
 
 		auto p_it = programID.find(prog_label);
-		if(p_it != programID.end())
+		if(p_it != programID.end() && !label.empty())
 		{
 			std::shared_ptr<Program::Program> p = p_it->second;
 
@@ -251,16 +251,23 @@ void Importer::TPGGraphDotImporter::readLinkTeamProgram()
 
 TPG::TPGGraph& Importer::TPGGraphDotImporter::importGraph()
 {
+	//force seek at the beginning of file.
+	fseek ( pFile , 0 , SEEK_SET );
+
+	//clear every storing objects
+	this->tpg.clear();
+	this->vertexID.clear();
+	this->actionID.clear();
+	this->actionLabel.clear();
+	this->programID.clear();
+
 	// skip header
 	this->dumpTPGGraphHeader();
-
 	bool read = true;
 	while(read)
 	{
 		read = this->readLineFromFile();
 	}
-
-	fflush(pFile);
 	return this->tpg;
 }
 
@@ -292,22 +299,18 @@ bool Importer::TPGGraphDotImporter::readLineFromFile()
 	if(std::regex_search(this->lastLine, this->matches, testTeamDeclare))
 	{
 		readTeam();
-		return true;
 	}
 	else if(std::regex_search(this->lastLine, this->matches, testActionDeclare))
 	{
 		readAction();
-		return true;
 	}
 	else if(std::regex_search(this->lastLine, this->matches, testProgramDeclare))
 	{
 		readProgram();
-		return true;
 	}
 	else if(std::regex_search(this->lastLine, this->matches, testInstructionDeclare))
 	{
 		readLine();
-		return true;
 	}
 	else if(std::regex_search(this->lastLine, this->matches, testLinkPI))
 	{
@@ -318,17 +321,14 @@ bool Importer::TPGGraphDotImporter::readLineFromFile()
 	else if(std::regex_search(this->lastLine, this->matches, testLinkTPA))
 	{
 		readLinkTeamProgramAction();
-		return true;
 	}
 	else if(std::regex_search(this->lastLine, this->matches, testLinkTPT))
 	{
 		readLinkTeamProgramTeam();
-		return true;
 	}
 	else if(std::regex_search(this->lastLine, this->matches, testLinkTP))
 	{
 		readLinkTeamProgram();
-		return true;
 	}
 	else
 	{

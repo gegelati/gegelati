@@ -128,7 +128,7 @@ namespace Importer {
 		*	\\x20\\x5B    looks for a succession of a whitespace and an opening bracket ('[')
 		*	.*			  the following can be any sequence of character
 		*	label=\"	  looks for the label declaration sequence.
-		*	(.*)\"\x5D	  stores the content of the label in a group and  look for the ending sequence : "]
+		*	(.*)\"\\x5D	  stores the content of the label in a group and  look for the ending sequence : "]
 		*
 		*   Example:
 		*	I0 [shape=box style=invis]				Should pass
@@ -139,7 +139,7 @@ namespace Importer {
 		/**
 		*	\brief contains the regex to identify an action declaration
 		*
-		*	this regex values "A([0-9]+)\\x20\\x5B.*=\"([0-9]+)\"\x5D"
+		*	this regex values "A([0-9]+)\\x20\\x5B.*=\"([0-9]+)\"\\x5D"
 		*
 		*	Explanation :
 		*
@@ -147,7 +147,7 @@ namespace Importer {
 		*	\\x20\\x5B    looks for a succession of a whitespace and an opening bracket ('[')
 		*	.*=\"	      the following can be any sequence of character ending with ="		  
 		*	([0-9]+)	  looks for a number and stores it into the next group
-		*	\"\x5D 		  the end of the sequence is made of "]
+		*	\"\\x5D 		  the end of the sequence is made of "]
 		*
 		*   Example:
 		*	A0 [shape=box style=invis]				Should pass
@@ -245,7 +245,7 @@ namespace Importer {
 		const std::string addLinkProgramRegex;
 
 
-		/*
+		/**
 		*	\brief used to pass the group that match from the previously executed regex
 		*	from one function to another
 		*/
@@ -301,17 +301,17 @@ namespace Importer {
 		*/
 		void readAction();
 
-		/*
+		/**
 		* \brief reads a link declaration and link objects together
 		*/
 		void readLinkTeamProgramAction();
 
-		/*
+		/**
 		* \brief reads a link declaration and link objects together
 		*/
 		void readLinkTeamProgramTeam();
 
-		/*
+		/**
 		* \brief reads a link declaration and link objects together
 		*/
 		void readLinkTeamProgram();
@@ -331,14 +331,13 @@ namespace Importer {
 		*
 		* \param[in] filePath initial path to the file where the dot content
 		* will be written.
-		* \param[in] graph const reference to the graph whose content will
-		* be imported in dot.
+		* \param[in] environment the environment in which the tpg Graph should be built
 		* \throws std::runtime_error in case no file could be opened at the
 		* given filePath.
 		*/
-		TPGGraphDotImporter(const char* filePath, Learn::LearningEnvironment& le, const Instructions::Set& iSet, const unsigned int nbRegs = 8) : 
+		TPGGraphDotImporter(const char* filePath, Environment environment) : 
 			pFile{ NULL }, 
-			env{iSet, le.getDataSources(), nbRegs}, 
+			env{environment}, 
 			tpg(env), 
 			lineSeparator("&#92;n"),
 			teamRegex("T([0-9]+)\\x20\\x5B.*\\x5D"), 
