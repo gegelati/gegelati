@@ -37,6 +37,9 @@ jobs:
                     - gcovr
           env:
             - GENERATOR="Unix Makefile"
+            - PATH=/opt/python/3.7.1/bin:$PATH
+          install:
+            - pip install gcovr
           script:
             - export CC=gcc-7
             - export CXX=g++-7
