@@ -102,6 +102,16 @@ namespace Program {
 		void setProgram(const Program& prog);
 
 		/**
+		* \brief Method for changing the dataSources on which the Program will be executed.
+		* 
+		* \param[in] dataSrc The vector of DataHandler references with which 
+		* the Program will be executed.
+		* \throws std::runtime_error if the Environment references by the
+		* Program is incompatible with the given dataSources.
+		*/
+		template <class T> void setDataSources(const std::vector<std::reference_wrapper<T>>& dataSrc);
+
+		/**
 		* \brief Get the DataHandler of the ProgramExecutionEngine.
 		*
 		* \return a vector containing references to the dataHandlers of the
@@ -214,5 +224,20 @@ namespace Program {
 		*/
 		double executeProgram(const bool ignoreException = false);
 	};
+	template<class T>
+	inline void ProgramExecutionEngine::setDataSources(const std::vector<std::reference_wrapper<T>>& dataSrc)
+	{
+		// Check that T is either convertible to a const DataHandler
+		static_assert(std::is_convertible<T&, const DataHandlers::DataHandler&>::value);
+
+		// Replace the references in attributes
+		this->dataSources = dataSrc;
+		for (auto idx = 0; idx < this->dataSources.size(); idx++) {
+			this->dataSourcesAndRegisters.at(idx + 1) = dataSrc.at(idx);
+		}
+
+		// Set program to check compatibility with new data source
+		this->setProgram(*this->program);
+	}
 };
 #endif
