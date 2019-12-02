@@ -133,5 +133,5 @@ TEST_F(LineTest, LineOperandAccessors) {
 	ASSERT_EQ(l.getOperand(1).second, 12) << "Get after valid set of operand location failed.";
 
 	// There are only 2 operands
-	ASSERT_THROW(l.getOperand(3), std::range_error) << "Getting value of an incorrectly indexed operand did not fail.";
+	ASSERT_THROW(l.getOperand(2), std::range_error) << "Getting value of an incorrectly indexed operand did not fail.";
 }
