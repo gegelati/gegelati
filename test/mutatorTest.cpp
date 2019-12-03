@@ -521,14 +521,12 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge) {
 	params.prog.pSwap = 1.0;
 	params.tpg.pEdgeDestinationChange = 1.0;
 
-	ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(tpg, arch, vertex0, &edge0, { &vertex0 }, { &vertex1 }, params));
+	std::list<std::shared_ptr<Program::Program>> newPrograms;
+
+	ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(tpg, arch, vertex0, &edge0, { &vertex0 }, { &vertex1 }, newPrograms, params));
+
 	// Check that progPointer use count was decreased since the mutated program is a copy of the original
 	ASSERT_EQ(progPointer.use_count(), 1) << "Shared pointer should no longer be used inside the TPG after mutation.";
-	// Verify new program uniqueness
-	Program::ProgramExecutionEngine pee(edge0.getProgram());
-	double result = pee.executeProgram();
-	std::map<size_t,double> hashesAndResults = { { arch.getCombinedHash(e->getDataSources()), result } };
-	ASSERT_TRUE(arch.areProgramResultsUnique(hashesAndResults)) << "Mutated program associated to the edge should return a unique bid on the environment.";
 }
 
 TEST_F(MutatorTest, TPGMutatorMutateTeam) {
@@ -562,11 +560,49 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam) {
 	Mutator::ProgramMutator::initRandomProgram(*progPointer, params);
 	tee.executeFromRoot(vertex0);
 
+	std::list<std::shared_ptr<Program::Program>> newPrograms;
+
 	// Test the function in normal conditions
 	Mutator::RNG::setSeed(0);
-	ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGTeam(tpg, arch, vertex0, { &vertex0, &vertex4 }, { &vertex1, &vertex2, &vertex3 }, { &edge0, &edge1, &edge2, &edge3 }, params)) << "Mutate team should not fail in these conditions.";
+	ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGTeam(tpg, arch, vertex0, { &vertex0, &vertex4 }, { &vertex1, &vertex2, &vertex3 }, { &edge0, &edge1, &edge2, &edge3 }, newPrograms, params)) << "Mutate team should not fail in these conditions.";
 
 	// No other check really needed since individual mutation functions are already covered in other unit tests.
+}
+
+TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive) {
+	// Init a TPG
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+	const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+	const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+
+	// Init its program and fill the archive
+	Mutator::MutationParameters params;
+	Archive arch;
+	TPG::TPGExecutionEngine tee(*e, &arch);
+	params.prog.maxProgramSize = 96;
+	Mutator::ProgramMutator::initRandomProgram(*progPointer, params);
+	tee.executeFromRoot(vertex0);
+
+	// Mutate (params selected for code coverage)
+	params.prog.pAdd = 0.5;
+	params.prog.pDelete = 0.5;
+	params.prog.pMutate = 1.0;
+	params.prog.pSwap = 1.0;
+	params.tpg.pEdgeDestinationChange = 1.0;
+
+	std::list<std::shared_ptr<Program::Program>> newPrograms;
+
+	Mutator::TPGMutator::mutateOutgoingEdge(tpg, arch, vertex0, &edge0, { &vertex0 }, { &vertex1 }, newPrograms, params);
+
+	ASSERT_NO_THROW(Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(newPrograms.front(), params, arch)) << "Mutating a Program behavior failed unexpectedly.";
+
+	// Check the unicity against the Archive
+	// Verify new program uniqueness
+	Program::ProgramExecutionEngine pee(*newPrograms.front());
+	double result = pee.executeProgram();
+	std::map<size_t, double> hashesAndResults = { { arch.getCombinedHash(e->getDataSources()), result } };
+	ASSERT_TRUE(arch.areProgramResultsUnique(hashesAndResults)) << "Mutated program associated to the edge should return a unique bid on the environment.";
 }
 
 TEST_F(MutatorTest, TPGMutatorPopulate) {

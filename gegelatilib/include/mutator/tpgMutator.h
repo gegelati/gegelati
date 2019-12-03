@@ -78,11 +78,11 @@ namespace Mutator {
 		* then, the new destination will be a TPGAction also. Otherwise, the
 		* function randomly choses between a TPGAction and a TPGTeam, with the
 		* probabilities within the given MutationParameters.
-		* No verification is made on the content of pre-existing TPGVertex 
-		* list. If one of this list contains the team itself, a self-loop may 
+		* No verification is made on the content of pre-existing TPGVertex
+		* list. If one of this list contains the team itself, a self-loop may
 		* be created. A TPGVertex not belonging to the graph in these lists
 		* will cause an exception within the TPGGraph class tough.
-		* If the current destination of the edge is among the candidates, the 
+		* If the current destination of the edge is among the candidates, the
 		* new destination may be the same as the old.
 		*
 		* \param[in,out] graph the TPGGraph within which the team and edge are
@@ -104,43 +104,13 @@ namespace Mutator {
 		/**
 		* \brief Mutate the Program and the Destination of the given TPGEdge.
 		*
-		* This function mutates the behavior of the given TPGEdge Program, 
-		* using the ProgramMutator functions, until the Program behavior is 
+		* This function mutates the behavior of the given TPGEdge Program,
+		* using the ProgramMutator functions, until the Program behavior is
 		* unique according to recordings held in the given Archive.
-		* The Program mutation is applid systematically, and a call to 
-		* MutateEdgeDestination is also made with a probability from the 
+		* The Program mutation is applid systematically, and a call to
+		* MutateEdgeDestination is also made with a probability from the
 		* given MutationParameters.
-		* 
-		* \param[in,out] graph the TPGGraph within which the team and edge are
-		*                stored.
-		* \param[in] archive Archive used to assess the uniqueness of the 
-		*            mutated Program behavior.
-		* \param[in] team the source TPGTeam of the edge.
-		* \param[in] edge the TPGEdge whose destination will be altered.
-		* \param[in] preExistingTeams the TPGTeam candidates for destination.
-		* \param[in] preExistingActions the TPGAction candidates for
-		*            destination.
-		* \param[in] params Probability parameters for the mutation.
-		*/
-		void mutateOutgoingEdge(TPG::TPGGraph& graph,
-			const Archive& archive,
-			const TPG::TPGTeam& team,
-			const TPG::TPGEdge* edge,
-			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
-			const std::vector<const TPG::TPGAction*>& preExistingActions,
-			const Mutator::MutationParameters& params);
-
-		/**
-		* \brief Mutates a TPGTeam by stochastically adding, deleting, and 
-		* mutating the Program and destination of outgoing TPGEdge.
 		*
-		* This function successively:
-		* - removes outgoing TPGEdge from the TPGTeam,
-		* - adds outgoing TPGEdge to the TPGTeam
-		* - mutates the Program and destination of outgoing TPGEdge.
-		* Probabilities in given MutationParameters are used to control
-		* the application of previous mutations.
-		* 
 		* \param[in,out] graph the TPGGraph within which the team and edge are
 		*                stored.
 		* \param[in] archive Archive used to assess the uniqueness of the
@@ -150,6 +120,48 @@ namespace Mutator {
 		* \param[in] preExistingTeams the TPGTeam candidates for destination.
 		* \param[in] preExistingActions the TPGAction candidates for
 		*            destination.
+		* \param[in,out] newPrograms List of new Program created during
+		*                mutations of the TPGTeam. The behavior of these
+		*                Program must be mutated to complete the mutation
+		*                process.
+		* \param[in] params Probability parameters for the mutation.
+		*/
+		void mutateOutgoingEdge(TPG::TPGGraph& graph,
+			const Archive& archive,
+			const TPG::TPGTeam& team,
+			const TPG::TPGEdge* edge,
+			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
+			const std::vector<const TPG::TPGAction*>& preExistingActions,
+			std::list<std::shared_ptr<Program::Program>>& newPrograms,
+			const Mutator::MutationParameters& params);
+
+		/**
+		* \brief Mutates a TPGTeam by stochastically adding, deleting, and
+		* mutating the Program and destination of outgoing TPGEdge.
+		*
+		* This function successively:
+		* - removes outgoing TPGEdge from the TPGTeam,
+		* - adds outgoing TPGEdge to the TPGTeam
+		* - selects the Program whose behavior should be mutated, an mutates
+		* destination of outgoing TPGEdge. Mutation of the Program behavior is
+		* not performed in this function. Program to mutate are instead stored
+		* in the newPrograms list for later mutation (potentially in parallel).
+		* Probabilities in given MutationParameters are used to control
+		* the application of previous mutations.
+		*
+		* \param[in,out] graph the TPGGraph within which the team and edge are
+		*                stored.
+		* \param[in] archive Archive used to assess the uniqueness of the
+		*            mutated Program behavior.
+		* \param[in] team the source TPGTeam of the edge.
+		* \param[in] edge the TPGEdge whose destination will be altered.
+		* \param[in] preExistingTeams the TPGTeam candidates for destination.
+		* \param[in] preExistingActions the TPGAction candidates for
+		*            destination.
+		* \param[in,out] newPrograms List of new Program created during
+		*                mutations of the TPGTeam. The behavior of these
+		*                Program must be mutated to complete the mutation
+		*                process.
 		* \param[in] params Probability parameters for the mutation.
 		*/
 		void mutateTPGTeam(TPG::TPGGraph& graph,
@@ -158,7 +170,19 @@ namespace Mutator {
 			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
 			const std::vector<const TPG::TPGAction*>& preExistingActions,
 			const std::list<const TPG::TPGEdge*>& preExistingEdges,
+			std::list<std::shared_ptr<Program::Program>>& newPrograms,
 			const Mutator::MutationParameters& params);
+
+		/**
+		* \brief Mutate the behavior of a Program and ensure its unicity
+		* against the given Archive.
+		*
+		* \param[in,out] newProg Program whose behavior is being mutated.
+		* \param[in] params Probability parameters for the mutation.
+		* \param[in] archive Archive used to assess the uniqueness of the
+		*            mutated Program behavior.
+		*/
+		void mutateProgramBehaviorAgainstArchive(std::shared_ptr<Program::Program>& newProg, const Mutator::MutationParameters& params, const Archive& archive);
 
 		/**
 		* \brief Create new root TPGTeam within the TPGGraph.

@@ -188,28 +188,13 @@ void Mutator::TPGMutator::mutateOutgoingEdge(TPG::TPGGraph& graph,
 	const TPG::TPGEdge* edge,
 	const std::vector<const TPG::TPGTeam*>& preExistingTeams,
 	const std::vector<const TPG::TPGAction*>& preExistingActions,
+	std::list<std::shared_ptr<Program::Program>>& newPrograms,
 	const Mutator::MutationParameters& params) {
 	// copy program
 	std::shared_ptr<Program::Program> newProg(new Program::Program(edge->getProgram()));
-	// Mutate its behavior until it changes (against the archive).
-	bool allUnique;
-	do {
-		// Mutate until something is mutated (i.e. the function returns true)
-		while (!Mutator::ProgramMutator::mutateProgram(*newProg, params));
-		// Check for uniqueness in archive
-		auto archivedDataHandlers = archive.getDataHandlers();
-		std::map<size_t, double> hashesAndResults;
-		Program::ProgramExecutionEngine pee(*newProg);
-		for (std::pair<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>> archiveDatahandler : archivedDataHandlers) {
-			// Execute the mutated program on the archive data handlers
-			pee.setDataSources(archiveDatahandler.second);
-			double result = pee.executeProgram();
-			hashesAndResults.insert({ archiveDatahandler.first, result });
-		}
 
-		// If the result is not unique, do another mutation.
-		allUnique = archive.areProgramResultsUnique(hashesAndResults);
-	} while (!allUnique);
+	// Add it to the list of new Program to be mutated.
+	newPrograms.push_back(newProg);
 
 	// Set the mutated program to the edge
 	edge->setProgram(newProg);
@@ -228,6 +213,7 @@ void Mutator::TPGMutator::mutateTPGTeam(TPG::TPGGraph& graph,
 	const std::vector<const TPG::TPGTeam*>& preExistingTeams,
 	const std::vector<const TPG::TPGAction*>& preExistingActions,
 	const std::list<const TPG::TPGEdge*>& preExistingEdges,
+	std::list<std::shared_ptr<Program::Program>>& newPrograms,
 	const Mutator::MutationParameters& params)
 {
 	// 1. Remove randomly selected edges
@@ -264,7 +250,7 @@ void Mutator::TPGMutator::mutateTPGTeam(TPG::TPGGraph& graph,
 				// Edge->Program bid modification
 				if (Mutator::RNG::getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
 					// Mutate the edge
-					mutateOutgoingEdge(graph, archive, team, edge, preExistingTeams, preExistingActions, params);
+					mutateOutgoingEdge(graph, archive, team, edge, preExistingTeams, preExistingActions, newPrograms, params);
 					anyMutationDone = true;
 				}
 			}
@@ -272,6 +258,29 @@ void Mutator::TPGMutator::mutateTPGTeam(TPG::TPGGraph& graph,
 	}
 }
 
+
+void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(std::shared_ptr<Program::Program>& newProg, const Mutator::MutationParameters& params, const Archive& archive)
+{
+	bool allUnique;
+	// Mutate behavior until it changes (against the archive).
+	do {
+		// Mutate until something is mutated (i.e. the function returns true)
+		while (!Mutator::ProgramMutator::mutateProgram(*newProg, params));
+		// Check for uniqueness in archive
+		auto archivedDataHandlers = archive.getDataHandlers();
+		std::map<size_t, double> hashesAndResults;
+		Program::ProgramExecutionEngine pee(*newProg);
+		for (std::pair<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>> archiveDatahandler : archivedDataHandlers) {
+			// Execute the mutated program on the archive data handlers
+			pee.setDataSources(archiveDatahandler.second);
+			double result = pee.executeProgram();
+			hashesAndResults.insert({ archiveDatahandler.first, result });
+		}
+
+		// If the result is not unique, do another mutation.
+		allUnique = archive.areProgramResultsUnique(hashesAndResults);
+	} while (!allUnique);
+}
 
 void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params)
 {
@@ -323,6 +332,9 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archi
 			preExistingEdges.push_back(&edge);
 		});
 
+	// Create an empty list to store Programs to mutate.
+	std::list<std::shared_ptr<Program::Program>> newPrograms;
+
 	// While the target is not reached, add new teams
 	uint64_t currentNumberOfRoot = rootVertices.size();
 	while (params.tpg.nbRoots > currentNumberOfRoot) {
@@ -331,9 +343,14 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archi
 		// clone it (the vertex and all its outgoing edges)
 		const TPG::TPGTeam& newRoot = (const TPG::TPGTeam&)graph.cloneVertex(*rootTeams.at(clonedRootIndex));
 		// Apply mutations to the root
-		mutateTPGTeam(graph, archive, newRoot, preExistingTeams, preExistingActions, preExistingEdges, params);
+		mutateTPGTeam(graph, archive, newRoot, preExistingTeams, preExistingActions, preExistingEdges, newPrograms, params);
 		// Check the new number of roots
 		// Needed since preExisting root may be subsumed by new ones.
 		currentNumberOfRoot = graph.getNbRootVertices();
+	}
+
+	// Mutate the new Program
+	for (std::shared_ptr<Program::Program> newProg : newPrograms) {
+		mutateProgramBehaviorAgainstArchive(newProg, params, archive);
 	}
 }
