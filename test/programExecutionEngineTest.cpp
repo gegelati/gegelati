@@ -159,6 +159,55 @@ TEST_F(ProgramExecutionEngineTest, executeCurrentLine) {
 
 }
 
+TEST_F(ProgramExecutionEngineTest, setProgram) {
+	Program::ProgramExecutionEngine progExecEng(*p);
+
+	// Create a new program
+	Program::Program p2(*e);
+
+	ASSERT_NO_THROW(progExecEng.setProgram(p2)) << "Setting a new Program with a valid Environment for a ProgramExecutionEngine failed.";
+
+	// Create a new incompatible program
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> otherVect;
+	otherVect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size2)));
+	Environment otherE(set,otherVect,2);
+	Program::Program p3(otherE);
+
+	ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error) << "Setting a Program with an incompatible Environment should not be possible.";
+
+	// Clean up
+	delete &otherVect.at(0).get();
+}
+
+TEST_F(ProgramExecutionEngineTest, setDataSources) {
+	Program::ProgramExecutionEngine progExecEng(*p);
+
+	// Create a new compatible set of dataSources
+	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> otherVect;
+	otherVect.push_back(*vect.at(0).get().clone());
+	otherVect.push_back(*vect.at(1).get().clone());
+
+	ASSERT_NO_THROW(progExecEng.setDataSources(otherVect)) << "Setting a new valid set of Data Sources failed.";
+
+	// Clean up
+	delete& otherVect.at(0).get();
+	delete& otherVect.at(1).get();
+	otherVect.pop_back();
+	otherVect.pop_back();
+
+	// Create a new incompatible set of dataSources
+	// although it has the same type and size of data, id of the
+	// data handlers are different, which currently breaks the comparison.
+	otherVect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size1)));
+	otherVect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
+
+	ASSERT_THROW(progExecEng.setDataSources(otherVect), std::runtime_error) << "Setting a new invalid set of Data Sources should fail.";
+
+	// Clean up
+	delete& otherVect.at(0).get();
+	delete& otherVect.at(1).get();
+}
+
 TEST_F(ProgramExecutionEngineTest, execute) {
 	Program::ProgramExecutionEngine progExecEng(*p);
 	double result;
