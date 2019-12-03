@@ -105,7 +105,43 @@ TEST_F(LearningAgentTest, GetArchive) {
 	ASSERT_NO_THROW(la.getArchive()) << "Cannot get the archive of a LearningAgent.";
 }
 
+TEST_F(LearningAgentTest, DecimateWorstRoots) {
+	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
+	params.maxNbActionsPerEval = 11;
+	params.nbIterationsPerPolicyEvaluation = 3;
+	params.mutation.tpg.maxInitOutgoingEdges = 2;
+	params.ratioDeletedRoots = 0.50;
+	params.mutation.tpg.nbRoots = le.getNbActions() - 1; // Param used in decimation
 
+	Learn::LearningAgent la(le, set, params, 4);
+
+	la.init();
+
+	// Remove two teams (first and last) to make the first action a root
+	TPG::TPGGraph& graph = la.getTPGGraph();
+	auto roots = graph.getRootVertices();
+	graph.removeVertex(*roots.at(0));
+	graph.removeVertex(*roots.at(le.getNbActions() - 1));
+
+	// Check that the action is now a root
+	roots = graph.getRootVertices();
+	ASSERT_EQ(typeid(*roots.at(0)), typeid(TPG::TPGAction)) << "An action should have become a root of the TPGGraph.";
+
+	// Create and fill results for each "root" artificially
+	std::multimap<double, const TPG::TPGVertex*> results;
+	double result = 0.0;
+	for (const TPG::TPGVertex* root : roots) {
+		results.insert({ result++, root });
+	}
+
+	// Do the decimation
+	ASSERT_NO_THROW(la.decimateWorstRoots(results)) << "Decimating worst roots failed.";
+
+	// Check the number of remaining roots.
+	// Initial number of vertex - 2 removed vertices - deleted roots.
+	ASSERT_EQ(la.getTPGGraph().getNbVertices(), (le.getNbActions() * 2) - 2 - params.ratioDeletedRoots * ((le.getNbActions() - 1)));
+}
 
 TEST_F(LearningAgentTest, TrainOnegeneration) {
 	params.archiveSize = 50;
@@ -407,9 +443,6 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel) {
 	// Check the number of vertex in the graph.
 	// Must be initial number of vertex - number of root removed
 	ASSERT_EQ(pla.getTPGGraph().getNbVertices(), initialNbVertex - floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots)) << "Number of remaining is under the number of roots from the TPGGraph.";
-	// Train a second generation, because most roots were removed, a root actions have appeared
-	// and the training algorithm will attempt to remove them.
-	ASSERT_NO_THROW(pla.trainOneGeneration(0)) << "Training for one generation failed.";
 }
 
 TEST_F(ParallelLearningAgentTest, TrainSequential) {
