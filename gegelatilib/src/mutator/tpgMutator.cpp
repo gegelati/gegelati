@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <numeric>
 #include <vector>
+#include <thread>
+#include <mutex>
+#include <queue>
 
 #include "archive.h"
 
@@ -285,7 +288,69 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(std::shared_ptr<Pr
 	} while (!allUnique);
 }
 
-void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params, Mutator::RNG& rng, bool enableParallelism)
+void Mutator::TPGMutator::mutateNewProgramBehaviors(const uint64_t& maxNbThreads, std::list<std::shared_ptr<Program::Program>>& newPrograms, Mutator::RNG& rng, const Mutator::MutationParameters& params, const Archive& archive)
+{
+	// This is a computing intensive part of the mutation process
+	// Hence the parallelization.
+	if (maxNbThreads <= 1) {
+		// Sequential (kept for determinism check mostly)
+		for (std::shared_ptr<Program::Program> newProg : newPrograms) {
+			Mutator::RNG privateRNG(rng.getUnsignedInt64(0, UINT64_MAX));
+			mutateProgramBehaviorAgainstArchive(newProg, params, archive, privateRNG);
+		}
+	}
+	else {
+		// Parallel
+		// Create job list with Program pointers and seed
+		std::queue<std::pair<std::shared_ptr<Program::Program>, uint64_t>> programsToMutate;
+		for (std::shared_ptr<Program::Program> newProg : newPrograms) {
+			programsToMutate.push({ newProg, rng.getUnsignedInt64(0, UINT64_MAX) });
+		}
+
+		std::mutex mutexMutation;
+
+		// Function executed in threads
+		auto parallelWorker = [&programsToMutate, &mutexMutation, &params, &archive]() {
+			Mutator::RNG privateRNG;
+			// While there is work to be done
+			bool jobDone;
+			do {
+				std::pair<std::shared_ptr<Program::Program>, uint64_t> job;
+				jobDone = false;
+				{	// get one job critical section
+					std::lock_guard lock(mutexMutation);
+					if (programsToMutate.size() != 0) {
+						jobDone = true;
+						job = programsToMutate.front();
+						programsToMutate.pop();
+					}
+				}
+
+				//  Do the job (if any)
+				if (jobDone) {
+					privateRNG.setSeed(job.second);
+					mutateProgramBehaviorAgainstArchive(job.first, params, archive, privateRNG);
+				}
+			} while (jobDone);
+		};
+
+		// Start threads
+		std::vector<std::thread> threads;
+		for (auto idx = 0; idx < maxNbThreads - 1; idx++) {
+			threads.emplace_back(std::thread(parallelWorker));
+		}
+
+		// Work in the main thread also
+		parallelWorker();
+
+		// Join the threads
+		for (auto& thread : threads) {
+			thread.join();
+		}
+	}
+}
+
+void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params, Mutator::RNG& rng, uint64_t maxNbThreads)
 {
 	// Get current vertex set (copy)
 	auto vertices(graph.getVertices());
@@ -352,8 +417,6 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archi
 		currentNumberOfRoot = graph.getNbRootVertices();
 	}
 
-	// Mutate the new Program
-	for (std::shared_ptr<Program::Program> newProg : newPrograms) {
-		mutateProgramBehaviorAgainstArchive(newProg, params, archive, rng);
-	}
+	// Mutate the new Programs
+	mutateNewProgramBehaviors(maxNbThreads, newPrograms, rng, params, archive);
 }

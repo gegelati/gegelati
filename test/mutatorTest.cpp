@@ -631,6 +631,140 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive) {
 	ASSERT_TRUE(arch.areProgramResultsUnique(hashesAndResults)) << "Mutated program associated to the edge should return a unique bid on the environment.";
 }
 
+TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential) {
+	Mutator::RNG rng;
+	rng.setSeed(0);
+
+	TPG::TPGGraph tpg(*e);
+
+	Mutator::MutationParameters params;
+
+	params.tpg.nbActions = 4;
+	params.tpg.maxInitOutgoingEdges = 3;
+	params.prog.maxProgramSize = 96;
+	params.tpg.nbRoots = 7;
+	// Proba as in Kelly's paper
+	params.tpg.pEdgeDeletion = 0.7;
+	params.tpg.pEdgeAddition = 0.7;
+	params.tpg.pProgramMutation = 0.2;
+	params.tpg.pEdgeDestinationChange = 0.1;
+	params.tpg.pEdgeDestinationIsAction = 0.5;
+	params.prog.pAdd = 0.5;
+	params.prog.pDelete = 0.5;
+	params.prog.pMutate = 1.0;
+	params.prog.pSwap = 1.0;
+	Archive arch;
+
+	Mutator::TPGMutator::initRandomTPG(tpg, params, rng);
+	// fill the archive before populating to test uniqueness of new prog
+	TPG::TPGExecutionEngine tee(*e, &arch);
+	for (auto rootVertex : tpg.getRootVertices()) {
+		tee.executeFromRoot(*rootVertex);
+	}
+
+	// Create a list of Programs to mutate
+	std::list<std::shared_ptr<Program::Program>> programs;
+	for (auto edge : tpg.getEdges()) {
+		programs.emplace_back(new Program::Program(edge.getProgram()));
+	}
+
+	// Mutate them sequentially
+	ASSERT_NO_THROW(Mutator::TPGMutator::mutateNewProgramBehaviors(0, programs, rng, params, arch)) << "Program behavior mutation failed (sequentially).";
+}
+
+TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel) {
+	Mutator::RNG rng;
+	rng.setSeed(0);
+
+	TPG::TPGGraph tpg(*e);
+
+	Mutator::MutationParameters params;
+
+	params.tpg.nbActions = 4;
+	params.tpg.maxInitOutgoingEdges = 3;
+	params.prog.maxProgramSize = 96;
+	params.tpg.nbRoots = 7;
+	// Proba as in Kelly's paper
+	params.tpg.pEdgeDeletion = 0.7;
+	params.tpg.pEdgeAddition = 0.7;
+	params.tpg.pProgramMutation = 0.2;
+	params.tpg.pEdgeDestinationChange = 0.1;
+	params.tpg.pEdgeDestinationIsAction = 0.5;
+	params.prog.pAdd = 0.5;
+	params.prog.pDelete = 0.5;
+	params.prog.pMutate = 1.0;
+	params.prog.pSwap = 1.0;
+	Archive arch;
+
+	Mutator::TPGMutator::initRandomTPG(tpg, params, rng);
+	// fill the archive before populating to test uniqueness of new prog
+	TPG::TPGExecutionEngine tee(*e, &arch);
+	for (auto rootVertex : tpg.getRootVertices()) {
+		tee.executeFromRoot(*rootVertex);
+	}
+
+	// Create a list of Programs to mutate
+	std::list<std::shared_ptr<Program::Program>> programs;
+	for (auto edge : tpg.getEdges()) {
+		programs.emplace_back(new Program::Program(edge.getProgram()));
+	}
+
+	// Mutate them sequentially
+	ASSERT_NO_THROW(Mutator::TPGMutator::mutateNewProgramBehaviors(4, programs, rng, params, arch)) << "Program behavior mutation failed (In parallel).";
+}
+
+TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism) {
+	Mutator::RNG rng;
+
+	TPG::TPGGraph tpg(*e);
+
+	Mutator::MutationParameters params;
+
+	params.tpg.nbActions = 4;
+	params.tpg.maxInitOutgoingEdges = 3;
+	params.prog.maxProgramSize = 96;
+	params.tpg.nbRoots = 7;
+	// Proba as in Kelly's paper
+	params.tpg.pEdgeDeletion = 0.7;
+	params.tpg.pEdgeAddition = 0.7;
+	params.tpg.pProgramMutation = 0.2;
+	params.tpg.pEdgeDestinationChange = 0.1;
+	params.tpg.pEdgeDestinationIsAction = 0.5;
+	params.prog.pAdd = 0.5;
+	params.prog.pDelete = 0.5;
+	params.prog.pMutate = 1.0;
+	params.prog.pSwap = 1.0;
+	Archive arch;
+
+	Mutator::TPGMutator::initRandomTPG(tpg, params, rng);
+	// fill the archive before populating to test uniqueness of new prog
+	TPG::TPGExecutionEngine tee(*e, &arch);
+	for (auto rootVertex : tpg.getRootVertices()) {
+		tee.executeFromRoot(*rootVertex);
+	}
+
+	// Create a list of Programs to mutate
+	std::list<std::shared_ptr<Program::Program>> programsSequential;
+	std::list<std::shared_ptr<Program::Program>> programsParallel;
+	for (auto edge : tpg.getEdges()) {
+		programsSequential.emplace_back(new Program::Program(edge.getProgram()));
+		programsParallel.emplace_back(new Program::Program(edge.getProgram()));
+	}
+	rng.setSeed(0);
+	Mutator::TPGMutator::mutateNewProgramBehaviors(1, programsSequential, rng, params, arch);
+
+	rng.setSeed(0);
+	Mutator::TPGMutator::mutateNewProgramBehaviors(4, programsParallel, rng, params, arch);
+
+	// Check determinism
+	// Using nb lines of programs
+	for (auto i = 0; i < programsParallel.size(); i++) {
+		ASSERT_EQ(programsParallel.front()->getNbLines(), programsSequential.front()->getNbLines()) << "Different number of line in mutatedPrograms.";
+		programsParallel.pop_front();
+		programsSequential.pop_front();
+	}
+}
+
 TEST_F(MutatorTest, TPGMutatorPopulate) {
 	Mutator::RNG rng;
 	rng.setSeed(0);
@@ -663,11 +797,11 @@ TEST_F(MutatorTest, TPGMutatorPopulate) {
 	}
 
 	// Check the correct execution
-	ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(tpg, arch, params, rng)) << "Populating a TPG failed.";
+	ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(tpg, arch, params, rng, 0)) << "Populating a TPG failed.";
 	// Check the number of roots
 	ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots);
 
 	// Increase coverage with a TPG that has no root team
 	TPG::TPGGraph tpg2(*e);
-	ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(tpg2, arch, params, rng)) << "Populating an empty TPG failed.";
+	ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(tpg2, arch, params, rng, 0)) << "Populating an empty TPG failed.";
 }

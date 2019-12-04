@@ -1,6 +1,8 @@
 #ifndef TPG_MUTATOR_H
 #define TPG_MUTATOR_H
 
+#include <thread>
+
 #include "mutator/mutationParameters.h"
 #include "archive.h"
 #include "tpg/tpgGraph.h"
@@ -195,6 +197,21 @@ namespace Mutator {
 			const Archive& archive, Mutator::RNG& rng);
 
 		/**
+		* \brief Function mutating the behavior of the given list of Program.
+		*
+		* \param[in] maxNbThreads Integer parameter controlling the number of
+		*           threads used for parallel execution.Possible values are :
+		*           -`0`and `1`: Do not use parallelism.
+		*           -`n > 1`: Set the number of threads explicitly.
+		* \param[in] newPrograms List of new Program to mutate.
+		* \param[in] rng Random Number Generator used in the mutation process.
+		* \param[in] params Probability parameters for the mutation.
+		* \param[in] archive Archive used to assess the uniqueness of the
+		* mutated Program behavior.
+		*/
+		void mutateNewProgramBehaviors(const uint64_t& maxNbThreads, std::list<std::shared_ptr<Program::Program>>& newPrograms, Mutator::RNG& rng, const Mutator::MutationParameters& params, const Archive& archive);
+
+		/**
 		* \brief Create new root TPGTeam within the TPGGraph.
 		*
 		* This function create and add new root TPGTeam to the TPGGraph
@@ -215,10 +232,14 @@ namespace Mutator {
 		*            mutated Program behavior.
 		* \param[in] params Probability parameters for the mutation.
 		* \param[in] rng Random Number Generator used in the mutation process.
-		* \param[in] enableParallelism Boolean parameters controlling the
-		*            parallelization of some part of the populate process.
+		* \param[in] maxNbThreads Integer parameter controlling the number of
+		* threads used for parallel execution. Possible values are:
+		*   - default:  Let the runtime decide using
+		*               std::thread::hardware_concurrency().
+		*   - `0` and `1`: Do not use parallelism.
+		*   - `n > 1`: Set the number of threads explicitly.
 		*/
-		void populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params, Mutator::RNG& rng, bool enableParallelism = false);
+		void populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params, Mutator::RNG& rng, uint64_t maxNbThreads = std::thread::hardware_concurrency());
 	};
 };
 
