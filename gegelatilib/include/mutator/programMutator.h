@@ -24,25 +24,27 @@ namespace Mutator {
 		*
 		* \param[in,out] p the Program to initialize.
 		* \param[in] params MutationParameters for the mutation.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		*/
-		void initRandomProgram(Program::Program& p, const MutationParameters& params);
+		void initRandomProgram(Program::Program& p, const MutationParameters& params, Mutator::RNG& rng);
 
 		/**
 		* \brief Deletes a randomly selected Line of the given Program.
 		*
 		* Unless a single Line (or less) remains in the given Progeam, this
 		* function randomly selects a line of the Program and deletes it.
-		* Random selection is based on the Mutator::RNG.
+		* Random selection is based on the given Mutator::RNG.
 		*
 		* This method does NOT update automatically the intron property of the
 		* Lines of the Program. Hence, the resulting Program may not execute
 		* correctly until Program::identifyIntrons() method is called.
 		*
 		* \param[in,out] p the Program whose lines will be altered.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		* \return true if a line could be added, false otherwise.
 		*
 		*/
-		bool deleteRandomLine(Program::Program& p);
+		bool deleteRandomLine(Program::Program& p, Mutator::RNG& rng);
 
 		/**
 		* \brief Insert a new Line at a randomly selected position within the given Program.
@@ -50,16 +52,17 @@ namespace Mutator {
 		* This function randomly selects a position in the Program.lines and
 		* insert a randomly initialized line (using Mutator::Line::
 		* initRandomCorrectLine).
-		* Random selection is based on the Mutator::RNG.
+		* Random selection is based on the given Mutator::RNG.
 		*
 		* This method does NOT update automatically the intron property of the
 		* Lines of the Program. Hence, the resulting Program may not execute
 		* correctly until Program::identifyIntrons() method is called.
 		*
 		* \param[in,out] p the Program whose lines will be altered.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		*
 		*/
-		void insertRandomLine(Program::Program& p);
+		void insertRandomLine(Program::Program& p, Mutator::RNG& rng);
 
 		/**
 		* \brief Swap two randomly selected instructions within the given
@@ -67,17 +70,18 @@ namespace Mutator {
 		*
 		* This function selects two lines of the program randomly and swaps
 		* them. If the given Program has less than two lines, nothing happens.
-		* Random selection is based on the Mutator::RNG.
+		* Random selection is based on the given Mutator::RNG.
 		*
 		* This method does NOT update automatically the intron property of the
 		* Lines of the Program. Hence, the resulting Program may not execute
 		* correctly until Program::identifyIntrons() method is called.
 		*
 		* \param[in,out] p the Program whose lines will be swapped.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		* \return true if the lines where successfully swapped, false if the
 		*         Program has less than two lines.
 		*/
-		bool swapRandomLines(Program::Program& p);
+		bool swapRandomLines(Program::Program& p, Mutator::RNG& rng);
 
 		/**
 		* \brief Alter a randomly selected Line in a given Program.
@@ -85,17 +89,18 @@ namespace Mutator {
 		* If the given Program has more than 0 Line, this function selects a
 		* Line (pseudo)-randomly in a given Program and calls the
 		* Mutator::LineMutator:AlterCorrectLine function on it.
-		* Random selection is based on the Mutator::RNG.
+		* Random selection is based on the given Mutator::RNG.
 		*
 		* This method does NOT update automatically the intron property of the
 		* Lines of the Program. Hence, the resulting Program may not execute
 		* correctly until Program::identifyIntrons() method is called.
 		*
 		* \param[in,out] p the Program whose line will be altered.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		* \return true if a line was successfully altered, false if the
 		*         Program has less than one line.
 		*/
-		bool alterRandomLine(Program::Program& p);
+		bool alterRandomLine(Program::Program& p, Mutator::RNG& rng);
 
 
 		/**
@@ -114,9 +119,10 @@ namespace Mutator {
 		*
 		* \param[in,out] p the Program whose line will be altered.
 		* \param[in] params MutationParameters for the mutation.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		* \return true if a modification was performed, false otherwise.
 		*/
-		bool mutateProgram(Program::Program& p, const MutationParameters& params);
+		bool mutateProgram(Program::Program& p, const MutationParameters& params, Mutator::RNG& rng);
 	};
 };
 

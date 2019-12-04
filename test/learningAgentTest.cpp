@@ -155,7 +155,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 	la.init();
 	// Do the populate call to keep know the number of initial vertex
 	Archive a(0);
-	Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation);
+	Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation, la.getRNG());
 	size_t initialNbVertex = la.getTPGGraph().getNbVertices();
 	// Seed selected so that an action becomes a root during next generation
 	ASSERT_NO_THROW(la.trainOneGeneration(4)) << "Training for one generation failed.";
@@ -230,10 +230,11 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential) {
 	TPG::TPGGraph tpg(env);
 
 	// Initialize Randomness
-	Mutator::RNG::setSeed(0);
+	Mutator::RNG rng;
+	rng.setSeed(0);
 
 	// Initialize the tpg
-	Mutator::TPGMutator::initRandomTPG(tpg, params.mutation);
+	Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng);
 
 	// create the archive
 	Archive archive;
@@ -283,21 +284,21 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism) {
 	params.nbIterationsPerPolicyEvaluation = 10;
 
 	Learn::LearningAgent la(le, set, params);
-	la.init(0); // Reset centralized RNG to 0
+	la.init(0); // Reset RNG to 0
 	auto results = la.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
-	auto nextInt = Mutator::RNG::getUnsignedInt64(0, UINT64_MAX);
+	auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
 	Learn::ParallelLearningAgent plaSequential(le, set, params, 1);
 
 	plaSequential.init(0); // Reset centralized RNG to 0
 	auto resultsSequential = plaSequential.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
-	auto nextIntSequential = Mutator::RNG::getUnsignedInt64(0, UINT64_MAX);
+	auto nextIntSequential = plaSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
 	Learn::ParallelLearningAgent plaParallel(le, set, params, 4);
 
 	plaParallel.init(0); // Reset centralized RNG to 0
 	auto resultsParallel = plaParallel.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
-	auto nextIntParallel = Mutator::RNG::getUnsignedInt64(0, UINT64_MAX);
+	auto nextIntParallel = plaParallel.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
 	// Check equality between LearningAgent and ParallelLearningAgent
 	ASSERT_EQ(results.size(), resultsSequential.size()) << "Result maps have a different size.";
@@ -352,19 +353,19 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism) {
 	Learn::LearningAgent la(le, set, params);
 	la.init(0); // Reset centralized RNG to 0
 	auto results = la.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
-	auto nextInt = Mutator::RNG::getUnsignedInt64(0, UINT64_MAX);
+	auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
 	Learn::ParallelLearningAgent plaSequential(le, set, params, 1);
 
 	plaSequential.init(0); // Reset centralized RNG to 0
 	auto resultsSequential = plaSequential.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
-	auto nextIntSequential = Mutator::RNG::getUnsignedInt64(0, UINT64_MAX);
+	auto nextIntSequential = plaSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
 	Learn::ParallelLearningAgent plaParallel(le, set, params, 4);
 
 	plaParallel.init(0); // Reset centralized RNG to 0
 	auto resultsParallel = plaParallel.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
-	auto nextIntParallel = Mutator::RNG::getUnsignedInt64(0, UINT64_MAX);
+	auto nextIntParallel = plaParallel.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
 	// Check equality between LearningAgent and ParallelLearningAgent
 	ASSERT_EQ(results.size(), resultsSequential.size()) << "Result maps have a different size.";
@@ -412,7 +413,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential) {
 	pla.init();
 	// Do the populate call to keep know the number of initial vertex
 	Archive a(0);
-	Mutator::TPGMutator::populateTPG(pla.getTPGGraph(), a, params.mutation);
+	Mutator::TPGMutator::populateTPG(pla.getTPGGraph(), a, params.mutation, pla.getRNG());
 	size_t initialNbVertex = pla.getTPGGraph().getNbVertices();
 	// Seed selected so that an action becomes a root during next generation
 	ASSERT_NO_THROW(pla.trainOneGeneration(4)) << "Training for one generation failed.";
@@ -436,7 +437,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel) {
 	pla.init();
 	// Do the populate call to keep know the number of initial vertex
 	Archive a(0);
-	Mutator::TPGMutator::populateTPG(pla.getTPGGraph(), a, params.mutation);
+	Mutator::TPGMutator::populateTPG(pla.getTPGGraph(), a, params.mutation, pla.getRNG());
 	size_t initialNbVertex = pla.getTPGGraph().getNbVertices();
 	// Seed selected so that an action becomes a root during next generation
 	ASSERT_NO_THROW(pla.trainOneGeneration(4)) << "Training for one generation failed.";

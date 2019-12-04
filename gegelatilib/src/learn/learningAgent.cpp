@@ -16,12 +16,16 @@ const Archive& Learn::LearningAgent::getArchive() const
 	return this->archive;
 }
 
+Mutator::RNG& Learn::LearningAgent::getRNG() {
+	return this->rng;
+}
+
 void Learn::LearningAgent::init(uint64_t seed) {
 	// Initialize Randomness
-	Mutator::RNG::setSeed(seed);
+	this->rng.setSeed(seed);
 
 	// Initialize the tpg
-	Mutator::TPGMutator::initRandomTPG(this->tpg, params.mutation);
+	Mutator::TPGMutator::initRandomTPG(this->tpg, params.mutation, this->rng);
 
 	// Clear the archive
 	this->archive.clear();
@@ -69,7 +73,7 @@ std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRo
 		// Before each root evaluation, set a new seed for the archive in TRAINING Mode
 		// Else, archiving should be deactivate anyway
 		if (mode == LearningMode::TRAINING) {
-			this->archive.setRandomSeed(Mutator::RNG::getUnsignedInt64(0, UINT64_MAX));
+			this->archive.setRandomSeed(this->rng.getUnsignedInt64(0, UINT64_MAX));
 		}
 
 		double avgScore = this->evaluateRoot(tee, *root, generationNumber, mode);
@@ -82,7 +86,7 @@ std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRo
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 {
 	// Populate
-	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation);
+	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation, this->rng);
 
 	// Evaluate
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);

@@ -53,7 +53,7 @@ std::multimap<double, const TPG::TPGVertex*> Learn::ParallelLearningAgent::evalu
 		for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
 			// Set the seed of the archive for this root.
 			if (mode == LearningMode::TRAINING) {
-				this->archive.setRandomSeed(Mutator::RNG::getUnsignedInt64(0, UINT64_MAX));
+				this->archive.setRandomSeed(this->rng.getUnsignedInt64(0, UINT64_MAX));
 			}
 			double avgScore = ParallelLearningAgent::evaluateRoot(tee, *root, generationNumber, mode, this->learningEnvironment, this->params);
 			results.insert({ avgScore, root });
@@ -179,7 +179,7 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generatio
 	for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
 		rootsToProcess.push({ idx , root });
 		if (mode == LearningMode::TRAINING) {
-			archiveSeeds.insert({ idx, Mutator::RNG::getUnsignedInt64(0, UINT64_MAX) });
+			archiveSeeds.insert({ idx, this->rng.getUnsignedInt64(0, UINT64_MAX) });
 		}
 		idx++;
 	}

@@ -28,13 +28,13 @@ const ArchiveRecording& Archive::at(uint64_t n) const
 
 void Archive::setRandomSeed(size_t newSeed)
 {
-	this->randomEngine.seed(newSeed);
+	this->rng.setSeed(newSeed);
 }
 
 void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler, double result, bool forced)
 {
 	// Archive according to probability
-	if (forced || this->archivingProbability == 1.0 || std::uniform_real_distribution<double>(0.0, 1.0)(this->randomEngine) <= this->archivingProbability) {
+	if (forced || this->archivingProbability == 1.0 || this->rng.getDouble(0.0, 1.0) <= this->archivingProbability) {
 		// get the combined hash
 		size_t hash = getCombinedHash(dHandler);
 
