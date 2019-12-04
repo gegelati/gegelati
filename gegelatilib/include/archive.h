@@ -5,6 +5,7 @@
 #include <map>
 #include <deque>
 
+#include "mutator/rng.h"
 #include "dataHandlers/dataHandler.h"
 #include "program/program.h"
 
@@ -53,7 +54,7 @@ protected:
 	* from a root TPGVertex in a TPGGraph is evaluated in parallel, the
 	* randomEngine should be reset before each root.
 	*/
-	std::mt19937_64 randomEngine;
+	Mutator::RNG rng;
 
 	/**
 	* \brief Storage for DataHandler copies used in recordings.
@@ -94,7 +95,7 @@ public:
 	* \param[in] size maximum number of recordings kept in the Archive.
 	* \param[in] initialSeed Seed value for the randomEngine.
 	*/
-	Archive(size_t size = 50, double archivingProbability = 1.0, size_t initialSeed = 0) : archivingProbability{ archivingProbability }, maxSize{ size }, recordings(), randomEngine(initialSeed) {};
+	Archive(size_t size = 50, double archivingProbability = 1.0, size_t initialSeed = 0) : archivingProbability{ archivingProbability }, maxSize{ size }, recordings(), rng(initialSeed) {};
 
 	/**
 	* \brief Destructor of the class.

@@ -1,9 +1,6 @@
 #include "mutator/rng.h"
 #include "mutator/deterministicRandom.h"
 
-/// Construct the engine
-std::mt19937_64 Mutator::RNG::engine;
-
 void Mutator::RNG::setSeed(uint64_t seed) {
 	engine.seed(seed);
 }

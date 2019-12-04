@@ -23,14 +23,14 @@ namespace Mutator {
 		* Parameters and operands of the line that are unused by the selected
 		* Instruction will be initialized
 		*
-		*
 		* \param[in,out] line the Program::Line whose attributes are being
 		* initialized.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		* \throw std::runtime_error if the provided Environment has no
 		* dataSource that can successfully provide data for any of its
 		* Instruction.
 		*/
-		void initRandomCorrectLine(Program::Line& line);
+		void initRandomCorrectLine(Program::Line& line, Mutator::RNG& rng);
 
 		/**
 		* \brief This function randomly modifies the behavior of a
@@ -52,8 +52,12 @@ namespace Mutator {
 		* a controlled complexity, and yet random, way to ensure that a valid
 		* line is obtained. The alternative (from TPG reference PhD) would be
 		* to repeatedly alter the line until a valid one is obtained.
+		*
+		* \param[in,out] line the Program::Line whose attributes are being
+		* altered.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		*/
-		void alterCorrectLine(Program::Line& line);
+		void alterCorrectLine(Program::Line& line, Mutator::RNG& rng);
 	}
 };
 #endif

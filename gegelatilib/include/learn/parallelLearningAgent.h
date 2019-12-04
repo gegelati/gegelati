@@ -130,6 +130,9 @@ namespace Learn {
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
 		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
+
+		/// Inherited from LearningAgent
+		void trainOneGeneration(uint64_t generationNumber) override;
 	};
 }
 #endif 

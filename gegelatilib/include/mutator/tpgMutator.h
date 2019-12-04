@@ -1,6 +1,8 @@
 #ifndef TPG_MUTATOR_H
 #define TPG_MUTATOR_H
 
+#include <thread>
+
 #include "mutator/mutationParameters.h"
 #include "archive.h"
 #include "tpg/tpgGraph.h"
@@ -30,10 +32,11 @@ namespace Mutator {
 		*
 		* \param[in,out] graph the initialized TPGGraph.
 		* \param[in] params the Parameters for the mutation.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		* \throw std::runtime_error if maxInitOutgoingEdges exceeds nbAction.
 		*        Or if nbAction is smaller than 1.
 		*/
-		void initRandomTPG(TPG::TPGGraph& graph, const MutationParameters& params);
+		void initRandomTPG(TPG::TPGGraph& graph, const MutationParameters& params, Mutator::RNG& rng);
 
 		/**
 		* \brief Select a random outgoingEdge of the given TPGTeam and removes
@@ -45,8 +48,9 @@ namespace Mutator {
 		*
 		* \param[in,out] graph the TPGGraph within which the team is stored.
 		* \param[in] team the TPGTeam whose outgoingEdges will be altered.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		*/
-		void removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team);
+		void removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team, Mutator::RNG& rng);
 
 		/**
 		* \brief Add a new outgoing TPGEdge to the TPGTeam within the TPGGraph.
@@ -64,9 +68,10 @@ namespace Mutator {
 		* \param[in,out] graph the TPGGraph within which the team is stored.
 		* \param[in] team the TPGTeam whose outgoingEdges will be altered.
 		* \param[in] preExistingEdge the TPGEdge candidates for cloning.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		*/
 		void addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team,
-			const std::list<const TPG::TPGEdge*>& preExistingEdges);
+			const std::list<const TPG::TPGEdge*>& preExistingEdges, Mutator::RNG& rng);
 
 		/**
 		* \brief Change the destination of a TPGEdge to an randomly chosen
@@ -78,11 +83,11 @@ namespace Mutator {
 		* then, the new destination will be a TPGAction also. Otherwise, the
 		* function randomly choses between a TPGAction and a TPGTeam, with the
 		* probabilities within the given MutationParameters.
-		* No verification is made on the content of pre-existing TPGVertex 
-		* list. If one of this list contains the team itself, a self-loop may 
+		* No verification is made on the content of pre-existing TPGVertex
+		* list. If one of this list contains the team itself, a self-loop may
 		* be created. A TPGVertex not belonging to the graph in these lists
 		* will cause an exception within the TPGGraph class tough.
-		* If the current destination of the edge is among the candidates, the 
+		* If the current destination of the edge is among the candidates, the
 		* new destination may be the same as the old.
 		*
 		* \param[in,out] graph the TPGGraph within which the team and edge are
@@ -93,54 +98,26 @@ namespace Mutator {
 		* \param[in] preExistingActions the TPGAction candidates for
 		*            destination.
 		* \param[in] params Probability parameters for the mutation.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		*/
 		void mutateEdgeDestination(TPG::TPGGraph& graph,
 			const TPG::TPGTeam& team,
 			const TPG::TPGEdge* edge,
 			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
 			const std::vector<const TPG::TPGAction*>& preExistingActions,
-			const Mutator::MutationParameters& params);
+			const Mutator::MutationParameters& params,
+			Mutator::RNG& rng);
 
 		/**
 		* \brief Mutate the Program and the Destination of the given TPGEdge.
 		*
-		* This function mutates the behavior of the given TPGEdge Program, 
-		* using the ProgramMutator functions, until the Program behavior is 
+		* This function mutates the behavior of the given TPGEdge Program,
+		* using the ProgramMutator functions, until the Program behavior is
 		* unique according to recordings held in the given Archive.
-		* The Program mutation is applid systematically, and a call to 
-		* MutateEdgeDestination is also made with a probability from the 
+		* The Program mutation is applid systematically, and a call to
+		* MutateEdgeDestination is also made with a probability from the
 		* given MutationParameters.
-		* 
-		* \param[in,out] graph the TPGGraph within which the team and edge are
-		*                stored.
-		* \param[in] archive Archive used to assess the uniqueness of the 
-		*            mutated Program behavior.
-		* \param[in] team the source TPGTeam of the edge.
-		* \param[in] edge the TPGEdge whose destination will be altered.
-		* \param[in] preExistingTeams the TPGTeam candidates for destination.
-		* \param[in] preExistingActions the TPGAction candidates for
-		*            destination.
-		* \param[in] params Probability parameters for the mutation.
-		*/
-		void mutateOutgoingEdge(TPG::TPGGraph& graph,
-			const Archive& archive,
-			const TPG::TPGTeam& team,
-			const TPG::TPGEdge* edge,
-			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
-			const std::vector<const TPG::TPGAction*>& preExistingActions,
-			const Mutator::MutationParameters& params);
-
-		/**
-		* \brief Mutates a TPGTeam by stochastically adding, deleting, and 
-		* mutating the Program and destination of outgoing TPGEdge.
 		*
-		* This function successively:
-		* - removes outgoing TPGEdge from the TPGTeam,
-		* - adds outgoing TPGEdge to the TPGTeam
-		* - mutates the Program and destination of outgoing TPGEdge.
-		* Probabilities in given MutationParameters are used to control
-		* the application of previous mutations.
-		* 
 		* \param[in,out] graph the TPGGraph within which the team and edge are
 		*                stored.
 		* \param[in] archive Archive used to assess the uniqueness of the
@@ -150,7 +127,51 @@ namespace Mutator {
 		* \param[in] preExistingTeams the TPGTeam candidates for destination.
 		* \param[in] preExistingActions the TPGAction candidates for
 		*            destination.
+		* \param[in,out] newPrograms List of new Program created during
+		*                mutations of the TPGTeam. The behavior of these
+		*                Program must be mutated to complete the mutation
+		*                process.
 		* \param[in] params Probability parameters for the mutation.
+		* \param[in] rng Random Number Generator used in the mutation process.
+		*/
+		void mutateOutgoingEdge(TPG::TPGGraph& graph,
+			const Archive& archive,
+			const TPG::TPGTeam& team,
+			const TPG::TPGEdge* edge,
+			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
+			const std::vector<const TPG::TPGAction*>& preExistingActions,
+			std::list<std::shared_ptr<Program::Program>>& newPrograms,
+			const Mutator::MutationParameters& params,
+			Mutator::RNG& rng);
+
+		/**
+		* \brief Mutates a TPGTeam by stochastically adding, deleting, and
+		* mutating the Program and destination of outgoing TPGEdge.
+		*
+		* This function successively:
+		* - removes outgoing TPGEdge from the TPGTeam,
+		* - adds outgoing TPGEdge to the TPGTeam
+		* - selects the Program whose behavior should be mutated, an mutates
+		* destination of outgoing TPGEdge. Mutation of the Program behavior is
+		* not performed in this function. Program to mutate are instead stored
+		* in the newPrograms list for later mutation (potentially in parallel).
+		* Probabilities in given MutationParameters are used to control
+		* the application of previous mutations.
+		*
+		* \param[in,out] graph the TPGGraph within which the team and edge are
+		*                stored.
+		* \param[in] archive Archive used to assess the uniqueness of the
+		*            mutated Program behavior.
+		* \param[in] team the source TPGTeam of the edge.
+		* \param[in] preExistingTeams the TPGTeam candidates for destination.
+		* \param[in] preExistingActions the TPGAction candidates for
+		*            destination.
+		* \param[in,out] newPrograms List of new Program created during
+		*                mutations of the TPGTeam. The behavior of these
+		*                Program must be mutated to complete the mutation
+		*                process.
+		* \param[in] params Probability parameters for the mutation.
+		* \param[in] rng Random Number Generator used in the mutation process.
 		*/
 		void mutateTPGTeam(TPG::TPGGraph& graph,
 			const Archive& archive,
@@ -158,7 +179,37 @@ namespace Mutator {
 			const std::vector<const TPG::TPGTeam*>& preExistingTeams,
 			const std::vector<const TPG::TPGAction*>& preExistingActions,
 			const std::list<const TPG::TPGEdge*>& preExistingEdges,
-			const Mutator::MutationParameters& params);
+			std::list<std::shared_ptr<Program::Program>>& newPrograms,
+			const Mutator::MutationParameters& params,
+			Mutator::RNG& rng);
+
+		/**
+		* \brief Mutate the behavior of a Program and ensure its unicity
+		* against the given Archive.
+		*
+		* \param[in,out] newProg Program whose behavior is being mutated.
+		* \param[in] params Probability parameters for the mutation.
+		* \param[in] archive Archive used to assess the uniqueness of the
+		*            mutated Program behavior.
+		* \param[in] rng Random Number Generator used in the mutation process.
+		*/
+		void mutateProgramBehaviorAgainstArchive(std::shared_ptr<Program::Program>& newProg, const Mutator::MutationParameters& params,
+			const Archive& archive, Mutator::RNG& rng);
+
+		/**
+		* \brief Function mutating the behavior of the given list of Program.
+		*
+		* \param[in] maxNbThreads Integer parameter controlling the number of
+		*           threads used for parallel execution.Possible values are :
+		*           -`0`and `1`: Do not use parallelism.
+		*           -`n > 1`: Set the number of threads explicitly.
+		* \param[in] newPrograms List of new Program to mutate.
+		* \param[in] rng Random Number Generator used in the mutation process.
+		* \param[in] params Probability parameters for the mutation.
+		* \param[in] archive Archive used to assess the uniqueness of the
+		* mutated Program behavior.
+		*/
+		void mutateNewProgramBehaviors(const uint64_t& maxNbThreads, std::list<std::shared_ptr<Program::Program>>& newPrograms, Mutator::RNG& rng, const Mutator::MutationParameters& params, const Archive& archive);
 
 		/**
 		* \brief Create new root TPGTeam within the TPGGraph.
@@ -180,8 +231,15 @@ namespace Mutator {
 		* \param[in] archive Archive used to assess the uniqueness of the
 		*            mutated Program behavior.
 		* \param[in] params Probability parameters for the mutation.
+		* \param[in] rng Random Number Generator used in the mutation process.
+		* \param[in] maxNbThreads Integer parameter controlling the number of
+		* threads used for parallel execution. Possible values are:
+		*   - default:  Let the runtime decide using
+		*               std::thread::hardware_concurrency().
+		*   - `0` and `1`: Do not use parallelism.
+		*   - `n > 1`: Set the number of threads explicitly.
 		*/
-		void populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params);
+		void populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params, Mutator::RNG& rng, uint64_t maxNbThreads = std::thread::hardware_concurrency());
 	};
 };
 

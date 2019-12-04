@@ -18,11 +18,12 @@
 * \param[in] initOperandDataSource should the operand data source be (re-)initialized?
 * \param[in] initOperandLocation should the operand location be (re)initialized?
 * \param[in] forceChange should the value be mandatorily new?
+* \param[in] rng Random Number Generator used in the mutation process.
 * \return true if the operand was successfully initialized, false if no valid
 * data source could be found for this Instruction and operandIdx couple.
 */
 static bool initRandomCorrectLineOperand(const Instructions::Instruction& instruction, Program::Line& line, const uint64_t& operandIdx,
-	const bool initOperandDataSource, const bool initOperandLocation, const bool forceChange)
+	const bool initOperandDataSource, const bool initOperandLocation, const bool forceChange, Mutator::RNG& rng)
 {
 	const Environment& env = line.getEnvironment();
 	uint64_t operandDataSourceIndex = line.getOperand(operandIdx).first;
@@ -43,7 +44,7 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 
 		while (!operandFound && operandDataSourceIndexes.size() < env.getNbDataSources()) {
 			// Select an operandDataSourceIndex
-			operandDataSourceIndex = Mutator::RNG::getUnsignedInt64(0, (env.getNbDataSources() - 1) - operandDataSourceIndexes.size());
+			operandDataSourceIndex = rng.getUnsignedInt64(0, (env.getNbDataSources() - 1) - operandDataSourceIndexes.size());
 			// Correct the index with the number of already tested ones inferior to it.
 			// This works because the set is ordered
 			std::for_each(operandDataSourceIndexes.begin(), operandDataSourceIndexes.end(),
@@ -71,7 +72,7 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 		// The operand is not constrained in type
 		operandFound = true;
 		// Select a location
-		operandDataSourceIndex = Mutator::RNG::getUnsignedInt64(0, env.getNbDataSources() - 1 - ((forceChange) ? 1 : 0));
+		operandDataSourceIndex = rng.getUnsignedInt64(0, env.getNbDataSources() - 1 - ((forceChange) ? 1 : 0));
 		if (forceChange && operandDataSourceIndex >= line.getOperand(operandIdx).first) {
 			operandDataSourceIndex += 1;
 		}
@@ -81,7 +82,7 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 	uint64_t operandLocation = line.getOperand(operandIdx).second;
 	if (operandFound && initOperandLocation) {
 		// Select a location
-		operandLocation = Mutator::RNG::getUnsignedInt64(0, env.getLargestAddressSpace() - 1 - ((forceChange) ? 1 : 0));
+		operandLocation = rng.getUnsignedInt64(0, env.getLargestAddressSpace() - 1 - ((forceChange) ? 1 : 0));
 		if (forceChange && operandLocation >= line.getOperand(operandIdx).second) {
 			operandLocation += 1;
 		}
@@ -95,22 +96,22 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 	return operandFound;
 }
 
-void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line)
+void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line, Mutator::RNG& rng)
 {
 	const Environment& env = line.getEnvironment();
 
 	// Select and set a destinationIndex. (can not fail)
-	uint64_t destinationIndex = RNG::getUnsignedInt64(0, env.getNbRegisters() - 1);
+	uint64_t destinationIndex = rng.getUnsignedInt64(0, env.getNbRegisters() - 1);
 	line.setDestinationIndex(destinationIndex); // Should never throw.. but I did not deactivate the check anyway.
 
 	// Select and set all parameter values. (can not fail)
 	for (uint64_t paramIdx = 0; paramIdx < env.getMaxNbParameters(); paramIdx++) {
-		Parameter param((int16_t)(Mutator::RNG::getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX - (int64_t)PARAM_INT_MIN)) + (int64_t)PARAM_INT_MIN));
+		Parameter param((int16_t)(rng.getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX - (int64_t)PARAM_INT_MIN)) + (int64_t)PARAM_INT_MIN));
 		line.setParameter(paramIdx, param);
 	}
 
 	// Select an instruction.
-	uint64_t instructionIndex = RNG::getUnsignedInt64(0, (env.getNbInstructions() - 1));
+	uint64_t instructionIndex = rng.getUnsignedInt64(0, (env.getNbInstructions() - 1));
 	// Get the instruction
 	const Instructions::Instruction& instruction = env.getInstructionSet().getInstruction(instructionIndex);
 	// Set the instructionIndex
@@ -121,18 +122,18 @@ void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line)
 	for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
 
 		// Check if all operands were tested (and none were valid)
-		initRandomCorrectLineOperand(instruction, line, operandIdx, true, true, false);
+		initRandomCorrectLineOperand(instruction, line, operandIdx, true, true, false, rng);
 
 		// This operation can (no longer) fail since commit abd7cd since 
 		// all Instruction are vetted when building the Environment
 	}
 }
 
-void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
+void Mutator::LineMutator::alterCorrectLine(Program::Line& line, Mutator::RNG& rng)
 {
 	// Generate a random int to select the modified part of the line
 	const LineSize lineSize = line.getEnvironment().getLineSize();
-	uint64_t selectedBit = Mutator::RNG::getUnsignedInt64(0, lineSize - 1);
+	uint64_t selectedBit = rng.getUnsignedInt64(0, lineSize - 1);
 
 	// Find the selected part
 	bool checkValidity = false;
@@ -140,7 +141,7 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
 		// InstructionIndex
 		// Select a random Instruction (different from the current one)
 		const uint64_t currentInstructionIndex = line.getInstructionIndex();
-		uint64_t newInstructionIndex = RNG::getUnsignedInt64(0, line.getEnvironment().getNbInstructions() - 2);
+		uint64_t newInstructionIndex = rng.getUnsignedInt64(0, line.getEnvironment().getNbInstructions() - 2);
 		newInstructionIndex += (newInstructionIndex >= currentInstructionIndex) ? 1 : 0;
 		line.setInstructionIndex(newInstructionIndex);
 
@@ -165,7 +166,7 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
 				// Force only the change of data source (location can remain unchanged thanks to scaling).
 				// This can never fail since there is a check for Instructions viability during the Environment
 				// Construction. Hence, eithed isValid is true, OR a valid dataSource will be found among other data sources.
-				initRandomCorrectLineOperand(instruction, line, i, true, false, true);
+				initRandomCorrectLineOperand(instruction, line, i, true, false, true, rng);
 			}
 		}
 	}
@@ -173,7 +174,7 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
 		// DestinationIndex
 		// Select a random destination (different from the current one)
 		const uint64_t currentDestinationIndex = line.getDestinationIndex();
-		uint64_t newDestinationIndex = RNG::getUnsignedInt64(0, line.getEnvironment().getNbRegisters() - 2);
+		uint64_t newDestinationIndex = rng.getUnsignedInt64(0, line.getEnvironment().getNbRegisters() - 2);
 		newDestinationIndex += (newDestinationIndex >= currentDestinationIndex) ? 1 : 0;
 		line.setDestinationIndex(newDestinationIndex);
 	}
@@ -190,11 +191,11 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
 		// Result of modulo is compared with the number of bits per operand for the operandSourceIndex encoding 
 		if (((selectedBit - (lineSize.nbInstructionBits + lineSize.nbDestinationBits)) % (lineSize.nbOperandDataSourceIndexBits + lineSize.nbOperandLocationBits)) < lineSize.nbOperandDataSourceIndexBits) {
 			// Operand data source index
-			initRandomCorrectLineOperand(instruction, line, operandIndex, true, false, true);
+			initRandomCorrectLineOperand(instruction, line, operandIndex, true, false, true, rng);
 		}
 		else {
 			// Location (no fail thanks to scaling)
-			initRandomCorrectLineOperand(instruction, line, operandIndex, false, true, true);
+			initRandomCorrectLineOperand(instruction, line, operandIndex, false, true, true, rng);
 		}
 	}
 	else {
@@ -206,7 +207,7 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line)
 		// Select a random parameterValue 
 		// (do not bother to make it different the probability is too low and 
 		// it will be detected through neutrality tests)
-		Parameter newParameter = (int16_t)(Mutator::RNG::getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX - (int64_t)PARAM_INT_MIN)) + (int64_t)PARAM_INT_MIN);
+		Parameter newParameter = (int16_t)(rng.getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX - (int64_t)PARAM_INT_MIN)) + (int64_t)PARAM_INT_MIN);
 		line.setParameter(parameterIndex, newParameter);
 	}
 }
