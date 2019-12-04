@@ -131,7 +131,7 @@ namespace Learn {
 		*
 		* \param[in] generationNumber the integer number of the current generation.
 		*/
-		void trainOneGeneration(uint64_t generationNumber);
+		virtual void trainOneGeneration(uint64_t generationNumber);
 
 		/**
 		* \brief Removes from the TPGGraph the root TPGVertex with the worst

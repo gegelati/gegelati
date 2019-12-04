@@ -85,8 +85,8 @@ std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRo
 
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 {
-	// Populate
-	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation, this->rng);
+	// Populate Sequentially
+	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation, this->rng, 1);
 
 	// Evaluate
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
