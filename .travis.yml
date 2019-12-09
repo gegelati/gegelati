@@ -24,6 +24,12 @@ jobs:
             - cmake --build . --target INSTALL --config Release
             - cmake --build . --target runTests --config Debug
             - ./bin/Debug/runTests.exe
+            - cd ..
+          deploy:
+            provider: script
+            script: bash scripts/upload_windows.sh
+            on:
+              branch: crossplatformDeployment
             
         - os: linux
           compiler: gcc-7
