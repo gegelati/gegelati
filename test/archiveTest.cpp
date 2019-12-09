@@ -41,8 +41,6 @@ protected:
 	}
 };
 
-class ExhaustiveArchiveTest : public ArchiveTest {};
-
 TEST_F(ArchiveTest, ConstructorDestructor) {
 	Archive* a;
 	ASSERT_NO_THROW(a = new Archive();) << "Default construction of an Archive failed";

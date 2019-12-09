@@ -140,7 +140,7 @@ namespace Learn {
 		* \param[in] results a multimap containing root TPGVertex associated
 		* to their score during an evaluation.
 		*/
-		void decimateWorstRoots(std::multimap<double, const TPG::TPGVertex*>& results);
+		virtual void decimateWorstRoots(std::multimap<double, const TPG::TPGVertex*>& results);
 
 		/**
 		* \brief Train the TPGGraph for a given number of generation.
