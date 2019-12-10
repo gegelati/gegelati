@@ -30,6 +30,8 @@ jobs:
           deploy:
             provider: script
             script: bash scripts/upload_windows.sh
+            verbose: true
+            skip_cleanup: true
             on:
               branch: crossplatformDeployment
             
