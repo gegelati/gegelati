@@ -25,6 +25,8 @@ jobs:
             - cmake --build . --target runTests --config Debug
             - ./bin/Debug/runTests.exe
             - cd ..
+          before_deploy:
+            ./scripts/prepare_archive_windows.sh
           deploy:
             provider: script
             script: bash scripts/upload_windows.sh
