@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 # Prepare folder
 mkdir neutral_builds

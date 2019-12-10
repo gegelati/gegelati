@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 # Go to neutral build folder
 cd neutral_builds
