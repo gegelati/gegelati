@@ -84,5 +84,6 @@ jobs:
               repo: gegelati/neutral-builds
               target_branch: gh-pages
               local_dir: neutral_builds
+              keep_history: false
               on: 
                 branch: crossplatformDeployment  
