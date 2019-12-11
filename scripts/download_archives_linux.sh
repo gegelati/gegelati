@@ -31,13 +31,16 @@ curl -L -O -J https://gegelati.shortcm.li/windows-package
 
 # Prepare readme
 echo "# GEGELATI Neutral Builds 
-* Windows:" > index.md  
+|Date|Time|Commit|Windows|
+|----|----|------|-------|" > index.md  
 
 # Generate list
-ARCHIVES=$(find -maxdepth 1 -regextype posix-egrep -regex "./gegelatilib-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.zip\$" | rev | cut -d'/' -f 1 | rev | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n | tail -n $MAX_VERSIONS_COUNT)
+ARCHIVES=$(find -maxdepth 1 -regextype posix-egrep -regex "./gegelatilib-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.zip\$" | rev | cut -d'/' -f 1 | rev | sort -t. -k 1,1nr -k 2,2nr -k 3,3nr -k 4,4nr | head -n $MAX_VERSIONS_COUNT)
 
+count=0
 for archive in ${ARCHIVES}; do
-	echo "\n  * [LABEL](./${archive})" >> index.md 
+	echo "|$(git show -s --format="%ci" HEAD~$count| cut -d' ' -f 1 | cut -d'-' -f 1,2,3 --output-delimiter='.')|$(git show -s --format="%ci" HEAD~$count| cut -d' ' -f 2) |[$(git show -s --format="%h" HEAD~$count)](https://github.com/gegelati/gegelati/commit/$(git show -s --format="%H" HEAD~$count))|[Zip](./${archive})|" >> index.md 
+	count=$((count+1))
 done
 
 
