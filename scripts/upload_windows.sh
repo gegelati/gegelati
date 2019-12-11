@@ -4,8 +4,11 @@ set -x
 # Go to neutral build folder
 cd neutral_builds
 
+# Recreate archive name
+ARCHIVE_NAME="gegelatilib-0.0.0.$(git show -s --format="%ci" | cut -d' ' -f 1 | sed 's/-//g')$(git show -s --format="%ci" | cut -d' ' -f 2 | sed 's/://g').zip"
+
 # Uploads the built library onto transfer.sh
-PACKAGE_LOCATION="$(curl -m 600 --upload-file gegelatilib-0.0.0.zip https://transfer.sh/gegegelatilib-0.0.0.zip)"
+PACKAGE_LOCATION="$(curl -m 600 --upload-file $ARCHIVE_NAME https://transfer.sh/$ARCHIVE_NAME)"
 
 # Check upload
 if [ "$PACKAGE_LOCATION" = "" ]
