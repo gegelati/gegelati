@@ -60,7 +60,7 @@ for archive in ${ARCHIVES}; do
 		cp $archive gegelatilib-0.0.0.latest.zip
 
 		# index.md html table
-		echo "<tr><td colspan=2><div align=center><i>Latest</i></div></td><td><a href=\"https://github.com/gegelati/gegelati/commit/$commit_long_sha1\"><code>$commit_short_sha1</code></a></td><td><a href=\"./gegelatilib-0.0.0.latest.zip\">Zip ($archive_size)</a></td></tr>" >> index.md
+		echo "<tr><td colspan='2'><div align='center'><i>Latest</i></div></td><td><a href=\"https://github.com/gegelati/gegelati/commit/$commit_long_sha1\"><code>$commit_short_sha1</code></a></td><td><a href=\"./gegelatilib-0.0.0.latest.zip\">Zip ($archive_size)</a></td></tr>" >> index.md
 		
 		# readme.md markdown table
 		echo "| Latest |  | [`$commit_short_sha1`](https://github.com/gegelati/gegelati/commit/$commit_long_sha1) | [Zip ($archive_size)](./gegelatilib-0.0.0.latest.zip) |" >> ReadMe.md 
@@ -71,7 +71,7 @@ for archive in ${ARCHIVES}; do
 	echo "<tr><td>$commit_date</td><td>$commit_time</td><td><a href=\"https://github.com/gegelati/gegelati/commit/$commit_long_sha1\"><code>$commit_short_sha1</code></a></td><td><a href=\"./$archive\">Zip ($archive_size)</a></td></tr>" >> index.md
 
 	# readme.md markdown table
-	echo "| $commit_date | $commit_time | [`$commit_short_sha1`](https://github.com/gegelati/gegelati/commit/$commit_long_sha1) | [Zip ($archive_size)](./${archive}) |" >> ReadMe.md 
+	echo "| $commit_date | $commit_time | [\`$commit_short_sha1\`](https://github.com/gegelati/gegelati/commit/$commit_long_sha1) | [Zip ($archive_size)](./${archive}) |" >> ReadMe.md 
 	count=$((count+1))
 done
 
