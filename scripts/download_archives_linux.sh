@@ -44,6 +44,8 @@ echo "# GEGELATI Neutral Builds
 # Generate list
 ARCHIVES=$(find -maxdepth 1 -regextype posix-egrep -regex "./gegelatilib-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.zip\$" | rev | cut -d'/' -f 1 | rev | sort -t. -k 1,1nr -k 2,2nr -k 3,3nr -k 4,4nr | head -n $MAX_VERSIONS_COUNT)
 
+
+
 count=0
 for archive in ${ARCHIVES}; do
 	# Variables
@@ -53,11 +55,23 @@ for archive in ${ARCHIVES}; do
 	commit_long_sha1=$(git show -s --format="%H" HEAD~$count)
 	archive_size=$(ls -s --block-size=K ./$archive | cut -d' ' -f 1)
 
+	if [ $count = 0 ] 
+	then
+		cp $archive gegelatilib-0.0.0.latest.zip
+
+		# index.md html table
+		echo "<tr><td colspan=2><div align=center><i>Latest</i></div></td><td><a href=\"https://github.com/gegelati/gegelati/commit/$commit_long_sha1\"><code>$commit_short_sha1</code></a></td><td><a href=\"./gegelatilib-0.0.0.latest.zip\">Zip ($archive_size)</a></td></tr>" >> index.md
+		
+		# readme.md markdown table
+		echo "| Latest |  | [`$commit_short_sha1`](https://github.com/gegelati/gegelati/commit/$commit_long_sha1) | [Zip ($archive_size)](./gegelatilib-0.0.0.latest.zip) |" >> ReadMe.md 
+
+	fi	
+
 	# index.md html table
 	echo "<tr><td>$commit_date</td><td>$commit_time</td><td><a href=\"https://github.com/gegelati/gegelati/commit/$commit_long_sha1\"><code>$commit_short_sha1</code></a></td><td><a href=\"./$archive\">Zip ($archive_size)</a></td></tr>" >> index.md
 
 	# readme.md markdown table
-	echo "| $commit_date | $commit_time | [$commit_short_sha1](https://github.com/gegelati/gegelati/commit/$commit_long_sha1) | [Zip ($archive_size)](./${archive}) |" >> ReadMe.md 
+	echo "| $commit_date | $commit_time | [`$commit_short_sha1`](https://github.com/gegelati/gegelati/commit/$commit_long_sha1) | [Zip ($archive_size)](./${archive}) |" >> ReadMe.md 
 	count=$((count+1))
 done
 
