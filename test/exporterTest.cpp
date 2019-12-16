@@ -4,6 +4,7 @@
 #include "dataHandlers/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "program/program.h"
 #include "tpg/tpgVertex.h"
 #include "tpg/tpgTeam.h"
@@ -35,14 +36,29 @@ protected:
 		// Put a 1 in the dataHandler to make it easy to have non-zero return in Programs.
 		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(PrimitiveType<double>), 0, 1.0);
 
+
+		auto minus = [](double a, double b)->double {return a - b; };
+
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
+		set.add(*(new Instructions::LambdaInstruction<double>(minus)));
+
 		e = new Environment(set, vect, 8);
 		tpg = new TPG::TPGGraph(*e);
 
 		// Create 10 programs
 		for (int i = 0; i < 8; i++) {
 			progPointers.push_back(std::shared_ptr<Program::Program>(new Program::Program(*e)));
+		}
+
+		//add instructions to at least one program.
+		for (int i = 0; i < 3; i++)
+		{
+			Program::Line& l = progPointers.at(0).get()->addNewLine();
+			l.setInstructionIndex(0);
+			l.setDestinationIndex(1);
+			l.setParameter(0, 0.2f);
+			l.setOperand(0, 0, 1);
 		}
 
 		// Create a TPG 
@@ -110,3 +126,4 @@ TEST_F(ExporterTest, print) {
 
 	ASSERT_NO_THROW(dotExporter.print());
 }
+

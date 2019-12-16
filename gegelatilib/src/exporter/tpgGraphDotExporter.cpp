@@ -99,36 +99,20 @@ void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program
 		//instruction parameters
 		for(int j =0; j < l.getEnvironment().getMaxNbParameters(); j++)
 		{
-			try
-			{
-				const Parameter & p = l.getParameter(j);
-				programContent += std::to_string(p.i);
-				programContent += "|";
-			}
-			catch(std::range_error)
-			{
-				//the exception thrown means that we try to acces non existing parameters and thus we can end the loop..
-				break; 
-			}
+			const Parameter & p = l.getParameter(j);
+			programContent += std::to_string(p.i);
+			programContent += "|";
 		}
 		programContent += "$";
 		//instruction operands
 		for(int j =0; j < l.getEnvironment().getMaxNbOperands(); j++)
 		{
-			try
-			{
-				std::pair<uint64_t, uint64_t> p = l.getOperand(j);
-				if(j != 0)
-					programContent += "#";
-				programContent += std::to_string(p.first);
-				programContent += "|";
-				programContent += std::to_string(p.second);
-			}
-			catch(std::range_error)
-			{
-				//the exception thrown means that we try to acces non existing parameters and thus we can end the loop..
-				break; 
-			}
+			std::pair<uint64_t, uint64_t> p = l.getOperand(j);
+			if(j != 0)
+				programContent += "#";
+			programContent += std::to_string(p.first);
+			programContent += "|";
+			programContent += std::to_string(p.second);
 		}
 
 		programContent += "&#92;n";

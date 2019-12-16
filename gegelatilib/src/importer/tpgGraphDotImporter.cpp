@@ -228,9 +228,7 @@ void Importer::TPGGraphDotImporter::readLinkTeamProgram()
 
 			auto edge_it = std::find_if(edges.begin(), edges.end(), 
 				[p](const TPG::TPGEdge& other) {
-				if(&(other.getProgram()) == p.get())
-					return true;
-				return false;
+					return (&(other.getProgram()) == p.get());
 			});
 			if(edge_it != edges.end())			//we got the corresponding edge : 
 			{
