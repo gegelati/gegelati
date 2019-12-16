@@ -82,8 +82,10 @@ jobs:
               skip_cleanup: true
               deploy_key: $GITHUB_TOKEN
               repo: gegelati/neutral-builds
-              target_branch: gh-pages
+              target_branch: testTrigger
               local_dir: neutral_builds
               keep_history: false
               on: 
-                branch: develop  
+                branch: triggerGegelatiApps 
+          after_deploy:
+            - ./scripts/trigger_gegelati-apps.sh
