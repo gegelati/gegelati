@@ -86,4 +86,6 @@ jobs:
               local_dir: neutral_builds
               keep_history: false
               on: 
-                branch: develop  
+                branch: develop
+          after_deploy:
+            - ./scripts/trigger_gegelati-apps.sh
