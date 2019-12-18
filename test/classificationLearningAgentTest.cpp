@@ -5,6 +5,7 @@
 #include "instructions/set.h"
 #include "instructions/addPrimitiveType.h"
 
+#include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 
 #include "learn/classificationLearningAgent.h"
@@ -45,7 +46,7 @@ protected:
 	DataHandlers::PrimitiveTypeArray<int> data;
 
 public:
-	FakeLearningEnvironment() : LearningEnvironment(2) {};
+	FakeLearningEnvironment() : LearningEnvironment(2), data(1) {};
 	void reset(size_t seed, Learn::LearningMode mode) {};
 	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
 		std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;

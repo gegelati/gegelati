@@ -72,9 +72,9 @@ TEST_F(LearningAgentTest, EvalRoot) {
 	TPG::TPGExecutionEngine tee(la.getTPGGraph().getEnvironment(), &a);
 
 	la.init();
-	double result;
+	Learn::EvaluationResult result(0.0);
 	ASSERT_NO_THROW(result = la.evaluateRoot(tee, *la.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
-	ASSERT_LE(result, 1.0) << "Average score should not exceed the score of a perfect player.";
+	ASSERT_LE(result.getResult(), 1.0) << "Average score should not exceed the score of a perfect player.";
 }
 
 TEST_F(LearningAgentTest, EvalAllRoots) {
@@ -86,7 +86,7 @@ TEST_F(LearningAgentTest, EvalAllRoots) {
 	Learn::LearningAgent la(le, set, params);
 
 	la.init();
-	std::multimap<double, const TPG::TPGVertex*> result;
+	std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> result;
 	ASSERT_NO_THROW(result = la.evaluateAllRoots(0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
 	ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }
@@ -129,7 +129,7 @@ TEST_F(LearningAgentTest, DecimateWorstRoots) {
 	ASSERT_EQ(typeid(*roots.at(0)), typeid(TPG::TPGAction)) << "An action should have become a root of the TPGGraph.";
 
 	// Create and fill results for each "root" artificially
-	std::multimap<double, const TPG::TPGVertex*> results;
+	std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> results;
 	double result = 0.0;
 	for (const TPG::TPGVertex* root : roots) {
 		results.insert({ result++, root });
@@ -256,7 +256,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential) {
 	Learn::ParallelLearningAgent pla(le, set, params, 1);
 
 	pla.init();
-	std::multimap<double, const TPG::TPGVertex*> result;
+	std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> result;
 	ASSERT_NO_THROW(result = pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
 	ASSERT_EQ(result.size(), pla.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }
@@ -270,7 +270,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel) {
 	Learn::ParallelLearningAgent pla(le, set, params, 4);
 
 	pla.init();
-	std::multimap<double, const TPG::TPGVertex*> result;
+	std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> result;
 	ASSERT_NO_THROW(result = pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
 	ASSERT_EQ(result.size(), pla.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }

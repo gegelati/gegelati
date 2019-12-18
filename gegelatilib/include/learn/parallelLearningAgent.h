@@ -7,6 +7,8 @@
 
 #include "instructions/set.h"
 #include "tpg/tpgExecutionEngine.h"
+
+#include "learn/evaluationResult.h"
 #include "learn/learningParameters.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningAgent.h"
@@ -34,7 +36,7 @@ namespace Learn {
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		* \param[in] results Map to store the resulting score of evaluated roots.
 		*/
-		void evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<double, const TPG::TPGVertex*>& results);
+		void evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<EvaluationResult, const TPG::TPGVertex*>& results);
 
 		/**
 		* \brief Function implementing the behavior of slave threads during
@@ -129,7 +131,7 @@ namespace Learn {
 		* \param[in] generationNumber the integer number of the current generation.
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
-		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
+		std::multimap<EvaluationResult, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
 
 		/// Inherited from LearningAgent
 		void trainOneGeneration(uint64_t generationNumber) override;

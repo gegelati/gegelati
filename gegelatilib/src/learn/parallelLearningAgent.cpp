@@ -40,9 +40,9 @@ double Learn::ParallelLearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, 
 	return result / (double)params.nbIterationsPerPolicyEvaluation;
 }
 
-std::multimap<double, const TPG::TPGVertex*> Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
+std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
 {
-	std::multimap<double, const TPG::TPGVertex*> results;
+	std::multimap<EvaluationResult, const TPG::TPGVertex*> results;
 
 	if (this->maxNbThreads <= 1 || !this->learningEnvironment.isCopyable()) {
 		// Sequential mode
@@ -167,7 +167,7 @@ void Learn::ParallelLearningAgent::mergeArchiveMap(std::map<uint64_t, Archive*>&
 	}
 }
 
-void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<double, const TPG::TPGVertex*>& results) {
+void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<EvaluationResult, const TPG::TPGVertex*>& results) {
 	// Create and fill the queue for distributing work among threads
 	// each root is associated to its number in the list for enabling the 
 	// determinism of stochastic archive storage.

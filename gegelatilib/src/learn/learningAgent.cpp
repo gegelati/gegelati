@@ -3,6 +3,7 @@
 #include "tpg/tpgExecutionEngine.h"
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
+#include "learn/evaluationResult.h"
 
 #include "learn/learningAgent.h"
 
@@ -31,7 +32,7 @@ void Learn::LearningAgent::init(uint64_t seed) {
 	this->archive.clear();
 }
 
-double Learn::LearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode)
+Learn::EvaluationResult Learn::LearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode)
 {
 	// Init results
 	double result = 0.0;
@@ -58,12 +59,12 @@ double Learn::LearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TP
 		// Update results
 		result += this->learningEnvironment.getScore();
 	}
-	return result / (double)params.nbIterationsPerPolicyEvaluation;
+	return EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation);
 }
 
-std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
+std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
 {
-	std::multimap<double, const TPG::TPGVertex*> result;
+	std::multimap<EvaluationResult, const TPG::TPGVertex*> result;
 
 	// Create the TPGExecutionEngine for this evaluation.
 	// The engine uses the Archive only in training mode.
@@ -76,7 +77,7 @@ std::multimap<double, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRo
 			this->archive.setRandomSeed(this->rng.getUnsignedInt64(0, UINT64_MAX));
 		}
 
-		double avgScore = this->evaluateRoot(tee, *root, generationNumber, mode);
+		EvaluationResult avgScore = this->evaluateRoot(tee, *root, generationNumber, mode);
 		result.insert({ avgScore, root });
 	}
 
@@ -95,7 +96,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 	decimateWorstRoots(results);
 }
 
-void Learn::LearningAgent::decimateWorstRoots(std::multimap<double, const TPG::TPGVertex*>& results)
+void Learn::LearningAgent::decimateWorstRoots(std::multimap<EvaluationResult, const TPG::TPGVertex*>& results)
 {
 	for (auto i = 0; i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots); i++) {
 		// If the root is an action, do not remove it!

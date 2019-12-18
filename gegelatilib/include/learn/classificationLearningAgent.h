@@ -3,6 +3,7 @@
 
 #include <type_traits>
 
+#include "learn/evaluationResult.h"
 #include "learn/learningAgent.h"
 #include "learn/ParallelLearningAgent.h"
 
@@ -46,8 +47,13 @@ namespace Learn {
 		/**
 		* \brief Decimate worst root specialized for classification purposes.
 		*/
-		void decimateWorstRoots(std::multimap<double, const TPG::TPGVertex*>& results) override;
+		void decimateWorstRoots(std::multimap<EvaluationResult, const TPG::TPGVertex*>& results) override;
 	};
-	
+
+	template<class BaseLearningAgent>
+	void ClassificationLearningAgent<BaseLearningAgent>::decimateWorstRoots(std::multimap <Learn::EvaluationResult, const TPG::TPGVertex* >& results) {
+		// TODO: when a "EvaluationResult" container is used instead of a double.
+	}
 };
+
 #endif

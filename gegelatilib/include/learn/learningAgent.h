@@ -10,6 +10,7 @@
 #include "tpg/tpgExecutionEngine.h"
 #include "mutator/mutationParameters.h"
 
+#include "learn/evaluationResult.h"
 #include "learn/learningParameters.h"
 #include "learn/learningEnvironment.h"
 
@@ -107,7 +108,7 @@ namespace Learn {
 		* \param[in] generationNumber the integer number of the current generation.
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
-		double evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode);
+		EvaluationResult evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode);
 
 		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
@@ -119,7 +120,7 @@ namespace Learn {
 		* \param[in] generationNumber the integer number of the current generation.
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
-		virtual std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
+		virtual std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
 
 		/**
 		* \brief Train the TPGGraph for one generation.
@@ -140,7 +141,7 @@ namespace Learn {
 		* \param[in] results a multimap containing root TPGVertex associated
 		* to their score during an evaluation.
 		*/
-		virtual void decimateWorstRoots(std::multimap<double, const TPG::TPGVertex*>& results);
+		virtual void decimateWorstRoots(std::multimap<EvaluationResult, const TPG::TPGVertex*>& results);
 
 		/**
 		* \brief Train the TPGGraph for a given number of generation.
