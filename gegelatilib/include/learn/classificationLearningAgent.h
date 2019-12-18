@@ -5,7 +5,7 @@
 
 #include "learn/evaluationResult.h"
 #include "learn/learningAgent.h"
-#include "learn/ParallelLearningAgent.h"
+#include "learn/parallelLearningAgent.h"
 
 namespace Learn {
 	/**
