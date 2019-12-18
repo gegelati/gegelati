@@ -44,15 +44,25 @@ namespace Learn {
 		*/
 		ClassificationLearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8) : BaseLearningAgent(le, iSet, p, nbRegs) {};
 
+		/// Specialization for classificationPurposes
+		std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode) override;
+
 		/**
 		* \brief Decimate worst root specialized for classification purposes.
 		*/
-		void decimateWorstRoots(std::multimap<EvaluationResult, const TPG::TPGVertex*>& results) override;
+		void decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results) override;
 	};
 
 	template<class BaseLearningAgent>
-	void ClassificationLearningAgent<BaseLearningAgent>::decimateWorstRoots(std::multimap <Learn::EvaluationResult, const TPG::TPGVertex* >& results) {
+	inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode)
+	{
+		return std::shared_ptr<EvaluationResult>();
+	}
+
+	template<class BaseLearningAgent>
+	void ClassificationLearningAgent<BaseLearningAgent>::decimateWorstRoots(std::multimap <std::shared_ptr<EvaluationResult>, const TPG::TPGVertex* >& results) {
 		// TODO: when a "EvaluationResult" container is used instead of a double.
+		std::cout << "Decimate";
 	}
 };
 

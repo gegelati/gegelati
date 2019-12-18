@@ -8,9 +8,10 @@
 #include "mutator/tpgMutator.h"
 #include "tpg/tpgExecutionEngine.h"
 
+#include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
 
-double Learn::ParallelLearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode, Learn::LearningEnvironment& le, const Learn::LearningParameters& params)
+std::shared_ptr<Learn::EvaluationResult> Learn::ParallelLearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode, Learn::LearningEnvironment& le, const Learn::LearningParameters& params)
 {
 	// Init results
 	double result = 0.0;
@@ -37,12 +38,12 @@ double Learn::ParallelLearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, 
 		// Update results
 		result += le.getScore();
 	}
-	return result / (double)params.nbIterationsPerPolicyEvaluation;
+	return std::shared_ptr<EvaluationResult>(new EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation));
 }
 
-std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
+std::multimap< std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
 {
-	std::multimap<EvaluationResult, const TPG::TPGVertex*> results;
+	std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> results;
 
 	if (this->maxNbThreads <= 1 || !this->learningEnvironment.isCopyable()) {
 		// Sequential mode
@@ -56,8 +57,8 @@ std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> Learn::ParallelLea
 			if (mode == LearningMode::TRAINING) {
 				this->archive.setRandomSeed(this->rng.getUnsignedInt64(0, UINT64_MAX));
 			}
-			double avgScore = ParallelLearningAgent::evaluateRoot(tee, *root, generationNumber, mode, this->learningEnvironment, this->params);
-			results.insert({ avgScore, root });
+			std::shared_ptr<EvaluationResult> avgScore = ParallelLearningAgent::evaluateRoot(tee, *root, generationNumber, mode, this->learningEnvironment, this->params);
+			results.emplace(avgScore, root);
 		}
 	}
 	else {
@@ -70,7 +71,7 @@ std::multimap<Learn::EvaluationResult, const TPG::TPGVertex*> Learn::ParallelLea
 
 void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
 	std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>& rootsToProcess, std::mutex& rootsToProcessMutex,
-	std::map<uint64_t, std::pair<double, const TPG::TPGVertex*>>& resultsPerRootMap, std::mutex& resultsPerRootMapMutex,
+	std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>>& resultsPerRootMap, std::mutex& resultsPerRootMapMutex,
 	std::map<uint64_t, size_t>& archiveSeeds,
 	std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex) {
 
@@ -104,11 +105,11 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
 			}
 			tee.setArchive(temporaryArchive);
 
-			double avgScore = evaluateRoot(tee, *rootToProcess.second, generationNumber, mode, *privateLearningEnvironment, this->params);
+			std::shared_ptr<EvaluationResult> avgScore = evaluateRoot(tee, *rootToProcess.second, generationNumber, mode, *privateLearningEnvironment, this->params);
 
 			{	// Store result Mutual exclusion zone
 				std::lock_guard<std::mutex> lock(resultsPerRootMapMutex);
-				resultsPerRootMap.insert({ rootToProcess.first, { avgScore, rootToProcess.second } });
+				resultsPerRootMap.emplace(rootToProcess.first, std::make_pair(avgScore, rootToProcess.second));
 			}
 
 			if (mode == LearningMode::TRAINING) {
@@ -167,7 +168,7 @@ void Learn::ParallelLearningAgent::mergeArchiveMap(std::map<uint64_t, Archive*>&
 	}
 }
 
-void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<EvaluationResult, const TPG::TPGVertex*>& results) {
+void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results) {
 	// Create and fill the queue for distributing work among threads
 	// each root is associated to its number in the list for enabling the 
 	// determinism of stochastic archive storage.
@@ -188,7 +189,7 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generatio
 	// Create Archive Map
 	std::map<uint64_t, Archive*> archiveMap;
 	// Create Map for results
-	std::map<uint64_t, std::pair<double, const TPG::TPGVertex*>> resultsPerRootMap;
+	std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>> resultsPerRootMap;
 
 	// Create mutexes
 	std::mutex rootsToProcessMutex;
@@ -220,8 +221,8 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generatio
 	}
 
 	// Merge the results
-	for (auto resultPerRoot : resultsPerRootMap) {
-		results.insert(resultPerRoot.second);
+	for (auto& resultPerRoot : resultsPerRootMap) {
+		results.emplace(resultPerRoot.second);
 	}
 
 	// Merge the archives

@@ -1,6 +1,8 @@
 #ifndef EVALUATION_RESULT_H
 #define EVALUATION_RESULT_H
 
+#include <memory>
+
 namespace Learn {
 	/**
 	* \brief Base class for storing all result of a policy evaluation within a 
@@ -46,6 +48,11 @@ namespace Learn {
 	* \brief Comparison function to enable sorting of EvaluationResult with STL.
 	*/
 	bool operator<(const EvaluationResult& a, const EvaluationResult& b);
+
+	/**
+	* \brief Comparison function to enable sorting of EvaluationResult with STL.
+	*/
+	bool operator<(const std::shared_ptr<EvaluationResult>& a, const std::shared_ptr<EvaluationResult>& b);
 
 
 	/**

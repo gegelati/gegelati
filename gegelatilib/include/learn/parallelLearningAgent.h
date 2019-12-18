@@ -36,7 +36,7 @@ namespace Learn {
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		* \param[in] results Map to store the resulting score of evaluated roots.
 		*/
-		void evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<EvaluationResult, const TPG::TPGVertex*>& results);
+		void evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results);
 
 		/**
 		* \brief Function implementing the behavior of slave threads during
@@ -55,7 +55,7 @@ namespace Learn {
 		*/
 		void slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
 			std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>& rootsToProcess, std::mutex& rootsToProcessMutex,
-			std::map<uint64_t, std::pair<double, const TPG::TPGVertex*>>& resultsPerRootMap, std::mutex& resultsPerRootMapMutex,
+			std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>>& resultsPerRootMap, std::mutex& resultsPerRootMapMutex,
 			std::map<uint64_t, size_t>& archiveSeeds,
 			std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex);
 
@@ -113,7 +113,7 @@ namespace Learn {
 		* policy evaluation.
 		* \param[in] params Reference to the LearningParameters.
 		*/
-		static double evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le, const Learn::LearningParameters& params);
+		static std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le, const Learn::LearningParameters& params);
 
 		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
@@ -131,7 +131,7 @@ namespace Learn {
 		* \param[in] generationNumber the integer number of the current generation.
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
-		std::multimap<EvaluationResult, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
+		std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
 
 		/// Inherited from LearningAgent
 		void trainOneGeneration(uint64_t generationNumber) override;
