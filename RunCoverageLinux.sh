@@ -5,5 +5,5 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug
 cmake --build . --target runTests
 ./bin/runTests
 mkdir coverage
-gcovr -r .. -e test --html --html-details -s -o ./coverage/coverage.html 
+gcovr -r .. -e '.*deterministicRandom.h' -e '.*test/.*' --html --html-details -s -o ./coverage/coverage.html
 

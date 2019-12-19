@@ -1,8 +1,13 @@
 language: cpp
 
+stages:
+    - Build
+    - Deploy
+
 jobs:
     include:
-        - os: windows
+        - stage: Build
+          os: windows
           env: GENERATOR="Visual Studio 16 2019"
           compiler: msvc19
           before_install:
@@ -24,8 +29,19 @@ jobs:
             - cmake --build . --target INSTALL --config Release
             - cmake --build . --target runTests --config Debug
             - ./bin/Debug/runTests.exe
+            - cd ..
+          before_deploy:
+            ./scripts/prepare_archive_windows.sh
+          deploy:
+            provider: script
+            script: bash scripts/upload_windows.sh
+            verbose: true
+            skip_cleanup: true
+            on:
+              branch: develop
             
         - os: linux
+          stage: Build
           compiler: gcc-7
           addons:
             apt:
@@ -37,6 +53,9 @@ jobs:
                     - gcovr
           env:
             - GENERATOR="Unix Makefile"
+            - PATH=/opt/python/3.7.1/bin:$PATH
+          install:
+            - pip install gcovr
           script:
             - export CC=gcc-7
             - export CXX=g++-7
@@ -50,3 +69,23 @@ jobs:
             - cd ..
             - ./RunCoverageLinux.sh
             
+        - os: linux
+          stage: Deploy
+          script:
+            - echo "Empty job"
+          before_deploy: 
+            ./scripts/download_archives_linux.sh
+          deploy:
+              provider: pages:git
+              verbose: true
+              edge: true # opt in to dpl v2
+              skip_cleanup: true
+              deploy_key: $GITHUB_TOKEN
+              repo: gegelati/neutral-builds
+              target_branch: gh-pages
+              local_dir: neutral_builds
+              keep_history: false
+              on: 
+                branch: develop
+          after_deploy:
+            - ./scripts/trigger_gegelati-apps.sh

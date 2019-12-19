@@ -36,6 +36,9 @@ namespace Learn {
 		/// TPGGraph built during the learning process.
 		TPG::TPGGraph tpg;
 
+		/// Random Number Generator for this Learning Agent
+		Mutator::RNG rng;
+
 	public:
 		/**
 		* \brief Constructor for LearningAgent.
@@ -96,6 +99,13 @@ namespace Learn {
 		const Archive& getArchive() const;
 
 		/**
+		* \brief Getter for the RNG used by the LearningAgent.
+		*
+		* \return Get a reference to the RNG.
+		*/
+		Mutator::RNG& getRNG();
+
+		/**
 		* \brief Initialize the LearningAgent.
 		*
 		* Calls the TPGMutator::initRandomTPG function.
@@ -144,13 +154,13 @@ namespace Learn {
 		*
 		* \param[in] generationNumber the integer number of the current generation.
 		*/
-		void trainOneGeneration(uint64_t generationNumber);
+		virtual void trainOneGeneration(uint64_t generationNumber);
 
 		/**
-		* \brief Removes from the TPGGraph the root TPGVertex with the worst 
+		* \brief Removes from the TPGGraph the root TPGVertex with the worst
 		* results.
 		*
-		* \param[in] results a multimap containing root TPGVertex associated 
+		* \param[in] results a multimap containing root TPGVertex associated
 		* to their score during an evaluation.
 		*/
 		void decimateWorstRoots(std::multimap<double, const TPG::TPGVertex*>& results);

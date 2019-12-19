@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <numeric>
 #include <vector>
+#include <thread>
+#include <mutex>
+#include <queue>
 
 #include "archive.h"
 
@@ -16,7 +19,7 @@
 #include "mutator/programMutator.h"
 #include "mutator/tpgMutator.h"
 
-void Mutator::TPGMutator::initRandomTPG(TPG::TPGGraph& graph, const Mutator::MutationParameters& params)
+void Mutator::TPGMutator::initRandomTPG(TPG::TPGGraph& graph, const Mutator::MutationParameters& params, Mutator::RNG& rng)
 {
 	if (params.tpg.maxInitOutgoingEdges > params.tpg.nbActions) {
 		throw std::runtime_error("Maximum initial number of outgoing edges cannot exceed the number of action");
@@ -38,7 +41,7 @@ void Mutator::TPGMutator::initRandomTPG(TPG::TPGGraph& graph, const Mutator::Mut
 	for (size_t i = 0; i < 2 * params.tpg.nbActions; i++) {
 		programs.emplace_back(new Program::Program(graph.getEnvironment()));
 		// RandomInit the Programs
-		Mutator::ProgramMutator::initRandomProgram(*programs.back(), params);
+		Mutator::ProgramMutator::initRandomProgram(*programs.back(), params, rng);
 	}
 
 	// Connect each team with two distinct actions, through two distinct programs
@@ -53,7 +56,7 @@ void Mutator::TPGMutator::initRandomTPG(TPG::TPGGraph& graph, const Mutator::Mut
 	// Team-by-Team
 	for (const TPG::TPGTeam* team : teams) {
 		// Pick a number of additional outedge
-		size_t nbAdditionalEdges = RNG::getUnsignedInt64(0, params.tpg.maxInitOutgoingEdges - 2);
+		size_t nbAdditionalEdges = rng.getUnsignedInt64(0, params.tpg.maxInitOutgoingEdges - 2);
 
 		// For each additional edge to add
 		for (uint64_t i = 0; i < nbAdditionalEdges; i++) {
@@ -80,7 +83,7 @@ void Mutator::TPGMutator::initRandomTPG(TPG::TPGGraph& graph, const Mutator::Mut
 
 				// Pick two programs (if possible, maybe only one is available)
 				for (int i = 0; i < 2 && availableChoices.size() > 0; i++) {
-					uint64_t progNr = RNG::getUnsignedInt64(0, availableChoices.size() - 1);
+					uint64_t progNr = rng.getUnsignedInt64(0, availableChoices.size() - 1);
 					randomProgIndex[i] = availableChoices.at(progNr);
 					availableChoices.erase(availableChoices.begin() + progNr);
 					pickedProgram++;
@@ -99,7 +102,7 @@ void Mutator::TPGMutator::initRandomTPG(TPG::TPGGraph& graph, const Mutator::Mut
 	}
 }
 
-void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team) {
+void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team, Mutator::RNG& rng) {
 	// Pick an outgoing edge randomly, 
 	// Copy the set 
 	std::list<TPG::TPGEdge*> pickableEdges = team.getOutgoingEdges();
@@ -121,13 +124,13 @@ void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGT
 
 	// Pick a random edge
 	auto iterSet = pickableEdges.begin();
-	std::advance(iterSet, Mutator::RNG::getUnsignedInt64(0, pickableEdges.size() - 1));
+	std::advance(iterSet, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
 	const TPG::TPGEdge* removedEdge = *iterSet;
 	graph.removeEdge(*removedEdge);
 }
 
 void Mutator::TPGMutator::addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team,
-	const std::list<const TPG::TPGEdge*>& preExistingEdges) {
+	const std::list<const TPG::TPGEdge*>& preExistingEdges, Mutator::RNG& rng) {
 	// Pick an edge (excluding ones from the team and edges with the team as a destination)
 	auto pickableEdges(preExistingEdges);
 	// cf erase-remove idiom
@@ -141,7 +144,7 @@ void Mutator::TPGMutator::addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam
 	// otherwise it will throw an exception. Possible solution if needed
 	// initialize an entirely new program and pick a random target.) 
 	std::list<const TPG::TPGEdge*>::iterator iter = pickableEdges.begin();
-	std::advance(iter, Mutator::RNG::getUnsignedInt64(0, pickableEdges.size() - 1));
+	std::advance(iter, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
 	const TPG::TPGEdge* pickedEdge = *iter;
 
 	// Create new edge from team and with the same ProgramSharedPointer
@@ -156,12 +159,13 @@ void Mutator::TPGMutator::mutateEdgeDestination(TPG::TPGGraph& graph,
 	const TPG::TPGEdge* edge,
 	const std::vector<const TPG::TPGTeam*>& preExistingTeams,
 	const std::vector<const TPG::TPGAction*>& preExistingActions,
-	const Mutator::MutationParameters& params)
+	const Mutator::MutationParameters& params,
+	Mutator::RNG& rng)
 {
 	// Pick an edge among preexisting vertices
 	const TPG::TPGVertex* target = NULL;
 	// Should the new target be an action or a team
-	bool targetAction = Mutator::RNG::getDouble(0, 1) < params.tpg.pEdgeDestinationIsAction;
+	bool targetAction = rng.getDouble(0, 1) < params.tpg.pEdgeDestinationIsAction;
 
 	// Check if the edge is the only of the team connected to an action.
 	// in which case, selecting an action is mandatory.
@@ -171,11 +175,11 @@ void Mutator::TPGMutator::mutateEdgeDestination(TPG::TPGGraph& graph,
 				return typeid(*other->getDestination()) == typeid(TPG::TPGAction);
 			}) == 1)) {
 		// Pick an Action target
-		target = preExistingActions.at(Mutator::RNG::getUnsignedInt64(0, preExistingActions.size() - 1));
+		target = preExistingActions.at(rng.getUnsignedInt64(0, preExistingActions.size() - 1));
 	}
 	else {
 		// Pick any target
-		target = preExistingTeams.at(Mutator::RNG::getUnsignedInt64(0, preExistingTeams.size() - 1));
+		target = preExistingTeams.at(rng.getUnsignedInt64(0, preExistingTeams.size() - 1));
 	}
 	// Change the target
 	// Changing the target should not fail.
@@ -188,27 +192,14 @@ void Mutator::TPGMutator::mutateOutgoingEdge(TPG::TPGGraph& graph,
 	const TPG::TPGEdge* edge,
 	const std::vector<const TPG::TPGTeam*>& preExistingTeams,
 	const std::vector<const TPG::TPGAction*>& preExistingActions,
-	const Mutator::MutationParameters& params) {
+	std::list<std::shared_ptr<Program::Program>>& newPrograms,
+	const Mutator::MutationParameters& params,
+	Mutator::RNG& rng) {
 	// copy program
 	std::shared_ptr<Program::Program> newProg(new Program::Program(edge->getProgram()));
-	// Mutate its behavior until it changes (against the archive).
-	bool allUnique;
-	do {
-		// Mutate until something is mutated (i.e. the function returns true)
-		while (!Mutator::ProgramMutator::mutateProgram(*newProg, params));
-		// Check for uniqueness in archive
-		auto archivedDataHandlers = archive.getDataHandlers();
-		std::map<size_t, double> hashesAndResults;
-		for (std::pair<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>> archiveDatahandler : archivedDataHandlers) {
-			// Execute the mutated program on the archive data handlers
-			Program::ProgramExecutionEngine pee(*newProg, archiveDatahandler.second);
-			double result = pee.executeProgram();
-			hashesAndResults.insert({ archiveDatahandler.first, result });
-		}
 
-		// If the result is not unique, do another mutation.
-		allUnique = archive.areProgramResultsUnique(hashesAndResults);
-	} while (!allUnique);
+	// Add it to the list of new Program to be mutated.
+	newPrograms.push_back(newProg);
 
 	// Set the mutated program to the edge
 	edge->setProgram(newProg);
@@ -216,8 +207,8 @@ void Mutator::TPGMutator::mutateOutgoingEdge(TPG::TPGGraph& graph,
 	// Edge target modification
 	// As it Stephen kelly's work, Edge target modification is conditionned
 	// to the modification of the prealable Edge.Program behavior.
-	if (Mutator::RNG::getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationChange) {
-		mutateEdgeDestination(graph, team, edge, preExistingTeams, preExistingActions, params);
+	if (rng.getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationChange) {
+		mutateEdgeDestination(graph, team, edge, preExistingTeams, preExistingActions, params, rng);
 	}
 }
 
@@ -227,13 +218,15 @@ void Mutator::TPGMutator::mutateTPGTeam(TPG::TPGGraph& graph,
 	const std::vector<const TPG::TPGTeam*>& preExistingTeams,
 	const std::vector<const TPG::TPGAction*>& preExistingActions,
 	const std::list<const TPG::TPGEdge*>& preExistingEdges,
-	const Mutator::MutationParameters& params)
+	std::list<std::shared_ptr<Program::Program>>& newPrograms,
+	const Mutator::MutationParameters& params,
+	Mutator::RNG& rng)
 {
 	// 1. Remove randomly selected edges
 	{
 		double proba = 1.0;
-		while (team.getOutgoingEdges().size() > 2 && proba > Mutator::RNG::getDouble(0.0, 1.0)) {
-			removeRandomEdge(graph, team);
+		while (team.getOutgoingEdges().size() > 2 && proba > rng.getDouble(0.0, 1.0)) {
+			removeRandomEdge(graph, team, rng);
 
 			// Decrement the proba of removing another edge
 			proba *= params.tpg.pEdgeDeletion;
@@ -244,9 +237,9 @@ void Mutator::TPGMutator::mutateTPGTeam(TPG::TPGGraph& graph,
 	{
 		double proba = 1.0;
 		while (team.getOutgoingEdges().size() < params.tpg.maxOutgoingEdges
-			&& proba > Mutator::RNG::getDouble(0.0, 1.0)) {
+			&& proba > rng.getDouble(0.0, 1.0)) {
 			// Add an edge (by duplication of an existing one)
-			addRandomEdge(graph, team, preExistingEdges);
+			addRandomEdge(graph, team, preExistingEdges, rng);
 
 			// Decrement the proba of adding another edge
 			proba *= params.tpg.pEdgeAddition;
@@ -261,9 +254,9 @@ void Mutator::TPGMutator::mutateTPGTeam(TPG::TPGGraph& graph,
 			// And possibly modify their behavior and their target
 			for (TPG::TPGEdge* edge : team.getOutgoingEdges()) {
 				// Edge->Program bid modification
-				if (Mutator::RNG::getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
+				if (rng.getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
 					// Mutate the edge
-					mutateOutgoingEdge(graph, archive, team, edge, preExistingTeams, preExistingActions, params);
+					mutateOutgoingEdge(graph, archive, team, edge, preExistingTeams, preExistingActions, newPrograms, params, rng);
 					anyMutationDone = true;
 				}
 			}
@@ -272,7 +265,92 @@ void Mutator::TPGMutator::mutateTPGTeam(TPG::TPGGraph& graph,
 }
 
 
-void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params)
+void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(std::shared_ptr<Program::Program>& newProg, const Mutator::MutationParameters& params, const Archive& archive, Mutator::RNG& rng)
+{
+	bool allUnique;
+	// Mutate behavior until it changes (against the archive).
+	do {
+		// Mutate until something is mutated (i.e. the function returns true)
+		while (!Mutator::ProgramMutator::mutateProgram(*newProg, params, rng));
+		// Check for uniqueness in archive
+		auto archivedDataHandlers = archive.getDataHandlers();
+		std::map<size_t, double> hashesAndResults;
+		Program::ProgramExecutionEngine pee(*newProg);
+		for (std::pair<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>> archiveDatahandler : archivedDataHandlers) {
+			// Execute the mutated program on the archive data handlers
+			pee.setDataSources(archiveDatahandler.second);
+			double result = pee.executeProgram();
+			hashesAndResults.insert({ archiveDatahandler.first, result });
+		}
+
+		// If the result is not unique, do another mutation.
+		allUnique = archive.areProgramResultsUnique(hashesAndResults);
+	} while (!allUnique);
+}
+
+void Mutator::TPGMutator::mutateNewProgramBehaviors(const uint64_t& maxNbThreads, std::list<std::shared_ptr<Program::Program>>& newPrograms, Mutator::RNG& rng, const Mutator::MutationParameters& params, const Archive& archive)
+{
+	// This is a computing intensive part of the mutation process
+	// Hence the parallelization.
+	if (maxNbThreads <= 1) {
+		// Sequential (kept for determinism check mostly)
+		for (std::shared_ptr<Program::Program> newProg : newPrograms) {
+			Mutator::RNG privateRNG(rng.getUnsignedInt64(0, UINT64_MAX));
+			mutateProgramBehaviorAgainstArchive(newProg, params, archive, privateRNG);
+		}
+	}
+	else {
+		// Parallel
+		// Create job list with Program pointers and seed
+		std::queue<std::pair<std::shared_ptr<Program::Program>, uint64_t>> programsToMutate;
+		for (std::shared_ptr<Program::Program> newProg : newPrograms) {
+			programsToMutate.push({ newProg, rng.getUnsignedInt64(0, UINT64_MAX) });
+		}
+
+		std::mutex mutexMutation;
+
+		// Function executed in threads
+		auto parallelWorker = [&programsToMutate, &mutexMutation, &params, &archive]() {
+			Mutator::RNG privateRNG;
+			// While there is work to be done
+			bool jobDone;
+			do {
+				std::pair<std::shared_ptr<Program::Program>, uint64_t> job;
+				jobDone = false;
+				{	// get one job critical section
+					std::lock_guard lock(mutexMutation);
+					if (programsToMutate.size() != 0) {
+						jobDone = true;
+						job = programsToMutate.front();
+						programsToMutate.pop();
+					}
+				}
+
+				//  Do the job (if any)
+				if (jobDone) {
+					privateRNG.setSeed(job.second);
+					mutateProgramBehaviorAgainstArchive(job.first, params, archive, privateRNG);
+				}
+			} while (jobDone);
+		};
+
+		// Start threads
+		std::vector<std::thread> threads;
+		for (auto idx = 0; idx < maxNbThreads - 1; idx++) {
+			threads.emplace_back(std::thread(parallelWorker));
+		}
+
+		// Work in the main thread also
+		parallelWorker();
+
+		// Join the threads
+		for (auto& thread : threads) {
+			thread.join();
+		}
+	}
+}
+
+void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archive, const Mutator::MutationParameters& params, Mutator::RNG& rng, uint64_t maxNbThreads)
 {
 	// Get current vertex set (copy)
 	auto vertices(graph.getVertices());
@@ -291,7 +369,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archi
 	// (note that execution of this code is not a very good sign.. maybe an 
 	// exception would be more appropriate?)
 	if (rootTeams.size() == 0) {
-		initRandomTPG(graph, params);
+		initRandomTPG(graph, params, rng);
 		vertices = graph.getVertices();
 		rootVertices = graph.getRootVertices();
 		rootTeams.clear();
@@ -322,17 +400,23 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph, const Archive& archi
 			preExistingEdges.push_back(&edge);
 		});
 
+	// Create an empty list to store Programs to mutate.
+	std::list<std::shared_ptr<Program::Program>> newPrograms;
+
 	// While the target is not reached, add new teams
 	uint64_t currentNumberOfRoot = rootVertices.size();
 	while (params.tpg.nbRoots > currentNumberOfRoot) {
 		// Select a random existing root
-		uint64_t clonedRootIndex = RNG::getUnsignedInt64(0, rootTeams.size() - 1);
+		uint64_t clonedRootIndex = rng.getUnsignedInt64(0, rootTeams.size() - 1);
 		// clone it (the vertex and all its outgoing edges)
 		const TPG::TPGTeam& newRoot = (const TPG::TPGTeam&)graph.cloneVertex(*rootTeams.at(clonedRootIndex));
 		// Apply mutations to the root
-		mutateTPGTeam(graph, archive, newRoot, preExistingTeams, preExistingActions, preExistingEdges, params);
+		mutateTPGTeam(graph, archive, newRoot, preExistingTeams, preExistingActions, preExistingEdges, newPrograms, params, rng);
 		// Check the new number of roots
 		// Needed since preExisting root may be subsumed by new ones.
 		currentNumberOfRoot = graph.getNbRootVertices();
 	}
+
+	// Mutate the new Programs
+	mutateNewProgramBehaviors(maxNbThreads, newPrograms, rng, params, archive);
 }

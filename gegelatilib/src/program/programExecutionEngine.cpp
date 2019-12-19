@@ -115,7 +115,14 @@ double Program::ProgramExecutionEngine::executeProgram(const bool ignoreExceptio
 	this->programCounter = 0;
 
 	// Iterate over the lines of the Program
-	bool hasNext = this->programCounter < this->program->getNbLines();
+	bool hasNext = this->program->getNbLines() > 0;
+
+	// Skip first lines if they are introns.
+	if (hasNext && this->program->isIntron(0)) {
+		hasNext = this->next();
+	}
+
+	// Execute useful lines
 	while (hasNext) {
 
 		try {
