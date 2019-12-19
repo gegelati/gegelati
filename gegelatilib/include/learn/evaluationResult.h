@@ -52,13 +52,20 @@ namespace Learn {
 	/**
 	* \brief Comparison function to enable sorting of EvaluationResult with STL.
 	*/
-	bool operator<(const std::shared_ptr<EvaluationResult>& a, const std::shared_ptr<EvaluationResult>& b);
-
-
-	/**
-	* \brief Comparison function to enable sorting of EvaluationResult with STL.
-	*/
 	bool operator==(const EvaluationResult& a, const EvaluationResult& b);
 }
+
+namespace std {
+	/// Struct specialization for EValuationResult
+	template<>
+	struct less<std::shared_ptr<Learn::EvaluationResult>>
+	{
+		/// Comparison operator for sorted containers.
+		bool operator()(const std::shared_ptr<Learn::EvaluationResult>& a, const std::shared_ptr<Learn::EvaluationResult>& b) const
+   		{
+      			return *a < *b;
+   		}
+	};
+};
 
 #endif
