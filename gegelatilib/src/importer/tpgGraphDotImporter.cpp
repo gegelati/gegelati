@@ -288,7 +288,6 @@ bool Importer::TPGGraphDotImporter::readLineFromFile()
 	else
 	{
 		this->lastLine = buffer;
-		std::cout << lastLine << std::endl;
 	}
 
 	// check the line shape and parse it 
