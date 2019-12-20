@@ -41,12 +41,12 @@ protected:
 };
 
 // Create a fake LearningEnvironment for testing purpose.
-class FakeLearningEnvironment : public Learn::LearningEnvironment {
+class FakeClassificationLearningEnvironment : public Learn::ClassificationLearningEnvironment {
 protected:
 	DataHandlers::PrimitiveTypeArray<int> data;
 
 public:
-	FakeLearningEnvironment() : LearningEnvironment(2), data(1) {};
+	FakeClassificationLearningEnvironment() : ClassificationLearningEnvironment(2), data(1) {};
 	void reset(size_t seed, Learn::LearningMode mode) {};
 	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
 		std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
@@ -60,6 +60,6 @@ public:
 TEST_F(ClassificationLearningAgentTest, Constructor) {
 	Learn::ClassificationLearningAgent<Learn::LearningAgent> * cla;
 
-	FakeLearningEnvironment fle;
+	FakeClassificationLearningEnvironment fle;
 	cla = new Learn::ClassificationLearningAgent<Learn::LearningAgent>(fle,set,params);
 }

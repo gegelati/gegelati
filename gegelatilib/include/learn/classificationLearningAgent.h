@@ -2,10 +2,14 @@
 #define CLASSIFICATION_LEARNING_AGENT_H
 
 #include <type_traits>
+#include <vector>
+#include <numeric>
 
 #include "learn/evaluationResult.h"
+#include "learn/classificationEvaluationResult.h"
 #include "learn/learningAgent.h"
 #include "learn/parallelLearningAgent.h"
+#include "learn/classificationLearningEnvironment.h"
 
 namespace Learn {
 	/**
@@ -42,7 +46,7 @@ namespace Learn {
 		* \param[in] nbRegs The number of registers for the execution
 		*                   environment of Program.
 		*/
-		ClassificationLearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8) : BaseLearningAgent(le, iSet, p, nbRegs) {};
+		ClassificationLearningAgent(ClassificationLearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8) : BaseLearningAgent(le, iSet, p, nbRegs) {};
 
 		/// Specialization for classificationPurposes
 		std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode) override;
@@ -56,7 +60,44 @@ namespace Learn {
 	template<class BaseLearningAgent>
 	inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode)
 	{
-		return std::shared_ptr<EvaluationResult>();
+		// Init results
+		std::vector<double> result(this->learningEnvironment.getNbActions(), 0.0);
+
+		// Evaluate nbIteration times
+		for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation; i++) {
+			// Compute a Hash
+			std::hash<uint64_t> hasher;
+			uint64_t hash = hasher(generationNumber) ^ hasher(i);
+
+			// Reset the learning Environment
+			this->learningEnvironment.reset(hash, mode);
+
+			uint64_t nbActions = 0;
+			while (!this->learningEnvironment.isTerminal() && nbActions < this->params.maxNbActionsPerEval) {
+				// Get the action
+				uint64_t actionID = ((const TPG::TPGAction*)tee.executeFromRoot(root).back())->getActionID();
+				// Do it
+				this->learningEnvironment.doAction(actionID);
+				// Count actions
+				nbActions++;
+			}
+
+			// Update results
+			const auto& classificationTable = ((ClassificationLearningEnvironment&)this->learningEnvironment).getClassificationTable();
+			// for each class
+			for (uint64_t classIdx = 0; classIdx < classificationTable.size(); classIdx++) {
+				// result for the class is the number of total guess for this 
+				// class divided by the total number of time this class was 
+				// presented to the LearningAgent
+				result.at(classIdx) += (double)classificationTable.at(classIdx).at(classIdx) / (double)std::accumulate(classificationTable.at(classIdx).begin(), classificationTable.at(classIdx).end(), 0.0);
+			}
+		}
+
+		// Before returning the EvaluationResult, divide the result per class by the number of iteration
+		const LearningParameters& p = this->params;
+		std::for_each(result.begin(), result.end(), [p](double& val) { val /= (double)p.nbIterationsPerPolicyEvaluation; });
+
+		return std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result));
 	}
 
 	template<class BaseLearningAgent>
