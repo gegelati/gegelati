@@ -34,6 +34,11 @@ namespace Learn {
 		ClassificationEvaluationResult(const std::vector<double>& scores) :
 			EvaluationResult(std::accumulate(scores.cbegin(), scores.cend(), 0.0) / scores.size()),
 			scorePerClass(scores) {};
+
+		/**
+		* \brief Get a const ref to the scorePerClass attribute.
+		*/
+		const std::vector<double>& getScorePerClass() const;
 	};
 };
 

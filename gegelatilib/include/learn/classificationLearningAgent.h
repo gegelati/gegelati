@@ -102,8 +102,67 @@ namespace Learn {
 
 	template<class BaseLearningAgent>
 	void ClassificationLearningAgent<BaseLearningAgent>::decimateWorstRoots(std::multimap <std::shared_ptr<EvaluationResult>, const TPG::TPGVertex* >& results) {
-		// TODO: when a "EvaluationResult" container is used instead of a double.
-		std::cout << "Decimate";
+
+		// Compute the number of root to keep/delete base on each criterion
+		uint64_t totalNbRoot = this->tpg.getNbRootVertices();
+		uint64_t nbRootsToDelete = (uint64_t)floor(this->params.ratioDeletedRoots * totalNbRoot);
+		uint64_t nbRootsToKeep = (totalNbRoot - nbRootsToDelete);
+
+		// Keep ~half+ of the roots based on their general score on 
+		// all class.
+		// and ~half- of the roots on a per class score (none if nbRoots to keep < 2*nb class)
+		uint64_t nbRootsKeptPerClass = (nbRootsToKeep / this->learningEnvironment.getNbActions()) / 2;
+		uint64_t nbRootsKeptGeneralScore = nbRootsToKeep - this->learningEnvironment.getNbActions() * nbRootsKeptPerClass;
+
+		// Build a list of roots to keep
+		std::vector<const TPG::TPGVertex*> rootsToKeep;
+
+		// Insert roots to keep per class
+		for (uint64_t classIdx = 0; classIdx < this->learningEnvironment.getNbActions(); classIdx++) {
+			// Fill a map with the roots and the score of the specific class as ID.
+			std::map<double, const TPG::TPGVertex*> sortedRoot;
+			std::for_each(results.begin(), results.end(), [&sortedRoot, &classIdx](const std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex* >& res)
+				{
+					sortedRoot.emplace(((ClassificationEvaluationResult*)res.first.get())->getScorePerClass().at(classIdx), res.second);
+				});
+
+			// Keep the best nbRootsKeptPerClass (or less for reasons explained in the loop)
+			auto iterator = sortedRoot.rbegin();
+			for (auto i = 0; i < nbRootsKeptPerClass; i++) {
+				// If the root is not already marked to be kept
+				if (std::find(rootsToKeep.begin(), rootsToKeep.end(), iterator->second) == rootsToKeep.end()) {
+					rootsToKeep.push_back(iterator->second);
+				}
+				// Advance the iterator no matter what.
+				// This means that is a root scores well for several classes
+				// it is kept only once anyway, but additional roots will not 
+				// be kept for any of the concerned class.
+				iterator++;
+			}
+		}
+
+		// Insert remaining roots to keep
+		auto iterator = results.rbegin();
+		while (rootsToKeep.size() < nbRootsToKeep) {
+			// If the root is not already marked to be kept
+			if (std::find(rootsToKeep.begin(), rootsToKeep.end(), iterator->second) == rootsToKeep.end()) {
+				rootsToKeep.push_back(iterator->second);
+			}
+			// Advance the iterator no matter what.
+			iterator++;
+		}
+
+		// Do the removal.
+		// Because of potential root actions, the remaining number of roots
+		// may be higher than the given ratio.
+		auto allRoots = this->tpg.getRootVertices();
+		auto& tpgRef = this->tpg;
+		std::for_each(allRoots.begin(), allRoots.end(), [&rootsToKeep, &tpgRef](const TPG::TPGVertex* vert)
+			{
+				if (std::find(rootsToKeep.begin(), rootsToKeep.end(), vert) == rootsToKeep.end()) {
+					tpgRef.removeVertex(*vert);
+				}
+			});
 	}
 };
 
