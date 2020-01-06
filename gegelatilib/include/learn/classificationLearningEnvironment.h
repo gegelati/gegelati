@@ -49,6 +49,15 @@ namespace Learn {
 		const std::vector<std::vector<uint64_t>>& getClassificationTable() const;
 
 		/**
+		* \brief Default implementation for the doAction method.
+		*
+		* This implementation only increments the classificationTable based on 
+		* the currentClass attribute. Refresh of the data should be implemented
+		* by the child class, hence the pure virtual method.
+		*/
+		virtual void doAction(uint64_t actionID) override = 0;
+
+		/**
 		* \brief Default scoring for classificationLearningEnvironment.
 		*
 		* The default scoring for the classificationLearningEnvironment is
@@ -57,6 +66,13 @@ namespace Learn {
 		* The score represents the percentage of correct classification.
 		*/
 		virtual double getScore() const override;
+
+		/**
+		* \brief Default implementation of the reset.
+		*
+		* Resets to zero the classificationTable.
+		*/
+		virtual void reset(size_t seed = 0, LearningMode mode = TRAINING) override = 0;
 	};
 };
 

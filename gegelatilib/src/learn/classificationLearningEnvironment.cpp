@@ -1,5 +1,13 @@
 #include "learn/classificationLearningEnvironment.h"
 
+void Learn::ClassificationLearningEnvironment::doAction(uint64_t actionID) {
+	// Base method
+	LearningEnvironment::doAction(actionID);
+
+	// Classification table update
+	this->classificationTable.at(this->currentClass).at(actionID)++;
+}
+
 const std::vector<std::vector<uint64_t>>& Learn::ClassificationLearningEnvironment::getClassificationTable() const
 {
 	return this->classificationTable;
@@ -20,4 +28,14 @@ double Learn::ClassificationLearningEnvironment::getScore() const
 	}
 
 	return (double)nbCorrectGuess / (double)nbTotalGuess;
+}
+
+void Learn::ClassificationLearningEnvironment::reset(size_t seed, LearningMode mode)
+{
+	// reset scores to 0 in classification table
+	for (std::vector<uint64_t>& perClass : this->classificationTable) {
+		for (uint64_t score : perClass) {
+			score = 0;
+		}
+	}
 }
