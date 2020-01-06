@@ -3,38 +3,8 @@
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
 #include "learn/classificationLearningEnvironment.h"
+#include "learn/fakeClassificationLearningEnvironment.h"
 
-// Create a fake LearningEnvironment for testing purpose.
-class FakeClassificationLearningEnvironment : public Learn::ClassificationLearningEnvironment {
-protected:
-	DataHandlers::PrimitiveTypeArray<int> data;
-	int value;
-
-public:
-	FakeClassificationLearningEnvironment() : ClassificationLearningEnvironment(3), data(1), value{ 0 } {};
-	void doAction(uint64_t actionId) override {
-		// Increment classificationTable
-		ClassificationLearningEnvironment::doAction(actionId);
-
-		// Update data
-		value++;
-		this->currentClass = value % 3;
-		data.setDataAt(typeid(PrimitiveType<int>), 0, value);
-	}
-	void reset(size_t seed, Learn::LearningMode mode) {
-		// Call super pure virtual method to reset the pure virtual method.
-		ClassificationLearningEnvironment::reset(seed, mode);
-
-		this->value = 0;
-		this->currentClass = 0;
-	};
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
-		std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
-		vect.push_back(data);
-		return vect;
-	}
-	bool isTerminal() const { return false; }
-};
 
 TEST(ClassificationLearningEnvironmentTest, Constructor) {
 	Learn::ClassificationLearningEnvironment* le = NULL;
@@ -75,7 +45,5 @@ TEST(ClassificationLearningEnvironmentTest, resetDoActionGetClassificationTableG
 	}
 
 	// Get score
-
 	ASSERT_EQ(fle.getScore(), 6.0/18.0) << "Score of the ClassificationLearningEnvironment is not as expected with known actions.";
-
 }

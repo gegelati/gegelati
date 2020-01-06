@@ -10,6 +10,8 @@
 
 #include "learn/classificationLearningAgent.h"
 
+#include "learn/fakeClassificationLearningEnvironment.h"
+
 class ClassificationLearningAgentTest : public ::testing::Test {
 protected:
 	Instructions::Set set;
@@ -40,31 +42,11 @@ protected:
 	}
 };
 
-// Create a fake LearningEnvironment for testing purpose.
-class FFakeClassificationLearningEnvironment : public Learn::ClassificationLearningEnvironment {
-protected:
-	DataHandlers::PrimitiveTypeArray<int> data;
-
-public:
-	FFakeClassificationLearningEnvironment() : ClassificationLearningEnvironment(2), data(1) {};
-	void doAction(uint64_t) {
-		// todo
-	}
-	void reset(size_t seed, Learn::LearningMode mode) {
-		// Call super pure virtual method
-		ClassificationLearningEnvironment::reset(seed, mode);
-	};
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
-		std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
-		vect.push_back(data);
-		return vect;
-	}
-	bool isTerminal() const { return false; }
-};
 
 TEST_F(ClassificationLearningAgentTest, Constructor) {
 	Learn::ClassificationLearningAgent<Learn::LearningAgent> * cla;
 
-	FFakeClassificationLearningEnvironment fle;
+	FakeClassificationLearningEnvironment fle;
+
 	cla = new Learn::ClassificationLearningAgent<Learn::LearningAgent>(fle,set,params);
 }
