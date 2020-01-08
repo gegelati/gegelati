@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <vector>
 #include <numeric>
+#include <stdexcept>
 
 #include "learn/evaluationResult.h"
 #include "learn/classificationEvaluationResult.h"
@@ -102,6 +103,11 @@ namespace Learn {
 
 	template<class BaseLearningAgent>
 	void ClassificationLearningAgent<BaseLearningAgent>::decimateWorstRoots(std::multimap <std::shared_ptr<EvaluationResult>, const TPG::TPGVertex* >& results) {
+		// Check that results are ClassificationEvaluationResults.
+		// (also throws on empty results)
+		if (typeid(ClassificationEvaluationResult) != typeid(*(results.begin()->first.get()))) {
+			throw std::runtime_error("ClassificationLearningAgent can not decimate worst roots for results whose type is not ClassificationEvaluationResult.");
+		}
 
 		// Compute the number of root to keep/delete base on each criterion
 		uint64_t totalNbRoot = this->tpg.getNbRootVertices();
@@ -120,7 +126,7 @@ namespace Learn {
 		// Insert roots to keep per class
 		for (uint64_t classIdx = 0; classIdx < this->learningEnvironment.getNbActions(); classIdx++) {
 			// Fill a map with the roots and the score of the specific class as ID.
-			std::map<double, const TPG::TPGVertex*> sortedRoot;
+			std::multimap<double, const TPG::TPGVertex*> sortedRoot;
 			std::for_each(results.begin(), results.end(), [&sortedRoot, &classIdx](const std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex* >& res)
 				{
 					sortedRoot.emplace(((ClassificationEvaluationResult*)res.first.get())->getScorePerClass().at(classIdx), res.second);
