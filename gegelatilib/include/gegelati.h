@@ -17,10 +17,15 @@
 #include <instructions/multByConstParam.h>
 #include <instructions/set.h>
 
+#include <learn/evaluationResult.h>
 #include <learn/learningAgent.h>
 #include <learn/parallelLearningAgent.h>
 #include <learn/learningEnvironment.h>
 #include <learn/learningParameters.h>
+
+#include <learn/classificationEvaluationResult.h>
+#include <learn/classificationLearningEnvironment.h>
+#include <learn/classificationLearningAgent.h>
 
 #include <mutator/lineMutator.h>
 #include <mutator/mutationParameters.h>
