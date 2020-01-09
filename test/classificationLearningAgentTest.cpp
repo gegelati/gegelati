@@ -72,7 +72,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot) {
 
 	cla.init();
 	std::shared_ptr<Learn::EvaluationResult> result;
-	ASSERT_NO_THROW(result = cla.evaluateRoot(tee, *cla.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
+	ASSERT_NO_THROW(result = cla.evaluateRoot(tee, *cla.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, fle)) << "Evaluation from a root failed.";
 	ASSERT_LE(result->getResult(), 1.0) << "Average score should not exceed the score of a perfect player.";
 }
 

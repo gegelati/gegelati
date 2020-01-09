@@ -50,7 +50,7 @@ namespace Learn {
 		ClassificationLearningAgent(ClassificationLearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8) : BaseLearningAgent(le, iSet, p, nbRegs) {};
 
 		/// Specialization for classificationPurposes
-		std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode) override;
+		virtual std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const override;
 
 		/**
 		* \brief Decimate worst root specialized for classification purposes.
@@ -65,7 +65,7 @@ namespace Learn {
 	* root instead of the usual EvaluationResult.
 	*/
 	template<class BaseLearningAgent>
-	inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode)
+	inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const
 	{
 		// Init results
 		std::vector<double> result(this->learningEnvironment.getNbActions(), 0.0);
@@ -77,20 +77,20 @@ namespace Learn {
 			uint64_t hash = hasher(generationNumber) ^ hasher(i);
 
 			// Reset the learning Environment
-			this->learningEnvironment.reset(hash, mode);
+			le.reset(hash, mode);
 
 			uint64_t nbActions = 0;
-			while (!this->learningEnvironment.isTerminal() && nbActions < this->params.maxNbActionsPerEval) {
+			while (!le.isTerminal() && nbActions < this->params.maxNbActionsPerEval) {
 				// Get the action
 				uint64_t actionID = ((const TPG::TPGAction*)tee.executeFromRoot(root).back())->getActionID();
 				// Do it
-				this->learningEnvironment.doAction(actionID);
+				le.doAction(actionID);
 				// Count actions
 				nbActions++;
 			}
 
 			// Update results
-			const auto& classificationTable = ((ClassificationLearningEnvironment&)this->learningEnvironment).getClassificationTable();
+			const auto& classificationTable = ((ClassificationLearningEnvironment&)le).getClassificationTable();
 			// for each class
 			for (uint64_t classIdx = 0; classIdx < classificationTable.size(); classIdx++) {
 				// result for the class is the number of total guess for this 

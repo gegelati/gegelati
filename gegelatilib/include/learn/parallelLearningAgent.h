@@ -95,27 +95,6 @@ namespace Learn {
 			LearningAgent(le, iSet, p, nbRegs), maxNbThreads{ maxNbThreads } {};
 
 		/**
-		* \brief Evaluates policy starting from the given root.
-		*
-		* **Overload the function from the base class LearningAgent.**
-		*
-		* The policy, that is, the TPGGraph execution starting from the given
-		* TPGVertex is evaluated nbIteration times. The generationNumber is
-		* combined with the current iteration number to generate a set of
-		* seeds for evaluating the policy.
-		* The method returns the average score for this policy.
-		*
-		* \param[in] tee the TPGExecutionEngine to use for evaluating the root.
-		* \param[in] root the TPGVertex from which the policy evaluation starts.
-		* \param[in] generationNumber the integer number of the current generation.
-		* \param[in] mode the LearningMode to use during the policy evaluation.
-		* \param[in] le Reference to the LearningEnvironment to use during the
-		* policy evaluation.
-		* \param[in] params Reference to the LearningParameters.
-		*/
-		static std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le, const Learn::LearningParameters& params);
-
-		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
 		*
 		* **Replaces the function from the base class LearningAgent.**

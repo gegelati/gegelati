@@ -32,32 +32,32 @@ void Learn::LearningAgent::init(uint64_t seed) {
 	this->archive.clear();
 }
 
-std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode)
+std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode, LearningEnvironment& le) const
 {
 	// Init results
 	double result = 0.0;
 
 	// Evaluate nbIteration times
-	for (auto i = 0; i < params.nbIterationsPerPolicyEvaluation; i++) {
+	for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation; i++) {
 		// Compute a Hash
 		std::hash<uint64_t> hasher;
 		uint64_t hash = hasher(generationNumber) ^ hasher(i);
 
 		// Reset the learning Environment
-		this->learningEnvironment.reset(hash, mode);
+		le.reset(hash, mode);
 
 		uint64_t nbActions = 0;
-		while (!this->learningEnvironment.isTerminal() && nbActions < params.maxNbActionsPerEval) {
+		while (!le.isTerminal() && nbActions < this->params.maxNbActionsPerEval) {
 			// Get the action
 			uint64_t actionID = ((const TPG::TPGAction*)tee.executeFromRoot(root).back())->getActionID();
 			// Do it
-			this->learningEnvironment.doAction(actionID);
+			le.doAction(actionID);
 			// Count actions
 			nbActions++;
 		}
 
 		// Update results
-		result += this->learningEnvironment.getScore();
+		result += le.getScore();
 	}
 	return std::shared_ptr<EvaluationResult>(new EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation));
 }
@@ -77,7 +77,7 @@ std::multimap< std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> 
 			this->archive.setRandomSeed(this->rng.getUnsignedInt64(0, UINT64_MAX));
 		}
 
-		std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(tee, *root, generationNumber, mode);
+		std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(tee, *root, generationNumber, mode, this->learningEnvironment);
 		result.emplace(avgScore, root); //{ avgScore, root });
 	}
 

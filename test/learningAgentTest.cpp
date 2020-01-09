@@ -73,7 +73,7 @@ TEST_F(LearningAgentTest, EvalRoot) {
 
 	la.init();
 	std::shared_ptr<Learn::EvaluationResult> result;
-	ASSERT_NO_THROW(result = la.evaluateRoot(tee, *la.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
+	ASSERT_NO_THROW(result = la.evaluateRoot(tee, *la.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, le)) << "Evaluation from a root failed.";
 	ASSERT_LE(result->getResult(), 1.0) << "Average score should not exceed the score of a perfect player.";
 }
 
@@ -243,7 +243,8 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential) {
 	TPG::TPGExecutionEngine tee(env, &archive);
 
 	std::shared_ptr<Learn::EvaluationResult> result;
-	ASSERT_NO_THROW(result = Learn::ParallelLearningAgent::evaluateRoot(tee, *tpg.getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, le, params)) << "Evaluation from a root failed.";
+	Learn::ParallelLearningAgent pla(le, set, params, 1);
+	ASSERT_NO_THROW(result = pla.evaluateRoot(tee, *tpg.getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, le)) << "Evaluation from a root failed.";
 	ASSERT_LE(result->getResult(), 1.0) << "Average score should not exceed the score of a perfect player.";
 }
 

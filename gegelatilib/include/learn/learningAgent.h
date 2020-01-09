@@ -103,12 +103,17 @@ namespace Learn {
 		* seeds for evaluating the policy.
 		* The method returns the average score for this policy.
 		*
+		* The method is const to enable potential parallel calls to it.
+		*
 		* \param[in] tee The TPGExecutionEngine to use.
 		* \param[in] root the TPGVertex from which the policy evaluation starts.
 		* \param[in] generationNumber the integer number of the current generation.
 		* \param[in] mode the LearningMode to use during the policy evaluation.
+		* \param[in] le Reference to the LearningEnvironment to use during the
+		* policy evaluation (may be different from the attribute of the class in
+		* child LearningAgentClass).
 		*/
-		virtual std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode);
+		virtual std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const;
 
 		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
