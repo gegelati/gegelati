@@ -88,14 +88,12 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
 	Learn::ClassificationLearningAgent cla(fle, set, params, 4);
 
 	// Initialize and populate the TPG
-	cla.init();
+	cla.init(0);
 	TPG::TPGGraph& graph = cla.getTPGGraph();
 	Mutator::TPGMutator::populateTPG(graph, cla.getArchive(), params.mutation, cla.getRNG());
-	uint64_t originalNbVertices = graph.getNbVertices();
 
-	// Check that the action is now a root
+	// Get roots
 	auto roots = graph.getRootVertices();
-	// TODO: ASSERT_EQ(typeid(*roots.at(0)), typeid(TPG::TPGAction)) << "An action should have become a root of the TPGGraph.";
 
 	// Create and fill results for each "root" artificially with EvaluationResults
 	std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> results;
@@ -115,7 +113,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
 		// Their general score will be 0.33.
 		// With score for 1st class to 0.0
 		std::vector<double> scores(fle.getNbActions(), 0.33 / (fle.getNbActions() - 1) * fle.getNbActions());
-		std::for_each(scores.begin(), scores.end(), [](double& score) {score = 0.0; });
+		scores.at(0) = 0.0;
 
 		classifResults.emplace(new Learn::ClassificationEvaluationResult(scores), root);
 	}
@@ -140,22 +138,37 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
 
 		// Add custom result
 		std::vector<double> scores(fle.getNbActions(), 0.0);
-		scores.at(0) = 0.25 * (idx + 1);
+		scores.at(0) = 0.25 * (idx + 1.0);
 		classifResults.emplace(new Learn::ClassificationEvaluationResult(scores), root);
 	}
 
-	// Do the decimation (must fail)
-	ASSERT_NO_THROW(cla.decimateWorstRoots(classifResults)) << "Decimating worst roots should fail with EvaluationResults instead of ClassificationEvaluationResults.";
+	// Add an additional 
+	// - root action (should not be removed, despite having the worst score)
+	// - team root (will be removed with the same score)
+	const TPG::TPGVertex& actionRoot = graph.addNewAction(0);
+	const TPG::TPGVertex& teamRoot = graph.addNewTeam();
+
+	uint64_t originalNbVertices = graph.getNbVertices();
+
+	// Create a poor score for the action and team root
+	classifResults.emplace(new Learn::ClassificationEvaluationResult(std::vector(fle.getNbActions(), 0.0)), &actionRoot);
+	classifResults.emplace(new Learn::ClassificationEvaluationResult(std::vector(fle.getNbActions(), 0.0)), &teamRoot);
+
+	// Do the decimation
+	ASSERT_NO_THROW(cla.decimateWorstRoots(classifResults)) << "Decimating worst roots should not fail with ClassificationEvaluationResults.";
 
 	// Check the number of remaining vertices.
 	ASSERT_EQ(cla.getTPGGraph().getNbVertices(), originalNbVertices - std::ceil(params.mutation.tpg.nbRoots * (1.0 - params.ratioDeletedRoots)));
 
 	// Check the presence of savedRoots among remaining roots.
-	// i.e. check that there good result for one class saved them from decimation.
+	// i.e. check that their good result for one class saved them from decimation.
 	auto remainingRoots = cla.getTPGGraph().getRootVertices();
 	for (const TPG::TPGVertex* savedRoot : savedRoots) {
 		ASSERT_TRUE(std::find(remainingRoots.begin(), remainingRoots.end(), savedRoot) != remainingRoots.end()) << "Roots with best classification score for 1st class were not preserved during decimation.";
 	}
 
-
+	// Check the presence of action root among remaining roots.
+	ASSERT_TRUE(std::find(remainingRoots.begin(), remainingRoots.end(), &actionRoot) != remainingRoots.end()) << "Action roots with poor score were not preserved during decimation.";
+	// Check the absence of team root among remaining roots.
+	ASSERT_TRUE(std::find(remainingRoots.begin(), remainingRoots.end(), &teamRoot) == remainingRoots.end()) << "Action roots with poor score were not preserved during decimation.";
 }

@@ -8,9 +8,3 @@ bool Learn::operator<(const EvaluationResult& a, const EvaluationResult& b)
 {
 	return a.getResult() < b.getResult();
 }
-
-
-bool Learn::operator==(const EvaluationResult& a, const EvaluationResult& b)
-{
-	return a.getResult() == b.getResult();
-}

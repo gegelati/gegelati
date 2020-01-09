@@ -58,6 +58,12 @@ namespace Learn {
 		void decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results) override;
 	};
 
+	/**
+	* \brief Specialization of the evaluateRoot method for classification purposes.
+	*
+	* This method returns a ClassificationEvaluationResult for the evaluated
+	* root instead of the usual EvaluationResult.
+	*/
 	template<class BaseLearningAgent>
 	inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode)
 	{
@@ -101,6 +107,30 @@ namespace Learn {
 		return std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result));
 	}
 
+	/**
+	* \brief Specialization of the decimateWorstRoots method for
+	* classification purposes.
+	*
+	* During the decimation process, roughly half of the roots are kept based on
+	* their score for individual class of the ClassificationLearningEnvironment.
+	* To do so, for each class of the ClassificationLearningEnvironment, the
+	* roots provided the best score are preserved during the decimation process
+	* even if their global score over all classes is not among the best.
+	*
+	* The remaining half of preserved roots is selected using the general score
+	* obtained over all classes.
+	*
+	* This per-class preservation is activated only if there is a sufficient
+	* number of root vertices in the TPGGraph after decimation to guarantee that
+	* all classes are preserved equally. In other word, the same number of root
+	* is marked for preservation for each class, which can only be achieved if
+	* the number of roots to preserve during the decimation process is superior
+	* or equal to twice the number of actions of the
+	* ClassificationLearningEnvironment.
+	* If an insufficient number of root is preserved during the decimation
+	* process, all roots are preserved based on their general score.
+	*
+	*/
 	template<class BaseLearningAgent>
 	void ClassificationLearningAgent<BaseLearningAgent>::decimateWorstRoots(std::multimap <std::shared_ptr<EvaluationResult>, const TPG::TPGVertex* >& results) {
 		// Check that results are ClassificationEvaluationResults.
@@ -140,7 +170,7 @@ namespace Learn {
 					rootsToKeep.push_back(iterator->second);
 				}
 				// Advance the iterator no matter what.
-				// This means that is a root scores well for several classes
+				// This means that if a root scores well for several classes
 				// it is kept only once anyway, but additional roots will not 
 				// be kept for any of the concerned class.
 				iterator++;
@@ -149,7 +179,7 @@ namespace Learn {
 
 		// Insert remaining roots to keep
 		auto iterator = results.rbegin();
-		while (rootsToKeep.size() < nbRootsToKeep) {
+		while (rootsToKeep.size() < nbRootsToKeep && iterator != results.rend()) {
 			// If the root is not already marked to be kept
 			if (std::find(rootsToKeep.begin(), rootsToKeep.end(), iterator->second) == rootsToKeep.end()) {
 				rootsToKeep.push_back(iterator->second);
@@ -159,13 +189,15 @@ namespace Learn {
 		}
 
 		// Do the removal.
-		// Because of potential root actions, the remaining number of roots
+		// Because of potential root actions, the preserved number of roots
 		// may be higher than the given ratio.
 		auto allRoots = this->tpg.getRootVertices();
 		auto& tpgRef = this->tpg;
 		std::for_each(allRoots.begin(), allRoots.end(), [&rootsToKeep, &tpgRef](const TPG::TPGVertex* vert)
 			{
-				if (std::find(rootsToKeep.begin(), rootsToKeep.end(), vert) == rootsToKeep.end()) {
+				// Do not remove actions
+				if (typeid(*vert) != typeid(TPG::TPGAction)
+					&& std::find(rootsToKeep.begin(), rootsToKeep.end(), vert) == rootsToKeep.end()) {
 					tpgRef.removeVertex(*vert);
 				}
 			});

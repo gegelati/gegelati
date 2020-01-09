@@ -48,11 +48,6 @@ namespace Learn {
 	* \brief Comparison function to enable sorting of EvaluationResult with STL.
 	*/
 	bool operator<(const EvaluationResult& a, const EvaluationResult& b);
-
-	/**
-	* \brief Comparison function to enable sorting of EvaluationResult with STL.
-	*/
-	bool operator==(const EvaluationResult& a, const EvaluationResult& b);
 }
 
 namespace std {
