@@ -34,7 +34,7 @@ void Learn::ClassificationLearningEnvironment::reset(size_t seed, LearningMode m
 {
 	// reset scores to 0 in classification table
 	for (std::vector<uint64_t>& perClass : this->classificationTable) {
-		for (uint64_t score : perClass) {
+		for (uint64_t& score : perClass) {
 			score = 0;
 		}
 	}
