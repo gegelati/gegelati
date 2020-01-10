@@ -54,6 +54,7 @@ namespace Learn {
 		*
 		* This method returns a ClassificationEvaluationResult for the evaluated
 		* root instead of the usual EvaluationResult.
+		* The score per root corresponds to the F1 score for this class.
 		*/
 		virtual std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const override;
 
@@ -113,9 +114,6 @@ namespace Learn {
 			const auto& classificationTable = ((ClassificationLearningEnvironment&)le).getClassificationTable();
 			// for each class
 			for (uint64_t classIdx = 0; classIdx < classificationTable.size(); classIdx++) {
-				// result for the class is the number of total guess for this 
-				// class divided by the total number of time this class was 
-				// presented to the LearningAgent
 				uint64_t truePositive = classificationTable.at(classIdx).at(classIdx);
 				uint64_t falseNegative = std::accumulate(classificationTable.at(classIdx).begin(), classificationTable.at(classIdx).end(), (uint64_t)0) - truePositive;
 				uint64_t falsePositive = std::transform_reduce(classificationTable.begin(), classificationTable.end(), (uint64_t)0, std::plus<>(),

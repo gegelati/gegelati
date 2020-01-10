@@ -1,3 +1,5 @@
+#include <numeric>
+
 #include "learn/classificationLearningEnvironment.h"
 
 void Learn::ClassificationLearningEnvironment::doAction(uint64_t actionID) {
@@ -15,19 +17,29 @@ const std::vector<std::vector<uint64_t>>& Learn::ClassificationLearningEnvironme
 
 double Learn::ClassificationLearningEnvironment::getScore() const
 {
+	// Compute the average f1 score over all classes
+	// (chosen instead of the global f1 score as it gives an equal weight to 
+	// the f1 score of each class, no matter its ratio within the observed
+	// population)
+	double averageF1Score = 0.0;
 
-	uint64_t nbTotalGuess = 0;
-	uint64_t nbCorrectGuess = 0;
+	// for each class
+	for (uint64_t classIdx = 0; classIdx < classificationTable.size(); classIdx++) {
+		uint64_t truePositive = classificationTable.at(classIdx).at(classIdx);
+		uint64_t falseNegative = std::accumulate(classificationTable.at(classIdx).begin(), classificationTable.at(classIdx).end(), (uint64_t)0) - truePositive;
+		uint64_t falsePositive = std::transform_reduce(classificationTable.begin(), classificationTable.end(), (uint64_t)0, std::plus<>(),
+			[&classIdx](const std::vector<uint64_t>& classifForClass) {return classifForClass.at(classIdx); }) - truePositive;
 
-	// Scan the classification table to compute the double score
-	for (auto classIdx = 0; classIdx < this->classificationTable.size(); classIdx++) {
-		for (auto guessedClass = 0; guessedClass < this->classificationTable.size(); guessedClass++) {
-			nbTotalGuess += this->classificationTable.at(classIdx).at(guessedClass);
-			nbCorrectGuess += (classIdx == guessedClass) ? this->classificationTable.at(classIdx).at(guessedClass) : 0;
-		}
+		double recall = (double)truePositive / (double)(truePositive + falseNegative);
+		double precision = (double)truePositive / (double)(truePositive + falsePositive);
+		// If true positive is 0, set score to 0.
+		double fScore = (truePositive != 0) ? 2 * (precision * recall) / (precision + recall) : 0.0;
+		averageF1Score += fScore;
 	}
 
-	return (double)nbCorrectGuess / (double)nbTotalGuess;
+	averageF1Score /= this->classificationTable.size();
+
+	return averageF1Score;
 }
 
 void Learn::ClassificationLearningEnvironment::reset(size_t seed, LearningMode mode)

@@ -44,6 +44,6 @@ TEST(ClassificationLearningEnvironmentTest, resetDoActionGetClassificationTableG
 		}
 	}
 
-	// Get score
-	ASSERT_EQ(fle.getScore(), 6.0/18.0) << "Score of the ClassificationLearningEnvironment is not as expected with known actions.";
+	// Get average f1 score
+	ASSERT_NEAR(fle.getScore(), 0.323077, 0.000001) << "Score of the ClassificationLearningEnvironment is not as expected with known actions.";
 }
