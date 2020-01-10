@@ -7,6 +7,8 @@
 
 #include "instructions/set.h"
 #include "tpg/tpgExecutionEngine.h"
+
+#include "learn/evaluationResult.h"
 #include "learn/learningParameters.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningAgent.h"
@@ -34,7 +36,7 @@ namespace Learn {
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		* \param[in] results Map to store the resulting score of evaluated roots.
 		*/
-		void evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<double, const TPG::TPGVertex*>& results);
+		void evaluateAllRootsInParallel(uint64_t generationNumber, LearningMode mode, std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results);
 
 		/**
 		* \brief Function implementing the behavior of slave threads during
@@ -53,7 +55,7 @@ namespace Learn {
 		*/
 		void slaveEvalRootThread(uint64_t generationNumber, LearningMode mode,
 			std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>& rootsToProcess, std::mutex& rootsToProcessMutex,
-			std::map<uint64_t, std::pair<double, const TPG::TPGVertex*>>& resultsPerRootMap, std::mutex& resultsPerRootMapMutex,
+			std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>>& resultsPerRootMap, std::mutex& resultsPerRootMapMutex,
 			std::map<uint64_t, size_t>& archiveSeeds,
 			std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex);
 
@@ -93,27 +95,6 @@ namespace Learn {
 			LearningAgent(le, iSet, p, nbRegs), maxNbThreads{ maxNbThreads } {};
 
 		/**
-		* \brief Evaluates policy starting from the given root.
-		*
-		* **Overload the function from the base class LearningAgent.**
-		*
-		* The policy, that is, the TPGGraph execution starting from the given
-		* TPGVertex is evaluated nbIteration times. The generationNumber is
-		* combined with the current iteration number to generate a set of
-		* seeds for evaluating the policy.
-		* The method returns the average score for this policy.
-		*
-		* \param[in] tee the TPGExecutionEngine to use for evaluating the root.
-		* \param[in] root the TPGVertex from which the policy evaluation starts.
-		* \param[in] generationNumber the integer number of the current generation.
-		* \param[in] mode the LearningMode to use during the policy evaluation.
-		* \param[in] le Reference to the LearningEnvironment to use during the
-		* policy evaluation.
-		* \param[in] params Reference to the LearningParameters.
-		*/
-		static double evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le, const Learn::LearningParameters& params);
-
-		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
 		*
 		* **Replaces the function from the base class LearningAgent.**
@@ -129,7 +110,7 @@ namespace Learn {
 		* \param[in] generationNumber the integer number of the current generation.
 		* \param[in] mode the LearningMode to use during the policy evaluation.
 		*/
-		std::multimap<double, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
+		std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
 
 		/// Inherited from LearningAgent
 		void trainOneGeneration(uint64_t generationNumber) override;
