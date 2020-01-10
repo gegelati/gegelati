@@ -1,4 +1,5 @@
 #include <numeric>
+#include <algorithm>
 
 #include "learn/classificationLearningEnvironment.h"
 
@@ -27,8 +28,10 @@ double Learn::ClassificationLearningEnvironment::getScore() const
 	for (uint64_t classIdx = 0; classIdx < classificationTable.size(); classIdx++) {
 		uint64_t truePositive = classificationTable.at(classIdx).at(classIdx);
 		uint64_t falseNegative = std::accumulate(classificationTable.at(classIdx).begin(), classificationTable.at(classIdx).end(), (uint64_t)0) - truePositive;
-		uint64_t falsePositive = std::transform_reduce(classificationTable.begin(), classificationTable.end(), (uint64_t)0, std::plus<>(),
-			[&classIdx](const std::vector<uint64_t>& classifForClass) {return classifForClass.at(classIdx); }) - truePositive;
+		uint64_t falsePositive = 0;
+		std::for_each(classificationTable.begin(), classificationTable.end(),
+			[&classIdx, &falsePositive](const std::vector<uint64_t>& classifForClass) {falsePositive += classifForClass.at(classIdx); });
+		falsePositive -= truePositive;
 
 		double recall = (double)truePositive / (double)(truePositive + falseNegative);
 		double precision = (double)truePositive / (double)(truePositive + falsePositive);
