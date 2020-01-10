@@ -58,6 +58,7 @@ for archive in ${ARCHIVES}; do
 	if [ $count = 0 ] 
 	then
 		cp $archive gegelatilib-latest-develop.zip
+		cp $archive ../
 
 		# index.md html table
 		echo "<tr><td colspan='2'><div align='center'><i>Latest</i></div></td><td><a href=\"https://github.com/gegelati/gegelati/commit/$commit_long_sha1\"><code>$commit_short_sha1</code></a></td><td><a href=\"./gegelatilib-latest-develop.zip\">Zip ($archive_size)</a></td></tr>" >> index.md
