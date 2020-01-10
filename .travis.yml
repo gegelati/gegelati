@@ -33,12 +33,18 @@ jobs:
           before_deploy:
             ./scripts/prepare_archive_windows.sh
           deploy:
-            provider: script
-            script: bash scripts/upload_windows.sh
-            verbose: true
-            skip_cleanup: true
-            on:
-              branch: develop
+            - provider: script
+              script: bash scripts/upload_windows.sh
+              verbose: true
+              skip_cleanup: true
+              on:
+                branch: develop
+            - provider: script
+              script: bash scripts/upload_windows.sh
+              verbose: true
+              skip_cleanup: true
+              on:
+                branch: master
             
         - os: linux
           stage: Build
@@ -76,16 +82,23 @@ jobs:
           before_deploy: 
             ./scripts/download_archives_linux.sh
           deploy:
-              provider: pages:git
-              verbose: true
-              edge: true # opt in to dpl v2
-              skip_cleanup: true
-              deploy_key: $GITHUB_TOKEN
-              repo: gegelati/neutral-builds
-              target_branch: gh-pages
-              local_dir: neutral_builds
-              keep_history: false
-              on: 
-                branch: develop
+              - provider: pages:git
+                verbose: true
+                edge: true # opt in to dpl v2
+                deploy_key: $GITHUB_TOKEN
+                repo: gegelati/neutral-builds
+                target_branch: gh-pages
+                local_dir: neutral_builds
+                keep_history: false
+                on:
+                  branch: develop
+
+              - provider: releases
+                edge: true # opt in to dpl v2
+                token: $GITHUB_TOKEN
+                draft: true
+                on: 
+                    branch: master
+                    tags: true
           after_deploy:
             - ./scripts/trigger_gegelati-apps.sh
