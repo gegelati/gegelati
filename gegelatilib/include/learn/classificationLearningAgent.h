@@ -49,21 +49,41 @@ namespace Learn {
 		*/
 		ClassificationLearningAgent(ClassificationLearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8) : BaseLearningAgent(le, iSet, p, nbRegs) {};
 
-		/// Specialization for classificationPurposes
+		/**
+		* \brief Specialization of the evaluateRoot method for classification purposes.
+		*
+		* This method returns a ClassificationEvaluationResult for the evaluated
+		* root instead of the usual EvaluationResult.
+		*/
 		virtual std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const override;
 
 		/**
-		* \brief Decimate worst root specialized for classification purposes.
+		* \brief Specialization of the decimateWorstRoots method for
+		* classification purposes.
+		*
+		* During the decimation process, roughly half of the roots are kept based on
+		* their score for individual class of the ClassificationLearningEnvironment.
+		* To do so, for each class of the ClassificationLearningEnvironment, the
+		* roots provided the best score are preserved during the decimation process
+		* even if their global score over all classes is not among the best.
+		*
+		* The remaining half of preserved roots is selected using the general score
+		* obtained over all classes.
+		*
+		* This per-class preservation is activated only if there is a sufficient
+		* number of root vertices in the TPGGraph after decimation to guarantee that
+		* all classes are preserved equally. In other word, the same number of root
+		* is marked for preservation for each class, which can only be achieved if
+		* the number of roots to preserve during the decimation process is superior
+		* or equal to twice the number of actions of the
+		* ClassificationLearningEnvironment.
+		* If an insufficient number of root is preserved during the decimation
+		* process, all roots are preserved based on their general score.
+		*
 		*/
 		void decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results) override;
 	};
 
-	/**
-	* \brief Specialization of the evaluateRoot method for classification purposes.
-	*
-	* This method returns a ClassificationEvaluationResult for the evaluated
-	* root instead of the usual EvaluationResult.
-	*/
 	template<class BaseLearningAgent>
 	inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const
 	{
@@ -96,7 +116,16 @@ namespace Learn {
 				// result for the class is the number of total guess for this 
 				// class divided by the total number of time this class was 
 				// presented to the LearningAgent
-				result.at(classIdx) += (double)classificationTable.at(classIdx).at(classIdx) / (double)std::accumulate(classificationTable.at(classIdx).begin(), classificationTable.at(classIdx).end(), 0.0);
+				uint64_t truePositive = classificationTable.at(classIdx).at(classIdx);
+				uint64_t falseNegative = std::accumulate(classificationTable.at(classIdx).begin(), classificationTable.at(classIdx).end(), (uint64_t)0) - truePositive;
+				uint64_t falsePositive = std::transform_reduce(classificationTable.begin(), classificationTable.end(), (uint64_t)0, std::plus<>(),
+					[&classIdx](const std::vector<uint64_t>& classifForClass) {return classifForClass.at(classIdx); }) - truePositive;
+
+				double recall = (double)truePositive / (double)(truePositive + falseNegative);
+				double precision = (double)truePositive / (double)(truePositive + falsePositive);
+				// If true positive is 0, set score to 0.
+				double fScore = (truePositive != 0) ? 2 * (precision * recall) / (precision + recall) : 0.0;
+				result.at(classIdx) += fScore;
 			}
 		}
 
@@ -107,30 +136,6 @@ namespace Learn {
 		return std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result));
 	}
 
-	/**
-	* \brief Specialization of the decimateWorstRoots method for
-	* classification purposes.
-	*
-	* During the decimation process, roughly half of the roots are kept based on
-	* their score for individual class of the ClassificationLearningEnvironment.
-	* To do so, for each class of the ClassificationLearningEnvironment, the
-	* roots provided the best score are preserved during the decimation process
-	* even if their global score over all classes is not among the best.
-	*
-	* The remaining half of preserved roots is selected using the general score
-	* obtained over all classes.
-	*
-	* This per-class preservation is activated only if there is a sufficient
-	* number of root vertices in the TPGGraph after decimation to guarantee that
-	* all classes are preserved equally. In other word, the same number of root
-	* is marked for preservation for each class, which can only be achieved if
-	* the number of roots to preserve during the decimation process is superior
-	* or equal to twice the number of actions of the
-	* ClassificationLearningEnvironment.
-	* If an insufficient number of root is preserved during the decimation
-	* process, all roots are preserved based on their general score.
-	*
-	*/
 	template<class BaseLearningAgent>
 	void ClassificationLearningAgent<BaseLearningAgent>::decimateWorstRoots(std::multimap <std::shared_ptr<EvaluationResult>, const TPG::TPGVertex* >& results) {
 		// Check that results are ClassificationEvaluationResults.
