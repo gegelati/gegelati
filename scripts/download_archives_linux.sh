@@ -58,13 +58,13 @@ for archive in ${ARCHIVES}; do
 	if [ $count = 0 ] 
 	then
 		cp $archive gegelatilib-latest-develop.zip
-		cp $archive ../
+		cp $archive ../$(echo $archive | cut -d'.' -f 1,2,3,5) # Copy for releases drop the date
 
 		# index.md html table
 		echo "<tr><td colspan='2'><div align='center'><i>Latest</i></div></td><td><a href=\"https://github.com/gegelati/gegelati/commit/$commit_long_sha1\"><code>$commit_short_sha1</code></a></td><td><a href=\"./gegelatilib-latest-develop.zip\">Zip ($archive_size)</a></td></tr>" >> index.md
 		
 		# readme.md markdown table
-		echo "| Latest |  | [\`$commit_short_sha1\`](https://github.com/gegelati/gegelati/commit/$commit_long_sha1) | [Zip ($archive_size)](./gegelatilib-0.0.0.latest.zip) |" >> ReadMe.md 
+		echo "| Latest |  | [\`$commit_short_sha1\`](https://github.com/gegelati/gegelati/commit/$commit_long_sha1) | [Zip ($archive_size)](./gegelatilib-latest-develop.zip) |" >> ReadMe.md 
 
 	fi	
 
