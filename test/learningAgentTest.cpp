@@ -72,9 +72,9 @@ TEST_F(LearningAgentTest, EvalRoot) {
 	TPG::TPGExecutionEngine tee(la.getTPGGraph().getEnvironment(), &a);
 
 	la.init();
-	double result;
-	ASSERT_NO_THROW(result = la.evaluateRoot(tee, *la.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
-	ASSERT_LE(result, 1.0) << "Average score should not exceed the score of a perfect player.";
+	std::shared_ptr<Learn::EvaluationResult> result;
+	ASSERT_NO_THROW(result = la.evaluateRoot(tee, *la.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, le)) << "Evaluation from a root failed.";
+	ASSERT_LE(result->getResult(), 1.0) << "Average score should not exceed the score of a perfect player.";
 }
 
 TEST_F(LearningAgentTest, EvalAllRoots) {
@@ -86,7 +86,7 @@ TEST_F(LearningAgentTest, EvalAllRoots) {
 	Learn::LearningAgent la(le, set, params);
 
 	la.init();
-	std::multimap<double, const TPG::TPGVertex*> result;
+	std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> result;
 	ASSERT_NO_THROW(result = la.evaluateAllRoots(0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
 	ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }
@@ -129,10 +129,10 @@ TEST_F(LearningAgentTest, DecimateWorstRoots) {
 	ASSERT_EQ(typeid(*roots.at(0)), typeid(TPG::TPGAction)) << "An action should have become a root of the TPGGraph.";
 
 	// Create and fill results for each "root" artificially
-	std::multimap<double, const TPG::TPGVertex*> results;
+	std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> results;
 	double result = 0.0;
 	for (const TPG::TPGVertex* root : roots) {
-		results.insert({ result++, root });
+		results.emplace(new Learn::EvaluationResult(result++), root);
 	}
 
 	// Do the decimation
@@ -242,9 +242,10 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential) {
 	// The TPGExecutionEngine
 	TPG::TPGExecutionEngine tee(env, &archive);
 
-	double result;
-	ASSERT_NO_THROW(result = Learn::ParallelLearningAgent::evaluateRoot(tee, *tpg.getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, le, params)) << "Evaluation from a root failed.";
-	ASSERT_LE(result, 1.0) << "Average score should not exceed the score of a perfect player.";
+	std::shared_ptr<Learn::EvaluationResult> result;
+	Learn::ParallelLearningAgent pla(le, set, params, 1);
+	ASSERT_NO_THROW(result = pla.evaluateRoot(tee, *tpg.getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, le)) << "Evaluation from a root failed.";
+	ASSERT_LE(result->getResult(), 1.0) << "Average score should not exceed the score of a perfect player.";
 }
 
 TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential) {
@@ -256,7 +257,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential) {
 	Learn::ParallelLearningAgent pla(le, set, params, 1);
 
 	pla.init();
-	std::multimap<double, const TPG::TPGVertex*> result;
+	std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> result;
 	ASSERT_NO_THROW(result = pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
 	ASSERT_EQ(result.size(), pla.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }
@@ -270,7 +271,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel) {
 	Learn::ParallelLearningAgent pla(le, set, params, 4);
 
 	pla.init();
-	std::multimap<double, const TPG::TPGVertex*> result;
+	std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> result;
 	ASSERT_NO_THROW(result = pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING)) << "Evaluation from a root failed.";
 	ASSERT_EQ(result.size(), pla.getTPGGraph().getNbRootVertices()) << "Number of evaluated roots is under the number of roots from the TPGGraph.";
 }
@@ -305,7 +306,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism) {
 	auto iter = results.begin();
 	auto iterSequential = resultsSequential.begin();
 	while (iter != results.end()) {
-		ASSERT_EQ(iter->first, iterSequential->first) << "Average score between sequential and parallel executions are differents.";
+		ASSERT_EQ(iter->first->getResult(), iterSequential->first->getResult()) << "Average score between sequential and parallel executions are differents.";
 		iter++;
 		iterSequential++;
 	}
@@ -326,7 +327,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism) {
 	iterSequential = resultsSequential.begin();
 	auto iterParallel = resultsParallel.begin();
 	while (iterSequential != resultsSequential.end()) {
-		ASSERT_EQ(iterSequential->first, iterParallel->first) << "Average score between sequential and parallel executions are differents.";
+		ASSERT_EQ(iterSequential->first->getResult(), iterParallel->first->getResult()) << "Average score between sequential and parallel executions are differents.";
 		iterSequential++;
 		iterParallel++;
 	}
@@ -372,7 +373,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism) {
 	auto iter = results.begin();
 	auto iterSequential = resultsSequential.begin();
 	while (iter != results.end()) {
-		ASSERT_EQ(iter->first, iterSequential->first) << "Average score between sequential and parallel executions are differents.";
+		ASSERT_EQ(iter->first->getResult(), iterSequential->first->getResult()) << "Average score between sequential and parallel executions are differents.";
 		iter++;
 		iterSequential++;
 	}
@@ -389,7 +390,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism) {
 	iterSequential = resultsSequential.begin();
 	auto iterParallel = resultsParallel.begin();
 	while (iterSequential != resultsSequential.end()) {
-		ASSERT_EQ(iterSequential->first, iterParallel->first) << "Average score between sequential and parallel executions are differents.";
+		ASSERT_EQ(iterSequential->first->getResult(), iterParallel->first->getResult()) << "Average score between sequential and parallel executions are differents.";
 		iterSequential++;
 		iterParallel++;
 	}

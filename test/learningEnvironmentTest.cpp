@@ -13,11 +13,14 @@ TEST(LearningEnvironmentTest, Constructor) {
 
 // Create a fake LearningEnvironment for testing purpose.
 class FakeLearningEnvironment : public Learn::LearningEnvironment {
+	DataHandlers::PrimitiveTypeArray<int> data;
 public:
-	FakeLearningEnvironment() : LearningEnvironment(2) {};
+	FakeLearningEnvironment() : LearningEnvironment(2), data(3) {};
 	void reset(size_t seed, Learn::LearningMode mode) {};
 	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
-		return std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>();
+		std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+		vect.push_back(data);
+		return vect;
 	}
 	double getScore() const { return 0.0; }
 	bool isTerminal() const { return false; }
