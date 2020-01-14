@@ -97,6 +97,8 @@ jobs:
                 edge: true # opt in to dpl v2
                 token: $GITHUB_TOKEN
                 draft: true
+                file: gegelatilib-*
+                release_notes_file: release_notes.md
                 on: 
                     branch: master
                     tags: true

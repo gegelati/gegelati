@@ -6,6 +6,7 @@ SITE_GITHUB_BRANCH=gh-pages
 NEW_SITE_FOLDER=neutral_builds
 MAX_VERSIONS_COUNT=10
 SITE_NAME="GEGELATI - Neutral Builds"
+RELEASE_NOTES_FILE="release_notes.md"
 
 ## -- fetch current site
 CURRENT_SITE=current
@@ -40,11 +41,8 @@ echo "# GEGELATI Neutral Builds
 |Date|Time|Commit|Windows|
 |----|----|------|-------|" > ReadMe.md  
 
-
 # Generate list
 ARCHIVES=$(find -maxdepth 1 -regextype posix-egrep -regex "./gegelatilib-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.zip\$" | rev | cut -d'/' -f 1 | rev | sort -t. -k 1,1nr -k 2,2nr -k 3,3nr -k 4,4nr | head -n $MAX_VERSIONS_COUNT)
-
-
 
 count=0
 for archive in ${ARCHIVES}; do
@@ -80,3 +78,27 @@ echo "</table>" >> index.md
 
 # Go back to parent
 cd ..  
+
+# Prepare Release Notes in case this is a release.
+rm -rf $RELEASE_NOTES_FILE
+
+found=0;
+while read -r line
+do
+  match=$(echo "$line" | sed -E -e 's/## Release version [0-9]+.[0-9]+.[0-9]+/1/')
+  if [ $found = 0 ]
+  then
+	if [ "$match" = "1" ]
+	then
+		found=1
+		echo "$line" >> $RELEASE_NOTES_FILE
+	fi
+  else
+    if [ "$match" = "1" ]
+	then
+		break
+	else
+	  echo "$line" >> $RELEASE_NOTES_FILE
+	fi
+  fi
+done < "Changelog.md"
