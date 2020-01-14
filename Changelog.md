@@ -1,5 +1,15 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_aaaa.mm.dd_
+
+### New features
+
+### Changes
+
+### Bug fix
+
+
 ## Release version 0.0.0
 _2020.01.14_
 
