@@ -1,0 +1,106 @@
+language: cpp
+
+stages:
+    - Build
+    - Deploy
+
+jobs:
+    include:
+        - stage: Build
+          os: windows
+          env: GENERATOR="Visual Studio 16 2019"
+          compiler: msvc19
+          before_install:
+            - choco install visualstudio2019buildtools --package-parameters "--includeRecommended --includeOptional"
+            - choco install visualstudio2019-workload-vctools
+          install:
+            - mkdir doxygen && cd doxygen
+            - curl -o doxygen.zip http://doxygen.nl/files/doxygen-1.8.16.windows.x64.bin.zip
+            - unzip doxygen.zip
+            - export PATH=$PATH:$PWD
+            - cd ..
+          script: 
+            - cd bin
+            - cmake ..
+            - cmake --build . --target GEGELATI --config Debug
+            - cmake --build . --target GEGELATI --config Release
+            - cmake --build . --target doc
+            - cmake --build . --target INSTALL --config Debug
+            - cmake --build . --target INSTALL --config Release
+            - cmake --build . --target runTests --config Debug
+            - ./bin/Debug/runTests.exe
+            - cd ..
+          before_deploy:
+            ./scripts/prepare_archive_windows.sh
+          deploy:
+            - provider: script
+              script: bash scripts/upload_windows.sh
+              verbose: true
+              skip_cleanup: true
+              on:
+                branch: develop
+            - provider: script
+              script: bash scripts/upload_windows.sh
+              verbose: true
+              skip_cleanup: true
+              on:
+                branch: master
+            
+        - os: linux
+          stage: Build
+          compiler: gcc-7
+          addons:
+            apt:
+                sources:
+                    - ubuntu-toolchain-r-test
+                packages:
+                    - g++-7
+                    - doxygen
+                    - gcovr
+          env:
+            - GENERATOR="Unix Makefile"
+            - PATH=/opt/python/3.7.1/bin:$PATH
+          install:
+            - pip install gcovr
+          script:
+            - export CC=gcc-7
+            - export CXX=g++-7
+            - cd bin
+            - cmake .. -DCMAKE_BUILD_TYPE=Debug
+            - cmake --build . --target GEGELATI
+            - cmake --build . --target doc
+            - sudo make install
+            - cmake --build . --target runTests
+            - ./bin/runTests
+            - cd ..
+            - ./RunCoverageLinux.sh
+            
+        - os: linux
+          stage: Deploy
+          script:
+            - echo "Empty job"
+          before_deploy: 
+            ./scripts/download_archives_linux.sh
+          deploy:
+              - provider: pages:git
+                verbose: true
+                edge: true # opt in to dpl v2
+                deploy_key: $GITHUB_TOKEN
+                repo: gegelati/neutral-builds
+                target_branch: gh-pages
+                local_dir: neutral_builds
+                keep_history: false
+                on:
+                  branch: develop
+
+              - provider: releases
+                edge: true # opt in to dpl v2
+                token: $GITHUB_TOKEN
+                draft: true
+                file: gegelatilib-*
+                release_notes_file: release_notes.md
+                on: 
+                    branch: master
+                    tags: true
+          after_deploy:
+            - ./scripts/trigger_gegelati-apps.sh
