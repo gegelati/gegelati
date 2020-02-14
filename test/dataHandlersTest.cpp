@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 
 TEST(DataHandlersTest, Constructor) {
 	ASSERT_NO_THROW({

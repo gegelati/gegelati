@@ -3,7 +3,7 @@
 
 #include <random>
 
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/primitiveTypeArray.h"
 #include "learn/learningEnvironment.h"
 
 /**

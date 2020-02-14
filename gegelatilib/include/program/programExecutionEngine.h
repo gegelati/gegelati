@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/primitiveTypeArray.h"
 #include "program/program.h"
 
 namespace Program {

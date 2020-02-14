@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "instructions/set.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"

@@ -6,8 +6,8 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
-#include <dataHandlers/dataHandler.h>  
-#include <dataHandlers/primitiveTypeArray.h>
+#include <data/dataHandler.h>  
+#include <data/primitiveTypeArray.h>
 
 #include <exporter/tpgGraphDotExporter.h>
 

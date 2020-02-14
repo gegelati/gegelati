@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "dataHandlers/dataHandler.h"
+#include "data/dataHandler.h"
 #include "instructions/instruction.h"
 #include "instructions/set.h"
 
