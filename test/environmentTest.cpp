@@ -11,14 +11,14 @@
 TEST(EnvironmentTest, Constructor) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 
 	set.add(*(new Instructions::AddPrimitiveType<int>()));
 	set.add(*(new Instructions::AddPrimitiveType<double>()));
 
-	DataHandlers::PrimitiveTypeArray<double> d1(size1);
-	DataHandlers::PrimitiveTypeArray<int> d2(size2);
+	Data::PrimitiveTypeArray<double> d1(size1);
+	Data::PrimitiveTypeArray<int> d2(size2);
 
 	vect.push_back(d1);
 	vect.push_back(d2);
@@ -35,14 +35,14 @@ TEST(EnvironmentTest, Constructor) {
 TEST(EnvironmentTest, ConstructorWithInvalidInstruction) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 
 	set.add(*(new Instructions::AddPrimitiveType<int>()));
 	set.add(*(new Instructions::AddPrimitiveType<double>()));
 
-	DataHandlers::PrimitiveTypeArray<double> d1(size1);
-	DataHandlers::PrimitiveTypeArray<int> d2(size2);
+	Data::PrimitiveTypeArray<double> d1(size1);
+	Data::PrimitiveTypeArray<int> d2(size2);
 
 	vect.push_back(d1);
 	vect.push_back(d2);
@@ -61,11 +61,11 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction) {
 TEST(EnvironmentTest, computeLineSize) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
-	vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
-	vect.push_back(*(new DataHandlers::PrimitiveTypeArray<float>((unsigned int)size2)));
+	vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
+	vect.push_back(*(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
 
 	set.add(*(new Instructions::AddPrimitiveType<float>()));
 	set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -87,11 +87,11 @@ TEST(EnvironmentTest, computeLineSize) {
 TEST(EnvironmentTest, Size_tAttributeAccessors) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 
-	DataHandlers::PrimitiveTypeArray<double> d1(size1);
-	DataHandlers::PrimitiveTypeArray<int> d2(size2);
+	Data::PrimitiveTypeArray<double> d1(size1);
+	Data::PrimitiveTypeArray<int> d2(size2);
 
 	Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter 
 	Instructions::MultByConstParam<double, float> iMult; // One operand, One parameter
@@ -115,11 +115,11 @@ TEST(EnvironmentTest, Size_tAttributeAccessors) {
 TEST(EnvironmentTest, InstructionSetAccessor) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 
-	DataHandlers::PrimitiveTypeArray<double> d1(size1);
-	DataHandlers::PrimitiveTypeArray<float> d2(size2);
+	Data::PrimitiveTypeArray<double> d1(size1);
+	Data::PrimitiveTypeArray<float> d2(size2);
 
 	Instructions::AddPrimitiveType<float> iAdd; // Two operands, No Parameter 
 	Instructions::MultByConstParam<double, float> iMult; // One operand, One parameter
@@ -143,11 +143,11 @@ TEST(EnvironmentTest, InstructionSetAccessor) {
 TEST(EnvironmentTest, DataSourceAccessor) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 
-	DataHandlers::PrimitiveTypeArray<double> d1(size1);
-	DataHandlers::PrimitiveTypeArray<int> d2(size2);
+	Data::PrimitiveTypeArray<double> d1(size1);
+	Data::PrimitiveTypeArray<int> d2(size2);
 
 	Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter 
 	Instructions::MultByConstParam<double, float> iMult; // One operand, One parameter

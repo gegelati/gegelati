@@ -15,14 +15,14 @@ class ArchiveTest : public ::testing::Test {
 protected:
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 	Program::Program* p;
 
 	virtual void SetUp() {
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size2)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
 		set.add(*(new Instructions::AddPrimitiveType<int>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -54,7 +54,7 @@ TEST_F(ArchiveTest, CombineHash) {
 	ASSERT_NO_THROW(hash = Archive::getCombinedHash(vect)) << "Combination of several DataHandler hash failed.";
 
 	// change data in one dataHandler
-	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
+	Data::PrimitiveTypeArray<int>& d = (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
 
 	// Compare hashes.
@@ -79,7 +79,7 @@ TEST_F(ArchiveTest, AddRecordingTests) {
 
 	// Add another recording with a new environment
 	// change data in one dataHandler
-	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
+	Data::PrimitiveTypeArray<int>& d = (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
 	ASSERT_NO_THROW(archive.addRecording(p, vect, 0.2)) << "Adding a recording to the non-empty archive failed.";
 	ASSERT_EQ(archive.getNbRecordings(), 3) << "Number or recordings in the archive is incorrect.";
@@ -104,7 +104,7 @@ TEST_F(ArchiveTest, AddRecordingWithProbabilityTests) {
 
 	// Add a few fictive recording
 	for (int i = 0; i < 10; i++) {
-		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
+		((Data::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
 		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
 	}
 	ASSERT_EQ(archive.getNbRecordings(), 4) << "Number or recordings in the archive is incorrect with a known seed.";
@@ -117,7 +117,7 @@ TEST_F(ArchiveTest, At) {
 
 	// Add a few fictive recording
 	for (int i = 0; i < 5; i++) {
-		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
+		((Data::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
 		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
 	}
 
@@ -137,7 +137,7 @@ TEST_F(ArchiveTest, SetSeed) {
 
 	// Add a few fictive recording
 	for (int i = 0; i < 10; i++) {
-		((DataHandlers::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
+		((Data::PrimitiveTypeArray<int>&)(vect.at(1).get())).setDataAt(typeid(PrimitiveType<int>), 0, i);
 		ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i)) << "Adding a recording to the archive failed.";
 	}
 	// With a seed set to 0, result is available in AddRecordingWithProbabilityTests
@@ -147,7 +147,7 @@ TEST_F(ArchiveTest, SetSeed) {
 TEST_F(ArchiveTest, areProgramResultsUnique) {
 	Archive archive(4);
 	size_t hash1 = archive.getCombinedHash(vect);
-	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
+	Data::PrimitiveTypeArray<int>& d = (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
 
 	// Add a few fictive recordings with p
 	archive.addRecording(p, vect, 1.0);
@@ -177,7 +177,7 @@ TEST_F(ArchiveTest, DataHandlersAccessors) {
 	// Add a few fictive recordings
 	archive.addRecording(p, vect, 1.0);
 	archive.addRecording(p, vect, 1.5);
-	DataHandlers::PrimitiveTypeArray<int>& d = (DataHandlers::PrimitiveTypeArray<int>&)vect.at(1).get();
+	Data::PrimitiveTypeArray<int>& d = (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
 	d.setDataAt(typeid(PrimitiveType<int>), 2, PrimitiveType<int>(1337));
 	archive.addRecording(p, vect, 2.0);
 	archive.addRecording(p, vect, 2.3);

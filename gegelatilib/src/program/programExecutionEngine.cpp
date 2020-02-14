@@ -33,7 +33,7 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog) {
 	this->programCounter = 0;
 }
 
-const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& Program::ProgramExecutionEngine::getDataSources() const
+const std::vector<std::reference_wrapper<const Data::DataHandler>>& Program::ProgramExecutionEngine::getDataSources() const
 {
 	return this->dataSources;
 }
@@ -53,7 +53,7 @@ const Program::Line& Program::ProgramExecutionEngine::getCurrentLine() const
 	return this->program->getLine(this->programCounter);
 }
 
-uint64_t Program::ProgramExecutionEngine::scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const std::type_info& type) const
+uint64_t Program::ProgramExecutionEngine::scaleLocation(const uint64_t rawLocation, const Data::DataHandler& dataHandler, const std::type_info& type) const
 {
 	return rawLocation % dataHandler.getAddressSpace(type);
 }
@@ -73,7 +73,7 @@ const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std
 	// Get as many operands as required by the instruction.
 	for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
 		const std::pair<uint64_t, uint64_t>& operandIndexes = line.getOperand(i);
-		const DataHandlers::DataHandler& dataSource = this->dataSourcesAndRegisters.at(operandIndexes.first); // Throws std::out_of_range
+		const Data::DataHandler& dataSource = this->dataSourcesAndRegisters.at(operandIndexes.first); // Throws std::out_of_range
 		const std::type_info& operandType = instruction.getOperandTypes().at(i).get();
 		const uint64_t operandLocation = this->scaleLocation(operandIndexes.second, dataSource, operandType);
 		const SupportedType& data = dataSource.getDataAt(operandType, operandLocation);

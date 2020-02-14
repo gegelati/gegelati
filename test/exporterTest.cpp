@@ -20,7 +20,7 @@ public:
 
 protected:
 	const size_t size1{ 24 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e = NULL;
 	std::vector<std::shared_ptr<Program::Program>> progPointers;
@@ -30,10 +30,10 @@ protected:
 
 	virtual void SetUp() {
 		// Setup environment
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
 
 		// Put a 1 in the dataHandler to make it easy to have non-zero return in Programs.
-		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(PrimitiveType<double>), 0, 1.0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(PrimitiveType<double>), 0, 1.0);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));

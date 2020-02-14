@@ -12,10 +12,10 @@
 class StickGameWithOpponent : public Learn::LearningEnvironment {
 protected:
 	/// During a game, number of remaining sticks.
-	DataHandlers::PrimitiveTypeArray<int> remainingSticks;
+	Data::PrimitiveTypeArray<int> remainingSticks;
 
 	/// This source of data give useful numbers for helping undertanding the game.
-	DataHandlers::PrimitiveTypeArray<int> hints;
+	Data::PrimitiveTypeArray<int> hints;
 
 	/// Did the player win or lose
 	bool win;
@@ -55,7 +55,7 @@ public:
 	virtual void reset(size_t seed = 0, Learn::LearningMode mode = Learn::LearningMode::TRAINING) override;
 
 	// Inherited via LearningEnvironment
-	virtual std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() override;
+	virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDataSources() override;
 
 	/**
 	* Returns 1.0 when the player won, 0.0 otherwise.

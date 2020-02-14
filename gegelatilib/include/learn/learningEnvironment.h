@@ -141,7 +141,7 @@ namespace Learn {
 		*
 		* \return a vector of references to the DataHandler.
 		*/
-		virtual std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() = 0;
+		virtual std::vector<std::reference_wrapper<const Data::DataHandler>> getDataSources() = 0;
 
 		/**
 		* \brief Returns the current score of the Environment.

@@ -13,12 +13,12 @@ TEST(LearningEnvironmentTest, Constructor) {
 
 // Create a fake LearningEnvironment for testing purpose.
 class FakeLearningEnvironment : public Learn::LearningEnvironment {
-	DataHandlers::PrimitiveTypeArray<int> data;
+	Data::PrimitiveTypeArray<int> data;
 public:
 	FakeLearningEnvironment() : LearningEnvironment(2), data(3) {};
 	void reset(size_t seed, Learn::LearningMode mode) {};
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
-		std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> getDataSources() {
+		std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 		vect.push_back(data);
 		return vect;
 	}
@@ -50,7 +50,7 @@ TEST(LearningEnvironmentTest, getNbAction) {
 TEST(LearningEnvironmentTest, getDataSource) {
 	StickGameWithOpponent le;
 
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> dataSrc;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> dataSrc;
 	ASSERT_NO_THROW(dataSrc = le.getDataSources()) << "Getting data sources should not fail";
 	ASSERT_EQ(dataSrc.size(), 2) << "Number of dataSource is incorrect";
 

@@ -5,20 +5,20 @@
 
 TEST(DataHandlersTest, Constructor) {
 	ASSERT_NO_THROW({
-		DataHandlers::DataHandler * d = new DataHandlers::PrimitiveTypeArray<double>();
+		Data::DataHandler * d = new Data::PrimitiveTypeArray<double>();
 		delete d;
 		}) << "Call to PrimitiveTypeArray constructor failed.";
 }
 
 TEST(DataHandlersTest, ID) {
-	DataHandlers::PrimitiveTypeArray<double> d0;
-	DataHandlers::PrimitiveTypeArray<int> d1;
+	Data::PrimitiveTypeArray<double> d0;
+	Data::PrimitiveTypeArray<int> d1;
 
 	ASSERT_NE(d0.getId(), d1.getId()) << "Id of two DataHandlers created one after the other should not be equal.";
 }
 
 TEST(DataHandlersTest, PrimitiveDataArrayCanProvide) {
-	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<double>();
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<double>();
 
 	ASSERT_TRUE(d->canHandle(typeid(PrimitiveType<double>))) << "PrimitiveTypeArray<double>() wrongfully say it can not provide PrimitiveType<double> data.";
 	ASSERT_FALSE(d->canHandle(typeid(PrimitiveType<int>))) << "PrimitiveTypeArray<double>() wrongfully say it can provide PrimitiveType<int> data.";
@@ -28,7 +28,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayCanProvide) {
 }
 
 TEST(DataHandlersTest, PrimitiveDataArrayGetHandledTypes) {
-	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<int>();
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<int>();
 
 	auto vect = d->getHandledTypes();
 	ASSERT_EQ(vect.size(), 1) << "Size of data type set handled by PrimitiveTypeArray<double> is incorrect.";
@@ -38,7 +38,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetHandledTypes) {
 }
 
 TEST(DataHandlersTest, PrimitiveDataArrayAddressSpace) {
-	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<long>(64); // Array of 64 long
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<long>(64); // Array of 64 long
 	ASSERT_EQ(d->getAddressSpace(typeid(PrimitiveType<long>)), 64) << "Address space size for type PrimitiveType<long> in PrimitiveTypeArray<long>(64) is not 64";
 	ASSERT_EQ(d->getAddressSpace(typeid(PrimitiveType<int>)), 0) << "Address space size for type PrimitiveType<int> in PrimitiveTypeArray<long>(64) is not 0";
 
@@ -46,7 +46,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayAddressSpace) {
 }
 
 TEST(DataHandlersTest, PrimitiveDataArrayLargestAddressSpace) {
-	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<float>(20); // Array of 64 long
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<float>(20); // Array of 64 long
 	ASSERT_EQ(d->getLargestAddressSpace(), 20) << "Largest address space size for type in PrimitiveTypeArray<float>(20) is not 20 as expected.";
 
 	delete d;
@@ -54,7 +54,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayLargestAddressSpace) {
 
 TEST(DataHandlersTest, PrimitiveDataArrayGetDataAt) {
 	const size_t size{ 32 };
-	DataHandlers::DataHandler* d = new DataHandlers::PrimitiveTypeArray<float>(size);
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<float>(size);
 
 	d->resetData();
 	for (int i = 0; i < size; i++) {
@@ -72,7 +72,7 @@ TEST(DataHandlersTest, PrimitiveDataArraySetDataAt) {
 	const size_t size{ 8 };
 	const size_t address{ 3 };
 	const double doubleValue{ 42.0 };
-	DataHandlers::PrimitiveTypeArray<double>* d = new DataHandlers::PrimitiveTypeArray<double>(size);
+	Data::PrimitiveTypeArray<double>* d = new Data::PrimitiveTypeArray<double>(size);
 
 	d->resetData();
 	PrimitiveType<double> value(doubleValue);
@@ -91,7 +91,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayHash) {
 	const size_t address{ 3 };
 	const double doubleValue{ 42.0 };
 
-	DataHandlers::PrimitiveTypeArray<double> d(size);
+	Data::PrimitiveTypeArray<double> d(size);
 
 	// Get hash
 	size_t hash = 0;
@@ -108,14 +108,14 @@ TEST(DataHandlersTest, PrimitiveDataArrayClone) {
 	const double doubleValue{ 42.0 };
 
 	// create a first one to increase the DataHandler::count
-	DataHandlers::PrimitiveTypeArray<int> d0(12);
-	DataHandlers::PrimitiveTypeArray<double> d(size);
+	Data::PrimitiveTypeArray<int> d0(12);
+	Data::PrimitiveTypeArray<double> d(size);
 	// change the content of the array
 	d.setDataAt(typeid(PrimitiveType<double>), address, PrimitiveType<double>(doubleValue));
 	// Hash was voluntarily not computed before clone.
 
 	// Create a clone
-	DataHandlers::DataHandler* dClone = NULL;
+	Data::DataHandler* dClone = NULL;
 	ASSERT_NO_THROW(dClone = d.clone();) << "Cloning a PrimitiTypeArray<double> failed.";
 
 	// Extra if to remove warnings on further use of dClone.
@@ -124,7 +124,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayClone) {
 	// Check ID
 	ASSERT_EQ(dClone->getId(), d.getId()) << "Cloned and original dataHandler do not have the same ID as expected.";
 	// Check the polymorphic type.
-	ASSERT_EQ(typeid(*dClone), typeid(DataHandlers::PrimitiveTypeArray<double>)) << "Type of clone DataHandler differes from the original one.";
+	ASSERT_EQ(typeid(*dClone), typeid(Data::PrimitiveTypeArray<double>)) << "Type of clone DataHandler differes from the original one.";
 	// Compute the hashes
 	ASSERT_EQ(dClone->getHash(), d.getHash()) << "Hash of clone and original DataHandler differ.";
 

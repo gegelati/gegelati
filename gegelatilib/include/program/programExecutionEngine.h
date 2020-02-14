@@ -19,13 +19,13 @@ namespace Program {
 		ProgramExecutionEngine() = delete;
 
 		/// Registers used for the Program execution.
-		DataHandlers::PrimitiveTypeArray<double> registers;
+		Data::PrimitiveTypeArray<double> registers;
 
 		/// Data sources used in the Program.
-		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSources;
+		std::vector < std::reference_wrapper<const Data::DataHandler >> dataSources;
 
 		/// Data sources (including registers) used in the Program.
-		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSourcesAndRegisters;
+		std::vector < std::reference_wrapper<const Data::DataHandler >> dataSourcesAndRegisters;
 
 		/// Program counter of the execution engine.
 		uint64_t programCounter;
@@ -67,7 +67,7 @@ namespace Program {
 		*/
 		template <class T> ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<T>>& dataSrc) : programCounter{ 0 }, registers{ prog.getEnvironment().getNbRegisters() }, program{ NULL } {
 			// Check that T is either convertible to a const DataHandler
-			static_assert(std::is_convertible<T&, const DataHandlers::DataHandler&>::value);
+			static_assert(std::is_convertible<T&, const Data::DataHandler&>::value);
 			// Setup the data sources
 			this->dataSourcesAndRegisters.push_back(this->registers);
 
@@ -117,7 +117,7 @@ namespace Program {
 		* \return a vector containing references to the dataHandlers of the
 		* dataSourses attribute (i.e. without the registers)
 		*/
-		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& getDataSources() const;
+		const std::vector<std::reference_wrapper<const Data::DataHandler>>& getDataSources() const;
 
 		/**
 		* \brief Increments the programCounter and checks for the end of the Program.
@@ -160,7 +160,7 @@ namespace Program {
 		* \throw std::domain_error if the data type is not supported by the
 		*        data handler.
 		*/
-		uint64_t scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const std::type_info& type) const;
+		uint64_t scaleLocation(const uint64_t rawLocation, const Data::DataHandler& dataHandler, const std::type_info& type) const;
 
 		/**
 		* \brief Get the Instruction corresponding to the current programCounter.
@@ -228,7 +228,7 @@ namespace Program {
 	inline void ProgramExecutionEngine::setDataSources(const std::vector<std::reference_wrapper<T>>& dataSrc)
 	{
 		// Check that T is either convertible to a const DataHandler
-		static_assert(std::is_convertible<T&, const DataHandlers::DataHandler&>::value);
+		static_assert(std::is_convertible<T&, const Data::DataHandler&>::value);
 
 		// Replace the references in attributes
 		this->dataSources = dataSrc;

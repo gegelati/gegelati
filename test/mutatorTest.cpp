@@ -26,7 +26,7 @@ protected:
 	const size_t size2{ 32 };
 	const double value0{ 2.3 };
 	const float value1{ 4.2f };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 	Program::Program* p;
@@ -35,10 +35,10 @@ protected:
 	MutatorTest() : e{ nullptr }, p{ nullptr }{};
 
 	virtual void SetUp() {
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size1)));
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
-		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(PrimitiveType<double>), 25, value0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(PrimitiveType<double>), 25, value0);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));

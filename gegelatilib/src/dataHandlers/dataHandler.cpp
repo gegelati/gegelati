@@ -1,17 +1,17 @@
 #include <algorithm>
 #include "dataHandlers/dataHandler.h"
 
-size_t DataHandlers::DataHandler::count = 0;
+size_t Data::DataHandler::count = 0;
 
-DataHandlers::DataHandler::DataHandler() : id{ count++ }, providedTypes(), cachedHash(), invalidCachedHash(true) {
+Data::DataHandler::DataHandler() : id{ count++ }, providedTypes(), cachedHash(), invalidCachedHash(true) {
 };
 
-size_t DataHandlers::DataHandler::getId() const
+size_t Data::DataHandler::getId() const
 {
 	return this->id;
 }
 
-size_t DataHandlers::DataHandler::getHash() const
+size_t Data::DataHandler::getHash() const
 {
 	if (this->invalidCachedHash) {
 		this->updateHash();
@@ -20,7 +20,7 @@ size_t DataHandlers::DataHandler::getHash() const
 	return this->cachedHash;
 }
 
-bool DataHandlers::DataHandler::canHandle(const std::type_info& type) const
+bool Data::DataHandler::canHandle(const std::type_info& type) const
 {
 	for (auto & t : this->providedTypes) {
 		if (t.get() == type)
@@ -30,12 +30,12 @@ bool DataHandlers::DataHandler::canHandle(const std::type_info& type) const
 	return false;
 }
 
-const std::vector<std::reference_wrapper<const std::type_info>>& DataHandlers::DataHandler::getHandledTypes() const
+const std::vector<std::reference_wrapper<const std::type_info>>& Data::DataHandler::getHandledTypes() const
 {
 	return this->providedTypes;
 }
 
-size_t DataHandlers::DataHandler::getLargestAddressSpace() const
+size_t Data::DataHandler::getLargestAddressSpace() const
 {
 	size_t maxSize = 0;
 

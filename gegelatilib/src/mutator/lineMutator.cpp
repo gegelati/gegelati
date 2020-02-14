@@ -158,7 +158,7 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line, Mutator::RNG& r
 			}
 			else {
 				// not register
-				const DataHandlers::DataHandler& dataSource = line.getEnvironment().getDataSources().at(dataSourceIndex - 1).get();
+				const Data::DataHandler& dataSource = line.getEnvironment().getDataSources().at(dataSourceIndex - 1).get();
 				isValid = dataSource.canHandle(type);
 			}
 			// Alter the operand if needed

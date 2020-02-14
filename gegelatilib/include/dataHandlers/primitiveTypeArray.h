@@ -7,7 +7,7 @@
 
 #include "dataHandler.h"
 
-namespace DataHandlers {
+namespace Data {
 	/**
 	* DataHandler for manipulating arrays of a primitive data type.
 	*/

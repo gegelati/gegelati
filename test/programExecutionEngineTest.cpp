@@ -16,16 +16,16 @@ protected:
 	const size_t size2{ 32 };
 	const double value0{ 2.3 };
 	const float value1{ 0.2f };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 	Program::Program* p;
 
 	virtual void SetUp() {
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size1)));
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
-		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(PrimitiveType<double>), 25, value0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(PrimitiveType<double>), 25, value0);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -72,7 +72,7 @@ TEST_F(ProgramExecutionEngineTest, ConstructorDestructor) {
 
 	ASSERT_NO_THROW(delete progExecEng) << "Destruction failed.";
 
-	std::vector<std::reference_wrapper<DataHandlers::DataHandler>> vect2;
+	std::vector<std::reference_wrapper<Data::DataHandler>> vect2;
 	vect2.push_back(*vect.at(0).get().clone());
 	ASSERT_THROW(progExecEng = new Program::ProgramExecutionEngine(*p, vect2), std::runtime_error) << "Construction should faile with data sources differing in number from those of the Environment.";
 	vect2.push_back(*vect.at(1).get().clone());
@@ -84,7 +84,7 @@ TEST_F(ProgramExecutionEngineTest, ConstructorDestructor) {
 	// Because its id is different, it will not be accepted by the PEE.
 	delete (&(vect2.at(1).get()));
 	vect2.pop_back();
-	vect2.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
+	vect2.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 	ASSERT_THROW(progExecEng = new Program::ProgramExecutionEngine(*p, vect2), std::runtime_error) << "Construction should fail with data sources differing in id from those of the Environment.";
 
 	delete (&(vect2.at(0).get()));
@@ -168,8 +168,8 @@ TEST_F(ProgramExecutionEngineTest, setProgram) {
 	ASSERT_NO_THROW(progExecEng.setProgram(p2)) << "Setting a new Program with a valid Environment for a ProgramExecutionEngine failed.";
 
 	// Create a new incompatible program
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> otherVect;
-	otherVect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size2)));
+	std::vector<std::reference_wrapper<const Data::DataHandler>> otherVect;
+	otherVect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 	Environment otherE(set,otherVect,2);
 	Program::Program p3(otherE);
 
@@ -183,7 +183,7 @@ TEST_F(ProgramExecutionEngineTest, setDataSources) {
 	Program::ProgramExecutionEngine progExecEng(*p);
 
 	// Create a new compatible set of dataSources
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> otherVect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> otherVect;
 	otherVect.push_back(*vect.at(0).get().clone());
 	otherVect.push_back(*vect.at(1).get().clone());
 
@@ -198,8 +198,8 @@ TEST_F(ProgramExecutionEngineTest, setDataSources) {
 	// Create a new incompatible set of dataSources
 	// although it has the same type and size of data, id of the
 	// data handlers are different, which currently breaks the comparison.
-	otherVect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size1)));
-	otherVect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
+	otherVect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
+	otherVect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
 	ASSERT_THROW(progExecEng.setDataSources(otherVect), std::runtime_error) << "Setting a new invalid set of Data Sources should fail.";
 

@@ -3,7 +3,7 @@
 */
 class FakeClassificationLearningEnvironment : public Learn::ClassificationLearningEnvironment {
 protected:
-	DataHandlers::PrimitiveTypeArray<int> data;
+	Data::PrimitiveTypeArray<int> data;
 	int value;
 
 public:
@@ -24,8 +24,8 @@ public:
 		this->value = 0;
 		this->currentClass = 0;
 	};
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
-		std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> getDataSources() {
+		std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 		vect.push_back(data);
 		return vect;
 	}

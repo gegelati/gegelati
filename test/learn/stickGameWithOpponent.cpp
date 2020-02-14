@@ -57,9 +57,9 @@ void StickGameWithOpponent::reset(size_t seed, Learn::LearningMode mode)
 	this->forbiddenMove = false;
 }
 
-std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> StickGameWithOpponent::getDataSources()
+std::vector<std::reference_wrapper<const Data::DataHandler>> StickGameWithOpponent::getDataSources()
 {
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> res = { this->hints, this->remainingSticks };
+	std::vector<std::reference_wrapper<const Data::DataHandler>> res = { this->hints, this->remainingSticks };
 
 	return res;
 }

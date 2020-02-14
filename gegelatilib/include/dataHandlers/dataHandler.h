@@ -14,7 +14,7 @@ namespace std {
 	bool operator==(const std::reference_wrapper<const std::type_info>& r0, const std::reference_wrapper<const std::type_info>& r1);
 }
 
-namespace DataHandlers {
+namespace Data {
 	/**
 	* \brief Base class for all sources of data to be accessed by a TPG Instruction executed within a Program.
 	*/
