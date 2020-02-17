@@ -3,7 +3,7 @@
 
 #include <functional>
 
-#include "supportedTypes.h"
+#include "data/supportedTypes.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
