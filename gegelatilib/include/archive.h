@@ -4,6 +4,7 @@
 #include <random>
 #include <map>
 #include <deque>
+#include <memory>
 
 #include "mutator/rng.h"
 #include "data/dataHandler.h"

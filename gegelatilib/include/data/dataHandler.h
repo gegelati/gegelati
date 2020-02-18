@@ -4,6 +4,7 @@
 #include <typeinfo>
 #include <vector>
 #include <functional>
+#include <memory>
 
 #include "data/supportedTypes.h"
 
