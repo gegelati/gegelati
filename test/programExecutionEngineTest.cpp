@@ -119,7 +119,7 @@ TEST_F(ProgramExecutionEngineTest, getCurrentInstruction) {
 
 TEST_F(ProgramExecutionEngineTest, fetchOperands) {
 	Program::ProgramExecutionEngine progExecEng(*p);
-	std::vector<std::reference_wrapper<const SupportedType>> operands;
+	std::vector<std::shared_ptr<const SupportedType>> operands;
 	// From Fixture:
 	// Program line 0
 	// Instruction is AddPrimitiveType<double>.
@@ -128,8 +128,8 @@ TEST_F(ProgramExecutionEngineTest, fetchOperands) {
 	// Check number of operands
 	ASSERT_EQ(operands.size(), 2) << "Incorrect number of operands were fetched by previous call.";
 	// Check operand value. Register is 0.0, array element is value0: 2.3
-	ASSERT_EQ((double)((const PrimitiveType<double>&)operands.at(0).get()), 0.0) << "Value of fetched operand from register is incorrect.";
-	ASSERT_EQ((double)((const PrimitiveType<double>&)operands.at(1).get()), value0) << "Value of fetched operand from array is incorrect compared to Test fixture.";
+	ASSERT_EQ((double) * (std::dynamic_pointer_cast<const PrimitiveType<double>>(operands.at(0))), 0.0) << "Value of fetched operand from register is incorrect.";
+	ASSERT_EQ((double) * (std::dynamic_pointer_cast<const PrimitiveType<double>>(operands.at(1))), value0) << "Value of fetched operand from array is incorrect compared to Test fixture.";
 }
 
 TEST_F(ProgramExecutionEngineTest, fetchParameters) {
@@ -170,13 +170,13 @@ TEST_F(ProgramExecutionEngineTest, setProgram) {
 	// Create a new incompatible program
 	std::vector<std::reference_wrapper<const Data::DataHandler>> otherVect;
 	otherVect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
-	Environment otherE(set,otherVect,2);
+	Environment otherE(set, otherVect, 2);
 	Program::Program p3(otherE);
 
 	ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error) << "Setting a Program with an incompatible Environment should not be possible.";
 
 	// Clean up
-	delete &otherVect.at(0).get();
+	delete& otherVect.at(0).get();
 }
 
 TEST_F(ProgramExecutionEngineTest, setDataSources) {

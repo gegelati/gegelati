@@ -45,14 +45,14 @@ namespace Instructions {
 
 		double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::reference_wrapper<const SupportedType>>& args) const override {
+			const std::vector<std::shared_ptr<const SupportedType>>& args) const override {
 
 			if (Instruction::execute(params, args) != 1.0) {
 				return 0.0;
 			}
 
-			const PrimitiveType<T>& arg1 = dynamic_cast<const PrimitiveType<T>&>(args.at(0).get());
-			const PrimitiveType<T>& arg2 = dynamic_cast<const PrimitiveType<T>&>(args.at(1).get());
+			const PrimitiveType<T>& arg1 = *std::dynamic_pointer_cast<const PrimitiveType<T>>(args.at(0));
+			const PrimitiveType<T>& arg2 = *std::dynamic_pointer_cast<const PrimitiveType<T>>(args.at(1));
 			double result = this->func((T)arg1, (T)arg2);
 			return result;
 		}

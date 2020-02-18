@@ -69,7 +69,7 @@ namespace Data {
 		void resetData();
 
 		// Inherited from DataHandler
-		const SupportedType& getDataAt(const std::type_info& type, const size_t address) const override;
+		virtual std::shared_ptr<const SupportedType> getDataAt(const std::type_info& type, const size_t address) const override;
 
 		/**
 		* \brief Set the data at the given address to the given value.
@@ -142,12 +142,13 @@ namespace Data {
 		}
 	}
 
-	template<class T> const SupportedType& PrimitiveTypeArray<T>::getDataAt(const std::type_info& type, const size_t address) const
+	template<class T> std::shared_ptr<const SupportedType> PrimitiveTypeArray<T>::getDataAt(const std::type_info& type, const size_t address) const
 	{
 		// Throw exception in case of invalid arguments.
 		checkAddressAndType(type, address);
 
-		return this->data[address];
+		std::shared_ptr<const SupportedType> result(&(this->data[address]), DataHandler::emptyDestructor());
+		return result;
 	}
 
 	template<class T> void PrimitiveTypeArray<T>::setDataAt(

@@ -188,7 +188,7 @@ namespace Program {
 		*         DataHandler, with the given data type, or if the indexed
 		*         DataHandler does not exist.
 		*/
-		const void fetchCurrentOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const;
+		const void fetchCurrentOperands(std::vector<std::shared_ptr<const SupportedType>>& operands) const;
 
 		/**
 		* \brief Get the parameters for the current Instruction.

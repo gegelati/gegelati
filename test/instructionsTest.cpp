@@ -1,4 +1,7 @@
 #include <gtest/gtest.h>
+
+#include "data/supportedTypes.h"
+#include "data/dataHandler.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
 #include "instructions/lambdaInstruction.h"
@@ -36,15 +39,15 @@ TEST(InstructionsTest, CheckArgumentTypes) {
 	PrimitiveType<double> c = 3.7;
 	PrimitiveType<int> d = 5;
 
-	std::vector<std::reference_wrapper<const SupportedType>> vect;
-	vect.push_back(a);
-	vect.push_back(b);
+	std::vector<std::shared_ptr<const SupportedType>> vect;
+	vect.emplace_back(&a, Data::DataHandler::emptyDestructor());
+	vect.emplace_back(&b, Data::DataHandler::emptyDestructor());
 	ASSERT_TRUE(i->checkOperandTypes(vect)) << "Operands of valid types wrongfully classified as invalid.";
-	vect.push_back(c);
+	vect.emplace_back(&c, Data::DataHandler::emptyDestructor());
 	ASSERT_FALSE(i->checkOperandTypes(vect)) << "Operands list of too long size wrongfully classified as valid.";
 	vect.pop_back();
 	vect.pop_back();
-	vect.push_back(d);
+	vect.emplace_back(&d, Data::DataHandler::emptyDestructor());
 	ASSERT_FALSE(i->checkOperandTypes(vect)) << "Operands of invalid types wrongfully classified as valid";
 	delete i;
 }
@@ -74,13 +77,13 @@ TEST(InstructionsTest, Execute) {
 	PrimitiveType<double> b = 5.5;
 	PrimitiveType<int> c = 3;
 
-	std::vector<std::reference_wrapper<const SupportedType>> vect;
-	vect.push_back(a);
-	vect.push_back(b);
+	std::vector<std::shared_ptr<const SupportedType>> vect;
+	vect.emplace_back(&a, Data::DataHandler::emptyDestructor());
+	vect.emplace_back(&b, Data::DataHandler::emptyDestructor());
 	ASSERT_EQ(i->execute({}, vect), 8.1) << "Execute method of AddPrimitiveType<double> returns an incorrect value with valid operands.";
 
 	vect.pop_back();
-	vect.push_back(c);
+	vect.emplace_back(&c, Data::DataHandler::emptyDestructor());
 	ASSERT_EQ(i->execute({}, vect), 0.0) << "Execute method of AddPrimitiveType<double> returns an incorrect value with invalid operands.";
 
 	delete i;
@@ -97,9 +100,9 @@ TEST(InstructionsTest, LambdaInstruction) {
 	PrimitiveType<double> b = 5.5;
 	PrimitiveType<int> c = 3;
 
-	std::vector<std::reference_wrapper<const SupportedType>> vect;
-	vect.push_back(a);
-	vect.push_back(b);
+	std::vector<std::shared_ptr<const SupportedType>> vect;
+	vect.emplace_back(&a, Data::DataHandler::emptyDestructor());
+	vect.emplace_back(&b, Data::DataHandler::emptyDestructor());
 
 	auto minus = [](double a, double b) {return a - b; };
 
@@ -110,7 +113,7 @@ TEST(InstructionsTest, LambdaInstruction) {
 
 	// Execute with wrong types of operands.
 	vect.pop_back();
-	vect.push_back(c);
+	vect.emplace_back(&c, Data::DataHandler::emptyDestructor());
 	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
 
 	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";

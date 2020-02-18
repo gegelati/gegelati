@@ -20,16 +20,16 @@ unsigned int Instruction::getNbParameters() const {
 	return this->nbParameters;
 }
 
-bool Instruction::checkOperandTypes(const std::vector<std::reference_wrapper<const SupportedType>> & arguments) const
+bool Instruction::checkOperandTypes(const std::vector<std::shared_ptr<const SupportedType>>& arguments) const
 {
-	if(arguments.size() != this->operandTypes.size()){
+	if (arguments.size() != this->operandTypes.size()) {
 		return false;
 	}
 
 	for (int i = 0; i < arguments.size(); i++) {
-		  if (typeid(arguments.at(i).get()) != this->operandTypes.at(i).get()) {
-			  return false;
-		  }
+		if (typeid(*arguments.at(i).get()) != this->operandTypes.at(i).get()) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -39,7 +39,9 @@ bool Instruction::checkParameters(const std::vector<std::reference_wrapper<const
 	return (params.size() == this->nbParameters);
 }
 
-double Instruction::execute(const std::vector<std::reference_wrapper<const Parameter>>& params, const std::vector<std::reference_wrapper<const SupportedType>>& arguments) const
+double Instruction::execute(
+	const std::vector<std::reference_wrapper<const Parameter>>& params,
+	const std::vector<std::shared_ptr<const SupportedType>>& arguments) const
 {
 	if (!this->checkParameters(params) || !this->checkOperandTypes(arguments)) {
 		return 0.0;

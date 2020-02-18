@@ -39,8 +39,10 @@ namespace Data {
 		/**
 		* \brief List of the types of the operands needed to execute the instruction.
 		*
-		* Because std::unordered_set was too complex to use (because it does not support std::reference_wrapper easily), std::vector is used instead.*
-		* Adding the same type several type to the list of providedType will lead to undefined behavior.
+		* Because std::unordered_set was too complex to use (because it does
+		* not support std::reference_wrapper easily), std::vector is used instead.
+		* Adding the same type several type to the list of providedType will lead
+		* to undefined behavior.
 		*/
 		std::vector<std::reference_wrapper<const std::type_info>> providedTypes;
 
@@ -169,13 +171,37 @@ namespace Data {
 		/**
 		* \brief Get data of the given type, from the given address.
 		*
+		* Data is returned as a shared_ptr, with two possible allocation types:
+		* - Classic pointer: The returned data is natively contained in the 
+		* DataHandler and could be accessed through a regular pointer. In this 
+		* case the returned shared pointer is associated with the emptyDestructor
+		* function as its destructor to avoid any deallocation on the 
+		* shared_ptr deletion.
+		* - Shared pointer: The returned data is a temporary object that was 
+		* constructed on request from data in the DataHandler. Once it has 
+		* been used, on deletion of the shared pointer, this temporary object
+		* is deallocated using its default destructor.
+		*
 		* \param[in] type the std::type_info of data retrieved.
 		* \param[in] address the location of the data to retrieve.
-		* \throws std::invalid_argument if the given data type is not provided by the DataHandler.
-		* \throws std::out_of_range if the given address is invalid for the given data type.
-		* \return a const reference to the requested data.
+		* \throws std::invalid_argument if the given data type is not provided 
+		* by the DataHandler.
+		* \throws std::out_of_range if the given address is invalid for the 
+		* given data type.
+		* \return a shared pointer to the requested const data.
 		*/
-		virtual const SupportedType& getDataAt(const std::type_info& type, const size_t address) const = 0;
+		virtual std::shared_ptr<const SupportedType> getDataAt(const std::type_info& type, const size_t address) const = 0;
+
+		/**
+		* \brief Empty destructor for data accesses.
+		*
+		* This empty function is used as a destructor whenever a shared pointer
+		* to data held in the DataHandler, in its native type, is created by 
+		* the DataHandler::getDataAt() method.
+		*/
+		inline static std::function<void(const SupportedType*)> emptyDestructor() {
+			return [](const SupportedType* ptr) {};
+		};
 	};
 }
 

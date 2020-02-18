@@ -1,10 +1,12 @@
 #include <algorithm>
+
 #include "data/dataHandler.h"
 
 size_t Data::DataHandler::count = 0;
 
 Data::DataHandler::DataHandler() : id{ count++ }, providedTypes(), cachedHash(), invalidCachedHash(true) {
 };
+
 
 size_t Data::DataHandler::getId() const
 {
@@ -22,7 +24,7 @@ size_t Data::DataHandler::getHash() const
 
 bool Data::DataHandler::canHandle(const std::type_info& type) const
 {
-	for (auto & t : this->providedTypes) {
+	for (auto& t : this->providedTypes) {
 		if (t.get() == type)
 			return true;
 	}
@@ -52,3 +54,5 @@ bool std::operator==(const std::reference_wrapper<const std::type_info>& r0, con
 {
 	return r0.get() == r1.get();
 }
+
+

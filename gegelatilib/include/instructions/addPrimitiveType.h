@@ -3,6 +3,7 @@
 
 #include <typeinfo>
 #include <type_traits>
+#include <memory>
 
 #include "instruction.h"
 
@@ -11,7 +12,7 @@ namespace Instructions {
 	/**
 	* \brief Template class for add instruction on all types of data: double, int, ...
 	*
-	* Although the given template parameter T is a primitive type, the 
+	* Although the given template parameter T is a primitive type, the
 	* SupportedType actually used by the instruction will be from the PrimitiveType<T> type.
 	*/
 	template <class T> class AddPrimitiveType : public Instruction {
@@ -24,9 +25,9 @@ namespace Instructions {
 		*/
 		AddPrimitiveType();
 
-		double execute(
+		virtual double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::reference_wrapper<const SupportedType>>& args) const;
+			const std::vector<std::shared_ptr<const SupportedType>>& args) const override;
 	};
 
 
@@ -38,13 +39,13 @@ namespace Instructions {
 
 	template <class T> double AddPrimitiveType<T>::execute(
 		const std::vector<std::reference_wrapper<const Parameter>>& params,
-		const std::vector<std::reference_wrapper<const SupportedType>>& args) const {
+		const std::vector<std::shared_ptr<const SupportedType>>& args) const {
 
 		if (Instruction::execute(params, args) != 1.0) {
 			return 0.0;
 		}
 
-		return dynamic_cast<const PrimitiveType<T>&>(args.at(0).get()) +(double) dynamic_cast<const PrimitiveType<T>&>(args.at(1).get());;
+		return *std::dynamic_pointer_cast<const PrimitiveType<T>>(args.at(0)) + (double) *std::dynamic_pointer_cast<const PrimitiveType<T>>(args.at(1));;
 	}
 }
 

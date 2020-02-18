@@ -19,7 +19,7 @@ void StickGameWithOpponent::doAction(uint64_t actionID)
 	if (!this->isTerminal()) {
 		// Execute the action
 		// Get current state
-		int currentState = (int)((const PrimitiveType<int>&)(this->remainingSticks.getDataAt(typeid(PrimitiveType<int>), 0)));
+		int currentState = (int) * (std::dynamic_pointer_cast<const PrimitiveType<int>>((this->remainingSticks.getDataAt(typeid(PrimitiveType<int>), 0))));
 		if ((actionID + 1) > currentState) {
 			// Illegal move
 			this->forbiddenMove = true;
@@ -82,5 +82,5 @@ double StickGameWithOpponent::getScore() const
 
 bool StickGameWithOpponent::isTerminal() const
 {
-	return (int)((const PrimitiveType<int>&)(this->remainingSticks.getDataAt(typeid(PrimitiveType<int>), 0))) == 0;
+	return (int)*(std::dynamic_pointer_cast<const PrimitiveType<int>>(this->remainingSticks.getDataAt(typeid(PrimitiveType<int>), 0))) == 0;
 }

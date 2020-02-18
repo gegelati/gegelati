@@ -58,7 +58,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAt) {
 
 	d->resetData();
 	for (int i = 0; i < size; i++) {
-		const PrimitiveType<float>& a = (const PrimitiveType<float>&)d->getDataAt(typeid(PrimitiveType<float>), i);
+		const PrimitiveType<float> a = *std::dynamic_pointer_cast<const PrimitiveType<float>>(d->getDataAt(typeid(PrimitiveType<float>), i));
 		ASSERT_EQ((float)a, 0.0f) << "Data at valid address and type can not be accessed.";
 	}
 
@@ -79,7 +79,7 @@ TEST(DataHandlersTest, PrimitiveDataArraySetDataAt) {
 	ASSERT_NO_THROW(d->setDataAt(typeid(value), address, value)) << "Setting data with valid Address and type failed.";
 
 	// Check that data was indeed updated.
-	ASSERT_EQ((double)((const PrimitiveType<double>&)d->getDataAt(typeid(PrimitiveType<double>), address)), doubleValue) << "Previously set data did not persist.";
+	ASSERT_EQ((double)*(std::dynamic_pointer_cast<const PrimitiveType<double>>(d->getDataAt(typeid(PrimitiveType<double>), address))), doubleValue) << "Previously set data did not persist.";
 
 	delete d;
 }
