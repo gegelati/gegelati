@@ -4,6 +4,7 @@
 #include <sstream>
 #include <functional>
 #include <typeinfo>
+#include <regex>
 
 #include "dataHandler.h"
 
@@ -56,6 +57,9 @@ namespace Data {
 		/// Default destructor.
 		virtual ~PrimitiveTypeArray() = default;
 
+		/// Override the DataHandler method.
+		virtual bool canHandle(const std::type_info& type) const override;
+
 		// Inherited from DataHandler
 		virtual DataHandler* clone() const override;
 
@@ -94,6 +98,30 @@ namespace Data {
 	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size) : nbElements{ size }, data(size) {
 		this->providedTypes.push_back(typeid(PrimitiveType<T>));
 	}
+
+	template <class T>
+	bool PrimitiveTypeArray<T>::canHandle(const std::type_info& type) const {
+		// If the type is in the supportedTypes list
+		if (DataHandler::canHandle(type)) {
+			return true;
+		}
+
+		// If the type is an array of the primitive type
+		// with a size inferior to the container.
+		std::string regex(typeid(PrimitiveType<T>).name());
+		regex.append(" \\[([0-9]+)\\]");
+		std::regex arrayType(regex);
+
+		std::cmatch cm;
+		if (std::regex_match(type.name(), cm, arrayType)) {
+			int size = std::atoi(cm[1].str().c_str());
+			if (size <= this->nbElements) {
+				return true;
+			}
+		}
+
+		return false;
+	};
 
 	template<class T>
 	inline DataHandler* PrimitiveTypeArray<T>::clone() const

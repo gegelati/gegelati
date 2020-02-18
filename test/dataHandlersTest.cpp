@@ -18,21 +18,14 @@ TEST(DataHandlersTest, ID) {
 }
 
 TEST(DataHandlersTest, PrimitiveDataArrayCanProvide) {
-	Data::DataHandler* d = new Data::PrimitiveTypeArray<double>();
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<double>(4);
 
 	ASSERT_TRUE(d->canHandle(typeid(PrimitiveType<double>))) << "PrimitiveTypeArray<double>() wrongfully say it can not provide PrimitiveType<double> data.";
 	ASSERT_FALSE(d->canHandle(typeid(PrimitiveType<int>))) << "PrimitiveTypeArray<double>() wrongfully say it can provide PrimitiveType<int> data.";
 	ASSERT_FALSE(d->canHandle(typeid(SupportedType))) << "PrimitiveTypeArray<double>() wrongfully say it can provide SupportedType data.";
 
-	delete d;
-}
-
-TEST(DataHandlersTest, PrimitiveDataArrayGetHandledTypes) {
-	Data::DataHandler* d = new Data::PrimitiveTypeArray<int>();
-
-	auto vect = d->getHandledTypes();
-	ASSERT_EQ(vect.size(), 1) << "Size of data type set handled by PrimitiveTypeArray<double> is incorrect.";
-	ASSERT_EQ(std::count(vect.begin(), vect.end(), typeid(PrimitiveType<int>)), 1) << "Vector of handled types returned by PrimitiveTypeArray<int> does not contain expectesd.";
+	ASSERT_TRUE(d->canHandle(typeid(PrimitiveType<double>[2]))) << "PrimitiveTypeArray<double>() wrongfully says it can not provide an array of its PrimitiveType<double>[2].";
+	ASSERT_FALSE(d->canHandle(typeid(PrimitiveType<double>[5]))) << "PrimitiveTypeArray<double>() wrongfully says it can provide an array of its PrimitiveType<double>[5].";
 
 	delete d;
 }
@@ -79,7 +72,7 @@ TEST(DataHandlersTest, PrimitiveDataArraySetDataAt) {
 	ASSERT_NO_THROW(d->setDataAt(typeid(value), address, value)) << "Setting data with valid Address and type failed.";
 
 	// Check that data was indeed updated.
-	ASSERT_EQ((double)*(std::dynamic_pointer_cast<const PrimitiveType<double>>(d->getDataAt(typeid(PrimitiveType<double>), address))), doubleValue) << "Previously set data did not persist.";
+	ASSERT_EQ((double) * (std::dynamic_pointer_cast<const PrimitiveType<double>>(d->getDataAt(typeid(PrimitiveType<double>), address))), doubleValue) << "Previously set data did not persist.";
 
 	delete d;
 }

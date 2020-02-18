@@ -38,14 +38,26 @@ namespace Data {
 		const size_t id;
 
 		/**
-		* \brief List of the types of the operands needed to execute the instruction.
+		* \brief List of the types provided by the DataHandler..
 		*
 		* Because std::unordered_set was too complex to use (because it does
 		* not support std::reference_wrapper easily), std::vector is used instead.
 		* Adding the same type several type to the list of providedType will lead
 		* to undefined behavior.
+		*
+		* Although this attribute is used by the default implementation of the
+		* canHandle method, some handled dataTypes may not be in the list.
+		* Only the canHandle method is public, and me accept types not in this 
+		* list.
 		*/
 		std::vector<std::reference_wrapper<const std::type_info>> providedTypes;
+
+		/**
+		* \brief Retrieve the set of types provided by the DataHandler.
+		*
+		* \return a const reference to the data type set provided by the DataHandler.
+		*/
+		const std::vector<std::reference_wrapper<const std::type_info>>& getHandledTypes() const;
 
 		/**
 		* \brief Cached value returned by the getHash() function.
@@ -128,14 +140,8 @@ namespace Data {
 		* \param[in] type the std::type_info whose availability in the DataHandler is being tested.
 		* \return true if the DataHandler can handle data for the given data type, and false otherwise.
 		*/
-		bool canHandle(const std::type_info& type) const;
+		virtual bool canHandle(const std::type_info& type) const;
 
-		/**
-		* \brief Retrieve the set of types provided by the DataHandler.
-		*
-		* \return a const reference to the data type set provided by the DataHandler.
-		*/
-		const std::vector<std::reference_wrapper<const std::type_info>>& getHandledTypes() const;
 
 		/**
 		* \brief Get the getAddressSpace size for the given data type.
@@ -173,21 +179,21 @@ namespace Data {
 		* \brief Get data of the given type, from the given address.
 		*
 		* Data is returned as a shared_ptr, with two possible allocation types:
-		* - Classic pointer: The returned data is natively contained in the 
-		* DataHandler and could be accessed through a regular pointer. In this 
+		* - Classic pointer: The returned data is natively contained in the
+		* DataHandler and could be accessed through a regular pointer. In this
 		* case the returned shared pointer is associated with the emptyDestructor
-		* function as its destructor to avoid any deallocation on the 
+		* function as its destructor to avoid any deallocation on the
 		* shared_ptr deletion.
-		* - Shared pointer: The returned data is a temporary object that was 
-		* constructed on request from data in the DataHandler. Once it has 
+		* - Shared pointer: The returned data is a temporary object that was
+		* constructed on request from data in the DataHandler. Once it has
 		* been used, on deletion of the shared pointer, this temporary object
 		* is deallocated using its default destructor.
 		*
 		* \param[in] type the std::type_info of data retrieved.
 		* \param[in] address the location of the data to retrieve.
-		* \throws std::invalid_argument if the given data type is not provided 
+		* \throws std::invalid_argument if the given data type is not provided
 		* by the DataHandler.
-		* \throws std::out_of_range if the given address is invalid for the 
+		* \throws std::out_of_range if the given address is invalid for the
 		* given data type.
 		* \return a shared pointer to the requested const data.
 		*/
@@ -197,7 +203,7 @@ namespace Data {
 		* \brief Empty destructor for data accesses.
 		*
 		* This empty function is used as a destructor whenever a shared pointer
-		* to data held in the DataHandler, in its native type, is created by 
+		* to data held in the DataHandler, in its native type, is created by
 		* the DataHandler::getDataAt() method.
 		*/
 		inline static std::function<void(const SupportedType*)> emptyDestructor() {
