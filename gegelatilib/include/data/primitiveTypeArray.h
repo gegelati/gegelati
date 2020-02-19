@@ -107,17 +107,9 @@ namespace Data {
 		}
 
 		// If the type is an array of the primitive type
-		// with a size inferior to the container.
-		std::string regex(typeid(PrimitiveType<T>).name());
-		regex.append(" \\[([0-9]+)\\]");
-		std::regex arrayType(regex);
-
-		std::cmatch cm;
-		if (std::regex_match(type.name(), cm, arrayType)) {
-			int size = std::atoi(cm[1].str().c_str());
-			if (size <= this->nbElements) {
-				return true;
-			}
+		// with a size inferior to the container (checked in getAddressSpace).
+		if (getAddressSpace(type) > 0) {
+			return true;
 		}
 
 		return false;
@@ -137,6 +129,21 @@ namespace Data {
 		if (type == typeid(PrimitiveType<T>)) {
 			return this->nbElements;
 		}
+
+		std::string regex(typeid(PrimitiveType<T>).name());
+		regex.append(" \\[([0-9]+)\\]");
+		std::regex arrayType(regex);
+
+		std::cmatch cm;
+		if (std::regex_match(type.name(), cm, arrayType)) {
+			int size = std::atoi(cm[1].str().c_str());
+			if (size <= this->nbElements) {
+				// address space size is the number of elements
+				// minus the size of the array
+				return this->nbElements - (size - 1);
+			}
+		}
+
 		// Default case
 		return 0;
 	}
@@ -175,7 +182,23 @@ namespace Data {
 		// Throw exception in case of invalid arguments.
 		checkAddressAndType(type, address);
 
-		std::shared_ptr<const SupportedType> result(&(this->data[address]), DataHandler::emptyDestructor());
+		// Native data type
+		if (type == typeid(PrimitiveType<T>)) {
+			std::shared_ptr<const SupportedType> result(&(this->data[address]), DataHandler::emptyDestructor());
+			return result;
+		}
+		
+		// Array type (or else checkAddress would throw an exception)
+		// retrieve size of array from addressSpace (to avoid code duplication of regex)
+		size_t arraySize = this->nbElements - this->getAddressSpace(type) + 1;
+
+		std::shared_ptr<SupportedType> result(new PrimitiveType<T>[arraySize], std::default_delete<PrimitiveType<T>[]>());
+		std::dynamic_pointer_cast<PrimitiveType<T>[]>(result)[0] = this->data[0];
+		// copy data into composite array
+		/*
+		for (uint64_t i = 0; i < arraySize; i++) {
+			arrayData[i] = this->data[address + i];
+		}*/
 		return result;
 	}
 
