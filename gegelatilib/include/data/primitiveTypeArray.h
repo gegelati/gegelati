@@ -11,6 +11,10 @@
 namespace Data {
 	/**
 	* DataHandler for manipulating arrays of a primitive data type.
+	*
+	* In addition to native data types PrimitiveType<T>, this DataHandler can
+	* also provide the following composite data type:
+	* - PrimitiveType<T>[n]: with n <= to the size of the PrimitiveTypeArray.
 	*/
 	template <class T> class PrimitiveTypeArray : public DataHandler {
 		static_assert(std::is_fundamental<T>::value, "Template class PrimitiveTypeArray<T> can only be used for primitive types.");
@@ -187,18 +191,17 @@ namespace Data {
 			std::shared_ptr<const SupportedType> result(&(this->data[address]), DataHandler::emptyDestructor());
 			return result;
 		}
-		
-		// Array type (or else checkAddress would throw an exception)
+
+		// Array type (or else checkAddress would have thrown an exception)
 		// retrieve size of array from addressSpace (to avoid code duplication of regex)
 		size_t arraySize = this->nbElements - this->getAddressSpace(type) + 1;
+		PrimitiveType<T>* resultArray = new PrimitiveType<T>[arraySize];
 
-		std::shared_ptr<SupportedType> result(new PrimitiveType<T>[arraySize], std::default_delete<PrimitiveType<T>[]>());
-		std::dynamic_pointer_cast<PrimitiveType<T>[]>(result)[0] = this->data[0];
 		// copy data into composite array
-		/*
 		for (uint64_t i = 0; i < arraySize; i++) {
-			arrayData[i] = this->data[address + i];
-		}*/
+			resultArray[i] = this->data[address + i];
+		}
+		std::shared_ptr<SupportedType> result(resultArray, std::default_delete<PrimitiveType<T>[]>());
 		return result;
 	}
 
