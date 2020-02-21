@@ -95,6 +95,28 @@ namespace Learn {
 			LearningAgent(le, iSet, p, nbRegs), maxNbThreads{ maxNbThreads } {};
 
 		/**
+		* \brief Constructor for ParallelLearningAgent with an imported TPG graph.
+		*
+		* Based on constructor of LearningAgent with an imported graph
+		*
+		* \param[in] le The LearningEnvironment for the TPG.
+		* \param[in] iSet Set of Instruction used to compose Programs in the
+		*            learning process.
+		* \param[in] p The LearningParameters for the LearningAgent.
+		* \param[in] model The trained model to import in the new learning agent.
+		* \param[in] nbRegs The number of registers for the execution
+		*                   environment of Program.
+		* \param[in] maxNbThreads Integer parameter controlling the number of
+		* threads used for parallel execution. Possible values are:
+		*   - default:  Let the runtime decide using
+		*               std::thread::hardware_concurrency().
+		*   - `0` and `1`: Do not use parallelism.
+		*   - `n > 1`: Set the number of threads explicitly.
+		*/
+		ParallelLearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, TPG::TPGGraph & model, const uint64_t maxNbThreads = std::thread::hardware_concurrency(), const unsigned int nbRegs = 8) :
+			LearningAgent(le, iSet, p, model, nbRegs), maxNbThreads{ maxNbThreads }{};
+
+		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
 		*
 		* **Replaces the function from the base class LearningAgent.**

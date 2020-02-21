@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include <iostream>
+#include <fstream>
 
 #include "dataHandlers/dataHandler.h"
 #include "dataHandlers/primitiveTypeArray.h"
@@ -139,4 +141,18 @@ TEST_F(ImporterTest, importGraph)
 	ASSERT_EQ(imported_model.getEdges().size(), 9) << "the wrong number of edges have been created.";
 	ASSERT_EQ(imported_model.getRootVertices().size(), 3) << "the wrong number of root teams have been created.";
 
+}
+
+
+TEST_F(ImporterTest, readLineFromFile) {
+	std::ofstream myfile;
+	Importer::TPGGraphDotImporter* dotImporter;
+
+	myfile.open ("wrongfile.dot");
+	for (int i = 0; i < 1025; i++)
+	    myfile << "aa";
+    myfile.close();
+	ASSERT_NO_THROW(dotImporter = new Importer::TPGGraphDotImporter("wrongfile.dot",*e)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
+
+	ASSERT_THROW(dotImporter->importGraph(),std::ifstream::failure) << "Reading more than MAX_READ_SIZE(1024) should fail -- function ReadLineFromFile";
 }

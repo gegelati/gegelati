@@ -50,12 +50,6 @@ namespace TPG {
 			swap(a.edges, b.edges);
 		}
 
-
-		/**
-		*	\brief assignement operator for class TPGGraph
-		*/
-		TPGGraph & operator=(TPGGraph model);
-
 		/**
 		* \brief Destructor for the TPGGraph.
 		*

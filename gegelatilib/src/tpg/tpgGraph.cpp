@@ -13,13 +13,6 @@ TPG::TPGGraph::~TPGGraph()
 	}
 }
 
-TPG::TPGGraph & TPG::TPGGraph::operator=(TPGGraph model)
-{
-	swap(*this, model);
-	return *this;
-}
-
-
 void TPG::TPGGraph::clear()
 {
 	// Remove all vertices

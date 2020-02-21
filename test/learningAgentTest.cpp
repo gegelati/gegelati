@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
+#include "tpg/tpgGraph.h"
+
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 #include "instructions/addPrimitiveType.h"
@@ -51,6 +53,7 @@ TEST_F(LearningAgentTest, Constructor) {
 
 	ASSERT_NO_THROW(delete la) << "Destruction of the LearningAgent failed.";
 }
+
 
 TEST_F(LearningAgentTest, Init) {
 	params.archiveSize = 50;
