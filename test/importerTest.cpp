@@ -18,6 +18,8 @@
 #include "importer/tpgGraphDotImporter.h"
 #include "exporter/tpgGraphDotExporter.h"
 
+#include <fstream>
+
 
 class ImporterTest : public ::testing::Test {
 public:
@@ -34,6 +36,10 @@ protected:
 	TPG::TPGGraph* tpg;
 	std::vector<const TPG::TPGEdge*> edges;
 
+	std::fstream failpfile;
+	std::fstream pfile;
+
+
 	virtual void SetUp() {
 		// Setup environment
 		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
@@ -47,7 +53,7 @@ protected:
 		tpg = new TPG::TPGGraph(*e);
 
 		// Create 10 programs
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 9; i++) {
 			progPointers.push_back(std::shared_ptr<Program::Program>(new Program::Program(*e)));
 		}
 
@@ -64,8 +70,8 @@ protected:
 		// Create a TPG 
 		// (T= Team, A= Action)
 		// 
-		//        .------. 
-		//        v      |
+		//  .--.  .------. 
+		//  v   \ v      |
 		// T0---->T1---->T2     T4
 		// |     /| \    |      |
 		// v    / v  \   v      v
@@ -89,6 +95,7 @@ protected:
 		// Add new Edges between teams
 		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(0), *tpg->getVertices().at(1), progPointers.at(4)));
 		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(2), progPointers.at(5)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().at(0), progPointers.at(8)));
 
 		// Add a cyclic edge
 		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2), *tpg->getVertices().at(1), progPointers.at(6)));
@@ -99,13 +106,54 @@ protected:
 
 		// Check the characteristics
 		ASSERT_EQ(tpg->getNbVertices(), 9);
-		ASSERT_EQ(tpg->getEdges().size(), 9);
-		ASSERT_EQ(tpg->getRootVertices().size(), 3);
+		ASSERT_EQ(tpg->getEdges().size(), 10);
+		ASSERT_EQ(tpg->getRootVertices().size(), 2);
 
 		// Save the graph in a dot file.
 		Exporter::TPGGraphDotExporter dotexporter ("exported_tpg.dot", *tpg);
 		dotexporter.print();
 
+		failpfile.open("fail_file.dot", std::fstream::out);
+		//the header isrepresented by 3 lines
+		failpfile<<"a\na\na\n";
+		for (int i = 0; i < 1025; i++)
+			failpfile << 'a';
+		failpfile.close();
+
+		tpg->clear();
+
+		// Create another TPG graph
+		// (T= Team, A= Action)
+		// 
+		//			T0 ---> A0
+		//		   /  \
+		//		  /    \
+		//		 |      |
+		//	A1<--T1 <-- T2-->A2
+		//		 |
+		//       v
+		//		A3
+
+		for (int i = 0; i < 3; i++) {
+			tpg->addNewTeam();
+		}
+		tpg->addNewAction(0);
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(0), *tpg->getVertices().back(), progPointers.at(0)));
+		tpg->addNewAction(1); 
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().back(), progPointers.at(1)));
+		tpg->addNewAction(2); 
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2), *tpg->getVertices().back(), progPointers.at(2)));
+		tpg->addNewAction(3); 
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1), *tpg->getVertices().back(), progPointers.at(3)));
+
+		// Add new Edges between teams
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(0), *tpg->getVertices().at(1), progPointers.at(4)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(0), *tpg->getVertices().at(2), progPointers.at(5)));
+		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2), *tpg->getVertices().at(1), progPointers.at(8)));
+
+		// Save the graph in a dot file.
+		Exporter::TPGGraphDotExporter exporter2("exported_tpg2.dot", *tpg);
+		exporter2.print();
 	}
 
 	virtual void TearDown() {
@@ -138,11 +186,9 @@ TEST_F(ImporterTest, importGraph)
 
 	// Check the imported graph characteristics
 	ASSERT_EQ(imported_model.getNbVertices(), 9) << "the wrong number of vertices have been created.";
-	ASSERT_EQ(imported_model.getEdges().size(), 9) << "the wrong number of edges have been created.";
-	ASSERT_EQ(imported_model.getRootVertices().size(), 3) << "the wrong number of root teams have been created.";
-
+	ASSERT_EQ(imported_model.getEdges().size(), 10) << "the wrong number of edges have been created.";
+	ASSERT_EQ(imported_model.getRootVertices().size(), 2) << "the wrong number of root teams have been created.";
 }
-
 
 TEST_F(ImporterTest, readLineFromFile) {
 	std::ofstream myfile;
@@ -155,4 +201,12 @@ TEST_F(ImporterTest, readLineFromFile) {
 	ASSERT_NO_THROW(dotImporter = new Importer::TPGGraphDotImporter("wrongfile.dot",*e)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
 
 	ASSERT_THROW(dotImporter->importGraph(),std::ifstream::failure) << "Reading more than MAX_READ_SIZE(1024) should fail -- function ReadLineFromFile";
+}
+
+TEST_F(ImporterTest, readLinkTeamProgram)
+{
+	Importer::TPGGraphDotImporter dotImporter("exported_tpg2.dot", *e);
+
+	//assert that we can import a tpg graph from a file
+	ASSERT_NO_THROW(dotImporter.importGraph()) << "Everything should be fine";
 }
