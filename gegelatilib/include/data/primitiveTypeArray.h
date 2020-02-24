@@ -8,6 +8,17 @@
 
 #include "dataHandler.h"
 
+#ifdef _MSC_VER
+/// Macro for getting type name in human readable format.
+#define DEMANGLE_TYPEID_NAME(name) name
+#elif __GNUC__
+#include <cxxabi.h>
+/// Macro for getting type name in human readable format.
+#define DEMANGLE_TYPEID_NAME(name) abi::__cxa_demangle(name, nullptr, nullptr, nullptr)
+#else
+#error Unsupported compiler (yet): Check need for name demangling of typeid.name().
+#endif
+
 namespace Data {
 	/**
 	* DataHandler for manipulating arrays of a primitive data type.
@@ -134,12 +145,14 @@ namespace Data {
 			return this->nbElements;
 		}
 
-		std::string regex(typeid(PrimitiveType<T>).name());
+		
+		std::string regex(DEMANGLE_TYPEID_NAME(typeid(PrimitiveType<T>).name()));
+
 		regex.append(" \\[([0-9]+)\\]");
 		std::regex arrayType(regex);
 
 		std::cmatch cm;
-		if (std::regex_match(type.name(), cm, arrayType)) {
+		if (std::regex_match(DEMANGLE_TYPEID_NAME(type.name()), cm, arrayType)) {
 			int size = std::atoi(cm[1].str().c_str());
 			if (size <= this->nbElements) {
 				// address space size is the number of elements
@@ -169,14 +182,14 @@ namespace Data {
 		// check type
 		if (addressSpace == 0) {
 			std::stringstream  message;
-			message << "Data type " << type.name() << " cannot be accessed in a " << typeid(*this).name() << ".";
+			message << "Data type " << DEMANGLE_TYPEID_NAME(type.name()) << " cannot be accessed in a " << DEMANGLE_TYPEID_NAME(typeid(*this).name()) << ".";
 			throw std::invalid_argument(message.str());
 		}
 
 		// check location
 		if (address >= addressSpace) {
 			std::stringstream  message;
-			message << "Data type " << type.name() << " cannot be accessed at address " << address << ", address space size is " << addressSpace + ".";
+			message << "Data type " << DEMANGLE_TYPEID_NAME(type.name()) << " cannot be accessed at address " << address << ", address space size is " << addressSpace + ".";
 			throw std::out_of_range(message.str());
 		}
 	}
