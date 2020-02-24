@@ -61,30 +61,7 @@ namespace Learn {
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
 		};
-
-
-		/**
-		* \brief Constructor for LearningAgent.
-		*
-		* \param[in] le The LearningEnvironment for the TPG.
-		* \param[in] iSet Set of Instruction used to compose Programs in the
-		*            learning process.
-		* \param[in] p The LearningParameters for the LearningAgent.
-		* \param[in] model the TPGGraph to copy.
-		* \param[in] nbRegs The number of registers for the execution
-		*                   environment of Program.
-		*/
-		LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, TPG::TPGGraph & model, const unsigned int nbRegs = 8) :
-			learningEnvironment{ le },
-			env(iSet, le.getDataSources(), nbRegs),
-			params{ p },
-			tpg(std::move(model)),
-			archive(p.archiveSize, p.archivingProbability)
-		{
-			// override the number of actions from the parameters.
-			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
-		};
-
+		
 		/**
 		* \brief Getter for the TPGGraph built by the LearningAgent.
 		*

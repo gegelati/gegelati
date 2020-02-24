@@ -100,7 +100,6 @@ void Learn::LearningAgent::decimateWorstRoots(std::multimap<std::shared_ptr<Eval
 	for (auto i = 0; i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots); i++) {
 		// If the root is an action, do not remove it!
 		if (typeid(*results.begin()->second) != typeid(TPG::TPGAction)) {
-
 			tpg.removeVertex(*results.begin()->second);
 		}
 		else {

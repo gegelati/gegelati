@@ -34,6 +34,7 @@ protected:
 	Exporter::TPGGraphDotExporter* dotExporter = NULL;
 
 	TPG::TPGGraph* tpg;
+	TPG::TPGGraph* tpg_copy;
 	std::vector<const TPG::TPGEdge*> edges;
 
 	std::fstream failpfile;
@@ -51,6 +52,7 @@ protected:
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
 		e = new Environment(set, vect, 8);
 		tpg = new TPG::TPGGraph(*e);
+		tpg_copy = new TPG::TPGGraph(*e);
 
 		// Create 10 programs
 		for (int i = 0; i < 9; i++) {
@@ -125,14 +127,14 @@ protected:
 		// Create another TPG graph
 		// (T= Team, A= Action)
 		// 
-		//			T0 ---> A0
-		//		   /  \
-		//		  /    \
-		//		 |      |
-		//	A1<--T1 <-- T2-->A2
-		//		 |
+		//          T0 ---> A0
+		//         /  \
+		//        /    \
+		//       |      |
+		//  A1<--T1 <-- T2-->A2
+		//       |
 		//       v
-		//		A3
+		//      A3
 
 		for (int i = 0; i < 3; i++) {
 			tpg->addNewTeam();
@@ -158,6 +160,7 @@ protected:
 
 	virtual void TearDown() {
 		delete tpg;
+		delete tpg_copy;
 		delete e;
 		delete (&(vect.at(0).get()));
 		delete (&set.getInstruction(0));
@@ -167,27 +170,24 @@ protected:
 
 TEST_F(ImporterTest, Constructor) {
 	Importer::TPGGraphDotImporter* dotImporter;
-	ASSERT_NO_THROW(dotImporter = new Importer::TPGGraphDotImporter("exported_tpg.dot",*e)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
+	ASSERT_NO_THROW(dotImporter = new Importer::TPGGraphDotImporter("exported_tpg.dot",*e, *tpg_copy)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
 
 	ASSERT_NO_THROW(delete dotImporter;) << "TPGGraphDotExporter could not be deleted.";
 
-	ASSERT_THROW(dotImporter = new Importer::TPGGraphDotImporter("XXX://INVALID_PATH", *e), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
+	ASSERT_THROW(dotImporter = new Importer::TPGGraphDotImporter("XXX://INVALID_PATH", *e, *tpg_copy), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
 }
 
 TEST_F(ImporterTest, importGraph)
 {
-	Importer::TPGGraphDotImporter dotImporter("exported_tpg.dot",*e);
+	Importer::TPGGraphDotImporter dotImporter("exported_tpg.dot",*e, *tpg_copy);
 
 	//assert that we can import a tpg graph from a file
 	ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
 
-	//actually import the model
-	TPG::TPGGraph imported_model = std::move(dotImporter.importGraph());
-
 	// Check the imported graph characteristics
-	ASSERT_EQ(imported_model.getNbVertices(), 9) << "the wrong number of vertices have been created.";
-	ASSERT_EQ(imported_model.getEdges().size(), 10) << "the wrong number of edges have been created.";
-	ASSERT_EQ(imported_model.getRootVertices().size(), 2) << "the wrong number of root teams have been created.";
+	ASSERT_EQ(tpg_copy->getNbVertices(), 9) << "the wrong number of vertices have been created.";
+	ASSERT_EQ(tpg_copy->getEdges().size(), 10) << "the wrong number of edges have been created.";
+	ASSERT_EQ(tpg_copy->getRootVertices().size(), 2) << "the wrong number of root teams have been created.";
 }
 
 TEST_F(ImporterTest, readLineFromFile) {
@@ -198,15 +198,21 @@ TEST_F(ImporterTest, readLineFromFile) {
 	for (int i = 0; i < 1025; i++)
 	    myfile << "aa";
     myfile.close();
-	ASSERT_NO_THROW(dotImporter = new Importer::TPGGraphDotImporter("wrongfile.dot",*e)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
-
-	ASSERT_THROW(dotImporter->importGraph(),std::ifstream::failure) << "Reading more than MAX_READ_SIZE(1024) should fail -- function ReadLineFromFile";
+	ASSERT_THROW(dotImporter = new Importer::TPGGraphDotImporter("wrongfile.dot",*e, *tpg_copy),std::ifstream::failure)<< "Reading more than MAX_READ_SIZE(1024) should fail -- function ReadLineFromFile";
 }
 
 TEST_F(ImporterTest, readLinkTeamProgram)
 {
-	Importer::TPGGraphDotImporter dotImporter("exported_tpg2.dot", *e);
+	Importer::TPGGraphDotImporter dotImporter("exported_tpg2.dot", *e, *tpg_copy);
 
 	//assert that we can import a tpg graph from a file
 	ASSERT_NO_THROW(dotImporter.importGraph()) << "Everything should be fine";
+}
+
+TEST_F(ImporterTest, setNewFilePath)
+{
+	Importer::TPGGraphDotImporter dotImporter("exported_tpg.dot",*e, *tpg_copy);
+
+	//assert that we can import a tpg graph from a file
+	ASSERT_NO_THROW(dotImporter.setNewFilePath("exported_tpg2.dot")) << "Changing the input file should be ok";
 }

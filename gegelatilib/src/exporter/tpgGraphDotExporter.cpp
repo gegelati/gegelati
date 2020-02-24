@@ -183,7 +183,6 @@ void Exporter::TPGGraphDotExporter::print()
 	auto edges = this->tpg.getEdges();
 	for (const TPG::TPGEdge& edge : edges) {
 		this->printTPGEdge(edge);
-		//print the edge's program
 	}
 
 	// Print footer

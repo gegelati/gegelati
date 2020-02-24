@@ -1,6 +1,15 @@
 #include "importer/tpgGraphDotImporter.h"
 
 
+const std::string Importer::TPGGraphDotImporter::lineSeparator("&#92;n");
+const std::string Importer::TPGGraphDotImporter::teamRegex("T([0-9]+)\\x20\\x5B.*\\x5D");
+const std::string Importer::TPGGraphDotImporter::programRegex("P([0-9]+)\\x20\\x5B.*\\x5D");
+const std::string Importer::TPGGraphDotImporter::instructionRegex("I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D");
+const std::string Importer::TPGGraphDotImporter::actionRegex("A([0-9]+)\\x20\\x5B.*=\"([0-9]+)\"\\x5D");
+const std::string Importer::TPGGraphDotImporter::linkProgramInstructionRegex("P([0-9]+)\\x20->\\x20I([0-9]+).*");
+const std::string Importer::TPGGraphDotImporter::linkProgramActionRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20A([0-9]+).*");
+const std::string Importer::TPGGraphDotImporter::linkProgramTeamRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*");
+const std::string Importer::TPGGraphDotImporter::addLinkProgramRegex("T([0-9]+)\\x20->\\x20P([0-9]+)");
 
 void Importer::TPGGraphDotImporter::readParameters(std::string & str, Program::Line & l)
 {
@@ -10,6 +19,8 @@ void Importer::TPGGraphDotImporter::readParameters(std::string & str, Program::L
 	uint64_t p_idx = 0;
 	
 	int16_t p_value;
+	// parameters are stored in str with the following format :
+	// param1|param2|...|param_N
 	while(!str.empty())
 	{
 		pos2 = str.find("|");
@@ -31,6 +42,9 @@ void Importer::TPGGraphDotImporter::readOperands(std::string & str, Program::Lin
 	uint64_t dataIndex = 0;
 	uint64_t location = 0;
 
+	// operands are stored in str with the following format :
+	// op1_param1|op1_param2#...|param_N
+
 	for(int i = 0; i < this->tpg.getEnvironment().getMaxNbOperands(); ++i )
 	{
 		pos2 = str.find("|");
@@ -46,8 +60,10 @@ void Importer::TPGGraphDotImporter::readOperands(std::string & str, Program::Lin
 	}
 }
 
-void Importer::TPGGraphDotImporter::readLine()
+void Importer::TPGGraphDotImporter::readLine(std::smatch & matches)
 {
+	// a line is stored in the .dot file with the following format
+	// inst_idx|dest_idx&param_1|param_2|...|param_n$op1_param1|op1_param2#...#opN_param1|opN_param2
 	if(!this->lastLine.empty() && !matches.empty())
 	{
 		uint64_t prog_label= std::stoi(matches[1]);
@@ -57,19 +73,24 @@ void Importer::TPGGraphDotImporter::readLine()
 		if(p_it != programID.end() && !label.empty())
 		{
 			std::shared_ptr<Program::Program> p = p_it->second;
-
+			//stores the whole program
 			std::string instruction;
 
+			//used to seek delimiters in the variable "instruction"
 			std::string::size_type pos;
 			std::string::size_type pos1;
 			std::string::size_type pos2;
 
+			//instruction index of a line
 			uint64_t instructionIdx;
+			//destination index of a line
 			uint64_t destinationIdx;
+			//store paramteres in a new string
 			std::string parameters;
+			//store operands in a new string 
 			std::string operands;
 
-
+			//as long as there are lines in the program, parse those lines
 			bool cont = true;
 			while (cont)
 			{
@@ -78,8 +99,10 @@ void Importer::TPGGraphDotImporter::readLine()
 				instruction = label.substr(0,pos);
 				label = label.substr(pos+this->lineSeparator.size(), label.size());
 				
+				//extract everything before pos (ie |)
+				//corresponds to instruction index
 				pos1 = instruction.find("|");
-				instructionIdx = std::stoi(instruction.substr(0, pos1)); 			//extract everything before pos (ie |)
+				instructionIdx = std::stoi(instruction.substr(0, pos1)); 			
 
 				//extract destination index;
 				pos2 = instruction.find("&");
@@ -115,13 +138,13 @@ void Importer::TPGGraphDotImporter::readLine()
 	}
 }
 
-void Importer::TPGGraphDotImporter::readProgram()
+void Importer::TPGGraphDotImporter::readProgram(std::smatch & matches)
 {
 	if(!this->lastLine.empty() && !matches.empty())
 	{
 		// Program definition : 
 		// P0 [fillcolor="#cccccc" shape=point]
-		this->programID.insert(std::pair<uint64_t, std::shared_ptr<Program::Program>>(std::stoi(this->matches[1]), 
+		this->programID.insert(std::pair<uint64_t, std::shared_ptr<Program::Program>>(std::stoi(matches[1]), 
 			new Program::Program(this->tpg.getEnvironment())));
 	}	
 }
@@ -135,7 +158,7 @@ void Importer::TPGGraphDotImporter::dumpTPGGraphHeader()
 	pFile.getline(buffer, MAX_READ_SIZE);
 }
 
-void Importer::TPGGraphDotImporter::readTeam()
+void Importer::TPGGraphDotImporter::readTeam(std::smatch & matches)
 {
 	if(!this->lastLine.empty() && !matches.empty())
 	{
@@ -143,35 +166,41 @@ void Importer::TPGGraphDotImporter::readTeam()
 	}
 }
 
-void Importer::TPGGraphDotImporter::readAction()
+void Importer::TPGGraphDotImporter::readAction(std::smatch & matches)
 {
 	if(!this->lastLine.empty() && !matches.empty())
 	{
+		//the regex matches two groups (action number and action label)
 		uint64_t action_label = std::stoi(matches[2]);
 		uint64_t action_number = std::stoi(matches[1]);
 
+		//elmt points to the action with the same label as the action we are parsing
 		auto elmt = actionID.find(action_label);
 		if (elmt == actionID.end()) 
 		{
+			//create a new action and insert it if none was previously found
 			this->actionID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(action_label, &this->tpg.addNewAction(action_label)));
 		}
 		this->actionLabel.insert(std::pair<uint64_t, uint64_t>(action_number,action_label));
 	}
 }
 
-void Importer::TPGGraphDotImporter::readLinkTeamProgramAction()
+void Importer::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch & matches)
 {
+	//Creating a edge from a team to an action
 	if(!this->lastLine.empty() && !matches.empty())
 	{
 		uint64_t team_in = std::stoi(matches[1]);
 		uint64_t program = std::stoi(matches[2]);
 		uint64_t act_out = std::stoi(matches[3]);
 
+		//get the action depending on its label
 		auto action_lab =  this->actionLabel.find(act_out);
 		if (action_lab != this->actionLabel.end())
 		{
 			auto team_it = this->vertexID.find(team_in);
 			auto action_it = this->actionID.find(action_lab->second);
+			//find the program to add to the edge
 			auto p_it = programID.find(program);
 			if(team_it != vertexID.end() && action_it != this->actionID.end() && p_it != programID.end())
 			{
@@ -184,22 +213,24 @@ void Importer::TPGGraphDotImporter::readLinkTeamProgramAction()
 	}
 }
 
-void Importer::TPGGraphDotImporter::readLinkTeamProgramTeam()
+void Importer::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch & matches)
 {
+	//creating a edge between two teams
 	if(!this->lastLine.empty() && !matches.empty())
 	{
 		uint64_t team_in  = std::stoi(matches[1]);
 		uint64_t program  = std::stoi(matches[2]);
 		uint64_t team_out = std::stoi(matches[3]);
 
+		//get the source and destination teams
 		auto t1_it = this->vertexID.find(team_in);
 		auto t2_it = this->vertexID.find(team_out);
 
+		//find the program
 		auto p_it = programID.find(program);
 		if(p_it != programID.end())
 		{
 			std::shared_ptr<Program::Program> p = p_it->second;
-
 			if(t1_it != this->vertexID.end() && t2_it != this->vertexID.end())
 			{
 				const TPG::TPGVertex * team_i = t1_it->second;
@@ -210,7 +241,7 @@ void Importer::TPGGraphDotImporter::readLinkTeamProgramTeam()
 	}
 }
 
-void Importer::TPGGraphDotImporter::readLinkTeamProgram()
+void Importer::TPGGraphDotImporter::readLinkTeamProgram(std::smatch & matches)
 {
 	if(!this->lastLine.empty() && !matches.empty())
 	{
@@ -245,7 +276,7 @@ void Importer::TPGGraphDotImporter::readLinkTeamProgram()
 }
 
 
-TPG::TPGGraph& Importer::TPGGraphDotImporter::importGraph()
+void Importer::TPGGraphDotImporter::importGraph()
 {
 	//force seek at the beginning of file.
 	pFile.seekg(0);
@@ -264,7 +295,6 @@ TPG::TPGGraph& Importer::TPGGraphDotImporter::importGraph()
 	{
 		read = this->readLineFromFile();
 	}
-	return this->tpg;
 }
 
 
@@ -281,6 +311,8 @@ bool Importer::TPGGraphDotImporter::readLineFromFile()
 	std::regex testLinkTPT(this->linkProgramTeamRegex);
 	std::regex testLinkTP(this->addLinkProgramRegex);
 
+	std::smatch matches;
+
 	if (!pFile.getline(buffer, MAX_READ_SIZE))
 		throw std::ifstream::failure("Couldn't read in the given file");
 	else
@@ -289,43 +321,54 @@ bool Importer::TPGGraphDotImporter::readLineFromFile()
 	}
 
 	// check the line shape and parse it 
-	if(std::regex_search(this->lastLine, this->matches, testTeamDeclare))
+	if(std::regex_search(this->lastLine, matches, testTeamDeclare))
 	{
-		readTeam();
+		readTeam(matches);
 	}
-	else if(std::regex_search(this->lastLine, this->matches, testActionDeclare))
+	else if(std::regex_search(this->lastLine, matches, testActionDeclare))
 	{
-		readAction();
+		readAction(matches);
 	}
-	else if(std::regex_search(this->lastLine, this->matches, testProgramDeclare))
+	else if(std::regex_search(this->lastLine, matches, testProgramDeclare))
 	{
-		readProgram();
+		readProgram(matches);
 	}
-	else if(std::regex_search(this->lastLine, this->matches, testInstructionDeclare))
+	else if(std::regex_search(this->lastLine, matches, testInstructionDeclare))
 	{
-		readLine();
+		readLine(matches);
 	}
-	else if(std::regex_search(this->lastLine, this->matches, testLinkPI))
+	else if(std::regex_search(this->lastLine, matches, testLinkPI))
 	{
 		// by definition, a program is linked to its instruction from its declaration.
 		// the link is used vor visualisation but doesn't require to be parsed
 		return true;
 	}
-	else if(std::regex_search(this->lastLine, this->matches, testLinkTPA))
+	else if(std::regex_search(this->lastLine, matches, testLinkTPA))
 	{
-		readLinkTeamProgramAction();
+		readLinkTeamProgramAction(matches);
 	}
-	else if(std::regex_search(this->lastLine, this->matches, testLinkTPT))
+	else if(std::regex_search(this->lastLine, matches, testLinkTPT))
 	{
-		readLinkTeamProgramTeam();
+		readLinkTeamProgramTeam(matches);
 	}
-	else if(std::regex_search(this->lastLine, this->matches, testLinkTP))
+	else if(std::regex_search(this->lastLine, matches, testLinkTP))
 	{
-		readLinkTeamProgram();
+		readLinkTeamProgram(matches);
 	}
 	else
 	{
 		return false;
 	}
 	return true;
+}
+
+void Importer::TPGGraphDotImporter::setNewFilePath(const char* newFilePath)
+{
+	//  Close previous file
+	pFile.close();
+	// open new one;
+	pFile.open(newFilePath);
+	if (!pFile.is_open()) {
+		throw std::runtime_error("Could not open file " + std::string(newFilePath));
+	}
 }
