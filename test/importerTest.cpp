@@ -15,11 +15,8 @@
 #include "tpg/tpgGraph.h"
 #include "learn/learningParameters.h"
 
-#include "importer/tpgGraphDotImporter.h"
-#include "exporter/tpgGraphDotExporter.h"
-
-#include <fstream>
-
+#include "file/tpgGraphDotImporter.h"
+#include "file/tpgGraphDotExporter.h"
 
 class ImporterTest : public ::testing::Test {
 public:
@@ -31,7 +28,7 @@ protected:
 	Instructions::Set set;
 	Environment* e = NULL;
 	std::vector<std::shared_ptr<Program::Program>> progPointers;
-	Exporter::TPGGraphDotExporter* dotExporter = NULL;
+	File::TPGGraphDotExporter* dotExporter = NULL;
 
 	TPG::TPGGraph* tpg;
 	TPG::TPGGraph* tpg_copy;
@@ -112,7 +109,7 @@ protected:
 		ASSERT_EQ(tpg->getRootVertices().size(), 2);
 
 		// Save the graph in a dot file.
-		Exporter::TPGGraphDotExporter dotexporter("exported_tpg.dot", *tpg);
+		File::TPGGraphDotExporter dotexporter("exported_tpg.dot", *tpg);
 		dotexporter.print();
 
 		failpfile.open("fail_file.dot", std::fstream::out);
@@ -154,7 +151,7 @@ protected:
 		edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2), *tpg->getVertices().at(1), progPointers.at(8)));
 
 		// Save the graph in a dot file.
-		Exporter::TPGGraphDotExporter exporter2("exported_tpg2.dot", *tpg);
+		File::TPGGraphDotExporter exporter2("exported_tpg2.dot", *tpg);
 		exporter2.print();
 	}
 
@@ -169,17 +166,17 @@ protected:
 };
 
 TEST_F(ImporterTest, Constructor) {
-	Importer::TPGGraphDotImporter* dotImporter;
-	ASSERT_NO_THROW(dotImporter = new Importer::TPGGraphDotImporter("exported_tpg.dot", *e, *tpg_copy)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
+	File::TPGGraphDotImporter* dotImporter;
+	ASSERT_NO_THROW(dotImporter = new File::TPGGraphDotImporter("exported_tpg.dot", *e, *tpg_copy)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
 
 	ASSERT_NO_THROW(delete dotImporter;) << "TPGGraphDotExporter could not be deleted.";
 
-	ASSERT_THROW(dotImporter = new Importer::TPGGraphDotImporter("XXX://INVALID_PATH", *e, *tpg_copy), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
+	ASSERT_THROW(dotImporter = new File::TPGGraphDotImporter("XXX://INVALID_PATH", *e, *tpg_copy), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
 }
 
 TEST_F(ImporterTest, importGraph)
 {
-	Importer::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
+	File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
 
 	//assert that we can import a tpg graph from a file
 	ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
@@ -192,18 +189,18 @@ TEST_F(ImporterTest, importGraph)
 
 TEST_F(ImporterTest, readLineFromFile) {
 	std::ofstream myfile;
-	Importer::TPGGraphDotImporter* dotImporter;
+	File::TPGGraphDotImporter* dotImporter;
 
 	myfile.open("wrongfile.dot");
 	for (int i = 0; i < 1025; i++)
 		myfile << "aa";
 	myfile.close();
-	ASSERT_THROW(dotImporter = new Importer::TPGGraphDotImporter("wrongfile.dot", *e, *tpg_copy), std::ifstream::failure) << "Reading more than MAX_READ_SIZE(1024) should fail -- function ReadLineFromFile";
+	ASSERT_THROW(dotImporter = new File::TPGGraphDotImporter("wrongfile.dot", *e, *tpg_copy), std::ifstream::failure) << "Reading more than MAX_READ_SIZE(1024) should fail -- function ReadLineFromFile";
 }
 
 TEST_F(ImporterTest, readLinkTeamProgram)
 {
-	Importer::TPGGraphDotImporter dotImporter("exported_tpg2.dot", *e, *tpg_copy);
+	File::TPGGraphDotImporter dotImporter("exported_tpg2.dot", *e, *tpg_copy);
 
 	//assert that we can import a tpg graph from a file
 	ASSERT_NO_THROW(dotImporter.importGraph()) << "Everything should be fine";
@@ -211,7 +208,7 @@ TEST_F(ImporterTest, readLinkTeamProgram)
 
 TEST_F(ImporterTest, setNewFilePath)
 {
-	Importer::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
+	File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
 
 	//assert that we can import a tpg graph from a file
 	ASSERT_NO_THROW(dotImporter.setNewFilePath("exported_tpg2.dot")) << "Changing the input file should be ok";

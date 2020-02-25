@@ -1,17 +1,17 @@
-#include "importer/tpgGraphDotImporter.h"
+#include "file/tpgGraphDotImporter.h"
 
 
-const std::string Importer::TPGGraphDotImporter::lineSeparator("&#92;n");
-const std::string Importer::TPGGraphDotImporter::teamRegex("T([0-9]+)\\x20\\x5B.*\\x5D");
-const std::string Importer::TPGGraphDotImporter::programRegex("P([0-9]+)\\x20\\x5B.*\\x5D");
-const std::string Importer::TPGGraphDotImporter::instructionRegex("I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D");
-const std::string Importer::TPGGraphDotImporter::actionRegex("A([0-9]+)\\x20\\x5B.*=\"([0-9]+)\"\\x5D");
-const std::string Importer::TPGGraphDotImporter::linkProgramInstructionRegex("P([0-9]+)\\x20->\\x20I([0-9]+).*");
-const std::string Importer::TPGGraphDotImporter::linkProgramActionRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20A([0-9]+).*");
-const std::string Importer::TPGGraphDotImporter::linkProgramTeamRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*");
-const std::string Importer::TPGGraphDotImporter::addLinkProgramRegex("T([0-9]+)\\x20->\\x20P([0-9]+)");
+const std::string File::TPGGraphDotImporter::lineSeparator("&#92;n");
+const std::string File::TPGGraphDotImporter::teamRegex("T([0-9]+)\\x20\\x5B.*\\x5D");
+const std::string File::TPGGraphDotImporter::programRegex("P([0-9]+)\\x20\\x5B.*\\x5D");
+const std::string File::TPGGraphDotImporter::instructionRegex("I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D");
+const std::string File::TPGGraphDotImporter::actionRegex("A([0-9]+)\\x20\\x5B.*=\"([0-9]+)\"\\x5D");
+const std::string File::TPGGraphDotImporter::linkProgramInstructionRegex("P([0-9]+)\\x20->\\x20I([0-9]+).*");
+const std::string File::TPGGraphDotImporter::linkProgramActionRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20A([0-9]+).*");
+const std::string File::TPGGraphDotImporter::linkProgramTeamRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*");
+const std::string File::TPGGraphDotImporter::addLinkProgramRegex("T([0-9]+)\\x20->\\x20P([0-9]+)");
 
-void Importer::TPGGraphDotImporter::readParameters(std::string & str, Program::Line & l)
+void File::TPGGraphDotImporter::readParameters(std::string & str, Program::Line & l)
 {
 	std::string::size_type pos = 0;
 	std::string::size_type pos2;
@@ -32,7 +32,7 @@ void Importer::TPGGraphDotImporter::readParameters(std::string & str, Program::L
 	}
 }
 
-void Importer::TPGGraphDotImporter::readOperands(std::string & str, Program::Line & l)
+void File::TPGGraphDotImporter::readOperands(std::string & str, Program::Line & l)
 {
 	std::string::size_type pos = 0;
 	std::string::size_type pos2;
@@ -60,7 +60,7 @@ void Importer::TPGGraphDotImporter::readOperands(std::string & str, Program::Lin
 	}
 }
 
-void Importer::TPGGraphDotImporter::readLine(std::smatch & matches)
+void File::TPGGraphDotImporter::readLine(std::smatch & matches)
 {
 	// a line is stored in the .dot file with the following format
 	// inst_idx|dest_idx&param_1|param_2|...|param_n$op1_param1|op1_param2#...#opN_param1|opN_param2
@@ -138,7 +138,7 @@ void Importer::TPGGraphDotImporter::readLine(std::smatch & matches)
 	}
 }
 
-void Importer::TPGGraphDotImporter::readProgram(std::smatch & matches)
+void File::TPGGraphDotImporter::readProgram(std::smatch & matches)
 {
 	if(!this->lastLine.empty() && !matches.empty())
 	{
@@ -149,7 +149,7 @@ void Importer::TPGGraphDotImporter::readProgram(std::smatch & matches)
 	}	
 }
 
-void Importer::TPGGraphDotImporter::dumpTPGGraphHeader()
+void File::TPGGraphDotImporter::dumpTPGGraphHeader()
 {
 	//skips the three first lines of the file
 	char buffer[MAX_READ_SIZE];
@@ -158,7 +158,7 @@ void Importer::TPGGraphDotImporter::dumpTPGGraphHeader()
 	pFile.getline(buffer, MAX_READ_SIZE);
 }
 
-void Importer::TPGGraphDotImporter::readTeam(std::smatch & matches)
+void File::TPGGraphDotImporter::readTeam(std::smatch & matches)
 {
 	if(!this->lastLine.empty() && !matches.empty())
 	{
@@ -166,7 +166,7 @@ void Importer::TPGGraphDotImporter::readTeam(std::smatch & matches)
 	}
 }
 
-void Importer::TPGGraphDotImporter::readAction(std::smatch & matches)
+void File::TPGGraphDotImporter::readAction(std::smatch & matches)
 {
 	if(!this->lastLine.empty() && !matches.empty())
 	{
@@ -185,7 +185,7 @@ void Importer::TPGGraphDotImporter::readAction(std::smatch & matches)
 	}
 }
 
-void Importer::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch & matches)
+void File::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch & matches)
 {
 	//Creating a edge from a team to an action
 	if(!this->lastLine.empty() && !matches.empty())
@@ -213,7 +213,7 @@ void Importer::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch & matc
 	}
 }
 
-void Importer::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch & matches)
+void File::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch & matches)
 {
 	//creating a edge between two teams
 	if(!this->lastLine.empty() && !matches.empty())
@@ -241,7 +241,7 @@ void Importer::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch & matche
 	}
 }
 
-void Importer::TPGGraphDotImporter::readLinkTeamProgram(std::smatch & matches)
+void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch & matches)
 {
 	if(!this->lastLine.empty() && !matches.empty())
 	{
@@ -276,7 +276,7 @@ void Importer::TPGGraphDotImporter::readLinkTeamProgram(std::smatch & matches)
 }
 
 
-void Importer::TPGGraphDotImporter::importGraph()
+void File::TPGGraphDotImporter::importGraph()
 {
 	//force seek at the beginning of file.
 	pFile.seekg(0);
@@ -298,7 +298,7 @@ void Importer::TPGGraphDotImporter::importGraph()
 }
 
 
-bool Importer::TPGGraphDotImporter::readLineFromFile()
+bool File::TPGGraphDotImporter::readLineFromFile()
 {
 	char buffer[MAX_READ_SIZE];
 
@@ -362,7 +362,7 @@ bool Importer::TPGGraphDotImporter::readLineFromFile()
 	return true;
 }
 
-void Importer::TPGGraphDotImporter::setNewFilePath(const char* newFilePath)
+void File::TPGGraphDotImporter::setNewFilePath(const char* newFilePath)
 {
 	//  Close previous file
 	pFile.close();

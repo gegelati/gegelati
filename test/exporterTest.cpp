@@ -12,7 +12,7 @@
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
 
-#include "exporter/tpgGraphDotExporter.h"
+#include "file/tpgGraphDotExporter.h"
 
 
 class ExporterTest : public ::testing::Test {
@@ -113,16 +113,16 @@ protected:
 };
 
 TEST_F(ExporterTest, Constructor) {
-	Exporter::TPGGraphDotExporter* dotExporter;
-	ASSERT_NO_THROW(dotExporter = new Exporter::TPGGraphDotExporter("exported_tpg.dot", *tpg)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
+	File::TPGGraphDotExporter* dotExporter;
+	ASSERT_NO_THROW(dotExporter = new File::TPGGraphDotExporter("exported_tpg.dot", *tpg)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
 
 	ASSERT_NO_THROW(delete dotExporter;) << "TPGGraphDotExporter could not be deleted.";
 
-	ASSERT_THROW(dotExporter = new Exporter::TPGGraphDotExporter("XXX://INVALID_PATH", *tpg), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
+	ASSERT_THROW(dotExporter = new File::TPGGraphDotExporter("XXX://INVALID_PATH", *tpg), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
 }
 
 TEST_F(ExporterTest, print) {
-	Exporter::TPGGraphDotExporter dotExporter("exported_tpg.dot", *tpg);
+	File::TPGGraphDotExporter dotExporter("exported_tpg.dot", *tpg);
 
 	ASSERT_NO_THROW(dotExporter.print());
 }

@@ -13,7 +13,7 @@
 #include "program/program.h"
 #include "program/line.h"
 
-namespace Exporter {
+namespace File {
 	/**
 	* \brief Class used to export a TPGGraph into a text file with the dot
 	* format.

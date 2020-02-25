@@ -1,8 +1,8 @@
 #include <inttypes.h>
 
-#include "exporter/tpgGraphDotExporter.h"
+#include "file/tpgGraphDotExporter.h"
 
-uint64_t Exporter::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
+uint64_t File::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
 {
 	static uint64_t nbVertex = 0;
 	auto iter = this->vertexID.find(&vertex);
@@ -17,7 +17,7 @@ uint64_t Exporter::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& verte
 	}
 }
 
-bool Exporter::TPGGraphDotExporter::findProgramID(const Program::Program& prog, uint64_t& id)
+bool File::TPGGraphDotExporter::findProgramID(const Program::Program& prog, uint64_t& id)
 {
 	static uint64_t nbPrograms = 0;
 	auto iter = this->programID.find(&prog);
@@ -34,7 +34,7 @@ bool Exporter::TPGGraphDotExporter::findProgramID(const Program::Program& prog, 
 	}
 }
 
-void Exporter::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
+void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 {
 	uint64_t name = this->findVertexID(team);
 	// Color is different for roots
@@ -49,13 +49,13 @@ void Exporter::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 	fprintf(pFile, "%sT%" PRIu64 " [fillcolor=\"%s\"]\n", this->offset.c_str(), name, color.c_str());
 }
 
-uint64_t Exporter::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
+uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 {
 	fprintf(pFile, "%sA%" PRIu64 " [fillcolor=\"#ff3366\" shape=box margin=0.03 width=0 height=0 label=\"%" PRIu64 "\"]\n", this->offset.c_str(), nbActions++, action.getActionID());
 	return nbActions - 1;
 }
 
-void Exporter::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
+void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 {
 	uint64_t srcID = this->findVertexID(*edge.getSource());
 	uint64_t progID;
@@ -82,7 +82,7 @@ void Exporter::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 	}
 }
 
-void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program)
+void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
 {
 	uint64_t progID;
 	this->findProgramID(program, progID);
@@ -121,7 +121,7 @@ void Exporter::TPGGraphDotExporter::printProgram(const Program::Program& program
 	fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"]\n", this->offset.c_str(), progID, programContent.c_str());
 }
 
-void Exporter::TPGGraphDotExporter::printTPGGraphHeader()
+void File::TPGGraphDotExporter::printTPGGraphHeader()
 {
 	/*
 	graph{
@@ -135,7 +135,7 @@ void Exporter::TPGGraphDotExporter::printTPGGraphHeader()
 	this->offset = "\t\t";
 }
 
-void Exporter::TPGGraphDotExporter::printTPGGraphFooter()
+void File::TPGGraphDotExporter::printTPGGraphFooter()
 {
 	// Print root actions (and keep the ids)
 	auto rootVertices = tpg.getRootVertices();
@@ -163,7 +163,7 @@ void Exporter::TPGGraphDotExporter::printTPGGraphFooter()
 	fprintf(pFile, "%s}\n", this->offset.c_str());
 }
 
-void Exporter::TPGGraphDotExporter::print()
+void File::TPGGraphDotExporter::print()
 {
 	// Print the graph header
 	this->printTPGGraphHeader();

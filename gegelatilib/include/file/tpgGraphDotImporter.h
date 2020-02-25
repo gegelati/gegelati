@@ -22,7 +22,7 @@
 */
 #define MAX_READ_SIZE 1024
 
-namespace Importer {
+namespace File {
 	/**
 	* \brief Class used to import a TPG graph from a dot file.
 	* It should be able to import a whole Learning agent object.
