@@ -4,12 +4,11 @@
 
 uint64_t File::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
 {
-	static uint64_t nbVertex = 0;
 	auto iter = this->vertexID.find(&vertex);
 	if (iter == this->vertexID.end()) {
 		// The vertex is not known yet
-		this->vertexID.insert(std::pair<const TPG::TPGVertex*, uint64_t>(&vertex, nbVertex));
-		nbVertex++;
+		this->vertexID.insert(std::pair<const TPG::TPGVertex*, uint64_t>(&vertex, this->nbVertex));
+		this->nbVertex++;
 		return nbVertex - 1;
 	}
 	else {
@@ -19,13 +18,12 @@ uint64_t File::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
 
 bool File::TPGGraphDotExporter::findProgramID(const Program::Program& prog, uint64_t& id)
 {
-	static uint64_t nbPrograms = 0;
 	auto iter = this->programID.find(&prog);
 	if (iter == this->programID.end()) {
 		// The vertex is not known yet
-		this->programID.insert(std::pair<const Program::Program*, uint64_t>(&prog, nbPrograms));
-		nbPrograms++;
-		id = nbPrograms - 1;
+		this->programID.insert(std::pair<const Program::Program*, uint64_t>(&prog, this->nbPrograms));
+		this->nbPrograms++;
+		id = this->nbPrograms - 1;
 		return true;
 	}
 	else {
@@ -60,7 +58,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 	uint64_t srcID = this->findVertexID(*edge.getSource());
 	uint64_t progID;
 
-	Program::Program & p = edge.getProgram();
+	Program::Program& p = edge.getProgram();
 	if (this->findProgramID(edge.getProgram(), progID)) {
 		// First time thie Program is encountered
 		fprintf(pFile, "%sP%" PRIu64 " [fillcolor=\"#cccccc\" shape=point]\n", this->offset.c_str(), progID);
@@ -87,9 +85,9 @@ void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
 	uint64_t progID;
 	this->findProgramID(program, progID);
 	std::string programContent = "";
-	for(int i = 0; i < program.getNbLines(); i++)
-	{	
-		const Program::Line & l = program.getLine(i);
+	for (int i = 0; i < program.getNbLines(); i++)
+	{
+		const Program::Line& l = program.getLine(i);
 		//instruction index
 		programContent += std::to_string(l.getInstructionIndex());
 		programContent += "|";
@@ -97,18 +95,18 @@ void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
 		programContent += std::to_string(l.getDestinationIndex());
 		programContent += "&";
 		//instruction parameters
-		for(int j =0; j < l.getEnvironment().getMaxNbParameters(); j++)
+		for (int j = 0; j < l.getEnvironment().getMaxNbParameters(); j++)
 		{
-			const Parameter & p = l.getParameter(j);
+			const Parameter& p = l.getParameter(j);
 			programContent += std::to_string(p.i);
 			programContent += "|";
 		}
 		programContent += "$";
 		//instruction operands
-		for(int j =0; j < l.getEnvironment().getMaxNbOperands(); j++)
+		for (int j = 0; j < l.getEnvironment().getMaxNbOperands(); j++)
 		{
 			std::pair<uint64_t, uint64_t> p = l.getOperand(j);
-			if(j != 0)
+			if (j != 0)
 				programContent += "#";
 			programContent += std::to_string(p.first);
 			programContent += "|";
@@ -116,7 +114,7 @@ void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
 		}
 
 		programContent += "&#92;n";
-			
+
 	}
 	fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"]\n", this->offset.c_str(), progID, programContent.c_str());
 }

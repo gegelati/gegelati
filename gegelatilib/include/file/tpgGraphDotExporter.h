@@ -56,6 +56,24 @@ namespace File {
 
 		/**
 		* \brief Integer number used during export to associate a unique
+		* integer identifier to each new TPGTeam.
+		*
+		* Using the VertexID map, a TPGTeam that was already printed in
+		* previous export will keep its ID.
+		*/
+		uint64_t nbVertex = 0;
+
+		/**
+		* \brief Integer number used during export to associate a unique
+		* integer identifier to each new Program.
+		*
+		* Using the programID map, a Program that was already printed in
+		* previous export will keep its ID.
+		*/
+		uint64_t nbPrograms = 0;
+
+		/**
+		* \brief Integer number used during export to associate a unique
 		* integer identifier to each TPGAction.
 		*
 		* Identifier associated to TPGAction are NOT preserved during multiple
@@ -132,16 +150,16 @@ namespace File {
 		*
 		* \param[in] program the Program to be printed
 		*
-		* a program is stored in the .dot file with the format : 
+		* a program is stored in the .dot file with the format :
 		* line_1&#92;nline2&#92;nline3&#92;n...&#92;nline_N&#92;n
 		*
 		* a line is stored in the .dot file with the following format
 		* inst_idx|dest_idx&param_1|param_2|...|param_n$op1_param1|op1_param2#...#
 		*
-		* inst_idx = instruction index 
+		* inst_idx = instruction index
 		* dest_idx = destination index
 		* param    = parameter
-		* op       = operand 
+		* op       = operand
 		*/
 		void printProgram(const Program::Program& program);
 
