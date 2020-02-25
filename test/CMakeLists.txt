@@ -33,6 +33,10 @@ file(
 	*.h
 )
 
+# Add definition for relative path into project
+# Path to dat folder needed for tests
+add_definitions( -DTESTS_DAT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/dat/")
+
 # Build for coverage when in debug
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage -fprofile-arcs -ftest-coverage")
