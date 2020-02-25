@@ -191,8 +191,9 @@ TEST_F(ImporterTest, readLineFromFile) {
 	std::ofstream myfile;
 	File::TPGGraphDotImporter* dotImporter;
 
+	// Create a file where some lines are longer than the limit set in the importer.
 	myfile.open("wrongfile.dot");
-	for (int i = 0; i < 1025; i++)
+	for (int i = 0; i < File::TPGGraphDotImporter::MAX_READ_SIZE + 1; i++)
 		myfile << "aa";
 	myfile.close();
 	ASSERT_THROW(dotImporter = new File::TPGGraphDotImporter("wrongfile.dot", *e, *tpg_copy), std::ifstream::failure) << "Reading more than MAX_READ_SIZE(1024) should fail -- function ReadLineFromFile";

@@ -17,11 +17,6 @@
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
 
-/**
-* \brief Maximum number of characters that can be read in a single line.
-*/
-#define MAX_READ_SIZE 1024
-
 namespace File {
 	/**
 	* \brief Class used to import a TPG graph from a dot file.
@@ -339,6 +334,11 @@ namespace File {
 			}
 			importGraph();
 		};
+
+		/**
+		* \brief Maximum number of characters that can be read in a single line.
+		*/
+		static const unsigned int MAX_READ_SIZE=1024;
 
 		/**
 		* Destructor for the importer.
