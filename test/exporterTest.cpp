@@ -152,20 +152,13 @@ TEST_F(ExporterTest, FileContentVerification) {
 		std::string lineExport;
 		std::getline(exportedFile, lineExport);
 
-		if (lineRef != lineExport) {
-			nbDiffs++;
-			std::cout << "Diff at Line " << lineNumber << ":" << std::endl;
-			std::cout << "\tref: " << lineRef << std::endl;
-			std::cout << "\texp: " << lineExport << std::endl;
-		}
+		EXPECT_EQ(lineRef, lineExport) << "Diff at Line " << lineNumber;
+		nbDiffs += (lineRef != lineExport) ? 1 : 0;
 
 		lineNumber++;
 	}
 
-	if (!exportedFile.eof() || !goldenRef.eof()) {
-		nbDiffs++;
-		std::cout << "Files have different length." << std::endl;
-	}
+	ASSERT_EQ(exportedFile.eof(), goldenRef.eof()) << "Files have different length.";
 
 	ASSERT_EQ(nbDiffs, 0) << "Differences between reference file and exported file were detected.";
 }
