@@ -56,7 +56,7 @@ protected:
 			progPointers.push_back(std::shared_ptr<Program::Program>(new Program::Program(*e)));
 		}
 
-		//add instructions to at least one program.
+		//add instructions to at least one program. (here we add 3.)
 		for (int i = 0; i < 3; i++)
 		{
 			Program::Line& l = progPointers.at(0).get()->addNewLine();
@@ -185,6 +185,30 @@ TEST_F(ImporterTest, importGraph)
 	ASSERT_EQ(tpg_copy->getNbVertices(), 9) << "the wrong number of vertices have been created.";
 	ASSERT_EQ(tpg_copy->getEdges().size(), 10) << "the wrong number of edges have been created.";
 	ASSERT_EQ(tpg_copy->getRootVertices().size(), 2) << "the wrong number of root teams have been created.";
+
+	//check that the imported program is the same as the one written in the file.
+	Program::Program & p = tpg_copy->getEdges().front().getProgram();
+	ASSERT_EQ(p.getNbLines(), 3) << "The number of lines of the copied program dismatch";
+	//checking the first line
+	ASSERT_EQ(p.getLine(0).getInstructionIndex(),0) << "The Instruction Index changed";
+	ASSERT_EQ(p.getLine(0).getDestinationIndex(),1) << "The destination index of the first line changed";
+	ASSERT_NEAR((float)(p.getLine(0).getParameter(0)),0.2f,0.0001) << "The parameter changed";
+	ASSERT_EQ(p.getLine(0).getOperand(0).first,0) << "The first part of the operand changed";
+	ASSERT_EQ(p.getLine(0).getOperand(0).second,1) << "The second part of the operand changed";
+
+	//checking the second line
+	ASSERT_EQ(p.getLine(1).getInstructionIndex(),0) << "The Instruction Index changed";
+	ASSERT_EQ(p.getLine(1).getDestinationIndex(),1) << "The destination index of the first line changed";
+	ASSERT_NEAR((float)(p.getLine(1).getParameter(0)),0.2f,0.0001) << "The parameter changed";
+	ASSERT_EQ(p.getLine(1).getOperand(0).first,0) << "The first part of the operand changed";
+	ASSERT_EQ(p.getLine(1).getOperand(0).second,1) << "The second part of the operand changed";
+
+	//checking the third(and last) line
+	ASSERT_EQ(p.getLine(2).getInstructionIndex(),0) << "The Instruction Index changed";
+	ASSERT_EQ(p.getLine(2).getDestinationIndex(),1) << "The destination index of the first line changed";
+	ASSERT_NEAR((float)(p.getLine(2).getParameter(0)),0.2f,0.0001) << "The parameter changed";
+	ASSERT_EQ(p.getLine(2).getOperand(0).first,0) << "The first part of the operand changed";
+	ASSERT_EQ(p.getLine(2).getOperand(0).second,1) << "The second part of the operand changed";
 }
 
 TEST_F(ImporterTest, readLineFromFile) {
@@ -197,14 +221,6 @@ TEST_F(ImporterTest, readLineFromFile) {
 		myfile << "aa";
 	myfile.close();
 	ASSERT_THROW(dotImporter = new File::TPGGraphDotImporter("wrongfile.dot", *e, *tpg_copy), std::ifstream::failure) << "Reading more than MAX_READ_SIZE(1024) should fail -- function ReadLineFromFile";
-}
-
-TEST_F(ImporterTest, readLinkTeamProgram)
-{
-	File::TPGGraphDotImporter dotImporter("exported_tpg2.dot", *e, *tpg_copy);
-
-	//assert that we can import a tpg graph from a file
-	ASSERT_NO_THROW(dotImporter.importGraph()) << "Everything should be fine";
 }
 
 TEST_F(ImporterTest, setNewFilePath)
