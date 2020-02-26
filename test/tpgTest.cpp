@@ -216,6 +216,8 @@ TEST_F(TPGTest, TPGGraphRemoveEdge) {
 	ASSERT_EQ(vertex1.getIncomingEdges().size(), 0) << "Destination vertex was not disconnected from the removed Edge.";
 	// Check that the edge was successfully deleted
 	ASSERT_EQ(progPointer.use_count(), 1) << "Edge was not properly deleted, its shared pointer is still active.";
+	// Remove an edge that does not exist anymore
+	ASSERT_THROW(tpg.removeEdge(edge), std::runtime_error) << "Edge not in the graph should not be removable";
 }
 
 TEST_F(TPGTest, TPGGraphRemoveVertex) {
@@ -399,4 +401,36 @@ TEST_F(TPGTest, TPGGraphSetEdgeSource) {
 	// Check failure 
 	TPG::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
 	ASSERT_FALSE(tpg.setEdgeSource(newEdge, vertex2)) << "Changing source of an edge not within the graph should not succeed.";
+}
+
+TEST_F(TPGTest, TPGMoveOperator) {
+	TPG::TPGGraph source(*e);
+	TPG::TPGGraph* destination = new TPG::TPGGraph(*e); //creates an empty tpg graph
+
+
+	const TPG::TPGTeam& vertex0 = source.addNewTeam();
+	const TPG::TPGAction& vertex1 = source.addNewAction(4);
+	const TPG::TPGTeam& vertex2 = source.addNewTeam();
+	const TPG::TPGEdge& edge = source.addNewEdge(vertex0, vertex1, progPointer);
+	const TPG::TPGEdge& edge2 = source.addNewEdge(vertex2, vertex1, progPointer);
+	const TPG::TPGEdge& edge3 = source.addNewEdge(vertex0, vertex2, progPointer);
+
+	/*
+	*	 T2
+	*	 ^	\
+	*    |	  A4
+	*	 T0	/
+	*/
+
+	ASSERT_NO_THROW(*destination = std::move(source)) << "The move operator is never supposed to fail";
+	ASSERT_EQ(destination->getNbVertices(), 3) << "All verticies were not moved";
+	ASSERT_EQ(source.getNbVertices(), 0) << "Some verticies are still present in the source graph";
+	ASSERT_EQ(destination->getEdges().size(), 3) << "All edges were not moved";
+	ASSERT_EQ(source.getEdges().size(), 0) << "Some edges are still present in the source graph";
+	delete(destination);
+}
+TEST_F(TPGTest, TPGAffectationOperator) {
+	TPG::TPGGraph source(*e);
+
+	ASSERT_NO_THROW(TPG::TPGGraph & destination = source) << "The affectation operator is never supposed to fail";
 }
