@@ -95,7 +95,7 @@ TEST(InstructionsTest, Execute) {
 	delete i;
 }
 
-TEST(InstructionsTest, LambdaInstruction) {
+TEST(InstructionsTest, LambdaInstructionPrimitiveType) {
 	Data::PrimitiveType<double> a{ 2.6 };
 	Data::PrimitiveType<double> b = 5.5;
 	Data::PrimitiveType<int> c = 3;
@@ -117,6 +117,30 @@ TEST(InstructionsTest, LambdaInstruction) {
 	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
 
 	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";
+}
+
+TEST(InstructionsTest, LambdaInstructionSupportedType) {
+	Data::PrimitiveType<double> a{ 2.6 };
+	Data::PrimitiveType<double> b = 5.5;
+	Data::PrimitiveType<int> c = 3;
+
+	std::vector<std::shared_ptr<const Data::SupportedType>> vect;
+	vect.emplace_back(&a, Data::DataHandler::emptyDestructor());
+	vect.emplace_back(&b, Data::DataHandler::emptyDestructor());
+
+	auto minus = [](Data::PrimitiveType<double> a, Data::PrimitiveType<double> b) {return (double)a - (double)b; };
+
+	Instructions::LambdaInstruction<Data::PrimitiveType<double>>* instruction;
+	ASSERT_NO_THROW(instruction = new Instructions::LambdaInstruction<Data::PrimitiveType<double>>(minus)) << "Constructing a new lambdaInstruction failed.";
+
+	ASSERT_EQ(instruction->execute({}, vect), -2.9) << "Result returned by the instruction is not as expected.";
+
+	// Execute with wrong types of operands.
+	vect.pop_back();
+	vect.emplace_back(&c, Data::DataHandler::emptyDestructor());
+	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
+
+	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed."; 
 }
 
 TEST(InstructionsTest, SetAdd) {

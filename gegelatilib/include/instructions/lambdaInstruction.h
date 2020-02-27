@@ -13,12 +13,33 @@ namespace Instructions {
 	* \brief Template instruction for simplifying the creation of an
 	* Instruction from a c++ lambda function.
 	*
-	* Although the given template parameter T is a primitive type, the
+	* Template parameter T can either be a primitive type (i.e. int, char,
+	* float, ...), a type inheriting from SupportedType, or an array whose type
+	* inherits from SupportedType.
+	*
+	* When the given template parameter T is a primitive type, the
 	* SupportedType actually used by the instruction will be from the
-	* PrimitiveType<T> type.
+	* PrimitiveType<T> type. Nevertheless, from the lambda function point
+	* of view, this will be transparent and the primitive type will be used.
+	*
+	* When the given template type is a SupportedType child class, or an array
+	* the lambda expression will used these types directly.
+	*
+	* Currently, LambdaInstructions all require two operands, with the same
+	* type determined by T.
+	*
+	* The second template parameter is using the SFINAE to specialize the class
+	* implementation differently, depending on the template parameter.
 	*/
-	template <class T> class LambdaInstruction : public Instruction {
-		static_assert(std::is_fundamental<T>::value, "Template class LambdaInstruction<T> can only be used for primitive types.");
+	template <class T, typename Enable = void> class LambdaInstruction : public Instruction {};
+
+	/**
+	* \brief Specialization of the LambdaInstruction template class for
+	* primitive types.
+	*/
+	template <class T>
+	class LambdaInstruction <T, typename std::enable_if<std::is_fundamental<T>::value>::type> : public Instruction
+	{
 	protected:
 
 		/**
@@ -57,7 +78,52 @@ namespace Instructions {
 			double result = this->func((T)arg1, (T)arg2);
 			return result;
 		}
+	};
 
+	/**
+	* \brief Specialization of the LambdaInstruction template class for
+	* types derived from SupportedType.
+	*/
+	template <class T>
+	class LambdaInstruction <T, typename std::enable_if<std::is_base_of<Data::SupportedType, T>::value>::type> : public Instruction
+	{
+	protected:
+		/**
+		* \brief Function executed for this Instruction.
+		*/
+		const std::function<double(T, T)> func;
+
+	public:
+		/**
+		* \brief delete the default constructor.
+		*/
+		LambdaInstruction() = delete;
+
+		/**
+		* \brief Constructor for the LambdaInstruction.
+		*
+		* \param[in] function the c++ std::function that will be executed for
+		* this Instruction.
+		*/
+		LambdaInstruction(std::function<double(T, T)> function) : func{ function } {
+			this->operandTypes.push_back(typeid(T));
+			this->operandTypes.push_back(typeid(T));
+		};
+
+		double execute(
+			const std::vector<std::reference_wrapper<const Parameter>>& params,
+			const std::vector<std::shared_ptr<const Data::SupportedType>>& args) const override {
+
+			// Check if operands and types have the right type.
+			if (Instruction::execute(params, args) != 1.0) {
+				return 0.0;
+			}
+
+			const T& arg1 = *std::dynamic_pointer_cast<const T>(args.at(0));
+			const T& arg2 = *std::dynamic_pointer_cast<const T>(args.at(1));
+			double result = this->func(arg1, arg2);
+			return result;
+		}
 	};
 };
 
