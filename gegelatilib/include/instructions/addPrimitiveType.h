@@ -5,6 +5,8 @@
 #include <type_traits>
 #include <memory>
 
+#include "data/supportedType.h"
+#include "data/primitiveType.h"
 #include "instruction.h"
 
 namespace Instructions {
@@ -27,25 +29,25 @@ namespace Instructions {
 
 		virtual double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::shared_ptr<const SupportedType>>& args) const override;
+			const std::vector<std::shared_ptr<const Data::SupportedType>>& args) const override;
 	};
 
 
 	template <class T> AddPrimitiveType<T>::AddPrimitiveType() {
-		this->operandTypes.push_back(typeid(PrimitiveType<T>));
-		this->operandTypes.push_back(typeid(PrimitiveType<T>));
+		this->operandTypes.push_back(typeid(Data::PrimitiveType<T>));
+		this->operandTypes.push_back(typeid(Data::PrimitiveType<T>));
 	}
 
 
 	template <class T> double AddPrimitiveType<T>::execute(
 		const std::vector<std::reference_wrapper<const Parameter>>& params,
-		const std::vector<std::shared_ptr<const SupportedType>>& args) const {
+		const std::vector<std::shared_ptr<const Data::SupportedType>>& args) const {
 
 		if (Instruction::execute(params, args) != 1.0) {
 			return 0.0;
 		}
 
-		return *std::dynamic_pointer_cast<const PrimitiveType<T>>(args.at(0)) + (double) *std::dynamic_pointer_cast<const PrimitiveType<T>>(args.at(1));;
+		return *std::dynamic_pointer_cast<const Data::PrimitiveType<T>>(args.at(0)) + (double)*std::dynamic_pointer_cast<const Data::PrimitiveType<T>>(args.at(1));;
 	}
 }
 

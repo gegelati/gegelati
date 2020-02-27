@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "parameter.h"
-#include "data/supportedTypes.h"
+#include "data/supportedType.h"
 
 namespace Instructions {
 	/**
@@ -53,7 +53,7 @@ namespace Instructions {
 		*
 		* \param[in] arguments a const list of shared pointers to any type of object. (not doable at compile time)
 		*/
-		bool checkOperandTypes(const std::vector<std::shared_ptr<const SupportedType>>& arguments) const;
+		bool checkOperandTypes(const std::vector < std::shared_ptr < const Data::SupportedType >> &arguments) const;
 
 		/**
 		* \brief Check if a given vector contains the right number of parameters for the Instruction.
@@ -76,7 +76,7 @@ namespace Instructions {
 		*/
 		virtual double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::shared_ptr<const SupportedType>>& args) const = 0;
+			const std::vector<std::shared_ptr<const Data::SupportedType>>& args) const = 0;
 
 	protected:
 		/**

@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include "data/supportedType.h"
+#include "data/primitiveType.h"
 #include "instruction.h"
 
 namespace Instructions {
@@ -21,24 +23,24 @@ namespace Instructions {
 
 		virtual double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::shared_ptr<const SupportedType>>& args) const override;
+			const std::vector<std::shared_ptr<const Data::SupportedType>>& args) const override;
 	};
 
 	template <class T, class U> MultByConstParam<T, U>::MultByConstParam() {
-		this->operandTypes.push_back(typeid(PrimitiveType<T>));
+		this->operandTypes.push_back(typeid(Data::PrimitiveType<T>));
 		this->nbParameters = 1;
 	}
 
 	template<class T, class U> double MultByConstParam<T, U>::execute(
 		const std::vector<std::reference_wrapper<const Parameter>>& params,
-		const std::vector<std::shared_ptr<const SupportedType>>& args) const
+		const std::vector<std::shared_ptr<const Data::SupportedType>>& args) const
 	{
 		if (Instruction::execute(params, args) != 1.0) {
 			return 0.0;
 		}
 
 		const U pValue = (const U&)params.at(0).get();
-		return *std::dynamic_pointer_cast<const PrimitiveType<T>>(args.at(0)) * (double)pValue;
+		return *std::dynamic_pointer_cast<const Data::PrimitiveType<T>>(args.at(0)) * (double)pValue;
 	}
 	;
 }

@@ -6,6 +6,7 @@
 #include <typeinfo>
 #include <regex>
 
+#include "data/primitiveType.h"
 #include "dataHandler.h"
 
 #ifdef _MSC_VER
@@ -88,7 +89,7 @@ namespace Data {
 		void resetData();
 
 		// Inherited from DataHandler
-		virtual std::shared_ptr<const SupportedType> getDataAt(const std::type_info& type, const size_t address) const override;
+		virtual std::shared_ptr<const Data::SupportedType> getDataAt(const std::type_info& type, const size_t address) const override;
 
 		/**
 		* \brief Set the data at the given address to the given value.
@@ -194,14 +195,14 @@ namespace Data {
 		}
 	}
 
-	template<class T> std::shared_ptr<const SupportedType> PrimitiveTypeArray<T>::getDataAt(const std::type_info& type, const size_t address) const
+	template<class T> std::shared_ptr<const Data::SupportedType> PrimitiveTypeArray<T>::getDataAt(const std::type_info& type, const size_t address) const
 	{
 		// Throw exception in case of invalid arguments.
 		checkAddressAndType(type, address);
 
 		// Native data type
 		if (type == typeid(PrimitiveType<T>)) {
-			std::shared_ptr<const SupportedType> result(&(this->data[address]), DataHandler::emptyDestructor());
+			std::shared_ptr<const Data::SupportedType> result(&(this->data[address]), DataHandler::emptyDestructor());
 			return result;
 		}
 

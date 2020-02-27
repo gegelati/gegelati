@@ -1,12 +1,14 @@
 /**
 * \file gegelati.h
-* \brief Helper file gathering all headers from the GEGELATI lib to ease their 
+* \brief Helper file gathering all headers from the GEGELATI lib to ease their
 * inclusion in apps.
 */
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
+#include <data/supportedType.h>
 #include <data/dataHandler.h>  
+#include <data/primitiveType.h>
 #include <data/primitiveTypeArray.h>
 
 #include <exporter/tpgGraphDotExporter.h>
@@ -43,5 +45,9 @@
 #include <tpg/tpgGraph.h>
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
+
+#include <archive.h>
+#include <environment.h>
+#include <parameter.h>
 
 #endif

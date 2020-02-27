@@ -1,5 +1,6 @@
 #include <stdexcept>
 
+#include "data/primitiveType.h"
 #include "environment.h"
 
 size_t Environment::computeLargestAddressSpace(const size_t nbRegisters, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandlers)
@@ -25,7 +26,7 @@ Instructions::Set Environment::filterInstructionSet(const Instructions::Set& iSe
 			// Check DataHandlers for this type until one is found
 			bool isHandled = false;
 			// Check registers double first
-			if (type == typeid(PrimitiveType<double>)) {
+			if (type == typeid(Data::PrimitiveType<double>)) {
 				// The type is handled by one dataHandler, stop searching for more.
 				isHandled = true;
 				break;

@@ -1,3 +1,5 @@
+#include "data/primitiveType.h"
+
 /**
 * \brief Classification Learning enviroment for testing purposes
 */
@@ -15,7 +17,7 @@ public:
 		// Update data
 		value++;
 		this->currentClass = value % 3;
-		data.setDataAt(typeid(PrimitiveType<int>), 0, value);
+		data.setDataAt(typeid(Data::PrimitiveType<int>), 0, value);
 	}
 	void reset(size_t seed, Learn::LearningMode mode) {
 		// Call super pure virtual method to reset the pure virtual method.

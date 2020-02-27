@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "data/supportedTypes.h"
+#include "data/supportedType.h"
 #include "data/dataHandler.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
@@ -26,20 +26,20 @@ TEST(InstructionsTest, OperandListAndNbParam) {
 	ASSERT_EQ(i->getNbOperands(), 2) << "Number of operands of Instructions::AddPrimitiveType<double> is different from 2";
 	auto operands = i->getOperandTypes();
 	ASSERT_EQ(operands.size(), 2) << "Operand list of AddPrimitiveType<double> is different from 2";
-	ASSERT_STREQ(operands.at(0).get().name(), typeid(PrimitiveType<double>).name()) << "First operand of AddPrimitiveType<double> is not\"" << typeid(PrimitiveType<double>).name() << "\".";
-	ASSERT_STREQ(operands.at(1).get().name(), typeid(PrimitiveType<double>).name()) << "Second operand of AddPrimitiveType<double> is not\"" << typeid(PrimitiveType<double>).name() << "\".";
+	ASSERT_STREQ(operands.at(0).get().name(), typeid(Data::PrimitiveType<double>).name()) << "First operand of AddPrimitiveType<double> is not\"" << typeid(Data::PrimitiveType<double>).name() << "\".";
+	ASSERT_STREQ(operands.at(1).get().name(), typeid(Data::PrimitiveType<double>).name()) << "Second operand of AddPrimitiveType<double> is not\"" << typeid(Data::PrimitiveType<double>).name() << "\".";
 	ASSERT_EQ(i->getNbParameters(), 0) << "Number of parameters of AddPrimitiveType<double> should be 0.";
 	delete i;
 }
 
 TEST(InstructionsTest, CheckArgumentTypes) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
-	PrimitiveType<double> a{ 2.5 };
-	PrimitiveType<double> b = 5.6;
-	PrimitiveType<double> c = 3.7;
-	PrimitiveType<int> d = 5;
+	Data::PrimitiveType<double> a{ 2.5 };
+	Data::PrimitiveType<double> b = 5.6;
+	Data::PrimitiveType<double> c = 3.7;
+	Data::PrimitiveType<int> d = 5;
 
-	std::vector<std::shared_ptr<const SupportedType>> vect;
+	std::vector<std::shared_ptr<const Data::SupportedType>> vect;
 	vect.emplace_back(&a, Data::DataHandler::emptyDestructor());
 	vect.emplace_back(&b, Data::DataHandler::emptyDestructor());
 	ASSERT_TRUE(i->checkOperandTypes(vect)) << "Operands of valid types wrongfully classified as invalid.";
@@ -73,11 +73,11 @@ TEST(InstructionsTest, CheckParameters) {
 
 TEST(InstructionsTest, Execute) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
-	PrimitiveType<double> a{ 2.6 };
-	PrimitiveType<double> b = 5.5;
-	PrimitiveType<int> c = 3;
+	Data::PrimitiveType<double> a{ 2.6 };
+	Data::PrimitiveType<double> b = 5.5;
+	Data::PrimitiveType<int> c = 3;
 
-	std::vector<std::shared_ptr<const SupportedType>> vect;
+	std::vector<std::shared_ptr<const Data::SupportedType>> vect;
 	vect.emplace_back(&a, Data::DataHandler::emptyDestructor());
 	vect.emplace_back(&b, Data::DataHandler::emptyDestructor());
 	ASSERT_EQ(i->execute({}, vect), 8.1) << "Execute method of AddPrimitiveType<double> returns an incorrect value with valid operands.";
@@ -96,11 +96,11 @@ TEST(InstructionsTest, Execute) {
 }
 
 TEST(InstructionsTest, LambdaInstruction) {
-	PrimitiveType<double> a{ 2.6 };
-	PrimitiveType<double> b = 5.5;
-	PrimitiveType<int> c = 3;
+	Data::PrimitiveType<double> a{ 2.6 };
+	Data::PrimitiveType<double> b = 5.5;
+	Data::PrimitiveType<int> c = 3;
 
-	std::vector<std::shared_ptr<const SupportedType>> vect;
+	std::vector<std::shared_ptr<const Data::SupportedType>> vect;
 	vect.emplace_back(&a, Data::DataHandler::emptyDestructor());
 	vect.emplace_back(&b, Data::DataHandler::emptyDestructor());
 

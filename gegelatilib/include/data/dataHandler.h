@@ -6,7 +6,7 @@
 #include <functional>
 #include <memory>
 
-#include "data/supportedTypes.h"
+#include "data/supportedType.h"
 
 namespace std {
 	/*
@@ -197,7 +197,7 @@ namespace Data {
 		* given data type.
 		* \return a shared pointer to the requested const data.
 		*/
-		virtual std::shared_ptr<const SupportedType> getDataAt(const std::type_info& type, const size_t address) const = 0;
+		virtual std::shared_ptr<const Data::SupportedType> getDataAt(const std::type_info& type, const size_t address) const = 0;
 
 		/**
 		* \brief Empty destructor for data accesses.
@@ -206,8 +206,8 @@ namespace Data {
 		* to data held in the DataHandler, in its native type, is created by
 		* the DataHandler::getDataAt() method.
 		*/
-		inline static std::function<void(const SupportedType*)> emptyDestructor() {
-			return [](const SupportedType* ptr) {};
+		inline static std::function<void(const Data::SupportedType*)> emptyDestructor() {
+			return [](const Data::SupportedType* ptr) {};
 		};
 	};
 }
