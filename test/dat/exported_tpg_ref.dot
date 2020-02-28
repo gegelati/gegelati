@@ -1,0 +1,48 @@
+digraph{
+	graph[pad = "0.212, 0.055" bgcolor = lightgray]
+	node[shape=circle style = filled label = ""]
+		T0 [fillcolor="#1199bb"]
+		T1 [fillcolor="#66ddff"]
+		T2 [fillcolor="#66ddff"]
+		T3 [fillcolor="#1199bb"]
+		P0 [fillcolor="#cccccc" shape=point]
+		I0 [shape=box style=invis label="0|1&6554|$0|1#0|0&#92;n0|1&6554|$0|1#0|0&#92;n0|1&6554|$0|1#0|0&#92;n"]
+		P0 -> I0[style=invis]
+		A0 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="0"]
+		T0 -> P0 -> A0
+		P1 [fillcolor="#cccccc" shape=point]
+		I1 [shape=box style=invis label=""]
+		P1 -> I1[style=invis]
+		A1 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="1"]
+		T1 -> P1 -> A1
+		P2 [fillcolor="#cccccc" shape=point]
+		I2 [shape=box style=invis label=""]
+		P2 -> I2[style=invis]
+		A2 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="2"]
+		T2 -> P2 -> A2
+		P3 [fillcolor="#cccccc" shape=point]
+		I3 [shape=box style=invis label=""]
+		P3 -> I3[style=invis]
+		A3 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="3"]
+		T3 -> P3 -> A3
+		P4 [fillcolor="#cccccc" shape=point]
+		I4 [shape=box style=invis label=""]
+		P4 -> I4[style=invis]
+		T0 -> P4 -> T1
+		P5 [fillcolor="#cccccc" shape=point]
+		I5 [shape=box style=invis label=""]
+		P5 -> I5[style=invis]
+		T1 -> P5 -> T2
+		P6 [fillcolor="#cccccc" shape=point]
+		I6 [shape=box style=invis label=""]
+		P6 -> I6[style=invis]
+		T2 -> P6 -> T1
+		T1 -> P0
+		P7 [fillcolor="#cccccc" shape=point]
+		I7 [shape=box style=invis label=""]
+		P7 -> I7[style=invis]
+		A4 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="2"]
+		T1 -> P7 -> A4
+		A5 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="4"]
+		{ rank= same T0 T3 A5 }
+}

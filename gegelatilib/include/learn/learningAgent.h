@@ -31,7 +31,7 @@ namespace Learn {
 		/// Archive used during the training process
 		Archive archive;
 
-		///Learning for the learning process
+		/// Parameters for the learning process
 		LearningParameters params;
 
 		/// TPGGraph built during the learning process.
@@ -61,7 +61,7 @@ namespace Learn {
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
 		};
-
+		
 		/**
 		* \brief Getter for the TPGGraph built by the LearningAgent.
 		*

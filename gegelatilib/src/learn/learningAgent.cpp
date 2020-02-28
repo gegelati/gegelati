@@ -91,7 +91,6 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
 	// Evaluate
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
-
 	// Remove worst performing roots
 	decimateWorstRoots(results);
 }

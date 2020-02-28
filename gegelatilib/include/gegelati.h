@@ -11,7 +11,9 @@
 #include <data/primitiveType.h>
 #include <data/primitiveTypeArray.h>
 
-#include <exporter/tpgGraphDotExporter.h>
+#include <file/tpgGraphDotExporter.h>
+
+#include <file/tpgGraphDotImporter.h>
 
 #include <instructions/addPrimitiveType.h>  
 #include <instructions/instruction.h>

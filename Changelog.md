@@ -4,8 +4,10 @@
 _aaaa.mm.dd_
 
 ### New features
+* Possibility to import a TPGGraph and its programs with the File::TPGGraphDotImporter class.
 
 ### Changes
+* Renaming the Exporter namespace into File.
 
 ### Bug fix
 
