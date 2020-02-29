@@ -216,7 +216,7 @@ namespace Data {
 		*/
 		struct Concept {
 			/// Default deleter made virtual to activate polyphormism.
-			virtual ~Concept() {} = default;
+			virtual ~Concept() = default;
 			/// Polymorphic getType() function.
 			virtual const std::type_info& getType() const = 0;
 			/// Polymorphic getPtrType() function.
@@ -248,7 +248,7 @@ namespace Data {
 				return typeid(sharedPtr.get());
 			}
 
-			/// std::shared_ptr of the UntypedSharedPTR
+			/// std::shared_ptr of the UntypedSharedPtr
 			std::shared_ptr<T> sharedPtr;
 		};
 
