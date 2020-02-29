@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
+#include <typeinfo>
 #include <vector>
 #include <memory>
 #include <any>
 #include <array>
+#include <exception>
 
 class A {
 public:
@@ -33,36 +35,67 @@ public:
 class Object {
 
 public:
-	template <typename T, class Deleter = std::default_delete<const T>>
-	Object(const T* obj, Deleter func = std::default_delete<const T>()) : object(std::make_shared<Model<T>>(obj, func)) {};
+	template <typename T, class Deleter = std::default_delete<T>>
+	Object(T* obj, Deleter func = std::default_delete<T>()) : object(std::make_shared<Model<T>>(obj, func)) {};
 
 	const std::type_info& getType() const {
 		return object->getType();
 	}
 
-	template<typename T>
-	std::shared_ptr<const T> getSharedPointer() const {
-		std::shared_ptr< const Model<T>> typedPtr = std::dynamic_pointer_cast<const Model<T>> (this->object);
+	const std::type_info& getPtrType() const {
+		return object->getPtrType();
+	}
 
-		return typedPtr->object;
+	template<typename T>
+	std::shared_ptr<T> getSharedPointer() const {
+		const auto& tT = typeid(T*);
+		const auto& templateTypeNoConst = typeid(std::remove_const_t<T>*);
+		const auto& oT = this->getPtrType();
+
+		// If pointer types are identical (which includes const qualifier), go for it.
+		if (oT == tT) {
+			std::shared_ptr< const Model<T>> typedPtr = std::dynamic_pointer_cast<const Model<T>> (this->object);
+			return typedPtr->object;
+		}
+		// If pointer types are identical when loosing const qualifier of function template type, go for it.
+		else if (oT == templateTypeNoConst) {
+			std::shared_ptr< const Model<std::remove_const_t<T>>> typedPtr = std::dynamic_pointer_cast<const Model<std::remove_const_t<T>>> (this->object);
+			return typedPtr->object;
+		}
+		else {
+			// Type mismatch
+			std::string msg("Cannot convert ");
+			msg.append(oT.name());
+			msg.append(" into ");
+			msg.append(tT.name());
+			msg.append(".");
+
+			throw std::runtime_error(msg);
+		}
 	}
 
 	struct Concept {
 		virtual ~Concept() {};
 		virtual const std::type_info& getType() const = 0;
+		virtual const std::type_info& getPtrType() const = 0;
 	};
 
 	template< typename T>
 	struct Model : Concept {
 	public:
 		template <typename Deleter>
-		Model(const T* t, Deleter func) : object(t, func) {}
+		Model(T* t, Deleter func) : object(t, func) {}
 
 		const std::type_info& getType() const override {
 			return typeid(*object);
 		}
 
-		std::shared_ptr<const T> object;
+		const std::type_info& getPtrType() const override {
+			return typeid(object.get());
+		}
+
+
+		std::shared_ptr<T> object;
 	};
 
 	std::shared_ptr<const Concept> object;
@@ -74,6 +107,13 @@ int main(int argc, char** argv) {
 	std::function<void(const int*)> del{ [](const int*) {} };
 
 	std::vector<Object> vect;
+
+	std::shared_ptr<int>PTR(new int(5));
+
+	std::shared_ptr<const int>cPTR(PTR);
+
+	std::shared_ptr<A>AAA(new A(1000));
+	std::shared_ptr<B>BBB(std::dynamic_pointer_cast<B>(AAA));
 
 	vect.emplace_back(&a, del);
 	vect.emplace_back(new int(2));
@@ -87,16 +127,29 @@ int main(int argc, char** argv) {
 		vect.push_back(ooo); // survive in vect.
 	}
 
-	Object o(&a, del);
-	auto aptr = o.getSharedPointer<int>();
-	std::cout << "P:" << typeid(aptr).name() << " - " << *aptr << std::endl;
+	Object o((int*)&a, del);
+	const int b = 3;
+	std::cout << ">>>" << o.getType().name() << " - " << typeid(b).name() << std::endl;
+	try {
+		auto aptr = o.getSharedPointer<const int>();
+		std::cout << "P:" << typeid(aptr).name() << " - " << *aptr << std::endl;
+	}
+	catch (const std::runtime_error & a) {
+		std::cout << a.what();
+		return 255;
+	}
+
+
+	//*aptr = 3;
+
+	std::cout << a << "<<<" << std::endl;
 
 	for (auto o : vect) {
 		std::cout << o.getType().name() << std::endl;
 	}
 
 	vect.at(4).getSharedPointer<B>()->print();
-
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	return 0;
+	//testing::InitGoogleTest(&argc, argv);
+	//return RUN_ALL_TESTS();
 }
