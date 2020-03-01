@@ -75,3 +75,54 @@ TEST_F(UntypedSharedPtrTest, GetType) {
 	ASSERT_EQ(usp3.getType(), typeid(Base)) << "getType() method does not return the expected type_info.";
 	ASSERT_EQ(usp3.getPtrType(), typeid(const Base*)) << "getPtrType() method does not return the expected type_info.";
 }
+
+TEST_F(UntypedSharedPtrTest, getSharedPtr) {
+	Derived* derivedPtr = new Derived();
+	Base* basePtr = new Derived();
+	const Derived* cderivedPtr = new Derived();
+	const Base* cbasePtr = new Derived();
+
+	std::shared_ptr<Derived> derivedSharedPtr;
+	std::shared_ptr<const Derived> constDerivedSharedPtr;
+	std::shared_ptr<Base> baseSharedPtr;
+
+	// Derived pointer on derived object
+	{ // scope
+		Data::UntypedSharedPtr usp{ derivedPtr };
+		ASSERT_NO_THROW(derivedSharedPtr = usp.getSharedPointer<Derived>()) << "Getting the shared pointer with the right type failed unexpectedly.";
+		ASSERT_EQ(derivedSharedPtr.use_count(), 2) << "Use count of retrieved shared pointer is incorrect.";
+
+		ASSERT_NO_THROW(constDerivedSharedPtr = usp.getSharedPointer<const Derived>()) << "Getting a shared pointer to const type should work.";
+		ASSERT_EQ(derivedSharedPtr.use_count(), 3) << "Use count of retrieved shared pointer is incorrect.";
+	} // usp disappears
+	ASSERT_EQ(derivedSharedPtr.use_count(), 2) << "Retrieved shared pointer should be the only user after deletion of the UntypedSharedPtr";
+	constDerivedSharedPtr.reset();
+	derivedSharedPtr.reset();
+
+	// Const Derived pointer on derived object
+	{
+		Data::UntypedSharedPtr usp{ cderivedPtr };
+		ASSERT_NO_THROW(constDerivedSharedPtr = usp.getSharedPointer<const Derived>()) << "Getting a shared pointer to const type should work.";
+		ASSERT_EQ(constDerivedSharedPtr.use_count(), 2) << "Use count of retrieved shared pointer is incorrect.";
+
+		ASSERT_THROW(derivedSharedPtr = usp.getSharedPointer<Derived>(), std::runtime_error) << "Getting the shared pointer with the const type should failed.";
+		ASSERT_EQ(constDerivedSharedPtr.use_count(), 2) << "Use count of retrieved shared pointer is incorrect.";
+	}
+	ASSERT_EQ(constDerivedSharedPtr.use_count(), 1) << "Retrieved shared pointer should be the only user after deletion of the UntypedSharedPtr";
+	constDerivedSharedPtr.reset();
+	derivedSharedPtr.reset();
+
+	// Base pointer on derived object
+	{
+		Data::UntypedSharedPtr usp{ basePtr };
+		ASSERT_NO_THROW(baseSharedPtr = usp.getSharedPointer<Base>()) << "Getting the shared pointer with the right type failed unexpectedly.";
+		ASSERT_EQ(baseSharedPtr.use_count(), 2) << "Use count of retrieved shared pointer is incorrect.";
+
+		ASSERT_THROW(derivedSharedPtr = usp.getSharedPointer<Derived>(), std::runtime_error) << "Getting the shared pointer with the actual type (Derived) from a UntypedSharedPtr built with a Base pointer should fail.";
+		ASSERT_EQ(baseSharedPtr.use_count(), 2) << "Use count of retrieved shared pointer is incorrect.";
+
+		// Conversion of previously retrieved shard pointer works though
+		ASSERT_NO_THROW(derivedSharedPtr = std::dynamic_pointer_cast<Derived>(baseSharedPtr)) << "Conversion of previously retrieved Base shared pointer to an object of actual type Derived can be done.";
+		ASSERT_EQ(baseSharedPtr.use_count(), 3) << "Use count of retrieved shared pointer is incorrect.";
+	}
+}
