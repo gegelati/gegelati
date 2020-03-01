@@ -7,7 +7,6 @@
 #define GEGELATI_H
 
 #include <data/untypedSharedPtr.h>
-#include <data/supportedType.h>
 #include <data/dataHandler.h>  
 #include <data/primitiveType.h>
 #include <data/primitiveTypeArray.h>

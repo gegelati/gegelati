@@ -1,6 +1,7 @@
 #ifndef UNTYPED_SHARED_PTR_H
 #define UNTYPED_SHARED_PTR_H
 
+#include <functional>
 #include <type_traits>
 #include <memory>
 

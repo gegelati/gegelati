@@ -6,8 +6,9 @@
 #include <functional>
 #include <memory>
 
+#include "data/untypedSharedPtr.h"
+
 #include "parameter.h"
-#include "data/supportedType.h"
 
 namespace Instructions {
 	/**
@@ -53,7 +54,7 @@ namespace Instructions {
 		*
 		* \param[in] arguments a const list of shared pointers to any type of object. (not doable at compile time)
 		*/
-		bool checkOperandTypes(const std::vector < std::shared_ptr < const Data::SupportedType >> &arguments) const;
+		bool checkOperandTypes(const std::vector<Data::UntypedSharedPtr>& arguments) const;
 
 		/**
 		* \brief Check if a given vector contains the right number of parameters for the Instruction.
@@ -70,13 +71,13 @@ namespace Instructions {
 		* method should always return 0.0.
 		*
 		* \param[in] params the vector of reference_wrapper to the Parameter passed to the Instruction.
-		* \param[in] args the vector of shared pointer to the SupportedType passed to the Instruction.
+		* \param[in] args the vector of UntypedSharedPtr passed to the Instruction.
 		* \return the default implementation of the Intruction class returns 0.0 if the given params or arguments are not valid.
 		*         Otherwise, 1.0 is returned.
 		*/
 		virtual double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::shared_ptr<const Data::SupportedType>>& args) const = 0;
+			const std::vector<Data::UntypedSharedPtr>& args) const = 0;
 
 	protected:
 		/**

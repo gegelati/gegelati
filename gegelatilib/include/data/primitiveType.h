@@ -4,13 +4,12 @@
 #include <typeinfo>
 #include <type_traits>
 
-#include "supportedType.h"
-
 namespace Data {
 	/**
 	* \brief Template class to simplify creation of SupportedType derivate for primitive types.
+	* TODO: Remove (after cleaning up removal of SupportedType)
 	*/
-	template <class T> class PrimitiveType : public SupportedType {
+	template <class T> class PrimitiveType {
 		static_assert(std::is_fundamental<T>::value, "Template class AddPrimitiveType<T> can only be used for primitive types.");
 
 	protected:

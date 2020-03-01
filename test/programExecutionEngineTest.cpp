@@ -4,6 +4,7 @@
 #include "instructions/set.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
+#include "data/untypedSharedPtr.h"
 #include "data/dataHandler.h"
 #include "data/primitiveType.h"
 #include "data/primitiveTypeArray.h"
@@ -120,7 +121,7 @@ TEST_F(ProgramExecutionEngineTest, getCurrentInstruction) {
 
 TEST_F(ProgramExecutionEngineTest, fetchOperands) {
 	Program::ProgramExecutionEngine progExecEng(*p);
-	std::vector<std::shared_ptr<const Data::SupportedType>> operands;
+	std::vector<Data::UntypedSharedPtr> operands;
 	// From Fixture:
 	// Program line 0
 	// Instruction is AddPrimitiveType<double>.
@@ -129,8 +130,8 @@ TEST_F(ProgramExecutionEngineTest, fetchOperands) {
 	// Check number of operands
 	ASSERT_EQ(operands.size(), 2) << "Incorrect number of operands were fetched by previous call.";
 	// Check operand value. Register is 0.0, array element is value0: 2.3
-	ASSERT_EQ((double) * (std::dynamic_pointer_cast<const Data::PrimitiveType<double>>(operands.at(0))), 0.0) << "Value of fetched operand from register is incorrect.";
-	ASSERT_EQ((double) * (std::dynamic_pointer_cast<const Data::PrimitiveType<double>>(operands.at(1))), value0) << "Value of fetched operand from array is incorrect compared to Test fixture.";
+	ASSERT_EQ((double)*((operands.at(0)).getSharedPointer<const Data::PrimitiveType<double>>()), 0.0) << "Value of fetched operand from register is incorrect.";
+	ASSERT_EQ((double)*((operands.at(1)).getSharedPointer<const Data::PrimitiveType<double>>()), value0) << "Value of fetched operand from array is incorrect compared to Test fixture.";
 }
 
 TEST_F(ProgramExecutionEngineTest, fetchParameters) {

@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <memory>
 
-#include "data/supportedType.h"
+#include "data/untypedSharedPtr.h"
 #include "data/primitiveType.h"
 #include "instruction.h"
 
@@ -16,6 +16,8 @@ namespace Instructions {
 	*
 	* Although the given template parameter T is a primitive type, the
 	* SupportedType actually used by the instruction will be from the PrimitiveType<T> type.
+	*
+	* TODO refactor after suppression of SupportedType and PrimitiveType
 	*/
 	template <class T> class AddPrimitiveType : public Instruction {
 
@@ -29,7 +31,7 @@ namespace Instructions {
 
 		virtual double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::shared_ptr<const Data::SupportedType>>& args) const override;
+			const std::vector<Data::UntypedSharedPtr>& args) const override;
 	};
 
 
@@ -41,13 +43,13 @@ namespace Instructions {
 
 	template <class T> double AddPrimitiveType<T>::execute(
 		const std::vector<std::reference_wrapper<const Parameter>>& params,
-		const std::vector<std::shared_ptr<const Data::SupportedType>>& args) const {
+		const std::vector<Data::UntypedSharedPtr>& args) const {
 
 		if (Instruction::execute(params, args) != 1.0) {
 			return 0.0;
 		}
 
-		return *std::dynamic_pointer_cast<const Data::PrimitiveType<T>>(args.at(0)) + (double)*std::dynamic_pointer_cast<const Data::PrimitiveType<T>>(args.at(1));;
+		return *(args.at(0).getSharedPointer<const Data::PrimitiveType<T>>()) + (double)*(args.at(1).getSharedPointer<const Data::PrimitiveType<T>>());
 	}
 }
 

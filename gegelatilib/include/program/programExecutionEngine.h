@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-#include "data/supportedType.h"
+#include "data/untypedSharedPtr.h"
 #include "data/primitiveTypeArray.h"
 #include "program/program.h"
 
@@ -104,8 +104,8 @@ namespace Program {
 
 		/**
 		* \brief Method for changing the dataSources on which the Program will be executed.
-		* 
-		* \param[in] dataSrc The vector of DataHandler references with which 
+		*
+		* \param[in] dataSrc The vector of DataHandler references with which
 		* the Program will be executed.
 		* \throws std::runtime_error if the Environment references by the
 		* Program is incompatible with the given dataSources.
@@ -189,7 +189,7 @@ namespace Program {
 		*         DataHandler, with the given data type, or if the indexed
 		*         DataHandler does not exist.
 		*/
-		const void fetchCurrentOperands(std::vector<std::shared_ptr<const Data::SupportedType>>& operands) const;
+		const void fetchCurrentOperands(std::vector<Data::UntypedSharedPtr>& operands) const;
 
 		/**
 		* \brief Get the parameters for the current Instruction.

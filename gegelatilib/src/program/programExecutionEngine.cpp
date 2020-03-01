@@ -65,7 +65,7 @@ const Instructions::Instruction& Program::ProgramExecutionEngine::getCurrentInst
 	return this->program->getEnvironment().getInstructionSet().getInstruction(instructionIndex); // throw std::out_of_range if the index of the line is too large.
 }
 
-const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std::shared_ptr<const Data::SupportedType>>& operands) const
+const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<Data::UntypedSharedPtr>& operands) const
 {
 	const Line& line = this->getCurrentLine(); // throw std::out_of_range
 	const Instructions::Instruction& instruction = this->getCurrentInstruction(); // throw std::out_of_range
@@ -76,7 +76,7 @@ const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std
 		const Data::DataHandler& dataSource = this->dataSourcesAndRegisters.at(operandIndexes.first); // Throws std::out_of_range
 		const std::type_info& operandType = instruction.getOperandTypes().at(i).get();
 		const uint64_t operandLocation = this->scaleLocation(operandIndexes.second, dataSource, operandType);
-		const std::shared_ptr<const Data::SupportedType> data = dataSource.getDataAt(operandType, operandLocation);
+		Data::UntypedSharedPtr data = dataSource.getDataAt(operandType, operandLocation);
 		operands.push_back(data);
 	}
 }
@@ -94,7 +94,7 @@ const void Program::ProgramExecutionEngine::fetchCurrentParameters(std::vector<s
 
 void Program::ProgramExecutionEngine::executeCurrentLine()
 {
-	std::vector<std::shared_ptr<const Data::SupportedType>> operands;
+	std::vector<Data::UntypedSharedPtr> operands;
 	std::vector<std::reference_wrapper<const Parameter>> parameters;
 
 	// Get everything needed (may throw)
@@ -141,5 +141,5 @@ double Program::ProgramExecutionEngine::executeProgram(const bool ignoreExceptio
 
 	// Returns the 0-indexed register. 
 	// cast to primitiveType<double> to enable cast to double.
-	return *std::dynamic_pointer_cast<const Data::PrimitiveType<double>>(this->registers.getDataAt(typeid(Data::PrimitiveType<double>), 0));
+	return *(this->registers.getDataAt(typeid(Data::PrimitiveType<double>), 0).getSharedPointer<const Data::PrimitiveType<double>>());
 }

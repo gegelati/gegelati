@@ -55,7 +55,7 @@ TEST(LearningEnvironmentTest, getDataSource) {
 	ASSERT_EQ(dataSrc.size(), 2) << "Number of dataSource is incorrect";
 
 	// Check initial number of sticks
-	int initNr = (const int)*std::dynamic_pointer_cast<const Data::PrimitiveType<int>>(dataSrc.at(1).get().getDataAt(typeid(Data::PrimitiveType<int>), 0));
+	int initNr = (const int)*(dataSrc.at(1).get().getDataAt(typeid(Data::PrimitiveType<int>), 0).getSharedPointer<const Data::PrimitiveType<int>>());
 	ASSERT_EQ(initNr, 21) << "Initial number of stick is incorrect";
 }
 
@@ -63,7 +63,7 @@ TEST(LearningEnvironmentTest, doAction) {
 	StickGameWithOpponent le;
 
 	ASSERT_NO_THROW(le.doAction(1)) << "Remove 2 stick after game init should not fail.";
-	std::shared_ptr<const Data::PrimitiveType<int>> nbSticks = std::dynamic_pointer_cast<const Data::PrimitiveType<int>>(le.getDataSources().at(1).get().getDataAt(typeid(Data::PrimitiveType<int>), 0));
+	std::shared_ptr<const Data::PrimitiveType<int>> nbSticks = (le.getDataSources().at(1).get().getDataAt(typeid(Data::PrimitiveType<int>), 0)).getSharedPointer<const Data::PrimitiveType<int>>();
 	// Remove 2 sticks brings us to 19 sticks
 	// Other player removes between 1 and 3 sticks
 	// thus, number of remaining sticks is within 18 and 16

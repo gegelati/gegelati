@@ -6,7 +6,7 @@
 #include <functional>
 #include <memory>
 
-#include "data/supportedType.h"
+#include "data/untypedSharedPtr.h"
 
 namespace std {
 	/*
@@ -44,11 +44,6 @@ namespace Data {
 		* not support std::reference_wrapper easily), std::vector is used instead.
 		* Adding the same type several type to the list of providedType will lead
 		* to undefined behavior.
-		*
-		* Although this attribute is used by the default implementation of the
-		* canHandle method, some handled dataTypes may not be in the list.
-		* Only the canHandle method is public, and me accept types not in this 
-		* list.
 		*/
 		std::vector<std::reference_wrapper<const std::type_info>> providedTypes;
 
@@ -178,10 +173,10 @@ namespace Data {
 		/**
 		* \brief Get data of the given type, from the given address.
 		*
-		* Data is returned as a shared_ptr, with two possible allocation types:
+		* Data is returned as an UntypedSharedPtr, with two possible allocations:
 		* - Classic pointer: The returned data is natively contained in the
 		* DataHandler and could be accessed through a regular pointer. In this
-		* case the returned shared pointer is associated with the emptyDestructor
+		* case the returned UntypedSharedPtr is associated with an empty destructor
 		* function as its destructor to avoid any deallocation on the
 		* shared_ptr deletion.
 		* - Shared pointer: The returned data is a temporary object that was
@@ -197,18 +192,7 @@ namespace Data {
 		* given data type.
 		* \return a shared pointer to the requested const data.
 		*/
-		virtual std::shared_ptr<const Data::SupportedType> getDataAt(const std::type_info& type, const size_t address) const = 0;
-
-		/**
-		* \brief Empty destructor for data accesses.
-		*
-		* This empty function is used as a destructor whenever a shared pointer
-		* to data held in the DataHandler, in its native type, is created by
-		* the DataHandler::getDataAt() method.
-		*/
-		inline static std::function<void(const Data::SupportedType*)> emptyDestructor() {
-			return [](const Data::SupportedType* ptr) {};
-		};
+		virtual UntypedSharedPtr getDataAt(const std::type_info& type, const size_t address) const = 0;
 	};
 }
 

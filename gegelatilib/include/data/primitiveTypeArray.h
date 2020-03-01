@@ -73,9 +73,6 @@ namespace Data {
 		/// Default destructor.
 		virtual ~PrimitiveTypeArray() = default;
 
-		/// Override the DataHandler method.
-		virtual bool canHandle(const std::type_info& type) const override;
-
 		// Inherited from DataHandler
 		virtual DataHandler* clone() const override;
 
@@ -88,8 +85,8 @@ namespace Data {
 		*/
 		void resetData();
 
-		// Inherited from DataHandler
-		virtual std::shared_ptr<const Data::SupportedType> getDataAt(const std::type_info& type, const size_t address) const override;
+		/// Inherited from DataHandler
+		virtual UntypedSharedPtr getDataAt(const std::type_info& type, const size_t address) const override;
 
 		/**
 		* \brief Set the data at the given address to the given value.
@@ -115,22 +112,6 @@ namespace Data {
 		this->providedTypes.push_back(typeid(PrimitiveType<T>));
 	}
 
-	template <class T>
-	bool PrimitiveTypeArray<T>::canHandle(const std::type_info& type) const {
-		// If the type is in the supportedTypes list
-		if (DataHandler::canHandle(type)) {
-			return true;
-		}
-
-		// If the type is an array of the primitive type
-		// with a size inferior to the container (checked in getAddressSpace).
-		if (getAddressSpace(type) > 0) {
-			return true;
-		}
-
-		return false;
-	};
-
 	template<class T>
 	inline DataHandler* PrimitiveTypeArray<T>::clone() const
 	{
@@ -144,22 +125,6 @@ namespace Data {
 	{
 		if (type == typeid(PrimitiveType<T>)) {
 			return this->nbElements;
-		}
-
-		
-		std::string regex(DEMANGLE_TYPEID_NAME(typeid(PrimitiveType<T>).name()));
-
-		regex.append(" \\[([0-9]+)\\]");
-		std::regex arrayType(regex);
-
-		std::cmatch cm;
-		if (std::regex_match(DEMANGLE_TYPEID_NAME(type.name()), cm, arrayType)) {
-			int size = std::atoi(cm[1].str().c_str());
-			if (size <= this->nbElements) {
-				// address space size is the number of elements
-				// minus the size of the array
-				return this->nbElements - (size - 1);
-			}
 		}
 
 		// Default case
@@ -195,27 +160,12 @@ namespace Data {
 		}
 	}
 
-	template<class T> std::shared_ptr<const Data::SupportedType> PrimitiveTypeArray<T>::getDataAt(const std::type_info& type, const size_t address) const
+	template<class T> UntypedSharedPtr PrimitiveTypeArray<T>::getDataAt(const std::type_info& type, const size_t address) const
 	{
 		// Throw exception in case of invalid arguments.
 		checkAddressAndType(type, address);
 
-		// Native data type
-		if (type == typeid(PrimitiveType<T>)) {
-			std::shared_ptr<const Data::SupportedType> result(&(this->data[address]), DataHandler::emptyDestructor());
-			return result;
-		}
-
-		// Array type (or else checkAddress would have thrown an exception)
-		// retrieve size of array from addressSpace (to avoid code duplication of regex)
-		size_t arraySize = this->nbElements - this->getAddressSpace(type) + 1;
-		PrimitiveType<T>* resultArray = new PrimitiveType<T>[arraySize];
-
-		// copy data into composite array
-		for (uint64_t i = 0; i < arraySize; i++) {
-			resultArray[i] = this->data[address + i];
-		}
-		std::shared_ptr<SupportedType> result(resultArray, std::default_delete<PrimitiveType<T>[]>());
+		UntypedSharedPtr result(&(this->data[address]), UntypedSharedPtr::emptyDestructor<const PrimitiveType<T>>());
 		return result;
 	}
 
