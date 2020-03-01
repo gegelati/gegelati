@@ -17,10 +17,6 @@ public:
 	virtual void SetUp() {};
 
 	virtual void TearDown() {};
-
-	/// Empty destructor for any type
-	template <typename T>
-	auto emptyDestructor() { return [](T* ptr) {}; };
 };
 
 
@@ -35,7 +31,7 @@ TEST_F(UntypedSharedPtrTest, ConstructorDestructor) {
 	// With no destructor
 	Derived obj;
 
-	ASSERT_NO_THROW(usp = new Data::UntypedSharedPtr(&obj, emptyDestructor<Derived>())) << "An exception was thrown when building the UntypedSharedPtr with a custom destructor.";
+	ASSERT_NO_THROW(usp = new Data::UntypedSharedPtr(&obj, Data::UntypedSharedPtr::emptyDestructor<Derived>())) << "An exception was thrown when building the UntypedSharedPtr with a custom destructor.";
 	ASSERT_NE(usp, nullptr) << "Construction of UntypedSharedPtr with empty deleter failed.";
 	ASSERT_NO_THROW(delete usp) << "Deletion of UntypedSharedPtr failed.";
 

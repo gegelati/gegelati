@@ -212,6 +212,22 @@ namespace Data {
 		}
 
 		/**
+		* \brief Get an empty destructor function for any type.
+		*
+		* When building an UntypedSharedPtr, this static method can be used to
+		* provide an empty destructor for the second argument of the constructor.
+		* The template param should be the same as the type of the pointer given to
+		* the UntypedSharetPtr constructor.
+		*
+		* \tparam T the type of the pointer to deallocate.
+		* \return the lambda function for deallocating.
+		*/
+		template <typename T>
+		static std::function<void(T*)> emptyDestructor() {
+			return [](T* ptr) {};
+		};
+
+		/**
 		* \brief Internal structure of the type erasure pattern.
 		*/
 		struct Concept {
