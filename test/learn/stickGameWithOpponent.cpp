@@ -37,8 +37,7 @@ void StickGameWithOpponent::doAction(uint64_t actionID)
 
 		// Random player's turn
 		if (currentState > 0) {
-			std::uniform_int_distribution<int> distribution(1, std::min(currentState, 3));
-			currentState -= distribution(engine);
+			currentState -= (int)rng.getUnsignedInt64(1, std::min(currentState, 3));
 			this->remainingSticks.setDataAt(typeid(PrimitiveType<int>), 0, currentState);
 			if (currentState == 0) {
 				this->win = true;
@@ -51,7 +50,7 @@ void StickGameWithOpponent::reset(size_t seed, Learn::LearningMode mode)
 {
 	// Create seed from seed and mode
 	size_t hash_seed = Data::hash<size_t>()(seed) ^ Data::hash<Learn::LearningMode>()(mode);
-	this->engine.seed(hash_seed);
+	this->rng.setSeed(hash_seed);
 	this->remainingSticks.setDataAt(typeid(PrimitiveType<int>), 0, 21);
 	this->win = false;
 	this->forbiddenMove = false;
