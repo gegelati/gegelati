@@ -1,6 +1,6 @@
 /**
 * \file gegelati.h
-* \brief Helper file gathering all headers from the GEGELATI lib to ease their 
+* \brief Helper file gathering all headers from the GEGELATI lib to ease their
 * inclusion in apps.
 */
 #ifndef GEGELATI_H
@@ -8,6 +8,7 @@
 
 #include <dataHandlers/dataHandler.h>  
 #include <dataHandlers/primitiveTypeArray.h>
+#include <data/hash.h>
 
 #include <file/tpgGraphDotExporter.h>
 

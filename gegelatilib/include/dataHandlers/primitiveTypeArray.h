@@ -5,6 +5,7 @@
 #include <functional>
 #include <typeinfo>
 
+#include "data/hash.h"
 #include "dataHandler.h"
 
 namespace DataHandlers {
@@ -166,10 +167,10 @@ namespace DataHandlers {
 	inline size_t PrimitiveTypeArray<T>::updateHash() const
 	{
 		// reset
-		this->cachedHash = std::hash<size_t>()(this->id);
+		this->cachedHash = Data::hash<size_t>()(this->id);
 
 		// hasher
-		std::hash<T> hasher;
+		Data::hash<T> hasher;
 
 		for (PrimitiveType<T> dataElement : this->data) {
 			// Rotate by 1 because otherwise, xor is comutative.

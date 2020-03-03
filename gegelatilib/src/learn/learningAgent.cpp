@@ -1,5 +1,6 @@
 #include <inttypes.h>
 
+#include "data/hash.h"
 #include "tpg/tpgExecutionEngine.h"
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
@@ -40,7 +41,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG:
 	// Evaluate nbIteration times
 	for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation; i++) {
 		// Compute a Hash
-		std::hash<uint64_t> hasher;
+		Data::hash<uint64_t> hasher;
 		uint64_t hash = hasher(generationNumber) ^ hasher(i);
 
 		// Reset the learning Environment
