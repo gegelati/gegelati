@@ -6,21 +6,14 @@
 #include <memory>
 
 #include "data/untypedSharedPtr.h"
-#include "data/primitiveType.h"
 #include "instruction.h"
 
 namespace Instructions {
 
 	/**
 	* \brief Template class for add instruction on all types of data: double, int, ...
-	*
-	* Although the given template parameter T is a primitive type, the
-	* SupportedType actually used by the instruction will be from the PrimitiveType<T> type.
-	*
-	* TODO refactor after suppression of SupportedType and PrimitiveType
 	*/
 	template <class T> class AddPrimitiveType : public Instruction {
-
 		static_assert(std::is_fundamental<T>::value, "Template class AddPrimitiveType<T> can only be used for primitive types.");
 
 	public:
@@ -36,8 +29,8 @@ namespace Instructions {
 
 
 	template <class T> AddPrimitiveType<T>::AddPrimitiveType() {
-		this->operandTypes.push_back(typeid(Data::PrimitiveType<T>));
-		this->operandTypes.push_back(typeid(Data::PrimitiveType<T>));
+		this->operandTypes.push_back(typeid(T));
+		this->operandTypes.push_back(typeid(T));
 	}
 
 
@@ -49,7 +42,7 @@ namespace Instructions {
 			return 0.0;
 		}
 
-		return *(args.at(0).getSharedPointer<const Data::PrimitiveType<T>>()) + (double)*(args.at(1).getSharedPointer<const Data::PrimitiveType<T>>());
+		return *(args.at(0).getSharedPointer<const T>()) + (double)*(args.at(1).getSharedPointer<const T>());
 	}
 }
 

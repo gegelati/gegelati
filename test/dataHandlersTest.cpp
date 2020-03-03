@@ -20,16 +20,16 @@ TEST(DataHandlersTest, ID) {
 TEST(DataHandlersTest, PrimitiveDataArrayCanProvide) {
 	Data::DataHandler* d = new Data::PrimitiveTypeArray<double>(4);
 
-	ASSERT_TRUE(d->canHandle(typeid(Data::PrimitiveType<double>))) << "PrimitiveTypeArray<double>() wrongfully say it can not provide PrimitiveType<double> data.";
-	ASSERT_FALSE(d->canHandle(typeid(Data::PrimitiveType<int>))) << "PrimitiveTypeArray<double>() wrongfully say it can provide PrimitiveType<int> data.";
+	ASSERT_TRUE(d->canHandle(typeid(double))) << "PrimitiveTypeArray<double>() wrongfully say it can not provide double data.";
+	ASSERT_FALSE(d->canHandle(typeid(int))) << "PrimitiveTypeArray<double>() wrongfully say it can provide int data.";
 	ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr))) << "PrimitiveTypeArray<double>() wrongfully say it can provide UntypedSharedPtr data.";
 	delete d;
 }
 
 TEST(DataHandlersTest, PrimitiveDataArrayAddressSpace) {
 	Data::DataHandler* d = new Data::PrimitiveTypeArray<long>(64); // Array of 64 long
-	ASSERT_EQ(d->getAddressSpace(typeid(Data::PrimitiveType<long>)), 64) << "Address space size for type PrimitiveType<long> in PrimitiveTypeArray<long>(64) is not 64";
-	ASSERT_EQ(d->getAddressSpace(typeid(Data::PrimitiveType<int>)), 0) << "Address space size for type PrimitiveType<int> in PrimitiveTypeArray<long>(64) is not 0";
+	ASSERT_EQ(d->getAddressSpace(typeid(long)), 64) << "Address space size for type long in PrimitiveTypeArray<long>(64) is not 64";
+	ASSERT_EQ(d->getAddressSpace(typeid(int)), 0) << "Address space size for type int in PrimitiveTypeArray<long>(64) is not 0";
 
 	delete d;
 }
@@ -47,12 +47,12 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAt) {
 
 	d->resetData();
 	for (int i = 0; i < size; i++) {
-		const Data::PrimitiveType<float> a = *(d->getDataAt(typeid(Data::PrimitiveType<float>), i).getSharedPointer<const Data::PrimitiveType<float>>());
+		const float a = *(d->getDataAt(typeid(float), i).getSharedPointer<const float>());
 		ASSERT_EQ((float)a, 0.0f) << "Data at valid address and type can not be accessed.";
 	}
 
-	ASSERT_THROW(d->getDataAt(typeid(Data::PrimitiveType<float>), size), std::out_of_range) << "Address exceeding the addressSpace should cause an exception.";
-	ASSERT_THROW(d->getDataAt(typeid(Data::PrimitiveType<double>), 0), std::invalid_argument) << "Requesting a non-handled type, even at a valid location, should cause an exception.";
+	ASSERT_THROW(d->getDataAt(typeid(float), size), std::out_of_range) << "Address exceeding the addressSpace should cause an exception.";
+	ASSERT_THROW(d->getDataAt(typeid(double), 0), std::invalid_argument) << "Requesting a non-handled type, even at a valid location, should cause an exception.";
 
 	delete d;
 }
@@ -64,11 +64,11 @@ TEST(DataHandlersTest, PrimitiveDataArraySetDataAt) {
 	Data::PrimitiveTypeArray<double>* d = new Data::PrimitiveTypeArray<double>(size);
 
 	d->resetData();
-	Data::PrimitiveType<double> value(doubleValue);
+	double value(doubleValue);
 	ASSERT_NO_THROW(d->setDataAt(typeid(value), address, value)) << "Setting data with valid Address and type failed.";
 
 	// Check that data was indeed updated.
-	ASSERT_EQ((double)*(d->getDataAt(typeid(Data::PrimitiveType<double>), address).getSharedPointer<const Data::PrimitiveType<double>>()), doubleValue) << "Previously set data did not persist.";
+	ASSERT_EQ((double)*(d->getDataAt(typeid(double), address).getSharedPointer<const double>()), doubleValue) << "Previously set data did not persist.";
 
 	delete d;
 }
@@ -85,7 +85,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayHash) {
 	size_t hash = 0;
 	ASSERT_NO_THROW(hash = d.getHash());
 	// change the content of the array
-	d.setDataAt(typeid(Data::PrimitiveType<double>), address, Data::PrimitiveType<double>(doubleValue));
+	d.setDataAt(typeid(double), address, doubleValue);
 	ASSERT_NE(hash, d.getHash());
 }
 
@@ -99,7 +99,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayClone) {
 	Data::PrimitiveTypeArray<int> d0(12);
 	Data::PrimitiveTypeArray<double> d(size);
 	// change the content of the array
-	d.setDataAt(typeid(Data::PrimitiveType<double>), address, Data::PrimitiveType<double>(doubleValue));
+	d.setDataAt(typeid(double), address, doubleValue);
 	// Hash was voluntarily not computed before clone.
 
 	// Create a clone

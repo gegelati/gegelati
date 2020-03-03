@@ -6,7 +6,6 @@
 #include <typeinfo>
 #include <regex>
 
-#include "data/primitiveType.h"
 #include "dataHandler.h"
 
 #ifdef _MSC_VER
@@ -24,16 +23,16 @@ namespace Data {
 	/**
 	* DataHandler for manipulating arrays of a primitive data type.
 	*
-	* In addition to native data types PrimitiveType<T>, this DataHandler can
+	* In addition to native data types T, this DataHandler can
 	* also provide the following composite data type:
-	* - PrimitiveType<T>[n]: with n <= to the size of the PrimitiveTypeArray.
+	* - TODO: T[n]: with n <= to the size of the PrimitiveTypeArray.
 	*/
 	template <class T> class PrimitiveTypeArray : public DataHandler {
 		static_assert(std::is_fundamental<T>::value, "Template class PrimitiveTypeArray<T> can only be used for primitive types.");
 
 	protected:
 		/**
-		* \brief Number of elements contained in the Array.
+		* \brief Number of elements contained in the array.
 		*
 		* Although this may seem redundant with the data.size() method, this attribute is here to
 		* make it possible to check whether the size of the data vector was modified throughout
@@ -44,7 +43,7 @@ namespace Data {
 		/**
 		* \brief Array storing the data of the PrimitiveTypeArray.
 		*/
-		std::vector<PrimitiveType<T>> data;
+		std::vector<T> data;
 
 		/**
 		* Check whether the given type of data can be accessed at the given address. Throws exception otherwise.
@@ -105,11 +104,11 @@ namespace Data {
 		* \throws std::invalid_argument if the given data type is not handled by the DataHandler.
 		* \throws std::out_of_range if the given address is invalid for the given data type.
 		*/
-		void setDataAt(const std::type_info& type, const size_t address, const PrimitiveType<T>& value);
+		void setDataAt(const std::type_info& type, const size_t address, const T& value);
 	};
 
 	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size) : nbElements{ size }, data(size) {
-		this->providedTypes.push_back(typeid(PrimitiveType<T>));
+		this->providedTypes.push_back(typeid(T));
 	}
 
 	template<class T>
@@ -123,7 +122,7 @@ namespace Data {
 
 	template<class T> size_t PrimitiveTypeArray<T>::getAddressSpace(const std::type_info& type) const
 	{
-		if (type == typeid(PrimitiveType<T>)) {
+		if (type == typeid(T)) {
 			return this->nbElements;
 		}
 
@@ -133,7 +132,7 @@ namespace Data {
 
 	template<class T> void PrimitiveTypeArray<T>::resetData()
 	{
-		for (PrimitiveType<T>& elt : this->data) {
+		for (T& elt : this->data) {
 			elt = 0;
 		}
 
@@ -165,14 +164,14 @@ namespace Data {
 		// Throw exception in case of invalid arguments.
 		checkAddressAndType(type, address);
 
-		UntypedSharedPtr result(&(this->data[address]), UntypedSharedPtr::emptyDestructor<const PrimitiveType<T>>());
+		UntypedSharedPtr result(&(this->data[address]), UntypedSharedPtr::emptyDestructor<const T>());
 		return result;
 	}
 
 	template<class T> void PrimitiveTypeArray<T>::setDataAt(
 		const std::type_info& type,
 		const size_t address,
-		const PrimitiveType<T>& value) {
+		const T& value) {
 		// Throw exception in case of invalid arguments.
 		checkAddressAndType(type, address);
 
@@ -190,7 +189,7 @@ namespace Data {
 		// hasher
 		std::hash<T> hasher;
 
-		for (PrimitiveType<T> dataElement : this->data) {
+		for (T dataElement : this->data) {
 			// Rotate by 1 because otherwise, xor is comutative.
 			this->cachedHash = (this->cachedHash >> 1) | (this->cachedHash << 63);
 			this->cachedHash ^= hasher((T)dataElement);

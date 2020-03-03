@@ -4,7 +4,6 @@
 #include <functional>
 
 #include "data/untypedSharedPtr.h"
-#include "data/primitiveType.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
@@ -13,17 +12,7 @@ namespace Instructions {
 	* \brief Template instruction for simplifying the creation of an
 	* Instruction from a c++ lambda function.
 	*
-	* Template parameter T can either be a primitive type (i.e. int, char,
-	* float, ...), a type inheriting from SupportedType, or an array whose type
-	* inherits from SupportedType.
-	*
-	* When the given template parameter T is a primitive type, the
-	* SupportedType actually used by the instruction will be from the
-	* PrimitiveType<T> type. Nevertheless, from the lambda function point
-	* of view, this will be transparent and the primitive type will be used.
-	*
-	* When the given template type is a SupportedType child class, or an array
-	* the lambda expression will used these types directly.
+	* Template parameter T can either be any type.
 	*
 	* Currently, LambdaInstructions all require two operands, with the same
 	* type determined by T.
@@ -60,8 +49,8 @@ namespace Instructions {
 		* this Instruction.
 		*/
 		LambdaInstruction(std::function<double(T, T)> function) : func{ function } {
-			this->operandTypes.push_back(typeid(Data::PrimitiveType<T>));
-			this->operandTypes.push_back(typeid(Data::PrimitiveType<T>));
+			this->operandTypes.push_back(typeid(T));
+			this->operandTypes.push_back(typeid(T));
 		};
 
 
@@ -73,9 +62,9 @@ namespace Instructions {
 				return 0.0;
 			}
 
-			const Data::PrimitiveType<T>& arg1 = *(args.at(0).getSharedPointer<const Data::PrimitiveType<T>>());
-			const Data::PrimitiveType<T>& arg2 = *(args.at(1).getSharedPointer<const Data::PrimitiveType<T>>());
-			double result = this->func((T)arg1, (T)arg2);
+			const T& arg1 = *(args.at(0).getSharedPointer<const T>());
+			const T& arg2 = *(args.at(1).getSharedPointer<const T>());
+			double result = this->func(arg1, arg2);
 			return result;
 		}
 	};

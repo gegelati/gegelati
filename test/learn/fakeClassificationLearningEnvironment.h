@@ -1,4 +1,5 @@
-#include "data/primitiveType.h"
+#ifndef FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
+#define FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
 
 /**
 * \brief Classification Learning enviroment for testing purposes
@@ -17,7 +18,7 @@ public:
 		// Update data
 		value++;
 		this->currentClass = value % 3;
-		data.setDataAt(typeid(Data::PrimitiveType<int>), 0, value);
+		data.setDataAt(typeid(int), 0, value);
 	}
 	void reset(size_t seed, Learn::LearningMode mode) {
 		// Call super pure virtual method to reset the pure virtual method.
@@ -33,3 +34,5 @@ public:
 	}
 	bool isTerminal() const { return false; }
 };
+
+#endif // !FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H

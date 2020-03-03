@@ -105,7 +105,7 @@ void Program::ProgramExecutionEngine::executeCurrentLine()
 
 	double result = instruction.execute(parameters, operands);
 
-	this->registers.setDataAt(typeid(Data::PrimitiveType<double>), line.getDestinationIndex(), result);
+	this->registers.setDataAt(typeid(double), line.getDestinationIndex(), result);
 }
 
 double Program::ProgramExecutionEngine::executeProgram(const bool ignoreException)
@@ -141,5 +141,5 @@ double Program::ProgramExecutionEngine::executeProgram(const bool ignoreExceptio
 
 	// Returns the 0-indexed register. 
 	// cast to primitiveType<double> to enable cast to double.
-	return *(this->registers.getDataAt(typeid(Data::PrimitiveType<double>), 0).getSharedPointer<const Data::PrimitiveType<double>>());
+	return *(this->registers.getDataAt(typeid(double), 0).getSharedPointer<const double>());
 }

@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "data/untypedSharedPtr.h"
-#include "data/primitiveType.h"
 #include "instruction.h"
 
 namespace Instructions {
@@ -27,7 +26,7 @@ namespace Instructions {
 	};
 
 	template <class T, class U> MultByConstParam<T, U>::MultByConstParam() {
-		this->operandTypes.push_back(typeid(Data::PrimitiveType<T>));
+		this->operandTypes.push_back(typeid(T));
 		this->nbParameters = 1;
 	}
 
@@ -40,7 +39,7 @@ namespace Instructions {
 		}
 
 		const U pValue = (const U&)params.at(0).get();
-		return *(args.at(0).getSharedPointer<const Data::PrimitiveType<T>>()) * (double)pValue;
+		return *(args.at(0).getSharedPointer<const T>()) * (double)pValue;
 	};
 }
 

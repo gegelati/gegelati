@@ -46,7 +46,7 @@ protected:
 		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
 		// Put a 1 in the dataHandler to make it easy to have non-zero return in Programs.
-		((Data::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(Data::PrimitiveType<double>), 0, 1.0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(double), 0, 1.0);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));

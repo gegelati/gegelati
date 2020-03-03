@@ -26,29 +26,29 @@ TEST(InstructionsTest, OperandListAndNbParam) {
 	ASSERT_EQ(i->getNbOperands(), 2) << "Number of operands of Instructions::AddPrimitiveType<double> is different from 2";
 	auto operands = i->getOperandTypes();
 	ASSERT_EQ(operands.size(), 2) << "Operand list of AddPrimitiveType<double> is different from 2";
-	ASSERT_STREQ(operands.at(0).get().name(), typeid(Data::PrimitiveType<double>).name()) << "First operand of AddPrimitiveType<double> is not\"" << typeid(Data::PrimitiveType<double>).name() << "\".";
-	ASSERT_STREQ(operands.at(1).get().name(), typeid(Data::PrimitiveType<double>).name()) << "Second operand of AddPrimitiveType<double> is not\"" << typeid(Data::PrimitiveType<double>).name() << "\".";
+	ASSERT_STREQ(operands.at(0).get().name(), typeid(double).name()) << "First operand of AddPrimitiveType<double> is not\"" << typeid(double).name() << "\".";
+	ASSERT_STREQ(operands.at(1).get().name(), typeid(double).name()) << "Second operand of AddPrimitiveType<double> is not\"" << typeid(double).name() << "\".";
 	ASSERT_EQ(i->getNbParameters(), 0) << "Number of parameters of AddPrimitiveType<double> should be 0.";
 	delete i;
 }
 
 TEST(InstructionsTest, CheckArgumentTypes) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
-	Data::PrimitiveType<double> a{ 2.5 };
-	Data::PrimitiveType<double> b = 5.6;
-	Data::PrimitiveType<double> c = 3.7;
-	Data::PrimitiveType<int> d = 5;
+	double a{ 2.5 };
+	double b = 5.6;
+	double c = 3.7;
+	int d = 5;
 
 	std::vector<Data::UntypedSharedPtr> vect;
 
-	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<double>>());
-	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<double>>());
+	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<double>());
+	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
 	ASSERT_TRUE(i->checkOperandTypes(vect)) << "Operands of valid types wrongfully classified as invalid.";
-	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<double>>());
+	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<double>());
 	ASSERT_FALSE(i->checkOperandTypes(vect)) << "Operands list of too long size wrongfully classified as valid.";
 	vect.pop_back();
 	vect.pop_back();
-	vect.emplace_back(&d, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<int>>());
+	vect.emplace_back(&d, Data::UntypedSharedPtr::emptyDestructor<int>());
 	ASSERT_FALSE(i->checkOperandTypes(vect)) << "Operands of invalid types wrongfully classified as valid";
 	delete i;
 }
@@ -74,17 +74,17 @@ TEST(InstructionsTest, CheckParameters) {
 
 TEST(InstructionsTest, Execute) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
-	Data::PrimitiveType<double> a{ 2.6 };
-	Data::PrimitiveType<double> b = 5.5;
-	Data::PrimitiveType<int> c = 3;
+	double a{ 2.6 };
+	double b = 5.5;
+	int c = 3;
 
 	std::vector<Data::UntypedSharedPtr> vect;
-	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<double>>());
-	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<double>>());
+	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<double>());
+	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
 	ASSERT_EQ(i->execute({}, vect), 8.1) << "Execute method of AddPrimitiveType<double> returns an incorrect value with valid operands.";
 
 	vect.pop_back();
-	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<int>>());
+	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
 	ASSERT_EQ(i->execute({}, vect), 0.0) << "Execute method of AddPrimitiveType<double> returns an incorrect value with invalid operands.";
 
 	delete i;
@@ -97,13 +97,13 @@ TEST(InstructionsTest, Execute) {
 }
 
 TEST(InstructionsTest, LambdaInstructionPrimitiveType) {
-	Data::PrimitiveType<double> a{ 2.6 };
-	Data::PrimitiveType<double> b = 5.5;
-	Data::PrimitiveType<int> c = 3;
+	double a{ 2.6 };
+	double b = 5.5;
+	int c = 3;
 
 	std::vector<Data::UntypedSharedPtr> vect;
-	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<double>>());
-	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<double>>());
+	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<double>());
+	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
 
 	auto minus = [](double a, double b) {return a - b; };
 
@@ -114,7 +114,7 @@ TEST(InstructionsTest, LambdaInstructionPrimitiveType) {
 
 	// Execute with wrong types of operands.
 	vect.pop_back();
-	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<int>>());
+	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
 	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
 
 	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";

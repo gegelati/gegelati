@@ -6,7 +6,6 @@
 #include "instructions/multByConstParam.h"
 #include "data/untypedSharedPtr.h"
 #include "data/dataHandler.h"
-#include "data/primitiveType.h"
 #include "data/primitiveTypeArray.h"
 #include "program/program.h"
 #include "program/line.h"
@@ -27,7 +26,7 @@ protected:
 		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
 		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
-		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(Data::PrimitiveType<double>), 25, value0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(double), 25, value0);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -130,8 +129,8 @@ TEST_F(ProgramExecutionEngineTest, fetchOperands) {
 	// Check number of operands
 	ASSERT_EQ(operands.size(), 2) << "Incorrect number of operands were fetched by previous call.";
 	// Check operand value. Register is 0.0, array element is value0: 2.3
-	ASSERT_EQ((double)*((operands.at(0)).getSharedPointer<const Data::PrimitiveType<double>>()), 0.0) << "Value of fetched operand from register is incorrect.";
-	ASSERT_EQ((double)*((operands.at(1)).getSharedPointer<const Data::PrimitiveType<double>>()), value0) << "Value of fetched operand from array is incorrect compared to Test fixture.";
+	ASSERT_EQ((double)*((operands.at(0)).getSharedPointer<const double>()), 0.0) << "Value of fetched operand from register is incorrect.";
+	ASSERT_EQ((double)*((operands.at(1)).getSharedPointer<const double>()), value0) << "Value of fetched operand from array is incorrect compared to Test fixture.";
 }
 
 TEST_F(ProgramExecutionEngineTest, fetchParameters) {

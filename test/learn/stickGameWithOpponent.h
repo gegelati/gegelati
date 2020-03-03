@@ -3,7 +3,6 @@
 
 #include <random>
 
-#include "data/primitiveType.h"
 #include "data/primitiveTypeArray.h"
 #include "learn/learningEnvironment.h"
 
@@ -35,9 +34,9 @@ public:
 	StickGameWithOpponent() : LearningEnvironment(3), remainingSticks(1), hints(3), win{ false }{
 		this->reset(0);
 		// Set hints
-		this->hints.setDataAt(typeid(Data::PrimitiveType<int>), 0, 1);
-		this->hints.setDataAt(typeid(Data::PrimitiveType<int>), 1, 2);
-		this->hints.setDataAt(typeid(Data::PrimitiveType<int>), 2, 3);
+		this->hints.setDataAt(typeid(int), 0, 1);
+		this->hints.setDataAt(typeid(int), 1, 2);
+		this->hints.setDataAt(typeid(int), 2, 3);
 	};
 
 	/// Destructor

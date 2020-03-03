@@ -8,7 +8,6 @@
 
 #include <data/untypedSharedPtr.h>
 #include <data/dataHandler.h>  
-#include <data/primitiveType.h>
 #include <data/primitiveTypeArray.h>
 
 #include <file/tpgGraphDotExporter.h>

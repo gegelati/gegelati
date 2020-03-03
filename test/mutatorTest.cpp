@@ -38,7 +38,7 @@ protected:
 		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
 		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
-		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(Data::PrimitiveType<double>), 25, value0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(double), 25, value0);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));

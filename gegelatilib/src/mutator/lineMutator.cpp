@@ -1,8 +1,6 @@
 #include <stdexcept>
 #include <set>
 
-#include "data/primitiveType.h"
-
 #include "environment.h"
 #include "mutator/rng.h"
 #include "mutator/lineMutator.h"
@@ -57,7 +55,7 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 			// check if the selected dataSource can provide the type requested by the instruction
 			if (operandDataSourceIndex == 0) {
 				// Data Source is the registers
-				if (operandType == typeid(Data::PrimitiveType<double>)) {
+				if (operandType == typeid(double)) {
 					operandFound = true;
 				}
 			}
@@ -156,7 +154,7 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line, Mutator::RNG& r
 			bool isValid = false;
 			if (dataSourceIndex == 0) {
 				// regsister
-				isValid = (type == typeid(Data::PrimitiveType<double>));
+				isValid = (type == typeid(double));
 			}
 			else {
 				// not register
