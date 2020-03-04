@@ -13,6 +13,6 @@ uint64_t Mutator::RNG::getUnsignedInt64(uint64_t min, uint64_t max)
 
 double Mutator::RNG::getDouble(double min, double max)
 {
-	std::uniform_real_distribution<double> distribution(min, max);
+	Mutator::uniform_real_distribution<double> distribution(min, max);
 	return distribution(engine);
 }

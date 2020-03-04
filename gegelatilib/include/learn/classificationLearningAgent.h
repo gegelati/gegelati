@@ -6,6 +6,7 @@
 #include <numeric>
 #include <stdexcept>
 
+#include <data/hash.h>
 #include "learn/evaluationResult.h"
 #include "learn/classificationEvaluationResult.h"
 #include "learn/learningAgent.h"
@@ -94,7 +95,7 @@ namespace Learn {
 		// Evaluate nbIteration times
 		for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation; i++) {
 			// Compute a Hash
-			std::hash<uint64_t> hasher;
+			Data::Hash<uint64_t> hasher;
 			uint64_t hash = hasher(generationNumber) ^ hasher(i);
 
 			// Reset the learning Environment
