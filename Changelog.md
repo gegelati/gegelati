@@ -8,6 +8,7 @@ _aaaa.mm.dd_
 
 ### Changes
 * Renaming the Exporter namespace into File.
+* Switch from transfer.sh to file.io for supporting deployment.
 
 ### Bug fix
 

@@ -28,7 +28,14 @@ done
 cd ${NEW_SITE_FOLDER}
 
 # Get latest archive from windows 
-curl -L -O -J https://gegelati.shortcm.li/windows-package
+MSG=$(curl -L -O -J https://gegelati.shortcm.li/windows-package)
+
+# Check download was a success
+# (with file.io, if the link was used, it is immediatly deactivated.)
+if [[ ! "$MSG" =~ "curl: Saved to filename 'gegelatilib-" ]]
+then
+	exit 255
+fi
 
 # Prepare index
 echo "# GEGELATI Neutral Builds 
