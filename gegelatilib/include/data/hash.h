@@ -100,17 +100,6 @@ namespace Data {
 	};
 
 	template<>
-	struct Hash<long double> {
-		using argument_type = long double;
-		using result_type = size_t;
-		_NODISCARD size_t
-
-			operator()(const long double _Keyval) const noexcept {
-			return _Hash_representation(_Keyval == 0.0L ? 0.0L : _Keyval); // map -0 to 0
-		}
-	};
-
-	template<>
 	struct Hash<nullptr_t> {
 		using argument_type = nullptr_t;
 		using result_type = size_t;
