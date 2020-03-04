@@ -32,6 +32,7 @@ protected:
 		params.mutation.tpg.pProgramMutation = 0.2;
 		params.mutation.tpg.pEdgeDestinationChange = 0.1;
 		params.mutation.tpg.pEdgeDestinationIsAction = 0.5;
+		params.mutation.tpg.maxOutgoingEdges = 4;
 		params.mutation.prog.pAdd = 0.5;
 		params.mutation.prog.pDelete = 0.5;
 		params.mutation.prog.pMutate = 1.0;
@@ -186,6 +187,33 @@ TEST_F(LearningAgentTest, Train) {
 	ASSERT_NO_THROW(la.train(alt, true)) << "Training a TPG for several generation should not fail.";
 	alt = true;
 	ASSERT_NO_THROW(la.train(alt, true)) << "Using the boolean reference to stop the training should not fail.";
+}
+
+// Similat to previous test, but verifications of graphs properties are here to
+// ensure the result of the training is identical on all OSes and Compilers.
+TEST_F(LearningAgentTest, TrainPortability) {
+	params.archiveSize = 50;
+	params.archivingProbability = 0.5;
+	params.maxNbActionsPerEval = 11;
+	params.nbIterationsPerPolicyEvaluation = 5;
+	params.ratioDeletedRoots = 0.2;
+	params.nbGenerations = 20;
+	params.mutation.tpg.nbRoots = 30;
+
+	Learn::LearningAgent la(le, set, params);
+
+	la.init();
+	bool alt = false;
+	la.train(alt, false);
+
+	// It is quite unlikely that two different TPGs after 20 generations
+	// end up with the same number of vertices, roots, edges and calls to
+	// the RNG without being identical.
+	TPG::TPGGraph& tpg = la.getTPGGraph();
+	ASSERT_EQ(tpg.getNbVertices(), 30) << "Graph does not have the expected determinst characteristics.";
+	ASSERT_EQ(tpg.getNbRootVertices(), 24) << "Graph does not have the expected determinst characteristics.";
+	ASSERT_EQ(tpg.getEdges().size(), 101) << "Graph does not have the expected determinst characteristics.";
+	ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 12618987376045473466) << "Graph does not have the expected determinst characteristics.";
 }
 
 TEST_F(LearningAgentTest, KeepBestPolicy) {
@@ -514,6 +542,8 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism) {
 
 	// Check number of vertex in graphs
 	// Non-zero to avoid false positive.
+	// These checks guarantee determinism between sequential and parallel version on a given platform.
+	// They do not guarantee portability between compilers and OS
 	ASSERT_GT(la.getTPGGraph().getNbVertices(), 0) << "Number of vertex in the trained graph should not be 0.";
 	ASSERT_EQ(la.getTPGGraph().getNbVertices(), pla.getTPGGraph().getNbVertices()) << "LearningAgent and ParallelLearning agent result in different TPGGraphs.";
 }

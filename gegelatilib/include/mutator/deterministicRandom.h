@@ -5,6 +5,7 @@
 
 #define _NODISCARD [[nodiscard]]
 
+// For unsigned int 
 namespace Mutator {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -240,8 +241,8 @@ namespace Mutator {
 	public:
 		// _RNG_REQUIRE_INTTYPE(uniform_int_distribution, _Ty); // From visual Removed
 
-		using _Mybase     = uniform_int<_Ty>;
-		using _Mypbase    = typename _Mybase::param_type;
+		using _Mybase = uniform_int<_Ty>;
+		using _Mypbase = typename _Mybase::param_type;
 		using result_type = typename _Mybase::result_type;
 
 		struct param_type : public _Mypbase { // parameter package
@@ -276,4 +277,168 @@ namespace Mutator {
 	}
 #endif
 }
+#include <istream>
+// For Double
+namespace Mutator {
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+#define _NRAND(eng, resty) (std::generate_canonical<resty, static_cast<size_t>(-1)>(eng))
+
+	// CLASS TEMPLATE uniform_real
+	template <class _Ty = double>
+	class uniform_real { // uniform real distribution
+	public:
+		using result_type = _Ty;
+
+		struct param_type { // parameter package
+			using distribution_type = uniform_real;
+
+			explicit param_type(_Ty _Min0 = _Ty{ 0 }, _Ty _Max0 = _Ty{ 1 }) {
+				_Init(_Min0, _Max0);
+			}
+
+			_NODISCARD bool operator==(const param_type& _Right) const {
+				return _Min == _Right._Min && _Max == _Right._Max;
+			}
+
+			_NODISCARD bool operator!=(const param_type& _Right) const {
+				return !(*this == _Right);
+			}
+
+			_NODISCARD result_type a() const {
+				return _Min;
+			}
+
+			_NODISCARD result_type b() const {
+				return _Max;
+			}
+
+			void _Init(_Ty _Min0, _Ty _Max0) { // set internal state
+				// From Visual : removed
+				// _STL_ASSERT(_Min0 <= _Max0 && (0 <= _Min0 || _Max0 <= _Min0 + (std::numeric_limits<_Ty>::max)()),
+				//	"invalid min and max arguments for uniform_real");
+				_Min = _Min0;
+				_Max = _Max0;
+			}
+
+			result_type _Min;
+			result_type _Max;
+		};
+
+		explicit uniform_real(_Ty _Min0 = _Ty{ 0 }, _Ty _Max0 = _Ty{ 1 }) : _Par(_Min0, _Max0) {}
+
+		explicit uniform_real(const param_type& _Par0) : _Par(_Par0) {}
+
+		_NODISCARD result_type a() const {
+			return _Par.a();
+		}
+
+		_NODISCARD result_type b() const {
+			return _Par.b();
+		}
+
+		_NODISCARD param_type param() const {
+			return _Par;
+		}
+
+		void param(const param_type& _Par0) { // set parameter package
+			_Par = _Par0;
+		}
+
+		_NODISCARD result_type(min)() const {
+			return _Par._Min;
+		}
+
+		_NODISCARD result_type(max)() const {
+			return _Par._Max;
+		}
+
+		void reset() { // clear internal state
+		}
+
+		template <class _Engine>
+		_NODISCARD result_type operator()(_Engine& _Eng) const {
+			return _Eval(_Eng, _Par);
+		}
+
+		template <class _Engine>
+		_NODISCARD result_type operator()(_Engine& _Eng, const param_type& _Par0) const {
+			return _Eval(_Eng, _Par0);
+		}
+
+		template <class _Elem, class _Traits>
+		std::basic_istream<_Elem, _Traits>& _Read(std::basic_istream<_Elem, _Traits>& _Istr) { // read state from _Istr
+			_Ty _Min0;
+			_Ty _Max0;
+			_In(_Istr, _Min0);
+			_In(_Istr, _Max0);
+			_Par._Init(_Min0, _Max0);
+			return _Istr;
+		}
+
+		template <class _Elem, class _Traits>
+		std::basic_ostream<_Elem, _Traits>& _Write(std::basic_ostream<_Elem, _Traits>& _Ostr) const { // write state to _Ostr
+			_Out(_Ostr, _Par._Min);
+			_Out(_Ostr, _Par._Max);
+			return _Ostr;
+		}
+
+	private:
+		template <class _Engine>
+		result_type _Eval(_Engine& _Eng, const param_type& _Par0) const {
+			return _NRAND(_Eng, _Ty) * (_Par0._Max - _Par0._Min) + _Par0._Min;
+		}
+
+		param_type _Par;
+	};
+
+	template <class _Elem, class _Traits, class _Ty>
+	std::basic_istream<_Elem, _Traits>& operator>>(std::basic_istream<_Elem, _Traits>& _Istr,
+		uniform_real<_Ty>& _Dist) { // read state from _Istr
+		return _Dist._Read(_Istr);
+	}
+
+	template <class _Elem, class _Traits, class _Ty>
+	std::basic_ostream<_Elem, _Traits>& operator<<(std::basic_ostream<_Elem, _Traits>& _Ostr,
+		const uniform_real<_Ty>& _Dist) { // write state to _Ostr
+		return _Dist._Write(_Ostr);
+	}
+
+
+	// CLASS TEMPLATE uniform_real_distribution
+	template <class _Ty = double>
+	class uniform_real_distribution : public uniform_real<_Ty> { // uniform real distribution
+	public:
+		//_RNG_REQUIRE_REALTYPE(uniform_real_distribution, _Ty);
+
+		using _Mybase = uniform_real<_Ty>;
+		using _Mypbase = typename _Mybase::param_type;
+		using result_type = typename _Mybase::result_type;
+
+		struct param_type : public _Mypbase { // parameter package
+			using distribution_type = uniform_real_distribution;
+
+			explicit param_type(_Ty _Min0 = _Ty{ 0 }, _Ty _Max0 = _Ty{ 1 }) : _Mypbase(_Min0, _Max0) {}
+
+			param_type(const _Mypbase& _Right) : _Mypbase(_Right) {}
+		};
+
+		explicit uniform_real_distribution(_Ty _Min0 = _Ty{ 0 }, _Ty _Max0 = _Ty{ 1 }) : _Mybase(_Min0, _Max0) {}
+
+		explicit uniform_real_distribution(const param_type& _Par0) : _Mybase(_Par0) {}
+	};
+
+	template <class _Ty>
+	_NODISCARD bool operator==(const uniform_real_distribution<_Ty>& _Left, const uniform_real_distribution<_Ty>& _Right) {
+		return _Left.param() == _Right.param();
+	}
+
+	template <class _Ty>
+	_NODISCARD bool operator!=(const uniform_real_distribution<_Ty>& _Left, const uniform_real_distribution<_Ty>& _Right) {
+		return !(_Left == _Right);
+	}
+#endif
+}
+
 #endif 
+

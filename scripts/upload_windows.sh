@@ -11,16 +11,18 @@ cd neutral_builds
 ARCHIVE_NAME="gegelatilib-${VERSION_NUMBER}.$(git show -s --format="%ci" | cut -d' ' -f 1 | sed 's/-//g')$(git show -s --format="%ci" | cut -d' ' -f 2 | sed 's/://g').zip"
 
 # Uploads the built library onto transfer.sh
-PACKAGE_LOCATION="$(curl -m 600 --upload-file $ARCHIVE_NAME https://transfer.sh/$ARCHIVE_NAME)"
+PACKAGE_LOCATION=$(curl -F"file=@${ARCHIVE_NAME}" https://file.io)
 
 # Check upload
-if [ "$PACKAGE_LOCATION" = "" ]
+if [[ $PACKAGE_LOCATION =~ \"success\":true,.*\"link\":\"(.+)\",.* ]]
 then
+	LINK="${BASH_REMATCH[1]}"
+else
 	exit 255
 fi
 
 # Update url with short.cm
-curl --request POST --url https://api.short.cm/links/240039262 --header 'accept: application/json' --header 'authorization: nDpuKUpkjU6Zgpwc' --header 'content-type: application/json' --data '{"domain":"gegelati.shortcm.li","originalURL":"'$PACKAGE_LOCATION'","allowDuplicates":false}'
+curl --request POST --url https://api.short.cm/links/240039262 --header 'accept: application/json' --header 'authorization: nDpuKUpkjU6Zgpwc' --header 'content-type: application/json' --data '{"domain":"gegelati.shortcm.li","originalURL":"'$LINK'","allowDuplicates":false}'
 
 # Back to parent folder
 cd ..

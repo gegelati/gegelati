@@ -3,6 +3,7 @@
 
 #include <random>
 
+#include "mutator/rng.h"
 #include "data/primitiveTypeArray.h"
 #include "learn/learningEnvironment.h"
 
@@ -24,7 +25,7 @@ protected:
 	bool forbiddenMove;
 
 	/// Randomness control
-	std::mt19937_64 engine;
+	Mutator::RNG rng;
 
 public:
 

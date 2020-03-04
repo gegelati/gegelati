@@ -6,6 +6,7 @@
 #include <typeinfo>
 #include <regex>
 
+#include "data/hash.h"
 #include "dataHandler.h"
 
 #ifdef _MSC_VER
@@ -184,10 +185,10 @@ namespace Data {
 	inline size_t PrimitiveTypeArray<T>::updateHash() const
 	{
 		// reset
-		this->cachedHash = std::hash<size_t>()(this->id);
+		this->cachedHash = Data::Hash<size_t>()(this->id);
 
 		// hasher
-		std::hash<T> hasher;
+		Data::Hash<T> hasher;
 
 		for (T dataElement : this->data) {
 			// Rotate by 1 because otherwise, xor is comutative.
