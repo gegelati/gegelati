@@ -167,10 +167,10 @@ namespace DataHandlers {
 	inline size_t PrimitiveTypeArray<T>::updateHash() const
 	{
 		// reset
-		this->cachedHash = Data::hash<size_t>()(this->id);
+		this->cachedHash = Data::Hash<size_t>()(this->id);
 
 		// hasher
-		Data::hash<T> hasher;
+		Data::Hash<T> hasher;
 
 		for (PrimitiveType<T> dataElement : this->data) {
 			// Rotate by 1 because otherwise, xor is comutative.

@@ -5,11 +5,13 @@ _aaaa.mm.dd_
 
 ### New features
 * Possibility to import a TPGGraph and its programs with the File::TPGGraphDotImporter class.
+* New Data::Hash class providing a portable hash mechanism in replacement of std::hash.
 
 ### Changes
 * Renaming the Exporter namespace into File.
 
 ### Bug fix
+* Training and mutation process were not portable on multiple OSes and compilers because of the diverse implementations of std::hash.
 
 
 ## Release version 0.0.0

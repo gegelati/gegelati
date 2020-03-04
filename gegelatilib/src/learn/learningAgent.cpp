@@ -41,7 +41,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG:
 	// Evaluate nbIteration times
 	for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation; i++) {
 		// Compute a Hash
-		Data::hash<uint64_t> hasher;
+		Data::Hash<uint64_t> hasher;
 		uint64_t hash = hasher(generationNumber) ^ hasher(i);
 
 		// Reset the learning Environment

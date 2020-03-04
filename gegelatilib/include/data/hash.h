@@ -49,7 +49,7 @@ namespace Data {
 
 	// STRUCT TEMPLATE _Conditionally_enabled_hash
 	template<class _Kty>
-	struct hash;
+	struct Hash;
 
 	template<class _Kty, bool _Enabled>
 	struct _Conditionally_enabled_hash { // conditionally enabled hash base
@@ -59,14 +59,14 @@ namespace Data {
 		_NODISCARD size_t
 
 			operator()(const _Kty& _Keyval) const
-			noexcept(noexcept(hash<_Kty>::_Do_hash(_Keyval))) /* strengthened */ {
-			return hash<_Kty>::_Do_hash(_Keyval);
+			noexcept(noexcept(Hash<_Kty>::_Do_hash(_Keyval))) /* strengthened */ {
+			return Hash<_Kty>::_Do_hash(_Keyval);
 		}
 	};
 
 	// STRUCT TEMPLATE hash
 	template<class _Kty>
-	struct hash
+	struct Hash
 		: _Conditionally_enabled_hash<_Kty,
 		!std::is_const_v < _Kty> && !
 		std::is_volatile_v <_Kty> && (std::is_enum_v<_Kty>
@@ -78,7 +78,7 @@ namespace Data {
 	};
 
 	template<>
-	struct hash<float> {
+	struct Hash<float> {
 		using argument_type = float;
 		using result_type = size_t;
 		_NODISCARD size_t
@@ -89,7 +89,7 @@ namespace Data {
 	};
 
 	template<>
-	struct hash<double> {
+	struct Hash<double> {
 		using argument_type = double;
 		using result_type = size_t;
 		_NODISCARD size_t
@@ -100,7 +100,7 @@ namespace Data {
 	};
 
 	template<>
-	struct hash<long double> {
+	struct Hash<long double> {
 		using argument_type = long double;
 		using result_type = size_t;
 		_NODISCARD size_t
@@ -111,7 +111,7 @@ namespace Data {
 	};
 
 	template<>
-	struct hash<nullptr_t> {
+	struct Hash<nullptr_t> {
 		using argument_type = nullptr_t;
 		using result_type = size_t;
 		_NODISCARD size_t
