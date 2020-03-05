@@ -30,8 +30,55 @@ namespace Data {
 	* directly inspired by [this example](https://www.modernescpp.com/index.php/c-core-guidelines-type-erasure-with-templates)/
 	*/
 	class UntypedSharedPtr {
-
 	public:
+
+		/**
+		* \brief Internal structure of the type erasure pattern.
+		*/
+		struct Concept {
+			/// Default deleter made virtual to activate polyphormism.
+			virtual ~Concept() = default;
+			/// Polymorphic getType() function.
+			virtual const std::type_info& getType() const = 0;
+			/// Polymorphic getPtrType() function.
+			virtual const std::type_info& getPtrType() const = 0;
+		};
+
+		/**
+		* \brief Internal templated structure of the type erasure pattern.
+		*
+		* This part of the type erasure pattern actually contains the
+		* std::shared_ptr.
+		*
+		* \tparam T Template type taken from UntypedSharedPtr constructor.
+		*/
+		template< typename T>
+		struct Model : Concept {
+		public:
+			/// Constructor of the Model: initializes the internal std::shared_ptr.
+			template <typename Deleter>
+			Model(T* t, Deleter func) : sharedPtr(t, func) {}
+
+			/// Constructor for model for array
+			/// (whose type decay into pointers when passed as arguments.)
+			/// Default deleter automatically used
+			template<typename U, typename = typename std::enable_if<std::is_array<T>::value>::type>
+			Model(U* p) : sharedPtr(p, std::default_delete<T>()) {};
+
+			/// Polymorphic getType() function.
+			const std::type_info& getType() const override {
+				return typeid(T);
+			}
+
+			/// Polymorphic getPtrType() function.
+			const std::type_info& getPtrType() const override {
+				return typeid(sharedPtr.get());
+			}
+
+			/// std::shared_ptr of the UntypedSharedPtr
+			std::shared_ptr<T> sharedPtr;
+		};
+
 		/**
 		* \brief Deleted default constructor.
 		*/
@@ -85,6 +132,22 @@ namespace Data {
 		*/
 		template <typename T, class Deleter = std::default_delete<T>>
 		UntypedSharedPtr(T* obj, Deleter func = Deleter()) : sharedPtrContainer(std::make_shared<Model<T>>(obj, func)) {};
+
+		/**
+		* \brief Constructor from an existing Concept.
+		*
+		* This constructor is needed when the pointer type passed to the
+		* classical constructor decays automatically into something else. For
+		* example, any pointer to a C-style array allocated with 'new T[]'
+		* automatically decays to 'T*' when passed to a function. By
+		* constructing a Model<W> with the desired template type (eg.
+		* W = T[]), it is possible to force the 'getPtr()' method to return
+		* this 'T[]' type.
+		*
+		* \param[in] concept the instance of the Model<T> class for building
+		* the UntypedSharedPointer.
+		*/
+		UntypedSharedPtr(std::shared_ptr<Concept> concept) : sharedPtrContainer(concept) {};
 
 		/**
 		* \brief Accessor to the type of data stored in the UntypedSharedPtr.
@@ -226,47 +289,6 @@ namespace Data {
 		template <typename T>
 		static std::function<void(T*)> emptyDestructor() {
 			return [](T* ptr) {};
-		};
-
-		/**
-		* \brief Internal structure of the type erasure pattern.
-		*/
-		struct Concept {
-			/// Default deleter made virtual to activate polyphormism.
-			virtual ~Concept() = default;
-			/// Polymorphic getType() function.
-			virtual const std::type_info& getType() const = 0;
-			/// Polymorphic getPtrType() function.
-			virtual const std::type_info& getPtrType() const = 0;
-		};
-
-		/**
-		* \brief Internal templated structure of the type erasure pattern.
-		*
-		* This part of the type erasure pattern actually contains the
-		* std::shared_ptr.
-		*
-		* \tparam T Template type taken from UntypedSharedPtr constructor.
-		*/
-		template< typename T>
-		struct Model : Concept {
-		public:
-			/// Constructor of the Model: initializes the internal std::shared_ptr.
-			template <typename Deleter>
-			Model(T* t, Deleter func) : sharedPtr(t, func) {}
-
-			/// Polymorphic getType() function.
-			const std::type_info& getType() const override {
-				return typeid(T);
-			}
-
-			/// Polymorphic getPtrType() function.
-			const std::type_info& getPtrType() const override {
-				return typeid(sharedPtr.get());
-			}
-
-			/// std::shared_ptr of the UntypedSharedPtr
-			std::shared_ptr<T> sharedPtr;
 		};
 
 		/**
