@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <array>
+
 #include "data/untypedSharedPtr.h"
 #include "data/dataHandler.h"
 #include "instructions/addPrimitiveType.h"
@@ -118,6 +120,26 @@ TEST(InstructionsTest, LambdaInstructionPrimitiveType) {
 	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
 
 	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";
+}
+
+TEST(InstructionsTest, LambdaInstructionArray) {
+	std::array<double, 3> arrayA{ 1.1, 2.2, 3.3 };
+	std::array<double, 3> arrayB{ 6.5, 4.3, 2.1 };
+
+	std::function<double(const std::array<double, 3>&, const std::array<double, 3>&)> mac = [](const std::array<double, 3>& a, const std::array<double, 3>& b) {
+		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+	};
+
+	// Build the instruction
+	Instructions::LambdaInstruction<std::array<double, 3>>* instruction;
+	ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<std::array<double, 3> >(mac)));
+	ASSERT_NE(instruction, nullptr);
+
+	// Test execution
+	std::vector<Data::UntypedSharedPtr> arguments;
+	arguments.emplace_back(&arrayA, Data::UntypedSharedPtr::emptyDestructor<std::array<double, 3>>());
+	arguments.emplace_back(&arrayB, Data::UntypedSharedPtr::emptyDestructor<std::array<double, 3>>());
+	ASSERT_EQ(instruction->execute({}, arguments), 23.54) << "Result returned by the instruction is not as expected.";
 }
 
 //TEST(InstructionsTest, LambdaInstructionSupportedType) {

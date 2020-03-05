@@ -16,6 +16,24 @@ namespace std {
 }
 
 namespace Data {
+	/// Template class to assess whether T is an std::array.
+	template<class T>
+	struct is_std_array :std::false_type {};
+	/// Template class to assess whether T is an std::array.
+	template<class T, std::size_t N>
+	struct is_std_array<std::array<T, N>> :std::true_type {};
+	/// Template class to assess whether T is an std::array.
+	template<class T>
+	struct is_std_array<T const> :is_std_array<T> {};
+	/// Template class to assess whether T is an std::array.
+	template<class T>
+	struct is_std_array<T volatile> :is_std_array<T> {};
+	/// Template class to assess whether T is an std::array.
+	template<class T>
+	struct is_std_array<T volatile const> :is_std_array<T> {};
+}
+
+namespace Data {
 	/**
 	* \brief Base class for all sources of data to be accessed by a TPG Instruction executed within a Program.
 	*/
