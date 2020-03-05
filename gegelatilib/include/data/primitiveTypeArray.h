@@ -26,7 +26,7 @@ namespace Data {
 	*
 	* In addition to native data types T, this DataHandler can
 	* also provide the following composite data type:
-	* - TODO: T[n]: with n <= to the size of the PrimitiveTypeArray.
+	* - std::array<T,n>: with $n <=$ to the size of the PrimitiveTypeArray.
 	*/
 	template <class T> class PrimitiveTypeArray : public DataHandler {
 		static_assert(std::is_fundamental<T>::value, "Template class PrimitiveTypeArray<T> can only be used for primitive types.");
@@ -77,7 +77,13 @@ namespace Data {
 		virtual DataHandler* clone() const override;
 
 		// Inherited from DataHandler
-		size_t getAddressSpace(const std::type_info& type)  const override;
+		virtual size_t getAddressSpace(const std::type_info& type)  const override;
+
+		// Inherited from DataHandler
+		virtual bool canHandle(const std::type_info& type)  const override;
+
+		// Inherited from DataHandler
+		virtual size_t getLargestAddressSpace(void) const override;
 
 		/**
 		* \brief Sets all elements of the Array to 0 (or its equivalent for
@@ -108,9 +114,7 @@ namespace Data {
 		void setDataAt(const std::type_info& type, const size_t address, const T& value);
 	};
 
-	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size) : nbElements{ size }, data(size) {
-		this->providedTypes.push_back(typeid(T));
-	}
+	template <class T> PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size) : nbElements{ size }, data(size) {}
 
 	template<class T>
 	inline DataHandler* PrimitiveTypeArray<T>::clone() const
@@ -121,6 +125,10 @@ namespace Data {
 		return result;
 	}
 
+	template<class T> bool PrimitiveTypeArray<T>::canHandle(const std::type_info& type)  const {
+		return typeid(T) == type;
+	}
+
 	template<class T> size_t PrimitiveTypeArray<T>::getAddressSpace(const std::type_info& type) const
 	{
 		if (type == typeid(T)) {
@@ -129,6 +137,11 @@ namespace Data {
 
 		// Default case
 		return 0;
+	}
+
+	// Inherited from DataHandler
+	template<class T> size_t PrimitiveTypeArray<T>::getLargestAddressSpace() const {
+		return this->data.size();
 	}
 
 	template<class T> void PrimitiveTypeArray<T>::resetData()

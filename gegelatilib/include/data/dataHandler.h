@@ -56,23 +56,6 @@ namespace Data {
 		const size_t id;
 
 		/**
-		* \brief List of the types provided by the DataHandler..
-		*
-		* Because std::unordered_set was too complex to use (because it does
-		* not support std::reference_wrapper easily), std::vector is used instead.
-		* Adding the same type several type to the list of providedType will lead
-		* to undefined behavior.
-		*/
-		std::vector<std::reference_wrapper<const std::type_info>> providedTypes;
-
-		/**
-		* \brief Retrieve the set of types provided by the DataHandler.
-		*
-		* \return a const reference to the data type set provided by the DataHandler.
-		*/
-		const std::vector<std::reference_wrapper<const std::type_info>>& getHandledTypes() const;
-
-		/**
 		* \brief Cached value returned by the getHash() function.
 		*
 		* The value of the hash is updated whenever the updateHash function is called.
@@ -153,7 +136,7 @@ namespace Data {
 		* \param[in] type the std::type_info whose availability in the DataHandler is being tested.
 		* \return true if the DataHandler can handle data for the given data type, and false otherwise.
 		*/
-		virtual bool canHandle(const std::type_info& type) const;
+		virtual bool canHandle(const std::type_info& type) const = 0;
 
 
 		/**
@@ -174,7 +157,7 @@ namespace Data {
 		* to compute the size of the largest addressSpace required by the dataHandler.
 		* \return the size of the largest addressSpace.
 		*/
-		size_t getLargestAddressSpace() const;
+		virtual size_t getLargestAddressSpace() const = 0;
 
 		/**
 		* \brief Generic method for DataHandler to reset their data.
