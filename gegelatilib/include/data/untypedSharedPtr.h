@@ -153,10 +153,11 @@ namespace Data {
 		* \brief Accessor to the type of data stored in the UntypedSharedPtr.
 		*
 		* \return a const ref to the std::type_info of the template type T of
-		* UntypedSharedPtr at construction. Please note that this may differ
-		* from the actual type of the data, if this data has a type derived
-		* from the base pointer type T. Also note that any const qualifier will be
-		* lost.
+		* UntypedSharedPtr at construction, or the Model template type for the
+		* constructor based on std::shared_ptr<Concept>. Please note that this
+		* type may differ from the actual type of the data, if this data has
+		* a type derived from the base pointer type T. Also note that any
+		* const qualifier will be lost.
 		*
 		* \code{.cpp}
 		* class Base {};
@@ -249,30 +250,59 @@ namespace Data {
 		*/
 		template<typename T>
 		std::shared_ptr<T> getSharedPointer() const {
-			const auto& templateType = typeid(T*);
-			const auto& templateTypeNoConst = typeid(std::remove_const_t<T>*);
-			const auto& ownType = this->getPtrType();
+			const auto& templateType = typeid(T);
+			const auto& templateTypeNoConst = typeid(std::remove_const_t<T>);
+			const auto& ownType = this->getType();
+			const auto& templatePtrType = typeid(T*);
+			const auto& templatePtrTypeNoConst = typeid(std::remove_const_t<T>*);
+			const auto& ownPtrType = this->getPtrType();
 
 			// If pointer types are identical (which includes const qualifier), go for it.
-			if (ownType == templateType) {
+			// Unless non-pointers types are different, which may be the case for arrays
+			if (ownPtrType == templatePtrType && templateType == ownType) {
 				std::shared_ptr< const Model<T>> typedPtr = std::dynamic_pointer_cast<const Model<T>> (this->sharedPtrContainer);
-				return typedPtr->sharedPtr;
+				if (typedPtr != NULL) {
+					return typedPtr->sharedPtr;
+				}
 			}
-			// If pointer types are identical when loosing const qualifier of function template type, go for it.
-			else if (ownType == templateTypeNoConst) {
-				std::shared_ptr< const Model<std::remove_const_t<T>>> typedPtr = std::dynamic_pointer_cast<const Model<std::remove_const_t<T>>> (this->sharedPtrContainer);
-				return typedPtr->sharedPtr;
-			}
-			else {
-				// Type mismatch
-				std::string msg("Cannot convert ");
-				msg.append(ownType.name());
-				msg.append(" into ");
-				msg.append(templateType.name());
-				msg.append(".");
 
-				throw std::runtime_error(msg);
+			// If pointer types are identical when loosing const qualifier of function template type, go for it.
+			// Unless non-pointers types are different, which may be the case for arrays
+			if (ownPtrType == templatePtrTypeNoConst && templateType == ownType) {
+				std::shared_ptr< const Model<std::remove_const_t<T>>> typedPtr = std::dynamic_pointer_cast<const Model<std::remove_const_t<T>>> (this->sharedPtrContainer);
+				if (typedPtr != NULL) {
+					return typedPtr->sharedPtr;
+				}
 			}
+
+			// If template type and owntype are the same, go for it.
+			// (it is not the first tested case because constness is lost in template type and own type.
+			if (templateType == ownType) {
+				std::shared_ptr< const Model<T>> typedPtr = std::dynamic_pointer_cast<const Model<T>> (this->sharedPtrContainer);
+				if (typedPtr != NULL) {
+					return typedPtr->sharedPtr;
+				}
+			}
+
+			// If template type and owntype are identical when loosing const qualifier of function template type, go for it.
+			// (it is not the first tested case because constness is lost in template type and own type.
+			if (templateTypeNoConst == ownType) {
+				std::shared_ptr< const Model<std::remove_const_t<T>>> typedPtr = std::dynamic_pointer_cast<const Model<std::remove_const_t<T>>> (this->sharedPtrContainer);
+				if (typedPtr != NULL) {
+					return typedPtr->sharedPtr;
+				}
+			}
+
+			// Type mismatch
+			std::string msg("Cannot convert ");
+			msg.append(ownPtrType.name());
+			msg.append(" into ");
+			msg.append(templatePtrType.name());
+			msg.append(".");
+
+			throw std::runtime_error(msg);
+
+			return NULL;
 		}
 
 		/**

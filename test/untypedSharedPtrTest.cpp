@@ -20,7 +20,7 @@ public:
 };
 
 
-TEST_F(UntypedSharedPtrTest, ConstructorDestructor) {
+TEST_F(UntypedSharedPtrTest, ConstructorDestructorClassical) {
 	Data::UntypedSharedPtr* usp, * copy;
 
 	// With default destructor
@@ -41,6 +41,20 @@ TEST_F(UntypedSharedPtrTest, ConstructorDestructor) {
 	ASSERT_NE(copy, nullptr) << "Copy construction of UntypedSharedPtr failed.";
 	ASSERT_NO_THROW(delete usp) << "Deletion of copied UntypedSharedPtr failed.";
 	ASSERT_NO_THROW(delete copy) << "Deletion of copy UntypedSharedPtr failed.";
+}
+
+TEST_F(UntypedSharedPtrTest, ConstructorDestructorFromModel) {
+	Data::UntypedSharedPtr* usp;
+
+	// Construct a shared_ptr to a Concept
+	std::shared_ptr<Data::UntypedSharedPtr::Concept> spConcept;;
+	ASSERT_NO_THROW(spConcept = std::make_shared<Data::UntypedSharedPtr::Model<int[]>>(new int[3])) << "Building a shared_pointer to a Model<cstyle array> failed.";
+	ASSERT_NE(spConcept, nullptr) << "Building a shared_pointer to a Model<cstyle array> failed.";
+
+	// Construct the UntypedSharedPtr
+	ASSERT_NO_THROW(usp = new Data::UntypedSharedPtr(spConcept)) << "Building an UntypedSharedPtr from an existing shared pointer to a Concept failed.";
+	ASSERT_NE(usp, nullptr) << "Building an UntypedSharedPtr from an existing shared pointer to a Concept failed.";
+	ASSERT_NO_THROW(delete usp) << "Deleting the UntypedSharedPtr built from a concept failed.";
 }
 
 TEST_F(UntypedSharedPtrTest, GetType) {
@@ -70,6 +84,20 @@ TEST_F(UntypedSharedPtrTest, GetType) {
 	Data::UntypedSharedPtr usp3{ cbasePtr };
 	ASSERT_EQ(usp3.getType(), typeid(Base)) << "getType() method does not return the expected type_info.";
 	ASSERT_EQ(usp3.getPtrType(), typeid(const Base*)) << "getPtrType() method does not return the expected type_info.";
+}
+
+
+TEST_F(UntypedSharedPtrTest, getTypesOnBuiltFromConcept) {
+	// getType and getPtrType on UntypedSharedPtr built from a shared_ptr<Concept>
+	Data::UntypedSharedPtr usp{ std::make_shared<Data::UntypedSharedPtr::Model<double[]>>(new double[5]) };
+
+	ASSERT_EQ(usp.getType(), typeid(double[]));
+	ASSERT_EQ(usp.getPtrType(), typeid(double*));
+
+	// For comparison only, the type returned with the classical constructor
+	Data::UntypedSharedPtr usp2{ new double[5] };
+	ASSERT_EQ(usp2.getType(), typeid(double)) << "getType() for an UntypedSharedPointer built from a Model<double[]> should return double[]";
+	ASSERT_EQ(usp2.getPtrType(), typeid(double*)) << "getPtrType() for an UntypedSharedPointer built from a Model<double[]> should return double*";
 }
 
 TEST_F(UntypedSharedPtrTest, getSharedPtr) {
@@ -120,5 +148,30 @@ TEST_F(UntypedSharedPtrTest, getSharedPtr) {
 		// Conversion of previously retrieved shard pointer works though
 		ASSERT_NO_THROW(derivedSharedPtr = std::dynamic_pointer_cast<Derived>(baseSharedPtr)) << "Conversion of previously retrieved Base shared pointer to an object of actual type Derived can be done.";
 		ASSERT_EQ(baseSharedPtr.use_count(), 3) << "Use count of retrieved shared pointer is incorrect.";
+	}
+}
+
+TEST_F(UntypedSharedPtrTest, getSharedPtrOnBuiltFromConcept) {
+
+	{ // non-const tests
+		auto msp = std::make_shared<Data::UntypedSharedPtr::Model<double[]>>(new double[5]);
+		Data::UntypedSharedPtr usp{ msp };
+		std::shared_ptr<double[]> dataPtr;
+		std::shared_ptr<const double[]> cdataPtr;
+		ASSERT_NO_THROW(dataPtr = usp.getSharedPointer<double[]>()) << "Getting the shared pointer to the original template parameter of the model failed.";
+		ASSERT_EQ(dataPtr.use_count(), 2) << "Retrieved shared_ptr use count is incorrect.";
+		ASSERT_NO_THROW(cdataPtr = usp.getSharedPointer<const double[]>()) << "Getting the const shared pointer to the original template parameter of the model failed.";
+		ASSERT_EQ(cdataPtr.use_count(), 3) << "Retrieved shared_ptr use count is incorrect.";
+	}
+
+	// const tests
+	{
+		auto cmsp = std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(new double[5]);
+		Data::UntypedSharedPtr cusp{ cmsp };
+		std::shared_ptr<double[]> dataPtr;
+		std::shared_ptr<const double[]> cdataPtr;
+		ASSERT_NO_THROW(cdataPtr = cusp.getSharedPointer<const double[]>()) << "Getting the shared pointer to the original template parameter of the model failed.";
+		ASSERT_EQ(cdataPtr.use_count(), 2) << "Retrieved shared_ptr use count is incorrect.";
+		ASSERT_THROW(dataPtr = cusp.getSharedPointer<double[]>(), std::runtime_error) << "Getting a non-const pointer to orignally const data should fail.";
 	}
 }
