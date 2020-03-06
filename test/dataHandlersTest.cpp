@@ -100,6 +100,28 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtArray) {
 	delete d;
 }
 
+TEST(DataHandlersTest, PrimitiveDataArrayGetAddressesAccessed) {
+	Data::PrimitiveTypeArray<float>d(100);
+
+	std::vector<size_t> accessedAddresses;
+	ASSERT_NO_THROW(accessedAddresses = d.getAddressesAccessed(typeid(float), 25)) << "No exception should be thrown with a valid type at a valid address.";
+	ASSERT_EQ(accessedAddresses.size(), 1) << "Only one address should be accessed with native type at a valid address.";
+	ASSERT_EQ(accessedAddresses.at(0), 25) << "Address accessed does not correspond to the requested one.";
+
+	ASSERT_NO_THROW(accessedAddresses = d.getAddressesAccessed(typeid(float[3]), 50)) << "No exception should be thrown with a valid type at a valid address.";
+	ASSERT_EQ(accessedAddresses.size(), 3) << "Only one address should be accessed with native type at a valid address.";
+	for (int i = 0; i < 3; i++) {
+		ASSERT_EQ(accessedAddresses.at(i), 50 + i) << "Address accessed does not correspond to the requested one.";
+	}
+
+	ASSERT_NO_THROW(accessedAddresses = d.getAddressesAccessed(typeid(double), 75)) << "No exception should be thrown with an invalid type at a valid address.";
+	ASSERT_EQ(accessedAddresses.size(), 0) << "No address should be accessed with and invalid type at a valid address.";
+
+
+	ASSERT_NO_THROW(accessedAddresses = d.getAddressesAccessed(typeid(float[25]), 90)) << "No exception should be thrown with a valid type at an invalid address.";
+	ASSERT_EQ(accessedAddresses.size(), 0) << "No address should be accessed with and valid type at an invalid address.";
+}
+
 TEST(DataHandlersTest, PrimitiveDataArraySetDataAt) {
 	const size_t size{ 8 };
 	const size_t address{ 3 };

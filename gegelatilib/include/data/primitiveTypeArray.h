@@ -94,6 +94,9 @@ namespace Data {
 		/// Inherited from DataHandler
 		virtual UntypedSharedPtr getDataAt(const std::type_info& type, const size_t address) const override;
 
+		/// Inherited from DataHandler
+		virtual std::vector<size_t> getAddressesAccessed(const std::type_info& type, const size_t address) const override;
+
 		/**
 		* \brief Set the data at the given address to the given value.
 		*
@@ -217,6 +220,28 @@ namespace Data {
 		UntypedSharedPtr result{ std::make_shared<UntypedSharedPtr::Model<const T[]>>(array) };
 		return result;
 
+	}
+
+	template<class T>
+	std::vector<size_t> PrimitiveTypeArray<T>::getAddressesAccessed(const std::type_info& type, const size_t address) const {
+		// Initialize the result
+		std::vector<size_t> result;
+
+		// If the accessed address is valid fill the result. 
+		const size_t space = this->getAddressSpace(type);
+		if (space > address) {
+			// For the native type.
+			if (type == typeid(T)) {
+				result.push_back(address);
+			}
+			else {
+				// Else, the type is the array type.
+				for (int i = 0; i < (this->nbElements - space + 1); i++) {
+					result.push_back(address + i);
+				}
+			}
+		}
+		return result;
 	}
 
 	template<class T> void PrimitiveTypeArray<T>::setDataAt(

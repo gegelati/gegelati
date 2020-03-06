@@ -16,24 +16,6 @@ namespace std {
 }
 
 namespace Data {
-	/// Template class to assess whether T is an std::array.
-	template<class T>
-	struct is_std_array :std::false_type {};
-	/// Template class to assess whether T is an std::array.
-	template<class T, std::size_t N>
-	struct is_std_array<std::array<T, N>> :std::true_type {};
-	/// Template class to assess whether T is an std::array.
-	template<class T>
-	struct is_std_array<T const> :is_std_array<T> {};
-	/// Template class to assess whether T is an std::array.
-	template<class T>
-	struct is_std_array<T volatile> :is_std_array<T> {};
-	/// Template class to assess whether T is an std::array.
-	template<class T>
-	struct is_std_array<T volatile const> :is_std_array<T> {};
-}
-
-namespace Data {
 	/**
 	* \brief Base class for all sources of data to be accessed by a TPG Instruction executed within a Program.
 	*/
@@ -194,6 +176,29 @@ namespace Data {
 		* \return a shared pointer to the requested const data.
 		*/
 		virtual UntypedSharedPtr getDataAt(const std::type_info& type, const size_t address) const = 0;
+
+		/**
+		* \brief Get the set of addresses actually used when getting the given
+		* type of data, at the given address.
+		*
+		*  When accessing a DataHandler with a type differing from the native
+		* storage type of the DataHandler, like an array for example, the
+		* DataHandler may need to use several of its data element to create
+		* and return the requested type. Keeping track of what addresses have
+		* been accessed and used may be usefull to better explain what part of
+		* the data was used in a learning process, or to identify introns when
+		* the DataHandler in question are the registers of the execution
+		* engine. This method returns the list of addresses that are used when
+		* requesting a given type of data, at a given address.
+		*
+		* \param[in] type the std::type_info of data whose access pattern is
+		* analyzed.
+		* \param[in] address the location of the data to retrieve.
+		* \return a std::vector containing the addresses of data accessed. In
+		* case the given type of data is invalid, or the address, an empty
+		* vector is returned.
+		*/
+		virtual std::vector<size_t> getAddressesAccessed(const std::type_info& type, const size_t address) const = 0;
 	};
 }
 
