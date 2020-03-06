@@ -62,7 +62,7 @@ namespace Data {
 			/// Constructor for model for array
 			/// (whose type decay into pointers when passed as arguments.)
 			/// Default deleter automatically used
-			template<typename U, typename = typename std::enable_if<std::is_array<T>::value>::type>
+			template<typename U, typename _ = typename std::enable_if<std::is_array<T>::value, U>::type>
 			Model(U* p) : sharedPtr(p, std::default_delete<T>()) {};
 
 			/// Polymorphic getType() function.
