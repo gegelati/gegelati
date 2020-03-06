@@ -122,23 +122,25 @@ TEST(InstructionsTest, LambdaInstructionPrimitiveType) {
 	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";
 }
 
+#define arrayA  1.1, 2.2, 3.3
+#define arrayB  6.5, 4.3, 2.1
 TEST(InstructionsTest, LambdaInstructionArray) {
-	std::array<double, 3> arrayA{ 1.1, 2.2, 3.3 };
-	std::array<double, 3> arrayB{ 6.5, 4.3, 2.1 };
+	double arrA[3]{ arrayA };
+	double arrB[3]{ arrayB };
 
-	std::function<double(const std::array<double, 3>&, const std::array<double, 3>&)> mac = [](const std::array<double, 3>& a, const std::array<double, 3>& b) {
+	std::function<double(const double[3], const double[3])> mac = [](const double a[3], const double b[3]) {
 		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 	};
 
 	// Build the instruction
-	Instructions::LambdaInstruction<std::array<double, 3>>* instruction;
-	ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<std::array<double, 3> >(mac)));
+	Instructions::LambdaInstruction<double[3]>* instruction;
+	ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<double[3] >(mac)));
 	ASSERT_NE(instruction, nullptr);
 
 	// Test execution
 	std::vector<Data::UntypedSharedPtr> arguments;
-	arguments.emplace_back(&arrayA, Data::UntypedSharedPtr::emptyDestructor<std::array<double, 3>>());
-	arguments.emplace_back(&arrayB, Data::UntypedSharedPtr::emptyDestructor<std::array<double, 3>>());
+	arguments.emplace_back(std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(new double[3]{ arrayA }));
+	arguments.emplace_back(std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(new double[3]{ arrayB }));
 	ASSERT_EQ(instruction->execute({}, arguments), 23.54) << "Result returned by the instruction is not as expected.";
 }
 

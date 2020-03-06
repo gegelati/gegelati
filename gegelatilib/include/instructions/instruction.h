@@ -41,7 +41,6 @@ namespace Instructions {
 		*/
 		unsigned int getNbOperands() const;
 
-
 		/**
 		* \brief Get the number of parameters required to execute the Instruction.
 		*
@@ -54,14 +53,14 @@ namespace Instructions {
 		*
 		* \param[in] arguments a const list of shared pointers to any type of object. (not doable at compile time)
 		*/
-		bool checkOperandTypes(const std::vector<Data::UntypedSharedPtr>& arguments) const;
+		virtual bool checkOperandTypes(const std::vector<Data::UntypedSharedPtr>& arguments) const;
 
 		/**
 		* \brief Check if a given vector contains the right number of parameters for the Instruction.
 		*
 		* \param[in] params a const list of reference_wrapper to Parameters.
 		*/
-		bool checkParameters(const std::vector<std::reference_wrapper<const Parameter>>& params) const;
+		virtual bool checkParameters(const std::vector<std::reference_wrapper<const Parameter>>& params) const;
 
 		/**
 		* \brief Execute the Instruction for the given parameters and arguments.
