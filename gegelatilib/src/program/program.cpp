@@ -2,6 +2,10 @@
 #include <new>
 #include <algorithm>
 #include <set>
+#include <typeinfo>
+
+
+#include "data/primitiveTypeArray.h"
 
 #include "parameter.h"
 #include "program/program.h"
@@ -72,6 +76,8 @@ bool Program::Program::isIntron(uint64_t index) const
 
 uint64_t Program::Program::identifyIntrons()
 {
+	// Create fake registers to identify accessed addresses.
+	Data::PrimitiveTypeArray<double> registers(this->environment.getNbRegisters());
 	// Number of introns within the Program.
 	uint64_t nbIntrons = 0;
 	// Set of useful register
@@ -94,15 +100,20 @@ uint64_t Program::Program::identifyIntrons()
 			usefulRegisters.erase(*destinationRegister);
 
 			// Add register operands to the list of useful registers
-			size_t nbOperands = this->environment.getInstructionSet().getInstruction(currentLine->getInstructionIndex()).getNbOperands();
+			const Instructions::Instruction& instruction = this->environment.getInstructionSet().getInstruction(currentLine->getInstructionIndex());
+			size_t nbOperands = instruction.getNbOperands();
 			for (auto idxOperand = 0; idxOperand < nbOperands; idxOperand++) {
 				// Is the operand a register (i.e. its index is 0)
 				if (currentLine->getOperand(idxOperand).first == 0) {
-					// The operand is a register, add this register to
+					// The operand is a register, add the accessed register to
 					// the list of useful registers.
+					const std::type_info& operandType = instruction.getOperandTypes().at(idxOperand);
 					uint64_t location = currentLine->getOperand(idxOperand).second;
-					uint64_t registerIdx = location % this->environment.getNbRegisters();
-					usefulRegisters.insert(registerIdx);
+					uint64_t registerIdx = location % registers.getAddressSpace(operandType);
+					std::vector<size_t> accessedAddresses = registers.getAddressesAccessed(operandType, registerIdx);
+					for (size_t accessedAddress : accessedAddresses) {
+						usefulRegisters.insert(accessedAddress);
+					}
 				}
 			}
 		}

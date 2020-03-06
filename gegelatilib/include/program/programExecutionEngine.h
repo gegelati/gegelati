@@ -20,7 +20,10 @@ namespace Program {
 		ProgramExecutionEngine() = delete;
 
 		/// Registers used for the Program execution.
-		Data::PrimitiveTypeArray<double> registers;
+		Data::PrimitiveTypeArray<double> registers; // If the type of registers attribute is changed one day
+													// make sure to update the Program::identifyIntrons() method
+													// as it create its own Data::PrimitiveTypeArray<double> to keep
+													// track of accessed addresses.
 
 		/// Data sources used in the Program.
 		std::vector < std::reference_wrapper<const Data::DataHandler >> dataSources;

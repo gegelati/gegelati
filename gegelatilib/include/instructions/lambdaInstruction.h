@@ -2,6 +2,7 @@
 #define LAMBDA_INSTRUCTION_H
 
 #include <functional>
+#include <typeinfo>
 
 #include "data/untypedSharedPtr.h"
 #include "instructions/instruction.h"
@@ -108,10 +109,10 @@ namespace Instructions {
 
 			for (int i = 0; i < arguments.size(); i++) {
 				// Argument Type
-				const type_info& argType = arguments.at(i).getType();
+				const std::type_info& argType = arguments.at(i).getType();
 				// Expected type.
 				// When requesting a c-style array "T[n]", the expected type is "const T[0]"
-				const type_info& ownType = typeid(const std::remove_all_extents_t<T>[0]);
+				const std::type_info& ownType = typeid(const std::remove_all_extents_t<T>[0]);
 				if (argType != ownType) {
 					return false;
 				}
