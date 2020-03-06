@@ -26,7 +26,7 @@ namespace Data {
 	*
 	* In addition to native data types T, this DataHandler can
 	* also provide the following composite data type:
-	* - std::array<T,n>: with $n <=$ to the size of the PrimitiveTypeArray.
+	* - T[n]: with $n <=$ to the size of the PrimitiveTypeArray.
 	*/
 	template <class T> class PrimitiveTypeArray : public DataHandler {
 		static_assert(std::is_fundamental<T>::value, "Template class PrimitiveTypeArray<T> can only be used for primitive types.");
@@ -126,7 +126,12 @@ namespace Data {
 	}
 
 	template<class T> bool PrimitiveTypeArray<T>::canHandle(const std::type_info& type)  const {
-		return typeid(T) == type;
+		if (typeid(T) == type) {
+			return true;
+		}
+
+		// Use the code in getAddressSpace to check if the type is supported.
+		return (this->getAddressSpace(type) > 0);
 	}
 
 	template<class T> size_t PrimitiveTypeArray<T>::getAddressSpace(const std::type_info& type) const
@@ -135,13 +140,27 @@ namespace Data {
 			return this->nbElements;
 		}
 
+		// If the type is an array of the primitive type
+		// with a size inferior to the container.
+		std::string typeName = DEMANGLE_TYPEID_NAME(type.name());
+		std::string regex{ DEMANGLE_TYPEID_NAME(typeid(T).name()) };
+		regex.append("\\s*\\[([0-9]+)\\]");
+		std::regex arrayType(regex);
+		std::cmatch cm;
+		if (std::regex_match(typeName.c_str(), cm, arrayType)) {
+			int size = std::atoi(cm[1].str().c_str());
+			if (size <= this->nbElements) {
+				return this->nbElements - size + 1;
+			}
+		}
 		// Default case
 		return 0;
 	}
 
 	// Inherited from DataHandler
 	template<class T> size_t PrimitiveTypeArray<T>::getLargestAddressSpace() const {
-		return this->data.size();
+		// Currently, largest addres space is for the template Type T.
+		return this->nbElements;
 	}
 
 	template<class T> void PrimitiveTypeArray<T>::resetData()
@@ -194,6 +213,7 @@ namespace Data {
 		// Invalidate the cached hash.
 		this->invalidCachedHash = true;
 	}
+
 	template<class T>
 	inline size_t PrimitiveTypeArray<T>::updateHash() const
 	{

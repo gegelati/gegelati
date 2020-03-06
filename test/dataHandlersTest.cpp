@@ -17,7 +17,7 @@ TEST(DataHandlersTest, ID) {
 	ASSERT_NE(d0.getId(), d1.getId()) << "Id of two DataHandlers created one after the other should not be equal.";
 }
 
-TEST(DataHandlersTest, PrimitiveDataArrayCanProvide) {
+TEST(DataHandlersTest, PrimitiveDataArrayCanProvideTemplateType) {
 	Data::DataHandler* d = new Data::PrimitiveTypeArray<double>(4);
 
 	ASSERT_TRUE(d->canHandle(typeid(double))) << "PrimitiveTypeArray<double>() wrongfully say it can not provide double data.";
@@ -26,10 +26,27 @@ TEST(DataHandlersTest, PrimitiveDataArrayCanProvide) {
 	delete d;
 }
 
-TEST(DataHandlersTest, PrimitiveDataArrayAddressSpace) {
+TEST(DataHandlersTest, PrimitiveDataArrayAddressSpaceTemplateType) {
 	Data::DataHandler* d = new Data::PrimitiveTypeArray<long>(64); // Array of 64 long
 	ASSERT_EQ(d->getAddressSpace(typeid(long)), 64) << "Address space size for type long in PrimitiveTypeArray<long>(64) is not 64";
 	ASSERT_EQ(d->getAddressSpace(typeid(int)), 0) << "Address space size for type int in PrimitiveTypeArray<long>(64) is not 0";
+
+	delete d;
+}
+
+TEST(DataHandlersTest, PrimitiveDataArrayCanProvideArray) {
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<double>(4);
+
+	ASSERT_TRUE(d->canHandle(typeid(double[2]))) << "PrimitiveTypeArray<double>(4) wrongfully say it can not provide std::array<double, 2> data.";
+	ASSERT_FALSE(d->canHandle(typeid(double[5]))) << "PrimitiveTypeArray<double>(4) wrongfully say it can provide std::array<double, 5> data.";
+	ASSERT_FALSE(d->canHandle(typeid(int[3]))) << "PrimitiveTypeArray<double>(4) wrongfully say it can provide std::array<int, 3> data.";
+	delete d;
+}
+
+TEST(DataHandlersTest, PrimitiveDataArrayAddressSpaceArray) {
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<long>(64); // Array of 64 long
+	ASSERT_EQ(d->getAddressSpace(typeid(long[50])), 15) << "Address space size for type std::array<long, 50> in PrimitiveTypeArray<long>(64) is not 15";
+	ASSERT_EQ(d->getAddressSpace(typeid(double[50])), 0) << "Address space size for type std::array<double, 50> in PrimitiveTypeArray<long>(64) is not 0";
 
 	delete d;
 }
