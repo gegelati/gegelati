@@ -78,11 +78,12 @@ namespace Instructions {
 	template <class T>
 	class LambdaInstruction < T, typename std::enable_if <std::is_array<T>::value>::type> : public Instruction
 	{
+	    using U = std::remove_all_extents_t<T>;
 	protected:
 		/**
 		* \brief Function executed for this Instruction.
 		*/
-		const std::function<double(const T, const T)> func;
+		const std::function<double(const U*, const U*)> func;
 
 	public:
 		/**
@@ -96,7 +97,7 @@ namespace Instructions {
 		* \param[in] function the c++ std::function that will be executed for
 		* this Instruction.
 		*/
-		LambdaInstruction(std::function<double(const T, const T)> function) : func{ function } {
+		LambdaInstruction(std::function<double(const U*, const U*)> function) : func{ function } {
 			this->operandTypes.push_back(typeid(T));
 			this->operandTypes.push_back(typeid(T));
 		};
@@ -112,7 +113,7 @@ namespace Instructions {
 				const std::type_info& argType = arguments.at(i).getType();
 				// Expected type.
 				// When requesting a c-style array "T[n]", the expected type is "const T[0]"
-				const std::type_info& ownType = typeid(const std::remove_all_extents_t<T>[0]);
+				const std::type_info& ownType = typeid(const std::remove_all_extents_t<T>[]);
 				if (argType != ownType) {
 					return false;
 				}
@@ -129,10 +130,9 @@ namespace Instructions {
 				return 0.0;
 			}
 
-			using U = std::remove_all_extents_t<T>[];
-			std::shared_ptr<const U> arg1 = (args.at(0)).getSharedPointer<const U>();
-			std::shared_ptr<const U> arg2 = (args.at(1)).getSharedPointer<const U>();
-			double result = this->func(arg1.get(), arg2.get());
+			std::shared_ptr<const U[]> arg1 = (args.at(0)).getSharedPointer<const U[]>();
+			std::shared_ptr<const U[]> arg2 = (args.at(1)).getSharedPointer<const U[]>();
+			double result = this->func(arg1.get(),  arg2.get());
 			return result;
 		};
 	};
