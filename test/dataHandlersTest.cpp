@@ -58,7 +58,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayLargestAddressSpace) {
 	delete d;
 }
 
-TEST(DataHandlersTest, PrimitiveDataArrayGetDataAt) {
+TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtNativeType) {
 	const size_t size{ 32 };
 	Data::DataHandler* d = new Data::PrimitiveTypeArray<float>(size);
 
@@ -70,6 +70,32 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAt) {
 
 	ASSERT_THROW(d->getDataAt(typeid(float), size), std::out_of_range) << "Address exceeding the addressSpace should cause an exception.";
 	ASSERT_THROW(d->getDataAt(typeid(double), 0), std::invalid_argument) << "Requesting a non-handled type, even at a valid location, should cause an exception.";
+
+	delete d;
+}
+
+TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtArray) {
+	const size_t size{ 8 };
+	const size_t sizeArray = 3;
+	Data::PrimitiveTypeArray<int>* d = new Data::PrimitiveTypeArray<int>(size);
+
+	// Fill the array
+	for (auto idx = 0; idx < size; idx++) {
+		d->setDataAt(typeid(int), idx, idx);
+	}
+
+	// Get data as arrays
+	for (int i = 0; i < size - sizeArray + 1; i++) {
+		std::shared_ptr<const int[]> sptr = d->getDataAt(typeid(int[sizeArray]), i).getSharedPointer<const int[]>();
+		const int* a = (sptr.get());
+		ASSERT_NE(a, nullptr) << "Retrieved data is a null_ptr";
+		for (int idx = 0; idx < sizeArray; idx++) {
+			ASSERT_EQ(a[idx], i + idx) << "Value given in the array do not correspond to the one stored in the array.";
+		}
+	}
+
+	ASSERT_THROW(d->getDataAt(typeid(int[sizeArray]), size - 1), std::out_of_range) << "Address exceeding the addressSpace should cause an exception.";
+	ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0), std::invalid_argument) << "Requesting a non-handled type, even at a valid location, should cause /an /exception.";
 
 	delete d;
 }

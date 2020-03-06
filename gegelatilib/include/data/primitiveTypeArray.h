@@ -197,8 +197,26 @@ namespace Data {
 		// Throw exception in case of invalid arguments.
 		checkAddressAndType(type, address);
 
-		UntypedSharedPtr result(&(this->data[address]), UntypedSharedPtr::emptyDestructor<const T>());
+		if (type == typeid(T)) {
+			UntypedSharedPtr result(&(this->data[address]), UntypedSharedPtr::emptyDestructor<const T>());
+			return result;
+		}
+
+		// Else, the only other supported type is cstyle array.
+
+		// Allocate the array
+		size_t arraySize = this->nbElements - this->getAddressSpace(type) + 1;
+		T* array = new T[arraySize];
+
+		// Copy its content
+		for (size_t idx = 0; idx < arraySize; idx++) {
+			array[idx] = this->data[address + idx];
+		}
+
+		// Create the UntypedSharedPtr
+		UntypedSharedPtr result{ std::make_shared<UntypedSharedPtr::Model<const T[]>>(array) };
 		return result;
+
 	}
 
 	template<class T> void PrimitiveTypeArray<T>::setDataAt(
