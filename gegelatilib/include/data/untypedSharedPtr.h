@@ -301,8 +301,6 @@ namespace Data {
 			msg.append(".");
 
 			throw std::runtime_error(msg);
-
-			return NULL;
 		}
 
 		/**

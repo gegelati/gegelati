@@ -4,6 +4,7 @@
 #include "instructions/set.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "data/untypedSharedPtr.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
@@ -17,6 +18,8 @@ protected:
 	const size_t size2{ 32 };
 	const double value0{ 2.3 };
 	const float value1{ 0.2f };
+	const double value2{ 0.5 };
+	const double value3{ 1.5 };
 	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
@@ -27,9 +30,14 @@ protected:
 		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
 		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(double), 25, value0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(double), 5, value2);
+		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(double), 6, value3);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
+		set.add(*new Instructions::LambdaInstruction<double[2]>([](const double a[2], const double b[2]) {
+			return a[0] * b[0] + a[1] * b[1];
+			}));
 
 		e = new Environment(set, vect, 8);
 		p = new Program::Program(*e);
@@ -53,6 +61,12 @@ protected:
 		l2.setParameter(0, value1); // Parameter is set to value1 (=0.2f)
 		l2.setDestinationIndex(0); // Destination is register at index 0
 
+		Program::Line& l3 = p->addNewLine();
+		l3.setInstructionIndex(2); // Instruction is LambdaInstruction<double[2]>.
+		l3.setOperand(0, 0, 0); // 1st operand: 0th and 1st registers.
+		l3.setOperand(1, 2, 5);	// 2nd operand : 6th and 7th double in the PrimitiveTypeArray of double.
+		l3.setDestinationIndex(0); // Destination is register at index 0
+
 		// Mark intron lines
 		ASSERT_EQ(p->identifyIntrons(), 1);
 	}
@@ -64,6 +78,7 @@ protected:
 		delete (&(vect.at(1).get()));
 		delete (&set.getInstruction(0));
 		delete (&set.getInstruction(1));
+		delete (&set.getInstruction(2));
 	}
 };
 
@@ -95,8 +110,10 @@ TEST_F(ProgramExecutionEngineTest, ConstructorDestructor) {
 TEST_F(ProgramExecutionEngineTest, next) {
 	Program::ProgramExecutionEngine progExecEng(*p);
 
-	ASSERT_TRUE(progExecEng.next()) << "Program has two line so going to the next line after initialization should succeed.";
-	ASSERT_FALSE(progExecEng.next()) << "Program has two line so going to the next line twice after initialization should not succeed.";
+	// 4 lines minus one intron line
+	ASSERT_TRUE(progExecEng.next()) << "Program has three line so going to the next line after initialization should succeed.";
+	ASSERT_TRUE(progExecEng.next()) << "Program has three line so going to the next line after initialization should succeed.";
+	ASSERT_FALSE(progExecEng.next()) << "Program has three line so going to the next line three times after initialization should not succeed.";
 }
 
 TEST_F(ProgramExecutionEngineTest, getCurrentLine) {
@@ -119,6 +136,27 @@ TEST_F(ProgramExecutionEngineTest, getCurrentInstruction) {
 }
 
 TEST_F(ProgramExecutionEngineTest, fetchOperands) {
+	Program::ProgramExecutionEngine progExecEng(*p);
+	std::vector<Data::UntypedSharedPtr> operands;
+
+	progExecEng.next();
+	progExecEng.next();
+
+	// From Fixture:
+	// Program line 3
+	// Instruction is LambdaInstruction<double[]>
+	// Operands are: index 0 and 1 registers register and index 5 and 6 elements of an double array.
+	ASSERT_NO_THROW(progExecEng.fetchCurrentOperands(operands)) << "Fetching the operands of a valid Program from fixtures failed.";
+	// Check number of operands
+	ASSERT_EQ(operands.size(), 2) << "Incorrect number of operands were fetched by previous call.";
+	// Check operand value. Registers are 0.0, array element is value2 and value3
+	ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>())[0], 0.0) << "Value of fetched operand from register is incorrect.";
+	ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>())[1], 0.0) << "Value of fetched operand from register is incorrect.";
+	ASSERT_EQ(((operands.at(1)).getSharedPointer<const double[]>())[0], value2) << "Value of fetched operand from array is incorrect.";
+	ASSERT_EQ(((operands.at(1)).getSharedPointer<const double[]>())[1], value3) << "Value of fetched operand from array is incorrect.";
+}
+
+TEST_F(ProgramExecutionEngineTest, fetchCompositeOperands) {
 	Program::ProgramExecutionEngine progExecEng(*p);
 	std::vector<Data::UntypedSharedPtr> operands;
 	// From Fixture:
@@ -156,8 +194,9 @@ TEST_F(ProgramExecutionEngineTest, executeCurrentLine) {
 	progExecEng.next(); // Skips the intron automatically
 	ASSERT_NO_THROW(progExecEng.executeCurrentLine()) << "Execution of the second line of the program from Fixture should not fail.";
 	progExecEng.next();
+	ASSERT_NO_THROW(progExecEng.executeCurrentLine()) << "Execution of the third line of the program from Fixture should not fail.";
+	progExecEng.next();
 	ASSERT_THROW(progExecEng.executeCurrentLine(), std::out_of_range) << "Execution of a non-existing line of the program should fail.";
-
 }
 
 TEST_F(ProgramExecutionEngineTest, setProgram) {
@@ -213,16 +252,20 @@ TEST_F(ProgramExecutionEngineTest, execute) {
 	Program::ProgramExecutionEngine progExecEng(*p);
 	double result;
 
+	double r1 = value0 + 0;
+	double r0 = r1 * (Parameter(value1)).operator float();
+	r0 = r0 * value2 + r1 * value3;
+
 	ASSERT_NO_THROW(result = progExecEng.executeProgram()) << "Program from fixture failed to execute. (Indivitual execution of its line in executeCurrentLine test).";
-	ASSERT_EQ(result, (value0 + 0) * (Parameter(value1)).operator float()) << "Result of the program from Fixture is not as expected.";
+	ASSERT_EQ(result, r0) << "Result of the program from Fixture is not as expected.";
 
 	// Introduce a new line in the program to test the throw
-	Program::Line& l2 = p->addNewLine();
-	// Instruction 2 does not exist. Must deactivate checks to write this instruction
-	l2.setInstructionIndex(2, false);
+	Program::Line& l4 = p->addNewLine();
+	// Instruction 3 does not exist. Must deactivate checks to write this instruction
+	l4.setInstructionIndex(3, false);
 	ASSERT_THROW(progExecEng.executeProgram(), std::out_of_range) << "Program line using a incorrect Instruction index should throw an exception.";
 
 	// Now ignoring the exceptions
 	ASSERT_NO_THROW(result = progExecEng.executeProgram(true)) << "Program line using a incorrect Instruction index should not interrupt the Execution when ignored.";
-	ASSERT_EQ(result, (value0 + 0) * Parameter(value1).operator float()) << "Result of the program from Fixture, with an additional ignored line, is not as expected.";
+	ASSERT_EQ(result, r0) << "Result of the program from Fixture, with an additional ignored line, is not as expected.";
 }
