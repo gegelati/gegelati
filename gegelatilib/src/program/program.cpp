@@ -77,7 +77,7 @@ bool Program::Program::isIntron(uint64_t index) const
 uint64_t Program::Program::identifyIntrons()
 {
 	// Create fake registers to identify accessed addresses.
-	Data::PrimitiveTypeArray<double> registers(this->environment.getNbRegisters());
+	const Data::DataHandler& fakeRegisters = this->environment.getFakeRegisters();
 	// Number of introns within the Program.
 	uint64_t nbIntrons = 0;
 	// Set of useful register
@@ -109,8 +109,8 @@ uint64_t Program::Program::identifyIntrons()
 					// the list of useful registers.
 					const std::type_info& operandType = instruction.getOperandTypes().at(idxOperand);
 					uint64_t location = currentLine->getOperand(idxOperand).second;
-					uint64_t registerIdx = location % registers.getAddressSpace(operandType);
-					std::vector<size_t> accessedAddresses = registers.getAddressesAccessed(operandType, registerIdx);
+					uint64_t registerIdx = location % fakeRegisters.getAddressSpace(operandType);
+					std::vector<size_t> accessedAddresses = fakeRegisters.getAddressesAccessed(operandType, registerIdx);
 					for (size_t accessedAddress : accessedAddresses) {
 						usefulRegisters.insert(accessedAddress);
 					}

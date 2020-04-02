@@ -41,7 +41,6 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 			operandDataSourceIndexes.insert(operandDataSourceIndex);
 		}
 
-
 		while (!operandFound && operandDataSourceIndexes.size() < env.getNbDataSources()) {
 			// Select an operandDataSourceIndex
 			operandDataSourceIndex = rng.getUnsignedInt64(0, (env.getNbDataSources() - 1) - operandDataSourceIndexes.size());
@@ -55,15 +54,11 @@ static bool initRandomCorrectLineOperand(const Instructions::Instruction& instru
 			// check if the selected dataSource can provide the type requested by the instruction
 			if (operandDataSourceIndex == 0) {
 				// Data Source is the registers
-				if (operandType == typeid(double)) {
-					operandFound = true;
-				}
+				operandFound = env.getFakeRegisters().canHandle(operandType);
 			}
 			else {
 				// Data source is a dataHandler
-				if (env.getDataSources().at(operandDataSourceIndex - 1).get().canHandle(operandType)) {
-					operandFound = true;
-				}
+				operandFound = env.getDataSources().at(operandDataSourceIndex - 1).get().canHandle(operandType);
 			}
 		}
 
@@ -154,7 +149,7 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line, Mutator::RNG& r
 			bool isValid = false;
 			if (dataSourceIndex == 0) {
 				// regsister
-				isValid = (type == typeid(double));
+				isValid = (line.getEnvironment().getFakeRegisters().canHandle(type));
 			}
 			else {
 				// not register

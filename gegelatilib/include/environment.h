@@ -103,11 +103,12 @@ protected:
 	* types provided by the given DataHandler.
 	*
 	* \param[in] iSet the Instructions::Set to filter.
+	* \param[in] nbRegisters Number of registers
 	* \param[in] dataSources a set of DataHandler providing data.
 	* \return a new Instructions:Set where only Instruction whose operands
 	* can be provided by at least one DataHandler are kept.
 	*/
-	static Instructions::Set filterInstructionSet(const Instructions::Set& iSet, const std::vector < std::reference_wrapper<const Data::DataHandler>>& dataSources);
+	static Instructions::Set filterInstructionSet(const Instructions::Set& iSet, const size_t nbRegisters, const std::vector < std::reference_wrapper<const Data::DataHandler>>& dataSources);
 
 private:
 	/// Default constructor deleted for its uselessness.
@@ -126,7 +127,7 @@ public:
 	*/
 	Environment(const Instructions::Set& iSet,
 		const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandlers,
-		const size_t nbRegs) : instructionSet{ filterInstructionSet(iSet, dHandlers) }, dataSources{ dHandlers },
+		const size_t nbRegs) : instructionSet{ filterInstructionSet(iSet, nbRegs, dHandlers) }, dataSources{ dHandlers },
 		nbRegisters{ nbRegs }, fakeRegisters(nbRegs),
 		nbInstructions{ instructionSet.getNbInstructions() }, maxNbOperands{ instructionSet.getMaxNbOperands() },
 		maxNbParameters{ instructionSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(nbRegs, dHandlers) },
