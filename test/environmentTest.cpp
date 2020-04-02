@@ -112,6 +112,31 @@ TEST(EnvironmentTest, Size_tAttributeAccessors) {
 	ASSERT_EQ(e.getLargestAddressSpace(), size2) << "Largest address space of the Environment does not corresponds to the dataHandlers or registers given during construction.";
 }
 
+TEST(EnvironmentTest, GetFakeRegisters) {
+	const size_t size1{ 24 };
+	const size_t size2{ 32 };
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
+	Instructions::Set set;
+
+	Data::PrimitiveTypeArray<double> d1(size1);
+	Data::PrimitiveTypeArray<int> d2(size2);
+
+	Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
+	Instructions::MultByConstParam<double, float> iMult; // One operand, One parameter
+
+	set.add(iAdd);
+	set.add(iMult);
+
+	vect.push_back(d1);
+	vect.push_back(d2);
+
+	Environment e(set, vect, 8);
+
+	ASSERT_NO_THROW(e.getFakeRegisters()) << "Couldn't access the fake registers of the environment.";
+	ASSERT_EQ(e.getFakeRegisters().getAddressSpace(typeid(double)), 8) << "Address space for double type id is incorrect in fake registers.";
+	ASSERT_EQ(typeid(e.getFakeRegisters()), typeid(Data::PrimitiveTypeArray<double>)) << "Unexpected type for fake registers of the environment.";
+}
+
 TEST(EnvironmentTest, InstructionSetAccessor) {
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };

@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "instructions/instruction.h"
 #include "instructions/set.h"
 
@@ -48,6 +49,9 @@ protected:
 
 	/// Number of registers
 	const size_t nbRegisters;
+
+	/// DataHandler whost type corresponds to registers.
+	const Data::PrimitiveTypeArray<double> fakeRegisters;
 
 	/// Number of Instruction in the Instructions::Set.
 	const size_t nbInstructions;
@@ -122,7 +126,8 @@ public:
 	*/
 	Environment(const Instructions::Set& iSet,
 		const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandlers,
-		const size_t nbRegs) : instructionSet{ filterInstructionSet(iSet, dHandlers) }, dataSources{ dHandlers }, nbRegisters{ nbRegs },
+		const size_t nbRegs) : instructionSet{ filterInstructionSet(iSet, dHandlers) }, dataSources{ dHandlers },
+		nbRegisters{ nbRegs }, fakeRegisters(nbRegs),
 		nbInstructions{ instructionSet.getNbInstructions() }, maxNbOperands{ instructionSet.getMaxNbOperands() },
 		maxNbParameters{ instructionSet.getMaxNbParameters() }, nbDataSources{ dHandlers.size() + 1 }, largestAddressSpace{ computeLargestAddressSpace(nbRegs, dHandlers) },
 		lineSize{ computeLineSize(*this) } {};
@@ -182,6 +187,17 @@ public:
 	* \return a const reference to the dataSources attribute of this Environment.
 	*/
 	const std::vector<std::reference_wrapper<const Data::DataHandler>>& getDataSources() const;
+
+	/**
+	* Get a DataHandler identical to the one that will be used as registers
+	* for this Environment.
+	*
+	* Getting a DataHandler identical to the one used as registers when
+	* executing a Program can be useful, notably when mutating a
+	* Program::Line and assessing whether a data type can be provided by the
+	* registers.
+	*/
+	const Data::DataHandler& getFakeRegisters() const;
 
 	/**
 	* \brief Get the Instruction Set of the Environment.

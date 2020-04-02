@@ -139,6 +139,11 @@ const std::vector<std::reference_wrapper<const Data::DataHandler>>& Environment:
 	return this->dataSources;
 }
 
+const Data::DataHandler& Environment::getFakeRegisters() const
+{
+	return this->fakeRegisters;
+}
+
 const Instructions::Set& Environment::getInstructionSet() const
 {
 	return this->instructionSet;
