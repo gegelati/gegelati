@@ -6,10 +6,15 @@ _aaaa.mm.dd_
 ### New features
 * Possibility to import a TPGGraph and its programs with the File::TPGGraphDotImporter class.
 * New Data::Hash class providing a portable hash mechanism in replacement of std::hash.
+* Use of Data::UntypedSharedPtr instead of std::reference_wrapper for fetching operands in DataHandler. This enables fetching "composite" operands, that is operands built on request from native data type in the data handler, and destroyed after use. Data::SupportedType and Data::PrimitiveType no longer needed after this change.
+* Adding support for C-style 1D arrays of primitive types in LambdaInstruction.
 
 ### Changes
-* Renaming the Exporter namespace into File.
+* Reorganization
+  * Renaming the Exporter namespace into File.
+  * Renaming DataHandlers namespace into Data.
 * Switch from transfer.sh to file.io for supporting deployment.
+* Update Data::DataHandler, Program::Program, Mutator::LineMutator to take composite operands into account.
 
 ### Bug fix
 * Training and mutation process were not portable on multiple OSes and compilers because of the diverse implementations of std::hash.
