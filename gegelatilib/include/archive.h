@@ -4,9 +4,10 @@
 #include <random>
 #include <map>
 #include <deque>
+#include <memory>
 
 #include "mutator/rng.h"
-#include "dataHandlers/dataHandler.h"
+#include "data/dataHandler.h"
 #include "program/program.h"
 
 /**
@@ -64,7 +65,7 @@ protected:
 	* recordings to associate each recording to the right copy of the
 	* DataHandler.
 	*/
-	std::map<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>> dataHandlers;
+	std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>> dataHandlers;
 
 	/**
 	* \brief Map storing the Program pointers referenced in recordings the
@@ -113,7 +114,7 @@ public:
 	*
 	* \return the hash resulting from the combination.
 	*/
-	static size_t getCombinedHash(const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler);
+	static size_t getCombinedHash(const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandler);
 
 	/**
 	* \brief Access the nth ArchiveRecording within the Archive.
@@ -153,7 +154,7 @@ public:
 	*                   insertion.
 	*/
 	virtual void addRecording(const Program::Program* const program,
-		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler,
+		const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandler,
 		double result,
 		bool forced = false);
 
@@ -204,7 +205,7 @@ public:
 	*
 	* \return a const reference to the dataHandlers attribute.
 	*/
-	const std::map < size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>>& getDataHandlers() const;
+	const std::map < size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>>& getDataHandlers() const;
 
 	/**
 	* \brief Clear all content from the Archive.

@@ -1,9 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include <fstream>
+
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "program/program.h"
 #include "tpg/tpgVertex.h"
 #include "tpg/tpgTeam.h"
@@ -11,7 +14,7 @@
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
 
-#include "exporter/tpgGraphDotExporter.h"
+#include "file/tpgGraphDotExporter.h"
 
 
 class ExporterTest : public ::testing::Test {
@@ -20,7 +23,7 @@ public:
 
 protected:
 	const size_t size1{ 24 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e = NULL;
 	std::vector<std::shared_ptr<Program::Program>> progPointers;
@@ -30,19 +33,34 @@ protected:
 
 	virtual void SetUp() {
 		// Setup environment
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
 
 		// Put a 1 in the dataHandler to make it easy to have non-zero return in Programs.
-		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(PrimitiveType<double>), 0, 1.0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(double), 0, 1.0);
+
+
+		auto minus = [](double a, double b)->double {return a - b; };
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
+		set.add(*(new Instructions::LambdaInstruction<double>(minus)));
+
 		e = new Environment(set, vect, 8);
 		tpg = new TPG::TPGGraph(*e);
 
 		// Create 10 programs
 		for (int i = 0; i < 8; i++) {
 			progPointers.push_back(std::shared_ptr<Program::Program>(new Program::Program(*e)));
+		}
+
+		//add instructions to at least one program.
+		for (int i = 0; i < 3; i++)
+		{
+			Program::Line& l = progPointers.at(0).get()->addNewLine();
+			l.setInstructionIndex(0);
+			l.setDestinationIndex(1);
+			l.setParameter(0, 0.2f);
+			l.setOperand(0, 0, 1);
 		}
 
 		// Create a TPG 
@@ -97,16 +115,16 @@ protected:
 };
 
 TEST_F(ExporterTest, Constructor) {
-	Exporter::TPGGraphDotExporter* dotExporter;
-	ASSERT_NO_THROW(dotExporter = new Exporter::TPGGraphDotExporter("exported_tpg.dot", *tpg)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
+	File::TPGGraphDotExporter* dotExporter;
+	ASSERT_NO_THROW(dotExporter = new File::TPGGraphDotExporter("exported_tpg.dot", *tpg)) << "The TPGGraphDotExporter could not be constructed with a valid file path.";
 
 	ASSERT_NO_THROW(delete dotExporter;) << "TPGGraphDotExporter could not be deleted.";
 
-	ASSERT_THROW(dotExporter = new Exporter::TPGGraphDotExporter("XXX://INVALID_PATH", *tpg), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
+	ASSERT_THROW(dotExporter = new File::TPGGraphDotExporter("XXX://INVALID_PATH", *tpg), std::runtime_error) << "The TPGGraphDotExplorer construction should fail with an invalid path.";
 }
 
 TEST_F(ExporterTest, print) {
-	Exporter::TPGGraphDotExporter dotExporter("exported_tpg.dot", *tpg);
+	File::TPGGraphDotExporter dotExporter("exported_tpg.dot", *tpg);
 
-	ASSERT_NO_THROW(dotExporter.print());
+	ASSERT_NO_THROW(dotExporter.print()) << "File export was executed without error.";
 }

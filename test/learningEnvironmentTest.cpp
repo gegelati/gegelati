@@ -13,12 +13,12 @@ TEST(LearningEnvironmentTest, Constructor) {
 
 // Create a fake LearningEnvironment for testing purpose.
 class FakeLearningEnvironment : public Learn::LearningEnvironment {
-	DataHandlers::PrimitiveTypeArray<int> data;
+	Data::PrimitiveTypeArray<int> data;
 public:
 	FakeLearningEnvironment() : LearningEnvironment(2), data(3) {};
 	void reset(size_t seed, Learn::LearningMode mode) {};
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
-		std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> getDataSources() {
+		std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 		vect.push_back(data);
 		return vect;
 	}
@@ -50,12 +50,12 @@ TEST(LearningEnvironmentTest, getNbAction) {
 TEST(LearningEnvironmentTest, getDataSource) {
 	StickGameWithOpponent le;
 
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> dataSrc;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> dataSrc;
 	ASSERT_NO_THROW(dataSrc = le.getDataSources()) << "Getting data sources should not fail";
 	ASSERT_EQ(dataSrc.size(), 2) << "Number of dataSource is incorrect";
 
 	// Check initial number of sticks
-	int initNr = (const int)(const PrimitiveType<int>&)dataSrc.at(1).get().getDataAt(typeid(PrimitiveType<int>), 0);
+	int initNr = (const int)*(dataSrc.at(1).get().getDataAt(typeid(int), 0).getSharedPointer<const int>());
 	ASSERT_EQ(initNr, 21) << "Initial number of stick is incorrect";
 }
 
@@ -63,11 +63,11 @@ TEST(LearningEnvironmentTest, doAction) {
 	StickGameWithOpponent le;
 
 	ASSERT_NO_THROW(le.doAction(1)) << "Remove 2 stick after game init should not fail.";
-	const PrimitiveType<int>& nbSticks = (const PrimitiveType<int>&)le.getDataSources().at(1).get().getDataAt(typeid(PrimitiveType<int>), 0);
+	std::shared_ptr<const int> nbSticks = (le.getDataSources().at(1).get().getDataAt(typeid(int), 0)).getSharedPointer<const int>();
 	// Remove 2 sticks brings us to 19 sticks
 	// Other player removes between 1 and 3 sticks
 	// thus, number of remaining sticks is within 18 and 16
-	ASSERT_TRUE(nbSticks <= 18 && nbSticks >= 16) << "Number of stick remaining after one action is not within expected range.";
+	ASSERT_TRUE(*nbSticks <= 18 && *nbSticks >= 16) << "Number of stick remaining after one action is not within expected range.";
 
 	// Check the illegal action
 	ASSERT_THROW(le.doAction(3), std::runtime_error) << "Illegal action not detected as such.";
@@ -77,7 +77,6 @@ TEST(LearningEnvironmentTest, getScoreAndIsTerminal) {
 	StickGameWithOpponent le;
 
 	ASSERT_EQ(le.getScore(), 0.0) << "Score should be zero until the game is over";
-	const PrimitiveType<int>& nbSticks = (const PrimitiveType<int>&)le.getDataSources().at(1).get().getDataAt(typeid(PrimitiveType<int>), 0);
 
 	// Play the full game and lose with known seed (0)
 	std::vector<int> actions = { 0, 1, 2, 1, 2, 0 };

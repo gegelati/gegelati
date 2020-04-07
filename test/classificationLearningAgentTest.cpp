@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/primitiveTypeArray.h"
 
 #include "instructions/set.h"
 #include "instructions/addPrimitiveType.h"

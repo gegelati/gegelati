@@ -10,8 +10,10 @@
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
+#include "program/program.h"
+#include "program/line.h"
 
-namespace Exporter {
+namespace File {
 	/**
 	* \brief Class used to export a TPGGraph into a text file with the dot
 	* format.
@@ -51,6 +53,24 @@ namespace Exporter {
 		* associated to the same integer identifier in all exported dot files.
 		*/
 		std::map<const Program::Program*, uint64_t> programID;
+
+		/**
+		* \brief Integer number used during export to associate a unique
+		* integer identifier to each new TPGTeam.
+		*
+		* Using the VertexID map, a TPGTeam that was already printed in
+		* previous export will keep its ID.
+		*/
+		uint64_t nbVertex = 0;
+
+		/**
+		* \brief Integer number used during export to associate a unique
+		* integer identifier to each new Program.
+		*
+		* Using the programID map, a Program that was already printed in
+		* previous export will keep its ID.
+		*/
+		uint64_t nbPrograms = 0;
 
 		/**
 		* \brief Integer number used during export to associate a unique
@@ -124,6 +144,24 @@ namespace Exporter {
 		* \param[in] edge the TPGEdge being printed.
 		*/
 		void printTPGEdge(const TPG::TPGEdge& edge);
+
+		/**
+		* \brief Prints the dot content for the given Program.
+		*
+		* \param[in] program the Program to be printed
+		*
+		* a program is stored in the .dot file with the format :
+		* line_1&#92;nline2&#92;nline3&#92;n...&#92;nline_N&#92;n
+		*
+		* a line is stored in the .dot file with the following format
+		* inst_idx|dest_idx&param_1|param_2|...|param_n$op1_param1|op1_param2#...#
+		*
+		* inst_idx = instruction index
+		* dest_idx = destination index
+		* param    = parameter
+		* op       = operand
+		*/
+		void printProgram(const Program::Program& program);
 
 		/**
 		* \brief Prints header content in the dot file.

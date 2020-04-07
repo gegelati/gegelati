@@ -4,8 +4,9 @@
 #include <typeinfo>
 #include <vector>
 #include <functional>
+#include <memory>
 
-#include "supportedTypes.h"
+#include "data/untypedSharedPtr.h"
 
 namespace std {
 	/*
@@ -14,7 +15,7 @@ namespace std {
 	bool operator==(const std::reference_wrapper<const std::type_info>& r0, const std::reference_wrapper<const std::type_info>& r1);
 }
 
-namespace DataHandlers {
+namespace Data {
 	/**
 	* \brief Base class for all sources of data to be accessed by a TPG Instruction executed within a Program.
 	*/
@@ -35,14 +36,6 @@ namespace DataHandlers {
 		* Two DataHandler resulting from a copy should thus have the same id.
 		*/
 		const size_t id;
-
-		/**
-		* \brief List of the types of the operands needed to execute the instruction.
-		*
-		* Because std::unordered_set was too complex to use (because it does not support std::reference_wrapper easily), std::vector is used instead.*
-		* Adding the same type several type to the list of providedType will lead to undefined behavior.
-		*/
-		std::vector<std::reference_wrapper<const std::type_info>> providedTypes;
 
 		/**
 		* \brief Cached value returned by the getHash() function.
@@ -125,14 +118,8 @@ namespace DataHandlers {
 		* \param[in] type the std::type_info whose availability in the DataHandler is being tested.
 		* \return true if the DataHandler can handle data for the given data type, and false otherwise.
 		*/
-		bool canHandle(const std::type_info& type) const;
+		virtual bool canHandle(const std::type_info& type) const = 0;
 
-		/**
-		* \brief Retrieve the set of types provided by the DataHandler.
-		*
-		* \return a const reference to the data type set provided by the DataHandler.
-		*/
-		const std::vector<std::reference_wrapper<const std::type_info>>& getHandledTypes() const;
 
 		/**
 		* \brief Get the getAddressSpace size for the given data type.
@@ -152,7 +139,7 @@ namespace DataHandlers {
 		* to compute the size of the largest addressSpace required by the dataHandler.
 		* \return the size of the largest addressSpace.
 		*/
-		size_t getLargestAddressSpace() const;
+		virtual size_t getLargestAddressSpace() const = 0;
 
 		/**
 		* \brief Generic method for DataHandler to reset their data.
@@ -169,13 +156,49 @@ namespace DataHandlers {
 		/**
 		* \brief Get data of the given type, from the given address.
 		*
+		* Data is returned as an UntypedSharedPtr, with two possible allocations:
+		* - Classic pointer: The returned data is natively contained in the
+		* DataHandler and could be accessed through a regular pointer. In this
+		* case the returned UntypedSharedPtr is associated with an empty destructor
+		* function as its destructor to avoid any deallocation on the
+		* shared_ptr deletion.
+		* - Shared pointer: The returned data is a temporary object that was
+		* constructed on request from data in the DataHandler. Once it has
+		* been used, on deletion of the shared pointer, this temporary object
+		* is deallocated using its default destructor.
+		*
 		* \param[in] type the std::type_info of data retrieved.
 		* \param[in] address the location of the data to retrieve.
-		* \throws std::invalid_argument if the given data type is not provided by the DataHandler.
-		* \throws std::out_of_range if the given address is invalid for the given data type.
-		* \return a const reference to the requested data.
+		* \throws std::invalid_argument if the given data type is not provided
+		* by the DataHandler.
+		* \throws std::out_of_range if the given address is invalid for the
+		* given data type.
+		* \return a shared pointer to the requested const data.
 		*/
-		virtual const SupportedType& getDataAt(const std::type_info& type, const size_t address) const = 0;
+		virtual UntypedSharedPtr getDataAt(const std::type_info& type, const size_t address) const = 0;
+
+		/**
+		* \brief Get the set of addresses actually used when getting the given
+		* type of data, at the given address.
+		*
+		*  When accessing a DataHandler with a type differing from the native
+		* storage type of the DataHandler, like an array for example, the
+		* DataHandler may need to use several of its data element to create
+		* and return the requested type. Keeping track of what addresses have
+		* been accessed and used may be usefull to better explain what part of
+		* the data was used in a learning process, or to identify introns when
+		* the DataHandler in question are the registers of the execution
+		* engine. This method returns the list of addresses that are used when
+		* requesting a given type of data, at a given address.
+		*
+		* \param[in] type the std::type_info of data whose access pattern is
+		* analyzed.
+		* \param[in] address the location of the data to retrieve.
+		* \return a std::vector containing the addresses of data accessed. In
+		* case the given type of data is invalid, or the address, an empty
+		* vector is returned.
+		*/
+		virtual std::vector<size_t> getAddressesAccessed(const std::type_info& type, const size_t address) const = 0;
 	};
 }
 

@@ -2,7 +2,7 @@
 
 #include "environment.h"
 
-size_t Environment::computeLargestAddressSpace(const size_t nbRegisters, const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandlers)
+size_t Environment::computeLargestAddressSpace(const size_t nbRegisters, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandlers)
 {
 	size_t res{ nbRegisters };
 	for (auto dHandler : dHandlers) {
@@ -12,8 +12,10 @@ size_t Environment::computeLargestAddressSpace(const size_t nbRegisters, const s
 	return res;
 }
 
-Instructions::Set Environment::filterInstructionSet(const Instructions::Set& iSet, const std::vector < std::reference_wrapper<const DataHandlers::DataHandler>>& dataSources) {
+Instructions::Set Environment::filterInstructionSet(const Instructions::Set& iSet, const size_t nbRegisters, const std::vector < std::reference_wrapper<const Data::DataHandler>>& dataSources) {
 	Instructions::Set filteredSet;
+
+	Data::PrimitiveTypeArray<double> fakeRegisters(nbRegisters);
 
 	// Check if all instructions can be used for the given DataHandlers
 	for (uint64_t idxInstruction = 0; idxInstruction < iSet.getNbInstructions(); idxInstruction++) {
@@ -25,7 +27,7 @@ Instructions::Set Environment::filterInstructionSet(const Instructions::Set& iSe
 			// Check DataHandlers for this type until one is found
 			bool isHandled = false;
 			// Check registers double first
-			if (type == typeid(PrimitiveType<double>)) {
+			if (fakeRegisters.canHandle(type)) {
 				// The type is handled by one dataHandler, stop searching for more.
 				isHandled = true;
 				break;
@@ -134,9 +136,14 @@ const LineSize& Environment::getLineSize() const
 	return this->lineSize;
 }
 
-const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& Environment::getDataSources() const
+const std::vector<std::reference_wrapper<const Data::DataHandler>>& Environment::getDataSources() const
 {
 	return this->dataSources;
+}
+
+const Data::DataHandler& Environment::getFakeRegisters() const
+{
+	return this->fakeRegisters;
 }
 
 const Instructions::Set& Environment::getInstructionSet() const

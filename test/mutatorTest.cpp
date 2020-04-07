@@ -8,8 +8,9 @@
 #include "instructions/instruction.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include "instructions/lambdaInstruction.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "program/program.h"
 #include "program/line.h"
 #include "program/programExecutionEngine.h"
@@ -26,7 +27,7 @@ protected:
 	const size_t size2{ 32 };
 	const double value0{ 2.3 };
 	const float value1{ 4.2f };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 	Program::Program* p;
@@ -35,10 +36,10 @@ protected:
 	MutatorTest() : e{ nullptr }, p{ nullptr }{};
 
 	virtual void SetUp() {
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size1)));
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
-		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(PrimitiveType<double>), 25, value0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(double), 25, value0);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -184,6 +185,49 @@ TEST_F(MutatorTest, LineMutatorAlterLine) {
 	ASSERT_EQ(l0.getOperand(1).second, 28) << "Alteration with known seed changed its result.";
 	ASSERT_EQ((int16_t)l0.getParameter(0), 31115) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+}
+
+TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands) {
+	Mutator::RNG rng;
+
+	// Setup for this test
+	set.add(*(new Instructions::LambdaInstruction<double[3]>([](const double* a, const double* b)->double {
+		return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
+		})));
+
+	Environment e2(set, vect, 8);
+	Program::Program p2(e2);
+
+	Program::ProgramExecutionEngine pEE(p2);
+
+	// Add a 0 lines to the program
+	// i=0, d=0, op0=(0,0), op1=(0,0),  param=0
+	Program::Line& l0 = p2.addNewLine();
+
+	// Alter instruction
+	// i=2, d=0, op0=(0,0), op1=(0,0),  param=0
+	rng.setSeed(6);
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getInstructionIndex(), 2) << "Alteration with known seed changed its result.";
+	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+
+	// Alter op0 location
+	// i=2, d=0, op0=(0,28), op1=(0,0),  param=0
+	rng.setSeed(2);
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getOperand(0).second, 28) << "Alteration with known seed changed its result.";
+	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+
+	// Alter op1 source
+	// i=2, d=0, op0=(0,28), op1=(2,0),  param=0
+	rng.setSeed(5);
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getOperand(1).first, 2) << "Alteration with known seed changed its result.";
+	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+
+
+	// Teardown for this test
+	delete& set.getInstruction(2);
 }
 
 TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine) {
