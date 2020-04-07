@@ -3,7 +3,8 @@
 
 #include <type_traits>
 
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/untypedSharedPtr.h"
+#include "data/primitiveTypeArray.h"
 #include "program/program.h"
 
 namespace Program {
@@ -19,13 +20,16 @@ namespace Program {
 		ProgramExecutionEngine() = delete;
 
 		/// Registers used for the Program execution.
-		DataHandlers::PrimitiveTypeArray<double> registers;
+		Data::PrimitiveTypeArray<double> registers; // If the type of registers attribute is changed one day
+													// make sure to update the Program::identifyIntrons() method
+													// as it create its own Data::PrimitiveTypeArray<double> to keep
+													// track of accessed addresses.
 
 		/// Data sources used in the Program.
-		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSources;
+		std::vector < std::reference_wrapper<const Data::DataHandler >> dataSources;
 
 		/// Data sources (including registers) used in the Program.
-		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSourcesAndRegisters;
+		std::vector < std::reference_wrapper<const Data::DataHandler >> dataSourcesAndRegisters;
 
 		/// Program counter of the execution engine.
 		uint64_t programCounter;
@@ -67,7 +71,7 @@ namespace Program {
 		*/
 		template <class T> ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<T>>& dataSrc) : programCounter{ 0 }, registers{ prog.getEnvironment().getNbRegisters() }, program{ NULL } {
 			// Check that T is either convertible to a const DataHandler
-			static_assert(std::is_convertible<T&, const DataHandlers::DataHandler&>::value);
+			static_assert(std::is_convertible<T&, const Data::DataHandler&>::value);
 			// Setup the data sources
 			this->dataSourcesAndRegisters.push_back(this->registers);
 
@@ -103,8 +107,8 @@ namespace Program {
 
 		/**
 		* \brief Method for changing the dataSources on which the Program will be executed.
-		* 
-		* \param[in] dataSrc The vector of DataHandler references with which 
+		*
+		* \param[in] dataSrc The vector of DataHandler references with which
 		* the Program will be executed.
 		* \throws std::runtime_error if the Environment references by the
 		* Program is incompatible with the given dataSources.
@@ -117,7 +121,7 @@ namespace Program {
 		* \return a vector containing references to the dataHandlers of the
 		* dataSourses attribute (i.e. without the registers)
 		*/
-		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& getDataSources() const;
+		const std::vector<std::reference_wrapper<const Data::DataHandler>>& getDataSources() const;
 
 		/**
 		* \brief Increments the programCounter and checks for the end of the Program.
@@ -160,7 +164,7 @@ namespace Program {
 		* \throw std::domain_error if the data type is not supported by the
 		*        data handler.
 		*/
-		uint64_t scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const std::type_info& type) const;
+		uint64_t scaleLocation(const uint64_t rawLocation, const Data::DataHandler& dataHandler, const std::type_info& type) const;
 
 		/**
 		* \brief Get the Instruction corresponding to the current programCounter.
@@ -188,7 +192,7 @@ namespace Program {
 		*         DataHandler, with the given data type, or if the indexed
 		*         DataHandler does not exist.
 		*/
-		const void fetchCurrentOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const;
+		const void fetchCurrentOperands(std::vector<Data::UntypedSharedPtr>& operands) const;
 
 		/**
 		* \brief Get the parameters for the current Instruction.
@@ -228,11 +232,11 @@ namespace Program {
 	inline void ProgramExecutionEngine::setDataSources(const std::vector<std::reference_wrapper<T>>& dataSrc)
 	{
 		// Check that T is either convertible to a const DataHandler
-		static_assert(std::is_convertible<T&, const DataHandlers::DataHandler&>::value);
+		static_assert(std::is_convertible<T&, const Data::DataHandler&>::value);
 
 		// Replace the references in attributes
 		this->dataSources = dataSrc;
-		for (auto idx = 0; idx < this->dataSources.size(); idx++) {
+		for (size_t idx = 0; idx < this->dataSources.size(); idx++) {
 			this->dataSourcesAndRegisters.at(idx + 1) = dataSrc.at(idx);
 		}
 

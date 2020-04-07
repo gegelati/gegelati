@@ -4,8 +4,8 @@
 #include "instructions/set.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "program/program.h"
 #include "program/line.h"
 
@@ -13,13 +13,13 @@ class LineTest : public ::testing::Test {
 protected:
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 
 	virtual void SetUp() {
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size2)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
 		set.add(*(new Instructions::AddPrimitiveType<int>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));

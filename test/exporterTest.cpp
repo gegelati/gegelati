@@ -2,8 +2,8 @@
 
 #include <fstream>
 
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
 #include "instructions/lambdaInstruction.h"
@@ -23,7 +23,7 @@ public:
 
 protected:
 	const size_t size1{ 24 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e = NULL;
 	std::vector<std::shared_ptr<Program::Program>> progPointers;
@@ -33,10 +33,10 @@ protected:
 
 	virtual void SetUp() {
 		// Setup environment
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
 
 		// Put a 1 in the dataHandler to make it easy to have non-zero return in Programs.
-		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(PrimitiveType<double>), 0, 1.0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(double), 0, 1.0);
 
 
 		auto minus = [](double a, double b)->double {return a - b; };
@@ -128,38 +128,3 @@ TEST_F(ExporterTest, print) {
 
 	ASSERT_NO_THROW(dotExporter.print()) << "File export was executed without error.";
 }
-
-TEST_F(ExporterTest, FileContentVerification) {
-	// This Test checks the content of the exported file against a golden reference.
-	File::TPGGraphDotExporter dotExporter("exported_tpg.dot", *tpg);
-
-	dotExporter.print();
-
-	std::ifstream goldenRef(TESTS_DAT_PATH "exported_tpg_ref.dot");
-	ASSERT_TRUE(goldenRef.is_open()) << "Could not open golden reference. Check project configuration.";
-
-	std::ifstream exportedFile("exported_tpg.dot");
-	ASSERT_TRUE(exportedFile) << "Could not open exported dot file.";
-
-	// Check the file content line by line
-	// print diffs in the console and count number of printed line.
-	uint64_t nbDiffs = 0;
-	uint64_t lineNumber = 0;
-	while (!exportedFile.eof() && !goldenRef.eof()) {
-		std::string lineRef;
-		std::getline(goldenRef, lineRef);
-
-		std::string lineExport;
-		std::getline(exportedFile, lineExport);
-
-		EXPECT_EQ(lineRef, lineExport) << "Diff at Line " << lineNumber;
-		nbDiffs += (lineRef != lineExport) ? 1 : 0;
-
-		lineNumber++;
-	}
-
-	ASSERT_EQ(exportedFile.eof(), goldenRef.eof()) << "Files have different length.";
-
-	ASSERT_EQ(nbDiffs, 0) << "Differences between reference file and exported file were detected.";
-}
-

@@ -4,8 +4,9 @@
 #include "instructions/set.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include "instructions/lambdaInstruction.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "program/program.h"
 #include "program/line.h"
 
@@ -13,13 +14,13 @@ class ProgramTest : public ::testing::Test {
 protected:
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 
 	virtual void SetUp() {
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size2)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
 		set.add(*(new Instructions::AddPrimitiveType<int>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -180,28 +181,36 @@ TEST_F(ProgramTest, RemoveProgramLine) {
 }
 
 TEST_F(ProgramTest, identifyIntronsAndIsIntron) {
+	// Create a new environment with instruction accessing arrays
+	set.add(*new Instructions::LambdaInstruction<double[2]>([](const double a[2], const double b[2]) {
+		return a[0] * b[0] + a[1] * b[1];
+		}));
+
+	Environment localE(set, vect, 8);
+
 	// Create a program with 2 introns
-	Program::Program p(*e);
+	Program::Program p(localE);
 	Program::Line& l1 = p.addNewLine();
 	Program::Line& l2 = p.addNewLine();
 	Program::Line& l3 = p.addNewLine();
 	Program::Line& l4 = p.addNewLine();
 
-	// L4: Register 0 = Register 1 * constant
+	// L4: Register 0 = func(Register {1,2}, DataSource_1{[4],[5]})
 	l4.setDestinationIndex(0);
 	l4.setOperand(0, 0, 1);
-	l4.setInstructionIndex(1); //MultByConst
+	l4.setOperand(1, 1, 4);
+	l4.setInstructionIndex(2); //Lambda
 
-	// L3: Register 2 = Datasource_1[0] + DataSource_1[0] (Intron)
-	l3.setDestinationIndex(2);
-	l3.setOperand(0, 2, 0);
-	l3.setOperand(1, 2, 0);
+	// L3: Register 3 = Datasource_1[0] + DataSource_1[0] (Intron)
+	l3.setDestinationIndex(3);
+	l3.setOperand(0, 1, 0);
+	l3.setOperand(1, 1, 0);
 	l3.setInstructionIndex(0);
 
 	// L2: Register 1 = Datasource_1[2] + DataSource_1[2] 
 	l2.setDestinationIndex(1);
-	l2.setOperand(0, 2, 2);
-	l2.setOperand(1, 2, 2);
+	l2.setOperand(0, 1, 2);
+	l2.setOperand(1, 1, 2);
 	l2.setInstructionIndex(0);
 
 	// L1: Register 0 = Register 1 * constant (Intron)
@@ -219,4 +228,7 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron) {
 	ASSERT_FALSE(p.isIntron(1)) << "Line 1 wrongfully detected as an intron.";
 	ASSERT_TRUE(p.isIntron(2)) << "Line 2 wrongfully detected as not an intron.";
 	ASSERT_FALSE(p.isIntron(3)) << "Line 3 wrongfully detected as an intron.";
+
+	// cleanup
+	delete (&set.getInstruction(2));
 }

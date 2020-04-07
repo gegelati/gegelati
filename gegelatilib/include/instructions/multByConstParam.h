@@ -1,6 +1,9 @@
 #ifndef INSTRUCTION_MULT_BY_CONST_PARAM
 #define INSTRUCTION_MULT_BY_CONST_PARAM
 
+#include <memory>
+
+#include "data/untypedSharedPtr.h"
 #include "instruction.h"
 
 namespace Instructions {
@@ -17,28 +20,27 @@ namespace Instructions {
 		*/
 		MultByConstParam();
 
-		double execute(
+		virtual double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::reference_wrapper<const SupportedType>>& args) const;
+			const std::vector<Data::UntypedSharedPtr>& args) const override;
 	};
 
 	template <class T, class U> MultByConstParam<T, U>::MultByConstParam() {
-		this->operandTypes.push_back(typeid(PrimitiveType<T>));
+		this->operandTypes.push_back(typeid(T));
 		this->nbParameters = 1;
 	}
 
 	template<class T, class U> double MultByConstParam<T, U>::execute(
 		const std::vector<std::reference_wrapper<const Parameter>>& params,
-		const std::vector<std::reference_wrapper<const SupportedType>>& args) const
+		const std::vector<Data::UntypedSharedPtr>& args) const
 	{
 		if (Instruction::execute(params, args) != 1.0) {
 			return 0.0;
 		}
 
 		const U pValue = (const U&)params.at(0).get();
-		return dynamic_cast<const PrimitiveType<T>&>(args.at(0).get()) *(double)pValue ;
-	}
-	;
+		return *(args.at(0).getSharedPointer<const T>()) * (double)pValue;
+	};
 }
 
 #endif

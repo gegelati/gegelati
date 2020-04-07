@@ -6,12 +6,12 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
-#include <dataHandlers/dataHandler.h>  
-#include <dataHandlers/primitiveTypeArray.h>
+#include <data/untypedSharedPtr.h>
 #include <data/hash.h>
+#include <data/dataHandler.h>  
+#include <data/primitiveTypeArray.h>
 
 #include <file/tpgGraphDotExporter.h>
-
 #include <file/tpgGraphDotImporter.h>
 
 #include <instructions/addPrimitiveType.h>  
@@ -46,5 +46,9 @@
 #include <tpg/tpgGraph.h>
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
+
+#include <archive.h>
+#include <environment.h>
+#include <parameter.h>
 
 #endif

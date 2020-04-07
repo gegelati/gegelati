@@ -1,9 +1,12 @@
+#ifndef FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
+#define FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
+
 /**
 * \brief Classification Learning enviroment for testing purposes
 */
 class FakeClassificationLearningEnvironment : public Learn::ClassificationLearningEnvironment {
 protected:
-	DataHandlers::PrimitiveTypeArray<int> data;
+	Data::PrimitiveTypeArray<int> data;
 	int value;
 
 public:
@@ -15,7 +18,7 @@ public:
 		// Update data
 		value++;
 		this->currentClass = value % 3;
-		data.setDataAt(typeid(PrimitiveType<int>), 0, value);
+		data.setDataAt(typeid(int), 0, value);
 	}
 	void reset(size_t seed, Learn::LearningMode mode) {
 		// Call super pure virtual method to reset the pure virtual method.
@@ -24,10 +27,12 @@ public:
 		this->value = 0;
 		this->currentClass = 0;
 	};
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> getDataSources() {
-		std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> getDataSources() {
+		std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 		vect.push_back(data);
 		return vect;
 	}
 	bool isTerminal() const { return false; }
 };
+
+#endif // !FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H

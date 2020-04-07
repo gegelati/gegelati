@@ -33,7 +33,7 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog) {
 	this->programCounter = 0;
 }
 
-const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& Program::ProgramExecutionEngine::getDataSources() const
+const std::vector<std::reference_wrapper<const Data::DataHandler>>& Program::ProgramExecutionEngine::getDataSources() const
 {
 	return this->dataSources;
 }
@@ -53,7 +53,7 @@ const Program::Line& Program::ProgramExecutionEngine::getCurrentLine() const
 	return this->program->getLine(this->programCounter);
 }
 
-uint64_t Program::ProgramExecutionEngine::scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const std::type_info& type) const
+uint64_t Program::ProgramExecutionEngine::scaleLocation(const uint64_t rawLocation, const Data::DataHandler& dataHandler, const std::type_info& type) const
 {
 	return rawLocation % dataHandler.getAddressSpace(type);
 }
@@ -65,7 +65,7 @@ const Instructions::Instruction& Program::ProgramExecutionEngine::getCurrentInst
 	return this->program->getEnvironment().getInstructionSet().getInstruction(instructionIndex); // throw std::out_of_range if the index of the line is too large.
 }
 
-const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const
+const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<Data::UntypedSharedPtr>& operands) const
 {
 	const Line& line = this->getCurrentLine(); // throw std::out_of_range
 	const Instructions::Instruction& instruction = this->getCurrentInstruction(); // throw std::out_of_range
@@ -73,10 +73,10 @@ const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std
 	// Get as many operands as required by the instruction.
 	for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
 		const std::pair<uint64_t, uint64_t>& operandIndexes = line.getOperand(i);
-		const DataHandlers::DataHandler& dataSource = this->dataSourcesAndRegisters.at(operandIndexes.first); // Throws std::out_of_range
+		const Data::DataHandler& dataSource = this->dataSourcesAndRegisters.at(operandIndexes.first); // Throws std::out_of_range
 		const std::type_info& operandType = instruction.getOperandTypes().at(i).get();
 		const uint64_t operandLocation = this->scaleLocation(operandIndexes.second, dataSource, operandType);
-		const SupportedType& data = dataSource.getDataAt(operandType, operandLocation);
+		Data::UntypedSharedPtr data = dataSource.getDataAt(operandType, operandLocation);
 		operands.push_back(data);
 	}
 }
@@ -94,7 +94,7 @@ const void Program::ProgramExecutionEngine::fetchCurrentParameters(std::vector<s
 
 void Program::ProgramExecutionEngine::executeCurrentLine()
 {
-	std::vector<std::reference_wrapper<const SupportedType>> operands;
+	std::vector<Data::UntypedSharedPtr> operands;
 	std::vector<std::reference_wrapper<const Parameter>> parameters;
 
 	// Get everything needed (may throw)
@@ -105,7 +105,7 @@ void Program::ProgramExecutionEngine::executeCurrentLine()
 
 	double result = instruction.execute(parameters, operands);
 
-	this->registers.setDataAt(typeid(PrimitiveType<double>), line.getDestinationIndex(), result);
+	this->registers.setDataAt(typeid(double), line.getDestinationIndex(), result);
 }
 
 double Program::ProgramExecutionEngine::executeProgram(const bool ignoreException)
@@ -141,5 +141,5 @@ double Program::ProgramExecutionEngine::executeProgram(const bool ignoreExceptio
 
 	// Returns the 0-indexed register. 
 	// cast to primitiveType<double> to enable cast to double.
-	return (const PrimitiveType<double>&)this->registers.getDataAt(typeid(PrimitiveType<double>), 0);
+	return *(this->registers.getDataAt(typeid(double), 0).getSharedPointer<const double>());
 }

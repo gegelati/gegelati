@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
 #include "program/program.h"
@@ -17,7 +17,7 @@ class TPGExecutionEngineTest : public ::testing::Test {
 protected:
 	const size_t size1{ 24 };
 	const size_t size2{ 32 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e = NULL;
 	std::vector<std::shared_ptr<Program::Program>> progPointers;
@@ -42,11 +42,11 @@ protected:
 
 	virtual void SetUp() {
 		// Setup environment
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size2)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
 		// Put a 1 in the dataHandler to make it easy to have non-zero return in Programs.
-		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(PrimitiveType<double>), 0, 1.0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(double), 0, 1.0);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
