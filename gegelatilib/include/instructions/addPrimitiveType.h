@@ -27,12 +27,10 @@ namespace Instructions {
 			const std::vector<Data::UntypedSharedPtr>& args) const override;
 	};
 
-
 	template <class T> AddPrimitiveType<T>::AddPrimitiveType() {
 		this->operandTypes.push_back(typeid(T));
 		this->operandTypes.push_back(typeid(T));
 	}
-
 
 	template <class T> double AddPrimitiveType<T>::execute(
 		const std::vector<std::reference_wrapper<const Parameter>>& params,
