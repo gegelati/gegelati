@@ -13,7 +13,7 @@ namespace Instructions {
 	* \brief Template instruction for simplifying the creation of an
 	* Instruction from a c++ lambda function.
 	*
-	* Template parameter T can either be any type.
+	* Template parameter T can be any type.
 	*
 	* Currently, LambdaInstructions all require two operands, with the same
 	* type determined by T.
@@ -54,7 +54,6 @@ namespace Instructions {
 			this->operandTypes.push_back(typeid(T));
 		};
 
-
 		double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
 			const std::vector<Data::UntypedSharedPtr>& args) const override {
@@ -69,7 +68,6 @@ namespace Instructions {
 			return result;
 		}
 	};
-
 
 	/**
 	* \brief Specialization of the LambdaInstruction template class for
