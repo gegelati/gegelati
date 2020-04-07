@@ -4,7 +4,6 @@
 #include <set>
 #include <typeinfo>
 
-
 #include "data/primitiveTypeArray.h"
 
 #include "parameter.h"
