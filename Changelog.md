@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_aaaa.mm.dd_
+## Release version 0.1.0
+_2020.04.07_
 
 ### New features
 * Possibility to import a TPGGraph and its programs with the File::TPGGraphDotImporter class.
