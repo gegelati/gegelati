@@ -68,7 +68,6 @@ jobs:
           install:
             - pip install gcovr
           script:
-            - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build . --target clean
             - export CC=gcc-7
             - export CXX=g++-7
             - cd bin
@@ -80,6 +79,7 @@ jobs:
             - ./bin/runTests
             - cd ..
             - ./RunCoverageLinux.sh
+            - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build . --target runTests
             - sonar-scanner -Dsonar.cfamily.build-wrapper-output=bw-output
 
         - os: linux
