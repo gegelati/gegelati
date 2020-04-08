@@ -79,8 +79,9 @@ jobs:
             - ./bin/runTests
             - cd ..
             - ./RunCoverageLinux.sh
+            - make -C bin/ clean
             - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
-            - sonar-scanner -Dsonar.cfamily.build-wrapper-output=bw-output -X
+            - sonar-scanner -X
 
         - os: linux
           stage: Deploy
