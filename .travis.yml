@@ -79,7 +79,9 @@ jobs:
             - ./bin/runTests
             - cd ..
             - ./RunCoverageLinux.sh
-            - make -C bin/ clean
+            - cd bin
+            - rm -rf *
+            - cd ..
             - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
             - sonar-scanner -X
 
