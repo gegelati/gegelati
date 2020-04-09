@@ -60,8 +60,6 @@ jobs:
                     - gcovr
             sonarcloud:
                 organization: "gegelati"
-                token:
-                  secure: "MPYiAwneqx0WvLOCNHlVJ7Lqw8EUQXh2CjGovG+6WCzZt6sItEoWTog3z2jAE39M+qD/0+UCijPResi+ktSkVyjPVCMPftFKHUN4SQlqQMlXsAi4xkuODYzNKO6FuwGvcStLNH/M+ARbRJfk+wguuZcAow03rs4iXsTjD+0MvE2b78+fdEJMxnNwMFAb7Lu/KtjM3RNTR4n+oph4emu0VujwxfQtG0WzWEmCiS8dbJhLH2kNyxO3OEwzCvTTrtojHEHXolNQ/Csn9Kz7TDI+XArXy2Me0m8qAl7SCm6lYAukzN3f+CMLA8ocs8C8IEyCd6mVVKCCWqdfBwHBWug3Krr1oruQKVWMUUhTHePaSWi7HzJlRca8zc0BpxPXxopfoHYTCT6Yo1InsU7FeRwRQxMilAC7R6re0ukfXma8OpdbbBEYB93OQS8UfU3VHKn+bjFMiqqu3mwDWWHIAQIwy9PkWaCrXynq/e3JlN2lsQGI76twAU/RJc56GhpdN9vZ/ZGN7ROYbfjecQAb8lCLR+ihtlBD8Hzf4XmDGy+Mmk0EySRoOOVX7XRD7FE2JJ671DFpRYZ0TOZvn0z46D1ZXHnn+IKlGytWlO2sHGXblG6oCNSqJ5m446Z18D3R+Ypg8kFLPh0vFwzgAa+CL6kmI/eyxYqnPb9DfsRLNbDSQXM=" # encrypted value of your token
           env:
             - GENERATOR="Unix Makefile"
             - PATH=/opt/python/3.7.1/bin:$PATH
@@ -81,9 +79,10 @@ jobs:
             - ./RunCoverageLinux.sh
             - cd bin
             - rm -rf *
+            - cmake .. -DCMAKE_BUILD_TYPE=Debug
             - cd ..
             - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
-            - sonar-scanner -X
+            - sonar-scanner -Dsonar.login=${SONAR_TOKEN}
 
         - os: linux
           stage: Deploy
