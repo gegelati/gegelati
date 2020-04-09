@@ -3,6 +3,7 @@ language: cpp
 stages:
     - Build
     - Deploy
+    - Analyze
 
 jobs:
     include:
@@ -58,8 +59,6 @@ jobs:
                     - g++-7
                     - doxygen
                     - gcovr
-            sonarcloud:
-                organization: "gegelati"
           env:
             - GENERATOR="Unix Makefile"
             - PATH=/opt/python/3.7.1/bin:$PATH
@@ -77,12 +76,6 @@ jobs:
             - ./bin/runTests
             - cd ..
             - ./RunCoverageLinux.sh
-            - cd bin
-            - rm -rf *
-            - cmake .. -DCMAKE_BUILD_TYPE=Debug
-            - cd ..
-            - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
-            - sonar-scanner -Dsonar.login=${SONAR_TOKEN}
 
         - os: linux
           stage: Deploy
@@ -113,4 +106,32 @@ jobs:
                     tags: true
           after_deploy:
             - ./scripts/trigger_gegelati-apps.sh
+
+        - os: linux
+          dist: xenial
+          stage: Analyze
+          compiler: gcc-7
+          addons:
+            apt:
+                sources:
+                    - ubuntu-toolchain-r-test
+                packages:
+                    - g++-7
+                    - doxygen
+                    - gcovr
+            sonarcloud:
+                organization: "gegelati"
+          env:
+            - GENERATOR="Unix Makefile"
+            - PATH=/opt/python/3.7.1/bin:$PATH
+          install:
+            - pip install gcovr
+          script:
+            - export CC=gcc-7
+            - export CXX=g++-7
+            - cd bin
+            - cmake .. -DCMAKE_BUILD_TYPE=Debug
+            - cd ..
+            - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
+            - sonar-scanner -Dsonar.login=${SONAR_TOKEN}
 
