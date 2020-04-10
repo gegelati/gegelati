@@ -133,5 +133,9 @@ jobs:
             - cmake .. -DCMAKE_BUILD_TYPE=Debug
             - cd ..
             - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
+            - cd bin
+            - ./bin/runTests
+            - gcovr -r .. -e '.*deterministicRandom.h' -e '.*test/.*' -s --sonarqube=sonarqube.xml 
+            - cd ..
             - sonar-scanner -Dsonar.login=${SONAR_TOKEN}
 
