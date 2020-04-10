@@ -139,4 +139,6 @@ jobs:
             - sed 's/ branchesToCover=\"[0-9]\+\" coveredBranches=\"[0-9]\+\"/ /g' sonarqube.xml > sonarqubecleaned.xml # Remove condition coverage info from report, only line coverage interests us.
             - cd ..
             - sonar-scanner -Dsonar.login=${SONAR_TOKEN}
-
+          cache:
+            directories:
+              - '$HOME/.sonar/cache'
