@@ -1,5 +1,16 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_aaaa.mm.dd_
+
+### New features
+* Configure SonarCloud for automated code analysis reports.
+
+### Changes
+
+### Bug fix
+
+
 ## Release version 0.1.0
 _2020.04.07_
 
