@@ -11,10 +11,10 @@ GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framew
 
 ## Continuous Integration
 
-| All branches | [Travis Status](https://travis-ci.com/gegelati/gegelati) |
-| ------------- |  ------------- |
-| master  |  [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=master)](https://travis-ci.com/gegelati/gegelati/branches)  |
-| develop  | [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=develop)](https://travis-ci.com/gegelati/gegelati/branches) |
+| All branches | [Travis Status](https://travis-ci.com/gegelati/gegelati) | [SonarCloud Analysis](https://sonarcloud.io/dashboard?id=gegelati_gegelati)[*](https://sonarcloud.io/organizations/gegelati/quality_gates/show/23677)|
+| ------------- |  ------------- |  ------------- |
+| master  |  [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=master)](https://travis-ci.com/gegelati/gegelati/branches)  | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master)|
+| develop  | [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=develop)](https://travis-ci.com/gegelati/gegelati/branches) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop)|
 
 ## Build and Install the Library
 ### Binaries
