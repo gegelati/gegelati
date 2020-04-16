@@ -197,6 +197,22 @@ namespace File {
 		};
 
 		/**
+		* Disable copy construction.
+		*
+		* Until we see the need for it, there si no reason to enable copy-construction
+		* of TPGGraphDotExporter.
+		*/
+		TPGGraphDotExporter(const TPGGraphDotExporter& other) = delete;
+
+		/**
+		* Disable TPGGraphDotExporter default assignment operator.
+		*
+		* Until we see the need for it, there si no reason to enable assignment
+		* operator of TPGGraphDotExporter.
+		*/
+		TPGGraphDotExporter& operator=(const TPGGraphDotExporter& other) = delete;
+
+		/**
 		* Destructor for the exporter.
 		*
 		* Closes the file.

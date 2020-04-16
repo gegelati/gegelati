@@ -66,9 +66,19 @@ namespace Program {
 				memcpy(this->parameters, other.parameters, this->environment.getMaxNbParameters() * sizeof(Parameter));
 
 				// Copy operand values
-				memcpy(this->operands, other.operands, this->environment.getMaxNbOperands() * sizeof(std::pair<uint64_t, uint64_t>));
+				for (auto idx = 0; idx < this->environment.getMaxNbOperands(); idx++) {
+					this->operands[idx] = other.operands[idx];
+				}
 			}
 		};
+
+		/**
+		* Disable Line default assignment operator.
+		*
+		* Until we see the need for it, there si no reason to enable assignment
+		* operator of Line
+		*/
+		Line& operator=(const Line& other) = delete;
 
 		/**
 		* Destructor of a Program::Line.
