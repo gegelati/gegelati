@@ -4,11 +4,12 @@
 _aaaa.mm.dd_
 
 ### New features
-* Configure SonarCloud for automated code analysis reports.
+* Configure SonarCloud for automated code analysis reports. [Custom quality gate for gegelati](https://sonarcloud.io/organizations/gegelati/quality_gates/show/23677) is a more restrictive version of the default sonar way.
 
 ### Changes
 
 ### Bug fix
+* Minor changes in code to pass SonarCloud quality gate.
 
 
 ## Release version 0.1.0
