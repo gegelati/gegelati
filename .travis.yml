@@ -16,7 +16,7 @@ jobs:
             - choco install visualstudio2019-workload-vctools
           install:
             - mkdir doxygen && cd doxygen
-            - curl -o doxygen.zip http://doxygen.nl/files/doxygen-1.8.16.windows.x64.bin.zip
+            - curl -o doxygen.zip https://netix.dl.sourceforge.net/project/doxygen/rel-1.8.16/doxygen-1.8.16.windows.bin.zip
             - unzip doxygen.zip
             - export PATH=$PATH:$PWD
             - cd ..
