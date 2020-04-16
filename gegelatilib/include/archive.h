@@ -99,6 +99,14 @@ public:
 	Archive(size_t size = 50, double archivingProbability = 1.0, size_t initialSeed = 0) : archivingProbability{ archivingProbability }, maxSize{ size }, recordings(), rng(initialSeed) {};
 
 	/**
+	* Disable Archive copy construction.
+	*
+	* Until we see the need for it, there si no reason to enable copy-construction
+	* of Archive.
+	*/
+	Archive(const Archive& other) = delete;
+
+	/**
 	* \brief Destructor of the class.
 	*
 	* In addition to default behavior, free all the memory associated to the
