@@ -58,6 +58,14 @@ namespace Program {
 		};
 
 		/**
+		* Disable Program default assignment operator.
+		*
+		* Until we see the need for it, there si no reason to enable assignment
+		* operator of Program.
+		*/
+		Program& operator=(const Program& other) = delete;
+
+		/**
 		* \brief Destructor for the Program class.
 		*
 		* This destructor deallocates all memory allocated for Program lines (if any).
