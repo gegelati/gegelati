@@ -75,7 +75,7 @@ TEST_F(TPGTest, TPGVertexEdgesSettersGetters) {
 	ASSERT_NO_THROW(action.addIncomingEdge(&edge)) << "Adding an outgoing edge to an Action vertex failed.";
 
 	ASSERT_EQ(team.getOutgoingEdges().size(), 1) << "Size of the outgoing edges of the node is incorrect.";
-	ASSERT_EQ(std::count(team.getOutgoingEdges().begin(), team.getOutgoingEdges().end(), (const TPG::TPGEdge*)&edge), 1) << "TPGEdge pointer contained in the outgoingEdges is incorrect.";
+	ASSERT_EQ(std::count(team.getOutgoingEdges().begin(), team.getOutgoingEdges().end(), (const TPG::TPGEdge*) & edge), 1) << "TPGEdge pointer contained in the outgoingEdges is incorrect.";
 
 	// Add the same edge again.. Nothing should happen, but it should not fail.
 	ASSERT_NO_THROW(team.addOutgoingEdge(&edge)) << "Adding an outgoing edge to a Team vertex, even though it is already there, failed unexpectedly.";
@@ -192,10 +192,8 @@ TEST_F(TPGTest, TPGGraphGetEdges) {
 		}), 1);
 
 	// Attempt an impossible add.
-	try { tpg.addNewEdge(vertex1, vertex0, progPointer); }
-	catch (std::runtime_error e) {
-		// do nothing
-	}
+	ASSERT_THROW(tpg.addNewEdge(vertex1, vertex0, progPointer), std::runtime_error) << "An exception should be thrown when adding an impossible edge.";
+
 	ASSERT_EQ(tpg.getEdges().size(), 1) << "Edges of the graph have incorrect size after unsuccessful add.";
 }
 
