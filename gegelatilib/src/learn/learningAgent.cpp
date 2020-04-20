@@ -99,7 +99,8 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 void Learn::LearningAgent::decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results)
 {
 	auto i = 0;
-	while (i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots)) {
+	while (i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots)
+		&& results.size() > 0) {
 		// If the root is an action, do not remove it!
 		if (typeid(*results.begin()->second) != typeid(TPG::TPGAction)) {
 			tpg.removeVertex(*results.begin()->second);

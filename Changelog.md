@@ -10,6 +10,7 @@ _aaaa.mm.dd_
 
 ### Bug fix
 * Minor changes in code to pass SonarCloud quality gate.
+* LearningAgent::decimateWorstRoot method crash.
 
 
 ## Release version 0.1.0
