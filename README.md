@@ -90,4 +90,4 @@ target_link_libraries(YOUR_EXECUTABLE ${GEGELATI_LIBRARIES})
 _(10.000 pages of documentation (or less) coming soon...)_
 
 ## License
-This project is distributed under the CeCILL-C license (see [LICENSE file](LICENSE)).
+This project is distributed under the CeCILL-C license (see [LICENSE file](LICENSE.txt)).
