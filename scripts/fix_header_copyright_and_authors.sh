@@ -24,6 +24,11 @@ DIR=$(cd `dirname $0` && echo `git rev-parse --show-toplevel`)
 
 cd $DIR
 
+# Check for modification in versionned files
+git update-index -q --refresh
+git diff-index --quiet HEAD -- || printf "Some versionned files have untracked modification.\nCommit, stash or reset before launching this script.\nScript exiting.";
+git diff-index --quiet HEAD -- || exit;
+
 # Extract pattern info from copyright
 PATTERN_START=$(head -1 $SCRIPT_DIR/$COPYRIGHT_TEMPLATE | sed "s/(%%DATE%%)/\\\(.+\\\)/g")
 PATTERN_STOP=$(tail -1 $SCRIPT_DIR/$COPYRIGHT_TEMPLATE)
@@ -201,5 +206,9 @@ echo " Done."
 wait
 )
 rm $TMPFILE
+
+# Karol's addition
+git add -u
+git commit -m "(Releng) Fix copyright in source code." --author="Vaader Bot <vaader-bot@insa-rennes.fr>"
 
 echo ""
