@@ -61,7 +61,7 @@ for SRC_FILE in $SRC_FILES; do
 	  # Replace it with the template
 	  TEMP_FILE=mktemp
 	  head -$(( START_LINE-1 )) $SRC_FILE >> $TEMP_FILE
-	  cat $SCRIPT_DIR/$COPYRIGHT_TEMPLATE | sed 's/^/ * /' >> $TEMP_FILE
+	  cat $SCRIPT_DIR/$COPYRIGHT_TEMPLATE | sed 's/^/ * /' | sed 's/^ \* $/ */' >> $TEMP_FILE
 	  tail +$(( STOP_LINE + 1 )) $SRC_FILE >> $TEMP_FILE
 	  mv $TEMP_FILE "${SRC_FILE}"
 
@@ -70,7 +70,7 @@ for SRC_FILE in $SRC_FILES; do
 	  # Insert it at the beginning
 	  TEMP_FILE=mktemp
 	  echo "/**" >> $TEMP_FILE
-      cat $SCRIPT_DIR/$COPYRIGHT_TEMPLATE | sed 's/^/ * /' >> $TEMP_FILE
+      cat $SCRIPT_DIR/$COPYRIGHT_TEMPLATE | sed 's/^/ * /' | sed 's/^ \* $/ */' >> $TEMP_FILE
 	  printf " */\n\n" >> $TEMP_FILE
 	  cat $SRC_FILE >> $TEMP_FILE
 	  mv $TEMP_FILE "${SRC_FILE}"
@@ -127,7 +127,8 @@ function fixFile {
 	esac
 
 	FILEAUTHORLISTWITHDATES=`git log --follow --use-mailmap --date=format:'%Y' --format='%ad %aN <%aE>' "$file" | sort -u`
-    FILEAUTHORLIST=`echo "$FILEAUTHORLISTWITHDATES" | rev | cut -d' ' -f1 | rev | sort -u`
+    # Karol's Modification: remove carriage return because it is messing with grep in the for loop.
+    FILEAUTHORLIST=`echo "$FILEAUTHORLISTWITHDATES" | rev | cut -d' ' -f1 | rev | sort -u | sed 's/\r//'`
     for AUTHOR in $FILEAUTHORLIST; do
 		AUTHORDATELIST=`echo "$FILEAUTHORLISTWITHDATES" | grep "$AUTHOR" | cut -d' ' -f1 | sort -u`
 		AUTHORUPPERDATE=`echo "$AUTHORDATELIST" | tail -n 1`
