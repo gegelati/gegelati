@@ -3,6 +3,7 @@
 COPYRIGHT_TEMPLATE="copyright_template.txt"
 SRC_FOLDERS="./gegelatilib/ ./test/"
 EXTENSION_REGEX=".*\.\(cpp\|c\|h\)"
+COMMIT_AUTHOR="Vaader Bot <vaader-bot@insa-rennes.fr>"
 
 #########
 ##
@@ -131,7 +132,7 @@ function fixFile {
 			;;
 	esac
 
-	FILEAUTHORLISTWITHDATES=`git log --follow --use-mailmap --date=format:'%Y' --format='%ad %aN <%aE>' "$file" | sort -u`
+	FILEAUTHORLISTWITHDATES=`git log --follow --use-mailmap --date=format:'%Y' --format='%ad %aN <%aE>' "$file" | sed -e "/^[0-9]* $COMMIT_AUTHOR$/d" | sort -u`
     # Karol's Modification: remove carriage return because it is messing with grep in the for loop.
     FILEAUTHORLIST=`echo "$FILEAUTHORLISTWITHDATES" | rev | cut -d' ' -f1 | rev | sort -u | sed 's/\r//'`
     for AUTHOR in $FILEAUTHORLIST; do
@@ -209,6 +210,6 @@ rm $TMPFILE
 
 # Karol's addition
 git add -u
-git commit -m "(Releng) Fix copyright in source code." --author="Vaader Bot <vaader-bot@insa-rennes.fr>"
+git commit -m "(Releng) Fix copyright in source code." --author="$COMMIT_AUTHOR"
 
 echo ""
