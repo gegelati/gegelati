@@ -1,16 +1,17 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_aaaa.mm.dd_
+## Release version 0.1.1
+_2020.04.28_
 
 ### New features
 * Configure SonarCloud for automated code analysis reports. [Custom quality gate for gegelati](https://sonarcloud.io/organizations/gegelati/quality_gates/show/23677) is a more restrictive version of the default sonar way.
+* New script to update license in all files.
 
 ### Changes
 
 ### Bug fix
 * Minor changes in code to pass SonarCloud quality gate.
-* LearningAgent::decimateWorstRoot method crash.
+* Fix LearningAgent::decimateWorstRoot method crash when too many root TPGAction were present in the decimated graph.
 
 
 ## Release version 0.1.0
