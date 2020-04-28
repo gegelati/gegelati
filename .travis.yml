@@ -3,6 +3,7 @@ language: cpp
 stages:
     - Build
     - Deploy
+    - Analyze
 
 jobs:
     include:
@@ -15,7 +16,7 @@ jobs:
             - choco install visualstudio2019-workload-vctools
           install:
             - mkdir doxygen && cd doxygen
-            - curl -o doxygen.zip http://doxygen.nl/files/doxygen-1.8.16.windows.x64.bin.zip
+            - curl -o doxygen.zip https://netix.dl.sourceforge.net/project/doxygen/rel-1.8.16/doxygen-1.8.16.windows.bin.zip
             - unzip doxygen.zip
             - export PATH=$PATH:$PWD
             - cd ..
@@ -47,6 +48,7 @@ jobs:
                 branch: master
             
         - os: linux
+          dist: xenial
           stage: Build
           compiler: gcc-7
           addons:
@@ -74,7 +76,7 @@ jobs:
             - ./bin/runTests
             - cd ..
             - ./RunCoverageLinux.sh
-            
+
         - os: linux
           stage: Deploy
           script:
@@ -104,3 +106,39 @@ jobs:
                     tags: true
           after_deploy:
             - ./scripts/trigger_gegelati-apps.sh
+
+        - os: linux
+          dist: xenial
+          stage: Analyze
+          compiler: gcc-7
+          addons:
+            apt:
+                sources:
+                    - ubuntu-toolchain-r-test
+                packages:
+                    - g++-7
+                    - doxygen
+                    - gcovr
+            sonarcloud:
+                organization: "gegelati"
+          env:
+            - GENERATOR="Unix Makefile"
+            - PATH=/opt/python/3.7.1/bin:$PATH
+          install:
+            - pip install gcovr
+          script:
+            - export CC=gcc-7
+            - export CXX=g++-7
+            - cd bin
+            - cmake .. -DCMAKE_BUILD_TYPE=Debug
+            - cd ..
+            - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
+            - cd bin
+            - ./bin/runTests
+            - gcovr -r .. -s --sonarqube=sonarqube.xml 
+            - sed 's/ branchesToCover=\"[0-9]\+\" coveredBranches=\"[0-9]\+\"/ /g' sonarqube.xml > sonarqubecleaned.xml # Remove condition coverage info from report, only line coverage interests us.
+            - cd ..
+            - sonar-scanner -Dsonar.login=${SONAR_TOKEN}
+          cache:
+            directories:
+              - '$HOME/.sonar/cache'

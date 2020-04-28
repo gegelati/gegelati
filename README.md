@@ -1,6 +1,10 @@
 # <img src="./doc/img/logo-full.svg" alt="GEGELATI" width="350"/>
 _Generic Evolvable Graphs for Efficient Learning of Artificial Tangled Intelligence_
 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=t0Ta5Vo5h7s
+" target="_blank"><img align="right" src="./doc/img/GEGELATI_video_screenshoot.png"
+alt="Introduction to GEGELATI" width="260" border="0" /></a>
+
 GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framework for training artificial intelligence based on [Tangled Program Graphs (TPGs)](http://stephenkelly.ca/research_files/Kelly-Stephen-PhD-CSCI-June-2018.pdf). The purpose of this framework, developed as a C++ shared library, is to make it as easy and as fast as possible and to train an agent on a new learning environment. The C++ library is developed to be portable, fully documented, and thoroughly unit tested to ensure its maintainability. GEGELATI is developed at the Institute of Electronics and Telecommunications-Rennes (IETR).
 
 ## Overview
@@ -11,10 +15,10 @@ GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framew
 
 ## Continuous Integration
 
-| All branches | [Travis Status](https://travis-ci.com/gegelati/gegelati) |
-| ------------- |  ------------- |
-| master  |  [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=master)](https://travis-ci.com/gegelati/gegelati/branches)  |
-| develop  | [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=develop)](https://travis-ci.com/gegelati/gegelati/branches) |
+| All branches | [Travis Status](https://travis-ci.com/gegelati/gegelati) | [SonarCloud Analysis](https://sonarcloud.io/dashboard?id=gegelati_gegelati)[*](https://sonarcloud.io/organizations/gegelati/quality_gates/show/23677)|
+| ------------- |  ------------- |  ------------- |
+| master  |  [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=master)](https://travis-ci.com/gegelati/gegelati/branches)  | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master)|
+| develop  | [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=develop)](https://travis-ci.com/gegelati/gegelati/branches) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop)|
 
 ## Build and Install the Library
 ### Binaries
@@ -90,4 +94,4 @@ target_link_libraries(YOUR_EXECUTABLE ${GEGELATI_LIBRARIES})
 _(10.000 pages of documentation (or less) coming soon...)_
 
 ## License
-This project is distributed under the CeCILL-C license (see [LICENSE file](LICENSE)).
+This project is distributed under the CeCILL-C license (see [LICENSE file](LICENSE.txt)).
