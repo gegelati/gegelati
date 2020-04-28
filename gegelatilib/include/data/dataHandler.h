@@ -44,13 +44,6 @@
 
 #include "data/untypedSharedPtr.h"
 
-namespace std {
-	/*
-	* \brief  Equality operator to std to enable use of standard algorithm on vectors of reference_wrapper of const std::type_info.
-	*/
-	bool operator==(const std::reference_wrapper<const std::type_info>& r0, const std::reference_wrapper<const std::type_info>& r1);
-}
-
 namespace Data {
 	/**
 	* \brief Base class for all sources of data to be accessed by a TPG Instruction executed within a Program.
