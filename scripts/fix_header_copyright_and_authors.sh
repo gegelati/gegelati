@@ -210,6 +210,6 @@ rm $TMPFILE
 
 # Karol's addition
 git add -u
-git commit -m "(Releng) Fix copyright in source code." --author="$COMMIT_AUTHOR"
+git -c user.name="$(echo $COMMIT_AUTHOR | cut -d' ' -f1,2)" -c user.email="$(echo $COMMIT_AUTHOR | cut -d'<' -f2 | cut -d'>' -f1)" commit -m "(Releng) Fix copyright in source code."
 
 echo ""
