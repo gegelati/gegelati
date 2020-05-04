@@ -191,7 +191,7 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands) {
 	Mutator::RNG rng;
 
 	// Setup for this test
-	set.add(*(new Instructions::LambdaInstruction<double[3]>([](const double* a, const double* b)->double {
+	set.add(*(new Instructions::LambdaInstruction<const double[3], const double[3]>([](const double* a, const double* b)->double {
 		return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
 		})));
 

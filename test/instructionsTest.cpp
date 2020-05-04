@@ -109,8 +109,8 @@ TEST(InstructionsTest, LambdaInstructionPrimitiveType) {
 
 	auto minus = [](double a, double b) {return a - b; };
 
-	Instructions::LambdaInstruction<double>* instruction;
-	ASSERT_NO_THROW(instruction = new Instructions::LambdaInstruction<double>(minus)) << "Constructing a new lambdaInstruction failed.";
+	Instructions::LambdaInstruction<double, double>* instruction;
+	ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<double, double>(minus))) << "Constructing a new lambdaInstruction failed.";
 
 	ASSERT_EQ(instruction->execute({}, vect), -2.9) << "Result returned by the instruction is not as expected.";
 
@@ -133,8 +133,8 @@ TEST(InstructionsTest, LambdaInstructionArray) {
 	};
 
 	// Build the instruction
-	Instructions::LambdaInstruction<double[3]>* instruction;
-	ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<double[3] >(mac)));
+	Instructions::LambdaInstruction<const double[3], const double[3]>* instruction;
+	ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<const double[3], const double[3] >(mac)));
 	ASSERT_NE(instruction, nullptr);
 
 	// Test execution

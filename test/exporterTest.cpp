@@ -43,7 +43,7 @@ protected:
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
-		set.add(*(new Instructions::LambdaInstruction<double>(minus)));
+		set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
 		e = new Environment(set, vect, 8);
 		tpg = new TPG::TPGGraph(*e);
