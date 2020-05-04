@@ -21,6 +21,7 @@ namespace Instructions {
 	*/
 	template< typename First, typename... Rest>
 	class LambdaInstruction : public Instructions::Instruction {
+
 	protected:
 
 		/**
@@ -83,30 +84,35 @@ namespace Instructions {
 				return 0.0;
 			}
 
-			// const evaluated lambda expression are needed because type of arg will
-			// not be the same if First is an array, and if it is not. 
-			// Fort this reason, ternary operator can not be used.
-			const auto& arg1 = [&]() {
-				if constexpr (!std::is_array<First>::value) {
-					return *(args.at(0).getSharedPointer<const First>());
-				}
-				else {
-					return (args.at(0).getSharedPointer<const std::remove_all_extents_t<First>[]>()).get();
-				};
-			}();
-
 			size_t i = args.size() - 1;
 			// Using i-- as expansion seems to happen with parameters evaluated from right to left.
-			double result = this->func(arg1,
-				[&]() {
-					if constexpr (!std::is_array<Rest>::value) {
-						return *(args.at(i--).getSharedPointer<const Rest>());
-					}
-					else {
-						return (args.at(i--).getSharedPointer<const std::remove_all_extents_t<Rest>[]>()).get();
-					};
-				}()...);
+			double result = this->func(getDataFromUntypedSharedPtr<First>(args, 0), getDataFromUntypedSharedPtr<Rest>(args, i--)...);
 			return result;
+		};
+
+	private:
+		/**
+		* \brief Function to retrieve the shared pointer from any datatype in the
+		* execute method.
+		*
+		* An inline lambda expression could be used in the execute method, with
+		* a variadic parameter pack expansion. Unfortunately not supported by
+		* GCC7.5
+		*
+		* Template parameter T is the Type of the retrieved argument.
+		*
+		* \param[in] args the UntypedSharedPtr of all arguments.
+		* \param[in] idx the current index in the args list.
+		* \return the appropriate argument for this->func.
+		*/
+		template<typename T>
+		constexpr auto getDataFromUntypedSharedPtr(const std::vector<Data::UntypedSharedPtr>& args, size_t idx) const {
+			if constexpr (!std::is_array<T>::value) {
+				return *(args.at(idx).getSharedPointer<const T>());
+			}
+			else {
+				return (args.at(idx).getSharedPointer<const std::remove_all_extents_t<T>[]>()).get();
+			};
 		};
 	};
 };
