@@ -86,6 +86,8 @@ namespace Instructions {
 
 			size_t i = args.size() - 1;
 			// Using i-- as expansion seems to happen with parameters evaluated from right to left.
+			// This assumption is valid within GCC7 and MSVC19. In case of failure on another
+			// compiler, a more portable solution should be found.
 			double result = this->func(getDataFromUntypedSharedPtr<First>(args, 0), getDataFromUntypedSharedPtr<Rest>(args, i--)...);
 			return result;
 		};
