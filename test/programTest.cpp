@@ -218,7 +218,7 @@ TEST_F(ProgramTest, RemoveProgramLine) {
 
 TEST_F(ProgramTest, identifyIntronsAndIsIntron) {
 	// Create a new environment with instruction accessing arrays
-	set.add(*new Instructions::LambdaInstruction<double[2]>([](const double a[2], const double b[2]) {
+	set.add(*new Instructions::LambdaInstruction<const double[2], const double[2]>([](const double a[2], const double b[2]) {
 		return a[0] * b[0] + a[1] * b[1];
 		}));
 

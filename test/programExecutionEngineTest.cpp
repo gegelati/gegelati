@@ -70,7 +70,7 @@ protected:
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
-		set.add(*new Instructions::LambdaInstruction<double[2]>([](const double a[2], const double b[2]) {
+		set.add(*new Instructions::LambdaInstruction<const double[2], const double[2]>([](const double a[2], const double b[2]) {
 			return a[0] * b[0] + a[1] * b[1];
 			}));
 

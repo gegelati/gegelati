@@ -183,11 +183,11 @@ namespace Data {
 		// with a size inferior to the container.
 		std::string typeName = DEMANGLE_TYPEID_NAME(type.name());
 		std::string regex{ DEMANGLE_TYPEID_NAME(typeid(T).name()) };
-		regex.append("\\s*\\[([0-9]+)\\]");
+		regex.append("\\s*(const\\s*)?\\[([0-9]+)\\]");
 		std::regex arrayType(regex);
 		std::cmatch cm;
 		if (std::regex_match(typeName.c_str(), cm, arrayType)) {
-			int size = std::atoi(cm[1].str().c_str());
+			int size = std::atoi(cm[2].str().c_str());
 			if (size <= this->nbElements) {
 				return this->nbElements - size + 1;
 			}

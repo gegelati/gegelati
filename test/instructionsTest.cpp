@@ -41,7 +41,6 @@
 #include "data/dataHandler.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
-#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 
 TEST(InstructionsTest, ConstructorDestructorCall) {
@@ -132,76 +131,6 @@ TEST(InstructionsTest, Execute) {
 	ASSERT_EQ(i->execute({ }, vect), 0.0) << "Execute method of MultByConstParam<double,int> returns an incorrect value with invalid params.";
 	delete i;
 }
-
-TEST(InstructionsTest, LambdaInstructionPrimitiveType) {
-	double a{ 2.6 };
-	double b = 5.5;
-	int c = 3;
-
-	std::vector<Data::UntypedSharedPtr> vect;
-	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<double>());
-	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
-
-	auto minus = [](double a, double b) {return a - b; };
-
-	Instructions::LambdaInstruction<double>* instruction;
-	ASSERT_NO_THROW(instruction = new Instructions::LambdaInstruction<double>(minus)) << "Constructing a new lambdaInstruction failed.";
-
-	ASSERT_EQ(instruction->execute({}, vect), -2.9) << "Result returned by the instruction is not as expected.";
-
-	// Execute with wrong types of operands.
-	vect.pop_back();
-	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
-	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
-
-	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";
-}
-
-#define arrayA  1.1, 2.2, 3.3
-#define arrayB  6.5, 4.3, 2.1
-TEST(InstructionsTest, LambdaInstructionArray) {
-	double arrA[3]{ arrayA };
-	double arrB[3]{ arrayB };
-
-	std::function<double(const double[3], const double[3])> mac = [](const double a[3], const double b[3]) {
-		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-	};
-
-	// Build the instruction
-	Instructions::LambdaInstruction<double[3]>* instruction;
-	ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<double[3] >(mac)));
-	ASSERT_NE(instruction, nullptr);
-
-	// Test execution
-	std::vector<Data::UntypedSharedPtr> arguments;
-	arguments.emplace_back(std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(new double[3]{ arrayA }));
-	arguments.emplace_back(std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(new double[3]{ arrayB }));
-	ASSERT_EQ(instruction->execute({}, arguments), 23.54) << "Result returned by the instruction is not as expected.";
-}
-
-//TEST(InstructionsTest, LambdaInstructionSupportedType) {
-//	Data::PrimitiveType<double> a{ 2.6 };
-//	Data::PrimitiveType<double> b = 5.5;
-//	Data::PrimitiveType<int> c = 3;
-//
-//	std::vector<Data::UntypedSharedPtr> vect;
-//	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<double>>());
-//	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<Data::PrimitiveType<double>>());
-//
-//	auto minus = [](Data::PrimitiveType<double> a, Data::PrimitiveType<double> b) {return (double)a - (double)b; };
-//
-//	Instructions::LambdaInstruction<Data::PrimitiveType<double>>* instruction;
-//	ASSERT_NO_THROW(instruction = new Instructions::LambdaInstruction<Data::PrimitiveType<double>>(minus)) << "Constructing a new lambdaInstruction //failed.";
-//
-//	ASSERT_EQ(instruction->execute({}, vect), -2.9) << "Result returned by the instruction is not as expected.";
-//
-//	// Execute with wrong types of operands.
-//	vect.pop_back();
-//	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor< Data::PrimitiveType<int> >());
-//	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
-//
-//	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";
-//}
 
 TEST(InstructionsTest, SetAdd) {
 	Instructions::Set s;
