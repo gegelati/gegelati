@@ -5,9 +5,11 @@ _aaaa.mm.dd_
 
 ### New features
 * The Instructions::LambdaInstruction template class now accepts any number and type of arguments instead of only two. To use the feature, the LambdaInstruction should be instanciated with the list of data types of its arguments as a template parameter. For example `Instructions::LambdaInstruction<int, double, const float[2]>` is a lamda instructions requiring 3 arguments for its execution, whose types are `int`, `double`, and `const float[2]`, respectively.
+* Learning agents (`Learn::LearningAgent` and `Learn::ParallelLearningAgent`) now keep a record of the root `TPGVertex` that has led to the best `EvaluationResult` throughout the training process. This root and the associated evaluation result can be retrieved using the new `getBestRoot()` method.
 
 ### Changes
 * Instructions:LambdaInstruction evolution listed in New Features lead to incompatibility with previous version. To update your code, simply double the template parameter of your previously existing LambdaInstruction. For example `LambdaInstruction<double>` becomes `LambdaInstruction<double, double>`.
+* The behavior of the `LearningAgent::keepBestPolicy()` is now based on the new `bestRoot` attribute, and not on a new evaluation of the remaining roots.
 
 ### Bug fix
 
