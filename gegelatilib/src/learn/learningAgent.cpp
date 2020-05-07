@@ -225,13 +225,13 @@ void Learn::LearningAgent::keepBestPolicy()
 {
 	// Evaluate all roots
 	if (this->tpg.hasVertex(*this->bestRoot.first)) {
-		auto bestRoot = this->bestRoot.first;
+		auto bestRootVertex = this->bestRoot.first;
 
 		// Remove all but the best root from the tpg
 		while (this->tpg.getNbRootVertices() != 1) {
 			auto roots = this->tpg.getRootVertices();
 			for (auto root : roots) {
-				if (root != bestRoot) {
+				if (root != bestRootVertex) {
 					tpg.removeVertex(*root);
 				}
 			}

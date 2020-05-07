@@ -74,7 +74,7 @@ namespace Learn {
 		TPG::TPGGraph tpg;
 
 		/// Pointer to the best root encountered during training, together with its EvaluationResult.
-		std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult> > bestRoot;
+		std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult> > bestRoot{ nullptr, nullptr };
 
 		/// Random Number Generator for this Learning Agent
 		Mutator::RNG rng;
@@ -95,8 +95,7 @@ namespace Learn {
 			env(iSet, le.getDataSources(), nbRegs),
 			tpg(this->env),
 			params{ p },
-			archive(p.archiveSize, p.archivingProbability),
-			bestRoot{ nullptr, nullptr }
+			archive(p.archiveSize, p.archivingProbability)
 		{
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
