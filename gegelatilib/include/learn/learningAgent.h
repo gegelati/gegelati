@@ -236,10 +236,10 @@ namespace Learn {
 		const std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>& getBestRoot() const;
 
 		/**
-		* \brief This method evaluates all roots and only keeps the one
-		* leading to the best average score in the TPGGraph.
+		* \brief This method keeps only the bestRoot policy in the TPGGraph.
 		*
-		* The LearningMode::VALIDATION is used to select the best root.
+		* If the TPGVertex referenced in the bestRoot attribute is no longer
+		* a TPGVertex of the TPGGraph, nothing happens.
 		*/
 		void keepBestPolicy();
 	};

@@ -224,17 +224,16 @@ const std::pair<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>
 void Learn::LearningAgent::keepBestPolicy()
 {
 	// Evaluate all roots
-	auto results = this->evaluateAllRoots(0, LearningMode::VALIDATION);
-	auto iterResults = results.end();
-	iterResults--;
-	auto bestRoot = iterResults->second;
+	if (this->tpg.hasVertex(*this->bestRoot.first)) {
+		auto bestRoot = this->bestRoot.first;
 
-	// Remove all but the best root from the tpg
-	while (this->tpg.getNbRootVertices() != 1) {
-		auto roots = this->tpg.getRootVertices();
-		for (auto root : roots) {
-			if (root != bestRoot) {
-				tpg.removeVertex(*root);
+		// Remove all but the best root from the tpg
+		while (this->tpg.getNbRootVertices() != 1) {
+			auto roots = this->tpg.getRootVertices();
+			for (auto root : roots) {
+				if (root != bestRoot) {
+					tpg.removeVertex(*root);
+				}
 			}
 		}
 	}
