@@ -49,7 +49,7 @@ TPG::TPGGraph::~TPGGraph()
 	}
 }
 
-TPG::TPGGraph & TPG::TPGGraph::operator=(TPGGraph model)
+TPG::TPGGraph& TPG::TPGGraph::operator=(TPGGraph model)
 {
 	swap(*this, model);
 	return *this;
@@ -110,6 +110,11 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
 	return result;
 }
 
+bool TPG::TPGGraph::hasVertex(const TPG::TPGVertex& vertex) const
+{
+	return std::find(this->vertices.cbegin(), this->vertices.cend(), &vertex) != this->vertices.cend();
+}
+
 void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 {
 	// Remove the vertex based on a pointer comparison.
@@ -121,7 +126,7 @@ void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 		std::list<TPGEdge*> inEdgesToRemove = (*iterator)->getIncomingEdges();
 		for (auto inEdge : inEdgesToRemove) {
 			this->removeEdge(*inEdge);
-		}		
+		}
 		// copy outEdges set for removal 
 		std::list<TPGEdge*> outEdgesToRemove = (*iterator)->getOutgoingEdges();
 		for (auto outEdge : outEdgesToRemove) {
@@ -214,7 +219,7 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 	if (iterator == this->edges.end()) {
 		throw std::runtime_error("Cannot erase a edge that does not belong to the graph");
 	}
-	
+
 	(*this->findVertex(iterator->getSource()))->removeOutgoingEdge(&(*iterator));
 	(*this->findVertex(iterator->getDestination()))->removeIncomingEdge(&(*iterator));
 	// Remove the edge

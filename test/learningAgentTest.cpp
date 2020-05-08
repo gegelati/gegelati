@@ -145,6 +145,49 @@ TEST_F(LearningAgentTest, GetArchive) {
 	ASSERT_NO_THROW(la.getArchive()) << "Cannot get the archive of a LearningAgent.";
 }
 
+TEST_F(LearningAgentTest, BestRoot) {
+	// test bestRoot methods
+	Learn::LearningAgent la(le, set, params);
+
+	// Check null at build
+	ASSERT_EQ(la.getBestRoot().first, nullptr) << "Best root should be a nullptr after building a new LearningAgent.";
+	ASSERT_EQ(la.getBestRoot().second, nullptr) << "Best root EvaluationResult should be a nullptr after building a new LearningAgent.";
+
+	// Check null at init
+	la.init();
+	ASSERT_EQ(la.getBestRoot().first, nullptr) << "Best root should be a nullptr after init of a LearningAgent.";
+	ASSERT_EQ(la.getBestRoot().second, nullptr) << "Best root EvaluationResult should be a nullptr after init of a LearningAgent.";
+
+	// Update with a fake result for a root of the graph
+	const TPG::TPGVertex* root = *la.getTPGGraph().getRootVertices().begin();
+	ASSERT_NO_THROW(la.updateBestRoot(root, std::make_shared<Learn::EvaluationResult>(1.0)));
+	ASSERT_EQ(la.getBestRoot().first, root) << "Best root not updated properly.";
+	ASSERT_EQ(la.getBestRoot().second->getResult(), 1.0) << "Best root not updated properly.";
+
+	// Update with a fake better result for another root of the graph
+	const TPG::TPGVertex* root2 = *(la.getTPGGraph().getRootVertices().begin() + 1);
+	ASSERT_NO_THROW(la.updateBestRoot(root2, std::make_shared<Learn::EvaluationResult>(2.0)));
+	ASSERT_EQ(la.getBestRoot().first, root2) << "Best root not updated properly.";
+	ASSERT_EQ(la.getBestRoot().second->getResult(), 2.0) << "Best root not updated properly.";
+
+	// Update with a fake worse result for another root of the graph
+	const TPG::TPGVertex* root3 = *(la.getTPGGraph().getRootVertices().begin() + 2);
+	ASSERT_NO_THROW(la.updateBestRoot(root3, std::make_shared<Learn::EvaluationResult>(1.5)));
+	ASSERT_EQ(la.getBestRoot().first, root2) << "Best root not updated properly.";
+	ASSERT_EQ(la.getBestRoot().second->getResult(), 2.0) << "Best root not updated properly.";
+
+	// Update with a root not from the graph
+	TPG::TPGTeam fakeRoot;
+	ASSERT_NO_THROW(la.updateBestRoot(&fakeRoot, std::make_shared<Learn::EvaluationResult>(3.0)));
+	ASSERT_EQ(la.getBestRoot().first, &fakeRoot) << "Best root not updated properly.";
+	ASSERT_EQ(la.getBestRoot().second->getResult(), 3.0) << "Best root not updated properly.";
+
+	// Update with a worse EvaluationResult (but still updated because previous Root is not in the TPGGraph
+	ASSERT_NO_THROW(la.updateBestRoot(root3, std::make_shared<Learn::EvaluationResult>(1.5)));
+	ASSERT_EQ(la.getBestRoot().first, root3) << "Best root not updated properly.";
+	ASSERT_EQ(la.getBestRoot().second->getResult(), 1.5) << "Best root not updated properly.";
+}
+
 TEST_F(LearningAgentTest, DecimateWorstRoots) {
 	params.archiveSize = 50;
 	params.archivingProbability = 0.5;
@@ -205,6 +248,9 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 	// Train a second generation, because most roots were removed, a root actions have appeared
 	// and the training algorithm will attempt to remove them.
 	ASSERT_NO_THROW(la.trainOneGeneration(0)) << "Training for one generation failed.";
+
+	// Check that bestRoot has been set
+	ASSERT_NE(la.getBestRoot().first, nullptr);
 }
 
 TEST_F(LearningAgentTest, Train) {
@@ -378,6 +424,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism) {
 		iterSequential++;
 	}
 
+	// Check determinism of bestRoot score
+	ASSERT_EQ(la.getBestRoot().second, plaSequential.getBestRoot().second);
+
 	// Check determinism of the number of RNG calls.
 	ASSERT_EQ(nextInt, nextIntSequential) << "Mutator::RNG was called a different number of time in parallel and sequential execution.";
 
@@ -398,6 +447,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism) {
 		iterSequential++;
 		iterParallel++;
 	}
+
+	// Check determinism of bestRoot score
+	ASSERT_EQ(plaSequential.getBestRoot().second, plaParallel.getBestRoot().second);
 
 	// Check determinism of the number of RNG calls.
 	ASSERT_EQ(nextIntSequential, nextIntParallel) << "Mutator::RNG was called a different number of time in parallel and sequential execution.";

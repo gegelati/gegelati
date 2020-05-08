@@ -175,6 +175,20 @@ TEST_F(TPGTest, TPGGraphAddTPGVertex) {
 
 }
 
+TEST_F(TPGTest, TPGGraphHasVertex) {
+	TPG::TPGGraph tpg(*e);
+	const TPG::TPGTeam* t;
+	const TPG::TPGAction* a;
+	ASSERT_NO_THROW(t = &tpg.addNewTeam()) << "Adding a new Team to a TPGGraph failed.";
+	ASSERT_NO_THROW(a = &tpg.addNewAction(0)) << "Adding a new Action to a TPGGraph failed.";
+
+	TPG::TPGAction external(12);
+
+	ASSERT_TRUE(tpg.hasVertex(*t)) << "A TPGVertex from the TPGGraph was not detected as such.";
+	ASSERT_FALSE(tpg.hasVertex(external)) << "A TPGVertex from the TPGGraph was wrongfully detected as such.";
+}
+
+
 TEST_F(TPGTest, TPGGraphGetNbVertices) {
 	TPG::TPGGraph tpg(*e);
 	tpg.addNewTeam();

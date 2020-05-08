@@ -73,6 +73,9 @@ namespace Learn {
 		/// TPGGraph built during the learning process.
 		TPG::TPGGraph tpg;
 
+		/// Pointer to the best root encountered during training, together with its EvaluationResult.
+		std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult> > bestRoot{ nullptr, nullptr };
+
 		/// Random Number Generator for this Learning Agent
 		Mutator::RNG rng;
 
@@ -97,7 +100,7 @@ namespace Learn {
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
 		};
-		
+
 		/**
 		* \brief Getter for the TPGGraph built by the LearningAgent.
 		*
@@ -169,7 +172,7 @@ namespace Learn {
 		* Training for one generation includes:
 		* - Populating the TPGGraph according to given MutationParameters.
 		* - Evaluating all roots of the TPGGraph. (call to evaluateAllRoots)
-		* - Removing from tge TPGGraph the worst performing root TPGVertex.
+		* - Removing from the TPGGraph the worst performing root TPGVertex.
 		*
 		* \param[in] generationNumber the integer number of the current generation.
 		*/
@@ -202,13 +205,42 @@ namespace Learn {
 		uint64_t train(volatile bool& altTraining, bool printProgressBar);
 
 		/**
-		* \brief This method evaluates all roots and only keeps the one
-		* leading to the best average score in the TPGGraph.
+		* \brief Update the bestRoot attribute if needed.
 		*
-		* The LearningMode::VALIDATION is used to select the best root.
+		* This method updates the value of the bestRoot attribute with the
+		* TPG::Vertex given as an argument in the following cases:
+		* - The given EvaluationResult is greater than the one of the current
+		*   bestRoot.
+		* - The current bestRoot is a nullptr.
+		* - The current bestRoot has been removed from the TPG::TPGGraph
+		*   managed by the LearningAgent.
+		*
+		* It should be noted that the last case alone (i.e. without validating
+		* the first one) indicates a great variability of the evaluation
+		* process as it means that a vertex currently known as the best root
+		* from previous generations, with an EvaluationResult never beaten,
+		* was removed from the graph in a following generation, beaten by root
+		* vertex with lower scores than the current record.
+		*/
+		void updateBestRoot(const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>);
+
+		/**
+		* \brief Get the best root TPG::Vertex encountered since the last init.
+		*
+		* The returned pointers may be nullptr if no generation was trained
+		* since the last init.
+		*
+		* \return a reference to the bestRoot attribute.
+		*/
+		const std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>& getBestRoot() const;
+
+		/**
+		* \brief This method keeps only the bestRoot policy in the TPGGraph.
+		*
+		* If the TPGVertex referenced in the bestRoot attribute is no longer
+		* a TPGVertex of the TPGGraph, nothing happens.
 		*/
 		void keepBestPolicy();
-
 	};
 };
 

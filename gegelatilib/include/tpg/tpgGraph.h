@@ -62,14 +62,14 @@ namespace TPG {
 		/**
 		* \brief delete copy constructor
 		*/
-		TPGGraph(const TPGGraph & model) = delete;
+		TPGGraph(const TPGGraph& model) = delete;
 
 		/**
 		* \brief TPGGraph move assignment operator
 		*
 		* \param[in] model the TPGGraph to copy
 		*/
-		TPGGraph(TPGGraph && model) noexcept : env{model.getEnvironment()}
+		TPGGraph(TPGGraph&& model) noexcept : env{ model.getEnvironment() }
 		{
 			swap(*this, model);
 		}
@@ -79,7 +79,7 @@ namespace TPG {
 		*
 		*	Swaps the TPGGraphs objects.
 		*/
-		friend inline void swap(TPGGraph &a, TPGGraph &b)
+		friend inline void swap(TPGGraph& a, TPGGraph& b)
 		{
 			using std::swap;
 			swap(a.vertices, b.vertices);
@@ -90,7 +90,7 @@ namespace TPG {
 		/**
 		*	\brief assignement operator for class TPGGraph
 		*/
-		TPGGraph & operator=(TPGGraph model);
+		TPGGraph& operator=(TPGGraph model);
 
 		/**
 		* \brief Destructor for the TPGGraph.
@@ -169,6 +169,16 @@ namespace TPG {
 		*/
 		const std::vector<const TPGVertex*> getRootVertices() const;
 
+
+		/**
+		* \brief Check whether a given vertex exists in the TPGGraph.
+		*
+		* \param[in] vertex the TPG::TPGVertex whose presence in the TPGGraph
+		* is checked.
+		* \return true if the vertex exists in the TPGGraph, false otherwise.
+		*/
+		bool hasVertex(const TPG::TPGVertex& vertex) const;
+
 		/**
 		* \brief Remove a TPGVertex from the TPGGraph and destroy it.
 		*
@@ -198,7 +208,7 @@ namespace TPG {
 		* TPGVertex.
 		*
 		* \param[in] src the source TPGVertex of the newly created TPGEdge.
-		* \param[in] dest the destination TPGVertex of the newly created 
+		* \param[in] dest the destination TPGVertex of the newly created
 		*                TPGEdge.
 		* \param[in] prog shared pointer to the Program associated to the newly
 		*                 created TPGEdge.

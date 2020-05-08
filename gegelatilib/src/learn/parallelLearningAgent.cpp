@@ -242,6 +242,11 @@ void Learn::ParallelLearningAgent::trainOneGeneration(uint64_t generationNumber)
 	// Evaluate
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
 
+	// Update the best (code duplicate in LearningAgent)
+	auto iterResults = results.end();
+	iterResults--;
+	this->updateBestRoot(iterResults->second, iterResults->first);
+
 	// Remove worst performing roots
 	decimateWorstRoots(results);
 }

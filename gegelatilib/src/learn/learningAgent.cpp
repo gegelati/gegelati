@@ -67,6 +67,9 @@ void Learn::LearningAgent::init(uint64_t seed) {
 
 	// Clear the archive
 	this->archive.clear();
+
+	// Clear the best root
+	this->bestRoot = { nullptr, nullptr };
 }
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode, LearningEnvironment& le) const
@@ -128,6 +131,12 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
 	// Evaluate
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
+
+	// Update the best (code duplicate in ParallelLearningAgent)
+	auto iterResults = results.end();
+	iterResults--;
+	this->updateBestRoot(iterResults->second, iterResults->first);
+
 	// Remove worst performing roots
 	decimateWorstRoots(results);
 }
@@ -192,20 +201,39 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining, bool printProgr
 	return generationNumber;
 }
 
+void Learn::LearningAgent::updateBestRoot(const TPG::TPGVertex* candidate, std::shared_ptr<EvaluationResult> evaluation)
+{
+	// Test the three replacement cases
+	// from the simpler to the most complex to test
+	if (this->bestRoot.first == nullptr  // NULL case
+		|| *this->bestRoot.second < *evaluation // new high-score case
+		|| !this->tpg.hasVertex(*this->bestRoot.first) // bestRoot disappearance
+		) {
+		// Replace the best root
+		this->bestRoot = { candidate, evaluation };
+	}
+
+	// Otherwise do nothing
+}
+
+const std::pair<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& Learn::LearningAgent::getBestRoot() const
+{
+	return this->bestRoot;
+}
+
 void Learn::LearningAgent::keepBestPolicy()
 {
 	// Evaluate all roots
-	auto results = this->evaluateAllRoots(0, LearningMode::VALIDATION);
-	auto iterResults = results.begin();
-	std::advance(iterResults, results.size() - 1);
-	auto bestRoot = iterResults->second;
+	if (this->tpg.hasVertex(*this->bestRoot.first)) {
+		auto bestRootVertex = this->bestRoot.first;
 
-	// Remove all but the best root from the tpg
-	while (this->tpg.getNbRootVertices() != 1) {
-		auto roots = this->tpg.getRootVertices();
-		for (auto root : roots) {
-			if (root != bestRoot) {
-				tpg.removeVertex(*root);
+		// Remove all but the best root from the tpg
+		while (this->tpg.getNbRootVertices() != 1) {
+			auto roots = this->tpg.getRootVertices();
+			for (auto root : roots) {
+				if (root != bestRootVertex) {
+					tpg.removeVertex(*root);
+				}
 			}
 		}
 	}
