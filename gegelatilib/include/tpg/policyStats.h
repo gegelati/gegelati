@@ -22,10 +22,21 @@ namespace TPG {
 	*
 	* To analyze different policies with a single PolicyStats instance, the
 	* clear() method should be called between calls to analyzePolicy().
+	*
+	* For access simplicity, all attributes filled during the analysis are
+	* public. Tampering with them will just make the result of the analysis
+	* useless.
 	*/
 	class PolicyStats {
 	private:
 
+		/// Environment used during analyses
+		const Environment* environment;
+
+		/// Data sources (including registers) used in the Program.
+		std::vector<std::reference_wrapper<const Data::DataHandler>> dataSourcesAndRegisters;
+
+	public:
 		/**
 		* \brief Number of time a Program was analyzed.
 		*
@@ -96,7 +107,6 @@ namespace TPG {
 		/// Number of distinct TPGTeams per policy.
 		size_t nbDistinctTeams;
 
-	public:
 		/// Default constructor
 		PolicyStats() = default;
 
@@ -106,21 +116,42 @@ namespace TPG {
 		void clear();
 
 		/**
-		* Analyze the given Program.
+		* \brief Set Environement used during analyses.
+		*
+		* From the given Environment, this method sets class attributes used
+		* during the analyses of the Program and Line of the policy. If the
+		* given Environment does not correspond to the one known to the Program
+		* exceptions may be thrown during analyses.
+		*/
+		void setEnvironment(const Environment& env);
+
+		/**
+		* \brief Analyze the given Line.
+		*
+		* The method updates the following stats:
+		* - Total number of usage of each Instruction.
+		* - Total number of access for each location.
+		*/
+		void analyzeLine(const Program::Line* line);
+
+		/**
+		* \brief Analyze the given Program.
 		*
 		* The method updates the following stats:
 		* - Number of use per Program.
 		* - Number of lines per Program.
 		* - Number of intron lines per Program.
-		* - Total number of usage of each Instruction.
-		* - Total number of access for each location (ignoring intron).
+		*
+		* For each non-intron line, the analyzeLine() method will be called.
 		*
 		* If a Program was already analyzed, it will not be analyzed again and
 		* only the number of use per program will be updated.
 		*
 		* \param[in] prog the analyzed Program.
+		* \throws std::runtime_error if the given Program has incorrect lines
+		* accessing for example non existing instructions.
 		*/
-		void analyzeProgram(const Program::Program prog);
+		void analyzeProgram(const Program::Program* prog);
 
 		/**
 		* Analyze the given TPGTeam.
