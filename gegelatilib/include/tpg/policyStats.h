@@ -102,10 +102,10 @@ namespace TPG {
 		* A TPGTeam may appear several time in a single policy, but only its
 		* "lowest" level is counted here.
 		*/
-		std::map<size_t, size_t> nbTeamPerDepthLevel;
+		std::map<size_t, size_t> nbTPGVertexPerDepthLevel;
 
 		/// Number of distinct TPGTeams per policy.
-		size_t nbDistinctTeams;
+		size_t nbDistinctTeams = 0;
 
 		/// Default constructor
 		PolicyStats() = default;
@@ -159,6 +159,7 @@ namespace TPG {
 		* The method updates the following stats:
 		* - Number of use per TPGTeam.
 		* - Number of outgoing TPGEdge per TPGTeam.
+		* - Total number of distinct TPGTeam in the policy.
 		*
 		* If a TPGTeam was already analyzed, it will not be analyzed again and
 		* only the number of use per TPGTeam will be updated.
@@ -175,7 +176,7 @@ namespace TPG {
 		* If a TPGAction was already analyzed, it will not be analyzed again and
 		* only the number of use per TPGAction will be updated.
 		*/
-		void analyzeTPGAction(const TPG::TPGAction* team);
+		void analyzeTPGAction(const TPG::TPGAction* action);
 
 		/**
 		* Analyze the policy starting from the given TPGVertex.
@@ -187,7 +188,6 @@ namespace TPG {
 		* The method updates the following stats:
 		* - Depth of the policy.
 		* - Number of TPGTeam per depth level.
-		* - Total number or distinct TPGTeam in the policy.
 		*/
 		void analyzePolicy(const TPG::TPGVertex* vertex);
 	};

@@ -148,32 +148,154 @@ TEST_F(PolicyStatsTest, AnalyzeProgram) {
 	TPG::PolicyStats ps;
 	ps.setEnvironment(*e);
 
-	ASSERT_NO_THROW(ps.analyzeProgram(progPointers.at(0).get())) << "Analysis of a valid Program failed unexpectedly.";
+	// Do the analysis twice to check that analyzing the same program 
+	// a second twice does not change most attributes except nbUsePerProgram.
+	for (auto i = 0; i < 2; i++) {
+		ASSERT_NO_THROW(ps.analyzeProgram(progPointers.at(0).get())) << "Analysis of a valid Program failed unexpectedly.";
+
+		// Check analysis results
+		ASSERT_EQ(ps.nbLinesPerProgram.size(), 1) << "Incorrect attribute value after analyzing a Program.";
+		ASSERT_EQ(ps.nbLinesPerProgram.at(0), 3) << "Incorrect attribute value after analyzing a Program.";
+		ASSERT_EQ(ps.nbIntronPerProgram.size(), 1) << "Incorrect attribute value after analyzing a Program.";
+		ASSERT_EQ(ps.nbIntronPerProgram.at(0), 1) << "Incorrect attribute value after analyzing a Program.";
+		ASSERT_EQ(ps.nbUsePerProgram.size(), 1) << "Incorrect attribute value after analyzing a Program.";
+		ASSERT_EQ(ps.nbUsePerProgram.begin()->first, progPointers.at(0).get()) << "Incorrect attribute value after analyzing a Program.";
+		ASSERT_EQ(ps.nbUsePerProgram.begin()->second, i + 1) << "Incorrect attribute value after analyzing a Program.";
+		// Only non intron are counted
+		ASSERT_EQ(ps.nbUsagePerInstruction.size(), 2) << "Incorrect attribute value after analyzing a Program.";
+		auto iter1 = ps.nbUsagePerInstruction.begin();
+		ASSERT_EQ(iter1->first, 1) << "Incorrect attribute value after analyzing a Program.";
+		ASSERT_EQ(iter1->second, 1) << "Incorrect attribute value after analyzing a Program.";
+		iter1++;
+		ASSERT_EQ(iter1->first, 2) << "Incorrect attribute value after analyzing a Program.";
+		ASSERT_EQ(iter1->second, 1) << "Incorrect attribute value after analyzing a Program.";
+		ASSERT_EQ(ps.nbUsagePerDataLocation.size(), 5) << "Incorrect attribute value after analyzing a Program.";
+		auto iter2 = ps.nbUsagePerDataLocation.begin();
+		std::map<std::pair<size_t, size_t>, size_t> content = {
+			{ {0,1}, 1 },
+			{ {0,2}, 1 },
+			{ {0,3}, 1 },
+			{ {0,5}, 1 },
+			{ {1,2}, 2 }
+		};
+		ASSERT_EQ(ps.nbUsagePerDataLocation, content) << "Incorrect attribute value after analyzing a Program.";
+	}
+}
+
+TEST_F(PolicyStatsTest, AnalyzeTPGTeam) {
+	TPG::PolicyStats ps;
+	ps.setEnvironment(*e);
+
+	for (auto i = 0; i < 2; i++) {
+		ASSERT_NO_THROW(ps.analyzeTPGTeam((const TPG::TPGTeam*)tpg->getVertices().at(0))) << "Analysis of a valid TPGTeam failed unexpectedly.";
+
+		// Check attributes
+		ASSERT_EQ(ps.nbUsePerTPGTeam.size(), 1);
+		ASSERT_EQ(ps.nbUsePerTPGTeam.begin()->first, tpg->getVertices().at(0));
+		ASSERT_EQ(ps.nbUsePerTPGTeam.begin()->second, i + 1);
+		ASSERT_EQ(ps.nbOutgoingEdgesPerTeam.size(), 1);
+		ASSERT_EQ(*ps.nbOutgoingEdgesPerTeam.begin(), 2);
+		ASSERT_EQ(ps.nbDistinctTeams, 1);
+	}
+}
+
+TEST_F(PolicyStatsTest, AnalyzeTPGAction) {
+	TPG::PolicyStats ps;
+	ps.setEnvironment(*e);
+
+	for (auto i = 0; i < 2; i++) {
+		ASSERT_NO_THROW(ps.analyzeTPGAction((const TPG::TPGAction*)tpg->getVertices().at(4))) << "Analysis of a valid TPGAction failed unexpectedly.";
+
+		// Check attributes
+		ASSERT_EQ(ps.nbUsePerTPGAction.size(), 1);
+		ASSERT_EQ(ps.nbUsePerTPGAction.begin()->first, tpg->getVertices().at(4));
+		ASSERT_EQ(ps.nbUsePerTPGAction.begin()->second, i + 1);
+		ASSERT_EQ(ps.nbUsagePerActionID.size(), 1);
+		ASSERT_EQ(ps.nbUsagePerActionID.begin()->first, 0);
+		ASSERT_EQ(ps.nbUsagePerActionID.begin()->second, i + 1);
+	}
+}
+
+TEST_F(PolicyStatsTest, AnalyzePolicy) {
+	TPG::PolicyStats ps;
+	ps.setEnvironment(*e);
+
+	ASSERT_NO_THROW(ps.analyzePolicy(tpg->getVertices().at(0))) << "Analysis of a valid Policy failed";
 
 	// Check analysis results
-	ASSERT_EQ(ps.nbLinesPerProgram.size(), 1) << "Incorrect attribute value after analyzing a Program.";
-	ASSERT_EQ(ps.nbLinesPerProgram.at(0), 3) << "Incorrect attribute value after analyzing a Program.";
-	ASSERT_EQ(ps.nbIntronPerProgram.size(), 1) << "Incorrect attribute value after analyzing a Program.";
-	ASSERT_EQ(ps.nbIntronPerProgram.at(0), 1) << "Incorrect attribute value after analyzing a Program.";
-	ASSERT_EQ(ps.nbUsePerProgram.size(), 1) << "Incorrect attribute value after analyzing a Program.";
-	ASSERT_EQ(ps.nbUsePerProgram.begin()->first, progPointers.at(0).get()) << "Incorrect attribute value after analyzing a Program.";
-	ASSERT_EQ(ps.nbUsePerProgram.begin()->second, 1) << "Incorrect attribute value after analyzing a Program.";
-	// Only non intron are counted
-	ASSERT_EQ(ps.nbUsagePerInstruction.size(), 2) << "Incorrect attribute value after analyzing a Program.";
-	auto iter1 = ps.nbUsagePerInstruction.begin();
-	ASSERT_EQ(iter1->first, 1) << "Incorrect attribute value after analyzing a Program.";
-	ASSERT_EQ(iter1->second, 1) << "Incorrect attribute value after analyzing a Program.";
-	iter1++;
-	ASSERT_EQ(iter1->first, 2) << "Incorrect attribute value after analyzing a Program.";
-	ASSERT_EQ(iter1->second, 1) << "Incorrect attribute value after analyzing a Program.";
-	ASSERT_EQ(ps.nbUsagePerDataLocation.size(), 5) << "Incorrect attribute value after analyzing a Program.";
-	auto iter2 = ps.nbUsagePerDataLocation.begin();
-	std::map<std::pair<size_t, size_t>, size_t> content = {
-		{ {0,1}, 1 },
-		{ {0,2}, 1 },
-		{ {0,3}, 1 },
-		{ {0,5}, 1 },
-		{ {1,2}, 2 }
+	ASSERT_EQ(ps.maxPolicyDepth, 3);
+	ASSERT_EQ(ps.nbDistinctTeams, 3);
+
+	std::map<size_t, size_t> nbTPGVertexPerLevel{
+		 {0, 1}, {1, 2}, {2, 4}, {3, 2} };
+	ASSERT_EQ(ps.nbTPGVertexPerDepthLevel, nbTPGVertexPerLevel);
+
+	std::vector<size_t> nbLinesPerProgram{ 3, 0, 1, 0, 0, 0, 0 };
+	ASSERT_EQ(ps.nbLinesPerProgram, nbLinesPerProgram);
+
+	std::vector<size_t> nbIntronPerProgram{ 1, 0, 0, 0, 0, 0, 0 };
+	ASSERT_EQ(ps.nbIntronPerProgram, nbIntronPerProgram);
+
+	std::vector<size_t> nbOutgoingEdgesPerTeam{ 2, 4, 2 };
+	ASSERT_EQ(ps.nbOutgoingEdgesPerTeam, nbOutgoingEdgesPerTeam);
+
+	std::map<size_t, size_t> nbUsagePerActionID{ {0, 2}, {1, 1}, {2, 2} };
+	ASSERT_EQ(ps.nbUsagePerActionID, nbUsagePerActionID);
+
+	std::map<size_t, size_t>nbUsagePerInstruction{ {1,1}, {2,2} };
+	ASSERT_EQ(ps.nbUsagePerInstruction, nbUsagePerInstruction);
+
+	std::map<std::pair<size_t, size_t>, size_t>nbUsagePerDataLocation{
+			{ {0,1}, 1 },
+			{ {0,2}, 1 },
+			{ {0,3}, 1 },
+			{ {0,5}, 1 },
+			{ {1,2}, 2 },
+			{ {1,10}, 1 },
+			{ {1,12}, 1 },
+			{ {1,13}, 1 },
+			{ {1,14}, 1 }
 	};
-	ASSERT_EQ(ps.nbUsagePerDataLocation, content) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(ps.nbUsagePerDataLocation, nbUsagePerDataLocation);
+
+	std::vector<size_t> nbUsePerProgram{ 2, 1, 1, 0, 1, 1, 0, 1 };
+	for (auto i = 0; i < nbUsePerProgram.size(); i++) {
+		if (nbUsePerProgram[i] > 0) {
+			ASSERT_EQ(ps.nbUsePerProgram.at(progPointers.at(i).get()), nbUsePerProgram[i]);
+		}
+	}
+
+	std::vector<size_t> nbUsePerTPGTeam{ 1, 2, 1 };
+	for (auto i = 0; i < nbUsePerTPGTeam.size(); i++) {
+		ASSERT_EQ(ps.nbUsePerTPGTeam.at((const TPG::TPGTeam*)tpg->getVertices().at(i)), nbUsePerTPGTeam[i]);
+	}
+
+	std::vector<size_t> nbUsePerTPGAction{ 2, 1, 2 };
+	for (auto i = 0; i < nbUsePerTPGAction.size(); i++) {
+		ASSERT_EQ(ps.nbUsePerTPGAction.at((const TPG::TPGAction*)tpg->getVertices().at(i + 4)), nbUsePerTPGAction[i]);
+	}
+}
+
+TEST_F(PolicyStatsTest, Clear) {
+	TPG::PolicyStats ps;
+	ps.setEnvironment(*e);
+
+	ps.analyzePolicy(tpg->getVertices().at(0));
+
+	ASSERT_NO_THROW(ps.clear());
+
+	// Check analysis results
+	ASSERT_EQ(ps.maxPolicyDepth, 0);
+	ASSERT_EQ(ps.nbDistinctTeams, 0);
+
+	ASSERT_TRUE(ps.nbTPGVertexPerDepthLevel.empty());
+	ASSERT_TRUE(ps.nbLinesPerProgram.empty());
+	ASSERT_TRUE(ps.nbIntronPerProgram.empty());
+	ASSERT_TRUE(ps.nbOutgoingEdgesPerTeam.empty());
+	ASSERT_TRUE(ps.nbUsagePerActionID.empty());
+	ASSERT_TRUE(ps.nbUsagePerInstruction.empty());
+	ASSERT_TRUE(ps.nbUsagePerDataLocation.empty());
+	ASSERT_TRUE(ps.nbUsePerProgram.empty());
+	ASSERT_TRUE(ps.nbUsePerTPGTeam.empty());
+	ASSERT_TRUE(ps.nbUsePerTPGAction.empty());
 }
