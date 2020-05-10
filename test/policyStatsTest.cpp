@@ -93,7 +93,7 @@ protected:
 		l->setInstructionIndex(1); // Add
 		l->setDestinationIndex(1); // Register[1]
 		l->setOperand(0, 1, 2); // Array[2]
-		l->setOperand(1, 1, 30); // Array[5]
+		l->setOperand(1, 0, 13); // Register[5]
 
 		l = &progPointers.at(0).get()->addNewLine();
 		l->setInstructionIndex(2); // Lambda
@@ -142,4 +142,38 @@ TEST_F(PolicyStatsTest, AnalyzeLine) {
 	ASSERT_EQ(ps.nbUsagePerInstruction.size(), 1) << "Incorrect attribute value after analyzing one line.";
 	ASSERT_EQ(ps.nbUsagePerInstruction.begin()->first, 0) << "Incorrect attribute value after analyzing one line.";
 	ASSERT_EQ(ps.nbUsagePerInstruction.begin()->second, 1) << "Incorrect attribute value after analyzing one line.";
+}
+
+TEST_F(PolicyStatsTest, AnalyzeProgram) {
+	TPG::PolicyStats ps;
+	ps.setEnvironment(*e);
+
+	ASSERT_NO_THROW(ps.analyzeProgram(progPointers.at(0).get())) << "Analysis of a valid Program failed unexpectedly.";
+
+	// Check analysis results
+	ASSERT_EQ(ps.nbLinesPerProgram.size(), 1) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(ps.nbLinesPerProgram.at(0), 3) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(ps.nbIntronPerProgram.size(), 1) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(ps.nbIntronPerProgram.at(0), 1) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(ps.nbUsePerProgram.size(), 1) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(ps.nbUsePerProgram.begin()->first, progPointers.at(0).get()) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(ps.nbUsePerProgram.begin()->second, 1) << "Incorrect attribute value after analyzing a Program.";
+	// Only non intron are counted
+	ASSERT_EQ(ps.nbUsagePerInstruction.size(), 2) << "Incorrect attribute value after analyzing a Program.";
+	auto iter1 = ps.nbUsagePerInstruction.begin();
+	ASSERT_EQ(iter1->first, 1) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(iter1->second, 1) << "Incorrect attribute value after analyzing a Program.";
+	iter1++;
+	ASSERT_EQ(iter1->first, 2) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(iter1->second, 1) << "Incorrect attribute value after analyzing a Program.";
+	ASSERT_EQ(ps.nbUsagePerDataLocation.size(), 5) << "Incorrect attribute value after analyzing a Program.";
+	auto iter2 = ps.nbUsagePerDataLocation.begin();
+	std::map<std::pair<size_t, size_t>, size_t> content = {
+		{ {0,1}, 1 },
+		{ {0,2}, 1 },
+		{ {0,3}, 1 },
+		{ {0,5}, 1 },
+		{ {1,2}, 2 }
+	};
+	ASSERT_EQ(ps.nbUsagePerDataLocation, content) << "Incorrect attribute value after analyzing a Program.";
 }
