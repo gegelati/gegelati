@@ -35,9 +35,8 @@ void TPG::PolicyStats::analyzeLine(const Program::Line* line) {
 	for (size_t operandIdx = 0; operandIdx < instruction.getNbOperands(); operandIdx++) {
 		const std::pair<size_t, size_t>& rawOperand = line->getOperand(operandIdx);
 		const std::type_info& operandType = instruction.getOperandTypes().at(operandIdx).get();
-		// TODO check for code duplicate with Program & ProgramExecutionEngine factorizing code may be possible
 		const Data::DataHandler& dHandler = dataSourcesAndRegisters.at(rawOperand.first).get();
-		size_t scaledLocation = rawOperand.second % dHandler.getAddressSpace(operandType); // scaling.. should not be duplicate code.
+		size_t scaledLocation = dHandler.scaleLocation(rawOperand.second, operandType); // scaling.. should not be duplicate code.
 		// Get list of accessed addresses
 		std::vector<size_t> accessedLocations = dHandler.getAddressesAccessed(operandType, scaledLocation);
 		// Fill attribute
