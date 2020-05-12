@@ -154,10 +154,6 @@ std::ostream& TPG::operator<<(std::ostream& os, const TPG::PolicyStats& policySt
 	os << "Edges:\t\t" << sumVec(policyStats.nbOutgoingEdgesPerTeam) << std::endl;
 	os << "Actions:\t" << policyStats.nbUsagePerActionID.size() << std::endl;
 
-	os << "Use/action:\t" << std::accumulate(policyStats.nbUsagePerActionID.begin(), policyStats.nbUsagePerActionID.end(), (size_t)0, [](size_t accu, std::pair<size_t, size_t> val) { return accu + val.second; }) / (double)policyStats.nbUsagePerActionID.size() << ": ";
-	std::for_each(policyStats.nbUsagePerActionID.begin(), policyStats.nbUsagePerActionID.end(), [&os](auto& val) {os << "{" << val.first << "," << val.second << "} "; });
-	os << std::endl;
-
 	os << "Stages\t\t" << policyStats.maxPolicyDepth << std::endl;
 	os << "Vertex/stage:\t";
 	for (auto& nbVertexPerStage : policyStats.nbTPGVertexPerDepthLevel) {
@@ -165,10 +161,16 @@ std::ostream& TPG::operator<<(std::ostream& os, const TPG::PolicyStats& policySt
 	}
 	os << std::endl;
 
+	os << "Use/action:\t" << std::accumulate(policyStats.nbUsagePerActionID.begin(), policyStats.nbUsagePerActionID.end(), (size_t)0, [](size_t accu, std::pair<size_t, size_t> val) { return accu + val.second; }) / (double)policyStats.nbUsagePerActionID.size() << ": ";
+	std::for_each(policyStats.nbUsagePerActionID.begin(), policyStats.nbUsagePerActionID.end(), [&os](auto& val) {os << "{" << val.first << "," << val.second << "} "; });
+	os << std::endl;
+
 	os << std::endl << "## Program info" << std::endl;
 	os << "Programs:\t" << policyStats.nbUsePerProgram.size() << std::endl;
 	os << "Line/prog:\t" << averageVec(policyStats.nbLinesPerProgram) << std::endl;
 	os << "Intr/prog:\t" << averageVec(policyStats.nbIntronPerProgram) << std::endl;
+	os << "Use/prog:\t" << std::accumulate(policyStats.nbUsePerProgram.cbegin(), policyStats.nbUsePerProgram.cend(), size_t(0),
+		[](size_t accu, const auto& val) {return accu + val.second; }) / (double)policyStats.nbUsePerProgram.size() << std::endl;
 
 	os << "Use/instr:\t" << std::accumulate(policyStats.nbUsagePerInstruction.cbegin(), policyStats.nbUsagePerInstruction.cend(), size_t(0), [](size_t accu, const std::pair<size_t, size_t>& val) {return accu + val.second; }) / (double)policyStats.nbUsagePerInstruction.size();
 	os << ": ";
