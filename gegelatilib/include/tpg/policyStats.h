@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <iostream>
 
 #include "instructions/instruction.h"
 
@@ -190,7 +191,15 @@ namespace TPG {
 		* - Number of TPGTeam per depth level.
 		*/
 		void analyzePolicy(const TPG::TPGVertex* vertex);
+
+
+		friend std::ostream& operator<<(std::ostream& os, const PolicyStats& policyStats);
 	};
+
+	/// Overload of the stream output operator for the PolicyStats class.
+	std::ostream& operator<<(std::ostream& os, const PolicyStats& policyStats);
 }
+
+
 
 #endif 

@@ -299,3 +299,14 @@ TEST_F(PolicyStatsTest, Clear) {
 	ASSERT_TRUE(ps.nbUsePerTPGTeam.empty());
 	ASSERT_TRUE(ps.nbUsePerTPGAction.empty());
 }
+
+TEST_F(PolicyStatsTest, InsertOperator) {
+	TPG::PolicyStats ps;
+	ps.setEnvironment(*e);
+
+	ps.analyzePolicy(tpg->getVertices().at(0));
+
+	std::stringstream ss;
+	ASSERT_NO_THROW(ss << ps);
+	// Do not check the result of the insert operation since it is subject to change.
+}
