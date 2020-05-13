@@ -82,6 +82,7 @@
 #include <tpg/tpgGraph.h>
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
+#include <tpg/policyStats.h>
 
 #include <archive.h>
 #include <environment.h>

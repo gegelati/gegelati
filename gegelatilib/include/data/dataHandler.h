@@ -228,6 +228,26 @@ namespace Data {
 		* vector is returned.
 		*/
 		virtual std::vector<size_t> getAddressesAccessed(const std::type_info& type, const size_t address) const = 0;
+
+		/**
+		* \brief Scale a location from the Environment largestAddressSpace to the
+		*        largestAddressSpace of the dataHandler, for the given data type.
+		*
+		* This function computes a valid location for the current DataHandler
+		* with the given data type. This location is computed from the given
+		* rawLocation with a simple modulo. The choice of the Modulo was made
+		* for simplicity and faster execution, but may introduce a bias
+		* towards low values. If this becomes a problem, a proper scaling with
+		* a division would be needed.
+		*
+		* \param[in] rawLocation integer number between 0 and the environment
+		*            largestAddressSpace. (unchecked)
+		* \param[in] type the type of data accessed.
+		* \return (rawLocation % dataHandler.largestAddressSpace(type))
+		* \throw std::domain_error if the data type is not supported by the
+		*        data handler.
+		*/
+		uint64_t scaleLocation(const uint64_t rawLocation, const std::type_info& type) const;
 	};
 }
 

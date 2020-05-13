@@ -89,11 +89,6 @@ const Program::Line& Program::ProgramExecutionEngine::getCurrentLine() const
 	return this->program->getLine(this->programCounter);
 }
 
-uint64_t Program::ProgramExecutionEngine::scaleLocation(const uint64_t rawLocation, const Data::DataHandler& dataHandler, const std::type_info& type) const
-{
-	return rawLocation % dataHandler.getAddressSpace(type);
-}
-
 const Instructions::Instruction& Program::ProgramExecutionEngine::getCurrentInstruction() const
 {
 	const Line& currentLine = this->getCurrentLine(); // throw std::out_of_range if the program counter is too large.
@@ -111,7 +106,7 @@ const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<Dat
 		const std::pair<uint64_t, uint64_t>& operandIndexes = line.getOperand(i);
 		const Data::DataHandler& dataSource = this->dataSourcesAndRegisters.at(operandIndexes.first); // Throws std::out_of_range
 		const std::type_info& operandType = instruction.getOperandTypes().at(i).get();
-		const uint64_t operandLocation = this->scaleLocation(operandIndexes.second, dataSource, operandType);
+		const uint64_t operandLocation = dataSource.scaleLocation(operandIndexes.second, operandType);
 		Data::UntypedSharedPtr data = dataSource.getDataAt(operandType, operandLocation);
 		operands.push_back(data);
 	}
