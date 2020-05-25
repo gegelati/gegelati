@@ -126,6 +126,7 @@ namespace Learn {
 	{
 		// Init results
 		std::vector<double> result(this->learningEnvironment.getNbActions(), 0.0);
+		std::vector<size_t> nbEvalPerClass(this->learningEnvironment.getNbActions(), 0);
 
 		// Evaluate nbIteration times
 		for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation; i++) {
@@ -162,6 +163,8 @@ namespace Learn {
 				// If true positive is 0, set score to 0.
 				double fScore = (truePositive != 0) ? 2 * (precision * recall) / (precision + recall) : 0.0;
 				result.at(classIdx) += fScore;
+
+				nbEvalPerClass.at(classIdx) += truePositive + falseNegative;
 			}
 		}
 
@@ -169,7 +172,7 @@ namespace Learn {
 		const LearningParameters& p = this->params;
 		std::for_each(result.begin(), result.end(), [p](double& val) { val /= (double)p.nbIterationsPerPolicyEvaluation; });
 
-		return std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result));
+		return std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result, nbEvalPerClass));
 	}
 
 	template<class BaseLearningAgent>

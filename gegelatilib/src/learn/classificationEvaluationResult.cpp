@@ -32,9 +32,49 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+#include <stdexcept>
 
 #include "learn/classificationEvaluationResult.h"
 
 const std::vector<double>& Learn::ClassificationEvaluationResult::getScorePerClass() const {
 	return this->scorePerClass;
+}
+
+const std::vector<size_t>& Learn::ClassificationEvaluationResult::getNbEvaluationPerClass() const
+{
+	return this->nbEvaluationPerClass;
+}
+
+Learn::EvaluationResult& Learn::ClassificationEvaluationResult::operator+=(const EvaluationResult& other)
+{
+	// Super call to detect type mismatch.
+	EvaluationResult::operator+=(other);
+
+	// If types are identical, add per-class scores
+	if (typeid(*this) == typeid(other))
+	{
+		const ClassificationEvaluationResult& otherEval = (const ClassificationEvaluationResult&)other;
+		if (this->scorePerClass.size() != otherEval.scorePerClass.size()) {
+			throw std::runtime_error("Number of score per class is different between the added ClassificationEvaluationResult.");
+		}
+
+		for (auto idx = 0; idx < this->scorePerClass.size(); idx++) {
+			// Weighted sum of scores.
+			this->scorePerClass.at(idx) = this->scorePerClass.at(idx) * this->nbEvaluationPerClass.at(idx)
+				+ otherEval.scorePerClass.at(idx) * otherEval.nbEvaluationPerClass.at(idx);
+			this->scorePerClass.at(idx) /= (double)this->nbEvaluationPerClass.at(idx)
+				+ (double)otherEval.nbEvaluationPerClass.at(idx);;
+
+			// Sum of number of evaluation per class
+			this->nbEvaluationPerClass.at(idx) += otherEval.nbEvaluationPerClass.at(idx);
+		}
+
+		// Update global score
+		this->result = std::accumulate(this->scorePerClass.cbegin(), this->scorePerClass.cend(), 0.0) / (double)this->scorePerClass.size();
+
+		// Update global number of evaluation
+		this->nbEvaluation += otherEval.nbEvaluation;
+	}
+
+	return *this;
 }

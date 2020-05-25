@@ -160,30 +160,30 @@ TEST_F(LearningAgentTest, BestRoot) {
 
 	// Update with a fake result for a root of the graph
 	const TPG::TPGVertex* root = *la.getTPGGraph().getRootVertices().begin();
-	ASSERT_NO_THROW(la.updateBestRoot(root, std::make_shared<Learn::EvaluationResult>(1.0)));
+	ASSERT_NO_THROW(la.updateBestRoot(root, std::make_shared<Learn::EvaluationResult>(1.0, 10)));
 	ASSERT_EQ(la.getBestRoot().first, root) << "Best root not updated properly.";
 	ASSERT_EQ(la.getBestRoot().second->getResult(), 1.0) << "Best root not updated properly.";
 
 	// Update with a fake better result for another root of the graph
 	const TPG::TPGVertex* root2 = *(la.getTPGGraph().getRootVertices().begin() + 1);
-	ASSERT_NO_THROW(la.updateBestRoot(root2, std::make_shared<Learn::EvaluationResult>(2.0)));
+	ASSERT_NO_THROW(la.updateBestRoot(root2, std::make_shared<Learn::EvaluationResult>(2.0, 10)));
 	ASSERT_EQ(la.getBestRoot().first, root2) << "Best root not updated properly.";
 	ASSERT_EQ(la.getBestRoot().second->getResult(), 2.0) << "Best root not updated properly.";
 
 	// Update with a fake worse result for another root of the graph
 	const TPG::TPGVertex* root3 = *(la.getTPGGraph().getRootVertices().begin() + 2);
-	ASSERT_NO_THROW(la.updateBestRoot(root3, std::make_shared<Learn::EvaluationResult>(1.5)));
+	ASSERT_NO_THROW(la.updateBestRoot(root3, std::make_shared<Learn::EvaluationResult>(1.5, 10)));
 	ASSERT_EQ(la.getBestRoot().first, root2) << "Best root not updated properly.";
 	ASSERT_EQ(la.getBestRoot().second->getResult(), 2.0) << "Best root not updated properly.";
 
 	// Update with a root not from the graph
 	TPG::TPGTeam fakeRoot;
-	ASSERT_NO_THROW(la.updateBestRoot(&fakeRoot, std::make_shared<Learn::EvaluationResult>(3.0)));
+	ASSERT_NO_THROW(la.updateBestRoot(&fakeRoot, std::make_shared<Learn::EvaluationResult>(3.0, 10)));
 	ASSERT_EQ(la.getBestRoot().first, &fakeRoot) << "Best root not updated properly.";
 	ASSERT_EQ(la.getBestRoot().second->getResult(), 3.0) << "Best root not updated properly.";
 
 	// Update with a worse EvaluationResult (but still updated because previous Root is not in the TPGGraph
-	ASSERT_NO_THROW(la.updateBestRoot(root3, std::make_shared<Learn::EvaluationResult>(1.5)));
+	ASSERT_NO_THROW(la.updateBestRoot(root3, std::make_shared<Learn::EvaluationResult>(1.5, 10)));
 	ASSERT_EQ(la.getBestRoot().first, root3) << "Best root not updated properly.";
 	ASSERT_EQ(la.getBestRoot().second->getResult(), 1.5) << "Best root not updated properly.";
 }
@@ -215,7 +215,7 @@ TEST_F(LearningAgentTest, DecimateWorstRoots) {
 	std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> results;
 	double result = 0.0;
 	for (const TPG::TPGVertex* root : roots) {
-		results.emplace(new Learn::EvaluationResult(result++), root);
+		results.emplace(new Learn::EvaluationResult(result++, 5), root);
 	}
 
 	// Do the decimation

@@ -99,7 +99,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG:
 		// Update results
 		result += le.getScore();
 	}
-	return std::shared_ptr<EvaluationResult>(new EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation));
+	return std::shared_ptr<EvaluationResult>(new EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation, params.nbIterationsPerPolicyEvaluation));
 }
 
 std::multimap< std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)

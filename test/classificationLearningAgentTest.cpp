@@ -134,7 +134,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
 	std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> results;
 	double result = 0.0;
 	for (const TPG::TPGVertex* root : roots) {
-		results.emplace(new Learn::EvaluationResult(result++), root);
+		results.emplace(new Learn::EvaluationResult(result++, 1), root);
 	}
 
 	// Do the decimation (must fail)
@@ -149,8 +149,9 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
 		// With score for 1st class to 0.0
 		std::vector<double> scores(fle.getNbActions(), 0.33 / (fle.getNbActions() - 1) * fle.getNbActions());
 		scores.at(0) = 0.0;
+		std::vector<size_t> nbEval(fle.getNbActions(), 1);
 
-		classifResults.emplace(new Learn::ClassificationEvaluationResult(scores), root);
+		classifResults.emplace(new Learn::ClassificationEvaluationResult(scores, nbEval), root);
 	}
 
 	// Change score for 4 roots, so that 
@@ -174,7 +175,8 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
 		// Add custom result
 		std::vector<double> scores(fle.getNbActions(), 0.0);
 		scores.at(0) = 0.25 * (idx + 1.0);
-		classifResults.emplace(new Learn::ClassificationEvaluationResult(scores), root);
+		std::vector<size_t> nbEvals(fle.getNbActions(), 10);
+		classifResults.emplace(new Learn::ClassificationEvaluationResult(scores, nbEvals), root);
 	}
 
 	// Add an additional 
@@ -186,8 +188,8 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
 	uint64_t originalNbVertices = graph.getNbVertices();
 
 	// Create a poor score for the action and team root
-	classifResults.emplace(new Learn::ClassificationEvaluationResult(std::vector(fle.getNbActions(), 0.0)), &actionRoot);
-	classifResults.emplace(new Learn::ClassificationEvaluationResult(std::vector(fle.getNbActions(), 0.0)), &teamRoot);
+	classifResults.emplace(new Learn::ClassificationEvaluationResult(std::vector(fle.getNbActions(), 0.0), std::vector(fle.getNbActions(), size_t(10))), &actionRoot);
+	classifResults.emplace(new Learn::ClassificationEvaluationResult(std::vector(fle.getNbActions(), 0.0), std::vector(fle.getNbActions(), size_t(10))), &teamRoot);
 
 	// Do the decimation
 	ASSERT_NO_THROW(cla.decimateWorstRoots(classifResults)) << "Decimating worst roots should not fail with ClassificationEvaluationResults.";

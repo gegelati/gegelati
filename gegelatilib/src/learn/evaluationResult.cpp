@@ -32,11 +32,39 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+#include <stdexcept>
 
 #include "learn/evaluationResult.h"
 
 double Learn::EvaluationResult::getResult() const {
 	return this->result;
+}
+
+size_t Learn::EvaluationResult::getNbEvaluation() const
+{
+	return this->nbEvaluation;
+}
+
+Learn::EvaluationResult& Learn::EvaluationResult::operator+=(const Learn::EvaluationResult& other)
+{
+	// Type Check (Must be done in all override)
+	// This test will succeed in child class.
+	const std::type_info& thisType = typeid(*this);
+	if (typeid(other) != thisType) {
+		throw std::runtime_error("Type mismatch between EvaluationResults.");
+	}
+
+	// If the added type is Learn::EvaluationResult
+	if (thisType == typeid(Learn::EvaluationResult)) {
+		// Weighted addition of results
+		this->result = this->result * this->nbEvaluation + other.result * other.nbEvaluation;
+		this->result /= (double)this->nbEvaluation + (double)other.nbEvaluation;
+
+		// Addition ot nbEvaluation
+		this->nbEvaluation += other.nbEvaluation;
+	}
+
+	return *this;
 }
 
 bool Learn::operator<(const EvaluationResult& a, const EvaluationResult& b)
