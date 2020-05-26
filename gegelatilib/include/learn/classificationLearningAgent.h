@@ -117,6 +117,8 @@ namespace Learn {
 		* If an insufficient number of root is preserved during the decimation
 		* process, all roots are preserved based on their general score.
 		*
+		* The results map is updated by the method to keep only the results of
+		* non-decimated roots.
 		*/
 		void decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results) override;
 	};
@@ -237,12 +239,17 @@ namespace Learn {
 		// may be higher than the given ratio.
 		auto allRoots = this->tpg.getRootVertices();
 		auto& tpgRef = this->tpg;
-		std::for_each(allRoots.begin(), allRoots.end(), [&rootsToKeep, &tpgRef](const TPG::TPGVertex* vert)
+		auto& resultsPerRootRef = this->resultsPerRoot;
+		std::for_each(allRoots.begin(), allRoots.end(), [&rootsToKeep, &tpgRef, &resultsPerRootRef](const TPG::TPGVertex* vert)
 			{
+				const std::type_info& vertexType = typeid(*vert);
 				// Do not remove actions
-				if (typeid(*vert) != typeid(TPG::TPGAction)
+				if (vertexType != typeid(TPG::TPGAction)
 					&& std::find(rootsToKeep.begin(), rootsToKeep.end(), vert) == rootsToKeep.end()) {
 					tpgRef.removeVertex(*vert);
+
+					// Keep only results of non-decimated roots.
+					resultsPerRootRef.erase(vert);
 				}
 			});
 	}
