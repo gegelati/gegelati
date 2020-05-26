@@ -62,6 +62,9 @@ namespace Learn {
 		double ratioDeletedRoots;
 		/// Number of generations of the training.
 		uint64_t nbGenerations;
+		/// Maximum number of times a given policy (i.e. a root TPGVertex) is
+		/// evaluated.
+		size_t maxNbEvaluationPerPolicy;
 	} LearningParameters;
 };
 
