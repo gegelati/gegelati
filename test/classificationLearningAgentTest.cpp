@@ -99,6 +99,8 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot) {
 	params.archivingProbability = 1.0;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 10;
+	// Only 1 evaluations of the root should be done.
+	params.maxNbEvaluationPerPolicy = params.nbIterationsPerPolicyEvaluation;
 
 	Learn::ClassificationLearningAgent cla(fle, set, params);
 	Archive a; // For testing purposes, notmally, the archive from the LearningAgent is used.
@@ -106,9 +108,17 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot) {
 	TPG::TPGExecutionEngine tee(cla.getTPGGraph().getEnvironment(), &a);
 
 	cla.init();
-	std::shared_ptr<Learn::EvaluationResult> result;
-	ASSERT_NO_THROW(result = cla.evaluateRoot(tee, *cla.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, fle)) << "Evaluation from a root failed.";
-	ASSERT_LE(result->getResult(), 1.0) << "Average score should not exceed the score of a perfect player.";
+	std::shared_ptr<Learn::EvaluationResult> result1;
+	ASSERT_NO_THROW(result1 = cla.evaluateRoot(tee, *cla.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, fle)) << "Evaluation from a root failed.";
+	ASSERT_LE(result1->getResult(), 1.0) << "Average score should not exceed the score of a perfect player.";
+
+	// Record this result
+	cla.updateEvaluationRecords({ {result1, cla.getTPGGraph().getRootVertices().at(0)} });
+
+	// Reevaluate to check that the previous result1 is returned.
+	std::shared_ptr<Learn::EvaluationResult> result2;
+	ASSERT_NO_THROW(result2 = cla.evaluateRoot(tee, *cla.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, fle)) << "Evaluation from a root failed.";
+	ASSERT_EQ(result1, result2);
 }
 
 TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
@@ -172,7 +182,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
 		// Remove from map
 		classifResults.erase(iterClassifResults);
 
-		// Add custom result
+		// Add custom result1
 		std::vector<double> scores(fle.getNbActions(), 0.0);
 		scores.at(0) = 0.25 * (idx + 1.0);
 		std::vector<size_t> nbEvals(fle.getNbActions(), 10);
@@ -198,7 +208,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
 	ASSERT_EQ(cla.getTPGGraph().getNbVertices(), originalNbVertices - std::ceil(params.mutation.tpg.nbRoots * (1.0 - params.ratioDeletedRoots)));
 
 	// Check the presence of savedRoots among remaining roots.
-	// i.e. check that their good result for one class saved them from decimation.
+	// i.e. check that their good result1 for one class saved them from decimation.
 	auto remainingRoots = cla.getTPGGraph().getRootVertices();
 	for (const TPG::TPGVertex* savedRoot : savedRoots) {
 		ASSERT_TRUE(std::find(remainingRoots.begin(), remainingRoots.end(), savedRoot) != remainingRoots.end()) << "Roots with best classification score for 1st class were not preserved during decimation.";

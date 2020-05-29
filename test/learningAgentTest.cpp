@@ -100,6 +100,34 @@ TEST_F(LearningAgentTest, Init) {
 	ASSERT_NO_THROW(la.init()) << "Initialization of the LearningAgent should not fail.";
 }
 
+TEST_F(LearningAgentTest, IsRootEvalSkipped) {
+	params.maxNbEvaluationPerPolicy = 2;
+
+	Learn::LearningAgent la(le, set, params);
+	la.init();
+
+	// Test a new root
+	std::shared_ptr<Learn::EvaluationResult> result1;
+	ASSERT_NO_THROW(result1 = la.isRootEvalSkipped(*la.getTPGGraph().getRootVertices().at(0))) << "Method should not fail for a root that has never been evaluated before.";
+	ASSERT_EQ(result1, nullptr) << "Method should return a nullptr for a root that has not been evaluated before.";
+
+	// Add an EvaluationResult artificially
+	la.updateEvaluationRecords({ {std::make_shared<Learn::EvaluationResult>(1.0, 1), la.getTPGGraph().getRootVertices().at(0)} });
+
+	// Test the root again
+	std::shared_ptr<Learn::EvaluationResult> result2;
+	ASSERT_NO_THROW(result2 = la.isRootEvalSkipped(*la.getTPGGraph().getRootVertices().at(0))) << "Method should not fail for a root that has been evaluated before.";
+	ASSERT_EQ(result2, nullptr) << "Method should return a nullptr for a root that has not been evaluated enough times before.";
+
+	// Update the EvaluationResult artificially
+	la.updateEvaluationRecords({ {std::make_shared<Learn::EvaluationResult>(1.0, 1), la.getTPGGraph().getRootVertices().at(0)} });
+
+	// Test the root again.
+	std::shared_ptr<Learn::EvaluationResult> result3;
+	ASSERT_NO_THROW(result3 = la.isRootEvalSkipped(*la.getTPGGraph().getRootVertices().at(0))) << "Method should not fail for a root that has been evaluated before.";
+	ASSERT_EQ(result3, result1) << "Method should return a the EvaluationResult from the resultsPerRoot map when the number of evaluation exceeds maxNbEvaluationPerPolicy.";
+}
+
 TEST_F(LearningAgentTest, EvalRoot) {
 	params.archiveSize = 50;
 	params.archivingProbability = 1.0;
@@ -145,7 +173,7 @@ TEST_F(LearningAgentTest, GetArchive) {
 	ASSERT_NO_THROW(la.getArchive()) << "Cannot get the archive of a LearningAgent.";
 }
 
-TEST_F(LearningAgentTest, BestRoot) {
+TEST_F(LearningAgentTest, UpdateEvaluationRecords) {
 	// test bestRoot methods
 	Learn::LearningAgent la(le, set, params);
 
@@ -183,9 +211,13 @@ TEST_F(LearningAgentTest, BestRoot) {
 	ASSERT_EQ(la.getBestRoot().second->getResult(), 3.0) << "Best root not updated properly.";
 
 	// Update with a worse EvaluationResult (but still updated because previous Root is not in the TPGGraph
-	ASSERT_NO_THROW(la.updateEvaluationRecords({ {std::make_shared<Learn::EvaluationResult>(1.5, 10), root3} }));
+	auto sharedPtr = std::make_shared<Learn::EvaluationResult>(1.5, 10);
+	ASSERT_NO_THROW(la.updateEvaluationRecords({ {sharedPtr, root3} }));
 	ASSERT_EQ(la.getBestRoot().first, root3) << "Best root not updated properly.";
 	ASSERT_EQ(la.getBestRoot().second->getResult(), 1.5) << "Best root not updated properly.";
+
+	// Update with the EvaluationResult already registered in the resultsPerRoot map (for code coverage)
+	ASSERT_NO_THROW(la.updateEvaluationRecords({ {sharedPtr, root3} }));
 }
 
 TEST_F(LearningAgentTest, DecimateWorstRoots) {
@@ -281,6 +313,8 @@ TEST_F(LearningAgentTest, TrainPortability) {
 	params.ratioDeletedRoots = 0.2;
 	params.nbGenerations = 20;
 	params.mutation.tpg.nbRoots = 30;
+	// A root may be evaluated at most for 3 generations
+	params.maxNbEvaluationPerPolicy = params.nbIterationsPerPolicyEvaluation * 3;
 
 	Learn::LearningAgent la(le, set, params);
 
@@ -292,10 +326,10 @@ TEST_F(LearningAgentTest, TrainPortability) {
 	// end up with the same number of vertices, roots, edges and calls to
 	// the RNG without being identical.
 	TPG::TPGGraph& tpg = la.getTPGGraph();
-	ASSERT_EQ(tpg.getNbVertices(), 30) << "Graph does not have the expected determinst characteristics.";
+	ASSERT_EQ(tpg.getNbVertices(), 29) << "Graph does not have the expected determinst characteristics.";
 	ASSERT_EQ(tpg.getNbRootVertices(), 24) << "Graph does not have the expected determinst characteristics.";
-	ASSERT_EQ(tpg.getEdges().size(), 101) << "Graph does not have the expected determinst characteristics.";
-	ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 12618987376045473466) << "Graph does not have the expected determinst characteristics.";
+	ASSERT_EQ(tpg.getEdges().size(), 92) << "Graph does not have the expected determinst characteristics.";
+	ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 909924408347182502) << "Graph does not have the expected determinst characteristics.";
 }
 
 TEST_F(LearningAgentTest, KeepBestPolicy) {
@@ -573,6 +607,7 @@ TEST_F(ParallelLearningAgentTest, TrainSequential) {
 	params.nbIterationsPerPolicyEvaluation = 5;
 	params.ratioDeletedRoots = 0.2;
 	params.nbGenerations = 3;
+	params.maxNbEvaluationPerPolicy = params.nbIterationsPerPolicyEvaluation * 2;
 
 	Learn::ParallelLearningAgent pla(le, set, params, 1);
 
@@ -591,6 +626,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallel) {
 	params.nbIterationsPerPolicyEvaluation = 5;
 	params.ratioDeletedRoots = 0.2;
 	params.nbGenerations = 3;
+	params.maxNbEvaluationPerPolicy = params.nbIterationsPerPolicyEvaluation * 2;
 
 	Learn::ParallelLearningAgent pla(le, set, params, std::thread::hardware_concurrency());
 
@@ -612,6 +648,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism) {
 	// so that the chances of something going wrong is higher.
 	params.nbGenerations = 20;
 	params.mutation.tpg.nbRoots = 30;
+	params.maxNbEvaluationPerPolicy = params.nbIterationsPerPolicyEvaluation * 5;
 
 	Learn::LearningAgent la(le, set, params);
 
@@ -643,6 +680,7 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy) {
 	params.nbIterationsPerPolicyEvaluation = 1;
 	params.ratioDeletedRoots = 0.2;
 	params.nbGenerations = 5;
+	params.maxNbEvaluationPerPolicy = params.nbIterationsPerPolicyEvaluation * 2;
 
 	Learn::ParallelLearningAgent pla(le, set, params);
 	pla.init();

@@ -166,8 +166,28 @@ namespace Learn {
 		* \param[in] le Reference to the LearningEnvironment to use during the
 		* policy evaluation (may be different from the attribute of the class in
 		* child LearningAgentClass).
+		*
+		* \return a std::shared_ptr to the EvaluationResult for the root. If
+		* this root was already evaluated more times then the limit in
+		* params.maxNbEvaluationPerPolicy, then the EvaluationResult from the
+		* resultsPerRoot map is returned.
 		*/
 		virtual std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const;
+
+		/**
+		* \brief Method detecting whether a root should be evaluated again.
+		*
+		* Using the resultsPerRoot map and the
+		* params.maxNbEvaluationPerPolicy, this method checks whether a root
+		* should be evaluated again, or if sufficient evaluations were already
+		* performed.
+		*
+		* \param[in] root The root TPGVertex whose number of evaluation is checked.
+		* \return the std::shared_ptr to the EvaluationResult of the root from
+		* the resultsPerRoot if enough evaluations were already performed. A
+		* nullptr otherwise.
+		*/
+		std::shared_ptr<Learn::EvaluationResult> isRootEvalSkipped(const TPG::TPGVertex& root) const;
 
 		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.

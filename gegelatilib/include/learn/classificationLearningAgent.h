@@ -126,6 +126,12 @@ namespace Learn {
 	template<class BaseLearningAgent>
 	inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const
 	{
+		// Skip the root evaluation process if enough evaluations were already performed.
+		std::shared_ptr<Learn::EvaluationResult> previousEval = this->isRootEvalSkipped(root);
+		if (previousEval != nullptr) {
+			return previousEval;
+		}
+
 		// Init results
 		std::vector<double> result(this->learningEnvironment.getNbActions(), 0.0);
 		std::vector<size_t> nbEvalPerClass(this->learningEnvironment.getNbActions(), 0);
