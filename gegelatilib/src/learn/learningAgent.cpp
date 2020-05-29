@@ -88,8 +88,9 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::isRootEvalSkipped
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode, LearningEnvironment& le) const
 {
 	// Skip the root evaluation process if enough evaluations were already performed.
-	std::shared_ptr<Learn::EvaluationResult> previousEval = this->isRootEvalSkipped(root);
-	if (previousEval != nullptr) {
+	// In the evaluation mode only.
+	std::shared_ptr<Learn::EvaluationResult> previousEval;
+	if (mode == TRAINING && (previousEval = this->isRootEvalSkipped(root)) != nullptr) {
 		return previousEval;
 	}
 
@@ -137,7 +138,7 @@ std::multimap< std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> 
 		}
 
 		std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(tee, *root, generationNumber, mode, this->learningEnvironment);
-		result.emplace(avgScore, root); //{ avgScore, root });
+		result.emplace(avgScore, root);
 	}
 
 	return result;
