@@ -129,7 +129,7 @@ namespace Learn {
 		// Skip the root evaluation process if enough evaluations were already performed.
 		// In the evaluation mode only.
 		std::shared_ptr<Learn::EvaluationResult> previousEval;
-		if (mode == TRAINING && (previousEval = this->isRootEvalSkipped(root)) != nullptr) {
+		if (mode == TRAINING && this->isRootEvalSkipped(root, previousEval)) {
 			return previousEval;
 		}
 
@@ -181,7 +181,14 @@ namespace Learn {
 		const LearningParameters& p = this->params;
 		std::for_each(result.begin(), result.end(), [p](double& val) { val /= (double)p.nbIterationsPerPolicyEvaluation; });
 
-		return std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result, nbEvalPerClass));
+		// Create the EvaluationResult
+		auto evaluationResult = std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result, nbEvalPerClass));
+
+		// Combine it with previous one if any
+		if (previousEval != nullptr) {
+			*evaluationResult += *previousEval;
+		}
+		return evaluationResult;
 	}
 
 	template<class BaseLearningAgent>

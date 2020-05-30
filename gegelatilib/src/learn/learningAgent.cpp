@@ -72,16 +72,17 @@ void Learn::LearningAgent::init(uint64_t seed) {
 	this->bestRoot = { nullptr, nullptr };
 }
 
-std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::isRootEvalSkipped(const TPG::TPGVertex& root) const {
+bool Learn::LearningAgent::isRootEvalSkipped(const TPG::TPGVertex& root, std::shared_ptr<Learn::EvaluationResult>& previousResult) const {
 	// Has the root already been evaluated more times than params.maxNbEvaluationPerPolicy
 	const auto& iter = this->resultsPerRoot.find(&root);
-	if (iter != this->resultsPerRoot.end()
-		&& iter->second->getNbEvaluation() > params.maxNbEvaluationPerPolicy) {
-		// The root has already been evaluated many times use the resultsPerRoot result.
-		return iter->second;
+	if (iter != this->resultsPerRoot.end()) {
+		// The root has already been evaluated
+		previousResult = iter->second;
+		return iter->second->getNbEvaluation() >= params.maxNbEvaluationPerPolicy;
 	}
 	else {
-		return nullptr;
+		previousResult = nullptr;
+		return false;
 	}
 }
 
@@ -90,7 +91,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG:
 	// Skip the root evaluation process if enough evaluations were already performed.
 	// In the evaluation mode only.
 	std::shared_ptr<Learn::EvaluationResult> previousEval;
-	if (mode == TRAINING && (previousEval = this->isRootEvalSkipped(root)) != nullptr) {
+	if (mode == TRAINING && this->isRootEvalSkipped(root, previousEval)) {
 		return previousEval;
 	}
 
@@ -119,7 +120,15 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG:
 		// Update results
 		result += le.getScore();
 	}
-	return std::shared_ptr<EvaluationResult>(new EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation, params.nbIterationsPerPolicyEvaluation));
+
+	// Create the EvaluationResult
+	auto evaluationResult = std::shared_ptr<EvaluationResult>(new EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation, params.nbIterationsPerPolicyEvaluation));
+
+	// Combine it with previous one if any
+	if (previousEval != nullptr) {
+		*evaluationResult += *previousEval;
+	}
+	return evaluationResult;
 }
 
 std::multimap< std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
@@ -241,10 +250,9 @@ void Learn::LearningAgent::updateEvaluationRecords(std::multimap<std::shared_ptr
 			else if (result.first != mapIterator->second) {
 				// This root has already been evaluated.
 				// If the received result pointer is different from the one stored
-				// in the map, update the one in the map using the addition 
-				// assignment operator from EvaluationResults
-				// Otherwise, do nothing.
-				(*mapIterator->second) += *result.first;
+				// in the map, update the one in the map by replacing it with the new
+				// one (which was combined with the pre-existing one in evalRoot)
+				mapIterator->second = result.first;
 			}
 		}
 	}

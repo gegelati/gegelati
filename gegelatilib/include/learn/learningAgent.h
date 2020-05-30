@@ -155,7 +155,6 @@ namespace Learn {
 		* TPGVertex is evaluated nbIteration times. The generationNumber is
 		* combined with the current iteration number to generate a set of
 		* seeds for evaluating the policy.
-		* The method returns the average score for this policy.
 		*
 		* The method is const to enable potential parallel calls to it.
 		*
@@ -170,7 +169,9 @@ namespace Learn {
 		* \return a std::shared_ptr to the EvaluationResult for the root. If
 		* this root was already evaluated more times then the limit in
 		* params.maxNbEvaluationPerPolicy, then the EvaluationResult from the
-		* resultsPerRoot map is returned.
+		* resultsPerRoot map is returned, else the EvaluationResult of the
+		* current generation is returned, already combined with the
+		* resultsPerRoot for this root (if any).
 		*/
 		virtual std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const;
 
@@ -183,11 +184,11 @@ namespace Learn {
 		* performed.
 		*
 		* \param[in] root The root TPGVertex whose number of evaluation is checked.
-		* \return the std::shared_ptr to the EvaluationResult of the root from
-		* the resultsPerRoot if enough evaluations were already performed. A
-		* nullptr otherwise.
+		* \param[out] previousResult the std::shared_ptr to the
+		* EvaluationResult of the root from the resultsPerRoot if any.
+		* \return true if the root has been evaluated enough times, false otherwise.
 		*/
-		std::shared_ptr<Learn::EvaluationResult> isRootEvalSkipped(const TPG::TPGVertex& root) const;
+		bool isRootEvalSkipped(const TPG::TPGVertex& root, std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
 
 		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
