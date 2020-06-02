@@ -70,6 +70,10 @@ namespace Learn {
 		* A ClassificationEvaluationResult storing a score for each class of a
 		* classification-oriented LearningEnvironment.
 		*
+		* Contrary to the base class EvaluationResult, the number of evaluation
+		* stored in a ClassificationEvaluationResult corresponds to the total
+		* number of times any action was performed.
+		*
 		* \param[in] scores a vector of double storing per-class scores.
 		* \param[in] nbEvalPerClass a vector of integer storing per-class
 		* number of evaluations.

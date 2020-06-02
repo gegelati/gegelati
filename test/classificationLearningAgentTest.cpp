@@ -99,8 +99,10 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot) {
 	params.archivingProbability = 1.0;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 10;
-	// Only 1 evaluations of the root should be done.
-	params.maxNbEvaluationPerPolicy = params.nbIterationsPerPolicyEvaluation;
+	// Only 2 evaluations of each root should be done (one to create a result,
+	// one to cover the line responsible for combining preexisting results with new ones).
+	// Warning: in ClassificationLearningEnvironment, the number of evaluation corresponds to the total number of action.
+	params.maxNbEvaluationPerPolicy = 2 * params.nbIterationsPerPolicyEvaluation * params.maxNbActionsPerEval;
 
 	Learn::ClassificationLearningAgent cla(fle, set, params);
 	Archive a; // For testing purposes, notmally, the archive from the LearningAgent is used.
@@ -115,10 +117,18 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot) {
 	// Record this result
 	cla.updateEvaluationRecords({ {result1, cla.getTPGGraph().getRootVertices().at(0)} });
 
-	// Reevaluate to check that the previous result1 is returned.
+	// Reevaluate to check that the previous result1 is not returned.
 	std::shared_ptr<Learn::EvaluationResult> result2;
 	ASSERT_NO_THROW(result2 = cla.evaluateRoot(tee, *cla.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, fle)) << "Evaluation from a root failed.";
-	ASSERT_EQ(result1, result2);
+	ASSERT_NE(result1, result2);
+
+	// Record this result
+	cla.updateEvaluationRecords({ {result2, cla.getTPGGraph().getRootVertices().at(0)} });
+
+	// Reevaluate to check that the previous result2 is returned.
+	std::shared_ptr<Learn::EvaluationResult> result3;
+	ASSERT_NO_THROW(result3 = cla.evaluateRoot(tee, *cla.getTPGGraph().getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, fle)) << "Evaluation from a root failed.";
+	ASSERT_EQ(result3, result2);
 }
 
 TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots) {
