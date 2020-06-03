@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_aaaa.mm.dd_
+## Release version 0.2.0
+_2020.06.03_
 
 ### New features
 * The Instructions::LambdaInstruction template class now accepts any number and type of arguments instead of only two. To use the feature, the LambdaInstruction should be instanciated with the list of data types of its arguments as a template parameter. For example `Instructions::LambdaInstruction<int, double, const float[2]>` is a lamda instructions requiring 3 arguments for its execution, whose types are `int`, `double`, and `const float[2]`, respectively.
