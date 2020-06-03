@@ -72,8 +72,29 @@ void Learn::LearningAgent::init(uint64_t seed) {
 	this->bestRoot = { nullptr, nullptr };
 }
 
+bool Learn::LearningAgent::isRootEvalSkipped(const TPG::TPGVertex& root, std::shared_ptr<Learn::EvaluationResult>& previousResult) const {
+	// Has the root already been evaluated more times than params.maxNbEvaluationPerPolicy
+	const auto& iter = this->resultsPerRoot.find(&root);
+	if (iter != this->resultsPerRoot.end()) {
+		// The root has already been evaluated
+		previousResult = iter->second;
+		return iter->second->getNbEvaluation() >= params.maxNbEvaluationPerPolicy;
+	}
+	else {
+		previousResult = nullptr;
+		return false;
+	}
+}
+
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, Learn::LearningMode mode, LearningEnvironment& le) const
 {
+	// Skip the root evaluation process if enough evaluations were already performed.
+	// In the evaluation mode only.
+	std::shared_ptr<Learn::EvaluationResult> previousEval;
+	if (mode == TRAINING && this->isRootEvalSkipped(root, previousEval)) {
+		return previousEval;
+	}
+
 	// Init results
 	double result = 0.0;
 
@@ -99,7 +120,15 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(TPG:
 		// Update results
 		result += le.getScore();
 	}
-	return std::shared_ptr<EvaluationResult>(new EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation));
+
+	// Create the EvaluationResult
+	auto evaluationResult = std::shared_ptr<EvaluationResult>(new EvaluationResult(result / (double)params.nbIterationsPerPolicyEvaluation, params.nbIterationsPerPolicyEvaluation));
+
+	// Combine it with previous one if any
+	if (previousEval != nullptr) {
+		*evaluationResult += *previousEval;
+	}
+	return evaluationResult;
 }
 
 std::multimap< std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode)
@@ -118,7 +147,7 @@ std::multimap< std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> 
 		}
 
 		std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(tee, *root, generationNumber, mode, this->learningEnvironment);
-		result.emplace(avgScore, root); //{ avgScore, root });
+		result.emplace(avgScore, root);
 	}
 
 	return result;
@@ -132,25 +161,30 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 	// Evaluate
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
 
-	// Update the best (code duplicate in ParallelLearningAgent)
-	auto iterResults = results.end();
-	iterResults--;
-	this->updateBestRoot(iterResults->second, iterResults->first);
-
 	// Remove worst performing roots
 	decimateWorstRoots(results);
+
+	// Update the best (code duplicate in ParallelLearningAgent)
+	this->updateEvaluationRecords(results);
 }
 
 void Learn::LearningAgent::decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results)
 {
+	// Some actions may be encountered but not removed while scanning the results map
+	// they should be re-inserted to the list before leaving the method.
+	std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> preservedActionRoots;
+
 	auto i = 0;
 	while (i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots)
 		&& results.size() > 0) {
 		// If the root is an action, do not remove it!
 		if (typeid(*results.begin()->second) != typeid(TPG::TPGAction)) {
 			tpg.removeVertex(*results.begin()->second);
+			// Removed stored result (if any)
+			this->resultsPerRoot.erase(results.begin()->second);
 		}
 		else {
+			preservedActionRoots.insert(*results.begin());
 			i--; // no vertex was actually removed
 		}
 		results.erase(results.begin());
@@ -158,6 +192,9 @@ void Learn::LearningAgent::decimateWorstRoots(std::multimap<std::shared_ptr<Eval
 		// Increment loop counter
 		i++;
 	}
+
+	// Restore root actions
+	results.insert(preservedActionRoots.begin(), preservedActionRoots.end());
 }
 
 uint64_t Learn::LearningAgent::train(volatile bool& altTraining, bool printProgressBar)
@@ -201,19 +238,41 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining, bool printProgr
 	return generationNumber;
 }
 
-void Learn::LearningAgent::updateBestRoot(const TPG::TPGVertex* candidate, std::shared_ptr<EvaluationResult> evaluation)
+void Learn::LearningAgent::updateEvaluationRecords(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> results)
 {
-	// Test the three replacement cases
-	// from the simpler to the most complex to test
-	if (this->bestRoot.first == nullptr  // NULL case
-		|| *this->bestRoot.second < *evaluation // new high-score case
-		|| !this->tpg.hasVertex(*this->bestRoot.first) // bestRoot disappearance
-		) {
-		// Replace the best root
-		this->bestRoot = { candidate, evaluation };
+	{ // Update resultsPerRoot 
+		for (auto result : results) {
+			auto mapIterator = this->resultsPerRoot.find(result.second);
+			if (mapIterator == this->resultsPerRoot.end()) {
+				// First time this root is evaluated
+				this->resultsPerRoot.emplace(result.second, result.first);
+			}
+			else if (result.first != mapIterator->second) {
+				// This root has already been evaluated.
+				// If the received result pointer is different from the one stored
+				// in the map, update the one in the map by replacing it with the new
+				// one (which was combined with the pre-existing one in evalRoot)
+				mapIterator->second = result.first;
+			}
+		}
 	}
 
-	// Otherwise do nothing
+	{ // Update bestRoot
+		auto iterator = --results.end();
+		const std::shared_ptr<EvaluationResult> evaluation = iterator->first;
+		const TPG::TPGVertex* candidate = iterator->second;
+		// Test the three replacement cases
+		// from the simpler to the most complex to test
+		if (this->bestRoot.first == nullptr  // NULL case
+			|| *this->bestRoot.second < *evaluation // new high-score case
+			|| !this->tpg.hasVertex(*this->bestRoot.first) // bestRoot disappearance
+			) {
+			// Replace the best root
+			this->bestRoot = { candidate, evaluation };
+		}
+
+		// Otherwise do nothing
+	}
 }
 
 const std::pair<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& Learn::LearningAgent::getBestRoot() const

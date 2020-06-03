@@ -76,6 +76,21 @@ namespace Learn {
 		/// Pointer to the best root encountered during training, together with its EvaluationResult.
 		std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult> > bestRoot{ nullptr, nullptr };
 
+		/**
+		* \brief Map associating root TPG::TPGVertex to their EvaluationResult.
+		*
+		* If a given TPGVertex is evaluated several times, its
+		* EvaluationResult may be updated with the newer results.
+		*
+		* Whenever a TPGVertex is removed from the TPGGraph, its
+		* EvaluationResult should also be removed from this map.
+		*
+		* This map may be used to avoid reevaluating a root that was already
+		* evaluated more than LearningParameters::maxNbEvaluationPerPolicy
+		* times.
+		*/
+		std::map<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>> resultsPerRoot;
+
 		/// Random Number Generator for this Learning Agent
 		Mutator::RNG rng;
 
@@ -140,7 +155,6 @@ namespace Learn {
 		* TPGVertex is evaluated nbIteration times. The generationNumber is
 		* combined with the current iteration number to generate a set of
 		* seeds for evaluating the policy.
-		* The method returns the average score for this policy.
 		*
 		* The method is const to enable potential parallel calls to it.
 		*
@@ -151,8 +165,30 @@ namespace Learn {
 		* \param[in] le Reference to the LearningEnvironment to use during the
 		* policy evaluation (may be different from the attribute of the class in
 		* child LearningAgentClass).
+		*
+		* \return a std::shared_ptr to the EvaluationResult for the root. If
+		* this root was already evaluated more times then the limit in
+		* params.maxNbEvaluationPerPolicy, then the EvaluationResult from the
+		* resultsPerRoot map is returned, else the EvaluationResult of the
+		* current generation is returned, already combined with the
+		* resultsPerRoot for this root (if any).
 		*/
 		virtual std::shared_ptr<EvaluationResult> evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const;
+
+		/**
+		* \brief Method detecting whether a root should be evaluated again.
+		*
+		* Using the resultsPerRoot map and the
+		* params.maxNbEvaluationPerPolicy, this method checks whether a root
+		* should be evaluated again, or if sufficient evaluations were already
+		* performed.
+		*
+		* \param[in] root The root TPGVertex whose number of evaluation is checked.
+		* \param[out] previousResult the std::shared_ptr to the
+		* EvaluationResult of the root from the resultsPerRoot if any.
+		* \return true if the root has been evaluated enough times, false otherwise.
+		*/
+		bool isRootEvalSkipped(const TPG::TPGVertex& root, std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
 
 		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.
@@ -182,7 +218,13 @@ namespace Learn {
 		* \brief Removes from the TPGGraph the root TPGVertex with the worst
 		* results.
 		*
-		* \param[in] results a multimap containing root TPGVertex associated
+		* The given multimap is updated by removing entries corresponding to
+		* decimated vertices.
+		*
+		* The resultsPerRoot attribute is updated to remove results associated
+		* to removed vertices.
+		*
+		* \param[in,out] results a multimap containing root TPGVertex associated
 		* to their score during an evaluation.
 		*/
 		virtual void decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results);
@@ -205,7 +247,7 @@ namespace Learn {
 		uint64_t train(volatile bool& altTraining, bool printProgressBar);
 
 		/**
-		* \brief Update the bestRoot attribute if needed.
+		* \brief Update the bestRoot and resultsPerRoot attributes.
 		*
 		* This method updates the value of the bestRoot attribute with the
 		* TPG::Vertex given as an argument in the following cases:
@@ -221,8 +263,10 @@ namespace Learn {
 		* from previous generations, with an EvaluationResult never beaten,
 		* was removed from the graph in a following generation, beaten by root
 		* vertex with lower scores than the current record.
+		*
+		* \param[in] results Map from the evaluateAllRoots method.
 		*/
-		void updateBestRoot(const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>);
+		void updateEvaluationRecords(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> results);
 
 		/**
 		* \brief Get the best root TPG::Vertex encountered since the last init.
