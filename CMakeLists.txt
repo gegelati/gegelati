@@ -41,7 +41,7 @@ set(PROJECT_NAME GEGELATI)
 
 project(${PROJECT_NAME}
         LANGUAGES CXX
-        VERSION 0.1.1)
+        VERSION 0.2.0)
 string(TOLOWER ${PROJECT_NAME} project_name)
 set(LIB_SOURCE_DIRECTORY ${project_name}lib)
 
