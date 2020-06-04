@@ -117,6 +117,8 @@ namespace Learn {
 		* If an insufficient number of root is preserved during the decimation
 		* process, all roots are preserved based on their general score.
 		*
+		* The results map is updated by the method to keep only the results of
+		* non-decimated roots.
 		*/
 		void decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results) override;
 	};
@@ -124,8 +126,16 @@ namespace Learn {
 	template<class BaseLearningAgent>
 	inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root, uint64_t generationNumber, LearningMode mode, LearningEnvironment& le) const
 	{
+		// Skip the root evaluation process if enough evaluations were already performed.
+		// In the evaluation mode only.
+		std::shared_ptr<Learn::EvaluationResult> previousEval;
+		if (mode == TRAINING && this->isRootEvalSkipped(root, previousEval)) {
+			return previousEval;
+		}
+
 		// Init results
 		std::vector<double> result(this->learningEnvironment.getNbActions(), 0.0);
+		std::vector<size_t> nbEvalPerClass(this->learningEnvironment.getNbActions(), 0);
 
 		// Evaluate nbIteration times
 		for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation; i++) {
@@ -162,6 +172,8 @@ namespace Learn {
 				// If true positive is 0, set score to 0.
 				double fScore = (truePositive != 0) ? 2 * (precision * recall) / (precision + recall) : 0.0;
 				result.at(classIdx) += fScore;
+
+				nbEvalPerClass.at(classIdx) += truePositive + falseNegative;
 			}
 		}
 
@@ -169,7 +181,14 @@ namespace Learn {
 		const LearningParameters& p = this->params;
 		std::for_each(result.begin(), result.end(), [p](double& val) { val /= (double)p.nbIterationsPerPolicyEvaluation; });
 
-		return std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result));
+		// Create the EvaluationResult
+		auto evaluationResult = std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result, nbEvalPerClass));
+
+		// Combine it with previous one if any
+		if (previousEval != nullptr) {
+			*evaluationResult += *previousEval;
+		}
+		return evaluationResult;
 	}
 
 	template<class BaseLearningAgent>
@@ -234,12 +253,17 @@ namespace Learn {
 		// may be higher than the given ratio.
 		auto allRoots = this->tpg.getRootVertices();
 		auto& tpgRef = this->tpg;
-		std::for_each(allRoots.begin(), allRoots.end(), [&rootsToKeep, &tpgRef](const TPG::TPGVertex* vert)
+		auto& resultsPerRootRef = this->resultsPerRoot;
+		std::for_each(allRoots.begin(), allRoots.end(), [&rootsToKeep, &tpgRef, &resultsPerRootRef](const TPG::TPGVertex* vert)
 			{
+				const std::type_info& vertexType = typeid(*vert);
 				// Do not remove actions
-				if (typeid(*vert) != typeid(TPG::TPGAction)
+				if (vertexType != typeid(TPG::TPGAction)
 					&& std::find(rootsToKeep.begin(), rootsToKeep.end(), vert) == rootsToKeep.end()) {
 					tpgRef.removeVertex(*vert);
+
+					// Keep only results of non-decimated roots.
+					resultsPerRootRef.erase(vert);
 				}
 			});
 	}

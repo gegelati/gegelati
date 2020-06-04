@@ -87,8 +87,16 @@ TEST(DataHandlersTest, PrimitiveDataArrayAddressSpaceArray) {
 }
 
 TEST(DataHandlersTest, PrimitiveDataArrayLargestAddressSpace) {
-	Data::DataHandler* d = new Data::PrimitiveTypeArray<float>(20); // Array of 64 long
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<float>(20); // Array of 20 float
 	ASSERT_EQ(d->getLargestAddressSpace(), 20) << "Largest address space size for type in PrimitiveTypeArray<float>(20) is not 20 as expected.";
+
+	delete d;
+}
+
+TEST(DataHandlersTest, PrimitiveDataArrayScaleLocation) {
+	Data::DataHandler* d = new Data::PrimitiveTypeArray<float>(20); // Array of 20 float
+	ASSERT_EQ(d->scaleLocation(25, typeid(float)), 5) << "Scaled location is wrong.";
+	ASSERT_EQ(d->scaleLocation(25, typeid(const float[5])), 9) << "Scaled location is wrong.";
 
 	delete d;
 }

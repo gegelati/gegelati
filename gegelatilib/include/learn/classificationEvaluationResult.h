@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -57,6 +57,12 @@ namespace Learn {
 		*/
 		std::vector<double> scorePerClass;
 
+		/**
+		* \brief Vector storing the number of evaluation for each class
+		* of the classification LearningEnvironment.
+		*/
+		std::vector<size_t> nbEvaluationPerClass;
+
 	public:
 		/**
 		* \brief Main constructor of the ClassificationEvaluationResult class.
@@ -64,16 +70,40 @@ namespace Learn {
 		* A ClassificationEvaluationResult storing a score for each class of a
 		* classification-oriented LearningEnvironment.
 		*
+		* Contrary to the base class EvaluationResult, the number of evaluation
+		* stored in a ClassificationEvaluationResult corresponds to the total
+		* number of times any action was performed.
+		*
 		* \param[in] scores a vector of double storing per-class scores.
+		* \param[in] nbEvalPerClass a vector of integer storing per-class
+		* number of evaluations.
 		*/
-		ClassificationEvaluationResult(const std::vector<double>& scores) :
-			EvaluationResult(std::accumulate(scores.cbegin(), scores.cend(), 0.0) / scores.size()),
-			scorePerClass(scores) {};
+		ClassificationEvaluationResult(const std::vector<double>& scores, const std::vector<size_t>& nbEvalPerClass) :
+			EvaluationResult(std::accumulate(scores.cbegin(), scores.cend(), 0.0) / scores.size(),
+				std::accumulate(nbEvalPerClass.cbegin(), nbEvalPerClass.cend(), size_t(0))),
+			scorePerClass(scores), nbEvaluationPerClass(nbEvalPerClass) {
+			if (scores.size() != nbEvalPerClass.size()) {
+				throw std::runtime_error("Mismatch between scores and nbEvalPerClass vector sizes.");
+			}
+		};
 
 		/**
 		* \brief Get a const ref to the scorePerClass attribute.
 		*/
 		const std::vector<double>& getScorePerClass() const;
+
+		/**
+		* \brief Get a const ref to the nbEvaluationPerClass attribute.
+		*/
+		const std::vector<size_t>& getNbEvaluationPerClass() const;
+
+		/**
+		* \brief Override from EvaluationResult
+		*
+		* \throw std::runtime_error in case the number of classes of the two
+		* ClassificationEvaluationResult are different.
+		*/
+		virtual EvaluationResult& operator+=(const EvaluationResult& other) override;
 	};
 };
 

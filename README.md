@@ -42,7 +42,8 @@ To build the shared library (and its code documentation), you can execute the fo
 git clone https://github.com/gegelati/gegelati.git
 cd gegelati/bin
 cmake ..
-cmake --build . --target INSTALL
+cmake --build . --target INSTALL # On Windows
+cmake --build . --target install # On Linux
 ```
 
 The shared library will be installed:

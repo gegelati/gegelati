@@ -57,3 +57,8 @@ size_t Data::DataHandler::getHash() const
 
 	return this->cachedHash;
 }
+
+uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation, const std::type_info& type) const
+{
+	return rawLocation % this->getAddressSpace(type);
+}
