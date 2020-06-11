@@ -62,7 +62,7 @@ std::multimap< std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> 
 			if (mode == LearningMode::TRAINING) {
 				this->archive.setRandomSeed(this->rng.getUnsignedInt64(0, UINT64_MAX));
 			}
-			std::shared_ptr<EvaluationResult> avgScore = ParallelLearningAgent::evaluateRoot(tee, *root, generationNumber, mode, this->learningEnvironment);
+			std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(tee, *root, generationNumber, mode, this->learningEnvironment);
 			results.emplace(avgScore, root);
 		}
 	}
@@ -110,7 +110,7 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
 			}
 			tee.setArchive(temporaryArchive);
 
-			std::shared_ptr<EvaluationResult> avgScore = evaluateRoot(tee, *rootToProcess.second, generationNumber, mode, *privateLearningEnvironment);
+			std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(tee, *rootToProcess.second, generationNumber, mode, *privateLearningEnvironment);
 
 			{	// Store result Mutual exclusion zone
 				std::lock_guard<std::mutex> lock(resultsPerRootMapMutex);
@@ -242,9 +242,9 @@ void Learn::ParallelLearningAgent::trainOneGeneration(uint64_t generationNumber)
 	// Evaluate
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
 
-	// Update the best (code duplicate in LearningAgent)
-	this->updateEvaluationRecords(results);
-
 	// Remove worst performing roots
 	decimateWorstRoots(results);
+
+	// Update the best (code duplicate in LearningAgent)
+	this->updateEvaluationRecords(results);
 }
