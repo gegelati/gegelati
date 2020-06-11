@@ -1,5 +1,15 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_yyyy.mm.dd_
+
+### New features
+
+### Changes
+
+### Bug fix
+* Fix non-determinism issue in ClassificationLearningAgent.
+
 ## Release version 0.2.0
 _2020.06.03_
 
