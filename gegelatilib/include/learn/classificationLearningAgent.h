@@ -254,7 +254,7 @@ namespace Learn {
 		auto allRoots = this->tpg.getRootVertices();
 		auto& tpgRef = this->tpg;
 		auto& resultsPerRootRef = this->resultsPerRoot;
-		std::for_each(allRoots.begin(), allRoots.end(), [&rootsToKeep, &tpgRef, &resultsPerRootRef](const TPG::TPGVertex* vert)
+		std::for_each(allRoots.begin(), allRoots.end(), [&rootsToKeep, &tpgRef, &resultsPerRootRef, &results](const TPG::TPGVertex* vert)
 			{
 				const std::type_info& vertexType = typeid(*vert);
 				// Do not remove actions
@@ -264,6 +264,16 @@ namespace Learn {
 
 					// Keep only results of non-decimated roots.
 					resultsPerRootRef.erase(vert);
+
+					// Update results also
+					std::multimap < std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>::iterator iter = results.begin();
+					while (iter != results.end()) {
+						if (iter->second == vert) {
+							results.erase(iter);
+							break;
+						}
+						iter++;
+					}
 				}
 			});
 	}
