@@ -1,12 +1,48 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
 
 #include <random>
 #include <map>
 #include <deque>
+#include <memory>
 
 #include "mutator/rng.h"
-#include "dataHandlers/dataHandler.h"
+#include "data/dataHandler.h"
 #include "program/program.h"
 
 /**
@@ -64,7 +100,7 @@ protected:
 	* recordings to associate each recording to the right copy of the
 	* DataHandler.
 	*/
-	std::map<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>> dataHandlers;
+	std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>> dataHandlers;
 
 	/**
 	* \brief Map storing the Program pointers referenced in recordings the
@@ -98,6 +134,14 @@ public:
 	Archive(size_t size = 50, double archivingProbability = 1.0, size_t initialSeed = 0) : archivingProbability{ archivingProbability }, maxSize{ size }, recordings(), rng(initialSeed) {};
 
 	/**
+	* Disable Archive copy construction.
+	*
+	* Until we see the need for it, there si no reason to enable copy-construction
+	* of Archive.
+	*/
+	Archive(const Archive& other) = delete;
+
+	/**
 	* \brief Destructor of the class.
 	*
 	* In addition to default behavior, free all the memory associated to the
@@ -113,7 +157,7 @@ public:
 	*
 	* \return the hash resulting from the combination.
 	*/
-	static size_t getCombinedHash(const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler);
+	static size_t getCombinedHash(const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandler);
 
 	/**
 	* \brief Access the nth ArchiveRecording within the Archive.
@@ -153,7 +197,7 @@ public:
 	*                   insertion.
 	*/
 	virtual void addRecording(const Program::Program* const program,
-		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler,
+		const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandler,
 		double result,
 		bool forced = false);
 
@@ -204,7 +248,7 @@ public:
 	*
 	* \return a const reference to the dataHandlers attribute.
 	*/
-	const std::map < size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>>& getDataHandlers() const;
+	const std::map < size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>>& getDataHandlers() const;
 
 	/**
 	* \brief Clear all content from the Archive.

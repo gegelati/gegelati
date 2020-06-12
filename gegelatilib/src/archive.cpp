@@ -1,3 +1,38 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #include <math.h>
 
 #include "archive.h"
@@ -12,10 +47,10 @@ Archive::~Archive()
 	}
 }
 
-size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandlers)
+size_t Archive::getCombinedHash(const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandlers)
 {
 	size_t hash = 0;
-	for (const std::reference_wrapper<const DataHandlers::DataHandler> dHandler : dHandlers) {
+	for (const std::reference_wrapper<const Data::DataHandler> dHandler : dHandlers) {
 		hash ^= dHandler.get().getHash();
 	}
 	return hash;
@@ -31,7 +66,7 @@ void Archive::setRandomSeed(size_t newSeed)
 	this->rng.setSeed(newSeed);
 }
 
-void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& dHandler, double result, bool forced)
+void Archive::addRecording(const Program::Program* const program, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dHandler, double result, bool forced)
 {
 	// Archive according to probability
 	if (forced || this->archivingProbability == 1.0 || this->rng.getDouble(0.0, 1.0) <= this->archivingProbability) {
@@ -41,9 +76,9 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 		// Check if dataHandler copy is needed.
 		if (this->dataHandlers.find(hash) == this->dataHandlers.end()) {
 			// Store a copy of data handlers.
-			std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> dHandlersCpy;
-			for (std::reference_wrapper<const DataHandlers::DataHandler> dh : dHandler) {
-				DataHandlers::DataHandler* dhCopy = dh.get().clone();
+			std::vector<std::reference_wrapper<const Data::DataHandler>> dHandlersCpy;
+			for (std::reference_wrapper<const Data::DataHandler> dh : dHandler) {
+				Data::DataHandler* dhCopy = dh.get().clone();
 				dHandlersCpy.push_back(*dhCopy);
 			}
 			// Create the map entry
@@ -78,7 +113,7 @@ void Archive::addRecording(const Program::Program* const program, const std::vec
 			// if not, remove it from the Archive also
 			if (!stillUsed) {
 				// Free memory of DataHandlers within the archive
-				for (std::reference_wrapper<const DataHandlers::DataHandler> toErase : this->dataHandlers.at(rec.dataHash)) {
+				for (std::reference_wrapper<const Data::DataHandler> toErase : this->dataHandlers.at(rec.dataHash)) {
 					delete& toErase.get();
 				}
 
@@ -153,7 +188,7 @@ size_t Archive::getNbDataHandlers() const
 	return this->dataHandlers.size();
 }
 
-const std::map<size_t, std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>>& Archive::getDataHandlers() const
+const std::map<size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>>& Archive::getDataHandlers() const
 {
 	return this->dataHandlers;
 }

@@ -1,3 +1,39 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #include "program/line.h"
 #include "program/programExecutionEngine.h"
 
@@ -33,7 +69,7 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog) {
 	this->programCounter = 0;
 }
 
-const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& Program::ProgramExecutionEngine::getDataSources() const
+const std::vector<std::reference_wrapper<const Data::DataHandler>>& Program::ProgramExecutionEngine::getDataSources() const
 {
 	return this->dataSources;
 }
@@ -53,11 +89,6 @@ const Program::Line& Program::ProgramExecutionEngine::getCurrentLine() const
 	return this->program->getLine(this->programCounter);
 }
 
-uint64_t Program::ProgramExecutionEngine::scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const std::type_info& type) const
-{
-	return rawLocation % dataHandler.getAddressSpace(type);
-}
-
 const Instructions::Instruction& Program::ProgramExecutionEngine::getCurrentInstruction() const
 {
 	const Line& currentLine = this->getCurrentLine(); // throw std::out_of_range if the program counter is too large.
@@ -65,7 +96,7 @@ const Instructions::Instruction& Program::ProgramExecutionEngine::getCurrentInst
 	return this->program->getEnvironment().getInstructionSet().getInstruction(instructionIndex); // throw std::out_of_range if the index of the line is too large.
 }
 
-const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const
+const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<Data::UntypedSharedPtr>& operands) const
 {
 	const Line& line = this->getCurrentLine(); // throw std::out_of_range
 	const Instructions::Instruction& instruction = this->getCurrentInstruction(); // throw std::out_of_range
@@ -73,10 +104,10 @@ const void Program::ProgramExecutionEngine::fetchCurrentOperands(std::vector<std
 	// Get as many operands as required by the instruction.
 	for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
 		const std::pair<uint64_t, uint64_t>& operandIndexes = line.getOperand(i);
-		const DataHandlers::DataHandler& dataSource = this->dataSourcesAndRegisters.at(operandIndexes.first); // Throws std::out_of_range
+		const Data::DataHandler& dataSource = this->dataSourcesAndRegisters.at(operandIndexes.first); // Throws std::out_of_range
 		const std::type_info& operandType = instruction.getOperandTypes().at(i).get();
-		const uint64_t operandLocation = this->scaleLocation(operandIndexes.second, dataSource, operandType);
-		const SupportedType& data = dataSource.getDataAt(operandType, operandLocation);
+		const uint64_t operandLocation = dataSource.scaleLocation(operandIndexes.second, operandType);
+		Data::UntypedSharedPtr data = dataSource.getDataAt(operandType, operandLocation);
 		operands.push_back(data);
 	}
 }
@@ -94,7 +125,7 @@ const void Program::ProgramExecutionEngine::fetchCurrentParameters(std::vector<s
 
 void Program::ProgramExecutionEngine::executeCurrentLine()
 {
-	std::vector<std::reference_wrapper<const SupportedType>> operands;
+	std::vector<Data::UntypedSharedPtr> operands;
 	std::vector<std::reference_wrapper<const Parameter>> parameters;
 
 	// Get everything needed (may throw)
@@ -105,7 +136,7 @@ void Program::ProgramExecutionEngine::executeCurrentLine()
 
 	double result = instruction.execute(parameters, operands);
 
-	this->registers.setDataAt(typeid(PrimitiveType<double>), line.getDestinationIndex(), result);
+	this->registers.setDataAt(typeid(double), line.getDestinationIndex(), result);
 }
 
 double Program::ProgramExecutionEngine::executeProgram(const bool ignoreException)
@@ -141,5 +172,5 @@ double Program::ProgramExecutionEngine::executeProgram(const bool ignoreExceptio
 
 	// Returns the 0-indexed register. 
 	// cast to primitiveType<double> to enable cast to double.
-	return (const PrimitiveType<double>&)this->registers.getDataAt(typeid(PrimitiveType<double>), 0);
+	return *(this->registers.getDataAt(typeid(double), 0).getSharedPointer<const double>());
 }

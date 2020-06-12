@@ -1,9 +1,45 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #include <gtest/gtest.h>
 
 #include <fstream>
 
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
 #include "instructions/lambdaInstruction.h"
@@ -23,7 +59,7 @@ public:
 
 protected:
 	const size_t size1{ 24 };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e = NULL;
 	std::vector<std::shared_ptr<Program::Program>> progPointers;
@@ -33,17 +69,17 @@ protected:
 
 	virtual void SetUp() {
 		// Setup environment
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
 
 		// Put a 1 in the dataHandler to make it easy to have non-zero return in Programs.
-		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(PrimitiveType<double>), 0, 1.0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(0).get()).setDataAt(typeid(double), 0, 1.0);
 
 
 		auto minus = [](double a, double b)->double {return a - b; };
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
-		set.add(*(new Instructions::LambdaInstruction<double>(minus)));
+		set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
 		e = new Environment(set, vect, 8);
 		tpg = new TPG::TPGGraph(*e);
@@ -128,45 +164,3 @@ TEST_F(ExporterTest, print) {
 
 	ASSERT_NO_THROW(dotExporter.print()) << "File export was executed without error.";
 }
-
-TEST_F(ExporterTest, FileContentVerification) {
-	// This Test checks the content of the exported file against a golden reference.
-	File::TPGGraphDotExporter dotExporter("exported_tpg.dot", *tpg);
-
-	dotExporter.print();
-
-	std::ifstream goldenRef(TESTS_DAT_PATH "exported_tpg_ref.dot");
-	ASSERT_TRUE(goldenRef.is_open()) << "Could not open golden reference. Check project configuration.";
-
-	std::ifstream exportedFile("exported_tpg.dot");
-	ASSERT_TRUE(exportedFile) << "Could not open exported dot file.";
-
-	// Check the file content line by line
-	// print diffs in the console and count number of printed line.
-	uint64_t nbDiffs = 0;
-	uint64_t lineNumber = 0;
-	while (!exportedFile.eof() && !goldenRef.eof()) {
-		std::string lineRef;
-		std::getline(goldenRef, lineRef);
-
-		std::string lineExport;
-		std::getline(exportedFile, lineExport);
-
-		if (lineRef != lineExport) {
-			nbDiffs++;
-			std::cout << "Diff at Line " << lineNumber << ":" << std::endl;
-			std::cout << "\tref: " << lineRef << std::endl;
-			std::cout << "\texp: " << lineExport << std::endl;
-		}
-
-		lineNumber++;
-	}
-
-	if (!exportedFile.eof() || !goldenRef.eof()) {
-		nbDiffs++;
-		std::cout << "Files have different length." << std::endl;
-	}
-
-	ASSERT_EQ(nbDiffs, 0) << "Differences between reference file and exported file were detected.";
-}
-

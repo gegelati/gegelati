@@ -1,15 +1,68 @@
 # GEGELATI Changelog
 
 ## Release version x.y.z
-_aaaa.mm.dd_
+_yyyy.mm.dd_
+
+### New features
+
+### Changes
+
+### Bug fix
+* Fix non-determinism issue in ClassificationLearningAgent.
+
+## Release version 0.2.0
+_2020.06.03_
+
+### New features
+* The Instructions::LambdaInstruction template class now accepts any number and type of arguments instead of only two. To use the feature, the LambdaInstruction should be instanciated with the list of data types of its arguments as a template parameter. For example `Instructions::LambdaInstruction<int, double, const float[2]>` is a lamda instructions requiring 3 arguments for its execution, whose types are `int`, `double`, and `const float[2]`, respectively.
+* Learning agents (`Learn::LearningAgent` and `Learn::ParallelLearningAgent`) now keep a record of the root `TPGVertex` that has led to the best `EvaluationResult` throughout the training process. This root and the associated evaluation result can be retrieved using the new `getBestRoot()` method.
+* New TPG::PolicyStats class for analyzing the topology and the Program of a TPG::TPGGraph starting from a given root TPG::TPGVertex.
+* In Learn::EvaluationResult:
+	* A new attribute `nbEvaluation` was added to count the number of times the associated policy was evaluated to produce this result. 
+	* A new addition assignment operator (`operator+=`) can be used to combine two existing EvaluationResult.
+* Learn::LearningAgent now store EvaluationResult for each non-decimated root TPGVertex. Each time a root is reevaluated, its EvaluationResult is updated by combining it with the new result. The number of evaluation of each policy (i.e. each root TPGVertex) can now be bounded using the Learn::LearningParameters::maxNbEvaluationPerPolicy parameter. Passed this number, previous EvaluationResult for this root, stored by the LearningAgent, will directly be returned instead of reevaluating the root.
+
+### Changes
+* New features cause a change in training determinism. Following this release, training result for a known LearningEnvironment with a known seed may differ.
+* Instructions:LambdaInstruction evolution listed in New Features lead to incompatibility with previous version. To update your code, simply double the template parameter of your previously existing LambdaInstruction. For example `LambdaInstruction<double>` becomes `LambdaInstruction<double, double>`.
+* The behavior of the `LearningAgent::keepBestPolicy()` is now based on the new `bestRoot` attribute, and not on a new evaluation of the remaining roots.
+* Method Program::ProgramExecutionEngine::scaleLocation() moved to Data::DataHandler::scaleLocation().
+
+### Bug fix
+
+
+## Release version 0.1.1
+_2020.04.28_
+
+### New features
+* Configure SonarCloud for automated code analysis reports. [Custom quality gate for gegelati](https://sonarcloud.io/organizations/gegelati/quality_gates/show/23677) is a more restrictive version of the default sonar way.
+* New script to update license in all files.
+
+### Changes
+
+### Bug fix
+* Minor changes in code to pass SonarCloud quality gate.
+* Fix LearningAgent::decimateWorstRoot method crash when too many root TPGAction were present in the decimated graph.
+
+
+## Release version 0.1.0
+_2020.04.07_
 
 ### New features
 * Possibility to import a TPGGraph and its programs with the File::TPGGraphDotImporter class.
+* New Data::Hash class providing a portable hash mechanism in replacement of std::hash.
+* Use of Data::UntypedSharedPtr instead of std::reference_wrapper for fetching operands in DataHandler. This enables fetching "composite" operands, that is operands built on request from native data type in the data handler, and destroyed after use. Data::SupportedType and Data::PrimitiveType no longer needed after this change.
+* Adding support for C-style 1D arrays of primitive types in LambdaInstruction.
 
 ### Changes
-* Renaming the Exporter namespace into File.
+* Reorganization
+  * Renaming the Exporter namespace into File.
+  * Renaming DataHandlers namespace into Data.
+* Switch from transfer.sh to file.io for supporting deployment.
+* Update Data::DataHandler, Program::Program, Mutator::LineMutator to take composite operands into account.
 
 ### Bug fix
+* Training and mutation process were not portable on multiple OSes and compilers because of the diverse implementations of std::hash.
 
 
 ## Release version 0.0.0

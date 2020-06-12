@@ -1,3 +1,39 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #include "file/tpgGraphDotImporter.h"
 
 
@@ -11,28 +47,28 @@ const std::string File::TPGGraphDotImporter::linkProgramActionRegex("T([0-9]+)\\
 const std::string File::TPGGraphDotImporter::linkProgramTeamRegex("T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*");
 const std::string File::TPGGraphDotImporter::addLinkProgramRegex("T([0-9]+)\\x20->\\x20P([0-9]+)");
 
-void File::TPGGraphDotImporter::readParameters(std::string & str, Program::Line & l)
+void File::TPGGraphDotImporter::readParameters(std::string& str, Program::Line& l)
 {
 	std::string::size_type pos = 0;
 	std::string::size_type pos2;
 
 	uint64_t p_idx = 0;
-	
+
 	int16_t p_value;
 	// parameters are stored in str with the following format :
 	// param1|param2|...|param_N
-	while(!str.empty())
+	while (!str.empty())
 	{
 		pos2 = str.find("|");
 		p_value = std::stoi(str.substr(pos, pos2));
 		pos2++; 									// skip the '|'
 		str = str.substr(pos2, str.size());			// store the rest of the string and iterate
-		l.setParameter(p_idx, {p_value});
+		l.setParameter(p_idx, { p_value });
 		p_idx++;
 	}
 }
 
-void File::TPGGraphDotImporter::readOperands(std::string & str, Program::Line & l)
+void File::TPGGraphDotImporter::readOperands(std::string& str, Program::Line& l)
 {
 	std::string::size_type pos = 0;
 	std::string::size_type pos2;
@@ -45,14 +81,13 @@ void File::TPGGraphDotImporter::readOperands(std::string & str, Program::Line & 
 	// operands are stored in str with the following format :
 	// op1_param1|op1_param2#...|param_N
 
-	for(int i = 0; i < this->tpg.getEnvironment().getMaxNbOperands(); ++i )
+	for (int i = 0; i < this->tpg.getEnvironment().getMaxNbOperands(); ++i)
 	{
 		pos2 = str.find("|");
 		dataIndex = std::stoi(str.substr(pos, pos2));
 		pos2++; 												// skip the '|'
 		pos3 = str.find("#");
 		location = std::stoi(str.substr(pos2, pos3 - pos2));
-		pos3;
 		str = str.substr(pos3 + 1, str.size() - pos3);			// store the rest of the string and iterate
 
 		l.setOperand(o_idx, dataIndex, location, true);
@@ -60,17 +95,17 @@ void File::TPGGraphDotImporter::readOperands(std::string & str, Program::Line & 
 	}
 }
 
-void File::TPGGraphDotImporter::readLine(std::smatch & matches)
+void File::TPGGraphDotImporter::readLine(std::smatch& matches)
 {
 	// a line is stored in the .dot file with the following format
 	// inst_idx|dest_idx&param_1|param_2|...|param_n$op1_param1|op1_param2#...#opN_param1|opN_param2
-	if(!this->lastLine.empty() && !matches.empty())
+	if (!this->lastLine.empty() && !matches.empty())
 	{
-		uint64_t prog_label= std::stoi(matches[1]);
+		uint64_t prog_label = std::stoi(matches[1]);
 		std::string label = matches[2];
 
 		auto p_it = programID.find(prog_label);
-		if(p_it != programID.end() && !label.empty())
+		if (p_it != programID.end() && !label.empty())
 		{
 			std::shared_ptr<Program::Program> p = p_it->second;
 			//stores the whole program
@@ -96,24 +131,24 @@ void File::TPGGraphDotImporter::readLine(std::smatch & matches)
 			{
 				Program::Line& l = p.get()->addNewLine();
 				pos = label.find(this->lineSeparator);
-				instruction = label.substr(0,pos);
-				label = label.substr(pos+this->lineSeparator.size(), label.size());
-				
+				instruction = label.substr(0, pos);
+				label = label.substr(pos + this->lineSeparator.size(), label.size());
+
 				//extract everything before pos (ie |)
 				//corresponds to instruction index
 				pos1 = instruction.find("|");
-				instructionIdx = std::stoi(instruction.substr(0, pos1)); 			
+				instructionIdx = std::stoi(instruction.substr(0, pos1));
 
 				//extract destination index;
 				pos2 = instruction.find("&");
 				pos1++; 															//skip the '|'
-				destinationIdx = std::stoi(instruction.substr(pos1, pos2-pos1));	//extract and convert to int
-				
+				destinationIdx = std::stoi(instruction.substr(pos1, pos2 - pos1));	//extract and convert to int
+
 				//extract parameters as a string
 				pos1 = instruction.find("$");										//parameters are in between & and $
 				pos2++;																// skip the '&'
 				parameters = instruction.substr(pos2, pos1 - pos2);
-				
+
 				//extract operands as a string
 				pos2 = instruction.size() - 1; 										//corresponds to the last index of the string.
 				pos1++;																//slip the '$'
@@ -124,12 +159,12 @@ void File::TPGGraphDotImporter::readLine(std::smatch & matches)
 				l.setDestinationIndex(destinationIdx);
 
 				//parse parameters
-				readParameters(parameters,l);
+				readParameters(parameters, l);
 
 				//parse operands
-				readOperands(operands,l);
-				
-				if(label.size() <= 3)
+				readOperands(operands, l);
+
+				if (label.size() <= 3)
 				{
 					cont = false;
 				}
@@ -139,15 +174,15 @@ void File::TPGGraphDotImporter::readLine(std::smatch & matches)
 	}
 }
 
-void File::TPGGraphDotImporter::readProgram(std::smatch & matches)
+void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
 {
-	if(!this->lastLine.empty() && !matches.empty())
+	if (!this->lastLine.empty() && !matches.empty())
 	{
 		// Program definition : 
 		// P0 [fillcolor="#cccccc" shape=point]
-		this->programID.insert(std::pair<uint64_t, std::shared_ptr<Program::Program>>(std::stoi(matches[1]), 
+		this->programID.insert(std::pair<uint64_t, std::shared_ptr<Program::Program>>(std::stoi(matches[1]),
 			new Program::Program(this->tpg.getEnvironment())));
-	}	
+	}
 }
 
 void File::TPGGraphDotImporter::dumpTPGGraphHeader()
@@ -159,17 +194,17 @@ void File::TPGGraphDotImporter::dumpTPGGraphHeader()
 	pFile.getline(buffer, MAX_READ_SIZE);
 }
 
-void File::TPGGraphDotImporter::readTeam(std::smatch & matches)
+void File::TPGGraphDotImporter::readTeam(std::smatch& matches)
 {
-	if(!this->lastLine.empty() && !matches.empty())
+	if (!this->lastLine.empty() && !matches.empty())
 	{
 		this->vertexID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(std::stoi(matches[1]), &this->tpg.addNewTeam()));
 	}
 }
 
-void File::TPGGraphDotImporter::readAction(std::smatch & matches)
+void File::TPGGraphDotImporter::readAction(std::smatch& matches)
 {
-	if(!this->lastLine.empty() && !matches.empty())
+	if (!this->lastLine.empty() && !matches.empty())
 	{
 		//the regex matches two groups (action number and action label)
 		uint64_t action_label = std::stoi(matches[2]);
@@ -177,36 +212,36 @@ void File::TPGGraphDotImporter::readAction(std::smatch & matches)
 
 		//elmt points to the action with the same label as the action we are parsing
 		auto elmt = actionID.find(action_label);
-		if (elmt == actionID.end()) 
+		if (elmt == actionID.end())
 		{
 			//create a new action and insert it if none was previously found
 			this->actionID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(action_label, &this->tpg.addNewAction(action_label)));
 		}
-		this->actionLabel.insert(std::pair<uint64_t, uint64_t>(action_number,action_label));
+		this->actionLabel.insert(std::pair<uint64_t, uint64_t>(action_number, action_label));
 	}
 }
 
-void File::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch & matches)
+void File::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch& matches)
 {
 	//Creating a edge from a team to an action
-	if(!this->lastLine.empty() && !matches.empty())
+	if (!this->lastLine.empty() && !matches.empty())
 	{
 		uint64_t team_in = std::stoi(matches[1]);
 		uint64_t program = std::stoi(matches[2]);
 		uint64_t act_out = std::stoi(matches[3]);
 
 		//get the action depending on its label
-		auto action_lab =  this->actionLabel.find(act_out);
+		auto action_lab = this->actionLabel.find(act_out);
 		if (action_lab != this->actionLabel.end())
 		{
 			auto team_it = this->vertexID.find(team_in);
 			auto action_it = this->actionID.find(action_lab->second);
 			//find the program to add to the edge
 			auto p_it = programID.find(program);
-			if(team_it != vertexID.end() && action_it != this->actionID.end() && p_it != programID.end())
+			if (team_it != vertexID.end() && action_it != this->actionID.end() && p_it != programID.end())
 			{
-				const TPG::TPGVertex * team = team_it->second;
-				const TPG::TPGVertex * action = action_it->second;
+				const TPG::TPGVertex* team = team_it->second;
+				const TPG::TPGVertex* action = action_it->second;
 				std::shared_ptr<Program::Program> p = p_it->second;
 				this->tpg.addNewEdge(*team, *action, p);
 			}
@@ -214,13 +249,13 @@ void File::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch & matches)
 	}
 }
 
-void File::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch & matches)
+void File::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch& matches)
 {
 	//creating a edge between two teams
-	if(!this->lastLine.empty() && !matches.empty())
+	if (!this->lastLine.empty() && !matches.empty())
 	{
-		uint64_t team_in  = std::stoi(matches[1]);
-		uint64_t program  = std::stoi(matches[2]);
+		uint64_t team_in = std::stoi(matches[1]);
+		uint64_t program = std::stoi(matches[2]);
 		uint64_t team_out = std::stoi(matches[3]);
 
 		//get the source and destination teams
@@ -229,47 +264,47 @@ void File::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch & matches)
 
 		//find the program
 		auto p_it = programID.find(program);
-		if(p_it != programID.end())
+		if (p_it != programID.end())
 		{
 			std::shared_ptr<Program::Program> p = p_it->second;
-			if(t1_it != this->vertexID.end() && t2_it != this->vertexID.end())
+			if (t1_it != this->vertexID.end() && t2_it != this->vertexID.end())
 			{
-				const TPG::TPGVertex * team_i = t1_it->second;
-				const TPG::TPGVertex * team_o = t2_it->second;
+				const TPG::TPGVertex* team_i = t1_it->second;
+				const TPG::TPGVertex* team_o = t2_it->second;
 				this->tpg.addNewEdge(*team_i, *team_o, p);
 			}
 		}
 	}
 }
 
-void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch & matches)
+void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
 {
-	if(!this->lastLine.empty() && !matches.empty())
+	if (!this->lastLine.empty() && !matches.empty())
 	{
-		uint64_t team_in  = std::stoi(matches[1]);
-		uint64_t program  = std::stoi(matches[2]);
+		uint64_t team_in = std::stoi(matches[1]);
+		uint64_t program = std::stoi(matches[2]);
 
 		//find edge
 		const std::list<TPG::TPGEdge>& edges = this->tpg.getEdges();
 
 		//find one of the selected program edges : 
 		auto p_it = programID.find(program);
-		if(p_it != programID.end())
+		if (p_it != programID.end())
 		{
 			std::shared_ptr<Program::Program> p = p_it->second;
 
-			auto edge_it = std::find_if(edges.begin(), edges.end(), 
+			auto edge_it = std::find_if(edges.begin(), edges.end(),
 				[p](const TPG::TPGEdge& other) {
 					return (&(other.getProgram()) == p.get());
-			});
-			if(edge_it != edges.end())			//we got the corresponding edge : 
+				});
+			if (edge_it != edges.end())			//we got the corresponding edge : 
 			{
 				//then get the team : 
 				auto team_it = this->vertexID.find(team_in);
-				if(team_it!= this->vertexID.end())
+				if (team_it != this->vertexID.end())
 				{
-					const TPG::TPGVertex * team = team_it->second;
-					this->tpg.addNewEdge(*team,*edge_it->getDestination(), p);
+					const TPG::TPGVertex* team = team_it->second;
+					this->tpg.addNewEdge(*team, *edge_it->getDestination(), p);
 				}
 			}
 		}
@@ -292,7 +327,7 @@ void File::TPGGraphDotImporter::importGraph()
 	// skip header
 	this->dumpTPGGraphHeader();
 	bool read = true;
-	while(read)
+	while (read)
 	{
 		read = this->readLineFromFile();
 	}
@@ -322,37 +357,37 @@ bool File::TPGGraphDotImporter::readLineFromFile()
 	}
 
 	// check the line shape and parse it 
-	if(std::regex_search(this->lastLine, matches, testTeamDeclare))
+	if (std::regex_search(this->lastLine, matches, testTeamDeclare))
 	{
 		readTeam(matches);
 	}
-	else if(std::regex_search(this->lastLine, matches, testActionDeclare))
+	else if (std::regex_search(this->lastLine, matches, testActionDeclare))
 	{
 		readAction(matches);
 	}
-	else if(std::regex_search(this->lastLine, matches, testProgramDeclare))
+	else if (std::regex_search(this->lastLine, matches, testProgramDeclare))
 	{
 		readProgram(matches);
 	}
-	else if(std::regex_search(this->lastLine, matches, testInstructionDeclare))
+	else if (std::regex_search(this->lastLine, matches, testInstructionDeclare))
 	{
 		readLine(matches);
 	}
-	else if(std::regex_search(this->lastLine, matches, testLinkPI))
+	else if (std::regex_search(this->lastLine, matches, testLinkPI))
 	{
 		// by definition, a program is linked to its instruction from its declaration.
 		// the link is used vor visualisation but doesn't require to be parsed
 		return true;
 	}
-	else if(std::regex_search(this->lastLine, matches, testLinkTPA))
+	else if (std::regex_search(this->lastLine, matches, testLinkTPA))
 	{
 		readLinkTeamProgramAction(matches);
 	}
-	else if(std::regex_search(this->lastLine, matches, testLinkTPT))
+	else if (std::regex_search(this->lastLine, matches, testLinkTPT))
 	{
 		readLinkTeamProgramTeam(matches);
 	}
-	else if(std::regex_search(this->lastLine, matches, testLinkTP))
+	else if (std::regex_search(this->lastLine, matches, testLinkTP))
 	{
 		readLinkTeamProgram(matches);
 	}

@@ -1,3 +1,39 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #include <algorithm>
 #include <stdexcept>
 #include <type_traits>
@@ -13,7 +49,7 @@ TPG::TPGGraph::~TPGGraph()
 	}
 }
 
-TPG::TPGGraph & TPG::TPGGraph::operator=(TPGGraph model)
+TPG::TPGGraph& TPG::TPGGraph::operator=(TPGGraph model)
 {
 	swap(*this, model);
 	return *this;
@@ -74,6 +110,11 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
 	return result;
 }
 
+bool TPG::TPGGraph::hasVertex(const TPG::TPGVertex& vertex) const
+{
+	return std::find(this->vertices.cbegin(), this->vertices.cend(), &vertex) != this->vertices.cend();
+}
+
 void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 {
 	// Remove the vertex based on a pointer comparison.
@@ -85,7 +126,7 @@ void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 		std::list<TPGEdge*> inEdgesToRemove = (*iterator)->getIncomingEdges();
 		for (auto inEdge : inEdgesToRemove) {
 			this->removeEdge(*inEdge);
-		}		
+		}
 		// copy outEdges set for removal 
 		std::list<TPGEdge*> outEdgesToRemove = (*iterator)->getOutgoingEdges();
 		for (auto outEdge : outEdgesToRemove) {
@@ -178,7 +219,7 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 	if (iterator == this->edges.end()) {
 		throw std::runtime_error("Cannot erase a edge that does not belong to the graph");
 	}
-	
+
 	(*this->findVertex(iterator->getSource()))->removeOutgoingEdge(&(*iterator));
 	(*this->findVertex(iterator->getDestination()))->removeIncomingEdge(&(*iterator));
 	// Remove the edge

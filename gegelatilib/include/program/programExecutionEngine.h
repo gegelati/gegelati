@@ -1,9 +1,46 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #ifndef PROGRAM_EXECUTION_ENGINE_H
 #define PROGRAM_EXECUTION_ENGINE_H
 
 #include <type_traits>
 
-#include "dataHandlers/primitiveTypeArray.h"
+#include "data/untypedSharedPtr.h"
+#include "data/primitiveTypeArray.h"
 #include "program/program.h"
 
 namespace Program {
@@ -19,13 +56,16 @@ namespace Program {
 		ProgramExecutionEngine() = delete;
 
 		/// Registers used for the Program execution.
-		DataHandlers::PrimitiveTypeArray<double> registers;
+		Data::PrimitiveTypeArray<double> registers; // If the type of registers attribute is changed one day
+													// make sure to update the Program::identifyIntrons() method
+													// as it create its own Data::PrimitiveTypeArray<double> to keep
+													// track of accessed addresses.
 
 		/// Data sources used in the Program.
-		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSources;
+		std::vector < std::reference_wrapper<const Data::DataHandler >> dataSources;
 
 		/// Data sources (including registers) used in the Program.
-		std::vector < std::reference_wrapper<const DataHandlers::DataHandler >> dataSourcesAndRegisters;
+		std::vector < std::reference_wrapper<const Data::DataHandler >> dataSourcesAndRegisters;
 
 		/// Program counter of the execution engine.
 		uint64_t programCounter;
@@ -67,7 +107,7 @@ namespace Program {
 		*/
 		template <class T> ProgramExecutionEngine(const Program& prog, const std::vector<std::reference_wrapper<T>>& dataSrc) : programCounter{ 0 }, registers{ prog.getEnvironment().getNbRegisters() }, program{ NULL } {
 			// Check that T is either convertible to a const DataHandler
-			static_assert(std::is_convertible<T&, const DataHandlers::DataHandler&>::value);
+			static_assert(std::is_convertible<T&, const Data::DataHandler&>::value);
 			// Setup the data sources
 			this->dataSourcesAndRegisters.push_back(this->registers);
 
@@ -103,8 +143,8 @@ namespace Program {
 
 		/**
 		* \brief Method for changing the dataSources on which the Program will be executed.
-		* 
-		* \param[in] dataSrc The vector of DataHandler references with which 
+		*
+		* \param[in] dataSrc The vector of DataHandler references with which
 		* the Program will be executed.
 		* \throws std::runtime_error if the Environment references by the
 		* Program is incompatible with the given dataSources.
@@ -117,7 +157,7 @@ namespace Program {
 		* \return a vector containing references to the dataHandlers of the
 		* dataSourses attribute (i.e. without the registers)
 		*/
-		const std::vector<std::reference_wrapper<const DataHandlers::DataHandler>>& getDataSources() const;
+		const std::vector<std::reference_wrapper<const Data::DataHandler>>& getDataSources() const;
 
 		/**
 		* \brief Increments the programCounter and checks for the end of the Program.
@@ -139,28 +179,6 @@ namespace Program {
 		* lines of the program.
 		*/
 		const Line& getCurrentLine() const;
-
-		/**
-		* \brief Scale a location from the Environment largestAddressSpace to the
-		*        largestAddressSpace of the given dataHandler, for the given data
-		*        type.
-		*
-		* This function computes a valid location for the givenDataHandler,
-		* with the givenDataType. This location is computed from the given
-		* rawLocation with a simple modulo. The choice of the Modulo was made
-		* for simplicity and faster execution, but may introduce a bias
-		* towards low values. If this becomes a problem, a proper scaling with
-		* a division would be needed.
-		*
-		* \param[in] rawLocation integer number between 0 and the environment
-		*            largestAddressSpace.
-		* \param[in] dataHandler the dataHandler whose data is being accessed.
-		* \param[in] type the type of data accessed.
-		* \return (rawLocation % dataHandler.largestAddressSpace(type))
-		* \throw std::domain_error if the data type is not supported by the
-		*        data handler.
-		*/
-		uint64_t scaleLocation(const uint64_t rawLocation, const DataHandlers::DataHandler& dataHandler, const std::type_info& type) const;
 
 		/**
 		* \brief Get the Instruction corresponding to the current programCounter.
@@ -188,7 +206,7 @@ namespace Program {
 		*         DataHandler, with the given data type, or if the indexed
 		*         DataHandler does not exist.
 		*/
-		const void fetchCurrentOperands(std::vector<std::reference_wrapper<const SupportedType>>& operands) const;
+		const void fetchCurrentOperands(std::vector<Data::UntypedSharedPtr>& operands) const;
 
 		/**
 		* \brief Get the parameters for the current Instruction.
@@ -228,11 +246,11 @@ namespace Program {
 	inline void ProgramExecutionEngine::setDataSources(const std::vector<std::reference_wrapper<T>>& dataSrc)
 	{
 		// Check that T is either convertible to a const DataHandler
-		static_assert(std::is_convertible<T&, const DataHandlers::DataHandler&>::value);
+		static_assert(std::is_convertible<T&, const Data::DataHandler&>::value);
 
 		// Replace the references in attributes
 		this->dataSources = dataSrc;
-		for (auto idx = 0; idx < this->dataSources.size(); idx++) {
+		for (size_t idx = 0; idx < this->dataSources.size(); idx++) {
 			this->dataSourcesAndRegisters.at(idx + 1) = dataSrc.at(idx);
 		}
 

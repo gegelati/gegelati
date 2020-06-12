@@ -1,3 +1,38 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #include <gtest/gtest.h>
 
 #include <set>
@@ -8,8 +43,9 @@
 #include "instructions/instruction.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
-#include "dataHandlers/dataHandler.h"
-#include "dataHandlers/primitiveTypeArray.h"
+#include "instructions/lambdaInstruction.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 #include "program/program.h"
 #include "program/line.h"
 #include "program/programExecutionEngine.h"
@@ -26,7 +62,7 @@ protected:
 	const size_t size2{ 32 };
 	const double value0{ 2.3 };
 	const float value1{ 4.2f };
-	std::vector<std::reference_wrapper<const DataHandlers::DataHandler>> vect;
+	std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 	Instructions::Set set;
 	Environment* e;
 	Program::Program* p;
@@ -35,10 +71,10 @@ protected:
 	MutatorTest() : e{ nullptr }, p{ nullptr }{};
 
 	virtual void SetUp() {
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<int>((unsigned int)size1)));
-		vect.push_back(*(new DataHandlers::PrimitiveTypeArray<double>((unsigned int)size2)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
+		vect.push_back(*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
-		((DataHandlers::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(PrimitiveType<double>), 25, value0);
+		((Data::PrimitiveTypeArray<double>&)vect.at(1).get()).setDataAt(typeid(double), 25, value0);
 
 		set.add(*(new Instructions::AddPrimitiveType<double>()));
 		set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -184,6 +220,49 @@ TEST_F(MutatorTest, LineMutatorAlterLine) {
 	ASSERT_EQ(l0.getOperand(1).second, 28) << "Alteration with known seed changed its result.";
 	ASSERT_EQ((int16_t)l0.getParameter(0), 31115) << "Alteration with known seed changed its result.";
 	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+}
+
+TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands) {
+	Mutator::RNG rng;
+
+	// Setup for this test
+	set.add(*(new Instructions::LambdaInstruction<const double[3], const double[3]>([](const double* a, const double* b)->double {
+		return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
+		})));
+
+	Environment e2(set, vect, 8);
+	Program::Program p2(e2);
+
+	Program::ProgramExecutionEngine pEE(p2);
+
+	// Add a 0 lines to the program
+	// i=0, d=0, op0=(0,0), op1=(0,0),  param=0
+	Program::Line& l0 = p2.addNewLine();
+
+	// Alter instruction
+	// i=2, d=0, op0=(0,0), op1=(0,0),  param=0
+	rng.setSeed(6);
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getInstructionIndex(), 2) << "Alteration with known seed changed its result.";
+	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+
+	// Alter op0 location
+	// i=2, d=0, op0=(0,28), op1=(0,0),  param=0
+	rng.setSeed(2);
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getOperand(0).second, 28) << "Alteration with known seed changed its result.";
+	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+
+	// Alter op1 source
+	// i=2, d=0, op0=(0,28), op1=(2,0),  param=0
+	rng.setSeed(5);
+	ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng)) << "Line mutation of a correct instruction should not throw.";
+	ASSERT_EQ(l0.getOperand(1).first, 2) << "Alteration with known seed changed its result.";
+	ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+
+
+	// Teardown for this test
+	delete& set.getInstruction(2);
 }
 
 TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine) {

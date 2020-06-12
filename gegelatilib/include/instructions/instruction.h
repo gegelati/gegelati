@@ -1,12 +1,50 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
 #include <typeinfo>
 #include <vector> 
 #include <functional>
+#include <memory>
+
+#include "data/untypedSharedPtr.h"
 
 #include "parameter.h"
-#include "supportedTypes.h"
 
 namespace Instructions {
 	/**
@@ -39,7 +77,6 @@ namespace Instructions {
 		*/
 		unsigned int getNbOperands() const;
 
-
 		/**
 		* \brief Get the number of parameters required to execute the Instruction.
 		*
@@ -50,16 +87,16 @@ namespace Instructions {
 		/**
 		* \brief Check if a given vector contains elements whose types corresponds to the types of the Instruction operands.
 		*
-		* \param[in] arguments a const list of reference_wrapper to any type of object. (not doable at compile time)
+		* \param[in] arguments a const list of shared pointers to any type of object. (not doable at compile time)
 		*/
-		bool checkOperandTypes(const std::vector<std::reference_wrapper<const SupportedType>>& arguments) const;
+		virtual bool checkOperandTypes(const std::vector<Data::UntypedSharedPtr>& arguments) const;
 
 		/**
 		* \brief Check if a given vector contains the right number of parameters for the Instruction.
 		*
 		* \param[in] params a const list of reference_wrapper to Parameters.
 		*/
-		bool checkParameters(const std::vector<std::reference_wrapper<const Parameter>>& params) const;
+		virtual bool checkParameters(const std::vector<std::reference_wrapper<const Parameter>>& params) const;
 
 		/**
 		* \brief Execute the Instruction for the given parameters and arguments.
@@ -69,13 +106,13 @@ namespace Instructions {
 		* method should always return 0.0.
 		*
 		* \param[in] params the vector of reference_wrapper to the Parameter passed to the Instruction.
-		* \param[in] args the vector of reference_wrapper to the SupportedType passed to the Instruction.
+		* \param[in] args the vector of UntypedSharedPtr passed to the Instruction.
 		* \return the default implementation of the Intruction class returns 0.0 if the given params or arguments are not valid.
 		*         Otherwise, 1.0 is returned.
 		*/
 		virtual double execute(
 			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<std::reference_wrapper<const SupportedType>>& args) const = 0;
+			const std::vector<Data::UntypedSharedPtr>& args) const = 0;
 
 	protected:
 		/**

@@ -1,7 +1,46 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
 #include <gtest/gtest.h>
+
+#include <array>
+
+#include "data/untypedSharedPtr.h"
+#include "data/dataHandler.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
-#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 
 TEST(InstructionsTest, ConstructorDestructorCall) {
@@ -23,28 +62,29 @@ TEST(InstructionsTest, OperandListAndNbParam) {
 	ASSERT_EQ(i->getNbOperands(), 2) << "Number of operands of Instructions::AddPrimitiveType<double> is different from 2";
 	auto operands = i->getOperandTypes();
 	ASSERT_EQ(operands.size(), 2) << "Operand list of AddPrimitiveType<double> is different from 2";
-	ASSERT_STREQ(operands.at(0).get().name(), typeid(PrimitiveType<double>).name()) << "First operand of AddPrimitiveType<double> is not\"" << typeid(PrimitiveType<double>).name() << "\".";
-	ASSERT_STREQ(operands.at(1).get().name(), typeid(PrimitiveType<double>).name()) << "Second operand of AddPrimitiveType<double> is not\"" << typeid(PrimitiveType<double>).name() << "\".";
+	ASSERT_STREQ(operands.at(0).get().name(), typeid(double).name()) << "First operand of AddPrimitiveType<double> is not\"" << typeid(double).name() << "\".";
+	ASSERT_STREQ(operands.at(1).get().name(), typeid(double).name()) << "Second operand of AddPrimitiveType<double> is not\"" << typeid(double).name() << "\".";
 	ASSERT_EQ(i->getNbParameters(), 0) << "Number of parameters of AddPrimitiveType<double> should be 0.";
 	delete i;
 }
 
 TEST(InstructionsTest, CheckArgumentTypes) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
-	PrimitiveType<double> a{ 2.5 };
-	PrimitiveType<double> b = 5.6;
-	PrimitiveType<double> c = 3.7;
-	PrimitiveType<int> d = 5;
+	double a{ 2.5 };
+	double b = 5.6;
+	double c = 3.7;
+	int d = 5;
 
-	std::vector<std::reference_wrapper<const SupportedType>> vect;
-	vect.push_back(a);
-	vect.push_back(b);
+	std::vector<Data::UntypedSharedPtr> vect;
+
+	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<double>());
+	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
 	ASSERT_TRUE(i->checkOperandTypes(vect)) << "Operands of valid types wrongfully classified as invalid.";
-	vect.push_back(c);
+	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<double>());
 	ASSERT_FALSE(i->checkOperandTypes(vect)) << "Operands list of too long size wrongfully classified as valid.";
 	vect.pop_back();
 	vect.pop_back();
-	vect.push_back(d);
+	vect.emplace_back(&d, Data::UntypedSharedPtr::emptyDestructor<int>());
 	ASSERT_FALSE(i->checkOperandTypes(vect)) << "Operands of invalid types wrongfully classified as valid";
 	delete i;
 }
@@ -70,17 +110,17 @@ TEST(InstructionsTest, CheckParameters) {
 
 TEST(InstructionsTest, Execute) {
 	Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
-	PrimitiveType<double> a{ 2.6 };
-	PrimitiveType<double> b = 5.5;
-	PrimitiveType<int> c = 3;
+	double a{ 2.6 };
+	double b = 5.5;
+	int c = 3;
 
-	std::vector<std::reference_wrapper<const SupportedType>> vect;
-	vect.push_back(a);
-	vect.push_back(b);
+	std::vector<Data::UntypedSharedPtr> vect;
+	vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<double>());
+	vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
 	ASSERT_EQ(i->execute({}, vect), 8.1) << "Execute method of AddPrimitiveType<double> returns an incorrect value with valid operands.";
 
 	vect.pop_back();
-	vect.push_back(c);
+	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
 	ASSERT_EQ(i->execute({}, vect), 0.0) << "Execute method of AddPrimitiveType<double> returns an incorrect value with invalid operands.";
 
 	delete i;
@@ -90,30 +130,6 @@ TEST(InstructionsTest, Execute) {
 	ASSERT_EQ(i->execute({ p }, vect), 5.2) << "Execute method of MultByConstParam<double,int> returns an incorrect value with valid operands.";
 	ASSERT_EQ(i->execute({ }, vect), 0.0) << "Execute method of MultByConstParam<double,int> returns an incorrect value with invalid params.";
 	delete i;
-}
-
-TEST(InstructionsTest, LambdaInstruction) {
-	PrimitiveType<double> a{ 2.6 };
-	PrimitiveType<double> b = 5.5;
-	PrimitiveType<int> c = 3;
-
-	std::vector<std::reference_wrapper<const SupportedType>> vect;
-	vect.push_back(a);
-	vect.push_back(b);
-
-	auto minus = [](double a, double b) {return a - b; };
-
-	Instructions::LambdaInstruction<double>* instruction;
-	ASSERT_NO_THROW(instruction = new Instructions::LambdaInstruction<double>(minus)) << "Constructing a new lambdaInstruction failed.";
-
-	ASSERT_EQ(instruction->execute({}, vect), -2.9) << "Result returned by the instruction is not as expected.";
-
-	// Execute with wrong types of operands.
-	vect.pop_back();
-	vect.push_back(c);
-	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
-
-	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";
 }
 
 TEST(InstructionsTest, SetAdd) {
