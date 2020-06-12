@@ -57,7 +57,7 @@ Learn::EvaluationResult& Learn::EvaluationResult::operator+=(const Learn::Evalua
 	// If the added type is Learn::EvaluationResult
 	if (thisType == typeid(Learn::EvaluationResult)) {
 		// Weighted addition of results
-		this->result = this->result * this->nbEvaluation + other.result * other.nbEvaluation;
+		this->result = this->result * (double)this->nbEvaluation + other.result * (double)other.nbEvaluation;
 		this->result /= (double)this->nbEvaluation + (double)other.nbEvaluation;
 
 		// Addition ot nbEvaluation
