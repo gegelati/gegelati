@@ -169,6 +169,7 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
 					cont = false;
 				}
 			}
+			p->identifyIntrons();
 		}
 	}
 }

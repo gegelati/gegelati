@@ -181,7 +181,7 @@ void TPG::PolicyStats::analyzePolicy(const TPG::TPGVertex* root)
 std::ostream& TPG::operator<<(std::ostream& os, const TPG::PolicyStats& policyStats)
 {
 	auto sumVec = [](const std::vector<size_t>& vec) {return std::accumulate(vec.cbegin(), vec.cend(), (size_t)0); };
-	auto averageVec = [&sumVec](const std::vector<size_t>& vec) {return sumVec(vec) / (double)vec.size(); };
+	auto averageVec = [&sumVec](const std::vector<size_t>& vec) {return (double)sumVec(vec) / (double)vec.size(); };
 
 	os << "# PolicyStats" << std::endl;
 	os << "## Topology info" << std::endl;
@@ -196,7 +196,7 @@ std::ostream& TPG::operator<<(std::ostream& os, const TPG::PolicyStats& policySt
 	}
 	os << std::endl;
 
-	os << "Use/action:\t" << std::accumulate(policyStats.nbUsagePerActionID.begin(), policyStats.nbUsagePerActionID.end(), (size_t)0, [](size_t accu, std::pair<size_t, size_t> val) { return accu + val.second; }) / (double)policyStats.nbUsagePerActionID.size() << ": ";
+	os << "Use/action:\t" << (double)std::accumulate(policyStats.nbUsagePerActionID.begin(), policyStats.nbUsagePerActionID.end(), (size_t)0, [](size_t accu, std::pair<size_t, size_t> val) { return accu + val.second; }) / (double)policyStats.nbUsagePerActionID.size() << ": ";
 	std::for_each(policyStats.nbUsagePerActionID.begin(), policyStats.nbUsagePerActionID.end(), [&os](auto& val) {os << "{" << val.first << "," << val.second << "} "; });
 	os << std::endl;
 
@@ -204,10 +204,10 @@ std::ostream& TPG::operator<<(std::ostream& os, const TPG::PolicyStats& policySt
 	os << "Programs:\t" << policyStats.nbUsePerProgram.size() << std::endl;
 	os << "Line/prog:\t" << averageVec(policyStats.nbLinesPerProgram) << std::endl;
 	os << "Intr/prog:\t" << averageVec(policyStats.nbIntronPerProgram) << std::endl;
-	os << "Use/prog:\t" << std::accumulate(policyStats.nbUsePerProgram.cbegin(), policyStats.nbUsePerProgram.cend(), size_t(0),
+	os << "Use/prog:\t" << (double)std::accumulate(policyStats.nbUsePerProgram.cbegin(), policyStats.nbUsePerProgram.cend(), size_t(0),
 		[](size_t accu, const auto& val) {return accu + val.second; }) / (double)policyStats.nbUsePerProgram.size() << std::endl;
 
-	os << "Use/instr:\t" << std::accumulate(policyStats.nbUsagePerInstruction.cbegin(), policyStats.nbUsagePerInstruction.cend(), size_t(0), [](size_t accu, const std::pair<size_t, size_t>& val) {return accu + val.second; }) / (double)policyStats.nbUsagePerInstruction.size();
+	os << "Use/instr:\t" << (double)std::accumulate(policyStats.nbUsagePerInstruction.cbegin(), policyStats.nbUsagePerInstruction.cend(), size_t(0), [](size_t accu, const std::pair<size_t, size_t>& val) {return accu + val.second; }) / (double)policyStats.nbUsagePerInstruction.size();
 	os << ": ";
 	std::for_each(policyStats.nbUsagePerInstruction.cbegin(), policyStats.nbUsagePerInstruction.cend(), [&os](const auto& val) {os << "{" << val.first << "," << val.second << "}"; });
 	os << std::endl << std::endl;

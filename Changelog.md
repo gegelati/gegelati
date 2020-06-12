@@ -1,5 +1,18 @@
 # GEGELATI Changelog
 
+## Release version 0.2.1
+_2020.06.12_
+
+### New features
+
+### Changes
+* LearningAgent now receives the number of threads and registers from the LearningParameter.
+
+### Bug fix
+* Fix non-determinism issue in ClassificationLearningAgent.
+* Fix intron detection when importing a dot file with TPGGraphDotImporter.
+
+
 ## Release version 0.2.0
 _2020.06.03_
 

@@ -118,17 +118,9 @@ namespace Learn {
 		* \param[in] iSet Set of Instruction used to compose Programs in the
 		*            learning process.
 		* \param[in] p The LearningParameters for the LearningAgent.
-		* \param[in] nbRegs The number of registers for the execution
-		*                   environment of Program.
-		* \param[in] maxNbThreads Integer parameter controlling the number of
-		* threads used for parallel execution. Possible values are:
-		*   - default:  Let the runtime decide using
-		*               std::thread::hardware_concurrency().
-		*   - `0` and `1`: Do not use parallelism.
-		*   - `n > 1`: Set the number of threads explicitly.
 		*/
-		ParallelLearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const uint64_t maxNbThreads = std::thread::hardware_concurrency(), const unsigned int nbRegs = 8) :
-			LearningAgent(le, iSet, p, nbRegs), maxNbThreads{ maxNbThreads } {};
+		ParallelLearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p) :
+			LearningAgent(le, iSet, p), maxNbThreads{ p.nbThreads } {};
 
 		/**
 		* \brief Evaluate all root TPGVertex of the TPGGraph.

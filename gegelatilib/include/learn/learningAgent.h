@@ -102,12 +102,10 @@ namespace Learn {
 		* \param[in] iSet Set of Instruction used to compose Programs in the
 		*            learning process.
 		* \param[in] p The LearningParameters for the LearningAgent.
-		* \param[in] nbRegs The number of registers for the execution
-		*                   environment of Program.
 		*/
-		LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8) :
+		LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p) :
 			learningEnvironment{ le },
-			env(iSet, le.getDataSources(), nbRegs),
+			env(iSet, le.getDataSources(), p.nbRegisters),
 			tpg(this->env),
 			params{ p },
 			archive(p.archiveSize, p.archivingProbability)

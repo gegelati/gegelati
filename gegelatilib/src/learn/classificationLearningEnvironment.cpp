@@ -75,7 +75,7 @@ double Learn::ClassificationLearningEnvironment::getScore() const
 		averageF1Score += fScore;
 	}
 
-	averageF1Score /= this->classificationTable.size();
+	averageF1Score /= (double)this->classificationTable.size();
 
 	return averageF1Score;
 }
