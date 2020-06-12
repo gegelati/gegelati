@@ -175,7 +175,7 @@ void Learn::LearningAgent::decimateWorstRoots(std::multimap<std::shared_ptr<Eval
 	std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> preservedActionRoots;
 
 	auto i = 0;
-	while (i < floor(this->params.ratioDeletedRoots * params.mutation.tpg.nbRoots)
+	while (i < floor(this->params.ratioDeletedRoots * (double)params.mutation.tpg.nbRoots)
 		&& results.size() > 0) {
 		// If the root is an action, do not remove it!
 		if (typeid(*results.begin()->second) != typeid(TPG::TPGAction)) {
