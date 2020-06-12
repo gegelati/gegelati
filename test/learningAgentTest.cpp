@@ -230,8 +230,9 @@ TEST_F(LearningAgentTest, DecimateWorstRoots) {
 	params.mutation.tpg.maxInitOutgoingEdges = 2;
 	params.ratioDeletedRoots = 0.50;
 	params.mutation.tpg.nbRoots = le.getNbActions() - 1; // Param used in decimation
+	params.nbRegisters = 4;
 
-	Learn::LearningAgent la(le, set, params, 4);
+	Learn::LearningAgent la(le, set, params);
 
 	la.init();
 
@@ -373,6 +374,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential) {
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 10;
 	params.mutation.tpg.nbActions = le.getNbActions();
+	params.nbThreads = 1;
 
 	Environment env(set, le.getDataSources(), 8);
 
@@ -392,7 +394,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential) {
 	TPG::TPGExecutionEngine tee(env, &archive);
 
 	std::shared_ptr<Learn::EvaluationResult> result;
-	Learn::ParallelLearningAgent pla(le, set, params, 1);
+	Learn::ParallelLearningAgent pla(le, set, params);
 	ASSERT_NO_THROW(result = pla.evaluateRoot(tee, *tpg.getRootVertices().at(0), 0, Learn::LearningMode::TRAINING, le)) << "Evaluation from a root failed.";
 	ASSERT_LE(result->getResult(), 1.0) << "Average score should not exceed the score of a perfect player.";
 }
@@ -402,8 +404,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential) {
 	params.archivingProbability = 0.5;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 10;
+	params.nbThreads = 1;
 
-	Learn::ParallelLearningAgent pla(le, set, params, 1);
+	Learn::ParallelLearningAgent pla(le, set, params);
 
 	pla.init();
 	std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> result;
@@ -416,8 +419,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel) {
 	params.archivingProbability = 0.5;
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 10;
+	params.nbThreads = 4;
 
-	Learn::ParallelLearningAgent pla(le, set, params, 4);
+	Learn::ParallelLearningAgent pla(le, set, params);
 
 	pla.init();
 	std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> result;
@@ -438,13 +442,17 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism) {
 	auto results = la.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
 	auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
-	Learn::ParallelLearningAgent plaSequential(le, set, params, 1);
+	Learn::LearningParameters paramsSequential = params;
+	paramsSequential.nbThreads = 1;
+	Learn::ParallelLearningAgent plaSequential(le, set, paramsSequential);
 
 	plaSequential.init(0); // Reset centralized RNG to 0
 	auto resultsSequential = plaSequential.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
 	auto nextIntSequential = plaSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
-	Learn::ParallelLearningAgent plaParallel(le, set, params, 4);
+	Learn::LearningParameters paramsParallel = params;
+	paramsParallel.nbThreads = 4;
+	Learn::ParallelLearningAgent plaParallel(le, set, paramsParallel);
 
 	plaParallel.init(0); // Reset centralized RNG to 0
 	auto resultsParallel = plaParallel.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
@@ -511,13 +519,17 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism) {
 	auto results = la.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
 	auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
-	Learn::ParallelLearningAgent plaSequential(le, set, params, 1);
+	Learn::LearningParameters paramsSequential = params;
+	paramsSequential.nbThreads = 1;
+	Learn::ParallelLearningAgent plaSequential(le, set, paramsSequential);
 
 	plaSequential.init(0); // Reset centralized RNG to 0
 	auto resultsSequential = plaSequential.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
 	auto nextIntSequential = plaSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
-	Learn::ParallelLearningAgent plaParallel(le, set, params, 4);
+	Learn::LearningParameters paramsParallel = params;
+	paramsParallel.nbThreads = 4;
+	Learn::ParallelLearningAgent plaParallel(le, set, paramsParallel);
 
 	plaParallel.init(0); // Reset centralized RNG to 0
 	auto resultsParallel = plaParallel.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
@@ -563,8 +575,9 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential) {
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 3;
 	params.ratioDeletedRoots = 0.95; // high number to force the apparition of root action.
+	params.nbThreads = 1;
 
-	Learn::ParallelLearningAgent pla(le, set, params, 1);
+	Learn::ParallelLearningAgent pla(le, set, params);
 
 	pla.init();
 	// Do the populate call to keep know the number of initial vertex
@@ -587,8 +600,9 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel) {
 	params.maxNbActionsPerEval = 11;
 	params.nbIterationsPerPolicyEvaluation = 3;
 	params.ratioDeletedRoots = 0.95; // high number to force the apparition of root action.
+	params.nbThreads = 4;
 
-	Learn::ParallelLearningAgent pla(le, set, params, 4);
+	Learn::ParallelLearningAgent pla(le, set, params);
 
 	pla.init();
 	// Do the populate call to keep know the number of initial vertex
@@ -610,8 +624,9 @@ TEST_F(ParallelLearningAgentTest, TrainSequential) {
 	params.ratioDeletedRoots = 0.2;
 	params.nbGenerations = 3;
 	params.maxNbEvaluationPerPolicy = params.nbIterationsPerPolicyEvaluation * 2;
+	params.nbThreads = 1;
 
-	Learn::ParallelLearningAgent pla(le, set, params, 1);
+	Learn::ParallelLearningAgent pla(le, set, params);
 
 	pla.init();
 	bool alt = false;
@@ -629,8 +644,9 @@ TEST_F(ParallelLearningAgentTest, TrainParallel) {
 	params.ratioDeletedRoots = 0.2;
 	params.nbGenerations = 3;
 	params.maxNbEvaluationPerPolicy = params.nbIterationsPerPolicyEvaluation * 2;
+	params.nbThreads = std::thread::hardware_concurrency();
 
-	Learn::ParallelLearningAgent pla(le, set, params, std::thread::hardware_concurrency());
+	Learn::ParallelLearningAgent pla(le, set, params);
 
 	pla.init();
 	bool alt = false;
@@ -660,7 +676,8 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism) {
 	bool alt = false;
 	la.train(alt, false);
 
-	Learn::ParallelLearningAgent pla(le, set, params, 4);
+	params.nbThreads = 4;
+	Learn::ParallelLearningAgent pla(le, set, params);
 
 	pla.init();
 

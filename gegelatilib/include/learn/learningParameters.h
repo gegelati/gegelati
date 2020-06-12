@@ -37,6 +37,7 @@
 #define LEARNING_PARAMETERS_H
 
 #include <cstdint>
+#include <thread>
 
 #include "mutator/mutationParameters.h"
 
@@ -65,6 +66,19 @@ namespace Learn {
 		/// Maximum number of times a given policy (i.e. a root TPGVertex) is
 		/// evaluated.
 		size_t maxNbEvaluationPerPolicy;
+		/// Number of registers for the Program execution
+		size_t nbRegisters = 8;
+		/**
+		* \brief Number of threads (ParallelLearningAgent only)
+		*
+		* Integer parameter controlling the number of
+		* threads used for parallel execution. Possible values are:
+		*   - default :  Let the runtime decide using
+		*         std::thread::hardware_concurrency().
+		*   - `0` or `1`: Do not use parallelism.
+		*   - `n > 1`: Set the number of threads explicitly.
+		*/
+		size_t nbThreads = std::thread::hardware_concurrency();
 	} LearningParameters;
 };
 

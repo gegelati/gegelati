@@ -80,10 +80,8 @@ namespace Learn {
 		* \param[in] iSet Set of Instruction used to compose Programs in the
 		*            learning process.
 		* \param[in] p The LearningParameters for the LearningAgent.
-		* \param[in] nbRegs The number of registers for the execution
-		*                   environment of Program.
 		*/
-		ClassificationLearningAgent(ClassificationLearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const unsigned int nbRegs = 8) : BaseLearningAgent(le, iSet, p, nbRegs) {};
+		ClassificationLearningAgent(ClassificationLearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p) : BaseLearningAgent(le, iSet, p) {};
 
 		/**
 		* \brief Specialization of the evaluateRoot method for classification purposes.
