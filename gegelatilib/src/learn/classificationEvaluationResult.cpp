@@ -60,8 +60,8 @@ Learn::EvaluationResult& Learn::ClassificationEvaluationResult::operator+=(const
 
 		for (auto idx = 0; idx < this->scorePerClass.size(); idx++) {
 			// Weighted sum of scores.
-			this->scorePerClass.at(idx) = this->scorePerClass.at(idx) * this->nbEvaluationPerClass.at(idx)
-				+ otherEval.scorePerClass.at(idx) * otherEval.nbEvaluationPerClass.at(idx);
+			this->scorePerClass.at(idx) = this->scorePerClass.at(idx) * (double)this->nbEvaluationPerClass.at(idx)
+				+ otherEval.scorePerClass.at(idx) * (double)otherEval.nbEvaluationPerClass.at(idx);
 			this->scorePerClass.at(idx) /= (double)this->nbEvaluationPerClass.at(idx)
 				+ (double)otherEval.nbEvaluationPerClass.at(idx);;
 
