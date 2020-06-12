@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_yyyy.mm.dd_
+## Release version 0.2.1
+_2020.06.12_
 
 ### New features
 
