@@ -41,6 +41,10 @@
 
 #include "mutator/mutationParameters.h"
 
+namespace Json {
+    class Value;
+}
+
 namespace Learn {
 	/**
 	* \brief Structure for simplifying the transmission of LearningParameters
@@ -80,6 +84,15 @@ namespace Learn {
 		*/
 		size_t nbThreads = std::thread::hardware_concurrency();
 	} LearningParameters;
+
+    /// Reads a given json file and puts the derivative tree in root
+    void readConfigFile(std::string path, Json::Value &root);
+
+    /// Puts the parameters described in the derivative tree root into params
+    void setAllParamsFrom(Json::Value root, LearningParameters *params);
+
+    /// Loads a given json file and puts the parameters it contains in params
+    void loadParametersFromJson(std::string path, LearningParameters *params);
 };
 
 #endif
