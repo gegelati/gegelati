@@ -41,19 +41,19 @@
 TEST(LearningParametersTest, isFileExisting) {
     Json::Value root;
 
-    ASSERT_THROW(Learn::readConfigFile("../../test/dat/non_existing_file", root), Json::Exception)
+    ASSERT_THROW(Learn::readConfigFile(TESTS_DAT_PATH "non_existing_file.json", root), Json::Exception)
                                 << "An exception should be raised if file doesn't exist";
-    ASSERT_NO_THROW(Learn::readConfigFile("../../test/dat/params", root))
+    ASSERT_NO_THROW(Learn::readConfigFile(TESTS_DAT_PATH "params.json", root))
                                 << "An exception is raised in spite of existing file";
 }
 
 TEST(LearningParametersTest, parsedFileValidity) {
     Json::Value root;
 
-    Learn::readConfigFile("../../test/dat/paramsNotConform", root);
+    Learn::readConfigFile(TESTS_DAT_PATH "paramsNotConform.json", root);
     ASSERT_EQ(0, root.size())<<"Ill-formed parameters file should result in no root filling";
 
-    Learn::readConfigFile("../../test/dat/params", root);
+    Learn::readConfigFile(TESTS_DAT_PATH "params.json", root);
     ASSERT_EQ(9, root.size())<<"Wrong number of elements in parsed json file";
     ASSERT_EQ(8, root["mutation"]["tpg"].size())<<"Wrong number of elements in parsed json file";
     ASSERT_EQ(5, root["mutation"]["prog"].size())<<"Wrong number of elements in parsed json file";
@@ -63,7 +63,7 @@ TEST(LearningParametersTest, parametersWellSet) {
     Learn::LearningParameters params;
     Json::Value root;
 
-    Learn::readConfigFile("../../test/dat/params", root);
+    Learn::readConfigFile(TESTS_DAT_PATH "params.json", root);
     ASSERT_NO_THROW(Learn::setAllParamsFrom(root,&params));
 
     ASSERT_EQ(50,params.archiveSize);
@@ -93,7 +93,7 @@ TEST(LearningParametersTest, defaultParameters) {
     Learn::LearningParameters params;
     Json::Value root;
 
-    Learn::readConfigFile("../../test/dat/paramsWithWrongOne", root);
+    Learn::readConfigFile(TESTS_DAT_PATH "paramsWithWrongOne.json", root);
 
     ASSERT_TRUE(params.nbThreads>0)<<"A default nbThreads value should be set when no one is specified";
     ASSERT_EQ(params.nbRegisters,8)<<"Bad parameter should be ignored";
@@ -101,7 +101,7 @@ TEST(LearningParametersTest, defaultParameters) {
 
 TEST(LearningParametersTest, loadingParametersWorks) {
     Learn::LearningParameters params;
-    ASSERT_NO_THROW(Learn::loadParametersFromJson("../../test/dat/params",&params));
+    ASSERT_NO_THROW(Learn::loadParametersFromJson(TESTS_DAT_PATH "params.json",&params));
     // only testing 1 parameter as readConfigFile was already tested
     ASSERT_EQ(params.nbRegisters,3.0)<<"There should be 3 registers according to the params file";
 }
