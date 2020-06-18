@@ -86,13 +86,13 @@ namespace Learn {
 	} LearningParameters;
 
     /// Reads a given json file and puts the derivative tree in root
-    void readConfigFile(std::string path, Json::Value &root);
+    void readConfigFile(const char* path, Json::Value &root);
 
     /// Puts the parameters described in the derivative tree root into params
-    void setAllParamsFrom(Json::Value root, LearningParameters *params);
+    void setAllParamsFrom(const Json::Value& root, LearningParameters *params);
 
     /// Loads a given json file and puts the parameters it contains in params
-    void loadParametersFromJson(std::string path, LearningParameters *params);
+    void loadParametersFromJson(const char* path, LearningParameters *params);
 };
 
 #endif

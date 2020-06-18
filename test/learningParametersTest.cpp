@@ -54,8 +54,8 @@ TEST(LearningParametersTest, parsedFileValidity) {
     ASSERT_EQ(0, root.size())<<"Ill-formed parameters file should result in no root filling";
 
     Learn::readConfigFile(TESTS_DAT_PATH "params.json", root);
-    ASSERT_EQ(9, root.size())<<"Wrong number of elements in parsed json file";
-    ASSERT_EQ(8, root["mutation"]["tpg"].size())<<"Wrong number of elements in parsed json file";
+    ASSERT_EQ(10, root.size())<<"Wrong number of elements in parsed json file";
+    ASSERT_EQ(9, root["mutation"]["tpg"].size())<<"Wrong number of elements in parsed json file";
     ASSERT_EQ(5, root["mutation"]["prog"].size())<<"Wrong number of elements in parsed json file";
 }
 
@@ -74,7 +74,9 @@ TEST(LearningParametersTest, parametersWellSet) {
     ASSERT_EQ(100,params.maxNbEvaluationPerPolicy);
     ASSERT_EQ(3.0,params.nbRegisters);
     ASSERT_EQ(2.0,params.nbThreads);
+    ASSERT_EQ(200,params.nbGenerations);
     ASSERT_EQ(100,params.mutation.tpg.nbRoots);
+    ASSERT_EQ(5,params.mutation.tpg.nbActions);
     ASSERT_EQ(3,params.mutation.tpg.maxInitOutgoingEdges);
     ASSERT_EQ(60,params.mutation.tpg.maxOutgoingEdges);
     ASSERT_EQ(0.8,params.mutation.tpg.pEdgeDeletion);
@@ -94,6 +96,7 @@ TEST(LearningParametersTest, defaultParameters) {
     Json::Value root;
 
     Learn::readConfigFile(TESTS_DAT_PATH "paramsWithWrongOne.json", root);
+    Learn::setAllParamsFrom(root,&params);
 
     ASSERT_TRUE(params.nbThreads>0)<<"A default nbThreads value should be set when no one is specified";
     ASSERT_EQ(params.nbRegisters,8)<<"Bad parameter should be ignored";

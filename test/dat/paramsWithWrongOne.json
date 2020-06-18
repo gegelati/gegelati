@@ -5,7 +5,7 @@
     "maxNbActionsPerEval" : 5,
     "ratioDeletedRoots" : 0.85,
     "maxNbEvaluationPerPolicy" : 100,
-    "nbRegisterazfaf" : 3,
+    "abcdef" : 3,
 
     "mutation":
     {

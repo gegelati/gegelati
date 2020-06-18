@@ -38,7 +38,7 @@
 #include <json.h>
 #include "learn/learningParameters.h"
 
-void Learn::readConfigFile(std::string path, Json::Value &root) {
+void Learn::readConfigFile(const char* path, Json::Value &root) {
     std::ifstream ifs;
     ifs.open(path);
 
@@ -56,7 +56,7 @@ void Learn::readConfigFile(std::string path, Json::Value &root) {
     }
 }
 
-void Learn::setAllParamsFrom(Json::Value root, LearningParameters *params) {
+void Learn::setAllParamsFrom(const Json::Value& root, LearningParameters *params) {
     for (std::string const &key : root.getMemberNames()) {
         if (key == "mutation") {
             // we have a subtree of mutation : parameters like mutation.xxx.xxx
@@ -178,7 +178,7 @@ void Learn::setAllParamsFrom(Json::Value root, LearningParameters *params) {
     }
 }
 
-void Learn::loadParametersFromJson(std::string path, LearningParameters *params) {
+void Learn::loadParametersFromJson(const char* path, LearningParameters *params) {
     Json::Value root;
     readConfigFile(path, root);
 
