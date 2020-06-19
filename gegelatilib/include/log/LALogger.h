@@ -11,23 +11,33 @@
 #define GEGELATI_LALOGGER_H
 
 
-class LALogger : Logger {
+class LALogger : public Logger {
 protected:
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> start;
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>* start;
 
-    double getDurationFrom(std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> begin);
+    double getDurationFrom(std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>& begin);
 
     std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> getTime();
 
 public:
-    LALogger() : start(std::chrono::system_clock::now()) {};
+    LALogger() : Logger(){
+        auto timeNow = getTime();
+        start = &timeNow;
+    };
 
-    virtual void logAfterPopulateTPG(TPG::TPGGraph tpg) = 0;
+    LALogger(std::ostream& stream) : Logger(stream){
+        auto timeNow = std::chrono::time_point(getTime());
+        start = &timeNow;
+    };
 
-    virtual void logEvaluate(uint64_t generationNumber,
-                             std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> results) = 0;
+    void chronoFromNow();
 
-    virtual void logAfterDecimate(TPG::TPGGraph tpg) = 0;
+    virtual void logAfterPopulateTPG(TPG::TPGGraph& tpg) = 0;
+
+    virtual void logAfterEvaluate(uint64_t& generationNumber,
+                             std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>& results) = 0;
+
+    virtual void logAfterDecimate(TPG::TPGGraph& tpg) = 0;
 };
 
 #endif //GEGELATI_LALOGGER_H

@@ -2,8 +2,9 @@
 
 #include <iostream>
 
-void Logger::operator<<(std::ostream &(*manip)(std::ostream &)) {
+Logger Logger::operator<<(std::ostream &(*manip)(std::ostream &)) {
     manip(*out);
+    return *this;
 }
 
 
