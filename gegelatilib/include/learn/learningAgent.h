@@ -38,6 +38,7 @@
 #define LEARNING_AGENT_H
 
 #include <map>
+#include <log/LALogger.h>
 
 #include "instructions/set.h"
 #include "environment.h"
@@ -96,7 +97,10 @@ namespace Learn {
 
         /// Control the maximum number of threads when running in parallel.
         uint64_t maxNbThreads = 1;
-	public:
+        /// Loggers that will all be called some times, to log what the user wants wherever he wants
+        std::vector<std::shared_ptr<LALogger>> loggers;
+
+public:
 		/**
 		* \brief Constructor for LearningAgent.
 		*
@@ -110,7 +114,8 @@ namespace Learn {
 			env(iSet, le.getDataSources(), p.nbRegisters),
 			tpg(this->env),
 			params{ p },
-			archive(p.archiveSize, p.archivingProbability)
+			archive(p.archiveSize, p.archivingProbability),
+			loggers()
 		{
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
@@ -148,6 +153,15 @@ namespace Learn {
 		* \param[in] seed the seed given to the TPGMutator.
 		*/
 		void init(uint64_t seed = 0);
+
+		/**
+		 * \brief Adds a logger to the loggers vector
+		 *
+		 * Adds a logger to the loggers vector, so that it will be called in addition of the others at some moments
+		 *
+		 * @param[in] logger the logger we want to use
+		 */
+		void addLogger(LALogger& logger);
 
 		/**
 		* \brief Evaluates policy starting from the given root.
