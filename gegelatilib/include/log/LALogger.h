@@ -1,10 +1,13 @@
 #ifndef GEGELATI_LALOGGER_H
 #define GEGELATI_LALOGGER_H
 
-#include <tpg/tpgGraph.h>
-#include <learn/evaluationResult.h>
 #include <chrono>
+#include <map>
+
+#include "tpg/tpgGraph.h"
+#include "learn/evaluationResult.h"
 #include "log/Logger.h"
+
 
 /// Learning Agent logger class that will be called during LA executions
 class LALogger : public Logger {

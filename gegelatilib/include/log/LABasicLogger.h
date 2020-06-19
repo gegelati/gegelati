@@ -1,7 +1,6 @@
 #ifndef GEGELATI_LABASICLOGGER_H
 #define GEGELATI_LABASICLOGGER_H
 
-
 #include "log/LALogger.h"
 
 /// Basic logger that will display some useful informations
