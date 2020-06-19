@@ -1,9 +1,9 @@
-#ifndef __LOG_HPP__
-#define __LOG_HPP__
+#ifndef GEGELATI_LOGGER_H
+#define GEGELATI_LOGGER_H
 
 #include <iostream>
 
-
+/// Logger class enabling to log elements in a given output stream
 class Logger {
 protected:
     /// output stream where all what is logged is brought
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif  // __LOG_HPP__
+#endif

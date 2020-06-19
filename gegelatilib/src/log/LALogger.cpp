@@ -1,7 +1,7 @@
 #include <log/LALogger.h>
 
 double LALogger::getDurationFrom(std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>& time) {
-    return (getTime() - time).count();
+    return ((std::chrono::duration<double>)(getTime() - time)).count();
 }
 
 std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> LALogger::getTime() {
@@ -9,6 +9,5 @@ std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> LAL
 }
 
 void LALogger::chronoFromNow() {
-    auto timeNow = getTime();
-    start = &timeNow;
+    start = std::make_shared<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>>(getTime());
 }

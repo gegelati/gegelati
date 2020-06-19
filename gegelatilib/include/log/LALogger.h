@@ -1,43 +1,46 @@
-//
-// Created by asimonu on 19/06/2020.
-//
+#ifndef GEGELATI_LALOGGER_H
+#define GEGELATI_LALOGGER_H
 
 #include <tpg/tpgGraph.h>
 #include <learn/evaluationResult.h>
 #include <chrono>
-#include "Log.hpp"
+#include "log/Logger.h"
 
-#ifndef GEGELATI_LALOGGER_H
-#define GEGELATI_LALOGGER_H
-
-
+/// Learning Agent logger class that will be called during LA executions
 class LALogger : public Logger {
 protected:
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>* start;
+    /// saves a given reference time, used to calculate some durations
+    std::shared_ptr<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>> start;
 
-    double getDurationFrom(std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>& begin);
+    /// returns the duration from a given begining
+    double getDurationFrom(std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> &begin);
 
+    /// returns the current time value
     std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> getTime();
 
 public:
-    LALogger() : Logger(){
-        auto timeNow = getTime();
-        start = &timeNow;
+    /// basic constructor setting cout as output and now as start
+    LALogger() : Logger() {
+        chronoFromNow();
     };
 
-    LALogger(std::ostream& stream) : Logger(stream){
-        auto timeNow = std::chrono::time_point(getTime());
-        start = &timeNow;
+    /// constructor defining a given output and setting  now as start
+    LALogger(std::ostream &stream) : Logger(stream) {
+        chronoFromNow();
     };
 
+    /// updates start to now
     void chronoFromNow();
 
-    virtual void logAfterPopulateTPG(TPG::TPGGraph& tpg) = 0;
+    /// called by the Learning Agent right after PopulateTPG is done
+    virtual void logAfterPopulateTPG(TPG::TPGGraph &tpg) = 0;
 
-    virtual void logAfterEvaluate(uint64_t& generationNumber,
-                             std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>& results) = 0;
+    /// called by the Learning Agent right after the evaluation is done
+    virtual void logAfterEvaluate(uint64_t &generationNumber,
+                                  std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results) = 0;
 
-    virtual void logAfterDecimate(TPG::TPGGraph& tpg) = 0;
+    /// called by the Learning Agent right after the decimation is done
+    virtual void logAfterDecimate(TPG::TPGGraph &tpg) = 0;
 };
 
-#endif //GEGELATI_LALOGGER_H
+#endif

@@ -1,4 +1,4 @@
-#include "log/Log.hpp"
+#include "log/Logger.h"
 
 #include <iostream>
 
