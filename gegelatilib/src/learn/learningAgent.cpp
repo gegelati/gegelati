@@ -156,7 +156,7 @@ std::multimap< std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> 
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 {
 	// Populate Sequentially
-	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation, this->rng, 1);
+	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation, this->rng, maxNbThreads);
 
 	// Evaluate
 	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);

@@ -233,18 +233,3 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(uint64_t generatio
 	// Merge the archives
 	this->mergeArchiveMap(archiveMap);
 }
-
-void Learn::ParallelLearningAgent::trainOneGeneration(uint64_t generationNumber)
-{
-	// Populate Sequentially
-	Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation, this->rng, this->maxNbThreads);
-
-	// Evaluate
-	auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
-
-	// Remove worst performing roots
-	decimateWorstRoots(results);
-
-	// Update the best (code duplicate in LearningAgent)
-	this->updateEvaluationRecords(results);
-}
