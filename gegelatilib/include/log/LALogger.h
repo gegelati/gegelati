@@ -12,8 +12,10 @@
 /// Learning Agent logger class that will be called during LA executions
 class LALogger : public Logger {
 protected:
-    /// saves a given reference time, used to calculate some durations
-    std::shared_ptr<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>> start;
+    /// keeps the time of logger declaration to be able to show total durations
+    std::shared_ptr<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>> const start;
+    /// keeps a given time to be able to show durations from that moment
+    std::shared_ptr<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>> checkpoint;
 
     /// returns the duration from a given begining
     double getDurationFrom(std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> &begin);
@@ -22,25 +24,30 @@ protected:
     std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> getTime();
 
 public:
-    /// basic constructor setting cout as output and now as start
-    LALogger() : Logger() {
+    /// basic constructor setting cout as output, start and checkpoint as now
+    LALogger()
+            : Logger(),
+              start(std::make_shared<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>>(
+                      getTime())) {
         chronoFromNow();
     };
 
-    /// constructor defining a given output and setting  now as start
-    LALogger(std::ostream &stream) : Logger(stream) {
+    /// constructor defining a given output and setting start and checkpoint as now
+    LALogger(std::ostream &stream) : Logger(stream),
+                                     start(std::make_shared<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>>(
+                                             getTime())) {
         chronoFromNow();
     };
 
-    /// updates start to now
+    /// updates checkpoint to now
     void chronoFromNow();
 
     /// called by the Learning Agent right after PopulateTPG is done
-    virtual void logAfterPopulateTPG(TPG::TPGGraph &tpg) = 0;
+    virtual void logAfterPopulateTPG(uint64_t &generationNumber, TPG::TPGGraph &tpg) = 0;
 
     /// called by the Learning Agent right after the evaluation is done
-    virtual void logAfterEvaluate(uint64_t &generationNumber,
-                                  std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results) = 0;
+    virtual void
+    logAfterEvaluate(std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results) = 0;
 
     /// called by the Learning Agent right after the decimation is done
     virtual void logAfterDecimate(TPG::TPGGraph &tpg) = 0;

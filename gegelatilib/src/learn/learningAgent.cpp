@@ -161,20 +161,16 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber, Learn::Learnin
 }
 
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber) {
-    for (auto logger : loggers) {
-        logger->chronoFromNow();
-    }
-
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation, this->rng, maxNbThreads);
     for (auto logger : loggers) {
-        logger->logAfterPopulateTPG(tpg);
+        logger->logAfterPopulateTPG(generationNumber,tpg);
     }
 
     // Evaluate
     auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
     for (auto logger : loggers) {
-        logger->logAfterEvaluate(generationNumber, results);
+        logger->logAfterEvaluate(results);
     }
 
     // Remove worst performing roots

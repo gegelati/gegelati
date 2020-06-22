@@ -9,5 +9,5 @@ std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> LAL
 }
 
 void LALogger::chronoFromNow() {
-    start = std::make_shared<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>>(getTime());
+    checkpoint = std::make_shared<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>>(getTime());
 }
