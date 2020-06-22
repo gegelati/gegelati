@@ -5,6 +5,10 @@
 
 /// Basic logger that will display some useful informations
 class LABasicLogger : public LALogger {
+protected:
+    /// width of columns when logging values
+    int colWidth = 17;
+
 public:
     /// same constructor as LaLogger
     LABasicLogger() : LALogger() {

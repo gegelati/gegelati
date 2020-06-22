@@ -4,12 +4,18 @@
 #include <log/LABasicLogger.h>
 
 void LABasicLogger::logHeader() {
-    *this << "Gen\t\tNbVert\t\tMin\t\t\tAvg\t\t\tMax\t\t\tDuration(eval)\t\tDuration(decimation)\tTotal_time\n";
+    // fixing float precision
+    *this << std::setprecision(2) << std::fixed;
+    *this << std::left << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert" << std::setw(colWidth)
+          << "Min" << std::setw(colWidth) << "Avg" << std::setw(colWidth)
+          << "Max" << std::setw(colWidth) << "Duration(eval)" << std::setw(colWidth)
+          << "Duration(decim)" << std::setw(colWidth)
+          << "Total_time" << std::endl;
 }
 
 void LABasicLogger::logAfterPopulateTPG(uint64_t &generationNumber, TPG::TPGGraph &tpg) {
-    *this << generationNumber << "\t\t";
-    *this << tpg.getNbVertices() << "\t\t\t";
+    *this << std::setw(colWidth) << generationNumber << std::setw(colWidth);
+    *this << tpg.getNbVertices() << std::setw(colWidth);
     // resets checkpoint to be able to show evaluation time
     chronoFromNow();
 }
@@ -25,13 +31,13 @@ void LABasicLogger::logAfterEvaluate(
                                     std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> pair) -> double {
                                      return acc + pair.first->getResult();
                                  });
-    *this << std::setprecision(2) << std::fixed << min << "\t\t" << avg << "\t\t" << max << "\t\t"
-          << getDurationFrom(*checkpoint)
-          << "\t\t\t\t";
+    avg /= results.size();
+    *this << min << std::setw(colWidth) << avg << std::setw(colWidth) << max << std::setw(colWidth)
+          << getDurationFrom(*checkpoint) << std::setw(colWidth);
     // resets checkpoint to be able to show decimation time
     chronoFromNow();
 }
 
 void LABasicLogger::logAfterDecimate(TPG::TPGGraph &tpg) {
-    *this << getDurationFrom(*checkpoint) << "\t\t\t\t\t" << getDurationFrom(*start) << "\n";
+    *this << getDurationFrom(*checkpoint) << std::setw(colWidth) << getDurationFrom(*start) << std::endl;
 }

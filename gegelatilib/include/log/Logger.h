@@ -2,6 +2,7 @@
 #define GEGELATI_LOGGER_H
 
 #include <iostream>
+#include <type_traits>
 
 /// Logger class enabling to log elements in a given output stream
 class Logger {
@@ -23,6 +24,10 @@ public:
     template<typename T>
     Logger operator<<(const T &val) {
         *out << val;
+
+        // flushes the buffer, useful especially with ofstream where without that, nothing will be printed until close
+        out->flush();
+
         return *this;
     }
 };
