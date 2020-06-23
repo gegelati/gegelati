@@ -38,12 +38,12 @@
 
 #include "log/Logger.h"
 
-TEST(loggerTest, loggerConstructor) {
+TEST(loggerTest, Constructor) {
     ASSERT_NO_THROW(Logger l);
     ASSERT_NO_THROW(Logger l(std::cerr));
 }
 
-TEST(loggerTest, loggerLog) {
+TEST(loggerTest, log) {
     Logger l;
     ASSERT_NO_THROW(l<<"test1"<<"test2"<<std::endl);
     std::stringstream strStr;
@@ -56,7 +56,7 @@ TEST(loggerTest, loggerLog) {
     ASSERT_EQ("test3test4\n\n",strStr.str());
 }
 
-TEST(loggerTest, loggerFileLog) {
+TEST(loggerTest, logWithFile) {
     std::ofstream o("tempFileForTest", std::ofstream::out);
     auto l2 = Logger(o);
     l2<<"randomDataForTest0";

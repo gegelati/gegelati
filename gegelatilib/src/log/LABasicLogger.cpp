@@ -14,8 +14,7 @@ void LABasicLogger::logHeader() {
 }
 
 void LABasicLogger::logAfterPopulateTPG(uint64_t &generationNumber, TPG::TPGGraph &tpg) {
-    *this << std::setw(colWidth) << generationNumber << std::setw(colWidth);
-    *this << tpg.getNbVertices() << std::setw(colWidth);
+    *this << std::setw(colWidth) << generationNumber << std::setw(colWidth) << tpg.getNbVertices();
     // resets checkpoint to be able to show evaluation time
     chronoFromNow();
 }
@@ -32,12 +31,14 @@ void LABasicLogger::logAfterEvaluate(
                                      return acc + pair.first->getResult();
                                  });
     avg /= results.size();
-    *this << min << std::setw(colWidth) << avg << std::setw(colWidth) << max << std::setw(colWidth)
-          << getDurationFrom(*checkpoint) << std::setw(colWidth);
+    *this << std::setw(colWidth) << min << std::setw(colWidth) << avg << std::setw(colWidth) << max
+          << std::setw(colWidth)
+          << getDurationFrom(*checkpoint);
     // resets checkpoint to be able to show decimation time
     chronoFromNow();
 }
 
 void LABasicLogger::logAfterDecimate(TPG::TPGGraph &tpg) {
-    *this << getDurationFrom(*checkpoint) << std::setw(colWidth) << getDurationFrom(*start) << std::endl;
+    *this << std::setw(colWidth) << getDurationFrom(*checkpoint) << std::setw(colWidth) << getDurationFrom(*start)
+          << std::endl;
 }

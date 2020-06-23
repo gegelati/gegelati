@@ -88,72 +88,113 @@ protected:
 };
 
 
-TEST_F(LABasicLoggerTest, loggerConstructor) {
+TEST_F(LABasicLoggerTest, ConstructorAndlogHeader) {
     ASSERT_NO_THROW(LABasicLogger l);
     ASSERT_NO_THROW(LABasicLogger l(std::cerr));
-}
 
-TEST_F(LABasicLoggerTest, logsNoThrow) {
     std::stringstream strStr;
     LABasicLogger l(strStr);
-    ASSERT_NO_THROW(l.logAfterPopulateTPG(generation, *tpg));
-    ASSERT_NO_THROW(l.logAfterEvaluate(*results));
-    ASSERT_NO_THROW(l.logAfterDecimate(*tpg));
+
+    // now we will check the header logged correctly
+    std::string s = strStr.str();
+    // putting each element seperated by blanks in a tab
+    std::vector<std::string> result;
+    std::istringstream iss(s);
+    for (std::string s2; iss >> s2;)
+        result.push_back(s2);
+
+    ASSERT_EQ("Gen", result[0]);
+    ASSERT_EQ("NbVert", result[1]);
+    ASSERT_EQ("Min", result[2]);
+    ASSERT_EQ("Avg", result[3]);
+    ASSERT_EQ("Max", result[4]);
+    ASSERT_EQ("Duration(eval)", result[5]);
+    ASSERT_EQ("Duration(decim)", result[6]);
+    ASSERT_EQ("Total_time", result[7]);
 }
 
-TEST_F(LABasicLoggerTest, goodLogHeader) {
+TEST_F(LABasicLoggerTest, logAfterPopulateTPG) {
     std::stringstream strStr;
     LABasicLogger l(strStr);
 
     l.logAfterPopulateTPG(generation, *tpg);
-    l.logAfterEvaluate(*results);
-    l.logAfterDecimate(*tpg);
     std::string s = strStr.str();
-
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
     std::istringstream iss(s);
-    for(std::string s2; iss >> s2; )
+    for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_EQ("Gen",result[0]);
-    ASSERT_EQ("NbVert",result[1]);
-    ASSERT_EQ("Min",result[2]);
-    ASSERT_EQ("Avg",result[3]);
-    ASSERT_EQ("Max",result[4]);
-    ASSERT_EQ("Duration(eval)",result[5]);
-    ASSERT_EQ("Duration(decim)",result[6]);
-    ASSERT_EQ("Total_time",result[7]);
+    ASSERT_EQ("0", result[8]);
+    ASSERT_EQ("0", result[9]);
 }
 
-TEST_F(LABasicLoggerTest, goodLogContent) {
+TEST_F(LABasicLoggerTest, logAfterEvaluate) {
+    std::stringstream strStr;
+    LABasicLogger l(strStr);
+
+    l.logAfterEvaluate(*results);
+    std::string s = strStr.str();
+    // putting each element seperated by blanks in a tab
+    std::vector<std::string> result;
+    std::istringstream iss(s);
+    for (std::string s2; iss >> s2;)
+        result.push_back(s2);
+
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[8]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[9]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[10]));
+    ASSERT_TRUE(std::stod(result[11]) >= 0.0) << "eval duration should be positive";
+}
+
+
+TEST_F(LABasicLoggerTest, logAfterDecimate) {
     std::stringstream strStr;
     LABasicLogger l(strStr);
 
     // little sleep to delay the total_time value (while the "checkpoint" of the logger will be reset)
+    double timeToWaitMili = 10;
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    l.logAfterPopulateTPG(generation, *tpg);
-    l.logAfterEvaluate(*results);
     l.logAfterDecimate(*tpg);
     std::string s = strStr.str();
-
-    std::cout << s << std::endl;
-
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
     std::istringstream iss(s);
-    for(std::string s2; iss >> s2; )
+    for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_EQ("0",result[8]);
-    ASSERT_EQ("0",result[9]);
-    ASSERT_EQ("5.00",result[10]);
-    ASSERT_EQ("7.50",result[11]);
-    ASSERT_EQ("10.00",result[12]);
-    // using inequations as we can have slight time changes
-    ASSERT_TRUE(std::stod(result[13])>=0.0);
-    ASSERT_TRUE(std::stod(result[14])>=0.0);
-    ASSERT_TRUE(std::stod(result[15])>=0.0);
-    ASSERT_TRUE(std::stod(result[15])>std::stod(result[14]))<<"Total time should be the largest duration !";
+    double decimTime = std::stod(result[8]);
+    double totTime = std::stod(result[9]);
+    ASSERT_TRUE(decimTime >= 0.0) << "decimation duration should be positive";
+    ASSERT_TRUE(totTime >= 0.0) << "total elapsed time should be positive";
+}
+
+TEST_F(LABasicLoggerTest, ChronoFromNow){
+    // to test chrono, we will wait, use chronoFromNow() which resets the "checkpoint" time
+    // and call logAfterDecimate() which shall print the duration from checkpoint and from start
+
+    std::stringstream strStr;
+    LABasicLogger l(strStr);
+
+    // little sleep to delay the total_time value (while the "checkpoint" of the logger will be reset)
+    double timeToWaitMili = 10;
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    // resets "checkpoint" so that the first displayed time shall be lower than the second which is the time from start
+    l.chronoFromNow();
+
+    l.logAfterDecimate(*tpg);
+    std::string s = strStr.str();
+    // putting each element seperated by blanks in a tab
+    std::vector<std::string> result;
+    std::istringstream iss(s);
+    for (std::string s2; iss >> s2;)
+        result.push_back(s2);
+
+    double decimTime = std::stod(result[8]);
+    double totTime = std::stod(result[9]);
+    ASSERT_TRUE(totTime > decimTime) << "Total time should be the largest duration !";
+    ASSERT_TRUE(totTime >= timeToWaitMili / 1000) << "Total time should be larger than the time we waited !";
+
 }

@@ -4,6 +4,7 @@
 _2020.06.12_
 
 ### New features
+* A logger was added so that it is possible to log things wherever we want just by passing LABasicLogger or another logger in argument to a Learning Agent
 
 ### Changes
 * LearningAgent now receives the number of threads and registers from the LearningParameter.

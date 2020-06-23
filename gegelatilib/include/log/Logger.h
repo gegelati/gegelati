@@ -2,7 +2,6 @@
 #define GEGELATI_LOGGER_H
 
 #include <iostream>
-#include <type_traits>
 
 /// Logger class enabling to log elements in a given output stream
 class Logger {
@@ -11,16 +10,22 @@ protected:
     std::ostream *out;
 
 public:
-    /// basic constructor printing on cout
+    /// \brief basic constructor logging on cout
     Logger() : out(&std::cout) {};
 
-    /// constructor initializing a specific output
+    /// \brief constructor initializing a specific output
+    /// \param[in] out the output stream we want to log things to
     Logger(std::ostream &out) : out(&out) {};
 
-    /// << operator to manipulate stream
+    /// \brief << operator to manipulate stream and enter stream-specific elements (like endl)
+    /// \param[in] manip the element we want to add
+    /// \return the samme logger to be able to stream several things (e.g. logger<<elA<<elB)
     Logger operator<<(std::ostream &(*manip)(std::ostream &));
 
-    /// << operator allowing to log elements that ostream actually accepts (char, int...)
+    /// \brief << operator allowing to log elements that ostream actually accepts (char, int...)
+    /// \tparam T the type of element we want to log
+    /// \param[in] val the element we want to log
+    /// \return the samme logger to be able to stream several things (e.g. logger<<elA<<elB)
     template<typename T>
     Logger operator<<(const T &val) {
         *out << val;
