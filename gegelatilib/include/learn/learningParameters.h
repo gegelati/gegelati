@@ -93,6 +93,9 @@ namespace Learn {
 
     /// Loads a given json file and puts the parameters it contains in params
     void loadParametersFromJson(const char* path, LearningParameters *params);
+
+    /// Given a parameter name, sets its value in params
+    void setParameterFromString(LearningParameters * params, std::string& param, double value);
 };
 
 #endif
