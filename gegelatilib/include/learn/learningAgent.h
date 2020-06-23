@@ -95,7 +95,7 @@ namespace Learn {
 		Mutator::RNG rng;
 
         /// Control the maximum number of threads when running in parallel.
-        uint64_t maxNbThreads;
+        uint64_t maxNbThreads = 1;
 	public:
 		/**
 		* \brief Constructor for LearningAgent.
@@ -110,8 +110,7 @@ namespace Learn {
 			env(iSet, le.getDataSources(), p.nbRegisters),
 			tpg(this->env),
 			params{ p },
-			archive(p.archiveSize, p.archivingProbability),
-			maxNbThreads(1)
+			archive(p.archiveSize, p.archivingProbability)
 		{
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();

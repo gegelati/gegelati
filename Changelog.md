@@ -7,6 +7,7 @@ _2020.06.12_
 
 ### Changes
 * LearningAgent now receives the number of threads and registers from the LearningParameter.
+* maxNbThreads is now a variable of learningAgent allowing to have a more generic trainOneGeneration method
 
 ### Bug fix
 * Fix non-determinism issue in ClassificationLearningAgent.
