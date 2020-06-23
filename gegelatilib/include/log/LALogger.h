@@ -17,7 +17,7 @@ protected:
     /// keeps a given time to be able to show durations from that moment
     std::shared_ptr<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>> checkpoint;
 
-    /// returns the duration from a given begining
+    /// returns the duration from a given beginning
     double getDurationFrom(std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> &begin);
 
     /// returns the current time value
