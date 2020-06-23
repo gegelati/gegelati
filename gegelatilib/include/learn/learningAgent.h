@@ -114,6 +114,7 @@ namespace Learn {
 		{
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
+			maxNbThreads=1;
 		};
 
 		/**
