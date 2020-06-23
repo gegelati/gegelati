@@ -36,9 +36,9 @@
 #include <iostream>
 #include <fstream>
 #include <json.h>
-#include "learn/learningParameters.h"
+#include "file/parametersParser.h"
 
-void Learn::readConfigFile(const char* path, Json::Value &root) {
+void ParametersParser::readConfigFile(const char* path, Json::Value &root) {
     std::ifstream ifs;
     ifs.open(path);
 
@@ -56,7 +56,7 @@ void Learn::readConfigFile(const char* path, Json::Value &root) {
     }
 }
 
-void Learn::setAllParamsFrom(const Json::Value& root, LearningParameters *params) {
+void ParametersParser::setAllParamsFrom(const Json::Value& root, Learn::LearningParameters *params) {
     for (std::string &key : root.getMemberNames()) {
         if (key == "mutation") {
             // we have a subtree of mutation : parameters like mutation.xxx.xxx
@@ -87,7 +87,7 @@ void Learn::setAllParamsFrom(const Json::Value& root, LearningParameters *params
     }
 }
 
-void Learn::setParameterFromString(LearningParameters * params, std::string& key, double value){
+void ParametersParser::setParameterFromString(Learn::LearningParameters * params, std::string& key, double value){
     if (key == "nbActions") {
         params->mutation.tpg.nbActions = (size_t)value;
         return;
@@ -184,7 +184,7 @@ void Learn::setParameterFromString(LearningParameters * params, std::string& key
     std::cerr << "Ignoring unknown parameter " << key << std::endl;
 }
 
-void Learn::loadParametersFromJson(const char* path, LearningParameters *params) {
+void ParametersParser::loadParametersFromJson(const char* path, Learn::LearningParameters *params) {
     Json::Value root;
     readConfigFile(path, root);
 

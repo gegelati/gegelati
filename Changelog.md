@@ -1,9 +1,10 @@
 # GEGELATI Changelog
 
 ## Release version 0.2.1
-_2020.06.12_
+_2020.06.23_
 
 ### New features
+* Parameters (learningParameters and mutationParameters) can now be set with a JSON file using parametersParser.
 
 ### Changes
 * LearningAgent now receives the number of threads and registers from the LearningParameter.

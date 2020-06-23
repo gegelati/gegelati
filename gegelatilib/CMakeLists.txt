@@ -20,6 +20,7 @@
 # option, see https://cmake.org/cmake/help/latest/command/set.html.
 set(LIBRARY_TARGET_NAME ${PROJECT_NAME})
 
+# includes JsonCpp library to be able to parse parameters JSON files
 include_directories("../lib/JsonCpp")
 # List of CPP (source) library files.
 file(

@@ -33,53 +33,39 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef LEARNING_PARAMETERS_H
-#define LEARNING_PARAMETERS_H
+#ifndef GEGELATI_PARAMETERSPARSER_H
+#define GEGELATI_PARAMETERSPARSER_H
 
-#include <thread>
-#include "mutator/mutationParameters.h"
+#include <string>
+#include "learn/learningParameters.h"
+
+/// Used to avoid importing the JsonCpp lib now, so it tells the compiler Json::Value exists
+namespace Json {
+    class Value;
+}
+
+namespace ParametersParser {
+    /// \brief Loads a given json file and puts the parameters it contains in params
+    /// \param[in] path path of the file we want to read
+    /// \param[out] params the learning parameters we are going to set
+    void loadParametersFromJson(const char *path, Learn::LearningParameters *params);
+
+    /// \brief Given a parameter name, sets its value in params
+    /// \param[out] params the learning parameters we are going to set
+    /// \param[in] param the name of the parameter we want to set
+    /// \param[in] value the value we want to set the parameter to
+    void setParameterFromString(Learn::LearningParameters *params, std::string &param, double value);
+
+    /// \brief Puts the parameters described in the derivative tree root into params
+    /// \param[in] root JSON tree we will use to set parameters
+    /// \param[out] params the learning parameters we are going to set
+    void setAllParamsFrom(const Json::Value &root, Learn::LearningParameters *params);
+
+    /// \brief Reads a given json file and puts the derivative tree in root
+    /// \param[in] path path of the file we want to read
+    /// \param[out] root JSON tree we are going to build with the file
+    void readConfigFile(const char *path, Json::Value &root);
+}
 
 
-
-namespace Learn {
-	/**
-	* \brief Structure for simplifying the transmission of LearningParameters
-	* to functions.
-	*/
-	typedef struct LearningParameters {
-		/// MutationParameters for controlling stochastic aspects of the learning 
-		/// process.
-		Mutator::MutationParameters mutation;
-		/// Number of recordings held in the Archive.
-		size_t archiveSize;
-		/// Probability of archiving each Program execution.
-		double archivingProbability;
-		/// Number of evaluation of each policy per generation.
-		uint64_t nbIterationsPerPolicyEvaluation;
-		/// Maximum number of action per evaluation of a policy. 
-		uint64_t maxNbActionsPerEval;
-		/// Percentage of deleted (and regenerated) root TPGVertex a each 
-		/// generation.
-		double ratioDeletedRoots;
-		/// Number of generations of the training.
-		uint64_t nbGenerations;
-		/// Maximum number of times a given policy (i.e. a root TPGVertex) is
-		/// evaluated.
-		size_t maxNbEvaluationPerPolicy;
-		/// Number of registers for the Program execution
-		size_t nbRegisters = 8;
-		/**
-		* \brief Number of threads (ParallelLearningAgent only)
-		*
-		* Integer parameter controlling the number of
-		* threads used for parallel execution. Possible values are:
-		*   - default :  Let the runtime decide using
-		*         std::thread::hardware_concurrency().
-		*   - `0` or `1`: Do not use parallelism.
-		*   - `n > 1`: Set the number of threads explicitly.
-		*/
-		size_t nbThreads = std::thread::hardware_concurrency();
-	} LearningParameters;
-};
-
-#endif
+#endif //GEGELATI_PARAMETERSPARSER_H
