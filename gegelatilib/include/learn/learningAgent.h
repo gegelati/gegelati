@@ -97,8 +97,15 @@ namespace Learn {
 
         /// Control the maximum number of threads when running in parallel.
         uint64_t maxNbThreads = 1;
-        /// Loggers that will all be called some times, to log what the user wants wherever he wants
-        std::vector<std::shared_ptr<LALogger>> loggers;
+
+        /**
+        * \brief Loggers that will all be called some times.
+        *
+        * When we will call loggers, every logger of the vector will
+        * be called. Having several ones allow to log different things
+        * on different outputs.
+        */
+        std::vector<std::shared_ptr<Log::LALogger>> loggers;
 
 public:
 		/**
@@ -155,13 +162,16 @@ public:
 		void init(uint64_t seed = 0);
 
 		/**
-		 * \brief Adds a logger to the loggers vector
+		 * \brief Adds a logger to the loggers vector.
 		 *
-		 * Adds a logger to the loggers vector, so that it will be called in addition of the others at some moments
+		 * Adds a logger to the loggers vector, so that it will be called in
+		 * addition of the others at some moments. This enables to have
+		 * several loggers that log different things on different outputs
+		 * simultaneously.
 		 *
-		 * @param[in] logger the logger we want to use
+		 * @param[in] logger the logger we want to add to the vector.
 		 */
-		void addLogger(LALogger& logger);
+		void addLogger(Log::LALogger& logger);
 
 		/**
 		* \brief Evaluates policy starting from the given root.

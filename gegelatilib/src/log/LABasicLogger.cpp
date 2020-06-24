@@ -3,7 +3,7 @@
 
 #include <log/LABasicLogger.h>
 
-void LABasicLogger::logHeader() {
+void Log::LABasicLogger::logHeader() {
     // fixing float precision
     *this << std::setprecision(2) << std::fixed << std::left;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert" << std::setw(colWidth)
@@ -13,13 +13,13 @@ void LABasicLogger::logHeader() {
           << "Total_time" << std::endl;
 }
 
-void LABasicLogger::logAfterPopulateTPG(uint64_t &generationNumber, TPG::TPGGraph &tpg) {
+void Log::LABasicLogger::logAfterPopulateTPG(uint64_t &generationNumber, TPG::TPGGraph &tpg) {
     *this << std::setw(colWidth) << generationNumber << std::setw(colWidth) << tpg.getNbVertices();
     // resets checkpoint to be able to show evaluation time
     chronoFromNow();
 }
 
-void LABasicLogger::logAfterEvaluate(
+void Log::LABasicLogger::logAfterEvaluate(
         std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results) {
     auto iter = results.begin();
     double min = iter->first->getResult();
@@ -38,7 +38,7 @@ void LABasicLogger::logAfterEvaluate(
     chronoFromNow();
 }
 
-void LABasicLogger::logAfterDecimate(TPG::TPGGraph &tpg) {
+void Log::LABasicLogger::logAfterDecimate(TPG::TPGGraph &tpg) {
     *this << std::setw(colWidth) << getDurationFrom(*checkpoint) << std::setw(colWidth) << getDurationFrom(*start)
           << std::endl;
 }

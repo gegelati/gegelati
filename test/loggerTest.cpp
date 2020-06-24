@@ -39,16 +39,16 @@
 #include "log/Logger.h"
 
 TEST(loggerTest, Constructor) {
-    ASSERT_NO_THROW(Logger l);
-    ASSERT_NO_THROW(Logger l(std::cerr));
+    ASSERT_NO_THROW(Log::Logger l);
+    ASSERT_NO_THROW(Log::Logger l(std::cerr));
 }
 
 TEST(loggerTest, log) {
-    Logger l;
+    Log::Logger l;
     ASSERT_NO_THROW(l<<"test1"<<"test2"<<std::endl);
     std::stringstream strStr;
 
-    Logger l2(strStr);
+    Log::Logger l2(strStr);
     ASSERT_NO_THROW(l2<<"test3"<<"test4"<<std::endl);
     ASSERT_EQ("test3test4\n",strStr.str());
 
@@ -58,7 +58,7 @@ TEST(loggerTest, log) {
 
 TEST(loggerTest, logWithFile) {
     std::ofstream o("tempFileForTest", std::ofstream::out);
-    auto l2 = Logger(o);
+    auto l2 = Log::Logger(o);
     l2<<"randomDataForTest0";
     o.close();
 

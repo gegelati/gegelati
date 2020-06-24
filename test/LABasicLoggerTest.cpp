@@ -89,11 +89,11 @@ protected:
 
 
 TEST_F(LABasicLoggerTest, ConstructorAndlogHeader) {
-    ASSERT_NO_THROW(LABasicLogger l);
-    ASSERT_NO_THROW(LABasicLogger l(std::cerr));
+    ASSERT_NO_THROW(Log::LABasicLogger l);
+    ASSERT_NO_THROW(Log::LABasicLogger l(std::cerr));
 
     std::stringstream strStr;
-    LABasicLogger l(strStr);
+    Log::LABasicLogger l(strStr);
 
     // now we will check the header logged correctly
     std::string s = strStr.str();
@@ -115,7 +115,7 @@ TEST_F(LABasicLoggerTest, ConstructorAndlogHeader) {
 
 TEST_F(LABasicLoggerTest, logAfterPopulateTPG) {
     std::stringstream strStr;
-    LABasicLogger l(strStr);
+    Log::LABasicLogger l(strStr);
 
     l.logAfterPopulateTPG(generation, *tpg);
     std::string s = strStr.str();
@@ -131,7 +131,7 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG) {
 
 TEST_F(LABasicLoggerTest, logAfterEvaluate) {
     std::stringstream strStr;
-    LABasicLogger l(strStr);
+    Log::LABasicLogger l(strStr);
 
     l.logAfterEvaluate(*results);
     std::string s = strStr.str();
@@ -150,7 +150,7 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate) {
 
 TEST_F(LABasicLoggerTest, logAfterDecimate) {
     std::stringstream strStr;
-    LABasicLogger l(strStr);
+    Log::LABasicLogger l(strStr);
 
     // little sleep to delay the total_time value (while the "checkpoint" of the logger will be reset)
     double timeToWaitMili = 10;
@@ -175,7 +175,7 @@ TEST_F(LABasicLoggerTest, ChronoFromNow){
     // and call logAfterDecimate() which shall print the duration from checkpoint and from start
 
     std::stringstream strStr;
-    LABasicLogger l(strStr);
+    Log::LABasicLogger l(strStr);
 
     // little sleep to delay the total_time value (while the "checkpoint" of the logger will be reset)
     double timeToWaitMili = 10;
