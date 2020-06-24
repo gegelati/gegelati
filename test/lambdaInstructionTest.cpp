@@ -63,7 +63,11 @@ TEST(LambdaInstructionsTest, ExecutePrimitiveType) {
 	// Execute with wrong types of operands.
 	vect.pop_back();
 	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
+#ifndef NDEBUG
 	ASSERT_EQ(instruction->execute({}, vect), 0.0) << "Instructions executed with wrong types of operands should return 0.0";
+#else
+	ASSERT_THROW(instruction->execute({}, vect), std::runtime_error) << "In NDEBUG mode, execution of a LambdaInstruction with wrong argument types should fail.";
+#endif
 
 	ASSERT_NO_THROW(delete instruction) << "Destruction of the LambdaInstruction failed.";
 }
@@ -119,9 +123,17 @@ TEST(LambdaInstructionsTest, ExecuteAllTypesMixed) {
 
 	// Test wrong number of argument detection.
 	vect2.pop_back();
+#ifndef NDEBUG
 	ASSERT_EQ(instruction2.execute({}, vect2), 0.0) << "Result of the LambdaInstruction with wrong number of arguments should be 0.";
+#else
+	ASSERT_THROW(instruction2.execute({}, vect2), std::runtime_error) << "In NDEBUG mode, execution of a LambdaInstruction with wrong number of arguments should fail.";
+#endif
 
 	// Test wrong argument type
 	vect2.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
+#ifndef NDEBUG
 	ASSERT_EQ(instruction2.execute({}, vect2), 0.0) << "Result of the LambdaInstruction with wrong argument types should be 0.";
+#else
+	ASSERT_THROW(instruction2.execute({}, vect2),std::runtime_error) << "In NDEBUG mode, execution of a LambdaInstruction with wrong argument types should fail.";;
+#endif
 }
