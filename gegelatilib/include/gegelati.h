@@ -49,6 +49,7 @@
 
 #include <file/tpgGraphDotExporter.h>
 #include <file/tpgGraphDotImporter.h>
+#include <file/parametersParser.h>
 
 #include <instructions/addPrimitiveType.h>  
 #include <instructions/instruction.h>
