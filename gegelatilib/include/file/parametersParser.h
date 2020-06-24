@@ -33,39 +33,62 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef GEGELATI_PARAMETERSPARSER_H
-#define GEGELATI_PARAMETERSPARSER_H
+#ifndef PARAMETERS_PARSER_H
+#define PARAMETERS_PARSER_H
 
 #include <string>
+
 #include "learn/learningParameters.h"
 
-/// Used to avoid importing the JsonCpp lib now, so it tells the compiler Json::Value exists
+ /// Used to avoid importing the JsonCpp lib now, so it tells the compiler Json::Value exists
 namespace Json {
-    class Value;
+	class Value;
 }
 
-namespace ParametersParser {
-    /// \brief Loads a given json file and puts the parameters it contains in params
-    /// \param[in] path path of the file we want to read
-    /// \param[out] params the learning parameters we are going to set
-    void loadParametersFromJson(const char *path, Learn::LearningParameters *params);
+namespace File {
+	/**
+	* \brief Namespace containing the functions for filling an instance of the
+	* Learn::LearningParameters class from a Json file.
+	*/
+	namespace ParametersParser {
+		/**
+		* \brief Loads a given json file and fills the parameters it contains in
+		* given LearningParameters.
+		*
+		* \param[in] path path of the JSON file from which the parameters are
+		*            read.
+		* \param[out] params the LearningParameters being updated.
+		*/
+		void loadParametersFromJson(const char* path, Learn::LearningParameters& params);
 
-    /// \brief Given a parameter name, sets its value in params
-    /// \param[out] params the learning parameters we are going to set
-    /// \param[in] param the name of the parameter we want to set
-    /// \param[in] value the value we want to set the parameter to
-    void setParameterFromString(Learn::LearningParameters *params, std::string &param, double value);
+		/**
+		* \brief Given a parameter name, sets its value in given
+		* LearningParameters.
+		*
+		* \param[out] params the learning parameters we are going to set.
+		* \param[in] param the name of the LearningParameters being updated.
+		* \param[in] value the value we want to set the parameter to.
+		*/
+		void setParameterFromString(Learn::LearningParameters& params, std::string& param, double value);
 
-    /// \brief Puts the parameters described in the derivative tree root into params
-    /// \param[in] root JSON tree we will use to set parameters
-    /// \param[out] params the learning parameters we are going to set
-    void setAllParamsFrom(const Json::Value &root, Learn::LearningParameters *params);
+		/**
+		* \brief Puts the parameters described in the derivative tree root in
+		* given LearningParameters.
+		*
+		* \param[in] root JSON tree we will use to set parameters.
+		* \param[out] params the LearningParameters being updated.
+		*/
+		void setAllParamsFrom(const Json::Value& root, Learn::LearningParameters& params);
 
-    /// \brief Reads a given json file and puts the derivative tree in root
-    /// \param[in] path path of the file we want to read
-    /// \param[out] root JSON tree we are going to build with the file
-    void readConfigFile(const char *path, Json::Value &root);
+		/**
+		* \brief Reads a given json file and puts the derivative tree in root.
+		*
+		* \param[in] path path of the JSON file from which the parameters are
+		*            read.
+		* \param[out] root JSON tree we are going to build with the file.
+		*/
+		void readConfigFile(const char* path, Json::Value& root);
+	}
 }
 
-
-#endif //GEGELATI_PARAMETERSPARSER_H
+#endif 
