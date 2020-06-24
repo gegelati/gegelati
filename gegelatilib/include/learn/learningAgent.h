@@ -121,12 +121,10 @@ public:
 			env(iSet, le.getDataSources(), p.nbRegisters),
 			tpg(this->env),
 			params{ p },
-			archive(p.archiveSize, p.archivingProbability),
-			loggers()
+			archive(p.archiveSize, p.archivingProbability)
 		{
 			// override the number of actions from the parameters.
 			this->params.mutation.tpg.nbActions = this->learningEnvironment.getNbActions();
-			maxNbThreads=1;
 		};
 
 		/**

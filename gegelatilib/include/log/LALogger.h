@@ -38,15 +38,15 @@ namespace Log {
         * \param[in] begin time from which we want to compute duration.
         * \return the duration from begin to now in seconds.
         */
-        double getDurationFrom(
-                std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> &begin);
+        double getDurationFrom(const
+                               std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> &begin) const;
 
         /**
         * \brief gets the current time value, for example to set checkpoint.
         * \return the current time value.
         */
         std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>
-        getTime();
+        getTime() const;
 
     public:
         /**
@@ -65,9 +65,9 @@ namespace Log {
         * checkpoint as now.
         * \param[in] out the output stream we want to log things to.
         */
-        LALogger(std::ostream &out) : Logger(out),
-                                      start(std::make_shared<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>>(
-                                              getTime())) {
+        explicit LALogger(std::ostream &out) : Logger(out),
+                                               start(std::make_shared<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>>(
+                                                       getTime())) {
             chronoFromNow();
         };
 

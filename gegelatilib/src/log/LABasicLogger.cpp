@@ -30,7 +30,7 @@ void Log::LABasicLogger::logAfterEvaluate(
                                     std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> pair) -> double {
                                      return acc + pair.first->getResult();
                                  });
-    avg /= results.size();
+    avg /= (double)results.size();
     *this << std::setw(colWidth) << min << std::setw(colWidth) << avg << std::setw(colWidth) << max
           << std::setw(colWidth)
           << getDurationFrom(*checkpoint);

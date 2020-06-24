@@ -9,7 +9,7 @@ namespace Log {
 * Logger class enabling to log elements in a given output stream.
 */
     class Logger {
-    protected:
+    private:
         /**
         * output stream where all what is logged is put.
         */
@@ -25,7 +25,7 @@ namespace Log {
         * \brief constructor initializing a specific output.
         * \param[in] out the output stream we want to log things to as ostream.
         */
-        Logger(std::ostream &out) : out(&out) {};
+        explicit Logger(std::ostream &out) : out(&out) {};
 
         /**
         * \brief << operator to manipulate stream and enter stream-specific

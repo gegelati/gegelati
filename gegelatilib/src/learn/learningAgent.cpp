@@ -71,8 +71,7 @@ void Learn::LearningAgent::init(uint64_t seed) {
 }
 
 void Learn::LearningAgent::addLogger(Log::LALogger &logger) {
-    std::shared_ptr<Log::LALogger> my_ptr(&logger);
-    loggers.push_back(my_ptr);
+    loggers.push_back(std::shared_ptr<Log::LALogger> (&logger));
 }
 
 bool Learn::LearningAgent::isRootEvalSkipped(const TPG::TPGVertex &root,

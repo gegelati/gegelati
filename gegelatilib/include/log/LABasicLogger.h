@@ -13,7 +13,7 @@ namespace Log {
 * Everything is logged like a tab with regularly spaces columns.
 */
     class LABasicLogger : public LALogger {
-    protected:
+    private:
         /**
         * width of columns when logging values.
         */
@@ -31,7 +31,7 @@ namespace Log {
         * \brief same constructor as LaLogger.
         * \param[in] out the output stream we want to log things to.
         */
-        LABasicLogger(std::ostream &out) : LALogger(out) {
+        explicit LABasicLogger(std::ostream &out) : LALogger(out) {
             logHeader();
         };
 
