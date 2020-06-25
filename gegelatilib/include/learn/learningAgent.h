@@ -38,10 +38,10 @@
 #define LEARNING_AGENT_H
 
 #include <map>
-#include <log/LALogger.h>
 
 #include "instructions/set.h"
 #include "environment.h"
+#include "log/LALogger.h"
 #include "archive.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgExecutionEngine.h"
@@ -99,13 +99,13 @@ namespace Learn {
         uint64_t maxNbThreads = 1;
 
         /**
-        * \brief Loggers that will all be called some times.
+        * \brief Set of LALogger called throughout the training process.
         *
-        * When we will call loggers, every logger of the vector will
-        * be called. Having several ones allow to log different things
-        * on different outputs.
+        * Each LALogger of this set will be invoked at pre-defined steps of the
+        * training process. Dedicated method in the LALogger
+        * are used for each step.
         */
-        std::vector<std::shared_ptr<Log::LALogger>> loggers;
+        std::vector<std::reference_wrapper<Log::LALogger>> loggers;
 
 public:
 		/**
@@ -160,14 +160,14 @@ public:
 		void init(uint64_t seed = 0);
 
 		/**
-		 * \brief Adds a logger to the loggers vector.
+		 * \brief Adds a LALogger to the loggers vector.
 		 *
 		 * Adds a logger to the loggers vector, so that it will be called in
-		 * addition of the others at some moments. This enables to have
-		 * several loggers that log different things on different outputs
+		 * addition of the others at some determined moments. This enables to
+		 * have several loggers that log different things on different outputs
 		 * simultaneously.
 		 *
-		 * @param[in] logger the logger we want to add to the vector.
+		 * @param[in] logger The logger that will be added to the vector.
 		 */
 		void addLogger(Log::LALogger& logger);
 

@@ -1,37 +1,35 @@
-#ifndef GEGELATI_LOGGER_H
-#define GEGELATI_LOGGER_H
+#ifndef LOGGER_H
+#define LOGGER_H
 
 #include <iostream>
 
 namespace Log {
 
 /**
-* Logger class enabling to log elements in a given output stream.
+* Basic LALogger for logging generic training information.
 */
     class Logger {
     private:
         /**
-        * output stream where all what is logged is put.
+        * Output stream where all what is logged is put.
         */
         std::ostream *out;
 
     public:
-        /**
-        * \brief basic constructor logging on cout.
-        */
-        Logger() : out(&std::cout) {};
 
         /**
-        * \brief constructor initializing a specific output.
-        * \param[in] out the output stream we want to log things to as ostream.
+        * \brief Constructor initializing a specific output. Default is cout.
+        *
+        * \param[in] out The output stream the logger will send elements to.
         */
-        explicit Logger(std::ostream &out) : out(&out) {};
+        explicit Logger(std::ostream &out=std::cout) : out(&out) {};
 
         /**
         * \brief << operator to manipulate stream and enter stream-specific
         * elements (like std::endl).
-        * \param[in] manip the element we want to add.
-        * \return the samme logger to be able to stream several things
+        *
+        * \param[in] manip The element that will be added.
+        * \return The samme logger to be able to stream several things
         * (e.g. logger<<elA<<elB).
         */
         Logger operator<<(std::ostream &(*manip)(std::ostream &));
@@ -39,9 +37,10 @@ namespace Log {
         /**
         * \brief << operator allowing to log elements that ostream actually
         * accepts (char, int...).
-        * \tparam T the type of element we want to log.
-        * \param[in] val the element we want to log.
-        * \return the same logger to be able to stream several things
+        *
+        * \tparam T The type of element that will be logged.
+        * \param[in] val The element that will be logged.
+        * \return The same logger to be able to stream several things
         * (e.g. logger<<elA<<elB).
         */
         template<typename T>

@@ -71,7 +71,7 @@ void Learn::LearningAgent::init(uint64_t seed) {
 }
 
 void Learn::LearningAgent::addLogger(Log::LALogger &logger) {
-    loggers.push_back(std::shared_ptr<Log::LALogger> (&logger));
+    loggers.push_back(std::reference_wrapper<Log::LALogger> (logger));
 }
 
 bool Learn::LearningAgent::isRootEvalSkipped(const TPG::TPGVertex &root,
@@ -163,19 +163,19 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber) {
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(this->tpg, this->archive, this->params.mutation, this->rng, maxNbThreads);
     for (auto logger : loggers) {
-        logger->logAfterPopulateTPG(generationNumber,tpg);
+        logger.get().logAfterPopulateTPG(generationNumber,tpg);
     }
 
     // Evaluate
     auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
     for (auto logger : loggers) {
-        logger->logAfterEvaluate(results);
+        logger.get().logAfterEvaluate(results);
     }
 
     // Remove worst performing roots
     decimateWorstRoots(results);
     for (auto logger : loggers) {
-        logger->logAfterDecimate(tpg);
+        logger.get().logAfterDecimate(tpg);
     }
 
     // Update the best (code duplicate in ParallelLearningAgent)

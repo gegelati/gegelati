@@ -1,4 +1,4 @@
-#include <log/LALogger.h>
+#include "log/LALogger.h"
 
 double Log::LALogger::getDurationFrom(const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>& time) const {
     return ((std::chrono::duration<double>)(getTime() - time)).count();
