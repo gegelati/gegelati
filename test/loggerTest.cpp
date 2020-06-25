@@ -2,7 +2,6 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,63 +33,39 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-/**
-* \file gegelati.h
-* \brief Helper file gathering all headers from the GEGELATI lib to ease their
-* inclusion in apps.
-*/
-#ifndef GEGELATI_H
-#define GEGELATI_H
+#include <gtest/gtest.h>
+#include <fstream>
 
-#include <data/untypedSharedPtr.h>
-#include <data/hash.h>
-#include <data/dataHandler.h>  
-#include <data/primitiveTypeArray.h>
+#include "log/Logger.h"
 
-#include <file/tpgGraphDotExporter.h>
-#include <file/tpgGraphDotImporter.h>
-#include <file/parametersParser.h>
+TEST(loggerTest, Constructor) {
+    ASSERT_NO_THROW(Log::Logger l);
+    ASSERT_NO_THROW(Log::Logger l(std::cerr));
+}
 
-#include <instructions/addPrimitiveType.h>  
-#include <instructions/instruction.h>
-#include <instructions/lambdaInstruction.h>
-#include <instructions/multByConstParam.h>
-#include <instructions/set.h>
+TEST(loggerTest, log) {
+    Log::Logger l;
+    ASSERT_NO_THROW(l<<"test1"<<"test2"<<std::endl);
+    std::stringstream strStr;
 
-#include <learn/evaluationResult.h>
-#include <learn/learningAgent.h>
-#include <learn/parallelLearningAgent.h>
-#include <learn/learningEnvironment.h>
-#include <learn/learningParameters.h>
+    Log::Logger l2(strStr);
+    ASSERT_NO_THROW(l2<<"test3"<<"test4"<<std::endl);
+    ASSERT_EQ("test3test4\n",strStr.str());
 
-#include <learn/classificationEvaluationResult.h>
-#include <learn/classificationLearningEnvironment.h>
-#include <learn/classificationLearningAgent.h>
+    l2<<std::endl;
+    ASSERT_EQ("test3test4\n\n",strStr.str());
+}
 
-#include <log/Logger.h>
-#include <log/LALogger.h>
-#include <log/LABasicLogger.h>
+TEST(loggerTest, logWithFile) {
+    std::ofstream o("tempFileForTest", std::ofstream::out);
+    auto l2 = Log::Logger(o);
+    l2<<"randomDataForTest0";
+    o.close();
 
-#include <mutator/lineMutator.h>
-#include <mutator/mutationParameters.h>
-#include <mutator/programMutator.h>
-#include <mutator/rng.h>
-#include <mutator/tpgMutator.h>
+    std::ifstream i("tempFileForTest", std::ofstream::in);
+    std::string s;
+    i>>s;
+    ASSERT_EQ("randomDataForTest0",s);
 
-#include <program/line.h>  
-#include <program/program.h>  
-#include <program/programExecutionEngine.h>
-
-#include <tpg/tpgAction.h>
-#include <tpg/tpgEdge.h>
-#include <tpg/tpgExecutionEngine.h>
-#include <tpg/tpgGraph.h>
-#include <tpg/tpgTeam.h>
-#include <tpg/tpgVertex.h>
-#include <tpg/policyStats.h>
-
-#include <archive.h>
-#include <environment.h>
-#include <parameter.h>
-
-#endif
+    remove("tempFileForTest");
+}

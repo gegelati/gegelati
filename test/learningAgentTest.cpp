@@ -36,6 +36,9 @@
 
 #include <gtest/gtest.h>
 #include <numeric>
+#include <fstream>
+
+#include "log/LABasicLogger.h"
 
 #include "tpg/tpgGraph.h"
 
@@ -98,6 +101,15 @@ TEST_F(LearningAgentTest, Init) {
 	Learn::LearningAgent la(le, set, params);
 
 	ASSERT_NO_THROW(la.init()) << "Initialization of the LearningAgent should not fail.";
+}
+
+TEST_F(LearningAgentTest, addLogger) {
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    Learn::LearningAgent la(le, set, params);
+
+    auto l = new Log::LABasicLogger(std::cout);
+    ASSERT_NO_THROW(la.addLogger(*l)) << "Adding a logger should not fail.";
 }
 
 TEST_F(LearningAgentTest, IsRootEvalSkipped) {
@@ -271,6 +283,12 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 	Learn::LearningAgent la(le, set, params);
 
 	la.init();
+
+	// we add a logger to la to check it logs things
+    std::ofstream o("tempFileForTest", std::ofstream::out);
+    auto l = new Log::LABasicLogger(o);
+    la.addLogger(*l);
+
 	// Do the populate call to keep know the number of initial vertex
 	Archive a(0);
 	Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation, la.getRNG());
@@ -286,6 +304,15 @@ TEST_F(LearningAgentTest, TrainOnegeneration) {
 
 	// Check that bestRoot has been set
 	ASSERT_NE(la.getBestRoot().first, nullptr);
+
+	o.close();
+    std::ifstream i("tempFileForTest", std::ofstream::in);
+    std::string s;
+    i>>s;
+    ASSERT_TRUE(s.size()>0)<<"Logger should have logged elements after a trainOneGeneration iteration.";
+    i.close();
+    // removing the temporary file
+    remove("tempFileForTest");
 }
 
 TEST_F(LearningAgentTest, Train) {

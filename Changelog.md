@@ -5,8 +5,11 @@ _aaaa.mm.dd_
 
 ### New features
 * Parameters (learningParameters and mutationParameters) can now be set with a JSON file using parametersParser.
+* A generic Logger class was added to ease the creation of log files within gegelati.
+* A specific logging mechanism is available for LearningAgent, using a child class of the LALogger class. A logger, LABasicLogger with basic learning information is provided.
 
 ### Changes
+* maxNbThreads is now a variable of learningAgent allowing to have a more generic trainOneGeneration method
 
 ### Bug fix
 

@@ -41,6 +41,7 @@
 
 #include "instructions/set.h"
 #include "environment.h"
+#include "log/LALogger.h"
 #include "archive.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgExecutionEngine.h"
@@ -94,7 +95,19 @@ namespace Learn {
 		/// Random Number Generator for this Learning Agent
 		Mutator::RNG rng;
 
-	public:
+        /// Control the maximum number of threads when running in parallel.
+        uint64_t maxNbThreads = 1;
+
+        /**
+        * \brief Set of LALogger called throughout the training process.
+        *
+        * Each LALogger of this set will be invoked at pre-defined steps of the
+        * training process. Dedicated method in the LALogger
+        * are used for each step.
+        */
+        std::vector<std::reference_wrapper<Log::LALogger>> loggers;
+
+public:
 		/**
 		* \brief Constructor for LearningAgent.
 		*
@@ -145,6 +158,18 @@ namespace Learn {
 		* \param[in] seed the seed given to the TPGMutator.
 		*/
 		void init(uint64_t seed = 0);
+
+		/**
+		 * \brief Adds a LALogger to the loggers vector.
+		 *
+		 * Adds a logger to the loggers vector, so that it will be called in
+		 * addition of the others at some determined moments. This enables to
+		 * have several loggers that log different things on different outputs
+		 * simultaneously.
+		 *
+		 * @param[in] logger The logger that will be added to the vector.
+		 */
+		void addLogger(Log::LALogger& logger);
 
 		/**
 		* \brief Evaluates policy starting from the given root.
