@@ -121,14 +121,22 @@ TEST(InstructionsTest, Execute) {
 
 	vect.pop_back();
 	vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
+#ifndef NDEBUG
 	ASSERT_EQ(i->execute({}, vect), 0.0) << "Execute method of AddPrimitiveType<double> returns an incorrect value with invalid operands.";
+#else 
+	ASSERT_THROW(i->execute({}, vect), std::runtime_error) << "In NDEBUG mode, execute method of AddPrimitiveType<double> should throw an exception with invalid operands.";
+#endif
 
 	delete i;
 	i = new Instructions::MultByConstParam<double, int16_t>();
 	vect.pop_back();
 	Parameter p = (int16_t)2;
 	ASSERT_EQ(i->execute({ p }, vect), 5.2) << "Execute method of MultByConstParam<double,int> returns an incorrect value with valid operands.";
+#ifndef NDEBUG
 	ASSERT_EQ(i->execute({ }, vect), 0.0) << "Execute method of MultByConstParam<double,int> returns an incorrect value with invalid params.";
+#else
+	ASSERT_THROW(i->execute({ }, vect), std::out_of_range) << "In NDEBUG mode, executing method MultByConstParam<double, int> should throw an exception with invalid params.";
+#endif
 	delete i;
 }
 

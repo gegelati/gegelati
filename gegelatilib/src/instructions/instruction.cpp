@@ -78,10 +78,14 @@ double Instruction::execute(
 	const std::vector<std::reference_wrapper<const Parameter>>& params,
 	const std::vector<Data::UntypedSharedPtr>& arguments) const
 {
+#ifndef NDEBUG
 	if (!this->checkParameters(params) || !this->checkOperandTypes(arguments)) {
 		return 0.0;
 	}
 	else {
 		return 1.0;
 	}
+#else
+	return 1.0;
+#endif
 }

@@ -72,9 +72,11 @@ namespace Instructions {
 		const std::vector<std::reference_wrapper<const Parameter>>& params,
 		const std::vector<Data::UntypedSharedPtr>& args) const {
 
+#ifndef NDEBUG
 		if (Instruction::execute(params, args) != 1.0) {
 			return 0.0;
 		}
+#endif
 
 		return *(args.at(0).getSharedPointer<const T>()) + (double)*(args.at(1).getSharedPointer<const T>());
 	}

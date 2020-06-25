@@ -46,11 +46,11 @@
 #include "dataHandler.h"
 
 #ifdef _MSC_VER
-/// Macro for getting type name in human readable format.
+ /// Macro for getting type name in human readable format.
 #define DEMANGLE_TYPEID_NAME(name) name
 #elif __GNUC__
 #include <cxxabi.h>
-/// Macro for getting type name in human readable format.
+ /// Macro for getting type name in human readable format.
 #define DEMANGLE_TYPEID_NAME(name) abi::__cxa_demangle(name, nullptr, nullptr, nullptr)
 #else
 #error Unsupported compiler (yet): Check need for name demangling of typeid.name().
@@ -233,8 +233,10 @@ namespace Data {
 
 	template<class T> UntypedSharedPtr PrimitiveTypeArray<T>::getDataAt(const std::type_info& type, const size_t address) const
 	{
+#ifndef NDEBUG
 		// Throw exception in case of invalid arguments.
 		checkAddressAndType(type, address);
+#endif 
 
 		if (type == typeid(T)) {
 			UntypedSharedPtr result(&(this->data[address]), UntypedSharedPtr::emptyDestructor<const T>());

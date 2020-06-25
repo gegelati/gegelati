@@ -111,8 +111,17 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtNativeType) {
 		ASSERT_EQ((float)a, 0.0f) << "Data at valid address and type can not be accessed.";
 	}
 
+#ifndef NDEBUG
 	ASSERT_THROW(d->getDataAt(typeid(float), size), std::out_of_range) << "Address exceeding the addressSpace should cause an exception.";
+#else
+	// No alternative test to put here.. out of range access to memory _may_ happen without being detected.
+#endif
+
+#ifndef NDEBUG
 	ASSERT_THROW(d->getDataAt(typeid(double), 0), std::invalid_argument) << "Requesting a non-handled type, even at a valid location, should cause an exception.";
+#else
+	ASSERT_THROW(d->getDataAt(typeid(double), 0).getSharedPointer<const double>(), std::runtime_error) << "In NDEBUG mode, a pointer with invalid type will be returned when requesting a non-handled type, even at a valid location.";
+#endif
 
 	delete d;
 }
@@ -137,8 +146,18 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtArray) {
 		}
 	}
 
+#ifndef NDEBUG
 	ASSERT_THROW(d->getDataAt(typeid(int[sizeArray]), size - 1), std::out_of_range) << "Address exceeding the addressSpace should cause an exception.";
-	ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0), std::invalid_argument) << "Requesting a non-handled type, even at a valid location, should cause /an /exception.";
+#else 
+	// No alternative test to put here.. out of range access to memory _may_ happen without being detected.
+#endif
+
+#ifndef NDEBUG
+	ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0), std::invalid_argument) << "Requesting a non-handled type, even at a valid location, should cause an exception.";
+#else 
+	ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0).getSharedPointer<const long[sizeArray]>(), std::runtime_error) << "In NDEBUG mode, a pointer with invalid type will be returned when requesting a non-handled type, even at a valid location.";
+#endif 
+
 
 	delete d;
 }
