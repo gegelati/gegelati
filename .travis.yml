@@ -129,6 +129,9 @@ jobs:
           script:
             - export CC=gcc-7
             - export CXX=g++-7
+            - echo "$TRAVIS_PULL_REQUEST";
+            - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "patate"; else echo "carotte"; fi
+            - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./scripts/fix_code_format.sh; fi
             - cd bin
             - cmake .. -DCMAKE_BUILD_TYPE=Debug
             - cd ..
