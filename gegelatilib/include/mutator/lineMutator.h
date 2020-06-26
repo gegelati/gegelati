@@ -39,6 +39,7 @@
 
 #include <typeinfo>
 
+#include "mutator/rng.h"
 #include "program/line.h"
 
 namespace Mutator {

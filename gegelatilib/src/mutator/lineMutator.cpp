@@ -38,7 +38,6 @@
 #include <set>
 
 #include "environment.h"
-#include "mutator/rng.h"
 #include "mutator/lineMutator.h"
 
 /**
