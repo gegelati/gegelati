@@ -47,6 +47,9 @@ case "${OPTARG}" in
 esac
 done
 
+if [ "$CLANG_FORMAT" = "" ]; then CLANG_FORMAT=clang-format; fi
+$CLANG_FORMAT -version
+
 #Check for modification in versionned files
 git update-index -q --refresh
 git diff-index --quiet HEAD -- || printf "Some versionned files have untracked modification.\nCommit, stash or reset before launching this script.\nScript exiting.";
@@ -59,7 +62,7 @@ function format_files() {
 	# Scan files one by one
 	for SRC_FILE in $SRC_FILES; do
 		echo "Format $SRC_FILE."
-		clang-format -i --style=file $SRC_FILE
+		$CLANG_FORMAT -i --style=file $SRC_FILE
 	done
 }
 
