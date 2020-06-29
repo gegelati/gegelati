@@ -6,6 +6,9 @@ stages:
     - Analyze
 
 jobs:
+    allow_failures:
+        - name: Code Style
+          if: type != pull_request
     include:
         - stage: Build
           os: windows
@@ -110,6 +113,7 @@ jobs:
         - os: linux
           dist: xenial
           stage: Analyze
+          name: Sonar
           compiler: gcc-7
           addons:
             apt:
@@ -129,9 +133,6 @@ jobs:
           script:
             - export CC=gcc-7
             - export CXX=g++-7
-            - echo "$TRAVIS_PULL_REQUEST";
-            - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "patate"; else echo "carotte"; fi
-            - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./scripts/fix_code_format.sh; fi
             - cd bin
             - cmake .. -DCMAKE_BUILD_TYPE=Debug
             - cd ..
@@ -145,3 +146,17 @@ jobs:
           cache:
             directories:
               - '$HOME/.sonar/cache'
+              
+        - os: linux
+          dist: focal
+          stage: Analyze
+          name: Code Style          
+          addons:
+            apt:
+                packages:
+                    - clang-format-10
+          env:
+            - CLANG_FORMAT=clang-format-10
+          script:
+            - clang-format --version
+            - bash ./scripts/fix_code_format.sh
