@@ -161,4 +161,4 @@ jobs:
             - sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-10 100          
           script:
             - $CLANG_FORMAT --version
-            - bash ./scripts/fix_code_format.sh
+            - ./scripts/fix_code_format.sh
