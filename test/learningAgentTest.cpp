@@ -357,6 +357,9 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     params.ratioDeletedRoots =
         0.95; // high number to force the apparition of root action.
 
+    // we will validate in order to cover validation log
+    params.doValidation = true;
+
     Learn::LearningAgent la(le, set, params);
 
     la.init();

@@ -8,6 +8,7 @@
   "nbRegisters": 3,
   "nbThreads": 2,
   "nbGenerations": 200,
+  "doValidation": true,
   "mutation": {
     "tpg": {
       "nbActions": 5,

@@ -76,6 +76,9 @@ void Learn::LearningAgent::init(uint64_t seed)
 
 void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 {
+    logger.doValidation = params.doValidation;
+    // logs for example the headers of the columns the logger will print
+    logger.logHeader();
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
 }
 
@@ -205,6 +208,19 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Update the best (code duplicate in ParallelLearningAgent)
     this->updateEvaluationRecords(results);
+
+    // Does a validation or not according to the parameter doValidation
+    if (params.doValidation) {
+        auto result =
+            evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
+        for (auto logger : loggers) {
+            logger.get().logAfterValidate(results);
+        }
+    }
+
+    for (auto logger : loggers) {
+        logger.get().logEndOfTraining();
+    }
 }
 
 void Learn::LearningAgent::decimateWorstRoots(

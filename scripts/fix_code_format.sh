@@ -47,13 +47,9 @@ case "${OPTARG}" in
 esac
 done
 
-if [ "$CLANG_FORMAT" = "" ]; then CLANG_FORMAT=clang-format; fi
+if [ "$CLANG_FORMAT" = "" ]; then CLANG_FORMAT=clang-format-10; fi
 $CLANG_FORMAT -version
 
-#Check for modification in versionned files
-git update-index -q --refresh
-git diff-index --quiet HEAD -- || printf "Some versionned files have untracked modification.\nCommit, stash or reset before launching this script.\nScript exiting.";
-git diff-index --quiet HEAD -- || exit;
 
 # Get all source files recursively
 SRC_FILES=$(find ${SRC_FOLDERS} -regex ${EXTENSION_REGEX})

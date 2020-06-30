@@ -11,6 +11,7 @@ _aaaa.mm.dd_
 * Automate code formatting with clang-format-10.
     * A new script, `fix_code_format.sh`, can be used to check and format all C++ files of the `gegelatilib` and `test` folders. Use the `--doCommit` option to commit the reformatting that was done.
 	* Update of Travis configuration to fail when files are not properly formatted when building a Pull Request. Other builds (i.e. non-PR) allow the failure of this job.
+* An automated validation is now possible when the parameter `doValidation` is set to true. In this case, the basicLALogger hides evaluation statistics, and displays validation ones instead.
 
 ### Changes
 * maxNbThreads is now a variable of learningAgent allowing to have a more generic trainOneGeneration method

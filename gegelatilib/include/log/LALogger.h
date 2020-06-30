@@ -38,6 +38,18 @@ namespace Log {
             checkpoint;
 
         /**
+         * Keeps the duration of the evaluation to be able to log it
+         * some time after it is computed.
+         */
+        double evalTime = 0;
+
+        /**
+         * Keeps the duration of the validation to be able to log it
+         * some time after it is computed.
+         */
+        double validTime = 0;
+
+        /**
          * \brief Computes the duration from a given time to now.
          *
          * \param[in] begin Time from which the durations will be computed
@@ -59,6 +71,11 @@ namespace Log {
 
       public:
         /**
+         * Boolean telling the logger if the training will make a validation
+         */
+        bool doValidation = false;
+
+        /**
          * \brief Constructor defining a given output and setting start and
          * checkpoint as now. Default output is cout.
          *
@@ -79,6 +96,11 @@ namespace Log {
         void chronoFromNow();
 
         /**
+         * \brief Logs the header (e.g. column names) of this logger.
+         */
+        virtual void logHeader() = 0;
+
+        /**
          * \brief Method called by the Learning Agent right after
          * PopulateTPG is done.
          *
@@ -92,7 +114,7 @@ namespace Log {
          * \brief Method called by the Learning Agent right after the evaluation
          * is done.
          *
-         * \param[in] results Scores of the evaluation.
+         * \param[in] results scores of the evaluation.
          */
 
         virtual void logAfterEvaluate(
@@ -106,6 +128,21 @@ namespace Log {
          * \param[in] tpg The current tpg of the learning agent.
          */
         virtual void logAfterDecimate(TPG::TPGGraph& tpg) = 0;
+
+        /**
+         * \brief Method called by the Learning Agent right after the validation
+         * is done.
+         *
+         * \param[in] results scores of the validation.
+         */
+        virtual void logAfterValidate(
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>& results) = 0;
+
+        /**
+         * \brief Method called by the Learning Agent when the training is done
+         */
+        virtual void logEndOfTraining() = 0;
     };
 } // namespace Log
 
