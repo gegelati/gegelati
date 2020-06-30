@@ -72,7 +72,8 @@ TEST(LearningParametersTest, setParameterFromString)
     Learn::LearningParameters params;
     ASSERT_EQ(params.nbRegisters, 8);
     std::string key = "nbRegisters";
-    File::ParametersParser::setParameterFromString(params, key, 5);
+    Json::Value v(5);
+    File::ParametersParser::setParameterFromString(params, key, v);
     ASSERT_EQ(params.nbRegisters, 5);
 }
 

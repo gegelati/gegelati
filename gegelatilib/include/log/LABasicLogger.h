@@ -73,11 +73,13 @@ namespace Log {
         /**
          * Inherited via LaLogger.
          *
-         * \ brief Does nothing in this logger.
+         * \brief Does nothing in this logger.
          *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(TPG::TPGGraph& tpg) override {};
+        virtual void logAfterDecimate(TPG::TPGGraph& tpg) override {
+            // nothing to log
+        };
 
         /**
         * Inherited via LaLogger.
