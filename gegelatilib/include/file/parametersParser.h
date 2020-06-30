@@ -85,7 +85,7 @@ namespace File {
         * \param[in] value the value we want to set the parameter to.
         */
         void setParameterFromString(Learn::LearningParameters &params,
-                                    std::string &param, double value);
+                                    std::string &param, Json::Value value);
 
         /**
         * \brief Puts the parameters described in the derivative tree root in

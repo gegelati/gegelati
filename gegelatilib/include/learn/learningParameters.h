@@ -79,6 +79,10 @@ namespace Learn {
 		*   - `n > 1`: Set the number of threads explicitly.
 		*/
 		size_t nbThreads = std::thread::hardware_concurrency();
+
+		/// Boolean set to true if the user wants a validation after each
+		/// training, and false otherwise
+		bool doValidation = false;
 	} LearningParameters;
 };
 

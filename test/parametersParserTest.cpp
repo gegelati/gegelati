@@ -83,6 +83,7 @@ TEST(LearningParametersTest, setAllParamsFrom) {
 	ASSERT_EQ(3.0, params.nbRegisters);
 	ASSERT_EQ(2.0, params.nbThreads);
 	ASSERT_EQ(200, params.nbGenerations);
+	ASSERT_EQ(true, params.doValidation);
 	ASSERT_EQ(100, params.mutation.tpg.nbRoots);
 	ASSERT_EQ(5, params.mutation.tpg.nbActions);
 	ASSERT_EQ(3, params.mutation.tpg.maxInitOutgoingEdges);
@@ -105,7 +106,8 @@ TEST(LearningParametersTest, setAllParamsFrom) {
 	File::ParametersParser::setAllParamsFrom(root, params2);
 
 	ASSERT_TRUE(params2.nbThreads > 0) << "A default nbThreads value should be set when no one is specified";
-	ASSERT_EQ(params2.nbRegisters, 8) << "Bad parameter should be ignored";
+    ASSERT_EQ(params2.doValidation, false) << "Default validation should be false";
+    ASSERT_EQ(params2.nbRegisters, 8) << "Bad parameter should be ignored";
 }
 
 TEST(LearningParametersTest, loadParametersFromJson) {

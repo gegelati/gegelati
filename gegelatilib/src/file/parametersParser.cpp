@@ -65,16 +65,16 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root, Learn::Le
 				if (key2 == "tpg") {
 					// we're on a mutation.tpg.xxx parameter
 					for (std::string& key3 : root[key][key2].getMemberNames()) {
-						double value = root[key][key2][key3].asDouble();
-						setParameterFromString(params, key3, value);
+                        Json::Value value = root[key][key2][key3];
+                        setParameterFromString(params, key3, value);
 					}
 				}
 				else {
 					if (key2 == "prog") {
 						// we're on a mutation.prog.xxx parameter
 						for (std::string& key3 : root[key][key2].getMemberNames()) {
-							double value = root[key][key2][key3].asDouble();
-							setParameterFromString(params, key3, value);
+                            Json::Value value = root[key][key2][key3];
+                            setParameterFromString(params, key3, value);
 						}
 					}
 				}
@@ -83,105 +83,109 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root, Learn::Le
 		}
 		if (root[key].size() == 0) {
 			// we have a parameter without subtree (as a leaf)
-			double value = root[key].asDouble();
+			Json::Value value = root[key];
 			setParameterFromString(params, key, value);
 		}
 	}
 }
 
-void File::ParametersParser::setParameterFromString(Learn::LearningParameters& params, std::string& key, double value) {
+void File::ParametersParser::setParameterFromString(Learn::LearningParameters& params, std::string& key, Json::Value value) {
 	if (key == "nbActions") {
-		params.mutation.tpg.nbActions = (size_t)value;
+		params.mutation.tpg.nbActions = (size_t)value.asUInt();
 		return;
 	}
 	if (key == "nbRoots") {
-		params.mutation.tpg.nbRoots = (size_t)value;
+		params.mutation.tpg.nbRoots = (size_t)value.asUInt();
 		return;
 	}
 	if (key == "maxInitOutgoingEdges") {
-		params.mutation.tpg.maxInitOutgoingEdges = (size_t)value;
+		params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
 		return;
 	}
 	if (key == "maxOutgoingEdges") {
-		params.mutation.tpg.maxOutgoingEdges = (size_t)value;
+		params.mutation.tpg.maxOutgoingEdges = (size_t)value.asUInt();
 		return;
 	}
 	if (key == "pEdgeDeletion") {
-		params.mutation.tpg.pEdgeDeletion = value;
+		params.mutation.tpg.pEdgeDeletion = value.asDouble();
 		return;
 	}
 	if (key == "pEdgeAddition") {
-		params.mutation.tpg.pEdgeAddition = value;
+		params.mutation.tpg.pEdgeAddition = value.asDouble();
 		return;
 	}
 	if (key == "pProgramMutation") {
-		params.mutation.tpg.pProgramMutation = value;
+		params.mutation.tpg.pProgramMutation = value.asDouble();
 		return;
 	}
 	if (key == "pEdgeDestinationChange") {
-		params.mutation.tpg.pEdgeDestinationChange = value;
+		params.mutation.tpg.pEdgeDestinationChange = value.asDouble();
 		return;
 	}
 	if (key == "pEdgeDestinationIsAction") {
-		params.mutation.tpg.pEdgeDestinationIsAction = value;
+		params.mutation.tpg.pEdgeDestinationIsAction = value.asDouble();
 		return;
 	}
 	if (key == "maxProgramSize") {
-		params.mutation.prog.maxProgramSize = (size_t)value;
+		params.mutation.prog.maxProgramSize = (size_t)value.asUInt();
 		return;
 	}
 	if (key == "pDelete") {
-		params.mutation.prog.pDelete = value;
+		params.mutation.prog.pDelete = value.asDouble();
 		return;
 	}
 	if (key == "pAdd") {
-		params.mutation.prog.pAdd = value;
+		params.mutation.prog.pAdd = value.asDouble();
 		return;
 	}
 	if (key == "pMutate") {
-		params.mutation.prog.pMutate = value;
+		params.mutation.prog.pMutate = value.asDouble();
 		return;
 	}
 	if (key == "pSwap") {
-		params.mutation.prog.pSwap = value;
+		params.mutation.prog.pSwap = value.asDouble();
 		return;
 	}
 	if (key == "archiveSize") {
-		params.archiveSize = (size_t)value;
+		params.archiveSize = (size_t)value.asUInt();
 		return;
 	}
 	if (key == "archivingProbability") {
-		params.archivingProbability = value;
+		params.archivingProbability = value.asDouble();
 		return;
 	}
 	if (key == "nbIterationsPerPolicyEvaluation") {
-		params.nbIterationsPerPolicyEvaluation = (uint64_t)value;
+		params.nbIterationsPerPolicyEvaluation = value.asUInt64();
 		return;
 	}
 	if (key == "maxNbActionsPerEval") {
-		params.maxNbActionsPerEval = (uint64_t)value;
+		params.maxNbActionsPerEval = value.asUInt64();
 		return;
 	}
 	if (key == "ratioDeletedRoots") {
-		params.ratioDeletedRoots = value;
+		params.ratioDeletedRoots = value.asDouble();
 		return;
 	}
 	if (key == "nbGenerations") {
-		params.nbGenerations = (uint64_t)value;
+		params.nbGenerations = value.asUInt64();
 		return;
 	}
 	if (key == "maxNbEvaluationPerPolicy") {
-		params.maxNbEvaluationPerPolicy = (size_t)value;
+		params.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
 		return;
 	}
 	if (key == "nbRegisters") {
-		params.nbRegisters = (size_t)value;
+		params.nbRegisters = (size_t)value.asUInt();
 		return;
 	}
 	if (key == "nbThreads") {
-		params.nbThreads = (size_t)value;
+		params.nbThreads = (size_t)value.asUInt();
 		return;
 	}
+    if (key == "doValidation") {
+        params.doValidation = value.asBool();
+        return;
+    }
 	// we didn't recognize the symbol
 	std::cerr << "Ignoring unknown parameter " << key << std::endl;
 }
