@@ -86,7 +86,7 @@ namespace File {
          */
         void setParameterFromString(Learn::LearningParameters& params,
                                     const std::string& param,
-                                    Json::Value& value);
+                                    Json::Value const& value);
 
         /**
          * \brief Puts the parameters described in the derivative tree root in

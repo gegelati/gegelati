@@ -62,13 +62,13 @@ void File::ParametersParser::readConfigFile(const char* path, Json::Value& root)
 void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
                                               Learn::LearningParameters& params)
 {
-    for (std::string& key : root.getMemberNames()) {
+    for (std::string const& key : root.getMemberNames()) {
         if (key == "mutation") {
             // we have a subtree of mutation : parameters like mutation.xxx.xxx
             for (std::string const& key2 : root[key].getMemberNames()) {
                 if (key2 == "tpg") {
                     // we're on a mutation.tpg.xxx parameter
-                    for (std::string& key3 : root[key][key2].getMemberNames()) {
+                    for (std::string const& key3 : root[key][key2].getMemberNames()) {
                         Json::Value value = root[key][key2][key3];
                         setParameterFromString(params, key3, value);
                     }
@@ -76,7 +76,7 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
                 else {
                     if (key2 == "prog") {
                         // we're on a mutation.prog.xxx parameter
-                        for (std::string& key3 :
+                        for (std::string const& key3 :
                              root[key][key2].getMemberNames()) {
                             Json::Value value = root[key][key2][key3];
                             setParameterFromString(params, key3, value);
@@ -96,7 +96,7 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
 
 void File::ParametersParser::setParameterFromString(
     Learn::LearningParameters& params, const std::string& param,
-    Json::Value& value)
+    Json::Value const& value)
 {
     if (param == "nbActions") {
         params.mutation.tpg.nbActions = (size_t)value.asUInt();
