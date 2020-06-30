@@ -68,7 +68,8 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
             for (std::string const& key2 : root[key].getMemberNames()) {
                 if (key2 == "tpg") {
                     // we're on a mutation.tpg.xxx parameter
-                    for (std::string const& key3 : root[key][key2].getMemberNames()) {
+                    for (std::string const& key3 :
+                         root[key][key2].getMemberNames()) {
                         Json::Value value = root[key][key2][key3];
                         setParameterFromString(params, key3, value);
                     }
