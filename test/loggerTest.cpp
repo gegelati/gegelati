@@ -33,39 +33,44 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <gtest/gtest.h>
 #include <fstream>
+#include <gtest/gtest.h>
 
 #include "log/Logger.h"
 
-TEST(loggerTest, Constructor) {
+TEST(loggerTest, Constructor)
+{
     ASSERT_NO_THROW(Log::Logger l);
     ASSERT_NO_THROW(Log::Logger l(std::cerr));
 }
 
-TEST(loggerTest, log) {
+TEST(loggerTest, log)
+{
     Log::Logger l;
-    ASSERT_NO_THROW(l<<"test1"<<"test2"<<std::endl);
+    ASSERT_NO_THROW(l << "test1"
+                      << "test2" << std::endl);
     std::stringstream strStr;
 
     Log::Logger l2(strStr);
-    ASSERT_NO_THROW(l2<<"test3"<<"test4"<<std::endl);
-    ASSERT_EQ("test3test4\n",strStr.str());
+    ASSERT_NO_THROW(l2 << "test3"
+                       << "test4" << std::endl);
+    ASSERT_EQ("test3test4\n", strStr.str());
 
-    l2<<std::endl;
-    ASSERT_EQ("test3test4\n\n",strStr.str());
+    l2 << std::endl;
+    ASSERT_EQ("test3test4\n\n", strStr.str());
 }
 
-TEST(loggerTest, logWithFile) {
+TEST(loggerTest, logWithFile)
+{
     std::ofstream o("tempFileForTest", std::ofstream::out);
     auto l2 = Log::Logger(o);
-    l2<<"randomDataForTest0";
+    l2 << "randomDataForTest0";
     o.close();
 
     std::ifstream i("tempFileForTest", std::ofstream::in);
     std::string s;
-    i>>s;
-    ASSERT_EQ("randomDataForTest0",s);
+    i >> s;
+    ASSERT_EQ("randomDataForTest0", s);
 
     remove("tempFileForTest");
 }

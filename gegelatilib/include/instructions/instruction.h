@@ -37,102 +37,118 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
-#include <typeinfo>
-#include <vector> 
 #include <functional>
 #include <memory>
+#include <typeinfo>
+#include <vector>
 
 #include "data/untypedSharedPtr.h"
 
 #include "parameter.h"
 
 namespace Instructions {
-	/**
-	* \brief This abstract class is the base class for any instruction to be used in a Program.
-	*
-	* An Instruction declares a list of operands it needs to be executed, as well
-	* as a set of parameters. This information will be used to fetch the required
-	* operands and parameters from any ProgramLine, and to ensure the
-	* compatibility of the type of the fetched operands with the instruction
-	* before executing it.
-	*/
-	class Instruction {
+    /**
+     * \brief This abstract class is the base class for any instruction to be
+     * used in a Program.
+     *
+     * An Instruction declares a list of operands it needs to be executed, as
+     * well as a set of parameters. This information will be used to fetch the
+     * required operands and parameters from any ProgramLine, and to ensure the
+     * compatibility of the type of the fetched operands with the instruction
+     * before executing it.
+     */
+    class Instruction
+    {
 
-	public:
+      public:
+        /// Default virtual destructor for polyphormism.
+        virtual ~Instruction() = default;
 
-		/// Default virtual destructor for polyphormism.
-		virtual ~Instruction() = default;
+        /**
+         * \brief Get the list of operand types needed by the Instruction.
+         *
+         * \return a const reference on the list of operand type_info of the
+         * Instruction.
+         */
+        const std::vector<std::reference_wrapper<const std::type_info>>&
+        getOperandTypes() const;
 
-		/**
-		* \brief Get the list of operand types needed by the Instruction.
-		*
-		* \return a const reference on the list of operand type_info of the Instruction.
-		*/
-		const std::vector<std::reference_wrapper<const std::type_info>>& getOperandTypes() const;
+        /**
+         * \brief Get the number of operands required to execute the
+         * Instruction.
+         *
+         * \return an unsigned int value corresponding to the number of operands
+         * required by the Instruction.
+         */
+        unsigned int getNbOperands() const;
 
-		/**
-		* \brief Get the number of operands required to execute the Instruction.
-		*
-		* \return an unsigned int value corresponding to the number of operands required by the Instruction.
-		*/
-		unsigned int getNbOperands() const;
+        /**
+         * \brief Get the number of parameters required to execute the
+         * Instruction.
+         *
+         * \return an unsigned int value corresponding to the number of
+         * parameters required by the Instruction.
+         */
+        unsigned int getNbParameters() const;
 
-		/**
-		* \brief Get the number of parameters required to execute the Instruction.
-		*
-		* \return an unsigned int value corresponding to the number of parameters required by the Instruction.
-		*/
-		unsigned int getNbParameters() const;
+        /**
+         * \brief Check if a given vector contains elements whose types
+         * corresponds to the types of the Instruction operands.
+         *
+         * \param[in] arguments a const list of shared pointers to any type of
+         * object. (not doable at compile time)
+         */
+        virtual bool checkOperandTypes(
+            const std::vector<Data::UntypedSharedPtr>& arguments) const;
 
-		/**
-		* \brief Check if a given vector contains elements whose types corresponds to the types of the Instruction operands.
-		*
-		* \param[in] arguments a const list of shared pointers to any type of object. (not doable at compile time)
-		*/
-		virtual bool checkOperandTypes(const std::vector<Data::UntypedSharedPtr>& arguments) const;
+        /**
+         * \brief Check if a given vector contains the right number of
+         * parameters for the Instruction.
+         *
+         * \param[in] params a const list of reference_wrapper to Parameters.
+         */
+        virtual bool checkParameters(
+            const std::vector<std::reference_wrapper<const Parameter>>& params)
+            const;
 
-		/**
-		* \brief Check if a given vector contains the right number of parameters for the Instruction.
-		*
-		* \param[in] params a const list of reference_wrapper to Parameters.
-		*/
-		virtual bool checkParameters(const std::vector<std::reference_wrapper<const Parameter>>& params) const;
+        /**
+         * \brief Execute the Instruction for the given parameters and
+         * arguments.
+         *
+         * Derived class should implement their own behavior for this method. In
+         * cas of invalid argument or parameters, for type or number or value
+         * reason, this method should always return 0.0.
+         *
+         * \param[in] params the vector of reference_wrapper to the Parameter
+         * passed to the Instruction. \param[in] args the vector of
+         * UntypedSharedPtr passed to the Instruction. \return the default
+         * implementation of the Intruction class returns 0.0 if the given
+         * params or arguments are not valid. Otherwise, 1.0 is returned.
+         */
+        virtual double execute(
+            const std::vector<std::reference_wrapper<const Parameter>>& params,
+            const std::vector<Data::UntypedSharedPtr>& args) const = 0;
 
-		/**
-		* \brief Execute the Instruction for the given parameters and arguments.
-		*
-		* Derived class should implement their own behavior for this method. In cas
-		* of invalid argument or parameters, for type or number or value reason, this
-		* method should always return 0.0.
-		*
-		* \param[in] params the vector of reference_wrapper to the Parameter passed to the Instruction.
-		* \param[in] args the vector of UntypedSharedPtr passed to the Instruction.
-		* \return the default implementation of the Intruction class returns 0.0 if the given params or arguments are not valid.
-		*         Otherwise, 1.0 is returned.
-		*/
-		virtual double execute(
-			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<Data::UntypedSharedPtr>& args) const = 0;
+      protected:
+        /**
+         * \brief Protected constructor to force the class abstract nature.
+         *
+         * The definition of this constructor initialize an empty operandType
+         * list and sets the number of required parameters to 0.
+         */
+        Instruction();
 
-	protected:
-		/**
-		* \brief Protected constructor to force the class abstract nature.
-		*
-		* The definition of this constructor initialize an empty operandType list and
-		* sets the number of required parameters to 0.
-		*/
-		Instruction();
+        /**
+         * \brief Number of parameters required when calling the instruction.
+         */
+        unsigned int nbParameters;
 
-		/**
-		* \brief Number of parameters required when calling the instruction.
-		*/
-		unsigned int nbParameters;
+        /**
+         * \brief List of the types of the operands needed to execute the
+         * instruction.
+         */
+        std::vector<std::reference_wrapper<const std::type_info>> operandTypes;
+    };
 
-		/**
-		* \brief List of the types of the operands needed to execute the instruction.
-		*/
-		std::vector<std::reference_wrapper<const std::type_info>> operandTypes;
-	};
-
-}
+} // namespace Instructions
 #endif

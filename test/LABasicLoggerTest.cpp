@@ -32,31 +32,35 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
-#include <gtest/gtest.h>
 #include <chrono>
+#include <gtest/gtest.h>
 #include <thread>
-
 
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
 #include "log/LABasicLogger.h"
 
-class LABasicLoggerTest : public ::testing::Test {
-protected:
+class LABasicLoggerTest : public ::testing::Test
+{
+  protected:
     const size_t size1{24};
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    Environment *e = NULL;
-    TPG::TPGGraph *tpg = NULL;
+    Environment* e = NULL;
+    TPG::TPGGraph* tpg = NULL;
     uint64_t generation = 0;
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> *results =
-            new std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>();
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>* results =
+        new std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>();
 
-
-    void SetUp() override {
-        vect.emplace_back(*(new Data::PrimitiveTypeArray<double>((unsigned int) size1)));
-        vect.emplace_back(*(new Data::PrimitiveTypeArray<float>((unsigned int) size2)));
+    void SetUp() override
+    {
+        vect.emplace_back(
+            *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
+        vect.emplace_back(
+            *(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<float>()));
         set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -68,11 +72,14 @@ protected:
         auto res2 = new Learn::EvaluationResult(10, 2);
         auto v1(new TPG::TPGAction(0));
         auto v2(new TPG::TPGAction(0));
-        results->insert(std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>(res1, v1));
-        results->insert(std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>(res2, v2));
+        results->insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                  const TPG::TPGVertex*>(res1, v1));
+        results->insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                  const TPG::TPGVertex*>(res2, v2));
     }
 
-    void TearDown() override {
+    void TearDown() override
+    {
         delete tpg;
         delete e;
         delete (&(vect.at(0).get()));
@@ -87,8 +94,8 @@ protected:
     }
 };
 
-
-TEST_F(LABasicLoggerTest, ConstructorAndlogHeader) {
+TEST_F(LABasicLoggerTest, ConstructorAndlogHeader)
+{
     ASSERT_NO_THROW(Log::LABasicLogger l);
     ASSERT_NO_THROW(Log::LABasicLogger l(std::cerr));
 
@@ -113,7 +120,8 @@ TEST_F(LABasicLoggerTest, ConstructorAndlogHeader) {
     ASSERT_EQ("Total_time", result[7]);
 }
 
-TEST_F(LABasicLoggerTest, logAfterPopulateTPG) {
+TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
+{
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
 
@@ -129,7 +137,8 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG) {
     ASSERT_EQ("0", result[9]);
 }
 
-TEST_F(LABasicLoggerTest, logAfterEvaluate) {
+TEST_F(LABasicLoggerTest, logAfterEvaluate)
+{
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
 
@@ -144,15 +153,17 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate) {
     ASSERT_DOUBLE_EQ(5.00, std::stod(result[8]));
     ASSERT_DOUBLE_EQ(7.50, std::stod(result[9]));
     ASSERT_DOUBLE_EQ(10.00, std::stod(result[10]));
-    ASSERT_TRUE(std::stod(result[11]) >= 0.0) << "eval duration should be positive";
+    ASSERT_TRUE(std::stod(result[11]) >= 0.0)
+        << "eval duration should be positive";
 }
 
-
-TEST_F(LABasicLoggerTest, logAfterDecimate) {
+TEST_F(LABasicLoggerTest, logAfterDecimate)
+{
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
 
-    // little sleep to delay the total_time value (while the "checkpoint" of the logger will be reset)
+    // little sleep to delay the total_time value (while the "checkpoint" of the
+    // logger will be reset)
     double timeToWaitMili = 10;
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -170,18 +181,22 @@ TEST_F(LABasicLoggerTest, logAfterDecimate) {
     ASSERT_TRUE(totTime >= 0.0) << "total elapsed time should be positive";
 }
 
-TEST_F(LABasicLoggerTest, ChronoFromNow){
-    // to test chrono, we will wait, use chronoFromNow() which resets the "checkpoint" time
-    // and call logAfterDecimate() which shall print the duration from checkpoint and from start
+TEST_F(LABasicLoggerTest, ChronoFromNow)
+{
+    // to test chrono, we will wait, use chronoFromNow() which resets the
+    // "checkpoint" time and call logAfterDecimate() which shall print the
+    // duration from checkpoint and from start
 
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
 
-    // little sleep to delay the total_time value (while the "checkpoint" of the logger will be reset)
+    // little sleep to delay the total_time value (while the "checkpoint" of the
+    // logger will be reset)
     double timeToWaitMili = 10;
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    // resets "checkpoint" so that the first displayed time shall be lower than the second which is the time from start
+    // resets "checkpoint" so that the first displayed time shall be lower than
+    // the second which is the time from start
     l.chronoFromNow();
 
     l.logAfterDecimate(*tpg);
@@ -194,7 +209,8 @@ TEST_F(LABasicLoggerTest, ChronoFromNow){
 
     double decimTime = std::stod(result[8]);
     double totTime = std::stod(result[9]);
-    ASSERT_TRUE(totTime > decimTime) << "Total time should be the largest duration !";
-    ASSERT_TRUE(totTime >= timeToWaitMili / 1000) << "Total time should be larger than the time we waited !";
-
+    ASSERT_TRUE(totTime > decimTime)
+        << "Total time should be the largest duration !";
+    ASSERT_TRUE(totTime >= timeToWaitMili / 1000)
+        << "Total time should be larger than the time we waited !";
 }
