@@ -77,7 +77,7 @@ namespace Log {
          *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(TPG::TPGGraph &tpg) {};
+        virtual void logAfterDecimate(TPG::TPGGraph &tpg) override {};
 
         /**
         * Inherited via LaLogger.
@@ -98,7 +98,7 @@ namespace Log {
         * \brief Logs the eval, valid (if doValidation is true)
         * and total running time.
         */
-        virtual void endOfTraining() override;
+        virtual void logEndOfTraining() override;
     };
 
 

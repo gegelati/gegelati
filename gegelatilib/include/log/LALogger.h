@@ -132,7 +132,7 @@ namespace Log {
         /**
          * \brief Method called by the Learning Agent when the training is done
          */
-        virtual void endOfTraining() = 0;
+        virtual void logEndOfTraining() = 0;
     };
 }
 

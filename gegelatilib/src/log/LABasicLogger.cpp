@@ -26,7 +26,7 @@ void Log::LABasicLogger::logHeader() {
           << "Min" << std::setw(colWidth) << "Avg" << std::setw(colWidth)
           << "Max" << std::setw(colWidth) << "Duration(eval)";
     if (doValidation) {
-        *this << std::setw(colWidth) << "Duration (valid)";
+        *this << std::setw(colWidth) << "Duration(valid)";
     }
     *this << std::setw(colWidth) << "Total_time" << std::endl;
 }
@@ -61,7 +61,7 @@ void Log::LABasicLogger::logAfterValidate(
     logResults(results);
 }
 
-void Log::LABasicLogger::endOfTraining() {
+void Log::LABasicLogger::logEndOfTraining() {
     *this << std::setw(colWidth) << evalTime;
     if(doValidation) {
         *this << std::setw(colWidth) << validTime;

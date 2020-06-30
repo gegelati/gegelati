@@ -200,6 +200,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber) {
     // Update the best (code duplicate in ParallelLearningAgent)
     this->updateEvaluationRecords(results);
 
+    // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
         auto result = evaluateAllRoots(generationNumber,
                                        Learn::LearningMode::VALIDATION);
@@ -209,7 +210,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber) {
     }
 
     for (auto logger : loggers) {
-        logger.get().endOfTraining();
+        logger.get().logEndOfTraining();
     }
 }
 
