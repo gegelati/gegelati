@@ -39,80 +39,99 @@
 #include "../lib/JsonCpp/json.h"
 #include "file/parametersParser.h"
 
-TEST(LearningParametersTest, readConfigFile) {
-	Json::Value root;
+TEST(LearningParametersTest, readConfigFile)
+{
+    Json::Value root;
 
-	// name validity
-	ASSERT_THROW(File::ParametersParser::readConfigFile(TESTS_DAT_PATH "non_existing_file.json", root), Json::Exception)
-		<< "An exception should be raised if file doesn't exist";
-	ASSERT_NO_THROW(File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root))
-		<< "An exception is raised in spite of existing file";
+    // name validity
+    ASSERT_THROW(File::ParametersParser::readConfigFile(
+                     TESTS_DAT_PATH "non_existing_file.json", root),
+                 Json::Exception)
+        << "An exception should be raised if file doesn't exist";
+    ASSERT_NO_THROW(File::ParametersParser::readConfigFile(
+        TESTS_DAT_PATH "params.json", root))
+        << "An exception is raised in spite of existing file";
 
-	// content validity
-	File::ParametersParser::readConfigFile(TESTS_DAT_PATH "paramsNotConform.json", root);
-	ASSERT_EQ(0, root.size()) << "Ill-formed parameters file should result in no root filling";
+    // content validity
+    File::ParametersParser::readConfigFile(
+        TESTS_DAT_PATH "paramsNotConform.json", root);
+    ASSERT_EQ(0, root.size())
+        << "Ill-formed parameters file should result in no root filling";
 
-	File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
-	ASSERT_EQ(10, root.size()) << "Wrong number of elements in parsed json file";
-	ASSERT_EQ(9, root["mutation"]["tpg"].size()) << "Wrong number of elements in parsed json file";
-	ASSERT_EQ(5, root["mutation"]["prog"].size()) << "Wrong number of elements in parsed json file";
+    File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
+    ASSERT_EQ(11, root.size())
+        << "Wrong number of elements in parsed json file";
+    ASSERT_EQ(9, root["mutation"]["tpg"].size())
+        << "Wrong number of elements in parsed json file";
+    ASSERT_EQ(5, root["mutation"]["prog"].size())
+        << "Wrong number of elements in parsed json file";
 }
 
-TEST(LearningParametersTest, setParameterFromString) {
-	Learn::LearningParameters params;
-	ASSERT_EQ(params.nbRegisters, 8);
-	std::string key = "nbRegisters";
-	File::ParametersParser::setParameterFromString(params, key, 5);
-	ASSERT_EQ(params.nbRegisters, 5);
+TEST(LearningParametersTest, setParameterFromString)
+{
+    Learn::LearningParameters params;
+    ASSERT_EQ(params.nbRegisters, 8);
+    std::string key = "nbRegisters";
+    File::ParametersParser::setParameterFromString(params, key, 5);
+    ASSERT_EQ(params.nbRegisters, 5);
 }
 
+TEST(LearningParametersTest, setAllParamsFrom)
+{
+    Learn::LearningParameters params;
+    Json::Value root;
 
-TEST(LearningParametersTest, setAllParamsFrom) {
-	Learn::LearningParameters params;
-	Json::Value root;
+    File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
+    ASSERT_NO_THROW(File::ParametersParser::setAllParamsFrom(root, params));
 
-	File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
-	ASSERT_NO_THROW(File::ParametersParser::setAllParamsFrom(root, params));
+    ASSERT_EQ(50, params.archiveSize);
+    ASSERT_EQ(0.5, params.archivingProbability);
+    ASSERT_EQ(50, params.nbIterationsPerPolicyEvaluation);
+    ASSERT_EQ(5, params.maxNbActionsPerEval);
+    ASSERT_EQ(0.85, params.ratioDeletedRoots);
+    ASSERT_EQ(100, params.maxNbEvaluationPerPolicy);
+    ASSERT_EQ(3.0, params.nbRegisters);
+    ASSERT_EQ(2.0, params.nbThreads);
+    ASSERT_EQ(200, params.nbGenerations);
+    ASSERT_EQ(true, params.doValidation);
+    ASSERT_EQ(100, params.mutation.tpg.nbRoots);
+    ASSERT_EQ(5, params.mutation.tpg.nbActions);
+    ASSERT_EQ(3, params.mutation.tpg.maxInitOutgoingEdges);
+    ASSERT_EQ(60, params.mutation.tpg.maxOutgoingEdges);
+    ASSERT_EQ(0.8, params.mutation.tpg.pEdgeDeletion);
+    ASSERT_EQ(0.8, params.mutation.tpg.pEdgeAddition);
+    ASSERT_EQ(0.8, params.mutation.tpg.pProgramMutation);
+    ASSERT_EQ(0.3, params.mutation.tpg.pEdgeDestinationChange);
+    ASSERT_EQ(0.6, params.mutation.tpg.pEdgeDestinationIsAction);
+    ASSERT_EQ(40, params.mutation.prog.maxProgramSize);
+    ASSERT_EQ(0.7, params.mutation.prog.pDelete);
+    ASSERT_EQ(0.7, params.mutation.prog.pAdd);
+    ASSERT_EQ(1.0, params.mutation.prog.pMutate);
+    ASSERT_EQ(1.0, params.mutation.prog.pSwap);
 
-	ASSERT_EQ(50, params.archiveSize);
-	ASSERT_EQ(0.5, params.archivingProbability);
-	ASSERT_EQ(50, params.nbIterationsPerPolicyEvaluation);
-	ASSERT_EQ(5, params.maxNbActionsPerEval);
-	ASSERT_EQ(0.85, params.ratioDeletedRoots);
-	ASSERT_EQ(100, params.maxNbEvaluationPerPolicy);
-	ASSERT_EQ(3.0, params.nbRegisters);
-	ASSERT_EQ(2.0, params.nbThreads);
-	ASSERT_EQ(200, params.nbGenerations);
-	ASSERT_EQ(true, params.doValidation);
-	ASSERT_EQ(100, params.mutation.tpg.nbRoots);
-	ASSERT_EQ(5, params.mutation.tpg.nbActions);
-	ASSERT_EQ(3, params.mutation.tpg.maxInitOutgoingEdges);
-	ASSERT_EQ(60, params.mutation.tpg.maxOutgoingEdges);
-	ASSERT_EQ(0.8, params.mutation.tpg.pEdgeDeletion);
-	ASSERT_EQ(0.8, params.mutation.tpg.pEdgeAddition);
-	ASSERT_EQ(0.8, params.mutation.tpg.pProgramMutation);
-	ASSERT_EQ(0.3, params.mutation.tpg.pEdgeDestinationChange);
-	ASSERT_EQ(0.6, params.mutation.tpg.pEdgeDestinationIsAction);
-	ASSERT_EQ(40, params.mutation.prog.maxProgramSize);
-	ASSERT_EQ(0.7, params.mutation.prog.pDelete);
-	ASSERT_EQ(0.7, params.mutation.prog.pAdd);
-	ASSERT_EQ(1.0, params.mutation.prog.pMutate);
-	ASSERT_EQ(1.0, params.mutation.prog.pSwap);
+    // check default parameters
+    Learn::LearningParameters params2;
 
-	// check default parameters
-	Learn::LearningParameters params2;
+    File::ParametersParser::readConfigFile(
+        TESTS_DAT_PATH "paramsWithWrongOne.json", root);
+    File::ParametersParser::setAllParamsFrom(root, params2);
+
 
 	File::ParametersParser::readConfigFile(TESTS_DAT_PATH "paramsWithWrongOne.json", root);
 	File::ParametersParser::setAllParamsFrom(root, params2);
 
-	ASSERT_TRUE(params2.nbThreads > 0) << "A default nbThreads value should be set when no one is specified";
+	ASSERT_TRUE(params2.nbThreads > 0)
+	    << "A default nbThreads value should be set when no one is specified";
     ASSERT_EQ(params2.doValidation, false) << "Default validation should be false";
     ASSERT_EQ(params2.nbRegisters, 8) << "Bad parameter should be ignored";
 }
 
-TEST(LearningParametersTest, loadParametersFromJson) {
-	Learn::LearningParameters params;
-	ASSERT_NO_THROW(File::ParametersParser::loadParametersFromJson(TESTS_DAT_PATH "params.json", params));
-	// only testing 1 parameter as readConfigFile was already tested
-	ASSERT_EQ(params.nbRegisters, 3.0) << "There should be 3 registers according to the params file";
+TEST(LearningParametersTest, loadParametersFromJson)
+{
+    Learn::LearningParameters params;
+    ASSERT_NO_THROW(File::ParametersParser::loadParametersFromJson(
+        TESTS_DAT_PATH "params.json", params));
+    // only testing 1 parameter as readConfigFile was already tested
+    ASSERT_EQ(params.nbRegisters, 3.0)
+        << "There should be 3 registers according to the params file";
 }

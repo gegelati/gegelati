@@ -36,54 +36,53 @@
 #ifndef LEARNING_PARAMETERS_H
 #define LEARNING_PARAMETERS_H
 
-#include <thread>
 #include "mutator/mutationParameters.h"
-
-
+#include <thread>
 
 namespace Learn {
-	/**
-	* \brief Structure for simplifying the transmission of LearningParameters
-	* to functions.
-	*/
-	typedef struct LearningParameters {
-		/// MutationParameters for controlling stochastic aspects of the learning 
-		/// process.
-		Mutator::MutationParameters mutation;
-		/// Number of recordings held in the Archive.
-		size_t archiveSize;
-		/// Probability of archiving each Program execution.
-		double archivingProbability;
-		/// Number of evaluation of each policy per generation.
-		uint64_t nbIterationsPerPolicyEvaluation;
-		/// Maximum number of action per evaluation of a policy. 
-		uint64_t maxNbActionsPerEval;
-		/// Percentage of deleted (and regenerated) root TPGVertex a each 
-		/// generation.
-		double ratioDeletedRoots;
-		/// Number of generations of the training.
-		uint64_t nbGenerations;
-		/// Maximum number of times a given policy (i.e. a root TPGVertex) is
-		/// evaluated.
-		size_t maxNbEvaluationPerPolicy;
-		/// Number of registers for the Program execution
-		size_t nbRegisters = 8;
-		/**
-		* \brief Number of threads (ParallelLearningAgent only)
-		*
-		* Integer parameter controlling the number of
-		* threads used for parallel execution. Possible values are:
-		*   - default :  Let the runtime decide using
-		*         std::thread::hardware_concurrency().
-		*   - `0` or `1`: Do not use parallelism.
-		*   - `n > 1`: Set the number of threads explicitly.
-		*/
-		size_t nbThreads = std::thread::hardware_concurrency();
+    /**
+     * \brief Structure for simplifying the transmission of LearningParameters
+     * to functions.
+     */
+    typedef struct LearningParameters
+    {
+        /// MutationParameters for controlling stochastic aspects of the
+        /// learning process.
+        Mutator::MutationParameters mutation;
+        /// Number of recordings held in the Archive.
+        size_t archiveSize;
+        /// Probability of archiving each Program execution.
+        double archivingProbability;
+        /// Number of evaluation of each policy per generation.
+        uint64_t nbIterationsPerPolicyEvaluation;
+        /// Maximum number of action per evaluation of a policy.
+        uint64_t maxNbActionsPerEval;
+        /// Percentage of deleted (and regenerated) root TPGVertex a each
+        /// generation.
+        double ratioDeletedRoots;
+        /// Number of generations of the training.
+        uint64_t nbGenerations;
+        /// Maximum number of times a given policy (i.e. a root TPGVertex) is
+        /// evaluated.
+        size_t maxNbEvaluationPerPolicy;
+        /// Number of registers for the Program execution
+        size_t nbRegisters = 8;
+        /**
+         * \brief Number of threads (ParallelLearningAgent only)
+         *
+         * Integer parameter controlling the number of
+         * threads used for parallel execution. Possible values are:
+         *   - default :  Let the runtime decide using
+         *         std::thread::hardware_concurrency().
+         *   - `0` or `1`: Do not use parallelism.
+         *   - `n > 1`: Set the number of threads explicitly.
+         */
+        size_t nbThreads = std::thread::hardware_concurrency();
 
-		/// Boolean set to true if the user wants a validation after each
-		/// training, and false otherwise
-		bool doValidation = false;
-	} LearningParameters;
-};
+        /// Boolean set to true if the user wants a validation after each
+        /// training, and false otherwise
+        bool doValidation = false;
+    } LearningParameters;
+}; // namespace Learn
 
 #endif

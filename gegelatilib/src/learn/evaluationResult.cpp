@@ -36,38 +36,41 @@
 
 #include "learn/evaluationResult.h"
 
-double Learn::EvaluationResult::getResult() const {
-	return this->result;
+double Learn::EvaluationResult::getResult() const
+{
+    return this->result;
 }
 
 size_t Learn::EvaluationResult::getNbEvaluation() const
 {
-	return this->nbEvaluation;
+    return this->nbEvaluation;
 }
 
-Learn::EvaluationResult& Learn::EvaluationResult::operator+=(const Learn::EvaluationResult& other)
+Learn::EvaluationResult& Learn::EvaluationResult::operator+=(
+    const Learn::EvaluationResult& other)
 {
-	// Type Check (Must be done in all override)
-	// This test will succeed in child class.
-	const std::type_info& thisType = typeid(*this);
-	if (typeid(other) != thisType) {
-		throw std::runtime_error("Type mismatch between EvaluationResults.");
-	}
+    // Type Check (Must be done in all override)
+    // This test will succeed in child class.
+    const std::type_info& thisType = typeid(*this);
+    if (typeid(other) != thisType) {
+        throw std::runtime_error("Type mismatch between EvaluationResults.");
+    }
 
-	// If the added type is Learn::EvaluationResult
-	if (thisType == typeid(Learn::EvaluationResult)) {
-		// Weighted addition of results
-		this->result = this->result * (double)this->nbEvaluation + other.result * (double)other.nbEvaluation;
-		this->result /= (double)this->nbEvaluation + (double)other.nbEvaluation;
+    // If the added type is Learn::EvaluationResult
+    if (thisType == typeid(Learn::EvaluationResult)) {
+        // Weighted addition of results
+        this->result = this->result * (double)this->nbEvaluation +
+                       other.result * (double)other.nbEvaluation;
+        this->result /= (double)this->nbEvaluation + (double)other.nbEvaluation;
 
-		// Addition ot nbEvaluation
-		this->nbEvaluation += other.nbEvaluation;
-	}
+        // Addition ot nbEvaluation
+        this->nbEvaluation += other.nbEvaluation;
+    }
 
-	return *this;
+    return *this;
 }
 
 bool Learn::operator<(const EvaluationResult& a, const EvaluationResult& b)
 {
-	return a.getResult() < b.getResult();
+    return a.getResult() < b.getResult();
 }

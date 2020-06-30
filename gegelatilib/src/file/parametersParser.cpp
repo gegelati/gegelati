@@ -33,31 +33,34 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <json.h>
 
 #include "file/parametersParser.h"
 
-void File::ParametersParser::readConfigFile(const char* path, Json::Value& root) {
-	std::ifstream ifs;
-	ifs.open(path);
+void File::ParametersParser::readConfigFile(const char* path, Json::Value& root)
+{
+    std::ifstream ifs;
+    ifs.open(path);
 
-	if (!ifs.is_open()) {
-		std::cerr << "Error : specified param file doesn't exist : " << path << std::endl;
-		throw Json::Exception("aborting");
-	}
+    if (!ifs.is_open()) {
+        std::cerr << "Error : specified param file doesn't exist : " << path
+                  << std::endl;
+        throw Json::Exception("aborting");
+    }
 
-	Json::CharReaderBuilder builder;
-	builder["collectComments"] = true;
-	JSONCPP_STRING errs;
-	if (!parseFromStream(builder, ifs, &root, &errs)) {
-		std::cout << errs << std::endl;
-		std::cerr << "Ignoring ill-formed config file " << path << std::endl;
-	}
+    Json::CharReaderBuilder builder;
+    builder["collectComments"] = true;
+    JSONCPP_STRING errs;
+    if (!parseFromStream(builder, ifs, &root, &errs)) {
+        std::cout << errs << std::endl;
+        std::cerr << "Ignoring ill-formed config file " << path << std::endl;
+    }
 }
 
-void File::ParametersParser::setAllParamsFrom(const Json::Value& root, Learn::LearningParameters& params) {
+void File::ParametersParser::setAllParamsFrom(const Json::Value& root, Learn::LearningParameters& params)
+{
 	for (std::string& key : root.getMemberNames()) {
 		if (key == "mutation") {
 			// we have a subtree of mutation : parameters like mutation.xxx.xxx
@@ -89,7 +92,8 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root, Learn::Le
 	}
 }
 
-void File::ParametersParser::setParameterFromString(Learn::LearningParameters& params, std::string& key, Json::Value value) {
+void File::ParametersParser::setParameterFromString(Learn::LearningParameters& params, std::string& key, Json::Value value)
+{
 	if (key == "nbActions") {
 		params.mutation.tpg.nbActions = (size_t)value.asUInt();
 		return;
@@ -188,11 +192,14 @@ void File::ParametersParser::setParameterFromString(Learn::LearningParameters& p
     }
 	// we didn't recognize the symbol
 	std::cerr << "Ignoring unknown parameter " << key << std::endl;
+
 }
 
-void File::ParametersParser::loadParametersFromJson(const char* path, Learn::LearningParameters& params) {
-	Json::Value root;
-	readConfigFile(path, root);
+void File::ParametersParser::loadParametersFromJson(
+    const char* path, Learn::LearningParameters& params)
+{
+    Json::Value root;
+    readConfigFile(path, root);
 
-	setAllParamsFrom(root, params);
+    setAllParamsFrom(root, params);
 }

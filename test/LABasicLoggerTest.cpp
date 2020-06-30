@@ -32,33 +32,35 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
-#include <gtest/gtest.h>
 #include <chrono>
+#include <gtest/gtest.h>
 #include <thread>
-
 
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
 #include "log/LABasicLogger.h"
 
-class LABasicLoggerTest : public ::testing::Test {
-protected:
+class LABasicLoggerTest : public ::testing::Test
+{
+  protected:
     const size_t size1{24};
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    Environment *e = NULL;
-    TPG::TPGGraph *tpg = NULL;
+    Environment* e = NULL;
+    TPG::TPGGraph* tpg = NULL;
     uint64_t generation = 1;
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> *results =
-            new std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>();
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>* results =
+        new std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>();
 
-
-    void SetUp() override {
+    void SetUp() override
+    {
         vect.emplace_back(
-                *(new Data::PrimitiveTypeArray<double>((unsigned int) size1)));
+            *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
         vect.emplace_back(
-                *(new Data::PrimitiveTypeArray<float>((unsigned int) size2)));
+            *(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<float>()));
         set.add(*(new Instructions::MultByConstParam<double, float>()));
@@ -70,15 +72,14 @@ protected:
         auto res2 = new Learn::EvaluationResult(10, 2);
         auto v1(new TPG::TPGAction(0));
         auto v2(new TPG::TPGAction(0));
-        results->insert(
-                std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>(
-                        res1, v1));
-        results->insert(
-                std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>(
-                        res2, v2));
+        results->insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                  const TPG::TPGVertex*>(res1, v1));
+        results->insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                  const TPG::TPGVertex*>(res2, v2));
     }
 
-    void TearDown() override {
+    void TearDown() override
+    {
         delete tpg;
         delete e;
         delete (&(vect.at(0).get()));
@@ -93,8 +94,8 @@ protected:
     }
 };
 
-
-TEST_F(LABasicLoggerTest, Constructor) {
+TEST_F(LABasicLoggerTest, Constructor)
+{
     ASSERT_NO_THROW(Log::LABasicLogger l);
     ASSERT_NO_THROW(Log::LABasicLogger l(std::cerr));
 }
@@ -127,8 +128,8 @@ TEST_F(LABasicLoggerTest, logHeader) {
     ASSERT_EQ("Duration(valid)", result[13]);
 }
 
-
-TEST_F(LABasicLoggerTest, logAfterPopulateTPG) {
+TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
+{
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
 
@@ -144,7 +145,8 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG) {
     ASSERT_EQ("0", result[1]);
 }
 
-TEST_F(LABasicLoggerTest, logAfterEvaluate) {
+TEST_F(LABasicLoggerTest, logAfterEvaluate)
+{
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
 
@@ -161,7 +163,8 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate) {
     ASSERT_DOUBLE_EQ(10.00, std::stod(result[2]));
 }
 
-TEST_F(LABasicLoggerTest, logAfterValidate) {
+TEST_F(LABasicLoggerTest, logAfterValidate)
+{
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
 
@@ -185,7 +188,8 @@ TEST_F(LABasicLoggerTest, logAfterDecimate) {
     ASSERT_NO_THROW(l.logAfterDecimate(*tpg));
 }
 
-TEST_F(LABasicLoggerTest, logEndOfTraining) {
+TEST_F(LABasicLoggerTest, logEndOfTraining)
+{
     // To test chrono, we will wait, use chronoFromNow() which resets the
     // "checkpoint" time, then call logAfterEvaluate() which will register
     // evalTime and call logEndOfTraining() which shall log the duration from
@@ -195,11 +199,13 @@ TEST_F(LABasicLoggerTest, logEndOfTraining) {
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
 
-    // little sleep to delay the total_time value (while the "checkpoint" of the logger will be reset)
+    // little sleep to delay the total_time value (while the "checkpoint" of the
+    // logger will be reset)
     double timeToWaitMili = 10;
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    // resets "checkpoint" so that the first displayed time shall be lower than the second which is the time from start
+    // resets "checkpoint" so that the first displayed time shall be lower than
+    // the second which is the time from start
     l.chronoFromNow();
     l.doValidation = true; // to avoid logging eval statistics
     l.logAfterEvaluate(*results);
@@ -215,6 +221,7 @@ TEST_F(LABasicLoggerTest, logEndOfTraining) {
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
+
     double evalTime = std::stod(result[0]);
     double validTime = std::stod(result[1]);
     double totTime = std::stod(result[2]);
@@ -226,5 +233,4 @@ TEST_F(LABasicLoggerTest, logEndOfTraining) {
                                 << "Total time should be larger than the time we waited !";
 
     ASSERT_TRUE(result.size()==5) << "logEndOfTraining with and without valid should have 3+2=5 elements";
-
 }

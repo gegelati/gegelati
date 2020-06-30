@@ -5,18 +5,19 @@
 
 namespace Log {
 
-/**
-* \brief Basic logger that will display some useful information
-*
-* The information logged by this LALogger are generation number, nb of
-* vertices, min, mean, avg score of this generation and to finish some timing.
-* Everything is logged like a tab with regularly spaced columns.
-*/
-    class LABasicLogger : public LALogger {
-    private:
+    /**
+     * \brief Basic logger that will display some useful information
+     *
+     * The information logged by this LALogger are generation number, nb of
+     * vertices, min, mean, avg score of this generation and to finish some
+     * timing. Everything is logged like a tab with regularly spaced columns.
+     */
+    class LABasicLogger : public LALogger
+    {
+      private:
         /**
-        * Width of columns when logging values.
-        */
+         * Width of columns when logging values.
+         */
         int colWidth = 17;
 
         /**
@@ -52,10 +53,8 @@ namespace Log {
          * \param[in] generationNumber The number of the current generation.
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void
-        logAfterPopulateTPG(uint64_t &generationNumber,
+        virtual void logAfterPopulateTPG(uint64_t &generationNumber,
                             TPG::TPGGraph &tpg) override;
-
         /**
          * Inherited via LaLogger.
          *
@@ -68,7 +67,8 @@ namespace Log {
          * \param[in] results scores of the evaluation.
          */
         virtual void logAfterEvaluate(
-                std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results) override;
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>& results) override;
 
         /**
          * Inherited via LaLogger.
@@ -77,7 +77,7 @@ namespace Log {
          *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(TPG::TPGGraph &tpg) override {};
+        virtual void logAfterDecimate(TPG::TPGGraph& tpg) override {};
 
         /**
         * Inherited via LaLogger.
@@ -90,7 +90,7 @@ namespace Log {
         * \param[in] results scores of the validation.
         */
         virtual void logAfterValidate(
-                std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results) override;
+                std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>& results) override;
 
         /**
         * Inherited via LaLogger

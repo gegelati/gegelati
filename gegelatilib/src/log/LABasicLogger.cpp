@@ -1,9 +1,10 @@
-#include <numeric>
 #include <iomanip>
+#include <numeric>
 
 #include "log/LABasicLogger.h"
 
-void Log::LABasicLogger::logResults(std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results){
+void Log::LABasicLogger::logResults(std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results)
+{
     auto iter = results.begin();
     double min = iter->first->getResult();
     std::advance(iter, results.size() - 1);
@@ -18,7 +19,8 @@ void Log::LABasicLogger::logResults(std::multimap<std::shared_ptr<Learn::Evaluat
           << std::setw(colWidth) << max;
 }
 
-void Log::LABasicLogger::logHeader() {
+void Log::LABasicLogger::logHeader()
+{
     // fixing float precision
     *this << std::setprecision(2) << std::fixed << std::left;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
@@ -32,7 +34,8 @@ void Log::LABasicLogger::logHeader() {
 }
 
 void Log::LABasicLogger::logAfterPopulateTPG(uint64_t &generationNumber,
-                                             TPG::TPGGraph &tpg) {
+                                             TPG::TPGGraph &tpg)
+{
     *this << std::setw(colWidth) << generationNumber << std::setw(colWidth)
           << tpg.getNbVertices();
     // resets checkpoint to be able to show evaluation time
@@ -40,7 +43,8 @@ void Log::LABasicLogger::logAfterPopulateTPG(uint64_t &generationNumber,
 }
 
 void Log::LABasicLogger::logAfterEvaluate(
-        std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results) {
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results)
+{
     evalTime = getDurationFrom(*checkpoint);
 
     // we only log results statistics if there is no validation
@@ -53,7 +57,8 @@ void Log::LABasicLogger::logAfterEvaluate(
 }
 
 void Log::LABasicLogger::logAfterValidate(
-        std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results) {
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results)
+{
     validTime = getDurationFrom(*checkpoint);
 
     // being in this method means validation is active, and so we are sure we
@@ -61,7 +66,8 @@ void Log::LABasicLogger::logAfterValidate(
     logResults(results);
 }
 
-void Log::LABasicLogger::logEndOfTraining() {
+void Log::LABasicLogger::logEndOfTraining()
+{
     *this << std::setw(colWidth) << evalTime;
     if(doValidation) {
         *this << std::setw(colWidth) << validTime;
