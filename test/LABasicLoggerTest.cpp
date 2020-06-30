@@ -100,7 +100,8 @@ TEST_F(LABasicLoggerTest, Constructor)
     ASSERT_NO_THROW(Log::LABasicLogger l(std::cerr));
 }
 
-TEST_F(LABasicLoggerTest, logHeader) {
+TEST_F(LABasicLoggerTest, logHeader)
+{
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
 
@@ -181,8 +182,8 @@ TEST_F(LABasicLoggerTest, logAfterValidate)
     ASSERT_DOUBLE_EQ(10.00, std::stod(result[2]));
 }
 
-
-TEST_F(LABasicLoggerTest, logAfterDecimate) {
+TEST_F(LABasicLoggerTest, logAfterDecimate)
+{
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
     ASSERT_NO_THROW(l.logAfterDecimate(*tpg));
@@ -221,16 +222,16 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-
     double evalTime = std::stod(result[0]);
     double validTime = std::stod(result[1]);
     double totTime = std::stod(result[2]);
-    ASSERT_TRUE(evalTime >= 0)<<"Eval duration should be positive";
-    ASSERT_TRUE(validTime >= 0)<<"Valid duration should be positive";
+    ASSERT_TRUE(evalTime >= 0) << "Eval duration should be positive";
+    ASSERT_TRUE(validTime >= 0) << "Valid duration should be positive";
     ASSERT_TRUE(totTime > evalTime)
-                                << "Total time should be the largest duration !";
+        << "Total time should be the largest duration !";
     ASSERT_TRUE(totTime >= timeToWaitMili / 1000)
-                                << "Total time should be larger than the time we waited !";
+        << "Total time should be larger than the time we waited !";
 
-    ASSERT_TRUE(result.size()==5) << "logEndOfTraining with and without valid should have 3+2=5 elements";
+    ASSERT_TRUE(result.size() == 5)
+        << "logEndOfTraining with and without valid should have 3+2=5 elements";
 }

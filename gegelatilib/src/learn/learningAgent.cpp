@@ -74,7 +74,7 @@ void Learn::LearningAgent::init(uint64_t seed)
     this->bestRoot = {nullptr, nullptr};
 }
 
-void Learn::LearningAgent::addLogger(Log::LALogger &logger)
+void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 {
     logger.doValidation = params.doValidation;
     // logs for example the headers of the columns the logger will print
@@ -211,8 +211,8 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
-        auto result = evaluateAllRoots(generationNumber,
-                                       Learn::LearningMode::VALIDATION);
+        auto result =
+            evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
         for (auto logger : loggers) {
             logger.get().logAfterValidate(results);
         }

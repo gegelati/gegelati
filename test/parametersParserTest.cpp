@@ -117,13 +117,14 @@ TEST(LearningParametersTest, setAllParamsFrom)
         TESTS_DAT_PATH "paramsWithWrongOne.json", root);
     File::ParametersParser::setAllParamsFrom(root, params2);
 
+    File::ParametersParser::readConfigFile(
+        TESTS_DAT_PATH "paramsWithWrongOne.json", root);
+    File::ParametersParser::setAllParamsFrom(root, params2);
 
-	File::ParametersParser::readConfigFile(TESTS_DAT_PATH "paramsWithWrongOne.json", root);
-	File::ParametersParser::setAllParamsFrom(root, params2);
-
-	ASSERT_TRUE(params2.nbThreads > 0)
-	    << "A default nbThreads value should be set when no one is specified";
-    ASSERT_EQ(params2.doValidation, false) << "Default validation should be false";
+    ASSERT_TRUE(params2.nbThreads > 0)
+        << "A default nbThreads value should be set when no one is specified";
+    ASSERT_EQ(params2.doValidation, false)
+        << "Default validation should be false";
     ASSERT_EQ(params2.nbRegisters, 8) << "Bad parameter should be ignored";
 }
 

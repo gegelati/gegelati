@@ -59,140 +59,143 @@ void File::ParametersParser::readConfigFile(const char* path, Json::Value& root)
     }
 }
 
-void File::ParametersParser::setAllParamsFrom(const Json::Value& root, Learn::LearningParameters& params)
+void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
+                                              Learn::LearningParameters& params)
 {
-	for (std::string& key : root.getMemberNames()) {
-		if (key == "mutation") {
-			// we have a subtree of mutation : parameters like mutation.xxx.xxx
-			for (std::string const& key2 : root[key].getMemberNames()) {
-				if (key2 == "tpg") {
-					// we're on a mutation.tpg.xxx parameter
-					for (std::string& key3 : root[key][key2].getMemberNames()) {
+    for (std::string& key : root.getMemberNames()) {
+        if (key == "mutation") {
+            // we have a subtree of mutation : parameters like mutation.xxx.xxx
+            for (std::string const& key2 : root[key].getMemberNames()) {
+                if (key2 == "tpg") {
+                    // we're on a mutation.tpg.xxx parameter
+                    for (std::string& key3 : root[key][key2].getMemberNames()) {
                         Json::Value value = root[key][key2][key3];
                         setParameterFromString(params, key3, value);
-					}
-				}
-				else {
-					if (key2 == "prog") {
-						// we're on a mutation.prog.xxx parameter
-						for (std::string& key3 : root[key][key2].getMemberNames()) {
+                    }
+                }
+                else {
+                    if (key2 == "prog") {
+                        // we're on a mutation.prog.xxx parameter
+                        for (std::string& key3 :
+                             root[key][key2].getMemberNames()) {
                             Json::Value value = root[key][key2][key3];
                             setParameterFromString(params, key3, value);
-						}
-					}
-				}
-			}
-			continue;
-		}
-		if (root[key].size() == 0) {
-			// we have a parameter without subtree (as a leaf)
-			Json::Value value = root[key];
-			setParameterFromString(params, key, value);
-		}
-	}
+                        }
+                    }
+                }
+            }
+            continue;
+        }
+        if (root[key].size() == 0) {
+            // we have a parameter without subtree (as a leaf)
+            Json::Value value = root[key];
+            setParameterFromString(params, key, value);
+        }
+    }
 }
 
-void File::ParametersParser::setParameterFromString(Learn::LearningParameters& params, const std::string& param, Json::Value& value)
+void File::ParametersParser::setParameterFromString(
+    Learn::LearningParameters& params, const std::string& param,
+    Json::Value& value)
 {
-	if (param == "nbActions") {
-		params.mutation.tpg.nbActions = (size_t)value.asUInt();
-		return;
-	}
-	if (param == "nbRoots") {
-		params.mutation.tpg.nbRoots = (size_t)value.asUInt();
-		return;
-	}
-	if (param == "maxInitOutgoingEdges") {
-		params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
-		return;
-	}
-	if (param == "maxOutgoingEdges") {
-		params.mutation.tpg.maxOutgoingEdges = (size_t)value.asUInt();
-		return;
-	}
-	if (param == "pEdgeDeletion") {
-		params.mutation.tpg.pEdgeDeletion = value.asDouble();
-		return;
-	}
-	if (param == "pEdgeAddition") {
-		params.mutation.tpg.pEdgeAddition = value.asDouble();
-		return;
-	}
-	if (param == "pProgramMutation") {
-		params.mutation.tpg.pProgramMutation = value.asDouble();
-		return;
-	}
-	if (param == "pEdgeDestinationChange") {
-		params.mutation.tpg.pEdgeDestinationChange = value.asDouble();
-		return;
-	}
-	if (param == "pEdgeDestinationIsAction") {
-		params.mutation.tpg.pEdgeDestinationIsAction = value.asDouble();
-		return;
-	}
-	if (param == "maxProgramSize") {
-		params.mutation.prog.maxProgramSize = (size_t)value.asUInt();
-		return;
-	}
-	if (param == "pDelete") {
-		params.mutation.prog.pDelete = value.asDouble();
-		return;
-	}
-	if (param == "pAdd") {
-		params.mutation.prog.pAdd = value.asDouble();
-		return;
-	}
-	if (param == "pMutate") {
-		params.mutation.prog.pMutate = value.asDouble();
-		return;
-	}
-	if (param == "pSwap") {
-		params.mutation.prog.pSwap = value.asDouble();
-		return;
-	}
-	if (param == "archiveSize") {
-		params.archiveSize = (size_t)value.asUInt();
-		return;
-	}
-	if (param == "archivingProbability") {
-		params.archivingProbability = value.asDouble();
-		return;
-	}
-	if (param == "nbIterationsPerPolicyEvaluation") {
-		params.nbIterationsPerPolicyEvaluation = value.asUInt64();
-		return;
-	}
-	if (param == "maxNbActionsPerEval") {
-		params.maxNbActionsPerEval = value.asUInt64();
-		return;
-	}
-	if (param == "ratioDeletedRoots") {
-		params.ratioDeletedRoots = value.asDouble();
-		return;
-	}
-	if (param == "nbGenerations") {
-		params.nbGenerations = value.asUInt64();
-		return;
-	}
-	if (param == "maxNbEvaluationPerPolicy") {
-		params.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
-		return;
-	}
-	if (param == "nbRegisters") {
-		params.nbRegisters = (size_t)value.asUInt();
-		return;
-	}
-	if (param == "nbThreads") {
-		params.nbThreads = (size_t)value.asUInt();
-		return;
-	}
+    if (param == "nbActions") {
+        params.mutation.tpg.nbActions = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "nbRoots") {
+        params.mutation.tpg.nbRoots = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "maxInitOutgoingEdges") {
+        params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "maxOutgoingEdges") {
+        params.mutation.tpg.maxOutgoingEdges = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "pEdgeDeletion") {
+        params.mutation.tpg.pEdgeDeletion = value.asDouble();
+        return;
+    }
+    if (param == "pEdgeAddition") {
+        params.mutation.tpg.pEdgeAddition = value.asDouble();
+        return;
+    }
+    if (param == "pProgramMutation") {
+        params.mutation.tpg.pProgramMutation = value.asDouble();
+        return;
+    }
+    if (param == "pEdgeDestinationChange") {
+        params.mutation.tpg.pEdgeDestinationChange = value.asDouble();
+        return;
+    }
+    if (param == "pEdgeDestinationIsAction") {
+        params.mutation.tpg.pEdgeDestinationIsAction = value.asDouble();
+        return;
+    }
+    if (param == "maxProgramSize") {
+        params.mutation.prog.maxProgramSize = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "pDelete") {
+        params.mutation.prog.pDelete = value.asDouble();
+        return;
+    }
+    if (param == "pAdd") {
+        params.mutation.prog.pAdd = value.asDouble();
+        return;
+    }
+    if (param == "pMutate") {
+        params.mutation.prog.pMutate = value.asDouble();
+        return;
+    }
+    if (param == "pSwap") {
+        params.mutation.prog.pSwap = value.asDouble();
+        return;
+    }
+    if (param == "archiveSize") {
+        params.archiveSize = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "archivingProbability") {
+        params.archivingProbability = value.asDouble();
+        return;
+    }
+    if (param == "nbIterationsPerPolicyEvaluation") {
+        params.nbIterationsPerPolicyEvaluation = value.asUInt64();
+        return;
+    }
+    if (param == "maxNbActionsPerEval") {
+        params.maxNbActionsPerEval = value.asUInt64();
+        return;
+    }
+    if (param == "ratioDeletedRoots") {
+        params.ratioDeletedRoots = value.asDouble();
+        return;
+    }
+    if (param == "nbGenerations") {
+        params.nbGenerations = value.asUInt64();
+        return;
+    }
+    if (param == "maxNbEvaluationPerPolicy") {
+        params.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "nbRegisters") {
+        params.nbRegisters = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "nbThreads") {
+        params.nbThreads = (size_t)value.asUInt();
+        return;
+    }
     if (param == "doValidation") {
         params.doValidation = value.asBool();
         return;
     }
-	// we didn't recognize the symbol
-	std::cerr << "Ignoring unknown parameter " << param << std::endl;
-
+    // we didn't recognize the symbol
+    std::cerr << "Ignoring unknown parameter " << param << std::endl;
 }
 
 void File::ParametersParser::loadParametersFromJson(

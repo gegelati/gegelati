@@ -21,28 +21,30 @@ namespace Log {
         int colWidth = 17;
 
         /**
-        * \brief Logs the min, avg and max score of the generation.
-        *
-        * This method is used by the eval and valid callback as
-        * they both have the same input and want to log the same elements
-        * (min, avg max).
-        */
-        void logResults(
-                std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results);
+         * \brief Logs the min, avg and max score of the generation.
+         *
+         * This method is used by the eval and valid callback as
+         * they both have the same input and want to log the same elements
+         * (min, avg max).
+         */
+        void logResults(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                                      const TPG::TPGVertex*>& results);
 
-    public:
+      public:
         /**
-        * \brief Same constructor as LaLogger. Default output is cout.
-        *
-        * \param[in] out The output stream the logger will send elements to.
-        */
-        explicit LABasicLogger(std::ostream &out = std::cout) : LALogger(out) {}
+         * \brief Same constructor as LaLogger. Default output is cout.
+         *
+         * \param[in] out The output stream the logger will send elements to.
+         */
+        explicit LABasicLogger(std::ostream& out = std::cout) : LALogger(out)
+        {
+        }
 
         /**
-        * Inherited via LaLogger
-        *
-        * \brief Logs the header (column names) of the tab that will be logged.
-        */
+         * Inherited via LaLogger
+         *
+         * \brief Logs the header (column names) of the tab that will be logged.
+         */
         virtual void logHeader() override;
 
         /**
@@ -53,8 +55,8 @@ namespace Log {
          * \param[in] generationNumber The number of the current generation.
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterPopulateTPG(uint64_t &generationNumber,
-                            TPG::TPGGraph &tpg) override;
+        virtual void logAfterPopulateTPG(uint64_t& generationNumber,
+                                         TPG::TPGGraph& tpg) override;
         /**
          * Inherited via LaLogger.
          *
@@ -77,33 +79,33 @@ namespace Log {
          *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(TPG::TPGGraph& tpg) override {
+        virtual void logAfterDecimate(TPG::TPGGraph& tpg) override{
             // nothing to log
         };
 
         /**
-        * Inherited via LaLogger.
-        *
-        * \brief Logs the min, avg and max score of the generation.
-        *
-        * If doValidation is true, no eval results are logged so that
-        * the logger can only show validation results.
-        *
-        * \param[in] results scores of the validation.
-        */
+         * Inherited via LaLogger.
+         *
+         * \brief Logs the min, avg and max score of the generation.
+         *
+         * If doValidation is true, no eval results are logged so that
+         * the logger can only show validation results.
+         *
+         * \param[in] results scores of the validation.
+         */
         virtual void logAfterValidate(
-                std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *>& results) override;
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>& results) override;
 
         /**
-        * Inherited via LaLogger
-        *
-        * \brief Logs the eval, valid (if doValidation is true)
-        * and total running time.
-        */
+         * Inherited via LaLogger
+         *
+         * \brief Logs the eval, valid (if doValidation is true)
+         * and total running time.
+         */
         virtual void logEndOfTraining() override;
     };
 
-
-}
+} // namespace Log
 
 #endif
