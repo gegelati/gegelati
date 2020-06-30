@@ -5,33 +5,35 @@
 
 namespace Log {
 
-/**
-* \brief Basic logger that will display some useful information
-*
-* The information logged by this LALogger are generation number, nb of
-* vertices, min, mean, avg score of this generation and to finish some timing.
-* Everything is logged like a tab with regularly spaced columns.
-*/
-    class LABasicLogger : public LALogger {
-    private:
+    /**
+     * \brief Basic logger that will display some useful information
+     *
+     * The information logged by this LALogger are generation number, nb of
+     * vertices, min, mean, avg score of this generation and to finish some
+     * timing. Everything is logged like a tab with regularly spaced columns.
+     */
+    class LABasicLogger : public LALogger
+    {
+      private:
         /**
-        * Width of columns when logging values.
-        */
+         * Width of columns when logging values.
+         */
         int colWidth = 17;
 
-    public:
+      public:
         /**
-        * \brief Same constructor as LaLogger. Default output is cout.
-        *
-        * \param[in] out The output stream the logger will send elements to.
-        */
-        explicit LABasicLogger(std::ostream &out = std::cout) : LALogger(out) {
+         * \brief Same constructor as LaLogger. Default output is cout.
+         *
+         * \param[in] out The output stream the logger will send elements to.
+         */
+        explicit LABasicLogger(std::ostream& out = std::cout) : LALogger(out)
+        {
             logHeader();
         };
 
         /**
-        * \brief Logs the header (column names) of the tab that will be logged.
-        */
+         * \brief Logs the header (column names) of the tab that will be logged.
+         */
         void logHeader();
 
         /**
@@ -42,8 +44,8 @@ namespace Log {
          * \param[in] generationNumber The number of the current generation.
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void
-        logAfterPopulateTPG(uint64_t &generationNumber, TPG::TPGGraph &tpg) override;
+        virtual void logAfterPopulateTPG(uint64_t& generationNumber,
+                                         TPG::TPGGraph& tpg) override;
 
         /**
          * Inherited via LaLogger.
@@ -54,7 +56,8 @@ namespace Log {
          * \param[in] results Scores of the evaluation.
          */
         virtual void logAfterEvaluate(
-                std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> &results) override;
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>& results) override;
 
         /**
          * Inherited via LaLogger.
@@ -63,8 +66,8 @@ namespace Log {
          *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(TPG::TPGGraph &tpg) override;
+        virtual void logAfterDecimate(TPG::TPGGraph& tpg) override;
     };
-}
+} // namespace Log
 
 #endif

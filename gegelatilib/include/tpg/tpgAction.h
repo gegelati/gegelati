@@ -42,46 +42,49 @@
 #include "tpg/tpgVertex.h"
 
 namespace TPG {
-	/**
-	* \brief Class representing an Action of a TPGGraph.
-	*
-	* An action is a leaf vertex of a TPG associated to an action of the
-	* learning agent within its environment.
-	*/
-	class TPGAction : public TPGVertex {
+    /**
+     * \brief Class representing an Action of a TPGGraph.
+     *
+     * An action is a leaf vertex of a TPG associated to an action of the
+     * learning agent within its environment.
+     */
+    class TPGAction : public TPGVertex
+    {
 
-		/**
-		* \brief Integer number abstracting the selected action.
-		*
-		* It is up to the used of a TPGGraph to associate the code to each
-		* actionID.
-		*/
-		const uint64_t actionID;
+        /**
+         * \brief Integer number abstracting the selected action.
+         *
+         * It is up to the used of a TPGGraph to associate the code to each
+         * actionID.
+         */
+        const uint64_t actionID;
 
-	public:
+      public:
+        /**
+         * \brief Main constructor of a TPGAction.
+         *
+         * \param[in] id integer stored as the actionID of the TPGAction.
+         */
+        TPGAction(const uint64_t id) : actionID{id} {};
 
-		/**
-		* \brief Main constructor of a TPGAction.
-		*
-		* \param[in] id integer stored as the actionID of the TPGAction.
-		*/
-		TPGAction(const uint64_t id) : actionID{ id } {};
+        /**
+         * \brief Specialization throwing an std::runtime_exception.
+         *
+         * Since the TPGAction is intented to be a leaf TPGVertex, no outgoing
+         * TPGEdge can be added to it.
+         */
+        virtual void addOutgoingEdge(TPGEdge* edge);
 
-		/**
-		* \brief Specialization throwing an std::runtime_exception.
-		*
-		* Since the TPGAction is intented to be a leaf TPGVertex, no outgoing
-		* TPGEdge can be added to it.
-		*/
-		virtual void addOutgoingEdge(TPGEdge* edge);
-
-		/**
-		* \brief Get the action ID associated to the TPGAction.
-		*
-		* \return the integer ID of the TPGAction.
-		*/
-		uint64_t getActionID() const { return this->actionID; };
-	};
-};
+        /**
+         * \brief Get the action ID associated to the TPGAction.
+         *
+         * \return the integer ID of the TPGAction.
+         */
+        uint64_t getActionID() const
+        {
+            return this->actionID;
+        };
+    };
+}; // namespace TPG
 
 #endif

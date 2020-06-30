@@ -6,6 +6,9 @@ stages:
     - Analyze
 
 jobs:
+    allow_failures:
+        - name: Code Style
+          if: type != pull_request
     include:
         - stage: Build
           os: windows
@@ -110,6 +113,7 @@ jobs:
         - os: linux
           dist: xenial
           stage: Analyze
+          name: Sonar
           compiler: gcc-7
           addons:
             apt:
@@ -142,3 +146,19 @@ jobs:
           cache:
             directories:
               - '$HOME/.sonar/cache'
+              
+        - os: linux
+          dist: focal
+          stage: Analyze
+          name: Code Style          
+          addons:
+            apt:
+                packages:
+                    - clang-format-10
+          env:
+            - CLANG_FORMAT=clang-format-10
+          install:
+            - sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-10 100          
+          script:
+            - $CLANG_FORMAT --version
+            - bash ./scripts/fix_code_format.sh
