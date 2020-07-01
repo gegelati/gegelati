@@ -155,16 +155,6 @@ void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line,
         destinationIndex); // Should never throw.. but I did not deactivate the
                            // check anyway.
 
-    // Select and set all parameter values. (can not fail)
-    for (uint64_t paramIdx = 0; paramIdx < env.getMaxNbParameters();
-         paramIdx++) {
-        Parameter param(
-            (int16_t)(rng.getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX -
-                                               (int64_t)PARAM_INT_MIN)) +
-                      (int64_t)PARAM_INT_MIN));
-        line.setParameter(paramIdx, param);
-    }
-
     // Select an instruction.
     uint64_t instructionIndex =
         rng.getUnsignedInt64(0, (env.getNbInstructions() - 1));
@@ -292,24 +282,5 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
             initRandomCorrectLineOperand(instruction, line, operandIndex, false,
                                          true, true, rng);
         }
-    }
-    else {
-        // Parameters
-        // Which Parameter is selected
-        const uint64_t parameterIndex =
-            (selectedBit - (lineSize.totalNbBits - lineSize.nbParametersBits)) /
-            (lineSize.nbParametersBits /
-             line.getEnvironment().getMaxNbParameters());
-        // should not cause any division by zero since if there is no parameter
-        // in an environment, this code should never be reached.
-
-        // Select a random parameterValue
-        // (do not bother to make it different the probability is too low and
-        // it will be detected through neutrality tests)
-        Parameter newParameter =
-            (int16_t)(rng.getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX -
-                                               (int64_t)PARAM_INT_MIN)) +
-                      (int64_t)PARAM_INT_MIN);
-        line.setParameter(parameterIndex, newParameter);
     }
 }

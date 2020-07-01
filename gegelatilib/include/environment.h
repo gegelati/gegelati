@@ -37,6 +37,7 @@
 #define ENVIRONMENT_H
 
 #include <iostream>
+#include <cmath>
 
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
@@ -56,8 +57,6 @@ typedef struct LineSize
     size_t nbOperandDataSourceIndexBits;
     /// Number of bits used for each operand pair, to encode location
     size_t nbOperandLocationBits;
-    /// Number of bits used to encode the parameters
-    size_t nbParametersBits;
     /// Total number of bits to encode a program line.
     size_t totalNbBits;
 
@@ -101,9 +100,6 @@ class Environment
     /// Maxmimum number of operands of the Instructions::Set.
     const size_t maxNbOperands;
 
-    /// Maximum number of Parameter of the Instruction::Set..
-    const size_t maxNbParameters;
-
     /// Number of DataHandler from which data can be accessed.
     const size_t nbDataSources;
 
@@ -135,7 +131,7 @@ class Environment
      * formula: $ ceil(log2(i)) + ceil(log2(n))+
      * m*(ceil(log2(nb_{src}))+ceil(log2(largestAddressSpace)) + p*32$ With bits
      * organised (theoretically) in the same order as in the equation |
-     * Instruction | destination | operands | parameters | See
+     * Instruction | destination | operands See
      * PROJECT/doc/instructions.md for more details.
      *
      * \param[in] env The Environment whose information is used.
@@ -188,7 +184,6 @@ class Environment
           dataSources{dHandlers}, nbRegisters{nbRegs}, fakeRegisters(nbRegs),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
-          maxNbParameters{instructionSet.getMaxNbParameters()},
           nbDataSources{dHandlers.size() + 1},
           largestAddressSpace{computeLargestAddressSpace(nbRegs, dHandlers)},
           lineSize{computeLineSize(*this)} {};
@@ -215,14 +210,6 @@ class Environment
      * \return the value of the maxNbOperands attribute.
      */
     size_t getMaxNbOperands() const;
-
-    /**
-     * \brief Get the size of the maximum number of Parameter of
-     * Instructions::Set.
-     *
-     * \return the value of the maxNbParamaters attribute.
-     */
-    size_t getMaxNbParameters() const;
 
     /**
      * \brief Get the size of the number of DataHandlers.

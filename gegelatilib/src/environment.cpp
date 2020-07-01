@@ -125,8 +125,6 @@ const LineSize Environment::computeLineSize(const Environment& env)
 
     const size_t largestAddressSpace = env.getLargestAddressSpace();
 
-    const size_t p = env.getMaxNbParameters();
-
     // Add some checks on values. Only p can be null for a valid program. nbSrc
     // cannot be 1, as it would mean an environment with only registers.
     // i cannot be 1 also because this would mean a unique instruction
@@ -150,10 +148,8 @@ const LineSize Environment::computeLineSize(const Environment& env)
         (size_t)ceill(log2l((long double)largestAddressSpace));
     result.nbOperandsBits = (size_t)(m * (result.nbOperandDataSourceIndexBits +
                                           result.nbOperandLocationBits));
-    result.nbParametersBits = (size_t)(p * sizeof(Parameter) * 8);
-
     result.totalNbBits = result.nbInstructionBits + result.nbDestinationBits +
-                         result.nbOperandsBits + result.nbParametersBits;
+                         result.nbOperandsBits;
 
     return result;
 }
@@ -171,11 +167,6 @@ size_t Environment::getNbInstructions() const
 size_t Environment::getMaxNbOperands() const
 {
     return this->maxNbOperands;
-}
-
-size_t Environment::getMaxNbParameters() const
-{
-    return this->maxNbParameters;
 }
 
 size_t Environment::getNbDataSources() const

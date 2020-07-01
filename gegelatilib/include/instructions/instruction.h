@@ -44,8 +44,6 @@
 
 #include "data/untypedSharedPtr.h"
 
-#include "parameter.h"
-
 namespace Instructions {
     /**
      * \brief This abstract class is the base class for any instruction to be
@@ -83,15 +81,6 @@ namespace Instructions {
         unsigned int getNbOperands() const;
 
         /**
-         * \brief Get the number of parameters required to execute the
-         * Instruction.
-         *
-         * \return an unsigned int value corresponding to the number of
-         * parameters required by the Instruction.
-         */
-        unsigned int getNbParameters() const;
-
-        /**
          * \brief Check if a given vector contains elements whose types
          * corresponds to the types of the Instruction operands.
          *
@@ -102,16 +91,6 @@ namespace Instructions {
             const std::vector<Data::UntypedSharedPtr>& arguments) const;
 
         /**
-         * \brief Check if a given vector contains the right number of
-         * parameters for the Instruction.
-         *
-         * \param[in] params a const list of reference_wrapper to Parameters.
-         */
-        virtual bool checkParameters(
-            const std::vector<std::reference_wrapper<const Parameter>>& params)
-            const;
-
-        /**
          * \brief Execute the Instruction for the given parameters and
          * arguments.
          *
@@ -119,15 +98,12 @@ namespace Instructions {
          * cas of invalid argument or parameters, for type or number or value
          * reason, this method should always return 0.0.
          *
-         * \param[in] params the vector of reference_wrapper to the Parameter
-         * passed to the Instruction. \param[in] args the vector of
-         * UntypedSharedPtr passed to the Instruction. \return the default
-         * implementation of the Intruction class returns 0.0 if the given
-         * params or arguments are not valid. Otherwise, 1.0 is returned.
+         * \param[in] args the vector of UntypedSharedPtr passed to the 
+         * Instruction. \return the default implementation of the Intruction 
+         * class returns 0.0 if the given params or arguments are not valid. 
+         * Otherwise, 1.0 is returned.
          */
-        virtual double execute(
-            const std::vector<std::reference_wrapper<const Parameter>>& params,
-            const std::vector<Data::UntypedSharedPtr>& args) const = 0;
+        virtual double execute(const std::vector<Data::UntypedSharedPtr>& args) const = 0;
 
       protected:
         /**
@@ -137,11 +113,6 @@ namespace Instructions {
          * list and sets the number of required parameters to 0.
          */
         Instruction();
-
-        /**
-         * \brief Number of parameters required when calling the instruction.
-         */
-        unsigned int nbParameters;
 
         /**
          * \brief List of the types of the operands needed to execute the

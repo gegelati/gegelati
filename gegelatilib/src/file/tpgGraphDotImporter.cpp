@@ -54,28 +54,6 @@ const std::string File::TPGGraphDotImporter::linkProgramTeamRegex(
 const std::string File::TPGGraphDotImporter::addLinkProgramRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)");
 
-void File::TPGGraphDotImporter::readParameters(std::string& str,
-                                               Program::Line& l)
-{
-    std::string::size_type pos = 0;
-    std::string::size_type pos2;
-
-    uint64_t p_idx = 0;
-
-    int16_t p_value;
-    // parameters are stored in str with the following format :
-    // param1|param2|...|param_N
-    while (!str.empty()) {
-        pos2 = str.find("|");
-        p_value = std::stoi(str.substr(pos, pos2));
-        pos2++; // skip the '|'
-        str = str.substr(
-            pos2, str.size()); // store the rest of the string and iterate
-        l.setParameter(p_idx, {p_value});
-        p_idx++;
-    }
-}
-
 void File::TPGGraphDotImporter::readOperands(std::string& str, Program::Line& l)
 {
     std::string::size_type pos = 0;
@@ -107,7 +85,7 @@ void File::TPGGraphDotImporter::readOperands(std::string& str, Program::Line& l)
 void File::TPGGraphDotImporter::readLine(std::smatch& matches)
 {
     // a line is stored in the .dot file with the following format
-    // inst_idx|dest_idx&param_1|param_2|...|param_n$op1_param1|op1_param2#...#opN_param1|opN_param2
+    // inst_idx|dest_idx&op1_param1|op1_param2#...#opN_param1|opN_param2
     if (!this->lastLine.empty() && !matches.empty()) {
         uint64_t prog_label = std::stoi(matches[1]);
         std::string label = matches[2];
@@ -127,8 +105,6 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
             uint64_t instructionIdx;
             // destination index of a line
             uint64_t destinationIdx;
-            // store paramteres in a new string
-            std::string parameters;
             // store operands in a new string
             std::string operands;
 
@@ -152,24 +128,13 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
                 destinationIdx = std::stoi(instruction.substr(
                     pos1, pos2 - pos1)); // extract and convert to int
 
-                // extract parameters as a string
-                pos1 =
-                    instruction.find("$"); // parameters are in between & and $
-                pos2++;                    // skip the '&'
-                parameters = instruction.substr(pos2, pos1 - pos2);
-
                 // extract operands as a string
-                pos2 = instruction.size() -
-                       1; // corresponds to the last index of the string.
-                pos1++;   // slip the '$'
-                operands = instruction.substr(pos1, instruction.size());
+                pos2++;   // skip the '$'
+                operands = instruction.substr(pos2, instruction.size());
 
                 // add indexes to line
                 l.setInstructionIndex(instructionIdx);
                 l.setDestinationIndex(destinationIdx);
-
-                // parse parameters
-                readParameters(parameters, l);
 
                 // parse operands
                 readOperands(operands, l);

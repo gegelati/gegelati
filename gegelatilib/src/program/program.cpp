@@ -42,7 +42,6 @@
 
 #include "data/primitiveTypeArray.h"
 
-#include "parameter.h"
 #include "program/program.h"
 
 Program::Program::~Program()

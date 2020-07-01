@@ -141,13 +141,6 @@ void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
         // instruction destination index
         programContent += std::to_string(l.getDestinationIndex());
         programContent += "&";
-        // instruction parameters
-        for (int j = 0; j < l.getEnvironment().getMaxNbParameters(); j++) {
-            const Parameter& p = l.getParameter(j);
-            programContent += std::to_string(p.i);
-            programContent += "|";
-        }
-        programContent += "$";
         // instruction operands
         for (int j = 0; j < l.getEnvironment().getMaxNbOperands(); j++) {
             std::pair<uint64_t, uint64_t> p = l.getOperand(j);

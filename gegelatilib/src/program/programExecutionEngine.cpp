@@ -133,32 +133,17 @@ const void Program::ProgramExecutionEngine::fetchCurrentOperands(
     }
 }
 
-const void Program::ProgramExecutionEngine::fetchCurrentParameters(
-    std::vector<std::reference_wrapper<const Parameter>>& parameters) const
-{
-    const Line& line = this->getCurrentLine(); // throw std::out_of_range
-    const Instructions::Instruction& instruction =
-        this->getCurrentInstruction(); // throw std::out_of_range
-
-    for (uint64_t i = 0; i < instruction.getNbParameters(); i++) {
-        const Parameter& p = line.getParameter(i); // throw std::out_of_range
-        parameters.push_back(p);
-    }
-}
-
 void Program::ProgramExecutionEngine::executeCurrentLine()
 {
     std::vector<Data::UntypedSharedPtr> operands;
-    std::vector<std::reference_wrapper<const Parameter>> parameters;
 
     // Get everything needed (may throw)
     const Line& line = this->getCurrentLine();
     const Instructions::Instruction& instruction =
         this->getCurrentInstruction();
     this->fetchCurrentOperands(operands);
-    this->fetchCurrentParameters(parameters);
 
-    double result = instruction.execute(parameters, operands);
+    double result = instruction.execute(operands);
 
     this->registers.setDataAt(typeid(double), line.getDestinationIndex(),
                               result);

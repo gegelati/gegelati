@@ -238,25 +238,9 @@ namespace Program {
             std::vector<Data::UntypedSharedPtr>& operands) const;
 
         /**
-         * \brief Get the parameters for the current Instruction.
-         *
-         * This method retrieves the number of Parameter required by the
-         * current Instruction and stores them into the given vector.
-         *
-         * \param[in,out] parameters std::vector where the fetched Parameter
-         * will be inserted. \throw std::out_of_range if the programCounter is
-         * beyond the program end, if the instruction requires more parameter
-         * than available.
-         */
-        const void fetchCurrentParameters(
-            std::vector<std::reference_wrapper<const Parameter>>& parameters)
-            const;
-
-        /**
          * \brief Execute the current line of the program.
          *
-         * \throws see fetchCurrentParameters, fetchCurrentOperands,
-         * getCurrentInstruction.
+         * \throws see fetchCurrentOperands, getCurrentInstruction.
          */
         void executeCurrentLine();
 
@@ -265,7 +249,7 @@ namespace Program {
          * register 0.
          *
          * \param[in] ignoreException When true, all exceptions thrown when
-         *            fetching current instructions, operands, parameters are
+         *            fetching current instructions, operands are
          *            caught and the current program Line is simply ignored.
          *            When true, all lines of the Program are assumed to be
          *            correct by construction, and any exception is re-thrown

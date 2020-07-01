@@ -62,9 +62,7 @@ namespace Instructions {
          */
         AddPrimitiveType();
 
-        virtual double execute(
-            const std::vector<std::reference_wrapper<const Parameter>>& params,
-            const std::vector<Data::UntypedSharedPtr>& args) const override;
+        virtual double execute(const std::vector<Data::UntypedSharedPtr>& args) const override;
     };
 
     template <class T> AddPrimitiveType<T>::AddPrimitiveType()
@@ -74,13 +72,11 @@ namespace Instructions {
     }
 
     template <class T>
-    double AddPrimitiveType<T>::execute(
-        const std::vector<std::reference_wrapper<const Parameter>>& params,
-        const std::vector<Data::UntypedSharedPtr>& args) const
+    double AddPrimitiveType<T>::execute(const std::vector<Data::UntypedSharedPtr>& args) const
     {
 
 #ifndef NDEBUG
-        if (Instruction::execute(params, args) != 1.0) {
+        if (Instruction::execute(args) != 1.0) {
             return 0.0;
         }
 #endif

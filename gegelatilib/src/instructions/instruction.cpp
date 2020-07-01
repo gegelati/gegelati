@@ -39,7 +39,7 @@
 
 using namespace Instructions;
 
-Instruction::Instruction() : operandTypes(), nbParameters(0)
+Instruction::Instruction() : operandTypes()
 {
 }
 
@@ -52,11 +52,6 @@ const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
 unsigned int Instructions::Instruction::getNbOperands() const
 {
     return (unsigned int)this->operandTypes.size();
-}
-
-unsigned int Instruction::getNbParameters() const
-{
-    return this->nbParameters;
 }
 
 bool Instruction::checkOperandTypes(
@@ -74,18 +69,10 @@ bool Instruction::checkOperandTypes(
     return true;
 }
 
-bool Instruction::checkParameters(
-    const std::vector<std::reference_wrapper<const Parameter>>& params) const
-{
-    return (params.size() == this->nbParameters);
-}
-
-double Instruction::execute(
-    const std::vector<std::reference_wrapper<const Parameter>>& params,
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
+double Instruction::execute(const std::vector<Data::UntypedSharedPtr>& arguments) const
 {
 #ifndef NDEBUG
-    if (!this->checkParameters(params) || !this->checkOperandTypes(arguments)) {
+    if (!this->checkOperandTypes(arguments)) {
         return 0.0;
     }
     else {
