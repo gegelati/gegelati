@@ -41,7 +41,6 @@
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
 #include "learn/learningParameters.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -86,7 +85,6 @@ class ImporterTest : public ::testing::Test
             .setDataAt(typeid(double), 0, 1.0);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
         e = new Environment(set, vect, 8);
         tpg = new TPG::TPGGraph(*e);
         tpg_copy = new TPG::TPGGraph(*e);
@@ -102,7 +100,6 @@ class ImporterTest : public ::testing::Test
             Program::Line& l = progPointers.at(0).get()->addNewLine();
             l.setInstructionIndex(0);
             l.setDestinationIndex(1);
-            l.setParameter(0, 0.2f);
             l.setOperand(0, 0, 1);
         }
 
@@ -277,8 +274,6 @@ TEST_F(ImporterTest, importGraph)
         << "The Instruction Index changed";
     ASSERT_EQ(p.getLine(0).getDestinationIndex(), 1)
         << "The destination index of the first line changed";
-    ASSERT_NEAR((float)(p.getLine(0).getParameter(0)), 0.2f, 0.0001)
-        << "The parameter changed";
     ASSERT_EQ(p.getLine(0).getOperand(0).first, 0)
         << "The first part of the operand changed";
     ASSERT_EQ(p.getLine(0).getOperand(0).second, 1)
@@ -289,8 +284,6 @@ TEST_F(ImporterTest, importGraph)
         << "The Instruction Index changed";
     ASSERT_EQ(p.getLine(1).getDestinationIndex(), 1)
         << "The destination index of the first line changed";
-    ASSERT_NEAR((float)(p.getLine(1).getParameter(0)), 0.2f, 0.0001)
-        << "The parameter changed";
     ASSERT_EQ(p.getLine(1).getOperand(0).first, 0)
         << "The first part of the operand changed";
     ASSERT_EQ(p.getLine(1).getOperand(0).second, 1)
@@ -301,8 +294,6 @@ TEST_F(ImporterTest, importGraph)
         << "The Instruction Index changed";
     ASSERT_EQ(p.getLine(2).getDestinationIndex(), 1)
         << "The destination index of the first line changed";
-    ASSERT_NEAR((float)(p.getLine(2).getParameter(0)), 0.2f, 0.0001)
-        << "The parameter changed";
     ASSERT_EQ(p.getLine(2).getOperand(0).first, 0)
         << "The first part of the operand changed";
     ASSERT_EQ(p.getLine(2).getOperand(0).second, 1)

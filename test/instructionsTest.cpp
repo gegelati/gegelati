@@ -40,7 +40,7 @@
 #include "data/dataHandler.h"
 #include "data/untypedSharedPtr.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 
 TEST(InstructionsTest, ConstructorDestructorCall)
@@ -73,8 +73,6 @@ TEST(InstructionsTest, OperandListAndNbParam)
     ASSERT_STREQ(operands.at(1).get().name(), typeid(double).name())
         << "Second operand of AddPrimitiveType<double> is not\""
         << typeid(double).name() << "\".";
-    ASSERT_EQ(i->getNbParameters(), 0)
-        << "Number of parameters of AddPrimitiveType<double> should be 0.";
     delete i;
 }
 
@@ -103,28 +101,6 @@ TEST(InstructionsTest, CheckArgumentTypes)
     delete i;
 }
 
-TEST(InstructionsTest, CheckParameters)
-{
-    Instructions::Instruction* i = new Instructions::AddPrimitiveType<int>();
-    std::vector<std::reference_wrapper<const Parameter>> v;
-    Parameter a = (int16_t)2;
-    Parameter b = 3.2f;
-    Parameter c = -2.0f; // To cover init from negative float in Parameter.
-    v.push_back(a);
-    v.push_back(b);
-    v.push_back(c);
-    ASSERT_FALSE(i->checkParameters(v))
-        << "Parameter list of wrong size not detected as such.";
-    delete i;
-
-    i = new Instructions::MultByConstParam<double, int16_t>();
-    v.pop_back();
-    v.pop_back();
-    ASSERT_TRUE(i->checkParameters(v))
-        << "Parameter list of right size not detected as such.";
-    delete i;
-}
-
 TEST(InstructionsTest, Execute)
 {
     Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
@@ -135,22 +111,23 @@ TEST(InstructionsTest, Execute)
     std::vector<Data::UntypedSharedPtr> vect;
     vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<double>());
     vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
-    ASSERT_EQ(i->execute({}, vect), 8.1)
+    ASSERT_EQ(i->execute(vect), 8.1)
         << "Execute method of AddPrimitiveType<double> returns an incorrect "
            "value with valid operands.";
 
     vect.pop_back();
     vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
 #ifndef NDEBUG
-    ASSERT_EQ(i->execute({}, vect), 0.0)
+    ASSERT_EQ(i->execute(vect), 0.0)
         << "Execute method of AddPrimitiveType<double> returns an incorrect "
            "value with invalid operands.";
 #else
-    ASSERT_THROW(i->execute({}, vect), std::runtime_error)
+    ASSERT_THROW(i->execute(vect), std::runtime_error)
         << "In NDEBUG mode, execute method of AddPrimitiveType<double> should "
            "throw an exception with invalid operands.";
 #endif
-
+//this code is to test instructions having parameters (not yet available)
+/*
     delete i;
     i = new Instructions::MultByConstParam<double, int16_t>();
     vect.pop_back();
@@ -168,22 +145,23 @@ TEST(InstructionsTest, Execute)
            "should throw an exception with invalid params.";
 #endif
     delete i;
+*/
 }
 
 TEST(InstructionsTest, SetAdd)
 {
     Instructions::Set s;
 
-    Instructions::MultByConstParam<int, float> iMult;
-    Instructions::MultByConstParam<int, float> iMult2;
-    Instructions::MultByConstParam<int, int16_t> iMult3;
+    Instructions::AddPrimitiveType<double> i1;
+    Instructions::AddPrimitiveType<double> i2;
+    Instructions::AddPrimitiveType<float> i3;
 
-    ASSERT_TRUE(s.add(iMult))
+    ASSERT_TRUE(s.add(i1))
         << "Add of instruction to empty Instructions::Set failed.";
     // Adding equivalent instructions is no longer forbidden.
-    ASSERT_TRUE(s.add(iMult2)) << "Add of instruction already present in an "
+    ASSERT_TRUE(s.add(i2)) << "Add of instruction already present in an "
                                   "Instructions::Set should not fail.";
-    ASSERT_TRUE(s.add(iMult3))
+    ASSERT_TRUE(s.add(i3))
         << "Add of instruction to non empty Instructions::Set failed. (with a "
            "template instruction with different template param than an already "
            "present one";
@@ -195,11 +173,11 @@ TEST(InstructionsTest, SetGetNbInstruction)
 
     ASSERT_EQ(s.getNbInstructions(), 0)
         << "Incorrect number of instructions in an empty Set.";
-
-    Instructions::MultByConstParam<int, float> iMult;
-    Instructions::MultByConstParam<int, int16_t> iMult2;
-    s.add(iMult);
-    s.add(iMult2);
+    
+    Instructions::AddPrimitiveType<double> i1;
+    Instructions::AddPrimitiveType<float> i2;
+    s.add(i1);
+    s.add(i2);
     ASSERT_EQ(s.getNbInstructions(), 2)
         << "Incorrect number of instructions in a non-empty Set.";
 }
@@ -209,9 +187,9 @@ TEST(InstructionsTest, SetGetInstruction)
     Instructions::Set s;
 
     Instructions::AddPrimitiveType<float> iAdd;
-    Instructions::MultByConstParam<double, float> iMult;
+    Instructions::AddPrimitiveType<double> iAddDouble;
     s.add(iAdd);
-    s.add(iMult);
+    s.add(iAddDouble);
 
     const Instructions::Instruction* res;
     ASSERT_NO_THROW(res = &s.getInstruction(1))
@@ -219,7 +197,7 @@ TEST(InstructionsTest, SetGetInstruction)
            "with a valid index.";
 
     // Compare that the returned reference points to the right object.
-    ASSERT_EQ(res, &iMult)
+    ASSERT_EQ(res, &iAddDouble)
         << "Incorrect Instruction was returned by valid Set::getInstruction.";
 
     // Check that exception is thrown when an invalid index is given.
@@ -236,29 +214,12 @@ TEST(InstructionsTest, SetGetNbMaxOperands)
         << "Max number of operands returned by the empty Instructions::Set is "
            "incorrect.";
 
-    Instructions::AddPrimitiveType<float> iAdd;          // Two operands
-    Instructions::MultByConstParam<double, float> iMult; // One operand
+    Instructions::AddPrimitiveType<float> iAdd;                     // one operand
+    auto minus = [](double a, double b)->double {return a - b; }; //two operands
+    
     s.add(iAdd);
-    s.add(iMult);
+    s.add(Instructions::LambdaInstruction<double,double>(minus));
 
     ASSERT_EQ(s.getMaxNbOperands(), 2) << "Max number of operands returned by "
                                           "the Instructions::Set is incorrect.";
-}
-
-TEST(InstructionsTest, SetGetNbMaxParameters)
-{
-    Instructions::Set s;
-
-    ASSERT_EQ(s.getMaxNbParameters(), 0)
-        << "Max number of parameters returned by the empty Instructions::Set "
-           "is incorrect.";
-
-    Instructions::AddPrimitiveType<float> iAdd;          // Two operands
-    Instructions::MultByConstParam<double, float> iMult; // One operand
-    s.add(iAdd);
-    s.add(iMult);
-
-    ASSERT_EQ(s.getMaxNbParameters(), 1)
-        << "Max number of parameters returned by the Instructions::Set is "
-           "incorrect.";
 }

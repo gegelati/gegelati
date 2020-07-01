@@ -45,7 +45,6 @@
 #include "instructions/addPrimitiveType.h"
 #include "instructions/instruction.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
 #include "mutator/lineMutator.h"
 #include "mutator/programMutator.h"
 #include "mutator/rng.h"
@@ -82,7 +81,6 @@ class MutatorTest : public ::testing::Test
             .setDataAt(typeid(double), 25, value0);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
 
         e = new Environment(set, vect, 8);
         p = new Program::Program(*e);
@@ -252,8 +250,6 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
     rng.setSeed(0);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ((int16_t)l0.getParameter(0), 31115)
-        << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter instruction (causing an alteration of op1 data source)
@@ -272,8 +268,6 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
     ASSERT_EQ(l0.getOperand(1).first, 0)
         << "Alteration with known seed changed its result.";
     ASSERT_EQ(l0.getOperand(1).second, 28)
-        << "Alteration with known seed changed its result.";
-    ASSERT_EQ((int16_t)l0.getParameter(0), 31115)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 }
@@ -363,8 +357,6 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
     ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p, rng));
     ASSERT_EQ(p->getNbLines(), 1)
         << "Line insertion in an empty program failed.";
-    ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 31115)
-        << "Inserted random line is not random. (with a known seed).";
 
     // Insert in non empty program
     // in first position (with known seed)
@@ -372,9 +364,7 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
     ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p, rng));
     ASSERT_EQ(p->getNbLines(), 2)
         << "Line insertion in a non-empty program failed.";
-    // Just to ensure the position of the inserted line is the first
-    ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 26809);
-    ASSERT_EQ((int16_t)p->getLine(1).getParameter(0), 31115);
+
 
     // Insert in non empty program
     // After last position (with known seed)
@@ -382,22 +372,13 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
     ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p, rng));
     ASSERT_EQ(p->getNbLines(), 3)
         << "Line insertion in a non-empty program failed.";
-    // Just to ensure the position of the inserted line is after the last
-    ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 26809);
-    ASSERT_EQ((int16_t)p->getLine(1).getParameter(0), 31115);
-    ASSERT_EQ((int16_t)p->getLine(2).getParameter(0), -14950);
-
+    
     // Insert in non empty program
     // In the middle position (with known seed)
     rng.setSeed(5);
     ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p, rng));
     ASSERT_EQ(p->getNbLines(), 4)
         << "Line insertion in a non-empty program failed.";
-    // Just to ensure the position of the inserted line is after the last
-    ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 26809);
-    ASSERT_EQ((int16_t)p->getLine(1).getParameter(0), 31115);
-    ASSERT_EQ((int16_t)p->getLine(2).getParameter(0), -17304);
-    ASSERT_EQ((int16_t)p->getLine(3).getParameter(0), -14950);
 }
 
 TEST_F(MutatorTest, ProgramMutatorSwapRandomLines)
@@ -456,7 +437,6 @@ TEST_F(MutatorTest, ProgramMutatorAlterRandomLine)
     // Alter a randomly selected line (with a known seed)
     // Parameter of Line 4 is altered.
     ASSERT_TRUE(Mutator::ProgramMutator::alterRandomLine(*p, rng));
-    ASSERT_EQ((int16_t)p->getLine(4).getParameter(0), 26809);
 }
 
 TEST_F(MutatorTest, ProgramMutatorInitProgram)

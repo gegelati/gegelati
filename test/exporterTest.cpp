@@ -42,7 +42,6 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
 #include "program/program.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
@@ -81,7 +80,6 @@ class ExporterTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
         e = new Environment(set, vect, 8);
@@ -98,7 +96,6 @@ class ExporterTest : public ::testing::Test
             Program::Line& l = progPointers.at(0).get()->addNewLine();
             l.setInstructionIndex(0);
             l.setDestinationIndex(1);
-            l.setParameter(0, 0.2f);
             l.setOperand(0, 0, 1);
         }
 

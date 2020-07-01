@@ -38,7 +38,6 @@
 #include "instructions/addPrimitiveType.h"
 #include "instructions/instruction.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
 
 #include "tpg/policyStats.h"
 
@@ -60,7 +59,6 @@ class PolicyStatsTest : public ::testing::Test
             [](double a, const double b[3]) {
                 return a * (b[0] + b[1] + b[2]);
             };
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(
             new Instructions::LambdaInstruction<double, const double[3]>(mac)));
@@ -137,12 +135,13 @@ class PolicyStatsTest : public ::testing::Test
 
         // Program 0 (referenced by two edges)
         Program::Line* l = &progPointers.at(0).get()->addNewLine();
+        /*
         // Intron
         l->setInstructionIndex(0); // MultByConst
         l->setDestinationIndex(4); // Register[4]
-        l->setParameter(0, 0.2f);  // Param
         l->setOperand(0, 1, 0);    // Array[0]
-
+        */
+        
         l = &progPointers.at(0).get()->addNewLine();
         l->setInstructionIndex(1); // Add
         l->setDestinationIndex(1); // Register[1]

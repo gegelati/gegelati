@@ -41,7 +41,6 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
 #include "instructions/set.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -63,7 +62,6 @@ class ProgramTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<int>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
 
         e = new Environment(set, vect, 8);
     }
@@ -112,10 +110,6 @@ TEST_F(ProgramTest, AddEmptyLineAtKnownPosition)
         << "New line Destination is not set to 0.";
     ASSERT_EQ(l->getInstructionIndex(), 0)
         << "New line Instruction is not set to 0.";
-    for (int i = 0; i < e->getMaxNbParameters(); i++) {
-        ASSERT_EQ(l->getParameter(i).i, 0)
-            << "New line parameter is not set to 0.";
-    }
     for (int i = 0; i < e->getMaxNbOperands(); i++) {
         ASSERT_EQ(l->getOperand(i).first, 0)
             << "New line operand source index is not set to 0.";
@@ -153,10 +147,6 @@ TEST_F(ProgramTest, AddEmptyLineAndDestruction)
         << "New line Destination is not set to 0.";
     ASSERT_EQ(l->getInstructionIndex(), 0)
         << "New line Instruction is not set to 0.";
-    for (int i = 0; i < e->getMaxNbParameters(); i++) {
-        ASSERT_EQ(l->getParameter(i).i, 0)
-            << "New line parameter is not set to 0.";
-    }
     for (int i = 0; i < e->getMaxNbOperands(); i++) {
         ASSERT_EQ(l->getOperand(i).first, 0)
             << "New line operand source index is not set to 0.";
@@ -177,7 +167,6 @@ TEST_F(ProgramTest, CopyConstructor)
     l.setDestinationIndex(1);
     l.setInstructionIndex(1);
     l.setOperand(0, 2, 24);
-    l.setParameter(0, 0.3f);
 
     // Create a copy of p0.
     Program::Program p1(*p0);
@@ -196,7 +185,6 @@ TEST_F(ProgramTest, CopyConstructor)
     l.setDestinationIndex(0);
     l.setInstructionIndex(0);
     l.setOperand(0, 0, 0);
-    l.setParameter(0, int16_t(0));
 
     // Check that line attributes have been duplicated
     // May be redundant with lineTest...?
@@ -209,9 +197,6 @@ TEST_F(ProgramTest, CopyConstructor)
            "copy.";
     ASSERT_EQ(p1.getLine(0).getOperand(0).second, 24)
         << "Line operand.location value was not copied on Program copy.";
-    ASSERT_NEAR((float)p1.getLine(0).getParameter(0), 0.3f,
-                PARAM_FLOAT_PRECISION)
-        << "Line parameter value was not copied on Program copy.";
 }
 
 TEST_F(ProgramTest, ProgramSwapLines)

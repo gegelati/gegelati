@@ -41,7 +41,6 @@
 #include "data/untypedSharedPtr.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
 #include "instructions/set.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -76,7 +75,11 @@ class ProgramExecutionEngineTest : public ::testing::Test
             .setDataAt(typeid(double), 6, value3);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
+        set.add(*new Instructions::LambdaInstruction<const double,
+                                                     const double>(
+            [](const double a, const double b) {
+                return a * b;
+            }));        
         set.add(*new Instructions::LambdaInstruction<const double[2],
                                                      const double[2]>(
             [](const double a[2], const double b[2]) {
@@ -98,14 +101,12 @@ class ProgramExecutionEngineTest : public ::testing::Test
         l1.setInstructionIndex(
             1); // Instruction is MultByConstParam<double, float>.
         l1.setOperand(0, 0, 3);            // 1st operand: 3rd register.
-        l1.setParameter(0, (float)value0); // Parameter is set to value1 (=2.3f)
         l1.setDestinationIndex(0);         // Destination is register at index 0
 
         Program::Line& l2 = p->addNewLine();
         l2.setInstructionIndex(
             1); // Instruction is MultByConstParam<double, float>.
         l2.setOperand(0, 0, 1);     // 1st operand: 1th register.
-        l2.setParameter(0, value1); // Parameter is set to value1 (=0.2f)
         l2.setDestinationIndex(0);  // Destination is register at index 0
 
         Program::Line& l3 = p->addNewLine();
@@ -268,31 +269,6 @@ TEST_F(ProgramExecutionEngineTest, fetchCompositeOperands)
            "fixture.";
 }
 
-TEST_F(ProgramExecutionEngineTest, fetchParameters)
-{
-    Program::ProgramExecutionEngine progExecEng(*p);
-    std::vector<std::reference_wrapper<const Parameter>> parameters;
-
-    // First line of fixture has no parameters. Just check that nothing is
-    // thrown.
-    ASSERT_NO_THROW(progExecEng.fetchCurrentParameters(parameters))
-        << "Fetching the parameters of a valid Program from fixtures failed.";
-    ASSERT_EQ(parameters.size(), 0)
-        << "Since first line of the Program refers to an instruction using no "
-           "Parameter, the vector should remain empty.";
-    progExecEng.next();
-
-    ASSERT_NO_THROW(progExecEng.fetchCurrentParameters(parameters))
-        << "Fetching the parameters of a valid Program from fixtures failed.";
-    // Check number of parameters
-    ASSERT_EQ(parameters.size(), 1)
-        << "Incorrect number of operands were fetched by previous call.";
-    // Check parameter value (set in fixture). value1: 0.2f (+/- the parameter
-    // floating precision)
-    ASSERT_NEAR((float)parameters.at(0).get(), value1, PARAM_FLOAT_PRECISION)
-        << "Value of fetched parameter is incorrect.";
-}
-
 TEST_F(ProgramExecutionEngineTest, executeCurrentLine)
 {
     Program::ProgramExecutionEngine progExecEng(*p);
@@ -379,7 +355,7 @@ TEST_F(ProgramExecutionEngineTest, execute)
     double result;
 
     double r1 = value0 + 0;
-    double r0 = r1 * (Parameter(value1)).operator float();
+    double r0 = r1;
     r0 = r0 * value2 + r1 * value3;
 
     ASSERT_NO_THROW(result = progExecEng.executeProgram())

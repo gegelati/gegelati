@@ -37,7 +37,7 @@
 #include <thread>
 
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "log/LABasicLogger.h"
 
 class LABasicLoggerTest : public ::testing::Test
@@ -63,8 +63,9 @@ class LABasicLoggerTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<float>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
-
+        auto minus = [](double a, double b)->double {return a - b; };
+        set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+        
         e = new Environment(set, vect, 8);
         tpg = new TPG::TPGGraph(*e);
 

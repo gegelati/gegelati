@@ -38,7 +38,7 @@
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "program/program.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
@@ -48,6 +48,8 @@
 
 #include "tpg/tpgExecutionEngine.h"
 
+//TODO REMOVE THAT. this is temporary.
+#define PARAM_FLOAT_PRECISION 0.001
 class TPGExecutionEngineTest : public ::testing::Test
 {
   protected:
@@ -74,7 +76,6 @@ class TPGExecutionEngineTest : public ::testing::Test
         line.setInstructionIndex(1);
         line.setOperand(0, 1, 0);    // Dhandler 0 location 0
         line.setDestinationIndex(0); // 0th register des
-        line.setParameter(0, (float)value);
     }
 
     virtual void SetUp()
@@ -91,7 +92,10 @@ class TPGExecutionEngineTest : public ::testing::Test
             .setDataAt(typeid(double), 0, 1.0);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
+
+        auto minus = [](double a, double b)->double {return a - b; };
+        set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+
         e = new Environment(set, vect, 8);
         tpg = new TPG::TPGGraph(*e);
 

@@ -40,7 +40,7 @@
 #include "data/primitiveTypeArray.h"
 #include "environment.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 
 TEST(EnvironmentTest, Constructor)
@@ -111,8 +111,8 @@ TEST(EnvironmentTest, computeLineSize)
     vect.push_back(*(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
 
     set.add(*(new Instructions::AddPrimitiveType<float>()));
-    set.add(*(new Instructions::MultByConstParam<double, float>()));
-
+    auto minus = [](double a, double b)->double {return a - b; };
+    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
     e = new Environment(set, vect, 8);
 
     // Expected answer:
@@ -141,11 +141,10 @@ TEST(EnvironmentTest, Size_tAttributeAccessors)
     Data::PrimitiveTypeArray<int> d2(size2);
 
     Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
-    Instructions::MultByConstParam<double, float>
-        iMult; // One operand, One parameter
+    auto minus = [](double a, double b)->double {return a - b; };
 
     set.add(iAdd);
-    set.add(iMult);
+    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
 
     vect.push_back(d1);
     vect.push_back(d2);
@@ -161,9 +160,6 @@ TEST(EnvironmentTest, Size_tAttributeAccessors)
     ASSERT_EQ(e.getMaxNbOperands(), 2)
         << "Maximum number of operands of the Environment does not correspond "
            "to the instruction set given during construction.";
-    ASSERT_EQ(e.getMaxNbParameters(), 1)
-        << "Maximum number of parameters of the Environment does not "
-           "correspond to the instruction set given during construction.";
     ASSERT_EQ(e.getNbDataSources(), 3)
         << "Number of data sources does not correspond to the number of "
            "DataHandler (+1 for registers) given during construction.";
@@ -183,11 +179,10 @@ TEST(EnvironmentTest, GetFakeRegisters)
     Data::PrimitiveTypeArray<int> d2(size2);
 
     Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
-    Instructions::MultByConstParam<double, float>
-        iMult; // One operand, One parameter
+    auto minus = [](double a, double b)->double {return a - b; };
 
     set.add(iAdd);
-    set.add(iMult);
+    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
 
     vect.push_back(d1);
     vect.push_back(d2);
@@ -214,12 +209,11 @@ TEST(EnvironmentTest, InstructionSetAccessor)
     Data::PrimitiveTypeArray<float> d2(size2);
 
     Instructions::AddPrimitiveType<float> iAdd; // Two operands, No Parameter
-    Instructions::MultByConstParam<double, float>
-        iMult; // One operand, One parameter
+    auto minus = [](double a, double b)->double {return a - b; };
 
     set.add(iAdd);
-    set.add(iMult);
-
+    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+    
     vect.push_back(d1);
     vect.push_back(d2);
 
@@ -250,11 +244,10 @@ TEST(EnvironmentTest, DataSourceAccessor)
     Data::PrimitiveTypeArray<int> d2(size2);
 
     Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
-    Instructions::MultByConstParam<double, float>
-        iMult; // One operand, One parameter
+    auto minus = [](double a, double b)->double {return a - b; };
 
     set.add(iAdd);
-    set.add(iMult);
+    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
 
     vect.push_back(d1);
     vect.push_back(d2);

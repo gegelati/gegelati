@@ -40,7 +40,7 @@
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -62,8 +62,9 @@ class LineTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<int>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
-
+        auto minus = [](double a, double b)->double {return a - b; };
+        set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+        
         e = new Environment(set, vect, 8);
     }
 
@@ -101,7 +102,6 @@ TEST_F(LineTest, CopyConstructor)
     l0->setInstructionIndex(1);
     l0->setDestinationIndex(1);
     l0->setOperand(0, 1, 1);
-    l0->setParameter(0, int16_t(1));
     ASSERT_EQ(l1->getInstructionIndex(), 0)
         << "The Line instructionIndex was not deeply copied.";
     ASSERT_EQ(l1->getDestinationIndex(), 0)
@@ -110,8 +110,6 @@ TEST_F(LineTest, CopyConstructor)
         << "The Line operand 0 dataSource index was not deeply copied.";
     ASSERT_EQ(l1->getOperand(0).second, 0)
         << "The Line operand 0 location was not deeply copied.";
-    ASSERT_EQ((int16_t)l1->getParameter(0), int16_t(0))
-        << "The Line parameter was not deeply copied.";
 
     ASSERT_NO_THROW(delete l0;) << "Destructing a copied line failed.";
     ASSERT_NO_THROW(delete l1;) << "Destructing a line copy failed.";
@@ -160,22 +158,6 @@ TEST_F(LineTest, LineDestinationInstructionGetters)
     l.setInstructionIndex(1, false);
     ASSERT_EQ(l.getInstructionIndex(), 1)
         << "Get after set returned the wrong value.";
-}
-
-TEST_F(LineTest, LineParameterAccessors)
-{
-    Program::Line l(*e); // with the given environment, there is a single
-                         // Parameter per line.
-    ASSERT_NO_THROW(l.setParameter(0, 0.2f))
-        << "Setting value of a correctly indexed parameter failed.";
-    ASSERT_THROW(l.setParameter(1, 0.3f), std::range_error)
-        << "Setting value of an incorrectly indexed parameter did not fail.";
-
-    // Is it equal (to the Parameter float precision)
-    ASSERT_NEAR((float)l.getParameter(0), 0.2f, PARAM_FLOAT_PRECISION)
-        << "Getting a previously set parameter failed.";
-    ASSERT_THROW(l.getParameter(1), std::range_error)
-        << "Getting value of an incorrectly indexed parameter did not fail.";
 }
 
 TEST_F(LineTest, LineOperandAccessors)
