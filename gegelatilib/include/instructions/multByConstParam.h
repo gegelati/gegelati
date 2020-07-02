@@ -43,39 +43,50 @@
 
 namespace Instructions {
 
-	/**
-	* \brief Instruction for multiplying a unique argument of type T by a constant parameter of type U.
-	*/
-	template <class T, class U> class MultByConstParam : public Instruction {
-		static_assert(std::is_fundamental<T>::value&& std::is_fundamental<U>::value, "Template class MultByConstParam<T,U> can only be used for primitive types.");
-		static_assert(std::is_same<int16_t, U>() || std::is_same<float, U>(), "Param type can either be int16_t or float.");
-	public:
-		/**
-		*  \brief Constructor for the MultByConstParam class.
-		*/
-		MultByConstParam();
+    /**
+     * \brief Instruction for multiplying a unique argument of type T by a
+     * constant parameter of type U.
+     */
+    template <class T, class U> class MultByConstParam : public Instruction
+    {
+        static_assert(std::is_fundamental<T>::value &&
+                          std::is_fundamental<U>::value,
+                      "Template class MultByConstParam<T,U> can only be used "
+                      "for primitive types.");
+        static_assert(std::is_same<int16_t, U>() || std::is_same<float, U>(),
+                      "Param type can either be int16_t or float.");
 
-		virtual double execute(
-			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<Data::UntypedSharedPtr>& args) const override;
-	};
+      public:
+        /**
+         *  \brief Constructor for the MultByConstParam class.
+         */
+        MultByConstParam();
 
-	template <class T, class U> MultByConstParam<T, U>::MultByConstParam() {
-		this->operandTypes.push_back(typeid(T));
-		this->nbParameters = 1;
-	}
+        virtual double execute(
+            const std::vector<std::reference_wrapper<const Parameter>>& params,
+            const std::vector<Data::UntypedSharedPtr>& args) const override;
+    };
 
-	template<class T, class U> double MultByConstParam<T, U>::execute(
-		const std::vector<std::reference_wrapper<const Parameter>>& params,
-		const std::vector<Data::UntypedSharedPtr>& args) const
-	{
-		if (Instruction::execute(params, args) != 1.0) {
-			return 0.0;
-		}
+    template <class T, class U> MultByConstParam<T, U>::MultByConstParam()
+    {
+        this->operandTypes.push_back(typeid(T));
+        this->nbParameters = 1;
+    }
 
-		const U pValue = (const U&)params.at(0).get();
-		return *(args.at(0).getSharedPointer<const T>()) * (double)pValue;
-	};
-}
+    template <class T, class U>
+    double MultByConstParam<T, U>::execute(
+        const std::vector<std::reference_wrapper<const Parameter>>& params,
+        const std::vector<Data::UntypedSharedPtr>& args) const
+    {
+#ifndef NDEBUG
+        if (Instruction::execute(params, args) != 1.0) {
+            return 0.0;
+        }
+#endif // !NDEBUG
+
+        const U pValue = (const U&)params.at(0).get();
+        return *(args.at(0).getSharedPointer<const T>()) * (double)pValue;
+    };
+} // namespace Instructions
 
 #endif

@@ -45,114 +45,131 @@
 
 namespace Instructions {
 
-	/**
-	* \brief Template instruction for simplifying the creation of an
-	* Instruction from a c++ lambda function.
-	*
-	* Template parameters First and Rest can be any primitive type, class or
-	* const c-style 1D array.
-	*
-	* Each template parameter corresponds to an argument of the function given
-	* to the LambdaInstruction constructor, specifying its type.
-	*/
-	template< typename First, typename... Rest>
-	class LambdaInstruction : public Instructions::Instruction {
+    /**
+     * \brief Template instruction for simplifying the creation of an
+     * Instruction from a c++ lambda function.
+     *
+     * Template parameters First and Rest can be any primitive type, class or
+     * const c-style 1D array.
+     *
+     * Each template parameter corresponds to an argument of the function given
+     * to the LambdaInstruction constructor, specifying its type.
+     */
+    template <typename First, typename... Rest>
+    class LambdaInstruction : public Instructions::Instruction
+    {
 
-	protected:
+      protected:
+        /**
+         * \brief Function executed for this Instruction.
+         */
+        const std::function<double(const First, const Rest...)> func;
 
-		/**
-		* \brief Function executed for this Instruction.
-		*/
-		const std::function<double(const First, const Rest...)> func;
+      public:
+        /**
+         * \brief delete the default constructor.
+         */
+        LambdaInstruction() = delete;
 
-	public:
-		/**
-		* \brief delete the default constructor.
-		*/
-		LambdaInstruction() = delete;
+        /**
+         * \brief Constructor for the LambdaInstruction.
+         *
+         * \param[in] function the c++ std::function that will be executed for
+         * this Instruction. The function must have the same types in its
+         * argument list as specified by the template parameters. (checked at
+         * compile time)
+         */
+        LambdaInstruction(std::function<double(First, Rest...)> function)
+            : func{function}
+        {
 
-		/**
-		* \brief Constructor for the LambdaInstruction.
-		*
-		* \param[in] function the c++ std::function that will be executed for
-		* this Instruction. The function must have the same types in its argument
-		* list as specified by the template parameters. (checked at compile time)
-		*/
-		LambdaInstruction(std::function<double(First, Rest...)> function) : func{ function } {
+            this->operandTypes.push_back(typeid(First));
+            // Fold expression to push all other types
+            (this->operandTypes.push_back(typeid(Rest)), ...);
+        };
 
-			this->operandTypes.push_back(typeid(First));
-			// Fold expression to push all other types
-			(this->operandTypes.push_back(typeid(Rest)), ...);
-		};
+        /// Inherited from Instruction
+        virtual bool checkOperandTypes(
+            const std::vector<Data::UntypedSharedPtr>& arguments) const override
+        {
+            if (arguments.size() != this->operandTypes.size()) {
+                return false;
+            }
 
-		/// Inherited from Instruction
-		virtual bool checkOperandTypes(const std::vector<Data::UntypedSharedPtr>& arguments) const override {
-			if (arguments.size() != this->operandTypes.size()) {
-				return false;
-			}
+            // List of expected types
+            const std::vector<std::reference_wrapper<const std::type_info>>
+                expectedTypes{
+                    // First
+                    (!std::is_array<First>::value)
+                        ? typeid(First)
+                        : typeid(std::remove_all_extents_t<First>[]),
+                    (!std::is_array<Rest>::value)
+                        ? typeid(Rest)
+                        : typeid(std::remove_all_extents_t<Rest>[])...};
 
-			// List of expected types
-			const std::vector<std::reference_wrapper<const std::type_info>> expectedTypes{
-				// First
-				(!std::is_array<First>::value) ?
-					typeid(First) :
-					typeid(std::remove_all_extents_t<First>[]),
-				(!std::is_array<Rest>::value) ?
-					typeid(Rest) :
-					typeid(std::remove_all_extents_t<Rest>[])... };
+            for (auto idx = 0; idx < arguments.size(); idx++) {
+                // Argument Type
+                const std::type_info& argType = arguments.at(idx).getType();
+                if (argType != expectedTypes.at(idx).get()) {
+                    return false;
+                }
+            }
 
-			for (auto idx = 0; idx < arguments.size(); idx++) {
-				// Argument Type
-				const std::type_info& argType = arguments.at(idx).getType();
-				if (argType != expectedTypes.at(idx).get()) {
-					return false;
-				}
-			}
+            return true;
+        };
 
-			return true;
-		};
+        double execute(
+            const std::vector<std::reference_wrapper<const Parameter>>& params,
+            const std::vector<Data::UntypedSharedPtr>& args) const override
+        {
 
-		double execute(
-			const std::vector<std::reference_wrapper<const Parameter>>& params,
-			const std::vector<Data::UntypedSharedPtr>& args) const override {
+#ifndef NDEBUG
+            if (Instruction::execute(params, args) != 1.0) {
+                return 0.0;
+            }
+#endif
 
-			if (Instruction::execute(params, args) != 1.0) {
-				return 0.0;
-			}
+            size_t i = args.size() - 1;
+            // Using i-- as expansion seems to happen with parameters evaluated
+            // from right to left. This assumption is valid within GCC7 and
+            // MSVC19. In case of failure on another compiler, a more portable
+            // solution should be found.
+            double result =
+                this->func(getDataFromUntypedSharedPtr<First>(args, 0),
+                           getDataFromUntypedSharedPtr<Rest>(args, i--)...);
+            return result;
+        };
 
-			size_t i = args.size() - 1;
-			// Using i-- as expansion seems to happen with parameters evaluated from right to left.
-			// This assumption is valid within GCC7 and MSVC19. In case of failure on another
-			// compiler, a more portable solution should be found.
-			double result = this->func(getDataFromUntypedSharedPtr<First>(args, 0), getDataFromUntypedSharedPtr<Rest>(args, i--)...);
-			return result;
-		};
-
-	private:
-		/**
-		* \brief Function to retrieve the shared pointer from any datatype in the
-		* execute method.
-		*
-		* An inline lambda expression could be used in the execute method, with
-		* a variadic parameter pack expansion. Unfortunately not supported by
-		* GCC7.5
-		*
-		* Template parameter T is the Type of the retrieved argument.
-		*
-		* \param[in] args the UntypedSharedPtr of all arguments.
-		* \param[in] idx the current index in the args list.
-		* \return the appropriate argument for this->func.
-		*/
-		template<typename T>
-		constexpr auto getDataFromUntypedSharedPtr(const std::vector<Data::UntypedSharedPtr>& args, size_t idx) const {
-			if constexpr (!std::is_array<T>::value) {
-				return *(args.at(idx).getSharedPointer<const T>());
-			}
-			else {
-				return (args.at(idx).getSharedPointer<const std::remove_all_extents_t<T>[]>()).get();
-			};
-		};
-	};
-};
+      private:
+        /**
+         * \brief Function to retrieve the shared pointer from any datatype in
+         * the execute method.
+         *
+         * An inline lambda expression could be used in the execute method, with
+         * a variadic parameter pack expansion. Unfortunately not supported by
+         * GCC7.5
+         *
+         * Template parameter T is the Type of the retrieved argument.
+         *
+         * \param[in] args the UntypedSharedPtr of all arguments.
+         * \param[in] idx the current index in the args list.
+         * \return the appropriate argument for this->func.
+         */
+        template <typename T>
+        constexpr auto getDataFromUntypedSharedPtr(
+            const std::vector<Data::UntypedSharedPtr>& args, size_t idx) const
+        {
+            if constexpr (!std::is_array<T>::value) {
+                return *(args.at(idx).getSharedPointer<const T>());
+            }
+            else {
+                return (args.at(idx)
+                            .getSharedPointer<
+                                const std::remove_all_extents_t<T>[]>())
+                    .get();
+            };
+        };
+    };
+}; // namespace Instructions
 
 #endif

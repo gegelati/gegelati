@@ -39,15 +39,15 @@
 #include "tpg/tpgVertex.h"
 
 namespace TPG {
-	/**
-	* Class used to represent a Team of the TPGGraph.
-	*
-	* A Team is a non-leaf vertex of a Tangled-Program-Graph.
-	*/
-	class TPGTeam : public TPGVertex {
+    /**
+     * Class used to represent a Team of the TPGGraph.
+     *
+     * A Team is a non-leaf vertex of a Tangled-Program-Graph.
+     */
+    class TPGTeam : public TPGVertex
+    {
+    };
 
-	};
-
-};
+}; // namespace TPG
 
 #endif

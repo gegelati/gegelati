@@ -20,18 +20,22 @@
 # option, see https://cmake.org/cmake/help/latest/command/set.html.
 set(LIBRARY_TARGET_NAME ${PROJECT_NAME})
 
+# includes JsonCpp library to be able to parse parameters JSON files
+include_directories("../lib/JsonCpp")
 # List of CPP (source) library files.
 file(
-	GLOB_RECURSE
-	${LIBRARY_TARGET_NAME}_SRC
-	./src/*.cpp
+        GLOB_RECURSE
+        ${LIBRARY_TARGET_NAME}_SRC
+        ./src/*.cpp
+        ../lib/*.cpp
 )
 
 # List of H (header) library files.
 file(
-	GLOB_RECURSE
-	${LIBRARY_TARGET_NAME}_HDR
-	./include/*.h
+        GLOB_RECURSE
+        ${LIBRARY_TARGET_NAME}_HDR
+        ./include/*.h
+        ../lib/*.h
 )
 
 # You can add an external dependency using the find_package() function call
@@ -67,22 +71,22 @@ add_library(${PROJECT_NAME}::${LIBRARY_TARGET_NAME} ALIAS ${LIBRARY_TARGET_NAME}
 
 # Set two minimum target properties for the library.
 # See https://cmake.org/cmake/help/latest/command/set_target_properties.html
-# Properties are: 1) Library version number 
+# Properties are: 1) Library version number
 set_target_properties(${LIBRARY_TARGET_NAME} PROPERTIES VERSION       ${${PROJECT_NAME}_VERSION})
-														# 2) list of corresponding public headers 
-														# EDIT: Was removed, because hierarchy is not preserved.
-														# Is replaced with install(DIRECTORY...) below
-                                                        #PUBLIC_HEADER "${${LIBRARY_TARGET_NAME}_HDR}")
+# 2) list of corresponding public headers
+# EDIT: Was removed, because hierarchy is not preserved.
+# Is replaced with install(DIRECTORY...) below
+#PUBLIC_HEADER "${${LIBRARY_TARGET_NAME}_HDR}")
 
 # Specify include directories for both compilation and installation process.
 # The $<INSTALL_PREFIX> generator expression is useful to ensure to create
 # relocatable configuration files, see https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-relocatable-packages
 if(WIN32)
-    target_include_directories(${LIBRARY_TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                                         "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+ target_include_directories(${LIBRARY_TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+         "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 else()
-    target_include_directories(${LIBRARY_TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                                         "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME}/include/>")
+ target_include_directories(${LIBRARY_TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+         "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME}/include/>")
 endif()
 
 # If you used find_package() you need to use target_include_directories() and/or
@@ -100,30 +104,29 @@ install(TARGETS ${LIBRARY_TARGET_NAME}
         LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"                            COMPONENT shlib
         ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"                            COMPONENT lib
         RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}"                            COMPONENT bin)
-        # Removed line for preserving header folder hierarchy.
-		# PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME}" COMPONENT dev)
+# Removed line for preserving header folder hierarchy.
+# PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME}" COMPONENT dev)
 
 # PDB fow windows visual
 if(MSVC)
-	install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> CONFIGURATIONS "Debug" "RelWithDebInfo" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> CONFIGURATIONS "Debug" "RelWithDebInfo" DESTINATION "${CMAKE_INSTALL_BINDIR}")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage -fprofile-arcs -ftest-coverage")
+ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage -fprofile-arcs -ftest-coverage")
 endif()
 
 # Doc installation
 if(WIN32)
-	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
-		DESTINATION "." # Destination is CMAKE_BINARY_DIR
-	        FILES_MATCHING # install only matched files
-	        PATTERN "*.h" # select header files
-	)
+ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
+         DESTINATION "." # Destination is CMAKE_BINARY_DIR
+         FILES_MATCHING # install only matched files
+         PATTERN "*.h" # select header files
+         )
 else()
-	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
-			DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME} 
-	        FILES_MATCHING # install only matched files
-	        PATTERN "*.h" # select header files
-	)
+ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" # source directory
+         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIBRARY_TARGET_NAME}
+         FILES_MATCHING # install only matched files
+         PATTERN "*.h" # select header files
+         )
 endif()
 
 message(STATUS "Created target ${LIBRARY_TARGET_NAME} for export ${PROJECT_NAME}.")
-

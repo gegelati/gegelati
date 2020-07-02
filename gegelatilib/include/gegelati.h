@@ -3,6 +3,7 @@
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -35,22 +36,23 @@
  */
 
 /**
-* \file gegelati.h
-* \brief Helper file gathering all headers from the GEGELATI lib to ease their
-* inclusion in apps.
-*/
+ * \file gegelati.h
+ * \brief Helper file gathering all headers from the GEGELATI lib to ease their
+ * inclusion in apps.
+ */
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
-#include <data/untypedSharedPtr.h>
+#include <data/dataHandler.h>
 #include <data/hash.h>
-#include <data/dataHandler.h>  
 #include <data/primitiveTypeArray.h>
+#include <data/untypedSharedPtr.h>
 
+#include <file/parametersParser.h>
 #include <file/tpgGraphDotExporter.h>
 #include <file/tpgGraphDotImporter.h>
 
-#include <instructions/addPrimitiveType.h>  
+#include <instructions/addPrimitiveType.h>
 #include <instructions/instruction.h>
 #include <instructions/lambdaInstruction.h>
 #include <instructions/multByConstParam.h>
@@ -58,13 +60,17 @@
 
 #include <learn/evaluationResult.h>
 #include <learn/learningAgent.h>
-#include <learn/parallelLearningAgent.h>
 #include <learn/learningEnvironment.h>
 #include <learn/learningParameters.h>
+#include <learn/parallelLearningAgent.h>
 
 #include <learn/classificationEvaluationResult.h>
-#include <learn/classificationLearningEnvironment.h>
 #include <learn/classificationLearningAgent.h>
+#include <learn/classificationLearningEnvironment.h>
+
+#include <log/LABasicLogger.h>
+#include <log/LALogger.h>
+#include <log/Logger.h>
 
 #include <mutator/lineMutator.h>
 #include <mutator/mutationParameters.h>
@@ -72,17 +78,17 @@
 #include <mutator/rng.h>
 #include <mutator/tpgMutator.h>
 
-#include <program/line.h>  
-#include <program/program.h>  
+#include <program/line.h>
+#include <program/program.h>
 #include <program/programExecutionEngine.h>
 
+#include <tpg/policyStats.h>
 #include <tpg/tpgAction.h>
 #include <tpg/tpgEdge.h>
 #include <tpg/tpgExecutionEngine.h>
 #include <tpg/tpgGraph.h>
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
-#include <tpg/policyStats.h>
 
 #include <archive.h>
 #include <environment.h>

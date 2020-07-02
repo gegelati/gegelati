@@ -1,5 +1,25 @@
 # GEGELATI Changelog
 
+## Release version 0.3.0
+_2020.07.02_
+
+### New features
+* Parameters (learningParameters and mutationParameters) can now be set with a JSON file using parametersParser.
+* A generic Logger class was added to ease the creation of log files within gegelati.
+* A specific logging mechanism is available for LearningAgent, using a child class of the LALogger class. A logger, LABasicLogger with basic learning information is provided.
+* In Release configuration, the `NDEBUG` macro is used to deactivate redundant operand type checks during Program execution. A performance gain of 8% was observed on the MNIST application.
+* Automate code formatting with clang-format-10.
+    * A new script, `fix_code_format.sh`, can be used to check and format all C++ files of the `gegelatilib` and `test` folders. Use the `--doCommit` option to commit the reformatting that was done.
+	* Update of Travis configuration to fail when files are not properly formatted when building a Pull Request. Other builds (i.e. non-PR) allow the failure of this job.
+* An automated validation is now possible when the parameter `doValidation` is set to true. In this case, the basicLALogger hides evaluation statistics, and displays validation ones instead.
+* Nicer README.md with illustrated links to application repositories, and useless but fancy emojis.
+
+### Changes
+* maxNbThreads is now a variable of learningAgent allowing to have a more generic trainOneGeneration method
+
+### Bug fix
+
+
 ## Release version 0.2.1
 _2020.06.12_
 
