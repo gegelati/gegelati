@@ -9,6 +9,7 @@ GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framew
 
 ## Overview
 * [Continuous Integration](#continuous-integration)
+* [Application Gallery](#application-gallery)
 * [Build and Install the Library](#build-and-install-the-library)
 * [How to Use the GEGELATI Library](#how-to-use-the-gegelati-library)
 * [License](#license)
@@ -19,6 +20,15 @@ GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framew
 | ------------- |  ------------- |  ------------- |
 | master  |  [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=master)](https://travis-ci.com/gegelati/gegelati/branches)  | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master)|
 | develop  | [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=develop)](https://travis-ci.com/gegelati/gegelati/branches) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop)|
+
+## Application Gallery
+You can try GEGELATI with our (growing) set of open-source applications.
+
+| [Atari Games](https://github.com/gegelati/ale-wrapper) | [Inverted Pendulum](https://github.com/gegelati/gegelati-apps) | [MNIST](https://github.com/gegelati/gegelati-apps) | [Tic Tac Toe](https://github.com/gegelati/gegelati-apps) |
+|:-:|:-:|:-:|:-:|
+|<img src="./doc/img/frostbite.gif" width="150" />|<img src="./doc/img/pendulum_g6_200x200.gif" width="150" />|<img src="./doc/img/mnist.png" width="150" />|<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Jogo_da_velha_-_tic_tac_toe.png/284px-Jogo_da_velha_-_tic_tac_toe.png" width="150"/>|
+
+Checkout the [gegelati-apps repository](https://github.com/gegelati/gegelati-apps) for more. If you have developed your own open-source learning environment and think it deserves to be listed here, don't hesitate to send us an e-mail.
 
 ## Build and Install the Library
 ### Binaries
