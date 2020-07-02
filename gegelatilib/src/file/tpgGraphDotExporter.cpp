@@ -110,7 +110,8 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
         printProgram(p);
         fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n",
                 this->offset.c_str(), progID, progID);
-        if (typeid(*edge.getDestination()) == typeid(TPG::TPGAction)) {
+		auto * dest = edge.getDestination();
+        if (dest && typeid(*dest) == typeid(TPG::TPGAction)) {
             uint64_t actionID =
                 printTPGAction(*(const TPG::TPGAction*)edge.getDestination());
             fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n",

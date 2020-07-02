@@ -53,6 +53,6 @@ TEST(DataHashTest, HashDouble)
 
 TEST(DataHashTest, HashNullptr)
 {
-    nullptr_t t = NULL;
-    ASSERT_EQ(Data::Hash<nullptr_t>()(t), 12161962213042174405);
+    std::nullptr_t t = NULL;
+    ASSERT_EQ(Data::Hash<std::nullptr_t>()(t), 12161962213042174405);
 }

@@ -162,7 +162,8 @@ void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph,
     // Copy the set
     std::list<TPG::TPGEdge*> pickableEdges = team.getOutgoingEdges();
     auto isTPGAction = [](const TPG::TPGEdge* edge) -> bool {
-        return typeid(*edge->getDestination()) == typeid(TPG::TPGAction);
+		auto * dest = edge->getDestination();
+        return dest && typeid(*dest) == typeid(TPG::TPGAction);
     };
 
     // if there is a unique TPGAction among the edges, exclude it from the
@@ -231,12 +232,14 @@ void Mutator::TPGMutator::mutateEdgeDestination(
 
     // Check if the edge is the only of the team connected to an action.
     // in which case, selecting an action is mandatory.
+	auto * dest = edge->getDestination();
     if (targetAction ||
-        (typeid(*edge->getDestination()) == typeid(TPG::TPGAction) &&
+        (dest && typeid(*dest) == typeid(TPG::TPGAction) &&
          std::count_if(team.getOutgoingEdges().begin(),
                        team.getOutgoingEdges().end(),
                        [](const TPG::TPGEdge* other) {
-                           return typeid(*other->getDestination()) ==
+						   auto * oDest = other->getDestination();
+                           return oDest && typeid(*oDest) ==
                                   typeid(TPG::TPGAction);
                        }) == 1)) {
         // Pick an Action target
