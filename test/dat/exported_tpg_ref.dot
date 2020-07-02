@@ -6,7 +6,7 @@ digraph{
 		T2 [fillcolor="#66ddff"]
 		T3 [fillcolor="#1199bb"]
 		P0 [fillcolor="#cccccc" shape=point]
-		I0 [shape=box style=invis label="0|1&6554|$0|1#0|0&#92;n0|1&6554|$0|1#0|0&#92;n0|1&6554|$0|1#0|0&#92;n"]
+		I0 [shape=box style=invis label="0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n"]
 		P0 -> I0[style=invis]
 		A0 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="0"]
 		T0 -> P0 -> A0

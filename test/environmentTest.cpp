@@ -118,17 +118,16 @@ TEST(EnvironmentTest, computeLineSize)
     // Expected answer:
     // n = 8
     // i = 2
-    // p = 1
     // nbSrc = 3
     // largestAddressSpace = 32
     // m = 2
     // ceil(log2(n)) + ceil(log2(i)) + m * (ceil(log2(nb_{ src })) +
-    // ceil(log2(largestAddressSpace)) + p * sizeof(Param) * 8 ceil(log2(8)) +
-    // ceil(log2(2)) + 2 * (ceil(log2(3)) + ceil(log2(32)) + 1 * 2 * 8
-    //            3  +             1 + 2 * (            2 +             5) +  16
-    ASSERT_EQ(e->getLineSize(), 34)
-        << "Program Line size is incorrect. Expected value is 50 for "
-           "(n=8,i=2,p=1,nbSrc=3,largAddrSpace=32,m=2). ";
+    // ceil(log2(largestAddressSpace))=
+    // ceil(log2(8)) + ceil(log2(2)) + 2 * (ceil(log2(3)) + ceil(log2(32)) + 1 * 2 * 8
+    //            3  +             1 + 2 * (            2 +             5) = 18
+    ASSERT_EQ(e->getLineSize(), 18)
+        << "Program Line size is incorrect. Expected value is 18 for "
+           "(n=8,i=2,nbSrc=3,largAddrSpace=32,m=2). ";
 }
 TEST(EnvironmentTest, Size_tAttributeAccessors)
 {

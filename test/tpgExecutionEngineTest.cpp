@@ -49,7 +49,9 @@
 #include "tpg/tpgExecutionEngine.h"
 
 //TODO REMOVE THAT. this is temporary.
+#ifndef PARAM_FLOAT_PRECISION
 #define PARAM_FLOAT_PRECISION 0.001
+#endif
 class TPGExecutionEngineTest : public ::testing::Test
 {
   protected:

@@ -59,10 +59,12 @@ class PolicyStatsTest : public ::testing::Test
             [](double a, const double b[3]) {
                 return a * (b[0] + b[1] + b[2]);
             };
+        std::function<double(double,double)> minus = [](double a, double b)->double {return a - b; };
+
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(
             new Instructions::LambdaInstruction<double, const double[3]>(mac)));
-
+        set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
         // Data handler
         // Setup environment
         vect.push_back(

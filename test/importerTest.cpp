@@ -41,6 +41,7 @@
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
+#include "instructions/lambdaInstruction.h"
 #include "learn/learningParameters.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -84,7 +85,10 @@ class ImporterTest : public ::testing::Test
         ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
             .setDataAt(typeid(double), 0, 1.0);
 
+         auto minus = [](double a, double b) -> double { return a - b; };
+
         set.add(*(new Instructions::AddPrimitiveType<double>()));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
         e = new Environment(set, vect, 8);
         tpg = new TPG::TPGGraph(*e);
         tpg_copy = new TPG::TPGGraph(*e);
