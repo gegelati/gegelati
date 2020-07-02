@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_aaaa.mm.dd_
+## Release version 0.3.0
+_2020.07.02_
 
 ### New features
 * Parameters (learningParameters and mutationParameters) can now be set with a JSON file using parametersParser.
