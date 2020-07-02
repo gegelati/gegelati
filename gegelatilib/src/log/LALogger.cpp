@@ -2,9 +2,9 @@
 
 double Log::LALogger::getDurationFrom(
     const std::chrono::time_point<std::chrono::system_clock,
-                                  std::chrono::nanoseconds>& time) const
+                                  std::chrono::nanoseconds>& begin) const
 {
-    return ((std::chrono::duration<double>)(getTime() - time)).count();
+    return ((std::chrono::duration<double>)(getTime() - begin)).count();
 }
 
 std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>
