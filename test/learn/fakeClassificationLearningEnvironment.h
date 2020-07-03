@@ -61,7 +61,7 @@ class FakeClassificationLearningEnvironment
         this->currentClass = value % 3;
         data.setDataAt(typeid(int), 0, value);
     }
-    void reset(size_t seed, Learn::LearningMode mode)
+    void reset(size_t seed, Learn::LearningMode mode) override
     {
         // Call super pure virtual method to reset the pure virtual method.
         ClassificationLearningEnvironment::reset(seed, mode);
@@ -70,13 +70,13 @@ class FakeClassificationLearningEnvironment
         this->currentClass = 0;
     };
     std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources()
+    getDataSources() override
     {
         std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
         vect.push_back(data);
         return vect;
     }
-    bool isTerminal() const
+    bool isTerminal() const override
     {
         return false;
     }

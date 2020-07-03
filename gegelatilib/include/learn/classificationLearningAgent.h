@@ -240,8 +240,9 @@ namespace Learn {
     {
         // Check that results are ClassificationEvaluationResults.
         // (also throws on empty results)
+		EvaluationResult* result = results.begin()->first.get();
         if (typeid(ClassificationEvaluationResult) !=
-            typeid(*(results.begin()->first.get()))) {
+            typeid(*result)) {
             throw std::runtime_error(
                 "ClassificationLearningAgent can not decimate worst roots for "
                 "results whose type is not ClassificationEvaluationResult.");
