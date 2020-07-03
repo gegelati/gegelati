@@ -176,6 +176,5 @@ TEST(LambdaInstructionsTest, ExecuteAllTypesMixed)
     ASSERT_THROW(instruction2.execute({}, vect2), std::runtime_error)
         << "In NDEBUG mode, execution of a LambdaInstruction with wrong "
            "argument types should fail.";
-    ;
 #endif
 }
