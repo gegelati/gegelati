@@ -1,5 +1,16 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_aaaa.mm.dd_
+
+### New features
+* Fix code for building GEGELATI with clang (v7+) and added a dedicated job with travis-ci.
+
+### Changes
+
+### Bug fix
+
+
 ## Release version 0.3.0
 _2020.07.02_
 

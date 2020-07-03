@@ -198,8 +198,8 @@ TEST(EnvironmentTest, GetFakeRegisters)
         << "Couldn't access the fake registers of the environment.";
     ASSERT_EQ(e.getFakeRegisters().getAddressSpace(typeid(double)), 8)
         << "Address space for double type id is incorrect in fake registers.";
-    ASSERT_EQ(typeid(e.getFakeRegisters()),
-              typeid(Data::PrimitiveTypeArray<double>))
+    auto& registers = e.getFakeRegisters();
+    ASSERT_EQ(typeid(registers), typeid(Data::PrimitiveTypeArray<double>))
         << "Unexpected type for fake registers of the environment.";
 }
 

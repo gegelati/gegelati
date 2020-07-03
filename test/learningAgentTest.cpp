@@ -326,7 +326,8 @@ TEST_F(LearningAgentTest, DecimateWorstRoots)
 
     // Check that the action is now a root
     roots = graph.getRootVertices();
-    ASSERT_EQ(typeid(*roots.at(0)), typeid(TPG::TPGAction))
+    auto* root = roots.at(0);
+    ASSERT_EQ(typeid(*root), typeid(TPG::TPGAction))
         << "An action should have become a root of the TPGGraph.";
 
     // Create and fill results for each "root" artificially
