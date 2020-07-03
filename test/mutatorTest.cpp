@@ -319,7 +319,7 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Teardown for this test
-    delete &set.getInstruction(2);
+    delete &set.getInstruction(3);
 }
 
 TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine)

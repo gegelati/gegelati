@@ -50,7 +50,7 @@
 
 //TODO REMOVE THAT. this is temporary.
 #ifndef PARAM_FLOAT_PRECISION
-#define PARAM_FLOAT_PRECISION 0.001
+#define PARAM_FLOAT_PRECISION 0.6
 #endif
 class TPGExecutionEngineTest : public ::testing::Test
 {
@@ -71,12 +71,13 @@ class TPGExecutionEngineTest : public ::testing::Test
      *
      * \param[in] value a double valut between -1.0 and 1.0.
      */
-    void makeProgramReturn(Program::Program& prog, double value)
+    void makeProgramReturn(Program::Program& prog, int value)
     {
         auto& line = prog.addNewLine();
         // do an multby constant with DHandler 0
         line.setInstructionIndex(1);
         line.setOperand(0, 1, 0);    // Dhandler 0 location 0
+        line.setOperand(1, 1, value);    // Dhandler 0 location value
         line.setDestinationIndex(0); // 0th register des
     }
 
@@ -92,11 +93,29 @@ class TPGExecutionEngineTest : public ::testing::Test
         // Programs.
         ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
             .setDataAt(typeid(double), 0, 1.0);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+            .setDataAt(typeid(double), 1, 0.5);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+            .setDataAt(typeid(double), 2, 0.5);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+            .setDataAt(typeid(double), 3, 0.3);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+            .setDataAt(typeid(double), 4, 0.0);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+            .setDataAt(typeid(double), 5, 0.8);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+            .setDataAt(typeid(double), 6, 0.9);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+            .setDataAt(typeid(double), 7, 0.7);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+            .setDataAt(typeid(double), 8, 0.6);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+            .setDataAt(typeid(double), 9, 0.3);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
-        auto minus = [](double a, double b)->double {return a - b; };
-        set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+        auto mult = [](double a, double b)->double {return a*b; };
+        set.add(*(new Instructions::LambdaInstruction<double,double>(mult)));
 
         e = new Environment(set, vect, 8);
         tpg = new TPG::TPGGraph(*e);
@@ -151,15 +170,15 @@ class TPGExecutionEngineTest : public ::testing::Test
                                          progPointers.at(8)));
 
         // Put a weight on edges
-        makeProgramReturn(*progPointers.at(0), 0.5); // T0->A0
-        makeProgramReturn(*progPointers.at(1), 0.5); // T1->A1
-        makeProgramReturn(*progPointers.at(2), 0.3); // T2->A2
-        makeProgramReturn(*progPointers.at(3), 0.0); // T3->A3
-        makeProgramReturn(*progPointers.at(4), 0.8); // T0->T1
-        makeProgramReturn(*progPointers.at(5), 0.9); // T1->T2
-        makeProgramReturn(*progPointers.at(6), 0.7); // T2->T1
-        makeProgramReturn(*progPointers.at(7), 0.6); // T1->A0
-        makeProgramReturn(*progPointers.at(8), 0.3); // T1->A2
+        makeProgramReturn(*progPointers.at(0), 1); // T0->A0
+        makeProgramReturn(*progPointers.at(1), 2); // T1->A1
+        makeProgramReturn(*progPointers.at(2), 3); // T2->A2
+        makeProgramReturn(*progPointers.at(3), 4); // T3->A3
+        makeProgramReturn(*progPointers.at(4), 5); // T0->T1
+        makeProgramReturn(*progPointers.at(5), 6); // T1->T2
+        makeProgramReturn(*progPointers.at(6), 7); // T2->T1
+        makeProgramReturn(*progPointers.at(7), 8); // T1->A0
+        makeProgramReturn(*progPointers.at(8), 9); // T1->A2
 
         // Check the characteristics
         ASSERT_EQ(tpg->getNbVertices(), 8);

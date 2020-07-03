@@ -59,7 +59,7 @@ class PolicyStatsTest : public ::testing::Test
             [](double a, const double b[3]) {
                 return a * (b[0] + b[1] + b[2]);
             };
-        std::function<double(double,double)> minus = [](double a, double b)->double {return a - b; };
+        std::function<double(double,double)> minus = [](double a, double b)->double {return a * b; };
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(
@@ -198,9 +198,9 @@ TEST_F(PolicyStatsTest, AnalyzeLine)
     ASSERT_EQ(ps.nbUsagePerDataLocation.size(), 1)
         << "Incorrect attribute value after analyzing one line.";
     ASSERT_EQ(ps.nbUsagePerDataLocation.begin()->first,
-              (std::make_pair<size_t, size_t>(1, 0)))
+              (std::make_pair<size_t, size_t>(0, 0)))
         << "Incorrect attribute value after analyzing one line.";
-    ASSERT_EQ(ps.nbUsagePerDataLocation.begin()->second, 1)
+    ASSERT_EQ(ps.nbUsagePerDataLocation.begin()->second, 2)
         << "Incorrect attribute value after analyzing one line.";
     ASSERT_EQ(ps.nbUsagePerInstruction.size(), 1)
         << "Incorrect attribute value after analyzing one line.";
@@ -249,11 +249,11 @@ TEST_F(PolicyStatsTest, AnalyzeProgram)
             << "Incorrect attribute value after analyzing a Program.";
         ASSERT_EQ(iter1->second, 1)
             << "Incorrect attribute value after analyzing a Program.";
-        ASSERT_EQ(ps.nbUsagePerDataLocation.size(), 5)
+        ASSERT_EQ(ps.nbUsagePerDataLocation.size(), 4)
             << "Incorrect attribute value after analyzing a Program.";
         auto iter2 = ps.nbUsagePerDataLocation.begin();
         std::map<std::pair<size_t, size_t>, size_t> content = {
-            {{0, 1}, 1}, {{0, 2}, 1}, {{0, 3}, 1}, {{0, 5}, 1}, {{1, 2}, 2}};
+            {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{1, 2}, 2}};
         ASSERT_EQ(ps.nbUsagePerDataLocation, content)
             << "Incorrect attribute value after analyzing a Program.";
     }
@@ -332,8 +332,7 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
     ASSERT_EQ(ps.nbUsagePerInstruction, nbUsagePerInstruction);
 
     std::map<std::pair<size_t, size_t>, size_t> nbUsagePerDataLocation{
-        {{0, 1}, 1},  {{0, 2}, 1},  {{0, 3}, 1},  {{0, 5}, 1}, {{1, 2}, 2},
-        {{1, 10}, 1}, {{1, 12}, 1}, {{1, 13}, 1}, {{1, 14}, 1}};
+        {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{1, 2}, 2}, {{1, 10}, 1}, {{1, 12}, 1}};
     ASSERT_EQ(ps.nbUsagePerDataLocation, nbUsagePerDataLocation);
 
     std::vector<size_t> nbUsePerProgram{2, 1, 1, 0, 1, 1, 0, 1};

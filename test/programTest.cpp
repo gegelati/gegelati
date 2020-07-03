@@ -62,6 +62,11 @@ class ProgramTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<int>()));
+        std::function<double(double,double)> minus = [](double a, double b)
+        {
+            return a-b;
+        };
+        set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
 
         e = new Environment(set, vect, 8);
     }

@@ -78,12 +78,16 @@ class ProgramExecutionEngineTest : public ::testing::Test
         set.add(*new Instructions::LambdaInstruction<const double,
                                                      const double>(
             [](const double a, const double b) {
-                return a * b;
+                return b==0 ? a: a*b;
             }));        
         set.add(*new Instructions::LambdaInstruction<const double[2],
                                                      const double[2]>(
             [](const double a[2], const double b[2]) {
                 return a[0] * b[0] + a[1] * b[1];
+            }));
+        set.add(*new Instructions::LambdaInstruction<const double>(
+            [](const double a) {
+                return 0;
             }));
 
         e = new Environment(set, vect, 8);
@@ -98,15 +102,14 @@ class ProgramExecutionEngineTest : public ::testing::Test
 
         // Intron line
         Program::Line& l1 = p->addNewLine();
-        l1.setInstructionIndex(
-            1); // Instruction is MultByConstParam<double, float>.
+        l1.setInstructionIndex(3); 
         l1.setOperand(0, 0, 3);            // 1st operand: 3rd register.
         l1.setDestinationIndex(0);         // Destination is register at index 0
 
         Program::Line& l2 = p->addNewLine();
-        l2.setInstructionIndex(
-            1); // Instruction is MultByConstParam<double, float>.
-        l2.setOperand(0, 0, 1);     // 1st operand: 1th register.
+        l2.setInstructionIndex(1);
+        l2.setOperand(0, 0, 1);     // 1st operand: 1st register.
+        l2.setOperand(1, 0, 2);     // 1st operand: 2nd register.
         l2.setDestinationIndex(0);  // Destination is register at index 0
 
         Program::Line& l3 = p->addNewLine();
@@ -354,7 +357,7 @@ TEST_F(ProgramExecutionEngineTest, execute)
     Program::ProgramExecutionEngine progExecEng(*p);
     double result;
 
-    double r1 = value0 + 0;
+    double r1 = value0;
     double r0 = r1;
     r0 = r0 * value2 + r1 * value3;
 
@@ -368,7 +371,7 @@ TEST_F(ProgramExecutionEngineTest, execute)
     Program::Line& l4 = p->addNewLine();
     // Instruction 3 does not exist. Must deactivate checks to write this
     // instruction
-    l4.setInstructionIndex(3, false);
+    l4.setInstructionIndex(4, false);
     ASSERT_THROW(progExecEng.executeProgram(), std::out_of_range)
         << "Program line using a incorrect Instruction index should throw an "
            "exception.";
