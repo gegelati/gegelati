@@ -49,9 +49,9 @@
 #include "tpg/tpgGraph.h"
 
 #include "learn/evaluationResult.h"
+#include "learn/job.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
-
 namespace Learn {
 
     /**
@@ -188,8 +188,11 @@ namespace Learn {
          * The method is const to enable potential parallel calls to it.
          *
          * \param[in] tee The TPGExecutionEngine to use.
-         * \param[in] root the TPGVertex from which the policy evaluation
-         * starts. \param[in] generationNumber the integer number of the current
+         * \param[in] job the TPGVertex group from which the policy evaluation
+         * starts. Each of the roots of the group shall be an agent of the
+         * same simulation, but as we are not in adversarial mode there is only
+         * one.
+         * \param[in] generationNumber the integer number of the current
          * generation. \param[in] mode the LearningMode to use during the policy
          * evaluation. \param[in] le Reference to the LearningEnvironment to use
          * during the policy evaluation (may be different from the attribute of
@@ -203,7 +206,7 @@ namespace Learn {
          * resultsPerRoot for this root (if any).
          */
         virtual std::shared_ptr<EvaluationResult> evaluateRoot(
-            TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root,
+            TPG::TPGExecutionEngine& tee, const Job& job,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
 
@@ -330,6 +333,8 @@ namespace Learn {
          * a TPGVertex of the TPGGraph, nothing happens.
          */
         void keepBestPolicy();
+
+        std::vector<std::shared_ptr<Learn::Job>> makeJobs(const TPG::TPGVertex* root, TPG::TPGGraph& tpg);
     };
 }; // namespace Learn
 

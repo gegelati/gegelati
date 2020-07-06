@@ -98,7 +98,7 @@ namespace Learn {
          * root corresponds to the F1 score for this class.
          */
         virtual std::shared_ptr<EvaluationResult> evaluateRoot(
-            TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root,
+            TPG::TPGExecutionEngine& tee, const Job& root,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const override;
 
@@ -137,15 +137,18 @@ namespace Learn {
     template <class BaseLearningAgent>
     inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<
         BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee,
-                                         const TPG::TPGVertex& root,
+                                         const Job& job,
                                          uint64_t generationNumber,
                                          LearningMode mode,
                                          LearningEnvironment& le) const
     {
+        // Only consider the first root of jobs as we are not in adversarial mode
+        const TPG::TPGVertex* root = job[0];
+
         // Skip the root evaluation process if enough evaluations were already
         // performed. In the evaluation mode only.
         std::shared_ptr<Learn::EvaluationResult> previousEval;
-        if (mode == TRAINING && this->isRootEvalSkipped(root, previousEval)) {
+        if (mode == TRAINING && this->isRootEvalSkipped(*root, previousEval)) {
             return previousEval;
         }
 
@@ -170,7 +173,7 @@ namespace Learn {
                    nbActions < this->params.maxNbActionsPerEval) {
                 // Get the action
                 uint64_t actionID =
-                    ((const TPG::TPGAction*)tee.executeFromRoot(root).back())
+                    ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())
                         ->getActionID();
                 // Do it
                 le.doAction(actionID);

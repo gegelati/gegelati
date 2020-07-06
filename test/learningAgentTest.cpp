@@ -185,8 +185,12 @@ TEST_F(LearningAgentTest, EvalRoot)
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result;
+    auto jobs = la.makeJobs(la.getTPGGraph().getRootVertices().at(0),la.getTPGGraph());
+    auto job = *(jobs[0]);
+    ASSERT_EQ(la.getTPGGraph().getRootVertices().at(0),job[0])
+    <<"Encapsulate the root shouldn't change it";
     ASSERT_NO_THROW(
-        result = la.evaluateRoot(tee, *la.getTPGGraph().getRootVertices().at(0),
+        result = la.evaluateRoot(tee, *la.makeJobs(la.getTPGGraph().getRootVertices().at(0),la.getTPGGraph())[0],
                                  0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getResult(), 1.0)
@@ -532,7 +536,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     std::shared_ptr<Learn::EvaluationResult> result;
     Learn::ParallelLearningAgent pla(le, set, params);
     ASSERT_NO_THROW(result =
-                        pla.evaluateRoot(tee, *tpg.getRootVertices().at(0), 0,
+                        pla.evaluateRoot(tee,  *pla.makeJobs(tpg.getRootVertices().at(0),pla.getTPGGraph())[0], 0,
                                          Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getResult(), 1.0)

@@ -83,9 +83,12 @@ namespace Learn {
          *
          * \param[in] generationNumber the integer number of the current
          * generation. \param[in] mode the LearningMode to use during the policy
-         * evaluation. \param[in,out] rootsToProcess Ordered list of root
+         * evaluation. \param[in,out] jobsToProcess Ordered list of jobs of
          * TPGVertex to process, stored as a pair with an id filling the
-         * archiveMap. \param[in] rootsToProcessMutex Mutex protecting the
+         * archiveMap. The jobs are groups of roots that shall be agents in the
+         * same simulation, there is only 1 root if there is no adversarial
+         * (e.g. if the environmnent is not multiplayer).
+         * \param[in] rootsToProcessMutex Mutex protecting the
          * rootsToProcess \param[in] resultsPerRootMap Map to store the
          * resulting score of evaluated roots. \param[in] resultsPerRootMapMutex
          * Mutex protecting the results. \param[in] archiveSeeds Seed values for
@@ -95,8 +98,8 @@ namespace Learn {
          */
         void slaveEvalRootThread(
             uint64_t generationNumber, LearningMode mode,
-            std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>&
-                rootsToProcess,
+            std::queue<std::pair<uint64_t, const std::shared_ptr<Learn::Job>>>
+                jobsToProcess,
             std::mutex& rootsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          const TPG::TPGVertex*>>&

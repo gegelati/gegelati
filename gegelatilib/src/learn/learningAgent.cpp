@@ -103,14 +103,17 @@ bool Learn::LearningAgent::isRootEvalSkipped(
 }
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(
-    TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root,
+    TPG::TPGExecutionEngine& tee, const Job& job,
     uint64_t generationNumber, Learn::LearningMode mode,
     LearningEnvironment& le) const
 {
+    // Only consider the first root of jobs as we are not in adversarial mode
+    const TPG::TPGVertex* root = job[0];
+
     // Skip the root evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
-    if (mode == TRAINING && this->isRootEvalSkipped(root, previousEval)) {
+    if (mode == TRAINING && this->isRootEvalSkipped(*root, previousEval)) {
         return previousEval;
     }
 
@@ -131,7 +134,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the action
             uint64_t actionID =
-                ((const TPG::TPGAction*)tee.executeFromRoot(root).back())
+                ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())
                     ->getActionID();
             // Do it
             le.doAction(actionID);
@@ -176,9 +179,13 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
                 this->rng.getUnsignedInt64(0, UINT64_MAX));
         }
 
-        std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
-            tee, *root, generationNumber, mode, this->learningEnvironment);
-        result.emplace(avgScore, root);
+        auto jobs = makeJobs(root, tpg);
+        for(const std::shared_ptr<Job>& job : jobs) {
+            std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
+                    tee, *job, generationNumber, mode,
+                    this->learningEnvironment);
+            result.emplace(avgScore, root);
+        }
     }
 
     return result;
@@ -367,4 +374,9 @@ void Learn::LearningAgent::keepBestPolicy()
             }
         }
     }
+}
+
+std::vector<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(const TPG::TPGVertex* root, TPG::TPGGraph& tpg) {
+    auto job = std::make_shared<Learn::Job>(Learn::Job({root}));
+    return {job};
 }
