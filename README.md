@@ -24,6 +24,7 @@ GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framew
 Environments currently covered by the continuous integration are:
 - Linux (Ubuntu 16.04) with GCC 7.5 and Clang 7.
 - Windows 10 (1809) with Microsoft Visual Studio 2019.
+- Mac OS X (10.13.6 ) with Clang 9.1.0
 
 ## :framed_picture: Application Gallery
 You can try GEGELATI with our (growing) set of open-source applications.
