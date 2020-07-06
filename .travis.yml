@@ -105,6 +105,23 @@ jobs:
             - ./bin/runTests
             - cd ..
 
+        - os: osx
+          stage: Build
+          compiler: clang
+          env:
+            - GENERATOR="Unix Makefile"
+          install:
+           - brew install doxygen
+          script:
+            - cd bin
+            - cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug
+            - cmake --build . --target GEGELATI
+            - cmake --build . --target doc
+            - sudo make install
+            - cmake --build . --target runTests
+            - ./bin/runTests
+            - cd ..
+
         - os: linux
           stage: Deploy
           script:
