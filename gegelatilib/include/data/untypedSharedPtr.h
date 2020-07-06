@@ -36,6 +36,7 @@
 #ifndef UNTYPED_SHARED_PTR_H
 #define UNTYPED_SHARED_PTR_H
 
+#include <string>
 #include <functional>
 #include <memory>
 #include <type_traits>
