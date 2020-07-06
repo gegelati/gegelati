@@ -9,6 +9,7 @@ _aaaa.mm.dd_
 ### Changes
 
 ### Bug fix
+* Adapt code for building GEGELATI with clang standard library: libc++. (see Issue #49 for mode details)
 
 
 ## Release version 0.3.0
