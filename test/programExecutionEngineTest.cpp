@@ -235,7 +235,8 @@ TEST_F(ProgramExecutionEngineTest, fetchOperands)
         << "Incorrect number of operands were fetched by previous call.";
     // Check operand value. Registers are 0.0, array element is value2 and
     // value3
-    ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>()).get()[0], 0.0)
+    ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>()).get()[0],
+              0.0)
         << "Value of fetched operand from register is incorrect.";
     ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>()).get()[1],
               0.0)
