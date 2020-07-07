@@ -334,7 +334,18 @@ namespace Learn {
          */
         void keepBestPolicy();
 
-        std::vector<std::shared_ptr<Learn::Job>> makeJobs(const TPG::TPGVertex* root, TPG::TPGGraph& tpg);
+        /**
+         * \brief Takes a given root index and creates a job containing it.
+         * Useful for exemple in adversarial mode where a job could contain a
+         * match of several roots.
+         *
+         * \param[in] num The index of the root we want to put in a job.
+         * \param[in] tpgGraph The TPG graph from which we will take the
+         * root.
+         *
+         * \return A job representing the root.
+         */
+        std::shared_ptr<Learn::Job> makeJob(int num, TPG::TPGGraph* tpgGraph=nullptr);
     };
 }; // namespace Learn
 

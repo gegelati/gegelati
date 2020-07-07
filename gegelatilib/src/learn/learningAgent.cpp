@@ -171,7 +171,7 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
     TPG::TPGExecutionEngine tee(
         this->env, (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
-    for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
+    for (int i=0; i<tpg.getNbRootVertices(); i++) {
         // Before each root evaluation, set a new seed for the archive in
         // TRAINING Mode Else, archiving should be deactivate anyway
         if (mode == LearningMode::TRAINING) {
@@ -179,13 +179,11 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
                 this->rng.getUnsignedInt64(0, UINT64_MAX));
         }
 
-        auto jobs = makeJobs(root, tpg);
-        for(const std::shared_ptr<Job>& job : jobs) {
-            std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
-                    tee, *job, generationNumber, mode,
-                    this->learningEnvironment);
-            result.emplace(avgScore, root);
-        }
+        auto job = makeJob(i);
+        std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
+                tee, *job, generationNumber, mode,
+                this->learningEnvironment);
+        result.emplace(avgScore, (*job)[0]);
     }
 
     return result;
@@ -376,7 +374,13 @@ void Learn::LearningAgent::keepBestPolicy()
     }
 }
 
-std::vector<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(const TPG::TPGVertex* root, TPG::TPGGraph& tpg) {
-    auto job = std::make_shared<Learn::Job>(Learn::Job({root}));
-    return {job};
+std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(int num, TPG::TPGGraph* tpgGraph) {
+    // sets the tpg to the Learning Agent's one if no one was specified
+    tpgGraph = tpgGraph==nullptr?&tpg:tpgGraph;
+
+    if(tpgGraph->getNbRootVertices()>0) {
+        return std::make_shared<Learn::Job>(
+                Learn::Job({tpgGraph->getRootVertices()[num]}));
+    }
+    return nullptr;
 }

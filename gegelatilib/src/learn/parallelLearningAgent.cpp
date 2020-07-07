@@ -46,6 +46,7 @@
 
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
+#include "learn/parallelJob.h"
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
 Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
@@ -63,20 +64,20 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
                                                    : NULL);
 
         // Execute for all root
-        for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
+        for(int i=0; i<this->tpg.getNbRootVertices(); i++){
             // Set the seed of the archive for this root.
-            if (mode == LearningMode::TRAINING) {
+
+            if(mode==TRAINING) {
                 this->archive.setRandomSeed(
-                    this->rng.getUnsignedInt64(0, UINT64_MAX));
+                        this->rng.getUnsignedInt64(0, UINT64_MAX));
             }
 
-            auto jobs = makeJobs(root, tpg);
-            for(const std::shared_ptr<Job>& job : jobs) {
-                std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
-                        tee, *job, generationNumber, mode,
-                        this->learningEnvironment);
-                results.emplace(avgScore, root);
-            }
+            auto job = makeJob(i);
+
+            std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
+                    tee, *job, generationNumber, mode,
+                    this->learningEnvironment);
+            results.emplace(avgScore, (*job)[0]);
         }
     }
     else {
@@ -89,11 +90,10 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
 void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber,
     Learn::LearningMode mode,
-    std::queue<std::pair<uint64_t, const std::shared_ptr<Learn::Job>>> jobsToProcess,
+    std::queue<std::shared_ptr<Learn::ParallelJob>> jobsToProcess,
     std::mutex &rootsToProcessMutex,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex *>> &resultsPerRootMap,
     std::mutex &resultsPerRootMapMutex,
-    std::map<uint64_t, size_t> &archiveSeeds,
     std::map<uint64_t, Archive *> &archiveMap,
     std::mutex &archiveMapMutex)
 {
@@ -113,7 +113,7 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
     while (!jobsToProcess.empty()) { // Thread safe access to size
         i++;
         bool doProcess = false;
-        std::pair<uint64_t, std::shared_ptr<Learn::Job>> jobToProcess;
+        std::shared_ptr<Learn::ParallelJob> jobToProcess;
         { // Mutuel exclusion zone
             std::lock_guard<std::mutex> lock(rootsToProcessMutex);
             if (!jobsToProcess.empty()) { // Additional verification after lock
@@ -131,25 +131,25 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
             if (mode == LearningMode::TRAINING) {
                 temporaryArchive =
                     new Archive(params.archiveSize, params.archivingProbability,
-                                archiveSeeds.at(jobToProcess.first));
+                                jobToProcess->getArchiveSeed());
             }
             tee.setArchive(temporaryArchive);
 
             std::shared_ptr<EvaluationResult> avgScore =
-                this->evaluateRoot(tee, *jobToProcess.second, generationNumber,
+                this->evaluateRoot(tee, *jobToProcess, generationNumber,
                                    mode, *privateLearningEnvironment);
 
             { // Store result Mutual exclusion zone
                 std::lock_guard<std::mutex> lock(resultsPerRootMapMutex);
                 resultsPerRootMap.emplace(
-                        jobToProcess.first,
-                    std::make_pair(avgScore, (*jobToProcess.second)[0]));
+                        jobToProcess->getIdx(),
+                    std::make_pair(avgScore, (*jobToProcess)[0]));
             }
 
             if (mode == LearningMode::TRAINING) {
                 { // Insertion archiveMap update mutual exclusion zone
                     std::lock_guard<std::mutex> lock(archiveMapMutex);
-                    archiveMap.insert({jobToProcess.first, temporaryArchive});
+                    archiveMap.insert({jobToProcess->getIdx(), temporaryArchive});
                 }
             }
         }
@@ -217,21 +217,7 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
     // Create and fill the queue for distributing work among threads
     // each root is associated to its number in the list for enabling the
     // determinism of stochastic archive storage.
-    std::queue<std::pair<uint64_t, const std::shared_ptr<Job>>> jobsToProcess;
-    uint64_t idx = 0;
-
-    // Fill also a map for seeding the Archive for each root
-    std::map<uint64_t, size_t> archiveSeeds;
-
-    for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
-        auto jobs = makeJobs(root,tpg);
-        jobsToProcess.push({idx, jobs[0]});
-        if (mode == LearningMode::TRAINING) {
-            archiveSeeds.insert(
-                {idx, this->rng.getUnsignedInt64(0, UINT64_MAX)});
-        }
-        idx++;
-    }
+    auto jobsToProcess = makeJobs(mode);
 
     // Create Archive Map
     std::map<uint64_t, Archive*> archiveMap;
@@ -251,15 +237,14 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
         threads.emplace_back(std::thread(
             &ParallelLearningAgent::slaveEvalRootThread, this, generationNumber,
             mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
-            std::ref(resultsPerRootMap), std::ref(resultsPerRootMutex),
-            std::ref(archiveSeeds), std::ref(archiveMap),
+            std::ref(resultsPerRootMap), std::ref(resultsPerRootMutex), std::ref(archiveMap),
             std::ref(archiveMapMutex)));
     }
 
     // Work in the main thread also
     this->slaveEvalRootThread(generationNumber, mode, jobsToProcess,
                               rootsToProcessMutex, resultsPerRootMap,
-                              resultsPerRootMutex, archiveSeeds, archiveMap,
+                              resultsPerRootMutex, archiveMap,
                               archiveMapMutex);
 
     // Join the threads
@@ -274,4 +259,24 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
 
     // Merge the archives
     this->mergeArchiveMap(archiveMap);
+}
+
+std::queue<std::shared_ptr<Learn::ParallelJob>> Learn::ParallelLearningAgent::makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph) {
+    // sets the tpg to the Learning Agent's one if no one was specified
+    tpgGraph = tpgGraph==nullptr?&tpg:tpgGraph;
+
+    std::queue<std::shared_ptr<Learn::ParallelJob>> jobs;
+    for(int i=0; i<tpgGraph->getNbRootVertices();i++){
+        uint64_t archiveSeed;
+        // we only generate a random if we are in training, to make like the
+        // learning agent in order to stay determinist
+        if(mode==TRAINING) {
+            archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
+        }else{
+            archiveSeed = 0;
+        }
+        auto job = std::make_shared<Learn::ParallelJob>(Learn::ParallelJob(i,archiveSeed,{tpgGraph->getRootVertices()[i]}));
+        jobs.push(job);
+    }
+    return jobs;
 }

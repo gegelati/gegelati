@@ -49,6 +49,7 @@
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
+#include "parallelJob.h"
 
 namespace Learn {
     /**
@@ -98,14 +99,13 @@ namespace Learn {
          */
         void slaveEvalRootThread(
             uint64_t generationNumber, LearningMode mode,
-            std::queue<std::pair<uint64_t, const std::shared_ptr<Learn::Job>>>
+            std::queue<std::shared_ptr<Learn::ParallelJob>>
                 jobsToProcess,
             std::mutex& rootsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          const TPG::TPGVertex*>>&
                 resultsPerRootMap,
             std::mutex& resultsPerRootMapMutex,
-            std::map<uint64_t, size_t>& archiveSeeds,
             std::map<uint64_t, Archive*>& archiveMap,
             std::mutex& archiveMapMutex);
 
@@ -161,6 +161,19 @@ namespace Learn {
          */
         std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
         evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
+
+        /**
+        * \brief Puts all roots into jobs to be able to use them in simulation
+        * later.
+        *
+        * \param[in] mode the mode of the training, determining for exemple
+        * if we generate values that we only need for training.
+        * \param[in] tpgGraph The TPG graph from which we will take the
+        * roots.
+        *
+        * @return A vector containing pointers of the newly created jobs.
+        */
+        std::queue<std::shared_ptr<Learn::ParallelJob>> makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph=nullptr);
     };
 } // namespace Learn
 #endif
