@@ -46,7 +46,6 @@
 
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
-#include "learn/parallelJob.h"
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
 Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
@@ -90,7 +89,7 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
 void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber,
     Learn::LearningMode mode,
-    std::queue<std::shared_ptr<Learn::ParallelJob>> jobsToProcess,
+    std::queue<std::shared_ptr<Learn::Job>> jobsToProcess,
     std::mutex &rootsToProcessMutex,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex *>> &resultsPerRootMap,
     std::mutex &resultsPerRootMapMutex,
@@ -113,7 +112,7 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
     while (!jobsToProcess.empty()) { // Thread safe access to size
         i++;
         bool doProcess = false;
-        std::shared_ptr<Learn::ParallelJob> jobToProcess;
+        std::shared_ptr<Learn::Job> jobToProcess;
         { // Mutuel exclusion zone
             std::lock_guard<std::mutex> lock(rootsToProcessMutex);
             if (!jobsToProcess.empty()) { // Additional verification after lock
@@ -261,11 +260,11 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
     this->mergeArchiveMap(archiveMap);
 }
 
-std::queue<std::shared_ptr<Learn::ParallelJob>> Learn::ParallelLearningAgent::makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph) {
+std::queue<std::shared_ptr<Learn::Job>> Learn::ParallelLearningAgent::makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph) {
     // sets the tpg to the Learning Agent's one if no one was specified
     tpgGraph = tpgGraph==nullptr?&tpg:tpgGraph;
 
-    std::queue<std::shared_ptr<Learn::ParallelJob>> jobs;
+    std::queue<std::shared_ptr<Learn::Job>> jobs;
     for(int i=0; i<tpgGraph->getNbRootVertices();i++){
         uint64_t archiveSeed;
         // we only generate a random if we are in training, to make like the
@@ -275,7 +274,7 @@ std::queue<std::shared_ptr<Learn::ParallelJob>> Learn::ParallelLearningAgent::ma
         }else{
             archiveSeed = 0;
         }
-        auto job = std::make_shared<Learn::ParallelJob>(Learn::ParallelJob(i,archiveSeed,{tpgGraph->getRootVertices()[i]}));
+        auto job = std::make_shared<Learn::Job>(Learn::Job(i,archiveSeed,{tpgGraph->getRootVertices()[i]}));
         jobs.push(job);
     }
     return jobs;

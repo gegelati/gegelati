@@ -7,6 +7,7 @@ _aaaa.mm.dd_
 * Fix code for building GEGELATI with clang (v7+) and added a dedicated job with travis-ci.
 
 ### Changes
+* Learning Agents now handle jobs instead of simple roots, allowing new concepts like adversarial learning (a job containing several roots that will train together).
 
 ### Bug fix
 

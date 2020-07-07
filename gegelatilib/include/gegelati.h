@@ -68,6 +68,8 @@
 #include <learn/classificationLearningAgent.h>
 #include <learn/classificationLearningEnvironment.h>
 
+#include <learn/job.h>
+
 #include <log/LABasicLogger.h>
 #include <log/LALogger.h>
 #include <log/Logger.h>

@@ -49,7 +49,7 @@
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
-#include "parallelJob.h"
+#include "learn/job.h"
 
 namespace Learn {
     /**
@@ -99,7 +99,7 @@ namespace Learn {
          */
         void slaveEvalRootThread(
             uint64_t generationNumber, LearningMode mode,
-            std::queue<std::shared_ptr<Learn::ParallelJob>>
+            std::queue<std::shared_ptr<Learn::Job>>
                 jobsToProcess,
             std::mutex& rootsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
@@ -173,7 +173,7 @@ namespace Learn {
         *
         * @return A vector containing pointers of the newly created jobs.
         */
-        std::queue<std::shared_ptr<Learn::ParallelJob>> makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph=nullptr);
+        std::queue<std::shared_ptr<Learn::Job>> makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph=nullptr);
     };
 } // namespace Learn
 #endif
