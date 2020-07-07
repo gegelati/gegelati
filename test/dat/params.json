@@ -26,7 +26,8 @@
       "pDelete": 0.7,
       "pAdd": 0.7,
       "pMutate": 1.0,
-      "pSwap": 1.0
+      "pSwap": 1.0,
+      "nbProgramConstant": 20
     }
   }
 }

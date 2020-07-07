@@ -155,6 +155,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.prog.pSwap = value.asDouble();
         return;
     }
+    if (param == "nbProgramConstant") {
+        params.mutation.prog.nbProgramConstant = (size_t)value.asUInt();
+        return;
+    }
     if (param == "archiveSize") {
         params.archiveSize = (size_t)value.asUInt();
         return;
