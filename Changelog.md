@@ -5,11 +5,14 @@ _aaaa.mm.dd_
 
 ### New features
 * Fix code for building GEGELATI with clang (v7+) and added a dedicated job with travis-ci.
+* Add osx job in travis-ci.
 
 ### Changes
 * Learning Agents now handle jobs instead of simple roots, allowing new concepts like adversarial learning (a job containing several roots that will train together).
 
 ### Bug fix
+* Adapt code for building GEGELATI with clang standard library: libc++. (see Issue #49 for mode details)
+* Fix implicit template type for std::vector in ClassificationLearningAgentTest.
 
 
 ## Release version 0.3.0

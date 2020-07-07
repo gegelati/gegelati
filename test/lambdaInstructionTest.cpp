@@ -161,7 +161,7 @@ TEST(LambdaInstructionsTest, ExecuteAllTypesMixed)
         << "Result of the LambdaInstruction with wrong number of arguments "
            "should be 0.";
 #else
-    ASSERT_THROW(instruction2.execute({}, vect2), std::runtime_error)
+    ASSERT_THROW(instruction2.execute({}, vect2), std::out_of_range)
         << "In NDEBUG mode, execution of a LambdaInstruction with wrong number "
            "of arguments should fail.";
 #endif
