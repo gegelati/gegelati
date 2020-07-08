@@ -97,7 +97,7 @@ namespace Learn {
          * evaluated root instead of the usual EvaluationResult. The score per
          * root corresponds to the F1 score for this class.
          */
-        virtual std::shared_ptr<EvaluationResult> evaluateRoot(
+        virtual std::shared_ptr<EvaluationResult> evaluateJob(
             TPG::TPGExecutionEngine& tee, const Job& root,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const override;
@@ -136,11 +136,11 @@ namespace Learn {
 
     template <class BaseLearningAgent>
     inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<
-        BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee,
-                                         const Job& job,
-                                         uint64_t generationNumber,
-                                         LearningMode mode,
-                                         LearningEnvironment& le) const
+        BaseLearningAgent>::evaluateJob(TPG::TPGExecutionEngine& tee,
+                                        const Job& job,
+                                        uint64_t generationNumber,
+                                        LearningMode mode,
+                                        LearningEnvironment& le) const
     {
         // Only consider the first root of jobs as we are not in adversarial mode
         const TPG::TPGVertex* root = job[0];

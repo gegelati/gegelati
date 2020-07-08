@@ -64,6 +64,9 @@
 #include <learn/learningParameters.h>
 #include <learn/parallelLearningAgent.h>
 
+#include <learn/adversarialEvaluationResult.h>
+#include <learn/adversarialLearningEnvironment.h>
+
 #include <learn/classificationEvaluationResult.h>
 #include <learn/classificationLearningAgent.h>
 #include <learn/classificationLearningEnvironment.h>
