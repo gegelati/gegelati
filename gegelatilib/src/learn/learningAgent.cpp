@@ -369,7 +369,8 @@ void Learn::LearningAgent::keepBestPolicy()
     }
 }
 
-void Learn::LearningAgent::forgetPreviousResults() {
+void Learn::LearningAgent::forgetPreviousResults()
+{
     resultsPerRoot.clear();
     bestRoot.second = nullptr;
 }

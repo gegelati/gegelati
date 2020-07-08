@@ -312,12 +312,13 @@ namespace Learn {
                 results);
 
         /**
-        * \brief This method resets the previous registered scores per root.
-        *
-        * Resets resultsPerRoot so that, in the next training,
-        * the current roots will be considered as if they had never
-        * been tested. To use for example when there is a scoring policy change.
-        */
+         * \brief This method resets the previous registered scores per root.
+         *
+         * Resets resultsPerRoot so that, in the next training,
+         * the current roots will be considered as if they had never
+         * been tested. To use for example when there is a scoring policy
+         * change.
+         */
         void forgetPreviousResults();
 
         /**

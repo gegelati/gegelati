@@ -302,40 +302,41 @@ TEST_F(LearningAgentTest, UpdateEvaluationRecords)
     ASSERT_NO_THROW(la.updateEvaluationRecords({{sharedPtr, root3}}));
 }
 
-TEST_F(LearningAgentTest, forgetPreviousResults){
+TEST_F(LearningAgentTest, forgetPreviousResults)
+{
     Learn::LearningAgent la(le, set, params);
     la.init();
 
     // Update with a fake result for a root of the graph
     const TPG::TPGVertex* root = *la.getTPGGraph().getRootVertices().begin();
     ASSERT_NO_THROW(la.updateEvaluationRecords(
-            {{std::make_shared<Learn::EvaluationResult>(1.0, 10), root}}));
+        {{std::make_shared<Learn::EvaluationResult>(1.0, 10), root}}));
     ASSERT_EQ(la.getBestRoot().second->getResult(), 1.0)
-                                << "Best root not updated properly.";
-    ASSERT_NO_THROW(*la.getBestRoot().second+=Learn::EvaluationResult(2.0,10));
+        << "Best root not updated properly.";
+    ASSERT_NO_THROW(*la.getBestRoot().second +=
+                    Learn::EvaluationResult(2.0, 10));
     ASSERT_EQ(la.getBestRoot().second->getResult(), 1.5)
-                                << "Best root not updated properly.";
+        << "Best root not updated properly.";
 
     // Looks for the eval record the Learning Agent should keep
     std::shared_ptr<Learn::EvaluationResult> previousEval;
     la.isRootEvalSkipped(*la.getBestRoot().first, previousEval);
 
-    ASSERT_NE(nullptr,previousEval)
-    << "Learning agent should remember the last score of the root.";
+    ASSERT_NE(nullptr, previousEval)
+        << "Learning agent should remember the last score of the root.";
 
     // Forgets the eval record
     ASSERT_NO_THROW(la.forgetPreviousResults())
-    << "forgetPreviousResults throws exception.";
+        << "forgetPreviousResults throws exception.";
 
     // Looks for the eval record the Learning Agent should keep
     la.isRootEvalSkipped(*la.getBestRoot().first, previousEval);
 
-    ASSERT_EQ(nullptr,previousEval)
-    << "Learning agent should have forgotten the last score of the root";
+    ASSERT_EQ(nullptr, previousEval)
+        << "Learning agent should have forgotten the last score of the root";
 
-    ASSERT_EQ(nullptr,la.getBestRoot().second)
-    << "Learning agent should have forgotten the last score of the root";
-
+    ASSERT_EQ(nullptr, la.getBestRoot().second)
+        << "Learning agent should have forgotten the last score of the root";
 }
 
 TEST_F(LearningAgentTest, DecimateWorstRoots)
