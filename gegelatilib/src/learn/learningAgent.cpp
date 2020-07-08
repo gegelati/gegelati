@@ -102,7 +102,7 @@ bool Learn::LearningAgent::isRootEvalSkipped(
     }
 }
 
-std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(
+std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     TPG::TPGExecutionEngine& tee, const Job& job,
     uint64_t generationNumber, Learn::LearningMode mode,
     LearningEnvironment& le) const
@@ -180,7 +180,7 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
         }
 
         auto job = makeJob(i);
-        std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
+        std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
                 tee, *job, generationNumber, mode,
                 this->learningEnvironment);
         result.emplace(avgScore, (*job)[0]);

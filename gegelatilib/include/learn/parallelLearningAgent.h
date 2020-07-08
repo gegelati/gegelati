@@ -97,7 +97,7 @@ namespace Learn {
          * storing the exhaustiveArchive to be merged. \param[in]
          * archiveMapMutex Mutex protecting the archiveMap.
          */
-        void slaveEvalRootThread(
+        void slaveEvalJobThread(
             uint64_t generationNumber, LearningMode mode,
             std::queue<std::shared_ptr<Learn::Job>>
                 jobsToProcess,
@@ -151,7 +151,7 @@ namespace Learn {
          * a sequential execution. The Archive should also be updated in the
          * exact same manner.
          *
-         * This method calls the evaluateRoot method for every root TPGVertex
+         * This method calls the evaluateJob method for every root TPGVertex
          * of the TPGGraph. The method returns a sorted map associating each
          * root vertex to its average score, in ascending order or score.
          *

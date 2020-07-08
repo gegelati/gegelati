@@ -205,7 +205,7 @@ namespace Learn {
          * current generation is returned, already combined with the
          * resultsPerRoot for this root (if any).
          */
-        virtual std::shared_ptr<EvaluationResult> evaluateRoot(
+        virtual std::shared_ptr<EvaluationResult> evaluateJob(
             TPG::TPGExecutionEngine& tee, const Job& job,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
@@ -231,7 +231,7 @@ namespace Learn {
         /**
          * \brief Evaluate all root TPGVertex of the TPGGraph.
          *
-         * This method calls the evaluateRoot method for every root TPGVertex
+         * This method calls the evaluateJob method for every root TPGVertex
          * of the TPGGraph. The method returns a sorted map associating each
          * root vertex to its average score, in ascending order or score.
          *

@@ -90,7 +90,7 @@ namespace Learn {
             : BaseLearningAgent(le, iSet, p){};
 
         /**
-         * \brief Specialization of the evaluateRoot method for classification
+         * \brief Specialization of the evaluateJob method for classification
          * purposes.
          *
          * This method returns a ClassificationEvaluationResult for the

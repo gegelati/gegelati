@@ -73,7 +73,7 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
             auto job = makeJob(i);
 
-            std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
+            std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
                     tee, *job, generationNumber, mode,
                     this->learningEnvironment);
             results.emplace(avgScore, (*job)[0]);
@@ -87,14 +87,14 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
     return results;
 }
 
-void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber,
-    Learn::LearningMode mode,
-    std::queue<std::shared_ptr<Learn::Job>> jobsToProcess,
-    std::mutex &rootsToProcessMutex,
-    std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex *>> &resultsPerRootMap,
-    std::mutex &resultsPerRootMapMutex,
-    std::map<uint64_t, Archive *> &archiveMap,
-    std::mutex &archiveMapMutex)
+void Learn::ParallelLearningAgent::slaveEvalJobThread(uint64_t generationNumber,
+                                                      Learn::LearningMode mode,
+                                                      std::queue<std::shared_ptr<Learn::Job>> jobsToProcess,
+                                                      std::mutex &rootsToProcessMutex,
+                                                      std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex *>> &resultsPerRootMap,
+                                                      std::mutex &resultsPerRootMapMutex,
+                                                      std::map<uint64_t, Archive *> &archiveMap,
+                                                      std::mutex &archiveMapMutex)
 {
 
     // Clone learningEnvironment
@@ -135,8 +135,8 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(uint64_t generationNumber
             tee.setArchive(temporaryArchive);
 
             std::shared_ptr<EvaluationResult> avgScore =
-                this->evaluateRoot(tee, *jobToProcess, generationNumber,
-                                   mode, *privateLearningEnvironment);
+                    this->evaluateJob(tee, *jobToProcess, generationNumber,
+                                      mode, *privateLearningEnvironment);
 
             { // Store result Mutual exclusion zone
                 std::lock_guard<std::mutex> lock(resultsPerRootMapMutex);
@@ -234,17 +234,17 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
     std::vector<std::thread> threads;
     for (auto i = 0; i < (this->maxNbThreads - 1); i++) {
         threads.emplace_back(std::thread(
-            &ParallelLearningAgent::slaveEvalRootThread, this, generationNumber,
-            mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
-            std::ref(resultsPerRootMap), std::ref(resultsPerRootMutex), std::ref(archiveMap),
-            std::ref(archiveMapMutex)));
+                &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
+                mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
+                std::ref(resultsPerRootMap), std::ref(resultsPerRootMutex), std::ref(archiveMap),
+                std::ref(archiveMapMutex)));
     }
 
     // Work in the main thread also
-    this->slaveEvalRootThread(generationNumber, mode, jobsToProcess,
-                              rootsToProcessMutex, resultsPerRootMap,
-                              resultsPerRootMutex, archiveMap,
-                              archiveMapMutex);
+    this->slaveEvalJobThread(generationNumber, mode, jobsToProcess,
+                             rootsToProcessMutex, resultsPerRootMap,
+                             resultsPerRootMutex, archiveMap,
+                             archiveMapMutex);
 
     // Join the threads
     for (auto& thread : threads) {
