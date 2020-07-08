@@ -10,6 +10,15 @@
 #include <vector>
 
 namespace Learn {
+    /**
+     * \brief This class embeds roots for the simulations.
+     *
+     * The goal of the Job is to contain one, or several roots, so that each job
+     * will match with one simulation/evaluation. A basic learning agent will
+     * embed one root per job to do as many simulations as there are roots.
+     * An adversarial learning agent will embed for example 2 roots per job
+     * to simulate 2 agents activities (like a tic-tac-toe).
+     */
     class Job
     {
       protected:
