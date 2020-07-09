@@ -304,6 +304,8 @@ TEST_F(LearningAgentTest, UpdateEvaluationRecords)
 
 TEST_F(LearningAgentTest, forgetPreviousResults)
 {
+    params.nbIterationsPerPolicyEvaluation = 10;
+
     Learn::LearningAgent la(le, set, params);
     la.init();
 
