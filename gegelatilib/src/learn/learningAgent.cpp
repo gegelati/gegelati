@@ -373,4 +373,5 @@ void Learn::LearningAgent::forgetPreviousResults()
 {
     resultsPerRoot.clear();
     bestRoot.first = nullptr;
+    bestRoot.second = nullptr;
 }
