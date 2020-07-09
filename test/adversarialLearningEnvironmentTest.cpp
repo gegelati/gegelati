@@ -78,7 +78,11 @@ TEST(AdversarialLearningEnvironmentTest,compatibilityLearningAgent)
     params.mutation.prog.pDelete = 0.5;
     params.mutation.prog.pMutate = 1.0;
     params.mutation.prog.pSwap = 1.0;
+    params.archiveSize = 50;
+    params.archivingProbability = 1.0;
     params.nbIterationsPerPolicyEvaluation = 10;
+    params.maxNbActionsPerEval = 11;
+
 
     Learn::LearningAgent la(*le, set, params);
 

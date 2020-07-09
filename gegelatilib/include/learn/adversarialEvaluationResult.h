@@ -37,6 +37,8 @@
 #define ADVERSARIALEVALUATIONRESULT_H
 
 #include <vector>
+#include <memory>
+#include <stdexcept>
 
 #include "learn/evaluationResult.h"
 

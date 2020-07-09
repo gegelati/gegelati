@@ -73,7 +73,7 @@ namespace Learn {
          * evaluation. \param[in] results Map to store the resulting score of
          * evaluated roots.
          */
-        void evaluateAllRootsInParallel(
+        virtual void evaluateAllRootsInParallel(
             uint64_t generationNumber, LearningMode mode,
             std::multimap<std::shared_ptr<EvaluationResult>,
                           const TPG::TPGVertex*>& results);
@@ -92,8 +92,7 @@ namespace Learn {
          * \param[in] rootsToProcessMutex Mutex protecting the
          * rootsToProcess \param[in] resultsPerRootMap Map to store the
          * resulting score of evaluated roots. \param[in] resultsPerRootMapMutex
-         * Mutex protecting the results. \param[in] archiveSeeds Seed values for
-         * the archiving process of each root. \param[in,out] archiveMap Map
+         * Mutex protecting the results. \param[in,out] archiveMap Map
          * storing the exhaustiveArchive to be merged. \param[in]
          * archiveMapMutex Mutex protecting the archiveMap.
          */
@@ -103,7 +102,7 @@ namespace Learn {
                 jobsToProcess,
             std::mutex& rootsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         const TPG::TPGVertex*>>&
+                                         std::shared_ptr<Job>>>&
                 resultsPerRootMap,
             std::mutex& resultsPerRootMapMutex,
             std::map<uint64_t, Archive*>& archiveMap,
@@ -161,19 +160,6 @@ namespace Learn {
          */
         std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
         evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
-
-        /**
-        * \brief Puts all roots into jobs to be able to use them in simulation
-        * later.
-        *
-        * \param[in] mode the mode of the training, determining for exemple
-        * if we generate values that we only need for training.
-        * \param[in] tpgGraph The TPG graph from which we will take the
-        * roots.
-        *
-        * @return A vector containing pointers of the newly created jobs.
-        */
-        std::queue<std::shared_ptr<Learn::Job>> makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph=nullptr);
     };
 } // namespace Learn
 #endif

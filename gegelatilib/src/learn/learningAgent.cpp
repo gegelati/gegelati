@@ -36,6 +36,7 @@
  */
 
 #include <inttypes.h>
+#include <queue>
 
 #include "data/hash.h"
 #include "learn/evaluationResult.h"
@@ -383,4 +384,24 @@ std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(int num, TPG::TPGGraph
                 Learn::Job({tpgGraph->getRootVertices()[num]}));
     }
     return nullptr;
+}
+
+std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph) {
+    // sets the tpg to the Learning Agent's one if no one was specified
+    tpgGraph = tpgGraph==nullptr?&tpg:tpgGraph;
+
+    std::queue<std::shared_ptr<Learn::Job>> jobs;
+    for(int i=0; i<tpgGraph->getNbRootVertices();i++){
+        uint64_t archiveSeed;
+        // we only generate a random if we are in training, to make like the
+        // learning agent in order to stay determinist
+        if(mode==TRAINING) {
+            archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
+        }else{
+            archiveSeed = 0;
+        }
+        auto job = std::make_shared<Learn::Job>(Learn::Job(i,archiveSeed,{tpgGraph->getRootVertices()[i]}));
+        jobs.push(job);
+    }
+    return jobs;
 }

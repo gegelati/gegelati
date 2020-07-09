@@ -62,15 +62,26 @@ namespace Learn {
         * \brief Constructor enabling to store elements in the job so that the
         * Learning Agents will be able to use them later.
         *
-        * @param idx The index of this job.
-        * @param archiveSeed The archive seed that will be used with this job.
-        * @param roots The roots that will be encapsulated into the job.
+        * @param[in] idx The index of this job.
+        * @param[in] archiveSeed The archive seed that will be used with this job.
+        * @param[in] roots The roots that will be encapsulated into the job.
         */
         Job(uint64_t idx, uint64_t archiveSeed,
             std::initializer_list<const TPG::TPGVertex*> roots)
             : roots(roots), size(roots.size()), archiveSeed(archiveSeed),
               idx(idx)
         {
+        }
+
+
+        /**
+         * \brief Adds a root to this job and updates the size of the job.
+         *
+         * @param[in] root The root that will be added to this job.
+         */
+        void addRoot(const TPG::TPGVertex* root){
+            roots.emplace_back(root);
+            size++;
         }
 
         /**
