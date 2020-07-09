@@ -72,6 +72,18 @@ namespace Learn {
         {}
 
         /**
+        * \brief Constructor initializing scores as empty.
+        *
+        * @param size The size of scores i.e. number of evaluated agents.
+        * @param nbEval The number of evaluations that have been done to get
+        * these scores. Default is 1 as we can guess user only did 1 iteration.
+        */
+        AdversarialEvaluationResult(size_t size,
+                                    size_t nbEval=0):
+                EvaluationResult(0,nbEval),scores(size,0)
+        {}
+
+        /**
          * \brief Simple getter of the score of a single root, given its index.
          *
          * @param index The index of the root in the results list.
@@ -89,7 +101,7 @@ namespace Learn {
          * \throw std::runtime_error in case the other
          * AdversarialEvaluationResult and this have a different typeid or size.
          */
-        virtual EvaluationResult& operator+=(const EvaluationResult& other){
+        EvaluationResult& operator+=(const EvaluationResult& other) override{
             // Type Check (Must be done in all override)
             // This test will succeed in child class.
             const std::type_info& thisType = typeid(*this);
@@ -109,12 +121,24 @@ namespace Learn {
             for(int i=0; i<scores.size(); i++){
                 this->scores[i] = this->scores[i] * (double)this->nbEvaluation +
                                otherConverted.scores[i] * (double)otherConverted.nbEvaluation;
+                this->scores[i] /= (double)this->nbEvaluation + (double)otherConverted.nbEvaluation;
+
             }
 
-            this->result /= (double)this->nbEvaluation + (double)otherConverted.nbEvaluation;
             // Addition ot nbEvaluation
             this->nbEvaluation += otherConverted.nbEvaluation;
 
+            return *this;
+        }
+
+        /**
+         * \brief Division operator for AdversariEalvaluationResult that simply
+         * divides all scores contained in the scores vectore.
+         */
+        virtual EvaluationResult& operator/=(double divisor){
+            for(double& val : scores){
+                val/=divisor;
+            }
             return *this;
         }
 

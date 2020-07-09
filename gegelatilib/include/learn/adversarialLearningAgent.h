@@ -41,6 +41,8 @@
 
 #include "learn/adversarialEvaluationResult.h"
 #include "learn/parallelLearningAgent.h"
+#include "learn/adversarialLearningAgent.h"
+
 
 namespace Learn{
     /**

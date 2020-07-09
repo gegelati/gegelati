@@ -35,7 +35,9 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "learn/adversarialLearningAgent.h"
+
+#include <memory>
+#include <gegelati.h>
 
 void Learn::AdversarialLearningAgent::evaluateAllRootsInParallel(
         uint64_t generationNumber, LearningMode mode,
@@ -124,8 +126,11 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::evalua
         uint64_t generationNumber, Learn::LearningMode mode,
         LearningEnvironment& le) const
 {
+    auto& ale = (AdversarialLearningEnvironment&) le;
+
+
     // Init results
-    double result = 0.0;
+    auto results = std::make_shared<AdversarialEvaluationResult>(this->agentsPerEvaluation);
 
     // Evaluate nbIteration times
     for (auto i = 0; i < this->iterationsPerJob; i++) {
@@ -134,21 +139,21 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::evalua
         uint64_t hash = hasher(generationNumber) ^ hasher(i);
 
         // Reset the learning Environment
-        le.reset(hash, mode);
+        ale.reset(hash, mode);
 
         uint64_t nbActions = 0;
 
         auto roots = job.getRoots();
         auto rootsIterator = roots.begin();
 
-        while (!le.isTerminal() &&
+        while (!ale.isTerminal() &&
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the action
             uint64_t actionID =
                     ((const TPG::TPGAction*)tee.executeFromRoot(**rootsIterator).back())
                             ->getActionID();
             // Do it
-            le.doAction(actionID);
+            ale.doAction(actionID);
 
             rootsIterator++;
             if(rootsIterator==roots.end()){
@@ -160,16 +165,13 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::evalua
         }
 
         // Update results
-        result += le.getScore();
+        *results += *std::dynamic_pointer_cast<EvaluationResult>(ale.getScores());
     }
 
-    // Create the EvaluationResult
-    auto evaluationResult =
-            std::shared_ptr<EvaluationResult>(new EvaluationResult(
-                    result / (double)iterationsPerJob,
-                    iterationsPerJob));
+    // Divides by nb iterations to get a mean of scores
+    *results /= this->iterationsPerJob;
 
-    return evaluationResult;
+    return results;
 }
 
 std::queue<std::shared_ptr<Learn::Job>>
@@ -213,6 +215,20 @@ Learn::AdversarialLearningAgent::makeJobs(Learn::LearningMode mode,
         // adding other roots in this job
         // we begin at 1 as there is already "root" in the job
         for(int i=1; i<agentsPerEvaluation; i++){
+            if(nbEvals.size()==0){
+                // there is no root that has not been evaluated enough times
+                // left. We will take a root that is already in the job.
+                // That's default behavior, it could be changed for the better.
+                auto roots = job->getRoots();
+                size_t position = rng.getUnsignedInt64(0,roots.size()-1);
+                auto iterator = roots.begin();
+                std::advance(iterator,position);
+                root=*iterator;
+                job->addRoot(root);
+                continue;
+            }
+
+            // we're sure there are still roots to include in jobs
             size_t position = rng.getUnsignedInt64(0,nbEvals.size()-1);
             auto iterator = nbEvals.begin();
             std::advance(iterator,position);
