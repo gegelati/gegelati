@@ -18,10 +18,13 @@ TEST(PrimitiveTypeArray2DTest, getAddressSpace)
     Data::PrimitiveTypeArray2D<int> a(w, h);
 
     // Check primitive type provided by 1D array
-    // (other types are covered by PrimitiveTypeArray tests)
     ASSERT_EQ(a.getAddressSpace(typeid(int)), w * h)
         << "Address space of the 2D array of int is not width*height for "
            "typeid(int).";
+
+    ASSERT_EQ(a.getAddressSpace(typeid(int[2])), (w * h) - 2 + 1)
+        << "Address space of the 2D array of int is not correct for "
+           "typeid(int[2]).";
 
     // Request a 2D array with valid dimensions
     ASSERT_EQ(a.getAddressSpace(typeid(int[2][4])), (w - 4 + 1) * (h - 2 + 1))
