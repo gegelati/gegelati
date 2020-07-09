@@ -181,6 +181,11 @@ uint64_t Program::Program::identifyIntrons()
     return nbIntrons;
 }
 
+const Data::ConstantHandler & Program::Program::getConstantHandler() const
+{
+	return this->constants;
+}
+
 size_t Program::Program::getConstantsAddressSpace() const 
 {
     return this->constants.getAddressSpace(typeid(Data::Constant));

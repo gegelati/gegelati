@@ -222,6 +222,16 @@ namespace Program {
          */
         uint64_t identifyIntrons();
 
+		/**
+		*  \brief get the constantHandler object of the Program
+		*
+		*  This method gives a reference to the constantHandler associated
+		*  with the program
+		*
+		*  \return the constantHandler of the program
+		*/
+		const Data::ConstantHandler & getConstantHandler() const;
+
         /**
          * \brief Get the size of the constantHandler
          *

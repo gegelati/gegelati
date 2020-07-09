@@ -130,6 +130,10 @@ namespace Program {
             // requires constnessand dataSrc data are not const...
             for (std::reference_wrapper<T> data : dataSrc) {
                 this->dataSourcesAndRegisters.push_back(data.get());
+				if (prog.getConstantsAddressSpace() < 0)
+				{
+					this->dataSourcesAndRegisters.push_back(prog.getConstantHandler());
+				}
                 this->dataSources.push_back(data.get());
             }
 
