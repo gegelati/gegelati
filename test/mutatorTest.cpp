@@ -521,6 +521,10 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     params.tpg.nbActions = 5;
     params.tpg.maxInitOutgoingEdges = 4;
     params.prog.maxProgramSize = 96;
+    params.prog.nbProgramConstant = 5;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
 
     ASSERT_NO_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params, rng))
         << "TPG Initialization failed.";

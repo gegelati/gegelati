@@ -85,7 +85,7 @@ namespace Program {
          * in the Program attributes.
          * \param[in] nb_constant the number of constants that the program can define and use
          */
-        Program(const Environment& e, size_t nb_constant) 
+        Program(const Environment& e, size_t nb_constant = 0)
             : environment{e}, constants{nb_constant}{
                 constants.resetData();//force all constant to 0 at first.
             };
