@@ -80,8 +80,14 @@ namespace Mutator {
         double pMutate;
         /// Probability of swapping two lines of the Program.
         double pSwap;
-        /// Number of Constant available for programs
+        /// Maximum number of Constants available in a program.
         size_t nbProgramConstant;
+        /// Probability of each constant to be mutated
+        double pConstantMutation;
+        /// Minimum constant value possible 
+        int32_t minConstValue;
+        /// Maximum constant value possible 
+        int32_t maxConstValue;
     } ProgramParameters;
 
     /**

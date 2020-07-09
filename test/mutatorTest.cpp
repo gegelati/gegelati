@@ -88,9 +88,9 @@ class MutatorTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
 
         e = new Environment(set, vect, 8);
-        p = new Program::Program(*e);
+        p = new Program::Program(*e,5);
         progPointer =
-            std::shared_ptr<Program::Program>(new Program::Program(*e));
+            std::shared_ptr<Program::Program>(new Program::Program(*e,5));
     }
 
     virtual void TearDown()
@@ -283,7 +283,7 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
             })));
 
     Environment e2(set, vect, 8);
-    Program::Program p2(e2);
+    Program::Program p2(e2,5);
 
     Program::ProgramExecutionEngine pEE(p2);
 
@@ -521,6 +521,10 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     params.tpg.nbActions = 5;
     params.tpg.maxInitOutgoingEdges = 4;
     params.prog.maxProgramSize = 96;
+    params.prog.nbProgramConstant = 5;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
 
     ASSERT_NO_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params, rng))
         << "TPG Initialization failed.";
@@ -875,6 +879,10 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
+    params.prog.nbProgramConstant = 5;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
     Archive arch;
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng);
@@ -919,6 +927,10 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
+    params.prog.nbProgramConstant = 5;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
     Archive arch;
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng);
@@ -962,6 +974,10 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
+    params.prog.nbProgramConstant = 5;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
     Archive arch;
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng);
@@ -1021,6 +1037,10 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
+    params.prog.nbProgramConstant = 5;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
     Archive arch;
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng);

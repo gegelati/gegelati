@@ -117,17 +117,17 @@ namespace Data {
         /// Default destructor.
         virtual ~PrimitiveTypeArray() = default;
 
-        // Inherited from DataHandler
+        /// Inherited from DataHandler
         virtual DataHandler* clone() const override;
 
-        // Inherited from DataHandler
+        /// Inherited from DataHandler
         virtual size_t getAddressSpace(
             const std::type_info& type) const override;
 
-        // Inherited from DataHandler
+        /// Inherited from DataHandler
         virtual bool canHandle(const std::type_info& type) const override;
 
-        // Inherited from DataHandler
+        /// Inherited from DataHandler
         virtual size_t getLargestAddressSpace(void) const override;
 
         /**

@@ -104,8 +104,14 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
     Program::Program& p = edge.getProgram();
     if (this->findProgramID(edge.getProgram(), progID)) {
         // First time thie Program is encountered
-        fprintf(pFile, "%sP%" PRIu64 " [fillcolor=\"#cccccc\" shape=point]\n",
-                this->offset.c_str(), progID);
+        fprintf(pFile, "%sP%" PRIu64 " [fillcolor=\"#cccccc\" shape=point] //",
+                this->offset.c_str(), progID); 
+        // add next the content of the constant data handler in a comment (//)
+        for(int i = 0; i < p.getConstantsAddressSpace(); i++)
+        {
+            fprintf(pFile, "%d|", p.getConstantAt(i));
+        }
+        fprintf(pFile, "\n");
         // print the program content :
         printProgram(p);
         fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n",

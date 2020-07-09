@@ -180,3 +180,20 @@ uint64_t Program::Program::identifyIntrons()
 
     return nbIntrons;
 }
+
+size_t Program::Program::getConstantsAddressSpace() const 
+{
+    return this->constants.getAddressSpace(typeid(Data::Constant));
+}
+
+const Data::Constant Program::Program::getConstantAt(size_t index) const 
+{
+    std::shared_ptr<const Data::Constant> value = 
+        this->constants.getDataAt(typeid(Data::Constant), index).getSharedPointer<const Data::Constant>();
+    return *value;
+}
+
+void Program::Program::setConstantAt(size_t index, Data::Constant value) 
+{
+    this->constants.setDataAt(typeid(Data::Constant), index, value);
+}

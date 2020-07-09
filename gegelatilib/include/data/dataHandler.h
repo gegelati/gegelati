@@ -114,7 +114,7 @@ namespace Data {
         /**
          * \brief Return a copy of the DataHandler (with all its content).
          *
-         * The returned copy shuold always have the same polymorphic type
+         * The returned copy should always have the same polymorphic type
          * as the original object, and give the same hash and data until
          * the original or the copy is modified.
          *

@@ -27,7 +27,10 @@
       "pAdd": 0.7,
       "pMutate": 1.0,
       "pSwap": 1.0,
-      "nbProgramConstant": 20
+      "nbProgramConstant": 5,
+      "pConstantMutation": 0.5,
+      "minConstValue": 0,
+      "maxConstValue": 1,
     }
   }
 }

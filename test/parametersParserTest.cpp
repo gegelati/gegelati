@@ -63,7 +63,7 @@ TEST(LearningParametersTest, readConfigFile)
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(9, root["mutation"]["tpg"].size())
         << "Wrong number of elements in parsed json file";
-    ASSERT_EQ(6, root["mutation"]["prog"].size())
+    ASSERT_EQ(9, root["mutation"]["prog"].size())
         << "Wrong number of elements in parsed json file";
 }
 
@@ -109,7 +109,10 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.7, params.mutation.prog.pAdd);
     ASSERT_EQ(1.0, params.mutation.prog.pMutate);
     ASSERT_EQ(1.0, params.mutation.prog.pSwap);
-    ASSERT_EQ(20, params.mutation.prog.nbProgramConstant);
+    ASSERT_EQ(5, params.mutation.prog.nbProgramConstant);
+    ASSERT_EQ(0.5, params.mutation.prog.pConstantMutation);
+    ASSERT_EQ(0, params.mutation.prog.minConstValue);
+    ASSERT_EQ(1, params.mutation.prog.maxConstValue);
 
     // check default parameters
     Learn::LearningParameters params2;
