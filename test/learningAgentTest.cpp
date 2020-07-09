@@ -338,13 +338,13 @@ TEST_F(LearningAgentTest, forgetPreviousResults)
         << "Learning agent should have forgotten the last score of the root";
 
     ASSERT_EQ(nullptr, la.getBestRoot().first)
-                                << "Learning agent should have forgotten the best root";
+        << "Learning agent should have forgotten the best root";
 
     ASSERT_EQ(nullptr, la.getBestRoot().second)
         << "Learning agent should have forgotten the last score of the root";
 
     ASSERT_NO_THROW(la.trainOneGeneration(0))
-            << "trainOneGeneration doesn't work after a forgetPreviousResults";
+        << "trainOneGeneration doesn't work after a forgetPreviousResults";
 }
 
 TEST_F(LearningAgentTest, DecimateWorstRoots)
