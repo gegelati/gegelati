@@ -95,8 +95,12 @@ class ImporterTest : public ::testing::Test
 
         // Create 10 programs
         for (int i = 0; i < 9; i++) {
-            progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+            std::shared_ptr<Program::Program> p = std::make_shared<Program::Program>(*e, 5);
+            for(int j = 0; j < 5; j++)
+            {
+                p.get()->setConstantAt(j,j-2);
+            }
+            progPointers.push_back(p);
         }
 
         // add instructions to at least one program. (here we add 3.)
@@ -164,7 +168,7 @@ class ImporterTest : public ::testing::Test
         ASSERT_EQ(tpg->getRootVertices().size(), 2);
 
         // Save the graph in a dot file.
-        File::TPGGraphDotExporter dotexporter("exported_tpg.dot", *tpg);
+        File::TPGGraphDotExporter dotexporter("exported_tpg_imp.dot", *tpg);
         dotexporter.print();
 
         failpfile.open("fail_file.dot", std::fstream::out);
@@ -220,7 +224,7 @@ class ImporterTest : public ::testing::Test
                                          progPointers.at(8)));
 
         // Save the graph in a dot file.
-        File::TPGGraphDotExporter exporter2("exported_tpg2.dot", *tpg);
+        File::TPGGraphDotExporter exporter2("exported_tpg2_imp.dot", *tpg);
         exporter2.print();
     }
 
@@ -239,7 +243,7 @@ TEST_F(ImporterTest, Constructor)
 {
     File::TPGGraphDotImporter* dotImporter;
     ASSERT_NO_THROW(dotImporter = new File::TPGGraphDotImporter(
-                        "exported_tpg.dot", *e, *tpg_copy))
+                        "exported_tpg_imp.dot", *e, *tpg_copy))
         << "The TPGGraphDotExporter could not be constructed with a valid file "
            "path.";
 
@@ -255,7 +259,7 @@ TEST_F(ImporterTest, Constructor)
 
 TEST_F(ImporterTest, importGraph)
 {
-    File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
+    File::TPGGraphDotImporter dotImporter("exported_tpg_imp.dot", *e, *tpg_copy);
 
     // assert that we can import a tpg graph from a file
     ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
@@ -302,6 +306,14 @@ TEST_F(ImporterTest, importGraph)
         << "The first part of the operand changed";
     ASSERT_EQ(p.getLine(2).getOperand(0).second, 1)
         << "The second part of the operand changed";
+
+    //checking the program's parameters
+    ASSERT_EQ(p.getConstantsAddressSpace(), 5) << "Address Space incorrect";
+    ASSERT_EQ(p.getConstantAt(0),-2) << "The constant changed";
+    ASSERT_EQ(p.getConstantAt(1),-1) << "The constant changed";
+    ASSERT_EQ(p.getConstantAt(2),0) << "The constant changed";
+    ASSERT_EQ(p.getConstantAt(3),1) << "The constant changed";
+    ASSERT_EQ(p.getConstantAt(4),2) << "The constant changed";
 }
 
 TEST_F(ImporterTest, readLineFromFile)
@@ -324,10 +336,10 @@ TEST_F(ImporterTest, readLineFromFile)
 
 TEST_F(ImporterTest, setNewFilePath)
 {
-    File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
+    File::TPGGraphDotImporter dotImporter("exported_tpg_imp.dot", *e, *tpg_copy);
 
     // assert that we can import a tpg graph from a file
-    ASSERT_NO_THROW(dotImporter.setNewFilePath("exported_tpg2.dot"))
+    ASSERT_NO_THROW(dotImporter.setNewFilePath("exported_tpg2_imp.dot"))
         << "Changing the input file should be ok";
 
     // Check invalid filepath

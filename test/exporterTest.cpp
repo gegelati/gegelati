@@ -85,10 +85,15 @@ class ExporterTest : public ::testing::Test
         e = new Environment(set, vect, 8);
         tpg = new TPG::TPGGraph(*e);
 
+        size_t constant_size = 5;
         // Create 10 programs
         for (int i = 0; i < 8; i++) {
-            progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+            std::shared_ptr<Program::Program> p = std::make_shared<Program::Program>(*e, constant_size);
+            for(int j = 0; j < constant_size; j++)
+            {
+                p.get()->setConstantAt(j,j-2);
+            }
+            progPointers.push_back(p);
         }
 
         // add instructions to at least one program.

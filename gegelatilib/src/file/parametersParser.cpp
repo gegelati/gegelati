@@ -159,6 +159,18 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.prog.nbProgramConstant = (size_t)value.asUInt();
         return;
     }
+    if (param == "pConstantMutation") {
+        params.mutation.prog.pConstantMutation = (double)value.asDouble();
+        return;
+    }
+    if (param == "minConstValue") {
+        params.mutation.prog.minConstValue = (int32_t)value.asInt();
+        return;
+    }
+    if (param == "maxConstValue") {
+        params.mutation.prog.maxConstValue = (int32_t)value.asInt();
+        return;
+    }
     if (param == "archiveSize") {
         params.archiveSize = (size_t)value.asUInt();
         return;

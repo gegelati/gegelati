@@ -85,7 +85,7 @@ namespace Program {
          *
          * \param[in] env The Environment in which the Program will be executed.
          */
-        ProgramExecutionEngine(Environment& env)
+        ProgramExecutionEngine(const Environment& env)
             : programCounter{0}, registers{env.getNbRegisters()}, program{NULL},
               dataSources{env.getDataSources()}
         {

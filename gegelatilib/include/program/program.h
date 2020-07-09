@@ -41,6 +41,7 @@
 
 #include "environment.h"
 #include "program/line.h"
+#include "data/constantHandler.h"
 
 namespace Program {
     /**
@@ -66,6 +67,13 @@ namespace Program {
          */
         std::vector<std::pair<Line*, bool>> lines;
 
+        /**
+        *   \brief Constants of the Program
+        *
+        *   A Program contains a set of constants in a dedicated Data::DataHandler
+        **/
+        Data::ConstantHandler constants;
+
         /// Delete the default constructor.
         Program() = delete;
 
@@ -75,8 +83,12 @@ namespace Program {
          *
          * \param[in] e the reference to the Environment that will be referenced
          * in the Program attributes.
+         * \param[in] nb_constant the number of constants that the program can define and use
          */
-        Program(const Environment& e) : environment{e} {};
+        Program(const Environment& e, size_t nb_constant) 
+            : environment{e}, constants{nb_constant}{
+                constants.resetData();//force all constant to 0 at first.
+            };
 
         /**
          * \brief Copy constructor of the Program.
@@ -87,7 +99,7 @@ namespace Program {
          * \param[in] other a const reference the the copied Program.
          */
         Program(const Program& other)
-            : environment{other.environment}, lines{other.lines}
+            : environment{other.environment}, lines{other.lines}, constants{other.constants}
         {
             // Replace lines with their copy
             // Keep intro info
@@ -209,6 +221,30 @@ namespace Program {
          * \return the number of intron Lines idendified.
          */
         uint64_t identifyIntrons();
+
+        /**
+         * \brief Get the size of the constantHandler
+         *
+         * \return the current size of the constantHandler of the program
+         */
+        size_t getConstantsAddressSpace() const;
+
+        /**
+         * \brief Get the value of a constant at a given index
+         *
+         * \param[in] index The index of the constant that will be accessed
+         * \return The value of the constant at the index
+         */
+        const Data::Constant getConstantAt(size_t index) const;
+
+        /**
+         * \brief Set a new value to a program's constant
+         *
+         * \param[in] index The index of the constant that will be changed
+         * \param[in] value The new value of the constant
+         */
+        void setConstantAt(size_t index, Data::Constant value);
+
     };
 } // namespace Program
 #endif
