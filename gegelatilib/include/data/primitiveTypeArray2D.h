@@ -11,6 +11,15 @@ namespace Data {
      * This specialization of the PrimitiveTypeArray template class additionally
      * provides the possibility to get data with the type:
      * - T[n][m]: with $n*m <=$ the size of the underlying PrimitiveTypeArray.
+     *
+     * It is important to note that only spatially coherent values will be
+     * returned when arrays are requested. For example, when requesting a 1D
+     * array of N pixels, the returned pixels will always be taken from a single
+     * line of pixels, and will never comprise the last pixel from a line i, and
+     * the first pixels from line i+1.
+     * This means that the addressable space for arrays will be less than a 1D
+     * PrimitiveDataArray with the same number of nbElements.
+     *
      */
     template <typename T>
     class PrimitiveTypeArray2D : public PrimitiveTypeArray<T>
@@ -53,8 +62,8 @@ namespace Data {
             const std::type_info& type) const override;
 
         /// Inherited from DataHandler
-        /*virtual UntypedSharedPtr getDataAt(const std::type_info& type,
-                                           const size_t address) const override;*/
+        virtual UntypedSharedPtr getDataAt(const std::type_info& type,
+                                           const size_t address) const override;
     };
 
     template <typename T>
@@ -80,29 +89,31 @@ namespace Data {
             std::regex arrayType(regex);
             std::cmatch cm;
             if (std::regex_match(typeName.c_str(), cm, arrayType)) {
+                int typeH = 0;
+                int typeW = 0;
                 if (cm[2].matched && !cm[4].matched) {
                     // 1D array
-                    int size = std::atoi(cm[2].str().c_str());
-                    if (size <= this->nbElements) {
-                        result = (this->nbElements - size + 1);
-                        if (dim1 != nullptr) {
-                            *dim1 = 1;
-                        }
-                    }
+                    // Only spatially coherent data can be provided.
+                    // Data spanning over several lines can not be
+                    // provided
+                    typeH = 1;
+                    typeW = std::atoi(cm[2].str().c_str());
                 }
                 else if (cm[2].matched && cm[4].matched) {
                     // 2D array
-                    int height = std::atoi(cm[2].str().c_str());
-                    int width = std::atoi(cm[4].str().c_str());
-                    if (height <= this->height && width <= this->width) {
-                        result = (this->height - height + 1) *
-                                 ((this->width - width + 1));
-                        if (dim1 != nullptr) {
-                            *dim1 = height;
-                        }
-                        if (dim2 != nullptr) {
-                            *dim2 = width;
-                        }
+                    typeH = std::atoi(cm[2].str().c_str());
+                    typeW = std::atoi(cm[4].str().c_str());
+                }
+
+                // Make sure dimensions are valid for this array
+                if (typeH <= this->height && typeW <= this->width) {
+                    result = (this->height - typeH + 1) *
+                             ((this->width - typeW + 1));
+                    if (dim1 != nullptr) {
+                        *dim1 = typeH;
+                    }
+                    if (dim2 != nullptr) {
+                        *dim2 = typeW;
                     }
                 }
             }
@@ -126,7 +137,7 @@ namespace Data {
         return this->getAddressSpace(type, nullptr, nullptr);
     }
 
-    /* template <typename T>
+    template <typename T>
     inline UntypedSharedPtr PrimitiveTypeArray2D<T>::getDataAt(
         const std::type_info& type, const size_t address) const
     {
@@ -143,43 +154,36 @@ namespace Data {
         }
 
         // Else, the only other supported type is cstyle array (1D or 2D).
+        // Because 2D arrays are array with the second dimension set to 1,
+        // all the following code is generic
 
         size_t dim1 = 0;
         size_t dim2 = 0;
         size_t addressableSpace = this->getAddressSpace(type, &dim1, &dim2);
 
-        if (dim2 == 0 && dim1 != 0) {
-            // Allocate the array
-            size_t arraySize = this->nbElements - dim1 + 1;
-            T* array = new T[arraySize];
+        // No need to have the if. Types was checked before trying to produce
+        // a return value
+        size_t arrayHeight = dim1;
+        size_t arrayWidth = dim2;
+        auto array = new T[arrayHeight * arrayWidth];
 
-            // Copy its content
-            for (size_t idx = 0; idx < arraySize; idx++) {
-                array[idx] = this->data[address + idx];
+        // Copy its content
+        size_t addressH = address / (this->width - dim2 + 1);
+        size_t addressW = address % (this->width - dim2 + 1);
+        size_t addressSrc = (addressH * this->width) + addressW;
+        size_t idxDst = 0;
+        for (size_t idxHeight = 0; idxHeight < arrayHeight; idxHeight++) {
+            for (size_t idxWidth = 0; idxWidth < arrayWidth; idxWidth++) {
+                size_t idxSrc = (idxHeight * this->width) + idxWidth;
+                array[idxDst++] = this->data[addressSrc + idxSrc];
             }
-
-            // Create the UntypedSharedPtr
-            UntypedSharedPtr result{
-                std::make_shared<UntypedSharedPtr::Model<const T[]>>(array)};
-            return result;
         }
-        else if (dim2 != 0 && dim1 != 0) {
-            // Allocate the array
-            size_t arrayHeight = this->height - dim1 + 1;
-            size_t arrayWidth = this->width - dim2 + 1;
-            auto array = new T[arrayHeight][arrayWidth];
 
-            // Copy its content
-            for (size_t idx = 0; idx < arraySize; idx++) {
-                array[idx] = this->data[address + idx];
-            }
-
-            // Create the UntypedSharedPtr
-            UntypedSharedPtr result{
-                std::make_shared<UntypedSharedPtr::Model<const T[][]>>((T**)array)};
-            return result; 
-        } 
-    } */
+        // Create the UntypedSharedPtr
+        UntypedSharedPtr result{
+            std::make_shared<UntypedSharedPtr::Model<const T[]>>(array)};
+        return result;
+    }
 
 }; // namespace Data
 #endif
