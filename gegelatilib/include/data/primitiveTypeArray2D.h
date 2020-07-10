@@ -143,7 +143,7 @@ namespace Data {
     {
 #ifndef NDEBUG
         // Throw exception in case of invalid arguments.
-        checkAddressAndType(type, address);
+        PrimitiveTypeArray<T>::checkAddressAndType(type, address);
 #endif
 
         if (type == typeid(T)) {
