@@ -9,6 +9,7 @@ _aaaa.mm.dd_
 
 ### Changes
 * Learning Agents now handle jobs instead of simple roots, allowing new concepts like adversarial learning (a job containing several roots that will train together).
+* tpgGraphDotImporter now has a line MAX_READ_SIZE limit of 4096 (instead of 1024), allowing to read greater tpg dot files.
 
 ### Bug fix
 * Adapt code for building GEGELATI with clang standard library: libc++. (see Issue #49 for mode details)
