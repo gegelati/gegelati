@@ -106,6 +106,24 @@ namespace Learn{
         {
         }
 
+
+        /**
+        * \brief Evaluate all root TPGVertex of the TPGGraph.
+        *
+        * **Replaces the function from the base class ParallelLearningAgent.**
+        *
+        * This method calls the evaluateJob method for every root TPGVertex
+        * of the TPGGraph. The method returns a sorted map associating each
+        * root vertex to its average score, in ascending order or score.
+        * Sequential or parallel, both situations should output the same result.
+        *
+        * \param[in] generationNumber the integer number of the current
+        * generation. \param[in] mode the LearningMode to use during the policy
+        * evaluation.
+        */
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
+        evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode) override;
+
         /**
         * \brief Evaluates policy starting from the given root, taking
         * adversarial in charge.

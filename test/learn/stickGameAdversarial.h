@@ -72,12 +72,15 @@ protected:
     /// Simple turn control, first player plays in even turn and second in odd
     int turn;
 
+    /// Boolean just used to cover the case the LE doesnt support copy in tests
+    bool copyable;
+
 public:
     /**
      * Constructor.
      */
-    StickGameAdversarial()
-            : AdversarialLearningEnvironment(3), remainingSticks(1), hints(3)
+    StickGameAdversarial(bool isCopyable=true)
+            : AdversarialLearningEnvironment(3), remainingSticks(1), hints(3), copyable(isCopyable)
     {
         this->reset(0);
         // Set hints

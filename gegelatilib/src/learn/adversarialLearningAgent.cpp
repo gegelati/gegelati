@@ -39,6 +39,20 @@
 #include <memory>
 #include <gegelati.h>
 
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
+Learn::AdversarialLearningAgent::evaluateAllRoots(uint64_t generationNumber,
+                                               Learn::LearningMode mode)
+{
+    // deactivates parallelism if le is not cloneable
+    if(!this->learningEnvironment.isCopyable()){
+        this->maxNbThreads = 1;
+    }
+    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
+            results;
+    evaluateAllRootsInParallel(generationNumber, mode, results);
+    return results;
+}
+
 void Learn::AdversarialLearningAgent::evaluateAllRootsInParallel(
         uint64_t generationNumber, LearningMode mode,
         std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
