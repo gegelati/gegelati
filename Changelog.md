@@ -9,6 +9,7 @@ _aaaa.mm.dd_
 * Adding `LearningAgent::forgetPreviousResults()` method to support changing LearningEnvironment where score of previous generation need to be forgotten from time to time. This is usefull when the LearningEnvironment evolves every _N_ generations to teach new skills gradually.
 
 ### Changes
+* tpgGraphDotImporter now has a line MAX_READ_SIZE limit of 4096 (instead of 1024), allowing to read greater tpg dot files.
 
 ### Bug fix
 * Adapt code for building GEGELATI with clang standard library: libc++. (see Issue #49 for mode details)
