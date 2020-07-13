@@ -38,7 +38,7 @@
 
 bool StickGameAdversarial::isCopyable() const
 {
-    return copyable;
+    return true;
 }
 
 Learn::LearningEnvironment* StickGameAdversarial::clone() const

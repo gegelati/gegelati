@@ -156,17 +156,6 @@ namespace Learn {
         Mutator::RNG& getRNG();
 
         /**
-         * \brief Initialize the LearningAgent.
-         *
-         * Calls the TPGMutator::initRandomTPG function.
-         * Initialize the Mutator::RNG with the given seed.
-         * Clears the Archive.
-         *
-         * \param[in] seed the seed given to the TPGMutator.
-         */
-        void init(uint64_t seed = 0);
-
-        /**
          * \brief Adds a LALogger to the loggers vector.
          *
          * Adds a logger to the loggers vector, so that it will be called in
@@ -360,6 +349,17 @@ namespace Learn {
         * @return A vector containing pointers of the newly created jobs.
         */
         virtual std::queue<std::shared_ptr<Learn::Job>> makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph=nullptr);
+
+        /**
+             * \brief Initialize the LearningAgent.
+             *
+             * Calls the TPGMutator::initRandomTPG function.
+             * Initialize the Mutator::RNG with the given seed.
+             * Clears the Archive.
+             *
+             * \param[in] seed the seed given to the TPGMutator.
+             */
+        void init(uint64_t seed = 0);
     };
 }; // namespace Learn
 

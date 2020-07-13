@@ -37,7 +37,6 @@
 #include <learn/adversarialLearningEnvironment.h>
 #include <gegelati.h>
 
-#include "learn/classificationLearningEnvironment.h"
 #include "learn/fakeClassificationLearningEnvironment.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningAgent.h"

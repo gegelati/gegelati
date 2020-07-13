@@ -52,6 +52,9 @@
 #include "learn/learningParameters.h"
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameAdversarial.h"
+#include "learn/adversarialLearningAgentWithCustomMakeJobs.h"
+#include "learn/fakeAdversarialLearningEnvironment.h"
+
 
 class adversarialLearningAgentTest : public ::testing::Test
 {
@@ -134,7 +137,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     }
 }
 
-TEST_F(adversarialLearningAgentTest, EvalRoot)
+TEST_F(adversarialLearningAgentTest, EvalJob)
 {
     params.archiveSize = 50;
     params.archivingProbability = 1.0;
@@ -166,7 +169,6 @@ TEST_F(adversarialLearningAgentTest, EvalRoot)
     ASSERT_LE(result->getResult(), 1.0)
                                 << "Average score should not exceed the score of a perfect layer.";
 }
-// TODO MakeJob MakeJobs
 
 TEST_F(adversarialLearningAgentTest, GetArchive)
 {
@@ -219,27 +221,6 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
                                 << "Graph does not have the expected determinst characteristics.";
 }
 
-TEST_F(adversarialLearningAgentTest, KeepBestPolicy)
-{
-    params.archiveSize = 50;
-    params.archivingProbability = 0.5;
-    params.maxNbActionsPerEval = 11;
-    params.nbIterationsPerPolicyEvaluation = 1;
-    params.ratioDeletedRoots = 0.2;
-    params.nbGenerations = 5;
-
-    Learn::AdversarialLearningAgent la(le, set, params);
-    la.init();
-    bool alt = false;
-    la.train(alt, true);
-
-    ASSERT_NO_THROW(la.keepBestPolicy())
-                                << "Keeping the best policy after training should not fail.";
-    ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), 1)
-                                << "A single root TPGVertex should remain in the TPGGraph when keeping "
-                                   "the best policy only";
-}
-
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
 {
@@ -283,6 +264,52 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)
     ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
                                 << "Number of evaluated roots is under the number of roots from the "
                                    "TPGGraph.";
+}
+
+TEST_F(adversarialLearningAgentTest, EvalAllRootsGoodResults)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 10;
+    params.nbThreads = 1;
+    params.mutation.tpg.nbRoots = 3; // important : keep it at 3 or more !
+    // the custom learning agent will only put the 3 first roots in jobs
+
+    FakeAdversarialLearningEnvironment customLe;
+
+    AdversarialLearningAgentWithCustomMakeJobs la(customLe, set, params);
+
+    la.init();
+    auto roots = la.getTPGGraph().getRootVertices();
+    auto firstRoot = roots[0];
+    auto secondRoot = roots[1];
+    auto thirdRoot = roots[2];
+
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+            const TPG::TPGVertex*>
+            result;
+
+    // this evaluation is custom, see AdversarialLearningAgentWithCustomMakeJobs
+    // and FakeAdversarialLearningEnvironment.
+    // to be brief, the 3 first roots of the Learning Env will have known scores
+    ASSERT_NO_THROW(result =
+                            la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
+                                << "Evaluation from a root failed.";
+
+    auto iter = result.begin();
+    ASSERT_EQ(firstRoot,iter->second)
+                                << "Wrong root has 1st place.";
+    ASSERT_EQ(-0.5,iter++->first->getResult())
+                                << "Wrong score for 1st root after an eval.";
+    ASSERT_EQ(secondRoot,iter->second)
+                                << "Wrong root has 2nd place.";
+    ASSERT_EQ(0.75,iter++->first->getResult())
+                                << "Wrong score for 2nd root after an eval.";
+    ASSERT_EQ(thirdRoot,iter->second)
+                                << "Wrong root has 3rd place.";
+    ASSERT_EQ(1.75,iter->first->getResult())
+                                << "Wrong score for 3rd root after an eval.";
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
@@ -473,161 +500,4 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     // Check archives
     ASSERT_EQ(laParallel.getArchive().getNbRecordings(), 0)
                                 << "Archives should be empty in Validation mode.";
-}
-
-TEST_F(adversarialLearningAgentTest, TrainOnegenerationSequential)
-{
-    params.archiveSize = 50;
-    params.archivingProbability = 0.5;
-    params.maxNbActionsPerEval = 11;
-    params.nbIterationsPerPolicyEvaluation = 3;
-    params.ratioDeletedRoots =
-            0.95; // high number to force the apparition of root action.
-    params.nbThreads = 1;
-
-    auto noCopyLe = StickGameAdversarial(false);
-
-    Learn::AdversarialLearningAgent la(noCopyLe, set, params);
-
-    la.init();
-    // Do the populate call to keep know the number of initial vertex
-    Archive a(0);
-    Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation,
-                                     la.getRNG());
-    size_t initialNbVertex = la.getTPGGraph().getNbVertices();
-    // Seed selected so that an action becomes a root during next generation
-    ASSERT_NO_THROW(la.trainOneGeneration(4))
-                                << "Training for one generation failed.";
-    // Check the number of vertex in the graph.
-    // Must be initial number of vertex - number of root removed
-    ASSERT_EQ(la.getTPGGraph().getNbVertices(),
-              initialNbVertex -
-              floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
-                                << "Number of remaining is under the number of roots from the "
-                                   "TPGGraph.";
-    // Train a second generation, because most roots were removed, a root
-    // actions have appeared and the training algorithm will attempt to remove
-    // them.
-    ASSERT_NO_THROW(la.trainOneGeneration(0))
-                                << "Training for one generation failed.";
-}
-
-TEST_F(adversarialLearningAgentTest, TrainOneGenerationParallel)
-{
-    params.archiveSize = 50;
-    params.archivingProbability = 0.5;
-    params.maxNbActionsPerEval = 11;
-    params.nbIterationsPerPolicyEvaluation = 3;
-    params.ratioDeletedRoots =
-            0.95; // high number to force the apparition of root action.
-    params.nbThreads = 4;
-
-    Learn::AdversarialLearningAgent la(le, set, params);
-
-    la.init();
-    // Do the populate call to keep know the number of initial vertex
-    Archive a(0);
-    Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation,
-                                     la.getRNG());
-    size_t initialNbVertex = la.getTPGGraph().getNbVertices();
-    // Seed selected so that an action becomes a root during next generation
-    ASSERT_NO_THROW(la.trainOneGeneration(4))
-                                << "Training for one generation failed.";
-    // Check the number of vertex in the graph.
-    // Must be initial number of vertex - number of root removed
-    ASSERT_EQ(la.getTPGGraph().getNbVertices(),
-              initialNbVertex -
-              floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
-                                << "Number of remaining is under the number of roots from the "
-                                   "TPGGraph.";
-}
-
-TEST_F(adversarialLearningAgentTest, TrainSequential)
-{
-    params.archiveSize = 50;
-    params.archivingProbability = 0.5;
-    params.maxNbActionsPerEval = 11;
-    params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
-    params.nbGenerations = 3;
-    params.maxNbEvaluationPerPolicy =
-            params.nbIterationsPerPolicyEvaluation * 2;
-    params.nbThreads = 1;
-
-    Learn::AdversarialLearningAgent la(le, set, params);
-
-    la.init();
-    bool alt = false;
-
-    ASSERT_NO_THROW(la.train(alt, true))
-                                << "Training a TPG for several generation should not fail.";
-    alt = true;
-    ASSERT_NO_THROW(la.train(alt, true))
-                                << "Using the boolean reference to stop the training should not fail.";
-}
-
-TEST_F(adversarialLearningAgentTest, TrainParallel)
-{
-    params.archiveSize = 50;
-    params.archivingProbability = 0.5;
-    params.maxNbActionsPerEval = 11;
-    params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
-    params.nbGenerations = 3;
-    params.maxNbEvaluationPerPolicy =
-            params.nbIterationsPerPolicyEvaluation * 2;
-    params.nbThreads = std::thread::hardware_concurrency();
-
-    Learn::AdversarialLearningAgent la(le, set, params);
-
-    la.init();
-    bool alt = false;
-
-    ASSERT_NO_THROW(la.train(alt, true))
-                                << "Training a TPG for several generation should not fail.";
-    alt = true;
-    ASSERT_NO_THROW(la.train(alt, true))
-                                << "Using the boolean reference to stop the training should not fail.";
-}
-
-TEST_F(adversarialLearningAgentTest, TrainParallelDeterminism)
-{
-    params.archiveSize = 50;
-    params.archivingProbability = 0.5;
-    params.maxNbActionsPerEval = 11;
-    params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
-    // Set a large number of generations and roots
-    // so that the chances of something going wrong is higher.
-    params.nbGenerations = 20;
-    params.mutation.tpg.nbRoots = 30;
-    params.maxNbEvaluationPerPolicy =
-            params.nbIterationsPerPolicyEvaluation * 5;
-
-    Learn::AdversarialLearningAgent la(le, set, params);
-
-    la.init();
-
-    // Train for several generation
-    bool alt = false;
-    la.train(alt, false);
-
-    params.nbThreads = 4;
-
-    la.init();
-
-    // Train for several generation
-    la.train(alt, false);
-
-    // Check number of vertex in graphs
-    // Non-zero to avoid false positive.
-    // These checks guarantee determinism between sequential and parallel
-    // version on a given latform. They do not guarantee portability between
-    // compilers and OS
-    ASSERT_GT(la.getTPGGraph().getNbVertices(), 0)
-                                << "Number of vertex in the trained graph should not be 0.";
-    ASSERT_EQ(la.getTPGGraph().getNbVertices(),
-              la.getTPGGraph().getNbVertices())
-                                << "LearningAgent and ParallelLearning agent result in different "
-                                   "TPGGraphs.";
 }

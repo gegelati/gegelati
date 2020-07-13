@@ -45,7 +45,7 @@ Learn::AdversarialLearningAgent::evaluateAllRoots(uint64_t generationNumber,
 {
     // deactivates parallelism if le is not cloneable
     if(!this->learningEnvironment.isCopyable()){
-        this->maxNbThreads = 1;
+        throw std::runtime_error("Not copyable environment. Exciting.");
     }
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
             results;
@@ -181,9 +181,6 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::evalua
         // Update results
         *results += *std::dynamic_pointer_cast<EvaluationResult>(ale.getScores());
     }
-
-    // Divides by nb iterations to get a mean of scores
-    *results /= this->iterationsPerJob;
 
     return results;
 }

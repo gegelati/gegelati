@@ -62,8 +62,8 @@ namespace Learn {
          * \brief Base constructor of EvaluationResult, allowing to set scores
          * and the number of evaluations.
          *
-         * @param res The scores of the roots in the order.
-         * @param nbEval The number of evaluations that have been done to get
+         * @param[in] res The scores of the roots in the order.
+         * @param[in] nbEval The number of evaluations that have been done to get
          * these scores. Default is 1 as we can guess user only did 1 iteration.
          */
         AdversarialEvaluationResult(std::initializer_list<double> res,
@@ -74,8 +74,8 @@ namespace Learn {
         /**
         * \brief Constructor initializing scores as empty.
         *
-        * @param size The size of scores i.e. number of evaluated agents.
-        * @param nbEval The number of evaluations that have been done to get
+        * @param[in] size The size of scores i.e. number of evaluated agents.
+        * @param[in] nbEval The number of evaluations that have been done to get
         * these scores. Default is 1 as we can guess user only did 1 iteration.
         */
         AdversarialEvaluationResult(size_t size,
@@ -86,67 +86,40 @@ namespace Learn {
         /**
          * \brief Simple getter of the score of a single root, given its index.
          *
-         * @param index The index of the root in the results list.
+         * @param[in] index The index of the root in the results list.
          * @return The score corresponding to this index.
          */
-        double getScoreOf(int index)
-        {
-            return scores[index];
-        }
+        double getScoreOf(int index);
 
         /**
          * \brief Polymorphic addition assignement operator for
          * AdversariEalvaluationResult.
          *
+         * \param[in] other The other evaluation result we add to this one.
+         * \return This AdversarialEvaluationResult.
          * \throw std::runtime_error in case the other
          * AdversarialEvaluationResult and this have a different typeid or size.
          */
-        EvaluationResult& operator+=(const EvaluationResult& other) override{
-            // Type Check (Must be done in all override)
-            // This test will succeed in child class.
-            const std::type_info& thisType = typeid(*this);
-            if (typeid(other) != thisType) {
-                throw std::runtime_error("Type mismatch between EvaluationResults.");
-            }
-
-            auto otherConverted = (AdversarialEvaluationResult&) other;
-
-            // Size Check
-            if (otherConverted.scores.size() != this->scores.size()) {
-                throw std::runtime_error("Size mismatch between AdversarialEvaluationResults.");
-            }
-
-            // If the added type is Learn::EvaluationResult
-            // Weighted addition of results
-            for(int i=0; i<scores.size(); i++){
-                this->scores[i] = this->scores[i] * (double)this->nbEvaluation +
-                               otherConverted.scores[i] * (double)otherConverted.nbEvaluation;
-                this->scores[i] /= (double)this->nbEvaluation + (double)otherConverted.nbEvaluation;
-
-            }
-
-            // Addition ot nbEvaluation
-            this->nbEvaluation += otherConverted.nbEvaluation;
-
-            return *this;
-        }
+        EvaluationResult& operator+=(const EvaluationResult& other) override;
 
         /**
          * \brief Division operator for AdversariEalvaluationResult that simply
-         * divides all scores contained in the scores vectore.
+         * divides all scores contained in the scores vector by divisor.
+         *
+         * @param[in] divisor The divisor by which we will divide the results.
+         * @return This AdversarialEvaluationResult.
          */
-        virtual EvaluationResult& operator/=(double divisor){
-            for(double& val : scores){
-                val/=divisor;
-            }
-            return *this;
-        }
+        virtual EvaluationResult& operator/=(double divisor);
 
         /// Inherited from EvaluationResult and unused in the case of a vector.
-        double getResult() const override
-        {
-            return scores[0];
-        }
+        double getResult() const override;
+
+        /**
+         * \brief Getter fot the size of scores.
+         *
+         * @return The size of the scores vector.
+         */
+        size_t getSize() const;
 
     };
 }
