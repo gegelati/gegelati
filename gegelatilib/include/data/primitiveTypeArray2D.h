@@ -57,13 +57,22 @@ namespace Data {
          */
         PrimitiveTypeArray2D(const size_t w = 2, const size_t h = 4);
 
+        /// Default copy constructor.
+        PrimitiveTypeArray2D(const PrimitiveTypeArray2D<T>& other) = default;
+
         // Inherited from DataHandler
         virtual size_t getAddressSpace(
             const std::type_info& type) const override;
 
         /// Inherited from DataHandler
+        virtual std::vector<size_t> getAddressesAccessed(
+            const std::type_info& type, const size_t address) const override;
+
+        /// Inherited from DataHandler
         virtual UntypedSharedPtr getDataAt(const std::type_info& type,
                                            const size_t address) const override;
+        /// Inherited from DataHandler
+        virtual DataHandler* clone() const override;
     };
 
     template <typename T>
@@ -138,7 +147,43 @@ namespace Data {
     }
 
     template <typename T>
-    inline UntypedSharedPtr PrimitiveTypeArray2D<T>::getDataAt(
+    std::vector<size_t> PrimitiveTypeArray2D<T>::getAddressesAccessed(
+        const std::type_info& type, const size_t address) const
+    {
+        // Initialize the result
+        std::vector<size_t> result;
+
+        // If the accessed address is valid fill the result.
+        size_t arrayHeight;
+        size_t arrayWidth;
+        const size_t space =
+            this->getAddressSpace(type, &arrayHeight, &arrayWidth);
+        if (space > address) {
+            // For the native type.
+            if (type == typeid(T)) {
+                result.push_back(address);
+            }
+            else {
+                // Else, the type is the array type.
+                size_t addressH = address / (this->width - arrayWidth + 1);
+                size_t addressW = address % (this->width - arrayWidth + 1);
+                size_t addressSrc = (addressH * this->width) + addressW;
+                size_t idxDst = 0;
+                for (size_t idxHeight = 0; idxHeight < arrayHeight;
+                     idxHeight++) {
+                    for (size_t idxWidth = 0; idxWidth < arrayWidth;
+                         idxWidth++) {
+                        size_t idxSrc = (idxHeight * this->width) + idxWidth;
+                        result.push_back(addressSrc + idxSrc);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    template <typename T>
+    UntypedSharedPtr PrimitiveTypeArray2D<T>::getDataAt(
         const std::type_info& type, const size_t address) const
     {
 #ifndef NDEBUG
@@ -168,8 +213,8 @@ namespace Data {
         auto array = new T[arrayHeight * arrayWidth];
 
         // Copy its content
-        size_t addressH = address / (this->width - dim2 + 1);
-        size_t addressW = address % (this->width - dim2 + 1);
+        size_t addressH = address / (this->width - arrayWidth + 1);
+        size_t addressW = address % (this->width - arrayWidth + 1);
         size_t addressSrc = (addressH * this->width) + addressW;
         size_t idxDst = 0;
         for (size_t idxHeight = 0; idxHeight < arrayHeight; idxHeight++) {
@@ -182,6 +227,15 @@ namespace Data {
         // Create the UntypedSharedPtr
         UntypedSharedPtr result{
             std::make_shared<UntypedSharedPtr::Model<const T[]>>(array)};
+        return result;
+    }
+
+    template <typename T>
+    inline DataHandler* PrimitiveTypeArray2D<T>::clone() const
+    {
+        // Default copy construtor should do the deep copy.
+        DataHandler* result = new PrimitiveTypeArray2D<T>(*this);
+
         return result;
     }
 

@@ -2,12 +2,25 @@
 
 #include "data/primitiveTypeArray2D.h"
 
-TEST(PrimitiveTypeArray2DTest, Constructor)
+TEST(PrimitiveTypeArray2DTest, Constructors)
 {
-    Data::PrimitiveTypeArray2D<double>* array;
+    Data::PrimitiveTypeArray2D<double>*array, *array2;
     ASSERT_NE(array = new Data::PrimitiveTypeArray2D<double>(3, 4), nullptr)
         << "A PrimitiveTypeArray2D<double> could not be built successfully.";
+
+    // Clone test
+    ASSERT_NE(array2 = (Data::PrimitiveTypeArray2D<double>*)array->clone(),
+              nullptr)
+        << "Cloning an existing array failed unexpectedly.";
+
+    // ID equality
+    ASSERT_EQ(array->getId(), array2->getId())
+        << "Clone array ID differs from the cloned one.";
+
     ASSERT_NO_THROW(delete array)
+        << "PrimitiveTypeArray2D could not be deleted.";
+
+    ASSERT_NO_THROW(delete array2)
         << "PrimitiveTypeArray2D could not be deleted.";
 }
 
@@ -105,4 +118,43 @@ TEST(PrimitiveTypeArray2DTest, getDataAt)
     // No alternative test to put here.. out of range access to memory _may_
     // happen without being detected.
 #endif
+}
+
+TEST(PrimitiveTypeArray2DTest, getAddressesAccessed)
+{
+    const size_t h = 10;
+    const size_t w = 12;
+    Data::PrimitiveTypeArray2D<float> a(w, h);
+
+    // Primitive type
+    std::vector<size_t> addr;
+    ASSERT_NO_THROW(addr = a.getAddressesAccessed(typeid(float), 50))
+        << "Retrieving the vector for a valid primitive type failed.";
+    ASSERT_EQ(addr.size(), 1)
+        << "Incorrect number of addresses accessed was returned.";
+    ASSERT_EQ(addr[0], 50) << "Incorrect address was returned.";
+
+    // 1D array
+    ASSERT_NO_THROW(addr = a.getAddressesAccessed(typeid(float[5]), 38))
+        << "Retrieving the vector for a valid primitive type failed.";
+    ASSERT_EQ(addr.size(), 5)
+        << "Incorrect number of addresses accessed was returned.";
+    auto baseAddress = ((38) / (w - 5 + 1) * w) + ((38) % (w - 5 + 1));
+    for (auto idx = 0; idx < 5; idx++) {
+        ASSERT_EQ(addr[idx], baseAddress + idx)
+            << "Incorrect address was returned.";
+    }
+
+    // 2D array
+    ASSERT_NO_THROW(addr = a.getAddressesAccessed(typeid(float[5][3]), 42))
+        << "Retrieving the vector for a valid primitive type failed.";
+    ASSERT_EQ(addr.size(), 5 * 3)
+        << "Incorrect number of addresses accessed was returned.";
+    baseAddress = ((42) / (w - 3 + 1) * w) + ((42) % (w - 3 + 1));
+    for (auto idxH = 0; idxH < 5; idxH++) {
+        for (auto idxW = 0; idxW < 3; idxW++) {
+            ASSERT_EQ(addr[idxH * 3 + idxW], baseAddress + (idxH * w) + idxW)
+                << "Incorrect address was returned.";
+        }
+    }
 }

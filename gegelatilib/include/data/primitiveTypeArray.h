@@ -114,6 +114,9 @@ namespace Data {
          */
         PrimitiveTypeArray(size_t size = 8);
 
+        /// Default copy constructor.
+        PrimitiveTypeArray(const PrimitiveTypeArray<T>& other) = default;
+
         /// Default destructor.
         virtual ~PrimitiveTypeArray() = default;
 
