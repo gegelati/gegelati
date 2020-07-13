@@ -36,9 +36,9 @@
 #ifndef ADVERSARIALEVALUATIONRESULT_H
 #define ADVERSARIALEVALUATIONRESULT_H
 
-#include <vector>
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 #include "learn/evaluationResult.h"
 
@@ -52,36 +52,40 @@ namespace Learn {
      * in a single simulation and, as a consequence, there are several results
      * at the end.
      */
-    class AdversarialEvaluationResult : public EvaluationResult {
-    protected:
+    class AdversarialEvaluationResult : public EvaluationResult
+    {
+      protected:
         /// The scores of the roots, in the order in which they participated.
         std::vector<double> scores;
 
-    public:
+      public:
         /**
          * \brief Base constructor of EvaluationResult, allowing to set scores
          * and the number of evaluations.
          *
          * @param[in] res The scores of the roots in the order.
-         * @param[in] nbEval The number of evaluations that have been done to get
-         * these scores. Default is 1 as we can guess user only did 1 iteration.
+         * @param[in] nbEval The number of evaluations that have been done to
+         * get these scores. Default is 1 as we can guess user only did 1
+         * iteration.
          */
         AdversarialEvaluationResult(std::initializer_list<double> res,
-                size_t nbEval=1):
-                EvaluationResult(*res.begin(),nbEval),scores(res)
-        {}
+                                    size_t nbEval = 1)
+            : EvaluationResult(*res.begin(), nbEval), scores(res)
+        {
+        }
 
         /**
-        * \brief Constructor initializing scores as empty.
-        *
-        * @param[in] size The size of scores i.e. number of evaluated agents.
-        * @param[in] nbEval The number of evaluations that have been done to get
-        * these scores. Default is 1 as we can guess user only did 1 iteration.
-        */
-        AdversarialEvaluationResult(size_t size,
-                                    size_t nbEval=0):
-                EvaluationResult(0,nbEval),scores(size,0)
-        {}
+         * \brief Constructor initializing scores as empty.
+         *
+         * @param[in] size The size of scores i.e. number of evaluated agents.
+         * @param[in] nbEval The number of evaluations that have been done to
+         * get these scores. Default is 1 as we can guess user only did 1
+         * iteration.
+         */
+        AdversarialEvaluationResult(size_t size, size_t nbEval = 0)
+            : EvaluationResult(0, nbEval), scores(size, 0)
+        {
+        }
 
         /**
          * \brief Simple getter of the score of a single root, given its index.
@@ -120,8 +124,7 @@ namespace Learn {
          * @return The size of the scores vector.
          */
         size_t getSize() const;
-
     };
-}
+} // namespace Learn
 
 #endif

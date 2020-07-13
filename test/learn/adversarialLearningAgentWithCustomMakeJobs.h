@@ -38,18 +38,22 @@
 #ifndef ADVERSARIAL_LEARNING_AGENT8WITH_CUSTOM_MAKE_JOBS_H
 #define ADVERSARIAL_LEARNING_AGENT8WITH_CUSTOM_MAKE_JOBS_H
 
-#include <gegelati.h>
 #include "learn/adversarialLearningAgent.h"
+#include <gegelati.h>
 
 // Class only used for testing purpose : we create a custom jobs organization
-class AdversarialLearningAgentWithCustomMakeJobs : public Learn::AdversarialLearningAgent{
-public:
+class AdversarialLearningAgentWithCustomMakeJobs
+    : public Learn::AdversarialLearningAgent
+{
+  public:
     AdversarialLearningAgentWithCustomMakeJobs(Learn::LearningEnvironment& le,
-            const::Instructions::Set& iSet,Learn::LearningParameters& p):
-            Learn::AdversarialLearningAgent(le,iSet,p,3){
+                                               const ::Instructions::Set& iSet,
+                                               Learn::LearningParameters& p)
+        : Learn::AdversarialLearningAgent(le, iSet, p, 3)
+    {
     }
 
-protected:
+  protected:
     // Warning : this override guess there are at least 3 roots in the tpg graph
     // It creates the following job :
     // root0-root1-root2
@@ -59,8 +63,9 @@ protected:
     // It means root0 is 3 times at pos 0 and 1 time at pos 1
     // root 1 is 1 time at pos 0 2 times at pos 1 and 1 time at pos 3
     // root 2 is 1 time at pos 1 and 3 times at pos 3
-    std::queue<std::shared_ptr<Learn::Job>>
-    makeJobs(Learn::LearningMode mode, TPG::TPGGraph *tpgGraph = nullptr) override {
+    std::queue<std::shared_ptr<Learn::Job>> makeJobs(
+        Learn::LearningMode mode, TPG::TPGGraph* tpgGraph = nullptr) override
+    {
         // sets the tpg to the Learning Agent's one if no one was specified
         std::queue<std::shared_ptr<Learn::Job>> jobs;
 
@@ -69,21 +74,23 @@ protected:
         uint64_t archiveSeed;
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
 
-
-
-        auto job = std::make_shared<Learn::Job>(Learn::Job(0,archiveSeed,{roots[0],roots[1],roots[2]}));
+        auto job = std::make_shared<Learn::Job>(
+            Learn::Job(0, archiveSeed, {roots[0], roots[1], roots[2]}));
         jobs.push(job);
 
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        auto job2 = std::make_shared<Learn::Job>(Learn::Job(1,archiveSeed,{roots[0],roots[2],roots[1]}));
+        auto job2 = std::make_shared<Learn::Job>(
+            Learn::Job(1, archiveSeed, {roots[0], roots[2], roots[1]}));
         jobs.push(job2);
 
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        auto job3 = std::make_shared<Learn::Job>(Learn::Job(2,archiveSeed,{roots[0],roots[1],roots[2]}));
+        auto job3 = std::make_shared<Learn::Job>(
+            Learn::Job(2, archiveSeed, {roots[0], roots[1], roots[2]}));
         jobs.push(job3);
 
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        auto job4 = std::make_shared<Learn::Job>(Learn::Job(3,archiveSeed,{roots[1],roots[0],roots[2]}));
+        auto job4 = std::make_shared<Learn::Job>(
+            Learn::Job(3, archiveSeed, {roots[1], roots[0], roots[2]}));
         jobs.push(job4);
 
         return jobs;

@@ -46,10 +46,10 @@
 #include "tpg/tpgExecutionEngine.h"
 
 #include "learn/evaluationResult.h"
+#include "learn/job.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
-#include "learn/job.h"
 
 namespace Learn {
     /**
@@ -98,8 +98,7 @@ namespace Learn {
          */
         void slaveEvalJobThread(
             uint64_t generationNumber, LearningMode mode,
-            std::queue<std::shared_ptr<Learn::Job>>
-                jobsToProcess,
+            std::queue<std::shared_ptr<Learn::Job>> jobsToProcess,
             std::mutex& rootsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Job>>>&

@@ -35,15 +35,14 @@
 
 #include "learn/adversarialEvaluationResult.h"
 
-
-
 double Learn::AdversarialEvaluationResult::getScoreOf(int index)
 {
     return scores[index];
 }
 
-
-Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator+=(const EvaluationResult& other){
+Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator+=(
+    const EvaluationResult& other)
+{
     // Type Check (Must be done in all override)
     // This test will succeed in child class.
     const std::type_info& thisType = typeid(*this);
@@ -51,20 +50,22 @@ Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator+=(const Ev
         throw std::runtime_error("Type mismatch between EvaluationResults.");
     }
 
-    auto otherConverted = (AdversarialEvaluationResult&) other;
+    auto otherConverted = (AdversarialEvaluationResult&)other;
 
     // Size Check
     if (otherConverted.scores.size() != this->scores.size()) {
-        throw std::runtime_error("Size mismatch between AdversarialEvaluationResults.");
+        throw std::runtime_error(
+            "Size mismatch between AdversarialEvaluationResults.");
     }
 
     // If the added type is Learn::EvaluationResult
     // Weighted addition of results
-    for(int i=0; i<scores.size(); i++){
-        this->scores[i] = this->scores[i] * (double)this->nbEvaluation +
-                          otherConverted.scores[i] * (double)otherConverted.nbEvaluation;
-        this->scores[i] /= (double)this->nbEvaluation + (double)otherConverted.nbEvaluation;
-
+    for (int i = 0; i < scores.size(); i++) {
+        this->scores[i] =
+            this->scores[i] * (double)this->nbEvaluation +
+            otherConverted.scores[i] * (double)otherConverted.nbEvaluation;
+        this->scores[i] /=
+            (double)this->nbEvaluation + (double)otherConverted.nbEvaluation;
     }
 
     // Addition ot nbEvaluation
@@ -73,10 +74,11 @@ Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator+=(const Ev
     return *this;
 }
 
-
-Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator/=(double divisor){
-    for(double& val : scores){
-        val/=divisor;
+Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator/=(
+    double divisor)
+{
+    for (double& val : scores) {
+        val /= divisor;
     }
     return *this;
 }
@@ -88,6 +90,5 @@ double Learn::AdversarialEvaluationResult::getResult() const
 
 size_t Learn::AdversarialEvaluationResult::getSize() const
 {
-     return scores.size();
+    return scores.size();
 }
-

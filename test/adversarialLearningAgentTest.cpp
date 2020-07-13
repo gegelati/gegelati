@@ -48,17 +48,16 @@
 #include "mutator/tpgMutator.h"
 
 #include "learn/adversarialLearningAgent.h"
+#include "learn/adversarialLearningAgentWithCustomMakeJobs.h"
+#include "learn/fakeAdversarialLearningEnvironment.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameAdversarial.h"
-#include "learn/adversarialLearningAgentWithCustomMakeJobs.h"
-#include "learn/fakeAdversarialLearningEnvironment.h"
-
 
 class adversarialLearningAgentTest : public ::testing::Test
 {
-protected:
+  protected:
     Instructions::Set set;
     StickGameAdversarial le;
     Learn::LearningParameters params;
@@ -91,49 +90,52 @@ protected:
     }
 };
 
-
 TEST_F(adversarialLearningAgentTest, Constructor)
 {
     Learn::AdversarialLearningAgent* la;
 
     ASSERT_NO_THROW(la = new Learn::AdversarialLearningAgent(le, set, params))
-                                << "Construction of the AdversarialLearningAgent failed.";
+        << "Construction of the AdversarialLearningAgent failed.";
 
-    ASSERT_NO_THROW(delete la) << "Destruction of the AdversarialLearningAgent failed.";
+    ASSERT_NO_THROW(delete la)
+        << "Destruction of the AdversarialLearningAgent failed.";
 }
 
 TEST_F(adversarialLearningAgentTest, MakeJobs)
 {
-    params.nbIterationsPerPolicyEvaluation=20;
-    size_t iterPerJob=2;
-    size_t agentsPerEval=5;
-    Learn::AdversarialLearningAgent la(le, set, params,agentsPerEval,iterPerJob);
+    params.nbIterationsPerPolicyEvaluation = 20;
+    size_t iterPerJob = 2;
+    size_t agentsPerEval = 5;
+    Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval,
+                                       iterPerJob);
     // 5 agents per job, 2 eval per job
-    // => It shall do 10 jobs per agent, and something close to nbRoots*2 (nbRoots*20/(5*2)) jobs at total
-    // the complete formula of the nb of jobs is
+    // => It shall do 10 jobs per agent, and something close to nbRoots*2
+    // (nbRoots*20/(5*2)) jobs at total the complete formula of the nb of jobs
+    // is
     la.init();
     auto jobs = la.makeJobs(Learn::TRAINING);
-    ASSERT_EQ(la.getTPGGraph().getNbRootVertices()*2,jobs.size())
-                                <<"There should be as many jobs as roots.";
-    // this map will compute the number of iterations per root that are scheduled
+    ASSERT_EQ(la.getTPGGraph().getNbRootVertices() * 2, jobs.size())
+        << "There should be as many jobs as roots.";
+    // this map will compute the number of iterations per root that are
+    // scheduled
     std::map<const TPG::TPGVertex*, int> nbEvalPerRoot;
-    for(auto root : la.getTPGGraph().getRootVertices()){
-        nbEvalPerRoot.emplace(root,0);
+    for (auto root : la.getTPGGraph().getRootVertices()) {
+        nbEvalPerRoot.emplace(root, 0);
     }
-    while(!jobs.empty()) {
+    while (!jobs.empty()) {
         ASSERT_EQ(5, (*jobs.front()).getSize())
-                                    << "job doesn'nt contain the right roots number.";
+            << "job doesn'nt contain the right roots number.";
         // updates number of iterations scheduled for the roots of the job
-        for(auto root : (*jobs.front()).getRoots()){
+        for (auto root : (*jobs.front()).getRoots()) {
             auto it = nbEvalPerRoot.find(root);
-            it->second=it->second+iterPerJob;
+            it->second = it->second + iterPerJob;
         }
         jobs.pop();
     }
     // now check there are enough iterations per root scheduled
-    for(auto pairRootNbEval : nbEvalPerRoot){
-        ASSERT_GE(pairRootNbEval.second,params.nbIterationsPerPolicyEvaluation)
-        << "jobs don't evaluate enough a root.";
+    for (auto pairRootNbEval : nbEvalPerRoot) {
+        ASSERT_GE(pairRootNbEval.second, params.nbIterationsPerPolicyEvaluation)
+            << "jobs don't evaluate enough a root.";
     }
 }
 
@@ -154,20 +156,18 @@ TEST_F(adversarialLearningAgentTest, EvalJob)
     std::shared_ptr<Learn::EvaluationResult> result;
     auto job = *la.makeJob(0);
     ASSERT_NO_THROW(
-            result = la.evaluateJob(tee, job,
-                                    0, Learn::LearningMode::TRAINING, le))
-                                << "Evaluation from a root in no parallel and no adversarial mode failed.";
+        result = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, le))
+        << "Evaluation from a root in no parallel and no adversarial mode "
+           "failed.";
     ASSERT_LE(result->getResult(), 1.0)
-                                << "Average score should not exceed the score of a perfect layer.";
-
+        << "Average score should not exceed the score of a perfect layer.";
 
     auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
-    ASSERT_NO_THROW(
-            result = la.evaluateJob(tee, *jobs.front(),
-                                    0, Learn::LearningMode::TRAINING, le))
-                                << "Evaluation from a root in adversarial mode failed.";
+    ASSERT_NO_THROW(result = la.evaluateJob(tee, *jobs.front(), 0,
+                                            Learn::LearningMode::TRAINING, le))
+        << "Evaluation from a root in adversarial mode failed.";
     ASSERT_LE(result->getResult(), 1.0)
-                                << "Average score should not exceed the score of a perfect layer.";
+        << "Average score should not exceed the score of a perfect layer.";
 }
 
 TEST_F(adversarialLearningAgentTest, GetArchive)
@@ -183,7 +183,7 @@ TEST_F(adversarialLearningAgentTest, GetArchive)
     la.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
 
     ASSERT_NO_THROW(la.getArchive())
-                                << "Cannot get the archive of a LearningAgent.";
+        << "Cannot get the archive of a LearningAgent.";
 }
 
 // Similat to previous test, but verifications of graphs properties are here to
@@ -199,7 +199,7 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.mutation.tpg.nbRoots = 30;
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
-            params.nbIterationsPerPolicyEvaluation * 3;
+        params.nbIterationsPerPolicyEvaluation * 3;
 
     Learn::AdversarialLearningAgent la(le, set, params);
 
@@ -212,15 +212,14 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     // the RNG without being identical.
     TPG::TPGGraph& tpg = la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 30)
-                                << "Graph does not have the expected determinst characteristics.";
+        << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 27)
-                                << "Graph does not have the expected determinist characteristics.";
+        << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 96)
-                                << "Graph does not have the expected determinst characteristics.";
+        << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 5961433082191139529)
-                                << "Graph does not have the expected determinst characteristics.";
+        << "Graph does not have the expected determinst characteristics.";
 }
-
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
 {
@@ -234,14 +233,14 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
 
     la.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-            const TPG::TPGVertex*>
-            result;
+                  const TPG::TPGVertex*>
+        result;
     ASSERT_NO_THROW(result =
-                            la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
-                                << "Evaluation from a root failed.";
+                        la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
+        << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
-                                << "Number of evaluated roots is under the number of roots from the "
-                                   "TPGGraph.";
+        << "Number of evaluated roots is under the number of roots from the "
+           "TPGGraph.";
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)
@@ -256,14 +255,14 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)
 
     la.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-            const TPG::TPGVertex*>
-            result;
+                  const TPG::TPGVertex*>
+        result;
     ASSERT_NO_THROW(result =
-                            la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
-                                << "Evaluation from a root failed.";
+                        la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
+        << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
-                                << "Number of evaluated roots is under the number of roots from the "
-                                   "TPGGraph.";
+        << "Number of evaluated roots is under the number of roots from the "
+           "TPGGraph.";
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsGoodResults)
@@ -287,29 +286,26 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsGoodResults)
     auto thirdRoot = roots[2];
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-            const TPG::TPGVertex*>
-            result;
+                  const TPG::TPGVertex*>
+        result;
 
     // this evaluation is custom, see AdversarialLearningAgentWithCustomMakeJobs
     // and FakeAdversarialLearningEnvironment.
     // to be brief, the 3 first roots of the Learning Env will have known scores
     ASSERT_NO_THROW(result =
-                            la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
-                                << "Evaluation from a root failed.";
+                        la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
+        << "Evaluation from a root failed.";
 
     auto iter = result.begin();
-    ASSERT_EQ(firstRoot,iter->second)
-                                << "Wrong root has 1st place.";
-    ASSERT_EQ(-0.5,iter++->first->getResult())
-                                << "Wrong score for 1st root after an eval.";
-    ASSERT_EQ(secondRoot,iter->second)
-                                << "Wrong root has 2nd place.";
-    ASSERT_EQ(0.75,iter++->first->getResult())
-                                << "Wrong score for 2nd root after an eval.";
-    ASSERT_EQ(thirdRoot,iter->second)
-                                << "Wrong root has 3rd place.";
-    ASSERT_EQ(1.75,iter->first->getResult())
-                                << "Wrong score for 3rd root after an eval.";
+    ASSERT_EQ(firstRoot, iter->second) << "Wrong root has 1st place.";
+    ASSERT_EQ(-0.5, iter++->first->getResult())
+        << "Wrong score for 1st root after an eval.";
+    ASSERT_EQ(secondRoot, iter->second) << "Wrong root has 2nd place.";
+    ASSERT_EQ(0.75, iter++->first->getResult())
+        << "Wrong score for 2nd root after an eval.";
+    ASSERT_EQ(thirdRoot, iter->second) << "Wrong root has 3rd place.";
+    ASSERT_EQ(1.75, iter->first->getResult())
+        << "Wrong score for 3rd root after an eval.";
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
@@ -332,9 +328,9 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     laSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
-            laSequential.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
+        laSequential.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
     auto nextIntSequential =
-            laSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
+        laSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     Learn::LearningParameters paramsParallel = params;
     paramsParallel.nbThreads = 4;
@@ -342,18 +338,18 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     laParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
-            laParallel.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
+        laParallel.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
     auto nextIntParallel = laParallel.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     // Check equality between LearningAgent and ParallelLearningAgent
     ASSERT_EQ(results.size(), resultsSequential.size())
-                                << "Result maps have a different size.";
+        << "Result maps have a different size.";
     auto iter = results.begin();
     auto iterSequential = resultsSequential.begin();
     while (iter != results.end()) {
         ASSERT_EQ(iter->first->getResult(), iterSequential->first->getResult())
-                                    << "Average score between sequential and parallel executions are "
-                                       "differents.";
+            << "Average score between sequential and parallel executions are "
+               "differents.";
         iter++;
         iterSequential++;
     }
@@ -363,36 +359,36 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
-                                << "Mutator::RNG was called a different number of time in parallel and "
-                                   "sequential execution.";
+        << "Mutator::RNG was called a different number of time in parallel and "
+           "sequential execution.";
 
     // Check archives
     ASSERT_GT(la.getArchive().getNbRecordings(), 0)
-                                << "For the archive determinism tests to be meaningful, Archive should "
-                                   "not be empty.";
+        << "For the archive determinism tests to be meaningful, Archive should "
+           "not be empty.";
     ASSERT_EQ(la.getArchive().getNbRecordings(),
               laSequential.getArchive().getNbRecordings())
-                                << "Archives have different sizes.";
+        << "Archives have different sizes.";
     for (auto i = 0; i < la.getArchive().getNbRecordings(); i++) {
         ASSERT_EQ(la.getArchive().at(i).dataHash,
                   laSequential.getArchive().at(i).dataHash)
-                                    << "Archives have different content.";
+            << "Archives have different content.";
         ASSERT_EQ(la.getArchive().at(i).result,
                   laSequential.getArchive().at(i).result)
-                                    << "Archives have different content.";
+            << "Archives have different content.";
     }
 
     // Check equality between ParallelLearningAgent in parallel and sequential
     // mode
     ASSERT_EQ(resultsParallel.size(), resultsParallel.size())
-                                << "Result maps have a different size.";
+        << "Result maps have a different size.";
     iterSequential = resultsSequential.begin();
     auto iterParallel = resultsParallel.begin();
     while (iterSequential != resultsSequential.end()) {
         ASSERT_EQ(iterSequential->first->getResult(),
                   iterParallel->first->getResult())
-                                    << "Average score between sequential and parallel executions are "
-                                       "differents.";
+            << "Average score between sequential and parallel executions are "
+               "differents.";
         iterSequential++;
         iterParallel++;
     }
@@ -403,20 +399,20 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)
-                                << "Mutator::RNG was called a different number of time in parallel and "
-                                   "sequential execution.";
+        << "Mutator::RNG was called a different number of time in parallel and "
+           "sequential execution.";
 
     // Check archives
     ASSERT_EQ(laParallel.getArchive().getNbRecordings(),
               laSequential.getArchive().getNbRecordings())
-                                << "Archives have different sizes.";
+        << "Archives have different sizes.";
     for (auto i = 0; i < laParallel.getArchive().getNbRecordings(); i++) {
         ASSERT_EQ(laParallel.getArchive().at(i).dataHash,
                   laSequential.getArchive().at(i).dataHash)
-                                    << "Archives have different content.";
+            << "Archives have different content.";
         ASSERT_EQ(laParallel.getArchive().at(i).result,
                   laSequential.getArchive().at(i).result)
-                                    << "Archives have different content.";
+            << "Archives have different content.";
     }
 }
 
@@ -440,9 +436,9 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     laSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
-            laSequential.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
+        laSequential.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
     auto nextIntSequential =
-            laSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
+        laSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     Learn::LearningParameters paramsParallel = params;
     paramsParallel.nbThreads = 4;
@@ -450,54 +446,54 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     laParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
-            laParallel.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
+        laParallel.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
     auto nextIntParallel = laParallel.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     // Check equality between LearningAgent and ParallelLearningAgent
     ASSERT_EQ(results.size(), resultsSequential.size())
-                                << "Result maps have a different size.";
+        << "Result maps have a different size.";
     auto iter = results.begin();
     auto iterSequential = resultsSequential.begin();
     while (iter != results.end()) {
         ASSERT_EQ(iter->first->getResult(), iterSequential->first->getResult())
-                                    << "Average score between sequential and parallel executions are "
-                                       "differents.";
+            << "Average score between sequential and parallel executions are "
+               "differents.";
         iter++;
         iterSequential++;
     }
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
-                                << "Mutator::RNG was called a different number of time in parallel and "
-                                   "sequential execution.";
+        << "Mutator::RNG was called a different number of time in parallel and "
+           "sequential execution.";
 
     // Check archives
     ASSERT_EQ(la.getArchive().getNbRecordings(), 0)
-                                << "Archives should be empty in Validation mode.";
+        << "Archives should be empty in Validation mode.";
     ASSERT_EQ(laSequential.getArchive().getNbRecordings(), 0)
-                                << "Archives should be empty in Validation mode.";
+        << "Archives should be empty in Validation mode.";
 
     // Check equality between ParallelLearningAgent in parallel and sequential
     // mode
     ASSERT_EQ(resultsParallel.size(), resultsParallel.size())
-                                << "Result maps have a different size.";
+        << "Result maps have a different size.";
     iterSequential = resultsSequential.begin();
     auto iterParallel = resultsParallel.begin();
     while (iterSequential != resultsSequential.end()) {
         ASSERT_EQ(iterSequential->first->getResult(),
                   iterParallel->first->getResult())
-                                    << "Average score between sequential and parallel executions are "
-                                       "differents.";
+            << "Average score between sequential and parallel executions are "
+               "differents.";
         iterSequential++;
         iterParallel++;
     }
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)
-                                << "Mutator::RNG was called a different number of time in parallel and "
-                                   "sequential execution.";
+        << "Mutator::RNG was called a different number of time in parallel and "
+           "sequential execution.";
 
     // Check archives
     ASSERT_EQ(laParallel.getArchive().getNbRecordings(), 0)
-                                << "Archives should be empty in Validation mode.";
+        << "Archives should be empty in Validation mode.";
 }

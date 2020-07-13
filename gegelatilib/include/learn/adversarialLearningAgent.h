@@ -35,147 +35,147 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifndef ADVERSARIALLEARNINGAGENT_H
 #define ADVERSARIALLEARNINGAGENT_H
 
 #include "learn/adversarialEvaluationResult.h"
-#include "learn/parallelLearningAgent.h"
 #include "learn/adversarialLearningAgent.h"
+#include "learn/parallelLearningAgent.h"
 
-
-namespace Learn{
+namespace Learn {
     /**
-    * \brief Class used to control the learning steps of a TPGGraph within
-    * a given LearningEnvironment, with a support of adversarial allowing
-    * multi-agent simulations. To have several agents per evaluation, we use a
-    * job object embedding some TPG roots.
-    */
-    class AdversarialLearningAgent : public ParallelLearningAgent{
-    protected:
+     * \brief Class used to control the learning steps of a TPGGraph within
+     * a given LearningEnvironment, with a support of adversarial allowing
+     * multi-agent simulations. To have several agents per evaluation, we use a
+     * job object embedding some TPG roots.
+     */
+    class AdversarialLearningAgent : public ParallelLearningAgent
+    {
+      protected:
         /**
          * \brief Number of agents per evaluation (e.g. 2 in tic-tac-toe).
          */
         size_t agentsPerEvaluation;
 
         /**
-        * \brief Number of game iterations for each job evaluation.
-        *
-        * Each of the roots will be evaluated in several jobs, but in order to
-        * have a representative score for each job, some environments will need
-        * to do several iterations to make an average score.
-        */
+         * \brief Number of game iterations for each job evaluation.
+         *
+         * Each of the roots will be evaluated in several jobs, but in order to
+         * have a representative score for each job, some environments will need
+         * to do several iterations to make an average score.
+         */
         size_t iterationsPerJob;
 
         /**
-        * \brief Method for evaluating all roots with parallelism & adversarial.
-        *
-        * \param[in] generationNumber the integer number of the current
-        * generation. \param[in] mode the LearningMode to use during the policy
-        * evaluation. \param[in] results Map to store the resulting score of
-        * evaluated roots.
-        */
+         * \brief Method for evaluating all roots with parallelism &
+         * adversarial.
+         *
+         * \param[in] generationNumber the integer number of the current
+         * generation. \param[in] mode the LearningMode to use during the policy
+         * evaluation. \param[in] results Map to store the resulting score of
+         * evaluated roots.
+         */
         void evaluateAllRootsInParallel(
-                uint64_t generationNumber, LearningMode mode,
-                std::multimap<std::shared_ptr<EvaluationResult>,
-                        const TPG::TPGVertex*>& results) override;
+            uint64_t generationNumber, LearningMode mode,
+            std::multimap<std::shared_ptr<EvaluationResult>,
+                          const TPG::TPGVertex*>& results) override;
 
-
-    public:
-
+      public:
         /**
-        * \brief Constructor for AdversarialLearningAgent.
-        *
-        * Based on default constructor of ParallelLearningAgent
-        *
-        * \param[in] le The LearningEnvironment for the TPG.
-        * \param[in] iSet Set of Instruction used to compose Programs in the
-        *            learning process.
-        * \param[in] p The LearningParameters for the LearningAgent.
-        * \param[in] agentsPerEval The number of agents each simulation will
-        * need.
-        * \param[in] iterPerJob The numver of iterations per job evaluation.
-        */
+         * \brief Constructor for AdversarialLearningAgent.
+         *
+         * Based on default constructor of ParallelLearningAgent
+         *
+         * \param[in] le The LearningEnvironment for the TPG.
+         * \param[in] iSet Set of Instruction used to compose Programs in the
+         *            learning process.
+         * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] agentsPerEval The number of agents each simulation will
+         * need.
+         * \param[in] iterPerJob The numver of iterations per job evaluation.
+         */
         AdversarialLearningAgent(LearningEnvironment& le,
-                                  const Instructions::Set& iSet,
-                                  const LearningParameters& p, size_t agentsPerEval=2,
-                                  size_t iterPerJob=10):
-                                  ParallelLearningAgent(le, iSet,p),
-                                  agentsPerEvaluation(agentsPerEval),
-                                  iterationsPerJob(iterPerJob)
+                                 const Instructions::Set& iSet,
+                                 const LearningParameters& p,
+                                 size_t agentsPerEval = 2,
+                                 size_t iterPerJob = 10)
+            : ParallelLearningAgent(le, iSet, p),
+              agentsPerEvaluation(agentsPerEval), iterationsPerJob(iterPerJob)
         {
         }
 
+        /**
+         * \brief Evaluate all root TPGVertex of the TPGGraph.
+         *
+         * **Replaces the function from the base class ParallelLearningAgent.**
+         *
+         * This method calls the evaluateJob method for every root TPGVertex
+         * of the TPGGraph. The method returns a sorted map associating each
+         * root vertex to its average score, in ascending order or score.
+         * Sequential or parallel, both situations should output the same
+         * result.
+         *
+         * \param[in] generationNumber the integer number of the current
+         * generation. \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         */
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                      const TPG::TPGVertex*>
+        evaluateAllRoots(uint64_t generationNumber,
+                         Learn::LearningMode mode) override;
 
         /**
-        * \brief Evaluate all root TPGVertex of the TPGGraph.
-        *
-        * **Replaces the function from the base class ParallelLearningAgent.**
-        *
-        * This method calls the evaluateJob method for every root TPGVertex
-        * of the TPGGraph. The method returns a sorted map associating each
-        * root vertex to its average score, in ascending order or score.
-        * Sequential or parallel, both situations should output the same result.
-        *
-        * \param[in] generationNumber the integer number of the current
-        * generation. \param[in] mode the LearningMode to use during the policy
-        * evaluation.
-        */
-        std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
-        evaluateAllRoots(uint64_t generationNumber, Learn::LearningMode mode) override;
-
-        /**
-        * \brief Evaluates policy starting from the given root, taking
-        * adversarial in charge.
-        *
-        * The policy, that is, the TPGGraph execution starting from the given
-        * TPGVertex is evaluated nbIteration times. The generationNumber is
-        * combined with the current iteration number to generate a set of
-        * seeds for evaluating the policy.
-        *
-        * The method is const to enable potential parallel calls to it.
-        *
-        * \param[in] tee The TPGExecutionEngine to use.
-        * \param[in] job the TPGVertex group from which the policy evaluation
-        * starts. Each of the roots of the group shall be an agent of the
-        * same simulation.
-        *
-        * \param[in] generationNumber the integer number of the current
-        * generation. \param[in] mode the LearningMode to use during the policy
-        * evaluation. \param[in] le Reference to the LearningEnvironment to use
-        * during the policy evaluation (may be different from the attribute of
-        * the class in child LearningAgentClass).
-        *
-        * \return a std::shared_ptr to the EvaluationResult for the root. This
-        * will be an AdversarialEvaluationResult that contains the score of
-        * each root of the job. The same root can appear in several jobs, so
-        * these scores are to be combined by the element that calls this
-        * method.
-        * AdversarialEvaluationResult will also contain the number of
-        * iterations that have been done in this job, that could be useful to
-        * combine results later.
-        */
+         * \brief Evaluates policy starting from the given root, taking
+         * adversarial in charge.
+         *
+         * The policy, that is, the TPGGraph execution starting from the given
+         * TPGVertex is evaluated nbIteration times. The generationNumber is
+         * combined with the current iteration number to generate a set of
+         * seeds for evaluating the policy.
+         *
+         * The method is const to enable potential parallel calls to it.
+         *
+         * \param[in] tee The TPGExecutionEngine to use.
+         * \param[in] job the TPGVertex group from which the policy evaluation
+         * starts. Each of the roots of the group shall be an agent of the
+         * same simulation.
+         *
+         * \param[in] generationNumber the integer number of the current
+         * generation. \param[in] mode the LearningMode to use during the policy
+         * evaluation. \param[in] le Reference to the LearningEnvironment to use
+         * during the policy evaluation (may be different from the attribute of
+         * the class in child LearningAgentClass).
+         *
+         * \return a std::shared_ptr to the EvaluationResult for the root. This
+         * will be an AdversarialEvaluationResult that contains the score of
+         * each root of the job. The same root can appear in several jobs, so
+         * these scores are to be combined by the element that calls this
+         * method.
+         * AdversarialEvaluationResult will also contain the number of
+         * iterations that have been done in this job, that could be useful to
+         * combine results later.
+         */
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
-                TPG::TPGExecutionEngine& tee, const Job& job,
-                uint64_t generationNumber, LearningMode mode,
-                LearningEnvironment& le) const override;
+            TPG::TPGExecutionEngine& tee, const Job& job,
+            uint64_t generationNumber, LearningMode mode,
+            LearningEnvironment& le) const override;
 
         /**
-        * \brief Puts all roots into jobs to be able to use them in simulation
-        * later. The difference with the base learning agent makeJobs is that
-        * here we make jobs containing several random roots to play together.
-        *
-        * \param[in] mode the mode of the training, determining for exemple
-        * if we generate values that we only need for training.
-        * \param[in] tpgGraph The TPG graph from which we will take the
-        * roots.
-        *
-        * @return A vector containing pointers of the newly created jobs.
-        */
-        std::queue<std::shared_ptr<Learn::Job>> makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph=nullptr) override;
-
+         * \brief Puts all roots into jobs to be able to use them in simulation
+         * later. The difference with the base learning agent makeJobs is that
+         * here we make jobs containing several random roots to play together.
+         *
+         * \param[in] mode the mode of the training, determining for exemple
+         * if we generate values that we only need for training.
+         * \param[in] tpgGraph The TPG graph from which we will take the
+         * roots.
+         *
+         * @return A vector containing pointers of the newly created jobs.
+         */
+        std::queue<std::shared_ptr<Learn::Job>> makeJobs(
+            Learn::LearningMode mode,
+            TPG::TPGGraph* tpgGraph = nullptr) override;
     };
-}
-
+} // namespace Learn
 
 #endif

@@ -33,11 +33,11 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <gtest/gtest.h>
 #include <gegelati.h>
+#include <gtest/gtest.h>
 
-#include "learn/learningEnvironment.h"
 #include "learn/learningAgent.h"
+#include "learn/learningEnvironment.h"
 
 TEST(JobTest, Constructor)
 {
@@ -47,34 +47,32 @@ TEST(JobTest, Constructor)
     TPG::TPGVertex* tpg = nullptr;
 
     ASSERT_NO_THROW(job = new Learn::Job({tpg}))
-                                << "Construction of the Job failed.";
+        << "Construction of the Job failed.";
 
-    ASSERT_EQ(1,job->getSize())
-    <<"Parameter size did not have expected value after calling job constructor.";
-    ASSERT_EQ(0,job->getIdx())
-    <<"Parameter idx did not have expected value after calling job constructor.";
-    ASSERT_EQ(0,job->getArchiveSeed())
-    <<"Parameter archiveSeed did not have expected value after calling job constructor.";
+    ASSERT_EQ(1, job->getSize()) << "Parameter size did not have expected "
+                                    "value after calling job constructor.";
+    ASSERT_EQ(0, job->getIdx()) << "Parameter idx did not have expected value "
+                                   "after calling job constructor.";
+    ASSERT_EQ(0, job->getArchiveSeed())
+        << "Parameter archiveSeed did not have expected value after calling "
+           "job constructor.";
 
-    ASSERT_NO_THROW(job2 = new Learn::Job(2,3,{tpg}))
-                                << "Construction of the Job failed.";
+    ASSERT_NO_THROW(job2 = new Learn::Job(2, 3, {tpg}))
+        << "Construction of the Job failed.";
 
+    ASSERT_EQ(1, job2->getSize()) << "Parameter size did not have expected "
+                                     "value after calling job constructor.";
+    ASSERT_EQ(2, job2->getIdx()) << "Parameter idx did not have expected value "
+                                    "after calling job constructor.";
+    ASSERT_EQ(3, job2->getArchiveSeed())
+        << "Parameter archiveSeed did not have expected value after calling "
+           "job constructor.";
 
-    ASSERT_EQ(1,job2->getSize())
-    <<"Parameter size did not have expected value after calling job constructor.";
-    ASSERT_EQ(2,job2->getIdx())
-    <<"Parameter idx did not have expected value after calling job constructor.";
-    ASSERT_EQ(3,job2->getArchiveSeed())
-    <<"Parameter archiveSeed did not have expected value after calling job constructor.";
-
-
-    ASSERT_NO_THROW(delete job)
-                                << "Destruction of the Job failed.";
-    ASSERT_NO_THROW(delete job2)
-                                << "Destruction of the Job failed.";
+    ASSERT_NO_THROW(delete job) << "Destruction of the Job failed.";
+    ASSERT_NO_THROW(delete job2) << "Destruction of the Job failed.";
 }
 
-TEST(JobTest,addRoot)
+TEST(JobTest, addRoot)
 {
     Learn::Job* job = nullptr;
 
@@ -83,16 +81,15 @@ TEST(JobTest,addRoot)
 
     job = new Learn::Job({tpg});
 
-    ASSERT_EQ(1,job->getSize())
-    <<"The job doesn't have the right size.";
+    ASSERT_EQ(1, job->getSize()) << "The job doesn't have the right size.";
 
     job->addRoot(tpg2);
 
-    ASSERT_EQ(2,job->getSize())
-    <<"The job doesn't have the right size after a root add.";
+    ASSERT_EQ(2, job->getSize())
+        << "The job doesn't have the right size after a root add.";
 }
 
-TEST(JobTest,getRoots)
+TEST(JobTest, getRoots)
 {
     Learn::Job* job = nullptr;
 
@@ -103,23 +100,23 @@ TEST(JobTest,getRoots)
     job = new Learn::Job({tpg});
 
     auto roots = job->getRoots();
-    ASSERT_EQ(job->getSize(),roots.size())
-    <<"The job doesn't contain as many roots as its size attribute";
-    ASSERT_EQ(tpg,roots[0]);
+    ASSERT_EQ(job->getSize(), roots.size())
+        << "The job doesn't contain as many roots as its size attribute";
+    ASSERT_EQ(tpg, roots[0]);
 
     job->addRoot(tpg2);
 
     roots = job->getRoots();
-    ASSERT_EQ(job->getSize(),roots.size())
-    <<"The job doesn't contain as many roots as its size attribute";
+    ASSERT_EQ(job->getSize(), roots.size())
+        << "The job doesn't contain as many roots as its size attribute";
 
-    ASSERT_EQ(tpg,roots[0])<<"The first root is not the good one";
-    ASSERT_EQ(tpg2,roots[1])<<"The second root is not the good one";
+    ASSERT_EQ(tpg, roots[0]) << "The first root is not the good one";
+    ASSERT_EQ(tpg2, roots[1]) << "The second root is not the good one";
 
     delete tpg2;
 }
 
-TEST(JobTest,operatorGet)
+TEST(JobTest, operatorGet)
 {
     Learn::Job* job = nullptr;
 
@@ -129,8 +126,8 @@ TEST(JobTest,operatorGet)
 
     job = new Learn::Job({tpg, tpg2});
 
-    ASSERT_EQ(tpg,(*job)[0])<<"The first root is not the good one";
-    ASSERT_EQ(tpg2,(*job)[1])<<"The second root is not the good one";
+    ASSERT_EQ(tpg, (*job)[0]) << "The first root is not the good one";
+    ASSERT_EQ(tpg2, (*job)[1]) << "The second root is not the good one";
 
     delete tpg2;
 }

@@ -36,22 +36,23 @@
 #ifndef FAKE_ADVERSARIAL_LEARNING_ENVIRONMENT_H
 #define FAKE_ADVERSARIAL_LEARNING_ENVIRONMENT_H
 
-#include <gegelati.h>
 #include "data/primitiveTypeArray.h"
+#include <gegelati.h>
 
 /**
  * \brief Classification Learning enviroment for testing purposes
  */
 class FakeAdversarialLearningEnvironment
-        : public Learn::AdversarialLearningEnvironment
+    : public Learn::AdversarialLearningEnvironment
 {
-protected:
+  protected:
     Data::PrimitiveTypeArray<int> hints;
     int nbTurns;
 
-public:
+  public:
     FakeAdversarialLearningEnvironment()
-            : AdversarialLearningEnvironment(3), hints(3), nbTurns(0) {
+        : AdversarialLearningEnvironment(3), hints(3), nbTurns(0)
+    {
         reset();
         this->hints.setDataAt(typeid(int), 0, 1);
         this->hints.setDataAt(typeid(int), 1, 2);
@@ -66,26 +67,29 @@ public:
         nbTurns++;
     }
 
-    void reset(size_t seed=0, Learn::LearningMode mode=Learn::TRAINING) override
-    {
+    void reset(size_t seed = 0,
+               Learn::LearningMode mode = Learn::TRAINING) override{
         // we just ignore the reset
     };
     std::vector<std::reference_wrapper<const Data::DataHandler>>
     getDataSources() override
     {
         std::vector<std::reference_wrapper<const Data::DataHandler>> res = {
-                this->hints};
+            this->hints};
 
         return res;
     }
     bool isTerminal() const override
     {
         // stop after a custom number of turns
-        return nbTurns==10;
+        return nbTurns == 10;
     }
 
-    std::shared_ptr<Learn::AdversarialEvaluationResult> getScores() const override{
-        return std::make_shared<Learn::AdversarialEvaluationResult>(Learn::AdversarialEvaluationResult({-1,1,2}));
+    std::shared_ptr<Learn::AdversarialEvaluationResult> getScores()
+        const override
+    {
+        return std::make_shared<Learn::AdversarialEvaluationResult>(
+            Learn::AdversarialEvaluationResult({-1, 1, 2}));
     }
 
     bool isCopyable() const override
@@ -96,7 +100,8 @@ public:
     Learn::LearningEnvironment* clone() const
     {
         // Default copy constructor does the trick.
-        return (Learn::LearningEnvironment*) new FakeAdversarialLearningEnvironment(*this);
+        return (Learn::LearningEnvironment*)new FakeAdversarialLearningEnvironment(
+            *this);
     }
 };
 

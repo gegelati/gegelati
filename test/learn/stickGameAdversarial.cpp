@@ -35,7 +35,6 @@
 
 #include "stickGameAdversarial.h"
 
-
 bool StickGameAdversarial::isCopyable() const
 {
     return true;
@@ -55,21 +54,21 @@ void StickGameAdversarial::doAction(uint64_t actionID)
     bool isFirstPlayer = turn % 2 == 0;
     // set a reference to update the correct forbiddenMove if there is one
     bool& forbiddenMove =
-            isFirstPlayer ? forbiddenMoveFirstPlayer : forbiddenMoveSecondPlayer;
+        isFirstPlayer ? forbiddenMoveFirstPlayer : forbiddenMoveSecondPlayer;
 
     // if the game is not over
     if (!this->isTerminal()) {
         // Execute the action
         // Get current state
         int currentState =
-                (int)*(((this->remainingSticks.getDataAt(typeid(int), 0))
+            (int)*(((this->remainingSticks.getDataAt(typeid(int), 0))
                         .getSharedPointer<const int>()));
         if ((actionID + 1) > currentState) {
             // Illegal move
             forbiddenMove = true;
             // and game over
             this->remainingSticks.setDataAt(typeid(int), 0, 0);
-            firstPlayerWon=!isFirstPlayer;
+            firstPlayerWon = !isFirstPlayer;
 
             // stop there
             return;
@@ -79,8 +78,8 @@ void StickGameAdversarial::doAction(uint64_t actionID)
             currentState -= ((int)actionID + 1);
             this->remainingSticks.setDataAt(typeid(int), 0, currentState);
             // if current state is now zero, the player lost
-            if(currentState==0){
-                firstPlayerWon=!isFirstPlayer;
+            if (currentState == 0) {
+                firstPlayerWon = !isFirstPlayer;
             }
             turn++;
         }
@@ -91,50 +90,54 @@ void StickGameAdversarial::reset(size_t seed, Learn::LearningMode mode)
 {
     // Create seed from seed and mode
     size_t hash_seed =
-            Data::Hash<size_t>()(seed) ^ Data::Hash<Learn::LearningMode>()(mode);
+        Data::Hash<size_t>()(seed) ^ Data::Hash<Learn::LearningMode>()(mode);
     this->rng.setSeed(hash_seed);
     this->remainingSticks.setDataAt(typeid(int), 0, 21);
     this->firstPlayerWon = false;
     this->forbiddenMoveFirstPlayer = false;
     this->forbiddenMoveSecondPlayer = false;
-    this->turn=0;
+    this->turn = 0;
 }
 
 std::vector<std::reference_wrapper<const Data::DataHandler>>
 StickGameAdversarial::getDataSources()
 {
     std::vector<std::reference_wrapper<const Data::DataHandler>> res = {
-            this->hints, this->remainingSticks};
+        this->hints, this->remainingSticks};
 
     return res;
 }
 
-std::shared_ptr<Learn::AdversarialEvaluationResult> StickGameAdversarial::getScores() const
+std::shared_ptr<Learn::AdversarialEvaluationResult> StickGameAdversarial::
+    getScores() const
 {
     double scoreFirst;
     double scoreSecond;
     if (this->firstPlayerWon) {
         scoreFirst = 1.0;
-        if(!this->forbiddenMoveSecondPlayer){
-            scoreSecond=0.0;
-        }else{
-            scoreSecond=-1.0;
+        if (!this->forbiddenMoveSecondPlayer) {
+            scoreSecond = 0.0;
         }
-    }else{
+        else {
+            scoreSecond = -1.0;
+        }
+    }
+    else {
         scoreSecond = 1.0;
-        if(!this->forbiddenMoveFirstPlayer){
-            scoreFirst=0.0;
-        }else{
-            scoreFirst=-1.0;
+        if (!this->forbiddenMoveFirstPlayer) {
+            scoreFirst = 0.0;
+        }
+        else {
+            scoreFirst = -1.0;
         }
     }
 
-    return std::make_shared<Learn::AdversarialEvaluationResult>(Learn::AdversarialEvaluationResult({scoreFirst,scoreSecond}));
+    return std::make_shared<Learn::AdversarialEvaluationResult>(
+        Learn::AdversarialEvaluationResult({scoreFirst, scoreSecond}));
 }
 
 bool StickGameAdversarial::isTerminal() const
 {
     return (int)*((this->remainingSticks.getDataAt(typeid(int), 0))
-            .getSharedPointer<const int>()) == 0;
+                      .getSharedPointer<const int>()) == 0;
 }
-

@@ -63,19 +63,18 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
                                                    : NULL);
 
         // Execute for all root
-        for(int i=0; i<this->tpg.getNbRootVertices(); i++){
+        for (int i = 0; i < this->tpg.getNbRootVertices(); i++) {
             // Set the seed of the archive for this root.
 
-            if(mode==TRAINING) {
+            if (mode == TRAINING) {
                 this->archive.setRandomSeed(
-                        this->rng.getUnsignedInt64(0, UINT64_MAX));
+                    this->rng.getUnsignedInt64(0, UINT64_MAX));
             }
 
             auto job = makeJob(i);
 
             std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
-                    tee, *job, generationNumber, mode,
-                    this->learningEnvironment);
+                tee, *job, generationNumber, mode, this->learningEnvironment);
             results.emplace(avgScore, (*job)[0]);
         }
     }
@@ -87,14 +86,14 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
     return results;
 }
 
-void Learn::ParallelLearningAgent::slaveEvalJobThread(uint64_t generationNumber,
-                                                      Learn::LearningMode mode,
-                                                      std::queue<std::shared_ptr<Learn::Job>> jobsToProcess,
-                                                      std::mutex &rootsToProcessMutex,
-                                                      std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>> &resultsPerRootMap,
-                                                      std::mutex &resultsPerRootMapMutex,
-                                                      std::map<uint64_t, Archive *> &archiveMap,
-                                                      std::mutex &archiveMapMutex)
+void Learn::ParallelLearningAgent::slaveEvalJobThread(
+    uint64_t generationNumber, Learn::LearningMode mode,
+    std::queue<std::shared_ptr<Learn::Job>> jobsToProcess,
+    std::mutex& rootsToProcessMutex,
+    std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
+                                 std::shared_ptr<Job>>>& resultsPerRootMap,
+    std::mutex& resultsPerRootMapMutex,
+    std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex)
 {
 
     // Clone learningEnvironment
@@ -107,7 +106,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(uint64_t generationNumber,
                            this->env.getNbRegisters());
     TPG::TPGExecutionEngine tee(privateEnv, NULL);
 
-    int i=0;
+    int i = 0;
     // Pop a job
     while (!jobsToProcess.empty()) { // Thread safe access to size
         i++;
@@ -135,20 +134,21 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(uint64_t generationNumber,
             tee.setArchive(temporaryArchive);
 
             std::shared_ptr<EvaluationResult> avgScore =
-                    this->evaluateJob(tee, *jobToProcess, generationNumber,
-                                      mode, *privateLearningEnvironment);
+                this->evaluateJob(tee, *jobToProcess, generationNumber, mode,
+                                  *privateLearningEnvironment);
 
             { // Store result Mutual exclusion zone
                 std::lock_guard<std::mutex> lock(resultsPerRootMapMutex);
                 resultsPerRootMap.emplace(
-                        jobToProcess->getIdx(),
+                    jobToProcess->getIdx(),
                     std::make_pair(avgScore, jobToProcess));
             }
 
             if (mode == LearningMode::TRAINING) {
                 { // Insertion archiveMap update mutual exclusion zone
                     std::lock_guard<std::mutex> lock(archiveMapMutex);
-                    archiveMap.insert({jobToProcess->getIdx(), temporaryArchive});
+                    archiveMap.insert(
+                        {jobToProcess->getIdx(), temporaryArchive});
                 }
             }
         }
@@ -221,8 +221,8 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
     // Create Archive Map
     std::map<uint64_t, Archive*> archiveMap;
     // Create Map for results
-    std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-            std::shared_ptr<Job>>>
+    std::map<uint64_t,
+             std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>
         resultsPerJobMap;
 
     // Create mutexes
@@ -234,17 +234,16 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
     std::vector<std::thread> threads;
     for (auto i = 0; i < (this->maxNbThreads - 1); i++) {
         threads.emplace_back(std::thread(
-                &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
-                mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
-                std::ref(resultsPerJobMap), std::ref(resultsPerRootMutex), std::ref(archiveMap),
-                std::ref(archiveMapMutex)));
+            &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
+            mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
+            std::ref(resultsPerJobMap), std::ref(resultsPerRootMutex),
+            std::ref(archiveMap), std::ref(archiveMapMutex)));
     }
 
     // Work in the main thread also
     this->slaveEvalJobThread(generationNumber, mode, jobsToProcess,
                              rootsToProcessMutex, resultsPerJobMap,
-                             resultsPerRootMutex, archiveMap,
-                             archiveMapMutex);
+                             resultsPerRootMutex, archiveMap, archiveMapMutex);
 
     // Join the threads
     for (auto& thread : threads) {
@@ -253,10 +252,10 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
 
     // Merge the results
     for (auto& resultPerRoot : resultsPerJobMap) {
-        results.emplace(resultPerRoot.second.first,(*resultPerRoot.second.second)[0]);
+        results.emplace(resultPerRoot.second.first,
+                        (*resultPerRoot.second.second)[0]);
     }
 
     // Merge the archives
     this->mergeArchiveMap(archiveMap);
 }
-

@@ -33,13 +33,13 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#include <gegelati.h>
 #include <gtest/gtest.h>
 #include <learn/adversarialLearningEnvironment.h>
-#include <gegelati.h>
 
 #include "learn/fakeClassificationLearningEnvironment.h"
-#include "learn/learningEnvironment.h"
 #include "learn/learningAgent.h"
+#include "learn/learningEnvironment.h"
 #include "learn/stickGameAdversarial.h"
 
 TEST(AdversarialLearningEnvironmentTest, Constructor)
@@ -47,13 +47,13 @@ TEST(AdversarialLearningEnvironmentTest, Constructor)
     Learn::AdversarialLearningEnvironment* le = NULL;
 
     ASSERT_NO_THROW(le = new StickGameAdversarial())
-                                << "Construction of the Adversarial Learning Environment failed";
+        << "Construction of the Adversarial Learning Environment failed";
 
     ASSERT_NO_THROW(delete le)
-                                << "Destruction of the Adversarial Learning Environment failed";
+        << "Destruction of the Adversarial Learning Environment failed";
 }
 
-TEST(AdversarialLearningEnvironmentTest,compatibilityLearningAgent)
+TEST(AdversarialLearningEnvironmentTest, compatibilityLearningAgent)
 {
     Learn::AdversarialLearningEnvironment* le = new StickGameAdversarial();
 
@@ -82,23 +82,22 @@ TEST(AdversarialLearningEnvironmentTest,compatibilityLearningAgent)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.maxNbActionsPerEval = 11;
 
-
     Learn::LearningAgent la(*le, set, params);
 
     la.init();
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-            const TPG::TPGVertex*>
-            result;
+                  const TPG::TPGVertex*>
+        result;
     ASSERT_NO_THROW(result =
-                            la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
-                                << "Evaluation from a root failed.";
+                        la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
+        << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
-                                << "Number of evaluated roots is under the number of roots from the "
-                                   "TPGGraph.";
+        << "Number of evaluated roots is under the number of roots from the "
+           "TPGGraph.";
 }
 
-TEST(AdversarialLearningEnvironmentTest,getScoresAndgetScore)
+TEST(AdversarialLearningEnvironmentTest, getScoresAndgetScore)
 {
     Learn::AdversarialLearningEnvironment* le = new StickGameAdversarial();
 
@@ -112,9 +111,9 @@ TEST(AdversarialLearningEnvironmentTest,getScoresAndgetScore)
     le->doAction(0);
     le->doAction(1);
 
-    ASSERT_EQ(1.0,le->getScores()->getScoreOf(0));
-    ASSERT_EQ(0.0,le->getScores()->getScoreOf(1));
-    ASSERT_DOUBLE_EQ(le->getScore(),le->getScores()->getScoreOf(0));
+    ASSERT_EQ(1.0, le->getScores()->getScoreOf(0));
+    ASSERT_EQ(0.0, le->getScores()->getScoreOf(1));
+    ASSERT_DOUBLE_EQ(le->getScore(), le->getScores()->getScoreOf(0));
 
     le->reset();
     // now makes the first player loose with a forbidden move to check the order
@@ -130,7 +129,7 @@ TEST(AdversarialLearningEnvironmentTest,getScoresAndgetScore)
     le->doAction(0);
     le->doAction(2);
 
-    ASSERT_EQ(-1.0,le->getScores()->getScoreOf(0));
-    ASSERT_EQ(1.0,le->getScores()->getScoreOf(1));
-    ASSERT_DOUBLE_EQ(le->getScore(),le->getScores()->getScoreOf(0));
+    ASSERT_EQ(-1.0, le->getScores()->getScoreOf(0));
+    ASSERT_EQ(1.0, le->getScores()->getScoreOf(1));
+    ASSERT_DOUBLE_EQ(le->getScore(), le->getScores()->getScoreOf(0));
 }

@@ -335,30 +335,32 @@ namespace Learn {
          *
          * \return A job representing the root.
          */
-        virtual std::shared_ptr<Learn::Job> makeJob(int num, TPG::TPGGraph* tpgGraph=nullptr);
+        virtual std::shared_ptr<Learn::Job> makeJob(
+            int num, TPG::TPGGraph* tpgGraph = nullptr);
 
         /**
-        * \brief Puts all roots into jobs to be able to use them in simulation
-        * later.
-        *
-        * \param[in] mode the mode of the training, determining for exemple
-        * if we generate values that we only need for training.
-        * \param[in] tpgGraph The TPG graph from which we will take the
-        * roots.
-        *
-        * @return A vector containing pointers of the newly created jobs.
-        */
-        virtual std::queue<std::shared_ptr<Learn::Job>> makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph=nullptr);
+         * \brief Puts all roots into jobs to be able to use them in simulation
+         * later.
+         *
+         * \param[in] mode the mode of the training, determining for exemple
+         * if we generate values that we only need for training.
+         * \param[in] tpgGraph The TPG graph from which we will take the
+         * roots.
+         *
+         * @return A vector containing pointers of the newly created jobs.
+         */
+        virtual std::queue<std::shared_ptr<Learn::Job>> makeJobs(
+            Learn::LearningMode mode, TPG::TPGGraph* tpgGraph = nullptr);
 
         /**
-             * \brief Initialize the LearningAgent.
-             *
-             * Calls the TPGMutator::initRandomTPG function.
-             * Initialize the Mutator::RNG with the given seed.
-             * Clears the Archive.
-             *
-             * \param[in] seed the seed given to the TPGMutator.
-             */
+         * \brief Initialize the LearningAgent.
+         *
+         * Calls the TPGMutator::initRandomTPG function.
+         * Initialize the Mutator::RNG with the given seed.
+         * Clears the Archive.
+         *
+         * \param[in] seed the seed given to the TPGMutator.
+         */
         void init(uint64_t seed = 0);
     };
 }; // namespace Learn

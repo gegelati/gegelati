@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifndef STICKGAMEADVERSARIAL_H
 #define STICKGAMEADVERSARIAL_H
 
@@ -47,8 +46,9 @@
 /**
  * Play the stick game against another agent
  */
-class StickGameAdversarial : public Learn::AdversarialLearningEnvironment {
-protected:
+class StickGameAdversarial : public Learn::AdversarialLearningEnvironment
+{
+  protected:
     /// During a game, number of remaining sticks.
     Data::PrimitiveTypeArray<int> remainingSticks;
 
@@ -72,12 +72,12 @@ protected:
     /// Simple turn control, first player plays in even turn and second in odd
     int turn;
 
-public:
+  public:
     /**
      * Constructor.
      */
     StickGameAdversarial()
-            : AdversarialLearningEnvironment(3), remainingSticks(1), hints(3)
+        : AdversarialLearningEnvironment(3), remainingSticks(1), hints(3)
     {
         this->reset(0);
         // Set hints
@@ -100,8 +100,8 @@ public:
 
     // Inherited via LearningEnvironment
     virtual void reset(
-            size_t seed = 0,
-            Learn::LearningMode mode = Learn::LearningMode::TRAINING) override;
+        size_t seed = 0,
+        Learn::LearningMode mode = Learn::LearningMode::TRAINING) override;
 
     // Inherited via LearningEnvironment
     virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
@@ -110,11 +110,11 @@ public:
     /**
      * Returns 1.0 for winning player won, 0.0 for the other.
      */
-    virtual std::shared_ptr<Learn::AdversarialEvaluationResult> getScores() const override;
+    virtual std::shared_ptr<Learn::AdversarialEvaluationResult> getScores()
+        const override;
 
     // Inherited via LearningEnvironment
     virtual bool isTerminal() const override;
 };
-
 
 #endif

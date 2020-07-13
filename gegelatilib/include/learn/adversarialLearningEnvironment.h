@@ -36,8 +36,8 @@
 #ifndef ADVERSARIALLEARNINGENVIRONMENT_H
 #define ADVERSARIALLEARNINGENVIRONMENT_H
 
-#include "learn/learningEnvironment.h"
 #include "learn/adversarialEvaluationResult.h"
+#include "learn/learningEnvironment.h"
 #include <vector>
 
 namespace Learn {
@@ -60,29 +60,33 @@ namespace Learn {
      * game. It shall return an evaluation result containing the scores of the
      * roots, in the order in which they participated.
      */
-    class AdversarialLearningEnvironment : public LearningEnvironment {
-    using LearningEnvironment::LearningEnvironment;
-    public:
+    class AdversarialLearningEnvironment : public LearningEnvironment
+    {
+        using LearningEnvironment::LearningEnvironment;
+
+      public:
         /**
          * \brief Computes scores of each root and returns them.
          *
          * @return A shared pointer of an evaluation result containing a score
          * per participant.
          */
-        virtual std::shared_ptr<Learn::AdversarialEvaluationResult> getScores() const = 0;
+        virtual std::shared_ptr<Learn::AdversarialEvaluationResult> getScores()
+            const = 0;
 
         /**
-        * Inherited from LearningEnvironment
-        *
-        * \brief Simply returns the first score of the results, allowing
-        * compatibility with non adversarial learning agents.
-        *
-        * @return The first score of the evaluation result from getScores().
-        */
-        double getScore() const override{
+         * Inherited from LearningEnvironment
+         *
+         * \brief Simply returns the first score of the results, allowing
+         * compatibility with non adversarial learning agents.
+         *
+         * @return The first score of the evaluation result from getScores().
+         */
+        double getScore() const override
+        {
             return getScores()->getScoreOf(0);
         }
     };
 
-}
+} // namespace Learn
 #endif

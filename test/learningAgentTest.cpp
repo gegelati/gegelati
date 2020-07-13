@@ -175,11 +175,10 @@ TEST_F(LearningAgentTest, MakeJob)
     Learn::LearningAgent la(le, set, params);
     la.init();
     auto job = *la.makeJob(0);
-    ASSERT_EQ(1,job.getSize())
-    <<"job made in LearningAgent makeJob should contain 1 root only";
-    ASSERT_EQ(la.getTPGGraph().getRootVertices().at(0),job[0])
-                                <<"Encapsulate the root in a job shouldn't change it";
-
+    ASSERT_EQ(1, job.getSize())
+        << "job made in LearningAgent makeJob should contain 1 root only";
+    ASSERT_EQ(la.getTPGGraph().getRootVertices().at(0), job[0])
+        << "Encapsulate the root in a job shouldn't change it";
 }
 
 TEST_F(LearningAgentTest, MakeJobs)
@@ -187,13 +186,13 @@ TEST_F(LearningAgentTest, MakeJobs)
     Learn::LearningAgent la(le, set, params);
     la.init();
     auto jobs = la.makeJobs(Learn::TRAINING);
-    ASSERT_EQ(la.getTPGGraph().getNbRootVertices(),jobs.size())
-                                <<"There should be as many jobs as roots";
-    for(int i=0; i<la.getTPGGraph().getNbRootVertices(); i++) {
+    ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), jobs.size())
+        << "There should be as many jobs as roots";
+    for (int i = 0; i < la.getTPGGraph().getNbRootVertices(); i++) {
         ASSERT_EQ(1, (*jobs.front()).getSize())
-                                    << "job made in LearningAgent makeJobs should contain 1 root only";
+            << "job made in LearningAgent makeJobs should contain 1 root only";
         ASSERT_EQ(la.getTPGGraph().getRootVertices().at(i), (*jobs.front())[0])
-                                    << "Encapsulate the root in a job shouldn't change it";
+            << "Encapsulate the root in a job shouldn't change it";
         jobs.pop();
     }
 }
@@ -215,8 +214,7 @@ TEST_F(LearningAgentTest, EvalRoot)
     std::shared_ptr<Learn::EvaluationResult> result;
     auto job = *la.makeJob(0);
     ASSERT_NO_THROW(
-        result = la.evaluateJob(tee, job,
-                                0, Learn::LearningMode::TRAINING, le))
+        result = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getResult(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
@@ -560,9 +558,8 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 
     std::shared_ptr<Learn::EvaluationResult> result;
     Learn::ParallelLearningAgent pla(le, set, params);
-    ASSERT_NO_THROW(result =
-                            pla.evaluateJob(tee, *pla.makeJob(0, &tpg), 0,
-                                            Learn::LearningMode::TRAINING, le))
+    ASSERT_NO_THROW(result = pla.evaluateJob(tee, *pla.makeJob(0, &tpg), 0,
+                                             Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getResult(), 1.0)
         << "Average score should not exceed the score of a perfect player.";

@@ -104,9 +104,8 @@ bool Learn::LearningAgent::isRootEvalSkipped(
 }
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
-    TPG::TPGExecutionEngine& tee, const Job& job,
-    uint64_t generationNumber, Learn::LearningMode mode,
-    LearningEnvironment& le) const
+    TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber,
+    Learn::LearningMode mode, LearningEnvironment& le) const
 {
     // Only consider the first root of jobs as we are not in adversarial mode
     const TPG::TPGVertex* root = job[0];
@@ -172,7 +171,7 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
     TPG::TPGExecutionEngine tee(
         this->env, (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
-    for (int i=0; i<tpg.getNbRootVertices(); i++) {
+    for (int i = 0; i < tpg.getNbRootVertices(); i++) {
         // Before each root evaluation, set a new seed for the archive in
         // TRAINING Mode Else, archiving should be deactivate anyway
         if (mode == LearningMode::TRAINING) {
@@ -182,8 +181,7 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
         auto job = makeJob(i);
         std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
-                tee, *job, generationNumber, mode,
-                this->learningEnvironment);
+            tee, *job, generationNumber, mode, this->learningEnvironment);
         result.emplace(avgScore, (*job)[0]);
     }
 
@@ -375,32 +373,38 @@ void Learn::LearningAgent::keepBestPolicy()
     }
 }
 
-std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(int num, TPG::TPGGraph* tpgGraph) {
+std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
+    int num, TPG::TPGGraph* tpgGraph)
+{
     // sets the tpg to the Learning Agent's one if no one was specified
-    tpgGraph = tpgGraph==nullptr?&tpg:tpgGraph;
+    tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
 
-    if(tpgGraph->getNbRootVertices()>0) {
+    if (tpgGraph->getNbRootVertices() > 0) {
         return std::make_shared<Learn::Job>(
-                Learn::Job({tpgGraph->getRootVertices()[num]}));
+            Learn::Job({tpgGraph->getRootVertices()[num]}));
     }
     return nullptr;
 }
 
-std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph) {
+std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
+    Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
+{
     // sets the tpg to the Learning Agent's one if no one was specified
-    tpgGraph = tpgGraph==nullptr?&tpg:tpgGraph;
+    tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
 
     std::queue<std::shared_ptr<Learn::Job>> jobs;
-    for(int i=0; i<tpgGraph->getNbRootVertices();i++){
+    for (int i = 0; i < tpgGraph->getNbRootVertices(); i++) {
         uint64_t archiveSeed;
         // we only generate a random if we are in training, to make like the
         // learning agent in order to stay determinist
-        if(mode==TRAINING) {
+        if (mode == TRAINING) {
             archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        }else{
+        }
+        else {
             archiveSeed = 0;
         }
-        auto job = std::make_shared<Learn::Job>(Learn::Job(i,archiveSeed,{tpgGraph->getRootVertices()[i]}));
+        auto job = std::make_shared<Learn::Job>(
+            Learn::Job(i, archiveSeed, {tpgGraph->getRootVertices()[i]}));
         jobs.push(job);
     }
     return jobs;
