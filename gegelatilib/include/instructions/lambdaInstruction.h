@@ -50,7 +50,7 @@ namespace Instructions {
      * Instruction from a c++ lambda function.
      *
      * Template parameters First and Rest can be any primitive type, class or
-     * const c-style 1D array.
+     * const c-style 1D and 2D array.
      *
      * Each template parameter corresponds to an argument of the function given
      * to the LambdaInstruction constructor, specifying its type.
@@ -172,7 +172,12 @@ namespace Instructions {
          * \param[in] idx the current index in the args list.
          * \return the appropriate argument for this->func.
          */
-        template <typename T>
+        template <typename T,
+                  typename MINUS_EXTENT = typename std::remove_extent<T>::type,
+                  typename RETURN_TYPE = typename std::conditional<
+                      !std::is_array<MINUS_EXTENT>::value,
+                      typename std::remove_all_extents<T>::type*,
+                      MINUS_EXTENT*>::type>
         constexpr auto getDataFromUntypedSharedPtr(
             const std::vector<Data::UntypedSharedPtr>& args, size_t idx) const
         {
@@ -180,9 +185,10 @@ namespace Instructions {
                 return *(args.at(idx).getSharedPointer<const T>());
             }
             else {
-                return (args.at(idx)
-                            .getSharedPointer<
-                                const std::remove_all_extents_t<T>[]>())
+                return (RETURN_TYPE)(
+                           args.at(idx)
+                               .getSharedPointer<
+                                   const std::remove_all_extents_t<T>[]>())
                     .get();
             };
         };
