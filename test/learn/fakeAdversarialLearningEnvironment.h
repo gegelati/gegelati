@@ -97,7 +97,7 @@ class FakeAdversarialLearningEnvironment
         return true;
     }
 
-    Learn::LearningEnvironment* clone() const
+    Learn::LearningEnvironment* clone() const override
     {
         // Default copy constructor does the trick.
         return (Learn::LearningEnvironment*)new FakeAdversarialLearningEnvironment(
