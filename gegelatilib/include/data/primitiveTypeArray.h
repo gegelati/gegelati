@@ -114,6 +114,9 @@ namespace Data {
          */
         PrimitiveTypeArray(size_t size = 8);
 
+        /// Default copy constructor.
+        PrimitiveTypeArray(const PrimitiveTypeArray<T>& other) = default;
+
         /// Default destructor.
         virtual ~PrimitiveTypeArray() = default;
 
@@ -319,8 +322,10 @@ namespace Data {
     void PrimitiveTypeArray<T>::setDataAt(const std::type_info& type,
                                           const size_t address, const T& value)
     {
+#ifndef NDEBUG
         // Throw exception in case of invalid arguments.
         checkAddressAndType(type, address);
+#endif
 
         this->data[address] = value;
 

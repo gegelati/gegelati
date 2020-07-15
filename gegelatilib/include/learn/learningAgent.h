@@ -305,6 +305,16 @@ namespace Learn {
                 results);
 
         /**
+         * \brief This method resets the previous registered scores per root.
+         *
+         * Resets resultsPerRoot so that, in the next training,
+         * the current roots will be considered as if they had never
+         * been tested. To use for example when there is a scoring policy
+         * change.
+         */
+        void forgetPreviousResults();
+
+        /**
          * \brief Get the best root TPG::Vertex encountered since the last init.
          *
          * The returned pointers may be nullptr if no generation was trained
