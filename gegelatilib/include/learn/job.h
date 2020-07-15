@@ -36,12 +36,12 @@ namespace Learn {
         /**
          * Index associated to this job.
          */
-        const uint64_t idx;
+        const uint64_t idx = 0;
 
         /**
          * Seed that will be used to randomize archive.
          */
-        const uint64_t archiveSeed;
+        const uint64_t archiveSeed = 0;
 
       public:
         /// Deleted default constructor.
@@ -54,7 +54,7 @@ namespace Learn {
          * @param[in] roots The roots that will be encapsulated into the job.
          */
         Job(std::initializer_list<const TPG::TPGVertex*> roots)
-            : roots(roots), size(roots.size()), archiveSeed(0), idx(0)
+            : roots(roots), size(roots.size())
         {
         }
 
@@ -90,7 +90,7 @@ namespace Learn {
          *
          * @return The index of the job.
          */
-        uint64_t getIdx()
+        uint64_t getIdx() const
         {
             return idx;
         }
@@ -100,7 +100,7 @@ namespace Learn {
          *
          * @return The archive seed of the job.
          */
-        uint64_t getArchiveSeed()
+        uint64_t getArchiveSeed() const
         {
             return archiveSeed;
         }

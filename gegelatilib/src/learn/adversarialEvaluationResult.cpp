@@ -50,7 +50,7 @@ Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator+=(
         throw std::runtime_error("Type mismatch between EvaluationResults.");
     }
 
-    auto otherConverted = (AdversarialEvaluationResult&)other;
+    auto otherConverted = (const AdversarialEvaluationResult&)other;
 
     // Size Check
     if (otherConverted.scores.size() != this->scores.size()) {

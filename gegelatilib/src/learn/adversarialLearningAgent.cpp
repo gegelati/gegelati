@@ -69,7 +69,7 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallel(
     // The reason why we use a vector is that for deterministic reasons, we need
     // the roots to be stored in the same order. In this case, it will be
     // in emplace order.
-    std::vector<std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>>
+    std::map<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>
         resultsPerRootMap;
 
     // Create intermediate Map to gather threads resukts
@@ -104,22 +104,20 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallel(
     }
 
     // Gather the results
-    for (auto& resultPerJob : jobPerResultsPerIdxMap) {
+    for (const auto& resultPerJob : jobPerResultsPerIdxMap) {
         // getting the AdversarialEvaluationResult that should be in this pair
         std::shared_ptr<AdversarialEvaluationResult> res =
             std::dynamic_pointer_cast<AdversarialEvaluationResult>(
                 resultPerJob.second.first);
         int rootIdx = 0;
         for (auto root : resultPerJob.second.second->getRoots()) {
-            auto iterator = resultsPerRootMap.begin();
-            // we look for the root
-            while(iterator!=resultsPerRootMap.end() && iterator->first!=root)iterator++;
+            auto iterator = resultsPerRootMap.find(root);
             if (iterator == resultsPerRootMap.end()) {
                 // first time we encounter the results of this root
-                resultsPerRootMap.emplace_back(std::make_pair(
+                resultsPerRootMap.emplace(
                     root,
                     std::make_shared<EvaluationResult>(EvaluationResult(
-                        res->getScoreOf(rootIdx), res->getNbEvaluation()))));
+                        res->getScoreOf(rootIdx), res->getNbEvaluation())));
             }
             else {
                 // there is already a score for this root, let's do an addition
@@ -131,7 +129,11 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallel(
     }
 
     // Swaps the results for the final map
-    for (auto& resultPerRoot : resultsPerRootMap) {
+    // It is important to iterate on tpg.getRootVertices : it ensures
+    // the order of the roots iteration remains the same no matter
+    // the order of resultsPerRootMap which depends on addresses.
+    for (auto root : tpg.getRootVertices()) {
+        auto& resultPerRoot=*resultsPerRootMap.find(root);
         results.emplace(resultPerRoot.second, resultPerRoot.first);
     }
 
@@ -250,13 +252,13 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
             auto iterator = nbEvals.begin();
             std::advance(iterator, position);
 
-            size_t nbEvalsThisRoot = iterator->first;
+            nbEvalsThisRoot = iterator->first;
             root = iterator->second;
             job->addRoot(root);
 
             // erases the old pair corresponding to this root
             nbEvals.erase(iterator);
-            size_t newNbEvalsThisRoot = nbEvalsThisRoot + iterationsPerJob;
+            newNbEvalsThisRoot = nbEvalsThisRoot + iterationsPerJob;
             // only re-add the root in the map if it has not enough been
             // evaluated
             if (newNbEvalsThisRoot < params.nbIterationsPerPolicyEvaluation) {
