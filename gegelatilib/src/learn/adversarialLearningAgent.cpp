@@ -52,77 +52,37 @@ Learn::AdversarialLearningAgent::evaluateAllRoots(uint64_t generationNumber,
     return results;
 }
 
-void Learn::AdversarialLearningAgent::evaluateAllRootsInParallel(
-    uint64_t generationNumber, LearningMode mode,
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
-        results)
+void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
+        std::map<uint64_t,std::pair<std::shared_ptr<EvaluationResult>,
+                std::shared_ptr<Job>>>& resultsPerJobMap,
+        std::multimap<std::shared_ptr<EvaluationResult>,
+                const TPG::TPGVertex*>& results,
+        std::map<uint64_t, Archive*>& archiveMap)
 {
-    // Create and fill the queue for distributing work among threads
-    // each root is associated to its number in the list for enabling the
-    // determinism of stochastic archive storage.
-    auto jobsToProcess = makeJobs(mode);
-
-    // Create Archive Map
-    std::map<uint64_t, Archive*> archiveMap;
-
-    // Create Map for results
-    // The reason why we use a vector is that for deterministic reasons, we need
-    // the roots to be stored in the same order. In this case, it will be
-    // in emplace order.
+    // Create temporary map to gather results per root
     std::map<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>
-        resultsPerRootMap;
-
-    // Create intermediate Map to gather threads resukts
-    std::map<uint64_t,
-             std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>
-        jobPerResultsPerIdxMap;
-
-    // Create mutexes
-    std::mutex rootsToProcessMutex;
-    std::mutex resultsPerRootMutex;
-    std::mutex archiveMapMutex;
-
-    // Create the threads
-    std::vector<std::thread> threads;
-    for (auto i = 0; i < (this->maxNbThreads - 1); i++) {
-        threads.emplace_back(std::thread(
-            &AdversarialLearningAgent::slaveEvalJobThread, this,
-            generationNumber, mode, std::ref(jobsToProcess),
-            std::ref(rootsToProcessMutex), std::ref(jobPerResultsPerIdxMap),
-            std::ref(resultsPerRootMutex), std::ref(archiveMap),
-            std::ref(archiveMapMutex)));
-    }
-
-    // Work in the main thread also
-    this->slaveEvalJobThread(generationNumber, mode, jobsToProcess,
-                             rootsToProcessMutex, jobPerResultsPerIdxMap,
-                             resultsPerRootMutex, archiveMap, archiveMapMutex);
-
-    // Join the threads
-    for (auto& thread : threads) {
-        thread.join();
-    }
+            resultsPerRootMap;
 
     // Gather the results
-    for (const auto& resultPerJob : jobPerResultsPerIdxMap) {
+    for (const auto& resultPerJob : resultsPerJobMap) {
         // getting the AdversarialEvaluationResult that should be in this pair
         std::shared_ptr<AdversarialEvaluationResult> res =
-            std::dynamic_pointer_cast<AdversarialEvaluationResult>(
-                resultPerJob.second.first);
+                std::dynamic_pointer_cast<AdversarialEvaluationResult>(
+                        resultPerJob.second.first);
         int rootIdx = 0;
         for (auto root : resultPerJob.second.second->getRoots()) {
             auto iterator = resultsPerRootMap.find(root);
             if (iterator == resultsPerRootMap.end()) {
                 // first time we encounter the results of this root
                 resultsPerRootMap.emplace(
-                    root,
-                    std::make_shared<EvaluationResult>(EvaluationResult(
-                        res->getScoreOf(rootIdx), res->getNbEvaluation())));
+                        root,
+                        std::make_shared<EvaluationResult>(EvaluationResult(
+                                res->getScoreOf(rootIdx), res->getNbEvaluation())));
             }
             else {
                 // there is already a score for this root, let's do an addition
                 (*iterator->second) += EvaluationResult(
-                    res->getScoreOf(rootIdx), res->getNbEvaluation());
+                        res->getScoreOf(rootIdx), res->getNbEvaluation());
             }
             rootIdx++;
         }

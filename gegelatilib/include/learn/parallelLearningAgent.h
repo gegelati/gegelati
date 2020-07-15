@@ -68,6 +68,10 @@ namespace Learn {
         /**
          * \brief Method for evaluating all roots with parallelism.
          *
+         * The work is delegated in two distinct methods (this structure is
+         * made for inheritance purpose) : evaluateAllRootsInParallelExecute and
+         * evaluateAllRootsInParallelCompileResults.
+         *
          * \param[in] generationNumber the integer number of the current
          * generation. \param[in] mode the LearningMode to use during the policy
          * evaluation. \param[in] results Map to store the resulting score of
@@ -77,6 +81,48 @@ namespace Learn {
             uint64_t generationNumber, LearningMode mode,
             std::multimap<std::shared_ptr<EvaluationResult>,
                           const TPG::TPGVertex*>& results);
+
+        /**
+         * \brief Subfunction of evaluateAllRootsInParallel which handles the
+         * creation of threads, their execution and junction.
+         *
+         * @param[in] generationNumber the integer number of the current
+         * generation.
+         * @param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * @param[out] resultsPerJobMap map linking the job number with its
+         * results and itself.
+         * @param[out] archiveMap map linking the job number with its gathered
+         * archive. These archive swill later be merged with the ones of the
+         * other jobs.
+         */
+        virtual void evaluateAllRootsInParallelExecute(uint64_t generationNumber,
+                LearningMode mode, std::map<uint64_t,
+                std::pair<std::shared_ptr<EvaluationResult>,
+                        std::shared_ptr<Job>>>& resultsPerJobMap,
+                        std::map<uint64_t, Archive*>& archiveMap);
+
+        /**
+         * \brief Subfunction of evaluateAllRootsInParallel which handles the
+         * gathering of results and the merge of the archives.
+         *
+         * This method just emplaces results from resultsPerJobMap, as each
+         * job only contains 1 root is is quite easy.
+         * The archive is merged with the mergeArchiveMap method.
+         *
+         * @param[in] resultsPerJobMap map linking the job number with its
+         * results and itself.
+         * @param[out] results map linking single results to their root vertex.
+         * @param[in,out] archiveMap map linking the job number with its gathered
+         * archive. These archive swill later be merged with the ones of the
+         * other jobs.
+         */
+        virtual void evaluateAllRootsInParallelCompileResults(
+                std::map<uint64_t,std::pair<std::shared_ptr<EvaluationResult>,
+                        std::shared_ptr<Job>>>& resultsPerJobMap,
+                std::multimap<std::shared_ptr<EvaluationResult>,
+                        const TPG::TPGVertex*>& results,
+                        std::map<uint64_t, Archive*>& archiveMap);
 
         /**
          * \brief Function implementing the behavior of slave threads during
