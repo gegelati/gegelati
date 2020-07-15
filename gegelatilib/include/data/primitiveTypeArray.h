@@ -322,8 +322,10 @@ namespace Data {
     void PrimitiveTypeArray<T>::setDataAt(const std::type_info& type,
                                           const size_t address, const T& value)
     {
+#ifndef NDEBUG
         // Throw exception in case of invalid arguments.
         checkAddressAndType(type, address);
+#endif
 
         this->data[address] = value;
 
