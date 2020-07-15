@@ -191,18 +191,18 @@ TEST_F(adversarialLearningAgentTest, GetArchive)
 TEST_F(adversarialLearningAgentTest, TrainPortability)
 {
     params.archiveSize = 50;
-    params.archivingProbability = 0.5;
+    params.archivingProbability = 0.05;
     params.maxNbActionsPerEval = 11;
-    params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.95;
+    params.nbIterationsPerPolicyEvaluation = 2;
+    params.maxNbEvaluationPerPolicy = 0;
+    params.ratioDeletedRoots = 0.5;
     params.nbGenerations = 20;
-    params.nbThreads = 1;
     params.mutation.tpg.nbRoots = 30;
-    // A root may be evaluated at most for 3 generations
-    params.maxNbEvaluationPerPolicy =
-        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.nbActions = 3;
+    params.mutation.tpg.maxInitOutgoingEdges = 3;
+    params.mutation.tpg.maxOutgoingEdges = 10;
 
-    Learn::AdversarialLearningAgent la(le, set, params);
+    Learn::AdversarialLearningAgent la(le, set, params,2,1);
 
     la.init();
     bool alt = false;
@@ -212,13 +212,13 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 28)
+    ASSERT_EQ(tpg.getNbVertices(), 23)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+    ASSERT_EQ(tpg.getNbRootVertices(), 15)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 108)
+    ASSERT_EQ(tpg.getEdges().size(), 149)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 5961433082191139529)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 11434807175007865590)
         << "Graph does not have the expected determinst characteristics.";
 }
 

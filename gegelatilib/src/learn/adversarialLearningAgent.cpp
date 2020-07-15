@@ -66,7 +66,10 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallel(
     std::map<uint64_t, Archive*> archiveMap;
 
     // Create Map for results
-    std::map<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>
+    // The reason why we use a vector is that for deterministic reasons, we need
+    // the roots to be stored in the same order. In this case, it will be
+    // in emplace order.
+    std::vector<std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>>
         resultsPerRootMap;
 
     // Create intermediate Map to gather threads resukts
@@ -108,13 +111,15 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallel(
                 resultPerJob.second.first);
         int rootIdx = 0;
         for (auto root : resultPerJob.second.second->getRoots()) {
-            auto iterator = resultsPerRootMap.find(root);
+            auto iterator = resultsPerRootMap.begin();
+            // we look for the root
+            while(iterator!=resultsPerRootMap.end() && iterator->first!=root)iterator++;
             if (iterator == resultsPerRootMap.end()) {
                 // first time we encounter the results of this root
-                resultsPerRootMap.emplace(
+                resultsPerRootMap.emplace_back(std::make_pair(
                     root,
                     std::make_shared<EvaluationResult>(EvaluationResult(
-                        res->getScoreOf(rootIdx), res->getNbEvaluation())));
+                        res->getScoreOf(rootIdx), res->getNbEvaluation()))));
             }
             else {
                 // there is already a score for this root, let's do an addition
