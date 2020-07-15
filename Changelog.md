@@ -13,6 +13,7 @@ _aaaa.mm.dd_
 	* Support for 2D primitive C-style array in LambdaInstructions.
 
 ### Changes
+* Remove redundant typecheck in `PrimitiveTypeArray::setDataAt()` in `NDEBUG` mode. A performance gain of ~25% was observed on the MNIST application (without a thorough profiling method).
 
 ### Bug fix
 * Adapt code for building GEGELATI with clang standard library: libc++. (see Issue #49 for mode details)
