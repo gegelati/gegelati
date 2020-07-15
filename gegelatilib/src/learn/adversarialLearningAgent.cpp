@@ -53,36 +53,36 @@ Learn::AdversarialLearningAgent::evaluateAllRoots(uint64_t generationNumber,
 }
 
 void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
-        std::map<uint64_t,std::pair<std::shared_ptr<EvaluationResult>,
-                std::shared_ptr<Job>>>& resultsPerJobMap,
-        std::multimap<std::shared_ptr<EvaluationResult>,
-                const TPG::TPGVertex*>& results,
-        std::map<uint64_t, Archive*>& archiveMap)
+    std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
+                                 std::shared_ptr<Job>>>& resultsPerJobMap,
+    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
+        results,
+    std::map<uint64_t, Archive*>& archiveMap)
 {
     // Create temporary map to gather results per root
     std::map<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>
-            resultsPerRootMap;
+        resultsPerRootMap;
 
     // Gather the results
     for (const auto& resultPerJob : resultsPerJobMap) {
         // getting the AdversarialEvaluationResult that should be in this pair
         std::shared_ptr<AdversarialEvaluationResult> res =
-                std::dynamic_pointer_cast<AdversarialEvaluationResult>(
-                        resultPerJob.second.first);
+            std::dynamic_pointer_cast<AdversarialEvaluationResult>(
+                resultPerJob.second.first);
         int rootIdx = 0;
         for (auto root : resultPerJob.second.second->getRoots()) {
             auto iterator = resultsPerRootMap.find(root);
             if (iterator == resultsPerRootMap.end()) {
                 // first time we encounter the results of this root
                 resultsPerRootMap.emplace(
-                        root,
-                        std::make_shared<EvaluationResult>(EvaluationResult(
-                                res->getScoreOf(rootIdx), res->getNbEvaluation())));
+                    root,
+                    std::make_shared<EvaluationResult>(EvaluationResult(
+                        res->getScoreOf(rootIdx), res->getNbEvaluation())));
             }
             else {
                 // there is already a score for this root, let's do an addition
                 (*iterator->second) += EvaluationResult(
-                        res->getScoreOf(rootIdx), res->getNbEvaluation());
+                    res->getScoreOf(rootIdx), res->getNbEvaluation());
             }
             rootIdx++;
         }
@@ -93,7 +93,7 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
     // the order of the roots iteration remains the same no matter
     // the order of resultsPerRootMap which depends on addresses.
     for (auto root : tpg.getRootVertices()) {
-        auto& resultPerRoot=*resultsPerRootMap.find(root);
+        auto& resultPerRoot = *resultsPerRootMap.find(root);
         results.emplace(resultPerRoot.second, resultPerRoot.first);
     }
 

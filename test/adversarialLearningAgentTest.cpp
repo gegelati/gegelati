@@ -202,7 +202,7 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.mutation.tpg.maxInitOutgoingEdges = 3;
     params.mutation.tpg.maxOutgoingEdges = 10;
 
-    Learn::AdversarialLearningAgent la(le, set, params,2,1);
+    Learn::AdversarialLearningAgent la(le, set, params, 2, 1);
 
     la.init();
     bool alt = false;

@@ -78,16 +78,17 @@ namespace Learn {
          * @param[in] resultsPerJobMap map linking the job number with its
          * results and itself.
          * @param[out] results map linking single results to their root vertex.
-         * @param[in,out] archiveMap map linking the job number with its gathered
-         * archive. These archive swill later be merged with the ones of the
-         * other jobs.
+         * @param[in,out] archiveMap map linking the job number with its
+         * gathered archive. These archive swill later be merged with the ones
+         * of the other jobs.
          */
         void evaluateAllRootsInParallelCompileResults(
-                std::map<uint64_t,std::pair<std::shared_ptr<EvaluationResult>,
-                        std::shared_ptr<Job>>>& resultsPerJobMap,
-                std::multimap<std::shared_ptr<EvaluationResult>,
-                        const TPG::TPGVertex*>& results,
-                std::map<uint64_t, Archive*>& archiveMap) override;
+            std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
+                                         std::shared_ptr<Job>>>&
+                resultsPerJobMap,
+            std::multimap<std::shared_ptr<EvaluationResult>,
+                          const TPG::TPGVertex*>& results,
+            std::map<uint64_t, Archive*>& archiveMap) override;
 
       public:
         /**

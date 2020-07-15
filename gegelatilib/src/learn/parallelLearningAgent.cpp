@@ -217,22 +217,25 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
     std::map<uint64_t, Archive*> archiveMap;
     // Create Map for results
     std::map<uint64_t,
-            std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>
-            resultsPerJobMap;
+             std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>
+        resultsPerJobMap;
 
-    evaluateAllRootsInParallelExecute(generationNumber,mode,resultsPerJobMap,archiveMap);
+    evaluateAllRootsInParallelExecute(generationNumber, mode, resultsPerJobMap,
+                                      archiveMap);
 
-    evaluateAllRootsInParallelCompileResults(resultsPerJobMap,results, archiveMap);
+    evaluateAllRootsInParallelCompileResults(resultsPerJobMap, results,
+                                             archiveMap);
 }
-void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(uint64_t generationNumber, LearningMode mode, std::map<uint64_t,
-        std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>& resultsPerJobMap, std::map<uint64_t, Archive*>& archiveMap)
+void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(
+    uint64_t generationNumber, LearningMode mode,
+    std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
+                                 std::shared_ptr<Job>>>& resultsPerJobMap,
+    std::map<uint64_t, Archive*>& archiveMap)
 {
     // Create and fill the queue for distributing work among threads
     // each root is associated to its number in the list for enabling the
     // determinism of stochastic archive storage.
     auto jobsToProcess = makeJobs(mode);
-
-
 
     // Create mutexes
     std::mutex rootsToProcessMutex;
@@ -243,10 +246,10 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(uint64_t ge
     std::vector<std::thread> threads;
     for (auto i = 0; i < (this->maxNbThreads - 1); i++) {
         threads.emplace_back(std::thread(
-                &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
-                mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
-                std::ref(resultsPerJobMap), std::ref(resultsPerRootMutex),
-                std::ref(archiveMap), std::ref(archiveMapMutex)));
+            &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
+            mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
+            std::ref(resultsPerJobMap), std::ref(resultsPerRootMutex),
+            std::ref(archiveMap), std::ref(archiveMapMutex)));
     }
 
     // Work in the main thread also
@@ -261,9 +264,11 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(uint64_t ge
 }
 
 void Learn::ParallelLearningAgent::evaluateAllRootsInParallelCompileResults(
-        std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>& resultsPerJobMap,
-        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex *> &results,
-        std::map<uint64_t, Archive *>& archiveMap)
+    std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
+                                 std::shared_ptr<Job>>>& resultsPerJobMap,
+    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
+        results,
+    std::map<uint64_t, Archive*>& archiveMap)
 {
     // Merge the results
     for (auto& resultPerRoot : resultsPerJobMap) {
@@ -273,5 +278,4 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallelCompileResults(
 
     // Merge the archives
     this->mergeArchiveMap(archiveMap);
-
 }
