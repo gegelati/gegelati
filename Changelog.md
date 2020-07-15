@@ -14,6 +14,7 @@ _aaaa.mm.dd_
 
 ### Changes
 * Remove redundant typecheck in `PrimitiveTypeArray::setDataAt()` in `NDEBUG` mode. A performance gain of ~25% was observed on the MNIST application (without a thorough profiling method).
+* tpgGraphDotImporter now has a line MAX_READ_SIZE limit of 4096 (instead of 1024), allowing to read greater tpg dot files.
 
 ### Bug fix
 * Adapt code for building GEGELATI with clang standard library: libc++. (see Issue #49 for mode details)
