@@ -8,9 +8,12 @@ namespace Data {
     /**
      * \brief DataHandler for 2D arrays of primitive types.
      *
-     * This specialization of the PrimitiveTypeArray template class additionally
-     * provides the possibility to get data with the type:
-     * - T[n][m]: with $n*m <=$ the size of the underlying PrimitiveTypeArray.
+     * This specialization of the PrimitiveTypeArray template class provides the
+     * possibility to get data with the type:
+     * - T: The primitive type.
+     * - T[n][m]: with $n <= height$ and $m <= width$ of the
+     * PrimitiveTypeArray2D.
+     * - T[n]: with $n <= width$ of the PrimitiveTypeArray2D.
      *
      * It is important to note that only spatially coherent values will be
      * returned when arrays are requested. For example, when requesting a 1D
@@ -34,8 +37,8 @@ namespace Data {
         /**
          * \brief Utility function for the class.
          *
-         * This method implements the getAddressSpace method, with an additional
-         * argument that is used to return the number of array dimensions of the
+         * This method implements the getAddressSpace method, with additional
+         * arguments that are used to return the number array dimensions of the
          * requested type.
          *
          * \param[in] type The requested type_info.
@@ -86,12 +89,9 @@ namespace Data {
             result = this->nbElements;
         }
 
-        // If the requested type is not provided by the underlying 1D array
-        // Check if it is a 2D array
+        // Check if it is a 1D or 2D array
+        // with a size (h and w) inferior to the container dimensions.
         if (result == 0) {
-
-            // If the type is a 2D array of the primitive type
-            // with a size (h*w) inferior to the container dimensions.
             std::string typeName = DEMANGLE_TYPEID_NAME(type.name());
             std::string regex{DEMANGLE_TYPEID_NAME(typeid(T).name())};
             regex.append("\\s*(const\\s*)?\\[([0-9]+)\\](\\[([0-9]+)\\])?");
@@ -102,9 +102,6 @@ namespace Data {
                 int typeW = 0;
                 if (cm[2].matched && !cm[4].matched) {
                     // 1D array
-                    // Only spatially coherent data can be provided.
-                    // Data spanning over several lines can not be
-                    // provided
                     typeH = 1;
                     typeW = std::atoi(cm[2].str().c_str());
                 }
@@ -115,6 +112,9 @@ namespace Data {
                 }
 
                 // Make sure dimensions are valid for this array
+                // Only spatially coherent data can be provided.
+                // Data spanning over several lines can not be
+                // provided
                 if (typeH <= this->height && typeW <= this->width) {
                     result = (this->height - typeH + 1) *
                              ((this->width - typeW + 1));
@@ -202,14 +202,13 @@ namespace Data {
         // Because 2D arrays are array with the second dimension set to 1,
         // all the following code is generic
 
-        size_t dim1 = 0;
-        size_t dim2 = 0;
-        size_t addressableSpace = this->getAddressSpace(type, &dim1, &dim2);
+        size_t arrayHeight = 0;
+        size_t arrayWidth = 0;
+        size_t addressableSpace =
+            this->getAddressSpace(type, &arrayHeight, &arrayWidth);
 
         // No need to have the if. Types was checked before trying to produce
         // a return value
-        size_t arrayHeight = dim1;
-        size_t arrayWidth = dim2;
         auto array = new T[arrayHeight * arrayWidth];
 
         // Copy its content
