@@ -29,13 +29,7 @@ namespace Data {
     template <typename T>
     class PrimitiveTypeArray2D : public PrimitiveTypeArray<T>
     {
-      protected:
-        /// Number of columns of the 2D array.
-        size_t width;
-
-        /// Number of lines of the 2D array.
-        size_t height;
-
+      private:
         /**
          * \brief Caching mechanism for storing addressSpace for different
          * types.
@@ -53,6 +47,13 @@ namespace Data {
          */
         mutable std::map<std::type_index, std::tuple<size_t, size_t, size_t>>
             cachedAddressSpace;
+
+      protected:
+        /// Number of columns of the 2D array.
+        size_t width;
+
+        /// Number of lines of the 2D array.
+        size_t height;
 
         /**
          * \brief Utility function for the class.

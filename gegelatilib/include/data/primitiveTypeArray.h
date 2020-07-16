@@ -73,17 +73,7 @@ namespace Data {
                       "Template class PrimitiveTypeArray<T> can only be used "
                       "for primitive types.");
 
-      protected:
-        /**
-         * \brief Number of elements contained in the array.
-         *
-         * Although this may seem redundant with the data.size() method, this
-         * attribute is here to make it possible to check whether the size of
-         * the data vector was modified throughout the lifetime of the
-         * PrimitiveTypeArray. (Which should not be possible.)
-         */
-        const size_t nbElements;
-
+      private:
         /**
          * \brief Caching mechanism for storing addressSpace for different
          * types.
@@ -97,6 +87,17 @@ namespace Data {
          * This map is updated and used by the getAddressSpace method.
          */
         mutable std::map<std::type_index, size_t> cachedAddressSpace;
+
+      protected:
+        /**
+         * \brief Number of elements contained in the array.
+         *
+         * Although this may seem redundant with the data.size() method, this
+         * attribute is here to make it possible to check whether the size of
+         * the data vector was modified throughout the lifetime of the
+         * PrimitiveTypeArray. (Which should not be possible.)
+         */
+        const size_t nbElements;
 
         /**
          * \brief Array storing the data of the PrimitiveTypeArray.
