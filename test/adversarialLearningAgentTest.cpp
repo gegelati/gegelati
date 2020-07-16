@@ -54,6 +54,7 @@
 #include "learn/learningParameters.h"
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameAdversarial.h"
+#include "learn/fakeClassificationLearningEnvironment.h"
 
 class adversarialLearningAgentTest : public ::testing::Test
 {
@@ -242,6 +243,11 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
     ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
+
+    auto le2 = FakeClassificationLearningEnvironment();
+    Learn::AdversarialLearningAgent laNotCopyabe(le2, set, params);
+
+    ASSERT_THROW(laNotCopyabe.evaluateAllRoots(0,Learn::LearningMode::TRAINING),std::runtime_error);
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)
