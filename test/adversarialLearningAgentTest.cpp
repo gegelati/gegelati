@@ -50,11 +50,11 @@
 #include "learn/adversarialLearningAgent.h"
 #include "learn/adversarialLearningAgentWithCustomMakeJobs.h"
 #include "learn/fakeAdversarialLearningEnvironment.h"
+#include "learn/fakeClassificationLearningEnvironment.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameAdversarial.h"
-#include "learn/fakeClassificationLearningEnvironment.h"
 
 class adversarialLearningAgentTest : public ::testing::Test
 {
@@ -247,7 +247,9 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
     auto le2 = FakeClassificationLearningEnvironment();
     Learn::AdversarialLearningAgent laNotCopyabe(le2, set, params);
 
-    ASSERT_THROW(laNotCopyabe.evaluateAllRoots(0,Learn::LearningMode::TRAINING),std::runtime_error);
+    ASSERT_THROW(
+        laNotCopyabe.evaluateAllRoots(0, Learn::LearningMode::TRAINING),
+        std::runtime_error);
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)

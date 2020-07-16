@@ -183,7 +183,7 @@ TEST_F(LearningAgentTest, MakeJob)
     Learn::LearningAgent la2(le, set, params);
     auto job2 = la2.makeJob(0);
     ASSERT_EQ(nullptr, job2)
-                                << "Create a job when no root should return nullptr";
+        << "Create a job when no root should return nullptr";
 }
 
 TEST_F(LearningAgentTest, MakeJobs)
@@ -342,7 +342,7 @@ TEST_F(LearningAgentTest, forgetPreviousResults)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.mutation.tpg.maxInitOutgoingEdges = 2;
     params.ratioDeletedRoots = 0.50;
-    params.mutation.tpg.nbRoots =10;
+    params.mutation.tpg.nbRoots = 10;
     params.nbRegisters = 4;
 
     Learn::LearningAgent la(le, set, params);

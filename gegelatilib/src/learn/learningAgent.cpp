@@ -373,7 +373,6 @@ void Learn::LearningAgent::keepBestPolicy()
     }
 }
 
-
 std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
     int num, TPG::TPGGraph* tpgGraph)
 {
@@ -388,7 +387,8 @@ std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
 }
 
 std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
-    Learn::LearningMode mode, TPG::TPGGraph* tpgGraph) {
+    Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
+{
     // sets the tpg to the Learning Agent's one if no one was specified
     tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
 
@@ -399,11 +399,12 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
         // learning agent in order to stay determinist
         if (mode == TRAINING) {
             archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        } else {
+        }
+        else {
             archiveSeed = 0;
         }
         auto job = std::make_shared<Learn::Job>(
-                Learn::Job(i, archiveSeed, {tpgGraph->getRootVertices()[i]}));
+            Learn::Job(i, archiveSeed, {tpgGraph->getRootVertices()[i]}));
         jobs.push(job);
     }
     return jobs;
