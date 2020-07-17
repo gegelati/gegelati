@@ -36,8 +36,8 @@
 #ifndef ADVERSARIAL_JOB_H
 #define ADVERSARIAL_JOB_H
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 #include "learn/job.h"
 
@@ -52,14 +52,14 @@ namespace Learn {
      */
     class AdversarialJob : public Job
     {
-    protected:
+      protected:
         /**
          * The roots contained in the job. e.g. 2 roots that
          * will compete together in a 1vs1 game.
          */
         std::vector<const TPG::TPGVertex*> roots;
 
-    public:
+      public:
         /// Deleted default constructor.
         AdversarialJob() = delete;
 
@@ -73,8 +73,8 @@ namespace Learn {
          * @param[in] idx The index of this job.
          */
         AdversarialJob(std::initializer_list<const TPG::TPGVertex*> roots,
-            uint64_t archiveSeed=0, uint64_t idx=0)
-                : roots(roots), Job(nullptr, archiveSeed,idx)
+                       uint64_t archiveSeed = 0, uint64_t idx = 0)
+            : roots(roots), Job(nullptr, archiveSeed, idx)
         {
         }
 
@@ -109,10 +109,10 @@ namespace Learn {
         }
 
         /**
-        * \brief Getter of the first root.
-        *
-        * @return The first root embedded by the job.
-        */
+         * \brief Getter of the first root.
+         *
+         * @return The first root embedded by the job.
+         */
         const TPG::TPGVertex* getRoot() const override
         {
             return roots[0];

@@ -73,23 +73,27 @@ class AdversarialLearningAgentWithCustomMakeJobs
         uint64_t archiveSeed;
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
 
-        auto job = std::make_shared<Learn::AdversarialJob>(
-            Learn::AdversarialJob({roots[0], roots[1], roots[2]}, archiveSeed, 0));
+        auto job =
+            std::make_shared<Learn::AdversarialJob>(Learn::AdversarialJob(
+                {roots[0], roots[1], roots[2]}, archiveSeed, 0));
         jobs.push(job);
 
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        auto job2 = std::make_shared<Learn::AdversarialJob>(
-            Learn::AdversarialJob({roots[0], roots[2], roots[1]}, archiveSeed, 1));
+        auto job2 =
+            std::make_shared<Learn::AdversarialJob>(Learn::AdversarialJob(
+                {roots[0], roots[2], roots[1]}, archiveSeed, 1));
         jobs.push(job2);
 
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        auto job3 = std::make_shared<Learn::AdversarialJob>(
-            Learn::AdversarialJob({roots[0], roots[1], roots[2]}, archiveSeed, 2));
+        auto job3 =
+            std::make_shared<Learn::AdversarialJob>(Learn::AdversarialJob(
+                {roots[0], roots[1], roots[2]}, archiveSeed, 2));
         jobs.push(job3);
 
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        auto job4 = std::make_shared<Learn::AdversarialJob>(
-            Learn::AdversarialJob({roots[1], roots[0], roots[2]}, archiveSeed, 3));
+        auto job4 =
+            std::make_shared<Learn::AdversarialJob>(Learn::AdversarialJob(
+                {roots[1], roots[0], roots[2]}, archiveSeed, 3));
         jobs.push(job4);
 
         return jobs;

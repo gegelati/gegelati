@@ -36,7 +36,6 @@
 #ifndef STICK_GAME_ADVERSARIAL_H
 #define STICK_GAME_ADVERSARIAL_H
 
-
 #include "data/primitiveTypeArray.h"
 #include "mutator/rng.h"
 

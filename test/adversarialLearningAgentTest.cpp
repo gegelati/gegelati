@@ -120,7 +120,8 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
         nbEvalPerRoot.emplace(root, 0);
     }
     while (!jobs.empty()) {
-        auto job = std::dynamic_pointer_cast<Learn::AdversarialJob>(jobs.front());
+        auto job =
+            std::dynamic_pointer_cast<Learn::AdversarialJob>(jobs.front());
         ASSERT_EQ(5, job->getSize())
             << "job doesn'nt contain the right roots number.";
         // updates number of iterations scheduled for the roots of the job
@@ -200,7 +201,6 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.mutation.tpg.maxInitOutgoingEdges = 3;
     params.mutation.tpg.maxOutgoingEdges = 10;
     params.nbIterationsPerJob = 1;
-
 
     Learn::AdversarialLearningAgent la(le, set, params, 2);
 

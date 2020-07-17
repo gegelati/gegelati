@@ -85,11 +85,11 @@ Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator/=(
 
 double Learn::AdversarialEvaluationResult::getResult() const
 {
-    double mean=0;
-    for(auto score:scores){
-        mean+=score;
+    double mean = 0;
+    for (auto score : scores) {
+        mean += score;
     }
-    return mean/getSize();
+    return mean / getSize();
 }
 
 size_t Learn::AdversarialEvaluationResult::getSize() const

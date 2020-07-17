@@ -35,10 +35,10 @@
 
 #include <gtest/gtest.h>
 
+#include "learn/adversarialJob.h"
+#include "learn/job.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
-#include "learn/job.h"
-#include "learn/adversarialJob.h"
 
 TEST(JobTest, Constructor)
 {
@@ -57,9 +57,8 @@ TEST(JobTest, Constructor)
         << "Parameter archiveSeed did not have expected value after calling "
            "job constructor.";
 
-    ASSERT_NO_THROW(job2 = new Learn::Job(tpg,3,2))
+    ASSERT_NO_THROW(job2 = new Learn::Job(tpg, 3, 2))
         << "Construction of the Job failed.";
-
 
     ASSERT_EQ(2, job2->getIdx()) << "Parameter idx did not have expected value "
                                     "after calling job constructor.";
@@ -67,11 +66,10 @@ TEST(JobTest, Constructor)
         << "Parameter archiveSeed did not have expected value after calling "
            "job constructor.";
 
-    ASSERT_NO_THROW(job3 = new Learn::AdversarialJob({tpg},3,2))
-                                << "Construction of the AdversarialJob failed.";
-    ASSERT_EQ(1, job3->getSize())
-    << "Size did not have expected value after calling adversarialJob constructor.";
-
+    ASSERT_NO_THROW(job3 = new Learn::AdversarialJob({tpg}, 3, 2))
+        << "Construction of the AdversarialJob failed.";
+    ASSERT_EQ(1, job3->getSize()) << "Size did not have expected value after "
+                                     "calling adversarialJob constructor.";
 
     ASSERT_NO_THROW(delete job) << "Destruction of the Job failed.";
     ASSERT_NO_THROW(delete job2) << "Destruction of the Job failed.";
@@ -120,9 +118,10 @@ TEST(JobTest, getRootsAndRoot)
 
     ASSERT_EQ(tpg, roots[0]) << "The first root is not the good one";
     ASSERT_EQ(tpg2, roots[1]) << "The second root is not the good one";
-    ASSERT_EQ(tpg, (*job).getRoot()) << "The root from getRoot is not the good one";
-    ASSERT_EQ(tpg, (*job2).getRoot()) << "The root from getRoot is not the good one";
-
+    ASSERT_EQ(tpg, (*job).getRoot())
+        << "The root from getRoot is not the good one";
+    ASSERT_EQ(tpg, (*job2).getRoot())
+        << "The root from getRoot is not the good one";
 
     delete tpg2;
 }

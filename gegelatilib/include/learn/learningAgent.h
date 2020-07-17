@@ -348,7 +348,7 @@ namespace Learn {
          * \return A job representing the root.
          */
         virtual std::shared_ptr<Learn::Job> makeJob(
-            int num, Learn::LearningMode mode, int idx=0,
+            int num, Learn::LearningMode mode, int idx = 0,
             TPG::TPGGraph* tpgGraph = nullptr);
 
         /**

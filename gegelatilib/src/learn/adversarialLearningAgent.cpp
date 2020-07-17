@@ -71,8 +71,9 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
             std::dynamic_pointer_cast<AdversarialEvaluationResult>(
                 resultPerJob.second.first);
         int rootIdx = 0;
-        for (auto root : std::dynamic_pointer_cast<Learn::AdversarialJob>
-                (resultPerJob.second.second)->getRoots()) {
+        for (auto root : std::dynamic_pointer_cast<Learn::AdversarialJob>(
+                             resultPerJob.second.second)
+                             ->getRoots()) {
             auto iterator = resultsPerRootMap.find(root);
             if (iterator == resultsPerRootMap.end()) {
                 // first time we encounter the results of this root
@@ -225,7 +226,8 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
             // only re-add the root in the map if it has not enough been
             // evaluated
             if (newNbEvalsThisRoot < params.nbIterationsPerPolicyEvaluation) {
-                nbEvals.emplace(nbEvalsThisRoot + params.nbIterationsPerJob, root);
+                nbEvals.emplace(nbEvalsThisRoot + params.nbIterationsPerJob,
+                                root);
             }
         }
 

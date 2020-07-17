@@ -39,11 +39,10 @@
 #define ADVERSARIAL_LEARNING_AGENT_H
 
 #include "learn/adversarialEvaluationResult.h"
+#include "learn/adversarialJob.h"
 #include "learn/adversarialLearningAgent.h"
 #include "learn/adversarialLearningEnvironment.h"
 #include "learn/parallelLearningAgent.h"
-#include "learn/adversarialJob.h"
-
 
 namespace Learn {
     /**

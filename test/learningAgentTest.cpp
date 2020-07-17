@@ -174,11 +174,9 @@ TEST_F(LearningAgentTest, MakeJob)
 {
     Learn::LearningAgent la(le, set, params);
     la.init();
-    auto job = *la.makeJob(0,Learn::TRAINING);
-    ASSERT_NO_THROW(job.getArchiveSeed())
-    <<"job should have an archive seed";
-    ASSERT_NO_THROW(job.getIdx())
-                                <<"job should have an idx";
+    auto job = *la.makeJob(0, Learn::TRAINING);
+    ASSERT_NO_THROW(job.getArchiveSeed()) << "job should have an archive seed";
+    ASSERT_NO_THROW(job.getIdx()) << "job should have an idx";
     ASSERT_EQ(la.getTPGGraph().getRootVertices().at(0), job.getRoot())
         << "Encapsulate the root in a job shouldn't change it";
 
@@ -196,7 +194,8 @@ TEST_F(LearningAgentTest, MakeJobs)
     ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), jobs.size())
         << "There should be as many jobs as roots";
     for (int i = 0; i < la.getTPGGraph().getNbRootVertices(); i++) {
-        ASSERT_EQ(la.getTPGGraph().getRootVertices().at(i), (*jobs.front()).getRoot())
+        ASSERT_EQ(la.getTPGGraph().getRootVertices().at(i),
+                  (*jobs.front()).getRoot())
             << "Encapsulate the root in a job shouldn't change it";
         jobs.pop();
     }
@@ -615,8 +614,10 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 
     std::shared_ptr<Learn::EvaluationResult> result;
     Learn::ParallelLearningAgent pla(le, set, params);
-    ASSERT_NO_THROW(result = pla.evaluateJob(tee, *pla.makeJob(0, Learn::LearningMode::TRAINING, 0,&tpg), 0,
-                                             Learn::LearningMode::TRAINING, le))
+    ASSERT_NO_THROW(result = pla.evaluateJob(
+                        tee,
+                        *pla.makeJob(0, Learn::LearningMode::TRAINING, 0, &tpg),
+                        0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getResult(), 1.0)
         << "Average score should not exceed the score of a perfect player.";

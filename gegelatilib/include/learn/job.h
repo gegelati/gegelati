@@ -79,10 +79,9 @@ namespace Learn {
          * job.
          * @param[in] idx The index of this job.
          */
-        Job(const TPG::TPGVertex* root,
-            uint64_t archiveSeed=0, uint64_t idx=0)
-            : root(root), archiveSeed(archiveSeed),
-              idx(idx)
+        Job(const TPG::TPGVertex* root, uint64_t archiveSeed = 0,
+            uint64_t idx = 0)
+            : root(root), archiveSeed(archiveSeed), idx(idx)
         {
         }
 
