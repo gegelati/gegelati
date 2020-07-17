@@ -174,14 +174,16 @@ TEST_F(LearningAgentTest, MakeJob)
 {
     Learn::LearningAgent la(le, set, params);
     la.init();
-    auto job = *la.makeJob(0);
-    ASSERT_EQ(1, job.getSize())
-        << "job made in LearningAgent makeJob should contain 1 root only";
-    ASSERT_EQ(la.getTPGGraph().getRootVertices().at(0), job[0])
+    auto job = *la.makeJob(0,Learn::TRAINING);
+    ASSERT_NO_THROW(job.getArchiveSeed())
+    <<"job should have an archive seed";
+    ASSERT_NO_THROW(job.getIdx())
+                                <<"job should have an idx";
+    ASSERT_EQ(la.getTPGGraph().getRootVertices().at(0), job.getRoot())
         << "Encapsulate the root in a job shouldn't change it";
 
     Learn::LearningAgent la2(le, set, params);
-    auto job2 = la2.makeJob(0);
+    auto job2 = la2.makeJob(0, Learn::LearningMode::TRAINING);
     ASSERT_EQ(nullptr, job2)
         << "Create a job when no root should return nullptr";
 }
@@ -194,9 +196,7 @@ TEST_F(LearningAgentTest, MakeJobs)
     ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), jobs.size())
         << "There should be as many jobs as roots";
     for (int i = 0; i < la.getTPGGraph().getNbRootVertices(); i++) {
-        ASSERT_EQ(1, (*jobs.front()).getSize())
-            << "job made in LearningAgent makeJobs should contain 1 root only";
-        ASSERT_EQ(la.getTPGGraph().getRootVertices().at(i), (*jobs.front())[0])
+        ASSERT_EQ(la.getTPGGraph().getRootVertices().at(i), (*jobs.front()).getRoot())
             << "Encapsulate the root in a job shouldn't change it";
         jobs.pop();
     }
@@ -217,7 +217,7 @@ TEST_F(LearningAgentTest, EvalRoot)
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = *la.makeJob(0);
+    auto job = *la.makeJob(0, Learn::LearningMode::TRAINING);
     ASSERT_NO_THROW(
         result = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
@@ -615,7 +615,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 
     std::shared_ptr<Learn::EvaluationResult> result;
     Learn::ParallelLearningAgent pla(le, set, params);
-    ASSERT_NO_THROW(result = pla.evaluateJob(tee, *pla.makeJob(0, &tpg), 0,
+    ASSERT_NO_THROW(result = pla.evaluateJob(tee, *pla.makeJob(0, Learn::LearningMode::TRAINING, 0,&tpg), 0,
                                              Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getResult(), 1.0)

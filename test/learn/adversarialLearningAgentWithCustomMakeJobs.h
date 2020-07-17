@@ -35,11 +35,10 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef ADVERSARIAL_LEARNING_AGENT8WITH_CUSTOM_MAKE_JOBS_H
-#define ADVERSARIAL_LEARNING_AGENT8WITH_CUSTOM_MAKE_JOBS_H
+#ifndef ADVERSARIAL_LEARNING_AGENT_WITH_CUSTOM_MAKE_JOBS_H
+#define ADVERSARIAL_LEARNING_AGENT_WITH_CUSTOM_MAKE_JOBS_H
 
 #include "learn/adversarialLearningAgent.h"
-#include <gegelati.h>
 
 // Class only used for testing purpose : we create a custom jobs organization
 class AdversarialLearningAgentWithCustomMakeJobs
@@ -74,23 +73,23 @@ class AdversarialLearningAgentWithCustomMakeJobs
         uint64_t archiveSeed;
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
 
-        auto job = std::make_shared<Learn::Job>(
-            Learn::Job(0, archiveSeed, {roots[0], roots[1], roots[2]}));
+        auto job = std::make_shared<Learn::AdversarialJob>(
+            Learn::AdversarialJob({roots[0], roots[1], roots[2]}, archiveSeed, 0));
         jobs.push(job);
 
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        auto job2 = std::make_shared<Learn::Job>(
-            Learn::Job(1, archiveSeed, {roots[0], roots[2], roots[1]}));
+        auto job2 = std::make_shared<Learn::AdversarialJob>(
+            Learn::AdversarialJob({roots[0], roots[2], roots[1]}, archiveSeed, 1));
         jobs.push(job2);
 
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        auto job3 = std::make_shared<Learn::Job>(
-            Learn::Job(2, archiveSeed, {roots[0], roots[1], roots[2]}));
+        auto job3 = std::make_shared<Learn::AdversarialJob>(
+            Learn::AdversarialJob({roots[0], roots[1], roots[2]}, archiveSeed, 2));
         jobs.push(job3);
 
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-        auto job4 = std::make_shared<Learn::Job>(
-            Learn::Job(3, archiveSeed, {roots[1], roots[0], roots[2]}));
+        auto job4 = std::make_shared<Learn::AdversarialJob>(
+            Learn::AdversarialJob({roots[1], roots[0], roots[2]}, archiveSeed, 3));
         jobs.push(job4);
 
         return jobs;

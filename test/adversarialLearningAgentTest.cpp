@@ -39,12 +39,9 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "log/LABasicLogger.h"
-
 #include "tpg/tpgGraph.h"
 
 #include "instructions/addPrimitiveType.h"
-#include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 
 #include "learn/adversarialLearningAgent.h"
@@ -105,10 +102,9 @@ TEST_F(adversarialLearningAgentTest, Constructor)
 TEST_F(adversarialLearningAgentTest, MakeJobs)
 {
     params.nbIterationsPerPolicyEvaluation = 20;
-    size_t iterPerJob = 2;
+    params.nbIterationsPerJob = 2;
     size_t agentsPerEval = 5;
-    Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval,
-                                       iterPerJob);
+    Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
     // 5 agents per job, 2 eval per job
     // => It shall do 10 jobs per agent, and something close to nbRoots*2
     // (nbRoots*20/(5*2)) jobs at total the complete formula of the nb of jobs
@@ -124,12 +120,13 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
         nbEvalPerRoot.emplace(root, 0);
     }
     while (!jobs.empty()) {
-        ASSERT_EQ(5, (*jobs.front()).getSize())
+        auto job = std::dynamic_pointer_cast<Learn::AdversarialJob>(jobs.front());
+        ASSERT_EQ(5, job->getSize())
             << "job doesn'nt contain the right roots number.";
         // updates number of iterations scheduled for the roots of the job
-        for (auto root : (*jobs.front()).getRoots()) {
+        for (auto root : job->getRoots()) {
             auto it = nbEvalPerRoot.find(root);
-            it->second = it->second + iterPerJob;
+            it->second = it->second + params.nbIterationsPerJob;
         }
         jobs.pop();
     }
@@ -155,7 +152,7 @@ TEST_F(adversarialLearningAgentTest, EvalJob)
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = *la.makeJob(0);
+    auto job = Learn::AdversarialJob({la.getTPGGraph().getRootVertices()[0]});
     ASSERT_NO_THROW(
         result = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root in no parallel and no adversarial mode "
@@ -202,8 +199,10 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.mutation.tpg.nbActions = 3;
     params.mutation.tpg.maxInitOutgoingEdges = 3;
     params.mutation.tpg.maxOutgoingEdges = 10;
+    params.nbIterationsPerJob = 1;
 
-    Learn::AdversarialLearningAgent la(le, set, params, 2, 1);
+
+    Learn::AdversarialLearningAgent la(le, set, params, 2);
 
     la.init();
     bool alt = false;

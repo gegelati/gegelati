@@ -35,12 +35,15 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef ADVERSARIALLEARNINGAGENT_H
-#define ADVERSARIALLEARNINGAGENT_H
+#ifndef ADVERSARIAL_LEARNING_AGENT_H
+#define ADVERSARIAL_LEARNING_AGENT_H
 
 #include "learn/adversarialEvaluationResult.h"
 #include "learn/adversarialLearningAgent.h"
+#include "learn/adversarialLearningEnvironment.h"
 #include "learn/parallelLearningAgent.h"
+#include "learn/adversarialJob.h"
+
 
 namespace Learn {
     /**
@@ -58,15 +61,6 @@ namespace Learn {
         size_t agentsPerEvaluation;
 
         /**
-         * \brief Number of game iterations for each job evaluation.
-         *
-         * Each of the roots will be evaluated in several jobs, but in order to
-         * have a representative score for each job, some environments will need
-         * to do several iterations to make an average score.
-         */
-        size_t iterationsPerJob;
-
-        /**
          * \brief Subfunction of evaluateAllRootsInParallel which handles the
          * gathering of results and the merge of the archives, adapted to
          * several roots in jobs for adversarial.
@@ -79,7 +73,7 @@ namespace Learn {
          * results and itself.
          * @param[out] results map linking single results to their root vertex.
          * @param[in,out] archiveMap map linking the job number with its
-         * gathered archive. These archive swill later be merged with the ones
+         * gathered archive. These archives will later be merged with the ones
          * of the other jobs.
          */
         void evaluateAllRootsInParallelCompileResults(
@@ -102,15 +96,13 @@ namespace Learn {
          * \param[in] p The LearningParameters for the LearningAgent.
          * \param[in] agentsPerEval The number of agents each simulation will
          * need.
-         * \param[in] iterPerJob The numver of iterations per job evaluation.
          */
         AdversarialLearningAgent(LearningEnvironment& le,
                                  const Instructions::Set& iSet,
                                  const LearningParameters& p,
-                                 size_t agentsPerEval = 2,
-                                 size_t iterPerJob = 10)
+                                 size_t agentsPerEval = 2)
             : ParallelLearningAgent(le, iSet, p),
-              agentsPerEvaluation(agentsPerEval), iterationsPerJob(iterPerJob)
+              agentsPerEvaluation(agentsPerEval)
         {
         }
 
@@ -121,7 +113,7 @@ namespace Learn {
          *
          * This method calls the evaluateJob method for every root TPGVertex
          * of the TPGGraph. The method returns a sorted map associating each
-         * root vertex to its average score, in ascending order or score.
+         * root vertex to its average score, in ascending order of score.
          * Sequential or parallel, both situations should output the same
          * result.
          *
@@ -171,16 +163,17 @@ namespace Learn {
             LearningEnvironment& le) const override;
 
         /**
-         * \brief Puts all roots into jobs to be able to use them in simulation
-         * later. The difference with the base learning agent makeJobs is that
-         * here we make jobs containing several random roots to play together.
+         * \brief Puts all roots into AdversarialJob to be able to use them in
+         * simulation later. The difference with the base learning agent
+         * makeJobs is that here we make jobs containing several random roots to
+         * play together.
          *
-         * \param[in] mode the mode of the training, determining for exemple
+         * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
          * \param[in] tpgGraph The TPG graph from which we will take the
          * roots.
          *
-         * @return A vector containing pointers of the newly created jobs.
+         * @return A queue containing pointers of the created AdversarialJobs.
          */
         std::queue<std::shared_ptr<Learn::Job>> makeJobs(
             Learn::LearningMode mode,

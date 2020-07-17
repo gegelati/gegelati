@@ -33,53 +33,59 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <gegelati.h>
 #include <gtest/gtest.h>
 
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
+#include "learn/job.h"
+#include "learn/adversarialJob.h"
 
 TEST(JobTest, Constructor)
 {
     Learn::Job* job = nullptr;
     Learn::Job* job2 = nullptr;
+    Learn::AdversarialJob* job3 = nullptr;
 
     TPG::TPGVertex* tpg = nullptr;
 
-    ASSERT_NO_THROW(job = new Learn::Job({tpg}))
+    ASSERT_NO_THROW(job = new Learn::Job(tpg))
         << "Construction of the Job failed.";
 
-    ASSERT_EQ(1, job->getSize()) << "Parameter size did not have expected "
-                                    "value after calling job constructor.";
     ASSERT_EQ(0, job->getIdx()) << "Parameter idx did not have expected value "
                                    "after calling job constructor.";
     ASSERT_EQ(0, job->getArchiveSeed())
         << "Parameter archiveSeed did not have expected value after calling "
            "job constructor.";
 
-    ASSERT_NO_THROW(job2 = new Learn::Job(2, 3, {tpg}))
+    ASSERT_NO_THROW(job2 = new Learn::Job(tpg,3,2))
         << "Construction of the Job failed.";
 
-    ASSERT_EQ(1, job2->getSize()) << "Parameter size did not have expected "
-                                     "value after calling job constructor.";
+
     ASSERT_EQ(2, job2->getIdx()) << "Parameter idx did not have expected value "
                                     "after calling job constructor.";
     ASSERT_EQ(3, job2->getArchiveSeed())
         << "Parameter archiveSeed did not have expected value after calling "
            "job constructor.";
 
+    ASSERT_NO_THROW(job3 = new Learn::AdversarialJob({tpg},3,2))
+                                << "Construction of the AdversarialJob failed.";
+    ASSERT_EQ(1, job3->getSize())
+    << "Size did not have expected value after calling adversarialJob constructor.";
+
+
     ASSERT_NO_THROW(delete job) << "Destruction of the Job failed.";
     ASSERT_NO_THROW(delete job2) << "Destruction of the Job failed.";
+    ASSERT_NO_THROW(delete job3) << "Destruction of the AdversarialJob failed.";
 }
 
 TEST(JobTest, addRoot)
 {
-    Learn::Job* job = nullptr;
+    Learn::AdversarialJob* job = nullptr;
 
     TPG::TPGVertex* tpg = nullptr;
     TPG::TPGVertex* tpg2 = nullptr;
 
-    job = new Learn::Job({tpg});
+    job = new Learn::AdversarialJob({tpg});
 
     ASSERT_EQ(1, job->getSize()) << "The job doesn't have the right size.";
 
@@ -89,15 +95,17 @@ TEST(JobTest, addRoot)
         << "The job doesn't have the right size after a root add.";
 }
 
-TEST(JobTest, getRoots)
+TEST(JobTest, getRootsAndRoot)
 {
-    Learn::Job* job = nullptr;
+    Learn::AdversarialJob* job = nullptr;
+    Learn::Job* job2 = nullptr;
 
     TPG::TPGVertex* tpg = nullptr;
     // we define a non-null tpg to check the content of the job later
     TPG::TPGVertex* tpg2 = new TPG::TPGAction(0);
 
-    job = new Learn::Job({tpg});
+    job = new Learn::AdversarialJob({tpg});
+    job2 = new Learn::Job(tpg);
 
     auto roots = job->getRoots();
     ASSERT_EQ(job->getSize(), roots.size())
@@ -112,19 +120,22 @@ TEST(JobTest, getRoots)
 
     ASSERT_EQ(tpg, roots[0]) << "The first root is not the good one";
     ASSERT_EQ(tpg2, roots[1]) << "The second root is not the good one";
+    ASSERT_EQ(tpg, (*job).getRoot()) << "The root from getRoot is not the good one";
+    ASSERT_EQ(tpg, (*job2).getRoot()) << "The root from getRoot is not the good one";
+
 
     delete tpg2;
 }
 
 TEST(JobTest, operatorGet)
 {
-    Learn::Job* job = nullptr;
+    Learn::AdversarialJob* job = nullptr;
 
     TPG::TPGVertex* tpg = nullptr;
     // we define a non-null tpg to check the content of the job later
     TPG::TPGVertex* tpg2 = new TPG::TPGAction(0);
 
-    job = new Learn::Job({tpg, tpg2});
+    job = new Learn::AdversarialJob({tpg, tpg2});
 
     ASSERT_EQ(tpg, (*job)[0]) << "The first root is not the good one";
     ASSERT_EQ(tpg2, (*job)[1]) << "The second root is not the good one";

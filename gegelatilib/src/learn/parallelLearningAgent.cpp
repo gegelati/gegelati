@@ -64,18 +64,13 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
         // Execute for all root
         for (int i = 0; i < this->tpg.getNbRootVertices(); i++) {
-            // Set the seed of the archive for this root.
+            auto job = makeJob(i,mode);
 
-            if (mode == TRAINING) {
-                this->archive.setRandomSeed(
-                    this->rng.getUnsignedInt64(0, UINT64_MAX));
-            }
-
-            auto job = makeJob(i);
+            this->archive.setRandomSeed(job->getArchiveSeed());
 
             std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
                 tee, *job, generationNumber, mode, this->learningEnvironment);
-            results.emplace(avgScore, (*job)[0]);
+            results.emplace(avgScore, (*job).getRoot());
         }
     }
     else {
@@ -273,7 +268,7 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallelCompileResults(
     // Merge the results
     for (auto& resultPerRoot : resultsPerJobMap) {
         results.emplace(resultPerRoot.second.first,
-                        (*resultPerRoot.second.second)[0]);
+                        (*resultPerRoot.second.second).getRoot());
     }
 
     // Merge the archives

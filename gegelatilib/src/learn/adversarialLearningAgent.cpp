@@ -35,8 +35,9 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <gegelati.h>
 #include <memory>
+
+#include "learn/adversarialLearningAgent.h"
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
 Learn::AdversarialLearningAgent::evaluateAllRoots(uint64_t generationNumber,
@@ -70,7 +71,8 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
             std::dynamic_pointer_cast<AdversarialEvaluationResult>(
                 resultPerJob.second.first);
         int rootIdx = 0;
-        for (auto root : resultPerJob.second.second->getRoots()) {
+        for (auto root : std::dynamic_pointer_cast<Learn::AdversarialJob>
+                (resultPerJob.second.second)->getRoots()) {
             auto iterator = resultsPerRootMap.find(root);
             if (iterator == resultsPerRootMap.end()) {
                 // first time we encounter the results of this root
@@ -113,7 +115,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
         this->agentsPerEvaluation);
 
     // Evaluate nbIteration times
-    for (auto i = 0; i < this->iterationsPerJob; i++) {
+    for (auto i = 0; i < this->params.nbIterationsPerJob; i++) {
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
         uint64_t hash = hasher(generationNumber) ^ hasher(i);
@@ -123,7 +125,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
 
         uint64_t nbActions = 0;
 
-        auto roots = job.getRoots();
+        auto roots = ((AdversarialJob&)job).getRoots();
+
         auto rootsIterator = roots.begin();
 
         while (!ale.isTerminal() &&
@@ -180,15 +183,15 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
         size_t nbEvalsThisRoot = nbEvals.begin()->first;
         root = nbEvals.begin()->second;
 
-        auto job = std::make_shared<Learn::Job>(
-            Learn::Job(index++, archiveSeed, {root}));
+        auto job = std::make_shared<Learn::AdversarialJob>(
+            Learn::AdversarialJob({root}, archiveSeed, index++));
 
         // erases the old pair corresponding to this root
         nbEvals.erase(nbEvals.begin());
-        size_t newNbEvalsThisRoot = nbEvalsThisRoot + iterationsPerJob;
+        size_t newNbEvalsThisRoot = nbEvalsThisRoot + params.nbIterationsPerJob;
         // only re-add the root in the map if it has not enough been evaluated
         if (newNbEvalsThisRoot < params.nbIterationsPerPolicyEvaluation) {
-            nbEvals.emplace(nbEvalsThisRoot + iterationsPerJob, root);
+            nbEvals.emplace(nbEvalsThisRoot + params.nbIterationsPerJob, root);
         }
 
         // adding other roots in this job
@@ -218,11 +221,11 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
 
             // erases the old pair corresponding to this root
             nbEvals.erase(iterator);
-            newNbEvalsThisRoot = nbEvalsThisRoot + iterationsPerJob;
+            newNbEvalsThisRoot = nbEvalsThisRoot + params.nbIterationsPerJob;
             // only re-add the root in the map if it has not enough been
             // evaluated
             if (newNbEvalsThisRoot < params.nbIterationsPerPolicyEvaluation) {
-                nbEvals.emplace(nbEvalsThisRoot + iterationsPerJob, root);
+                nbEvals.emplace(nbEvalsThisRoot + params.nbIterationsPerJob, root);
             }
         }
 

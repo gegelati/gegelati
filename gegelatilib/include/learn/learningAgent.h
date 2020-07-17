@@ -178,10 +178,8 @@ namespace Learn {
          * The method is const to enable potential parallel calls to it.
          *
          * \param[in] tee The TPGExecutionEngine to use.
-         * \param[in] job the TPGVertex group from which the policy evaluation
-         * starts. Each of the roots of the group shall be an agent of the
-         * same simulation, but as we are not in adversarial mode there is only
-         * one.
+         * \param[in] job The job containing the root and archiveSeed for
+         * the evaluation.
          * \param[in] generationNumber the integer number of the current
          * generation. \param[in] mode the LearningMode to use during the policy
          * evaluation. \param[in] le Reference to the LearningEnvironment to use
@@ -336,28 +334,33 @@ namespace Learn {
 
         /**
          * \brief Takes a given root index and creates a job containing it.
-         * Useful for exemple in adversarial mode where a job could contain a
+         * Useful for example in adversarial mode where a job could contain a
          * match of several roots.
          *
          * \param[in] num The index of the root we want to put in a job.
+         * \param[in] mode the mode of the training, determining for example
+         * if we generate values that we only need for training.
+         * \param[in] idx The index of the job, can be used to organize a map
+         * for example.
          * \param[in] tpgGraph The TPG graph from which we will take the
          * root.
          *
          * \return A job representing the root.
          */
         virtual std::shared_ptr<Learn::Job> makeJob(
-            int num, TPG::TPGGraph* tpgGraph = nullptr);
+            int num, Learn::LearningMode mode, int idx=0,
+            TPG::TPGGraph* tpgGraph = nullptr);
 
         /**
          * \brief Puts all roots into jobs to be able to use them in simulation
          * later.
          *
-         * \param[in] mode the mode of the training, determining for exemple
+         * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
          * \param[in] tpgGraph The TPG graph from which we will take the
          * roots.
          *
-         * @return A vector containing pointers of the newly created jobs.
+         * @return A queue containing pointers of the newly created jobs.
          */
         virtual std::queue<std::shared_ptr<Learn::Job>> makeJobs(
             Learn::LearningMode mode, TPG::TPGGraph* tpgGraph = nullptr);

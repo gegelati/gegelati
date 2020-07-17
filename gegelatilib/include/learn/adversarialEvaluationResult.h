@@ -33,8 +33,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef ADVERSARIALEVALUATIONRESULT_H
-#define ADVERSARIALEVALUATIONRESULT_H
+#ifndef ADVERSARIAL_EVALUATION_RESULT_H
+#define ADVERSARIAL_EVALUATION_RESULT_H
 
 #include <memory>
 #include <stdexcept>
@@ -79,8 +79,7 @@ namespace Learn {
          *
          * @param[in] size The size of scores i.e. number of evaluated agents.
          * @param[in] nbEval The number of evaluations that have been done to
-         * get these scores. Default is 1 as we can guess user only did 1
-         * iteration.
+         * get these scores. Default is 0, as we have no score, we have no eval.
          */
         AdversarialEvaluationResult(size_t size, size_t nbEval = 0)
             : EvaluationResult(0, nbEval), scores(size, 0)
@@ -107,7 +106,7 @@ namespace Learn {
         EvaluationResult& operator+=(const EvaluationResult& other) override;
 
         /**
-         * \brief Division operator for AdversariEalvaluationResult that simply
+         * \brief Division operator for AdversarialEvaluationResult that simply
          * divides all scores contained in the scores vector by divisor.
          *
          * @param[in] divisor The divisor by which we will divide the results.
@@ -115,7 +114,13 @@ namespace Learn {
          */
         virtual EvaluationResult& operator/=(double divisor);
 
-        /// Inherited from EvaluationResult and unused in the case of a vector.
+        /**
+         * \brief Returns the mean of the scores, used for example in a simple
+         * learning agent as the root will play against itself. In this
+         * situation getting the mean of the scores would be relevant.
+         *
+         * @return The mean of the scores contained in this object.
+         */
         double getResult() const override;
 
         /**

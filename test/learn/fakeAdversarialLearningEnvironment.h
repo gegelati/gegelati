@@ -37,7 +37,7 @@
 #define FAKE_ADVERSARIAL_LEARNING_ENVIRONMENT_H
 
 #include "data/primitiveTypeArray.h"
-#include <gegelati.h>
+#include "learn/adversarialLearningEnvironment.h"
 
 /**
  * \brief Classification Learning enviroment for testing purposes

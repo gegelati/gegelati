@@ -33,15 +33,10 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <gegelati.h>
 #include <gtest/gtest.h>
-#include <learn/adversarialEvaluationResult.h>
-#include <learn/evaluationResult.h>
 
-#include "learn/fakeClassificationLearningEnvironment.h"
-#include "learn/learningAgent.h"
-#include "learn/learningEnvironment.h"
-#include "learn/stickGameAdversarial.h"
+#include "learn/adversarialEvaluationResult.h"
+#include "learn/evaluationResult.h"
 
 TEST(AdversarialEvaluationResultTest, Constructor)
 {
@@ -59,12 +54,12 @@ TEST(AdversarialEvaluationResultTest, Constructor)
     ASSERT_NO_THROW(delete er)
         << "Destruction of the Adversarial Learning Result failed.";
 
-    ASSERT_NO_THROW(er = new Learn::AdversarialEvaluationResult({1, 2, 4}, 5))
+    ASSERT_NO_THROW(er = new Learn::AdversarialEvaluationResult({1, 2, 6}, 5))
         << "Construction of the Adversarial Learning Result failed.";
 
     ASSERT_EQ(3, er->getSize()) << "The adversarial evaluation result doesn't "
                                    "have the right size after construction.";
-    ASSERT_EQ(1, er->getResult()) // should simply be the first value
+    ASSERT_EQ(3, er->getResult()) // should simply be the first value
         << "The adversarial evaluation result doesn't have the right value "
            "after construction.";
     ASSERT_EQ(1, er->getScoreOf(0))
@@ -73,7 +68,7 @@ TEST(AdversarialEvaluationResultTest, Constructor)
     ASSERT_EQ(2, er->getScoreOf(1))
         << "The adversarial evaluation result doesn't have the right value "
            "after construction.";
-    ASSERT_EQ(4, er->getScoreOf(2))
+    ASSERT_EQ(6, er->getScoreOf(2))
         << "The adversarial evaluation result doesn't have the right value "
            "after construction.";
     ASSERT_EQ(5, er->getNbEvaluation())

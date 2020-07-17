@@ -33,8 +33,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef ADVERSARIALLEARNINGENVIRONMENT_H
-#define ADVERSARIALLEARNINGENVIRONMENT_H
+#ifndef ADVERSARIAL_LEARNING_ENVIRONMENT_H
+#define ADVERSARIAL_LEARNING_ENVIRONMENT_H
 
 #include "learn/adversarialEvaluationResult.h"
 #include "learn/learningEnvironment.h"

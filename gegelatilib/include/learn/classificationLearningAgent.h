@@ -144,7 +144,7 @@ namespace Learn {
     {
         // Only consider the first root of jobs as we are not in adversarial
         // mode
-        const TPG::TPGVertex* root = job[0];
+        const TPG::TPGVertex* root = job.getRoot();
 
         // Skip the root evaluation process if enough evaluations were already
         // performed. In the evaluation mode only.

@@ -33,87 +33,100 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef JOB_H
-#define JOB_H
+#ifndef ADVERSARIAL_JOB_H
+#define ADVERSARIAL_JOB_H
 
 #include <vector>
+#include <cstdint>
 
-#include "tpg/tpgVertex.h"
+#include "learn/job.h"
 
 namespace Learn {
     /**
      * \brief This class embeds roots for the simulations.
      *
-     * The goal of the Job is to contain one root, so that each job
-     * will match with one simulation/evaluation. A basic learning agent will
-     * embed one root per job to do as many simulations as there are roots.
+     * The goal of the AdversarialJob is to contain several roots, so that each
+     * job will match with one simulation/evaluation.
+     * An adversarial learning agent will embed for example 2 roots per job
+     * to simulate 2 agents activities (like a tic-tac-toe).
      */
-    class Job
+    class AdversarialJob : public Job
     {
-      protected:
+    protected:
         /**
-         * The root contained in the job.
+         * The roots contained in the job. e.g. 2 roots that
+         * will compete together in a 1vs1 game.
          */
-        const TPG::TPGVertex* root;
+        std::vector<const TPG::TPGVertex*> roots;
 
-        /**
-         * Index associated to this job.
-         */
-        const uint64_t idx;
-
-        /**
-         * Seed that will be used to randomize archive.
-         */
-        const uint64_t archiveSeed;
-
-      public:
+    public:
         /// Deleted default constructor.
-        Job() = delete;
+        AdversarialJob() = delete;
 
         /**
          * \brief Constructor enabling storing elements in the job so that the
          * Learning Agents will be able to use them later.
          *
-         * @param[in] root The root that will be encapsulated into the job.
+         * @param[in] roots The roots that will be encapsulated into the job.
          * @param[in] archiveSeed The archive seed that will be used with this
          * job.
          * @param[in] idx The index of this job.
          */
-        Job(const TPG::TPGVertex* root,
+        AdversarialJob(std::initializer_list<const TPG::TPGVertex*> roots,
             uint64_t archiveSeed=0, uint64_t idx=0)
-            : root(root), archiveSeed(archiveSeed),
-              idx(idx)
+                : roots(roots), Job(nullptr, archiveSeed,idx)
         {
         }
 
         /**
-         * \brief Getter of index.
+         * \brief Adds a root to this job and updates the size of the job.
          *
-         * @return The index of the job.
+         * @param[in] root The root that will be added to this job.
          */
-        uint64_t getIdx() const
+        void addRoot(const TPG::TPGVertex* root)
         {
-            return idx;
+            roots.emplace_back(root);
         }
 
         /**
-         * \brief Getter of archiveSeed.
+         * \brief Getter of the number of roots.
          *
-         * @return The archive seed of the job.
+         * @return The number of roots in this job.
          */
-        uint64_t getArchiveSeed() const
+        [[nodiscard]] size_t getSize() const
         {
-            return archiveSeed;
+            return roots.size();
         }
 
         /**
-         * \brief Getter of the root.
+         * \brief Getter of the roots.
          *
-         * @return The root embedded by the job.
+         * @return The vector containing the roots of the job.
          */
-        virtual const TPG::TPGVertex* getRoot() const
+        [[nodiscard]] std::vector<const TPG::TPGVertex*> getRoots() const
         {
-            return root;
+            return roots;
+        }
+
+        /**
+        * \brief Getter of the first root.
+        *
+        * @return The first root embedded by the job.
+        */
+        const TPG::TPGVertex* getRoot() const override
+        {
+            return roots[0];
+        }
+
+        /**
+         * \brief Getter of a single root in the list.
+         *
+         * @param[in] i The wanted index in the list of roots.
+         * @return The root found at index i.
+         */
+        const TPG::TPGVertex* operator[](int i) const
+        {
+            return roots[i];
         }
     };
 } // namespace Learn

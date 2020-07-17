@@ -33,10 +33,11 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <gegelati.h>
 #include <gtest/gtest.h>
-#include <learn/adversarialLearningEnvironment.h>
 
+#include "instructions/addPrimitiveType.h"
+
+#include "learn/adversarialLearningEnvironment.h"
 #include "learn/fakeClassificationLearningEnvironment.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"

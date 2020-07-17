@@ -33,10 +33,9 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef STICKGAMEADVERSARIAL_H
-#define STICKGAMEADVERSARIAL_H
+#ifndef STICK_GAME_ADVERSARIAL_H
+#define STICK_GAME_ADVERSARIAL_H
 
-#include <random>
 
 #include "data/primitiveTypeArray.h"
 #include "mutator/rng.h"
