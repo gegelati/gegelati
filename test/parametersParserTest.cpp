@@ -127,7 +127,8 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(params2.doValidation, false)
         << "Default validation should be false";
     ASSERT_EQ(params2.nbRegisters, 8) << "Bad parameter should be ignored";
-    ASSERT_EQ(params2.nbIterationsPerJob, 1) << "Default nbIterationsPerJob should be 1";
+    ASSERT_EQ(params2.nbIterationsPerJob, 1)
+        << "Default nbIterationsPerJob should be 1";
 }
 
 TEST(LearningParametersTest, loadParametersFromJson)

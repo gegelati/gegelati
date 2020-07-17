@@ -112,17 +112,19 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
 
     std::queue<std::shared_ptr<Learn::Job>> jobs;
     ASSERT_NO_THROW(jobs = la.makeJobs(Learn::TRAINING))
-    <<"makeJobs shouldn't throw an exception in adversarialLearningAgent";
+        << "makeJobs shouldn't throw an exception in adversarialLearningAgent";
     ASSERT_EQ(la.getTPGGraph().getNbRootVertices() * 2, jobs.size())
         << "There should be 2 times as many jobs as roots.";
 
     // put nbIterationsPerJob to 3 so that there won't be exactly 20 eval/root
-    // Actually there should b
+    // Actually there should bd
     params.nbIterationsPerJob = 7;
-    Learn::AdversarialLearningAgent la2(le,set,params,agentsPerEval);
+    Learn::AdversarialLearningAgent la2(le, set, params, agentsPerEval);
     la2.init();
     ASSERT_NO_THROW(jobs = la2.makeJobs(Learn::TRAINING))
-    <<"makeJobs shouldn't throw an exception in adversarialLearningAgent when nbIterationsPerPolicyEvaluation is not a multiple of nbIterationsPerJob";
+        << "makeJobs shouldn't throw an exception in adversarialLearningAgent "
+           "when nbIterationsPerPolicyEvaluation is not a multiple of "
+           "nbIterationsPerJob";
 
     // this map will compute the number of iterations per root that are
     // scheduled
