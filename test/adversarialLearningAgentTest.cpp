@@ -107,16 +107,27 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
     // 5 agents per job, 2 eval per job
     // => It shall do 10 jobs per agent, and something close to nbRoots*2
-    // (nbRoots*20/(5*2)) jobs at total the complete formula of the nb of jobs
-    // is
+    // (nbRoots*20/(5*2)) jobs at total
     la.init();
-    auto jobs = la.makeJobs(Learn::TRAINING);
+
+    std::queue<std::shared_ptr<Learn::Job>> jobs;
+    ASSERT_NO_THROW(jobs = la.makeJobs(Learn::TRAINING))
+    <<"makeJobs shouldn't throw an exception in adversarialLearningAgent";
     ASSERT_EQ(la.getTPGGraph().getNbRootVertices() * 2, jobs.size())
-        << "There should be as many jobs as roots.";
+        << "There should be 2 times as many jobs as roots.";
+
+    // put nbIterationsPerJob to 3 so that there won't be exactly 20 eval/root
+    // Actually there should b
+    params.nbIterationsPerJob = 7;
+    Learn::AdversarialLearningAgent la2(le,set,params,agentsPerEval);
+    la2.init();
+    ASSERT_NO_THROW(jobs = la2.makeJobs(Learn::TRAINING))
+    <<"makeJobs shouldn't throw an exception in adversarialLearningAgent when nbIterationsPerPolicyEvaluation is not a multiple of nbIterationsPerJob";
+
     // this map will compute the number of iterations per root that are
     // scheduled
     std::map<const TPG::TPGVertex*, int> nbEvalPerRoot;
-    for (auto root : la.getTPGGraph().getRootVertices()) {
+    for (auto root : la2.getTPGGraph().getRootVertices()) {
         nbEvalPerRoot.emplace(root, 0);
     }
     while (!jobs.empty()) {
