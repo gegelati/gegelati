@@ -43,7 +43,7 @@
 #include "archive.h"
 #include "environment.h"
 #include "instructions/set.h"
-#include "log/LALogger.h"
+#include "log/laLogger.h"
 #include "mutator/mutationParameters.h"
 #include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"

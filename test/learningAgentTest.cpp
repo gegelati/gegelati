@@ -39,7 +39,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "log/LABasicLogger.h"
+#include "log/laBasicLogger.h"
 
 #include "tpg/tpgGraph.h"
 

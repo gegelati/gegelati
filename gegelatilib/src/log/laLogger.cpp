@@ -1,6 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -33,12 +34,23 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <iostream>
+#include "log/laLogger.h"
 
-#include "log/Logger.h"
-
-Log::Logger Log::Logger::operator<<(std::ostream& (*manip)(std::ostream&))
+double Log::LALogger::getDurationFrom(
+    const std::chrono::time_point<std::chrono::system_clock,
+                                  std::chrono::nanoseconds>& begin) const
 {
-    manip(*out);
-    return *this;
+    return ((std::chrono::duration<double>)(getTime() - begin)).count();
+}
+
+std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>
+Log::LALogger::getTime() const
+{
+    return std::chrono::system_clock::now();
+}
+
+void Log::LALogger::chronoFromNow()
+{
+    checkpoint = std::make_shared<std::chrono::time_point<
+        std::chrono::system_clock, std::chrono::nanoseconds>>(getTime());
 }

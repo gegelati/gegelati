@@ -40,7 +40,7 @@
 #include <map>
 
 #include "learn/evaluationResult.h"
-#include "log/Logger.h"
+#include "log/logger.h"
 #include "tpg/tpgGraph.h"
 
 namespace Log {

@@ -36,7 +36,7 @@
 #ifndef LA_BASIC_LOGGER_H
 #define LA_BASIC_LOGGER_H
 
-#include "log/LALogger.h"
+#include "log/laLogger.h"
 
 namespace Log {
 

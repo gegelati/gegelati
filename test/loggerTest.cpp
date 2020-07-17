@@ -37,7 +37,7 @@
 #include <fstream>
 #include <gtest/gtest.h>
 
-#include "log/Logger.h"
+#include "log/logger.h"
 
 TEST(loggerTest, Constructor)
 {

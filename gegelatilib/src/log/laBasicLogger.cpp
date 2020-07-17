@@ -36,7 +36,7 @@
 #include <iomanip>
 #include <numeric>
 
-#include "log/LABasicLogger.h"
+#include "log/laBasicLogger.h"
 
 void Log::LABasicLogger::logResults(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,

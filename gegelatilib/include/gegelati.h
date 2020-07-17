@@ -69,9 +69,9 @@
 #include <learn/classificationLearningAgent.h>
 #include <learn/classificationLearningEnvironment.h>
 
-#include <log/LABasicLogger.h>
-#include <log/LALogger.h>
-#include <log/Logger.h>
+#include <log/laBasicLogger.h>
+#include <log/laLogger.h>
+#include <log/logger.h>
 
 #include <mutator/lineMutator.h>
 #include <mutator/mutationParameters.h>

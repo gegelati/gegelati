@@ -38,7 +38,7 @@
 
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
-#include "log/LABasicLogger.h"
+#include "log/laBasicLogger.h"
 
 class LABasicLoggerTest : public ::testing::Test
 {
