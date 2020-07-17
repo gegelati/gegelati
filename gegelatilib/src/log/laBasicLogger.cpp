@@ -59,8 +59,6 @@ void Log::LABasicLogger::logResults(
 
 void Log::LABasicLogger::logHeader()
 {
-    // fixing float precision
-    *this << std::setprecision(2) << std::fixed << std::left;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
           << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
           << std::setw(colWidth) << "Max" << std::setw(colWidth)

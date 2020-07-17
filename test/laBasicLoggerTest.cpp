@@ -217,9 +217,9 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
 
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
+    std::cout << s;
     std::vector<std::string> result;
     std::istringstream iss(s);
-    std::cout << iss.str();
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
@@ -228,7 +228,7 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     double totTime = std::stod(result[2]);
     ASSERT_GE(evalTime, 0) << "Eval duration should be positive";
     ASSERT_GE(validTime, 0) << "Valid duration should be positive";
-    ASSERT_GT(totTime, evalTime)
+    ASSERT_GE(totTime, evalTime)
         << "Total time should be the largest duration !";
     ASSERT_GE(totTime, timeToWaitMili / 1000)
         << "Total time should be larger than the time we waited !";

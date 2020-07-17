@@ -36,6 +36,8 @@
 #ifndef LA_BASIC_LOGGER_H
 #define LA_BASIC_LOGGER_H
 
+#include <iomanip>
+
 #include "log/laLogger.h"
 
 namespace Log {
@@ -73,6 +75,8 @@ namespace Log {
          */
         explicit LABasicLogger(std::ostream& out = std::cout) : LALogger(out)
         {
+            // fixing float precision
+            *this << std::setprecision(2) << std::fixed << std::right;
         }
 
         /**
