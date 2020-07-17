@@ -64,11 +64,11 @@ void Log::LABasicLogger::logHeader()
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
           << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
           << std::setw(colWidth) << "Max" << std::setw(colWidth)
-          << "Duration(eval)";
+          << "T_eval";
     if (doValidation) {
-        *this << std::setw(colWidth) << "Duration(valid)";
+        *this << std::setw(colWidth) << "T_valid";
     }
-    *this << std::setw(colWidth) << "Total_time" << std::endl;
+    *this << std::setw(colWidth) << "T_total" << std::endl;
 }
 
 void Log::LABasicLogger::logAfterPopulateTPG(uint64_t& generationNumber,

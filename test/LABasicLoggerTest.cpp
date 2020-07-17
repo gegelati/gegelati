@@ -124,9 +124,9 @@ TEST_F(LABasicLoggerTest, logHeader)
     ASSERT_EQ("Min", result[2]);
     ASSERT_EQ("Avg", result[3]);
     ASSERT_EQ("Max", result[4]);
-    ASSERT_EQ("Duration(eval)", result[5]);
-    ASSERT_EQ("Total_time", result[6]);
-    ASSERT_EQ("Duration(valid)", result[13]);
+    ASSERT_EQ("T_eval", result[5]);
+    ASSERT_EQ("T_total", result[6]);
+    ASSERT_EQ("T_valid", result[13]);
 }
 
 TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
@@ -219,6 +219,7 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
     std::istringstream iss(s);
+    std::cout << iss.str();
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
