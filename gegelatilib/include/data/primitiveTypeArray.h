@@ -38,8 +38,10 @@
 #define PRIMITIVE_TYPE_ARRAY
 
 #include <functional>
+#include <map>
 #include <regex>
 #include <sstream>
+#include <typeindex>
 #include <typeinfo>
 
 #include "data/hash.h"
@@ -70,6 +72,21 @@ namespace Data {
         static_assert(std::is_fundamental<T>::value,
                       "Template class PrimitiveTypeArray<T> can only be used "
                       "for primitive types.");
+
+      private:
+        /**
+         * \brief Caching mechanism for storing addressSpace for different
+         * types.
+         *
+         * This map stores for each data type the size of the addressSpace for
+         * the PrimitiveTypeArray. The purpose of this cache is to accelerate
+         * the numerous access to the addressSpace for different data types, by
+         * performing it only once per data type requested by the Instructions,
+         * through the ProgramExecutionEngine.
+         *
+         * This map is updated and used by the getAddressSpace method.
+         */
+        mutable std::map<std::type_index, size_t> cachedAddressSpace;
 
       protected:
         /**
@@ -198,7 +215,14 @@ namespace Data {
     size_t PrimitiveTypeArray<T>::getAddressSpace(
         const std::type_info& type) const
     {
+        // Has the addresSpaceSize been cached
+        auto iter = this->cachedAddressSpace.find(type);
+        if (iter != this->cachedAddressSpace.end()) {
+            return iter->second;
+        }
+
         if (type == typeid(T)) {
+            this->cachedAddressSpace.emplace(type, this->nbElements);
             return this->nbElements;
         }
 
@@ -212,7 +236,9 @@ namespace Data {
         if (std::regex_match(typeName.c_str(), cm, arrayType)) {
             int size = std::atoi(cm[2].str().c_str());
             if (size <= this->nbElements) {
-                return this->nbElements - size + 1;
+                size_t result = this->nbElements - size + 1;
+                this->cachedAddressSpace.emplace(type, result);
+                return result;
             }
         }
         // Default case

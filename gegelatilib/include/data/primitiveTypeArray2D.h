@@ -1,6 +1,8 @@
 #ifndef PRIMITIVE_TYPE_ARRAY_2D_H
 #define PRIMITIVE_TYPE_ARRAY_2D_H
 
+#include <tuple>
+
 #include "data/primitiveTypeArray.h"
 
 namespace Data {
@@ -27,6 +29,25 @@ namespace Data {
     template <typename T>
     class PrimitiveTypeArray2D : public PrimitiveTypeArray<T>
     {
+      private:
+        /**
+         * \brief Caching mechanism for storing addressSpace for different
+         * types.
+         *
+         * This map stores for each data type the size of the addressSpace for
+         * the PrimitiveTypeArray. The purpose of this cache is to accelerate
+         * the numerous access to the addressSpace for different data types, by
+         * performing it only once per data type requested by the Instructions,
+         * through the ProgramExecutionEngine.
+         *
+         * This map is updated and used by the getAddressSpace method.
+         *
+         * Like the getAddressSpace method of the 2D array, this map stores all
+         * type dimensions.
+         */
+        mutable std::map<std::type_index, std::tuple<size_t, size_t, size_t>>
+            cachedAddressSpace;
+
       protected:
         /// Number of columns of the 2D array.
         size_t width;
@@ -83,9 +104,23 @@ namespace Data {
                                                     size_t* dim1,
                                                     size_t* dim2) const
     {
+        // Has the result been cached
+        auto iter = this->cachedAddressSpace.find(type);
+        if (iter != this->cachedAddressSpace.end()) {
+            if (dim1 != nullptr) {
+                *dim1 = std::get<1>(iter->second);
+            }
+            if (dim2 != nullptr) {
+                *dim2 = std::get<2>(iter->second);
+            }
+            return std::get<0>(iter->second);
+        }
+
         size_t result = 0;
         // The parent function is not used to avoid performing 2 regex matches.
         if (type == typeid(T)) {
+            this->cachedAddressSpace.emplace(
+                type, std::make_tuple(this->nbElements, 0, 0));
             result = this->nbElements;
         }
 
@@ -124,6 +159,8 @@ namespace Data {
                     if (dim2 != nullptr) {
                         *dim2 = typeW;
                     }
+                    this->cachedAddressSpace.emplace(
+                        type, std::make_tuple(result, typeH, typeW));
                 }
             }
         }
