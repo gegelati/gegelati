@@ -61,20 +61,27 @@ void Log::LABasicLogger::logHeader()
 {
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
           << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
-          << std::setw(colWidth) << "Max" << std::setw(colWidth)
-          << "T_eval";
+          << std::setw(colWidth) << "Max" << std::setw(colWidth) << "T_mutat"
+          << std::setw(colWidth) << "T_eval";
     if (doValidation) {
         *this << std::setw(colWidth) << "T_valid";
     }
     *this << std::setw(colWidth) << "T_total" << std::endl;
 }
 
-void Log::LABasicLogger::logAfterPopulateTPG(uint64_t& generationNumber,
-                                             TPG::TPGGraph& tpg)
+void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
 {
-    *this << std::setw(colWidth) << generationNumber << std::setw(colWidth)
-          << tpg.getNbVertices();
+    *this << std::setw(colWidth) << generationNumber;
     // resets checkpoint to be able to show evaluation time
+    chronoFromNow();
+}
+
+void Log::LABasicLogger::logAfterPopulateTPG(TPG::TPGGraph& tpg)
+{
+    this->mutationTime = getDurationFrom(*checkpoint);
+
+    *this << std::setw(colWidth) << tpg.getNbVertices();
+    
     chronoFromNow();
 }
 
@@ -106,6 +113,7 @@ void Log::LABasicLogger::logAfterValidate(
 
 void Log::LABasicLogger::logEndOfTraining()
 {
+    *this << std::setw(colWidth) << mutationTime;
     *this << std::setw(colWidth) << evalTime;
     if (doValidation) {
         *this << std::setw(colWidth) << validTime;

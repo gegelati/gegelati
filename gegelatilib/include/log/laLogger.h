@@ -73,6 +73,12 @@ namespace Log {
             checkpoint;
 
         /**
+         * Keeps the duration of the mutation to be able to log it
+         * some time after it is computed.
+         */
+        double mutationTime = 0;
+
+        /**
          * Keeps the duration of the evaluation to be able to log it
          * some time after it is computed.
          */
@@ -136,14 +142,21 @@ namespace Log {
         virtual void logHeader() = 0;
 
         /**
+         * \brief Method called by the LearningAgent at the start of a
+         * generation.
+         *
+         * \param[in] generationNumber The number of the current
+         * generation.
+         */
+        virtual void logNewGeneration(uint64_t& generationNumber) = 0;
+
+        /**
          * \brief Method called by the Learning Agent right after
          * PopulateTPG is done.
          *
-         * \param[in] generationNumber The number of the current generation.
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterPopulateTPG(uint64_t& generationNumber,
-                                         TPG::TPGGraph& tpg) = 0;
+        virtual void logAfterPopulateTPG(TPG::TPGGraph& tpg) = 0;
 
         /**
          * \brief Method called by the Learning Agent right after the evaluation

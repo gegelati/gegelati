@@ -186,12 +186,16 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 {
+    for (auto logger : loggers) {
+        logger.get().logNewGeneration(generationNumber);
+    }
+
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(this->tpg, this->archive,
                                      this->params.mutation, this->rng,
                                      maxNbThreads);
     for (auto logger : loggers) {
-        logger.get().logAfterPopulateTPG(generationNumber, tpg);
+        logger.get().logAfterPopulateTPG(tpg);
     }
 
     // Evaluate

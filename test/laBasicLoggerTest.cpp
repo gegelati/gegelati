@@ -124,17 +124,20 @@ TEST_F(LABasicLoggerTest, logHeader)
     ASSERT_EQ("Min", result[2]);
     ASSERT_EQ("Avg", result[3]);
     ASSERT_EQ("Max", result[4]);
-    ASSERT_EQ("T_eval", result[5]);
-    ASSERT_EQ("T_total", result[6]);
-    ASSERT_EQ("T_valid", result[13]);
+    ASSERT_EQ("T_mutat", result[5]);
+    ASSERT_EQ("T_eval", result[6]);
+    ASSERT_EQ("T_total", result[7]);
+    ASSERT_EQ("T_valid", result[15]);
 }
 
-TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
+TEST_F(LABasicLoggerTest, logNewGeneration)
 {
     std::stringstream strStr;
     Log::LABasicLogger l(strStr);
+    uint64_t nbGen = 42;
 
-    l.logAfterPopulateTPG(generation, *tpg);
+    l.logNewGeneration(nbGen);
+    
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
@@ -142,8 +145,23 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_EQ("1", result[0]);
-    ASSERT_EQ("0", result[1]);
+    ASSERT_EQ("42", result[0]);
+    ASSERT_EQ(result.size(), 1);
+}
+
+TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
+{
+    std::stringstream strStr;
+    Log::LABasicLogger l(strStr);
+    l.logAfterPopulateTPG(*tpg);
+    std::string s = strStr.str();
+    // putting each element seperated by blanks in a tab
+    std::vector<std::string> result;
+    std::istringstream iss(s);
+    for (std::string s2; iss >> s2;)
+        result.push_back(s2);
+
+    ASSERT_EQ("0", result[0]);
 }
 
 TEST_F(LABasicLoggerTest, logAfterEvaluate)
@@ -223,9 +241,11 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    double evalTime = std::stod(result[0]);
-    double validTime = std::stod(result[1]);
-    double totTime = std::stod(result[2]);
+    double mutatTime = std::stod(result[0]);
+    double evalTime = std::stod(result[1]);
+    double validTime = std::stod(result[2]);
+    double totTime = std::stod(result[3]);
+    ASSERT_GE(mutatTime, 0) << "Eval duration should be positive";
     ASSERT_GE(evalTime, 0) << "Eval duration should be positive";
     ASSERT_GE(validTime, 0) << "Valid duration should be positive";
     ASSERT_GE(totTime, evalTime)
@@ -233,6 +253,6 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     ASSERT_GE(totTime, timeToWaitMili / 1000)
         << "Total time should be larger than the time we waited !";
 
-    ASSERT_EQ(result.size(), 5)
-        << "logEndOfTraining with and without valid should have 3+2=5 elements";
+    ASSERT_EQ(result.size(), 7)
+        << "logEndOfTraining with and without valid should have 4+3=7 elements";
 }

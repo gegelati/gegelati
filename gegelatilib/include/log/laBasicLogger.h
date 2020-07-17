@@ -87,15 +87,24 @@ namespace Log {
         virtual void logHeader() override;
 
         /**
-         * Inherited via LaLogger.
+         * Inherited via LALogger.
          *
-         * \brief Logs the generation and vertices nb of the tpg.
+         * \brief Logs the generation of training.
          *
-         * \param[in] generationNumber The number of the current generation.
+         * \param[in] generationNumber The number of the current
+         * generation.
+         */
+        virtual void logNewGeneration(uint64_t& generationNumber) override;
+
+        /**
+         * Inherited via LALogger.
+         *
+         * \brief Logs the vertices nb of the tpg.
+         *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterPopulateTPG(uint64_t& generationNumber,
-                                         TPG::TPGGraph& tpg) override;
+        virtual void logAfterPopulateTPG(TPG::TPGGraph& tpg) override;
+
         /**
          * Inherited via LaLogger.
          *
