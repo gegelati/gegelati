@@ -216,10 +216,10 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
-        auto result =
+        auto validationResults =
             evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
         for (auto logger : loggers) {
-            logger.get().logAfterValidate(results);
+            logger.get().logAfterValidate(validationResults);
         }
     }
 
