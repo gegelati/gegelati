@@ -54,6 +54,16 @@ namespace Learn {
     class AdversarialLearningAgent : public ParallelLearningAgent
     {
       protected:
+
+        /**
+         * \brief Champions of the last generation.
+         *
+         * A given number n of roots are saved, in fact the n first roots
+         * are simply saved in this vector. n is calculated with a ratio that
+         * is defined in parameters.
+         */
+        std::vector<const TPG::TPGVertex*> champions;
+
         /**
          * \brief Number of agents per evaluation (e.g. 2 in tic-tac-toe).
          */

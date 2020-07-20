@@ -100,6 +100,11 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
         results.emplace(resultPerRoot.second, resultPerRoot.first);
     }
 
+    champions.clear();
+    auto iterator = results.end();
+    for(int i=0; i<=(1-params.ratioDeletedRoots)*tpg.getNbRootVertices()-1;i++){
+        champions.emplace_back((--iterator)->second);
+    }
     // Merge the archives
     this->mergeArchiveMap(archiveMap);
 }
@@ -134,7 +139,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the action
             uint64_t actionID =
-                ((const TPG::TPGAction*)tee.executeFromRoot(**rootsIterator)
+                ((const TPG::TPGAction*)tee.executeFromRoot(*((TPG::TPGTeam*)*rootsIterator))
                      .back())
                     ->getActionID();
             // Do it
@@ -165,73 +170,25 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
 
     std::queue<std::shared_ptr<Learn::Job>> jobs;
 
-    // registers nb of evaluations per root and sorts it
-    std::multimap<size_t, const TPG::TPGVertex*> nbEvals;
-    for (auto root : tpgGraph->getRootVertices()) {
-        nbEvals.emplace(0, root);
+    size_t index=0;
+    auto roots = tpg.getRootVertices();
+    if(champions.size()==0){
+        for(int i=0; i<roots.size()*(1-params.ratioDeletedRoots);i++){
+            champions.emplace_back(roots[i]);
+        }
     }
 
-    const TPG::TPGVertex* root;
+    for(auto root : roots){
 
-    size_t index = 0;
-    // while nbEvals still contains roots.
-    // roots will be removed after been evaluated enough times (indeed any root
-    // shall be evaluated nbIterationsPerPolicyEvaluation times or more)
-    while (!nbEvals.empty()) {
         uint64_t archiveSeed;
-        archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
+        for(auto champion : champions) {
+            archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
 
-        size_t nbEvalsThisRoot = nbEvals.begin()->first;
-        root = nbEvals.begin()->second;
-
-        auto job = std::make_shared<Learn::AdversarialJob>(
-            Learn::AdversarialJob({root}, archiveSeed, index++));
-
-        // erases the old pair corresponding to this root
-        nbEvals.erase(nbEvals.begin());
-        size_t newNbEvalsThisRoot = nbEvalsThisRoot + params.nbIterationsPerJob;
-        // only re-add the root in the map if it has not enough been evaluated
-        if (newNbEvalsThisRoot < params.nbIterationsPerPolicyEvaluation) {
-            nbEvals.emplace(nbEvalsThisRoot + params.nbIterationsPerJob, root);
+            auto job = std::make_shared<Learn::AdversarialJob>(
+                    Learn::AdversarialJob({root}, archiveSeed, index++));
+            job->addRoot(champion);
+            jobs.push(job);
         }
-
-        // adding other roots in this job
-        // we begin at 1 as there is already "root" in the job
-        for (int i = 1; i < agentsPerEvaluation; i++) {
-            if (nbEvals.size() == 0) {
-                // there is no root that has not been evaluated enough times
-                // left. We will take a root that is already in the job.
-                // That's default behavior, it could be changed for the better.
-                auto roots = job->getRoots();
-                size_t position = rng.getUnsignedInt64(0, roots.size() - 1);
-                auto iterator = roots.begin();
-                std::advance(iterator, position);
-                root = *iterator;
-                job->addRoot(root);
-                continue;
-            }
-
-            // we're sure there are still roots to include in jobs
-            size_t position = rng.getUnsignedInt64(0, nbEvals.size() - 1);
-            auto iterator = nbEvals.begin();
-            std::advance(iterator, position);
-
-            nbEvalsThisRoot = iterator->first;
-            root = iterator->second;
-            job->addRoot(root);
-
-            // erases the old pair corresponding to this root
-            nbEvals.erase(iterator);
-            newNbEvalsThisRoot = nbEvalsThisRoot + params.nbIterationsPerJob;
-            // only re-add the root in the map if it has not enough been
-            // evaluated
-            if (newNbEvalsThisRoot < params.nbIterationsPerPolicyEvaluation) {
-                nbEvals.emplace(nbEvalsThisRoot + params.nbIterationsPerJob,
-                                root);
-            }
-        }
-
-        jobs.push(job);
     }
 
     return jobs;
