@@ -194,7 +194,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
                                      this->params.mutation, this->rng,
                                      maxNbThreads);
     for (auto logger : loggers) {
-        logger.get().logAfterPopulateTPG(tpg);
+        logger.get().logAfterPopulateTPG();
     }
 
     // Evaluate
@@ -210,7 +210,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
     this->updateEvaluationRecords(results);
 
     for (auto logger : loggers) {
-        logger.get().logAfterDecimate(tpg);
+        logger.get().logAfterDecimate();
     }
 
     // Does a validation or not according to the parameter doValidation

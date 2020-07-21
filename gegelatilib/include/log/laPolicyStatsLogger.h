@@ -47,10 +47,10 @@ namespace Log {
         void logHeader() override{};
 
         /// Inherited from LALogger
-        void logAfterPopulateTPG(const TPG::TPGGraph& tpg) override{};
+        void logAfterPopulateTPG() override{};
 
         /// Inherited from LALogger
-        void logAfterDecimate(const TPG::TPGGraph& tpg) override;
+        void logAfterDecimate() override;
 
         /// Inherited from LALogger
         void logAfterValidate(

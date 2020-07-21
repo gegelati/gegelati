@@ -106,10 +106,8 @@ namespace Log {
          * Inherited via LALogger.
          *
          * \brief Logs the vertices nb of the tpg.
-         *
-         * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterPopulateTPG(const TPG::TPGGraph& tpg) override;
+        virtual void logAfterPopulateTPG() override;
 
         /**
          * Inherited via LaLogger.
@@ -130,10 +128,8 @@ namespace Log {
          * Inherited via LaLogger.
          *
          * \brief Does nothing in this logger.
-         *
-         * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(const TPG::TPGGraph& tpg) override{
+        virtual void logAfterDecimate() override{
             // nothing to log
         };
 

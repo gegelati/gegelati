@@ -79,7 +79,7 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluate)
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>
         emptyMap;
-    ASSERT_NO_THROW(log.logAfterDecimate(la->getTPGGraph()))
+    ASSERT_NO_THROW(log.logAfterDecimate())
         << "Logging after an evaluation failed unexpectedly.";
 
     ASSERT_GT(strStr.str().size(), 100)
@@ -87,7 +87,7 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluate)
 
     auto length = strStr.str().size();
 
-    ASSERT_NO_THROW(log.logAfterDecimate(la->getTPGGraph()))
+    ASSERT_NO_THROW(log.logAfterDecimate())
         << "Logging a second time after an evaluation failed unexpectedly.";
 
     ASSERT_EQ(strStr.str().size(), length)

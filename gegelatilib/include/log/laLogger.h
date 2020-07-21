@@ -132,7 +132,8 @@ namespace Log {
          * of the given LearningAgent.
          *
          * \param[in] la The LearningAgent which will be logged by this
-         * LALogger. \param[in] out The output stream the logger will send
+         * LALogger.
+         * \param[in] out The output stream the logger will send
          * elements to.
          */
         explicit LALogger(Learn::LearningAgent& la,
@@ -161,9 +162,8 @@ namespace Log {
          * \brief Method called by the Learning Agent right after
          * PopulateTPG is done.
          *
-         * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterPopulateTPG(const TPG::TPGGraph& tpg) = 0;
+        virtual void logAfterPopulateTPG() = 0;
 
         /**
          * \brief Method called by the Learning Agent right after the evaluation
@@ -179,10 +179,8 @@ namespace Log {
         /**
          * \brief Method called by the Learning Agent right after the decimation
          * is done.
-         *
-         * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(const TPG::TPGGraph& tpg) = 0;
+        virtual void logAfterDecimate() = 0;
 
         /**
          * \brief Method called by the Learning Agent right after the validation

@@ -7,7 +7,7 @@ void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
     this->generationNumber = generationNumber;
 }
 
-void Log::LAPolicyStatsLogger::logAfterDecimate(const TPG::TPGGraph& tpg)
+void Log::LAPolicyStatsLogger::logAfterDecimate()
 {
     if (this->learningAgent.getBestRoot().first != this->lastBestRoot) {
         // Update the best root befor loggin it PolicyStats

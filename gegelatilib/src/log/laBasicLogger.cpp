@@ -36,6 +36,8 @@
 #include <iomanip>
 #include <numeric>
 
+#include "learn/learningAgent.h"
+
 #include "log/laBasicLogger.h"
 
 void Log::LABasicLogger::logResults(
@@ -76,12 +78,13 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
     chronoFromNow();
 }
 
-void Log::LABasicLogger::logAfterPopulateTPG(const TPG::TPGGraph& tpg)
+void Log::LABasicLogger::logAfterPopulateTPG()
 {
     this->mutationTime = getDurationFrom(*checkpoint);
 
-    *this << std::setw(colWidth) << tpg.getNbVertices();
-    
+    *this << std::setw(colWidth)
+          << this->learningAgent.getTPGGraph().getNbVertices();
+
     chronoFromNow();
 }
 
