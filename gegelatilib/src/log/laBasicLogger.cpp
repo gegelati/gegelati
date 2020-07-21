@@ -76,7 +76,7 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
     chronoFromNow();
 }
 
-void Log::LABasicLogger::logAfterPopulateTPG(TPG::TPGGraph& tpg)
+void Log::LABasicLogger::logAfterPopulateTPG(const TPG::TPGGraph& tpg)
 {
     this->mutationTime = getDurationFrom(*checkpoint);
 

@@ -71,12 +71,18 @@ namespace Log {
         /**
          * \brief Same constructor as LaLogger. Default output is cout.
          *
-         * \param[in] out The output stream the logger will send elements to.
+         * \param[in] la LearningAgent whose information will be logged by the
+         * LABasicLogger.
+         * \param[in] out The output stream the logger will send
+         * elements to.
          */
-        explicit LABasicLogger(std::ostream& out = std::cout) : LALogger(out)
+        explicit LABasicLogger(Learn::LearningAgent& la,
+                               std::ostream& out = std::cout)
+            : LALogger(la, out)
         {
             // fixing float precision
             *this << std::setprecision(2) << std::fixed << std::right;
+            this->logHeader();
         }
 
         /**
@@ -103,7 +109,7 @@ namespace Log {
          *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterPopulateTPG(TPG::TPGGraph& tpg) override;
+        virtual void logAfterPopulateTPG(const TPG::TPGGraph& tpg) override;
 
         /**
          * Inherited via LaLogger.
@@ -127,7 +133,7 @@ namespace Log {
          *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(TPG::TPGGraph& tpg) override{
+        virtual void logAfterDecimate(const TPG::TPGGraph& tpg) override{
             // nothing to log
         };
 

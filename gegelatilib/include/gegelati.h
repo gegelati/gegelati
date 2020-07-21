@@ -71,6 +71,7 @@
 
 #include <log/laBasicLogger.h>
 #include <log/laLogger.h>
+#include <log/laPolicyStatsLogger.h>
 #include <log/logger.h>
 
 #include <mutator/lineMutator.h>

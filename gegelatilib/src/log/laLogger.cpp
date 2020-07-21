@@ -34,6 +34,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#include "learn/learningAgent.h"
 #include "log/laLogger.h"
 
 double Log::LALogger::getDurationFrom(
@@ -48,6 +49,16 @@ Log::LALogger::getTime() const
 {
     return std::chrono::system_clock::now();
 }
+
+Log::LALogger::LALogger(Learn::LearningAgent& la, std::ostream& out):
+    Log::Logger(out),
+    learningAgent(la),
+    start(std::make_shared<std::chrono::time_point<
+              std::chrono::system_clock, std::chrono::nanoseconds>>(getTime()))
+{
+    this->learningAgent.addLogger(*this);
+    chronoFromNow();
+};
 
 void Log::LALogger::chronoFromNow()
 {

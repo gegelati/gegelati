@@ -38,10 +38,15 @@
 
 #include <chrono>
 #include <map>
+#include <ostream>
 
 #include "learn/evaluationResult.h"
 #include "log/logger.h"
 #include "tpg/tpgGraph.h"
+
+namespace Learn {
+    class LearningAgent;
+}
 
 namespace Log {
 
@@ -90,6 +95,9 @@ namespace Log {
          */
         double validTime = 0;
 
+        /// LearningAgent logged by the LALogger
+        Learn::LearningAgent& learningAgent;
+
         /**
          * \brief Computes the duration from a given time to now.
          *
@@ -120,16 +128,15 @@ namespace Log {
          * \brief Constructor defining a given output and setting start and
          * checkpoint as now. Default output is cout.
          *
-         * \param[in] out The output stream the logger will send elements to.
+         * The constructed LALogger will add itself automatically to the Loggers
+         * of the given LearningAgent.
+         *
+         * \param[in] la The LearningAgent which will be logged by this
+         * LALogger. \param[in] out The output stream the logger will send
+         * elements to.
          */
-        explicit LALogger(std::ostream& out = std::cout)
-            : Logger(out),
-              start(std::make_shared<std::chrono::time_point<
-                        std::chrono::system_clock, std::chrono::nanoseconds>>(
-                  getTime()))
-        {
-            chronoFromNow();
-        };
+        explicit LALogger(Learn::LearningAgent& la,
+                          std::ostream& out = std::cout);
 
         /**
          * \brief Updates checkpoint to now.
@@ -156,7 +163,7 @@ namespace Log {
          *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterPopulateTPG(TPG::TPGGraph& tpg) = 0;
+        virtual void logAfterPopulateTPG(const TPG::TPGGraph& tpg) = 0;
 
         /**
          * \brief Method called by the Learning Agent right after the evaluation
@@ -175,7 +182,7 @@ namespace Log {
          *
          * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(TPG::TPGGraph& tpg) = 0;
+        virtual void logAfterDecimate(const TPG::TPGGraph& tpg) = 0;
 
         /**
          * \brief Method called by the Learning Agent right after the validation

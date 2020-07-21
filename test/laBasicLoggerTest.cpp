@@ -38,6 +38,9 @@
 
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstParam.h"
+#include "learn/learningAgent.h"
+#include "learn/stickGameWithOpponent.h"
+
 #include "log/laBasicLogger.h"
 
 class LABasicLoggerTest : public ::testing::Test
@@ -55,14 +58,18 @@ class LABasicLoggerTest : public ::testing::Test
         new std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           const TPG::TPGVertex*>();
 
+    StickGameWithOpponent le;
+    Learn::LearningParameters params;
+    Learn::LearningAgent * la;
+
     void SetUp() override
     {
         vect.emplace_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
         vect.emplace_back(
-            *(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
+            *(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
-        set.add(*(new Instructions::AddPrimitiveType<float>()));
+        set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstParam<double, float>()));
 
         e = new Environment(set, vect, 8);
@@ -76,6 +83,10 @@ class LABasicLoggerTest : public ::testing::Test
                                   const TPG::TPGVertex*>(res1, v1));
         results->insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
                                   const TPG::TPGVertex*>(res2, v2));
+
+            
+
+       la = new Learn::LearningAgent(le,set,params);
     }
 
     void TearDown() override
@@ -91,22 +102,26 @@ class LABasicLoggerTest : public ::testing::Test
         it++;
         delete it->second;
         delete results;
+        delete la;
     }
 };
 
 TEST_F(LABasicLoggerTest, Constructor)
 {
-    ASSERT_NO_THROW(Log::LABasicLogger l);
-    ASSERT_NO_THROW(Log::LABasicLogger l(std::cerr));
+    Log::LABasicLogger* l = nullptr;
+    ASSERT_NO_THROW( l = new Log::LABasicLogger(*la));
+    if (l != nullptr) {
+        delete l;
+    }
+    ASSERT_NO_THROW(Log::LABasicLogger l(*la,std::cerr));
 }
 
 TEST_F(LABasicLoggerTest, logHeader)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
-
     // basic header without validation
-    l.logHeader();
+    Log::LABasicLogger l(*la, strStr);   
+   
     // we log a second header with validation column
     l.doValidation = true;
     l.logHeader();
@@ -133,11 +148,11 @@ TEST_F(LABasicLoggerTest, logHeader)
 TEST_F(LABasicLoggerTest, logNewGeneration)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
     uint64_t nbGen = 42;
 
     l.logNewGeneration(nbGen);
-    
+
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
@@ -145,14 +160,15 @@ TEST_F(LABasicLoggerTest, logNewGeneration)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_EQ("42", result[0]);
-    ASSERT_EQ(result.size(), 1);
+    // index 8 because we skip the header
+    ASSERT_EQ("42", result[8]);
+    ASSERT_EQ(result.size(), 8 + 1);
 }
 
 TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
     l.logAfterPopulateTPG(*tpg);
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
@@ -161,13 +177,14 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_EQ("0", result[0]);
+    // index 8 because we skip the header
+    ASSERT_EQ("0", result[8]);
 }
 
 TEST_F(LABasicLoggerTest, logAfterEvaluate)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
 
     l.logAfterEvaluate(*results);
     std::string s = strStr.str();
@@ -177,15 +194,16 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_DOUBLE_EQ(5.00, std::stod(result[0]));
-    ASSERT_DOUBLE_EQ(7.50, std::stod(result[1]));
-    ASSERT_DOUBLE_EQ(10.00, std::stod(result[2]));
+    // index 8 because we skip the header
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[8]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[9]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[10]));
 }
 
 TEST_F(LABasicLoggerTest, logAfterValidate)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
 
     l.logAfterValidate(*results);
     std::string s = strStr.str();
@@ -195,15 +213,16 @@ TEST_F(LABasicLoggerTest, logAfterValidate)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_DOUBLE_EQ(5.00, std::stod(result[0]));
-    ASSERT_DOUBLE_EQ(7.50, std::stod(result[1]));
-    ASSERT_DOUBLE_EQ(10.00, std::stod(result[2]));
+    // index 8+ because we skip the header
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[8]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[9]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[10]));
 }
 
 TEST_F(LABasicLoggerTest, logAfterDecimate)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
     ASSERT_NO_THROW(l.logAfterDecimate(*tpg));
 }
 
@@ -216,7 +235,7 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     // The total duration should be larger than the evalTime
 
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
 
     // little sleep to delay the total_time value (while the "checkpoint" of the
     // logger will be reset)
@@ -241,10 +260,11 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    double mutatTime = std::stod(result[0]);
-    double evalTime = std::stod(result[1]);
-    double validTime = std::stod(result[2]);
-    double totTime = std::stod(result[3]);
+    // index 8+ because we skip the headers
+    double mutatTime = std::stod(result[8]);
+    double evalTime = std::stod(result[9]);
+    double validTime = std::stod(result[10]);
+    double totTime = std::stod(result[11]);
     ASSERT_GE(mutatTime, 0) << "Eval duration should be positive";
     ASSERT_GE(evalTime, 0) << "Eval duration should be positive";
     ASSERT_GE(validTime, 0) << "Valid duration should be positive";
@@ -253,6 +273,7 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     ASSERT_GE(totTime, timeToWaitMili / 1000)
         << "Total time should be larger than the time we waited !";
 
-    ASSERT_EQ(result.size(), 7)
+    // Size is headerSize (8) + log size (4 + 3)
+    ASSERT_EQ(result.size(), 8 + 7)
         << "logEndOfTraining with and without valid should have 4+3=7 elements";
 }

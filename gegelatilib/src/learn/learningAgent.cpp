@@ -77,9 +77,8 @@ void Learn::LearningAgent::init(uint64_t seed)
 
 void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 {
-    logger.doValidation = params.doValidation;
+    logger.doValidation = this->params.doValidation;
     // logs for example the headers of the columns the logger will print
-    logger.logHeader();
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
 }
 
@@ -94,7 +93,7 @@ bool Learn::LearningAgent::isRootEvalSkipped(
         // The root has already been evaluated
         previousResult = iter->second;
         return iter->second->getNbEvaluation() >=
-               params.maxNbEvaluationPerPolicy;
+               this->params.maxNbEvaluationPerPolicy;
     }
     else {
         previousResult = nullptr;
@@ -207,12 +206,12 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Remove worst performing roots
     decimateWorstRoots(results);
+    // Update the best 
+    this->updateEvaluationRecords(results);
+
     for (auto logger : loggers) {
         logger.get().logAfterDecimate(tpg);
     }
-
-    // Update the best (code duplicate in ParallelLearningAgent)
-    this->updateEvaluationRecords(results);
 
     // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
