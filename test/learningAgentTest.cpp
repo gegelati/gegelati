@@ -119,7 +119,8 @@ TEST_F(LearningAgentTest, addLogger)
     Learn::LearningAgent la(le, set, params);
 
     Log::LALogger* l = nullptr;
-    ASSERT_NO_THROW(l = new Log::LABasicLogger(la, std::cout);) // Call addLogger.
+    ASSERT_NO_THROW(
+        l = new Log::LABasicLogger(la, std::cout)) // Call addLogger.
         << "Adding a logger should not fail.";
     if (l != nullptr) {
         delete l;

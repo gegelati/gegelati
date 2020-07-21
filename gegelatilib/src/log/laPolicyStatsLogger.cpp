@@ -12,7 +12,9 @@ void Log::LAPolicyStatsLogger::logAfterDecimate()
     if (this->learningAgent.getBestRoot().first != this->lastBestRoot) {
         // Update the best root befor loggin it PolicyStats
         this->lastBestRoot = this->learningAgent.getBestRoot().first;
-        *this << "Generation " << this->generationNumber << std::endl
+        *this << "Generation " << this->generationNumber << " - Score "
+              << this->learningAgent.getBestRoot().second->getResult()
+              << std::endl
               << std::endl;
         TPG::PolicyStats ps;
         ps.setEnvironment(this->learningAgent.getTPGGraph().getEnvironment());
