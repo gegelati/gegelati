@@ -96,6 +96,10 @@ TEST(AdversarialLearningEnvironmentTest, compatibilityLearningAgent)
     ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
+
+    delete (&set.getInstruction(0));
+    delete (&set.getInstruction(1));
+    delete le;
 }
 
 TEST(AdversarialLearningEnvironmentTest, getScoresAndgetScore)
@@ -133,4 +137,6 @@ TEST(AdversarialLearningEnvironmentTest, getScoresAndgetScore)
     ASSERT_EQ(-1.0, le->getScores()->getScoreOf(0));
     ASSERT_EQ(1.0, le->getScores()->getScoreOf(1));
     ASSERT_DOUBLE_EQ(le->getScore(), le->getScores()->getScoreOf(0));
+
+    delete le;
 }

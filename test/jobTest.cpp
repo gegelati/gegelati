@@ -91,6 +91,8 @@ TEST(JobTest, addRoot)
 
     ASSERT_EQ(2, job->getSize())
         << "The job doesn't have the right size after a root add.";
+
+    delete job;
 }
 
 TEST(JobTest, getRootsAndRoot)
@@ -124,6 +126,8 @@ TEST(JobTest, getRootsAndRoot)
         << "The root from getRoot is not the good one";
 
     delete tpg2;
+    delete job;
+    delete job2;
 }
 
 TEST(JobTest, operatorGet)
@@ -140,4 +144,5 @@ TEST(JobTest, operatorGet)
     ASSERT_EQ(tpg2, (*job)[1]) << "The second root is not the good one";
 
     delete tpg2;
+    delete job;
 }
