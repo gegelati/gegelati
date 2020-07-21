@@ -91,7 +91,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
             }));
 
         e = new Environment(set, vect, 8);
-        p = new Program::Program(*e,5);
+        p = new Program::Program(*e,0);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(0); // Instruction is addPrimitiveType<double>.
@@ -297,7 +297,7 @@ TEST_F(ProgramExecutionEngineTest, setProgram)
     Program::ProgramExecutionEngine progExecEng(*p);
 
     // Create a new program
-    Program::Program p2(*e,5);
+    Program::Program p2(*e,0);
 
     ASSERT_NO_THROW(progExecEng.setProgram(p2))
         << "Setting a new Program with a valid Environment for a "
@@ -308,11 +308,17 @@ TEST_F(ProgramExecutionEngineTest, setProgram)
     otherVect.push_back(
         *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
     Environment otherE(set, otherVect, 2);
-    Program::Program p3(otherE,5);
+    Program::Program p3(otherE,0);
 
     ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error)
         << "Setting a Program with an incompatible Environment should not be "
            "possible.";
+
+	//add programs with parameters.
+	Program::Program p4(*e, 5);
+	Program::Program p5(*e, 5);
+	ASSERT_NO_THROW(progExecEng.setProgram(p4));
+	ASSERT_NO_THROW(progExecEng.setProgram(p5));
 
     // Clean up
     delete &otherVect.at(0).get();

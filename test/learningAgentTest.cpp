@@ -78,7 +78,7 @@ class LearningAgentTest : public ::testing::Test
         params.mutation.prog.pDelete = 0.5;
         params.mutation.prog.pMutate = 1.0;
         params.mutation.prog.pSwap = 1.0;
-        params.mutation.prog.nbProgramConstant = 5;
+        params.mutation.prog.nbProgramConstant = 0;
         params.mutation.prog.pConstantMutation = 0.5;
         params.mutation.prog.minConstValue = 0;
         params.mutation.prog.maxConstValue = 1;
@@ -358,8 +358,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
-    params.ratioDeletedRoots =
-        0.95; // high number to force the apparition of root action.
+    params.ratioDeletedRoots = 0.95; // high number to force the apparition of root action.
 
     // we will validate in order to cover validation log
     params.doValidation = true;

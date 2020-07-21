@@ -88,9 +88,9 @@ class MutatorTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
 
         e = new Environment(set, vect, 8);
-        p = new Program::Program(*e,5);
+        p = new Program::Program(*e);
         progPointer =
-            std::shared_ptr<Program::Program>(new Program::Program(*e,5));
+            std::shared_ptr<Program::Program>(new Program::Program(*e));
     }
 
     virtual void TearDown()
@@ -283,7 +283,7 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
             })));
 
     Environment e2(set, vect, 8);
-    Program::Program p2(e2,5);
+    Program::Program p2(e2);
 
     Program::ProgramExecutionEngine pEE(p2);
 
@@ -879,7 +879,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
-    params.prog.nbProgramConstant = 5;
+    params.prog.nbProgramConstant = 0;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
     params.prog.maxConstValue = 1;
@@ -927,7 +927,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
-    params.prog.nbProgramConstant = 5;
+    params.prog.nbProgramConstant = 0;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
     params.prog.maxConstValue = 1;
@@ -974,7 +974,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
-    params.prog.nbProgramConstant = 5;
+    params.prog.nbProgramConstant = 0;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
     params.prog.maxConstValue = 1;
@@ -1037,7 +1037,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
-    params.prog.nbProgramConstant = 5;
+    params.prog.nbProgramConstant = 0;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
     params.prog.maxConstValue = 1;

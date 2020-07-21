@@ -342,8 +342,7 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
     // Mutate behavior until it changes (against the archive).
     do {
         // Mutate until something is mutated (i.e. the function returns true)
-        while (!Mutator::ProgramMutator::mutateProgram(*newProg, params, rng))
-            ;
+        while (!Mutator::ProgramMutator::mutateProgram(*newProg, params, rng));
         // Check for uniqueness in archive
         auto archivedDataHandlers = archive.getDataHandlers();
         std::map<size_t, double> hashesAndResults;

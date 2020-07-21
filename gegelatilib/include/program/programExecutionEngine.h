@@ -65,7 +65,7 @@ namespace Program {
                        // Data::PrimitiveTypeArray<double> to keep track of
                        // accessed addresses.
 
-        /// Data sources used in the Program.
+        /// Data sources from the environment used for archiving a program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>
             dataSources;
 
@@ -124,16 +124,12 @@ namespace Program {
             static_assert(
                 std::is_convertible<T&, const Data::DataHandler&>::value);
             // Setup the data sources
-            this->dataSourcesAndRegisters.push_back(this->registers);
+            this->dataSourcesAndRegisters.push_back(this->registers);	
 
             // Cannot use insert here because it dataSourcesAndRegisters
             // requires constnessand dataSrc data are not const...
             for (std::reference_wrapper<T> data : dataSrc) {
                 this->dataSourcesAndRegisters.push_back(data.get());
-				if (prog.getConstantsAddressSpace() < 0)
-				{
-					this->dataSourcesAndRegisters.push_back(prog.getConstantHandler());
-				}
                 this->dataSources.push_back(data.get());
             }
 

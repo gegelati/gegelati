@@ -74,7 +74,7 @@ class ClassificationLearningAgentTest : public ::testing::Test
         params.mutation.prog.pDelete = 0.5;
         params.mutation.prog.pMutate = 1.0;
         params.mutation.prog.pSwap = 1.0;
-        params.mutation.prog.nbProgramConstant = 5;
+        params.mutation.prog.nbProgramConstant = 0;
         params.mutation.prog.pConstantMutation = 0.5;
         params.mutation.prog.minConstValue = 0;
         params.mutation.prog.maxConstValue = 1;
@@ -122,7 +122,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
         2 * params.nbIterationsPerPolicyEvaluation * params.maxNbActionsPerEval;
 
     Learn::ClassificationLearningAgent cla(fle, set, params);
-    Archive a; // For testing purposes, notmally, the archive from the
+    Archive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
     TPG::TPGExecutionEngine tee(cla.getTPGGraph().getEnvironment(), &a);

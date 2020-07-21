@@ -60,5 +60,5 @@ size_t Data::DataHandler::getHash() const
 uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation,
                                           const std::type_info& type) const
 {
-    return rawLocation % this->getAddressSpace(type);
+	return rawLocation%getAddressSpace(type);
 }

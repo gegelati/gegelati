@@ -343,7 +343,12 @@ TEST_F(ProgramTest, constants)
     {
         p.setConstantAt(j,j-2);
     }
-    ASSERT_EQ(p.getConstantsAddressSpace(), 5)
+
+	auto constants = p.getConstantHandler();
+	size_t c_size =  0;
+	ASSERT_NO_THROW(c_size = constants.getAddressSpace(typeid(Data::Constant))) 
+		<< "The accessor to the programs constants failed";
+    ASSERT_EQ(p.getConstantsAddressSpace(), c_size)
         << "The returned size of the constant adress space is incorrect";
     //access a constant
     ASSERT_EQ(p.getConstantAt(2), 0)

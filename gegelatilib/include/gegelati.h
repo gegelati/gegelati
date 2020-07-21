@@ -91,6 +91,5 @@
 
 #include <archive.h>
 #include <environment.h>
-#include <parameter.h>
 
 #endif

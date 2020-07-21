@@ -123,7 +123,7 @@ class TPGExecutionEngineTest : public ::testing::Test
         // Create 10 programs
         for (int i = 0; i < 10; i++) {
             progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e,5)));
+                std::shared_ptr<Program::Program>(new Program::Program(*e)));
         }
 
         // Create a TPG

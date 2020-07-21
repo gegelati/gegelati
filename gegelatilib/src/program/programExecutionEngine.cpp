@@ -40,23 +40,21 @@
 void Program::ProgramExecutionEngine::setProgram(const Program& prog)
 {
     // Check dataSource are similar in all point to the program environment
-    // '-1' on this->dataSources is to ignore registers
-	
-	//determine whether or not a programExecutionEngine has a constantHandler.
-	int peeHasConstants = 0;
-	if ((this->dataSources.size() + 2) == this->dataSourcesAndRegisters.size())
+	//delete programs parameters
+	if (this->program && this->program->getConstantsAddressSpace() > 0)
 	{
-		peeHasConstants = 1;
+		dataSourcesAndRegisters.erase(dataSourcesAndRegisters.begin(),dataSourcesAndRegisters.begin()+1);
 	}
-	if (this->dataSourcesAndRegisters.size() - 1 - peeHasConstants !=
+	// -1 because we don't count the registers that are the first datasources 
+	if (this->dataSourcesAndRegisters.size() - 1 !=
         prog.getEnvironment().getDataSources().size()) {
         throw std::runtime_error(
             "Data sources characteristics for Program Execution differ from "
             "Program reference Environment.");
     }
-    for (size_t i = 0; i < this->dataSourcesAndRegisters.size() - 1 - peeHasConstants; i++) {
+    for (size_t i = 0; i < this->dataSourcesAndRegisters.size() - 1; i++) {
         // check data source characteristics
-        auto& iDataSrc = this->dataSourcesAndRegisters.at(i + (size_t)(1+peeHasConstants)).get();
+        auto& iDataSrc = this->dataSourcesAndRegisters.at(i + (size_t)1).get();
         auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
         // Assume that dataSource must be (at least) a copy of each other to
         // simplify the comparison This is characterise by the two data sources
@@ -75,17 +73,12 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog)
 
     // Set the program
     this->program = &prog;
+	//add the program's parameters to the datasources
+	if (this->program->getConstantsAddressSpace() > 0)
+	{
+		this->dataSourcesAndRegisters.insert(dataSourcesAndRegisters.begin()+1, this->program->getConstantHandler());
+	}
 
-	//if the program had constants, we can replace them with the one of the new program
-	if(this->program->getConstantsAddressSpace() > 0 && peeHasConstants)
-	{
-		dataSourcesAndRegisters.at(1) = this->program->getConstantHandler();
-	}
-	else if (peeHasConstants) // the previous program had constants but the current doesn't
-	{
-		//delete the constants
-		dataSourcesAndRegisters.erase(dataSourcesAndRegisters.begin()+1);
-	}
     // Reset Registers (in case it is not done when they are constructed)
     this->registers.resetData();
 
