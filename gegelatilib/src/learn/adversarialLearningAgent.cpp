@@ -183,11 +183,17 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
         uint64_t archiveSeed;
         for(auto champion : champions) {
             archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-
             auto job = std::make_shared<Learn::AdversarialJob>(
                     Learn::AdversarialJob({root}, archiveSeed, index++));
             job->addRoot(champion);
             jobs.push(job);
+
+            // do the same but with the champion as first agent
+            archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
+            auto job2 = std::make_shared<Learn::AdversarialJob>(
+                    Learn::AdversarialJob({champion}, archiveSeed, index++));
+            job2->addRoot(root);
+            jobs.push(job2);
         }
     }
 
