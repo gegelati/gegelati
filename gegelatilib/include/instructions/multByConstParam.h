@@ -34,8 +34,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef INST_MULT_BY_CONST_PARAM_H
-#define INST_MULT_BY_CONST_PARAM_H
+#ifndef INST_MULT_BY_CONST_PARAM
+#define INST_MULT_BY_CONST_PARAM
 
 #include <memory>
 #include <type_traits>
@@ -48,17 +48,16 @@
 namespace Instructions {
 
     /**
-     * \brief Template class for add instruction on all types of data: double,
-     * int, ...
+     * \brief Template class for multiplying a unique argument of type T by a constant parameter
      */
-    template <class T, class U> class MultByConstParam : public Instruction
+    template <class T, class U = Data::Constant> 
+	class MultByConstParam : public Instruction
     {
-        static_assert(std::is_fundamental<T>::value && 
-						std::is_fundamental<U>::value,
-                      "Template class MultByConstParam<T,U> can only be used for "
+        static_assert(std::is_fundamental<T>::value,
+                      "Template class MultByConstParam<> can only be used for "
                       "primitive types.");
-		static_assert(std::is_same<Data::Constant, U>() || std::is_same<int32_t, U>(),
-						"Parameters type should be Data::Constant")
+		static_assert(std::is_same<U, Data::Constant>() || std::is_same<U, int32_t>(),
+						"Parameters type should be Data::Constant");
 
      public:
         /**
@@ -66,26 +65,24 @@ namespace Instructions {
          */
         MultByConstParam();
 
-        double execute(std::vector<Data::UntypedSharedPtr>& args) const override;
+        double execute(const std::vector<Data::UntypedSharedPtr>& args) const override;
 	};
 	
-	template<class T, class U>
-	inline MultByConstParam<T, U>::MultByConstParam()
+	template<class T,class U> MultByConstParam<T,U>::MultByConstParam()
 	{
 		this->operandTypes.push_back(typeid(T));
+		this->operandTypes.push_back(typeid(U));
 		this->nbParameters = 1;
 	}
 
 	template<class T, class U>
-	inline double MultByConstParam<T, U>::execute(std::vector<Data::UntypedSharedPtr>& args) const
+	inline double MultByConstParam<T, U>::execute(const std::vector<Data::UntypedSharedPtr>& args) const
 	{
 	#ifndef NDEBUG
 		if(Instruction::execute(args)!=1.0) return 0;
 	#endif
-		const U pValue = (const U &) args.at(1).getSharedPointer<const U>();
-		return *(args.at(0).getSharedPointer<const T>()) * double pValue;
+		const U pValue = (const U &) *(args.at(1).getSharedPointer<const U>());
+		return *(args.at(0).getSharedPointer<const T>()) * (double)pValue;
 	}
 } // namespace Instructions
-
-
 #endif //INST_MULT_BY_CONST_PARAM_H
