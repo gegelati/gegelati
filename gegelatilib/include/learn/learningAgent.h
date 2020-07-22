@@ -133,6 +133,9 @@ namespace Learn {
                 this->learningEnvironment.getNbActions();
         };
 
+        /// Default destructor for polymorphism
+        virtual ~LearningAgent() = default;
+
         /**
          * \brief Getter for the TPGGraph built by the LearningAgent.
          *
