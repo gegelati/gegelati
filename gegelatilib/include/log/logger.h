@@ -59,6 +59,9 @@ namespace Log {
          */
         explicit Logger(std::ostream& out = std::cout) : out(&out){};
 
+        /// Virtual default destructor for polyphormism support.
+        virtual ~Logger() = default;
+
         /**
          * \brief << operator to manipulate stream and enter stream-specific
          * elements (like std::endl).
