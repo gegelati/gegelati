@@ -11,15 +11,23 @@ _aaaa.mm.dd_
     * New Data::PrimitiveTypeArray2D data handler for providing 2D data sources.
 	* Support in UntypedSharedPtr for fetching 2D operands for instructions. Due to C++ constraints, 2D arrays must be packaged into 1D dynamically allocated arrays.
 	* Support for 2D primitive C-style array in LambdaInstructions.
+* New LAPolicyStatsLogger that logs the PolicyStats of the LearningAgent::bestRoot each time it is updated.
 
 ### Changes
 * Remove redundant typecheck in `PrimitiveTypeArray::setDataAt()` in `NDEBUG` mode. A performance gain of ~25% was observed on the MNIST application (without a thorough profiling method).
 * tpgGraphDotImporter now has a line MAX_READ_SIZE limit of 4096 (instead of 1024), allowing to read greater tpg dot files.
 * Add a caching mechanism in `Data::PrimitiveTypeArray[2D]` to avoid reexecuting the `getAddressSpace()` regular expression more than once for each data type. (This had a huge overhead on execution time.)
+* Logger
+    * Refactor the LALogger class (and daughter classes) to keep a reference to the associated LearningAgent at construction time.
+	* Update formatting of LABasicLogger to produce a more compact log.
+	* Add mutation time "T_mutat" to LABasicLogger log.
+	* Rename Logger files to start with a lower-case character.
 
 ### Bug fix
 * Adapt code for building GEGELATI with clang standard library: libc++. (see Issue #49 for mode details)
 * Fix implicit template type for std::vector in ClassificationLearningAgentTest.
+* Fix call to LALogger when validation is activated. LALoggers were called on training results even when validation was activated.
+* Fix missing virtual destructor in the Logger class.
 
 
 ## Release version 0.3.0
