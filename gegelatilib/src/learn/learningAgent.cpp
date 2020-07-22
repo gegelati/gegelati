@@ -307,8 +307,8 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
 }
 
 void Learn::LearningAgent::updateEvaluationRecords(
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
-        results)
+    const std::multimap<std::shared_ptr<EvaluationResult>,
+                        const TPG::TPGVertex*>& results)
 {
     { // Update resultsPerRoot
         for (auto result : results) {

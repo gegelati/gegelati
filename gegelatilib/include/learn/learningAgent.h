@@ -307,9 +307,8 @@ namespace Learn {
          * \param[in] results Map from the evaluateAllRoots method.
          */
         void updateEvaluationRecords(
-            std::multimap<std::shared_ptr<EvaluationResult>,
-                          const TPG::TPGVertex*>
-                results);
+            const std::multimap<std::shared_ptr<EvaluationResult>,
+                                const TPG::TPGVertex*>& results);
 
         /**
          * \brief This method resets the previous registered scores per root.
