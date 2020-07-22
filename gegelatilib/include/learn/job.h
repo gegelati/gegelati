@@ -37,6 +37,7 @@
 #define JOB_H
 
 #include <vector>
+#include <cstdint>
 
 #include "tpg/tpgVertex.h"
 
@@ -85,35 +86,29 @@ namespace Learn {
         {
         }
 
+        /// Default virtual destructor
+        virtual ~Job() = default;
+
         /**
          * \brief Getter of index.
          *
          * @return The index of the job.
          */
-        uint64_t getIdx() const
-        {
-            return idx;
-        }
+        uint64_t getIdx() const;
 
         /**
          * \brief Getter of archiveSeed.
          *
          * @return The archive seed of the job.
          */
-        uint64_t getArchiveSeed() const
-        {
-            return archiveSeed;
-        }
+        uint64_t getArchiveSeed() const;
 
         /**
          * \brief Getter of the root.
          *
          * @return The root embedded by the job.
          */
-        virtual const TPG::TPGVertex* getRoot() const
-        {
-            return root;
-        }
+        virtual const TPG::TPGVertex* getRoot() const;
     };
 } // namespace Learn
 

@@ -83,40 +83,28 @@ namespace Learn {
          *
          * @param[in] root The root that will be added to this job.
          */
-        void addRoot(const TPG::TPGVertex* root)
-        {
-            roots.emplace_back(root);
-        }
+        void addRoot(const TPG::TPGVertex* root);
 
         /**
          * \brief Getter of the number of roots.
          *
          * @return The number of roots in this job.
          */
-        [[nodiscard]] size_t getSize() const
-        {
-            return roots.size();
-        }
+        size_t getSize() const;
 
         /**
          * \brief Getter of the roots.
          *
          * @return The vector containing the roots of the job.
          */
-        [[nodiscard]] std::vector<const TPG::TPGVertex*> getRoots() const
-        {
-            return roots;
-        }
+        std::vector<const TPG::TPGVertex*> getRoots() const;
 
         /**
          * \brief Getter of the first root.
          *
          * @return The first root embedded by the job.
          */
-        const TPG::TPGVertex* getRoot() const override
-        {
-            return roots[0];
-        }
+        const TPG::TPGVertex* getRoot() const override;
 
         /**
          * \brief Getter of a single root in the list.
@@ -124,10 +112,7 @@ namespace Learn {
          * @param[in] i The wanted index in the list of roots.
          * @return The root found at index i.
          */
-        const TPG::TPGVertex* operator[](int i) const
-        {
-            return roots[i];
-        }
+        const TPG::TPGVertex* operator[](int i) const;
     };
 } // namespace Learn
 
