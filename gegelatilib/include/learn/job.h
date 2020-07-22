@@ -36,8 +36,8 @@
 #ifndef JOB_H
 #define JOB_H
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 #include "tpg/tpgVertex.h"
 

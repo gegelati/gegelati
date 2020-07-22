@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #include "learn/job.h"
 
 uint64_t Learn::Job::getIdx() const
@@ -41,12 +40,12 @@ uint64_t Learn::Job::getIdx() const
     return idx;
 }
 
-
 uint64_t Learn::Job::getArchiveSeed() const
 {
     return archiveSeed;
 }
 
-const TPG::TPGVertex* Learn::Job::getRoot() const {
+const TPG::TPGVertex* Learn::Job::getRoot() const
+{
     return root;
 }

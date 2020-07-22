@@ -35,7 +35,6 @@
 
 #include "learn/adversarialJob.h"
 
-
 void Learn::AdversarialJob::addRoot(const TPG::TPGVertex* root)
 {
     roots.emplace_back(root);
@@ -52,7 +51,7 @@ std::vector<const TPG::TPGVertex*> Learn::AdversarialJob::getRoots() const
 
 const TPG::TPGVertex* Learn::AdversarialJob::getRoot() const
 {
-return roots[0];
+    return roots[0];
 }
 
 const TPG::TPGVertex* Learn::AdversarialJob::operator[](int i) const
