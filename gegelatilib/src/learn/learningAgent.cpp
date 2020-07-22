@@ -206,7 +206,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Remove worst performing roots
     decimateWorstRoots(results);
-    // Update the best 
+    // Update the best
     this->updateEvaluationRecords(results);
 
     for (auto logger : loggers) {
@@ -324,6 +324,11 @@ void Learn::LearningAgent::updateEvaluationRecords(
                 // with the new one (which was combined with the pre-existing
                 // one in evalRoot)
                 mapIterator->second = result.first;
+                // If the received result is associated to the current bestRoot,
+                // update it.
+                if (result.second == this->bestRoot.first) {
+                    this->bestRoot.second = result.first;
+                }
             }
         }
     }
