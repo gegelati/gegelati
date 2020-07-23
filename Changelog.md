@@ -6,6 +6,10 @@ _aaaa.mm.dd_
 ### New features
 * Fix code for building GEGELATI with clang (v7+) and added a dedicated job with travis-ci.
 * Add osx job in travis-ci.
+* Add adversarial training support. AdversarialLearningAgent can be declared and used with an AdversarialLearningEnvironment to train random groups of several roots together.
+
+### Changes
+* Learning Agents now handle jobs instead of simple roots, allowing new concepts like adversarial learning (a job containing several roots that will train together).
 * Adding `LearningAgent::forgetPreviousResults()` method to support changing LearningEnvironment where score of previous generation need to be forgotten from time to time. This is usefull when the LearningEnvironment evolves every _N_ generations to teach new skills gradually.
 * Add support for 2D arrays with.
     * New Data::PrimitiveTypeArray2D data handler for providing 2D data sources.

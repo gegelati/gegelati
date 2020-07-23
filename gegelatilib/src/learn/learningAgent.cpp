@@ -36,6 +36,7 @@
  */
 
 #include <inttypes.h>
+#include <queue>
 
 #include "data/hash.h"
 #include "learn/evaluationResult.h"
@@ -101,15 +102,17 @@ bool Learn::LearningAgent::isRootEvalSkipped(
     }
 }
 
-std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(
-    TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root,
-    uint64_t generationNumber, Learn::LearningMode mode,
-    LearningEnvironment& le) const
+std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
+    TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber,
+    Learn::LearningMode mode, LearningEnvironment& le) const
 {
+    // Only consider the first root of jobs as we are not in adversarial mode
+    const TPG::TPGVertex* root = job.getRoot();
+
     // Skip the root evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
-    if (mode == TRAINING && this->isRootEvalSkipped(root, previousEval)) {
+    if (mode == TRAINING && this->isRootEvalSkipped(*root, previousEval)) {
         return previousEval;
     }
 
@@ -130,7 +133,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the action
             uint64_t actionID =
-                ((const TPG::TPGAction*)tee.executeFromRoot(root).back())
+                ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())
                     ->getActionID();
             // Do it
             le.doAction(actionID);
@@ -167,17 +170,12 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
     TPG::TPGExecutionEngine tee(
         this->env, (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
-    for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
-        // Before each root evaluation, set a new seed for the archive in
-        // TRAINING Mode Else, archiving should be deactivate anyway
-        if (mode == LearningMode::TRAINING) {
-            this->archive.setRandomSeed(
-                this->rng.getUnsignedInt64(0, UINT64_MAX));
-        }
-
-        std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
-            tee, *root, generationNumber, mode, this->learningEnvironment);
-        result.emplace(avgScore, root);
+    for (int i = 0; i < tpg.getNbRootVertices(); i++) {
+        auto job = makeJob(i, mode);
+        this->archive.setRandomSeed(job->getArchiveSeed());
+        std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
+            tee, *job, generationNumber, mode, this->learningEnvironment);
+        result.emplace(avgScore, (*job).getRoot());
     }
 
     return result;
@@ -375,6 +373,40 @@ void Learn::LearningAgent::keepBestPolicy()
             }
         }
     }
+}
+
+std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
+    int num, Learn::LearningMode mode, int idx, TPG::TPGGraph* tpgGraph)
+{
+    // sets the tpg to the Learning Agent's one if no one was specified
+    tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
+
+    // Before each root evaluation, set a new seed for the archive in
+    // TRAINING Mode Else, archiving should be deactivate anyway
+    auto archiveSeed = 0;
+    if (mode == LearningMode::TRAINING) {
+        archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
+    }
+
+    if (tpgGraph->getNbRootVertices() > 0) {
+        return std::make_shared<Learn::Job>(
+            Learn::Job({tpgGraph->getRootVertices()[num]}, archiveSeed, idx));
+    }
+    return nullptr;
+}
+
+std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
+    Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
+{
+    // sets the tpg to the Learning Agent's one if no one was specified
+    tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
+
+    std::queue<std::shared_ptr<Learn::Job>> jobs;
+    for (int i = 0; i < tpgGraph->getNbRootVertices(); i++) {
+        auto job = makeJob(i, mode, i);
+        jobs.push(job);
+    }
+    return jobs;
 }
 
 void Learn::LearningAgent::forgetPreviousResults()

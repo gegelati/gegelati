@@ -39,6 +39,7 @@
 #define LEARNING_AGENT_H
 
 #include <map>
+#include <queue>
 
 #include "archive.h"
 #include "environment.h"
@@ -49,9 +50,9 @@
 #include "tpg/tpgGraph.h"
 
 #include "learn/evaluationResult.h"
+#include "learn/job.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
-
 namespace Learn {
 
     /**
@@ -158,17 +159,6 @@ namespace Learn {
         Mutator::RNG& getRNG();
 
         /**
-         * \brief Initialize the LearningAgent.
-         *
-         * Calls the TPGMutator::initRandomTPG function.
-         * Initialize the Mutator::RNG with the given seed.
-         * Clears the Archive.
-         *
-         * \param[in] seed the seed given to the TPGMutator.
-         */
-        void init(uint64_t seed = 0);
-
-        /**
          * \brief Adds a LALogger to the loggers vector.
          *
          * Adds a logger to the loggers vector, so that it will be called in
@@ -191,8 +181,9 @@ namespace Learn {
          * The method is const to enable potential parallel calls to it.
          *
          * \param[in] tee The TPGExecutionEngine to use.
-         * \param[in] root the TPGVertex from which the policy evaluation
-         * starts. \param[in] generationNumber the integer number of the current
+         * \param[in] job The job containing the root and archiveSeed for
+         * the evaluation.
+         * \param[in] generationNumber the integer number of the current
          * generation. \param[in] mode the LearningMode to use during the policy
          * evaluation. \param[in] le Reference to the LearningEnvironment to use
          * during the policy evaluation (may be different from the attribute of
@@ -205,8 +196,8 @@ namespace Learn {
          * current generation is returned, already combined with the
          * resultsPerRoot for this root (if any).
          */
-        virtual std::shared_ptr<EvaluationResult> evaluateRoot(
-            TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root,
+        virtual std::shared_ptr<EvaluationResult> evaluateJob(
+            TPG::TPGExecutionEngine& tee, const Job& job,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
 
@@ -231,7 +222,7 @@ namespace Learn {
         /**
          * \brief Evaluate all root TPGVertex of the TPGGraph.
          *
-         * This method calls the evaluateRoot method for every root TPGVertex
+         * This method calls the evaluateJob method for every root TPGVertex
          * of the TPGGraph. The method returns a sorted map associating each
          * root vertex to its average score, in ascending order or score.
          *
@@ -342,6 +333,50 @@ namespace Learn {
          * a TPGVertex of the TPGGraph, nothing happens.
          */
         void keepBestPolicy();
+
+        /**
+         * \brief Takes a given root index and creates a job containing it.
+         * Useful for example in adversarial mode where a job could contain a
+         * match of several roots.
+         *
+         * \param[in] num The index of the root we want to put in a job.
+         * \param[in] mode the mode of the training, determining for example
+         * if we generate values that we only need for training.
+         * \param[in] idx The index of the job, can be used to organize a map
+         * for example.
+         * \param[in] tpgGraph The TPG graph from which we will take the
+         * root.
+         *
+         * \return A job representing the root.
+         */
+        virtual std::shared_ptr<Learn::Job> makeJob(
+            int num, Learn::LearningMode mode, int idx = 0,
+            TPG::TPGGraph* tpgGraph = nullptr);
+
+        /**
+         * \brief Puts all roots into jobs to be able to use them in simulation
+         * later.
+         *
+         * \param[in] mode the mode of the training, determining for example
+         * if we generate values that we only need for training.
+         * \param[in] tpgGraph The TPG graph from which we will take the
+         * roots.
+         *
+         * @return A queue containing pointers of the newly created jobs.
+         */
+        virtual std::queue<std::shared_ptr<Learn::Job>> makeJobs(
+            Learn::LearningMode mode, TPG::TPGGraph* tpgGraph = nullptr);
+
+        /**
+         * \brief Initialize the LearningAgent.
+         *
+         * Calls the TPGMutator::initRandomTPG function.
+         * Initialize the Mutator::RNG with the given seed.
+         * Clears the Archive.
+         *
+         * \param[in] seed the seed given to the TPGMutator.
+         */
+        void init(uint64_t seed = 0);
     };
 }; // namespace Learn
 

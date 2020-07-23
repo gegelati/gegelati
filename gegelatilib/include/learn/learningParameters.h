@@ -54,7 +54,18 @@ namespace Learn {
         size_t archiveSize;
         /// Probability of archiving each Program execution.
         double archivingProbability;
-        /// Number of evaluation of each policy per generation.
+        /**
+         * \brief Number of evaluation of each policy per generation.
+         *
+         * In LearningAgent and ParallelLearningAgent it is just the number of
+         * times the evaluations are repeated (that can produce a more
+         * representative result in non-deterministic environments).
+         * In adversarial mode, that represents the minimum number of evaluation
+         * of each root. Each root will be evaluated in several jobs, each job
+         * can be evaluated several times, but the total number of times a root
+         * appears in an evaluation will be nbIterationsPerPolicyEvaluation or
+         * a bit higher.
+         */
         uint64_t nbIterationsPerPolicyEvaluation;
         /// Maximum number of action per evaluation of a policy.
         uint64_t maxNbActionsPerEval;
@@ -66,6 +77,26 @@ namespace Learn {
         /// Maximum number of times a given policy (i.e. a root TPGVertex) is
         /// evaluated.
         size_t maxNbEvaluationPerPolicy;
+
+        /**
+         * \brief Number of evaluations done for each job.
+         *
+         * In some situations where the environments is not determinist,
+         * i.e. if the agent does exactly the same thing at the same moment
+         * but he can still make different scores in different runs, then it
+         * can be a good thing to evaluate several times a single job. It will
+         * statistically be more representative of the job.
+         *
+         * Note than in LearningAgent and ParallelLearningAgent it is currently
+         * unused as the number of eval per job will simply be
+         * nbIterationsPerPolicyEvaluation.
+         *
+         * The default value is to 1, that means a given job will be evaluated
+         * a single time and there will be as many jobs as
+         * nbIterationsPerPolicyEvaluation.
+         */
+        size_t nbIterationsPerJob = 1;
+
         /// Number of registers for the Program execution
         size_t nbRegisters = 8;
         /**

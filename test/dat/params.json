@@ -4,6 +4,7 @@
   "nbIterationsPerPolicyEvaluation": 50,
   "maxNbActionsPerEval": 5,
   "ratioDeletedRoots": 0.85,
+  "nbIterationsPerJob": 31,
   "maxNbEvaluationPerPolicy": 100,
   "nbRegisters": 3,
   "nbThreads": 2,
