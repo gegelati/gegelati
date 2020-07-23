@@ -35,7 +35,7 @@
 
 #include <iostream>
 
-#include "log/Logger.h"
+#include "log/logger.h"
 
 Log::Logger Log::Logger::operator<<(std::ostream& (*manip)(std::ostream&))
 {

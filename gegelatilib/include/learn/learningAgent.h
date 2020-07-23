@@ -44,7 +44,7 @@
 #include "archive.h"
 #include "environment.h"
 #include "instructions/set.h"
-#include "log/LALogger.h"
+#include "log/laLogger.h"
 #include "mutator/mutationParameters.h"
 #include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"
@@ -133,6 +133,9 @@ namespace Learn {
             this->params.mutation.tpg.nbActions =
                 this->learningEnvironment.getNbActions();
         };
+
+        /// Default destructor for polymorphism
+        virtual ~LearningAgent() = default;
 
         /**
          * \brief Getter for the TPGGraph built by the LearningAgent.
@@ -298,9 +301,8 @@ namespace Learn {
          * \param[in] results Map from the evaluateAllRoots method.
          */
         void updateEvaluationRecords(
-            std::multimap<std::shared_ptr<EvaluationResult>,
-                          const TPG::TPGVertex*>
-                results);
+            const std::multimap<std::shared_ptr<EvaluationResult>,
+                                const TPG::TPGVertex*>& results);
 
         /**
          * \brief This method resets the previous registered scores per root.

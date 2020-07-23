@@ -78,9 +78,8 @@ void Learn::LearningAgent::init(uint64_t seed)
 
 void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 {
-    logger.doValidation = params.doValidation;
+    logger.doValidation = this->params.doValidation;
     // logs for example the headers of the columns the logger will print
-    logger.logHeader();
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
 }
 
@@ -95,7 +94,7 @@ bool Learn::LearningAgent::isRootEvalSkipped(
         // The root has already been evaluated
         previousResult = iter->second;
         return iter->second->getNbEvaluation() >=
-               params.maxNbEvaluationPerPolicy;
+               this->params.maxNbEvaluationPerPolicy;
     }
     else {
         previousResult = nullptr;
@@ -184,12 +183,16 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 {
+    for (auto logger : loggers) {
+        logger.get().logNewGeneration(generationNumber);
+    }
+
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(this->tpg, this->archive,
                                      this->params.mutation, this->rng,
                                      maxNbThreads);
     for (auto logger : loggers) {
-        logger.get().logAfterPopulateTPG(generationNumber, tpg);
+        logger.get().logAfterPopulateTPG();
     }
 
     // Evaluate
@@ -201,19 +204,19 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Remove worst performing roots
     decimateWorstRoots(results);
-    for (auto logger : loggers) {
-        logger.get().logAfterDecimate(tpg);
-    }
-
-    // Update the best (code duplicate in ParallelLearningAgent)
+    // Update the best
     this->updateEvaluationRecords(results);
+
+    for (auto logger : loggers) {
+        logger.get().logAfterDecimate();
+    }
 
     // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
-        auto result =
+        auto validationResults =
             evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
         for (auto logger : loggers) {
-            logger.get().logAfterValidate(results);
+            logger.get().logAfterValidate(validationResults);
         }
     }
 
@@ -302,8 +305,8 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
 }
 
 void Learn::LearningAgent::updateEvaluationRecords(
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
-        results)
+    const std::multimap<std::shared_ptr<EvaluationResult>,
+                        const TPG::TPGVertex*>& results)
 {
     { // Update resultsPerRoot
         for (auto result : results) {
@@ -319,6 +322,11 @@ void Learn::LearningAgent::updateEvaluationRecords(
                 // with the new one (which was combined with the pre-existing
                 // one in evalRoot)
                 mapIterator->second = result.first;
+                // If the received result is associated to the current bestRoot,
+                // update it.
+                if (result.second == this->bestRoot.first) {
+                    this->bestRoot.second = result.first;
+                }
             }
         }
     }

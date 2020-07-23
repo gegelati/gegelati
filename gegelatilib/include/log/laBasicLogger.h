@@ -36,7 +36,9 @@
 #ifndef LA_BASIC_LOGGER_H
 #define LA_BASIC_LOGGER_H
 
-#include "log/LALogger.h"
+#include <iomanip>
+
+#include "log/laLogger.h"
 
 namespace Log {
 
@@ -53,7 +55,7 @@ namespace Log {
         /**
          * Width of columns when logging values.
          */
-        int colWidth = 17;
+        int colWidth = 9;
 
         /**
          * \brief Logs the min, avg and max score of the generation.
@@ -69,10 +71,18 @@ namespace Log {
         /**
          * \brief Same constructor as LaLogger. Default output is cout.
          *
-         * \param[in] out The output stream the logger will send elements to.
+         * \param[in] la LearningAgent whose information will be logged by the
+         * LABasicLogger.
+         * \param[in] out The output stream the logger will send
+         * elements to.
          */
-        explicit LABasicLogger(std::ostream& out = std::cout) : LALogger(out)
+        explicit LABasicLogger(Learn::LearningAgent& la,
+                               std::ostream& out = std::cout)
+            : LALogger(la, out)
         {
+            // fixing float precision
+            *this << std::setprecision(2) << std::fixed << std::right;
+            this->logHeader();
         }
 
         /**
@@ -83,15 +93,22 @@ namespace Log {
         virtual void logHeader() override;
 
         /**
-         * Inherited via LaLogger.
+         * Inherited via LALogger.
          *
-         * \brief Logs the generation and vertices nb of the tpg.
+         * \brief Logs the generation of training.
          *
-         * \param[in] generationNumber The number of the current generation.
-         * \param[in] tpg The current tpg of the learning agent.
+         * \param[in] generationNumber The number of the current
+         * generation.
          */
-        virtual void logAfterPopulateTPG(uint64_t& generationNumber,
-                                         TPG::TPGGraph& tpg) override;
+        virtual void logNewGeneration(uint64_t& generationNumber) override;
+
+        /**
+         * Inherited via LALogger.
+         *
+         * \brief Logs the vertices nb of the tpg.
+         */
+        virtual void logAfterPopulateTPG() override;
+
         /**
          * Inherited via LaLogger.
          *
@@ -111,10 +128,8 @@ namespace Log {
          * Inherited via LaLogger.
          *
          * \brief Does nothing in this logger.
-         *
-         * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(TPG::TPGGraph& tpg) override{
+        virtual void logAfterDecimate() override{
             // nothing to log
         };
 

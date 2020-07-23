@@ -39,7 +39,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "log/LABasicLogger.h"
+#include "log/laBasicLogger.h"
 
 #include "tpg/tpgGraph.h"
 
@@ -118,8 +118,13 @@ TEST_F(LearningAgentTest, addLogger)
     params.archivingProbability = 0.5;
     Learn::LearningAgent la(le, set, params);
 
-    auto l = new Log::LABasicLogger(std::cout);
-    ASSERT_NO_THROW(la.addLogger(*l)) << "Adding a logger should not fail.";
+    Log::LALogger* l = nullptr;
+    ASSERT_NO_THROW(
+        l = new Log::LABasicLogger(la, std::cout)) // Call addLogger.
+        << "Adding a logger should not fail.";
+    if (l != nullptr) {
+        delete l;
+    }
 }
 
 TEST_F(LearningAgentTest, IsRootEvalSkipped)
@@ -451,8 +456,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
 
     // we add a logger to la to check it logs things
     std::ofstream o("tempFileForTest", std::ofstream::out);
-    auto l = new Log::LABasicLogger(o);
-    la.addLogger(*l);
+    Log::LABasicLogger l(la, o);
 
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
