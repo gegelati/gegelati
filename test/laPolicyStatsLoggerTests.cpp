@@ -103,3 +103,25 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluate)
         << "Training a new generation (which deterministically creates a new "
            "bestRoot) should result in new log being written.";
 }
+
+TEST_F(LAPolicyStatsLoggerTest, EmptyMethods)
+{
+    std::stringstream strStr;
+    Log::LAPolicyStatsLogger log(*la, strStr);
+
+    // Explicit calls to empty method to force code coverage.
+    // These methods are called during la.trainOneGeneration
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        emptyMap;
+    log.logAfterPopulateTPG();
+    log.logEndOfTraining();
+    log.logAfterEvaluate(emptyMap);
+
+    // These methods are not called otherwise
+    log.logHeader();
+    log.logAfterValidate(emptyMap);
+
+    ASSERT_EQ(strStr.str().size(), 0)
+        << "Empty method should not generate any log.";
+}

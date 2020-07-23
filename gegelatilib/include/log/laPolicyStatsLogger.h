@@ -44,10 +44,14 @@ namespace Log {
         void logNewGeneration(uint64_t& generationNumber) override;
 
         /// Inherited from LALogger
-        void logHeader() override{};
+        void logHeader() override{
+            // nothing to log
+        };
 
         /// Inherited from LALogger
-        void logAfterPopulateTPG() override{};
+        void logAfterPopulateTPG() override{
+            // nothing to log
+        };
 
         /// Inherited from LALogger
         void logAfterDecimate() override;
@@ -55,15 +59,21 @@ namespace Log {
         /// Inherited from LALogger
         void logAfterValidate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) override{};
+                          const TPG::TPGVertex*>& results) override{
+            // nothing to log
+        };
 
         /// Inherited from LALogger
-        void logEndOfTraining() override{};
+        void logEndOfTraining() override{
+            // nothing to log
+        };
 
         /// Inherited from LALogger
         void logAfterEvaluate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) override{};
+                          const TPG::TPGVertex*>& results) override{
+            // nothing to log
+        };
     };
 }; // namespace Log
 
