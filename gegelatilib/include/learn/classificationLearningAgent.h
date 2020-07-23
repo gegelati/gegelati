@@ -90,15 +90,15 @@ namespace Learn {
             : BaseLearningAgent(le, iSet, p){};
 
         /**
-         * \brief Specialization of the evaluateRoot method for classification
+         * \brief Specialization of the evaluateJob method for classification
          * purposes.
          *
          * This method returns a ClassificationEvaluationResult for the
          * evaluated root instead of the usual EvaluationResult. The score per
          * root corresponds to the F1 score for this class.
          */
-        virtual std::shared_ptr<EvaluationResult> evaluateRoot(
-            TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root,
+        virtual std::shared_ptr<EvaluationResult> evaluateJob(
+            TPG::TPGExecutionEngine& tee, const Job& root,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const override;
 
@@ -136,16 +136,20 @@ namespace Learn {
 
     template <class BaseLearningAgent>
     inline std::shared_ptr<EvaluationResult> ClassificationLearningAgent<
-        BaseLearningAgent>::evaluateRoot(TPG::TPGExecutionEngine& tee,
-                                         const TPG::TPGVertex& root,
-                                         uint64_t generationNumber,
-                                         LearningMode mode,
-                                         LearningEnvironment& le) const
+        BaseLearningAgent>::evaluateJob(TPG::TPGExecutionEngine& tee,
+                                        const Job& job,
+                                        uint64_t generationNumber,
+                                        LearningMode mode,
+                                        LearningEnvironment& le) const
     {
+        // Only consider the first root of jobs as we are not in adversarial
+        // mode
+        const TPG::TPGVertex* root = job.getRoot();
+
         // Skip the root evaluation process if enough evaluations were already
         // performed. In the evaluation mode only.
         std::shared_ptr<Learn::EvaluationResult> previousEval;
-        if (mode == TRAINING && this->isRootEvalSkipped(root, previousEval)) {
+        if (mode == TRAINING && this->isRootEvalSkipped(*root, previousEval)) {
             return previousEval;
         }
 
@@ -170,7 +174,7 @@ namespace Learn {
                    nbActions < this->params.maxNbActionsPerEval) {
                 // Get the action
                 uint64_t actionID =
-                    ((const TPG::TPGAction*)tee.executeFromRoot(root).back())
+                    ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())
                         ->getActionID();
                 // Do it
                 le.doAction(actionID);
@@ -240,7 +244,7 @@ namespace Learn {
     {
         // Check that results are ClassificationEvaluationResults.
         // (also throws on empty results)
-        EvaluationResult* result = results.begin()->first.get();
+        const EvaluationResult* result = results.begin()->first.get();
         if (typeid(ClassificationEvaluationResult) != typeid(*result)) {
             throw std::runtime_error(
                 "ClassificationLearningAgent can not decimate worst roots for "

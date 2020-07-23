@@ -180,6 +180,10 @@ void File::ParametersParser::setParameterFromString(
         params.nbGenerations = value.asUInt64();
         return;
     }
+    if (param == "nbIterationsPerJob") {
+        params.nbIterationsPerJob = value.asUInt64();
+        return;
+    }
     if (param == "maxNbEvaluationPerPolicy") {
         params.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
         return;

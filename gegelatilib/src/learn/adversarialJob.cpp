@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,54 +33,28 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
-#define FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
+#include "learn/adversarialJob.h"
 
-#include "data/primitiveTypeArray.h"
-#include "learn/classificationLearningEnvironment.h"
-
-/**
- * \brief Classification Learning enviroment for testing purposes
- */
-class FakeClassificationLearningEnvironment
-    : public Learn::ClassificationLearningEnvironment
+void Learn::AdversarialJob::addRoot(const TPG::TPGVertex* root)
 {
-  protected:
-    Data::PrimitiveTypeArray<int> data;
-    int value;
+    roots.emplace_back(root);
+}
 
-  public:
-    FakeClassificationLearningEnvironment()
-        : ClassificationLearningEnvironment(3), data(1), value{0} {};
-    void doAction(uint64_t actionId) override
-    {
-        // Increment classificationTable
-        ClassificationLearningEnvironment::doAction(actionId);
+size_t Learn::AdversarialJob::getSize() const
+{
+    return roots.size();
+}
+std::vector<const TPG::TPGVertex*> Learn::AdversarialJob::getRoots() const
+{
+    return roots;
+}
 
-        // Update data
-        value++;
-        this->currentClass = value % 3;
-        data.setDataAt(typeid(int), 0, value);
-    }
-    void reset(size_t seed, Learn::LearningMode mode) override
-    {
-        // Call super pure virtual method to reset the pure virtual method.
-        ClassificationLearningEnvironment::reset(seed, mode);
+const TPG::TPGVertex* Learn::AdversarialJob::getRoot() const
+{
+    return roots[0];
+}
 
-        this->value = 0;
-        this->currentClass = 0;
-    };
-    std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources() override
-    {
-        std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
-        vect.push_back(data);
-        return vect;
-    }
-    bool isTerminal() const override
-    {
-        return false;
-    }
-};
-
-#endif // !FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
+const TPG::TPGVertex* Learn::AdversarialJob::operator[](int i) const
+{
+    return roots[i];
+}
