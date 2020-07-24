@@ -59,7 +59,7 @@ TEST(LearningParametersTest, readConfigFile)
         << "Ill-formed parameters file should result in no root filling";
 
     File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
-    ASSERT_EQ(11, root.size())
+    ASSERT_EQ(12, root.size())
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(9, root["mutation"]["tpg"].size())
         << "Wrong number of elements in parsed json file";
@@ -88,6 +88,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(50, params.archiveSize);
     ASSERT_EQ(0.5, params.archivingProbability);
     ASSERT_EQ(50, params.nbIterationsPerPolicyEvaluation);
+    ASSERT_EQ(31, params.nbIterationsPerJob);
     ASSERT_EQ(5, params.maxNbActionsPerEval);
     ASSERT_EQ(0.85, params.ratioDeletedRoots);
     ASSERT_EQ(100, params.maxNbEvaluationPerPolicy);
@@ -126,6 +127,8 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(params2.doValidation, false)
         << "Default validation should be false";
     ASSERT_EQ(params2.nbRegisters, 8) << "Bad parameter should be ignored";
+    ASSERT_EQ(params2.nbIterationsPerJob, 1)
+        << "Default nbIterationsPerJob should be 1";
 }
 
 TEST(LearningParametersTest, loadParametersFromJson)

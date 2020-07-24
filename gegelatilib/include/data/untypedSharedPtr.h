@@ -38,6 +38,7 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 #include <type_traits>
 
 namespace Data {
@@ -91,6 +92,9 @@ namespace Data {
          */
         template <typename T> struct Model : Concept
         {
+            /// Raw type of the element stored in the shared_ptr
+            using ELEM_TYPE = typename std::remove_all_extents<T>::type;
+
           public:
             /// Constructor of the Model: initializes the internal
             /// std::shared_ptr.
@@ -119,7 +123,7 @@ namespace Data {
             }
 
             /// std::shared_ptr of the UntypedSharedPtr
-            std::shared_ptr<T> sharedPtr;
+            std::shared_ptr<ELEM_TYPE> sharedPtr;
         };
 
         /**
@@ -297,7 +301,8 @@ namespace Data {
          * \throws std::runtime_exception if the template parameter differs
          * from the type given at construction of the UntypedSharedPtr.
          */
-        template <typename T> std::shared_ptr<T> getSharedPointer() const
+        template <typename T>
+        std::shared_ptr<std::remove_all_extents_t<T>> getSharedPointer() const
         {
             const auto& templateType = typeid(T);
             const auto& templateTypeNoConst = typeid(std::remove_const_t<T>);

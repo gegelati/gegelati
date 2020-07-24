@@ -34,44 +34,66 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <fstream>
-#include <gtest/gtest.h>
+#include "learn/adversarialEvaluationResult.h"
 
-#include "log/logger.h"
-
-TEST(loggerTest, Constructor)
+double Learn::AdversarialEvaluationResult::getScoreOf(int index)
 {
-    ASSERT_NO_THROW(Log::Logger l);
-    ASSERT_NO_THROW(Log::Logger l(std::cerr));
+    return scores[index];
 }
 
-TEST(loggerTest, log)
+Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator+=(
+    const EvaluationResult& other)
 {
-    Log::Logger l;
-    ASSERT_NO_THROW(l << "test1"
-                      << "test2" << std::endl);
-    std::stringstream strStr;
+    // Type Check (Must be done in all override)
+    // This test will succeed in child class.
+    const std::type_info& thisType = typeid(*this);
+    if (typeid(other) != thisType) {
+        throw std::runtime_error("Type mismatch between EvaluationResults.");
+    }
 
-    Log::Logger l2(strStr);
-    ASSERT_NO_THROW(l2 << "test3"
-                       << "test4" << std::endl);
-    ASSERT_EQ("test3test4\n", strStr.str());
+    auto otherConverted = (const AdversarialEvaluationResult&)other;
 
-    l2 << std::endl;
-    ASSERT_EQ("test3test4\n\n", strStr.str());
+    // Size Check
+    if (otherConverted.scores.size() != this->scores.size()) {
+        throw std::runtime_error(
+            "Size mismatch between AdversarialEvaluationResults.");
+    }
+
+    // If the added type is Learn::EvaluationResult
+    // Weighted addition of results
+    for (int i = 0; i < scores.size(); i++) {
+        this->scores[i] =
+            this->scores[i] * (double)this->nbEvaluation +
+            otherConverted.scores[i] * (double)otherConverted.nbEvaluation;
+        this->scores[i] /=
+            (double)this->nbEvaluation + (double)otherConverted.nbEvaluation;
+    }
+
+    // Addition ot nbEvaluation
+    this->nbEvaluation += otherConverted.nbEvaluation;
+
+    return *this;
 }
 
-TEST(loggerTest, logWithFile)
+Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator/=(
+    double divisor)
 {
-    std::ofstream o("tempFileForTest", std::ofstream::out);
-    auto l2 = Log::Logger(o);
-    l2 << "randomDataForTest0";
-    o.close();
+    for (double& val : scores) {
+        val /= divisor;
+    }
+    return *this;
+}
 
-    std::ifstream i("tempFileForTest", std::ofstream::in);
-    std::string s;
-    i >> s;
-    ASSERT_EQ("randomDataForTest0", s);
+double Learn::AdversarialEvaluationResult::getResult() const
+{
+    double mean = 0;
+    for (auto score : scores) {
+        mean += score;
+    }
+    return mean / getSize();
+}
 
-    remove("tempFileForTest");
+size_t Learn::AdversarialEvaluationResult::getSize() const
+{
+    return scores.size();
 }

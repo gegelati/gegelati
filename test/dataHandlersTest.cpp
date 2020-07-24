@@ -187,7 +187,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtArray)
 
     // Get data as arrays
     for (int i = 0; i < size - sizeArray + 1; i++) {
-        std::shared_ptr<const int[]> sptr =
+        std::shared_ptr<const int> sptr =
             d->getDataAt(typeid(int[sizeArray]), i)
                 .getSharedPointer<const int[]>();
         const int* a = (sptr.get());

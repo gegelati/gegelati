@@ -33,61 +33,83 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef JOB_H
+#define JOB_H
 
-#include <iostream>
+#include <cstdint>
+#include <vector>
 
-namespace Log {
+#include "tpg/tpgVertex.h"
 
+namespace Learn {
     /**
-     * Basic LALogger for logging generic training information.
+     * \brief This class embeds roots for the simulations.
+     *
+     * The goal of the Job is to contain one root, so that each job
+     * will match with one simulation/evaluation. A basic learning agent will
+     * embed one root per job to do as many simulations as there are roots.
      */
-    class Logger
+    class Job
     {
-      private:
+      protected:
         /**
-         * Output stream where all what is logged is put.
+         * The root contained in the job.
          */
-        std::ostream* out;
+        const TPG::TPGVertex* root;
+
+        /**
+         * Index associated to this job.
+         */
+        const uint64_t idx;
+
+        /**
+         * Seed that will be used to randomize archive.
+         */
+        const uint64_t archiveSeed;
 
       public:
-        /**
-         * \brief Constructor initializing a specific output. Default is cout.
-         *
-         * \param[in] out The output stream the logger will send elements to.
-         */
-        explicit Logger(std::ostream& out = std::cout) : out(&out){};
+        /// Deleted default constructor.
+        Job() = delete;
 
         /**
-         * \brief << operator to manipulate stream and enter stream-specific
-         * elements (like std::endl).
+         * \brief Constructor enabling storing elements in the job so that the
+         * Learning Agents will be able to use them later.
          *
-         * \param[in] manip The element that will be added.
-         * \return The samme logger to be able to stream several things
-         * (e.g. logger<<elA<<elB).
+         * @param[in] root The root that will be encapsulated into the job.
+         * @param[in] archiveSeed The archive seed that will be used with this
+         * job.
+         * @param[in] idx The index of this job.
          */
-        Logger operator<<(std::ostream& (*manip)(std::ostream&));
-
-        /**
-         * \brief << operator allowing to log elements that ostream actually
-         * accepts (char, int...).
-         *
-         * \tparam T The type of element that will be logged.
-         * \param[in] val The element that will be logged.
-         * \return The same logger to be able to stream several things
-         * (e.g. logger<<elA<<elB).
-         */
-        template <typename T> Logger operator<<(const T& val)
+        Job(const TPG::TPGVertex* root, uint64_t archiveSeed = 0,
+            uint64_t idx = 0)
+            : root(root), archiveSeed(archiveSeed), idx(idx)
         {
-            *out << val;
-
-            // flushes the buffer, useful especially with ofstream where without
-            // that, nothing will be printed until close
-            out->flush();
-
-            return *this;
         }
+
+        /// Default virtual destructor
+        virtual ~Job() = default;
+
+        /**
+         * \brief Getter of index.
+         *
+         * @return The index of the job.
+         */
+        uint64_t getIdx() const;
+
+        /**
+         * \brief Getter of archiveSeed.
+         *
+         * @return The archive seed of the job.
+         */
+        uint64_t getArchiveSeed() const;
+
+        /**
+         * \brief Getter of the root.
+         *
+         * @return The root embedded by the job.
+         */
+        virtual const TPG::TPGVertex* getRoot() const;
     };
-} // namespace Log
+} // namespace Learn
+
 #endif

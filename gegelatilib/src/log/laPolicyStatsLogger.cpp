@@ -2,7 +2,6 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
- * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,23 +33,31 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "log/LALogger.h"
+#include "learn/learningAgent.h"
 
-double Log::LALogger::getDurationFrom(
-    const std::chrono::time_point<std::chrono::system_clock,
-                                  std::chrono::nanoseconds>& begin) const
+#include "log/laPolicyStatsLogger.h"
+
+void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
 {
-    return ((std::chrono::duration<double>)(getTime() - begin)).count();
+    this->generationNumber = generationNumber;
 }
 
-std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>
-Log::LALogger::getTime() const
+void Log::LAPolicyStatsLogger::logAfterDecimate()
 {
-    return std::chrono::system_clock::now();
-}
-
-void Log::LALogger::chronoFromNow()
-{
-    checkpoint = std::make_shared<std::chrono::time_point<
-        std::chrono::system_clock, std::chrono::nanoseconds>>(getTime());
+    if (this->learningAgent.getBestRoot().first != this->lastBestRoot) {
+        // Update the best root befor loggin it PolicyStats
+        this->lastBestRoot = this->learningAgent.getBestRoot().first;
+        *this << "Generation " << this->generationNumber << " - Score "
+              << this->learningAgent.getBestRoot().second->getResult()
+              << std::endl
+              << std::endl;
+        TPG::PolicyStats ps;
+        ps.setEnvironment(this->learningAgent.getTPGGraph().getEnvironment());
+        ps.analyzePolicy(this->lastBestRoot);
+        *this << ps << std::endl;
+        *this << std::endl
+              << std::endl
+              << "==========" << std::endl
+              << std::endl;
+    }
 }
