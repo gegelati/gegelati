@@ -128,7 +128,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
 
     // this map will compute the number of iterations per root that are
     // scheduled
-    std::map<const TPG::TPGVertex*, int> nbEvalPerRoot;
+    std::map<const TPG::TPGVertex*, size_t> nbEvalPerRoot;
     for (auto root : la2.getTPGGraph().getRootVertices()) {
         nbEvalPerRoot.emplace(root, 0);
     }

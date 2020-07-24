@@ -383,7 +383,7 @@ std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
 
     // Before each root evaluation, set a new seed for the archive in
     // TRAINING Mode Else, archiving should be deactivate anyway
-    auto archiveSeed = 0;
+    uint64_t archiveSeed = 0;
     if (mode == LearningMode::TRAINING) {
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
     }
