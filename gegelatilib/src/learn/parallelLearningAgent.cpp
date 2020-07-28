@@ -88,11 +88,13 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Job>>>& resultsPerRootMap,
     std::mutex& resultsPerRootMapMutex,
-    std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex)
+    std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex,
+    bool useMainEnvironment)
 {
 
     // Clone learningEnvironment
     LearningEnvironment* privateLearningEnvironment =
+        useMainEnvironment ? &this->learningEnvironment :
         this->learningEnvironment.clone();
 
     // Create a TPGExecutionEngine
@@ -150,7 +152,9 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     }
 
     // Clean up
-    delete privateLearningEnvironment;
+    if(!useMainEnvironment) {
+        delete privateLearningEnvironment;
+    }
 }
 
 void Learn::ParallelLearningAgent::mergeArchiveMap(
@@ -244,13 +248,13 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(
             &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
             mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
             std::ref(resultsPerJobMap), std::ref(resultsPerRootMutex),
-            std::ref(archiveMap), std::ref(archiveMapMutex)));
+            std::ref(archiveMap), std::ref(archiveMapMutex),false));
     }
 
-    // Work in the main thread also
+    // Work in the main thread also, using the main environment
     this->slaveEvalJobThread(generationNumber, mode, jobsToProcess,
                              rootsToProcessMutex, resultsPerJobMap,
-                             resultsPerRootMutex, archiveMap, archiveMapMutex);
+                             resultsPerRootMutex, archiveMap, archiveMapMutex,true);
 
     // Join the threads
     for (auto& thread : threads) {

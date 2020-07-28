@@ -143,6 +143,8 @@ namespace Learn {
          * Mutex protecting the results. \param[in,out] archiveMap Map
          * storing the exhaustiveArchive to be merged. \param[in]
          * archiveMapMutex Mutex protecting the archiveMap.
+         * \param[in] useMainEnvironment Boolean that is true if we use the
+         * declared LearningEnvironment, otherwise the method will clone it.
          */
         void slaveEvalJobThread(
             uint64_t generationNumber, LearningMode mode,
@@ -153,7 +155,7 @@ namespace Learn {
                 resultsPerRootMap,
             std::mutex& resultsPerRootMapMutex,
             std::map<uint64_t, Archive*>& archiveMap,
-            std::mutex& archiveMapMutex);
+            std::mutex& archiveMapMutex, bool useMainEnvironment);
 
         /**
          * \brief Method to merge several Archive created in parallel
