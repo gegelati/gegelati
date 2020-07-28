@@ -94,8 +94,8 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
 
     // Clone learningEnvironment
     LearningEnvironment* privateLearningEnvironment =
-        useMainEnvironment ? &this->learningEnvironment :
-        this->learningEnvironment.clone();
+        useMainEnvironment ? &this->learningEnvironment
+                           : this->learningEnvironment.clone();
 
     // Create a TPGExecutionEngine
     Environment privateEnv(this->env.getInstructionSet(),
@@ -152,7 +152,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     }
 
     // Clean up
-    if(!useMainEnvironment) {
+    if (!useMainEnvironment) {
         delete privateLearningEnvironment;
     }
 }
@@ -248,13 +248,14 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(
             &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
             mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
             std::ref(resultsPerJobMap), std::ref(resultsPerRootMutex),
-            std::ref(archiveMap), std::ref(archiveMapMutex),false));
+            std::ref(archiveMap), std::ref(archiveMapMutex), false));
     }
 
     // Work in the main thread also, using the main environment
     this->slaveEvalJobThread(generationNumber, mode, jobsToProcess,
                              rootsToProcessMutex, resultsPerJobMap,
-                             resultsPerRootMutex, archiveMap, archiveMapMutex,true);
+                             resultsPerRootMutex, archiveMap, archiveMapMutex,
+                             true);
 
     // Join the threads
     for (auto& thread : threads) {

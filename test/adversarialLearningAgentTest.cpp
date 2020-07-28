@@ -259,7 +259,7 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
     Learn::AdversarialLearningAgent laNotCopyabe(le2, set, params);
     // not copyable + sequential => should work
     ASSERT_NO_THROW(
-            laNotCopyabe.evaluateAllRoots(0, Learn::LearningMode::TRAINING));
+        laNotCopyabe.evaluateAllRoots(0, Learn::LearningMode::TRAINING));
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)
@@ -283,13 +283,12 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
 
-
     auto le2 = FakeClassificationLearningEnvironment();
     Learn::AdversarialLearningAgent laNotCopyabe(le2, set, params);
     // not copyable + multithread => exception
     ASSERT_THROW(
-            laNotCopyabe.evaluateAllRoots(0, Learn::LearningMode::TRAINING),
-            std::runtime_error);
+        laNotCopyabe.evaluateAllRoots(0, Learn::LearningMode::TRAINING),
+        std::runtime_error);
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsGoodResults)
