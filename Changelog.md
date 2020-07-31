@@ -1,4 +1,15 @@
 # GEGELATI Changelog
+## Release version x.y.z
+_aaaa.mm.dd_
+
+### New features
+
+### Changes
+* During eval, the main thread of ParallelLearningAgent now use the main LearningEnvironment instead of systematically cloning it. It enables sequential mode with non-copyable environment for the AdversarialLearningAgent.
+
+### Changes
+
+### Bug fix
 
 ## Release version 0.4.0
 _2020.07.24_

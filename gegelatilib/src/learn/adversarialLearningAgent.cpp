@@ -41,9 +41,10 @@ std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
 Learn::AdversarialLearningAgent::evaluateAllRoots(uint64_t generationNumber,
                                                   Learn::LearningMode mode)
 {
-    // deactivates parallelism if le is not cloneable
-    if (!this->learningEnvironment.isCopyable()) {
-        throw std::runtime_error("Not copyable environment. Exciting.");
+    // exception if LE is not cloneable and if there are several threads to use
+    if (!this->learningEnvironment.isCopyable() && this->maxNbThreads > 1) {
+        throw std::runtime_error(
+            "Max number of threads for a non copyable environment is 1.");
     }
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
         results;
