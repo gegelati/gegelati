@@ -89,7 +89,7 @@ class ImporterTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-        e = new Environment(set, vect, 8);
+        e = new Environment(set, vect, 8, 5);
         tpg = new TPG::TPGGraph(*e);
         tpg_copy = new TPG::TPGGraph(*e);
 

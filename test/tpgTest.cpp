@@ -70,9 +70,9 @@ class TPGTest : public ::testing::Test
         auto minus = [](double a, double b)->double {return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
         
-        e = new Environment(set, vect, 8);
+        e = new Environment(set, vect, 8, 5);
         progPointer =
-            std::shared_ptr<Program::Program>(new Program::Program(*e,5));
+            std::shared_ptr<Program::Program>(new Program::Program(*e));
     }
 
     virtual void TearDown()

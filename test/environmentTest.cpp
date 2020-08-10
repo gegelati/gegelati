@@ -188,11 +188,11 @@ TEST(EnvironmentTest, GetFakeRegisters)
 
     Environment e(set, vect, 8);
 
-    ASSERT_NO_THROW(e.getFakeRegisters())
+    ASSERT_NO_THROW(e.getFakeDataSources().at(0))
         << "Couldn't access the fake registers of the environment.";
-    ASSERT_EQ(e.getFakeRegisters().getAddressSpace(typeid(double)), 8)
+    ASSERT_EQ(e.getFakeDataSources().at(0).get().getAddressSpace(typeid(double)), 8)
         << "Address space for double type id is incorrect in fake registers.";
-    ASSERT_EQ(typeid(e.getFakeRegisters()),
+    ASSERT_EQ(typeid(e.getFakeDataSources().at(0).get()),
               typeid(Data::PrimitiveTypeArray<double>))
         << "Unexpected type for fake registers of the environment.";
 }
@@ -216,7 +216,7 @@ TEST(EnvironmentTest, InstructionSetAccessor)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Environment e(set, vect, 8);
+    Environment e(set, vect, 8, 5);
 
     const Instructions::Set& setCpy = e.getInstructionSet();
     ASSERT_NE(&setCpy, &set)
@@ -251,7 +251,7 @@ TEST(EnvironmentTest, DataSourceAccessor)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Environment e(set, vect, 8);
+    Environment e(set, vect, 8, 5);
 
     auto& dataSourcesCpy = e.getDataSources();
     ASSERT_NE(&dataSourcesCpy, &vect)

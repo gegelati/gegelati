@@ -120,7 +120,7 @@ uint64_t Program::Program::identifyIntrons()
 {
     // Create fake registers to identify accessed addresses.
     const Data::DataHandler& fakeRegisters =
-        this->environment.getFakeRegisters();
+        this->environment.getFakeDataSources().at(0);
     // Number of introns within the Program.
     uint64_t nbIntrons = 0;
     // Set of useful register

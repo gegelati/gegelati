@@ -68,7 +68,7 @@ class ProgramTest : public ::testing::Test
         };
         set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
 
-        e = new Environment(set, vect, 8);
+        e = new Environment(set, vect, 8, 5);
     }
 
     virtual void TearDown()
@@ -282,7 +282,7 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
                 return a[0] * b[0] + a[1] * b[1];
             }));
 
-    Environment localE(set, vect, 8);
+    Environment localE(set, vect, 8, 5);
 
     // Create a program with 2 introns
     Program::Program p(localE,5);

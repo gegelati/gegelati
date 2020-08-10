@@ -76,8 +76,8 @@ class TPGExecutionEngineTest : public ::testing::Test
         auto& line = prog.addNewLine();
         // do an multby constant with DHandler 0
         line.setInstructionIndex(1);
-        line.setOperand(0, 1, 0);    // Dhandler 0 location 0
-        line.setOperand(1, 1, value);    // Dhandler 0 location value
+        line.setOperand(0, 2, 0);    // Dhandler 0 location 0
+        line.setOperand(1, 2, value);    // Dhandler 0 location value
         line.setDestinationIndex(0); // 0th register des
     }
 
@@ -117,13 +117,13 @@ class TPGExecutionEngineTest : public ::testing::Test
         auto mult = [](double a, double b)->double {return a*b; };
         set.add(*(new Instructions::LambdaInstruction<double,double>(mult)));
 
-        e = new Environment(set, vect, 8);
+        e = new Environment(set, vect, 8, 5);
         tpg = new TPG::TPGGraph(*e);
 
         // Create 10 programs
         for (int i = 0; i < 10; i++) {
             progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+                std::shared_ptr<Program::Program>(new Program::Program(*e,5)));
         }
 
         // Create a TPG

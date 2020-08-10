@@ -38,11 +38,11 @@
 #include "environment.h"
 
 size_t Environment::computeLargestAddressSpace(
-    const size_t nbRegisters,
+    const size_t nbRegisters, const size_t nbParam,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dHandlers)
 {
-    size_t res{nbRegisters};
+    size_t res = nbRegisters > nbParam ? nbRegisters : nbParam;
     for (auto dHandler : dHandlers) {
         size_t addressSpace = dHandler.get().getLargestAddressSpace();
         res = (addressSpace > res) ? addressSpace : res;
@@ -51,13 +51,14 @@ size_t Environment::computeLargestAddressSpace(
 }
 
 Instructions::Set Environment::filterInstructionSet(
-    const Instructions::Set& iSet, const size_t nbRegisters,
+    const Instructions::Set& iSet, const size_t nbRegisters, const size_t nbParams,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dataSources)
 {
     Instructions::Set filteredSet;
 
     Data::PrimitiveTypeArray<double> fakeRegisters(nbRegisters);
+	Data::ConstantHandler fakeConstants(nbParams);
 
     // Check if all instructions can be used for the given DataHandlers
     for (uint64_t idxInstruction = 0; idxInstruction < iSet.getNbInstructions();
@@ -74,6 +75,13 @@ Instructions::Set Environment::filterInstructionSet(
             bool isHandled = false;
             // Check registers double first
             if (fakeRegisters.canHandle(type)) {
+                // The type is handled by one dataHandler, stop searching for
+                // more.
+                isHandled = true;
+                break;
+            }
+
+			if(fakeConstants.canHandle(type)) {
                 // The type is handled by one dataHandler, stop searching for
                 // more.
                 isHandled = true;
@@ -159,6 +167,11 @@ size_t Environment::getNbRegisters() const
     return this->nbRegisters;
 }
 
+size_t Environment::getNbConstant() const
+{
+    return this->nbConstant;
+}
+
 size_t Environment::getNbInstructions() const
 {
     return this->nbInstructions;
@@ -190,9 +203,10 @@ Environment::getDataSources() const
     return this->dataSources;
 }
 
-const Data::DataHandler& Environment::getFakeRegisters() const
+ const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+	 Environment::getFakeDataSources() const
 {
-    return this->fakeRegisters;
+    return this->fakeDataSources;
 }
 
 const Instructions::Set& Environment::getInstructionSet() const

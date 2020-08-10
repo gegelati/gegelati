@@ -95,21 +95,8 @@ static bool initRandomCorrectLineOperand(
                           });
             // Add the index to the set
             operandDataSourceIndexes.insert(operandDataSourceIndex);
-
-            // check if the selected dataSource can provide the type requested
-            // by the instruction
-            if (operandDataSourceIndex == 0) {
-                // Data Source is the registers
-                operandFound = env.getFakeRegisters().canHandle(operandType);
-            }
-            else {
-                // Data source is a dataHandler
-                operandFound = env.getDataSources()
-                                   .at(operandDataSourceIndex - 1)
-                                   .get()
-                                   .canHandle(operandType);
-            }
-        }
+			operandFound = env.getFakeDataSources().at(operandDataSourceIndex).get().canHandle(operandType);
+		}
     }
     //As we deletted parameters, this is supposed never to happen 
     //as the selected operands indexes can only be constrained in type.
@@ -212,20 +199,12 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
                 instruction.getOperandTypes().at(i).get();
             uint64_t dataSourceIndex = line.getOperand(i).first;
             bool isValid = false;
-            if (dataSourceIndex == 0) {
-                // regsister
-                isValid =
-                    (line.getEnvironment().getFakeRegisters().canHandle(type));
-            }
-            else {
-                // not register
-                const Data::DataHandler& dataSource =
-                    line.getEnvironment()
-                        .getDataSources()
-                        .at(dataSourceIndex - 1)
-                        .get();
-                isValid = dataSource.canHandle(type);
-            }
+            const Data::DataHandler& dataSource =
+               line.getEnvironment()
+                   .getFakeDataSources()
+                   .at(dataSourceIndex)
+                   .get();
+            isValid = dataSource.canHandle(type);
             // Alter the operand if needed
             if (!isValid) {
                 // Force only the change of data source (location can remain

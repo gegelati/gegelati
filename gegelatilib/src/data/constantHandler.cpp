@@ -34,49 +34,39 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef CONSTANT_HANDLER_H
-#define CONSTANT_HANDLER_H
+#include <algorithm>
 
-#include <functional>
-#include <memory>
-#include <typeinfo>
-#include <vector>
+#include "data/constantHandler.h"
+/*
+bool Data::ConstantHandler::canHandle(const std::type_info& type) const
+{
+    if (typeid(Data::Constant) == type || type == typeid(int32_t)) {
+        return true;
+    }
 
-#include "data/primitiveTypeArray.h"
-#include "data/untypedSharedPtr.h"
+    // Use the code in getAddressSpace to check if the type is supported.
+    return (this->getAddressSpace(type) > 0);
+}
 
-namespace Data {
+size_t Data::ConstantHandler::getAddressSpace(const std::type_info& type) const
+{
+	if (type == typeid(Data::Constant)) {
+        return this->nbElements;
+    }
 
-    /// A constant is basically an Integer value.
-    typedef int32_t Constant;
-
-    /**
-     * \brief Base class for all sources of data to be accessed by a TPG
-     * Instruction executed within a Program.
-     */
-    class ConstantHandler : public PrimitiveTypeArray<Constant>
-    {
-    public:
-        /**
-         * \brief Default constructor of the ConstantHandler class.
-         */
-        ConstantHandler(size_t nb_constants): PrimitiveTypeArray<Constant>{nb_constants}{};
-
-        /// Default destructor
-        virtual ~ConstantHandler() = default;
-
-        /**
-         * \brief Default copy constructor.
-         */
-        ConstantHandler(const ConstantHandler& other) = default;
-		
-		//inherited from dataHandler
-		//virtual bool canHandle(const std::type_info& type) const override;
-
-		//inherited from dataHandler
-		//virtual size_t getAddressSpace(const std::type_info & type) const override;
-		
-	};
-} // namespace Data
-
-#endif
+    // If the type is an array of the primitive type
+    // with a size inferior to the container.
+    std::string typeName = DEMANGLE_TYPEID_NAME(type.name());
+    std::string regex{DEMANGLE_TYPEID_NAME(typeid(Data::Constant).name())};
+    regex.append("\\s*(const\\s*)?\\[([0-9]+)\\]");
+    std::regex arrayType(regex);
+    std::cmatch cm;
+    if (std::regex_match(typeName.c_str(), cm, arrayType)) {
+        int size = std::atoi(cm[2].str().c_str());
+        if (size <= this->nbElements) {
+            return this->nbElements - size + 1;
+        }
+    }
+    // Default case
+    return 0;
+}*/

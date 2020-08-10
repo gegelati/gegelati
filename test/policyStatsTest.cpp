@@ -38,6 +38,7 @@
 #include "instructions/addPrimitiveType.h"
 #include "instructions/instruction.h"
 #include "instructions/lambdaInstruction.h"
+#include "instructions/multByConstParam.h"
 
 #include "tpg/policyStats.h"
 
@@ -62,16 +63,17 @@ class PolicyStatsTest : public ::testing::Test
         std::function<double(double,double)> minus = [](double a, double b)->double {return a * b; };
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(
-            new Instructions::LambdaInstruction<double, const double[3]>(mac)));
+        set.add(*(new Instructions::LambdaInstruction<double, const double[3]>(mac)));
         set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+		set.add(*(new Instructions::MultByConstParam<double, Data::Constant>()));
+
         // Data handler
         // Setup environment
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)25)));
 
         // Environment
-        e = new Environment(set, vect, 8);
+        e = new Environment(set, vect, 8, 5);
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
@@ -137,23 +139,22 @@ class PolicyStatsTest : public ::testing::Test
 
         // Program 0 (referenced by two edges)
         Program::Line* l = &progPointers.at(0).get()->addNewLine();
-        /*
         // Intron
-        l->setInstructionIndex(0); // MultByConst
+        l->setInstructionIndex(3); // MultByConst
         l->setDestinationIndex(4); // Register[4]
-        l->setOperand(0, 1, 0);    // Array[0]
-        */
+        l->setOperand(0, 0, 0);    // Array[0]
+        l->setOperand(1, 1, 0);    // Constant[0]
         
         l = &progPointers.at(0).get()->addNewLine();
         l->setInstructionIndex(1); // Add
         l->setDestinationIndex(1); // Register[1]
-        l->setOperand(0, 1, 2);    // Array[2]
+        l->setOperand(0, 2, 2);    // Array[2]
         l->setOperand(1, 0, 13);   // Register[5]
 
         l = &progPointers.at(0).get()->addNewLine();
         l->setInstructionIndex(2); // Lambda
         l->setDestinationIndex(0); // Register[0]
-        l->setOperand(0, 1, 2);    // Array[2]
+        l->setOperand(0, 2, 2);    // Array[2]
         l->setOperand(1, 0, 1);    // Register[1 .. 3]
 
         progPointers.at(0).get()->identifyIntrons();
@@ -162,8 +163,8 @@ class PolicyStatsTest : public ::testing::Test
         l = &progPointers.at(1).get()->addNewLine();
         l->setInstructionIndex(2); // Lambda
         l->setDestinationIndex(0); // Register[0]
-        l->setOperand(0, 1, 10);   // Array[10]
-        l->setOperand(1, 1, 12);   // Array[12 .. 15]
+        l->setOperand(0, 2, 10);   // Array[10]
+        l->setOperand(1, 2, 12);   // Array[12 .. 15]
 
         progPointers.at(1).get()->identifyIntrons();
     }
@@ -176,6 +177,7 @@ class PolicyStatsTest : public ::testing::Test
         delete (&set.getInstruction(0));
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
+        delete (&set.getInstruction(3));
     }
 };
 
@@ -195,16 +197,16 @@ TEST_F(PolicyStatsTest, AnalyzeLine)
         << "Analysis of a valid line failed unexpectedly.";
 
     // Check analysis results
-    ASSERT_EQ(ps.nbUsagePerDataLocation.size(), 1)
+    ASSERT_EQ(ps.nbUsagePerDataLocation.size(), 2)
         << "Incorrect attribute value after analyzing one line.";
     ASSERT_EQ(ps.nbUsagePerDataLocation.begin()->first,
               (std::make_pair<size_t, size_t>(0, 0)))
         << "Incorrect attribute value after analyzing one line.";
-    ASSERT_EQ(ps.nbUsagePerDataLocation.begin()->second, 2)
+    ASSERT_EQ(ps.nbUsagePerDataLocation.begin()->second, 1)
         << "Incorrect attribute value after analyzing one line.";
     ASSERT_EQ(ps.nbUsagePerInstruction.size(), 1)
         << "Incorrect attribute value after analyzing one line.";
-    ASSERT_EQ(ps.nbUsagePerInstruction.begin()->first, 0)
+    ASSERT_EQ(ps.nbUsagePerInstruction.begin()->first, 3)
         << "Incorrect attribute value after analyzing one line.";
     ASSERT_EQ(ps.nbUsagePerInstruction.begin()->second, 1)
         << "Incorrect attribute value after analyzing one line.";
@@ -253,7 +255,7 @@ TEST_F(PolicyStatsTest, AnalyzeProgram)
             << "Incorrect attribute value after analyzing a Program.";
         auto iter2 = ps.nbUsagePerDataLocation.begin();
         std::map<std::pair<size_t, size_t>, size_t> content = {
-            {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{1, 2}, 2}};
+            {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{2, 2}, 2}};
         ASSERT_EQ(ps.nbUsagePerDataLocation, content)
             << "Incorrect attribute value after analyzing a Program.";
     }
@@ -332,7 +334,7 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
     ASSERT_EQ(ps.nbUsagePerInstruction, nbUsagePerInstruction);
 
     std::map<std::pair<size_t, size_t>, size_t> nbUsagePerDataLocation{
-        {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{1, 2}, 2}, {{1, 10}, 1}, {{1, 12}, 1}};
+        {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{2, 2}, 2}, {{2, 10}, 1}, {{2, 12}, 1}};
     ASSERT_EQ(ps.nbUsagePerDataLocation, nbUsagePerDataLocation);
 
     std::vector<size_t> nbUsePerProgram{2, 1, 1, 0, 1, 1, 0, 1};

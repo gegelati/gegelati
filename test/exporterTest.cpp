@@ -82,10 +82,11 @@ class ExporterTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        e = new Environment(set, vect, 8);
+        size_t constant_size = 5;
+
+        e = new Environment(set, vect, 8, 5);
         tpg = new TPG::TPGGraph(*e);
 
-        size_t constant_size = 5;
         // Create 10 programs
         for (int i = 0; i < 8; i++) {
             std::shared_ptr<Program::Program> p = std::make_shared<Program::Program>(*e, constant_size);

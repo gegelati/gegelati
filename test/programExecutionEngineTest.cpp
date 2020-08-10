@@ -90,13 +90,13 @@ class ProgramExecutionEngineTest : public ::testing::Test
                 return 0;
             }));
 
-        e = new Environment(set, vect, 8);
-        p = new Program::Program(*e,0);
+        e = new Environment(set, vect, 8, 5);
+        p = new Program::Program(*e,5);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(0); // Instruction is addPrimitiveType<double>.
         l0.setOperand(0, 0, 5);    // 1st operand: 6th register.
-        l0.setOperand(1, 2, 25);   // 2nd operand: 26th double in the
+        l0.setOperand(1, 3, 25);   // 2nd operand: 26th double in the
                                    // PrimitiveTypeArray of double.
         l0.setDestinationIndex(1); // Destination is resgister at index 1
 
@@ -116,7 +116,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
         l3.setInstructionIndex(
             2);                 // Instruction is LambdaInstruction<double[2]>.
         l3.setOperand(0, 0, 0); // 1st operand: 0th and 1st registers.
-        l3.setOperand(1, 2, 5); // 2nd operand : 6th and 7th double in the
+        l3.setOperand(1, 3, 5); // 2nd operand : 6th and 7th double in the
                                 // PrimitiveTypeArray of double.
         l3.setDestinationIndex(0); // Destination is register at index 0
 
@@ -307,7 +307,7 @@ TEST_F(ProgramExecutionEngineTest, setProgram)
     std::vector<std::reference_wrapper<const Data::DataHandler>> otherVect;
     otherVect.push_back(
         *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
-    Environment otherE(set, otherVect, 2);
+    Environment otherE(set, otherVect, 2, 5);
     Program::Program p3(otherE,0);
 
     ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error)
@@ -334,6 +334,13 @@ TEST_F(ProgramExecutionEngineTest, setDataSources)
     otherVect.push_back(*vect.at(1).get().clone());
 
     ASSERT_NO_THROW(progExecEng.setDataSources(otherVect))
+        << "Setting a new valid set of Data Sources failed."; 
+	
+	// Create a new compatible set of dataSources and add parameters
+	Program::Program p4(*e, 5);
+	ASSERT_NO_THROW(progExecEng.setProgram(p4));
+
+    ASSERT_NO_THROW(progExecEng.setDataSources(otherVect))
         << "Setting a new valid set of Data Sources failed.";
 
     // Clean up
@@ -341,6 +348,7 @@ TEST_F(ProgramExecutionEngineTest, setDataSources)
     delete &otherVect.at(1).get();
     otherVect.pop_back();
     otherVect.pop_back();
+
 
     // Create a new incompatible set of dataSources
     // although it has the same type and size of data, id of the

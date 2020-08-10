@@ -375,7 +375,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation,
-                                     la.getRNG());
+                                     la.getRNG(), 1);
     size_t initialNbVertex = la.getTPGGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(la.trainOneGeneration(4))
@@ -513,7 +513,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.mutation.tpg.nbActions = le.getNbActions();
     params.nbThreads = 1;
 
-    Environment env(set, le.getDataSources(), 8);
+    Environment env(set, le.getDataSources(), 8, params.mutation.prog.nbProgramConstant);
 
     TPG::TPGGraph tpg(env);
 

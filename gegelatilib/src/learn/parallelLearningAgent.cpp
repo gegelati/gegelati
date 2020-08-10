@@ -99,7 +99,7 @@ void Learn::ParallelLearningAgent::slaveEvalRootThread(
     // Create a TPGExecutionEngine
     Environment privateEnv(this->env.getInstructionSet(),
                            privateLearningEnvironment->getDataSources(),
-                           this->env.getNbRegisters());
+                           this->env.getNbRegisters(), this->env.getNbConstant());
     TPG::TPGExecutionEngine tee(privateEnv, NULL);
 
     // Pop a job
