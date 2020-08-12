@@ -45,7 +45,7 @@ void Mutator::ProgramMutator::initRandomProgram(
         p.removeLine(0);
     }
 
-	//insert random parameters
+	//insert random constants in the program
 	Data::Constant c_value;
 	for (int i = 0; i < params.prog.nbProgramConstant; i++)
 	{
@@ -140,7 +140,7 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
         swapRandomLines(p, rng);
     }
 
-	//mutate the programs parameters
+	//mutate the programs constants
 	for(int i = 0; i < params.prog.nbProgramConstant; i++)
 	{
 		if (rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation)

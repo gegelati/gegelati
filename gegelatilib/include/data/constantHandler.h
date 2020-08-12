@@ -68,14 +68,7 @@ namespace Data {
         /**
          * \brief Default copy constructor.
          */
-        ConstantHandler(const ConstantHandler& other) = default;
-		
-		//inherited from dataHandler
-		//virtual bool canHandle(const std::type_info& type) const override;
-
-		//inherited from dataHandler
-		//virtual size_t getAddressSpace(const std::type_info & type) const override;
-		
+        ConstantHandler(const ConstantHandler& other) = default;		
 	};
 } // namespace Data
 

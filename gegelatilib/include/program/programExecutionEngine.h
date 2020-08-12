@@ -65,8 +65,8 @@ namespace Program {
                        // Data::PrimitiveTypeArray<double> to keep track of
                        // accessed addresses.
 
-		/// Parameters of the program
-		Data::ConstantHandler parameters;
+		/// Connstants of the program
+		Data::ConstantHandler constants;
 
         /// Data sources from the environment used for archiving a program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>
@@ -89,7 +89,7 @@ namespace Program {
          * \param[in] env The Environment in which the Program will be executed.
          */
         ProgramExecutionEngine(const Environment& env)
-            : programCounter{0}, registers{env.getNbRegisters()}, parameters{env.getNbConstant()},
+            : programCounter{0}, registers{env.getNbRegisters()}, constants{env.getNbConstant()},
 				program{NULL},
               dataSources{env.getDataSources()}
         {
@@ -97,7 +97,7 @@ namespace Program {
             dataSourcesAndRegisters.push_back(this->registers);
 
 			if(env.getNbConstant() > 0)
-				dataSourcesAndRegisters.push_back(this->parameters);
+				dataSourcesAndRegisters.push_back(this->constants);
 
             // Cannot use insert here because it dataSourcesAndRegisters
             // requires constnessand dataSrc data are not const...
@@ -126,7 +126,7 @@ namespace Program {
             const std::vector<std::reference_wrapper<T>>& dataSrc)
             : programCounter{0},
               registers{prog.getEnvironment().getNbRegisters()}, 
-			  parameters{prog.getConstantsAddressSpace()}, program{NULL}
+			  constants{prog.getConstantsAddressSpace()}, program{NULL}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
@@ -136,7 +136,7 @@ namespace Program {
 			
 			if (prog.getEnvironment().getNbConstant() > 0)
 			{
-				this->dataSourcesAndRegisters.push_back(parameters);
+				this->dataSourcesAndRegisters.push_back(constants);
 			}
 
             // Cannot use insert here because it dataSourcesAndRegisters
@@ -282,7 +282,7 @@ namespace Program {
 
         // Replace the references in attributes
         this->dataSources = dataSrc;
-		size_t offset = this->parameters.getAddressSpace(typeid(Data::Constant)) > 0 ? 2 : 1;
+		size_t offset = this->constants.getAddressSpace(typeid(Data::Constant)) > 0 ? 2 : 1;
 		if (this->program && offset == 2)
 		{
 			this->dataSourcesAndRegisters.at(1) = this->program->getConstantHandler();

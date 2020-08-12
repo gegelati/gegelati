@@ -41,12 +41,12 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog)
 {
 	//set the program
 	this->program = &prog;
-	//are parameters used here ? 
+	//are constants used here ? 
 	size_t offset = 1;
 	if (prog.getEnvironment().getNbConstant() > 0 && 
 		this->dataSourcesAndRegisters.size() - 2 == prog.getEnvironment().getDataSources().size())
 	{
-		// replace programs parameters if already existing
+		// replace programs constants if already existing
 		dataSourcesAndRegisters.at(1) = prog.getConstantHandler();
 		//increment offset for the datahandlers verification
 		offset++;
@@ -54,7 +54,7 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog)
 	
 	// Check dataSource are similar in all point to the program environment
 	// offset is -1 if there is only the registers to ignore
-	// -2 because we don't count the registers that are the first datasources and the parameters (second datasource)
+	// -2 because we don't count the registers that are the first datasources and the constants (second datasource)
 	if (this->dataSourcesAndRegisters.size() - offset !=
         prog.getEnvironment().getDataSources().size()) {
         throw std::runtime_error(

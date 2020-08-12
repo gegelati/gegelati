@@ -49,11 +49,10 @@ namespace Instructions {
      * \brief This abstract class is the base class for any instruction to be
      * used in a Program.
      *
-     * An Instruction declares a list of operands it needs to be executed, as
-     * well as a set of parameters. This information will be used to fetch the
-     * required operands and parameters from any ProgramLine, and to ensure the
-     * compatibility of the type of the fetched operands with the instruction
-     * before executing it.
+     * An Instruction declares a list of operands it needs to be executed.
+	 * This information will be used to fetch the required operands from 
+	 * any ProgramLine, and to ensure the compatibility of the type of the
+	 * fetched operands with the instruction before executing it.
      */
     class Instruction
     {
@@ -91,11 +90,10 @@ namespace Instructions {
             const std::vector<Data::UntypedSharedPtr>& arguments) const;
 
         /**
-         * \brief Execute the Instruction for the given parameters and
-         * arguments.
+         * \brief Execute the Instruction for the given arguments.
          *
          * Derived class should implement their own behavior for this method. In
-         * cas of invalid argument or parameters, for type or number or value
+         * case of invalid arguments, for type or number or value
          * reason, this method should always return 0.0.
          *
          * \param[in] args the vector of UntypedSharedPtr passed to the 
