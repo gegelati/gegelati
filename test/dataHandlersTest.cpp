@@ -373,7 +373,7 @@ TEST(DataHandlersTest, ConstantHandlerCanProvideTemplateType)
     ASSERT_FALSE(d->canHandle(typeid(double)))
         << "ConstantHandler wrongfully say it can provide "
            "double data.";
-    ASSERT_TRUE(d->canHandle(typeid(Data::Constant[])))
+    ASSERT_TRUE(d->canHandle(typeid(Data::Constant[3])))
         << "ConstantHandler wrongfully say it can not provide "
            "dataConstant array.";
 	delete d;
