@@ -133,8 +133,7 @@ bool Program::Line::operator==(const Line& other) const
     }
 
     // Compare operands
-    for (auto idx = 0; idx < this->getEnvironment().getMaxNbOperands();
-         idx++) {
+    for (auto idx = 0; idx < this->getEnvironment().getMaxNbOperands(); idx++) {
         if (this->operands[idx] != other.operands[idx]) {
             return false;
         }

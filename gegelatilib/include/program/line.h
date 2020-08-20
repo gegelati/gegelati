@@ -260,8 +260,8 @@ namespace Program {
         bool operator==(const Line& other) const;
 
         /**
-        * \brief Opposite of the operator==
-        */
+         * \brief Opposite of the operator==
+         */
         bool operator!=(const Line& other) const;
     };
 }; // namespace Program

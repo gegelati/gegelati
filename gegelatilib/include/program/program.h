@@ -209,6 +209,17 @@ namespace Program {
          * \return the number of intron Lines idendified.
          */
         uint64_t identifyIntrons();
+
+        /**
+         * \brief Check if two Program have the same behavior.
+         *
+         * Two Program have the same behaviour if their sequence of non-intron
+         * Lines are strictly identical (i.e. same instructions and operands, in
+         * the same order).
+         *
+         * \param[in] other the Program whose behavior is compared.
+         */
+        bool hasIdenticalBehavior(const Program& other) const;
     };
 } // namespace Program
 #endif
