@@ -189,28 +189,62 @@ makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
     std::queue<std::shared_ptr<Learn::Job>> jobs;
 
     size_t index=0;
+
     auto roots = tpg.getRootVertices();
+
+    // if champions is empty fills it with the first roots come
     if(champions.size()==0){
         for(int i=0; i<roots.size()*(1-params.ratioDeletedRoots);i++){
             champions.emplace_back(roots[i]);
         }
     }
 
+    // Creates a list of teams of champion to compete with other roots.
+    // We have to make enough teams to have nbIterationsPerPolicyEvaluation
+    // iterations per root.
+    int nbChampionsTeams = params.nbIterationsPerPolicyEvaluation/
+                           (agentsPerEvaluation*params.nbIterationsPerJob);
+    auto championsTeams = std::vector<std::vector<const TPG::TPGVertex*>>(nbChampionsTeams);
+
+    // rng used to make champions teams
+    Mutator::RNG rngChampions(rng.getUnsignedInt64(0,UINT64_MAX));
+    for(auto& team : championsTeams){
+        // If the environment needs n agents, we will make lists of n-1
+        // agents that will incorporate other roots.
+        team = std::vector<const TPG::TPGVertex*>(agentsPerEvaluation-1);
+        for(int i=0; i<agentsPerEvaluation-1; i++){
+            auto it = champions.begin();
+            std::advance(it,rngChampions.getUnsignedInt64(0,champions.size()-1));
+            team[i]=*it;
+        }
+    }
+
+
+    // Each root is put at every possible location in champions teams
+    // for example, let's say the champions team is A-B.
+    // A root R will fulfill the list as follow :
+    // -1 job with R-A-B
+    // -1 job with A-R-B
+    // -1 job with A-B-R
     for(auto root : roots){
         uint64_t archiveSeed;
-        for(auto champion : champions) {
-            archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-            auto job = std::make_shared<Learn::AdversarialJob>(
-                    Learn::AdversarialJob({root}, archiveSeed, index++));
-            job->addRoot(champion);
-            jobs.push(job);
+        // browses champions teams
+        for(auto& team : championsTeams){
+            // puts the root at each possible location in the team
+            for(int i=0; i<agentsPerEvaluation; i++){
+                archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
+                auto job = std::make_shared<Learn::AdversarialJob>(
+                        Learn::AdversarialJob({}, archiveSeed, index++));
 
-            // do the same but with the champion as first agent
-            archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-            auto job2 = std::make_shared<Learn::AdversarialJob>(
-                    Learn::AdversarialJob({champion}, archiveSeed, index++));
-            job2->addRoot(root);
-            jobs.push(job2);
+                for(int j=0; j<agentsPerEvaluation; j++){
+                    if(j==i){
+                        job->addRoot(root);
+                    }
+                    job->addRoot(team[j]);
+                }
+
+                jobs.push(job);
+            }
         }
     }
 
