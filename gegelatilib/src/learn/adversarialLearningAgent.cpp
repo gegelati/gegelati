@@ -36,6 +36,7 @@
  */
 
 #include <memory>
+#include <fstream>
 
 #include "learn/adversarialLearningAgent.h"
 
@@ -48,44 +49,58 @@ Learn::AdversarialLearningAgent::evaluateAllRoots(uint64_t generationNumber,
         throw std::runtime_error("Not copyable environment. Exciting.");
     }
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
-        results;
+            results;
     evaluateAllRootsInParallel(generationNumber, mode, results);
     return results;
 }
 
 void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
-    std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Job>>>& resultsPerJobMap,
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
+        std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
+                std::shared_ptr<Job>>>& resultsPerJobMap,
+        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
         results,
-    std::map<uint64_t, Archive*>& archiveMap)
+        std::map<uint64_t, Archive*>& archiveMap)
 {
     // Create temporary map to gather results per root
     std::map<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>
-        resultsPerRootMap;
+            resultsPerRootMap;
 
     // Gather the results
     for (const auto& resultPerJob : resultsPerJobMap) {
         // getting the AdversarialEvaluationResult that should be in this pair
         std::shared_ptr<AdversarialEvaluationResult> res =
-            std::dynamic_pointer_cast<AdversarialEvaluationResult>(
-                resultPerJob.second.first);
+                std::dynamic_pointer_cast<AdversarialEvaluationResult>(
+                        resultPerJob.second.first);
         int rootIdx = 0;
         for (auto root : std::dynamic_pointer_cast<Learn::AdversarialJob>(
-                             resultPerJob.second.second)
-                             ->getRoots()) {
+                resultPerJob.second.second)
+                ->getRoots()) {
+            bool rootC=false;
+            for(auto champion : champions){
+                if(root==champion){
+                    rootC=true;
+                }
+            }
+            if(rootC){
+                resultsPerRootMap.emplace(
+                        root,
+                        std::make_shared<EvaluationResult>(EvaluationResult(
+                                -1, res->getNbEvaluation())));
+                rootIdx++;
+                continue;
+            }
             auto iterator = resultsPerRootMap.find(root);
             if (iterator == resultsPerRootMap.end()) {
                 // first time we encounter the results of this root
                 resultsPerRootMap.emplace(
-                    root,
-                    std::make_shared<EvaluationResult>(EvaluationResult(
-                        res->getScoreOf(rootIdx), res->getNbEvaluation())));
+                        root,
+                        std::make_shared<EvaluationResult>(EvaluationResult(
+                                res->getScoreOf(rootIdx), res->getNbEvaluation())));
             }
             else {
                 // there is already a score for this root, let's do an addition
                 (*iterator->second) += EvaluationResult(
-                    res->getScoreOf(rootIdx), res->getNbEvaluation());
+                        res->getScoreOf(rootIdx), res->getNbEvaluation());
             }
             rootIdx++;
         }
@@ -110,15 +125,15 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
 }
 
 std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
-    evaluateJob(TPG::TPGExecutionEngine& tee, const Job& job,
-                uint64_t generationNumber, Learn::LearningMode mode,
-                LearningEnvironment& le) const
+evaluateJob(TPG::TPGExecutionEngine& tee, const Job& job,
+            uint64_t generationNumber, Learn::LearningMode mode,
+            LearningEnvironment& le) const
 {
     auto& ale = (AdversarialLearningEnvironment&)le;
 
     // Init results
     auto results = std::make_shared<AdversarialEvaluationResult>(
-        this->agentsPerEvaluation);
+            this->agentsPerEvaluation);
 
     // Evaluate nbIteration times
     for (auto i = 0; i < this->params.nbIterationsPerJob; i++) {
@@ -139,9 +154,9 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the action
             uint64_t actionID =
-                ((const TPG::TPGAction*)tee.executeFromRoot(*((TPG::TPGTeam*)*rootsIterator))
-                     .back())
-                    ->getActionID();
+                    ((const TPG::TPGAction*)tee.executeFromRoot(*((TPG::TPGTeam*)*rootsIterator))
+                            .back())
+                            ->getActionID();
             // Do it
             ale.doAction(actionID);
 
@@ -154,16 +169,19 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
             }
         }
 
+        auto scores = ale.getScores();
+
         // Update results
         *results +=
-            *std::dynamic_pointer_cast<EvaluationResult>(ale.getScores());
+                *std::dynamic_pointer_cast<EvaluationResult>(scores);
+
     }
 
     return results;
 }
 
 std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
-    makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
+makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
 {
     // sets the tpg to the Learning Agent's one if no one was specified
     tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
@@ -179,7 +197,6 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
     }
 
     for(auto root : roots){
-
         uint64_t archiveSeed;
         for(auto champion : champions) {
             archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
