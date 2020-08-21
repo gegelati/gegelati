@@ -212,6 +212,7 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.mutation.tpg.nbActions = 3;
     params.mutation.tpg.maxInitOutgoingEdges = 3;
     params.mutation.tpg.maxOutgoingEdges = 10;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbIterationsPerJob = 1;
 
     Learn::AdversarialLearningAgent la(le, set, params, 2);

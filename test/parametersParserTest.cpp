@@ -39,8 +39,7 @@
 #include "../lib/JsonCpp/json.h"
 #include "file/parametersParser.h"
 
-TEST(LearningParametersTest, readConfigFile)
-{
+TEST(LearningParametersTest, readConfigFile){
     Json::Value root;
 
     // name validity
@@ -61,7 +60,7 @@ TEST(LearningParametersTest, readConfigFile)
     File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
     ASSERT_EQ(12, root.size())
         << "Wrong number of elements in parsed json file";
-    ASSERT_EQ(9, root["mutation"]["tpg"].size())
+    ASSERT_EQ(10, root["mutation"]["tpg"].size())
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(5, root["mutation"]["prog"].size())
         << "Wrong number of elements in parsed json file";
@@ -103,6 +102,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.8, params.mutation.tpg.pEdgeDeletion);
     ASSERT_EQ(0.8, params.mutation.tpg.pEdgeAddition);
     ASSERT_EQ(0.8, params.mutation.tpg.pProgramMutation);
+    ASSERT_TRUE(params.mutation.tpg.forceProgramBehaviorChangeOnMutation);
     ASSERT_EQ(0.3, params.mutation.tpg.pEdgeDestinationChange);
     ASSERT_EQ(0.6, params.mutation.tpg.pEdgeDestinationIsAction);
     ASSERT_EQ(40, params.mutation.prog.maxProgramSize);
