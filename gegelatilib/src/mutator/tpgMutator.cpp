@@ -340,12 +340,19 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
     const Mutator::MutationParameters& params, const Archive& archive,
     Mutator::RNG& rng)
 {
+    // Copy the program to check that its behavior is changed before
+    // verifying its unicity against the archive
+    Program::Program newProgCopy(*newProg);
+
     bool allUnique;
     // Mutate behavior until it changes (against the archive).
     do {
 
         // Mutate until something is mutated (i.e. the function returns true)
-        while (!Mutator::ProgramMutator::mutateProgram(*newProg, params, rng))
+        // And until the program behavior is changed
+        while (
+            !(Mutator::ProgramMutator::mutateProgram(*newProg, params, rng) &&
+              !newProg->hasIdenticalBehavior(newProgCopy)))
             ;
         // Check for uniqueness in archive
         auto archivedDataHandlers = archive.getDataHandlers();
@@ -462,8 +469,8 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
         }
 
         // START: TEMP CODE TO BE REMOVED
-        std::cout << " <" << nbIdenticalBehavior << " / "
-                  << newPrograms.size() << "> " ;
+        std::cout << " <" << nbIdenticalBehavior << " / " << newPrograms.size()
+                  << "> ";
         // END: TEMP CODE TO BE REMOVED
     }
 }
