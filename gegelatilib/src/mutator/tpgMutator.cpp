@@ -343,6 +343,7 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
     bool allUnique;
     // Mutate behavior until it changes (against the archive).
     do {
+
         // Mutate until something is mutated (i.e. the function returns true)
         while (!Mutator::ProgramMutator::mutateProgram(*newProg, params, rng))
             ;
@@ -371,14 +372,29 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
     Mutator::RNG& rng, const Mutator::MutationParameters& params,
     const Archive& archive)
 {
+    // START: TEMP CODE TO BE REMOVED
+    size_t nbIdenticalBehavior = 0;
+    // END: TEMP CODE TO BE REMOVED
+
     // This is a computing intensive part of the mutation process
     // Hence the parallelization.
     if (maxNbThreads <= 1) {
         // Sequential (kept for determinism check mostly)
         for (std::shared_ptr<Program::Program> newProg : newPrograms) {
+            // START: TEMP CODE TO BE REMOVED
+            // Detect program behavior change
+            // copy program
+            std::shared_ptr<Program::Program> newProgCpy(
+                new Program::Program(*newProg));
+            // END: TEMP CODE TO BE REMOVED
+
             Mutator::RNG privateRNG(rng.getUnsignedInt64(0, UINT64_MAX));
             mutateProgramBehaviorAgainstArchive(newProg, params, archive,
                                                 privateRNG);
+
+            // START: TEMP CODE TO BE REMOVED
+            nbIdenticalBehavior += (newProg->hasIdenticalBehavior(*newProgCpy));
+            // END: TEMP CODE TO BE REMOVED
         }
     }
     else {
@@ -395,7 +411,7 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
 
         // Function executed in threads
         auto parallelWorker = [&programsToMutate, &mutexMutation, &params,
-                               &archive]() {
+                               &archive, &nbIdenticalBehavior]() {
             Mutator::RNG privateRNG;
             // While there is work to be done
             bool jobDone;
@@ -413,9 +429,20 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
 
                 //  Do the job (if any)
                 if (jobDone) {
+                    // START: TEMP CODE TO BE REMOVED
+                    // Detect program behavior change
+                    // copy program
+                    std::shared_ptr<Program::Program> newProgCpy(
+                        new Program::Program(*job.first));
+                    // END: TEMP CODE TO BE REMOVED
+
                     privateRNG.setSeed(job.second);
                     mutateProgramBehaviorAgainstArchive(job.first, params,
                                                         archive, privateRNG);
+                    // START: TEMP CODE TO BE REMOVED
+                    nbIdenticalBehavior +=
+                        (job.first->hasIdenticalBehavior(*newProgCpy));
+                    // END: TEMP CODE TO BE REMOVED
                 }
             } while (jobDone);
         };
@@ -433,6 +460,11 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
         for (auto& thread : threads) {
             thread.join();
         }
+
+        // START: TEMP CODE TO BE REMOVED
+        std::cout << " <" << nbIdenticalBehavior << " / "
+                  << newPrograms.size() << "> " ;
+        // END: TEMP CODE TO BE REMOVED
     }
 }
 
