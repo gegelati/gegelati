@@ -356,7 +356,8 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         // And until the program behavior is changed
         while (
             !(Mutator::ProgramMutator::mutateProgram(*newProg, params, rng) &&
-              !(newProgCopy!= nullptr && newProg->hasIdenticalBehavior(*newProgCopy))))
+              !(newProgCopy != nullptr &&
+                newProg->hasIdenticalBehavior(*newProgCopy))))
             ;
         // Check for uniqueness in archive
         auto archivedDataHandlers = archive.getDataHandlers();

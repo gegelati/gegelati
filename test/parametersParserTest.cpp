@@ -39,7 +39,8 @@
 #include "../lib/JsonCpp/json.h"
 #include "file/parametersParser.h"
 
-TEST(LearningParametersTest, readConfigFile){
+TEST(LearningParametersTest, readConfigFile)
+{
     Json::Value root;
 
     // name validity
