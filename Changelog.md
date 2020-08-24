@@ -10,8 +10,7 @@ _aaaa.mm.dd_
 
 ### Changes
 * During eval, the main thread of ParallelLearningAgent now use the main LearningEnvironment instead of systematically cloning it. It enables sequential mode with non-copyable environment for the AdversarialLearningAgent.
-
-### Changes
+* AdversarialLearningAgent now proceeds evaluations by making each root play against/with champions of the previous generation.
 
 ### Bug fix
 
