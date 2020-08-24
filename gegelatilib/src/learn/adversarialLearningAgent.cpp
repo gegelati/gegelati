@@ -111,7 +111,7 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
     champions.clear();
     auto iterator = results.end();
     for (int i = 0;
-         i <= (1 - params.ratioDeletedRoots) * tpg.getNbRootVertices() - 1;
+         i <= (1.0 - params.ratioDeletedRoots) * (double)tpg.getNbRootVertices() - 1.0;
          i++) {
         champions.emplace_back((--iterator)->second);
     }
@@ -150,7 +150,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
             // Get the action
             uint64_t actionID =
                 ((const TPG::TPGAction*)tee
-                     .executeFromRoot(*((TPG::TPGTeam*)*rootsIterator))
+                     .executeFromRoot(*((const TPG::TPGTeam*)*rootsIterator))
                      .back())
                     ->getActionID();
             // Do it
@@ -184,11 +184,11 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
 
     size_t index = 0;
 
-    auto roots = tpg.getRootVertices();
+    auto roots = tpgGraph->getRootVertices();
 
     // if champions is empty fills it with the first roots come
     if (champions.size() == 0) {
-        for (int i = 0; i < roots.size() * (1 - params.ratioDeletedRoots);
+        for (int i = 0; i <= (double)roots.size() * (1.0 - params.ratioDeletedRoots);
              i++) {
             champions.emplace_back(roots[i]);
         }
@@ -197,8 +197,8 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
     // Creates a list of teams of champion to compete with other roots.
     // We have to make enough teams to have nbIterationsPerPolicyEvaluation
     // iterations per root.
-    int nbChampionsTeams =
-        std::ceil((double)params.nbIterationsPerPolicyEvaluation /
+    int16_t nbChampionsTeams =
+        (int16_t)std::ceil((double)params.nbIterationsPerPolicyEvaluation /
                   (double)(agentsPerEvaluation * params.nbIterationsPerJob));
     auto championsTeams =
         std::vector<std::vector<const TPG::TPGVertex*>>(nbChampionsTeams);
@@ -228,16 +228,16 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
         // browses champions teams
         for (auto& team : championsTeams) {
             // puts the root at each possible location in the team
-            for (int i = 0; i < agentsPerEvaluation; i++) {
+            for (int16_t i = 0; i < agentsPerEvaluation; i++) {
                 archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
                 auto job = std::make_shared<Learn::AdversarialJob>(
                     Learn::AdversarialJob({}, archiveSeed, index++, i));
 
-                for (int j = 0; j < i; j++) {
+                for (int16_t j = 0; j < i; j++) {
                     job->addRoot(team[j]);
                 }
                 job->addRoot(root);
-                for (int j = i; j < agentsPerEvaluation - 1; j++) {
+                for (int16_t j = i; j < agentsPerEvaluation - 1; j++) {
                     job->addRoot(team[j]);
                 }
 
