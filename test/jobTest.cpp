@@ -67,19 +67,21 @@ TEST(JobTest, Constructor)
         << "Parameter archiveSeed did not have expected value after calling "
            "job constructor.";
 
-    ASSERT_NO_THROW(job3 = new Learn::AdversarialJob({tpg}, 3, 2,4))
+    ASSERT_NO_THROW(job3 = new Learn::AdversarialJob({tpg}, 3, 2, 4))
         << "Construction of the AdversarialJob failed.";
     ASSERT_EQ(1, job3->getSize()) << "Size did not have expected value after "
                                      "calling adversarialJob constructor.";
-    ASSERT_EQ(4, job3->getPosOfStudiedRoot()) << "posOfStudiedRoot did not have "
-                                                 "expected value after "
-                                     "calling adversarialJob constructor.";
+    ASSERT_EQ(4, job3->getPosOfStudiedRoot())
+        << "posOfStudiedRoot did not have "
+           "expected value after "
+           "calling adversarialJob constructor.";
 
     ASSERT_NO_THROW(job4 = new Learn::AdversarialJob({tpg}))
-                                << "Construction of the AdversarialJob failed.";
-    ASSERT_EQ(-1, job4->getPosOfStudiedRoot()) << "posOfStudiedRoot did not have "
-                                                  "expected default value after "
-                                                 "calling adversarialJob constructor.";
+        << "Construction of the AdversarialJob failed.";
+    ASSERT_EQ(-1, job4->getPosOfStudiedRoot())
+        << "posOfStudiedRoot did not have "
+           "expected default value after "
+           "calling adversarialJob constructor.";
 
     ASSERT_NO_THROW(delete job) << "Destruction of the Job failed.";
     ASSERT_NO_THROW(delete job2) << "Destruction of the Job failed.";

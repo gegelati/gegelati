@@ -60,13 +60,13 @@ namespace Learn {
         std::vector<const TPG::TPGVertex*> roots;
 
         /**
-        * Position of the root that is to be evaluated.
-        * Equal to -1 if there is no one.
-        * That's typically useful if we have e.g. 4 champions
-        * and a root to evaluate in the job : we can
-        * skip the champions and just look at the score of
-        * the root.
-        */
+         * Position of the root that is to be evaluated.
+         * Equal to -1 if there is no one.
+         * That's typically useful if we have e.g. 4 champions
+         * and a root to evaluate in the job : we can
+         * skip the champions and just look at the score of
+         * the root.
+         */
         const int16_t posOfStudiedRoot;
 
       public:
@@ -130,10 +130,10 @@ namespace Learn {
         const TPG::TPGVertex* operator[](int i) const;
 
         /**
-        * \brief Getter of the posOfStudiedRoot.
-        *
-        * @return The position of the evaluated root.
-        */
+         * \brief Getter of the posOfStudiedRoot.
+         *
+         * @return The position of the evaluated root.
+         */
         virtual const int16_t getPosOfStudiedRoot() const;
     };
 } // namespace Learn

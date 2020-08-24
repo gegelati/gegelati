@@ -106,8 +106,10 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     size_t agentsPerEval = 5;
     Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
     // 5 agents per job, 2 eval per job, 20 per root
-    // => It shall do 10 jobs per agent (as there will be 2 eval for each job, 10*2>=20)
-    // => There will be 2 champions teams per agent (as there will be 5 jobs per team, 2*5>=10)
+    // => It shall do 10 jobs per agent (as there will be 2 eval for each job,
+    // 10*2>=20)
+    // => There will be 2 champions teams per agent (as there will be 5 jobs per
+    // team, 2*5>=10)
     la.init();
 
     std::queue<std::shared_ptr<Learn::Job>> jobs;
@@ -118,7 +120,8 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
         << "There should be 2 times as many jobs as roots.";
 
     // put nbIterationsPerJob to 6 so that there won't be exactly 20 eval/root
-    // Actually there should be 5>4 jobs per root, 1 team per root => 1*5*6=30 iter per root
+    // Actually there should be 5>4 jobs per root, 1 team per root => 1*5*6=30
+    // iter per root
     params.nbIterationsPerJob = 6;
     Learn::AdversarialLearningAgent la2(le, set, params, agentsPerEval);
     la2.init();
@@ -147,7 +150,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     }
     // now check there are enough iterations per root scheduled
     for (auto pairRootNbEval : nbEvalPerRoot) {
-        ASSERT_EQ(30,pairRootNbEval.second)
+        ASSERT_EQ(30, pairRootNbEval.second)
             << "jobs don't evaluate the right amount of times a root.";
     }
 }

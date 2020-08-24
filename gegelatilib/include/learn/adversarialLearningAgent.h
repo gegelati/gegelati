@@ -52,7 +52,6 @@ namespace Learn {
     class AdversarialLearningAgent : public ParallelLearningAgent
     {
       protected:
-
         /**
          * \brief Champions of the last generation.
          *
