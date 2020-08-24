@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -34,44 +34,12 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <fstream>
-#include <gtest/gtest.h>
+#include <iostream>
 
 #include "log/logger.h"
 
-TEST(loggerTest, Constructor)
+Log::Logger Log::Logger::operator<<(std::ostream& (*manip)(std::ostream&))
 {
-    ASSERT_NO_THROW(Log::Logger l);
-    ASSERT_NO_THROW(Log::Logger l(std::cerr));
-}
-
-TEST(loggerTest, log)
-{
-    Log::Logger l;
-    ASSERT_NO_THROW(l << "test1"
-                      << "test2" << std::endl);
-    std::stringstream strStr;
-
-    Log::Logger l2(strStr);
-    ASSERT_NO_THROW(l2 << "test3"
-                       << "test4" << std::endl);
-    ASSERT_EQ("test3test4\n", strStr.str());
-
-    l2 << std::endl;
-    ASSERT_EQ("test3test4\n\n", strStr.str());
-}
-
-TEST(loggerTest, logWithFile)
-{
-    std::ofstream o("tempFileForTest", std::ofstream::out);
-    auto l2 = Log::Logger(o);
-    l2 << "randomDataForTest0";
-    o.close();
-
-    std::ifstream i("tempFileForTest", std::ofstream::in);
-    std::string s;
-    i >> s;
-    ASSERT_EQ("randomDataForTest0", s);
-
-    remove("tempFileForTest");
+    manip(*out);
+    return *this;
 }

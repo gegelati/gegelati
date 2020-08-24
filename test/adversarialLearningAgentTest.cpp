@@ -1,8 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -130,7 +129,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
 
     // this map will compute the number of iterations per root that are
     // scheduled
-    std::map<const TPG::TPGVertex*, int> nbEvalPerRoot;
+    std::map<const TPG::TPGVertex*, size_t> nbEvalPerRoot;
     for (auto root : la2.getTPGGraph().getRootVertices()) {
         nbEvalPerRoot.emplace(root, 0);
     }
@@ -215,6 +214,7 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.mutation.tpg.nbActions = 3;
     params.mutation.tpg.maxInitOutgoingEdges = 3;
     params.mutation.tpg.maxOutgoingEdges = 10;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbIterationsPerJob = 1;
 
     Learn::AdversarialLearningAgent la(le, set, params, 2);
@@ -260,10 +260,9 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
 
     auto le2 = FakeClassificationLearningEnvironment();
     Learn::AdversarialLearningAgent laNotCopyabe(le2, set, params);
-
-    ASSERT_THROW(
-        laNotCopyabe.evaluateAllRoots(0, Learn::LearningMode::TRAINING),
-        std::runtime_error);
+    // not copyable + sequential => should work
+    ASSERT_NO_THROW(
+        laNotCopyabe.evaluateAllRoots(0, Learn::LearningMode::TRAINING));
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)
@@ -286,6 +285,13 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)
     ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
+
+    auto le2 = FakeClassificationLearningEnvironment();
+    Learn::AdversarialLearningAgent laNotCopyabe(le2, set, params);
+    // not copyable + multithread => exception
+    ASSERT_THROW(
+        laNotCopyabe.evaluateAllRoots(0, Learn::LearningMode::TRAINING),
+        std::runtime_error);
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsGoodResults)

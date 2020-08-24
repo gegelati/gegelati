@@ -342,3 +342,78 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
     // cleanup
     delete (&set.getInstruction(2));
 }
+
+TEST_F(ProgramTest, HasIdenticalBehavior)
+{
+    Instructions::Set localSet;
+
+    localSet.add(*(new Instructions::AddPrimitiveType<double>()));
+    localSet.add(*(new Instructions::AddPrimitiveType<int>()));
+    Environment localEnv(localSet, vect, 8);
+
+    // Create 2 Programs
+    Program::Program p1(localEnv), p2(localEnv);
+
+    // Check that they are identical when empty
+    ASSERT_TRUE(p1.hasIdenticalBehavior(p2))
+        << "Two empty Program should have an identical behaviour.";
+
+    // Add a few lines to p1
+    Program::Line& p1l0 = p1.addNewLine();
+    Program::Line& p1l1 = p1.addNewLine();
+    Program::Line& p1l2 = p1.addNewLine();
+    p1.identifyIntrons();
+    // and p2
+    Program::Line& p2l0 = p2.addNewLine();
+    Program::Line& p2l1 = p2.addNewLine();
+    Program::Line& p2l2 = p2.addNewLine();
+    p2.identifyIntrons();
+
+    // Check that they are identical when all lines are identical
+    ASSERT_TRUE(p1.hasIdenticalBehavior(p2))
+        << "Two strictly identical Program should have an identical behaviour.";
+
+    // Make one line an intron in p1
+    p1l2.setDestinationIndex(1);
+    p1.identifyIntrons();
+    ASSERT_TRUE(p1.isIntron(2)) << "Line should be an intron.";
+
+    // Check difference
+    ASSERT_FALSE(p1.hasIdenticalBehavior(p2))
+        << "Program with different number of non-intron Line should be "
+           "different.";
+
+    // Make one line a different intron in p2
+    p2l0.setDestinationIndex(3);
+    p2.identifyIntrons();
+    ASSERT_TRUE(p2.isIntron(0)) << "Line should be an intron.";
+
+    // Check identity
+    ASSERT_TRUE(p1.hasIdenticalBehavior(p2))
+        << "Program with different intron position but identical non-intron "
+           "lines should be identical.";
+
+    // Add another intron line to p1
+    Program::Line& p1l3 = p1.addNewLine();
+    p1l3.setDestinationIndex(2);
+    p1.identifyIntrons();
+    ASSERT_TRUE(p1.isIntron(3)) << "Line should be an intron.";
+
+    // Check identity
+    ASSERT_TRUE(p1.hasIdenticalBehavior(p2))
+        << "Program with different intron number but identical non-intron "
+           "lines should be identical.";
+
+    // Change p2 behavior
+    p2l1.setInstructionIndex(1);
+    p2l1.setOperand(0, 2, 1);
+    p2l1.setOperand(1, 2, 2);
+
+    // Check non identity
+    ASSERT_FALSE(p1.hasIdenticalBehavior(p2))
+        << "Program with different behavior should be detected as such.";
+
+    // Cleanup
+    delete &localSet.getInstruction(0);
+    delete &localSet.getInstruction(1);
+}

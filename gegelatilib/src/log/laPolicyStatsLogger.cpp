@@ -1,8 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,44 +33,31 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <fstream>
-#include <gtest/gtest.h>
+#include "learn/learningAgent.h"
 
-#include "log/logger.h"
+#include "log/laPolicyStatsLogger.h"
 
-TEST(loggerTest, Constructor)
+void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
 {
-    ASSERT_NO_THROW(Log::Logger l);
-    ASSERT_NO_THROW(Log::Logger l(std::cerr));
+    this->generationNumber = generationNumber;
 }
 
-TEST(loggerTest, log)
+void Log::LAPolicyStatsLogger::logAfterDecimate()
 {
-    Log::Logger l;
-    ASSERT_NO_THROW(l << "test1"
-                      << "test2" << std::endl);
-    std::stringstream strStr;
-
-    Log::Logger l2(strStr);
-    ASSERT_NO_THROW(l2 << "test3"
-                       << "test4" << std::endl);
-    ASSERT_EQ("test3test4\n", strStr.str());
-
-    l2 << std::endl;
-    ASSERT_EQ("test3test4\n\n", strStr.str());
-}
-
-TEST(loggerTest, logWithFile)
-{
-    std::ofstream o("tempFileForTest", std::ofstream::out);
-    auto l2 = Log::Logger(o);
-    l2 << "randomDataForTest0";
-    o.close();
-
-    std::ifstream i("tempFileForTest", std::ofstream::in);
-    std::string s;
-    i >> s;
-    ASSERT_EQ("randomDataForTest0", s);
-
-    remove("tempFileForTest");
+    if (this->learningAgent.getBestRoot().first != this->lastBestRoot) {
+        // Update the best root befor loggin it PolicyStats
+        this->lastBestRoot = this->learningAgent.getBestRoot().first;
+        *this << "Generation " << this->generationNumber << " - Score "
+              << this->learningAgent.getBestRoot().second->getResult()
+              << std::endl
+              << std::endl;
+        TPG::PolicyStats ps;
+        ps.setEnvironment(this->learningAgent.getTPGGraph().getEnvironment());
+        ps.analyzePolicy(this->lastBestRoot);
+        *this << ps << std::endl;
+        *this << std::endl
+              << std::endl
+              << "==========" << std::endl
+              << std::endl;
+    }
 }

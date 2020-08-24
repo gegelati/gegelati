@@ -1,6 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -36,7 +37,9 @@
 #include <iomanip>
 #include <numeric>
 
-#include "log/LABasicLogger.h"
+#include "learn/learningAgent.h"
+
+#include "log/laBasicLogger.h"
 
 void Log::LABasicLogger::logResults(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -59,24 +62,30 @@ void Log::LABasicLogger::logResults(
 
 void Log::LABasicLogger::logHeader()
 {
-    // fixing float precision
-    *this << std::setprecision(2) << std::fixed << std::left;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
           << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
-          << std::setw(colWidth) << "Max" << std::setw(colWidth)
-          << "Duration(eval)";
+          << std::setw(colWidth) << "Max" << std::setw(colWidth) << "T_mutat"
+          << std::setw(colWidth) << "T_eval";
     if (doValidation) {
-        *this << std::setw(colWidth) << "Duration(valid)";
+        *this << std::setw(colWidth) << "T_valid";
     }
-    *this << std::setw(colWidth) << "Total_time" << std::endl;
+    *this << std::setw(colWidth) << "T_total" << std::endl;
 }
 
-void Log::LABasicLogger::logAfterPopulateTPG(uint64_t& generationNumber,
-                                             TPG::TPGGraph& tpg)
+void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
 {
-    *this << std::setw(colWidth) << generationNumber << std::setw(colWidth)
-          << tpg.getNbVertices();
+    *this << std::setw(colWidth) << generationNumber;
     // resets checkpoint to be able to show evaluation time
+    chronoFromNow();
+}
+
+void Log::LABasicLogger::logAfterPopulateTPG()
+{
+    this->mutationTime = getDurationFrom(*checkpoint);
+
+    *this << std::setw(colWidth)
+          << this->learningAgent.getTPGGraph().getNbVertices();
+
     chronoFromNow();
 }
 
@@ -108,6 +117,7 @@ void Log::LABasicLogger::logAfterValidate(
 
 void Log::LABasicLogger::logEndOfTraining()
 {
+    *this << std::setw(colWidth) << mutationTime;
     *this << std::setw(colWidth) << evalTime;
     if (doValidation) {
         *this << std::setw(colWidth) << validTime;

@@ -181,3 +181,52 @@ uint64_t Program::Program::identifyIntrons()
 
     return nbIntrons;
 }
+
+bool Program::Program::hasIdenticalBehavior(const Program& other) const
+{
+    size_t thisLineIdx = 0;
+    size_t otherLineIdx = 0;
+
+    auto nextNonIntronIdx = [](const Program& p, size_t& lineIdx) {
+        while (lineIdx < p.getNbLines() && p.isIntron(lineIdx)) {
+            lineIdx++;
+        }
+    };
+
+    // Look for the first non intron line in both programs
+    nextNonIntronIdx(*this, thisLineIdx);
+    nextNonIntronIdx(other, otherLineIdx);
+
+    // Scan the two programs
+    while (thisLineIdx < this->getNbLines() &&
+           otherLineIdx < other.getNbLines()) {
+
+        // Check that two non-intron lines were reached
+        if (thisLineIdx < this->getNbLines() &&
+            otherLineIdx < other.getNbLines()) {
+
+            // Compare the two lines
+            const Line& thisLine = this->getLine(thisLineIdx);
+            const Line& otherLine = other.getLine(otherLineIdx);
+
+            if (thisLine != otherLine) {
+                return false;
+            }
+
+            // Look for the next non intron line in both programs
+            thisLineIdx++;
+            nextNonIntronIdx(*this, thisLineIdx);
+            otherLineIdx++;
+            nextNonIntronIdx(other, otherLineIdx);
+        }
+    }
+
+    if ((thisLineIdx < this->getNbLines()) ^
+        (otherLineIdx < other.getNbLines())) {
+        // XOR: only one of the two program reached its last line
+        return false;
+    }
+
+    // Everything was identical, return true
+    return true;
+}

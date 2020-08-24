@@ -1,8 +1,6 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -44,9 +42,10 @@ std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
 Learn::AdversarialLearningAgent::evaluateAllRoots(uint64_t generationNumber,
                                                   Learn::LearningMode mode)
 {
-    // deactivates parallelism if le is not cloneable
-    if (!this->learningEnvironment.isCopyable()) {
-        throw std::runtime_error("Not copyable environment. Exciting.");
+    // exception if LE is not cloneable and if there are several threads to use
+    if (!this->learningEnvironment.isCopyable() && this->maxNbThreads > 1) {
+        throw std::runtime_error(
+            "Max number of threads for a non copyable environment is 1.");
     }
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
             results;

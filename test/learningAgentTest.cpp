@@ -39,7 +39,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "log/LABasicLogger.h"
+#include "log/laBasicLogger.h"
 
 #include "tpg/tpgGraph.h"
 
@@ -118,8 +118,13 @@ TEST_F(LearningAgentTest, addLogger)
     params.archivingProbability = 0.5;
     Learn::LearningAgent la(le, set, params);
 
-    auto l = new Log::LABasicLogger(std::cout);
-    ASSERT_NO_THROW(la.addLogger(*l)) << "Adding a logger should not fail.";
+    Log::LALogger* l = nullptr;
+    ASSERT_NO_THROW(
+        l = new Log::LABasicLogger(la, std::cout)) // Call addLogger.
+        << "Adding a logger should not fail.";
+    if (l != nullptr) {
+        delete l;
+    }
 }
 
 TEST_F(LearningAgentTest, IsRootEvalSkipped)
@@ -451,8 +456,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
 
     // we add a logger to la to check it logs things
     std::ofstream o("tempFileForTest", std::ofstream::out);
-    auto l = new Log::LABasicLogger(o);
-    la.addLogger(*l);
+    Log::LABasicLogger l(la, o);
 
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
@@ -524,6 +528,7 @@ TEST_F(LearningAgentTest, TrainPortability)
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
 
     Learn::LearningAgent la(le, set, params);
 
@@ -537,11 +542,12 @@ TEST_F(LearningAgentTest, TrainPortability)
     TPG::TPGGraph& tpg = la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 28)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+    ASSERT_EQ(tpg.getNbRootVertices(), 25)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 97)
+    ASSERT_EQ(tpg.getEdges().size(), 94)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8677432978740876680)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              14825295448422883263u)
         << "Graph does not have the expected determinst characteristics.";
 }
 

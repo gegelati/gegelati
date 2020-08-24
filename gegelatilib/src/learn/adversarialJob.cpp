@@ -1,6 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -33,12 +34,33 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <iostream>
+#include "learn/adversarialJob.h"
 
-#include "log/Logger.h"
-
-Log::Logger Log::Logger::operator<<(std::ostream& (*manip)(std::ostream&))
+void Learn::AdversarialJob::addRoot(const TPG::TPGVertex* root)
 {
-    manip(*out);
-    return *this;
+    roots.emplace_back(root);
+}
+
+size_t Learn::AdversarialJob::getSize() const
+{
+    return roots.size();
+}
+std::vector<const TPG::TPGVertex*> Learn::AdversarialJob::getRoots() const
+{
+    return roots;
+}
+
+const TPG::TPGVertex* Learn::AdversarialJob::getRoot() const
+{
+    return roots[0];
+}
+
+const TPG::TPGVertex* Learn::AdversarialJob::operator[](int i) const
+{
+    return roots[i];
+}
+
+const int16_t Learn::AdversarialJob::getPosOfStudiedRoot() const
+{
+    return posOfStudiedRoot;
 }

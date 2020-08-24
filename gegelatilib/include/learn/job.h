@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -36,6 +36,7 @@
 #ifndef JOB_H
 #define JOB_H
 
+#include <cstdint>
 #include <vector>
 
 #include "tpg/tpgVertex.h"
@@ -85,35 +86,29 @@ namespace Learn {
         {
         }
 
+        /// Default virtual destructor
+        virtual ~Job() = default;
+
         /**
          * \brief Getter of index.
          *
          * @return The index of the job.
          */
-        uint64_t getIdx() const
-        {
-            return idx;
-        }
+        uint64_t getIdx() const;
 
         /**
          * \brief Getter of archiveSeed.
          *
          * @return The archive seed of the job.
          */
-        uint64_t getArchiveSeed() const
-        {
-            return archiveSeed;
-        }
+        uint64_t getArchiveSeed() const;
 
         /**
          * \brief Getter of the root.
          *
          * @return The root embedded by the job.
          */
-        virtual const TPG::TPGVertex* getRoot() const
-        {
-            return root;
-        }
+        virtual const TPG::TPGVertex* getRoot() const;
     };
 } // namespace Learn
 

@@ -1,6 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -58,6 +59,9 @@ namespace Log {
          * \param[in] out The output stream the logger will send elements to.
          */
         explicit Logger(std::ostream& out = std::cout) : out(&out){};
+
+        /// Virtual default destructor for polyphormism support.
+        virtual ~Logger() = default;
 
         /**
          * \brief << operator to manipulate stream and enter stream-specific
