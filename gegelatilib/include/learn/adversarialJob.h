@@ -62,7 +62,7 @@ namespace Learn {
         /**
         * Position of the root that is to be evaluated.
         * Equal to -1 if there is no one.
-        * That's typically useful if we have 4 champions
+        * That's typically useful if we have e.g. 4 champions
         * and a root to evaluate in the job : we can
         * skip the champions and just look at the score of
         * the root.

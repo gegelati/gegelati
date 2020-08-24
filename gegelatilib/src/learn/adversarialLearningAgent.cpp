@@ -195,8 +195,8 @@ makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
     // Creates a list of teams of champion to compete with other roots.
     // We have to make enough teams to have nbIterationsPerPolicyEvaluation
     // iterations per root.
-    int nbChampionsTeams = params.nbIterationsPerPolicyEvaluation/
-                           (agentsPerEvaluation*params.nbIterationsPerJob);
+    int nbChampionsTeams = std::ceil((double)params.nbIterationsPerPolicyEvaluation/
+                                             (double)(agentsPerEvaluation*params.nbIterationsPerJob));
     auto championsTeams = std::vector<std::vector<const TPG::TPGVertex*>>(nbChampionsTeams);
 
     // rng used to make champions teams

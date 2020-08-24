@@ -103,22 +103,24 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
 {
     params.nbIterationsPerPolicyEvaluation = 20;
     params.nbIterationsPerJob = 2;
+    params.ratioDeletedRoots = 0.4;
     size_t agentsPerEval = 5;
     Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
-    // 5 agents per job, 2 eval per job
-    // => It shall do 10 jobs per agent, and something close to nbRoots*2
-    // (nbRoots*20/(5*2)) jobs at total
+    // 5 agents per job, 2 eval per job, 20 per root
+    // => It shall do 10 jobs per agent (as there will be 2 eval for each job, 10*2>=20)
+    // => There will be 2 champions teams per agent (as there will be 5 jobs per team, 2*5>=10)
     la.init();
 
     std::queue<std::shared_ptr<Learn::Job>> jobs;
     ASSERT_NO_THROW(jobs = la.makeJobs(Learn::TRAINING))
         << "makeJobs shouldn't throw an exception in adversarialLearningAgent";
-    ASSERT_EQ(la.getTPGGraph().getNbRootVertices() * 2, jobs.size())
+    // 3 roots for now -> 30 jobs
+    ASSERT_EQ(30, jobs.size())
         << "There should be 2 times as many jobs as roots.";
 
-    // put nbIterationsPerJob to 3 so that there won't be exactly 20 eval/root
-    // Actually there should bd
-    params.nbIterationsPerJob = 7;
+    // put nbIterationsPerJob to 6 so that there won't be exactly 20 eval/root
+    // Actually there should be 5>4 jobs per root, 1 team per root => 1*5*6=30 iter per root
+    params.nbIterationsPerJob = 6;
     Learn::AdversarialLearningAgent la2(le, set, params, agentsPerEval);
     la2.init();
     ASSERT_NO_THROW(jobs = la2.makeJobs(Learn::TRAINING))
@@ -138,16 +140,16 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
         ASSERT_EQ(5, job->getSize())
             << "job doesn'nt contain the right roots number.";
         // updates number of iterations scheduled for the roots of the job
-        for (auto root : job->getRoots()) {
-            auto it = nbEvalPerRoot.find(root);
-            it->second = it->second + params.nbIterationsPerJob;
-        }
+        auto root = (*job)[job->getPosOfStudiedRoot()];
+        auto it = nbEvalPerRoot.find(root);
+        it->second = it->second + params.nbIterationsPerJob;
+
         jobs.pop();
     }
     // now check there are enough iterations per root scheduled
     for (auto pairRootNbEval : nbEvalPerRoot) {
-        ASSERT_GE(pairRootNbEval.second, params.nbIterationsPerPolicyEvaluation)
-            << "jobs don't evaluate enough a root.";
+        ASSERT_EQ(30,pairRootNbEval.second)
+            << "jobs don't evaluate the right amount of times a root.";
     }
 }
 
@@ -208,7 +210,7 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.nbIterationsPerPolicyEvaluation = 2;
     params.maxNbEvaluationPerPolicy = 0;
     params.ratioDeletedRoots = 0.5;
-    params.nbGenerations = 20;
+    params.nbGenerations = 10;
     params.mutation.tpg.nbRoots = 30;
     params.mutation.tpg.nbActions = 3;
     params.mutation.tpg.maxInitOutgoingEdges = 3;
@@ -225,13 +227,13 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 26)
+    ASSERT_EQ(tpg.getNbVertices(), 24)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 18)
+    ASSERT_EQ(tpg.getNbRootVertices(), 16)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 179)
+    ASSERT_EQ(tpg.getEdges().size(), 131)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 2660350567691381690)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 2963487602117135482)
         << "Graph does not have the expected determinst characteristics.";
 }
 

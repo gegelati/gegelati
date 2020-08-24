@@ -58,9 +58,9 @@ namespace Learn {
         /**
          * \brief Champions of the last generation.
          *
-         * A given number n of roots are saved, in fact the n first roots
-         * are simply saved in this vector. n is calculated with a ratio that
-         * is defined in parameters.
+         * All roots of a generation that are kept are put in
+         * this list. Then, the roots of the next generation
+         * will fight against these champions to be evaluated.
          */
         std::vector<const TPG::TPGVertex*> champions;
 
