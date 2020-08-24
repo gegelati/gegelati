@@ -65,6 +65,7 @@ class adversarialLearningAgentTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
         // Proba as in Kelly's paper
+        params.ratioDeletedRoots = 0.5;
         params.mutation.tpg.maxInitOutgoingEdges = 3;
         params.mutation.prog.maxProgramSize = 96;
         params.mutation.tpg.nbRoots = 15;
@@ -211,7 +212,6 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 2;
     params.maxNbEvaluationPerPolicy = 0;
-    params.ratioDeletedRoots = 0.5;
     params.nbGenerations = 10;
     params.mutation.tpg.nbRoots = 30;
     params.mutation.tpg.nbActions = 3;
@@ -234,9 +234,9 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 16)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 131)
+    ASSERT_EQ(tpg.getEdges().size(), 115)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 2963487602117135482)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 17155070136633306147)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -261,8 +261,8 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
 
-    auto le2 = FakeClassificationLearningEnvironment();
-    Learn::AdversarialLearningAgent laNotCopyabe(le2, set, params);
+    Learn::AdversarialLearningAgent laNotCopyabe(le, set, params);
+    laNotCopyabe.init();
     // not copyable + sequential => should work
     ASSERT_NO_THROW(
         laNotCopyabe.evaluateAllRoots(0, Learn::LearningMode::TRAINING));
