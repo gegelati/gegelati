@@ -128,6 +128,11 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.pProgramMutation = value.asDouble();
         return;
     }
+    if (param == "forceProgramBehaviorChangeOnMutation") {
+        params.mutation.tpg.forceProgramBehaviorChangeOnMutation =
+            value.asBool();
+        return;
+    }
     if (param == "pEdgeDestinationChange") {
         params.mutation.tpg.pEdgeDestinationChange = value.asDouble();
         return;

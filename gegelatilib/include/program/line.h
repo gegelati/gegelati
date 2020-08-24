@@ -249,6 +249,20 @@ namespace Program {
          */
         bool setOperand(const uint64_t idx, const uint64_t dataIndex,
                         const uint64_t location, const bool check = true);
+
+        /**
+         * \brief Comparison operator between Line.
+         *
+         * \param[in] other the line with which the current Line is compared.
+         * \return true if all attributes (except the Environment) of the two
+         * Lines are identical.
+         */
+        bool operator==(const Line& other) const;
+
+        /**
+         * \brief Opposite of the operator==
+         */
+        bool operator!=(const Line& other) const;
     };
 }; // namespace Program
 

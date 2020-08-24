@@ -528,6 +528,7 @@ TEST_F(LearningAgentTest, TrainPortability)
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
 
     Learn::LearningAgent la(le, set, params);
 
@@ -541,11 +542,12 @@ TEST_F(LearningAgentTest, TrainPortability)
     TPG::TPGGraph& tpg = la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 28)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+    ASSERT_EQ(tpg.getNbRootVertices(), 25)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 97)
+    ASSERT_EQ(tpg.getEdges().size(), 94)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8677432978740876680)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              14825295448422883263u)
         << "Graph does not have the expected determinst characteristics.";
 }
 
