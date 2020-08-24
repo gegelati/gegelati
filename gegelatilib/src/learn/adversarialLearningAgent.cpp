@@ -71,38 +71,31 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
         std::shared_ptr<AdversarialEvaluationResult> res =
                 std::dynamic_pointer_cast<AdversarialEvaluationResult>(
                         resultPerJob.second.first);
-        int rootIdx = 0;
-        for (auto root : std::dynamic_pointer_cast<Learn::AdversarialJob>(
-                resultPerJob.second.second)
-                ->getRoots()) {
-            bool rootC=false;
-            for(auto champion : champions){
-                if(root==champion){
-                    rootC=true;
-                }
-            }
-            if(rootC){
-                resultsPerRootMap.emplace(
-                        root,
-                        std::make_shared<EvaluationResult>(EvaluationResult(
-                                -1, res->getNbEvaluation())));
-                rootIdx++;
-                continue;
-            }
+
+        auto advJob = std::dynamic_pointer_cast<Learn::AdversarialJob>(
+                resultPerJob.second.second);
+        // we begin from 0 or the pos of the root to get the score if there is one
+        for (int i=std::max((int16_t)0,advJob->getPosOfStudiedRoot()); i<advJob->getSize(); i++) {
+            auto root = (*advJob)[i];
             auto iterator = resultsPerRootMap.find(root);
             if (iterator == resultsPerRootMap.end()) {
                 // first time we encounter the results of this root
                 resultsPerRootMap.emplace(
                         root,
                         std::make_shared<EvaluationResult>(EvaluationResult(
-                                res->getScoreOf(rootIdx), res->getNbEvaluation())));
+                                res->getScoreOf(i), res->getNbEvaluation())));
             }
             else {
                 // there is already a score for this root, let's do an addition
                 (*iterator->second) += EvaluationResult(
-                        res->getScoreOf(rootIdx), res->getNbEvaluation());
+                        res->getScoreOf(i), res->getNbEvaluation());
             }
-            rootIdx++;
+
+            // if there is a specific root to read the score we skip the others
+            // when it is done.
+            if(advJob->getPosOfStudiedRoot()!=-1){
+                break;
+            }
         }
     }
 
@@ -207,7 +200,7 @@ makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
     auto championsTeams = std::vector<std::vector<const TPG::TPGVertex*>>(nbChampionsTeams);
 
     // rng used to make champions teams
-    Mutator::RNG rngChampions(rng.getUnsignedInt64(0,UINT64_MAX));
+    Mutator::RNG rngChampions;
     for(auto& team : championsTeams){
         // If the environment needs n agents, we will make lists of n-1
         // agents that will incorporate other roots.
@@ -223,9 +216,9 @@ makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
     // Each root is put at every possible location in champions teams
     // for example, let's say the champions team is A-B.
     // A root R will fulfill the list as follow :
-    // -1 job with R-A-B
-    // -1 job with A-R-B
-    // -1 job with A-B-R
+    // -> 1 job with R-A-B
+    // -> 1 job with A-R-B
+    // -> 1 job with A-B-R
     for(auto root : roots){
         uint64_t archiveSeed;
         // browses champions teams
@@ -234,12 +227,13 @@ makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
             for(int i=0; i<agentsPerEvaluation; i++){
                 archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
                 auto job = std::make_shared<Learn::AdversarialJob>(
-                        Learn::AdversarialJob({}, archiveSeed, index++));
+                        Learn::AdversarialJob({}, archiveSeed, index++, i));
 
-                for(int j=0; j<agentsPerEvaluation; j++){
-                    if(j==i){
-                        job->addRoot(root);
-                    }
+                for(int j=0; j<i; j++){
+                    job->addRoot(team[j]);
+                }
+                job->addRoot(root);
+                for(int j=i; j<agentsPerEvaluation-1; j++){
                     job->addRoot(team[j]);
                 }
 

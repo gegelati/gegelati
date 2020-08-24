@@ -77,6 +77,8 @@ namespace Learn {
          * This method gathers results in a map linking root to result, and
          * then reverts the map to match the "results" argument.
          * The archive will just be merged like in ParallelLearningAgent.
+         * Note that if there is a "posOfStudiedRoot" in the jobs, we will
+         * only take the score of the given root and others will be ignored.
          *
          * @param[in] resultsPerJobMap map linking the job number with its
          * results and itself.
@@ -174,8 +176,19 @@ namespace Learn {
         /**
          * \brief Puts all roots into AdversarialJob to be able to use them in
          * simulation later. The difference with the base learning agent
-         * makeJobs is that here we make jobs containing several random roots to
+         * makeJobs is that here we make jobs containing several roots to
          * play together.
+         *
+         * To make jobs, this method used champions. If no champion exists,
+         * the first roots of the roots list are taken. Otherwise, the
+         * best roots from the previous generation are kept in the list
+         * of champions.
+         * Several champions are put together to create "teams" of
+         * predefined roots. They are chosen randomly.
+         * Then, to create the job each root of the
+         * population is put to fulfill this team at every possible
+         * location (for example if the team is A-B we will have R-A-B,
+         * A-R-B and A-B-R as jobs).
          *
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
