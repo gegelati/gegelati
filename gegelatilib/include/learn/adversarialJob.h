@@ -66,6 +66,10 @@ namespace Learn {
          * and a root to evaluate in the job : we can
          * skip the champions and just look at the score of
          * the root.
+         *
+         * See
+         * AdversarialLearningAgent.evaluateAllRootsInParallelCompileResults()
+         * for further understandings of its usage.
          */
         const int16_t posOfStudiedRoot;
 

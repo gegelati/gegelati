@@ -66,15 +66,16 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
 
     // Gather the results
     for (const auto& resultPerJob : resultsPerJobMap) {
-        // getting the AdversarialEvaluationResult that should be in this pair
+        // Getting the AdversarialEvaluationResult that should be in this pair
         std::shared_ptr<AdversarialEvaluationResult> res =
             std::dynamic_pointer_cast<AdversarialEvaluationResult>(
                 resultPerJob.second.first);
 
         auto advJob = std::dynamic_pointer_cast<Learn::AdversarialJob>(
             resultPerJob.second.second);
-        // we begin from 0 or the pos of the root to get the score if there is
-        // one
+        // We browse the roots contained in the jobs to update their respective
+        // scores, unless posOfStudiedRoot is defined. In this case, we will
+        // only take 1 root in consideration.
         for (int i = std::max((int16_t)0, advJob->getPosOfStudiedRoot());
              i < advJob->getSize(); i++) {
             auto root = (*advJob)[i];
