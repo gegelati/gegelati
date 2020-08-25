@@ -110,8 +110,9 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
 
     champions.clear();
     auto iterator = results.end();
-    for (int i = 0;
-         i <= (1.0 - params.ratioDeletedRoots) * (double)tpg.getNbRootVertices() - 1.0;
+    for (int i = 0; i <= (1.0 - params.ratioDeletedRoots) *
+                                 (double)tpg.getNbRootVertices() -
+                             1.0;
          i++) {
         champions.emplace_back((--iterator)->second);
     }
@@ -188,7 +189,8 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
 
     // if champions is empty fills it with the first roots come
     if (champions.size() == 0) {
-        for (int i = 0; i <= (double)roots.size() * (1.0 - params.ratioDeletedRoots);
+        for (int i = 0;
+             i <= (double)roots.size() * (1.0 - params.ratioDeletedRoots);
              i++) {
             champions.emplace_back(roots[i]);
         }
@@ -197,9 +199,9 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
     // Creates a list of teams of champion to compete with other roots.
     // We have to make enough teams to have nbIterationsPerPolicyEvaluation
     // iterations per root.
-    int16_t nbChampionsTeams =
-        (int16_t)std::ceil((double)params.nbIterationsPerPolicyEvaluation /
-                  (double)(agentsPerEvaluation * params.nbIterationsPerJob));
+    int16_t nbChampionsTeams = (int16_t)std::ceil(
+        (double)params.nbIterationsPerPolicyEvaluation /
+        (double)(agentsPerEvaluation * params.nbIterationsPerJob));
     auto championsTeams =
         std::vector<std::vector<const TPG::TPGVertex*>>(nbChampionsTeams);
 
