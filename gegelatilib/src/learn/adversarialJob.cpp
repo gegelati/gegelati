@@ -59,3 +59,8 @@ const TPG::TPGVertex* Learn::AdversarialJob::operator[](int i) const
 {
     return roots[i];
 }
+
+const int16_t Learn::AdversarialJob::getPosOfStudiedRoot() const
+{
+    return posOfStudiedRoot;
+}
