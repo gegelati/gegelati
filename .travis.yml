@@ -81,6 +81,48 @@ jobs:
             - ./RunCoverageLinux.sh
 
         - os: linux
+          dist: xenial
+          stage: Build
+          compiler: clang
+          addons:
+            apt:
+                sources:
+                    - ubuntu-toolchain-r-test
+                packages:
+                    - g++-7
+                    - doxygen
+          env:
+            - GENERATOR="Unix Makefile"
+          script:
+            - export CC=gcc-7
+            - export CXX=g++-7
+            - cd bin
+            - cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug
+            - cmake --build . --target GEGELATI
+            - cmake --build . --target doc
+            - sudo make install
+            - cmake --build . --target runTests
+            - ./bin/runTests
+            - cd ..
+
+        - os: osx
+          stage: Build
+          compiler: clang
+          env:
+            - GENERATOR="Unix Makefile"
+          install:
+           - brew install doxygen
+          script:
+            - cd bin
+            - cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug
+            - cmake --build . --target GEGELATI
+            - cmake --build . --target doc
+            - sudo make install
+            - cmake --build . --target runTests
+            - ./bin/runTests
+            - cd ..
+
+        - os: linux
           stage: Deploy
           script:
             - echo "Empty job"

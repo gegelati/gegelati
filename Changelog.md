@@ -4,6 +4,21 @@
 _aaaa.mm.dd_
 
 ### New features
+* Fix code for building GEGELATI with clang (v7+) and added a dedicated job with travis-ci.
+* Add osx job in travis-ci.
+* Adding `LearningAgent::forgetPreviousResults()` method to support changing LearningEnvironment where score of previous generation need to be forgotten from time to time. This is usefull when the LearningEnvironment evolves every _N_ generations to teach new skills gradually.
+
+### Changes
+
+### Bug fix
+* Adapt code for building GEGELATI with clang standard library: libc++. (see Issue #49 for mode details)
+* Fix implicit template type for std::vector in ClassificationLearningAgentTest.
+
+
+## Release version 0.3.0
+_2020.07.02_
+
+### New features
 * Parameters (learningParameters and mutationParameters) can now be set with a JSON file using parametersParser.
 * A generic Logger class was added to ease the creation of log files within gegelati.
 * A specific logging mechanism is available for LearningAgent, using a child class of the LALogger class. A logger, LABasicLogger with basic learning information is provided.

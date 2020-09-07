@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -203,8 +203,8 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
 
     // little sleep to delay the total_time value (while the "checkpoint" of the
     // logger will be reset)
-    double timeToWaitMili = 10;
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    size_t timeToWaitMili = 10;
+    std::this_thread::sleep_for(std::chrono::milliseconds(timeToWaitMili));
 
     // resets "checkpoint" so that the first displayed time shall be lower than
     // the second which is the time from start
@@ -226,13 +226,13 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     double evalTime = std::stod(result[0]);
     double validTime = std::stod(result[1]);
     double totTime = std::stod(result[2]);
-    ASSERT_TRUE(evalTime >= 0) << "Eval duration should be positive";
-    ASSERT_TRUE(validTime >= 0) << "Valid duration should be positive";
-    ASSERT_TRUE(totTime > evalTime)
+    ASSERT_GE(evalTime, 0) << "Eval duration should be positive";
+    ASSERT_GE(validTime, 0) << "Valid duration should be positive";
+    ASSERT_GT(totTime, evalTime)
         << "Total time should be the largest duration !";
-    ASSERT_TRUE(totTime >= timeToWaitMili / 1000)
+    ASSERT_GE(totTime, timeToWaitMili / 1000)
         << "Total time should be larger than the time we waited !";
 
-    ASSERT_TRUE(result.size() == 5)
+    ASSERT_EQ(result.size(), 5)
         << "logEndOfTraining with and without valid should have 3+2=5 elements";
 }

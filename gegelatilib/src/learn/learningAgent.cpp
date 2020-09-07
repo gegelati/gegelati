@@ -3,6 +3,7 @@
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -238,7 +239,8 @@ void Learn::LearningAgent::decimateWorstRoots(
                      (double)params.mutation.tpg.nbRoots) &&
            results.size() > 0) {
         // If the root is an action, do not remove it!
-        if (typeid(*results.begin()->second) != typeid(TPG::TPGAction)) {
+        const TPG::TPGVertex* root = results.begin()->second;
+        if (typeid(*root) != typeid(TPG::TPGAction)) {
             tpg.removeVertex(*results.begin()->second);
             // Removed stored result (if any)
             this->resultsPerRoot.erase(results.begin()->second);
@@ -365,4 +367,11 @@ void Learn::LearningAgent::keepBestPolicy()
             }
         }
     }
+}
+
+void Learn::LearningAgent::forgetPreviousResults()
+{
+    resultsPerRoot.clear();
+    bestRoot.first = nullptr;
+    bestRoot.second = nullptr;
 }

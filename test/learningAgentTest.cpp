@@ -3,6 +3,7 @@
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -305,6 +306,51 @@ TEST_F(LearningAgentTest, UpdateEvaluationRecords)
     ASSERT_NO_THROW(la.updateEvaluationRecords({{sharedPtr, root3}}));
 }
 
+TEST_F(LearningAgentTest, forgetPreviousResults)
+{
+    params.nbIterationsPerPolicyEvaluation = 10;
+
+    Learn::LearningAgent la(le, set, params);
+    la.init();
+
+    // Update with a fake result for a root of the graph
+    const TPG::TPGVertex* root = *la.getTPGGraph().getRootVertices().begin();
+    ASSERT_NO_THROW(la.updateEvaluationRecords(
+        {{std::make_shared<Learn::EvaluationResult>(1.0, 10), root}}));
+    ASSERT_EQ(la.getBestRoot().second->getResult(), 1.0)
+        << "Best root not updated properly.";
+    ASSERT_NO_THROW(*la.getBestRoot().second +=
+                    Learn::EvaluationResult(2.0, 10));
+    ASSERT_EQ(la.getBestRoot().second->getResult(), 1.5)
+        << "Best root not updated properly.";
+
+    // Looks for the eval record the Learning Agent should keep
+    std::shared_ptr<Learn::EvaluationResult> previousEval;
+    la.isRootEvalSkipped(*la.getBestRoot().first, previousEval);
+
+    ASSERT_NE(nullptr, previousEval)
+        << "Learning agent should remember the last score of the root.";
+
+    // Forgets the eval record
+    ASSERT_NO_THROW(la.forgetPreviousResults())
+        << "forgetPreviousResults throws exception.";
+
+    // Looks for the eval record the Learning Agent should keep
+    la.isRootEvalSkipped(*la.getBestRoot().first, previousEval);
+
+    ASSERT_EQ(nullptr, previousEval)
+        << "Learning agent should have forgotten the last score of the root";
+
+    ASSERT_EQ(nullptr, la.getBestRoot().first)
+        << "Learning agent should have forgotten the best root";
+
+    ASSERT_EQ(nullptr, la.getBestRoot().second)
+        << "Learning agent should have forgotten the last score of the root";
+
+    ASSERT_NO_THROW(la.trainOneGeneration(0))
+        << "trainOneGeneration doesn't work after a forgetPreviousResults";
+}
+
 TEST_F(LearningAgentTest, DecimateWorstRoots)
 {
     params.archiveSize = 50;
@@ -329,7 +375,8 @@ TEST_F(LearningAgentTest, DecimateWorstRoots)
 
     // Check that the action is now a root
     roots = graph.getRootVertices();
-    ASSERT_EQ(typeid(*roots.at(0)), typeid(TPG::TPGAction))
+    auto* root = roots.at(0);
+    ASSERT_EQ(typeid(*root), typeid(TPG::TPGAction))
         << "An action should have become a root of the TPGGraph.";
 
     // Create and fill results for each "root" artificially

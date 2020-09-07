@@ -476,7 +476,8 @@ TEST_F(TPGTest, TPGGraphCloneVertex)
     // Duplicate the action (to increase code coverage)
     ASSERT_NO_THROW(tpg.cloneVertex(vertex1));
     // Check that the type is correct
-    ASSERT_EQ(typeid(vertex1).name(), typeid(*tpg.getVertices().at(3)).name());
+    const TPG::TPGVertex* vertex = tpg.getVertices().at(3);
+    ASSERT_EQ(typeid(vertex1).name(), typeid(*vertex).name());
     ASSERT_EQ(vertex1.getActionID(),
               ((TPG::TPGAction*)tpg.getVertices().at(3))->getActionID());
 

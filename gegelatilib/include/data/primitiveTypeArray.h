@@ -134,7 +134,7 @@ namespace Data {
          * \brief Sets all elements of the Array to 0 (or its equivalent for
          * the given template param.)
          */
-        void resetData();
+        void resetData() override;
 
         /// Inherited from DataHandler
         virtual UntypedSharedPtr getDataAt(const std::type_info& type,
@@ -253,7 +253,7 @@ namespace Data {
             std::stringstream message;
             message << "Data type " << DEMANGLE_TYPEID_NAME(type.name())
                     << " cannot be accessed at address " << address
-                    << ", address space size is " << addressSpace + ".";
+                    << ", address space size is " << addressSpace << ".";
             throw std::out_of_range(message.str());
         }
     }

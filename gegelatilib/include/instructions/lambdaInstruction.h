@@ -126,19 +126,36 @@ namespace Instructions {
                 return 0.0;
             }
 #endif
-
-            size_t i = args.size() - 1;
-            // Using i-- as expansion seems to happen with parameters evaluated
-            // from right to left. This assumption is valid within GCC7 and
-            // MSVC19. In case of failure on another compiler, a more portable
-            // solution should be found.
             double result =
-                this->func(getDataFromUntypedSharedPtr<First>(args, 0),
-                           getDataFromUntypedSharedPtr<Rest>(args, i--)...);
+                doExecution(args, std::index_sequence_for<Rest...>{});
+
             return result;
         };
 
       private:
+        /**
+         * \brief Template function to handle variadic parameter pack expansion.
+         *
+         * In order to call the LambdaInstruction::func function, the arguments
+         * given as a std::vector to the execute method must be expanded using
+         * the template parameter expansion pack. In order to index arguments in
+         * args, a second layer of template function is needed to expand an
+         * std::index_sequence making it possible to index args at compile time.
+         * This is the purpose of this method.
+         *
+         * \param[in] args The argument for the func execution, stored in an
+         * std::vector.
+         * \tparam I the std::index_sequence used to access args.
+         */
+        template <size_t... I>
+        double doExecution(const std::vector<Data::UntypedSharedPtr>& args,
+                           std::index_sequence<I...>) const
+        {
+            return this->func(
+                getDataFromUntypedSharedPtr<First>(args, 0),
+                getDataFromUntypedSharedPtr<Rest>(args, I + 1)...);
+        }
+
         /**
          * \brief Function to retrieve the shared pointer from any datatype in
          * the execute method.

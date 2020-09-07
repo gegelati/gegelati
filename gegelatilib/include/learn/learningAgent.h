@@ -3,6 +3,7 @@
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -309,6 +310,16 @@ namespace Learn {
             std::multimap<std::shared_ptr<EvaluationResult>,
                           const TPG::TPGVertex*>
                 results);
+
+        /**
+         * \brief This method resets the previous registered scores per root.
+         *
+         * Resets resultsPerRoot so that, in the next training,
+         * the current roots will be considered as if they had never
+         * been tested. To use for example when there is a scoring policy
+         * change.
+         */
+        void forgetPreviousResults();
 
         /**
          * \brief Get the best root TPG::Vertex encountered since the last init.

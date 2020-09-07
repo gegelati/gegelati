@@ -262,8 +262,8 @@ TEST_F(UntypedSharedPtrTest, getSharedPtrOnBuiltFromConcept)
         auto msp = std::make_shared<Data::UntypedSharedPtr::Model<double[]>>(
             new double[5]);
         Data::UntypedSharedPtr usp{msp};
-        std::shared_ptr<double[]> dataPtr;
-        std::shared_ptr<const double[]> cdataPtr;
+        std::shared_ptr<double> dataPtr;
+        std::shared_ptr<const double> cdataPtr;
         ASSERT_NO_THROW(dataPtr = usp.getSharedPointer<double[]>())
             << "Getting the shared pointer to the original template parameter "
                "of the model failed.";
@@ -282,8 +282,8 @@ TEST_F(UntypedSharedPtrTest, getSharedPtrOnBuiltFromConcept)
             std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
                 new double[5]);
         Data::UntypedSharedPtr cusp{cmsp};
-        std::shared_ptr<double[]> dataPtr;
-        std::shared_ptr<const double[]> cdataPtr;
+        std::shared_ptr<double> dataPtr;
+        std::shared_ptr<const double> cdataPtr;
         ASSERT_NO_THROW(cdataPtr = cusp.getSharedPointer<const double[]>())
             << "Getting the shared pointer to the original template parameter "
                "of the model failed.";

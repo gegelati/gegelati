@@ -149,13 +149,13 @@ namespace Data {
         }
     };
 
-    template <> struct Hash<nullptr_t>
+    template <> struct Hash<std::nullptr_t>
     {
-        using argument_type = nullptr_t;
+        using argument_type = std::nullptr_t;
         using result_type = size_t;
         _NODISCARD size_t
 
-        operator()(nullptr_t) const noexcept
+        operator()(std::nullptr_t) const noexcept
         {
             void* _Null{};
             return _Hash_representation(_Null);

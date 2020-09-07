@@ -254,14 +254,16 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     uint64_t originalNbVertices = graph.getNbVertices();
 
     // Create a poor score for the action and team root
-    classifResults.emplace(new Learn::ClassificationEvaluationResult(
-                               std::vector(fle.getNbActions(), 0.0),
-                               std::vector(fle.getNbActions(), size_t(10))),
-                           &actionRoot);
-    classifResults.emplace(new Learn::ClassificationEvaluationResult(
-                               std::vector(fle.getNbActions(), 0.0),
-                               std::vector(fle.getNbActions(), size_t(10))),
-                           &teamRoot);
+    classifResults.emplace(
+        new Learn::ClassificationEvaluationResult(
+            std::vector<double>(fle.getNbActions(), 0.0),
+            std::vector<size_t>(fle.getNbActions(), size_t(10))),
+        &actionRoot);
+    classifResults.emplace(
+        new Learn::ClassificationEvaluationResult(
+            std::vector<double>(fle.getNbActions(), 0.0),
+            std::vector<size_t>(fle.getNbActions(), size_t(10))),
+        &teamRoot);
 
     // Do the decimation
     ASSERT_NO_THROW(cla.decimateWorstRoots(classifResults))
