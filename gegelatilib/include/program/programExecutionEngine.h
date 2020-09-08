@@ -90,7 +90,7 @@ namespace Program {
          */
         ProgramExecutionEngine(const Environment& env)
             : programCounter{0}, registers{env.getNbRegisters()},
-              constants{env.getNbConstant()}, program{NULL},
+              constants{env.getNbConstant()}, program(NULL),
               dataSources{env.getDataSources()}
         {
             // Setup the data sources
@@ -126,7 +126,7 @@ namespace Program {
             const std::vector<std::reference_wrapper<T>>& dataSrc)
             : programCounter{0},
               registers{prog.getEnvironment().getNbRegisters()},
-              constants{prog.getConstantsAddressSpace()}, program{NULL}
+              constants{prog.getConstantsAddressSpace()}, program(NULL)
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(

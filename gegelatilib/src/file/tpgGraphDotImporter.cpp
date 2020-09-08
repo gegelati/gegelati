@@ -161,7 +161,7 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
         pos1 = this->lastLine.find("|", pos);
         for (;;) {
             if (pos1 != std::string::npos) {
-                v_constant.push_back((Data::Constant)std::stoi(
+                v_constant.push_back(std::stoi(
                     this->lastLine.substr(pos, pos1 - pos)));
             }
             else {
