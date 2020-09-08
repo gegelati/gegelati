@@ -4,6 +4,7 @@
   "nbIterationsPerPolicyEvaluation": 50,
   "maxNbActionsPerEval": 5,
   "ratioDeletedRoots": 0.85,
+  "nbIterationsPerJob": 31,
   "maxNbEvaluationPerPolicy": 100,
   "nbRegisters": 3,
   "nbThreads": 2,
@@ -18,6 +19,7 @@
       "pEdgeDeletion": 0.8,
       "pEdgeAddition": 0.8,
       "pProgramMutation": 0.8,
+	  "forceProgramBehaviorChangeOnMutation": true,
       "pEdgeDestinationChange": 0.3,
       "pEdgeDestinationIsAction": 0.6
     },

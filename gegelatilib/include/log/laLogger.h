@@ -1,6 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -38,10 +39,15 @@
 
 #include <chrono>
 #include <map>
+#include <ostream>
 
 #include "learn/evaluationResult.h"
-#include "log/Logger.h"
+#include "log/logger.h"
 #include "tpg/tpgGraph.h"
+
+namespace Learn {
+    class LearningAgent;
+}
 
 namespace Log {
 
@@ -73,6 +79,12 @@ namespace Log {
             checkpoint;
 
         /**
+         * Keeps the duration of the mutation to be able to log it
+         * some time after it is computed.
+         */
+        double mutationTime = 0;
+
+        /**
          * Keeps the duration of the evaluation to be able to log it
          * some time after it is computed.
          */
@@ -83,6 +95,9 @@ namespace Log {
          * some time after it is computed.
          */
         double validTime = 0;
+
+        /// LearningAgent logged by the LALogger
+        Learn::LearningAgent& learningAgent;
 
         /**
          * \brief Computes the duration from a given time to now.
@@ -114,16 +129,16 @@ namespace Log {
          * \brief Constructor defining a given output and setting start and
          * checkpoint as now. Default output is cout.
          *
-         * \param[in] out The output stream the logger will send elements to.
+         * The constructed LALogger will add itself automatically to the Loggers
+         * of the given LearningAgent.
+         *
+         * \param[in] la The LearningAgent which will be logged by this
+         * LALogger.
+         * \param[in] out The output stream the logger will send
+         * elements to.
          */
-        explicit LALogger(std::ostream& out = std::cout)
-            : Logger(out),
-              start(std::make_shared<std::chrono::time_point<
-                        std::chrono::system_clock, std::chrono::nanoseconds>>(
-                  getTime()))
-        {
-            chronoFromNow();
-        };
+        explicit LALogger(Learn::LearningAgent& la,
+                          std::ostream& out = std::cout);
 
         /**
          * \brief Updates checkpoint to now.
@@ -136,14 +151,20 @@ namespace Log {
         virtual void logHeader() = 0;
 
         /**
+         * \brief Method called by the LearningAgent at the start of a
+         * generation.
+         *
+         * \param[in] generationNumber The number of the current
+         * generation.
+         */
+        virtual void logNewGeneration(uint64_t& generationNumber) = 0;
+
+        /**
          * \brief Method called by the Learning Agent right after
          * PopulateTPG is done.
          *
-         * \param[in] generationNumber The number of the current generation.
-         * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterPopulateTPG(uint64_t& generationNumber,
-                                         TPG::TPGGraph& tpg) = 0;
+        virtual void logAfterPopulateTPG() = 0;
 
         /**
          * \brief Method called by the Learning Agent right after the evaluation
@@ -159,10 +180,8 @@ namespace Log {
         /**
          * \brief Method called by the Learning Agent right after the decimation
          * is done.
-         *
-         * \param[in] tpg The current tpg of the learning agent.
          */
-        virtual void logAfterDecimate(TPG::TPGGraph& tpg) = 0;
+        virtual void logAfterDecimate() = 0;
 
         /**
          * \brief Method called by the Learning Agent right after the validation

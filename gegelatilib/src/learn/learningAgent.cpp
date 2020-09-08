@@ -36,6 +36,7 @@
  */
 
 #include <inttypes.h>
+#include <queue>
 
 #include "data/hash.h"
 #include "learn/evaluationResult.h"
@@ -77,9 +78,8 @@ void Learn::LearningAgent::init(uint64_t seed)
 
 void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 {
-    logger.doValidation = params.doValidation;
+    logger.doValidation = this->params.doValidation;
     // logs for example the headers of the columns the logger will print
-    logger.logHeader();
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
 }
 
@@ -94,7 +94,7 @@ bool Learn::LearningAgent::isRootEvalSkipped(
         // The root has already been evaluated
         previousResult = iter->second;
         return iter->second->getNbEvaluation() >=
-               params.maxNbEvaluationPerPolicy;
+               this->params.maxNbEvaluationPerPolicy;
     }
     else {
         previousResult = nullptr;
@@ -102,15 +102,17 @@ bool Learn::LearningAgent::isRootEvalSkipped(
     }
 }
 
-std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(
-    TPG::TPGExecutionEngine& tee, const TPG::TPGVertex& root,
-    uint64_t generationNumber, Learn::LearningMode mode,
-    LearningEnvironment& le) const
+std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
+    TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber,
+    Learn::LearningMode mode, LearningEnvironment& le) const
 {
+    // Only consider the first root of jobs as we are not in adversarial mode
+    const TPG::TPGVertex* root = job.getRoot();
+
     // Skip the root evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
-    if (mode == TRAINING && this->isRootEvalSkipped(root, previousEval)) {
+    if (mode == TRAINING && this->isRootEvalSkipped(*root, previousEval)) {
         return previousEval;
     }
 
@@ -131,7 +133,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateRoot(
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the action
             uint64_t actionID =
-                ((const TPG::TPGAction*)tee.executeFromRoot(root).back())
+                ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())
                     ->getActionID();
             // Do it
             le.doAction(actionID);
@@ -168,17 +170,12 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
     TPG::TPGExecutionEngine tee(
         this->env, (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
-    for (const TPG::TPGVertex* root : this->tpg.getRootVertices()) {
-        // Before each root evaluation, set a new seed for the archive in
-        // TRAINING Mode Else, archiving should be deactivate anyway
-        if (mode == LearningMode::TRAINING) {
-            this->archive.setRandomSeed(
-                this->rng.getUnsignedInt64(0, UINT64_MAX));
-        }
-
-        std::shared_ptr<EvaluationResult> avgScore = this->evaluateRoot(
-            tee, *root, generationNumber, mode, this->learningEnvironment);
-        result.emplace(avgScore, root);
+    for (int i = 0; i < tpg.getNbRootVertices(); i++) {
+        auto job = makeJob(i, mode);
+        this->archive.setRandomSeed(job->getArchiveSeed());
+        std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
+            tee, *job, generationNumber, mode, this->learningEnvironment);
+        result.emplace(avgScore, (*job).getRoot());
     }
 
     return result;
@@ -186,12 +183,16 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 {
+    for (auto logger : loggers) {
+        logger.get().logNewGeneration(generationNumber);
+    }
+
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(this->tpg, this->archive,
                                      this->params.mutation, this->rng,
                                      maxNbThreads);
     for (auto logger : loggers) {
-        logger.get().logAfterPopulateTPG(generationNumber, tpg);
+        logger.get().logAfterPopulateTPG();
     }
 
     // Evaluate
@@ -203,19 +204,19 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Remove worst performing roots
     decimateWorstRoots(results);
-    for (auto logger : loggers) {
-        logger.get().logAfterDecimate(tpg);
-    }
-
-    // Update the best (code duplicate in ParallelLearningAgent)
+    // Update the best
     this->updateEvaluationRecords(results);
+
+    for (auto logger : loggers) {
+        logger.get().logAfterDecimate();
+    }
 
     // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
-        auto result =
+        auto validationResults =
             evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
         for (auto logger : loggers) {
-            logger.get().logAfterValidate(results);
+            logger.get().logAfterValidate(validationResults);
         }
     }
 
@@ -304,8 +305,8 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
 }
 
 void Learn::LearningAgent::updateEvaluationRecords(
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
-        results)
+    const std::multimap<std::shared_ptr<EvaluationResult>,
+                        const TPG::TPGVertex*>& results)
 {
     { // Update resultsPerRoot
         for (auto result : results) {
@@ -321,6 +322,11 @@ void Learn::LearningAgent::updateEvaluationRecords(
                 // with the new one (which was combined with the pre-existing
                 // one in evalRoot)
                 mapIterator->second = result.first;
+                // If the received result is associated to the current bestRoot,
+                // update it.
+                if (result.second == this->bestRoot.first) {
+                    this->bestRoot.second = result.first;
+                }
             }
         }
     }
@@ -367,6 +373,40 @@ void Learn::LearningAgent::keepBestPolicy()
             }
         }
     }
+}
+
+std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
+    int num, Learn::LearningMode mode, int idx, TPG::TPGGraph* tpgGraph)
+{
+    // sets the tpg to the Learning Agent's one if no one was specified
+    tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
+
+    // Before each root evaluation, set a new seed for the archive in
+    // TRAINING Mode Else, archiving should be deactivate anyway
+    uint64_t archiveSeed = 0;
+    if (mode == LearningMode::TRAINING) {
+        archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
+    }
+
+    if (tpgGraph->getNbRootVertices() > 0) {
+        return std::make_shared<Learn::Job>(
+            Learn::Job({tpgGraph->getRootVertices()[num]}, archiveSeed, idx));
+    }
+    return nullptr;
+}
+
+std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
+    Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
+{
+    // sets the tpg to the Learning Agent's one if no one was specified
+    tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
+
+    std::queue<std::shared_ptr<Learn::Job>> jobs;
+    for (int i = 0; i < tpgGraph->getNbRootVertices(); i++) {
+        auto job = makeJob(i, mode, i);
+        jobs.push(job);
+    }
+    return jobs;
 }
 
 void Learn::LearningAgent::forgetPreviousResults()

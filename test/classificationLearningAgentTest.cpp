@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -129,8 +130,8 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
 
     cla.init();
     std::shared_ptr<Learn::EvaluationResult> result1;
-    ASSERT_NO_THROW(result1 = cla.evaluateRoot(
-                        tee, *cla.getTPGGraph().getRootVertices().at(0), 0,
+    ASSERT_NO_THROW(result1 = cla.evaluateJob(
+                        tee, *cla.makeJob(0, Learn::LearningMode::TRAINING), 0,
                         Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
     ASSERT_LE(result1->getResult(), 1.0)
@@ -142,8 +143,8 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
 
     // Reevaluate to check that the previous result1 is not returned.
     std::shared_ptr<Learn::EvaluationResult> result2;
-    ASSERT_NO_THROW(result2 = cla.evaluateRoot(
-                        tee, *cla.getTPGGraph().getRootVertices().at(0), 0,
+    ASSERT_NO_THROW(result2 = cla.evaluateJob(
+                        tee, *cla.makeJob(0, Learn::LearningMode::TRAINING), 0,
                         Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
     ASSERT_NE(result1, result2);
@@ -154,8 +155,8 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
 
     // Reevaluate to check that the previous result2 is returned.
     std::shared_ptr<Learn::EvaluationResult> result3;
-    ASSERT_NO_THROW(result3 = cla.evaluateRoot(
-                        tee, *cla.getTPGGraph().getRootVertices().at(0), 0,
+    ASSERT_NO_THROW(result3 = cla.evaluateJob(
+                        tee, *cla.makeJob(0, Learn::LearningMode::TRAINING), 0,
                         Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result3, result2);

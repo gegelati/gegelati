@@ -128,6 +128,11 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.pProgramMutation = value.asDouble();
         return;
     }
+    if (param == "forceProgramBehaviorChangeOnMutation") {
+        params.mutation.tpg.forceProgramBehaviorChangeOnMutation =
+            value.asBool();
+        return;
+    }
     if (param == "pEdgeDestinationChange") {
         params.mutation.tpg.pEdgeDestinationChange = value.asDouble();
         return;
@@ -194,6 +199,10 @@ void File::ParametersParser::setParameterFromString(
     }
     if (param == "nbGenerations") {
         params.nbGenerations = value.asUInt64();
+        return;
+    }
+    if (param == "nbIterationsPerJob") {
+        params.nbIterationsPerJob = value.asUInt64();
         return;
     }
     if (param == "maxNbEvaluationPerPolicy") {

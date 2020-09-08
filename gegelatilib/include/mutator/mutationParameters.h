@@ -59,6 +59,11 @@ namespace Mutator {
         double pEdgeAddition;
         /// Probability of mutating the Program of an outgoing TPGEdge.
         double pProgramMutation;
+        /// When a Program is mutated, makes sure its behavior is no longer the
+        /// same. (This possibility does not exists in Kelly's work, where only
+        /// the archive is used for this purpose, which is far from 100%
+        /// accurate.)
+        bool forceProgramBehaviorChangeOnMutation = false;
         /// Probability of changing the destination of a TPGEdge.
         double pEdgeDestinationChange;
         /// Probability of the new destination of a TPGEdge to be a TPGAction.

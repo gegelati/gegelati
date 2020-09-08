@@ -46,6 +46,7 @@
 #include <data/dataHandler.h>
 #include <data/hash.h>
 #include <data/primitiveTypeArray.h>
+#include <data/primitiveTypeArray2D.h>
 #include <data/untypedSharedPtr.h>
 
 #include <file/parametersParser.h>
@@ -59,18 +60,25 @@
 #include <instructions/set.h>
 
 #include <learn/evaluationResult.h>
+#include <learn/job.h>
 #include <learn/learningAgent.h>
 #include <learn/learningEnvironment.h>
 #include <learn/learningParameters.h>
 #include <learn/parallelLearningAgent.h>
 
+#include <learn/adversarialEvaluationResult.h>
+#include <learn/adversarialJob.h>
+#include <learn/adversarialLearningAgent.h>
+#include <learn/adversarialLearningEnvironment.h>
+
 #include <learn/classificationEvaluationResult.h>
 #include <learn/classificationLearningAgent.h>
 #include <learn/classificationLearningEnvironment.h>
 
-#include <log/LABasicLogger.h>
-#include <log/LALogger.h>
-#include <log/Logger.h>
+#include <log/laBasicLogger.h>
+#include <log/laLogger.h>
+#include <log/laPolicyStatsLogger.h>
+#include <log/logger.h>
 
 #include <mutator/lineMutator.h>
 #include <mutator/mutationParameters.h>

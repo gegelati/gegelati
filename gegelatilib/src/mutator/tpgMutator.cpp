@@ -340,11 +340,25 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
     const Mutator::MutationParameters& params, const Archive& archive,
     Mutator::RNG& rng)
 {
+    // If the Program behavior should be new after mutation:
+    std::shared_ptr<Program::Program> newProgCopy(nullptr);
+    if (params.tpg.forceProgramBehaviorChangeOnMutation) {
+        // Copy the program to check that its behavior is changed before
+        // verifying its unicity against the archive
+        newProgCopy = std::make_shared<Program::Program>(*newProg);
+    }
+
     bool allUnique;
     // Mutate behavior until it changes (against the archive).
     do {
+
         // Mutate until something is mutated (i.e. the function returns true)
-        while (!Mutator::ProgramMutator::mutateProgram(*newProg, params, rng));
+        // And until the program behavior is changed
+        while (
+            !(Mutator::ProgramMutator::mutateProgram(*newProg, params, rng) &&
+              !(newProgCopy != nullptr &&
+                newProg->hasIdenticalBehavior(*newProgCopy))))
+            ;
         // Check for uniqueness in archive
         auto archivedDataHandlers = archive.getDataHandlers();
         std::map<size_t, double> hashesAndResults;

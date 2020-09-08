@@ -33,6 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#include <numeric>
 #include <stdexcept>
 
 #include "program/line.h"
@@ -102,4 +103,28 @@ bool Program::Line::setOperand(const uint64_t idx, const uint64_t dataIndex,
     this->operands[idx].second = location;
 
     return true;
+}
+
+bool Program::Line::operator==(const Line& other) const
+{
+    // Compare instruction and destination Index
+    if (this->instructionIndex != other.instructionIndex ||
+        this->destinationIndex != other.destinationIndex) {
+        return false;
+    }
+
+    // Compare operands
+    for (auto idx = 0; idx < this->getEnvironment().getMaxNbOperands(); idx++) {
+        if (this->operands[idx] != other.operands[idx]) {
+            return false;
+        }
+    }
+
+    // No difference was found
+    return true;
+}
+
+bool Program::Line::operator!=(const Line& other) const
+{
+    return !(this->operator==(other));
 }

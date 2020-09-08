@@ -39,7 +39,7 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
-#include "log/LABasicLogger.h"
+#include "log/laBasicLogger.h"
 
 #include "tpg/tpgGraph.h"
 
@@ -122,8 +122,13 @@ TEST_F(LearningAgentTest, addLogger)
     params.archivingProbability = 0.5;
     Learn::LearningAgent la(le, set, params);
 
-    auto l = new Log::LABasicLogger(std::cout);
-    ASSERT_NO_THROW(la.addLogger(*l)) << "Adding a logger should not fail.";
+    Log::LALogger* l = nullptr;
+    ASSERT_NO_THROW(
+        l = new Log::LABasicLogger(la, std::cout)) // Call addLogger.
+        << "Adding a logger should not fail.";
+    if (l != nullptr) {
+        delete l;
+    }
 }
 
 TEST_F(LearningAgentTest, IsRootEvalSkipped)
@@ -174,6 +179,37 @@ TEST_F(LearningAgentTest, IsRootEvalSkipped)
            "maxNbEvaluationPerPolicy.";
 }
 
+TEST_F(LearningAgentTest, MakeJob)
+{
+    Learn::LearningAgent la(le, set, params);
+    la.init();
+    auto job = *la.makeJob(0, Learn::TRAINING);
+    ASSERT_NO_THROW(job.getArchiveSeed()) << "job should have an archive seed";
+    ASSERT_NO_THROW(job.getIdx()) << "job should have an idx";
+    ASSERT_EQ(la.getTPGGraph().getRootVertices().at(0), job.getRoot())
+        << "Encapsulate the root in a job shouldn't change it";
+
+    Learn::LearningAgent la2(le, set, params);
+    auto job2 = la2.makeJob(0, Learn::LearningMode::TRAINING);
+    ASSERT_EQ(nullptr, job2)
+        << "Create a job when no root should return nullptr";
+}
+
+TEST_F(LearningAgentTest, MakeJobs)
+{
+    Learn::LearningAgent la(le, set, params);
+    la.init();
+    auto jobs = la.makeJobs(Learn::TRAINING);
+    ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), jobs.size())
+        << "There should be as many jobs as roots";
+    for (int i = 0; i < la.getTPGGraph().getNbRootVertices(); i++) {
+        ASSERT_EQ(la.getTPGGraph().getRootVertices().at(i),
+                  (*jobs.front()).getRoot())
+            << "Encapsulate the root in a job shouldn't change it";
+        jobs.pop();
+    }
+}
+
 TEST_F(LearningAgentTest, EvalRoot)
 {
     params.archiveSize = 50;
@@ -189,9 +225,9 @@ TEST_F(LearningAgentTest, EvalRoot)
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result;
+    auto job = *la.makeJob(0, Learn::LearningMode::TRAINING);
     ASSERT_NO_THROW(
-        result = la.evaluateRoot(tee, *la.getTPGGraph().getRootVertices().at(0),
-                                 0, Learn::LearningMode::TRAINING, le))
+        result = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getResult(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
@@ -308,7 +344,14 @@ TEST_F(LearningAgentTest, UpdateEvaluationRecords)
 
 TEST_F(LearningAgentTest, forgetPreviousResults)
 {
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
+    params.mutation.tpg.maxInitOutgoingEdges = 2;
+    params.ratioDeletedRoots = 0.50;
+    params.mutation.tpg.nbRoots = 10;
+    params.nbRegisters = 4;
 
     Learn::LearningAgent la(le, set, params);
     la.init();
@@ -416,8 +459,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
 
     // we add a logger to la to check it logs things
     std::ofstream o("tempFileForTest", std::ofstream::out);
-    auto l = new Log::LABasicLogger(o);
-    la.addLogger(*l);
+    Log::LABasicLogger l(la, o);
 
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
@@ -489,6 +531,7 @@ TEST_F(LearningAgentTest, TrainPortability)
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
 
     Learn::LearningAgent la(le, set, params);
 
@@ -502,11 +545,12 @@ TEST_F(LearningAgentTest, TrainPortability)
     TPG::TPGGraph& tpg = la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 28)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+    ASSERT_EQ(tpg.getNbRootVertices(), 25)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 97)
+    ASSERT_EQ(tpg.getEdges().size(), 94)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8677432978740876680)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              14825295448422883263u)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -579,9 +623,10 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 
     std::shared_ptr<Learn::EvaluationResult> result;
     Learn::ParallelLearningAgent pla(le, set, params);
-    ASSERT_NO_THROW(result =
-                        pla.evaluateRoot(tee, *tpg.getRootVertices().at(0), 0,
-                                         Learn::LearningMode::TRAINING, le))
+    ASSERT_NO_THROW(result = pla.evaluateJob(
+                        tee,
+                        *pla.makeJob(0, Learn::LearningMode::TRAINING, 0, &tpg),
+                        0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getResult(), 1.0)
         << "Average score should not exceed the score of a perfect player.";

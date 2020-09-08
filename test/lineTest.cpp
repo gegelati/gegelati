@@ -213,3 +213,35 @@ TEST_F(LineTest, LineOperandAccessors)
     ASSERT_THROW(l.getOperand(2), std::range_error)
         << "Getting value of an incorrectly indexed operand did not fail.";
 }
+
+TEST_F(LineTest, OperatorEquality)
+{
+    Program::Line l1(*e),
+        l2(*e); // with the given environment, there are two operands
+                // per line, one param, and 3 data sources.
+
+    ASSERT_EQ(l1, l2)
+        << "Lines built with default constructor should be equal.";
+
+    l1.setInstructionIndex(1);
+
+    ASSERT_NE(l1, l2)
+        << "Lines built with different instruction should not be equal.";
+
+    l2.setInstructionIndex(1);
+    l1.setDestinationIndex(2);
+
+    ASSERT_NE(l1, l2)
+        << "Lines built with different destination should not be equal.";
+
+    l2.setDestinationIndex(2);
+    l1.setOperand(1, 1, 2);
+
+    ASSERT_NE(l1, l2)
+        << "Lines built with different operand should not be equal.";
+
+    l2.setOperand(1, 1, 2);
+
+    ASSERT_EQ(l1, l2)
+        << "Lines with identical indexes and operands should be equal.";
+}

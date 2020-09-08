@@ -1,18 +1,51 @@
 # GEGELATI Changelog
-
 ## Release version x.y.z
 _aaaa.mm.dd_
 
 ### New features
-* Fix code for building GEGELATI with clang (v7+) and added a dedicated job with travis-ci.
-* Add osx job in travis-ci.
-* Adding `LearningAgent::forgetPreviousResults()` method to support changing LearningEnvironment where score of previous generation need to be forgotten from time to time. This is usefull when the LearningEnvironment evolves every _N_ generations to teach new skills gradually.
+* Optionnaly, it is now possible to force a Program to have a new behavior after being mutated. 
+    * New methods were added for testing equality of `Program::Line` and `Program::Program`. Program equality is based on an analysis of non-intron lines of the Program.
+    * Mutation of the Program behavior is enforced by comparing its state before and after being mutated. This comparison can be activated complementary to the legacy archiving mechanism from Kelly's PhD. 
+    * The `tpg.forceProgramBehaviorChangeOnMutation` boolean was added to the MutationParameters.
 
 ### Changes
+* During eval, the main thread of ParallelLearningAgent now use the main LearningEnvironment instead of systematically cloning it. It enables sequential mode with non-copyable environment for the AdversarialLearningAgent.
+* AdversarialLearningAgent now proceeds evaluations by making each root play against/with champions of the previous generation.
+
+### Bug fix
+
+## Release version 0.4.0
+_2020.07.24_
+
+### New features
+* Fix code for building GEGELATI with clang (v7+) and added a dedicated job with travis-ci.
+* Add osx job in travis-ci.
+* Add adversarial training support. AdversarialLearningAgent can be declared and used with an AdversarialLearningEnvironment to train random groups of several roots together.
+
+### Changes
+* Learning Agents now handle jobs instead of simple roots, allowing new concepts like adversarial learning (a job containing several roots that will train together).
+* Adding `LearningAgent::forgetPreviousResults()` method to support changing LearningEnvironment where score of previous generation need to be forgotten from time to time. This is usefull when the LearningEnvironment evolves every _N_ generations to teach new skills gradually.
+* Add support for 2D arrays with.
+    * New Data::PrimitiveTypeArray2D data handler for providing 2D data sources.
+    * Support in UntypedSharedPtr for fetching 2D operands for instructions. Due to C++ constraints, 2D arrays must be packaged into 1D dynamically allocated arrays.
+    * Support for 2D primitive C-style array in LambdaInstructions.
+* New LAPolicyStatsLogger that logs the PolicyStats of the LearningAgent::bestRoot each time it is updated.
+
+### Changes
+* Remove redundant typecheck in `PrimitiveTypeArray::setDataAt()` in `NDEBUG` mode. A performance gain of ~25% was observed on the MNIST application (without a thorough profiling method).
+* tpgGraphDotImporter now has a line MAX_READ_SIZE limit of 4096 (instead of 1024), allowing to read greater tpg dot files.
+* Add a caching mechanism in `Data::PrimitiveTypeArray[2D]` to avoid reexecuting the `getAddressSpace()` regular expression more than once for each data type. (This had a huge overhead on execution time.)
+* Logger
+    * Refactor the LALogger class (and daughter classes) to keep a reference to the associated LearningAgent at construction time.
+    * Update formatting of LABasicLogger to produce a more compact log.
+    * Add mutation time "T_mutat" to LABasicLogger log.
+    * Rename Logger files to start with a lower-case character.
 
 ### Bug fix
 * Adapt code for building GEGELATI with clang standard library: libc++. (see Issue #49 for mode details)
 * Fix implicit template type for std::vector in ClassificationLearningAgentTest.
+* Fix call to LALogger when validation is activated. LALoggers were called on training results even when validation was activated.
+* Fix missing virtual destructor in the Logger class.
 
 
 ## Release version 0.3.0
@@ -25,7 +58,7 @@ _2020.07.02_
 * In Release configuration, the `NDEBUG` macro is used to deactivate redundant operand type checks during Program execution. A performance gain of 8% was observed on the MNIST application.
 * Automate code formatting with clang-format-10.
     * A new script, `fix_code_format.sh`, can be used to check and format all C++ files of the `gegelatilib` and `test` folders. Use the `--doCommit` option to commit the reformatting that was done.
-	* Update of Travis configuration to fail when files are not properly formatted when building a Pull Request. Other builds (i.e. non-PR) allow the failure of this job.
+    * Update of Travis configuration to fail when files are not properly formatted when building a Pull Request. Other builds (i.e. non-PR) allow the failure of this job.
 * An automated validation is now possible when the parameter `doValidation` is set to true. In this case, the basicLALogger hides evaluation statistics, and displays validation ones instead.
 * Nicer README.md with illustrated links to application repositories, and useless but fancy emojis.
 
@@ -56,8 +89,8 @@ _2020.06.03_
 * Learning agents (`Learn::LearningAgent` and `Learn::ParallelLearningAgent`) now keep a record of the root `TPGVertex` that has led to the best `EvaluationResult` throughout the training process. This root and the associated evaluation result can be retrieved using the new `getBestRoot()` method.
 * New TPG::PolicyStats class for analyzing the topology and the Program of a TPG::TPGGraph starting from a given root TPG::TPGVertex.
 * In Learn::EvaluationResult:
-	* A new attribute `nbEvaluation` was added to count the number of times the associated policy was evaluated to produce this result. 
-	* A new addition assignment operator (`operator+=`) can be used to combine two existing EvaluationResult.
+    * A new attribute `nbEvaluation` was added to count the number of times the associated policy was evaluated to produce this result. 
+    * A new addition assignment operator (`operator+=`) can be used to combine two existing EvaluationResult.
 * Learn::LearningAgent now store EvaluationResult for each non-decimated root TPGVertex. Each time a root is reevaluated, its EvaluationResult is updated by combining it with the new result. The number of evaluation of each policy (i.e. each root TPGVertex) can now be bounded using the Learn::LearningParameters::maxNbEvaluationPerPolicy parameter. Passed this number, previous EvaluationResult for this root, stored by the LearningAgent, will directly be returned instead of reevaluating the root.
 
 ### Changes

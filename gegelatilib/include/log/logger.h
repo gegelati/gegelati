@@ -34,54 +34,64 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
-#define FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
+#ifndef LOGGER_H
+#define LOGGER_H
 
-#include "data/primitiveTypeArray.h"
-#include "learn/classificationLearningEnvironment.h"
+#include <iostream>
 
-/**
- * \brief Classification Learning enviroment for testing purposes
- */
-class FakeClassificationLearningEnvironment
-    : public Learn::ClassificationLearningEnvironment
-{
-  protected:
-    Data::PrimitiveTypeArray<int> data;
-    int value;
+namespace Log {
 
-  public:
-    FakeClassificationLearningEnvironment()
-        : ClassificationLearningEnvironment(3), data(1), value{0} {};
-    void doAction(uint64_t actionId) override
+    /**
+     * Basic LALogger for logging generic training information.
+     */
+    class Logger
     {
-        // Increment classificationTable
-        ClassificationLearningEnvironment::doAction(actionId);
+      private:
+        /**
+         * Output stream where all what is logged is put.
+         */
+        std::ostream* out;
 
-        // Update data
-        value++;
-        this->currentClass = value % 3;
-        data.setDataAt(typeid(int), 0, value);
-    }
-    void reset(size_t seed, Learn::LearningMode mode) override
-    {
-        // Call super pure virtual method to reset the pure virtual method.
-        ClassificationLearningEnvironment::reset(seed, mode);
+      public:
+        /**
+         * \brief Constructor initializing a specific output. Default is cout.
+         *
+         * \param[in] out The output stream the logger will send elements to.
+         */
+        explicit Logger(std::ostream& out = std::cout) : out(&out){};
 
-        this->value = 0;
-        this->currentClass = 0;
+        /// Virtual default destructor for polyphormism support.
+        virtual ~Logger() = default;
+
+        /**
+         * \brief << operator to manipulate stream and enter stream-specific
+         * elements (like std::endl).
+         *
+         * \param[in] manip The element that will be added.
+         * \return The samme logger to be able to stream several things
+         * (e.g. logger<<elA<<elB).
+         */
+        Logger operator<<(std::ostream& (*manip)(std::ostream&));
+
+        /**
+         * \brief << operator allowing to log elements that ostream actually
+         * accepts (char, int...).
+         *
+         * \tparam T The type of element that will be logged.
+         * \param[in] val The element that will be logged.
+         * \return The same logger to be able to stream several things
+         * (e.g. logger<<elA<<elB).
+         */
+        template <typename T> Logger operator<<(const T& val)
+        {
+            *out << val;
+
+            // flushes the buffer, useful especially with ofstream where without
+            // that, nothing will be printed until close
+            out->flush();
+
+            return *this;
+        }
     };
-    std::vector<std::reference_wrapper<const Data::DataHandler>>
-    getDataSources() override
-    {
-        std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
-        vect.push_back(data);
-        return vect;
-    }
-    bool isTerminal() const override
-    {
-        return false;
-    }
-};
-
-#endif // !FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
+} // namespace Log
+#endif

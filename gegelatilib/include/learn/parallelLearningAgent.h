@@ -46,6 +46,7 @@
 #include "tpg/tpgExecutionEngine.h"
 
 #include "learn/evaluationResult.h"
+#include "learn/job.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
@@ -67,15 +68,63 @@ namespace Learn {
         /**
          * \brief Method for evaluating all roots with parallelism.
          *
+         * The work is delegated in two distinct methods (this structure is
+         * made for inheritance purpose) : evaluateAllRootsInParallelExecute and
+         * evaluateAllRootsInParallelCompileResults.
+         *
          * \param[in] generationNumber the integer number of the current
          * generation. \param[in] mode the LearningMode to use during the policy
          * evaluation. \param[in] results Map to store the resulting score of
          * evaluated roots.
          */
-        void evaluateAllRootsInParallel(
+        virtual void evaluateAllRootsInParallel(
             uint64_t generationNumber, LearningMode mode,
             std::multimap<std::shared_ptr<EvaluationResult>,
                           const TPG::TPGVertex*>& results);
+
+        /**
+         * \brief Subfunction of evaluateAllRootsInParallel which handles the
+         * creation of threads, their execution and junction.
+         *
+         * @param[in] generationNumber the integer number of the current
+         * generation.
+         * @param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * @param[out] resultsPerJobMap map linking the job number with its
+         * results and itself.
+         * @param[out] archiveMap map linking the job number with its gathered
+         * archive. These archive swill later be merged with the ones of the
+         * other jobs.
+         */
+        virtual void evaluateAllRootsInParallelExecute(
+            uint64_t generationNumber, LearningMode mode,
+            std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
+                                         std::shared_ptr<Job>>>&
+                resultsPerJobMap,
+            std::map<uint64_t, Archive*>& archiveMap);
+
+        /**
+         * \brief Subfunction of evaluateAllRootsInParallel which handles the
+         * gathering of results and the merge of the archives.
+         *
+         * This method just emplaces results from resultsPerJobMap, as each
+         * job only contains 1 root is is quite easy.
+         * The archive is merged with the mergeArchiveMap method.
+         *
+         * @param[in] resultsPerJobMap map linking the job number with its
+         * results and itself.
+         * @param[out] results map linking single results to their root vertex.
+         * @param[in,out] archiveMap map linking the job number with its
+         * gathered archive. These archive swill later be merged with the ones
+         * of the other jobs.
+         */
+        virtual void evaluateAllRootsInParallelCompileResults(
+            std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
+                                         std::shared_ptr<Job>>>&
+                resultsPerJobMap,
+            std::multimap<std::shared_ptr<EvaluationResult>,
+                          const TPG::TPGVertex*>& results,
+            std::map<uint64_t, Archive*>& archiveMap);
 
         /**
          * \brief Function implementing the behavior of slave threads during
@@ -83,28 +132,30 @@ namespace Learn {
          *
          * \param[in] generationNumber the integer number of the current
          * generation. \param[in] mode the LearningMode to use during the policy
-         * evaluation. \param[in,out] rootsToProcess Ordered list of root
+         * evaluation. \param[in,out] jobsToProcess Ordered list of jobs of
          * TPGVertex to process, stored as a pair with an id filling the
-         * archiveMap. \param[in] rootsToProcessMutex Mutex protecting the
+         * archiveMap. The jobs are groups of roots that shall be agents in the
+         * same simulation, there is only 1 root if there is no adversarial
+         * (e.g. if the environmnent is not multiplayer).
+         * \param[in] rootsToProcessMutex Mutex protecting the
          * rootsToProcess \param[in] resultsPerRootMap Map to store the
          * resulting score of evaluated roots. \param[in] resultsPerRootMapMutex
-         * Mutex protecting the results. \param[in] archiveSeeds Seed values for
-         * the archiving process of each root. \param[in,out] archiveMap Map
+         * Mutex protecting the results. \param[in,out] archiveMap Map
          * storing the exhaustiveArchive to be merged. \param[in]
          * archiveMapMutex Mutex protecting the archiveMap.
+         * \param[in] useMainEnvironment Boolean that is true if we use the
+         * declared LearningEnvironment, otherwise the method will clone it.
          */
-        void slaveEvalRootThread(
+        void slaveEvalJobThread(
             uint64_t generationNumber, LearningMode mode,
-            std::queue<std::pair<uint64_t, const TPG::TPGVertex*>>&
-                rootsToProcess,
+            std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess,
             std::mutex& rootsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         const TPG::TPGVertex*>>&
+                                         std::shared_ptr<Job>>>&
                 resultsPerRootMap,
             std::mutex& resultsPerRootMapMutex,
-            std::map<uint64_t, size_t>& archiveSeeds,
             std::map<uint64_t, Archive*>& archiveMap,
-            std::mutex& archiveMapMutex);
+            std::mutex& archiveMapMutex, bool useMainEnvironment);
 
         /**
          * \brief Method to merge several Archive created in parallel
@@ -148,7 +199,7 @@ namespace Learn {
          * a sequential execution. The Archive should also be updated in the
          * exact same manner.
          *
-         * This method calls the evaluateRoot method for every root TPGVertex
+         * This method calls the evaluateJob method for every root TPGVertex
          * of the TPGGraph. The method returns a sorted map associating each
          * root vertex to its average score, in ascending order or score.
          *

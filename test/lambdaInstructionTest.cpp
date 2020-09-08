@@ -112,6 +112,45 @@ TEST(LambdaInstructionsTest, ExecuteArray)
         << "Result returned by the instruction is not as expected.";
 }
 
+#define arrayAL1 1.1, 2.2, 3.3
+#define arrayAL2 4.4, 5.5, 6.6
+#define arrayBL1 6.5, 4.3, 2.1
+#define arrayBL2 9.8, 7.6, 5.4
+TEST(LambdaInstructionsTest, ExecuteArray2D)
+{
+    double arrA[2][3]{{arrayAL1}, {arrayAL2}};
+    double arrB[2][3]{{arrayBL1}, {arrayBL2}};
+
+    std::function<double(const double[2][3], const double[2][3])> mac =
+        [](const double a[2][3], const double b[2][3]) {
+            double res = 0.0;
+            for (auto h = 0; h < 2; h++) {
+                for (auto w = 0; w < 3; w++) {
+                    res += a[h][w] * b[h][w];
+                }
+            }
+            return res;
+        };
+
+    // Build the instruction
+    Instructions::LambdaInstruction<const double[2][3], const double[2][3]>*
+        instruction;
+    ASSERT_NO_THROW((instruction = new Instructions::LambdaInstruction<
+                         const double[2][3], const double[2][3]>(mac)));
+    ASSERT_NE(instruction, nullptr);
+
+    // Test execution
+    std::vector<Data::UntypedSharedPtr> arguments;
+    arguments.emplace_back(
+        std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
+            new double[6]{arrayAL1, arrayAL2}));
+    arguments.emplace_back(
+        std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
+            new double[6]{arrayBL1, arrayBL2}));
+    ASSERT_EQ(instruction->execute(arguments), 144.1)
+        << "Result returned by the instruction is not as expected.";
+}
+
 TEST(LambdaInstructionsTest, ExecuteAllTypesMixed)
 {
 

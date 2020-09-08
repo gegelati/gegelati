@@ -1,6 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -37,77 +38,94 @@
 #include <thread>
 
 #include "instructions/addPrimitiveType.h"
-#include "instructions/lambdaInstruction.h"
-#include "log/LABasicLogger.h"
+#include "instructions/multByConstParam.h"
+#include "learn/learningAgent.h"
+#include "learn/stickGameWithOpponent.h"
+
+#include "log/laBasicLogger.h"
 
 class LABasicLoggerTest : public ::testing::Test
 {
   protected:
-    const size_t size1{24};
-    const size_t size2{32};
-    std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    Environment* e = NULL;
-    TPG::TPGGraph* tpg = NULL;
-    uint64_t generation = 1;
+
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>* results =
-        new std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>();
+                  const TPG::TPGVertex*>
+        results;
+
+    StickGameWithOpponent le;
+    Learn::LearningParameters params;
+    Learn::LearningAgent* la;
 
     void SetUp() override
     {
-        vect.emplace_back(
-            *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
-        vect.emplace_back(
-            *(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
+        // Proba as in Kelly's paper
+        params.mutation.tpg.maxInitOutgoingEdges = 3;
+        params.mutation.prog.maxProgramSize = 96;
+        params.mutation.tpg.nbRoots = 15;
+        params.mutation.tpg.pEdgeDeletion = 0.7;
+        params.mutation.tpg.pEdgeAddition = 0.7;
+        params.mutation.tpg.pProgramMutation = 0.2;
+        params.mutation.tpg.pEdgeDestinationChange = 0.1;
+        params.mutation.tpg.pEdgeDestinationIsAction = 0.5;
+        params.mutation.tpg.maxOutgoingEdges = 4;
+        params.mutation.prog.pAdd = 0.5;
+        params.mutation.prog.pDelete = 0.5;
+        params.mutation.prog.pMutate = 1.0;
+        params.mutation.prog.pSwap = 1.0;
+		params.mutation.prog.nbProgramConstant = 0;
 
-        set.add(*(new Instructions::AddPrimitiveType<float>()));
-        auto minus = [](double a, double b)->double {return a - b; };
-        set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
-        
-        e = new Environment(set, vect, 8);
-        tpg = new TPG::TPGGraph(*e);
+        params.archiveSize = 50;
+        params.archivingProbability = 0.5;
+        params.maxNbActionsPerEval = 11;
+        params.nbIterationsPerPolicyEvaluation = 3;
+        params.ratioDeletedRoots =
+            0.95; // high number to force the apparition of root action.
+        params.nbThreads = 1;
+
+        set.add(*(new Instructions::AddPrimitiveType<double>()));
+        set.add(*(new Instructions::MultByConstParam<double, int32_t>()));
 
         auto res1 = new Learn::EvaluationResult(5, 2);
         auto res2 = new Learn::EvaluationResult(10, 2);
         auto v1(new TPG::TPGAction(0));
         auto v2(new TPG::TPGAction(0));
-        results->insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                  const TPG::TPGVertex*>(res1, v1));
-        results->insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                  const TPG::TPGVertex*>(res2, v2));
+        results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                 const TPG::TPGVertex*>(res1, v1));
+        results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                 const TPG::TPGVertex*>(res2, v2));
+
+        la = new Learn::LearningAgent(le, set, params);
     }
 
     void TearDown() override
     {
-        delete tpg;
-        delete e;
-        delete (&(vect.at(0).get()));
-        delete (&(vect.at(1).get()));
         delete (&set.getInstruction(0));
         delete (&set.getInstruction(1));
-        auto it = results->begin();
+        auto it = results.begin();
         delete it->second;
         it++;
         delete it->second;
-        delete results;
+        delete la;
     }
 };
 
 TEST_F(LABasicLoggerTest, Constructor)
 {
-    ASSERT_NO_THROW(Log::LABasicLogger l);
-    ASSERT_NO_THROW(Log::LABasicLogger l(std::cerr));
+    Log::LABasicLogger* l = nullptr;
+    ASSERT_NO_THROW(l = new Log::LABasicLogger(*la));
+    if (l != nullptr) {
+        delete l;
+    }
+    ASSERT_NO_THROW(Log::LABasicLogger l(*la, std::cerr));
 }
 
 TEST_F(LABasicLoggerTest, logHeader)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
-
     // basic header without validation
-    l.logHeader();
+    Log::LABasicLogger l(*la, strStr);
+
     // we log a second header with validation column
     l.doValidation = true;
     l.logHeader();
@@ -125,17 +143,20 @@ TEST_F(LABasicLoggerTest, logHeader)
     ASSERT_EQ("Min", result[2]);
     ASSERT_EQ("Avg", result[3]);
     ASSERT_EQ("Max", result[4]);
-    ASSERT_EQ("Duration(eval)", result[5]);
-    ASSERT_EQ("Total_time", result[6]);
-    ASSERT_EQ("Duration(valid)", result[13]);
+    ASSERT_EQ("T_mutat", result[5]);
+    ASSERT_EQ("T_eval", result[6]);
+    ASSERT_EQ("T_total", result[7]);
+    ASSERT_EQ("T_valid", result[15]);
 }
 
-TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
+TEST_F(LABasicLoggerTest, logNewGeneration)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
+    uint64_t nbGen = 42;
 
-    l.logAfterPopulateTPG(generation, *tpg);
+    l.logNewGeneration(nbGen);
+
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
@@ -143,16 +164,36 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_EQ("1", result[0]);
-    ASSERT_EQ("0", result[1]);
+    // index 8 because we skip the header
+    ASSERT_EQ("42", result[8]);
+    ASSERT_EQ(result.size(), 8 + 1);
+}
+
+TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
+{
+    la->init();
+    std::stringstream strStr;
+    Log::LABasicLogger l(*la, strStr);
+
+    l.logAfterPopulateTPG();
+    std::string s = strStr.str();
+    // putting each element seperated by blanks in a tab
+    std::vector<std::string> result;
+    std::istringstream iss(s);
+    for (std::string s2; iss >> s2;)
+        result.push_back(s2);
+
+    // index 8 because we skip the header
+    ASSERT_EQ("6", result[8])
+        << "Unexpected number of vertices was printed in the log.";
 }
 
 TEST_F(LABasicLoggerTest, logAfterEvaluate)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
 
-    l.logAfterEvaluate(*results);
+    l.logAfterEvaluate(results);
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
@@ -160,17 +201,18 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_DOUBLE_EQ(5.00, std::stod(result[0]));
-    ASSERT_DOUBLE_EQ(7.50, std::stod(result[1]));
-    ASSERT_DOUBLE_EQ(10.00, std::stod(result[2]));
+    // index 8 because we skip the header
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[8]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[9]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[10]));
 }
 
 TEST_F(LABasicLoggerTest, logAfterValidate)
 {
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
 
-    l.logAfterValidate(*results);
+    l.logAfterValidate(results);
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
@@ -178,16 +220,18 @@ TEST_F(LABasicLoggerTest, logAfterValidate)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    ASSERT_DOUBLE_EQ(5.00, std::stod(result[0]));
-    ASSERT_DOUBLE_EQ(7.50, std::stod(result[1]));
-    ASSERT_DOUBLE_EQ(10.00, std::stod(result[2]));
+    // index 8+ because we skip the header
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[8]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[9]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[10]));
 }
 
 TEST_F(LABasicLoggerTest, logAfterDecimate)
 {
+    la->init();
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
-    ASSERT_NO_THROW(l.logAfterDecimate(*tpg));
+    Log::LABasicLogger l(*la, strStr);
+    ASSERT_NO_THROW(l.logAfterDecimate());
 }
 
 TEST_F(LABasicLoggerTest, logEndOfTraining)
@@ -199,7 +243,7 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     // The total duration should be larger than the evalTime
 
     std::stringstream strStr;
-    Log::LABasicLogger l(strStr);
+    Log::LABasicLogger l(*la, strStr);
 
     // little sleep to delay the total_time value (while the "checkpoint" of the
     // logger will be reset)
@@ -210,7 +254,7 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     // the second which is the time from start
     l.chronoFromNow();
     l.doValidation = true; // to avoid logging eval statistics
-    l.logAfterEvaluate(*results);
+    l.logAfterEvaluate(results);
     l.logEndOfTraining();
     // then, we can test the method when there is no validation
     l.doValidation = false; // to avoid logging eval statistics
@@ -218,21 +262,26 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
 
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
+    std::cout << s;
     std::vector<std::string> result;
     std::istringstream iss(s);
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    double evalTime = std::stod(result[0]);
-    double validTime = std::stod(result[1]);
-    double totTime = std::stod(result[2]);
+    // index 8+ because we skip the headers
+    double mutatTime = std::stod(result[8]);
+    double evalTime = std::stod(result[9]);
+    double validTime = std::stod(result[10]);
+    double totTime = std::stod(result[11]);
+    ASSERT_GE(mutatTime, 0) << "Eval duration should be positive";
     ASSERT_GE(evalTime, 0) << "Eval duration should be positive";
     ASSERT_GE(validTime, 0) << "Valid duration should be positive";
-    ASSERT_GT(totTime, evalTime)
+    ASSERT_GE(totTime, evalTime)
         << "Total time should be the largest duration !";
     ASSERT_GE(totTime, timeToWaitMili / 1000)
         << "Total time should be larger than the time we waited !";
 
-    ASSERT_EQ(result.size(), 5)
-        << "logEndOfTraining with and without valid should have 3+2=5 elements";
+    // Size is headerSize (8) + log size (4 + 3)
+    ASSERT_EQ(result.size(), 8 + 7)
+        << "logEndOfTraining with and without valid should have 4+3=7 elements";
 }

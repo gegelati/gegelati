@@ -75,23 +75,21 @@ class ProgramExecutionEngineTest : public ::testing::Test
             .setDataAt(typeid(double), 6, value3);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*new Instructions::LambdaInstruction<const double,
-                                                     const double>(
-            [](const double a, const double b) {
-                return b==0 ? a: a*b;
-            }));        
+        set.add(
+            *new Instructions::LambdaInstruction<const double, const double>(
+                [](const double a, const double b) {
+                    return b == 0 ? a : a * b;
+                }));
         set.add(*new Instructions::LambdaInstruction<const double[2],
                                                      const double[2]>(
             [](const double a[2], const double b[2]) {
                 return a[0] * b[0] + a[1] * b[1];
             }));
         set.add(*new Instructions::LambdaInstruction<const double>(
-            [](const double a) {
-                return 0;
-            }));
+            [](const double a) { return 0; }));
 
         e = new Environment(set, vect, 8, 5);
-        p = new Program::Program(*e,5);
+        p = new Program::Program(*e, 5);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(0); // Instruction is addPrimitiveType<double>.
@@ -102,15 +100,15 @@ class ProgramExecutionEngineTest : public ::testing::Test
 
         // Intron line
         Program::Line& l1 = p->addNewLine();
-        l1.setInstructionIndex(3); 
-        l1.setOperand(0, 0, 3);            // 1st operand: 3rd register.
-        l1.setDestinationIndex(0);         // Destination is register at index 0
+        l1.setInstructionIndex(3);
+        l1.setOperand(0, 0, 3);    // 1st operand: 3rd register.
+        l1.setDestinationIndex(0); // Destination is register at index 0
 
         Program::Line& l2 = p->addNewLine();
         l2.setInstructionIndex(1);
-        l2.setOperand(0, 0, 1);     // 1st operand: 1st register.
-        l2.setOperand(1, 0, 2);     // 1st operand: 2nd register.
-        l2.setDestinationIndex(0);  // Destination is register at index 0
+        l2.setOperand(0, 0, 1);    // 1st operand: 1st register.
+        l2.setOperand(1, 0, 2);    // 1st operand: 2nd register.
+        l2.setDestinationIndex(0); // Destination is register at index 0
 
         Program::Line& l3 = p->addNewLine();
         l3.setInstructionIndex(
@@ -239,17 +237,13 @@ TEST_F(ProgramExecutionEngineTest, fetchOperands)
         << "Incorrect number of operands were fetched by previous call.";
     // Check operand value. Registers are 0.0, array element is value2 and
     // value3
-    ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>()).get()[0],
-              0.0)
+    ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>()).get()[0], 0.0)
         << "Value of fetched operand from register is incorrect.";
-    ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>()).get()[1],
-              0.0)
+    ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>()).get()[1], 0.0)
         << "Value of fetched operand from register is incorrect.";
-    ASSERT_EQ(((operands.at(1)).getSharedPointer<const double[]>()).get()[0],
-              value2)
+    ASSERT_EQ(((operands.at(1)).getSharedPointer<const double[]>()).get()[0], value2)
         << "Value of fetched operand from array is incorrect.";
-    ASSERT_EQ(((operands.at(1)).getSharedPointer<const double[]>()).get()[1],
-              value3)
+    ASSERT_EQ(((operands.at(1)).getSharedPointer<const double[]>()).get()[1], value3)
         << "Value of fetched operand from array is incorrect.";
 }
 
@@ -301,7 +295,7 @@ TEST_F(ProgramExecutionEngineTest, setProgram)
     Program::ProgramExecutionEngine progExecEng(*p);
 
     // Create a new program
-    Program::Program p2(*e,0);
+    Program::Program p2(*e, 0);
 
     ASSERT_NO_THROW(progExecEng.setProgram(p2))
         << "Setting a new Program with a valid Environment for a "
@@ -312,17 +306,17 @@ TEST_F(ProgramExecutionEngineTest, setProgram)
     otherVect.push_back(
         *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
     Environment otherE(set, otherVect, 2, 5);
-    Program::Program p3(otherE,0);
+    Program::Program p3(otherE, 0);
 
     ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error)
         << "Setting a Program with an incompatible Environment should not be "
            "possible.";
 
-	//add programs with parameters.
-	Program::Program p4(*e, 5);
-	Program::Program p5(*e, 5);
-	ASSERT_NO_THROW(progExecEng.setProgram(p4));
-	ASSERT_NO_THROW(progExecEng.setProgram(p5));
+    // add programs with parameters.
+    Program::Program p4(*e, 5);
+    Program::Program p5(*e, 5);
+    ASSERT_NO_THROW(progExecEng.setProgram(p4));
+    ASSERT_NO_THROW(progExecEng.setProgram(p5));
 
     // Clean up
     delete &otherVect.at(0).get();
@@ -338,11 +332,11 @@ TEST_F(ProgramExecutionEngineTest, setDataSources)
     otherVect.push_back(*vect.at(1).get().clone());
 
     ASSERT_NO_THROW(progExecEng.setDataSources(otherVect))
-        << "Setting a new valid set of Data Sources failed."; 
-	
-	// Create a new compatible set of dataSources and add parameters
-	Program::Program p4(*e, 5);
-	ASSERT_NO_THROW(progExecEng.setProgram(p4));
+        << "Setting a new valid set of Data Sources failed.";
+
+    // Create a new compatible set of dataSources and add parameters
+    Program::Program p4(*e, 5);
+    ASSERT_NO_THROW(progExecEng.setProgram(p4));
 
     ASSERT_NO_THROW(progExecEng.setDataSources(otherVect))
         << "Setting a new valid set of Data Sources failed.";
@@ -352,7 +346,6 @@ TEST_F(ProgramExecutionEngineTest, setDataSources)
     delete &otherVect.at(1).get();
     otherVect.pop_back();
     otherVect.pop_back();
-
 
     // Create a new incompatible set of dataSources
     // although it has the same type and size of data, id of the

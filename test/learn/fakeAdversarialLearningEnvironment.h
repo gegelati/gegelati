@@ -34,54 +34,76 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
-#define FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
+#ifndef FAKE_ADVERSARIAL_LEARNING_ENVIRONMENT_H
+#define FAKE_ADVERSARIAL_LEARNING_ENVIRONMENT_H
 
 #include "data/primitiveTypeArray.h"
-#include "learn/classificationLearningEnvironment.h"
+#include "learn/adversarialLearningEnvironment.h"
 
 /**
  * \brief Classification Learning enviroment for testing purposes
  */
-class FakeClassificationLearningEnvironment
-    : public Learn::ClassificationLearningEnvironment
+class FakeAdversarialLearningEnvironment
+    : public Learn::AdversarialLearningEnvironment
 {
   protected:
-    Data::PrimitiveTypeArray<int> data;
-    int value;
+    Data::PrimitiveTypeArray<int> hints;
+    int nbTurns;
 
   public:
-    FakeClassificationLearningEnvironment()
-        : ClassificationLearningEnvironment(3), data(1), value{0} {};
+    FakeAdversarialLearningEnvironment()
+        : AdversarialLearningEnvironment(3), hints(3), nbTurns(0)
+    {
+        reset();
+        this->hints.setDataAt(typeid(int), 0, 1);
+        this->hints.setDataAt(typeid(int), 1, 2);
+        this->hints.setDataAt(typeid(int), 2, 3);
+    };
+
+    ~FakeAdversarialLearningEnvironment(){};
+
     void doAction(uint64_t actionId) override
     {
-        // Increment classificationTable
-        ClassificationLearningEnvironment::doAction(actionId);
-
-        // Update data
-        value++;
-        this->currentClass = value % 3;
-        data.setDataAt(typeid(int), 0, value);
+        // we just ignore this action
+        nbTurns++;
     }
-    void reset(size_t seed, Learn::LearningMode mode) override
-    {
-        // Call super pure virtual method to reset the pure virtual method.
-        ClassificationLearningEnvironment::reset(seed, mode);
 
-        this->value = 0;
-        this->currentClass = 0;
+    void reset(size_t seed = 0,
+               Learn::LearningMode mode = Learn::TRAINING) override{
+        // we just ignore the reset
     };
     std::vector<std::reference_wrapper<const Data::DataHandler>>
     getDataSources() override
     {
-        std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
-        vect.push_back(data);
-        return vect;
+        std::vector<std::reference_wrapper<const Data::DataHandler>> res = {
+            this->hints};
+
+        return res;
     }
     bool isTerminal() const override
     {
-        return false;
+        // stop after a custom number of turns
+        return nbTurns == 10;
+    }
+
+    std::shared_ptr<Learn::AdversarialEvaluationResult> getScores()
+        const override
+    {
+        return std::make_shared<Learn::AdversarialEvaluationResult>(
+            Learn::AdversarialEvaluationResult({-1, 1, 2}));
+    }
+
+    bool isCopyable() const override
+    {
+        return true;
+    }
+
+    Learn::LearningEnvironment* clone() const override
+    {
+        // Default copy constructor does the trick.
+        return (Learn::LearningEnvironment*)new FakeAdversarialLearningEnvironment(
+            *this);
     }
 };
 
-#endif // !FAKE_CLASSIFICATION_LEARNING_ENVIRONMENT_H
+#endif
