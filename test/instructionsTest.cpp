@@ -126,26 +126,26 @@ TEST(InstructionsTest, Execute)
         << "In NDEBUG mode, execute method of AddPrimitiveType<double> should "
            "throw an exception with invalid operands.";
 #endif
-//this code is to test instructions having parameters (not yet available)
-/*
-    delete i;
-    i = new Instructions::MultByConstParam<double, int16_t>();
-    vect.pop_back();
-    Parameter p = (int16_t)2;
-    ASSERT_EQ(i->execute({p}, vect), 5.2)
-        << "Execute method of MultByConstParam<double,int> returns an "
-           "incorrect value with valid operands.";
-#ifndef NDEBUG
-    ASSERT_EQ(i->execute({}, vect), 0.0)
-        << "Execute method of MultByConstParam<double,int> returns an "
-           "incorrect value with invalid params.";
-#else
-    ASSERT_THROW(i->execute({}, vect), std::out_of_range)
-        << "In NDEBUG mode, executing method MultByConstParam<double, int> "
-           "should throw an exception with invalid params.";
-#endif
-    delete i;
-*/
+    // this code is to test instructions having parameters (not yet available)
+    /*
+        delete i;
+        i = new Instructions::MultByConstParam<double, int16_t>();
+        vect.pop_back();
+        Parameter p = (int16_t)2;
+        ASSERT_EQ(i->execute({p}, vect), 5.2)
+            << "Execute method of MultByConstParam<double,int> returns an "
+               "incorrect value with valid operands.";
+    #ifndef NDEBUG
+        ASSERT_EQ(i->execute({}, vect), 0.0)
+            << "Execute method of MultByConstParam<double,int> returns an "
+               "incorrect value with invalid params.";
+    #else
+        ASSERT_THROW(i->execute({}, vect), std::out_of_range)
+            << "In NDEBUG mode, executing method MultByConstParam<double, int> "
+               "should throw an exception with invalid params.";
+    #endif
+        delete i;
+    */
 }
 
 TEST(InstructionsTest, SetAdd)
@@ -160,7 +160,7 @@ TEST(InstructionsTest, SetAdd)
         << "Add of instruction to empty Instructions::Set failed.";
     // Adding equivalent instructions is no longer forbidden.
     ASSERT_TRUE(s.add(i2)) << "Add of instruction already present in an "
-                                  "Instructions::Set should not fail.";
+                              "Instructions::Set should not fail.";
     ASSERT_TRUE(s.add(i3))
         << "Add of instruction to non empty Instructions::Set failed. (with a "
            "template instruction with different template param than an already "
@@ -173,7 +173,7 @@ TEST(InstructionsTest, SetGetNbInstruction)
 
     ASSERT_EQ(s.getNbInstructions(), 0)
         << "Incorrect number of instructions in an empty Set.";
-    
+
     Instructions::AddPrimitiveType<double> i1;
     Instructions::AddPrimitiveType<float> i2;
     s.add(i1);
@@ -214,11 +214,13 @@ TEST(InstructionsTest, SetGetNbMaxOperands)
         << "Max number of operands returned by the empty Instructions::Set is "
            "incorrect.";
 
-    Instructions::AddPrimitiveType<float> iAdd;                     // one operand
-    auto minus = [](double a, double b)->double {return a - b; }; //two operands
-    
+    Instructions::AddPrimitiveType<float> iAdd; // one operand
+    auto minus = [](double a, double b) -> double {
+        return a - b;
+    }; // two operands
+
     s.add(iAdd);
-    s.add(Instructions::LambdaInstruction<double,double>(minus));
+    s.add(Instructions::LambdaInstruction<double, double>(minus));
 
     ASSERT_EQ(s.getMaxNbOperands(), 2) << "Max number of operands returned by "
                                           "the Instructions::Set is incorrect.";

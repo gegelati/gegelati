@@ -89,10 +89,10 @@ class ExporterTest : public ::testing::Test
 
         // Create 10 programs
         for (int i = 0; i < 8; i++) {
-            std::shared_ptr<Program::Program> p = std::make_shared<Program::Program>(*e, constant_size);
-            for(int j = 0; j < constant_size; j++)
-            {
-                p.get()->setConstantAt(j,j-2);
+            std::shared_ptr<Program::Program> p =
+                std::make_shared<Program::Program>(*e, constant_size);
+            for (int j = 0; j < constant_size; j++) {
+                p.get()->setConstantAt(j, j - 2);
             }
             progPointers.push_back(p);
         }

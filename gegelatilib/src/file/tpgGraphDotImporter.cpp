@@ -129,7 +129,7 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
                     pos1, pos2 - pos1)); // extract and convert to int
 
                 // extract operands as a string
-                pos2++;   // skip the '$'
+                pos2++; // skip the '$'
                 operands = instruction.substr(pos2, instruction.size());
 
                 // add indexes to line
@@ -155,33 +155,31 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
         // P0 [fillcolor="#cccccc" shape=point] //const0|const1|...|constn|
         std::string::size_type pos;
         std::string::size_type pos1;
-        //read constants
+        // read constants
         std::vector<Data::Constant> v_constant;
-        pos = this->lastLine.find("//")+2;
-        pos1 = this->lastLine.find("|",pos);
-        for(;;)
-        {
-            if (pos1!=std::string::npos)
-            {
-                v_constant.push_back((Data::Constant)std::stoi(this->lastLine.substr(pos, pos1-pos)));
+        pos = this->lastLine.find("//") + 2;
+        pos1 = this->lastLine.find("|", pos);
+        for (;;) {
+            if (pos1 != std::string::npos) {
+                v_constant.push_back((Data::Constant)std::stoi(
+                    this->lastLine.substr(pos, pos1 - pos)));
             }
-            else
-            {
+            else {
                 break;
             }
-            pos = pos1+1;
+            pos = pos1 + 1;
             pos1 = this->lastLine.find("|", pos);
-        }   
-        //create new program with the correct amount of constants
-        Program::Program * p = new Program::Program(this->tpg.getEnvironment(), v_constant.size());
-        //set the previously read constants 
-        for(int i=0; i < v_constant.size(); i++)
-        {
+        }
+        // create new program with the correct amount of constants
+        Program::Program* p =
+            new Program::Program(this->tpg.getEnvironment(), v_constant.size());
+        // set the previously read constants
+        for (int i = 0; i < v_constant.size(); i++) {
             p->setConstantAt(i, v_constant.at(i));
         }
         this->programID.insert(
             std::pair<uint64_t, std::shared_ptr<Program::Program>>(
-                std::stoi(matches[1]),p));
+                std::stoi(matches[1]), p));
     }
 }
 

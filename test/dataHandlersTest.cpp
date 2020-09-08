@@ -35,8 +35,8 @@
 
 #include <gtest/gtest.h>
 
-#include "data/dataHandler.h"
 #include "data/constantHandler.h"
+#include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 
 TEST(DataHandlersTest, Constructor)
@@ -362,7 +362,8 @@ TEST(DataHandlersTest, ConstantHandlerCanProvideTemplateType)
         << "ConstantHandler wrongfully say it can not provide "
            "32 bitint data.";
     ASSERT_TRUE(d->canHandle(typeid(Data::Constant)))
-        << "ConstantHandler wrongfully say it can not provide \"Data::Constant\" "
+        << "ConstantHandler wrongfully say it can not provide "
+           "\"Data::Constant\" "
            "data.";
     ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr)))
         << "ConstantHandler wrongfully say it can provide "
@@ -376,6 +377,6 @@ TEST(DataHandlersTest, ConstantHandlerCanProvideTemplateType)
     ASSERT_TRUE(d->canHandle(typeid(Data::Constant[3])))
         << "ConstantHandler wrongfully say it can not provide "
            "dataConstant array.";
-	delete d;
-	delete d2;
+    delete d;
+    delete d2;
 }

@@ -36,11 +36,11 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
-#include "data/dataHandler.h"
 #include "data/constantHandler.h"
+#include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/instruction.h"
 #include "instructions/set.h"
@@ -92,11 +92,12 @@ class Environment
     /// Number of registers
     const size_t nbRegisters;
 
-	/// Number of parameters
+    /// Number of parameters
     const size_t nbConstant;
 
     /// Vector of DataHandlers containing the environment's dataSources
-    std::vector<std::reference_wrapper<const Data::DataHandler>> fakeDataSources;
+    std::vector<std::reference_wrapper<const Data::DataHandler>>
+        fakeDataSources;
 
     /// DataHandler whost type corresponds to registers.
     const Data::PrimitiveTypeArray<double> fakeRegisters;
@@ -166,7 +167,8 @@ class Environment
      * can be provided by at least one DataHandler are kept.
      */
     static Instructions::Set filterInstructionSet(
-        const Instructions::Set& iSet, const size_t nbRegisters, const size_t nbParams,
+        const Instructions::Set& iSet, const size_t nbRegisters,
+        const size_t nbParams,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dataSources);
 
@@ -193,24 +195,28 @@ class Environment
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dHandlers,
         const size_t nbRegs, const size_t nbConst = 0)
-        : instructionSet{filterInstructionSet(iSet, nbRegs, nbConst, dHandlers)},
-          dataSources{dHandlers}, nbRegisters{nbRegs}, nbConstant{nbConst}, fakeRegisters(nbRegs),
-		  fakeConstants(nbConst),
+        : instructionSet{filterInstructionSet(iSet, nbRegs, nbConst,
+                                              dHandlers)},
+          dataSources{dHandlers}, nbRegisters{nbRegs}, nbConstant{nbConst},
+          fakeRegisters(nbRegs), fakeConstants(nbConst),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
-          nbDataSources{dHandlers.size() + (nbConst>0?2:1)},
-		  largestAddressSpace{computeLargestAddressSpace(nbRegs, nbConst, dHandlers)},
-          lineSize{computeLineSize(*this)} 
-	{
-		this->fakeDataSources.push_back((std::reference_wrapper<const Data::DataHandler>)this->fakeRegisters);
-	
-	if(nbConst > 0)
-	{
-		this->fakeDataSources.push_back(this->fakeConstants);
-	}
+          nbDataSources{dHandlers.size() + (nbConst > 0 ? 2 : 1)},
+          largestAddressSpace{
+              computeLargestAddressSpace(nbRegs, nbConst, dHandlers)},
+          lineSize{computeLineSize(*this)}
+    {
+        this->fakeDataSources.push_back(
+            (std::reference_wrapper<const Data::DataHandler>)this
+                ->fakeRegisters);
 
-	for (auto & elem : this->dataSources)
-		this->fakeDataSources.push_back(elem);};
+        if (nbConst > 0) {
+            this->fakeDataSources.push_back(this->fakeConstants);
+        }
+
+        for (auto& elem : this->dataSources)
+            this->fakeDataSources.push_back(elem);
+    };
 
     /**
      * \brief Get the size of the number of registers of this Environment.
@@ -218,8 +224,8 @@ class Environment
      * \return the value of the nbRegisters attribute.
      */
     size_t getNbRegisters() const;
-	   
-	/**
+
+    /**
      * \brief Get the number of parameters used by programs.
      *
      * \return the value of the nbParameters attribute.
@@ -272,17 +278,17 @@ class Environment
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
     getDataSources() const;
 
-	/**
+    /**
      * Get the datasource identical to the one that will be used as registers
      * for this Environment.
      *
-     * Getting the data sources identical to the one used as registers/parameters when
-     * executing a Program can be useful, notably when mutating a
-     * Program::Line and assessing whether a data type can be provided by the
-     * registers.
+     * Getting the data sources identical to the one used as
+     * registers/parameters when executing a Program can be useful, notably when
+     * mutating a Program::Line and assessing whether a data type can be
+     * provided by the registers.
      */
-	 const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-		 getFakeDataSources() const;
+    const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+    getFakeDataSources() const;
 
     /**
      * \brief Get the Instruction Set of the Environment.

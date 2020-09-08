@@ -60,12 +60,15 @@ class PolicyStatsTest : public ::testing::Test
             [](double a, const double b[3]) {
                 return a * (b[0] + b[1] + b[2]);
             };
-        std::function<double(double,double)> minus = [](double a, double b)->double {return a * b; };
+        std::function<double(double, double)> minus =
+            [](double a, double b) -> double { return a * b; };
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::LambdaInstruction<double, const double[3]>(mac)));
-        set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
-		set.add(*(new Instructions::MultByConstParam<double, Data::Constant>()));
+        set.add(*(
+            new Instructions::LambdaInstruction<double, const double[3]>(mac)));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+        set.add(
+            *(new Instructions::MultByConstParam<double, Data::Constant>()));
 
         // Data handler
         // Setup environment
@@ -78,7 +81,7 @@ class PolicyStatsTest : public ::testing::Test
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
             progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e,5)));
+                std::shared_ptr<Program::Program>(new Program::Program(*e, 5)));
         }
 
         // Create a TPG
@@ -144,7 +147,7 @@ class PolicyStatsTest : public ::testing::Test
         l->setDestinationIndex(4); // Register[4]
         l->setOperand(0, 0, 0);    // Array[0]
         l->setOperand(1, 1, 0);    // Constant[0]
-        
+
         l = &progPointers.at(0).get()->addNewLine();
         l->setInstructionIndex(1); // Add
         l->setDestinationIndex(1); // Register[1]
@@ -334,7 +337,8 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
     ASSERT_EQ(ps.nbUsagePerInstruction, nbUsagePerInstruction);
 
     std::map<std::pair<size_t, size_t>, size_t> nbUsagePerDataLocation{
-        {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{2, 2}, 2}, {{2, 10}, 1}, {{2, 12}, 1}};
+        {{0, 1}, 2}, {{0, 2}, 1},  {{0, 3}, 1},
+        {{2, 2}, 2}, {{2, 10}, 1}, {{2, 12}, 1}};
     ASSERT_EQ(ps.nbUsagePerDataLocation, nbUsagePerDataLocation);
 
     std::vector<size_t> nbUsePerProgram{2, 1, 1, 0, 1, 1, 0, 1};

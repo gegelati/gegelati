@@ -51,14 +51,15 @@ size_t Environment::computeLargestAddressSpace(
 }
 
 Instructions::Set Environment::filterInstructionSet(
-    const Instructions::Set& iSet, const size_t nbRegisters, const size_t nbParams,
+    const Instructions::Set& iSet, const size_t nbRegisters,
+    const size_t nbParams,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dataSources)
 {
     Instructions::Set filteredSet;
 
     Data::PrimitiveTypeArray<double> fakeRegisters(nbRegisters);
-	Data::ConstantHandler fakeConstants(nbParams);
+    Data::ConstantHandler fakeConstants(nbParams);
 
     // Check if all instructions can be used for the given DataHandlers
     for (uint64_t idxInstruction = 0; idxInstruction < iSet.getNbInstructions();
@@ -81,7 +82,7 @@ Instructions::Set Environment::filterInstructionSet(
                 break;
             }
 
-			if(fakeConstants.canHandle(type)) {
+            if (fakeConstants.canHandle(type)) {
                 // The type is handled by one dataHandler, stop searching for
                 // more.
                 isHandled = true;
@@ -203,8 +204,8 @@ Environment::getDataSources() const
     return this->dataSources;
 }
 
- const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-	 Environment::getFakeDataSources() const
+const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+Environment::getFakeDataSources() const
 {
     return this->fakeDataSources;
 }

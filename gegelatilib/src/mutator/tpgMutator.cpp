@@ -77,7 +77,8 @@ void Mutator::TPGMutator::initRandomTPG(
         teams.push_back(&(graph.addNewTeam()));
     }
     for (size_t i = 0; i < 2 * params.tpg.nbActions; i++) {
-        programs.emplace_back(new Program::Program(graph.getEnvironment(), params.prog.nbProgramConstant));
+        programs.emplace_back(new Program::Program(
+            graph.getEnvironment(), params.prog.nbProgramConstant));
         // RandomInit the Programs
         Mutator::ProgramMutator::initRandomProgram(*programs.back(), params,
                                                    rng);

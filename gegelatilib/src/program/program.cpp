@@ -181,24 +181,25 @@ uint64_t Program::Program::identifyIntrons()
     return nbIntrons;
 }
 
-const Data::ConstantHandler & Program::Program::getConstantHandler() const
+const Data::ConstantHandler& Program::Program::getConstantHandler() const
 {
-	return this->constants;
+    return this->constants;
 }
 
-size_t Program::Program::getConstantsAddressSpace() const 
+size_t Program::Program::getConstantsAddressSpace() const
 {
     return this->constants.getAddressSpace(typeid(Data::Constant));
 }
 
-const Data::Constant Program::Program::getConstantAt(size_t index) const 
+const Data::Constant Program::Program::getConstantAt(size_t index) const
 {
-    std::shared_ptr<const Data::Constant> value = 
-        this->constants.getDataAt(typeid(Data::Constant), index).getSharedPointer<const Data::Constant>();
+    std::shared_ptr<const Data::Constant> value =
+        this->constants.getDataAt(typeid(Data::Constant), index)
+            .getSharedPointer<const Data::Constant>();
     return *value;
 }
 
-void Program::Program::setConstantAt(size_t index, Data::Constant value) 
+void Program::Program::setConstantAt(size_t index, Data::Constant value)
 {
     this->constants.setDataAt(typeid(Data::Constant), index, value);
 }

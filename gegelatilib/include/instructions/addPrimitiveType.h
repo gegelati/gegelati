@@ -62,7 +62,8 @@ namespace Instructions {
          */
         AddPrimitiveType();
 
-        virtual double execute(const std::vector<Data::UntypedSharedPtr>& args) const override;
+        virtual double execute(
+            const std::vector<Data::UntypedSharedPtr>& args) const override;
     };
 
     template <class T> AddPrimitiveType<T>::AddPrimitiveType()
@@ -72,7 +73,8 @@ namespace Instructions {
     }
 
     template <class T>
-    double AddPrimitiveType<T>::execute(const std::vector<Data::UntypedSharedPtr>& args) const
+    double AddPrimitiveType<T>::execute(
+        const std::vector<Data::UntypedSharedPtr>& args) const
     {
 
 #ifndef NDEBUG

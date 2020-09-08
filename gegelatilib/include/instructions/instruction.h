@@ -50,9 +50,9 @@ namespace Instructions {
      * used in a Program.
      *
      * An Instruction declares a list of operands it needs to be executed.
-	 * This information will be used to fetch the required operands from 
-	 * any ProgramLine, and to ensure the compatibility of the type of the
-	 * fetched operands with the instruction before executing it.
+     * This information will be used to fetch the required operands from
+     * any ProgramLine, and to ensure the compatibility of the type of the
+     * fetched operands with the instruction before executing it.
      */
     class Instruction
     {
@@ -96,12 +96,13 @@ namespace Instructions {
          * case of invalid arguments, for type or number or value
          * reason, this method should always return 0.0.
          *
-         * \param[in] args the vector of UntypedSharedPtr passed to the 
-         * Instruction. \return the default implementation of the Intruction 
-         * class returns 0.0 if the given params or arguments are not valid. 
+         * \param[in] args the vector of UntypedSharedPtr passed to the
+         * Instruction. \return the default implementation of the Intruction
+         * class returns 0.0 if the given params or arguments are not valid.
          * Otherwise, 1.0 is returned.
          */
-        virtual double execute(const std::vector<Data::UntypedSharedPtr>& args) const = 0;
+        virtual double execute(
+            const std::vector<Data::UntypedSharedPtr>& args) const = 0;
 
       protected:
         /**
@@ -112,10 +113,10 @@ namespace Instructions {
          */
         Instruction();
 
-		/**
-		*  \brief Number of parameters required when calling the instruction
-		*/
-		unsigned int nbParameters;
+        /**
+         *  \brief Number of parameters required when calling the instruction
+         */
+        unsigned int nbParameters;
 
         /**
          * \brief List of the types of the operands needed to execute the

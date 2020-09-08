@@ -448,7 +448,8 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
-    params.ratioDeletedRoots = 0.95; // high number to force the apparition of root action.
+    params.ratioDeletedRoots =
+        0.95; // high number to force the apparition of root action.
 
     // we will validate in order to cover validation log
     params.doValidation = true;
@@ -604,7 +605,8 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.mutation.tpg.nbActions = le.getNbActions();
     params.nbThreads = 1;
 
-    Environment env(set, le.getDataSources(), 8, params.mutation.prog.nbProgramConstant);
+    Environment env(set, le.getDataSources(), 8,
+                    params.mutation.prog.nbProgramConstant);
 
     TPG::TPGGraph tpg(env);
 

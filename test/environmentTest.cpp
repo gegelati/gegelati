@@ -111,8 +111,8 @@ TEST(EnvironmentTest, computeLineSize)
     vect.push_back(*(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
 
     set.add(*(new Instructions::AddPrimitiveType<float>()));
-    auto minus = [](double a, double b)->double {return a - b; };
-    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+    auto minus = [](double a, double b) -> double { return a - b; };
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
     e = new Environment(set, vect, 8);
 
     // Expected answer:
@@ -123,7 +123,8 @@ TEST(EnvironmentTest, computeLineSize)
     // m = 2
     // ceil(log2(n)) + ceil(log2(i)) + m * (ceil(log2(nb_{ src })) +
     // ceil(log2(largestAddressSpace))=
-    // ceil(log2(8)) + ceil(log2(2)) + 2 * (ceil(log2(3)) + ceil(log2(32)) + 1 * 2 * 8
+    // ceil(log2(8)) + ceil(log2(2)) + 2 * (ceil(log2(3)) + ceil(log2(32)) + 1 *
+    // 2 * 8
     //            3  +             1 + 2 * (            2 +             5) = 18
     ASSERT_EQ(e->getLineSize(), 18)
         << "Program Line size is incorrect. Expected value is 18 for "
@@ -140,10 +141,10 @@ TEST(EnvironmentTest, Size_tAttributeAccessors)
     Data::PrimitiveTypeArray<int> d2(size2);
 
     Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
-    auto minus = [](double a, double b)->double {return a - b; };
+    auto minus = [](double a, double b) -> double { return a - b; };
 
     set.add(iAdd);
-    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
     vect.push_back(d1);
     vect.push_back(d2);
@@ -178,10 +179,10 @@ TEST(EnvironmentTest, GetFakeRegisters)
     Data::PrimitiveTypeArray<int> d2(size2);
 
     Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
-    auto minus = [](double a, double b)->double {return a - b; };
+    auto minus = [](double a, double b) -> double { return a - b; };
 
     set.add(iAdd);
-    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
     vect.push_back(d1);
     vect.push_back(d2);
@@ -190,7 +191,8 @@ TEST(EnvironmentTest, GetFakeRegisters)
 
     ASSERT_NO_THROW(e.getFakeDataSources().at(0))
         << "Couldn't access the fake registers of the environment.";
-    ASSERT_EQ(e.getFakeDataSources().at(0).get().getAddressSpace(typeid(double)), 8)
+    ASSERT_EQ(
+        e.getFakeDataSources().at(0).get().getAddressSpace(typeid(double)), 8)
         << "Address space for double type id is incorrect in fake registers.";
     ASSERT_EQ(typeid(e.getFakeDataSources().at(0).get()),
               typeid(Data::PrimitiveTypeArray<double>))
@@ -208,11 +210,11 @@ TEST(EnvironmentTest, InstructionSetAccessor)
     Data::PrimitiveTypeArray<float> d2(size2);
 
     Instructions::AddPrimitiveType<float> iAdd; // Two operands, No Parameter
-    auto minus = [](double a, double b)->double {return a - b; };
+    auto minus = [](double a, double b) -> double { return a - b; };
 
     set.add(iAdd);
-    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
-    
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+
     vect.push_back(d1);
     vect.push_back(d2);
 
@@ -243,10 +245,10 @@ TEST(EnvironmentTest, DataSourceAccessor)
     Data::PrimitiveTypeArray<int> d2(size2);
 
     Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
-    auto minus = [](double a, double b)->double {return a - b; };
+    auto minus = [](double a, double b) -> double { return a - b; };
 
     set.add(iAdd);
-    set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
     vect.push_back(d1);
     vect.push_back(d2);

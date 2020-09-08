@@ -95,11 +95,14 @@ static bool initRandomCorrectLineOperand(
                           });
             // Add the index to the set
             operandDataSourceIndexes.insert(operandDataSourceIndex);
-			operandFound = env.getFakeDataSources().at(operandDataSourceIndex).get().canHandle(operandType);
-		}
+            operandFound = env.getFakeDataSources()
+                               .at(operandDataSourceIndex)
+                               .get()
+                               .canHandle(operandType);
+        }
     }
-    //As we deletted parameters, this is supposed never to happen 
-    //as the selected operands indexes can only be constrained in type.
+    // As we deletted parameters, this is supposed never to happen
+    // as the selected operands indexes can only be constrained in type.
     /*
     else if (initOperandDataSource) {
         // The operand is not constrained in type
@@ -199,11 +202,10 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
                 instruction.getOperandTypes().at(i).get();
             uint64_t dataSourceIndex = line.getOperand(i).first;
             bool isValid = false;
-            const Data::DataHandler& dataSource =
-               line.getEnvironment()
-                   .getFakeDataSources()
-                   .at(dataSourceIndex)
-                   .get();
+            const Data::DataHandler& dataSource = line.getEnvironment()
+                                                      .getFakeDataSources()
+                                                      .at(dataSourceIndex)
+                                                      .get();
             isValid = dataSource.canHandle(type);
             // Alter the operand if needed
             if (!isValid) {

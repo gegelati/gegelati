@@ -118,7 +118,8 @@ namespace Instructions {
             return true;
         };
 
-        double execute(const std::vector<Data::UntypedSharedPtr>& args) const override
+        double execute(
+            const std::vector<Data::UntypedSharedPtr>& args) const override
         {
 
 #ifndef NDEBUG

@@ -45,14 +45,13 @@ void Mutator::ProgramMutator::initRandomProgram(
         p.removeLine(0);
     }
 
-	//insert random constants in the program
-	Data::Constant c_value;
-	for (int i = 0; i < params.prog.nbProgramConstant; i++)
-	{
-		c_value = (Data::Constant)rng.getUnsignedInt64(params.prog.minConstValue, 
-			params.prog.maxConstValue);
-		p.setConstantAt(i,c_value);
-	}
+    // insert random constants in the program
+    Data::Constant c_value;
+    for (int i = 0; i < params.prog.nbProgramConstant; i++) {
+        c_value = (Data::Constant)rng.getUnsignedInt64(
+            params.prog.minConstValue, params.prog.maxConstValue);
+        p.setConstantAt(i, c_value);
+    }
 
     // Select the number of line randomly
     const uint64_t nbLine = rng.getUnsignedInt64(1, params.prog.maxProgramSize);
@@ -140,16 +139,15 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
         swapRandomLines(p, rng);
     }
 
-	//mutate the programs constants
-	for(int i = 0; i < params.prog.nbProgramConstant; i++)
-	{
-		if (rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation)
-		{
-			anyMutation = true;
-			p.setConstantAt(i, (Data::Constant)rng.getUnsignedInt64(params.prog.minConstValue,
-				params.prog.maxConstValue));
-		}
-	}
+    // mutate the programs constants
+    for (int i = 0; i < params.prog.nbProgramConstant; i++) {
+        if (rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation) {
+            anyMutation = true;
+            p.setConstantAt(
+                i, (Data::Constant)rng.getUnsignedInt64(
+                       params.prog.minConstValue, params.prog.maxConstValue));
+        }
+    }
 
     // Identify introns
     if (anyMutation) {

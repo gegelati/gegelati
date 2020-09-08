@@ -58,8 +58,10 @@ void TPG::PolicyStats::setEnvironment(const Environment& env)
 {
     // Object needed to perform the analysis.. should be policyStats attributes
     this->environment = &env;
-    this->dataSourcesAndRegisters.insert(dataSourcesAndRegisters.begin(),
-		environment->getFakeDataSources().begin(),environment->getFakeDataSources().end());
+    this->dataSourcesAndRegisters.insert(
+        dataSourcesAndRegisters.begin(),
+        environment->getFakeDataSources().begin(),
+        environment->getFakeDataSources().end());
 }
 
 void TPG::PolicyStats::analyzeLine(const Program::Line* line)

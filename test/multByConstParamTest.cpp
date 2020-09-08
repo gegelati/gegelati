@@ -37,9 +37,9 @@
 
 #include <array>
 
+#include "data/constantHandler.h"
 #include "data/dataHandler.h"
 #include "data/untypedSharedPtr.h"
-#include "data/constantHandler.h"
 #include "instructions/multByConstParam.h"
 #include "instructions/set.h"
 
@@ -50,9 +50,10 @@ TEST(MultByConstParamTest, ExecutePrimitiveType)
     double c = 4.04;
     std::vector<Data::UntypedSharedPtr> vect;
     vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<int>());
-    vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<Data::Constant>());
+    vect.emplace_back(
+        &b, Data::UntypedSharedPtr::emptyDestructor<Data::Constant>());
 
-	Instructions::MultByConstParam<int> * instruction;
+    Instructions::MultByConstParam<int>* instruction;
 
     ASSERT_NO_THROW(instruction = new Instructions::MultByConstParam<int>())
         << "Constructing a new multByConstParam Instruction failed.";
@@ -86,8 +87,8 @@ TEST(MultByConstParamTest, ExecuteArray)
 
     // Build the instruction
     Instructions::MultByConstParam<const double[3]>* instruction;
-    ASSERT_NO_THROW((instruction = new Instructions::MultByConstParam<const double[3]>()));
-    ASSERT_NE(instruction, nullptr);
+    ASSERT_NO_THROW((instruction = new Instructions::MultByConstParam<const
+double[3]>())); ASSERT_NE(instruction, nullptr);
 
     // Test execution
     std::vector<Data::UntypedSharedPtr> arguments;

@@ -81,20 +81,23 @@ class MutatorTest : public ::testing::Test
         ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
             .setDataAt(typeid(double), 25, value0);
 
-        std::function<double(double,double)> minus = [](double a, double b) -> double { return a - b; };
-        std::function<double(double,double)> add = [](double a, double b) -> double { return a + b; };
+        std::function<double(double, double)> minus =
+            [](double a, double b) -> double { return a - b; };
+        std::function<double(double, double)> add =
+            [](double a, double b) -> double { return a + b; };
 
-		set.add(*(new Instructions::MultByConstParam<double, Data::Constant>()));
-		set.add(*(new Instructions::AddPrimitiveType<double>()));
+        set.add(
+            *(new Instructions::MultByConstParam<double, Data::Constant>()));
+        set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
 
-
-		//the environment and the programs have 5 Constant parameters
-		int nb_const = 5;
+        // the environment and the programs have 5 Constant parameters
+        int nb_const = 5;
         e = new Environment(set, vect, 8, nb_const);
         p = new Program::Program(*e, nb_const);
-        progPointer = std::shared_ptr<Program::Program>(new Program::Program(*e, nb_const));
+        progPointer = std::shared_ptr<Program::Program>(
+            new Program::Program(*e, nb_const));
     }
 
     virtual void TearDown()
@@ -106,7 +109,7 @@ class MutatorTest : public ::testing::Test
         delete (&set.getInstruction(0));
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
-		delete (&set.getInstruction(3));
+        delete (&set.getInstruction(3));
     }
 };
 
@@ -256,7 +259,7 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
-    // Alter instruction index 
+    // Alter instruction index
     // i=1, d=3, op0=(3,17), op1=(3,28)
     rng.setSeed(5);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
@@ -316,12 +319,12 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
 
     // Alter op0 source
     // i=2, d=0, op0=(2,0), op1=(0,16),  param=0
-	/*for (int i = 0; i < 100; i++)
-	{
-		rng.setSeed(i);
-		Mutator::LineMutator::alterCorrectLine(l0, rng);
-		std::cout << i << " " << l0.getOperand(0).first << std::endl;
-	}*/
+    /*for (int i = 0; i < 100; i++)
+    {
+        rng.setSeed(i);
+        Mutator::LineMutator::alterCorrectLine(l0, rng);
+        std::cout << i << " " << l0.getOperand(0).first << std::endl;
+    }*/
     rng.setSeed(3);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
@@ -375,14 +378,13 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
     ASSERT_EQ(p->getNbLines(), 2)
         << "Line insertion in a non-empty program failed.";
 
-
     // Insert in non empty program
     // After last position (with known seed)
     rng.setSeed(1);
     ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p, rng));
     ASSERT_EQ(p->getNbLines(), 3)
         << "Line insertion in a non-empty program failed.";
-    
+
     // Insert in non empty program
     // In the middle position (with known seed)
     rng.setSeed(5);
@@ -456,9 +458,9 @@ TEST_F(MutatorTest, ProgramMutatorInitProgram)
 
     Mutator::MutationParameters params;
     params.prog.maxProgramSize = 96;
-	params.prog.maxConstValue = 10;
-	params.prog.minConstValue = 0;
-	params.prog.nbProgramConstant = 5;
+    params.prog.maxConstValue = 10;
+    params.prog.minConstValue = 0;
+    params.prog.nbProgramConstant = 5;
 
     ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, params, rng))
         << "Empty Program Random init failed";
@@ -487,23 +489,23 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior)
     Mutator::RNG rng;
 
     // Add 3 lines
-    Program::Line & l = p->addNewLine();
-	Mutator::LineMutator::initRandomCorrectLine(l,rng);
-    Program::Line & l2 = p->addNewLine();
-	Mutator::LineMutator::initRandomCorrectLine(l2,rng);
-    Program::Line & l3 = p->addNewLine();
-	Mutator::LineMutator::initRandomCorrectLine(l3,rng);
+    Program::Line& l = p->addNewLine();
+    Mutator::LineMutator::initRandomCorrectLine(l, rng);
+    Program::Line& l2 = p->addNewLine();
+    Mutator::LineMutator::initRandomCorrectLine(l2, rng);
+    Program::Line& l3 = p->addNewLine();
+    Mutator::LineMutator::initRandomCorrectLine(l3, rng);
 
-	Mutator::MutationParameters params;
+    Mutator::MutationParameters params;
     params.prog.maxProgramSize = 15;
     params.prog.pDelete = 0.5;
     params.prog.pAdd = 0.0;
     params.prog.pMutate = 0.0;
     params.prog.pSwap = 0.0;
-	params.prog.nbProgramConstant = 5;
-	params.prog.maxConstValue = 1;
-	params.prog.minConstValue = 0;
-	params.prog.pConstantMutation = 0.2;
+    params.prog.nbProgramConstant = 5;
+    params.prog.maxConstValue = 1;
+    params.prog.minConstValue = 0;
+    params.prog.pConstantMutation = 0.2;
 
     rng.setSeed(0);
     ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, params, rng))

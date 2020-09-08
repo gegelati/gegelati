@@ -39,23 +39,24 @@
 
 void Program::ProgramExecutionEngine::setProgram(const Program& prog)
 {
-	//set the program
-	this->program = &prog;
-	//are constants used here ? 
-	size_t offset = 1;
-	if (prog.getEnvironment().getNbConstant() > 0 && 
-		this->dataSourcesAndRegisters.size() - 2 == prog.getEnvironment().getDataSources().size())
-	{
-		// replace programs constants if already existing
-		dataSourcesAndRegisters.at(1) = prog.getConstantHandler();
-		//increment offset for the datahandlers verification
-		offset++;
-	}
-	
-	// Check dataSource are similar in all point to the program environment
-	// offset is -1 if there is only the registers to ignore
-	// -2 because we don't count the registers that are the first datasources and the constants (second datasource)
-	if (this->dataSourcesAndRegisters.size() - offset !=
+    // set the program
+    this->program = &prog;
+    // are constants used here ?
+    size_t offset = 1;
+    if (prog.getEnvironment().getNbConstant() > 0 &&
+        this->dataSourcesAndRegisters.size() - 2 ==
+            prog.getEnvironment().getDataSources().size()) {
+        // replace programs constants if already existing
+        dataSourcesAndRegisters.at(1) = prog.getConstantHandler();
+        // increment offset for the datahandlers verification
+        offset++;
+    }
+
+    // Check dataSource are similar in all point to the program environment
+    // offset is -1 if there is only the registers to ignore
+    // -2 because we don't count the registers that are the first datasources
+    // and the constants (second datasource)
+    if (this->dataSourcesAndRegisters.size() - offset !=
         prog.getEnvironment().getDataSources().size()) {
         throw std::runtime_error(
             "Data sources characteristics for Program Execution differ from "
@@ -63,7 +64,8 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog)
     }
     for (size_t i = 0; i < this->dataSourcesAndRegisters.size() - offset; i++) {
         // check data source characteristics
-        auto& iDataSrc = this->dataSourcesAndRegisters.at(i + (size_t)offset).get();
+        auto& iDataSrc =
+            this->dataSourcesAndRegisters.at(i + (size_t)offset).get();
         auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
         // Assume that dataSource must be (at least) a copy of each other to
         // simplify the comparison This is characterise by the two data sources

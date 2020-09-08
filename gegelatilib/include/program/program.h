@@ -39,9 +39,9 @@
 #include <algorithm>
 #include <vector>
 
+#include "data/constantHandler.h"
 #include "environment.h"
 #include "program/line.h"
-#include "data/constantHandler.h"
 
 namespace Program {
     /**
@@ -68,10 +68,11 @@ namespace Program {
         std::vector<std::pair<Line*, bool>> lines;
 
         /**
-        *   \brief Constants of the Program
-        *
-        *   A Program contains a set of constants in a dedicated Data::DataHandler
-        **/
+         *   \brief Constants of the Program
+         *
+         *   A Program contains a set of constants in a dedicated
+         *Data::DataHandler
+         **/
         Data::ConstantHandler constants;
 
         /// Delete the default constructor.
@@ -83,12 +84,14 @@ namespace Program {
          *
          * \param[in] e the reference to the Environment that will be referenced
          * in the Program attributes.
-         * \param[in] nb_constant the number of constants that the program can define and use
+         * \param[in] nb_constant the number of constants that the program can
+         * define and use
          */
         Program(const Environment& e, size_t nb_constant = 0)
-            : environment{e}, constants{nb_constant}{
-                constants.resetData();//force all constant to 0 at first.
-            };
+            : environment{e}, constants{nb_constant}
+        {
+            constants.resetData(); // force all constant to 0 at first.
+        };
 
         /**
          * \brief Copy constructor of the Program.
@@ -99,7 +102,8 @@ namespace Program {
          * \param[in] other a const reference the the copied Program.
          */
         Program(const Program& other)
-            : environment{other.environment}, lines{other.lines}, constants{other.constants}
+            : environment{other.environment}, lines{other.lines},
+              constants{other.constants}
         {
             // Replace lines with their copy
             // Keep intro info
@@ -222,15 +226,15 @@ namespace Program {
          */
         uint64_t identifyIntrons();
 
-		/**
-		*  \brief get the constantHandler object of the Program
-		*
-		*  This method gives a reference to the constantHandler associated
-		*  with the program
-		*
-		*  \return the constantHandler of the program
-		*/
-		const Data::ConstantHandler & getConstantHandler() const;
+        /**
+         *  \brief get the constantHandler object of the Program
+         *
+         *  This method gives a reference to the constantHandler associated
+         *  with the program
+         *
+         *  \return the constantHandler of the program
+         */
+        const Data::ConstantHandler& getConstantHandler() const;
 
         /**
          * \brief Get the size of the constantHandler
@@ -255,7 +259,7 @@ namespace Program {
          */
         void setConstantAt(size_t index, Data::Constant value);
 
-		/**
+        /**
          * \brief Check if two Program have the same behavior.
          *
          * Two Program have the same behaviour if their sequence of non-intron

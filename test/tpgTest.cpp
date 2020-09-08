@@ -67,9 +67,9 @@ class TPGTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<float>()));
-        auto minus = [](double a, double b)->double {return a - b; };
-        set.add(*(new Instructions::LambdaInstruction<double,double>(minus)));
-        
+        auto minus = [](double a, double b) -> double { return a - b; };
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+
         e = new Environment(set, vect, 8, 5);
         progPointer =
             std::shared_ptr<Program::Program>(new Program::Program(*e));
@@ -183,7 +183,7 @@ TEST_F(TPGTest, TPGEdgeGetSetProgram)
            "the one given at construction.";
 
     // program is a mutable attribute of the Edge.
-    std::shared_ptr<Program::Program> progPointer2(new Program::Program(*e,5));
+    std::shared_ptr<Program::Program> progPointer2(new Program::Program(*e, 5));
     constEdge.setProgram(progPointer2);
     ASSERT_EQ(&constEdge.getProgram(), progPointer2.get())
         << "Program accessor on TPGEdge returns a Program different from the "

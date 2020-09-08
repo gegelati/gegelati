@@ -89,9 +89,9 @@ namespace Mutator {
         size_t nbProgramConstant;
         /// Probability of each constant to be mutated
         double pConstantMutation;
-        /// Minimum constant value possible 
+        /// Minimum constant value possible
         int32_t minConstValue;
-        /// Maximum constant value possible 
+        /// Maximum constant value possible
         int32_t maxConstValue;
     } ProgramParameters;
 

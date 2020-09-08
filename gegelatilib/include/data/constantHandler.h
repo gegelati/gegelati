@@ -56,11 +56,12 @@ namespace Data {
      */
     class ConstantHandler : public PrimitiveTypeArray<Constant>
     {
-    public:
+      public:
         /**
          * \brief Default constructor of the ConstantHandler class.
          */
-        ConstantHandler(size_t nb_constants): PrimitiveTypeArray<Constant>{nb_constants}{};
+        ConstantHandler(size_t nb_constants)
+            : PrimitiveTypeArray<Constant>{nb_constants} {};
 
         /// Default destructor
         virtual ~ConstantHandler() = default;
@@ -68,8 +69,8 @@ namespace Data {
         /**
          * \brief Default copy constructor.
          */
-        ConstantHandler(const ConstantHandler& other) = default;		
-	};
+        ConstantHandler(const ConstantHandler& other) = default;
+    };
 } // namespace Data
 
 #endif

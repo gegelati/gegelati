@@ -69,7 +69,8 @@ bool Instruction::checkOperandTypes(
     return true;
 }
 
-double Instruction::execute(const std::vector<Data::UntypedSharedPtr>& arguments) const
+double Instruction::execute(
+    const std::vector<Data::UntypedSharedPtr>& arguments) const
 {
 #ifndef NDEBUG
     if (!this->checkOperandTypes(arguments)) {
