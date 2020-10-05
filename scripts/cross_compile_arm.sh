@@ -2,10 +2,11 @@
 
 PRINTED_MAKEFILE=Makefile
 COMPILER=arm-linux-gnueabihf-g++
-INSTALL_DIR=./rootfs
+INSTALL_DIR=$(pwd)/rootfs # Must be absolute path
+PRINTED_MAKEFILE_APP=Makefile_app
 
 ## Create Makefile
-echo "Create Makefile"
+echo "Create Makefile for lib"
 
 # Go back to bin folder
 DIR=$(cd `dirname $0` && echo `git rev-parse --show-toplevel`)
@@ -66,10 +67,42 @@ install:
 	install -d $INSTALL_DIR/usr/local/lib/gegelati
 	mv libgegelati.so $INSTALL_DIR/usr/local/lib/gegelati
 	install -d $INSTALL_DIR/usr/local/include/gegelati
-	cp -rf ./gegelatilib/include/* $INSTALL_DIR/usr/local/include/gegelati
+	cp -rf ../gegelatilib/include/* $INSTALL_DIR/usr/local/include/gegelati
 
 clean:
 	@rm -f bin/* gegelatilib.so
 	@rm -f *.o *.gcno *.gcda *.save
 	@rm -r ./obj
 " >> $PRINTED_MAKEFILE
+
+# Print Makefile for app
+
+echo "Print Makefile for app"
+rm $PRINTED_MAKEFILE_APP
+
+echo "INCLUDE_DIRECTORIES=<YOUR_SOURCE_DIR> $INSTALL_DIR/usr/local/include/gegelati" >> $PRINTED_MAKEFILE_APP
+
+echo "CC=$COMPILER --std=c++17
+
+CFLAGS=\$(addprefix -I ,\$(INCLUDE_DIRECTORIES))
+LDFLAGS=-pthread -L $INSTALL_DIR/usr/local/lib/gegelati -lgegelati" >> $PRINTED_MAKEFILE_APP
+echo "VPATH=<YOUR_SOURCE_DIR>
+OBJS=<FILES.o>
+
+all: <EXECUTABLE_NAME>
+
+cicids: \$(OBJS)
+    \$(CC) \$^ -o \$@ \$(LDFLAGS)
+    @mkdir ./obj
+    @mv *.o ./obj
+    @mv <EXECUTABLE> ./bin
+
+<DEPENDENCE_LIST>
+
+%.o: %.cpp
+    \$(CC) \$(CFLAGS) -c \$<
+
+clean:
+    @rm -f bin/* <EXECUTABLE>
+    @rm -f *.o *.gcno *.gcda *.save
+    @rm -r ./obj" >> $PRINTED_MAKEFILE_APP
