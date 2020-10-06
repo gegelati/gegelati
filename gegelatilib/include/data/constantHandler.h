@@ -42,9 +42,9 @@
 #include <typeinfo>
 #include <vector>
 
+#include "data/constant.h"
 #include "data/primitiveTypeArray.h"
 #include "data/untypedSharedPtr.h"
-#include "data/constant.h"
 
 namespace Data {
 

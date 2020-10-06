@@ -86,17 +86,15 @@ namespace Program {
          * \param[in] env The Environment in which the Program will be executed.
          */
         ProgramExecutionEngine(const Environment& env)
-            : programCounter{0}, registers{env.getNbRegisters()},
-              program{NULL},
+            : programCounter{0}, registers{env.getNbRegisters()}, program{NULL},
               dataSources{env.getDataSources()}
         {
             // Setup the data sources
             dataScsConstsAndRegs.push_back(this->registers);
 
-            if (env.getNbConstant() > 0)
-			{
+            if (env.getNbConstant() > 0) {
                 dataScsConstsAndRegs.push_back(env.getFakeDataSources().at(1));
-			}
+            }
 
             // Cannot use insert here because it dataSourcesAndRegisters
             // requires constnessand dataSrc data are not const...
@@ -124,8 +122,7 @@ namespace Program {
             const Program& prog,
             const std::vector<std::reference_wrapper<T>>& dataSrc)
             : programCounter{0},
-              registers{prog.getEnvironment().getNbRegisters()},
-			  program{NULL}
+              registers{prog.getEnvironment().getNbRegisters()}, program{NULL}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
@@ -134,7 +131,8 @@ namespace Program {
             this->dataScsConstsAndRegs.push_back(this->registers);
 
             if (prog.getEnvironment().getNbConstant() > 0) {
-                this->dataScsConstsAndRegs.push_back(prog.cGetConstantHandler());
+                this->dataScsConstsAndRegs.push_back(
+                    prog.cGetConstantHandler());
             }
 
             // Cannot use insert here because it dataSourcesAndRegisters
@@ -280,8 +278,9 @@ namespace Program {
 
         // Replace the references in attributes
         this->dataSources = dataSrc;
-		//we need this offset to push the constant at the firs
-        size_t offset = this->program->getEnvironment().getNbConstant() > 0 ? 2 : 1;
+        // we need this offset to push the constant at the firs
+        size_t offset =
+            this->program->getEnvironment().getNbConstant() > 0 ? 2 : 1;
         if (this->program && offset == 2) {
             this->dataScsConstsAndRegs.at(1) =
                 this->program->cGetConstantHandler();

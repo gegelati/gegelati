@@ -62,78 +62,83 @@ class ProgramExecutionEngineTest : public ::testing::Test
     Environment* e;
     Program::Program* p;
 
-	virtual void SetUp()
-	{
-		vect.push_back(
-			*(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
-		vect.push_back(
-			*(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
-		vect.push_back(*(new Data::PrimitiveTypeArray2D<double>(size1, size2)));
+    virtual void SetUp()
+    {
+        vect.push_back(
+            *(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
+        vect.push_back(
+            *(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
+        vect.push_back(*(new Data::PrimitiveTypeArray2D<double>(size1, size2)));
 
-		((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
-			.setDataAt(typeid(double), 25, value0);
-		((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
-			.setDataAt(typeid(double), 5, value2);
-		((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
-			.setDataAt(typeid(double), 6, value3);
-		((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
-			.setDataAt(typeid(double), 0, value0);
-		((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
-			.setDataAt(typeid(double), 1, value1);
-		((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
-			.setDataAt(typeid(double), 24, value0);
-		((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
-			.setDataAt(typeid(double), 25, value0);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
+            .setDataAt(typeid(double), 25, value0);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
+            .setDataAt(typeid(double), 5, value2);
+        ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
+            .setDataAt(typeid(double), 6, value3);
+        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
+            .setDataAt(typeid(double), 0, value0);
+        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
+            .setDataAt(typeid(double), 1, value1);
+        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
+            .setDataAt(typeid(double), 24, value0);
+        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
+            .setDataAt(typeid(double), 25, value0);
 
-		set.add(*(new Instructions::AddPrimitiveType<double>()));
-		set.add(*(new Instructions::MultByConstant<double>()));
-		set.add(*new Instructions::LambdaInstruction<const double[2],
-			const double[2]>(
-				[](const double a[2], const double b[2]) {
-					return a[0] * b[0] + a[1] * b[1];
-				}));
-		set.add(*new Instructions::LambdaInstruction<const double[2][2]>(
-			[](const double a[2][2]) {
-				double res = 0.0;
-				for (auto h = 0; h < 2; h++) {
-					for (auto w = 0; w < 2; w++) {
-						res += a[h][w];
-					}
-				}
-				return res / 4.0;
-			}));
+        set.add(*(new Instructions::AddPrimitiveType<double>()));
+        set.add(*(new Instructions::MultByConstant<double>()));
+        set.add(*new Instructions::LambdaInstruction<const double[2],
+                                                     const double[2]>(
+            [](const double a[2], const double b[2]) {
+                return a[0] * b[0] + a[1] * b[1];
+            }));
+        set.add(*new Instructions::LambdaInstruction<const double[2][2]>(
+            [](const double a[2][2]) {
+                double res = 0.0;
+                for (auto h = 0; h < 2; h++) {
+                    for (auto w = 0; w < 2; w++) {
+                        res += a[h][w];
+                    }
+                }
+                return res / 4.0;
+            }));
 
-		e = new Environment(set, vect, 8, 5);
-		p = new Program::Program(*e);
+        e = new Environment(set, vect, 8, 5);
+        p = new Program::Program(*e);
 
-		Program::Line& l0 = p->addNewLine();
-		l0.setInstructionIndex(
-			3); // Instruction is lambdaInstruction<double[2][2]>.
-		l0.setOperand(0, 4, 0);    // 1st operand: 4 values in 2D array
-		l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
+        Program::Line& l0 = p->addNewLine();
+        l0.setInstructionIndex(
+            3); // Instruction is lambdaInstruction<double[2][2]>.
+        l0.setOperand(0, 4, 0);    // 1st operand: 4 values in 2D array
+        l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
 
-		Program::Line& l1 = p->addNewLine();
-		l1.setInstructionIndex(0); // Instruction is addPrimitiveType<double>.
-		l1.setOperand(0, 0, 5);    // 1st operand: 6th register.
-		l1.setOperand(1, 3, 25);   // 2nd operand: 26th double in the
-								   // PrimitiveTypeArray of double.
-		l1.setDestinationIndex(1); // Destination is register at index 1
+        Program::Line& l1 = p->addNewLine();
+        l1.setInstructionIndex(0); // Instruction is addPrimitiveType<double>.
+        l1.setOperand(0, 0, 5);    // 1st operand: 6th register.
+        l1.setOperand(1, 3, 25);   // 2nd operand: 26th double in the
+                                   // PrimitiveTypeArray of double.
+        l1.setDestinationIndex(1); // Destination is register at index 1
 
-		// Intron line
-		Program::Line& l2 = p->addNewLine();
-		l2.setInstructionIndex(
-			1); // Instruction is MultByConstant<double>.
-		l2.setOperand(0, 0, 3);            // 1st operand: 3rd register.
-		l2.setOperand(1, 1, 0);            // 2nd operand: parameter 0.
-		p->getConstantHandler().setDataAt(typeid(Data::Constant), 0, {static_cast<int32_t>(value0)}); // Parameter is set to value1 (=2.3f) => 2
-        l2.setDestinationIndex(0);         // Destination is register at index 0
+        // Intron line
+        Program::Line& l2 = p->addNewLine();
+        l2.setInstructionIndex(1); // Instruction is MultByConstant<double>.
+        l2.setOperand(0, 0, 3);    // 1st operand: 3rd register.
+        l2.setOperand(1, 1, 0);    // 2nd operand: parameter 0.
+        p->getConstantHandler().setDataAt(
+            typeid(Data::Constant), 0,
+            {static_cast<int32_t>(
+                value0)});         // Parameter is set to value1 (=2.3f) => 2
+        l2.setDestinationIndex(0); // Destination is register at index 0
 
         Program::Line& l3 = p->addNewLine();
         l3.setInstructionIndex(1); // Instruction is MultByConstant<double>.
-        l3.setOperand(0, 0, 1);     // 1st operand: 1st register.
-        l3.setOperand(1, 1, 1);     // 2nd operand: 1st parameter.
-		p->getConstantHandler().setDataAt(typeid(Data::Constant),1, {static_cast<int32_t>(value1)}); // Parameter is set to value1 (=1.2f) => 1
-        l3.setDestinationIndex(0);  // Destination is register at index 0
+        l3.setOperand(0, 0, 1);    // 1st operand: 1st register.
+        l3.setOperand(1, 1, 1);    // 2nd operand: 1st parameter.
+        p->getConstantHandler().setDataAt(
+            typeid(Data::Constant), 1,
+            {static_cast<int32_t>(
+                value1)});         // Parameter is set to value1 (=1.2f) => 1
+        l3.setDestinationIndex(0); // Destination is register at index 0
 
         Program::Line& l4 = p->addNewLine();
         l4.setInstructionIndex(
@@ -404,7 +409,7 @@ TEST_F(ProgramExecutionEngineTest, execute)
 
     double r6 = (value0 + value1 + value0 + value0) / 4;
     double r1 = value0 + r6;
-	double r0 = r1 * ((int)value1);
+    double r0 = r1 * ((int)value1);
     r0 = r0 * value2 + r1 * value3;
 
     ASSERT_NO_THROW(result = progExecEng.executeProgram())

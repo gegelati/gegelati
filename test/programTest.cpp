@@ -339,7 +339,7 @@ TEST_F(ProgramTest, constants)
 
     // add some constants to the program (-2,-1,0,1)
     for (int j = 0; j < 4; j++) {
-        p.getConstantHandler().setDataAt(typeid(Data::Constant),j, {j - 2});
+        p.getConstantHandler().setDataAt(typeid(Data::Constant), j, {j - 2});
     }
 
     auto constants = p.getConstantHandler();
@@ -353,11 +353,13 @@ TEST_F(ProgramTest, constants)
     ASSERT_THROW(p.getConstantAt(10), std::out_of_range)
         << "Accessing a constant out of range should throw an exception.";
     // modify a constant
-    p.getConstantHandler().setDataAt(typeid(Data::Constant),0, {5});
+    p.getConstantHandler().setDataAt(typeid(Data::Constant), 0, {5});
     ASSERT_EQ((int32_t)(p.getConstantAt(0)), 5)
         << "The value of the constant should have changed";
     // modify a constant out of range
-    ASSERT_THROW(p.getConstantHandler().setDataAt(typeid(Data::Constant),10, {5}), std::out_of_range)
+    ASSERT_THROW(
+        p.getConstantHandler().setDataAt(typeid(Data::Constant), 10, {5}),
+        std::out_of_range)
         << "modifying a constant out of range should throw an exception.";
 }
 

@@ -49,7 +49,7 @@
 #include "tpg/tpgExecutionEngine.h"
 
 #ifndef PARAM_FLOAT_PRECISION
-#define PARAM_FLOAT_PRECISION (float)(int16_t(1)/(float)(-INT16_MIN))
+#define PARAM_FLOAT_PRECISION (float)(int16_t(1) / (float)(-INT16_MIN))
 #endif
 
 class TPGExecutionEngineTest : public ::testing::Test
@@ -76,10 +76,11 @@ class TPGExecutionEngineTest : public ::testing::Test
         auto& line = prog.addNewLine();
         // do an multby constant with DHandler 0
         line.setInstructionIndex(1);
-        line.setOperand(0, 2, 0);		   // Dhandler 0 location 0
+        line.setOperand(0, 2, 0);    // Dhandler 0 location 0
         line.setOperand(1, 1, 0);    // CHandler at location 0
         line.setDestinationIndex(0); // 0th register dest
-		prog.getConstantHandler().setDataAt(typeid(Data::Constant), 0, { static_cast<int32_t>(value) });
+        prog.getConstantHandler().setDataAt(typeid(Data::Constant), 0,
+                                            {static_cast<int32_t>(value)});
     }
 
     virtual void SetUp()

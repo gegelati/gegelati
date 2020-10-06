@@ -86,8 +86,7 @@ class MutatorTest : public ::testing::Test
         std::function<double(double, double)> add =
             [](double a, double b) -> double { return a + b; };
 
-        set.add(
-            *(new Instructions::MultByConstant<double>()));
+        set.add(*(new Instructions::MultByConstant<double>()));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
@@ -96,8 +95,8 @@ class MutatorTest : public ::testing::Test
         int nb_const = 5;
         e = new Environment(set, vect, 8, nb_const);
         p = new Program::Program(*e);
-        progPointer = std::shared_ptr<Program::Program>(
-            new Program::Program(*e));
+        progPointer =
+            std::shared_ptr<Program::Program>(new Program::Program(*e));
     }
 
     virtual void TearDown()
@@ -479,70 +478,71 @@ TEST_F(MutatorTest, ProgramMutatorInitProgram)
 
 TEST_F(MutatorTest, ProgramMutatorMutateBehavior)
 {
-	Mutator::RNG rng;
-	//specific for this test
-	//we need an instruction with three operands to 
-	//trigger a special condition in LineMutator
-	set.add(
-		*(new Instructions::LambdaInstruction<const double, const double, const double>(
-			[](const double a, const double b, const double c) -> double {
-				return (cos(a + b + c)); })));
+    Mutator::RNG rng;
+    // specific for this test
+    // we need an instruction with three operands to
+    // trigger a special condition in LineMutator
+    set.add(*(new Instructions::LambdaInstruction<const double, const double,
+                                                  const double>(
+        [](const double a, const double b, const double c) -> double {
+            return (cos(a + b + c));
+        })));
 
-	Environment e2(set, vect, 8, 5);
-	Program::Program p2(e2);
+    Environment e2(set, vect, 8, 5);
+    Program::Program p2(e2);
 
-	Program::ProgramExecutionEngine pEE(p2);
+    Program::ProgramExecutionEngine pEE(p2);
 
-	rng.setSeed(14);
-	Program::Line& l = p2.addNewLine();
-	Mutator::LineMutator::initRandomCorrectLine(l, rng);
-	Program::Line& l2 = p2.addNewLine();
-	Mutator::LineMutator::initRandomCorrectLine(l2, rng);
-	Program::Line& l3 = p2.addNewLine();
-	Mutator::LineMutator::initRandomCorrectLine(l3, rng);
+    rng.setSeed(14);
+    Program::Line& l = p2.addNewLine();
+    Mutator::LineMutator::initRandomCorrectLine(l, rng);
+    Program::Line& l2 = p2.addNewLine();
+    Mutator::LineMutator::initRandomCorrectLine(l2, rng);
+    Program::Line& l3 = p2.addNewLine();
+    Mutator::LineMutator::initRandomCorrectLine(l3, rng);
 
-	Mutator::MutationParameters params;
-	params.prog.maxProgramSize = 15;
-	params.prog.pDelete = 0.5;
-	params.prog.pAdd = 0.0;
-	params.prog.pMutate = 0.0;
-	params.prog.pSwap = 0.0;
-	params.prog.maxConstValue = 1;
-	params.prog.minConstValue = 0;
-	params.prog.pConstantMutation = 0.2;
+    Mutator::MutationParameters params;
+    params.prog.maxProgramSize = 15;
+    params.prog.pDelete = 0.5;
+    params.prog.pAdd = 0.0;
+    params.prog.pMutate = 0.0;
+    params.prog.pSwap = 0.0;
+    params.prog.maxConstValue = 1;
+    params.prog.minConstValue = 0;
+    params.prog.pConstantMutation = 0.2;
 
-	rng.setSeed(0);
-	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
-		<< "Mutation did not occur with known seed.";
-	ASSERT_EQ(p2.getNbLines(), 2)
-		<< "Wrong program mutation occured. Expected: Line deletion.";
+    rng.setSeed(0);
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
+        << "Mutation did not occur with known seed.";
+    ASSERT_EQ(p2.getNbLines(), 2)
+        << "Wrong program mutation occured. Expected: Line deletion.";
 
-	params.prog.pDelete = 0.0;
-	params.prog.pAdd = 0.5;
-	rng.setSeed(1);
-	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
-		<< "Mutation did not occur with known seed.";
-	ASSERT_EQ(p2.getNbLines(), 3)
-		<< "Wrong program mutation occured. Expected: Line insertion.";
+    params.prog.pDelete = 0.0;
+    params.prog.pAdd = 0.5;
+    rng.setSeed(1);
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
+        << "Mutation did not occur with known seed.";
+    ASSERT_EQ(p2.getNbLines(), 3)
+        << "Wrong program mutation occured. Expected: Line insertion.";
 
-	params.prog.pAdd = 0.0;
-	params.prog.pMutate = 0.01;
-	rng.setSeed(86);
-	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
-		<< "Mutation did not occur with known seed.";
+    params.prog.pAdd = 0.0;
+    params.prog.pMutate = 0.01;
+    rng.setSeed(86);
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
+        << "Mutation did not occur with known seed.";
 
-	params.prog.pMutate = 0.00;
-	params.prog.pSwap = 0.1;
-	rng.setSeed(1);
-	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
-		<< "Mutation did not occur with known seed.";
+    params.prog.pMutate = 0.00;
+    params.prog.pSwap = 0.1;
+    rng.setSeed(1);
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
+        << "Mutation did not occur with known seed.";
 
-	//mutate other instructions
-	params.prog.pSwap = 0.0;
-	params.prog.pMutate = 1;
-	rng.setSeed(114);
-	ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
-		<< "Mutation did not occur with known seed.";
+    // mutate other instructions
+    params.prog.pSwap = 0.0;
+    params.prog.pMutate = 1;
+    rng.setSeed(114);
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
+        << "Mutation did not occur with known seed.";
 
     // Teardown for this test
     delete &set.getInstruction(4);

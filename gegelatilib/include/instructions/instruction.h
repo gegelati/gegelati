@@ -97,8 +97,8 @@ namespace Instructions {
          * reason, this method should always return 0.0.
          *
          * \param[in] args the vector of UntypedSharedPtr passed to the
-         * Instruction. 
-		 * \return the default implementation of the Intruction
+         * Instruction.
+         * \return the default implementation of the Intruction
          * class returns 0.0 if the given params or arguments are not valid.
          * Otherwise, 1.0 is returned.
          */

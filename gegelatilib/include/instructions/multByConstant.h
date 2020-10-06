@@ -51,8 +51,7 @@ namespace Instructions {
      * \brief Template class for multiplying a unique argument of type T by a
      * constant parameter
      */
-    template <class T>
-    class MultByConstant : public Instruction
+    template <class T> class MultByConstant : public Instruction
     {
         static_assert(std::is_fundamental<T>::value,
                       "Template class MultByConstParam<> can only be used for "
@@ -83,8 +82,10 @@ namespace Instructions {
         if (Instruction::execute(args) != 1.0)
             return 0;
 #endif
-        const Data::Constant constantValue = (const Data::Constant&)*(args.at(1).getSharedPointer<const Data::Constant>());
-        return *(args.at(0).getSharedPointer<const T>()) * (double)constantValue;
+        const Data::Constant constantValue = (const Data::Constant&)*(
+            args.at(1).getSharedPointer<const Data::Constant>());
+        return *(args.at(0).getSharedPointer<const T>()) *
+               (double)constantValue;
     }
 } // namespace Instructions
 #endif // INST_MULT_BY_CONST_H

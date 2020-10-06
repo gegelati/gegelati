@@ -604,8 +604,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.mutation.tpg.nbActions = le.getNbActions();
     params.nbThreads = 1;
 
-    Environment env(set, le.getDataSources(), 8,
-                    params.nbProgramConstant);
+    Environment env(set, le.getDataSources(), 8, params.nbProgramConstant);
 
     TPG::TPGGraph tpg(env);
 

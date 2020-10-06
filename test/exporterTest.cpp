@@ -92,7 +92,8 @@ class ExporterTest : public ::testing::Test
             std::shared_ptr<Program::Program> p =
                 std::make_shared<Program::Program>(*e);
             for (int j = 0; j < constant_size; j++) {
-                p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),j, {j - 2});
+                p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
+                                                        j, {j - 2});
             }
             progPointers.push_back(p);
         }

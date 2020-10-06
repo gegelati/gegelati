@@ -58,8 +58,8 @@ TEST(MultByConstParamTest, ExecutePrimitiveType)
     ASSERT_NO_THROW(instruction = new Instructions::MultByConstant<int>())
         << "Constructing a new multByConstParam Instruction failed.";
 
-	ASSERT_EQ(instruction->getNbOperands(), 2)
-		<< "The multByConstant Instruction should use two operands.";
+    ASSERT_EQ(instruction->getNbOperands(), 2)
+        << "The multByConstant Instruction should use two operands.";
     ASSERT_EQ(instruction->execute(vect), 10)
         << "Result returned by the instruction is not as expected.";
 

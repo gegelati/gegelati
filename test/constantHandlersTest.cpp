@@ -51,8 +51,9 @@ TEST(ConstantHandlersTest, ID)
     Data::ConstantHandler d0(5);
     Data::ConstantHandler d1(5);
 
-    ASSERT_NE(d0.getId(), d1.getId()) << "Id of two ConstantHandlers created one "
-                                         "after the other should not be equal.";
+    ASSERT_NE(d0.getId(), d1.getId())
+        << "Id of two ConstantHandlers created one "
+           "after the other should not be equal.";
 }
 
 TEST(ConstantHandlersTest, ConstantHandlerCanProvideTemplateType)

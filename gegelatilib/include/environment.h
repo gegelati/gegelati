@@ -185,11 +185,11 @@ class Environment
      * construction time.
      *
      * \param[in] iSet the Instructions::Set whose Instruction will be used in
-     * this Environment. 
-	 * \param[in] dHandlers the list of DataHandler that will
-     * be used in this Environment. 
-	 * \param[in] nbRegs the number of double registers in this Environment.
-	 * \param[in] nbConst the number of program's constants in this Environment.
+     * this Environment.
+     * \param[in] dHandlers the list of DataHandler that will
+     * be used in this Environment.
+     * \param[in] nbRegs the number of double registers in this Environment.
+     * \param[in] nbConst the number of program's constants in this Environment.
      */
     Environment(
         const Instructions::Set& iSet,
@@ -202,7 +202,11 @@ class Environment
           fakeRegisters(nbRegs), fakeConstants(nbConst),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
-          nbDataSources{dHandlers.size() + (nbConst > 0 ? 2 : 1)}, // if Constants are used, we need an extra datasource to store them in the environment
+          nbDataSources{
+              dHandlers.size() +
+              (nbConst > 0 ? 2
+                           : 1)}, // if Constants are used, we need an extra
+                                  // datasource to store them in the environment
           largestAddressSpace{
               computeLargestAddressSpace(nbRegs, nbConst, dHandlers)},
           lineSize{computeLineSize(*this)}
@@ -283,7 +287,7 @@ class Environment
      * Get the datasource identical to the one used by programs
      *
      * Getting the data sources identical to the one used by programs
-	 * when executing a Program can be useful, notably when
+     * when executing a Program can be useful, notably when
      * mutating a Program::Line and assessing whether a data type can be
      * provided by the registers.
      */

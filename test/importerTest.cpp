@@ -98,7 +98,8 @@ class ImporterTest : public ::testing::Test
             std::shared_ptr<Program::Program> p =
                 std::make_shared<Program::Program>(*e);
             for (int j = 0; j < 5; j++) {
-                p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),j, {j - 2});
+                p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
+                                                        j, {j - 2});
             }
             progPointers.push_back(p);
         }
@@ -259,8 +260,7 @@ TEST_F(ImporterTest, Constructor)
 
 TEST_F(ImporterTest, importGraph)
 {
-    File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e,
-                                          *tpg_copy);
+    File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
 
     // assert that we can import a tpg graph from a file
     ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
@@ -309,11 +309,16 @@ TEST_F(ImporterTest, importGraph)
         << "The second part of the operand changed";
 
     // checking the program's parameters
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(0)), -2) << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(1)), -1) << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(2)), 0) << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(3)), 1) << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(4)), 2) << "The constant changed";
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(0)), -2)
+        << "The constant changed";
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(1)), -1)
+        << "The constant changed";
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(2)), 0)
+        << "The constant changed";
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(3)), 1)
+        << "The constant changed";
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(4)), 2)
+        << "The constant changed";
 }
 
 TEST_F(ImporterTest, readLineFromFile)
@@ -336,8 +341,7 @@ TEST_F(ImporterTest, readLineFromFile)
 
 TEST_F(ImporterTest, setNewFilePath)
 {
-    File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e,
-                                          *tpg_copy);
+    File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
 
     // assert that we can import a tpg graph from a file
     ASSERT_NO_THROW(dotImporter.setNewFilePath("exported_tpg2.dot"))

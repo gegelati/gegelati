@@ -127,7 +127,7 @@ TEST(InstructionsTest, Execute)
         << "In NDEBUG mode, execute method of AddPrimitiveType<double> should "
            "throw an exception with invalid operands.";
 #endif
-        delete i;
+    delete i;
 }
 
 TEST(InstructionsTest, SetAdd)

@@ -37,10 +37,10 @@
 
 Data::Constant::operator int32_t() const
 {
-	return this->value;
+    return this->value;
 }
 
 Data::Constant::operator double() const
 {
-	return (double)this->value;
+    return (double)this->value;
 }

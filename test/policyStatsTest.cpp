@@ -67,8 +67,7 @@ class PolicyStatsTest : public ::testing::Test
         set.add(*(
             new Instructions::LambdaInstruction<double, const double[3]>(mac)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-        set.add(
-            *(new Instructions::MultByConstant<double>()));
+        set.add(*(new Instructions::MultByConstant<double>()));
 
         // Data handler
         // Setup environment

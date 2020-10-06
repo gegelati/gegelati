@@ -43,13 +43,13 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
+#include <data/constant.h>
+#include <data/constantHandler.h>
 #include <data/dataHandler.h>
 #include <data/hash.h>
 #include <data/primitiveTypeArray.h>
 #include <data/primitiveTypeArray2D.h>
 #include <data/untypedSharedPtr.h>
-#include <data/constantHandler.h>
-#include <data/constant.h>
 
 #include <file/parametersParser.h>
 #include <file/tpgGraphDotExporter.h>

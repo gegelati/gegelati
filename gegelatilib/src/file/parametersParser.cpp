@@ -166,7 +166,7 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
     if (param == "pConstantMutation") {
-        params.mutation.prog.pConstantMutation =value.asDouble();
+        params.mutation.prog.pConstantMutation = value.asDouble();
         return;
     }
     if (param == "minConstValue") {

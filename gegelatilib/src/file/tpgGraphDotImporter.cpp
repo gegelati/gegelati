@@ -161,7 +161,8 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
         pos1 = this->lastLine.find("|", pos);
         for (;;) {
             if (pos1 != std::string::npos) {
-                v_constant.push_back({std::stoi(this->lastLine.substr(pos, pos1 - pos))});
+                v_constant.push_back(
+                    {std::stoi(this->lastLine.substr(pos, pos1 - pos))});
             }
             else {
                 break;
@@ -170,11 +171,11 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
             pos1 = this->lastLine.find("|", pos);
         }
         // create new program with the correct amount of constants
-        Program::Program* p =
-            new Program::Program(this->tpg.getEnvironment());
+        Program::Program* p = new Program::Program(this->tpg.getEnvironment());
         // set the previously read constants
         for (int i = 0; i < v_constant.size(); i++) {
-            p->getConstantHandler().setDataAt(typeid(Data::Constant), i, v_constant.at(i));
+            p->getConstantHandler().setDataAt(typeid(Data::Constant), i,
+                                              v_constant.at(i));
         }
         this->programID.insert(
             std::pair<uint64_t, std::shared_ptr<Program::Program>>(

@@ -34,9 +34,9 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <inttypes.h>
-#include "data/constant.h"
 #include "file/tpgGraphDotExporter.h"
+#include "data/constant.h"
+#include <inttypes.h>
 
 uint64_t File::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
 {

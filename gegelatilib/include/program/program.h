@@ -85,7 +85,8 @@ namespace Program {
          * \param[in] e the reference to the Environment that will be referenced
          * in the Program attributes.
          */
-        Program(const Environment& e) : environment{e}, constants{e.getNbConstant()}
+        Program(const Environment& e)
+            : environment{e}, constants{e.getNbConstant()}
         {
             constants.resetData(); // force all constant to 0 at first.
         };
@@ -233,26 +234,27 @@ namespace Program {
          */
         Data::ConstantHandler& getConstantHandler();
 
-		/**
-         *  \brief get a const reference to the constantHandler object of the Program
+        /**
+         *  \brief get a const reference to the constantHandler object of the
+         * Program
          *
-         *  This method gives a const reference to the constantHandler associated
-         *  with the program
+         *  This method gives a const reference to the constantHandler
+         * associated with the program
          *
          *  \return the constantHandler of the program through a const reference
          */
-		const Data::ConstantHandler& cGetConstantHandler() const;
+        const Data::ConstantHandler& cGetConstantHandler() const;
 
-		/**
-		*	\brief Get the value of a constant at a given index
-		*	
-		*	Although this method is not required as the data is accessible from
-		*	the constantHandler, it allows a shortcut and add readability.
-		*
-		*	\param[in] index the position at which we access the constant
-		*	\return the value of the constant at the given index
-		*/
-		const Data::Constant getConstantAt(size_t index) const;
+        /**
+         *	\brief Get the value of a constant at a given index
+         *
+         *	Although this method is not required as the data is accessible from
+         *	the constantHandler, it allows a shortcut and add readability.
+         *
+         *	\param[in] index the position at which we access the constant
+         *	\return the value of the constant at the given index
+         */
+        const Data::Constant getConstantAt(size_t index) const;
 
         /**
          * \brief Check if two Program have the same behavior.

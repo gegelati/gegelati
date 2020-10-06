@@ -84,7 +84,7 @@ class LABasicLoggerTest : public ::testing::Test
         params.ratioDeletedRoots =
             0.95; // high number to force the apparition of root action.
         params.nbThreads = 1;
-		params.nbProgramConstant = 5;
+        params.nbProgramConstant = 5;
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));

@@ -141,11 +141,11 @@ namespace Mutator {
          */
         bool alterRandomLine(Program::Program& p, Mutator::RNG& rng);
 
-		/**
+        /**
          * \brief Alter a program's constant.
          *
          * If the constants are used, this function selects one of them
-		 * in a pseudo-random way and modifies it
+         * in a pseudo-random way and modifies it
          * Random selection is based on the given Mutator::RNG.
          *
          * This method does NOT update automatically the intron property of the
@@ -153,12 +153,14 @@ namespace Mutator {
          * correctly until Program::identifyIntrons() method is called.
          *
          * \param[in,out] p the Program whose line will be altered.
-		 * \param[in] params the mutation parameters 
+         * \param[in] params the mutation parameters
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if a constant was successfully altered, false if the
          *         Program has less than one line.
          */
-		bool alterRandomConstant(Program::Program& p, const MutationParameters& params, Mutator::RNG& rng);
+        bool alterRandomConstant(Program::Program& p,
+                                 const MutationParameters& params,
+                                 Mutator::RNG& rng);
 
         /**
          * \brief Mutate the behavior of the Program with given probabilities.

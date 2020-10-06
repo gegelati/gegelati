@@ -191,12 +191,12 @@ Data::ConstantHandler& Program::Program::getConstantHandler()
     return this->constants;
 }
 
-const Data::Constant Program::Program::getConstantAt(size_t index) const 
+const Data::Constant Program::Program::getConstantAt(size_t index) const
 {
-	std::shared_ptr<const Data::Constant> value = 
-		this->constants.getDataAt(typeid(Data::Constant), index)
-		.getSharedPointer<const Data::Constant>();
-	return *value;
+    std::shared_ptr<const Data::Constant> value =
+        this->constants.getDataAt(typeid(Data::Constant), index)
+            .getSharedPointer<const Data::Constant>();
+    return *value;
 }
 
 bool Program::Program::hasIdenticalBehavior(const Program& other) const

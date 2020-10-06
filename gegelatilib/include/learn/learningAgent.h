@@ -124,9 +124,8 @@ namespace Learn {
          */
         LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet,
                       const LearningParameters& p)
-            : learningEnvironment{le},
-              env(iSet, le.getDataSources(), p.nbRegisters,
-                  p.nbProgramConstant),
+            : learningEnvironment{le}, env(iSet, le.getDataSources(),
+                                           p.nbRegisters, p.nbProgramConstant),
               tpg(this->env), params{p},
               archive(p.archiveSize, p.archivingProbability)
         {

@@ -39,29 +39,28 @@
 
 #include <cstdint>
 
-namespace Data
-{
-	/**
+namespace Data {
+    /**
      * \brief Base class for all sources of data to be accessed by a TPG
      * Instruction executed within a Program.
      */
-	struct Constant
-	{
-			/**
-			*	\brief the value of the Constant
-			*/
-			int32_t value;
+    struct Constant
+    {
+        /**
+         *	\brief the value of the Constant
+         */
+        int32_t value;
 
-			/**
-			*	\brief const casts of a Constant to a 32 bits integer
-			*/
-			operator int32_t() const;
+        /**
+         *	\brief const casts of a Constant to a 32 bits integer
+         */
+        operator int32_t() const;
 
-			/**
-			*	\brief const casts of a Constant to a double
-			*/
-			operator double () const;
-	};
-}
+        /**
+         *	\brief const casts of a Constant to a double
+         */
+        operator double() const;
+    };
+} // namespace Data
 
-#endif  //CONSTANT_H
+#endif // CONSTANT_H

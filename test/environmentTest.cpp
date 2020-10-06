@@ -147,8 +147,7 @@ TEST(EnvironmentTest, Size_tAttributeAccessors)
 
     set.add(iAdd);
     set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-	set.add(*(new Instructions::MultByConstant<double>()));
-
+    set.add(*(new Instructions::MultByConstant<double>()));
 
     vect.push_back(d1);
     vect.push_back(d2);
@@ -221,7 +220,7 @@ TEST(EnvironmentTest, InstructionSetAccessor)
 
     set.add(iAdd);
     set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-	set.add(*(new Instructions::MultByConstant<double>));
+    set.add(*(new Instructions::MultByConstant<double>));
 
     vect.push_back(d1);
     vect.push_back(d2);
