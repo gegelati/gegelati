@@ -181,27 +181,22 @@ uint64_t Program::Program::identifyIntrons()
     return nbIntrons;
 }
 
-const Data::ConstantHandler& Program::Program::getConstantHandler() const
+const Data::ConstantHandler& Program::Program::cGetConstantHandler() const
 {
     return this->constants;
 }
 
-size_t Program::Program::getConstantsAddressSpace() const
+Data::ConstantHandler& Program::Program::getConstantHandler()
 {
-    return this->constants.getAddressSpace(typeid(Data::Constant));
+    return this->constants;
 }
 
-const Data::Constant Program::Program::getConstantAt(size_t index) const
+const Data::Constant Program::Program::getConstantAt(size_t index) const 
 {
-    std::shared_ptr<const Data::Constant> value =
-        this->constants.getDataAt(typeid(Data::Constant), index)
-            .getSharedPointer<const Data::Constant>();
-    return *value;
-}
-
-void Program::Program::setConstantAt(size_t index, Data::Constant value)
-{
-    this->constants.setDataAt(typeid(Data::Constant), index, value);
+	std::shared_ptr<const Data::Constant> value = 
+		this->constants.getDataAt(typeid(Data::Constant), index)
+		.getSharedPointer<const Data::Constant>();
+	return *value;
 }
 
 bool Program::Program::hasIdenticalBehavior(const Program& other) const

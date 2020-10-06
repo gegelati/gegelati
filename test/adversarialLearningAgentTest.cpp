@@ -79,7 +79,6 @@ class adversarialLearningAgentTest : public ::testing::Test
         params.mutation.prog.pDelete = 0.5;
         params.mutation.prog.pMutate = 1.0;
         params.mutation.prog.pSwap = 1.0;
-        params.mutation.prog.nbProgramConstant = 0;
     }
 
     virtual void TearDown()

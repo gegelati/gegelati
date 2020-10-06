@@ -65,16 +65,13 @@ namespace Program {
                        // Data::PrimitiveTypeArray<double> to keep track of
                        // accessed addresses.
 
-        /// Connstants of the program
-        Data::ConstantHandler constants;
-
         /// Data sources from the environment used for archiving a program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>
             dataSources;
 
         /// Data sources (including registers) used in the Program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>
-            dataSourcesAndRegisters;
+            dataScsConstsAndRegs;
 
         /// Program counter of the execution engine.
         uint64_t programCounter;
@@ -90,19 +87,21 @@ namespace Program {
          */
         ProgramExecutionEngine(const Environment& env)
             : programCounter{0}, registers{env.getNbRegisters()},
-              constants{env.getNbConstant()}, program{NULL},
+              program{NULL},
               dataSources{env.getDataSources()}
         {
             // Setup the data sources
-            dataSourcesAndRegisters.push_back(this->registers);
+            dataScsConstsAndRegs.push_back(this->registers);
 
             if (env.getNbConstant() > 0)
-                dataSourcesAndRegisters.push_back(this->constants);
+			{
+                dataScsConstsAndRegs.push_back(env.getFakeDataSources().at(1));
+			}
 
             // Cannot use insert here because it dataSourcesAndRegisters
             // requires constnessand dataSrc data are not const...
             for (auto data : env.getDataSources()) {
-                dataSourcesAndRegisters.push_back(data.get());
+                dataScsConstsAndRegs.push_back(data.get());
             }
         }
 
@@ -126,22 +125,22 @@ namespace Program {
             const std::vector<std::reference_wrapper<T>>& dataSrc)
             : programCounter{0},
               registers{prog.getEnvironment().getNbRegisters()},
-              constants{prog.getConstantsAddressSpace()}, program{NULL}
+			  program{NULL}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
                 std::is_convertible<T&, const Data::DataHandler&>::value);
             // Setup the data sources
-            this->dataSourcesAndRegisters.push_back(this->registers);
+            this->dataScsConstsAndRegs.push_back(this->registers);
 
             if (prog.getEnvironment().getNbConstant() > 0) {
-                this->dataSourcesAndRegisters.push_back(constants);
+                this->dataScsConstsAndRegs.push_back(prog.cGetConstantHandler());
             }
 
             // Cannot use insert here because it dataSourcesAndRegisters
             // requires constnessand dataSrc data are not const...
             for (std::reference_wrapper<T> data : dataSrc) {
-                this->dataSourcesAndRegisters.push_back(data.get());
+                this->dataScsConstsAndRegs.push_back(data.get());
                 this->dataSources.push_back(data.get());
             }
 
@@ -281,14 +280,14 @@ namespace Program {
 
         // Replace the references in attributes
         this->dataSources = dataSrc;
-        size_t offset =
-            this->constants.getAddressSpace(typeid(Data::Constant)) > 0 ? 2 : 1;
+		//we need this offset to push the constant at the firs
+        size_t offset = this->program->getEnvironment().getNbConstant() > 0 ? 2 : 1;
         if (this->program && offset == 2) {
-            this->dataSourcesAndRegisters.at(1) =
-                this->program->getConstantHandler();
+            this->dataScsConstsAndRegs.at(1) =
+                this->program->cGetConstantHandler();
         }
         for (size_t idx = 0; idx < this->dataSources.size(); idx++) {
-            this->dataSourcesAndRegisters.at(idx + offset) = dataSrc.at(idx);
+            this->dataScsConstsAndRegs.at(idx + offset) = dataSrc.at(idx);
         }
 
         // Set program to check compatibility with new data source

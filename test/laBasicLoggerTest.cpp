@@ -38,7 +38,7 @@
 #include <thread>
 
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/multByConstant.h"
 #include "learn/learningAgent.h"
 #include "learn/stickGameWithOpponent.h"
 
@@ -73,7 +73,7 @@ class LABasicLoggerTest : public ::testing::Test
         params.mutation.prog.pDelete = 0.5;
         params.mutation.prog.pMutate = 1.0;
         params.mutation.prog.pSwap = 1.0;
-        params.mutation.prog.nbProgramConstant = 0;
+        params.nbProgramConstant = 0;
 
         params.archiveSize = 50;
         params.archivingProbability = 0.5;
@@ -82,9 +82,10 @@ class LABasicLoggerTest : public ::testing::Test
         params.ratioDeletedRoots =
             0.95; // high number to force the apparition of root action.
         params.nbThreads = 1;
+		params.nbProgramConstant = 5;
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, int32_t>()));
+        set.add(*(new Instructions::MultByConstant<double>()));
 
         auto res1 = new Learn::EvaluationResult(5, 2);
         auto res2 = new Learn::EvaluationResult(10, 2);

@@ -47,10 +47,10 @@ void Mutator::ProgramMutator::initRandomProgram(
 
     // insert random constants in the program
     Data::Constant c_value;
-    for (int i = 0; i < params.prog.nbProgramConstant; i++) {
-        c_value = (Data::Constant)rng.getUnsignedInt64(
-            params.prog.minConstValue, params.prog.maxConstValue);
-        p.setConstantAt(i, c_value);
+    for (int i = 0; i < p.getEnvironment().getNbConstant(); i++) {
+        c_value = {static_cast<int32_t>(rng.getUnsignedInt64(
+            params.prog.minConstValue, params.prog.maxConstValue))};
+        p.getConstantHandler().setDataAt(typeid(Data::Constant), i, c_value);
     }
 
     // Select the number of line randomly
@@ -113,6 +113,16 @@ bool Mutator::ProgramMutator::alterRandomLine(Program::Program& p,
     return true;
 }
 
+bool Mutator::ProgramMutator::alterRandomConstant(Program::Program& p,
+                                            const MutationParameters& params,
+											Mutator::RNG& rng)
+{
+	const uint64_t constant_idx = rng.getUnsignedInt64(0, p.getEnvironment().getNbConstant()-1);
+	p.getConstantHandler().setDataAt(typeid(Data::Constant), constant_idx, {static_cast<int32_t>(rng.getUnsignedInt64(
+                       params.prog.minConstValue, params.prog.maxConstValue))});
+	return true;
+}
+
 bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
                                             const MutationParameters& params,
                                             Mutator::RNG& rng)
@@ -139,15 +149,13 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
         swapRandomLines(p, rng);
     }
 
-    // mutate the programs constants
-    for (int i = 0; i < params.prog.nbProgramConstant; i++) {
-        if (rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation) {
-            anyMutation = true;
-            p.setConstantAt(
-                i, (Data::Constant)rng.getUnsignedInt64(
-                       params.prog.minConstValue, params.prog.maxConstValue));
-        }
-    }
+    // mutate the programs constants if they exists
+	if (p.getEnvironment().getNbConstant() > 0 && 
+		rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation)
+	{
+		anyMutation = true;
+		alterRandomConstant(p, params, rng);
+	}
 
     // Identify introns
     if (anyMutation) {

@@ -35,7 +35,6 @@
 
 #include <gtest/gtest.h>
 
-#include "data/constantHandler.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 
@@ -353,30 +352,11 @@ TEST(DataHandlersTest, PrimitiveDataArrayClone)
            "modification of data within the original DataHandler.";
 }
 
-TEST(DataHandlersTest, ConstantHandlerCanProvideTemplateType)
+TEST(DataHandlersTest, PrimitiveDataArrayCanNotProvideConstants)
 {
-    Data::DataHandler* d = new Data::ConstantHandler(4);
-    Data::DataHandler* d2 = new Data::ConstantHandler(0);
-
-    ASSERT_TRUE(d->canHandle(typeid(int32_t)))
-        << "ConstantHandler wrongfully say it can not provide "
-           "32 bitint data.";
-    ASSERT_TRUE(d->canHandle(typeid(Data::Constant)))
-        << "ConstantHandler wrongfully say it can not provide "
-           "\"Data::Constant\" "
+    Data::DataHandler* d = new Data::PrimitiveTypeArray<int>(4);
+    ASSERT_FALSE(d->canHandle(typeid(Data::Constant)))
+        << "PrimitiveTypeArray<double>() wrongfully say it can provide Data::Constant "
            "data.";
-    ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr)))
-        << "ConstantHandler wrongfully say it can provide "
-           "UntypedSharedPtr data.";
-    ASSERT_FALSE(d->canHandle(typeid(float)))
-        << "ConstantHandler wrongfully say it can provide "
-           "float data.";
-    ASSERT_FALSE(d->canHandle(typeid(double)))
-        << "ConstantHandler wrongfully say it can provide "
-           "double data.";
-    ASSERT_TRUE(d->canHandle(typeid(Data::Constant[3])))
-        << "ConstantHandler wrongfully say it can not provide "
-           "dataConstant array.";
     delete d;
-    delete d2;
 }

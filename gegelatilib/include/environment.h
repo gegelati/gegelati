@@ -92,8 +92,8 @@ class Environment
     /// Number of registers
     const size_t nbRegisters;
 
-    /// Number of parameters
-    const size_t nbConstant;
+    /// Number of constants
+    const size_t nbConstants;
 
     /// Vector of DataHandlers containing the environment's dataSources
     std::vector<std::reference_wrapper<const Data::DataHandler>>
@@ -125,13 +125,13 @@ class Environment
      * the largest AddressSpace of a set of DataHandler.
      *
      * \param[in] nbRegisters the number of registers of the environment.
-     * \param[in] nbParam the number of program's parameters.
+     * \param[in] nbConstants the number of program's constants.
      * \param[in] dHandlers reference to the set of DataHandler whose largest
      * largestAddressSpace is searched. \return the found value, or 0 default
      * value if the given std::vector was empty.
      */
     static size_t computeLargestAddressSpace(
-        const size_t nbRegisters, const size_t nbParam,
+        const size_t nbRegisters, const size_t nbConstants,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dHandlers);
 
@@ -161,14 +161,14 @@ class Environment
      *
      * \param[in] iSet the Instructions::Set to filter.
      * \param[in] nbRegisters Number of registers
-     * \param[in] nbParams Number of registers
+     * \param[in] nbConstants Number of constants of the program
      * \param[in] dataSources a set of DataHandler providing data.
      * \return a new Instructions:Set where only Instruction whose operands
      * can be provided by at least one DataHandler are kept.
      */
     static Instructions::Set filterInstructionSet(
         const Instructions::Set& iSet, const size_t nbRegisters,
-        const size_t nbParams,
+        const size_t nbConstants,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dataSources);
 
@@ -185,10 +185,11 @@ class Environment
      * construction time.
      *
      * \param[in] iSet the Instructions::Set whose Instruction will be used in
-     * this Environment. \param[in] dHandlers the list of DataHandler that will
-     * be used in this Environment. \param[in] nbRegs the number of double
-     * registers in this Environment.\param[in] nbConst the number of double
-     * registers in this Environment.
+     * this Environment. 
+	 * \param[in] dHandlers the list of DataHandler that will
+     * be used in this Environment. 
+	 * \param[in] nbRegs the number of double registers in this Environment.
+	 * \param[in] nbConst the number of program's constants in this Environment.
      */
     Environment(
         const Instructions::Set& iSet,
@@ -197,11 +198,11 @@ class Environment
         const size_t nbRegs, const size_t nbConst = 0)
         : instructionSet{filterInstructionSet(iSet, nbRegs, nbConst,
                                               dHandlers)},
-          dataSources{dHandlers}, nbRegisters{nbRegs}, nbConstant{nbConst},
+          dataSources{dHandlers}, nbRegisters{nbRegs}, nbConstants{nbConst},
           fakeRegisters(nbRegs), fakeConstants(nbConst),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
-          nbDataSources{dHandlers.size() + (nbConst > 0 ? 2 : 1)},
+          nbDataSources{dHandlers.size() + (nbConst > 0 ? 2 : 1)}, // if Constants are used, we need an extra datasource to store them in the environment
           largestAddressSpace{
               computeLargestAddressSpace(nbRegs, nbConst, dHandlers)},
           lineSize{computeLineSize(*this)}
@@ -226,7 +227,7 @@ class Environment
     size_t getNbRegisters() const;
 
     /**
-     * \brief Get the number of parameters used by programs.
+     * \brief Get the number of constants used by programs.
      *
      * \return the value of the nbParameters attribute.
      */
@@ -279,11 +280,10 @@ class Environment
     getDataSources() const;
 
     /**
-     * Get the datasource identical to the one that will be used as registers
-     * for this Environment.
+     * Get the datasource identical to the one used by programs
      *
-     * Getting the data sources identical to the one used as
-     * registers/parameters when executing a Program can be useful, notably when
+     * Getting the data sources identical to the one used by programs
+	 * when executing a Program can be useful, notably when
      * mutating a Program::Line and assessing whether a data type can be
      * provided by the registers.
      */

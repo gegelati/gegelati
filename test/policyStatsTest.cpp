@@ -38,7 +38,7 @@
 #include "instructions/addPrimitiveType.h"
 #include "instructions/instruction.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/multByConstant.h"
 
 #include "tpg/policyStats.h"
 
@@ -68,7 +68,7 @@ class PolicyStatsTest : public ::testing::Test
             new Instructions::LambdaInstruction<double, const double[3]>(mac)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
         set.add(
-            *(new Instructions::MultByConstParam<double, Data::Constant>()));
+            *(new Instructions::MultByConstant<double>()));
 
         // Data handler
         // Setup environment
@@ -81,7 +81,7 @@ class PolicyStatsTest : public ::testing::Test
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
             progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e, 5)));
+                std::shared_ptr<Program::Program>(new Program::Program(*e)));
         }
 
         // Create a TPG

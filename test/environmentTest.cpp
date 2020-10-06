@@ -41,6 +41,7 @@
 #include "environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
+#include "instructions/multByConstant.h"
 #include "instructions/set.h"
 
 TEST(EnvironmentTest, Constructor)
@@ -52,6 +53,7 @@ TEST(EnvironmentTest, Constructor)
 
     set.add(*(new Instructions::AddPrimitiveType<int>()));
     set.add(*(new Instructions::AddPrimitiveType<double>()));
+    set.add(*(new Instructions::MultByConstant<int>()));
 
     Data::PrimitiveTypeArray<double> d1(size1);
     Data::PrimitiveTypeArray<int> d2(size2);
@@ -59,11 +61,11 @@ TEST(EnvironmentTest, Constructor)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    ASSERT_NO_THROW({ Environment e(set, vect, 8); });
+    ASSERT_NO_THROW({ Environment e(set, vect, 8, 5); });
 
     ASSERT_THROW(
         // Empty dataHandlers
-        Environment e2(set, {}, 8);, std::domain_error)
+        Environment e2(set, {}, 8, 0);, std::domain_error)
         << "Something went unexpectedly right when constructing an Environment "
            "with an invalid Environment.";
 }
@@ -88,7 +90,7 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction)
     set.add(*(new Instructions::AddPrimitiveType<bool>()));
 
     Environment* e3 = NULL;
-    ASSERT_NO_THROW(e3 = new Environment(set, vect, 8))
+    ASSERT_NO_THROW(e3 = new Environment(set, vect, 8, 5))
         << "Constructing an Environemnt with an invalid Instruction should not "
            "throw an exception.";
     if (e3 != NULL) {
@@ -113,7 +115,7 @@ TEST(EnvironmentTest, computeLineSize)
     set.add(*(new Instructions::AddPrimitiveType<float>()));
     auto minus = [](double a, double b) -> double { return a - b; };
     set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-    e = new Environment(set, vect, 8);
+    e = new Environment(set, vect, 8, 5);
 
     // Expected answer:
     // n = 8
@@ -145,22 +147,27 @@ TEST(EnvironmentTest, Size_tAttributeAccessors)
 
     set.add(iAdd);
     set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+	set.add(*(new Instructions::MultByConstant<double>()));
+
 
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Environment e(set, vect, 8);
+    Environment e(set, vect, 8, 5);
 
     ASSERT_EQ(e.getNbRegisters(), 8)
         << "Number of registers of the Environment does not correspond to the "
            "one given during construction.";
-    ASSERT_EQ(e.getNbInstructions(), 2)
+    ASSERT_EQ(e.getNbConstant(), 5)
+        << "Number of Constants of the Environment does not correspond to the "
+           "one given during construction.";
+    ASSERT_EQ(e.getNbInstructions(), 3)
         << "Number of instructions of the Environment does not correspond to "
            "the content of the set given during construction.";
     ASSERT_EQ(e.getMaxNbOperands(), 2)
         << "Maximum number of operands of the Environment does not correspond "
            "to the instruction set given during construction.";
-    ASSERT_EQ(e.getNbDataSources(), 3)
+    ASSERT_EQ(e.getNbDataSources(), 4)
         << "Number of data sources does not correspond to the number of "
            "DataHandler (+1 for registers) given during construction.";
     ASSERT_EQ(e.getLargestAddressSpace(), size2)
@@ -187,7 +194,7 @@ TEST(EnvironmentTest, GetFakeRegisters)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Environment e(set, vect, 8);
+    Environment e(set, vect, 8, 5);
 
     ASSERT_NO_THROW(e.getFakeDataSources().at(0))
         << "Couldn't access the fake registers of the environment.";
@@ -214,6 +221,7 @@ TEST(EnvironmentTest, InstructionSetAccessor)
 
     set.add(iAdd);
     set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+	set.add(*(new Instructions::MultByConstant<double>));
 
     vect.push_back(d1);
     vect.push_back(d2);

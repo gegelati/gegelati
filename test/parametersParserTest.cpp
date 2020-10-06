@@ -93,6 +93,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.85, params.ratioDeletedRoots);
     ASSERT_EQ(100, params.maxNbEvaluationPerPolicy);
     ASSERT_EQ(3.0, params.nbRegisters);
+    ASSERT_EQ(5, params.nbProgramConstant);
     ASSERT_EQ(2.0, params.nbThreads);
     ASSERT_EQ(200, params.nbGenerations);
     ASSERT_EQ(true, params.doValidation);
@@ -111,7 +112,6 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.7, params.mutation.prog.pAdd);
     ASSERT_EQ(1.0, params.mutation.prog.pMutate);
     ASSERT_EQ(1.0, params.mutation.prog.pSwap);
-    ASSERT_EQ(5, params.mutation.prog.nbProgramConstant);
     ASSERT_EQ(0.5, params.mutation.prog.pConstantMutation);
     ASSERT_EQ(0, params.mutation.prog.minConstValue);
     ASSERT_EQ(1, params.mutation.prog.maxConstValue);
