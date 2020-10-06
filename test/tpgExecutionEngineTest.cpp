@@ -38,7 +38,7 @@
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/lambdaInstruction.h"
+#include "instructions/multByConstant.h"
 #include "program/program.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
@@ -48,10 +48,10 @@
 
 #include "tpg/tpgExecutionEngine.h"
 
-// TODO REMOVE THAT. this is temporary.
 #ifndef PARAM_FLOAT_PRECISION
-#define PARAM_FLOAT_PRECISION 0.6
+#define PARAM_FLOAT_PRECISION (float)(int16_t(1)/(float)(-INT16_MIN))
 #endif
+
 class TPGExecutionEngineTest : public ::testing::Test
 {
   protected:
@@ -69,16 +69,17 @@ class TPGExecutionEngineTest : public ::testing::Test
     /**
      * Populate the program instructions so that it returns the given value.
      *
-     * \param[in] value a double valut between -1.0 and 1.0.
+     * \param[in] value a double value between 0 and 10.
      */
-    void makeProgramReturn(Program::Program& prog, int value)
+    void makeProgramReturn(Program::Program& prog, double value)
     {
         auto& line = prog.addNewLine();
         // do an multby constant with DHandler 0
         line.setInstructionIndex(1);
-        line.setOperand(0, 2, 0);     // Dhandler 0 location 0
-        line.setOperand(1, 2, value); // Dhandler 0 location value
-        line.setDestinationIndex(0);  // 0th register des
+        line.setOperand(0, 2, 0);		   // Dhandler 0 location 0
+        line.setOperand(1, 1, 0);    // CHandler at location 0
+        line.setDestinationIndex(0); // 0th register dest
+		prog.getConstantHandler().setDataAt(typeid(Data::Constant), 0, { static_cast<int32_t>(value) });
     }
 
     virtual void SetUp()
@@ -93,37 +94,16 @@ class TPGExecutionEngineTest : public ::testing::Test
         // Programs.
         ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
             .setDataAt(typeid(double), 0, 1.0);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 1, 0.5);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 2, 0.5);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 3, 0.3);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 4, 0.0);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 5, 0.8);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 6, 0.9);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 7, 0.7);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 8, 0.6);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
-            .setDataAt(typeid(double), 9, 0.3);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-
-        auto mult = [](double a, double b) -> double { return a * b; };
-        set.add(*(new Instructions::LambdaInstruction<double, double>(mult)));
-
-        e = new Environment(set, vect, 8, 5);
+        set.add(*(new Instructions::MultByConstant<double>()));
+        e = new Environment(set, vect, 8, 1);
         tpg = new TPG::TPGGraph(*e);
 
         // Create 10 programs
         for (int i = 0; i < 10; i++) {
             progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e, 5)));
+                std::shared_ptr<Program::Program>(new Program::Program(*e)));
         }
 
         // Create a TPG
@@ -170,15 +150,15 @@ class TPGExecutionEngineTest : public ::testing::Test
                                          progPointers.at(8)));
 
         // Put a weight on edges
-        makeProgramReturn(*progPointers.at(0), 1); // T0->A0
-        makeProgramReturn(*progPointers.at(1), 2); // T1->A1
+        makeProgramReturn(*progPointers.at(0), 5); // T0->A0
+        makeProgramReturn(*progPointers.at(1), 5); // T1->A1
         makeProgramReturn(*progPointers.at(2), 3); // T2->A2
-        makeProgramReturn(*progPointers.at(3), 4); // T3->A3
-        makeProgramReturn(*progPointers.at(4), 5); // T0->T1
-        makeProgramReturn(*progPointers.at(5), 6); // T1->T2
+        makeProgramReturn(*progPointers.at(3), 0); // T3->A3
+        makeProgramReturn(*progPointers.at(4), 8); // T0->T1
+        makeProgramReturn(*progPointers.at(5), 9); // T1->T2
         makeProgramReturn(*progPointers.at(6), 7); // T2->T1
-        makeProgramReturn(*progPointers.at(7), 8); // T1->A0
-        makeProgramReturn(*progPointers.at(8), 9); // T1->A2
+        makeProgramReturn(*progPointers.at(7), 6); // T1->A0
+        makeProgramReturn(*progPointers.at(8), 3); // T1->A2
 
         // Check the characteristics
         ASSERT_EQ(tpg->getNbVertices(), 8);
@@ -211,7 +191,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateEdge)
 {
     TPG::TPGExecutionEngine tpee(*e);
 
-    ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION)
+    ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 5, PARAM_FLOAT_PRECISION)
         << "Evaluation of the program of an Edge failed.";
 }
 
@@ -219,7 +199,7 @@ TEST_F(TPGExecutionEngineTest, ArchiveUsage)
 {
     TPG::TPGExecutionEngine tpee(*e, &a);
 
-    ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 0.5, PARAM_FLOAT_PRECISION)
+    ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 5, PARAM_FLOAT_PRECISION)
         << "Evaluation of the program of an Edge failed when result is "
            "archived.";
     ASSERT_EQ(a.getNbRecordings(), 1)

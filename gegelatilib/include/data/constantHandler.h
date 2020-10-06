@@ -44,11 +44,9 @@
 
 #include "data/primitiveTypeArray.h"
 #include "data/untypedSharedPtr.h"
+#include "data/constant.h"
 
 namespace Data {
-
-    /// A constant is basically an Integer value.
-    typedef int32_t Constant;
 
     /**
      * \brief Base class for all sources of data to be accessed by a TPG

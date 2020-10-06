@@ -162,7 +162,7 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
     if (param == "nbProgramConstant") {
-        params.mutation.prog.nbProgramConstant = (size_t)value.asUInt();
+        params.nbProgramConstant = (size_t)value.asUInt();
         return;
     }
     if (param == "pConstantMutation") {

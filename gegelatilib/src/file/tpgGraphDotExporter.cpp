@@ -35,7 +35,7 @@
  */
 
 #include <inttypes.h>
-
+#include "data/constant.h"
 #include "file/tpgGraphDotExporter.h"
 
 uint64_t File::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
@@ -107,8 +107,8 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
         fprintf(pFile, "%sP%" PRIu64 " [fillcolor=\"#cccccc\" shape=point] //",
                 this->offset.c_str(), progID);
         // add next the content of the constant data handler in a comment (//)
-        for (int i = 0; i < p.getConstantsAddressSpace(); i++) {
-            fprintf(pFile, "%d|", p.getConstantAt(i));
+        for (int i = 0; i < p.getEnvironment().getNbConstant(); i++) {
+            fprintf(pFile, "%d|", static_cast<int>(p.getConstantAt(i)));
         }
         fprintf(pFile, "\n");
         // print the program content :

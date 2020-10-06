@@ -40,24 +40,26 @@
 #include "data/constantHandler.h"
 #include "data/dataHandler.h"
 #include "data/untypedSharedPtr.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/multByConstant.h"
 #include "instructions/set.h"
 
 TEST(MultByConstParamTest, ExecutePrimitiveType)
 {
     int a{2};
-    Data::Constant b = 5;
+    Data::Constant b{5};
     double c = 4.04;
     std::vector<Data::UntypedSharedPtr> vect;
     vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<int>());
     vect.emplace_back(
         &b, Data::UntypedSharedPtr::emptyDestructor<Data::Constant>());
 
-    Instructions::MultByConstParam<int>* instruction;
+    Instructions::MultByConstant<int>* instruction;
 
-    ASSERT_NO_THROW(instruction = new Instructions::MultByConstParam<int>())
+    ASSERT_NO_THROW(instruction = new Instructions::MultByConstant<int>())
         << "Constructing a new multByConstParam Instruction failed.";
 
+	ASSERT_EQ(instruction->getNbOperands(), 2)
+		<< "The multByConstant Instruction should use two operands.";
     ASSERT_EQ(instruction->execute(vect), 10)
         << "Result returned by the instruction is not as expected.";
 
@@ -77,27 +79,3 @@ TEST(MultByConstParamTest, ExecutePrimitiveType)
     ASSERT_NO_THROW(delete instruction)
         << "Destruction of the MultByConstParam instruction failed.";
 }
-/*
-#define arrayA 1.1, 2.2, 3.3
-#define arrayB 6.5, 4.3, 2.1
-TEST(MultByConstParamTest, ExecuteArray)
-{
-    double arrA[3]{arrayA};
-    double arrB[3]{arrayB};
-
-    // Build the instruction
-    Instructions::MultByConstParam<const double[3]>* instruction;
-    ASSERT_NO_THROW((instruction = new Instructions::MultByConstParam<const
-double[3]>())); ASSERT_NE(instruction, nullptr);
-
-    // Test execution
-    std::vector<Data::UntypedSharedPtr> arguments;
-    arguments.emplace_back(
-        std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
-            new double[3]{arrayA}));
-    arguments.emplace_back(
-        std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
-            new double[3]{arrayB}));
-    ASSERT_EQ(instruction->execute(arguments), 23.54)
-        << "Result returned by the instruction is not as expected.";
-}*/

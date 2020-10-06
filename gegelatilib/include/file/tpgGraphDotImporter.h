@@ -328,7 +328,7 @@ namespace File {
         void readLine(std::smatch& matches);
 
         /**
-         * \brief Create a program from its dot content.
+         * \brief Create a program from its dot content and import its constants
          */
         void readProgram(std::smatch& matches);
 

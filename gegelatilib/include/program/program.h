@@ -71,7 +71,7 @@ namespace Program {
          *   \brief Constants of the Program
          *
          *   A Program contains a set of constants in a dedicated
-         *Data::DataHandler
+         *	 Data::DataHandler
          **/
         Data::ConstantHandler constants;
 
@@ -84,11 +84,8 @@ namespace Program {
          *
          * \param[in] e the reference to the Environment that will be referenced
          * in the Program attributes.
-         * \param[in] nb_constant the number of constants that the program can
-         * define and use
          */
-        Program(const Environment& e, size_t nb_constant = 0)
-            : environment{e}, constants{nb_constant}
+        Program(const Environment& e) : environment{e}, constants{e.getNbConstant()}
         {
             constants.resetData(); // force all constant to 0 at first.
         };
@@ -234,30 +231,28 @@ namespace Program {
          *
          *  \return the constantHandler of the program
          */
-        const Data::ConstantHandler& getConstantHandler() const;
+        Data::ConstantHandler& getConstantHandler();
 
-        /**
-         * \brief Get the size of the constantHandler
+		/**
+         *  \brief get a const reference to the constantHandler object of the Program
          *
-         * \return the current size of the constantHandler of the program
+         *  This method gives a const reference to the constantHandler associated
+         *  with the program
+         *
+         *  \return the constantHandler of the program through a const reference
          */
-        size_t getConstantsAddressSpace() const;
+		const Data::ConstantHandler& cGetConstantHandler() const;
 
-        /**
-         * \brief Get the value of a constant at a given index
-         *
-         * \param[in] index The index of the constant that will be accessed
-         * \return The value of the constant at the index
-         */
-        const Data::Constant getConstantAt(size_t index) const;
-
-        /**
-         * \brief Set a new value to a program's constant
-         *
-         * \param[in] index The index of the constant that will be changed
-         * \param[in] value The new value of the constant
-         */
-        void setConstantAt(size_t index, Data::Constant value);
+		/**
+		*	\brief Get the value of a constant at a given index
+		*	
+		*	Although this method is not required as the data is accessible from
+		*	the constantHandler, it allows a shortcut and add readability.
+		*
+		*	\param[in] index the position at which we access the constant
+		*	\return the value of the constant at the given index
+		*/
+		const Data::Constant getConstantAt(size_t index) const;
 
         /**
          * \brief Check if two Program have the same behavior.

@@ -39,15 +39,11 @@
 
 void Program::ProgramExecutionEngine::setProgram(const Program& prog)
 {
-    // set the program
-    this->program = &prog;
     // are constants used here ?
     size_t offset = 1;
-    if (prog.getEnvironment().getNbConstant() > 0 &&
-        this->dataSourcesAndRegisters.size() - 2 ==
-            prog.getEnvironment().getDataSources().size()) {
+    if (prog.getEnvironment().getNbConstant() > 0) {
         // replace programs constants if already existing
-        dataSourcesAndRegisters.at(1) = prog.getConstantHandler();
+        dataScsConstsAndRegs.at(1) = prog.cGetConstantHandler();
         // increment offset for the datahandlers verification
         offset++;
     }
@@ -56,16 +52,16 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog)
     // offset is -1 if there is only the registers to ignore
     // -2 because we don't count the registers that are the first datasources
     // and the constants (second datasource)
-    if (this->dataSourcesAndRegisters.size() - offset !=
+    if (this->dataScsConstsAndRegs.size() - offset !=
         prog.getEnvironment().getDataSources().size()) {
         throw std::runtime_error(
             "Data sources characteristics for Program Execution differ from "
             "Program reference Environment.");
     }
-    for (size_t i = 0; i < this->dataSourcesAndRegisters.size() - offset; i++) {
+    for (size_t i = 0; i < this->dataScsConstsAndRegs.size() - offset; i++) {
         // check data source characteristics
         auto& iDataSrc =
-            this->dataSourcesAndRegisters.at(i + (size_t)offset).get();
+            this->dataScsConstsAndRegs.at(i + (size_t)offset).get();
         auto& envDataSrc = prog.getEnvironment().getDataSources().at(i).get();
         // Assume that dataSource must be (at least) a copy of each other to
         // simplify the comparison This is characterise by the two data sources
@@ -81,6 +77,8 @@ void Program::ProgramExecutionEngine::setProgram(const Program& prog)
             // space size for each data type.
         }
     }
+    // set the program
+    this->program = &prog;
     // Reset Registers (in case it is not done when they are constructed)
     this->registers.resetData();
 
@@ -133,7 +131,7 @@ const void Program::ProgramExecutionEngine::fetchCurrentOperands(
     for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
         const std::pair<uint64_t, uint64_t>& operandIndexes =
             line.getOperand(i);
-        const Data::DataHandler& dataSource = this->dataSourcesAndRegisters.at(
+        const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             operandIndexes.first); // Throws std::out_of_range
         const std::type_info& operandType =
             instruction.getOperandTypes().at(i).get();

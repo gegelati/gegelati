@@ -175,7 +175,12 @@ namespace File {
         uint64_t printTPGAction(const TPG::TPGAction& action);
 
         /**
-         * \brief Prints the dot content for the given TPGAction.
+         * \brief Prints the dot content for the given TPGEdge.
+		 * Prints the program index followed by its contants if the constants 
+		 * are used.
+		 * 
+		 * the program is printed under the format : 
+		 * Pindex [fillcolor=\#cccccc shape = point] //constant1|...|constant_n
          *
          * \param[in] edge the TPGEdge being printed.
          */

@@ -83,7 +83,7 @@ class ProgramTest : public ::testing::Test
 TEST_F(ProgramTest, ProgramConstructor)
 {
     Program::Program* p;
-    ASSERT_NO_THROW({ p = new Program::Program(*e, 5); })
+    ASSERT_NO_THROW({ p = new Program::Program(*e); })
         << "Something went wrong when constructing a Program with a valid "
            "Environment.";
 
@@ -94,7 +94,7 @@ TEST_F(ProgramTest, ProgramConstructor)
 
 TEST_F(ProgramTest, ProgramGetEnvironment)
 {
-    Program::Program p(*e, 5);
+    Program::Program p(*e);
 
     ASSERT_EQ(&p.getEnvironment(), e)
         << "Environment of a Program differs from the one given at "
@@ -103,7 +103,7 @@ TEST_F(ProgramTest, ProgramGetEnvironment)
 
 TEST_F(ProgramTest, AddEmptyLineAtKnownPosition)
 {
-    Program::Program* p = new Program::Program(*e, 5);
+    Program::Program* p = new Program::Program(*e);
     Program::Line* l;
     ASSERT_NO_THROW(l = &p->addNewLine(0);)
         << "Inserting a single empty line at position 0 in an empty program "
@@ -140,7 +140,7 @@ TEST_F(ProgramTest, AddEmptyLineAtKnownPosition)
 
 TEST_F(ProgramTest, AddEmptyLineAndDestruction)
 {
-    Program::Program* p = new Program::Program(*e, 5);
+    Program::Program* p = new Program::Program(*e);
     Program::Line* l;
     ASSERT_NO_THROW(l = &p->addNewLine();)
         << "Inserting a single empty line in an empty program should not be an "
@@ -164,7 +164,7 @@ TEST_F(ProgramTest, AddEmptyLineAndDestruction)
 
 TEST_F(ProgramTest, CopyConstructor)
 {
-    Program::Program* p0 = new Program::Program(*e, 5);
+    Program::Program* p0 = new Program::Program(*e);
     Program::Line& l = p0->addNewLine();
 
     // Initialize some line attributes
@@ -205,7 +205,7 @@ TEST_F(ProgramTest, CopyConstructor)
 
 TEST_F(ProgramTest, ProgramSwapLines)
 {
-    Program::Program p(*e, 5);
+    Program::Program p(*e);
 
     std::vector<Program::Line*> lines;
     for (auto i = 0; i < 10; i++) {
@@ -228,7 +228,7 @@ TEST_F(ProgramTest, ProgramSwapLines)
 
 TEST_F(ProgramTest, getProgramNbLines)
 {
-    Program::Program p(*e, 5);
+    Program::Program p(*e);
     ASSERT_EQ(p.getNbLines(), 0) << "Empty program nb lines should be 0.";
     p.addNewLine();
     ASSERT_EQ(p.getNbLines(), 1)
@@ -237,7 +237,7 @@ TEST_F(ProgramTest, getProgramNbLines)
 
 TEST_F(ProgramTest, GetProgramLine)
 {
-    Program::Program p(*e, 5);
+    Program::Program p(*e);
     Program::Line& l1 = p.addNewLine();
     Program::Line& l2 = p.addNewLine();
     Program::Line& l3 = p.addNewLine();
@@ -259,7 +259,7 @@ TEST_F(ProgramTest, GetProgramLine)
 
 TEST_F(ProgramTest, RemoveProgramLine)
 {
-    Program::Program p(*e, 5);
+    Program::Program p(*e);
     Program::Line& l1 = p.addNewLine();
     Program::Line& l2 = p.addNewLine();
     Program::Line& l3 = p.addNewLine();
@@ -284,7 +284,7 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
     Environment localE(set, vect, 8, 5);
 
     // Create a program with 2 introns
-    Program::Program p(localE, 5);
+    Program::Program p(localE);
     Program::Line& l1 = p.addNewLine();
     Program::Line& l2 = p.addNewLine();
     Program::Line& l3 = p.addNewLine();
@@ -335,31 +335,29 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
 TEST_F(ProgramTest, constants)
 {
     // Create a program with constants
-    Program::Program p(*e, 5);
+    Program::Program p(*e);
 
     // add some constants to the program (-2,-1,0,1)
     for (int j = 0; j < 4; j++) {
-        p.setConstantAt(j, j - 2);
+        p.getConstantHandler().setDataAt(typeid(Data::Constant),j, {j - 2});
     }
 
     auto constants = p.getConstantHandler();
     size_t c_size = 0;
     ASSERT_NO_THROW(c_size = constants.getAddressSpace(typeid(Data::Constant)))
         << "The accessor to the programs constants failed";
-    ASSERT_EQ(p.getConstantsAddressSpace(), c_size)
-        << "The returned size of the constant adress space is incorrect";
     // access a constant
-    ASSERT_EQ(p.getConstantAt(2), 0)
+    ASSERT_EQ((int32_t)(p.getConstantAt(2)), 0)
         << "The accessed constant has the wrong value";
     // access a constant out of range
     ASSERT_THROW(p.getConstantAt(10), std::out_of_range)
         << "Accessing a constant out of range should throw an exception.";
     // modify a constant
-    p.setConstantAt(0, 5);
-    ASSERT_EQ(p.getConstantAt(0), 5)
+    p.getConstantHandler().setDataAt(typeid(Data::Constant),0, {5});
+    ASSERT_EQ((int32_t)(p.getConstantAt(0)), 5)
         << "The value of the constant should have changed";
     // modify a constant out of range
-    ASSERT_THROW(p.setConstantAt(10, 5), std::out_of_range)
+    ASSERT_THROW(p.getConstantHandler().setDataAt(typeid(Data::Constant),10, {5}), std::out_of_range)
         << "modifying a constant out of range should throw an exception.";
 }
 

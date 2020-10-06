@@ -45,6 +45,7 @@
 #include <typeinfo>
 
 #include "data/hash.h"
+#include "data/constant.h"
 #include "dataHandler.h"
 
 #ifdef _MSC_VER
@@ -69,7 +70,7 @@ namespace Data {
      */
     template <class T> class PrimitiveTypeArray : public DataHandler
     {
-        static_assert(std::is_fundamental<T>::value,
+        static_assert(std::is_fundamental<T>::value || std::is_same<T, Data::Constant>(),
                       "Template class PrimitiveTypeArray<T> can only be used "
                       "for primitive types.");
 
@@ -256,7 +257,7 @@ namespace Data {
     template <class T> void PrimitiveTypeArray<T>::resetData()
     {
         for (T& elt : this->data) {
-            elt = 0;
+            elt = T{0};
         }
 
         // Invalidate the cached hash

@@ -101,9 +101,6 @@ static bool initRandomCorrectLineOperand(
                                .canHandle(operandType);
         }
     }
-    // As we deletted parameters, this is supposed never to happen
-    // as the selected operands indexes can only be constrained in type.
-    /*
     else if (initOperandDataSource) {
         // The operand is not constrained in type
         operandFound = true;
@@ -115,7 +112,6 @@ static bool initRandomCorrectLineOperand(
             operandDataSourceIndex += 1;
         }
     }
-    */
 
     // The data source can provide the required data type
     uint64_t operandLocation = line.getOperand(operandIdx).second;

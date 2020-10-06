@@ -126,7 +126,7 @@ namespace Learn {
                       const LearningParameters& p)
             : learningEnvironment{le},
               env(iSet, le.getDataSources(), p.nbRegisters,
-                  p.mutation.prog.nbProgramConstant),
+                  p.nbProgramConstant),
               tpg(this->env), params{p},
               archive(p.archiveSize, p.archivingProbability)
         {

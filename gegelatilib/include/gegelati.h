@@ -48,6 +48,8 @@
 #include <data/primitiveTypeArray.h>
 #include <data/primitiveTypeArray2D.h>
 #include <data/untypedSharedPtr.h>
+#include <data/constantHandler.h>
+#include <data/constant.h>
 
 #include <file/parametersParser.h>
 #include <file/tpgGraphDotExporter.h>
@@ -56,7 +58,7 @@
 #include <instructions/addPrimitiveType.h>
 #include <instructions/instruction.h>
 #include <instructions/lambdaInstruction.h>
-#include <instructions/multByConstParam.h>
+#include <instructions/multByConstant.h>
 #include <instructions/set.h>
 
 #include <learn/evaluationResult.h>

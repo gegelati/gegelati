@@ -41,6 +41,7 @@
 #include "data/untypedSharedPtr.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
+#include "instructions/multByConstant.h"
 #include "instructions/set.h"
 
 TEST(InstructionsTest, ConstructorDestructorCall)
@@ -126,26 +127,7 @@ TEST(InstructionsTest, Execute)
         << "In NDEBUG mode, execute method of AddPrimitiveType<double> should "
            "throw an exception with invalid operands.";
 #endif
-    // this code is to test instructions having parameters (not yet available)
-    /*
         delete i;
-        i = new Instructions::MultByConstParam<double, int16_t>();
-        vect.pop_back();
-        Parameter p = (int16_t)2;
-        ASSERT_EQ(i->execute({p}, vect), 5.2)
-            << "Execute method of MultByConstParam<double,int> returns an "
-               "incorrect value with valid operands.";
-    #ifndef NDEBUG
-        ASSERT_EQ(i->execute({}, vect), 0.0)
-            << "Execute method of MultByConstParam<double,int> returns an "
-               "incorrect value with invalid params.";
-    #else
-        ASSERT_THROW(i->execute({}, vect), std::out_of_range)
-            << "In NDEBUG mode, executing method MultByConstParam<double, int> "
-               "should throw an exception with invalid params.";
-    #endif
-        delete i;
-    */
 }
 
 TEST(InstructionsTest, SetAdd)
