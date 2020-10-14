@@ -95,6 +95,8 @@ static bool initRandomCorrectLineOperand(
                           });
             // Add the index to the set
             operandDataSourceIndexes.insert(operandDataSourceIndex);
+            // check if the selected dataSource can provide the type requested
+            // by the instruction
             operandFound = env.getFakeDataSources()
                                .at(operandDataSourceIndex)
                                .get()

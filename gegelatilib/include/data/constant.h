@@ -41,8 +41,8 @@
 
 namespace Data {
     /**
-     * \brief Base class for all sources of data to be accessed by a TPG
-     * Instruction executed within a Program.
+     * \brief Data type used in Program::Program to define constant values,
+     * accessible to Instructions, and mutated during the training process.
      */
     struct Constant
     {

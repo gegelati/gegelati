@@ -37,6 +37,7 @@
 
 #include <array>
 
+#include "data/constant.h"
 #include "data/dataHandler.h"
 #include "data/untypedSharedPtr.h"
 #include "instructions/addPrimitiveType.h"
@@ -67,6 +68,49 @@ TEST(LambdaInstructionsTest, ExecutePrimitiveType)
     // Execute with wrong types of operands.
     vect.pop_back();
     vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
+#ifndef NDEBUG
+    ASSERT_EQ(instruction->execute(vect), 0.0)
+        << "Instructions executed with wrong types of operands should return "
+           "0.0";
+#else
+    ASSERT_THROW(instruction->execute(vect), std::runtime_error)
+        << "In NDEBUG mode, execution of a LambdaInstruction with wrong "
+           "argument types should fail.";
+#endif
+
+    ASSERT_NO_THROW(delete instruction)
+        << "Destruction of the LambdaInstruction failed.";
+}
+
+TEST(LambdaInstructionsTest, ExecuteConstant)
+{
+    Data::Constant a{4};
+    double b{2.6};
+
+    int c = 3;
+
+    std::vector<Data::UntypedSharedPtr> vect;
+    vect.emplace_back(
+        &a, Data::UntypedSharedPtr::emptyDestructor<Data::Constant>());
+    vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
+
+    auto multByConst = [](Data::Constant a, double b) { return (double)a * b; };
+
+    Instructions::LambdaInstruction<Data::Constant, double>* instruction;
+    ASSERT_NO_THROW(
+        (instruction =
+             new Instructions::LambdaInstruction<Data::Constant, double>(
+                 multByConst)))
+        << "Constructing a new lambdaInstruction failed.";
+
+    ASSERT_EQ(instruction->execute(vect), 4.0 * 2.6)
+        << "Result returned by the instruction is not as expected.";
+
+    // Execute with wrong types of operands.
+    vect.pop_back();
+    vect.pop_back();
+    vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<int>());
+    vect.emplace_back(&b, Data::UntypedSharedPtr::emptyDestructor<double>());
 #ifndef NDEBUG
     ASSERT_EQ(instruction->execute(vect), 0.0)
         << "Instructions executed with wrong types of operands should return "

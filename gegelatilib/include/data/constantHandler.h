@@ -49,8 +49,8 @@
 namespace Data {
 
     /**
-     * \brief Base class for all sources of data to be accessed by a TPG
-     * Instruction executed within a Program.
+     * \brief Data::DataHandler used by Program::Program to handle their set of
+     * Constant values.
      */
     class ConstantHandler : public PrimitiveTypeArray<Constant>
     {
