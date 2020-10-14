@@ -230,6 +230,31 @@ bool Program::Program::hasIdenticalBehavior(const Program& other) const
                 return false;
             }
 
+            // If lines are referencing Constant, compare the values
+            // of these Constants
+            if (this->environment.getNbConstant() > 0) {
+                // Get Instruction
+                const Instructions::Instruction& instruction =
+                    this->environment.getInstructionSet().getInstruction(
+                        thisLine.getInstructionIndex());
+
+                // Check operands
+                for (auto operandIdx = 0;
+                     operandIdx < instruction.getNbOperands(); operandIdx++) {
+                    // Is the operand from the Constant data source.
+                    if (thisLine.getOperand(operandIdx).first == 1) {
+                        // Check equality of constants
+                        Data::Constant thisCste = this->getConstantAt(
+                            thisLine.getOperand(operandIdx).second);
+                        Data::Constant otherCste = other.getConstantAt(
+                            thisLine.getOperand(operandIdx).second);
+                        if (thisCste != otherCste) {
+                            return false;
+                        }
+                    }
+                }
+            }
+
             // Look for the next non intron line in both programs
             thisLineIdx++;
             nextNonIntronIdx(*this, thisLineIdx);

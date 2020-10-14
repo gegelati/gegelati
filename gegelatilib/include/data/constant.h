@@ -60,6 +60,16 @@ namespace Data {
          *	\brief const casts of a Constant to a double
          */
         operator double() const;
+
+        /**
+         * \brief Comparison operator for Constant.
+         */
+        bool operator==(const Constant& other) const;
+
+        /**
+         * \brief Comparison operator for Constant.
+         */
+        bool operator!=(const Constant& other) const;
     };
 } // namespace Data
 

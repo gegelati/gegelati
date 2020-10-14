@@ -41,6 +41,7 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
+#include "instructions/multByConstant.h"
 #include "instructions/set.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -369,7 +370,8 @@ TEST_F(ProgramTest, HasIdenticalBehavior)
 
     localSet.add(*(new Instructions::AddPrimitiveType<double>()));
     localSet.add(*(new Instructions::AddPrimitiveType<int>()));
-    Environment localEnv(localSet, vect, 8);
+    localSet.add(*(new Instructions::MultByConstant<int>()));
+    Environment localEnv(localSet, vect, 8, 5);
 
     // Create 2 Programs
     Program::Program p1(localEnv), p2(localEnv);
@@ -425,15 +427,39 @@ TEST_F(ProgramTest, HasIdenticalBehavior)
            "lines should be identical.";
 
     // Change p2 behavior
-    p2l1.setInstructionIndex(1);
-    p2l1.setOperand(0, 2, 1);
-    p2l1.setOperand(1, 2, 2);
+    p2l1.setInstructionIndex(2); // MultByConstant
+    p2l1.setOperand(0, 1, 1);    // Constant 1
 
     // Check non identity
     ASSERT_FALSE(p1.hasIdenticalBehavior(p2))
         << "Program with different behavior should be detected as such.";
 
+    // Change p1 similarly
+    p1l0.setInstructionIndex(2); // MultByConstant
+    p1l0.setOperand(0, 1, 1);    // Constant 1
+
+    // Check identity
+    ASSERT_TRUE(p1.hasIdenticalBehavior(p2))
+        << "Program with identical behavior should be detected as such.";
+
+    // Change unused Constant value in p2
+    p2.getConstantHandler().setDataAt(typeid(Data::Constant), 2,
+                                      Data::Constant{42});
+
+    // Check identity
+    ASSERT_TRUE(p1.hasIdenticalBehavior(p2))
+        << "Program with identical behavior should be detected as such.";
+
+    // Change used Constant value in p1
+    p1.getConstantHandler().setDataAt(typeid(Data::Constant), 1,
+                                      Data::Constant{12});
+
+    // Check identity
+    ASSERT_FALSE(p1.hasIdenticalBehavior(p2))
+        << "Program with identical behavior should be detected as such.";
+
     // Cleanup
     delete &localSet.getInstruction(0);
     delete &localSet.getInstruction(1);
+    delete &localSet.getInstruction(2);
 }

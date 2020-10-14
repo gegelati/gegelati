@@ -261,7 +261,7 @@ namespace Program {
          *
          * Two Program have the same behaviour if their sequence of non-intron
          * Lines are strictly identical (i.e. same instructions and operands, in
-         * the same order).
+         * the same order, and used Constant with identical values).
          *
          * \param[in] other the Program whose behavior is compared.
          */
