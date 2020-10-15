@@ -115,11 +115,6 @@ namespace Instructions {
         Instruction();
 
         /**
-         *  \brief Number of parameters required when calling the instruction.
-         */
-        unsigned int nbParameters;
-
-        /**
          * \brief List of the types of the operands needed to execute the
          * instruction.
          */

@@ -71,7 +71,6 @@ namespace Instructions {
     {
         this->operandTypes.push_back(typeid(T));
         this->operandTypes.push_back(typeid(Data::Constant));
-        this->nbParameters = 1;
     }
 
     template <class T>
