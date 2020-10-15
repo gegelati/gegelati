@@ -99,6 +99,30 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction)
                "should remain.";
         delete e3;
     }
+
+    delete &set.getInstruction(0);
+    delete &set.getInstruction(1);
+    delete &set.getInstruction(2);
+
+    // Test with Constant
+    Instructions::Set set2;
+    set2.add(*(new Instructions::AddPrimitiveType<int>()));
+    set2.add(*(new Instructions::AddPrimitiveType<double>()));
+    set2.add(*(new Instructions::MultByConstant<int>()));
+    Environment* e4 = NULL;
+    ASSERT_NO_THROW(e4 = new Environment(set2, vect, 8, 0))
+        << "Constructing an Environemnt with an invalid Instruction should not "
+           "throw an exception.";
+    if (e4 != NULL) {
+        ASSERT_EQ(e4->getInstructionSet().getNbInstructions(), 2)
+            << "After removing the non-usable instruction, only 2 instructions "
+               "should remain.";
+        delete e4;
+    }
+
+    delete &set2.getInstruction(0);
+    delete &set2.getInstruction(1);
+    delete &set2.getInstruction(2);
 }
 
 TEST(EnvironmentTest, computeLineSize)

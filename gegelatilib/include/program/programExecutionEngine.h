@@ -114,7 +114,8 @@ namespace Program {
          * Environment than its own.
          *
          * \param[in] prog the const Program that will be executed by the
-         * ProgramExecutionEngine. \param[in] dataSrc The DataHandler with which
+         * ProgramExecutionEngine. 
+         * \param[in] dataSrc The DataHandler with which
          * the Program will be executed.
          */
         template <class T>

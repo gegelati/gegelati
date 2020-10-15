@@ -81,7 +81,7 @@ Instructions::Set Environment::filterInstructionSet(
                 isHandled = true;
             }
 
-            if (fakeConstants.canHandle(type)) {
+            if (nbConstants > 0 && fakeConstants.canHandle(type)) {
                 // The type is handled by one dataHandler, stop searching for
                 // more.
                 isHandled = true;
@@ -101,7 +101,8 @@ Instructions::Set Environment::filterInstructionSet(
                 std::cout
                     << "An instruction with an operand of type " << type.name()
                     << " is ignored when building the Environment because"
-                    << " no dataSource can provide data for this operand type.";
+                    << " no dataSource can provide data for this operand type."
+                    << std::endl;
 
                 // break of the operand loop for this instruction.
                 allOperandsHandled = false;
