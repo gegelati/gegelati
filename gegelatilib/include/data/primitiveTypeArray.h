@@ -300,7 +300,7 @@ namespace Data {
 
         if (type == typeid(T)) {
             UntypedSharedPtr result(
-                &(this->data[address]),
+                &(this->data.at(address)),
                 UntypedSharedPtr::emptyDestructor<const T>());
             return result;
         }
@@ -313,7 +313,7 @@ namespace Data {
 
         // Copy its content
         for (size_t idx = 0; idx < arraySize; idx++) {
-            array[idx] = this->data[address + idx];
+            array[idx] = this->data.at(address + idx);
         }
 
         // Create the UntypedSharedPtr
@@ -355,7 +355,7 @@ namespace Data {
         checkAddressAndType(type, address);
 #endif
 
-        this->data[address] = value;
+        this->data.at(address) = value;
 
         // Invalidate the cached hash.
         this->invalidCachedHash = true;
