@@ -38,7 +38,7 @@
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "mutator/rng.h"
 #include "program/line.h"
@@ -64,9 +64,11 @@ class ArchiveTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<int>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
 
-        e = new Environment(set, vect, 8);
+        auto minus = [](double a, double b) -> double { return a - b; };
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+
+        e = new Environment(set, vect, 8, 5);
         p = new Program::Program(*e);
     }
 

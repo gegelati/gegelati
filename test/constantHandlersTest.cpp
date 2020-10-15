@@ -33,53 +33,53 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "instructions/instruction.h"
+#include <gtest/gtest.h>
 
-#include <iostream>
+#include "data/constantHandler.h"
+#include "data/primitiveTypeArray.h"
 
-using namespace Instructions;
-
-Instruction::Instruction() : operandTypes()
+TEST(ConstantHandlersTest, Constructor)
 {
+    ASSERT_NO_THROW({
+        Data::ConstantHandler* d = new Data::ConstantHandler(5);
+        delete d;
+    }) << "Call to ConstantHandler constructor failed.";
 }
 
-const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
-    getOperandTypes() const
+TEST(ConstantHandlersTest, ID)
 {
-    return this->operandTypes;
+    Data::ConstantHandler d0(5);
+    Data::ConstantHandler d1(5);
+
+    ASSERT_NE(d0.getId(), d1.getId())
+        << "Id of two ConstantHandlers created one "
+           "after the other should not be equal.";
 }
 
-unsigned int Instructions::Instruction::getNbOperands() const
+TEST(ConstantHandlersTest, ConstantHandlerCanProvideTemplateType)
 {
-    return (unsigned int)this->operandTypes.size();
-}
+    Data::DataHandler* d = new Data::ConstantHandler(4);
+    Data::DataHandler* d2 = new Data::ConstantHandler(0);
 
-bool Instruction::checkOperandTypes(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
-{
-    if (arguments.size() != this->operandTypes.size()) {
-        return false;
-    }
-
-    for (int i = 0; i < arguments.size(); i++) {
-        if (arguments.at(i).getType() != this->operandTypes.at(i).get()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-double Instruction::execute(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
-{
-#ifndef NDEBUG
-    if (!this->checkOperandTypes(arguments)) {
-        return 0.0;
-    }
-    else {
-        return 1.0;
-    }
-#else
-    return 1.0;
-#endif
+    ASSERT_FALSE(d->canHandle(typeid(int32_t)))
+        << "ConstantHandler wrongfully say it can provide "
+           "32 bit int data.";
+    ASSERT_TRUE(d->canHandle(typeid(Data::Constant)))
+        << "ConstantHandler wrongfully say it can not provide "
+           "\"Data::Constant\" "
+           "data.";
+    ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr)))
+        << "ConstantHandler wrongfully say it can provide "
+           "UntypedSharedPtr data.";
+    ASSERT_FALSE(d->canHandle(typeid(float)))
+        << "ConstantHandler wrongfully say it can provide "
+           "float data.";
+    ASSERT_FALSE(d->canHandle(typeid(double)))
+        << "ConstantHandler wrongfully say it can provide "
+           "double data.";
+    ASSERT_TRUE(d->canHandle(typeid(Data::Constant[3])))
+        << "ConstantHandler wrongfully say it can not provide "
+           "dataConstant array.";
+    delete d;
+    delete d2;
 }

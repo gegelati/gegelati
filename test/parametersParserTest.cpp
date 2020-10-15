@@ -59,11 +59,11 @@ TEST(LearningParametersTest, readConfigFile)
         << "Ill-formed parameters file should result in no root filling";
 
     File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
-    ASSERT_EQ(12, root.size())
+    ASSERT_EQ(13, root.size())
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(10, root["mutation"]["tpg"].size())
         << "Wrong number of elements in parsed json file";
-    ASSERT_EQ(5, root["mutation"]["prog"].size())
+    ASSERT_EQ(8, root["mutation"]["prog"].size())
         << "Wrong number of elements in parsed json file";
 }
 
@@ -93,6 +93,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.85, params.ratioDeletedRoots);
     ASSERT_EQ(100, params.maxNbEvaluationPerPolicy);
     ASSERT_EQ(3.0, params.nbRegisters);
+    ASSERT_EQ(5, params.nbProgramConstant);
     ASSERT_EQ(2.0, params.nbThreads);
     ASSERT_EQ(200, params.nbGenerations);
     ASSERT_EQ(true, params.doValidation);
@@ -111,6 +112,9 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.7, params.mutation.prog.pAdd);
     ASSERT_EQ(1.0, params.mutation.prog.pMutate);
     ASSERT_EQ(1.0, params.mutation.prog.pSwap);
+    ASSERT_EQ(0.5, params.mutation.prog.pConstantMutation);
+    ASSERT_EQ(-10, params.mutation.prog.minConstValue);
+    ASSERT_EQ(10, params.mutation.prog.maxConstValue);
 
     // check default parameters
     Learn::LearningParameters params2;

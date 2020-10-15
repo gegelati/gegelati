@@ -41,7 +41,7 @@
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "learn/learningParameters.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -85,16 +85,23 @@ class ImporterTest : public ::testing::Test
         ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
             .setDataAt(typeid(double), 0, 1.0);
 
+        auto minus = [](double a, double b) -> double { return a - b; };
+
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
-        e = new Environment(set, vect, 8);
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+        e = new Environment(set, vect, 8, 5);
         tpg = new TPG::TPGGraph(*e);
         tpg_copy = new TPG::TPGGraph(*e);
 
         // Create 10 programs
         for (int i = 0; i < 9; i++) {
-            progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+            std::shared_ptr<Program::Program> p =
+                std::make_shared<Program::Program>(*e);
+            for (int j = 0; j < 5; j++) {
+                p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
+                                                        j, {j - 2});
+            }
+            progPointers.push_back(p);
         }
 
         // add instructions to at least one program. (here we add 3.)
@@ -102,7 +109,6 @@ class ImporterTest : public ::testing::Test
             Program::Line& l = progPointers.at(0).get()->addNewLine();
             l.setInstructionIndex(0);
             l.setDestinationIndex(1);
-            l.setParameter(0, 0.2f);
             l.setOperand(0, 0, 1);
         }
 
@@ -277,8 +283,6 @@ TEST_F(ImporterTest, importGraph)
         << "The Instruction Index changed";
     ASSERT_EQ(p.getLine(0).getDestinationIndex(), 1)
         << "The destination index of the first line changed";
-    ASSERT_NEAR((float)(p.getLine(0).getParameter(0)), 0.2f, 0.0001)
-        << "The parameter changed";
     ASSERT_EQ(p.getLine(0).getOperand(0).first, 0)
         << "The first part of the operand changed";
     ASSERT_EQ(p.getLine(0).getOperand(0).second, 1)
@@ -289,8 +293,6 @@ TEST_F(ImporterTest, importGraph)
         << "The Instruction Index changed";
     ASSERT_EQ(p.getLine(1).getDestinationIndex(), 1)
         << "The destination index of the first line changed";
-    ASSERT_NEAR((float)(p.getLine(1).getParameter(0)), 0.2f, 0.0001)
-        << "The parameter changed";
     ASSERT_EQ(p.getLine(1).getOperand(0).first, 0)
         << "The first part of the operand changed";
     ASSERT_EQ(p.getLine(1).getOperand(0).second, 1)
@@ -301,12 +303,22 @@ TEST_F(ImporterTest, importGraph)
         << "The Instruction Index changed";
     ASSERT_EQ(p.getLine(2).getDestinationIndex(), 1)
         << "The destination index of the first line changed";
-    ASSERT_NEAR((float)(p.getLine(2).getParameter(0)), 0.2f, 0.0001)
-        << "The parameter changed";
     ASSERT_EQ(p.getLine(2).getOperand(0).first, 0)
         << "The first part of the operand changed";
     ASSERT_EQ(p.getLine(2).getOperand(0).second, 1)
         << "The second part of the operand changed";
+
+    // checking the program's parameters
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(0)), -2)
+        << "The constant changed";
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(1)), -1)
+        << "The constant changed";
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(2)), 0)
+        << "The constant changed";
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(3)), 1)
+        << "The constant changed";
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(4)), 2)
+        << "The constant changed";
 }
 
 TEST_F(ImporterTest, readLineFromFile)

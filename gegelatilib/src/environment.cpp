@@ -38,11 +38,11 @@
 #include "environment.h"
 
 size_t Environment::computeLargestAddressSpace(
-    const size_t nbRegisters,
+    const size_t nbRegisters, const size_t nbConstants,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dHandlers)
 {
-    size_t res{nbRegisters};
+    size_t res = nbRegisters > nbConstants ? nbRegisters : nbConstants;
     for (auto dHandler : dHandlers) {
         size_t addressSpace = dHandler.get().getLargestAddressSpace();
         res = (addressSpace > res) ? addressSpace : res;
@@ -52,12 +52,14 @@ size_t Environment::computeLargestAddressSpace(
 
 Instructions::Set Environment::filterInstructionSet(
     const Instructions::Set& iSet, const size_t nbRegisters,
+    const size_t nbConstants,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dataSources)
 {
     Instructions::Set filteredSet;
 
     Data::PrimitiveTypeArray<double> fakeRegisters(nbRegisters);
+    Data::ConstantHandler fakeConstants(nbConstants);
 
     // Check if all instructions can be used for the given DataHandlers
     for (uint64_t idxInstruction = 0; idxInstruction < iSet.getNbInstructions();
@@ -77,7 +79,12 @@ Instructions::Set Environment::filterInstructionSet(
                 // The type is handled by one dataHandler, stop searching for
                 // more.
                 isHandled = true;
-                break;
+            }
+
+            if (nbConstants > 0 && fakeConstants.canHandle(type)) {
+                // The type is handled by one dataHandler, stop searching for
+                // more.
+                isHandled = true;
             }
 
             for (const auto& dHandler : dataSources) {
@@ -94,7 +101,8 @@ Instructions::Set Environment::filterInstructionSet(
                 std::cout
                     << "An instruction with an operand of type " << type.name()
                     << " is ignored when building the Environment because"
-                    << " no dataSource can provide data for this operand type.";
+                    << " no dataSource can provide data for this operand type."
+                    << std::endl;
 
                 // break of the operand loop for this instruction.
                 allOperandsHandled = false;
@@ -125,8 +133,6 @@ const LineSize Environment::computeLineSize(const Environment& env)
 
     const size_t largestAddressSpace = env.getLargestAddressSpace();
 
-    const size_t p = env.getMaxNbParameters();
-
     // Add some checks on values. Only p can be null for a valid program. nbSrc
     // cannot be 1, as it would mean an environment with only registers.
     // i cannot be 1 also because this would mean a unique instruction
@@ -150,10 +156,8 @@ const LineSize Environment::computeLineSize(const Environment& env)
         (size_t)ceill(log2l((long double)largestAddressSpace));
     result.nbOperandsBits = (size_t)(m * (result.nbOperandDataSourceIndexBits +
                                           result.nbOperandLocationBits));
-    result.nbParametersBits = (size_t)(p * sizeof(Parameter) * 8);
-
     result.totalNbBits = result.nbInstructionBits + result.nbDestinationBits +
-                         result.nbOperandsBits + result.nbParametersBits;
+                         result.nbOperandsBits;
 
     return result;
 }
@@ -161,6 +165,11 @@ const LineSize Environment::computeLineSize(const Environment& env)
 size_t Environment::getNbRegisters() const
 {
     return this->nbRegisters;
+}
+
+size_t Environment::getNbConstant() const
+{
+    return this->nbConstants;
 }
 
 size_t Environment::getNbInstructions() const
@@ -171,11 +180,6 @@ size_t Environment::getNbInstructions() const
 size_t Environment::getMaxNbOperands() const
 {
     return this->maxNbOperands;
-}
-
-size_t Environment::getMaxNbParameters() const
-{
-    return this->maxNbParameters;
 }
 
 size_t Environment::getNbDataSources() const
@@ -199,9 +203,10 @@ Environment::getDataSources() const
     return this->dataSources;
 }
 
-const Data::DataHandler& Environment::getFakeRegisters() const
+const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+Environment::getFakeDataSources() const
 {
-    return this->fakeRegisters;
+    return this->fakeDataSources;
 }
 
 const Instructions::Set& Environment::getInstructionSet() const

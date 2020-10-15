@@ -351,3 +351,13 @@ TEST(DataHandlersTest, PrimitiveDataArrayClone)
         << "Hash of the clone dataHandler should remain unchanged after "
            "modification of data within the original DataHandler.";
 }
+
+TEST(DataHandlersTest, PrimitiveDataArrayCanNotProvideConstants)
+{
+    Data::DataHandler* d = new Data::PrimitiveTypeArray<int>(4);
+    ASSERT_FALSE(d->canHandle(typeid(Data::Constant)))
+        << "PrimitiveTypeArray<double>() wrongfully say it can provide "
+           "Data::Constant "
+           "data.";
+    delete d;
+}

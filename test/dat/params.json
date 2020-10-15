@@ -10,6 +10,7 @@
   "nbThreads": 2,
   "nbGenerations": 200,
   "doValidation": true,
+  "nbProgramConstant": 5,
   "mutation": {
     "tpg": {
       "nbActions": 5,
@@ -19,7 +20,7 @@
       "pEdgeDeletion": 0.8,
       "pEdgeAddition": 0.8,
       "pProgramMutation": 0.8,
-	  "forceProgramBehaviorChangeOnMutation": true,
+      "forceProgramBehaviorChangeOnMutation": true,
       "pEdgeDestinationChange": 0.3,
       "pEdgeDestinationIsAction": 0.6
     },
@@ -28,7 +29,10 @@
       "pDelete": 0.7,
       "pAdd": 0.7,
       "pMutate": 1.0,
-      "pSwap": 1.0
+      "pSwap": 1.0,
+      "pConstantMutation": 0.5,
+      "minConstValue": -10,
+      "maxConstValue": 10,
     }
   }
 }

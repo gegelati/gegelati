@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,53 +34,57 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "instructions/instruction.h"
+#ifndef INST_MULT_BY_CONST_H
+#define INST_MULT_BY_CONST_H
 
-#include <iostream>
+#include <memory>
+#include <type_traits>
+#include <typeinfo>
 
-using namespace Instructions;
+#include "data/constantHandler.h"
+#include "data/untypedSharedPtr.h"
+#include "instruction.h"
 
-Instruction::Instruction() : operandTypes()
-{
-}
+namespace Instructions {
 
-const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
-    getOperandTypes() const
-{
-    return this->operandTypes;
-}
+    /**
+     * \brief Template class for multiplying a unique argument of type T by a
+     * constant parameter
+     */
+    template <class T> class MultByConstant : public Instruction
+    {
+        static_assert(std::is_fundamental<T>::value,
+                      "Template class MultByConstParam<> can only be used for "
+                      "primitive types.");
 
-unsigned int Instructions::Instruction::getNbOperands() const
-{
-    return (unsigned int)this->operandTypes.size();
-}
+      public:
+        /**
+         *  \brief Constructor for the MultByConstParam class.
+         */
+        MultByConstant();
 
-bool Instruction::checkOperandTypes(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
-{
-    if (arguments.size() != this->operandTypes.size()) {
-        return false;
+        double execute(
+            const std::vector<Data::UntypedSharedPtr>& args) const override;
+    };
+
+    template <class T> MultByConstant<T>::MultByConstant()
+    {
+        this->operandTypes.push_back(typeid(T));
+        this->operandTypes.push_back(typeid(Data::Constant));
     }
 
-    for (int i = 0; i < arguments.size(); i++) {
-        if (arguments.at(i).getType() != this->operandTypes.at(i).get()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-double Instruction::execute(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
-{
+    template <class T>
+    inline double MultByConstant<T>::execute(
+        const std::vector<Data::UntypedSharedPtr>& args) const
+    {
 #ifndef NDEBUG
-    if (!this->checkOperandTypes(arguments)) {
-        return 0.0;
-    }
-    else {
-        return 1.0;
-    }
-#else
-    return 1.0;
+        if (Instruction::execute(args) != 1.0)
+            return 0;
 #endif
-}
+        const Data::Constant constantValue = (const Data::Constant&)*(
+            args.at(1).getSharedPointer<const Data::Constant>());
+        return *(args.at(0).getSharedPointer<const T>()) *
+               (double)constantValue;
+    }
+} // namespace Instructions
+#endif // INST_MULT_BY_CONST_H
