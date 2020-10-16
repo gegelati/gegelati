@@ -99,6 +99,10 @@ namespace Learn {
 
         /// Number of registers for the Program execution
         size_t nbRegisters = 8;
+
+        /// Number of Constants available in a program.
+        size_t nbProgramConstant = 0;
+
         /**
          * \brief Number of threads (ParallelLearningAgent only)
          *

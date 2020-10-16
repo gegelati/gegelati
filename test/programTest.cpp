@@ -41,7 +41,7 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/multByConstant.h"
 #include "instructions/set.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -63,9 +63,12 @@ class ProgramTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<int>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
+        std::function<double(double, double)> minus = [](double a, double b) {
+            return a - b;
+        };
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        e = new Environment(set, vect, 8);
+        e = new Environment(set, vect, 8, 5);
     }
 
     virtual void TearDown()
@@ -112,10 +115,6 @@ TEST_F(ProgramTest, AddEmptyLineAtKnownPosition)
         << "New line Destination is not set to 0.";
     ASSERT_EQ(l->getInstructionIndex(), 0)
         << "New line Instruction is not set to 0.";
-    for (int i = 0; i < e->getMaxNbParameters(); i++) {
-        ASSERT_EQ(l->getParameter(i).i, 0)
-            << "New line parameter is not set to 0.";
-    }
     for (int i = 0; i < e->getMaxNbOperands(); i++) {
         ASSERT_EQ(l->getOperand(i).first, 0)
             << "New line operand source index is not set to 0.";
@@ -153,10 +152,6 @@ TEST_F(ProgramTest, AddEmptyLineAndDestruction)
         << "New line Destination is not set to 0.";
     ASSERT_EQ(l->getInstructionIndex(), 0)
         << "New line Instruction is not set to 0.";
-    for (int i = 0; i < e->getMaxNbParameters(); i++) {
-        ASSERT_EQ(l->getParameter(i).i, 0)
-            << "New line parameter is not set to 0.";
-    }
     for (int i = 0; i < e->getMaxNbOperands(); i++) {
         ASSERT_EQ(l->getOperand(i).first, 0)
             << "New line operand source index is not set to 0.";
@@ -177,7 +172,6 @@ TEST_F(ProgramTest, CopyConstructor)
     l.setDestinationIndex(1);
     l.setInstructionIndex(1);
     l.setOperand(0, 2, 24);
-    l.setParameter(0, 0.3f);
 
     // Create a copy of p0.
     Program::Program p1(*p0);
@@ -196,7 +190,6 @@ TEST_F(ProgramTest, CopyConstructor)
     l.setDestinationIndex(0);
     l.setInstructionIndex(0);
     l.setOperand(0, 0, 0);
-    l.setParameter(0, int16_t(0));
 
     // Check that line attributes have been duplicated
     // May be redundant with lineTest...?
@@ -209,9 +202,6 @@ TEST_F(ProgramTest, CopyConstructor)
            "copy.";
     ASSERT_EQ(p1.getLine(0).getOperand(0).second, 24)
         << "Line operand.location value was not copied on Program copy.";
-    ASSERT_NEAR((float)p1.getLine(0).getParameter(0), 0.3f,
-                PARAM_FLOAT_PRECISION)
-        << "Line parameter value was not copied on Program copy.";
 }
 
 TEST_F(ProgramTest, ProgramSwapLines)
@@ -292,7 +282,7 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
                 return a[0] * b[0] + a[1] * b[1];
             }));
 
-    Environment localE(set, vect, 8);
+    Environment localE(set, vect, 8, 5);
 
     // Create a program with 2 introns
     Program::Program p(localE);
@@ -343,13 +333,45 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
     delete (&set.getInstruction(2));
 }
 
+TEST_F(ProgramTest, constants)
+{
+    // Create a program with constants
+    Program::Program p(*e);
+
+    // add some constants to the program (-2,-1,0,1)
+    for (int j = 0; j < 4; j++) {
+        p.getConstantHandler().setDataAt(typeid(Data::Constant), j, {j - 2});
+    }
+
+    auto constants = p.getConstantHandler();
+    size_t c_size = 0;
+    ASSERT_NO_THROW(c_size = constants.getAddressSpace(typeid(Data::Constant)))
+        << "The accessor to the programs constants failed";
+    // access a constant
+    ASSERT_EQ((int32_t)(p.getConstantAt(2)), 0)
+        << "The accessed constant has the wrong value";
+    // access a constant out of range
+    ASSERT_THROW(p.getConstantAt(10), std::out_of_range)
+        << "Accessing a constant out of range should throw an exception.";
+    // modify a constant
+    p.getConstantHandler().setDataAt(typeid(Data::Constant), 0, {5});
+    ASSERT_EQ((int32_t)(p.getConstantAt(0)), 5)
+        << "The value of the constant should have changed";
+    // modify a constant out of range
+    ASSERT_THROW(
+        p.getConstantHandler().setDataAt(typeid(Data::Constant), 10, {5}),
+        std::out_of_range)
+        << "modifying a constant out of range should throw an exception.";
+}
+
 TEST_F(ProgramTest, HasIdenticalBehavior)
 {
     Instructions::Set localSet;
 
     localSet.add(*(new Instructions::AddPrimitiveType<double>()));
     localSet.add(*(new Instructions::AddPrimitiveType<int>()));
-    Environment localEnv(localSet, vect, 8);
+    localSet.add(*(new Instructions::MultByConstant<int>()));
+    Environment localEnv(localSet, vect, 8, 5);
 
     // Create 2 Programs
     Program::Program p1(localEnv), p2(localEnv);
@@ -405,15 +427,39 @@ TEST_F(ProgramTest, HasIdenticalBehavior)
            "lines should be identical.";
 
     // Change p2 behavior
-    p2l1.setInstructionIndex(1);
-    p2l1.setOperand(0, 2, 1);
-    p2l1.setOperand(1, 2, 2);
+    p2l1.setInstructionIndex(2); // MultByConstant
+    p2l1.setOperand(0, 1, 1);    // Constant 1
 
     // Check non identity
     ASSERT_FALSE(p1.hasIdenticalBehavior(p2))
         << "Program with different behavior should be detected as such.";
 
+    // Change p1 similarly
+    p1l0.setInstructionIndex(2); // MultByConstant
+    p1l0.setOperand(0, 1, 1);    // Constant 1
+
+    // Check identity
+    ASSERT_TRUE(p1.hasIdenticalBehavior(p2))
+        << "Program with identical behavior should be detected as such.";
+
+    // Change unused Constant value in p2
+    p2.getConstantHandler().setDataAt(typeid(Data::Constant), 2,
+                                      Data::Constant{42});
+
+    // Check identity
+    ASSERT_TRUE(p1.hasIdenticalBehavior(p2))
+        << "Program with identical behavior should be detected as such.";
+
+    // Change used Constant value in p1
+    p1.getConstantHandler().setDataAt(typeid(Data::Constant), 1,
+                                      Data::Constant{12});
+
+    // Check identity
+    ASSERT_FALSE(p1.hasIdenticalBehavior(p2))
+        << "Program with identical behavior should be detected as such.";
+
     // Cleanup
     delete &localSet.getInstruction(0);
     delete &localSet.getInstruction(1);
+    delete &localSet.getInstruction(2);
 }

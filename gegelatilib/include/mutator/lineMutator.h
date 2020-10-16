@@ -57,7 +57,7 @@ namespace Mutator {
          * instructionIndex, the destinationIndex, all operands pairs (sources
          * and localisation) will be initialized randomly such
          * that the corresponding instruction can be executed with valid data.
-         * Parameters and operands of the line that are unused by the selected
+         * Operands of the line that are unused by the selected
          * Instruction will be initialized
          *
          * \param[in,out] line the Program::Line whose attributes are being

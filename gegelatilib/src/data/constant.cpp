@@ -1,7 +1,8 @@
 /**
- * Copyright or Â© or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nicolas.sourbier@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -32,54 +33,24 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
+#include "data/constant.h"
 
-#include "instructions/instruction.h"
-
-#include <iostream>
-
-using namespace Instructions;
-
-Instruction::Instruction() : operandTypes()
+Data::Constant::operator int32_t() const
 {
+    return this->value;
 }
 
-const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
-    getOperandTypes() const
+Data::Constant::operator double() const
 {
-    return this->operandTypes;
+    return (double)this->value;
 }
 
-unsigned int Instructions::Instruction::getNbOperands() const
+bool Data::Constant::operator==(const Constant& other) const
 {
-    return (unsigned int)this->operandTypes.size();
+    return this->value == other.value;
 }
 
-bool Instruction::checkOperandTypes(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
+bool Data::Constant::operator!=(const Constant& other) const
 {
-    if (arguments.size() != this->operandTypes.size()) {
-        return false;
-    }
-
-    for (int i = 0; i < arguments.size(); i++) {
-        if (arguments.at(i).getType() != this->operandTypes.at(i).get()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-double Instruction::execute(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
-{
-#ifndef NDEBUG
-    if (!this->checkOperandTypes(arguments)) {
-        return 0.0;
-    }
-    else {
-        return 1.0;
-    }
-#else
-    return 1.0;
-#endif
+    return this->value != other.value;
 }

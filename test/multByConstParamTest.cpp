@@ -1,7 +1,7 @@
 /**
- * Copyright or Â© or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,53 +33,49 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "instructions/instruction.h"
+#include <gtest/gtest.h>
 
-#include <iostream>
+#include <array>
 
-using namespace Instructions;
+#include "data/constantHandler.h"
+#include "data/dataHandler.h"
+#include "data/untypedSharedPtr.h"
+#include "instructions/multByConstant.h"
+#include "instructions/set.h"
 
-Instruction::Instruction() : operandTypes()
+TEST(MultByConstParamTest, ExecutePrimitiveType)
 {
-}
+    int a{2};
+    Data::Constant b{5};
+    double c = 4.04;
+    std::vector<Data::UntypedSharedPtr> vect;
+    vect.emplace_back(&a, Data::UntypedSharedPtr::emptyDestructor<int>());
+    vect.emplace_back(
+        &b, Data::UntypedSharedPtr::emptyDestructor<Data::Constant>());
 
-const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
-    getOperandTypes() const
-{
-    return this->operandTypes;
-}
+    Instructions::MultByConstant<int>* instruction;
 
-unsigned int Instructions::Instruction::getNbOperands() const
-{
-    return (unsigned int)this->operandTypes.size();
-}
+    ASSERT_NO_THROW(instruction = new Instructions::MultByConstant<int>())
+        << "Constructing a new multByConstParam Instruction failed.";
 
-bool Instruction::checkOperandTypes(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
-{
-    if (arguments.size() != this->operandTypes.size()) {
-        return false;
-    }
+    ASSERT_EQ(instruction->getNbOperands(), 2)
+        << "The multByConstant Instruction should use two operands.";
+    ASSERT_EQ(instruction->execute(vect), 10)
+        << "Result returned by the instruction is not as expected.";
 
-    for (int i = 0; i < arguments.size(); i++) {
-        if (arguments.at(i).getType() != this->operandTypes.at(i).get()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-double Instruction::execute(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
-{
+    // Execute with wrong types of operands.
+    vect.pop_back();
+    vect.emplace_back(&c, Data::UntypedSharedPtr::emptyDestructor<double>());
 #ifndef NDEBUG
-    if (!this->checkOperandTypes(arguments)) {
-        return 0.0;
-    }
-    else {
-        return 1.0;
-    }
+    ASSERT_EQ(instruction->execute(vect), 0.0)
+        << "Instructions executed with wrong types of operands should return "
+           "0.0";
 #else
-    return 1.0;
+    ASSERT_THROW(instruction->execute(vect), std::runtime_error)
+        << "In NDEBUG mode, execution of a LambdaInstruction with wrong "
+           "argument types should fail.";
 #endif
+
+    ASSERT_NO_THROW(delete instruction)
+        << "Destruction of the MultByConstParam instruction failed.";
 }

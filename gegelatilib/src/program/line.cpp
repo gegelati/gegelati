@@ -71,25 +71,6 @@ bool Program::Line::setInstructionIndex(uint64_t instr, bool check)
     return true;
 }
 
-const Parameter& Program::Line::getParameter(uint64_t idx) const
-{
-    if (idx >= this->environment.getMaxNbParameters()) {
-        throw std::range_error(
-            "Attempting to access an non-existing Parameter.");
-    }
-
-    return this->parameters[idx];
-}
-
-void Program::Line::setParameter(const uint64_t idx, const Parameter p)
-{
-    if (idx >= this->environment.getMaxNbParameters()) {
-        throw std::range_error("Attempting to set an non-existing Parameter.");
-    }
-
-    this->parameters[idx] = p;
-}
-
 const std::pair<uint64_t, uint64_t>& Program::Line::getOperand(
     const uint64_t idx) const
 {
@@ -135,14 +116,6 @@ bool Program::Line::operator==(const Line& other) const
     // Compare operands
     for (auto idx = 0; idx < this->getEnvironment().getMaxNbOperands(); idx++) {
         if (this->operands[idx] != other.operands[idx]) {
-            return false;
-        }
-    }
-
-    // Compare parameters
-    for (auto idx = 0; idx < this->getEnvironment().getMaxNbParameters();
-         idx++) {
-        if ((int16_t)this->parameters[idx] != (int16_t)other.parameters[idx]) {
             return false;
         }
     }

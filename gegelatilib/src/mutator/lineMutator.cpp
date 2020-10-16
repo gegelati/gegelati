@@ -95,20 +95,12 @@ static bool initRandomCorrectLineOperand(
                           });
             // Add the index to the set
             operandDataSourceIndexes.insert(operandDataSourceIndex);
-
             // check if the selected dataSource can provide the type requested
             // by the instruction
-            if (operandDataSourceIndex == 0) {
-                // Data Source is the registers
-                operandFound = env.getFakeRegisters().canHandle(operandType);
-            }
-            else {
-                // Data source is a dataHandler
-                operandFound = env.getDataSources()
-                                   .at(operandDataSourceIndex - 1)
-                                   .get()
-                                   .canHandle(operandType);
-            }
+            operandFound = env.getFakeDataSources()
+                               .at(operandDataSourceIndex)
+                               .get()
+                               .canHandle(operandType);
         }
     }
     else if (initOperandDataSource) {
@@ -154,16 +146,6 @@ void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line,
     line.setDestinationIndex(
         destinationIndex); // Should never throw.. but I did not deactivate the
                            // check anyway.
-
-    // Select and set all parameter values. (can not fail)
-    for (uint64_t paramIdx = 0; paramIdx < env.getMaxNbParameters();
-         paramIdx++) {
-        Parameter param(
-            (int16_t)(rng.getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX -
-                                               (int64_t)PARAM_INT_MIN)) +
-                      (int64_t)PARAM_INT_MIN));
-        line.setParameter(paramIdx, param);
-    }
 
     // Select an instruction.
     uint64_t instructionIndex =
@@ -218,20 +200,11 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
                 instruction.getOperandTypes().at(i).get();
             uint64_t dataSourceIndex = line.getOperand(i).first;
             bool isValid = false;
-            if (dataSourceIndex == 0) {
-                // regsister
-                isValid =
-                    (line.getEnvironment().getFakeRegisters().canHandle(type));
-            }
-            else {
-                // not register
-                const Data::DataHandler& dataSource =
-                    line.getEnvironment()
-                        .getDataSources()
-                        .at(dataSourceIndex - 1)
-                        .get();
-                isValid = dataSource.canHandle(type);
-            }
+            const Data::DataHandler& dataSource = line.getEnvironment()
+                                                      .getFakeDataSources()
+                                                      .at(dataSourceIndex)
+                                                      .get();
+            isValid = dataSource.canHandle(type);
             // Alter the operand if needed
             if (!isValid) {
                 // Force only the change of data source (location can remain
@@ -292,24 +265,5 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
             initRandomCorrectLineOperand(instruction, line, operandIndex, false,
                                          true, true, rng);
         }
-    }
-    else {
-        // Parameters
-        // Which Parameter is selected
-        const uint64_t parameterIndex =
-            (selectedBit - (lineSize.totalNbBits - lineSize.nbParametersBits)) /
-            (lineSize.nbParametersBits /
-             line.getEnvironment().getMaxNbParameters());
-        // should not cause any division by zero since if there is no parameter
-        // in an environment, this code should never be reached.
-
-        // Select a random parameterValue
-        // (do not bother to make it different the probability is too low and
-        // it will be detected through neutrality tests)
-        Parameter newParameter =
-            (int16_t)(rng.getUnsignedInt64(0, ((int64_t)PARAM_INT_MAX -
-                                               (int64_t)PARAM_INT_MIN)) +
-                      (int64_t)PARAM_INT_MIN);
-        line.setParameter(parameterIndex, newParameter);
     }
 }

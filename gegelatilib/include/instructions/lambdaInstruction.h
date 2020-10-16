@@ -119,12 +119,11 @@ namespace Instructions {
         };
 
         double execute(
-            const std::vector<std::reference_wrapper<const Parameter>>& params,
             const std::vector<Data::UntypedSharedPtr>& args) const override
         {
 
 #ifndef NDEBUG
-            if (Instruction::execute(params, args) != 1.0) {
+            if (Instruction::execute(args) != 1.0) {
                 return 0.0;
             }
 #endif

@@ -36,8 +36,10 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
+#include <cmath>
 #include <iostream>
 
+#include "data/constantHandler.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/instruction.h"
@@ -56,8 +58,6 @@ typedef struct LineSize
     size_t nbOperandDataSourceIndexBits;
     /// Number of bits used for each operand pair, to encode location
     size_t nbOperandLocationBits;
-    /// Number of bits used to encode the parameters
-    size_t nbParametersBits;
     /// Total number of bits to encode a program line.
     size_t totalNbBits;
 
@@ -92,17 +92,24 @@ class Environment
     /// Number of registers
     const size_t nbRegisters;
 
+    /// Number of constants
+    const size_t nbConstants;
+
+    /// Vector of DataHandlers containing the environment's dataSources
+    std::vector<std::reference_wrapper<const Data::DataHandler>>
+        fakeDataSources;
+
     /// DataHandler whost type corresponds to registers.
     const Data::PrimitiveTypeArray<double> fakeRegisters;
+
+    /// DataHandler whost type corresponds to the programs constants.
+    const Data::ConstantHandler fakeConstants;
 
     /// Number of Instruction in the Instructions::Set.
     const size_t nbInstructions;
 
     /// Maxmimum number of operands of the Instructions::Set.
     const size_t maxNbOperands;
-
-    /// Maximum number of Parameter of the Instruction::Set..
-    const size_t maxNbParameters;
 
     /// Number of DataHandler from which data can be accessed.
     const size_t nbDataSources;
@@ -118,12 +125,13 @@ class Environment
      * the largest AddressSpace of a set of DataHandler.
      *
      * \param[in] nbRegisters the number of registers of the environment.
+     * \param[in] nbConstants the number of program's constants.
      * \param[in] dHandlers reference to the set of DataHandler whose largest
      * largestAddressSpace is searched. \return the found value, or 0 default
      * value if the given std::vector was empty.
      */
     static size_t computeLargestAddressSpace(
-        const size_t nbRegisters,
+        const size_t nbRegisters, const size_t nbConstants,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dHandlers);
 
@@ -135,7 +143,7 @@ class Environment
      * formula: $ ceil(log2(i)) + ceil(log2(n))+
      * m*(ceil(log2(nb_{src}))+ceil(log2(largestAddressSpace)) + p*32$ With bits
      * organised (theoretically) in the same order as in the equation |
-     * Instruction | destination | operands | parameters | See
+     * Instruction | destination | operands See
      * PROJECT/doc/instructions.md for more details.
      *
      * \param[in] env The Environment whose information is used.
@@ -153,12 +161,14 @@ class Environment
      *
      * \param[in] iSet the Instructions::Set to filter.
      * \param[in] nbRegisters Number of registers
+     * \param[in] nbConstants Number of constants of the program
      * \param[in] dataSources a set of DataHandler providing data.
      * \return a new Instructions:Set where only Instruction whose operands
      * can be provided by at least one DataHandler are kept.
      */
     static Instructions::Set filterInstructionSet(
         const Instructions::Set& iSet, const size_t nbRegisters,
+        const size_t nbConstants,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dataSources);
 
@@ -175,23 +185,43 @@ class Environment
      * construction time.
      *
      * \param[in] iSet the Instructions::Set whose Instruction will be used in
-     * this Environment. \param[in] dHandlers the list of DataHandler that will
-     * be used in this Environment. \param[in] nbRegs the number of double
-     * registers in this Environment.
+     * this Environment.
+     * \param[in] dHandlers the list of DataHandler that will
+     * be used in this Environment.
+     * \param[in] nbRegs the number of double registers in this Environment.
+     * \param[in] nbConst the number of program's constants in this Environment.
      */
     Environment(
         const Instructions::Set& iSet,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dHandlers,
-        const size_t nbRegs)
-        : instructionSet{filterInstructionSet(iSet, nbRegs, dHandlers)},
-          dataSources{dHandlers}, nbRegisters{nbRegs}, fakeRegisters(nbRegs),
+        const size_t nbRegs, const size_t nbConst = 0)
+        : instructionSet{filterInstructionSet(iSet, nbRegs, nbConst,
+                                              dHandlers)},
+          dataSources{dHandlers}, nbRegisters{nbRegs}, nbConstants{nbConst},
+          fakeRegisters(nbRegs), fakeConstants(nbConst),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
-          maxNbParameters{instructionSet.getMaxNbParameters()},
-          nbDataSources{dHandlers.size() + 1},
-          largestAddressSpace{computeLargestAddressSpace(nbRegs, dHandlers)},
-          lineSize{computeLineSize(*this)} {};
+          nbDataSources{
+              dHandlers.size() +
+              (nbConst > 0 ? 2
+                           : 1)}, // if Constants are used, we need an extra
+                                  // datasource to store them in the environment
+          largestAddressSpace{
+              computeLargestAddressSpace(nbRegs, nbConst, dHandlers)},
+          lineSize{computeLineSize(*this)}
+    {
+        this->fakeDataSources.push_back(
+            (std::reference_wrapper<const Data::DataHandler>)this
+                ->fakeRegisters);
+
+        if (nbConst > 0) {
+            this->fakeDataSources.push_back(this->fakeConstants);
+        }
+
+        for (auto& elem : this->dataSources)
+            this->fakeDataSources.push_back(elem);
+    };
 
     /**
      * \brief Get the size of the number of registers of this Environment.
@@ -199,6 +229,13 @@ class Environment
      * \return the value of the nbRegisters attribute.
      */
     size_t getNbRegisters() const;
+
+    /**
+     * \brief Get the number of constants used by programs.
+     *
+     * \return the value of the nbParameters attribute.
+     */
+    size_t getNbConstant() const;
 
     /**
      * \brief Get the size of the number of Instruction within the
@@ -215,14 +252,6 @@ class Environment
      * \return the value of the maxNbOperands attribute.
      */
     size_t getMaxNbOperands() const;
-
-    /**
-     * \brief Get the size of the maximum number of Parameter of
-     * Instructions::Set.
-     *
-     * \return the value of the maxNbParamaters attribute.
-     */
-    size_t getMaxNbParameters() const;
 
     /**
      * \brief Get the size of the number of DataHandlers.
@@ -255,15 +284,15 @@ class Environment
     getDataSources() const;
 
     /**
-     * Get a DataHandler identical to the one that will be used as registers
-     * for this Environment.
+     * Get the datasource identical to the one used by programs
      *
-     * Getting a DataHandler identical to the one used as registers when
-     * executing a Program can be useful, notably when mutating a
-     * Program::Line and assessing whether a data type can be provided by the
-     * registers.
+     * Getting the data sources identical to the one used by programs
+     * when executing a Program can be useful, notably when
+     * mutating a Program::Line and assessing whether a data type can be
+     * provided by the registers.
      */
-    const Data::DataHandler& getFakeRegisters() const;
+    const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+    getFakeDataSources() const;
 
     /**
      * \brief Get the Instruction Set of the Environment.

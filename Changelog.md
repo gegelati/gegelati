@@ -7,6 +7,10 @@ _aaaa.mm.dd_
     * New methods were added for testing equality of `Program::Line` and `Program::Program`. Program equality is based on an analysis of non-intron lines of the Program.
     * Mutation of the Program behavior is enforced by comparing its state before and after being mutated. This comparison can be activated complementary to the legacy archiving mechanism from Kelly's PhD. 
     * The `tpg.forceProgramBehaviorChangeOnMutation` boolean was added to the MutationParameters.
+    
+* Optionnaly, it is now possible to use constants during the training. 
+   * A fixed number of constants can be defined in the parameters. They can be used by instructions designed to use the Data::Constant types.
+   * Mutations of the program affect the values of the constants. A constant is mutated with a probability and bounds defined as MutationParameters. 
 
 ### Changes
 * During eval, the main thread of ParallelLearningAgent now use the main LearningEnvironment instead of systematically cloning it. It enables sequential mode with non-copyable environment for the AdversarialLearningAgent.

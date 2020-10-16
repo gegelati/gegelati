@@ -313,15 +313,6 @@ namespace File {
         static const std::string addLinkProgramRegex;
 
         /**
-         * \brief Reads the content of the parameters in a string and puts it in
-         * the line passed in parameter
-         *
-         * \param[in] str the string to parse
-         * \param[in] line the line to fill with the parsed informations
-         */
-        void readParameters(std::string& str, Program::Line& line);
-
-        /**
          * \brief Reads the content of the operands and puts it in the line
          * passed in parameter
          *
@@ -337,7 +328,7 @@ namespace File {
         void readLine(std::smatch& matches);
 
         /**
-         * \brief Create a program from its dot content.
+         * \brief Create a program from its dot content and import its constants
          */
         void readProgram(std::smatch& matches);
 

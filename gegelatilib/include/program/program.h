@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "data/constantHandler.h"
 #include "environment.h"
 #include "program/line.h"
 
@@ -66,6 +67,14 @@ namespace Program {
          */
         std::vector<std::pair<Line*, bool>> lines;
 
+        /**
+         *   \brief Constants of the Program
+         *
+         *   A Program contains a set of constants in a dedicated
+         *	 Data::DataHandler
+         **/
+        Data::ConstantHandler constants;
+
         /// Delete the default constructor.
         Program() = delete;
 
@@ -76,7 +85,11 @@ namespace Program {
          * \param[in] e the reference to the Environment that will be referenced
          * in the Program attributes.
          */
-        Program(const Environment& e) : environment{e} {};
+        Program(const Environment& e)
+            : environment{e}, constants{e.getNbConstant()}
+        {
+            constants.resetData(); // force all constant to 0 at first.
+        };
 
         /**
          * \brief Copy constructor of the Program.
@@ -87,7 +100,8 @@ namespace Program {
          * \param[in] other a const reference the the copied Program.
          */
         Program(const Program& other)
-            : environment{other.environment}, lines{other.lines}
+            : environment{other.environment}, lines{other.lines},
+              constants{other.constants}
         {
             // Replace lines with their copy
             // Keep intro info
@@ -211,11 +225,43 @@ namespace Program {
         uint64_t identifyIntrons();
 
         /**
+         *  \brief get the constantHandler object of the Program
+         *
+         *  This method gives a reference to the constantHandler associated
+         *  with the program
+         *
+         *  \return the constantHandler of the program
+         */
+        Data::ConstantHandler& getConstantHandler();
+
+        /**
+         *  \brief get a const reference to the constantHandler object of the
+         * Program
+         *
+         *  This method gives a const reference to the constantHandler
+         * associated with the program
+         *
+         *  \return the constantHandler of the program through a const reference
+         */
+        const Data::ConstantHandler& cGetConstantHandler() const;
+
+        /**
+         *	\brief Get the value of a constant at a given index
+         *
+         *	Although this method is not required as the data is accessible from
+         *	the constantHandler, it allows a shortcut and add readability.
+         *
+         *	\param[in] index the position at which we access the constant
+         *	\return the value of the constant at the given index
+         */
+        const Data::Constant getConstantAt(size_t index) const;
+
+        /**
          * \brief Check if two Program have the same behavior.
          *
          * Two Program have the same behaviour if their sequence of non-intron
          * Lines are strictly identical (i.e. same instructions and operands, in
-         * the same order).
+         * the same order, and used Constant with identical values).
          *
          * \param[in] other the Program whose behavior is compared.
          */

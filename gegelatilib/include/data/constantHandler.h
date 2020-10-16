@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,60 +34,41 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef INSTRUCTION_MULT_BY_CONST_PARAM
-#define INSTRUCTION_MULT_BY_CONST_PARAM
+#ifndef CONSTANT_HANDLER_H
+#define CONSTANT_HANDLER_H
 
+#include <functional>
 #include <memory>
+#include <typeinfo>
+#include <vector>
 
+#include "data/constant.h"
+#include "data/primitiveTypeArray.h"
 #include "data/untypedSharedPtr.h"
-#include "instruction.h"
 
-namespace Instructions {
+namespace Data {
 
     /**
-     * \brief Instruction for multiplying a unique argument of type T by a
-     * constant parameter of type U.
+     * \brief Data::DataHandler used by Program::Program to handle their set of
+     * Constant values.
      */
-    template <class T, class U> class MultByConstParam : public Instruction
+    class ConstantHandler : public PrimitiveTypeArray<Constant>
     {
-        static_assert(std::is_fundamental<T>::value &&
-                          std::is_fundamental<U>::value,
-                      "Template class MultByConstParam<T,U> can only be used "
-                      "for primitive types.");
-        static_assert(std::is_same<int16_t, U>() || std::is_same<float, U>(),
-                      "Param type can either be int16_t or float.");
-
       public:
         /**
-         *  \brief Constructor for the MultByConstParam class.
+         * \brief Default constructor of the ConstantHandler class.
          */
-        MultByConstParam();
+        ConstantHandler(size_t nb_constants)
+            : PrimitiveTypeArray<Constant>{nb_constants} {};
 
-        virtual double execute(
-            const std::vector<std::reference_wrapper<const Parameter>>& params,
-            const std::vector<Data::UntypedSharedPtr>& args) const override;
+        /// Default destructor
+        virtual ~ConstantHandler() = default;
+
+        /**
+         * \brief Default copy constructor.
+         */
+        ConstantHandler(const ConstantHandler& other) = default;
     };
-
-    template <class T, class U> MultByConstParam<T, U>::MultByConstParam()
-    {
-        this->operandTypes.push_back(typeid(T));
-        this->nbParameters = 1;
-    }
-
-    template <class T, class U>
-    double MultByConstParam<T, U>::execute(
-        const std::vector<std::reference_wrapper<const Parameter>>& params,
-        const std::vector<Data::UntypedSharedPtr>& args) const
-    {
-#ifndef NDEBUG
-        if (Instruction::execute(params, args) != 1.0) {
-            return 0.0;
-        }
-#endif // !NDEBUG
-
-        const U pValue = (const U&)params.at(0).get();
-        return *(args.at(0).getSharedPointer<const T>()) * (double)pValue;
-    };
-} // namespace Instructions
+} // namespace Data
 
 #endif

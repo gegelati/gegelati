@@ -161,6 +161,22 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.prog.pSwap = value.asDouble();
         return;
     }
+    if (param == "nbProgramConstant") {
+        params.nbProgramConstant = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "pConstantMutation") {
+        params.mutation.prog.pConstantMutation = value.asDouble();
+        return;
+    }
+    if (param == "minConstValue") {
+        params.mutation.prog.minConstValue = value.asInt();
+        return;
+    }
+    if (param == "maxConstValue") {
+        params.mutation.prog.maxConstValue = value.asInt();
+        return;
+    }
     if (param == "archiveSize") {
         params.archiveSize = (size_t)value.asUInt();
         return;

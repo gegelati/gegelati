@@ -44,6 +44,7 @@
 #include <typeindex>
 #include <typeinfo>
 
+#include "data/constant.h"
 #include "data/hash.h"
 #include "dataHandler.h"
 
@@ -69,7 +70,8 @@ namespace Data {
      */
     template <class T> class PrimitiveTypeArray : public DataHandler
     {
-        static_assert(std::is_fundamental<T>::value,
+        static_assert(std::is_fundamental<T>::value ||
+                          std::is_same<T, Data::Constant>(),
                       "Template class PrimitiveTypeArray<T> can only be used "
                       "for primitive types.");
 
@@ -137,17 +139,17 @@ namespace Data {
         /// Default destructor.
         virtual ~PrimitiveTypeArray() = default;
 
-        // Inherited from DataHandler
+        /// Inherited from DataHandler
         virtual DataHandler* clone() const override;
 
-        // Inherited from DataHandler
+        /// Inherited from DataHandler
         virtual size_t getAddressSpace(
             const std::type_info& type) const override;
 
-        // Inherited from DataHandler
+        /// Inherited from DataHandler
         virtual bool canHandle(const std::type_info& type) const override;
 
-        // Inherited from DataHandler
+        /// Inherited from DataHandler
         virtual size_t getLargestAddressSpace(void) const override;
 
         /**
@@ -256,7 +258,7 @@ namespace Data {
     template <class T> void PrimitiveTypeArray<T>::resetData()
     {
         for (T& elt : this->data) {
-            elt = 0;
+            elt = T{0};
         }
 
         // Invalidate the cached hash
@@ -298,7 +300,7 @@ namespace Data {
 
         if (type == typeid(T)) {
             UntypedSharedPtr result(
-                &(this->data[address]),
+                &(this->data.at(address)),
                 UntypedSharedPtr::emptyDestructor<const T>());
             return result;
         }
@@ -311,7 +313,7 @@ namespace Data {
 
         // Copy its content
         for (size_t idx = 0; idx < arraySize; idx++) {
-            array[idx] = this->data[address + idx];
+            array[idx] = this->data.at(address + idx);
         }
 
         // Create the UntypedSharedPtr
@@ -353,7 +355,7 @@ namespace Data {
         checkAddressAndType(type, address);
 #endif
 
-        this->data[address] = value;
+        this->data.at(address) = value;
 
         // Invalidate the cached hash.
         this->invalidCachedHash = true;

@@ -40,7 +40,8 @@
 #include "data/primitiveTypeArray.h"
 #include "environment.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
+#include "instructions/multByConstant.h"
 #include "instructions/set.h"
 
 TEST(EnvironmentTest, Constructor)
@@ -52,6 +53,7 @@ TEST(EnvironmentTest, Constructor)
 
     set.add(*(new Instructions::AddPrimitiveType<int>()));
     set.add(*(new Instructions::AddPrimitiveType<double>()));
+    set.add(*(new Instructions::MultByConstant<int>()));
 
     Data::PrimitiveTypeArray<double> d1(size1);
     Data::PrimitiveTypeArray<int> d2(size2);
@@ -59,11 +61,11 @@ TEST(EnvironmentTest, Constructor)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    ASSERT_NO_THROW({ Environment e(set, vect, 8); });
+    ASSERT_NO_THROW({ Environment e(set, vect, 8, 5); });
 
     ASSERT_THROW(
         // Empty dataHandlers
-        Environment e2(set, {}, 8);, std::domain_error)
+        Environment e2(set, {}, 8, 0);, std::domain_error)
         << "Something went unexpectedly right when constructing an Environment "
            "with an invalid Environment.";
 }
@@ -88,7 +90,7 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction)
     set.add(*(new Instructions::AddPrimitiveType<bool>()));
 
     Environment* e3 = NULL;
-    ASSERT_NO_THROW(e3 = new Environment(set, vect, 8))
+    ASSERT_NO_THROW(e3 = new Environment(set, vect, 8, 5))
         << "Constructing an Environemnt with an invalid Instruction should not "
            "throw an exception.";
     if (e3 != NULL) {
@@ -97,6 +99,30 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction)
                "should remain.";
         delete e3;
     }
+
+    delete &set.getInstruction(0);
+    delete &set.getInstruction(1);
+    delete &set.getInstruction(2);
+
+    // Test with Constant
+    Instructions::Set set2;
+    set2.add(*(new Instructions::AddPrimitiveType<int>()));
+    set2.add(*(new Instructions::AddPrimitiveType<double>()));
+    set2.add(*(new Instructions::MultByConstant<int>()));
+    Environment* e4 = NULL;
+    ASSERT_NO_THROW(e4 = new Environment(set2, vect, 8, 0))
+        << "Constructing an Environemnt with an invalid Instruction should not "
+           "throw an exception.";
+    if (e4 != NULL) {
+        ASSERT_EQ(e4->getInstructionSet().getNbInstructions(), 2)
+            << "After removing the non-usable instruction, only 2 instructions "
+               "should remain.";
+        delete e4;
+    }
+
+    delete &set2.getInstruction(0);
+    delete &set2.getInstruction(1);
+    delete &set2.getInstruction(2);
 }
 
 TEST(EnvironmentTest, computeLineSize)
@@ -111,24 +137,24 @@ TEST(EnvironmentTest, computeLineSize)
     vect.push_back(*(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
 
     set.add(*(new Instructions::AddPrimitiveType<float>()));
-    set.add(*(new Instructions::MultByConstParam<double, float>()));
-
-    e = new Environment(set, vect, 8);
+    auto minus = [](double a, double b) -> double { return a - b; };
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+    e = new Environment(set, vect, 8, 5);
 
     // Expected answer:
     // n = 8
     // i = 2
-    // p = 1
     // nbSrc = 3
     // largestAddressSpace = 32
     // m = 2
     // ceil(log2(n)) + ceil(log2(i)) + m * (ceil(log2(nb_{ src })) +
-    // ceil(log2(largestAddressSpace)) + p * sizeof(Param) * 8 ceil(log2(8)) +
-    // ceil(log2(2)) + 2 * (ceil(log2(3)) + ceil(log2(32)) + 1 * 2 * 8
-    //            3  +             1 + 2 * (            2 +             5) +  16
-    ASSERT_EQ(e->getLineSize(), 34)
-        << "Program Line size is incorrect. Expected value is 50 for "
-           "(n=8,i=2,p=1,nbSrc=3,largAddrSpace=32,m=2). ";
+    // ceil(log2(largestAddressSpace))=
+    // ceil(log2(8)) + ceil(log2(2)) + 2 * (ceil(log2(3)) + ceil(log2(32)) + 1 *
+    // 2 * 8
+    //            3  +             1 + 2 * (            2 +             5) = 18
+    ASSERT_EQ(e->getLineSize(), 18)
+        << "Program Line size is incorrect. Expected value is 18 for "
+           "(n=8,i=2,nbSrc=3,largAddrSpace=32,m=2). ";
 }
 TEST(EnvironmentTest, Size_tAttributeAccessors)
 {
@@ -141,30 +167,30 @@ TEST(EnvironmentTest, Size_tAttributeAccessors)
     Data::PrimitiveTypeArray<int> d2(size2);
 
     Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
-    Instructions::MultByConstParam<double, float>
-        iMult; // One operand, One parameter
+    auto minus = [](double a, double b) -> double { return a - b; };
 
     set.add(iAdd);
-    set.add(iMult);
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+    set.add(*(new Instructions::MultByConstant<double>()));
 
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Environment e(set, vect, 8);
+    Environment e(set, vect, 8, 5);
 
     ASSERT_EQ(e.getNbRegisters(), 8)
         << "Number of registers of the Environment does not correspond to the "
            "one given during construction.";
-    ASSERT_EQ(e.getNbInstructions(), 2)
+    ASSERT_EQ(e.getNbConstant(), 5)
+        << "Number of Constants of the Environment does not correspond to the "
+           "one given during construction.";
+    ASSERT_EQ(e.getNbInstructions(), 3)
         << "Number of instructions of the Environment does not correspond to "
            "the content of the set given during construction.";
     ASSERT_EQ(e.getMaxNbOperands(), 2)
         << "Maximum number of operands of the Environment does not correspond "
            "to the instruction set given during construction.";
-    ASSERT_EQ(e.getMaxNbParameters(), 1)
-        << "Maximum number of parameters of the Environment does not "
-           "correspond to the instruction set given during construction.";
-    ASSERT_EQ(e.getNbDataSources(), 3)
+    ASSERT_EQ(e.getNbDataSources(), 4)
         << "Number of data sources does not correspond to the number of "
            "DataHandler (+1 for registers) given during construction.";
     ASSERT_EQ(e.getLargestAddressSpace(), size2)
@@ -183,23 +209,23 @@ TEST(EnvironmentTest, GetFakeRegisters)
     Data::PrimitiveTypeArray<int> d2(size2);
 
     Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
-    Instructions::MultByConstParam<double, float>
-        iMult; // One operand, One parameter
+    auto minus = [](double a, double b) -> double { return a - b; };
 
     set.add(iAdd);
-    set.add(iMult);
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Environment e(set, vect, 8);
+    Environment e(set, vect, 8, 5);
 
-    ASSERT_NO_THROW(e.getFakeRegisters())
+    ASSERT_NO_THROW(e.getFakeDataSources().at(0))
         << "Couldn't access the fake registers of the environment.";
-    ASSERT_EQ(e.getFakeRegisters().getAddressSpace(typeid(double)), 8)
+    ASSERT_EQ(
+        e.getFakeDataSources().at(0).get().getAddressSpace(typeid(double)), 8)
         << "Address space for double type id is incorrect in fake registers.";
-    auto& registers = e.getFakeRegisters();
-    ASSERT_EQ(typeid(registers), typeid(Data::PrimitiveTypeArray<double>))
+    ASSERT_EQ(typeid(e.getFakeDataSources().at(0).get()),
+              typeid(Data::PrimitiveTypeArray<double>))
         << "Unexpected type for fake registers of the environment.";
 }
 
@@ -214,16 +240,16 @@ TEST(EnvironmentTest, InstructionSetAccessor)
     Data::PrimitiveTypeArray<float> d2(size2);
 
     Instructions::AddPrimitiveType<float> iAdd; // Two operands, No Parameter
-    Instructions::MultByConstParam<double, float>
-        iMult; // One operand, One parameter
+    auto minus = [](double a, double b) -> double { return a - b; };
 
     set.add(iAdd);
-    set.add(iMult);
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+    set.add(*(new Instructions::MultByConstant<double>));
 
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Environment e(set, vect, 8);
+    Environment e(set, vect, 8, 5);
 
     const Instructions::Set& setCpy = e.getInstructionSet();
     ASSERT_NE(&setCpy, &set)
@@ -250,16 +276,15 @@ TEST(EnvironmentTest, DataSourceAccessor)
     Data::PrimitiveTypeArray<int> d2(size2);
 
     Instructions::AddPrimitiveType<int> iAdd; // Two operands, No Parameter
-    Instructions::MultByConstParam<double, float>
-        iMult; // One operand, One parameter
+    auto minus = [](double a, double b) -> double { return a - b; };
 
     set.add(iAdd);
-    set.add(iMult);
+    set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Environment e(set, vect, 8);
+    Environment e(set, vect, 8, 5);
 
     auto& dataSourcesCpy = e.getDataSources();
     ASSERT_NE(&dataSourcesCpy, &vect)

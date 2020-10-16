@@ -65,13 +65,13 @@ namespace Program {
                        // Data::PrimitiveTypeArray<double> to keep track of
                        // accessed addresses.
 
-        /// Data sources used in the Program.
+        /// Data sources from the environment used for archiving a program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>
             dataSources;
 
         /// Data sources (including registers) used in the Program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>
-            dataSourcesAndRegisters;
+            dataScsConstsAndRegs;
 
         /// Program counter of the execution engine.
         uint64_t programCounter;
@@ -85,17 +85,21 @@ namespace Program {
          *
          * \param[in] env The Environment in which the Program will be executed.
          */
-        ProgramExecutionEngine(Environment& env)
+        ProgramExecutionEngine(const Environment& env)
             : programCounter{0}, registers{env.getNbRegisters()}, program{NULL},
               dataSources{env.getDataSources()}
         {
             // Setup the data sources
-            dataSourcesAndRegisters.push_back(this->registers);
+            dataScsConstsAndRegs.push_back(this->registers);
+
+            if (env.getNbConstant() > 0) {
+                dataScsConstsAndRegs.push_back(env.getFakeDataSources().at(1));
+            }
 
             // Cannot use insert here because it dataSourcesAndRegisters
             // requires constnessand dataSrc data are not const...
             for (auto data : env.getDataSources()) {
-                dataSourcesAndRegisters.push_back(data.get());
+                dataScsConstsAndRegs.push_back(data.get());
             }
         }
 
@@ -110,7 +114,8 @@ namespace Program {
          * Environment than its own.
          *
          * \param[in] prog the const Program that will be executed by the
-         * ProgramExecutionEngine. \param[in] dataSrc The DataHandler with which
+         * ProgramExecutionEngine.
+         * \param[in] dataSrc The DataHandler with which
          * the Program will be executed.
          */
         template <class T>
@@ -124,12 +129,17 @@ namespace Program {
             static_assert(
                 std::is_convertible<T&, const Data::DataHandler&>::value);
             // Setup the data sources
-            this->dataSourcesAndRegisters.push_back(this->registers);
+            this->dataScsConstsAndRegs.push_back(this->registers);
+
+            if (prog.getEnvironment().getNbConstant() > 0) {
+                this->dataScsConstsAndRegs.push_back(
+                    prog.cGetConstantHandler());
+            }
 
             // Cannot use insert here because it dataSourcesAndRegisters
             // requires constnessand dataSrc data are not const...
             for (std::reference_wrapper<T> data : dataSrc) {
-                this->dataSourcesAndRegisters.push_back(data.get());
+                this->dataScsConstsAndRegs.push_back(data.get());
                 this->dataSources.push_back(data.get());
             }
 
@@ -238,25 +248,9 @@ namespace Program {
             std::vector<Data::UntypedSharedPtr>& operands) const;
 
         /**
-         * \brief Get the parameters for the current Instruction.
-         *
-         * This method retrieves the number of Parameter required by the
-         * current Instruction and stores them into the given vector.
-         *
-         * \param[in,out] parameters std::vector where the fetched Parameter
-         * will be inserted. \throw std::out_of_range if the programCounter is
-         * beyond the program end, if the instruction requires more parameter
-         * than available.
-         */
-        const void fetchCurrentParameters(
-            std::vector<std::reference_wrapper<const Parameter>>& parameters)
-            const;
-
-        /**
          * \brief Execute the current line of the program.
          *
-         * \throws see fetchCurrentParameters, fetchCurrentOperands,
-         * getCurrentInstruction.
+         * \throws see fetchCurrentOperands, getCurrentInstruction.
          */
         void executeCurrentLine();
 
@@ -265,7 +259,7 @@ namespace Program {
          * register 0.
          *
          * \param[in] ignoreException When true, all exceptions thrown when
-         *            fetching current instructions, operands, parameters are
+         *            fetching current instructions, operands are
          *            caught and the current program Line is simply ignored.
          *            When true, all lines of the Program are assumed to be
          *            correct by construction, and any exception is re-thrown
@@ -285,8 +279,15 @@ namespace Program {
 
         // Replace the references in attributes
         this->dataSources = dataSrc;
+        // we need this offset to push the constant at the firs
+        size_t offset =
+            this->program->getEnvironment().getNbConstant() > 0 ? 2 : 1;
+        if (this->program && offset == 2) {
+            this->dataScsConstsAndRegs.at(1) =
+                this->program->cGetConstantHandler();
+        }
         for (size_t idx = 0; idx < this->dataSources.size(); idx++) {
-            this->dataSourcesAndRegisters.at(idx + 1) = dataSrc.at(idx);
+            this->dataScsConstsAndRegs.at(idx + offset) = dataSrc.at(idx);
         }
 
         // Set program to check compatibility with new data source

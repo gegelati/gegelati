@@ -1,7 +1,8 @@
 /**
- * Copyright or Â© or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nicolas.sourbier@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,53 +34,43 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "instructions/instruction.h"
+#ifndef CONSTANT_H
+#define CONSTANT_H
 
-#include <iostream>
+#include <cstdint>
 
-using namespace Instructions;
+namespace Data {
+    /**
+     * \brief Data type used in Program::Program to define constant values,
+     * accessible to Instructions, and mutated during the training process.
+     */
+    struct Constant
+    {
+        /**
+         *	\brief the value of the Constant
+         */
+        int32_t value;
 
-Instruction::Instruction() : operandTypes()
-{
-}
+        /**
+         *	\brief const casts of a Constant to a 32 bits integer
+         */
+        operator int32_t() const;
 
-const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
-    getOperandTypes() const
-{
-    return this->operandTypes;
-}
+        /**
+         *	\brief const casts of a Constant to a double
+         */
+        operator double() const;
 
-unsigned int Instructions::Instruction::getNbOperands() const
-{
-    return (unsigned int)this->operandTypes.size();
-}
+        /**
+         * \brief Comparison operator for Constant.
+         */
+        bool operator==(const Constant& other) const;
 
-bool Instruction::checkOperandTypes(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
-{
-    if (arguments.size() != this->operandTypes.size()) {
-        return false;
-    }
+        /**
+         * \brief Comparison operator for Constant.
+         */
+        bool operator!=(const Constant& other) const;
+    };
+} // namespace Data
 
-    for (int i = 0; i < arguments.size(); i++) {
-        if (arguments.at(i).getType() != this->operandTypes.at(i).get()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-double Instruction::execute(
-    const std::vector<Data::UntypedSharedPtr>& arguments) const
-{
-#ifndef NDEBUG
-    if (!this->checkOperandTypes(arguments)) {
-        return 0.0;
-    }
-    else {
-        return 1.0;
-    }
-#else
-    return 1.0;
-#endif
-}
+#endif // CONSTANT_H
