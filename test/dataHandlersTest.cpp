@@ -166,7 +166,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtNativeType)
 #else
     ASSERT_THROW(
         d->getDataAt(typeid(double), 0).getSharedPointer<const double>(),
-        std::runtime_error)
+        std::out_of_range)
         << "In NDEBUG mode, a pointer with invalid type will be returned when "
            "requesting a non-handled type, even at a valid location.";
 #endif
@@ -216,7 +216,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtArray)
 #else
     ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0)
                      .getSharedPointer<const long[sizeArray]>(),
-                 std::runtime_error)
+                 std::out_of_range)
         << "In NDEBUG mode, a pointer with invalid type will be returned when "
            "requesting a non-handled type, even at a valid location.";
 #endif

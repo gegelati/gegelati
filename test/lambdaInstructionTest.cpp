@@ -260,3 +260,26 @@ TEST(LambdaInstructionsTest, ExecuteAllTypesMixed)
            "argument types should fail.";
 #endif
 }
+
+class Dummy
+{
+  public:
+    size_t val;
+    Dummy(size_t v) : val{v} {};
+};
+
+TEST(LambdaInstructionsTest, ExecuteNonPrimitiveTypes)
+{
+    // Create the instruction
+    Instructions::LambdaInstruction<Dummy> instruction(
+        [](Dummy a) -> double { return (double)a.val; });
+
+    // Prepare arguments
+    std::vector<Data::UntypedSharedPtr> arguments;
+    Dummy aVal(42);
+    arguments.emplace_back(&aVal,
+                           Data::UntypedSharedPtr::emptyDestructor<Dummy>());
+
+    // Execute it
+    ASSERT_EQ(instruction.execute(arguments), 42.0);
+}
