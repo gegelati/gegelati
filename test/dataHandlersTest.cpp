@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -166,7 +167,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtNativeType)
 #else
     ASSERT_THROW(
         d->getDataAt(typeid(double), 0).getSharedPointer<const double>(),
-        std::runtime_error)
+        std::out_of_range)
         << "In NDEBUG mode, a pointer with invalid type will be returned when "
            "requesting a non-handled type, even at a valid location.";
 #endif
@@ -216,7 +217,7 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtArray)
 #else
     ASSERT_THROW(d->getDataAt(typeid(long[sizeArray]), 0)
                      .getSharedPointer<const long[sizeArray]>(),
-                 std::runtime_error)
+                 std::out_of_range)
         << "In NDEBUG mode, a pointer with invalid type will be returned when "
            "requesting a non-handled type, even at a valid location.";
 #endif
@@ -350,4 +351,14 @@ TEST(DataHandlersTest, PrimitiveDataArrayClone)
     ASSERT_EQ(dClone->getHash(), hash)
         << "Hash of the clone dataHandler should remain unchanged after "
            "modification of data within the original DataHandler.";
+}
+
+TEST(DataHandlersTest, PrimitiveDataArrayCanNotProvideConstants)
+{
+    Data::DataHandler* d = new Data::PrimitiveTypeArray<int>(4);
+    ASSERT_FALSE(d->canHandle(typeid(Data::Constant)))
+        << "PrimitiveTypeArray<double>() wrongfully say it can provide "
+           "Data::Constant "
+           "data.";
+    delete d;
 }

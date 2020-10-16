@@ -2,7 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -40,7 +40,7 @@
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -62,7 +62,8 @@ class LineTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
 
         set.add(*(new Instructions::AddPrimitiveType<int>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
+        auto minus = [](double a, double b) -> double { return a - b; };
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
         e = new Environment(set, vect, 8);
     }
@@ -101,7 +102,6 @@ TEST_F(LineTest, CopyConstructor)
     l0->setInstructionIndex(1);
     l0->setDestinationIndex(1);
     l0->setOperand(0, 1, 1);
-    l0->setParameter(0, int16_t(1));
     ASSERT_EQ(l1->getInstructionIndex(), 0)
         << "The Line instructionIndex was not deeply copied.";
     ASSERT_EQ(l1->getDestinationIndex(), 0)
@@ -110,8 +110,6 @@ TEST_F(LineTest, CopyConstructor)
         << "The Line operand 0 dataSource index was not deeply copied.";
     ASSERT_EQ(l1->getOperand(0).second, 0)
         << "The Line operand 0 location was not deeply copied.";
-    ASSERT_EQ((int16_t)l1->getParameter(0), int16_t(0))
-        << "The Line parameter was not deeply copied.";
 
     ASSERT_NO_THROW(delete l0;) << "Destructing a copied line failed.";
     ASSERT_NO_THROW(delete l1;) << "Destructing a line copy failed.";
@@ -160,22 +158,6 @@ TEST_F(LineTest, LineDestinationInstructionGetters)
     l.setInstructionIndex(1, false);
     ASSERT_EQ(l.getInstructionIndex(), 1)
         << "Get after set returned the wrong value.";
-}
-
-TEST_F(LineTest, LineParameterAccessors)
-{
-    Program::Line l(*e); // with the given environment, there is a single
-                         // Parameter per line.
-    ASSERT_NO_THROW(l.setParameter(0, 0.2f))
-        << "Setting value of a correctly indexed parameter failed.";
-    ASSERT_THROW(l.setParameter(1, 0.3f), std::range_error)
-        << "Setting value of an incorrectly indexed parameter did not fail.";
-
-    // Is it equal (to the Parameter float precision)
-    ASSERT_NEAR((float)l.getParameter(0), 0.2f, PARAM_FLOAT_PRECISION)
-        << "Getting a previously set parameter failed.";
-    ASSERT_THROW(l.getParameter(1), std::range_error)
-        << "Getting value of an incorrectly indexed parameter did not fail.";
 }
 
 TEST_F(LineTest, LineOperandAccessors)
@@ -230,4 +212,36 @@ TEST_F(LineTest, LineOperandAccessors)
     // There are only 2 operands
     ASSERT_THROW(l.getOperand(2), std::range_error)
         << "Getting value of an incorrectly indexed operand did not fail.";
+}
+
+TEST_F(LineTest, OperatorEquality)
+{
+    Program::Line l1(*e),
+        l2(*e); // with the given environment, there are two operands
+                // per line, one param, and 3 data sources.
+
+    ASSERT_EQ(l1, l2)
+        << "Lines built with default constructor should be equal.";
+
+    l1.setInstructionIndex(1);
+
+    ASSERT_NE(l1, l2)
+        << "Lines built with different instruction should not be equal.";
+
+    l2.setInstructionIndex(1);
+    l1.setDestinationIndex(2);
+
+    ASSERT_NE(l1, l2)
+        << "Lines built with different destination should not be equal.";
+
+    l2.setDestinationIndex(2);
+    l1.setOperand(1, 1, 2);
+
+    ASSERT_NE(l1, l2)
+        << "Lines built with different operand should not be equal.";
+
+    l2.setOperand(1, 1, 2);
+
+    ASSERT_EQ(l1, l2)
+        << "Lines with identical indexes and operands should be equal.";
 }

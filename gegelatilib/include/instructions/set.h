@@ -1,8 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -101,15 +101,6 @@ namespace Instructions {
          * of operands needed to execute an Instruction in the Set.
          */
         unsigned int getMaxNbOperands() const;
-
-        /**
-         * \brief Get the maximum number of parameters for Instruction currently
-         * contained in the Set.
-         *
-         * \return the unsigned int value corresponding to the largest number
-         * of parameters needed to execute an Instruction in the Set.
-         */
-        unsigned int getMaxNbParameters() const;
     };
 } // namespace Instructions
 

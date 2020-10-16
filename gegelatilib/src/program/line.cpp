@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,6 +34,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#include <numeric>
 #include <stdexcept>
 
 #include "program/line.h"
@@ -70,25 +72,6 @@ bool Program::Line::setInstructionIndex(uint64_t instr, bool check)
     return true;
 }
 
-const Parameter& Program::Line::getParameter(uint64_t idx) const
-{
-    if (idx >= this->environment.getMaxNbParameters()) {
-        throw std::range_error(
-            "Attempting to access an non-existing Parameter.");
-    }
-
-    return this->parameters[idx];
-}
-
-void Program::Line::setParameter(const uint64_t idx, const Parameter p)
-{
-    if (idx >= this->environment.getMaxNbParameters()) {
-        throw std::range_error("Attempting to set an non-existing Parameter.");
-    }
-
-    this->parameters[idx] = p;
-}
-
 const std::pair<uint64_t, uint64_t>& Program::Line::getOperand(
     const uint64_t idx) const
 {
@@ -121,4 +104,28 @@ bool Program::Line::setOperand(const uint64_t idx, const uint64_t dataIndex,
     this->operands[idx].second = location;
 
     return true;
+}
+
+bool Program::Line::operator==(const Line& other) const
+{
+    // Compare instruction and destination Index
+    if (this->instructionIndex != other.instructionIndex ||
+        this->destinationIndex != other.destinationIndex) {
+        return false;
+    }
+
+    // Compare operands
+    for (auto idx = 0; idx < this->getEnvironment().getMaxNbOperands(); idx++) {
+        if (this->operands[idx] != other.operands[idx]) {
+            return false;
+        }
+    }
+
+    // No difference was found
+    return true;
+}
+
+bool Program::Line::operator!=(const Line& other) const
+{
+    return !(this->operator==(other));
 }

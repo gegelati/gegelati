@@ -2,7 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,31 +34,57 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <algorithm>
+#ifndef INST_MULT_BY_CONST_H
+#define INST_MULT_BY_CONST_H
 
-#include "data/dataHandler.h"
+#include <memory>
+#include <type_traits>
+#include <typeinfo>
 
-size_t Data::DataHandler::count = 0;
+#include "data/constantHandler.h"
+#include "data/untypedSharedPtr.h"
+#include "instruction.h"
 
-Data::DataHandler::DataHandler()
-    : id{count++}, cachedHash(), invalidCachedHash(true){};
+namespace Instructions {
 
-size_t Data::DataHandler::getId() const
-{
-    return this->id;
-}
+    /**
+     * \brief Template class for multiplying a unique argument of type T by a
+     * constant parameter
+     */
+    template <class T> class MultByConstant : public Instruction
+    {
+        static_assert(std::is_fundamental<T>::value,
+                      "Template class MultByConstParam<> can only be used for "
+                      "primitive types.");
 
-size_t Data::DataHandler::getHash() const
-{
-    if (this->invalidCachedHash) {
-        this->updateHash();
+      public:
+        /**
+         *  \brief Constructor for the MultByConstParam class.
+         */
+        MultByConstant();
+
+        double execute(
+            const std::vector<Data::UntypedSharedPtr>& args) const override;
+    };
+
+    template <class T> MultByConstant<T>::MultByConstant()
+    {
+        this->operandTypes.push_back(typeid(T));
+        this->operandTypes.push_back(typeid(Data::Constant));
     }
 
-    return this->cachedHash;
-}
-
-uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation,
-                                          const std::type_info& type) const
-{
-    return rawLocation % this->getAddressSpace(type);
-}
+    template <class T>
+    inline double MultByConstant<T>::execute(
+        const std::vector<Data::UntypedSharedPtr>& args) const
+    {
+#ifndef NDEBUG
+        if (Instruction::execute(args) != 1.0)
+            return 0;
+#endif
+        const Data::Constant constantValue = (const Data::Constant&)*(
+            args.at(1).getSharedPointer<const Data::Constant>());
+        return *(args.at(0).getSharedPointer<const T>()) *
+               (double)constantValue;
+    }
+} // namespace Instructions
+#endif // INST_MULT_BY_CONST_H

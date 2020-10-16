@@ -175,7 +175,12 @@ namespace File {
         uint64_t printTPGAction(const TPG::TPGAction& action);
 
         /**
-         * \brief Prints the dot content for the given TPGAction.
+         * \brief Prints the dot content for the given TPGEdge.
+         * Prints the program index followed by its contants if the constants
+         * are used.
+         *
+         * the program is printed under the format :
+         * Pindex [fillcolor=\#cccccc shape = point] //constant1|...|constant_n
          *
          * \param[in] edge the TPGEdge being printed.
          */
@@ -190,11 +195,10 @@ namespace File {
          * line_1&#92;nline2&#92;nline3&#92;n...&#92;nline_N&#92;n
          *
          * a line is stored in the .dot file with the following format
-         * inst_idx|dest_idx&param_1|param_2|...|param_n$op1_param1|op1_param2#...#
+         * inst_idx|dest_idx&op1_param1|op1_param2#...#
          *
          * inst_idx = instruction index
          * dest_idx = destination index
-         * param    = parameter
          * op       = operand
          */
         void printProgram(const Program::Program& program);

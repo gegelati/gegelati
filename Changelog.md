@@ -1,4 +1,24 @@
 # GEGELATI Changelog
+## Release version 0.5.0
+_2020.10.16_
+
+### New features
+* Optionnaly, it is now possible to force a Program to have a new behavior after being mutated. 
+    * New methods were added for testing equality of `Program::Line` and `Program::Program`. Program equality is based on an analysis of non-intron lines of the Program.
+    * Mutation of the Program behavior is enforced by comparing its state before and after being mutated. This comparison can be activated complementary to the legacy archiving mechanism from Kelly's PhD. 
+    * The `tpg.forceProgramBehaviorChangeOnMutation` boolean was added to the MutationParameters.
+    
+* Optionnaly, it is now possible to use constants during the training. 
+   * A fixed number of constants can be defined in the parameters. They can be used by instructions designed to use the Data::Constant types.
+   * Mutations of the program affect the values of the constants. A constant is mutated with a probability and bounds defined as MutationParameters. 
+
+### Changes
+* The Parameter stored within Instructions have been removed entirely. Similar behavior is now supported by newly introduced Data::Constant that belong to Program instead of Instruction.
+* During eval, the main thread of ParallelLearningAgent now use the main LearningEnvironment instead of systematically cloning it. It enables sequential mode with non-copyable environment for the AdversarialLearningAgent.
+* AdversarialLearningAgent now proceeds evaluations by making each root play against/with champions of the previous generation.
+* New Unit Test cover the use of LambdaInstruction with non-primitive data types.
+
+### Bug fix
 
 ## Release version 0.4.0
 _2020.07.24_

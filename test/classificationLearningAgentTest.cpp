@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -75,6 +76,9 @@ class ClassificationLearningAgentTest : public ::testing::Test
         params.mutation.prog.pDelete = 0.5;
         params.mutation.prog.pMutate = 1.0;
         params.mutation.prog.pSwap = 1.0;
+        params.mutation.prog.pConstantMutation = 0.5;
+        params.mutation.prog.minConstValue = 0;
+        params.mutation.prog.maxConstValue = 1;
     }
 
     virtual void TearDown()
@@ -119,7 +123,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
         2 * params.nbIterationsPerPolicyEvaluation * params.maxNbActionsPerEval;
 
     Learn::ClassificationLearningAgent cla(fle, set, params);
-    Archive a; // For testing purposes, notmally, the archive from the
+    Archive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
     TPG::TPGExecutionEngine tee(cla.getTPGGraph().getEnvironment(), &a);

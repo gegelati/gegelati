@@ -1,8 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,31 +33,24 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <algorithm>
+#include <gtest/gtest.h>
 
-#include "data/dataHandler.h"
+#include "data/constant.h"
 
-size_t Data::DataHandler::count = 0;
-
-Data::DataHandler::DataHandler()
-    : id{count++}, cachedHash(), invalidCachedHash(true){};
-
-size_t Data::DataHandler::getId() const
+TEST(ConstantTest, Cast)
 {
-    return this->id;
+    Data::Constant c{1};
+
+    ASSERT_EQ((int32_t)c, 1)
+        << "int32_t casted value of constant is incorrect.";
+    ASSERT_EQ((double)c, 1.0)
+        << "double casted value of constant is incorrect.";
 }
 
-size_t Data::DataHandler::getHash() const
+TEST(ConstantTest, OperatorEqual)
 {
-    if (this->invalidCachedHash) {
-        this->updateHash();
-    }
+    Data::Constant c0{1}, c1{2}, c3{1};
 
-    return this->cachedHash;
-}
-
-uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation,
-                                          const std::type_info& type) const
-{
-    return rawLocation % this->getAddressSpace(type);
+    ASSERT_NE(c0, c1) << "Constant with different values should be non-equal.";
+    ASSERT_EQ(c0, c3) << "Constant with identical values should be equal.";
 }

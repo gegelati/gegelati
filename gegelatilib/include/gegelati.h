@@ -2,7 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -43,6 +43,8 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
+#include <data/constant.h>
+#include <data/constantHandler.h>
 #include <data/dataHandler.h>
 #include <data/hash.h>
 #include <data/primitiveTypeArray.h>
@@ -56,7 +58,7 @@
 #include <instructions/addPrimitiveType.h>
 #include <instructions/instruction.h>
 #include <instructions/lambdaInstruction.h>
-#include <instructions/multByConstParam.h>
+#include <instructions/multByConstant.h>
 #include <instructions/set.h>
 
 #include <learn/evaluationResult.h>
@@ -100,6 +102,5 @@
 
 #include <archive.h>
 #include <environment.h>
-#include <parameter.h>
 
 #endif

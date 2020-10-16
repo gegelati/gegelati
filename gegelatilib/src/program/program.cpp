@@ -42,7 +42,6 @@
 
 #include "data/primitiveTypeArray.h"
 
-#include "parameter.h"
 #include "program/program.h"
 
 Program::Program::~Program()
@@ -121,7 +120,7 @@ uint64_t Program::Program::identifyIntrons()
 {
     // Create fake registers to identify accessed addresses.
     const Data::DataHandler& fakeRegisters =
-        this->environment.getFakeRegisters();
+        this->environment.getFakeDataSources().at(0);
     // Number of introns within the Program.
     uint64_t nbIntrons = 0;
     // Set of useful register
@@ -180,4 +179,96 @@ uint64_t Program::Program::identifyIntrons()
     }
 
     return nbIntrons;
+}
+
+const Data::ConstantHandler& Program::Program::cGetConstantHandler() const
+{
+    return this->constants;
+}
+
+Data::ConstantHandler& Program::Program::getConstantHandler()
+{
+    return this->constants;
+}
+
+const Data::Constant Program::Program::getConstantAt(size_t index) const
+{
+    std::shared_ptr<const Data::Constant> value =
+        this->constants.getDataAt(typeid(Data::Constant), index)
+            .getSharedPointer<const Data::Constant>();
+    return *value;
+}
+
+bool Program::Program::hasIdenticalBehavior(const Program& other) const
+{
+    size_t thisLineIdx = 0;
+    size_t otherLineIdx = 0;
+
+    auto nextNonIntronIdx = [](const Program& p, size_t& lineIdx) {
+        while (lineIdx < p.getNbLines() && p.isIntron(lineIdx)) {
+            lineIdx++;
+        }
+    };
+
+    // Look for the first non intron line in both programs
+    nextNonIntronIdx(*this, thisLineIdx);
+    nextNonIntronIdx(other, otherLineIdx);
+
+    // Scan the two programs
+    while (thisLineIdx < this->getNbLines() &&
+           otherLineIdx < other.getNbLines()) {
+
+        // Check that two non-intron lines were reached
+        if (thisLineIdx < this->getNbLines() &&
+            otherLineIdx < other.getNbLines()) {
+
+            // Compare the two lines
+            const Line& thisLine = this->getLine(thisLineIdx);
+            const Line& otherLine = other.getLine(otherLineIdx);
+
+            if (thisLine != otherLine) {
+                return false;
+            }
+
+            // If lines are referencing Constant, compare the values
+            // of these Constants
+            if (this->environment.getNbConstant() > 0) {
+                // Get Instruction
+                const Instructions::Instruction& instruction =
+                    this->environment.getInstructionSet().getInstruction(
+                        thisLine.getInstructionIndex());
+
+                // Check operands
+                for (auto operandIdx = 0;
+                     operandIdx < instruction.getNbOperands(); operandIdx++) {
+                    // Is the operand from the Constant data source.
+                    if (thisLine.getOperand(operandIdx).first == 1) {
+                        // Check equality of constants
+                        Data::Constant thisCste = this->getConstantAt(
+                            thisLine.getOperand(operandIdx).second);
+                        Data::Constant otherCste = other.getConstantAt(
+                            thisLine.getOperand(operandIdx).second);
+                        if (thisCste != otherCste) {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // Look for the next non intron line in both programs
+            thisLineIdx++;
+            nextNonIntronIdx(*this, thisLineIdx);
+            otherLineIdx++;
+            nextNonIntronIdx(other, otherLineIdx);
+        }
+    }
+
+    if ((thisLineIdx < this->getNbLines()) ^
+        (otherLineIdx < other.getNbLines())) {
+        // XOR: only one of the two program reached its last line
+        return false;
+    }
+
+    // Everything was identical, return true
+    return true;
 }

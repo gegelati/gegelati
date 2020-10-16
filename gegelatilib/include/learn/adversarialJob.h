@@ -59,6 +59,20 @@ namespace Learn {
          */
         std::vector<const TPG::TPGVertex*> roots;
 
+        /**
+         * Position of the root that is to be evaluated.
+         * Equal to -1 if there is no one.
+         * That's typically useful if we have e.g. 4 champions
+         * and a root to evaluate in the job : we can
+         * skip the champions and just look at the score of
+         * the root.
+         *
+         * See
+         * AdversarialLearningAgent.evaluateAllRootsInParallelCompileResults()
+         * for further understandings of its usage.
+         */
+        const int16_t posOfStudiedRoot;
+
       public:
         /// Deleted default constructor.
         AdversarialJob() = delete;
@@ -71,10 +85,14 @@ namespace Learn {
          * @param[in] archiveSeed The archive seed that will be used with this
          * job.
          * @param[in] idx The index of this job.
+         * @param[in] posOfStudiedRoot The position of the root we will have
+         * to check the score. Equal to -1 if all roots have to be checked.
          */
         AdversarialJob(std::initializer_list<const TPG::TPGVertex*> roots,
-                       uint64_t archiveSeed = 0, uint64_t idx = 0)
-            : roots(roots), Job(nullptr, archiveSeed, idx)
+                       uint64_t archiveSeed = 0, uint64_t idx = 0,
+                       int16_t posOfStudiedRoot = -1)
+            : roots(roots), Job(nullptr, archiveSeed, idx),
+              posOfStudiedRoot(posOfStudiedRoot)
         {
         }
 
@@ -112,7 +130,15 @@ namespace Learn {
          * @param[in] i The wanted index in the list of roots.
          * @return The root found at index i.
          */
+
         const TPG::TPGVertex* operator[](int i) const;
+
+        /**
+         * \brief Getter of the posOfStudiedRoot.
+         *
+         * @return The position of the evaluated root.
+         */
+        virtual const int16_t getPosOfStudiedRoot() const;
     };
 } // namespace Learn
 

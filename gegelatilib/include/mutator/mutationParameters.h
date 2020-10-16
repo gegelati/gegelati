@@ -1,8 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -59,6 +59,11 @@ namespace Mutator {
         double pEdgeAddition;
         /// Probability of mutating the Program of an outgoing TPGEdge.
         double pProgramMutation;
+        /// When a Program is mutated, makes sure its behavior is no longer the
+        /// same. (This possibility does not exists in Kelly's work, where only
+        /// the archive is used for this purpose, which is far from 100%
+        /// accurate.)
+        bool forceProgramBehaviorChangeOnMutation = false;
         /// Probability of changing the destination of a TPGEdge.
         double pEdgeDestinationChange;
         /// Probability of the new destination of a TPGEdge to be a TPGAction.
@@ -80,6 +85,12 @@ namespace Mutator {
         double pMutate;
         /// Probability of swapping two lines of the Program.
         double pSwap;
+        /// Probability of each constant to be mutated
+        double pConstantMutation;
+        /// Minimum constant value possible
+        int32_t minConstValue;
+        /// Maximum constant value possible
+        int32_t maxConstValue;
     } ProgramParameters;
 
     /**

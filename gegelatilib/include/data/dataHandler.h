@@ -2,7 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -114,7 +114,7 @@ namespace Data {
         /**
          * \brief Return a copy of the DataHandler (with all its content).
          *
-         * The returned copy shuold always have the same polymorphic type
+         * The returned copy should always have the same polymorphic type
          * as the original object, and give the same hash and data until
          * the original or the copy is modified.
          *

@@ -34,31 +34,53 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <algorithm>
+#include <gtest/gtest.h>
 
-#include "data/dataHandler.h"
+#include "data/constantHandler.h"
+#include "data/primitiveTypeArray.h"
 
-size_t Data::DataHandler::count = 0;
-
-Data::DataHandler::DataHandler()
-    : id{count++}, cachedHash(), invalidCachedHash(true){};
-
-size_t Data::DataHandler::getId() const
+TEST(ConstantHandlersTest, Constructor)
 {
-    return this->id;
+    ASSERT_NO_THROW({
+        Data::ConstantHandler* d = new Data::ConstantHandler(5);
+        delete d;
+    }) << "Call to ConstantHandler constructor failed.";
 }
 
-size_t Data::DataHandler::getHash() const
+TEST(ConstantHandlersTest, ID)
 {
-    if (this->invalidCachedHash) {
-        this->updateHash();
-    }
+    Data::ConstantHandler d0(5);
+    Data::ConstantHandler d1(5);
 
-    return this->cachedHash;
+    ASSERT_NE(d0.getId(), d1.getId())
+        << "Id of two ConstantHandlers created one "
+           "after the other should not be equal.";
 }
 
-uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation,
-                                          const std::type_info& type) const
+TEST(ConstantHandlersTest, ConstantHandlerCanProvideTemplateType)
 {
-    return rawLocation % this->getAddressSpace(type);
+    Data::DataHandler* d = new Data::ConstantHandler(4);
+    Data::DataHandler* d2 = new Data::ConstantHandler(0);
+
+    ASSERT_FALSE(d->canHandle(typeid(int32_t)))
+        << "ConstantHandler wrongfully say it can provide "
+           "32 bit int data.";
+    ASSERT_TRUE(d->canHandle(typeid(Data::Constant)))
+        << "ConstantHandler wrongfully say it can not provide "
+           "\"Data::Constant\" "
+           "data.";
+    ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr)))
+        << "ConstantHandler wrongfully say it can provide "
+           "UntypedSharedPtr data.";
+    ASSERT_FALSE(d->canHandle(typeid(float)))
+        << "ConstantHandler wrongfully say it can provide "
+           "float data.";
+    ASSERT_FALSE(d->canHandle(typeid(double)))
+        << "ConstantHandler wrongfully say it can provide "
+           "double data.";
+    ASSERT_TRUE(d->canHandle(typeid(Data::Constant[3])))
+        << "ConstantHandler wrongfully say it can not provide "
+           "dataConstant array.";
+    delete d;
+    delete d2;
 }

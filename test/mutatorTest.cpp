@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -45,7 +46,7 @@
 #include "instructions/addPrimitiveType.h"
 #include "instructions/instruction.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/multByConstant.h"
 #include "mutator/lineMutator.h"
 #include "mutator/programMutator.h"
 #include "mutator/rng.h"
@@ -81,10 +82,19 @@ class MutatorTest : public ::testing::Test
         ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
             .setDataAt(typeid(double), 25, value0);
 
-        set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
+        std::function<double(double, double)> minus =
+            [](double a, double b) -> double { return a - b; };
+        std::function<double(double, double)> add =
+            [](double a, double b) -> double { return a + b; };
 
-        e = new Environment(set, vect, 8);
+        set.add(*(new Instructions::MultByConstant<double>()));
+        set.add(*(new Instructions::AddPrimitiveType<double>()));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
+
+        // the environment and the programs have 5 Constant parameters
+        int nb_const = 5;
+        e = new Environment(set, vect, 8, nb_const);
         p = new Program::Program(*e);
         progPointer =
             std::shared_ptr<Program::Program>(new Program::Program(*e));
@@ -98,6 +108,8 @@ class MutatorTest : public ::testing::Test
         delete (&(vect.at(1).get()));
         delete (&set.getInstruction(0));
         delete (&set.getInstruction(1));
+        delete (&set.getInstruction(2));
+        delete (&set.getInstruction(3));
     }
 };
 
@@ -126,12 +138,12 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1)
         << "Pseudo-Random correct line initialization failed within an "
            "environment where failure should not be possible.";
     // With this known seed
-    // InstructionIndex=1 > MultByConst<double, float>
+    // InstructionIndex=3 > lambda instruction (plus)
     // DestinationIndex=6
-    // Operand 0= (0, 4) => 5th register
+    // Operand 0= (0, 12) => 12th register
     // Covers: correct instruction, correct operand type (register), additional
     // uneeded operand (not register)
-    ASSERT_EQ(l0.getInstructionIndex(), 1)
+    ASSERT_EQ(l0.getInstructionIndex(), 3)
         << "Selected pseudo-random instructionIndex changed with a known seed.";
     ASSERT_EQ(l0.getDestinationIndex(), 6)
         << "Selected pseudo-random destinationIndex changed with a known seed.";
@@ -144,14 +156,14 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1)
     // Add another pseudo-random lines to the program
     Program::Line& l1 = p->addNewLine();
     // Additionally covers correct operand type from data source
-    // Instruction if MultByConst<double, float>
-    // first operand is PrimitiveTypeArray<double>
+    // Instruction if lambda instruction(plus)
+    // first operand is register 0
     ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l1, rng))
         << "Pseudo-Random correct line initialization failed within an "
            "environment where failure should not be possible.";
-    ASSERT_EQ(l1.getInstructionIndex(), 1)
+    ASSERT_EQ(l1.getInstructionIndex(), 3)
         << "Selected pseudo-random instructionIndex changed with a known seed.";
-    ASSERT_EQ(l1.getOperand(0).first, 2)
+    ASSERT_EQ(l1.getOperand(0).first, 0)
         << "Selected pseudo-random operand data source index changed with a "
            "known seed.";
 
@@ -172,9 +184,9 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1)
     ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l4, rng))
         << "Pseudo-Random correct line initialization failed within an "
            "environment where failure should not be possible.";
-    ASSERT_EQ(l4.getInstructionIndex(), 1)
+    ASSERT_EQ(l4.getInstructionIndex(), 3)
         << "Selected pseudo-random instructionIndex changed with a known seed.";
-    ASSERT_EQ(l4.getOperand(1).first, 0)
+    ASSERT_EQ(l4.getOperand(1).first, 3)
         << "Selected pseudo-random operand data source index changed with a "
            "known seed.";
 
@@ -190,21 +202,21 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
     Program::ProgramExecutionEngine pEE(*p);
 
     // Add a 0 lines to the program
-    // i=0, d=0, op0=(0,0), op1=(0,0),  param=0
+    // i=0, d=0, op0=(0,0), op1=(0,0)
     Program::Line& l0 = p->addNewLine();
 
     // Alter instruction
-    // i=1, d=0, op0=(0,0), op1=(0,0),  param=0
+    // i=, d=0, op0=(0,0), op1=(0,0)
     rng.setSeed(5);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getInstructionIndex(), 1)
+    ASSERT_EQ(l0.getInstructionIndex(), 2)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter destination
-    // i=1, d=3, op0=(0,0), op1=(0,0),  param=0
-    rng.setSeed(33);
+    // i=2, d=3, op0=(0,0), op1=(0,0)
+    rng.setSeed(29);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
     ASSERT_EQ(l0.getDestinationIndex(), 3)
@@ -212,34 +224,34 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter operand 0 data source
-    // i=1, d=3, op0=(2,0), op1=(0,0),  param=0
-    rng.setSeed(12);
+    // i=2, d=3, op0=(3,0), op1=(0,0)
+    rng.setSeed(8);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getOperand(0).first, 2)
+    ASSERT_EQ(l0.getOperand(0).first, 3)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter operand 0 location
-    // i=1, d=3, op0=(2,14), op1=(0,0),  param=0
-    rng.setSeed(7);
+    // i=2, d=3, op0=(3,17), op1=(0,0)
+    rng.setSeed(1);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getOperand(0).second, 14)
+    ASSERT_EQ(l0.getOperand(0).second, 17)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter operand 1 data source
-    // i=1, d=3, op0=(2,14), op1=(1,0),  param=0
+    // i=2, d=3, op0=(3,17), op1=(3,0)
     rng.setSeed(323);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getOperand(1).first, 1)
+    ASSERT_EQ(l0.getOperand(1).first, 3)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter operand 1 location
-    // i=1, d=6, op0=(2,14), op1=(1,28),  param=0
+    // i=2, d=3, op0=(3,17), op1=(3,28)
     rng.setSeed(2);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
@@ -247,33 +259,22 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
-    // Alter parameter 0
-    // i=1, d=6, op0=(2,14), op1=(1,28),  param=31115
-    rng.setSeed(0);
-    ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
-        << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ((int16_t)l0.getParameter(0), 31115)
-        << "Alteration with known seed changed its result.";
-    ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
-
-    // Alter instruction (causing an alteration of op1 data source)
-    // i=0, d=6, op0=(2,14), op1=(0,28),  param=31115
+    // Alter instruction index
+    // i=1, d=3, op0=(3,17), op1=(3,28)
     rng.setSeed(5);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getInstructionIndex(), 0)
+    ASSERT_EQ(l0.getInstructionIndex(), 1)
         << "Alteration with known seed changed its result.";
     ASSERT_EQ(l0.getDestinationIndex(), 3)
         << "Alteration with known seed changed its result.";
-    ASSERT_EQ(l0.getOperand(0).first, 2)
+    ASSERT_EQ(l0.getOperand(0).first, 3)
         << "Alteration with known seed changed its result.";
-    ASSERT_EQ(l0.getOperand(0).second, 14)
+    ASSERT_EQ(l0.getOperand(0).second, 17)
         << "Alteration with known seed changed its result.";
-    ASSERT_EQ(l0.getOperand(1).first, 0)
+    ASSERT_EQ(l0.getOperand(1).first, 3)
         << "Alteration with known seed changed its result.";
     ASSERT_EQ(l0.getOperand(1).second, 28)
-        << "Alteration with known seed changed its result.";
-    ASSERT_EQ((int16_t)l0.getParameter(0), 31115)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 }
@@ -289,44 +290,44 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
                 return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
             })));
 
-    Environment e2(set, vect, 8);
+    Environment e2(set, vect, 8, 5);
     Program::Program p2(e2);
 
     Program::ProgramExecutionEngine pEE(p2);
 
-    // Add a 0 lines to the program
-    // i=0, d=0, op0=(0,0), op1=(0,0),  param=0
+    // Add a 0 line to the program
+    // i=0, d=0, op0=(0,0), op1=(0,0)
     Program::Line& l0 = p2.addNewLine();
 
     // Alter instruction
-    // i=2, d=0, op0=(0,0), op1=(0,0),  param=0
-    rng.setSeed(6);
-    ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
-        << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getInstructionIndex(), 2)
-        << "Alteration with known seed changed its result.";
-    ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
-
-    // Alter op0 location
-    // i=2, d=0, op0=(0,28), op1=(0,0),  param=0
-    rng.setSeed(2);
-    ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
-        << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getOperand(0).second, 28)
-        << "Alteration with known seed changed its result.";
-    ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
-
-    // Alter op1 source
-    // i=2, d=0, op0=(0,28), op1=(2,0),  param=0
+    // i=2, d=0, op0=(0,0), op1=(0,0)
     rng.setSeed(5);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getOperand(1).first, 2)
+    ASSERT_EQ(l0.getInstructionIndex(), 1)
+        << "Alteration with known seed changed its result.";
+    ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+
+    // Alter op1 location
+    // i=2, d=0, op0=(0,0), op1=(0,16),  param=0
+    rng.setSeed(4);
+    ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
+        << "Line mutation of a correct instruction should not throw.";
+    ASSERT_EQ(l0.getOperand(1).second, 16)
+        << "Alteration with known seed changed its result.";
+    ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
+
+    // Alter op0 source
+    // i=2, d=0, op0=(3,0), op1=(0,16),  param=0
+    rng.setSeed(3);
+    ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
+        << "Line mutation of a correct instruction should not throw.";
+    ASSERT_EQ(l0.getOperand(0).first, 3)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Teardown for this test
-    delete &set.getInstruction(2);
+    delete &set.getInstruction(4);
 }
 
 TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine)
@@ -363,8 +364,6 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
     ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p, rng));
     ASSERT_EQ(p->getNbLines(), 1)
         << "Line insertion in an empty program failed.";
-    ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 31115)
-        << "Inserted random line is not random. (with a known seed).";
 
     // Insert in non empty program
     // in first position (with known seed)
@@ -372,9 +371,6 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
     ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p, rng));
     ASSERT_EQ(p->getNbLines(), 2)
         << "Line insertion in a non-empty program failed.";
-    // Just to ensure the position of the inserted line is the first
-    ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 26809);
-    ASSERT_EQ((int16_t)p->getLine(1).getParameter(0), 31115);
 
     // Insert in non empty program
     // After last position (with known seed)
@@ -382,10 +378,6 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
     ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p, rng));
     ASSERT_EQ(p->getNbLines(), 3)
         << "Line insertion in a non-empty program failed.";
-    // Just to ensure the position of the inserted line is after the last
-    ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 26809);
-    ASSERT_EQ((int16_t)p->getLine(1).getParameter(0), 31115);
-    ASSERT_EQ((int16_t)p->getLine(2).getParameter(0), -14950);
 
     // Insert in non empty program
     // In the middle position (with known seed)
@@ -393,11 +385,6 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
     ASSERT_NO_THROW(Mutator::ProgramMutator::insertRandomLine(*p, rng));
     ASSERT_EQ(p->getNbLines(), 4)
         << "Line insertion in a non-empty program failed.";
-    // Just to ensure the position of the inserted line is after the last
-    ASSERT_EQ((int16_t)p->getLine(0).getParameter(0), 26809);
-    ASSERT_EQ((int16_t)p->getLine(1).getParameter(0), 31115);
-    ASSERT_EQ((int16_t)p->getLine(2).getParameter(0), -17304);
-    ASSERT_EQ((int16_t)p->getLine(3).getParameter(0), -14950);
 }
 
 TEST_F(MutatorTest, ProgramMutatorSwapRandomLines)
@@ -456,7 +443,6 @@ TEST_F(MutatorTest, ProgramMutatorAlterRandomLine)
     // Alter a randomly selected line (with a known seed)
     // Parameter of Line 4 is altered.
     ASSERT_TRUE(Mutator::ProgramMutator::alterRandomLine(*p, rng));
-    ASSERT_EQ((int16_t)p->getLine(4).getParameter(0), 26809);
 }
 
 TEST_F(MutatorTest, ProgramMutatorInitProgram)
@@ -466,15 +452,17 @@ TEST_F(MutatorTest, ProgramMutatorInitProgram)
 
     Mutator::MutationParameters params;
     params.prog.maxProgramSize = 96;
+    params.prog.maxConstValue = 10;
+    params.prog.minConstValue = 0;
 
     ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, params, rng))
         << "Empty Program Random init failed";
-    ASSERT_EQ(p->getNbLines(), 31)
+    ASSERT_EQ(p->getNbLines(), 15)
         << "Random number of line is not as expected (with known seed).";
 
     ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, params, rng))
         << "Non-Empty Program Random init failed";
-    ASSERT_EQ(p->getNbLines(), 53)
+    ASSERT_EQ(p->getNbLines(), 38)
         << "Random number of line is not as expected (with known seed).";
 
     // Count lines marked as introns (with a known seed).
@@ -486,17 +474,33 @@ TEST_F(MutatorTest, ProgramMutatorInitProgram)
     }
 
     // Check nb intron lines with a known seed.
-    ASSERT_EQ(nbIntrons, 51);
+    ASSERT_EQ(nbIntrons, 36);
 }
 
 TEST_F(MutatorTest, ProgramMutatorMutateBehavior)
 {
     Mutator::RNG rng;
+    // specific for this test
+    // we need an instruction with three operands to
+    // trigger a special condition in LineMutator
+    set.add(*(new Instructions::LambdaInstruction<const double, const double,
+                                                  const double>(
+        [](const double a, const double b, const double c) -> double {
+            return (cos(a + b + c));
+        })));
 
-    // Add 3 lines
-    p->addNewLine();
-    p->addNewLine();
-    p->addNewLine();
+    Environment e2(set, vect, 8, 5);
+    Program::Program p2(e2);
+
+    Program::ProgramExecutionEngine pEE(p2);
+
+    rng.setSeed(14);
+    Program::Line& l = p2.addNewLine();
+    Mutator::LineMutator::initRandomCorrectLine(l, rng);
+    Program::Line& l2 = p2.addNewLine();
+    Mutator::LineMutator::initRandomCorrectLine(l2, rng);
+    Program::Line& l3 = p2.addNewLine();
+    Mutator::LineMutator::initRandomCorrectLine(l3, rng);
 
     Mutator::MutationParameters params;
     params.prog.maxProgramSize = 15;
@@ -504,32 +508,45 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior)
     params.prog.pAdd = 0.0;
     params.prog.pMutate = 0.0;
     params.prog.pSwap = 0.0;
+    params.prog.maxConstValue = 1;
+    params.prog.minConstValue = 0;
+    params.prog.pConstantMutation = 0.2;
 
     rng.setSeed(0);
-    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, params, rng))
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
         << "Mutation did not occur with known seed.";
-    ASSERT_EQ(p->getNbLines(), 2)
+    ASSERT_EQ(p2.getNbLines(), 2)
         << "Wrong program mutation occured. Expected: Line deletion.";
 
     params.prog.pDelete = 0.0;
     params.prog.pAdd = 0.5;
     rng.setSeed(1);
-    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, params, rng))
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
         << "Mutation did not occur with known seed.";
-    ASSERT_EQ(p->getNbLines(), 3)
+    ASSERT_EQ(p2.getNbLines(), 3)
         << "Wrong program mutation occured. Expected: Line insertion.";
 
     params.prog.pAdd = 0.0;
     params.prog.pMutate = 0.01;
     rng.setSeed(86);
-    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, params, rng))
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
         << "Mutation did not occur with known seed.";
 
     params.prog.pMutate = 0.00;
     params.prog.pSwap = 0.1;
     rng.setSeed(1);
-    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(*p, params, rng))
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
         << "Mutation did not occur with known seed.";
+
+    // mutate other instructions
+    params.prog.pSwap = 0.0;
+    params.prog.pMutate = 1;
+    rng.setSeed(114);
+    ASSERT_TRUE(Mutator::ProgramMutator::mutateProgram(p2, params, rng))
+        << "Mutation did not occur with known seed.";
+
+    // Teardown for this test
+    delete &set.getInstruction(4);
 }
 
 TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
@@ -542,6 +559,9 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     params.tpg.nbActions = 5;
     params.tpg.maxInitOutgoingEdges = 4;
     params.prog.maxProgramSize = 96;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
 
     ASSERT_NO_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params, rng))
         << "TPG Initialization failed.";
@@ -753,6 +773,9 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
     Archive arch;
     TPG::TPGExecutionEngine tee(*e, &arch);
     params.prog.maxProgramSize = 96;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
     Mutator::ProgramMutator::initRandomProgram(*progPointer, params, rng);
     tee.executeFromRoot(vertex0);
 
@@ -804,6 +827,9 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
 
     // Init its program and fill the archive
     Archive arch;
@@ -842,6 +868,10 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     Archive arch;
     TPG::TPGExecutionEngine tee(*e, &arch);
     params.prog.maxProgramSize = 96;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
+
     Mutator::ProgramMutator::initRandomProgram(*progPointer, params, rng);
     tee.executeFromRoot(vertex0);
 
@@ -896,6 +926,9 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 10;
     Archive arch;
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng);
@@ -940,6 +973,9 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 10;
     Archive arch;
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng);
@@ -983,6 +1019,9 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 10;
     Archive arch;
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng);
@@ -1042,6 +1081,9 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
     params.prog.pSwap = 1.0;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 10;
     Archive arch;
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng);

@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -39,7 +40,7 @@
 
 using namespace Instructions;
 
-Instruction::Instruction() : operandTypes(), nbParameters(0)
+Instruction::Instruction() : operandTypes()
 {
 }
 
@@ -52,11 +53,6 @@ const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
 unsigned int Instructions::Instruction::getNbOperands() const
 {
     return (unsigned int)this->operandTypes.size();
-}
-
-unsigned int Instruction::getNbParameters() const
-{
-    return this->nbParameters;
 }
 
 bool Instruction::checkOperandTypes(
@@ -74,18 +70,11 @@ bool Instruction::checkOperandTypes(
     return true;
 }
 
-bool Instruction::checkParameters(
-    const std::vector<std::reference_wrapper<const Parameter>>& params) const
-{
-    return (params.size() == this->nbParameters);
-}
-
 double Instruction::execute(
-    const std::vector<std::reference_wrapper<const Parameter>>& params,
     const std::vector<Data::UntypedSharedPtr>& arguments) const
 {
 #ifndef NDEBUG
-    if (!this->checkParameters(params) || !this->checkOperandTypes(arguments)) {
+    if (!this->checkOperandTypes(arguments)) {
         return 0.0;
     }
     else {

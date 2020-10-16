@@ -33,6 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#include <fstream>
 #include <memory>
 
 #include "learn/adversarialLearningAgent.h"
@@ -41,9 +42,10 @@ std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
 Learn::AdversarialLearningAgent::evaluateAllRoots(uint64_t generationNumber,
                                                   Learn::LearningMode mode)
 {
-    // deactivates parallelism if le is not cloneable
-    if (!this->learningEnvironment.isCopyable()) {
-        throw std::runtime_error("Not copyable environment. Exciting.");
+    // exception if LE is not cloneable and if there are several threads to use
+    if (!this->learningEnvironment.isCopyable() && this->maxNbThreads > 1) {
+        throw std::runtime_error(
+            "Max number of threads for a non copyable environment is 1.");
     }
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
         results;
@@ -64,28 +66,37 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
 
     // Gather the results
     for (const auto& resultPerJob : resultsPerJobMap) {
-        // getting the AdversarialEvaluationResult that should be in this pair
+        // Getting the AdversarialEvaluationResult that should be in this pair
         std::shared_ptr<AdversarialEvaluationResult> res =
             std::dynamic_pointer_cast<AdversarialEvaluationResult>(
                 resultPerJob.second.first);
-        int rootIdx = 0;
-        for (auto root : std::dynamic_pointer_cast<Learn::AdversarialJob>(
-                             resultPerJob.second.second)
-                             ->getRoots()) {
+
+        auto advJob = std::dynamic_pointer_cast<Learn::AdversarialJob>(
+            resultPerJob.second.second);
+        // We browse the roots contained in the jobs to update their respective
+        // scores, unless posOfStudiedRoot is defined. In this case, we will
+        // only take 1 root in consideration.
+        for (int i = std::max((int16_t)0, advJob->getPosOfStudiedRoot());
+             i < advJob->getSize(); i++) {
+            auto root = (*advJob)[i];
             auto iterator = resultsPerRootMap.find(root);
             if (iterator == resultsPerRootMap.end()) {
                 // first time we encounter the results of this root
                 resultsPerRootMap.emplace(
-                    root,
-                    std::make_shared<EvaluationResult>(EvaluationResult(
-                        res->getScoreOf(rootIdx), res->getNbEvaluation())));
+                    root, std::make_shared<EvaluationResult>(EvaluationResult(
+                              res->getScoreOf(i), res->getNbEvaluation())));
             }
             else {
                 // there is already a score for this root, let's do an addition
-                (*iterator->second) += EvaluationResult(
-                    res->getScoreOf(rootIdx), res->getNbEvaluation());
+                (*iterator->second) += EvaluationResult(res->getScoreOf(i),
+                                                        res->getNbEvaluation());
             }
-            rootIdx++;
+
+            // if there is a specific root to read the score we skip the others
+            // when it is done.
+            if (advJob->getPosOfStudiedRoot() != -1) {
+                break;
+            }
         }
     }
 
@@ -98,6 +109,14 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
         results.emplace(resultPerRoot.second, resultPerRoot.first);
     }
 
+    champions.clear();
+    auto iterator = results.end();
+    for (int i = 0; i <= (1.0 - params.ratioDeletedRoots) *
+                                 (double)tpg.getNbRootVertices() -
+                             1.0;
+         i++) {
+        champions.emplace_back((--iterator)->second);
+    }
     // Merge the archives
     this->mergeArchiveMap(archiveMap);
 }
@@ -132,7 +151,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the action
             uint64_t actionID =
-                ((const TPG::TPGAction*)tee.executeFromRoot(**rootsIterator)
+                ((const TPG::TPGAction*)tee
+                     .executeFromRoot(*((const TPG::TPGTeam*)*rootsIterator))
                      .back())
                     ->getActionID();
             // Do it
@@ -147,9 +167,10 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
             }
         }
 
+        auto scores = ale.getScores();
+
         // Update results
-        *results +=
-            *std::dynamic_pointer_cast<EvaluationResult>(ale.getScores());
+        *results += *std::dynamic_pointer_cast<EvaluationResult>(scores);
     }
 
     return results;
@@ -163,73 +184,69 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
 
     std::queue<std::shared_ptr<Learn::Job>> jobs;
 
-    // registers nb of evaluations per root and sorts it
-    std::multimap<size_t, const TPG::TPGVertex*> nbEvals;
-    for (auto root : tpgGraph->getRootVertices()) {
-        nbEvals.emplace(0, root);
+    size_t index = 0;
+
+    auto roots = tpgGraph->getRootVertices();
+
+    // if champions is empty fills it with the first roots come
+    if (champions.size() == 0) {
+        for (int i = 0;
+             i <= (double)roots.size() * (1.0 - params.ratioDeletedRoots);
+             i++) {
+            champions.emplace_back(roots[i]);
+        }
     }
 
-    const TPG::TPGVertex* root;
+    // Creates a list of teams of champion to compete with other roots.
+    // We have to make enough teams to have nbIterationsPerPolicyEvaluation
+    // iterations per root.
+    int16_t nbChampionsTeams = (int16_t)std::ceil(
+        (double)params.nbIterationsPerPolicyEvaluation /
+        (double)(agentsPerEvaluation * params.nbIterationsPerJob));
+    auto championsTeams =
+        std::vector<std::vector<const TPG::TPGVertex*>>(nbChampionsTeams);
 
-    size_t index = 0;
-    // while nbEvals still contains roots.
-    // roots will be removed after been evaluated enough times (indeed any root
-    // shall be evaluated nbIterationsPerPolicyEvaluation times or more)
-    while (!nbEvals.empty()) {
+    // rng used to make champions teams
+    Mutator::RNG rngChampions;
+    for (auto& team : championsTeams) {
+        // If the environment needs n agents, we will make lists of n-1
+        // agents that will incorporate other roots.
+        team = std::vector<const TPG::TPGVertex*>(agentsPerEvaluation - 1);
+        for (int i = 0; i < agentsPerEvaluation - 1; i++) {
+            auto it = champions.begin();
+            std::advance(
+                it, rngChampions.getUnsignedInt64(0, champions.size() - 1));
+            team[i] = *it;
+        }
+    }
+
+    // Each root is put at every possible location in champions teams
+    // for example, let's say the champions team is A-B.
+    // A root R will fulfill the list as follow :
+    // -> 1 job with R-A-B
+    // -> 1 job with A-R-B
+    // -> 1 job with A-B-R
+    for (auto root : roots) {
         uint64_t archiveSeed;
-        archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
+        // browses champions teams
+        for (auto& team : championsTeams) {
+            // puts the root at each possible location in the team
+            for (int16_t i = 0; i < agentsPerEvaluation; i++) {
+                archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
+                auto job = std::make_shared<Learn::AdversarialJob>(
+                    Learn::AdversarialJob({}, archiveSeed, index++, i));
 
-        size_t nbEvalsThisRoot = nbEvals.begin()->first;
-        root = nbEvals.begin()->second;
-
-        auto job = std::make_shared<Learn::AdversarialJob>(
-            Learn::AdversarialJob({root}, archiveSeed, index++));
-
-        // erases the old pair corresponding to this root
-        nbEvals.erase(nbEvals.begin());
-        size_t newNbEvalsThisRoot = nbEvalsThisRoot + params.nbIterationsPerJob;
-        // only re-add the root in the map if it has not enough been evaluated
-        if (newNbEvalsThisRoot < params.nbIterationsPerPolicyEvaluation) {
-            nbEvals.emplace(nbEvalsThisRoot + params.nbIterationsPerJob, root);
-        }
-
-        // adding other roots in this job
-        // we begin at 1 as there is already "root" in the job
-        for (int i = 1; i < agentsPerEvaluation; i++) {
-            if (nbEvals.size() == 0) {
-                // there is no root that has not been evaluated enough times
-                // left. We will take a root that is already in the job.
-                // That's default behavior, it could be changed for the better.
-                auto roots = job->getRoots();
-                size_t position = rng.getUnsignedInt64(0, roots.size() - 1);
-                auto iterator = roots.begin();
-                std::advance(iterator, position);
-                root = *iterator;
+                for (int16_t j = 0; j < i; j++) {
+                    job->addRoot(team[j]);
+                }
                 job->addRoot(root);
-                continue;
-            }
+                for (int16_t j = i; j < agentsPerEvaluation - 1; j++) {
+                    job->addRoot(team[j]);
+                }
 
-            // we're sure there are still roots to include in jobs
-            size_t position = rng.getUnsignedInt64(0, nbEvals.size() - 1);
-            auto iterator = nbEvals.begin();
-            std::advance(iterator, position);
-
-            nbEvalsThisRoot = iterator->first;
-            root = iterator->second;
-            job->addRoot(root);
-
-            // erases the old pair corresponding to this root
-            nbEvals.erase(iterator);
-            newNbEvalsThisRoot = nbEvalsThisRoot + params.nbIterationsPerJob;
-            // only re-add the root in the map if it has not enough been
-            // evaluated
-            if (newNbEvalsThisRoot < params.nbIterationsPerPolicyEvaluation) {
-                nbEvals.emplace(nbEvalsThisRoot + params.nbIterationsPerJob,
-                                root);
+                jobs.push(job);
             }
         }
-
-        jobs.push(job);
     }
 
     return jobs;

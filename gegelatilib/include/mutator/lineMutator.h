@@ -2,7 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -57,7 +57,7 @@ namespace Mutator {
          * instructionIndex, the destinationIndex, all operands pairs (sources
          * and localisation) will be initialized randomly such
          * that the corresponding instruction can be executed with valid data.
-         * Parameters and operands of the line that are unused by the selected
+         * Operands of the line that are unused by the selected
          * Instruction will be initialized
          *
          * \param[in,out] line the Program::Line whose attributes are being

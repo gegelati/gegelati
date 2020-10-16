@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -128,6 +129,11 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.pProgramMutation = value.asDouble();
         return;
     }
+    if (param == "forceProgramBehaviorChangeOnMutation") {
+        params.mutation.tpg.forceProgramBehaviorChangeOnMutation =
+            value.asBool();
+        return;
+    }
     if (param == "pEdgeDestinationChange") {
         params.mutation.tpg.pEdgeDestinationChange = value.asDouble();
         return;
@@ -154,6 +160,22 @@ void File::ParametersParser::setParameterFromString(
     }
     if (param == "pSwap") {
         params.mutation.prog.pSwap = value.asDouble();
+        return;
+    }
+    if (param == "nbProgramConstant") {
+        params.nbProgramConstant = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "pConstantMutation") {
+        params.mutation.prog.pConstantMutation = value.asDouble();
+        return;
+    }
+    if (param == "minConstValue") {
+        params.mutation.prog.minConstValue = value.asInt();
+        return;
+    }
+    if (param == "maxConstValue") {
+        params.mutation.prog.maxConstValue = value.asInt();
         return;
     }
     if (param == "archiveSize") {

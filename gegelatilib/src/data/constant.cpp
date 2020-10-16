@@ -2,7 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,31 +34,24 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <algorithm>
+#include "data/constant.h"
 
-#include "data/dataHandler.h"
-
-size_t Data::DataHandler::count = 0;
-
-Data::DataHandler::DataHandler()
-    : id{count++}, cachedHash(), invalidCachedHash(true){};
-
-size_t Data::DataHandler::getId() const
+Data::Constant::operator int32_t() const
 {
-    return this->id;
+    return this->value;
 }
 
-size_t Data::DataHandler::getHash() const
+Data::Constant::operator double() const
 {
-    if (this->invalidCachedHash) {
-        this->updateHash();
-    }
-
-    return this->cachedHash;
+    return (double)this->value;
 }
 
-uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation,
-                                          const std::type_info& type) const
+bool Data::Constant::operator==(const Constant& other) const
 {
-    return rawLocation % this->getAddressSpace(type);
+    return this->value == other.value;
+}
+
+bool Data::Constant::operator!=(const Constant& other) const
+{
+    return this->value != other.value;
 }

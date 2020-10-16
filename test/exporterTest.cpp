@@ -2,7 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -42,7 +42,6 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
 #include "program/program.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
@@ -81,16 +80,22 @@ class ExporterTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        e = new Environment(set, vect, 8);
+        size_t constant_size = 5;
+
+        e = new Environment(set, vect, 8, 5);
         tpg = new TPG::TPGGraph(*e);
 
         // Create 10 programs
         for (int i = 0; i < 8; i++) {
-            progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+            std::shared_ptr<Program::Program> p =
+                std::make_shared<Program::Program>(*e);
+            for (int j = 0; j < constant_size; j++) {
+                p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
+                                                        j, {j - 2});
+            }
+            progPointers.push_back(p);
         }
 
         // add instructions to at least one program.
@@ -98,7 +103,6 @@ class ExporterTest : public ::testing::Test
             Program::Line& l = progPointers.at(0).get()->addNewLine();
             l.setInstructionIndex(0);
             l.setDestinationIndex(1);
-            l.setParameter(0, 0.2f);
             l.setOperand(0, 0, 1);
         }
 

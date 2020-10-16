@@ -2,7 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -38,7 +38,6 @@
 #define LINE_H
 
 #include "environment.h"
-#include "parameter.h"
 #include <cstring>
 
 namespace Program {
@@ -59,9 +58,6 @@ namespace Program {
         /// written.
         uint64_t destinationIndex;
 
-        /// Array storing the parameters for this instruction.
-        Parameter* const parameters;
-
         /// Array storing the operands pair (each with an index for the
         /// DataHandlers of the Environment, and a location within it.)
         std::pair<uint64_t, uint64_t>* const operands;
@@ -80,8 +76,6 @@ namespace Program {
          */
         Line(const Environment& env)
             : environment{env}, instructionIndex{0}, destinationIndex{0},
-              parameters{(Parameter*)calloc(env.getMaxNbParameters(),
-                                            sizeof(Parameter))},
               operands{(std::pair<uint64_t, uint64_t>*)calloc(
                   env.getMaxNbOperands(),
                   sizeof(std::pair<uint64_t, uint64_t>))} {};
@@ -98,19 +92,12 @@ namespace Program {
             : environment{other.environment},
               instructionIndex{other.instructionIndex},
               destinationIndex{other.destinationIndex},
-              parameters{(Parameter*)calloc(
-                  other.environment.getMaxNbParameters(), sizeof(Parameter))},
               operands{(std::pair<uint64_t, uint64_t>*)calloc(
                   other.environment.getMaxNbOperands(),
                   sizeof(std::pair<uint64_t, uint64_t>))}
         {
             // Check needed to avoid compilation warnings
-            if (this->parameters != NULL && this->operands != NULL) {
-                // Copy parameter values
-                memcpy(this->parameters, other.parameters,
-                       this->environment.getMaxNbParameters() *
-                           sizeof(Parameter));
-
+            if (this->operands != NULL) {
                 // Copy operand values
                 for (auto idx = 0; idx < this->environment.getMaxNbOperands();
                      idx++) {
@@ -134,7 +121,6 @@ namespace Program {
          */
         ~Line()
         {
-            free((void*)this->parameters);
             free((void*)this->operands);
         }
 
@@ -192,26 +178,6 @@ namespace Program {
         bool setInstructionIndex(const uint64_t instr, const bool check = true);
 
         /**
-         * \brief Getter for the parameters of this Line.
-         *
-         * \param[in] idx the index of the accessed Parameter.
-         * \return the const reference of the parameter at the given index.
-         * \throw std::range_error if the given index exceeds the number of
-         * Parameter of the Line.
-         */
-        const Parameter& getParameter(const uint64_t idx) const;
-
-        /**
-         * \brief Setter for the parameters of this Line.
-         *
-         * \param[in] idx the index of the set Parameter.
-         * \param[in] p the new value for the parameter.
-         * \throw std::range_error if the given index exceeds the number of
-         * Parameter of the Line.
-         */
-        void setParameter(const uint64_t idx, const Parameter p);
-
-        /**
          *
          * \brief Getter for the operands of this Line.
          *
@@ -249,6 +215,20 @@ namespace Program {
          */
         bool setOperand(const uint64_t idx, const uint64_t dataIndex,
                         const uint64_t location, const bool check = true);
+
+        /**
+         * \brief Comparison operator between Line.
+         *
+         * \param[in] other the line with which the current Line is compared.
+         * \return true if all attributes (except the Environment) of the two
+         * Lines are identical.
+         */
+        bool operator==(const Line& other) const;
+
+        /**
+         * \brief Opposite of the operator==
+         */
+        bool operator!=(const Line& other) const;
     };
 }; // namespace Program
 

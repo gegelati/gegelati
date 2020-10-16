@@ -34,31 +34,41 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <algorithm>
+#ifndef CONSTANT_HANDLER_H
+#define CONSTANT_HANDLER_H
 
-#include "data/dataHandler.h"
+#include <functional>
+#include <memory>
+#include <typeinfo>
+#include <vector>
 
-size_t Data::DataHandler::count = 0;
+#include "data/constant.h"
+#include "data/primitiveTypeArray.h"
+#include "data/untypedSharedPtr.h"
 
-Data::DataHandler::DataHandler()
-    : id{count++}, cachedHash(), invalidCachedHash(true){};
+namespace Data {
 
-size_t Data::DataHandler::getId() const
-{
-    return this->id;
-}
+    /**
+     * \brief Data::DataHandler used by Program::Program to handle their set of
+     * Constant values.
+     */
+    class ConstantHandler : public PrimitiveTypeArray<Constant>
+    {
+      public:
+        /**
+         * \brief Default constructor of the ConstantHandler class.
+         */
+        ConstantHandler(size_t nb_constants)
+            : PrimitiveTypeArray<Constant>{nb_constants} {};
 
-size_t Data::DataHandler::getHash() const
-{
-    if (this->invalidCachedHash) {
-        this->updateHash();
-    }
+        /// Default destructor
+        virtual ~ConstantHandler() = default;
 
-    return this->cachedHash;
-}
+        /**
+         * \brief Default copy constructor.
+         */
+        ConstantHandler(const ConstantHandler& other) = default;
+    };
+} // namespace Data
 
-uint64_t Data::DataHandler::scaleLocation(const uint64_t rawLocation,
-                                          const std::type_info& type) const
-{
-    return rawLocation % this->getAddressSpace(type);
-}
+#endif

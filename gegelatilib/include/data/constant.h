@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,60 +34,43 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef INSTRUCTION_MULT_BY_CONST_PARAM
-#define INSTRUCTION_MULT_BY_CONST_PARAM
+#ifndef CONSTANT_H
+#define CONSTANT_H
 
-#include <memory>
+#include <cstdint>
 
-#include "data/untypedSharedPtr.h"
-#include "instruction.h"
-
-namespace Instructions {
-
+namespace Data {
     /**
-     * \brief Instruction for multiplying a unique argument of type T by a
-     * constant parameter of type U.
+     * \brief Data type used in Program::Program to define constant values,
+     * accessible to Instructions, and mutated during the training process.
      */
-    template <class T, class U> class MultByConstParam : public Instruction
+    struct Constant
     {
-        static_assert(std::is_fundamental<T>::value &&
-                          std::is_fundamental<U>::value,
-                      "Template class MultByConstParam<T,U> can only be used "
-                      "for primitive types.");
-        static_assert(std::is_same<int16_t, U>() || std::is_same<float, U>(),
-                      "Param type can either be int16_t or float.");
-
-      public:
         /**
-         *  \brief Constructor for the MultByConstParam class.
+         *	\brief the value of the Constant
          */
-        MultByConstParam();
+        int32_t value;
 
-        virtual double execute(
-            const std::vector<std::reference_wrapper<const Parameter>>& params,
-            const std::vector<Data::UntypedSharedPtr>& args) const override;
+        /**
+         *	\brief const casts of a Constant to a 32 bits integer
+         */
+        operator int32_t() const;
+
+        /**
+         *	\brief const casts of a Constant to a double
+         */
+        operator double() const;
+
+        /**
+         * \brief Comparison operator for Constant.
+         */
+        bool operator==(const Constant& other) const;
+
+        /**
+         * \brief Comparison operator for Constant.
+         */
+        bool operator!=(const Constant& other) const;
     };
+} // namespace Data
 
-    template <class T, class U> MultByConstParam<T, U>::MultByConstParam()
-    {
-        this->operandTypes.push_back(typeid(T));
-        this->nbParameters = 1;
-    }
-
-    template <class T, class U>
-    double MultByConstParam<T, U>::execute(
-        const std::vector<std::reference_wrapper<const Parameter>>& params,
-        const std::vector<Data::UntypedSharedPtr>& args) const
-    {
-#ifndef NDEBUG
-        if (Instruction::execute(params, args) != 1.0) {
-            return 0.0;
-        }
-#endif // !NDEBUG
-
-        const U pValue = (const U&)params.at(0).get();
-        return *(args.at(0).getSharedPointer<const T>()) * (double)pValue;
-    };
-} // namespace Instructions
-
-#endif
+#endif // CONSTANT_H

@@ -48,10 +48,39 @@ namespace Learn {
      * a given LearningEnvironment, with a support of adversarial allowing
      * multi-agent simulations. To have several agents per evaluation, we use a
      * job object embedding some TPG roots.
+     *
+     * Globally the process of the adversarial learning agent normal training
+     * can be summed up as follow :
+     * 1-Initialize, create/populate the TPG.
+     * 2-Create jobs with makeJobs.
+     * Each job is a simulation configuration : it contains some IDs and more
+     * important the roots that will be evaluated, in their order of play.
+     * There will be agentsPerEvaluation roots in each one.
+     * There can the same roots several times in the same job, and each root
+     * can be in several jobs.
+     * 3-Evaluate each job nbIterationsPerJob times, getting as many results
+     * scores as there are roots in the job.
+     * 4-Browse the results of every job and accumulate them to compute the
+     * results per root.
+     * 5-Eliminate bad roots.
+     * 6-Validate if params.doValidation is true.
+     * 7-Go back to step 1 until we want to stop.
+     *
+     * Note that the process only differs from the normal Learning Agent in
+     * steps 2, 3, 4 and 6.
      */
     class AdversarialLearningAgent : public ParallelLearningAgent
     {
       protected:
+        /**
+         * \brief Champions of the last generation.
+         *
+         * All roots of a generation that are kept are put in
+         * this list. Then, the roots of the next generation
+         * will fight against these champions to be evaluated.
+         */
+        std::vector<const TPG::TPGVertex*> champions;
+
         /**
          * \brief Number of agents per evaluation (e.g. 2 in tic-tac-toe).
          */
@@ -65,6 +94,14 @@ namespace Learn {
          * This method gathers results in a map linking root to result, and
          * then reverts the map to match the "results" argument.
          * The archive will just be merged like in ParallelLearningAgent.
+         *
+         * Note that if there is a "posOfStudiedRoot" different from -1 in the
+         * jobs, only the EvaluationResult of the posOfStudiedRoot will be
+         * written to the results map. And the results of the other roots within
+         * the Job will be discarded.
+         * The reason is that when roots face champions, the champions
+         * shouldn't have their scores updated, or as they encounter many
+         * unskilled roots they will always have a high score.
          *
          * @param[in] resultsPerJobMap map linking the job number with its
          * results and itself.
@@ -162,8 +199,21 @@ namespace Learn {
         /**
          * \brief Puts all roots into AdversarialJob to be able to use them in
          * simulation later. The difference with the base learning agent
-         * makeJobs is that here we make jobs containing several random roots to
+         * makeJobs is that here we make jobs containing several roots to
          * play together.
+         *
+         * To make jobs, this method used champions. If no champion exists,
+         * the first roots of the roots list are taken. Otherwise, the
+         * best roots from the previous generation are kept in the list
+         * of champions.
+         * Several champions are put together to create "teams" of
+         * predefined roots. They are chosen randomly and are of size
+         * agentsPerEvaluation-1. Then, to create the job each root of the
+         * population is put to fulfill this team at every possible
+         * location (for example if the team is made of roots A-B and if we
+         * put a root R in it, we will have R-A-B, A-R-B and A-B-R as jobs).
+         * The number of teams is calculated so that each root will be evaluated
+         * nbIterationsPerPolicyEvaluation times.
          *
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.

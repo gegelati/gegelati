@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -42,7 +43,7 @@
 #include "data/untypedSharedPtr.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "instructions/multByConstParam.h"
+#include "instructions/multByConstant.h"
 #include "instructions/set.h"
 #include "program/line.h"
 #include "program/program.h"
@@ -54,7 +55,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
     const size_t size1{24};
     const size_t size2{32};
     const double value0{2.3};
-    const float value1{0.2f};
+    const float value1{1.2f};
     const double value2{0.5};
     const double value3{1.5};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
@@ -86,7 +87,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
             .setDataAt(typeid(double), 25, value0);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstParam<double, float>()));
+        set.add(*(new Instructions::MultByConstant<double>()));
         set.add(*new Instructions::LambdaInstruction<const double[2],
                                                      const double[2]>(
             [](const double a[2], const double b[2]) {
@@ -103,42 +104,48 @@ class ProgramExecutionEngineTest : public ::testing::Test
                 return res / 4.0;
             }));
 
-        e = new Environment(set, vect, 8);
+        e = new Environment(set, vect, 8, 5);
         p = new Program::Program(*e);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(
             3); // Instruction is lambdaInstruction<double[2][2]>.
-        l0.setOperand(0, 3, 0);    // 1st operand: 4 values in 2D array
-        l0.setDestinationIndex(5); // Destination is resgister at index 5 (6th)
+        l0.setOperand(0, 4, 0);    // 1st operand: 4 values in 2D array
+        l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
 
         Program::Line& l1 = p->addNewLine();
         l1.setInstructionIndex(0); // Instruction is addPrimitiveType<double>.
         l1.setOperand(0, 0, 5);    // 1st operand: 6th register.
-        l1.setOperand(1, 2, 25);   // 2nd operand: 26th double in the
+        l1.setOperand(1, 3, 25);   // 2nd operand: 26th double in the
                                    // PrimitiveTypeArray of double.
-        l1.setDestinationIndex(1); // Destination is resgister at index 1
+        l1.setDestinationIndex(1); // Destination is register at index 1
 
         // Intron line
         Program::Line& l2 = p->addNewLine();
-        l2.setInstructionIndex(
-            1); // Instruction is MultByConstParam<double, float>.
-        l2.setOperand(0, 0, 3);            // 1st operand: 3rd register.
-        l2.setParameter(0, (float)value0); // Parameter is set to value1 (=2.3f)
-        l2.setDestinationIndex(0);         // Destination is register at index 0
+        l2.setInstructionIndex(1); // Instruction is MultByConstant<double>.
+        l2.setOperand(0, 0, 3);    // 1st operand: 3rd register.
+        l2.setOperand(1, 1, 0);    // 2nd operand: parameter 0.
+        p->getConstantHandler().setDataAt(
+            typeid(Data::Constant), 0,
+            {static_cast<int32_t>(
+                value0)});         // Parameter is set to value1 (=2.3f) => 2
+        l2.setDestinationIndex(0); // Destination is register at index 0
 
         Program::Line& l3 = p->addNewLine();
-        l3.setInstructionIndex(
-            1); // Instruction is MultByConstParam<double, float>.
-        l3.setOperand(0, 0, 1);     // 1st operand: 1th register.
-        l3.setParameter(0, value1); // Parameter is set to value1 (=0.2f)
-        l3.setDestinationIndex(0);  // Destination is register at index 0
+        l3.setInstructionIndex(1); // Instruction is MultByConstant<double>.
+        l3.setOperand(0, 0, 1);    // 1st operand: 1st register.
+        l3.setOperand(1, 1, 1);    // 2nd operand: 1st parameter.
+        p->getConstantHandler().setDataAt(
+            typeid(Data::Constant), 1,
+            {static_cast<int32_t>(
+                value1)});         // Parameter is set to value1 (=1.2f) => 1
+        l3.setDestinationIndex(0); // Destination is register at index 0
 
         Program::Line& l4 = p->addNewLine();
         l4.setInstructionIndex(
             2);                 // Instruction is LambdaInstruction<double[2]>.
         l4.setOperand(0, 0, 0); // 1st operand: 0th and 1st registers.
-        l4.setOperand(1, 2, 5); // 2nd operand : 6th and 7th double in the
+        l4.setOperand(1, 3, 5); // 2nd operand : 6th and 7th double in the
                                 // PrimitiveTypeArray of double.
         l4.setDestinationIndex(0); // Destination is register at index 0
 
@@ -310,33 +317,6 @@ TEST_F(ProgramExecutionEngineTest, fetchCompositeOperands)
         << "Value of fetched operand from array is incorrect.";
 }
 
-TEST_F(ProgramExecutionEngineTest, fetchParameters)
-{
-    Program::ProgramExecutionEngine progExecEng(*p);
-    std::vector<std::reference_wrapper<const Parameter>> parameters;
-
-    // First line of fixture has no parameters. Just check that nothing is
-    // thrown.
-    ASSERT_NO_THROW(progExecEng.fetchCurrentParameters(parameters))
-        << "Fetching the parameters of a valid Program from fixtures failed.";
-    ASSERT_EQ(parameters.size(), 0)
-        << "Since first line of the Program refers to an instruction using no "
-           "Parameter, the vector should remain empty.";
-
-    progExecEng.next();
-    progExecEng.next();
-
-    ASSERT_NO_THROW(progExecEng.fetchCurrentParameters(parameters))
-        << "Fetching the parameters of a valid Program from fixtures failed.";
-    // Check number of parameters
-    ASSERT_EQ(parameters.size(), 1)
-        << "Incorrect number of operands were fetched by previous call.";
-    // Check parameter value (set in fixture). value1: 0.2f (+/- the parameter
-    // floating precision)
-    ASSERT_NEAR((float)parameters.at(0).get(), value1, PARAM_FLOAT_PRECISION)
-        << "Value of fetched parameter is incorrect.";
-}
-
 TEST_F(ProgramExecutionEngineTest, executeCurrentLine)
 {
     Program::ProgramExecutionEngine progExecEng(*p);
@@ -430,7 +410,7 @@ TEST_F(ProgramExecutionEngineTest, execute)
 
     double r6 = (value0 + value1 + value0 + value0) / 4;
     double r1 = value0 + r6;
-    double r0 = r1 * (Parameter(value1)).operator float();
+    double r0 = r1 * ((int)value1);
     r0 = r0 * value2 + r1 * value3;
 
     ASSERT_NO_THROW(result = progExecEng.executeProgram())

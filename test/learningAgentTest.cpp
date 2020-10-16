@@ -79,6 +79,9 @@ class LearningAgentTest : public ::testing::Test
         params.mutation.prog.pDelete = 0.5;
         params.mutation.prog.pMutate = 1.0;
         params.mutation.prog.pSwap = 1.0;
+        params.mutation.prog.pConstantMutation = 0.5;
+        params.mutation.prog.minConstValue = 0;
+        params.mutation.prog.maxConstValue = 1;
     }
 
     virtual void TearDown()
@@ -461,7 +464,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     Mutator::TPGMutator::populateTPG(la.getTPGGraph(), a, params.mutation,
-                                     la.getRNG());
+                                     la.getRNG(), 1);
     size_t initialNbVertex = la.getTPGGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(la.trainOneGeneration(4))
@@ -528,6 +531,7 @@ TEST_F(LearningAgentTest, TrainPortability)
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
 
     Learn::LearningAgent la(le, set, params);
 
@@ -541,11 +545,12 @@ TEST_F(LearningAgentTest, TrainPortability)
     TPG::TPGGraph& tpg = la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 28)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+    ASSERT_EQ(tpg.getNbRootVertices(), 25)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 97)
+    ASSERT_EQ(tpg.getEdges().size(), 94)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8677432978740876680)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              14825295448422883263u)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -599,7 +604,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.mutation.tpg.nbActions = le.getNbActions();
     params.nbThreads = 1;
 
-    Environment env(set, le.getDataSources(), 8);
+    Environment env(set, le.getDataSources(), 8, params.nbProgramConstant);
 
     TPG::TPGGraph tpg(env);
 
