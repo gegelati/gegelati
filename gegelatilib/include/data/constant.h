@@ -34,7 +34,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifndef CONSTANT_H
 #define CONSTANT_H
 

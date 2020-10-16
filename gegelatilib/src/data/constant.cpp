@@ -34,7 +34,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #include "data/constant.h"
 
 Data::Constant::operator int32_t() const
