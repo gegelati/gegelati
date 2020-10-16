@@ -13,8 +13,10 @@ _aaaa.mm.dd_
    * Mutations of the program affect the values of the constants. A constant is mutated with a probability and bounds defined as MutationParameters. 
 
 ### Changes
+* The Parameter stored within Instructions have been removed entirely. Similar behavior is now supported by newly introduced Data::Constant that belong to Program instead of Instruction.
 * During eval, the main thread of ParallelLearningAgent now use the main LearningEnvironment instead of systematically cloning it. It enables sequential mode with non-copyable environment for the AdversarialLearningAgent.
 * AdversarialLearningAgent now proceeds evaluations by making each root play against/with champions of the previous generation.
+* New Unit Test cover the use of LambdaInstruction with non-primitive data types.
 
 ### Bug fix
 

@@ -281,5 +281,5 @@ TEST(LambdaInstructionsTest, ExecuteNonPrimitiveTypes)
                            Data::UntypedSharedPtr::emptyDestructor<Dummy>());
 
     // Execute it
-    ASSERT_EQ(instruction.execute({}, arguments), 42.0);
+    ASSERT_EQ(instruction.execute(arguments), 42.0);
 }
