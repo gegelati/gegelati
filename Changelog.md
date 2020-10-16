@@ -1,6 +1,6 @@
 # GEGELATI Changelog
-## Release version x.y.z
-_aaaa.mm.dd_
+## Release version 0.5.0
+_2020.10.16_
 
 ### New features
 * Optionnaly, it is now possible to force a Program to have a new behavior after being mutated. 
