@@ -49,8 +49,8 @@ void Mutator::ProgramMutator::initRandomProgram(
     // insert random constants in the program
     Data::Constant c_value;
     for (int i = 0; i < p.getEnvironment().getNbConstant(); i++) {
-        c_value = {static_cast<int32_t>(rng.getUnsignedInt64(
-            params.prog.minConstValue, params.prog.maxConstValue))};
+        c_value = {
+            rng.getInt32(params.prog.minConstValue, params.prog.maxConstValue)};
         p.getConstantHandler().setDataAt(typeid(Data::Constant), i, c_value);
     }
 
@@ -121,8 +121,7 @@ bool Mutator::ProgramMutator::alterRandomConstant(
         rng.getUnsignedInt64(0, p.getEnvironment().getNbConstant() - 1);
     p.getConstantHandler().setDataAt(
         typeid(Data::Constant), constant_idx,
-        {static_cast<int32_t>(rng.getUnsignedInt64(
-            params.prog.minConstValue, params.prog.maxConstValue))});
+        {rng.getInt32(params.prog.minConstValue, params.prog.maxConstValue)});
     return true;
 }
 
