@@ -47,6 +47,12 @@ uint64_t Mutator::RNG::getUnsignedInt64(uint64_t min, uint64_t max)
     return distribution(engine);
 }
 
+int32_t Mutator::RNG::getInt32(int32_t min, int32_t max)
+{
+    Mutator::uniform_int_distribution<int32_t> distribution(min, max);
+    return distribution(engine);
+}
+
 double Mutator::RNG::getDouble(double min, double max)
 {
     Mutator::uniform_real_distribution<double> distribution(min, max);

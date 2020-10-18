@@ -80,6 +80,15 @@ namespace Mutator {
         uint64_t getUnsignedInt64(uint64_t min, uint64_t max);
 
         /**
+         * \brief Get a pseudo random int number between two bounds (included).
+         *
+         * \param[in] min the lower bound.
+         * \param[in] max the upper bound.
+         * \return an uniformely selected value between min and max includes.
+         */
+        int32_t getInt32(int32_t min, int32_t max);
+
+        /**
          * \brief Get a pseudo random double number between two bounds
          * (included).
          *

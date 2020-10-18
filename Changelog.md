@@ -1,4 +1,17 @@
 # GEGELATI Changelog
+
+## Release version 0.5.1
+_2020.10.18_
+
+### New features
+
+### Changes
+
+### Bug fix
+* Fix bugs with Constants:
+    * Negative values for Constant mutations were not supported by RNG.
+    * Program behavior unicity was not scaling adresses of Constant properly.
+
 ## Release version 0.5.0
 _2020.10.16_
 
