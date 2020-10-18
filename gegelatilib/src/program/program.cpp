@@ -244,10 +244,14 @@ bool Program::Program::hasIdenticalBehavior(const Program& other) const
                     // Is the operand from the Constant data source.
                     if (thisLine.getOperand(operandIdx).first == 1) {
                         // Check equality of constants
-                        Data::Constant thisCste = this->getConstantAt(
-                            thisLine.getOperand(operandIdx).second);
-                        Data::Constant otherCste = other.getConstantAt(
-                            thisLine.getOperand(operandIdx).second);
+                        Data::Constant thisCste =
+                            this->getConstantAt(this->constants.scaleLocation(
+                                thisLine.getOperand(operandIdx).second,
+                                typeid(Data::Constant)));
+                        Data::Constant otherCste =
+                            other.getConstantAt(other.constants.scaleLocation(
+                                otherLine.getOperand(operandIdx).second,
+                                typeid(Data::Constant)));
                         if (thisCste != otherCste) {
                             return false;
                         }
