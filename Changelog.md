@@ -1,5 +1,15 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_20aa.mm.dd_
+
+### New features
+
+### Changes
+
+### Bug fix
+* Fix travis config for OSX. Build old doxygen from source because `brew install doxygen` no longer works.
+
 ## Release version 0.5.1
 _2020.10.18_
 

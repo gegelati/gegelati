@@ -111,6 +111,7 @@ jobs:
           env:
             - GENERATOR="Unix Makefile"
           install:
+           - # Build an old doxygen because brew install doxygen does not work on travis
            - git clone --branch Release_1_8_12 https://github.com/doxygen/doxygen.git
            - cd doxygen
            - mkdir build
