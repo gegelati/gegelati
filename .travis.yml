@@ -111,7 +111,15 @@ jobs:
           env:
             - GENERATOR="Unix Makefile"
           install:
-           - brew install --build-from-source doxygen
+           - # Build an old doxygen because brew install doxygen does not work on travis
+           - git clone --branch Release_1_8_12 https://github.com/doxygen/doxygen.git
+           - cd doxygen
+           - mkdir build
+           - cd build
+           - cmake -G "Unix Makefiles" ..
+           - make
+           - sudo make install
+           - cd ../..
           script:
             - cd bin
             - cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug
