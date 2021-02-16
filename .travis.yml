@@ -111,7 +111,13 @@ jobs:
           env:
             - GENERATOR="Unix Makefile"
           install:
-           - brew install --build-from-source doxygen
+           - curl -O https://altushost-swe.dl.sourceforge.net/project/doxygen/rel-1.8.20/Doxygen-1.8.20.dmg
+           - hdiutil attach Doxygen-1.8.20.dmg
+           - pushd .
+           - cd /Volumes/Doxygen/
+           - ls
+           - sudo cp -r Doxygen.app ~/Applications/
+           - popd
           script:
             - cd bin
             - cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug
