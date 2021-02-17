@@ -64,11 +64,10 @@ void Log::LABasicLogger::logHeader()
 {
     // First line of header
     //*this << std::left;
-    *this << std::setw(2*colWidth) << " "
-          << std::setw(colWidth) << "Train";
-    if(doValidation){
-        *this << std::setw(2*colWidth) << " "
-              << std::setw(1*colWidth) << "Valid";
+    *this << std::setw(2 * colWidth) << " " << std::setw(colWidth) << "Train";
+    if (doValidation) {
+        *this << std::setw(2 * colWidth) << " " << std::setw(1 * colWidth)
+              << "Valid";
     }
     *this << std::endl;
 
@@ -77,12 +76,12 @@ void Log::LABasicLogger::logHeader()
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
           << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
           << std::setw(colWidth) << "Max";
-    if(doValidation){
+    if (doValidation) {
         *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
               << std::setw(colWidth) << "Max";
     }
-    *this << std::setw(colWidth) << "T_mutat"
-          << std::setw(colWidth) << "T_eval";
+    *this << std::setw(colWidth) << "T_mutat" << std::setw(colWidth)
+          << "T_eval";
     if (doValidation) {
         *this << std::setw(colWidth) << "T_valid";
     }
