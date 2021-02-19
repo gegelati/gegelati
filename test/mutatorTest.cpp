@@ -1077,6 +1077,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     params.tpg.pProgramMutation = 0.2;
     params.tpg.pEdgeDestinationChange = 0.1;
     params.tpg.pEdgeDestinationIsAction = 0.5;
+    params.tpg.ratioOriginalRoots = 0.0; //default value
     params.prog.pAdd = 0.5;
     params.prog.pDelete = 0.5;
     params.prog.pMutate = 1.0;
@@ -1103,5 +1104,12 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     TPG::TPGGraph tpg2(*e);
     ASSERT_NO_THROW(
         Mutator::TPGMutator::populateTPG(tpg2, arch, params, rng, 0))
+        << "Populating an empty TPG failed.";
+
+    // Cover also the original Roots code 
+    params.tpg.ratioOriginalRoots = 0.5;
+    TPG::TPGGraph tpg3(*e);
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::populateTPG(tpg3, arch, params, rng, 0))
         << "Populating an empty TPG failed.";
 }

@@ -507,6 +507,38 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Create an empty list to store Programs to mutate.
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
+    // Add original root teams first
+    size_t nbOriginalRoots =
+        (size_t)(params.tpg.nbRoots - rootVertices.size()) *
+        params.tpg.ratioOriginalRoots;
+    for (size_t idx = 0; idx < nbOriginalRoots; idx++) {
+        // add a new team
+        const TPG::TPGVertex& newRoot = graph.addNewTeam();
+
+        // Connect it to a randomy selected action
+        size_t actionIdx =
+            rng.getUnsignedInt64(0, preExistingActions.size() - 1);
+        std::shared_ptr<Program::Program> newProg =
+            std::make_shared<Program::Program>(graph.getEnvironment());
+        Mutator::ProgramMutator::initRandomProgram(*newProg, params, rng);
+        graph.addNewEdge(newRoot, *preExistingActions.at(actionIdx), newProg);
+
+        // Add other connections randomly
+        // param minus one to account for the action already added
+        size_t nbConnectionsToAdd =
+            rng.getUnsignedInt64(0, params.tpg.maxInitOutgoingEdges - 1);
+        while (nbConnectionsToAdd > 0) {
+            nbConnectionsToAdd--;
+
+            newProg =
+                std::make_shared<Program::Program>(graph.getEnvironment());
+            Mutator::ProgramMutator::initRandomProgram(*newProg, params, rng);
+            size_t randomIdx = rng.getUnsignedInt64(0, vertices.size() - 1);
+            graph.addNewEdge(newRoot, *vertices.at(randomIdx),
+                             newProg);
+        }
+    }
+
     // While the target is not reached, add new teams
     uint64_t currentNumberOfRoot = rootVertices.size();
     while (params.tpg.nbRoots > currentNumberOfRoot) {

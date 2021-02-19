@@ -53,11 +53,11 @@ namespace Mutator {
         size_t maxInitOutgoingEdges;
         /// Maximum number of outgoing edge during TPGGraph mutations.
         size_t maxOutgoingEdges;
-        /// Ratio of completely original root team among the new root at each generation.
-        /// An original root is not the result of a copy from an existing team, and has
-        /// between 1 and maxInitOutgoingEdges randomly initialized programs.
-        /// Program originality is not enforced on new programs.
-        /// Default value: 0.0
+        /// Ratio of completely original root team among the new root at each
+        /// generation. An original root is not the result of a copy from an
+        /// existing team, and has between 1 and maxInitOutgoingEdges randomly
+        /// initialized programs. Program originality is not enforced on new
+        /// programs. Default value: 0.0
         double ratioOriginalRoots = 0.0;
         /// Probability of deleting an outgoing TPGEdge of a TPGTeam.
         double pEdgeDeletion;
