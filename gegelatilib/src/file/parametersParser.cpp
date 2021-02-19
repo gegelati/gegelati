@@ -109,6 +109,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.nbRoots = (size_t)value.asUInt();
         return;
     }
+    if (param == "ratioOriginalRoots") {
+        params.mutation.tpg.ratioOriginalRoots = value.asDouble();
+        return;
+    }
     if (param == "maxInitOutgoingEdges") {
         params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;

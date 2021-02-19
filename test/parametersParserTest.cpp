@@ -62,7 +62,7 @@ TEST(LearningParametersTest, readConfigFile)
     File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
     ASSERT_EQ(13, root.size())
         << "Wrong number of elements in parsed json file";
-    ASSERT_EQ(10, root["mutation"]["tpg"].size())
+    ASSERT_EQ(11, root["mutation"]["tpg"].size())
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(8, root["mutation"]["prog"].size())
         << "Wrong number of elements in parsed json file";
@@ -102,6 +102,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(5, params.mutation.tpg.nbActions);
     ASSERT_EQ(3, params.mutation.tpg.maxInitOutgoingEdges);
     ASSERT_EQ(60, params.mutation.tpg.maxOutgoingEdges);
+    ASSERT_EQ(0.1, params.mutation.tpg.ratioOriginalRoots);
     ASSERT_EQ(0.8, params.mutation.tpg.pEdgeDeletion);
     ASSERT_EQ(0.8, params.mutation.tpg.pEdgeAddition);
     ASSERT_EQ(0.8, params.mutation.tpg.pProgramMutation);

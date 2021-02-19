@@ -17,6 +17,7 @@
       "nbRoots": 100,
       "maxInitOutgoingEdges": 3,
       "maxOutgoingEdges": 60,
+      "ratioOriginalRoots": 0.1,
       "pEdgeDeletion": 0.8,
       "pEdgeAddition": 0.8,
       "pProgramMutation": 0.8,

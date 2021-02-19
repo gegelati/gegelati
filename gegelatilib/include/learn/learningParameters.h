@@ -51,10 +51,13 @@ namespace Learn {
         /// MutationParameters for controlling stochastic aspects of the
         /// learning process.
         Mutator::MutationParameters mutation;
+
         /// Number of recordings held in the Archive.
         size_t archiveSize;
+
         /// Probability of archiving each Program execution.
         double archivingProbability;
+
         /**
          * \brief Number of evaluation of each policy per generation.
          *
@@ -68,13 +71,17 @@ namespace Learn {
          * a bit higher.
          */
         uint64_t nbIterationsPerPolicyEvaluation;
+
         /// Maximum number of action per evaluation of a policy.
         uint64_t maxNbActionsPerEval;
+
         /// Percentage of deleted (and regenerated) root TPGVertex a each
         /// generation.
         double ratioDeletedRoots;
+
         /// Number of generations of the training.
         uint64_t nbGenerations;
+
         /// Maximum number of times a given policy (i.e. a root TPGVertex) is
         /// evaluated.
         size_t maxNbEvaluationPerPolicy;
