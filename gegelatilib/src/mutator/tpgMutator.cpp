@@ -540,7 +540,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     }
 
     // While the target is not reached, add new teams
-    uint64_t currentNumberOfRoot = rootVertices.size();
+    uint64_t currentNumberOfRoot = graph.getNbRootVertices();
     while (params.tpg.nbRoots > currentNumberOfRoot) {
         // Select a random existing root
         uint64_t clonedRootIndex =
