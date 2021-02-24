@@ -234,3 +234,65 @@ void File::ParametersParser::loadParametersFromJson(
 
     setAllParamsFrom(root, params);
 }
+
+void File::ParametersParser::writeParametersToJson(
+    const char* path, const Learn::LearningParameters& params)
+{
+    // Create the JSON Structure
+    Json::Value root;
+
+    // Fill it
+    // base parameters
+    root["archiveSize"] = params.archiveSize;
+    root["archivingProbability"] = params.archivingProbability;
+    root["doValidation"] = params.doValidation;
+    root["maxNbActionsPerEval"] = params.maxNbActionsPerEval;
+    root["maxNbEvaluationPerPolicy"] = params.maxNbEvaluationPerPolicy;
+    root["nbGenerations"] = params.nbGenerations;
+    root["nbIterationsPerJob"] = params.nbIterationsPerJob;
+    root["nbIterationsPerPolicyEvaluation"] =
+        params.nbIterationsPerPolicyEvaluation;
+    root["nbProgramConstant"] = params.nbProgramConstant;
+    root["nbRegisters"] = params.nbRegisters;
+    root["nbThreads"] = params.nbThreads;
+    root["ratioDeletedRoots"] = params.ratioDeletedRoots;
+
+    // Mutation.tpg parameters
+    root["mutation"]["tpg"]["forceProgramBehaviorChangeOnMutation"] =
+        params.mutation.tpg.forceProgramBehaviorChangeOnMutation;
+    root["mutation"]["tpg"]["maxInitOutgoingEdges"] =
+        params.mutation.tpg.maxInitOutgoingEdges;
+    root["mutation"]["tpg"]["maxOutgoingEdges"] =
+        params.mutation.tpg.maxOutgoingEdges;
+    root["mutation"]["tpg"]["nbActions"] = params.mutation.tpg.nbActions;
+    root["mutation"]["tpg"]["nbRoots"] = params.mutation.tpg.nbRoots;
+    root["mutation"]["tpg"]["pEdgeAddition"] =
+        params.mutation.tpg.pEdgeAddition;
+    root["mutation"]["tpg"]["pEdgeDeletion"] =
+        params.mutation.tpg.pEdgeDeletion;
+    root["mutation"]["tpg"]["pEdgeDestinationChange"] =
+        params.mutation.tpg.pEdgeDestinationChange;
+    root["mutation"]["tpg"]["pEdgeDestinationIsAction"] =
+        params.mutation.tpg.pEdgeDestinationIsAction;
+    root["mutation"]["tpg"]["pProgramMutation"] =
+        params.mutation.tpg.pProgramMutation;
+
+    // Mutation.program parameters
+    root["mutation"]["prog"]["maxConstValue"] =
+        params.mutation.prog.maxConstValue;
+    root["mutation"]["prog"]["maxProgramSize"] =
+        params.mutation.prog.maxProgramSize;
+    root["mutation"]["prog"]["minConstValue"] =
+        params.mutation.prog.minConstValue;
+    root["mutation"]["prog"]["pAdd"] = params.mutation.prog.pAdd;
+    root["mutation"]["prog"]["pConstantMutation"] =
+        params.mutation.prog.pConstantMutation;
+    root["mutation"]["prog"]["pDelete"] = params.mutation.prog.pDelete;
+    root["mutation"]["prog"]["pMutate"] = params.mutation.prog.pMutate;
+    root["mutation"]["prog"]["pSwap"] = params.mutation.prog.pSwap;
+
+    // Write to the output stream
+    std::ofstream writtenFile(path);
+    writtenFile << root;
+    writtenFile.close();
+}

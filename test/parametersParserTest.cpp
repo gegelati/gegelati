@@ -146,3 +146,72 @@ TEST(LearningParametersTest, loadParametersFromJson)
     ASSERT_EQ(params.nbRegisters, 3.0)
         << "There should be 3 registers according to the params file";
 }
+
+TEST(LearningParametersTest, writeParametersToJson)
+{
+    Learn::LearningParameters params;
+    // Load from file
+    File::ParametersParser::loadParametersFromJson(TESTS_DAT_PATH "params.json",
+                                                   params);
+
+    // Write to file
+    ASSERT_NO_THROW(File::ParametersParser::writeParametersToJson(
+        "current_params.json", params))
+        << "Failure while writing parameters to the file.";
+
+    // Re-parse the written file
+    Learn::LearningParameters params2;
+    File::ParametersParser::loadParametersFromJson("current_params.json",
+                                                   params2);
+
+    // Check equality
+    // Base parameters
+    ASSERT_EQ(params.archiveSize, params2.archiveSize);
+    ASSERT_EQ(params.archivingProbability, params2.archivingProbability);
+    ASSERT_EQ(params.doValidation, params2.doValidation);
+    ASSERT_EQ(params.maxNbActionsPerEval, params2.maxNbActionsPerEval);
+    ASSERT_EQ(params.maxNbEvaluationPerPolicy,
+              params2.maxNbEvaluationPerPolicy);
+    ASSERT_EQ(params.nbGenerations, params2.nbGenerations);
+    ASSERT_EQ(params.nbIterationsPerJob, params2.nbIterationsPerJob);
+    ASSERT_EQ(params.nbIterationsPerPolicyEvaluation,
+              params2.nbIterationsPerPolicyEvaluation);
+    ASSERT_EQ(params.nbProgramConstant, params2.nbProgramConstant);
+    ASSERT_EQ(params.nbRegisters, params2.nbRegisters);
+    ASSERT_EQ(params.nbThreads, params2.nbThreads);
+    ASSERT_EQ(params.ratioDeletedRoots, params2.ratioDeletedRoots);
+
+    // Mutation prog parameters
+    ASSERT_EQ(params.mutation.prog.maxConstValue,
+              params2.mutation.prog.maxConstValue);
+    ASSERT_EQ(params.mutation.prog.maxProgramSize,
+              params2.mutation.prog.maxProgramSize);
+    ASSERT_EQ(params.mutation.prog.minConstValue,
+              params2.mutation.prog.minConstValue);
+    ASSERT_EQ(params.mutation.prog.pAdd, params2.mutation.prog.pAdd);
+    ASSERT_EQ(params.mutation.prog.pConstantMutation,
+              params2.mutation.prog.pConstantMutation);
+    ASSERT_EQ(params.mutation.prog.pDelete, params2.mutation.prog.pDelete);
+    ASSERT_EQ(params.mutation.prog.pMutate, params2.mutation.prog.pMutate);
+    ASSERT_EQ(params.mutation.prog.pSwap, params2.mutation.prog.pSwap);
+
+    // Mutation parameters tpg
+    ASSERT_EQ(params.mutation.tpg.forceProgramBehaviorChangeOnMutation,
+              params2.mutation.tpg.forceProgramBehaviorChangeOnMutation);
+    ASSERT_EQ(params.mutation.tpg.maxInitOutgoingEdges,
+              params2.mutation.tpg.maxInitOutgoingEdges);
+    ASSERT_EQ(params.mutation.tpg.maxOutgoingEdges,
+              params2.mutation.tpg.maxOutgoingEdges);
+    ASSERT_EQ(params.mutation.tpg.nbActions, params2.mutation.tpg.nbActions);
+    ASSERT_EQ(params.mutation.tpg.nbRoots, params2.mutation.tpg.nbRoots);
+    ASSERT_EQ(params.mutation.tpg.pEdgeAddition,
+              params2.mutation.tpg.pEdgeAddition);
+    ASSERT_EQ(params.mutation.tpg.pEdgeDeletion,
+              params2.mutation.tpg.pEdgeDeletion);
+    ASSERT_EQ(params.mutation.tpg.pEdgeDestinationChange,
+              params2.mutation.tpg.pEdgeDestinationChange);
+    ASSERT_EQ(params.mutation.tpg.pEdgeDestinationIsAction,
+              params2.mutation.tpg.pEdgeDestinationIsAction);
+    ASSERT_EQ(params.mutation.tpg.pProgramMutation,
+              params2.mutation.tpg.pProgramMutation);
+}
