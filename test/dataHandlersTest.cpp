@@ -362,3 +362,38 @@ TEST(DataHandlersTest, PrimitiveDataArrayCanNotProvideConstants)
            "data.";
     delete d;
 }
+
+TEST(DataHandlersTest, PrimitiveDataArrayAssignmentOperator)
+{
+    // Create a DataHandler
+    const size_t size{8};
+    Data::PrimitiveTypeArray<int>* d = new Data::PrimitiveTypeArray<int>(size);
+
+    // Fill the array
+    d->resetData();
+    for (auto idx = 0; idx < size; idx++){
+        d->setDataAt(typeid(int), idx, idx);
+    }
+
+    // Create another DataHandler with the same size
+    Data::PrimitiveTypeArray<int>* d2 = new Data::PrimitiveTypeArray<int>(size);
+    // Create another DataHandler with a different size
+    Data::PrimitiveTypeArray<int>* d3 = new Data::PrimitiveTypeArray<int>(size-1);
+
+    // Check that assignment do not throw std::domain_error
+    ASSERT_NO_THROW(*d2 = *d)
+        << "Assigning PrimitiveTypeArray with valid size and type failed.";
+
+    // Check that data was successfully copied.
+    for (auto idx = 0; idx < size; idx++) {
+        ASSERT_EQ(
+            (int)*(d2->getDataAt(typeid(int), idx).getSharedPointer<const int>()), idx)
+            << "Previously set data did not persist.";
+    }
+
+    // Check that a wrong assignment throw std::domain_error
+    ASSERT_THROW(*d3 = *d, std::domain_error)
+        << "Assigning PrimitiveTypeArray with invalid size did not throw domain_error.";
+
+    delete d, d2, d3;
+}

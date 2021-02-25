@@ -186,6 +186,18 @@ namespace Data {
          */
         void setDataAt(const std::type_info& type, const size_t address,
                        const T& value);
+        /**
+         * \brief Assignement Operator for PrimitiveTypeArray<T>
+         *
+         * Copy nbElements and data from the right side argument to the
+         * left side argument
+         *
+         * \param[in] other the left side argument, to be assigned to the right side argument.
+         * 
+         * PrimitiveTypeArray \throws std::domain_error if both arguents do not
+         * have the same size, which implies that assignement cannot be successfull.
+         */
+        PrimitiveTypeArray<T>& operator=(const PrimitiveTypeArray<T>& other);
     };
 
     template <class T>
@@ -380,6 +392,28 @@ namespace Data {
         this->invalidCachedHash = false;
 
         return this->cachedHash;
+    }
+
+    template <class T>
+    PrimitiveTypeArray<T>& PrimitiveTypeArray<T>::operator=(
+        const PrimitiveTypeArray<T>& other)
+    {
+        // Guard self assignment
+        if (this != &other) {
+            if (this->nbElements != other.nbElements) {
+                std::stringstream message;
+                message << "Assigned PrimitiveTypeArray do not have the same "
+                           "size : "
+                        << this->nbElements << " / " << other.nbElements << ".";
+                throw std::domain_error(message.str());
+            }
+
+            // Copy Data from right arg to this
+            for (auto i = 0; i < this->nbElements; i++) {
+                this->data.at(i) = other.data.at(i);
+            }
+        }
+        return *this;
     }
 } // namespace Data
 
