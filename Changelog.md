@@ -1,5 +1,16 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_20aa.mm.dd_
+
+### New features
+
+### Changes
+* Update LABasicLogger to log rewards both on training and validation sets.
+
+### Bug fix
+* Fix travis config for OSX. Build old doxygen from source because `brew install doxygen` no longer works.
+
 ## Release version 0.5.1
 _2020.10.18_
 
@@ -20,8 +31,8 @@ _2020.10.16_
     * New methods were added for testing equality of `Program::Line` and `Program::Program`. Program equality is based on an analysis of non-intron lines of the Program.
     * Mutation of the Program behavior is enforced by comparing its state before and after being mutated. This comparison can be activated complementary to the legacy archiving mechanism from Kelly's PhD. 
     * The `tpg.forceProgramBehaviorChangeOnMutation` boolean was added to the MutationParameters.
-    
-* Optionnaly, it is now possible to use constants during the training. 
+
+* Optionnaly, it is now possible to use constants during the training.
    * A fixed number of constants can be defined in the parameters. They can be used by instructions designed to use the Data::Constant types.
    * Mutations of the program affect the values of the constants. A constant is mutated with a probability and bounds defined as MutationParameters. 
 
