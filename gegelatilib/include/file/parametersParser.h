@@ -70,6 +70,13 @@ namespace File {
                                     Learn::LearningParameters& params);
 
         /**
+         * \brief Write the LearningParameters given as arguments into the file
+         * at the given path, using the JSON format.
+         */
+        void writeParametersToJson(const char* path,
+                                   const Learn::LearningParameters& params);
+
+        /**
          * \brief Given a parameter name, sets its value in given
          * LearningParameters.
          *
