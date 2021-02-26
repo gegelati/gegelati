@@ -2789,24 +2789,10 @@ Value::Value(Int value) {
   value_.int_ = value;
 }
 
-Value::Value(UInt value) {
-  initBasic(uintValue);
-  value_.uint_ = value;
-}
-
-Value::Value(size_t value)
-{
-    initBasic(uintValue);
-    value_.uint_ = value;
-}
 #if defined(JSON_HAS_INT64)
 Value::Value(Int64 value) {
   initBasic(intValue);
   value_.int_ = value;
-}
-Value::Value(UInt64 value) {
-  initBasic(uintValue);
-  value_.uint_ = value;
 }
 #endif // defined(JSON_HAS_INT64)
 

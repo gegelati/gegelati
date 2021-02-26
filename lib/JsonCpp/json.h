@@ -839,11 +839,16 @@ public:
    */
   Value(ValueType type = nullValue);
   Value(Int value);
-  Value(UInt value);
-  Value(size_t value);
+  
+  // Portable support for uint, uint64_t, size_t
+  template <typename T>
+  Value(T value) {
+      initBasic(uintValue);
+      value_.uint_ = value;
+  }
+
 #if defined(JSON_HAS_INT64)
   Value(Int64 value);
-  Value(UInt64 value);
 #endif // if defined(JSON_HAS_INT64)
   Value(double value);
   Value(const char* value); ///< Copy til first 0. (NULL causes to seg-fault.)
