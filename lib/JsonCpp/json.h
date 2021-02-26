@@ -1,5 +1,10 @@
 /// Json-cpp amalgamated header (http://jsoncpp.sourceforge.net/).
 /// It is intended to be used with #include "json/json.h"
+/// 
+/// This code was slightly modified by K. Desnos for GEGELATI's purpose
+/// Modifications
+/// - Replacing JSon::Value unsigned constructors with a templated one
+///   to support size_t on all OSes and compilers.
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE

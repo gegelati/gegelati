@@ -4,6 +4,7 @@
 _20aa.mm.dd_
 
 ### New features
+* Learn::LearningParameters can now be exported into a commented JSon file using  the File::ParameterParser::writeParametersToJson() function.
 
 ### Changes
 * Update LABasicLogger to log rewards both on training and validation sets.
