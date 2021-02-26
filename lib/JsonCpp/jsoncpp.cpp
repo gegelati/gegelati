@@ -2793,6 +2793,12 @@ Value::Value(UInt value) {
   initBasic(uintValue);
   value_.uint_ = value;
 }
+
+Value::Value(size_t value)
+{
+    initBasic(uintValue);
+    value_.uint_ = value;
+}
 #if defined(JSON_HAS_INT64)
 Value::Value(Int64 value) {
   initBasic(intValue);

@@ -840,6 +840,7 @@ public:
   Value(ValueType type = nullValue);
   Value(Int value);
   Value(UInt value);
+  Value(size_t value);
 #if defined(JSON_HAS_INT64)
   Value(Int64 value);
   Value(UInt64 value);
