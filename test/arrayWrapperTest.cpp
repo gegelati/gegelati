@@ -25,11 +25,113 @@ TEST(ArrayWrapperTest, SetPointer)
            "ArrayWrapper should fail.";
 }
 
+TEST(ArrayWrapperTest, CanProvideTemplateType)
+{
+    Data::DataHandler* d = new Data::ArrayWrapper<double>(4);
+
+    ASSERT_TRUE(d->canHandle(typeid(double)))
+        << "ArrayWrapper<double>() wrongfully say it can not provide "
+           "double data.";
+    ASSERT_FALSE(d->canHandle(typeid(int)))
+        << "ArrayWrapper<double>() wrongfully say it can provide int "
+           "data.";
+    ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr)))
+        << "ArrayWrapper<double>() wrongfully say it can provide "
+           "UntypedSharedPtr data.";
+    delete d;
+}
+
+TEST(ArrayWrapperTest, CanProvideArray)
+{
+    Data::DataHandler* d = new Data::ArrayWrapper<double>(4);
+
+    ASSERT_TRUE(d->canHandle(typeid(double[2])))
+        << "ArrayWrapper<double>(4) wrongfully say it can not provide "
+           "std::array<double, 2> data.";
+    ASSERT_FALSE(d->canHandle(typeid(double[5])))
+        << "ArrayWrapper<double>(4) wrongfully say it can provide "
+           "std::array<double, 5> data.";
+    ASSERT_FALSE(d->canHandle(typeid(int[3])))
+        << "ArrayWrapper<double>(4) wrongfully say it can provide "
+           "std::array<int, 3> data.";
+    delete d;
+}
+
+TEST(ArrayWrapperTest, GetAddressesAccessed)
+{
+    Data::ArrayWrapper<float> d(100);
+
+    std::vector<size_t> accessedAddresses;
+    ASSERT_NO_THROW(accessedAddresses =
+                        d.getAddressesAccessed(typeid(float), 25))
+        << "No exception should be thrown with a valid type at a valid "
+           "address.";
+    ASSERT_EQ(accessedAddresses.size(), 1)
+        << "Only one address should be accessed with native type at a valid "
+           "address.";
+    ASSERT_EQ(accessedAddresses.at(0), 25)
+        << "Address accessed does not correspond to the requested one.";
+
+    ASSERT_NO_THROW(accessedAddresses =
+                        d.getAddressesAccessed(typeid(float[3]), 50))
+        << "No exception should be thrown with a valid type at a valid "
+           "address.";
+    ASSERT_EQ(accessedAddresses.size(), 3)
+        << "Only one address should be accessed with native type at a valid "
+           "address.";
+    for (int i = 0; i < 3; i++) {
+        ASSERT_EQ(accessedAddresses.at(i), 50 + i)
+            << "Address accessed does not correspond to the requested one.";
+    }
+
+    ASSERT_NO_THROW(accessedAddresses =
+                        d.getAddressesAccessed(typeid(double), 75))
+        << "No exception should be thrown with an invalid type at a valid "
+           "address.";
+    ASSERT_EQ(accessedAddresses.size(), 0)
+        << "No address should be accessed with and invalid type at a valid "
+           "address.";
+
+    ASSERT_NO_THROW(accessedAddresses =
+                        d.getAddressesAccessed(typeid(float[25]), 90))
+        << "No exception should be thrown with a valid type at an invalid "
+           "address.";
+    ASSERT_EQ(accessedAddresses.size(), 0)
+        << "No address should be accessed with and valid type at an invalid "
+           "address.";
+}
+
+TEST(ArrayWrapperTest, GetAddressSpaceTemplateType)
+{
+    Data::DataHandler* d = new Data::ArrayWrapper<long>(64); // Array of 64 long
+    ASSERT_EQ(d->getAddressSpace(typeid(long)), 64)
+        << "Address space size for type long in ArrayWrapper<long>(64) "
+           "is not 64";
+    ASSERT_EQ(d->getAddressSpace(typeid(int)), 0)
+        << "Address space size for type int in ArrayWrapper<long>(64) is "
+           "not 0";
+
+    delete d;
+}
+
+TEST(ArrayWrapperTest, GetAddressSpaceArray)
+{
+    Data::DataHandler* d = new Data::ArrayWrapper<long>(64); // Array of 64 long
+    ASSERT_EQ(d->getAddressSpace(typeid(long[50])), 15)
+        << "Address space size for type std::array<long, 50> in "
+           "ArrayWrapper<long>(64) is not 15";
+    ASSERT_EQ(d->getAddressSpace(typeid(double[50])), 0)
+        << "Address space size for type std::array<double, 50> in "
+           "ArrayWrapper<long>(64) is not 0";
+
+    delete d;
+}
+
 TEST(ArrayWrapperTest, GetDataAtNativeType)
 {
     const size_t size{3};
     std::vector<float> values{0.0f, 1.1f, 2.2f};
-    Data::DataHandler* d = new Data::ArrayWrapper<float>(size, &values);
+    Data::ArrayWrapper<float>* d = new Data::ArrayWrapper<float>(size, &values);
 
     for (int i = 0; i < size; i++) {
         const float a =
@@ -58,10 +160,17 @@ TEST(ArrayWrapperTest, GetDataAtNativeType)
            "requesting a non-handled type, even at a valid location.";
 #endif
 
+    // test null ptr container
+    d->setPointer(nullptr);
+    ASSERT_THROW(d->getDataAt(typeid(float), 0).getSharedPointer<const float>(),
+                 std::runtime_error)
+        << "Accessing data within a ArrayWrapper associated to a nullptr "
+           "should fail.";
+
     delete d;
 }
 
-TEST(ArrayWrapperTest, PrimitiveDataArrayGetDataAtArray)
+TEST(ArrayWrapperTest, GetDataAtArray)
 {
     const size_t size{8};
     std::vector<int> values{0, 1, 2, 3, 4, 5, 6, 7};
@@ -104,5 +213,57 @@ TEST(ArrayWrapperTest, PrimitiveDataArrayGetDataAtArray)
            "requesting a non-handled type, even at a valid location.";
 #endif
 
+    delete d;
+}
+
+TEST(ArrayWrapperTest, GetLargestAddressSpace)
+{
+    Data::DataHandler* d =
+        new Data::ArrayWrapper<float>(20); // Array of 20 float
+    ASSERT_EQ(d->getLargestAddressSpace(), 20)
+        << "Largest address space size for type in "
+           "ArrayWrapper<float>(20) is not 20 as expected.";
+
+    delete d;
+}
+
+TEST(ArrayWrapperTest, ScaleLocation)
+{
+    Data::DataHandler* d =
+        new Data::ArrayWrapper<float>(20); // Array of 20 float
+    ASSERT_EQ(d->scaleLocation(25, typeid(float)), 5)
+        << "Scaled location is wrong.";
+    ASSERT_EQ(d->scaleLocation(25, typeid(const float[5])), 9)
+        << "Scaled location is wrong.";
+
+    delete d;
+}
+
+TEST(ArrayWrapperTest, Hash)
+{
+    // Create a DataHandler
+    const size_t size{8};
+    const size_t address{3};
+    const double doubleValue{42.0};
+    std::vector<double> values(8);
+
+    Data::ArrayWrapper<double> d(size, &values);
+
+    // Get hash
+    size_t hash = 0;
+    ASSERT_NO_THROW(hash = d.getHash());
+    // change the content of the array
+    values.at(address) = doubleValue;
+    d.setPointer(&values); // (force hash update)
+    ASSERT_NE(hash, d.getHash());
+}
+
+TEST(ArrayWrapperTest, CanHandleConstants)
+{
+    Data::DataHandler* d = new Data::ArrayWrapper<int>(4);
+    ASSERT_FALSE(d->canHandle(typeid(Data::Constant)))
+        << "ArrayWrapper<double>() wrongfully say it can provide "
+           "Data::Constant "
+           "data.";
     delete d;
 }
