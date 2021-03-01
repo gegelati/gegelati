@@ -119,7 +119,7 @@ namespace Data {
         /// Default copy constructor.
         PrimitiveTypeArray2D(const PrimitiveTypeArray2D<T>& other) = default;
 
-        // Inherited from DataHandler
+        /// Inherited from DataHandler
         virtual size_t getAddressSpace(
             const std::type_info& type) const override;
 
