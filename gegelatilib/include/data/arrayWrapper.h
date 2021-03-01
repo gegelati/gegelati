@@ -34,6 +34,9 @@ namespace Data {
      * Contrary to the PrimitiveTypeArray, the ArrayWrapper does not contain its
      * data, but possesses a pointer to them.
      *
+     * Every time the data associated to the pointer is modified, the
+     * invalidateCachedHash method should be called.
+     *
      * In addition to native data types T, this DataHandler can
      * also provide the following composite data type:
      * - T[n]: with $n <=$ to the size of the ArrayWrapper.
@@ -123,20 +126,31 @@ namespace Data {
         virtual DataHandler* clone() const override;
 
         /// Inherited from DataHandler
+        virtual bool canHandle(const std::type_info& type) const override;
+
+        /// Inherited from DataHandler
         virtual size_t getAddressSpace(
             const std::type_info& type) const override;
 
         /// Inherited from DataHandler
-        virtual bool canHandle(const std::type_info& type) const override;
-
-        /// Inherited from DataHandler
         virtual size_t getLargestAddressSpace(void) const override;
+
+        /**
+         * \brief Invalidate the hash of the container.
+         *
+         * Each time the data pointed by the ArrayWrapper is modified, this
+         * method should be called to ensure that the hash value of the
+         * DataHandler is properly updated.
+         */
+        void invalidateCachedHash();
 
         /// Inherited from DataHandler. Does nothing.
         void resetData() override;
 
         /**
          * \brief Set the pointer of the ArrayWrapper.
+         *
+         * This method automatically invalidates the cachedHash.
          *
          * \param[in] ptr the new pointer managed by the ArrayWrapper.
          *
@@ -295,6 +309,11 @@ namespace Data {
     {
         // Currently, largest addres space is for the template Type T.
         return this->nbElements;
+    }
+
+    template <class T> void ArrayWrapper<T>::invalidateCachedHash()
+    {
+        this->invalidCachedHash = true;
     }
 
     template <class T> void ArrayWrapper<T>::resetData()

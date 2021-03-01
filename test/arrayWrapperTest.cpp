@@ -254,7 +254,7 @@ TEST(ArrayWrapperTest, Hash)
     ASSERT_NO_THROW(hash = d.getHash());
     // change the content of the array
     values.at(address) = doubleValue;
-    d.setPointer(&values); // (force hash update)
+    d.invalidateCachedHash();
     ASSERT_NE(hash, d.getHash());
 }
 
