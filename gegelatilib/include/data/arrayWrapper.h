@@ -122,7 +122,12 @@ namespace Data {
         /// Default copy constructor.
         ArrayWrapper(const ArrayWrapper<T>& other) = default;
 
-        /// Inherited from DataHandler
+        /**
+         * \brief Return a PrimitiveTypeArray<T> where all data of the
+         * ArrayWrapper has been copied.
+         *
+         * \return a PrimitiveTypeArray.
+         */
         virtual DataHandler* clone() const override;
 
         /// Inherited from DataHandler
@@ -168,14 +173,6 @@ namespace Data {
         virtual std::vector<size_t> getAddressesAccessed(
             const std::type_info& type, const size_t address) const override;
     };
-
-    template <class T> inline DataHandler* ArrayWrapper<T>::clone() const
-    {
-        // Default copy construtor should do the deep copy.
-        DataHandler* result = new ArrayWrapper<T>(*this);
-
-        return result;
-    }
 
     template <class T>
     bool ArrayWrapper<T>::canHandle(const std::type_info& type) const
@@ -373,4 +370,15 @@ namespace Data {
     }
 } // namespace Data
 
+// Out of the Data namespace for inclusion
+// This include is needed for the clone operation.
+#include "primitiveTypeArray.h"
+
+template <class T> inline Data::DataHandler* Data::ArrayWrapper<T>::clone() const
+{
+    // Create a constantCopy of the ArrayWrapper content.
+    DataHandler* result = new PrimitiveTypeArray<T>(*this);
+
+    return result;
+}
 #endif // !ARRAY_WRAPPER_H

@@ -68,6 +68,9 @@ namespace Data {
         /// Default copy constructor.
         PrimitiveTypeArray(const PrimitiveTypeArray<T>& other);
 
+        /// Copy content from an ArrayWrapper
+        PrimitiveTypeArray(const ArrayWrapper<T>& other);
+
         /// Default destructor.
         virtual ~PrimitiveTypeArray() = default;
 
@@ -113,6 +116,26 @@ namespace Data {
     PrimitiveTypeArray<T>::PrimitiveTypeArray(const PrimitiveTypeArray& other)
         : ArrayWrapper<T>(other), data(other.data)
     {
+        // Set the pointer to the right data
+        this->setPointer(&(this->data));
+    }
+
+    template <class T>
+    PrimitiveTypeArray<T>::PrimitiveTypeArray(const ArrayWrapper<T>& other)
+        : ArrayWrapper<T>(other), data(this->nbElements)
+    {
+        if (this->containerPtr != NULL) {
+            // Copy the data from the given ArrayWrapper
+            for (size_t i = 0; i < this->nbElements; i++) {
+                // exploit the fact that the container pointer still points to
+                // data from other.
+                this->data[i] = this->containerPtr->at(i);
+            }
+        }
+        else {
+            this->resetData();
+        }
+
         // Set the pointer to the right data
         this->setPointer(&(this->data));
     }
