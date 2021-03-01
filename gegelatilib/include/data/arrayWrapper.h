@@ -1,5 +1,6 @@
 
 #ifndef ARRAY_WRAPPER_H
+#define ARRAY_WRAPPER_H
 
 #include <functional>
 #include <map>
@@ -12,7 +13,6 @@
 #include "data/constant.h"
 #include "data/hash.h"
 #include "dataHandler.h"
-#include "primitiveTypeArray.h"
 
 #ifdef _MSC_VER
 /// Macro for getting type name in human readable format.
