@@ -2,6 +2,7 @@
 
 #include "data/arrayWrapper.h"
 #include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
 
 TEST(ArrayWrapperTest, Constructor)
 {

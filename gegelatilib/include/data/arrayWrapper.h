@@ -209,6 +209,17 @@ namespace Data {
         }
     }
 
+    // Declare class for clone method
+    template <class T> class PrimitiveTypeArray;
+
+    template <class T> inline DataHandler* ArrayWrapper<T>::clone() const
+    {
+        // Create a constantCopy of the ArrayWrapper content.
+        DataHandler* result = new PrimitiveTypeArray<T>(*this);
+
+        return result;
+    }
+
     template <class T>
     size_t ArrayWrapper<T>::getAddressSpace(const std::type_info& type) const
     {
@@ -369,16 +380,4 @@ namespace Data {
         return this->cachedHash;
     }
 } // namespace Data
-
-// Out of the Data namespace for inclusion
-// This include is needed for the clone operation.
-#include "primitiveTypeArray.h"
-
-template <class T> inline Data::DataHandler* Data::ArrayWrapper<T>::clone() const
-{
-    // Create a constantCopy of the ArrayWrapper content.
-    DataHandler* result = new PrimitiveTypeArray<T>(*this);
-
-    return result;
-}
 #endif // !ARRAY_WRAPPER_H
