@@ -141,7 +141,7 @@ namespace Data {
     {
 #ifndef NDEBUG
         // Throw exception in case of invalid arguments.
-        checkAddressAndType(type, address);
+        this->checkAddressAndType(type, address);
 #endif
 
         this->data.at(address) = value;
