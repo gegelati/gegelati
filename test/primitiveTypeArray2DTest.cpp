@@ -39,24 +39,71 @@
 
 TEST(PrimitiveTypeArray2DTest, Constructors)
 {
-    Data::PrimitiveTypeArray2D<double>*array, *array2;
+    Data::PrimitiveTypeArray2D<double>* array;
     ASSERT_NE(array = new Data::PrimitiveTypeArray2D<double>(3, 4), nullptr)
         << "A PrimitiveTypeArray2D<double> could not be built successfully.";
 
-    // Clone test
-    ASSERT_NE(array2 = (Data::PrimitiveTypeArray2D<double>*)array->clone(),
-              nullptr)
-        << "Cloning an existing array failed unexpectedly.";
-
-    // ID equality
-    ASSERT_EQ(array->getId(), array2->getId())
-        << "Clone array ID differs from the cloned one.";
-
     ASSERT_NO_THROW(delete array)
         << "PrimitiveTypeArray2D could not be deleted.";
+}
 
-    ASSERT_NO_THROW(delete array2)
-        << "PrimitiveTypeArray2D could not be deleted.";
+TEST(PrimitiveTypeArray2DTest, Clone)
+{
+    // Create a DataHandler
+    const size_t width{8}, height{3};
+    const size_t address{3};
+    const double doubleValue{42.0};
+    std::vector<double> values(width * height);
+
+    // create a first one to increase the DataHandler::count
+    Data::PrimitiveTypeArray2D<int> d0(12, 10);
+    Data::PrimitiveTypeArray2D<double> d(width, height);
+    // change the content of the array
+    d.setDataAt(typeid(double), address, doubleValue);
+    // Hash was voluntarily not computed before clone.
+
+    // Create a clone
+    Data::DataHandler* dClone = NULL;
+    ASSERT_NO_THROW(dClone = d.clone();)
+        << "Cloning a PrimitiveTypeArray2D<double> failed.";
+
+    // Extra if to remove warnings on further use of dClone.
+    if (dClone == NULL)
+        FAIL() << "Cloning of PrimitiveTypeArray2D returned a NULL Pointer.";
+
+    // Check ID
+    ASSERT_EQ(dClone->getId(), d.getId())
+        << "Cloned and original PrimitiveTypeArray2D do not have the same ID "
+           "as "
+           "expected.";
+    // Check the polymorphic type.
+    ASSERT_EQ(typeid(*dClone), typeid(Data::PrimitiveTypeArray2D<double>))
+        << "Type of clone PrimitiveTypeArray2D is not a PrimitiveTypeArray2D "
+           "as "
+           "expected.";
+    // Compute the hashes
+    ASSERT_EQ(dClone->getHash(), d.getHash())
+        << "Hash of clone and original DataHandler differ.";
+
+    // Change data in the original to make sure the two dHandlers are decoupled.
+    size_t hash = dClone->getHash();
+    d.setDataAt(typeid(double), address + 1, doubleValue + 1.0);
+    ((Data::PrimitiveTypeArray2D<double>*)dClone)->invalidateCachedHash();
+    ASSERT_NE(dClone->getHash(), d.getHash())
+        << "Hash of clone and original DataHandler should differ after "
+           "modification of data in the original.";
+    ASSERT_EQ(dClone->getHash(), hash)
+        << "Hash of the clone dataHandler should remain unchanged after "
+           "modification of data within the original DataHandler.";
+    delete dClone;
+
+    // Check nullptr clone also
+    d.setPointer(nullptr);
+    ASSERT_NO_THROW(dClone = d.clone())
+        << "Cloning an Array2DWrapper pointing to a nullptr should not fail.";
+    if (dClone == NULL)
+        FAIL() << "Cloning of Array2DWrapper returned a NULL Pointer.";
+    delete dClone;
 }
 
 TEST(PrimitiveTypeArray2DTest, getDataAt)

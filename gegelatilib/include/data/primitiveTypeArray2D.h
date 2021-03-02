@@ -82,8 +82,8 @@ namespace Data {
          */
         PrimitiveTypeArray2D(const size_t w = 2, const size_t h = 4);
 
-        /// Default copy constructor.
-        PrimitiveTypeArray2D(const PrimitiveTypeArray2D<T>& other) = default;
+        /// Copy constructor.
+        PrimitiveTypeArray2D(const PrimitiveTypeArray2D<T>& other);
 
         /// Copy content from an Array2DWrapper
         PrimitiveTypeArray2D(const Array2DWrapper<T>& other);
@@ -128,6 +128,15 @@ namespace Data {
         this->setPointer(&(this->data));
     }
 
+    template <typename T>
+    inline PrimitiveTypeArray2D<T>::PrimitiveTypeArray2D(
+        const PrimitiveTypeArray2D<T>& other)
+        : Array2DWrapper<T>(other), data(other.data)
+    {
+        // Set the pointer to the right data
+        this->setPointer(&(this->data));
+    }
+
     template <class T>
     PrimitiveTypeArray2D<T>::PrimitiveTypeArray2D(
         const Array2DWrapper<T>& other)
@@ -152,7 +161,7 @@ namespace Data {
     template <typename T>
     inline DataHandler* PrimitiveTypeArray2D<T>::clone() const
     {
-        // Default copy construtor should do the deep copy.
+        // Copy construtor should do the deep copy.
         DataHandler* result = new PrimitiveTypeArray2D<T>(*this);
 
         return result;

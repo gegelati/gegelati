@@ -65,7 +65,7 @@ namespace Data {
          */
         PrimitiveTypeArray(size_t size = 8);
 
-        /// Default copy constructor.
+        /// Copy constructor (deep copy).
         PrimitiveTypeArray(const PrimitiveTypeArray<T>& other);
 
         /// Copy content from an ArrayWrapper
@@ -113,7 +113,8 @@ namespace Data {
     }
 
     template <class T>
-    PrimitiveTypeArray<T>::PrimitiveTypeArray(const PrimitiveTypeArray& other)
+    PrimitiveTypeArray<T>::PrimitiveTypeArray(
+        const PrimitiveTypeArray<T>& other)
         : ArrayWrapper<T>(other), data(other.data)
     {
         // Set the pointer to the right data
