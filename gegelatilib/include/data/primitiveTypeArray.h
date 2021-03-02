@@ -113,7 +113,7 @@ namespace Data {
          * side argument.
          *
          * \return the assigned PrimitiveTypeArray
-         * 
+         *
          * \throws std::domain_error if both arguents do not have the same size,
          * which implies that assignement cannot be successfull.
          */
