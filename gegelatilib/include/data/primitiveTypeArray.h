@@ -34,31 +34,11 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef PRIMITIVE_TYPE_ARRAY
-#define PRIMITIVE_TYPE_ARRAY
+#ifndef PRIMITIVE_TYPE_ARRAY_H
+#define PRIMITIVE_TYPE_ARRAY_H
 
-#include <functional>
-#include <map>
-#include <regex>
-#include <sstream>
-#include <typeindex>
-#include <typeinfo>
-
-#include "data/constant.h"
-#include "data/hash.h"
+#include "arrayWrapper.h"
 #include "dataHandler.h"
-
-#ifdef _MSC_VER
-/// Macro for getting type name in human readable format.
-#define DEMANGLE_TYPEID_NAME(name) name
-#elif __GNUC__
-#include <cxxabi.h>
-/// Macro for getting type name in human readable format.
-#define DEMANGLE_TYPEID_NAME(name)                                             \
-    abi::__cxa_demangle(name, nullptr, nullptr, nullptr)
-#else
-#error Unsupported compiler (yet): Check need for name demangling of typeid.name().
-#endif
 
 namespace Data {
     /**
@@ -68,61 +48,13 @@ namespace Data {
      * also provide the following composite data type:
      * - T[n]: with $n <=$ to the size of the PrimitiveTypeArray.
      */
-    template <class T> class PrimitiveTypeArray : public DataHandler
+    template <class T> class PrimitiveTypeArray : public ArrayWrapper<T>
     {
-        static_assert(std::is_fundamental<T>::value ||
-                          std::is_same<T, Data::Constant>(),
-                      "Template class PrimitiveTypeArray<T> can only be used "
-                      "for primitive types.");
-
-      private:
-        /**
-         * \brief Caching mechanism for storing addressSpace for different
-         * types.
-         *
-         * This map stores for each data type the size of the addressSpace for
-         * the PrimitiveTypeArray. The purpose of this cache is to accelerate
-         * the numerous access to the addressSpace for different data types, by
-         * performing it only once per data type requested by the Instructions,
-         * through the ProgramExecutionEngine.
-         *
-         * This map is updated and used by the getAddressSpace method.
-         */
-        mutable std::map<std::type_index, size_t> cachedAddressSpace;
-
       protected:
-        /**
-         * \brief Number of elements contained in the array.
-         *
-         * Although this may seem redundant with the data.size() method, this
-         * attribute is here to make it possible to check whether the size of
-         * the data vector was modified throughout the lifetime of the
-         * PrimitiveTypeArray. (Which should not be possible.)
-         */
-        const size_t nbElements;
-
         /**
          * \brief Array storing the data of the PrimitiveTypeArray.
          */
         std::vector<T> data;
-
-        /**
-         * Check whether the given type of data can be accessed at the given
-         * address. Throws exception otherwise.
-         *
-         * \param[in] type the std::type_info of data.
-         * \param[in] address the location of the data.
-         * \throws std::invalid_argument if the given data type is not provided
-         * by the DataHandler. \throws std::out_of_range if the given address is
-         * invalid for the given data type.
-         */
-        void checkAddressAndType(const std::type_info& type,
-                                 const size_t& address) const;
-
-        /**
-         * \brief Implementation of the updateHash method.
-         */
-        virtual size_t updateHash() const override;
 
       public:
         /**
@@ -133,8 +65,11 @@ namespace Data {
          */
         PrimitiveTypeArray(size_t size = 8);
 
-        /// Default copy constructor.
-        PrimitiveTypeArray(const PrimitiveTypeArray<T>& other) = default;
+        /// Copy constructor (deep copy).
+        PrimitiveTypeArray(const PrimitiveTypeArray<T>& other);
+
+        /// Copy content from an ArrayWrapper
+        PrimitiveTypeArray(const ArrayWrapper<T>& other);
 
         /// Default destructor.
         virtual ~PrimitiveTypeArray() = default;
@@ -142,29 +77,11 @@ namespace Data {
         /// Inherited from DataHandler
         virtual DataHandler* clone() const override;
 
-        /// Inherited from DataHandler
-        virtual size_t getAddressSpace(
-            const std::type_info& type) const override;
-
-        /// Inherited from DataHandler
-        virtual bool canHandle(const std::type_info& type) const override;
-
-        /// Inherited from DataHandler
-        virtual size_t getLargestAddressSpace(void) const override;
-
         /**
          * \brief Sets all elements of the Array to 0 (or its equivalent for
          * the given template param.)
          */
         void resetData() override;
-
-        /// Inherited from DataHandler
-        virtual UntypedSharedPtr getDataAt(const std::type_info& type,
-                                           const size_t address) const override;
-
-        /// Inherited from DataHandler
-        virtual std::vector<size_t> getAddressesAccessed(
-            const std::type_info& type, const size_t address) const override;
 
         /**
          * \brief Set the data at the given address to the given value.
@@ -192,79 +109,59 @@ namespace Data {
          * Copy nbElements and data from the right side argument to the
          * left side argument
          *
-         * \param[in] other the left side argument, to be assigned to the right side argument.
+         * \param[in] other the left side argument, to be assigned to the right
+         * side argument.
+         *
+         * \return the assigned PrimitiveTypeArray
          * 
-         * PrimitiveTypeArray \throws std::domain_error if both arguents do not
-         * have the same size, which implies that assignement cannot be successfull.
+         * \throws std::domain_error if both arguents do not have the same size,
+         * which implies that assignement cannot be successfull.
          */
         PrimitiveTypeArray<T>& operator=(const PrimitiveTypeArray<T>& other);
     };
 
     template <class T>
     PrimitiveTypeArray<T>::PrimitiveTypeArray(size_t size)
-        : nbElements{size}, data(size)
+        : ArrayWrapper<T>(size, nullptr), data(size)
     {
+        this->setPointer(&(this->data));
+    }
+
+    template <class T>
+    PrimitiveTypeArray<T>::PrimitiveTypeArray(
+        const PrimitiveTypeArray<T>& other)
+        : ArrayWrapper<T>(other), data(other.data)
+    {
+        // Set the pointer to the right data
+        this->setPointer(&(this->data));
+    }
+
+    template <class T>
+    PrimitiveTypeArray<T>::PrimitiveTypeArray(const ArrayWrapper<T>& other)
+        : ArrayWrapper<T>(other), data(this->nbElements)
+    {
+        if (this->containerPtr != NULL) {
+            // Copy the data from the given ArrayWrapper
+            for (size_t i = 0; i < this->nbElements; i++) {
+                // exploit the fact that the container pointer still points to
+                // data from other.
+                this->data[i] = this->containerPtr->at(i);
+            }
+        }
+        else {
+            this->resetData();
+        }
+
+        // Set the pointer to the right data
+        this->setPointer(&(this->data));
     }
 
     template <class T> inline DataHandler* PrimitiveTypeArray<T>::clone() const
     {
-        // Default copy construtor should do the deep copy.
-        DataHandler* result = new PrimitiveTypeArray<T>(*this);
+        // Default copy construtor does the deep copy.
+        PrimitiveTypeArray<T>* result = new PrimitiveTypeArray<T>(*this);
 
         return result;
-    }
-
-    template <class T>
-    bool PrimitiveTypeArray<T>::canHandle(const std::type_info& type) const
-    {
-        if (typeid(T) == type) {
-            return true;
-        }
-
-        // Use the code in getAddressSpace to check if the type is supported.
-        return (this->getAddressSpace(type) > 0);
-    }
-
-    template <class T>
-    size_t PrimitiveTypeArray<T>::getAddressSpace(
-        const std::type_info& type) const
-    {
-        // Has the addresSpaceSize been cached
-        auto iter = this->cachedAddressSpace.find(type);
-        if (iter != this->cachedAddressSpace.end()) {
-            return iter->second;
-        }
-
-        if (type == typeid(T)) {
-            this->cachedAddressSpace.emplace(type, this->nbElements);
-            return this->nbElements;
-        }
-
-        // If the type is an array of the primitive type
-        // with a size inferior to the container.
-        std::string typeName = DEMANGLE_TYPEID_NAME(type.name());
-        std::string regex{DEMANGLE_TYPEID_NAME(typeid(T).name())};
-        regex.append("\\s*(const\\s*)?\\[([0-9]+)\\]");
-        std::regex arrayType(regex);
-        std::cmatch cm;
-        if (std::regex_match(typeName.c_str(), cm, arrayType)) {
-            int size = std::atoi(cm[2].str().c_str());
-            if (size <= this->nbElements) {
-                size_t result = this->nbElements - size + 1;
-                this->cachedAddressSpace.emplace(type, result);
-                return result;
-            }
-        }
-        // Default case
-        return 0;
-    }
-
-    // Inherited from DataHandler
-    template <class T>
-    size_t PrimitiveTypeArray<T>::getLargestAddressSpace() const
-    {
-        // Currently, largest addres space is for the template Type T.
-        return this->nbElements;
     }
 
     template <class T> void PrimitiveTypeArray<T>::resetData()
@@ -278,93 +175,12 @@ namespace Data {
     }
 
     template <class T>
-    void PrimitiveTypeArray<T>::checkAddressAndType(const std::type_info& type,
-                                                    const size_t& address) const
-    {
-        size_t addressSpace = this->getAddressSpace(type);
-        // check type
-        if (addressSpace == 0) {
-            std::stringstream message;
-            message << "Data type " << DEMANGLE_TYPEID_NAME(type.name())
-                    << " cannot be accessed in a "
-                    << DEMANGLE_TYPEID_NAME(typeid(*this).name()) << ".";
-            throw std::invalid_argument(message.str());
-        }
-
-        // check location
-        if (address >= addressSpace) {
-            std::stringstream message;
-            message << "Data type " << DEMANGLE_TYPEID_NAME(type.name())
-                    << " cannot be accessed at address " << address
-                    << ", address space size is " << addressSpace << ".";
-            throw std::out_of_range(message.str());
-        }
-    }
-
-    template <class T>
-    UntypedSharedPtr PrimitiveTypeArray<T>::getDataAt(
-        const std::type_info& type, const size_t address) const
-    {
-#ifndef NDEBUG
-        // Throw exception in case of invalid arguments.
-        checkAddressAndType(type, address);
-#endif
-
-        if (type == typeid(T)) {
-            UntypedSharedPtr result(
-                &(this->data.at(address)),
-                UntypedSharedPtr::emptyDestructor<const T>());
-            return result;
-        }
-
-        // Else, the only other supported type is cstyle array.
-
-        // Allocate the array
-        size_t arraySize = this->nbElements - this->getAddressSpace(type) + 1;
-        T* array = new T[arraySize];
-
-        // Copy its content
-        for (size_t idx = 0; idx < arraySize; idx++) {
-            array[idx] = this->data.at(address + idx);
-        }
-
-        // Create the UntypedSharedPtr
-        UntypedSharedPtr result{
-            std::make_shared<UntypedSharedPtr::Model<const T[]>>(array)};
-        return result;
-    }
-
-    template <class T>
-    std::vector<size_t> PrimitiveTypeArray<T>::getAddressesAccessed(
-        const std::type_info& type, const size_t address) const
-    {
-        // Initialize the result
-        std::vector<size_t> result;
-
-        // If the accessed address is valid fill the result.
-        const size_t space = this->getAddressSpace(type);
-        if (space > address) {
-            // For the native type.
-            if (type == typeid(T)) {
-                result.push_back(address);
-            }
-            else {
-                // Else, the type is the array type.
-                for (int i = 0; i < (this->nbElements - space + 1); i++) {
-                    result.push_back(address + i);
-                }
-            }
-        }
-        return result;
-    }
-
-    template <class T>
     void PrimitiveTypeArray<T>::setDataAt(const std::type_info& type,
                                           const size_t address, const T& value)
     {
 #ifndef NDEBUG
         // Throw exception in case of invalid arguments.
-        checkAddressAndType(type, address);
+        this->checkAddressAndType(type, address);
 #endif
 
         this->data.at(address) = value;
@@ -372,28 +188,6 @@ namespace Data {
         // Invalidate the cached hash.
         this->invalidCachedHash = true;
     }
-
-    template <class T> inline size_t PrimitiveTypeArray<T>::updateHash() const
-    {
-        // reset
-        this->cachedHash = Data::Hash<size_t>()(this->id);
-
-        // hasher
-        Data::Hash<T> hasher;
-
-        for (T dataElement : this->data) {
-            // Rotate by 1 because otherwise, xor is comutative.
-            this->cachedHash =
-                (this->cachedHash >> 1) | (this->cachedHash << 63);
-            this->cachedHash ^= hasher((T)dataElement);
-        }
-
-        // Validate the cached hash value
-        this->invalidCachedHash = false;
-
-        return this->cachedHash;
-    }
-
     template <class T>
     PrimitiveTypeArray<T>& PrimitiveTypeArray<T>::operator=(
         const PrimitiveTypeArray<T>& other)

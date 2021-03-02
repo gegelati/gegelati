@@ -56,89 +56,6 @@ TEST(DataHandlersTest, ID)
                                          "after the other should not be equal.";
 }
 
-TEST(DataHandlersTest, PrimitiveDataArrayCanProvideTemplateType)
-{
-    Data::DataHandler* d = new Data::PrimitiveTypeArray<double>(4);
-
-    ASSERT_TRUE(d->canHandle(typeid(double)))
-        << "PrimitiveTypeArray<double>() wrongfully say it can not provide "
-           "double data.";
-    ASSERT_FALSE(d->canHandle(typeid(int)))
-        << "PrimitiveTypeArray<double>() wrongfully say it can provide int "
-           "data.";
-    ASSERT_FALSE(d->canHandle(typeid(Data::UntypedSharedPtr)))
-        << "PrimitiveTypeArray<double>() wrongfully say it can provide "
-           "UntypedSharedPtr data.";
-    delete d;
-}
-
-TEST(DataHandlersTest, PrimitiveDataArrayAddressSpaceTemplateType)
-{
-    Data::DataHandler* d =
-        new Data::PrimitiveTypeArray<long>(64); // Array of 64 long
-    ASSERT_EQ(d->getAddressSpace(typeid(long)), 64)
-        << "Address space size for type long in PrimitiveTypeArray<long>(64) "
-           "is not 64";
-    ASSERT_EQ(d->getAddressSpace(typeid(int)), 0)
-        << "Address space size for type int in PrimitiveTypeArray<long>(64) is "
-           "not 0";
-
-    delete d;
-}
-
-TEST(DataHandlersTest, PrimitiveDataArrayCanProvideArray)
-{
-    Data::DataHandler* d = new Data::PrimitiveTypeArray<double>(4);
-
-    ASSERT_TRUE(d->canHandle(typeid(double[2])))
-        << "PrimitiveTypeArray<double>(4) wrongfully say it can not provide "
-           "std::array<double, 2> data.";
-    ASSERT_FALSE(d->canHandle(typeid(double[5])))
-        << "PrimitiveTypeArray<double>(4) wrongfully say it can provide "
-           "std::array<double, 5> data.";
-    ASSERT_FALSE(d->canHandle(typeid(int[3])))
-        << "PrimitiveTypeArray<double>(4) wrongfully say it can provide "
-           "std::array<int, 3> data.";
-    delete d;
-}
-
-TEST(DataHandlersTest, PrimitiveDataArrayAddressSpaceArray)
-{
-    Data::DataHandler* d =
-        new Data::PrimitiveTypeArray<long>(64); // Array of 64 long
-    ASSERT_EQ(d->getAddressSpace(typeid(long[50])), 15)
-        << "Address space size for type std::array<long, 50> in "
-           "PrimitiveTypeArray<long>(64) is not 15";
-    ASSERT_EQ(d->getAddressSpace(typeid(double[50])), 0)
-        << "Address space size for type std::array<double, 50> in "
-           "PrimitiveTypeArray<long>(64) is not 0";
-
-    delete d;
-}
-
-TEST(DataHandlersTest, PrimitiveDataArrayLargestAddressSpace)
-{
-    Data::DataHandler* d =
-        new Data::PrimitiveTypeArray<float>(20); // Array of 20 float
-    ASSERT_EQ(d->getLargestAddressSpace(), 20)
-        << "Largest address space size for type in "
-           "PrimitiveTypeArray<float>(20) is not 20 as expected.";
-
-    delete d;
-}
-
-TEST(DataHandlersTest, PrimitiveDataArrayScaleLocation)
-{
-    Data::DataHandler* d =
-        new Data::PrimitiveTypeArray<float>(20); // Array of 20 float
-    ASSERT_EQ(d->scaleLocation(25, typeid(float)), 5)
-        << "Scaled location is wrong.";
-    ASSERT_EQ(d->scaleLocation(25, typeid(const float[5])), 9)
-        << "Scaled location is wrong.";
-
-    delete d;
-}
-
 TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtNativeType)
 {
     const size_t size{32};
@@ -225,50 +142,6 @@ TEST(DataHandlersTest, PrimitiveDataArrayGetDataAtArray)
     delete d;
 }
 
-TEST(DataHandlersTest, PrimitiveDataArrayGetAddressesAccessed)
-{
-    Data::PrimitiveTypeArray<float> d(100);
-
-    std::vector<size_t> accessedAddresses;
-    ASSERT_NO_THROW(accessedAddresses =
-                        d.getAddressesAccessed(typeid(float), 25))
-        << "No exception should be thrown with a valid type at a valid "
-           "address.";
-    ASSERT_EQ(accessedAddresses.size(), 1)
-        << "Only one address should be accessed with native type at a valid "
-           "address.";
-    ASSERT_EQ(accessedAddresses.at(0), 25)
-        << "Address accessed does not correspond to the requested one.";
-
-    ASSERT_NO_THROW(accessedAddresses =
-                        d.getAddressesAccessed(typeid(float[3]), 50))
-        << "No exception should be thrown with a valid type at a valid "
-           "address.";
-    ASSERT_EQ(accessedAddresses.size(), 3)
-        << "Only one address should be accessed with native type at a valid "
-           "address.";
-    for (int i = 0; i < 3; i++) {
-        ASSERT_EQ(accessedAddresses.at(i), 50 + i)
-            << "Address accessed does not correspond to the requested one.";
-    }
-
-    ASSERT_NO_THROW(accessedAddresses =
-                        d.getAddressesAccessed(typeid(double), 75))
-        << "No exception should be thrown with an invalid type at a valid "
-           "address.";
-    ASSERT_EQ(accessedAddresses.size(), 0)
-        << "No address should be accessed with and invalid type at a valid "
-           "address.";
-
-    ASSERT_NO_THROW(accessedAddresses =
-                        d.getAddressesAccessed(typeid(float[25]), 90))
-        << "No exception should be thrown with a valid type at an invalid "
-           "address.";
-    ASSERT_EQ(accessedAddresses.size(), 0)
-        << "No address should be accessed with and valid type at an invalid "
-           "address.";
-}
-
 TEST(DataHandlersTest, PrimitiveDataArraySetDataAt)
 {
     const size_t size{8};
@@ -351,16 +224,6 @@ TEST(DataHandlersTest, PrimitiveDataArrayClone)
     ASSERT_EQ(dClone->getHash(), hash)
         << "Hash of the clone dataHandler should remain unchanged after "
            "modification of data within the original DataHandler.";
-}
-
-TEST(DataHandlersTest, PrimitiveDataArrayCanNotProvideConstants)
-{
-    Data::DataHandler* d = new Data::PrimitiveTypeArray<int>(4);
-    ASSERT_FALSE(d->canHandle(typeid(Data::Constant)))
-        << "PrimitiveTypeArray<double>() wrongfully say it can provide "
-           "Data::Constant "
-           "data.";
-    delete d;
 }
 
 TEST(DataHandlersTest, PrimitiveDataArrayAssignmentOperator)

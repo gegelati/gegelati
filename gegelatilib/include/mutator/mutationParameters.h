@@ -45,29 +45,88 @@ namespace Mutator {
      */
     typedef struct TPGParameters
     {
+        /// JSon comment
+        inline static const std::string nbActionsComment =
+            "// Number of TPGAction vertex of the initialized TPGGraph.\n"
+            "// This parameter is generally automatically set by the "
+            "LearningEnvironment.\n"
+            "// /* \"nbActions\" : 0,*/ // Commented by default";
         /// Number of TPGAction vertex of the initialized TPGGraph.
         size_t nbActions;
+
+        /// JSon comment
+        inline static const std::string nbRootsComment =
+            "// Number of root TPGTeams to maintain when populating the "
+            "TPGGraph\n"
+            "// \"nbRoots\" : 100, // Default value";
         /// Number of root TPGTeams to maintain when populating the TPGGraph
-        size_t nbRoots;
-        /// Maximum number of TPGEdge connected to each TPGTeam of the TPGGraph.
-        size_t maxInitOutgoingEdges;
-        /// Maximum number of outgoing edge during TPGGraph mutations0
-        size_t maxOutgoingEdges;
+        size_t nbRoots = 100;
+
+        /// JSon comment
+        inline static const std::string maxInitOutgoingEdgesComment =
+            "// Maximum number of TPGEdge connected to each TPGTeam of the "
+            "TPGGraph when\n"
+            "// initialized.\n"
+            "// \"maxInitOutgoingEdges\" : 3, // Default value";
+        /// Maximum number of TPGEdge connected to each TPGTeam of the TPGGraph
+        /// when initialized.
+        size_t maxInitOutgoingEdges = 3;
+
+        /// JSon comment
+        inline static const std::string maxOutgoingEdgesComment =
+            "// Maximum number of outgoing edge during TPGGraph mutations.\n"
+            "// \"maxOutgoingEdges\" : 5, // Default value";
+        /// Maximum number of outgoing edge during TPGGraph mutations.
+        size_t maxOutgoingEdges = 5;
+
+        /// JSon comment
+        inline static const std::string pEdgeDeletionComment =
+            "// Probability of deleting an outgoing Edge of a Team.\n"
+            "// \"pEdgeDeletion\" : 0.7, // Default value";
         /// Probability of deleting an outgoing TPGEdge of a TPGTeam.
-        double pEdgeDeletion;
+        double pEdgeDeletion = 0.7;
+
+        /// JSon comment
+        inline static const std::string pEdgeAdditionComment =
+            "// Probability of adding an outgoing Edge to a Team.\n"
+            "// \"pEdgeAddition\" : 0.7, // Default value";
         /// Probability of adding an outgoing TPGEdge to a TPGTeam.
-        double pEdgeAddition;
+        double pEdgeAddition = 0.7;
+
+        /// JSon comment
+        inline static const std::string pProgramMutationComment =
+            "// Probability of mutating the Program of an outgoing Edge.\n"
+            "// \"pProgramMutation\" : 0.2, // Default value";
         /// Probability of mutating the Program of an outgoing TPGEdge.
-        double pProgramMutation;
+        double pProgramMutation = 0.2;
+
+        /// JSon comment
+        inline static const std::string
+            forceProgramBehaviorChangeOnMutationComment =
+                "// When a Program is mutated, makes sure its behavior is no "
+                "longer the same.\n"
+                "// \"forceProgramBehaviorChangeOnMutation\" : false, // "
+                "Default value";
         /// When a Program is mutated, makes sure its behavior is no longer the
         /// same. (This possibility does not exists in Kelly's work, where only
         /// the archive is used for this purpose, which is far from 100%
         /// accurate.)
         bool forceProgramBehaviorChangeOnMutation = false;
+
+        /// JSon comment
+        inline static const std::string pEdgeDestinationChangeComment =
+            "// Probability of changing the destination of an Edge.\n"
+            "// \"pEdgeDestinationChange\" : 0.1, // Default value";
         /// Probability of changing the destination of a TPGEdge.
-        double pEdgeDestinationChange;
+        double pEdgeDestinationChange = 0.1;
+
+        /// JSon comment
+        inline static const std::string pEdgeDestinationIsActionComment =
+            "// Probability of the new destination of an Edge to be an "
+            "Action.\n"
+            "// \"pEdgeDestinationIsAction\" : 0.5, // Default value";
         /// Probability of the new destination of a TPGEdge to be a TPGAction.
-        double pEdgeDestinationIsAction;
+        double pEdgeDestinationIsAction = 0.5;
     } TPGParameters;
 
     /**
@@ -75,22 +134,61 @@ namespace Mutator {
      */
     typedef struct ProgramParameters
     {
+        /// JSon comment
+        inline static const std::string maxProgramSizeComment =
+            "// Maximum number of Line within the Program of the TPG.\n"
+            "// \"maxProgramSize\" : 96, // Default value";
         /// Maximum number of Line within the Program of the TPGGraph.
-        size_t maxProgramSize;
+        size_t maxProgramSize = 96;
+
+        /// JSon comment
+        inline static const std::string pDeleteComment =
+            "// Probability of deleting a line of the Program.\n"
+            "// \"pDelete\" : 0.5, // Default value";
         /// Probability of deleting a line of the Program.
-        double pDelete;
+        double pDelete = 0.5;
+
+        /// JSon comment
+        inline static const std::string pAddComment =
+            "// Probability of inserting a line in the Program.\n"
+            "// \"pAdd\" : 0.5, // Default value";
         /// Probability of inserting a line in the Program
-        double pAdd;
+        double pAdd = 0.5;
+
+        /// JSon comment
+        inline static const std::string pMutateComment =
+            "// Probability of altering a line of the Program.\n"
+            "// \"pMutate\" : 1.0, // Default value";
         /// Probability of altering a line of the Program.
-        double pMutate;
+        double pMutate = 1.0;
+
+        /// JSon comment
+        inline static const std::string pSwapComment =
+            "// Probability of swapping two lines of the Program.\n"
+            "// \"pSwap\" : 1.0, // Default value";
         /// Probability of swapping two lines of the Program.
-        double pSwap;
+        double pSwap = 1.0;
+
+        /// JSon comment
+        inline static const std::string pConstantMutationComment =
+            "// Probability of each constant to be mutated.\n"
+            "// \"pConstantMutation\" : 0.5, // Default value";
         /// Probability of each constant to be mutated
         double pConstantMutation;
+
+        /// JSon comment
+        inline static const std::string minConstValueComment =
+            "// Minimum constant value possible.\n"
+            "// \"minConstValue\" : -10, // Default value";
         /// Minimum constant value possible
-        int32_t minConstValue;
+        int32_t minConstValue = -100;
+
+        /// JSon comment
+        inline static const std::string maxConstValueComment =
+            "// Maximum constant value possible.\n"
+            "// \"maxConstValue\" : 100, // Default value";
         /// Maximum constant value possible
-        int32_t maxConstValue;
+        int32_t maxConstValue = 100;
     } ProgramParameters;
 
     /**

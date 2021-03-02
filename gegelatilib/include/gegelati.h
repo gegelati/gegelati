@@ -43,6 +43,8 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
+#include <data/array2DWrapper.h>
+#include <data/arrayWrapper.h>
 #include <data/constant.h>
 #include <data/constantHandler.h>
 #include <data/dataHandler.h>
