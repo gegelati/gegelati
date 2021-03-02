@@ -228,6 +228,17 @@ TEST(ArrayWrapperTest, GetLargestAddressSpace)
     delete d;
 }
 
+TEST(ArrayWrapperTest, resetData)
+{
+    // For code coverage.
+    Data::DataHandler* d =
+        new Data::ArrayWrapper<float>(20); // Array of 20 float
+    ASSERT_NO_THROW(d->resetData())
+        << "Reseting data on an ArrayWrapper should not do anything.";
+
+    delete d;
+}
+
 TEST(ArrayWrapperTest, ScaleLocation)
 {
     Data::DataHandler* d =
@@ -257,6 +268,10 @@ TEST(ArrayWrapperTest, Hash)
     values.at(address) = doubleValue;
     d.invalidateCachedHash();
     ASSERT_NE(hash, d.getHash());
+
+    // Tesh Hash of nullptr
+    d.setPointer(nullptr);
+    ASSERT_EQ(d.getHash(), 0);
 }
 
 TEST(ArrayWrapperTest, CanHandleConstants)

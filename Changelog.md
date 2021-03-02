@@ -4,9 +4,11 @@
 _20aa.mm.dd_
 
 ### New features
+* Add ArrayWrapper and ArrayWrapper2D classes inheriting from DataHandler, in the Data namespace. These two classes act as a wrapper between a pointer to std::vector of data, and the DataHandler methods. Contrary to PrimitiveTypeArray and PrimitiveTypeArray2D, there is no need to copy all the data into the ArrayWrappers.
 
 ### Changes
 * Update LABasicLogger to log rewards both on training and validation sets.
+* Update PrimitiveTypeArray and PrimitiveTypeArray2D to be child classes of ArrayWrapper and ArrayWrapper2D, respectively.
 
 ### Bug fix
 * Fix travis config for OSX. Build old doxygen from source because `brew install doxygen` no longer works.
