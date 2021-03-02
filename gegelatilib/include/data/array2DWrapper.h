@@ -90,7 +90,12 @@ namespace Data {
         /// Default destructor
         virtual ~Array2DWrapper() = default;
 
-        /// Inherited from DataHandler
+        /**
+         * \brief Return a PrimitiveTypeArray2D<T> where all data of the
+         * Array2DWrapper has been copied.
+         *
+         * \return a PrimitiveTypeArray2D.
+         */
         virtual DataHandler* clone() const override;
 
         /// Inherited from DataHandler
@@ -113,10 +118,15 @@ namespace Data {
     {
     }
 
+    // Declare the child class for use in clone
+    template <class T> class PrimitiveTypeArray2D;
+
     template <class T> DataHandler* Array2DWrapper<T>::clone() const
     {
-        // TODO
-        return nullptr;
+        // Create a constantCopy of the ArrayWrapper content.
+        DataHandler* result = new PrimitiveTypeArray2D<T>(*this);
+
+        return result;
     }
 
     template <typename T>
@@ -278,3 +288,6 @@ namespace Data {
     }
 } // namespace Data
 #endif // !ARRAY_2D_WRAPPER_H
+
+// Include PrimitiveTypeArray2D to ensure availability of the used clone method.
+#include "data/primitiveTypeArray2D.h"
