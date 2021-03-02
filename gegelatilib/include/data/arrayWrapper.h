@@ -381,3 +381,6 @@ namespace Data {
     }
 } // namespace Data
 #endif // !ARRAY_WRAPPER_H
+
+// Include primitiveType array to ensure availability of the used clone method.
+#include "data/primitiveTypeArray.h"
