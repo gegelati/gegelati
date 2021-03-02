@@ -1,5 +1,10 @@
 /// Json-cpp amalgamated header (http://jsoncpp.sourceforge.net/).
 /// It is intended to be used with #include "json/json.h"
+/// 
+/// This code was slightly modified by K. Desnos for GEGELATI's purpose
+/// Modifications
+/// - Replacing JSon::Value unsigned constructors with a templated one
+///   to support size_t on all OSes and compilers.
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -839,10 +844,16 @@ public:
    */
   Value(ValueType type = nullValue);
   Value(Int value);
-  Value(UInt value);
+  
+  // Portable support for uint, uint64_t, size_t
+  template <typename T>
+  Value(T value) {
+      initBasic(uintValue);
+      value_.uint_ = value;
+  }
+
 #if defined(JSON_HAS_INT64)
   Value(Int64 value);
-  Value(UInt64 value);
 #endif // if defined(JSON_HAS_INT64)
   Value(double value);
   Value(const char* value); ///< Copy til first 0. (NULL causes to seg-fault.)

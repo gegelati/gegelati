@@ -45,16 +45,35 @@ namespace Learn {
     /**
      * \brief Structure for simplifying the transmission of LearningParameters
      * to functions.
+     *
+     * When modifying this structure and its comments, you must also update the
+     * functions in the ParameterParser namespace.
      */
     typedef struct LearningParameters
     {
         /// MutationParameters for controlling stochastic aspects of the
         /// learning process.
         Mutator::MutationParameters mutation;
+
+        /// JSon comment
+        inline static const std::string archiveSizeComment =
+            "// Number of recordings held in the Archive.\n"
+            "// \"archiveSize\" : 50, // Default value";
         /// Number of recordings held in the Archive.
-        size_t archiveSize;
-        /// Probability of archiving each Program execution.
-        double archivingProbability;
+        size_t archiveSize = 50;
+
+        /// JSon comment
+        inline static const std::string archivingProbabilityComment =
+            "// Probability of archiving the result of each Program "
+            "execution.\n"
+            "// \"archivingProbability\" : 0.05, // Default value";
+        /// Probability of archiving the result of each Program execution.
+        double archivingProbability = 0.05;
+
+        /// JSon comment
+        inline static const std::string nbIterationsPerPolicyEvaluationComment =
+            "// Number of evaluation of each root per generation.\n"
+            "// \"nbIterationsPerPolicyEvaluation\" : 5, // Default value";
         /**
          * \brief Number of evaluation of each policy per generation.
          *
@@ -67,18 +86,55 @@ namespace Learn {
          * appears in an evaluation will be nbIterationsPerPolicyEvaluation or
          * a bit higher.
          */
-        uint64_t nbIterationsPerPolicyEvaluation;
-        /// Maximum number of action per evaluation of a policy.
-        uint64_t maxNbActionsPerEval;
-        /// Percentage of deleted (and regenerated) root TPGVertex a each
+        uint64_t nbIterationsPerPolicyEvaluation = 5;
+
+        /// JSon comment
+        inline static const std::string maxNbActionsPerEvalComment =
+            "// Maximum number of actions performed on the learning "
+            "environment during the\n"
+            "// each evaluation of a root.\n"
+            "// \"maxNbActionsPerEval\" : 1000, // Default value";
+        /// Maximum number of actions performed on the learning environment
+        /// during the each evaluation of a root
+        uint64_t maxNbActionsPerEval = 1000;
+
+        /// JSon comment
+        inline static const std::string ratioDeletedRootsComment =
+            "// Percentage of deleted (and regenerated) root TPGVertex at each "
+            "generation.\n"
+            "// \"ratioDeletedRoots\" : 0.5, // Default value";
+        /// Percentage of deleted (and regenerated) root TPGVertex at each
         /// generation.
-        double ratioDeletedRoots;
+        double ratioDeletedRoots = 0.5;
+
+        /// JSon comment
+        inline static const std::string nbGenerationsComment =
+            "// Number of generations of the training.\n"
+            "// \"nbGenerations\" : 500, // Default value";
         /// Number of generations of the training.
-        uint64_t nbGenerations;
+        uint64_t nbGenerations = 500;
+
+        /// JSon comment
+        inline static const std::string maxNbEvaluationPerPolicyComment =
+            "// Maximum number of times a given root is evaluated."
+            "After this number is\n"
+            "// reached, possibly after several generations, the score of the "
+            "root will be\n"
+            "// fixed, and no further evaluation will be done.\n"
+            "// \"maxNbEvaluationPerPolicy\" : 1000, // Default value";
         /// Maximum number of times a given policy (i.e. a root TPGVertex) is
         /// evaluated.
-        size_t maxNbEvaluationPerPolicy;
+        size_t maxNbEvaluationPerPolicy = 1000;
 
+        /// JSon comment
+        inline static const std::string nbIterationsPerJobComment =
+            "// [Only used in AdversarialLearningAgent.]\n"
+            "// Number of times each job is evaluated in the learning "
+            "process.\n"
+            "// Each root may belong to several jobs, hence this parameter "
+            "should be lower\n"
+            "// than the nbIterationsPerPolicyEvaluation parameter.\n"
+            "// \"nbIterationsPerJob\" : 1, // Default value";
         /**
          * \brief Number of evaluations done for each job.
          *
@@ -98,12 +154,28 @@ namespace Learn {
          */
         size_t nbIterationsPerJob = 1;
 
+        /// JSon comment
+        inline static const std::string nbRegistersComment =
+            "// Number of registers for the Program execution.\n"
+            "// \"nbRegisters\" : 8, // Default value";
         /// Number of registers for the Program execution
         size_t nbRegisters = 8;
 
+        /// JSon comment
+        inline static const std::string nbProgramConstantComment =
+            "// Number of Constant available in each Program.\n"
+            "// \"nbProgramConstant\" : 0, // Default value";
         /// Number of Constants available in a program.
         size_t nbProgramConstant = 0;
 
+        /// JSon comment
+        inline static const std::string nbThreadsComment =
+            "// [Only used in ParallelLearningAgent and child classes.]\n"
+            "// Number of threads used for the training process.\n"
+            "// When undefined in the json file, this parameter is "
+            "automatically set to the\n"
+            "// number of cores of the CPU.\n"
+            "// /* \"nbThreads\" : 0,*/ // Commented by default";
         /**
          * \brief Number of threads (ParallelLearningAgent only)
          *
@@ -116,6 +188,12 @@ namespace Learn {
          */
         size_t nbThreads = std::thread::hardware_concurrency();
 
+        /// JSon comment
+        inline static const std::string doValidationComment =
+            "// Boolean used to activate an evaluation of the surviving roots "
+            "in validation\n"
+            "// mode after the training at each generation.\n"
+            "// \"doValidation\" : false, // Default value";
         /// Boolean set to true if the user wants a validation after each
         /// training, and false otherwise
         bool doValidation = false;

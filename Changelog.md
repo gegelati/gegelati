@@ -5,6 +5,7 @@ _20aa.mm.dd_
 
 ### New features
 * Add ArrayWrapper and ArrayWrapper2D classes inheriting from DataHandler, in the Data namespace. These two classes act as a wrapper between a pointer to std::vector of data, and the DataHandler methods. Contrary to PrimitiveTypeArray and PrimitiveTypeArray2D, there is no need to copy all the data into the ArrayWrappers.
+* Learn::LearningParameters can now be exported into a commented JSon file using  the File::ParameterParser::writeParametersToJson() function.
 
 ### Changes
 * Update LABasicLogger to log rewards both on training and validation sets.
