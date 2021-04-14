@@ -123,7 +123,7 @@ namespace Data {
          * Copy nbElements and data from the right side argument to the
          * left side argument
          *
-         * \param[in] other, the left side argument, to be assigned to the right
+         * \param[in] other the left side argument, to be assigned to the right
          * side argument.
          *
          * \return the assigned PrimitiveTypeArray2D
