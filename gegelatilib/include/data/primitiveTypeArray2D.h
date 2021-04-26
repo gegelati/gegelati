@@ -131,7 +131,8 @@ namespace Data {
          * \throws std::domain_error if both arguents do not have the same size,
          * which implies that assignement cannot be successfull.
          */
-        PrimitiveTypeArray2D<T>& operator=(const PrimitiveTypeArray2D<T>& other);
+        PrimitiveTypeArray2D<T>& operator=(
+            const PrimitiveTypeArray2D<T>& other);
     };
 
     template <typename T>

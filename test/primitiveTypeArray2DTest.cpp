@@ -169,11 +169,11 @@ TEST(PrimitiveTypeArray2DTest, PrimitiveDataArray2DAssignmentOperator)
 {
     // Create a DataHandler
     const size_t size{4};
-    auto d = new Data::PrimitiveTypeArray2D<int>(size, size);      // 4x4
+    auto d = new Data::PrimitiveTypeArray2D<int>(size, size); // 4x4
 
     // Fill the array
     d->resetData();
-    for (auto idx = 0; idx < size*size; idx++) {
+    for (auto idx = 0; idx < size * size; idx++) {
         d->setDataAt(typeid(int), idx, idx);
     }
 
@@ -187,14 +187,18 @@ TEST(PrimitiveTypeArray2DTest, PrimitiveDataArray2DAssignmentOperator)
         << "Assigning PrimitiveTypeArray2D with valid size and type failed.";
 
     // Check that data was successfully copied.
-    for (auto idx = 0; idx < size*size; idx++) {
-        ASSERT_EQ( (int)*(d2->getDataAt(typeid(int), idx).getSharedPointer<const int>()), idx)
+    for (auto idx = 0; idx < size * size; idx++) {
+        ASSERT_EQ(
+            (int)*(
+                d2->getDataAt(typeid(int), idx).getSharedPointer<const int>()),
+            idx)
             << "Previously set data did not persist.";
     }
 
     // Check that a wrong assignment throw std::domain_error
     ASSERT_THROW(*d3 = *d, std::domain_error)
-        << "Assigning PrimitiveTypeArray2D with invalid size did not throw domain_error.";
+        << "Assigning PrimitiveTypeArray2D with invalid size did not throw "
+           "domain_error.";
 
     delete d, d2, d3;
 }
