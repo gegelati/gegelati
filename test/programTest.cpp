@@ -333,6 +333,85 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
     delete (&set.getInstruction(2));
 }
 
+TEST_F(ProgramTest, clearIntrons)
+{
+    // Create a new environment with instruction accessing arrays
+    set.add(
+        *new Instructions::LambdaInstruction<const double[2], const double[2]>(
+            [](const double a[2], const double b[2]) {
+                return a[0] * b[0] + a[1] * b[1];
+            }));
+
+    Environment localE(set, vect, 8, 5);
+
+    // Create a program with 2 introns
+    Program::Program p(localE);
+    Program::Line& l1 = p.addNewLine();
+    Program::Line& l2 = p.addNewLine();
+    Program::Line& l3 = p.addNewLine();
+    Program::Line& l4 = p.addNewLine();
+
+    // L4: Register 0 = func(Register {1,2}, DataSource_1{[4],[5]})
+    l4.setDestinationIndex(0);
+    l4.setOperand(0, 0, 1);
+    l4.setOperand(1, 1, 4);
+    l4.setInstructionIndex(2); // Lambda
+
+    // L3: Register 3 = Datasource_1[0] + DataSource_1[0] (Intron)
+    l3.setDestinationIndex(3);
+    l3.setOperand(0, 1, 0);
+    l3.setOperand(1, 1, 0);
+    l3.setInstructionIndex(0);
+
+    // L2: Register 1 = Datasource_1[2] + DataSource_1[2]
+    l2.setDestinationIndex(1);
+    l2.setOperand(0, 1, 2);
+    l2.setOperand(1, 1, 2);
+    l2.setInstructionIndex(0);
+
+    // L1: Register 0 = Register 1 * constant (Intron)
+    l1.setDestinationIndex(0);
+    l1.setOperand(0, 0, 1);
+    l1.setInstructionIndex(1); // MultByConst
+
+    ASSERT_EQ(p.getNbLines(), 4)
+        << "Program length before clearing introns is unexpected.";
+
+    // Clear intron without identifying them first.
+    ASSERT_NO_THROW(p.clearIntrons())
+        << "Clearing introns failed unexpectedly.";
+
+    ASSERT_EQ(p.getNbLines(), 4)
+        << "No Program line should have been removed, as Introns were not "
+           "identified before trying to clear them.";
+
+    // Identify the 2 intron lines.
+    p.identifyIntrons();
+
+    // Clear intron
+    ASSERT_NO_THROW(p.clearIntrons())
+        << "Clearing introns failed unexpectedly.";
+
+    ASSERT_EQ(p.getNbLines(), 2)
+        << "Program length was not affected as expected by intron removal.";
+
+    // Check that remaining lines are the expected ones.
+    ASSERT_EQ(p.getLine(0), l2)
+        << "Remaining line after intron removal is not as expected.";
+    ASSERT_EQ(p.getLine(1), l4)
+        << "Remaining line after intron removal is not as expected.";
+
+    // Check that no inton line remains.
+    uint64_t nbIntrons = 0;
+    ASSERT_NO_THROW(nbIntrons = p.identifyIntrons())
+        << "Identification of intron lines failed unexpectedly.";
+    ASSERT_EQ(nbIntrons, 0)
+        << "Number of identified introns is not as expected.";
+
+    // cleanup
+    delete (&set.getInstruction(2));
+}
+
 TEST_F(ProgramTest, constants)
 {
     // Create a program with constants

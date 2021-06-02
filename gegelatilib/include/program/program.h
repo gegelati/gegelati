@@ -152,6 +152,18 @@ namespace Program {
         Line& addNewLine(const uint64_t idx);
 
         /**
+         * \brief Clear all intron instructions in the Program.
+         *
+         * All introns lines from the Program are removed by this method.
+         * The behavior of the Program should not be modified after a call
+         * to this function.
+         *
+         * Introns should have been identified before calling this methos, as
+         * this method does NOT call the identifyIntrons method.
+         */
+        void clearIntrons();
+
+        /**
          * \brief Remove a Line from the Program.
          *
          * Remove the Line at the given index from the Program and free the

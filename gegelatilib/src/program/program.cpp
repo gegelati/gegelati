@@ -72,6 +72,25 @@ Program::Line& Program::Program::addNewLine(const uint64_t idx)
     return *newLine;
 }
 
+void Program::Program::clearIntrons()
+{
+    size_t index = 0;
+
+    // Scan the lines of the Program.
+    while (index < lines.size()) {
+        // If the Line is an intron
+        if (this->isIntron(index)) {
+            // Remove it
+            this->removeLine(index);
+            // Do not increment index
+        }
+        else {
+            // Next line
+            index++;
+        }
+    }
+}
+
 void Program::Program::removeLine(const uint64_t idx)
 {
     delete this->lines.at(idx).first; // throws std::out_of_range on bad index.
