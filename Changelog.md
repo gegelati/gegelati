@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_20aa.mm.dd_
+## Release version 0.6.0
+_2021.06.02_
 
 ### New features
 * Add `ArrayWrapper` and `ArrayWrapper2D` classes inheriting from `DataHandler`, in the `Data` namespace. These two classes act as a wrapper between a pointer to `std::vector` of data, and the `DataHandler` methods. Contrary to `PrimitiveTypeArray` and `PrimitiveTypeArray2D`, there is no need to copy all the data into the `ArrayWrapper`s.
