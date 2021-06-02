@@ -79,11 +79,10 @@ namespace TPG {
          *
          *	Swaps the TPGGraphs objects.
          */
-        friend inline void swap(TPGGraph& a, TPGGraph& b)
+        inline void swap(TPGGraph& a, TPGGraph& b)
         {
-            using std::swap;
-            swap(a.vertices, b.vertices);
-            swap(a.edges, b.edges);
+            std::swap(a.vertices, b.vertices);
+            std::swap(a.edges, b.edges);
         }
 
         /**
