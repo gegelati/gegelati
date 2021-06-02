@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifndef ARRAY_2D_WRAPPER_H
 #define ARRAY_2D_WRAPPER_H
 
