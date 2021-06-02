@@ -279,6 +279,14 @@ namespace TPG {
          */
         bool setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc);
 
+        /**
+         * \brief Clear all intron instructions in the Program of the TPGGraph.
+         *
+         * This method scans all the Programs associated to the TPGEdge of the
+         * TPGGraph and removes all intron instructions from them.
+         */
+        void clearProgramIntrons();
+
       protected:
         /// Environment of the TPGGraph
         const Environment& env;

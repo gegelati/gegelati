@@ -417,6 +417,20 @@ TEST_F(TPGTest, TPGGraphClear)
         << "Cleared graph is not empty of edges as expected.";
 }
 
+TEST_F(TPGTest, TPGGraphClearProgramIntrons)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGVertex& vertex0 = tpg.addNewTeam();
+    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+    const TPG::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+
+    // Test that the method doesn't fail.
+    ASSERT_NO_THROW(tpg.clearProgramIntrons())
+        << "Clearing the introns from the TPGGraph programs failed.";
+
+    // Real test of TPG unmodified execution in TPGExecutionEngineTest
+}
+
 TEST_F(TPGTest, TPGGraphGetNbRootVertices)
 {
     TPG::TPGGraph tpg(*e);
@@ -653,7 +667,7 @@ TEST_F(TPGTest, TPGMoveOperator)
 
     /*
      *	 T2
-     *	 ^	\
+     *	  ^	\
      *    |	  A4
      *	 T0	/
      */

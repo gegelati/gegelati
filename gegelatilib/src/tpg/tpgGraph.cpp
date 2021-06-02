@@ -308,3 +308,10 @@ std::list<TPG::TPGEdge>::iterator TPG::TPGGraph::findEdge(const TPGEdge* edge)
         this->edges.begin(), this->edges.end(),
         [&edge](TPG::TPGEdge& other) { return &other == edge; });
 }
+
+void TPG::TPGGraph::clearProgramIntrons()
+{
+    for (auto& edge : this->edges) {
+        edge.getProgram().clearIntrons();
+    }
+}
