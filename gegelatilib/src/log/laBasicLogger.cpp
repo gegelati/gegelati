@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -62,10 +62,26 @@ void Log::LABasicLogger::logResults(
 
 void Log::LABasicLogger::logHeader()
 {
+    // First line of header
+    //*this << std::left;
+    *this << std::setw(2 * colWidth) << " " << std::setw(colWidth) << "Train";
+    if (doValidation) {
+        *this << std::setw(2 * colWidth) << " " << std::setw(1 * colWidth)
+              << "Valid";
+    }
+    *this << std::endl;
+
+    // Second line of header
+    //*this << std::right;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
           << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
-          << std::setw(colWidth) << "Max" << std::setw(colWidth) << "T_mutat"
-          << std::setw(colWidth) << "T_eval";
+          << std::setw(colWidth) << "Max";
+    if (doValidation) {
+        *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
+              << std::setw(colWidth) << "Max";
+    }
+    *this << std::setw(colWidth) << "T_mutat" << std::setw(colWidth)
+          << "T_eval";
     if (doValidation) {
         *this << std::setw(colWidth) << "T_valid";
     }
@@ -95,10 +111,7 @@ void Log::LABasicLogger::logAfterEvaluate(
 {
     evalTime = getDurationFrom(*checkpoint);
 
-    // we only log results statistics if there is no validation
-    if (!doValidation) {
-        logResults(results);
-    }
+    logResults(results);
 
     // resets checkpoint to be able to show validation time if there is some
     chronoFromNow();

@@ -5,13 +5,14 @@ _Generic Evolvable Graphs for Efficient Learning of Artificial Tangled Intellige
 " target="_blank"><img align="right" src="./doc/img/GEGELATI_video_screenshoot.png"
 alt="Introduction to GEGELATI" width="260" border="0" /></a>
 
-GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framework for training artificial intelligence based on [Tangled Program Graphs (TPGs)](http://stephenkelly.ca/research_files/Kelly-Stephen-PhD-CSCI-June-2018.pdf). The purpose of this framework, developed as a C++ shared library, is to make it as easy and as fast as possible and to train an agent on a new learning environment. The C++ library is developed to be portable, fully documented, and thoroughly unit tested to ensure its maintainability. GEGELATI is developed at the Institute of Electronics and Telecommunications-Rennes (IETR).
+GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framework for training artificial intelligence based on [Tangled Program Graphs (TPGs)](http://stephenkelly.ca/research_files/Kelly-Stephen-PhD-CSCI-June-2018.pdf). The purpose of this framework, developed as a C++ shared library, is to make it as easy and as fast as possible and to train an agent on a new learning environment. The C++ library is developed to be portable, fully documented, and thoroughly unit tested to ensure its maintainability. GEGELATI is developed at the Institut d'Electronique et des Technologies du numéRique (IETR).
 
 ## Overview
 * [:gear: Continuous Integration](#gear-continuous-integration)
 * [:framed_picture: Application Gallery](#framed_picture-application-gallery)
 * [:hammer_and_wrench: Build and Install the Library](#hammer_and_wrench-build-and-install-the-library)
 * [:book: How to Use the GEGELATI Library](#book-how-to-use-the-gegelati-library)
+* [:mortar_board: Citing GEGELATI](#mortar_board-citing-gegelati)
 * [:balance_scale: License](#balance_scale-license)
 
 ## :gear: Continuous Integration
@@ -108,6 +109,25 @@ target_link_libraries(YOUR_EXECUTABLE ${GEGELATI_LIBRARIES})
 
 ### Utilization Guide
 _(10.000 pages of documentation (or less) coming soon...)_
+
+## :mortar_board: Citing GEGELATI
+If you use, ~criticize,~ or praise GEGELATI in your research, please cite the following:
+
+*K. Desnos, N. Sourbier, P.-Y. Raumer, O. Gesny and M. Pelcat. GEGELATI: Lightweight Artificial Intelligence through Generic and Evolvable Tangled Program Graphs. In Workshop on Design and Architectures for Signal and Image Processing (DASIP), ACM, 2021*
+
+Or using Bibtex:
+```bibtex
+@inproceedings{Desnos_GEGELATI_2021,
+  title = {GEGELATI: Lightweight Artificial Intelligence through Generic and Evolvable Tangled Program Graphs},
+  author = {Karol Desnos and Nicolas Sourbier and Pierre-Yves Raumer and Olivier Gesny and Maxime Pelcat },
+  year = {2021},
+  date = {2021-01-18},
+  booktitle = {Workshop on Design and Architectures for Signal and Image Processing (DASIP)},
+  publisher = {ACM},
+  address = {Budapest, Hungary},
+  series = {International Conference Proceedings Series (ICPS)},
+}
+```
 
 ## :balance_scale: License
 This project is distributed under the CeCILL-C license (see [LICENSE file](LICENSE.txt)).

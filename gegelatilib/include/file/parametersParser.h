@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -68,6 +68,13 @@ namespace File {
          */
         void loadParametersFromJson(const char* path,
                                     Learn::LearningParameters& params);
+
+        /**
+         * \brief Write the LearningParameters given as arguments into the file
+         * at the given path, using the JSON format.
+         */
+        void writeParametersToJson(const char* path,
+                                   const Learn::LearningParameters& params);
 
         /**
          * \brief Given a parameter name, sets its value in given

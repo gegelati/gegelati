@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -43,6 +43,8 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
+#include <data/array2DWrapper.h>
+#include <data/arrayWrapper.h>
 #include <data/constant.h>
 #include <data/constantHandler.h>
 #include <data/dataHandler.h>

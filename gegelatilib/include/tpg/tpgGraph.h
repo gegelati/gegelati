@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -278,6 +278,14 @@ namespace TPG {
          * the operation was successful, false otherwise.
          */
         bool setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc);
+
+        /**
+         * \brief Clear all intron instructions in the Program of the TPGGraph.
+         *
+         * This method scans all the Programs associated to the TPGEdge of the
+         * TPGGraph and removes all intron instructions from them.
+         */
+        void clearProgramIntrons();
 
       protected:
         /// Environment of the TPGGraph

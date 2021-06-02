@@ -1,7 +1,6 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
  *
- * Cedric Leonard <cleonard@insa-rennes.fr> (2021)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -36,19 +35,19 @@
 
 #include <gtest/gtest.h>
 
-#include "data/primitiveTypeArray2D.h"
+#include "data/array2DWrapper.h"
+#include "data/dataHandler.h"
 
-TEST(PrimitiveTypeArray2DTest, Constructors)
+TEST(Array2DWrapperTest, Constructor)
 {
-    Data::PrimitiveTypeArray2D<double>* array;
-    ASSERT_NE(array = new Data::PrimitiveTypeArray2D<double>(3, 4), nullptr)
-        << "A PrimitiveTypeArray2D<double> could not be built successfully.";
-
-    ASSERT_NO_THROW(delete array)
-        << "PrimitiveTypeArray2D could not be deleted.";
+    std::vector<double> values{0.0, 1.1, 2.2, 3.3, 4.4, 5.5};
+    ASSERT_NO_THROW({
+        Data::DataHandler* d = new Data::Array2DWrapper<double>(2, 3, &values);
+        delete d;
+    }) << "Call to ArrayWrapper constructor failed.";
 }
 
-TEST(PrimitiveTypeArray2DTest, Clone)
+TEST(Array2DWrapperTest, Clone)
 {
     // Create a DataHandler
     const size_t width{8}, height{3};
@@ -57,30 +56,29 @@ TEST(PrimitiveTypeArray2DTest, Clone)
     std::vector<double> values(width * height);
 
     // create a first one to increase the DataHandler::count
-    Data::PrimitiveTypeArray2D<int> d0(12, 10);
-    Data::PrimitiveTypeArray2D<double> d(width, height);
+    Data::Array2DWrapper<int> d0(12, 10);
+    Data::Array2DWrapper<double> d(width, height, &values);
     // change the content of the array
-    d.setDataAt(typeid(double), address, doubleValue);
+    values.at(address) = doubleValue;
+    d.invalidateCachedHash();
     // Hash was voluntarily not computed before clone.
 
     // Create a clone
     Data::DataHandler* dClone = NULL;
     ASSERT_NO_THROW(dClone = d.clone();)
-        << "Cloning a PrimitiveTypeArray2D<double> failed.";
+        << "Cloning a Array2DWrapper<double> failed.";
 
     // Extra if to remove warnings on further use of dClone.
     if (dClone == NULL)
-        FAIL() << "Cloning of PrimitiveTypeArray2D returned a NULL Pointer.";
+        FAIL() << "Cloning of Array2DWrapper returned a NULL Pointer.";
 
     // Check ID
     ASSERT_EQ(dClone->getId(), d.getId())
-        << "Cloned and original PrimitiveTypeArray2D do not have the same ID "
-           "as "
+        << "Cloned and original Array2DWrapper do not have the same ID as "
            "expected.";
     // Check the polymorphic type.
     ASSERT_EQ(typeid(*dClone), typeid(Data::PrimitiveTypeArray2D<double>))
-        << "Type of clone PrimitiveTypeArray2D is not a PrimitiveTypeArray2D "
-           "as "
+        << "Type of clone Array2DWrapper is not a PrimitiveTypeArray2D as "
            "expected.";
     // Compute the hashes
     ASSERT_EQ(dClone->getHash(), d.getHash())
@@ -88,8 +86,8 @@ TEST(PrimitiveTypeArray2DTest, Clone)
 
     // Change data in the original to make sure the two dHandlers are decoupled.
     size_t hash = dClone->getHash();
-    d.setDataAt(typeid(double), address + 1, doubleValue + 1.0);
-    ((Data::PrimitiveTypeArray2D<double>*)dClone)->invalidateCachedHash();
+    values.at(address + 1) = doubleValue + 1.0;
+    d.invalidateCachedHash();
     ASSERT_NE(dClone->getHash(), d.getHash())
         << "Hash of clone and original DataHandler should differ after "
            "modification of data in the original.";
@@ -107,16 +105,94 @@ TEST(PrimitiveTypeArray2DTest, Clone)
     delete dClone;
 }
 
-TEST(PrimitiveTypeArray2DTest, getDataAt)
+TEST(Array2DWrapperTest, getAddressesAccessed)
+{
+    const size_t h = 10;
+    const size_t w = 12;
+    Data::Array2DWrapper<float> a(w, h);
+
+    // Primitive type
+    std::vector<size_t> addr;
+    ASSERT_NO_THROW(addr = a.getAddressesAccessed(typeid(float), 50))
+        << "Retrieving the vector for a valid primitive type failed.";
+    ASSERT_EQ(addr.size(), 1)
+        << "Incorrect number of addresses accessed was returned.";
+    ASSERT_EQ(addr[0], 50) << "Incorrect address was returned.";
+
+    // 1D array
+    ASSERT_NO_THROW(addr = a.getAddressesAccessed(typeid(float[5]), 38))
+        << "Retrieving the vector for a valid primitive type failed.";
+    ASSERT_EQ(addr.size(), 5)
+        << "Incorrect number of addresses accessed was returned.";
+    auto baseAddress = ((38) / (w - 5 + 1) * w) + ((38) % (w - 5 + 1));
+    for (auto idx = 0; idx < 5; idx++) {
+        ASSERT_EQ(addr[idx], baseAddress + idx)
+            << "Incorrect address was returned.";
+    }
+
+    // 2D array
+    ASSERT_NO_THROW(addr = a.getAddressesAccessed(typeid(float[5][3]), 42))
+        << "Retrieving the vector for a valid primitive type failed.";
+    ASSERT_EQ(addr.size(), 5 * 3)
+        << "Incorrect number of addresses accessed was returned.";
+    baseAddress = ((42) / (w - 3 + 1) * w) + ((42) % (w - 3 + 1));
+    for (auto idxH = 0; idxH < 5; idxH++) {
+        for (auto idxW = 0; idxW < 3; idxW++) {
+            ASSERT_EQ(addr[idxH * 3 + idxW], baseAddress + (idxH * w) + idxW)
+                << "Incorrect address was returned.";
+        }
+    }
+}
+
+TEST(Array2DWrapperTest, getAddressSpace)
+{
+    size_t h = 3;
+    size_t w = 5;
+    Data::Array2DWrapper<int> a(w, h);
+
+    // Check primitive type provided by 1D array
+    ASSERT_EQ(a.getAddressSpace(typeid(int)), w * h)
+        << "Address space of the 2D array of int is not width*height for "
+           "typeid(int).";
+
+    ASSERT_EQ(a.getAddressSpace(typeid(int[2])), (w - 2 + 1) * h)
+        << "Address space of the 2D array of int is not correct for "
+           "typeid(int[2]).";
+
+    // Request a 2D array with valid dimensions
+    ASSERT_EQ(a.getAddressSpace(typeid(int[2][4])), (w - 4 + 1) * (h - 2 + 1))
+        << "Returned address space for int[2][4] in a 2D int array of size 5x3 "
+           "is incorrect.";
+
+    // Request a const 2D array with valid dimensions
+    ASSERT_EQ(a.getAddressSpace(typeid(const int[2][4])),
+              (w - 4 + 1) * (h - 2 + 1))
+        << "Returned address space for int[2][4] in a 2D int array of size 5x3 "
+           "is incorrect.";
+
+    // Request a 2D array with invalid dimensions
+    ASSERT_EQ(a.getAddressSpace(typeid(int[4][2])), 0)
+        << "Returned address space for int[4][2] in a 2D int array of size 5x3 "
+           "is incorrect.";
+
+    // Request a 2D array with invalid type
+    ASSERT_EQ(a.getAddressSpace(typeid(long[1][1])), 0)
+        << "Returned address space for int[4][2] in a 2D int array of size 5x3 "
+           "is incorrect.";
+}
+
+TEST(Array2DWrapperTest, getDataAt)
 {
     const size_t h = 3;
     const size_t w = 5;
-    Data::PrimitiveTypeArray2D<int> a(w, h);
+    std::vector<int> values(h * w);
+    Data::Array2DWrapper<int> a(w, h, &values);
 
     // Fill the array
     for (auto idx = 0; idx < h * w; idx++) {
-        a.setDataAt(typeid(int), idx, idx);
+        values.at(idx) = idx;
     }
+    a.invalidateCachedHash();
 
     // Check primitive type provided by 1D array
     for (auto idx = 0; idx < h * w; idx++) {
@@ -164,42 +240,4 @@ TEST(PrimitiveTypeArray2DTest, getDataAt)
     // No alternative test to put here.. out of range access to memory _may_
     // happen without being detected.
 #endif
-}
-
-TEST(PrimitiveTypeArray2DTest, PrimitiveDataArray2DAssignmentOperator)
-{
-    // Create a DataHandler
-    const size_t size{4};
-    auto d = new Data::PrimitiveTypeArray2D<int>(size, size); // 4x4
-
-    // Fill the array
-    d->resetData();
-    for (auto idx = 0; idx < size * size; idx++) {
-        d->setDataAt(typeid(int), idx, idx);
-    }
-
-    // Create another DataHandler with the same size
-    auto d2 = new Data::PrimitiveTypeArray2D<int>(size, size);
-    // Create another DataHandler with a different size
-    auto d3 = new Data::PrimitiveTypeArray2D<int>(size - 1, size - 1);
-
-    // Check that assignment do not throw std::domain_error
-    ASSERT_NO_THROW(*d2 = *d)
-        << "Assigning PrimitiveTypeArray2D with valid size and type failed.";
-
-    // Check that data was successfully copied.
-    for (auto idx = 0; idx < size * size; idx++) {
-        ASSERT_EQ(
-            (int)*(
-                d2->getDataAt(typeid(int), idx).getSharedPointer<const int>()),
-            idx)
-            << "Previously set data did not persist.";
-    }
-
-    // Check that a wrong assignment throw std::domain_error
-    ASSERT_THROW(*d3 = *d, std::domain_error)
-        << "Assigning PrimitiveTypeArray2D with invalid size did not throw "
-           "domain_error.";
-
-    delete d, d2, d3;
 }

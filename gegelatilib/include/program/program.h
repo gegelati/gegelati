@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -150,6 +150,18 @@ namespace Program {
          * the Program.
          */
         Line& addNewLine(const uint64_t idx);
+
+        /**
+         * \brief Clear all intron instructions in the Program.
+         *
+         * All introns lines from the Program are removed by this method.
+         * The behavior of the Program should not be modified after a call
+         * to this function.
+         *
+         * Introns should have been identified before calling this methos, as
+         * this method does NOT call the identifyIntrons method.
+         */
+        void clearIntrons();
 
         /**
          * \brief Remove a Line from the Program.

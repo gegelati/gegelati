@@ -1,5 +1,21 @@
 # GEGELATI Changelog
 
+## Release version 0.6.0
+_2021.06.02_
+
+### New features
+* Add `ArrayWrapper` and `ArrayWrapper2D` classes inheriting from `DataHandler`, in the `Data` namespace. These two classes act as a wrapper between a pointer to `std::vector` of data, and the `DataHandler` methods. Contrary to `PrimitiveTypeArray` and `PrimitiveTypeArray2D`, there is no need to copy all the data into the `ArrayWrapper`s.
+* `Learn::LearningParameters` can now be exported into a commented JSon file using the `File::ParameterParser::writeParametersToJson()` function.
+* Add an assignment operator `operator=` to `PrimitiveTypeArray`and `PrimitiveTypeArray2D`.
+* Add methods to clear introns from Program and TPGGraph.
+
+### Changes
+* Update `LABasicLogger` to log rewards both on training and validation sets.
+* Update `PrimitiveTypeArray` and `PrimitiveTypeArray2D` to be child classes of `ArrayWrapper` and `ArrayWrapper2D`, respectively.
+
+### Bug fix
+* Fix travis config for OSX. Build old doxygen from source because `brew install doxygen` no longer works.
+
 ## Release version 0.5.1
 _2020.10.18_
 
@@ -16,14 +32,14 @@ _2020.10.18_
 _2020.10.16_
 
 ### New features
-* Optionnaly, it is now possible to force a Program to have a new behavior after being mutated. 
+* Optionnaly, it is now possible to force a Program to have a new behavior after being mutated.
     * New methods were added for testing equality of `Program::Line` and `Program::Program`. Program equality is based on an analysis of non-intron lines of the Program.
-    * Mutation of the Program behavior is enforced by comparing its state before and after being mutated. This comparison can be activated complementary to the legacy archiving mechanism from Kelly's PhD. 
+    * Mutation of the Program behavior is enforced by comparing its state before and after being mutated. This comparison can be activated complementary to the legacy archiving mechanism from Kelly's PhD.
     * The `tpg.forceProgramBehaviorChangeOnMutation` boolean was added to the MutationParameters.
-    
-* Optionnaly, it is now possible to use constants during the training. 
+
+* Optionnaly, it is now possible to use constants during the training.
    * A fixed number of constants can be defined in the parameters. They can be used by instructions designed to use the Data::Constant types.
-   * Mutations of the program affect the values of the constants. A constant is mutated with a probability and bounds defined as MutationParameters. 
+   * Mutations of the program affect the values of the constants. A constant is mutated with a probability and bounds defined as MutationParameters.
 
 ### Changes
 * The Parameter stored within Instructions have been removed entirely. Similar behavior is now supported by newly introduced Data::Constant that belong to Program instead of Instruction.
@@ -108,7 +124,7 @@ _2020.06.03_
 * Learning agents (`Learn::LearningAgent` and `Learn::ParallelLearningAgent`) now keep a record of the root `TPGVertex` that has led to the best `EvaluationResult` throughout the training process. This root and the associated evaluation result can be retrieved using the new `getBestRoot()` method.
 * New TPG::PolicyStats class for analyzing the topology and the Program of a TPG::TPGGraph starting from a given root TPG::TPGVertex.
 * In Learn::EvaluationResult:
-    * A new attribute `nbEvaluation` was added to count the number of times the associated policy was evaluated to produce this result. 
+    * A new attribute `nbEvaluation` was added to count the number of times the associated policy was evaluated to produce this result.
     * A new addition assignment operator (`operator+=`) can be used to combine two existing EvaluationResult.
 * Learn::LearningAgent now store EvaluationResult for each non-decimated root TPGVertex. Each time a root is reevaluated, its EvaluationResult is updated by combining it with the new result. The number of evaluation of each policy (i.e. each root TPGVertex) can now be bounded using the Learn::LearningParameters::maxNbEvaluationPerPolicy parameter. Passed this number, previous EvaluationResult for this root, stored by the LearningAgent, will directly be returned instead of reevaluating the root.
 

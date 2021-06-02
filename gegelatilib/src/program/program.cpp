@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -70,6 +70,25 @@ Program::Line& Program::Program::addNewLine(const uint64_t idx)
     this->lines.insert(lines.begin() + idx, {newLine, false});
 
     return *newLine;
+}
+
+void Program::Program::clearIntrons()
+{
+    size_t index = 0;
+
+    // Scan the lines of the Program.
+    while (index < lines.size()) {
+        // If the Line is an intron
+        if (this->isIntron(index)) {
+            // Remove it
+            this->removeLine(index);
+            // Do not increment index
+        }
+        else {
+            // Next line
+            index++;
+        }
+    }
 }
 
 void Program::Program::removeLine(const uint64_t idx)
