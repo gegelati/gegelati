@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -307,4 +307,11 @@ std::list<TPG::TPGEdge>::iterator TPG::TPGGraph::findEdge(const TPGEdge* edge)
     return std::find_if(
         this->edges.begin(), this->edges.end(),
         [&edge](TPG::TPGEdge& other) { return &other == edge; });
+}
+
+void TPG::TPGGraph::clearProgramIntrons()
+{
+    for (auto& edge : this->edges) {
+        edge.getProgram().clearIntrons();
+    }
 }

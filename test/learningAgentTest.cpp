@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -35,12 +35,14 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#include <algorithm>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <numeric>
 
 #include "log/laBasicLogger.h"
 
+#include "tpg/policyStats.h"
 #include "tpg/tpgGraph.h"
 
 #include "instructions/addPrimitiveType.h"
@@ -573,6 +575,68 @@ TEST_F(LearningAgentTest, KeepBestPolicy)
     ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), 1)
         << "A single root TPGVertex should remain in the TPGGraph when keeping "
            "the best policy only";
+}
+
+TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 1;
+    params.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 5;
+
+    Learn::LearningAgent la(le, set, params);
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    la.keepBestPolicy();
+
+    TPG::TPGGraph& tpg = la.getTPGGraph();
+
+    // Get policy stats
+    TPG::PolicyStats psOrigin;
+    psOrigin.setEnvironment(tpg.getEnvironment());
+    psOrigin.analyzePolicy(tpg.getRootVertices().at(0));
+
+    // Check the presence of introns
+    ASSERT_GT(std::accumulate(psOrigin.nbIntronPerProgram.begin(),
+                              psOrigin.nbIntronPerProgram.end(), size_t(0)),
+              0)
+        << "TPGGraph has no introns in its programs after training.";
+
+    // Record the behavior of the TPG with introns
+    le.reset();
+    TPG::TPGExecutionEngine tee(tpg.getEnvironment());
+    std::vector<const TPG::TPGVertex*> pathOrigin =
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0)));
+
+    // Clear introns
+    tpg.clearProgramIntrons();
+
+    // Get new policy stats
+    TPG::PolicyStats psNoIntrons;
+    psNoIntrons.setEnvironment(tpg.getEnvironment());
+    psNoIntrons.analyzePolicy(tpg.getRootVertices().at(0));
+
+    // Compare
+    ASSERT_EQ(std::accumulate(psNoIntrons.nbIntronPerProgram.begin(),
+                              psNoIntrons.nbIntronPerProgram.end(), size_t(0)),
+              0)
+        << "TPGGraph still contains introns after they were cleared.";
+
+    // Check that the behavior is identical (empirically, not really foolproof)
+    std::vector<const TPG::TPGVertex*> pathNoIntrons =
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0)));
+
+    ASSERT_EQ(pathOrigin.size(), pathNoIntrons.size())
+        << "Path length in TPG before and after inton removal is not "
+           "identical.";
+    for (auto idx = 0; idx < pathOrigin.size(); idx++) {
+        ASSERT_EQ(pathOrigin.at(idx), pathNoIntrons.at(idx))
+            << "Path element in TPGGraph changed when removing introns.";
+    }
 }
 
 TEST_F(ParallelLearningAgentTest, Constructor)
