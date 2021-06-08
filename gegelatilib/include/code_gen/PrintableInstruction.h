@@ -43,22 +43,36 @@
 #include "instructions/instruction.h"
 
 namespace Instructions {
+    /**
+     * \brief This abstract class is the base class for any instruction to be
+     * used for the code generation.
+     *
+     * A PrintableInstruction declares a format that will be used to generate
+     * the equivalent C code. The data in the format are represented with
+     * a $ followed by a number. $0 correspond to the result of the function
+     *
+     */
     class PrintableInstruction : virtual public Instructions::Instruction
     {
       public:
-        bool isFormatValid();
+//        bool isFormatValid();
 
         /**
-        * \brief This function generate the line of code according to the format of the instruction
-        * The operand of the format are replaced by the value
+        * \brief This function return the format of the line of code used to
+        * represent the instruction
         *
-
-        * The definition of this constructor initialize //TODO complete pas ici
+        *
         */
-        const std::string& getFormat();
+        const std::string& getFormat() const;
 
+        /**
+        * \brief This function return true for a PrintableInstruction and all
+        * its derivative class
+        *
+        *
+        */
 
-
+        bool isPrintable() const override;
       protected:
         /**
         * \brief Protected constructor to force the class abstract nature.
@@ -67,6 +81,7 @@ namespace Instructions {
         */
         PrintableInstruction();
 
+        /// format of the instruction used to generate the code
         std::string format;
     };
 } // namespace Instructions

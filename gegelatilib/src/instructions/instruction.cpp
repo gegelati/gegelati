@@ -84,3 +84,7 @@ double Instruction::execute(
     return 1.0;
 #endif
 }
+bool Instruction::isPrintable() const
+{
+    return false;
+}

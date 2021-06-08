@@ -104,6 +104,19 @@ namespace Instructions {
          */
         virtual double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const = 0;
+        /**
+        * \brief Say if an instruction can be used to generate C code.
+        *
+        * Derived class should implement their own behavior for this method. In
+        * case of invalid arguments, for type or number or value
+        * reason, this method should always return 0.0.
+        *
+        * \return the default implementation of the Intruction
+        * class returns false if the instruction is Printable (derived from
+        * PrintableInstruction) return true.
+        */
+
+        virtual bool isPrintable() const;
 
       protected:
         /**

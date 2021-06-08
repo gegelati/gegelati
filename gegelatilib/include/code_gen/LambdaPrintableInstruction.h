@@ -41,6 +41,16 @@
 #define GEGELATI_LAMBDAPRINTABLEINSTRUCTION_H
 #include "PrintableInstruction.h"
 namespace Instructions {
+    /**
+     * \brief Template instruction for simplifying the creation of an
+     * PrintableInstruction from a c++ lambda function.
+     *
+     * Template parameters First and Rest can be any primitive type, class or
+     * const c-style 1D and 2D array.
+     *
+     * Each template parameter corresponds to an argument of the function given
+     * to the LambdaInstruction constructor, specifying its type.
+     */
     template <typename First, typename... Rest>
     class LambdaPrintableInstruction : public Instructions::PrintableInstruction
     {
@@ -56,11 +66,16 @@ namespace Instructions {
         /**
          * \brief Constructor for the LambdaInstruction.
          *
+         * \param[in] format the std::string used to compute the function in the
+         * generated code. The result of the function is represented with $0.
+         * The first parameter correspond to $1 then $2...
+         *
          * \param[in] function the c++ std::function that will be executed for
          * this Instruction. The function must have the same types in its
          * argument list as specified by the template parameters. (checked at
          * compile time)
-         */
+         *
+         **/
         LambdaPrintableInstruction(std::string format, std::function<double(First, Rest...)> function)
         : func{function}
         {
@@ -69,6 +84,8 @@ namespace Instructions {
             // Fold expression to push all other types
             (this->operandTypes.push_back(typeid(Rest)), ...);
         };
+
+
 
     };
 } // namespace Instructions

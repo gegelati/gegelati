@@ -39,16 +39,20 @@
 
 #include "code_gen/PrintableInstruction.h"
 
-bool Instructions::PrintableInstruction::isFormatValid()
-{
-    return false;
-}
+//bool Instructions::PrintableInstruction::isFormatValid()
+//{
+//    return false;
+//}
 
 Instructions::PrintableInstruction::PrintableInstruction() : Instructions::Instruction{}, format{}{
 }
-const std::string& Instructions::PrintableInstruction::getFormat()
+const std::string& Instructions::PrintableInstruction::getFormat() const
 {
     return this->format;
+}
+bool Instructions::PrintableInstruction::isPrintable() const
+{
+    return true;
 }
 
 //std::string Instructions::PrintableInstruction::print(
