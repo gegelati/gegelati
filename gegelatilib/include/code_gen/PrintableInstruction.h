@@ -52,7 +52,7 @@ namespace Instructions {
      * a $ followed by a number. $0 correspond to the result of the function
      *
      */
-    class PrintableInstruction : virtual public Instructions::Instruction
+    class PrintableInstruction : public Instructions::Instruction
     {
       public:
 //        bool isFormatValid();

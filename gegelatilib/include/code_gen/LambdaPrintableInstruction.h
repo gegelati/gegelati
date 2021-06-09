@@ -85,8 +85,109 @@ namespace Instructions {
             (this->operandTypes.push_back(typeid(Rest)), ...);
         };
 
+        /// Inherited from Instruction
+        virtual bool checkOperandTypes(
+                const std::vector<Data::UntypedSharedPtr>& arguments) const override
+        {
+            if (arguments.size() != this->operandTypes.size()) {
+                return false;
+            }
 
+            // List of expected types
+            const std::vector<std::reference_wrapper<const std::type_info>>
+                    expectedTypes{
+                    // First
+                    (!std::is_array<First>::value)
+                    ? typeid(First)
+                    : typeid(std::remove_all_extents_t<First>[]),
+                    (!std::is_array<Rest>::value)
+                    ? typeid(Rest)
+                    : typeid(std::remove_all_extents_t<Rest>[])...};
 
+            for (auto idx = 0; idx < arguments.size(); idx++) {
+                // Argument Type
+                const std::type_info& argType = arguments.at(idx).getType();
+                if (argType != expectedTypes.at(idx).get()) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        double execute(
+                const std::vector<Data::UntypedSharedPtr>& args) const override
+        {
+
+#ifndef NDEBUG
+            if (Instruction::execute(args) != 1.0) {
+                return 0.0;
+            }
+#endif
+            double result =
+                    doExecution(args, std::index_sequence_for<Rest...>{});
+
+            return result;
+        };
+
+    private:
+        /**
+         * \brief Template function to handle variadic parameter pack expansion.
+         *
+         * In order to call the LambdaInstruction::func function, the arguments
+         * given as a std::vector to the execute method must be expanded using
+         * the template parameter expansion pack. In order to index arguments in
+         * args, a second layer of template function is needed to expand an
+         * std::index_sequence making it possible to index args at compile time.
+         * This is the purpose of this method.
+         *
+         * \param[in] args The argument for the func execution, stored in an
+         * std::vector.
+         * \tparam I the std::index_sequence used to access args.
+         */
+        template <size_t... I>
+        double doExecution(const std::vector<Data::UntypedSharedPtr>& args,
+                           std::index_sequence<I...>) const
+        {
+            return this->func(
+                    getDataFromUntypedSharedPtr<First>(args, 0),
+                    getDataFromUntypedSharedPtr<Rest>(args, I + 1)...);
+        }
+
+        /**
+         * \brief Function to retrieve the shared pointer from any datatype in
+         * the execute method.
+         *
+         * An inline lambda expression could be used in the execute method, with
+         * a variadic parameter pack expansion. Unfortunately not supported by
+         * GCC7.5
+         *
+         * Template parameter T is the Type of the retrieved argument.
+         *
+         * \param[in] args the UntypedSharedPtr of all arguments.
+         * \param[in] idx the current index in the args list.
+         * \return the appropriate argument for this->func.
+         */
+        template <typename T,
+                typename MINUS_EXTENT = typename std::remove_extent<T>::type,
+                typename RETURN_TYPE = typename std::conditional<
+                        !std::is_array<MINUS_EXTENT>::value,
+                        typename std::remove_all_extents<T>::type*,
+                        MINUS_EXTENT*>::type>
+        constexpr auto getDataFromUntypedSharedPtr(
+                const std::vector<Data::UntypedSharedPtr>& args, size_t idx) const
+        {
+            if constexpr (!std::is_array<T>::value) {
+                return *(args.at(idx).getSharedPointer<const T>());
+            }
+            else {
+                return (RETURN_TYPE)(
+                        args.at(idx)
+                                .getSharedPointer<
+                                        const std::remove_all_extents_t<T>[]>())
+                        .get();
+            };
+        };
     };
 } // namespace Instructions
 
