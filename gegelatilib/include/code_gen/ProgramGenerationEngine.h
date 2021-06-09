@@ -38,10 +38,59 @@
 
 #ifndef GEGELATI_PROGRAMGENERATIONENGINE_H
 #define GEGELATI_PROGRAMGENERATIONENGINE_H
+#include "PrintableInstruction.h"
+#include "program/programEngine.h"
+#include <fstream>
 
-class ProgramGenerationEngine
-{
-};
+namespace Program {
+    /**
+     *  \brief Class in charge of generating a Program.
+     */
+    class ProgramGenerationEngine : public ProgramEngine
+    {
+      protected:
+        static const std::regex operand_regex;
+        static const std::string nameRegVariable;
+
+        /// The file in which the program will be added
+        std::ofstream file;
+
+
+      public:
+        /**
+         * \brief Constructor of the class
+         *
+         * The constructor initialize the member of the parent class (ProgramEngine)
+         * and the file "filename" is open with the flag std::ofstream::app
+         * to generate the program in the file.
+         *
+         * \param[in] filename
+         * \param[in] env
+         */
+
+        ProgramGenerationEngine(std::string filename,const Environment& env)
+            : ProgramEngine(env){
+            this->file.open(filename, std::ofstream::out | std::ofstream::app);
+        }
+        /**
+         * \brief destructor
+         *
+         * close the file
+         */
+
+         ~ProgramGenerationEngine(){
+            file.close();
+        }
+
+        void generateCurrentLine();
+
+        void generateProgram(const bool ignoreException = false);
+
+      protected:
+        std::string completeFormat(const Instructions::PrintableInstruction&, std::vector<Data::UntypedSharedPtr>) const;
+    };
+
+} // namespace Program
 
 #endif // GEGELATI_PROGRAMGENERATIONENGINE_H
 

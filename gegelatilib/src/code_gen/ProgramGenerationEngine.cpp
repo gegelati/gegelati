@@ -38,4 +38,96 @@
 
 #include "code_gen/ProgramGenerationEngine.h"
 
+const std::regex Program::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
+const std::string Program::ProgramGenerationEngine::nameRegVariable("reg");
+
+void Program::ProgramGenerationEngine::generateCurrentLine()
+{
+    std::vector<Data::UntypedSharedPtr> operand;
+
+    const Line& line = this->getCurrentLine();
+    const Instructions::Instruction& instruction = this->getCurrentInstruction();
+    this->fetchCurrentOperands(operand);
+
+    if(instruction.isPrintable()){
+        auto prtIns = dynamic_cast<const Instructions::PrintableInstruction*>(&instruction);
+        if (prtIns != nullptr){
+            std::string codeLine = completeFormat(*prtIns,operand);
+            file << "\t" << codeLine << std::endl;
+        }
+        else{
+            throw std::runtime_error("The pointer on the instruction cannot be"
+                                     " converted to a pointer on a printable"
+                                     "instruction.");
+        }
+    }
+    else{
+        throw std::runtime_error("Could not generate the line, the line is not printable");
+    }
+
+}
+void Program::ProgramGenerationEngine::generateProgram(const bool ignoreException)
+{
+    // print function (signature) double P...(data::){
+    file << "\ndouble P1(){" << std::endl;
+
+    // instanciate register
+    file << "\tdouble "<< nameRegVariable <<"[" << program->getEnvironment().getNbRegisters() << "];" << std::endl;
+    this->programCounter = 0;
+
+    // Iterate over the lines of the Program
+    bool hasNext = this->program->getNbLines() > 0;
+
+    // Skip first lines if they are introns.
+    if (hasNext && this->program->isIntron(0)) {
+        hasNext = this->next();
+    }
+
+    // Execute useful lines
+    while (hasNext) {
+        try {
+            // generate the current line
+            this->generateCurrentLine();
+        }
+        catch (std::out_of_range e) {
+            if (!ignoreException) {
+                throw; // rethrow
+            }
+        }
+
+        // Increment the programCounter.
+        hasNext = this->next();
+    };
+    file << "\treturn reg[0];\n}" << std::endl;
+
+
+}
+std::string Program::ProgramGenerationEngine::completeFormat(
+    const Instructions::PrintableInstruction& ins, std::vector<Data::UntypedSharedPtr> operand) const
+{
+    const std::string& format = ins.getFormat();
+    std::string codeLine(format);
+    std::string reg;
+    for(auto itr = std::sregex_iterator(format.begin(), format.end(), operand_regex); itr != std::sregex_iterator(); ++itr){
+        const std::string& match = (*itr).str();
+        auto pos = codeLine.find(match);
+        // get number after character '$'
+        int idx = std::stoi(match.substr(1));
+        if(idx > 0) {
+            // if number > 0 means that it's an operand
+            auto ptr = operand.at(idx-1).getSharedPointer<double>();
+            //todo manage pointer to the environnement instead of the value
+            // pointed and register if the operand is one
+
+            codeLine.replace(pos, match.size(), std::to_string(*ptr));
+        }
+        else{
+            // if number == 0 it correpond to the result of the function
+            std::string regNb = std::to_string(this->getCurrentLine().getDestinationIndex());
+            reg = nameRegVariable + "[" + regNb + "]";
+            codeLine.replace(pos, match.size(), reg);
+        }
+    }
+    return codeLine;
+}
 #endif // CODE_GENERATION
