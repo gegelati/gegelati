@@ -38,10 +38,136 @@
 
 #ifndef GEGELATI_TPGGENERATIONENGINE_H
 #define GEGELATI_TPGGENERATIONENGINE_H
+#include "ProgramGenerationEngine.h"
+#include <string>
+#include "tpg/tpgEdge.h"
+#include "tpg/tpgGraph.h"
+#include "tpg/tpgTeam.h"
 
-class TpgGenerationEngine
-{
-};
+namespace TPG {
+    class TpgGenerationEngine
+    {
+        /**
+         * \brief Class in charge of generating the C code of a TPGGraph
+         *
+         * Each program of the TPGGraph is represented by a C function.
+         * All the function are regrouped in a file. Another file holds
+         * the main function to iterate threw the TPGGraph.
+         *
+         */
+      protected:
+        /// Filename of the file with the main function
+        static const std::string filenameProg;
+
+        /// Main function in charge of iterating threw the TPG
+        std::ofstream fileMain;
+        /// header file for the function that iterates threw the TPG
+        std::ofstream fileMainH;
+
+        /**
+         * \brief Reference to the TPGGraph for which the code gen is generated.
+         */
+        const TPG::TPGGraph& tpg;
+
+        /**
+         * \brief ProgramGenerationEngine for generating Programs of edges.
+         *
+         * Keeping this ProgramGenerationEngine as an attribute avoids wasting
+         * time rebuilding a new one for each edge.
+         */
+        Program::ProgramGenerationEngine progGenerationEngine;
+
+        /**
+         * \brief Map associating pointers to Program to an integer ID.
+         *
+         */
+        std::map<const Program::Program*, uint64_t> programID;
+
+        /**
+         * \brief Integer number used during export to associate a unique
+         * integer identifier to each new Program.
+         *
+         * Using the programID map, a Program that was already printed in
+         * previous export will keep its ID.
+         */
+        uint64_t nbPrograms = 0;
+
+        /**
+         * \brief Map associating pointers to TPGVertex to an integer ID.
+         *
+         * In case the TPGGraphDotExporter is used to export multiple TPGGraph,
+         * this map is used to ensure that a given TPGVertex will always be
+         * associated to the same integer identifier in all exported dot files.
+         */
+        std::map<const TPG::TPGVertex*, uint64_t> vertexID;
+
+        /**
+         * \brief Integer number used during export to associate a unique
+         * integer identifier to each new TPGTeam.
+         *
+         * Using the VertexID map, a TPGTeam that was already printed in
+         * previous export will keep its ID.
+         */
+        uint64_t nbVertex = 0;
+
+        void initTpgFile();
+
+        void initHeaderFile();
+
+      public:
+        /**
+         * \brief Main constructor of the class.
+         *
+         * \param[in] filename : filename of the file holding the main function
+         *                of the generated program.
+         *
+         * \param[in] env Environment in which the Program of the TPGGraph will
+         *                be executed.
+         */
+        TpgGenerationEngine(std::string filename, const TPG::TPGGraph& tpg)
+            :
+            progGenerationEngine{filenameProg,tpg.getEnvironment()}, tpg{tpg} {
+            this->fileMain.open(filename+".c", std::ofstream::out);
+            this->fileMainH.open(filename+".h", std::ofstream::out);
+            fileMain << "#include \"" << filename << ".h\"" << std::endl;
+            initTpgFile();
+            fileMainH << "#ifndef " << filename << "_H" << std::endl;
+            fileMainH << "#define " << filename << "_H\n" << std::endl;
+            initHeaderFile();
+        };
+
+        ~TpgGenerationEngine(){
+            fileMainH << "\n#endif" << std::endl;
+            fileMain.close();
+            fileMainH.close();
+        }
+
+        bool findProgramID(const Program::Program& prog, uint64_t& id);
+
+        /**
+         * \brief Method for finding the unique identifier associated to a given
+         * TPGVertex.
+         *
+         * Using the vertexID map, this method returns the integer identifier
+         * associated to the given TPGVertex. If not identifier exists for this
+         * TPGVertex, a new one is created automatically and saved into the map.
+         *
+         * \param[in] vertex a const reference to the TPGVertex whose integer
+         *                    identifier is retrieved.
+         * \return the integer identifier for the given TPGVertex.
+         */
+        uint64_t findVertexID(const TPG::TPGVertex& vertex);
+
+        //todo
+        void generateEdge(const TPG::TPGEdge&);
+
+        //todo
+        void generateTeam(const TPG::TPGTeam&);
+
+        //todo
+        void generateFromRoot();
+    };
+} // namespace TPG
 
 #endif // GEGELATI_TPGGENERATIONENGINE_H
 

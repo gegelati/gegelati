@@ -40,6 +40,7 @@
 #define GEGELATI_PROGRAMGENERATIONENGINE_H
 #include "PrintableInstruction.h"
 #include "program/programEngine.h"
+//#include <bits/fcntl-linux.h>
 #include <fstream>
 
 namespace Program {
@@ -51,11 +52,35 @@ namespace Program {
       protected:
         static const std::regex operand_regex;
         static const std::string nameRegVariable;
+        static const std::string nameDataVariable;
 
-        /// The file in which the program will be added
-        std::ofstream file;
+        /// The file in which programs will be added
+        std::ofstream fileC;
+        /// The file in which prototypes of programs will be added
+        std::ofstream fileH;
 
+        /**
+         * \brief Set global variables in the file holding the programs
+         *
+         * Set type of the global variable accordingly to the type of the data sources of the environnement
+         * Pay attention that the function typeid::name() is dependant on the compiler choosen.
+         * Here the function must return a human readable type. If it's not the case the output of the function has to
+         * be unmangle
+         *
+         */
 
+        void initGlobalVar();
+
+        /**
+         * \brief function use to unmangle the char* obtain by the function typeid::name()
+         *
+         *  // todo
+         * for now the function only takes into account the gcc compiler
+         *  // todo manage MSVC as compiler (with #ifdef, MSVC le code de retour est lisible pas besoin de unmangle)
+         * @return unamngle type of the variable
+         */
+
+        char* unmangle(char*);
       public:
         /**
          * \brief Constructor of the class
@@ -68,26 +93,33 @@ namespace Program {
          * \param[in] env
          */
 
-        ProgramGenerationEngine(std::string filename,const Environment& env)
+        ProgramGenerationEngine(const std::string& filename,const Environment& env)
             : ProgramEngine(env){
-            this->file.open(filename, std::ofstream::out | std::ofstream::app);
+            this->fileC.open(filename+".c", std::ofstream::out /*| std::ofstream::app*/);
+            this->fileH.open(filename+".h", std::ofstream::out /*| std::ofstream::app*/);
+            fileC << "#include \"" << filename <<".h\"" << std::endl;
+            initGlobalVar();
+            fileH << "#ifndef " << filename << "_H" << std::endl;
+            fileH << "#define " << filename << "_H\n" << std::endl;
         }
+
         /**
          * \brief destructor
          *
-         * close the file
+         * close both files
          */
 
          ~ProgramGenerationEngine(){
-            file.close();
+            fileH << "#endif " << std::endl;
+            fileC.close();
+            fileH.close();
         }
 
         void generateCurrentLine();
 
-        void generateProgram(const bool ignoreException = false);
-
+        void generateProgram(uint64_t progID, const bool ignoreException = false);
       protected:
-        std::string completeFormat(const Instructions::PrintableInstruction&, std::vector<Data::UntypedSharedPtr>) const;
+        std::string completeFormat(const Instructions::PrintableInstruction&, const std::vector<Data::UntypedSharedPtr>&) const;
     };
 
 } // namespace Program

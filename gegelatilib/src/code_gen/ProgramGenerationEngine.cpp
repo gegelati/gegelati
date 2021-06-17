@@ -36,10 +36,13 @@
 #define CODE_GENERATION
 #ifdef CODE_GENERATION
 
+#include <search.h>
 #include "code_gen/ProgramGenerationEngine.h"
+#include <cxxabi.h>
 
 const std::regex Program::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
 const std::string Program::ProgramGenerationEngine::nameRegVariable("reg");
+const std::string Program::ProgramGenerationEngine::nameDataVariable("in");
 
 void Program::ProgramGenerationEngine::generateCurrentLine()
 {
@@ -53,7 +56,7 @@ void Program::ProgramGenerationEngine::generateCurrentLine()
         auto prtIns = dynamic_cast<const Instructions::PrintableInstruction*>(&instruction);
         if (prtIns != nullptr){
             std::string codeLine = completeFormat(*prtIns,operand);
-            file << "\t" << codeLine << std::endl;
+            fileC << "\t" << codeLine << std::endl;
         }
         else{
             throw std::runtime_error("The pointer on the instruction cannot be"
@@ -62,17 +65,20 @@ void Program::ProgramGenerationEngine::generateCurrentLine()
         }
     }
     else{
-        throw std::runtime_error("Could not generate the line, the line is not printable");
+        throw std::runtime_error("Could not generate the line, the instruction"
+                                 " is not printable");
     }
 
 }
-void Program::ProgramGenerationEngine::generateProgram(const bool ignoreException)
+void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bool ignoreException)
 {
     // print function (signature) double P...(data::){
-    file << "\ndouble P1(){" << std::endl;
+    // todo manage input parameter (one pointer for each element of dataS
+    fileC << "\ndouble P" << progID <<"(){" << std::endl;
+    fileH << "double P" << progID <<"();\n" << std::endl;
 
-    // instanciate register
-    file << "\tdouble "<< nameRegVariable <<"[" << program->getEnvironment().getNbRegisters() << "];" << std::endl;
+    // instantiate register
+    fileC << "\tdouble "<< nameRegVariable <<"[" << program->getEnvironment().getNbRegisters() << "];" << std::endl;
     this->programCounter = 0;
 
     // Iterate over the lines of the Program
@@ -98,36 +104,51 @@ void Program::ProgramGenerationEngine::generateProgram(const bool ignoreExceptio
         // Increment the programCounter.
         hasNext = this->next();
     };
-    file << "\treturn reg[0];\n}" << std::endl;
+    fileC << "\treturn reg[0];\n}" << std::endl;
 
 
 }
 std::string Program::ProgramGenerationEngine::completeFormat(
-    const Instructions::PrintableInstruction& ins, std::vector<Data::UntypedSharedPtr> operand) const
+    const Instructions::PrintableInstruction& ins, const std::vector<Data::UntypedSharedPtr>& operand) const
 {
     const std::string& format = ins.getFormat();
+    const Line& line = this->getCurrentLine(); // throw std::out_of_range
     std::string codeLine(format);
-    std::string reg;
+    std::string operandValue;
     for(auto itr = std::sregex_iterator(format.begin(), format.end(), operand_regex); itr != std::sregex_iterator(); ++itr){
         const std::string& match = (*itr).str();
         auto pos = codeLine.find(match);
         // get number after character '$'
         int idx = std::stoi(match.substr(1));
         if(idx > 0) {
-            // if number > 0 means that it's an operand
-            auto ptr = operand.at(idx-1).getSharedPointer<double>();
-            //todo manage pointer to the environnement instead of the value
-            // pointed and register if the operand is one
+            // if number > 0 means that it's in the left side of the operation
+            if(line.getOperand(idx-1).first == 0){
+                //operand value is an intern register
+                 operandValue = nameRegVariable + "[" +
+                               std::to_string(line.getOperand(idx-1).second) + "]";
 
-            codeLine.replace(pos, match.size(), std::to_string(*ptr));
+            }
+            else {
+                //operandValue come from the environment
+                 operandValue = nameDataVariable + std::to_string(line.getOperand(idx-1).first) + "[" +
+                               std::to_string(line.getOperand(idx-1).second) + "]";
+            }
         }
         else{
-            // if number == 0 it correpond to the result of the function
-            std::string regNb = std::to_string(this->getCurrentLine().getDestinationIndex());
-            reg = nameRegVariable + "[" + regNb + "]";
-            codeLine.replace(pos, match.size(), reg);
+            // if number == 0 it corresponds to the result of the function
+            operandValue = nameRegVariable + "[" + std::to_string(line.getDestinationIndex()) + "]";
         }
+        codeLine.replace(pos, match.size(), operandValue);
     }
     return codeLine;
+}
+void Program::ProgramGenerationEngine::initGlobalVar(){
+    for (int i = 1; i < this->dataScsConstsAndRegs.size(); ++i) {
+        int status = 1;
+        const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
+        std::string type = "double";
+        fileC << "extern " << type << "* in" << i << ";" << std::endl;
+        std::cout << abi::__cxa_demangle(typeid(d).name(), NULL, NULL, &status) << std::endl;
+    }
 }
 #endif // CODE_GENERATION
