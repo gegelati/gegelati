@@ -131,8 +131,8 @@ namespace TPG {
             this->fileMainH.open(filename+".h", std::ofstream::out);
             fileMain << "#include \"" << filename << ".h\"" << std::endl;
             initTpgFile();
-            fileMainH << "#ifndef " << filename << "_H" << std::endl;
-            fileMainH << "#define " << filename << "_H\n" << std::endl;
+            fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
+            fileMainH << "#define C_" << filename << "_H\n" << std::endl;
             initHeaderFile();
         };
 
@@ -163,6 +163,9 @@ namespace TPG {
 
         //todo
         void generateTeam(const TPG::TPGTeam&);
+
+        //todo
+        void generateAction(const TPG::TPGAction&);
 
         //todo
         void generateFromRoot();

@@ -99,8 +99,8 @@ namespace Program {
             this->fileH.open(filename+".h", std::ofstream::out /*| std::ofstream::app*/);
             fileC << "#include \"" << filename <<".h\"" << std::endl;
             initGlobalVar();
-            fileH << "#ifndef " << filename << "_H" << std::endl;
-            fileH << "#define " << filename << "_H\n" << std::endl;
+            fileH << "#ifndef C_" << filename << "_H" << std::endl;
+            fileH << "#define C_" << filename << "_H\n" << std::endl;
         }
 
         /**

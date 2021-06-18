@@ -77,40 +77,90 @@ void TPG::TpgGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 {
     const Program::Program& p = edge.getProgram();
     uint64_t progID;
-    std::cout << "Génération d'une edge" << std::endl;
+    //std::cout << "Génération d'une edge" << std::endl;
     progGenerationEngine.setProgram(p);
     if (this->findProgramID(p, progID)){
-        std::cout << "on connaissais pas le programme" << std::endl;
+        //std::cout << "on connaissais pas le programme" << std::endl;
         progGenerationEngine.generateProgram(progID);
     }
+    fileMain << "\t\t\t{0,P" << progID << ",";
+    if(typeid(*(edge.getDestination())) == (typeid(TPG::TPGTeam))){
+        fileMain << "T" << findVertexID(*(edge.getDestination())) << "}";
+    }
+    else if (typeid(*(edge.getDestination())) == (typeid(TPG::TPGAction))){
+        auto a = dynamic_cast<const TPG::TPGAction*>(edge.getDestination());
+        fileMain << "A" << a->getActionID() << "}";
+    }
+
 }
 
 void TPG::TpgGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 {
+    uint64_t id = findVertexID(team);
     //print prototype and declaration of the function
+    fileMain << "void* T" << id << "(int* action){" << std::endl;
+    fileMainH << "void* T" << id << "(int* action);\n" << std::endl;
     //generate static array
+    fileMain << "\tstatic Edge e[] = {" << std::endl;
+    auto list = team.getOutgoingEdges();
+    for (auto l = list.begin(); l != list.end(); l++){
+        if (l != list.begin()){
+            fileMain << "," << std::endl;
+        }
+        generateEdge(**l);
+//        std::cout << *(team.getOutgoingEdges().end()) << std::endl;
+//        std::cout << e << std::endl;
+    }
+    /*
     for (TPG::TPGEdge* e : team.getOutgoingEdges()){
         generateEdge(*e);
-        //print "," de séparation
-    }
-    //print }
+        std::cout << *(team.getOutgoingEdges().end()) << std::endl;
+        std::cout << e << std::endl;
+        if (e != *team.getOutgoingEdges().end()){
+            //print "," de séparation
+            fileMain << "," << std::endl;
+        }
+    }*/
+    //print end static array
+    fileMain << "\n\t};" << std::endl;
     // appel des fonction d'exécution
-    //fin de la fonction de team
+    fileMain << "\tint nbEdge = " << team.getOutgoingEdges().size() << ";" << std::endl;
+    fileMain << "\treturn executeTeam(e,nbEdge, input);\n}\n" << std::endl;
+
+}
+
+void TPG::TpgGenerationEngine::generateAction(const TPG::TPGAction& action){
+    uint64_t id = action.getActionID();
+    //print prototype and declaration of the function
+    fileMain << "void* A" << id << "(int* action){" << std::endl;
+    fileMainH << "void* A" << id << "(int* action);\n" << std::endl;
+
+    //print definition of the function
+    fileMain << "\t*action = " << id << ";" << std::endl;
+    fileMain << "\treturn NULL;\n}\n" << std::endl;
+
 }
 
 void TPG::TpgGenerationEngine::generateFromRoot()
 {
     std::map<const TPG::TPGTeam*, std::list<TPGEdge*>> graph;
     auto vertices = this->tpg.getVertices();
+    //give an id for each team of the graph
     for(const TPG::TPGVertex* vertex : vertices ){
         if(typeid(*vertex) == typeid(TPG::TPGTeam)){
-            //findVertexId()
-        }
-        else if(typeid(*vertex) == typeid(TPG::TPGAction)){
-
+            findVertexID(*vertex);
         }
     }
-//    generateTeam(*(const TPG::TPGTeam*)vertex);
+    for (auto vertex : vertices) {
+        if(typeid(*vertex) == typeid(TPG::TPGTeam)){
+            generateTeam(*(const TPG::TPGTeam*)vertex);
+        }
+    }
+    for (auto vertex : vertices) {
+        if(typeid(*vertex) == typeid(TPG::TPGAction)){
+            generateAction(*(const TPG::TPGAction*)vertex);
+        }
+    }
 }
 
 void TPG::TpgGenerationEngine::initTpgFile(){
@@ -157,7 +207,7 @@ void TPG::TpgGenerationEngine::initTpgFile(){
     << "\tidx = idxNext+1;\n"
     << "\t//check if there exist another none visited edge with a better result\n"
     << "\twhile(idx < nbEdge){\n"
-    << "\tr = e[idx].ptr_prog();"
+    << "\t\tr = e[idx].ptr_prog();\n"
     << "\t\tif(e[idx].visited == 0 && bestResult < r){\n"
     << "\t\t\tbestResult =r;\n"
     << "\t\t\tidxNext = idx;\n"
@@ -169,7 +219,6 @@ void TPG::TpgGenerationEngine::initTpgFile(){
     << std::endl;
 
 }
-
 void TPG::TpgGenerationEngine::initHeaderFile(){
     fileMainH
     << "#include <stdlib.h>\n\n"
