@@ -99,7 +99,7 @@ void TPG::TpgGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     uint64_t id = findVertexID(team);
     //print prototype and declaration of the function
     fileMain << "void* T" << id << "(int* action){" << std::endl;
-    fileMainH << "void* T" << id << "(int* action);\n" << std::endl;
+    fileMainH << "void* T" << id << "(int* action);" << std::endl;
     //generate static array
     fileMain << "\tstatic Edge e[] = {" << std::endl;
     auto list = team.getOutgoingEdges();
@@ -125,7 +125,7 @@ void TPG::TpgGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     fileMain << "\n\t};" << std::endl;
     // appel des fonction d'exécution
     fileMain << "\tint nbEdge = " << team.getOutgoingEdges().size() << ";" << std::endl;
-    fileMain << "\treturn executeTeam(e,nbEdge, input);\n}\n" << std::endl;
+    fileMain << "\treturn executeTeam(e,nbEdge);\n}\n" << std::endl;
 
 }
 
@@ -133,7 +133,7 @@ void TPG::TpgGenerationEngine::generateAction(const TPG::TPGAction& action){
     uint64_t id = action.getActionID();
     //print prototype and declaration of the function
     fileMain << "void* A" << id << "(int* action){" << std::endl;
-    fileMainH << "void* A" << id << "(int* action);\n" << std::endl;
+    fileMainH << "void* A" << id << "(int* action);" << std::endl;
 
     //print definition of the function
     fileMain << "\t*action = " << id << ";" << std::endl;
@@ -164,59 +164,91 @@ void TPG::TpgGenerationEngine::generateFromRoot()
 }
 
 void TPG::TpgGenerationEngine::initTpgFile(){
+    fileMain << "#include <limits.h> \n"
+             << "#include <assert.h>\n"
+             << "#include <stdio.h>\n"
+
+             << "Stack s;\n\n"
+
+             << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
+             << "\tvoid*(*f)(int*action) = ptr_f;\n"
+             << "\tint action = INT_MIN;\n"
+             << "\twhile (f!=NULL){\n"
+             << "\t\tf= (void*(*)(int*)) (f(&action));\n"
+             << "\t}\n"
+             << "\treturn action;\n}\n\n"
+
+             << "void* executeTeam(Edge* e, int nbEdge){\n"
+             << "\tint idxNext = execute(e, nbEdge); // on récupère l'indice de l'edge qui à le programme qui renvoie la plus grande valeur\n"
+             << "\tif(idxNext != -1) {\n"
+             << "\t\te[idxNext].visited = 1; // on marque l'edge visité\n"
+             << "\t\tpush(&e[idxNext]);\n"
+             << "\t\treturn e[idxNext].ptr_vertex; // on renvoie le pointeur de la prochaine team à exécuter\n"
+             << "\t}\n"
+             << "\treturn NULL;\n"
+             << "}\n\n"
+
+             << "int execute(Edge* e, int nbEdge){\n"
+             << "\tdouble bestResult = e[0].ptr_prog();\n"
+             << "\tint idxNext = 0;\n"
+             << "\tint idx;\n"
+             << "\tdouble r;\n"
+             << "\twhile (e[idxNext].visited == 1){\n"
+             << "\t\tidxNext++;\n"
+             << "\t\tif(idxNext>= nbEdge){\n"
+             << "\t\t\tprintf(\"Error all the edges of the team are already visited\\n\");\n"
+             << "\t\t\treturn -1;\n"
+             << "\t\t}\n"
+             << "\t\tbestResult = e[idxNext].ptr_prog();\n"
+             << "\t}\n"
+             << "\tidx = idxNext+1;\n"
+             << "\t//check if there exist another none visited edge with a better result\n"
+             << "\twhile(idx < nbEdge){\n"
+             << "\t\tr = e[idx].ptr_prog();\n"
+             << "\t\tif(e[idx].visited == 0 && bestResult < r){\n"
+             << "\t\t\tbestResult =r;\n"
+             << "\t\t\tidxNext = idx;\n"
+             << "\t\t}\n"
+             << "\t\tidx++;\n"
+             << "\t}\n"
+             << "\treturn idxNext;\n"
+             << "}\n\n"
+
+             << "void push( Edge* e){\n"
+             << "\tif(s.top == s.max) {\n"
+             << "\t\tif(s.max == 0){\n"
+             << "\t\t\ts.e = (Edge **)(malloc((s.max + 1) * sizeof(Edge *)));\n"
+             << "\t\t}\n"
+             << "\t\telse{\n"
+             << "\t\t\ts.e = (Edge **) (realloc(s.e, (s.max + 1) * sizeof(Edge *)));\n"
+             << "\t\t}\n"
+             << "\t\tassert(s.e != NULL);\n"
+             << "\t\ts.max++;\n"
+             << "\t}\n"
+             << "\ts.e[s.top] = e;\n"
+             << "\ts.top++;\n"
+             << "}\n\n"
+
+             << "Edge* pop(){\n"
+             << "\tEdge* edge = NULL;\n"
+             << "\tif(s.top > 0){\n"
+             << "\t\ts.top--;\n"
+             << "\t\tedge = s.e[s.top];\n"
+             << "\t}\n"
+             << "\tif(s.top == 0 && s.e != NULL){\n"
+             << "\t\tfree(s.e);\n"
+             << "\t\ts.max = 0;\n"
+             << "\t}\n"
+             << "\treturn edge;\n"
+             << "}\n\n"
+
+             << "void reset(){\n"
+             << "\twhile (s.top > 0) {\n"
+             << "\t\tpop()->visited = 0;\n"
+             << "\t}\n"
+             << "}\n"
+             << std::endl;
     fileMain << "#include \"" << filenameProg << ".h\"" << std::endl;
-    fileMain << "#include <limits.h> \n\n"
-    << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
-    << "\tvoid*(*f)(int*action) = ptr_f;\n"
-    << "\tint action = INT_MIN;\n"
-    << "\twhile (f!=NULL){\n"
-    << "\t\tf= (void*(*)(int*)) (f(&action));\n"
-    << "\t}\n"
-    << "\treturn action;\n}\n\n"
-
-    << "void* executeTeam(Edge* e, int nbEdge, double* input){\n"
-    << "\tif(input == NULL){\n"
-    << "\t\tfor (int i = 0; i < nbEdge; ++i) {\n"
-    << "\t\t\te[i].visited = 0;\n"
-    << "\t\t}\n"
-    << "\t} else {\n"
-    << "\t\tint idxNext = execute(e, nbEdge); // on récupère l'indice de l'edge qui à le programme qui renvoie la plus grande valeur\n"
-    << "\t\tif(idxNext != -1) {\n"
-    << "\t\t\te[idxNext].visited = 1; // on marque l'edge visité\n"
-    << "\t\t\treturn e[idxNext].ptr_vertex; // on renvoie le pointeur de la prochaine team à exécuter\n"
-    << "\t\t} else{\n"
-    << "\t\t\treturn NULL; // cas d'erreur\n"
-    << "\t\t}\n"
-    << "\t}\n"
-    << "\treturn NULL;\n"
-    << "}\n\n"
-
-    << "int execute(Edge* e, int nbEdge){\n"
-    << "\tdouble bestResult = e[0].ptr_prog();\n"
-    << "\tint idxNext = 0;\n"
-    << "\tint idx;\n"
-    << "\tdouble r;\n"
-    << "\twhile (e[idxNext].visited == 1){\n"
-    << "\t\tidxNext++;\n"
-    << "\t\tif(idxNext>= nbEdge){\n"
-    << "\t\t\tprintf(\"Error all the edges of the team are already visited\\n\");\n"
-    << "\t\t\treturn -1;\n"
-    << "\t\t}\n"
-    << "\t\tbestResult = e[idxNext].ptr_prog();\n"
-    << "\t}\n"
-    << "\tidx = idxNext+1;\n"
-    << "\t//check if there exist another none visited edge with a better result\n"
-    << "\twhile(idx < nbEdge){\n"
-    << "\t\tr = e[idx].ptr_prog();\n"
-    << "\t\tif(e[idx].visited == 0 && bestResult < r){\n"
-    << "\t\t\tbestResult =r;\n"
-    << "\t\t\tidxNext = idx;\n"
-    << "\t\t}\n"
-    << "\t\tidx++;\n"
-    << "\t}\n"
-    << "\treturn idxNext;\n"
-    << "}\n"
-    << std::endl;
 
 }
 void TPG::TpgGenerationEngine::initHeaderFile(){
@@ -229,10 +261,18 @@ void TPG::TpgGenerationEngine::initHeaderFile(){
     << "\tvoid* (*ptr_vertex)(int* action);\n"
     << "}Edge;\n\n"
 
+    << "typedef struct Stack {\n"
+    << "\tEdge** e;\n"
+    << "\tint max;\n"
+    << "\tint top;\n"
+    << "}Stack;"
+
     << "int executeFromVertex(void*(*)(int*action));\n"
-    << "void* executeTeam(Edge* e, int nbEdge, double* input);\n"
+    << "void* executeTeam(Edge* e, int nbEdge);\n"
     << "int execute(Edge* e, int nbEdge);\n"
-    << "void reset(void* (*p[])(double*, int*), int);\n"
+    << "void push(Edge* e);\n"
+    << "Edge* pop();\n"
+    << "void reset();\n"
     << std::endl;
 }
 

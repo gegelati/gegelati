@@ -75,7 +75,7 @@ void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
     // print function (signature) double P...(data::){
     // todo manage input parameter (one pointer for each element of dataS
     fileC << "\ndouble P" << progID <<"(){" << std::endl;
-    fileH << "double P" << progID <<"();\n" << std::endl;
+    fileH << "double P" << progID <<"();" << std::endl;
 
     // instantiate register
     fileC << "\tdouble "<< nameRegVariable <<"[" << program->getEnvironment().getNbRegisters() << "];" << std::endl;
