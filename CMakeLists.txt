@@ -82,6 +82,16 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
 endif()
 
+add_definitions( -DCODE_GENERATION)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_definitions( -DGCC)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_definitions( -DMSVC)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_definitions( -DCLANG)
+endif()
+
 # Build position independent code.
 # Position Independent Code (PIC) is commonly used for shared libraries so that
 # the same shared library code can be loaded in each program address space in a

@@ -35,7 +35,7 @@
  */
 
 
-#define CODE_GENERATION
+
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_PRINTABLEMULT_H

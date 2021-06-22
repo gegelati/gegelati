@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#define CODE_GENERATION
+
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_TPGGENERATIONENGINE_H
@@ -110,8 +110,29 @@ namespace TPG {
          */
         uint64_t nbVertex = 0;
 
+        /**
+         * \brief Size of the stack
+         *
+         * Stack holding the visited edges during the inference
+         */
+        //todo la stack size
+        unsigned int stackSize;
+
+        /**
+         * \brief function printing generic code in the main file
+         *
+         * This function print generic code to execute the TPG and manage the
+         * stack of visited edges
+         */
         void initTpgFile();
 
+        /**
+         * \brief function printing generic code declaration in the main file header
+         *
+         * This function print the the struct required to represent the TPG and
+         * the prototypes of the function to execute the TPG and manage the
+         * stack of visited edges
+         */
         void initHeaderFile();
 
       public:
@@ -126,21 +147,44 @@ namespace TPG {
          */
         TpgGenerationEngine(std::string filename, const TPG::TPGGraph& tpg)
             :
-            progGenerationEngine{filenameProg,tpg.getEnvironment()}, tpg{tpg} {
+            progGenerationEngine{filename+"_"+filenameProg,tpg.getEnvironment()}, tpg{tpg} {
             this->fileMain.open(filename+".c", std::ofstream::out);
             this->fileMainH.open(filename+".h", std::ofstream::out);
             fileMain << "#include \"" << filename << ".h\"" << std::endl;
+            fileMain << "#include \"" << filename << "_" << filenameProg << ".h\"" << std::endl;
             initTpgFile();
             fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
             fileMainH << "#define C_" << filename << "_H\n" << std::endl;
             initHeaderFile();
         };
 
+        /**
+         * \brief destructor of the class
+         *
+         * add #endif at the end of the header and close both file
+         */
+
         ~TpgGenerationEngine(){
             fileMainH << "\n#endif" << std::endl;
             fileMain.close();
             fileMainH.close();
         }
+
+        /**
+         * \brief Method for finding the unique identifier associated to a given
+         * Program.
+         *
+         * Using the programID map, this method retrieves the integer identifier
+         * associated to the given Program. If not identifier exists for this
+         * Program, a new one is created automatically and saved into the map.
+         *
+         * \param[in] prog a const reference to the Program whose integer
+         *                    identifier is retrieved.
+         * \param[out] id a pointer to an integer number, used to return the
+         *                found identifier.
+         * \return A boolean value indicating whether the returned ID is a new
+         * one (true), or one found in the programID map (false).
+         */
 
         bool findProgramID(const Program::Program& prog, uint64_t& id);
 
@@ -156,19 +200,48 @@ namespace TPG {
          *                    identifier is retrieved.
          * \return the integer identifier for the given TPGVertex.
          */
+
         uint64_t findVertexID(const TPG::TPGVertex& vertex);
 
-        //todo
+        /**
+         * \brief Method for generating an edge of the graph
+         *
+         * This function generate the code that represent an edge.
+         * An edge of a team is represented by a struct with an integer, a function
+         * pointer of type : double (*ptr_prog)() the following vertex is represented
+         * by a function pointer of type : void* (*ptr_vertex)(int*);
+         *
+         * \param[in] edge that must be generated
+         */
         void generateEdge(const TPG::TPGEdge&);
 
-        //todo
+        /**
+         * \brief Method for generating a team of the graph
+         *
+         * This method generates the C function that represents a team.
+         * Each function representing a team contains a static array of Edge
+         * and calls the function executeTeam(Edge*, int)
+         *
+         * \param[in] team that must be generated
+         */
         void generateTeam(const TPG::TPGTeam&);
 
-        //todo
+        /**
+         * \brief Method for generating a team of the graph
+         *
+         * This method generates the C function that represents a team.
+         * Each function representing a team contains a static array of Edge
+         * and calls the function executeTeam(Edge*, int). The generated
+         * function return a pointer to the next vertex to execute
+         *
+         * \param[in] team that must be generated
+         */
         void generateAction(const TPG::TPGAction&);
 
+        void setRoot(const TPG::TPGVertex&);
+
         //todo
-        void generateFromRoot();
+        void generateTPGGraph();
     };
 } // namespace TPG
 

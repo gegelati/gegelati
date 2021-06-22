@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#define CODE_GENERATION
+
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_PROGRAMGENERATIONENGINE_H
@@ -80,7 +80,7 @@ namespace Program {
          * @return unamngle type of the variable
          */
 
-        char* unmangle(char*);
+        std::string unmangle(const Data::DataHandler&);
       public:
         /**
          * \brief Constructor of the class
@@ -101,12 +101,16 @@ namespace Program {
             initGlobalVar();
             fileH << "#ifndef C_" << filename << "_H" << std::endl;
             fileH << "#define C_" << filename << "_H\n" << std::endl;
+            fileC << "#include \"externHeader.h\"" << std::endl;
+#ifdef DEBUG
+            fileC << "#include <stdio.h>" << std::endl;
+#endif
         }
 
         /**
-         * \brief destructor
+         * \brief destructor of the class
          *
-         * close both files
+         * close both files and add #endif at the end of the header
          */
 
          ~ProgramGenerationEngine(){
@@ -115,10 +119,47 @@ namespace Program {
             fileH.close();
         }
 
+        /**
+         * \brief generate the current line of the program
+         *
+         * Generate the line of code that corresponds to the current line in the
+         * program of the TPG.
+         */
         void generateCurrentLine();
 
+        /**
+         * \brief generate the C code that corresponds to the member program of the class
+         *
+         * Create a function in the file <filename>_program.c that regroup all
+         * the instruction of the program and return a double. The name of the
+         * function is based on the identifier of the program. The declaration of
+         * function of the program with ID=1 is double P1(int* action)
+         *
+         * \param[in] unique identifier of the program used to generate the name
+         *            of the function in the C file.
+         * \param[in] ignoreException When true, all exceptions thrown when
+         *            fetching current instructions, operands are
+         *            caught and the current program Line is simply ignored.
+         *            When true, all lines of the Program are assumed to be
+         *            correct by construction, and any exception is re-thrown
+         *            for higher-level handling, thus stopping the program.
+         *            Exception thrown by getCurrentLine are never ignored.
+         */
         void generateProgram(uint64_t progID, const bool ignoreException = false);
+
       protected:
+        /**
+         * \brief create the line of C code that equals to instruction in parameter
+         *
+         * Replace each operand of the format of the printable instruction by a
+         * pointer to the data of the environment.
+         *
+         * \param[in] instruction that as to be converted into a line of code
+         * \param[in] operands of the instruction that replace the symbols $<number>
+         *            $0 correspond to the result of the instruction.
+         *
+         * @return a line of code that can be printed in the program file
+         */
         std::string completeFormat(const Instructions::PrintableInstruction&, const std::vector<Data::UntypedSharedPtr>&) const;
     };
 

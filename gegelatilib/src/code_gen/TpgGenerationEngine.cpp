@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#define CODE_GENERATION
+
 #ifdef CODE_GENERATION
 
 #include "code_gen/TpgGenerationEngine.h"
@@ -41,8 +41,7 @@
 const std::string TPG::TpgGenerationEngine::filenameProg = "program";
 
 bool TPG::TpgGenerationEngine::findProgramID(const Program::Program& prog,
-                                             uint64_t& id)
-{
+                                             uint64_t& id){
     auto iter = this->programID.find(&prog);
     if (iter == this->programID.end()) {
         // The vertex is not known yet
@@ -58,8 +57,7 @@ bool TPG::TpgGenerationEngine::findProgramID(const Program::Program& prog,
     }
 }
 
-uint64_t TPG::TpgGenerationEngine::findVertexID(const TPG::TPGVertex& vertex)
-{
+uint64_t TPG::TpgGenerationEngine::findVertexID(const TPG::TPGVertex& vertex){
     auto iter = this->vertexID.find(&vertex);
     if (iter == this->vertexID.end()) {
         // The vertex is not known yet
@@ -77,10 +75,10 @@ void TPG::TpgGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 {
     const Program::Program& p = edge.getProgram();
     uint64_t progID;
-    //std::cout << "Génération d'une edge" << std::endl;
+
     progGenerationEngine.setProgram(p);
+
     if (this->findProgramID(p, progID)){
-        //std::cout << "on connaissais pas le programme" << std::endl;
         progGenerationEngine.generateProgram(progID);
     }
     fileMain << "\t\t\t{0,P" << progID << ",";
@@ -108,21 +106,12 @@ void TPG::TpgGenerationEngine::generateTeam(const TPG::TPGTeam& team)
             fileMain << "," << std::endl;
         }
         generateEdge(**l);
-//        std::cout << *(team.getOutgoingEdges().end()) << std::endl;
-//        std::cout << e << std::endl;
     }
-    /*
-    for (TPG::TPGEdge* e : team.getOutgoingEdges()){
-        generateEdge(*e);
-        std::cout << *(team.getOutgoingEdges().end()) << std::endl;
-        std::cout << e << std::endl;
-        if (e != *team.getOutgoingEdges().end()){
-            //print "," de séparation
-            fileMain << "," << std::endl;
-        }
-    }*/
     //print end static array
     fileMain << "\n\t};" << std::endl;
+#ifdef DEBUG
+    fileMain << "\tprintf(\"T%d\\n\", " << id << ");" << std::endl;
+#endif
     // appel des fonction d'exécution
     fileMain << "\tint nbEdge = " << team.getOutgoingEdges().size() << ";" << std::endl;
     fileMain << "\treturn executeTeam(e,nbEdge);\n}\n" << std::endl;
@@ -141,8 +130,13 @@ void TPG::TpgGenerationEngine::generateAction(const TPG::TPGAction& action){
 
 }
 
-void TPG::TpgGenerationEngine::generateFromRoot()
-{
+void TPG::TpgGenerationEngine::setRoot(const TPG::TPGVertex& team){
+    fileMainH << "\nvoid* (*root)(int* action);" << std::endl;
+    fileMain << "void* (*root)(int* action) = T" << findVertexID(team) << ";" << std::endl;
+
+}
+
+void TPG::TpgGenerationEngine::generateTPGGraph(){
     std::map<const TPG::TPGTeam*, std::list<TPGEdge*>> graph;
     auto vertices = this->tpg.getVertices();
     //give an id for each team of the graph
@@ -155,14 +149,12 @@ void TPG::TpgGenerationEngine::generateFromRoot()
         if(typeid(*vertex) == typeid(TPG::TPGTeam)){
             generateTeam(*(const TPG::TPGTeam*)vertex);
         }
-    }
-    for (auto vertex : vertices) {
-        if(typeid(*vertex) == typeid(TPG::TPGAction)){
+        else if(typeid(*vertex) == typeid(TPG::TPGAction)){
             generateAction(*(const TPG::TPGAction*)vertex);
         }
     }
+    setRoot(*tpg.getRootVertices().at(0));
 }
-
 void TPG::TpgGenerationEngine::initTpgFile(){
     fileMain << "#include <limits.h> \n"
              << "#include <assert.h>\n"
@@ -248,7 +240,6 @@ void TPG::TpgGenerationEngine::initTpgFile(){
              << "\t}\n"
              << "}\n"
              << std::endl;
-    fileMain << "#include \"" << filenameProg << ".h\"" << std::endl;
 
 }
 void TPG::TpgGenerationEngine::initHeaderFile(){

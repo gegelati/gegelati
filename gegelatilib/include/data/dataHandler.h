@@ -259,6 +259,8 @@ namespace Data {
          */
         uint64_t scaleLocation(const uint64_t rawLocation,
                                const std::type_info& type) const;
+
+        virtual std::string getTemplateType() const = 0;
     };
 } // namespace Data
 

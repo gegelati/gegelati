@@ -84,7 +84,7 @@ getCurrentInstruction() const
 }
 
 const void Program::ProgramEngine::fetchCurrentOperands(
-    std::vector<Data::UntypedSharedPtr>& operands) const
+    std::vector</*std::pair<const uint64_t, const uint64_t>*/ Data::UntypedSharedPtr>& operands) const
 {
     const Line& line = this->getCurrentLine(); // throw std::out_of_range
     const Instructions::Instruction& instruction =

@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#define CODE_GENERATION
+
 #ifdef CODE_GENERATION
 
 #include <search.h>
@@ -44,8 +44,7 @@ const std::regex Program::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
 const std::string Program::ProgramGenerationEngine::nameRegVariable("reg");
 const std::string Program::ProgramGenerationEngine::nameDataVariable("in");
 
-void Program::ProgramGenerationEngine::generateCurrentLine()
-{
+void Program::ProgramGenerationEngine::generateCurrentLine(){
     std::vector<Data::UntypedSharedPtr> operand;
 
     const Line& line = this->getCurrentLine();
@@ -72,8 +71,6 @@ void Program::ProgramGenerationEngine::generateCurrentLine()
 }
 void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bool ignoreException)
 {
-    // print function (signature) double P...(data::){
-    // todo manage input parameter (one pointer for each element of dataS
     fileC << "\ndouble P" << progID <<"(){" << std::endl;
     fileH << "double P" << progID <<"();" << std::endl;
 
@@ -104,8 +101,10 @@ void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
         // Increment the programCounter.
         hasNext = this->next();
     };
+#ifdef DEBUG
+    fileC << "\tprintf(\"P" << progID << " : reg[0] = %lf \\n\", reg[0]);" << std::endl;
+#endif
     fileC << "\treturn reg[0];\n}" << std::endl;
-
 
 }
 std::string Program::ProgramGenerationEngine::completeFormat(
@@ -143,12 +142,22 @@ std::string Program::ProgramGenerationEngine::completeFormat(
     return codeLine;
 }
 void Program::ProgramGenerationEngine::initGlobalVar(){
+    std::cout << "size de dataScsConstsAndRegs : " << this->dataScsConstsAndRegs.size() << std::endl;
     for (int i = 1; i < this->dataScsConstsAndRegs.size(); ++i) {
         int status = 1;
         const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
-        std::string type = "double";
+        std::cout << "data n°" << i << " : " << abi::__cxa_demangle(typeid(d).name(), NULL, NULL, &status) << std::endl;
+
+        std::cout << "get template type data n°" << i << " : " << d.getTemplateType() << std::endl;
+
+        std::string type = d.getTemplateType();
         fileC << "extern " << type << "* in" << i << ";" << std::endl;
-        std::cout << abi::__cxa_demangle(typeid(d).name(), NULL, NULL, &status) << std::endl;
+
     }
+}
+std::string Program::ProgramGenerationEngine::unmangle(const Data::DataHandler& data){
+    std::string type;
+
+    return type;
 }
 #endif // CODE_GENERATION

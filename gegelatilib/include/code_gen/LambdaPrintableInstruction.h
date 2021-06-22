@@ -34,7 +34,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#define CODE_GENERATION
+
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_LAMBDAPRINTABLEINSTRUCTION_H
