@@ -39,13 +39,14 @@
 #ifndef GEGELATI_TPGGENERATIONENGINE_H
 #define GEGELATI_TPGGENERATIONENGINE_H
 #include "ProgramGenerationEngine.h"
-#include <string>
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgTeam.h"
+#include "tpg/tpgAbstractEngine.h"
+#include <string>
 
 namespace TPG {
-    class TpgGenerationEngine
+    class TPGGenerationEngine : public TPG::TPGAbstractEngine
     {
         /**
          * \brief Class in charge of generating the C code of a TPGGraph
@@ -64,12 +65,7 @@ namespace TPG {
         /// header file for the function that iterates threw the TPG
         std::ofstream fileMainH;
 
-        /**
-         * \brief Reference to the TPGGraph for which the code gen is generated.
-         */
-        const TPG::TPGGraph& tpg;
-
-        /**
+                /**
          * \brief ProgramGenerationEngine for generating Programs of edges.
          *
          * Keeping this ProgramGenerationEngine as an attribute avoids wasting
@@ -78,45 +74,12 @@ namespace TPG {
         Program::ProgramGenerationEngine progGenerationEngine;
 
         /**
-         * \brief Map associating pointers to Program to an integer ID.
-         *
-         */
-        std::map<const Program::Program*, uint64_t> programID;
-
-        /**
-         * \brief Integer number used during export to associate a unique
-         * integer identifier to each new Program.
-         *
-         * Using the programID map, a Program that was already printed in
-         * previous export will keep its ID.
-         */
-        uint64_t nbPrograms = 0;
-
-        /**
-         * \brief Map associating pointers to TPGVertex to an integer ID.
-         *
-         * In case the TPGGraphDotExporter is used to export multiple TPGGraph,
-         * this map is used to ensure that a given TPGVertex will always be
-         * associated to the same integer identifier in all exported dot files.
-         */
-        std::map<const TPG::TPGVertex*, uint64_t> vertexID;
-
-        /**
-         * \brief Integer number used during export to associate a unique
-         * integer identifier to each new TPGTeam.
-         *
-         * Using the VertexID map, a TPGTeam that was already printed in
-         * previous export will keep its ID.
-         */
-        uint64_t nbVertex = 0;
-
-        /**
          * \brief Size of the stack
          *
          * Stack holding the visited edges during the inference
          */
         //todo la stack size
-        unsigned int stackSize;
+        uint64_t stackSize;
 
         /**
          * \brief function printing generic code in the main file
@@ -145,9 +108,9 @@ namespace TPG {
          * \param[in] env Environment in which the Program of the TPGGraph will
          *                be executed.
          */
-        TpgGenerationEngine(std::string filename, const TPG::TPGGraph& tpg)
-            :
-            progGenerationEngine{filename+"_"+filenameProg,tpg.getEnvironment()}, tpg{tpg} {
+        TPGGenerationEngine(std::string filename, const TPG::TPGGraph& tpg, uint64_t stackSize = 8)
+            : TPGAbstractEngine(tpg),
+            progGenerationEngine{filename+"_"+filenameProg,tpg.getEnvironment()}, stackSize{stackSize} {
             this->fileMain.open(filename+".c", std::ofstream::out);
             this->fileMainH.open(filename+".h", std::ofstream::out);
             fileMain << "#include \"" << filename << ".h\"" << std::endl;
@@ -164,44 +127,11 @@ namespace TPG {
          * add #endif at the end of the header and close both file
          */
 
-        ~TpgGenerationEngine(){
+        ~TPGGenerationEngine(){
             fileMainH << "\n#endif" << std::endl;
             fileMain.close();
             fileMainH.close();
         }
-
-        /**
-         * \brief Method for finding the unique identifier associated to a given
-         * Program.
-         *
-         * Using the programID map, this method retrieves the integer identifier
-         * associated to the given Program. If not identifier exists for this
-         * Program, a new one is created automatically and saved into the map.
-         *
-         * \param[in] prog a const reference to the Program whose integer
-         *                    identifier is retrieved.
-         * \param[out] id a pointer to an integer number, used to return the
-         *                found identifier.
-         * \return A boolean value indicating whether the returned ID is a new
-         * one (true), or one found in the programID map (false).
-         */
-
-        bool findProgramID(const Program::Program& prog, uint64_t& id);
-
-        /**
-         * \brief Method for finding the unique identifier associated to a given
-         * TPGVertex.
-         *
-         * Using the vertexID map, this method returns the integer identifier
-         * associated to the given TPGVertex. If not identifier exists for this
-         * TPGVertex, a new one is created automatically and saved into the map.
-         *
-         * \param[in] vertex a const reference to the TPGVertex whose integer
-         *                    identifier is retrieved.
-         * \return the integer identifier for the given TPGVertex.
-         */
-
-        uint64_t findVertexID(const TPG::TPGVertex& vertex);
 
         /**
          * \brief Method for generating an edge of the graph

@@ -38,47 +38,16 @@
 
 #include "code_gen/TpgGenerationEngine.h"
 
-const std::string TPG::TpgGenerationEngine::filenameProg = "program";
+const std::string TPG::TPGGenerationEngine::filenameProg = "program";
 
-bool TPG::TpgGenerationEngine::findProgramID(const Program::Program& prog,
-                                             uint64_t& id){
-    auto iter = this->programID.find(&prog);
-    if (iter == this->programID.end()) {
-        // The vertex is not known yet
-        this->programID.insert(std::pair<const Program::Program*, uint64_t>(
-            &prog, this->nbPrograms));
-        this->nbPrograms++;
-        id = this->nbPrograms - 1;
-        return true;
-    }
-    else {
-        id = iter->second;
-        return false;
-    }
-}
-
-uint64_t TPG::TpgGenerationEngine::findVertexID(const TPG::TPGVertex& vertex){
-    auto iter = this->vertexID.find(&vertex);
-    if (iter == this->vertexID.end()) {
-        // The vertex is not known yet
-        this->vertexID.insert(std::pair<const TPG::TPGVertex*, uint64_t>(
-            &vertex, this->nbVertex));
-        this->nbVertex++;
-        return nbVertex - 1;
-    }
-    else {
-        return iter->second;
-    }
-}
-
-void TPG::TpgGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
+void TPG::TPGGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 {
     const Program::Program& p = edge.getProgram();
     uint64_t progID;
 
     progGenerationEngine.setProgram(p);
 
-    if (this->findProgramID(p, progID)){
+    if (findProgramID(p, progID)){
         progGenerationEngine.generateProgram(progID);
     }
     fileMain << "\t\t\t{0,P" << progID << ",";
@@ -92,7 +61,7 @@ void TPG::TpgGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 
 }
 
-void TPG::TpgGenerationEngine::generateTeam(const TPG::TPGTeam& team)
+void TPG::TPGGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 {
     uint64_t id = findVertexID(team);
     //print prototype and declaration of the function
@@ -118,7 +87,7 @@ void TPG::TpgGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
 }
 
-void TPG::TpgGenerationEngine::generateAction(const TPG::TPGAction& action){
+void TPG::TPGGenerationEngine::generateAction(const TPG::TPGAction& action){
     uint64_t id = action.getActionID();
     //print prototype and declaration of the function
     fileMain << "void* A" << id << "(int* action){" << std::endl;
@@ -130,13 +99,13 @@ void TPG::TpgGenerationEngine::generateAction(const TPG::TPGAction& action){
 
 }
 
-void TPG::TpgGenerationEngine::setRoot(const TPG::TPGVertex& team){
+void TPG::TPGGenerationEngine::setRoot(const TPG::TPGVertex& team){
     fileMainH << "\nvoid* (*root)(int* action);" << std::endl;
     fileMain << "void* (*root)(int* action) = T" << findVertexID(team) << ";" << std::endl;
 
 }
 
-void TPG::TpgGenerationEngine::generateTPGGraph(){
+void TPG::TPGGenerationEngine::generateTPGGraph(){
     std::map<const TPG::TPGTeam*, std::list<TPGEdge*>> graph;
     auto vertices = this->tpg.getVertices();
     //give an id for each team of the graph
@@ -155,7 +124,7 @@ void TPG::TpgGenerationEngine::generateTPGGraph(){
     }
     setRoot(*tpg.getRootVertices().at(0));
 }
-void TPG::TpgGenerationEngine::initTpgFile(){
+void TPG::TPGGenerationEngine::initTpgFile(){
     fileMain << "#include <limits.h> \n"
              << "#include <assert.h>\n"
              << "#include <stdio.h>\n"
@@ -197,7 +166,7 @@ void TPG::TpgGenerationEngine::initTpgFile(){
              << "\t//check if there exist another none visited edge with a better result\n"
              << "\twhile(idx < nbEdge){\n"
              << "\t\tr = e[idx].ptr_prog();\n"
-             << "\t\tif(e[idx].visited == 0 && bestResult < r){\n"
+             << "\t\tif(e[idx].visited == 0 &&  r >= bestResult){\n"
              << "\t\t\tbestResult =r;\n"
              << "\t\t\tidxNext = idx;\n"
              << "\t\t}\n"
@@ -242,7 +211,7 @@ void TPG::TpgGenerationEngine::initTpgFile(){
              << std::endl;
 
 }
-void TPG::TpgGenerationEngine::initHeaderFile(){
+void TPG::TPGGenerationEngine::initHeaderFile(){
     fileMainH
     << "#include <stdlib.h>\n\n"
 

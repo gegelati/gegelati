@@ -75,7 +75,11 @@ void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
     fileH << "double P" << progID <<"();" << std::endl;
 
     // instantiate register
-    fileC << "\tdouble "<< nameRegVariable <<"[" << program->getEnvironment().getNbRegisters() << "];" << std::endl;
+    fileC << "\tdouble "<< nameRegVariable <<"[" << program->getEnvironment().getNbRegisters() << "] = {0";
+    for (int i = 1; i < program->getEnvironment().getNbRegisters(); ++i) {
+        fileC << ", 0";
+    }
+    fileC << "};" << std::endl;
     this->programCounter = 0;
 
     // Iterate over the lines of the Program
@@ -108,9 +112,9 @@ void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
 
 }
 std::string Program::ProgramGenerationEngine::completeFormat(
-    const Instructions::PrintableInstruction& ins, const std::vector<Data::UntypedSharedPtr>& operand) const
+    const Instructions::PrintableInstruction& instruction, const std::vector<Data::UntypedSharedPtr>& operand) const
 {
-    const std::string& format = ins.getFormat();
+    const std::string& format = instruction.getFormat();
     const Line& line = this->getCurrentLine(); // throw std::out_of_range
     std::string codeLine(format);
     std::string operandValue;
@@ -120,17 +124,25 @@ std::string Program::ProgramGenerationEngine::completeFormat(
         // get number after character '$'
         int idx = std::stoi(match.substr(1));
         if(idx > 0) {
+            const std::pair<uint64_t, uint64_t>& operandIndexes =
+                line.getOperand(idx-1);
+            const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
+                operandIndexes.first); // Throws std::out_of_range
+            const std::type_info& operandType =
+                instruction.getOperandTypes().at(idx-1).get();
+            const uint64_t operandLocation =
+                dataSource.scaleLocation(operandIndexes.second, operandType);
             // if number > 0 means that it's in the left side of the operation
             if(line.getOperand(idx-1).first == 0){
                 //operand value is an intern register
                  operandValue = nameRegVariable + "[" +
-                               std::to_string(line.getOperand(idx-1).second) + "]";
+                     std::to_string(operandLocation) + "]";
 
             }
             else {
                 //operandValue come from the environment
                  operandValue = nameDataVariable + std::to_string(line.getOperand(idx-1).first) + "[" +
-                               std::to_string(line.getOperand(idx-1).second) + "]";
+                     std::to_string(operandLocation) + "]";
             }
         }
         else{
@@ -142,13 +154,13 @@ std::string Program::ProgramGenerationEngine::completeFormat(
     return codeLine;
 }
 void Program::ProgramGenerationEngine::initGlobalVar(){
-    std::cout << "size de dataScsConstsAndRegs : " << this->dataScsConstsAndRegs.size() << std::endl;
+    //std::cout << "size de dataScsConstsAndRegs : " << this->dataScsConstsAndRegs.size() << std::endl;
     for (int i = 1; i < this->dataScsConstsAndRegs.size(); ++i) {
         int status = 1;
         const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
-        std::cout << "data n°" << i << " : " << abi::__cxa_demangle(typeid(d).name(), NULL, NULL, &status) << std::endl;
+    //    std::cout << "data n°" << i << " : " << abi::__cxa_demangle(typeid(d).name(), NULL, NULL, &status) << std::endl;
 
-        std::cout << "get template type data n°" << i << " : " << d.getTemplateType() << std::endl;
+    //    std::cout << "get template type data n°" << i << " : " << d.getTemplateType() << std::endl;
 
         std::string type = d.getTemplateType();
         fileC << "extern " << type << "* in" << i << ";" << std::endl;
