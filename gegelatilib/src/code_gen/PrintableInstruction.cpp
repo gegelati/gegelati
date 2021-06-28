@@ -44,8 +44,6 @@
 //    return false;
 //}
 
-Instructions::PrintableInstruction::PrintableInstruction() : Instructions::Instruction{}, format{}{
-}
 const std::string& Instructions::PrintableInstruction::getFormat() const
 {
     return this->format;

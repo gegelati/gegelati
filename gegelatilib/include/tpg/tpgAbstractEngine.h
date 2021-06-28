@@ -5,14 +5,15 @@
 #include "program/program.h"
 
 namespace TPG {
+    /**
+     * \brief Abstract Class in charge of managing maps to give a unique ID
+     * for each of a TPGGraph
+     *
+     *
+    */
     class TPGAbstractEngine
     {
-        /**
-         * \brief Abstract Class in charge of managing maps to give a unique ID
-         * for each of a TPGGraph
-         *
-         *
-         */
+
       protected:
 
         /**
@@ -52,6 +53,11 @@ namespace TPG {
          * previous export will keep its ID.
          */
         uint64_t nbVertex = 0;
+
+        /**
+         * \brief constructor
+         * @param tpg
+         */
 
         TPGAbstractEngine(const TPG::TPGGraph& tpg) : tpg{tpg}{};
 

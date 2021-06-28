@@ -45,17 +45,17 @@
 #include "tpg/tpgAbstractEngine.h"
 #include <string>
 
-namespace TPG {
+namespace CodeGen {
+    /**
+     * \brief Class in charge of generating the C code of a TPGGraph
+     *
+     * Each program of the TPGGraph is represented by a C function.
+     * All the function are regrouped in a file. Another file holds
+     * the main function to iterate threw the TPGGraph.
+     *
+     */
     class TPGGenerationEngine : public TPG::TPGAbstractEngine
     {
-        /**
-         * \brief Class in charge of generating the C code of a TPGGraph
-         *
-         * Each program of the TPGGraph is represented by a C function.
-         * All the function are regrouped in a file. Another file holds
-         * the main function to iterate threw the TPGGraph.
-         *
-         */
       protected:
         /// Filename of the file with the main function
         static const std::string filenameProg;
@@ -65,7 +65,7 @@ namespace TPG {
         /// header file for the function that iterates threw the TPG
         std::ofstream fileMainH;
 
-                /**
+        /**
          * \brief ProgramGenerationEngine for generating Programs of edges.
          *
          * Keeping this ProgramGenerationEngine as an attribute avoids wasting
@@ -87,6 +87,7 @@ namespace TPG {
          * This function print generic code to execute the TPG and manage the
          * stack of visited edges
          */
+         //todo des .c/.h qui sont dupliqué pour éviter le recopiage ?
         void initTpgFile();
 
         /**
@@ -105,10 +106,12 @@ namespace TPG {
          * \param[in] filename : filename of the file holding the main function
          *                of the generated program.
          *
-         * \param[in] env Environment in which the Program of the TPGGraph will
+         * \param[in] tpg Environment in which the Program of the TPGGraph will
          *                be executed.
+         *
+         * \param[in] stackSize size of call stack for the execution of the TPG graph
          */
-        TPGGenerationEngine(std::string filename, const TPG::TPGGraph& tpg, uint64_t stackSize = 8)
+        TPGGenerationEngine(const std::string& filename, const TPG::TPGGraph& tpg, const uint64_t& stackSize = 8)
             : TPGAbstractEngine(tpg),
             progGenerationEngine{filename+"_"+filenameProg,tpg.getEnvironment()}, stackSize{stackSize} {
             this->fileMain.open(filename+".c", std::ofstream::out);
@@ -124,7 +127,7 @@ namespace TPG {
         /**
          * \brief destructor of the class
          *
-         * add #endif at the end of the header and close both file
+         * add endif at the end of the header and close both file
          */
 
         ~TPGGenerationEngine(){
@@ -136,14 +139,15 @@ namespace TPG {
         /**
          * \brief Method for generating an edge of the graph
          *
-         * This function generate the code that represent an edge.
+         * This function generates the code that represents an edge.
          * An edge of a team is represented by a struct with an integer, a function
-         * pointer of type : double (*ptr_prog)() the following vertex is represented
-         * by a function pointer of type : void* (*ptr_vertex)(int*);
+         * pointer of type : double (*ptr_prog)() for the program of the edge
+         * and the following vertex is represented by a function pointer of type
+         * : void* (*ptr_vertex)(int*);
          *
          * \param[in] edge that must be generated
          */
-        void generateEdge(const TPG::TPGEdge&);
+        void generateEdge(const TPG::TPGEdge& edge);
 
         /**
          * \brief Method for generating a team of the graph
@@ -154,23 +158,32 @@ namespace TPG {
          *
          * \param[in] team that must be generated
          */
-        void generateTeam(const TPG::TPGTeam&);
+        void generateTeam(const TPG::TPGTeam& team);
 
         /**
-         * \brief Method for generating a team of the graph
+         * \brief Method for generating a action of the graph
          *
-         * This method generates the C function that represents a team.
-         * Each function representing a team contains a static array of Edge
-         * and calls the function executeTeam(Edge*, int). The generated
-         * function return a pointer to the next vertex to execute
+         * This method generates the C function that represents an action.
+         * The generated function return a NULL pointer and write the action in
+         * the pointer given as parameter
          *
-         * \param[in] team that must be generated
+         * \param[in] action that must be generated
          */
-        void generateAction(const TPG::TPGAction&);
+        void generateAction(const TPG::TPGAction& action);
 
-        void setRoot(const TPG::TPGVertex&);
+        /**
+         * \brief define the function pointer root to the vertex passed in argument
+         *
+         * \param[in] root of the TPG graph
+         */
 
-        //todo
+        void setRoot(const TPG::TPGVertex& root);
+
+        /**
+         * \brief function that creates the C files required to execute the TPG
+         * without gegelati
+         *  /todo complete
+         */
         void generateTPGGraph();
     };
 } // namespace TPG

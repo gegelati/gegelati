@@ -38,9 +38,9 @@
 
 #include "code_gen/TpgGenerationEngine.h"
 
-const std::string TPG::TPGGenerationEngine::filenameProg = "program";
+const std::string CodeGen::TPGGenerationEngine::filenameProg = "program";
 
-void TPG::TPGGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
+void CodeGen::TPGGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 {
     const Program::Program& p = edge.getProgram();
     uint64_t progID;
@@ -61,7 +61,7 @@ void TPG::TPGGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 
 }
 
-void TPG::TPGGenerationEngine::generateTeam(const TPG::TPGTeam& team)
+void CodeGen::TPGGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 {
     uint64_t id = findVertexID(team);
     //print prototype and declaration of the function
@@ -87,7 +87,7 @@ void TPG::TPGGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
 }
 
-void TPG::TPGGenerationEngine::generateAction(const TPG::TPGAction& action){
+void CodeGen::TPGGenerationEngine::generateAction(const TPG::TPGAction& action){
     uint64_t id = action.getActionID();
     //print prototype and declaration of the function
     fileMain << "void* A" << id << "(int* action){" << std::endl;
@@ -99,14 +99,14 @@ void TPG::TPGGenerationEngine::generateAction(const TPG::TPGAction& action){
 
 }
 
-void TPG::TPGGenerationEngine::setRoot(const TPG::TPGVertex& team){
+void CodeGen::TPGGenerationEngine::setRoot(const TPG::TPGVertex& team){
     fileMainH << "\nvoid* (*root)(int* action);" << std::endl;
     fileMain << "void* (*root)(int* action) = T" << findVertexID(team) << ";" << std::endl;
 
 }
 
-void TPG::TPGGenerationEngine::generateTPGGraph(){
-    std::map<const TPG::TPGTeam*, std::list<TPGEdge*>> graph;
+void CodeGen::TPGGenerationEngine::generateTPGGraph(){
+    std::map<const TPG::TPGTeam*, std::list<TPG::TPGEdge*>> graph;
     auto vertices = this->tpg.getVertices();
     //give an id for each team of the graph
     for(const TPG::TPGVertex* vertex : vertices ){
@@ -124,7 +124,7 @@ void TPG::TPGGenerationEngine::generateTPGGraph(){
     }
     setRoot(*tpg.getRootVertices().at(0));
 }
-void TPG::TPGGenerationEngine::initTpgFile(){
+void CodeGen::TPGGenerationEngine::initTpgFile(){
     fileMain << "#include <limits.h> \n"
              << "#include <assert.h>\n"
              << "#include <stdio.h>\n"
@@ -211,7 +211,7 @@ void TPG::TPGGenerationEngine::initTpgFile(){
              << std::endl;
 
 }
-void TPG::TPGGenerationEngine::initHeaderFile(){
+void CodeGen::TPGGenerationEngine::initHeaderFile(){
     fileMainH
     << "#include <stdlib.h>\n\n"
 

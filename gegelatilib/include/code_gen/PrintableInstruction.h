@@ -34,7 +34,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_PRINTABLEINSTRUCTION_H
@@ -52,7 +51,7 @@ namespace Instructions {
      * a $ followed by a number. $0 correspond to the result of the function
      *
      */
-    class PrintableInstruction : public Instructions::Instruction
+    class PrintableInstruction : public virtual Instructions::Instruction
     {
       public:
 //        bool isFormatValid();
@@ -64,7 +63,7 @@ namespace Instructions {
         *
         */
         const std::string& getFormat() const;
-
+//todo del
         /**
         * \brief This function return true for a PrintableInstruction and all
         * its derivative class
@@ -77,9 +76,22 @@ namespace Instructions {
         /**
         * \brief Protected constructor to force the class abstract nature.
         *
-        * The definition of this constructor initialize //TODO complete
+        * The definition of this constructor initialize the string format with
+        * the format given as parameter
+        *
+        * \param[in] format of the line used to represent the instruction in the
+        * C files generated
+        *
         */
-        PrintableInstruction();
+        PrintableInstruction(std::string format): format(format){};
+
+        /**
+         * \brief delete default constructor
+         *
+         * A printableInstruction without any format does not make sense
+         */
+
+        PrintableInstruction() = delete;
 
         /// format of the instruction used to generate the code
         std::string format;

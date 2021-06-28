@@ -50,9 +50,20 @@ namespace Program {
     class ProgramGenerationEngine : public ProgramEngine
     {
       protected:
+        /// regex used to identify operand in the format of a printableInstruction
         static const std::regex operand_regex;
-        static const std::string nameRegVariable;
+
+        /**
+         * \brief name given to the global variable in generated files.
+         *
+         * "nameDataVariable"1 corresponds to the first variable
+         * "nameDataVariable"2 is used if an other data is given
+         * ...
+         */
         static const std::string nameDataVariable;
+
+        /// names of the registers in the TPG's programs
+        static const std::string nameRegVariable;
 
         /// The file in which programs will be added
         std::ofstream fileC;
@@ -61,7 +72,7 @@ namespace Program {
 
         /**
          * \brief Set global variables in the file holding the programs
-         *
+         * //todo
          * Set type of the global variable accordingly to the type of the data sources of the environnement
          * Pay attention that the function typeid::name() is dependant on the compiler choosen.
          * Here the function must return a human readable type. If it's not the case the output of the function has to
@@ -71,16 +82,6 @@ namespace Program {
 
         void initGlobalVar();
 
-        /**
-         * \brief function use to unmangle the char* obtain by the function typeid::name()
-         *
-         *  // todo
-         * for now the function only takes into account the gcc compiler
-         *  // todo manage MSVC as compiler (with #ifdef, MSVC le code de retour est lisible pas besoin de unmangle)
-         * @return unamngle type of the variable
-         */
-
-        std::string unmangle(const Data::DataHandler&);
       public:
         /**
          * \brief Constructor of the class
@@ -104,13 +105,13 @@ namespace Program {
             fileC << "#include \"externHeader.h\"" << std::endl;
 #ifdef DEBUG
             fileC << "#include <stdio.h>" << std::endl;
-#endif
+#endif // DEBUG
         }
 
         /**
          * \brief destructor of the class
          *
-         * close both files and add #endif at the end of the header
+         * close both files and add endif at the end of the header
          */
 
          ~ProgramGenerationEngine(){
@@ -130,12 +131,12 @@ namespace Program {
         /**
          * \brief generate the C code that corresponds to the member program of the class
          *
-         * Create a function in the file <filename>_program.c that regroup all
+         * Create a function in the file "filename"_program.c that regroup all
          * the instruction of the program and return a double. The name of the
          * function is based on the identifier of the program. The declaration of
          * function of the program with ID=1 is double P1(int* action)
          *
-         * \param[in] unique identifier of the program used to generate the name
+         * \param[in] progID unique identifier of the program used to generate the name
          *            of the function in the C file.
          * \param[in] ignoreException When true, all exceptions thrown when
          *            fetching current instructions, operands are
@@ -155,12 +156,10 @@ namespace Program {
          * pointer to the data of the environment.
          *
          * \param[in] instruction that as to be converted into a line of code
-         * \param[in] operands of the instruction that replace the symbols $<number>
-         *            $0 correspond to the result of the instruction.
          *
          * @return a line of code that can be printed in the program file
          */
-        std::string completeFormat(const Instructions::PrintableInstruction&, const std::vector<Data::UntypedSharedPtr>&) const;
+        std::string completeFormat(const Instructions::PrintableInstruction& instruction) const;
     };
 
 } // namespace Program

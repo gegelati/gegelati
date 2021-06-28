@@ -36,7 +36,6 @@
 
 #ifdef CODE_GENERATION
 
-#include <search.h>
 #include "code_gen/ProgramGenerationEngine.h"
 #include <cxxabi.h>
 
@@ -49,12 +48,12 @@ void Program::ProgramGenerationEngine::generateCurrentLine(){
 
     const Line& line = this->getCurrentLine();
     const Instructions::Instruction& instruction = this->getCurrentInstruction();
-    this->fetchCurrentOperands(operand);
+//todo change here : remove isPrintable and only check if cast is possible
 
     if(instruction.isPrintable()){
         auto prtIns = dynamic_cast<const Instructions::PrintableInstruction*>(&instruction);
         if (prtIns != nullptr){
-            std::string codeLine = completeFormat(*prtIns,operand);
+            std::string codeLine = completeFormat(*prtIns);
             fileC << "\t" << codeLine << std::endl;
         }
         else{
@@ -112,7 +111,7 @@ void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
 
 }
 std::string Program::ProgramGenerationEngine::completeFormat(
-    const Instructions::PrintableInstruction& instruction, const std::vector<Data::UntypedSharedPtr>& operand) const
+    const Instructions::PrintableInstruction& instruction) const
 {
     const std::string& format = instruction.getFormat();
     const Line& line = this->getCurrentLine(); // throw std::out_of_range
@@ -167,9 +166,5 @@ void Program::ProgramGenerationEngine::initGlobalVar(){
 
     }
 }
-std::string Program::ProgramGenerationEngine::unmangle(const Data::DataHandler& data){
-    std::string type;
 
-    return type;
-}
 #endif // CODE_GENERATION

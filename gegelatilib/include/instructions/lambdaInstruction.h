@@ -56,7 +56,7 @@ namespace Instructions {
      * to the LambdaInstruction constructor, specifying its type.
      */
     template <typename First, typename... Rest>
-    class LambdaInstruction : public Instructions::Instruction
+    class LambdaInstruction : public virtual Instructions::Instruction
     {
 
       protected:
