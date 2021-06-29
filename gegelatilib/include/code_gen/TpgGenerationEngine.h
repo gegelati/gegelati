@@ -33,16 +33,17 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_TPGGENERATIONENGINE_H
 #define GEGELATI_TPGGENERATIONENGINE_H
 #include "ProgramGenerationEngine.h"
+#include "tpg/tpgAbstractEngine.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgTeam.h"
-#include "tpg/tpgAbstractEngine.h"
+#include <ios>
+#include <iostream>
 #include <string>
 
 namespace CodeGen {
@@ -78,7 +79,7 @@ namespace CodeGen {
          *
          * Stack holding the visited edges during the inference
          */
-        //todo la stack size
+        // todo la stack size
         uint64_t stackSize;
 
         /**
@@ -87,11 +88,12 @@ namespace CodeGen {
          * This function print generic code to execute the TPG and manage the
          * stack of visited edges
          */
-         //todo des .c/.h qui sont dupliqué pour éviter le recopiage ?
+        // todo des .c/.h qui sont dupliqué pour éviter le recopiage ?
         void initTpgFile();
 
         /**
-         * \brief function printing generic code declaration in the main file header
+         * \brief function printing generic code declaration in the main file
+         * header
          *
          * This function print the the struct required to represent the TPG and
          * the prototypes of the function to execute the TPG and manage the
@@ -109,15 +111,32 @@ namespace CodeGen {
          * \param[in] tpg Environment in which the Program of the TPGGraph will
          *                be executed.
          *
-         * \param[in] stackSize size of call stack for the execution of the TPG graph
+         * \param[in] path to the folder in which the file are generated. If the folder does not exist
+         *
+         * \param[in] stackSize size of call stack for the execution of the TPG
+         * graph
          */
-        TPGGenerationEngine(const std::string& filename, const TPG::TPGGraph& tpg, const uint64_t& stackSize = 8)
+        TPGGenerationEngine(const std::string& filename,
+                            const TPG::TPGGraph& tpg,
+                            const std::string& path = "./",
+                            const uint64_t& stackSize = 8)
             : TPGAbstractEngine(tpg),
-            progGenerationEngine{filename+"_"+filenameProg,tpg.getEnvironment()}, stackSize{stackSize} {
-            this->fileMain.open(filename+".c", std::ofstream::out);
-            this->fileMainH.open(filename+".h", std::ofstream::out);
+              progGenerationEngine{filename + "_" + filenameProg,
+                                   tpg.getEnvironment()},
+              stackSize{stackSize}
+        {
+            try {
+                this->fileMain.open(path+filename + ".c", std::ofstream::out);
+                this->fileMainH.open(path+filename + ".h", std::ofstream::out); 
+            }
+            catch (std::ios_base::failure e) {
+                throw std::runtime_error("Could not open file " +
+                                         std::string(path+filename));
+            }
+
             fileMain << "#include \"" << filename << ".h\"" << std::endl;
-            fileMain << "#include \"" << filename << "_" << filenameProg << ".h\"" << std::endl;
+            fileMain << "#include \"" << filename << "_" << filenameProg
+                     << ".h\"" << std::endl;
             initTpgFile();
             fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
             fileMainH << "#define C_" << filename << "_H\n" << std::endl;
@@ -130,7 +149,8 @@ namespace CodeGen {
          * add endif at the end of the header and close both file
          */
 
-        ~TPGGenerationEngine(){
+        ~TPGGenerationEngine()
+        {
             fileMainH << "\n#endif" << std::endl;
             fileMain.close();
             fileMainH.close();
@@ -140,10 +160,10 @@ namespace CodeGen {
          * \brief Method for generating an edge of the graph
          *
          * This function generates the code that represents an edge.
-         * An edge of a team is represented by a struct with an integer, a function
-         * pointer of type : double (*ptr_prog)() for the program of the edge
-         * and the following vertex is represented by a function pointer of type
-         * : void* (*ptr_vertex)(int*);
+         * An edge of a team is represented by a struct with an integer, a
+         * function pointer of type : double (*ptr_prog)() for the program of
+         * the edge and the following vertex is represented by a function
+         * pointer of type : void* (*ptr_vertex)(int*);
          *
          * \param[in] edge that must be generated
          */
@@ -172,7 +192,8 @@ namespace CodeGen {
         void generateAction(const TPG::TPGAction& action);
 
         /**
-         * \brief define the function pointer root to the vertex passed in argument
+         * \brief define the function pointer root to the vertex passed in
+         * argument
          *
          * \param[in] root of the TPG graph
          */
@@ -186,7 +207,7 @@ namespace CodeGen {
          */
         void generateTPGGraph();
     };
-} // namespace TPG
+} // namespace CodeGen
 
 #endif // GEGELATI_TPGGENERATIONENGINE_H
 

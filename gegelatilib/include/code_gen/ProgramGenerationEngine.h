@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_PROGRAMGENERATIONENGINE_H
@@ -50,7 +49,8 @@ namespace CodeGen {
     class ProgramGenerationEngine : public Program::ProgramEngine
     {
       protected:
-        /// regex used to identify operand in the format of a printableInstruction
+        /// regex used to identify operand in the format of a
+        /// printableInstruction
         static const std::regex operand_regex;
 
         /**
@@ -87,23 +87,32 @@ namespace CodeGen {
         /**
          * \brief Constructor of the class
          *
-         * The constructor initialize the member of the parent class (ProgramEngine)
-         * and the file "filename" is open with the flag std::ofstream::app
-         * to generate the program in the file.
+         * The constructor initialize the member of the parent class
+         * (ProgramEngine) and the file "filename" is open with the flag
+         * std::ofstream::app to generate the program in the file.
          *
-         * \param[in] filename
+         * \param[in] filename //todo
          * \param[in] env
+         * \param[in] path
          */
 
-        ProgramGenerationEngine(const std::string& filename,const Environment& env)
-            : ProgramEngine(env){
-            if(filename.size() == 0){
+        ProgramGenerationEngine(const std::string& filename,
+                                const Environment& env, const std::string& path = "./")
+            : ProgramEngine(env)
+        {
+            if (filename.size() == 0) {
                 std::cout << "filename is empty" << std::endl;
                 throw std::invalid_argument("filename is empty");
             }
-            this->fileC.open(filename+".c", std::ofstream::out);
-            this->fileH.open(filename+".h", std::ofstream::out);
-            fileC << "#include \"" << filename <<".h\"" << std::endl;
+            try{
+                this->fileC.open(path+filename + ".c", std::ofstream::out);
+                this->fileH.open(path+filename + ".h", std::ofstream::out);
+            }
+            catch (std::ios_base::failure e) {
+                throw std::runtime_error("Could not open file " +
+                                         std::string(path+filename));
+            }
+            fileC << "#include \"" << filename << ".h\"" << std::endl;
             initGlobalVar();
             fileH << "#ifndef C_" << filename << "_H" << std::endl;
             fileH << "#define C_" << filename << "_H\n" << std::endl;
@@ -115,23 +124,25 @@ namespace CodeGen {
         /**
          * \brief Constructor of the class
          *
-         * The constructor initialize the member of the parent class (ProgramEngine)
-         * and the file "filename" is open with the flag std::ofstream::app
-         * to generate the program in the file.
+         * The constructor initialize the member of the parent class
+         * (ProgramEngine) and the file "filename" is open with the flag
+         * std::ofstream::app to generate the program in the file.
          *
-         * \param[in] filename
+         * \param[in] filename //todo
          * \param[in] env
          */
 
-        ProgramGenerationEngine(const std::string& filename, const Program::Program& p)
-            : ProgramEngine(p){
-            if(filename.size() == 0){
+        ProgramGenerationEngine(const std::string& filename,
+                                const Program::Program& p)
+            : ProgramEngine(p)
+        {
+            if (filename.size() == 0) {
                 std::cout << "filename is empty" << std::endl;
                 throw std::invalid_argument("filename is empty");
             }
-            this->fileC.open(filename+".c", std::ofstream::out);
-            this->fileH.open(filename+".h", std::ofstream::out);
-            fileC << "#include \"" << filename <<".h\"" << std::endl;
+            this->fileC.open(filename + ".c", std::ofstream::out);
+            this->fileH.open(filename + ".h", std::ofstream::out);
+            fileC << "#include \"" << filename << ".h\"" << std::endl;
             initGlobalVar();
             fileH << "#ifndef C_" << filename << "_H" << std::endl;
             fileH << "#define C_" << filename << "_H\n" << std::endl;
@@ -147,7 +158,8 @@ namespace CodeGen {
          * close both files and add endif at the end of the header
          */
 
-         ~ProgramGenerationEngine(){
+        ~ProgramGenerationEngine()
+        {
             fileH << "#endif " << std::endl;
             fileC.close();
             fileH.close();
@@ -162,12 +174,13 @@ namespace CodeGen {
         void generateCurrentLine();
 
         /**
-         * \brief generate the C code that corresponds to the member program of the class
+         * \brief generate the C code that corresponds to the member program of
+         * the class
          *
          * Create a function in the file "filename"_program.c that regroups all
          * the instruction of the program and return a double. The name of the
-         * function is based on the identifier of the program. The declaration of
-         * function of the program with ID=1 is double P1(int* action)
+         * function is based on the identifier of the program. The declaration
+         * of function of the program with ID=1 is double P1(int* action)
          *
          * \param[in] progID : unique identifier of the program used to generate
          *            the name of the function in the C file.
@@ -179,11 +192,13 @@ namespace CodeGen {
          *            for higher-level handling, thus stopping the program.
          *            Exception thrown by getCurrentLine are never ignored.
          */
-        void generateProgram(uint64_t progID, const bool ignoreException = false);
+        void generateProgram(uint64_t progID,
+                             const bool ignoreException = false);
 
       protected:
         /**
-         * \brief create the line of C code that equals to instruction in parameter
+         * \brief create the line of C code that equals to instruction in
+         * parameter
          *
          * Replace each operand of the format of the printable instruction by a
          * pointer to the data of the environment.
@@ -193,10 +208,11 @@ namespace CodeGen {
          * @return a copy of the format with the variables changed according to
          * the operand of the instruction.
          */
-        std::string completeFormat(const Instructions::PrintableInstruction& instruction) const;
+        std::string completeFormat(
+            const Instructions::PrintableInstruction& instruction) const;
     };
 
-} // namespace Program
+} // namespace CodeGen
 
 #endif // GEGELATI_PROGRAMGENERATIONENGINE_H
 

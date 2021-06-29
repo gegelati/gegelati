@@ -43,6 +43,7 @@ project(${PROJECT_NAME}
         LANGUAGES CXX
         VERSION 0.6.0)
 string(TOLOWER ${PROJECT_NAME} project_name)
+add_definitions( -DCODE_GENERATION)
 set(LIB_SOURCE_DIRECTORY ${project_name}lib)
 
 # Defines the CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_BINDIR and many other useful macros.
@@ -82,7 +83,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
 endif()
 
-add_definitions( -DCODE_GENERATION)
+
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_definitions( -DGCC)
@@ -189,5 +190,5 @@ if(BUILD_TESTING)
 endif()
 
 # Add targets related to doxygen documention generation
-add_subdirectory(doc)
+#add_subdirectory(doc)
 
