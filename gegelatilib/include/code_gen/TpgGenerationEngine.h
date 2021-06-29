@@ -71,7 +71,7 @@ namespace CodeGen {
          * Keeping this ProgramGenerationEngine as an attribute avoids wasting
          * time rebuilding a new one for each edge.
          */
-        Program::ProgramGenerationEngine progGenerationEngine;
+        CodeGen::ProgramGenerationEngine progGenerationEngine;
 
         /**
          * \brief Size of the stack

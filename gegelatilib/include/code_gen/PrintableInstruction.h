@@ -34,6 +34,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_PRINTABLEINSTRUCTION_H
@@ -60,18 +61,10 @@ namespace Instructions {
         * \brief This function return the format of the line of code used to
         * represent the instruction
         *
-        *
+        * \return The format used to represent the instruction in the C program
         */
         const std::string& getFormat() const;
-//todo del
-        /**
-        * \brief This function return true for a PrintableInstruction and all
-        * its derivative class
-        *
-        *
-        */
 
-        bool isPrintable() const override;
       protected:
         /**
         * \brief Protected constructor to force the class abstract nature.

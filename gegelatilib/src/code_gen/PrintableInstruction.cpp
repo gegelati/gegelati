@@ -48,10 +48,7 @@ const std::string& Instructions::PrintableInstruction::getFormat() const
 {
     return this->format;
 }
-bool Instructions::PrintableInstruction::isPrintable() const
-{
-    return true;
-}
+
 
 //std::string Instructions::PrintableInstruction::print(
 //    const std::vector<Data::UntypedSharedPtr>& args){

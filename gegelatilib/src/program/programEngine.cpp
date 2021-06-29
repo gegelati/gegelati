@@ -84,7 +84,7 @@ getCurrentInstruction() const
 }
 
 const void Program::ProgramEngine::fetchCurrentOperands(
-    std::vector</*std::pair<const uint64_t, const uint64_t>*/ Data::UntypedSharedPtr>& operands) const
+    std::vector<Data::UntypedSharedPtr>& operands) const
 {
     const Line& line = this->getCurrentLine(); // throw std::out_of_range
     const Instructions::Instruction& instruction =
@@ -92,16 +92,31 @@ const void Program::ProgramEngine::fetchCurrentOperands(
 
     // Get as many operands as required by the instruction.
     for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
-        const std::pair<uint64_t, uint64_t>& operandIndexes =
-            line.getOperand(i);
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
-            operandIndexes.first); // Throws std::out_of_range
+        line.getOperand(i).first); // Throws std::out_of_range
+        const uint64_t operandLocation = getOperandLocation(i);
         const std::type_info& operandType =
             instruction.getOperandTypes().at(i).get();
-        const uint64_t operandLocation =
-            dataSource.scaleLocation(operandIndexes.second, operandType);
         Data::UntypedSharedPtr data =
             dataSource.getDataAt(operandType, operandLocation);
         operands.push_back(data);
     }
+}
+
+uint64_t Program::ProgramEngine::getOperandLocation(uint64_t idxOp) const
+{
+    const Line& line = this->getCurrentLine(); // throw std::out_of_range
+    const Instructions::Instruction& instruction =
+        this->getCurrentInstruction(); // throw std::out_of_range
+
+    const std::pair<uint64_t, uint64_t>& operandIndexes =
+        line.getOperand(idxOp);
+    const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
+        operandIndexes.first); // Throws std::out_of_range
+    const std::type_info& operandType =
+        instruction.getOperandTypes().at(idxOp).get();
+    uint64_t operandLocation =
+        dataSource.scaleLocation(operandIndexes.second, operandType);
+
+    return operandLocation;
 }

@@ -211,6 +211,23 @@ namespace Program {
          */
         const void fetchCurrentOperands(
             std::vector<Data::UntypedSharedPtr>& operands) const;
+
+        /**
+         * \brief Get the location for the current Instruction.
+         *
+         * This method fetches from the dataSourcesAndRegisters the operands
+         * indexed in the current Line of the Program. To get the correct data,
+         * the method Uses the data types of the current Instruction of the
+         * program.
+         *
+         * \param[in] operands std::vector where the fetched operands will
+         * be inserted. \throws std::invalid_argument if the data type of the
+         * current Instruction is not provided by the indexed DataHandler.
+         * \throws std::out_of_range if the given address is invalid for the
+         * indexed DataHandler, with the given data type, or if the indexed
+         *         DataHandler does not exist.
+         */
+        uint64_t getOperandLocation(uint64_t idxOp) const;
     };
 
     template <class T>

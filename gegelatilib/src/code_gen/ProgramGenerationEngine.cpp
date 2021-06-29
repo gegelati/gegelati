@@ -39,36 +39,27 @@
 #include "code_gen/ProgramGenerationEngine.h"
 #include <cxxabi.h>
 
-const std::regex Program::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
-const std::string Program::ProgramGenerationEngine::nameRegVariable("reg");
-const std::string Program::ProgramGenerationEngine::nameDataVariable("in");
+const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
+const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
+const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
 
-void Program::ProgramGenerationEngine::generateCurrentLine(){
-    std::vector<Data::UntypedSharedPtr> operand;
-
-    const Line& line = this->getCurrentLine();
+void CodeGen::ProgramGenerationEngine::generateCurrentLine(){
+    const Program::Line& line = this->getCurrentLine();
     const Instructions::Instruction& instruction = this->getCurrentInstruction();
-//todo change here : remove isPrintable and only check if cast is possible
+    auto prtIns = dynamic_cast<const Instructions::PrintableInstruction*>(&instruction);
 
-    if(instruction.isPrintable()){
-        auto prtIns = dynamic_cast<const Instructions::PrintableInstruction*>(&instruction);
-        if (prtIns != nullptr){
-            std::string codeLine = completeFormat(*prtIns);
-            fileC << "\t" << codeLine << std::endl;
-        }
-        else{
-            throw std::runtime_error("The pointer on the instruction cannot be"
-                                     " converted to a pointer on a printable"
-                                     "instruction.");
-        }
+    if (prtIns != nullptr){
+        std::string codeLine = completeFormat(*prtIns);
+        fileC << "\t" << codeLine << std::endl;
     }
     else{
-        throw std::runtime_error("Could not generate the line, the instruction"
-                                 " is not printable");
+        throw std::runtime_error("The pointer on the instruction cannot be"
+                                 " converted to a pointer on a printable"
+                                 "instruction.");
     }
 
 }
-void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bool ignoreException)
+void CodeGen::ProgramGenerationEngine::generateProgram(uint64_t progID, const bool ignoreException)
 {
     fileC << "\ndouble P" << progID <<"(){" << std::endl;
     fileH << "double P" << progID <<"();" << std::endl;
@@ -80,7 +71,7 @@ void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
     }
     fileC << "};" << std::endl;
     this->programCounter = 0;
-
+//todo embarqué dans une fonction globale avec une operateur() ? avec un objet foncteur
     // Iterate over the lines of the Program
     bool hasNext = this->program->getNbLines() > 0;
 
@@ -93,7 +84,7 @@ void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
     while (hasNext) {
         try {
             // generate the current line
-            this->generateCurrentLine();
+            this->generateCurrentLine(); //todo utilisez un objet foncteur à la place
         }
         catch (std::out_of_range e) {
             if (!ignoreException) {
@@ -105,16 +96,18 @@ void Program::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
         hasNext = this->next();
     };
 #ifdef DEBUG
+    fileC << "#ifdef DEBUG" << std::endl;
     fileC << "\tprintf(\"P" << progID << " : reg[0] = %lf \\n\", reg[0]);" << std::endl;
+    fileC << "#endif" << std::endl;
 #endif
     fileC << "\treturn reg[0];\n}" << std::endl;
 
 }
-std::string Program::ProgramGenerationEngine::completeFormat(
+std::string CodeGen::ProgramGenerationEngine::completeFormat(
     const Instructions::PrintableInstruction& instruction) const
 {
     const std::string& format = instruction.getFormat();
-    const Line& line = this->getCurrentLine(); // throw std::out_of_range
+    const Program::Line& line = this->getCurrentLine(); // throw std::out_of_range
     std::string codeLine(format);
     std::string operandValue;
     for(auto itr = std::sregex_iterator(format.begin(), format.end(), operand_regex); itr != std::sregex_iterator(); ++itr){
@@ -123,14 +116,8 @@ std::string Program::ProgramGenerationEngine::completeFormat(
         // get number after character '$'
         int idx = std::stoi(match.substr(1));
         if(idx > 0) {
-            const std::pair<uint64_t, uint64_t>& operandIndexes =
-                line.getOperand(idx-1);
-            const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
-                operandIndexes.first); // Throws std::out_of_range
-            const std::type_info& operandType =
-                instruction.getOperandTypes().at(idx-1).get();
-            const uint64_t operandLocation =
-                dataSource.scaleLocation(operandIndexes.second, operandType);
+            const uint64_t operandLocation = this->getOperandLocation(idx-1);
+
             // if number > 0 means that it's in the left side of the operation
             if(line.getOperand(idx-1).first == 0){
                 //operand value is an intern register
@@ -152,18 +139,14 @@ std::string Program::ProgramGenerationEngine::completeFormat(
     }
     return codeLine;
 }
-void Program::ProgramGenerationEngine::initGlobalVar(){
-    //std::cout << "size de dataScsConstsAndRegs : " << this->dataScsConstsAndRegs.size() << std::endl;
-    for (int i = 1; i < this->dataScsConstsAndRegs.size(); ++i) {
-        int status = 1;
-        const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
-    //    std::cout << "data n°" << i << " : " << abi::__cxa_demangle(typeid(d).name(), NULL, NULL, &status) << std::endl;
+void CodeGen::ProgramGenerationEngine::initGlobalVar(){
 
-    //    std::cout << "get template type data n°" << i << " : " << d.getTemplateType() << std::endl;
+    for (int i = 1; i < this->dataScsConstsAndRegs.size(); ++i) {
+
+        const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
 
         std::string type = d.getTemplateType();
         fileC << "extern " << type << "* in" << i << ";" << std::endl;
-
     }
 }
 

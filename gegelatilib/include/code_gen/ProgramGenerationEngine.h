@@ -43,11 +43,11 @@
 //#include <bits/fcntl-linux.h>
 #include <fstream>
 
-namespace Program {
+namespace CodeGen {
     /**
      *  \brief Class in charge of generating a Program.
      */
-    class ProgramGenerationEngine : public ProgramEngine
+    class ProgramGenerationEngine : public Program::ProgramEngine
     {
       protected:
         /// regex used to identify operand in the format of a printableInstruction
@@ -72,11 +72,12 @@ namespace Program {
 
         /**
          * \brief Set global variables in the file holding the programs
-         * //todo
-         * Set type of the global variable accordingly to the type of the data sources of the environnement
-         * Pay attention that the function typeid::name() is dependant on the compiler choosen.
-         * Here the function must return a human readable type. If it's not the case the output of the function has to
-         * be unmangle
+         *
+         * Set type of the global variable accordingly to the type of the data
+         * sources of the environnement. Pay attention that the function
+         * typeid::name() is dependant on the compiler choosen. Here the
+         * function must return a human readable type. If it's not the case the
+         * output of the function has to be unmangle
          *
          */
 
@@ -96,8 +97,40 @@ namespace Program {
 
         ProgramGenerationEngine(const std::string& filename,const Environment& env)
             : ProgramEngine(env){
-            this->fileC.open(filename+".c", std::ofstream::out /*| std::ofstream::app*/);
-            this->fileH.open(filename+".h", std::ofstream::out /*| std::ofstream::app*/);
+            if(filename.size() == 0){
+                std::cout << "filename is empty" << std::endl;
+                throw std::invalid_argument("filename is empty");
+            }
+            this->fileC.open(filename+".c", std::ofstream::out);
+            this->fileH.open(filename+".h", std::ofstream::out);
+            fileC << "#include \"" << filename <<".h\"" << std::endl;
+            initGlobalVar();
+            fileH << "#ifndef C_" << filename << "_H" << std::endl;
+            fileH << "#define C_" << filename << "_H\n" << std::endl;
+            fileC << "#include \"externHeader.h\"" << std::endl;
+#ifdef DEBUG
+            fileC << "#include <stdio.h>" << std::endl;
+#endif // DEBUG
+        }
+        /**
+         * \brief Constructor of the class
+         *
+         * The constructor initialize the member of the parent class (ProgramEngine)
+         * and the file "filename" is open with the flag std::ofstream::app
+         * to generate the program in the file.
+         *
+         * \param[in] filename
+         * \param[in] env
+         */
+
+        ProgramGenerationEngine(const std::string& filename, const Program::Program& p)
+            : ProgramEngine(p){
+            if(filename.size() == 0){
+                std::cout << "filename is empty" << std::endl;
+                throw std::invalid_argument("filename is empty");
+            }
+            this->fileC.open(filename+".c", std::ofstream::out);
+            this->fileH.open(filename+".h", std::ofstream::out);
             fileC << "#include \"" << filename <<".h\"" << std::endl;
             initGlobalVar();
             fileH << "#ifndef C_" << filename << "_H" << std::endl;
@@ -131,17 +164,17 @@ namespace Program {
         /**
          * \brief generate the C code that corresponds to the member program of the class
          *
-         * Create a function in the file "filename"_program.c that regroup all
+         * Create a function in the file "filename"_program.c that regroups all
          * the instruction of the program and return a double. The name of the
          * function is based on the identifier of the program. The declaration of
          * function of the program with ID=1 is double P1(int* action)
          *
-         * \param[in] progID unique identifier of the program used to generate the name
-         *            of the function in the C file.
+         * \param[in] progID : unique identifier of the program used to generate
+         *            the name of the function in the C file.
          * \param[in] ignoreException When true, all exceptions thrown when
          *            fetching current instructions, operands are
          *            caught and the current program Line is simply ignored.
-         *            When true, all lines of the Program are assumed to be
+         *            When false, all lines of the Program are assumed to be
          *            correct by construction, and any exception is re-thrown
          *            for higher-level handling, thus stopping the program.
          *            Exception thrown by getCurrentLine are never ignored.
@@ -157,7 +190,8 @@ namespace Program {
          *
          * \param[in] instruction that as to be converted into a line of code
          *
-         * @return a line of code that can be printed in the program file
+         * @return a copy of the format with the variables changed according to
+         * the operand of the instruction.
          */
         std::string completeFormat(const Instructions::PrintableInstruction& instruction) const;
     };
