@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef lksjvd
 #include "OneTeamTwoLeaves.h"
-#elif
+
 double* in1;
 
 int main(){
@@ -21,5 +20,5 @@ int main(){
     reset();
     action = executeFromVertex(root);
     printf("action : %d\n", action);
-    return 0;
+    return action;
 }

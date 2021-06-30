@@ -19,5 +19,5 @@ int main(){
     reset();
     action = executeFromVertex(root);
     printf("action : %d\n", action);
-    return 0;
+    return action;
 }

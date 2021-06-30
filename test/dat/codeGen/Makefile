@@ -1,9 +1,11 @@
-SRC := ../../../bin/src/
-OBJ := ${SRC}obj/
-BIN := ${SRC}bin/
+dir := ../../../bin/
+SRC := ${dir}src/
+INCLUDE := ${dir}src/
+OBJ := ${dir}obj/
+BIN := ${dir}bin/
 CC=gcc
 #CFLAGS= -Wall -I.. -I../../UnitTest -I.
-CFLAGS= -I${SRC} -I. #-Wall
+CFLAGS= -I${INCLUDE} -I. #-Wall
 
 TARGET = OneLeafNoInstruction OneLeaf TwoLeaves OneTeamOneLeaf OneTeamTwoLeaves TwoTeamsOneCycle ThreeTeamsOneCycleThreeLeaves
 
@@ -18,6 +20,9 @@ OneLeaf : % : ${OBJ}%.o ${OBJ}%_program.o ${OBJ}main%.o
 TwoLeaves : % : ${OBJ}%.o ${OBJ}%_program.o ${OBJ}main%.o
 	${CC} $^ -o ${BIN}$@
 
+ThreeLeaves : % : ${OBJ}%.o ${OBJ}%_program.o ${OBJ}main%.o
+	${CC} $^ -o ${BIN}$@
+
 OneTeamOneLeaf : % : ${OBJ}%.o ${OBJ}%_program.o ${OBJ}main%.o
 	${CC} $^ -o ${BIN}$@
 
@@ -29,6 +34,12 @@ TwoTeamsOneCycle : % : ${OBJ}%.o ${OBJ}%_program.o ${OBJ}main%.o
 
 ThreeTeamsOneCycleThreeLeaves : % : ${OBJ}%.o ${OBJ}%_program.o ${OBJ}main%.o
 	${CC} $^ -o ${BIN}$@
+
+TicTacToeBest_TPG : % : ${OBJ}%.o ${OBJ}%_program.o ${OBJ}main%.o
+	${CC} $^ -o ${BIN}$@ -lm
+
+StickGameBest_TPG : % : ${OBJ}%.o ${OBJ}%_program.o ${OBJ}main%.o
+	${CC} $^ -o ${BIN}$@ -lm
 
 ${OBJ}main%.o : main%.c
 	${CC} -c ${CFLAGS} $^ -o $@

@@ -39,8 +39,10 @@
 
 #ifndef GEGELATI_LAMBDAPRINTABLEINSTRUCTION_H
 #define GEGELATI_LAMBDAPRINTABLEINSTRUCTION_H
+
 #include "PrintableInstruction.h"
 #include "instructions/lambdaInstruction.h"
+
 namespace Instructions {
     /**
      * \brief Template instruction for simplifying the creation of an
@@ -52,12 +54,11 @@ namespace Instructions {
      * Each template parameter corresponds to an argument of the function given
      * to the LambdaInstruction constructor, specifying its type.
      */
-    template <typename First, typename... Rest>
+    template<typename First, typename... Rest>
     class LambdaPrintableInstruction :
-        public Instructions::LambdaInstruction<First, Rest...>,
-        public Instructions::PrintableInstruction
-    {
-      public:
+            public Instructions::LambdaInstruction<First, Rest...>,
+            public Instructions::PrintableInstruction {
+    public:
         LambdaPrintableInstruction() = delete;
 
         /**
@@ -74,15 +75,9 @@ namespace Instructions {
          *
          **/
         LambdaPrintableInstruction(
-            std::string format, std::function<double(First, Rest...)> function)
-            : Instructions::LambdaInstruction<First, Rest...>(function),
-              Instructions::PrintableInstruction(format)
-        {
-            this->format = format;
-            this->operandTypes.push_back(typeid(First));
-            // Fold expression to push all other types
-            (this->operandTypes.push_back(typeid(Rest)), ...);
-        };
+                std::string format, std::function<double(First, Rest...)> function)
+                : Instructions::LambdaInstruction<First, Rest...>(function),
+                  Instructions::PrintableInstruction(format) {};
     };
 
 

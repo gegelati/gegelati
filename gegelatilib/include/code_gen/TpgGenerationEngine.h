@@ -122,7 +122,7 @@ namespace CodeGen {
                             const uint64_t& stackSize = 8)
             : TPGAbstractEngine(tpg),
               progGenerationEngine{filename + "_" + filenameProg,
-                                   tpg.getEnvironment()},
+                                   tpg.getEnvironment(), path},
               stackSize{stackSize}
         {
             try {

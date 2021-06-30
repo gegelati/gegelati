@@ -10,6 +10,7 @@ class ProgramGenerationEngineTest : public ::testing::Test{
     Instructions::Set set;
     Environment* e;
     Program::Program* p;
+    Program::Program* p2;
 
     virtual void SetUp()
     {
@@ -26,6 +27,7 @@ class ProgramGenerationEngineTest : public ::testing::Test{
 
         e = new Environment(set, vect, 8);
         p = new Program::Program(*e);
+        p2 = new Program::Program(*e);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(0); // Instruction is add.
@@ -63,6 +65,13 @@ class ProgramGenerationEngineTest : public ::testing::Test{
         l4.setOperand(1, 1, 5); // 2nd operand : parameter 6.
         l4.setDestinationIndex(0); // Destination is register at index 0
 
+        Program::Line& P2l0 = p2->addNewLine();
+        P2l0.setInstructionIndex(2); // Instruction is add(non printable).
+        //Reg[5] = in1[0] + in1[1];
+        P2l0.setOperand(0, 1, 0);    // 1st operand: parameter 0.
+        P2l0.setOperand(0, 1, 1);    // 2nd operand: parameter 1.
+        P2l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
+
         // Mark intron lines
         ASSERT_EQ(p->identifyIntrons(), 1);
     }
@@ -70,6 +79,7 @@ class ProgramGenerationEngineTest : public ::testing::Test{
     virtual void TearDown()
     {
         delete p;
+        delete p2;
         delete e;
         delete (&(vect.at(0).get()));
         delete (&set.getInstruction(0));
@@ -97,19 +107,11 @@ TEST_F(ProgramGenerationEngineTest, generateCurrentLine){
     progGen.setProgram(*p);
     ASSERT_NO_THROW(progGen.generateCurrentLine()) << "Can't generate the first line";
 
-    Program::Program* p1 = new Program::Program(*e);
-    Program::Line& l0 = p1->addNewLine();
-    l0.setInstructionIndex(2); // Instruction is add(non printable).
-    //Reg[5] = in1[0] + in1[1];
-    l0.setOperand(0, 1, 0);    // 1st operand: parameter 0.
-    l0.setOperand(0, 1, 1);    // 2nd operand: parameter 1.
-    l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
-    progGen.setProgram(*p1);
+    progGen.setProgram(*p2);
 
     ASSERT_THROW(progGen.generateCurrentLine(), std::runtime_error)
         << "Should not be able to generate line, the instruction is not printable";
 
-    delete p1;
 }
 
 TEST_F(ProgramGenerationEngineTest, generateProgram){
@@ -118,10 +120,4 @@ TEST_F(ProgramGenerationEngineTest, generateProgram){
     ASSERT_NO_THROW(progGen.generateProgram(1)) <<
         "Out of range exception while generating the program";
 }
-
-//TEST_F(ProgramGenerationEngineTest, completeFormat){
-//    CodeGen::ProgramGenerationEngine progGen("completFormat", *e);
-//
-//
-//}
 
