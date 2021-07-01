@@ -34,7 +34,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_LAMBDAPRINTABLEINSTRUCTION_H
@@ -45,41 +44,35 @@
 
 namespace Instructions {
     /**
-     * \brief Template instruction for simplifying the creation of an
-     * PrintableInstruction from a c++ lambda function.
+     * \brief Template instruction creating a lambda instruction that can be
+     * generated as a line of C code. This class inherits from
+     * PrintableInstruction and LambdaInstruction
      *
-     * Template parameters First and Rest can be any primitive type, class or
-     * const c-style 1D and 2D array.
-     *
-     * Each template parameter corresponds to an argument of the function given
-     * to the LambdaInstruction constructor, specifying its type.
      */
-    template<typename First, typename... Rest>
-    class LambdaPrintableInstruction :
-            public Instructions::LambdaInstruction<First, Rest...>,
-            public Instructions::PrintableInstruction {
-    public:
+    template <typename First, typename... Rest>
+    class LambdaPrintableInstruction
+        : public Instructions::LambdaInstruction<First, Rest...>,
+          public Instructions::PrintableInstruction
+    {
+      public:
         LambdaPrintableInstruction() = delete;
 
         /**
-         * \brief Constructor for the LambdaInstruction.
+         * \brief Constructor for the LambdaPrintableInstruction.
          *
          * \param[in] format the std::string used to compute the function in the
          * generated code. The result of the function is represented with $0.
          * The first parameter correspond to $1 then $2...
          *
          * \param[in] function the c++ std::function that will be executed for
-         * this Instruction. The function must have the same types in its
-         * argument list as specified by the template parameters. (checked at
-         * compile time)
+         * this Instruction. See LambdaInstruction for more details
          *
          **/
         LambdaPrintableInstruction(
-                std::string format, std::function<double(First, Rest...)> function)
-                : Instructions::LambdaInstruction<First, Rest...>(function),
-                  Instructions::PrintableInstruction(format) {};
+            std::string format, std::function<double(First, Rest...)> function)
+            : Instructions::LambdaInstruction<First, Rest...>(function),
+              Instructions::PrintableInstruction(format){};
     };
-
 
 } // namespace Instructions
 

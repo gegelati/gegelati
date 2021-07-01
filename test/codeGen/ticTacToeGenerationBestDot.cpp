@@ -23,7 +23,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     TPG::TPGGraph* tpg;
     File::TPGGraphDotImporter* dot = nullptr;
     CodeGen::TPGGenerationEngine* tpgGen;
-    std::string cmdCompile{"make -C " TESTS_DAT_PATH "/codeGen"};
+    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH "codeGen"};
 
     virtual void SetUp()
     {

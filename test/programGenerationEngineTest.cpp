@@ -94,8 +94,13 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor){
     ASSERT_NO_THROW(progGen = new CodeGen::ProgramGenerationEngine("constructor", *e)) <<  "Construction failed.";
 
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
+    ASSERT_NO_THROW(progGen = new CodeGen::ProgramGenerationEngine("constructor", *e, "../src/")) <<  "Construction failed.";
+
+    ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
 
     ASSERT_THROW(progGen = new CodeGen::ProgramGenerationEngine("", *e), std::invalid_argument) <<  "Construction should fail, filename is empty.";
+
+
 
 }
 

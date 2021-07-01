@@ -149,5 +149,28 @@ void CodeGen::ProgramGenerationEngine::initGlobalVar(){
         fileC << "extern " << type << "* in" << i << ";" << std::endl;
     }
 }
+void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
+                                                const std::string& path){
+    if (filename.size() == 0) {
+        std::cout << "filename is empty" << std::endl;
+        throw std::invalid_argument("filename is empty");
+    }
+    try {
+        this->fileC.open(path + filename + ".c", std::ofstream::out);
+        this->fileH.open(path + filename + ".h", std::ofstream::out);
+    }
+    catch (std::ios_base::failure e) {
+        throw std::runtime_error("Could not open file " +
+                                 std::string(path + filename));
+    }
+    fileC << "#include \"" << filename << ".h\"" << std::endl;
+    initGlobalVar();
+    fileH << "#ifndef C_" << filename << "_H" << std::endl;
+    fileH << "#define C_" << filename << "_H\n" << std::endl;
+    fileC << "#include \"externHeader.h\"" << std::endl;
+#ifdef DEBUG
+    fileC << "#include <stdio.h>" << std::endl;
+#endif // DEBUG
+}
 
 #endif // CODE_GENERATION

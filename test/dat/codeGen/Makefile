@@ -1,11 +1,11 @@
-dir := ../../../bin/
-SRC := ${dir}src/
-INCLUDE := ${dir}src/
-OBJ := ${dir}obj/
-BIN := ${dir}bin/
-CC=gcc
+dir ?= ../../../bin
+SRC := ${dir}/src/
+INCLUDE := ${dir}/src/
+OBJ := ${dir}/obj/
+BIN := ${dir}/bin/
+CC := gcc
 #CFLAGS= -Wall -I.. -I../../UnitTest -I.
-CFLAGS= -I${INCLUDE} -I. #-Wall
+CFLAGS := -I${INCLUDE} -I. #-Wall
 
 TARGET = OneLeafNoInstruction OneLeaf TwoLeaves OneTeamOneLeaf OneTeamTwoLeaves TwoTeamsOneCycle ThreeTeamsOneCycleThreeLeaves
 

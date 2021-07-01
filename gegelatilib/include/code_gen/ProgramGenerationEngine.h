@@ -44,13 +44,20 @@
 
 namespace CodeGen {
     /**
-     *  \brief Class in charge of generating a Program.
+     *  \brief Class in charge of generating all the programs of a TPG.
+     *
+     *  This class generates the files(header and source code) that contains the
+     * programs of the TPG. A program can be generated if all its instructions
+     * are printable (inherits from PrintableInstruction).
+     *
+     *  The header externHeader.h allows to add the required header(like math.h)
+     * to compile the generated code without modifying it.
      */
     class ProgramGenerationEngine : public Program::ProgramEngine
     {
       protected:
         /// regex used to identify operand in the format of a
-        /// printableInstruction
+        /// PrintableInstruction.
         static const std::regex operand_regex;
 
         /**
@@ -62,22 +69,19 @@ namespace CodeGen {
          */
         static const std::string nameDataVariable;
 
-        /// names of the registers in the TPG's programs
+        /// names of the registers in the TPG's programs.
         static const std::string nameRegVariable;
 
-        /// The file in which programs will be added
+        /// The file in which programs will be added.
         std::ofstream fileC;
-        /// The file in which prototypes of programs will be added
+        /// The file in which prototypes of programs will be added.
         std::ofstream fileH;
 
         /**
-         * \brief Set global variables in the file holding the programs
+         * \brief Set global variables in the file holding the programs.
          *
          * Set type of the global variable accordingly to the type of the data
-         * sources of the environnement. Pay attention that the function
-         * typeid::name() is dependant on the compiler choosen. Here the
-         * function must return a human readable type. If it's not the case the
-         * output of the function has to be unmangle
+         * sources of the environment.
          *
          */
 
@@ -91,65 +95,49 @@ namespace CodeGen {
          * (ProgramEngine) and the file "filename" is open with the flag
          * std::ofstream::app to generate the program in the file.
          *
-         * \param[in] filename //todo
-         * \param[in] env
-         * \param[in] path
+         * \param[in] filename a const reference used to generate the filename
+         * of the file that holds the programs of the TPG graph. The filename
+         * holding the programs of the TPG is : 'filename'_program.c
+         *
+         * \param[in] env a const reference to the Environment of the TPGGraph
+         *
+         * \param[in] path a const reference to the path in which the file must
+         * be generated. By default, the file is generated in the current
+         * directory.
          */
 
         ProgramGenerationEngine(const std::string& filename,
-                                const Environment& env, const std::string& path = "./")
+                                const Environment& env,
+                                const std::string& path = "./")
             : ProgramEngine(env)
         {
-            if (filename.size() == 0) {
-                std::cout << "filename is empty" << std::endl;
-                throw std::invalid_argument("filename is empty");
-            }
-            try{
-                this->fileC.open(path+filename + ".c", std::ofstream::out);
-                this->fileH.open(path+filename + ".h", std::ofstream::out);
-            }
-            catch (std::ios_base::failure e) {
-                throw std::runtime_error("Could not open file " +
-                                         std::string(path+filename));
-            }
-            fileC << "#include \"" << filename << ".h\"" << std::endl;
-            initGlobalVar();
-            fileH << "#ifndef C_" << filename << "_H" << std::endl;
-            fileH << "#define C_" << filename << "_H\n" << std::endl;
-            fileC << "#include \"externHeader.h\"" << std::endl;
-#ifdef DEBUG
-            fileC << "#include <stdio.h>" << std::endl;
-#endif // DEBUG
+            openFile(filename, path);
         }
         /**
          * \brief Constructor of the class
          *
          * The constructor initialize the member of the parent class
          * (ProgramEngine) and the file "filename" is open with the flag
-         * std::ofstream::app to generate the program in the file.
+         * std::ofstream::out to generate the program in the file.
          *
-         * \param[in] filename //todo
-         * \param[in] env
+         * This constructor is useful to create a ProgramGeneration engine
+         *
+         * \param[in] filename a const reference used to generate the filename
+         * of the file that holds the programs of the TPG graph. The filename
+         * holding the programs of the TPG is : 'filename'_program.c
+         *
+         * \param[in] p const reference to a Program
+         *
+         * \param[in] path const reference to the path in which the file is
+         * generated
          */
 
         ProgramGenerationEngine(const std::string& filename,
-                                const Program::Program& p)
+                                const Program::Program& p,
+                                const std::string& path = "./")
             : ProgramEngine(p)
         {
-            if (filename.size() == 0) {
-                std::cout << "filename is empty" << std::endl;
-                throw std::invalid_argument("filename is empty");
-            }
-            this->fileC.open(filename + ".c", std::ofstream::out);
-            this->fileH.open(filename + ".h", std::ofstream::out);
-            fileC << "#include \"" << filename << ".h\"" << std::endl;
-            initGlobalVar();
-            fileH << "#ifndef C_" << filename << "_H" << std::endl;
-            fileH << "#define C_" << filename << "_H\n" << std::endl;
-            fileC << "#include \"externHeader.h\"" << std::endl;
-#ifdef DEBUG
-            fileC << "#include <stdio.h>" << std::endl;
-#endif // DEBUG
+            openFile(filename, path);
         }
 
         /**
@@ -210,6 +198,20 @@ namespace CodeGen {
          */
         std::string completeFormat(
             const Instructions::PrintableInstruction& instruction) const;
+
+      private:
+        /**
+         * \brief function used to open the file that as to be generated.
+         *
+         * This is function is called in both constructor of the class. It open
+         * the source file and the header file. It also add the include guards
+         * in the header
+         *
+         * \param[in] filename const reference to the name of the file
+         *
+         * \param[in] path const reference to the path of the file
+         */
+        void openFile(const std::string& filename, const std::string& path);
     };
 
 } // namespace CodeGen

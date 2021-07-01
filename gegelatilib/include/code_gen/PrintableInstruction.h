@@ -34,13 +34,12 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifdef CODE_GENERATION
 
 #ifndef GEGELATI_PRINTABLEINSTRUCTION_H
 #define GEGELATI_PRINTABLEINSTRUCTION_H
-#include <string>
 #include "instructions/instruction.h"
+#include <string>
 
 namespace Instructions {
     /**
@@ -49,44 +48,47 @@ namespace Instructions {
      *
      * A PrintableInstruction declares a format that will be used to generate
      * the equivalent C code. The data in the format are represented with
-     * a $ followed by a number. $0 correspond to the result of the function
+     * a $ followed by a number. $0 correspond to the result of the function, $1
+     * corresponds to the first operand of the instruction. For example, the
+     * following format could represent an addition : "$0 = $1 + $2;"
      *
      */
     class PrintableInstruction : public virtual Instructions::Instruction
     {
       public:
-//        bool isFormatValid();
+        //        bool isFormatValid();
 
         /**
-        * \brief This function return the format of the line of code used to
-        * represent the instruction
-        *
-        * \return The format used to represent the instruction in the C program
-        */
+         * \brief This function return the format of the line of code used to
+         * represent the instruction.
+         *
+         * \return The format of the line of code used to represent the
+         * instruction in the C program.
+         */
         const std::string& getFormat() const;
 
       protected:
         /**
-        * \brief Protected constructor to force the class abstract nature.
-        *
-        * The definition of this constructor initialize the string format with
-        * the format given as parameter
-        *
-        * \param[in] format of the line used to represent the instruction in the
-        * C files generated
-        *
-        */
-        PrintableInstruction(std::string format): format(format){};
+         * \brief Protected constructor to force the class abstract nature.
+         *
+         * The definition of this constructor initialize the string format with
+         * the format given as parameter.
+         *
+         * \param[in] format of the line used to represent the instruction in
+         * the C files generated.
+         *
+         */
+        PrintableInstruction(std::string format) : format(format){};
 
         /**
          * \brief delete default constructor
          *
-         * A printableInstruction without any format does not make sense
+         * A printableInstruction without a format does not make sense.
          */
 
         PrintableInstruction() = delete;
 
-        /// format of the instruction used to generate the code
+        /// format of the instruction used to generate the code.
         std::string format;
     };
 } // namespace Instructions

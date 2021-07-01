@@ -48,22 +48,25 @@
 
 namespace CodeGen {
     /**
-     * \brief Class in charge of generating the C code of a TPGGraph
+     * \brief Class in charge of generating the C code of a TPGGraph.
      *
      * Each program of the TPGGraph is represented by a C function.
-     * All the function are regrouped in a file. Another file holds
-     * the main function to iterate threw the TPGGraph.
+     * All the functions are regrouped in a file. Another file holds
+     * the required functions to iterate through the TPGGraph.
      *
      */
     class TPGGenerationEngine : public TPG::TPGAbstractEngine
     {
       protected:
-        /// Filename of the file with the main function
+        /**
+         * String added at the end of the parameter filename to create the
+         * filename of the file with the programs of the TPGGraph.
+         */
         static const std::string filenameProg;
 
-        /// Main function in charge of iterating threw the TPG
+        /// File holding the functions in charge of iterating through the TPG.
         std::ofstream fileMain;
-        /// header file for the function that iterates threw the TPG
+        /// header file for the function that iterates through the TPG.
         std::ofstream fileMainH;
 
         /**
@@ -75,29 +78,29 @@ namespace CodeGen {
         CodeGen::ProgramGenerationEngine progGenerationEngine;
 
         /**
-         * \brief Size of the stack
+         * \brief Size of the stack.
          *
-         * Stack holding the visited edges during the inference
+         * Stack holding the visited edges during the iteration of the TPG.
          */
         // todo la stack size
         uint64_t stackSize;
 
         /**
-         * \brief function printing generic code in the main file
+         * \brief function printing generic code in the main file.
          *
          * This function print generic code to execute the TPG and manage the
-         * stack of visited edges
+         * stack of visited edges.
          */
         // todo des .c/.h qui sont dupliqué pour éviter le recopiage ?
         void initTpgFile();
 
         /**
          * \brief function printing generic code declaration in the main file
-         * header
+         * header.
          *
          * This function print the the struct required to represent the TPG and
          * the prototypes of the function to execute the TPG and manage the
-         * stack of visited edges
+         * stack of visited edges.
          */
         void initHeaderFile();
 
@@ -111,27 +114,34 @@ namespace CodeGen {
          * \param[in] tpg Environment in which the Program of the TPGGraph will
          *                be executed.
          *
-         * \param[in] path to the folder in which the file are generated. If the folder does not exist
+         * \param[in] path to the folder in which the file are generated. If the
+         * folder does not exist.
          *
          * \param[in] stackSize size of call stack for the execution of the TPG
-         * graph
+         * graph.
          */
         TPGGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
                             const std::string& path = "./",
                             const uint64_t& stackSize = 8)
-            : TPGAbstractEngine(tpg),
-              progGenerationEngine{filename + "_" + filenameProg,
-                                   tpg.getEnvironment(), path},
+            : TPGAbstractEngine(tpg), progGenerationEngine{filename + "_" +
+                                                               filenameProg,
+                                                           tpg.getEnvironment(),
+                                                           path},
               stackSize{stackSize}
         {
+            if (stackSize == 0) {
+                throw std::runtime_error(
+                    "error the size of the call stack is equal to 0");
+            }
             try {
-                this->fileMain.open(path+filename + ".c", std::ofstream::out);
-                this->fileMainH.open(path+filename + ".h", std::ofstream::out); 
+                this->fileMain.open(path + filename + ".c", std::ofstream::out);
+                this->fileMainH.open(path + filename + ".h",
+                                     std::ofstream::out);
             }
             catch (std::ios_base::failure e) {
                 throw std::runtime_error("Could not open file " +
-                                         std::string(path+filename));
+                                         std::string(path + filename));
             }
 
             fileMain << "#include \"" << filename << ".h\"" << std::endl;
@@ -144,9 +154,9 @@ namespace CodeGen {
         };
 
         /**
-         * \brief destructor of the class
+         * \brief destructor of the class.
          *
-         * add endif at the end of the header and close both file
+         * add endif at the end of the header and close both file.
          */
 
         ~TPGGenerationEngine()
@@ -157,53 +167,61 @@ namespace CodeGen {
         }
 
         /**
-         * \brief Method for generating an edge of the graph
+         * \brief Method for generating an edge of the graph.
          *
          * This function generates the code that represents an edge.
-         * An edge of a team is represented by a struct with an integer, a
-         * function pointer of type : double (*ptr_prog)() for the program of
-         * the edge and the following vertex is represented by a function
-         * pointer of type : void* (*ptr_vertex)(int*);
+         * An edge of a team is represented by a struct with:
+         *  an integer,
+         *  a function pointer of type : double (*ptr_prog)() for the program of
+         * the edge
+         *  a a function pointer of type : void* (*ptr_vertex)(int*) to
+         * represent the destination of the edge
          *
-         * \param[in] edge that must be generated
+         * \param[in] edge that must be generated.
          */
         void generateEdge(const TPG::TPGEdge& edge);
 
         /**
-         * \brief Method for generating a team of the graph
+         * \brief Method for generating a team of the graph.
          *
          * This method generates the C function that represents a team.
-         * Each function representing a team contains a static array of Edge
-         * and calls the function executeTeam(Edge*, int)
+         * Each function representing a team contains a static array of TPGEdge
+         * and calls the function executeTeam(Edge*, int).
          *
-         * \param[in] team that must be generated
+         * \param[in] team const reference of the TPGTeam that must be
+         * generated.
          */
         void generateTeam(const TPG::TPGTeam& team);
 
         /**
-         * \brief Method for generating a action of the graph
-         *
+         * \brief Method for generating a action of the graph.
+         * //todo regroup function ? with polymorphism et Vertex* ?
          * This method generates the C function that represents an action.
          * The generated function return a NULL pointer and write the action in
-         * the pointer given as parameter
+         * the pointer given as parameter.
          *
-         * \param[in] action that must be generated
+         * \param[in] action const reference of the TPGAction that must be
+         * generated.
          */
         void generateAction(const TPG::TPGAction& action);
 
         /**
-         * \brief define the function pointer root to the vertex passed in
-         * argument
+         * \brief define the function pointer root to the vertex given in
+         * parameter.
          *
-         * \param[in] root of the TPG graph
+         * \param[in] root const reference to the root of the TPG graph.
          */
 
         void setRoot(const TPG::TPGVertex& root);
 
         /**
          * \brief function that creates the C files required to execute the TPG
-         * without gegelati
-         *  /todo complete
+         * without gegelati.
+         *
+         * This function iterates trough the TPGGraph and create the required C
+         * code to represent each element of the TPGGraph
+         *
+         *
          */
         void generateTPGGraph();
     };

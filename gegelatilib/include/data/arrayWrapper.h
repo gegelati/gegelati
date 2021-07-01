@@ -207,6 +207,7 @@ namespace Data {
         virtual std::vector<size_t> getAddressesAccessed(
             const std::type_info& type, const size_t address) const override;
 
+        /// Inherited from DataHandler
         virtual std::string getTemplateType() const;
     };
 
@@ -417,17 +418,8 @@ namespace Data {
     }
     template <class T>
     std::string ArrayWrapper<T>::getTemplateType() const{
-        int status = 1;
-        std::string type;
-#ifdef GCC
-        type = abi::__cxa_demangle(typeid(T).name(), NULL, NULL, &status);
-#elif CLANG
-        type = abi::__cxa_demangle(typeid(T).name(), NULL, NULL, &status);
-#elif MSVC
-            type = typeid(T).name();
-#else
-            throw std::runtime_error("Running an unknown compiler please use GCC or MSVC to compile the code gen");
-#endif
+
+        std::string type(DEMANGLE_TYPEID_NAME(typeid(T).name()));
         return type;
     }
 

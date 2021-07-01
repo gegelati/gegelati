@@ -29,7 +29,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     TPG::TPGGraph* tpg;
     CodeGen::TPGGenerationEngine* tpgGen;
     File::TPGGraphDotImporter* dot = nullptr;
-    std::string cmdCompile{"make -C " TESTS_DAT_PATH "/codeGen"};
+    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH "codeGen"};
 
     virtual void SetUp()
     {
@@ -89,6 +89,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 
 TEST_F(StickGameGenerationBestDotTest, BestTPG)
 {
+    int result;
     dot = new File::TPGGraphDotImporter(TESTS_DAT_PATH "StickGame_out_best.dot",
                                         *e, *tpg);
     ASSERT_NO_THROW(dot->importGraph())
@@ -101,10 +102,10 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
     delete tpgGen;
 
     cmdCompile += " StickGameBest_TPG";
-
-    ASSERT_EQ(system(cmdCompile.c_str()), 0)
+    result = WEXITSTATUS(system(cmdCompile.c_str()));
+    ASSERT_EQ(result, 0)
         << "Fail to compile generated files to test stick game";
-    int result = WEXITSTATUS(system("./StickGameBest_TPG"));
+    result = WEXITSTATUS(system("./StickGameBest_TPG"));
 
     ASSERT_EQ(result, 2)
         << "Error inference of Stick Game has changed";

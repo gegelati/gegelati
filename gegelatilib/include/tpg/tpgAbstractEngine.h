@@ -1,47 +1,49 @@
 #ifndef GEGELATI_TPGABSTRACTENGINE_H
 #define GEGELATI_TPGABSTRACTENGINE_H
 
-#include "tpgGraph.h"
 #include "program/program.h"
+#include "tpgGraph.h"
 
 namespace TPG {
     /**
      * \brief Abstract Class in charge of managing maps to give a unique ID
-     * for each of a TPGGraph
+     * for vertex and a program of a TPGGraph.
      *
-     *
-    */
+     */
     class TPGAbstractEngine
     {
 
       protected:
-
         /**
-         * \brief Reference to the TPGGraph for which the code gen is generated.
+         * \brief Reference to the TPGGraph whose content will be used to fill
+         * the maps.
          */
         const TPG::TPGGraph& tpg;
 
         /**
          * \brief Map associating pointers to Program to an integer ID.
          *
+         * In case the TPGAbstractEngine is used to export multiple TPGGraph,
+         * this map is used to ensure that a given Program will always be
+         * associated to the same integer identifier in all exported files.
          */
         std::map<const Program::Program*, uint64_t> programID;
 
         /**
-         * \brief Integer number used during export to associate a unique
+         * \brief Integer number used to associate a unique
          * integer identifier to each new Program.
          *
-         * Using the programID map, a Program that was already printed in
-         * previous export will keep its ID.
+         * In case the TPGAbstractEngine is used to export multiple TPGGraph, a
+         * Program that was already printed in previous export will keep its ID.
          */
         uint64_t nbPrograms = 0;
 
         /**
          * \brief Map associating pointers to TPGVertex to an integer ID.
          *
-         * In case the TPGGraphDotExporter is used to export multiple TPGGraph,
+         * In case the TPGAbstractEngine is used to export multiple TPGGraph,
          * this map is used to ensure that a given TPGVertex will always be
-         * associated to the same integer identifier in all exported dot files.
+         * associated to the same integer identifier in all exported files.
          */
         std::map<const TPG::TPGVertex*, uint64_t> vertexID;
 
@@ -55,11 +57,22 @@ namespace TPG {
         uint64_t nbVertex = 0;
 
         /**
-         * \brief constructor
-         * @param tpg
+         * \brief Integer number used during export to associate a unique
+         * integer identifier to each TPGAction.
+         *
+         * Identifier associated to TPGAction are NOT preserved during multiple
+         * printing of a TPGGraph.
+         */
+        uint64_t nbActions;
+
+        /**
+         * \brief constructor for the abstract engine
+         *
+         * \param[in] tpg const reference to the graph whose content will be used to
+         * fill the maps of IDs  (vertex and program).
          */
 
-        TPGAbstractEngine(const TPG::TPGGraph& tpg) : tpg{tpg}{};
+        TPGAbstractEngine(const TPG::TPGGraph& tpg) : tpg{tpg} {};
 
       public:
         /**
@@ -67,7 +80,7 @@ namespace TPG {
          * Program.
          *
          * Using the programID map, this method retrieves the integer identifier
-         * associated to the given Program. If not identifier exists for this
+         * associated to the given Program. If no identifier exists for this
          * Program, a new one is created automatically and saved into the map.
          *
          * \param[in] prog a const reference to the Program whose integer
@@ -94,7 +107,6 @@ namespace TPG {
          */
 
         uint64_t findVertexID(const TPG::TPGVertex& vertex);
-
     };
-}
+} // namespace TPG
 #endif // GEGELATI_TPGABSTRACTENGINE_H
