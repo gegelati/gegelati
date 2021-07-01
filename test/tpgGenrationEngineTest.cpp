@@ -28,14 +28,7 @@ class TPGGenerationEngineTest : public ::testing::Test
     {
         path = TESTS_DAT_PATH;
         path += "codeGen";
-        currentState.setDataAt(typeid(double), 0, 4.5);
-        currentState.setDataAt(typeid(double), 1, 6.8);
-        currentState.setDataAt(typeid(double), 2, 9.4);
-        currentState.setDataAt(typeid(double), 3, 7.3);
-        currentState.setDataAt(typeid(double), 4, 5.25);
-        currentState.setDataAt(typeid(double), 5, 3.2);
-        currentState.setDataAt(typeid(double), 6, 2.7);
-        currentState.setDataAt(typeid(double), 7, 6);
+
         data.emplace_back(currentState);
 
         auto add = [](double a, double b) -> double { return a + b; };
@@ -81,13 +74,14 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
-//    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
-//    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine("constructor", *tpg,
-//                                                           "../src", 0), std::runtime_error)
-//        << "Should fail, try to construct a TPGGenerationEngine with the size "
-//           "of the call stack equal to 0";
+    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine("constructor", *tpg,
+                                                           "../src", 0), std::runtime_error)
+        << "Should fail, try to construct a TPGGenerationEngine with the size "
+           "of the call stack equal to 0";
 
+    //ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 }
 
 TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
@@ -113,7 +107,7 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    system("pwd");
+
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneLeafNoInstruction";
     std::cout << system(cmdCompile.c_str()) << std::endl;
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
@@ -149,9 +143,7 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    std::cout << system("pwd") << std::endl;
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneLeaf";
-    std::cout << system(cmdCompile.c_str());
     ASSERT_EQ(system(cmdCompile.c_str()), 0);
     ASSERT_EQ(WEXITSTATUS(system("./OneLeaf")), 1)
         << "Error wrong action returned in test OneLeaf";
@@ -194,9 +186,7 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    std::cout << system("pwd") << std::endl;
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoLeaves";
-    std::cout << system(cmdCompile.c_str());
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoLeaves";
     ASSERT_EQ(WEXITSTATUS(system("./TwoLeaves")), 2)
@@ -253,9 +243,7 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    std::cout << system("pwd") << std::endl;
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " ThreeLeaves";
-    std::cout << system(cmdCompile.c_str());
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeLeaves";
     ASSERT_EQ(WEXITSTATUS(system("./ThreeLeaves")), 3)
@@ -302,9 +290,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    std::cout << system("pwd") << std::endl;
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneTeamOneLeaf";
-    std::cout << system(cmdCompile.c_str());
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
     ASSERT_EQ(WEXITSTATUS(system("./OneTeamOneLeaf")), 1)
@@ -360,9 +346,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    std::cout << system("pwd") << std::endl;
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneTeamTwoLeaves";
-    std::cout << system(cmdCompile.c_str());
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamTwoLeaves";
     ASSERT_EQ(WEXITSTATUS(system("./OneTeamTwoLeaves")), 2)
@@ -438,10 +422,8 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    std::cout << system("pwd") << std::endl;
 
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoTeamsOneCycle";
-    std::cout << system(cmdCompile.c_str());
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoTeamsOneCycle";
     ASSERT_EQ(WEXITSTATUS(system("./TwoTeamsOneCycle")), 1)
@@ -524,9 +506,7 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    std::cout << system("pwd") << std::endl;
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " ThreeTeamsOneCycleThreeLeaves";
-    std::cout << system(cmdCompile.c_str());
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(WEXITSTATUS(system("./ThreeTeamsOneCycleThreeLeaves")), 0)

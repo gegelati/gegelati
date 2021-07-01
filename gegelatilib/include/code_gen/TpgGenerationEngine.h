@@ -78,11 +78,12 @@ namespace CodeGen {
         CodeGen::ProgramGenerationEngine progGenerationEngine;
 
         /**
-         * \brief Size of the stack.
+         * \brief Size of the stack of visited edges.
          *
          * Stack holding the visited edges during the iteration of the TPG.
+         * Stop the execution of the program if the callStack is too small to
+         * store all the visited edges
          */
-        // todo la stack size
         uint64_t stackSize;
 
         /**
@@ -219,9 +220,7 @@ namespace CodeGen {
          * without gegelati.
          *
          * This function iterates trough the TPGGraph and create the required C
-         * code to represent each element of the TPGGraph
-         *
-         *
+         * code to represent each element of the TPGGraph.
          */
         void generateTPGGraph();
     };

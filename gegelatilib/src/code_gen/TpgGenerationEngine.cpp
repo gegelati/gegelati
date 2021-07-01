@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifdef CODE_GENERATION
 
 #include "code_gen/TpgGenerationEngine.h"
@@ -47,193 +46,184 @@ void CodeGen::TPGGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 
     progGenerationEngine.setProgram(p);
 
-    if (findProgramID(p, progID)){
+    if (findProgramID(p, progID)) {
         progGenerationEngine.generateProgram(progID);
     }
     fileMain << "\t\t\t{0,P" << progID << ",";
-    if(typeid(*(edge.getDestination())) == (typeid(TPG::TPGTeam))){
+    if (typeid(*(edge.getDestination())) == (typeid(TPG::TPGTeam))) {
         fileMain << "T" << findVertexID(*(edge.getDestination())) << "}";
     }
-    else if (typeid(*(edge.getDestination())) == (typeid(TPG::TPGAction))){
+    else if (typeid(*(edge.getDestination())) == (typeid(TPG::TPGAction))) {
         auto a = dynamic_cast<const TPG::TPGAction*>(edge.getDestination());
         fileMain << "A" << a->getActionID() << "}";
     }
-
 }
 
 void CodeGen::TPGGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 {
     uint64_t id = findVertexID(team);
-    //print prototype and declaration of the function
+    // print prototype and declaration of the function
     fileMain << "void* T" << id << "(int* action){" << std::endl;
     fileMainH << "void* T" << id << "(int* action);" << std::endl;
-    //generate static array
+    // generate static array
     fileMain << "\tstatic Edge e[] = {" << std::endl;
     auto list = team.getOutgoingEdges();
-    for (auto l = list.begin(); l != list.end(); l++){
-        if (l != list.begin()){
+    for (auto l = list.begin(); l != list.end(); l++) {
+        if (l != list.begin()) {
             fileMain << "," << std::endl;
         }
         generateEdge(**l);
     }
-    //print end static array
+    // print end static array
     fileMain << "\n\t};" << std::endl;
 #ifdef DEBUG
     fileMain << "\tprintf(\"T%d\\n\", " << id << ");" << std::endl;
 #endif
     // appel des fonction d'exécution
-    fileMain << "\tint nbEdge = " << team.getOutgoingEdges().size() << ";" << std::endl;
+    fileMain << "\tint nbEdge = " << team.getOutgoingEdges().size() << ";"
+             << std::endl;
     fileMain << "\treturn executeTeam(e,nbEdge);\n}\n" << std::endl;
-
 }
 
-void CodeGen::TPGGenerationEngine::generateAction(const TPG::TPGAction& action){
+void CodeGen::TPGGenerationEngine::generateAction(const TPG::TPGAction& action)
+{
     uint64_t id = action.getActionID();
-    //print prototype and declaration of the function
+    // print prototype and declaration of the function
     fileMain << "void* A" << id << "(int* action){" << std::endl;
     fileMainH << "void* A" << id << "(int* action);" << std::endl;
 
-    //print definition of the function
+    // print definition of the function
     fileMain << "\t*action = " << id << ";" << std::endl;
     fileMain << "\treturn NULL;\n}\n" << std::endl;
-
 }
 
-void CodeGen::TPGGenerationEngine::setRoot(const TPG::TPGVertex& team){
+void CodeGen::TPGGenerationEngine::setRoot(const TPG::TPGVertex& team)
+{
     fileMainH << "\nvoid* (*root)(int* action);" << std::endl;
-    fileMain << "void* (*root)(int* action) = T" << findVertexID(team) << ";" << std::endl;
-
+    fileMain << "void* (*root)(int* action) = T" << findVertexID(team) << ";"
+             << std::endl;
 }
 
-void CodeGen::TPGGenerationEngine::generateTPGGraph(){
+void CodeGen::TPGGenerationEngine::generateTPGGraph()
+{
     std::map<const TPG::TPGTeam*, std::list<TPG::TPGEdge*>> graph;
     auto vertices = this->tpg.getVertices();
-    //give an id for each team of the graph
-    for(const TPG::TPGVertex* vertex : vertices ){
-        if(typeid(*vertex) == typeid(TPG::TPGTeam)){
-            findVertexID(*vertex);
-        }
-    }
+    // give an id for each team of the graph
     for (auto vertex : vertices) {
-        if(typeid(*vertex) == typeid(TPG::TPGTeam)){
+        if (typeid(*vertex) == typeid(TPG::TPGTeam)) {
             generateTeam(*(const TPG::TPGTeam*)vertex);
         }
-        else if(typeid(*vertex) == typeid(TPG::TPGAction)){
+        else if (typeid(*vertex) == typeid(TPG::TPGAction)) {
             generateAction(*(const TPG::TPGAction*)vertex);
         }
     }
     setRoot(*tpg.getRootVertices().at(0));
 }
-void CodeGen::TPGGenerationEngine::initTpgFile(){
-    fileMain << "#include <limits.h> \n"
-             << "#include <assert.h>\n"
-             << "#include <stdio.h>\n"
 
-             << "Stack s;\n\n"
+void CodeGen::TPGGenerationEngine::initTpgFile()
+{
+    fileMain
+        << "#include <limits.h> \n"
+        << "#include <assert.h>\n"
+        << "#include <errno.h>\n"
+        << "#include <err.h>\n"
+        << "#include <stdio.h>\n"
 
-             << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
-             << "\tvoid*(*f)(int*action) = ptr_f;\n"
-             << "\tint action = INT_MIN;\n"
-             << "\twhile (f!=NULL){\n"
-             << "\t\tf= (void*(*)(int*)) (f(&action));\n"
-             << "\t}\n"
-             << "\treturn action;\n}\n\n"
+        << "#define stackSize  " << stackSize << "\n\n"
 
-             << "void* executeTeam(Edge* e, int nbEdge){\n"
-             << "\tint idxNext = execute(e, nbEdge); // on récupère l'indice de l'edge qui à le programme qui renvoie la plus grande valeur\n"
-             << "\tif(idxNext != -1) {\n"
-             << "\t\te[idxNext].visited = 1; // on marque l'edge visité\n"
-             << "\t\tpush(&e[idxNext]);\n"
-             << "\t\treturn e[idxNext].ptr_vertex; // on renvoie le pointeur de la prochaine team à exécuter\n"
-             << "\t}\n"
-             << "\treturn NULL;\n"
-             << "}\n\n"
+        << "Edge* callStack[stackSize];\n"
+        << "u_int64_t top = 0;\n\n"
 
-             << "int execute(Edge* e, int nbEdge){\n"
-             << "\tdouble bestResult = e[0].ptr_prog();\n"
-             << "\tint idxNext = 0;\n"
-             << "\tint idx;\n"
-             << "\tdouble r;\n"
-             << "\twhile (e[idxNext].visited == 1){\n"
-             << "\t\tidxNext++;\n"
-             << "\t\tif(idxNext>= nbEdge){\n"
-             << "\t\t\tprintf(\"Error all the edges of the team are already visited\\n\");\n"
-             << "\t\t\treturn -1;\n"
-             << "\t\t}\n"
-             << "\t\tbestResult = e[idxNext].ptr_prog();\n"
-             << "\t}\n"
-             << "\tidx = idxNext+1;\n"
-             << "\t//check if there exist another none visited edge with a better result\n"
-             << "\twhile(idx < nbEdge){\n"
-             << "\t\tr = e[idx].ptr_prog();\n"
-             << "\t\tif(e[idx].visited == 0 &&  r >= bestResult){\n"
-             << "\t\t\tbestResult =r;\n"
-             << "\t\t\tidxNext = idx;\n"
-             << "\t\t}\n"
-             << "\t\tidx++;\n"
-             << "\t}\n"
-             << "\treturn idxNext;\n"
-             << "}\n\n"
+        << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
+        << "\tvoid*(*f)(int*action) = ptr_f;\n"
+        << "\tint action = INT_MIN;\n"
+        << "\twhile (f!=NULL){\n"
+        << "\t\tf= (void*(*)(int*)) (f(&action));\n"
+        << "\t}\n"
+        << "\treturn action;\n}\n\n"
 
-             << "void push( Edge* e){\n"
-             << "\tif(s.top == s.max) {\n"
-             << "\t\tif(s.max == 0){\n"
-             << "\t\t\ts.e = (Edge **)(malloc((s.max + 1) * sizeof(Edge *)));\n"
-             << "\t\t}\n"
-             << "\t\telse{\n"
-             << "\t\t\ts.e = (Edge **) (realloc(s.e, (s.max + 1) * sizeof(Edge *)));\n"
-             << "\t\t}\n"
-             << "\t\tassert(s.e != NULL);\n"
-             << "\t\ts.max++;\n"
-             << "\t}\n"
-             << "\ts.e[s.top] = e;\n"
-             << "\ts.top++;\n"
-             << "}\n\n"
+        << "void* executeTeam(Edge* e, int nbEdge){\n"
+        << "\tint idxNext = execute(e, nbEdge); // on récupère l'indice de "
+           "l'edge qui à le programme qui renvoie la plus grande valeur\n"
+        << "\tif(idxNext != -1) {\n"
+        << "\t\te[idxNext].visited = 1; // on marque l'edge visité\n"
+        << "\t\tpush(&e[idxNext]);\n"
+        << "\t\treturn e[idxNext].ptr_vertex; // on renvoie le pointeur de la "
+           "prochaine team à exécuter\n"
+        << "\t}\n"
+        << "\treturn NULL;\n"
+        << "}\n\n"
 
-             << "Edge* pop(){\n"
-             << "\tEdge* edge = NULL;\n"
-             << "\tif(s.top > 0){\n"
-             << "\t\ts.top--;\n"
-             << "\t\tedge = s.e[s.top];\n"
-             << "\t}\n"
-             << "\tif(s.top == 0 && s.e != NULL){\n"
-             << "\t\tfree(s.e);\n"
-             << "\t\ts.max = 0;\n"
-             << "\t}\n"
-             << "\treturn edge;\n"
-             << "}\n\n"
+        << "int execute(Edge* e, int nbEdge){\n"
+        << "\tdouble bestResult = e[0].ptr_prog();\n"
+        << "\tint idxNext = 0;\n"
+        << "\tint idx;\n"
+        << "\tdouble r;\n"
+        << "\twhile (e[idxNext].visited == 1){\n"
+        << "\t\tidxNext++;\n"
+        << "\t\tif(idxNext>= nbEdge){\n"
+        << "\t\t\tprintf(\"Error all the edges of the team are already "
+           "visited\\n\");\n"
+        << "\t\t\treturn -1;\n"
+        << "\t\t}\n"
+        << "\t\tbestResult = e[idxNext].ptr_prog();\n"
+        << "\t}\n"
+        << "\tidx = idxNext+1;\n"
+        << "\t//check if there exist another none visited edge with a better "
+           "result\n"
+        << "\twhile(idx < nbEdge){\n"
+        << "\t\tr = e[idx].ptr_prog();\n"
+        << "\t\tif(e[idx].visited == 0 &&  r >= bestResult){\n"
+        << "\t\t\tbestResult =r;\n"
+        << "\t\t\tidxNext = idx;\n"
+        << "\t\t}\n"
+        << "\t\tidx++;\n"
+        << "\t}\n"
+        << "\treturn idxNext;\n"
+        << "}\n\n"
 
-             << "void reset(){\n"
-             << "\twhile (s.top > 0) {\n"
-             << "\t\tpop()->visited = 0;\n"
-             << "\t}\n"
-             << "}\n"
-             << std::endl;
+        << "void push( Edge* e){\n"
+        << "if(top == stackSize) {\n"
+        << "\t\terrx(EOVERFLOW, \"Call stack is too small for the iteration of "
+           "this TPG\");\n"
+        << "\t}\n"
+        << "\tcallStack[top] = e;\n"
+        << "\ttop++;"
+        << "}\n\n"
 
+        << "Edge* pop(){\n"
+        << "\tEdge* edge = NULL;\n"
+        << "if(top > 0){\n"
+        << "\t\ttop--;\n"
+        << "\t\tedge = callStack[top];\n"
+        << "\t}\n"
+        << "\treturn edge;\n"
+        << "}\n\n"
+
+        << "void reset(){\n"
+        << "\twhile (top > 0) {\n"
+        << "\t\tpop()->visited = 0;\n"
+        << "\t}\n"
+        << "}\n"
+        << std::endl;
 }
-void CodeGen::TPGGenerationEngine::initHeaderFile(){
-    fileMainH
-    << "#include <stdlib.h>\n\n"
+void CodeGen::TPGGenerationEngine::initHeaderFile()
+{
+    fileMainH << "#include <stdlib.h>\n\n"
 
-    << "typedef struct Edge {\n"
-    << "\tint visited;\n"
-    << "\tdouble (*ptr_prog)(void);\n"
-    << "\tvoid* (*ptr_vertex)(int* action);\n"
-    << "}Edge;\n\n"
+              << "typedef struct Edge {\n"
+              << "\tint visited;\n"
+              << "\tdouble (*ptr_prog)(void);\n"
+              << "\tvoid* (*ptr_vertex)(int* action);\n"
+              << "}Edge;\n\n"
 
-    << "typedef struct Stack {\n"
-    << "\tEdge** e;\n"
-    << "\tint max;\n"
-    << "\tint top;\n"
-    << "}Stack;"
-
-    << "int executeFromVertex(void*(*)(int*action));\n"
-    << "void* executeTeam(Edge* e, int nbEdge);\n"
-    << "int execute(Edge* e, int nbEdge);\n"
-    << "void push(Edge* e);\n"
-    << "Edge* pop();\n"
-    << "void reset();\n"
-    << std::endl;
+              << "int executeFromVertex(void*(*)(int*action));\n"
+              << "void* executeTeam(Edge* e, int nbEdge);\n"
+              << "int execute(Edge* e, int nbEdge);\n"
+              << "void push(Edge* e);\n"
+              << "Edge* pop();\n"
+              << "void reset();\n"
+              << std::endl;
 }
 
 #endif // CODE_GENERATION
