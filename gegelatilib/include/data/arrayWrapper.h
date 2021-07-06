@@ -75,7 +75,7 @@ namespace Data {
      * also provide the following composite data type:
      * - T[n]: with $n <=$ to the size of the ArrayWrapper.
      */
-    template <class T> class ArrayWrapper : public DataHandler
+    template <class T> class ArrayWrapper : public virtual DataHandler
     {
         static_assert(std::is_fundamental<T>::value ||
                           std::is_same<T, Data::Constant>(),
@@ -207,8 +207,6 @@ namespace Data {
         virtual std::vector<size_t> getAddressesAccessed(
             const std::type_info& type, const size_t address) const override;
 
-        /// Inherited from DataHandler
-        virtual std::string getTemplateType() const;
     };
 
     template <class T>
@@ -415,12 +413,6 @@ namespace Data {
         this->invalidCachedHash = false;
 
         return this->cachedHash;
-    }
-    template <class T>
-    std::string ArrayWrapper<T>::getTemplateType() const{
-
-        std::string type(DEMANGLE_TYPEID_NAME(typeid(T).name()));
-        return type;
     }
 
 } // namespace Data
