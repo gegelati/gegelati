@@ -225,7 +225,7 @@ namespace Program {
          * the method Uses the data types of the current Instruction of the
          * program.
          *
-         * \param[in] operands std::vector where the fetched operands will
+         * \param[in] idxOp std::vector where the fetched operands will
          * be inserted. \throws std::invalid_argument if the data type of the
          * current Instruction is not provided by the indexed DataHandler.
          * \throws std::out_of_range if the given address is invalid for the

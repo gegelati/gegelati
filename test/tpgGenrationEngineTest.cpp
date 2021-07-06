@@ -20,7 +20,7 @@ class TPGGenerationEngineTest : public ::testing::Test
     Instructions::Set set;
     Environment* e;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
-    Data::PrimitiveTypeArray<double> currentState{s1};
+    Data::PrintablePrimitiveTypeArray<double> currentState{s1};
     CodeGen::TPGGenerationEngine* tpgGen;
     TPG::TPGGraph* tpg;
 

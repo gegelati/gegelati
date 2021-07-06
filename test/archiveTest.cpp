@@ -101,8 +101,8 @@ TEST_F(ArchiveTest, CombineHash)
         << "Combination of several DataHandler hash failed.";
 
     // change data in one dataHandler
-    Data::PrimitiveTypeArray<int>& d =
-        (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
+    auto d =
+        dynamic_cast<const Data::PrimitiveTypeArray<int>&>(vect.at(1).get());
     d.setDataAt(typeid(int), 2, 1337);
 
     // Compare hashes.
@@ -135,7 +135,10 @@ TEST_F(ArchiveTest, AddRecordingTests)
     // Add another recording with a new environment
     // change data in one dataHandler
     Data::PrimitiveTypeArray<int>& d =
-        (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()));
+
     d.setDataAt(typeid(int), 2, 1337);
     ASSERT_NO_THROW(archive.addRecording(p, vect, 0.2))
         << "Adding a recording to the non-empty archive failed.";
@@ -170,7 +173,9 @@ TEST_F(ArchiveTest, AddRecordingWithProbabilityTests)
 
     // Add a few fictive recording
     for (int i = 0; i < 10; i++) {
-        ((Data::PrimitiveTypeArray<int>&)(vect.at(1).get()))
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()))
             .setDataAt(typeid(int), 0, i);
         ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i))
             << "Adding a recording to the archive failed.";
@@ -188,7 +193,9 @@ TEST_F(ArchiveTest, At)
 
     // Add a few fictive recording
     for (int i = 0; i < 5; i++) {
-        ((Data::PrimitiveTypeArray<int>&)(vect.at(1).get()))
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()))
             .setDataAt(typeid(int), 0, i);
         ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i))
             << "Adding a recording to the archive failed.";
@@ -215,7 +222,9 @@ TEST_F(ArchiveTest, SetSeed)
 
     // Add a few fictive recording
     for (int i = 0; i < 10; i++) {
-        ((Data::PrimitiveTypeArray<int>&)(vect.at(1).get()))
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()))
             .setDataAt(typeid(int), 0, i);
         ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i))
             << "Adding a recording to the archive failed.";
@@ -232,7 +241,9 @@ TEST_F(ArchiveTest, areProgramResultsUnique)
     Archive archive(4);
     size_t hash1 = archive.getCombinedHash(vect);
     Data::PrimitiveTypeArray<int>& d =
-        (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()));
 
     // Add a few fictive recordings with p
     archive.addRecording(p, vect, 1.0);
@@ -269,7 +280,9 @@ TEST_F(ArchiveTest, DataHandlersAccessors)
     archive.addRecording(p, vect, 1.0);
     archive.addRecording(p, vect, 1.5);
     Data::PrimitiveTypeArray<int>& d =
-        (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()));
     d.setDataAt(typeid(int), 2, 1337);
     archive.addRecording(p, vect, 2.0);
     archive.addRecording(p, vect, 2.3);

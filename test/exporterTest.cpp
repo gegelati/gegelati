@@ -74,7 +74,9 @@ class ExporterTest : public ::testing::Test
 
         // Put a 1 in the dataHandler to make it easy to have non-zero return in
         // Programs.
-        ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+        (const_cast<Data::PrimitiveTypeArray<double>&>(
+             dynamic_cast<const Data::PrimitiveTypeArray<double>&>(
+                 vect.at(0).get())))
             .setDataAt(typeid(double), 0, 1.0);
 
         auto minus = [](double a, double b) -> double { return a - b; };

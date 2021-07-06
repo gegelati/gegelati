@@ -2,6 +2,7 @@
 
 #include "code_gen/ProgramGenerationEngine.h"
 #include "code_gen/LambdaPrintableInstruction.h"
+#include "data/printablePrimitiveTypeArray.h"
 
 class ProgramGenerationEngineTest : public ::testing::Test{
   protected:
@@ -15,7 +16,7 @@ class ProgramGenerationEngineTest : public ::testing::Test{
     virtual void SetUp()
     {
         vect.push_back(
-            *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
+            *(new Data::PrintablePrimitiveTypeArray<double>((unsigned int)size1)));
 
 
         auto add = [](double a, double b)->double{return a+b;};

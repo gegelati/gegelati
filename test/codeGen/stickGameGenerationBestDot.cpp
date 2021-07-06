@@ -24,8 +24,8 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     Instructions::Set set;
     Environment* e;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
-    Data::PrimitiveTypeArray<int> hints{sizeHint};
-    Data::PrimitiveTypeArray<int> remainingSticks{sizeRemainingStick};
+    Data::PrintablePrimitiveTypeArray<int> hints{sizeHint};
+    Data::PrintablePrimitiveTypeArray<int> remainingSticks{sizeRemainingStick};
     TPG::TPGGraph* tpg;
     CodeGen::TPGGenerationEngine* tpgGen;
     File::TPGGraphDotImporter* dot = nullptr;

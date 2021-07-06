@@ -35,19 +35,19 @@ class ProgramEngineTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
         vect.push_back(*(new Data::PrimitiveTypeArray2D<double>(size1, size2)));
 
-        ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
+        const_cast<Data::PrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrimitiveTypeArray<double>&>(vect.at(1).get()))
             .setDataAt(typeid(double), 25, value0);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
+        const_cast<Data::PrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrimitiveTypeArray<double>&>(vect.at(1).get()))
             .setDataAt(typeid(double), 5, value2);
-        ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
+        const_cast<Data::PrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrimitiveTypeArray<double>&>(vect.at(1).get()))
             .setDataAt(typeid(double), 6, value3);
-        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
+        const_cast<Data::PrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrimitiveTypeArray2D<double>&>(vect.at(2).get()))
             .setDataAt(typeid(double), 0, value0);
-        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
+        const_cast<Data::PrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrimitiveTypeArray2D<double>&>(vect.at(2).get()))
             .setDataAt(typeid(double), 1, value1);
-        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
+        const_cast<Data::PrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrimitiveTypeArray2D<double>&>(vect.at(2).get()))
             .setDataAt(typeid(double), 24, value0);
-        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
+        const_cast<Data::PrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrimitiveTypeArray2D<double>&>(vect.at(2).get()))
             .setDataAt(typeid(double), 25, value0);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
