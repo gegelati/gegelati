@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
-#include "data/primitiveTypeArray2D.h"
+#include "data/printablePrimitiveTypeArray.h"
+#include "data/printablePrimitiveTypeArray2D.h"
 #include "data/untypedSharedPtr.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
@@ -35,19 +35,19 @@ class ProgramEngineTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
         vect.push_back(*(new Data::PrimitiveTypeArray2D<double>(size1, size2)));
 
-        const_cast<Data::PrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrimitiveTypeArray<double>&>(vect.at(1).get()))
+        const_cast<Data::PrintablePrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray<double>&>(vect.at(1).get()))
             .setDataAt(typeid(double), 25, value0);
-        const_cast<Data::PrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrimitiveTypeArray<double>&>(vect.at(1).get()))
+        const_cast<Data::PrintablePrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray<double>&>(vect.at(1).get()))
             .setDataAt(typeid(double), 5, value2);
-        const_cast<Data::PrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrimitiveTypeArray<double>&>(vect.at(1).get()))
+        const_cast<Data::PrintablePrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray<double>&>(vect.at(1).get()))
             .setDataAt(typeid(double), 6, value3);
-        const_cast<Data::PrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrimitiveTypeArray2D<double>&>(vect.at(2).get()))
+        const_cast<Data::PrintablePrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray2D<double>&>(vect.at(2).get()))
             .setDataAt(typeid(double), 0, value0);
-        const_cast<Data::PrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrimitiveTypeArray2D<double>&>(vect.at(2).get()))
+        const_cast<Data::PrintablePrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray2D<double>&>(vect.at(2).get()))
             .setDataAt(typeid(double), 1, value1);
-        const_cast<Data::PrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrimitiveTypeArray2D<double>&>(vect.at(2).get()))
+        const_cast<Data::PrintablePrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray2D<double>&>(vect.at(2).get()))
             .setDataAt(typeid(double), 24, value0);
-        const_cast<Data::PrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrimitiveTypeArray2D<double>&>(vect.at(2).get()))
+        const_cast<Data::PrintablePrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray2D<double>&>(vect.at(2).get()))
             .setDataAt(typeid(double), 25, value0);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));

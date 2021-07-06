@@ -36,6 +36,8 @@
 #ifndef ARRAY_WRAPPER_H
 #define ARRAY_WRAPPER_H
 
+#include <iostream> //test purposes //todo
+
 #include <functional>
 #include <map>
 #include <regex>
@@ -206,7 +208,6 @@ namespace Data {
         /// Inherited from DataHandler
         virtual std::vector<size_t> getAddressesAccessed(
             const std::type_info& type, const size_t address) const override;
-
     };
 
     template <class T>

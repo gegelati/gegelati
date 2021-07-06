@@ -20,7 +20,7 @@ namespace Data {
 
         /// Copy constructor (deep copy).
         PrintablePrimitiveTypeArray(const PrintablePrimitiveTypeArray<T> &other)
-                : Data::PrimitiveTypeArray<T>(other) {};
+                : Data::PrimitiveTypeArray<T>(other), Data::PrintableDataHandler(other) {};
 
         /// Copy content from an ArrayWrapper
         PrintablePrimitiveTypeArray(const PrintableArrayWrapper<T> &other)
@@ -30,16 +30,18 @@ namespace Data {
         /// Default destructor.
         virtual ~PrintablePrimitiveTypeArray() = default;
 
+        /// Inherited from DataHandler
+        virtual Data::DataHandler *clone() const override;
+
         std::vector<uint64_t> getDataIndexes(
                 const std::type_info &type, const size_t address) const override;
 
         std::string getTemplatedType() const override;
     };
 
-    template <class T>
+    template<class T>
     std::vector<uint64_t> PrintablePrimitiveTypeArray<T>::getDataIndexes(
-            const std::type_info& type, const size_t address) const
-    {
+            const std::type_info &type, const size_t address) const {
         if (this->containerPtr == nullptr) {
             throw std::runtime_error("Null pointer access.");
         }
@@ -64,11 +66,15 @@ namespace Data {
         return idx;
     }
 
-    template <class T>
-    std::string PrintablePrimitiveTypeArray<T>::getTemplatedType() const{
+    template<class T>
+    std::string PrintablePrimitiveTypeArray<T>::getTemplatedType() const {
         return DEMANGLE_TYPEID_NAME(typeid(T).name());
     }
 
+    template<class T>
+    Data::DataHandler *PrintablePrimitiveTypeArray<T>::clone() const {
+        return (Data::DataHandler*)(new PrintablePrimitiveTypeArray<T>(*this));
+    }
 
 
 } // namespace Data

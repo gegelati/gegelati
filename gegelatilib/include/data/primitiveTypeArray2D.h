@@ -39,6 +39,7 @@
 
 #include <tuple>
 
+#include "data/dataHandler.h"
 #include "data/array2DWrapper.h"
 #include "data/primitiveTypeArray.h"
 
@@ -63,7 +64,7 @@ namespace Data {
      * PrimitiveDataArray with the same number of nbElements.
      *
      */
-    template <typename T> class PrimitiveTypeArray2D : public Array2DWrapper<T>
+    template <typename T> class PrimitiveTypeArray2D : public Array2DWrapper<T>, public virtual DataHandler
     {
       protected:
         /**
@@ -148,7 +149,7 @@ namespace Data {
     template <typename T>
     inline PrimitiveTypeArray2D<T>::PrimitiveTypeArray2D(
         const PrimitiveTypeArray2D<T>& other)
-        : Array2DWrapper<T>(other), data(other.data)
+        : DataHandler{other}, Array2DWrapper<T>(other), data(other.data)
     {
         // Set the pointer to the right data
         this->setPointer(&(this->data));
@@ -157,7 +158,7 @@ namespace Data {
     template <class T>
     PrimitiveTypeArray2D<T>::PrimitiveTypeArray2D(
         const Array2DWrapper<T>& other)
-        : Array2DWrapper<T>(other), data(this->nbElements)
+        : DataHandler{other}, Array2DWrapper<T>(other), data(this->nbElements)
     {
         if (this->containerPtr != NULL) {
             // Copy the data from the given ArrayWrapper
