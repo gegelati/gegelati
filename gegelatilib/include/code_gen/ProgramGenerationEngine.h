@@ -72,6 +72,9 @@ namespace CodeGen {
         /// names of the registers in the TPG's programs.
         static const std::string nameRegVariable;
 
+        /// names of the temporary operand used in the TPG's programs.
+        static const std::string nameOperandVariable;
+
         /// The file in which programs will be added.
         std::ofstream fileC;
         /// The file in which prototypes of programs will be added.
@@ -212,6 +215,9 @@ namespace CodeGen {
          * \param[in] path const reference to the path of the file
          */
         void openFile(const std::string& filename, const std::string& path);
+        void initOperandCurrentLine();
+        void printInitOperand(const std::vector<uint64_t>& vectIdx);
+        void printNameSourceData(const uint64_t idx);
     };
 
 } // namespace CodeGen

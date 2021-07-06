@@ -34,26 +34,42 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifdef CODE_GENERATION
 
 #include "code_gen/PrintableInstruction.h"
+#include "data/arrayWrapper.h"
 
-//bool Instructions::PrintableInstruction::isFormatValid()
+// bool Instructions::PrintableInstruction::isFormatValid()
 //{
-//    return false;
-//}
+//     return false;
+// }
 
 const std::string& Instructions::PrintableInstruction::getFormat() const
 {
     return this->format;
 }
+std::string Instructions::PrintableInstruction::getPrimitiveType(
+    const uint64_t& opIdx) const
+{
+    //    regex :  (const )?([\w \*]*)(\[(\d)+\])?
 
+    std::string typeName =
+        DEMANGLE_TYPEID_NAME(this->getOperandTypes().at(opIdx).get().name());
+    std::string regex{"(const )?([\\w \\*]*)(\\[(\\d)+\\])?"};
+    std::regex arrayType(regex);
+    std::cmatch cm;
+    std::string type;
+    if (std::regex_match(typeName.c_str(), cm, arrayType)) {
+        type = cm[2].str();
+    }
+    // Default case
+    return type;
+}
 
-//std::string Instructions::PrintableInstruction::print(
-//    const std::vector<Data::UntypedSharedPtr>& args){
-//    std::string formatComplete(this->format);
-//    return formatComplete;
-//}
+// std::string Instructions::PrintableInstruction::print(
+//     const std::vector<Data::UntypedSharedPtr>& args){
+//     std::string formatComplete(this->format);
+//     return formatComplete;
+// }
 
 #endif // CODE_GENERATION

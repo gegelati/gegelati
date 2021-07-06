@@ -67,6 +67,8 @@ namespace Instructions {
          */
         const std::string& getFormat() const;
 
+        std::string getPrimitiveType(const uint64_t&) const;
+
       protected:
         /**
          * \brief Protected constructor to force the class abstract nature.

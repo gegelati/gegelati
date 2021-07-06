@@ -33,46 +33,55 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifdef CODE_GENERATION
 
 #include "code_gen/ProgramGenerationEngine.h"
-#include <cxxabi.h>
+#include "data/printableDataHandler.h"
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
 const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
+const std::string CodeGen::ProgramGenerationEngine::nameOperandVariable("op");
 
-void CodeGen::ProgramGenerationEngine::generateCurrentLine(){
-    const Program::Line& line = this->getCurrentLine();
-    const Instructions::Instruction& instruction = this->getCurrentInstruction();
-    auto prtIns = dynamic_cast<const Instructions::PrintableInstruction*>(&instruction);
+void CodeGen::ProgramGenerationEngine::generateCurrentLine() {
+    // const Program::Line& line = this->getCurrentLine();
+    const Instructions::Instruction &instruction =
+            this->getCurrentInstruction();
+    auto prtIns =
+            dynamic_cast<const Instructions::PrintableInstruction *>(&instruction);
 
-    if (prtIns != nullptr){
+    if (prtIns != nullptr) {
+        // std::map<operand(uint64t ?), uint_64t> initOperand // = (operand,
+        // chiffre après "op")
+        fileC << "\t{" << std::endl;
+        initOperandCurrentLine();
         std::string codeLine = completeFormat(*prtIns);
-        fileC << "\t" << codeLine << std::endl;
-    }
-    else{
+        // init
+        fileC << "\t\t" << codeLine << "\n"
+              << "\t}" << std::endl;
+    } else {
         throw std::runtime_error("The pointer on the instruction cannot be"
                                  " converted to a pointer on a printable"
                                  "instruction.");
     }
-
 }
-void CodeGen::ProgramGenerationEngine::generateProgram(uint64_t progID, const bool ignoreException)
-{
-    fileC << "\ndouble P" << progID <<"(){" << std::endl;
-    fileH << "double P" << progID <<"();" << std::endl;
+
+void CodeGen::ProgramGenerationEngine::generateProgram(
+        uint64_t progID, const bool ignoreException) {
+    fileC << "\ndouble P" << progID << "(){" << std::endl;
+    fileH << "double P" << progID << "();" << std::endl;
 
     // instantiate register
-    fileC << "\tdouble "<< nameRegVariable <<"[" << program->getEnvironment().getNbRegisters() << "] = {0";
+    fileC << "\tdouble " << nameRegVariable << "["
+          << program->getEnvironment().getNbRegisters() << "] = {0";
     for (int i = 1; i < program->getEnvironment().getNbRegisters(); ++i) {
         fileC << ", 0";
     }
     fileC << "};" << std::endl;
     this->programCounter = 0;
-//todo embarqué dans une fonction globale avec une operateur() ? avec un objet foncteur
-    // Iterate over the lines of the Program
+    // todo embarqué dans une fonction globale avec une operateur() ? avec un
+    // objet foncteur
+    //  Iterate over the lines of the Program
     bool hasNext = this->program->getNbLines() > 0;
 
     // Skip first lines if they are introns.
@@ -84,7 +93,8 @@ void CodeGen::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
     while (hasNext) {
         try {
             // generate the current line
-            this->generateCurrentLine(); //todo utilisez un objet foncteur à la place
+            this->generateCurrentLine(); // todo utilisez un objet foncteur à la
+            // place
         }
         catch (std::out_of_range e) {
             if (!ignoreException) {
@@ -97,60 +107,72 @@ void CodeGen::ProgramGenerationEngine::generateProgram(uint64_t progID, const bo
     };
 #ifdef DEBUG
     fileC << "#ifdef DEBUG" << std::endl;
-    fileC << "\tprintf(\"P" << progID << " : reg[0] = %lf \\n\", reg[0]);" << std::endl;
+    fileC << "\tprintf(\"P" << progID << " : reg[0] = %lf \\n\", reg[0]);"
+          << std::endl;
     fileC << "#endif" << std::endl;
 #endif
     fileC << "\treturn reg[0];\n}" << std::endl;
-
 }
+
 std::string CodeGen::ProgramGenerationEngine::completeFormat(
-    const Instructions::PrintableInstruction& instruction) const
-{
-    const std::string& format = instruction.getFormat();
-    const Program::Line& line = this->getCurrentLine(); // throw std::out_of_range
+        const Instructions::PrintableInstruction &instruction) const {
+    const std::string &format = instruction.getFormat();
+    const Program::Line &line =
+            this->getCurrentLine(); // throw std::out_of_range
     std::string codeLine(format);
     std::string operandValue;
-    for(auto itr = std::sregex_iterator(format.begin(), format.end(), operand_regex); itr != std::sregex_iterator(); ++itr){
-        const std::string& match = (*itr).str();
+    for (auto itr =
+            std::sregex_iterator(format.begin(), format.end(), operand_regex);
+         itr != std::sregex_iterator(); ++itr) {
+        const std::string &match = (*itr).str();
         auto pos = codeLine.find(match);
         // get number after character '$'
         int idx = std::stoi(match.substr(1));
-        if(idx > 0) {
-            const uint64_t operandLocation = this->getOperandLocation(idx-1);
-
+        if (idx > 0) {
+            const uint64_t operandLocation = this->getOperandLocation(idx - 1);
+            std::string operandIdx(std::to_string(idx - 1));
+            operandValue = nameOperandVariable + operandIdx;
             // if number > 0 means that it's in the left side of the operation
-            if(line.getOperand(idx-1).first == 0){
-                //operand value is an intern register
-                 operandValue = nameRegVariable + "[" +
-                     std::to_string(operandLocation) + "]";
-
-            }
-            else {
-                //operandValue come from the environment
-                 operandValue = nameDataVariable + std::to_string(line.getOperand(idx-1).first) + "[" +
-                     std::to_string(operandLocation) + "]";
-            }
-        }
-        else{
+//            if (line.getOperand(idx - 1).first == 0) {
+//                // operand value is an intern register
+//                operandValue = nameOperandVariable + "[" +
+//                               std::to_string(operandLocation) + "]";
+//            } else {
+//                // operandValue come from the environment
+//                operandValue = nameDataVariable +
+//                               std::to_string(line.getOperand(idx - 1).first) +
+//                               "[" + std::to_string(operandLocation) + "]";
+//            }
+        } else {
             // if number == 0 it corresponds to the result of the function
-            operandValue = nameRegVariable + "[" + std::to_string(line.getDestinationIndex()) + "]";
+            operandValue = nameRegVariable + "[" +
+                           std::to_string(line.getDestinationIndex()) + "]";
         }
         codeLine.replace(pos, match.size(), operandValue);
     }
     return codeLine;
 }
-void CodeGen::ProgramGenerationEngine::initGlobalVar(){
+
+void CodeGen::ProgramGenerationEngine::initGlobalVar() {
 
     for (int i = 1; i < this->dataScsConstsAndRegs.size(); ++i) {
 
-        const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
-
-        std::string type = d.getTemplateType();
+        const Data::DataHandler &d = this->dataScsConstsAndRegs.at(i);
+        auto printableDataSource =
+                dynamic_cast<const Data::PrintableDataHandler *>(&d);
+        //todo fonction de cast pour pas dupliquer du code ?
+        if (printableDataSource == nullptr) {
+            throw std::runtime_error("The data source cannot be"
+                                     " converted to a pointer on a printable"
+                                     "instruction.");
+        }
+        std::string type = printableDataSource->getTemplatedType();
         fileC << "extern " << type << "* in" << i << ";" << std::endl;
     }
 }
-void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
-                                                const std::string& path){
+
+void CodeGen::ProgramGenerationEngine::openFile(const std::string &filename,
+                                                const std::string &path) {
     if (filename.size() == 0) {
         std::cout << "filename is empty" << std::endl;
         throw std::invalid_argument("filename is empty");
@@ -171,6 +193,71 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
 #ifdef DEBUG
     fileC << "#include <stdio.h>" << std::endl;
 #endif // DEBUG
+}
+
+void CodeGen::ProgramGenerationEngine::initOperandCurrentLine() {
+    uint64_t opIdx;
+    const Program::Line &line = getCurrentLine();
+    const Instructions::Instruction &instruction = getCurrentInstruction();
+    auto printableIns = dynamic_cast<const Instructions::PrintableInstruction *>(&instruction);
+    if (printableIns == nullptr){
+        throw std::runtime_error("The pointer on the instruction cannot be"
+                                 " converted to a pointer on a printable"
+                                 "instruction.");
+    }
+    for (int i = 0; i < instruction.getNbOperands(); ++i) {
+        uint64_t sourceIdx = line.getOperand(i).first;
+        const std::type_info &operandType =
+                instruction.getOperandTypes().at(i).get();
+        opIdx = this->getOperandLocation(i);
+        const Data::DataHandler &dataSource = this->dataScsConstsAndRegs.at(
+                sourceIdx); // Throws std::out_of_range
+        auto printableDataSource =
+                dynamic_cast<const Data::PrintableDataHandler *>(&dataSource);
+        if (printableDataSource == nullptr) {
+            throw std::runtime_error(
+                    "error can't cast dataHandler into a PrintableDataHandler\n");
+        }
+        fileC << "\t\t" << printableIns->getPrimitiveType(i) << " "
+                                                << nameOperandVariable << i;
+        std::vector<uint64_t> vectIdx =
+                printableDataSource->getDataIndexes(operandType, opIdx);
+
+        size_t size = vectIdx.size();
+        if (size <= 0) {
+            throw std::runtime_error("Vector of indexes is negative or equal "
+                                     "to 0, can't generate the "
+                                     "declaration of the variable\n");
+        }
+        if (size == 1) {
+            fileC << " = ";
+            printNameSourceData(i);
+            fileC << "[" << vectIdx.at(0) << "];\n";
+        } else {
+            fileC << "[] = {";
+            for (int j = 0; j < size; ++j) {
+                printNameSourceData(i);
+                fileC << "[" << vectIdx.at(j) << "]";
+                if (j < (size - 1)) {
+                    fileC << ",";
+                }
+            }
+            fileC << "};\n";
+        }
+    }
+}
+
+void CodeGen::ProgramGenerationEngine::printInitOperand(
+        const std::vector<uint64_t> &vectIdx) {
+}
+
+void CodeGen::ProgramGenerationEngine::printNameSourceData(const uint64_t idx) {
+    uint64_t dataSourceIdx = getCurrentLine().getOperand(idx).first;
+    if (dataSourceIdx == 0) {
+        fileC << nameRegVariable;
+    } else {
+        fileC << nameDataVariable << dataSourceIdx;
+    }
 }
 
 #endif // CODE_GENERATION

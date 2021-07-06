@@ -1,7 +1,7 @@
 #ifndef GEGELATI_PROGRAMENGINE_H
 #define GEGELATI_PROGRAMENGINE_H
 
-#include "data/primitiveTypeArray.h"
+#include "data/printablePrimitiveTypeArray.h"
 #include "data/untypedSharedPtr.h"
 #include "program/program.h"
 
@@ -24,8 +24,13 @@ namespace Program {
         ProgramEngine() = delete;
 
         /// Registers used for the Program execution.
-        Data::PrimitiveTypeArray<double>
-            registers; // If the type of registers attribute is changed one day
+        Data::PrintablePrimitiveTypeArray<
+            double> // todo problème ici mauvais type :( créer une copie dans le
+                    // ProgramGenerationEngine à partir de register pour pouvoir
+                    // travailler sur le bon type et en gardant les algo
+                    // existant
+                        registers; // If the type of registers attribute is
+                                   // changed one day
         // make sure to update the Program::identifyIntrons()
         // method as it create its own
         // Data::PrimitiveTypeArray<double> to keep track of
@@ -86,7 +91,7 @@ namespace Program {
          */
         template <class T>
         ProgramEngine(const Program& prog,
-            const std::vector<std::reference_wrapper<T>>& dataSrc)
+                      const std::vector<std::reference_wrapper<T>>& dataSrc)
             : programCounter{0},
               registers{prog.getEnvironment().getNbRegisters()}, program{NULL}
         {
@@ -122,8 +127,8 @@ namespace Program {
          * ProgramExecutionEngine.
          */
         ProgramEngine(const Program& prog)
-            : ProgramEngine(prog,
-                                     prog.getEnvironment().getDataSources()){};
+            : ProgramEngine(prog, prog.getEnvironment().getDataSources()){};
+
       public:
         /**
          * \brief Method for changing the Program executed by a
