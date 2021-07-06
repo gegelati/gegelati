@@ -15,16 +15,22 @@ namespace Data {
                                           public virtual Data::DataHandler
     {
         // todo constructor et les méthodes de retour de types
+      public:
+        PrintablePrimitiveTypeArray2D(
+            const PrintablePrimitiveTypeArray2D& other) = default;
+        /// Inherited from DataHandler
+        virtual Data::DataHandler* clone() const override;
 
+        std::vector<uint64_t> getDataIndexes(
+            const std::type_info& type, const size_t address) const override;
+
+        std::string getTemplatedType() const override;
 
         PrintablePrimitiveTypeArray2D(const size_t w = 2, const size_t h = 4)
             : Data::PrimitiveTypeArray2D<T>(w, h), Data::PrintableDataHandler(),
-              Data::DataHandler(){};
-
-        PrintablePrimitiveTypeArray2D(
-            const PrintablePrimitiveTypeArray2D& other) = default;
-
-        virtual Data::DataHandler* clone() const override;
+              Data::DataHandler()
+        {
+        }
     };
 
     template <class T>
@@ -32,6 +38,17 @@ namespace Data {
     {
 
         return new PrintablePrimitiveTypeArray2D<T>(*this);
+    }
+    template <class T>
+    std::vector<uint64_t> PrintablePrimitiveTypeArray2D<T>::getDataIndexes(
+        const std::type_info& type, const size_t address) const
+    {
+        return std::vector<uint64_t>();
+    }
+    template <class T>
+    std::string PrintablePrimitiveTypeArray2D<T>::getTemplatedType() const
+    {
+        return std::__cxx11::string();
     }
 } // namespace Data
 

@@ -29,11 +29,10 @@ namespace Data {
          *
          * //todo
          */
-        virtual std::vector<uint64_t> getDataIndexes(const std::type_info& type,
-                                              const size_t address) const = 0;
+        virtual std::vector<uint64_t> getDataIndexes(
+            const std::type_info& type, const size_t address) const = 0;
 
         virtual std::string getTemplatedType() const = 0;
-
     };
 } // namespace Data
 

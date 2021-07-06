@@ -30,10 +30,10 @@ class ProgramEngineTest : public ::testing::Test
     virtual void SetUp()
     {
         vect.push_back(
-            *(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
+            *(new Data::PrintablePrimitiveTypeArray<int>((unsigned int)size1)));
         vect.push_back(
-            *(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
-        vect.push_back(*(new Data::PrimitiveTypeArray2D<double>(size1, size2)));
+            *(new Data::PrintablePrimitiveTypeArray<double>((unsigned int)size2)));
+        vect.push_back(*(new Data::PrintablePrimitiveTypeArray2D<double>(size1, size2)));
 
         const_cast<Data::PrintablePrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray<double>&>(vect.at(1).get()))
             .setDataAt(typeid(double), 25, value0);
@@ -52,12 +52,12 @@ class ProgramEngineTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
-        set.add(*new Instructions::LambdaInstruction<const double[2],
+        set.add(*(new Instructions::LambdaInstruction<const double[2],
             const double[2]>(
             [](const double a[2], const double b[2]) {
               return a[0] * b[0] + a[1] * b[1];
-            }));
-        set.add(*new Instructions::LambdaInstruction<const double[2][2]>(
+            })));
+        set.add(*(new Instructions::LambdaInstruction<const double[2][2]>(
             [](const double a[2][2]) {
               double res = 0.0;
               for (auto h = 0; h < 2; h++) {
@@ -66,7 +66,7 @@ class ProgramEngineTest : public ::testing::Test
                   }
               }
               return res / 4.0;
-            }));
+            })));
 
         e = new Environment(set, vect, 8, 5);
         p = new Program::Program(*e);

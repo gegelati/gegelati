@@ -31,10 +31,10 @@ namespace Data {
         virtual ~PrintablePrimitiveTypeArray() = default;
 
         /// Inherited from DataHandler
-        virtual Data::DataHandler *clone() const override;
+        virtual Data::DataHandler* clone() const override;
 
         std::vector<uint64_t> getDataIndexes(
-                const std::type_info &type, const size_t address) const override;
+            const std::type_info& type, const size_t address) const override;
 
         std::string getTemplatedType() const override;
     };
