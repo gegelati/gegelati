@@ -3,17 +3,14 @@
 #include <stddef.h>
 
 #include "cfloat"
-#include "code_gen/LambdaPrintableInstruction.h"
 #include "code_gen/ProgramGenerationEngine.h"
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/set.h"
-#include "tpg/tpgAction.h"
 #include "tpg/tpgGraph.h"
-#include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
-#include <file/parametersParser.h>
+#include "instructions/lambdaInstruction.h"
 #include <iostream>
 
 class StickGameGenerationBestDotTest : public ::testing::Test
@@ -52,17 +49,17 @@ class StickGameGenerationBestDotTest : public ::testing::Test
             }
         };
 
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = (($2) != 0.0) ? fmod($1, $2) : DBL_MIN ;", modulo)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<int, int>(
+        set.add(*(new Instructions::LambdaInstruction<int, int>(
             "$0 = (double)($1) - (double)($2);", minus)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = $1 + $2;", add)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<int>(
+        set.add(*(new Instructions::LambdaInstruction<int>(
             "$0 = (double)($1);", cast)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = (($1) < ($2)) ? ($2) : ($1); ", max)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double>(
+        set.add(*(new Instructions::LambdaInstruction<double>(
             "$0 = ($1 == 0.0) ? 10.0 : 0.0;", nulltest)));
         data = {hints, remainingSticks};
 

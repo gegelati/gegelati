@@ -57,6 +57,55 @@ namespace Instructions {
     class Instruction
     {
 
+#ifdef CODE_GENERATION
+      public:
+        /**
+         * \brief function saying if an Instruction can be printed in a C file
+         * during the code gen
+         *
+         * @return true if the Instruction can be used to generated C code false
+         * in other case
+         */
+        virtual bool isPrintable() const;
+
+        /**
+         * \brief This function return the format of the line of code used to
+         * represent the instruction.
+         *
+         * \return The format of the line of code used to represent the
+         * instruction in the C program.
+         */
+        virtual const std::string& getFormat() const;
+
+        /**
+         * \brief Retreive the primitive data type of the operand
+         *
+         * Return the type othe operand. If the operand is an array return the
+         * type of the element of the array
+         * \param[in] opIdx const uint64_t reference to the index of the operand
+         * of the instruction
+         *
+         * @return
+         */
+        virtual std::string getPrimitiveType(const uint64_t& opIdx) const;
+
+      protected:
+        /**
+         * \brief Protected constructor to force the class abstract nature.
+         *
+         * The definition of this constructor initialize the string format with
+         * the format given as parameter.
+         *
+         * \param[in] format of the line used to represent the instruction in
+         * the C files generated.
+         *
+         */
+        Instruction(std::string format);
+
+        /// format of the instruction used to generate the code.
+        std::string format;
+#endif // CODE_GENERATION
+
       public:
         /// Default virtual destructor for polyphormism.
         virtual ~Instruction() = default;

@@ -56,9 +56,24 @@ namespace Instructions {
      * to the LambdaInstruction constructor, specifying its type.
      */
     template <typename First, typename... Rest>
-    class LambdaInstruction : public virtual Instructions::Instruction
+    class LambdaInstruction : public Instructions::Instruction
     {
 
+#ifdef CODE_GENERATION
+      public:
+        LambdaInstruction(const std::string& format,
+                          std::function<double(First, Rest...)> function)
+            : Instructions::Instruction(format), func{function}
+        {
+            this->operandTypes.push_back(typeid(First));
+            // Fold expression to push all other types
+            (this->operandTypes.push_back(typeid(Rest)), ...);
+        };
+
+        ///inherited from Instruction
+        virtual bool isPrintable()const override{ return true;};
+
+#endif // CODE_GENERATION
       protected:
         /**
          * \brief Function executed for this Instruction.
@@ -80,7 +95,7 @@ namespace Instructions {
          * compile time)
          */
         LambdaInstruction(std::function<double(First, Rest...)> function)
-            : func{function}
+            : Instructions::Instruction(), func{function}
         {
 
             this->operandTypes.push_back(typeid(First));
@@ -184,10 +199,10 @@ namespace Instructions {
                 return *(args.at(idx).getSharedPointer<const T>());
             }
             else {
-                return (RETURN_TYPE)(
-                           args.at(idx)
-                               .getSharedPointer<
-                                   const std::remove_all_extents_t<T>[]>())
+                return (RETURN_TYPE)(args.at(idx)
+                                         .getSharedPointer<
+                                             const std::remove_all_extents_t<
+                                                 T>[]>())
                     .get();
             };
         };

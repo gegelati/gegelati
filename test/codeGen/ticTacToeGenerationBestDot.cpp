@@ -2,10 +2,10 @@
 #include <gtest/gtest.h>
 #include <stddef.h>
 
-#include "code_gen/LambdaPrintableInstruction.h"
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
+#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgGraph.h"
@@ -49,23 +49,23 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
         };
         auto cond = [](double a, double b) -> double { return a < b ? -a : a; };
 
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = (double)($1) - (double)($2);", minus)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = $1 + $2;", add)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = (($1) < ($2)) ? ($2) : ($1); ", max)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = (($2) != 0.0) ? fmod($1, $2) : DBL_MIN ;", modulo)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double>(
+        set.add(*(new Instructions::LambdaInstruction<double>(
             "$0 = ($1) == -1.0 ? 10.0 : 0.0;", nulltest)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double>(
+        set.add(*(new Instructions::LambdaInstruction<double>(
             "$0 = ($1) == 0.0 ? 10.0 : 0.0;", circletest)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double>(
+        set.add(*(new Instructions::LambdaInstruction<double>(
             "$0 = ($1) == 1.0 ? 10.0 : 0.0;", crosstest)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double>(
+        set.add(*(new Instructions::LambdaInstruction<double>(
             "$0 = ($1) >= 15.0 ? 10.0 : 0.0;", test15)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = ($1) < ($2) ? -1*($1) : ($1);", cond)));
 
         data.push_back(currentState);

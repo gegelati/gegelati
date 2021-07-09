@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <stddef.h>
 
-#include "code_gen/LambdaPrintableInstruction.h"
+#include "instructions/lambdaInstruction.h"
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
@@ -33,9 +33,9 @@ class TPGGenerationEngineTest : public ::testing::Test
 
         auto add = [](double a, double b) -> double { return a + b; };
         auto sub = [](double a, double b) -> double { return a - b; };
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = $1 + $2;", add)));
-        set.add(*(new Instructions::LambdaPrintableInstruction<double, double>(
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = $1 - $2;", sub)));
 
         e = new Environment(set, data, 8);
