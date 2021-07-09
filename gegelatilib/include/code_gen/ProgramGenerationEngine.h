@@ -37,8 +37,10 @@
 
 #ifndef GEGELATI_PROGRAMGENERATIONENGINE_H
 #define GEGELATI_PROGRAMGENERATIONENGINE_H
-#include "PrintableInstruction.h"
+#include "instructions/instruction.h"
+#include "data/primitiveTypeArray.h"
 #include "program/programEngine.h"
+#include "data/dataHandlerPrinter.h"
 //#include <bits/fcntl-linux.h>
 #include <fstream>
 
@@ -138,7 +140,7 @@ namespace CodeGen {
         ProgramGenerationEngine(const std::string& filename,
                                 const Program::Program& p,
                                 const std::string& path = "./")
-            : ProgramEngine(p)
+            : ProgramEngine(p.getEnvironment())
         {
             openFile(filename, path);
         }
@@ -155,6 +157,7 @@ namespace CodeGen {
             fileC.close();
             fileH.close();
         }
+
 
         /**
          * \brief generate the current line of the program
@@ -200,7 +203,7 @@ namespace CodeGen {
          * the operand of the instruction.
          */
         std::string completeFormat(
-            const Instructions::PrintableInstruction& instruction) const;
+            const Instructions::Instruction& instruction) const;
 
       private:
         /**

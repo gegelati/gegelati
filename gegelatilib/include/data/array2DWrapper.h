@@ -62,7 +62,7 @@ namespace Data {
      * Like with the ArrayWrapper, every time the data associated to the pointer
      * is modified, the invalidateCachedHash method should be called.
      */
-    template <class T> class Array2DWrapper : public ArrayWrapper<T>, public virtual DataHandler
+    template <class T> class Array2DWrapper : public ArrayWrapper<T>
     {
       private:
         /**

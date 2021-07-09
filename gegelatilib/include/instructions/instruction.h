@@ -61,10 +61,10 @@ namespace Instructions {
       public:
         /**
          * \brief function saying if an Instruction can be printed in a C file
-         * during the code gen
+         * during the code gen.
          *
-         * @return true if the Instruction can be used to generated C code false
-         * in other case
+         * @return true if the format of the Instruction is not empty, false
+         * in other case.
          */
         virtual bool isPrintable() const;
 

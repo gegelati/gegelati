@@ -259,6 +259,16 @@ namespace Data {
          */
         uint64_t scaleLocation(const uint64_t rawLocation,
                                const std::type_info& type) const;
+        /**
+         * \brief Function returning the type of the template for this
+         * DataHandler.
+         *
+         * For example, in case of a Data::PrimitiveTypeArray<double> this
+         * function return typeid(double).
+         *
+         * @return std::type_info of the template
+         */
+        virtual const std::type_info& getTemplateType() const = 0;
     };
 } // namespace Data
 

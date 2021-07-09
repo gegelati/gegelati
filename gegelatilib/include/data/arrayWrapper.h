@@ -77,7 +77,7 @@ namespace Data {
      * also provide the following composite data type:
      * - T[n]: with $n <=$ to the size of the ArrayWrapper.
      */
-    template <class T> class ArrayWrapper : public virtual DataHandler
+    template <class T> class ArrayWrapper : public DataHandler
     {
         static_assert(std::is_fundamental<T>::value ||
                           std::is_same<T, Data::Constant>(),
@@ -149,6 +149,8 @@ namespace Data {
         ArrayWrapper(size_t size = 8, std::vector<T>* ptr = nullptr)
             : nbElements{size}
         {
+            //            std::cout << "default constructor Array wrapper "<<
+            //            std::endl;
             this->setPointer(ptr);
         };
 
@@ -156,7 +158,12 @@ namespace Data {
         virtual ~ArrayWrapper() = default;
 
         /// Default copy constructor.
-        ArrayWrapper(const ArrayWrapper<T>& other) = default;
+        ArrayWrapper(const ArrayWrapper<T>& other)
+            : DataHandler(other), nbElements{other.nbElements},
+              containerPtr{other.containerPtr}
+        {
+            // std::cout << "copy constructor Array wrapper "<< std::endl;
+        } // = default;
 
         /**
          * \brief Return a PrimitiveTypeArray<T> where all data of the
@@ -208,6 +215,9 @@ namespace Data {
         /// Inherited from DataHandler
         virtual std::vector<size_t> getAddressesAccessed(
             const std::type_info& type, const size_t address) const override;
+
+        /// Inherited from DataHandler
+        virtual const std::type_info& getTemplateType() const override;
     };
 
     template <class T>
@@ -414,6 +424,12 @@ namespace Data {
         this->invalidCachedHash = false;
 
         return this->cachedHash;
+    }
+
+    template <class T> const std::type_info& ArrayWrapper<T>::getTemplateType() const
+    {
+        const std::type_info& a = typeid(T);
+        return a;
     }
 
 } // namespace Data

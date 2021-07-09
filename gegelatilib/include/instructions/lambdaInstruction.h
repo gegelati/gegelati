@@ -65,13 +65,8 @@ namespace Instructions {
                           std::function<double(First, Rest...)> function)
             : Instructions::Instruction(format), func{function}
         {
-            this->operandTypes.push_back(typeid(First));
-            // Fold expression to push all other types
-            (this->operandTypes.push_back(typeid(Rest)), ...);
+            setUpOperand();
         };
-
-        ///inherited from Instruction
-        virtual bool isPrintable()const override{ return true;};
 
 #endif // CODE_GENERATION
       protected:
@@ -97,10 +92,7 @@ namespace Instructions {
         LambdaInstruction(std::function<double(First, Rest...)> function)
             : Instructions::Instruction(), func{function}
         {
-
-            this->operandTypes.push_back(typeid(First));
-            // Fold expression to push all other types
-            (this->operandTypes.push_back(typeid(Rest)), ...);
+            setUpOperand();
         };
 
         /// Inherited from Instruction
@@ -206,6 +198,13 @@ namespace Instructions {
                     .get();
             };
         };
+
+        void setUpOperand()
+        {
+            this->operandTypes.push_back(typeid(First));
+            // Fold expression to push all other types
+            (this->operandTypes.push_back(typeid(Rest)), ...);
+        }
     };
 }; // namespace Instructions
 

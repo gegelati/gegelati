@@ -42,6 +42,9 @@
 using namespace Instructions;
 
 Instruction::Instruction() : operandTypes()
+#ifdef CODE_GENERATION
+      , format()
+#endif //CODE_GENERATION
 {
 }
 
@@ -94,7 +97,7 @@ Instruction::Instruction(std::string format) : format(format), operandTypes()
 
 bool Instruction::isPrintable() const
 {
-    return false;
+    return !this->format.empty();
 }
 
 const std::string& Instruction::getFormat() const

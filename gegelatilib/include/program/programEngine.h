@@ -1,7 +1,7 @@
 #ifndef GEGELATI_PROGRAMENGINE_H
 #define GEGELATI_PROGRAMENGINE_H
 
-#include "data/printablePrimitiveTypeArray.h"
+#include "data/primitiveTypeArray.h"
 #include "data/untypedSharedPtr.h"
 #include "program/program.h"
 
@@ -24,7 +24,7 @@ namespace Program {
         ProgramEngine() = delete;
 
         /// Registers used for the Program execution.
-        Data::PrintablePrimitiveTypeArray<
+        Data::PrimitiveTypeArray<
             double> // todo problème ici mauvais type :( créer une copie dans le
                     // ProgramGenerationEngine à partir de register pour pouvoir
                     // travailler sur le bon type et en gardant les algo
@@ -84,10 +84,10 @@ namespace Program {
          * This constructor is useful for testing a Program on a different
          * Environment than its own.
          *
-         * \param[in] prog the const Program that will be executed by the
-         * ProgramExecutionEngine.
-         * \param[in] dataSrc The DataHandler with which
-         * the Program will be executed.
+         * \param[in] prog the const Program that will be executed or
+         * generated.
+         * \param[in] dataSrc The DataHandler with which the Program
+         * will be executed.
          */
         template <class T>
         ProgramEngine(const Program& prog,

@@ -49,13 +49,17 @@ namespace Instructions {
 
     /**
      * \brief Template class for multiplying a unique argument of type T by a
-     * constant parameter
+     * constant parameter.
      */
     template <class T> class MultByConstant : public Instruction
     {
         static_assert(std::is_fundamental<T>::value,
                       "Template class MultByConstParam<> can only be used for "
                       "primitive types.");
+#ifdef CODE_GENERATION
+      public:
+        MultByConstant(const std::string& format);
+#endif // CODE_GENERATION
 
       public:
         /**
@@ -65,12 +69,28 @@ namespace Instructions {
 
         double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override;
+
+      private:
+        /**
+         * \brief function call in constructor to puh the types of the operand
+         * of the instruction
+         */
+        void setUpOperand();
     };
 
-    template <class T> MultByConstant<T>::MultByConstant()
+#ifdef CODE_GENERATION
+    template <class T>
+    MultByConstant<T>::MultByConstant(const std::string& format)
+        : Instruction(format)
     {
-        this->operandTypes.push_back(typeid(T));
-        this->operandTypes.push_back(typeid(Data::Constant));
+        setUpOperand();
+    }
+
+#endif // CODE_GENERATION
+
+    template <class T> MultByConstant<T>::MultByConstant() : Instruction()
+    {
+        setUpOperand();
     }
 
     template <class T>
@@ -85,6 +105,12 @@ namespace Instructions {
             args.at(1).getSharedPointer<const Data::Constant>());
         return *(args.at(0).getSharedPointer<const T>()) *
                (double)constantValue;
+    }
+
+    template <class T>
+    void MultByConstant<T>::setUpOperand()
+    {
+        setUpOperand();
     }
 } // namespace Instructions
 #endif // INST_MULT_BY_CONST_H

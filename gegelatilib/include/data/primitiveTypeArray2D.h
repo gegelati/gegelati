@@ -64,7 +64,7 @@ namespace Data {
      * PrimitiveDataArray with the same number of nbElements.
      *
      */
-    template <typename T> class PrimitiveTypeArray2D : public Array2DWrapper<T>, public virtual DataHandler
+    template <typename T> class PrimitiveTypeArray2D : public Array2DWrapper<T>
     {
       protected:
         /**

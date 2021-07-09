@@ -36,7 +36,6 @@
 #ifdef CODE_GENERATION
 
 #include "code_gen/ProgramGenerationEngine.h"
-#include "data/printableDataHandler.h"
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
@@ -48,15 +47,14 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine()
     // const Program::Line& line = this->getCurrentLine();
     const Instructions::Instruction& instruction =
         this->getCurrentInstruction();
-    auto prtIns =
-        dynamic_cast<const Instructions::PrintableInstruction*>(&instruction);
 
-    if (prtIns != nullptr) {
+
+    if (instruction.isPrintable()) {
         // std::map<operand(uint64t ?), uint_64t> initOperand // = (operand,
         // chiffre après "op")
         fileC << "\t{" << std::endl;
         initOperandCurrentLine();
-        std::string codeLine = completeFormat(*prtIns);
+        std::string codeLine = completeFormat(instruction);
         // init
         fileC << "\t\t" << codeLine << "\n"
               << "\t}" << std::endl;
@@ -83,7 +81,7 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
     fileC << "};" << std::endl;
     this->programCounter = 0;
     // todo embarqué dans une fonction globale avec une operateur() ? avec un
-    // objet foncteur
+    //  objet foncteur
     //  Iterate over the lines of the Program
     bool hasNext = this->program->getNbLines() > 0;
 
@@ -118,7 +116,7 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
 }
 
 std::string CodeGen::ProgramGenerationEngine::completeFormat(
-    const Instructions::PrintableInstruction& instruction) const
+    const Instructions::Instruction& instruction) const
 {
     const std::string& format = instruction.getFormat();
     const Program::Line& line =
@@ -136,21 +134,6 @@ std::string CodeGen::ProgramGenerationEngine::completeFormat(
             const uint64_t operandLocation = this->getOperandLocation(idx - 1);
             std::string operandIdx(std::to_string(idx - 1));
             operandValue = nameOperandVariable + operandIdx;
-            // if number > 0 means that it's in the left side of the operation
-            //            if (line.getOperand(idx - 1).first == 0) {
-            //                // operand value is an intern register
-            //                operandValue = nameOperandVariable + "[" +
-            //                               std::to_string(operandLocation) +
-            //                               "]";
-            //            } else {
-            //                // operandValue come from the environment
-            //                operandValue = nameDataVariable +
-            //                               std::to_string(line.getOperand(idx
-            //                               - 1).first) +
-            //                               "[" +
-            //                               std::to_string(operandLocation) +
-            //                               "]";
-            //            }
         }
         else {
             // if number == 0 it corresponds to the result of the function
@@ -169,14 +152,15 @@ void CodeGen::ProgramGenerationEngine::initGlobalVar()
 
         const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
         auto printableDataSource =
-            dynamic_cast<const Data::PrintableDataHandler*>(&d);
-        // todo fonction de cast pour pas dupliquer du code ?
+            dynamic_cast<const Data::DataHandler*>(&d);
+
         if (printableDataSource == nullptr) {
             throw std::runtime_error(
                 "The data source cannot be"
-                " converted to a pointer on a PrintableDataHandler.");
+                " converted to a pointer on a PrintableDataHandler during the "
+                "creation of C the global variables.");
         }
-        std::string type = printableDataSource->getTemplatedType();
+        std::string type;// = printableDataSource->getTemplatedType();
         fileC << "extern " << type << "* in" << i << ";" << std::endl;
     }
 }
@@ -211,12 +195,11 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
     uint64_t opIdx;
     const Program::Line& line = getCurrentLine();
     const Instructions::Instruction& instruction = getCurrentInstruction();
-    auto printableIns =
-        dynamic_cast<const Instructions::PrintableInstruction*>(&instruction);
-    if (printableIns == nullptr) {
+    if (instruction.isPrintable() == false) {
         throw std::runtime_error("The pointer on the instruction cannot be"
                                  " converted to a pointer on a printable"
-                                 "instruction.");
+                                 "instruction during the initialization of an "
+                                 "operand of an instruction.");
     }
     for (int i = 0; i < instruction.getNbOperands(); ++i) {
         uint64_t sourceIdx = line.getOperand(i).first;
@@ -225,16 +208,11 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
         opIdx = this->getOperandLocation(i);
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             sourceIdx); // Throws std::out_of_range
-        auto printableDataSource =
-            dynamic_cast<const Data::PrintableDataHandler*>(&dataSource);
-        if (printableDataSource == nullptr) {
-            throw std::runtime_error(
-                "error can't cast dataHandler into a PrintableDataHandler\n");
-        }
-        fileC << "\t\t" << printableIns->getPrimitiveType(i) << " "
-              << nameOperandVariable << i;
-        std::vector<uint64_t> vectIdx =
-            printableDataSource->getDataIndexes(operandType, opIdx);
+//        Data::DataHandlerPrinter<dataSource.getTemplateType()>
+        fileC << "\t\t" << instruction.getPrimitiveType(i) << " "
+              << nameOperandVariable << i ;
+        std::vector<uint64_t> vectIdx = {1,2};
+//            printableDataSource->getDataIndexes(operandType, opIdx);
 
         size_t size = vectIdx.size();
         if (size <= 0) {
