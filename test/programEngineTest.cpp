@@ -1,17 +1,17 @@
 #include <gtest/gtest.h>
 
+#include "code_gen/ProgramGenerationEngine.h"
 #include "data/dataHandler.h"
-#include "data/printablePrimitiveTypeArray.h"
-#include "data/printablePrimitiveTypeArray2D.h"
+#include "data/primitiveTypeArray.h"
+#include "data/primitiveTypeArray2D.h"
 #include "data/untypedSharedPtr.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
+//#include "printableEnvironment.h"
 #include "program/line.h"
 #include "program/program.h"
-#include "code_gen/ProgramGenerationEngine.h"
-#include "code_gen/LambdaPrintableInstruction.h"
 
 class ProgramEngineTest : public ::testing::Test
 {
@@ -30,42 +30,47 @@ class ProgramEngineTest : public ::testing::Test
     virtual void SetUp()
     {
         vect.push_back(
-            *(new Data::PrintablePrimitiveTypeArray<int>((unsigned int)size1)));
+            *(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
         vect.push_back(
-            *(new Data::PrintablePrimitiveTypeArray<double>((unsigned int)size2)));
-        vect.push_back(*(new Data::PrintablePrimitiveTypeArray2D<double>(size1, size2)));
+            *(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
+        vect.push_back(*(new Data::PrimitiveTypeArray2D<double>(size1, size2)));
 
-        const_cast<Data::PrintablePrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray<double>&>(vect.at(1).get()))
+        ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
             .setDataAt(typeid(double), 25, value0);
-        const_cast<Data::PrintablePrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray<double>&>(vect.at(1).get()))
+        ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
             .setDataAt(typeid(double), 5, value2);
-        const_cast<Data::PrintablePrimitiveTypeArray<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray<double>&>(vect.at(1).get()))
+        ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
             .setDataAt(typeid(double), 6, value3);
-        const_cast<Data::PrintablePrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray2D<double>&>(vect.at(2).get()))
+        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
             .setDataAt(typeid(double), 0, value0);
-        const_cast<Data::PrintablePrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray2D<double>&>(vect.at(2).get()))
+        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
             .setDataAt(typeid(double), 1, value1);
-        const_cast<Data::PrintablePrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray2D<double>&>(vect.at(2).get()))
+        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
             .setDataAt(typeid(double), 24, value0);
-        const_cast<Data::PrintablePrimitiveTypeArray2D<double>&>(dynamic_cast<const Data::PrintablePrimitiveTypeArray2D<double>&>(vect.at(2).get()))
+        ((Data::PrimitiveTypeArray2D<double>&)vect.at(2).get())
             .setDataAt(typeid(double), 25, value0);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::MultByConstant<double>()));
+        //        set.add(*(new Instructions::LambdaInstruction<double>(
+        //            "$0 = $1 + $1;", [](double a) -> double { return a + a;
+        //            })));
+        set.add(*(new Instructions::MultByConstant<double>("$0 = $1 * $2;")));
         set.add(*(new Instructions::LambdaInstruction<const double[2],
-            const double[2]>(
+                                                      const double[2]>(
+            "$0 = $1[0] * $2[0] + $1[1] * $2[1];",
             [](const double a[2], const double b[2]) {
-              return a[0] * b[0] + a[1] * b[1];
+                return a[0] * b[0] + a[1] * b[1];
             })));
         set.add(*(new Instructions::LambdaInstruction<const double[2][2]>(
+            "$0 = 0.25*($1[0] + $1[1] + $1[2] + $1[3]);",
             [](const double a[2][2]) {
-              double res = 0.0;
-              for (auto h = 0; h < 2; h++) {
-                  for (auto w = 0; w < 2; w++) {
-                      res += a[h][w];
-                  }
-              }
-              return res / 4.0;
+                double res = 0.0;
+                for (auto h = 0; h < 2; h++) {
+                    for (auto w = 0; w < 2; w++) {
+                        res += a[h][w];
+                    }
+                }
+                return res / 4.0;
             })));
 
         e = new Environment(set, vect, 8, 5);
@@ -92,7 +97,7 @@ class ProgramEngineTest : public ::testing::Test
         p->getConstantHandler().setDataAt(
             typeid(Data::Constant), 0,
             {static_cast<int32_t>(
-                 value0)});         // Parameter is set to value1 (=2.3f) => 2
+                value0)});         // Parameter is set to value1 (=2.3f) => 2
         l2.setDestinationIndex(0); // Destination is register at index 0
 
         Program::Line& l3 = p->addNewLine();
@@ -102,7 +107,7 @@ class ProgramEngineTest : public ::testing::Test
         p->getConstantHandler().setDataAt(
             typeid(Data::Constant), 1,
             {static_cast<int32_t>(
-                 value1)});         // Parameter is set to value1 (=1.2f) => 1
+                value1)});         // Parameter is set to value1 (=1.2f) => 1
         l3.setDestinationIndex(0); // Destination is register at index 0
 
         Program::Line& l4 = p->addNewLine();
@@ -133,8 +138,8 @@ class ProgramEngineTest : public ::testing::Test
 
 TEST_F(ProgramEngineTest, next)
 {
-    CodeGen::ProgramGenerationEngine progExecEng("hasNext", *p);
-
+    CodeGen::ProgramGenerationEngine progExecEng("hasNext", *e);
+    progExecEng.setProgram(*p);
     // 4 lines minus one intron line
     ASSERT_TRUE(progExecEng.next())
         << "Program has three line so going to the next line after "
@@ -157,13 +162,13 @@ TEST_F(ProgramEngineTest, getCurrentLine)
     // Valid since the program has more than 0 line and program counter is
     // initialized to 0.
     ASSERT_EQ(&progExecEng.getCurrentLine(), &p->getLine(0))
-                    << "First line of the Program not accessible from the "
-                       "ProgramExecutionEngine.";
+        << "First line of the Program not accessible from the "
+           "ProgramExecutionEngine.";
     progExecEng.next();
     progExecEng.next(); // Skips the intron automatically
     ASSERT_EQ(&progExecEng.getCurrentLine(), &p->getLine(3))
-                    << "Second line of the Program not accessible from the "
-                       "ProgramExecutionEngine.";
+        << "Second line of the Program not accessible from the "
+           "ProgramExecutionEngine.";
 }
 
 TEST_F(ProgramEngineTest, getCurrentInstruction)
@@ -180,8 +185,8 @@ TEST_F(ProgramEngineTest, getCurrentInstruction)
     // Instructions::AddPrimitiveType<double>. Since the Line was initialized to
     // 0, its instruction index is 0.
     ASSERT_EQ(typeid(instr), typeid(Instructions::AddPrimitiveType<double>))
-                    << "The type of the instruction does not correspond to the Set of the "
-                       "Environment.";
+        << "The type of the instruction does not correspond to the Set of the "
+           "Environment.";
 }
 
 TEST_F(ProgramEngineTest, fetchOperands)
@@ -224,24 +229,24 @@ TEST_F(ProgramEngineTest, fetchCompositeOperands)
     // Operands are: index 0 and 1 registers register and index 5 and 6 elements
     // of an double array.
     ASSERT_NO_THROW(progExecEng.fetchCurrentOperands(operands))
-                    << "Fetching the operands of a valid Program from fixtures failed.";
+        << "Fetching the operands of a valid Program from fixtures failed.";
     // Check number of operands
     ASSERT_EQ(operands.size(), 2)
-                    << "Incorrect number of operands were fetched by previous call.";
+        << "Incorrect number of operands were fetched by previous call.";
     // Check operand value. Registers are 0.0, array element is value2 and
     // value3
     ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>()).get()[0],
               0.0)
-                    << "Value of fetched operand from register is incorrect.";
+        << "Value of fetched operand from register is incorrect.";
     ASSERT_EQ(((operands.at(0)).getSharedPointer<const double[]>()).get()[1],
               0.0)
-                    << "Value of fetched operand from register is incorrect.";
+        << "Value of fetched operand from register is incorrect.";
     ASSERT_EQ(((operands.at(1)).getSharedPointer<const double[]>()).get()[0],
               value2)
-                    << "Value of fetched operand from array is incorrect.";
+        << "Value of fetched operand from array is incorrect.";
     ASSERT_EQ(((operands.at(1)).getSharedPointer<const double[]>()).get()[1],
               value3)
-                    << "Value of fetched operand from array is incorrect.";
+        << "Value of fetched operand from array is incorrect.";
 }
 
 TEST_F(ProgramEngineTest, setProgram)
@@ -252,8 +257,8 @@ TEST_F(ProgramEngineTest, setProgram)
     Program::Program p2(*e);
 
     ASSERT_NO_THROW(progExecEng.setProgram(p2))
-                    << "Setting a new Program with a valid Environment for a "
-                       "ProgramExecutionEngine failed.";
+        << "Setting a new Program with a valid Environment for a "
+           "ProgramExecutionEngine failed.";
 
     // Create a new incompatible program
     std::vector<std::reference_wrapper<const Data::DataHandler>> otherVect;
@@ -263,8 +268,8 @@ TEST_F(ProgramEngineTest, setProgram)
     Program::Program p3(otherE);
 
     ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error)
-                    << "Setting a Program with an incompatible Environment should not be "
-                       "possible.";
+        << "Setting a Program with an incompatible Environment should not be "
+           "possible.";
 
     // Clean up
     delete &otherVect.at(0).get();
@@ -280,7 +285,7 @@ TEST_F(ProgramEngineTest, setDataSources)
     otherVect.push_back(*vect.at(1).get().clone());
 
     ASSERT_NO_THROW(progExecEng.setDataSources(otherVect))
-                    << "Setting a new valid set of Data Sources failed.";
+        << "Setting a new valid set of Data Sources failed.";
 
     // Clean up
     delete &otherVect.at(0).get();
@@ -297,25 +302,22 @@ TEST_F(ProgramEngineTest, setDataSources)
         *(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
     ASSERT_THROW(progExecEng.setDataSources(otherVect), std::runtime_error)
-                    << "Setting a new invalid set of Data Sources should fail.";
+        << "Setting a new invalid set of Data Sources should fail.";
 
     // Clean up
     delete &otherVect.at(0).get();
     delete &otherVect.at(1).get();
 }
 
-TEST_F(ProgramEngineTest, getOperandLocation){
+TEST_F(ProgramEngineTest, getOperandLocation)
+{
     CodeGen::ProgramGenerationEngine progExecEng("hasNext", *p);
-    ASSERT_EQ(progExecEng.getOperandLocation(0), 0) <<
-        "fail to retreive operand location in a 2D array";
+    ASSERT_EQ(progExecEng.getOperandLocation(0), 0)
+        << "fail to retreive operand location in a 2D array";
     progExecEng.next();
-    ASSERT_EQ(progExecEng.getOperandLocation(1), 25) <<
-        "fail to retreive operand location";
+    ASSERT_EQ(progExecEng.getOperandLocation(1), 25)
+        << "fail to retreive operand location";
 
-    ASSERT_THROW(progExecEng.getOperandLocation(4), std::range_error) <<
-        "Try to read an operand out of range";
-
-
+    ASSERT_THROW(progExecEng.getOperandLocation(4), std::range_error)
+        << "Try to read an operand out of range";
 }
-
-

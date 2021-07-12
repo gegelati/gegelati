@@ -19,7 +19,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     Instructions::Set set;
     Environment* e;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
-    Data::PrintablePrimitiveTypeArray<double> currentState{s1};
+    Data::PrimitiveTypeArray<double> currentState{s1};
     TPG::TPGGraph* tpg;
     File::TPGGraphDotImporter* dot = nullptr;
     CodeGen::TPGGenerationEngine* tpgGen;

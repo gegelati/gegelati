@@ -89,7 +89,7 @@ TEST(PrimitiveTypeArray2DTest, Clone)
     // Change data in the original to make sure the two dHandlers are decoupled.
     size_t hash = dClone->getHash();
     d.setDataAt(typeid(double), address + 1, doubleValue + 1.0);
-    (dynamic_cast<Data::PrimitiveTypeArray2D<double>*>(dClone))->invalidateCachedHash();
+    ((Data::PrimitiveTypeArray2D<double>*)dClone)->invalidateCachedHash();
     ASSERT_NE(dClone->getHash(), d.getHash())
         << "Hash of clone and original DataHandler should differ after "
            "modification of data in the original.";

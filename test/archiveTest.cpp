@@ -101,8 +101,8 @@ TEST_F(ArchiveTest, CombineHash)
         << "Combination of several DataHandler hash failed.";
 
     // change data in one dataHandler
-    auto d =
-        dynamic_cast<const Data::PrimitiveTypeArray<int>&>(vect.at(1).get());
+    Data::PrimitiveTypeArray<int>& d =
+        (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
     d.setDataAt(typeid(int), 2, 1337);
 
     // Compare hashes.
