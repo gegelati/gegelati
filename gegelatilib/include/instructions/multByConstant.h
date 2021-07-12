@@ -110,7 +110,8 @@ namespace Instructions {
     template <class T>
     void MultByConstant<T>::setUpOperand()
     {
-        setUpOperand();
+        this->operandTypes.push_back(typeid(T));
+        this->operandTypes.push_back(typeid(Data::Constant));
     }
 } // namespace Instructions
 #endif // INST_MULT_BY_CONST_H

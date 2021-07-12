@@ -48,7 +48,6 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine()
     const Instructions::Instruction& instruction =
         this->getCurrentInstruction();
 
-
     if (instruction.isPrintable()) {
         // std::map<operand(uint64t ?), uint_64t> initOperand // = (operand,
         // chiffre après "op")
@@ -151,16 +150,14 @@ void CodeGen::ProgramGenerationEngine::initGlobalVar()
     for (int i = 1; i < this->dataScsConstsAndRegs.size(); ++i) {
 
         const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
-        auto printableDataSource =
-            dynamic_cast<const Data::DataHandler*>(&d);
-
-        if (printableDataSource == nullptr) {
-            throw std::runtime_error(
-                "The data source cannot be"
-                " converted to a pointer on a PrintableDataHandler during the "
-                "creation of C the global variables.");
+        auto printer = dataPrinters.find(d.getId());
+        if (printer == dataPrinters.end()) {
+            throw std::runtime_error("Can't find the DataHandlerPrinter in the "
+                                     "map for the DataHandler with the Id : " +
+                                     std::to_string(d.getId()));
         }
-        std::string type;// = printableDataSource->getTemplatedType();
+
+        std::string type = printer->second.getTemplatedType();
         fileC << "extern " << type << "* in" << i << ";" << std::endl;
     }
 }
@@ -196,10 +193,10 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
     const Program::Line& line = getCurrentLine();
     const Instructions::Instruction& instruction = getCurrentInstruction();
     if (instruction.isPrintable() == false) {
-        throw std::runtime_error("The pointer on the instruction cannot be"
-                                 " converted to a pointer on a printable"
-                                 "instruction during the initialization of an "
-                                 "operand of an instruction.");
+        throw std::runtime_error("The instruction is not printable, "
+                                 "stop the initialization of the "
+                                 "operands of the instruction n° " +
+                                 std::to_string(line.getInstructionIndex()));
     }
     for (int i = 0; i < instruction.getNbOperands(); ++i) {
         uint64_t sourceIdx = line.getOperand(i).first;
@@ -208,50 +205,67 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
         opIdx = this->getOperandLocation(i);
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             sourceIdx); // Throws std::out_of_range
-//        Data::DataHandlerPrinter<dataSource.getTemplateType()>
+        auto printerPair = dataPrinters.find(dataSource.getId());
+        if (printerPair == dataPrinters.end()) {
+            throw std::runtime_error("Can't find the DataHandlerPrinter in the "
+                                     "map for the DataHandler with the Id : " +
+                                     std::to_string(dataSource.getId()));
+        }
+        const Data::DataHandlerPrinter& printer = printerPair->second;
         fileC << "\t\t" << instruction.getPrimitiveType(i) << " "
-              << nameOperandVariable << i ;
-        std::vector<uint64_t> vectIdx = {1,2};
-//            printableDataSource->getDataIndexes(operandType, opIdx);
+              << nameOperandVariable << i;
 
-        size_t size = vectIdx.size();
-        if (size <= 0) {
-            throw std::runtime_error("Vector of indexes is negative or equal "
-                                     "to 0, can't generate the "
-                                     "declaration of the variable\n");
-        }
-        if (size == 1) {
-            fileC << " = ";
-            printNameSourceData(i);
-            fileC << "[" << vectIdx.at(0) << "];\n";
-        }
-        else {
-            fileC << "[] = {";
-            for (int j = 0; j < size; ++j) {
-                printNameSourceData(i);
-                fileC << "[" << vectIdx.at(j) << "]";
-                if (j < (size - 1)) {
-                    fileC << ",";
-                }
-            }
-            fileC << "};\n";
-        }
+        fileC << printer.printDataAt(operandType, opIdx,
+                                             getNameSourceData(sourceIdx))
+              << std::endl;
+        /*         std::vector<uint64_t> vectIdx = {1, 2};
+                     printableDataSource->getDataIndexes(operandType, opIdx);
+
+                 size_t size = vectIdx.size();
+                 if (size <= 0) {
+                     throw std::runtime_error("Vector of indexes is negative or
+                     equal "
+                                              "to 0, can't generate the "
+                                              "declaration of the variable\n");
+                 }
+                 if (size == 1) {
+                     fileC << " = ";
+                     printNameSourceData(i);
+                     fileC << "[" << vectIdx.at(0) << "];\n";
+                 } else {
+                     fileC << "[] = {";
+                     for (int j = 0; j < size; ++j) {
+                         printNameSourceData(i);
+                         fileC << "[" << vectIdx.at(j) << "]";
+                         if (j < (size - 1)) {
+                             fileC << ",";
+                         }
+                     }
+                     fileC << "};\n";
+                 }*/
     }
 }
 
-void CodeGen::ProgramGenerationEngine::printInitOperand(
-    const std::vector<uint64_t>& vectIdx)
-{
-}
-
-void CodeGen::ProgramGenerationEngine::printNameSourceData(const uint64_t idx)
+std::string CodeGen::ProgramGenerationEngine::getNameSourceData(
+    const uint64_t& idx)
 {
     uint64_t dataSourceIdx = getCurrentLine().getOperand(idx).first;
+    std::string nameDataSource;
     if (dataSourceIdx == 0) {
-        fileC << nameRegVariable;
+        nameDataSource = nameRegVariable;
     }
     else {
-        fileC << nameDataVariable << dataSourceIdx;
+        nameDataSource = nameDataVariable + std::to_string(dataSourceIdx);
+    }
+    return nameDataSource;
+}
+
+void CodeGen::ProgramGenerationEngine::generateDataPrinterMap()
+{
+    for (auto& dataScsConstsAndReg : dataScsConstsAndRegs) {
+        const Data::DataHandler& d = dataScsConstsAndReg.get();
+        dataPrinters.insert(std::pair<size_t, Data::DataHandlerPrinter>(
+            d.getId(), Data::DataHandlerPrinter(&d)));
     }
 }
 

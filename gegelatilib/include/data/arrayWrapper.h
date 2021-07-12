@@ -158,12 +158,7 @@ namespace Data {
         virtual ~ArrayWrapper() = default;
 
         /// Default copy constructor.
-        ArrayWrapper(const ArrayWrapper<T>& other)
-            : DataHandler(other), nbElements{other.nbElements},
-              containerPtr{other.containerPtr}
-        {
-            // std::cout << "copy constructor Array wrapper "<< std::endl;
-        } // = default;
+        ArrayWrapper(const ArrayWrapper<T>& other) = default;
 
         /**
          * \brief Return a PrimitiveTypeArray<T> where all data of the

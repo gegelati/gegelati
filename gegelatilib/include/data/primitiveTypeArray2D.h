@@ -149,7 +149,7 @@ namespace Data {
     template <typename T>
     inline PrimitiveTypeArray2D<T>::PrimitiveTypeArray2D(
         const PrimitiveTypeArray2D<T>& other)
-        : DataHandler{other}, Array2DWrapper<T>(other), data(other.data)
+        : Array2DWrapper<T>(other), data(other.data)
     {
         // Set the pointer to the right data
         this->setPointer(&(this->data));
@@ -158,7 +158,7 @@ namespace Data {
     template <class T>
     PrimitiveTypeArray2D<T>::PrimitiveTypeArray2D(
         const Array2DWrapper<T>& other)
-        : DataHandler{other}, Array2DWrapper<T>(other), data(this->nbElements)
+        : Array2DWrapper<T>(other), data(this->nbElements)
     {
         if (this->containerPtr != NULL) {
             // Copy the data from the given ArrayWrapper

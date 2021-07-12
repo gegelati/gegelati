@@ -37,10 +37,10 @@
 
 #ifndef GEGELATI_PROGRAMGENERATIONENGINE_H
 #define GEGELATI_PROGRAMGENERATIONENGINE_H
-#include "instructions/instruction.h"
-#include "data/primitiveTypeArray.h"
-#include "program/programEngine.h"
 #include "data/dataHandlerPrinter.h"
+#include "data/primitiveTypeArray.h"
+#include "instructions/instruction.h"
+#include "program/programEngine.h"
 //#include <bits/fcntl-linux.h>
 #include <fstream>
 
@@ -83,6 +83,15 @@ namespace CodeGen {
         std::ofstream fileH;
 
         /**
+         * \brief Map associating a DataHandlerPrinter to the ID of its
+         * DataHandler
+         *
+         * This map is filled in the generateDataPrinterMap method.
+         */
+
+        std::map<size_t, Data::DataHandlerPrinter> dataPrinters;
+
+        /**
          * \brief Set global variables in the file holding the programs.
          *
          * Set type of the global variable accordingly to the type of the data
@@ -116,6 +125,7 @@ namespace CodeGen {
                                 const std::string& path = "./")
             : ProgramEngine(env)
         {
+            generateDataPrinterMap();
             openFile(filename, path);
         }
         /**
@@ -142,7 +152,9 @@ namespace CodeGen {
                                 const std::string& path = "./")
             : ProgramEngine(p.getEnvironment())
         {
+            generateDataPrinterMap();
             openFile(filename, path);
+            setProgram(p);
         }
 
         /**
@@ -157,7 +169,6 @@ namespace CodeGen {
             fileC.close();
             fileH.close();
         }
-
 
         /**
          * \brief generate the current line of the program
@@ -205,22 +216,48 @@ namespace CodeGen {
         std::string completeFormat(
             const Instructions::Instruction& instruction) const;
 
-      private:
+        // private:
         /**
-         * \brief function used to open the file that as to be generated.
+         * \brief Function used to open the file that as to be generated.
          *
          * This is function is called in both constructor of the class. It open
          * the source file and the header file. It also add the include guards
-         * in the header
+         * in the header.
          *
-         * \param[in] filename const reference to the name of the file
+         * \param[in] filename const reference to the name of the file.
          *
-         * \param[in] path const reference to the path of the file
+         * \param[in] path const reference to the path of the file.
          */
         void openFile(const std::string& filename, const std::string& path);
+
+        /**
+         * \brief Function called to generate the initialization of all operand
+         * of an instruction.
+         *
+         * This function prints in the C source file the declaration and the
+         * initialization for each operand of the current line.
+         */
         void initOperandCurrentLine();
-        void printInitOperand(const std::vector<uint64_t>& vectIdx);
-        void printNameSourceData(const uint64_t idx);
+
+        /**
+         * \brief Method returning the name of the data source in the file
+         * generated.
+         * //todo managing constant
+         *
+         * \param[in] idx const uint64_t reference to the index of the data
+         * source in Environment of the Program.
+         * @return the name of the variable to use to access the data source in
+         * the generated program
+         */
+        std::string getNameSourceData(const uint64_t& idx);
+
+        /**
+         * \brief method used to fill the map of DataHandlePrinter.
+         *
+         * This function iterate through the data sources of the Environment
+         * and associates the id of a DataHandler to its DataHandlerPrinter.
+         */
+        void generateDataPrinterMap();
     };
 
 } // namespace CodeGen
