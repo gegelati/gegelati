@@ -53,9 +53,10 @@
 #define DEMANGLE_TYPEID_NAME(name) name
 #elif __GNUC__
 #include <cxxabi.h>
+std::string demangle(const char* name);
 /// Macro for getting type name in human readable format.
 #define DEMANGLE_TYPEID_NAME(name)                                             \
-    abi::__cxa_demangle(name, nullptr, nullptr, nullptr)
+    demangle(name).c_str()
 #else
 #error Unsupported compiler (yet): Check need for name demangling of typeid.name().
 #endif
