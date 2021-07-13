@@ -213,6 +213,9 @@ namespace Data {
 
         /// Inherited from DataHandler
         virtual const std::type_info& getTemplateType() const override;
+
+        /// Inherited from DataHandler
+        virtual std::vector<size_t> getDimensionsSize() const override;
     };
 
     template <class T>
@@ -425,6 +428,12 @@ namespace Data {
     {
         const std::type_info& a = typeid(T);
         return a;
+    }
+    template <class T>
+    std::vector<size_t> ArrayWrapper<T>::getDimensionsSize() const
+    {
+        std::vector<size_t > sizes = {nbElements};
+        return sizes;
     }
 
 } // namespace Data

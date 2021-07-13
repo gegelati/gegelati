@@ -39,6 +39,7 @@
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
+const std::string CodeGen::ProgramGenerationEngine::nameConstantVariable("cst");
 const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
 const std::string CodeGen::ProgramGenerationEngine::nameOperandVariable("op");
 
@@ -78,6 +79,18 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
         fileC << ", 0";
     }
     fileC << "};" << std::endl;
+    if (program->getEnvironment().getNbConstant() > 0) {
+        fileC << "\tdouble " << nameConstantVariable << "["
+              << program->getEnvironment().getNbConstant() << "] = {";
+        for (int i = 0; i < program->getEnvironment().getNbConstant(); ++i) {
+            fileC << (double)(program->getConstantAt(i));
+            if (i < program->getEnvironment().getNbConstant() - 1) {
+                fileC << ", ";
+            }
+        }
+        fileC << "};" << std::endl;
+    }
+
     this->programCounter = 0;
     // todo embarqué dans une fonction globale avec une operateur() ? avec un
     //  objet foncteur
@@ -207,55 +220,37 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
             sourceIdx); // Throws std::out_of_range
         auto printerPair = dataPrinters.find(dataSource.getId());
         if (printerPair == dataPrinters.end()) {
-            throw std::runtime_error("Can't find the DataHandlerPrinter in the "
-                                     "map for the DataHandler with the Id : " +
-                                     std::to_string(dataSource.getId()));
+            printerPair = dataPrinters.begin()++;
+//            throw std::runtime_error("Can't find the DataHandlerPrinter in the "
+//                                     "map for the DataHandler with the Id : " +
+//                                     std::to_string(dataSource.getId()));
         }
         const Data::DataHandlerPrinter& printer = printerPair->second;
         fileC << "\t\t" << instruction.getPrimitiveType(i) << " "
               << nameOperandVariable << i;
 
         fileC << printer.printDataAt(operandType, opIdx,
-                                             getNameSourceData(sourceIdx))
+                                     getNameSourceData(sourceIdx))
               << std::endl;
-        /*         std::vector<uint64_t> vectIdx = {1, 2};
-                     printableDataSource->getDataIndexes(operandType, opIdx);
-
-                 size_t size = vectIdx.size();
-                 if (size <= 0) {
-                     throw std::runtime_error("Vector of indexes is negative or
-                     equal "
-                                              "to 0, can't generate the "
-                                              "declaration of the variable\n");
-                 }
-                 if (size == 1) {
-                     fileC << " = ";
-                     printNameSourceData(i);
-                     fileC << "[" << vectIdx.at(0) << "];\n";
-                 } else {
-                     fileC << "[] = {";
-                     for (int j = 0; j < size; ++j) {
-                         printNameSourceData(i);
-                         fileC << "[" << vectIdx.at(j) << "]";
-                         if (j < (size - 1)) {
-                             fileC << ",";
-                         }
-                     }
-                     fileC << "};\n";
-                 }*/
     }
 }
 
 std::string CodeGen::ProgramGenerationEngine::getNameSourceData(
     const uint64_t& idx)
 {
-    uint64_t dataSourceIdx = getCurrentLine().getOperand(idx).first;
     std::string nameDataSource;
-    if (dataSourceIdx == 0) {
+    if (idx == 0) {
         nameDataSource = nameRegVariable;
     }
+    else if (this->program->getEnvironment().getNbConstant() > 0 && idx == 1) {
+        nameDataSource = nameConstantVariable;
+    }
     else {
-        nameDataSource = nameDataVariable + std::to_string(dataSourceIdx);
+        uint64_t varNumber = idx;
+        if (this->program->getEnvironment().getNbConstant() > 0) {
+            varNumber--;
+        }
+        nameDataSource = nameDataVariable + std::to_string(varNumber);
     }
     return nameDataSource;
 }
@@ -267,6 +262,18 @@ void CodeGen::ProgramGenerationEngine::generateDataPrinterMap()
         dataPrinters.insert(std::pair<size_t, Data::DataHandlerPrinter>(
             d.getId(), Data::DataHandlerPrinter(&d)));
     }
+}
+void CodeGen::ProgramGenerationEngine::initInterVariable(
+    const std::string& varNam, const std::vector<double>& data)
+{
+    fileC << "\tdouble " << varNam << "[" << data.size() << "] = {";
+    for (int i = 0; i < data.size(); ++i) {
+        fileC << data.at(i);
+        if (i < data.size() - 1) {
+            fileC << ", ";
+        }
+    }
+    fileC << "};" << std::endl;
 }
 
 #endif // CODE_GENERATION

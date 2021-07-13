@@ -71,10 +71,13 @@ namespace CodeGen {
          */
         static const std::string nameDataVariable;
 
-        /// names of the registers in the TPG's programs.
+        /// name of the registers in the TPG's programs.
         static const std::string nameRegVariable;
 
-        /// names of the temporary operand used in the TPG's programs.
+        /// name of the array of constants in the TPG's programs.
+        static const std::string nameConstantVariable;
+
+        /// name of the temporary operand used in the TPG's programs.
         static const std::string nameOperandVariable;
 
         /// The file in which programs will be added.
@@ -90,16 +93,6 @@ namespace CodeGen {
          */
 
         std::map<size_t, Data::DataHandlerPrinter> dataPrinters;
-
-        /**
-         * \brief Set global variables in the file holding the programs.
-         *
-         * Set type of the global variable accordingly to the type of the data
-         * sources of the environment.
-         *
-         */
-
-        void initGlobalVar();
 
       public:
         /**
@@ -150,11 +143,10 @@ namespace CodeGen {
         ProgramGenerationEngine(const std::string& filename,
                                 const Program::Program& p,
                                 const std::string& path = "./")
-            : ProgramEngine(p.getEnvironment())
+            : ProgramEngine(p)
         {
             generateDataPrinterMap();
             openFile(filename, path);
-            setProgram(p);
         }
 
         /**
@@ -201,6 +193,16 @@ namespace CodeGen {
                              const bool ignoreException = false);
 
       protected:
+
+        /**
+         * \brief Set global variables in the file holding the programs.
+         *
+         * Set type of the global variable accordingly to the type of the data
+         * sources of the environment.
+         *
+         */
+        void initGlobalVar();
+
         /**
          * \brief create the line of C code that equals to instruction in
          * parameter
@@ -258,6 +260,8 @@ namespace CodeGen {
          * and associates the id of a DataHandler to its DataHandlerPrinter.
          */
         void generateDataPrinterMap();
+
+        void initInterVariable(const std::string& varNam, const std::vector<double>& data);
     };
 
 } // namespace CodeGen

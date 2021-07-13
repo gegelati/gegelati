@@ -266,9 +266,23 @@ namespace Data {
          * For example, in case of a Data::PrimitiveTypeArray<double> this
          * function return typeid(double).
          *
-         * @return std::type_info of the template
+         * \return std::type_info of the template
          */
         virtual const std::type_info& getTemplateType() const = 0;
+
+        /**
+         * \brief Give the size of each dimension of the DataHandler
+         *
+         * Function that return a std::vector<size_t> that contain the size of
+         * each dimension of an array. For a 1D array the vector contains the
+         * size of the array, for a 2D array the vector holds the height and the
+         * width of the DataHandler.
+         *
+         * \return a std::vector containing the size of each dimension of a
+         * DataHandler
+         */
+
+        virtual std::vector<size_t> getDimensionsSize() const = 0;
     };
 } // namespace Data
 
