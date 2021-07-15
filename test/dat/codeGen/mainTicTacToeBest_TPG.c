@@ -2,8 +2,9 @@
 #include <stdio.h>
 double* in1;
 
-int main(){
-    in1 = (double*)(malloc(9* sizeof(double)));
+int main()
+{
+    in1 = (double*)(malloc(9 * sizeof(double)));
     in1[0] = -1;
     in1[1] = -1;
     in1[2] = -1;
@@ -18,10 +19,9 @@ int main(){
     reset();
     int action2 = executeFromVertex(root);
     printf("action : %d\n", action2);
-    if(action2 != action){
+    if (action2 != action) {
         return -1;
     }
     free(in1);
     return action;
 }
-

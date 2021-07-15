@@ -39,8 +39,8 @@
 
 #include <tuple>
 
-#include "data/dataHandler.h"
 #include "data/array2DWrapper.h"
+#include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 
 namespace Data {

@@ -326,7 +326,7 @@ namespace Data {
     template <class T>
     std::vector<size_t> Array2DWrapper<T>::getDimensionsSize() const
     {
-        std::vector<size_t > sizes = {height, width};
+        std::vector<size_t> sizes = {height, width};
         return sizes;
     }
 } // namespace Data

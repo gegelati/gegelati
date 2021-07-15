@@ -68,8 +68,8 @@ namespace TPG {
         /**
          * \brief constructor for the abstract engine
          *
-         * \param[in] tpg const reference to the graph whose content will be used to
-         * fill the maps of IDs  (vertex and program).
+         * \param[in] tpg const reference to the graph whose content will be
+         * used to fill the maps of IDs  (vertex and program).
          */
 
         TPGAbstractEngine(const TPG::TPGGraph& tpg) : tpg{tpg} {};

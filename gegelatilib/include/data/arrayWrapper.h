@@ -420,7 +420,8 @@ namespace Data {
         return this->cachedHash;
     }
 
-    template <class T> const std::type_info& ArrayWrapper<T>::getTemplateType() const
+    template <class T>
+    const std::type_info& ArrayWrapper<T>::getTemplateType() const
     {
         const std::type_info& a = typeid(T);
         return a;
@@ -428,7 +429,7 @@ namespace Data {
     template <class T>
     std::vector<size_t> ArrayWrapper<T>::getDimensionsSize() const
     {
-        std::vector<size_t > sizes = {nbElements};
+        std::vector<size_t> sizes = {nbElements};
         return sizes;
     }
 

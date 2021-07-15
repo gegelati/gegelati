@@ -130,7 +130,8 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngine::
     while (typeid(*currentVertex) == typeid(TPG::TPGTeam)) {
         // Get the next edge
 #ifdef DEBUG
-        std::cout << "nombre d'edges de sorties : " << currentVertex->getOutgoingEdges().size() << std::endl;
+        std::cout << "nombre d'edges de sorties : "
+                  << currentVertex->getOutgoingEdges().size() << std::endl;
 #endif
         const TPGEdge& edge =
             this->evaluateTeam(*(TPGTeam*)currentVertex, visitedVertices);

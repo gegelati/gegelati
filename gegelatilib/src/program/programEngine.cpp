@@ -51,7 +51,7 @@ void Program::ProgramEngine::setProgram(const Program& prog)
 }
 
 const std::vector<std::reference_wrapper<const Data::DataHandler>>& Program::
-ProgramEngine::getDataSources() const
+    ProgramEngine::getDataSources() const
 {
     return this->dataSources;
 }
@@ -72,8 +72,8 @@ const Program::Line& Program::ProgramEngine::getCurrentLine() const
     return this->program->getLine(this->programCounter);
 }
 
-const Instructions::Instruction& Program::ProgramEngine::
-getCurrentInstruction() const
+const Instructions::Instruction& Program::ProgramEngine::getCurrentInstruction()
+    const
 {
     const Line& currentLine =
         this->getCurrentLine(); // throw std::out_of_range if the program
@@ -94,7 +94,7 @@ const void Program::ProgramEngine::fetchCurrentOperands(
     // Get as many operands as required by the instruction.
     for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
-        line.getOperand(i).first); // Throws std::out_of_range
+            line.getOperand(i).first); // Throws std::out_of_range
         const uint64_t operandLocation = getOperandLocation(i);
         const std::type_info& operandType =
             instruction.getOperandTypes().at(i).get();

@@ -1,7 +1,8 @@
 #include "tpg/tpgAbstractEngine.h"
 
 bool TPG::TPGAbstractEngine::findProgramID(const Program::Program& prog,
-                                             uint64_t& id){
+                                           uint64_t& id)
+{
     auto iter = this->programID.find(&prog);
     if (iter == this->programID.end()) {
         // The vertex is not known yet
@@ -17,7 +18,8 @@ bool TPG::TPGAbstractEngine::findProgramID(const Program::Program& prog,
     }
 }
 
-uint64_t TPG::TPGAbstractEngine::findVertexID(const TPG::TPGVertex& vertex){
+uint64_t TPG::TPGAbstractEngine::findVertexID(const TPG::TPGVertex& vertex)
+{
     auto iter = this->vertexID.find(&vertex);
     if (iter == this->vertexID.end()) {
         // The vertex is not known yet
@@ -30,6 +32,5 @@ uint64_t TPG::TPGAbstractEngine::findVertexID(const TPG::TPGVertex& vertex){
         return iter->second;
     }
 }
-
 
 #include "tpg/tpgAbstractEngine.h"

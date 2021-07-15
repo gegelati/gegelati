@@ -107,8 +107,7 @@ namespace Instructions {
                (double)constantValue;
     }
 
-    template <class T>
-    void MultByConstant<T>::setUpOperand()
+    template <class T> void MultByConstant<T>::setUpOperand()
     {
         this->operandTypes.push_back(typeid(T));
         this->operandTypes.push_back(typeid(Data::Constant));

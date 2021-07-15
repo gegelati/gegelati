@@ -41,10 +41,12 @@
 
 using namespace Instructions;
 
-Instruction::Instruction() : operandTypes()
+Instruction::Instruction()
+    : operandTypes()
 #ifdef CODE_GENERATION
-      , format()
-#endif //CODE_GENERATION
+      ,
+      format()
+#endif // CODE_GENERATION
 {
 }
 

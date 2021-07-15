@@ -1,10 +1,11 @@
+#include "TwoTeamsOneCycle.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "TwoTeamsOneCycle.h"
 double* in1;
 
-int main(){
-    in1 = (double*)(malloc(8* sizeof(double)));
+int main()
+{
+    in1 = (double*)(malloc(8 * sizeof(double)));
     in1[0] = 4.5;
     in1[1] = 6.8;
     in1[2] = 9.4;

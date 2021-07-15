@@ -49,9 +49,8 @@ namespace Data {
      * also provide the following composite data type:
      * - T[n]: with $n <=$ to the size of the PrimitiveTypeArray.
      */
-    template <class T>
-    class PrimitiveTypeArray : public ArrayWrapper<T>
-                               //,public virtual DataHandler
+    template <class T> class PrimitiveTypeArray : public ArrayWrapper<T>
+    //,public virtual DataHandler
     {
       protected:
         /**
@@ -141,8 +140,7 @@ namespace Data {
 
     template <class T>
     PrimitiveTypeArray<T>::PrimitiveTypeArray(const ArrayWrapper<T>& other)
-        :ArrayWrapper<T>(other),
-          data(this->nbElements)
+        : ArrayWrapper<T>(other), data(this->nbElements)
     {
         if (this->containerPtr != NULL) {
             // Copy the data from the given ArrayWrapper

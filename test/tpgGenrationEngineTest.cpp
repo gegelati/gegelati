@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 #include <stddef.h>
 
-#include "instructions/lambdaInstruction.h"
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
+#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgGraph.h"
@@ -77,11 +77,12 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
     ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine("constructor", *tpg,
-                                                           "../src", 0), std::runtime_error)
+                                                           "../src", 0),
+                 std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0";
 
-    //ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+    // ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 }
 
 TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
@@ -108,7 +109,8 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     // call the destructor to close the file
     delete tpgGen;
 
-    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneLeafNoInstruction";
+    cmdCompile =
+        "dir=" BIN_DIR_PATH " make -C " + path + " OneLeafNoInstruction";
     std::cout << system(cmdCompile.c_str()) << std::endl;
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Compilation failed in OneLeafNoInstruction";
@@ -506,7 +508,8 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " ThreeTeamsOneCycleThreeLeaves";
+    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path +
+                 " ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(WEXITSTATUS(system("./ThreeTeamsOneCycleThreeLeaves")), 0)

@@ -220,11 +220,13 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
             sourceIdx); // Throws std::out_of_range
         auto printerPair = dataPrinters.find(dataSource.getId());
         if (printerPair == dataPrinters.end()) {
-            //todo gestion constantes plus propres nécessaire
+            // todo gestion constantes plus propres nécessaire
             printerPair = dataPrinters.begin()++;
-//            throw std::runtime_error("Can't find the DataHandlerPrinter in the "
-//                                     "map for the DataHandler with the Id : " +
-//                                     std::to_string(dataSource.getId()));
+            //            throw std::runtime_error("Can't find the
+            //            DataHandlerPrinter in the "
+            //                                     "map for the DataHandler with
+            //                                     the Id : " +
+            //                                     std::to_string(dataSource.getId()));
         }
         const Data::DataHandlerPrinter& printer = printerPair->second;
         fileC << "\t\t" << instruction.getPrimitiveType(i) << " "

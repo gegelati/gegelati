@@ -92,7 +92,8 @@ std::string Data::DataHandlerPrinter::print2DArray(
     size_t addressSrc = (addressH * width) + addressW;
     size_t idxSrc = 0;
     for (size_t idxHeight = 0; idxHeight < arrayHeight; idxHeight++) {
-//        var = nameVar + "[" + std::to_string(addressH + idxHeight) + "]";
+        //        var = nameVar + "[" + std::to_string(addressH + idxHeight) +
+        //        "]";
         idxSrc = addressSrc + idxHeight * width;
         array += print1DArray(idxSrc, arrayWidth, nameVar);
 

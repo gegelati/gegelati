@@ -41,8 +41,7 @@
 size_t Data::DataHandler::count = 0;
 
 Data::DataHandler::DataHandler()
-    : id{count++}, cachedHash(),
-      invalidCachedHash(true){};
+    : id{count++}, cachedHash(), invalidCachedHash(true){};
 
 size_t Data::DataHandler::getId() const
 {

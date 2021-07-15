@@ -1,10 +1,11 @@
+#include "TwoLeaves.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "TwoLeaves.h"
 double* in1;
 
-int main(){
-    in1 = (double*)(malloc(4* sizeof(double)));
+int main()
+{
+    in1 = (double*)(malloc(4 * sizeof(double)));
     in1[0] = 0;
     in1[1] = 1.5;
     in1[2] = 2.4;

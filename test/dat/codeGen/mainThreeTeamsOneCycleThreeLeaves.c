@@ -1,10 +1,11 @@
+#include "OneLeaf.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "OneLeaf.h"
 double* in1;
 
-int main(){
-    in1 = (double*)(malloc(8* sizeof(double)));
+int main()
+{
+    in1 = (double*)(malloc(8 * sizeof(double)));
     in1[0] = 4.5;
     in1[1] = 2.8;
     in1[2] = 3.4;

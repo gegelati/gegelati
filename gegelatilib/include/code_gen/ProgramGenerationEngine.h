@@ -193,7 +193,6 @@ namespace CodeGen {
                              const bool ignoreException = false);
 
       protected:
-
         /**
          * \brief Set global variables in the file holding the programs.
          *
@@ -261,7 +260,8 @@ namespace CodeGen {
          */
         void generateDataPrinterMap();
 
-        void initInterVariable(const std::string& varNam, const std::vector<double>& data);
+        void initInterVariable(const std::string& varNam,
+                               const std::vector<double>& data);
     };
 
 } // namespace CodeGen

@@ -7,10 +7,10 @@
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
+#include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgVertex.h"
-#include "instructions/lambdaInstruction.h"
 #include <iostream>
 
 class StickGameGenerationBestDotTest : public ::testing::Test
@@ -26,7 +26,8 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     TPG::TPGGraph* tpg;
     CodeGen::TPGGenerationEngine* tpgGen;
     File::TPGGraphDotImporter* dot = nullptr;
-    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH "codeGen"};
+    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
+                           "codeGen"};
 
     virtual void SetUp()
     {
@@ -55,8 +56,8 @@ class StickGameGenerationBestDotTest : public ::testing::Test
             "$0 = (double)($1) - (double)($2);", minus)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = $1 + $2;", add)));
-        set.add(*(new Instructions::LambdaInstruction<int>(
-            "$0 = (double)($1);", cast)));
+        set.add(*(new Instructions::LambdaInstruction<int>("$0 = (double)($1);",
+                                                           cast)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             "$0 = (($1) < ($2)) ? ($2) : ($1); ", max)));
         set.add(*(new Instructions::LambdaInstruction<double>(
@@ -104,6 +105,5 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         << "Fail to compile generated files to test stick game";
     result = WEXITSTATUS(system("./StickGameBest_TPG"));
 
-    ASSERT_EQ(result, 2)
-        << "Error inference of Stick Game has changed";
+    ASSERT_EQ(result, 2) << "Error inference of Stick Game has changed";
 }

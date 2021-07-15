@@ -23,7 +23,8 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     TPG::TPGGraph* tpg;
     File::TPGGraphDotImporter* dot = nullptr;
     CodeGen::TPGGenerationEngine* tpgGen;
-    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH "codeGen"};
+    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
+                           "codeGen"};
 
     virtual void SetUp()
     {
@@ -112,5 +113,4 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
         << "Fail to compile generated files to test TicTacToe";
     ASSERT_EQ(WEXITSTATUS(system("./TicTacToeBest_TPG")), 7)
         << "Error inference of TicTacToe has changed";
-
 }
