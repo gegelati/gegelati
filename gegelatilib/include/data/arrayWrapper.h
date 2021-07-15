@@ -49,7 +49,6 @@
 #include "dataHandler.h"
 #include "demangle.h"
 
-
 namespace Data {
 
     /**
