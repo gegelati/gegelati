@@ -1,8 +1,8 @@
-#ifndef GEGELATI_TPGABSTRACTENGINE_H
-#define GEGELATI_TPGABSTRACTENGINE_H
+#ifndef TPGABSTRACTENGINE_H
+#define TPGABSTRACTENGINE_H
 
 #include "program/program.h"
-#include "tpgGraph.h"
+#include "tpg/tpgGraph.h"
 
 namespace TPG {
     /**
@@ -109,4 +109,4 @@ namespace TPG {
         uint64_t findVertexID(const TPG::TPGVertex& vertex);
     };
 } // namespace TPG
-#endif // GEGELATI_TPGABSTRACTENGINE_H
+#endif // TPGABSTRACTENGINE_H

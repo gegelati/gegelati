@@ -42,7 +42,7 @@
 #include "archive.h"
 #include "program/programExecutionEngine.h"
 
-#include "tpgGraph.h"
+#include "tpg/tpgGraph.h"
 
 namespace TPG {
     /**

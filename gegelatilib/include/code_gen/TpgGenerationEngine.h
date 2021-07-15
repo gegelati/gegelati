@@ -35,9 +35,9 @@
 
 #ifdef CODE_GENERATION
 
-#ifndef GEGELATI_TPGGENERATIONENGINE_H
-#define GEGELATI_TPGGENERATIONENGINE_H
-#include "ProgramGenerationEngine.h"
+#ifndef TPGGENERATIONENGINE_H
+#define TPGGENERATIONENGINE_H
+#include "code_gen/ProgramGenerationEngine.h"
 #include "tpg/tpgAbstractEngine.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
@@ -226,6 +226,6 @@ namespace CodeGen {
     };
 } // namespace CodeGen
 
-#endif // GEGELATI_TPGGENERATIONENGINE_H
+#endif // TPGGENERATIONENGINE_H
 
 #endif // CODE_GENERATION

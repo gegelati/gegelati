@@ -45,8 +45,8 @@
 #include <typeinfo>
 
 #include "data/constant.h"
+#include "data/dataHandler.h"
 #include "data/hash.h"
-#include "dataHandler.h"
 
 #ifdef _MSC_VER
 /// Macro for getting type name in human readable format.

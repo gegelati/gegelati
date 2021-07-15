@@ -35,8 +35,8 @@
 
 #ifdef CODE_GENERATION
 
-#ifndef GEGELATI_PROGRAMGENERATIONENGINE_H
-#define GEGELATI_PROGRAMGENERATIONENGINE_H
+#ifndef PROGRAMGENERATIONENGINE_H
+#define PROGRAMGENERATIONENGINE_H
 #include "data/dataHandlerPrinter.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/instruction.h"
@@ -266,6 +266,6 @@ namespace CodeGen {
 
 } // namespace CodeGen
 
-#endif // GEGELATI_PROGRAMGENERATIONENGINE_H
+#endif // PROGRAMGENERATIONENGINE_H
 
 #endif // CODE_GENERATION

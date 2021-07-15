@@ -1,11 +1,11 @@
 #ifdef CODE_GENERATION
-#ifndef GEGELATI_DATAHANDLERPRINTER_H
-#define GEGELATI_DATAHANDLERPRINTER_H
+#ifndef DATAHANDLERPRINTER_H
+#define DATAHANDLERPRINTER_H
 
-//#include "abstractDataHandlerPrinter.h"
-#include "array2DWrapper.h"
-#include "arrayWrapper.h"
-#include "dataHandler.h"
+//#include "data/abstractDataHandlerPrinter.h"
+#include "data/array2DWrapper.h"
+#include "data/arrayWrapper.h"
+#include "data/dataHandler.h"
 
 namespace Data {
     /**
@@ -176,5 +176,5 @@ namespace Data {
 
 } // namespace Data
 
-#endif // GEGELATI_DATAHANDLERPRINTER_H
+#endif // DATAHANDLERPRINTER_H
 #endif // CODE_GENERATION

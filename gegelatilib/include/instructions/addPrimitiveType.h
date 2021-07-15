@@ -42,7 +42,7 @@
 #include <typeinfo>
 
 #include "data/untypedSharedPtr.h"
-#include "instruction.h"
+#include "instructions/instruction.h"
 
 namespace Instructions {
 

@@ -39,7 +39,7 @@
 
 #include <functional>
 
-#include "instruction.h"
+#include "instructions/instruction.h"
 
 namespace Instructions {
     /**

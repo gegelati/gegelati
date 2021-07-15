@@ -43,7 +43,7 @@
 
 #include "data/constantHandler.h"
 #include "data/untypedSharedPtr.h"
-#include "instruction.h"
+#include "instructions/instruction.h"
 
 namespace Instructions {
 

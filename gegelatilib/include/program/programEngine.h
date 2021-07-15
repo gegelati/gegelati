@@ -1,5 +1,5 @@
-#ifndef GEGELATI_PROGRAMENGINE_H
-#define GEGELATI_PROGRAMENGINE_H
+#ifndef PROGRAMENGINE_H
+#define PROGRAMENGINE_H
 
 #include "data/primitiveTypeArray.h"
 #include "data/untypedSharedPtr.h"
@@ -256,4 +256,4 @@ namespace Program {
     }
 } // namespace Program
 
-#endif // GEGELATI_PROGRAMENGINE_H
+#endif // PROGRAMENGINE_H
