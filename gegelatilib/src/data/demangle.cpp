@@ -11,9 +11,7 @@ std::string demangle(const char* name)
         free(demangleValue);
     }
     else {
-        throw std::runtime_error("Error while trying to demangle the value. "
-                                 "Return code of abi::__cxa_demangle is " +
-                                 std::to_string(status));
+        throw std::runtime_error("Error while trying to demangle a value.");
     }
     return result;
 }
