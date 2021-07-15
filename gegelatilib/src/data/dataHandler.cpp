@@ -35,17 +35,14 @@
  */
 
 #include <algorithm>
-#include <iostream> //test purposes //todo
 
 #include "data/dataHandler.h"
 
 size_t Data::DataHandler::count = 0;
 
 Data::DataHandler::DataHandler()
-    : id{count++}, cachedHash(), invalidCachedHash(true)
-{
-    std::cout << "dataHandler par défault" << std::endl;
-};
+    : id{count++}, cachedHash(),
+      invalidCachedHash(true){};
 
 size_t Data::DataHandler::getId() const
 {

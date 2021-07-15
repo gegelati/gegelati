@@ -109,7 +109,7 @@ std::string Instruction::getPrimitiveType(const uint64_t& opIdx) const
 {
     std::string typeName =
         DEMANGLE_TYPEID_NAME(this->operandTypes.at(opIdx).get().name());
-    std::string regex{"(const )?([\\w \\*]*)(\\[(\\d)+\\])?"};
+    std::string regex{"(const )?([\\w\\*]*)[ ]?(\\[(\\d)+\\])*"};
     std::regex arrayType(regex);
     std::cmatch cm;
     std::string type;

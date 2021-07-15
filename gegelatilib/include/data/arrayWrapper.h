@@ -36,8 +36,6 @@
 #ifndef ARRAY_WRAPPER_H
 #define ARRAY_WRAPPER_H
 
-#include <iostream> //test purposes //todo
-
 #include <functional>
 #include <map>
 #include <regex>
@@ -149,8 +147,6 @@ namespace Data {
         ArrayWrapper(size_t size = 8, std::vector<T>* ptr = nullptr)
             : nbElements{size}
         {
-            //            std::cout << "default constructor Array wrapper "<<
-            //            std::endl;
             this->setPointer(ptr);
         };
 

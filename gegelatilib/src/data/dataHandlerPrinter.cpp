@@ -12,9 +12,25 @@ std::string Data::DataHandlerPrinter::printDataAt(
         return std::string{" = " + nameVar + "[" + std::to_string(address) +
                            "];"};
     }
-    // else if(false){}
+
     const std::vector<size_t> opDimension = this->getOperandSizes(type);
     std::string operandInit;
+    //    size_t operandSize;
+    //    switch (dataSizes.size()) {
+    //    case 0:
+    //        throw std::runtime_error(
+    //            "Error the std::vector containing the size of the dimension of
+    //            the " "DataHandler is empty.");
+    //        break;
+    //    case 1:
+    //        operandInit = "[] = ";
+    //        operandSize = opDimension.at(0);
+    //        operandInit += print1DArray(address, operandSize, nameVar);
+    //        break;
+    //    case 2:
+    //        break;
+    //    }
+
     if (dataSizes.size() == 1) {
         // We retreive all indexes of the global variable to initialize
         // the operand for a 1D array
@@ -30,7 +46,7 @@ std::string Data::DataHandlerPrinter::printDataAt(
             operandInit += print1DArray(address, opDimension.at(0), nameVar);
         }
         else {
-            operandInit = "[][] = ";
+            operandInit = "[][" + std::to_string(opDimension.at(1)) + "] = ";
             operandInit +=
                 print2DArray(address, dataSizes, opDimension, nameVar);
         }
@@ -62,10 +78,34 @@ std::string Data::DataHandlerPrinter::print1DArray(
 
 std::string Data::DataHandlerPrinter::print2DArray(
     const size_t& start, const std::vector<size_t>& sourceTabSize,
-    const std::vector<size_t>& generatedTabSize, const std::string& nameVar) const
+    const std::vector<size_t>& generatedTabSize,
+    const std::string& nameVar) const
 {
+    std::string array{"{"};
+    size_t width = sourceTabSize.at(0);
+    //    size_t height = sourceTabSize.at(1);
+    size_t arrayWidth = generatedTabSize.at(0);
+    size_t arrayHeight = generatedTabSize.at(1);
 
-    return std::__cxx11::string();
+    size_t addressH = start / (width - arrayWidth + 1);
+    size_t addressW = start % (width - arrayWidth + 1);
+    size_t addressSrc = (addressH * width) + addressW;
+    size_t idxSrc = 0;
+    for (size_t idxHeight = 0; idxHeight < arrayHeight; idxHeight++) {
+//        var = nameVar + "[" + std::to_string(addressH + idxHeight) + "]";
+        idxSrc = addressSrc + idxHeight * width;
+        array += print1DArray(idxSrc, arrayWidth, nameVar);
+
+        //        for (size_t idxWidth = 0; idxWidth < arrayWidth; idxWidth++) {
+        //            size_t idxSrc = (idxHeight * this->width) + idxWidth;
+        ////            result.push_back(addressSrc + idxSrc);
+        //        }
+        if (idxHeight < (arrayHeight - 1)) {
+            array += ", ";
+        }
+    }
+    array += "}";
+    return array;
 }
 
 std::vector<size_t> Data::DataHandlerPrinter::getOperandSizes(

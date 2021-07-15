@@ -24,13 +24,9 @@ namespace Program {
         ProgramEngine() = delete;
 
         /// Registers used for the Program execution.
-        Data::PrimitiveTypeArray<
-            double> // todo problème ici mauvais type :( créer une copie dans le
-                    // ProgramGenerationEngine à partir de register pour pouvoir
-                    // travailler sur le bon type et en gardant les algo
-                    // existant
-                        registers; // If the type of registers attribute is
-                                   // changed one day
+        Data::PrimitiveTypeArray<double>
+            registers; // If the type of registers attribute is
+                       // changed one day
         // make sure to update the Program::identifyIntrons()
         // method as it create its own
         // Data::PrimitiveTypeArray<double> to keep track of
