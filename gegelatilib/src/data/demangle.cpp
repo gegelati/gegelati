@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 #ifdef __GNUC__
-std::string demangle(const char* name)
+std::string Data::demangle(const char* name)
 {
     int status = -4;
     char* demangleValue = abi::__cxa_demangle(name, nullptr, nullptr, &status);

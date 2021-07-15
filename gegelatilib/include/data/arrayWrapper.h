@@ -45,9 +45,9 @@
 #include <typeinfo>
 
 #include "data/constant.h"
+#include "data/dataHandler.h"
+#include "data/demangle.h"
 #include "data/hash.h"
-#include "dataHandler.h"
-#include "demangle.h"
 
 namespace Data {
 

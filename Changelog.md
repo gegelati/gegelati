@@ -1,5 +1,16 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_yyyy.mm.dd_
+
+### New features
+
+### Changes
+
+### Bug fix
+* Fix memory leak when demangling type name in GNU environment.
+
+
 ## Release version 0.6.0
 _2021.06.02_
 
