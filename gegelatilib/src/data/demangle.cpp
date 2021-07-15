@@ -1,4 +1,5 @@
-#include "data/arrayWrapper.h"
+#include "data/demangle.h"
+#include <stdexcept>
 
 #ifdef __GNUC__
 std::string demangle(const char* name)

@@ -47,19 +47,8 @@
 #include "data/constant.h"
 #include "data/hash.h"
 #include "dataHandler.h"
+#include "demangle.h"
 
-#ifdef _MSC_VER
-/// Macro for getting type name in human readable format.
-#define DEMANGLE_TYPEID_NAME(name) name
-#elif __GNUC__
-#include <cxxabi.h>
-std::string demangle(const char* name);
-/// Macro for getting type name in human readable format.
-#define DEMANGLE_TYPEID_NAME(name)                                             \
-    demangle(name).c_str()
-#else
-#error Unsupported compiler (yet): Check need for name demangling of typeid.name().
-#endif
 
 namespace Data {
 

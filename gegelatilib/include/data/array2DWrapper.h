@@ -38,6 +38,7 @@
 
 #include "data/arrayWrapper.h"
 #include "data/dataHandler.h"
+#include "data/demangle.h"
 
 namespace Data {
 
