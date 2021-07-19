@@ -3,9 +3,9 @@
 
 #include "code_gen/ProgramGenerationEngine.h"
 #include "data/primitiveTypeArray.h"
+#include "environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "environment.h"
 #include "program/program.h"
 
 class ProgramGenerationEngineTest : public ::testing::Test
@@ -135,7 +135,5 @@ TEST_F(ProgramGenerationEngineTest, generateProgram)
 
     ASSERT_NO_THROW(progGen.generateProgram(1))
         << "Out of range exception while generating the program";
-
-
 }
 #endif // CODE_GENERATION

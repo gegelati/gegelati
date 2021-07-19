@@ -103,7 +103,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
     result = WEXITSTATUS(system(cmdCompile.c_str()));
     ASSERT_EQ(result, 0)
         << "Fail to compile generated files to test stick game";
-    result = WEXITSTATUS(system("./StickGameBest_TPG"));
+    result = WEXITSTATUS(system("./StickGameBest_TPG 2 21 1 2 3 4"));
 
-    ASSERT_EQ(result, 2) << "Error inference of Stick Game has changed";
+    ASSERT_EQ(result, 0) << "Error inference of Stick Game has changed";
 }

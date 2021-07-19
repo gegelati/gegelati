@@ -229,8 +229,9 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
             sourceIdx); // Throws std::out_of_range
 
         const Data::DataHandlerPrinter& printer = getPrinter(dataSource);
-        fileC << "\t\t" << instruction.getPrimitiveType(i) << " " << nameOperandVariable
-              << i << printer.printDataAt(operandType, opIdx,
+        fileC << "\t\t" << instruction.getPrimitiveType(i) << " "
+              << nameOperandVariable << i
+              << printer.printDataAt(operandType, opIdx,
                                      getNameSourceData(sourceIdx))
               << std::endl;
     }
