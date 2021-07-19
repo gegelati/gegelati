@@ -27,15 +27,6 @@ namespace Data {
         //        const std::string nameConstantVariable;
         //        const std::string nameDataVariable;
 
-        /*virtual*/ std::string print1DArray(
-            const size_t& start, const size_t& size,
-            const std::string& nameVar) const; // override;
-
-        /*virtual*/ std::string print2DArray(
-            const size_t& start, const std::vector<size_t>& sourceTabSize,
-            const std::vector<size_t>& generatedTabSize,
-            const std::string& nameVar) const; // override;
-
       public:
         /**
          * \brief  constructor
@@ -70,8 +61,6 @@ namespace Data {
         virtual ~DataHandlerPrinter() = default;
 
         /// copy constructor
-        //        DataHandlerPrinter(const DataHandlerPrinter<T>& other) =
-        //        default;
         DataHandlerPrinter(const DataHandlerPrinter& other) = default;
 
         /**
@@ -83,6 +72,15 @@ namespace Data {
                                             const size_t address,
                                             const std::string& nameVar) const
             /*override*/;
+
+        std::string print1DArray(const size_t& start, const size_t& size,
+                                 const std::string& nameVar) const; // override;
+
+        std::string print2DArray(const size_t& start,
+                                 const std::vector<size_t>& sourceTabSize,
+                                 const std::vector<size_t>& generatedTabSize,
+                                 const std::string& nameVar) const;
+
         /**
          * \brief function used to retrieve the typename of the template of the
          * DataHandler
@@ -91,7 +89,7 @@ namespace Data {
          */
         /*virtual*/ std::string getTemplatedType() const /*override*/;
 
-        std::vector<size_t> getOperandSizes(const std::type_info& type) const;
+        static std::vector<size_t> getOperandSizes(const std::type_info& type);
     };
 
     /*//    template <class T>

@@ -119,7 +119,7 @@ namespace CodeGen {
             : ProgramEngine(env)
         {
             generateDataPrinterMap();
-            openFile(filename, path);
+            openFile(filename, path, env.getNbConstant());
         }
         /**
          * \brief Constructor of the class
@@ -146,7 +146,7 @@ namespace CodeGen {
             : ProgramEngine(p)
         {
             generateDataPrinterMap();
-            openFile(filename, path);
+            openFile(filename, path, p.getEnvironment().getNbConstant());
         }
 
         /**
@@ -199,8 +199,9 @@ namespace CodeGen {
          * Set type of the global variable accordingly to the type of the data
          * sources of the environment.
          *
+         * \param[in] nbConstant size_t of the number of Data::Constant available for a Program.
          */
-        void initGlobalVar();
+        void initGlobalVar(size_t nbConstant);
 
         /**
          * \brief create the line of C code that equals to instruction in
@@ -229,7 +230,7 @@ namespace CodeGen {
          *
          * \param[in] path const reference to the path of the file.
          */
-        void openFile(const std::string& filename, const std::string& path);
+        void openFile(const std::string& filename, const std::string& path, size_t nbConstant);
 
         /**
          * \brief Function called to generate the initialization of all operand
@@ -257,11 +258,17 @@ namespace CodeGen {
          *
          * This function iterate through the data sources of the Environment
          * and associates the id of a DataHandler to its DataHandlerPrinter.
+         * \param[in]
+         * \param[in]
+         * \param[in]
          */
         void generateDataPrinterMap();
-
-        void initInterVariable(const std::string& varNam,
+        // todo
+        void initLocalVariable(const std::string& type, const std::string& varNam,
                                const std::vector<double>& data);
+
+
+        const Data::DataHandlerPrinter& getPrinter(const Data::DataHandler& d);
     };
 
 } // namespace CodeGen

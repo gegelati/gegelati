@@ -1,3 +1,4 @@
+#ifdef CODE_GENERATION
 #include "data/dataHandlerPrinter.h"
 
 std::string Data::DataHandlerPrinter::printDataAt(
@@ -41,8 +42,14 @@ std::string Data::DataHandlerPrinter::printDataAt(
             }
             else {
 
-                operandInit += print2DArray(address, dataSizes,
-                                            {1, opDimension.at(0)}, nameVar);
+                size_t width = dataSizes.at(0);
+                size_t arrayWidth = opDimension.at(0);
+
+                size_t addressH = address / (width - arrayWidth + 1);
+                size_t addressW = address % (width - arrayWidth + 1);
+                size_t addressSrc = (addressH * width) + addressW;
+                operandInit +=
+                    print1DArray(addressSrc, arrayWidth, nameVar);
             }
             break;
         }
@@ -91,18 +98,12 @@ std::string Data::DataHandlerPrinter::print2DArray(
     size_t addressH = start / (width - arrayWidth + 1);
     size_t addressW = start % (width - arrayWidth + 1);
     size_t addressSrc = (addressH * width) + addressW;
-    size_t idxSrc = 0;
+    size_t idxSrc;
 
     for (size_t idxHeight = 0; idxHeight < arrayHeight; idxHeight++) {
-        //        var = nameVar + "[" + std::to_string(addressH + idxHeight) +
-        //        "]";
         idxSrc = addressSrc + idxHeight * width;
         array += print1DArray(idxSrc, arrayWidth, nameVar);
 
-        //        for (size_t idxWidth = 0; idxWidth < arrayWidth; idxWidth++) {
-        //            size_t idxSrc = (idxHeight * this->width) + idxWidth;
-        ////            result.push_back(addressSrc + idxSrc);
-        //        }
         if (idxHeight < (arrayHeight - 1)) {
             array += ", ";
         }
@@ -112,7 +113,7 @@ std::string Data::DataHandlerPrinter::print2DArray(
 }
 
 std::vector<size_t> Data::DataHandlerPrinter::getOperandSizes(
-    const std::type_info& type) const
+    const std::type_info& type)
 {
     std::vector<size_t> sizes;
     std::string typeName = DEMANGLE_TYPEID_NAME(type.name());
@@ -131,3 +132,4 @@ std::vector<size_t> Data::DataHandlerPrinter::getOperandSizes(
     }
     return sizes;
 }
+#endif //CODE_GENERATION
