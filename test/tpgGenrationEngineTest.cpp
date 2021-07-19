@@ -1,3 +1,4 @@
+#ifdef CODE_GENERATION
 #include <gtest/gtest.h>
 #include <stddef.h>
 
@@ -515,3 +516,4 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     ASSERT_EQ(WEXITSTATUS(system("./ThreeTeamsOneCycleThreeLeaves")), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
 }
+#endif //CODE_GENERATION
