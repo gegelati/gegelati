@@ -16,7 +16,7 @@ namespace Data {
      * \param[in] name const char* of the type to demangle.
      * \return demangle type of name in a std::string.
      */
-    std::string demangle(const char* name);
+    ::std::string demangle(const char* name);
 /// Macro for getting type name in human readable format.
 #define DEMANGLE_TYPEID_NAME(name) Data::demangle(name).c_str()
 #else
