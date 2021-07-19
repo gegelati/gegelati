@@ -97,7 +97,8 @@ namespace Instructions {
          * the format given as parameter.
          *
          * \param[in] format of the line used to represent the instruction in
-         * the C files generated.
+         * the C files generated. The result of the function is represented with
+         * $0. The first parameter correspond to $1 the second to $2...
          *
          */
         Instruction(std::string format);

@@ -199,7 +199,8 @@ namespace CodeGen {
          * Set type of the global variable accordingly to the type of the data
          * sources of the environment.
          *
-         * \param[in] nbConstant size_t of the number of Data::Constant available for a Program.
+         * \param[in] nbConstant size_t of the number of Data::Constant
+         * available for a Program.
          */
         void initGlobalVar(size_t nbConstant);
 
@@ -230,7 +231,8 @@ namespace CodeGen {
          *
          * \param[in] path const reference to the path of the file.
          */
-        void openFile(const std::string& filename, const std::string& path, size_t nbConstant);
+        void openFile(const std::string& filename, const std::string& path,
+                      size_t nbConstant);
 
         /**
          * \brief Function called to generate the initialization of all operand
@@ -264,9 +266,9 @@ namespace CodeGen {
          */
         void generateDataPrinterMap();
         // todo
-        void initLocalVariable(const std::string& type, const std::string& varNam,
+        void initLocalVariable(const std::string& type,
+                               const std::string& varNam,
                                const std::vector<double>& data);
-
 
         const Data::DataHandlerPrinter& getPrinter(const Data::DataHandler& d);
     };

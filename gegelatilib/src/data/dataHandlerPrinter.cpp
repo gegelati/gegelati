@@ -48,8 +48,7 @@ std::string Data::DataHandlerPrinter::printDataAt(
                 size_t addressH = address / (width - arrayWidth + 1);
                 size_t addressW = address % (width - arrayWidth + 1);
                 size_t addressSrc = (addressH * width) + addressW;
-                operandInit +=
-                    print1DArray(addressSrc, arrayWidth, nameVar);
+                operandInit += print1DArray(addressSrc, arrayWidth, nameVar);
             }
             break;
         }
@@ -132,4 +131,4 @@ std::vector<size_t> Data::DataHandlerPrinter::getOperandSizes(
     }
     return sizes;
 }
-#endif //CODE_GENERATION
+#endif // CODE_GENERATION

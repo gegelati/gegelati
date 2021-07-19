@@ -159,7 +159,6 @@ namespace CodeGen {
          *
          * add endif at the end of the header and close both file.
          */
-
         ~TPGGenerationEngine()
         {
             fileMainH << "\n#endif" << std::endl;
@@ -212,7 +211,6 @@ namespace CodeGen {
          *
          * \param[in] root const reference to the root of the TPG graph.
          */
-
         void setRoot(const TPG::TPGVertex& root);
 
         /**

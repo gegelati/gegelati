@@ -58,6 +58,12 @@ namespace Instructions {
                       "primitive types.");
 #ifdef CODE_GENERATION
       public:
+        /**
+         * \brief Constructor for the MultByConstant class so it can be use
+         * during the code gen.
+         * @param format std::string use at the generation. Check
+         * Instructions::Instruction for more details.
+         */
         MultByConstant(const std::string& format);
 #endif // CODE_GENERATION
 

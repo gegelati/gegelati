@@ -56,6 +56,18 @@ namespace Instructions {
                       "Template class AddPrimitiveType<T> can only be used for "
                       "primitive types.");
 
+#ifdef CODE_GENERATION
+      public:
+        /**
+         * \brief Constructor for the AddPrimitiveType class so it can be use
+         * during the code gen.
+         *
+         * @param format std::string use at the generation. Check
+         * Instructions::Instruction for more details.
+         */
+        AddPrimitiveType(const std::string& format);
+#endif // CODE_GENERATION
+
       public:
         /**
          *  \brief Constructor for the AddPrimitiveType class.
@@ -64,12 +76,18 @@ namespace Instructions {
 
         virtual double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override;
+
+      private:
+        /**
+         * \brief function call in constructor to puh the types of the operand
+         * of the instruction
+         */
+        void setUpOperand();
     };
 
     template <class T> AddPrimitiveType<T>::AddPrimitiveType()
     {
-        this->operandTypes.push_back(typeid(T));
-        this->operandTypes.push_back(typeid(T));
+        setUpOperand();
     }
 
     template <class T>
@@ -85,6 +103,21 @@ namespace Instructions {
 
         return *(args.at(0).getSharedPointer<const T>()) +
                (double)*(args.at(1).getSharedPointer<const T>());
+    }
+
+#ifdef CODE_GENERATION
+    template <class T>
+    AddPrimitiveType<T>::AddPrimitiveType(const std::string& format)
+        : Instruction(format)
+    {
+        setUpOperand();
+    }
+#endif // CODE_GENERATION
+
+    template <class T> void AddPrimitiveType<T>::setUpOperand()
+    {
+        this->operandTypes.push_back(typeid(T));
+        this->operandTypes.push_back(typeid(T));
     }
 } // namespace Instructions
 

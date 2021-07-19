@@ -43,10 +43,11 @@ const std::string CodeGen::ProgramGenerationEngine::nameConstantVariable("cst");
 const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
 const std::string CodeGen::ProgramGenerationEngine::nameOperandVariable("op");
 
-void CodeGen::ProgramGenerationEngine::generateCurrentLine() {
+void CodeGen::ProgramGenerationEngine::generateCurrentLine()
+{
     // const Program::Line& line = this->getCurrentLine();
-    const Instructions::Instruction &instruction =
-            this->getCurrentInstruction();
+    const Instructions::Instruction& instruction =
+        this->getCurrentInstruction();
 
     if (instruction.isPrintable()) {
         // std::map<operand(uint64t ?), uint_64t> initOperand // = (operand,
@@ -57,7 +58,8 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine() {
         // init
         fileC << "\t\t" << codeLine << "\n"
               << "\t}" << std::endl;
-    } else {
+    }
+    else {
         throw std::runtime_error("The pointer on the instruction cannot be"
                                  " converted to a pointer on a printable"
                                  "instruction.");
@@ -65,7 +67,8 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine() {
 }
 
 void CodeGen::ProgramGenerationEngine::generateProgram(
-        uint64_t progID, const bool ignoreException) {
+    uint64_t progID, const bool ignoreException)
+{
     fileC << "\ndouble P" << progID << "(){" << std::endl;
     fileH << "double P" << progID << "();" << std::endl;
 
@@ -81,8 +84,8 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
     fileC << "};" << std::endl;
     if (program->getEnvironment().getNbConstant() > 0) {
         size_t nbCst = program->getEnvironment().getNbConstant();
-        fileC << "\tint32_t " << nameConstantVariable << "["
-              << nbCst << "] = {";
+        fileC << "\tint32_t " << nameConstantVariable << "[" << nbCst
+              << "] = {";
         for (int i = 0; i < nbCst; ++i) {
             fileC << program->getConstantAt(i).value;
             if (i < nbCst - 1) {
@@ -129,16 +132,17 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
 }
 
 std::string CodeGen::ProgramGenerationEngine::completeFormat(
-        const Instructions::Instruction &instruction) const {
-    const std::string &format = instruction.getFormat();
-    const Program::Line &line =
-            this->getCurrentLine(); // throw std::out_of_range
+    const Instructions::Instruction& instruction) const
+{
+    const std::string& format = instruction.getFormat();
+    const Program::Line& line =
+        this->getCurrentLine(); // throw std::out_of_range
     std::string codeLine(format);
     std::string operandValue;
     for (auto itr =
-            std::sregex_iterator(format.begin(), format.end(), operand_regex);
+             std::sregex_iterator(format.begin(), format.end(), operand_regex);
          itr != std::sregex_iterator(); ++itr) {
-        const std::string &match = (*itr).str();
+        const std::string& match = (*itr).str();
         auto pos = codeLine.find(match);
         // get number after character '$'
         int idx = std::stoi(match.substr(1));
@@ -146,7 +150,8 @@ std::string CodeGen::ProgramGenerationEngine::completeFormat(
             const uint64_t operandLocation = this->getOperandLocation(idx - 1);
             std::string operandIdx(std::to_string(idx - 1));
             operandValue = nameOperandVariable + operandIdx;
-        } else {
+        }
+        else {
             // if number == 0 it corresponds to the result of the function
             operandValue = nameRegVariable + "[" +
                            std::to_string(line.getDestinationIndex()) + "]";
@@ -156,26 +161,30 @@ std::string CodeGen::ProgramGenerationEngine::completeFormat(
     return codeLine;
 }
 
-void CodeGen::ProgramGenerationEngine::initGlobalVar(size_t nbConstant) {
+void CodeGen::ProgramGenerationEngine::initGlobalVar(size_t nbConstant)
+{
     int i;
     if (nbConstant > 0) {
         fileC << "#include <stdint.h>" << std::endl;
         i = 2;
-    } else {
+    }
+    else {
         i = 1;
     }
 
     for (int cpt = 1; i < this->dataScsConstsAndRegs.size(); ++i, ++cpt) {
 
-        const Data::DataHandler &d = this->dataScsConstsAndRegs.at(i);
+        const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
         std::string type = getPrinter(d).getTemplatedType();
 
         fileC << "extern " << type << "* in" << cpt << ";" << std::endl;
     }
 }
 
-void CodeGen::ProgramGenerationEngine::openFile(const std::string &filename,
-                                                const std::string &path, size_t nbConstant) {
+void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
+                                                const std::string& path,
+                                                size_t nbConstant)
+{
     if (filename.size() == 0) {
         std::cout << "filename is empty" << std::endl;
         throw std::invalid_argument("filename is empty");
@@ -199,10 +208,11 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string &filename,
     initGlobalVar(nbConstant);
 }
 
-void CodeGen::ProgramGenerationEngine::initOperandCurrentLine() {
+void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
+{
     uint64_t opIdx;
-    const Program::Line &line = getCurrentLine();
-    const Instructions::Instruction &instruction = getCurrentInstruction();
+    const Program::Line& line = getCurrentLine();
+    const Instructions::Instruction& instruction = getCurrentInstruction();
     if (instruction.isPrintable() == false) {
         throw std::runtime_error("The instruction is not printable, "
                                  "stop the initialization of the "
@@ -211,35 +221,32 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine() {
     }
     for (int i = 0; i < instruction.getNbOperands(); ++i) {
         uint64_t sourceIdx = line.getOperand(i).first;
-        const std::type_info &operandType =
-                instruction.getOperandTypes().at(i).get();
+        const std::type_info& operandType =
+            instruction.getOperandTypes().at(i).get();
 
         opIdx = this->getOperandLocation(i);
-        const Data::DataHandler &dataSource = this->dataScsConstsAndRegs.at(
-                sourceIdx); // Throws std::out_of_range
+        const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
+            sourceIdx); // Throws std::out_of_range
 
-        const Data::DataHandlerPrinter &printer = getPrinter(dataSource);
-        fileC << "\t\t";
-        if (operandType == typeid(Data::Constant)) {
-            fileC << "int32_t";
-        } else {
-            fileC << instruction.getPrimitiveType(i);
-        }
-        fileC << " " << nameOperandVariable << i
-              << printer.printDataAt(operandType, opIdx,
+        const Data::DataHandlerPrinter& printer = getPrinter(dataSource);
+        fileC << "\t\t" << instruction.getPrimitiveType(i) << " " << nameOperandVariable
+              << i << printer.printDataAt(operandType, opIdx,
                                      getNameSourceData(sourceIdx))
               << std::endl;
     }
 }
 
 std::string CodeGen::ProgramGenerationEngine::getNameSourceData(
-        const uint64_t &idx) {
+    const uint64_t& idx)
+{
     std::string nameDataSource;
     if (idx == 0) {
         nameDataSource = nameRegVariable;
-    } else if (this->program->getEnvironment().getNbConstant() > 0 && idx == 1) {
+    }
+    else if (this->program->getEnvironment().getNbConstant() > 0 && idx == 1) {
         nameDataSource = nameConstantVariable;
-    } else {
+    }
+    else {
         uint64_t varNumber = idx;
         if (this->program->getEnvironment().getNbConstant() > 0) {
             varNumber--;
@@ -249,19 +256,20 @@ std::string CodeGen::ProgramGenerationEngine::getNameSourceData(
     return nameDataSource;
 }
 
-void CodeGen::ProgramGenerationEngine::generateDataPrinterMap() {
-    for (auto &dataScsConstsAndReg : dataScsConstsAndRegs) {
-        const Data::DataHandler &d = dataScsConstsAndReg.get();
-        dataPrinters.insert(std::pair<size_t,
-                Data::DataHandlerPrinter>(
-                d.getId(), Data::DataHandlerPrinter(&d)));
-//        dataPrinters.emplace_back(&d);
+void CodeGen::ProgramGenerationEngine::generateDataPrinterMap()
+{
+    for (auto& dataScsConstsAndReg : dataScsConstsAndRegs) {
+        const Data::DataHandler& d = dataScsConstsAndReg.get();
+        dataPrinters.insert(std::pair<size_t, Data::DataHandlerPrinter>(
+            d.getId(), Data::DataHandlerPrinter(&d)));
+        //        dataPrinters.emplace_back(&d);
     }
 }
 
 void CodeGen::ProgramGenerationEngine::initLocalVariable(
-        const std::string &type, const std::string &varNam,
-        const std::vector<double> &data) {
+    const std::string& type, const std::string& varNam,
+    const std::vector<double>& data)
+{
     fileC << "\t" << type << varNam << "[" << data.size() << "] = {";
     for (int i = 0; i < data.size(); ++i) {
         fileC << data.at(i);
@@ -272,14 +280,16 @@ void CodeGen::ProgramGenerationEngine::initLocalVariable(
     fileC << "};" << std::endl;
 }
 
-const Data::DataHandlerPrinter &CodeGen::ProgramGenerationEngine::getPrinter(const Data::DataHandler &d) {
+const Data::DataHandlerPrinter& CodeGen::ProgramGenerationEngine::getPrinter(
+    const Data::DataHandler& d)
+{
     auto printerPair = dataPrinters.find(d.getId());
     if (printerPair == dataPrinters.end()) {
         // insert a new pair <id, printer> and get its iterator
-        printerPair = dataPrinters.insert(std::pair<size_t,
-                Data::DataHandlerPrinter>(
-                d.getId(), Data::DataHandlerPrinter(&d))).first;
-
+        printerPair = dataPrinters
+                          .insert(std::pair<size_t, Data::DataHandlerPrinter>(
+                              d.getId(), Data::DataHandlerPrinter(&d)))
+                          .first;
     }
     return printerPair->second;
 }
