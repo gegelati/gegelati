@@ -7,7 +7,7 @@ TEST(DemangleTest, demangleTypeDouble)
 {
     std::string demangled;
     const std::type_info& type = typeid(double);
-    ASSERT_NO_THROW(demangled = demangle(type.name()))
+    ASSERT_NO_THROW(demangled = Data::demangle(type.name()))
         << "Error can't demangle the primitive type double.";
 
     ASSERT_EQ(demangled, std::string("double"))
@@ -23,7 +23,7 @@ TEST(DemangleTest, demangleFail)
 {
     const char* toDemangle = "gegelati";
 
-    ASSERT_THROW(demangle(toDemangle), std::runtime_error)
+    ASSERT_THROW(Data::demangle(toDemangle), std::runtime_error)
         << "Error the function should be able to demangle the type "
            "\"gegelati\"";
 
