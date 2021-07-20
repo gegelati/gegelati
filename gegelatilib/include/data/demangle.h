@@ -3,7 +3,6 @@
 
 #include <string>
 
-
 #ifdef _MSC_VER
 /// Macro for getting type name in human readable format.
 #define DEMANGLE_TYPEID_NAME(name) name
@@ -19,7 +18,7 @@ namespace Data {
      */
     std::string demangle(const char* name);
 } // namespace Data
-/// Macro for getting type name in human readable format.
+  /// Macro for getting type name in human readable format.
 #define DEMANGLE_TYPEID_NAME(name) Data::demangle(name).c_str()
 #else
 #error Unsupported compiler (yet): Check need for name demangling of typeid.name().
