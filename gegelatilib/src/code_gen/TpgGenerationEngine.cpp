@@ -99,7 +99,7 @@ void CodeGen::TPGGenerationEngine::generateAction(const TPG::TPGAction& action)
 
 void CodeGen::TPGGenerationEngine::setRoot(const TPG::TPGVertex& team)
 {
-    fileMainH << "\nvoid* (*root)(int* action);" << std::endl;
+    fileMainH << "\nextern void* (*root)(int* action);" << std::endl;
     fileMain << "void* (*root)(int* action) = T" << findVertexID(team) << ";"
              << std::endl;
 }
