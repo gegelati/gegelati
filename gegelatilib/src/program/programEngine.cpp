@@ -121,3 +121,30 @@ uint64_t Program::ProgramEngine::getOperandLocation(uint64_t idxOp) const
 
     return operandLocation;
 }
+void Program::ProgramEngine::iterateThroughtProgram(
+    const bool ignoreException = false)
+{
+    this->programCounter = 0;
+    bool hasNext = this->program->getNbLines() > 0;
+
+    // Skip first lines if they are introns.
+    if (hasNext && this->program->isIntron(0)) {
+        hasNext = this->next();
+    }
+
+    // Execute useful lines
+    while (hasNext) {
+        try {
+            // generate the current line
+            this->operator()();
+        }
+        catch (std::out_of_range e) {
+            if (!ignoreException) {
+                throw; // rethrow
+            }
+        }
+
+        // Increment the programCounter.
+        hasNext = this->next();
+    };
+}

@@ -91,8 +91,10 @@ namespace CodeGen {
          *
          * This map is filled in the generateDataPrinterMap method.
          */
-
         std::map<size_t, Data::DataHandlerPrinter> dataPrinters;
+
+        /// inherited from Program::ProgramEngine
+        virtual void operator()() override;
 
       public:
         /**
@@ -121,6 +123,7 @@ namespace CodeGen {
             generateDataPrinterMap();
             openFile(filename, path, env.getNbConstant());
         }
+
         /**
          * \brief Constructor of the class
          *
@@ -139,7 +142,6 @@ namespace CodeGen {
          * \param[in] path const reference to the path in which the file is
          * generated
          */
-
         ProgramGenerationEngine(const std::string& filename,
                                 const Program::Program& p,
                                 const std::string& path = "./")
@@ -154,7 +156,6 @@ namespace CodeGen {
          *
          * close both files and add endif at the end of the header
          */
-
         ~ProgramGenerationEngine()
         {
             fileH << "#endif " << std::endl;
@@ -246,7 +247,6 @@ namespace CodeGen {
         /**
          * \brief Method returning the name of the data source in the file
          * generated.
-         * //todo managing constant
          *
          * \param[in] idx const uint64_t reference to the index of the data
          * source in Environment of the Program.
@@ -270,6 +270,18 @@ namespace CodeGen {
                                const std::string& varNam,
                                const std::vector<double>& data);
 
+        /**
+         * \brief Retrieve in the std::map dataPrinter the DataHandlerPrinter
+         * for the DataHandler d given in parameter.
+         *
+         * If d is not in dataPrinter, the DataHandlerPrinter is created and
+         * inserted in dataPrinter.
+         *
+         * \param[in] d const reference to the Data::DataHandler that we want
+         * the DataHandlerPrinter.
+         * \return a const reference to the DataHandlerPrinter for the
+         * DataHandler given in parameter.
+         */
         const Data::DataHandlerPrinter& getPrinter(const Data::DataHandler& d);
     };
 

@@ -95,33 +95,7 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
         fileC << "};" << std::endl;
     }
 
-    this->programCounter = 0;
-    // todo embarqué dans une fonction globale avec une operateur() ? avec un
-    //  objet foncteur
-    //  Iterate over the lines of the Program
-    bool hasNext = this->program->getNbLines() > 0;
-
-    // Skip first lines if they are introns.
-    if (hasNext && this->program->isIntron(0)) {
-        hasNext = this->next();
-    }
-
-    // Execute useful lines
-    while (hasNext) {
-        try {
-            // generate the current line
-            this->generateCurrentLine(); // todo utilisez un objet foncteur à la
-            // place
-        }
-        catch (std::out_of_range e) {
-            if (!ignoreException) {
-                throw; // rethrow
-            }
-        }
-
-        // Increment the programCounter.
-        hasNext = this->next();
-    };
+    iterateThroughtProgram(ignoreException);
 #ifdef DEBUG
     fileC << "#ifdef DEBUG" << std::endl;
     fileC << "\tprintf(\"P" << progID << " : reg[0] = %lf \\n\", reg[0]);"
@@ -263,7 +237,6 @@ void CodeGen::ProgramGenerationEngine::generateDataPrinterMap()
         const Data::DataHandler& d = dataScsConstsAndReg.get();
         dataPrinters.insert(std::pair<size_t, Data::DataHandlerPrinter>(
             d.getId(), Data::DataHandlerPrinter(&d)));
-        //        dataPrinters.emplace_back(&d);
     }
 }
 
@@ -293,6 +266,11 @@ const Data::DataHandlerPrinter& CodeGen::ProgramGenerationEngine::getPrinter(
                           .first;
     }
     return printerPair->second;
+}
+
+void CodeGen::ProgramGenerationEngine::operator()()
+{
+    this->generateCurrentLine();
 }
 
 #endif // CODE_GENERATION

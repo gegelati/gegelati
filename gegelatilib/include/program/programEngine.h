@@ -125,6 +125,12 @@ namespace Program {
         ProgramEngine(const Program& prog)
             : ProgramEngine(prog, prog.getEnvironment().getDataSources()){};
 
+        /**
+         * \brief operator parenthesis used when iterating through the program
+         * with the function iterationThroughtProgram
+         */
+        virtual void operator()() = 0;
+
       public:
         /**
          * \brief Method for changing the Program executed by a
@@ -229,6 +235,11 @@ namespace Program {
          *         DataHandler does not exist.
          */
         uint64_t getOperandLocation(uint64_t idxOp) const;
+
+        /**
+         * //todo
+         */
+        virtual void iterateThroughtProgram(const bool ignoreException);
     };
 
     template <class T>

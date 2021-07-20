@@ -164,6 +164,7 @@ double Program::ProgramExecutionEngine::executeProgram(
 {
     // Reset registers and programCounter
     this->registers.resetData();
+    // iterateThroughtProgram();
     this->programCounter = 0;
 
     // Iterate over the lines of the Program
