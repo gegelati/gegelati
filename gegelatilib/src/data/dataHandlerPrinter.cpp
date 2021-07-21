@@ -16,14 +16,8 @@ std::string Data::DataHandlerPrinter::printDataAt(
 
     std::vector<size_t> opDimension{this->getOperandSizes(type)};
     std::string operandInit;
-    size_t start;
-    //    std::vector<size_t> operandSize;
     if (opDimension.size() <= dataSizes.size()) {
         switch (dataSizes.size()) {
-        case 0:
-            throw std::runtime_error(
-                "Error the std::vector containing the size of "
-                "the dimension of the DataHandler is empty.");
         case 1:
             operandInit = "[] = ";
 
@@ -51,6 +45,9 @@ std::string Data::DataHandlerPrinter::printDataAt(
                 operandInit += print1DArray(addressSrc, arrayWidth, nameVar);
             }
             break;
+        default:
+            throw std::invalid_argument(
+                "DataHandlerPrinter only manage 1D and 2D DataHandler.");
         }
     }
     else {

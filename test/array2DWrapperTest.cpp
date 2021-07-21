@@ -241,3 +241,25 @@ TEST(Array2DWrapperTest, getDataAt)
     // happen without being detected.
 #endif
 }
+
+TEST(Array2DWrapperTest, getTemplateType)
+{
+    Data::DataHandler* d = new Data::ArrayWrapper<double>(4);
+
+    ASSERT_EQ(d->getTemplateType(), typeid(double))
+        << "Fail to retrieve typeid(double) from a ArrayWrapper<double>.";
+
+    delete d;
+}
+
+TEST(Array2DWrapperTest, getDimensionSize)
+{
+    size_t h = 4, w = 5;
+    Data::DataHandler* d = new Data::Array2DWrapper<double>(w, h);
+
+    ASSERT_EQ(d->getDimensionsSize(), std::vector<size_t>({h, w}))
+        << "Fail to retrieve a std::vector holding the size of the "
+           "Array2DWrapper.";
+
+    delete d;
+}

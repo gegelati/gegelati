@@ -114,7 +114,6 @@ namespace CodeGen {
          * be generated. By default, the file is generated in the current
          * directory.
          */
-
         ProgramGenerationEngine(const std::string& filename,
                                 const Environment& env,
                                 const std::string& path = "./")
@@ -149,6 +148,7 @@ namespace CodeGen {
         {
             generateDataPrinterMap();
             openFile(filename, path, p.getEnvironment().getNbConstant());
+            setProgram(p);
         }
 
         /**
@@ -265,10 +265,6 @@ namespace CodeGen {
          * \param[in]
          */
         void generateDataPrinterMap();
-        // todo
-        void initLocalVariable(const std::string& type,
-                               const std::string& varNam,
-                               const std::vector<double>& data);
 
         /**
          * \brief Retrieve in the std::map dataPrinter the DataHandlerPrinter

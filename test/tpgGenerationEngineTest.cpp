@@ -63,22 +63,22 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
-    ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine("constructor",
-                                                              *tpg, "../src"))
+    ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine("constructorWithPath",
+                                                              *tpg, "../src/"))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG and a path";
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
     ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-                        "constructor", *tpg, "../src", 15))
+                        "constructorWithStackSize", *tpg, "../src/", 15))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
-    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine("constructor", *tpg,
-                                                           "../src", 0),
+    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine("constructorErrorStackSize", *tpg,
+                                                           "../src/", 0),
                  std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0";

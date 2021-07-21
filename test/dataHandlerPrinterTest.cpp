@@ -150,6 +150,12 @@ TEST_F(DataHandlerPrinterTest, printDataAt)
            "array of size 5*5.";
     ASSERT_EQ(print, expected)
         << "Error the array generated does not have the right format.";
+
+    ASSERT_THROW(print = array1DPrinter->printDataAt(matrix, start, nameVar),
+                 std::invalid_argument)
+        << "Error should fail to extract a 2D array of size 2*2 at address 4 "
+           "from a 1D "
+           "array.";
 }
 
 TEST_F(DataHandlerPrinterTest, getTemplatedType)

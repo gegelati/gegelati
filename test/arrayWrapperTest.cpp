@@ -376,3 +376,25 @@ TEST(ArrayWrapperTest, Clone)
         FAIL() << "Cloning of ArrayWrapper returned a NULL Pointer.";
     delete dClone;
 }
+
+TEST(ArrayWrapperTest, getTemplateType)
+{
+    Data::DataHandler* d = new Data::ArrayWrapper<double>(4);
+
+    ASSERT_EQ(d->getTemplateType(), typeid(double))
+        << "Fail to retrieve typeid(double) from a ArrayWrapper<double>.";
+
+    delete d;
+}
+
+TEST(ArrayWrapperTest, getDimensionSize)
+{
+    size_t size = 4;
+    Data::DataHandler* d = new Data::ArrayWrapper<double>(size);
+
+    ASSERT_EQ(d->getDimensionsSize(), std::vector<size_t>({size}))
+        << "Fail to retrieve a std::vector holding the size of the "
+           "ArrayWrapper.";
+
+    delete d;
+}

@@ -60,9 +60,8 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine()
               << "\t}" << std::endl;
     }
     else {
-        throw std::runtime_error("The pointer on the instruction cannot be"
-                                 " converted to a pointer on a printable"
-                                 "instruction.");
+        throw std::runtime_error("The instruction is not printable, stop the "
+                                 "generation of the program.");
     }
 }
 
@@ -187,12 +186,6 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
     uint64_t opIdx;
     const Program::Line& line = getCurrentLine();
     const Instructions::Instruction& instruction = getCurrentInstruction();
-    if (instruction.isPrintable() == false) {
-        throw std::runtime_error("The instruction is not printable, "
-                                 "stop the initialization of the "
-                                 "operands of the instruction n° " +
-                                 std::to_string(line.getInstructionIndex()));
-    }
     for (int i = 0; i < instruction.getNbOperands(); ++i) {
         uint64_t sourceIdx = line.getOperand(i).first;
         const std::type_info& operandType =
@@ -238,20 +231,6 @@ void CodeGen::ProgramGenerationEngine::generateDataPrinterMap()
         dataPrinters.insert(std::pair<size_t, Data::DataHandlerPrinter>(
             d.getId(), Data::DataHandlerPrinter(&d)));
     }
-}
-
-void CodeGen::ProgramGenerationEngine::initLocalVariable(
-    const std::string& type, const std::string& varNam,
-    const std::vector<double>& data)
-{
-    fileC << "\t" << type << varNam << "[" << data.size() << "] = {";
-    for (int i = 0; i < data.size(); ++i) {
-        fileC << data.at(i);
-        if (i < data.size() - 1) {
-            fileC << ", ";
-        }
-    }
-    fileC << "};" << std::endl;
 }
 
 const Data::DataHandlerPrinter& CodeGen::ProgramGenerationEngine::getPrinter(

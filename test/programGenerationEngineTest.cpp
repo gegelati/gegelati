@@ -72,7 +72,7 @@ class ProgramGenerationEngineTest : public ::testing::Test
         l4.setDestinationIndex(0); // Destination is register at index 0
 
         Program::Line& P2l0 = p2->addNewLine();
-        P2l0.setInstructionIndex(2); // Instruction is add(non printable).
+        P2l0.setInstructionIndex(2); // Instruction is add(not printable).
         // Reg[5] = in1[0] + in1[1];
         P2l0.setOperand(0, 1, 0);    // 1st operand: parameter 0.
         P2l0.setOperand(0, 1, 1);    // 2nd operand: parameter 1.
@@ -108,6 +108,12 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
 
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
 
+    ASSERT_NO_THROW(progGen =
+                        new CodeGen::ProgramGenerationEngine("constructor", *p))
+        << "Construction failed with a valid program.";
+
+    ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
+
     ASSERT_THROW(progGen = new CodeGen::ProgramGenerationEngine("", *e),
                  std::invalid_argument)
         << "Construction should fail, filename is empty.";
@@ -115,25 +121,44 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
 
 TEST_F(ProgramGenerationEngineTest, generateCurrentLine)
 {
+    CodeGen::ProgramGenerationEngine engine("genCurrentLine", *p);
 
-    CodeGen::ProgramGenerationEngine progGen("genCurrentLine", *e);
-
-    progGen.setProgram(*p);
-    ASSERT_NO_THROW(progGen.generateCurrentLine())
+    //    progGen.setProgram(*p);
+    ASSERT_NO_THROW(engine.generateCurrentLine())
         << "Can't generate the first line";
 
-    progGen.setProgram(*p2);
+    ASSERT_NO_THROW(engine.setProgram(*p2)) << "Fail to set a program";
 
-    ASSERT_THROW(progGen.generateCurrentLine(), std::runtime_error)
+    ASSERT_THROW(engine.generateCurrentLine(), std::runtime_error)
         << "Should not be able to generate line, the instruction is not "
            "printable";
 }
 
 TEST_F(ProgramGenerationEngineTest, generateProgram)
 {
-    CodeGen::ProgramGenerationEngine progGen("genProgram", *p);
+    CodeGen::ProgramGenerationEngine engine("genCurrentLine", *p);
 
-    ASSERT_NO_THROW(progGen.generateProgram(1))
+    ASSERT_NO_THROW(engine.generateProgram(1))
         << "Out of range exception while generating the program";
+
+    ASSERT_NO_THROW(engine.setProgram(*p2)) << "Fail to set a program";
+
+    ASSERT_THROW(engine.generateProgram(2), std::runtime_error)
+        << "Should be able to generate the program contain an instruction not "
+           "printable";
+}
+
+TEST_F(ProgramGenerationEngineTest, initOperandCurrentLine)
+{
+
+    CodeGen::ProgramGenerationEngine engine("genCurrentLine", *p);
+
+    ASSERT_NO_THROW(engine.generateCurrentLine())
+        << "Fail to generate a valid line.";
+
+    ASSERT_NO_THROW(engine.setProgram(*p2)) << "Fail to set a program.";
+
+    ASSERT_THROW(engine.generateCurrentLine(), std::runtime_error)
+        << "Should fail to generate a none printable Instruction.";
 }
 #endif // CODE_GENERATION

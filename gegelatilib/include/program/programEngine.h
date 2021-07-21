@@ -237,7 +237,12 @@ namespace Program {
         uint64_t getOperandLocation(uint64_t idxOp) const;
 
         /**
-         * //todo
+         * \brief Function that iterates through the lines of the program and
+         * execute the operator()().
+         *
+         * For each line that is not an intron, this function calls the
+         * operator()(). This operator can be overloaded for example to execute
+         * or to generate the non introns lines depending on the derived class.
          */
         virtual void iterateThroughtProgram(const bool ignoreException);
     };
