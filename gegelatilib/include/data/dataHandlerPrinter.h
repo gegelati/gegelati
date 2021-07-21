@@ -23,7 +23,6 @@ namespace Data {
         DataHandlerPrinter() = delete;
 
       public:
-
         /**
          * \brief  Constructor for the DataHandlerPrinter
          *

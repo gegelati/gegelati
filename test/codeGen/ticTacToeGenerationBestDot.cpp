@@ -111,7 +111,6 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
 
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Fail to compile generated files to test TicTacToe";
-    ASSERT_EQ(
-        system("./TicTacToeBest_TPG 7 -1 -1 -1 -1 -1 -1 -1 -1"), 0)
+    ASSERT_EQ(system("./TicTacToeBest_TPG 7 -1 -1 -1 -1 -1 -1 -1 -1"), 0)
         << "Error inference of TicTacToe has changed";
 }

@@ -63,8 +63,8 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
-    ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine("constructorWithPath",
-                                                              *tpg, "../src/"))
+    ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
+                        "constructorWithPath", *tpg, "../src/"))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG and a path";
 
@@ -77,8 +77,8 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
-    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine("constructorErrorStackSize", *tpg,
-                                                           "../src/", 0),
+    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
+                     "constructorErrorStackSize", *tpg, "../src/", 0),
                  std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0";
@@ -514,9 +514,7 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(
-        system(
-            "./ThreeTeamsOneCycleThreeLeaves 0 4.5 2.8 3.4 1.3 2.25 3.2"),
-        0)
+        system("./ThreeTeamsOneCycleThreeLeaves 0 4.5 2.8 3.4 1.3 2.25 3.2"), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
 }
 #endif // CODE_GENERATION

@@ -202,10 +202,10 @@ namespace Instructions {
                 return *(args.at(idx).getSharedPointer<const T>());
             }
             else {
-                return (RETURN_TYPE)(args.at(idx)
-                                         .getSharedPointer<
-                                             const std::remove_all_extents_t<
-                                                 T>[]>())
+                return (RETURN_TYPE)(
+                           args.at(idx)
+                               .getSharedPointer<
+                                   const std::remove_all_extents_t<T>[]>())
                     .get();
             };
         };

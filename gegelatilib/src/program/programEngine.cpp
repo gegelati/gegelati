@@ -121,8 +121,7 @@ uint64_t Program::ProgramEngine::getOperandLocation(uint64_t idxOp) const
 
     return operandLocation;
 }
-void Program::ProgramEngine::iterateThroughtProgram(
-    const bool ignoreException)
+void Program::ProgramEngine::iterateThroughtProgram(const bool ignoreException)
 {
     this->programCounter = 0;
     bool hasNext = this->program->getNbLines() > 0;
