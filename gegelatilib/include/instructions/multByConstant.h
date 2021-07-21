@@ -61,7 +61,7 @@ namespace Instructions {
         /**
          * \brief Constructor for the MultByConstant class so it can be use
          * during the code gen.
-         * @param format std::string use at the generation. Check
+         * \param[in] format std::string use at the generation. Check
          * Instructions::Instruction for more details.
          */
         MultByConstant(const std::string& format);
@@ -73,6 +73,7 @@ namespace Instructions {
          */
         MultByConstant();
 
+        /// Inherited from Instruction
         double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override;
 

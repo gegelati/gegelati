@@ -195,7 +195,7 @@ namespace CodeGen {
 
         /**
          * \brief Method for generating a action of the graph.
-         * //todo regroup function ? with polymorphism et Vertex* ?
+         *
          * This method generates the C function that represents an action.
          * The generated function return a NULL pointer and write the action in
          * the pointer given as parameter.

@@ -148,7 +148,7 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
     delete tpgGen;
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0);
-    ASSERT_EQ(WEXITSTATUS(system("./OneLeaf 1 4.5")), 0)
+    ASSERT_EQ(system("./OneLeaf 1 4.5"), 0)
         << "Error wrong action returned in test OneLeaf";
 }
 
@@ -192,7 +192,7 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoLeaves";
-    ASSERT_EQ(WEXITSTATUS(system("./TwoLeaves 2 4.5 6.8 9.4")), 0)
+    ASSERT_EQ(system("./TwoLeaves 2 4.5 6.8 9.4"), 0)
         << "Error wrong action returned in test TwoLeaves";
 }
 
@@ -249,7 +249,7 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " ThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeLeaves";
-    ASSERT_EQ(WEXITSTATUS(system("./ThreeLeaves 3 0 1.5 2.4 2.4")), 0)
+    ASSERT_EQ(system("./ThreeLeaves 3 0 1.5 2.4 2.4"), 0)
         << "Error wrong action returned in test ThreeLeaves";
 }
 
@@ -296,7 +296,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneTeamOneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
-    ASSERT_EQ(WEXITSTATUS(system("./OneTeamOneLeaf 1 4.5 6.8")), 0)
+    ASSERT_EQ(system("./OneTeamOneLeaf 1 4.5 6.8"), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
 }
 
@@ -352,7 +352,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneTeamTwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamTwoLeaves";
-    ASSERT_EQ(WEXITSTATUS(system("./OneTeamTwoLeaves 2 4.5 6.8")), 0)
+    ASSERT_EQ(system("./OneTeamTwoLeaves 2 4.5 6.8"), 0)
         << "Error wrong action returned in test OneTeamTwoLeaves";
 }
 
@@ -429,7 +429,7 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoTeamsOneCycle";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoTeamsOneCycle";
-    ASSERT_EQ(WEXITSTATUS(system("./TwoTeamsOneCycle 1 4.5 6.8 9.4")), 0)
+    ASSERT_EQ(system("./TwoTeamsOneCycle 1 4.5 6.8 9.4"), 0)
         << "Error wrong action returned in test TwoTeamsOneCycle";
 }
 
@@ -514,8 +514,8 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(
-        WEXITSTATUS(system(
-            "./ThreeTeamsOneCycleThreeLeaves 0 4.5 2.8 3.4 1.3 2.25 3.2")),
+        system(
+            "./ThreeTeamsOneCycleThreeLeaves 0 4.5 2.8 3.4 1.3 2.25 3.2"),
         0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
 }

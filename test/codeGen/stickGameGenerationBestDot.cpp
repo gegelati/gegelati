@@ -100,10 +100,10 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
     delete tpgGen;
 
     cmdCompile += " StickGameBest_TPG";
-    result = WEXITSTATUS(system(cmdCompile.c_str()));
+    result = system(cmdCompile.c_str());
     ASSERT_EQ(result, 0)
         << "Fail to compile generated files to test stick game";
-    result = WEXITSTATUS(system("./StickGameBest_TPG 2 21 1 2 3 4"));
+    result = system("./StickGameBest_TPG 2 21 1 2 3 4");
 
     ASSERT_EQ(result, 0) << "Error inference of Stick Game has changed";
 }

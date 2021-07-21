@@ -61,6 +61,16 @@ namespace Instructions {
 
 #ifdef CODE_GENERATION
       public:
+        /**
+         * \brief Constructor of the class LambdaInstruction to create a
+         * printable Instruction.
+         *
+         * \param[in] format std::string use at the generation. Check
+         * Instructions::Instruction for more details.
+         * \param[in] function the c++ std::function that will be executed for
+         * this Instruction. Check the constructor with only the function as
+         * parameter for more details.
+         */
         LambdaInstruction(const std::string& format,
                           std::function<double(First, Rest...)> function)
             : Instructions::Instruction(format), func{function}
@@ -125,7 +135,8 @@ namespace Instructions {
             return true;
         };
 
-        double execute(
+        /// Inherited from Instruction
+        virtual double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override
         {
 
@@ -191,10 +202,10 @@ namespace Instructions {
                 return *(args.at(idx).getSharedPointer<const T>());
             }
             else {
-                return (RETURN_TYPE)(
-                           args.at(idx)
-                               .getSharedPointer<
-                                   const std::remove_all_extents_t<T>[]>())
+                return (RETURN_TYPE)(args.at(idx)
+                                         .getSharedPointer<
+                                             const std::remove_all_extents_t<
+                                                 T>[]>())
                     .get();
             };
         };

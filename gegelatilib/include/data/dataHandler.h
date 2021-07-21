@@ -281,7 +281,6 @@ namespace Data {
          * \return a std::vector containing the size of each dimension of a
          * DataHandler
          */
-
         virtual std::vector<size_t> getDimensionsSize() const = 0;
     };
 } // namespace Data

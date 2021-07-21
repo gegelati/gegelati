@@ -144,7 +144,7 @@ class Archive
     /**
      * Disable Archive copy construction.
      *
-     * Until we see the need for it, there si no reason to enable
+     * Until we see the need for it, there is no reason to enable
      * copy-construction of Archive.
      */
     Archive(const Archive& other) = delete;

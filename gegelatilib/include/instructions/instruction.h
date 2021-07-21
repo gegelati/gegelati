@@ -78,14 +78,13 @@ namespace Instructions {
         virtual const std::string& getFormat() const;
 
         /**
-         * \brief Retreive the primitive data type of the operand
+         * \brief Retrieve the primitive data type of the operand
          *
-         * Return the type othe operand. If the operand is an array return the
-         * type of the element of the array
          * \param[in] opIdx const uint64_t reference to the index of the operand
          * of the instruction
          *
-         * @return
+         * \return The type of the operand. If the operand is an array return
+         * the type of the element of the array.
          */
         virtual std::string getPrimitiveType(const uint64_t& opIdx) const;
 
@@ -97,13 +96,15 @@ namespace Instructions {
          * the format given as parameter.
          *
          * \param[in] format of the line used to represent the instruction in
-         * the C files generated. The result of the function is represented with
-         * $0. The first parameter correspond to $1 the second to $2...
-         *
+         * the C files generated.
          */
         Instruction(std::string format);
 
-        /// format of the instruction used to generate the code.
+        /**
+         * format of the instruction used to generate the code. The result of
+         * the function is represented with $0. The first parameter correspond
+         * to $1 the second to $2...
+         */
         std::string format;
 #endif // CODE_GENERATION
 
@@ -148,7 +149,7 @@ namespace Instructions {
          *
          * \param[in] args the vector of UntypedSharedPtr passed to the
          * Instruction.
-         * \return the default implementation of the Intruction
+         * \return the default implementation of the Instruction
          * class returns 0.0 if the given params or arguments are not valid.
          * Otherwise, 1.0 is returned.
          */

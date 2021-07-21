@@ -59,10 +59,10 @@ namespace Instructions {
 #ifdef CODE_GENERATION
       public:
         /**
-         * \brief Constructor for the AddPrimitiveType class so it can be use
+         * \brief Constructor for the AddPrimitiveType class, so it can be use
          * during the code gen.
          *
-         * @param format std::string use at the generation. Check
+         * \param[in] format std::string use at the generation. Check
          * Instructions::Instruction for more details.
          */
         AddPrimitiveType(const std::string& format);
@@ -74,6 +74,7 @@ namespace Instructions {
          */
         AddPrimitiveType();
 
+        /// Inherited from Instruction
         virtual double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override;
 

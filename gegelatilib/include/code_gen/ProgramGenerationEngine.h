@@ -229,8 +229,9 @@ namespace CodeGen {
          * in the header.
          *
          * \param[in] filename const reference to the name of the file.
-         *
          * \param[in] path const reference to the path of the file.
+         * \param[in] nbConstant number of constant used in the program of the
+         * TPG.
          */
         void openFile(const std::string& filename, const std::string& path,
                       size_t nbConstant);
@@ -250,19 +251,17 @@ namespace CodeGen {
          *
          * \param[in] idx const uint64_t reference to the index of the data
          * source in Environment of the Program.
-         * @return the name of the variable to use to access the data source in
+         * \return the name of the variable to use to access the data source in
          * the generated program
          */
         std::string getNameSourceData(const uint64_t& idx);
 
         /**
-         * \brief method used to fill the map of DataHandlePrinter.
+         * \brief method used to fill the map with DataHandlePrinter.
          *
-         * This function iterate through the data sources of the Environment
+         * This function iterates through the data sources of the Environment
          * and associates the id of a DataHandler to its DataHandlerPrinter.
-         * \param[in]
-         * \param[in]
-         * \param[in]
+         *
          */
         void generateDataPrinterMap();
 
