@@ -1,5 +1,6 @@
-#include "data/demangle.h"
 #include <stdexcept>
+
+#include "data/demangle.h"
 
 #ifdef __GNUC__
 std::string Data::demangle(const char* name)
