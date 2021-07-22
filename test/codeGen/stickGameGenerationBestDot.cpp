@@ -1,17 +1,19 @@
+#include <cfloat>
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
+#include <iostream>
 #include <stddef.h>
 
-#include "cfloat"
+#include "../learn/stickGameAdversarial.h"
 #include "code_gen/ProgramGenerationEngine.h"
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
+#include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgVertex.h"
-#include <iostream>
 
 class StickGameGenerationBestDotTest : public ::testing::Test
 {
@@ -20,15 +22,17 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     const size_t sizeRemainingStick{1};
     Instructions::Set set;
     Environment* e;
+    StickGameAdversarial* le;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
-    Data::PrimitiveTypeArray<int> hints{sizeHint};
-    Data::PrimitiveTypeArray<int> remainingSticks{sizeRemainingStick};
     TPG::TPGGraph* tpg;
+    TPG::TPGExecutionEngine* tee;
     CodeGen::TPGGenerationEngine* tpgGen;
     File::TPGGraphDotImporter* dot = nullptr;
     std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
                            "codeGen"};
-    std::string cmdExec{BIN_DIR_PATH "/bin/StickGameBest_TPG 2 21 1 2 3 4"};
+    std::string cmdExec{BIN_DIR_PATH "/bin/StickGameBest_TPG "};
+    std::string dataIn;
+    TPG::TPGVertex const* rootVertex;
 
     virtual void SetUp()
     {
@@ -63,10 +67,16 @@ class StickGameGenerationBestDotTest : public ::testing::Test
             "$0 = (($1) < ($2)) ? ($2) : ($1); ", max)));
         set.add(*(new Instructions::LambdaInstruction<double>(
             "$0 = ($1 == 0.0) ? 10.0 : 0.0;", nulltest)));
-        data = {hints, remainingSticks};
 
-        e = new Environment(set, data, 8);
+        le = new StickGameAdversarial();
+        data = {le->getDataSources().at(0), le->getDataSources().at(1)};
+        e = new Environment(set, le->getDataSources(), 8);
         tpg = new TPG::TPGGraph(*e);
+        tee = new TPG::TPGExecutionEngine(*e);
+        dot = new File::TPGGraphDotImporter(
+            TESTS_DAT_PATH "StickGame_out_best.dot", *e, *tpg);
+        dot->importGraph();
+        rootVertex = tpg->getRootVertices().back();
     }
 
     virtual void TearDown()
@@ -74,6 +84,8 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 
         delete e;
         delete tpg;
+        delete le;
+        delete tee;
 
         delete (&set.getInstruction(0));
         delete (&set.getInstruction(1));
@@ -88,23 +100,42 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 
 TEST_F(StickGameGenerationBestDotTest, BestTPG)
 {
-    int result;
-    dot = new File::TPGGraphDotImporter(TESTS_DAT_PATH "StickGame_out_best.dot",
-                                        *e, *tpg);
-    ASSERT_NO_THROW(dot->importGraph())
-        << "Failed to Import the graph to test inference of stick game";
+    int inferenceCodeGen, inferenceGegelati;
     tpgGen = new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg,
-                                              BIN_DIR_PATH "/src//");
+                                              BIN_DIR_PATH "/src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files
     delete tpgGen;
 
     cmdCompile += " StickGameBest_TPG";
-    result = system(cmdCompile.c_str());
-    ASSERT_EQ(result, 0)
-        << "Fail to compile generated files to test stick game";
-    result = system(cmdExec.c_str());
 
-    ASSERT_EQ(result, 0) << "Error inference of Stick Game has changed";
+    ASSERT_EQ(system(cmdCompile.c_str()), 0)
+        << "Fail to compile generated files to test stick game";
+
+    while (!le->isTerminal()) {
+        dataIn = "";
+        for (int i = 0; i < 3; ++i) {
+            dataIn +=  std::to_string((*(le->getDataSources()
+                                                  .at(0)
+                                                  .get()
+                                                  .getDataAt(typeid(int), i)
+                                                  .getSharedPointer<int>()
+                                                  .get())))+ " ";
+        }
+        dataIn += std::to_string((*(le->getDataSources()
+            .at(1)
+            .get()
+            .getDataAt(typeid(int), 0)
+            .getSharedPointer<int>()
+            .get())));
+        std::cout << cmdExec << dataIn << std::endl;
+        inferenceCodeGen = WEXITSTATUS(system((cmdExec + dataIn).c_str()));
+        inferenceGegelati =
+            ((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex).back())
+                ->getActionID();
+        ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
+            << "Error inference of Stick Game has changed";
+        le->doAction(inferenceGegelati);
+    }
 }

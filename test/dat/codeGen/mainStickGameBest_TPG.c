@@ -22,14 +22,16 @@ int main(int argc, char* argv[])
         hints[3] = 4;
     }
     else {
-        expectedVal = atoi(argv[1]);
-        remainingSticks[0] = atoi(argv[2]);
-        for (int cpt = 0, i = 3; i < argc && cpt < 4; ++cpt, ++i) {
+        //        expectedVal = atoi(argv[1]);
+        int cpt = 0, i = 1;
+        for (; i < argc && cpt < 3; ++cpt, ++i) {
             hints[cpt] = atoi(argv[i]);
         }
+        remainingSticks[0] = atoi(argv[i]);
     }
 
     action = executeFromVertex(root);
+    return action;
     printf("action : %d\n", action);
     if (expectedVal != -1 && action != expectedVal) {
         return ERROR_INFERENCE;

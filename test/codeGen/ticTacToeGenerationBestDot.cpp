@@ -103,7 +103,7 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
         << "Failed to Import the graph to test inference of TicTacToe";
 
     tpgGen = new CodeGen::TPGGenerationEngine("TicTacToeBest_TPG", *tpg,
-                                              BIN_DIR_PATH "/src//");
+                                              BIN_DIR_PATH "/src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test TicTacToe";
     // call destructor to close generated files

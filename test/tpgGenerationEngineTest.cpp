@@ -67,7 +67,7 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
     ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-                        "constructorWithPath", *tpg, BIN_DIR_PATH "/src//"))
+                        "constructorWithPath", *tpg, BIN_DIR_PATH "/src/"))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG and a path";
 
@@ -75,7 +75,7 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 
     ASSERT_NO_THROW(
         tpgGen = new CodeGen::TPGGenerationEngine(
-            "constructorWithStackSize", *tpg, BIN_DIR_PATH "/src//", 15))
+            "constructorWithStackSize", *tpg, BIN_DIR_PATH "/src/", 15))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
@@ -83,7 +83,7 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 
     ASSERT_THROW(
         tpgGen = new CodeGen::TPGGenerationEngine(
-            "constructorErrorStackSize", *tpg, BIN_DIR_PATH "/src//", 0),
+            "constructorErrorStackSize", *tpg, BIN_DIR_PATH "/src/", 0),
         std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0";
@@ -110,7 +110,7 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
         << "bad number of edges in OneLeafNoInstruction";
 
     tpgGen = new CodeGen::TPGGenerationEngine("OneLeafNoInstruction", *tpg,
-                                              BIN_DIR_PATH "/src//");
+                                              BIN_DIR_PATH "/src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -193,7 +193,7 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     ASSERT_EQ(tpg->getEdges().size(), 2) << "bad number of edges in TwoLeaves";
 
     tpgGen = new CodeGen::TPGGenerationEngine("TwoLeaves", *tpg,
-                                              BIN_DIR_PATH "/src//");
+                                              BIN_DIR_PATH "/src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -258,7 +258,7 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
         << "bad number of edges in ThreeLeaves";
 
     tpgGen = new CodeGen::TPGGenerationEngine("ThreeLeaves", *tpg,
-                                              BIN_DIR_PATH "/src//");
+                                              BIN_DIR_PATH "/src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -314,7 +314,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
         << "bad number of edges in OneTeamOneLeaf";
 
     tpgGen = new CodeGen::TPGGenerationEngine("OneTeamOneLeaf", *tpg,
-                                              BIN_DIR_PATH "/src//");
+                                              BIN_DIR_PATH "/src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -371,7 +371,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
         << "bad number of edges in OneTeamTwoLeaves";
 
     tpgGen = new CodeGen::TPGGenerationEngine("OneTeamTwoLeaves", *tpg,
-                                              BIN_DIR_PATH "/src//");
+                                              BIN_DIR_PATH "/src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -456,7 +456,7 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
         << "bad number of edges in TwoTeamsOneCycle";
 
     tpgGen = new CodeGen::TPGGenerationEngine("TwoTeamsOneCycle", *tpg,
-                                              BIN_DIR_PATH "/src//");
+                                              BIN_DIR_PATH "/src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -546,7 +546,7 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
         << "bad number of edges in ThreeTeamsOneCycleThreeLeaves";
 
     tpgGen = new CodeGen::TPGGenerationEngine("ThreeTeamsOneCycleThreeLeaves",
-                                              *tpg, BIN_DIR_PATH "/src//");
+                                              *tpg, BIN_DIR_PATH "/src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
