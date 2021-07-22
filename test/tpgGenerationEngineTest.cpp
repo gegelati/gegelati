@@ -142,7 +142,7 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
 
     ASSERT_EQ(tpg->getEdges().size(), 1) << "bad number of edges in OneLeaf";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("OneLeaf", *tpg, "../src/");
+    tpgGen = new CodeGen::TPGGenerationEngine("OneLeaf", *tpg, BIN_DIR_PATH "/src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
