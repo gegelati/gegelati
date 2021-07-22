@@ -17,6 +17,7 @@ class TPGGenerationEngineTest : public ::testing::Test
   protected:
     std::string path;
     std::string cmdCompile;
+    std::string cmdExec;
     const size_t s1{8};
     Instructions::Set set;
     Environment* e;
@@ -110,7 +111,7 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     // call the destructor to close the file
     delete tpgGen;
 
-    cmdCompile =
+    cmdCompile +=
         "dir=" BIN_DIR_PATH " make -C " + path + " OneLeafNoInstruction";
     std::cout << system(cmdCompile.c_str()) << std::endl;
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
@@ -146,14 +147,10 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    std::string test{"echo " BIN_DIR_PATH};
-    system(test.c_str());
-    test = "echo " + path;
-    system(test.c_str());
-    system("pwd");
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0);
-    ASSERT_EQ(system("./OneLeaf 1 4.5"), 0)
+    cmdExec = BIN_DIR_PATH "/bin/OneLeaf 1 4.5";
+    ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneLeaf";
 }
 
@@ -197,7 +194,8 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoLeaves";
-    ASSERT_EQ(system("./TwoLeaves 2 4.5 6.8 9.4"), 0)
+    cmdExec = BIN_DIR_PATH "/bin/TwoLeaves 2 4.5 6.8 9.4";
+ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test TwoLeaves";
 }
 
@@ -254,7 +252,8 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " ThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeLeaves";
-    ASSERT_EQ(system("./ThreeLeaves 3 0 1.5 2.4 2.4"), 0)
+    cmdExec = BIN_DIR_PATH "/bin/ThreeLeaves 3 0 1.5 2.4 2.4";
+ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test ThreeLeaves";
 }
 
@@ -301,7 +300,8 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneTeamOneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
-    ASSERT_EQ(system("./OneTeamOneLeaf 1 4.5 6.8"), 0)
+    cmdExec = BIN_DIR_PATH "/bin/OneTeamOneLeaf 1 4.5 6.8";
+ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
 }
 
@@ -357,7 +357,8 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneTeamTwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamTwoLeaves";
-    ASSERT_EQ(system("./OneTeamTwoLeaves 2 4.5 6.8"), 0)
+    cmdExec = BIN_DIR_PATH "/bin/OneTeamTwoLeaves 2 4.5 6.8";
+ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneTeamTwoLeaves";
 }
 
@@ -434,7 +435,8 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoTeamsOneCycle";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoTeamsOneCycle";
-    ASSERT_EQ(system("./TwoTeamsOneCycle 1 4.5 6.8 9.4"), 0)
+    cmdExec = BIN_DIR_PATH "/bin/TwoTeamsOneCycle 1 4.5 6.8 9.4";
+ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test TwoTeamsOneCycle";
 }
 

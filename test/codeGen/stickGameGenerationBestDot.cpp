@@ -28,6 +28,8 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     File::TPGGraphDotImporter* dot = nullptr;
     std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
                            "codeGen"};
+    std::string cmdExec{BIN_DIR_PATH "/bin/StickGameBest_TPG 2 21 1 2 3 4"};
+
 
     virtual void SetUp()
     {
@@ -103,7 +105,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
     result = system(cmdCompile.c_str());
     ASSERT_EQ(result, 0)
         << "Fail to compile generated files to test stick game";
-    result = system("./StickGameBest_TPG 2 21 1 2 3 4");
+    result = system(cmdExec.c_str());
 
     ASSERT_EQ(result, 0) << "Error inference of Stick Game has changed";
 }
