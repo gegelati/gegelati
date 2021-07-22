@@ -2,10 +2,8 @@
 #ifndef DATAHANDLERPRINTER_H
 #define DATAHANDLERPRINTER_H
 
-//#include "data/abstractDataHandlerPrinter.h"
-#include "data/array2DWrapper.h"
-#include "data/arrayWrapper.h"
 #include "data/dataHandler.h"
+#include "data/demangle.h"
 
 namespace Data {
     /**

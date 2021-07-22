@@ -37,12 +37,12 @@
 
 #ifndef PROGRAMGENERATIONENGINE_H
 #define PROGRAMGENERATIONENGINE_H
+#include <fstream>
+
 #include "data/dataHandlerPrinter.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/instruction.h"
 #include "program/programEngine.h"
-//#include <bits/fcntl-linux.h>
-#include <fstream>
 
 namespace CodeGen {
     /**

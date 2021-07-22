@@ -146,6 +146,10 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
+    std::string test{"echo " BIN_DIR_PATH};
+    system(test.c_str());
+    test = "echo " + path;
+    system(test.c_str());
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0);
     ASSERT_EQ(system("./OneLeaf 1 4.5"), 0)

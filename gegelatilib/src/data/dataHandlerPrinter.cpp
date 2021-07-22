@@ -1,4 +1,6 @@
 #ifdef CODE_GENERATION
+#include <sstream>
+
 #include "data/dataHandlerPrinter.h"
 
 std::string Data::DataHandlerPrinter::printDataAt(

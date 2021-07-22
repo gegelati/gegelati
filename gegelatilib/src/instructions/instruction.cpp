@@ -34,12 +34,15 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "instructions/instruction.h"
-#include "data/arrayWrapper.h"
-
 #include <iostream>
+#include <regex>
 #include <search.h>
 #include <valarray>
+
+#include "instructions/instruction.h"
+#include "data/demangle.h"
+#include "data/constant.h"
+
 
 using namespace Instructions;
 

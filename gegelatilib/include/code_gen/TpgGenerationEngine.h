@@ -37,14 +37,15 @@
 
 #ifndef TPGGENERATIONENGINE_H
 #define TPGGENERATIONENGINE_H
+#include <ios>
+#include <iostream>
+#include <string>
+
 #include "code_gen/ProgramGenerationEngine.h"
 #include "tpg/tpgAbstractEngine.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgTeam.h"
-#include <ios>
-#include <iostream>
-#include <string>
 
 namespace CodeGen {
     /**
