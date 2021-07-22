@@ -25,7 +25,8 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     CodeGen::TPGGenerationEngine* tpgGen;
     std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
                            "codeGen"};
-    std::string cmdExec{BIN_DIR_PATH "/bin/TicTacToeBest_TPG 7 -1 -1 -1 -1 -1 -1 -1 -1"};
+    std::string cmdExec{BIN_DIR_PATH
+                        "/bin/TicTacToeBest_TPG 7 -1 -1 -1 -1 -1 -1 -1 -1"};
 
     virtual void SetUp()
     {
@@ -101,8 +102,8 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
     ASSERT_NO_THROW(dot->importGraph())
         << "Failed to Import the graph to test inference of TicTacToe";
 
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("TicTacToeBest_TPG", *tpg, BIN_DIR_PATH "/src//");
+    tpgGen = new CodeGen::TPGGenerationEngine("TicTacToeBest_TPG", *tpg,
+                                              BIN_DIR_PATH "/src//");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test TicTacToe";
     // call destructor to close generated files

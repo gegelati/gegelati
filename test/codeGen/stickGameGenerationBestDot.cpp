@@ -30,7 +30,6 @@ class StickGameGenerationBestDotTest : public ::testing::Test
                            "codeGen"};
     std::string cmdExec{BIN_DIR_PATH "/bin/StickGameBest_TPG 2 21 1 2 3 4"};
 
-
     virtual void SetUp()
     {
 
@@ -94,8 +93,8 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
                                         *e, *tpg);
     ASSERT_NO_THROW(dot->importGraph())
         << "Failed to Import the graph to test inference of stick game";
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, BIN_DIR_PATH "/src//");
+    tpgGen = new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg,
+                                              BIN_DIR_PATH "/src//");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files

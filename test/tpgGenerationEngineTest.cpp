@@ -71,16 +71,18 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
-    ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-                        "constructorWithStackSize", *tpg, BIN_DIR_PATH "/src//", 15))
+    ASSERT_NO_THROW(
+        tpgGen = new CodeGen::TPGGenerationEngine(
+            "constructorWithStackSize", *tpg, BIN_DIR_PATH "/src//", 15))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
-    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-                     "constructorErrorStackSize", *tpg, BIN_DIR_PATH "/src//", 0),
-                 std::runtime_error)
+    ASSERT_THROW(
+        tpgGen = new CodeGen::TPGGenerationEngine(
+            "constructorErrorStackSize", *tpg, BIN_DIR_PATH "/src//", 0),
+        std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0";
 
@@ -143,7 +145,8 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
 
     ASSERT_EQ(tpg->getEdges().size(), 1) << "bad number of edges in OneLeaf";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("OneLeaf", *tpg, BIN_DIR_PATH "/src/");
+    tpgGen =
+        new CodeGen::TPGGenerationEngine("OneLeaf", *tpg, BIN_DIR_PATH "/src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -187,7 +190,8 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
 
     ASSERT_EQ(tpg->getEdges().size(), 2) << "bad number of edges in TwoLeaves";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("TwoLeaves", *tpg, BIN_DIR_PATH "/src//");
+    tpgGen = new CodeGen::TPGGenerationEngine("TwoLeaves", *tpg,
+                                              BIN_DIR_PATH "/src//");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -195,7 +199,7 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoLeaves";
     cmdExec = BIN_DIR_PATH "/bin/TwoLeaves 2 4.5 6.8 9.4";
-ASSERT_EQ(system(cmdExec.c_str()), 0)
+    ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test TwoLeaves";
 }
 
@@ -245,7 +249,8 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     ASSERT_EQ(tpg->getEdges().size(), 3)
         << "bad number of edges in ThreeLeaves";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("ThreeLeaves", *tpg, BIN_DIR_PATH "/src//");
+    tpgGen = new CodeGen::TPGGenerationEngine("ThreeLeaves", *tpg,
+                                              BIN_DIR_PATH "/src//");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -253,7 +258,7 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeLeaves";
     cmdExec = BIN_DIR_PATH "/bin/ThreeLeaves 3 0 1.5 2.4 2.4";
-ASSERT_EQ(system(cmdExec.c_str()), 0)
+    ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test ThreeLeaves";
 }
 
@@ -292,8 +297,8 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     ASSERT_EQ(tpg->getEdges().size(), 2)
         << "bad number of edges in OneTeamOneLeaf";
 
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("OneTeamOneLeaf", *tpg, BIN_DIR_PATH "/src//");
+    tpgGen = new CodeGen::TPGGenerationEngine("OneTeamOneLeaf", *tpg,
+                                              BIN_DIR_PATH "/src//");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -301,7 +306,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
     cmdExec = BIN_DIR_PATH "/bin/OneTeamOneLeaf 1 4.5 6.8";
-ASSERT_EQ(system(cmdExec.c_str()), 0)
+    ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
 }
 
@@ -349,8 +354,8 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     ASSERT_EQ(tpg->getEdges().size(), 3)
         << "bad number of edges in OneTeamTwoLeaves";
 
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("OneTeamTwoLeaves", *tpg, BIN_DIR_PATH "/src//");
+    tpgGen = new CodeGen::TPGGenerationEngine("OneTeamTwoLeaves", *tpg,
+                                              BIN_DIR_PATH "/src//");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -358,7 +363,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamTwoLeaves";
     cmdExec = BIN_DIR_PATH "/bin/OneTeamTwoLeaves 2 4.5 6.8";
-ASSERT_EQ(system(cmdExec.c_str()), 0)
+    ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneTeamTwoLeaves";
 }
 
@@ -426,8 +431,8 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     ASSERT_EQ(tpg->getEdges().size(), 5)
         << "bad number of edges in TwoTeamsOneCycle";
 
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("TwoTeamsOneCycle", *tpg, BIN_DIR_PATH "/src//");
+    tpgGen = new CodeGen::TPGGenerationEngine("TwoTeamsOneCycle", *tpg,
+                                              BIN_DIR_PATH "/src//");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -436,7 +441,7 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoTeamsOneCycle";
     cmdExec = BIN_DIR_PATH "/bin/TwoTeamsOneCycle 1 4.5 6.8 9.4";
-ASSERT_EQ(system(cmdExec.c_str()), 0)
+    ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test TwoTeamsOneCycle";
 }
 
@@ -520,8 +525,9 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
                  " ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
-    ASSERT_EQ(
-        system("./ThreeTeamsOneCycleThreeLeaves 0 4.5 2.8 3.4 1.3 2.25 3.2"), 0)
+    cmdExec = BIN_DIR_PATH
+        "/bin/ThreeTeamsOneCycleThreeLeaves 0 4.5 2.8 3.4 1.3 2.25 3.2";
+    ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
 }
 #endif // CODE_GENERATION

@@ -39,10 +39,9 @@
 #include <search.h>
 #include <valarray>
 
-#include "instructions/instruction.h"
-#include "data/demangle.h"
 #include "data/constant.h"
-
+#include "data/demangle.h"
+#include "instructions/instruction.h"
 
 using namespace Instructions;
 
