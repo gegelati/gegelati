@@ -37,7 +37,7 @@
 
 #include "code_gen/TpgGenerationEngine.h"
 
-const std::string CodeGen::TPGGenerationEngine::filenameProg = "program";
+//const std::string CodeGen::TPGGenerationEngine::filenameProg = "program";
 
 void CodeGen::TPGGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 {

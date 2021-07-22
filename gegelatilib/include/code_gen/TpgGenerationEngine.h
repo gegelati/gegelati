@@ -63,7 +63,7 @@ namespace CodeGen {
          * String added at the end of the parameter filename to create the
          * filename of the file with the programs of the TPGGraph.
          */
-        static const std::string filenameProg;
+        inline static const std::string filenameProg = "program";
 
         /// File holding the functions in charge of iterating through the TPG.
         std::ofstream fileMain;
