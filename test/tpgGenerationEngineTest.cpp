@@ -25,6 +25,8 @@ class TPGGenerationEngineTest : public ::testing::Test
     Data::PrimitiveTypeArray<double> currentState{s1};
     CodeGen::TPGGenerationEngine* tpgGen;
     TPG::TPGGraph* tpg;
+    std::ifstream dataCSV;
+    std::string dataLine;
 
     virtual void SetUp()
     {
@@ -198,9 +200,15 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoLeaves";
-    cmdExec = BIN_DIR_PATH "/bin/TwoLeaves 2 4.5 6.8 9.4";
-    ASSERT_EQ(system(cmdExec.c_str()), 0)
-        << "Error wrong action returned in test TwoLeaves";
+    dataCSV.open(path + "/DataTwoLeaves.csv");
+
+    while (std::getline(dataCSV, dataLine)) {
+        cmdExec = BIN_DIR_PATH "/bin/TwoLeaves " + dataLine;
+        ASSERT_EQ(system(cmdExec.c_str()), 0)
+            << "Error wrong action returned in test TwoLeaves with input value "
+               ": " +
+                   dataLine;
+    }
 }
 
 TEST_F(TPGGenerationEngineTest, ThreeLeaves)
@@ -257,9 +265,17 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " ThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeLeaves";
-    cmdExec = BIN_DIR_PATH "/bin/ThreeLeaves 3 0 1.5 2.4 2.4";
-    ASSERT_EQ(system(cmdExec.c_str()), 0)
-        << "Error wrong action returned in test ThreeLeaves";
+
+    dataCSV.open(path + "/DataThreeLeaves.csv");
+
+    while (std::getline(dataCSV, dataLine)) {
+        cmdExec = BIN_DIR_PATH "/bin/ThreeLeaves " + dataLine;
+        ASSERT_EQ(system(cmdExec.c_str()), 0)
+            << "Error wrong action returned in test ThreeLeaves with input "
+               "value "
+               ": " +
+                   dataLine;
+    }
 }
 
 TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
@@ -362,9 +378,17 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneTeamTwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamTwoLeaves";
-    cmdExec = BIN_DIR_PATH "/bin/OneTeamTwoLeaves 2 4.5 6.8";
-    ASSERT_EQ(system(cmdExec.c_str()), 0)
-        << "Error wrong action returned in test OneTeamTwoLeaves";
+
+    dataCSV.open(path + "/DataOneTeamTwoLeaves.csv");
+
+    while (std::getline(dataCSV, dataLine)) {
+        cmdExec = BIN_DIR_PATH "/bin/OneTeamTwoLeaves " + dataLine;
+        ASSERT_EQ(system(cmdExec.c_str()), 0)
+            << "Error wrong action returned in test OneTeamTwoLeaves with "
+               "input value "
+               ": " +
+                   dataLine;
+    }
 }
 
 TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
@@ -393,27 +417,27 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
 
     const std::shared_ptr<Program::Program> prog3(new Program::Program(*e));
     Program::Line& prog3L1 = prog3->addNewLine();
-    // reg[0] = in1[1] - in1[2];
+    // reg[0] = in1[1] + in1[3];
     prog3L1.setDestinationIndex(0);
-    prog3L1.setInstructionIndex(1);
+    prog3L1.setInstructionIndex(0);
     prog3L1.setOperand(0, 1, 1);
-    prog3L1.setOperand(1, 1, 2);
+    prog3L1.setOperand(1, 1, 3);
 
     const std::shared_ptr<Program::Program> prog4(new Program::Program(*e));
     Program::Line& prog4L1 = prog4->addNewLine();
-    // reg[0] = in1[1] - in1[2];
+    // reg[0] = in1[1] + in1[4];
     prog4L1.setDestinationIndex(0);
-    prog4L1.setInstructionIndex(1);
+    prog4L1.setInstructionIndex(0);
     prog4L1.setOperand(0, 1, 1);
-    prog4L1.setOperand(1, 1, 2);
+    prog4L1.setOperand(1, 1, 4);
 
     const std::shared_ptr<Program::Program> prog5(new Program::Program(*e));
     Program::Line& prog5L1 = prog5->addNewLine();
-    // reg[0] = in1[1] + in1[2];
+    // reg[0] = in1[1] + in1[5];
     prog5L1.setDestinationIndex(0);
     prog5L1.setInstructionIndex(0);
     prog5L1.setOperand(0, 1, 1);
-    prog5L1.setOperand(1, 1, 2);
+    prog5L1.setOperand(1, 1, 5);
 
     // Version avec team intermédiaire
     tpg->addNewEdge(*root, *T1, prog1);
@@ -440,20 +464,28 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoTeamsOneCycle";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoTeamsOneCycle";
-    cmdExec = BIN_DIR_PATH "/bin/TwoTeamsOneCycle 1 4.5 6.8 9.4";
-    ASSERT_EQ(system(cmdExec.c_str()), 0)
-        << "Error wrong action returned in test TwoTeamsOneCycle";
+
+    dataCSV.open(path + "/DataTwoTeamsOneCycle.csv");
+
+    while (std::getline(dataCSV, dataLine)) {
+        cmdExec = BIN_DIR_PATH "/bin/TwoTeamsOneCycle " + dataLine;
+        ASSERT_EQ(system(cmdExec.c_str()), 0)
+            << "Error wrong action returned in test TwoTeamsOneCycle with "
+               "input value "
+               ": " +
+                   dataLine;
+    }
 }
 
 static void setProgLine(const std::shared_ptr<Program::Program> prog,
                         int operand)
 {
     Program::Line& line = prog->addNewLine();
-    // reg[0] = in1[operand] + in1[8] (= 0)
+    // reg[0] = in1[operand] + reg[8] (= 0)
     line.setDestinationIndex(0);
     line.setInstructionIndex(0);
     line.setOperand(0, 1, operand);
-    line.setOperand(1, 1, 8);
+    line.setOperand(1, 0, 1);
 }
 
 TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
@@ -477,24 +509,21 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     const std::shared_ptr<Program::Program> prog5(new Program::Program(*e));
     const std::shared_ptr<Program::Program> prog6(new Program::Program(*e));
     const std::shared_ptr<Program::Program> prog7(new Program::Program(*e));
-    const std::shared_ptr<Program::Program> prog8(new Program::Program(*e));
 
     setProgLine(prog1, 0);
-    // reg[0] = in1[0] + in1[8] (= 0)
+    // reg[0] = in1[0] + reg[1] (reg[1] = 0)
     setProgLine(prog2, 1);
-    // reg[0] = in1[1] + in1[8] (= 0)
+    // reg[0] = in1[1] + reg[1] (reg[1] = 0)
     setProgLine(prog3, 2);
-    // reg[0] = in1[2] + in1[8] (= 0)
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
     setProgLine(prog4, 3);
-    // reg[0] = in1[3] + in1[8] (= 0)
+    // reg[0] = in1[3] + reg[1] (reg[1] = 0)
     setProgLine(prog5, 4);
-    // reg[0] = in1[4] + in1[8] (= 0)
+    // reg[0] = in1[4] + reg[1] (reg[1] = 0)
     setProgLine(prog6, 5);
-    // reg[0] = in1[5] + in1[8] (= 0)
+    // reg[0] = in1[5] + reg[1] (reg[1] = 0)
     setProgLine(prog7, 6);
-    // reg[0] = in1[6] + in1[8] (= 0)
-    setProgLine(prog8, 7);
-    // reg[0] = in1[7] + in1[8] (= 0)
+    // reg[0] = in1[6] + reg[1] (reg[1] = 0)
 
     // Version avec team intermédiaire
     tpg->addNewEdge(*T1, *T2, prog1);
@@ -502,10 +531,10 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     tpg->addNewEdge(*T1, *T3, prog3);
 
     tpg->addNewEdge(*T2, *A0, prog4);
-    tpg->addNewEdge(*T2, *T3, prog2);
+    tpg->addNewEdge(*T2, *T3, prog5);
 
-    tpg->addNewEdge(*T3, *A2, prog5);
-    tpg->addNewEdge(*T3, *T2, prog6);
+    tpg->addNewEdge(*T3, *A2, prog6);
+    tpg->addNewEdge(*T3, *T2, prog7);
 
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
         << "number of root is not 1 in ThreeTeamsOneCycleThreeLeaves";
@@ -525,9 +554,16 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
                  " ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
-    cmdExec = BIN_DIR_PATH
-        "/bin/ThreeTeamsOneCycleThreeLeaves 0 4.5 2.8 3.4 1.3 2.25 3.2";
-    ASSERT_EQ(system(cmdExec.c_str()), 0)
-        << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
+
+    dataCSV.open(path + "/DataThreeTeamsOneCycleThreeLeaves.csv");
+
+    while (std::getline(dataCSV, dataLine)) {
+        cmdExec = BIN_DIR_PATH "/bin/ThreeTeamsOneCycleThreeLeaves " + dataLine;
+        ASSERT_EQ(system(cmdExec.c_str()), 0)
+            << "Error wrong action returned in test "
+               "ThreeTeamsOneCycleThreeLeaves with input value "
+               ": " +
+                   dataLine;
+    }
 }
 #endif // CODE_GENERATION

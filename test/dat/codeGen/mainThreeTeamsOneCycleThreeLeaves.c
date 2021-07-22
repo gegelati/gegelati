@@ -7,7 +7,7 @@ double* in1;
 
 int main(int argc, char* argv[])
 {
-    double tab[6];
+    double tab[7];
     in1 = tab;
     int expectedVal;
     int action;
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     }
     else {
         expectedVal = atoi(argv[1]);
-        for (int i = 2, cpt = 0; i < argc && cpt < 6; ++cpt, ++i) {
+        for (int i = 2, cpt = 0; i < argc && cpt < 7; ++cpt, ++i) {
             tab[cpt] = atof(argv[i]);
         }
     }
