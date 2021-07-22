@@ -103,7 +103,7 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
 
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
     ASSERT_NO_THROW(progGen = new CodeGen::ProgramGenerationEngine(
-                        "constructor", *e, "../src/"))
+                        "constructor", *e, BIN_DIR_PATH "/src//"))
         << "Construction failed.";
 
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";

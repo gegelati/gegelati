@@ -93,7 +93,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
     ASSERT_NO_THROW(dot->importGraph())
         << "Failed to Import the graph to test inference of stick game";
     tpgGen =
-        new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, "../src/");
+        new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, BIN_DIR_PATH "/src//");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files
