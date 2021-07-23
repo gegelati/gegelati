@@ -100,7 +100,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 
 TEST_F(StickGameGenerationBestDotTest, BestTPG)
 {
-    int inferenceCodeGen, inferenceGegelati;
+    int inferenceCodeGen, inferenceGegelati, status;
     tpgGen = new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg,
                                               BIN_DIR_PATH "/src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
@@ -130,7 +130,8 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
             .getSharedPointer<int>()
             .get())));
         std::cout << cmdExec << dataIn << std::endl;
-        inferenceCodeGen = WEXITSTATUS(system((cmdExec + dataIn).c_str()));
+        status = system((cmdExec + dataIn).c_str());
+        inferenceCodeGen = WEXITSTATUS(status);
         inferenceGegelati =
             ((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex).back())
                 ->getActionID();
