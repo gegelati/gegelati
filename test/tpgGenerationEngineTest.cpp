@@ -27,7 +27,6 @@ class TPGGenerationEngineTest : public ::testing::Test
     TPG::TPGGraph* tpg;
     std::ifstream dataCSV;
     std::string dataLine;
-    std::string cmdBuildSystem{"cd " BIN_DIR_PATH "/buildCodeGen; cmake -DDIR=" BIN_DIR_PATH " " TESTS_DAT_PATH "codeGen; cd -"};
 
     virtual void SetUp()
     {
@@ -45,11 +44,8 @@ class TPGGenerationEngineTest : public ::testing::Test
 
         e = new Environment(set, data, 8);
         tpg = new TPG::TPGGraph(*e);
-#ifdef _MSC_VER
-    cmdCompile = "dir=" BIN_DIR_PATH " nmake -C " + path + " ";
-#elif __GNUC__
-    cmdCompile = "dir=" BIN_DIR_PATH  " make -C " + path + " ";
-#endif
+        cmdCompile = "" TESTS_DAT_PATH "codeGen/compile.sh " BIN_DIR_PATH
+                     " " TESTS_DAT_PATH " ";
     }
 
     virtual void TearDown()

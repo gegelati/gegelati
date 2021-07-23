@@ -77,13 +77,8 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         dot->importGraph();
         rootVertex = tpg->getRootVertices().back();
 
-#ifdef _MSC_VER
-        cmdCompile = "dir=" BIN_DIR_PATH " nmake -C " TESTS_DAT_PATH
-                           "codeGen StickGameBest_TPG";
-#elif __GNUC__
-        cmdCompile = "dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
-                               "codeGen StickGameBest_TPG";
-#endif
+        cmdCompile = "" TESTS_DAT_PATH "codeGen/compile.sh " BIN_DIR_PATH
+                     " " TESTS_DAT_PATH " StickGameBest_TPG";
     }
 
     virtual void TearDown()
@@ -121,19 +116,20 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
     while (!le->isTerminal()) {
         dataIn = "";
         for (int i = 0; i < 3; ++i) {
-            dataIn +=  std::to_string((*(le->getDataSources()
-                                                  .at(0)
-                                                  .get()
-                                                  .getDataAt(typeid(int), i)
-                                                  .getSharedPointer<int>()
-                                                  .get())))+ " ";
+            dataIn += std::to_string((*(le->getDataSources()
+                                            .at(0)
+                                            .get()
+                                            .getDataAt(typeid(int), i)
+                                            .getSharedPointer<int>()
+                                            .get()))) +
+                      " ";
         }
         dataIn += std::to_string((*(le->getDataSources()
-            .at(1)
-            .get()
-            .getDataAt(typeid(int), 0)
-            .getSharedPointer<int>()
-            .get())));
+                                        .at(1)
+                                        .get()
+                                        .getDataAt(typeid(int), 0)
+                                        .getSharedPointer<int>()
+                                        .get())));
         std::cout << cmdExec << dataIn << std::endl;
 #ifdef _MSC_VER
         inferenceCodeGen = system((cmdExec + dataIn).c_str());
