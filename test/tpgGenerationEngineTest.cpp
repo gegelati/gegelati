@@ -27,6 +27,7 @@ class TPGGenerationEngineTest : public ::testing::Test
     TPG::TPGGraph* tpg;
     std::ifstream dataCSV;
     std::string dataLine;
+    std::string cmdBuildSystem{"cd " BIN_DIR_PATH "/buildCodeGen; cmake -DDIR=" BIN_DIR_PATH " " TESTS_DAT_PATH "codeGen; cd -"};
 
     virtual void SetUp()
     {
@@ -121,7 +122,6 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     delete tpgGen;
 
     cmdCompile += "OneLeafNoInstruction";
-
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Compilation failed in OneLeafNoInstruction";
 }
