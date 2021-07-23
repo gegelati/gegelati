@@ -130,8 +130,13 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
             .getSharedPointer<int>()
             .get())));
         std::cout << cmdExec << dataIn << std::endl;
+#ifdef _MSC_VER
+        inferenceCodeGen = system((cmdExec + dataIn).c_str());
+        std::cout << "return value : " << inferenceCodeGen << std::endl;
+#elif __GNUC__
         status = system((cmdExec + dataIn).c_str());
         inferenceCodeGen = WEXITSTATUS(status);
+#endif
         inferenceGegelati =
             ((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex).back())
                 ->getActionID();
