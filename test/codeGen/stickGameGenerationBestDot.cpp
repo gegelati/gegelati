@@ -28,8 +28,13 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     TPG::TPGExecutionEngine* tee;
     CodeGen::TPGGenerationEngine* tpgGen;
     File::TPGGraphDotImporter* dot = nullptr;
-    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
-                           "codeGen"};
+
+
+//    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
+//                           "codeGen"};
+//    std::string cmdExec{BIN_DIR_PATH "/bin/StickGameBest_TPG "};
+    std::string cmdBuildSystem{"cd " BIN_DIR_PATH "/buildCodeGen; cmake -DDIR=" BIN_DIR_PATH " " TESTS_DAT_PATH "codeGen; cd -"};
+    std::string cmdCompile{"cmake --build " BIN_DIR_PATH "/buildCodeGen --target StickGameBest_TPG"};
     std::string cmdExec{BIN_DIR_PATH "/bin/StickGameBest_TPG "};
     std::string dataIn;
     TPG::TPGVertex const* rootVertex;
@@ -77,6 +82,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
             TESTS_DAT_PATH "StickGame_out_best.dot", *e, *tpg);
         dot->importGraph();
         rootVertex = tpg->getRootVertices().back();
+        ASSERT_EQ(system(cmdBuildSystem.c_str()), 0);
     }
 
     virtual void TearDown()
@@ -107,8 +113,6 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files
     delete tpgGen;
-
-    cmdCompile += " StickGameBest_TPG";
 
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Fail to compile generated files to test stick game";

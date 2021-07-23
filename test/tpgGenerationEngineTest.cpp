@@ -27,6 +27,7 @@ class TPGGenerationEngineTest : public ::testing::Test
     TPG::TPGGraph* tpg;
     std::ifstream dataCSV;
     std::string dataLine;
+    std::string cmdBuildSystem{"cd " BIN_DIR_PATH "/buildCodeGen; cmake -DDIR=" BIN_DIR_PATH " " TESTS_DAT_PATH "codeGen; cd -"};
 
     virtual void SetUp()
     {
@@ -44,6 +45,8 @@ class TPGGenerationEngineTest : public ::testing::Test
 
         e = new Environment(set, data, 8);
         tpg = new TPG::TPGGraph(*e);
+        ASSERT_EQ(system(cmdBuildSystem.c_str()), 0);
+        cmdCompile = "cmake --build " BIN_DIR_PATH "/buildCodeGen --target ";
     }
 
     virtual void TearDown()
@@ -115,8 +118,7 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     // call the destructor to close the file
     delete tpgGen;
 
-    cmdCompile +=
-        "dir=" BIN_DIR_PATH " make -C " + path + " OneLeafNoInstruction";
+    cmdCompile += "OneLeafNoInstruction";
     std::cout << system(cmdCompile.c_str()) << std::endl;
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Compilation failed in OneLeafNoInstruction";
@@ -152,7 +154,7 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneLeaf";
+    cmdCompile += "OneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0);
     cmdExec = BIN_DIR_PATH "/bin/OneLeaf 1 4.5";
     ASSERT_EQ(system(cmdExec.c_str()), 0)
@@ -197,7 +199,7 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoLeaves";
+    cmdCompile += "TwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoLeaves";
     dataCSV.open(path + "/DataTwoLeaves.csv");
@@ -262,7 +264,7 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " ThreeLeaves";
+    cmdCompile += "ThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeLeaves";
 
@@ -318,7 +320,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneTeamOneLeaf";
+    cmdCompile += "OneTeamOneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
     cmdExec = BIN_DIR_PATH "/bin/OneTeamOneLeaf 1 4.5 6.8";
@@ -375,7 +377,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " OneTeamTwoLeaves";
+    cmdCompile += "OneTeamTwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamTwoLeaves";
 
@@ -461,7 +463,7 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     // call the destructor to close the file
     delete tpgGen;
 
-    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path + " TwoTeamsOneCycle";
+    cmdCompile += "TwoTeamsOneCycle";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test TwoTeamsOneCycle";
 
@@ -550,8 +552,7 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
-    cmdCompile = "dir=" BIN_DIR_PATH " make -C " + path +
-                 " ThreeTeamsOneCycleThreeLeaves";
+    cmdCompile += "ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
 

@@ -23,8 +23,12 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     TPG::TPGGraph* tpg;
     File::TPGGraphDotImporter* dot = nullptr;
     CodeGen::TPGGenerationEngine* tpgGen;
-    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
-                           "codeGen"};
+//    std::string cmdCompile{"dir=" BIN_DIR_PATH " make -C " TESTS_DAT_PATH
+//                           "codeGen"};
+//    std::string cmdExec{BIN_DIR_PATH
+//                        "/bin/TicTacToeBest_TPG 7 -1 -1 -1 -1 -1 -1 -1 -1"};
+    std::string cmdBuildSystem{"cd " BIN_DIR_PATH "/buildCodeGen; cmake -DDIR=" BIN_DIR_PATH " " TESTS_DAT_PATH "codeGen; cd -"};
+    std::string cmdCompile{"cmake --build " BIN_DIR_PATH "/buildCodeGen --target TicTacToeBest_TPG"};
     std::string cmdExec{BIN_DIR_PATH
                         "/bin/TicTacToeBest_TPG 7 -1 -1 -1 -1 -1 -1 -1 -1"};
 
@@ -75,6 +79,8 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
 
         e = new Environment(set, data, 8);
         tpg = new TPG::TPGGraph(*e);
+
+        ASSERT_EQ(system(cmdBuildSystem.c_str()), 0);
     }
 
     virtual void TearDown()
@@ -109,7 +115,6 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
     // call destructor to close generated files
     delete tpgGen;
 
-    cmdCompile += " TicTacToeBest_TPG";
 
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Fail to compile generated files to test TicTacToe";
