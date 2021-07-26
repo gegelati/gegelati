@@ -45,13 +45,14 @@ class TPGGenerationEngineTest : public ::testing::Test
 
         e = new Environment(set, data, 8);
         tpg = new TPG::TPGGraph(*e);
+
+        cmdCompile = "" TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
-        cmdCompile = "" TESTS_DAT_PATH "codeGen/compile.bat " BIN_DIR_PATH
-                     " " TESTS_DAT_PATH " ";
+        cmdCompile += "compile.bat";
 #elif __GNUC__
-        cmdCompile = "" TESTS_DAT_PATH "codeGen/compile.sh " BIN_DIR_PATH
-                     " " TESTS_DAT_PATH " ";
+        cmdCompile += "compile.sh";
 #endif
+        cmdCompile += " " BIN_DIR_PATH " " TESTS_DAT_PATH " ";
     }
 
     virtual void TearDown()
@@ -161,7 +162,7 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
     cmdCompile += "OneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0);
     cmdExec = BIN_DIR_PATH "/bin/OneLeaf 1 4.5";
-    std::cout << "CmdExe : " << cmdExec << std::endl;
+
     ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneLeaf";
 }
@@ -280,7 +281,6 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
         << "Error cannot open file DataThreeLeaves.csv.";
     while (std::getline(dataCSV, dataLine)) {
         cmdExec = BIN_DIR_PATH "/bin/ThreeLeaves " + dataLine;
-        std::cout << "CmdExe : " << cmdExec << std::endl;
         ASSERT_EQ(system(cmdExec.c_str()), 0)
             << "Error wrong action returned in test ThreeLeaves with input "
                "value "

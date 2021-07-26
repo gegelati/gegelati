@@ -157,7 +157,8 @@ namespace Data {
     //    }
     //
     //    template <class T>
-    //    std::string Data::DataHandlerPrinter<T>::getDemangleTemplateType() const
+    //    std::string Data::DataHandlerPrinter<T>::getDemangleTemplateType()
+    const
     //    {
     //        return std::string{
     //            DEMANGLE_TYPEID_NAME(dataHandler->getTemplateType().name())};

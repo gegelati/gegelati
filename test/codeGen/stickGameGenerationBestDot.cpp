@@ -18,8 +18,6 @@
 class StickGameGenerationBestDotTest : public ::testing::Test
 {
   protected:
-    const size_t sizeHint{4};
-    const size_t sizeRemainingStick{1};
     Instructions::Set set;
     Environment* e;
     StickGameAdversarial* le;
@@ -33,7 +31,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     std::string dataIn;
     TPG::TPGVertex const* rootVertex;
 
-    virtual void SetUp()
+    virtual void SetUp() override
     {
 
         auto minus = [](int a, int b) -> double {
@@ -77,11 +75,17 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         dot->importGraph();
         rootVertex = tpg->getRootVertices().back();
 
-        cmdCompile = "" TESTS_DAT_PATH "codeGen/compile.sh " BIN_DIR_PATH
-                     " " TESTS_DAT_PATH " StickGameBest_TPG";
+        cmdCompile = "" TESTS_DAT_PATH "codeGen/";
+#ifdef _MSC_VER
+        cmdCompile += "compile.bat";
+#elif __GNUC__
+        cmdCompile += "compile.sh";
+#endif
+        cmdCompile += " " BIN_DIR_PATH
+                      " " TESTS_DAT_PATH " StickGameBest_TPG";
     }
 
-    virtual void TearDown()
+    virtual void TearDown() override
     {
 
         delete e;
@@ -139,8 +143,8 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
         inferenceGegelati =
-            ((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex).back())
-                ->getActionID();
+            (int)(((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex).back())
+                ->getActionID());
         ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
             << "Error inference of Stick Game has changed";
         le->doAction(inferenceGegelati);

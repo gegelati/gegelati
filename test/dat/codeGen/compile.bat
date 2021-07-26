@@ -1,10 +1,10 @@
-DIR=%1
-DAT=%2
-target=%3
+set DIR=%1
+set DAT=%2
+set target=%3
 
 set build=%DIR%/buildCodeGen/%target%
 
-mkdir -p %build%
+if not exist %build% mkdir %build%
 
 pushd %DIR%/buildCodeGen/%target%
 
