@@ -61,7 +61,7 @@ std::string Data::DataHandlerPrinter::printDataAt(
     return operandInit;
 }
 
-std::string Data::DataHandlerPrinter::getTemplatedType() const
+std::string Data::DataHandlerPrinter::getDemangleTemplateType() const
 {
     return std::string{
         DEMANGLE_TYPEID_NAME(dataHandler->getTemplateType().name())};

@@ -148,7 +148,7 @@ void CodeGen::ProgramGenerationEngine::initGlobalVar(size_t nbConstant)
     for (int cpt = 1; i < this->dataScsConstsAndRegs.size(); ++i, ++cpt) {
 
         const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
-        std::string type = getPrinter(d).getTemplatedType();
+        std::string type = getPrinter(d).getDemangleTemplateType();
 
         fileC << "extern " << type << "* in" << cpt << ";" << std::endl;
     }

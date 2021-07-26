@@ -99,7 +99,7 @@ namespace Data {
          *
          * \return template type of the DataHandler in a human readable format.
          */
-        std::string getTemplatedType() const;
+        std::string getDemangleTemplateType() const;
 
         /**
          * \brief Function that return the size of each dimension of an operand.
@@ -140,7 +140,7 @@ namespace Data {
     //        // the operand for a 1D array
     //        std::string operandInit{"[] = "};
     //        std::string typeName = DEMANGLE_TYPEID_NAME(type.name());
-    //        std::string regex{this->getTemplatedType()};
+    //        std::string regex{this->getDemangleTemplateType()};
     //        regex.append("\\s*(const\\s*)?\\[([0-9]+)\\]");
     //        std::regex arrayType(regex);
     //        std::cmatch cm;
@@ -157,7 +157,7 @@ namespace Data {
     //    }
     //
     //    template <class T>
-    //    std::string Data::DataHandlerPrinter<T>::getTemplatedType() const
+    //    std::string Data::DataHandlerPrinter<T>::getDemangleTemplateType() const
     //    {
     //        return std::string{
     //            DEMANGLE_TYPEID_NAME(dataHandler->getTemplateType().name())};

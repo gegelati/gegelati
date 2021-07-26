@@ -158,13 +158,13 @@ TEST_F(DataHandlerPrinterTest, printDataAt)
            "array.";
 }
 
-TEST_F(DataHandlerPrinterTest, getTemplatedType)
+TEST_F(DataHandlerPrinterTest, getDemangleTemplateType)
 {
-    ASSERT_EQ(array1DPrinter->getTemplatedType(), "double")
+    ASSERT_EQ(array1DPrinter->getDemangleTemplateType(), "double")
         << "Fail to retrieve the type (in a human readable format) of the "
            "PrimitiveTypeArray inside the DataHandlerPrinter.";
 
-    ASSERT_EQ(array2DPrinter->getTemplatedType(), "double")
+    ASSERT_EQ(array2DPrinter->getDemangleTemplateType(), "double")
         << "Fail to retrieve the type (in a human readable format) of the "
            "PrimitiveTypeArray2D inside the DataHandlerPrinter.";
 }
