@@ -6,9 +6,9 @@ set build=%DIR%/buildCodeGen/%target%
 
 if not exist %build% mkdir %build%
 
-pushd %DIR%/buildCodeGen/%target%
+pushd %DIR%/build/CodeGen/%target%
 
-cmake -DDIR=%DIR% %DAT%/codeGen/%target%
+cmake -DDIR=%DIR% %DAT%codeGen/%target%
 
 popd
 

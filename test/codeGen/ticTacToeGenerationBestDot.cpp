@@ -76,12 +76,11 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
         tpg = new TPG::TPGGraph(*e);
         cmdCompile = "" TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
-         cmdCompile += "compile.bat";
+        cmdCompile += "compile.bat";
 #elif __GNUC__
         cmdCompile += "compile.sh";
 #endif
-        cmdCompile += " " BIN_DIR_PATH
-                      " " TESTS_DAT_PATH " TicTacToeBest_TPG";
+        cmdCompile += " " BIN_DIR_PATH " " TESTS_DAT_PATH " TicTacToeBest_TPG";
     }
 
     virtual void TearDown()

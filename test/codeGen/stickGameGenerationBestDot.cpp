@@ -81,8 +81,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 #elif __GNUC__
         cmdCompile += "compile.sh";
 #endif
-        cmdCompile += " " BIN_DIR_PATH
-                      " " TESTS_DAT_PATH " StickGameBest_TPG";
+        cmdCompile += " " BIN_DIR_PATH " " TESTS_DAT_PATH " StickGameBest_TPG";
     }
 
     virtual void TearDown() override
@@ -143,8 +142,9 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
         inferenceGegelati =
-            (int)(((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex).back())
-                ->getActionID());
+            (int)(((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex)
+                       .back())
+                      ->getActionID());
         ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
             << "Error inference of Stick Game has changed";
         le->doAction(inferenceGegelati);
