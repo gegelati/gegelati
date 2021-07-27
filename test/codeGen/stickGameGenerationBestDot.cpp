@@ -110,7 +110,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
 {
     int inferenceCodeGen, inferenceGegelati, status;
     tpgGen =
-        new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, "../src/");
+        new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, BIN_DIR_PATH "/src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files
