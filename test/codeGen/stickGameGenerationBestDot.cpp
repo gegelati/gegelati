@@ -147,8 +147,9 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
         inferenceGegelati =
-            (int)(((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex).back())
-                ->getActionID());
+            (int)(((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex)
+                       .back())
+                      ->getActionID());
         ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
             << "Error inference of Stick Game has changed";
         le->doAction(inferenceGegelati);

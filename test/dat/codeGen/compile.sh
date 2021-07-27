@@ -8,7 +8,7 @@ build=${DIR}/buildCodeGen/${target}
 
 mkdir -p ${build}
 
-cd ${DIR}/buildCodeGen/${target}
+cd ${build}
 
 cmake -DDIR=${DIR} ${DAT}/codeGen/${target}
 
