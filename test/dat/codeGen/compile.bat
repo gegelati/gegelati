@@ -1,15 +1,19 @@
-set DIR=%1
-set DAT=%2
-set target=%3
+@echo off
+set DAT=%1
+set target=%2
 
-set build=%DIR%/buildCodeGen/%target%
+if not exist ".\buildCodeGen\%target%\" mkdir ".\buildCodeGen\%target%\"
 
-if not exist %build% mkdir %build%
+if %errorlevel% NEQ 0 (
+	echo "Error cannot create the directory for buildsystem."
+	EXIT \B %errorlevel%
+)
 
-pushd %DIR%/buildCodeGen/%target%
+set DIR=%cd:\=/%
 
-cmake -DDIR=%DIR% %DAT%/codeGen/%target%
+cd .\buildCodeGen\%target%
 
-popd
 
-cmake --build %build% --target %target%
+cmake -DDIR="%DIR%"  %DAT%codeGen\%target%
+
+cmake --build . --target %target%

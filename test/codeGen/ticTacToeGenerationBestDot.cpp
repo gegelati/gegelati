@@ -24,8 +24,9 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     File::TPGGraphDotImporter* dot = nullptr;
     CodeGen::TPGGenerationEngine* tpgGen;
     std::string cmdCompile;
-    std::string cmdExec{BIN_DIR_PATH
-                        "/bin/TicTacToeBest_TPG 7 -1 -1 -1 -1 -1 -1 -1 -1"};
+	std::string cmdExec{ "\"" BIN_DIR_PATH "/bin/" };
+    //std::string cmdExec{BIN_DIR_PATH
+                        //"/bin/
 
     virtual void SetUp()
     {
@@ -74,14 +75,17 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
 
         e = new Environment(set, data, 8);
         tpg = new TPG::TPGGraph(*e);
-        cmdCompile = "" TESTS_DAT_PATH "codeGen/";
+
+		cmdCompile = TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
-         cmdCompile += "compile.bat";
+		cmdCompile += "compile.bat ";
+		cmdExec += "debug/TicTacToeBest_TPG.exe";
 #elif __GNUC__
-        cmdCompile += "compile.sh";
+		cmdCompile += "compile.sh " BIN_DIR_PATH " ";
+		cmdExec += "TicTacToeBest_TPG";
 #endif
-        cmdCompile += " " BIN_DIR_PATH
-                      " " TESTS_DAT_PATH " TicTacToeBest_TPG";
+        cmdCompile +=  TESTS_DAT_PATH " TicTacToeBest_TPG";
+		cmdExec += "\" 7 -1 -1 -1 -1 -1 -1 -1 -1 -1";
     }
 
     virtual void TearDown()
@@ -118,6 +122,7 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
 
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Fail to compile generated files to test TicTacToe";
+	std::cout << cmdExec << std::endl;
     ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error inference of TicTacToe has changed";
 }

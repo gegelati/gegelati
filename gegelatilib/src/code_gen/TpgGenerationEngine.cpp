@@ -125,14 +125,13 @@ void CodeGen::TPGGenerationEngine::initTpgFile()
     fileMain
         << "#include <limits.h> \n"
         << "#include <assert.h>\n"
-        << "#include <errno.h>\n"
-        << "#include <err.h>\n"
         << "#include <stdio.h>\n"
+		<< "#include <stdint.h>\n"
 
         << "#define stackSize  " << stackSize << "\n\n"
 
         << "Edge* callStack[stackSize];\n"
-        << "u_int64_t top = 0;\n\n"
+        << "uint32_t top = 0;\n\n"
 
         << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
         << "\tvoid*(*f)(int*action) = ptr_f;\n"
@@ -181,9 +180,9 @@ void CodeGen::TPGGenerationEngine::initTpgFile()
         << "}\n\n"
 
         << "void push( Edge* e){\n"
-        << "if(top == stackSize) {\n"
-        << "\t\terrx(EOVERFLOW, \"Call stack is too small for the iteration of "
-           "this TPG\");\n"
+        << "\tif(top == stackSize) {\n"
+        << "\t\tfprintf(stderr, \"Call stack of size %d is too small for the iteration of "
+           "this TPG\", stackSize);\n"
         << "\t}\n"
         << "\tcallStack[top] = e;\n"
         << "\ttop++;"

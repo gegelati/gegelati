@@ -27,7 +27,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     CodeGen::TPGGenerationEngine* tpgGen;
     File::TPGGraphDotImporter* dot = nullptr;
     std::string cmdCompile;
-    std::string cmdExec{BIN_DIR_PATH "/bin/StickGameBest_TPG "};
+    std::string cmdExec{"\"" BIN_DIR_PATH "/bin/"};
     std::string dataIn;
     TPG::TPGVertex const* rootVertex;
 
@@ -75,14 +75,16 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         dot->importGraph();
         rootVertex = tpg->getRootVertices().back();
 
-        cmdCompile = "" TESTS_DAT_PATH "codeGen/";
+		cmdCompile = TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
-        cmdCompile += "compile.bat";
+		cmdCompile += "compile.bat ";
+		cmdExec += "debug/";
 #elif __GNUC__
-        cmdCompile += "compile.sh";
+		cmdCompile += "compile.sh " BIN_DIR_PATH " ";
 #endif
-        cmdCompile += " " BIN_DIR_PATH
-                      " " TESTS_DAT_PATH " StickGameBest_TPG";
+		cmdCompile += TESTS_DAT_PATH " StickGameBest_TPG";
+		cmdExec += "StickGameBest_TPG";
+		std::cout <<"commande : " << cmdCompile << std::endl;
     }
 
     virtual void TearDown() override
@@ -108,7 +110,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
 {
     int inferenceCodeGen, inferenceGegelati, status;
     tpgGen = new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg,
-                                              BIN_DIR_PATH "/src/");
+                                              "../src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files
@@ -134,12 +136,14 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
                                         .getDataAt(typeid(int), 0)
                                         .getSharedPointer<int>()
                                         .get())));
-        std::cout << cmdExec << dataIn << std::endl;
+        
 #ifdef _MSC_VER
-        inferenceCodeGen = system((cmdExec + dataIn).c_str());
+		std::string cmd{ cmdExec + ".exe\" " + dataIn };
+        inferenceCodeGen = system(cmd.c_str());
         std::cout << "return value : " << inferenceCodeGen << std::endl;
 #elif __GNUC__
-        status = system((cmdExec + dataIn).c_str());
+		std::string cmd{ cmdExec + "\" " + dataIn };
+        status = system(cmd.c_str());
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
         inferenceGegelati =
@@ -149,4 +153,5 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
             << "Error inference of Stick Game has changed";
         le->doAction(inferenceGegelati);
     }
+	std::cout << "pouet" << std::endl;
 }
