@@ -126,7 +126,7 @@ void CodeGen::TPGGenerationEngine::initTpgFile()
         << "#include <limits.h> \n"
         << "#include <assert.h>\n"
         << "#include <stdio.h>\n"
-		<< "#include <stdint.h>\n"
+        << "#include <stdint.h>\n"
 
         << "#define stackSize  " << stackSize << "\n\n"
 
@@ -181,7 +181,8 @@ void CodeGen::TPGGenerationEngine::initTpgFile()
 
         << "void push( Edge* e){\n"
         << "\tif(top == stackSize) {\n"
-        << "\t\tfprintf(stderr, \"Call stack of size %d is too small for the iteration of "
+        << "\t\tfprintf(stderr, \"Call stack of size %d is too small for the "
+           "iteration of "
            "this TPG\", stackSize);\n"
         << "\t}\n"
         << "\tcallStack[top] = e;\n"

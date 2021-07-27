@@ -1,16 +1,13 @@
 #ifdef CODE_GENERATION
+#include <cstddef>
 #include <gtest/gtest.h>
 #include <iostream>
-#include <stddef.h>
 
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
-#include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
-#include "tpg/tpgAction.h"
 #include "tpg/tpgGraph.h"
-#include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
 
 class TPGGenerationEngineTest : public ::testing::Test
@@ -49,10 +46,10 @@ class TPGGenerationEngineTest : public ::testing::Test
         cmdCompile = "" TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
         cmdCompile += "compile.bat ";
-		cmdExec = "\"" BIN_DIR_PATH "/bin/debug/";
+        cmdExec = "\"" BIN_DIR_PATH "/bin/debug/";
 #elif __GNUC__
         cmdCompile += "compile.sh " BIN_DIR_PATH " ";
-		cmdExec = BIN_DIR_PATH "/bin/";
+        cmdExec = BIN_DIR_PATH "/bin/";
 #endif
         cmdCompile += TESTS_DAT_PATH " ";
     }
@@ -167,9 +164,9 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
 #ifdef _MSC_VER
     cmdExec += "OneLeaf.exe";
 #elif __GNUC__
-	cmdExec += "OneLeaf";
+    cmdExec += "OneLeaf";
 #endif
-	cmdExec += " 1 4.5";
+    cmdExec += " 1 4.5";
 
     ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneLeaf";
@@ -219,15 +216,15 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     dataCSV.open(path + "/TwoLeaves/DataTwoLeaves.csv");
     ASSERT_EQ(dataCSV.is_open(), 1)
         << "Error cannot open file DataTwoLeaves.csv.";
-	
+
 #ifdef _MSC_VER
-	cmdExec +="TwoLeaves.exe ";
+    cmdExec += "TwoLeaves.exe ";
 #elif __GNUC__
-	cmdExec += "TwoLeaves ";
+    cmdExec += "TwoLeaves ";
 #endif
     while (std::getline(dataCSV, dataLine)) {
 
-        ASSERT_EQ(system((cmdExec+ dataLine).c_str()), 0)
+        ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
             << "Error wrong action returned in test TwoLeaves with input value "
                ": " +
                    dataLine;
@@ -294,14 +291,14 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
         << "Error cannot open file DataThreeLeaves.csv.";
 
 #ifdef _MSC_VER
-	cmdExec += "ThreeLeaves.exe ";
+    cmdExec += "ThreeLeaves.exe ";
 #elif __GNUC__
-	cmdExec += "ThreeLeaves ";
+    cmdExec += "ThreeLeaves ";
 #endif
 
     while (std::getline(dataCSV, dataLine)) {
 
-        ASSERT_EQ(system((cmdExec+ dataLine).c_str()), 0)
+        ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
             << "Error wrong action returned in test ThreeLeaves with input "
                "value "
                ": " +
@@ -353,9 +350,9 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
 #ifdef _MSC_VER
-	cmdExec += "OneTeamOneLeaf.exe ";
+    cmdExec += "OneTeamOneLeaf.exe ";
 #elif __GNUC__
-	cmdExec += "OneTeamOneLeaf ";
+    cmdExec += "OneTeamOneLeaf ";
 #endif
     cmdExec += "1 4.5 6.8";
 
@@ -421,13 +418,13 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
         << "Error cannot open file DataOneTeamTwoLeaves.csv.";
 
 #ifdef _MSC_VER
-	cmdExec += "OneTeamTwoLeaves.exe ";
+    cmdExec += "OneTeamTwoLeaves.exe ";
 #elif __GNUC__
-	cmdExec += "TwoOneTeamTwoLeavesLeaves ";
+    cmdExec += "OneTeamTwoLeaves ";
 #endif
 
     while (std::getline(dataCSV, dataLine)) {
-        
+
         ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
             << "Error wrong action returned in test OneTeamTwoLeaves with "
                "input value "
@@ -515,13 +512,13 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
         << "Cannot open file DataTwoTeamsOneCycle.csv";
 
 #ifdef _MSC_VER
-	cmdExec += "TwoTeamsOneCycle.exe ";
+    cmdExec += "TwoTeamsOneCycle.exe ";
 #elif __GNUC__
-	cmdExec += "TwoTeamsOneCycle ";
+    cmdExec += "TwoTeamsOneCycle ";
 #endif
 
     while (std::getline(dataCSV, dataLine)) {
-        
+
         ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
             << "Error wrong action returned in test TwoTeamsOneCycle with "
                "input value "
@@ -614,13 +611,13 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
         << "Cannot open file DataThreeTeamsOneCycleThreeLeaves.csv.";
 
 #ifdef _MSC_VER
-	cmdExec += "ThreeTeamsOneCycleThreeLeaves.exe ";
+    cmdExec += "ThreeTeamsOneCycleThreeLeaves.exe ";
 #elif __GNUC__
-	cmdExec += "ThreeTeamsOneCycleThreeLeaves ";
+    cmdExec += "ThreeTeamsOneCycleThreeLeaves ";
 #endif
 
     while (std::getline(dataCSV, dataLine)) {
-        
+
         ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
             << "Error wrong action returned in test "
                "ThreeTeamsOneCycleThreeLeaves with input value "
