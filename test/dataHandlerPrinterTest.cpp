@@ -40,7 +40,6 @@ TEST_F(DataHandlerPrinterTest, constructorDestructor)
            "failed.";
 
     ASSERT_NO_THROW(delete dp) << "Destruction failed.";
-    
 }
 
 TEST_F(DataHandlerPrinterTest, print1DArray)
@@ -71,8 +70,8 @@ TEST_F(DataHandlerPrinterTest, print2DArray)
                            "]}, {" + nameVar + "[" + std::to_string(start + 5) +
                            "], " + nameVar + "[" +
                            std::to_string(start + 5 + 1) + "]}}";
-    ASSERT_NO_THROW(
-        print = printer->print2DArray(start, {5, 5}, {2, 2}, nameVar))
+    ASSERT_NO_THROW(print =
+                        printer->print2DArray(start, {5, 5}, {2, 2}, nameVar))
         << "Failed to extract a 2D array at address 3 of size 2*2 from a 2D "
            "array of size 5*5.";
     ASSERT_EQ(print, expected)
@@ -80,8 +79,8 @@ TEST_F(DataHandlerPrinterTest, print2DArray)
 
     start = 4;
     expected = "{{in1[5], in1[6]}, {in1[10], in1[11]}}";
-    ASSERT_NO_THROW(
-        print = printer->print2DArray(start, {5, 5}, {2, 2}, nameVar))
+    ASSERT_NO_THROW(print =
+                        printer->print2DArray(start, {5, 5}, {2, 2}, nameVar))
         << "Failed to extract a 2D array at address 4 of size 2*2 from a 2D "
            "array of size 5*5.";
     ASSERT_EQ(print, expected)
@@ -95,7 +94,8 @@ TEST_F(DataHandlerPrinterTest, printDataAt)
     std::string expected = "[3] = {" + nameVar + "[" + std::to_string(5) +
                            "], " + nameVar + "[" + std::to_string(6) + "], " +
                            nameVar + "[" + std::to_string(7) + "]};";
-    ASSERT_NO_THROW(print = printer->printDataAt(*array2D, array, start, nameVar))
+    ASSERT_NO_THROW(print =
+                        printer->printDataAt(*array2D, array, start, nameVar))
         << "Failed to extract a 1D array of size 2 at address 4 from a 2D "
            "array of size 5*5.";
     ASSERT_EQ(print, expected)
@@ -103,7 +103,8 @@ TEST_F(DataHandlerPrinterTest, printDataAt)
 
     start = 4;
     expected = "[2][2] = {{in1[5], in1[6]}, {in1[10], in1[11]}};";
-    ASSERT_NO_THROW(print = printer->printDataAt(*array2D, matrix, start, nameVar))
+    ASSERT_NO_THROW(print =
+                        printer->printDataAt(*array2D, matrix, start, nameVar))
         << "Failed to extract a 2D array at address 4 of size 2*2 from a 2D "
            "array of size 5*5.";
     ASSERT_EQ(print, expected)

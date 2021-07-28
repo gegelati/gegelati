@@ -28,7 +28,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     CodeGen::TPGGenerationEngine* tpgGen;
     File::TPGGraphDotImporter* dot = nullptr;
     std::string cmdCompile;
-    std::string cmdExec{"./bin/"};
+    std::string cmdExec;
     std::string dataIn;
     TPG::TPGVertex const* rootVertex;
 
@@ -79,9 +79,10 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         cmdCompile = TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
         cmdCompile += "compile.bat ";
-        cmdExec += "debug/";
+        cmdExec = BIN_DIR_PATH "/bin/debug/";
 #elif __GNUC__
         cmdCompile += "compile.sh ";
+        cmdExec = "./bin/";
 #endif
 #ifdef DEBUG
         cmdCompile += "1 ";
@@ -143,11 +144,10 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
                                         .get())));
 
 #ifdef _MSC_VER
-        std::string cmd{cmdExec + ".exe\" " + dataIn};
+        std::string cmd{cmdExec + ".exe " + dataIn};
         inferenceCodeGen = system(cmd.c_str());
 #elif __GNUC__
         std::string cmd{cmdExec + " " + dataIn};
-        std::cout << cmd << std::endl;
         status = system(cmd.c_str());
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
@@ -155,7 +155,6 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
             (int)(((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex)
                        .back())
                       ->getActionID());
-        std::cout << "inferenceGegelati : " << inferenceGegelati << std::endl << "inferenceCodeGen : " << inferenceCodeGen << std::endl;
         ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
             << "Error inference of Stick Game has changed";
         le->doAction(inferenceGegelati);

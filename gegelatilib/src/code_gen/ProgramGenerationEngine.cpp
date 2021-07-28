@@ -198,7 +198,7 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
         fileC << "\t\t" << instruction.getPrimitiveType(i) << " "
               << nameOperandVariable << i
               << dataPrinter.printDataAt(dataSource, operandType, opIdx,
-                                     getNameSourceData(sourceIdx))
+                                         getNameSourceData(sourceIdx))
               << std::endl;
     }
 }

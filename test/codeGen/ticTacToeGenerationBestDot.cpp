@@ -1,7 +1,7 @@
 #ifdef CODE_GENERATION
+#include <cstddef>
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
-#include <cstddef>
 
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
@@ -76,10 +76,10 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
         cmdCompile = TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
         cmdCompile += "compile.bat ";
-        cmdExec += "debug/TicTacToeBest_TPG.exe";
+        cmdExec = BIN_DIR_PATH "/bin/debug/";
 #elif __GNUC__
         cmdCompile += "compile.sh ";
-        cmdExec += "TicTacToeBest_TPG";
+        cmdExec = "./bin/";
 #endif
 #ifdef DEBUG
         cmdCompile += "1 ";
@@ -87,7 +87,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
         cmdCompile += "0 ";
 #endif // DEBUG
         cmdCompile += TESTS_DAT_PATH " TicTacToeBest_TPG";
-        cmdExec += "\" 7 -1 -1 -1 -1 -1 -1 -1 -1 -1";
+        cmdExec += "TicTacToeBest_TPG 7 -1 -1 -1 -1 -1 -1 -1 -1 -1";
     }
 
     virtual void TearDown()

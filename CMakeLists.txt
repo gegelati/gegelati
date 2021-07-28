@@ -176,6 +176,7 @@ include(AddUninstallTarget)
 
 # Add integration tests (unit tests for each library should be in each sublibrary directory).
 if(BUILD_TESTING)
+	add_definitions(-DBIN_DIR_PATH="${CMAKE_CURRENT_BINARY_DIR}")
     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/obj ${CMAKE_CURRENT_BINARY_DIR}/buildCodeGen)
     add_subdirectory(test)
 endif()

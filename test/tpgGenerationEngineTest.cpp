@@ -41,10 +41,10 @@ class TPGGenerationEngineTest : public ::testing::Test
         e = new Environment(set, data, 8);
         tpg = new TPG::TPGGraph(*e);
 
-        cmdCompile = "" TESTS_DAT_PATH "codeGen/";
+        cmdCompile = TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
         cmdCompile += "compile.bat ";
-        cmdExec = "\"./bin/debug/";
+        cmdExec = BIN_DIR_PATH "/bin/debug/";
 #elif __GNUC__
         cmdCompile += "compile.sh ";
         cmdExec = "./bin/";
@@ -167,7 +167,7 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
     cmdExec += "OneLeaf";
 #endif
     cmdExec += " 1 4.5";
-
+    std::cout << cmdExec << std::endl;
     ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneLeaf.";
 }

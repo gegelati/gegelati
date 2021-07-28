@@ -23,8 +23,7 @@ std::string Data::DataHandlerPrinter::printDataAt(
         case 1:
             operandInit = "[] = ";
 
-            operandInit +=
-                print1DArray(address, opDimension.at(0), nameVar);
+            operandInit += print1DArray(address, opDimension.at(0), nameVar);
 
             break;
         case 2:
@@ -34,8 +33,8 @@ std::string Data::DataHandlerPrinter::printDataAt(
             operandInit += " = ";
 
             if (opDimension.size() == 2) {
-                operandInit += print2DArray(address, dataSizes,
-                                            opDimension, nameVar);
+                operandInit +=
+                    print2DArray(address, dataSizes, opDimension, nameVar);
             }
             else {
 
@@ -45,8 +44,7 @@ std::string Data::DataHandlerPrinter::printDataAt(
                 size_t addressH = address / (width - arrayWidth + 1);
                 size_t addressW = address % (width - arrayWidth + 1);
                 size_t addressSrc = (addressH * width) + addressW;
-                operandInit +=
-                    print1DArray(addressSrc, arrayWidth, nameVar);
+                operandInit += print1DArray(addressSrc, arrayWidth, nameVar);
             }
             break;
         default:
