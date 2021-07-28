@@ -50,23 +50,23 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
         auto cond = [](double a, double b) -> double { return a < b ? -a : a; };
 
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = (double)($1) - (double)($2);", minus)));
+            minus, "$0 = (double)($1) - (double)($2);")));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = $1 + $2;", add)));
+            add, "$0 = $1 + $2;")));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = (($1) < ($2)) ? ($2) : ($1); ", max)));
+            max, "$0 = (($1) < ($2)) ? ($2) : ($1); ")));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = (($2) != 0.0) ? fmod($1, $2) : DBL_MIN ;", modulo)));
+            modulo, "$0 = (($2) != 0.0) ? fmod($1, $2) : DBL_MIN ;")));
         set.add(*(new Instructions::LambdaInstruction<double>(
-            "$0 = ($1) == -1.0 ? 10.0 : 0.0;", nulltest)));
+            nulltest, "$0 = ($1) == -1.0 ? 10.0 : 0.0;")));
         set.add(*(new Instructions::LambdaInstruction<double>(
-            "$0 = ($1) == 0.0 ? 10.0 : 0.0;", circletest)));
+            circletest, "$0 = ($1) == 0.0 ? 10.0 : 0.0;")));
         set.add(*(new Instructions::LambdaInstruction<double>(
-            "$0 = ($1) == 1.0 ? 10.0 : 0.0;", crosstest)));
+            crosstest, "$0 = ($1) == 1.0 ? 10.0 : 0.0;")));
         set.add(*(new Instructions::LambdaInstruction<double>(
-            "$0 = ($1) >= 15.0 ? 10.0 : 0.0;", test15)));
+            test15, "$0 = ($1) >= 15.0 ? 10.0 : 0.0;")));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = ($1) < ($2) ? -1*($1) : ($1);", cond)));
+            cond, "$0 = ($1) < ($2) ? -1*($1) : ($1);")));
 
         data.push_back(currentState);
 

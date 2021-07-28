@@ -63,19 +63,19 @@ namespace Instructions {
          * \brief function saying if an Instruction can be printed in a C file
          * during the code gen.
          *
-         * @return true if the format of the Instruction is not empty, false
-         * in other case.
+         * @return true if the printTemplate of the Instruction is not empty,
+         * false in other case.
          */
         virtual bool isPrintable() const;
 
         /**
-         * \brief This function return the format of the line of code used to
-         * represent the instruction.
+         * \brief This function return the printTemplate of the line of code
+         * used to represent the instruction.
          *
-         * \return The format of the line of code used to represent the
+         * \return The printTemplate of the line of code used to represent the
          * instruction in the C program.
          */
-        virtual const std::string& getFormat() const;
+        virtual const std::string& getPrintTemplate() const;
 
         /**
          * \brief Retrieve the primitive data type of the operand
@@ -86,26 +86,27 @@ namespace Instructions {
          * \return The type of the operand. If the operand is an array return
          * the type of the element of the array.
          */
-        virtual std::string getPrimitiveType(const uint64_t& opIdx) const;
+        virtual std::string getPrintablePrimitiveType(
+            const uint64_t& opIdx) const;
 
       protected:
         /**
          * \brief Protected constructor to force the class abstract nature.
          *
-         * The definition of this constructor initialize the string format with
-         * the format given as parameter.
+         * The definition of this constructor initialize the string
+         * printTemplate with the format given as parameter.
          *
-         * \param[in] format of the line used to represent the instruction in
-         * the C files generated.
+         * \param[in] printTemplate of the line used to represent the
+         * instruction in the C files generated.
          */
-        Instruction(std::string format);
+        Instruction(std::string printTemplate);
 
         /**
-         * format of the instruction used to generate the code. The result of
-         * the function is represented with $0. The first parameter correspond
-         * to $1 the second to $2...
+         * printTemplate of the instruction used to generate the code. The
+         * result of the function is represented with $0. The first parameter
+         * correspond to $1 the second to $2...
          */
-        std::string format;
+        std::string printTemplate;
 #endif // CODE_GENERATION
 
       public:
@@ -157,6 +158,7 @@ namespace Instructions {
             const std::vector<Data::UntypedSharedPtr>& args) const = 0;
 
       protected:
+#ifndef CODE_GENERATION
         /**
          * \brief Protected constructor to force the class abstract nature.
          *
@@ -164,7 +166,7 @@ namespace Instructions {
          * list and sets the number of required parameters to 0.
          */
         Instruction();
-
+#endif // CODE_GENERATION
         /**
          * \brief List of the types of the operands needed to execute the
          * instruction.

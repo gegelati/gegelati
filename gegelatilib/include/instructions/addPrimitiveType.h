@@ -62,19 +62,20 @@ namespace Instructions {
          * \brief Constructor for the AddPrimitiveType class, so it can be use
          * during the code gen.
          *
-         * \param[in] format std::string use at the generation. Check
+         * \param[in] printTemplate std::string use at the generation. Check
          * Instructions::Instruction for more details.
          */
-        AddPrimitiveType(const std::string& format);
+        AddPrimitiveType(const std::string& printTemplate = "");
 #endif // CODE_GENERATION
 
       public:
+#ifndef CODE_GENERATION
         /**
          *  \brief Constructor for the AddPrimitiveType class.
          */
         AddPrimitiveType();
-
-        /// Inherited from Instruction
+#endif // CODE_GENERATION
+       /// Inherited from Instruction
         virtual double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override;
 
@@ -85,12 +86,12 @@ namespace Instructions {
          */
         void setUpOperand();
     };
-
+#ifndef CODE_GENERATION
     template <class T> AddPrimitiveType<T>::AddPrimitiveType()
     {
         setUpOperand();
     }
-
+#endif // CODE_GENERATION
     template <class T>
     double AddPrimitiveType<T>::execute(
         const std::vector<Data::UntypedSharedPtr>& args) const
@@ -108,8 +109,8 @@ namespace Instructions {
 
 #ifdef CODE_GENERATION
     template <class T>
-    AddPrimitiveType<T>::AddPrimitiveType(const std::string& format)
-        : Instruction(format)
+    AddPrimitiveType<T>::AddPrimitiveType(const std::string& printTemplate)
+        : Instruction(printTemplate)
     {
         setUpOperand();
     }

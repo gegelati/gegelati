@@ -61,17 +61,19 @@ namespace Instructions {
         /**
          * \brief Constructor for the MultByConstant class so it can be use
          * during the code gen.
-         * \param[in] format std::string use at the generation. Check
+         * \param[in] printTemplate std::string use at the generation. Check
          * Instructions::Instruction for more details.
          */
-        MultByConstant(const std::string& format);
+        MultByConstant(const std::string& printTemplate = "");
 #endif // CODE_GENERATION
 
       public:
+#ifndef CODE_GENERATION
         /**
          *  \brief Constructor for the MultByConstParam class.
          */
         MultByConstant();
+#endif // CODE_GENERATION
 
         /// Inherited from Instruction
         double execute(
@@ -87,19 +89,20 @@ namespace Instructions {
 
 #ifdef CODE_GENERATION
     template <class T>
-    MultByConstant<T>::MultByConstant(const std::string& format)
-        : Instruction(format)
+    MultByConstant<T>::MultByConstant(const std::string& printTemplate)
+        : Instruction(printTemplate)
     {
         setUpOperand();
     }
 
 #endif // CODE_GENERATION
 
+#ifndef CODE_GENERATION
     template <class T> MultByConstant<T>::MultByConstant() : Instruction()
     {
         setUpOperand();
     }
-
+#endif // CODE_GENERATION
     template <class T>
     inline double MultByConstant<T>::execute(
         const std::vector<Data::UntypedSharedPtr>& args) const

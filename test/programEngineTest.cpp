@@ -57,12 +57,11 @@ class ProgramEngineTest : public ::testing::Test
         set.add(*(new Instructions::MultByConstant<double>("$0 = $1 * $2;")));
         set.add(*(new Instructions::LambdaInstruction<const double[2],
                                                       const double[2]>(
-            "$0 = $1[0] * $2[0] + $1[1] * $2[1];",
             [](const double a[2], const double b[2]) {
                 return a[0] * b[0] + a[1] * b[1];
-            })));
+            },
+            "$0 = $1[0] * $2[0] + $1[1] * $2[1];")));
         set.add(*(new Instructions::LambdaInstruction<const double[2][2]>(
-            "$0 = 0.25*($1[0] + $1[1] + $1[2] + $1[3]);",
             [](const double a[2][2]) {
                 double res = 0.0;
                 for (auto h = 0; h < 2; h++) {
@@ -71,7 +70,8 @@ class ProgramEngineTest : public ::testing::Test
                     }
                 }
                 return res / 4.0;
-            })));
+            },
+            "$0 = 0.25*($1[0] + $1[1] + $1[2] + $1[3]);")));
 
         e = new Environment(set, vect, 8, 5);
         p = new Program::Program(*e);

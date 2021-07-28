@@ -65,15 +65,15 @@ namespace Instructions {
          * \brief Constructor of the class LambdaInstruction to create a
          * printable Instruction.
          *
-         * \param[in] format std::string use at the generation. Check
+         * \param[in] printTemplate std::string use at the generation. Check
          * Instructions::Instruction for more details.
          * \param[in] function the c++ std::function that will be executed for
          * this Instruction. Check the constructor with only the function as
          * parameter for more details.
          */
-        LambdaInstruction(const std::string& format,
-                          std::function<double(First, Rest...)> function)
-            : Instructions::Instruction(format), func{function}
+        LambdaInstruction(std::function<double(First, Rest...)> function,
+                          const std::string& printTemplate = "")
+            : Instructions::Instruction(printTemplate), func{function}
         {
             setUpOperand();
         };
@@ -90,7 +90,7 @@ namespace Instructions {
          * \brief delete the default constructor.
          */
         LambdaInstruction() = delete;
-
+#ifndef CODE_GENERATION
         /**
          * \brief Constructor for the LambdaInstruction.
          *
@@ -104,8 +104,8 @@ namespace Instructions {
         {
             setUpOperand();
         };
-
-        /// Inherited from Instruction
+#endif // CODE_GENERATION
+       /// Inherited from Instruction
         virtual bool checkOperandTypes(
             const std::vector<Data::UntypedSharedPtr>& arguments) const override
         {

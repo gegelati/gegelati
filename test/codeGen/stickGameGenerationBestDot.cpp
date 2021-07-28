@@ -54,17 +54,17 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         };
 
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = (($2) != 0.0) ? fmod($1, $2) : DBL_MIN ;", modulo)));
+            modulo, "$0 = (($2) != 0.0) ? fmod($1, $2) : DBL_MIN ;")));
         set.add(*(new Instructions::LambdaInstruction<int, int>(
-            "$0 = (double)($1) - (double)($2);", minus)));
+            minus, "$0 = (double)($1) - (double)($2);")));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = $1 + $2;", add)));
-        set.add(*(new Instructions::LambdaInstruction<int>("$0 = (double)($1);",
-                                                           cast)));
+            add, "$0 = $1 + $2;")));
+        set.add(*(new Instructions::LambdaInstruction<int>(
+            cast, "$0 = (double)($1);")));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = (($1) < ($2)) ? ($2) : ($1); ", max)));
+            max, "$0 = (($1) < ($2)) ? ($2) : ($1); ")));
         set.add(*(new Instructions::LambdaInstruction<double>(
-            "$0 = ($1 == 0.0) ? 10.0 : 0.0;", nulltest)));
+            nulltest, "$0 = ($1 == 0.0) ? 10.0 : 0.0;")));
 
         le = new StickGameAdversarial();
         data = {le->getDataSources().at(0), le->getDataSources().at(1)};

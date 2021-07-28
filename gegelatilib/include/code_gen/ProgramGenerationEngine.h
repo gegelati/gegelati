@@ -58,8 +58,8 @@ namespace CodeGen {
     class ProgramGenerationEngine : public Program::ProgramEngine
     {
       protected:
-        /// regex used to identify operand in the format of a
-        /// PrintableInstruction.
+        /// regex used to identify operand in the printTemplate of an
+        /// Instruction.
         static const std::regex operand_regex;
 
         /**
@@ -207,13 +207,13 @@ namespace CodeGen {
          * \brief create the line of C code that equals to instruction in
          * parameter
          *
-         * Replace each operand of the format of the printable instruction by a
-         * pointer to the data of the environment.
+         * Replace each operand of the printTemplate of the printable
+         * instruction by a pointer to the data of the environment.
          *
          * \param[in] instruction that as to be converted into a line of code
          *
-         * @return a copy of the format with the variables changed according to
-         * the operand of the instruction.
+         * @return a copy of the printTemplate with the variables changed
+         * according to the operand of the instruction.
          */
         std::string completeFormat(
             const Instructions::Instruction& instruction) const;

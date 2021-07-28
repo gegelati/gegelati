@@ -107,13 +107,13 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
 std::string CodeGen::ProgramGenerationEngine::completeFormat(
     const Instructions::Instruction& instruction) const
 {
-    const std::string& format = instruction.getFormat();
+    const std::string& printTemplate = instruction.getPrintTemplate();
     const Program::Line& line =
         this->getCurrentLine(); // throw std::out_of_range
-    std::string codeLine(format);
+    std::string codeLine(printTemplate);
     std::string operandValue;
-    for (auto itr =
-             std::sregex_iterator(format.begin(), format.end(), operand_regex);
+    for (auto itr = std::sregex_iterator(printTemplate.begin(),
+                                         printTemplate.end(), operand_regex);
          itr != std::sregex_iterator(); ++itr) {
         const std::string& match = (*itr).str();
         auto pos = codeLine.find(match);
@@ -195,7 +195,7 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             sourceIdx); // Throws std::out_of_range
 
-        fileC << "\t\t" << instruction.getPrimitiveType(i) << " "
+        fileC << "\t\t" << instruction.getPrintablePrimitiveType(i) << " "
               << nameOperandVariable << i
               << dataPrinter.printDataAt(dataSource, operandType, opIdx,
                                          getNameSourceData(sourceIdx))

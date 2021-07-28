@@ -80,3 +80,16 @@ TEST(MultByConstParamTest, ExecutePrimitiveType)
     ASSERT_NO_THROW(delete instruction)
         << "Destruction of the MultByConstParam instruction failed.";
 }
+
+#ifdef CODE_GENERATION
+TEST(MultByConstParamTest, PrintConstructor)
+{
+    Instructions::Instruction* instruction;
+    ASSERT_NO_THROW(instruction =
+                        new Instructions::MultByConstant<int>("$0 = $1 * $2;"))
+        << "Constructing a new multByConstParam Instruction with a "
+           "printTemplate failed.";
+    delete instruction;
+}
+
+#endif // CODE_GENERATION

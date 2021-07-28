@@ -26,9 +26,9 @@ class ProgramGenerationEngineTest : public ::testing::Test
         auto add = [](double a, double b) -> double { return a + b; };
         auto sub = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = $1 + $2;", add)));
+            add, "$0 = $1 + $2;")));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
-            "$0 = $1 - $2;", sub)));
+            sub, "$0 = $1 - $2;")));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
         e = new Environment(set, vect, 8);

@@ -45,14 +45,11 @@
 
 using namespace Instructions;
 
-Instruction::Instruction()
-    : operandTypes()
-#ifdef CODE_GENERATION
-      ,
-      format()
-#endif // CODE_GENERATION
+#ifndef CODE_GENERATION
+Instruction::Instruction() : operandTypes()
 {
 }
+#endif // CODE_GENERATION
 
 const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
     getOperandTypes() const
@@ -97,21 +94,22 @@ double Instruction::execute(
 
 #ifdef CODE_GENERATION
 
-Instruction::Instruction(std::string format) : format(format), operandTypes()
+Instruction::Instruction(std::string printTemplate)
+    : printTemplate(printTemplate), operandTypes()
 {
 }
 
 bool Instruction::isPrintable() const
 {
-    return !this->format.empty();
+    return !this->printTemplate.empty();
 }
 
-const std::string& Instruction::getFormat() const
+const std::string& Instruction::getPrintTemplate() const
 {
-    return format;
+    return printTemplate;
 }
 
-std::string Instruction::getPrimitiveType(const uint64_t& opIdx) const
+std::string Instruction::getPrintablePrimitiveType(const uint64_t& opIdx) const
 {
     std::string typeName =
         DEMANGLE_TYPEID_NAME(this->operandTypes.at(opIdx).get().name());
