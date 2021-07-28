@@ -91,10 +91,10 @@ namespace CodeGen {
          *
          * This map is filled in the generateDataPrinterMap method.
          */
-        std::map<size_t, Data::DataHandlerPrinter> dataPrinters;
+        Data::DataHandlerPrinter dataPrinter;
 
         /// inherited from Program::ProgramEngine
-        virtual void operator()() override;
+        virtual void processLine() override;
 
       public:
         /**
@@ -117,9 +117,8 @@ namespace CodeGen {
         ProgramGenerationEngine(const std::string& filename,
                                 const Environment& env,
                                 const std::string& path = "./")
-            : ProgramEngine(env)
+            : ProgramEngine(env), dataPrinter()
         {
-            generateDataPrinterMap();
             openFile(filename, path, env.getNbConstant());
         }
 
@@ -144,9 +143,8 @@ namespace CodeGen {
         ProgramGenerationEngine(const std::string& filename,
                                 const Program::Program& p,
                                 const std::string& path = "./")
-            : ProgramEngine(p)
+            : ProgramEngine(p), dataPrinter()
         {
-            generateDataPrinterMap();
             openFile(filename, path, p.getEnvironment().getNbConstant());
             setProgram(p);
         }
@@ -255,29 +253,6 @@ namespace CodeGen {
          * the generated program
          */
         std::string getNameSourceData(const uint64_t& idx);
-
-        /**
-         * \brief method used to fill the map with DataHandlePrinter.
-         *
-         * This function iterates through the data sources of the Environment
-         * and associates the id of a DataHandler to its DataHandlerPrinter.
-         *
-         */
-        void generateDataPrinterMap();
-
-        /**
-         * \brief Retrieve in the std::map dataPrinter the DataHandlerPrinter
-         * for the DataHandler d given in parameter.
-         *
-         * If d is not in dataPrinter, the DataHandlerPrinter is created and
-         * inserted in dataPrinter.
-         *
-         * \param[in] d const reference to the Data::DataHandler that we want
-         * the DataHandlerPrinter.
-         * \return a const reference to the DataHandlerPrinter for the
-         * DataHandler given in parameter.
-         */
-        const Data::DataHandlerPrinter& getPrinter(const Data::DataHandler& d);
     };
 
 } // namespace CodeGen

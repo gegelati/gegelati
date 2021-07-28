@@ -12,28 +12,14 @@ namespace Data {
      */
     class DataHandlerPrinter
     {
-      protected:
-        /// Pointer to the DataHandler that will be printed.
-        const Data::DataHandler* const dataHandler;
-
-      private:
-        /// Default constructor deleted for its uselessness.
-        DataHandlerPrinter() = delete;
-
       public:
-        /**
-         * \brief  Constructor for the DataHandlerPrinter
-         *
-         * \param[in] dataHandler const reference to the DataHandler that need
-         * to be printed
-         */
-        DataHandlerPrinter(const Data::DataHandler* const dataHandler)
-            : dataHandler{dataHandler} {};
+        /// Constructor for the DataHandlerPrinter
+        DataHandlerPrinter() = default;
 
         /// destructor
         virtual ~DataHandlerPrinter() = default;
 
-        /// copy constructor (shallow)
+        /// copy constructor
         DataHandlerPrinter(const DataHandlerPrinter& other) = default;
 
         /**
@@ -50,8 +36,9 @@ namespace Data {
          * its initialization based on the extracted data of the global variable
          * nameVar at index address.
          */
-        std::string printDataAt(const std::type_info& type,
-                                const size_t address,
+        std::string printDataAt(const Data::DataHandler& dataHandler,
+                                const std::type_info& type,
+                                const size_t& address,
                                 const std::string& nameVar) const;
 
         /**
@@ -99,7 +86,8 @@ namespace Data {
          *
          * \return template type of the DataHandler in a human readable format.
          */
-        std::string getDemangleTemplateType() const;
+        std::string getDemangleTemplateType(
+            const Data::DataHandler& dataHandler) const;
 
         /**
          * \brief Function that return the size of each dimension of an operand.

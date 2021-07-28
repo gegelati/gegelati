@@ -148,7 +148,7 @@ void CodeGen::ProgramGenerationEngine::initGlobalVar(size_t nbConstant)
     for (int cpt = 1; i < this->dataScsConstsAndRegs.size(); ++i, ++cpt) {
 
         const Data::DataHandler& d = this->dataScsConstsAndRegs.at(i);
-        std::string type = getPrinter(d).getDemangleTemplateType();
+        std::string type = dataPrinter.getDemangleTemplateType(d);
 
         fileC << "extern " << type << "* in" << cpt << ";" << std::endl;
     }
@@ -195,10 +195,9 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             sourceIdx); // Throws std::out_of_range
 
-        const Data::DataHandlerPrinter& printer = getPrinter(dataSource);
         fileC << "\t\t" << instruction.getPrimitiveType(i) << " "
               << nameOperandVariable << i
-              << printer.printDataAt(operandType, opIdx,
+              << dataPrinter.printDataAt(dataSource, operandType, opIdx,
                                      getNameSourceData(sourceIdx))
               << std::endl;
     }
@@ -224,30 +223,7 @@ std::string CodeGen::ProgramGenerationEngine::getNameSourceData(
     return nameDataSource;
 }
 
-void CodeGen::ProgramGenerationEngine::generateDataPrinterMap()
-{
-    for (auto& dataScsConstsAndReg : dataScsConstsAndRegs) {
-        const Data::DataHandler& d = dataScsConstsAndReg.get();
-        dataPrinters.insert(std::pair<size_t, Data::DataHandlerPrinter>(
-            d.getId(), Data::DataHandlerPrinter(&d)));
-    }
-}
-
-const Data::DataHandlerPrinter& CodeGen::ProgramGenerationEngine::getPrinter(
-    const Data::DataHandler& d)
-{
-    auto printerPair = dataPrinters.find(d.getId());
-    if (printerPair == dataPrinters.end()) {
-        // insert a new pair <id, printer> and get its iterator
-        printerPair = dataPrinters
-                          .insert(std::pair<size_t, Data::DataHandlerPrinter>(
-                              d.getId(), Data::DataHandlerPrinter(&d)))
-                          .first;
-    }
-    return printerPair->second;
-}
-
-void CodeGen::ProgramGenerationEngine::operator()()
+void CodeGen::ProgramGenerationEngine::processLine()
 {
     this->generateCurrentLine();
 }

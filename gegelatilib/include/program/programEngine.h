@@ -129,7 +129,7 @@ namespace Program {
          * \brief operator parenthesis used when iterating through the program
          * with the function iterationThroughtProgram
          */
-        virtual void operator()() = 0;
+        virtual void processLine() = 0;
 
       public:
         /**
@@ -238,11 +238,11 @@ namespace Program {
 
         /**
          * \brief Function that iterates through the lines of the program and
-         * execute the operator()().
+         * execute the function processLine().
          *
-         * For each line that is not an intron, this function calls the
-         * operator()(). This operator can be overloaded for example to execute
-         * or to generate the non introns lines depending on the derived class.
+         * For each line that is not an intron, this function calls
+         * processLine(). This function can be overloaded for example to execute
+         * or to generate the non introns lines.
          */
         virtual void iterateThroughtProgram(const bool ignoreException);
     };

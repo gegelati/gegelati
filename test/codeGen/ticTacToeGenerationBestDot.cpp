@@ -1,15 +1,14 @@
+#ifdef CODE_GENERATION
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
-#include <stddef.h>
+#include <cstddef>
 
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
-#include "tpg/tpgAction.h"
 #include "tpg/tpgGraph.h"
-#include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
 
 class TicTacToeGenerationBestDotTest : public ::testing::Test
@@ -129,3 +128,4 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
     ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error inference of TicTacToe has changed";
 }
+#endif // CODE_GENERATION

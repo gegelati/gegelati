@@ -135,7 +135,7 @@ void Program::ProgramEngine::iterateThroughtProgram(const bool ignoreException)
     while (hasNext) {
         try {
             // generate the current line
-            this->operator()();
+            processLine();
         }
         catch (std::out_of_range e) {
             if (!ignoreException) {

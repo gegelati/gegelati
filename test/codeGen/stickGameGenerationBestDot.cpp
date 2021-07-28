@@ -1,8 +1,9 @@
+#ifdef CODE_GENERATION
+
 #include <cfloat>
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
 #include <iostream>
-#include <stddef.h>
 
 #include "../learn/stickGameAdversarial.h"
 #include "code_gen/ProgramGenerationEngine.h"
@@ -27,7 +28,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     CodeGen::TPGGenerationEngine* tpgGen;
     File::TPGGraphDotImporter* dot = nullptr;
     std::string cmdCompile;
-    std::string cmdExec{"\"./bin/"};
+    std::string cmdExec{"./bin/"};
     std::string dataIn;
     TPG::TPGVertex const* rootVertex;
 
@@ -145,7 +146,8 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         std::string cmd{cmdExec + ".exe\" " + dataIn};
         inferenceCodeGen = system(cmd.c_str());
 #elif __GNUC__
-        std::string cmd{cmdExec + "\" " + dataIn};
+        std::string cmd{cmdExec + " " + dataIn};
+        std::cout << cmd << std::endl;
         status = system(cmd.c_str());
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
@@ -153,8 +155,10 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
             (int)(((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex)
                        .back())
                       ->getActionID());
+        std::cout << "inferenceGegelati : " << inferenceGegelati << std::endl << "inferenceCodeGen : " << inferenceCodeGen << std::endl;
         ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
             << "Error inference of Stick Game has changed";
         le->doAction(inferenceGegelati);
     }
 }
+#endif // CODE_GENERATION

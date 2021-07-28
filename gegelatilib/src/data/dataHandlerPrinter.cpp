@@ -4,11 +4,11 @@
 #include "data/dataHandlerPrinter.h"
 
 std::string Data::DataHandlerPrinter::printDataAt(
-    const std::type_info& type, const size_t address,
-    const std::string& nameVar) const
+    const Data::DataHandler& dataHandler, const std::type_info& type,
+    const size_t& address, const std::string& nameVar) const
 {
-    const std::type_info& templateType = dataHandler->getTemplateType();
-    const std::vector<size_t> dataSizes{dataHandler->getDimensionsSize()};
+    const std::type_info& templateType = dataHandler.getTemplateType();
+    const std::vector<size_t> dataSizes{dataHandler.getDimensionsSize()};
 
     // Check if the operand need only one value
     if (type == templateType) {
@@ -16,14 +16,15 @@ std::string Data::DataHandlerPrinter::printDataAt(
                            "];"};
     }
 
-    std::vector<size_t> opDimension{this->getOperandSizes(type)};
+    std::vector<size_t> opDimension{getOperandSizes(type)};
     std::string operandInit;
     if (opDimension.size() <= dataSizes.size()) {
         switch (dataSizes.size()) {
         case 1:
             operandInit = "[] = ";
 
-            operandInit += print1DArray(address, opDimension.at(0), nameVar);
+            operandInit +=
+                print1DArray(address, opDimension.at(0), nameVar);
 
             break;
         case 2:
@@ -33,8 +34,8 @@ std::string Data::DataHandlerPrinter::printDataAt(
             operandInit += " = ";
 
             if (opDimension.size() == 2) {
-                operandInit +=
-                    print2DArray(address, dataSizes, opDimension, nameVar);
+                operandInit += print2DArray(address, dataSizes,
+                                            opDimension, nameVar);
             }
             else {
 
@@ -44,7 +45,8 @@ std::string Data::DataHandlerPrinter::printDataAt(
                 size_t addressH = address / (width - arrayWidth + 1);
                 size_t addressW = address % (width - arrayWidth + 1);
                 size_t addressSrc = (addressH * width) + addressW;
-                operandInit += print1DArray(addressSrc, arrayWidth, nameVar);
+                operandInit +=
+                    print1DArray(addressSrc, arrayWidth, nameVar);
             }
             break;
         default:
@@ -61,10 +63,11 @@ std::string Data::DataHandlerPrinter::printDataAt(
     return operandInit;
 }
 
-std::string Data::DataHandlerPrinter::getDemangleTemplateType() const
+std::string Data::DataHandlerPrinter::getDemangleTemplateType(
+    const Data::DataHandler& dataHandler) const
 {
     return std::string{
-        DEMANGLE_TYPEID_NAME(dataHandler->getTemplateType().name())};
+        DEMANGLE_TYPEID_NAME(dataHandler.getTemplateType().name())};
 }
 
 std::string Data::DataHandlerPrinter::print1DArray(
