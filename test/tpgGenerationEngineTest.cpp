@@ -23,8 +23,6 @@ class TPGGenerationEngineTest : public ::testing::Test
     Data::PrimitiveTypeArray<double> currentState{s1};
     CodeGen::TPGGenerationEngine* tpgGen;
     TPG::TPGGraph* tpg;
-    std::ifstream dataCSV;
-    std::string dataLine;
 
     virtual void SetUp()
     {
@@ -46,11 +44,16 @@ class TPGGenerationEngineTest : public ::testing::Test
         cmdCompile = "" TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
         cmdCompile += "compile.bat ";
-        cmdExec = "\"" BIN_DIR_PATH "/bin/debug/";
+        cmdExec = "\"./bin/debug/";
 #elif __GNUC__
-        cmdCompile += "compile.sh " BIN_DIR_PATH " ";
-        cmdExec = BIN_DIR_PATH "/bin/";
+        cmdCompile += "compile.sh ";
+        cmdExec = "./bin/";
 #endif
+#ifdef DEBUG
+        cmdCompile += "1 ";
+#else
+        cmdCompile += "0 ";
+#endif // DEBUG
         cmdCompile += TESTS_DAT_PATH " ";
     }
 
@@ -75,26 +78,24 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
     ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-                        "constructorWithPath", *tpg, BIN_DIR_PATH "/src/"))
+                        "constructorWithPath", *tpg, "./src/"))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG and a path";
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
-    ASSERT_NO_THROW(
-        tpgGen = new CodeGen::TPGGenerationEngine(
-            "constructorWithStackSize", *tpg, BIN_DIR_PATH "/src/", 15))
+    ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
+                        "constructorWithStackSize", *tpg, "./src/", 15))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
-    ASSERT_THROW(
-        tpgGen = new CodeGen::TPGGenerationEngine(
-            "constructorErrorStackSize", *tpg, BIN_DIR_PATH "/src/", 0),
-        std::runtime_error)
+    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
+                     "constructorErrorStackSize", *tpg, "./src/", 0),
+                 std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
-           "of the call stack equal to 0";
+           "of the call stack equal to 0.";
 
     // ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 }
@@ -118,14 +119,14 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
         << "bad number of edges in OneLeafNoInstruction";
 
     tpgGen = new CodeGen::TPGGenerationEngine("OneLeafNoInstruction", *tpg,
-                                              BIN_DIR_PATH "/src/");
+                                              "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
 
     cmdCompile += "OneLeafNoInstruction";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Compilation failed in OneLeafNoInstruction";
+        << "Compilation failed in OneLeafNoInstruction.";
 }
 
 TEST_F(TPGGenerationEngineTest, OneLeaf)
@@ -153,8 +154,7 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
 
     ASSERT_EQ(tpg->getEdges().size(), 1) << "bad number of edges in OneLeaf";
 
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("OneLeaf", *tpg, BIN_DIR_PATH "/src/");
+    tpgGen = new CodeGen::TPGGenerationEngine("OneLeaf", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -169,7 +169,7 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
     cmdExec += " 1 4.5";
 
     ASSERT_EQ(system(cmdExec.c_str()), 0)
-        << "Error wrong action returned in test OneLeaf";
+        << "Error wrong action returned in test OneLeaf.";
 }
 
 TEST_F(TPGGenerationEngineTest, TwoLeaves)
@@ -205,30 +205,23 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
 
     ASSERT_EQ(tpg->getEdges().size(), 2) << "bad number of edges in TwoLeaves";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("TwoLeaves", *tpg,
-                                              BIN_DIR_PATH "/src/");
+    tpgGen = new CodeGen::TPGGenerationEngine("TwoLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
     cmdCompile += "TwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Error wrong action returned in test TwoLeaves";
-    dataCSV.open(path + "/TwoLeaves/DataTwoLeaves.csv");
-    ASSERT_EQ(dataCSV.is_open(), 1)
-        << "Error cannot open file DataTwoLeaves.csv.";
+        << "Error while compiling the test TwoLeaves.";
 
 #ifdef _MSC_VER
     cmdExec += "TwoLeaves.exe ";
 #elif __GNUC__
     cmdExec += "TwoLeaves ";
 #endif
-    while (std::getline(dataCSV, dataLine)) {
 
-        ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
-            << "Error wrong action returned in test TwoLeaves with input value "
-               ": " +
-                   dataLine;
-    }
+    ASSERT_EQ(system((cmdExec + path + "/TwoLeaves/DataTwoLeaves.csv").c_str()),
+              0)
+        << "Error wrong action returned in test TwoLeaves.";
 }
 
 TEST_F(TPGGenerationEngineTest, ThreeLeaves)
@@ -269,26 +262,21 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     tpg->addNewEdge(*root, *leaf3, prog3);
 
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
-        << "number of root is not 1 in ThreeLeaves";
+        << "number of root is not 1 in ThreeLeaves.";
 
     ASSERT_EQ(tpg->getNbVertices(), 4)
-        << "bad number of vertices in ThreeLeaves";
+        << "bad number of vertices in ThreeLeaves.";
 
     ASSERT_EQ(tpg->getEdges().size(), 3)
-        << "bad number of edges in ThreeLeaves";
+        << "bad number of edges in ThreeLeaves.";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("ThreeLeaves", *tpg,
-                                              BIN_DIR_PATH "/src/");
+    tpgGen = new CodeGen::TPGGenerationEngine("ThreeLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
     cmdCompile += "ThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Error while compiling the test ThreeLeaves";
-
-    dataCSV.open(path + "/ThreeLeaves/DataThreeLeaves.csv");
-    ASSERT_EQ(dataCSV.is_open(), 1)
-        << "Error cannot open file DataThreeLeaves.csv.";
+        << "Error while compiling the test ThreeLeaves.";
 
 #ifdef _MSC_VER
     cmdExec += "ThreeLeaves.exe ";
@@ -296,14 +284,10 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     cmdExec += "ThreeLeaves ";
 #endif
 
-    while (std::getline(dataCSV, dataLine)) {
-
-        ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
-            << "Error wrong action returned in test ThreeLeaves with input "
-               "value "
-               ": " +
-                   dataLine;
-    }
+    ASSERT_EQ(
+        system((cmdExec + path + "/ThreeLeaves/DataThreeLeaves.csv").c_str()),
+        0)
+        << "Error wrong action returned in test ThreeLeaves.";
 }
 
 TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
@@ -341,14 +325,13 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     ASSERT_EQ(tpg->getEdges().size(), 2)
         << "bad number of edges in OneTeamOneLeaf";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("OneTeamOneLeaf", *tpg,
-                                              BIN_DIR_PATH "/src/");
+    tpgGen = new CodeGen::TPGGenerationEngine("OneTeamOneLeaf", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
     cmdCompile += "OneTeamOneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Error wrong action returned in test OneTeamOneLeaf";
+        << "Error while compiling the test OneTeamOneLeaf";
 #ifdef _MSC_VER
     cmdExec += "OneTeamOneLeaf.exe ";
 #elif __GNUC__
@@ -404,18 +387,14 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     ASSERT_EQ(tpg->getEdges().size(), 3)
         << "bad number of edges in OneTeamTwoLeaves";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("OneTeamTwoLeaves", *tpg,
-                                              BIN_DIR_PATH "/src/");
+    tpgGen =
+        new CodeGen::TPGGenerationEngine("OneTeamTwoLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
     cmdCompile += "OneTeamTwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Error wrong action returned in test OneTeamTwoLeaves";
-
-    dataCSV.open(path + "/OneTeamTwoLeaves/DataOneTeamTwoLeaves.csv");
-    ASSERT_EQ(dataCSV.is_open(), 1)
-        << "Error cannot open file DataOneTeamTwoLeaves.csv.";
+        << "Error while compiling the test OneTeamTwoLeaves.";
 
 #ifdef _MSC_VER
     cmdExec += "OneTeamTwoLeaves.exe ";
@@ -423,14 +402,11 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     cmdExec += "OneTeamTwoLeaves ";
 #endif
 
-    while (std::getline(dataCSV, dataLine)) {
-
-        ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
-            << "Error wrong action returned in test OneTeamTwoLeaves with "
-               "input value "
-               ": " +
-                   dataLine;
-    }
+    ASSERT_EQ(
+        system((cmdExec + path + "/OneTeamTwoLeaves/DataOneTeamTwoLeaves.csv")
+                   .c_str()),
+        0)
+        << "Error wrong action returned in test OneTeamTwoLeaves.";
 }
 
 TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
@@ -497,19 +473,15 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     ASSERT_EQ(tpg->getEdges().size(), 5)
         << "bad number of edges in TwoTeamsOneCycle";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("TwoTeamsOneCycle", *tpg,
-                                              BIN_DIR_PATH "/src/");
+    tpgGen =
+        new CodeGen::TPGGenerationEngine("TwoTeamsOneCycle", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
 
     cmdCompile += "TwoTeamsOneCycle";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Error wrong action returned in test TwoTeamsOneCycle";
-
-    dataCSV.open(path + "/TwoTeamsOneCycle/DataTwoTeamsOneCycle.csv");
-    ASSERT_EQ(dataCSV.is_open(), 1)
-        << "Cannot open file DataTwoTeamsOneCycle.csv";
+        << "Error while compiling the test TwoTeamsOneCycle.";
 
 #ifdef _MSC_VER
     cmdExec += "TwoTeamsOneCycle.exe ";
@@ -517,14 +489,11 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     cmdExec += "TwoTeamsOneCycle ";
 #endif
 
-    while (std::getline(dataCSV, dataLine)) {
-
-        ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
-            << "Error wrong action returned in test TwoTeamsOneCycle with "
-               "input value "
-               ": " +
-                   dataLine;
-    }
+    ASSERT_EQ(
+        system((cmdExec + path + "/TwoTeamsOneCycle/DataTwoTeamsOneCycle.csv")
+                   .c_str()),
+        0)
+        << "Error wrong action returned in test TwoTeamsOneCycle.";
 }
 
 static void setProgLine(const std::shared_ptr<Program::Program> prog,
@@ -596,19 +565,13 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
         << "bad number of edges in ThreeTeamsOneCycleThreeLeaves";
 
     tpgGen = new CodeGen::TPGGenerationEngine("ThreeTeamsOneCycleThreeLeaves",
-                                              *tpg, BIN_DIR_PATH "/src/");
+                                              *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
     cmdCompile += "ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Error wrong action returned in test ThreeTeamsOneCycleThreeLeaves";
-
-    dataCSV.open(
-        path +
-        "/ThreeTeamsOneCycleThreeLeaves/DataThreeTeamsOneCycleThreeLeaves.csv");
-    ASSERT_EQ(dataCSV.is_open(), 1)
-        << "Cannot open file DataThreeTeamsOneCycleThreeLeaves.csv.";
+        << "Error while compiling the test ThreeTeamsOneCycleThreeLeaves";
 
 #ifdef _MSC_VER
     cmdExec += "ThreeTeamsOneCycleThreeLeaves.exe ";
@@ -616,13 +579,12 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     cmdExec += "ThreeTeamsOneCycleThreeLeaves ";
 #endif
 
-    while (std::getline(dataCSV, dataLine)) {
-
-        ASSERT_EQ(system((cmdExec + dataLine).c_str()), 0)
-            << "Error wrong action returned in test "
-               "ThreeTeamsOneCycleThreeLeaves with input value "
-               ": " +
-                   dataLine;
-    }
+    ASSERT_EQ(system((cmdExec + path +
+                      "/ThreeTeamsOneCycleThreeLeaves/"
+                      "DataThreeTeamsOneCycleThreeLeaves.csv")
+                         .c_str()),
+              0)
+        << "Error wrong action returned in test "
+           "ThreeTeamsOneCycleThreeLeaves.";
 }
 #endif // CODE_GENERATION

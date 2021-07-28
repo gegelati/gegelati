@@ -1,6 +1,7 @@
 #!/bin/sh
 
-DIR=$1
+DIR=$PWD
+DEBUG=$1
 DAT=$2
 target=$3
 
@@ -10,7 +11,7 @@ mkdir -p ${build}
 
 cd ${build}
 
-cmake -DDIR=${DIR} ${DAT}/codeGen/${target}
+cmake -DDIR=${DIR} -DDEBUG=${DEBUG} ${DAT}/codeGen/${target}
 
 cd -
 

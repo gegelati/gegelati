@@ -24,9 +24,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     File::TPGGraphDotImporter* dot = nullptr;
     CodeGen::TPGGenerationEngine* tpgGen;
     std::string cmdCompile;
-    std::string cmdExec{"\"" BIN_DIR_PATH "/bin/"};
-    // std::string cmdExec{BIN_DIR_PATH
-    //"/bin/
+    std::string cmdExec{"\"./bin/"};
 
     virtual void SetUp()
     {
@@ -81,9 +79,14 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
         cmdCompile += "compile.bat ";
         cmdExec += "debug/TicTacToeBest_TPG.exe";
 #elif __GNUC__
-        cmdCompile += "compile.sh " BIN_DIR_PATH " ";
+        cmdCompile += "compile.sh ";
         cmdExec += "TicTacToeBest_TPG";
 #endif
+#ifdef DEBUG
+        cmdCompile += "1 ";
+#else
+        cmdCompile += "0 ";
+#endif // DEBUG
         cmdCompile += TESTS_DAT_PATH " TicTacToeBest_TPG";
         cmdExec += "\" 7 -1 -1 -1 -1 -1 -1 -1 -1 -1";
     }
@@ -113,8 +116,8 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
     ASSERT_NO_THROW(dot->importGraph())
         << "Failed to Import the graph to test inference of TicTacToe";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("TicTacToeBest_TPG", *tpg,
-                                              BIN_DIR_PATH "/src/");
+    tpgGen =
+        new CodeGen::TPGGenerationEngine("TicTacToeBest_TPG", *tpg, "./src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test TicTacToe";
     // call destructor to close generated files
@@ -122,7 +125,7 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
 
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Fail to compile generated files to test TicTacToe";
-    std::cout << cmdExec << std::endl;
+
     ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error inference of TicTacToe has changed";
 }

@@ -9,8 +9,13 @@ set(BIN ${DIR}/bin/)
 
 include_directories(${INCLUDE})
 include_directories(.)
+include_directories(../csvparser)
+
+if (${DEBUG})
+    add_definitions(-DDEBUG)
+endif ()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN})
 
 set(target TwoTeamsOneCycle)
-add_executable(${target} ${SRC}${target}.c ${SRC}${target}_program.c main${target}.c)
+add_executable(${target} ${SRC}${target}.c ${SRC}${target}_program.c main${target}.c ../csvparser/csvparser.c ../csvparser/inferenceCSV.c)

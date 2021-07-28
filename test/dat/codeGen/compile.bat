@@ -1,6 +1,7 @@
 @echo off
-set DAT=%1
-set target=%2
+set DEBUG=%1
+set DAT=%2
+set target=%3
 
 if not exist ".\buildCodeGen\%target%\" mkdir ".\buildCodeGen\%target%\"
 
@@ -14,6 +15,6 @@ set DIR=%cd:\=/%
 cd .\buildCodeGen\%target%
 
 
-cmake -DDIR="%DIR%"  %DAT%codeGen\%target%
+cmake -DDIR="%DIR%" -DDEBUG=%DEBUG% %DAT%codeGen\%target%
 
 cmake --build . --target %target%

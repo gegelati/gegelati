@@ -22,14 +22,15 @@ int main(int argc, char* argv[])
         }
     }
     action = executeFromVertex(root);
+#ifdef DEBUG
     printf("action : %d\n", action);
+#endif // DEBUG
     if (expectedVal != -1 && action != expectedVal) {
         return ERROR_INFERENCE;
     }
 
     reset();
     action = executeFromVertex(root);
-    printf("action : %d\n", action);
     if (expectedVal != -1 && action != expectedVal) {
         return ERROR_RESET;
     }

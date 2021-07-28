@@ -10,6 +10,10 @@ set(BIN ${DIR}/bin/)
 include_directories(${INCLUDE})
 include_directories(.)
 
+if (${DEBUG})
+    add_definitions(-DDEBUG)
+endif ()
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN})
 
 set(target OneLeaf)

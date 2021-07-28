@@ -27,7 +27,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     CodeGen::TPGGenerationEngine* tpgGen;
     File::TPGGraphDotImporter* dot = nullptr;
     std::string cmdCompile;
-    std::string cmdExec{"\"" BIN_DIR_PATH "/bin/"};
+    std::string cmdExec{"\"./bin/"};
     std::string dataIn;
     TPG::TPGVertex const* rootVertex;
 
@@ -80,11 +80,15 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         cmdCompile += "compile.bat ";
         cmdExec += "debug/";
 #elif __GNUC__
-        cmdCompile += "compile.sh " BIN_DIR_PATH " ";
+        cmdCompile += "compile.sh ";
 #endif
+#ifdef DEBUG
+        cmdCompile += "1 ";
+#else
+        cmdCompile += "0 ";
+#endif // DEBUG
         cmdCompile += TESTS_DAT_PATH " StickGameBest_TPG";
         cmdExec += "StickGameBest_TPG";
-        std::cout << "commande : " << cmdCompile << std::endl;
     }
 
     virtual void TearDown() override
@@ -110,7 +114,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
 {
     int inferenceCodeGen, inferenceGegelati, status;
     tpgGen =
-        new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, BIN_DIR_PATH "/src/");
+        new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, "./src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files
@@ -140,7 +144,6 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
 #ifdef _MSC_VER
         std::string cmd{cmdExec + ".exe\" " + dataIn};
         inferenceCodeGen = system(cmd.c_str());
-        std::cout << "return value : " << inferenceCodeGen << std::endl;
 #elif __GNUC__
         std::string cmd{cmdExec + "\" " + dataIn};
         status = system(cmd.c_str());
@@ -154,5 +157,4 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
             << "Error inference of Stick Game has changed";
         le->doAction(inferenceGegelati);
     }
-    std::cout << "pouet" << std::endl;
 }
