@@ -109,12 +109,11 @@ const std::string& Instruction::getPrintTemplate() const
     return printTemplate;
 }
 
-std::string Instruction::getPrintablePrimitiveType(const uint64_t& opIdx) const
+std::string Instruction::getPrintablePrimitiveOperandType(const uint64_t& opIdx) const
 {
     std::string typeName =
         DEMANGLE_TYPEID_NAME(this->operandTypes.at(opIdx).get().name());
-    std::string regex{"(const )?([\\w:\\*]*)[ ]?(\\[(\\d)+\\])*"};
-    std::regex arrayType(regex);
+    std::regex arrayType(GET_PRINT_PRIMITIVE_OPERAND_TYPE);
     std::cmatch cm;
     std::string type;
     if (std::regex_match(typeName.c_str(), cm, arrayType)) {

@@ -186,7 +186,7 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
     uint64_t opIdx;
     const Program::Line& line = getCurrentLine();
     const Instructions::Instruction& instruction = getCurrentInstruction();
-    for (int i = 0; i < instruction.getNbOperands(); ++i) {
+    for (unsigned int i = 0; i < instruction.getNbOperands(); ++i) {
         uint64_t sourceIdx = line.getOperand(i).first;
         const std::type_info& operandType =
             instruction.getOperandTypes().at(i).get();
@@ -195,7 +195,7 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             sourceIdx); // Throws std::out_of_range
 
-        fileC << "\t\t" << instruction.getPrintablePrimitiveType(i) << " "
+        fileC << "\t\t" << instruction.getPrintablePrimitiveOperandType(i) << " "
               << nameOperandVariable << i
               << dataPrinter.printDataAt(dataSource, operandType, opIdx,
                                          getNameSourceData(sourceIdx))
