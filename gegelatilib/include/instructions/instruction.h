@@ -108,37 +108,40 @@ namespace Instructions {
          */
         std::string printTemplate;
 
-	private:
-		/**
-		 * This regular expression is used to extract the primitive type from the type of an instruction. It removes the const definition and any array declaration from the type.
-		 *
-		 * Explanation:
-		 * \code{.unparse}
-		 * (const )?
-		 * \endcode
-		 * match \c const if it is in the operand type
-		 * \code{.unparse}
-		 * [\\w:\\*]*
-		 * \endcode
-		 * match 1 to infinite words separated by \c : . Allow to match \c Data::Constant.
-		 * \code{.unparse}
-		 * ((struct )?[\\w:\\*]*)
-		 * \endcode
-		 * match the primitive type of the operand. For MSVC Data::Constant is a struct so we need to match this possibility too.   
-		 * \code{.unparse}
-		 * [ ]?
-		 * \endcode
-		 * match if the operand is a 1D array without a static size. This pattern can only appear 0 or 1 time in the C/Cpp semantic.
-		 * \code{.unparse}
-		 * (\\d)+
-		 * \endcode
-		 * match any digit 1 to infinite times.  
-		 * \code{.unparse}
-		 * (\\[(\\d)+\\])*
-		 * \endcode
-		 * match 0 to infinite dimensions that have static size.
-		**/
-		inline static const std::string GET_PRINT_PRIMITIVE_OPERAND_TYPE{ "(const )?((struct )?[\\w:\\*]*)[ ]?(\\[(\\d)+\\])*" };
+      private:
+        /**
+         * This regular expression is used to extract the primitive type from
+         *the type of an instruction. It removes the const definition and any
+         *array declaration from the type.
+         *
+         * Explanation:
+         * \code{.unparse}
+         * (const )?
+         * \endcode
+         * match \c const if it is in the operand type
+         * \code{.unparse}
+         * [\\w:\\*]*
+         * \endcode
+         * match 1 to infinite words separated by \c : . Allow to match \c
+         *Data::Constant. \code{.unparse}
+         * ((struct )?[\\w:\\*]*)
+         * \endcode
+         * match the primitive type of the operand. For MSVC Data::Constant is a
+         *struct so we need to match this possibility too. \code{.unparse} [ ]?
+         * \endcode
+         * match if the operand is a 1D array without a static size. This
+         *pattern can only appear 0 or 1 time in the C/Cpp semantic.
+         * \code{.unparse}
+         * (\\d)+
+         * \endcode
+         * match any digit 1 to infinite times.
+         * \code{.unparse}
+         * (\\[(\\d)+\\])*
+         * \endcode
+         * match 0 to infinite dimensions that have static size.
+         **/
+        inline static const std::string GET_PRINT_PRIMITIVE_OPERAND_TYPE{
+            "(const )?((struct )?[\\w:\\*]*)[ ]?(\\[(\\d)+\\])*"};
 
 #endif // CODE_GENERATION
 

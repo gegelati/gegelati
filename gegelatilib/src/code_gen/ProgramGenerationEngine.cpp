@@ -195,8 +195,8 @@ void CodeGen::ProgramGenerationEngine::initOperandCurrentLine()
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             sourceIdx); // Throws std::out_of_range
 
-        fileC << "\t\t" << instruction.getPrintablePrimitiveOperandType(i) << " "
-              << nameOperandVariable << i
+        fileC << "\t\t" << instruction.getPrintablePrimitiveOperandType(i)
+              << " " << nameOperandVariable << i
               << dataPrinter.printDataAt(dataSource, operandType, opIdx,
                                          getNameSourceData(sourceIdx))
               << std::endl;

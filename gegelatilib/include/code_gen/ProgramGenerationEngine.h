@@ -93,10 +93,10 @@ namespace CodeGen {
          */
         Data::DataHandlerPrinter dataPrinter;
 
+      public:
         /// inherited from Program::ProgramEngine
         virtual void processLine() override;
 
-      public:
         /**
          * \brief Constructor of the class
          *

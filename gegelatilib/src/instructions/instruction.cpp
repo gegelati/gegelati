@@ -109,7 +109,8 @@ const std::string& Instruction::getPrintTemplate() const
     return printTemplate;
 }
 
-std::string Instruction::getPrintablePrimitiveOperandType(const uint64_t& opIdx) const
+std::string Instruction::getPrintablePrimitiveOperandType(
+    const uint64_t& opIdx) const
 {
     std::string typeName =
         DEMANGLE_TYPEID_NAME(this->operandTypes.at(opIdx).get().name());
