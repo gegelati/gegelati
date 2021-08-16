@@ -26,6 +26,8 @@ namespace Data {
          * \brief Function used to generate the declaration of an operand based
          * on its type.
          *
+         * \param[in] dataHandler const reference to the Data::DataHandler that
+         * must be printed
          * \param[in] type the std::type_info of the operand that we want to
          * print.
          * \param[in] address the location of the data to print.
@@ -84,6 +86,8 @@ namespace Data {
          * \brief function used to retrieve the typename of the template of the
          * DataHandler.
          *
+         * \param[in] dataHandler const reference to the Data::DataHandler that
+         * must be printed
          * \return template type of the DataHandler in a human readable format.
          */
         std::string getDemangleTemplateType(
