@@ -72,7 +72,7 @@ namespace TPG {
          * used to fill the maps of IDs  (vertex and program).
          */
 
-        TPGAbstractEngine(const TPG::TPGGraph& tpg) : tpg{tpg} {};
+        TPGAbstractEngine(const TPG::TPGGraph& tpg) : tpg{tpg}, nbActions{0} {};
 
       public:
         /**

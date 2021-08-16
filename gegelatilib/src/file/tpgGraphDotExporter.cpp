@@ -38,39 +38,6 @@
 #include "data/constant.h"
 #include <inttypes.h>
 
-uint64_t File::TPGGraphDotExporter::findVertexID(const TPG::TPGVertex& vertex)
-{
-    auto iter = this->vertexID.find(&vertex);
-    if (iter == this->vertexID.end()) {
-        // The vertex is not known yet
-        this->vertexID.insert(std::pair<const TPG::TPGVertex*, uint64_t>(
-            &vertex, this->nbVertex));
-        this->nbVertex++;
-        return nbVertex - 1;
-    }
-    else {
-        return iter->second;
-    }
-}
-
-bool File::TPGGraphDotExporter::findProgramID(const Program::Program& prog,
-                                              uint64_t& id)
-{
-    auto iter = this->programID.find(&prog);
-    if (iter == this->programID.end()) {
-        // The vertex is not known yet
-        this->programID.insert(std::pair<const Program::Program*, uint64_t>(
-            &prog, this->nbPrograms));
-        this->nbPrograms++;
-        id = this->nbPrograms - 1;
-        return true;
-    }
-    else {
-        id = iter->second;
-        return false;
-    }
-}
-
 void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 {
     uint64_t name = this->findVertexID(team);
