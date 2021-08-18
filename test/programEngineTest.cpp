@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "code_gen/ProgramGenerationEngine.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "data/primitiveTypeArray2D.h"
@@ -9,9 +8,9 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
-//#include "printableEnvironment.h"
 #include "program/line.h"
 #include "program/program.h"
+#include "program/programExecutionEngine.h"
 
 class ProgramEngineTest : public ::testing::Test
 {
@@ -51,17 +50,13 @@ class ProgramEngineTest : public ::testing::Test
             .setDataAt(typeid(double), 25, value0);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        //        set.add(*(new Instructions::LambdaInstruction<double>(
-        //            "$0 = $1 + $1;", [](double a) -> double { return a + a;
-        //            })));
-        set.add(*(new Instructions::MultByConstant<double>("$0 = $1 * $2;")));
-        set.add(*(new Instructions::LambdaInstruction<const double[2],
-                                                      const double[2]>(
+        set.add(*(new Instructions::MultByConstant<double>()));
+        set.add(*new Instructions::LambdaInstruction<const double[2],
+                                                     const double[2]>(
             [](const double a[2], const double b[2]) {
                 return a[0] * b[0] + a[1] * b[1];
-            },
-            "$0 = $1[0] * $2[0] + $1[1] * $2[1];")));
-        set.add(*(new Instructions::LambdaInstruction<const double[2][2]>(
+            }));
+        set.add(*new Instructions::LambdaInstruction<const double[2][2]>(
             [](const double a[2][2]) {
                 double res = 0.0;
                 for (auto h = 0; h < 2; h++) {
@@ -70,8 +65,7 @@ class ProgramEngineTest : public ::testing::Test
                     }
                 }
                 return res / 4.0;
-            },
-            "$0 = 0.25*($1[0] + $1[1] + $1[2] + $1[3]);")));
+            }));
 
         e = new Environment(set, vect, 8, 5);
         p = new Program::Program(*e);
@@ -138,8 +132,8 @@ class ProgramEngineTest : public ::testing::Test
 
 TEST_F(ProgramEngineTest, next)
 {
-    CodeGen::ProgramGenerationEngine progExecEng("hasNext", *e);
-    progExecEng.setProgram(*p);
+    Program::ProgramExecutionEngine progExecEng(*p);
+
     // 4 lines minus one intron line
     ASSERT_TRUE(progExecEng.next())
         << "Program has three line so going to the next line after "
@@ -157,7 +151,7 @@ TEST_F(ProgramEngineTest, next)
 
 TEST_F(ProgramEngineTest, getCurrentLine)
 {
-    CodeGen::ProgramGenerationEngine progExecEng("getCurrentLine", *p);
+    Program::ProgramExecutionEngine progExecEng(*p);
 
     // Valid since the program has more than 0 line and program counter is
     // initialized to 0.
@@ -173,7 +167,7 @@ TEST_F(ProgramEngineTest, getCurrentLine)
 
 TEST_F(ProgramEngineTest, getCurrentInstruction)
 {
-    CodeGen::ProgramGenerationEngine progExecEng("getCurrentInstruiction", *p);
+    Program::ProgramExecutionEngine progExecEng(*p);
 
     progExecEng.next();
 
@@ -191,7 +185,7 @@ TEST_F(ProgramEngineTest, getCurrentInstruction)
 
 TEST_F(ProgramEngineTest, fetchOperands)
 {
-    CodeGen::ProgramGenerationEngine progExecEng("fetchOperand", *p);
+    Program::ProgramExecutionEngine progExecEng(*p);
     std::vector<Data::UntypedSharedPtr> operands;
 
     progExecEng.next();
@@ -217,8 +211,9 @@ TEST_F(ProgramEngineTest, fetchOperands)
 
 TEST_F(ProgramEngineTest, fetchCompositeOperands)
 {
-    CodeGen::ProgramGenerationEngine progExecEng("fetchCompositeOperand", *p);
+    Program::ProgramExecutionEngine progExecEng(*p);
     std::vector<Data::UntypedSharedPtr> operands;
+
     progExecEng.next();
     progExecEng.next();
     progExecEng.next();
@@ -251,7 +246,7 @@ TEST_F(ProgramEngineTest, fetchCompositeOperands)
 
 TEST_F(ProgramEngineTest, setProgram)
 {
-    CodeGen::ProgramGenerationEngine progExecEng("setProgram", *e);
+    Program::ProgramExecutionEngine progExecEng(*p);
 
     // Create a new program
     Program::Program p2(*e);
@@ -277,7 +272,7 @@ TEST_F(ProgramEngineTest, setProgram)
 
 TEST_F(ProgramEngineTest, setDataSources)
 {
-    CodeGen::ProgramGenerationEngine progExecEng("setDataSources", *p);
+    Program::ProgramExecutionEngine progExecEng(*p);
 
     // Create a new compatible set of dataSources
     std::vector<std::reference_wrapper<const Data::DataHandler>> otherVect;
@@ -311,7 +306,7 @@ TEST_F(ProgramEngineTest, setDataSources)
 
 TEST_F(ProgramEngineTest, getOperandLocation)
 {
-    CodeGen::ProgramGenerationEngine progExecEng("hasNext", *p);
+    Program::ProgramExecutionEngine progExecEng(*p);
     ASSERT_EQ(progExecEng.getOperandLocation(0), 0)
         << "fail to retreive operand location in a 2D array";
     progExecEng.next();
@@ -320,4 +315,27 @@ TEST_F(ProgramEngineTest, getOperandLocation)
 
     ASSERT_THROW(progExecEng.getOperandLocation(4), std::range_error)
         << "Try to read an operand out of range";
+}
+
+TEST_F(ProgramEngineTest, iterateThroughtProgram)
+{
+    Program::ProgramExecutionEngine progExecEng(*p);
+
+    ASSERT_NO_THROW(progExecEng.iterateThroughtProgram(false))
+        << "Fail to iterate through the program from fixture. (Indivitual "
+           "execution of its line in executeCurrentLine test).";
+
+    // Introduce a new line in the program to test the throw
+    Program::Line& l5 = p->addNewLine();
+    // Instruction 4 does not exist. Must deactivate checks to write this
+    // instruction
+    l5.setInstructionIndex(4, false);
+    ASSERT_THROW(progExecEng.iterateThroughtProgram(false), std::out_of_range)
+        << "Iterate throught a program that contain a line using an incorrect "
+           "Instruction index should throw an exception.";
+
+    // Now ignoring the exceptions
+    ASSERT_NO_THROW(progExecEng.iterateThroughtProgram(true))
+        << "Program line using a incorrect Instruction index should not "
+           "interrupt the Execution when ignored.";
 }
