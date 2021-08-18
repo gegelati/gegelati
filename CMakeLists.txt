@@ -43,8 +43,16 @@ project(${PROJECT_NAME}
         LANGUAGES CXX
         VERSION 0.6.0)
 string(TOLOWER ${PROJECT_NAME} project_name)
-add_definitions( -DCODE_GENERATION)
 set(LIB_SOURCE_DIRECTORY ${project_name}lib)
+
+# If CODE_GEN = 1 gegelati is compile with the codeGen, if CODE_GEN = 0 the 
+# codeGen is disabled
+set(CODE_GEN 1)
+
+if(CODE_GEN EQUAL 1)
+    add_definitions( -DCODE_GENERATION)
+endif()
+
 
 # Defines the CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_BINDIR and many other useful macros.
 # See https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
