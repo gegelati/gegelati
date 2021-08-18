@@ -43,6 +43,12 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
+#ifdef CODE_GENERATION
+#include <code_gen/ProgramGenerationEngine.h>
+#include <code_gen/TpgGenerationEngine.h>
+#endif // CODE_GENERATION
+
+
 #include <data/array2DWrapper.h>
 #include <data/arrayWrapper.h>
 #include <data/constant.h>
@@ -92,9 +98,11 @@
 
 #include <program/line.h>
 #include <program/program.h>
+#include <program/programEngine.h>
 #include <program/programExecutionEngine.h>
 
 #include <tpg/policyStats.h>
+#include <tpg/tpgAbstractEngine.h>
 #include <tpg/tpgAction.h>
 #include <tpg/tpgEdge.h>
 #include <tpg/tpgExecutionEngine.h>

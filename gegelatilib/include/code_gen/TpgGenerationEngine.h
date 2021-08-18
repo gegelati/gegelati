@@ -55,6 +55,11 @@ namespace CodeGen {
      * All the functions are regrouped in a file. Another file holds
      * the required functions to iterate through the TPGGraph.
      *
+     * To use the generated code two code templates are provided in the directory
+     * doc/codeGen. One template is for generic learning environment. The
+     * other one is dedicated for adversarial learning environment and manages
+     * the switch between the players. Both templates can use the inference with
+     * the codeGen or the inference with Gegelati.
      */
     class TPGGenerationEngine : public TPG::TPGAbstractEngine
     {
