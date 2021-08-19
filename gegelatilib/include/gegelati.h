@@ -48,7 +48,6 @@
 #include <code_gen/TpgGenerationEngine.h>
 #endif // CODE_GENERATION
 
-
 #include <data/array2DWrapper.h>
 #include <data/arrayWrapper.h>
 #include <data/constant.h>

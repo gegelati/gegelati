@@ -37,10 +37,10 @@
 
 #ifndef TPGGENERATIONENGINE_H
 #define TPGGENERATIONENGINE_H
+#include <filesystem>
 #include <ios>
 #include <iostream>
 #include <string>
-#include <filesystem>
 
 #include "code_gen/ProgramGenerationEngine.h"
 #include "tpg/tpgAbstractEngine.h"
@@ -56,11 +56,11 @@ namespace CodeGen {
      * All the functions are regrouped in a file. Another file holds
      * the required functions to iterate through the TPGGraph.
      *
-     * To use the generated code two code templates are provided in the directory
-     * doc/codeGen. One template is for generic learning environment. The
-     * other one is dedicated for adversarial learning environment and manages
-     * the switch between the players. Both templates can use the inference with
-     * the codeGen or the inference with Gegelati.
+     * To use the generated code two code templates are provided in the
+     * directory doc/codeGen. One template is for generic learning environment.
+     * The other one is dedicated for adversarial learning environment and
+     * manages the switch between the players. Both templates can use the
+     * inference with the codeGen or the inference with Gegelati.
      *
      * The repo gegelati apps give some example of the template code completed
      * for TicTacToe, Pendulum and StickGame.
@@ -144,7 +144,7 @@ namespace CodeGen {
                 throw std::runtime_error(
                     "error the size of the call stack is equal to 0");
             }
-            if(std::filesystem::is_directory(path) == false){
+            if (std::filesystem::is_directory(path) == false) {
                 std::filesystem::create_directories(path);
             }
 
