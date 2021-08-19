@@ -37,7 +37,6 @@
 
 #ifndef TPGGENERATIONENGINE_H
 #define TPGGENERATIONENGINE_H
-#include <filesystem>
 #include <ios>
 #include <iostream>
 #include <string>
@@ -144,10 +143,6 @@ namespace CodeGen {
                 throw std::runtime_error(
                     "error the size of the call stack is equal to 0");
             }
-            if (std::filesystem::is_directory(path) == false) {
-                std::filesystem::create_directories(path);
-            }
-
             try {
                 this->fileMain.open(path + filename + ".c", std::ofstream::out);
                 this->fileMainH.open(path + filename + ".h",
@@ -157,7 +152,11 @@ namespace CodeGen {
                 throw std::runtime_error("Could not open file " +
                                          std::string(path + filename));
             }
-
+            if (!fileMain.is_open() || !fileMainH.is_open()) {
+                throw std::runtime_error(
+                    "Error can't open " + std::string(path + filename) +
+                    ".c or " + std::string(path + filename) + ".h");
+            }
             fileMain << "#include \"" << filename << ".h\"" << std::endl;
             fileMain << "#include \"" << filename << "_" << filenameProg
                      << ".h\"" << std::endl;

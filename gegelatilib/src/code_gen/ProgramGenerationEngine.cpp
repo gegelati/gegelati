@@ -35,7 +35,6 @@
 
 #ifdef CODE_GENERATION
 #include "code_gen/ProgramGenerationEngine.h"
-#include <filesystem>
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
@@ -162,9 +161,6 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
         std::cout << "filename is empty" << std::endl;
         throw std::invalid_argument("filename is empty");
     }
-    if (std::filesystem::is_directory(path) == false) {
-        std::filesystem::create_directories(path);
-    }
     try {
         this->fileC.open(path + filename + ".c", std::ofstream::out);
         this->fileH.open(path + filename + ".h", std::ofstream::out);
@@ -172,6 +168,11 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
     catch (std::ios_base::failure e) {
         throw std::runtime_error("Could not open file " +
                                  std::string(path + filename));
+    }
+    if (!fileC.is_open() || !fileH.is_open()) {
+        throw std::runtime_error("Error can't open " +
+                                 std::string(path + filename) + ".c or " +
+                                 std::string(path + filename) + ".h");
     }
     fileC << "#include \"" << filename << ".h\"" << std::endl;
 
