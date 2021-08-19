@@ -40,6 +40,7 @@
 #include <ios>
 #include <iostream>
 #include <string>
+#include <filesystem>
 
 #include "code_gen/ProgramGenerationEngine.h"
 #include "tpg/tpgAbstractEngine.h"
@@ -60,6 +61,9 @@ namespace CodeGen {
      * other one is dedicated for adversarial learning environment and manages
      * the switch between the players. Both templates can use the inference with
      * the codeGen or the inference with Gegelati.
+     *
+     * The repo gegelati apps give some example of the template code completed
+     * for TicTacToe, Pendulum and StickGame.
      */
     class TPGGenerationEngine : public TPG::TPGAbstractEngine
     {
@@ -98,7 +102,6 @@ namespace CodeGen {
          * This function print generic code to execute the TPG and manage the
          * stack of visited edges.
          */
-        // todo des .c/.h qui sont dupliqué pour éviter le recopiage ?
         void initTpgFile();
 
         /**
@@ -141,6 +144,10 @@ namespace CodeGen {
                 throw std::runtime_error(
                     "error the size of the call stack is equal to 0");
             }
+            if(std::filesystem::is_directory(path) == false){
+                std::filesystem::create_directories(path);
+            }
+
             try {
                 this->fileMain.open(path + filename + ".c", std::ofstream::out);
                 this->fileMainH.open(path + filename + ".h",

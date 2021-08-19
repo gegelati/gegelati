@@ -34,7 +34,7 @@
  */
 
 #ifdef CODE_GENERATION
-
+#include <filesystem>
 #include "code_gen/ProgramGenerationEngine.h"
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
@@ -161,6 +161,9 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
     if (filename.size() == 0) {
         std::cout << "filename is empty" << std::endl;
         throw std::invalid_argument("filename is empty");
+    }
+    if(std::filesystem::is_directory(path) == false){
+        std::filesystem::create_directories(path);
     }
     try {
         this->fileC.open(path + filename + ".c", std::ofstream::out);
