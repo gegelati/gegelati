@@ -161,14 +161,9 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
         std::cout << "filename is empty" << std::endl;
         throw std::invalid_argument("filename is empty");
     }
-    try {
-        this->fileC.open(path + filename + ".c", std::ofstream::out);
-        this->fileH.open(path + filename + ".h", std::ofstream::out);
-    }
-    catch (std::ios_base::failure e) {
-        throw std::runtime_error("Could not open file " +
-                                 std::string(path + filename));
-    }
+    this->fileC.open(path + filename + ".c", std::ofstream::out);
+    this->fileH.open(path + filename + ".h", std::ofstream::out);
+
     if (!fileC.is_open() || !fileH.is_open()) {
         throw std::runtime_error("Error can't open " +
                                  std::string(path + filename) + ".c or " +

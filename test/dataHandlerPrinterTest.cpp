@@ -7,10 +7,22 @@
 
 class DataHandlerPrinterTest : public ::testing::Test
 {
+    class Fake3DDataHandler : public Data::Array2DWrapper<double>
+    {
+      public:
+        /// Inherited from DataHandler
+        virtual std::vector<size_t> getDimensionsSize() const override
+        {
+            std::vector<size_t> sizes = {1, 2, 3};
+            return sizes;
+        };
+    };
+
   protected:
     Data::DataHandlerPrinter* printer;
     Data::PrimitiveTypeArray<double>* array1D;
     Data::PrimitiveTypeArray2D<double>* array2D;
+    Fake3DDataHandler* fake3D;
     const std::type_info& scalar = typeid(double);
     const std::type_info& array = typeid(double[3]);
     const std::type_info& matrix = typeid(double[2][2]);
@@ -22,6 +34,7 @@ class DataHandlerPrinterTest : public ::testing::Test
         array1D = new Data::PrimitiveTypeArray<double>(8);
         array2D = new Data::PrimitiveTypeArray2D<double>(5, 5);
         printer = new Data::DataHandlerPrinter();
+        fake3D = new Fake3DDataHandler;
     }
 
     virtual void Teardown()
@@ -91,6 +104,7 @@ TEST_F(DataHandlerPrinterTest, printDataAt)
 {
     std::string print;
     size_t start = 3;
+
     std::string expected = "[3] = {" + nameVar + "[" + std::to_string(5) +
                            "], " + nameVar + "[" + std::to_string(6) + "], " +
                            nameVar + "[" + std::to_string(7) + "]};";
@@ -105,16 +119,31 @@ TEST_F(DataHandlerPrinterTest, printDataAt)
     expected = "[2][2] = {{in1[5], in1[6]}, {in1[10], in1[11]}};";
     ASSERT_NO_THROW(print =
                         printer->printDataAt(*array2D, matrix, start, nameVar))
-        << "Failed to extract a 2D array at address 4 of size 2*2 from a 2D "
+        << "Failed to extract a 2D array of size 2*2 at address 4 from a 2D "
            "array of size 5*5.";
     ASSERT_EQ(print, expected)
         << "Error the array generated does not have the right format.";
 
+    expected = "[3] = {in1[6], in1[7], in1[8]};";
+    ASSERT_NO_THROW(print =
+                        printer->printDataAt(*array1D, array, start, nameVar))
+        << "Failed to extract a 1D array  of size 3 at address 4 from a 2D "
+           "array of size 5*5.";
+
     ASSERT_THROW(print = printer->printDataAt(*array1D, matrix, start, nameVar),
                  std::invalid_argument)
         << "Error should fail to extract a 2D array of size 2*2 at address 4 "
-           "from a 1D "
-           "array.";
+           "from a 1D array.";
+
+    ASSERT_THROW(print = printer->printDataAt(*array1D, matrix, 15, nameVar),
+                 std::invalid_argument)
+        << "Error should fail to extract a 1D array  of size 3 at address 15 "
+           "from a 2D "
+           "array of size 5*5.";
+
+    ASSERT_THROW(printer->printDataAt(*fake3D, array, start, nameVar),
+                 std::invalid_argument)
+        << "Error should fail to extract data from 3D DataHandler";
 }
 
 TEST_F(DataHandlerPrinterTest, getDemangleTemplateType)

@@ -97,6 +97,11 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0.";
 
+    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
+                     "constructorWithPath", *tpg, "./src/unknownDir/"),
+                 std::runtime_error)
+        << "Construction should fail because the path does not exist.";
+
     // ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 }
 

@@ -15,8 +15,10 @@ class ProgramGenerationEngineTest : public ::testing::Test
     const size_t size1{32};
     Instructions::Set set;
     Environment* e;
+    Environment* envWithConstant;
     Program::Program* p;
     Program::Program* p2;
+    Program::Program* p3;
 
     virtual void SetUp()
     {
@@ -32,8 +34,10 @@ class ProgramGenerationEngineTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
         e = new Environment(set, vect, 8);
+        envWithConstant = new Environment(set, vect, 8, 5);
         p = new Program::Program(*e);
         p2 = new Program::Program(*e);
+        p3 = new Program::Program(*envWithConstant);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(0); // Instruction is add.
@@ -78,6 +82,13 @@ class ProgramGenerationEngineTest : public ::testing::Test
         P2l0.setOperand(0, 1, 1);    // 2nd operand: parameter 1.
         P2l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
 
+        Program::Line& P3l0 = p3->addNewLine();
+        P3l0.setInstructionIndex(1); // Instruction is add.
+        // Reg[5] = cst[0] + in1[1];
+        P3l0.setOperand(0, 1, 0);    // 1st operand: constant 0.
+        P3l0.setOperand(0, 2, 1);    // 2nd operand: parameter 1.
+        P3l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
+
         // Mark intron lines
         ASSERT_EQ(p->identifyIntrons(), 1);
     }
@@ -117,6 +128,11 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
     ASSERT_THROW(progGen = new CodeGen::ProgramGenerationEngine("", *e),
                  std::invalid_argument)
         << "Construction should fail, filename is empty.";
+
+    ASSERT_THROW(progGen = new CodeGen::ProgramGenerationEngine(
+                     "constructor", *e, "./src/unkownDir/"),
+                 std::runtime_error)
+        << "Construction should fail because the path does not exist.";
 }
 
 TEST_F(ProgramGenerationEngineTest, generateCurrentLine)
@@ -137,6 +153,8 @@ TEST_F(ProgramGenerationEngineTest, generateCurrentLine)
 TEST_F(ProgramGenerationEngineTest, generateProgram)
 {
     CodeGen::ProgramGenerationEngine engine("genCurrentLine", *p);
+    CodeGen::ProgramGenerationEngine engineForConstant("programWithConstant",
+                                                       *p3);
 
     ASSERT_NO_THROW(engine.generateProgram(1))
         << "Out of range exception while generating the program";
@@ -146,6 +164,9 @@ TEST_F(ProgramGenerationEngineTest, generateProgram)
     ASSERT_THROW(engine.generateProgram(2), std::runtime_error)
         << "Should be able to generate the program contain an instruction not "
            "printable";
+
+    ASSERT_NO_THROW(engineForConstant.generateProgram(3))
+        << "Fail to generate a program with constant";
 }
 
 TEST_F(ProgramGenerationEngineTest, initOperandCurrentLine)
