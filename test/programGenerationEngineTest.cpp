@@ -26,6 +26,7 @@ class ProgramGenerationEngineTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
 
         auto add = [](double a, double b) -> double { return a + b; };
+        auto addConstant = [](Data::Constant a, double b) -> double { return (double)(a) + b; };
         auto sub = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             add, "$0 = $1 + $2;")));
@@ -34,6 +35,10 @@ class ProgramGenerationEngineTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
         e = new Environment(set, vect, 8);
+
+        set.add(*(new Instructions::LambdaInstruction<Data::Constant, double>(
+            addConstant, "$0 = (double)($1) - $2;")));
+
         envWithConstant = new Environment(set, vect, 8, 5);
         p = new Program::Program(*e);
         p2 = new Program::Program(*e);
@@ -43,7 +48,7 @@ class ProgramGenerationEngineTest : public ::testing::Test
         l0.setInstructionIndex(0); // Instruction is add.
         // Reg[5] = in1[0] + in1[1];
         l0.setOperand(0, 1, 0);    // 1st operand: parameter 0.
-        l0.setOperand(0, 1, 1);    // 2nd operand: parameter 1.
+        l0.setOperand(1, 1, 1);    // 2nd operand: parameter 1.
         l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
 
         Program::Line& l1 = p->addNewLine();
@@ -79,14 +84,14 @@ class ProgramGenerationEngineTest : public ::testing::Test
         P2l0.setInstructionIndex(2); // Instruction is add(not printable).
         // Reg[5] = in1[0] + in1[1];
         P2l0.setOperand(0, 1, 0);    // 1st operand: parameter 0.
-        P2l0.setOperand(0, 1, 1);    // 2nd operand: parameter 1.
+        P2l0.setOperand(1, 1, 1);    // 2nd operand: parameter 1.
         P2l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
 
         Program::Line& P3l0 = p3->addNewLine();
-        P3l0.setInstructionIndex(1); // Instruction is add.
+        P3l0.setInstructionIndex(3); // Instruction is add.
         // Reg[5] = cst[0] + in1[1];
-        P3l0.setOperand(0, 1, 0);    // 1st operand: constant 0.
-        P3l0.setOperand(0, 2, 1);    // 2nd operand: parameter 1.
+        P3l0.setOperand(0, 1, 1);    // 1st operand: constant 0.
+        P3l0.setOperand(1, 2, 1);    // 2nd operand: parameter 1.
         P3l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
 
         // Mark intron lines
@@ -124,6 +129,11 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
         << "Construction failed with a valid program.";
 
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
+
+    ASSERT_NO_THROW(progGen = new CodeGen::ProgramGenerationEngine(
+        "constructorWithPath", *e, "./src/"))
+                    << "Failed to construct a TPGGenerationEngine with a filename and a "
+                       "TPG and a path";
 
     ASSERT_THROW(progGen = new CodeGen::ProgramGenerationEngine("", *e),
                  std::invalid_argument)

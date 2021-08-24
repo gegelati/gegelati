@@ -97,10 +97,26 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0.";
 
-    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-                     "constructorWithPath", *tpg, "./src/unknownDir/"),
+    std::fstream out;
+    out.open("./src/rdOnly.c", std::ofstream::out);
+    if(!out.is_open()){
+        out.open("./src/rdOnly.c", std::ofstream::in);
+    }
+    ASSERT_TRUE(out.is_open()) << "Error can't open file ./src/rdOnly.c";
+    out.close();
+    ASSERT_TRUE(!out.is_open()) << "Error can't close file ./src/rdOnly.c";
+
+#ifdef _MSC_VER
+    system("attrib +R ./src/rdOnly.c");
+#elif __GNUC__
+    system("chmod 444 ./src/rdOnly.c");
+#endif
+
+    ASSERT_THROW(tpgGen =
+                     new CodeGen::TPGGenerationEngine("rdOnly", *tpg, "./src/"),
                  std::runtime_error)
-        << "Construction should fail because the path does not exist.";
+        << "Construction should fail because the file rdOnly is in read only "
+           "status.";
 
     // ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 }
