@@ -133,6 +133,11 @@ void CodeGen::TPGGenerationEngine::initTpgFile()
         << "Edge* callStack[stackSize];\n"
         << "uint32_t top = 0;\n\n"
 
+        << "int inferenceTPG(){\n"
+        << "\treset();\n"
+        << "\treturn executeFromVertex(root);\n"
+        << "}\n\n"
+
         << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
         << "\tvoid*(*f)(int*action) = ptr_f;\n"
         << "\tint action = INT_MIN;\n"
@@ -215,6 +220,7 @@ void CodeGen::TPGGenerationEngine::initHeaderFile()
               << "\tvoid* (*ptr_vertex)(int* action);\n"
               << "}Edge;\n\n"
 
+              << "int inferenceTPG();\n"
               << "int executeFromVertex(void*(*)(int*action));\n"
               << "void* executeTeam(Edge* e, int nbEdge);\n"
               << "int execute(Edge* e, int nbEdge);\n"
