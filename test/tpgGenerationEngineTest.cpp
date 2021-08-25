@@ -99,7 +99,7 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 
     std::fstream out;
     out.open("./src/rdOnly.c", std::ofstream::out);
-    if(!out.is_open()){
+    if (!out.is_open()) {
         out.open("./src/rdOnly.c", std::ofstream::in);
     }
     ASSERT_TRUE(out.is_open()) << "Error can't open file ./src/rdOnly.c";

@@ -144,8 +144,7 @@ namespace CodeGen {
                     "error the size of the call stack is equal to 0");
             }
             this->fileMain.open(path + filename + ".c", std::ofstream::out);
-            this->fileMainH.open(path + filename + ".h",
-                                 std::ofstream::out);
+            this->fileMainH.open(path + filename + ".h", std::ofstream::out);
             if (!fileMain.is_open() || !fileMainH.is_open()) {
                 throw std::runtime_error(
                     "Error can't open " + std::string(path + filename) +

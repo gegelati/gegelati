@@ -26,7 +26,9 @@ class ProgramGenerationEngineTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
 
         auto add = [](double a, double b) -> double { return a + b; };
-        auto addConstant = [](Data::Constant a, double b) -> double { return (double)(a) + b; };
+        auto addConstant = [](Data::Constant a, double b) -> double {
+            return (double)(a) + b;
+        };
         auto sub = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             add, "$0 = $1 + $2;")));
@@ -131,9 +133,9 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
 
     ASSERT_NO_THROW(progGen = new CodeGen::ProgramGenerationEngine(
-        "constructorWithPath", *e, "./src/"))
-                    << "Failed to construct a TPGGenerationEngine with a filename and a "
-                       "TPG and a path";
+                        "constructorWithPath", *e, "./src/"))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG and a path";
 
     ASSERT_THROW(progGen = new CodeGen::ProgramGenerationEngine("", *e),
                  std::invalid_argument)
