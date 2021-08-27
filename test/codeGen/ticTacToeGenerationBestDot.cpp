@@ -2,7 +2,11 @@
 #include <cstddef>
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
+
+#ifdef _MSC_VER
+// C++17 not available in gcc7 or clang7
 #include <filesystem>
+#endif
 
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
@@ -74,12 +78,13 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
         e = new Environment(set, data, 8);
         tpg = new TPG::TPGGraph(*e);
 
+
+
+        cmdCompile = TESTS_DAT_PATH "codeGen/";
+#ifdef _MSC_VER  
         // Set working directory to BIN_DIR_PATH where the "src" directory was
         // created.
         std::filesystem::current_path(BIN_DIR_PATH);
-
-        cmdCompile = TESTS_DAT_PATH "codeGen/";
-#ifdef _MSC_VER
         cmdCompile += "compile.bat ";
         cmdExec = BIN_DIR_PATH "/bin/debug/";
 #elif __GNUC__

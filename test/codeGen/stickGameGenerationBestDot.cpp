@@ -4,7 +4,11 @@
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
 #include <iostream>
+
+#ifdef _MSC_VER
+// C++17 not available in gcc7 or clang7
 #include <filesystem>
+#endif
 
 #include "../learn/stickGameAdversarial.h"
 #include "code_gen/ProgramGenerationEngine.h"
@@ -77,12 +81,13 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         dot->importGraph();
         rootVertex = tpg->getRootVertices().back();
 
+
+
+        cmdCompile = TESTS_DAT_PATH "codeGen/";
+#ifdef _MSC_VER  
         // Set working directory to BIN_DIR_PATH where the "src" directory was
         // created.
         std::filesystem::current_path(BIN_DIR_PATH);
-
-        cmdCompile = TESTS_DAT_PATH "codeGen/";
-#ifdef _MSC_VER
         cmdCompile += "compile.bat ";
         cmdExec = BIN_DIR_PATH "/bin/debug/";
 #elif __GNUC__
