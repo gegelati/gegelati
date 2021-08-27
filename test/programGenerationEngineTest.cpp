@@ -1,5 +1,6 @@
 #ifdef CODE_GENERATION
 #include <gtest/gtest.h>
+#include <filesystem>
 
 #include "code_gen/ProgramGenerationEngine.h"
 #include "data/primitiveTypeArray.h"
@@ -45,6 +46,10 @@ class ProgramGenerationEngineTest : public ::testing::Test
         p = new Program::Program(*e);
         p2 = new Program::Program(*e);
         p3 = new Program::Program(*envWithConstant);
+
+        // Set working directory to BIN_DIR_PATH where the "src" directory was
+        // created.
+        std::filesystem::current_path(BIN_DIR_PATH);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(0); // Instruction is add.
@@ -122,7 +127,7 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
 
     ASSERT_NO_THROW(progGen = new CodeGen::ProgramGenerationEngine(
-                        "constructor", *e, BIN_DIR_PATH "./src/"))
+                        "constructor", *e, "./src/"))
         << "Construction failed.";
 
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
@@ -134,7 +139,7 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
 
     ASSERT_NO_THROW(progGen = new CodeGen::ProgramGenerationEngine(
-                        "constructorWithPath", *e, BIN_DIR_PATH  "./src/"))
+                        "constructorWithPath", *e, "./src/"))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG and a path";
 
@@ -143,7 +148,7 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
         << "Construction should fail, filename is empty.";
 
     ASSERT_THROW(progGen = new CodeGen::ProgramGenerationEngine(
-                     "constructor", *e, BIN_DIR_PATH "./src/unkownDir/"),
+                     "constructor", *e, "./src/unkownDir/"),
                  std::runtime_error)
         << "Construction should fail because the path does not exist.";
 }

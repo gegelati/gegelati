@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
+#include <filesystem>
 
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
@@ -72,6 +73,10 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
 
         e = new Environment(set, data, 8);
         tpg = new TPG::TPGGraph(*e);
+
+        // Set working directory to BIN_DIR_PATH where the "src" directory was
+        // created.
+        std::filesystem::current_path(BIN_DIR_PATH);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER

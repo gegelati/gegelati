@@ -4,6 +4,7 @@
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
 #include <iostream>
+#include <filesystem>
 
 #include "../learn/stickGameAdversarial.h"
 #include "code_gen/ProgramGenerationEngine.h"
@@ -75,6 +76,10 @@ class StickGameGenerationBestDotTest : public ::testing::Test
             TESTS_DAT_PATH "StickGame_out_best.dot", *e, *tpg);
         dot->importGraph();
         rootVertex = tpg->getRootVertices().back();
+
+        // Set working directory to BIN_DIR_PATH where the "src" directory was
+        // created.
+        std::filesystem::current_path(BIN_DIR_PATH);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER
