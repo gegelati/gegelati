@@ -120,8 +120,9 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
         << "Construction failed.";
 
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
+
     ASSERT_NO_THROW(progGen = new CodeGen::ProgramGenerationEngine(
-                        "constructor", *e, "./src/"))
+                        "constructor", *e, BIN_DIR_PATH "./src/"))
         << "Construction failed.";
 
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
@@ -133,7 +134,7 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
     ASSERT_NO_THROW(delete progGen) << "Destruction failed.";
 
     ASSERT_NO_THROW(progGen = new CodeGen::ProgramGenerationEngine(
-                        "constructorWithPath", *e, "./src/"))
+                        "constructorWithPath", *e, BIN_DIR_PATH  "./src/"))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG and a path";
 
@@ -142,7 +143,7 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
         << "Construction should fail, filename is empty.";
 
     ASSERT_THROW(progGen = new CodeGen::ProgramGenerationEngine(
-                     "constructor", *e, "./src/unkownDir/"),
+                     "constructor", *e, BIN_DIR_PATH "./src/unkownDir/"),
                  std::runtime_error)
         << "Construction should fail because the path does not exist.";
 }
