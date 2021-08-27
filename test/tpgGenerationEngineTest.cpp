@@ -95,37 +95,37 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
     ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-            "constructorWithStackSize", *tpg, BIN_DIR_PATH "./src/", 15))
+            "constructorWithStackSize", *tpg, "./src/", 15))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
     ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
     ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-            "constructorErrorStackSize", *tpg, BIN_DIR_PATH "./src/", 0),
+            "constructorErrorStackSize", *tpg, "./src/", 0),
                  std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0.";
 
     std::fstream out;
-    out.open(BIN_DIR_PATH "./src/rdOnly.c", std::ofstream::out);
+    out.open("./src/rdOnly.c", std::ofstream::out);
     if (!out.is_open()) {
-        out.open(BIN_DIR_PATH "./src/rdOnly.c", std::ofstream::in);
+        out.open("./src/rdOnly.c", std::ofstream::in);
     }
     ASSERT_TRUE(out.is_open())
-        << "Error can't open file" BIN_DIR_PATH "./src/rdOnly.c";
+        << "Error can't open file ./src/rdOnly.c";
     out.close();
     ASSERT_TRUE(!out.is_open())
-        << "Error can't close file" BIN_DIR_PATH  "./src/rdOnly.c";
+        << "Error can't close file ./src/rdOnly.c";
 
 #ifdef _MSC_VER
-    system("attrib +R " BIN_DIR_PATH "./src/rdOnly.c");
+    system("attrib +R ./src/rdOnly.c");
 #elif __GNUC__
-    system("chmod 444 " BIN_DIR_PATH "./src/rdOnly.c");
+    system("chmod 444 ./src/rdOnly.c");
 #endif
 
     ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-                     "rdOnly", *tpg, BIN_DIR_PATH "./src/"),
+                     "rdOnly", *tpg, "./src/"),
                  std::runtime_error)
         << "Construction should fail because the file rdOnly is in read only "
            "status.";
