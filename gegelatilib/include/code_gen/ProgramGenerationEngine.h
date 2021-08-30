@@ -156,7 +156,7 @@ namespace CodeGen {
          */
         ~ProgramGenerationEngine()
         {
-            fileH << "#endif " << std::endl;
+            fileH << "#endif" << std::endl;
             fileC.close();
             fileH.close();
         }

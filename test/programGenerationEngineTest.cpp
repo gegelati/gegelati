@@ -4,6 +4,7 @@
 #include "code_gen/ProgramGenerationEngine.h"
 #include "data/primitiveTypeArray.h"
 #include "environment.h"
+#include "goldenReferenceComparison.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "program/program.h"
@@ -149,17 +150,27 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
 
 TEST_F(ProgramGenerationEngineTest, generateCurrentLine)
 {
-    CodeGen::ProgramGenerationEngine engine("genCurrentLine", *p);
+    CodeGen::ProgramGenerationEngine* engine = new CodeGen::ProgramGenerationEngine("genCurrentLine", *p);
 
-    //    progGen.setProgram(*p);
-    ASSERT_NO_THROW(engine.generateCurrentLine())
+    ASSERT_TRUE(engine != NULL) << "Fail to create a ProgramGenerationEngine.";
+
+    ASSERT_NO_THROW(engine->generateCurrentLine())
         << "Can't generate the first line";
 
-    ASSERT_NO_THROW(engine.setProgram(*p2)) << "Fail to set a program";
+    delete engine; // call the destructor to close the file.
 
-    ASSERT_THROW(engine.generateCurrentLine(), std::runtime_error)
+    ASSERT_TRUE(compare_files("genCurrentLine.c", TESTS_DAT_PATH "codeGen/ProgramGenerationEngineTest.generateCurrentLine/goldenReference.c")) << "Error the source file generated is different from the golden reference.";
+    ASSERT_TRUE(compare_files("genCurrentLine.h", TESTS_DAT_PATH "codeGen/ProgramGenerationEngineTest.generateCurrentLine/goldenReference.h")) << "Error the header file generated is different from the golden reference.";
+
+    engine = new CodeGen::ProgramGenerationEngine("genCurrentLine", *p2);
+
+    ASSERT_TRUE(engine != NULL) << "Fail to create a ProgramGenerationEngine.";
+
+    ASSERT_THROW(engine->generateCurrentLine(), std::runtime_error)
         << "Should not be able to generate line, the instruction is not "
            "printable";
+
+    delete engine;
 }
 
 TEST_F(ProgramGenerationEngineTest, generateProgram)

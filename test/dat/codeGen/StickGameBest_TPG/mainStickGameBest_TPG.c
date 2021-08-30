@@ -1,5 +1,8 @@
-#include "StickGameBest_TPG.h"
+///doc in ../README.md
 #include <stdio.h>
+
+#include "StickGameBest_TPG.h"
+
 #define ERROR_INFERENCE 1
 #define ERROR_RESET 2
 int* in1;

@@ -125,8 +125,6 @@ std::vector<size_t> Data::DataHandlerPrinter::getOperandSizes(
             sizes.push_back(std::stoull(shrink));
         }
         catch (std::exception const& e) {
-            // std::cout<< e.what() << " try to convert : " << shrink
-            // <<std::endl;
         }
     }
     return sizes;

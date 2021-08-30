@@ -44,13 +44,10 @@ const std::string CodeGen::ProgramGenerationEngine::nameOperandVariable("op");
 
 void CodeGen::ProgramGenerationEngine::generateCurrentLine()
 {
-    // const Program::Line& line = this->getCurrentLine();
     const Instructions::Instruction& instruction =
         this->getCurrentInstruction();
 
     if (instruction.isPrintable()) {
-        // std::map<operand(uint64t ?), uint_64t> initOperand // = (operand,
-        // chiffre après "op")
         fileC << "\t{" << std::endl;
         initOperandCurrentLine();
         std::string codeLine = completeFormat(instruction);

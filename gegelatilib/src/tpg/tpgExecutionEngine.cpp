@@ -98,9 +98,6 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(
     // First
     TPGEdge* bestEdge = *outgoingEdges.begin();
     double bestBid = this->evaluateEdge(*bestEdge);
-#ifdef DEBUG
-    std::cout << "R = " << bestBid << std::endl;
-#endif
     // Others
     for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
          iter++) {
@@ -129,10 +126,6 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngine::
     // Browse the TPG until a TPGAction is reached.
     while (typeid(*currentVertex) == typeid(TPG::TPGTeam)) {
         // Get the next edge
-#ifdef DEBUG
-        std::cout << "nombre d'edges de sorties : "
-                  << currentVertex->getOutgoingEdges().size() << std::endl;
-#endif
         const TPGEdge& edge =
             this->evaluateTeam(*(TPGTeam*)currentVertex, visitedVertices);
         // update currentVertex and backup in visitedVertex.

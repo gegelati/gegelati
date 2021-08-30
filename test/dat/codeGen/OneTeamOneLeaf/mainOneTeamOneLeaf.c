@@ -1,6 +1,9 @@
-#include "OneTeamOneLeaf.h"
+///doc in ../README.md
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "OneTeamOneLeaf.h"
+
 #define ERROR_INFERENCE 1
 #define ERROR_RESET 2
 double* in1;

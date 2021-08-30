@@ -32,5 +32,3 @@ uint64_t TPG::TPGAbstractEngine::findVertexID(const TPG::TPGVertex& vertex)
         return iter->second;
     }
 }
-
-#include "tpg/tpgAbstractEngine.h"

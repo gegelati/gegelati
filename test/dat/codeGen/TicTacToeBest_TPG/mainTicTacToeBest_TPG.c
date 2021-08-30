@@ -1,5 +1,8 @@
-#include "TicTacToeBest_TPG.h"
+///doc in ../README.md
 #include <stdio.h>
+
+#include "TicTacToeBest_TPG.h"
+
 #define ERROR_INFERENCE 1
 #define ERROR_RESET 2
 double* in1;

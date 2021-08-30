@@ -9,6 +9,7 @@
 #include "instructions/set.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgVertex.h"
+#include "goldenReferenceComparison.h"
 
 class TPGGenerationEngineTest : public ::testing::Test
 {
@@ -107,9 +108,9 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
     ASSERT_TRUE(!out.is_open()) << "Error can't close file ./src/rdOnly.c";
 
 #ifdef _MSC_VER
-    system("attrib +R ./src/rdOnly.c");
+    ASSERT_EQ(system("attrib +R ./src/rdOnly.c"),0) << "Fail to change the file as read only";
 #elif __GNUC__
-    system("chmod 444 ./src/rdOnly.c");
+    ASSERT_EQ(system("chmod 444 ./src/rdOnly.c"), 0) << "Fail to change the file as read only";
 #endif
 
     ASSERT_THROW(tpgGen =
@@ -118,7 +119,6 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
         << "Construction should fail because the file rdOnly is in read only "
            "status.";
 
-    // ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 }
 
 TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
@@ -145,6 +145,13 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     // call the destructor to close the file
     delete tpgGen;
 
+    std::vector<std::string> fileGenerated{"OneLeafNoInstruction.c", "OneLeafNoInstruction.h", "OneLeafNoInstruction_program.c", "OneLeafNoInstruction_program.h"};
+
+    ASSERT_TRUE(compare_files("./src/"+fileGenerated[0], TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_"+fileGenerated[0])) << "Error the source file holding the functions of the node of TGP generated is different from the golden reference.";
+    ASSERT_TRUE(compare_files("./src/"+fileGenerated[1], TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_"+fileGenerated[1])) << "Error the header file holding the functions of the node of TGP generated is different from the golden reference.";
+    ASSERT_TRUE(compare_files("./src/"+fileGenerated[2], TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_"+fileGenerated[2])) << "Error the source file holding the functions of the program of TGP generated is different from the golden reference.";
+    ASSERT_TRUE(compare_files("./src/"+fileGenerated[3], TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_"+fileGenerated[3])) << "Error the header file holding the functions of the program of TGP generated is different from the golden reference.";
+
     cmdCompile += "OneLeafNoInstruction";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Compilation failed in OneLeafNoInstruction.";
@@ -165,7 +172,6 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
 
     prog1->identifyIntrons();
 
-    // Version avec 1 root, 1 action, 1 programme
     tpg->addNewEdge(*root, *leaf, prog1);
 
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
@@ -215,7 +221,6 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     prog2L1.setOperand(0, 1, 0);
     prog2L1.setOperand(1, 1, 2);
 
-    // Version : choix de 2 action à partir de la root
     tpg->addNewEdge(*root, *leaf, prog1);
     tpg->addNewEdge(*root, *leaf2, prog2);
 
@@ -277,7 +282,6 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     prog3L1.setOperand(0, 1, 0);
     prog3L1.setOperand(1, 1, 3);
 
-    // Version : choix de 2 action à partir de la root
     tpg->addNewEdge(*root, *leaf, prog1);
     tpg->addNewEdge(*root, *leaf2, prog2);
     tpg->addNewEdge(*root, *leaf3, prog3);
@@ -333,7 +337,6 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     prog2L1.setOperand(0, 1, 0);
     prog2L1.setOperand(1, 1, 1);
 
-    // Version avec team intermédiaire
     TPG::TPGEdge edge1 = tpg->addNewEdge(*root, *T1, prog1);
     TPG::TPGEdge edge2 = tpg->addNewEdge(*T1, *leaf, prog2);
 
@@ -395,7 +398,6 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     prog3L1.setOperand(0, 1, 0);
     prog3L1.setOperand(1, 1, 1);
 
-    // Version avec team intermédiaire
     tpg->addNewEdge(*root, *T1, prog1);
     tpg->addNewEdge(*T1, *leaf, prog2);
     tpg->addNewEdge(*T1, *leaf2, prog3);
@@ -478,7 +480,6 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     prog5L1.setOperand(0, 1, 1);
     prog5L1.setOperand(1, 1, 5);
 
-    // Version avec team intermédiaire
     tpg->addNewEdge(*root, *T1, prog1);
     tpg->addNewEdge(*T1, *leaf, prog2);
     tpg->addNewEdge(*T1, *T2, prog3);
@@ -530,11 +531,6 @@ static void setProgLine(const std::shared_ptr<Program::Program> prog,
 
 TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
 {
-    // P1 > P2
-    // P1 > P3
-    // P6 > P5
-    // P7 > P4
-
     const TPG::TPGVertex* A1 = (&tpg->addNewAction(1));
     const TPG::TPGVertex* A2 = (&tpg->addNewAction(2));
     const TPG::TPGVertex* A0 = (&tpg->addNewAction(0));
@@ -565,7 +561,6 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     setProgLine(prog7, 6);
     // reg[0] = in1[6] + reg[1] (reg[1] = 0)
 
-    // Version avec team intermédiaire
     tpg->addNewEdge(*T1, *T2, prog1);
     tpg->addNewEdge(*T1, *A1, prog2);
     tpg->addNewEdge(*T1, *T3, prog3);

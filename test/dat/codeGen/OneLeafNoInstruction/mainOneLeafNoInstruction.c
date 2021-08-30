@@ -1,6 +1,9 @@
-#include "OneLeafNoInstruction.h"
+///doc in ../README.md
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "OneLeafNoInstruction.h"
+
 #define ERROR_INFERENCE 1
 #define ERROR_RESET 2
 double* in1;

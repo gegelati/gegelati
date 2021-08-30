@@ -1,5 +1,5 @@
-#ifndef TPGABSTRACTENGINE_H
-#define TPGABSTRACTENGINE_H
+#ifndef TPG_ABSTRACT_ENGINE_H
+#define TPG_ABSTRACT_ENGINE_H
 
 #include "program/program.h"
 #include "tpg/tpgGraph.h"
@@ -66,7 +66,7 @@ namespace TPG {
         uint64_t nbActions;
 
         /**
-         * \brief constructor for the abstract engine
+         * \brief Constructor for the abstract engine.
          *
          * \param[in] tpg const reference to the graph whose content will be
          * used to fill the maps of IDs  (vertex and program).
@@ -109,4 +109,4 @@ namespace TPG {
         uint64_t findVertexID(const TPG::TPGVertex& vertex);
     };
 } // namespace TPG
-#endif // TPGABSTRACTENGINE_H
+#endif // TPG_ABSTRACT_ENGINE_H

@@ -1,3 +1,4 @@
+///doc in ../README.md
 #include <stdio.h>
 #include <stdlib.h>
 

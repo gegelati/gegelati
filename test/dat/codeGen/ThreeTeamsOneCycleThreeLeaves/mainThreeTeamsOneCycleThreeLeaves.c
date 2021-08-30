@@ -1,10 +1,10 @@
+///doc in ../README.md
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "ThreeTeamsOneCycleThreeLeaves.h"
 #include "csvparser.h"
 #include "inferenceCSV.h"
-#include <stdio.h>
-#include <stdlib.h>
-#define ERROR_INFERENCE 1
-#define ERROR_RESET 2
 
 double* in1;
 

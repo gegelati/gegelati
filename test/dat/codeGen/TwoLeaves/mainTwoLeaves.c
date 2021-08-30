@@ -1,11 +1,11 @@
+///doc in ../README.md
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "TwoLeaves.h"
 #include "csvparser.h"
 #include "inferenceCSV.h"
-#define ERROR_INFERENCE 1
-#define ERROR_RESET 2
+
 double* in1;
 
 int main(int argc, char* argv[])
