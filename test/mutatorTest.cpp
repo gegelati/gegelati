@@ -80,7 +80,7 @@ class MutatorTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
 
         ((Data::PrimitiveTypeArray<double>&)vect.at(1).get())
-        .setDataAt(typeid(double), 25, value0);
+            .setDataAt(typeid(double), 25, value0);
 
         std::function<double(double, double)> minus =
             [](double a, double b) -> double { return a - b; };

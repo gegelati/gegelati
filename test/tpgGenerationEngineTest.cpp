@@ -5,11 +5,11 @@
 
 #include "code_gen/TpgGenerationEngine.h"
 #include "environment.h"
+#include "goldenReferenceComparison.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgVertex.h"
-#include "goldenReferenceComparison.h"
 
 class TPGGenerationEngineTest : public ::testing::Test
 {
@@ -108,9 +108,11 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
     ASSERT_TRUE(!out.is_open()) << "Error can't close file ./src/rdOnly.c";
 
 #ifdef _MSC_VER
-    ASSERT_EQ(system("attrib +R ./src/rdOnly.c"),0) << "Fail to change the file as read only";
+    ASSERT_EQ(system("attrib +R ./src/rdOnly.c"), 0)
+        << "Fail to change the file as read only";
 #elif __GNUC__
-    ASSERT_EQ(system("chmod 444 ./src/rdOnly.c"), 0) << "Fail to change the file as read only";
+    ASSERT_EQ(system("chmod 444 ./src/rdOnly.c"), 0)
+        << "Fail to change the file as read only";
 #endif
 
     ASSERT_THROW(tpgGen =
@@ -118,7 +120,6 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
                  std::runtime_error)
         << "Construction should fail because the file rdOnly is in read only "
            "status.";
-
 }
 
 TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
@@ -145,12 +146,34 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     // call the destructor to close the file
     delete tpgGen;
 
-    std::vector<std::string> fileGenerated{"OneLeafNoInstruction.c", "OneLeafNoInstruction.h", "OneLeafNoInstruction_program.c", "OneLeafNoInstruction_program.h"};
+    std::vector<std::string> fileGenerated{
+        "OneLeafNoInstruction.c", "OneLeafNoInstruction.h",
+        "OneLeafNoInstruction_program.c", "OneLeafNoInstruction_program.h"};
 
-    ASSERT_TRUE(compare_files("./src/"+fileGenerated[0], TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_"+fileGenerated[0])) << "Error the source file holding the functions of the node of TGP generated is different from the golden reference.";
-    ASSERT_TRUE(compare_files("./src/"+fileGenerated[1], TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_"+fileGenerated[1])) << "Error the header file holding the functions of the node of TGP generated is different from the golden reference.";
-    ASSERT_TRUE(compare_files("./src/"+fileGenerated[2], TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_"+fileGenerated[2])) << "Error the source file holding the functions of the program of TGP generated is different from the golden reference.";
-    ASSERT_TRUE(compare_files("./src/"+fileGenerated[3], TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_"+fileGenerated[3])) << "Error the header file holding the functions of the program of TGP generated is different from the golden reference.";
+    ASSERT_TRUE(compare_files(
+        "./src/" + fileGenerated[0],
+        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_" +
+            fileGenerated[0]))
+        << "Error the source file holding the functions of the node of TGP "
+           "generated is different from the golden reference.";
+    ASSERT_TRUE(compare_files(
+        "./src/" + fileGenerated[1],
+        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_" +
+            fileGenerated[1]))
+        << "Error the header file holding the functions of the node of TGP "
+           "generated is different from the golden reference.";
+    ASSERT_TRUE(compare_files(
+        "./src/" + fileGenerated[2],
+        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_" +
+            fileGenerated[2]))
+        << "Error the source file holding the functions of the program of TGP "
+           "generated is different from the golden reference.";
+    ASSERT_TRUE(compare_files(
+        "./src/" + fileGenerated[3],
+        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_" +
+            fileGenerated[3]))
+        << "Error the header file holding the functions of the program of TGP "
+           "generated is different from the golden reference.";
 
     cmdCompile += "OneLeafNoInstruction";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)

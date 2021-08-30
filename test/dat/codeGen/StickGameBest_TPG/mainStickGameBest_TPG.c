@@ -1,4 +1,4 @@
-///doc in ../README.md
+/// doc in ../README.md
 #include <stdio.h>
 
 #include "StickGameBest_TPG.h"

@@ -150,7 +150,8 @@ TEST_F(ProgramGenerationEngineTest, ConstructorDestructor)
 
 TEST_F(ProgramGenerationEngineTest, generateCurrentLine)
 {
-    CodeGen::ProgramGenerationEngine* engine = new CodeGen::ProgramGenerationEngine("genCurrentLine", *p);
+    CodeGen::ProgramGenerationEngine* engine =
+        new CodeGen::ProgramGenerationEngine("genCurrentLine", *p);
 
     ASSERT_TRUE(engine != NULL) << "Fail to create a ProgramGenerationEngine.";
 
@@ -159,8 +160,18 @@ TEST_F(ProgramGenerationEngineTest, generateCurrentLine)
 
     delete engine; // call the destructor to close the file.
 
-    ASSERT_TRUE(compare_files("genCurrentLine.c", TESTS_DAT_PATH "codeGen/ProgramGenerationEngineTest.generateCurrentLine/goldenReference.c")) << "Error the source file generated is different from the golden reference.";
-    ASSERT_TRUE(compare_files("genCurrentLine.h", TESTS_DAT_PATH "codeGen/ProgramGenerationEngineTest.generateCurrentLine/goldenReference.h")) << "Error the header file generated is different from the golden reference.";
+    ASSERT_TRUE(
+        compare_files("genCurrentLine.c", TESTS_DAT_PATH
+                      "codeGen/ProgramGenerationEngineTest.generateCurrentLine/"
+                      "goldenReference.c"))
+        << "Error the source file generated is different from the golden "
+           "reference.";
+    ASSERT_TRUE(
+        compare_files("genCurrentLine.h", TESTS_DAT_PATH
+                      "codeGen/ProgramGenerationEngineTest.generateCurrentLine/"
+                      "goldenReference.h"))
+        << "Error the header file generated is different from the golden "
+           "reference.";
 
     engine = new CodeGen::ProgramGenerationEngine("genCurrentLine", *p2);
 
