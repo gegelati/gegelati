@@ -1,7 +1,7 @@
 #ifdef CODE_GENERATION
 #include <gtest/gtest.h>
 
-#include "code_gen/ProgramGenerationEngine.h"
+#include "code_gen/programGenerationEngine.h"
 #include "data/primitiveTypeArray.h"
 #include "environment.h"
 #include "goldenReferenceComparison.h"
@@ -163,13 +163,13 @@ TEST_F(ProgramGenerationEngineTest, generateCurrentLine)
     ASSERT_TRUE(
         compare_files("genCurrentLine.c", TESTS_DAT_PATH
                       "codeGen/ProgramGenerationEngineTest.generateCurrentLine/"
-                      "goldenReference.c"))
+                      "goldenReference.c_ref"))
         << "Error the source file generated is different from the golden "
            "reference.";
     ASSERT_TRUE(
         compare_files("genCurrentLine.h", TESTS_DAT_PATH
                       "codeGen/ProgramGenerationEngineTest.generateCurrentLine/"
-                      "goldenReference.h"))
+                      "goldenReference.h_ref"))
         << "Error the header file generated is different from the golden "
            "reference.";
 

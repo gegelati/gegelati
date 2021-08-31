@@ -6,8 +6,8 @@
 #include <iostream>
 
 #include "../learn/stickGameAdversarial.h"
-#include "code_gen/ProgramGenerationEngine.h"
-#include "code_gen/TpgGenerationEngine.h"
+#include "code_gen/programGenerationEngine.h"
+#include "code_gen/tpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"

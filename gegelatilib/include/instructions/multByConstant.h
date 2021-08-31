@@ -81,8 +81,8 @@ namespace Instructions {
 
       private:
         /**
-         * \brief function call in constructor to puh the types of the operand
-         * of the instruction
+         * \brief Function call in constructor to setup the operand
+         * of the instruction.
          */
         void setUpOperand();
     };

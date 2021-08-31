@@ -41,7 +41,7 @@
 #include <iostream>
 #include <string>
 
-#include "code_gen/ProgramGenerationEngine.h"
+#include "code_gen/programGenerationEngine.h"
 #include "tpg/tpgAbstractEngine.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"

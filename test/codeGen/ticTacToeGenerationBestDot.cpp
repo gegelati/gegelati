@@ -3,7 +3,7 @@
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
 
-#include "code_gen/TpgGenerationEngine.h"
+#include "code_gen/tpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"

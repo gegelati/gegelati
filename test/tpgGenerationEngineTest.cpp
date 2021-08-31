@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include "code_gen/TpgGenerationEngine.h"
+#include "code_gen/tpgGenerationEngine.h"
 #include "environment.h"
 #include "goldenReferenceComparison.h"
 #include "instructions/lambdaInstruction.h"
@@ -152,26 +152,26 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
 
     ASSERT_TRUE(compare_files(
         "./src/" + fileGenerated[0],
-        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_" +
-            fileGenerated[0]))
+        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/" +
+            fileGenerated[0] + "_ref"))
         << "Error the source file holding the functions of the node of TGP "
            "generated is different from the golden reference.";
     ASSERT_TRUE(compare_files(
         "./src/" + fileGenerated[1],
-        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_" +
-            fileGenerated[1]))
+        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/" +
+            fileGenerated[1] + "_ref"))
         << "Error the header file holding the functions of the node of TGP "
            "generated is different from the golden reference.";
     ASSERT_TRUE(compare_files(
         "./src/" + fileGenerated[2],
-        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_" +
-            fileGenerated[2]))
+        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/" +
+            fileGenerated[2] + "_ref"))
         << "Error the source file holding the functions of the program of TGP "
            "generated is different from the golden reference.";
     ASSERT_TRUE(compare_files(
         "./src/" + fileGenerated[3],
-        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/goldenReference_" +
-            fileGenerated[3]))
+        TESTS_DAT_PATH "codeGen/OneLeafNoInstruction/" +
+            fileGenerated[3] + "_ref"))
         << "Error the header file holding the functions of the program of TGP "
            "generated is different from the golden reference.";
 

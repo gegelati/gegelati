@@ -1,9 +1,5 @@
-//
-// Created by tbourgoi on 28/07/2021.
-//
-
-#ifndef INFERENCECSV_H
-#define INFERENCECSV_H
+#ifndef INFERENCE_CSV_H
+#define INFERENCE_CSV_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,4 +51,4 @@ int inferenceCSV(char* filename,
                  int (*executeFromVertex)(void* (*)(int* action)),
                  void* (*root)(int*), void (*reset)());
 
-#endif // INFERENCECSV_H
+#endif // INFERENCE_CSV_H

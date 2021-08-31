@@ -135,9 +135,7 @@ TEST_F(ArchiveTest, AddRecordingTests)
     // Add another recording with a new environment
     // change data in one dataHandler
     Data::PrimitiveTypeArray<int>& d =
-        const_cast<Data::PrimitiveTypeArray<int>&>(
-            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
-                vect.at(1).get()));
+        (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
 
     d.setDataAt(typeid(int), 2, 1337);
     ASSERT_NO_THROW(archive.addRecording(p, vect, 0.2))

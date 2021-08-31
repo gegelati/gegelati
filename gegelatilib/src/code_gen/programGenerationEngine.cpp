@@ -34,7 +34,7 @@
  */
 
 #ifdef CODE_GENERATION
-#include "code_gen/ProgramGenerationEngine.h"
+#include "code_gen/programGenerationEngine.h"
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
