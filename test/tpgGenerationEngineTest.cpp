@@ -3,6 +3,11 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#ifdef _MSC_VER
+// C++17 not available in gcc7 or clang7
+#include <filesystem>
+#endif
+
 #include "code_gen/tpgGenerationEngine.h"
 #include "environment.h"
 #include "goldenReferenceComparison.h"
@@ -43,7 +48,10 @@ class TPGGenerationEngineTest : public ::testing::Test
         tpg = new TPG::TPGGraph(*e);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
-#ifdef _MSC_VER
+#ifdef _MSC_VER   
+        // Set working directory to BIN_DIR_PATH where the "src" directory was
+        // created.
+        std::filesystem::current_path(BIN_DIR_PATH);
         cmdCompile += "compile.bat ";
         cmdExec = BIN_DIR_PATH "/bin/debug/";
 #elif __GNUC__
@@ -120,6 +128,8 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
                  std::runtime_error)
         << "Construction should fail because the file rdOnly is in read only "
            "status.";
+
+
 }
 
 TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
@@ -195,6 +205,7 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
 
     prog1->identifyIntrons();
 
+
     tpg->addNewEdge(*root, *leaf, prog1);
 
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
@@ -243,6 +254,7 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
     prog2L1.setInstructionIndex(0);
     prog2L1.setOperand(0, 1, 0);
     prog2L1.setOperand(1, 1, 2);
+
 
     tpg->addNewEdge(*root, *leaf, prog1);
     tpg->addNewEdge(*root, *leaf2, prog2);
@@ -305,6 +317,7 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     prog3L1.setOperand(0, 1, 0);
     prog3L1.setOperand(1, 1, 3);
 
+
     tpg->addNewEdge(*root, *leaf, prog1);
     tpg->addNewEdge(*root, *leaf2, prog2);
     tpg->addNewEdge(*root, *leaf3, prog3);
@@ -359,6 +372,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     prog2L1.setInstructionIndex(1);
     prog2L1.setOperand(0, 1, 0);
     prog2L1.setOperand(1, 1, 1);
+
 
     TPG::TPGEdge edge1 = tpg->addNewEdge(*root, *T1, prog1);
     TPG::TPGEdge edge2 = tpg->addNewEdge(*T1, *leaf, prog2);
@@ -420,6 +434,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     prog3L1.setInstructionIndex(0);
     prog3L1.setOperand(0, 1, 0);
     prog3L1.setOperand(1, 1, 1);
+
 
     tpg->addNewEdge(*root, *T1, prog1);
     tpg->addNewEdge(*T1, *leaf, prog2);
@@ -503,6 +518,7 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     prog5L1.setOperand(0, 1, 1);
     prog5L1.setOperand(1, 1, 5);
 
+
     tpg->addNewEdge(*root, *T1, prog1);
     tpg->addNewEdge(*T1, *leaf, prog2);
     tpg->addNewEdge(*T1, *T2, prog3);
@@ -554,6 +570,8 @@ static void setProgLine(const std::shared_ptr<Program::Program> prog,
 
 TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
 {
+
+
     const TPG::TPGVertex* A1 = (&tpg->addNewAction(1));
     const TPG::TPGVertex* A2 = (&tpg->addNewAction(2));
     const TPG::TPGVertex* A0 = (&tpg->addNewAction(0));
@@ -583,6 +601,7 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     // reg[0] = in1[5] + reg[1] (reg[1] = 0)
     setProgLine(prog7, 6);
     // reg[0] = in1[6] + reg[1] (reg[1] = 0)
+
 
     tpg->addNewEdge(*T1, *T2, prog1);
     tpg->addNewEdge(*T1, *A1, prog2);

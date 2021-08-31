@@ -1,6 +1,11 @@
 #ifdef CODE_GENERATION
 #include <gtest/gtest.h>
 
+#ifdef _MSC_VER
+// C++17 not available in gcc7 or clang7
+#include <filesystem>
+#endif
+
 #include "code_gen/programGenerationEngine.h"
 #include "data/primitiveTypeArray.h"
 #include "environment.h"
@@ -46,6 +51,12 @@ class ProgramGenerationEngineTest : public ::testing::Test
         p = new Program::Program(*e);
         p2 = new Program::Program(*e);
         p3 = new Program::Program(*envWithConstant);
+
+#ifdef _MSC_VER
+        // Set working directory to BIN_DIR_PATH where the "src" directory was
+        // created.
+        std::filesystem::current_path(BIN_DIR_PATH);
+#endif 
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(0); // Instruction is add.
