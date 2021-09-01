@@ -5,7 +5,7 @@
 
 typedef struct Edge {
 	int visited;
-	double (*ptr_prog)(void);
+	double (*ptr_prog)();
 	void* (*ptr_vertex)(int* action);
 }Edge;
 

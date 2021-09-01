@@ -18,6 +18,11 @@ if (${DEBUG})
     add_definitions(-DDEBUG)
 endif ()
 
+if(NOT ${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
+	#add libmath during non visual studio builds
+	set(CMAKE_EXTRA_LIB m)
+endif()
+
 # Control where the executable is placed during the build.
 # This is required so the test fixture can execute the compiled binary
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN})
@@ -25,4 +30,3 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN})
 # set the target name
 set(target TicTacToeBest_TPG)
 add_executable(${target} ${SRC}${target}.c ${SRC}${target}_program.c main${target}.c)
-target_link_libraries(${target} -lm)
