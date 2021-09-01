@@ -30,3 +30,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN})
 # set the target name
 set(target StickGameBest_TPG)
 add_executable(${target} ${SRC}${target}.c ${SRC}${target}_program.c main${target}.c)
+target_link_libraries(${target} ${CMAKE_EXTRA_LIB})
