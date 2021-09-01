@@ -1,18 +1,20 @@
-#ifndef GEGELATI_GOLDEN_REFERENCE_COMPARISON_H
-#define GEGELATI_GOLDEN_REFERENCE_COMPARISON_H
+#ifndef GOLDEN_REFERENCE_COMPARISON_H
+#define GOLDEN_REFERENCE_COMPARISON_H
 
 #include <fstream>
 
 /**
- * Function that return true if filename1 and filename2 have the same content.
+ * Function that return true if printedFilePath and goldenRefPath have the same
+ * content.
  *
- * @param filename1 const reference to a std::string holding the name of the
- * first file to compare.
- * @param filename2 const reference to a std::string holding the name of the
+ * @param printedFilePath const reference to a std::string holding the name of
+ * the first file to compare.
+ * @param goldenRefPath const reference to a std::string holding the name of the
  * second file to compare.
  * @return return true if the content of both files are identical, false in
  * other cases
  */
-bool compare_files(const std::string& filename1, const std::string& filename2);
+bool compare_files(const std::string& printedFilePath,
+                   const std::string& goldenRefPath);
 
-#endif // GEGELATI_GOLDEN_REFERENCE_COMPARISON_H
+#endif // GOLDEN_REFERENCE_COMPARISON_H

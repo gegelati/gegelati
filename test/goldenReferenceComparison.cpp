@@ -1,28 +1,49 @@
-#include "goldenReferenceComparison.h"
+#include <gtest/gtest.h>
 
 #include <algorithm>
 #include <iostream>
 
-bool compare_files(const std::string& filename1, const std::string& filename2)
+#include "goldenReferenceComparison.h"
+
+bool compare_files(const std::string& printedFilePath, const std::string& goldenRefPath)
 {
-    std::ifstream file1(filename1,
-                        std::ifstream::ate); // open file at the end
-    std::ifstream file2(filename2,
-                        std::ifstream::ate); // open file at the end
-
-    const std::ifstream::pos_type fileSize = file1.tellg();
-
-    if (fileSize != file2.tellg()) {
-        std::cout << "erreur de tailles" << std::endl;
-        return false; // different file size
+    std::ifstream printedFile(printedFilePath);
+    if (!printedFile.is_open()) {
+        std::cout << "Could not open file \"" << printedFilePath
+                  << "\". Check project configuration." << std::endl;
     }
 
-    file1.seekg(0); // rewind
-    file2.seekg(0); // rewind
+    std::ifstream goldenRef(goldenRefPath);
+    if (!goldenRef.is_open()) {
+        std::cout << "Could not open file \"" << goldenRefPath
+                  << "\". Check project configuration." << std::endl;
+    }
 
-    std::istreambuf_iterator<char> begin1(file1);
-    std::istreambuf_iterator<char> begin2(file2);
+    // Check the file content line by line
+    // print diffs in the console and count number of printed line.
+    uint64_t nbDiffs = 0;
+    uint64_t lineNumber = 0;
+    while (!printedFile.eof() && !goldenRef.eof()) {
+        std::string lineRef;
+        std::getline(goldenRef, lineRef);
 
-    return std::equal(begin1, std::istreambuf_iterator<char>(),
-                      begin2); // Second argument is end-of-range iterator
+        std::string lineExport;
+        std::getline(printedFile, lineExport);
+
+        if (lineRef != lineExport) {
+            nbDiffs++;
+            std::cout << "Diff at Line " << lineNumber << ":" << std::endl;
+            std::cout << "\tref: " << lineRef << std::endl;
+            std::cout << "\texp: " << lineExport << std::endl;
+        }
+
+        lineNumber++;
+    }
+
+    if (!printedFile.eof() || !goldenRef.eof()) {
+        nbDiffs++;
+        std::cout << "Files have different length." << std::endl;
+    }
+
+    return nbDiffs == 0;
 }

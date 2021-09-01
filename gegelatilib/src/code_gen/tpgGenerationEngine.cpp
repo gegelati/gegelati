@@ -216,7 +216,7 @@ void CodeGen::TPGGenerationEngine::initHeaderFile()
 
               << "typedef struct Edge {\n"
               << "\tint visited;\n"
-              << "\tdouble (*ptr_prog)(void);\n"
+              << "\tdouble (*ptr_prog)();\n"
               << "\tvoid* (*ptr_vertex)(int* action);\n"
               << "}Edge;\n\n"
 
