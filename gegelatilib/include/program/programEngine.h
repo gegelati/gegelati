@@ -256,10 +256,10 @@ namespace Program {
 
         // Replace the references in attributes
         this->dataSources = dataSrc;
-        // we need this offset to push the constant at the firs
+        // we need this offset to push the constant at the first
         size_t offset =
             this->program->getEnvironment().getNbConstant() > 0 ? 2 : 1;
-        if (this->program && offset == 2) {
+        if (offset == 2) {
             this->dataScsConstsAndRegs.at(1) =
                 this->program->cGetConstantHandler();
         }

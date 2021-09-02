@@ -6,9 +6,12 @@ _yyyy.mm.dd_
 ### New features
 
 ### Changes
+* Change the typedef Learn::LearningMode into an enum class to remove compilation warnings in MSVC. Because of this change, members of the enum must now be used with the class name: `TRAINING` > `LearningMode::TRAINING`.
 
 ### Bug fix
 * Fix memory leak when demangling type name in GNU environment.
+* Fix dangling pointers warning from MSVC.
+* Fix unitialized attributes in various classes.
 
 
 ## Release version 0.6.0

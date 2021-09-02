@@ -112,7 +112,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // Skip the root evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
-    if (mode == TRAINING && this->isRootEvalSkipped(*root, previousEval)) {
+    if (mode == LearningMode::TRAINING &&
+        this->isRootEvalSkipped(*root, previousEval)) {
         return previousEval;
     }
 

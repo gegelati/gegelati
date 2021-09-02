@@ -12,8 +12,6 @@ int main(int argc, char* argv[])
 {
     double tab[6];
     in1 = tab;
-    int expectedVal;
-    int action;
 
     if (argc != 2) {
         fprintf(stderr, "error the program only require one parameter : the "

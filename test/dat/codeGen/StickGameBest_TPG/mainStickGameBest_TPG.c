@@ -9,7 +9,6 @@ int* in1;
 int* in2;
 int main(int argc, char* argv[])
 {
-    double tab[1];
     int remainingSticks[1];
     int hints[4];
     in1 = hints;

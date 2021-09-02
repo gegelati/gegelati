@@ -25,17 +25,16 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Environment* e;
-    StickGameAdversarial* le;
+    Environment* e = nullptr;
+    StickGameAdversarial* le = nullptr;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
-    TPG::TPGGraph* tpg;
-    TPG::TPGExecutionEngine* tee;
-    CodeGen::TPGGenerationEngine* tpgGen;
+    TPG::TPGGraph* tpg = nullptr;
+    TPG::TPGExecutionEngine* tee = nullptr;
+    CodeGen::TPGGenerationEngine* tpgGen = nullptr;
     File::TPGGraphDotImporter* dot = nullptr;
     std::string cmdCompile;
     std::string cmdExec;
     std::string dataIn;
-    TPG::TPGVertex const* rootVertex;
 
     virtual void SetUp() override
     {
@@ -79,9 +78,6 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         dot = new File::TPGGraphDotImporter(
             TESTS_DAT_PATH "StickGame_out_best.dot", *e, *tpg);
         dot->importGraph();
-        rootVertex = tpg->getRootVertices().back();
-
-
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
 #ifdef _MSC_VER  
@@ -124,7 +120,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 
 TEST_F(StickGameGenerationBestDotTest, BestTPG)
 {
-    int inferenceCodeGen, inferenceGegelati, status;
+    int inferenceCodeGen, inferenceGegelati;
     tpgGen =
         new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, "./src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
@@ -158,11 +154,12 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         inferenceCodeGen = system(cmd.c_str());
 #elif __GNUC__
         std::string cmd{cmdExec + " " + dataIn};
-        status = system(cmd.c_str());
+        int status = system(cmd.c_str());
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
         inferenceGegelati =
-            (int)(((const TPG::TPGAction*)tee->executeFromRoot(*rootVertex)
+            (int)(((const TPG::TPGAction*)tee
+                       ->executeFromRoot(*tpg->getRootVertices().back())
                        .back())
                       ->getActionID());
         ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
