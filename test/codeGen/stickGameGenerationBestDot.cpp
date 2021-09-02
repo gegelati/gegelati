@@ -154,7 +154,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         inferenceCodeGen = system(cmd.c_str());
 #elif __GNUC__
         std::string cmd{cmdExec + " " + dataIn};
-        status = system(cmd.c_str());
+        int status = system(cmd.c_str());
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
         inferenceGegelati =
