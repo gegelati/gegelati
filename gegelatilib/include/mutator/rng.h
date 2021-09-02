@@ -51,7 +51,7 @@ namespace Mutator {
     {
       protected:
         /// Mersenne twister MT19937 engine used for Random Number generation.
-        std::mt19937_64 engine;
+        std::mt19937_64* engine;
 
       public:
         /**
@@ -59,7 +59,17 @@ namespace Mutator {
          *
          * \param[in] seed the seed for the engine.
          */
-        RNG(uint64_t seed = 0) : engine(seed)
+        RNG(uint64_t seed = 0) : engine(new std::mt19937_64(seed))
+        {
+        }
+
+        /**
+         * \brief Copy constructor.
+         *
+         * The copy constructor does a deep copy.
+         * \param[in] other the RNG to copy.
+         */
+        RNG(const RNG& other) : engine(new std::mt19937_64(*(other.engine)))
         {
         }
 
