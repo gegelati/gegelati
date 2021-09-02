@@ -184,7 +184,7 @@ TEST_F(LearningAgentTest, MakeJob)
 {
     Learn::LearningAgent la(le, set, params);
     la.init();
-    auto job = *la.makeJob(0, Learn::TRAINING);
+    auto job = *la.makeJob(0, Learn::LearningMode::TRAINING);
     ASSERT_NO_THROW(job.getArchiveSeed()) << "job should have an archive seed";
     ASSERT_NO_THROW(job.getIdx()) << "job should have an idx";
     ASSERT_EQ(la.getTPGGraph().getRootVertices().at(0), job.getRoot())
@@ -200,7 +200,7 @@ TEST_F(LearningAgentTest, MakeJobs)
 {
     Learn::LearningAgent la(le, set, params);
     la.init();
-    auto jobs = la.makeJobs(Learn::TRAINING);
+    auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
     ASSERT_EQ(la.getTPGGraph().getNbRootVertices(), jobs.size())
         << "There should be as many jobs as roots";
     for (int i = 0; i < la.getTPGGraph().getNbRootVertices(); i++) {
