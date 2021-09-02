@@ -67,7 +67,7 @@ namespace TPG {
     {
       private:
         /// Environment used during analyses
-        const Environment* environment;
+        const Environment* environment = nullptr;
 
         /// Data sources (including registers) used in the Program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>

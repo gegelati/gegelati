@@ -24,11 +24,11 @@ class TPGGenerationEngineTest : public ::testing::Test
     std::string cmdExec;
     const size_t s1{8};
     Instructions::Set set;
-    Environment* e;
+    Environment* e = nullptr;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     Data::PrimitiveTypeArray<double> currentState{s1};
-    CodeGen::TPGGenerationEngine* tpgGen;
-    TPG::TPGGraph* tpg;
+    CodeGen::TPGGenerationEngine* tpgGen = nullptr;
+    TPG::TPGGraph* tpg = nullptr;
 
     virtual void SetUp()
     {

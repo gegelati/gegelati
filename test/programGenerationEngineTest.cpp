@@ -20,11 +20,11 @@ class ProgramGenerationEngineTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     const size_t size1{32};
     Instructions::Set set;
-    Environment* e;
-    Environment* envWithConstant;
-    Program::Program* p;
-    Program::Program* p2;
-    Program::Program* p3;
+    Environment* e = nullptr;
+    Environment* envWithConstant = nullptr;
+    Program::Program* p = nullptr;
+    Program::Program* p2 = nullptr;
+    Program::Program* p3 = nullptr;
 
     virtual void SetUp()
     {
@@ -56,7 +56,7 @@ class ProgramGenerationEngineTest : public ::testing::Test
         // Set working directory to BIN_DIR_PATH where the "src" directory was
         // created.
         std::filesystem::current_path(BIN_DIR_PATH);
-#endif 
+#endif
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(0); // Instruction is add.

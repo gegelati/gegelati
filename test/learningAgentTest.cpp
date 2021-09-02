@@ -292,7 +292,8 @@ TEST_F(LearningAgentTest, UpdateEvaluationRecords)
            "LearningAgent.";
 
     // Update with a fake result for a root of the graph
-    const TPG::TPGVertex* root = *la.getTPGGraph().getRootVertices().begin();
+    auto rootVertices = la.getTPGGraph().getRootVertices();
+    const TPG::TPGVertex* root = *rootVertices.begin();
     ASSERT_NO_THROW(la.updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(1.0, 10), root}}));
     ASSERT_EQ(la.getBestRoot().first, root)
@@ -358,7 +359,8 @@ TEST_F(LearningAgentTest, forgetPreviousResults)
     la.init();
 
     // Update with a fake result for a root of the graph
-    const TPG::TPGVertex* root = *la.getTPGGraph().getRootVertices().begin();
+    auto rootVertices = la.getTPGGraph().getRootVertices();
+    const TPG::TPGVertex* root = *rootVertices.begin();
     ASSERT_NO_THROW(la.updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(1.0, 10), root}}));
     ASSERT_EQ(la.getBestRoot().second->getResult(), 1.0)

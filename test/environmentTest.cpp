@@ -220,7 +220,7 @@ TEST(EnvironmentTest, GetFakeRegisters)
 
     Environment e(set, vect, 8, 5);
 
-    ASSERT_NO_THROW(e.getFakeDataSources().at(0))
+    ASSERT_NO_THROW(auto dataHandler = e.getFakeDataSources().at(0))
         << "Couldn't access the fake registers of the environment.";
     ASSERT_EQ(
         e.getFakeDataSources().at(0).get().getAddressSpace(typeid(double)), 8)
