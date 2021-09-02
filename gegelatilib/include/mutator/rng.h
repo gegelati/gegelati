@@ -36,6 +36,7 @@
 #ifndef RNG_H
 #define RNG_H
 
+#include <memory>
 #include <random>
 
 namespace Mutator {
@@ -51,7 +52,7 @@ namespace Mutator {
     {
       protected:
         /// Mersenne twister MT19937 engine used for Random Number generation.
-        std::mt19937_64* engine;
+        std::unique_ptr<std::mt19937_64> engine;
 
       public:
         /**
@@ -59,7 +60,7 @@ namespace Mutator {
          *
          * \param[in] seed the seed for the engine.
          */
-        RNG(uint64_t seed = 0) : engine(new std::mt19937_64(seed))
+        RNG(uint64_t seed = 0) : engine(std::make_unique<std::mt19937_64>(seed))
         {
         }
 
@@ -69,7 +70,8 @@ namespace Mutator {
          * The copy constructor does a deep copy.
          * \param[in] other the RNG to copy.
          */
-        RNG(const RNG& other) : engine(new std::mt19937_64(*(other.engine)))
+        RNG(const RNG& other)
+            : engine(std::make_unique<std::mt19937_64>(*(other.engine)))
         {
         }
 
