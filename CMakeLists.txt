@@ -45,12 +45,12 @@ project(${PROJECT_NAME}
 string(TOLOWER ${PROJECT_NAME} project_name)
 set(LIB_SOURCE_DIRECTORY ${project_name}lib)
 
-# If CODE_GEN = 1 gegelati is compile with the codeGen, if CODE_GEN = 0 the 
+# If CODE_GEN = ON gegelati is compile with the codeGen, if CODE_GEN = OFF the
 # codeGen is disabled
-set(CODE_GEN 1)
+option(CODE_GEN "Compile GEGELATI with the code generation feature." ON)
 
-if(CODE_GEN EQUAL 1)
-    add_definitions( -DCODE_GENERATION)
+if(CODE_GEN)
+    add_definitions(-DCODE_GENERATION)
 endif()
 
 

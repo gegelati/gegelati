@@ -60,11 +60,11 @@ file(
 # source and header files listed in the command invocation.
 add_library(${LIBRARY_TARGET_NAME} SHARED ${${LIBRARY_TARGET_NAME}_SRC} ${${LIBRARY_TARGET_NAME}_HDR})
 
-if(CODE_GEN EQUAL 1)
+if(CODE_GEN)
         target_compile_definitions(${LIBRARY_TARGET_NAME} PUBLIC -DCODE_GENERATION)
-        message("code gen active")
+        message(STATUS "Code generation module of GEGELATI is enabled.")
 else()
-        message("code gen non active")
+        message(STATUS "Code generation module of GEGELATI is disabled.")
 endif()
 
 
@@ -76,11 +76,8 @@ endif()
 # always treated as the name of either an alias or imported target. Any attempt
 # to use such a name for a different target type will result in an error.
 add_library(${PROJECT_NAME}::${LIBRARY_TARGET_NAME} ALIAS ${LIBRARY_TARGET_NAME})
-if(CODE_GEN EQUAL 1)
+if(CODE_GEN)
         target_compile_definitions(${PROJECT_NAME} PUBLIC -DCODE_GENERATION)
-        message("code gen active")
-else()
-        message("code gen non active")
 endif()
 
 # Set two minimum target properties for the library.
