@@ -16,6 +16,11 @@ if(result)
   message(FATAL_ERROR "Build step for googletest failed: ${result}")
 endif()
 
+if(CODE_GEN)
+  add_definitions(-DBIN_DIR_PATH="${CMAKE_CURRENT_BINARY_DIR}")
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/obj ${CMAKE_CURRENT_BINARY_DIR}/buildCodeGen)
+endif()
+
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
