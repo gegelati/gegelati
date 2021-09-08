@@ -196,11 +196,13 @@ namespace Data {
         virtual std::vector<size_t> getAddressesAccessed(
             const std::type_info& type, const size_t address) const override;
 
+#ifdef CODE_GENERATION
         /// Inherited from DataHandler
-        virtual const std::type_info& getTemplateType() const override;
+        virtual const std::type_info& getNativeType() const override;
 
         /// Inherited from DataHandler
         virtual std::vector<size_t> getDimensionsSize() const override;
+#endif
     };
 
     template <class T>
@@ -409,18 +411,21 @@ namespace Data {
         return this->cachedHash;
     }
 
+#ifdef CODE_GENERATION
     template <class T>
-    const std::type_info& ArrayWrapper<T>::getTemplateType() const
+    const std::type_info& ArrayWrapper<T>::getNativeType() const
     {
         const std::type_info& a = typeid(T);
         return a;
     }
+
     template <class T>
     std::vector<size_t> ArrayWrapper<T>::getDimensionsSize() const
     {
         std::vector<size_t> sizes = {nbElements};
         return sizes;
     }
+#endif
 
 } // namespace Data
 #endif // !ARRAY_WRAPPER_H

@@ -145,8 +145,10 @@ namespace Data {
         virtual UntypedSharedPtr getDataAt(const std::type_info& type,
                                            const size_t address) const override;
 
+#ifdef CODE_GENERATION
         /// Inherited from DataHandler
         virtual std::vector<size_t> getDimensionsSize() const override;
+#endif
     };
 
     template <class T>
@@ -324,12 +326,15 @@ namespace Data {
             std::make_shared<UntypedSharedPtr::Model<const T[]>>(array)};
         return result;
     }
+
+#ifdef CODE_GENERATION
     template <class T>
     std::vector<size_t> Array2DWrapper<T>::getDimensionsSize() const
     {
         std::vector<size_t> sizes = {height, width};
         return sizes;
     }
+#endif
 } // namespace Data
 #endif // !ARRAY_2D_WRAPPER_H
 

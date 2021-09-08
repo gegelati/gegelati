@@ -7,7 +7,7 @@ std::string Data::DataHandlerPrinter::printDataAt(
     const Data::DataHandler& dataHandler, const std::type_info& type,
     const size_t& address, const std::string& nameVar) const
 {
-    const std::type_info& templateType = dataHandler.getTemplateType();
+    const std::type_info& templateType = dataHandler.getNativeType();
     const std::vector<size_t> dataSizes{dataHandler.getDimensionsSize()};
 
     // Check if the operand need only one value
@@ -65,7 +65,7 @@ std::string Data::DataHandlerPrinter::getDemangleTemplateType(
     const Data::DataHandler& dataHandler) const
 {
     return std::string{
-        DEMANGLE_TYPEID_NAME(dataHandler.getTemplateType().name())};
+        DEMANGLE_TYPEID_NAME(dataHandler.getNativeType().name())};
 }
 
 std::string Data::DataHandlerPrinter::print1DArray(

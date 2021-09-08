@@ -259,16 +259,20 @@ namespace Data {
          */
         uint64_t scaleLocation(const uint64_t rawLocation,
                                const std::type_info& type) const;
+
+#ifdef CODE_GENERATION
         /**
-         * \brief Function returning the type of the template for this
-         * DataHandler.
+         * \brief Function returning the native type of the DataHandler.
          *
          * For example, in case of a Data::PrimitiveTypeArray<double> this
          * function return typeid(double).
          *
+         * This info is currently used only to support the code generation
+         * feature of GEGELATI.
+         *
          * \return std::type_info of the template
          */
-        virtual const std::type_info& getTemplateType() const = 0;
+        virtual const std::type_info& getNativeType() const = 0;
 
         /**
          * \brief Give the size of each dimension of the DataHandler
@@ -278,10 +282,14 @@ namespace Data {
          * size of the array, for a 2D array the vector holds the height and the
          * width of the DataHandler.
          *
+         * This info is currently used only to support the code generation
+         * feature of GEGELATI.
+         *
          * \return a std::vector containing the size of each dimension of a
          * DataHandler
          */
         virtual std::vector<size_t> getDimensionsSize() const = 0;
+#endif
     };
 } // namespace Data
 

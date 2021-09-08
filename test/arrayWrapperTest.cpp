@@ -377,11 +377,12 @@ TEST(ArrayWrapperTest, Clone)
     delete dClone;
 }
 
-TEST(ArrayWrapperTest, getTemplateType)
+#ifdef CODE_GENERATION
+TEST(ArrayWrapperTest, getNativeType)
 {
     Data::DataHandler* d = new Data::ArrayWrapper<double>(4);
 
-    ASSERT_EQ(d->getTemplateType(), typeid(double))
+    ASSERT_EQ(d->getNativeType(), typeid(double))
         << "Fail to retrieve typeid(double) from a ArrayWrapper<double>.";
 
     delete d;
@@ -398,3 +399,4 @@ TEST(ArrayWrapperTest, getDimensionSize)
 
     delete d;
 }
+#endif
