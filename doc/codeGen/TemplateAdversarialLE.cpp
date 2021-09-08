@@ -1,3 +1,13 @@
+/**
+* This file is a template that can be filled to connect C code generated with
+* the code generation feature from Gegelati with an
+* AdversarialLearningEnvironment AND (optionally) to compare its behaviour
+* with the TPG from Gegelati, imported from its dot format.
+*
+* To use this template, the following changes should be made, carefully read
+* and replace all comments in this file.
+*/
+
 #include <iostream>
 
 extern "C" {
