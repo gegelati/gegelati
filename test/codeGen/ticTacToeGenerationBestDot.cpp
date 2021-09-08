@@ -8,7 +8,7 @@
 #include <filesystem>
 #endif
 
-#include "code_gen/tpgGenerationEngine.h"
+#include "codeGen/tpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"

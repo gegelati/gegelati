@@ -11,8 +11,8 @@
 #endif
 
 #include "../learn/stickGameAdversarial.h"
-#include "code_gen/programGenerationEngine.h"
-#include "code_gen/tpgGenerationEngine.h"
+#include "codeGen/programGenerationEngine.h"
+#include "codeGen/tpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
