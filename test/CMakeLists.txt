@@ -17,10 +17,6 @@ if(result)
 endif()
 
 if(CODE_GEN)
-  if(NOT WIN32)
-    # Set execution directory for all IDEs.
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-  endif()
   add_definitions(-DBIN_DIR_PATH="${CMAKE_BINARY_DIR}")
   file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/src ${CMAKE_BINARY_DIR}/obj ${CMAKE_BINARY_DIR}/buildCodeGen)
 endif()
