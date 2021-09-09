@@ -1,6 +1,6 @@
 #ifdef CODE_GENERATION
-#ifndef DATAHANDLERPRINTER_H
-#define DATAHANDLERPRINTER_H
+#ifndef DATA_HANDLER_PRINTER_H
+#define DATA_HANDLER_PRINTER_H
 
 #include "data/dataHandler.h"
 #include "data/demangle.h"
