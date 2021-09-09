@@ -275,12 +275,14 @@ namespace Data {
         virtual const std::type_info& getNativeType() const = 0;
 
         /**
-         * \brief Give the size of each dimension of the DataHandler
+         * \brief Give the size of each dimension (if any) of the DataHandler
          *
-         * Function that return a std::vector<size_t> that contain the size of
-         * each dimension of an array. For a 1D array the vector contains the
-         * size of the array, for a 2D array the vector holds the height and the
-         * width of the DataHandler.
+         * Function that returns a std::vector<size_t> that contain the size of
+         * each dimension of the date in the DataHandler.
+         * For a scalar value, a one-element vector containing only value 1 is
+         * returned. For a 1D array the vector contains the size of the array,
+         * for a 2D array the vector holds the height and the width of the
+         * DataHandler.
          *
          * This info is currently used only to support the code generation
          * feature of GEGELATI.

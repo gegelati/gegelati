@@ -27,7 +27,7 @@ namespace Data {
          * on its type.
          *
          * \param[in] dataHandler const reference to the Data::DataHandler that
-         * must be printed
+         * is accessed by the printed code.
          * \param[in] type the std::type_info of the operand that we want to
          * print.
          * \param[in] address the location of the data to print.
