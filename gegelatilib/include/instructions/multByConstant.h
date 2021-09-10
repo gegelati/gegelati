@@ -64,7 +64,7 @@ namespace Instructions {
          * \param[in] printTemplate std::string use at the generation. Check
          * Instructions::Instruction for more details.
          */
-        MultByConstant(const std::string& printTemplate = "");
+        MultByConstant(const std::string& printTemplate = "$0 = $1 * $2;");
 #endif // CODE_GENERATION
 
       public:

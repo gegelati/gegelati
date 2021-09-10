@@ -1,6 +1,6 @@
 #ifdef CODE_GENERATION
-#ifndef DATAHANDLERPRINTER_H
-#define DATAHANDLERPRINTER_H
+#ifndef DATA_HANDLER_PRINTER_H
+#define DATA_HANDLER_PRINTER_H
 
 #include "data/dataHandler.h"
 #include "data/demangle.h"
@@ -27,7 +27,7 @@ namespace Data {
          * on its type.
          *
          * \param[in] dataHandler const reference to the Data::DataHandler that
-         * must be printed
+         * is accessed by the printed code.
          * \param[in] type the std::type_info of the operand that we want to
          * print.
          * \param[in] address the location of the data to print.

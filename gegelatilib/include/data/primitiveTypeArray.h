@@ -50,7 +50,6 @@ namespace Data {
      * - T[n]: with $n <=$ to the size of the PrimitiveTypeArray.
      */
     template <class T> class PrimitiveTypeArray : public ArrayWrapper<T>
-    //,public virtual DataHandler
     {
       protected:
         /**

@@ -35,7 +35,7 @@
 
 #ifdef CODE_GENERATION
 
-#include "code_gen/tpgGenerationEngine.h"
+#include "codeGen/tpgGenerationEngine.h"
 
 // const std::string CodeGen::TPGGenerationEngine::filenameProg = "program";
 

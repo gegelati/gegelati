@@ -35,8 +35,8 @@
 
 #ifdef CODE_GENERATION
 
-#ifndef PROGRAMGENERATIONENGINE_H
-#define PROGRAMGENERATIONENGINE_H
+#ifndef PROGRAM_GENERATION_ENGINE_H
+#define PROGRAM_GENERATION_ENGINE_H
 #include <fstream>
 
 #include "data/dataHandlerPrinter.h"
@@ -46,14 +46,17 @@
 
 namespace CodeGen {
     /**
-     *  \brief Class in charge of generating all the programs of a TPG.
+     * \brief Class in charge of generating inference C code for all the Program
+     * of a TPG.
      *
-     *  This class generates the files(header and source code) that contains the
-     * programs of the TPG. A program can be generated if all its instructions
-     * are printable (inherits from PrintableInstruction).
+     * This class generates header and C source code files that implements the
+     * Program of a TPG. Code can be generated only if all instructions of the
+     * Program are printable, that is, if they inherits from
+     * PrintableInstruction.
      *
-     *  The header externHeader.h allows to add the required header(like math.h)
-     * to compile the generated code without modifying it.
+     * In the generated code, inclusion of externHeader.h allows including
+     * necessary headers (like math.h) to compile the generated code without
+     * modifying it.
      */
     class ProgramGenerationEngine : public Program::ProgramEngine
     {
@@ -63,7 +66,7 @@ namespace CodeGen {
         static const std::regex operand_regex;
 
         /**
-         * \brief name given to the global variable in generated files.
+         * \brief Name given to the global variable in generated files.
          *
          * "nameDataVariable"1 corresponds to the first variable
          * "nameDataVariable"2 is used if an other data is given
@@ -85,12 +88,7 @@ namespace CodeGen {
         /// The file in which prototypes of programs will be added.
         std::ofstream fileH;
 
-        /**
-         * \brief Map associating a DataHandlerPrinter to the ID of its
-         * DataHandler
-         *
-         * This map is filled in the generateDataPrinterMap method.
-         */
+        ///  Utility class used to print data accesses in generated code.
         Data::DataHandlerPrinter dataPrinter;
 
       public:
@@ -100,9 +98,10 @@ namespace CodeGen {
         /**
          * \brief Constructor of the class
          *
-         * The constructor initialize the member of the parent class
-         * (ProgramEngine) and the file "filename" is open with the flag
-         * std::ofstream::app to generate the program in the file.
+         * The constructor initializes the member of the parent class
+         * (ProgramEngine) and the file "filename" is opened with the flag
+         * std::ofstream::out to generate the program in the file and replace
+         * any previous content.
          *
          * \param[in] filename a const reference used to generate the filename
          * of the file that holds the programs of the TPG graph. The filename
@@ -125,7 +124,7 @@ namespace CodeGen {
         /**
          * \brief Constructor of the class
          *
-         * The constructor initialize the member of the parent class
+         * The constructor initializes the member of the parent class
          * (ProgramEngine) and the file "filename" is open with the flag
          * std::ofstream::out to generate the program in the file.
          *
@@ -150,9 +149,9 @@ namespace CodeGen {
         }
 
         /**
-         * \brief destructor of the class
+         * \brief Destructor of the class
          *
-         * close both files and add endif at the end of the header
+         * Close both files and add endif at the end of the generated header.
          */
         ~ProgramGenerationEngine()
         {
@@ -162,7 +161,7 @@ namespace CodeGen {
         }
 
         /**
-         * \brief generate the current line of the program
+         * \brief Generate the current line of the program.
          *
          * Generate the line of code that corresponds to the current line in the
          * program of the TPG.
@@ -170,13 +169,14 @@ namespace CodeGen {
         void generateCurrentLine();
 
         /**
-         * \brief generate the C code that corresponds to the member program of
-         * the class
+         * \brief Generate the C code that corresponds to the member program of
+         * the class.
          *
-         * Create a function in the file "filename"_program.c that regroups all
+         * Print a function in the file "filename"_program.c that regroups all
          * the instruction of the program and return a double. The name of the
-         * function is based on the identifier of the program. The declaration
-         * of function of the program with ID=1 is double P1(int* action)
+         * printed function is based on the identifier of the program. The
+         * declaration of function of the program with ID=1 is double P1(int*
+         * action)
          *
          * \param[in] progID : unique identifier of the program used to generate
          *            the name of the function in the C file.
@@ -195,8 +195,10 @@ namespace CodeGen {
         /**
          * \brief Set global variables in the file holding the programs.
          *
-         * Set type of the global variable accordingly to the type of the data
-         * sources of the environment.
+         * Global variables printed in the generated code are used by this code
+         * to access the data from the LearningEnvironment. This methot sets the
+         * type of the global variable accordingly to the type of the data
+         * sources of the Environment of the printed Program.
          *
          * \param[in] nbConstant size_t of the number of Data::Constant
          * available for a Program.
@@ -204,11 +206,12 @@ namespace CodeGen {
         void initGlobalVar(size_t nbConstant);
 
         /**
-         * \brief create the line of C code that equals to instruction in
-         * parameter
+         * \brief Generates the line of C code that implements the instruction
+         * in parameter.
          *
-         * Replace each operand of the printTemplate of the printable
-         * instruction by a pointer to the data of the environment.
+         * Replace each operand from the printTemplate of the
+         * printableInstruction with a pointer to the data of the environment,
+         * through the printed global variables.
          *
          * \param[in] instruction that as to be converted into a line of code
          *
@@ -218,12 +221,11 @@ namespace CodeGen {
         std::string completeFormat(
             const Instructions::Instruction& instruction) const;
 
-        // private:
         /**
-         * \brief Function used to open the file that as to be generated.
+         * \brief Function used to open the file that is generated.
          *
          * This is function is called in both constructor of the class. It open
-         * the source file and the header file. It also add the include guards
+         * the source file and the header file. It also adds the include guards
          * in the header.
          *
          * \param[in] filename const reference to the name of the file.
@@ -235,7 +237,7 @@ namespace CodeGen {
                       size_t nbConstant);
 
         /**
-         * \brief Function called to generate the initialization of all operand
+         * \brief Function called to generate the initialization of all operands
          * of an instruction.
          *
          * This function prints in the C source file the declaration and the

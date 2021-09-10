@@ -35,13 +35,13 @@
 
 #ifdef CODE_GENERATION
 
-#ifndef TPGGENERATIONENGINE_H
-#define TPGGENERATIONENGINE_H
+#ifndef TPG_GENERATION_ENGINE_H
+#define TPG_GENERATION_ENGINE_H
 #include <ios>
 #include <iostream>
 #include <string>
 
-#include "code_gen/programGenerationEngine.h"
+#include "codeGen/programGenerationEngine.h"
 #include "tpg/tpgAbstractEngine.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
@@ -98,7 +98,7 @@ namespace CodeGen {
         /**
          * \brief function printing generic code in the main file.
          *
-         * This function print generic code to execute the TPG and manage the
+         * This function prints generic code to execute the TPG and manage the
          * stack of visited edges.
          */
         void initTpgFile();
@@ -172,7 +172,7 @@ namespace CodeGen {
         }
 
         /**
-         * \brief Method for generating an edge of the graph.
+         * \brief Method for generating the code for an edge of the graph.
          *
          * This function generates the code that represents an edge.
          * An edge of a team is represented by a struct with:
@@ -187,7 +187,7 @@ namespace CodeGen {
         void generateEdge(const TPG::TPGEdge& edge);
 
         /**
-         * \brief Method for generating a team of the graph.
+         * \brief Method for generating the code for a team of the graph.
          *
          * This method generates the C function that represents a team.
          * Each function representing a team contains a static array of TPGEdge

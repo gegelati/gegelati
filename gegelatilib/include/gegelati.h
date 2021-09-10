@@ -109,6 +109,11 @@
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
 
+#ifdef CODE_GENERATION
+#include <codeGen/programGenerationEngine.h>
+#include <codeGen/tpgGenerationEngine.h>
+#endif
+
 #include <archive.h>
 #include <environment.h>
 

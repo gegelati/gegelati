@@ -11,8 +11,8 @@
 #endif
 
 #include "../learn/stickGameAdversarial.h"
-#include "code_gen/programGenerationEngine.h"
-#include "code_gen/tpgGenerationEngine.h"
+#include "codeGen/programGenerationEngine.h"
+#include "codeGen/tpgGenerationEngine.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
@@ -80,7 +80,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         dot->importGraph();
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
-#ifdef _MSC_VER  
+#ifdef _MSC_VER
         // Set working directory to BIN_DIR_PATH where the "src" directory was
         // created.
         std::filesystem::current_path(BIN_DIR_PATH);

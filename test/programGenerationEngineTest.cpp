@@ -6,7 +6,7 @@
 #include <filesystem>
 #endif
 
-#include "code_gen/programGenerationEngine.h"
+#include "codeGen/programGenerationEngine.h"
 #include "data/primitiveTypeArray.h"
 #include "environment.h"
 #include "goldenReferenceComparison.h"
