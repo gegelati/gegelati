@@ -80,7 +80,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         dot->importGraph();
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
-#ifdef _MSC_VER  
+#ifdef _MSC_VER
         // Set working directory to BIN_DIR_PATH where the "src" directory was
         // created.
         std::filesystem::current_path(BIN_DIR_PATH);

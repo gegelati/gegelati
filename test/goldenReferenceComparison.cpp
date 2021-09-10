@@ -5,7 +5,8 @@
 
 #include "goldenReferenceComparison.h"
 
-bool compare_files(const std::string& printedFilePath, const std::string& goldenRefPath)
+bool compare_files(const std::string& printedFilePath,
+                   const std::string& goldenRefPath)
 {
     std::ifstream printedFile(printedFilePath);
     if (!printedFile.is_open()) {

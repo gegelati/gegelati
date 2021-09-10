@@ -245,7 +245,7 @@ TEST(Array2DWrapperTest, getDataAt)
 #ifdef CODE_GENERATION
 TEST(Array2DWrapperTest, getNativeType)
 {
-    Data::DataHandler* d = new Data::Array2DWrapper<double>(4,6);
+    Data::DataHandler* d = new Data::Array2DWrapper<double>(4, 6);
 
     ASSERT_EQ(d->getNativeType(), typeid(double))
         << "Fail to retrieve typeid(double) from a Array2DWrapper<double>.";

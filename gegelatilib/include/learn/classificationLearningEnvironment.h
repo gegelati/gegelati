@@ -109,7 +109,8 @@ namespace Learn {
          *
          * Resets to zero the classificationTable.
          */
-        virtual void reset(size_t seed = 0,
+        virtual void reset(
+            size_t seed = 0,
             LearningMode mode = LearningMode::TRAINING) override = 0;
     };
 }; // namespace Learn

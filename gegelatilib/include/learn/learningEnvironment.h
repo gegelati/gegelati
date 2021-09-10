@@ -165,7 +165,8 @@ namespace Learn {
          * \param[in] mode LearningMode in which the Environment should be
          * reset for the next set of actions.
          */
-        virtual void reset(size_t seed = 0, LearningMode mode = LearningMode::TRAINING) = 0;
+        virtual void reset(size_t seed = 0,
+                           LearningMode mode = LearningMode::TRAINING) = 0;
 
         /**
          * \brief Get the data sources for this LearningEnvironment.
