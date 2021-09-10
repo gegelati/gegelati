@@ -27,10 +27,9 @@ jobs:
             - cd bin
             - cmake ..
             - cmake --build . --target GEGELATI --config Debug
-            - cmake --build . --target GEGELATI --config Release
             - cmake --build . --target doc
             - cmake --build . --target INSTALL --config Debug
-            - cmake --build . --target INSTALL --config Release
+            - if [ $TRAVIS_BRANCH == "develop" ] || [ $TRAVIS_BRANCH == "master" ] ; then cmake --build . --target INSTALL --config Release ; fi;
             - cmake --build . --target runTests --config Debug
             - ./bin/Debug/runTests.exe
             - cd ..
