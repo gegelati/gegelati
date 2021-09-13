@@ -59,6 +59,26 @@ namespace Instructions {
     class LambdaInstruction : public Instructions::Instruction
     {
 
+#ifdef CODE_GENERATION
+      public:
+        /**
+         * \brief Constructor of the class LambdaInstruction to create a
+         * printable Instruction.
+         *
+         * \param[in] printTemplate std::string use at the generation. Check
+         * Instructions::Instruction for more details.
+         * \param[in] function the c++ std::function that will be executed for
+         * this Instruction. Check the constructor with only the function as
+         * parameter for more details.
+         */
+        LambdaInstruction(std::function<double(First, Rest...)> function,
+                          const std::string& printTemplate = "")
+            : Instructions::Instruction(printTemplate), func{function}
+        {
+            setUpOperand();
+        };
+
+#endif // CODE_GENERATION
       protected:
         /**
          * \brief Function executed for this Instruction.
@@ -70,7 +90,7 @@ namespace Instructions {
          * \brief delete the default constructor.
          */
         LambdaInstruction() = delete;
-
+#ifndef CODE_GENERATION
         /**
          * \brief Constructor for the LambdaInstruction.
          *
@@ -80,15 +100,12 @@ namespace Instructions {
          * compile time)
          */
         LambdaInstruction(std::function<double(First, Rest...)> function)
-            : func{function}
+            : Instructions::Instruction(), func{function}
         {
-
-            this->operandTypes.push_back(typeid(First));
-            // Fold expression to push all other types
-            (this->operandTypes.push_back(typeid(Rest)), ...);
+            setUpOperand();
         };
-
-        /// Inherited from Instruction
+#endif // CODE_GENERATION
+       /// Inherited from Instruction
         virtual bool checkOperandTypes(
             const std::vector<Data::UntypedSharedPtr>& arguments) const override
         {
@@ -118,7 +135,8 @@ namespace Instructions {
             return true;
         };
 
-        double execute(
+        /// Inherited from Instruction
+        virtual double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override
         {
 
@@ -184,13 +202,20 @@ namespace Instructions {
                 return *(args.at(idx).getSharedPointer<const T>());
             }
             else {
-                return (RETURN_TYPE)(
-                           args.at(idx)
-                               .getSharedPointer<
-                                   const std::remove_all_extents_t<T>[]>())
-                    .get();
+                auto returnedPtr =
+                    args.at(idx)
+                        .getSharedPointer<
+                            const std::remove_all_extents_t<T>[]>();
+                return (RETURN_TYPE)returnedPtr.get();
             };
         };
+
+        void setUpOperand()
+        {
+            this->operandTypes.push_back(typeid(First));
+            // Fold expression to push all other types
+            (this->operandTypes.push_back(typeid(Rest)), ...);
+        }
     };
 }; // namespace Instructions
 

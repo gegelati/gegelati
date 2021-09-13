@@ -57,6 +57,94 @@ namespace Instructions {
     class Instruction
     {
 
+#ifdef CODE_GENERATION
+      public:
+        /**
+         * \brief function saying if an Instruction can be printed in a C file
+         * during the code gen.
+         *
+         * @return true if the printTemplate of the Instruction is not empty,
+         * false in other case.
+         */
+        virtual bool isPrintable() const;
+
+        /**
+         * \brief This function return the printTemplate of the line of code
+         * used to represent the instruction.
+         *
+         * \return The printTemplate of the line of code used to represent the
+         * instruction in the C program.
+         */
+        virtual const std::string& getPrintTemplate() const;
+
+        /**
+         * \brief Retrieve the primitive data type of the operand
+         *
+         * \param[in] opIdx const uint64_t reference to the index of the operand
+         * of the instruction
+         *
+         * \return The type of the operand. If the operand is an array return
+         * the type of the element of the array.
+         */
+        virtual std::string getPrintablePrimitiveOperandType(
+            const uint64_t& opIdx) const;
+
+      protected:
+        /**
+         * \brief Protected constructor to force the class abstract nature.
+         *
+         * The definition of this constructor initialize the string
+         * printTemplate with the format given as parameter.
+         *
+         * \param[in] printTemplate of the line used to represent the
+         * instruction in the C files generated.
+         */
+        Instruction(std::string printTemplate);
+
+        /**
+         * printTemplate of the instruction used to generate the code. The
+         * result of the function is represented with $0. The first parameter
+         * correspond to $1 the second to $2...
+         */
+        std::string printTemplate;
+
+      private:
+        /**
+         * This regular expression is used to extract the primitive type from
+         *the type of an instruction. It removes the const definition and any
+         *array declaration from the type.
+         *
+         * Explanation:
+         * \code{.unparse}
+         * (const )?
+         * \endcode
+         * match \c const if it is in the operand type
+         * \code{.unparse}
+         * [\\w:\\*]*
+         * \endcode
+         * match 1 to infinite words separated by \c : . Allow to match \c
+         *Data::Constant. \code{.unparse}
+         * ((struct )?[\\w:\\*]*)
+         * \endcode
+         * match the primitive type of the operand. For MSVC Data::Constant is a
+         *struct so we need to match this possibility too. \code{.unparse} [ ]?
+         * \endcode
+         * match if the operand is a 1D array without a static size. This
+         *pattern can only appear 0 or 1 time in the C/Cpp semantic.
+         * \code{.unparse}
+         * (\\d)+
+         * \endcode
+         * match any digit 1 to infinite times.
+         * \code{.unparse}
+         * (\\[(\\d)+\\])*
+         * \endcode
+         * match 0 to infinite dimensions that have static size.
+         **/
+        inline static const std::string GET_PRINT_PRIMITIVE_OPERAND_TYPE{
+            "(const )?((struct )?[\\w:\\*]*)[ ]?(\\[(\\d)+\\])*"};
+
+#endif // CODE_GENERATION
+
       public:
         /// Default virtual destructor for polyphormism.
         virtual ~Instruction() = default;
@@ -98,7 +186,7 @@ namespace Instructions {
          *
          * \param[in] args the vector of UntypedSharedPtr passed to the
          * Instruction.
-         * \return the default implementation of the Intruction
+         * \return the default implementation of the Instruction
          * class returns 0.0 if the given params or arguments are not valid.
          * Otherwise, 1.0 is returned.
          */
@@ -106,6 +194,7 @@ namespace Instructions {
             const std::vector<Data::UntypedSharedPtr>& args) const = 0;
 
       protected:
+#ifndef CODE_GENERATION
         /**
          * \brief Protected constructor to force the class abstract nature.
          *
@@ -113,7 +202,7 @@ namespace Instructions {
          * list and sets the number of required parameters to 0.
          */
         Instruction();
-
+#endif // CODE_GENERATION
         /**
          * \brief List of the types of the operands needed to execute the
          * instruction.

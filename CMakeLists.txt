@@ -45,6 +45,15 @@ project(${PROJECT_NAME}
 string(TOLOWER ${PROJECT_NAME} project_name)
 set(LIB_SOURCE_DIRECTORY ${project_name}lib)
 
+# If CODE_GEN = ON gegelati is compile with the codeGen, if CODE_GEN = OFF the
+# codeGen is disabled
+option(CODE_GEN "Compile GEGELATI with the code generation feature." ON)
+
+if(CODE_GEN)
+    add_definitions(-DCODE_GENERATION)
+endif()
+
+
 # Defines the CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_BINDIR and many other useful macros.
 # See https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
 include(GNUInstallDirs)

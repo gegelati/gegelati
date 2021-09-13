@@ -103,6 +103,9 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(
          iter++) {
         TPGEdge* edge = *iter;
         double bid = this->evaluateEdge(*edge);
+#ifdef DEBUG
+        std::cout << "R = " << bid << std::endl;
+#endif
         if (bid >= bestBid) {
             bestEdge = edge;
             bestBid = bid;

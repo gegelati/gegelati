@@ -1,0 +1,36 @@
+####################
+### C CSV Parser ###
+####################
+
+- This software is free for any kind of use, including commercial use
+- The usage of this software is on your own risk and responsibility
+- The library was tested on both Linux/GCC and Windows MSVC
+
+source : https://sourceforge.net/projects/cccsvparser/
+
+Compilation under Linux
+=======================
+
+1. Creating a shared library
+   -------------------------
+   cd CsvParser
+   mkdir lib
+   gcc -Iinclude src/csvparser.c -fPIC -shared -o lib/libcsvparser.so
+
+
+2. Compiling the usage examples (statically)
+   -----------------------------------------
+   cd CsvParser
+   cd examples
+   gcc usage_example.c -I ../include ../src/csvparser.c -o usage_example
+   gcc usage_example_with_header.c -I ../include ../src/csvparser.c -o usage_example_with_header
+
+
+Compilation in Windows/MSVC
+===========================
+
+This library was successfully tested in MSVC 2015, by just copying all the source and header files to an existing project directory and then adding them to the project, building and running it.
+
+Note that you'll probably need to define _CRT_SECURE_NO_WARNINGS
+
+

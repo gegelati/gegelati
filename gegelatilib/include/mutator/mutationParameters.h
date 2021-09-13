@@ -52,7 +52,7 @@ namespace Mutator {
             "LearningEnvironment.\n"
             "// /* \"nbActions\" : 0,*/ // Commented by default";
         /// Number of TPGAction vertex of the initialized TPGGraph.
-        size_t nbActions;
+        size_t nbActions = 0;
 
         /// JSon comment
         inline static const std::string nbRootsComment =
@@ -174,7 +174,7 @@ namespace Mutator {
             "// Probability of each constant to be mutated.\n"
             "// \"pConstantMutation\" : 0.5, // Default value";
         /// Probability of each constant to be mutated
-        double pConstantMutation;
+        double pConstantMutation = 0.5;
 
         /// JSon comment
         inline static const std::string minConstValueComment =

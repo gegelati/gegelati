@@ -54,12 +54,12 @@ namespace Learn {
      * evaluation. TESTING mode is used at the end of all training activity to
      * evaluate the efficiency of the agent on completely new data.
      */
-    typedef enum LearningMode
+    enum class LearningMode
     {
         TRAINING,
         VALIDATION,
         TESTING
-    } LearningMode;
+    };
 
     /**
      * \brief Interface for creating a Learning Environment.
@@ -165,7 +165,8 @@ namespace Learn {
          * \param[in] mode LearningMode in which the Environment should be
          * reset for the next set of actions.
          */
-        virtual void reset(size_t seed = 0, LearningMode mode = TRAINING) = 0;
+        virtual void reset(size_t seed = 0,
+                           LearningMode mode = LearningMode::TRAINING) = 0;
 
         /**
          * \brief Get the data sources for this LearningEnvironment.

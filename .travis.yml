@@ -23,14 +23,13 @@ jobs:
             - unzip doxygen.zip
             - export PATH=$PATH:$PWD
             - cd ..
-          script: 
+          script:
             - cd bin
             - cmake ..
             - cmake --build . --target GEGELATI --config Debug
-            - cmake --build . --target GEGELATI --config Release
             - cmake --build . --target doc
             - cmake --build . --target INSTALL --config Debug
-            - cmake --build . --target INSTALL --config Release
+            - if [ $TRAVIS_BRANCH == "develop" ] || [ $TRAVIS_BRANCH == "master" ] ; then cmake --build . --target INSTALL --config Release ; fi;
             - cmake --build . --target runTests --config Debug
             - ./bin/Debug/runTests.exe
             - cd ..
@@ -49,6 +48,28 @@ jobs:
               skip_cleanup: true
               on:
                 branch: master
+                
+        - stage: Build
+          name: Modular features disabled
+          os: windows
+          env: GENERATOR="Visual Studio 16 2019"
+          compiler: msvc19
+          if: branch = develop OR branch = master
+          before_install:
+            - choco install visualstudio2019buildtools --package-parameters "--includeRecommended --includeOptional"
+            - choco install visualstudio2019-workload-vctools
+          install:
+            - mkdir doxygen && cd doxygen
+            - curl -L -o doxygen.zip https://doxygen.nl/files/doxygen-1.9.1.windows.x64.bin.zip
+            - unzip doxygen.zip
+            - export PATH=$PATH:$PWD
+            - cd ..
+          script:
+            - cd bin
+            - cmake .. -DCODE_GEN=OFF
+            - cmake --build . --target runTests --config Debug
+            - ./bin/Debug/runTests.exe
+            - cd ..
             
         - os: linux
           dist: xenial
@@ -79,6 +100,34 @@ jobs:
             - ./bin/runTests
             - cd ..
             - ./RunCoverageLinux.sh
+            
+        - os: linux
+          name: Modular features disabled
+          dist: xenial
+          stage: Build
+          compiler: gcc-7
+          if: branch = develop OR branch = master
+          addons:
+            apt:
+                sources:
+                    - ubuntu-toolchain-r-test
+                packages:
+                    - g++-7
+                    - doxygen
+                    - gcovr
+          env:
+            - GENERATOR="Unix Makefile"
+            - PATH=/opt/python/3.7.1/bin:$PATH
+          install:
+            - pip install gcovr
+          script:
+            - export CC=gcc-7
+            - export CXX=g++-7
+            - cd bin
+            - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCODE_GEN=OFF
+            - cmake --build . --target runTests
+            - ./bin/runTests
+            - cd ..
 
         - os: linux
           dist: xenial
@@ -105,6 +154,30 @@ jobs:
             - ./bin/runTests
             - cd ..
 
+        - os: linux
+          name: Modular features disabled
+          dist: xenial
+          stage: Build
+          if: branch = develop OR branch = master
+          compiler: clang
+          addons:
+            apt:
+                sources:
+                    - ubuntu-toolchain-r-test
+                packages:
+                    - g++-7
+                    - doxygen
+          env:
+            - GENERATOR="Unix Makefile"
+          script:
+            - export CC=gcc-7
+            - export CXX=g++-7
+            - cd bin
+            - cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DCODE_GEN=OFF
+            - cmake --build . --target runTests
+            - ./bin/runTests
+            - cd ..
+
         - os: osx
           stage: Build
           compiler: clang
@@ -126,6 +199,30 @@ jobs:
             - cmake --build . --target GEGELATI
             - cmake --build . --target doc
             - sudo make install
+            - cmake --build . --target runTests
+            - ./bin/runTests
+            - cd ..
+            
+        - os: osx
+          name: Modular features disabled
+          stage: Build
+          compiler: clang
+          if: branch = develop OR branch = master
+          env:
+            - GENERATOR="Unix Makefile"
+          install:
+           - # Build an old doxygen because brew install doxygen does not work on travis
+           - git clone --branch Release_1_8_12 https://github.com/doxygen/doxygen.git
+           - cd doxygen
+           - mkdir build
+           - cd build
+           - cmake -G "Unix Makefiles" ..
+           - make
+           - sudo make install
+           - cd ../..
+          script:
+            - cd bin
+            - cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DCODE_GEN=OFF
             - cmake --build . --target runTests
             - ./bin/runTests
             - cd ..

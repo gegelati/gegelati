@@ -68,8 +68,8 @@ class FakeAdversarialLearningEnvironment
         nbTurns++;
     }
 
-    void reset(size_t seed = 0,
-               Learn::LearningMode mode = Learn::TRAINING) override{
+    void reset(size_t seed = 0, Learn::LearningMode mode =
+                                    Learn::LearningMode::TRAINING) override{
         // we just ignore the reset
     };
     std::vector<std::reference_wrapper<const Data::DataHandler>>

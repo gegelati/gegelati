@@ -284,3 +284,18 @@ TEST(LambdaInstructionsTest, ExecuteNonPrimitiveTypes)
     // Execute it
     ASSERT_EQ(instruction.execute(arguments), 42.0);
 }
+
+#ifdef CODE_GENERATION
+TEST(LambdaInstructionsTest, PrintConstructor)
+{
+    auto minus = [](double a, double b) { return a - b; };
+
+    Instructions::LambdaInstruction<double, double>* instruction;
+    ASSERT_NO_THROW(
+        (instruction = new Instructions::LambdaInstruction<double, double>(
+             minus, "$0 = $1 - $2;")))
+        << "Constructing a new lambdaInstruction with a printTemplate failed.";
+
+    delete instruction;
+}
+#endif // CODE_GENERATION

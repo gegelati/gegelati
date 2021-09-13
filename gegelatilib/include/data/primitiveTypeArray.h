@@ -38,8 +38,8 @@
 #ifndef PRIMITIVE_TYPE_ARRAY_H
 #define PRIMITIVE_TYPE_ARRAY_H
 
-#include "arrayWrapper.h"
-#include "dataHandler.h"
+#include "data/arrayWrapper.h"
+#include "data/dataHandler.h"
 
 namespace Data {
     /**

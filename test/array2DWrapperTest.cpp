@@ -241,3 +241,27 @@ TEST(Array2DWrapperTest, getDataAt)
     // happen without being detected.
 #endif
 }
+
+#ifdef CODE_GENERATION
+TEST(Array2DWrapperTest, getNativeType)
+{
+    Data::DataHandler* d = new Data::Array2DWrapper<double>(4, 6);
+
+    ASSERT_EQ(d->getNativeType(), typeid(double))
+        << "Fail to retrieve typeid(double) from a Array2DWrapper<double>.";
+
+    delete d;
+}
+
+TEST(Array2DWrapperTest, getDimensionSize)
+{
+    size_t h = 4, w = 5;
+    Data::DataHandler* d = new Data::Array2DWrapper<double>(w, h);
+
+    ASSERT_EQ(d->getDimensionsSize(), std::vector<size_t>({h, w}))
+        << "Fail to retrieve a std::vector holding the size of the "
+           "Array2DWrapper.";
+
+    delete d;
+}
+#endif
