@@ -43,11 +43,6 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
-#ifdef CODE_GENERATION
-#include <code_gen/programGenerationEngine.h>
-#include <code_gen/tpgGenerationEngine.h>
-#endif // CODE_GENERATION
-
 #include <data/array2DWrapper.h>
 #include <data/arrayWrapper.h>
 #include <data/constant.h>
