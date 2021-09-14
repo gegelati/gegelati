@@ -1,0 +1,47 @@
+name: CI
+on: [push]
+jobs:
+  Ubuntu-GCC:
+    runs-on: ubuntu-latest
+    env:
+      GENERATOR: 'Unix Makefile'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install
+        run: |
+          sudo apt install doxygen gcovr
+      - name: Build
+        run: |
+          cd bin
+          cmake .. -DCMAKE_BUILD_TYPE=Debug
+          cmake --build . --target GEGELATI
+          cmake --build . --target doc
+          sudo make install
+          cmake --build . --target runTests
+      - name: Run Tests
+        run: |
+          cd bin
+          ./bin/runTests
+  Windows-MSVC:
+    runs-on: windows-latest
+    env:
+      GENERATOR: 'Visual Studio 16 2019'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install
+        run: choco install doxygen.install
+        shell: bash
+      - name: Build
+        run: |
+          cd bin
+          cmake ..
+          cmake --build . --target GEGELATI --config Debug
+          cmake --build . --target doc
+          cmake --build . --target INSTALL --config Debug
+          echo "${GITHUB_REF##*/}$"
+          if [ ${GITHUB_REF##*/}$ == "develop" ] || [ ${GITHUB_REF##*/}$ == "master" ] ; then cmake --build . --target INSTALL --config Release ; fi;
+          cmake --build . --target runTests --config Debug
+          ./bin/Debug/runTests.exe
+        shell: bash
