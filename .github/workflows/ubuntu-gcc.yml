@@ -23,5 +23,3 @@ jobs:
         run: |
           cd bin
           ./bin/runTests
-      - name: Code Coverage
-        run: ./RunCoverageLinux.sh
