@@ -1,8 +1,12 @@
 name: CI
 on: [push]
 jobs:
-  Ubuntu-GCC:
+  Ubuntu:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [g++, clang++]
+    name: Ubuntu-${{ matrix.compiler }}
     env:
       GENERATOR: 'Unix Makefile'
     steps:
@@ -10,11 +14,11 @@ jobs:
         uses: actions/checkout@v2
       - name: Install
         run: |
-          sudo apt install doxygen gcovr
+          sudo apt install doxygen
       - name: Build
         run: |
           cd bin
-          cmake .. -DCMAKE_BUILD_TYPE=Debug
+          cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_BUILD_TYPE=Debug
           cmake --build . --target GEGELATI
           cmake --build . --target doc
           sudo make install
