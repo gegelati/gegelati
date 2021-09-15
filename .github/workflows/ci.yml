@@ -35,8 +35,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Install
-        run: choco install doxygen.install
-        shell: bash
+        uses: nick-invision/retry@v2
+        with:
+          max_attempts: 3
+          timeout_minutes: 1
+          retry_on: error
+          command: choco install doxygen.install --force
+          shell: bash
       - name: Build
         run: |
           cd bin
