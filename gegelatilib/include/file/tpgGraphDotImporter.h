@@ -142,7 +142,7 @@ namespace File {
          *
          * Example:
          * T10 [fillcolor="#1199bb"]				Should pass
-         * P0 [fillcolor="#cccccc" shape=point]	Should not pass
+         * P0 [fillcolor="#22cccc" shape=point]	Should not pass
          */
         static const std::string teamRegex;
 
@@ -162,7 +162,7 @@ namespace File {
          * ]
          *
          * Example:
-         * P0 [fillcolor="#cccccc" shape=point]	Should pass
+         * P0 [fillcolor="#22cccc" shape=point]	Should pass
          * T10 [fillcolor="#1199bb"]				Should not pass
          */
         static const std::string programRegex;
@@ -185,7 +185,7 @@ namespace File {
          *
          * Example:
          * I0 [shape=box style=invis]			Should pass
-         * P0 [fillcolor="#cccccc" shape=point]	Should not pass
+         * P0 [fillcolor="#22cccc" shape=point]	Should not pass
          */
         static const std::string instructionRegex;
 
@@ -207,7 +207,7 @@ namespace File {
          *
          * Example:
          * A0 [shape=box style=invis]			Should pass
-         * P0 [fillcolor="#cccccc" shape=point]	Should not pass
+         * P0 [fillcolor="#22cccc" shape=point]	Should not pass
          */
         static const std::string actionRegex;
 
