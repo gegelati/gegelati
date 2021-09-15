@@ -40,8 +40,9 @@ jobs:
           cmake --build . --target GEGELATI --config Debug
           cmake --build . --target doc
           cmake --build . --target INSTALL --config Debug
-          echo "${GITHUB_REF##*/}$"
-          if [ ${GITHUB_REF##*/}$ == "develop" ] || [ ${GITHUB_REF##*/}$ == "master" ] ; then cmake --build . --target INSTALL --config Release ; fi;
+          if [ ${GITHUB_REF##*/} == "develop" ] || [ ${GITHUB_REF##*/} == "master" ] ; then cmake --build . --target INSTALL --config Release ; fi;
           cmake --build . --target runTests --config Debug
-          ./bin/Debug/runTests.exe
+        shell: bash
+      - name: Run Tests
+        run: ./bin/bin/Debug/runTests.exe
         shell: bash
