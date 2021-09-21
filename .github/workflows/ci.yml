@@ -109,4 +109,4 @@ jobs:
           name: windows-gegelatilib
           path: ./neutral_builds/
       - name: Prepare neutral build page
-        run: ./scripts/download_archives_linux.sh
+        run: bash -e ./scripts/download_archives_linux.sh
