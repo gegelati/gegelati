@@ -52,7 +52,7 @@ files.reverse()
 print(list)
 
 # Create the markdown files
-indexFile = open("{}/index.md".format(),"w")
+indexFile = open("{}/index.md".format(NEW_SITE_FOLDER),"w")
 readmeFile = open("{}/ReadMe.md".format(NEW_SITE_FOLDER),"w")
 
 indexFile.write("# GEGELATI Neutral Builds\n\n"
