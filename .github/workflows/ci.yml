@@ -103,10 +103,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Download
         uses: actions/download-artifact@v2
         with:
           name: windows-gegelatilib
           path: ./neutral_builds/
       - name: Prepare neutral build page
-        run: bash -e ./scripts/download_archives_linux.sh
+        run: python ./scripts/prepare_neutral_build_page.py
