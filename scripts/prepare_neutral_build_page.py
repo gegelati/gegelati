@@ -36,21 +36,23 @@ files = glob_re(r'gegelatilib-([0-9]+\.)+zip', CURRENT_SITE)
 if len(files) > (MAX_VERSIONS_COUNT - 1):
     del files[0:(len(files) - MAX_VERSIONS_COUNT + 1)]
 
-# Reverse order of files in the list (now sorted from newest to oldest)
-files.reverse()
-
-# Prepare folder for new version of the page
-# if(os.path.exists(NEW_SITE_FOLDER)):
-  #  shutil.rmtree(NEW_SITE_FOLDER, onerror=del_rw)
-
-# os.mkdir(NEW_SITE_FOLDER)
+# Latest archive is already in the NEW_SITE_FOLDER
+latest_file = glob_re(r'gegelatilib-([0-9]+\.)+zip', NEW_SITE_FOLDER)[0]
 
 # Copy old builds
 for file in files:
     shutil.copyfile("{}/{}".format(CURRENT_SITE,file), "{}/{}".format(NEW_SITE_FOLDER,file))
 
+# Add latest file to the list
+files.append(latest_file)
+
+# Reverse order of files in the list (now sorted from newest to oldest)
+files.reverse()
+
+print(list)
+
 # Create the markdown files
-indexFile = open("{}/index.md".format(NEW_SITE_FOLDER),"w")
+indexFile = open("{}/index.md".format(),"w")
 readmeFile = open("{}/ReadMe.md".format(NEW_SITE_FOLDER),"w")
 
 indexFile.write("# GEGELATI Neutral Builds\n\n"
