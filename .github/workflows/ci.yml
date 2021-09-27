@@ -69,13 +69,13 @@ jobs:
          cp -r ../bin/gegelatilib-${VERSION_NUMBER} ./gegelatilib-${VERSION_NUMBER}
          7z a $ARCHIVE_NAME gegelatilib-${VERSION_NUMBER}/*
         shell: bash
-        if: endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || endsWith(github.ref, 'githubCI')
+        if: endsWith(github.ref, 'develop') || endsWith(github.ref, 'master')
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: windows-gegelatilib
           path: ./neutral_builds/*.zip
-        if: endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || endsWith(github.ref, 'githubCI')
+        if: endsWith(github.ref, 'develop') || endsWith(github.ref, 'master')
   MacOS-clang:
     runs-on: macos-latest
     env:
@@ -97,9 +97,10 @@ jobs:
         run: |
           cd bin
           ./bin/runTests
-  Deploy:
+  Deploy-NeutralBuilds:
     runs-on: ubuntu-latest
     needs: [Ubuntu, MacOS-clang, Windows-MSVC]
+    if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
