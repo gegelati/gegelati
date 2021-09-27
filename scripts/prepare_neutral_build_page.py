@@ -10,7 +10,6 @@ SITE_GITHUB_BRANCH="gh-pages"
 NEW_SITE_FOLDER="neutral_builds"
 MAX_VERSIONS_COUNT=10
 SITE_NAME="GEGELATI - Neutral Builds"
-RELEASE_NOTES_FILE="release_notes.md"
 CURRENT_SITE="current"
 
 # Fetch current site
@@ -99,3 +98,6 @@ for file in files:
 # End html table
 indexFile.write("</table>\n")
 
+# Close files
+indexFile.close()
+readmeFile.close()
