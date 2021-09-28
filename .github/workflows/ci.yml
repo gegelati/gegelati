@@ -135,12 +135,15 @@ jobs:
           path: ./neutral_builds/
       - name: Prepare Release Log
         run: python ./scripts/prepare_release_log.py
-      - name: Upload release
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: ${{ secrets.BOT_DEPLOY_TOKEN }}
-          prerelease: true
-          automatic_release_tag: latest
-          files: |
-            release_notes.md
-            ./neutral_builds/*.zip
+      - name: Prepare upload 
+        run: | 
+          echo "RELEASE_NOTE<<EOF" >> $GITHUB_ENV
+          RELEASE_NOTE=$(cat release_notes.md)
+          echo "$RELEASE_NOTE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      - name: Upload release note
+        id: upload_release_note
+        uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_DEPLOY_TOKEN }}
+        
