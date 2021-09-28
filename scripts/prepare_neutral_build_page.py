@@ -18,10 +18,6 @@ def del_rw(action, name, exc):
     os.chmod(name, stat.S_IWRITE)
     os.remove(name)
 
-# Remove previously existing CURRENT_SITE folder
-# if(os.path.exists(CURRENT_SITE)):
-  # shutil.rmtree(CURRENT_SITE, onerror=del_rw)
-
 # Clone the TARGET_GH_REPO repository on github.com
 os.system("git clone https://github.com/{}.git -b {} {}".format(TARGET_GH_REPO, SITE_GITHUB_BRANCH, CURRENT_SITE))
 
