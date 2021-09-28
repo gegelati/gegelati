@@ -81,8 +81,6 @@ for file in files:
     # Prepare latest build and release file.
     if count == 0:
         shutil.copyfile("{}/{}".format(NEW_SITE_FOLDER,file),"{}/gegelatilib-latest-develop.zip".format(NEW_SITE_FOLDER))
-        release_name = re.sub(r'(gegelatilib-[0-9]+\.[0-9]+\.[0-9]+).*',r'\1.zip', file)
-        shutil.copyfile("{}/{}".format(NEW_SITE_FOLDER,file),"{}/{}".format(NEW_SITE_FOLDER,release_name))
 
         # Write entry into markdown files
         indexFile.write("<tr><td colspan='2'><div align='center'><i>Latest</i></div></td><td><a href=\"https://github.com/gegelati/gegelati/commit/{}\"><code>{}</code></a></td><td><a href=\"./gegelatilib-latest-develop.zip\">Zip ({})</a></td></tr>\n".format(commit_long_sha1, commit_short_sha1, file_size))
