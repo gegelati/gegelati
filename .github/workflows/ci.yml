@@ -135,3 +135,12 @@ jobs:
           path: ./neutral_builds/
       - name: Prepare Release Log
         run: python ./scripts/prepare_release_log.py
+      - name: Upload release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.BOT_DEPLOY_TOKEN }}
+          prerelease: true
+          automatic_release_tag: latest
+          files: |
+            release_notes.md
+            ./neutral_builds/*.zip
