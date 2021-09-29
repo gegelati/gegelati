@@ -7,7 +7,9 @@ jobs:
       matrix-ubuntu: ${{ steps.set-matrix-ubuntu.outputs.matrix-ubuntu }}
     steps:
       - id: set-matrix-ubuntu
-        run: echo "::set-output name=matrix-ubuntu::{\"compiler\":[\"g++\", \"clang++\"]}"
+        run: |
+          UBUNTU_MATRIX="{\"compiler\":[\"g++\", \"clang++\"]}"
+          echo "::set-output name=matrix-ubuntu::$UBUNTU_MATRIX"
   Ubuntu:
     needs: Configure-Workflow
     runs-on: ubuntu-latest
