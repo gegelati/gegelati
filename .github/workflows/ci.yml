@@ -1,11 +1,18 @@
 name: CI
 on: [push, pull_request]
 jobs:
+  Configure-Workflow:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix-ubuntu: ${{ steps.set-matrix-ubuntu.outputs.matrix-ubuntu }}
+    steps:
+      - id: set-matrix-ubuntu
+        run: echo "::set-output name=matrix-ubuntu::{\"compiler\":[\"g++\", \"clang++\"]}"
   Ubuntu:
+    needs: Configure-Workflow
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        compiler: [g++, clang++]
+      matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-ubuntu)}}
     name: Ubuntu-${{ matrix.compiler }}
     env:
       GENERATOR: 'Unix Makefile'
