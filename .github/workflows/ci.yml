@@ -8,14 +8,16 @@ jobs:
     steps:
       - id: set-matrix-ubuntu
         run: |
-          UBUNTU_MATRIX="{\"compiler\":[\"g++\", \"clang++\"]}"
+          UBUNTU_MATRIX="{\"compiler\":[\"g++\", \"clang++\"]"
+          if [[ "${{ github.ref }}" == *"githubCI" ]]; then UBUNTU_MATRIX="$UBUNTU_MATRIX,\"modular\":[\"on\",\"off\"]"; fi
+          UBUNTU_MATRIX="$UBUNTU_MATRIX}"
           echo "::set-output name=matrix-ubuntu::$UBUNTU_MATRIX"
   Ubuntu:
     needs: Configure-Workflow
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-ubuntu)}}
-    name: Ubuntu-${{ matrix.compiler }}
+    name: Ubuntu-${{ matrix.compiler }}-${{ matrix.modular }}
     env:
       GENERATOR: 'Unix Makefile'
     steps:
