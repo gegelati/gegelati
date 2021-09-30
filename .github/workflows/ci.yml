@@ -8,9 +8,9 @@ jobs:
     steps:
       - id: set-matrix-ubuntu
         run: |
-          UBUNTU_MATRIX="{\"compiler\":[\"g++\", \"clang++\"]"
-          if [[ "${{ github.ref }}" == *"githubCI" ]]; then UBUNTU_MATRIX="$UBUNTU_MATRIX,\"modular\":[\"on\",\"off\"]"; fi
-          UBUNTU_MATRIX="$UBUNTU_MATRIX}"
+          UBUNTU_MATRIX="{\"compiler\":[\"g++\", \"clang++\"],\"modular\":[\"fullBuild\""
+          if [[ "${{ github.ref }}" == *"githubCI" ]]; then UBUNTU_MATRIX="$UBUNTU_MATRIX,\"noModules\""; fi
+          UBUNTU_MATRIX="$UBUNTU_MATRIX]}"
           echo "::set-output name=matrix-ubuntu::$UBUNTU_MATRIX"
   Ubuntu:
     needs: Configure-Workflow
@@ -29,7 +29,8 @@ jobs:
       - name: Build
         run: |
           cd bin
-          cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_BUILD_TYPE=Debug
+          if [ "${{ matrix.modular }}" = "fullBuild" ]; then MODULES=ON; else MODULES=OFF; fi
+          cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_BUILD_TYPE=Debug -DCODE_GEN=$MODULES
           cmake --build . --target GEGELATI
           cmake --build . --target doc
           sudo make install
