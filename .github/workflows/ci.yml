@@ -190,6 +190,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run script
+        continue-on-error: true
         run: |
-          clang-format --version
           ./scripts/fix_code_format.sh
+          
