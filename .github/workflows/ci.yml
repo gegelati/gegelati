@@ -105,13 +105,13 @@ jobs:
          cp -r ../bin/gegelatilib-${VERSION_NUMBER} ./gegelatilib-${VERSION_NUMBER}
          7z a $ARCHIVE_NAME gegelatilib-${VERSION_NUMBER}/*
         shell: bash
-        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'develop') || contains(github.ref, '/tags/v') )
+        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v') )
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: windows-gegelatilib
           path: ./neutral_builds/*.zip
-        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'develop') || contains(github.ref, '/tags/v') )
+        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v') )
   Build-MacOS-clang:
     needs: Configure-Workflow
     runs-on: macos-latest
@@ -190,7 +190,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run script
-        continue-on-error: true
+        continue-on-error: ${{ !(endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v')  || endsWith(github.base_ref, 'develop') || endsWith(github.base_ref, 'master')) }}
         run: |
           ./scripts/fix_code_format.sh
-          
