@@ -8,22 +8,27 @@ jobs:
       matrix-windows: ${{ steps.set-matrix-windows.outputs.matrix-windows }}
       matrix-macos: ${{ steps.set-matrix-macos.outputs.matrix-macos }}
     steps:
+      - name: Detect Configuration
+        run: |
+          if [[ "${{ github.ref }}" == *"develop" ]] || [[ "${{ github.base_ref }}" == *"develop" ]] || [[ "${{ github.ref }}" == *"master" ]] || [[ "${{ github.base_ref }}" == *"master" ]] || [[ "${{ github.base_ref }}" == *"tags/v"* ]]; then ACTIVATE=true; else ACTIVATE=false; fi
+          echo "activate=$ACTIVATE" >> $GITHUB_ENV
+          
       - id: set-matrix-ubuntu
         run: |
           UBUNTU_MATRIX="{\"compiler\":[\"g++\", \"clang++\"],\"modular\":[\"fullBuild\""
-          if [[ "${{ github.ref }}" == *"githubCI" ]]; then UBUNTU_MATRIX="$UBUNTU_MATRIX,\"noModules\""; fi
+          if ${{ env.activate }}; then UBUNTU_MATRIX="$UBUNTU_MATRIX,\"noModules\""; fi
           UBUNTU_MATRIX="$UBUNTU_MATRIX]}"
           echo "::set-output name=matrix-ubuntu::$UBUNTU_MATRIX"
       - id: set-matrix-windows
         run: |
           WINDOWS_MATRIX="{\"modular\":[\"fullBuild\""
-          if [[ "${{ github.ref }}" == *"githubCI" ]]; then WINDOWS_MATRIX="$WINDOWS_MATRIX,\"noModules\""; fi
+          if ${{ env.activate }}; then WINDOWS_MATRIX="$WINDOWS_MATRIX,\"noModules\""; fi
           WINDOWS_MATRIX="$WINDOWS_MATRIX]}"
           echo "::set-output name=matrix-windows::$WINDOWS_MATRIX"
       - id: set-matrix-macos
         run: |
           MACOS_MATRIX="{\"modular\":[\"fullBuild\""
-          if [[ "${{ github.ref }}" == *"githubCI" ]]; then MACOS_MATRIX="$MACOS_MATRIX,\"noModules\""; fi
+          if ${{ env.activate }}; then MACOS_MATRIX="$MACOS_MATRIX,\"noModules\""; fi
           MACOS_MATRIX="$MACOS_MATRIX]}"
           echo "::set-output name=matrix-macos::$MACOS_MATRIX"
   Ubuntu:
@@ -100,13 +105,13 @@ jobs:
          cp -r ../bin/gegelatilib-${VERSION_NUMBER} ./gegelatilib-${VERSION_NUMBER}
          7z a $ARCHIVE_NAME gegelatilib-${VERSION_NUMBER}/*
         shell: bash
-        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'githubCI') || endsWith(github.ref, 'develop') || contains(github.ref, '/tags/v') )
+        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'develop') || contains(github.ref, '/tags/v') )
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: windows-gegelatilib
           path: ./neutral_builds/*.zip
-        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'githubCI') || endsWith(github.ref, 'develop') || contains(github.ref, '/tags/v') )
+        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'develop') || contains(github.ref, '/tags/v') )
   MacOS-clang:
     needs: Configure-Workflow
     runs-on: macos-latest
