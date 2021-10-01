@@ -31,7 +31,7 @@ jobs:
           if ${{ env.activate }}; then MACOS_MATRIX="$MACOS_MATRIX,\"noModules\""; fi
           MACOS_MATRIX="$MACOS_MATRIX]}"
           echo "::set-output name=matrix-macos::$MACOS_MATRIX"
-  Ubuntu:
+  Build-Ubuntu:
     needs: Configure-Workflow
     runs-on: ubuntu-latest
     strategy:
@@ -58,7 +58,7 @@ jobs:
         run: |
           cd bin
           ./bin/runTests
-  Windows-MSVC:
+  Build-Windows-MSVC:
     needs: Configure-Workflow
     runs-on: windows-latest
     strategy: 
@@ -112,7 +112,7 @@ jobs:
           name: windows-gegelatilib
           path: ./neutral_builds/*.zip
         if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'develop') || contains(github.ref, '/tags/v') )
-  MacOS-clang:
+  Build-MacOS-clang:
     needs: Configure-Workflow
     runs-on: macos-latest
     strategy: 
@@ -140,7 +140,7 @@ jobs:
           ./bin/runTests
   Deploy-NeutralBuilds:
     runs-on: ubuntu-latest
-    needs: [Ubuntu, MacOS-clang, Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
     if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout
@@ -164,7 +164,7 @@ jobs:
           single-commit: true
   Deploy-Releases:
     runs-on: ubuntu-latest
-    needs: [Ubuntu, MacOS-clang, Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
     if: contains(github.ref, '/tags/v')
     steps:
       - name: Checkout
@@ -183,4 +183,13 @@ jobs:
           token: ${{ secrets.BOT_DEPLOY_TOKEN }}
           files: ./neutral_builds/*.zip
           draft: true
-        
+  Analyze-Code_Style:
+    runs-on: ubuntu-latest
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run script
+        run: |
+          clang-format --version
+          ./scripts/fix_code_format.sh
