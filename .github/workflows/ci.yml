@@ -211,12 +211,12 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+     # - name: Cache SonarCloud packages
+     #   uses: actions/cache@v1
+     #   with:
+     #     path: ~/.sonar/cache
+     #     key: ${{ runner.os }}-sonar
+     #     restore-keys: ${{ runner.os }}-sonar
       - name: Install
         run: |
           sudo apt install doxygen gcovr
@@ -250,5 +250,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BOT_DEPLOY_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          
           sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
           
