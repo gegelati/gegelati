@@ -223,6 +223,9 @@ jobs:
           sed 's/ branchesToCover=\"[0-9]\+\" coveredBranches=\"[0-9]\+\"/ /g' sonarqube.xml > sonarqubecleaned.xml # Remove condition coverage info from report, only line coverage interests us.
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
+        with:
+          args: >
+            -X
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_DEPLOY_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
