@@ -215,9 +215,14 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Debug
           cd ..
           build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
+      - name: Run Tests
+        run: |
           cd bin
           ./bin/runTests
           gcovr -r .. -s --sonarqube=sonarqube.xml 
           sed 's/ branchesToCover=\"[0-9]\+\" coveredBranches=\"[0-9]\+\"/ /g' sonarqube.xml > sonarqubecleaned.xml # Remove condition coverage info from report, only line coverage interests us.
-          cd ..
-          
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_DEPLOY_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
