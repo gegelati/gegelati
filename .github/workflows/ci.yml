@@ -204,7 +204,7 @@ jobs:
           fetch-depth: 0
       - name: Install
         run: |
-          sudo apt install doxygen
+          sudo apt install doxygen gcovr
       - name: Download Sonarcloud
         run: |
           curl -L -O https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
