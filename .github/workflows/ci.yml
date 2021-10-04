@@ -195,19 +195,26 @@ jobs:
           ./scripts/fix_code_format.sh
   Analyze-Sonar:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    #needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
       - name: Install
         run: |
           sudo apt install doxygen
+      - name: Download Sonarcloud
+        run: |
+          curl -L -O https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+          unzip -o build-wrapper-linux-x86.zip
       - name: Build
         run: |
           cd bin
           cmake .. -DCMAKE_BUILD_TYPE=Debug
           cd ..
-          build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
+          build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output cmake --build bin/ --target runTests
           cd bin
           ./bin/runTests
           gcovr -r .. -s --sonarqube=sonarqube.xml 
