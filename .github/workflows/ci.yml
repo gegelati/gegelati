@@ -69,6 +69,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Trigger apps
+        run: |
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/githubCI"}'
+        shell: bash
       - name: Install
         uses: nick-invision/retry@v2
         with:
