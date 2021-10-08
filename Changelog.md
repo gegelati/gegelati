@@ -10,6 +10,7 @@ _yyyy.mm.dd_
 * Change the typedef Learn::LearningMode into an enum class to remove compilation warnings in MSVC. Because of this change, members of the enum must now be used with the class name: `TRAINING` > `LearningMode::TRAINING`.
 * Add conditional builds without the code-generation for the continuous integration.
 * Fasten the continuous integration on windows build by building the `Release` target only for builds of the `develop` and `master` branches.
+* Migrate CI to Github Actions instead of Travis.
 
 ### Bug fix
 * Fix memory leak when demangling type name in GNU environment.
