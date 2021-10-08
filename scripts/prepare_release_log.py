@@ -1,3 +1,7 @@
+# This script prepares the release note for the latest version from the change log.
+#
+# Author: K. Desnos
+# License: CeCILL-C
 
 import re
 import os

@@ -1,3 +1,11 @@
+# This script prepares the neutral build github page based on
+# - Previous neutral builds on the page
+# - Latest build produced by the CI.
+#
+# The neutral build page is produced both as a markdown and an html page.
+#
+# Author: K. Desnos
+# License: CeCILL-C
 
 import os
 import shutil
