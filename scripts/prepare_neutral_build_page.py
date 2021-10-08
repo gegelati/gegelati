@@ -49,10 +49,8 @@ for file in files:
 # Add latest file to the list
 files.append(latest_file)
 
-# Reverse order of files in the list (now sorted from newest to oldest)
-files.reverse()
-
-print(list)
+# Sort files alphabetically (now sorted from newest to oldest)
+files.sort(reverse= True)
 
 # Create the markdown files
 indexFile = open("{}/index.md".format(NEW_SITE_FOLDER),"w")
