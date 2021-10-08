@@ -17,15 +17,17 @@ GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framew
 
 ## :gear: Continuous Integration
 
-| All branches | [Travis Status](https://travis-ci.com/gegelati/gegelati) | [SonarCloud Analysis](https://sonarcloud.io/dashboard?id=gegelati_gegelati)[*](https://sonarcloud.io/organizations/gegelati/quality_gates/show/23677)|
+| All branches | [CI Status](https://github.com/gegelati/gegelati/actions/workflows/ci.yml) | [SonarCloud Analysis](https://sonarcloud.io/dashboard?id=gegelati_gegelati)[*](https://sonarcloud.io/organizations/gegelati/quality_gates/show/23677)|
 | ------------- |  ------------- |  ------------- |
-| master  |  [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=master)](https://travis-ci.com/gegelati/gegelati/branches)  | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master)|
-| develop  | [![Build Status](https://travis-ci.com/gegelati/gegelati.svg?branch=develop)](https://travis-ci.com/gegelati/gegelati/branches) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop)|
+| master  |  [![CI](https://github.com/gegelati/gegelati/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/gegelati/gegelati/actions/workflows/ci.yml)  | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master)|
+| develop  | [![CI](https://github.com/gegelati/gegelati/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/gegelati/gegelati/actions/workflows/ci.yml) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop)|
 
 Environments currently covered by the continuous integration are:
-- Linux (Ubuntu 16.04) with GCC 7.5 and Clang 7.
-- Windows 10 (1809) with Microsoft Visual Studio 2019.
-- Mac OS X (10.13.6 ) with Clang 9.1.0
+- `ubuntu-latest`: Linux (Ubuntu 20.04) with GCC 9.3 and Clang 11.
+- `windows-latest`: Windows Server 2019 (10.0.17763) with Microsoft Visual Studio 2019.
+- `macos-latest`: Mac OS X (10.15.7 ) with Clang 12.0.0
+
+For more (and updated) information on CI environment, please refer to [GitHub doc](https://github.com/actions/virtual-environments).
 
 ## :framed_picture: Application Gallery
 You can try GEGELATI with our (growing) set of open-source applications.
@@ -44,7 +46,7 @@ Binaries of the library for windows (MSVC only) are available at the following l
 * [Release binaries](https://github.com/gegelati/gegelati/releases)
 * [Develop neutral builds](https://gegelati.github.io/neutral-builds/)
 
-To use these binaries, simply unzip them in a `lib` directory of your c++ project, and follow the "[How to Use the GEGELATI Library](#how-to-use-the-gegelati-library)" guide.
+To use these binaries, simply unzip them in a `lib` directory of your c++ project, and follow the "[How to Use the GEGELATI Library](#book-how-to-use-the-gegelati-library)" guide.
 
 ### Build tools
 The build process of GEGELATI relies on [cmake](https://cmake.org) to configure a project for a wide variety of development environments and operating systems. Install [cmake](https://cmake.org/download/) on your system before building the library.
