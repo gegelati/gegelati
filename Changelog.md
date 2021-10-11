@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_yyyy.mm.dd_
+## Release version 1.0.0 - Amamaretto version/flavor
+_2021.10.11_
 
 ### New features
 * A code generation feature is added to GEGELATI. The code generation feature enables generating a stand-alone C code implementing the inference behavior of a trained Tangled Program Graph. To enable this feature, PrintableInstruction have been added to GEGELATI. Each PrintableInstruction possess its own print template which defines, with a regex-like syntax, how this instruction should be printed in the generated C code. The code generation feature can be disabled when building the library, by appending the `-DCODE_GEN=OFF` directive to the cmake command.
