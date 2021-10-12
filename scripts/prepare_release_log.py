@@ -29,7 +29,7 @@ while True:
             releaseNoteFile.write(line)
 
             # Prepare release archive
-            release_name = re.sub(r'## Release version ([0-9]+\.[0-9]+\.[0-9]+)\n', r'gegelatilib-\1.zip', line)
+            release_name = re.sub(r'## Release version ([0-9]+\.[0-9]+\.[0-9]+).*\n', r'gegelatilib-\1.zip', line)
 
             # Get file list of old builds from current site
             def glob_re(pattern, folder):
