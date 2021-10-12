@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,15 +35,22 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "instructions/instruction.h"
-
 #include <iostream>
+#include <regex>
+#include <search.h>
+#include <valarray>
+
+#include "data/constant.h"
+#include "data/demangle.h"
+#include "instructions/instruction.h"
 
 using namespace Instructions;
 
+#ifndef CODE_GENERATION
 Instruction::Instruction() : operandTypes()
 {
 }
+#endif // CODE_GENERATION
 
 const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
     getOperandTypes() const
@@ -84,3 +92,40 @@ double Instruction::execute(
     return 1.0;
 #endif
 }
+
+#ifdef CODE_GENERATION
+
+Instruction::Instruction(std::string printTemplate)
+    : printTemplate(printTemplate), operandTypes()
+{
+}
+
+bool Instruction::isPrintable() const
+{
+    return !this->printTemplate.empty();
+}
+
+const std::string& Instruction::getPrintTemplate() const
+{
+    return printTemplate;
+}
+
+std::string Instruction::getPrintablePrimitiveOperandType(
+    const uint64_t& opIdx) const
+{
+    std::string typeName =
+        DEMANGLE_TYPEID_NAME(this->operandTypes.at(opIdx).get().name());
+    std::regex arrayType(GET_PRINT_PRIMITIVE_OPERAND_TYPE);
+    std::cmatch cm;
+    std::string type;
+    if (std::regex_match(typeName.c_str(), cm, arrayType)) {
+        type = cm[2].str();
+    }
+    if (type == DEMANGLE_TYPEID_NAME(typeid(Data::Constant).name())) {
+        type = "int32_t";
+    }
+    // Default case
+    return type;
+}
+
+#endif // CODE_GENERATION

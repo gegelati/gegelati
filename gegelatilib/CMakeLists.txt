@@ -60,6 +60,14 @@ file(
 # source and header files listed in the command invocation.
 add_library(${LIBRARY_TARGET_NAME} SHARED ${${LIBRARY_TARGET_NAME}_SRC} ${${LIBRARY_TARGET_NAME}_HDR})
 
+if(CODE_GEN)
+        target_compile_definitions(${LIBRARY_TARGET_NAME} PUBLIC -DCODE_GENERATION)
+        message(STATUS "Code generation module of GEGELATI is enabled.")
+else()
+        message(STATUS "Code generation module of GEGELATI is disabled.")
+endif()
+
+
 # Within this project, you can link to this library by just specifing the name
 # of the target, i.e. ${LIBRARY_TARGET_NAME} = LibTemplateCMake. It is useful,
 # however, to define an alias of this library with the scope of the exported
@@ -68,6 +76,9 @@ add_library(${LIBRARY_TARGET_NAME} SHARED ${${LIBRARY_TARGET_NAME}_SRC} ${${LIBR
 # always treated as the name of either an alias or imported target. Any attempt
 # to use such a name for a different target type will result in an error.
 add_library(${PROJECT_NAME}::${LIBRARY_TARGET_NAME} ALIAS ${LIBRARY_TARGET_NAME})
+if(CODE_GEN)
+        target_compile_definitions(${PROJECT_NAME} PUBLIC -DCODE_GENERATION)
+endif()
 
 # Set two minimum target properties for the library.
 # See https://cmake.org/cmake/help/latest/command/set_target_properties.html

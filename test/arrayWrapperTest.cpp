@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2021)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -376,3 +377,27 @@ TEST(ArrayWrapperTest, Clone)
         FAIL() << "Cloning of ArrayWrapper returned a NULL Pointer.";
     delete dClone;
 }
+
+#ifdef CODE_GENERATION
+TEST(ArrayWrapperTest, getNativeType)
+{
+    Data::DataHandler* d = new Data::ArrayWrapper<double>(4);
+
+    ASSERT_EQ(d->getNativeType(), typeid(double))
+        << "Fail to retrieve typeid(double) from a ArrayWrapper<double>.";
+
+    delete d;
+}
+
+TEST(ArrayWrapperTest, getDimensionSize)
+{
+    size_t size = 4;
+    Data::DataHandler* d = new Data::ArrayWrapper<double>(size);
+
+    ASSERT_EQ(d->getDimensionsSize(), std::vector<size_t>({size}))
+        << "Fail to retrieve a std::vector holding the size of the "
+           "ArrayWrapper.";
+
+    delete d;
+}
+#endif

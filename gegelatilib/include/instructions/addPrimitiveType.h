@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -42,7 +43,7 @@
 #include <typeinfo>
 
 #include "data/untypedSharedPtr.h"
-#include "instruction.h"
+#include "instructions/instruction.h"
 
 namespace Instructions {
 
@@ -56,22 +57,42 @@ namespace Instructions {
                       "Template class AddPrimitiveType<T> can only be used for "
                       "primitive types.");
 
+#ifdef CODE_GENERATION
       public:
+        /**
+         * \brief Constructor for the AddPrimitiveType class, so it can be use
+         * during the code gen.
+         *
+         * \param[in] printTemplate std::string use at the generation. Check
+         * Instructions::Instruction for more details.
+         */
+        AddPrimitiveType(const std::string& printTemplate = "");
+#endif // CODE_GENERATION
+
+      public:
+#ifndef CODE_GENERATION
         /**
          *  \brief Constructor for the AddPrimitiveType class.
          */
         AddPrimitiveType();
-
+#endif // CODE_GENERATION
+       /// Inherited from Instruction
         virtual double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override;
-    };
 
+      private:
+        /**
+         * \brief Function call in constructor to setup the operand
+         * of the instruction.
+         */
+        void setUpOperand();
+    };
+#ifndef CODE_GENERATION
     template <class T> AddPrimitiveType<T>::AddPrimitiveType()
     {
-        this->operandTypes.push_back(typeid(T));
-        this->operandTypes.push_back(typeid(T));
+        setUpOperand();
     }
-
+#endif // CODE_GENERATION
     template <class T>
     double AddPrimitiveType<T>::execute(
         const std::vector<Data::UntypedSharedPtr>& args) const
@@ -85,6 +106,21 @@ namespace Instructions {
 
         return *(args.at(0).getSharedPointer<const T>()) +
                (double)*(args.at(1).getSharedPointer<const T>());
+    }
+
+#ifdef CODE_GENERATION
+    template <class T>
+    AddPrimitiveType<T>::AddPrimitiveType(const std::string& printTemplate)
+        : Instruction(printTemplate)
+    {
+        setUpOperand();
+    }
+#endif // CODE_GENERATION
+
+    template <class T> void AddPrimitiveType<T>::setUpOperand()
+    {
+        this->operandTypes.push_back(typeid(T));
+        this->operandTypes.push_back(typeid(T));
     }
 } // namespace Instructions
 

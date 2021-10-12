@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -38,6 +39,7 @@
 
 #include "data/arrayWrapper.h"
 #include "data/dataHandler.h"
+#include "data/demangle.h"
 
 namespace Data {
 
@@ -143,6 +145,11 @@ namespace Data {
         /// Inherited from DataHandler
         virtual UntypedSharedPtr getDataAt(const std::type_info& type,
                                            const size_t address) const override;
+
+#ifdef CODE_GENERATION
+        /// Inherited from DataHandler
+        virtual std::vector<size_t> getDimensionsSize() const override;
+#endif
     };
 
     template <class T>
@@ -320,6 +327,15 @@ namespace Data {
             std::make_shared<UntypedSharedPtr::Model<const T[]>>(array)};
         return result;
     }
+
+#ifdef CODE_GENERATION
+    template <class T>
+    std::vector<size_t> Array2DWrapper<T>::getDimensionsSize() const
+    {
+        std::vector<size_t> sizes = {height, width};
+        return sizes;
+    }
+#endif
 } // namespace Data
 #endif // !ARRAY_2D_WRAPPER_H
 

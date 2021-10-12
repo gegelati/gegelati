@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -115,7 +115,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     la.init();
 
     std::queue<std::shared_ptr<Learn::Job>> jobs;
-    ASSERT_NO_THROW(jobs = la.makeJobs(Learn::TRAINING))
+    ASSERT_NO_THROW(jobs = la.makeJobs(Learn::LearningMode::TRAINING))
         << "makeJobs shouldn't throw an exception in adversarialLearningAgent";
     // 3 roots for now -> 30 jobs
     ASSERT_EQ(30, jobs.size())
@@ -127,7 +127,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     params.nbIterationsPerJob = 6;
     Learn::AdversarialLearningAgent la2(le, set, params, agentsPerEval);
     la2.init();
-    ASSERT_NO_THROW(jobs = la2.makeJobs(Learn::TRAINING))
+    ASSERT_NO_THROW(jobs = la2.makeJobs(Learn::LearningMode::TRAINING))
         << "makeJobs shouldn't throw an exception in adversarialLearningAgent "
            "when nbIterationsPerPolicyEvaluation is not a multiple of "
            "nbIterationsPerJob";

@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -38,23 +38,23 @@
 
 void Mutator::RNG::setSeed(uint64_t seed)
 {
-    engine.seed(seed);
+    engine->seed(seed);
 }
 
 uint64_t Mutator::RNG::getUnsignedInt64(uint64_t min, uint64_t max)
 {
     Mutator::uniform_int_distribution<uint64_t> distribution(min, max);
-    return distribution(engine);
+    return distribution(*engine);
 }
 
 int32_t Mutator::RNG::getInt32(int32_t min, int32_t max)
 {
     Mutator::uniform_int_distribution<int32_t> distribution(min, max);
-    return distribution(engine);
+    return distribution(*engine);
 }
 
 double Mutator::RNG::getDouble(double min, double max)
 {
     Mutator::uniform_real_distribution<double> distribution(min, max);
-    return distribution(engine);
+    return distribution(*engine);
 }

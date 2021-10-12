@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -36,6 +36,7 @@
 #ifndef RNG_H
 #define RNG_H
 
+#include <memory>
 #include <random>
 
 namespace Mutator {
@@ -51,7 +52,7 @@ namespace Mutator {
     {
       protected:
         /// Mersenne twister MT19937 engine used for Random Number generation.
-        std::mt19937_64 engine;
+        std::unique_ptr<std::mt19937_64> engine;
 
       public:
         /**
@@ -59,7 +60,18 @@ namespace Mutator {
          *
          * \param[in] seed the seed for the engine.
          */
-        RNG(uint64_t seed = 0) : engine(seed)
+        RNG(uint64_t seed = 0) : engine(std::make_unique<std::mt19937_64>(seed))
+        {
+        }
+
+        /**
+         * \brief Copy constructor.
+         *
+         * The copy constructor does a deep copy.
+         * \param[in] other the RNG to copy.
+         */
+        RNG(const RNG& other)
+            : engine(std::make_unique<std::mt19937_64>(*(other.engine)))
         {
         }
 

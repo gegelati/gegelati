@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -43,36 +44,66 @@
 
 #include "data/constantHandler.h"
 #include "data/untypedSharedPtr.h"
-#include "instruction.h"
+#include "instructions/instruction.h"
 
 namespace Instructions {
 
     /**
      * \brief Template class for multiplying a unique argument of type T by a
-     * constant parameter
+     * constant parameter.
      */
     template <class T> class MultByConstant : public Instruction
     {
         static_assert(std::is_fundamental<T>::value,
                       "Template class MultByConstParam<> can only be used for "
                       "primitive types.");
+#ifdef CODE_GENERATION
+      public:
+        /**
+         * \brief Constructor for the MultByConstant class so it can be use
+         * during the code gen.
+         * \param[in] printTemplate std::string use at the generation. Check
+         * Instructions::Instruction for more details.
+         */
+        MultByConstant(const std::string& printTemplate = "$0 = $1 * $2;");
+#endif // CODE_GENERATION
 
       public:
+#ifndef CODE_GENERATION
         /**
          *  \brief Constructor for the MultByConstParam class.
          */
         MultByConstant();
+#endif // CODE_GENERATION
 
+        /// Inherited from Instruction
         double execute(
             const std::vector<Data::UntypedSharedPtr>& args) const override;
+
+      private:
+        /**
+         * \brief Function call in constructor to setup the operand
+         * of the instruction.
+         */
+        void setUpOperand();
     };
 
-    template <class T> MultByConstant<T>::MultByConstant()
+#ifdef CODE_GENERATION
+    template <class T>
+    MultByConstant<T>::MultByConstant(const std::string& printTemplate)
+        : Instruction(printTemplate)
     {
-        this->operandTypes.push_back(typeid(T));
-        this->operandTypes.push_back(typeid(Data::Constant));
+        setUpOperand();
     }
 
+#endif // CODE_GENERATION
+
+#ifndef CODE_GENERATION
+    template <class T> MultByConstant<T>::MultByConstant() : Instruction()
+    {
+        setUpOperand();
+    }
+#endif // CODE_GENERATION
     template <class T>
     inline double MultByConstant<T>::execute(
         const std::vector<Data::UntypedSharedPtr>& args) const
@@ -85,6 +116,12 @@ namespace Instructions {
             args.at(1).getSharedPointer<const Data::Constant>());
         return *(args.at(0).getSharedPointer<const T>()) *
                (double)constantValue;
+    }
+
+    template <class T> void MultByConstant<T>::setUpOperand()
+    {
+        this->operandTypes.push_back(typeid(T));
+        this->operandTypes.push_back(typeid(Data::Constant));
     }
 } // namespace Instructions
 #endif // INST_MULT_BY_CONST_H

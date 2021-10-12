@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -43,6 +44,7 @@
 
 #include "program/line.h"
 #include "program/program.h"
+#include "tpg/tpgAbstractEngine.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgGraph.h"
@@ -54,7 +56,7 @@ namespace File {
      * \brief Class used to export a TPGGraph into a text file with the dot
      * format.
      */
-    class TPGGraphDotExporter
+    class TPGGraphDotExporter : TPG::TPGAbstractEngine
     {
       protected:
         /**
@@ -67,87 +69,6 @@ namespace File {
          * exported file.
          */
         std::string offset;
-
-        /**
-         * \brief Reference to the TPGGraph exported into dot.
-         */
-        const TPG::TPGGraph& tpg;
-
-        /**
-         * \brief Map associating pointers to TPGVertex to an integer ID.
-         *
-         * In case the TPGGraphDotExporter is used to export multiple TPGGraph,
-         * this map is used to ensure that a given TPGVertex will always be
-         * associated to the same integer identifier in all exported dot files.
-         */
-        std::map<const TPG::TPGVertex*, uint64_t> vertexID;
-
-        /**
-         * \brief Map associating pointers to Program to an integer ID.
-         *
-         * In case the TPGGraphDotExporter is used to export multiple TPGGraph,
-         * this map is used to ensure that a given Program will always be
-         * associated to the same integer identifier in all exported dot files.
-         */
-        std::map<const Program::Program*, uint64_t> programID;
-
-        /**
-         * \brief Integer number used during export to associate a unique
-         * integer identifier to each new TPGTeam.
-         *
-         * Using the VertexID map, a TPGTeam that was already printed in
-         * previous export will keep its ID.
-         */
-        uint64_t nbVertex = 0;
-
-        /**
-         * \brief Integer number used during export to associate a unique
-         * integer identifier to each new Program.
-         *
-         * Using the programID map, a Program that was already printed in
-         * previous export will keep its ID.
-         */
-        uint64_t nbPrograms = 0;
-
-        /**
-         * \brief Integer number used during export to associate a unique
-         * integer identifier to each TPGAction.
-         *
-         * Identifier associated to TPGAction are NOT preserved during multiple
-         * printing of a TPGGraph.
-         */
-        uint64_t nbActions;
-
-        /**
-         * \brief Method for finding the unique identifier associated to a given
-         * TPGVertex.
-         *
-         * Using the vertexID map, this method returns the integer identifier
-         * associated to the given TPGVertex. If not identifier exists for this
-         * TPGVertex, a new one is created automatically and saved into the map.
-         *
-         * \param[in] vertex a const reference to the TPGVertex whose integer
-         *                    identifier is retrieved.
-         * \return the integer identifier for the given TPGVertex.
-         */
-        uint64_t findVertexID(const TPG::TPGVertex& vertex);
-
-        /**
-         * \brief Method for finding the unique identifier associated to a given
-         * Program.
-         *
-         * Using the programID map, this method retrieves the integer identifier
-         * associated to the given Program. If not identifier exists for this
-         * Program, a new one is created automatically and saved into the map.
-         *
-         * \param[in] prog a const reference to the Program whose integer
-         *                    identifier is retrieved.
-         * \param[out] id a pointer to an integer number, used to return the
-         *                found identifier.
-         * \return A boolean value indicating whether the returned ID is a new
-         * one (true), or one found in the programID map (false).
-         */
-        bool findProgramID(const Program::Program& prog, uint64_t& id);
 
         /**
          * \brief Print the dot content for the given TPGTeam.
@@ -231,7 +152,7 @@ namespace File {
          * given filePath.
          */
         TPGGraphDotExporter(const char* filePath, const TPG::TPGGraph& graph)
-            : pFile{NULL}, tpg{graph}, offset{""}, nbActions{0}
+            : TPG::TPGAbstractEngine(graph), pFile{NULL}, offset{""}
         {
             if ((pFile = fopen(filePath, "w")) == NULL) {
                 throw std::runtime_error("Could not open file " +

@@ -4,6 +4,7 @@
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -92,15 +93,22 @@
 
 #include <program/line.h>
 #include <program/program.h>
+#include <program/programEngine.h>
 #include <program/programExecutionEngine.h>
 
 #include <tpg/policyStats.h>
+#include <tpg/tpgAbstractEngine.h>
 #include <tpg/tpgAction.h>
 #include <tpg/tpgEdge.h>
 #include <tpg/tpgExecutionEngine.h>
 #include <tpg/tpgGraph.h>
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
+
+#ifdef CODE_GENERATION
+#include <codeGen/programGenerationEngine.h>
+#include <codeGen/tpgGenerationEngine.h>
+#endif
 
 #include <archive.h>
 #include <environment.h>

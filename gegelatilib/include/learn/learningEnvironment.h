@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -54,12 +54,12 @@ namespace Learn {
      * evaluation. TESTING mode is used at the end of all training activity to
      * evaluate the efficiency of the agent on completely new data.
      */
-    typedef enum LearningMode
+    enum class LearningMode
     {
         TRAINING,
         VALIDATION,
         TESTING
-    } LearningMode;
+    };
 
     /**
      * \brief Interface for creating a Learning Environment.
@@ -165,7 +165,8 @@ namespace Learn {
          * \param[in] mode LearningMode in which the Environment should be
          * reset for the next set of actions.
          */
-        virtual void reset(size_t seed = 0, LearningMode mode = TRAINING) = 0;
+        virtual void reset(size_t seed = 0,
+                           LearningMode mode = LearningMode::TRAINING) = 0;
 
         /**
          * \brief Get the data sources for this LearningEnvironment.

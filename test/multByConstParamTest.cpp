@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -80,3 +81,16 @@ TEST(MultByConstParamTest, ExecutePrimitiveType)
     ASSERT_NO_THROW(delete instruction)
         << "Destruction of the MultByConstParam instruction failed.";
 }
+
+#ifdef CODE_GENERATION
+TEST(MultByConstParamTest, PrintConstructor)
+{
+    Instructions::Instruction* instruction;
+    ASSERT_NO_THROW(instruction =
+                        new Instructions::MultByConstant<int>("$0 = $1 * $2;"))
+        << "Constructing a new multByConstParam Instruction with a "
+           "printTemplate failed.";
+    delete instruction;
+}
+
+#endif // CODE_GENERATION

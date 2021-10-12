@@ -102,6 +102,8 @@ if [ "$CHANGE_MADE" = true ] && [ "$DO_COMMIT" = true ]; then
 elif [ "$CHANGE_MADE" = true ] && [ "$KEEP_CHANGES" = false ]; then
 	# Error
 	echo "Code is not properly formatted."
+	echo "List of files not properly formatted:"
+	git status --porcelain
 	echo "Use fix_code_format.sh -doCommit to commit a proper code formatting."
 	echo "Reverting all changes."
 	git reset --hard

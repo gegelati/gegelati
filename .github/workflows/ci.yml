@@ -1,0 +1,263 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  Configure-Workflow:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix-ubuntu: ${{ steps.set-matrix-ubuntu.outputs.matrix-ubuntu }}
+      matrix-windows: ${{ steps.set-matrix-windows.outputs.matrix-windows }}
+      matrix-macos: ${{ steps.set-matrix-macos.outputs.matrix-macos }}
+    steps:
+      - name: Detect Configuration
+        run: |
+          if [[ "${{ github.ref }}" == *"develop" ]] || [[ "${{ github.base_ref }}" == *"develop" ]] || [[ "${{ github.ref }}" == *"master" ]] || [[ "${{ github.base_ref }}" == *"master" ]] || [[ "${{ github.base_ref }}" == *"tags/v"* ]]; then ACTIVATE=true; else ACTIVATE=false; fi
+          echo "activate=$ACTIVATE" >> $GITHUB_ENV
+          
+      - id: set-matrix-ubuntu
+        run: |
+          UBUNTU_MATRIX="{\"compiler\":[\"g++\", \"clang++\"],\"modular\":[\"fullBuild\""
+          if ${{ env.activate }}; then UBUNTU_MATRIX="$UBUNTU_MATRIX,\"noModules\""; fi
+          UBUNTU_MATRIX="$UBUNTU_MATRIX]}"
+          echo "::set-output name=matrix-ubuntu::$UBUNTU_MATRIX"
+      - id: set-matrix-windows
+        run: |
+          WINDOWS_MATRIX="{\"modular\":[\"fullBuild\""
+          if ${{ env.activate }}; then WINDOWS_MATRIX="$WINDOWS_MATRIX,\"noModules\""; fi
+          WINDOWS_MATRIX="$WINDOWS_MATRIX]}"
+          echo "::set-output name=matrix-windows::$WINDOWS_MATRIX"
+      - id: set-matrix-macos
+        run: |
+          MACOS_MATRIX="{\"modular\":[\"fullBuild\""
+          if ${{ env.activate }}; then MACOS_MATRIX="$MACOS_MATRIX,\"noModules\""; fi
+          MACOS_MATRIX="$MACOS_MATRIX]}"
+          echo "::set-output name=matrix-macos::$MACOS_MATRIX"
+  Build-Ubuntu:
+    needs: Configure-Workflow
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-ubuntu)}}
+    name: Ubuntu-${{ matrix.compiler }}-${{ matrix.modular }}
+    env:
+      GENERATOR: 'Unix Makefile'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install
+        run: |
+          sudo apt install doxygen
+      - name: Build
+        run: |
+          cd bin
+          if [ "${{ matrix.modular }}" = "fullBuild" ]; then MODULES=ON; else MODULES=OFF; fi
+          cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_BUILD_TYPE=Debug -DCODE_GEN=$MODULES
+          cmake --build . --target GEGELATI
+          cmake --build . --target doc
+          sudo make install
+          cmake --build . --target runTests
+      - name: Run Tests
+        run: |
+          cd bin
+          ./bin/runTests
+  Build-Windows-MSVC:
+    needs: Configure-Workflow
+    runs-on: windows-latest
+    strategy: 
+      matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-windows)}}
+    name: Windows-MSVC-${{ matrix.modular }}
+    env:
+      GENERATOR: 'Visual Studio 16 2019'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install
+        uses: nick-invision/retry@v2
+        with:
+          max_attempts: 3
+          timeout_minutes: 1
+          retry_on: error
+          command: choco install doxygen.install --force
+          shell: bash
+      - name: Build
+        run: |
+          cd bin
+          if [ "${{ matrix.modular }}" = "fullBuild" ]; then MODULES=ON; else MODULES=OFF; fi
+          cmake .. -DCODE_GEN=$MODULES
+          cmake --build . --target GEGELATI --config Debug
+          cmake --build . --target doc
+          cmake --build . --target INSTALL --config Debug
+          if [[ "${{ github.ref }}" == *"master" ]] || [[ "${{ github.ref }}" == *"develop" ]] || [[ "${{ github.ref }}" == *"tags/v"* ]]; then cmake --build . --target INSTALL --config Release ; fi;
+          cmake --build . --target runTests --config Debug
+        shell: bash
+      - name: Run Tests
+        run: |
+          cd bin
+          ./bin/Debug/runTests.exe
+        shell: bash
+      - name: Prepare archive
+        run: |
+         VERSION_NUMBER="$(cat CMakeLists.txt | grep -m 1 "VERSION \([0-9]\+.[0-9]\+.[0-9]\+\)" | sed -E -e 's/ |\)|VERSION//g')"
+         # Prepare folder
+         mkdir neutral_builds
+         cd neutral_builds
+         # Prepare archive name
+         ARCHIVE_NAME="gegelatilib-${VERSION_NUMBER}.$(git show -s --format="%ci" | cut -d' ' -f 1 | sed 's/-//g')$(git show -s --format="%ci" | cut -d' ' -f 2 | sed 's/://g').zip"
+         # Copy windows built and create an archive
+         cp -r ../bin/gegelatilib-${VERSION_NUMBER} ./gegelatilib-${VERSION_NUMBER}
+         7z a $ARCHIVE_NAME gegelatilib-${VERSION_NUMBER}/*
+        shell: bash
+        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v') )
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-gegelatilib
+          path: ./neutral_builds/*.zip
+        if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v') )
+  Build-MacOS-clang:
+    needs: Configure-Workflow
+    runs-on: macos-latest
+    strategy: 
+      matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-macos)}}
+    name: MacOS-clang-${{ matrix.modular }}
+    env:
+      GENERATOR: 'Unix Makefile'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install
+        run: brew install doxygen
+      - name: Build
+        run: |
+          cd bin
+          if [ "${{ matrix.modular }}" = "fullBuild" ]; then MODULES=ON; else MODULES=OFF; fi
+          cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DCODE_GEN=$MODULES
+          cmake --build . --target GEGELATI
+          cmake --build . --target doc
+          sudo make install
+          cmake --build . --target runTests
+      - name: Run Tests
+        run: |
+          cd bin
+          ./bin/runTests
+  Deploy-NeutralBuilds:
+    runs-on: ubuntu-latest
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Download
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-gegelatilib
+          path: ./neutral_builds/
+      - name: Prepare neutral build page
+        run: python ./scripts/prepare_neutral_build_page.py
+      - name: Upload pages
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          repository-name: gegelati/neutral-builds
+          branch: gh-pages
+          folder: ./neutral_builds
+          token: ${{ secrets.BOT_DEPLOY_TOKEN }}
+          single-commit: true
+      - name: Trigger apps
+        run: |
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/develop"}'
+        shell: bash
+  Deploy-Releases:
+    runs-on: ubuntu-latest
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    if: contains(github.ref, '/tags/v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-gegelatilib
+          path: ./neutral_builds/
+      - name: Prepare Release Log
+        run: python ./scripts/prepare_release_log.py
+      - name: Upload
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release_notes.md
+          token: ${{ secrets.BOT_DEPLOY_TOKEN }}
+          files: ./neutral_builds/*.zip
+          draft: true
+      - name: Trigger apps
+        run: |
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/master"}'
+        shell: bash
+  Analyze-Code_Style:
+    runs-on: ubuntu-latest
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run script
+        continue-on-error: ${{ !(endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v')  || endsWith(github.base_ref, 'develop') || endsWith(github.base_ref, 'master')) }}
+        run: |
+          ./scripts/fix_code_format.sh
+  Analyze-Sonar:
+    runs-on: ubuntu-latest
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    env:
+      SONAR_SCANNER_VERSION: 4.6.1.2450 # Find the latest version in the "Linux" link on this page:
+                                        # https://sonarcloud.io/documentation/analysis/scan/sonarscanner/
+      SONAR_SERVER_URL: "https://sonarcloud.io"
+      BUILD_WRAPPER_OUT_DIR: bw-output # Directory where build-wrapper output will be placed
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Install
+        run: |
+          sudo apt install doxygen gcovr
+      - name: Download and set up sonar-scanner
+        env:
+          SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
+        run: |
+          mkdir -p $HOME/.sonar
+          curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }} 
+          unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+          echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
+      - name: Download and set up build-wrapper
+        env:
+          BUILD_WRAPPER_DOWNLOAD_URL: ${{ env.SONAR_SERVER_URL }}/static/cpp/build-wrapper-linux-x86.zip
+        run: |
+          curl -sSLo $HOME/.sonar/build-wrapper-linux-x86.zip ${{ env.BUILD_WRAPPER_DOWNLOAD_URL }}
+          unzip -o $HOME/.sonar/build-wrapper-linux-x86.zip -d $HOME/.sonar/
+          echo "$HOME/.sonar/build-wrapper-linux-x86" >> $GITHUB_PATH
+      - name: Build
+        run: |
+          cmake -S . -B bin -DCMAKE_BUILD_TYPE=Debug
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build bin/ --target runTests
+      - name: Run Tests
+        run: |
+          cd bin
+          ./bin/runTests
+          gcovr -r .. -s --sonarqube=sonarqube.xml 
+          sed 's/ branchesToCover=\"[0-9]\+\" coveredBranches=\"[0-9]\+\"/ /g' sonarqube.xml > sonarqubecleaned.xml # Remove condition coverage info from report, only line coverage interests us.
+      - name: Run sonar-scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_DEPLOY_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          
+          sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
+          

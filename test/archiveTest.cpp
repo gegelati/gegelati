@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -136,6 +137,7 @@ TEST_F(ArchiveTest, AddRecordingTests)
     // change data in one dataHandler
     Data::PrimitiveTypeArray<int>& d =
         (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
+
     d.setDataAt(typeid(int), 2, 1337);
     ASSERT_NO_THROW(archive.addRecording(p, vect, 0.2))
         << "Adding a recording to the non-empty archive failed.";
@@ -170,7 +172,9 @@ TEST_F(ArchiveTest, AddRecordingWithProbabilityTests)
 
     // Add a few fictive recording
     for (int i = 0; i < 10; i++) {
-        ((Data::PrimitiveTypeArray<int>&)(vect.at(1).get()))
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()))
             .setDataAt(typeid(int), 0, i);
         ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i))
             << "Adding a recording to the archive failed.";
@@ -188,7 +192,9 @@ TEST_F(ArchiveTest, At)
 
     // Add a few fictive recording
     for (int i = 0; i < 5; i++) {
-        ((Data::PrimitiveTypeArray<int>&)(vect.at(1).get()))
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()))
             .setDataAt(typeid(int), 0, i);
         ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i))
             << "Adding a recording to the archive failed.";
@@ -215,7 +221,9 @@ TEST_F(ArchiveTest, SetSeed)
 
     // Add a few fictive recording
     for (int i = 0; i < 10; i++) {
-        ((Data::PrimitiveTypeArray<int>&)(vect.at(1).get()))
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()))
             .setDataAt(typeid(int), 0, i);
         ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i))
             << "Adding a recording to the archive failed.";
@@ -232,7 +240,9 @@ TEST_F(ArchiveTest, areProgramResultsUnique)
     Archive archive(4);
     size_t hash1 = archive.getCombinedHash(vect);
     Data::PrimitiveTypeArray<int>& d =
-        (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()));
 
     // Add a few fictive recordings with p
     archive.addRecording(p, vect, 1.0);
@@ -269,7 +279,9 @@ TEST_F(ArchiveTest, DataHandlersAccessors)
     archive.addRecording(p, vect, 1.0);
     archive.addRecording(p, vect, 1.5);
     Data::PrimitiveTypeArray<int>& d =
-        (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
+        const_cast<Data::PrimitiveTypeArray<int>&>(
+            dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
+                vect.at(1).get()));
     d.setDataAt(typeid(int), 2, 1337);
     archive.addRecording(p, vect, 2.0);
     archive.addRecording(p, vect, 2.3);

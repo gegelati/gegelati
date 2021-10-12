@@ -4,6 +4,7 @@
  * Cedric Leonard <cleonard@insa-rennes.fr> (2021)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -38,8 +39,8 @@
 #ifndef PRIMITIVE_TYPE_ARRAY_H
 #define PRIMITIVE_TYPE_ARRAY_H
 
-#include "arrayWrapper.h"
-#include "dataHandler.h"
+#include "data/arrayWrapper.h"
+#include "data/dataHandler.h"
 
 namespace Data {
     /**

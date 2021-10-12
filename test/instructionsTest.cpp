@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -208,3 +209,44 @@ TEST(InstructionsTest, SetGetNbMaxOperands)
     ASSERT_EQ(s.getMaxNbOperands(), 2) << "Max number of operands returned by "
                                           "the Instructions::Set is incorrect.";
 }
+
+#ifdef CODE_GENERATION
+TEST(InstructionsTest, ConstructorDestructorCallPrint)
+{
+    ASSERT_NO_THROW({
+        Instructions::Instruction* i =
+            new Instructions::AddPrimitiveType<double>("$0 = $1 + $2;");
+        delete i;
+    }) << "Call to constructor for AddPrimitiveType<double>(std::string "
+          "printTemplate) failed.";
+}
+
+TEST(InstructionsTest, isPrintable)
+{
+    Instructions::Instruction* i = new Instructions::AddPrimitiveType<double>();
+    ASSERT_EQ(i->isPrintable(), false);
+    delete i;
+
+    i = new Instructions::AddPrimitiveType<double>("$0 = $1 + $2;");
+    ASSERT_EQ(i->isPrintable(), true);
+    delete i;
+}
+
+TEST(InstructionsTest, getPrintTemplate)
+{
+    std::string printTemplate{"$0 = $1 + $2;"};
+    Instructions::Instruction* i =
+        new Instructions::AddPrimitiveType<double>(printTemplate);
+    ASSERT_EQ(i->getPrintTemplate(), printTemplate);
+    delete i;
+}
+
+TEST(InstructionsTest, getPrintablePrimitiveOperandType)
+{
+    Instructions::Instruction* i = new Instructions::MultByConstant<double>();
+    ASSERT_EQ(i->getPrintablePrimitiveOperandType(0), "double");
+    ASSERT_EQ(i->getPrintablePrimitiveOperandType(1), "int32_t");
+    delete i;
+}
+
+#endif // CODE_GENERATION

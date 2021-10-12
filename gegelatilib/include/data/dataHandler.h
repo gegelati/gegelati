@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -259,6 +260,39 @@ namespace Data {
          */
         uint64_t scaleLocation(const uint64_t rawLocation,
                                const std::type_info& type) const;
+
+#ifdef CODE_GENERATION
+        /**
+         * \brief Function returning the native type of the DataHandler.
+         *
+         * For example, in case of a Data::PrimitiveTypeArray<double> this
+         * function return typeid(double).
+         *
+         * This info is currently used only to support the code generation
+         * feature of GEGELATI.
+         *
+         * \return std::type_info of the template
+         */
+        virtual const std::type_info& getNativeType() const = 0;
+
+        /**
+         * \brief Give the size of each dimension (if any) of the DataHandler
+         *
+         * Function that returns a std::vector<size_t> that contain the size of
+         * each dimension of the date in the DataHandler.
+         * For a scalar value, a one-element vector containing only value 1 is
+         * returned. For a 1D array the vector contains the size of the array,
+         * for a 2D array the vector holds the height and the width of the
+         * DataHandler.
+         *
+         * This info is currently used only to support the code generation
+         * feature of GEGELATI.
+         *
+         * \return a std::vector containing the size of each dimension of a
+         * DataHandler
+         */
+        virtual std::vector<size_t> getDimensionsSize() const = 0;
+#endif
     };
 } // namespace Data
 

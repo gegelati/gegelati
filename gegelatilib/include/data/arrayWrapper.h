@@ -2,6 +2,7 @@
  * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2021)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -45,20 +46,9 @@
 #include <typeinfo>
 
 #include "data/constant.h"
+#include "data/dataHandler.h"
+#include "data/demangle.h"
 #include "data/hash.h"
-#include "dataHandler.h"
-
-#ifdef _MSC_VER
-/// Macro for getting type name in human readable format.
-#define DEMANGLE_TYPEID_NAME(name) name
-#elif __GNUC__
-#include <cxxabi.h>
-/// Macro for getting type name in human readable format.
-#define DEMANGLE_TYPEID_NAME(name)                                             \
-    abi::__cxa_demangle(name, nullptr, nullptr, nullptr)
-#else
-#error Unsupported compiler (yet): Check need for name demangling of typeid.name().
-#endif
 
 namespace Data {
 
@@ -206,6 +196,14 @@ namespace Data {
         /// Inherited from DataHandler
         virtual std::vector<size_t> getAddressesAccessed(
             const std::type_info& type, const size_t address) const override;
+
+#ifdef CODE_GENERATION
+        /// Inherited from DataHandler
+        virtual const std::type_info& getNativeType() const override;
+
+        /// Inherited from DataHandler
+        virtual std::vector<size_t> getDimensionsSize() const override;
+#endif
     };
 
     template <class T>
@@ -413,6 +411,23 @@ namespace Data {
 
         return this->cachedHash;
     }
+
+#ifdef CODE_GENERATION
+    template <class T>
+    const std::type_info& ArrayWrapper<T>::getNativeType() const
+    {
+        const std::type_info& a = typeid(T);
+        return a;
+    }
+
+    template <class T>
+    std::vector<size_t> ArrayWrapper<T>::getDimensionsSize() const
+    {
+        std::vector<size_t> sizes = {nbElements};
+        return sizes;
+    }
+#endif
+
 } // namespace Data
 #endif // !ARRAY_WRAPPER_H
 

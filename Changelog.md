@@ -1,5 +1,23 @@
 # GEGELATI Changelog
 
+## Release version 1.0.0 - Amamaretto version/flavor
+_2021.10.11_
+
+### New features
+* A code generation feature is added to GEGELATI. The code generation feature enables generating a stand-alone C code implementing the inference behavior of a trained Tangled Program Graph. To enable this feature, PrintableInstruction have been added to GEGELATI. Each PrintableInstruction possess its own print template which defines, with a regex-like syntax, how this instruction should be printed in the generated C code. The code generation feature can be disabled when building the library, by appending the `-DCODE_GEN=OFF` directive to the cmake command.
+
+### Changes
+* Change the typedef Learn::LearningMode into an enum class to remove compilation warnings in MSVC. Because of this change, members of the enum must now be used with the class name: `TRAINING` > `LearningMode::TRAINING`.
+* Add conditional builds without the code-generation for the continuous integration.
+* Fasten the continuous integration on windows build by building the `Release` target only for builds of the `develop` and `master` branches.
+* Migrate CI to Github Actions instead of Travis.
+
+### Bug fix
+* Fix memory leak when demangling type name in GNU environment.
+* Fix dangling pointers warning from MSVC.
+* Fix unitialized attributes in various classes.
+
+
 ## Release version 0.6.0
 _2021.06.02_
 

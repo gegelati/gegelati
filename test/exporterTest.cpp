@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -50,6 +51,8 @@
 #include "tpg/tpgVertex.h"
 
 #include "file/tpgGraphDotExporter.h"
+
+#include "goldenReferenceComparison.h"
 
 class ExporterTest : public ::testing::Test
 {
@@ -204,39 +207,9 @@ TEST_F(ExporterTest, FileContentVerification)
 
     dotExporter.print();
 
-    std::ifstream goldenRef(TESTS_DAT_PATH "exported_tpg_ref.dot");
-    ASSERT_TRUE(goldenRef.is_open())
-        << "Could not open golden reference. Check project configuration.";
-
-    std::ifstream exportedFile("exported_tpg.dot");
-    ASSERT_TRUE(exportedFile) << "Could not open exported dot file.";
-
-    // Check the file content line by line
-    // print diffs in the console and count number of printed line.
-    uint64_t nbDiffs = 0;
-    uint64_t lineNumber = 0;
-    while (!exportedFile.eof() && !goldenRef.eof()) {
-        std::string lineRef;
-        std::getline(goldenRef, lineRef);
-
-        std::string lineExport;
-        std::getline(exportedFile, lineExport);
-
-        if (lineRef != lineExport) {
-            nbDiffs++;
-            std::cout << "Diff at Line " << lineNumber << ":" << std::endl;
-            std::cout << "\tref: " << lineRef << std::endl;
-            std::cout << "\texp: " << lineExport << std::endl;
-        }
-
-        lineNumber++;
-    }
-
-    if (!exportedFile.eof() || !goldenRef.eof()) {
-        nbDiffs++;
-        std::cout << "Files have different length." << std::endl;
-    }
-
-    ASSERT_EQ(nbDiffs, 0) << "Differences between reference file and exported "
-                             "file were detected.";
+    // Compare the two files
+    ASSERT_TRUE(compare_files("exported_tpg.dot",
+                              TESTS_DAT_PATH "exported_tpg_ref.dot"))
+        << "Differences between reference file and exported "
+           "file were detected.";
 }

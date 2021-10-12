@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -284,3 +285,18 @@ TEST(LambdaInstructionsTest, ExecuteNonPrimitiveTypes)
     // Execute it
     ASSERT_EQ(instruction.execute(arguments), 42.0);
 }
+
+#ifdef CODE_GENERATION
+TEST(LambdaInstructionsTest, PrintConstructor)
+{
+    auto minus = [](double a, double b) { return a - b; };
+
+    Instructions::LambdaInstruction<double, double>* instruction;
+    ASSERT_NO_THROW(
+        (instruction = new Instructions::LambdaInstruction<double, double>(
+             minus, "$0 = $1 - $2;")))
+        << "Constructing a new lambdaInstruction with a printTemplate failed.";
+
+    delete instruction;
+}
+#endif // CODE_GENERATION
