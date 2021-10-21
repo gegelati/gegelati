@@ -266,7 +266,7 @@ namespace Mutator {
          * If the TPGGraph does not have any root TPGTeam, it is reinitialized
          * entirely with the initRandomTPG function.
          * If the given TPGGraph already has more root TPGVertex than the
-         * targetted number of root teams, nothing happens.
+         * targeted number of root teams, nothing happens.
          *
          * \param[in,out] graph the TPGGraph to mutate.
          * \param[in] archive Archive used to assess the uniqueness of the
@@ -284,6 +284,41 @@ namespace Mutator {
             TPG::TPGGraph& graph, const Archive& archive,
             const Mutator::MutationParameters& params, Mutator::RNG& rng,
             uint64_t maxNbThreads = std::thread::hardware_concurrency());
+
+        /**
+         * \brief Create new root TPGTeam within the TPGGraph from crossover.
+         *
+         * This function create and add new root TPGTeam to the TPGGraph
+         * until the targeted number of roots is reached.  The targeted
+         * number of root is defined by the ratio of crossovers and the
+         * number of roots to add. To create new root, two parents teams
+         * are selected, one is copied and the edges that the parents have
+         * in common are kept and the edges that only one parent has is kept
+         * with a probability of P_cpy.
+         *
+         * A few special cases are handled:
+         * If the set of root vertices of the TPGGraph contains any TPGAction,
+         * this TPGAction is ignored when selecting a candidate for duplication.
+         * If the TPGGraph does not have any root TPGTeam, it is reinitialized
+         * entirely with the initRandomTPG function.
+         * If the given TPGGraph already has more root TPGVertex than the
+         * targeted number of root teams, nothing happens.
+         *
+         * \param[in,out] graph the TPGGraph to mutate.
+         * \param[in] archive Archive used to assess the uniqueness of the
+         *            mutated Program behavior.
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in] maxNbThreads Integer parameter controlling the number of
+         * threads used for parallel execution. Possible values are:
+         *   - default:  Let the runtime decide using
+         *               std::thread::hardware_concurrency().
+         *   - `0` and `1`: Do not use parallelism.
+         *   - `n > 1`: Set the number of threads explicitly.
+         */
+        void addNewRootsFromCrossover(
+                TPG::TPGGraph& graph,
+                const Mutator::MutationParameters& params, Mutator::RNG& rng);
     }; // namespace TPGMutator
 };     // namespace Mutator
 

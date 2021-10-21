@@ -507,7 +507,10 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Create an empty list to store Programs to mutate.
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
-    // While the target is not reached, add new teams
+    //add teams from crossover
+    addNewRootsFromCrossover(graph, params,rng);
+
+    //while the target is not reached
     uint64_t currentNumberOfRoot = rootVertices.size();
     while (params.tpg.nbRoots > currentNumberOfRoot) {
         // Select a random existing root
@@ -527,4 +530,116 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
     // Mutate the new Programs
     mutateNewProgramBehaviors(maxNbThreads, newPrograms, rng, params, archive);
+}
+
+void Mutator::TPGMutator::addNewRootsFromCrossover(TPG::TPGGraph &graph,
+                                                   const Mutator::MutationParameters &params,
+                                                   Mutator::RNG &rng)
+{
+    // Get current vertex set (copy)
+    auto vertices(graph.getVertices());
+    // Get current root teams (copy)
+    auto rootVertices(graph.getRootVertices());
+    // While the target is not reached, add new teams
+
+    //first, add new teams through crossover, as described in Smith and Heywood paper
+    uint64_t numberRootAddFromCrossover = (params.tpg.nbRoots-rootVertices.size())
+                                          * params.tpg.ratioCrossover;
+    for(int i = 0; i < numberRootAddFromCrossover; ++i)
+    {
+        //select two random teams
+        uint64_t parentOneIndex =
+                rng.getUnsignedInt64(0, vertices.size() - 1);
+        uint64_t parentTwoIndex =
+                rng.getUnsignedInt64(0, vertices.size() - 1);
+        //while the selected vertex is an action
+        while(typeid(*vertices.at(parentOneIndex)) == typeid(TPG::TPGAction))
+        {
+            parentOneIndex =
+                    rng.getUnsignedInt64(0, vertices.size() - 1);
+        }
+        //while the selected vertex is an action or the same vertex as previously
+        while(typeid(*vertices.at(parentTwoIndex)) == typeid(TPG::TPGAction)
+              && parentOneIndex == parentTwoIndex)
+        {
+            parentTwoIndex =
+                    rng.getUnsignedInt64(0, vertices.size() - 1);
+        }
+
+        //clone first parent
+        TPG::TPGTeam& newRoot = (TPG::TPGTeam&)graph.cloneVertex(
+                *vertices.at(parentOneIndex));
+        auto & edgeFromP2 = (*vertices.at(parentTwoIndex)).getOutgoingEdges();
+        //add edges that are in P1 and P2
+        //Add edges of P1 that are not in P2 with a probability
+        for(auto & edgeIt : newRoot.getOutgoingEdges() )
+        {
+            auto it = find(edgeFromP2.begin(), edgeFromP2.end(), edgeIt);
+            // the edge is in P1 but not in P2
+            if(it == edgeFromP2.end())
+            {
+                //keep outgoing edge with a probability of p_Copy
+                uint64_t rand = rng.getDouble(0,1);
+                if(rand > params.tpg.pProgramCopy)
+                {
+                    //delete outgoing edge of the new Team
+                    newRoot.removeOutgoingEdge(*it);
+                }
+            }
+        }
+        // Add edges of P2 that are not in P1 with a probability
+        auto & edgeFromP1 = (*vertices.at(parentOneIndex)).getOutgoingEdges();
+        for (auto & edgeIt : edgeFromP2)
+        {
+            auto it = find(edgeFromP1.begin(), edgeFromP1.end(), edgeIt);
+            // the edge is in P2 but not in P1
+            if(it == edgeFromP1.end())
+            {
+                //keep outgoing edge with a probability of p_Copy
+                uint64_t rand = rng.getDouble(0,1);
+                if(rand <= params.tpg.pProgramCopy)
+                {
+                    //delete outgoing edge of the new Team
+                    if(params.tpg.maxOutgoingEdges < newRoot.getOutgoingEdges().size())
+                    {
+                        newRoot.addOutgoingEdge(edgeIt);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        //check if the new team has an action as an outgoing edge
+        bool validate = false;
+        for(auto & edgeIt : newRoot.getOutgoingEdges() )
+        {
+            //if the current edge is an action
+            if(typeid(*edgeIt->getDestination()) == typeid(TPG::TPGAction))
+            {
+                validate = true;
+                break;
+            }
+        }
+        //if no edges lead to an action
+        if(!validate)
+        {
+            //select randomly the parent from whom the action will be copied
+            uint64_t parentSource = rng.getInt32(1,2)==1 ?
+                                    parentOneIndex : parentTwoIndex;
+            for(auto& edgeIt : (*vertices.at(parentSource)).getOutgoingEdges())
+            {
+                if(typeid(*edgeIt->getDestination()) == typeid(TPG::TPGAction))
+                {
+                    newRoot.addOutgoingEdge(edgeIt);
+                }
+            }
+
+        }
+        /*mutateTPGTeam(graph, archive, newRoot, preExistingTeams,
+                      preExistingActions, preExistingEdges, newPrograms, params,
+                      rng);*/
+    }
 }

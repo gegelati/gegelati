@@ -129,6 +129,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.pProgramMutation = value.asDouble();
         return;
     }
+    if (param == "pProgramCopy") {
+        params.mutation.tpg.pProgramCopy = value.asDouble();
+        return;
+    }
     if (param == "forceProgramBehaviorChangeOnMutation") {
         params.mutation.tpg.forceProgramBehaviorChangeOnMutation =
             value.asBool();
@@ -140,6 +144,10 @@ void File::ParametersParser::setParameterFromString(
     }
     if (param == "pEdgeDestinationIsAction") {
         params.mutation.tpg.pEdgeDestinationIsAction = value.asDouble();
+        return;
+    }
+    if (param == "ratioCrossover") {
+        params.mutation.tpg.ratioCrossover = value.asDouble();
         return;
     }
     if (param == "maxProgramSize") {
@@ -348,10 +356,21 @@ void File::ParametersParser::writeParametersToJson(
         Mutator::TPGParameters::pEdgeDestinationIsActionComment,
         Json::commentBefore);
 
+    root["mutation"]["tpg"]["ratioCrossover"] =
+            params.mutation.tpg.ratioCrossover;
+    root["mutation"]["tpg"]["ratioCrossover"].setComment(
+            Mutator::TPGParameters::ratioCrossoverComment,
+            Json::commentBefore);
+
     root["mutation"]["tpg"]["pProgramMutation"] =
         params.mutation.tpg.pProgramMutation;
     root["mutation"]["tpg"]["pProgramMutation"].setComment(
         Mutator::TPGParameters::pProgramMutationComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["pProgramCopy"] =
+            params.mutation.tpg.pProgramCopy;
+    root["mutation"]["tpg"]["pProgramCopy"].setComment(
+            Mutator::TPGParameters::pProgramCopyComment, Json::commentBefore);
 
     // Mutation.program parameters
     root["mutation"]["prog"]["maxConstValue"] =

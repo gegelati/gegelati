@@ -101,6 +101,14 @@ namespace Mutator {
         double pProgramMutation = 0.2;
 
         /// JSon comment
+        inline static const std::string pProgramCopyComment =
+                "// Probability of copying an outgoing edge when a crossover "
+                "occurs if the program is linked to a single parent.\n"
+                "// \"pProgramCopy\" : 0.5, // Default value";
+        /// Probability of keeping a "one-parent" outgoing TPGEdge at crossover.
+        double pProgramCopy = 0.5;
+
+        /// JSon comment
         inline static const std::string
             forceProgramBehaviorChangeOnMutationComment =
                 "// When a Program is mutated, makes sure its behavior is no "
@@ -127,6 +135,13 @@ namespace Mutator {
             "// \"pEdgeDestinationIsAction\" : 0.5, // Default value";
         /// Probability of the new destination of a TPGEdge to be a TPGAction.
         double pEdgeDestinationIsAction = 0.5;
+
+        /// JSon comment
+        inline static const std::string ratioCrossoverComment =
+                "// Ratio of teams created through crossover while populating the graph\n"
+                "// \"ratioCrossover\" : 0.5, // Default value";
+        /// Ratio of crossovers at populate phase
+        double ratioCrossover = 0.5;
     } TPGParameters;
 
     /**
