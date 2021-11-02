@@ -317,8 +317,10 @@ namespace Mutator {
          *   - `n > 1`: Set the number of threads explicitly.
          */
         void addNewRootsFromCrossover(
-                TPG::TPGGraph& graph,
-                const Mutator::MutationParameters& params, Mutator::RNG& rng);
+                TPG::TPGGraph& graph, const Archive& archive,
+                const Mutator::MutationParameters& params,
+                Mutator::RNG& rng,
+                uint64_t maxNbThreads = std::thread::hardware_concurrency());
     }; // namespace TPGMutator
 };     // namespace Mutator
 

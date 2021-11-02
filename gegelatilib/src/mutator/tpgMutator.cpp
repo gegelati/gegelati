@@ -482,20 +482,23 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                       });
     }
 
+    //add teams from crossover
+    addNewRootsFromCrossover(graph, archive,params,rng);
+
     // Pre compute liste of available TPGTeam and TPGActions
     std::vector<const TPG::TPGTeam*> preExistingTeams;
     std::vector<const TPG::TPGAction*> preExistingActions;
 
     std::for_each(
-        vertices.begin(), vertices.end(),
-        [&preExistingActions, &preExistingTeams](const TPG::TPGVertex* target) {
-            if (typeid(*target) == typeid(TPG::TPGAction)) {
-                preExistingActions.push_back((const TPG::TPGAction*)target);
-            }
-            else {
-                preExistingTeams.push_back((const TPG::TPGTeam*)target);
-            }
-        });
+            vertices.begin(), vertices.end(),
+            [&preExistingActions, &preExistingTeams](const TPG::TPGVertex* target) {
+                if (typeid(*target) == typeid(TPG::TPGAction)) {
+                    preExistingActions.push_back((const TPG::TPGAction*)target);
+                }
+                else {
+                    preExistingTeams.push_back((const TPG::TPGTeam*)target);
+                }
+            });
 
     // Get a list of pre existing edges before mutations (copy)
     std::list<const TPG::TPGEdge*> preExistingEdges;
@@ -506,9 +509,6 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
     // Create an empty list to store Programs to mutate.
     std::list<std::shared_ptr<Program::Program>> newPrograms;
-
-    //add teams from crossover
-    addNewRootsFromCrossover(graph, params,rng);
 
     //while the target is not reached
     uint64_t currentNumberOfRoot = rootVertices.size();
@@ -532,15 +532,40 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     mutateNewProgramBehaviors(maxNbThreads, newPrograms, rng, params, archive);
 }
 
-void Mutator::TPGMutator::addNewRootsFromCrossover(TPG::TPGGraph &graph,
+void Mutator::TPGMutator::addNewRootsFromCrossover(TPG::TPGGraph &graph, const Archive& archive,
                                                    const Mutator::MutationParameters &params,
-                                                   Mutator::RNG &rng)
+                                                   Mutator::RNG &rng, uint64_t maxNbThreads)
 {
     // Get current vertex set (copy)
     auto vertices(graph.getVertices());
     // Get current root teams (copy)
     auto rootVertices(graph.getRootVertices());
     // While the target is not reached, add new teams
+
+    // Pre compute liste of available TPGTeam and TPGActions
+    std::vector<const TPG::TPGTeam*> preExistingTeams;
+    std::vector<const TPG::TPGAction*> preExistingActions;
+
+    std::for_each(
+            vertices.begin(), vertices.end(),
+            [&preExistingActions, &preExistingTeams](const TPG::TPGVertex* target) {
+                if (typeid(*target) == typeid(TPG::TPGAction)) {
+                    preExistingActions.push_back((const TPG::TPGAction*)target);
+                }
+                else {
+                    preExistingTeams.push_back((const TPG::TPGTeam*)target);
+                }
+            });
+
+    // Get a list of pre existing edges before mutations (copy)
+    std::list<const TPG::TPGEdge*> preExistingEdges;
+    std::for_each(graph.getEdges().begin(), graph.getEdges().end(),
+                  [&preExistingEdges](const TPG::TPGEdge& edge) {
+                      preExistingEdges.push_back(&edge);
+                  });
+
+    // Create an empty list to store Programs to mutate.
+    std::list<std::shared_ptr<Program::Program>> newPrograms;
 
     //first, add new teams through crossover, as described in Smith and Heywood paper
     uint64_t numberRootAddFromCrossover = (params.tpg.nbRoots-rootVertices.size())
@@ -638,8 +663,11 @@ void Mutator::TPGMutator::addNewRootsFromCrossover(TPG::TPGGraph &graph,
             }
 
         }
-        /*mutateTPGTeam(graph, archive, newRoot, preExistingTeams,
+        mutateTPGTeam(graph, archive, newRoot, preExistingTeams,
                       preExistingActions, preExistingEdges, newPrograms, params,
-                      rng);*/
+                      rng);
     }
+
+    // Mutate the new Programs
+    mutateNewProgramBehaviors(maxNbThreads, newPrograms, rng, params, archive);
 }
