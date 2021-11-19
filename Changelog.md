@@ -1,5 +1,16 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_aaaa.mm.dd_
+
+### New features
+
+### Changes
+
+### Bug fix
+* Change google test repo config. Branch name is now `main` instead of `develop`.
+
+
 ## Release version 1.0.0 - Amamaretto version/flavor
 _2021.10.11_
 
