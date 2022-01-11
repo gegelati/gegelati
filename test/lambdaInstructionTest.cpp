@@ -154,7 +154,7 @@ TEST(LambdaInstructionsTest, ExecuteArray)
     arguments.emplace_back(
         std::make_shared<Data::UntypedSharedPtr::Model<const double[]>>(
             new double[3]{arrayB}));
-    ASSERT_EQ(instruction->execute(arguments), 23.54)
+    ASSERT_DOUBLE_EQ(instruction->execute(arguments), 23.54)
         << "Result returned by the instruction is not as expected.";
 }
 
