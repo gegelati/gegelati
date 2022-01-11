@@ -51,7 +51,7 @@ namespace Data {
 #define _NODISCARD [[nodiscard]]
 #endif
 
-#if defined(_WIN64) || defined(__x86_64__)
+#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
     inline constexpr size_t _FNV_offset_basis = 14695981039346656037ULL;
     inline constexpr size_t _FNV_prime = 1099511628211ULL;
 #else  // defined(_WIN64)
