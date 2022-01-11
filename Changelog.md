@@ -9,6 +9,7 @@ _aaaa.mm.dd_
 
 ### Bug fix
 * Change google test repo config. Branch name is now `main` instead of `develop`.
+* Fix determinism issue with ARM 64-bit architecture in `Data::Hash`. Determinism still not provided on non 64bit architectures (X86, ARM, or others). 
 
 
 ## Release version 1.0.0 - Amamaretto version/flavor
