@@ -224,7 +224,7 @@ namespace TPG {
          *
          * \return a const reference to the edges attribute.
          */
-        const std::list<TPGEdge>& getEdges() const;
+        const std::list<std::unique_ptr<TPGEdge>>& getEdges() const;
 
         /**
          * \brief Remove a TPGEdge from the TPGGraph.
@@ -299,7 +299,7 @@ namespace TPG {
         /**
          * \brief Set of TPGEdge composing the TPGGraph.
          */
-        std::list<TPGEdge> edges;
+        std::list<std::unique_ptr<TPGEdge>> edges;
 
         /**
          * \brief Find the non-const iterator to a vertex of the graph from
@@ -321,7 +321,8 @@ namespace TPG {
          *         the searched edge pointer. If the given vertex pointer is
          *         not in the vertices, then vertices.end() is returned.
          */
-        std::list<TPGEdge>::iterator findEdge(const TPGEdge* edge);
+        std::list<std::unique_ptr<TPGEdge>>::iterator findEdge(
+            const TPGEdge* edge);
     };
 }; // namespace TPG
 

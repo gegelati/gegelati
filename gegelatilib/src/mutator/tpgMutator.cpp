@@ -500,8 +500,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Get a list of pre existing edges before mutations (copy)
     std::list<const TPG::TPGEdge*> preExistingEdges;
     std::for_each(graph.getEdges().begin(), graph.getEdges().end(),
-                  [&preExistingEdges](const TPG::TPGEdge& edge) {
-                      preExistingEdges.push_back(&edge);
+                  [&preExistingEdges](const std::unique_ptr<TPG::TPGEdge>& edge) {
+                      preExistingEdges.push_back(edge.get());
                   });
 
     // Create an empty list to store Programs to mutate.

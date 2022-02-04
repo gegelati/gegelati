@@ -193,9 +193,9 @@ void File::TPGGraphDotExporter::print()
     this->programID.erase(this->programID.begin(), this->programID.end());
 
     // Print all edges
-    auto edges = this->tpg.getEdges();
-    for (const TPG::TPGEdge& edge : edges) {
-        this->printTPGEdge(edge);
+    auto& edges = this->tpg.getEdges();
+    for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
+        this->printTPGEdge(*edge.get());
     }
 
     // Print footer

@@ -279,7 +279,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
         uint64_t program = std::stoi(matches[2]);
 
         // find edge
-        const std::list<TPG::TPGEdge>& edges = this->tpg.getEdges();
+        const std::list<std::unique_ptr<TPG::TPGEdge>>& edges = this->tpg.getEdges();
 
         // find one of the selected program edges :
         auto p_it = programID.find(program);
@@ -287,8 +287,8 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
             std::shared_ptr<Program::Program> p = p_it->second;
 
             auto edge_it = std::find_if(
-                edges.begin(), edges.end(), [p](const TPG::TPGEdge& other) {
-                    return (&(other.getProgram()) == p.get());
+                edges.begin(), edges.end(), [p](const std::unique_ptr<TPG::TPGEdge>& other) {
+                    return (&(other->getProgram()) == p.get());
                 });
             if (edge_it != edges.end()) // we got the corresponding edge :
             {
@@ -296,7 +296,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
                 auto team_it = this->vertexID.find(team_in);
                 if (team_it != this->vertexID.end()) {
                     const TPG::TPGVertex* team = team_it->second;
-                    this->tpg.addNewEdge(*team, *edge_it->getDestination(), p);
+                    this->tpg.addNewEdge(*team, *(edge_it->get()->getDestination()), p);
                 }
             }
         }
