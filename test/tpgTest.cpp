@@ -222,6 +222,17 @@ TEST_F(TPGTest, TPGGraphAddTPGVertex)
         << "Adding a new Action to a TPGGraph failed.";
 }
 
+TEST_F(TPGTest, TPGGraphConstructorDestructor)
+{
+    TPG::TPGGraph* tpg;
+
+    ASSERT_NO_THROW(tpg = new TPG::TPGGraph(*e)) << "Error while calling a TPGGraph constructor.";
+
+    ASSERT_NE(tpg, nullptr) << "TPGGraph construction succeded but returned a null pointer.";
+
+    ASSERT_NO_THROW(delete tpg) << "Destruction of a TPGGraph failed.";
+}
+
 TEST_F(TPGTest, TPGGraphHasVertex)
 {
     TPG::TPGGraph tpg(*e);

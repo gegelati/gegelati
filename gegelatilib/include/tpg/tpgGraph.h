@@ -96,7 +96,7 @@ namespace TPG {
          *
          * Free the memory allocated for TPGVertices.
          */
-        ~TPGGraph();
+        virtual ~TPGGraph();
 
         /**
          * \brief Empty the TPGGraph of all its content.
