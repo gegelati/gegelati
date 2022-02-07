@@ -5,6 +5,7 @@
 #include "instructions/lambdaInstruction.h"
 
 #include "tpg/instrumented/tpgGraphInstrumented.h"
+#include "tpg/instrumented/tpgTeamInstrumented.h"
 
 class TPGInstrumentedTest : public ::testing::Test
 {
@@ -41,6 +42,19 @@ class TPGInstrumentedTest : public ::testing::Test
         delete (&set.getInstruction(1));
     }
 };
+
+TEST_F(TPGInstrumentedTest, TPGTeamInstrumentedAndTPGActionInstrumentedConstructorsDestructors)
+{
+    TPG::TPGVertex* team;
+    TPG::TPGVertex* action;
+
+    
+    ASSERT_NO_THROW(team = new TPG::TPGTeamInstrumented());
+    ASSERT_NO_THROW(action = new TPG::TPGAction(0));
+
+    ASSERT_NO_THROW(delete team);
+    ASSERT_NO_THROW(delete action);
+}
 
 TEST_F(TPGInstrumentedTest, TPGGraphConstructorDestructor)
 {
