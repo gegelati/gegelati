@@ -1,6 +1,7 @@
-
 #ifndef TPG_VERTEX_INSTRUMENTATION_H
 #define TPG_VERTEX_INSTRUMENTATION_H
+
+#include <cstddef>
 
 namespace TPG {
     /**
