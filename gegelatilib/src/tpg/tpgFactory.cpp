@@ -1,17 +1,17 @@
-#include "tpg/tpgGraphElementFactory.h"
+#include "tpg/tpgFactory.h"
 
-TPG::TPGTeam* TPG::TPGGraphElementFactory::createTPGTeam() const
+TPG::TPGTeam* TPG::TPGFactory::createTPGTeam() const
 {
     return new TPG::TPGTeam();
 }
 
-TPG::TPGAction* TPG::TPGGraphElementFactory::createTPGAction(
+TPG::TPGAction* TPG::TPGFactory::createTPGAction(
     const uint64_t id) const
 {
     return new TPG::TPGAction(id);
 }
 
-std::unique_ptr<TPG::TPGEdge> TPG::TPGGraphElementFactory::createTPGEdge(
+std::unique_ptr<TPG::TPGEdge> TPG::TPGFactory::createTPGEdge(
     const TPGVertex* src, const TPGVertex* dest,
     const std::shared_ptr<Program::Program> prog) const
 {

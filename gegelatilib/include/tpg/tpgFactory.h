@@ -1,5 +1,5 @@
-#ifndef TPG_GRAPH_ELEMENT_FACTORY_H
-#define TPG_GRAPH_ELEMENT_FACTORY_H
+#ifndef TPG_FACTORY_H
+#define TPG_FACTORY_H
 
 #include <memory>
 
@@ -20,12 +20,12 @@ namespace TPG {
      *
      * This implementation returns the default type for each kind of element.
      */
-    class TPGGraphElementFactory
+    class TPGFactory
     {
 
       public:
         ///  Default virtual destructor.
-        virtual ~TPGGraphElementFactory() = default;
+        virtual ~TPGFactory() = default;
 
         /**
          * \brief Create a TPGTeam for a TPGGraph.

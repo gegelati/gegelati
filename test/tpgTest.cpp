@@ -49,7 +49,7 @@
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
 
-#include "tpg/tpgGraphElementFactory.h"
+#include "tpg/tpgFactory.h"
 
 class TPGTest : public ::testing::Test
 {
@@ -213,9 +213,9 @@ TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination)
         << "Destination of the TPGEdge differs from the one set right before.";
 }
 
-TEST_F(TPGTest, TPGGraphElementFactory)
+TEST_F(TPGTest, TPGFactory)
 {
-    TPG::TPGGraphElementFactory factory;
+    TPG::TPGFactory factory;
 
     TPG::TPGAction* action;
     TPG::TPGTeam* team;
