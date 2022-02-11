@@ -70,13 +70,13 @@ const Environment& TPG::TPGGraph::getEnvironment() const
 
 const TPG::TPGTeam& TPG::TPGGraph::addNewTeam()
 {
-    this->vertices.push_back(new TPG::TPGTeam());
+    this->vertices.push_back(factory.createTPGTeam());
     return (const TPGTeam&)(*this->vertices.back());
 }
 
 const TPG::TPGAction& TPG::TPGGraph::addNewAction(uint64_t actionID)
 {
-    this->vertices.push_back(new TPG::TPGAction(actionID));
+    this->vertices.push_back(factory.createTPGAction(actionID));
     return (const TPGAction&)(*this->vertices.back());
 }
 
@@ -188,7 +188,7 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
     }
 
     // Create the edge
-    this->edges.push_back(std::make_unique<TPGEdge>(&src, &dest, prog));
+    this->edges.push_back(factory.createTPGEdge(&src, &dest, prog));
     TPGEdge& newEdge = *(this->edges.back());
 
     // Add the edged to the Vertices
