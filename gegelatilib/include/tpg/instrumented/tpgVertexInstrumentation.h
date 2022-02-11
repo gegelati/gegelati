@@ -5,10 +5,12 @@
 
 namespace TPG {
     /**
-     * \brief Instrumentation code for TPGVertex class for instrumented execution.
+     * \brief Instrumentation code for TPGVertex class for instrumented
+     * execution.
      */
-    class TPGVertexInstrumentation 
+    class TPGVertexInstrumentation
     {
+      public:
         /**
          * \brief Get the number of time a TPGVertexInstrumentation was visited.
          */

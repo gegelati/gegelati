@@ -3,12 +3,13 @@
 
 #include "data/dataHandler.h"
 #include "environment.h"
-#include "instructions/set.h"
-#include "program/program.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
+#include "instructions/set.h"
+#include "program/program.h"
 
 #include "tpg/instrumented/tpgActionInstrumented.h"
+#include "tpg/instrumented/tpgEdgeInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 
 class TPGInstrumentedTest : public ::testing::Test
@@ -58,4 +59,84 @@ TEST_F(TPGInstrumentedTest,
 
     ASSERT_NO_THROW(delete team);
     ASSERT_NO_THROW(delete action);
+}
+
+TEST_F(TPGInstrumentedTest, TPGVertexInstrumentationSettersAndGetters)
+{
+    // Test TPGVertexInstrumentation through its TPGTeamInstrumented
+    // specialization.
+    TPG::TPGTeamInstrumented team;
+
+    ASSERT_EQ(team.getNbVisits(), 0)
+        << "Number of visit on a newly constructed TPGTeamInstrumented should "
+           "be 0.";
+
+    ASSERT_NO_THROW(team.incrementNbVisits())
+        << "Increment of number of visits on a TPGTeamInstrumented should not "
+           "fail.";
+
+    ASSERT_EQ(team.getNbVisits(), 1)
+        << "Number of visit of a TPGTeamInstrumented should "
+           "be 1 after an increment.";
+
+    ASSERT_NO_THROW(team.reset()) << "Reset of instrumentation counter should "
+                                     "not fail on a TPGTeamInstrumented.";
+
+    ASSERT_EQ(team.getNbVisits(), 0)
+        << "Number of visit of a TPGTeamInstrumented should "
+           "be 0 after a reset.";
+}
+
+TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedConstructorsDestructors)
+{
+    TPG::TPGTeam team;
+    TPG::TPGAction action(1);
+    TPG::TPGEdge* edge;
+
+    ASSERT_NO_THROW(
+        edge = new TPG::TPGEdgeInstrumented(&team, &action, progPointer));
+
+    ASSERT_NO_THROW(delete edge);
+}
+
+TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedSettersAndGetters)
+{
+    TPG::TPGTeam team;
+    TPG::TPGAction action(1);
+    TPG::TPGEdgeInstrumented edge(&team, &action, progPointer);
+
+    ASSERT_EQ(edge.getNbVisits(), 0)
+        << "Number of visit on a newly constructed TPGEdgeInstrumented should "
+           "be 0.";
+
+        ASSERT_EQ(edge.getNbTraversed(), 0)
+        << "Number of traversal on a newly constructed TPGEdgeInstrumented should "
+           "be 0.";
+
+    ASSERT_NO_THROW(edge.incrementNbVisits())
+        << "Increment of number of visits on a TPGEdgeInstrumented should not "
+           "fail.";
+
+    ASSERT_EQ(edge.getNbVisits(), 1)
+        << "Number of visit of a TPGEdgeInstrumented should "
+           "be 1 after an increment.";
+
+    ASSERT_NO_THROW(edge.incrementNbTraversed())
+        << "Increment of number of traversal on a TPGEdgeInstrumented should not "
+           "fail.";
+
+    ASSERT_EQ(edge.getNbTraversed(), 1)
+        << "Number of traversal of a TPGEdgeInstrumented should "
+           "be 1 after an increment.";
+
+    ASSERT_NO_THROW(edge.reset()) << "Reset of instrumentation counter should "
+                                     "not fail on a TPGEdgeInstrumented.";
+
+    ASSERT_EQ(edge.getNbVisits(), 0)
+        << "Number of visit of a TPGEdgeInstrumented should "
+           "be 0 after a reset.";
+
+        ASSERT_EQ(edge.getNbTraversed(), 0)
+        << "Number of traversal of a TPGEdgeInstrumented should "
+           "be 0 after a reset.";
 }
