@@ -75,6 +75,11 @@ namespace TPG {
         /**
          * \brief Set a new Program for the TPGEdge.
          *
+         * This method is const to enable use outside of the TPGGraph which is
+         * the only class accessing the non-const TPGEdge. Since the program
+         * pointer attribute is mutable, this method can successfully be used to
+         * alter the program.
+         *
          * \param[in] prog the new shared pointer to a Program.
          */
         void setProgram(const std::shared_ptr<Program::Program> prog) const;
@@ -127,6 +132,8 @@ namespace TPG {
 
         /// Shared pointer to the Program to execute when evaluating the bid
         /// of this TPGEdge.
+        /// This attribute is mutable to enable its modification during
+        /// mutations.
         mutable std::shared_ptr<Program::Program> program;
 
         /// Delete the default constructor.

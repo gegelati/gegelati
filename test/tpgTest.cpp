@@ -49,6 +49,8 @@
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
 
+#include "tpg/tpgGraphElementFactory.h"
+
 class TPGTest : public ::testing::Test
 {
   protected:
@@ -211,6 +213,28 @@ TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination)
         << "Destination of the TPGEdge differs from the one set right before.";
 }
 
+TEST_F(TPGTest, TPGGraphElementFactory)
+{
+    TPG::TPGGraphElementFactory factory;
+
+    TPG::TPGAction* action;
+    TPG::TPGTeam* team;
+    std::unique_ptr<TPG::TPGEdge> edge;
+
+    ASSERT_NO_THROW(action = factory.createTPGAction(0))
+        << "TPGGraphELementFactory could not build a TPGAction.";
+    ASSERT_NE(action, nullptr) << "Created TPGAction should not be null.";
+    ASSERT_NO_THROW(team = factory.createTPGTeam())
+        << "TPGGraphELementFactory could not build a TPGAction.";
+    ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
+    ASSERT_NO_THROW(edge = factory.createTPGEdge(team, action, progPointer))
+        << "TPGGraphELementFactory could not build a TPGAction.";
+    ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
+
+    delete team;
+    delete action;
+}
+
 TEST_F(TPGTest, TPGGraphAddTPGVertex)
 {
     TPG::TPGGraph tpg(*e);
@@ -226,9 +250,11 @@ TEST_F(TPGTest, TPGGraphConstructorDestructor)
 {
     TPG::TPGGraph* tpg;
 
-    ASSERT_NO_THROW(tpg = new TPG::TPGGraph(*e)) << "Error while calling a TPGGraph constructor.";
+    ASSERT_NO_THROW(tpg = new TPG::TPGGraph(*e))
+        << "Error while calling a TPGGraph constructor.";
 
-    ASSERT_NE(tpg, nullptr) << "TPGGraph construction succeded but returned a null pointer.";
+    ASSERT_NE(tpg, nullptr)
+        << "TPGGraph construction succeded but returned a null pointer.";
 
     ASSERT_NO_THROW(delete tpg) << "Destruction of a TPGGraph failed.";
 }

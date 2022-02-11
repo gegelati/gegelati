@@ -11,7 +11,9 @@ TPG::TPGAction* TPG::TPGGraphElementFactory::createTPGAction(
     return new TPG::TPGAction(id);
 }
 
-std::unique_ptr<TPG::TPGEdge> TPG::TPGGraphElementFactory::createTPGEdge() const
+std::unique_ptr<TPG::TPGEdge> TPG::TPGGraphElementFactory::createTPGEdge(
+    const TPGVertex* src, const TPGVertex* dest,
+    const std::shared_ptr<Program::Program> prog) const
 {
-    return std::unique_ptr<TPGEdge>();
+    return std::make_unique<TPG::TPGEdge>(src, dest, prog);
 }
