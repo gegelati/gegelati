@@ -1,8 +1,8 @@
 #ifndef TPG_VERTEX_INSTRUMENTATION_H
 #define TPG_VERTEX_INSTRUMENTATION_H
 
-#include <cstddef>
 #include <atomic>
+#include <cstddef>
 
 namespace TPG {
     /**
@@ -21,12 +21,12 @@ namespace TPG {
          * \brief Add one to the number of visits for this
          * TPGVertexInstrumented.
          */
-        void incrementNbVisits();
+        void incrementNbVisits() const;
 
         /**
          *  \brief Reset the instrumentation attributes.
          */
-        void reset();
+        void reset() const;
 
       protected:
         /**
@@ -39,7 +39,9 @@ namespace TPG {
         }
 
         /// Number of a time a TPGVertex has been visited
-        std::atomic_uint64_t nbVisits;
+        /// Attribute is mutable because all TPGVertex are seen as const outside
+        /// from their TPGGraph.
+        mutable std::atomic_uint64_t nbVisits;
     };
 } // namespace TPG
 

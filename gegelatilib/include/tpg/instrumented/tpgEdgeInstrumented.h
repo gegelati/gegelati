@@ -30,7 +30,7 @@ namespace TPG {
          * \brief Add one to the number of visits for this
          * TPGEdge
          */
-        void incrementNbVisits();
+        void incrementNbVisits() const;
 
         /**
          * \brief Get the number of time a TPGEdge was traversed.
@@ -43,21 +43,25 @@ namespace TPG {
          * \brief Add one to the number of visits for this
          * TPGEdge
          */
-        void incrementNbTraversed();
+        void incrementNbTraversed() const;
 
         /**
          *  \brief Reset the instrumentation attributes.
          */
-        void reset();
+        void reset() const;
 
       protected:
         /// Number of a time a TPGEdge has been visited
         /// That is the number of time it caused an execution of its program.
-        std::atomic_uint64_t nbVisits;
+        /// Attribute is mutable because all TPGEdge are seen as const outside
+        /// from their TPGGraph.
+        mutable std::atomic_uint64_t nbVisits;
 
         /// Number of a time a TPGEdge has been traversed
         /// That is the number of time its program produced the winning bid.
-        std::atomic_uint64_t nbTraversed;
+        /// Attribute is mutable because all TPGEdge are seen as const outside
+        /// from their TPGGraph.
+        mutable std::atomic_uint64_t nbTraversed;
     };
 } // namespace TPG
 

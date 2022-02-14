@@ -100,7 +100,7 @@ namespace TPG {
          * evaluated.
          * \return the double value returned by the Program of the TPGEdge.
          */
-        double evaluateEdge(const TPGEdge& edge);
+        virtual double evaluateEdge(const TPGEdge& edge);
 
         /**
          * \brief Evaluate all the Program of the outgoing TPGEdge of the
@@ -125,7 +125,7 @@ namespace TPG {
          *        at least one TPGAction, to ensure that all cycles have an
          *        exit.
          */
-        const TPG::TPGEdge& evaluateTeam(
+        virtual const TPG::TPGEdge& evaluateTeam(
             const TPGTeam& team, const std::vector<const TPGVertex*>& excluded);
 
         /**
@@ -139,7 +139,7 @@ namespace TPG {
          *         evaluation of the TPGGraph. The TPGAction resulting from the
          *         TPGGraph execution is at the end of the returned vector.
          */
-        const std::vector<const TPGVertex*> executeFromRoot(
+        virtual const std::vector<const TPGVertex*> executeFromRoot(
             const TPGVertex& root);
     };
 }; // namespace TPG
