@@ -10,6 +10,7 @@
 
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
+#include "tpg/instrumented/tpgInstrumentedFactory.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 
 class TPGInstrumentedTest : public ::testing::Test
@@ -109,8 +110,9 @@ TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedSettersAndGetters)
         << "Number of visit on a newly constructed TPGEdgeInstrumented should "
            "be 0.";
 
-        ASSERT_EQ(edge.getNbTraversed(), 0)
-        << "Number of traversal on a newly constructed TPGEdgeInstrumented should "
+    ASSERT_EQ(edge.getNbTraversed(), 0)
+        << "Number of traversal on a newly constructed TPGEdgeInstrumented "
+           "should "
            "be 0.";
 
     ASSERT_NO_THROW(edge.incrementNbVisits())
@@ -122,7 +124,8 @@ TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedSettersAndGetters)
            "be 1 after an increment.";
 
     ASSERT_NO_THROW(edge.incrementNbTraversed())
-        << "Increment of number of traversal on a TPGEdgeInstrumented should not "
+        << "Increment of number of traversal on a TPGEdgeInstrumented should "
+           "not "
            "fail.";
 
     ASSERT_EQ(edge.getNbTraversed(), 1)
@@ -136,7 +139,37 @@ TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedSettersAndGetters)
         << "Number of visit of a TPGEdgeInstrumented should "
            "be 0 after a reset.";
 
-        ASSERT_EQ(edge.getNbTraversed(), 0)
+    ASSERT_EQ(edge.getNbTraversed(), 0)
         << "Number of traversal of a TPGEdgeInstrumented should "
            "be 0 after a reset.";
+}
+
+TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
+{
+    TPG::TPGInstrumentedFactory factory;
+
+    TPG::TPGAction* action;
+    TPG::TPGTeam* team;
+    std::unique_ptr<TPG::TPGEdge> edge;
+
+    ASSERT_NO_THROW(action = factory.createTPGAction(0))
+        << "TPGFactory could not build a TPGAction.";
+    ASSERT_NE(action, nullptr) << "Created TPGAction should not be null.";
+    ASSERT_EQ(typeid(*action), typeid(TPG::TPGActionInstrumented))
+        << "Action built by the TPGInstrumentedFactory has an incorrect type.";
+
+    ASSERT_NO_THROW(team = factory.createTPGTeam())
+        << "TPGGraphELementFactory could not build a TPGAction.";
+    ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
+    ASSERT_EQ(typeid(*team), typeid(TPG::TPGTeamInstrumented))
+        << "Team built by the TPGInstrumentedFactory has an incorrect type.";
+
+    ASSERT_NO_THROW(edge = factory.createTPGEdge(team, action, progPointer))
+        << "TPGGraphELementFactory could not build a TPGAction.";
+    ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
+    ASSERT_EQ(typeid(*edge), typeid(TPG::TPGEdgeInstrumented))
+        << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
+
+    delete team;
+    delete action;
 }

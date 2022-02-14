@@ -50,6 +50,9 @@ namespace TPG {
     class TPGEdge
     {
       public:
+        /// Default virtual destructor (for polymorphism)
+        virtual ~TPGEdge() = default;
+
         /**
          * \brief Main constructor of the TPGEdge class.
          *
