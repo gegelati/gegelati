@@ -59,8 +59,9 @@ namespace TPG {
          * \param[in] e the Environment for the TPGGraph.
          * \param[in] f the TPGFactory used to create the graph elements.
          */
-        TPGGraph(const Environment& e, TPGFactory f = TPGFactory())
-            : env{e}, factory{f} {};
+        TPGGraph(const Environment& e,
+                 std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>())
+            : env{e}, factory{std::move(f)} {};
 
         /**
          * \brief delete copy constructor
@@ -298,7 +299,7 @@ namespace TPG {
         const Environment& env;
 
         /// TPGFactory of the TPGGraph
-        const TPGFactory factory;
+        const std::unique_ptr<TPGFactory> factory;
 
         /**
          * \brief Set of TPGVertex composing the TPGGraph.

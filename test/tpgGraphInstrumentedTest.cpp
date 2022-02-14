@@ -12,6 +12,7 @@
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 #include "tpg/instrumented/tpgInstrumentedFactory.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
+#include "tpg/tpgGraph.h"
 
 class TPGInstrumentedTest : public ::testing::Test
 {
@@ -172,4 +173,26 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
 
     delete team;
     delete action;
+}
+
+TEST_F(TPGInstrumentedTest, TPGGraphAddTPGVertexAndEdge)
+{
+    TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGInstrumentedFactory>());
+    const TPG::TPGTeam* t;
+    const TPG::TPGAction* a;
+    const TPG::TPGEdge* e;
+
+    ASSERT_NO_THROW(t = &tpg.addNewTeam())
+        << "Adding a new Team to a TPGGraph failed.";
+    ASSERT_EQ(typeid(*t), typeid(TPG::TPGTeamInstrumented))
+        << "Team built by the TPGInstrumentedFactory has an incorrect type.";
+
+    ASSERT_NO_THROW(a = &tpg.addNewAction(0))
+        << "Adding a new Action to a TPGGraph failed.";
+    ASSERT_EQ(typeid(*a), typeid(TPG::TPGActionInstrumented))
+        << "Action built by the TPGInstrumentedFactory has an incorrect type.";
+
+    ASSERT_NO_THROW(e = &tpg.addNewEdge(*t, *a, progPointer));
+    ASSERT_EQ(typeid(*e), typeid(TPG::TPGEdgeInstrumented))
+        << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
 }
