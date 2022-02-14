@@ -1,6 +1,9 @@
 #ifndef TPG_EDGE_INSTRUMENTED_H
 #define TPG_EDGE_INSTRUMENTED_H
 
+#include <atomic>
+#include <cstddef>
+
 #include "tpg/tpgEdge.h"
 
 namespace TPG {
