@@ -24,7 +24,7 @@ namespace TPG {
          *
          * That is the number of time it caused an execution of its program.
          */
-        size_t getNbVisits() const;
+        uint64_t getNbVisits() const;
 
         /**
          * \brief Add one to the number of visits for this
@@ -37,7 +37,7 @@ namespace TPG {
          *
          * hat is the number of time its program produced the winning bid.
          */
-        size_t getNbTraversed() const;
+        uint64_t getNbTraversed() const;
 
         /**
          * \brief Add one to the number of visits for this
@@ -53,11 +53,11 @@ namespace TPG {
       protected:
         /// Number of a time a TPGEdge has been visited
         /// That is the number of time it caused an execution of its program.
-        size_t nbVisits;
+        std::atomic_uint64_t nbVisits;
 
         /// Number of a time a TPGEdge has been traversed
         /// That is the number of time its program produced the winning bid.
-        size_t nbTraversed;
+        std::atomic_uint64_t nbTraversed;
     };
 } // namespace TPG
 

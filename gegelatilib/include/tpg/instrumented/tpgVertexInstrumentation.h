@@ -2,6 +2,7 @@
 #define TPG_VERTEX_INSTRUMENTATION_H
 
 #include <cstddef>
+#include <atomic>
 
 namespace TPG {
     /**
@@ -14,7 +15,7 @@ namespace TPG {
         /**
          * \brief Get the number of time a TPGVertexInstrumentation was visited.
          */
-        size_t getNbVisits() const;
+        uint64_t getNbVisits() const;
 
         /**
          * \brief Add one to the number of visits for this
@@ -38,7 +39,7 @@ namespace TPG {
         }
 
         /// Number of a time a TPGVertex has been visited
-        size_t nbVisits;
+        std::atomic_uint64_t nbVisits;
     };
 } // namespace TPG
 

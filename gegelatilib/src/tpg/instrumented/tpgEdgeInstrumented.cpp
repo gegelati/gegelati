@@ -1,6 +1,6 @@
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 
-size_t TPG::TPGEdgeInstrumented::getNbVisits() const
+uint64_t TPG::TPGEdgeInstrumented::getNbVisits() const
 {
     return this->nbVisits;
 }
@@ -10,7 +10,7 @@ void TPG::TPGEdgeInstrumented::incrementNbVisits()
     this->nbVisits++;
 }
 
-size_t TPG::TPGEdgeInstrumented::getNbTraversed() const
+uint64_t TPG::TPGEdgeInstrumented::getNbTraversed() const
 {
     return this->nbTraversed;
 }

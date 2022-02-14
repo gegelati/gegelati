@@ -1,7 +1,7 @@
 
 #include "tpg/instrumented/tpgVertexInstrumentation.h"
 
-size_t TPG::TPGVertexInstrumentation::getNbVisits() const
+uint64_t TPG::TPGVertexInstrumentation::getNbVisits() const
 {
     return this->nbVisits;
 }
