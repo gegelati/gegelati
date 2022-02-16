@@ -2,6 +2,7 @@
 #define TPG_INSTRUMENTED_FACTORY
 
 #include "tpg/tpgFactory.h"
+#include "tpg/tpgGraph.h"
 
 namespace TPG {
 
@@ -10,6 +11,11 @@ namespace TPG {
     class TPGInstrumentedFactory : public TPGFactory
     {
       public:
+        /// Specialization of the method returing the TPGGraph with a
+        /// TPGInstrumentedFactory as an attribute.
+        virtual std::shared_ptr<TPGGraph> createTPGGraph(
+            const Environment& env) const override;
+
         ///  Specialization of the method returning a TPGTeamInstrumented
         virtual TPGTeam* createTPGTeam() const override;
 

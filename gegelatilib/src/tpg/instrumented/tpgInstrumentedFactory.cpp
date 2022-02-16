@@ -3,6 +3,13 @@
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 
+std::shared_ptr<TPG::TPGGraph> TPG::TPGInstrumentedFactory::createTPGGraph(
+    const Environment& env) const
+{
+    return std::make_shared<TPG::TPGGraph>(
+        env, std::make_unique<TPGInstrumentedFactory>());
+}
+
 TPG::TPGTeam* TPG::TPGInstrumentedFactory::createTPGTeam() const
 {
     return new TPGTeamInstrumented();
