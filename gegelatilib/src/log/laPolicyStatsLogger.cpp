@@ -52,7 +52,7 @@ void Log::LAPolicyStatsLogger::logAfterDecimate()
               << std::endl
               << std::endl;
         TPG::PolicyStats ps;
-        ps.setEnvironment(this->learningAgent.getTPGGraph().getEnvironment());
+        ps.setEnvironment(this->learningAgent.getTPGGraph()->getEnvironment());
         ps.analyzePolicy(this->lastBestRoot);
         *this << ps << std::endl;
         *this << std::endl

@@ -66,7 +66,7 @@ class AdversarialLearningAgentWithCustomMakeJobs
         // sets the tpg to the Learning Agent's one if no one was specified
         std::queue<std::shared_ptr<Learn::Job>> jobs;
 
-        auto roots = tpg.getRootVertices();
+        auto roots = tpg->getRootVertices();
 
         uint64_t archiveSeed;
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);

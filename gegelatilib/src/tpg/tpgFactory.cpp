@@ -1,12 +1,18 @@
 #include "tpg/tpgFactory.h"
+#include "tpg/tpgGraph.h"
+
+std::shared_ptr<TPG::TPGGraph> TPG::TPGFactory::createTPGGraph(
+    const Environment& env) const
+{
+    return std::make_shared<TPG::TPGGraph>(env, std::make_unique<TPGFactory>());
+}
 
 TPG::TPGTeam* TPG::TPGFactory::createTPGTeam() const
 {
     return new TPG::TPGTeam();
 }
 
-TPG::TPGAction* TPG::TPGFactory::createTPGAction(
-    const uint64_t id) const
+TPG::TPGAction* TPG::TPGFactory::createTPGAction(const uint64_t id) const
 {
     return new TPG::TPGAction(id);
 }

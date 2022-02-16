@@ -4,16 +4,20 @@
 #include <memory>
 
 #include "tpg/tpgAction.h"
-#include "tpg/tpgTeam.h"
 #include "tpg/tpgEdge.h"
+#include "tpg/tpgTeam.h"
 
 namespace TPG {
+
+    // Declare the TPGGraph class to be used as a parameter.
+    class TPGGraph;
 
     /**
      * \brief Factory for creating all elements constituting a TPG.
      *
      * Using the factory design pattern, this class enables the creation of
      * all elements composing a TPGGraph:
+     * - TPGGraph
      * - TPGTeam
      * - TPGAction
      * - TPGVertex
@@ -26,6 +30,14 @@ namespace TPG {
       public:
         ///  Default virtual destructor.
         virtual ~TPGFactory() = default;
+
+        /**
+         * \brief Create a TPGGraph with this TPGFactory.
+         *
+         * \param[in] env Environment used to build the TPGGraph.
+         */
+        virtual std::shared_ptr<TPGGraph> createTPGGraph(
+            const Environment& env) const;
 
         /**
          * \brief Create a TPGTeam for a TPGGraph.

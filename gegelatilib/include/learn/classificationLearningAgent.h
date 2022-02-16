@@ -254,7 +254,7 @@ namespace Learn {
         }
 
         // Compute the number of root to keep/delete base on each criterion
-        uint64_t totalNbRoot = this->tpg.getNbRootVertices();
+        uint64_t totalNbRoot = this->tpg->getNbRootVertices();
         uint64_t nbRootsToDelete =
             (uint64_t)floor(this->params.ratioDeletedRoots * totalNbRoot);
         uint64_t nbRootsToKeep = (totalNbRoot - nbRootsToDelete);
@@ -323,7 +323,7 @@ namespace Learn {
         // Do the removal.
         // Because of potential root actions, the preserved number of roots
         // may be higher than the given ratio.
-        auto allRoots = this->tpg.getRootVertices();
+        auto allRoots = this->tpg->getRootVertices();
         auto& tpgRef = this->tpg;
         auto& resultsPerRootRef = this->resultsPerRoot;
         std::for_each(
@@ -335,7 +335,7 @@ namespace Learn {
                 if (vertexType != typeid(TPG::TPGAction) &&
                     std::find(rootsToKeep.begin(), rootsToKeep.end(), vert) ==
                         rootsToKeep.end()) {
-                    tpgRef.removeVertex(*vert);
+                    tpgRef->removeVertex(*vert);
 
                     // Keep only results of non-decimated roots.
                     resultsPerRootRef.erase(vert);
