@@ -1,5 +1,6 @@
 #include "tpg/tpgFactory.h"
 #include "tpg/tpgGraph.h"
+#include "tpg/tpgExecutionEngine.h"
 
 std::shared_ptr<TPG::TPGGraph> TPG::TPGFactory::createTPGGraph(
     const Environment& env) const
@@ -22,4 +23,10 @@ std::unique_ptr<TPG::TPGEdge> TPG::TPGFactory::createTPGEdge(
     const std::shared_ptr<Program::Program> prog) const
 {
     return std::make_unique<TPG::TPGEdge>(src, dest, prog);
+}
+
+std::unique_ptr<TPG::TPGExecutionEngine> TPG::TPGFactory::createTPGExecutionEngine(
+    const Environment& env, Archive* arch) const
+{
+    return std::make_unique<TPG::TPGExecutionEngine>(env, arch);
 }

@@ -45,6 +45,7 @@
 
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
+#include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
@@ -220,16 +221,23 @@ TEST_F(TPGTest, TPGFactory)
     TPG::TPGAction* action;
     TPG::TPGTeam* team;
     std::unique_ptr<TPG::TPGEdge> edge;
+    std::unique_ptr<TPG::TPGExecutionEngine> tee;
 
     ASSERT_NO_THROW(action = factory.createTPGAction(0))
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(action, nullptr) << "Created TPGAction should not be null.";
+
     ASSERT_NO_THROW(team = factory.createTPGTeam())
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
+
     ASSERT_NO_THROW(edge = factory.createTPGEdge(team, action, progPointer))
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
+
+    ASSERT_NO_THROW(tee = factory.createTPGExecutionEngine(*e, nullptr))
+        << "TPGGraphELementFactory could not build a TPGExecutionEngine.";
+    ASSERT_NE(tee.get(), nullptr) << "Created TPGEdge should not be null.";
 
     delete team;
     delete action;

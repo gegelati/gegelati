@@ -6,11 +6,15 @@
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgTeam.h"
+#include "archive.h"
 
 namespace TPG {
 
     // Declare the TPGGraph class to be used as a parameter.
     class TPGGraph;
+
+    // Declare the TPGExecutionEngine class to be used as a parameter.
+    class TPGExecutionEngine;
 
     /**
      * \brief Factory for creating all elements constituting a TPG.
@@ -21,6 +25,8 @@ namespace TPG {
      * - TPGTeam
      * - TPGAction
      * - TPGVertex
+     *
+     * The factory also enables the creation of TPGExecutionEngine.
      *
      * This implementation returns the default type for each kind of element.
      */
@@ -69,7 +75,24 @@ namespace TPG {
         virtual std::unique_ptr<TPGEdge> createTPGEdge(
             const TPGVertex* src, const TPGVertex* dest,
             const std::shared_ptr<Program::Program> prog) const;
+
+        /**
+         * \brief Create a TPGExecutionEngine for a TPGGraph produced by this
+         * TPGFactory.
+         *
+         * \param[in] env Environment in which the Program of the TPGGraph will
+         * be executed.
+         * \param[in] arch pointer to the Archive for storing recordings of the
+         * Program Execution. By default, a NULL pointer is given, meaning that
+         * no recording of the execution will be made.
+         *
+         * \return the returned TPGExecutionEngine returned as an unique_ptr.
+         */
+        virtual std::unique_ptr<TPG::TPGExecutionEngine>
+        createTPGExecutionEngine(const Environment& env,
+                                 Archive* arch = NULL) const;
     };
+
 } // namespace TPG
 
 #endif // !TPG_GRAPH_ELEMENT_FACTORY_H

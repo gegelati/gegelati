@@ -115,6 +115,13 @@ namespace TPG {
         const Environment& getEnvironment() const;
 
         /**
+        * \brief Get a reference to the TPGFactory of the TPGGraph.
+        * 
+        * \return a reference to the TPGFactory.
+        */
+        const TPGFactory& getFactory() const;
+
+        /**
          * \brief Create a new TPGTeam and add it to the vertices of the
          * TPGGraph.
          *

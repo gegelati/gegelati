@@ -1,6 +1,7 @@
 #include "tpg/instrumented/tpgInstrumentedFactory.h"
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
+#include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 
 std::shared_ptr<TPG::TPGGraph> TPG::TPGInstrumentedFactory::createTPGGraph(
@@ -27,4 +28,10 @@ std::unique_ptr<TPG::TPGEdge> TPG::TPGInstrumentedFactory::createTPGEdge(
 {
     auto ptr = std::make_unique<TPG::TPGEdgeInstrumented>(src, dest, prog);
     return ptr;
+}
+
+std::unique_ptr<TPG::TPGExecutionEngine> TPG::TPGInstrumentedFactory::
+    createTPGExecutionEngine(const Environment& env, Archive* arch) const
+{
+    return std::make_unique<TPGExecutionEngineInstrumented>(env, arch);
 }

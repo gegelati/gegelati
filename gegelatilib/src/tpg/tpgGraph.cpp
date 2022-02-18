@@ -68,6 +68,11 @@ const Environment& TPG::TPGGraph::getEnvironment() const
     return this->env;
 }
 
+const TPG::TPGFactory& TPG::TPGGraph::getFactory() const
+{
+    return *this->factory;
+}
+
 const TPG::TPGTeam& TPG::TPGGraph::addNewTeam()
 {
     this->vertices.push_back(factory->createTPGTeam());

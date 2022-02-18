@@ -26,6 +26,10 @@ namespace TPG {
         virtual std::unique_ptr<TPGEdge> createTPGEdge(
             const TPGVertex* src, const TPGVertex* dest,
             const std::shared_ptr<Program::Program> prog) const override;
+
+        ///  Specialization of the method returning a TPGExecutionEngineInstrumented
+        virtual std::unique_ptr<TPGExecutionEngine> createTPGExecutionEngine(
+            const Environment& env, Archive* arch = NULL) const override;
     };
 } // namespace TPG
 

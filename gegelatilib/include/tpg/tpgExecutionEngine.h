@@ -82,6 +82,9 @@ namespace TPG {
         TPGExecutionEngine(const Environment& env, Archive* arch = NULL)
             : progExecutionEngine(env), archive{arch} {};
 
+        ///  Default virtual destructor
+        virtual ~TPGExecutionEngine() = default;
+
         /**
          * \brief Set a new Archive for storing Program results.
          *

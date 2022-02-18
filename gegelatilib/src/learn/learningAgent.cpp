@@ -168,14 +168,16 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
     // Create the TPGExecutionEngine for this evaluation.
     // The engine uses the Archive only in training mode.
-    TPG::TPGExecutionEngine tee(
-        this->env, (mode == LearningMode::TRAINING) ? &this->archive : NULL);
+    std::unique_ptr<TPG::TPGExecutionEngine> tee =
+        this->tpg->getFactory().createTPGExecutionEngine(
+            this->env,
+            (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
     for (int i = 0; i < tpg->getNbRootVertices(); i++) {
         auto job = makeJob(i, mode);
         this->archive.setRandomSeed(job->getArchiveSeed());
         std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
-            tee, *job, generationNumber, mode, this->learningEnvironment);
+            *tee, *job, generationNumber, mode, this->learningEnvironment);
         result.emplace(avgScore, (*job).getRoot());
     }
 

@@ -10,6 +10,7 @@
 
 #include "tpg/instrumented/tpgActionInstrumented.h"
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
+#include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
 #include "tpg/instrumented/tpgInstrumentedFactory.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 #include "tpg/tpgGraph.h"
@@ -152,6 +153,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
     TPG::TPGAction* action;
     TPG::TPGTeam* team;
     std::unique_ptr<TPG::TPGEdge> edge;
+    std::unique_ptr<TPG::TPGExecutionEngine> tee;
 
     ASSERT_NO_THROW(action = factory.createTPGAction(0))
         << "TPGFactory could not build a TPGAction.";
@@ -169,6 +171,12 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
     ASSERT_EQ(typeid(*edge), typeid(TPG::TPGEdgeInstrumented))
+        << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
+
+    ASSERT_NO_THROW(tee = factory.createTPGExecutionEngine(*e, nullptr))
+        << "TPGGraphELementFactory could not build a TPGExecutionEngine.";
+    ASSERT_NE(tee.get(), nullptr) << "Created TPGEdge should not be null.";
+    ASSERT_EQ(typeid(*tee), typeid(TPG::TPGExecutionEngineInstrumented))
         << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
 
     delete team;
