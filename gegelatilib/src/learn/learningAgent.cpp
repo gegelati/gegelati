@@ -244,7 +244,7 @@ void Learn::LearningAgent::decimateWorstRoots(
            results.size() > 0) {
         // If the root is an action, do not remove it!
         const TPG::TPGVertex* root = results.begin()->second;
-        if (typeid(*root) != typeid(TPG::TPGAction)) {
+        if (dynamic_cast<const TPG::TPGAction*>(root) == nullptr) {
             tpg->removeVertex(*results.begin()->second);
             // Removed stored result (if any)
             this->resultsPerRoot.erase(results.begin()->second);

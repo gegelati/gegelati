@@ -574,13 +574,15 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const TPG::TPGVertex* vert) {
-                                return typeid(*vert) == typeid(TPG::TPGAction);
+                                return dynamic_cast<const TPG::TPGAction*>(
+                                           vert) != nullptr;
                             }),
               params.tpg.nbActions)
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const TPG::TPGVertex* vert) {
-                                return typeid(*vert) == typeid(TPG::TPGTeam);
+                                return dynamic_cast<const TPG::TPGTeam*>(
+                                           vert) != nullptr;
                             }),
               params.tpg.nbActions)
         << "Number of team vertex in the graph is incorrect.";

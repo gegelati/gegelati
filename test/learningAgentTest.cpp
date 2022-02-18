@@ -44,6 +44,7 @@
 
 #include "tpg/policyStats.h"
 #include "tpg/tpgGraph.h"
+#include "tpg/instrumented/tpgInstrumentedFactory.h"
 
 #include "instructions/addPrimitiveType.h"
 #include "mutator/rng.h"
@@ -521,7 +522,7 @@ TEST_F(LearningAgentTest, Train)
         << "Using the boolean reference to stop the training should not fail.";
 }
 
-// Similat to previous test, but verifications of graphs properties are here to
+// Similar to previous test, but verifications of graphs properties are here to
 // ensure the result of the training is identical on all OSes and Compilers.
 TEST_F(LearningAgentTest, TrainPortability)
 {
@@ -538,6 +539,42 @@ TEST_F(LearningAgentTest, TrainPortability)
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
 
     Learn::LearningAgent la(le, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    ASSERT_EQ(tpg.getNbVertices(), 28)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 25)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 94)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              14825295448422883263u)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
+// Same as previous, but with a TPGInstrumentedFactory
+TEST_F(LearningAgentTest, TrainInstrumented)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+
+    Learn::LearningAgent la(le, set, params, TPG::TPGInstrumentedFactory());
 
     la.init();
     bool alt = false;

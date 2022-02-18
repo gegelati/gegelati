@@ -156,10 +156,10 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
 
     // Create a new Vertex
     // (at the end of the vertices list)
-    if (typeid(vertex) == typeid(TPGTeam)) {
+    if (dynamic_cast<const TPG::TPGTeam*>(&vertex) != nullptr) {
         this->addNewTeam();
     }
-    else if (typeid(vertex) == typeid(TPGAction)) {
+    else if (dynamic_cast<const TPG::TPGAction*>(&vertex) != nullptr) {
         this->addNewAction(((TPGAction&)vertex).getActionID());
     }
 
