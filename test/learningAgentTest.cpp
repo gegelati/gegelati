@@ -45,6 +45,10 @@
 #include "tpg/policyStats.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/instrumented/tpgEdgeInstrumented.h"
+#include "tpg/instrumented/tpgTeamInstrumented.h"
+#include "tpg/instrumented/tpgActionInstrumented.h"
+#include "tpg/instrumented/tpgVertexInstrumentation.h"
 
 #include "instructions/addPrimitiveType.h"
 #include "mutator/rng.h"
@@ -593,6 +597,31 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
               14825295448422883263u)
         << "Graph does not have the expected determinst characteristics.";
+
+    // Check number of visits of a few edges & vertices
+    auto& edgesIterator = tpg.getEdges().begin();
+    const auto* edge1 = edgesIterator->get();
+    ASSERT_EQ(dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(), 1);
+    ASSERT_EQ(
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversed(), 1);
+
+    std::advance(edgesIterator, 38);
+    const auto* edge2 = edgesIterator->get();
+    ASSERT_EQ(
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbVisits(), 106);
+    ASSERT_EQ(
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversed(),
+        2);
+
+
+    auto& verticesIterator = tpg.getVertices();
+    ASSERT_EQ(
+        dynamic_cast<const TPG::TPGVertexInstrumentation*>(verticesIterator.at(0))->getNbVisits(),
+        7036);
+    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
+                  verticesIterator.at(3))
+                  ->getNbVisits(),
+              684);
 }
 
 TEST_F(LearningAgentTest, KeepBestPolicy)
