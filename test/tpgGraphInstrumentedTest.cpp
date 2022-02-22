@@ -204,3 +204,39 @@ TEST_F(TPGInstrumentedTest, TPGGraphAddTPGVertexAndEdge)
     ASSERT_EQ(typeid(*e), typeid(TPG::TPGEdgeInstrumented))
         << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
 }
+
+TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
+{
+    // Add to the TPG
+    TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGInstrumentedFactory>());
+    const TPG::TPGTeamInstrumented& t =
+        dynamic_cast<const TPG::TPGTeamInstrumented&>(tpg.addNewTeam());
+    const TPG::TPGActionInstrumented& a =
+        dynamic_cast<const TPG::TPGActionInstrumented&>(tpg.addNewAction(0));
+    const TPG::TPGEdgeInstrumented& e =
+        dynamic_cast<const TPG::TPGEdgeInstrumented&>(
+            tpg.addNewEdge(t, a, progPointer));
+
+    // Increment counters
+    t.incrementNbVisits();
+    a.incrementNbVisits();
+    e.incrementNbVisits();
+    e.incrementNbTraversed();
+
+    // Check increment
+    ASSERT_EQ(t.getNbVisits(), 1);
+    ASSERT_EQ(a.getNbVisits(), 1);
+    ASSERT_EQ(e.getNbVisits(), 1);
+    ASSERT_EQ(e.getNbTraversed(), 1);
+
+    // Do the reset
+    ASSERT_NO_THROW(
+        dynamic_cast<const TPG::TPGInstrumentedFactory&>(tpg.getFactory())
+            .resetTPGGraphCounters(tpg));
+
+    // Check result
+    ASSERT_EQ(t.getNbVisits(), 0);
+    ASSERT_EQ(a.getNbVisits(), 0);
+    ASSERT_EQ(e.getNbVisits(), 0);
+    ASSERT_EQ(e.getNbTraversed(), 0);
+}

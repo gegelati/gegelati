@@ -6,8 +6,12 @@
 
 namespace TPG {
 
-    ///  Specialization of the TPGFactory class producing TPGTeamInstrumented,
-    ///  TPGActionInstrumented, TPGEdgeInstrumented
+    /// Specialization of the TPGFactory class producing TPGTeamInstrumented,
+    /// TPGActionInstrumented, TPGEdgeInstrumented, and
+    /// TPGExecutionEngineInstrumented
+    ///
+    /// Also contains a helper function for resetting the instrumentation of a
+    /// TPGGraph.
     class TPGInstrumentedFactory : public TPGFactory
     {
       public:
@@ -27,9 +31,18 @@ namespace TPG {
             const TPGVertex* src, const TPGVertex* dest,
             const std::shared_ptr<Program::Program> prog) const override;
 
-        ///  Specialization of the method returning a TPGExecutionEngineInstrumented
+        ///  Specialization of the method returning a
+        ///  TPGExecutionEngineInstrumented
         virtual std::unique_ptr<TPGExecutionEngine> createTPGExecutionEngine(
             const Environment& env, Archive* arch = NULL) const override;
+        /**
+         * \brief Reset all visit and traversal counters of a TPGGraph.
+         *
+         * \param[in] tpg the TPGGraph whose TPGTeamInstrumented,
+         * TPGActionInstrumented, and TPGEdgeInstrumented will be reseted.The
+         * TPGGraph is const since all instrumentation counters are mutable.
+         */
+        void resetTPGGraphCounters(const TPG::TPGGraph& tpg) const;
     };
 } // namespace TPG
 

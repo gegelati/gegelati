@@ -35,3 +35,25 @@ std::unique_ptr<TPG::TPGExecutionEngine> TPG::TPGInstrumentedFactory::
 {
     return std::make_unique<TPGExecutionEngineInstrumented>(env, arch);
 }
+
+void TPG::TPGInstrumentedFactory::resetTPGGraphCounters(
+    const TPG::TPGGraph& tpg) const
+{
+    // Reset all vertices
+    for (const TPG::TPGVertex* vertex : tpg.getVertices()) {
+        const TPG::TPGVertexInstrumentation* vertexI =
+            dynamic_cast<const TPG::TPGVertexInstrumentation*>(vertex);
+        if (vertexI != nullptr) {
+            vertexI->reset();
+        }
+    }
+
+    // Reset all edges
+    for (const auto& edge : tpg.getEdges()) {
+        const TPG::TPGEdgeInstrumented* edgeI =
+            dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge.get());
+        if (edgeI != nullptr) {
+            edgeI->reset();
+        }
+    }
+}
