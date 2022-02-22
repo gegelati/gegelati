@@ -599,7 +599,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
         << "Graph does not have the expected determinst characteristics.";
 
     // Check number of visits of a few edges & vertices
-    auto& edgesIterator = tpg.getEdges().begin();
+    auto edgesIterator = tpg.getEdges().begin();
     const auto* edge1 = edgesIterator->get();
     ASSERT_EQ(dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(), 1);
     ASSERT_EQ(
