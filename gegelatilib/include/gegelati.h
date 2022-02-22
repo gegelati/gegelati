@@ -108,6 +108,7 @@
 #ifdef CODE_GENERATION
 #include <codeGen/programGenerationEngine.h>
 #include <codeGen/tpgGenerationEngine.h>
+#include <codeGen/tpgGenerationEngineFactory.h>
 #endif
 
 #include <archive.h>

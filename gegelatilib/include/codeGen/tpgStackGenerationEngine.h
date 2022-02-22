@@ -37,17 +37,9 @@
 
 #ifdef CODE_GENERATION
 
-#ifndef TPG_GENERATION_ENGINE_H
-#define TPG_GENERATION_ENGINE_H
-#include <ios>
-#include <iostream>
-#include <string>
-
-#include "codeGen/programGenerationEngine.h"
-#include "tpg/tpgAbstractEngine.h"
-#include "tpg/tpgEdge.h"
-#include "tpg/tpgGraph.h"
-#include "tpg/tpgTeam.h"
+#ifndef TPG_STACK_GENERATION_ENGINE_H
+#define TPG_STACK_GENERATION_ENGINE_H
+#include "codeGen/tpgGenerationEngine.h"
 
 namespace CodeGen {
     /**
@@ -66,35 +58,24 @@ namespace CodeGen {
      * The repo gegelati apps give some example of the template code completed
      * for TicTacToe, Pendulum and StickGame.
      */
-    class TPGGenerationEngine : public TPG::TPGAbstractEngine
+    class TPGStackGenerationEngine : public CodeGen::TPGGenerationEngine
     {
       protected:
         /**
-         * String added at the end of the parameter filename to create the
-         * filename of the file with the programs of the TPGGraph.
-         */
-        inline static const std::string filenameProg = "program";
-
-        /// File holding the functions in charge of iterating through the TPG.
-        std::ofstream fileMain;
-        /// header file for the function that iterates through the TPG.
-        std::ofstream fileMainH;
-
-        /**
-         * \brief ProgramGenerationEngine for generating Programs of edges.
+         * \brief Size of the stack of visited edges.
          *
-         * Keeping this ProgramGenerationEngine as an attribute avoids wasting
-         * time rebuilding a new one for each edge.
+         * Stack holding the visited edges during the iteration of the TPG.
+         * Stop the execution of the program if the callStack is too small to
+         * store all the visited edges
          */
-        CodeGen::ProgramGenerationEngine progGenerationEngine;
-
+        uint64_t stackSize;
         /**
          * \brief function printing generic code in the main file.
          *
          * This function prints generic code to execute the TPG and manage the
          * stack of visited edges.
          */
-        virtual void initTpgFile() = 0;
+        virtual void initTpgFile();
 
         /**
          * \brief function printing generic code declaration in the main file
@@ -104,7 +85,7 @@ namespace CodeGen {
          * the prototypes of the function to execute the TPG and manage the
          * stack of visited edges.
          */
-        virtual void initHeaderFile() = 0;
+        virtual void initHeaderFile();
 
       public:
         /**
@@ -118,17 +99,21 @@ namespace CodeGen {
          *
          * \param[in] path to the folder in which the file are generated. If the
          * folder does not exist.
+         *
+         * \param[in] stackSize size of call stack for the execution of the TPG
+         * graph.
          */
-        TPGGenerationEngine(const std::string& filename,
-                            const TPG::TPGGraph& tpg,
-                            const std::string& path = "./");
+        TPGStackGenerationEngine(const std::string& filename,
+                                 const TPG::TPGGraph& tpg,
+                                 const std::string& path = "./",
+                                 const uint64_t& stackSize = 8);
 
         /**
          * \brief destructor of the class.
          *
          * add endif at the end of the header and close both file.
          */
-        ~TPGGenerationEngine();
+        ~TPGStackGenerationEngine();
 
         /**
          * \brief function that creates the C files required to execute the TPG
@@ -137,9 +122,8 @@ namespace CodeGen {
          * This function iterates trough the TPGGraph and create the required C
          * code to represent each element of the TPGGraph.
          */
-        virtual void generateTPGGraph() = 0;
+        virtual void generateTPGGraph();
 
-    protected:
         /**
          * \brief Method for generating the code for an edge of the graph.
          *
@@ -153,7 +137,7 @@ namespace CodeGen {
          *
          * \param[in] edge that must be generated.
          */
-        virtual void generateEdge(const TPG::TPGEdge& edge) = 0;
+        virtual void generateEdge(const TPG::TPGEdge& edge);
 
         /**
          * \brief Method for generating the code for a team of the graph.
@@ -165,7 +149,7 @@ namespace CodeGen {
          * \param[in] team const reference of the TPGTeam that must be
          * generated.
          */
-        virtual void generateTeam(const TPG::TPGTeam& team) = 0;
+        virtual void generateTeam(const TPG::TPGTeam& team);
 
         /**
          * \brief Method for generating a action of the graph.
@@ -177,10 +161,18 @@ namespace CodeGen {
          * \param[in] action const reference of the TPGAction that must be
          * generated.
          */
-        virtual void generateAction(const TPG::TPGAction& action) = 0;
+        virtual void generateAction(const TPG::TPGAction& action);
+
+        /**
+         * \brief define the function pointer root to the vertex given in
+         * parameter.
+         *
+         * \param[in] root const reference to the root of the TPG graph.
+         */
+        virtual void setRoot(const TPG::TPGVertex& root);
     };
 } // namespace CodeGen
 
-#endif // TPGGENERATIONENGINE_H
+#endif // TPG_STACK_GENERATION_ENGINE_H
 
 #endif // CODE_GENERATION

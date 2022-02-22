@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
         remainingSticks[0] = atoi(argv[i]);
     }
 
-    action = executeFromVertex(root);
+    action = inferenceTPG();
     return action;
 #ifdef DEBUG
     printf("action : %d\n", action);
@@ -77,8 +77,7 @@ int main(int argc, char* argv[])
         return ERROR_INFERENCE;
     }
 
-    reset();
-    action = executeFromVertex(root);
+    action = inferenceTPG();
     if (expectedVal != -1 && action != expectedVal) {
         return ERROR_RESET;
     }

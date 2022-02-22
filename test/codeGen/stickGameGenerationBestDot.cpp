@@ -48,7 +48,7 @@
 
 #include "../learn/stickGameAdversarial.h"
 #include "codeGen/programGenerationEngine.h"
-#include "codeGen/tpgGenerationEngine.h"
+#include "codeGen/tpgGenerationEngineFactory.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
@@ -157,8 +157,9 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 TEST_F(StickGameGenerationBestDotTest, BestTPG)
 {
     int inferenceCodeGen, inferenceGegelati;
+    CodeGen::TPGGenerationEngineFactory factory;
     tpgGen =
-        new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, "./src/");
+        factory.create("StickGameBest_TPG", *tpg, "./src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files

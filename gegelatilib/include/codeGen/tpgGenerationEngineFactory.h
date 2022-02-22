@@ -1,7 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
+ * Mickael Dardaillon <mdardail@insa-rennes.fr> (2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,44 +35,56 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-/// doc in ../README.md
-#include <stdio.h>
-#include <stdlib.h>
+#ifdef CODE_GENERATION
 
-#include "OneLeafNoInstruction.h"
+#ifndef TPG_GENERATION_ENGINE_FACTORY_H
+#define TPG_GENERATION_ENGINE_FACTORY_H
+#include "codeGen/tpgGenerationEngine.h"
 
-#define ERROR_INFERENCE 1
-#define ERROR_RESET 2
-double* in1;
+namespace CodeGen {
+    /**
+     * \brief Factory class to create code generators.
+     */
+    class TPGGenerationEngineFactory
+    {
+      public:
+        /**
+         * @brief Enumeration of possible codegen modes.
+         *
+         */
+        enum generationEngineMode
+        {
+            stackMode,
+            switchMode
+        };
 
-int main(int argc, char* argv[])
-{
-    double tab[1];
-    in1 = tab;
-    int expectedVal;
-    int action;
-    if (argc == 1) {
-        expectedVal = -1;
-        in1[0] = 1;
-    }
-    else {
-        expectedVal = atoi(argv[1]);
-        for (int i = 2, cpt = 0; i < argc && cpt < 1; ++cpt, ++i) {
-            tab[cpt] = atof(argv[i]);
-        }
-    }
-    action = inferenceTPG();
-#ifdef DEBUG
-    printf("action : %d\n", action);
-#endif // DEBUG
-    if (expectedVal != -1 && action != expectedVal) {
-        return ERROR_INFERENCE;
-    }
+        /**
+         * @brief Factory constructor with default mode
+         *
+         */
+        TPGGenerationEngineFactory();
 
-    action = inferenceTPG();
-    if (expectedVal != -1 && action != expectedVal) {
-        return ERROR_RESET;
-    }
+        /**
+         * @brief Factory constructor with parameterized mode
+         *
+         * @param mode method chosen for code generation
+         */
+        TPGGenerationEngineFactory(enum generationEngineMode mode);
 
-    return 0;
-}
+        /**
+         * @brief Factory method to create a codegen with the configured mode.
+         *
+         * @return TPGGenerationEngine*
+         */
+        TPGGenerationEngine* create(const std::string& filename,
+                                    const TPG::TPGGraph& tpg,
+                                    const std::string& path = "./");
+
+      private:
+        enum generationEngineMode mode;
+    };
+} // namespace CodeGen
+
+#endif // TPG_GENERATION_ENGINE_FACTORY_H
+
+#endif // CODE_GENERATION
