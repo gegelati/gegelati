@@ -128,7 +128,7 @@ namespace CodeGen {
          *
          * add endif at the end of the header and close both file.
          */
-        ~TPGGenerationEngine();
+        virtual ~TPGGenerationEngine();
 
         /**
          * \brief function that creates the C files required to execute the TPG
