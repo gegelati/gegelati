@@ -112,7 +112,7 @@ TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedSettersAndGetters)
         << "Number of visit on a newly constructed TPGEdgeInstrumented should "
            "be 0.";
 
-    ASSERT_EQ(edge.getNbTraversed(), 0)
+    ASSERT_EQ(edge.getNbTraversal(), 0)
         << "Number of traversal on a newly constructed TPGEdgeInstrumented "
            "should "
            "be 0.";
@@ -125,12 +125,12 @@ TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedSettersAndGetters)
         << "Number of visit of a TPGEdgeInstrumented should "
            "be 1 after an increment.";
 
-    ASSERT_NO_THROW(edge.incrementNbTraversed())
+    ASSERT_NO_THROW(edge.incrementNbTraversal())
         << "Increment of number of traversal on a TPGEdgeInstrumented should "
            "not "
            "fail.";
 
-    ASSERT_EQ(edge.getNbTraversed(), 1)
+    ASSERT_EQ(edge.getNbTraversal(), 1)
         << "Number of traversal of a TPGEdgeInstrumented should "
            "be 1 after an increment.";
 
@@ -141,7 +141,7 @@ TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedSettersAndGetters)
         << "Number of visit of a TPGEdgeInstrumented should "
            "be 0 after a reset.";
 
-    ASSERT_EQ(edge.getNbTraversed(), 0)
+    ASSERT_EQ(edge.getNbTraversal(), 0)
         << "Number of traversal of a TPGEdgeInstrumented should "
            "be 0 after a reset.";
 }
@@ -221,13 +221,13 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
     t.incrementNbVisits();
     a.incrementNbVisits();
     e.incrementNbVisits();
-    e.incrementNbTraversed();
+    e.incrementNbTraversal();
 
     // Check increment
     ASSERT_EQ(t.getNbVisits(), 1);
     ASSERT_EQ(a.getNbVisits(), 1);
     ASSERT_EQ(e.getNbVisits(), 1);
-    ASSERT_EQ(e.getNbTraversed(), 1);
+    ASSERT_EQ(e.getNbTraversal(), 1);
 
     // Do the reset
     ASSERT_NO_THROW(
@@ -238,5 +238,5 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
     ASSERT_EQ(t.getNbVisits(), 0);
     ASSERT_EQ(a.getNbVisits(), 0);
     ASSERT_EQ(e.getNbVisits(), 0);
-    ASSERT_EQ(e.getNbTraversed(), 0);
+    ASSERT_EQ(e.getNbTraversal(), 0);
 }

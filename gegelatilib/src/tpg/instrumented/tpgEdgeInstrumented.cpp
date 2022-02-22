@@ -10,18 +10,18 @@ void TPG::TPGEdgeInstrumented::incrementNbVisits() const
     this->nbVisits++;
 }
 
-uint64_t TPG::TPGEdgeInstrumented::getNbTraversed() const
+uint64_t TPG::TPGEdgeInstrumented::getNbTraversal() const
 {
-    return this->nbTraversed;
+    return this->nbTraversal;
 }
 
-void TPG::TPGEdgeInstrumented::incrementNbTraversed() const
+void TPG::TPGEdgeInstrumented::incrementNbTraversal() const
 {
-    this->nbTraversed++;
+    this->nbTraversal++;
 }
 
 void TPG::TPGEdgeInstrumented::reset() const
 {
-    this->nbTraversed = 0;
+    this->nbTraversal = 0;
     this->nbVisits = 0;
 }

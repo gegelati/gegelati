@@ -17,7 +17,7 @@ const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(
     const TPGEdge& winningEdge =
         TPGExecutionEngine::evaluateTeam(team, excluded);
     dynamic_cast<const TPGEdgeInstrumented&>(winningEdge)
-        .incrementNbTraversed();
+        .incrementNbTraversal();
     return winningEdge;
 }
 

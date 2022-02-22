@@ -18,7 +18,7 @@ namespace TPG {
         /// Default constructor
         TPGEdgeInstrumented(const TPGVertex* src, const TPGVertex* dest,
                             const std::shared_ptr<Program::Program> prog)
-            : TPGEdge(src, dest, prog), nbVisits{0}, nbTraversed{0}
+            : TPGEdge(src, dest, prog), nbVisits{0}, nbTraversal{0}
         {
         }
 
@@ -38,15 +38,15 @@ namespace TPG {
         /**
          * \brief Get the number of time a TPGEdge was traversed.
          *
-         * hat is the number of time its program produced the winning bid.
+         * That is the number of time its program produced the winning bid.
          */
-        uint64_t getNbTraversed() const;
+        uint64_t getNbTraversal() const;
 
         /**
-         * \brief Add one to the number of visits for this
+         * \brief Add one to the number of traversal for this
          * TPGEdge
          */
-        void incrementNbTraversed() const;
+        void incrementNbTraversal() const;
 
         /**
          *  \brief Reset the instrumentation attributes.
@@ -64,7 +64,7 @@ namespace TPG {
         /// That is the number of time its program produced the winning bid.
         /// Attribute is mutable because all TPGEdge are seen as const outside
         /// from their TPGGraph.
-        mutable std::atomic_uint64_t nbTraversed;
+        mutable std::atomic_uint64_t nbTraversal;
     };
 } // namespace TPG
 

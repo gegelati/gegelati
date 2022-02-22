@@ -603,14 +603,14 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     const auto* edge1 = edgesIterator->get();
     ASSERT_EQ(dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(), 1);
     ASSERT_EQ(
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversed(), 1);
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(), 1);
 
     std::advance(edgesIterator, 38);
     const auto* edge2 = edgesIterator->get();
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbVisits(), 106);
     ASSERT_EQ(
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversed(),
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversal(),
         2);
 
 

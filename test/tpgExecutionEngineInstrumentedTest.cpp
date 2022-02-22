@@ -192,7 +192,7 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateEdge)
     const TPG::TPGEdgeInstrumented* edge =
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edges.at(0));
 
-    ASSERT_EQ(edge->getNbTraversed(), 0)
+    ASSERT_EQ(edge->getNbTraversal(), 0)
         << "Edge should not have been visited before.";
     ASSERT_EQ(edge->getNbVisits(), 0)
         << "Edge should not have been traversed before.";
@@ -200,7 +200,7 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateEdge)
     ASSERT_NEAR(tpeei.evaluateEdge(*edge), 5, PARAM_FLOAT_PRECISION)
         << "Evaluation of the program of an Edge failed.";
 
-    ASSERT_EQ(edge->getNbTraversed(), 0)
+    ASSERT_EQ(edge->getNbTraversal(), 0)
         << "Edge should still not have been traversed after evaluation.";
     ASSERT_EQ(edge->getNbVisits(), 1)
         << "Edge should have been visited once after the evaluation.";
@@ -219,12 +219,12 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
 
     // Check initial instrumentation
     ASSERT_EQ(t1->getNbVisits(), 0) << "Vertex number of visits should be 0.";
-    ASSERT_EQ(t1t2->getNbTraversed(), 0)
+    ASSERT_EQ(t1t2->getNbTraversal(), 0)
         << "Edge should not have been visited before.";
     ASSERT_EQ(t1t2->getNbVisits(), 0)
         << "Edge should not have been traversed before.";
 
-    ASSERT_EQ(t1a0->getNbTraversed(), 0)
+    ASSERT_EQ(t1a0->getNbTraversal(), 0)
         << "Edge should not have been visited before.";
     ASSERT_EQ(t1a0->getNbVisits(), 0)
         << "Edge should not have been traversed before.";
@@ -239,9 +239,9 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
 
     // Check visit counters
     ASSERT_EQ(t1->getNbVisits(), 1) << "Vertex number of visits should be 1.";
-    ASSERT_EQ(t1t2->getNbTraversed(), 1) << "Edge should have been traversed.";
+    ASSERT_EQ(t1t2->getNbTraversal(), 1) << "Edge should have been traversed.";
     ASSERT_EQ(t1t2->getNbVisits(), 1) << "Edge should have been visited.";
-    ASSERT_EQ(t1a0->getNbTraversed(), 0)
+    ASSERT_EQ(t1a0->getNbTraversal(), 0)
         << "Edge should not have been traversed.";
     ASSERT_EQ(t1a0->getNbVisits(), 1) << "Edge should have been visited.";
 
@@ -256,10 +256,10 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
 
     // Check visit counters
     ASSERT_EQ(t1->getNbVisits(), 2) << "Vertex number of visits should be 1.";
-    ASSERT_EQ(t1t2->getNbTraversed(), 1)
+    ASSERT_EQ(t1t2->getNbTraversal(), 1)
         << "Edge should have been traversed once.";
     ASSERT_EQ(t1t2->getNbVisits(), 1) << "Edge should have been visited once.";
-    ASSERT_EQ(t1a0->getNbTraversed(), 1)
+    ASSERT_EQ(t1a0->getNbTraversal(), 1)
         << "Edge should not have been traversed once.";
     ASSERT_EQ(t1a0->getNbVisits(), 2) << "Edge should have been visited twice.";
 }
