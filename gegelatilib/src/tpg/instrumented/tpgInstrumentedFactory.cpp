@@ -57,3 +57,37 @@ void TPG::TPGInstrumentedFactory::resetTPGGraphCounters(
         }
     }
 }
+
+void TPG::TPGInstrumentedFactory::clearUnusedTPGGraphElements(
+    TPG::TPGGraph& tpg) const
+{
+    // Remove unused vertices first
+    // (this will remove a few edges as a side-effect)
+    // Work on a copy of vertex list as the graph is modified during the for
+    // loop.
+    std::vector<const TPG::TPGVertex*> vertices(tpg.getVertices());
+    for (const TPG::TPGVertex* vertex : vertices) {
+        const TPG::TPGVertexInstrumentation* vertexI =
+            dynamic_cast<const TPG::TPGVertexInstrumentation*>(vertex);
+        // If the vertex is instrumented AND was never visited
+        if (vertexI != nullptr && vertexI->getNbVisits() == 0) {
+            // remove it
+            tpg.removeVertex(*vertex);
+        }
+    }
+
+    // Remove un-traversed edges
+    std::vector<const TPG::TPGEdge*> edges;
+    // Copy the edge list before iteration
+    for (auto& edge : tpg.getEdges()) {
+        edges.push_back(edge.get());
+    }
+    // Iterate on the edge list
+    for (auto edge : edges) {
+        const TPG::TPGEdgeInstrumented* edgeI =
+            dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge);
+        if (edgeI != nullptr && edgeI->getNbTraversal() == 0) {
+            tpg.removeEdge(*edge);
+        }
+    }
+}

@@ -240,3 +240,88 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
     ASSERT_EQ(e.getNbVisits(), 0);
     ASSERT_EQ(e.getNbTraversal(), 0);
 }
+
+TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryCleanTPG)
+{
+    // Add to the TPG
+
+    /**
+     *  Numbers next to edges teams represent the number of visits/traversal.
+     *        T0:1
+     *       /    \
+     *      /:1    \:1
+     *     T1:1    A0:1
+     *    /    \
+     *   /:1    \:0
+     *  T2:1     T3:0
+     *  |        |
+     *  |:1      |:0
+     * A1:1      A2:0
+     *
+     */
+
+    TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGInstrumentedFactory>());
+    const TPG::TPGTeamInstrumented* t[4];
+    for (auto i = 0; i < 4; i++) {
+        t[i] = dynamic_cast<const TPG::TPGTeamInstrumented*>(&tpg.addNewTeam());
+    }
+
+    const TPG::TPGActionInstrumented* a[3];
+    for (auto i = 0; i < 3; i++) {
+        a[i] = dynamic_cast<const TPG::TPGActionInstrumented*>(
+            &tpg.addNewAction(i));
+    }
+
+    const TPG::TPGEdgeInstrumented* e[6];
+    // T0->T1
+    e[0] = dynamic_cast<const TPG::TPGEdgeInstrumented*>(
+        &tpg.addNewEdge(*t[0], *t[1], progPointer));
+    t[0]->incrementNbVisits();
+    e[0]->incrementNbVisits();
+    e[0]->incrementNbTraversal();
+    // T0->A0
+    e[1] = dynamic_cast<const TPG::TPGEdgeInstrumented*>(
+        &tpg.addNewEdge(*t[0], *a[0], progPointer));
+    e[1]->incrementNbVisits();
+    e[1]->incrementNbTraversal();
+    a[0]->incrementNbVisits();
+    // T1->T2
+    e[2] = dynamic_cast<const TPG::TPGEdgeInstrumented*>(
+        &tpg.addNewEdge(*t[1], *t[2], progPointer));
+    t[1]->incrementNbVisits();
+    e[2]->incrementNbVisits();
+    e[2]->incrementNbTraversal();
+    // T2->A1
+    e[3] = dynamic_cast<const TPG::TPGEdgeInstrumented*>(
+        &tpg.addNewEdge(*t[2], *a[1], progPointer));
+    t[2]->incrementNbVisits();
+    e[3]->incrementNbVisits();
+    e[3]->incrementNbTraversal();
+    a[1]->incrementNbVisits();
+    // T1->T3
+    e[4] = dynamic_cast<const TPG::TPGEdgeInstrumented*>(
+        &tpg.addNewEdge(*t[1], *t[3], progPointer));
+    e[4]->incrementNbVisits();
+    // T3->A2
+    e[5] = dynamic_cast<const TPG::TPGEdgeInstrumented*>(
+        &tpg.addNewEdge(*t[3], *a[2], progPointer));
+
+    ASSERT_EQ(tpg.getNbVertices(), 7)
+        << "Number of vertices of the TPGGraph before being cleaned is not as "
+           "expected.";
+
+    ASSERT_EQ(tpg.getEdges().size(), 6)
+        << "Number of edges of the TPGGraph before being cleaned is not as "
+           "expected.";
+
+    ASSERT_NO_THROW(dynamic_cast<const TPG::TPGInstrumentedFactory&>(tpg.getFactory())
+                        .clearUnusedTPGGraphElements(tpg));
+
+    ASSERT_EQ(tpg.getNbVertices(), 5)
+        << "Number of vertices of the TPGGraph after being cleaned is not as "
+           "expected.";
+
+    ASSERT_EQ(tpg.getEdges().size(), 4)
+        << "Number of edges of the TPGGraph after being cleaned is not as "
+           "expected.";
+}

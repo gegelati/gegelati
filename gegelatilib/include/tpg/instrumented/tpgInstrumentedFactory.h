@@ -43,6 +43,26 @@ namespace TPG {
          * TPGGraph is const since all instrumentation counters are mutable.
          */
         void resetTPGGraphCounters(const TPG::TPGGraph& tpg) const;
+
+        /**
+         * \brief Removes from the TPGGraph the vertices and edges that were
+         * never visited (since the last reset).
+         *
+         * This method removes from the TPGGraph:
+         * - The TPGVertex with a number of visit equal to zero.
+         * - The TPGEdge with a number of traversal equal to zero.
+         *
+         * The method will do nothing on a TPGGraph whose TPGVertex and TPGEdge
+         * are not TPGVertexInstrumentation and TPGEdgeInstrumented
+         * specializations.
+         *
+         * Beware, this function may remove TPGAction from the TPGGraph, thus
+         * making it improper for future training.
+         *
+         * \param[in] tpg Reference to the TPGGraph whose
+         * TPGVertexInstrumentation and TPGEdge will be removed.
+         */
+        void clearUnusedTPGGraphElements(TPG::TPGGraph& tpg) const;
     };
 } // namespace TPG
 
