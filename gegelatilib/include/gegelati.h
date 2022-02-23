@@ -101,9 +101,17 @@
 #include <tpg/tpgAction.h>
 #include <tpg/tpgEdge.h>
 #include <tpg/tpgExecutionEngine.h>
+#include <tpg/tpgFactory.h>
 #include <tpg/tpgGraph.h>
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
+
+#include <tpg/instrumented/tpgActionInstrumented.h>
+#include <tpg/instrumented/tpgEdgeInstrumented.h>
+#include <tpg/instrumented/tpgExecutionEngineInstrumented.h>
+#include <tpg/instrumented/tpgInstrumentedFactory.h>
+#include <tpg/instrumented/tpgTeamInstrumented.h>
+#include <tpg/instrumented/tpgVertexInstrumentation.h>
 
 #ifdef CODE_GENERATION
 #include <codeGen/programGenerationEngine.h>
