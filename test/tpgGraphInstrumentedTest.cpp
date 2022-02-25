@@ -250,7 +250,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryCleanTPG)
      *        T0:1-------.
      *       /   \        \
      *      /:1   \:1     /:0
-     *     T1:1   A0:1---' 
+     *     T1:1   A0:1---'
      *    /    \
      *   /:1    \:0
      *  T2:1     T3:0
@@ -318,8 +318,9 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryCleanTPG)
         << "Number of edges of the TPGGraph before being cleaned is not as "
            "expected.";
 
-    ASSERT_NO_THROW(dynamic_cast<const TPG::TPGInstrumentedFactory&>(tpg.getFactory())
-                        .clearUnusedTPGGraphElements(tpg));
+    ASSERT_NO_THROW(
+        dynamic_cast<const TPG::TPGInstrumentedFactory&>(tpg.getFactory())
+            .clearUnusedTPGGraphElements(tpg));
 
     ASSERT_EQ(tpg.getNbVertices(), 5)
         << "Number of vertices of the TPGGraph after being cleaned is not as "

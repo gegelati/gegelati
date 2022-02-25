@@ -240,7 +240,8 @@ void Mutator::TPGMutator::mutateEdgeDestination(
              team.getOutgoingEdges().begin(), team.getOutgoingEdges().end(),
              [](const TPG::TPGEdge* other) {
                  auto* oDest = other->getDestination();
-                 return oDest && dynamic_cast<const TPG::TPGAction*>(oDest) != nullptr;
+                 return oDest &&
+                        dynamic_cast<const TPG::TPGAction*>(oDest) != nullptr;
              }) == 1)) {
         // Pick an Action target
         target = preExistingActions.at(
@@ -463,7 +464,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     std::vector<const TPG::TPGTeam*> rootTeams;
     std::for_each(rootVertices.begin(), rootVertices.end(),
                   [&rootTeams](const TPG::TPGVertex* vertex) {
-                      if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
+                      if (dynamic_cast<const TPG::TPGTeam*>(vertex) !=
+                          nullptr) {
                           rootTeams.push_back((const TPG::TPGTeam*)vertex);
                       }
                   });
@@ -499,10 +501,11 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
     // Get a list of pre existing edges before mutations (copy)
     std::list<const TPG::TPGEdge*> preExistingEdges;
-    std::for_each(graph.getEdges().begin(), graph.getEdges().end(),
-                  [&preExistingEdges](const std::unique_ptr<TPG::TPGEdge>& edge) {
-                      preExistingEdges.push_back(edge.get());
-                  });
+    std::for_each(
+        graph.getEdges().begin(), graph.getEdges().end(),
+        [&preExistingEdges](const std::unique_ptr<TPG::TPGEdge>& edge) {
+            preExistingEdges.push_back(edge.get());
+        });
 
     // Create an empty list to store Programs to mutate.
     std::list<std::shared_ptr<Program::Program>> newPrograms;

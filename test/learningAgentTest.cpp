@@ -42,13 +42,13 @@
 
 #include "log/laBasicLogger.h"
 
+#include "tpg/instrumented/tpgActionInstrumented.h"
+#include "tpg/instrumented/tpgEdgeInstrumented.h"
+#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/instrumented/tpgTeamInstrumented.h"
+#include "tpg/instrumented/tpgVertexInstrumentation.h"
 #include "tpg/policyStats.h"
 #include "tpg/tpgGraph.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
-#include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgTeamInstrumented.h"
-#include "tpg/instrumented/tpgActionInstrumented.h"
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
 
 #include "instructions/addPrimitiveType.h"
 #include "mutator/rng.h"
@@ -146,8 +146,8 @@ TEST_F(LearningAgentTest, IsRootEvalSkipped)
 
     // Test a new root
     std::shared_ptr<Learn::EvaluationResult> result1;
-    ASSERT_FALSE(la.isRootEvalSkipped(*la.getTPGGraph()->getRootVertices().at(0),
-                                      result1))
+    ASSERT_FALSE(la.isRootEvalSkipped(
+        *la.getTPGGraph()->getRootVertices().at(0), result1))
         << "Method should return false for a root that has never been "
            "evaluated before.";
     ASSERT_EQ(result1, nullptr) << "Method should return a nullptr for a root "
@@ -160,8 +160,8 @@ TEST_F(LearningAgentTest, IsRootEvalSkipped)
 
     // Test the root again
     std::shared_ptr<Learn::EvaluationResult> result2;
-    ASSERT_FALSE(la.isRootEvalSkipped(*la.getTPGGraph()->getRootVertices().at(0),
-                                      result2))
+    ASSERT_FALSE(la.isRootEvalSkipped(
+        *la.getTPGGraph()->getRootVertices().at(0), result2))
         << "Method should return false for a root that has been evaluated "
            "before.";
     ASSERT_EQ(result2, result1)
@@ -601,23 +601,26 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     // Check number of visits of a few edges & vertices
     auto edgesIterator = tpg.getEdges().begin();
     const auto* edge1 = edgesIterator->get();
-    ASSERT_EQ(dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(), 1);
     ASSERT_EQ(
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(), 1);
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(), 1);
+    ASSERT_EQ(
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(),
+        1);
 
     std::advance(edgesIterator, 38);
     const auto* edge2 = edgesIterator->get();
     ASSERT_EQ(
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbVisits(), 106);
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbVisits(),
+        106);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversal(),
         2);
 
-
     auto& verticesIterator = tpg.getVertices();
-    ASSERT_EQ(
-        dynamic_cast<const TPG::TPGVertexInstrumentation*>(verticesIterator.at(0))->getNbVisits(),
-        7036);
+    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
+                  verticesIterator.at(0))
+                  ->getNbVisits(),
+              7036);
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(3))
                   ->getNbVisits(),
