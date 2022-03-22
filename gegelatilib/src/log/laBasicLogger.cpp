@@ -100,7 +100,7 @@ void Log::LABasicLogger::logAfterPopulateTPG()
     this->mutationTime = getDurationFrom(*checkpoint);
 
     *this << std::setw(colWidth)
-          << this->learningAgent.getTPGGraph().getNbVertices();
+          << this->learningAgent.getTPGGraph()->getNbVertices();
 
     chronoFromNow();
 }

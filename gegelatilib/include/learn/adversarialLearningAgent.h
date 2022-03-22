@@ -130,12 +130,14 @@ namespace Learn {
          * \param[in] p The LearningParameters for the LearningAgent.
          * \param[in] agentsPerEval The number of agents each simulation will
          * need.
+         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * default TPGFactory is used if none is provided.
          */
-        AdversarialLearningAgent(LearningEnvironment& le,
-                                 const Instructions::Set& iSet,
-                                 const LearningParameters& p,
-                                 size_t agentsPerEval = 2)
-            : ParallelLearningAgent(le, iSet, p),
+        AdversarialLearningAgent(
+            LearningEnvironment& le, const Instructions::Set& iSet,
+            const LearningParameters& p, size_t agentsPerEval = 2,
+            const TPG::TPGFactory& factory = TPG::TPGFactory())
+            : ParallelLearningAgent(le, iSet, p, factory),
               agentsPerEvaluation(agentsPerEval)
         {
         }

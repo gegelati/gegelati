@@ -84,7 +84,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
         fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n",
                 this->offset.c_str(), progID, progID);
         auto* dest = edge.getDestination();
-        if (dest && typeid(*dest) == typeid(TPG::TPGAction)) {
+        if (dest && dynamic_cast<const TPG::TPGAction*>(dest) != nullptr) {
             uint64_t actionID =
                 printTPGAction(*(const TPG::TPGAction*)edge.getDestination());
             fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n",
@@ -153,7 +153,7 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
     auto rootVertices = tpg.getRootVertices();
     std::vector<uint64_t> rootActionIDs;
     for (const TPG::TPGVertex* rootVertex : rootVertices) {
-        if (typeid(*rootVertex) == typeid(TPG::TPGAction)) {
+        if (dynamic_cast<const TPG::TPGAction*>(rootVertex) != nullptr) {
             rootActionIDs.push_back(
                 this->printTPGAction(*(const TPG::TPGAction*)rootVertex));
         }
@@ -163,7 +163,7 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
     // Team root ids
     for (const TPG::TPGVertex* rootVertex : rootVertices) {
-        if (typeid(*rootVertex) == typeid(TPG::TPGTeam)) {
+        if (dynamic_cast<const TPG::TPGTeam*>(rootVertex) != nullptr) {
             fprintf(pFile, "T%" PRIu64 " ", this->findVertexID(*rootVertex));
         }
     }
@@ -184,7 +184,7 @@ void File::TPGGraphDotExporter::print()
     // Print all teams
     auto vertices = this->tpg.getVertices();
     for (const TPG::TPGVertex* vertex : vertices) {
-        if (typeid(*vertex) == typeid(TPG::TPGTeam)) {
+        if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
             this->printTPGTeam(*(const TPG::TPGTeam*)vertex);
         }
     }
@@ -193,9 +193,9 @@ void File::TPGGraphDotExporter::print()
     this->programID.erase(this->programID.begin(), this->programID.end());
 
     // Print all edges
-    auto edges = this->tpg.getEdges();
-    for (const TPG::TPGEdge& edge : edges) {
-        this->printTPGEdge(edge);
+    auto& edges = this->tpg.getEdges();
+    for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
+        this->printTPGEdge(*edge.get());
     }
 
     // Print footer

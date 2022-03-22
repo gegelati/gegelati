@@ -126,7 +126,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
     Archive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
-    TPG::TPGExecutionEngine tee(cla.getTPGGraph().getEnvironment(), &a);
+    TPG::TPGExecutionEngine tee(cla.getTPGGraph()->getEnvironment(), &a);
 
     cla.init();
     std::shared_ptr<Learn::EvaluationResult> result1;
@@ -139,7 +139,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
 
     // Record this result
     cla.updateEvaluationRecords(
-        {{result1, cla.getTPGGraph().getRootVertices().at(0)}});
+        {{result1, cla.getTPGGraph()->getRootVertices().at(0)}});
 
     // Reevaluate to check that the previous result1 is not returned.
     std::shared_ptr<Learn::EvaluationResult> result2;
@@ -151,7 +151,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
 
     // Record this result
     cla.updateEvaluationRecords(
-        {{result2, cla.getTPGGraph().getRootVertices().at(0)}});
+        {{result2, cla.getTPGGraph()->getRootVertices().at(0)}});
 
     // Reevaluate to check that the previous result2 is returned.
     std::shared_ptr<Learn::EvaluationResult> result3;
@@ -177,7 +177,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
 
     // Initialize and populate the TPG
     cla.init(0);
-    TPG::TPGGraph& graph = cla.getTPGGraph();
+    TPG::TPGGraph& graph = *cla.getTPGGraph();
     Mutator::TPGMutator::populateTPG(graph, cla.getArchive(), params.mutation,
                                      cla.getRNG());
 
@@ -272,14 +272,14 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
            "ClassificationEvaluationResults.";
 
     // Check the number of remaining vertices.
-    ASSERT_EQ(cla.getTPGGraph().getNbVertices(),
+    ASSERT_EQ(cla.getTPGGraph()->getNbVertices(),
               originalNbVertices - std::ceil(params.mutation.tpg.nbRoots *
                                              (1.0 - params.ratioDeletedRoots)));
 
     // Check the presence of savedRoots among remaining roots.
     // i.e. check that their good result1 for one class saved them from
     // decimation.
-    auto remainingRoots = cla.getTPGGraph().getRootVertices();
+    auto remainingRoots = cla.getTPGGraph()->getRootVertices();
     for (const TPG::TPGVertex* savedRoot : savedRoots) {
         ASSERT_TRUE(std::find(remainingRoots.begin(), remainingRoots.end(),
                               savedRoot) != remainingRoots.end())
