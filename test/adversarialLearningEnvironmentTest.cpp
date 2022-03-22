@@ -94,7 +94,7 @@ TEST(AdversarialLearningEnvironmentTest, compatibilityLearningAgent)
     ASSERT_NO_THROW(result =
                         la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
-    ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
+    ASSERT_EQ(result.size(), la.getTPGGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
 

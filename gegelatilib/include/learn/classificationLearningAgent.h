@@ -84,11 +84,14 @@ namespace Learn {
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * default TPGFactory is used if none is provided.
          */
-        ClassificationLearningAgent(ClassificationLearningEnvironment& le,
-                                    const Instructions::Set& iSet,
-                                    const LearningParameters& p)
-            : BaseLearningAgent(le, iSet, p){};
+        ClassificationLearningAgent(
+            ClassificationLearningEnvironment& le,
+            const Instructions::Set& iSet, const LearningParameters& p,
+            const TPG::TPGFactory& factory = TPG::TPGFactory())
+            : BaseLearningAgent(le, iSet, p, factory){};
 
         /**
          * \brief Specialization of the evaluateJob method for classification
@@ -254,7 +257,7 @@ namespace Learn {
         }
 
         // Compute the number of root to keep/delete base on each criterion
-        uint64_t totalNbRoot = this->tpg.getNbRootVertices();
+        uint64_t totalNbRoot = this->tpg->getNbRootVertices();
         uint64_t nbRootsToDelete =
             (uint64_t)floor(this->params.ratioDeletedRoots * totalNbRoot);
         uint64_t nbRootsToKeep = (totalNbRoot - nbRootsToDelete);
@@ -323,19 +326,18 @@ namespace Learn {
         // Do the removal.
         // Because of potential root actions, the preserved number of roots
         // may be higher than the given ratio.
-        auto allRoots = this->tpg.getRootVertices();
+        auto allRoots = this->tpg->getRootVertices();
         auto& tpgRef = this->tpg;
         auto& resultsPerRootRef = this->resultsPerRoot;
         std::for_each(
             allRoots.begin(), allRoots.end(),
             [&rootsToKeep, &tpgRef, &resultsPerRootRef,
              &results](const TPG::TPGVertex* vert) {
-                const std::type_info& vertexType = typeid(*vert);
                 // Do not remove actions
-                if (vertexType != typeid(TPG::TPGAction) &&
+                if (dynamic_cast<const TPG::TPGAction*>(vert) == nullptr &&
                     std::find(rootsToKeep.begin(), rootsToKeep.end(), vert) ==
                         rootsToKeep.end()) {
-                    tpgRef.removeVertex(*vert);
+                    tpgRef->removeVertex(*vert);
 
                     // Keep only results of non-decimated roots.
                     resultsPerRootRef.erase(vert);

@@ -69,10 +69,11 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
         progGenerationEngine.generateProgram(progID);
     }
     fileMain << "\t\t\t{0,P" << progID << ",";
-    if (typeid(*(edge.getDestination())) == (typeid(TPG::TPGTeam))) {
+    if (dynamic_cast<const TPG::TPGTeam*>((edge.getDestination())) != nullptr) {
         fileMain << "T" << findVertexID(*(edge.getDestination())) << "}";
     }
-    else if (typeid(*(edge.getDestination())) == (typeid(TPG::TPGAction))) {
+    else if (dynamic_cast<const TPG::TPGAction*>((edge.getDestination())) !=
+             nullptr) {
         auto a = dynamic_cast<const TPG::TPGAction*>(edge.getDestination());
         fileMain << "A" << a->getActionID() << "}";
     }
@@ -132,10 +133,10 @@ void CodeGen::TPGStackGenerationEngine::generateTPGGraph()
     auto vertices = this->tpg.getVertices();
     // give an id for each team of the graph
     for (auto vertex : vertices) {
-        if (typeid(*vertex) == typeid(TPG::TPGTeam)) {
+        if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
             generateTeam(*(const TPG::TPGTeam*)vertex);
         }
-        else if (typeid(*vertex) == typeid(TPG::TPGAction)) {
+        else if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr) {
             generateAction(*(const TPG::TPGAction*)vertex);
         }
     }
