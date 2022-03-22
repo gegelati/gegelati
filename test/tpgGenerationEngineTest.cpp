@@ -44,14 +44,16 @@
 #include <filesystem>
 #endif
 
-#include "codeGen/tpgGenerationEngineFactory.h"
-#include "codeGen/tpgStackGenerationEngine.h"
 #include "environment.h"
-#include "goldenReferenceComparison.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgVertex.h"
+
+#include "codeGen/tpgGenerationEngineFactory.h"
+#include "codeGen/tpgStackGenerationEngine.h"
+#include "codeGen/tpgSwitchGenerationEngine.h"
+#include "goldenReferenceComparison.h"
 
 class TPGGenerationEngineTest : public ::testing::Test
 {
@@ -115,20 +117,6 @@ class TPGGenerationEngineTest : public ::testing::Test
 
 TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 {
-    CodeGen::TPGGenerationEngineFactory factory;
-    ASSERT_NO_THROW(tpgGen = factory.create("constructor", *tpg))
-        << "Failed to construct a TPGGenerationEngine with a filename and a "
-           "TPG";
-
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
-
-    ASSERT_NO_THROW(tpgGen = factory.create(
-                        "constructorWithPath", *tpg, "./src/"))
-        << "Failed to construct a TPGGenerationEngine with a filename and a "
-           "TPG and a path";
-
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
-
     ASSERT_NO_THROW(tpgGen = new CodeGen::TPGStackGenerationEngine(
                         "constructorWithStackSize", *tpg, "./src/", 15))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
@@ -141,6 +129,27 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
                  std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0.";
+}
+
+TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateSwitch)
+{
+    CodeGen::TPGGenerationEngineFactory factorySwitch;
+    ASSERT_NO_THROW(tpgGen = factorySwitch.create("constructor", *tpg))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG";
+
+    ASSERT_NE(dynamic_cast<CodeGen::TPGSwitchGenerationEngine*>(tpgGen),
+              nullptr)
+        << "Created TPGGenerationEngine has incorrect type.";
+
+    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+
+    ASSERT_NO_THROW(
+        tpgGen = factorySwitch.create("constructorWithPath", *tpg, "./src/"))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG and a path";
+
+    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
 
     std::fstream out;
     out.open("./src/rdOnly.c", std::ofstream::out);
@@ -159,10 +168,47 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
         << "Fail to change the file as read only";
 #endif
 
-    ASSERT_THROW(tpgGen = factory.create("rdOnly", *tpg, "./src/"),
+    ASSERT_THROW(tpgGen = factorySwitch.create("rdOnly", *tpg, "./src/"),
                  std::runtime_error)
         << "Construction should fail because the file rdOnly is in read only "
            "status.";
+}
+
+TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateStack)
+{
+    auto& team = tpg->addNewTeam();
+    auto& action = tpg->addNewAction(0);
+    tpg->addNewEdge(team, action, std::make_shared<Program::Program>(*e));
+
+    CodeGen::TPGGenerationEngineFactory factoryStack(
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::stackMode);
+    ASSERT_NO_THROW(tpgGen = factoryStack.create("constructor", *tpg))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG";
+
+    ASSERT_NE(dynamic_cast<CodeGen::TPGStackGenerationEngine*>(tpgGen), nullptr)
+        << "Created TPGGenerationEngine has incorrect type.";
+
+    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+
+    ASSERT_NO_THROW(
+        tpgGen = factoryStack.create("constructorWithPath", *tpg, "./src/"))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG and a path";
+
+    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+}
+
+TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateNoMode)
+{
+    // Create the factory with a non-existing mode.
+    CodeGen::TPGGenerationEngineFactory factoryStack(
+        (CodeGen::TPGGenerationEngineFactory::generationEngineMode)-1);
+    ASSERT_NO_THROW(tpgGen = factoryStack.create("constructor", *tpg))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG";
+    ASSERT_EQ(tpgGen, nullptr) << "Factory should return a null pointer when a "
+                                  "non existing mode is used.";
 }
 
 TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
@@ -184,8 +230,7 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
         << "bad number of edges in OneLeafNoInstruction";
 
     CodeGen::TPGGenerationEngineFactory factory;
-    tpgGen = factory.create("OneLeafNoInstruction", *tpg,
-                                              "./src/");
+    tpgGen = factory.create("OneLeafNoInstruction", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -478,8 +523,7 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
         << "bad number of edges in OneTeamTwoLeaves";
 
     CodeGen::TPGGenerationEngineFactory factory;
-    tpgGen =
-        factory.create("OneTeamTwoLeaves", *tpg, "./src/");
+    tpgGen = factory.create("OneTeamTwoLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -564,8 +608,7 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
         << "bad number of edges in TwoTeamsOneCycle";
 
     CodeGen::TPGGenerationEngineFactory factory;
-    tpgGen =
-        factory.create("TwoTeamsOneCycle", *tpg, "./src/");
+    tpgGen = factory.create("TwoTeamsOneCycle", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
@@ -651,8 +694,7 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
         << "bad number of edges in ThreeTeamsOneCycleThreeLeaves";
 
     CodeGen::TPGGenerationEngineFactory factory;
-    tpgGen = factory.create("ThreeTeamsOneCycleThreeLeaves",
-                                              *tpg, "./src/");
+    tpgGen = factory.create("ThreeTeamsOneCycleThreeLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     delete tpgGen;
