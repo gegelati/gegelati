@@ -117,6 +117,8 @@
 #include <codeGen/programGenerationEngine.h>
 #include <codeGen/tpgGenerationEngine.h>
 #include <codeGen/tpgGenerationEngineFactory.h>
+#include <codeGen/tpgStackGenerationEngine.h>
+#include <codeGen/tpgSwitchGenerationEngine.h>
 #endif
 
 #include <archive.h>

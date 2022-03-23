@@ -55,11 +55,11 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 {
     fileMain << "\t\t\tif (!teamsVisited[currentVertex]) {" << std::endl;
     fileMain << "\t\t\t\tteamsVisited[currentVertex] = true;" << std::endl;
-    
+
     auto edges = team.getOutgoingEdges();
     auto teamName = vertexName(team);
     auto nextVertices = std::vector<const TPG::TPGVertex*>();
-    
+
     int i = 0;
     for (auto edge : edges) {
         fileMain << "\t\t\t\t" << teamName << "Scores[" << i++ << "] = ";
@@ -68,7 +68,8 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     }
     fileMain << "\t\t\t}" << std::endl;
 
-    fileMain << "\t\t\tint best = bestProgram(" << teamName << "Scores, " << edges.size() << ");" << std::endl;
+    fileMain << "\t\t\tint best = bestProgram(" << teamName << "Scores, "
+             << edges.size() << ");" << std::endl;
     fileMain << "\t\t\t" << teamName << "Scores[best] = DBL_MIN;" << std::endl;
     fileMain << "\t\t\tconst enum vertices next[" << edges.size() << "] = { ";
     for (auto nextVertex : nextVertices) {
@@ -78,7 +79,8 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     fileMain << "\t\t\tcurrentVertex = next[best];" << std::endl;
 }
 
-void CodeGen::TPGSwitchGenerationEngine::generateAction(const TPG::TPGAction& action)
+void CodeGen::TPGSwitchGenerationEngine::generateAction(
+    const TPG::TPGAction& action)
 {
     uint64_t id = action.getActionID();
     fileMain << "\t\t\treturn " << id << ";" << std::endl;
@@ -101,28 +103,32 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
 
     // generate inference function
     fileMain << "int inferenceTPG() {" << std::endl;
-    fileMain << "\tbool teamsVisited[" << vertices.size() << "] = { false };" << std::endl << std::endl;
+    fileMain << "\tbool teamsVisited[" << vertices.size() << "] = { false };"
+             << std::endl
+             << std::endl;
 
     // create score array for each team
-   for (auto vertex : vertices) {
-        if (typeid(*vertex) == typeid(TPG::TPGTeam)) {
-            fileMain << "\tdouble " << vertexName(*vertex) << "Scores[" << vertex->getOutgoingEdges().size() << "];" << std::endl;
+    for (auto vertex : vertices) {
+        if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
+            fileMain << "\tdouble " << vertexName(*vertex) << "Scores["
+                     << vertex->getOutgoingEdges().size() << "];" << std::endl;
         }
-   }
+    }
     fileMain << std::endl;
 
-   // start graph on root
-   fileMain << "\tenum vertices currentVertex = " << vertexName(*tpg.getRootVertices().at(0)) << ";" << std::endl;
+    // start graph on root
+    fileMain << "\tenum vertices currentVertex = "
+             << vertexName(*tpg.getRootVertices().at(0)) << ";" << std::endl;
 
-   // generate switch case to navigate the graph
-   fileMain << "\twhile(1) {" << std::endl;
-   fileMain << "\t\tswitch (currentVertex) {" << std::endl;
+    // generate switch case to navigate the graph
+    fileMain << "\twhile(1) {" << std::endl;
+    fileMain << "\t\tswitch (currentVertex) {" << std::endl;
     for (auto vertex : vertices) {
         fileMain << "\t\tcase " << vertexName(*vertex) << ": {" << std::endl;
-        if (typeid(*vertex) == typeid(TPG::TPGTeam)) {
+        if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
             generateTeam(*(const TPG::TPGTeam*)vertex);
         }
-        else if (typeid(*vertex) == typeid(TPG::TPGAction)) {
+        else if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr) {
             generateAction(*(const TPG::TPGAction*)vertex);
         }
         fileMain << "\t\t\tbreak;" << std::endl;
@@ -135,29 +141,28 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
 
 void CodeGen::TPGSwitchGenerationEngine::initTpgFile()
 {
-    fileMain
-        << "#include <limits.h>\n"
-        << "#include <assert.h>\n"
-        << "#include <float.h>\n"
-        << "#include <stdbool.h>\n"
-        << "#include <stdio.h>\n"
-        << "#include <stdint.h>\n"
-        << "\n"
+    fileMain << "#include <limits.h>\n"
+             << "#include <assert.h>\n"
+             << "#include <float.h>\n"
+             << "#include <stdbool.h>\n"
+             << "#include <stdio.h>\n"
+             << "#include <stdint.h>\n"
+             << "\n"
 
-        << "int bestProgram(double *results, int nb) {\n"
-        << "\tint bestProgram = 0;\n"
-        << "\tdouble bestScore = results[0];\n"
-        << "\tfor (int i = 1; i < nb; i++) {\n"
-        << "\t\tdouble challengerScore = results[i];\n"
-        << "\t\tif (challengerScore >= bestScore) {\n"
-        << "\t\t\tbestProgram = i;\n"
-        << "\t\t\tbestScore = challengerScore;\n"
-        << "\t\t}\n"
-        << "\t}\n"
-        << "\treturn bestProgram;\n"
-        << "}\n"
-   
-        << std::endl;
+             << "int bestProgram(double *results, int nb) {\n"
+             << "\tint bestProgram = 0;\n"
+             << "\tdouble bestScore = results[0];\n"
+             << "\tfor (int i = 1; i < nb; i++) {\n"
+             << "\t\tdouble challengerScore = results[i];\n"
+             << "\t\tif (challengerScore >= bestScore) {\n"
+             << "\t\t\tbestProgram = i;\n"
+             << "\t\t\tbestScore = challengerScore;\n"
+             << "\t\t}\n"
+             << "\t}\n"
+             << "\treturn bestProgram;\n"
+             << "}\n"
+
+             << std::endl;
 }
 void CodeGen::TPGSwitchGenerationEngine::initHeaderFile()
 {
@@ -165,16 +170,18 @@ void CodeGen::TPGSwitchGenerationEngine::initHeaderFile()
               << "int inferenceTPG();\n";
 }
 
-std::string CodeGen::TPGSwitchGenerationEngine::vertexName(const TPG::TPGVertex& v) {
+std::string CodeGen::TPGSwitchGenerationEngine::vertexName(
+    const TPG::TPGVertex& v)
+{
     std::ostringstream vertexName;
-    if (typeid(v) == typeid(TPG::TPGTeam)) {
+    if (dynamic_cast<const TPG::TPGTeam*>(&v) != nullptr) {
         vertexName << "T";
-    } else {
+    }
+    else {
         vertexName << "A";
     }
     vertexName << findVertexID(v);
     return vertexName.str();
 }
-
 
 #endif // CODE_GENERATION
