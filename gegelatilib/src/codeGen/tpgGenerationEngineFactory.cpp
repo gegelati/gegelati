@@ -49,17 +49,20 @@ CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory(
     this->mode = mode;
 }
 
-CodeGen::TPGGenerationEngine* CodeGen::TPGGenerationEngineFactory::create(
-    const std::string& filename, const TPG::TPGGraph& tpg,
-    const std::string& path)
+std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
+    TPGGenerationEngineFactory::create(const std::string& filename,
+                                       const TPG::TPGGraph& tpg,
+                                       const std::string& path)
 {
     if (this->mode == stackMode) {
-        int stack = tpg.getEdges().size(); //use upper bound on stack size
-        return new TPGStackGenerationEngine(filename, tpg, path, stack);
+        int stack = tpg.getEdges().size(); // use upper bound on stack size
+        return std::make_unique<TPGStackGenerationEngine>(filename, tpg, path,
+                                                          stack);
     }
     else if (this->mode == switchMode) {
-        return new TPGSwitchGenerationEngine(filename, tpg, path);
-    } else {
+        return std::make_unique<TPGSwitchGenerationEngine>(filename, tpg, path);
+    }
+    else {
         return nullptr;
     }
 }

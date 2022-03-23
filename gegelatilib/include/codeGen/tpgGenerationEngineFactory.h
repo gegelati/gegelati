@@ -74,9 +74,9 @@ namespace CodeGen {
         /**
          * @brief Factory method to create a codegen with the configured mode.
          *
-         * @return TPGGenerationEngine*
+         * @return a unique_ptr<TPGGenerationEngine>.
          */
-        TPGGenerationEngine* create(const std::string& filename,
+        std::unique_ptr<TPGGenerationEngine> create(const std::string& filename,
                                     const TPG::TPGGraph& tpg,
                                     const std::string& path = "./");
 

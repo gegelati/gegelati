@@ -66,7 +66,7 @@ class TPGGenerationEngineTest : public ::testing::Test
     Environment* e = nullptr;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     Data::PrimitiveTypeArray<double> currentState{s1};
-    CodeGen::TPGGenerationEngine* tpgGen = nullptr;
+    std::unique_ptr<CodeGen::TPGGenerationEngine> tpgGen = nullptr;
     TPG::TPGGraph* tpg = nullptr;
 
     virtual void SetUp()
@@ -117,14 +117,14 @@ class TPGGenerationEngineTest : public ::testing::Test
 
 TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 {
-    ASSERT_NO_THROW(tpgGen = new CodeGen::TPGStackGenerationEngine(
+    ASSERT_NO_THROW(tpgGen = std::make_unique<CodeGen::TPGStackGenerationEngine>(
                         "constructorWithStackSize", *tpg, "./src/", 15))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
 
-    ASSERT_THROW(tpgGen = new CodeGen::TPGStackGenerationEngine(
+    ASSERT_THROW(tpgGen = std::make_unique<CodeGen::TPGStackGenerationEngine>(
                      "constructorErrorStackSize", *tpg, "./src/", 0),
                  std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
@@ -138,18 +138,18 @@ TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateSwitch)
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG";
 
-    ASSERT_NE(dynamic_cast<CodeGen::TPGSwitchGenerationEngine*>(tpgGen),
+    ASSERT_NE(dynamic_cast<CodeGen::TPGSwitchGenerationEngine*>(tpgGen.get()),
               nullptr)
         << "Created TPGGenerationEngine has incorrect type.";
 
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
 
     ASSERT_NO_THROW(
         tpgGen = factorySwitch.create("constructorWithPath", *tpg, "./src/"))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG and a path";
 
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
 
     std::fstream out;
     out.open("./src/rdOnly.c", std::ofstream::out);
@@ -186,17 +186,17 @@ TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateStack)
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG";
 
-    ASSERT_NE(dynamic_cast<CodeGen::TPGStackGenerationEngine*>(tpgGen), nullptr)
+    ASSERT_NE(dynamic_cast<CodeGen::TPGStackGenerationEngine*>(tpgGen.get()), nullptr)
         << "Created TPGGenerationEngine has incorrect type.";
 
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
 
     ASSERT_NO_THROW(
         tpgGen = factoryStack.create("constructorWithPath", *tpg, "./src/"))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG and a path";
 
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
 }
 
 TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateNoMode)
@@ -233,7 +233,7 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     tpgGen = factory.create("OneLeafNoInstruction", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
 
     std::vector<std::string> fileGenerated{
         "OneLeafNoInstruction.c", "OneLeafNoInstruction.h",
@@ -314,7 +314,7 @@ TEST_BOTH_MODE(OneLeaf, {
     tpgGen = factory.create("OneLeaf", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "OneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0);
 
@@ -360,7 +360,7 @@ TEST_BOTH_MODE(TwoLeaves, {
     tpgGen = factory.create("TwoLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "TwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test TwoLeaves.";
@@ -419,7 +419,7 @@ TEST_BOTH_MODE(ThreeLeaves, {
     tpgGen = factory.create("ThreeLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "ThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test ThreeLeaves.";
@@ -431,7 +431,6 @@ TEST_BOTH_MODE(ThreeLeaves, {
         0)
         << "Error wrong action returned in test ThreeLeaves.";
 });
-
 
 TEST_BOTH_MODE(OneTeamOneLeaf, {
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
@@ -469,7 +468,7 @@ TEST_BOTH_MODE(OneTeamOneLeaf, {
     tpgGen = factory.create("OneTeamOneLeaf", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "OneTeamOneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test OneTeamOneLeaf";
@@ -527,7 +526,7 @@ TEST_BOTH_MODE(OneTeamTwoLeaves, {
     tpgGen = factory.create("OneTeamTwoLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "OneTeamTwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test OneTeamTwoLeaves.";
@@ -606,7 +605,7 @@ TEST_BOTH_MODE(TwoTeamsOneCycle, {
     tpgGen = factory.create("TwoTeamsOneCycle", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
 
     cmdCompile += "TwoTeamsOneCycle";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
@@ -685,7 +684,7 @@ TEST_BOTH_MODE(ThreeTeamsOneCycleThreeLeaves, {
     tpgGen = factory.create("ThreeTeamsOneCycleThreeLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test ThreeTeamsOneCycleThreeLeaves";

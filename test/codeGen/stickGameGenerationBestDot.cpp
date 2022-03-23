@@ -66,7 +66,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     TPG::TPGGraph* tpg = nullptr;
     TPG::TPGExecutionEngine* tee = nullptr;
-    CodeGen::TPGGenerationEngine* tpgGen = nullptr;
+    std::unique_ptr<CodeGen::TPGGenerationEngine> tpgGen = nullptr;
     File::TPGGraphDotImporter* dot = nullptr;
     std::string cmdCompile;
     std::string cmdExec;
@@ -163,7 +163,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files
-    delete tpgGen;
+    tpgGen.reset();
 
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Fail to compile generated files to test stick game";
