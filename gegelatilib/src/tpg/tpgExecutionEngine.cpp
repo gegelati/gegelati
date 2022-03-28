@@ -59,6 +59,9 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     // Execute the program.
     double result = this->progExecutionEngine.executeProgram();
 
+    // Filter NaN results: replace with -inf
+    result = (std::isnan(result))? -std::numeric_limits<double>::infinity() : result;
+
     // Put the result in the archive before returning it.
     if (this->archive != NULL) {
         this->archive->addRecording(&prog, progExecutionEngine.getDataSources(),
