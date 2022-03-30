@@ -160,8 +160,7 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
         << "Failed to Import the graph to test inference of TicTacToe";
 
     CodeGen::TPGGenerationEngineFactory factory;
-    tpgGen =
-        factory.create("TicTacToeBest_TPG", *tpg, "./src/");
+    tpgGen = factory.create("TicTacToeBest_TPG", *tpg, "./src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test TicTacToe";
     // call destructor to close generated files

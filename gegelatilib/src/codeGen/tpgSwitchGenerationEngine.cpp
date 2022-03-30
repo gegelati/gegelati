@@ -141,29 +141,31 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
 
 void CodeGen::TPGSwitchGenerationEngine::initTpgFile()
 {
-    fileMain << "#include <limits.h>\n"
-             << "#include <assert.h>\n"
-             << "#include <float.h>\n"
-             << "#include <stdbool.h>\n"
-             << "#include <stdio.h>\n"
-             << "#include <stdint.h>\n"
-             << "#include <math.h>\n"
-             << "\n"
+    fileMain
+        << "#include <limits.h>\n"
+        << "#include <assert.h>\n"
+        << "#include <float.h>\n"
+        << "#include <stdbool.h>\n"
+        << "#include <stdio.h>\n"
+        << "#include <stdint.h>\n"
+        << "#include <math.h>\n"
+        << "\n"
 
-             << "int bestProgram(double *results, int nb) {\n"
-             << "\tint bestProgram = 0;\n"
-             << "\tdouble bestScore = (isnan(results[0]))? -INFINITY : results[0];\n"
-             << "\tfor (int i = 1; i < nb; i++) {\n"
-             << "\t\tdouble challengerScore = (isnan(results[i]))? -INFINITY : results[i];\n"
-             << "\t\tif (challengerScore >= bestScore) {\n"
-             << "\t\t\tbestProgram = i;\n"
-             << "\t\t\tbestScore = challengerScore;\n"
-             << "\t\t}\n"
-             << "\t}\n"
-             << "\treturn bestProgram;\n"
-             << "}\n"
+        << "int bestProgram(double *results, int nb) {\n"
+        << "\tint bestProgram = 0;\n"
+        << "\tdouble bestScore = (isnan(results[0]))? -INFINITY : results[0];\n"
+        << "\tfor (int i = 1; i < nb; i++) {\n"
+        << "\t\tdouble challengerScore = (isnan(results[i]))? -INFINITY : "
+           "results[i];\n"
+        << "\t\tif (challengerScore >= bestScore) {\n"
+        << "\t\t\tbestProgram = i;\n"
+        << "\t\t\tbestScore = challengerScore;\n"
+        << "\t\t}\n"
+        << "\t}\n"
+        << "\treturn bestProgram;\n"
+        << "}\n"
 
-             << std::endl;
+        << std::endl;
 }
 void CodeGen::TPGSwitchGenerationEngine::initHeaderFile()
 {

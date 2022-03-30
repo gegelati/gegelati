@@ -39,10 +39,9 @@
 
 #include "codeGen/tpgStackGenerationEngine.h"
 
-CodeGen::TPGStackGenerationEngine::TPGStackGenerationEngine(const std::string& filename,
-                    const TPG::TPGGraph& tpg,
-                    const std::string& path,
-                    const uint64_t& stackSize)
+CodeGen::TPGStackGenerationEngine::TPGStackGenerationEngine(
+    const std::string& filename, const TPG::TPGGraph& tpg,
+    const std::string& path, const uint64_t& stackSize)
     : TPGGenerationEngine(filename, tpg, path), stackSize{stackSize}
 {
     if (stackSize == 0) {
@@ -105,7 +104,8 @@ void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     fileMain << "\treturn executeTeam(e,nbEdge);\n}\n" << std::endl;
 }
 
-void CodeGen::TPGStackGenerationEngine::generateAction(const TPG::TPGAction& action)
+void CodeGen::TPGStackGenerationEngine::generateAction(
+    const TPG::TPGAction& action)
 {
     uint64_t id = action.getActionID();
     // print prototype and declaration of the function

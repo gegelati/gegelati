@@ -84,8 +84,9 @@ namespace CodeGen {
          * folder does not exist.
          */
         TPGSwitchGenerationEngine(const std::string& filename,
-                            const TPG::TPGGraph& tpg,
-                            const std::string& path = "./") : TPGGenerationEngine(filename, tpg, path) {};
+                                  const TPG::TPGGraph& tpg,
+                                  const std::string& path = "./")
+            : TPGGenerationEngine(filename, tpg, path){};
 
         /**
          * \brief destructor of the class.
@@ -142,10 +143,10 @@ namespace CodeGen {
          * generated.
          */
         virtual void generateAction(const TPG::TPGAction& action);
-        
+
         /**
          * @brief generates function names depending on the vertex type
-         * 
+         *
          * @param v vertex to be named
          * @return std::string name of the vertex
          */

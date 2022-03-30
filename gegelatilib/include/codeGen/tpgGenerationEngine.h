@@ -139,7 +139,7 @@ namespace CodeGen {
          */
         virtual void generateTPGGraph() = 0;
 
-    protected:
+      protected:
         /**
          * \brief Method for generating the code for an edge of the graph.
          *

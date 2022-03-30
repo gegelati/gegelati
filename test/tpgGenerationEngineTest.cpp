@@ -117,8 +117,9 @@ class TPGGenerationEngineTest : public ::testing::Test
 
 TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 {
-    ASSERT_NO_THROW(tpgGen = std::make_unique<CodeGen::TPGStackGenerationEngine>(
-                        "constructorWithStackSize", *tpg, "./src/", 15))
+    ASSERT_NO_THROW(tpgGen =
+                        std::make_unique<CodeGen::TPGStackGenerationEngine>(
+                            "constructorWithStackSize", *tpg, "./src/", 15))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
@@ -186,7 +187,8 @@ TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateStack)
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG";
 
-    ASSERT_NE(dynamic_cast<CodeGen::TPGStackGenerationEngine*>(tpgGen.get()), nullptr)
+    ASSERT_NE(dynamic_cast<CodeGen::TPGStackGenerationEngine*>(tpgGen.get()),
+              nullptr)
         << "Created TPGGenerationEngine has incorrect type.";
 
     ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";

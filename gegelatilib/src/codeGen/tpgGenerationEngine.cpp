@@ -40,23 +40,22 @@
 #include "codeGen/tpgGenerationEngine.h"
 
 CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
-                    const TPG::TPGGraph& tpg,
-                    const std::string& path)
+                                                  const TPG::TPGGraph& tpg,
+                                                  const std::string& path)
     : TPGAbstractEngine(tpg), progGenerationEngine{filename + "_" +
-                                                        filenameProg,
-                                                    tpg.getEnvironment(),
-                                                    path}
+                                                       filenameProg,
+                                                   tpg.getEnvironment(), path}
 {
     this->fileMain.open(path + filename + ".c", std::ofstream::out);
     this->fileMainH.open(path + filename + ".h", std::ofstream::out);
     if (!fileMain.is_open() || !fileMainH.is_open()) {
-        throw std::runtime_error(
-            "Error can't open " + std::string(path + filename) +
-            ".c or " + std::string(path + filename) + ".h");
+        throw std::runtime_error("Error can't open " +
+                                 std::string(path + filename) + ".c or " +
+                                 std::string(path + filename) + ".h");
     }
     fileMain << "#include \"" << filename << ".h\"" << std::endl;
-    fileMain << "#include \"" << filename << "_" << filenameProg
-                << ".h\"" << std::endl;
+    fileMain << "#include \"" << filename << "_" << filenameProg << ".h\""
+             << std::endl;
 
     fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
     fileMainH << "#define C_" << filename << "_H\n" << std::endl;

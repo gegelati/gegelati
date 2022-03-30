@@ -46,8 +46,7 @@ void errorPrint(int action, int expect, CsvRow* row, double* tab)
     printf("\n");
 }
 
-int inferenceCSV(char* filename,
-                 int (*inferenceTPG)(void))
+int inferenceCSV(char* filename, int (*inferenceTPG)(void))
 {
     double* tab = in1;
     int expectedVal;

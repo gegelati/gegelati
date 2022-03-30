@@ -60,7 +60,8 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     double result = this->progExecutionEngine.executeProgram();
 
     // Filter NaN results: replace with -inf
-    result = (std::isnan(result))? -std::numeric_limits<double>::infinity() : result;
+    result = (std::isnan(result)) ? -std::numeric_limits<double>::infinity()
+                                  : result;
 
     // Put the result in the archive before returning it.
     if (this->archive != NULL) {
@@ -107,7 +108,7 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(
     TPGEdge* bestEdge = *outgoingEdges.begin();
     double bestBid = this->evaluateEdge(*bestEdge);
 #ifdef DEBUG
-            std::cout << "R = " << bestBid << "*" << std::endl;
+    std::cout << "R = " << bestBid << "*" << std::endl;
 #endif
     // Others
     for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
@@ -123,7 +124,8 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(
 #endif
             bestEdge = edge;
             bestBid = bid;
-        } else {
+        }
+        else {
 #ifdef DEBUG
             std::cout << std::endl;
 #endif
