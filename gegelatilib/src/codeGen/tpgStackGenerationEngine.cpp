@@ -150,6 +150,7 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
         << "#include <assert.h>\n"
         << "#include <stdio.h>\n"
         << "#include <stdint.h>\n"
+        << "#include <math.h>\n"
 
         << "#define stackSize  " << stackSize << "\n\n"
 
@@ -192,12 +193,14 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
         << "\t\t\treturn -1;\n"
         << "\t\t}\n"
         << "\t\tbestResult = e[idxNext].ptr_prog();\n"
+        << "\t\tbestResult = (isnan(bestResult))? -INFINITY : bestResult;\n"
         << "\t}\n"
         << "\tidx = idxNext+1;\n"
         << "\t//check if there exist another none visited edge with a better "
            "result\n"
         << "\twhile(idx < nbEdge){\n"
         << "\t\tr = e[idx].ptr_prog();\n"
+        << "\t\tr = (isnan(r))? -INFINITY : r;"
         << "\t\tif(e[idx].visited == 0 &&  r >= bestResult){\n"
         << "\t\t\tbestResult =r;\n"
         << "\t\t\tidxNext = idx;\n"
