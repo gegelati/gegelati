@@ -99,6 +99,9 @@ namespace TPG {
          * If an Archive is associated to the TPGExecutionEngine, the Program
          * result is recorded in it.
          *
+         * If the value returned by the Program is NaN, then it is replaced with
+         * a -inf value.
+         *
          * \param[in] edge the const ref to the TPGEdge whose Program will be
          * evaluated.
          * \return the double value returned by the Program of the TPGEdge.
