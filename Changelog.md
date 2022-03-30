@@ -5,16 +5,21 @@ _aaaa.mm.dd_
 
 ### New features
 * Add instrumented specializations of the `TPGVertex` and `TPGEdge` classes that contain internal counters to keep track of the number of time these graph elements are visited or traversed. To exploit these counters, one must create a `TPGGraph` using a `TPGFactoryInstrumented`, use a new execution engine: `TPGExecutionEngineInstrumented` that will update the counters. The `TPGFactoryInstrumented` also contains utility methods to reset all counter in a `TPGGraph` with instrumented elements, or remove from a `TPGGraph` all the vertices and edges that were never visited or traversed.
+* A new code generation backend is proposed. Instead of using the stack-based traversal of the TPG graph, this approach is based on a Switch system, achieving slightly faster inference. The `TPGSwitchGenerationEngine` has been made the default code generator, thus replacing the `TPGStackGenerationEngine`.
 
 ### Changes
 * Refactor the `LearningAgent` class to access and store the trained `TPGGraph` as a shared pointer. This is needed to ensure that the trained `TPGGraph` can survive to the destruction of its parent `LearningAgent`.
 * Refactor the `TPGGraph` class to:
     * Use a `TPGFactory` to create the TPGAction, TPGTeam, TPGEdge of a TPGGraph.
     * Store `TPGEdge` with `unique_ptr` to support polymorphic operations on them.
+* In code generation:
+    * The `TPGGenerationEngine` becomes a pure virtual class, whose former code is transferred to the `TPGStackGenerationEngine` class.
+    * A new factory system, has been developed to switch between the two generation engine: `TPGGenerationEngineFactory`.
 
 ### Bug fix
 * Change google test repo config. Branch name is now `main` instead of `develop`.
-* Fix determinism issue with ARM 64-bit architecture in `Data::Hash`. Determinism still not provided on non 64bit architectures (X86, ARM, or others). 
+* Fix determinism issue with ARM 64-bit architecture in `Data::Hash`. Determinism still not provided on non 64bit architectures (X86, ARM, or others).
+* Fix issue with programs returning `NaN` during a TPG execution. Comparison with a `NaN` always returns false, which made `NaN` a winning bid for the first edge of a team, and a losing bid for any other edge. During TPG execution, in gegelati and generated code, any `NaN` bid is now replaced with `-inf`.
 
 
 ## Release version 1.0.0 - Amamaretto version/flavor
