@@ -182,6 +182,7 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
 
         << "int execute(Edge* e, int nbEdge){\n"
         << "\tdouble bestResult = e[0].ptr_prog();\n"
+        << "\tbestResult = (isnan(bestResult)) ? -INFINITY : bestResult;\n "
         << "\tint idxNext = 0;\n"
         << "\tint idx;\n"
         << "\tdouble r;\n"
