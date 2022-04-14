@@ -201,7 +201,7 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
            "result\n"
         << "\twhile(idx < nbEdge){\n"
         << "\t\tr = e[idx].ptr_prog();\n"
-        << "\t\tr = (isnan(r))? -INFINITY : r;"
+        << "\t\tr = (isnan(r))? -INFINITY : r;\n"
         << "\t\tif(e[idx].visited == 0 &&  r >= bestResult){\n"
         << "\t\t\tbestResult =r;\n"
         << "\t\t\tidxNext = idx;\n"
