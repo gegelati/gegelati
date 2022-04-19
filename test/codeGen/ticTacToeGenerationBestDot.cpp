@@ -44,7 +44,7 @@
 #include <filesystem>
 #endif
 
-#include "codeGen/tpgGenerationEngine.h"
+#include "codeGen/tpgGenerationEngineFactory.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
@@ -62,7 +62,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     Data::PrimitiveTypeArray<double> currentState{s1};
     TPG::TPGGraph* tpg;
     File::TPGGraphDotImporter* dot = nullptr;
-    CodeGen::TPGGenerationEngine* tpgGen;
+    std::unique_ptr<CodeGen::TPGGenerationEngine> tpgGen;
     std::string cmdCompile;
     std::string cmdExec{"\"./bin/"};
 
@@ -159,12 +159,12 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
     ASSERT_NO_THROW(dot->importGraph())
         << "Failed to Import the graph to test inference of TicTacToe";
 
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("TicTacToeBest_TPG", *tpg, "./src/");
+    CodeGen::TPGGenerationEngineFactory factory;
+    tpgGen = factory.create("TicTacToeBest_TPG", *tpg, "./src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test TicTacToe";
     // call destructor to close generated files
-    delete tpgGen;
+    tpgGen.reset();
 
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Fail to compile generated files to test TicTacToe";

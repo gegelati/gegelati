@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Mickael Dardaillon <mdardail@insa-rennes.fr> (2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,44 +34,37 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-/// doc in ../README.md
-#include <stdio.h>
-#include <stdlib.h>
+#ifdef CODE_GENERATION
 
-#include "OneLeafNoInstruction.h"
+#include "codeGen/tpgGenerationEngineFactory.h"
+#include "codeGen/tpgStackGenerationEngine.h"
+#include "codeGen/tpgSwitchGenerationEngine.h"
 
-#define ERROR_INFERENCE 1
-#define ERROR_RESET 2
-double* in1;
+CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory()
+    : TPGGenerationEngineFactory(switchMode){};
 
-int main(int argc, char* argv[])
+CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory(
+    enum generationEngineMode mode)
 {
-    double tab[1];
-    in1 = tab;
-    int expectedVal;
-    int action;
-    if (argc == 1) {
-        expectedVal = -1;
-        in1[0] = 1;
+    this->mode = mode;
+}
+
+std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
+    TPGGenerationEngineFactory::create(const std::string& filename,
+                                       const TPG::TPGGraph& tpg,
+                                       const std::string& path)
+{
+    if (this->mode == stackMode) {
+        int stack = tpg.getEdges().size(); // use upper bound on stack size
+        return std::make_unique<TPGStackGenerationEngine>(filename, tpg, path,
+                                                          stack);
+    }
+    else if (this->mode == switchMode) {
+        return std::make_unique<TPGSwitchGenerationEngine>(filename, tpg, path);
     }
     else {
-        expectedVal = atoi(argv[1]);
-        for (int i = 2, cpt = 0; i < argc && cpt < 1; ++cpt, ++i) {
-            tab[cpt] = atof(argv[i]);
-        }
+        return nullptr;
     }
-    action = inferenceTPG();
-#ifdef DEBUG
-    printf("action : %d\n", action);
-#endif // DEBUG
-    if (expectedVal != -1 && action != expectedVal) {
-        return ERROR_INFERENCE;
-    }
-
-    action = inferenceTPG();
-    if (expectedVal != -1 && action != expectedVal) {
-        return ERROR_RESET;
-    }
-
-    return 0;
 }
+
+#endif // CODE_GENERATION

@@ -44,13 +44,16 @@
 #include <filesystem>
 #endif
 
-#include "codeGen/tpgGenerationEngine.h"
 #include "environment.h"
-#include "goldenReferenceComparison.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgVertex.h"
+
+#include "codeGen/tpgGenerationEngineFactory.h"
+#include "codeGen/tpgStackGenerationEngine.h"
+#include "codeGen/tpgSwitchGenerationEngine.h"
+#include "goldenReferenceComparison.h"
 
 class TPGGenerationEngineTest : public ::testing::Test
 {
@@ -63,7 +66,7 @@ class TPGGenerationEngineTest : public ::testing::Test
     Environment* e = nullptr;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     Data::PrimitiveTypeArray<double> currentState{s1};
-    CodeGen::TPGGenerationEngine* tpgGen = nullptr;
+    std::unique_ptr<CodeGen::TPGGenerationEngine> tpgGen = nullptr;
     TPG::TPGGraph* tpg = nullptr;
 
     virtual void SetUp()
@@ -114,33 +117,40 @@ class TPGGenerationEngineTest : public ::testing::Test
 
 TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 {
-
     ASSERT_NO_THROW(tpgGen =
-                        new CodeGen::TPGGenerationEngine("constructor", *tpg))
-        << "Failed to construct a TPGGenerationEngine with a filename and a "
-           "TPG";
-
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
-
-    ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-                        "constructorWithPath", *tpg, "./src/"))
-        << "Failed to construct a TPGGenerationEngine with a filename and a "
-           "TPG and a path";
-
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
-
-    ASSERT_NO_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
-                        "constructorWithStackSize", *tpg, "./src/", 15))
+                        std::make_unique<CodeGen::TPGStackGenerationEngine>(
+                            "constructorWithStackSize", *tpg, "./src/", 15))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
-    ASSERT_NO_THROW(delete tpgGen) << "Destruction failed.";
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
 
-    ASSERT_THROW(tpgGen = new CodeGen::TPGGenerationEngine(
+    ASSERT_THROW(tpgGen = std::make_unique<CodeGen::TPGStackGenerationEngine>(
                      "constructorErrorStackSize", *tpg, "./src/", 0),
                  std::runtime_error)
         << "Should fail, try to construct a TPGGenerationEngine with the size "
            "of the call stack equal to 0.";
+}
+
+TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateSwitch)
+{
+    CodeGen::TPGGenerationEngineFactory factorySwitch;
+    ASSERT_NO_THROW(tpgGen = factorySwitch.create("constructor", *tpg))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG";
+
+    ASSERT_NE(dynamic_cast<CodeGen::TPGSwitchGenerationEngine*>(tpgGen.get()),
+              nullptr)
+        << "Created TPGGenerationEngine has incorrect type.";
+
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
+
+    ASSERT_NO_THROW(
+        tpgGen = factorySwitch.create("constructorWithPath", *tpg, "./src/"))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG and a path";
+
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
 
     std::fstream out;
     out.open("./src/rdOnly.c", std::ofstream::out);
@@ -159,11 +169,48 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
         << "Fail to change the file as read only";
 #endif
 
-    ASSERT_THROW(tpgGen =
-                     new CodeGen::TPGGenerationEngine("rdOnly", *tpg, "./src/"),
+    ASSERT_THROW(tpgGen = factorySwitch.create("rdOnly", *tpg, "./src/"),
                  std::runtime_error)
         << "Construction should fail because the file rdOnly is in read only "
            "status.";
+}
+
+TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateStack)
+{
+    auto& team = tpg->addNewTeam();
+    auto& action = tpg->addNewAction(0);
+    tpg->addNewEdge(team, action, std::make_shared<Program::Program>(*e));
+
+    CodeGen::TPGGenerationEngineFactory factoryStack(
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::stackMode);
+    ASSERT_NO_THROW(tpgGen = factoryStack.create("constructor", *tpg))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG";
+
+    ASSERT_NE(dynamic_cast<CodeGen::TPGStackGenerationEngine*>(tpgGen.get()),
+              nullptr)
+        << "Created TPGGenerationEngine has incorrect type.";
+
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
+
+    ASSERT_NO_THROW(
+        tpgGen = factoryStack.create("constructorWithPath", *tpg, "./src/"))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG and a path";
+
+    ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
+}
+
+TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateNoMode)
+{
+    // Create the factory with a non-existing mode.
+    CodeGen::TPGGenerationEngineFactory factoryStack(
+        (CodeGen::TPGGenerationEngineFactory::generationEngineMode)-1);
+    ASSERT_NO_THROW(tpgGen = factoryStack.create("constructor", *tpg))
+        << "Failed to construct a TPGGenerationEngine with a filename and a "
+           "TPG";
+    ASSERT_EQ(tpgGen, nullptr) << "Factory should return a null pointer when a "
+                                  "non existing mode is used.";
 }
 
 TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
@@ -184,11 +231,11 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     ASSERT_EQ(tpg->getEdges().size(), 1)
         << "bad number of edges in OneLeafNoInstruction";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("OneLeafNoInstruction", *tpg,
-                                              "./src/");
+    CodeGen::TPGGenerationEngineFactory factory;
+    tpgGen = factory.create("OneLeafNoInstruction", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
 
     std::vector<std::string> fileGenerated{
         "OneLeafNoInstruction.c", "OneLeafNoInstruction.h",
@@ -220,8 +267,30 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
         << "Compilation failed in OneLeafNoInstruction.";
 }
 
-TEST_F(TPGGenerationEngineTest, OneLeaf)
-{
+/// Extension for built executables
+#ifdef _MSC_VER
+std::string executableExtension = ".exe ";
+#elif __GNUC__
+std::string executableExtension = " ";
+#endif
+
+#define TEST_BOTH_MODE(TEST_NAME, TEST_CODE)                                   \
+    TEST_F(TPGGenerationEngineTest, TEST_NAME##Switch)                         \
+    {                                                                          \
+        CodeGen::TPGGenerationEngineFactory factory(                           \
+            CodeGen::TPGGenerationEngineFactory::generationEngineMode::        \
+                switchMode);                                                   \
+        TEST_CODE                                                              \
+    }                                                                          \
+    TEST_F(TPGGenerationEngineTest, TEST_NAME##Stack)                          \
+    {                                                                          \
+        CodeGen::TPGGenerationEngineFactory factory(                           \
+            CodeGen::TPGGenerationEngineFactory::generationEngineMode::        \
+                stackMode);                                                    \
+        TEST_CODE                                                              \
+    }
+
+TEST_BOTH_MODE(OneLeaf, {
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
 
@@ -244,26 +313,22 @@ TEST_F(TPGGenerationEngineTest, OneLeaf)
 
     ASSERT_EQ(tpg->getEdges().size(), 1) << "bad number of edges in OneLeaf";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("OneLeaf", *tpg, "./src/");
+    tpgGen = factory.create("OneLeaf", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "OneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0);
 
-#ifdef _MSC_VER
-    cmdExec += "OneLeaf.exe";
-#elif __GNUC__
-    cmdExec += "OneLeaf";
-#endif
+    cmdExec += "OneLeaf" + executableExtension;
+
     cmdExec += " 1 4.5";
     std::cout << cmdExec << std::endl;
     ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneLeaf.";
-}
+});
 
-TEST_F(TPGGenerationEngineTest, TwoLeaves)
-{
+TEST_BOTH_MODE(TwoLeaves, {
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
     const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
@@ -294,27 +359,22 @@ TEST_F(TPGGenerationEngineTest, TwoLeaves)
 
     ASSERT_EQ(tpg->getEdges().size(), 2) << "bad number of edges in TwoLeaves";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("TwoLeaves", *tpg, "./src/");
+    tpgGen = factory.create("TwoLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "TwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test TwoLeaves.";
 
-#ifdef _MSC_VER
-    cmdExec += "TwoLeaves.exe ";
-#elif __GNUC__
-    cmdExec += "TwoLeaves ";
-#endif
+    cmdExec += "TwoLeaves" + executableExtension;
 
     ASSERT_EQ(system((cmdExec + path + "/TwoLeaves/DataTwoLeaves.csv").c_str()),
               0)
         << "Error wrong action returned in test TwoLeaves.";
-}
+});
 
-TEST_F(TPGGenerationEngineTest, ThreeLeaves)
-{
+TEST_BOTH_MODE(ThreeLeaves, {
     // P1 < P2 = P3
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
     const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
@@ -358,28 +418,23 @@ TEST_F(TPGGenerationEngineTest, ThreeLeaves)
     ASSERT_EQ(tpg->getEdges().size(), 3)
         << "bad number of edges in ThreeLeaves.";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("ThreeLeaves", *tpg, "./src/");
+    tpgGen = factory.create("ThreeLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "ThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test ThreeLeaves.";
 
-#ifdef _MSC_VER
-    cmdExec += "ThreeLeaves.exe ";
-#elif __GNUC__
-    cmdExec += "ThreeLeaves ";
-#endif
+    cmdExec += "ThreeLeaves" + executableExtension;
 
     ASSERT_EQ(
         system((cmdExec + path + "/ThreeLeaves/DataThreeLeaves.csv").c_str()),
         0)
         << "Error wrong action returned in test ThreeLeaves.";
-}
+});
 
-TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
-{
+TEST_BOTH_MODE(OneTeamOneLeaf, {
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
     const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
@@ -412,26 +467,23 @@ TEST_F(TPGGenerationEngineTest, OneTeamOneLeaf)
     ASSERT_EQ(tpg->getEdges().size(), 2)
         << "bad number of edges in OneTeamOneLeaf";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("OneTeamOneLeaf", *tpg, "./src/");
+    tpgGen = factory.create("OneTeamOneLeaf", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "OneTeamOneLeaf";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test OneTeamOneLeaf";
-#ifdef _MSC_VER
-    cmdExec += "OneTeamOneLeaf.exe ";
-#elif __GNUC__
-    cmdExec += "OneTeamOneLeaf ";
-#endif
+
+    cmdExec += "OneTeamOneLeaf" + executableExtension;
+
     cmdExec += "1 4.5 6.8";
 
     ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error wrong action returned in test OneTeamOneLeaf";
-}
+});
 
-TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
-{
+TEST_BOTH_MODE(OneTeamTwoLeaves, {
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
     const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
@@ -473,30 +525,24 @@ TEST_F(TPGGenerationEngineTest, OneTeamTwoLeaves)
     ASSERT_EQ(tpg->getEdges().size(), 3)
         << "bad number of edges in OneTeamTwoLeaves";
 
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("OneTeamTwoLeaves", *tpg, "./src/");
+    tpgGen = factory.create("OneTeamTwoLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "OneTeamTwoLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test OneTeamTwoLeaves.";
 
-#ifdef _MSC_VER
-    cmdExec += "OneTeamTwoLeaves.exe ";
-#elif __GNUC__
-    cmdExec += "OneTeamTwoLeaves ";
-#endif
+    cmdExec += "OneTeamTwoLeaves" + executableExtension;
 
     ASSERT_EQ(
         system((cmdExec + path + "/OneTeamTwoLeaves/DataOneTeamTwoLeaves.csv")
                    .c_str()),
         0)
         << "Error wrong action returned in test OneTeamTwoLeaves.";
-}
+});
 
-TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
-{
+TEST_BOTH_MODE(TwoTeamsOneCycle, {
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
     const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
     const TPG::TPGVertex* T2 = (&tpg->addNewTeam());
@@ -558,28 +604,23 @@ TEST_F(TPGGenerationEngineTest, TwoTeamsOneCycle)
     ASSERT_EQ(tpg->getEdges().size(), 5)
         << "bad number of edges in TwoTeamsOneCycle";
 
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("TwoTeamsOneCycle", *tpg, "./src/");
+    tpgGen = factory.create("TwoTeamsOneCycle", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
 
     cmdCompile += "TwoTeamsOneCycle";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test TwoTeamsOneCycle.";
 
-#ifdef _MSC_VER
-    cmdExec += "TwoTeamsOneCycle.exe ";
-#elif __GNUC__
-    cmdExec += "TwoTeamsOneCycle ";
-#endif
+    cmdExec += "TwoTeamsOneCycle" + executableExtension;
 
     ASSERT_EQ(
         system((cmdExec + path + "/TwoTeamsOneCycle/DataTwoTeamsOneCycle.csv")
                    .c_str()),
         0)
         << "Error wrong action returned in test TwoTeamsOneCycle.";
-}
+});
 
 static void setProgLine(const std::shared_ptr<Program::Program> prog,
                         int operand)
@@ -592,9 +633,7 @@ static void setProgLine(const std::shared_ptr<Program::Program> prog,
     line.setOperand(1, 0, 1);
 }
 
-TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
-{
-
+TEST_BOTH_MODE(ThreeTeamsOneCycleThreeLeaves, {
     const TPG::TPGVertex* A1 = (&tpg->addNewAction(1));
     const TPG::TPGVertex* A2 = (&tpg->addNewAction(2));
     const TPG::TPGVertex* A0 = (&tpg->addNewAction(0));
@@ -644,20 +683,15 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
     ASSERT_EQ(tpg->getEdges().size(), 7)
         << "bad number of edges in ThreeTeamsOneCycleThreeLeaves";
 
-    tpgGen = new CodeGen::TPGGenerationEngine("ThreeTeamsOneCycleThreeLeaves",
-                                              *tpg, "./src/");
+    tpgGen = factory.create("ThreeTeamsOneCycleThreeLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
-    delete tpgGen;
+    tpgGen.reset();
     cmdCompile += "ThreeTeamsOneCycleThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Error while compiling the test ThreeTeamsOneCycleThreeLeaves";
 
-#ifdef _MSC_VER
-    cmdExec += "ThreeTeamsOneCycleThreeLeaves.exe ";
-#elif __GNUC__
-    cmdExec += "ThreeTeamsOneCycleThreeLeaves ";
-#endif
+    cmdExec += "ThreeTeamsOneCycleThreeLeaves" + executableExtension;
 
     ASSERT_EQ(system((cmdExec + path +
                       "/ThreeTeamsOneCycleThreeLeaves/"
@@ -666,5 +700,5 @@ TEST_F(TPGGenerationEngineTest, ThreeTeamsOneCycleThreeLeaves)
               0)
         << "Error wrong action returned in test "
            "ThreeTeamsOneCycleThreeLeaves.";
-}
+});
 #endif // CODE_GENERATION

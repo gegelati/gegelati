@@ -59,6 +59,10 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     // Execute the program.
     double result = this->progExecutionEngine.executeProgram();
 
+    // Filter NaN results: replace with -inf
+    result = (std::isnan(result)) ? -std::numeric_limits<double>::infinity()
+                                  : result;
+
     // Put the result in the archive before returning it.
     if (this->archive != NULL) {
         this->archive->addRecording(&prog, progExecutionEngine.getDataSources(),
@@ -86,6 +90,10 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(
         }
     }
 
+#ifdef DEBUG
+    std::cout << "New team :" << &team << std::endl;
+#endif
+
     // Throw an error if no edge remains
     if (outgoingEdges.size() == 0) {
         // This should not happen in a correctly constructed TPG, since every
@@ -99,17 +107,28 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(
     // First
     TPGEdge* bestEdge = *outgoingEdges.begin();
     double bestBid = this->evaluateEdge(*bestEdge);
+#ifdef DEBUG
+    std::cout << "R = " << bestBid << "*" << std::endl;
+#endif
     // Others
     for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
          iter++) {
         TPGEdge* edge = *iter;
         double bid = this->evaluateEdge(*edge);
 #ifdef DEBUG
-        std::cout << "R = " << bid << std::endl;
+        std::cout << "R = " << bid;
 #endif
         if (bid >= bestBid) {
+#ifdef DEBUG
+            std::cout << "*" << std::endl;
+#endif
             bestEdge = edge;
             bestBid = bid;
+        }
+        else {
+#ifdef DEBUG
+            std::cout << std::endl;
+#endif
         }
     }
 

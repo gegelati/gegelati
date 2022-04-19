@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    action = executeFromVertex(root);
+    action = inferenceTPG();
 #ifdef DEBUG
     printf("action : %d\n", action);
 #endif // DEBUG
@@ -76,8 +76,7 @@ int main(int argc, char* argv[])
         return ERROR_INFERENCE;
     }
 
-    reset();
-    action = executeFromVertex(root);
+    action = inferenceTPG();
     if (expectedVal != -1 && action != expectedVal) {
         return ERROR_RESET;
     }
