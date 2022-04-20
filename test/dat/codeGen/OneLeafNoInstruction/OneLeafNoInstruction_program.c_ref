@@ -1,3 +1,9 @@
+~/**
+~ * File generated with GEGELATI vX.Y.Z
+~ * On the AAAA-MM-DD HH:MM:SS
+~ * With the <generator class name>.
+~ */
+
 #include "OneLeafNoInstruction_program.h"
 #include "externHeader.h"
 extern double* in1;

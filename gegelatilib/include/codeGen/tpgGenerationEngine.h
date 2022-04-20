@@ -93,6 +93,9 @@ namespace CodeGen {
          *
          * This function prints generic code to execute the TPG and manage the
          * stack of visited edges.
+         *
+         * Virtual function body prints logging (date, gegelati version) info
+         * into file, and should be called before any specialization.
          */
         virtual void initTpgFile() = 0;
 
