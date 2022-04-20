@@ -185,11 +185,19 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
 
 void File::TPGGraphDotImporter::dumpTPGGraphHeader()
 {
-    // skips the three first lines of the file
+
     char buffer[MAX_READ_SIZE];
-    pFile.getline(buffer, MAX_READ_SIZE);
-    pFile.getline(buffer, MAX_READ_SIZE);
-    pFile.getline(buffer, MAX_READ_SIZE);
+
+    // skips the comment lines of header (if any)
+    do {
+        pFile.getline(buffer, MAX_READ_SIZE);
+    } while (buffer[0] == '/');
+
+    // Skip the header (should be 3 lines, including one covered by previous
+    // while loop)
+    for (int i = 0; i < 2; i++) {
+        pFile.getline(buffer, MAX_READ_SIZE);
+    }
 }
 
 void File::TPGGraphDotImporter::readTeam(std::smatch& matches)

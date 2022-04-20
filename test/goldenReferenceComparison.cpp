@@ -67,7 +67,9 @@ bool compare_files(const std::string& printedFilePath,
         std::string lineExport;
         std::getline(printedFile, lineExport);
 
-        if (lineRef != lineExport) {
+        // If the lines are different
+        // Ref lines starting with a '~' are ignored during the comparison.
+        if (lineRef != lineExport && lineRef.at(0) != '~') {
             nbDiffs++;
             std::cout << "Diff at Line " << lineNumber << ":" << std::endl;
             std::cout << "\tref: " << lineRef << std::endl;

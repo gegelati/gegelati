@@ -43,6 +43,9 @@
  * Function that return true if printedFilePath and goldenRefPath have the same
  * content.
  *
+ * Lines of the reference file starting with a `~` are ignored during the
+ * comparison.
+ *
  * @param printedFilePath const reference to a std::string holding the name of
  * the first file to compare.
  * @param goldenRefPath const reference to a std::string holding the name of the

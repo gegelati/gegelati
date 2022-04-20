@@ -38,6 +38,8 @@
 #ifdef CODE_GENERATION
 
 #include "codeGen/tpgGenerationEngine.h"
+#include "data/demangle.h"
+#include "util/timestamp.h"
 
 CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
                                                   const TPG::TPGGraph& tpg,
@@ -53,10 +55,24 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
                                  std::string(path + filename) + ".c or " +
                                  std::string(path + filename) + ".h");
     }
+
+    fileMain << "/**\n"
+             << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
+             << " * On the " << Util::getCurrentDate() << "\n"
+             << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
+             << ".\n"
+             << " */\n\n";
+
     fileMain << "#include \"" << filename << ".h\"" << std::endl;
     fileMain << "#include \"" << filename << "_" << filenameProg << ".h\""
              << std::endl;
 
+    fileMainH << "/**\n"
+              << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
+              << " * On the " << Util::getCurrentDate() << "\n"
+              << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
+              << ".\n"
+              << " */\n\n";
     fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
     fileMainH << "#define C_" << filename << "_H\n" << std::endl;
 };
