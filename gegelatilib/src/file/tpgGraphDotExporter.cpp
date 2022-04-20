@@ -35,9 +35,11 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "file/tpgGraphDotExporter.h"
-#include "data/constant.h"
 #include <inttypes.h>
+
+#include "data/constant.h"
+#include "file/tpgGraphDotExporter.h"
+#include "util/timestamp.h"
 
 void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 {
@@ -134,10 +136,17 @@ void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
 void File::TPGGraphDotExporter::printTPGGraphHeader()
 {
     /*
+    // File exported with GEGELATI vX.Y.Z
+    // On the YYYY-MM-DD HH:MM:SS
+    // With the <Printer>
     graph{
     graph[pad = "0.212,0.055" bgcolor = lightgray]
     node[style = filled label = ""]
     */
+    fprintf(pFile, "// File exported with GEGELATI v" GEGELATI_VERSION "\n");
+    fprintf(pFile, "// On the %s\n", Util::getCurrentDate().c_str());
+    fprintf(pFile, "// With the %s\n",
+            DEMANGLE_TYPEID_NAME(typeid(*this).name()));
     fprintf(pFile, "%sdigraph{\n", this->offset.c_str());
     this->offset = "\t";
     fprintf(pFile, "%sgraph[pad = \"0.212, 0.055\" bgcolor = lightgray]\n",
