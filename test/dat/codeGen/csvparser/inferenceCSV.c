@@ -1,6 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
  *
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -46,9 +47,7 @@ void errorPrint(int action, int expect, CsvRow* row, double* tab)
     printf("\n");
 }
 
-int inferenceCSV(char* filename,
-                 int (*executeFromVertex)(void* (*)(int* action)),
-                 void* (*root)(int*), void (*reset)())
+int inferenceCSV(char* filename, int (*inferenceTPG)(void))
 {
     double* tab = in1;
     int expectedVal;
@@ -64,7 +63,7 @@ int inferenceCSV(char* filename,
             tab[i - 1] = strtod(rowFields[i], NULL);
         }
 
-        action = executeFromVertex(root);
+        action = inferenceTPG();
 #ifdef DEBUG
         printf("action : %d\n", action);
 #endif // DEBUG
@@ -73,15 +72,13 @@ int inferenceCSV(char* filename,
             return ERROR_INFERENCE;
         }
 
-        reset();
-        action = executeFromVertex(root);
+        action = inferenceTPG();
         if (action != expectedVal) {
             errorPrint(action, expectedVal, row, tab);
             return ERROR_RESET;
         }
 
         CsvParser_destroy_row(row);
-        reset();
     }
     CsvParser_destroy(csvparser);
     return 0;

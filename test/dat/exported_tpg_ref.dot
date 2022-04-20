@@ -1,3 +1,6 @@
+~// File exported with GEGELATI vX.Y.Z
+~// On the YYYY-MM-DD HH:MM:SS
+~// With the <Printer>
 digraph{
 	graph[pad = "0.212, 0.055" bgcolor = lightgray]
 	node[shape=circle style = filled label = ""]

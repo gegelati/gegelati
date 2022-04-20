@@ -1,6 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -104,7 +105,7 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
     // It is important to iterate on tpg.getRootVertices : it ensures
     // the order of the roots iteration remains the same no matter
     // the order of resultsPerRootMap which depends on addresses.
-    for (auto root : tpg.getRootVertices()) {
+    for (auto root : tpg->getRootVertices()) {
         auto& resultPerRoot = *resultsPerRootMap.find(root);
         results.emplace(resultPerRoot.second, resultPerRoot.first);
     }
@@ -112,7 +113,7 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
     champions.clear();
     auto iterator = results.end();
     for (int i = 0; i <= (1.0 - params.ratioDeletedRoots) *
-                                 (double)tpg.getNbRootVertices() -
+                                 (double)tpg->getNbRootVertices() -
                              1.0;
          i++) {
         champions.emplace_back((--iterator)->second);
@@ -180,7 +181,7 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
     makeJobs(Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
 {
     // sets the tpg to the Learning Agent's one if no one was specified
-    tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
+    tpgGraph = tpgGraph == nullptr ? tpg.get() : tpgGraph;
 
     std::queue<std::shared_ptr<Learn::Job>> jobs;
 

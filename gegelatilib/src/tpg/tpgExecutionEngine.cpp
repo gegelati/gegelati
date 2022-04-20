@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -59,6 +59,10 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     // Execute the program.
     double result = this->progExecutionEngine.executeProgram();
 
+    // Filter NaN results: replace with -inf
+    result = (std::isnan(result)) ? -std::numeric_limits<double>::infinity()
+                                  : result;
+
     // Put the result in the archive before returning it.
     if (this->archive != NULL) {
         this->archive->addRecording(&prog, progExecutionEngine.getDataSources(),
@@ -86,6 +90,10 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(
         }
     }
 
+#ifdef DEBUG
+    std::cout << "New team :" << &team << std::endl;
+#endif
+
     // Throw an error if no edge remains
     if (outgoingEdges.size() == 0) {
         // This should not happen in a correctly constructed TPG, since every
@@ -99,17 +107,28 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(
     // First
     TPGEdge* bestEdge = *outgoingEdges.begin();
     double bestBid = this->evaluateEdge(*bestEdge);
+#ifdef DEBUG
+    std::cout << "R = " << bestBid << "*" << std::endl;
+#endif
     // Others
     for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
          iter++) {
         TPGEdge* edge = *iter;
         double bid = this->evaluateEdge(*edge);
 #ifdef DEBUG
-        std::cout << "R = " << bid << std::endl;
+        std::cout << "R = " << bid;
 #endif
         if (bid >= bestBid) {
+#ifdef DEBUG
+            std::cout << "*" << std::endl;
+#endif
             bestEdge = edge;
             bestBid = bid;
+        }
+        else {
+#ifdef DEBUG
+            std::cout << std::endl;
+#endif
         }
     }
 
@@ -125,7 +144,7 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngine::
     visitedVertices.push_back(currentVertex);
 
     // Browse the TPG until a TPGAction is reached.
-    while (typeid(*currentVertex) == typeid(TPG::TPGTeam)) {
+    while (dynamic_cast<const TPG::TPGTeam*>(currentVertex)) {
         // Get the next edge
         const TPGEdge& edge =
             this->evaluateTeam(*(TPGTeam*)currentVertex, visitedVertices);

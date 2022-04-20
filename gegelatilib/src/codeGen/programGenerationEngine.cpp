@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -36,6 +36,7 @@
 
 #ifdef CODE_GENERATION
 #include "codeGen/programGenerationEngine.h"
+#include "util/timestamp.h"
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
@@ -167,8 +168,22 @@ void CodeGen::ProgramGenerationEngine::openFile(const std::string& filename,
                                  std::string(path + filename) + ".c or " +
                                  std::string(path + filename) + ".h");
     }
-    fileC << "#include \"" << filename << ".h\"" << std::endl;
 
+    fileC << "/**\n"
+          << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
+          << " * On the " << Util::getCurrentDate() << "\n"
+          << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
+          << ".\n"
+          << " */\n\n";
+
+    fileH << "/**\n"
+          << " * File generated with GEGELATI v" GEGELATI_VERSION "\n"
+          << " * On the " << Util::getCurrentDate() << "\n"
+          << " * With the " << DEMANGLE_TYPEID_NAME(typeid(*this).name())
+          << ".\n"
+          << " */\n\n";
+
+    fileC << "#include \"" << filename << ".h\"" << std::endl;
     fileH << "#ifndef C_" << filename << "_H" << std::endl;
     fileH << "#define C_" << filename << "_H\n" << std::endl;
     fileC << "#include \"externHeader.h\"" << std::endl;

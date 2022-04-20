@@ -1,97 +1,57 @@
+~/**
+~ * File generated with GEGELATI vX.Y.Z
+~ * On the AAAA-MM-DD HH:MM:SS
+~ * With the <generator class name>.
+~ */
+
 #include "OneLeafNoInstruction.h"
 #include "OneLeafNoInstruction_program.h"
-#include <limits.h> 
+#include <limits.h>
 #include <assert.h>
+#include <float.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
-#define stackSize  8
+#include <math.h>
 
-Edge* callStack[stackSize];
-uint32_t top = 0;
-
-int inferenceTPG(){
-	reset();
-	return executeFromVertex(root);
-}
-
-int executeFromVertex(void*(*ptr_f)(int*action)){
-	void*(*f)(int*action) = ptr_f;
-	int action = INT_MIN;
-	while (f!=NULL){
-		f= (void*(*)(int*)) (f(&action));
-	}
-	return action;
-}
-
-void* executeTeam(Edge* e, int nbEdge){
-	int idxNext = execute(e, nbEdge); 
-	if(idxNext != -1) {
-		e[idxNext].visited = 1;
-		push(&e[idxNext]);
-		return e[idxNext].ptr_vertex;
-	}
-	return NULL;
-}
-
-int execute(Edge* e, int nbEdge){
-	double bestResult = e[0].ptr_prog();
-	int idxNext = 0;
-	int idx;
-	double r;
-	while (e[idxNext].visited == 1){
-		idxNext++;
-		if(idxNext>= nbEdge){
-			printf("Error all the edges of the team are already visited\n");
-			return -1;
+int bestProgram(double *results, int nb) {
+	int bestProgram = 0;
+	double bestScore = (isnan(results[0]))? -INFINITY : results[0];
+	for (int i = 1; i < nb; i++) {
+		double challengerScore = (isnan(results[i]))? -INFINITY : results[i];
+		if (challengerScore >= bestScore) {
+			bestProgram = i;
+			bestScore = challengerScore;
 		}
-		bestResult = e[idxNext].ptr_prog();
 	}
-	idx = idxNext+1;
-	//check if there exist another none visited edge with a better result
-	while(idx < nbEdge){
-		r = e[idx].ptr_prog();
-		if(e[idx].visited == 0 &&  r >= bestResult){
-			bestResult =r;
-			idxNext = idx;
+	return bestProgram;
+}
+
+enum vertices {A0, T1, };
+
+int inferenceTPG() {
+	bool teamsVisited[2] = { false };
+
+	double T1Scores[1];
+
+	enum vertices currentVertex = T1;
+	while(1) {
+		switch (currentVertex) {
+		case A0: {
+			return 1;
+			break;
 		}
-		idx++;
-	}
-	return idxNext;
-}
-
-void push( Edge* e){
-	if(top == stackSize) {
-		fprintf(stderr, "Call stack of size %d is too small for the iteration of this TPG", stackSize);
-	}
-	callStack[top] = e;
-	top++;}
-
-Edge* pop(){
-	Edge* edge = NULL;
-if(top > 0){
-		top--;
-		edge = callStack[top];
-	}
-	return edge;
-}
-
-void reset(){
-	while (top > 0) {
-		pop()->visited = 0;
+		case T1: {
+			if (!teamsVisited[currentVertex]) {
+				teamsVisited[currentVertex] = true;
+				T1Scores[0] = P0();
+			}
+			int best = bestProgram(T1Scores, 1);
+			T1Scores[best] = DBL_MIN;
+			const enum vertices next[1] = { A0,  };
+			currentVertex = next[best];
+			break;
+		}
+		}
 	}
 }
-
-void* A1(int* action){
-	*action = 1;
-	return NULL;
-}
-
-void* T0(int* action){
-	static Edge e[] = {
-			{0,P0,A1}
-	};
-	int nbEdge = 1;
-	return executeTeam(e,nbEdge);
-}
-
-void* (*root)(int* action) = T0;

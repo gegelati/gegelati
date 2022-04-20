@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -100,7 +100,7 @@ void Log::LABasicLogger::logAfterPopulateTPG()
     this->mutationTime = getDurationFrom(*checkpoint);
 
     *this << std::setw(colWidth)
-          << this->learningAgent.getTPGGraph().getNbVertices();
+          << this->learningAgent.getTPGGraph()->getNbVertices();
 
     chronoFromNow();
 }

@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -196,6 +196,15 @@ TEST_F(TPGExecutionEngineTest, EvaluateEdge)
 
     ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 5, PARAM_FLOAT_PRECISION)
         << "Evaluation of the program of an Edge failed.";
+
+    // Change value returned by Program to NaN
+    ((Data::PrimitiveTypeArray<double>&)vect.at(0).get())
+        .setDataAt(typeid(double), 0, std::numeric_limits<double>::quiet_NaN());
+
+    ASSERT_EQ(tpee.evaluateEdge(*edges.at(0)),
+              -std::numeric_limits<double>::infinity())
+        << "Filtering of NaN result when evaluating the Program of an Edge "
+           "failed.";
 }
 
 TEST_F(TPGExecutionEngineTest, ArchiveUsage)

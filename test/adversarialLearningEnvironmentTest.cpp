@@ -1,6 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -94,7 +95,7 @@ TEST(AdversarialLearningEnvironmentTest, compatibilityLearningAgent)
     ASSERT_NO_THROW(result =
                         la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
-    ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
+    ASSERT_EQ(result.size(), la.getTPGGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
 

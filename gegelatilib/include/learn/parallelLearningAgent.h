@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -180,11 +180,14 @@ namespace Learn {
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * default TPGFactory is used if none is provided.
          */
-        ParallelLearningAgent(LearningEnvironment& le,
-                              const Instructions::Set& iSet,
-                              const LearningParameters& p)
-            : LearningAgent(le, iSet, p)
+        ParallelLearningAgent(
+            LearningEnvironment& le, const Instructions::Set& iSet,
+            const LearningParameters& p,
+            const TPG::TPGFactory& factory = TPG::TPGFactory())
+            : LearningAgent(le, iSet, p, factory)
         {
             // overriding the maxNbThreads that basic LA defined to 1
             maxNbThreads = p.nbThreads;

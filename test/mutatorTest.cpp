@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -574,13 +574,15 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const TPG::TPGVertex* vert) {
-                                return typeid(*vert) == typeid(TPG::TPGAction);
+                                return dynamic_cast<const TPG::TPGAction*>(
+                                           vert) != nullptr;
                             }),
               params.tpg.nbActions)
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const TPG::TPGVertex* vert) {
-                                return typeid(*vert) == typeid(TPG::TPGTeam);
+                                return dynamic_cast<const TPG::TPGTeam*>(
+                                           vert) != nullptr;
                             }),
               params.tpg.nbActions)
         << "Number of team vertex in the graph is incorrect.";
@@ -593,8 +595,8 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     // Check number of Programs.
     std::set<Program::Program*> programs;
     std::for_each(tpg.getEdges().begin(), tpg.getEdges().end(),
-                  [&programs](const TPG::TPGEdge& edge) {
-                      programs.insert(&edge.getProgram());
+                  [&programs](const std::unique_ptr<TPG::TPGEdge>& edge) {
+                      programs.insert(&edge->getProgram());
                   });
     ASSERT_EQ(programs.size(), params.tpg.nbActions * 2)
         << "Number of distinct program in the TPG is incorrect.";
@@ -640,23 +642,26 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
     // Check properties of the tpg
     ASSERT_EQ(tpg.getEdges().size(), 2) << "No edge was removed from the TPG.";
     // With known seed edge 0 was removed
-    ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                            [&edge0](const TPG::TPGEdge& other) {
-                                return &edge0 == &other;
-                            }),
-              0)
+    ASSERT_EQ(
+        std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+                      [&edge0](const std::unique_ptr<TPG::TPGEdge>& other) {
+                          return &edge0 == other.get();
+                      }),
+        0)
         << "With a known seed, edge0 should be removed from the TPG.";
-    ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                            [&edge1](const TPG::TPGEdge& other) {
-                                return &edge1 == &other;
-                            }),
-              1)
+    ASSERT_EQ(
+        std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+                      [&edge1](const std::unique_ptr<TPG::TPGEdge>& other) {
+                          return &edge1 == other.get();
+                      }),
+        1)
         << "With a known seed, edge1 should not be removed from the TPG.";
-    ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                            [&edge2](const TPG::TPGEdge& other) {
-                                return &edge2 == &other;
-                            }),
-              1)
+    ASSERT_EQ(
+        std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+                      [&edge2](const std::unique_ptr<TPG::TPGEdge>& other) {
+                          return &edge2 == other.get();
+                      }),
+        1)
         << "With a known seed, edge2 should not be removed from the TPG.";
 
     // Remove again to cover the "1 action remaining" code.
@@ -665,17 +670,19 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
     // Check properties of the tpg
     ASSERT_EQ(tpg.getEdges().size(), 1) << "No edge was removed from the TPG.";
     // Edge 1 was removed
-    ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                            [&edge1](const TPG::TPGEdge& other) {
-                                return &edge1 == &other;
-                            }),
-              0)
+    ASSERT_EQ(
+        std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+                      [&edge1](const std::unique_ptr<TPG::TPGEdge>& other) {
+                          return &edge1 == other.get();
+                      }),
+        0)
         << "With a known seed, edge1 should be removed from the TPG.";
-    ASSERT_EQ(std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                            [&edge2](const TPG::TPGEdge& other) {
-                                return &edge2 == &other;
-                            }),
-              1)
+    ASSERT_EQ(
+        std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
+                      [&edge2](const std::unique_ptr<TPG::TPGEdge>& other) {
+                          return &edge2 == other.get();
+                      }),
+        1)
         << "With a known seed, edge2 should not be removed from the TPG.";
 }
 
@@ -941,8 +948,8 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 
     // Create a list of Programs to mutate
     std::list<std::shared_ptr<Program::Program>> programs;
-    for (auto edge : tpg.getEdges()) {
-        programs.emplace_back(new Program::Program(edge.getProgram()));
+    for (auto& edge : tpg.getEdges()) {
+        programs.emplace_back(new Program::Program(edge->getProgram()));
     }
 
     // Mutate them sequentially
@@ -988,8 +995,8 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 
     // Create a list of Programs to mutate
     std::list<std::shared_ptr<Program::Program>> programs;
-    for (auto edge : tpg.getEdges()) {
-        programs.emplace_back(new Program::Program(edge.getProgram()));
+    for (auto& edge : tpg.getEdges()) {
+        programs.emplace_back(new Program::Program(edge->getProgram()));
     }
 
     // Mutate them sequentially
@@ -1035,10 +1042,10 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     // Create a list of Programs to mutate
     std::list<std::shared_ptr<Program::Program>> programsSequential;
     std::list<std::shared_ptr<Program::Program>> programsParallel;
-    for (auto edge : tpg.getEdges()) {
+    for (auto& edge : tpg.getEdges()) {
         programsSequential.emplace_back(
-            new Program::Program(edge.getProgram()));
-        programsParallel.emplace_back(new Program::Program(edge.getProgram()));
+            new Program::Program(edge->getProgram()));
+        programsParallel.emplace_back(new Program::Program(edge->getProgram()));
     }
     rng.setSeed(0);
     Mutator::TPGMutator::mutateNewProgramBehaviors(1, programsSequential, rng,

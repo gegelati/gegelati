@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -135,7 +135,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     // this map will compute the number of iterations per root that are
     // scheduled
     std::map<const TPG::TPGVertex*, size_t> nbEvalPerRoot;
-    for (auto root : la2.getTPGGraph().getRootVertices()) {
+    for (auto root : la2.getTPGGraph()->getRootVertices()) {
         nbEvalPerRoot.emplace(root, 0);
     }
     while (!jobs.empty()) {
@@ -168,11 +168,11 @@ TEST_F(adversarialLearningAgentTest, EvalJob)
     Archive a; // For testing purposes, notmally, the archive from the
     // LearningAgent is used.
 
-    TPG::TPGExecutionEngine tee(la.getTPGGraph().getEnvironment(), &a);
+    TPG::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = Learn::AdversarialJob({la.getTPGGraph().getRootVertices()[0]});
+    auto job = Learn::AdversarialJob({la.getTPGGraph()->getRootVertices()[0]});
     ASSERT_NO_THROW(
         result = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root in no parallel and no adversarial mode "
@@ -230,7 +230,7 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    TPG::TPGGraph& tpg = la.getTPGGraph();
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 24)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 16)
@@ -258,7 +258,7 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
     ASSERT_NO_THROW(result =
                         la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
-    ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
+    ASSERT_EQ(result.size(), la.getTPGGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
 
@@ -286,7 +286,7 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallel)
     ASSERT_NO_THROW(result =
                         la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
-    ASSERT_EQ(result.size(), la.getTPGGraph().getNbRootVertices())
+    ASSERT_EQ(result.size(), la.getTPGGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
 
@@ -313,7 +313,7 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsGoodResults)
     AdversarialLearningAgentWithCustomMakeJobs la(customLe, set, params);
 
     la.init();
-    auto roots = la.getTPGGraph().getRootVertices();
+    auto roots = la.getTPGGraph()->getRootVertices();
     auto firstRoot = roots[0];
     auto secondRoot = roots[1];
     auto thirdRoot = roots[2];

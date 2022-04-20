@@ -1,6 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -66,7 +67,7 @@ class AdversarialLearningAgentWithCustomMakeJobs
         // sets the tpg to the Learning Agent's one if no one was specified
         std::queue<std::shared_ptr<Learn::Job>> jobs;
 
-        auto roots = tpg.getRootVertices();
+        auto roots = tpg->getRootVertices();
 
         uint64_t archiveSeed;
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);

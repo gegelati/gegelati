@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -50,6 +50,9 @@ namespace TPG {
     class TPGEdge
     {
       public:
+        /// Default virtual destructor (for polymorphism)
+        virtual ~TPGEdge() = default;
+
         /**
          * \brief Main constructor of the TPGEdge class.
          *
@@ -74,6 +77,11 @@ namespace TPG {
 
         /**
          * \brief Set a new Program for the TPGEdge.
+         *
+         * This method is const to enable use outside of the TPGGraph which is
+         * the only class accessing the non-const TPGEdge. Since the program
+         * pointer attribute is mutable, this method can successfully be used to
+         * alter the program.
          *
          * \param[in] prog the new shared pointer to a Program.
          */
@@ -127,6 +135,8 @@ namespace TPG {
 
         /// Shared pointer to the Program to execute when evaluating the bid
         /// of this TPGEdge.
+        /// This attribute is mutable to enable its modification during
+        /// mutations.
         mutable std::shared_ptr<Program::Program> program;
 
         /// Delete the default constructor.

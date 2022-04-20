@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -42,6 +42,7 @@
 #include "environment.h"
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
+#include "tpg/tpgFactory.h"
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
 
@@ -56,8 +57,11 @@ namespace TPG {
          * \brief Main TPGGraph constructor.
          *
          * \param[in] e the Environment for the TPGGraph.
+         * \param[in] f the TPGFactory used to create the graph elements.
          */
-        TPGGraph(const Environment& e) : env{e} {};
+        TPGGraph(const Environment& e,
+                 std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>())
+            : env{e}, factory{std::move(f)} {};
 
         /**
          * \brief delete copy constructor
@@ -96,7 +100,7 @@ namespace TPG {
          *
          * Free the memory allocated for TPGVertices.
          */
-        ~TPGGraph();
+        virtual ~TPGGraph();
 
         /**
          * \brief Empty the TPGGraph of all its content.
@@ -111,10 +115,18 @@ namespace TPG {
         const Environment& getEnvironment() const;
 
         /**
+         * \brief Get a reference to the TPGFactory of the TPGGraph.
+         *
+         * \return a reference to the TPGFactory.
+         */
+        const TPGFactory& getFactory() const;
+
+        /**
          * \brief Create a new TPGTeam and add it to the vertices of the
          * TPGGraph.
          *
          * The new TPGTeam is added to the back of the vertices list.
+         * The TPGTeam is created using the TPGFactory of the TPGGraph.
          *
          * \return a const reference to the newly created TPGTeam.
          */
@@ -125,6 +137,7 @@ namespace TPG {
          * TPGGraph.
          *
          * The new TPGAction is added to the back of the vertices list.
+         * The TPGAction is created using the TPGFactory of the TPGGraph.
          *
          * \param[in] actionID the identifier to associate to the TPGAction.
          * \return a const reference to the newly created TPGAction.
@@ -205,6 +218,7 @@ namespace TPG {
          * and associated with the given Program. The newly created TPGEdge is
          * inserted in the incoming and outgoing edges lists of the connected
          * TPGVertex.
+         * The TPGEdge is created using the TPGFactory of the TPGGraph.
          *
          * \param[in] src the source TPGVertex of the newly created TPGEdge.
          * \param[in] dest the destination TPGVertex of the newly created
@@ -224,7 +238,7 @@ namespace TPG {
          *
          * \return a const reference to the edges attribute.
          */
-        const std::list<TPGEdge>& getEdges() const;
+        const std::list<std::unique_ptr<TPGEdge>>& getEdges() const;
 
         /**
          * \brief Remove a TPGEdge from the TPGGraph.
@@ -242,7 +256,7 @@ namespace TPG {
         /**
          * Duplicate a TPGEdge from the TPGGraph.
          *
-         * This method creates a perfecte copy of the given TPGEdge, that is
+         * This method creates a perfect copy of the given TPGEdge, that is
          * a TPGEdge with the same source, destination and program shared
          * pointer.
          *
@@ -291,6 +305,9 @@ namespace TPG {
         /// Environment of the TPGGraph
         const Environment& env;
 
+        /// TPGFactory of the TPGGraph
+        const std::unique_ptr<TPGFactory> factory;
+
         /**
          * \brief Set of TPGVertex composing the TPGGraph.
          */
@@ -299,7 +316,7 @@ namespace TPG {
         /**
          * \brief Set of TPGEdge composing the TPGGraph.
          */
-        std::list<TPGEdge> edges;
+        std::list<std::unique_ptr<TPGEdge>> edges;
 
         /**
          * \brief Find the non-const iterator to a vertex of the graph from
@@ -321,7 +338,8 @@ namespace TPG {
          *         the searched edge pointer. If the given vertex pointer is
          *         not in the vertices, then vertices.end() is returned.
          */
-        std::list<TPGEdge>::iterator findEdge(const TPGEdge* edge);
+        std::list<std::unique_ptr<TPGEdge>>::iterator findEdge(
+            const TPGEdge* edge);
     };
 }; // namespace TPG
 

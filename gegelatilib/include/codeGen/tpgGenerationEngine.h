@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -88,21 +89,12 @@ namespace CodeGen {
         CodeGen::ProgramGenerationEngine progGenerationEngine;
 
         /**
-         * \brief Size of the stack of visited edges.
-         *
-         * Stack holding the visited edges during the iteration of the TPG.
-         * Stop the execution of the program if the callStack is too small to
-         * store all the visited edges
-         */
-        uint64_t stackSize;
-
-        /**
          * \brief function printing generic code in the main file.
          *
          * This function prints generic code to execute the TPG and manage the
          * stack of visited edges.
          */
-        void initTpgFile();
+        virtual void initTpgFile() = 0;
 
         /**
          * \brief function printing generic code declaration in the main file
@@ -112,7 +104,7 @@ namespace CodeGen {
          * the prototypes of the function to execute the TPG and manage the
          * stack of visited edges.
          */
-        void initHeaderFile();
+        virtual void initHeaderFile() = 0;
 
       public:
         /**
@@ -126,52 +118,28 @@ namespace CodeGen {
          *
          * \param[in] path to the folder in which the file are generated. If the
          * folder does not exist.
-         *
-         * \param[in] stackSize size of call stack for the execution of the TPG
-         * graph.
          */
         TPGGenerationEngine(const std::string& filename,
                             const TPG::TPGGraph& tpg,
-                            const std::string& path = "./",
-                            const uint64_t& stackSize = 8)
-            : TPGAbstractEngine(tpg), progGenerationEngine{filename + "_" +
-                                                               filenameProg,
-                                                           tpg.getEnvironment(),
-                                                           path},
-              stackSize{stackSize}
-        {
-            if (stackSize == 0) {
-                throw std::runtime_error(
-                    "error the size of the call stack is equal to 0");
-            }
-            this->fileMain.open(path + filename + ".c", std::ofstream::out);
-            this->fileMainH.open(path + filename + ".h", std::ofstream::out);
-            if (!fileMain.is_open() || !fileMainH.is_open()) {
-                throw std::runtime_error(
-                    "Error can't open " + std::string(path + filename) +
-                    ".c or " + std::string(path + filename) + ".h");
-            }
-            fileMain << "#include \"" << filename << ".h\"" << std::endl;
-            fileMain << "#include \"" << filename << "_" << filenameProg
-                     << ".h\"" << std::endl;
-            initTpgFile();
-            fileMainH << "#ifndef C_" << filename << "_H" << std::endl;
-            fileMainH << "#define C_" << filename << "_H\n" << std::endl;
-            initHeaderFile();
-        };
+                            const std::string& path = "./");
 
         /**
          * \brief destructor of the class.
          *
          * add endif at the end of the header and close both file.
          */
-        ~TPGGenerationEngine()
-        {
-            fileMainH << "\n#endif" << std::endl;
-            fileMain.close();
-            fileMainH.close();
-        }
+        virtual ~TPGGenerationEngine();
 
+        /**
+         * \brief function that creates the C files required to execute the TPG
+         * without gegelati.
+         *
+         * This function iterates trough the TPGGraph and create the required C
+         * code to represent each element of the TPGGraph.
+         */
+        virtual void generateTPGGraph() = 0;
+
+      protected:
         /**
          * \brief Method for generating the code for an edge of the graph.
          *
@@ -185,7 +153,7 @@ namespace CodeGen {
          *
          * \param[in] edge that must be generated.
          */
-        void generateEdge(const TPG::TPGEdge& edge);
+        virtual void generateEdge(const TPG::TPGEdge& edge) = 0;
 
         /**
          * \brief Method for generating the code for a team of the graph.
@@ -197,7 +165,7 @@ namespace CodeGen {
          * \param[in] team const reference of the TPGTeam that must be
          * generated.
          */
-        void generateTeam(const TPG::TPGTeam& team);
+        virtual void generateTeam(const TPG::TPGTeam& team) = 0;
 
         /**
          * \brief Method for generating a action of the graph.
@@ -209,24 +177,7 @@ namespace CodeGen {
          * \param[in] action const reference of the TPGAction that must be
          * generated.
          */
-        void generateAction(const TPG::TPGAction& action);
-
-        /**
-         * \brief define the function pointer root to the vertex given in
-         * parameter.
-         *
-         * \param[in] root const reference to the root of the TPG graph.
-         */
-        void setRoot(const TPG::TPGVertex& root);
-
-        /**
-         * \brief function that creates the C files required to execute the TPG
-         * without gegelati.
-         *
-         * This function iterates trough the TPGGraph and create the required C
-         * code to represent each element of the TPGGraph.
-         */
-        void generateTPGGraph();
+        virtual void generateAction(const TPG::TPGAction& action) = 0;
     };
 } // namespace CodeGen
 

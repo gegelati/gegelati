@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -46,7 +46,7 @@
 
 #include "learn/learningAgent.h"
 
-TPG::TPGGraph& Learn::LearningAgent::getTPGGraph()
+std::shared_ptr<TPG::TPGGraph> Learn::LearningAgent::getTPGGraph()
 {
     return this->tpg;
 }
@@ -67,7 +67,7 @@ void Learn::LearningAgent::init(uint64_t seed)
     this->rng.setSeed(seed);
 
     // Initialize the tpg
-    Mutator::TPGMutator::initRandomTPG(this->tpg, params.mutation, this->rng);
+    Mutator::TPGMutator::initRandomTPG(*this->tpg, params.mutation, this->rng);
 
     // Clear the archive
     this->archive.clear();
@@ -168,14 +168,16 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
 
     // Create the TPGExecutionEngine for this evaluation.
     // The engine uses the Archive only in training mode.
-    TPG::TPGExecutionEngine tee(
-        this->env, (mode == LearningMode::TRAINING) ? &this->archive : NULL);
+    std::unique_ptr<TPG::TPGExecutionEngine> tee =
+        this->tpg->getFactory().createTPGExecutionEngine(
+            this->env,
+            (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
-    for (int i = 0; i < tpg.getNbRootVertices(); i++) {
+    for (int i = 0; i < tpg->getNbRootVertices(); i++) {
         auto job = makeJob(i, mode);
         this->archive.setRandomSeed(job->getArchiveSeed());
         std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
-            tee, *job, generationNumber, mode, this->learningEnvironment);
+            *tee, *job, generationNumber, mode, this->learningEnvironment);
         result.emplace(avgScore, (*job).getRoot());
     }
 
@@ -189,7 +191,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
     }
 
     // Populate Sequentially
-    Mutator::TPGMutator::populateTPG(this->tpg, this->archive,
+    Mutator::TPGMutator::populateTPG(*this->tpg, this->archive,
                                      this->params.mutation, this->rng,
                                      maxNbThreads);
     for (auto logger : loggers) {
@@ -242,8 +244,8 @@ void Learn::LearningAgent::decimateWorstRoots(
            results.size() > 0) {
         // If the root is an action, do not remove it!
         const TPG::TPGVertex* root = results.begin()->second;
-        if (typeid(*root) != typeid(TPG::TPGAction)) {
-            tpg.removeVertex(*results.begin()->second);
+        if (dynamic_cast<const TPG::TPGAction*>(root) == nullptr) {
+            tpg->removeVertex(*results.begin()->second);
             // Removed stored result (if any)
             this->resultsPerRoot.erase(results.begin()->second);
         }
@@ -340,7 +342,7 @@ void Learn::LearningAgent::updateEvaluationRecords(
         // from the simpler to the most complex to test
         if (this->bestRoot.first == nullptr         // NULL case
             || *this->bestRoot.second < *evaluation // new high-score case
-            || !this->tpg.hasVertex(
+            || !this->tpg->hasVertex(
                    *this->bestRoot.first) // bestRoot disappearance
         ) {
             // Replace the best root
@@ -361,15 +363,15 @@ Learn::LearningAgent::getBestRoot() const
 void Learn::LearningAgent::keepBestPolicy()
 {
     // Evaluate all roots
-    if (this->tpg.hasVertex(*this->bestRoot.first)) {
+    if (this->tpg->hasVertex(*this->bestRoot.first)) {
         auto bestRootVertex = this->bestRoot.first;
 
         // Remove all but the best root from the tpg
-        while (this->tpg.getNbRootVertices() != 1) {
-            auto roots = this->tpg.getRootVertices();
+        while (this->tpg->getNbRootVertices() != 1) {
+            auto roots = this->tpg->getRootVertices();
             for (auto root : roots) {
                 if (root != bestRootVertex) {
-                    tpg.removeVertex(*root);
+                    tpg->removeVertex(*root);
                 }
             }
         }
@@ -380,7 +382,7 @@ std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
     int num, Learn::LearningMode mode, int idx, TPG::TPGGraph* tpgGraph)
 {
     // sets the tpg to the Learning Agent's one if no one was specified
-    tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
+    tpgGraph = tpgGraph == nullptr ? tpg.get() : tpgGraph;
 
     // Before each root evaluation, set a new seed for the archive in
     // TRAINING Mode Else, archiving should be deactivate anyway
@@ -400,7 +402,7 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
     Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
 {
     // sets the tpg to the Learning Agent's one if no one was specified
-    tpgGraph = tpgGraph == nullptr ? &tpg : tpgGraph;
+    tpgGraph = tpgGraph == nullptr ? tpg.get() : tpgGraph;
 
     std::queue<std::shared_ptr<Learn::Job>> jobs;
     for (int i = 0; i < tpgGraph->getNbRootVertices(); i++) {

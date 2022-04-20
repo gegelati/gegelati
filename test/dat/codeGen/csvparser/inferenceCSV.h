@@ -1,6 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
  *
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -82,8 +83,6 @@ void errorPrint(int action, int expect, CsvRow* row, double* tab);
  * it means that the TPG has not been reset correctly
  */
 
-int inferenceCSV(char* filename,
-                 int (*executeFromVertex)(void* (*)(int* action)),
-                 void* (*root)(int*), void (*reset)());
+int inferenceCSV(char* filename, int (*inferenceTPG)(void));
 
 #endif // INFERENCE_CSV_H

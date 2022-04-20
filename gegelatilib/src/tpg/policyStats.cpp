@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -168,7 +168,7 @@ void TPG::PolicyStats::analyzePolicy(const TPG::TPGVertex* root)
 
         // scan current stage
         for (const TPG::TPGVertex* vertex : stage[depth % 2]) {
-            if (typeid(*vertex) == typeid(TPG::TPGTeam)) {
+            if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
                 this->analyzeTPGTeam((const TPG::TPGTeam*)vertex);
                 // Unless it was already analysed more than once,
                 // add successors to the next stage and analyze their
@@ -183,7 +183,7 @@ void TPG::PolicyStats::analyzePolicy(const TPG::TPGVertex* root)
                 }
             }
 
-            if (typeid(*vertex) == typeid(TPG::TPGAction)) {
+            if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr) {
                 this->analyzeTPGAction((const TPG::TPGAction*)vertex);
             }
         }

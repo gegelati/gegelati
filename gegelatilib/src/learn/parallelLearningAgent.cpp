@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -59,18 +59,19 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
         // Sequential mode
 
         // Create the TPGExecutionEngine
-        TPG::TPGExecutionEngine tee(this->env, (mode == LearningMode::TRAINING)
-                                                   ? &this->archive
-                                                   : NULL);
+        std::unique_ptr<TPG::TPGExecutionEngine> tee =
+            this->tpg->getFactory().createTPGExecutionEngine(
+                this->env,
+                (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
         // Execute for all root
-        for (int i = 0; i < this->tpg.getNbRootVertices(); i++) {
+        for (int i = 0; i < this->tpg->getNbRootVertices(); i++) {
             auto job = makeJob(i, mode);
 
             this->archive.setRandomSeed(job->getArchiveSeed());
 
             std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
-                tee, *job, generationNumber, mode, this->learningEnvironment);
+                *tee, *job, generationNumber, mode, this->learningEnvironment);
             results.emplace(avgScore, (*job).getRoot());
         }
     }
@@ -103,7 +104,8 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                            privateLearningEnvironment->getDataSources(),
                            this->env.getNbRegisters(),
                            this->env.getNbConstant());
-    TPG::TPGExecutionEngine tee(privateEnv, NULL);
+    std::unique_ptr<TPG::TPGExecutionEngine> tee =
+        this->tpg->getFactory().createTPGExecutionEngine(privateEnv, NULL);
 
     int i = 0;
     // Pop a job
@@ -130,10 +132,10 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                     new Archive(params.archiveSize, params.archivingProbability,
                                 jobToProcess->getArchiveSeed());
             }
-            tee.setArchive(temporaryArchive);
+            tee->setArchive(temporaryArchive);
 
             std::shared_ptr<EvaluationResult> avgScore =
-                this->evaluateJob(tee, *jobToProcess, generationNumber, mode,
+                this->evaluateJob(*tee, *jobToProcess, generationNumber, mode,
                                   *privateLearningEnvironment);
 
             { // Store result Mutual exclusion zone

@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -68,15 +68,20 @@ const Environment& TPG::TPGGraph::getEnvironment() const
     return this->env;
 }
 
+const TPG::TPGFactory& TPG::TPGGraph::getFactory() const
+{
+    return *this->factory;
+}
+
 const TPG::TPGTeam& TPG::TPGGraph::addNewTeam()
 {
-    this->vertices.push_back(new TPG::TPGTeam());
+    this->vertices.push_back(factory->createTPGTeam());
     return (const TPGTeam&)(*this->vertices.back());
 }
 
 const TPG::TPGAction& TPG::TPGGraph::addNewAction(uint64_t actionID)
 {
-    this->vertices.push_back(new TPG::TPGAction(actionID));
+    this->vertices.push_back(factory->createTPGAction(actionID));
     return (const TPGAction&)(*this->vertices.back());
 }
 
@@ -151,10 +156,10 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
 
     // Create a new Vertex
     // (at the end of the vertices list)
-    if (typeid(vertex) == typeid(TPGTeam)) {
+    if (dynamic_cast<const TPG::TPGTeam*>(&vertex) != nullptr) {
         this->addNewTeam();
     }
-    else if (typeid(vertex) == typeid(TPGAction)) {
+    else if (dynamic_cast<const TPG::TPGAction*>(&vertex) != nullptr) {
         this->addNewAction(((TPGAction&)vertex).getActionID());
     }
 
@@ -188,7 +193,8 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
     }
 
     // Create the edge
-    TPGEdge& newEdge = this->edges.emplace_back(&src, &dest, prog);
+    this->edges.push_back(factory->createTPGEdge(&src, &dest, prog));
+    TPGEdge& newEdge = *(this->edges.back());
 
     // Add the edged to the Vertices
     try {
@@ -206,7 +212,7 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
     return newEdge;
 }
 
-const std::list<TPG::TPGEdge>& TPG::TPGGraph::getEdges() const
+const std::list<std::unique_ptr<TPG::TPGEdge>>& TPG::TPGGraph::getEdges() const
 {
     return this->edges;
 }
@@ -214,9 +220,10 @@ const std::list<TPG::TPGEdge>& TPG::TPGGraph::getEdges() const
 void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 {
     // Get the edge (if it is in the graph)
-    auto iterator =
-        std::find_if(this->edges.begin(), this->edges.end(),
-                     [&edge](TPG::TPGEdge& other) { return &edge == &other; });
+    auto iterator = std::find_if(this->edges.begin(), this->edges.end(),
+                                 [&edge](std::unique_ptr<TPG::TPGEdge>& other) {
+                                     return &edge == other.get();
+                                 });
 
     // Disconnect the edge from the vertices
     if (iterator == this->edges.end()) {
@@ -224,10 +231,10 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
             "Cannot erase a edge that does not belong to the graph");
     }
 
-    (*this->findVertex(iterator->getSource()))
-        ->removeOutgoingEdge(&(*iterator));
-    (*this->findVertex(iterator->getDestination()))
-        ->removeIncomingEdge(&(*iterator));
+    (*this->findVertex(iterator->get()->getSource()))
+        ->removeOutgoingEdge(iterator->get());
+    (*this->findVertex(iterator->get()->getDestination()))
+        ->removeIncomingEdge(iterator->get());
     // Remove the edge
     this->edges.erase(iterator);
 }
@@ -240,9 +247,9 @@ const TPG::TPGEdge& TPG::TPGGraph::cloneEdge(const TPGEdge& edge)
             "Cannot duplicate an Edge not belonging to the graph.");
     }
     else {
-        return this->addNewEdge(*iterEdge->getSource(),
-                                *iterEdge->getDestination(),
-                                iterEdge->getProgramSharedPointer());
+        return this->addNewEdge(*iterEdge->get()->getSource(),
+                                *iterEdge->get()->getDestination(),
+                                iterEdge->get()->getProgramSharedPointer());
     }
 }
 
@@ -255,16 +262,17 @@ bool TPG::TPGGraph::setEdgeDestination(const TPGEdge& edge,
     if (iterNewDestination != this->vertices.end() &&
         iterEdge != this->edges.end()) {
         // Unregister the edge from the old destination
-        const TPG::TPGVertex* oldDestination = iterEdge->getDestination();
+        const TPG::TPGVertex* oldDestination =
+            iterEdge->get()->getDestination();
         auto iterOldDest = findVertex(oldDestination);
         // finding the vertex should not fail. Otherwise, the exception for
         // next line would be well deserved since it means an edge in the
         // graph is connected to a vertex not in the graph.
-        (*iterOldDest)->removeIncomingEdge(&*iterEdge);
+        (*iterOldDest)->removeIncomingEdge(iterEdge->get());
         // Register the edge to the new destination
-        (*iterNewDestination)->addIncomingEdge(&*iterEdge);
+        (*iterNewDestination)->addIncomingEdge(iterEdge->get());
         // Set the destination
-        iterEdge->setDestination(*iterNewDestination);
+        iterEdge->get()->setDestination(*iterNewDestination);
         return true;
     }
     else {
@@ -279,16 +287,16 @@ bool TPG::TPGGraph::setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc)
     auto iterEdge = findEdge(&edge);
     if (iterNewSrc != this->vertices.end() && iterEdge != this->edges.end()) {
         // Unregister the edge from the old source
-        const TPG::TPGVertex* oldSrc = iterEdge->getSource();
+        const TPG::TPGVertex* oldSrc = iterEdge->get()->getSource();
         auto iterOldSrc = findVertex(oldSrc);
         // finding the vertex should not fail. Otherwise, the exception for
         // next line would be well deserved since it means an edge in the
         // graph is connected to a vertex not in the graph.
-        (*iterOldSrc)->removeOutgoingEdge(&*iterEdge);
+        (*iterOldSrc)->removeOutgoingEdge(iterEdge->get());
         // Register the edge to the new source
-        (*iterNewSrc)->addOutgoingEdge(&*iterEdge);
+        (*iterNewSrc)->addOutgoingEdge(iterEdge->get());
         // Set the destination
-        iterEdge->setSource(*(iterNewSrc));
+        iterEdge->get()->setSource(*(iterNewSrc));
         return true;
     }
     else {
@@ -302,16 +310,18 @@ std::list<TPG::TPGVertex*>::iterator TPG::TPGGraph::findVertex(
     return std::find(this->vertices.begin(), this->vertices.end(), vertex);
 }
 
-std::list<TPG::TPGEdge>::iterator TPG::TPGGraph::findEdge(const TPGEdge* edge)
+std::list<std::unique_ptr<TPG::TPGEdge>>::iterator TPG::TPGGraph::findEdge(
+    const TPGEdge* edge)
 {
-    return std::find_if(
-        this->edges.begin(), this->edges.end(),
-        [&edge](TPG::TPGEdge& other) { return &other == edge; });
+    return std::find_if(this->edges.begin(), this->edges.end(),
+                        [&edge](std::unique_ptr<TPG::TPGEdge>& other) {
+                            return other.get() == edge;
+                        });
 }
 
 void TPG::TPGGraph::clearProgramIntrons()
 {
     for (auto& edge : this->edges) {
-        edge.getProgram().clearIntrons();
+        edge.get()->getProgram().clearIntrons();
     }
 }

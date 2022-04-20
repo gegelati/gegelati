@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -82,6 +82,9 @@ namespace TPG {
         TPGExecutionEngine(const Environment& env, Archive* arch = NULL)
             : progExecutionEngine(env), archive{arch} {};
 
+        ///  Default virtual destructor
+        virtual ~TPGExecutionEngine() = default;
+
         /**
          * \brief Set a new Archive for storing Program results.
          *
@@ -96,11 +99,14 @@ namespace TPG {
          * If an Archive is associated to the TPGExecutionEngine, the Program
          * result is recorded in it.
          *
+         * If the value returned by the Program is NaN, then it is replaced with
+         * a -inf value.
+         *
          * \param[in] edge the const ref to the TPGEdge whose Program will be
          * evaluated.
          * \return the double value returned by the Program of the TPGEdge.
          */
-        double evaluateEdge(const TPGEdge& edge);
+        virtual double evaluateEdge(const TPGEdge& edge);
 
         /**
          * \brief Evaluate all the Program of the outgoing TPGEdge of the
@@ -125,7 +131,7 @@ namespace TPG {
          *        at least one TPGAction, to ensure that all cycles have an
          *        exit.
          */
-        const TPG::TPGEdge& evaluateTeam(
+        virtual const TPG::TPGEdge& evaluateTeam(
             const TPGTeam& team, const std::vector<const TPGVertex*>& excluded);
 
         /**
@@ -139,7 +145,7 @@ namespace TPG {
          *         evaluation of the TPGGraph. The TPGAction resulting from the
          *         TPGGraph execution is at the end of the returned vector.
          */
-        const std::vector<const TPGVertex*> executeFromRoot(
+        virtual const std::vector<const TPGVertex*> executeFromRoot(
             const TPGVertex& root);
     };
 }; // namespace TPG

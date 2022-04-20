@@ -1,6 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
  *
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -62,7 +63,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    action = executeFromVertex(root);
+    action = inferenceTPG();
 #ifdef DEBUG
     printf("action : %d\n", action);
 #endif // DEBUG
@@ -70,8 +71,7 @@ int main(int argc, char* argv[])
         return ERROR_INFERENCE;
     }
 
-    reset();
-    action = executeFromVertex(root);
+    action = inferenceTPG();
     if (expectedVal != -1 && action != expectedVal) {
         return ERROR_RESET;
     }

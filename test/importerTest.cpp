@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -276,7 +276,7 @@ TEST_F(ImporterTest, importGraph)
 
     // check that the imported program is the same as the one written in the
     // file.
-    Program::Program& p = tpg_copy->getEdges().front().getProgram();
+    Program::Program& p = tpg_copy->getEdges().front().get()->getProgram();
     ASSERT_EQ(p.getNbLines(), 3)
         << "The number of lines of the copied program dismatch";
     // checking the first line

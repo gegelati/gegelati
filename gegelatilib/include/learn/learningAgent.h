@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -75,7 +75,7 @@ namespace Learn {
         LearningParameters params;
 
         /// TPGGraph built during the learning process.
-        TPG::TPGGraph tpg;
+        std::shared_ptr<TPG::TPGGraph> tpg;
 
         /// Pointer to the best root encountered during training, together with
         /// its EvaluationResult.
@@ -121,12 +121,15 @@ namespace Learn {
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * default TPGFactory is used if none is provided.
          */
         LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet,
-                      const LearningParameters& p)
+                      const LearningParameters& p,
+                      const TPG::TPGFactory& factory = TPG::TPGFactory())
             : learningEnvironment{le}, env(iSet, le.getDataSources(),
                                            p.nbRegisters, p.nbProgramConstant),
-              tpg(this->env), params{p},
+              tpg(factory.createTPGGraph(env)), params{p},
               archive(p.archiveSize, p.archivingProbability)
         {
             // override the number of actions from the parameters.
@@ -140,9 +143,9 @@ namespace Learn {
         /**
          * \brief Getter for the TPGGraph built by the LearningAgent.
          *
-         * \return Get a reference to the TPGGraph.
+         * \return Get a shared_pointer to the TPGGraph.
          */
-        TPG::TPGGraph& getTPGGraph();
+        std::shared_ptr<TPG::TPGGraph> getTPGGraph();
 
         /**
          * \brief Getter for the Archive filled by the LearningAgent

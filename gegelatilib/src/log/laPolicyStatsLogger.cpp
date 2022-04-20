@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -52,7 +52,7 @@ void Log::LAPolicyStatsLogger::logAfterDecimate()
               << std::endl
               << std::endl;
         TPG::PolicyStats ps;
-        ps.setEnvironment(this->learningAgent.getTPGGraph().getEnvironment());
+        ps.setEnvironment(this->learningAgent.getTPGGraph()->getEnvironment());
         ps.analyzePolicy(this->lastBestRoot);
         *this << ps << std::endl;
         *this << std::endl

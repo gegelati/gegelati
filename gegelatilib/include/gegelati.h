@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
@@ -43,6 +44,8 @@
  */
 #ifndef GEGELATI_H
 #define GEGELATI_H
+
+#include <util/timestamp.h>
 
 #include <data/array2DWrapper.h>
 #include <data/arrayWrapper.h>
@@ -101,13 +104,24 @@
 #include <tpg/tpgAction.h>
 #include <tpg/tpgEdge.h>
 #include <tpg/tpgExecutionEngine.h>
+#include <tpg/tpgFactory.h>
 #include <tpg/tpgGraph.h>
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
 
+#include <tpg/instrumented/tpgActionInstrumented.h>
+#include <tpg/instrumented/tpgEdgeInstrumented.h>
+#include <tpg/instrumented/tpgExecutionEngineInstrumented.h>
+#include <tpg/instrumented/tpgInstrumentedFactory.h>
+#include <tpg/instrumented/tpgTeamInstrumented.h>
+#include <tpg/instrumented/tpgVertexInstrumentation.h>
+
 #ifdef CODE_GENERATION
 #include <codeGen/programGenerationEngine.h>
 #include <codeGen/tpgGenerationEngine.h>
+#include <codeGen/tpgGenerationEngineFactory.h>
+#include <codeGen/tpgStackGenerationEngine.h>
+#include <codeGen/tpgSwitchGenerationEngine.h>
 #endif
 
 #include <archive.h>

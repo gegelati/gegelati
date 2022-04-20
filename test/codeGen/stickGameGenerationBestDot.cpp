@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2021 - 2022)
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -48,7 +49,7 @@
 
 #include "../learn/stickGameAdversarial.h"
 #include "codeGen/programGenerationEngine.h"
-#include "codeGen/tpgGenerationEngine.h"
+#include "codeGen/tpgGenerationEngineFactory.h"
 #include "environment.h"
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
@@ -66,7 +67,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     TPG::TPGGraph* tpg = nullptr;
     TPG::TPGExecutionEngine* tee = nullptr;
-    CodeGen::TPGGenerationEngine* tpgGen = nullptr;
+    std::unique_ptr<CodeGen::TPGGenerationEngine> tpgGen = nullptr;
     File::TPGGraphDotImporter* dot = nullptr;
     std::string cmdCompile;
     std::string cmdExec;
@@ -157,12 +158,12 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 TEST_F(StickGameGenerationBestDotTest, BestTPG)
 {
     int inferenceCodeGen, inferenceGegelati;
-    tpgGen =
-        new CodeGen::TPGGenerationEngine("StickGameBest_TPG", *tpg, "./src/");
+    CodeGen::TPGGenerationEngineFactory factory;
+    tpgGen = factory.create("StickGameBest_TPG", *tpg, "./src/");
     ASSERT_NO_THROW(tpgGen->generateTPGGraph())
         << "Fail to generate the C file to test StickGame";
     // call destructor to close generated files
-    delete tpgGen;
+    tpgGen.reset();
 
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
         << "Fail to compile generated files to test stick game";

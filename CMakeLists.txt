@@ -41,9 +41,12 @@ set(PROJECT_NAME GEGELATI)
 
 project(${PROJECT_NAME}
         LANGUAGES CXX
-        VERSION 1.0.0)
+        VERSION 1.1.0)
 string(TOLOWER ${PROJECT_NAME} project_name)
 set(LIB_SOURCE_DIRECTORY ${project_name}lib)
+
+# Propagate version number
+add_definitions(-DGEGELATI_VERSION="${PROJECT_VERSION}")
 
 # If CODE_GEN = ON gegelati is compile with the codeGen, if CODE_GEN = OFF the
 # codeGen is disabled

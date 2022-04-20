@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -45,9 +45,12 @@
 
 #include "tpg/tpgAction.h"
 #include "tpg/tpgEdge.h"
+#include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
+
+#include "tpg/tpgFactory.h"
 
 class TPGTest : public ::testing::Test
 {
@@ -211,6 +214,35 @@ TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination)
         << "Destination of the TPGEdge differs from the one set right before.";
 }
 
+TEST_F(TPGTest, TPGFactory)
+{
+    TPG::TPGFactory factory;
+
+    TPG::TPGAction* action;
+    TPG::TPGTeam* team;
+    std::unique_ptr<TPG::TPGEdge> edge;
+    std::unique_ptr<TPG::TPGExecutionEngine> tee;
+
+    ASSERT_NO_THROW(action = factory.createTPGAction(0))
+        << "TPGGraphELementFactory could not build a TPGAction.";
+    ASSERT_NE(action, nullptr) << "Created TPGAction should not be null.";
+
+    ASSERT_NO_THROW(team = factory.createTPGTeam())
+        << "TPGGraphELementFactory could not build a TPGAction.";
+    ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
+
+    ASSERT_NO_THROW(edge = factory.createTPGEdge(team, action, progPointer))
+        << "TPGGraphELementFactory could not build a TPGAction.";
+    ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
+
+    ASSERT_NO_THROW(tee = factory.createTPGExecutionEngine(*e, nullptr))
+        << "TPGGraphELementFactory could not build a TPGExecutionEngine.";
+    ASSERT_NE(tee.get(), nullptr) << "Created TPGEdge should not be null.";
+
+    delete team;
+    delete action;
+}
+
 TEST_F(TPGTest, TPGGraphAddTPGVertex)
 {
     TPG::TPGGraph tpg(*e);
@@ -220,6 +252,19 @@ TEST_F(TPGTest, TPGGraphAddTPGVertex)
         << "Adding a new Team to a TPGGraph failed.";
     ASSERT_NO_THROW(a = &tpg.addNewAction(0))
         << "Adding a new Action to a TPGGraph failed.";
+}
+
+TEST_F(TPGTest, TPGGraphConstructorDestructor)
+{
+    TPG::TPGGraph* tpg;
+
+    ASSERT_NO_THROW(tpg = new TPG::TPGGraph(*e))
+        << "Error while calling a TPGGraph constructor.";
+
+    ASSERT_NE(tpg, nullptr)
+        << "TPGGraph construction succeded but returned a null pointer.";
+
+    ASSERT_NO_THROW(delete tpg) << "Destruction of a TPGGraph failed.";
 }
 
 TEST_F(TPGTest, TPGGraphHasVertex)

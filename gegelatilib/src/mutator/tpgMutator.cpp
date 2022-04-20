@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -164,7 +164,7 @@ void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph,
     std::list<TPG::TPGEdge*> pickableEdges = team.getOutgoingEdges();
     auto isTPGAction = [](const TPG::TPGEdge* edge) -> bool {
         auto* dest = edge->getDestination();
-        return dest && typeid(*dest) == typeid(TPG::TPGAction);
+        return dest && dynamic_cast<const TPG::TPGAction*>(dest) != nullptr;
     };
 
     // if there is a unique TPGAction among the edges, exclude it from the
@@ -235,12 +235,13 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     // in which case, selecting an action is mandatory.
     auto* dest = edge->getDestination();
     if (targetAction ||
-        (dest && typeid(*dest) == typeid(TPG::TPGAction) &&
+        (dest && dynamic_cast<const TPG::TPGAction*>(dest) != nullptr &&
          std::count_if(
              team.getOutgoingEdges().begin(), team.getOutgoingEdges().end(),
              [](const TPG::TPGEdge* other) {
                  auto* oDest = other->getDestination();
-                 return oDest && typeid(*oDest) == typeid(TPG::TPGAction);
+                 return oDest &&
+                        dynamic_cast<const TPG::TPGAction*>(oDest) != nullptr;
              }) == 1)) {
         // Pick an Action target
         target = preExistingActions.at(
@@ -463,7 +464,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     std::vector<const TPG::TPGTeam*> rootTeams;
     std::for_each(rootVertices.begin(), rootVertices.end(),
                   [&rootTeams](const TPG::TPGVertex* vertex) {
-                      if (typeid(*vertex) == typeid(TPG::TPGTeam)) {
+                      if (dynamic_cast<const TPG::TPGTeam*>(vertex) !=
+                          nullptr) {
                           rootTeams.push_back((const TPG::TPGTeam*)vertex);
                       }
                   });
@@ -489,7 +491,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     std::for_each(
         vertices.begin(), vertices.end(),
         [&preExistingActions, &preExistingTeams](const TPG::TPGVertex* target) {
-            if (typeid(*target) == typeid(TPG::TPGAction)) {
+            if (dynamic_cast<const TPG::TPGAction*>(target) != nullptr) {
                 preExistingActions.push_back((const TPG::TPGAction*)target);
             }
             else {
@@ -499,10 +501,11 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
     // Get a list of pre existing edges before mutations (copy)
     std::list<const TPG::TPGEdge*> preExistingEdges;
-    std::for_each(graph.getEdges().begin(), graph.getEdges().end(),
-                  [&preExistingEdges](const TPG::TPGEdge& edge) {
-                      preExistingEdges.push_back(&edge);
-                  });
+    std::for_each(
+        graph.getEdges().begin(), graph.getEdges().end(),
+        [&preExistingEdges](const std::unique_ptr<TPG::TPGEdge>& edge) {
+            preExistingEdges.push_back(edge.get());
+        });
 
     // Create an empty list to store Programs to mutate.
     std::list<std::shared_ptr<Program::Program>> newPrograms;

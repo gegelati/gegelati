@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2021 - 2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -42,6 +42,9 @@
 /**
  * Function that return true if printedFilePath and goldenRefPath have the same
  * content.
+ *
+ * Lines of the reference file starting with a `~` are ignored during the
+ * comparison.
  *
  * @param printedFilePath const reference to a std::string holding the name of
  * the first file to compare.
