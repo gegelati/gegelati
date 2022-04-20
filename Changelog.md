@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_aaaa.mm.dd_
+## Release version 1.1.0
+_2022.04.20_
 
 ### New features
 * Add instrumented specializations of the `TPGVertex` and `TPGEdge` classes that contain internal counters to keep track of the number of time these graph elements are visited or traversed. To exploit these counters, one must create a `TPGGraph` using a `TPGFactoryInstrumented`, use a new execution engine: `TPGExecutionEngineInstrumented` that will update the counters. The `TPGFactoryInstrumented` also contains utility methods to reset all counter in a `TPGGraph` with instrumented elements, or remove from a `TPGGraph` all the vertices and edges that were never visited or traversed.
