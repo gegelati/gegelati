@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #include "tpg/instrumented/tpgVertexInstrumentation.h"
 
 uint64_t TPG::TPGVertexInstrumentation::getNbVisits() const

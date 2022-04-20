@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifndef TPG_TEAM_INSTRUMENTED_H
 #define TPG_TEAM_INSTRUMENTED_H
 
