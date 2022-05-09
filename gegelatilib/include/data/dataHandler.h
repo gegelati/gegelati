@@ -142,7 +142,7 @@ namespace Data {
          *
          * \return the cached value of the Hash.
          */
-        size_t getHash() const;
+        virtual size_t getHash() const;
 
         /**
          * \brief Check a given DataHandler can handle data for the given data

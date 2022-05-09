@@ -158,7 +158,6 @@ TEST(PointerWrapperTest, Hash)
     ASSERT_NO_THROW(hash = d.getHash());
     // change the content of the array
     val = doubleValue;
-    d.invalidateCachedHash();
     ASSERT_NE(hash, d.getHash());
 
     // Tesh Hash of nullptr
@@ -174,13 +173,11 @@ TEST(PointerWrapperTest, Clone)
 
     // create a first one to increase the DataHandler::count
     Data::PointerWrapper<int> d0;
-    d0.invalidateCachedHash();
 
     // Create the actual dataHandler
     Data::PointerWrapper<double> d(&val);
     // change the content of the array
     val = doubleValue;
-    d.invalidateCachedHash();
     // Hash was voluntarily not computed before clone.
 
     // Create a clone
@@ -207,7 +204,7 @@ TEST(PointerWrapperTest, Clone)
     // Change data in the original to make sure the two dHandlers are decoupled.
     size_t hash = dClone->getHash();
     val = doubleValue + 1.0;
-    d.invalidateCachedHash();
+
     ASSERT_NE(dClone->getHash(), d.getHash())
         << "Hash of clone and original DataHandler should differ after "
            "modification of data in the original.";

@@ -30,6 +30,9 @@ namespace Data {
 
         /**
          * \brief Implementation of the updateHash method.
+         *
+         * Hash is very lightweight and does not need to be cashed. This method
+         * is empty.
          */
         virtual size_t updateHash() const override;
 
@@ -71,14 +74,8 @@ namespace Data {
         /// Inherited from DataHandler
         virtual size_t getLargestAddressSpace(void) const override;
 
-        /**
-         * \brief Invalidate the hash of the container.
-         *
-         * Each time the data pointed by the PointerWrapper is modified, this
-         * method should be called to ensure that the hash value of the
-         * DataHandler is properly updated.
-         */
-        void invalidateCachedHash();
+        /// Inherited from DataHandler
+        virtual size_t getHash() const override;
 
         /// Inherited from DataHandler. Does nothing.
         void resetData() override;
@@ -109,6 +106,11 @@ namespace Data {
         virtual std::vector<size_t> getDimensionsSize() const override;
 #endif
     };
+
+    template <class T> inline size_t PointerWrapper<T>::getHash() const
+    {
+        return updateHash();
+    }
 
     template <class T> inline size_t PointerWrapper<T>::updateHash() const
     {
@@ -167,11 +169,6 @@ namespace Data {
         return 1;
     }
 
-    template <class T> inline void PointerWrapper<T>::invalidateCachedHash()
-    {
-        this->invalidCachedHash = true;
-    }
-
     template <class T> inline void PointerWrapper<T>::resetData()
     {
         // Does nothing
@@ -179,9 +176,7 @@ namespace Data {
 
     template <class T> inline void PointerWrapper<T>::setPointer(T* ptr)
     {
-
         this->containerPtr = ptr;
-        this->invalidCachedHash = true;
         return;
     }
 
