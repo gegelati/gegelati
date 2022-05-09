@@ -224,3 +224,27 @@ TEST(PointerWrapperTest, Clone)
         FAIL() << "Cloning of PointerWrapper returned a NULL Pointer.";
     delete dClone;
 }
+
+#ifdef CODE_GENERATION
+TEST(PointerWrapperTest, getNativeType)
+{
+    Data::DataHandler* d = new Data::PointerWrapper<double>();
+
+    ASSERT_EQ(d->getNativeType(), typeid(double))
+        << "Fail to retrieve typeid(double) from a PointerWrapper<double>.";
+
+    delete d;
+}
+
+TEST(PointerWrapperTest, getDimensionSize)
+{
+    size_t size = 1;
+    Data::DataHandler* d = new Data::PointerWrapper<double>();
+
+    ASSERT_EQ(d->getDimensionsSize(), std::vector<size_t>({size}))
+        << "Fail to retrieve a std::vector holding the size of the "
+           "PointerWrapper.";
+
+    delete d;
+}
+#endif
