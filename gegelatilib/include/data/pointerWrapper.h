@@ -4,6 +4,7 @@
 #include "data/constant.h"
 #include "data/dataHandler.h"
 #include "data/hash.h"
+#include "demangle.h"
 
 namespace Data {
 
@@ -50,7 +51,7 @@ namespace Data {
         PointerWrapper(const PointerWrapper<T>& other) = default;
 
         // Friend relation needed for copy-construction.
-        template <class T> friend class PrimitiveTypeArray;
+        template <class U> friend class PrimitiveTypeArray;
 
         /**
          * \brief Return a PrimitiveTypeArray<T> where the data of the
