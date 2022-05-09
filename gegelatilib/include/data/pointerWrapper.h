@@ -4,7 +4,6 @@
 #include "data/constant.h"
 #include "data/dataHandler.h"
 #include "data/hash.h"
-#include "primitiveTypeArray.h"
 
 namespace Data {
 
@@ -49,6 +48,9 @@ namespace Data {
 
         /// Default copy constructor.
         PointerWrapper(const PointerWrapper<T>& other) = default;
+
+        // Friend relation needed for copy-construction.
+        template <class T> friend class PrimitiveTypeArray;
 
         /**
          * \brief Return a PrimitiveTypeArray<T> where the data of the
@@ -111,7 +113,14 @@ namespace Data {
     {
         if (this->containerPtr != nullptr) {
 
-            this->cachedHash = Data::Hash<T>()(*this->containerPtr);
+            // reset
+            this->cachedHash = Data::Hash<size_t>()(this->id);
+
+            // Rotate by 1 because otherwise, xor is comutative.
+            this->cachedHash =
+                (this->cachedHash >> 1) | (this->cachedHash << 63);
+
+            this->cachedHash ^= Data::Hash<T>()(*this->containerPtr);
             return this->cachedHash;
         }
         else {
@@ -119,13 +128,13 @@ namespace Data {
         }
     }
 
+    // Declare class for clone method
+    template <class T> class PrimitiveTypeArray;
+
     template <class T> inline DataHandler* PointerWrapper<T>::clone() const
     {
         // Create a constantCopy of the PointerWrapper content.
-        DataHandler* result = new PrimitiveTypeArray<T>(1);
-
-        ((PrimitiveTypeArray<T>*)result)
-            ->setDataAt(typeid(T), 0, *this->containerPtr);
+        DataHandler* result = new PrimitiveTypeArray<T>(*this);
 
         return result;
     }
