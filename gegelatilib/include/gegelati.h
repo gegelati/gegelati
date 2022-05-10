@@ -53,6 +53,7 @@
 #include <data/constantHandler.h>
 #include <data/dataHandler.h>
 #include <data/hash.h>
+#include <data/pointerWrapper.h>
 #include <data/primitiveTypeArray.h>
 #include <data/primitiveTypeArray2D.h>
 #include <data/untypedSharedPtr.h>

@@ -147,6 +147,17 @@ namespace Data {
         ArrayWrapper(const ArrayWrapper<T>& other) = default;
 
         /**
+         * \brief Copy constructor for DataHandler
+         *
+         * This constructor ensures the id of the other DataHandler is copied
+         * and initialize the ArrayWrapper with a null pointer.
+         *
+         * \param[in] other Other DataHandler whose id is copied.
+         * \param[in] size Number of element of the created ArrayWrapper.
+         */
+        ArrayWrapper(const DataHandler& other, size_t size);
+
+        /**
          * \brief Return a PrimitiveTypeArray<T> where all data of the
          * ArrayWrapper has been copied.
          *
@@ -239,6 +250,13 @@ namespace Data {
                     << ", address space size is " << addressSpace << ".";
             throw std::out_of_range(message.str());
         }
+    }
+
+    template <class T>
+    ArrayWrapper<T>::ArrayWrapper(const DataHandler& other, size_t size)
+        : DataHandler(other), containerPtr{nullptr}, nbElements(size)
+    {
+        this->setPointer(nullptr);
     }
 
     // Declare class for clone method

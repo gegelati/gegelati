@@ -1,6 +1,17 @@
 # GEGELATI Changelog
 
-## Release version 1.1.0
+## Release version x.y.x
+_yyyy.mm.dd_
+
+### New features
+* Add `Data::PointerWrapper` class to simplify interracing of GEGELATI with primitive variables (non-array) data from a learning environment.
+
+### Changes
+
+### Bug fix
+
+
+## Release version 1.1.0 - Babacio flavor
 _2022.04.20_
 
 ### New features
