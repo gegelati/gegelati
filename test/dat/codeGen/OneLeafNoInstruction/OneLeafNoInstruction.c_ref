@@ -47,7 +47,7 @@ int inferenceTPG() {
 				T1Scores[0] = P0();
 			}
 			int best = bestProgram(T1Scores, 1);
-			T1Scores[best] = DBL_MIN;
+			T1Scores[best] = -DBL_MAX;
 			const enum vertices next[1] = { A0,  };
 			currentVertex = next[best];
 			break;
