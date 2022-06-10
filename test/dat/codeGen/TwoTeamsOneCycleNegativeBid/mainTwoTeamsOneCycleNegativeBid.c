@@ -47,13 +47,13 @@ double* in1;
 
 int main(int argc, char* argv[])
 {
-    double tab[6];
+    double tab[7];
     in1 = tab;
 
     if (argc != 2) {
         fprintf(stderr, "error the program only require one parameter : the "
                         "filename of the data.\n");
-        return 3;
+        return 4;
     }
 
     return inferenceCSV(argv[1], inferenceTPG);
