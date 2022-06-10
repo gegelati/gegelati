@@ -623,7 +623,6 @@ TEST_BOTH_MODE(TwoTeamsOneCycle, {
         << "Error wrong action returned in test TwoTeamsOneCycle.";
 });
 
-
 TEST_BOTH_MODE(TwoTeamsOneCycleNegativeBid, {
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
     const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
@@ -708,13 +707,13 @@ TEST_BOTH_MODE(TwoTeamsOneCycleNegativeBid, {
     cmdExec += "TwoTeamsOneCycleNegativeBid" + executableExtension;
 
     ASSERT_EQ(
-        system((cmdExec + path + "/TwoTeamsOneCycleNegativeBid/DataTwoTeamsOneCycleNegativeBid.csv")
-                   .c_str()),
+        system(
+            (cmdExec + path +
+             "/TwoTeamsOneCycleNegativeBid/DataTwoTeamsOneCycleNegativeBid.csv")
+                .c_str()),
         0)
         << "Error wrong action returned in test TwoTeamsOneCycleNegativeBid.";
 });
-
-
 
 static void setProgLine(const std::shared_ptr<Program::Program> prog,
                         int operand)
