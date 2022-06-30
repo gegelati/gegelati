@@ -61,7 +61,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     auto nextVertices = std::vector<const TPG::TPGVertex*>();
 
     int i = 0;
-    for (auto edge : edges) {
+    for (const auto* edge : edges) {
         fileMain << "\t\t\t\t" << teamName << "Scores[" << i++ << "] = ";
         generateEdge(*edge);
         nextVertices.push_back(edge->getDestination());
