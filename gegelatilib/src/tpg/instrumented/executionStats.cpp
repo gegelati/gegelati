@@ -9,6 +9,16 @@
 #include "program/program.h"
 #include "program/line.h"
 
+void TPG::ExecutionStats::analyzeProgram(
+    std::map<uint64_t, uint64_t>& instructionCounts, const Program::Program& program)
+{
+
+    for(int i = 0; i < program.getNbLines(); i++){
+        instructionCounts[program.getLine(i).getInstructionIndex()]++;
+    }
+
+}
+
 void TPG::ExecutionStats::analyzeExecution(const TPGGraph* graph)
 {
     this->avgNbExecutionPerInstruction.clear();
@@ -24,17 +34,15 @@ void TPG::ExecutionStats::analyzeExecution(const TPGGraph* graph)
             return accu + rootTeam.getNbVisits();
         });
 
-    auto vertices = graph->getVertices();
-
-    // TODO make them class attributes ?
-    uint64_t nbVisitedTeams = 0;
+    uint64_t nbEvaluatedTeams = 0;
     uint64_t nbEvaluatedPrograms = 0;
     uint64_t nbExecutedLines = 0;
     std::map<size_t, uint64_t> totalExecutionsPerInstruction;
 
+    auto vertices = graph->getVertices();
+
     for(auto vertex : vertices){
 
-        // TODO in a function analyseTeam
         // Skip non-team instrumented vertices
         if(dynamic_cast<const TPGActionInstrumented*>(vertex))
             continue;
@@ -42,37 +50,34 @@ void TPG::ExecutionStats::analyzeExecution(const TPGGraph* graph)
         auto& team = dynamic_cast<const TPGTeamInstrumented&>(*vertex);
             // Raise std::bad_cast if not an instrumented team
 
-        nbVisitedTeams += team.getNbVisits();
+        nbEvaluatedTeams += team.getNbVisits();
 
         for(const auto * edge : team.getOutgoingEdges()){
 
-            // TODO in a function analyzeEdge
             auto& instruEdge = dynamic_cast<const TPGEdgeInstrumented&>(*edge);
                 // Raise std::bad_cast if not an instrumented edge
 
-            uint64_t edgeVisits = instruEdge.getNbVisits();
+            uint64_t nbEdgeEval = instruEdge.getNbVisits();
             Program::Program& edgeProgram = instruEdge.getProgram();
 
-            // Visited edge => edge program executed
-            if(edgeVisits > 0){
-                nbEvaluatedPrograms += edgeVisits;
-                nbExecutedLines +=
-                    edgeVisits * edgeProgram.getNbLines();
+            // Evaluated edge => edge program executed
+            if(nbEdgeEval > 0){
+                nbEvaluatedPrograms += nbEdgeEval;
+                nbExecutedLines += nbEdgeEval * edgeProgram.getNbLines();
 
-                // TODO in a function analyzeProgram
-                for(int i = 0; i < edgeProgram.getNbLines(); i++){
-                    Program::Line& line = edgeProgram.getLine(i);
-
-                    totalExecutionsPerInstruction[line.getDestinationIndex()]
-                        += edgeVisits;
+                std::map<uint64_t, uint64_t> linesPerInstruction;
+                analyzeProgram(linesPerInstruction, edgeProgram);
+                for(const auto& pair : linesPerInstruction){
+                    totalExecutionsPerInstruction[pair.first]
+                        += nbEdgeEval * pair.second;
                 }
-
             }
 
         }
+
     }
 
-    this->avgVisitedTeams = (double)nbVisitedTeams / (double)nbInferences;
+    this->avgEvaluatedTeams = (double)nbEvaluatedTeams / (double)nbInferences;
     this->avgEvaluatedPrograms = (double)nbEvaluatedPrograms / (double)nbInferences;
     this->avgExecutedLines = (double)nbExecutedLines / (double)nbInferences;
 
@@ -86,4 +91,23 @@ void TPG::ExecutionStats::analyzeInferenceTrace(
     const std::vector<const TPGVertex*> trace)
 {
     // TODO
+
+}
+
+double TPG::ExecutionStats::getAvgEvaluatedTeams() const
+{
+    return this->avgEvaluatedTeams;
+}
+double TPG::ExecutionStats::getAvgEvaluatedPrograms() const
+{
+    return this->avgEvaluatedPrograms;
+}
+double TPG::ExecutionStats::getAvgExecutedLines() const
+{
+    return this->avgExecutedLines;
+}
+const std::map<size_t, double>& TPG::ExecutionStats::
+    getAvgNbExecutionPerInstruction() const
+{
+    return this->avgNbExecutionPerInstruction;
 }
