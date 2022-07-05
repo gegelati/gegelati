@@ -9,10 +9,10 @@
 namespace TPG{
 
     /**
-     * \brief Struct used to store execution statistics about one inference execution trace.
+     * \brief Struct used to store execution statistics about one inference trace.
      *
      * It contains for one trace :
-     * - the execution trace in a std::vector<const TPG::TPGVertex*>
+     * - the inference trace in a std::vector<const TPG::TPGVertex*>
      * - the number of evaluated teams
      * - the number of evaluated programs
      * - the number of executed lines
@@ -31,7 +31,33 @@ namespace TPG{
      * \brief Utility class for extracting execution statistics
      * from a TPGExecutionEngineInstrumented.
      *
-     * TODO how to use the class
+     * The main method of this class is analyzeExecution(), which will :
+     *  - retrieve from a TPGGraph the instrumented values and compute
+     *  average execution statistics.
+     *  - compute execution statistics for every inference done with a TPGExecutionEngineInstrumented.
+     *
+     * Before analyzing or even starting any inference, you must :
+     *  - use a TPGGraph associated to a TPGInstrumentedFactory.
+     *  - use a TPGExecutionEngineInstrumented that will execute the TPGGraph.
+     *  - clear any previous instrumented data :
+     *      --> for the TPGGraph, use TPGInstrumentedFactory::resetTPGGraphCounters().
+     *      --> for the TPGExecutionEngineInstrumented, use its method clearTraceHistory().
+     * Otherwise, the results won't have any meaning.
+     * If you have never execute the TPGGraph or the TPGExecutionEngineInstrumented,
+     * resetting them isn't required.
+     *
+     * You can then execute the TPG for as many inferences as you like.
+     *
+     * Then, use analyzeExecution() with the related TPGGraph and
+     * TPGExecutionEngineInstrumented, and use the getters and setters to
+     * read the statistics.
+     *
+     * Warning : the class deduce the number of inferences based on the sum
+     * of evaluation each root vertices had. If you executed your TPGGraph
+     * starting from multiple roots, then remember that the average statistics
+     * are based on ALL inference, regardless of the root vertices used.
+     *
+     * // TODO explanation on JSon exporter
      */
     class ExecutionStats{
 
@@ -56,7 +82,7 @@ namespace TPG{
         std::map<size_t, double> avgNbExecutionPerInstruction;
 
         /// Statistics of last analyzed traces.
-        std::vector<TraceStats> executionTracesStats;
+        std::vector<TraceStats> inferenceTracesStats;
 
 
       protected:
@@ -80,17 +106,39 @@ namespace TPG{
         virtual ~ExecutionStats() = default;
 
         /**
-         * \brief Analyze the average results of a TPGGraph execution.
+         * \brief Analyze the average statistics of an instrumented TPGGraph execution.
          *
          * Results are stored in the average results class attributes.
          *
          * \param graph the analyzed TPGGraph*.
-         * \throws std::bad_cast if the TPG contains a non instrumented vertex or edge.
+         * \throws std::bad_cast if graph contains at least one non instrumented vertex or edge.
          */
-        void analyzeExecution(const TPGGraph* graph);
+        void analyzeInstrumentedGraph(const TPGGraph* graph);
 
-        /// Analyze the execution of one inference trace.
-        void analyzeInferenceTrace(const std::vector<const TPGVertex*> trace);
+        /**
+         * \brief Analyze the execution statistics of one inference trace.
+         *
+         * The vector trace contains all visited vertices for one inference
+         * in order : trace[0] is the root, and trace[trace.size()-1] the action.
+         *
+         * Results are stored in a new TraceStats struct which is pushed back
+         * in inferenceTracesStats of the object.
+         *
+         * \param trace a const vector of the analyzed inference trace.
+         */
+        void analyzeInferenceTrace(const std::vector<const TPGVertex*>& trace);
+
+        /**
+         * \brief Analyze the execution statistics of multiple inferences
+         * done with a TPGExecutionEngineInstrumented.
+         *
+         * Previous results will be erased.
+         *
+         * \param tee the TPGExecutionEngineInstrumented.
+         * \param graph the TPGGraph executed with tee.
+         * \throws std::bad_cast if the graph contains a non instrumented vertex or edge.
+         */
+        void analyzeExecution(const TPG::TPGExecutionEngineInstrumented& tee, const TPGGraph* graph);
 
 
         /// Get the average number of evaluated teams per inference.
@@ -107,7 +155,10 @@ namespace TPG{
         const std::map<size_t, double>& getAvgNbExecutionPerInstruction() const;
 
         /// Get a vector of the trace statistics of last analyzed traces.
-        const std::vector<TraceStats>& getExecutionTracesStats() const;
+        const std::vector<TraceStats>& getInferenceTracesStats() const;
+
+        /// Clear results of previously analyzed inference trace.
+        void clearInferenceTracesStats();
 
     };
 

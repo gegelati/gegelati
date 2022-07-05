@@ -31,7 +31,7 @@ class ExecutionStatsTest : public ::testing::Test
 
     TPG::TPGExecutionEngineInstrumented* execEngine;
 
-    std::vector<std::vector<const TPG::TPGVertex*>> executionTraces;
+    std::vector<std::vector<const TPG::TPGVertex*>> inferenceTraces;
 
 
     virtual void SetUp() override{
@@ -198,7 +198,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P1 = 0
         // P2 = 10
         // P8 = 12
-        ASSERT_NO_THROW(executionTraces.push_back(
+        ASSERT_NO_THROW(inferenceTraces.push_back(
             execEngine->executeFromRoot(*tpg->getVertices().at(0))
             ));
 
@@ -209,7 +209,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P1 = 13
         // P2 = 10
         // P8 = 12
-        ASSERT_NO_THROW(executionTraces.push_back(
+        ASSERT_NO_THROW(inferenceTraces.push_back(
             execEngine->executeFromRoot(*tpg->getVertices().at(0))
             ));
 
@@ -220,7 +220,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P1 = -3
         // P2 = 10
         // P8 = -18
-        ASSERT_NO_THROW(executionTraces.push_back(
+        ASSERT_NO_THROW(inferenceTraces.push_back(
             execEngine->executeFromRoot(*tpg->getVertices().at(0))
             ));
 
@@ -230,7 +230,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P1 = -3
         // P2 = -10
         // P8 = -18
-        ASSERT_NO_THROW(executionTraces.push_back(
+        ASSERT_NO_THROW(inferenceTraces.push_back(
             execEngine->executeFromRoot(*tpg->getVertices().at(0))
             ));
 
@@ -251,10 +251,10 @@ class ExecutionStatsTest : public ::testing::Test
 
 };
 
-TEST_F(ExecutionStatsTest, AnalyzeExecution)
+TEST_F(ExecutionStatsTest, AnalyzeInstrumentedGraph)
 {
     TPG::ExecutionStats executionStats;
-    ASSERT_NO_THROW(executionStats.analyzeExecution(tpg))
+    ASSERT_NO_THROW(executionStats.analyzeInstrumentedGraph(tpg))
         << "Analysis of a valid tpg execution failed unexpectedly.";
 
     ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 10.0/4.0)
@@ -284,7 +284,7 @@ TEST_F(ExecutionStatsTest, AnalyzeNotInstrumented){
     notInstrumented.addNewTeam();
 
     TPG::ExecutionStats executionStats;
-    ASSERT_THROW(executionStats.analyzeExecution(&notInstrumented), std::bad_cast)
+    ASSERT_THROW(executionStats.analyzeInstrumentedGraph(&notInstrumented), std::bad_cast)
         << "Analysis of not instrumented TPG didn't failed or did with an unexpected error.";
 
 }
@@ -293,19 +293,91 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace){
 
     TPG::ExecutionStats executionStats;
 
-    ASSERT_EQ(executionStats.getExecutionTracesStats().size(), 0)
-        << "Attribute executionTracesStats isn't empty at initialisation.";
+    ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 0)
+        << "Attribute inferenceTracesStats isn't empty at initialisation.";
 
-    ASSERT_NO_THROW(executionStats.analyzeInferenceTrace(executionTraces[3]))
+    ASSERT_NO_THROW(executionStats.analyzeInferenceTrace(inferenceTraces[3]))
         << "Analysis of execution trace failed unexpectedly.";
 
-    ASSERT_EQ(executionStats.getExecutionTracesStats().size(), 1)
+    ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 1)
         << "Attribute executionTraceStats doesn't have just the analyzed trace statistics.";
-    ASSERT_EQ(executionStats.getExecutionTracesStats()[0].trace, executionTraces[3])
+    ASSERT_EQ(executionStats.getInferenceTracesStats()[0].trace, inferenceTraces[3])
         << "Wrong analyzed execution trace in executionStats.";
 
 
-    const TPG::TraceStats& stats = executionStats.getExecutionTracesStats()[0];
+    const TPG::TraceStats& stats = executionStats.getInferenceTracesStats()[0];
+
+    ASSERT_EQ(stats.nbEvaluatedTeams, 3)
+        << "Wrong number of evaluated teams.";
+    ASSERT_EQ(stats.nbEvaluatedPrograms, 7)
+        << "Wrong number of evaluated programs.";
+    ASSERT_EQ(stats.nbExecutedLines, 9)
+        << "Wrong number of executed lines.";
+    // Add
+    ASSERT_EQ(stats.nbExecutionPerInstruction.at(0), 1)
+        << "Wrong number of executed instruction.";
+    // mac
+    ASSERT_EQ(stats.nbExecutionPerInstruction.at(1), 1)
+        << "Wrong number of executed instruction.";
+    // Minus
+    ASSERT_EQ(stats.nbExecutionPerInstruction.at(2), 5)
+        << "Wrong number of executed instruction.";
+    // MultByConst
+    ASSERT_EQ(stats.nbExecutionPerInstruction.at(3), 2)
+        << "Wrong number of executed instruction.";
+
+}
+
+TEST_F(ExecutionStatsTest, ClearTracesStats){
+
+    TPG::ExecutionStats executionStats;
+    executionStats.analyzeInferenceTrace(inferenceTraces[3]);
+    executionStats.analyzeInferenceTrace(inferenceTraces[1]);
+
+    ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 2)
+        << "Not enough TraceStats after trace analysis.";
+    ASSERT_NO_THROW(executionStats.clearInferenceTracesStats())
+        << "Clearing inferenceTracesStats failed unexpectedly.";
+    ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 0)
+        << "inferenceTracesStats is not empty after clearing.";
+
+}
+
+TEST_F(ExecutionStatsTest, AnalyzeExecution){
+
+    TPG::ExecutionStats executionStats;
+
+    // These analyzed traces must be cleared by analyzeExecution()
+    executionStats.analyzeInferenceTrace(inferenceTraces[3]);
+    executionStats.analyzeInferenceTrace(inferenceTraces[1]);
+
+    ASSERT_NO_THROW(executionStats.analyzeExecution(*execEngine, tpg));
+
+    ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 4)
+        << "Incorrect number of analyzed traces.";
+
+    /* Average graph execution statistics */
+    ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 10.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
+    ASSERT_EQ(executionStats.getAvgEvaluatedPrograms(), 26.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
+    ASSERT_EQ(executionStats.getAvgExecutedLines(), 34.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
+    // Add
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(0), 2.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
+    // mac
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(1), 4.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
+    // Minus
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(2), 20.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
+    // MultByConst
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 8.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
+
+
+    const TPG::TraceStats& stats = executionStats.getInferenceTracesStats()[3];
 
     ASSERT_EQ(stats.nbEvaluatedTeams, 3)
         << "Wrong number of evaluated teams.";

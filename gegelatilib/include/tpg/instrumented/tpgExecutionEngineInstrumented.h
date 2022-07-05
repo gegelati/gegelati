@@ -103,7 +103,7 @@ namespace TPG {
 
 
         /// Get all previous execution traces.
-        const std::vector<std::vector<const TPGVertex*>>& getTraceHistory();
+        const std::vector<std::vector<const TPGVertex*>>& getTraceHistory() const;
 
         /// Clear the trace history from all previous execution trace.
         void clearTraceHistory();

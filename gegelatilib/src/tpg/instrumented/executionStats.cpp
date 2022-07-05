@@ -21,7 +21,7 @@ void TPG::ExecutionStats::analyzeProgram(
 
 }
 
-void TPG::ExecutionStats::analyzeExecution(const TPGGraph* graph)
+void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
 {
     this->avgNbExecutionPerInstruction.clear();
 
@@ -90,7 +90,7 @@ void TPG::ExecutionStats::analyzeExecution(const TPGGraph* graph)
 }
 
 void TPG::ExecutionStats::analyzeInferenceTrace(
-    const std::vector<const TPGVertex*> trace)
+    const std::vector<const TPGVertex*>& trace)
 {
     uint64_t nbEvaluatedTeams = trace.size() - 1;
         // Remove the action vertex at the end
@@ -116,7 +116,19 @@ void TPG::ExecutionStats::analyzeInferenceTrace(
         }
     }
 
-    this->executionTracesStats.push_back({trace, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutedLines, nbExecutionPerInstruction});
+    this->inferenceTracesStats.push_back({trace, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutedLines, nbExecutionPerInstruction});
+
+}
+
+void TPG::ExecutionStats::analyzeExecution(
+    const TPG::TPGExecutionEngineInstrumented& tee, const TPG::TPGGraph* graph)
+{
+    clearInferenceTracesStats();
+
+    analyzeInstrumentedGraph(graph);
+
+    for(const auto& trace : tee.getTraceHistory())
+        analyzeInferenceTrace(trace);
 
 }
 
@@ -138,8 +150,14 @@ const std::map<size_t, double>& TPG::ExecutionStats::
     return this->avgNbExecutionPerInstruction;
 }
 
-const std::vector<TPG::TraceStats>& TPG::ExecutionStats::getExecutionTracesStats()
+const std::vector<TPG::TraceStats>& TPG::ExecutionStats::
+    getInferenceTracesStats()
     const
 {
-    return this->executionTracesStats;
+    return this->inferenceTracesStats;
+}
+
+void TPG::ExecutionStats::clearInferenceTracesStats()
+{
+    this->inferenceTracesStats.clear();
 }

@@ -72,7 +72,7 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngineInstrumented::
 }
 
 const std::vector<std::vector<const TPG::TPGVertex*>>& TPG::
-    TPGExecutionEngineInstrumented::getTraceHistory()
+    TPGExecutionEngineInstrumented::getTraceHistory() const
 {
     return this->traceHistory;
 }
