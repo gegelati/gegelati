@@ -285,6 +285,45 @@ TEST_F(ExecutionStatsTest, AnalyzeNotInstrumented){
 
     TPG::ExecutionStats executionStats;
     ASSERT_THROW(executionStats.analyzeExecution(&notInstrumented), std::bad_cast)
-        << "Analysis of not instrumented TPG didn't failed or did for an unexpected error.";
+        << "Analysis of not instrumented TPG didn't failed or did with an unexpected error.";
+
+}
+
+TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace){
+
+    TPG::ExecutionStats executionStats;
+
+    ASSERT_EQ(executionStats.getExecutionTracesStats().size(), 0)
+        << "Attribute executionTracesStats isn't empty at initialisation.";
+
+    ASSERT_NO_THROW(executionStats.analyzeInferenceTrace(executionTraces[3]))
+        << "Analysis of execution trace failed unexpectedly.";
+
+    ASSERT_EQ(executionStats.getExecutionTracesStats().size(), 1)
+        << "Attribute executionTraceStats doesn't have just the analyzed trace statistics.";
+    ASSERT_EQ(executionStats.getExecutionTracesStats()[0].trace, executionTraces[3])
+        << "Wrong analyzed execution trace in executionStats.";
+
+
+    const TPG::TraceStats& stats = executionStats.getExecutionTracesStats()[0];
+
+    ASSERT_EQ(stats.nbEvaluatedTeams, 3)
+        << "Wrong number of evaluated teams.";
+    ASSERT_EQ(stats.nbEvaluatedPrograms, 7)
+        << "Wrong number of evaluated programs.";
+    ASSERT_EQ(stats.nbExecutedLines, 9)
+        << "Wrong number of executed lines.";
+    // Add
+    ASSERT_EQ(stats.nbExecutionPerInstruction.at(0), 1)
+        << "Wrong number of executed instruction.";
+    // mac
+    ASSERT_EQ(stats.nbExecutionPerInstruction.at(1), 1)
+        << "Wrong number of executed instruction.";
+    // Minus
+    ASSERT_EQ(stats.nbExecutionPerInstruction.at(2), 5)
+        << "Wrong number of executed instruction.";
+    // MultByConst
+    ASSERT_EQ(stats.nbExecutionPerInstruction.at(3), 2)
+        << "Wrong number of executed instruction.";
 
 }

@@ -1,6 +1,8 @@
 #include "tpg/instrumented/executionStats.h"
 
 #include <numeric>
+#include <algorithm>
+#include <vector>
 
 #include "tpg/instrumented/tpgVertexInstrumentation.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
@@ -90,7 +92,31 @@ void TPG::ExecutionStats::analyzeExecution(const TPGGraph* graph)
 void TPG::ExecutionStats::analyzeInferenceTrace(
     const std::vector<const TPGVertex*> trace)
 {
-    // TODO
+    uint64_t nbEvaluatedTeams = trace.size() - 1;
+        // Remove the action vertex at the end
+
+    uint64_t nbEvaluatedPrograms = 0;
+    uint64_t nbExecutedLines = 0;
+    std::map<uint64_t, uint64_t> nbExecutionPerInstruction;
+
+    // For of each visited teams, analysing its edges
+    for(auto it = trace.begin(); it != trace.end()-1; it++){
+        for(auto edge : (*it)->getOutgoingEdges()){
+
+            // Edges leading to a previously visited teams (including the current team) are not evaluated
+            auto endSearchIt = it+1;
+            if( std::find(trace.begin(), endSearchIt, edge->getDestination()) != endSearchIt )
+                continue;
+
+            nbEvaluatedPrograms++;
+            nbExecutedLines += edge->getProgram().getNbLines();
+
+            analyzeProgram(nbExecutionPerInstruction, edge->getProgram());
+
+        }
+    }
+
+    this->executionTracesStats.push_back({trace, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutedLines, nbExecutionPerInstruction});
 
 }
 
@@ -110,4 +136,10 @@ const std::map<size_t, double>& TPG::ExecutionStats::
     getAvgNbExecutionPerInstruction() const
 {
     return this->avgNbExecutionPerInstruction;
+}
+
+const std::vector<TPG::TraceStats>& TPG::ExecutionStats::getExecutionTracesStats()
+    const
+{
+    return this->executionTracesStats;
 }

@@ -28,7 +28,7 @@ namespace TPG{
     };
 
     /**
-     * Utility class for extracting execution statistics
+     * \brief Utility class for extracting execution statistics
      * from a TPGExecutionEngineInstrumented.
      *
      * TODO how to use the class
@@ -40,13 +40,13 @@ namespace TPG{
         /* Average results */
 
         /// Average number of evaluated teams per inference.
-        double avgEvaluatedTeams;
+        double avgEvaluatedTeams = 0.0;
 
         /// Average number of programs evaluated per inference.
-        double avgEvaluatedPrograms;
+        double avgEvaluatedPrograms = 0.0;
 
         /// Average number of executed lines per inference.
-        double avgExecutedLines;
+        double avgExecutedLines = 0.0;
 
         /**
          * This map associate an Instruction identifier from an
@@ -54,6 +54,9 @@ namespace TPG{
          * of the instruction per inference.
          */
         std::map<size_t, double> avgNbExecutionPerInstruction;
+
+        /// Statistics of last analyzed traces.
+        std::vector<TraceStats> executionTracesStats;
 
 
       protected:
@@ -102,6 +105,9 @@ namespace TPG{
         /// Get a reference to the map that associate each instruction to
         /// its average number of execution per inference.
         const std::map<size_t, double>& getAvgNbExecutionPerInstruction() const;
+
+        /// Get a vector of the trace statistics of last analyzed traces.
+        const std::vector<TraceStats>& getExecutionTracesStats() const;
 
     };
 
