@@ -254,19 +254,37 @@ class ExecutionStatsTest : public ::testing::Test
 TEST_F(ExecutionStatsTest, AnalyzeExecution)
 {
     TPG::ExecutionStats executionStats;
-    ASSERT_NO_THROW(executionStats.analyzeExecution(tpg));
+    ASSERT_NO_THROW(executionStats.analyzeExecution(tpg))
+        << "Analysis of a valid tpg execution failed unexpectedly.";
 
-    ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 10.0/4.0);
-    ASSERT_EQ(executionStats.getAvgEvaluatedPrograms(), 26.0/4.0);
-    ASSERT_EQ(executionStats.getAvgExecutedLines(), 34.0/4.0);
+    ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 10.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
+    ASSERT_EQ(executionStats.getAvgEvaluatedPrograms(), 26.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
+    ASSERT_EQ(executionStats.getAvgExecutedLines(), 34.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
     // Add
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(0), 2.0/4.0);
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(0), 2.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
     // mac
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(1), 4.0/4.0);
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(1), 4.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
     // Minus
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(2), 20.0/4.0);
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(2), 20.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
     // MultByConst
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 8.0/4.0);
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 8.0/4.0)
+        << "Incorrect attribute value after analyzing execution.";
 
 }
 
+TEST_F(ExecutionStatsTest, AnalyzeNotInstrumented){
+
+    TPG::TPGGraph notInstrumented(*e);
+    notInstrumented.addNewTeam();
+
+    TPG::ExecutionStats executionStats;
+    ASSERT_THROW(executionStats.analyzeExecution(&notInstrumented), std::bad_cast)
+        << "Analysis of not instrumented TPG didn't failed or did for an unexpected error.";
+
+}
