@@ -19,11 +19,17 @@ namespace TPG{
      * - the number of execution for each instructions (indexed by instruction index)
      */
     struct TraceStats{
+        /// The inference trace.
         const std::vector<const TPG::TPGVertex*> trace;
 
+        /// Number of team evaluated.
         const uint64_t nbEvaluatedTeams;
+        /// Number of programs evaluated.
         const uint64_t nbEvaluatedPrograms;
+        /// Number of program lines executed.
         const uint64_t nbExecutedLines;
+        /// Map that associate the instruction indexes with the number of
+        /// execution of the corresponding Instruction.
         const std::map<uint64_t, uint64_t> nbExecutionPerInstruction;
     };
 
