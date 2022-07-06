@@ -1,0 +1,94 @@
+{
+	"AverageStats" : 
+	{
+		"avgEvaluatedPrograms" : 6.5,
+		"avgEvaluatedTeams" : 2.5,
+		"avgExecutedLines" : 8.5,
+		"avgNbExecutionPerInstruction" : 
+		{
+			"0" : 0.5,
+			"1" : 1.0,
+			"2" : 5.0,
+			"3" : 2.0
+		}
+	},
+	"TracesStats" : 
+	{
+		"0" : 
+		{
+			"nbEvaluatedPrograms" : 6,
+			"nbEvaluatedTeams" : 2,
+			"nbExecutedLines" : 8,
+			"nbExecutionPerInstruction" : 
+			{
+				"1" : 1,
+				"2" : 5,
+				"3" : 2
+			},
+			"trace" : 
+			[
+				0,
+				1,
+				6
+			]
+		},
+		"1" : 
+		{
+			"nbEvaluatedPrograms" : 6,
+			"nbEvaluatedTeams" : 2,
+			"nbExecutedLines" : 8,
+			"nbExecutionPerInstruction" : 
+			{
+				"1" : 1,
+				"2" : 5,
+				"3" : 2
+			},
+			"trace" : 
+			[
+				0,
+				1,
+				5
+			]
+		},
+		"2" : 
+		{
+			"nbEvaluatedPrograms" : 7,
+			"nbEvaluatedTeams" : 3,
+			"nbExecutedLines" : 9,
+			"nbExecutionPerInstruction" : 
+			{
+				"0" : 1,
+				"1" : 1,
+				"2" : 5,
+				"3" : 2
+			},
+			"trace" : 
+			[
+				0,
+				1,
+				2,
+				6
+			]
+		},
+		"3" : 
+		{
+			"nbEvaluatedPrograms" : 7,
+			"nbEvaluatedTeams" : 3,
+			"nbExecutedLines" : 9,
+			"nbExecutionPerInstruction" : 
+			{
+				"0" : 1,
+				"1" : 1,
+				"2" : 5,
+				"3" : 2
+			},
+			"trace" : 
+			[
+				0,
+				1,
+				2,
+				6
+			]
+		}
+	}
+}

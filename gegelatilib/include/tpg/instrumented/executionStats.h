@@ -11,7 +11,7 @@ namespace TPG{
     /**
      * \brief Struct used to store execution statistics about one inference trace.
      *
-     * It contains for one trace :
+     * It contains :
      * - the inference trace in a std::vector<const TPG::TPGVertex*>
      * - the number of evaluated teams
      * - the number of evaluated programs
@@ -29,7 +29,7 @@ namespace TPG{
 
     /**
      * \brief Utility class for extracting execution statistics
-     * from a TPGExecutionEngineInstrumented.
+     * from a TPGExecutionEngineInstrumented and an instrumented TPGGraph.
      *
      * The main method of this class is analyzeExecution(), which will :
      *  - retrieve from a TPGGraph the instrumented values and compute
@@ -43,21 +43,22 @@ namespace TPG{
      *      --> for the TPGGraph, use TPGInstrumentedFactory::resetTPGGraphCounters().
      *      --> for the TPGExecutionEngineInstrumented, use its method clearTraceHistory().
      * Otherwise, the results won't have any meaning.
-     * If you have never execute the TPGGraph or the TPGExecutionEngineInstrumented,
+     * If you have never executed the TPGGraph or the TPGExecutionEngineInstrumented,
      * resetting them isn't required.
      *
      * You can then execute the TPG for as many inferences as you like.
      *
      * Then, use analyzeExecution() with the related TPGGraph and
-     * TPGExecutionEngineInstrumented, and use the getters and setters to
-     * read the statistics.
+     * TPGExecutionEngineInstrumented, and access the statistics using the
+     * provided getters and setters.
      *
-     * Warning : the class deduce the number of inferences based on the sum
+     * Warning : the class deduces the number of inferences based on the sum
      * of evaluation each root vertices had. If you executed your TPGGraph
      * starting from multiple roots, then remember that the average statistics
-     * are based on ALL inference, regardless of the root vertices used.
+     * are based on ALL inferences, regardless of the root vertices used.
      *
-     * // TODO explanation on JSon exporter
+     * The Json exporter is designed to be used after a call to analyzeExecution().
+     * Just call writeStatsToJson() to export statistics in a file with json format.
      */
     class ExecutionStats{
 
@@ -84,14 +85,17 @@ namespace TPG{
         /// Statistics of last analyzed traces.
         std::vector<TraceStats> inferenceTracesStats;
 
+        /// Graph used during last call to analyzeExecution
+        const TPGGraph* lastAnalyzedGraph = nullptr;
+
 
       protected:
 
         /**
-         * \brief Analyze a program to get the number of each instructions used.
+         * \brief Analyze a program to get how many times each instruction is used.
          *
          * \param[out] instructionCounts the std::map<uint64_t, uint64_t>& that
-         * will be incremented for each instruction used by the program.
+         * will be incremented for each instruction use.
          * \param[in] program the analyzed program.
          */
         static void analyzeProgram(std::map<uint64_t, uint64_t>& instructionCounts,
@@ -110,7 +114,7 @@ namespace TPG{
          *
          * Results are stored in the average results class attributes.
          *
-         * \param graph the analyzed TPGGraph*.
+         * \param[in] graph the analyzed TPGGraph*.
          * \throws std::bad_cast if graph contains at least one non instrumented vertex or edge.
          */
         void analyzeInstrumentedGraph(const TPGGraph* graph);
@@ -122,9 +126,9 @@ namespace TPG{
          * in order : trace[0] is the root, and trace[trace.size()-1] the action.
          *
          * Results are stored in a new TraceStats struct which is pushed back
-         * in inferenceTracesStats of the object.
+         * in attribute inferenceTracesStats. Previous results will be erased.
          *
-         * \param trace a const vector of the analyzed inference trace.
+         * \param[in] trace a vector<const TPGVertex*> of the analyzed inference trace.
          */
         void analyzeInferenceTrace(const std::vector<const TPGVertex*>& trace);
 
@@ -134,8 +138,8 @@ namespace TPG{
          *
          * Previous results will be erased.
          *
-         * \param tee the TPGExecutionEngineInstrumented.
-         * \param graph the TPGGraph executed with tee.
+         * \param[in] tee the TPGExecutionEngineInstrumented.
+         * \param[in] graph the TPGGraph executed with tee.
          * \throws std::bad_cast if the graph contains a non instrumented vertex or edge.
          */
         void analyzeExecution(const TPG::TPGExecutionEngineInstrumented& tee, const TPGGraph* graph);
@@ -154,11 +158,62 @@ namespace TPG{
         /// its average number of execution per inference.
         const std::map<size_t, double>& getAvgNbExecutionPerInstruction() const;
 
-        /// Get a vector of the trace statistics of last analyzed traces.
+        /// Get stored trace statistics.
         const std::vector<TraceStats>& getInferenceTracesStats() const;
 
-        /// Clear results of previously analyzed inference trace.
+        /// Clear stored trace statistics.
         void clearInferenceTracesStats();
+
+
+        /**
+         * \brief Export the execution statistics of the last analyzeExecution()
+         * call to a file using Json format.
+         *
+         * This method will use the statistics currently stored in the object
+         * because it is intended to be used after a call to analyzeExecution().
+         * Using it after separate calls to analyzeInstrumentedGraph() or
+         * analyzeInferenceTrace() might lead to uncorrelated data.
+         *
+         * Data is organised as follows :
+         * { "AverageStats" :
+         *  {
+         *      "avgEvaluatedTeams" : value,
+         *      "avgEvaluatedPrograms" : value,
+         *      "avgExecutedLines" : value,
+         *      "avgNbExecutionPerInstruction"
+         *      {
+         *          "InstructionIndex" : nbExecution,
+         *          ...
+         *      }
+         *  },
+         *
+         *  "TracesStats" :
+         *  {
+         *      "TraceNumber" :
+         *      {
+         *          "nbEvaluatedPrograms" : value,
+         *          "nbEvaluatedTeams" : value,
+         *          "nbExecutedLines" : value,
+         *          "nbExecutionPerInstruction" :
+         *          {
+         *              "InstructionIndex" : nbExecution,
+         *              ...
+         *          },
+         *          "trace" : [Array of vertex indexes in the TPGGraph]
+         *      },
+         *      ...
+         *  }
+         *
+         * }
+         *
+         * \param[in] filePath the path to the output file.
+         * \param[in] noIndent true if the json format must not be indented. Files can
+         * become large quickly with a lot of traces, so if the file purpose
+         * is to be analysed by another program, set this to true to save some
+         * space on your disk. Set noIndent to false if you want to keep
+         * the file readable.
+         */
+        void writeStatsToJson(const char * filePath, bool noIndent = false) const;
 
     };
 

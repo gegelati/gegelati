@@ -11,6 +11,7 @@
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
+#include "goldenReferenceComparison.h"
 
 #include "tpg/instrumented/executionStats.h"
 
@@ -351,7 +352,8 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution){
     executionStats.analyzeInferenceTrace(inferenceTraces[3]);
     executionStats.analyzeInferenceTrace(inferenceTraces[1]);
 
-    ASSERT_NO_THROW(executionStats.analyzeExecution(*execEngine, tpg));
+    ASSERT_NO_THROW(executionStats.analyzeExecution(*execEngine, tpg))
+        << "Analysing execution failed unexpectedly.";
 
     ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 4)
         << "Incorrect number of analyzed traces.";
@@ -397,5 +399,18 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution){
     // MultByConst
     ASSERT_EQ(stats.nbExecutionPerInstruction.at(3), 2)
         << "Wrong number of executed instruction.";
+
+}
+
+TEST_F(ExecutionStatsTest, WriteStatsToJson){
+
+    TPG::ExecutionStats executionStats;
+    executionStats.analyzeExecution(*execEngine, tpg);
+
+    ASSERT_NO_THROW(executionStats.writeStatsToJson("execution_stats.json"))
+        << "Exporting execution statistics to file failed unexpectedly.";
+
+    ASSERT_TRUE(compare_files("execution_stats.json", TESTS_DAT_PATH "execution_stats_ref.json"))
+        << "Generated json file is different from the reference file.";
 
 }
