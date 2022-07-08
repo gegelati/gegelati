@@ -9,6 +9,7 @@ _yyyy.mm.dd_
 ### Changes
 
 ### Bug fix
+* Fix penalty score given to a visited team to record edge traversals in `TPGSwitchGenerationEngine`, was `DBL_MIN` but should be `-DBL_MAX`.
 
 
 ## Release version 1.1.0 - Babacio flavor

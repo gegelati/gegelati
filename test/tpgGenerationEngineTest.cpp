@@ -623,6 +623,98 @@ TEST_BOTH_MODE(TwoTeamsOneCycle, {
         << "Error wrong action returned in test TwoTeamsOneCycle.";
 });
 
+TEST_BOTH_MODE(TwoTeamsOneCycleNegativeBid, {
+    const TPG::TPGVertex* root = (&tpg->addNewTeam());
+    const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
+    const TPG::TPGVertex* T2 = (&tpg->addNewTeam());
+    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
+    const TPG::TPGVertex* leaf3 = (&tpg->addNewAction(3));
+
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    Program::Line& prog1L1 = prog1->addNewLine();
+    // reg[0] = in1[0] + in1[1];
+    prog1L1.setDestinationIndex(0);
+    prog1L1.setInstructionIndex(0);
+    prog1L1.setOperand(0, 1, 0);
+    prog1L1.setOperand(1, 1, 1);
+
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    Program::Line& prog2L1 = prog2->addNewLine();
+    // reg[0] = in1[1] - in1[2];
+    prog2L1.setDestinationIndex(0);
+    prog2L1.setInstructionIndex(1);
+    prog2L1.setOperand(0, 1, 1);
+    prog2L1.setOperand(1, 1, 2);
+
+    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e));
+    Program::Line& prog3L1 = prog3->addNewLine();
+    // reg[0] = in1[1] + in1[3];
+    prog3L1.setDestinationIndex(0);
+    prog3L1.setInstructionIndex(0);
+    prog3L1.setOperand(0, 1, 1);
+    prog3L1.setOperand(1, 1, 3);
+
+    const std::shared_ptr<Program::Program> prog4(new Program::Program(*e));
+    Program::Line& prog4L1 = prog4->addNewLine();
+    // reg[0] = in1[1] + in1[4];
+    prog4L1.setDestinationIndex(0);
+    prog4L1.setInstructionIndex(0);
+    prog4L1.setOperand(0, 1, 1);
+    prog4L1.setOperand(1, 1, 4);
+
+    const std::shared_ptr<Program::Program> prog5(new Program::Program(*e));
+    Program::Line& prog5L1 = prog5->addNewLine();
+    // reg[0] = in1[1] + in1[5];
+    prog5L1.setDestinationIndex(0);
+    prog5L1.setInstructionIndex(0);
+    prog5L1.setOperand(0, 1, 1);
+    prog5L1.setOperand(1, 1, 5);
+
+    const std::shared_ptr<Program::Program> prog6(new Program::Program(*e));
+    Program::Line& prog6L1 = prog6->addNewLine();
+    // reg[0] = in1[1] + in1[6];
+    prog6L1.setDestinationIndex(0);
+    prog6L1.setInstructionIndex(0);
+    prog6L1.setOperand(0, 1, 1);
+    prog6L1.setOperand(1, 1, 6);
+
+    tpg->addNewEdge(*root, *T1, prog1);
+    tpg->addNewEdge(*T1, *leaf, prog2);
+    tpg->addNewEdge(*T1, *T2, prog3);
+    tpg->addNewEdge(*T2, *leaf2, prog4);
+    tpg->addNewEdge(*T2, *T1, prog5);
+    tpg->addNewEdge(*T2, *leaf3, prog6);
+
+    ASSERT_EQ(tpg->getNbRootVertices(), 1)
+        << "number of root is not 1 in TwoTeamsOneCycleNegativeBid";
+
+    ASSERT_EQ(tpg->getNbVertices(), 6)
+        << "bad number of vertices in TwoTeamsOneCycleNegativeBid";
+
+    ASSERT_EQ(tpg->getEdges().size(), 6)
+        << "bad number of edges in TwoTeamsOneCycleNegativeBid";
+
+    tpgGen = factory.create("TwoTeamsOneCycleNegativeBid", *tpg, "./src/");
+    tpgGen->generateTPGGraph();
+    // call the destructor to close the file
+    tpgGen.reset();
+
+    cmdCompile += "TwoTeamsOneCycleNegativeBid";
+    ASSERT_EQ(system(cmdCompile.c_str()), 0)
+        << "Error while compiling the test TwoTeamsOneCycleNegativeBid.";
+
+    cmdExec += "TwoTeamsOneCycleNegativeBid" + executableExtension;
+
+    ASSERT_EQ(
+        system(
+            (cmdExec + path +
+             "/TwoTeamsOneCycleNegativeBid/DataTwoTeamsOneCycleNegativeBid.csv")
+                .c_str()),
+        0)
+        << "Error wrong action returned in test TwoTeamsOneCycleNegativeBid.";
+});
+
 static void setProgLine(const std::shared_ptr<Program::Program> prog,
                         int operand)
 {
