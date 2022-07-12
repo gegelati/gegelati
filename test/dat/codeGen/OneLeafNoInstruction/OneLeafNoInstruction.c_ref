@@ -42,13 +42,12 @@ int inferenceTPG() {
 			break;
 		}
 		case T1: {
-			if (!teamsVisited[currentVertex]) {
-				teamsVisited[currentVertex] = true;
-				T1Scores[0] = P0();
-			}
-			int best = bestProgram(T1Scores, 1);
-			T1Scores[best] = -DBL_MAX;
 			const enum vertices next[1] = { A0,  };
+
+			teamsVisited[currentVertex] = true;
+			T1Scores[0] = !teamsVisited[next[0]] ? P0() : -DBL_MAX;
+
+			int best = bestProgram(T1Scores, 1);
 			currentVertex = next[best];
 			break;
 		}
