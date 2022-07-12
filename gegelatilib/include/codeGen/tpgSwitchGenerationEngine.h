@@ -145,10 +145,10 @@ namespace CodeGen {
         virtual void generateAction(const TPG::TPGAction& action);
 
         /**
-         * @brief generates function names depending on the vertex type
+         * \brief Generate function name depending on the vertex type.
          *
-         * @param v vertex to be named
-         * @return std::string name of the vertex
+         * \param v vertex to be named.
+         * \return std::string name of the vertex.
          */
         std::string vertexName(const TPG::TPGVertex& v);
     };
