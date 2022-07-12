@@ -57,7 +57,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     auto teamName = vertexName(team);
 
     auto nextVertices = std::vector<const TPG::TPGVertex*>();
-    for(const auto* edge : edges)
+    for (const auto* edge : edges)
         nextVertices.push_back(edge->getDestination());
 
     fileMain << "\t\t\tconst enum vertices next[" << edges.size() << "] = { ";
@@ -71,7 +71,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     int i = 0;
     for (const auto* edge : edges) {
         fileMain << "\t\t\t" << teamName << "Scores[" << i << "] = "
-            << "!teamsVisited[next[" << i++ << "]] ? ";
+                 << "!teamsVisited[next[" << i++ << "]] ? ";
         generateEdge(*edge);
         fileMain << " : -DBL_MAX;" << std::endl;
     }

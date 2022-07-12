@@ -72,18 +72,15 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     const TPG::TPGVertex* destination = edge.getDestination();
 
     if (dynamic_cast<const TPG::TPGTeam*>(destination) != nullptr) {
-        destinationName = 'T' +
-              std::to_string(findVertexID(*destination));
+        destinationName = 'T' + std::to_string(findVertexID(*destination));
     }
-    else if (dynamic_cast<const TPG::TPGAction*>(destination) !=
-             nullptr) {
+    else if (dynamic_cast<const TPG::TPGAction*>(destination) != nullptr) {
         auto a = dynamic_cast<const TPG::TPGAction*>(destination);
-        destinationName = 'A' +
-              std::to_string(a->getActionID());
+        destinationName = 'A' + std::to_string(a->getActionID());
     }
 
-    fileMain << "\t\t\t{" << destinationName << "Vert, P" << progID
-             << ", " << destinationName << "}";
+    fileMain << "\t\t\t{" << destinationName << "Vert, P" << progID << ", "
+             << destinationName << "}";
 }
 
 void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
@@ -199,7 +196,8 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
         << "\twhile (teamsVisited[e[idxNext].destination]){\n"
         << "\t\tidxNext++;\n"
         << "\t\tif (idxNext >= nbEdge){\n"
-        << "\t\t\tfprintf(stderr, \"Error all the edges of the team lead to an already visited team\\n\");\n"
+        << "\t\t\tfprintf(stderr, \"Error all the edges of the team lead to an "
+           "already visited team\\n\");\n"
         << "\t\t\treturn -1;\n"
         << "\t\t}\n"
         << "\t}\n\n"
@@ -247,7 +245,8 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
         << "\twhile (top > 0) {\n"
         << "\t\tpop();\n"
         << "\t}\n"
-        << "\tfor (int i = 0; i < " << this->tpg.getVertices().size() << "; i++){\n"
+        << "\tfor (int i = 0; i < " << this->tpg.getVertices().size()
+        << "; i++){\n"
         << "\t\tteamsVisited[i] = false;\n"
         << "\t}\n"
         << "}\n"
@@ -260,7 +259,8 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
 
     fileMainH << "typedef enum Vertex {";
     for (auto vertex : this->tpg.getVertices()) {
-        fileMainH << vertexName(*vertex) << "Vert" << ", ";
+        fileMainH << vertexName(*vertex) << "Vert"
+                  << ", ";
     }
 
     fileMainH << "} Vertex;\n\n"
@@ -281,7 +281,6 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
               << std::endl;
 }
 
-
 std::string CodeGen::TPGStackGenerationEngine::vertexName(
     const TPG::TPGVertex& v)
 {
@@ -290,10 +289,10 @@ std::string CodeGen::TPGStackGenerationEngine::vertexName(
         vertexName << "T" << findVertexID(v);
     }
     else {
-        vertexName << "A" << dynamic_cast<const TPG::TPGAction*>(&v)->getActionID();
+        vertexName << "A"
+                   << dynamic_cast<const TPG::TPGAction*>(&v)->getActionID();
     }
     return vertexName.str();
 }
-
 
 #endif // CODE_GENERATION
