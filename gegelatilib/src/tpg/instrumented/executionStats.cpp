@@ -224,13 +224,32 @@ void TPG::ExecutionStats::writeStatsToJson(const char* filePath, bool noIndent) 
     Json::Value root;
 
         // Average statistics
-    root["AverageStats"]["avgEvaluatedTeams"] = this->avgEvaluatedTeams;
-    root["AverageStats"]["avgEvaluatedPrograms"] = this->avgEvaluatedPrograms;
-    root["AverageStats"]["avgExecutedLines"] = this->avgExecutedLines;
+    root["ExecutionStats"]["avgEvaluatedTeams"] = this->avgEvaluatedTeams;
+    root["ExecutionStats"]["avgEvaluatedPrograms"] = this->avgEvaluatedPrograms;
+    root["ExecutionStats"]["avgExecutedLines"] = this->avgExecutedLines;
 
     for(const auto& p : this->avgNbExecutionPerInstruction)
-        root["AverageStats"]["avgNbExecutionPerInstruction"][std::to_string(p.first)] = p.second;
+        root["ExecutionStats"]["avgNbExecutionPerInstruction"][std::to_string(p.first)] = p.second;
 
+        // Distributions
+    for(const auto& p : this->distribEvaluatedTeams)
+        root["ExecutionStats"]["distributionEvaluatedTeams"][std::to_string(p.first)] = p.second;
+
+    for(const auto& p : this->distribEvaluatedPrograms)
+        root["ExecutionStats"]["distributionEvaluatedPrograms"][std::to_string(p.first)] = p.second;
+
+    for(const auto& p : this->distribExecutedLines)
+        root["ExecutionStats"]["distributionExecutedLines"][std::to_string(p.first)] = p.second;
+
+    for(const auto& p1 : this->distribNbExecutionPerInstruction){
+        for(const auto& p2 : p1.second)
+            root["ExecutionStats"]["distributionNbExecutionPerInstruction"][std::to_string(p1.first)][std::to_string(p2.first)] = p2.second;
+    }
+
+    for(const auto& p : this->distribUsedVertices){
+        size_t idxVertex = vertexIndexes[p.first];
+        root["ExecutionStats"]["distributionUsedVertices"][std::to_string(idxVertex)] = p.second;
+    }
 
         // Trace statistics
     int i = 0;
@@ -252,8 +271,6 @@ void TPG::ExecutionStats::writeStatsToJson(const char* filePath, bool noIndent) 
 
         i++;
     }
-
-    // TODO add distributions export
 
     Json::StreamWriterBuilder writerFactory;
     // Set a precision to 6 digits after the point.

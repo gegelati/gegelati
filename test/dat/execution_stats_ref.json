@@ -1,5 +1,5 @@
 {
-	"AverageStats" : 
+	"ExecutionStats" : 
 	{
 		"avgEvaluatedPrograms" : 6.5,
 		"avgEvaluatedTeams" : 2.5,
@@ -10,6 +10,48 @@
 			"1" : 1.0,
 			"2" : 5.0,
 			"3" : 2.0
+		},
+		"distributionEvaluatedPrograms" : 
+		{
+			"6" : 2,
+			"7" : 2
+		},
+		"distributionEvaluatedTeams" : 
+		{
+			"2" : 2,
+			"3" : 2
+		},
+		"distributionExecutedLines" : 
+		{
+			"8" : 2,
+			"9" : 2
+		},
+		"distributionNbExecutionPerInstruction" : 
+		{
+			"0" : 
+			{
+				"1" : 2
+			},
+			"1" : 
+			{
+				"1" : 4
+			},
+			"2" : 
+			{
+				"5" : 4
+			},
+			"3" : 
+			{
+				"2" : 4
+			}
+		},
+		"distributionUsedVertices" : 
+		{
+			"0" : 4,
+			"1" : 4,
+			"2" : 2,
+			"5" : 1,
+			"6" : 3
 		}
 	},
 	"TracesStats" : 
