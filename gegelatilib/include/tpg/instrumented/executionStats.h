@@ -213,6 +213,21 @@ namespace TPG{
         /// Get stored trace statistics.
         const std::vector<TraceStats>& getInferenceTracesStats() const;
 
+        /// Get the distribution of the number of evaluated teams.
+        const std::map<size_t, size_t>& getDistribEvaluatedTeams() const;
+
+        /// Get the distribution of the number of evaluated programs.
+        const std::map<size_t, size_t>& getDistribEvaluatedPrograms() const;
+
+        /// Get the distribution of the number of executed lines.
+        const std::map<size_t, size_t>& getDistribExecutedLines() const;
+
+        /// Get distributions of the number of executions for each instruction.
+        const std::map<size_t, std::map<size_t, size_t>>& getDistribNbExecutionPerInstruction() const;
+
+        /// Get the distribution if the number of visit for each vertex.
+        const std::map<const TPG::TPGVertex*, size_t>& getDistribUsedVertices() const;
+
         /// Clear stored trace statistics and distributions.
         void clearInferenceTracesStats();
 

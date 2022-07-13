@@ -169,6 +169,32 @@ const std::vector<TPG::TraceStats>& TPG::ExecutionStats::
     return this->inferenceTracesStats;
 }
 
+const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribEvaluatedTeams()
+    const
+{
+    return this->distribEvaluatedTeams;
+}
+const std::map<size_t, size_t>& TPG::ExecutionStats::
+    getDistribEvaluatedPrograms() const
+{
+    return this->distribEvaluatedPrograms;
+}
+const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribExecutedLines()
+    const
+{
+    return this->distribExecutedLines;
+}
+const std::map<size_t, std::map<size_t, size_t>>& TPG::ExecutionStats::
+    getDistribNbExecutionPerInstruction() const
+{
+    return this->distribNbExecutionPerInstruction;
+}
+const std::map<const TPG::TPGVertex*, size_t>& TPG::ExecutionStats::
+    getDistribUsedVertices() const
+{
+    return this->distribUsedVertices;
+}
+
 void TPG::ExecutionStats::clearInferenceTracesStats()
 {
     this->inferenceTracesStats.clear();

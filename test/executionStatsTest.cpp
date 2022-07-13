@@ -327,6 +327,38 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace){
     ASSERT_EQ(stats.nbExecutionPerInstruction.at(3), 2)
         << "Wrong number of executed instruction.";
 
+
+    /* Distributions */
+
+    std::map<size_t, size_t> expectedDistribEvaluatedTeams = { {3, 1} };
+    std::map<size_t, size_t> expectedDistribEvaluatedPrograms = { {7, 1} };
+    std::map<size_t, size_t> expectedDistribExecutedLines = { { 9, 1 } };
+    std::map<size_t, std::map<size_t, size_t>> expectedDistribNbExecutionPerInstruction
+        = {
+            { 0, { {1, 1} } },
+            { 1, { {1, 1} } },
+            { 2, { {5, 1} } },
+            { 3, { {2, 1} } },
+        };
+    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices
+        = {
+            { tpg->getVertices()[0], 1 },
+            { tpg->getVertices()[1], 1 },
+            { tpg->getVertices()[2], 1 },
+            { tpg->getVertices()[6], 1 }
+        };
+
+    ASSERT_EQ(expectedDistribEvaluatedTeams, executionStats.getDistribEvaluatedTeams())
+        << "Wrong evaluated teams distribution.";
+    ASSERT_EQ(expectedDistribEvaluatedPrograms, executionStats.getDistribEvaluatedPrograms())
+        << "Wrong evaluated programs distribution.";
+    ASSERT_EQ(expectedDistribExecutedLines, executionStats.getDistribExecutedLines())
+        << "Wrong executed lines distribution.";
+    ASSERT_EQ(expectedDistribNbExecutionPerInstruction, executionStats.getDistribNbExecutionPerInstruction())
+        << "Wrong executions per instruction distributions.";
+    ASSERT_EQ(expectedDistribUsedVertices, executionStats.getDistribUsedVertices())
+        << "Wrong used vertices distribution.";
+
 }
 
 TEST_F(ExecutionStatsTest, ClearTracesStats){
@@ -341,6 +373,21 @@ TEST_F(ExecutionStatsTest, ClearTracesStats){
         << "Clearing inferenceTracesStats failed unexpectedly.";
     ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 0)
         << "inferenceTracesStats is not empty after clearing.";
+
+    ASSERT_EQ(executionStats.getDistribEvaluatedTeams().size(), 0)
+        << "distribEvaluatedTeams is not empty after clearing.";
+
+    ASSERT_EQ(executionStats.getDistribEvaluatedPrograms().size(), 0)
+        << "distribEvaluatedPrograms is not empty after clearing.";
+
+    ASSERT_EQ(executionStats.getDistribExecutedLines().size(), 0)
+        << "distribExecutedLines is not empty after clearing.";
+
+    ASSERT_EQ(executionStats.getDistribNbExecutionPerInstruction().size(), 0)
+        << "distribNbExecutionPerInstruction is not empty after clearing.";
+
+    ASSERT_EQ(executionStats.getDistribUsedVertices().size(), 0)
+        << "distribUsedVertices is not empty after clearing.";
 
 }
 
@@ -399,6 +446,41 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution){
     // MultByConst
     ASSERT_EQ(stats.nbExecutionPerInstruction.at(3), 2)
         << "Wrong number of executed instruction.";
+
+
+    /* Distributions */
+
+    std::map<size_t, size_t> expectedDistribEvaluatedTeams = { {2, 2}, {3, 2} };
+    std::map<size_t, size_t> expectedDistribEvaluatedPrograms = { {6, 2}, {7, 2} };
+    std::map<size_t, size_t> expectedDistribExecutedLines = { {8, 2}, { 9, 2 } };
+    std::map<size_t, std::map<size_t, size_t>> expectedDistribNbExecutionPerInstruction
+        = {
+            { 0, { {1, 2} } },
+            { 1, { {1, 4} } },
+            { 2, { {5, 4} } },
+            { 3, { {2, 4} } },
+        };
+    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices
+        = {
+            { tpg->getVertices()[0], 4 },
+            { tpg->getVertices()[1], 4 },
+            { tpg->getVertices()[2], 2 },
+            { tpg->getVertices()[5], 1 },
+            { tpg->getVertices()[6], 3 }
+        };
+
+    ASSERT_EQ(expectedDistribEvaluatedTeams, executionStats.getDistribEvaluatedTeams())
+        << "Wrong evaluated teams distribution.";
+    ASSERT_EQ(expectedDistribEvaluatedPrograms, executionStats.getDistribEvaluatedPrograms())
+        << "Wrong evaluated programs distribution.";
+    ASSERT_EQ(expectedDistribExecutedLines, executionStats.getDistribExecutedLines())
+        << "Wrong executed lines distribution.";
+    ASSERT_EQ(expectedDistribNbExecutionPerInstruction, executionStats.getDistribNbExecutionPerInstruction())
+        << "Wrong executions per instruction distributions.";
+    ASSERT_EQ(expectedDistribUsedVertices, executionStats.getDistribUsedVertices())
+        << "Wrong used vertices distribution.";
+
+
 
 }
 
