@@ -133,7 +133,7 @@ namespace TPG{
          *
          * distribUsedVertices[v] = y --> y inferences visited vertex pointed by v.
          */
-        std::map<const TPG::TPGVertex*, size_t> distribUsedVertices;
+            std::map<const TPG::TPGVertex*, size_t> distribUsedVertices;
 
 
 
@@ -242,7 +242,7 @@ namespace TPG{
          * analyzeInferenceTrace() might lead to uncorrelated data.
          *
          * Data is organised as follows :
-         * { "AverageStats" :
+         * { "ExecutionStats" :
          *  {
          *      "avgEvaluatedTeams" : value,
          *      "avgEvaluatedPrograms" : value,
@@ -250,6 +250,35 @@ namespace TPG{
          *      "avgNbExecutionPerInstruction"
          *      {
          *          "InstructionIndex" : nbExecution,
+         *          ...
+         *      },
+         *      "distributionEvaluatedPrograms" :
+         *      {
+         *          "N" : count of inferences which evaluated N programs,
+         *          ...
+         *      },
+         *      "distributionEvaluatedTeams" :
+         *      {
+         *          "N" : count of inferences which evaluated N teams,
+         *          ...
+         *      },
+         *      "distributionExecutedLines" :
+         *      {
+         *          "N" : count of inferences which executed N lines,
+         *          ...
+         *      },
+         *      "distributionNbExecutionPerInstruction" :
+         *      {
+         *          "InstructionIndex" :
+         *          {
+         *              "N" : count of inferences which executed the instruction N times,
+         *              ...
+         *          }
+         *          ...
+         *      },
+         *      "distributionUsedVertices" :
+         *      {
+         *          "VertexIndex" : count of inferences which visited the vertex,
          *          ...
          *      }
          *  },
