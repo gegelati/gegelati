@@ -41,6 +41,7 @@ namespace TPG{
      *  - retrieve from a TPGGraph the instrumented values and compute
      *  average execution statistics.
      *  - compute execution statistics for every inference done with a TPGExecutionEngineInstrumented.
+     *  - create distributions from the statistics of the traces.
      *
      * Before analyzing or even starting any inference, you must :
      *  - use a TPGGraph associated to a TPGInstrumentedFactory.
@@ -88,8 +89,53 @@ namespace TPG{
          */
         std::map<size_t, double> avgNbExecutionPerInstruction;
 
+
+        /* Analysed Traces */
+
         /// Statistics of last analyzed traces.
         std::vector<TraceStats> inferenceTracesStats;
+
+
+        /* Distributions */
+
+        /**
+         * Distribution of the number of evaluated team per inference for all analysed traces.
+         *
+         * distribEvaluatedTeams[x] = y --> y inferences evaluated x teams.
+         */
+        std::map<size_t, size_t> distribEvaluatedTeams;
+
+        /**
+         * Distribution of the number of evaluated programs per inference for all analysed traces.
+         *
+         * distribEvaluatedPrograms[x] = y --> y inferences evaluated x programs.
+         */
+        std::map<size_t, size_t> distribEvaluatedPrograms;
+
+        /**
+         * Distribution of the number of executed lines per inference for all analysed traces.
+         *
+         * distribExecutedLines[x] = y --> y inferences executed x lines.
+         */
+        std::map<size_t, size_t> distribExecutedLines;
+
+        /**
+         * Distributions of the number of executions of each instruction per
+         * inference for all analysed traces.
+         *
+         * distribNbExecutionPerInstruction[i][x] = y --> for instruction at index i,
+         * y inferences executed this instruction x times.
+         */
+        std::map<size_t, std::map<size_t, size_t>> distribNbExecutionPerInstruction;
+
+        /**
+         * Distribution of the number of visit each vertex had for all analysed traces.
+         *
+         * distribUsedVertices[v] = y --> y inferences visited vertex pointed by v.
+         */
+        std::map<const TPG::TPGVertex*, size_t> distribUsedVertices;
+
+
 
         /// Graph used during last call to analyzeExecution
         const TPGGraph* lastAnalyzedGraph = nullptr;
@@ -167,7 +213,7 @@ namespace TPG{
         /// Get stored trace statistics.
         const std::vector<TraceStats>& getInferenceTracesStats() const;
 
-        /// Clear stored trace statistics.
+        /// Clear stored trace statistics and distributions.
         void clearInferenceTracesStats();
 
 

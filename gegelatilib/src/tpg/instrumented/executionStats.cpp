@@ -119,6 +119,16 @@ void TPG::ExecutionStats::analyzeInferenceTrace(
 
     this->inferenceTracesStats.push_back({trace, nbEvaluatedTeams, nbEvaluatedPrograms, nbExecutedLines, nbExecutionPerInstruction});
 
+    // Update distributions
+
+    this->distribEvaluatedTeams[nbEvaluatedTeams]++;
+    this->distribEvaluatedPrograms[nbEvaluatedPrograms]++;
+    this->distribExecutedLines[nbExecutedLines]++;
+    for(const auto& p : nbExecutionPerInstruction)
+        this->distribNbExecutionPerInstruction[p.first][p.second]++;
+    for(auto vertex : trace)
+        this->distribUsedVertices[vertex]++;
+
 }
 
 void TPG::ExecutionStats::analyzeExecution(
@@ -162,6 +172,12 @@ const std::vector<TPG::TraceStats>& TPG::ExecutionStats::
 void TPG::ExecutionStats::clearInferenceTracesStats()
 {
     this->inferenceTracesStats.clear();
+
+    this->distribEvaluatedTeams.clear();
+    this->distribEvaluatedPrograms.clear();
+    this->distribExecutedLines.clear();
+    this->distribNbExecutionPerInstruction.clear();
+    this->distribUsedVertices.clear();
 }
 
 
@@ -210,6 +226,8 @@ void TPG::ExecutionStats::writeStatsToJson(const char* filePath, bool noIndent) 
 
         i++;
     }
+
+    // TODO add distributions export
 
     Json::StreamWriterBuilder writerFactory;
     // Set a precision to 6 digits after the point.
