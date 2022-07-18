@@ -77,3 +77,8 @@ std::vector<std::reference_wrapper<const Data::DataHandler>> Learn::ImprovedClas
 {
     return { this->_currentSample };
 }
+
+bool Learn::ImprovedClassificationLearningEnvironment::isTerminal() const
+{
+    return false;
+}

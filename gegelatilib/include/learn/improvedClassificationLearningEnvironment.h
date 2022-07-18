@@ -24,9 +24,10 @@ namespace Learn
         explicit ImprovedClassificationLearningEnvironment(uint64_t nbClass);
 
         [[nodiscard]] const std::vector<std::vector<double>>& getClassificationTable() const;
-        void doAction(uint64_t actionID) override = 0;
+        virtual void doAction(uint64_t actionID) override = 0;
         [[nodiscard]] double getScore() const override;
-        void reset(size_t seed = 0, LearningMode mode = LearningMode::TRAINING) override = 0;
+        virtual void reset(size_t seed = 0, LearningMode mode = LearningMode::TRAINING) override = 0;
+        bool isTerminal() const override;
 
         // Getters and setters
         void setDatasubset(DS * datasubset);
