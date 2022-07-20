@@ -10,13 +10,6 @@
 
 namespace Learn
 {
-    typedef enum LearningAlgorithm
-    {
-        DEFAULT, BRSS, FS, BANDIT, LEXICASE
-    }LearningAlgorithm;
-
-    //--------------------------------------------------------------------------------------------------------------------------------------------------------
-
     template <class BaseLearningAgent = ParallelLearningAgent>
     class ImprovedClassificationLearningAgent : public BaseLearningAgent
     {
@@ -24,14 +17,6 @@ namespace Learn
 
       protected:
         LearningAlgorithm _type;
-        float _datsubsetSizeRatio;
-
-        /// All the 'evaluateJob functions', one for each learning algorithm
-        std::shared_ptr<EvaluationResult> evaluateJob_BRSS(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le) const;
-        std::shared_ptr<EvaluationResult> evaluateJob_FS(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le) const;
-        std::shared_ptr<EvaluationResult> evaluateJob_BANDIT(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le) const;
-        std::shared_ptr<EvaluationResult> evaluateJob_LEXICASE(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le) const;
-        std::shared_ptr<EvaluationResult> evaluateJob_DEFAULT(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le) const;
 
       public:
         /**
@@ -46,8 +31,8 @@ namespace Learn
          * \param[in] type The LearningAlgorithm that would be used by the agent
          */
         ImprovedClassificationLearningAgent<BaseLearningAgent>(Learn::ImprovedClassificationLearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const TPG::TPGFactory& factory = TPG::TPGFactory(), LearningAlgorithm type = DEFAULT)
-            : BaseLearningAgent(le, iSet, p, factory), _type(type), _datsubsetSizeRatio(0.6)
-                                                                        {};
+            : BaseLearningAgent(le, iSet, p, factory), _type(type)
+        {};
 
         /**
          * \brief Specialization of the evaluateJob method for classification
@@ -87,6 +72,20 @@ namespace Learn
          * non-decimated roots.
          */
         void decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results) override;
+
+        /**
+         * \brief Train the TPGGraph for one generation.
+         *
+         * This implementation of training for one generation includes:
+         * - Populating the TPGGraph according to given MutationParameters.
+         * - Refresh the Datasubset according to the LearningAlgorithm
+         * - Evaluating all roots of the TPGGraph. (call to evaluateAllRoots)
+         * - Removing from the TPGGraph the worst performing root TPGVertex.
+         *
+         * \param[in] generationNumber the integer number of the current
+         * generation.
+         */
+        virtual void trainOneGeneration(uint64_t generationNumber);
     };
 
     //--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -94,28 +93,8 @@ namespace Learn
     template <class BaseLearningAgent>
     inline std::shared_ptr<EvaluationResult> ImprovedClassificationLearningAgent<BaseLearningAgent>::evaluateJob(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::LearningEnvironment& le) const
     {
-        auto icle = dynamic_cast<Learn::ImprovedClassificationLearningEnvironment&>((Learn::LearningEnvironment&)le);
+        auto icle = dynamic_cast<ImprovedClassificationLearningEnvironment&>(le);
 
-        switch(this->_type)
-        {
-        case (DEFAULT):
-            return evaluateJob_DEFAULT(tee, job, generationNumber, mode, icle);
-        case (BRSS):
-            return evaluateJob_BRSS(tee, job, generationNumber, mode, icle);
-        case (FS):
-            return evaluateJob_FS(tee, job, generationNumber, mode, icle);
-        case (BANDIT):
-            return evaluateJob_BANDIT(tee, job, generationNumber, mode, icle);
-        case (LEXICASE):
-            return evaluateJob_LEXICASE(tee, job, generationNumber, mode, icle);
-        default:
-            break;
-        }
-    }
-
-    template <class BaseLearningAgent>
-    inline std::shared_ptr<EvaluationResult> ImprovedClassificationLearningAgent<BaseLearningAgent>::evaluateJob_DEFAULT(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le) const
-    {
         // Only consider the first root of jobs as we are not in adversarial
         // mode
         auto root = job.getRoot();
@@ -138,21 +117,21 @@ namespace Learn
             uint64_t hash = hasher(generationNumber) ^ hasher(i);
 
             // Reset the learning Environment
-            le.reset(hash, mode);
+            icle.reset(hash, mode);
 
             uint64_t nbActions = 0;
-            while (!le.isTerminal() && nbActions < this->params.maxNbActionsPerEval)
+            while (!icle.isTerminal() && nbActions < this->params.maxNbActionsPerEval)
             {
                 // Get the action
                 uint64_t actionID = ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())->getActionID();
                 // Do it
-                le.doAction(actionID);
+                icle.doAction(actionID);
                 // Count actions
                 nbActions++;
             }
 
             // Update results
-            const auto& classificationTable = le.getClassificationTable();
+            const auto& classificationTable = icle.getClassificationTable();
             // for each class
             for (uint64_t classIdx = 0; classIdx < classificationTable.size(); classIdx++)
             {
@@ -191,110 +170,6 @@ namespace Learn
             *evaluationResult += *previousEval;
         return evaluationResult;
     }
-
-    template <class BaseLearningAgent>
-    inline std::shared_ptr<EvaluationResult> ImprovedClassificationLearningAgent<BaseLearningAgent>::evaluateJob_BRSS(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le) const
-    {
-        // Only consider the first root of jobs as we are not in adversarial
-        // mode
-        auto root = job.getRoot();
-
-        // Skip the root evaluation process if enough evaluations were already
-        // performed. In the evaluation mode only.
-        std::shared_ptr<Learn::EvaluationResult> previousEval;
-        if (mode == LearningMode::TRAINING && this->isRootEvalSkipped(*root, previousEval))
-            return previousEval;
-
-        // Init results
-        std::vector<double> result(this->learningEnvironment.getNbActions(), 0.0);
-        std::vector<size_t> nbEvalPerClass(this->learningEnvironment.getNbActions(), 0);
-
-        // Init the datasubset
-        auto datasubset = new DS();
-
-        for(int i=0 ; i<this->_datsubsetSizeRatio * le._dataset->first.size() ; i++)
-        {
-            for(int j=0 ; j<le._dataset->first.at(i).size() ; j++)
-                datasubset->first.at(i).push_back(le._dataset->first.at(i).at(j));
-            datasubset->second.push_back(le._dataset->second.at(i));
-        }
-
-        //first refresh the datasubset
-        le.refreshDatasubset((this->_type == BANDIT || this->_type == LEXICASE) + 2 * (this->_type == DEFAULT), le._rng.getUnsignedInt64(0, datasubset->first.size()-1));
-
-        // Evaluate nbIteration times
-        for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation; i++)
-        {
-            // Compute a Hash
-            Data::Hash<uint64_t> hasher;
-            uint64_t hash = hasher(generationNumber) ^ hasher(i);
-
-            // Reset the learning Environment
-            le.reset(hash, mode);
-
-            uint64_t nbActions = 0;
-            while (!le.isTerminal() && nbActions < this->params.maxNbActionsPerEval)
-            {
-                // Get the action
-                uint64_t actionID = ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())->getActionID();
-                // Do it
-                le.doAction(actionID);
-                // Count actions
-                nbActions++;
-            }
-
-            // Update results
-            const auto& classificationTable = ((ImprovedClassificationLearningEnvironment&)le).getClassificationTable();
-            // for each class
-            for (uint64_t classIdx = 0; classIdx < classificationTable.size(); classIdx++)
-            {
-                double n=0;
-                for(auto id=0 ; id < classificationTable.size() ; id++)
-                    n+= (double)classificationTable.at(classIdx).at(id);
-                result.at(classIdx) = (double)classificationTable.at(classIdx).at(classIdx) / n;
-            }
-
-            le.refreshDatasubset((this->_type == BANDIT || this->_type == LEXICASE) + 2 * (this->_type == DEFAULT), le._rng.getUnsignedInt64(0, datasubset->first.size()-1));
-        }
-
-        // Before returning the EvaluationResult, divide the result per class by
-        // the number of iteration
-        const LearningParameters& p = this->params;
-        std::for_each(result.begin(), result.end(), [p](double& val)
-                      {
-                          val /= (double)p.nbIterationsPerPolicyEvaluation;
-                      });
-
-        // Create the EvaluationResult
-        auto evaluationResult = std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result, nbEvalPerClass));
-
-        // Combine it with previous one if any
-        if (previousEval != nullptr)
-            *evaluationResult += *previousEval;
-
-        return evaluationResult;
-    }
-
-    template <class BaseLearningAgent>
-    inline std::shared_ptr<EvaluationResult> ImprovedClassificationLearningAgent<BaseLearningAgent>::evaluateJob_FS(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le) const
-    {
-        return nullptr;
-    }
-
-    template <class BaseLearningAgent>
-    inline std::shared_ptr<EvaluationResult> ImprovedClassificationLearningAgent<BaseLearningAgent>::evaluateJob_BANDIT(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le) const
-    {
-        return nullptr;
-    }
-
-    template <class BaseLearningAgent>
-    inline std::shared_ptr<EvaluationResult> ImprovedClassificationLearningAgent<BaseLearningAgent>::evaluateJob_LEXICASE(TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber, LearningMode mode, Learn::ImprovedClassificationLearningEnvironment& le)const
-    {
-        return nullptr;
-    }
-
-
-
 
     template <class BaseLearningAgent>
     void ImprovedClassificationLearningAgent<BaseLearningAgent>::decimateWorstRoots(std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results)
@@ -386,6 +261,45 @@ namespace Learn
                               }
                           }
                       });
+    }
+
+    template <class BaseLearningAgent>
+    void ImprovedClassificationLearningAgent<BaseLearningAgent>::trainOneGeneration(uint64_t generationNumber)
+    {
+        for (auto logger : ((LearningAgent*)this)->loggers)
+            logger.get().logNewGeneration(generationNumber);
+
+        // Populate Sequentially
+        Mutator::TPGMutator::populateTPG(*this->tpg, this->archive,this->params.mutation, this->rng,((LearningAgent*)this)->maxNbThreads);
+        for (auto logger : ((LearningAgent*)this)->loggers)
+            logger.get().logAfterPopulateTPG();
+
+        // Evaluate
+        auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
+        for (auto logger : ((LearningAgent*)this)->loggers)
+            logger.get().logAfterEvaluate(results);
+
+        // Refresh the Datasubset
+        auto icle = dynamic_cast<ImprovedClassificationLearningEnvironment&>(((LearningAgent*)this)->learningEnvironment);
+        icle.refreshDatasubset(this->_type, ((LearningAgent*)this)->rng.getUnsignedInt64(0, UINT64_MAX));
+
+        // Remove worst performing roots
+        decimateWorstRoots(results);
+        // Update the best
+        this->updateEvaluationRecords(results);
+
+        for (auto logger : ((LearningAgent*)this)->loggers)
+            logger.get().logAfterDecimate();
+
+        // Does a validation or not according to the parameter doValidation
+        if (((LearningAgent*)this)->params.doValidation) {
+            auto validationResults = ((LearningAgent*)this)->evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
+            for (auto logger : ((LearningAgent*)this)->loggers)
+                logger.get().logAfterValidate(validationResults);
+        }
+
+        for (auto logger : ((LearningAgent*)this)->loggers)
+            logger.get().logEndOfTraining();
     }
 }
 

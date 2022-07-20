@@ -6,6 +6,11 @@
 
 namespace Learn
 {
+    typedef enum LearningAlgorithm
+    {
+        DEFAULT, BRSS, FS, BANDIT, LEXICASE
+    }LearningAlgorithm;
+
     using DS = std::pair<std::vector<std::vector<double>>,std::vector<double>>;
 
     class ImprovedClassificationLearningEnvironment : public LearningEnvironment
@@ -20,8 +25,10 @@ namespace Learn
         float _datasubsetRefreshRatio;
 
         void changeCurrentSample();
+
+      private:
         void refreshDatasubset_BRSS(size_t seed);
-        void refreshDatasubset_BANDIT(size_t seed);
+        static void refreshDatasubset_BANDIT(size_t seed);
 
       public:
         /**
@@ -60,7 +67,7 @@ namespace Learn
          * @param algo is the type of LearningAlgorithm
          * @param seed is useful to keep control on randomness
          */
-        void refreshDatasubset(int algo, size_t seed);
+        void refreshDatasubset(LearningAlgorithm algo, size_t seed);
 
         // Getters and setters
         void setDatasubset(DS * datasubset);

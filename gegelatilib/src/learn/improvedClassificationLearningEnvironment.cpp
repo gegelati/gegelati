@@ -91,19 +91,12 @@ void Learn::ImprovedClassificationLearningEnvironment::setDataset(Learn::DS *dat
     this->changeCurrentSample();
 }
 
-void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset(int algo, size_t seed)
+void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset(Learn::LearningAlgorithm algo, size_t seed)
 {
-    switch(algo)
-    {
-    case (0):
+    if(algo == BRSS || algo == FS)
         refreshDatasubset_BRSS(seed);
-        break;
-    case (1):
+    else if(algo == BANDIT || algo == LEXICASE)
         refreshDatasubset_BANDIT(seed);
-        break;
-    default:
-        break;
-    }
 }
 
 void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BRSS(size_t seed)
