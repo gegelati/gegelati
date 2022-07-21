@@ -48,34 +48,37 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     if (findProgramID(p, progID)) {
         progGenerationEngine.generateProgram(progID);
     }
-    fileMain << "P" << progID << "();" << std::endl;
+    fileMain << "P" << progID << "()";
 }
 
 void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 {
-    fileMain << "\t\t\tif (!teamsVisited[currentVertex]) {" << std::endl;
-    fileMain << "\t\t\t\tteamsVisited[currentVertex] = true;" << std::endl;
-
     auto edges = team.getOutgoingEdges();
     auto teamName = vertexName(team);
+
     auto nextVertices = std::vector<const TPG::TPGVertex*>();
-
-    int i = 0;
-    for (const auto* edge : edges) {
-        fileMain << "\t\t\t\t" << teamName << "Scores[" << i++ << "] = ";
-        generateEdge(*edge);
+    for (const auto* edge : edges)
         nextVertices.push_back(edge->getDestination());
-    }
-    fileMain << "\t\t\t}" << std::endl;
 
-    fileMain << "\t\t\tint best = bestProgram(" << teamName << "Scores, "
-             << edges.size() << ");" << std::endl;
-    fileMain << "\t\t\t" << teamName << "Scores[best] = -DBL_MAX;" << std::endl;
     fileMain << "\t\t\tconst enum vertices next[" << edges.size() << "] = { ";
     for (auto nextVertex : nextVertices) {
         fileMain << vertexName(*nextVertex) << ", ";
     }
-    fileMain << " };" << std::endl;
+    fileMain << " };" << std::endl << std::endl;
+
+    fileMain << "\t\t\tteamsVisited[currentVertex] = true;" << std::endl;
+
+    int i = 0;
+    for (const auto* edge : edges) {
+        fileMain << "\t\t\t" << teamName << "Scores[" << i << "] = "
+                 << "!teamsVisited[next[" << i++ << "]] ? ";
+        generateEdge(*edge);
+        fileMain << " : -DBL_MAX;" << std::endl;
+    }
+    fileMain << std::endl;
+
+    fileMain << "\t\t\tint best = bestProgram(" << teamName << "Scores, "
+             << edges.size() << ");" << std::endl;
     fileMain << "\t\t\tcurrentVertex = next[best];" << std::endl;
 }
 

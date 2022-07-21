@@ -27,16 +27,16 @@ These files are almost all the same, they allow to compile the generated code wi
 
 ## Test purposes
 ### OneLeafNoInstruction
-This test check if the structure of the generated file are correctly generated : the function that execute the teams, the management of the stack of visited edges ...
+This test checks if the structure of the generated file is correctly generated : the function that execute the teams, the management of the stack of visited edges ...
 
-###OneLeaf
-This test check if a simple TPG with 1 root and 1 leaf can be generated and executed. 
+### OneLeaf
+This test checks if a simple TPG with 1 root and 1 leaf can be generated and executed. 
 
 ### TwoLeaves
-This test check if the choice between 2 destinations is correct. The two destinations are leaves in this test.
+This test checks if the choice between 2 destinations is correct. The two destinations are leaves in this test.
 
 ### ThreeLeaves
-This test check more conditions to choose the destination, one of the is if the bid of the program P2 executed is equal to the actual max result we follow the edge that contain P1.
+This test checks more conditions to choose the destination, one of the is if the bid of the program P2 executed is equal to the actual max result we follow the edge that contain P1.
 
 ### OneTeamOneLeaf
 This test is composed of 1 root, 1 team (destination of the root) and 1 leaf. It checks if a non root team is properly executed. 

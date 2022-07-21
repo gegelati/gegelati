@@ -7,9 +7,10 @@ _yyyy.mm.dd_
 * Add `Data::PointerWrapper` class to simplify interracing of GEGELATI with primitive variables (non-array) data from a learning environment.
 
 ### Changes
+* CodeGen TPGs (Switch and Stack modes) now match the execution behaviour of `TPGExecutionEngine`, especially regarding cycle handling. Now, a team can't be visited more than once per inference, and edges leading to an already visited team are not evaluated (their program are not executed).
 
 ### Bug fix
-* Fix penalty score given to a visited team to record edge traversals in `TPGSwitchGenerationEngine`, was `DBL_MIN` but should be `-DBL_MAX`.
+* Fix penalty score given to edges in cycle handling in `TPGSwitchGenerationEngine`, was `DBL_MIN` but should be `-DBL_MAX`.
 
 
 ## Release version 1.1.0 - Babacio flavor

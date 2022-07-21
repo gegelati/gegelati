@@ -164,12 +164,20 @@ namespace CodeGen {
         virtual void generateAction(const TPG::TPGAction& action);
 
         /**
-         * \brief define the function pointer root to the vertex given in
+         * \brief Define the function pointer root to the vertex given in
          * parameter.
          *
          * \param[in] root const reference to the root of the TPG graph.
          */
         virtual void setRoot(const TPG::TPGVertex& root);
+
+        /**
+         * \brief Generate function name depending on the vertex type.
+         *
+         * \param v vertex to be named.
+         * \return std::string name of the vertex.
+         */
+        std::string vertexName(const TPG::TPGVertex& v);
     };
 } // namespace CodeGen
 

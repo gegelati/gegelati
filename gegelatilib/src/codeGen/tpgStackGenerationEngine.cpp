@@ -67,15 +67,20 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     if (findProgramID(p, progID)) {
         progGenerationEngine.generateProgram(progID);
     }
-    fileMain << "\t\t\t{0,P" << progID << ",";
-    if (dynamic_cast<const TPG::TPGTeam*>((edge.getDestination())) != nullptr) {
-        fileMain << "T" << findVertexID(*(edge.getDestination())) << "}";
+
+    std::string destinationName;
+    const TPG::TPGVertex* destination = edge.getDestination();
+
+    if (dynamic_cast<const TPG::TPGTeam*>(destination) != nullptr) {
+        destinationName = 'T' + std::to_string(findVertexID(*destination));
     }
-    else if (dynamic_cast<const TPG::TPGAction*>((edge.getDestination())) !=
-             nullptr) {
-        auto a = dynamic_cast<const TPG::TPGAction*>(edge.getDestination());
-        fileMain << "A" << a->getActionID() << "}";
+    else if (dynamic_cast<const TPG::TPGAction*>(destination) != nullptr) {
+        auto a = dynamic_cast<const TPG::TPGAction*>(destination);
+        destinationName = 'A' + std::to_string(a->getActionID());
     }
+
+    fileMain << "\t\t\t{" << destinationName << "Vert, P" << progID << ", "
+             << destinationName << "}";
 }
 
 void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
@@ -94,7 +99,8 @@ void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
         generateEdge(**l);
     }
     // print end static array
-    fileMain << "\n\t};" << std::endl;
+    fileMain << "\n\t};\n"
+             << "\tteamsVisited[T" << id << "Vert] = true;\n";
 #ifdef DEBUG
     fileMain << "\tprintf(\"T%d\\n\", " << id << ");" << std::endl;
 #endif
@@ -150,12 +156,14 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
         << "#include <assert.h>\n"
         << "#include <stdio.h>\n"
         << "#include <stdint.h>\n"
+        << "#include <stdbool.h>\n"
         << "#include <math.h>\n"
 
         << "#define stackSize  " << stackSize << "\n\n"
 
         << "Edge* callStack[stackSize];\n"
-        << "uint32_t top = 0;\n\n"
+        << "uint32_t top = 0;\n"
+        << "bool teamsVisited[" << this->tpg.getVertices().size() << "];\n\n"
 
         << "int inferenceTPG(){\n"
         << "\treset();\n"
@@ -173,7 +181,6 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
         << "void* executeTeam(Edge* e, int nbEdge){\n"
         << "\tint idxNext = execute(e, nbEdge); \n"
         << "\tif(idxNext != -1) {\n"
-        << "\t\te[idxNext].visited = 1;\n"
         << "\t\tpush(&e[idxNext]);\n"
         << "\t\treturn e[idxNext].ptr_vertex;\n"
         << "\t}\n"
@@ -181,30 +188,34 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
         << "}\n\n"
 
         << "int execute(Edge* e, int nbEdge){\n"
-        << "\tdouble bestResult = e[0].ptr_prog();\n"
-        << "\tbestResult = (isnan(bestResult)) ? -INFINITY : bestResult;\n "
+        << "\tdouble bestResult;\n"
         << "\tint idxNext = 0;\n"
         << "\tint idx;\n"
-        << "\tdouble r;\n"
-        << "\twhile (e[idxNext].visited == 1){\n"
+        << "\tdouble r;\n\n"
+
+        << "\twhile (teamsVisited[e[idxNext].destination]){\n"
         << "\t\tidxNext++;\n"
-        << "\t\tif(idxNext>= nbEdge){\n"
-        << "\t\t\tprintf(\"Error all the edges of the team are already "
-           "visited\\n\");\n"
+        << "\t\tif (idxNext >= nbEdge){\n"
+        << "\t\t\tfprintf(stderr, \"Error all the edges of the team lead to an "
+           "already visited team\\n\");\n"
         << "\t\t\treturn -1;\n"
         << "\t\t}\n"
-        << "\t\tbestResult = e[idxNext].ptr_prog();\n"
-        << "\t\tbestResult = (isnan(bestResult))? -INFINITY : bestResult;\n"
-        << "\t}\n"
-        << "\tidx = idxNext+1;\n"
-        << "\t//check if there exist another none visited edge with a better "
-           "result\n"
-        << "\twhile(idx < nbEdge){\n"
-        << "\t\tr = e[idx].ptr_prog();\n"
-        << "\t\tr = (isnan(r))? -INFINITY : r;\n"
-        << "\t\tif(e[idx].visited == 0 &&  r >= bestResult){\n"
-        << "\t\t\tbestResult =r;\n"
-        << "\t\t\tidxNext = idx;\n"
+        << "\t}\n\n"
+
+        << "\tbestResult = e[idxNext].ptr_prog();\n"
+        << "\tbestResult = (isnan(bestResult)) ? -INFINITY : bestResult;\n"
+        << "\tidx = idxNext + 1;\n\n"
+
+        << "\t// Check if there is another edge with a better result\n"
+        << "\twhile (idx < nbEdge){\n"
+
+        << "\t\tif (teamsVisited[e[idx].destination] == false){\n"
+        << "\t\t\tr = e[idx].ptr_prog();\n"
+        << "\t\t\tr = (isnan(r)) ? -INFINITY : r;\n"
+        << "\t\t\tif (r >= bestResult){\n"
+        << "\t\t\t\tbestResult = r;\n"
+        << "\t\t\t\tidxNext = idx;\n"
+        << "\t\t\t}\n"
         << "\t\t}\n"
         << "\t\tidx++;\n"
         << "\t}\n"
@@ -218,12 +229,12 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
            "this TPG\", stackSize);\n"
         << "\t}\n"
         << "\tcallStack[top] = e;\n"
-        << "\ttop++;"
+        << "\ttop++;\n"
         << "}\n\n"
 
         << "Edge* pop(){\n"
         << "\tEdge* edge = NULL;\n"
-        << "if(top > 0){\n"
+        << "\tif(top > 0){\n"
         << "\t\ttop--;\n"
         << "\t\tedge = callStack[top];\n"
         << "\t}\n"
@@ -232,7 +243,11 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
 
         << "void reset(){\n"
         << "\twhile (top > 0) {\n"
-        << "\t\tpop()->visited = 0;\n"
+        << "\t\tpop();\n"
+        << "\t}\n"
+        << "\tfor (int i = 0; i < " << this->tpg.getVertices().size()
+        << "; i++){\n"
+        << "\t\tteamsVisited[i] = false;\n"
         << "\t}\n"
         << "}\n"
         << std::endl;
@@ -240,10 +255,18 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
 
 void CodeGen::TPGStackGenerationEngine::initHeaderFile()
 {
-    fileMainH << "#include <stdlib.h>\n\n"
+    fileMainH << "#include <stdlib.h>\n\n";
+
+    fileMainH << "typedef enum Vertex {";
+    for (auto vertex : this->tpg.getVertices()) {
+        fileMainH << vertexName(*vertex) << "Vert"
+                  << ", ";
+    }
+
+    fileMainH << "} Vertex;\n\n"
 
               << "typedef struct Edge {\n"
-              << "\tint visited;\n"
+              << "\tVertex destination;\n"
               << "\tdouble (*ptr_prog)();\n"
               << "\tvoid* (*ptr_vertex)(int* action);\n"
               << "}Edge;\n\n"
@@ -256,6 +279,20 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
               << "Edge* pop();\n"
               << "void reset();\n"
               << std::endl;
+}
+
+std::string CodeGen::TPGStackGenerationEngine::vertexName(
+    const TPG::TPGVertex& v)
+{
+    std::ostringstream vertexName;
+    if (dynamic_cast<const TPG::TPGTeam*>(&v) != nullptr) {
+        vertexName << "T" << findVertexID(v);
+    }
+    else {
+        vertexName << "A"
+                   << dynamic_cast<const TPG::TPGAction*>(&v)->getActionID();
+    }
+    return vertexName.str();
 }
 
 #endif // CODE_GENERATION
