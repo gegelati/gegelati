@@ -5,6 +5,7 @@ _yyyy.mm.dd_
 
 ### New features
 * Add `Data::PointerWrapper` class to simplify interracing of GEGELATI with primitive variables (non-array) data from a learning environment.
+* Add `TPG::ExecutionsStats` class to analyze and export execution statistics gathered using an instrumented TPGGraph. Statistics include averages on evaluated teams, programs, program lines and instructions, execution traces and various distributions based on execution traces. The class also provide a method to export these statistics to a JSon file, which can be use by other programs and scripts.
 
 ### Changes
 
