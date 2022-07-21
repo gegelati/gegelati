@@ -9,10 +9,10 @@
 namespace TPG{
 
     /**
-     * \brief Struct used to store execution statistics about one inference trace.
+     * \brief Store execution statistics of one inference trace.
      *
      * It contains :
-     * - the inference trace in a std::vector<const TPG::TPGVertex*>
+     * - the execution trace in a std::vector<const TPG::TPGVertex*>
      * - the number of evaluated teams
      * - the number of evaluated programs
      * - the number of executed lines
@@ -41,21 +41,21 @@ namespace TPG{
      *  - retrieve from a TPGGraph the instrumented values and compute
      *  average execution statistics.
      *  - compute execution statistics for every inference done with a TPGExecutionEngineInstrumented.
-     *  - create distributions from the statistics of the traces.
+     *  - create distributions from statistics of analyzed traces.
      *
      * Before analyzing or even starting any inference, you must :
      *  - use a TPGGraph associated to a TPGInstrumentedFactory.
      *  - use a TPGExecutionEngineInstrumented that will execute the TPGGraph.
      *  - clear any previous instrumented data :
      *      --> for the TPGGraph, use TPGInstrumentedFactory::resetTPGGraphCounters().
-     *      --> for the TPGExecutionEngineInstrumented, use its method clearTraceHistory().
+     *      --> for the TPGExecutionEngineInstrumented, use its method TPGExecutionEngineInstrumented::clearTraceHistory().
      * Otherwise, the results won't have any meaning.
      * If you have never executed the TPGGraph or the TPGExecutionEngineInstrumented,
      * resetting them isn't required.
      *
      * You can then execute the TPG for as many inferences as you like.
      *
-     * Then, use analyzeExecution() with the related TPGGraph and
+     * Then, use analyzeExecution() with the TPGGraph and
      * TPGExecutionEngineInstrumented, and access the statistics using the
      * provided getters and setters.
      *
@@ -90,7 +90,7 @@ namespace TPG{
         std::map<size_t, double> avgNbExecutionPerInstruction;
 
 
-        /* Analysed Traces */
+        /* Analyzed Traces */
 
         /// Statistics of last analyzed traces.
         std::vector<TraceStats> inferenceTracesStats;
@@ -99,29 +99,29 @@ namespace TPG{
         /* Distributions */
 
         /**
-         * Distribution of the number of evaluated team per inference for all analysed traces.
+         * \brief Distribution of the number of evaluated team per inference for all analyzed traces.
          *
          * distribEvaluatedTeams[x] = y --> y inferences evaluated x teams.
          */
         std::map<size_t, size_t> distribEvaluatedTeams;
 
         /**
-         * Distribution of the number of evaluated programs per inference for all analysed traces.
+         * \brief Distribution of the number of evaluated programs per inference for all analyzed traces.
          *
          * distribEvaluatedPrograms[x] = y --> y inferences evaluated x programs.
          */
         std::map<size_t, size_t> distribEvaluatedPrograms;
 
         /**
-         * Distribution of the number of executed lines per inference for all analysed traces.
+         * \brief Distribution of the number of executed lines per inference for all analyzed traces.
          *
          * distribExecutedLines[x] = y --> y inferences executed x lines.
          */
         std::map<size_t, size_t> distribExecutedLines;
 
         /**
-         * Distributions of the number of executions of each instruction per
-         * inference for all analysed traces.
+         * \brief Distributions of the number of executions of each instruction per
+         * inference for all analyzed traces.
          *
          * distribNbExecutionPerInstruction[i][x] = y --> for instruction at index i,
          * y inferences executed this instruction x times.
@@ -129,7 +129,7 @@ namespace TPG{
         std::map<size_t, std::map<size_t, size_t>> distribNbExecutionPerInstruction;
 
         /**
-         * Distribution of the number of visit each vertex had for all analysed traces.
+         * \brief Distribution of the number of visit each vertex had for all analyzed traces.
          *
          * distribUsedVertices[v] = y --> y inferences visited vertex pointed by v.
          */
@@ -241,71 +241,73 @@ namespace TPG{
          * Using it after separate calls to analyzeInstrumentedGraph() or
          * analyzeInferenceTrace() might lead to uncorrelated data.
          *
-         * Data is organised as follows :
-         * { "ExecutionStats" :
-         *  {
-         *      "avgEvaluatedTeams" : value,
-         *      "avgEvaluatedPrograms" : value,
-         *      "avgExecutedLines" : value,
-         *      "avgNbExecutionPerInstruction"
+         * Data is organized as follows :
+         *
          *      {
-         *          "InstructionIndex" : nbExecution,
-         *          ...
-         *      },
-         *      "distributionEvaluatedPrograms" :
-         *      {
-         *          "N" : count of inferences which evaluated N programs,
-         *          ...
-         *      },
-         *      "distributionEvaluatedTeams" :
-         *      {
-         *          "N" : count of inferences which evaluated N teams,
-         *          ...
-         *      },
-         *      "distributionExecutedLines" :
-         *      {
-         *          "N" : count of inferences which executed N lines,
-         *          ...
-         *      },
-         *      "distributionNbExecutionPerInstruction" :
-         *      {
-         *          "InstructionIndex" :
+         *          "ExecutionStats" :
          *          {
-         *              "N" : count of inferences which executed the instruction N times,
+         *              "avgEvaluatedTeams" : value,
+         *              "avgEvaluatedPrograms" : value,
+         *              "avgExecutedLines" : value,
+         *              "avgNbExecutionPerInstruction" :
+         *              {
+         *                  "InstructionIndex" : nbExecution,
+         *                  ...
+         *              },
+         *              "distributionEvaluatedPrograms" :
+         *              {
+         *                  "N" : count of inferences which evaluated N programs,
+         *                  ...
+         *              },
+         *              "distributionEvaluatedTeams" :
+         *              {
+         *                  "N" : count of inferences which evaluated N teams,
+         *                  ...
+         *              },
+         *              "distributionExecutedLines" :
+         *              {
+         *                  "N" : count of inferences which executed N lines,
+         *                  ...
+         *              },
+         *              "distributionNbExecutionPerInstruction" :
+         *              {
+         *                  "InstructionIndex" :
+         *                  {
+         *                      "N" : count of inferences which executed the instruction N times,
+         *                      ...
+         *                  },
+         *                  ...
+         *              },
+         *              "distributionUsedVertices" :
+         *              {
+         *                  "VertexIndex" : count of inferences which visited the vertex,
+         *                  ...
+         *              }
+         *          },
+         *
+         *          "TracesStats" :
+         *          {
+         *              "TraceNumber" :
+         *              {
+         *                  "nbEvaluatedPrograms" : value,
+         *                  "nbEvaluatedTeams" : value,
+         *                  "nbExecutedLines" : value,
+         *                  "nbExecutionPerInstruction" :
+         *                  {
+         *                      "InstructionIndex" : nbExecution,
+         *                  ...
+         *                  },
+         *                  "trace" : [Array of vertex indexes in the TPGGraph]
+         *              },
          *              ...
          *          }
-         *          ...
-         *      },
-         *      "distributionUsedVertices" :
-         *      {
-         *          "VertexIndex" : count of inferences which visited the vertex,
-         *          ...
+         *
          *      }
-         *  },
-         *
-         *  "TracesStats" :
-         *  {
-         *      "TraceNumber" :
-         *      {
-         *          "nbEvaluatedPrograms" : value,
-         *          "nbEvaluatedTeams" : value,
-         *          "nbExecutedLines" : value,
-         *          "nbExecutionPerInstruction" :
-         *          {
-         *              "InstructionIndex" : nbExecution,
-         *              ...
-         *          },
-         *          "trace" : [Array of vertex indexes in the TPGGraph]
-         *      },
-         *      ...
-         *  }
-         *
-         * }
          *
          * \param[in] filePath the path to the output file.
          * \param[in] noIndent true if the json format must not be indented. Files can
-         * become large quickly with a lot of traces, so if the file purpose
-         * is to be analysed by another program, set this to true to save some
+         * become large quickly with a lot of traces, so if the file will
+         * just be analyzed by another program, set this to true to save some
          * space on your disk. Set noIndent to false if you want to keep
          * the file readable.
          */
