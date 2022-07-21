@@ -1,26 +1,23 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "instructions/set.h"
+#include "data/dataHandler.h"
+#include "data/primitiveTypeArray.h"
+#include "environment.h"
+#include "goldenReferenceComparison.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
-#include "tpg/tpgGraph.h"
-#include "environment.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "instructions/set.h"
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "data/dataHandler.h"
-#include "data/primitiveTypeArray.h"
-#include "goldenReferenceComparison.h"
+#include "tpg/instrumented/tpgInstrumentedFactory.h"
+#include "tpg/tpgGraph.h"
 
 #include "tpg/instrumented/executionStats.h"
-
-
 
 class ExecutionStatsTest : public ::testing::Test
 {
   protected:
-
     Instructions::Set set;
     Data::PrimitiveTypeArray<double>* data;
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
@@ -34,8 +31,8 @@ class ExecutionStatsTest : public ::testing::Test
 
     std::vector<std::vector<const TPG::TPGVertex*>> inferenceTraces;
 
-
-    virtual void SetUp() override{
+    virtual void SetUp() override
+    {
 
         // Based on policyStats tests
 
@@ -66,8 +63,7 @@ class ExecutionStatsTest : public ::testing::Test
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
-            progPointers.push_back(
-                std::make_shared<Program::Program>(*e));
+            progPointers.push_back(std::make_shared<Program::Program>(*e));
         }
 
         // Create a TPG
@@ -90,7 +86,8 @@ class ExecutionStatsTest : public ::testing::Test
         // share the same program: progPointers.at(0)
 
         // The TPG is given a TPGInstrumentedFactory to enable instrumentation
-        tpg = new TPG::TPGGraph(*e, std::make_unique<TPG::TPGInstrumentedFactory>());
+        tpg = new TPG::TPGGraph(
+            *e, std::make_unique<TPG::TPGInstrumentedFactory>());
         for (int i = 0; i < 4; i++) {
             tpg->addNewTeam();
         }
@@ -145,7 +142,7 @@ class ExecutionStatsTest : public ::testing::Test
         l->setInstructionIndex(2); // Minus
         l->setDestinationIndex(1); // Register[1]
         l->setOperand(0, 2, 5);    // Register[5]
-        l->setOperand(1, 0, 2);   // Array[2]
+        l->setOperand(1, 0, 2);    // Array[2]
 
         l = &progPointers.at(0).get()->addNewLine();
         l->setInstructionIndex(2); // Minus
@@ -164,17 +161,16 @@ class ExecutionStatsTest : public ::testing::Test
 
         progPointers.at(1).get()->identifyIntrons();
 
-
         // Program 8 (T1 -> A2)
         l = &progPointers.at(8).get()->addNewLine();
-        l->setInstructionIndex(1);  // mac
+        l->setInstructionIndex(1); // mac
         l->setDestinationIndex(0);
         l->setOperand(0, 2, 6); // Array[6]
         l->setOperand(1, 2, 7); // Array[7..9]
 
         // Program 2 (T2 -> A2)
         l = &progPointers.at(2).get()->addNewLine();
-        l->setInstructionIndex(0);  // Add
+        l->setInstructionIndex(0); // Add
         l->setDestinationIndex(0);
         l->setOperand(0, 2, 3); // Array[3]
         l->setOperand(1, 2, 4); // Array[4]
@@ -186,7 +182,6 @@ class ExecutionStatsTest : public ::testing::Test
         //  - T0 -> T1 -> A1
         //  - T0 -> T1 -> T2 -> A2
         //  - T0 -> T1 -> T2 -> A2 with possible cycle
-
 
         //  - T0 -> T1 -> A2
         data->setDataAt(typeid(double), 2, -6);
@@ -200,8 +195,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = 10
         // P8 = 12
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))
-            ));
+            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
 
         //  - T0 -> T1 -> A1
         data->setDataAt(typeid(double), 10, 10);
@@ -211,8 +205,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = 10
         // P8 = 12
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))
-            ));
+            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
 
         //  - T0 -> T1 -> T2 -> A2
         data->setDataAt(typeid(double), 12, 13);
@@ -222,8 +215,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = 10
         // P8 = -18
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))
-            ));
+            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
 
         //  - T0 -> T1 -> T2 -> A2 with possible cycle
         data->setDataAt(typeid(double), 3, -10);
@@ -232,12 +224,11 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = -10
         // P8 = -18
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))
-            ));
-
+            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
     }
 
-    virtual void TearDown() override{
+    virtual void TearDown() override
+    {
 
         delete tpg;
         delete execEngine;
@@ -247,9 +238,7 @@ class ExecutionStatsTest : public ::testing::Test
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
         delete (&set.getInstruction(3));
-
     }
-
 };
 
 TEST_F(ExecutionStatsTest, AnalyzeInstrumentedGraph)
@@ -258,39 +247,42 @@ TEST_F(ExecutionStatsTest, AnalyzeInstrumentedGraph)
     ASSERT_NO_THROW(executionStats.analyzeInstrumentedGraph(tpg))
         << "Analysis of a valid tpg execution failed unexpectedly.";
 
-    ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 10.0/4.0)
+    ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 10.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
-    ASSERT_EQ(executionStats.getAvgEvaluatedPrograms(), 26.0/4.0)
+    ASSERT_EQ(executionStats.getAvgEvaluatedPrograms(), 26.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
-    ASSERT_EQ(executionStats.getAvgExecutedLines(), 34.0/4.0)
+    ASSERT_EQ(executionStats.getAvgExecutedLines(), 34.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
     // Add
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(0), 2.0/4.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(0), 2.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
     // mac
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(1), 4.0/4.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(1), 4.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
     // Minus
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(2), 20.0/4.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(2),
+              20.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
     // MultByConst
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 8.0/4.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 8.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
-
 }
 
-TEST_F(ExecutionStatsTest, AnalyzeNotInstrumented){
+TEST_F(ExecutionStatsTest, AnalyzeNotInstrumented)
+{
 
     TPG::TPGGraph notInstrumented(*e);
     notInstrumented.addNewTeam();
 
     TPG::ExecutionStats executionStats;
-    ASSERT_THROW(executionStats.analyzeInstrumentedGraph(&notInstrumented), std::bad_cast)
-        << "Analysis of not instrumented TPG didn't failed or did with an unexpected error.";
-
+    ASSERT_THROW(executionStats.analyzeInstrumentedGraph(&notInstrumented),
+                 std::bad_cast)
+        << "Analysis of not instrumented TPG didn't failed or did with an "
+           "unexpected error.";
 }
 
-TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace){
+TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace)
+{
 
     TPG::ExecutionStats executionStats;
 
@@ -301,19 +293,18 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace){
         << "Analysis of execution trace failed unexpectedly.";
 
     ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 1)
-        << "Attribute executionTraceStats doesn't have just the analyzed trace statistics.";
-    ASSERT_EQ(executionStats.getInferenceTracesStats()[0].trace, inferenceTraces[3])
+        << "Attribute executionTraceStats doesn't have just the analyzed trace "
+           "statistics.";
+    ASSERT_EQ(executionStats.getInferenceTracesStats()[0].trace,
+              inferenceTraces[3])
         << "Wrong analyzed execution trace in executionStats.";
-
 
     const TPG::TraceStats& stats = executionStats.getInferenceTracesStats()[0];
 
-    ASSERT_EQ(stats.nbEvaluatedTeams, 3)
-        << "Wrong number of evaluated teams.";
+    ASSERT_EQ(stats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
     ASSERT_EQ(stats.nbEvaluatedPrograms, 7)
         << "Wrong number of evaluated programs.";
-    ASSERT_EQ(stats.nbExecutedLines, 9)
-        << "Wrong number of executed lines.";
+    ASSERT_EQ(stats.nbExecutedLines, 9) << "Wrong number of executed lines.";
     // Add
     ASSERT_EQ(stats.nbExecutionPerInstruction.at(0), 1)
         << "Wrong number of executed instruction.";
@@ -327,41 +318,43 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace){
     ASSERT_EQ(stats.nbExecutionPerInstruction.at(3), 2)
         << "Wrong number of executed instruction.";
 
-
     /* Distributions */
 
-    std::map<size_t, size_t> expectedDistribEvaluatedTeams = { {3, 1} };
-    std::map<size_t, size_t> expectedDistribEvaluatedPrograms = { {7, 1} };
-    std::map<size_t, size_t> expectedDistribExecutedLines = { { 9, 1 } };
-    std::map<size_t, std::map<size_t, size_t>> expectedDistribNbExecutionPerInstruction
-        = {
-            { 0, { {1, 1} } },
-            { 1, { {1, 1} } },
-            { 2, { {5, 1} } },
-            { 3, { {2, 1} } },
+    std::map<size_t, size_t> expectedDistribEvaluatedTeams = {{3, 1}};
+    std::map<size_t, size_t> expectedDistribEvaluatedPrograms = {{7, 1}};
+    std::map<size_t, size_t> expectedDistribExecutedLines = {{9, 1}};
+    std::map<size_t, std::map<size_t, size_t>>
+        expectedDistribNbExecutionPerInstruction = {
+            {0, {{1, 1}}},
+            {1, {{1, 1}}},
+            {2, {{5, 1}}},
+            {3, {{2, 1}}},
         };
-    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices
-        = {
-            { tpg->getVertices()[0], 1 },
-            { tpg->getVertices()[1], 1 },
-            { tpg->getVertices()[2], 1 },
-            { tpg->getVertices()[6], 1 }
-        };
+    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices = {
+        {tpg->getVertices()[0], 1},
+        {tpg->getVertices()[1], 1},
+        {tpg->getVertices()[2], 1},
+        {tpg->getVertices()[6], 1}};
 
-    ASSERT_EQ(expectedDistribEvaluatedTeams, executionStats.getDistribEvaluatedTeams())
+    ASSERT_EQ(expectedDistribEvaluatedTeams,
+              executionStats.getDistribEvaluatedTeams())
         << "Wrong evaluated teams distribution.";
-    ASSERT_EQ(expectedDistribEvaluatedPrograms, executionStats.getDistribEvaluatedPrograms())
+    ASSERT_EQ(expectedDistribEvaluatedPrograms,
+              executionStats.getDistribEvaluatedPrograms())
         << "Wrong evaluated programs distribution.";
-    ASSERT_EQ(expectedDistribExecutedLines, executionStats.getDistribExecutedLines())
+    ASSERT_EQ(expectedDistribExecutedLines,
+              executionStats.getDistribExecutedLines())
         << "Wrong executed lines distribution.";
-    ASSERT_EQ(expectedDistribNbExecutionPerInstruction, executionStats.getDistribNbExecutionPerInstruction())
+    ASSERT_EQ(expectedDistribNbExecutionPerInstruction,
+              executionStats.getDistribNbExecutionPerInstruction())
         << "Wrong executions per instruction distributions.";
-    ASSERT_EQ(expectedDistribUsedVertices, executionStats.getDistribUsedVertices())
+    ASSERT_EQ(expectedDistribUsedVertices,
+              executionStats.getDistribUsedVertices())
         << "Wrong used vertices distribution.";
-
 }
 
-TEST_F(ExecutionStatsTest, ClearTracesStats){
+TEST_F(ExecutionStatsTest, ClearTracesStats)
+{
 
     TPG::ExecutionStats executionStats;
     executionStats.analyzeInferenceTrace(inferenceTraces[3]);
@@ -388,10 +381,10 @@ TEST_F(ExecutionStatsTest, ClearTracesStats){
 
     ASSERT_EQ(executionStats.getDistribUsedVertices().size(), 0)
         << "distribUsedVertices is not empty after clearing.";
-
 }
 
-TEST_F(ExecutionStatsTest, AnalyzeExecution){
+TEST_F(ExecutionStatsTest, AnalyzeExecution)
+{
 
     TPG::ExecutionStats executionStats;
 
@@ -406,34 +399,32 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution){
         << "Incorrect number of analyzed traces.";
 
     /* Average graph execution statistics */
-    ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 10.0/4.0)
+    ASSERT_EQ(executionStats.getAvgEvaluatedTeams(), 10.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
-    ASSERT_EQ(executionStats.getAvgEvaluatedPrograms(), 26.0/4.0)
+    ASSERT_EQ(executionStats.getAvgEvaluatedPrograms(), 26.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
-    ASSERT_EQ(executionStats.getAvgExecutedLines(), 34.0/4.0)
+    ASSERT_EQ(executionStats.getAvgExecutedLines(), 34.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
     // Add
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(0), 2.0/4.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(0), 2.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
     // mac
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(1), 4.0/4.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(1), 4.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
     // Minus
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(2), 20.0/4.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(2),
+              20.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
     // MultByConst
-    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 8.0/4.0)
+    ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 8.0 / 4.0)
         << "Incorrect attribute value after analyzing execution.";
-
 
     const TPG::TraceStats& stats = executionStats.getInferenceTracesStats()[3];
 
-    ASSERT_EQ(stats.nbEvaluatedTeams, 3)
-        << "Wrong number of evaluated teams.";
+    ASSERT_EQ(stats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
     ASSERT_EQ(stats.nbEvaluatedPrograms, 7)
         << "Wrong number of evaluated programs.";
-    ASSERT_EQ(stats.nbExecutedLines, 9)
-        << "Wrong number of executed lines.";
+    ASSERT_EQ(stats.nbExecutedLines, 9) << "Wrong number of executed lines.";
     // Add
     ASSERT_EQ(stats.nbExecutionPerInstruction.at(0), 1)
         << "Wrong number of executed instruction.";
@@ -447,44 +438,45 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution){
     ASSERT_EQ(stats.nbExecutionPerInstruction.at(3), 2)
         << "Wrong number of executed instruction.";
 
-
     /* Distributions */
 
-    std::map<size_t, size_t> expectedDistribEvaluatedTeams = { {2, 2}, {3, 2} };
-    std::map<size_t, size_t> expectedDistribEvaluatedPrograms = { {6, 2}, {7, 2} };
-    std::map<size_t, size_t> expectedDistribExecutedLines = { {8, 2}, { 9, 2 } };
-    std::map<size_t, std::map<size_t, size_t>> expectedDistribNbExecutionPerInstruction
-        = {
-            { 0, { {1, 2} } },
-            { 1, { {1, 4} } },
-            { 2, { {5, 4} } },
-            { 3, { {2, 4} } },
+    std::map<size_t, size_t> expectedDistribEvaluatedTeams = {{2, 2}, {3, 2}};
+    std::map<size_t, size_t> expectedDistribEvaluatedPrograms = {{6, 2},
+                                                                 {7, 2}};
+    std::map<size_t, size_t> expectedDistribExecutedLines = {{8, 2}, {9, 2}};
+    std::map<size_t, std::map<size_t, size_t>>
+        expectedDistribNbExecutionPerInstruction = {
+            {0, {{1, 2}}},
+            {1, {{1, 4}}},
+            {2, {{5, 4}}},
+            {3, {{2, 4}}},
         };
-    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices
-        = {
-            { tpg->getVertices()[0], 4 },
-            { tpg->getVertices()[1], 4 },
-            { tpg->getVertices()[2], 2 },
-            { tpg->getVertices()[5], 1 },
-            { tpg->getVertices()[6], 3 }
-        };
+    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices = {
+        {tpg->getVertices()[0], 4},
+        {tpg->getVertices()[1], 4},
+        {tpg->getVertices()[2], 2},
+        {tpg->getVertices()[5], 1},
+        {tpg->getVertices()[6], 3}};
 
-    ASSERT_EQ(expectedDistribEvaluatedTeams, executionStats.getDistribEvaluatedTeams())
+    ASSERT_EQ(expectedDistribEvaluatedTeams,
+              executionStats.getDistribEvaluatedTeams())
         << "Wrong evaluated teams distribution.";
-    ASSERT_EQ(expectedDistribEvaluatedPrograms, executionStats.getDistribEvaluatedPrograms())
+    ASSERT_EQ(expectedDistribEvaluatedPrograms,
+              executionStats.getDistribEvaluatedPrograms())
         << "Wrong evaluated programs distribution.";
-    ASSERT_EQ(expectedDistribExecutedLines, executionStats.getDistribExecutedLines())
+    ASSERT_EQ(expectedDistribExecutedLines,
+              executionStats.getDistribExecutedLines())
         << "Wrong executed lines distribution.";
-    ASSERT_EQ(expectedDistribNbExecutionPerInstruction, executionStats.getDistribNbExecutionPerInstruction())
+    ASSERT_EQ(expectedDistribNbExecutionPerInstruction,
+              executionStats.getDistribNbExecutionPerInstruction())
         << "Wrong executions per instruction distributions.";
-    ASSERT_EQ(expectedDistribUsedVertices, executionStats.getDistribUsedVertices())
+    ASSERT_EQ(expectedDistribUsedVertices,
+              executionStats.getDistribUsedVertices())
         << "Wrong used vertices distribution.";
-
-
-
 }
 
-TEST_F(ExecutionStatsTest, WriteStatsToJson){
+TEST_F(ExecutionStatsTest, WriteStatsToJson)
+{
 
     TPG::ExecutionStats executionStats;
     executionStats.analyzeExecution(*execEngine, tpg);
@@ -492,7 +484,7 @@ TEST_F(ExecutionStatsTest, WriteStatsToJson){
     ASSERT_NO_THROW(executionStats.writeStatsToJson("execution_stats.json"))
         << "Exporting execution statistics to file failed unexpectedly.";
 
-    ASSERT_TRUE(compare_files("execution_stats.json", TESTS_DAT_PATH "execution_stats_ref.json"))
+    ASSERT_TRUE(compare_files("execution_stats.json",
+                              TESTS_DAT_PATH "execution_stats_ref.json"))
         << "Generated json file is different from the reference file.";
-
 }

@@ -293,11 +293,12 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
         << "Nb visit after evaluation is incorrect.";
 }
 
-TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors){
+TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors)
+{
     TPG::TPGExecutionEngineInstrumented tpeei(*e);
     std::vector<const TPG::TPGVertex*> result;
 
-    ASSERT_EQ(tpeei.getTraceHistory().size(),0)
+    ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
         << "Trace history isn't empty before execution.";
 
     result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
