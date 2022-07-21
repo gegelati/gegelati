@@ -110,6 +110,7 @@
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
 
+#include <tpg/instrumented/executionStats.h>
 #include <tpg/instrumented/tpgActionInstrumented.h>
 #include <tpg/instrumented/tpgEdgeInstrumented.h>
 #include <tpg/instrumented/tpgExecutionEngineInstrumented.h>

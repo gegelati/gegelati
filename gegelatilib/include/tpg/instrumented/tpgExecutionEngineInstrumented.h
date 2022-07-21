@@ -51,6 +51,11 @@ namespace TPG {
      */
     class TPGExecutionEngineInstrumented : public TPGExecutionEngine
     {
+      protected:
+        /// History of all previous execution traces. New traces are pushed
+        /// back.
+        std::vector<std::vector<const TPGVertex*>> traceHistory;
+
       public:
         /**
          * \brief Main constructor of the class.
@@ -95,6 +100,13 @@ namespace TPG {
          */
         const std::vector<const TPGVertex*> executeFromRoot(
             const TPGVertex& root) override;
+
+        /// Get all previous execution traces.
+        const std::vector<std::vector<const TPGVertex*>>& getTraceHistory()
+            const;
+
+        /// Clear the trace history from all previous execution trace.
+        void clearTraceHistory();
     };
 }; // namespace TPG
 

@@ -66,5 +66,18 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngineInstrumented::
     dynamic_cast<const TPGActionInstrumented*>(result.back())
         ->incrementNbVisits();
 
+    this->traceHistory.push_back(result);
+
     return result;
+}
+
+const std::vector<std::vector<const TPG::TPGVertex*>>& TPG::
+    TPGExecutionEngineInstrumented::getTraceHistory() const
+{
+    return this->traceHistory;
+}
+
+void TPG::TPGExecutionEngineInstrumented::clearTraceHistory()
+{
+    this->traceHistory.clear();
 }
