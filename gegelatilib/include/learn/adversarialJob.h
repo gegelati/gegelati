@@ -36,6 +36,7 @@
 #ifndef ADVERSARIAL_JOB_H
 #define ADVERSARIAL_JOB_H
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
