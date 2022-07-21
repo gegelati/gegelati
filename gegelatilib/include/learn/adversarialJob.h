@@ -38,6 +38,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <cstddef>
 
 #include "learn/job.h"
 
