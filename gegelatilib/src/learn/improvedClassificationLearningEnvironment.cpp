@@ -1,10 +1,14 @@
 #include "learn/improvedClassificationLearningEnvironment.h"
 
-Learn::ImprovedClassificationLearningEnvironment::ImprovedClassificationLearningEnvironment(uint64_t nbClass) : LearningEnvironment(nbClass), _currentClass(0), _classificationTable(nbClass, std::vector<uint64_t>(nbClass, 0)), _currentMode(Learn::LearningMode::TRAINING)
+Learn::ImprovedClassificationLearningEnvironment::ImprovedClassificationLearningEnvironment(uint64_t nbClass, uint64_t sampleSize) : LearningEnvironment(nbClass), _classificationTable(nbClass, std::vector<uint64_t>(nbClass, 0)), _sampleSize(sampleSize), _currentMode(Learn::LearningMode::TRAINING),
+      _currentSample(sampleSize, sampleSize)
 {
-    this->_dataset = new std::pair< std::vector< std::vector<double> > , std::vector<double> >();
-    this->_currentSampleIndex = 0;
-    this->setRefreshRatio(0.3);
+    this->_dataset = new Learn::DS();
+    this->_currentSampleIndex = -1;
+    this->_datasubsetRefreshRatio = 0.3;
+    this->_datasubsetSizeRatio = 0.4;
+    this->_currentClass = -1;
+    this->_datasubset = new Learn::DS();
 }
 
 const std::vector<std::vector<uint64_t>>& Learn::ImprovedClassificationLearningEnvironment::getClassificationTable() const
@@ -67,6 +71,8 @@ void Learn::ImprovedClassificationLearningEnvironment::changeCurrentSample()
         this->_currentSampleIndex = this->_rng.getUnsignedInt64(0, this->_datasubset->first.size()-1);
     else
         this->_currentSampleIndex = (this->_currentSampleIndex + 1) % this->_datasubset->first.size();
+
+    this->_currentClass = (uint64_t)this->_datasubset->second.at(this->_currentSampleIndex);
 }
 
 void Learn::ImprovedClassificationLearningEnvironment::setDatasubset(DS * datasubset)
@@ -102,21 +108,31 @@ void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset(Learn::
 void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BRSS(size_t seed)
 {
     srand(seed);
-    for(int i=0 ; i<this->_datasubsetRefreshRatio * (double)this->_datasubset->first.size() ; i++)
+    int samplesToRefresh = (int) (this->_datasubsetRefreshRatio * (double)this->_datasubset->first.size());
+    int subsetSize = (int) (this->_datasubsetSizeRatio * (double)this->_dataset->first.size());
+
+    if(this->_datasubset->first.size() > subsetSize)
     {
-        auto idx_ds = rand() % this->_dataset->first.size(), idx_dss = rand() % this->_datasubset->first.size();
-        for(int k=0 ; k<this->_dataset->first.size() ; k++)
+        for(int i=subsetSize ; i<this->_datasubset->first.size() ; i++)
         {
-            if(k < this->_datasubset->first.size())
-                this->_datasubset->first.at(idx_dss).at(k) = this->_dataset->first.at(idx_ds).at(k);
-            else
-                this->_datasubset->first.at(idx_dss).push_back(this->_dataset->first.at(idx_ds).at(k));
+            this->_datasubset->first.pop_back();
+            this->_datasubset->second.pop_back();
         }
+    }
+    else if(this->_datasubset->first.size() < subsetSize)
+    {
+        for(int i=this->_datasubset->first.size() ; i<subsetSize ; i++)
+        {
+            this->_datasubset->first.push_back(*new std::vector<double>());
+            this->_datasubset->second.push_back(0);
+        }
+    }
 
-        if(this->_datasubset->first.size() > this->_dataset->first.size())
-            for(int k=0 ; k<(this->_datasubset->first.size() - this->_dataset->first.size()) ; k++)
-                this->_datasubset->first.pop_back();
+    for(int i=0 ; i<samplesToRefresh ; i++)
+    {
+        int idx_ds = rand() % this->_dataset->first.size(), idx_dss = (rand() % this->_datasubset->first.size());
 
+        this->_datasubset->first.at(idx_dss) = this->_dataset->first.at(idx_ds);
         this->_datasubset->second.at(idx_dss) = this->_dataset->second.at(idx_ds);
     }
 }

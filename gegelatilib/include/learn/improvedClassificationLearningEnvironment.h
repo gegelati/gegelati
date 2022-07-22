@@ -17,12 +17,12 @@ namespace Learn
     {
       protected:
         std::vector<std::vector<uint64_t>> _classificationTable;
-        uint64_t _currentClass, _currentSampleIndex;
+        uint64_t _currentClass, _currentSampleIndex, _sampleSize;
         mutable DS * _dataset, * _datasubset;
         Learn::LearningMode _currentMode;
         Mutator::RNG _rng;
         Data::Array2DWrapper<double> _currentSample;
-        float _datasubsetRefreshRatio;
+        float _datasubsetRefreshRatio, _datasubsetSizeRatio;
 
         void changeCurrentSample();
 
@@ -36,7 +36,7 @@ namespace Learn
          *
          * @param nbClass The amount of classes the classification will use
          */
-        explicit ImprovedClassificationLearningEnvironment(uint64_t nbClass);
+        explicit ImprovedClassificationLearningEnvironment(uint64_t nbClass, uint64_t sampleSize);
 
         /**
          * \brief Default implementation for the doAction method.

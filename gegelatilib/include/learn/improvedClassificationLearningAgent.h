@@ -32,7 +32,7 @@ namespace Learn
          */
         ImprovedClassificationLearningAgent<BaseLearningAgent>(Learn::ImprovedClassificationLearningEnvironment& le, const Instructions::Set& iSet, const LearningParameters& p, const TPG::TPGFactory& factory = TPG::TPGFactory(), LearningAlgorithm type = DEFAULT)
             : BaseLearningAgent(le, iSet, p, factory), _type(type)
-        {};
+                                                           {};
 
         /**
          * \brief Specialization of the evaluateJob method for classification
@@ -176,8 +176,10 @@ namespace Learn
     {
         // Check that results are ClassificationEvaluationResults.
         // (also throws on empty results)
-        if (typeid(ClassificationEvaluationResult) != typeid(results.begin()->first.get()))
-            throw std::runtime_error("ClassificationLearningAgent can not decimate worst roots for " "results whose type is not ClassificationEvaluationResult.");
+        const EvaluationResult* result = results.begin()->first.get();
+        if (typeid(ClassificationEvaluationResult) != typeid(*result))
+            throw std::runtime_error("ClassificationLearningAgent can not decimate worst roots for "
+                                     "results whose type is not ClassificationEvaluationResult.");
 
         // Compute the number of root to keep/delete base on each criterion
         uint64_t totalNbRoot = this->tpg->getNbRootVertices();
@@ -266,39 +268,39 @@ namespace Learn
     template <class BaseLearningAgent>
     void ImprovedClassificationLearningAgent<BaseLearningAgent>::trainOneGeneration(uint64_t generationNumber)
     {
-        for (auto logger : ((LearningAgent*)this)->loggers)
+        for (auto logger : (std::vector< std::reference_wrapper<Log::LALogger> >)this->loggers)
             logger.get().logNewGeneration(generationNumber);
 
         // Populate Sequentially
-        Mutator::TPGMutator::populateTPG(*this->tpg, this->archive,this->params.mutation, this->rng,((LearningAgent*)this)->maxNbThreads);
-        for (auto logger : ((LearningAgent*)this)->loggers)
+        Mutator::TPGMutator::populateTPG(*this->tpg, this->archive,this->params.mutation, this->rng,this->maxNbThreads);
+        for (auto logger : this->loggers)
             logger.get().logAfterPopulateTPG();
 
         // Evaluate
-        auto results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
-        for (auto logger : ((LearningAgent*)this)->loggers)
+        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> results = this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
+        for (auto logger : this->loggers)
             logger.get().logAfterEvaluate(results);
 
         // Refresh the Datasubset
-        auto icle = dynamic_cast<ImprovedClassificationLearningEnvironment&>(((LearningAgent*)this)->learningEnvironment);
-        icle.refreshDatasubset(this->_type, ((LearningAgent*)this)->rng.getUnsignedInt64(0, UINT64_MAX));
+        auto icle = dynamic_cast<ImprovedClassificationLearningEnvironment&>(this->learningEnvironment);
+        icle.refreshDatasubset(this->_type, this->rng.getUnsignedInt64(0, UINT64_MAX));
 
         // Remove worst performing roots
         decimateWorstRoots(results);
         // Update the best
         this->updateEvaluationRecords(results);
 
-        for (auto logger : ((LearningAgent*)this)->loggers)
+        for (auto logger : this->loggers)
             logger.get().logAfterDecimate();
 
         // Does a validation or not according to the parameter doValidation
-        if (((LearningAgent*)this)->params.doValidation) {
-            auto validationResults = ((LearningAgent*)this)->evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
-            for (auto logger : ((LearningAgent*)this)->loggers)
+        if (this->params.doValidation) {
+            auto validationResults = this->evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
+            for (auto logger : this->loggers)
                 logger.get().logAfterValidate(validationResults);
         }
 
-        for (auto logger : ((LearningAgent*)this)->loggers)
+        for (auto logger : this->loggers)
             logger.get().logEndOfTraining();
     }
 }
