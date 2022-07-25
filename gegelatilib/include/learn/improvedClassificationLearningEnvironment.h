@@ -28,7 +28,9 @@ namespace Learn
 
       private:
         void refreshDatasubset_BRSS(size_t seed);
-        static void refreshDatasubset_BANDIT(size_t seed);
+        void refreshDatasubset_BANDIT(size_t seed);
+        double getScore_DEFAULT() const;
+        double getScore_BRSS() const;
 
       public:
         /**

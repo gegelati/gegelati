@@ -36,7 +36,7 @@ void Learn::ImprovedClassificationLearningEnvironment::reset(size_t seed, Learni
     this->changeCurrentSample();
 }
 
-double Learn::ImprovedClassificationLearningEnvironment::getScore() const
+double Learn::ImprovedClassificationLearningEnvironment::getScore_DEFAULT() const
 {
     double score = 0;
 
@@ -65,6 +65,39 @@ double Learn::ImprovedClassificationLearningEnvironment::getScore() const
     return score;
 }
 
+double Learn::ImprovedClassificationLearningEnvironment::getScore_BRSS() const
+{
+    int good = 0, total = 0;
+
+    for(int i=0 ; i<this->_classificationTable.size() ; i++)
+        for(int j=0 ; j<this->_classificationTable.at(i).size() ; j++)
+        {
+            total += this->_classificationTable.at(i).at(j);
+            if(i == j)
+                good += this->_classificationTable.at(i).at(j);
+        }
+
+    return (double)good / (double)total;
+}
+
+double Learn::ImprovedClassificationLearningEnvironment::getScore() const
+{
+    double score = 0;
+
+    //    if(algo == Learn::LearningAlgorithm::BRSS)
+    //        score = getScore_BRSS();
+    //    else if(algo == Learn::LearningAlgorithm::FS || algo == Learn::LearningAlgorithm::BANDIT)
+    //        score = 0;
+    //    else if(algo == Learn::LearningAlgorithm::LEXICASE)
+    //        score = 0;
+    //    else
+    //        score = getScore_DEFAULT();
+
+    score = getScore_BRSS();
+
+    return score;
+}
+
 void Learn::ImprovedClassificationLearningEnvironment::changeCurrentSample()
 {
     if(this->_currentMode != Learn::LearningMode::TESTING)
@@ -72,12 +105,14 @@ void Learn::ImprovedClassificationLearningEnvironment::changeCurrentSample()
     else
         this->_currentSampleIndex = (this->_currentSampleIndex + 1) % this->_datasubset->first.size();
 
-    this->_currentClass = (uint64_t)this->_datasubset->second.at(this->_currentSampleIndex);
+    if(this->_datasubset->first.size() > 0)
+        this->_currentClass = (uint64_t)this->_datasubset->second.at(this->_currentSampleIndex);
 }
 
 void Learn::ImprovedClassificationLearningEnvironment::setDatasubset(DS * datasubset)
 {
-    this->_datasubset = datasubset;
+    this->_datasubset->first = std::vector< std::vector<double> >(datasubset->first);
+    this->_datasubset->second = std::vector<double>(datasubset->second);
 }
 
 std::vector<std::reference_wrapper<const Data::DataHandler>> Learn::ImprovedClassificationLearningEnvironment::getDataSources()
@@ -92,8 +127,10 @@ bool Learn::ImprovedClassificationLearningEnvironment::isTerminal() const
 
 void Learn::ImprovedClassificationLearningEnvironment::setDataset(Learn::DS *dataset)
 {
-    this->_dataset = dataset;
-    this->_datasubset = dataset;
+    this->_dataset->first = std::vector< std::vector<double> >(dataset->first);
+    this->_dataset->second =  std::vector<double>(dataset->second);
+    this->setDatasubset(dataset);
+
     this->changeCurrentSample();
 }
 
@@ -108,12 +145,13 @@ void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset(Learn::
 void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BRSS(size_t seed)
 {
     srand(seed);
-    int samplesToRefresh = (int) (this->_datasubsetRefreshRatio * (double)this->_datasubset->first.size());
+    int samplesToRefresh = (int) (this->_datasubsetRefreshRatio * (double)this->_dataset->first.size());
     int subsetSize = (int) (this->_datasubsetSizeRatio * (double)this->_dataset->first.size());
 
     if(this->_datasubset->first.size() > subsetSize)
     {
-        for(int i=subsetSize ; i<this->_datasubset->first.size() ; i++)
+        uint64_t temp_size = this->_datasubset->first.size();
+        for(int i=0 ; i<temp_size-subsetSize ; i++)
         {
             this->_datasubset->first.pop_back();
             this->_datasubset->second.pop_back();
@@ -121,7 +159,8 @@ void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BRSS(si
     }
     else if(this->_datasubset->first.size() < subsetSize)
     {
-        for(int i=this->_datasubset->first.size() ; i<subsetSize ; i++)
+        uint64_t temp_size = this->_datasubset->first.size();
+        for(int i=temp_size ; i<subsetSize ; i++)
         {
             this->_datasubset->first.push_back(*new std::vector<double>());
             this->_datasubset->second.push_back(0);
@@ -135,6 +174,8 @@ void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BRSS(si
         this->_datasubset->first.at(idx_dss) = this->_dataset->first.at(idx_ds);
         this->_datasubset->second.at(idx_dss) = this->_dataset->second.at(idx_ds);
     }
+
+    printf("\ndss size : %ld\nds size : %ld\n", this->_datasubset->first.size(), this->_dataset->first.size());
 }
 
 void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BANDIT(size_t seed)
