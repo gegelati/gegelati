@@ -174,8 +174,6 @@ void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BRSS(si
         this->_datasubset->first.at(idx_dss) = this->_dataset->first.at(idx_ds);
         this->_datasubset->second.at(idx_dss) = this->_dataset->second.at(idx_ds);
     }
-
-    printf("\ndss size : %ld\nds size : %ld\n", this->_datasubset->first.size(), this->_dataset->first.size());
 }
 
 void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BANDIT(size_t seed)
