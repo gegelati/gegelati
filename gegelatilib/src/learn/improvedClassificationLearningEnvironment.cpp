@@ -167,12 +167,15 @@ void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BRSS(si
         }
     }
 
-    for(int i=0 ; i<samplesToRefresh ; i++)
+    if(this->_datasubset->first.size() == subsetSize)
     {
-        int idx_ds = rand() % this->_dataset->first.size(), idx_dss = (rand() % this->_datasubset->first.size());
+        for(int i=0 ; i<samplesToRefresh ; i++)
+        {
+            int idx_ds = rand() % this->_dataset->first.size(), idx_dss = (rand() % this->_datasubset->first.size());
 
-        this->_datasubset->first.at(idx_dss) = this->_dataset->first.at(idx_ds);
-        this->_datasubset->second.at(idx_dss) = this->_dataset->second.at(idx_ds);
+            this->_datasubset->first.at(idx_dss) = this->_dataset->first.at(idx_ds);
+            this->_datasubset->second.at(idx_dss) = this->_dataset->second.at(idx_ds);
+        }
     }
 }
 

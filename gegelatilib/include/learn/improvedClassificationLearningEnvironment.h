@@ -6,58 +6,24 @@
 
 namespace Learn
 {
-    /**
-     * \brief This enum manage the different types of algorithm that the classification is able to use
-     */
     typedef enum LearningAlgorithm
     {
         DEFAULT, BRSS, FS, BANDIT, LEXICASE
     }LearningAlgorithm;
 
-    /**
-     * \brief The DS type is used to manage the dataset
-     */
     using DS = std::pair<std::vector<std::vector<double>>,std::vector<double>>;
 
-    /**
-     * \brief Specialization of the LearningEnvironment class for classification
-     * purposes.
-     */
     class ImprovedClassificationLearningEnvironment : public LearningEnvironment
     {
       protected:
-        /// _classificationTable is the result of a training
         std::vector<std::vector<uint64_t>> _classificationTable;
-
-        /// _currentClass is the current class that the environment is providing
-        uint64_t _currentClass;
-        /// _currentSampleIndex is the index in the datasubset of the curent sample
-        uint64_t _currentSampleIndex;
-        /// _sampleSize is the size of one data sample
-        uint64_t _sampleSize;
-
-        /// _dataset is the dataset
-        mutable DS * _dataset;
-        /// _datasubset is the datasubset
-        mutable DS * _datasubset;
-
-        /// _curentMode is the agent's learning mode
+        uint64_t _currentClass, _currentSampleIndex, _sampleSize;
+        mutable DS * _dataset, * _datasubset;
         Learn::LearningMode _currentMode;
-
-        /// _rng is used to manage rng with predictability
         Mutator::RNG _rng;
-
-        /// _currentSample is the current sample that is provided to the agent
         Data::Array2DWrapper<double> _currentSample;
+        float _datasubsetRefreshRatio, _datasubsetSizeRatio;
 
-        /// _datasubsetRefreshRatio is the ammount of the datasubset's samples wich will be refresh between each generations
-        float _datasubsetRefreshRatio;
-        /// _datasubsetSizeRatio is the size of the datasubset relative to the dataset's one
-        float _datasubsetSizeRatio;
-
-        /**
-         * \brief This method is used to change the current datasubset's sample
-         */
         void changeCurrentSample();
 
       private:
@@ -65,14 +31,12 @@ namespace Learn
         void refreshDatasubset_BANDIT(size_t seed);
         double getScore_DEFAULT() const;
         double getScore_BRSS() const;
-        void setDatasubset(DS * datasubset);
 
       public:
         /**
          * \brief Constructor for the Learning Environment.
          *
          * @param nbClass The amount of classes the classification will use
-         * @param sampleSize The size of one data sample
          */
         explicit ImprovedClassificationLearningEnvironment(uint64_t nbClass, uint64_t sampleSize);
 
@@ -89,7 +53,7 @@ namespace Learn
          *
          *  This learning algorithm is indicated in the class attributes.
          */
-        [[nodiscard]] double getScore() const override;
+        virtual double getScore() const override;
 
         /**
          * \brief Default implementation of the reset.
@@ -108,27 +72,11 @@ namespace Learn
         void refreshDatasubset(LearningAlgorithm algo, size_t seed);
 
         // Getters and setters
-
-        /**
-         * \brief This method is used to change the dataset, for it initialization for example
-         * @param dataset
-         */
+        void setDatasubset(DS * datasubset);
         void setDataset(DS * dataset);
-
-        /**
-         * \brief This method is used to set the value of the RefreshRatio wich describes the ammount of datasubset's samples will be refresh between each generations
-         * @param ratio
-         */
         void setRefreshRatio(float ratio);
 
-        /**
-         * \brief Return the classification table
-         */
         [[nodiscard]] const std::vector<std::vector<uint64_t>>& getClassificationTable() const;
-
-        /**
-         * Return the data source
-         */
         std::vector<std::reference_wrapper<const Data::DataHandler>> getDataSources() override;
     };
 }

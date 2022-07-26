@@ -10,24 +10,12 @@
 
 namespace Learn
 {
-    /**
-     * \brief LearningAgent specialized for LearningEnvironments representing a
-     * classification problem.
-     *
-     * In this context, it is assumed that each action of the
-     * LearningEnvironment represents a class of the classification problem.
-     *
-     * The BaseLearningAgent template parameter is the LearningAgent from which
-     * the ImprovedClassificationLearningAgent inherits. This template notably enable
-     * selecting between the classical and the ParallelLearningAgent.
-     */
     template <class BaseLearningAgent = ParallelLearningAgent>
     class ImprovedClassificationLearningAgent : public BaseLearningAgent
     {
         static_assert(std::is_convertible<BaseLearningAgent*, LearningAgent*>::value);
 
       protected:
-        /// This attributes indicates the algorithm type that the agent will use
         LearningAlgorithm _type;
 
       public:
@@ -149,18 +137,18 @@ namespace Learn
             {
                 uint64_t truePositive = classificationTable.at(classIdx).at(classIdx);
                 uint64_t falseNegative = std::accumulate(classificationTable.at(classIdx).begin(), classificationTable.at(classIdx).end(), (uint64_t)0) - truePositive;
-                uint64_t falsePositive = 0;
-                std::for_each(classificationTable.begin(), classificationTable.end(), [&classIdx, &falsePositive](const std::vector<uint64_t>& classifForClass)
-                              {
-                                  falsePositive += classifForClass.at(classIdx);
-                              });
-                falsePositive -= truePositive;
-
-                double recall = (double)truePositive / (double)(truePositive + falseNegative);
-                double precision = (double)truePositive / (double)(truePositive + falsePositive);
-                // If true positive is 0, set score to 0.
-                double fScore = (truePositive != 0) ? 2 * (precision * recall) / (precision + recall) : 0.0;
-                result.at(classIdx) += fScore;
+                //                uint64_t falsePositive = 0;
+                //                std::for_each(classificationTable.begin(), classificationTable.end(), [&classIdx, &falsePositive](const std::vector<uint64_t>& classifForClass)
+                //                              {
+                //                                  falsePositive += classifForClass.at(classIdx);
+                //                              });
+                //                falsePositive -= truePositive;
+                //
+                //                double recall = (double)truePositive / (double)(truePositive + falseNegative);
+                //                double precision = (double)truePositive / (double)(truePositive + falsePositive);
+                //                // If true positive is 0, set score to 0.
+                //                double fScore = (truePositive != 0) ? 2 * (precision * recall) / (precision + recall) : 0.0;
+                result.at(classIdx) += icle.getScore();
 
                 nbEvalPerClass.at(classIdx) += truePositive + falseNegative;
             }
@@ -169,10 +157,8 @@ namespace Learn
         // Before returning the EvaluationResult, divide the result per class by
         // the number of iteration
         const LearningParameters& p = this->params;
-        std::for_each(result.begin(), result.end(), [p](double& val)
-                      {
-                          val /= (double)p.nbIterationsPerPolicyEvaluation;
-                      });
+        for(double & val : result)
+            val /= (double)p.nbIterationsPerPolicyEvaluation;
 
         // Create the EvaluationResult
         auto evaluationResult = std::shared_ptr<EvaluationResult>(new ClassificationEvaluationResult(result, nbEvalPerClass));
@@ -180,6 +166,7 @@ namespace Learn
         // Combine it with previous one if any
         if (previousEval != nullptr)
             *evaluationResult += *previousEval;
+
         return evaluationResult;
     }
 
