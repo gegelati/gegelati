@@ -10,12 +10,24 @@
 
 namespace Learn
 {
+    /**
+     * \brief LearningAgent specialized for LearningEnvironments representing a
+     * classification problem.
+     *
+     * In this context, it is assumed that each action of the
+     * LearningEnvironment represents a class of the classification problem.
+     *
+     * The BaseLearningAgent template parameter is the LearningAgent from which
+     * the ImprovedClassificationLearningAgent inherits. This template notably enable
+     * selecting between the classical and the ParallelLearningAgent.
+     */
     template <class BaseLearningAgent = ParallelLearningAgent>
     class ImprovedClassificationLearningAgent : public BaseLearningAgent
     {
         static_assert(std::is_convertible<BaseLearningAgent*, LearningAgent*>::value);
 
       protected:
+        /// This attributes indicates the algorithm type that the agent will use
         LearningAlgorithm _type;
 
       public:
