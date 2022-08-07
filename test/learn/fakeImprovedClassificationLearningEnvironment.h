@@ -16,7 +16,7 @@ class FakeImprovedClassificationLearningEnvironment
 
   public:
     FakeImprovedClassificationLearningEnvironment()
-        : ImprovedClassificationLearningEnvironment(3, 5), data(1), value{0} {};
+        : ImprovedClassificationLearningEnvironment(3, 81), data(1), value{0} {};
     void doAction(uint64_t actionId) override
     {
         // Increment classificationTable

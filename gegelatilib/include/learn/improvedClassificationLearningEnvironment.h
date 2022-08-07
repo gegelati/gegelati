@@ -1,11 +1,13 @@
-#ifndef GEGELATI_IMPROVEDCLASSIFICATIONLEARNINGENVIRONMENT_H
-#define GEGELATI_IMPROVEDCLASSIFICATIONLEARNINGENVIRONMENT_H
+#ifndef DICE_PROJECT_IMPROVEDCLASSIFICATIONLEARNINGENVIRONMENT_H
+#define DICE_PROJECT_IMPROVEDCLASSIFICATIONLEARNINGENVIRONMENT_H
 
-#include "gegelati.h"
+#include <gegelati.h>
+#include <vector>
+
 #include "learn/learningEnvironment.h"
 
-namespace Learn
-{
+namespace Learn {
+
     /**
      * \brief This enum manage the different types of algorithm that the classification is able to use
      */
@@ -19,69 +21,127 @@ namespace Learn
      */
     using DS = std::pair<std::vector<std::vector<double>>,std::vector<double>>;
 
+    /**
+     * \brief Specialization of the LearningEnvironment class for classification
+     * purposes.
+     */
     class ImprovedClassificationLearningEnvironment : public LearningEnvironment
     {
       protected:
-        /// _classificationTable is the result of a training
-        std::vector<std::vector<uint64_t>> _classificationTable;
-        /// _currentClass is the current class that the environment is providing
-        uint64_t _currentClass;
-        /// _currentSampleIndex is the index in the datasubset of the curent sample
-        uint64_t _currentSampleIndex;
-        /// _sampleSize is the size of one data sample
-        uint64_t _sampleSize;
-
-        /// _dataset is the dataset
-        mutable DS * _dataset;
-        /// _datasubset is the datasubset
-        mutable DS * _datasubset;
-
-        /// _curentMode is the agent's learning mode
-        Learn::LearningMode _currentMode;
-
-        /// _rng is used to manage rng with predictability
-        Mutator::RNG _rng;
-
-        /// _currentSample is the current sample that is provided to the agent
-        Data::Array2DWrapper<double> _currentSample;
-
-        /// _datasubsetRefreshRatio is the ammount of the datasubset's samples wich will be refresh between each generations
-        float _datasubsetRefreshRatio;
-        /// _datasubsetSizeRatio is the size of the datasubset relative to the dataset's one
-        float _datasubsetSizeRatio;
+        /**
+         * \brief 2D array storing for each class the guesses that were made by
+         * the LearningAgent.
+         *
+         * For example classificationTable.at(x).at(y) represents the number of
+         * times a LearningAgent guessed class y, for a data from class x since
+         * the last reset.
+         */
+        std::vector<std::vector<uint64_t>> classificationTable;
 
         /**
-         * \brief This method is used to change the current datasubset's sample
+         * \brief Class of the current data.
+         *
+         * This attribute should be updated alongside the data made avalaible
+         * to the LearningAgent.
          */
-        void changeCurrentSample();
+        uint64_t currentClass;
+
+        /**
+         * \brief Current learning algorithm used
+         */
+        LearningAlgorithm currentAlgo;
+
+        /**
+         * \brief The dataset is the set of data that will be presented to the
+         * agent for learning
+         */
+        DS * dataset;
+
+        /**
+         * \brief The datasubset is the set of data that will be presented to the
+         * agent at each generation for learning
+         */
+        DS * datasubset;
+
+        /**
+         * \brief datasubsetSizeRatio is the ratio between the datasubset size
+         * and the dataset size
+         */
+        float datasubsetSizeRatio;
+
+        /**
+         * \brief datasubsetRefreshRatio is the ratio between the number of
+         * samples that will be refreshed at each generation and the datasubset
+         * size
+         */
+        float datasubsetRefreshRatio;
+
+        /**
+         * \brief rng is used to keep predictability
+         */
+        Mutator::RNG rng;
+
+        /**
+         * \brief currentSampleIndex is the index of the current sample in the
+         * datasubset
+         */
+        uint64_t currentSampleIndex;
+
+        /**
+          * \brief currentSample is the sample that will be presented to the agent
+          * on this generation
+         */
+        Data::Array2DWrapper<double> currentSample;
 
       private:
-        void refreshDatasubset_BRSS(size_t seed);
-        void refreshDatasubset_BANDIT(size_t seed);
-        double getScore_DEFAULT() const;
-        double getScore_BRSS() const;
+        virtual double getScore_DEFAULT() const;
+        virtual double getScore_BRSS() const;
+
+        void refreshDatasubset_BRSS();
 
       public:
         /**
-         * \brief Constructor for the Learning Environment.
+         * Main constructor of the ClassificationLearningEnvironment.
          *
-         * @param nbClass The amount of classes the classification will use
-         * @param sampleSize The size of one data sample
+         * \param[in] nbClass number of classes of the
+         * classificationLearningEnvironment, and thus number of action of the
+         * underlying LearningEnvironment.
          */
-        explicit ImprovedClassificationLearningEnvironment(uint64_t nbClass, uint64_t sampleSize);
+        ImprovedClassificationLearningEnvironment(uint64_t nbClass, LearningAlgorithm algo, uint64_t sampleSize)
+            : LearningEnvironment(nbClass),
+              classificationTable(nbClass, std::vector<uint64_t>(nbClass, 0)),
+              currentClass{0}, currentAlgo(algo), currentSample(sampleSize, sampleSize)
+        {
+            this->datasubsetSizeRatio = 0.4;
+            this->datasubsetRefreshRatio = 0.1;
+
+            this->dataset = new DS();
+            this->datasubset = new DS();
+        };
+
+        /**
+         * \brief Get a const ref to the classification table of the learning
+         * environment.
+         */
+        const std::vector<std::vector<uint64_t>>& getClassificationTable()
+            const;
 
         /**
          * \brief Default implementation for the doAction method.
          *
-         * This implementation increments the classificationTable based on
-         * the currentClass attribute and refresh the dataSample within the dataSet attribute.
+         * This implementation only increments the classificationTable based on
+         * the currentClass attribute. Refresh of the data should be implemented
+         * by the child class, hence the pure virtual method.
          */
-        void doAction(uint64_t actionID) override;
+        virtual void doAction(uint64_t actionID) override = 0;
 
         /**
-         * \brief This implementation returns the score based on the appropriate learning algorithm.
+         * \brief Default scoring for classificationLearningEnvironment.
          *
-         *  This learning algorithm is indicated in the class attributes.
+         * The default scoring for the classificationLearningEnvironment is
+         * computed based on the classificationTable attribute.
+         *
+         * The score represents the percentage of correct classification.
          */
         virtual double getScore() const override;
 
@@ -90,44 +150,49 @@ namespace Learn
          *
          * Resets to zero the classificationTable.
          */
-        virtual void reset(size_t seed = 0, LearningMode mode = LearningMode::TRAINING) override;
-        bool isTerminal() const override;
+        virtual void reset(
+            size_t seed = 0,
+            LearningMode mode = LearningMode::TRAINING) override = 0;
 
         /**
-         * \brief This implementation refreshes the datasubset.
+         * \brief This method will refresh the datasubset according to the current
+         * learning algorithm
+         */
+        void refreshDatasubset();
+
+        /**
+         * \brief This implementation will select the next current sample according
+         * to the current learning mode
+         */
+        void changeCurrentSample(LearningMode mode);
+
+        /**
+         * \brief This implementation is used to modify the dataset (and will set
+         * the datasubset equal to the dataset attribute)
+         */
+        void setDataset(DS * newDataset);
+
+        /**
+         * \brief This implementation is used to modify the current learning algorithm
+         * that change the way the score is computed and the way the datasubset is
+         * refreshed
+         */
+        void setAlgorithm(LearningAlgorithm algo);
+
+        /**
+         * \brief This implementation modify the datasubsetSizeRatio attributes
          *
-         * @param algo is the type of LearningAlgorithm
-         * @param seed is useful to keep control on randomness
+         * It needs to be between 0 and 1
          */
-        void refreshDatasubset(LearningAlgorithm algo, size_t seed);
-
-        // Getters and setters
+        void setDatasubsetSizeRatio(float ratio);
 
         /**
-         * \brief This method is used to change the datasubset, for it initialization for example
-         * @param datasubset
+         * \brief This implementation modify the datasubsetRefreshRatio attributes
+         *
+         * It needs to be between 0 and 1
          */
-        void setDatasubset(DS * datasubset);
-        /**
-         * \brief This method is used to change the dataset, for it initialization for example
-         * @param dataset
-         */
-        void setDataset(DS * dataset);
-        /**
-         * \brief This method is used to set the value of the RefreshRatio wich describes the ammount of datasubset's samples will be refresh between each generations
-         * @param ratio
-         */
-        void setRefreshRatio(float ratio);
-
-        /**
-         * \brief Return the classification table
-         */
-        [[nodiscard]] const std::vector<std::vector<uint64_t>>& getClassificationTable() const;
-        /**
-         * Return the data source
-         */
-        std::vector<std::reference_wrapper<const Data::DataHandler>> getDataSources() override;
+        void setDatasubsetRefreshRatio(float ratio);
     };
-}
+}; // namespace Learn
 
-#endif // GEGELATI_IMPROVEDCLASSIFICATIONLEARNINGENVIRONMENT_H
+#endif //DICE_PROJECT_IMPROVEDCLASSIFICATIONLEARNINGENVIRONMENT_H
