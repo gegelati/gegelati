@@ -1,193 +1,211 @@
 #include "learn/improvedClassificationLearningEnvironment.h"
 
-Learn::ImprovedClassificationLearningEnvironment::ImprovedClassificationLearningEnvironment(uint64_t nbClass, uint64_t sampleSize) : LearningEnvironment(nbClass), _classificationTable(nbClass, std::vector<uint64_t>(nbClass, 0)), _sampleSize(sampleSize), _currentMode(Learn::LearningMode::TRAINING),
-      _currentSample(sampleSize, sampleSize)
-{
-    this->_dataset = new Learn::DS();
-    this->_currentSampleIndex = -1;
-    this->_datasubsetRefreshRatio = 0.3;
-    this->_datasubsetSizeRatio = 0.4;
-    this->_currentClass = -1;
-    this->_datasubset = new Learn::DS();
-}
-
-const std::vector<std::vector<uint64_t>>& Learn::ImprovedClassificationLearningEnvironment::getClassificationTable() const
-{
-    return this->_classificationTable;
-}
+#include <algorithm>
+#include <numeric>
 
 void Learn::ImprovedClassificationLearningEnvironment::doAction(uint64_t actionID)
 {
+    // Base method
     LearningEnvironment::doAction(actionID);
-    this->_classificationTable.at(this->_currentClass).at(actionID)++;
-    this->changeCurrentSample();
+
+    // Classification table update
+    this->classificationTable.at(this->currentClass).at(actionID)++;
 }
 
-void Learn::ImprovedClassificationLearningEnvironment::reset(size_t seed, LearningMode mode)
+const std::vector<std::vector<uint64_t>>& Learn::
+    ImprovedClassificationLearningEnvironment::getClassificationTable() const
 {
-    for(auto & i : this->_classificationTable)
-        for(uint64_t & j : i)
-            j = 0;
-
-    this->_currentMode = mode;
-    this->_rng.setSeed(seed);
-    this->_currentSampleIndex = -1;
-
-    this->changeCurrentSample();
+    return this->classificationTable;
 }
 
 double Learn::ImprovedClassificationLearningEnvironment::getScore_DEFAULT() const
 {
-    double score = 0;
+    // Compute the average f1 score over all classes
+    // (chosen instead of the global f1 score as it gives an equal weight to
+    // the f1 score of each class, no matter its ratio within the observed
+    // population)
+    double averageF1Score = 0.0;
 
-    for (uint64_t classIdx = 0; classIdx < this->nbActions; classIdx++)
-    {
-        uint64_t truePositive = this->_classificationTable.at(classIdx).at(classIdx);
-
-        uint64_t falseNegative = 0;
-        for(int i=0 ; i<this->nbActions ; i++)
-            falseNegative += this->_classificationTable.at(classIdx).at(i);
-        falseNegative -= truePositive;
-
+    // for each class
+    for (uint64_t classIdx = 0; classIdx < classificationTable.size();
+         classIdx++) {
+        uint64_t truePositive = classificationTable.at(classIdx).at(classIdx);
+        uint64_t falseNegative =
+            std::accumulate(classificationTable.at(classIdx).begin(),
+                            classificationTable.at(classIdx).end(),
+                            (uint64_t)0) -
+            truePositive;
         uint64_t falsePositive = 0;
-        for(int i=0 ; i<this->nbActions ; i++)
-            falsePositive += this->_classificationTable.at(i).at(classIdx);
+        std::for_each(classificationTable.begin(), classificationTable.end(),
+                      [&classIdx, &falsePositive](
+                          const std::vector<uint64_t>& classifForClass) {
+                          falsePositive += classifForClass.at(classIdx);
+                      });
         falsePositive -= truePositive;
 
-        double recall = (double)truePositive / (double)(truePositive + falseNegative);
-        double precision = (double)truePositive / (double)(truePositive + falsePositive);
+        double recall =
+            (double)truePositive / (double)(truePositive + falseNegative);
+        double precision =
+            (double)truePositive / (double)(truePositive + falsePositive);
         // If true positive is 0, set score to 0.
-        score += (truePositive != 0) ? 2 * (precision * recall) / (precision + recall) : 0.0;
+        double fScore = (truePositive != 0)
+                            ? 2 * (precision * recall) / (precision + recall)
+                            : 0.0;
+        averageF1Score += fScore;
     }
 
-    score /= (double)this->nbActions;
+    averageF1Score /= (double)this->classificationTable.size();
 
-    return score;
+    return averageF1Score;
 }
 
 double Learn::ImprovedClassificationLearningEnvironment::getScore_BRSS() const
 {
-    int good = 0, total = 0;
+    double score;
+    uint64_t good=0, total=0;
+    auto classTable = this->classificationTable;
 
-    for(int i=0 ; i<this->_classificationTable.size() ; i++)
-        for(int j=0 ; j<this->_classificationTable.at(i).size() ; j++)
+    for(uint64_t i=0 ; i<classTable.size() ; i++)
+        for(uint64_t j=0 ; j<classTable.at(i).size() ; j++)
         {
-            total += this->_classificationTable.at(i).at(j);
             if(i == j)
-                good += this->_classificationTable.at(i).at(j);
+                good += classTable.at(i).at(j);
+            total += classTable.at(i).at(j);
         }
 
-    return (double)good / (double)total;
-}
-
-double Learn::ImprovedClassificationLearningEnvironment::getScore() const
-{
-    double score = 0;
-
-    //    if(algo == Learn::LearningAlgorithm::BRSS)
-    //        score = getScore_BRSS();
-    //    else if(algo == Learn::LearningAlgorithm::FS || algo == Learn::LearningAlgorithm::BANDIT)
-    //        score = 0;
-    //    else if(algo == Learn::LearningAlgorithm::LEXICASE)
-    //        score = 0;
-    //    else
-    //        score = getScore_DEFAULT();
-
-    score = getScore_BRSS();
+    score = (double)good / (double)total;
 
     return score;
 }
 
-void Learn::ImprovedClassificationLearningEnvironment::changeCurrentSample()
+double Learn::ImprovedClassificationLearningEnvironment::getScore_FS() const
 {
-    if(this->_currentMode != Learn::LearningMode::TESTING)
-        this->_currentSampleIndex = this->_rng.getUnsignedInt64(0, this->_datasubset->first.size()-1);
+
+}
+
+double Learn::ImprovedClassificationLearningEnvironment::getScore() const
+{
+    switch(this->currentAlgo)
+    {
+    case(Learn::LearningAlgorithm::BRSS):
+        //return this->getScore_BRSS();
+        return this->getScore_DEFAULT();
+    case(Learn::LearningAlgorithm::FS):
+        return this->getScore_FS();
+    default:
+        return this->getScore_DEFAULT();
+    }
+}
+
+void Learn::ImprovedClassificationLearningEnvironment::reset(size_t seed, LearningMode mode)
+{
+    // reset scores to 0 in classification table
+    for (std::vector<uint64_t>& perClass : this->classificationTable) {
+        for (uint64_t& score : perClass) {
+            score = 0;
+        }
+    }
+
+    //reset the RNG
+    this->rng.setSeed(seed);
+}
+
+void Learn::ImprovedClassificationLearningEnvironment::setAlgorithm(Learn::LearningAlgorithm algo)
+{
+    this->currentAlgo = algo;
+}
+
+void Learn::ImprovedClassificationLearningEnvironment::setDataset(Learn::DS *newDataset)
+{
+    this->dataset->first = newDataset->first;
+    this->dataset->second = newDataset->second;
+    this->datasubset->first = newDataset->first;
+    this->datasubset->second = newDataset->second;
+}
+
+
+void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BRSS()
+{
+    auto datasubsetSize = (uint64_t)floor(this->datasubsetSizeRatio * (float)this->dataset->first.size());
+    auto actualSize = this->datasubset->first.size();
+
+    // -------------------- Resize in case -------------------------------
+
+    if(actualSize > datasubsetSize)
+    {
+        for(uint64_t i=datasubsetSize ; i<actualSize ; i++)
+        {
+            this->datasubset->first.pop_back();
+            this->datasubset->second.pop_back();
+        }
+    }
+    else if(actualSize < datasubsetSize)
+    {
+        for(uint64_t i=actualSize ; i<datasubsetSize ; i++)
+        {
+            this->datasubset->first.push_back(*new std::vector<double>());
+            this->datasubset->second.push_back(0);
+        }
+    }
+
+    // --------------------------- Refresh -------------------------------
+
+    uint64_t nbSamplesToRefresh = (uint64_t)floor(this->datasubsetRefreshRatio * (float)this->datasubset->first.size());
+
+    for(int sample=0 ; sample < nbSamplesToRefresh ; sample++)
+    {
+        uint64_t wanted_class = this->rng.getUnsignedInt64(0, this->nbActions-1);
+        uint64_t dataset_idx = 0;
+        uint64_t datasubset_idx = this->rng.getUnsignedInt64(0, this->datasubset->first.size()-1);
+
+        while((uint64_t)this->dataset->second.at(dataset_idx) != wanted_class)
+            dataset_idx = this->rng.getUnsignedInt64(0, this->dataset->first.size()-1);
+
+
+        this->datasubset->first.at(datasubset_idx) = this->dataset->first.at(dataset_idx);
+        this->datasubset->second.at(datasubset_idx) = this->dataset->second.at(dataset_idx);
+    }
+}
+
+void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset()
+{
+    switch(this->currentAlgo)
+    {
+    case(LearningAlgorithm::BRSS):
+        this->refreshDatasubset_BRSS();
+        break;
+    case(LearningAlgorithm::FS):
+        this->refreshDatasubset_BRSS();
+        break;
+    default:
+        this->datasubset = this->dataset;
+        break;
+    }
+}
+
+void Learn::ImprovedClassificationLearningEnvironment::setDatasubsetSizeRatio(float ratio)
+{
+    if(ratio > 0 && ratio <1)
+        this->datasubsetSizeRatio = ratio;
     else
-        this->_currentSampleIndex = (this->_currentSampleIndex + 1) % this->_datasubset->first.size();
-
-    if(this->_datasubset->first.size() > 0)
-        this->_currentClass = (uint64_t)this->_datasubset->second.at(this->_currentSampleIndex);
+        printf("\nRatio need to be between 0 and 1, nothing have been done\n");
 }
 
-void Learn::ImprovedClassificationLearningEnvironment::setDatasubset(DS * datasubset)
+void Learn::ImprovedClassificationLearningEnvironment::setDatasubsetRefreshRatio(float ratio)
 {
-    this->_datasubset->first = std::vector< std::vector<double> >(datasubset->first);
-    this->_datasubset->second = std::vector<double>(datasubset->second);
-}
-
-std::vector<std::reference_wrapper<const Data::DataHandler>> Learn::ImprovedClassificationLearningEnvironment::getDataSources()
-{
-    return { this->_currentSample };
-}
-
-bool Learn::ImprovedClassificationLearningEnvironment::isTerminal() const
-{
-    return false;
-}
-
-void Learn::ImprovedClassificationLearningEnvironment::setDataset(Learn::DS *dataset)
-{
-    this->_dataset->first = std::vector< std::vector<double> >(dataset->first);
-    this->_dataset->second =  std::vector<double>(dataset->second);
-    this->setDatasubset(dataset);
-
-    this->changeCurrentSample();
-}
-
-void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset(Learn::LearningAlgorithm algo, size_t seed)
-{
-    if(algo == BRSS || algo == FS)
-        refreshDatasubset_BRSS(seed);
-    else if(algo == BANDIT || algo == LEXICASE)
-        refreshDatasubset_BANDIT(seed);
-}
-
-void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BRSS(size_t seed)
-{
-    srand(seed);
-    int samplesToRefresh = (int) (this->_datasubsetRefreshRatio * (double)this->_dataset->first.size());
-    int subsetSize = (int) (this->_datasubsetSizeRatio * (double)this->_dataset->first.size());
-
-    if(this->_datasubset->first.size() > subsetSize)
-    {
-        uint64_t temp_size = this->_datasubset->first.size();
-        for(int i=0 ; i<temp_size-subsetSize ; i++)
-        {
-            this->_datasubset->first.pop_back();
-            this->_datasubset->second.pop_back();
-        }
-    }
-    else if(this->_datasubset->first.size() < subsetSize)
-    {
-        uint64_t temp_size = this->_datasubset->first.size();
-        for(int i=temp_size ; i<subsetSize ; i++)
-        {
-            this->_datasubset->first.push_back(*new std::vector<double>());
-            this->_datasubset->second.push_back(0);
-        }
-    }
-
-    if(this->_datasubset->first.size() == subsetSize)
-    {
-        for(int i=0 ; i<samplesToRefresh ; i++)
-        {
-            int idx_ds = rand() % this->_dataset->first.size(), idx_dss = (rand() % this->_datasubset->first.size());
-
-            this->_datasubset->first.at(idx_dss) = this->_dataset->first.at(idx_ds);
-            this->_datasubset->second.at(idx_dss) = this->_dataset->second.at(idx_ds);
-        }
-    }
-}
-
-void Learn::ImprovedClassificationLearningEnvironment::refreshDatasubset_BANDIT(size_t seed)
-{
-
-}
-
-void Learn::ImprovedClassificationLearningEnvironment::setRefreshRatio(float ratio)
-{
-    if(ratio < 1 && ratio > 0)
-        this->_datasubsetRefreshRatio = ratio;
+    if(ratio > 0 && ratio <1)
+        this->datasubsetRefreshRatio = ratio;
     else
-        printf("Datasubset Refreshing Ratio Must Be between 0 and 1. Nothing is done.\n");
+        printf("\nRatio need to be between 0 and 1, nothing have been done\n");
+}
+
+void Learn::ImprovedClassificationLearningEnvironment::changeCurrentSample(LearningMode mode)
+{
+    if(mode != LearningMode::TESTING)
+        this->currentSampleIndex = this->rng.getUnsignedInt64(0, this->datasubset->first.size()-1);
+    else
+        this->currentSampleIndex = (this->currentSampleIndex + 1) % this->datasubset->first.size();
+
+    this->currentSample.setPointer(&this->datasubset->first.at(this->currentSampleIndex));
+    this->currentClass = (uint64_t)this->datasubset->second.at(this->currentSampleIndex);
 }
