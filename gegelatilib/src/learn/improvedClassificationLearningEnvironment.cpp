@@ -10,6 +10,10 @@ void Learn::ImprovedClassificationLearningEnvironment::doAction(uint64_t actionI
 
     // Classification table update
     this->classificationTable.at(this->currentClass).at(actionID)++;
+
+    // Count the good previsions
+    if(this->currentSampleIndex == actionID)
+        this->classStatsTracker.at(actionID)++;
 }
 
 const std::vector<std::vector<uint64_t>>& Learn::
@@ -78,9 +82,40 @@ double Learn::ImprovedClassificationLearningEnvironment::getScore_BRSS() const
     return score;
 }
 
-double Learn::ImprovedClassificationLearningEnvironment::getScore_FS() const
+double Learn::ImprovedClassificationLearningEnvironment::getScore_FS(int root, std::vector< std::vector<std::vector<uint64_t>> *> * table) const
 {
+    auto global_classification = std::vector<uint64_t>(this->nbActions, 0);
+    auto currentRoot_classification = std::vector<uint64_t>(this->nbActions, 0);
 
+    for(auto & classifTable : *table)
+    {
+        for(int c=0 ; c<this->nbActions ; c++)
+        {
+            global_classification.at(c) += classifTable->at(c).at(c);
+        }
+    }
+
+    auto classifTable = table->at(root);
+    for(int c=0 ; c<classifTable->size() ; c++)
+    {
+        currentRoot_classification.at(c) += classifTable->at(c).at(c);
+    }
+
+    double score = 0;
+
+    for(int c=0 ; c<this->nbActions ; c++)
+    {
+        //        printf("\nCURRENT : %ld", currentRoot_classification.at(c));
+        //        printf("\nGLOBAL : %ld", global_classification.at(c));
+
+        score += (double)currentRoot_classification.at(c) / (double)global_classification.at(c);
+    }
+
+    //    score /= (double)this->nbActions;
+
+    //    printf("\nSCORE : %lf\n", score);
+
+    return score;
 }
 
 double Learn::ImprovedClassificationLearningEnvironment::getScore() const
@@ -88,10 +123,9 @@ double Learn::ImprovedClassificationLearningEnvironment::getScore() const
     switch(this->currentAlgo)
     {
     case(Learn::LearningAlgorithm::BRSS):
-        //return this->getScore_BRSS();
-        return this->getScore_DEFAULT();
+        return this->getScore_BRSS();
     case(Learn::LearningAlgorithm::FS):
-        return this->getScore_FS();
+        return 0;
     default:
         return this->getScore_DEFAULT();
     }
@@ -108,6 +142,10 @@ void Learn::ImprovedClassificationLearningEnvironment::reset(size_t seed, Learni
 
     //reset the RNG
     this->rng.setSeed(seed);
+
+    //reset the counter
+    for(unsigned long & i : this->classStatsTracker)
+        i = 0;
 }
 
 void Learn::ImprovedClassificationLearningEnvironment::setAlgorithm(Learn::LearningAlgorithm algo)
@@ -208,4 +246,9 @@ void Learn::ImprovedClassificationLearningEnvironment::changeCurrentSample(Learn
 
     this->currentSample.setPointer(&this->datasubset->first.at(this->currentSampleIndex));
     this->currentClass = (uint64_t)this->datasubset->second.at(this->currentSampleIndex);
+}
+
+Learn::LearningAlgorithm Learn::ImprovedClassificationLearningEnvironment::getAlgo()
+{
+    return this->currentAlgo;
 }

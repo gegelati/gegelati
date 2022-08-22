@@ -93,10 +93,14 @@ namespace Learn {
          */
         Data::Array2DWrapper<double> currentSample;
 
+        /**
+         * \brief classStatsTracker track the IA's good previsions, useful for FS and BRSS algorithms
+         */
+        std::vector<uint64_t> classStatsTracker;
+
       private:
         virtual double getScore_DEFAULT() const;
         virtual double getScore_BRSS() const;
-        virtual double getScore_FS() const;
 
         void refreshDatasubset_BRSS();
 
@@ -118,6 +122,8 @@ namespace Learn {
 
             this->dataset = new DS();
             this->datasubset = new DS();
+
+            this->classStatsTracker = *new std::vector<uint64_t>(this->nbActions);
         };
 
         /**
@@ -145,6 +151,11 @@ namespace Learn {
          * The score represents the percentage of correct classification.
          */
         virtual double getScore() const override;
+
+        /**
+         * \brief This implementation is used to determinate the score for the FS algorithm
+         */
+        virtual double getScore_FS(int root, std::vector< std::vector<std::vector<uint64_t>> *> * table) const;
 
         /**
          * \brief Default implementation of the reset.
@@ -193,6 +204,12 @@ namespace Learn {
          * It needs to be between 0 and 1
          */
         void setDatasubsetRefreshRatio(float ratio);
+
+        /**
+         * \brief
+         * @return the current algorithm
+         */
+        LearningAlgorithm getAlgo();
     };
 }; // namespace Learn
 

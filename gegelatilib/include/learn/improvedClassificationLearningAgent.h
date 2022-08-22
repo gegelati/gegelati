@@ -40,6 +40,12 @@ namespace Learn {
         static_assert(
             std::is_convertible<BaseLearningAgent*, LearningAgent*>::value);
 
+      protected:
+        /**
+         * \brief classificationTables saves the classification tables for each root
+         */
+        mutable std::vector< std::vector<std::vector<uint64_t>>* > classificationTables;
+
       public:
         /**
          * \brief Constructor for LearningAgent.
@@ -55,15 +61,17 @@ namespace Learn {
             ImprovedClassificationLearningEnvironment& le,
             const Instructions::Set& iSet, const LearningParameters& p,
             const TPG::TPGFactory& factory = TPG::TPGFactory())
-            : BaseLearningAgent(le, iSet, p, factory){};
+            : BaseLearningAgent(le, iSet, p, factory)
+        {
+            this->classificationTables = *new std::vector< std::vector<std::vector<uint64_t>>* >();
+        };
 
         /**
          * \brief Specialization of the evaluateJob method for classification
          * purposes.
          *
          * This method returns a ClassificationEvaluationResult for the
-         * evaluated root instead of the usual EvaluationResult. The score per
-         * root corresponds to the F1 score for this class.
+         * evaluated root instead of the usual EvaluationResult.
          */
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
             TPG::TPGExecutionEngine& tee, const Job& root,
@@ -113,6 +121,19 @@ namespace Learn {
          * generation.
          */
         virtual void trainOneGeneration(uint64_t generationNumber) override;
+
+        /**
+         * \brief Evaluate all root TPGVertex of the TPGGraph.
+         *
+         * This method calls the evaluateJob method for every root TPGVertex
+         * of the TPGGraph. The method returns a sorted map associating each
+         * root vertex to its average score, in ascending order or score.
+         *
+         * \param[in] generationNumber the integer number of the current
+         * generation. \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         */
+        virtual std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
     };
 
     template <class BaseLearningAgent>
@@ -147,19 +168,21 @@ namespace Learn {
             // Reset the learning Environment
             le.reset(hash, mode);
 
-            uint64_t nbActions = 0;
-            while (!le.isTerminal() && nbActions < this->params.maxNbActionsPerEval)
+            uint64_t nbActions_onEval = 0;
+            while (!le.isTerminal() && nbActions_onEval < this->params.maxNbActionsPerEval)
             {
                 // Get the action
                 uint64_t actionID = ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())->getActionID();
                 // Do it
                 le.doAction(actionID);
                 // Count actions
-                nbActions++;
+                nbActions_onEval++;
             }
 
             // Update results
-            const auto& classificationTable = ((ImprovedClassificationLearningEnvironment&)le).getClassificationTable();
+            auto icle = dynamic_cast<Learn::ImprovedClassificationLearningEnvironment*>(&this->learningEnvironment);
+            auto classificationTable = icle->getClassificationTable();
+
             // for each class
             for (uint64_t classIdx = 0; classIdx < classificationTable.size(); classIdx++)
             {
@@ -311,9 +334,113 @@ namespace Learn {
     template<class BaseLearningAgent>
     void ImprovedClassificationLearningAgent<BaseLearningAgent>::trainOneGeneration(uint64_t generationNumber)
     {
-        Learn::LearningAgent::trainOneGeneration(generationNumber);
         auto icle = dynamic_cast<Learn::ImprovedClassificationLearningEnvironment*>(&this->learningEnvironment);
+
+        for (auto logger : this->loggers) {
+            logger.get().logNewGeneration(generationNumber);
+        }
+
+        // Populate Sequentially
+        Mutator::TPGMutator::populateTPG(*this->tpg, this->archive,
+                                         this->params.mutation, this->rng,
+                                         this->maxNbThreads);
+        for (auto logger : this->loggers) {
+            logger.get().logAfterPopulateTPG();
+        }
+
+        // Evaluate
+        auto results =
+            this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
+
+        // ----------------------------------------------- FS SCORE ----------------------------------------------------
+
+        if(icle->getAlgo() == Learn::LearningAlgorithm::FS || icle->getAlgo() == Learn::LearningAlgorithm::BANDIT)
+        {
+            int rootID = 0;
+            for(auto root = results.begin() ; root != results.end() ; ++root)
+            {
+                auto score = icle->getScore_FS(rootID, &this->classificationTables);
+                //auto score = 1;
+                auto nbEval = root->first->getNbEvaluation();
+
+                auto evaluationRes = *new EvaluationResult(score, nbEval);
+
+                *root->first = evaluationRes;
+
+                rootID++;
+            }
+        }
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        for (auto logger : this->loggers) {
+            logger.get().logAfterEvaluate(results);
+        }
+
+        // Remove worst performing roots
+        decimateWorstRoots(results);
+
+        // Update the best
+        this->updateEvaluationRecords(results);
+
+        for (auto logger : this->loggers) {
+            logger.get().logAfterDecimate();
+        }
+
+        // Does a validation or not according to the parameter doValidation
+        if (this->params.doValidation) {
+            auto validationResults =
+                this->evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
+            for (auto logger : this->loggers) {
+                logger.get().logAfterValidate(validationResults);
+            }
+        }
+
+        for (auto logger : this->loggers) {
+            logger.get().logEndOfTraining();
+        }
+
+        // -------------------------------- Refresh the datasubset -------------------------------------------
+
         icle->refreshDatasubset();
+
+        // Clear the classification tables
+        if(icle->getAlgo() == Learn::LearningAlgorithm::FS || icle->getAlgo() == Learn::LearningAlgorithm::BANDIT)
+            this->classificationTables.clear();
+    }
+
+
+
+    template<class BaseLearningAgent>
+    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex *> ImprovedClassificationLearningAgent<BaseLearningAgent>::
+        evaluateAllRoots(uint64_t generationNumber, LearningMode mode)
+    {
+        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> result;
+
+        // Create the TPGExecutionEngine for this evaluation.
+        // The engine uses the Archive only in training mode.
+        std::unique_ptr<TPG::TPGExecutionEngine> tee =
+            this->tpg->getFactory().createTPGExecutionEngine(this->env,  (mode == LearningMode::TRAINING) ? &this->archive : NULL);
+
+        for (int i = 0; i < this->tpg->getNbRootVertices(); i++)
+        {
+            auto job = this->makeJob(i, mode);
+            this->archive.setRandomSeed(job->getArchiveSeed());
+            std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(*tee, *job, generationNumber, mode, this->learningEnvironment);
+            result.emplace(avgScore, (*job).getRoot());
+
+            // Save the classification table
+            auto icle = dynamic_cast<Learn::ImprovedClassificationLearningEnvironment*>(&this->learningEnvironment);
+            auto classificationTable = icle->getClassificationTable();
+
+            if(icle->getAlgo() == Learn::LearningAlgorithm::FS || icle->getAlgo() == Learn::LearningAlgorithm::BANDIT)
+            {
+                auto tab = new std::vector< std::vector<uint64_t> >(classificationTable);
+                this->classificationTables.push_back(tab);
+            }
+        }
+
+        return result;
     }
 }; // namespace Learn
 
