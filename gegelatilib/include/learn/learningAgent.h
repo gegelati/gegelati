@@ -342,11 +342,11 @@ namespace Learn {
         void keepBestPolicy();
 
         /**
-         * \brief Takes a given root index and creates a job containing it.
+         * \brief Takes a given TPGVertex and creates a job containing it.
          * Useful for example in adversarial mode where a job could contain a
          * match of several roots.
          *
-         * \param[in] num The index of the root we want to put in a job.
+         * \param[in] vertex the TPGVertex stemming a TPGGraph to be evaluated.
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
          * \param[in] idx The index of the job, can be used to organize a map
@@ -357,7 +357,7 @@ namespace Learn {
          * \return A job representing the root.
          */
         virtual std::shared_ptr<Learn::Job> makeJob(
-            int num, Learn::LearningMode mode, int idx = 0,
+            const TPG::TPGVertex* vertex, Learn::LearningMode mode, int idx = 0,
             TPG::TPGGraph* tpgGraph = nullptr);
 
         /**

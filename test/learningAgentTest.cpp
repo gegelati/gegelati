@@ -189,14 +189,15 @@ TEST_F(LearningAgentTest, MakeJob)
 {
     Learn::LearningAgent la(le, set, params);
     la.init();
-    auto job = *la.makeJob(0, Learn::LearningMode::TRAINING);
+    auto job = *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
+                           Learn::LearningMode::TRAINING);
     ASSERT_NO_THROW(job.getArchiveSeed()) << "job should have an archive seed";
     ASSERT_NO_THROW(job.getIdx()) << "job should have an idx";
     ASSERT_EQ(la.getTPGGraph()->getRootVertices().at(0), job.getRoot())
         << "Encapsulate the root in a job shouldn't change it";
 
     Learn::LearningAgent la2(le, set, params);
-    auto job2 = la2.makeJob(0, Learn::LearningMode::TRAINING);
+    auto job2 = la2.makeJob(nullptr, Learn::LearningMode::TRAINING);
     ASSERT_EQ(nullptr, job2)
         << "Create a job when no root should return nullptr";
 }
@@ -231,7 +232,8 @@ TEST_F(LearningAgentTest, EvalRoot)
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = *la.makeJob(0, Learn::LearningMode::TRAINING);
+    auto job = *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
+                           Learn::LearningMode::TRAINING);
     ASSERT_NO_THROW(
         result = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
@@ -760,7 +762,8 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     Learn::ParallelLearningAgent pla(le, set, params);
     ASSERT_NO_THROW(result = pla.evaluateJob(
                         tee,
-                        *pla.makeJob(0, Learn::LearningMode::TRAINING, 0, &tpg),
+                        *pla.makeJob(tpg.getRootVertices().at(0),
+                                     Learn::LearningMode::TRAINING, 0, &tpg),
                         0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getResult(), 1.0)
