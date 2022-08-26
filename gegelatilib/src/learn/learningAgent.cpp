@@ -185,6 +185,36 @@ Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
     return result;
 }
 
+std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneRoot(
+    uint64_t generationNumber, Learn::LearningMode mode,
+    const TPG::TPGVertex* root)
+{
+    // Retrieve the index of the root TPGVertex
+    const std::vector<const TPG::TPGVertex*> vertices = tpg->getVertices();
+    std::vector<const TPG::TPGVertex*>::const_iterator iterator =
+        std::find(vertices.begin(), vertices.end(), root);
+    if (iterator == vertices.end()) {
+        throw std::runtime_error("The vertex to evaluate does not exist in the "
+                                 "TPGGraph of the LearningAgent.");
+    }
+
+    // Create the TPGExecutionEngine for this evaluation.
+    // The engine uses the Archive only in training mode.
+    std::unique_ptr<TPG::TPGExecutionEngine> tee =
+        this->tpg->getFactory().createTPGExecutionEngine(
+            this->env,
+            (mode == LearningMode::TRAINING) ? &this->archive : NULL);
+
+    // Create and evaluate the job
+    auto job = makeJob(*iterator, mode);
+    this->archive.setRandomSeed(job->getArchiveSeed());
+    std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
+        *tee, *job, generationNumber, mode, this->learningEnvironment);
+
+    // Return the result
+    return avgScore;
+}
+
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 {
     for (auto logger : loggers) {

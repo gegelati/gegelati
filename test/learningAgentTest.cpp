@@ -241,6 +241,28 @@ TEST_F(LearningAgentTest, EvalRoot)
         << "Average score should not exceed the score of a perfect player.";
 }
 
+TEST_F(LearningAgentTest, EvaluateOneRoot)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 1.0;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 10;
+
+    Learn::LearningAgent la(le, set, params);
+    Archive a; // For testing purposes, normally, the archive from the
+               // LearningAgent is used.
+
+    la.init();
+
+    std::shared_ptr<Learn::EvaluationResult> result;
+    ASSERT_NO_THROW(
+        result = la.evaluateOneRoot(0, Learn::LearningMode::TRAINING,
+                                    la.getTPGGraph()->getRootVertices().at(0)))
+        << "Evaluation from a root failed.";
+    ASSERT_LE(result->getResult(), 1.0)
+        << "Average score should not exceed the score of a perfect player.";
+}
+
 TEST_F(LearningAgentTest, EvalAllRoots)
 {
     params.archiveSize = 50;

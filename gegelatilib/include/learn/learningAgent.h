@@ -242,6 +242,27 @@ namespace Learn {
         evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
 
         /**
+         * \brief Evaluate one root TPGVertex of the TPGGraph.
+         *
+         * This method calls the evaluateJob method for a specified TPGVertex of
+         * the TPGGraph. The method returns the average score of this root. It
+         * is important to note that the specified TPGVertex may be an internal
+         * or even a leaf vertex of the graph (i.e. not a root).
+         *
+         * \param[in] generationNumber the integer number of the current
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * \param[in] root the evaluated TPGVertex of the TPGGraph.
+         * \return the averaged EvaluationResult for the given TPGVertex.
+         * \throws an exception in case the given root does not exist in the
+         * TPGGraph.
+         */
+        virtual std::shared_ptr<EvaluationResult> evaluateOneRoot(
+            uint64_t generationNumber, LearningMode mode,
+            const TPG::TPGVertex* root);
+
+        /**
          * \brief Train the TPGGraph for one generation.
          *
          * Training for one generation includes:
