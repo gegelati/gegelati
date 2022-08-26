@@ -169,7 +169,7 @@ namespace Learn {
          * have several loggers that log different things on different outputs
          * simultaneously.
          *
-         * @param[in] logger The logger that will be added to the vector.
+         * \param[in] logger The logger that will be added to the vector.
          */
         void addLogger(Log::LALogger& logger);
 
@@ -187,8 +187,10 @@ namespace Learn {
          * \param[in] job The job containing the root and archiveSeed for
          * the evaluation.
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
-         * evaluation. \param[in] le Reference to the LearningEnvironment to use
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * \param[in] le Reference to the LearningEnvironment to use
          * during the policy evaluation (may be different from the attribute of
          * the class in child LearningAgentClass).
          *
@@ -213,7 +215,8 @@ namespace Learn {
          * performed.
          *
          * \param[in] root The root TPGVertex whose number of evaluation is
-         * checked. \param[out] previousResult the std::shared_ptr to the
+         * checked.
+         * \param[out] previousResult the std::shared_ptr to the
          * EvaluationResult of the root from the resultsPerRoot if any.
          * \return true if the root has been evaluated enough times, false
          * otherwise.
@@ -230,7 +233,8 @@ namespace Learn {
          * root vertex to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
