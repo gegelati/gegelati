@@ -155,6 +155,13 @@ namespace Learn {
         const Archive& getArchive() const;
 
         /**
+         * \brief Accessor to the Environment of the TPGGraph.
+         *
+         * \return the const reference to the env attribute.
+         */
+        const Environment& getEnvironment() const;
+
+        /**
          * \brief Getter for the RNG used by the LearningAgent.
          *
          * \return Get a reference to the RNG.

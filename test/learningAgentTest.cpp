@@ -300,6 +300,15 @@ TEST_F(LearningAgentTest, GetArchive)
         << "Cannot get the archive of a LearningAgent.";
 }
 
+TEST_F(LearningAgentTest, GetEnvironment)
+{
+    Learn::LearningAgent la(le, set, params);
+
+    const Environment* env;
+    ASSERT_NO_THROW(env = &la.getEnvironment())
+        << "Getting the environment of the learning agent failed unexpectedly.";
+}
+
 TEST_F(LearningAgentTest, UpdateEvaluationRecords)
 {
     // test bestRoot methods
