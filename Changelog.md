@@ -6,9 +6,11 @@ _yyyy.mm.dd_
 ### New features
 * Add `Data::PointerWrapper` class to simplify interracing of GEGELATI with primitive variables (non-array) data from a learning environment.
 * Add `TPG::ExecutionsStats` class to analyze and export execution statistics gathered using an instrumented TPGGraph. Statistics include averages on numbers of evaluated teams, programs, program lines and instructions, execution traces and various distributions based on execution traces. The class also provides a method to export these statistics to a JSon file, which can be used by other programs and scripts.
+* Add a new `Learn::LearningAgent::EvaluateOneRoot()` method to ease the evaluation of individual policies in a trained TPG.
 
 ### Changes
 * CodeGen TPGs (Switch and Stack modes) now match the execution behaviour of `TPGExecutionEngine`, especially regarding cycle handling. Now, a team can't be visited more than once per inference, and edges leading to an already visited team are not evaluated (their program are not executed).
+* Change in the `Learn::LearningAgent::makeJob()` that now takes a `TPG::TPGVertex*` as an input instead of the index of a root. As a result, the method can now be used to evaluate a TPG from any vertex, including non-roots ones.
 
 ### Bug fix
 * Fix penalty score given to edges in cycle handling in `TPGSwitchGenerationEngine`, was `DBL_MIN` but should be `-DBL_MAX`.
