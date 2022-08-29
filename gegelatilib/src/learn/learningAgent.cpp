@@ -56,6 +56,11 @@ const Archive& Learn::LearningAgent::getArchive() const
     return this->archive;
 }
 
+const Environment& Learn::LearningAgent::getEnvironment() const
+{
+    return this->env;
+}
+
 Mutator::RNG& Learn::LearningAgent::getRNG()
 {
     return this->rng;
