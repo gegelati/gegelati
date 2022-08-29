@@ -228,6 +228,17 @@ namespace Learn {
         std::queue<std::shared_ptr<Learn::Job>> makeJobs(
             Learn::LearningMode mode,
             TPG::TPGGraph* tpgGraph = nullptr) override;
+
+        /**
+         * \brief Override of the LearningAgent::makeJob function.
+         *
+         * Currently, this method is not used in the makeJobs method of the
+         * AdversarialLearningAgent. For this reason, this overrides throws an
+         * exception when called.
+         */
+        std::shared_ptr<Learn::Job> makeJob(const TPG::TPGVertex* vertex,
+                                            Learn::LearningMode mode, int idx,
+                                            TPG::TPGGraph* tpgGraph) override;
     };
 } // namespace Learn
 

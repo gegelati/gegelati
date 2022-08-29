@@ -100,6 +100,24 @@ TEST_F(adversarialLearningAgentTest, Constructor)
         << "Destruction of the AdversarialLearningAgent failed.";
 }
 
+TEST_F(adversarialLearningAgentTest, MakeJob)
+{
+    params.nbIterationsPerPolicyEvaluation = 20;
+    params.nbIterationsPerJob = 2;
+    params.ratioDeletedRoots = 0.4;
+    size_t agentsPerEval = 5;
+    Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
+
+    la.init();
+
+    ASSERT_THROW(la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
+                            Learn::LearningMode::TRAINING, 0,
+                            la.getTPGGraph().get()),
+                 std::runtime_error)
+        << "Call to makeJob() method did not throw an exception as currently "
+           "expected for an AdversarialLearningAgent.";
+}
+
 TEST_F(adversarialLearningAgentTest, MakeJobs)
 {
     params.nbIterationsPerPolicyEvaluation = 20;

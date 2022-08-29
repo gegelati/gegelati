@@ -252,3 +252,11 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
 
     return jobs;
 }
+
+std::shared_ptr<Learn::Job> Learn::AdversarialLearningAgent::makeJob(
+    const TPG::TPGVertex* vertex, Learn::LearningMode mode, int idx,
+    TPG::TPGGraph* tpgGraph)
+{
+    throw std::runtime_error(
+        "Method not supported in AdversarialLearningAgent.");
+}
