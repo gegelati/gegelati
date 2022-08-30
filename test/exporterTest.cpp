@@ -199,6 +199,20 @@ TEST_F(ExporterTest, print)
         << "File export was executed without error.";
 }
 
+TEST_F(ExporterTest, printSubGraph)
+{
+    File::TPGGraphDotExporter dotExporter("exported_subtpg.dot", *tpg);
+
+    ASSERT_NO_THROW(dotExporter.printSubGraph(tpg->getVertices().at(0)))
+        << "File export was executed without error.";
+
+    // Compare the file with a golden ref
+    ASSERT_TRUE(compare_files("exported_subtpg.dot",
+                              TESTS_DAT_PATH "exported_subtpg_ref.dot"))
+        << "Differences between reference file and exported "
+           "file were detected.";
+}
+
 TEST_F(ExporterTest, FileContentVerification)
 {
     // This Test checks the content of the exported file against a golden

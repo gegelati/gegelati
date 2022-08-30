@@ -101,7 +101,7 @@ TEST(PointerWrapperTest, GetDataAtNativeType)
 #else
     ASSERT_THROW(
         d->getDataAt(typeid(double), 0).getSharedPointer<const double>(),
-        std::out_of_range)
+        std::runtime_error)
         << "In NDEBUG mode, a pointer with invalid type will be returned when "
            "requesting a non-handled type, even at a valid location.";
 #endif
