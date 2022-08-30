@@ -1,0 +1,43 @@
+~// File exported with GEGELATI vX.Y.Z
+~// On the YYYY-MM-DD HH:MM:SS
+~// With the <Printer>
+digraph{
+	graph[pad = "0.212, 0.055" bgcolor = lightgray]
+	node[shape=circle style = filled label = ""]
+		T0 [fillcolor="#1199bb"]
+		T1 [fillcolor="#66ddff"]
+		T2 [fillcolor="#66ddff"]
+		P0 [fillcolor="#cccccc" shape=point] //-2|-1|0|1|2|
+		I0 [shape=box style=invis label="0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n"]
+		P0 -> I0[style=invis]
+		A0 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="0"]
+		T0 -> P0 -> A0
+		P1 [fillcolor="#cccccc" shape=point] //-2|-1|0|1|2|
+		I1 [shape=box style=invis label=""]
+		P1 -> I1[style=invis]
+		T0 -> P1 -> T1
+		P2 [fillcolor="#cccccc" shape=point] //-2|-1|0|1|2|
+		I2 [shape=box style=invis label=""]
+		P2 -> I2[style=invis]
+		A1 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="1"]
+		T1 -> P2 -> A1
+		P3 [fillcolor="#cccccc" shape=point] //-2|-1|0|1|2|
+		I3 [shape=box style=invis label=""]
+		P3 -> I3[style=invis]
+		T1 -> P3 -> T2
+		T1 -> P0
+		P4 [fillcolor="#cccccc" shape=point] //-2|-1|0|1|2|
+		I4 [shape=box style=invis label=""]
+		P4 -> I4[style=invis]
+		A2 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="2"]
+		T1 -> P4 -> A2
+		P5 [fillcolor="#cccccc" shape=point] //-2|-1|0|1|2|
+		I5 [shape=box style=invis label=""]
+		P5 -> I5[style=invis]
+		A3 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="2"]
+		T2 -> P5 -> A3
+		P6 [fillcolor="#cccccc" shape=point] //-2|-1|0|1|2|
+		I6 [shape=box style=invis label=""]
+		P6 -> I6[style=invis]
+		T2 -> P6 -> T1
+}
