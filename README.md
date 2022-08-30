@@ -69,6 +69,10 @@ The shared library will be installed:
 * On Linux, in the shared folders `/usr/local/lib/cmake/GEGELATI`, `/usr/lib/libGEGELATI.so.<version>`, `/usr/local/include/GEGELATI/`, and `/usr/local/share/doc/GEGELATI-<version>`.
 
 ## :book: How to Use the GEGELATI Library
+
+### Learn with our tutorials
+For a gentle introduction to the c++ API of GEGELATI, we strongly recommend you to follow our [tutorials](https://gegelati.github.io/gegelati-tutorial/). These tutorials will guide you through the different features of the library and will help you better understand the functionning of TPGs.
+
 ### Learn by Examples
 Since sometimes, a simple example is worth 10.000 pages of documentations, examples of applications built with the GEGELATI library are available in the [gegelati-apps repository](https://github.com/gegelati/gegelati-apps).
 
