@@ -6,6 +6,7 @@ _yyyy.mm.dd_
 ### New features
 * Add `Data::PointerWrapper` class to simplify interracing of GEGELATI with primitive variables (non-array) data from a learning environment.
 * Add `TPG::ExecutionsStats` class to analyze and export execution statistics gathered using an instrumented TPGGraph. Statistics include averages on numbers of evaluated teams, programs, program lines and instructions, execution traces and various distributions based on execution traces. The class also provides a method to export these statistics to a JSon file, which can be used by other programs and scripts.
+* Add a `File::TPGDotExporter::printSubgraph()` method to print only a subgraph from a TPG, starting from a specified `TPGVertex`. This method can notably be used to export the champion TPG throughout the training process, without having to remove other roots from the TPG.
 * Add a new `Learn::LearningAgent::evaluateOneRoot()` method to ease the evaluation of individual policies in a trained TPG.
 * Add a new `Learn::LearningAgent::getEnvironment()` method for convenience.
 
