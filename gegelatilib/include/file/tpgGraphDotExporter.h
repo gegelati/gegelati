@@ -215,6 +215,21 @@ namespace File {
          * TPGGraphDotExporter into a dot file.
          */
         void print();
+
+        /**
+         * \brief Print a sub-tree of the TPGGraph given when constructing the
+         * TPGGraphDotExporter into a dot file.
+         *
+         * Contrary to the print() method, which prints the whole TPG, this
+         * method only prints the TPG stemming from the TPG::TPGVertex passed as
+         * a parameter. Hence, only vertices and programs connected to this
+         * TPGVertex will be printed in the file, and all others will be
+         * ignored.
+         *
+         * \param[in] root The vertex used as a starting point to print a
+         * connected TPG.
+         */
+        void printSubGraph(const TPG::TPGVertex* root);
     };
 }; // namespace File
 
