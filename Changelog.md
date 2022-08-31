@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
-## Release version x.y.x
-_yyyy.mm.dd_
+## Release version 1.2.0 - Cantutuccini flavor
+_2022.08.31_
 
 ### New features
 * Add `Data::PointerWrapper` class to simplify interracing of GEGELATI with primitive variables (non-array) data from a learning environment.
