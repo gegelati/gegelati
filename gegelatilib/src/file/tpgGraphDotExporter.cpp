@@ -199,6 +199,10 @@ void File::TPGGraphDotExporter::print()
     }
 
     // Reset program ids
+    // This is done to ensure that a program without an ID is properly printed
+    // when first encountered. However, this ruins the original purpose of the
+    // ID, which should remain constant through multiple exports and
+    // generations.
     this->programID.erase(this->programID.begin(), this->programID.end());
 
     // Print all edges
@@ -209,6 +213,69 @@ void File::TPGGraphDotExporter::print()
 
     // Print footer
     this->printTPGGraphFooter();
+
+    // flush file
+    fflush(pFile);
+}
+
+void File::TPGGraphDotExporter::printSubGraph(const TPG::TPGVertex* root)
+{
+    // Print the graph header
+    this->printTPGGraphHeader();
+
+    // Reset program ids
+    // This is done to ensure that a program without an ID is properly printed
+    // when first encountered. However, this ruins the original purpose of the
+    // ID, which should remain constant through multiple exports and
+    // generations.
+    this->programID.erase(this->programID.begin(), this->programID.end());
+
+    // Print edges stemming from the given root
+    // Init a Breadth First scan
+    std::deque<const TPG::TPGVertex*> verticesToVisit;
+    verticesToVisit.push_back(root);
+    std::vector<const TPG::TPGVertex*> visitedVertices;
+    std::vector<const TPG::TPGEdge*> edgesToPrint;
+
+    while (!verticesToVisit.empty()) {
+        // Get first vertex
+        const TPG::TPGVertex* vertex = verticesToVisit.front();
+        verticesToVisit.pop_front();
+        visitedVertices.push_back(vertex);
+
+        // Print it if it is a team (actions are printed with edges)
+        const TPG::TPGTeam* team = nullptr;
+        if ((team = dynamic_cast<const TPG::TPGTeam*>(vertex)) != nullptr) {
+            this->printTPGTeam(*(const TPG::TPGTeam*)vertex);
+
+            // Put its outgoing edge in the list for later print.
+            // Edges must be printed after their destination team has been
+            // written.
+            for (auto edge : team->getOutgoingEdges()) {
+                edgesToPrint.push_back(edge);
+
+                // If the edge destination is a Team, put it in the list of
+                // vertex to be visited.
+                const TPG::TPGVertex* dest = edge->getDestination();
+                if (dynamic_cast<const TPG::TPGTeam*>(dest) != nullptr &&
+                    std::find(visitedVertices.begin(), visitedVertices.end(),
+                              dest) == visitedVertices.end() &&
+                    std::find(verticesToVisit.begin(), verticesToVisit.end(),
+                              dest) == verticesToVisit.end()) {
+                    verticesToVisit.push_back(dest);
+                }
+            }
+        }
+    }
+
+    // Print edges
+    for (const TPG::TPGEdge* edge : edgesToPrint) {
+        this->printTPGEdge(*edge);
+    }
+
+    // Print specific footer (no need for rank, since there is a single root)
+    this->offset = "";
+    fprintf(pFile, "%s}\n", this->offset.c_str());
 
     // flush file
     fflush(pFile);

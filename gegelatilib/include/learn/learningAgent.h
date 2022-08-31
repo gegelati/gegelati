@@ -155,6 +155,13 @@ namespace Learn {
         const Archive& getArchive() const;
 
         /**
+         * \brief Accessor to the Environment of the TPGGraph.
+         *
+         * \return the const reference to the env attribute.
+         */
+        const Environment& getEnvironment() const;
+
+        /**
          * \brief Getter for the RNG used by the LearningAgent.
          *
          * \return Get a reference to the RNG.
@@ -169,7 +176,7 @@ namespace Learn {
          * have several loggers that log different things on different outputs
          * simultaneously.
          *
-         * @param[in] logger The logger that will be added to the vector.
+         * \param[in] logger The logger that will be added to the vector.
          */
         void addLogger(Log::LALogger& logger);
 
@@ -187,8 +194,10 @@ namespace Learn {
          * \param[in] job The job containing the root and archiveSeed for
          * the evaluation.
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
-         * evaluation. \param[in] le Reference to the LearningEnvironment to use
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * \param[in] le Reference to the LearningEnvironment to use
          * during the policy evaluation (may be different from the attribute of
          * the class in child LearningAgentClass).
          *
@@ -213,7 +222,8 @@ namespace Learn {
          * performed.
          *
          * \param[in] root The root TPGVertex whose number of evaluation is
-         * checked. \param[out] previousResult the std::shared_ptr to the
+         * checked.
+         * \param[out] previousResult the std::shared_ptr to the
          * EvaluationResult of the root from the resultsPerRoot if any.
          * \return true if the root has been evaluated enough times, false
          * otherwise.
@@ -230,12 +240,34 @@ namespace Learn {
          * root vertex to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
                               const TPG::TPGVertex*>
         evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
+
+        /**
+         * \brief Evaluate one root TPGVertex of the TPGGraph.
+         *
+         * This method calls the evaluateJob method for a specified TPGVertex of
+         * the TPGGraph. The method returns the average score of this root. It
+         * is important to note that the specified TPGVertex may be an internal
+         * or even a leaf vertex of the graph (i.e. not a root).
+         *
+         * \param[in] generationNumber the integer number of the current
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * \param[in] root the evaluated TPGVertex of the TPGGraph.
+         * \return the averaged EvaluationResult for the given TPGVertex.
+         * \throws an exception in case the given root does not exist in the
+         * TPGGraph.
+         */
+        virtual std::shared_ptr<EvaluationResult> evaluateOneRoot(
+            uint64_t generationNumber, LearningMode mode,
+            const TPG::TPGVertex* root);
 
         /**
          * \brief Train the TPGGraph for one generation.
@@ -338,11 +370,11 @@ namespace Learn {
         void keepBestPolicy();
 
         /**
-         * \brief Takes a given root index and creates a job containing it.
+         * \brief Takes a given TPGVertex and creates a job containing it.
          * Useful for example in adversarial mode where a job could contain a
          * match of several roots.
          *
-         * \param[in] num The index of the root we want to put in a job.
+         * \param[in] vertex the TPGVertex stemming a TPGGraph to be evaluated.
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
          * \param[in] idx The index of the job, can be used to organize a map
@@ -353,7 +385,7 @@ namespace Learn {
          * \return A job representing the root.
          */
         virtual std::shared_ptr<Learn::Job> makeJob(
-            int num, Learn::LearningMode mode, int idx = 0,
+            const TPG::TPGVertex* vertex, Learn::LearningMode mode, int idx = 0,
             TPG::TPGGraph* tpgGraph = nullptr);
 
         /**

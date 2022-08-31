@@ -1,8 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
  *
  * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
- * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2021)
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,51 +36,26 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/instrumented/tpgActionInstrumented.h"
-#include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgTeamInstrumented.h"
+/// doc in ../README.md
+#include <stdio.h>
+#include <stdlib.h>
 
-double TPG::TPGExecutionEngineInstrumented::evaluateEdge(const TPGEdge& edge)
+#include "TwoTeamsOneCycleNegativeBid.h"
+#include "csvparser.h"
+#include "inferenceCSV.h"
+
+double* in1;
+
+int main(int argc, char* argv[])
 {
-    dynamic_cast<const TPGEdgeInstrumented&>(edge).incrementNbVisits();
-    return TPGExecutionEngine::evaluateEdge(edge);
-}
+    double tab[7];
+    in1 = tab;
 
-const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(
-    const TPGTeam& team, const std::vector<const TPGVertex*>& excluded)
-{
-    dynamic_cast<const TPGTeamInstrumented&>(team).incrementNbVisits();
+    if (argc != 2) {
+        fprintf(stderr, "error the program only require one parameter : the "
+                        "filename of the data.\n");
+        return 4;
+    }
 
-    const TPGEdge& winningEdge =
-        TPGExecutionEngine::evaluateTeam(team, excluded);
-    dynamic_cast<const TPGEdgeInstrumented&>(winningEdge)
-        .incrementNbTraversal();
-    return winningEdge;
-}
-
-const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngineInstrumented::
-    executeFromRoot(const TPG::TPGVertex& root)
-{
-    const std::vector<const TPG::TPGVertex*> result =
-        TPGExecutionEngine::executeFromRoot(root);
-
-    // Increment action visit
-    dynamic_cast<const TPGActionInstrumented*>(result.back())
-        ->incrementNbVisits();
-
-    this->traceHistory.push_back(result);
-
-    return result;
-}
-
-const std::vector<std::vector<const TPG::TPGVertex*>>& TPG::
-    TPGExecutionEngineInstrumented::getTraceHistory() const
-{
-    return this->traceHistory;
-}
-
-void TPG::TPGExecutionEngineInstrumented::clearTraceHistory()
-{
-    this->traceHistory.clear();
+    return inferenceCSV(argv[1], inferenceTPG);
 }

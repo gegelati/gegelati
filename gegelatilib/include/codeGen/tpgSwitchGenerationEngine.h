@@ -1,6 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
+ * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
@@ -145,10 +146,10 @@ namespace CodeGen {
         virtual void generateAction(const TPG::TPGAction& action);
 
         /**
-         * @brief generates function names depending on the vertex type
+         * \brief Generate function name depending on the vertex type.
          *
-         * @param v vertex to be named
-         * @return std::string name of the vertex
+         * \param v vertex to be named.
+         * \return std::string name of the vertex.
          */
         std::string vertexName(const TPG::TPGVertex& v);
     };

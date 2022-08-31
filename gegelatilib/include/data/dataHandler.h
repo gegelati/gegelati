@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -142,7 +142,7 @@ namespace Data {
          *
          * \return the cached value of the Hash.
          */
-        size_t getHash() const;
+        virtual size_t getHash() const;
 
         /**
          * \brief Check a given DataHandler can handle data for the given data

@@ -1,6 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
+ * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
@@ -53,6 +54,7 @@
 #include <data/constantHandler.h>
 #include <data/dataHandler.h>
 #include <data/hash.h>
+#include <data/pointerWrapper.h>
 #include <data/primitiveTypeArray.h>
 #include <data/primitiveTypeArray2D.h>
 #include <data/untypedSharedPtr.h>
@@ -109,6 +111,7 @@
 #include <tpg/tpgTeam.h>
 #include <tpg/tpgVertex.h>
 
+#include <tpg/instrumented/executionStats.h>
 #include <tpg/instrumented/tpgActionInstrumented.h>
 #include <tpg/instrumented/tpgEdgeInstrumented.h>
 #include <tpg/instrumented/tpgExecutionEngineInstrumented.h>

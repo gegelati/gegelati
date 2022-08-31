@@ -1,6 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
  *
+ * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -51,6 +52,11 @@ namespace TPG {
      */
     class TPGExecutionEngineInstrumented : public TPGExecutionEngine
     {
+      protected:
+        /// History of all previous execution traces. New traces are pushed
+        /// back.
+        std::vector<std::vector<const TPGVertex*>> traceHistory;
+
       public:
         /**
          * \brief Main constructor of the class.
@@ -95,6 +101,13 @@ namespace TPG {
          */
         const std::vector<const TPGVertex*> executeFromRoot(
             const TPGVertex& root) override;
+
+        /// Get all previous execution traces.
+        const std::vector<std::vector<const TPGVertex*>>& getTraceHistory()
+            const;
+
+        /// Clear the trace history from all previous execution trace.
+        void clearTraceHistory();
     };
 }; // namespace TPG
 

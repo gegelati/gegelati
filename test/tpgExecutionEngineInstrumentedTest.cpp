@@ -1,6 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
+ * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
@@ -291,4 +292,26 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
     // Check nb visits
     ASSERT_EQ(action->getNbVisits(), 1)
         << "Nb visit after evaluation is incorrect.";
+}
+
+TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors)
+{
+    TPG::TPGExecutionEngineInstrumented tpeei(*e);
+    std::vector<const TPG::TPGVertex*> result;
+
+    ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
+        << "Trace history isn't empty before execution.";
+
+    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
+    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
+
+    ASSERT_EQ(tpeei.getTraceHistory().size(), 2)
+        << "Wrong number of recorded traces.";
+    ASSERT_EQ(result, tpeei.getTraceHistory().at(0))
+        << "Recorded trace is different from result trace.";
+
+    ASSERT_NO_THROW(tpeei.clearTraceHistory())
+        << "Clearing trace history failed unexpectedly.";
+    ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
+        << "Trace history isn't empty after clear.";
 }

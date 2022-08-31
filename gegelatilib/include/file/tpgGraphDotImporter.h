@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
@@ -381,8 +381,10 @@ namespace File {
          * \param[in] filePath initial path to the file where the dot content
          * will be written.
          * \param[in] environment the environment in which the tpg Graph should
-         * be built \param[in] tpgref a Reference to the TPGGraph to buiuld from
-         * the .dot file \throws std::runtime_error in case no file could be
+         * be built
+         * \param[in] tpgref a Reference to the TPGGraph to build from
+         * the .dot file
+         * \throws std::runtime_error in case no file could be
          * opened at the given filePath.
          */
         TPGGraphDotImporter(const char* filePath, Environment environment,

@@ -1,6 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
  *
+ * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -36,6 +37,7 @@
 #ifndef ADVERSARIAL_JOB_H
 #define ADVERSARIAL_JOB_H
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 

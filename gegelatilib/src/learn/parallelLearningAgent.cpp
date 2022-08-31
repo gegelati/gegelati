@@ -65,8 +65,9 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
                 (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
         // Execute for all root
-        for (int i = 0; i < this->tpg->getNbRootVertices(); i++) {
-            auto job = makeJob(i, mode);
+        auto roots = this->tpg->getRootVertices();
+        for (int i = 0; i < roots.size(); i++) {
+            auto job = makeJob(roots.at(i), mode);
 
             this->archive.setRandomSeed(job->getArchiveSeed());
 

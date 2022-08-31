@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -197,6 +197,20 @@ TEST_F(ExporterTest, print)
 
     ASSERT_NO_THROW(dotExporter.print())
         << "File export was executed without error.";
+}
+
+TEST_F(ExporterTest, printSubGraph)
+{
+    File::TPGGraphDotExporter dotExporter("exported_subtpg.dot", *tpg);
+
+    ASSERT_NO_THROW(dotExporter.printSubGraph(tpg->getVertices().at(0)))
+        << "File export was executed without error.";
+
+    // Compare the file with a golden ref
+    ASSERT_TRUE(compare_files("exported_subtpg.dot",
+                              TESTS_DAT_PATH "exported_subtpg_ref.dot"))
+        << "Differences between reference file and exported "
+           "file were detected.";
 }
 
 TEST_F(ExporterTest, FileContentVerification)

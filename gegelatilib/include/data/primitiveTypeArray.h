@@ -1,8 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
  * Cedric Leonard <cleonard@insa-rennes.fr> (2021)
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -41,6 +41,7 @@
 
 #include "data/arrayWrapper.h"
 #include "data/dataHandler.h"
+#include "data/pointerWrapper.h"
 
 namespace Data {
     /**
@@ -72,6 +73,9 @@ namespace Data {
 
         /// Copy content from an ArrayWrapper
         PrimitiveTypeArray(const ArrayWrapper<T>& other);
+
+        /// Copy content from a PointerWrapper
+        PrimitiveTypeArray(const PointerWrapper<T>& other);
 
         /// Default destructor.
         virtual ~PrimitiveTypeArray() = default;
@@ -149,6 +153,22 @@ namespace Data {
                 // data from other.
                 this->data[i] = this->containerPtr->at(i);
             }
+        }
+        else {
+            this->resetData();
+        }
+
+        // Set the pointer to the right data
+        this->setPointer(&(this->data));
+    }
+
+    template <class T>
+    PrimitiveTypeArray<T>::PrimitiveTypeArray(const PointerWrapper<T>& other)
+        : ArrayWrapper<T>(other, 1), data(1)
+    {
+        if (other.containerPtr != NULL) {
+            // Copy the data from the given PointerWrapper
+            this->data[0] = *other.containerPtr;
         }
         else {
             this->resetData();
