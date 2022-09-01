@@ -85,6 +85,7 @@
 #include <learn/classificationLearningAgent.h>
 #include <learn/classificationLearningEnvironment.h>
 
+#include <log/cycleDetectionLALogger.h>
 #include <log/laBasicLogger.h>
 #include <log/laLogger.h>
 #include <log/laPolicyStatsLogger.h>
