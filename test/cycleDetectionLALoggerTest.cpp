@@ -85,3 +85,107 @@ TEST_F(CycleDetectionLoggerTest, Constructor)
     }
     ASSERT_NO_THROW(Log::CycleDetectionLALogger l(*la, std::cerr));
 }
+
+TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
+{
+    la->init();
+    std::stringstream strStr;
+    Log::CycleDetectionLALogger l(*la, strStr);
+
+    l.logAfterPopulateTPG();
+    std::string s = strStr.str();
+
+    ASSERT_EQ(s.length(), 0)
+        << "TPG after initialization should not contain any cycle.";
+
+    // Change the TPG
+    //
+    //  T0-->T1   T4
+    //   |   |     |
+    //   v   v     v
+    //  T2-->T3   T5
+    //       |     |
+    //       v     v
+    //       A0    A1
+
+    auto tpg = la->getTPGGraph();
+    tpg->clear();
+    std::vector<const TPG::TPGTeam*> teams;
+    for (auto idx = 0; idx < 6; idx++) {
+        teams.push_back(&(tpg->addNewTeam()));
+    }
+
+    std::vector<const TPG::TPGAction*> actions;
+    for (auto idx = 0; idx < 2; idx++) {
+        actions.push_back(&tpg->addNewAction(0));
+    }
+
+    // tree 1
+    tpg->addNewEdge(*teams[0], *teams[1],
+                    std::make_shared<Program::Program>(la->getEnvironment()));
+    tpg->addNewEdge(*teams[0], *teams[2],
+                    std::make_shared<Program::Program>(la->getEnvironment()));
+    tpg->addNewEdge(*teams[1], *teams[3],
+                    std::make_shared<Program::Program>(la->getEnvironment()));
+    tpg->addNewEdge(*teams[2], *teams[3],
+                    std::make_shared<Program::Program>(la->getEnvironment()));
+    tpg->addNewEdge(*teams[3], *actions[0],
+                    std::make_shared<Program::Program>(la->getEnvironment()));
+
+    tpg->addNewEdge(*teams[4], *teams[5],
+                    std::make_shared<Program::Program>(la->getEnvironment()));
+    tpg->addNewEdge(*teams[5], *actions[1],
+                    std::make_shared<Program::Program>(la->getEnvironment()));
+
+    // Check cycle detection again
+    strStr.str(std::string()); // clear the string
+    l.logAfterPopulateTPG();
+    s = strStr.str();
+
+    ASSERT_EQ(s.length(), 0) << "Custom TPG does not contain any cycle.";
+
+    // Add a cycle to the graph
+    // A subgraph won't be traversed by the DFS because it has no root.
+    //
+    // .>T0-->T1   T4
+    // |  |   |     |
+    // |  v   v     v
+    // | T2-->T3   T5
+    // |_____/|     |
+    //        v     v
+    //        A0    A1
+
+    tpg->addNewEdge(*teams[3], *teams[0],
+                    std::make_shared<Program::Program>(la->getEnvironment()));
+
+    // Check cycle detection again
+    strStr.str(std::string()); // clear the string
+    l.logAfterPopulateTPG();
+    s = strStr.str();
+
+    ASSERT_GT(s.length(), 0) << "Cycle in custom TPG is not detected.";
+
+    // Add a root to the cycle.
+    //        T6
+    //         |
+    //         v
+    // .>T0-->T1   T4
+    // |  |   |     |
+    // |  v   v     v
+    // | T2-->T3   T5
+    // |_____/|     |
+    //        v     v
+    //        A0    A1
+
+    // Add a new team and edge
+    teams.push_back(&(tpg->addNewTeam()));
+    tpg->addNewEdge(*teams[6], *teams[1],
+                    std::make_shared<Program::Program>(la->getEnvironment()));
+
+    // Check cycle detection again
+    strStr.str(std::string()); // clear the string
+    l.logAfterPopulateTPG();
+    s = strStr.str();
+
+    ASSERT_GT(s.length(), 0) << "Cycle in custom TPG is not detected.";
+}
