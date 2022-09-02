@@ -10,6 +10,10 @@ namespace Log {
      */
     class CycleDetectionLALogger : public LALogger
     {
+      private:
+        /// Control whether a message is printed when no loop is detected.
+        bool logOnSuccess;
+
       public:
         /**
          * \brief Same constructor as LALogger. Default output is cerr.
@@ -18,10 +22,13 @@ namespace Log {
          * CycleDetectionLALogger.
          * \param[in] out The output stream the logger will send
          * elements to.
+         * \param[in] logOnSuccess When true, the logger will log the absence of
+         * cycles.
          */
         explicit CycleDetectionLALogger(Learn::LearningAgent& la,
-                                        std::ostream& out = std::cerr)
-            : LALogger(la, out)
+                                        std::ostream& out = std::cerr,
+                                        bool logOnSuccess = false)
+            : LALogger(la, out), logOnSuccess(logOnSuccess)
         {
         }
 

@@ -144,6 +144,13 @@ TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
 
     ASSERT_EQ(s.length(), 0) << "Custom TPG does not contain any cycle.";
 
+    // Check with a "positive" detection for this case
+    std::stringstream strStr2;
+    Log::CycleDetectionLALogger l2(*la, strStr2, true);
+    l2.logAfterPopulateTPG();
+    ASSERT_EQ(strStr2.str(), "No cycle detected in this TPG.")
+        << "Logging from \"logOnDetection\" logger in incorrect.";
+
     // Add a cycle to the graph
     // A subgraph won't be traversed by the DFS because it has no root.
     //
