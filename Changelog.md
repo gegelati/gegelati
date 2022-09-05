@@ -1,5 +1,16 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_yyyy.mm.dd_
+
+### New features
+* Add a `Log::CycleDetectionLALogger` for detecting directed cycles in TPG graphs. Using this logger, the detection is automatically at each generation right after populating the TPG with new vertices. In case a cycle is detected, a message is printed in `std::cerr`.
+
+### Changes
+
+### Bug fix
+
+
 ## Release version 1.2.0 - Cantutuccini flavor
 _2022.08.31_
 
