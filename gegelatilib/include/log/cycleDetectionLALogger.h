@@ -37,20 +37,14 @@ namespace Log {
          *
          * \brief Does nothing in this logger.
          */
-        virtual void logHeader() override
-        {
-            // nothing to log
-        }
+        virtual void logHeader() override;
 
         /**
          * Inherited via LALogger.
          *
          * \brief Does nothing in this logger.
          */
-        virtual void logNewGeneration(uint64_t& generationNumber) override
-        {
-            // nothing to log
-        }
+        virtual void logNewGeneration(uint64_t& generationNumber) override;
 
         /**
          * Inherited via LALogger.
@@ -69,19 +63,14 @@ namespace Log {
          */
         virtual void logAfterEvaluate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) override
-        {
-            // nothing to log
-        }
+                          const TPG::TPGVertex*>& results) override;
 
         /**
          * Inherited via LaLogger.
          *
          * \brief Does nothing in this logger.
          */
-        virtual void logAfterDecimate() override{
-            // nothing to log
-        };
+        virtual void logAfterDecimate() override;
 
         /**
          * Inherited via LaLogger.
@@ -95,19 +84,12 @@ namespace Log {
          */
         virtual void logAfterValidate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) override
-        {
-            // nothing to log
-        }
-
+                          const TPG::TPGVertex*>& results) override;
         /**
          * Inherited via LaLogger
          *
          * \brief Does nothing in this logger.
          */
-        virtual void logEndOfTraining() override
-        {
-            // nothing to log
-        }
+        virtual void logEndOfTraining() override;
     };
 }; // namespace Log

@@ -86,6 +86,28 @@ TEST_F(CycleDetectionLoggerTest, Constructor)
     ASSERT_NO_THROW(Log::CycleDetectionLALogger l(*la, std::cerr));
 }
 
+TEST_F(CycleDetectionLoggerTest, EmptyMethods)
+{
+    la->init();
+    std::stringstream strStr;
+    Log::CycleDetectionLALogger l(*la, strStr);
+
+    // Call to all empty methods
+    l.logAfterDecimate();
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        results;
+    l.logAfterEvaluate(results);
+    l.logAfterValidate(results);
+    l.logEndOfTraining();
+    l.logHeader();
+    uint64_t generation;
+    l.logNewGeneration(generation);
+
+    ASSERT_EQ(strStr.str().length(), 0)
+        << "Empty methods should not generate any log.";
+}
+
 TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
 {
     la->init();

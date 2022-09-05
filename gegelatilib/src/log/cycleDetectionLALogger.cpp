@@ -5,6 +5,16 @@
 #include "learn/learningAgent.h"
 #include "log/cycleDetectionLALogger.h"
 
+void Log::CycleDetectionLALogger::logHeader()
+{
+    // nothing to log
+}
+
+void Log::CycleDetectionLALogger::logNewGeneration(uint64_t& generationNumber)
+{
+    // nothing to log
+}
+
 void Log::CycleDetectionLALogger::logAfterPopulateTPG()
 {
     // Do a Depth First Search of the TPG from all roots.
@@ -73,4 +83,28 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
     if (this->logOnSuccess) {
         *this << "No cycle detected in this TPG.";
     }
+}
+
+void Log::CycleDetectionLALogger::logAfterEvaluate(
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>& results)
+{
+    // nothing to log
+}
+
+void Log::CycleDetectionLALogger::logAfterDecimate()
+{
+    // nothing to log
+}
+
+void Log::CycleDetectionLALogger::logAfterValidate(
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>& results)
+{
+    // nothing to log
+}
+
+void Log::CycleDetectionLALogger::logEndOfTraining()
+{
+    // nothing to log
 }
