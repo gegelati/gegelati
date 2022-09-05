@@ -78,10 +78,6 @@ namespace Mutator {
          * \brief Select a random outgoingEdge of the given TPGTeam and removes
          * it from the TPGGraph.
          *
-         * If there is a unique TPGAction among the destination of the available
-         * outgoing TPGEdge of the TPGTeam, this edge will be avoided during the
-         * random selection of the TPGEdge to remove.
-         *
          * \param[in,out] graph the TPGGraph within which the team is stored.
          * \param[in] team the TPGTeam whose outgoingEdges will be altered.
          * \param[in] rng Random Number Generator used in the mutation process.
@@ -118,16 +114,14 @@ namespace Mutator {
          *
          * This function selects a random TPGVertex among given pre-existing
          * vector of TPGTeam and TPGAction.
-         * If the edge is the only one within the team targetting a TPGAction,
-         * then, the new destination will be a TPGAction also. Otherwise, the
-         * function randomly choses between a TPGAction and a TPGTeam, with the
-         * probabilities within the given MutationParameters.
-         * No verification is made on the content of pre-existing TPGVertex
-         * list. If one of this list contains the team itself, a self-loop may
-         * be created. A TPGVertex not belonging to the graph in these lists
-         * will cause an exception within the TPGGraph class tough.
-         * If the current destination of the edge is among the candidates, the
-         * new destination may be the same as the old.
+         * The function randomly choses between a TPGAction and a TPGTeam, with
+         * the probabilities within the given MutationParameters. No
+         * verification is made on the content of pre-existing TPGVertex list.
+         * If one of this list contains the team itself, a self-loop may be
+         * created. A TPGVertex not belonging to the graph in these lists will
+         * cause an exception within the TPGGraph class though. If the current
+         * destination of the edge is among the candidates, the new destination
+         * may be the same as the old.
          *
          * \param[in,out] graph the TPGGraph within which the team and edge are
          *                stored.
