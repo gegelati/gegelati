@@ -232,7 +232,7 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
 
     const TPG::TPGEdge* result = NULL;
     ASSERT_NO_THROW(result = &tpeei.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)), {});)
+                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)));)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
@@ -245,24 +245,6 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
     ASSERT_EQ(t1a0->getNbTraversal(), 0)
         << "Edge should not have been traversed.";
     ASSERT_EQ(t1a0->getNbVisits(), 1) << "Edge should have been visited.";
-
-    // Exclude an edge
-    ASSERT_NO_THROW(result = &tpeei.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)),
-                        {tpg->getVertices().at(2)});)
-        << "Evaluation of a valid TPGTeam with one exclusion failed.";
-    // Expected result is edge between T1 -> A0 (with 0.6)
-    ASSERT_EQ(result, edges.at(7))
-        << "Edge selected during team evaluation is incorrect.";
-
-    // Check visit counters
-    ASSERT_EQ(t1->getNbVisits(), 2) << "Vertex number of visits should be 1.";
-    ASSERT_EQ(t1t2->getNbTraversal(), 1)
-        << "Edge should have been traversed once.";
-    ASSERT_EQ(t1t2->getNbVisits(), 1) << "Edge should have been visited once.";
-    ASSERT_EQ(t1a0->getNbTraversal(), 1)
-        << "Edge should not have been traversed once.";
-    ASSERT_EQ(t1a0->getNbVisits(), 2) << "Edge should have been visited twice.";
 }
 
 TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)

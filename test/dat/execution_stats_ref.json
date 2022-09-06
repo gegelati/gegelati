@@ -1,12 +1,12 @@
 {
 	"ExecutionStats" : 
 	{
-		"avgEvaluatedPrograms" : 6.5,
-		"avgEvaluatedTeams" : 2.5,
-		"avgExecutedLines" : 8.5,
+		"avgEvaluatedPrograms" : 6.33333,
+		"avgEvaluatedTeams" : 2.33333,
+		"avgExecutedLines" : 8.33333,
 		"avgNbExecutionPerInstruction" : 
 		{
-			"0" : 0.5,
+			"0" : 0.333333,
 			"1" : 1.0,
 			"2" : 5.0,
 			"3" : 2.0
@@ -14,44 +14,44 @@
 		"distributionEvaluatedPrograms" : 
 		{
 			"6" : 2,
-			"7" : 2
+			"7" : 1
 		},
 		"distributionEvaluatedTeams" : 
 		{
 			"2" : 2,
-			"3" : 2
+			"3" : 1
 		},
 		"distributionExecutedLines" : 
 		{
 			"8" : 2,
-			"9" : 2
+			"9" : 1
 		},
 		"distributionNbExecutionPerInstruction" : 
 		{
 			"0" : 
 			{
-				"1" : 2
+				"1" : 1
 			},
 			"1" : 
 			{
-				"1" : 4
+				"1" : 3
 			},
 			"2" : 
 			{
-				"5" : 4
+				"5" : 3
 			},
 			"3" : 
 			{
-				"2" : 4
+				"2" : 3
 			}
 		},
 		"distributionUsedVertices" : 
 		{
-			"0" : 4,
-			"1" : 4,
-			"2" : 2,
+			"0" : 3,
+			"1" : 3,
+			"2" : 1,
 			"5" : 1,
-			"6" : 3
+			"6" : 2
 		}
 	},
 	"TracesStats" : 
@@ -93,26 +93,6 @@
 			]
 		},
 		"2" : 
-		{
-			"nbEvaluatedPrograms" : 7,
-			"nbEvaluatedTeams" : 3,
-			"nbExecutedLines" : 9,
-			"nbExecutionPerInstruction" : 
-			{
-				"0" : 1,
-				"1" : 1,
-				"2" : 5,
-				"3" : 2
-			},
-			"trace" : 
-			[
-				0,
-				1,
-				2,
-				6
-			]
-		},
-		"3" : 
 		{
 			"nbEvaluatedPrograms" : 7,
 			"nbEvaluatedTeams" : 3,

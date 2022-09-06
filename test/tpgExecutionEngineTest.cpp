@@ -224,28 +224,11 @@ TEST_F(TPGExecutionEngineTest, EvaluateTeam)
 
     const TPG::TPGEdge* result = NULL;
     ASSERT_NO_THROW(result = &tpee.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)), {});)
+                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)));)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
         << "Edge selected during team evaluation is incorrect.";
-
-    // Exclude an edge
-    ASSERT_NO_THROW(result = &tpee.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)),
-                        {tpg->getVertices().at(2)});)
-        << "Evaluation of a valid TPGTeam with one exclusion failed.";
-    // Expected result is edge between T1 -> A0 (with 0.6)
-    ASSERT_EQ(result, edges.at(7))
-        << "Edge selected during team evaluation is incorrect.";
-
-    // Exclude all edges
-    ASSERT_THROW(result = &tpee.evaluateTeam(
-                     *(const TPG::TPGTeam*)(tpg->getVertices().at(0)),
-                     {tpg->getVertices().at(1), tpg->getVertices().at(4)}),
-                 std::runtime_error)
-        << "Evaluation of a TPGTeam with all edges excluded did not fail as "
-           "expected.";
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
