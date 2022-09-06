@@ -544,7 +544,7 @@ TEST_BOTH_MODE(OneTeamTwoLeaves, {
         << "Error wrong action returned in test OneTeamTwoLeaves.";
 });
 
-TEST_BOTH_MODE(TwoTeamsOneCycle, {
+TEST_BOTH_MODE(TwoTeams, {
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
     const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
     const TPG::TPGVertex* T2 = (&tpg->addNewTeam());
@@ -583,48 +583,39 @@ TEST_BOTH_MODE(TwoTeamsOneCycle, {
     prog4L1.setOperand(0, 1, 1);
     prog4L1.setOperand(1, 1, 4);
 
-    const std::shared_ptr<Program::Program> prog5(new Program::Program(*e));
-    Program::Line& prog5L1 = prog5->addNewLine();
-    // reg[0] = in1[1] + in1[5];
-    prog5L1.setDestinationIndex(0);
-    prog5L1.setInstructionIndex(0);
-    prog5L1.setOperand(0, 1, 1);
-    prog5L1.setOperand(1, 1, 5);
-
     tpg->addNewEdge(*root, *T1, prog1);
     tpg->addNewEdge(*T1, *leaf, prog2);
     tpg->addNewEdge(*T1, *T2, prog3);
     tpg->addNewEdge(*T2, *leaf2, prog4);
-    tpg->addNewEdge(*T2, *T1, prog5);
 
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
-        << "number of root is not 1 in TwoTeamsOneCycle";
+        << "number of root is not 1 in TwoTeams";
 
     ASSERT_EQ(tpg->getNbVertices(), 5)
-        << "bad number of vertices in TwoTeamsOneCycle";
+        << "bad number of vertices in TwoTeams";
 
-    ASSERT_EQ(tpg->getEdges().size(), 5)
-        << "bad number of edges in TwoTeamsOneCycle";
+    ASSERT_EQ(tpg->getEdges().size(), 4)
+        << "bad number of edges in TwoTeams";
 
-    tpgGen = factory.create("TwoTeamsOneCycle", *tpg, "./src/");
+    tpgGen = factory.create("TwoTeams", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     tpgGen.reset();
 
-    cmdCompile += "TwoTeamsOneCycle";
+    cmdCompile += "TwoTeams";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Error while compiling the test TwoTeamsOneCycle.";
+        << "Error while compiling the test TwoTeams.";
 
-    cmdExec += "TwoTeamsOneCycle" + executableExtension;
+    cmdExec += "TwoTeams" + executableExtension;
 
     ASSERT_EQ(
-        system((cmdExec + path + "/TwoTeamsOneCycle/DataTwoTeamsOneCycle.csv")
+        system((cmdExec + path + "/TwoTeams/DataTwoTeams.csv")
                    .c_str()),
         0)
-        << "Error wrong action returned in test TwoTeamsOneCycle.";
+        << "Error wrong action returned in test TwoTeams.";
 });
 
-TEST_BOTH_MODE(TwoTeamsOneCycleNegativeBid, {
+TEST_BOTH_MODE(TwoTeamsNegativeBid, {
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
     const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
     const TPG::TPGVertex* T2 = (&tpg->addNewTeam());
@@ -666,54 +657,45 @@ TEST_BOTH_MODE(TwoTeamsOneCycleNegativeBid, {
 
     const std::shared_ptr<Program::Program> prog5(new Program::Program(*e));
     Program::Line& prog5L1 = prog5->addNewLine();
-    // reg[0] = in1[1] + in1[5];
+    // reg[0] = in1[1] + in1[6];
     prog5L1.setDestinationIndex(0);
     prog5L1.setInstructionIndex(0);
     prog5L1.setOperand(0, 1, 1);
-    prog5L1.setOperand(1, 1, 5);
-
-    const std::shared_ptr<Program::Program> prog6(new Program::Program(*e));
-    Program::Line& prog6L1 = prog6->addNewLine();
-    // reg[0] = in1[1] + in1[6];
-    prog6L1.setDestinationIndex(0);
-    prog6L1.setInstructionIndex(0);
-    prog6L1.setOperand(0, 1, 1);
-    prog6L1.setOperand(1, 1, 6);
+    prog5L1.setOperand(1, 1, 6);
 
     tpg->addNewEdge(*root, *T1, prog1);
     tpg->addNewEdge(*T1, *leaf, prog2);
     tpg->addNewEdge(*T1, *T2, prog3);
     tpg->addNewEdge(*T2, *leaf2, prog4);
-    tpg->addNewEdge(*T2, *T1, prog5);
-    tpg->addNewEdge(*T2, *leaf3, prog6);
+    tpg->addNewEdge(*T2, *leaf3, prog5);
 
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
-        << "number of root is not 1 in TwoTeamsOneCycleNegativeBid";
+        << "number of root is not 1 in TwoTeamsNegativeBid";
 
     ASSERT_EQ(tpg->getNbVertices(), 6)
-        << "bad number of vertices in TwoTeamsOneCycleNegativeBid";
+        << "bad number of vertices in TwoTeamsNegativeBid";
 
-    ASSERT_EQ(tpg->getEdges().size(), 6)
-        << "bad number of edges in TwoTeamsOneCycleNegativeBid";
+    ASSERT_EQ(tpg->getEdges().size(), 5)
+        << "bad number of edges in TwoTeamsNegativeBid";
 
-    tpgGen = factory.create("TwoTeamsOneCycleNegativeBid", *tpg, "./src/");
+    tpgGen = factory.create("TwoTeamsNegativeBid", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     tpgGen.reset();
 
-    cmdCompile += "TwoTeamsOneCycleNegativeBid";
+    cmdCompile += "TwoTeamsNegativeBid";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Error while compiling the test TwoTeamsOneCycleNegativeBid.";
+        << "Error while compiling the test TwoTeamsNegativeBid.";
 
-    cmdExec += "TwoTeamsOneCycleNegativeBid" + executableExtension;
+    cmdExec += "TwoTeamsNegativeBid" + executableExtension;
 
     ASSERT_EQ(
         system(
             (cmdExec + path +
-             "/TwoTeamsOneCycleNegativeBid/DataTwoTeamsOneCycleNegativeBid.csv")
+             "/TwoTeamsNegativeBid/DataTwoTeamsNegativeBid.csv")
                 .c_str()),
         0)
-        << "Error wrong action returned in test TwoTeamsOneCycleNegativeBid.";
+        << "Error wrong action returned in test TwoTeamsNegativeBid.";
 });
 
 static void setProgLine(const std::shared_ptr<Program::Program> prog,
@@ -727,7 +709,7 @@ static void setProgLine(const std::shared_ptr<Program::Program> prog,
     line.setOperand(1, 0, 1);
 }
 
-TEST_BOTH_MODE(ThreeTeamsOneCycleThreeLeaves, {
+TEST_BOTH_MODE(ThreeTeamsThreeLeaves, {
     const TPG::TPGVertex* A1 = (&tpg->addNewAction(1));
     const TPG::TPGVertex* A2 = (&tpg->addNewAction(2));
     const TPG::TPGVertex* A0 = (&tpg->addNewAction(0));
@@ -741,7 +723,6 @@ TEST_BOTH_MODE(ThreeTeamsOneCycleThreeLeaves, {
     const std::shared_ptr<Program::Program> prog4(new Program::Program(*e));
     const std::shared_ptr<Program::Program> prog5(new Program::Program(*e));
     const std::shared_ptr<Program::Program> prog6(new Program::Program(*e));
-    const std::shared_ptr<Program::Program> prog7(new Program::Program(*e));
 
     setProgLine(prog1, 0);
     // reg[0] = in1[0] + reg[1] (reg[1] = 0)
@@ -755,8 +736,6 @@ TEST_BOTH_MODE(ThreeTeamsOneCycleThreeLeaves, {
     // reg[0] = in1[4] + reg[1] (reg[1] = 0)
     setProgLine(prog6, 5);
     // reg[0] = in1[5] + reg[1] (reg[1] = 0)
-    setProgLine(prog7, 6);
-    // reg[0] = in1[6] + reg[1] (reg[1] = 0)
 
     tpg->addNewEdge(*T1, *T2, prog1);
     tpg->addNewEdge(*T1, *A1, prog2);
@@ -766,33 +745,32 @@ TEST_BOTH_MODE(ThreeTeamsOneCycleThreeLeaves, {
     tpg->addNewEdge(*T2, *T3, prog5);
 
     tpg->addNewEdge(*T3, *A2, prog6);
-    tpg->addNewEdge(*T3, *T2, prog7);
 
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
-        << "number of root is not 1 in ThreeTeamsOneCycleThreeLeaves";
+        << "number of root is not 1 in ThreeTeamsThreeLeaves";
 
     ASSERT_EQ(tpg->getNbVertices(), 6)
-        << "bad number of vertices in ThreeTeamsOneCycleThreeLeaves";
+        << "bad number of vertices in ThreeTeamsThreeLeaves";
 
-    ASSERT_EQ(tpg->getEdges().size(), 7)
-        << "bad number of edges in ThreeTeamsOneCycleThreeLeaves";
+    ASSERT_EQ(tpg->getEdges().size(), 6)
+        << "bad number of edges in ThreeTeamsThreeLeaves";
 
-    tpgGen = factory.create("ThreeTeamsOneCycleThreeLeaves", *tpg, "./src/");
+    tpgGen = factory.create("ThreeTeamsThreeLeaves", *tpg, "./src/");
     tpgGen->generateTPGGraph();
     // call the destructor to close the file
     tpgGen.reset();
-    cmdCompile += "ThreeTeamsOneCycleThreeLeaves";
+    cmdCompile += "ThreeTeamsThreeLeaves";
     ASSERT_EQ(system(cmdCompile.c_str()), 0)
-        << "Error while compiling the test ThreeTeamsOneCycleThreeLeaves";
+        << "Error while compiling the test ThreeTeamsThreeLeaves";
 
-    cmdExec += "ThreeTeamsOneCycleThreeLeaves" + executableExtension;
+    cmdExec += "ThreeTeamsThreeLeaves" + executableExtension;
 
     ASSERT_EQ(system((cmdExec + path +
-                      "/ThreeTeamsOneCycleThreeLeaves/"
-                      "DataThreeTeamsOneCycleThreeLeaves.csv")
+                      "/ThreeTeamsThreeLeaves/"
+                      "DataThreeTeamsThreeLeaves.csv")
                          .c_str()),
-              0)
+              1)
         << "Error wrong action returned in test "
-           "ThreeTeamsOneCycleThreeLeaves.";
+           "ThreeTeamsThreeLeaves.";
 });
 #endif // CODE_GENERATION

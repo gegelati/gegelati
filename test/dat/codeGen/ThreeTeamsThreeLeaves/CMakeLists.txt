@@ -24,5 +24,5 @@ endif ()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN})
 
 # set the target name
-set(target TwoTeamsOneCycle)
+set(target ThreeTeamsThreeLeaves)
 add_executable(${target} ${SRC}${target}.c ${SRC}${target}_program.c main${target}.c ../csvparser/csvparser.c ../csvparser/inferenceCSV.c)

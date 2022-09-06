@@ -44,11 +44,11 @@ This test is composed of 1 root, 1 team (destination of the root) and 1 leaf. It
 ### OneTeamTwoLeaves
 This test is composed of 1 root, 1 team (destination of the root) and 2 leaves. It checks if a non root team do the right choice between two leaves. 
 
-### TwoTeamsOneCycle
-This test is composed of 1 root, 2 team (destination of the root) and 2 leaves. It checks if a cycle is correctly handle by a generated TPG. 
+### TwoTeams
+This test is composed of 1 root, 2 team (destination of the root) and 2 leaves.
 
-### TwoTeamsOneCycleNegativeBid
-This test is composed of 1 root, 2 team (destination of the root) and 3 leaves. It checks if a cycle is correctly handle by a generated TPG when some program bids can be negative.
+### TwoTeamsNegativeBid
+This test is composed of 1 root, 2 team (destination of the root) and 3 leaves. Check behavior with negative program bids.
 
-### ThreeTeamsOneCycleThreeLeaves
-This test is composed of 1 root, 3 team (destination of the root) and 3 leaves. It checks if a more complex cycle is correctly handle by a generated TPG. 
+### ThreeTeamsThreeLeaves
+This test is composed of 1 root, 3 team (destination of the root) and 3 leaves.
