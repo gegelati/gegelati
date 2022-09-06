@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "TwoTeamsOneCycleNegativeBid.h"
+#include "TwoTeamsNegativeBid.h"
 #include "csvparser.h"
 #include "inferenceCSV.h"
 
