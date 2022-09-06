@@ -89,9 +89,7 @@ namespace TPG {
          * visits of the evaluated TPGTeam and the number of traversal of the
          * TPGEdge with the winning bid.
          */
-        const TPG::TPGEdge& evaluateTeam(
-            const TPGTeam& team,
-            const std::vector<const TPGVertex*>& excluded) override;
+        const TPG::TPGEdge& evaluateTeam(const TPGTeam& team) override;
         /**
          * \brief Specialization of the evaluateTeam function.
          *

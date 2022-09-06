@@ -46,12 +46,11 @@ double TPG::TPGExecutionEngineInstrumented::evaluateEdge(const TPGEdge& edge)
 }
 
 const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(
-    const TPGTeam& team, const std::vector<const TPGVertex*>& excluded)
+    const TPGTeam& team)
 {
     dynamic_cast<const TPGTeamInstrumented&>(team).incrementNbVisits();
 
-    const TPGEdge& winningEdge =
-        TPGExecutionEngine::evaluateTeam(team, excluded);
+    const TPGEdge& winningEdge = TPGExecutionEngine::evaluateTeam(team);
     dynamic_cast<const TPGEdgeInstrumented&>(winningEdge)
         .incrementNbTraversal();
     return winningEdge;
