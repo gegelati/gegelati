@@ -121,17 +121,11 @@ TEST_F(TPGGenerationEngineTest, ConstructorDestructor)
 {
     ASSERT_NO_THROW(tpgGen =
                         std::make_unique<CodeGen::TPGStackGenerationEngine>(
-                            "constructorWithStackSize", *tpg, "./src/", 15))
+                            "constructorWithStackSize", *tpg, "./src/"))
         << "Failed to construct a TPGGenerationEngine with a filename and a "
            "TPG, a path and the size of the call stack";
 
     ASSERT_NO_THROW(tpgGen.reset()) << "Destruction failed.";
-
-    ASSERT_THROW(tpgGen = std::make_unique<CodeGen::TPGStackGenerationEngine>(
-                     "constructorErrorStackSize", *tpg, "./src/", 0),
-                 std::runtime_error)
-        << "Should fail, try to construct a TPGGenerationEngine with the size "
-           "of the call stack equal to 0.";
 }
 
 TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateSwitch)
@@ -591,11 +585,9 @@ TEST_BOTH_MODE(TwoTeams, {
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
         << "number of root is not 1 in TwoTeams";
 
-    ASSERT_EQ(tpg->getNbVertices(), 5)
-        << "bad number of vertices in TwoTeams";
+    ASSERT_EQ(tpg->getNbVertices(), 5) << "bad number of vertices in TwoTeams";
 
-    ASSERT_EQ(tpg->getEdges().size(), 4)
-        << "bad number of edges in TwoTeams";
+    ASSERT_EQ(tpg->getEdges().size(), 4) << "bad number of edges in TwoTeams";
 
     tpgGen = factory.create("TwoTeams", *tpg, "./src/");
     tpgGen->generateTPGGraph();
@@ -608,10 +600,8 @@ TEST_BOTH_MODE(TwoTeams, {
 
     cmdExec += "TwoTeams" + executableExtension;
 
-    ASSERT_EQ(
-        system((cmdExec + path + "/TwoTeams/DataTwoTeams.csv")
-                   .c_str()),
-        0)
+    ASSERT_EQ(system((cmdExec + path + "/TwoTeams/DataTwoTeams.csv").c_str()),
+              0)
         << "Error wrong action returned in test TwoTeams.";
 });
 
@@ -689,12 +679,10 @@ TEST_BOTH_MODE(TwoTeamsNegativeBid, {
 
     cmdExec += "TwoTeamsNegativeBid" + executableExtension;
 
-    ASSERT_EQ(
-        system(
-            (cmdExec + path +
-             "/TwoTeamsNegativeBid/DataTwoTeamsNegativeBid.csv")
-                .c_str()),
-        0)
+    ASSERT_EQ(system((cmdExec + path +
+                      "/TwoTeamsNegativeBid/DataTwoTeamsNegativeBid.csv")
+                         .c_str()),
+              0)
         << "Error wrong action returned in test TwoTeamsNegativeBid.";
 });
 
