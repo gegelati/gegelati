@@ -769,7 +769,7 @@ TEST_BOTH_MODE(ThreeTeamsThreeLeaves, {
                       "/ThreeTeamsThreeLeaves/"
                       "DataThreeTeamsThreeLeaves.csv")
                          .c_str()),
-              1)
+              0)
         << "Error wrong action returned in test "
            "ThreeTeamsThreeLeaves.";
 });
