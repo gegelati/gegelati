@@ -143,7 +143,6 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
                                          *tpg->getVertices().at(2),
                                          progPointers.at(5)));
 
-
         // Add new outgoing edge to one team
         edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
                                          *tpg->getVertices().at(4),

@@ -591,7 +591,8 @@ TEST_F(LearningAgentTest, TrainPortability)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 113)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 18365948485044467717u)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              18365948485044467717u)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -634,7 +635,8 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     auto edgesIterator = tpg.getEdges().begin();
     const auto* edge1 = edgesIterator->get();
     ASSERT_EQ(
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(), 1175);
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(),
+        1175);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(),
         0);
