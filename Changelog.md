@@ -7,6 +7,9 @@ _yyyy.mm.dd_
 * Add a `Log::CycleDetectionLALogger` for detecting directed cycles in TPG graphs. Using this logger, the detection is automatically at each generation right after populating the TPG with new vertices. In case a cycle is detected, a message is printed in `std::cerr`.
 
 ### Changes
+* Remove support for cycles in trained TPG graphs. _This change alters the deterministic outputs of trainings._ As explained in [Issue #106](https://github.com/gegelati/gegelati/issues/106), the genetic mutation of the graph, as described by Stephen Kelly in his PhD manuscript will never introduce any cycle in the trained TPG. As a consequence, parts of the code have been simplified:
+  * Mutations: It is no longer mandatory to have an action referenced in each team of the TPG.
+  * TPG Execution (in gegelati and in generated code): When executing outgoing edges of a team, providing a mechanism to exclude already visited edges is not needed.
 
 ### Bug fix
 
