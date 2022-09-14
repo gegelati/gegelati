@@ -220,8 +220,14 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     // Note: Having an action in all teams is no longer enforced,
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
-    target = preExistingTeams.at(
-        rng.getUnsignedInt64(0, preExistingTeams.size() - 1));
+    if (targetAction) {
+        target = preExistingTeams.at(
+            rng.getUnsignedInt64(0, preExistingActions.size() - 1));
+    }
+    else {
+        target = preExistingTeams.at(
+            rng.getUnsignedInt64(0, preExistingTeams.size() - 1));
+    }
 
     // Change the target
     // Changing the target should not fail.

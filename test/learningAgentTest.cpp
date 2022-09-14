@@ -585,14 +585,14 @@ TEST_F(LearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 33)
+    ASSERT_EQ(tpg.getNbVertices(), 31)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+    ASSERT_EQ(tpg.getNbRootVertices(), 25)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 113)
+    ASSERT_EQ(tpg.getEdges().size(), 106)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              18365948485044467717u)
+              14825295448422883263u)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -621,14 +621,14 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 33)
+    ASSERT_EQ(tpg.getNbVertices(), 31)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+    ASSERT_EQ(tpg.getNbRootVertices(), 25)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 113)
+    ASSERT_EQ(tpg.getEdges().size(), 106)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              18365948485044467717u)
+              14825295448422883263u)
         << "Graph does not have the expected determinst characteristics.";
 
     // Check number of visits of a few edges & vertices
@@ -636,7 +636,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     const auto* edge1 = edgesIterator->get();
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(),
-        1175);
+        2151);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(),
         0);
@@ -648,17 +648,17 @@ TEST_F(LearningAgentTest, TrainInstrumented)
         106);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversal(),
-        2);
+        106);
 
     auto& verticesIterator = tpg.getVertices();
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(0))
                   ->getNbVisits(),
-              8943);
+              8488);
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(3))
                   ->getNbVisits(),
-              1175);
+              2151);
 }
 
 TEST_F(LearningAgentTest, KeepBestPolicy)
