@@ -196,9 +196,6 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
              << "\t\tidx++;\n"
              << "\t}\n"
              << "\treturn idxNext;\n"
-             << "}\n\n"
-
-             << "void reset(){\n"
              << "}\n"
              << std::endl;
 }
@@ -225,7 +222,6 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
               << "int executeFromVertex(void*(*)(int*action));\n"
               << "void* executeTeam(Edge* e, int nbEdge);\n"
               << "int execute(Edge* e, int nbEdge);\n"
-              << "void reset();\n"
               << std::endl;
 }
 
