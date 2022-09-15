@@ -767,8 +767,7 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(
-        tpg, arch, vertex0, &edge0, {&vertex0}, {&vertex1}, newPrograms, params,
-        rng));
+        tpg, arch, &edge0, {&vertex0}, {&vertex1}, newPrograms, params, rng));
 
     // Check that progPointer use count was decreased since the mutated program
     // is a copy of the original
@@ -862,9 +861,8 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
-    Mutator::TPGMutator::mutateOutgoingEdge(tpg, arch, vertex0, &edge0,
-                                            {&vertex0}, {&vertex1}, newPrograms,
-                                            params, rng);
+    Mutator::TPGMutator::mutateOutgoingEdge(
+        tpg, arch, &edge0, {&vertex0}, {&vertex1}, newPrograms, params, rng);
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         newPrograms.front(), params, arch, rng))

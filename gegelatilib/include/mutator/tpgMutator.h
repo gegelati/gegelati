@@ -144,7 +144,7 @@ namespace Mutator {
          * This function mutates the behavior of the given TPGEdge Program,
          * using the ProgramMutator functions, until the Program behavior is
          * unique according to recordings held in the given Archive.
-         * The Program mutation is applid systematically, and a call to
+         * The Program mutation is applied systematically, and a call to
          * MutateEdgeDestination is also made with a probability from the
          * given MutationParameters.
          *
@@ -152,7 +152,6 @@ namespace Mutator {
          *                stored.
          * \param[in] archive Archive used to assess the uniqueness of the
          *            mutated Program behavior.
-         * \param[in] team the source TPGTeam of the edge.
          * \param[in] edge the TPGEdge whose destination will be altered.
          * \param[in] preExistingTeams the TPGTeam candidates for destination.
          * \param[in] preExistingActions the TPGAction candidates for
@@ -166,7 +165,7 @@ namespace Mutator {
          */
         void mutateOutgoingEdge(
             TPG::TPGGraph& graph, const Archive& archive,
-            const TPG::TPGTeam& team, const TPG::TPGEdge* edge,
+            const TPG::TPGEdge* edge,
             const std::vector<const TPG::TPGTeam*>& preExistingTeams,
             const std::vector<const TPG::TPGAction*>& preExistingActions,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
