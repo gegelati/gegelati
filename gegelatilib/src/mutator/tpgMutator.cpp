@@ -205,13 +205,14 @@ void Mutator::TPGMutator::addRandomEdge(
 }
 
 void Mutator::TPGMutator::mutateEdgeDestination(
-    TPG::TPGGraph& graph, const TPG::TPGTeam& team, const TPG::TPGEdge* edge,
+    TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
     const std::vector<const TPG::TPGTeam*>& preExistingTeams,
     const std::vector<const TPG::TPGAction*>& preExistingActions,
     const Mutator::MutationParameters& params, Mutator::RNG& rng)
 {
     // Pick an edge among preexisting vertices
     const TPG::TPGVertex* target = NULL;
+
     // Should the new target be an action or a team
     bool targetAction =
         rng.getDouble(0, 1) < params.tpg.pEdgeDestinationIsAction;
@@ -256,8 +257,8 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
     // As it Stephen kelly's work, Edge target modification is conditionned
     // to the modification of the prealable Edge.Program behavior.
     if (rng.getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationChange) {
-        mutateEdgeDestination(graph, team, edge, preExistingTeams,
-                              preExistingActions, params, rng);
+        mutateEdgeDestination(graph, edge, preExistingTeams, preExistingActions,
+                              params, rng);
     }
 }
 

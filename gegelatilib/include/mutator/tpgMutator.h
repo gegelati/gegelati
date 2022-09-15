@@ -125,7 +125,6 @@ namespace Mutator {
          *
          * \param[in,out] graph the TPGGraph within which the team and edge are
          *                stored.
-         * \param[in] team the source TPGTeam of the edge.
          * \param[in] edge the TPGEdge whose destination will be altered.
          * \param[in] preExistingTeams the TPGTeam candidates for destination.
          * \param[in] preExistingActions the TPGAction candidates for
@@ -134,8 +133,7 @@ namespace Mutator {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void mutateEdgeDestination(
-            TPG::TPGGraph& graph, const TPG::TPGTeam& team,
-            const TPG::TPGEdge* edge,
+            TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
             const std::vector<const TPG::TPGTeam*>& preExistingTeams,
             const std::vector<const TPG::TPGAction*>& preExistingActions,
             const Mutator::MutationParameters& params, Mutator::RNG& rng);

@@ -127,7 +127,8 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngine::
     // Browse the TPG until a TPGAction is reached.
     while (dynamic_cast<const TPG::TPGTeam*>(currentVertex)) {
         // Get the next edge
-        const TPGEdge& edge = this->evaluateTeam(*(TPGTeam*)currentVertex);
+        const TPGEdge& edge =
+            this->evaluateTeam(*(const TPGTeam*)currentVertex);
         // update currentVertex and backup in visitedVertex.
         currentVertex = edge.getDestination();
         visitedVertices.push_back(currentVertex);

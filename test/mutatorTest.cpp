@@ -723,8 +723,7 @@ TEST_F(MutatorTest, TPGMutatorMutateEdgeDestination)
     Mutator::RNG rng;
     rng.setSeed(2);
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateEdgeDestination(
-        tpg, vertex0, &edge1, {&vertex3, &vertex4}, {&vertex1, &vertex2},
-        params, rng));
+        tpg, &edge1, {&vertex3, &vertex4}, {&vertex1, &vertex2}, params, rng));
     // Check properties of the tpg
     ASSERT_EQ(tpg.getEdges().size(), 2)
         << "Number of edge should remain unchanged after destination change.";

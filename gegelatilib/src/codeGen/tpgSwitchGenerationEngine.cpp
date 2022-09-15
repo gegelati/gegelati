@@ -76,7 +76,8 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     int i = 0;
     for (const auto* edge : edges) {
-        fileMain << "\t\t\t" << teamName << "Scores[" << i++ << "] = ";
+        fileMain << "\t\t\t" << teamName << "Scores[" << i << "] = ";
+        ++i;
         generateEdge(*edge);
         fileMain << ";" << std::endl;
     }
