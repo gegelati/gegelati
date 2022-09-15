@@ -133,7 +133,7 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluate)
 
     // Train a new gen (calls the log)
     ASSERT_NO_THROW(la->trainOneGeneration(
-        genNumber + 2)) // +2 deterministically creares a new bestRoot.
+        genNumber + 1)) // +1 deterministically creates a new bestRoot.
         << "Training a new generation should not cause any problem.";
 
     ASSERT_GT(strStr.str().size(), length)

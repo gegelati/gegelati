@@ -42,13 +42,9 @@
 
 CodeGen::TPGStackGenerationEngine::TPGStackGenerationEngine(
     const std::string& filename, const TPG::TPGGraph& tpg,
-    const std::string& path, const uint64_t& stackSize)
-    : TPGGenerationEngine(filename, tpg, path), stackSize{stackSize}
+    const std::string& path)
+    : TPGGenerationEngine(filename, tpg, path)
 {
-    if (stackSize == 0) {
-        throw std::runtime_error(
-            "error the size of the call stack is equal to 0");
-    }
 }
 
 CodeGen::TPGStackGenerationEngine::~TPGStackGenerationEngine()
@@ -100,8 +96,7 @@ void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
         generateEdge(**l);
     }
     // print end static array
-    fileMain << "\n\t};\n"
-             << "\tteamsVisited[T" << id << "Vert] = true;\n";
+    fileMain << "\n\t};\n";
 #ifdef DEBUG
     fileMain << "\tprintf(\"T%d\\n\", " << id << ");" << std::endl;
 #endif
@@ -152,106 +147,57 @@ void CodeGen::TPGStackGenerationEngine::generateTPGGraph()
 
 void CodeGen::TPGStackGenerationEngine::initTpgFile()
 {
-    fileMain
-        << "#include <limits.h> \n"
-        << "#include <assert.h>\n"
-        << "#include <stdio.h>\n"
-        << "#include <stdint.h>\n"
-        << "#include <stdbool.h>\n"
-        << "#include <math.h>\n"
+    fileMain << "#include <limits.h> \n"
+             << "#include <assert.h>\n"
+             << "#include <stdio.h>\n"
+             << "#include <stdint.h>\n"
+             << "#include <stdbool.h>\n"
+             << "#include <math.h>\n\n"
 
-        << "#define stackSize  " << stackSize << "\n\n"
+             << "int inferenceTPG(){\n"
+             << "\treturn executeFromVertex(root);\n"
+             << "}\n\n"
 
-        << "Edge* callStack[stackSize];\n"
-        << "uint32_t top = 0;\n"
-        << "bool teamsVisited[" << this->tpg.getVertices().size() << "];\n\n"
+             << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
+             << "\tvoid*(*f)(int*action) = ptr_f;\n"
+             << "\tint action = INT_MIN;\n"
+             << "\twhile (f!=NULL){\n"
+             << "\t\tf= (void*(*)(int*)) (f(&action));\n"
+             << "\t}\n"
+             << "\treturn action;\n}\n\n"
 
-        << "int inferenceTPG(){\n"
-        << "\treset();\n"
-        << "\treturn executeFromVertex(root);\n"
-        << "}\n\n"
+             << "void* executeTeam(Edge* e, int nbEdge){\n"
+             << "\tint idxNext = execute(e, nbEdge); \n"
+             << "\tif(idxNext != -1) {\n"
+             << "\t\treturn e[idxNext].ptr_vertex;\n"
+             << "\t}\n"
+             << "\treturn NULL;\n"
+             << "}\n\n"
 
-        << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
-        << "\tvoid*(*f)(int*action) = ptr_f;\n"
-        << "\tint action = INT_MIN;\n"
-        << "\twhile (f!=NULL){\n"
-        << "\t\tf= (void*(*)(int*)) (f(&action));\n"
-        << "\t}\n"
-        << "\treturn action;\n}\n\n"
+             << "int execute(Edge* e, int nbEdge){\n"
+             << "\tdouble bestResult;\n"
+             << "\tint idxNext = 0;\n"
+             << "\tint idx;\n"
+             << "\tdouble r;\n\n"
 
-        << "void* executeTeam(Edge* e, int nbEdge){\n"
-        << "\tint idxNext = execute(e, nbEdge); \n"
-        << "\tif(idxNext != -1) {\n"
-        << "\t\tpush(&e[idxNext]);\n"
-        << "\t\treturn e[idxNext].ptr_vertex;\n"
-        << "\t}\n"
-        << "\treturn NULL;\n"
-        << "}\n\n"
+             << "\tbestResult = e[idxNext].ptr_prog();\n"
+             << "\tbestResult = (isnan(bestResult)) ? -INFINITY : bestResult;\n"
+             << "\tidx = idxNext + 1;\n\n"
 
-        << "int execute(Edge* e, int nbEdge){\n"
-        << "\tdouble bestResult;\n"
-        << "\tint idxNext = 0;\n"
-        << "\tint idx;\n"
-        << "\tdouble r;\n\n"
+             << "\t// Check if there is another edge with a better result\n"
+             << "\twhile (idx < nbEdge){\n"
 
-        << "\twhile (teamsVisited[e[idxNext].destination]){\n"
-        << "\t\tidxNext++;\n"
-        << "\t\tif (idxNext >= nbEdge){\n"
-        << "\t\t\tfprintf(stderr, \"Error all the edges of the team lead to an "
-           "already visited team\\n\");\n"
-        << "\t\t\treturn -1;\n"
-        << "\t\t}\n"
-        << "\t}\n\n"
-
-        << "\tbestResult = e[idxNext].ptr_prog();\n"
-        << "\tbestResult = (isnan(bestResult)) ? -INFINITY : bestResult;\n"
-        << "\tidx = idxNext + 1;\n\n"
-
-        << "\t// Check if there is another edge with a better result\n"
-        << "\twhile (idx < nbEdge){\n"
-
-        << "\t\tif (teamsVisited[e[idx].destination] == false){\n"
-        << "\t\t\tr = e[idx].ptr_prog();\n"
-        << "\t\t\tr = (isnan(r)) ? -INFINITY : r;\n"
-        << "\t\t\tif (r >= bestResult){\n"
-        << "\t\t\t\tbestResult = r;\n"
-        << "\t\t\t\tidxNext = idx;\n"
-        << "\t\t\t}\n"
-        << "\t\t}\n"
-        << "\t\tidx++;\n"
-        << "\t}\n"
-        << "\treturn idxNext;\n"
-        << "}\n\n"
-
-        << "void push( Edge* e){\n"
-        << "\tif(top == stackSize) {\n"
-        << "\t\tfprintf(stderr, \"Call stack of size %d is too small for the "
-           "iteration of "
-           "this TPG\", stackSize);\n"
-        << "\t}\n"
-        << "\tcallStack[top] = e;\n"
-        << "\ttop++;\n"
-        << "}\n\n"
-
-        << "Edge* pop(){\n"
-        << "\tEdge* edge = NULL;\n"
-        << "\tif(top > 0){\n"
-        << "\t\ttop--;\n"
-        << "\t\tedge = callStack[top];\n"
-        << "\t}\n"
-        << "\treturn edge;\n"
-        << "}\n\n"
-
-        << "void reset(){\n"
-        << "\twhile (top > 0) {\n"
-        << "\t\tpop();\n"
-        << "\t}\n"
-        << "\tfor (int i = 0; i < " << this->tpg.getVertices().size()
-        << "; i++){\n"
-        << "\t\tteamsVisited[i] = false;\n"
-        << "\t}\n"
-        << "}\n"
-        << std::endl;
+             << "\t\tr = e[idx].ptr_prog();\n"
+             << "\t\tr = (isnan(r)) ? -INFINITY : r;\n"
+             << "\t\tif (r >= bestResult){\n"
+             << "\t\t\tbestResult = r;\n"
+             << "\t\t\tidxNext = idx;\n"
+             << "\t\t}\n"
+             << "\t\tidx++;\n"
+             << "\t}\n"
+             << "\treturn idxNext;\n"
+             << "}\n"
+             << std::endl;
 }
 
 void CodeGen::TPGStackGenerationEngine::initHeaderFile()
@@ -276,9 +222,6 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
               << "int executeFromVertex(void*(*)(int*action));\n"
               << "void* executeTeam(Edge* e, int nbEdge);\n"
               << "int execute(Edge* e, int nbEdge);\n"
-              << "void push(Edge* e);\n"
-              << "Edge* pop();\n"
-              << "void reset();\n"
               << std::endl;
 }
 

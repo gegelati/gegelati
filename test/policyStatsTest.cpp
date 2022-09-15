@@ -78,8 +78,8 @@ class PolicyStatsTest : public ::testing::Test
         // Environment
         e = new Environment(set, vect, 8, 5);
 
-        // Create 9 programs
-        for (int i = 0; i < 9; i++) {
+        // Create 8 programs
+        for (int i = 0; i < 8; i++) {
             progPointers.push_back(
                 std::shared_ptr<Program::Program>(new Program::Program(*e)));
         }
@@ -87,8 +87,6 @@ class PolicyStatsTest : public ::testing::Test
         // Create a TPG
         // (T= Team, A= Action)
         //
-        //        .------.
-        //        v      |
         // T0---->T1---->T2<----T3
         // |     /| \    |       |
         // v    / v  \   v       v
@@ -120,22 +118,17 @@ class PolicyStatsTest : public ::testing::Test
                                          *tpg->getVertices().at(2),
                                          progPointers.at(6)));
 
-        // Add a cyclic edge
-        edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2),
-                                         *tpg->getVertices().at(1),
-                                         progPointers.at(7)));
-
         // Add new outgoing edge to one team
         edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
                                          *tpg->getVertices().at(4),
                                          progPointers.at(0)));
         edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
                                          *tpg->getVertices().at(6),
-                                         progPointers.at(8)));
+                                         progPointers.at(7)));
 
         // Check the characteristics
         ASSERT_EQ(tpg->getNbVertices(), 8);
-        ASSERT_EQ(tpg->getEdges().size(), 10);
+        ASSERT_EQ(tpg->getEdges().size(), 9);
         ASSERT_EQ(tpg->getRootVertices().size(), 2);
 
         // Add instructions to 2 programs
@@ -318,16 +311,16 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
     ASSERT_EQ(ps.nbDistinctTeams, 3);
 
     std::map<size_t, size_t> nbTPGVertexPerLevel{
-        {0, 1}, {1, 2}, {2, 4}, {3, 2}};
+        {0, 1}, {1, 2}, {2, 4}, {3, 1}};
     ASSERT_EQ(ps.nbTPGVertexPerDepthLevel, nbTPGVertexPerLevel);
 
-    std::vector<size_t> nbLinesPerProgram{3, 0, 1, 0, 0, 0, 0};
+    std::vector<size_t> nbLinesPerProgram{3, 0, 1, 0, 0, 0};
     ASSERT_EQ(ps.nbLinesPerProgram, nbLinesPerProgram);
 
-    std::vector<size_t> nbIntronPerProgram{1, 0, 0, 0, 0, 0, 0};
+    std::vector<size_t> nbIntronPerProgram{1, 0, 0, 0, 0, 0};
     ASSERT_EQ(ps.nbIntronPerProgram, nbIntronPerProgram);
 
-    std::vector<size_t> nbOutgoingEdgesPerTeam{2, 4, 2};
+    std::vector<size_t> nbOutgoingEdgesPerTeam{2, 4, 1};
     ASSERT_EQ(ps.nbOutgoingEdgesPerTeam, nbOutgoingEdgesPerTeam);
 
     std::map<size_t, size_t> nbUsagePerActionID{{0, 2}, {1, 1}, {2, 2}};
@@ -349,7 +342,7 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
         }
     }
 
-    std::vector<size_t> nbUsePerTPGTeam{1, 2, 1};
+    std::vector<size_t> nbUsePerTPGTeam{1, 1, 1};
     for (auto i = 0; i < nbUsePerTPGTeam.size(); i++) {
         ASSERT_EQ(ps.nbUsePerTPGTeam.at(
                       (const TPG::TPGTeam*)tpg->getVertices().at(i)),

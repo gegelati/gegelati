@@ -72,38 +72,19 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     return result;
 }
 
-const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(
-    const TPGTeam& team, const std::vector<const TPGVertex*>& excluded)
+const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team)
 {
     // Copy outgoing edge list
-    std::list<TPG::TPGEdge*> outgoingEdges = team.getOutgoingEdges();
+    const std::list<TPG::TPGEdge*>& outgoingEdges = team.getOutgoingEdges();
 
-    // Remove all edges leading to excluded TPGTeam
-    std::list<TPG::TPGEdge*>::iterator iter = outgoingEdges.begin();
-    while (iter != outgoingEdges.end()) {
-        if (std::find(excluded.begin(), excluded.end(),
-                      (*iter)->getDestination()) != excluded.end()) {
-            outgoingEdges.erase(iter++);
-        }
-        else {
-            iter++;
-        }
-    }
+    // Note: No need to exclude previously visited edges as the graph is now
+    // assumed to be acyclic.
 
 #ifdef DEBUG
     std::cout << "New team :" << &team << std::endl;
 #endif
 
-    // Throw an error if no edge remains
-    if (outgoingEdges.size() == 0) {
-        // This should not happen in a correctly constructed TPG, since every
-        // team should be connected to at least one action, thus eventually
-        // breaking any potential cycles.
-        throw std::runtime_error(
-            "No outgoing edge to evaluate in the TPGTeam.");
-    }
-
-    // Evaluate all remaining TPGEdge
+    // Evaluate all TPGEdge
     // First
     TPGEdge* bestEdge = *outgoingEdges.begin();
     double bestBid = this->evaluateEdge(*bestEdge);
@@ -147,7 +128,7 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngine::
     while (dynamic_cast<const TPG::TPGTeam*>(currentVertex)) {
         // Get the next edge
         const TPGEdge& edge =
-            this->evaluateTeam(*(TPGTeam*)currentVertex, visitedVertices);
+            this->evaluateTeam(*(const TPGTeam*)currentVertex);
         // update currentVertex and backup in visitedVertex.
         currentVertex = edge.getDestination();
         visitedVertices.push_back(currentVertex);

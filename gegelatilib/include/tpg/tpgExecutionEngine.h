@@ -115,24 +115,15 @@ namespace TPG {
          * This method evaluates the Programs of all outgoing TPGEdge of the
          * TPGTeam, and returns the reference to the TPGEdge providing the
          * largest evaluation.
-         * TPGEdge leading to a TPGTeam in the excluded set will not be
-         * evaluated.
          *
          * \param[in] team the TPGTeam whose outgoing TPGEdge are evaluated.
-         * \param[in] excluded the TPGTeam pointers that must be avoided when
-         *            TPGEdge lead to them.
          * \return the reference to the TPGEdge evaluated with the the highest
          *         double value (and not excluded).
          *
-         * \throw std::runtime_error in case the TPGTeam has no outgoing edge
-         *        after excluding all edges leading to TPGVertex from the
-         *        excluded set. This should not happen in a correctly
-         *        constructed TPGGraph where each TPGTeam must be connected to
-         *        at least one TPGAction, to ensure that all cycles have an
-         *        exit.
+         * \throw std::runtime_error in case the TPGTeam has no outgoing edge.
+         * This should not happen in a correctly constructed TPGGraph.
          */
-        virtual const TPG::TPGEdge& evaluateTeam(
-            const TPGTeam& team, const std::vector<const TPGVertex*>& excluded);
+        virtual const TPG::TPGEdge& evaluateTeam(const TPGTeam& team);
 
         /**
          * \brief Execute the TPGGraph starting from the given TPGVertex.
