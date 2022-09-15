@@ -139,19 +139,16 @@ namespace Mutator {
             const Mutator::MutationParameters& params, Mutator::RNG& rng);
 
         /**
-         * \brief Mutate the Program and the Destination of the given TPGEdge.
+         * \brief Prepares the mutation of a TPGEdge.
          *
-         * This function mutates the behavior of the given TPGEdge Program,
-         * using the ProgramMutator functions, until the Program behavior is
-         * unique according to recordings held in the given Archive.
-         * The Program mutation is applied systematically, and a call to
-         * MutateEdgeDestination is also made with a probability from the
-         * given MutationParameters.
+         * This function creates a copy of the program associated to the TPGEdge
+         * in preparation of its mutation. The methods also takes care of
+         * stochastically mutating the destination of the TPGEdge. The copied
+         * program are referenced in the newProgram list, and their behavior
+         * must be mutated after this function to complete the mutation process.
          *
          * \param[in,out] graph the TPGGraph within which the team and edge are
          *                stored.
-         * \param[in] archive Archive used to assess the uniqueness of the
-         *            mutated Program behavior.
          * \param[in] edge the TPGEdge whose destination will be altered.
          * \param[in] preExistingTeams the TPGTeam candidates for destination.
          * \param[in] preExistingActions the TPGAction candidates for
@@ -164,8 +161,7 @@ namespace Mutator {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void mutateOutgoingEdge(
-            TPG::TPGGraph& graph, const Archive& archive,
-            const TPG::TPGEdge* edge,
+            TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
             const std::vector<const TPG::TPGTeam*>& preExistingTeams,
             const std::vector<const TPG::TPGAction*>& preExistingActions,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,

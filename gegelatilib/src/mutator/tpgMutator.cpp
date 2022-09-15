@@ -236,7 +236,7 @@ void Mutator::TPGMutator::mutateEdgeDestination(
 }
 
 void Mutator::TPGMutator::mutateOutgoingEdge(
-    TPG::TPGGraph& graph, const Archive& archive, const TPG::TPGEdge* edge,
+    TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
     const std::vector<const TPG::TPGTeam*>& preExistingTeams,
     const std::vector<const TPG::TPGAction*>& preExistingActions,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
@@ -295,17 +295,17 @@ void Mutator::TPGMutator::mutateTPGTeam(
         }
     }
 
-    // 3. Mutate program of the team
+    // 3. Mutate edges of the team
     {
         bool anyMutationDone = false;
         do {
             // Process edge-by-edge
-            // And possibly modify their behavior and their target
+            // And possibly modify their target
             for (TPG::TPGEdge* edge : team.getOutgoingEdges()) {
                 // Edge->Program bid modification
                 if (rng.getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
                     // Mutate the edge
-                    mutateOutgoingEdge(graph, archive, edge, preExistingTeams,
+                    mutateOutgoingEdge(graph, edge, preExistingTeams,
                                        preExistingActions, newPrograms, params,
                                        rng);
                     anyMutationDone = true;
