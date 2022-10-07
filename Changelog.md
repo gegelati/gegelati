@@ -12,6 +12,7 @@ _yyyy.mm.dd_
   * TPG Execution (in gegelati and in generated code): When executing outgoing edges of a team, providing a mechanism to exclude already visited edges is not needed.
 
 ### Bug fix
+* Fix build issue with MSVC19. `#include <ctime>` needed in timestamp.cpp.
 
 
 ## Release version 1.2.0 - Cantutuccini flavor
