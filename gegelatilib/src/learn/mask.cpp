@@ -17,9 +17,10 @@ std::vector<int> Mask::getIdx()
 
     // x = random index of a column according to :
     //      - n = random double between 0 and std::accumulate(columns.begin(), columns.end(), 0)
-    //
-    //      - x = last index of columns where the sum of previous index values is lower than n
 
+    n = this->_rng.getDouble(0.0, std::accumulate(columns.begin(), columns.end(), 0.0));
+
+    //      - x = last index of columns where the sum of previous index values is lower than n
     do {
         temp_value += columns.at(temp_idx++);
     } while(temp_value < n);
@@ -41,9 +42,10 @@ std::vector<int> Mask::getIdx()
 
     // y = random index of a line according to :
     //      - n = random double between 0 and std::accumulate(lines.begin(), lines.end(), 0)
-    //
-    //      - y = last index of columns where the sum of previous index values is lower than n
 
+    n = this->_rng.getDouble(0.0, std::accumulate(lines.begin(), lines.end(), 0.0));
+
+    //      - y = last index of columns where the sum of previous index values is lower than n
     temp_idx = 0;
     temp_value = 0.0;
     do {
@@ -52,13 +54,11 @@ std::vector<int> Mask::getIdx()
 
     y = temp_idx;
 
-    std::vector<int> res(2);
-    res.push_back(x);
-    res.push_back(y);
+    std::vector<int> res{x, y};
     return res;
 }
 
-void Mask::init()
+void Mask::init(uint64_t seed)
 {
-    // Initialise a Mutator attribute with a given seed ?
+    this->_rng.setSeed(seed);
 }
