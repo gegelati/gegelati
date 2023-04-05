@@ -8,6 +8,8 @@
 
 #include "mutator/rng.h"
 
+#define THRESHOLD 0.2
+
 class Mask
 {
   public:
@@ -17,16 +19,15 @@ class Mask
         return instance;
     }
 
-    void updateMask();              // Allow to update the mask content (the log data shall be added to parameters)
-    std::vector<int> getIdx();      // Return a random index according to the mask statistic repartition
-    void init(uint64_t seed);                    // Mutator in parameters, and maybe a data sample to make the mask size be coherent
+    void updateMask();                          // Allow to update the mask content (the log data shall be added to parameters)
+    std::vector<int> getIdx(Mutator::RNG rng);                  // Return a random index according to the mask statistic repartition
+    void init();                                // Mutator in parameters, and maybe a data sample to make the mask size be coherent
+    std::vector<int> getSize(); // Mask dimensions
 
   private:
     Mask() = default;
 
     std::vector<std::vector<double>> _mask;    // Mask content | Statistic repartition
-
-    Mutator::RNG _rng;
 
     //Mask(Mask const&);
     //void operator=(Mask const&);

@@ -3,9 +3,13 @@
 void Mask::updateMask()
 {
 
+    // Make sure all the weights are above the threshold to avoid null values
+    for(auto & m : this->_mask)
+        for(auto & p : m)
+            p = p < THRESHOLD ? THRESHOLD : p;
 }
 
-std::vector<int> Mask::getIdx()
+std::vector<int> Mask::getIdx(Mutator::RNG rng) // utiliser un rng en parametre pour para
 {
     int x = 0, y = 0, temp_idx = 0;
     double n = 0.0, temp_value = 0.0;
@@ -18,7 +22,7 @@ std::vector<int> Mask::getIdx()
     // x = random index of a column according to :
     //      - n = random double between 0 and std::accumulate(columns.begin(), columns.end(), 0)
 
-    n = this->_rng.getDouble(0.0, std::accumulate(columns.begin(), columns.end(), 0.0));
+    n = rng.getDouble(0.0, std::accumulate(columns.begin(), columns.end(), 0.0));
 
     //      - x = last index of columns where the sum of previous index values is lower than n
     do {
@@ -43,7 +47,7 @@ std::vector<int> Mask::getIdx()
     // y = random index of a line according to :
     //      - n = random double between 0 and std::accumulate(lines.begin(), lines.end(), 0)
 
-    n = this->_rng.getDouble(0.0, std::accumulate(lines.begin(), lines.end(), 0.0));
+    n = rng.getDouble(0.0, std::accumulate(lines.begin(), lines.end(), 0.0));
 
     //      - y = last index of columns where the sum of previous index values is lower than n
     temp_idx = 0;
@@ -58,7 +62,10 @@ std::vector<int> Mask::getIdx()
     return res;
 }
 
-void Mask::init(uint64_t seed)
+void Mask::init()
 {
-    this->_rng.setSeed(seed);
+}
+std::vector<int> Mask::getSize()
+{
+    return std::vector<int>{static_cast<int>(this->_mask.size()), static_cast<int>(this->_mask.begin()->size())};
 }
