@@ -41,6 +41,7 @@
 
 #include "mutator/rng.h"
 #include "program/line.h"
+#include "learn/mask.h"
 
 namespace Mutator {
     /**

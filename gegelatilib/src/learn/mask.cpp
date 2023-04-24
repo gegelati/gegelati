@@ -9,14 +9,16 @@ void Mask::updateMask()
             p = p < THRESHOLD ? THRESHOLD : p;
 }
 
-std::vector<int> Mask::getIdx(Mutator::RNG rng) // utiliser un rng en parametre pour para
+std::vector<int> Mask::getIdx(Mutator::RNG rng, uint64_t mask_index) // utiliser un rng en parametre pour para
 {
     int x = 0, y = 0, temp_idx = 0;
     double n = 0.0, temp_value = 0.0;
 
+    auto mask = this->all_masks.at(mask_index);
+
     // Choosing a column
     std::vector<double> columns;
-    for(auto & i : this->_mask)
+    for(auto & i : mask)
         columns.push_back(std::accumulate(i.begin(), i.end(), 0.0));    // Sum of the column content
 
     // x = random index of a column according to :
@@ -33,10 +35,10 @@ std::vector<int> Mask::getIdx(Mutator::RNG rng) // utiliser un rng en parametre 
 
     // Choosing a line
     std::vector<double> lines;
-    for(int i=0 ; i<this->_mask.at(0).size() ; i++)
-        lines.push_back(std::accumulate(this->_mask.at(x).begin(), this->_mask.at(x).end(), 0.0));
+    for(int i=0 ; i<mask.at(0).size() ; i++)
+        lines.push_back(std::accumulate(mask.at(x).begin(), mask.at(x).end(), 0.0));
 
-    for(auto & i : this->_mask)
+    for(auto & i : mask)
     {
         double count = 0.0;
         for (double j : i)
@@ -65,7 +67,7 @@ std::vector<int> Mask::getIdx(Mutator::RNG rng) // utiliser un rng en parametre 
 void Mask::init()
 {
 }
-std::vector<int> Mask::getSize()
+std::vector<int> Mask::getSize(uint64_t mask_index)
 {
-    return std::vector<int>{static_cast<int>(this->_mask.size()), static_cast<int>(this->_mask.begin()->size())};
+    return std::vector<int>{static_cast<int>(this->all_masks.at(mask_index).size()), static_cast<int>(this->all_masks.at(mask_index).begin()->size())};
 }

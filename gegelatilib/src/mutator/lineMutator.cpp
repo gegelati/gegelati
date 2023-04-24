@@ -85,6 +85,7 @@ static bool initRandomCorrectLineOperand(
             operandDataSourceIndex =
                 rng.getUnsignedInt64(0, (env.getNbDataSources() - 1) -
                                             operandDataSourceIndexes.size());
+
             // Correct the index with the number of already tested ones inferior
             // to it. This works because the set is ordered
             std::for_each(operandDataSourceIndexes.begin(),
@@ -109,6 +110,7 @@ static bool initRandomCorrectLineOperand(
         // Select a location
         operandDataSourceIndex = rng.getUnsignedInt64(
             0, env.getNbDataSources() - 1 - ((forceChange) ? 1 : 0));
+
         if (forceChange &&
             operandDataSourceIndex >= line.getOperand(operandIdx).first) {
             operandDataSourceIndex += 1;
@@ -121,6 +123,11 @@ static bool initRandomCorrectLineOperand(
         // Select a location
         operandLocation = rng.getUnsignedInt64(
             0, env.getLargestAddressSpace() - 1 - ((forceChange) ? 1 : 0));
+
+        Mask& mask = Mask::getInstance();
+        auto idx = mask.getIdx(rng, operandDataSourceIndex);
+        operandLocation = mask.getSize(operandDataSourceIndex).at(0) * idx.at(0) + idx.at(1);
+
         if (forceChange &&
             operandLocation >= line.getOperand(operandIdx).second) {
             operandLocation += 1;
@@ -198,7 +205,9 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
         for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
             const std::type_info& type =
                 instruction.getOperandTypes().at(i).get();
+
             uint64_t dataSourceIndex = line.getOperand(i).first;
+
             bool isValid = false;
             const Data::DataHandler& dataSource = line.getEnvironment()
                                                       .getFakeDataSources()
@@ -234,11 +243,13 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
         // Which operand is selected
         // Equal position of selectedBit within operand bits, divided by the
         // total number of bits per operand.
+
         const uint64_t operandIndex =
             (selectedBit -
              (lineSize.nbInstructionBits + lineSize.nbDestinationBits)) /
             (lineSize.nbOperandDataSourceIndexBits +
              lineSize.nbOperandLocationBits);
+
         const uint64_t currentOperandDataSourceIndex =
             line.getOperand(operandIndex).first;
         const uint64_t currentOperandLocation =
