@@ -21,15 +21,13 @@ class Mask
         return instance;
     }
 
-    void updateMask();                          // Allow to update the mask content (the log data shall be added to parameters)
+    void updateMask(uint64_t mask_index);                          // Allow to update the mask content (the log data shall be added to parameters)
     std::vector<int> getIdx(Mutator::RNG rng, uint64_t mask_index);                  // Return a random index according to the mask statistic repartition
-    void init();                                // Mutator in parameters, and maybe a data sample to make the mask size be coherent
+    void init(std::vector<mask_t> &masks);                                // Mutator in parameters, and maybe a data sample to make the mask size be coherent
     std::vector<int> getSize(uint64_t mask_index); // Mask dimensions
 
   private:
     Mask() = default;
-
-    std::vector<std::vector<double>> _mask;    // Mask content | Statistic repartition
 
     std::vector<mask_t> all_masks;
 

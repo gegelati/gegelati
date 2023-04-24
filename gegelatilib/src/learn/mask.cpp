@@ -1,10 +1,12 @@
+#include <utility>
+
 #include "../../include/learn/mask.h"
 
-void Mask::updateMask()
+void Mask::updateMask(uint64_t mask_index)
 {
 
     // Make sure all the weights are above the threshold to avoid null values
-    for(auto & m : this->_mask)
+    for(auto & m : this->all_masks.at(mask_index))
         for(auto & p : m)
             p = p < THRESHOLD ? THRESHOLD : p;
 }
@@ -64,8 +66,9 @@ std::vector<int> Mask::getIdx(Mutator::RNG rng, uint64_t mask_index) // utiliser
     return res;
 }
 
-void Mask::init()
+void Mask::init(std::vector<mask_t> &masks)
 {
+    this->all_masks = masks;
 }
 std::vector<int> Mask::getSize(uint64_t mask_index)
 {
