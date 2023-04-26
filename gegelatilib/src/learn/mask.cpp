@@ -13,6 +13,8 @@ void Mask::updateMask(uint64_t mask_index)
 
 std::vector<int> Mask::getIdx(Mutator::RNG rng, uint64_t mask_index) // utiliser un rng en parametre pour para
 {
+//    printf("\nm idx : %ld\n", mask_index);
+
     int x = 0, y = 0, temp_idx = 0;
     double n = 0.0, temp_value = 0.0;
 
@@ -33,7 +35,7 @@ std::vector<int> Mask::getIdx(Mutator::RNG rng, uint64_t mask_index) // utiliser
         temp_value += columns.at(temp_idx++);
     } while(temp_value < n);
 
-    x = temp_idx;
+    x = temp_idx-1;
 
     // Choosing a line
     std::vector<double> lines;
@@ -60,9 +62,10 @@ std::vector<int> Mask::getIdx(Mutator::RNG rng, uint64_t mask_index) // utiliser
         temp_value += lines.at(temp_idx++);
     } while(temp_value < n);
 
-    y = temp_idx;
+    y = temp_idx-1;
 
     std::vector<int> res{x, y};
+//    printf("\nx : %d\ny : %d\n", x, y);
     return res;
 }
 
