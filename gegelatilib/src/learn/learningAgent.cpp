@@ -241,6 +241,9 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
         logger.get().logAfterEvaluate(results);
     }
 
+    // Save the best score of this generation
+    this->updateBestScoreLastGen(results);
+
     // Remove worst performing roots
     decimateWorstRoots(results);
     // Update the best
@@ -394,6 +397,20 @@ const std::pair<const TPG::TPGVertex*,
 Learn::LearningAgent::getBestRoot() const
 {
     return this->bestRoot;
+}
+
+void Learn::LearningAgent::updateBestScoreLastGen(
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>& results)
+{
+    auto iter = results.begin();
+    std::advance(iter, results.size() - 1);
+    bestScoreLastGen = iter->first->getResult();
+}
+
+double Learn::LearningAgent::getBestScoreLastGen()
+{
+    return bestScoreLastGen;
 }
 
 void Learn::LearningAgent::keepBestPolicy()
