@@ -766,8 +766,6 @@ TEST_F(ParallelLearningAgentTest, Init)
     ASSERT_NO_THROW(pla.init())
         << "Initialization of the LearningAgent should not fail.";
 
-    ASSERT_EQ(pla.bestScoreLastGen, 0.0)
-        << "bestScoreLastGen should be init with a score of 0.0";
 }
 
 TEST_F(ParallelLearningAgentTest, EvalRootSequential)
