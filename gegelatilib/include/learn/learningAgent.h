@@ -132,7 +132,7 @@ namespace Learn {
                       const TPG::TPGFactory& factory = TPG::TPGFactory())
             : learningEnvironment{le}, env(iSet, le.getDataSources(),
                                            p.nbRegisters, p.nbProgramConstant),
-              tpg(factory.createTPGGraph(env)), params{p},
+              tpg(factory.createTPGGraph(env)), params{p}, bestScoreLastGen(0.0),
               archive(p.archiveSize, p.archivingProbability)
         {
             // override the number of actions from the parameters.
