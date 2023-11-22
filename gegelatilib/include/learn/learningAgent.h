@@ -366,7 +366,7 @@ namespace Learn {
          * 
          * \return double of bestScoreLastGen attribute.
          */
-        const double getBestScoreLastGen();
+        double getBestScoreLastGen() const;
         
         /**
          * \brief Get the best root TPG::Vertex encountered since the last init.

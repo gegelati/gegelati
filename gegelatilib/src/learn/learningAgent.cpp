@@ -408,7 +408,7 @@ void Learn::LearningAgent::updateBestScoreLastGen(
     bestScoreLastGen = iter->first->getResult();
 }
 
-const double Learn::LearningAgent::getBestScoreLastGen()
+double Learn::LearningAgent::getBestScoreLastGen() const
 {
     return bestScoreLastGen;
 }
