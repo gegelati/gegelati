@@ -114,7 +114,7 @@ namespace Learn {
         std::vector<std::reference_wrapper<Log::LALogger>> loggers;
 
         /// double corresponding to the best score reached at the last generation
-        double bestScoreLastGen;
+        double bestScoreLastGen = 0.0;
 
       public:
         /**
@@ -132,7 +132,7 @@ namespace Learn {
                       const TPG::TPGFactory& factory = TPG::TPGFactory())
             : learningEnvironment{le}, env(iSet, le.getDataSources(),
                                            p.nbRegisters, p.nbProgramConstant),
-              tpg(factory.createTPGGraph(env)), params{p}, bestScoreLastGen(0.0),
+              tpg(factory.createTPGGraph(env)), params{p},
               archive(p.archiveSize, p.archivingProbability)
         {
             // override the number of actions from the parameters.
