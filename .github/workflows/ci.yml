@@ -73,7 +73,7 @@ jobs:
         uses: nick-invision/retry@v2
         with:
           max_attempts: 3
-          timeout_minutes: 1
+          timeout_minutes: 2
           retry_on: error
           command: choco install doxygen.install --force
           shell: bash
