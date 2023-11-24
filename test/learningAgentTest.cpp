@@ -524,6 +524,9 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     ASSERT_NO_THROW(la.trainOneGeneration(0))
         << "Training for one generation failed.";
 
+    // Check that bestScoreLastGen has been set
+    ASSERT_NE(la.getBestScoreLastGen(), 0.0);
+
     // Check that bestRoot has been set
     ASSERT_NE(la.getBestRoot().first, nullptr);
 
@@ -762,6 +765,7 @@ TEST_F(ParallelLearningAgentTest, Init)
 
     ASSERT_NO_THROW(pla.init())
         << "Initialization of the LearningAgent should not fail.";
+
 }
 
 TEST_F(ParallelLearningAgentTest, EvalRootSequential)
@@ -892,6 +896,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
         iterSequential++;
     }
 
+    // Check determinism of bestScoreLastGen
+    ASSERT_EQ(la.getBestScoreLastGen(), plaSequential.getBestScoreLastGen());
+
     // Check determinism of bestRoot score
     ASSERT_EQ(la.getBestRoot().second, plaSequential.getBestRoot().second);
 
@@ -930,6 +937,10 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
         iterSequential++;
         iterParallel++;
     }
+
+    // Check determinism of bestScoreLastGen
+    ASSERT_EQ(plaSequential.getBestScoreLastGen(),
+              plaParallel.getBestScoreLastGen());
 
     // Check determinism of bestRoot score
     ASSERT_EQ(plaSequential.getBestRoot().second,
