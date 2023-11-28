@@ -18,19 +18,19 @@ jobs:
           UBUNTU_MATRIX="{\"compiler\":[\"g++\", \"clang++\"],\"modular\":[\"fullBuild\""
           if ${{ env.activate }}; then UBUNTU_MATRIX="$UBUNTU_MATRIX,\"noModules\""; fi
           UBUNTU_MATRIX="$UBUNTU_MATRIX]}"
-          echo "::set-output name=matrix-ubuntu::$UBUNTU_MATRIX"
+          echo "matrix-ubuntu=$UBUNTU_MATRIX" >> $GITHUB_OUTPUT
       - id: set-matrix-windows
         run: |
           WINDOWS_MATRIX="{\"modular\":[\"fullBuild\""
           if ${{ env.activate }}; then WINDOWS_MATRIX="$WINDOWS_MATRIX,\"noModules\""; fi
           WINDOWS_MATRIX="$WINDOWS_MATRIX]}"
-          echo "::set-output name=matrix-windows::$WINDOWS_MATRIX"
+          echo "matrix-windows=$WINDOWS_MATRIX" >> $GITHUB_OUTPUT
       - id: set-matrix-macos
         run: |
           MACOS_MATRIX="{\"modular\":[\"fullBuild\""
           if ${{ env.activate }}; then MACOS_MATRIX="$MACOS_MATRIX,\"noModules\""; fi
           MACOS_MATRIX="$MACOS_MATRIX]}"
-          echo "::set-output name=matrix-macos::$MACOS_MATRIX"
+          echo "matrix-macos=$MACOS_MATRIX" >> $GITHUB_OUTPUT
   Build-Ubuntu:
     needs: Configure-Workflow
     runs-on: ubuntu-latest
