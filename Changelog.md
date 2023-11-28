@@ -14,6 +14,7 @@ _yyyy.mm.dd_
 
 ### Bug fix
 * Fix build issue with MSVC19. `#include <ctime>` needed in timestamp.cpp.
+* Fix silly installation timeout for CI on Windows.
 
 
 ## Release version 1.2.0 - Cantutuccini flavor
