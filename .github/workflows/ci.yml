@@ -41,7 +41,7 @@ jobs:
       GENERATOR: 'Unix Makefile'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install
         run: |
           sudo apt install doxygen
@@ -68,7 +68,7 @@ jobs:
       GENERATOR: 'Visual Studio 16 2019'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install
         uses: nick-invision/retry@v2
         with:
@@ -122,7 +122,7 @@ jobs:
       GENERATOR: 'Unix Makefile'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install
         run: brew install doxygen
       - name: Build
@@ -144,7 +144,7 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Download
@@ -172,7 +172,7 @@ jobs:
     if: contains(github.ref, '/tags/v')
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Download
         uses: actions/download-artifact@v2
         with:
@@ -196,7 +196,7 @@ jobs:
     needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Run script
         continue-on-error: ${{ !(endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v')  || endsWith(github.base_ref, 'develop') || endsWith(github.base_ref, 'master')) }}
         run: |
@@ -211,7 +211,7 @@ jobs:
       BUILD_WRAPPER_OUT_DIR: bw-output # Directory where build-wrapper output will be placed
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
