@@ -107,7 +107,7 @@ jobs:
         shell: bash
         if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v') )
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: windows-gegelatilib
           path: ./neutral_builds/*.zip
@@ -148,7 +148,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Download
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: windows-gegelatilib
           path: ./neutral_builds/
@@ -174,7 +174,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: windows-gegelatilib
           path: ./neutral_builds/
