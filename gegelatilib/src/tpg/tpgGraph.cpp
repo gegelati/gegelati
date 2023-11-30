@@ -201,7 +201,7 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
         // (May throw if an outgoing edge is added to an action)
         (*srcVertex)->addOutgoingEdge(&newEdge);
     }
-    catch (std::runtime_error e) {
+    catch (std::runtime_error& e) {
         // Remove the edge before re-throwing
         this->edges.pop_back();
         throw e;

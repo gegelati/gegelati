@@ -174,9 +174,9 @@ void Program::ProgramEngine::iterateThroughtProgram(const bool ignoreException)
             // process the current line
             processLine();
         }
-        catch (std::out_of_range e) {
+        catch (std::out_of_range& e) {
             if (!ignoreException) {
-                throw; // rethrow
+                throw e; // rethrow
             }
         }
 
