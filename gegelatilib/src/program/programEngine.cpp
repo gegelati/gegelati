@@ -176,7 +176,7 @@ void Program::ProgramEngine::iterateThroughtProgram(const bool ignoreException)
         }
         catch (std::out_of_range& e) {
             if (!ignoreException) {
-                throw; // rethrow
+                throw e; // rethrow
             }
         }
 
