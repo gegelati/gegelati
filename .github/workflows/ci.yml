@@ -205,8 +205,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
     env:
-      SONAR_SCANNER_VERSION: 4.6.1.2450 # Find the latest version in the "Linux" link on this page:
-                                        # https://sonarcloud.io/documentation/analysis/scan/sonarscanner/
+      SONAR_SCANNER_VERSION: 5.0.1.3006 # Find the latest version in the "Linux" link on this page:
+                                        # https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/
       SONAR_SERVER_URL: "https://sonarcloud.io"
       BUILD_WRAPPER_OUT_DIR: bw-output # Directory where build-wrapper output will be placed
     steps:
