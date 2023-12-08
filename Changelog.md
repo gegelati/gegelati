@@ -11,6 +11,7 @@ _yyyy.mm.dd_
   * Mutations: It is no longer mandatory to have an action referenced in each team of the TPG.
   * TPG Execution (in gegelati and in generated code): When executing outgoing edges of a team, providing a mechanism to exclude already visited edges is not needed.
 * Add the attribute "bestScoreLastGen" to the learning agent that records the best score achieved in each generation. This score can be obtained using the "getBestScoreLastGen" method.
+* Update the generated CMake support for `find_package(GEGELATI)`. Make the `GEGELATI_INCLUDE_DIRS` and `GEGELATI_LIBRARIES` visible in the CMakeGui and in the whole CMake scope in case subdirectory are used.
 
 ### Bug fix
 * Fix build issue with MSVC19. `#include <ctime>` needed in timestamp.cpp.
