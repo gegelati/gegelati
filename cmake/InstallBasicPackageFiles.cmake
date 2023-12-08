@@ -486,9 +486,9 @@ function(INSTALL_BASIC_PACKAGE_FILES _Name)
         endforeach()
         string(REPLACE ";" " " _include_dir_list "${_include_dir_list}")
         string(REPLACE ";" " " _target_list "${_target_list}")
-        set(_set_include_dir "set(${_Name}_INCLUDE_DIRS ${_include_dir_list})\nlist(REMOVE_DUPLICATES ${_Name}_INCLUDE_DIRS)")
+        set(_set_include_dir "set(${_Name}_INCLUDE_DIRS ${_include_dir_list} CACHE PATH \"Location of the header files\")\nlist(REMOVE_DUPLICATES ${_Name}_INCLUDE_DIRS)")
       endif()
-      set(_compatibility_vars "# Compatibility\n${_get_include_dir}\nset(${_Name}_LIBRARIES ${_target_list})\n${_set_include_dir}")
+      set(_compatibility_vars "# Compatibility\n${_get_include_dir}\nset(${_Name}_LIBRARIES ${_target_list} CACHE PATH \"Location of the shared binaries\")\n${_set_include_dir}")
     endif()
 
     # Write the file
