@@ -92,6 +92,8 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
         message(FATAL_ERROR "GCC version cannot be lower than 7.0 to build this lib!")
     endif()
+    # Add definition for inttype support in Mingw
+    add_definitions(-D__STDC_FORMAT_MACROS)
 endif()
 
 # Build position independent code.
