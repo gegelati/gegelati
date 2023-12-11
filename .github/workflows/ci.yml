@@ -21,7 +21,7 @@ jobs:
           echo "matrix-ubuntu=$UBUNTU_MATRIX" >> $GITHUB_OUTPUT
       - id: set-matrix-windows
         run: |
-          WINDOWS_MATRIX="{\"modular\":[\"fullBuild\""
+          WINDOWS_MATRIX="{\"compiler\":[\"msvc\",\"mingw\"],\"modular\":[\"fullBuild\""
           if ${{ env.activate }}; then WINDOWS_MATRIX="$WINDOWS_MATRIX,\"noModules\""; fi
           WINDOWS_MATRIX="$WINDOWS_MATRIX]}"
           echo "matrix-windows=$WINDOWS_MATRIX" >> $GITHUB_OUTPUT
@@ -63,9 +63,9 @@ jobs:
     runs-on: windows-latest
     strategy: 
       matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-windows)}}
-    name: Windows-MSVC-${{ matrix.modular }}
+    name: Windows-MSVC-${{matrix.compiler}}-${{ matrix.modular }}
     env:
-      GENERATOR: 'Visual Studio 16 2019'
+      GENERATOR: ${{ matrix.compiler == 'msvc' && 'Visual Studio 17 2022' || 'MinGW Makefiles'}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,17 +81,17 @@ jobs:
         run: |
           cd bin
           if [ "${{ matrix.modular }}" = "fullBuild" ]; then MODULES=ON; else MODULES=OFF; fi
-          cmake .. -DCODE_GEN=$MODULES
+          cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=$MODULES
           cmake --build . --target GEGELATI --config Debug
           cmake --build . --target doc
-          cmake --build . --target INSTALL --config Debug
+          if [ "${{ matrix.compiler }}" = "msvc" ]; then cmake --build . --target INSTALL --config Debug; fi
           if [[ "${{ github.ref }}" == *"master" ]] || [[ "${{ github.ref }}" == *"develop" ]] || [[ "${{ github.ref }}" == *"tags/v"* ]]; then cmake --build . --target INSTALL --config Release ; fi;
           cmake --build . --target runTests --config Debug
         shell: bash
       - name: Run Tests
         run: |
           cd bin
-          ./bin/Debug/runTests.exe
+          if [ "${{ matrix.compiler }}" = "msvc" ]; then ./bin/Debug/runTests.exe; else ./bin/runTests.exe; fi
         shell: bash
       - name: Prepare archive
         run: |
