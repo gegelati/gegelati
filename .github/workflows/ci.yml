@@ -88,11 +88,18 @@ jobs:
           if [[ "${{ github.ref }}" == *"master" ]] || [[ "${{ github.ref }}" == *"develop" ]] || [[ "${{ github.ref }}" == *"tags/v"* ]]; then cmake --build . --target INSTALL --config Release ; fi;
           cmake --build . --target runTests --config Debug
         shell: bash
-      - name: Run Tests
+      - name: Run Tests MSVC
+        if: ${{matrix.compiler == 'msvc'}}
         run: |
           cd bin
-          if [ "${{ matrix.compiler }}" = "msvc" ]; then ./bin/Debug/runTests.exe; else ./bin/runTests.exe; fi
+          ./bin/Debug/runTests.exe
         shell: bash
+      - name: Run Tests MinGW
+        if: ${{matrix.compiler == 'mingw'}}
+        run: |
+          cd bin
+          .\bin\runTests.exe
+        shell: cmd
       - name: Prepare archive
         run: |
          VERSION_NUMBER="$(cat CMakeLists.txt | grep -m 1 "VERSION \([0-9]\+.[0-9]\+.[0-9]\+\)" | sed -E -e 's/ |\)|VERSION//g')"
