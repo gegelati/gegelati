@@ -41,7 +41,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || (__MINGW32__)
 // C++17 not available in gcc7 or clang7
 #include <filesystem>
 #endif
@@ -89,7 +89,7 @@ class TPGGenerationEngineTest : public ::testing::Test
         tpg = new TPG::TPGGraph(*e);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || (__MINGW32__)
         // Set working directory to BIN_DIR_PATH where the "src" directory was
         // created.
         std::filesystem::current_path(BIN_DIR_PATH);
@@ -157,7 +157,7 @@ TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateSwitch)
     out.close();
     ASSERT_TRUE(!out.is_open()) << "Error can't close file ./src/rdOnly.c";
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || (__MINGW32__)
     ASSERT_EQ(system("attrib +R ./src/rdOnly.c"), 0)
         << "Fail to change the file as read only";
 #elif __GNUC__
@@ -264,7 +264,7 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
 }
 
 /// Extension for built executables
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || (__MINGW32__)
 std::string executableExtension = ".exe ";
 #elif __GNUC__
 std::string executableExtension = " ";

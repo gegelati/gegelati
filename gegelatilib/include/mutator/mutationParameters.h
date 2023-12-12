@@ -38,6 +38,7 @@
 #define MUTATION_PARAMETERS_H
 
 #include <cstddef>
+#include <cstdint>
 
 namespace Mutator {
     /**

@@ -42,7 +42,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
 // C++17 not available in gcc7 or clang7
 #include <filesystem>
 #endif
@@ -117,7 +117,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
         dot->importGraph();
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
         // Set working directory to BIN_DIR_PATH where the "src" directory was
         // created.
         std::filesystem::current_path(BIN_DIR_PATH);
@@ -186,7 +186,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
                                         .getSharedPointer<int>()
                                         .get())));
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
         std::string cmd{cmdExec + ".exe " + dataIn};
         inferenceCodeGen = system(cmd.c_str());
 #elif __GNUC__

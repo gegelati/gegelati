@@ -21,7 +21,7 @@ jobs:
           echo "matrix-ubuntu=$UBUNTU_MATRIX" >> $GITHUB_OUTPUT
       - id: set-matrix-windows
         run: |
-          WINDOWS_MATRIX="{\"modular\":[\"fullBuild\""
+          WINDOWS_MATRIX="{\"compiler\":[\"msvc\",\"mingw\"],\"modular\":[\"fullBuild\""
           if ${{ env.activate }}; then WINDOWS_MATRIX="$WINDOWS_MATRIX,\"noModules\""; fi
           WINDOWS_MATRIX="$WINDOWS_MATRIX]}"
           echo "matrix-windows=$WINDOWS_MATRIX" >> $GITHUB_OUTPUT
@@ -58,14 +58,14 @@ jobs:
         run: |
           cd bin
           ./bin/runTests
-  Build-Windows-MSVC:
+  Build-Windows:
     needs: Configure-Workflow
     runs-on: windows-latest
     strategy: 
       matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-windows)}}
-    name: Windows-MSVC-${{ matrix.modular }}
+    name: Windows-${{matrix.compiler}}-${{ matrix.modular }}
     env:
-      GENERATOR: 'Visual Studio 16 2019'
+      GENERATOR: ${{ matrix.compiler == 'msvc' && 'Visual Studio 17 2022' || 'MinGW Makefiles'}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,20 +81,39 @@ jobs:
         run: |
           cd bin
           if [ "${{ matrix.modular }}" = "fullBuild" ]; then MODULES=ON; else MODULES=OFF; fi
-          cmake .. -DCODE_GEN=$MODULES
+          cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=$MODULES
           cmake --build . --target GEGELATI --config Debug
           cmake --build . --target doc
-          cmake --build . --target INSTALL --config Debug
-          if [[ "${{ github.ref }}" == *"master" ]] || [[ "${{ github.ref }}" == *"develop" ]] || [[ "${{ github.ref }}" == *"tags/v"* ]]; then cmake --build . --target INSTALL --config Release ; fi;
+          if [ "${{ matrix.compiler }}" = "msvc" ]; then INSTALL_TARGET=INSTALL; else INSTALL_TARGET=install; fi
+          cmake --build . --target $INSTALL_TARGET --config Debug
           cmake --build . --target runTests --config Debug
         shell: bash
-      - name: Run Tests
+      - name: Run Tests MSVC
+        if: ${{matrix.compiler == 'msvc'}}
         run: |
           cd bin
           ./bin/Debug/runTests.exe
         shell: bash
+      - name: Run Tests MinGW
+        if: ${{matrix.compiler == 'mingw'}}
+        run: |
+          cd bin
+          .\bin\runTests.exe
+        shell: cmd
       - name: Prepare archive
         run: |
+         # Build Release version
+         cd bin
+         if [ "${{ matrix.compiler }}" = "msvc" ];
+         then
+           cmake --build . --target INSTALL --config Release;
+         else
+           # Default build with MinGW was Release, because it is a lot faster to build
+           # build debug here
+           cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=$MODULES -DCMAKE_BUILD_TYPE=Debug;
+           cmake --build . --target install;
+         fi;
+         cd ..
          VERSION_NUMBER="$(cat CMakeLists.txt | grep -m 1 "VERSION \([0-9]\+.[0-9]\+.[0-9]\+\)" | sed -E -e 's/ |\)|VERSION//g')"
          # Prepare folder
          mkdir neutral_builds
@@ -102,8 +121,8 @@ jobs:
          # Prepare archive name
          ARCHIVE_NAME="gegelatilib-${VERSION_NUMBER}.$(git show -s --format="%ci" | cut -d' ' -f 1 | sed 's/-//g')$(git show -s --format="%ci" | cut -d' ' -f 2 | sed 's/://g').zip"
          # Copy windows built and create an archive
-         cp -r ../bin/gegelatilib-${VERSION_NUMBER} ./gegelatilib-${VERSION_NUMBER}
-         7z a $ARCHIVE_NAME gegelatilib-${VERSION_NUMBER}/*
+         cp -r ../bin/gegelatilib-${VERSION_NUMBER} ./gegelatilib-${{ matrix.compiler }}-${VERSION_NUMBER}
+         7z a $ARCHIVE_NAME gegelatilib-${{ matrix.compiler }}-${VERSION_NUMBER}/*
         shell: bash
         if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v') )
       - name: Upload
@@ -140,7 +159,7 @@ jobs:
           ./bin/runTests
   Deploy-NeutralBuilds:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
     if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout
@@ -168,7 +187,7 @@ jobs:
         shell: bash
   Deploy-Releases:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
     if: contains(github.ref, '/tags/v')
     steps:
       - name: Checkout
@@ -193,7 +212,7 @@ jobs:
         shell: bash
   Analyze-Code_Style:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -203,7 +222,7 @@ jobs:
           ./scripts/fix_code_format.sh
   Analyze-Sonar:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
     env:
       SONAR_SCANNER_VERSION: 5.0.1.3006 # Find the latest version in the "Linux" link on this page:
                                         # https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/

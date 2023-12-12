@@ -37,7 +37,7 @@
 #ifdef CODE_GENERATION
 #include <gtest/gtest.h>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || (__MINGW32__)
 // C++17 not available in gcc7 or clang7
 #include <filesystem>
 #endif
@@ -88,7 +88,7 @@ class ProgramGenerationEngineTest : public ::testing::Test
         p2 = new Program::Program(*e);
         p3 = new Program::Program(*envWithConstant);
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || (__MINGW32__)
         // Set working directory to BIN_DIR_PATH where the "src" directory was
         // created.
         std::filesystem::current_path(BIN_DIR_PATH);
