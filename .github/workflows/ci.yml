@@ -84,8 +84,8 @@ jobs:
           cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=$MODULES
           cmake --build . --target GEGELATI --config Debug
           cmake --build . --target doc
-          if [ "${{ matrix.compiler }}" = "msvc" ]; then cmake --build . --target INSTALL --config Debug; fi
-          if [[ "${{ github.ref }}" == *"master" ]] || [[ "${{ github.ref }}" == *"develop" ]] || [[ "${{ github.ref }}" == *"tags/v"* ]]; then cmake --build . --target INSTALL --config Release ; fi;
+          if [ "${{ matrix.compiler }}" = "msvc" ]; then INSTALL_TARGET=INSTALL; else INSTALL_TARGET=install; fi
+          cmake --build . --target $INSTALL_TARGET --config Debug
           cmake --build . --target runTests --config Debug
         shell: bash
       - name: Run Tests MSVC
@@ -102,6 +102,18 @@ jobs:
         shell: cmd
       - name: Prepare archive
         run: |
+         # Build Release version
+         cd bin
+         if [ "${{ matrix.compiler }}" = "msvc"];
+         then
+           cmake --build . --target INSTALL --config Release
+         else
+           # Default build with MinGW was Release, because it is a lot faster to build
+           # build debug here
+           cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=$MODULES -DCMAKE_BUILD_TYPE = Debug
+           cmake --build . --target install
+         fi;
+         cd ..
          VERSION_NUMBER="$(cat CMakeLists.txt | grep -m 1 "VERSION \([0-9]\+.[0-9]\+.[0-9]\+\)" | sed -E -e 's/ |\)|VERSION//g')"
          # Prepare folder
          mkdir neutral_builds
@@ -109,8 +121,8 @@ jobs:
          # Prepare archive name
          ARCHIVE_NAME="gegelatilib-${VERSION_NUMBER}.$(git show -s --format="%ci" | cut -d' ' -f 1 | sed 's/-//g')$(git show -s --format="%ci" | cut -d' ' -f 2 | sed 's/://g').zip"
          # Copy windows built and create an archive
-         cp -r ../bin/gegelatilib-${VERSION_NUMBER} ./gegelatilib-${VERSION_NUMBER}
-         7z a $ARCHIVE_NAME gegelatilib-${VERSION_NUMBER}/*
+         cp -r ../bin/gegelatilib-${VERSION_NUMBER} ./gegelatilib-${{ matrix.compiler }}-${VERSION_NUMBER}
+         7z a $ARCHIVE_NAME gegelatilib-${{ matrix.compiler }}-${VERSION_NUMBER}/*
         shell: bash
         if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v') )
       - name: Upload

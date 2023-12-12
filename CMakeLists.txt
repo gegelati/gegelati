@@ -87,7 +87,17 @@ if(MSVC)
 	add_definitions( -D_CRT_SECURE_NO_WARNINGS )
 	# Install in dedicated subfolder
 	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/${LIB_SOURCE_DIRECTORY}-${PROJECT_VERSION})
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+elseif(MINGW)
+    # Under MinGW, we set CMAKE_DEBUG_POSTFIX to "d" to add a trailing "d" to library
+	# built in debug mode. In this Windows user can compile, build and install the
+	# library in both Release and Debug configuration avoiding naming clashes in the
+	# installation directories.
+    set(CMAKE_DEBUG_POSTFIX "d")
+    # Install in dedicated subfolder
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/${LIB_SOURCE_DIRECTORY}-${PROJECT_VERSION})
+endif()
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # Require gcc 7 at least.
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
         message(FATAL_ERROR "GCC version cannot be lower than 7.0 to build this lib!")
