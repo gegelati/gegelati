@@ -58,12 +58,12 @@ jobs:
         run: |
           cd bin
           ./bin/runTests
-  Build-Windows-MSVC:
+  Build-Windows:
     needs: Configure-Workflow
     runs-on: windows-latest
     strategy: 
       matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-windows)}}
-    name: Windows-MSVC-${{matrix.compiler}}-${{ matrix.modular }}
+    name: Windows-${{matrix.compiler}}-${{ matrix.modular }}
     env:
       GENERATOR: ${{ matrix.compiler == 'msvc' && 'Visual Studio 17 2022' || 'MinGW Makefiles'}}
     steps:
@@ -159,7 +159,7 @@ jobs:
           ./bin/runTests
   Deploy-NeutralBuilds:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
     if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout
@@ -187,7 +187,7 @@ jobs:
         shell: bash
   Deploy-Releases:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
     if: contains(github.ref, '/tags/v')
     steps:
       - name: Checkout
@@ -212,7 +212,7 @@ jobs:
         shell: bash
   Analyze-Code_Style:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -222,7 +222,7 @@ jobs:
           ./scripts/fix_code_format.sh
   Analyze-Sonar:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows-MSVC]
+    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
     env:
       SONAR_SCANNER_VERSION: 5.0.1.3006 # Find the latest version in the "Linux" link on this page:
                                         # https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/
