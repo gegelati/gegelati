@@ -114,7 +114,8 @@ namespace Learn {
          */
         std::vector<std::reference_wrapper<Log::LALogger>> loggers;
 
-        /// double corresponding to the best score reached at the last generation
+        /// double corresponding to the best score reached at the last
+        /// generation
         double bestScoreLastGen = 0.0;
 
       public:
@@ -354,21 +355,22 @@ namespace Learn {
         void forgetPreviousResults();
 
         /**
-         * \brief This method update the best score reached at the last generation trained.
-         * 
+         * \brief This method update the best score reached at the last
+         * generation trained.
+         *
          * \param[in] results Map from the evaluateAllRoots method.
          */
         void updateBestScoreLastGen(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results);
+                          const TPG::TPGVertex*>& results);
 
         /**
          * \brief Get the best score reached at the last generation trained
-         * 
+         *
          * \return double of bestScoreLastGen attribute.
          */
         double getBestScoreLastGen() const;
-        
+
         /**
          * \brief Get the best root TPG::Vertex encountered since the last init.
          *

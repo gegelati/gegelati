@@ -767,7 +767,6 @@ TEST_F(ParallelLearningAgentTest, Init)
 
     ASSERT_NO_THROW(pla.init())
         << "Initialization of the LearningAgent should not fail.";
-
 }
 
 TEST_F(ParallelLearningAgentTest, EvalRootSequential)
