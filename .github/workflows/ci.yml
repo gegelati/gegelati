@@ -82,11 +82,11 @@ jobs:
           cd bin
           if [ "${{ matrix.modular }}" = "fullBuild" ]; then MODULES=ON; else MODULES=OFF; fi
           cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=$MODULES
-          cmake --build . --target GEGELATI --config Debug
+          cmake --build . --target GEGELATI --config Debug -j 2
           cmake --build . --target doc
           if [ "${{ matrix.compiler }}" = "msvc" ]; then INSTALL_TARGET=INSTALL; else INSTALL_TARGET=install; fi
-          cmake --build . --target $INSTALL_TARGET --config Debug
-          cmake --build . --target runTests --config Debug
+          cmake --build . --target $INSTALL_TARGET --config Debug 
+          cmake --build . --target runTests --config Debug -j 2
         shell: bash
       - name: Run Tests MSVC
         if: ${{matrix.compiler == 'msvc'}}
@@ -111,7 +111,7 @@ jobs:
            # Default build with MinGW was Release, because it is a lot faster to build
            # build debug here
            cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=$MODULES -DCMAKE_BUILD_TYPE=Debug;
-           cmake --build . --target install;
+           cmake --build . --target install -j 2;
          fi;
          cd ..
          VERSION_NUMBER="$(cat CMakeLists.txt | grep -m 1 "VERSION \([0-9]\+.[0-9]\+.[0-9]\+\)" | sed -E -e 's/ |\)|VERSION//g')"
