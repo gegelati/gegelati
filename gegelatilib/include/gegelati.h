@@ -1,7 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
+ * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
@@ -85,6 +85,7 @@
 #include <learn/classificationLearningAgent.h>
 #include <learn/classificationLearningEnvironment.h>
 
+#include <log/cycleDetectionLALogger.h>
 #include <log/laBasicLogger.h>
 #include <log/laLogger.h>
 #include <log/laPolicyStatsLogger.h>

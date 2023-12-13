@@ -56,9 +56,7 @@ std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
                                        const std::string& path)
 {
     if (this->mode == stackMode) {
-        int stack = tpg.getEdges().size(); // use upper bound on stack size
-        return std::make_unique<TPGStackGenerationEngine>(filename, tpg, path,
-                                                          stack);
+        return std::make_unique<TPGStackGenerationEngine>(filename, tpg, path);
     }
     else if (this->mode == switchMode) {
         return std::make_unique<TPGSwitchGenerationEngine>(filename, tpg, path);

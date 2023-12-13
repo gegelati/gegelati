@@ -30,10 +30,6 @@ int bestProgram(double *results, int nb) {
 enum vertices {A0, T1, };
 
 int inferenceTPG() {
-	bool teamsVisited[2] = { false };
-
-	double T1Scores[1];
-
 	enum vertices currentVertex = T1;
 	while(1) {
 		switch (currentVertex) {
@@ -44,8 +40,9 @@ int inferenceTPG() {
 		case T1: {
 			const enum vertices next[1] = { A0,  };
 
-			teamsVisited[currentVertex] = true;
-			T1Scores[0] = !teamsVisited[next[0]] ? P0() : -DBL_MAX;
+			double T1Scores[1];
+
+			T1Scores[0] = P0();
 
 			int best = bestProgram(T1Scores, 1);
 			currentVertex = next[best];

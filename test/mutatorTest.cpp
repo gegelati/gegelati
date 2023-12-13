@@ -663,27 +663,6 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
                       }),
         1)
         << "With a known seed, edge2 should not be removed from the TPG.";
-
-    // Remove again to cover the "1 action remaining" code.
-    ASSERT_NO_THROW(Mutator::TPGMutator::removeRandomEdge(tpg, vertex0, rng))
-        << "Removing a random edge failed unexpectedly.";
-    // Check properties of the tpg
-    ASSERT_EQ(tpg.getEdges().size(), 1) << "No edge was removed from the TPG.";
-    // Edge 1 was removed
-    ASSERT_EQ(
-        std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                      [&edge1](const std::unique_ptr<TPG::TPGEdge>& other) {
-                          return &edge1 == other.get();
-                      }),
-        0)
-        << "With a known seed, edge1 should be removed from the TPG.";
-    ASSERT_EQ(
-        std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                      [&edge2](const std::unique_ptr<TPG::TPGEdge>& other) {
-                          return &edge2 == other.get();
-                      }),
-        1)
-        << "With a known seed, edge2 should not be removed from the TPG.";
 }
 
 TEST_F(MutatorTest, TPGMutatorAddRandomEdge)
@@ -744,8 +723,7 @@ TEST_F(MutatorTest, TPGMutatorMutateEdgeDestination)
     Mutator::RNG rng;
     rng.setSeed(2);
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateEdgeDestination(
-        tpg, vertex0, &edge1, {&vertex3, &vertex4}, {&vertex1, &vertex2},
-        params, rng));
+        tpg, &edge1, {&vertex3, &vertex4}, {&vertex1, &vertex2}, params, rng));
     // Check properties of the tpg
     ASSERT_EQ(tpg.getEdges().size(), 2)
         << "Number of edge should remain unchanged after destination change.";
@@ -755,14 +733,6 @@ TEST_F(MutatorTest, TPGMutatorMutateEdgeDestination)
         << "The edge Destination should be vertex4 (with known seed).";
     ASSERT_EQ(vertex4.getIncomingEdges().size(), 1)
         << "The edge Destination should be vertex4 (with known seed).";
-
-    // Cover the only action case
-    params.tpg.pEdgeDestinationIsAction = 0.0; // even with a probability of 0.
-    ASSERT_NO_THROW(Mutator::TPGMutator::mutateEdgeDestination(
-        tpg, vertex0, &edge0, {&vertex3, &vertex4}, {&vertex2}, params, rng));
-    ASSERT_EQ(vertex2.getIncomingEdges().size(), 1)
-        << "The only choice of action given to the mutation should have been "
-           "used.";
 }
 
 TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
@@ -797,8 +767,7 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(
-        tpg, arch, vertex0, &edge0, {&vertex0}, {&vertex1}, newPrograms, params,
-        rng));
+        tpg, &edge0, {&vertex0}, {&vertex1}, newPrograms, params, rng));
 
     // Check that progPointer use count was decreased since the mutated program
     // is a copy of the original
@@ -892,9 +861,8 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
-    Mutator::TPGMutator::mutateOutgoingEdge(tpg, arch, vertex0, &edge0,
-                                            {&vertex0}, {&vertex1}, newPrograms,
-                                            params, rng);
+    Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, {&vertex0}, {&vertex1},
+                                            newPrograms, params, rng);
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         newPrograms.front(), params, arch, rng))

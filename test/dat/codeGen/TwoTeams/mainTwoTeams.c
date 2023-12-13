@@ -1,6 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
  *
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2021 - 2022)
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -33,7 +35,26 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef EXTERN_HEADER_H
-#define EXTERN_HEADER_H
-#include <float.h>
-#endif
+/// doc in ../README.md
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "TwoTeams.h"
+#include "csvparser.h"
+#include "inferenceCSV.h"
+
+double* in1;
+
+int main(int argc, char* argv[])
+{
+    double tab[6];
+    in1 = tab;
+
+    if (argc != 2) {
+        fprintf(stderr, "error the program only require one parameter : the "
+                        "filename of the data.\n");
+        return 3;
+    }
+
+    return inferenceCSV(argv[1], inferenceTPG);
+}

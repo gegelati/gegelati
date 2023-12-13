@@ -1,5 +1,25 @@
 # GEGELATI Changelog
 
+## Release version 1.3.0 - Donanatella flavor
+_2023.12.13_
+
+### New features
+* Add a `Log::CycleDetectionLALogger` for detecting directed cycles in TPG graphs. Using this logger, the detection is automatically at each generation right after populating the TPG with new vertices. In case a cycle is detected, a message is printed in `std::cerr`.
+* Make GEGELATI compatible with MinGW on windows. Adds a dedicated job in Github action. Package a pre-built library `gegelati-mingw-<version>.zip` for future releases.
+
+### Changes
+* Remove support for cycles in trained TPG graphs. _This change alters the deterministic outputs of trainings._ As explained in [Issue #106](https://github.com/gegelati/gegelati/issues/106), the genetic mutation of the graph, as described by Stephen Kelly in his PhD manuscript will never introduce any cycle in the trained TPG. As a consequence, parts of the code have been simplified:
+  * Mutations: It is no longer mandatory to have an action referenced in each team of the TPG.
+  * TPG Execution (in gegelati and in generated code): When executing outgoing edges of a team, providing a mechanism to exclude already visited edges is not needed.
+* Add the attribute "bestScoreLastGen" to the learning agent that records the best score achieved in each generation. This score can be obtained using the "getBestScoreLastGen" method.
+* Update the generated CMake support for `find_package(GEGELATI)`. Make the `GEGELATI_INCLUDE_DIRS` and `GEGELATI_LIBRARIES` visible in the CMakeGui and in the whole CMake scope in case subdirectory are used.
+* Rename Visual Studio pre-built library `gegelati-msvc-<version>.zip` to differentiate from the new MinGW `gegelati-mingw-<version>.zip` version.
+
+### Bug fix
+* Fix build issue with MSVC19. `#include <ctime>` needed in timestamp.cpp.
+* Fix silly installation timeout for CI on Windows.
+
+
 ## Release version 1.2.0 - Cantutuccini flavor
 _2022.08.31_
 

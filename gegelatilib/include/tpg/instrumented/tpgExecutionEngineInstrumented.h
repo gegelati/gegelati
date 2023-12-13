@@ -1,7 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
  *
- * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
+ * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -89,9 +89,7 @@ namespace TPG {
          * visits of the evaluated TPGTeam and the number of traversal of the
          * TPGEdge with the winning bid.
          */
-        const TPG::TPGEdge& evaluateTeam(
-            const TPGTeam& team,
-            const std::vector<const TPGVertex*>& excluded) override;
+        const TPG::TPGEdge& evaluateTeam(const TPGTeam& team) override;
         /**
          * \brief Specialization of the evaluateTeam function.
          *

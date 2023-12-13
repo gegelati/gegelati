@@ -1,8 +1,8 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -63,14 +63,6 @@ namespace CodeGen {
     {
       protected:
         /**
-         * \brief Size of the stack of visited edges.
-         *
-         * Stack holding the visited edges during the iteration of the TPG.
-         * Stop the execution of the program if the callStack is too small to
-         * store all the visited edges
-         */
-        uint64_t stackSize;
-        /**
          * \brief function printing generic code in the main file.
          *
          * This function prints generic code to execute the TPG and manage the
@@ -100,14 +92,10 @@ namespace CodeGen {
          *
          * \param[in] path to the folder in which the file are generated. If the
          * folder does not exist.
-         *
-         * \param[in] stackSize size of call stack for the execution of the TPG
-         * graph.
          */
         TPGStackGenerationEngine(const std::string& filename,
                                  const TPG::TPGGraph& tpg,
-                                 const std::string& path = "./",
-                                 const uint64_t& stackSize = 8);
+                                 const std::string& path = "./");
 
         /**
          * \brief destructor of the class.

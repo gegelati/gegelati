@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2023) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2023)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -174,9 +174,9 @@ void Program::ProgramEngine::iterateThroughtProgram(const bool ignoreException)
             // process the current line
             processLine();
         }
-        catch (std::out_of_range e) {
+        catch (std::out_of_range& e) {
             if (!ignoreException) {
-                throw; // rethrow
+                throw e; // rethrow
             }
         }
 

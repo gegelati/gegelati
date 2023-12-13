@@ -1,7 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
  *
- * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
+ * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -46,12 +46,11 @@ double TPG::TPGExecutionEngineInstrumented::evaluateEdge(const TPGEdge& edge)
 }
 
 const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(
-    const TPGTeam& team, const std::vector<const TPGVertex*>& excluded)
+    const TPGTeam& team)
 {
     dynamic_cast<const TPGTeamInstrumented&>(team).incrementNbVisits();
 
-    const TPGEdge& winningEdge =
-        TPGExecutionEngine::evaluateTeam(team, excluded);
+    const TPGEdge& winningEdge = TPGExecutionEngine::evaluateTeam(team);
     dynamic_cast<const TPGEdgeInstrumented&>(winningEdge)
         .incrementNbTraversal();
     return winningEdge;

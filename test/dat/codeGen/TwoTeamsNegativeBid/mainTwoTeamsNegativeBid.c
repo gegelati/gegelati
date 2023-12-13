@@ -1,8 +1,8 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
  *
- * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
- * Karol Desnos <kdesnos@insa-rennes.fr> (2021)
+ * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2021 - 2022)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "TwoTeamsOneCycleNegativeBid.h"
+#include "TwoTeamsNegativeBid.h"
 #include "csvparser.h"
 #include "inferenceCSV.h"
 

@@ -1,9 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2023) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2023)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -241,6 +242,9 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
         logger.get().logAfterEvaluate(results);
     }
 
+    // Save the best score of this generation
+    this->updateBestScoreLastGen(results);
+
     // Remove worst performing roots
     decimateWorstRoots(results);
     // Update the best
@@ -394,6 +398,19 @@ const std::pair<const TPG::TPGVertex*,
 Learn::LearningAgent::getBestRoot() const
 {
     return this->bestRoot;
+}
+
+void Learn::LearningAgent::updateBestScoreLastGen(
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>& results)
+{
+    auto iterator = --results.end();
+    bestScoreLastGen = iterator->first->getResult();
+}
+
+double Learn::LearningAgent::getBestScoreLastGen() const
+{
+    return bestScoreLastGen;
 }
 
 void Learn::LearningAgent::keepBestPolicy()

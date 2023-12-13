@@ -1,7 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
  *
- * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
+ * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  *
@@ -61,20 +61,25 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     for (const auto* edge : edges)
         nextVertices.push_back(edge->getDestination());
 
+    // Destinations
     fileMain << "\t\t\tconst enum vertices next[" << edges.size() << "] = { ";
     for (auto nextVertex : nextVertices) {
         fileMain << vertexName(*nextVertex) << ", ";
     }
     fileMain << " };" << std::endl << std::endl;
 
-    fileMain << "\t\t\tteamsVisited[currentVertex] = true;" << std::endl;
+    // score array
+    fileMain << "\t\t\tdouble " << vertexName(team) << "Scores["
+             << team.getOutgoingEdges().size() << "];" << std::endl;
+
+    fileMain << std::endl;
 
     int i = 0;
     for (const auto* edge : edges) {
-        fileMain << "\t\t\t" << teamName << "Scores[" << i << "] = "
-                 << "!teamsVisited[next[" << i++ << "]] ? ";
+        fileMain << "\t\t\t" << teamName << "Scores[" << i << "] = ";
+        ++i;
         generateEdge(*edge);
-        fileMain << " : -DBL_MAX;" << std::endl;
+        fileMain << ";" << std::endl;
     }
     fileMain << std::endl;
 
@@ -107,18 +112,6 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
 
     // generate inference function
     fileMain << "int inferenceTPG() {" << std::endl;
-    fileMain << "\tbool teamsVisited[" << vertices.size() << "] = { false };"
-             << std::endl
-             << std::endl;
-
-    // create score array for each team
-    for (auto vertex : vertices) {
-        if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
-            fileMain << "\tdouble " << vertexName(*vertex) << "Scores["
-                     << vertex->getOutgoingEdges().size() << "];" << std::endl;
-        }
-    }
-    fileMain << std::endl;
 
     // start graph on root
     fileMain << "\tenum vertices currentVertex = "

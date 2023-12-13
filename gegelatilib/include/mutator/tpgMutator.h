@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -78,10 +78,6 @@ namespace Mutator {
          * \brief Select a random outgoingEdge of the given TPGTeam and removes
          * it from the TPGGraph.
          *
-         * If there is a unique TPGAction among the destination of the available
-         * outgoing TPGEdge of the TPGTeam, this edge will be avoided during the
-         * random selection of the TPGEdge to remove.
-         *
          * \param[in,out] graph the TPGGraph within which the team is stored.
          * \param[in] team the TPGTeam whose outgoingEdges will be altered.
          * \param[in] rng Random Number Generator used in the mutation process.
@@ -118,20 +114,17 @@ namespace Mutator {
          *
          * This function selects a random TPGVertex among given pre-existing
          * vector of TPGTeam and TPGAction.
-         * If the edge is the only one within the team targetting a TPGAction,
-         * then, the new destination will be a TPGAction also. Otherwise, the
-         * function randomly choses between a TPGAction and a TPGTeam, with the
-         * probabilities within the given MutationParameters.
-         * No verification is made on the content of pre-existing TPGVertex
-         * list. If one of this list contains the team itself, a self-loop may
-         * be created. A TPGVertex not belonging to the graph in these lists
-         * will cause an exception within the TPGGraph class tough.
-         * If the current destination of the edge is among the candidates, the
-         * new destination may be the same as the old.
+         * The function randomly choses between a TPGAction and a TPGTeam, with
+         * the probabilities within the given MutationParameters. No
+         * verification is made on the content of pre-existing TPGVertex list.
+         * If one of this list contains the team itself, a self-loop may be
+         * created. A TPGVertex not belonging to the graph in these lists will
+         * cause an exception within the TPGGraph class though. If the current
+         * destination of the edge is among the candidates, the new destination
+         * may be the same as the old.
          *
          * \param[in,out] graph the TPGGraph within which the team and edge are
          *                stored.
-         * \param[in] team the source TPGTeam of the edge.
          * \param[in] edge the TPGEdge whose destination will be altered.
          * \param[in] preExistingTeams the TPGTeam candidates for destination.
          * \param[in] preExistingActions the TPGAction candidates for
@@ -140,27 +133,22 @@ namespace Mutator {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void mutateEdgeDestination(
-            TPG::TPGGraph& graph, const TPG::TPGTeam& team,
-            const TPG::TPGEdge* edge,
+            TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
             const std::vector<const TPG::TPGTeam*>& preExistingTeams,
             const std::vector<const TPG::TPGAction*>& preExistingActions,
             const Mutator::MutationParameters& params, Mutator::RNG& rng);
 
         /**
-         * \brief Mutate the Program and the Destination of the given TPGEdge.
+         * \brief Prepares the mutation of a TPGEdge.
          *
-         * This function mutates the behavior of the given TPGEdge Program,
-         * using the ProgramMutator functions, until the Program behavior is
-         * unique according to recordings held in the given Archive.
-         * The Program mutation is applid systematically, and a call to
-         * MutateEdgeDestination is also made with a probability from the
-         * given MutationParameters.
+         * This function creates a copy of the program associated to the TPGEdge
+         * in preparation of its mutation. The methods also takes care of
+         * stochastically mutating the destination of the TPGEdge. The copied
+         * program are referenced in the newProgram list, and their behavior
+         * must be mutated after this function to complete the mutation process.
          *
          * \param[in,out] graph the TPGGraph within which the team and edge are
          *                stored.
-         * \param[in] archive Archive used to assess the uniqueness of the
-         *            mutated Program behavior.
-         * \param[in] team the source TPGTeam of the edge.
          * \param[in] edge the TPGEdge whose destination will be altered.
          * \param[in] preExistingTeams the TPGTeam candidates for destination.
          * \param[in] preExistingActions the TPGAction candidates for
@@ -173,8 +161,7 @@ namespace Mutator {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void mutateOutgoingEdge(
-            TPG::TPGGraph& graph, const Archive& archive,
-            const TPG::TPGTeam& team, const TPG::TPGEdge* edge,
+            TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
             const std::vector<const TPG::TPGTeam*>& preExistingTeams,
             const std::vector<const TPG::TPGAction*>& preExistingActions,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,

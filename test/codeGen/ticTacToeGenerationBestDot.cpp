@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2023) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2021 - 2022)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2021 - 2023)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
@@ -40,7 +40,7 @@
 #include <file/parametersParser.h>
 #include <gtest/gtest.h>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
 // C++17 not available in gcc7 or clang7
 #include <filesystem>
 #endif
@@ -116,7 +116,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
         tpg = new TPG::TPGGraph(*e);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
         // Set working directory to BIN_DIR_PATH where the "src" directory was
         // created.
         std::filesystem::current_path(BIN_DIR_PATH);

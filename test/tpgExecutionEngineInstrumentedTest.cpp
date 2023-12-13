@@ -1,7 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
  *
- * Emmanuel Montmasson <emontmas@insa-rennes.fr> (2022)
+ * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
@@ -109,8 +109,8 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
         tpg = new TPG::TPGGraph(
             *e, std::make_unique<TPG::TPGInstrumentedFactory>());
 
-        // Create 10 programs
-        for (int i = 0; i < 10; i++) {
+        // Create 9 programs
+        for (int i = 0; i < 9; i++) {
             progPointers.push_back(
                 std::shared_ptr<Program::Program>(new Program::Program(*e)));
         }
@@ -118,8 +118,6 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
         // Create a TPG
         // (T= Team, A= Action)
         //
-        //        .------.
-        //        v      |
         // T0---->T1---->T2     T4
         // |     /| \    |      |
         // v    / v  \   v      v
@@ -145,18 +143,13 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
                                          *tpg->getVertices().at(2),
                                          progPointers.at(5)));
 
-        // Add a cyclic edge
-        edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2),
-                                         *tpg->getVertices().at(1),
-                                         progPointers.at(6)));
-
         // Add new outgoing edge to one team
         edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
                                          *tpg->getVertices().at(4),
-                                         progPointers.at(7)));
+                                         progPointers.at(6)));
         edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
                                          *tpg->getVertices().at(6),
-                                         progPointers.at(8)));
+                                         progPointers.at(7)));
 
         // Put a weight on edges
         makeProgramReturn(*progPointers.at(0), 5); // T0->A0
@@ -165,13 +158,12 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
         makeProgramReturn(*progPointers.at(3), 0); // T3->A3
         makeProgramReturn(*progPointers.at(4), 8); // T0->T1
         makeProgramReturn(*progPointers.at(5), 9); // T1->T2
-        makeProgramReturn(*progPointers.at(6), 7); // T2->T1
-        makeProgramReturn(*progPointers.at(7), 6); // T1->A0
-        makeProgramReturn(*progPointers.at(8), 3); // T1->A2
+        makeProgramReturn(*progPointers.at(6), 6); // T1->A0
+        makeProgramReturn(*progPointers.at(7), 3); // T1->A2
 
         // Check the characteristics
         ASSERT_EQ(tpg->getNbVertices(), 8);
-        ASSERT_EQ(tpg->getEdges().size(), 9);
+        ASSERT_EQ(tpg->getEdges().size(), 8);
         ASSERT_EQ(tpg->getRootVertices().size(), 2);
     }
 
@@ -232,7 +224,7 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
 
     const TPG::TPGEdge* result = NULL;
     ASSERT_NO_THROW(result = &tpeei.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)), {});)
+                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)));)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
@@ -245,24 +237,6 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
     ASSERT_EQ(t1a0->getNbTraversal(), 0)
         << "Edge should not have been traversed.";
     ASSERT_EQ(t1a0->getNbVisits(), 1) << "Edge should have been visited.";
-
-    // Exclude an edge
-    ASSERT_NO_THROW(result = &tpeei.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)),
-                        {tpg->getVertices().at(2)});)
-        << "Evaluation of a valid TPGTeam with one exclusion failed.";
-    // Expected result is edge between T1 -> A0 (with 0.6)
-    ASSERT_EQ(result, edges.at(7))
-        << "Edge selected during team evaluation is incorrect.";
-
-    // Check visit counters
-    ASSERT_EQ(t1->getNbVisits(), 2) << "Vertex number of visits should be 1.";
-    ASSERT_EQ(t1t2->getNbTraversal(), 1)
-        << "Edge should have been traversed once.";
-    ASSERT_EQ(t1t2->getNbVisits(), 1) << "Edge should have been visited once.";
-    ASSERT_EQ(t1a0->getNbTraversal(), 1)
-        << "Edge should not have been traversed once.";
-    ASSERT_EQ(t1a0->getNbVisits(), 2) << "Edge should have been visited twice.";
 }
 
 TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)

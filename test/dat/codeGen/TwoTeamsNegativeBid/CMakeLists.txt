@@ -1,4 +1,4 @@
-#doc in ../README.md
+    #doc in ../README.md
 cmake_minimum_required(VERSION 3.8)
 
 # This sets the PROJECT_NAME, PROJECT_VERSION as well as other variable
@@ -24,5 +24,5 @@ endif ()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN})
 
 # set the target name
-set(target ThreeTeamsOneCycleThreeLeaves)
+set(target TwoTeamsNegativeBid)
 add_executable(${target} ${SRC}${target}.c ${SRC}${target}_program.c main${target}.c ../csvparser/csvparser.c ../csvparser/inferenceCSV.c)

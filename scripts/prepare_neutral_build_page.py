@@ -33,24 +33,33 @@ os.system("git clone https://github.com/{}.git -b {} {}".format(TARGET_GH_REPO, 
 def glob_re(pattern, folder):
     return list(filter(re.compile(pattern).match, os.listdir(folder)))
 
-files = glob_re(r'gegelatilib-([0-9]+\.)+zip', CURRENT_SITE)
+files_msvc  = glob_re(r'gegelatilib(-msvc)?-([0-9]+\.)+zip', CURRENT_SITE)
+files_mingw = glob_re(r'gegelatilib-mingw-([0-9]+\.)+zip', CURRENT_SITE)
 
 # Remove oldest element from the list to keep only MAX_VERSION_COUNT versions
-if len(files) > (MAX_VERSIONS_COUNT - 1):
-    del files[0:(len(files) - MAX_VERSIONS_COUNT + 1)]
+if len(files_msvc) > (MAX_VERSIONS_COUNT - 1):
+    del files_msvc[0:(len(files_msvc) - MAX_VERSIONS_COUNT + 1)]
+
+if len(files_mingw) > (MAX_VERSIONS_COUNT - 1):
+    del files_mingw[0:(len(files_mingw) - MAX_VERSIONS_COUNT + 1)]
 
 # Latest archive is already in the NEW_SITE_FOLDER
-latest_file = glob_re(r'gegelatilib-([0-9]+\.)+zip', NEW_SITE_FOLDER)[0]
+latest_file_msvc = glob_re(r'gegelatilib-msvc-([0-9]+\.)+zip', NEW_SITE_FOLDER)[0]
+latest_file_mingw = glob_re(r'gegelatilib-mingw-([0-9]+\.)+zip', NEW_SITE_FOLDER)[0]
 
 # Copy old builds
-for file in files:
+for file in files_msvc:
+    shutil.copyfile("{}/{}".format(CURRENT_SITE,file), "{}/{}".format(NEW_SITE_FOLDER,file))
+for file in files_mingw:
     shutil.copyfile("{}/{}".format(CURRENT_SITE,file), "{}/{}".format(NEW_SITE_FOLDER,file))
 
 # Add latest file to the list
-files.append(latest_file)
+files_msvc.append(latest_file_msvc)
+files_mingw.append(latest_file_mingw)
 
 # Sort files alphabetically (now sorted from newest to oldest)
-files.sort(reverse= True)
+files_msvc.sort(reverse= True)
+files_mingw.sort(reverse= True)
 
 # Create the markdown files
 indexFile = open("{}/index.md".format(NEW_SITE_FOLDER),"w")
@@ -58,14 +67,14 @@ readmeFile = open("{}/ReadMe.md".format(NEW_SITE_FOLDER),"w")
 
 indexFile.write("# GEGELATI Neutral Builds\n\n"
              "<table>\n"
-             "<tr><td><b>Date</b></td><td><b>Time</b></td><td><b>Commit</b></td><td><b>Windows</b></td></tr>\n")
+             "<tr><td><b>Date</b></td><td><b>Time</b></td><td><b>Commit</b></td><td><b>MSVC</b></td><td><b>MinGW</b></td></tr>\n")
 readmeFile.write("# GEGELATI Neutral Builds\n"
-                 "|Date|Time|Commit|Windows|\n"
-                 "|----|----|------|-------|\n")
+                 "|Date|Time|Commit|MSVC|MinGW|\n"
+                 "|----|----|------|----|-----|\n")
 
 # Generate files content, version by version
 count = 0
-for file in files:
+for file in files_msvc:
     # Get Git infos
     commit_date_time = subprocess.check_output("git show -s --format=\"%ci\" HEAD~{}".format(count), shell=True)
     commit_date_time = commit_date_time.decode("utf-8").strip()
@@ -77,21 +86,35 @@ for file in files:
     commit_long_sha1 = subprocess.check_output("git show -s --format=\"%H\" HEAD~{}".format(count), shell=True)
     commit_long_sha1 = commit_long_sha1.decode("utf-8").strip()
 
-    file_size = os.path.getsize("{}/{}".format(NEW_SITE_FOLDER, file)) / 1024
-    file_size = "{}K".format(int(file_size))
+    file_size_msvc = os.path.getsize("{}/{}".format(NEW_SITE_FOLDER, file)) / 1024
+    file_size_msvc = "{}K".format(int(file_size_msvc))
+
+    if(len(files_mingw) > count):
+        file_size_mingw = os.path.getsize("{}/{}".format(NEW_SITE_FOLDER, files_mingw[count])) / 1024
+        file_size_mingw = "{}K".format(int(file_size_mingw))
 
     # Prepare latest build and release file.
     if count == 0:
-        shutil.copyfile("{}/{}".format(NEW_SITE_FOLDER,file),"{}/gegelatilib-latest-develop.zip".format(NEW_SITE_FOLDER))
+        shutil.copyfile("{}/{}".format(NEW_SITE_FOLDER,file),"{}/gegelatilib-msvc-latest-develop.zip".format(NEW_SITE_FOLDER))
+        shutil.copyfile("{}/{}".format(NEW_SITE_FOLDER,files_mingw[count]),"{}/gegelatilib-mingw-latest-develop.zip".format(NEW_SITE_FOLDER))
 
         # Write entry into markdown files
-        indexFile.write("<tr><td colspan='2'><div align='center'><i>Latest</i></div></td><td><a href=\"https://github.com/gegelati/gegelati/commit/{}\"><code>{}</code></a></td><td><a href=\"./gegelatilib-latest-develop.zip\">Zip ({})</a></td></tr>\n".format(commit_long_sha1, commit_short_sha1, file_size))
-        readmeFile.write("| Latest |  | [\`{}\`](https://github.com/gegelati/gegelati/commit/{}) | [Zip ({})](./gegelatilib-latest-develop.zip) |\n".format(commit_short_sha1, commit_long_sha1, file_size))
+        indexFile.write("<tr><td colspan='2'><div align='center'><i>Latest</i></div></td><td><a href=\"https://github.com/gegelati/gegelati/commit/{}\"><code>{}</code></a></td><td><a href=\"./gegelatilib-msvc-latest-develop.zip\">Zip ({})</a></td><td><a href=\"./gegelatilib-mingw-latest-develop.zip\">Zip ({})</a></td></tr>\n".format(commit_long_sha1, commit_short_sha1, file_size_msvc, file_size_mingw))
+        readmeFile.write("| Latest |  | [\`{}\`](https://github.com/gegelati/gegelati/commit/{}) | [Zip ({})](./gegelatilib-msvc-latest-develop.zip) |[Zip ({})](./gegelatilib-mingw-latest-develop.zip) |\n".format(commit_short_sha1, commit_long_sha1, file_size_msvc, file_size_mingw))
 
     # Write normal entry into markdown
-    indexFile.write("<tr><td>{}</td><td>{}</td><td><a href=\"https://github.com/gegelati/gegelati/commit/{}\"><code>{}</code></a></td><td><a href=\"./{}\">Zip ({})</a></td></tr>\n".format(commit_date, commit_time, commit_long_sha1, commit_short_sha1, file, file_size))
-    readmeFile.write("| {} | {} | [\`{}\`](https://github.com/gegelati/gegelati/commit/{}) | [Zip ({})](./{}) |\n".format(commit_date, commit_time, commit_short_sha1, commit_long_sha1, file_size, file))
+    indexFile.write("<tr><td>{}</td><td>{}</td><td><a href=\"https://github.com/gegelati/gegelati/commit/{}\"><code>{}</code></a></td><td><a href=\"./{}\">Zip ({})</a></td>".format(commit_date, commit_time, commit_long_sha1, commit_short_sha1, file, file_size_msvc))
+    readmeFile.write("| {} | {} | [\`{}\`](https://github.com/gegelati/gegelati/commit/{}) | [Zip ({})](./{}) |".format(commit_date, commit_time, commit_short_sha1, commit_long_sha1, file_size_msvc, file))
 
+    if(len(files_mingw) > count):
+        indexFile.write("<td><a href=\"./{}\">Zip ({})</a></td>".format(files_mingw[count], file_size_mingw))
+        readmeFile.write("[Zip ({})](./{}) |".format(file_size_mingw, files_mingw[count]))
+    else:
+        indexFile.write("<td></td>")
+        readmeFile.write("|")
+
+    indexFile.write("</tr>\n")
+    readmeFile.write("\n")
     # increase counter
     count+=1
 

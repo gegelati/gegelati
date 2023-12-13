@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2023) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2023)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -201,7 +201,7 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
         // (May throw if an outgoing edge is added to an action)
         (*srcVertex)->addOutgoingEdge(&newEdge);
     }
-    catch (std::runtime_error e) {
+    catch (std::runtime_error& e) {
         // Remove the edge before re-throwing
         this->edges.pop_back();
         throw e;

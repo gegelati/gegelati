@@ -103,8 +103,8 @@ class TPGExecutionEngineTest : public ::testing::Test
         e = new Environment(set, vect, 8, 1);
         tpg = new TPG::TPGGraph(*e);
 
-        // Create 10 programs
-        for (int i = 0; i < 10; i++) {
+        // Create 9 programs
+        for (int i = 0; i < 9; i++) {
             progPointers.push_back(
                 std::shared_ptr<Program::Program>(new Program::Program(*e)));
         }
@@ -112,8 +112,6 @@ class TPGExecutionEngineTest : public ::testing::Test
         // Create a TPG
         // (T= Team, A= Action)
         //
-        //        .------.
-        //        v      |
         // T0---->T1---->T2     T4
         // |     /| \    |      |
         // v    / v  \   v      v
@@ -139,18 +137,13 @@ class TPGExecutionEngineTest : public ::testing::Test
                                          *tpg->getVertices().at(2),
                                          progPointers.at(5)));
 
-        // Add a cyclic edge
-        edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(2),
-                                         *tpg->getVertices().at(1),
-                                         progPointers.at(6)));
-
         // Add new outgoing edge to one team
         edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
                                          *tpg->getVertices().at(4),
-                                         progPointers.at(7)));
+                                         progPointers.at(6)));
         edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(1),
                                          *tpg->getVertices().at(6),
-                                         progPointers.at(8)));
+                                         progPointers.at(7)));
 
         // Put a weight on edges
         makeProgramReturn(*progPointers.at(0), 5); // T0->A0
@@ -159,13 +152,12 @@ class TPGExecutionEngineTest : public ::testing::Test
         makeProgramReturn(*progPointers.at(3), 0); // T3->A3
         makeProgramReturn(*progPointers.at(4), 8); // T0->T1
         makeProgramReturn(*progPointers.at(5), 9); // T1->T2
-        makeProgramReturn(*progPointers.at(6), 7); // T2->T1
-        makeProgramReturn(*progPointers.at(7), 6); // T1->A0
-        makeProgramReturn(*progPointers.at(8), 3); // T1->A2
+        makeProgramReturn(*progPointers.at(6), 6); // T1->A0
+        makeProgramReturn(*progPointers.at(7), 3); // T1->A2
 
         // Check the characteristics
         ASSERT_EQ(tpg->getNbVertices(), 8);
-        ASSERT_EQ(tpg->getEdges().size(), 9);
+        ASSERT_EQ(tpg->getEdges().size(), 8);
         ASSERT_EQ(tpg->getRootVertices().size(), 2);
     }
 
@@ -224,28 +216,11 @@ TEST_F(TPGExecutionEngineTest, EvaluateTeam)
 
     const TPG::TPGEdge* result = NULL;
     ASSERT_NO_THROW(result = &tpee.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)), {});)
+                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)));)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
         << "Edge selected during team evaluation is incorrect.";
-
-    // Exclude an edge
-    ASSERT_NO_THROW(result = &tpee.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)),
-                        {tpg->getVertices().at(2)});)
-        << "Evaluation of a valid TPGTeam with one exclusion failed.";
-    // Expected result is edge between T1 -> A0 (with 0.6)
-    ASSERT_EQ(result, edges.at(7))
-        << "Edge selected during team evaluation is incorrect.";
-
-    // Exclude all edges
-    ASSERT_THROW(result = &tpee.evaluateTeam(
-                     *(const TPG::TPGTeam*)(tpg->getVertices().at(0)),
-                     {tpg->getVertices().at(1), tpg->getVertices().at(4)}),
-                 std::runtime_error)
-        << "Evaluation of a TPGTeam with all edges excluded did not fail as "
-           "expected.";
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
