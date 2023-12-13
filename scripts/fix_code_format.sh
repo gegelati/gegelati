@@ -47,7 +47,7 @@ case "${OPTARG}" in
 esac
 done
 
-if [ "$CLANG_FORMAT" = "" ]; then CLANG_FORMAT=clang-format-10; fi
+if [ "$CLANG_FORMAT" = "" ]; then CLANG_FORMAT=clang-format-15; fi
 $CLANG_FORMAT -version
 
 
