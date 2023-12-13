@@ -29,14 +29,18 @@ while True:
             releaseNoteFile.write(line)
 
             # Prepare release archive
-            release_name = re.sub(r'## Release version ([0-9]+\.[0-9]+\.[0-9]+).*\n', r'gegelatilib-\1.zip', line)
+            release_name_msvc = re.sub(r'## Release version ([0-9]+\.[0-9]+\.[0-9]+).*\n', r'gegelatilib-msvc-\1.zip', line)
+            release_name_mingw = re.sub(r'## Release version ([0-9]+\.[0-9]+\.[0-9]+).*\n', r'gegelatilib-mingw-\1.zip', line)
 
             # Get file list of old builds from current site
             def glob_re(pattern, folder):
                 return list(filter(re.compile(pattern).match, os.listdir(folder)))
 
-            archive = glob_re(r'.*.zip', r'neutral_builds')[0]
-            shutil.move(r'neutral_builds/{}'.format(archive), r'neutral_builds/{}'.format(release_name))
+            archive_msvc = glob_re(r'gegelatilib-msvc.*.zip', r'neutral_builds')[0]
+            shutil.move(r'neutral_builds/{}'.format(archive_msvc), r'neutral_builds/{}'.format(release_name_msvc))
+            
+            archive_mingw = glob_re(r'gegelatilib-mingw.*.zip', r'neutral_builds')[0]
+            shutil.move(r'neutral_builds/{}'.format(archive_mingw), r'neutral_builds/{}'.format(release_name_mingw))
 
     else:
         if match:
