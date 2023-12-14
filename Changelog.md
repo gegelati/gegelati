@@ -1,5 +1,12 @@
 # GEGELATI Changelog
 
+## Release version 1.3.1 - Donanatella flavor with extra sprinkles
+_2023.12.14_
+
+### Bug fix
+* Build MinGW Release zip with Codegen module
+
+
 ## Release version 1.3.0 - Donanatella flavor
 _2023.12.13_
 

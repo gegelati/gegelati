@@ -110,7 +110,7 @@ jobs:
          else
            # Default build with MinGW was Release, because it is a lot faster to build
            # build debug here
-           cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=$MODULES -DCMAKE_BUILD_TYPE=Debug;
+           cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=ON -DCMAKE_BUILD_TYPE=Debug;
            cmake --build . --target install -j 2;
          fi;
          cd ..
