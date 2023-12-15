@@ -107,11 +107,9 @@ jobs:
          if [ "${{ matrix.compiler }}" = "msvc" ];
          then
            cmake --build . --target INSTALL --config Release;
-         else
-           # Default build with MinGW was Release, because it is a lot faster to build
-           # build debug here
-           cmake .. -G "${{env.GENERATOR}}" -DCODE_GEN=ON -DCMAKE_BUILD_TYPE=Debug;
-           cmake --build . --target install -j 2;
+         # else
+           # Do nothing, building two version in a same folder seems to pose a problem.
+           # Keep only the Release version.
          fi;
          cd ..
          VERSION_NUMBER="$(cat CMakeLists.txt | grep -m 1 "VERSION \([0-9]\+.[0-9]\+.[0-9]\+\)" | sed -E -e 's/ |\)|VERSION//g')"
