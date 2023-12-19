@@ -202,6 +202,7 @@ if(BUILD_TESTING)
     add_subdirectory(test)
 endif()
 
-# Add targets related to doxygen documention generation
-add_subdirectory(doc)
-
+if(NOT SKIP_DOXYGEN_BUILD)
+    # Add targets related to doxygen documention generation
+    add_subdirectory(doc)
+endif()
