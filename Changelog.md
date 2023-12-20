@@ -3,6 +3,9 @@
 ## Release version 1.3.1 - Donanatella flavor with extra sprinkles
 _2023.12.14_
 
+### Changes
+* Add possibility to build gegelati without the documentation, using the `-DSKIP_DOXYGEN_BUILD=ON` option during CMake configuration.
+
 ### Bug fix
 * Build MinGW Release zip with Codegen module
 
