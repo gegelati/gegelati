@@ -41,7 +41,7 @@ set(PROJECT_NAME GEGELATI)
 
 project(${PROJECT_NAME}
         LANGUAGES CXX
-        VERSION 1.3.0)
+        VERSION 1.3.1)
 string(TOLOWER ${PROJECT_NAME} project_name)
 set(LIB_SOURCE_DIRECTORY ${project_name}lib)
 
@@ -202,6 +202,7 @@ if(BUILD_TESTING)
     add_subdirectory(test)
 endif()
 
-# Add targets related to doxygen documention generation
-add_subdirectory(doc)
-
+if(NOT SKIP_DOXYGEN_BUILD)
+    # Add targets related to doxygen documention generation
+    add_subdirectory(doc)
+endif()
