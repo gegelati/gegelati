@@ -94,7 +94,9 @@ class StickGameWithOpponent : public Learn::LearningEnvironment
     // Inherited via LearningEnvironment
     virtual void reset(
         size_t seed = 0,
-        Learn::LearningMode mode = Learn::LearningMode::TRAINING) override;
+        Learn::LearningMode mode = Learn::LearningMode::TRAINING,
+        uint16_t iterationNumber = 0,
+        uint64_t generationNumber = 0) override;
 
     // Inherited via LearningEnvironment
     virtual std::vector<std::reference_wrapper<const Data::DataHandler>>

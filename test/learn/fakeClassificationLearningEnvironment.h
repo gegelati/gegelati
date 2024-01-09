@@ -63,7 +63,7 @@ class FakeClassificationLearningEnvironment
         this->currentClass = value % 3;
         data.setDataAt(typeid(int), 0, value);
     }
-    void reset(size_t seed, Learn::LearningMode mode) override
+    void reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber=0, uint64_t generationNumber=0) override
     {
         // Call super pure virtual method to reset the pure virtual method.
         ClassificationLearningEnvironment::reset(seed, mode);

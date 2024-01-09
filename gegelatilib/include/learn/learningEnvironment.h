@@ -164,9 +164,15 @@ namespace Learn {
          * the LearningEnvironment.
          * \param[in] mode LearningMode in which the Environment should be
          * reset for the next set of actions.
+         * \param[in] iterationNumber the integer value to indicate the current
+         * iteration number when parameter nbIterationsPerPolicyEvaluation > 1
+         * \param[in] generationNumber the integer value to indicate the 
+         * current generation number
          */
         virtual void reset(size_t seed = 0,
-                           LearningMode mode = LearningMode::TRAINING) = 0;
+                           LearningMode mode = LearningMode::TRAINING,
+                           uint16_t iterationNumber = 0,
+                           uint64_t generationNumber = 0) = 0;
 
         /**
          * \brief Get the data sources for this LearningEnvironment.
