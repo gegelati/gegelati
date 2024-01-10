@@ -127,7 +127,9 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     double result = 0.0;
 
     // Evaluate nbIteration times
-    for (auto iterationNumber = 0; iterationNumber < this->params.nbIterationsPerPolicyEvaluation; iterationNumber++) {
+    for (auto iterationNumber = 0;
+         iterationNumber < this->params.nbIterationsPerPolicyEvaluation;
+         iterationNumber++) {
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
         uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);

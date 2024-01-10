@@ -166,7 +166,7 @@ namespace Learn {
          * reset for the next set of actions.
          * \param[in] iterationNumber the integer value to indicate the current
          * iteration number when parameter nbIterationsPerPolicyEvaluation > 1
-         * \param[in] generationNumber the integer value to indicate the 
+         * \param[in] generationNumber the integer value to indicate the
          * current generation number
          */
         virtual void reset(size_t seed = 0,
