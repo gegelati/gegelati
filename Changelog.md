@@ -7,10 +7,11 @@ _2024.01.10_
 
 ### Changes
 * Add two parameters to the reset method of the learning environment. These parameters are used for environments that use specific initialization.
-  * Parameter "iterationNumber": an integer indicating the current iteration number when the "nbIterationsPerPolicyEvaluation" parameter is greater than 1, default value = 0.
-  * Parameter "generationNumber": an integer indicating the current generation number, default value = 0.
+  * Parameter `iterationNumber`: an integer indicating the current iteration number when the `nbIterationsPerPolicyEvaluation` parameter is greater than 1, default value = 0.
+  * Parameter `generationNumber`: an integer indicating the current generation number, default value = 0.
 
 ### Bug fix
+
 
 ## Release version 1.3.1 - Donanatella flavor with extra sprinkles
 _2023.12.14_
