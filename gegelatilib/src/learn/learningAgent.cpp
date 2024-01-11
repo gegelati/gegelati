@@ -127,13 +127,15 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     double result = 0.0;
 
     // Evaluate nbIteration times
-    for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation; i++) {
+    for (auto iterationNumber = 0;
+         iterationNumber < this->params.nbIterationsPerPolicyEvaluation;
+         iterationNumber++) {
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
-        uint64_t hash = hasher(generationNumber) ^ hasher(i);
+        uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
 
         // Reset the learning Environment
-        le.reset(hash, mode);
+        le.reset(hash, mode, iterationNumber, generationNumber);
 
         uint64_t nbActions = 0;
         while (!le.isTerminal() &&

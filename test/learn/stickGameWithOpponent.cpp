@@ -84,7 +84,9 @@ void StickGameWithOpponent::doAction(uint64_t actionID)
     }
 }
 
-void StickGameWithOpponent::reset(size_t seed, Learn::LearningMode mode)
+void StickGameWithOpponent::reset(size_t seed, Learn::LearningMode mode,
+                                  uint16_t iterationNumber,
+                                  uint64_t generationNumber)
 {
     // Create seed from seed and mode
     size_t hash_seed =
