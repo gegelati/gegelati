@@ -1,5 +1,5 @@
 name: CI
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   Configure-Workflow:
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
           echo "matrix-windows=$WINDOWS_MATRIX" >> $GITHUB_OUTPUT
       - id: set-matrix-macos
         run: |
-          MACOS_MATRIX="{\"modular\":[\"fullBuild\""
+          MACOS_MATRIX="{\"compiler\":[\"clang++\"],\"modular\":[\"fullBuild\""
           if ${{ env.activate }}; then MACOS_MATRIX="$MACOS_MATRIX,\"noModules\""; fi
           MACOS_MATRIX="$MACOS_MATRIX]}"
           echo "matrix-macos=$MACOS_MATRIX" >> $GITHUB_OUTPUT
@@ -45,6 +45,14 @@ jobs:
       - name: Install
         run: |
           sudo apt install doxygen
+      - name: Setup ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.modular }} build cache # Only trigger on feature branch
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          create-symlink: true
+          save: ${{ github.ref == 'refs/heads/develop' }}
+          restore: ${{ github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/main' }}
+          key: ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.modular }} # Will fallback on restore-keys, most recent cache
+          restore-keys: ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.modular }}
       - name: Build
         run: |
           cd bin
@@ -70,7 +78,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install
-        uses: nick-invision/retry@v2
+        uses: nick-fields/retry@v3
         with:
           max_attempts: 3
           timeout_minutes: 10
@@ -124,17 +132,17 @@ jobs:
         shell: bash
         if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v') )
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-gegelatilib-${{ matrix.compiler }}
           path: ./neutral_builds/*.zip
         if: matrix.modular == 'fullBuild'  && ( endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v') )
-  Build-MacOS-clang:
+  Build-MacOS:
     needs: Configure-Workflow
     runs-on: macos-latest
     strategy: 
       matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-macos)}}
-    name: MacOS-clang-${{ matrix.modular }}
+    name: MacOS-${{ matrix.compiler }}-${{ matrix.modular }}
     env:
       GENERATOR: 'Unix Makefile'
     steps:
@@ -142,11 +150,19 @@ jobs:
         uses: actions/checkout@v4
       - name: Install
         run: brew install doxygen
+      - name: Setup ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.modular }} build cache # Only trigger on feature branch
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          create-symlink: true
+          save: ${{ github.ref == 'refs/heads/develop' }} # A new cache entry is only created on develop branch
+          restore: ${{ github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/main' }} # Cache is not used on develop and main branch
+          key: ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.modular }} # Will fallback on restore-keys, most recent cache
+          restore-keys: ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.modular }}
       - name: Build
         run: |
           cd bin
           if [ "${{ matrix.modular }}" = "fullBuild" ]; then MODULES=ON; else MODULES=OFF; fi
-          cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DCODE_GEN=$MODULES
+          cmake .. -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_BUILD_TYPE=Debug -DCODE_GEN=$MODULES
           cmake --build . --target GEGELATI
           cmake --build . --target doc
           sudo make install
@@ -157,7 +173,7 @@ jobs:
           ./bin/runTests
   Deploy-NeutralBuilds:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
+    needs: [Build-Ubuntu, Build-MacOS, Build-Windows]
     if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout
@@ -165,19 +181,19 @@ jobs:
         with:
           fetch-depth: 0
       - name: Download msvc
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows-gegelatilib-msvc
           path: ./neutral_builds/
       - name: Download mingw
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows-gegelatilib-mingw
           path: ./neutral_builds/
       - name: Prepare neutral build page
         run: python ./scripts/prepare_neutral_build_page.py
       - name: Upload pages
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           repository-name: gegelati/neutral-builds
           branch: gh-pages
@@ -190,25 +206,25 @@ jobs:
         shell: bash
   Deploy-Releases:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
+    needs: [Build-Ubuntu, Build-MacOS, Build-Windows]
     if: contains(github.ref, '/tags/v')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download msvc
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows-gegelatilib-msvc
           path: ./neutral_builds/
       - name: Download MinGW
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows-gegelatilib-mingw
           path: ./neutral_builds/
       - name: Prepare Release Log
         run: python ./scripts/prepare_release_log.py
       - name: Upload
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           body_path: release_notes.md
           token: ${{ secrets.BOT_DEPLOY_TOKEN }}
@@ -220,7 +236,7 @@ jobs:
         shell: bash
   Analyze-Code_Style:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
+    needs: [Build-Ubuntu, Build-MacOS, Build-Windows]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -230,7 +246,7 @@ jobs:
           ./scripts/fix_code_format.sh
   Analyze-Sonar:
     runs-on: ubuntu-latest
-    needs: [Build-Ubuntu, Build-MacOS-clang, Build-Windows]
+    needs: [Build-Ubuntu, Build-MacOS, Build-Windows]
     env:
       SONAR_SCANNER_VERSION: 5.0.1.3006 # Find the latest version in the "Linux" link on this page:
                                         # https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/
@@ -243,12 +259,12 @@ jobs:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 17
       - name: Cache SonarCloud packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
