@@ -222,7 +222,7 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        target = preExistingTeams.at(
+        target = preExistingActions.at(
             rng.getUnsignedInt64(0, preExistingActions.size() - 1));
     }
     else {
