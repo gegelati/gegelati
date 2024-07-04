@@ -101,7 +101,7 @@ void Mutator::TPGMutator::initRandomTPG(
             programs.at(i));
     }
 
-    // After a number of teams equal to the number of actions, 
+    // After a number of teams equal to the number of actions,
     // Connect the team to two random actions
     for (size_t i = 2 * params.tpg.nbActions; i < 2 * params.tpg.initNbRoots;
          i++) {
