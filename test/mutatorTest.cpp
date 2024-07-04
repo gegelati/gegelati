@@ -623,6 +623,12 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     ASSERT_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params, rng),
                  std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
+    params.tpg.nbActions = 5;
+    params.tpg.initNbRoots = 2;
+    params.tpg.maxInitOutgoingEdges = 4;
+    ASSERT_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params, rng),
+                 std::runtime_error)
+        << "TPG Initialization should fail with bad parameters.";
 }
 
 TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)

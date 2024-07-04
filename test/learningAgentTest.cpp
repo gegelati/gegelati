@@ -129,6 +129,8 @@ TEST_F(LearningAgentTest, InitNbRoots)
     params.mutation.tpg.initNbRoots = 42;
     Learn::LearningAgent la(le, set, params);
 
+    la.init();
+
     ASSERT_NO_THROW(la.getTPGGraph()->getNbRootVertices() != 42)
         << "Initialization of the LearningAgent should have a "
            "number of roots equal to the number specify";
