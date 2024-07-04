@@ -63,6 +63,17 @@ namespace Mutator {
         /// Number of root TPGTeams to maintain when populating the TPGGraph
         size_t nbRoots = 100;
 
+
+        /// JSon comment
+        inline static const std::string initNbRootsComment =
+            "// Number of root TPGTeams at the initialisation of a "
+            "TPGGraph.\n"
+            "// If 0, if will be init to the number of actions\n"
+            "// \"nbRoots\" : 0, // Default value";
+        /// Number of root TPGTeams at the initialisation of a TPGGraph
+        /// If 0, if will be init to the number of actions
+        size_t initNbRoots = 0;
+
         /// JSon comment
         inline static const std::string maxInitOutgoingEdgesComment =
             "// Maximum number of TPGEdge connected to each TPGTeam of the "

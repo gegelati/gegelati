@@ -62,7 +62,7 @@ TEST(LearningParametersTest, readConfigFile)
     File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
     ASSERT_EQ(13, root.size())
         << "Wrong number of elements in parsed json file";
-    ASSERT_EQ(10, root["mutation"]["tpg"].size())
+    ASSERT_EQ(11, root["mutation"]["tpg"].size())
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(8, root["mutation"]["prog"].size())
         << "Wrong number of elements in parsed json file";

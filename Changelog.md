@@ -10,6 +10,8 @@ _2024.01.10_
   * Parameter `iterationNumber`: an integer indicating the current iteration number when the `nbIterationsPerPolicyEvaluation` parameter is greater than 1, default value = 0.
   * Parameter `generationNumber`: an integer indicating the current generation number, default value = 0.
 
+* Add a new parameter to select the number of roots to initialise a TPG
+
 ### Bug fix
 
 

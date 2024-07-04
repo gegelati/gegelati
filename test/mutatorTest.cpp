@@ -558,6 +558,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     Mutator::MutationParameters params;
 
     params.tpg.nbActions = 5;
+    params.tpg.initNbRoots = 5;
     params.tpg.maxInitOutgoingEdges = 4;
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
@@ -889,6 +890,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     Mutator::MutationParameters params;
 
     params.tpg.nbActions = 4;
+    params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
@@ -936,6 +938,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     Mutator::MutationParameters params;
 
     params.tpg.nbActions = 4;
+    params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
@@ -982,6 +985,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     Mutator::MutationParameters params;
 
     params.tpg.nbActions = 4;
+    params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
@@ -1044,6 +1048,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     Mutator::MutationParameters params;
 
     params.tpg.nbActions = 4;
+    params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
