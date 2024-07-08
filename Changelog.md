@@ -10,6 +10,20 @@ _2024.01.10_
   * Parameter `iterationNumber`: an integer indicating the current iteration number when the `nbIterationsPerPolicyEvaluation` parameter is greater than 1, default value = 0.
   * Parameter `generationNumber`: an integer indicating the current generation number, default value = 0.
 
+* CI now uses build caches for Linux and Macos runner.
+  * Build caches are saved from the `develop` branch and used on feature branches.
+  * `main` and `develop` branches still do full compilation.
+  * Build caches are also used for Sonar analysis.
+
+* Updated CI actions versions
+  * nick-invision/retry@v2 -> nick-fields/retry@v3
+  * actions/upload-artifact@v3 -> actions/upload-artifact@v4
+  * actions/download-artifact@v3 -> actions/download-artifact@v4
+  * JamesIves/github-pages-deploy-action@4.1.5 -> JamesIves/github-pages-deploy-action@4 (will used latest v4, currently 4.6.1)
+  * softprops/action-gh-release@v1 -> softprops/action-gh-release@v2
+  * actions/setup-java@v3 -> actions/setup-java@v4
+  * actions/cache@v3 -> actions/cache@v4
+
 ### Bug fix
 
 
