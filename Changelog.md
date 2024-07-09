@@ -25,7 +25,8 @@ _2024.01.10_
   * actions/cache@v3 -> actions/cache@v4
 
 ### Bug fix
-
+* Fixed a bug in mutationEdgeDestination.
+  * When changing the destination of an edge, if the new destination was an action, an index i between 0 and nbAction was sampled, but the new destination was the team of index i instead of the action of index i.
 
 ## Release version 1.3.1 - Donanatella flavor with extra sprinkles
 _2023.12.14_

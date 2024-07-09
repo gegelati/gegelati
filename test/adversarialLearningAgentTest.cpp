@@ -251,11 +251,12 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     TPG::TPGGraph& tpg = *la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 25)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 17)
+    ASSERT_EQ(tpg.getNbRootVertices(), 16)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 102)
+    ASSERT_EQ(tpg.getEdges().size(), 113)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 9442226923705130763u)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              12166825911877062892u)
         << "Graph does not have the expected determinst characteristics.";
 }
 
