@@ -103,7 +103,7 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluate)
 {
     // Train one generatio before adding the logger.
     uint64_t genNumber = 42;
-    la->init(2);
+    la->init();
     la->trainOneGeneration(genNumber);
 
     // add the Logger

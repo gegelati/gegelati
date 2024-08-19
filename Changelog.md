@@ -11,23 +11,9 @@ _2024.01.10_
   * Parameter `generationNumber`: an integer indicating the current generation number, default value = 0.
 
 * Add a new parameter to select the number of roots to initialise a TPG
-* CI now uses build caches for Linux and Macos runner.
-  * Build caches are saved from the `develop` branch and used on feature branches.
-  * `main` and `develop` branches still do full compilation.
-  * Build caches are also used for Sonar analysis.
-
-* Updated CI actions versions
-  * nick-invision/retry@v2 -> nick-fields/retry@v3
-  * actions/upload-artifact@v3 -> actions/upload-artifact@v4
-  * actions/download-artifact@v3 -> actions/download-artifact@v4
-  * JamesIves/github-pages-deploy-action@4.1.5 -> JamesIves/github-pages-deploy-action@4 (will used latest v4, currently 4.6.1)
-  * softprops/action-gh-release@v1 -> softprops/action-gh-release@v2
-  * actions/setup-java@v3 -> actions/setup-java@v4
-  * actions/cache@v3 -> actions/cache@v4
 
 ### Bug fix
-* Fixed a bug in mutationEdgeDestination.
-  * When changing the destination of an edge, if the new destination was an action, an index i between 0 and nbAction was sampled, but the new destination was the team of index i instead of the action of index i.
+
 
 ## Release version 1.3.1 - Donanatella flavor with extra sprinkles
 _2023.12.14_
