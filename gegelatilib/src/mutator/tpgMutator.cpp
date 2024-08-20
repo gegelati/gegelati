@@ -101,7 +101,7 @@ void Mutator::TPGMutator::initRandomTPG(
             programs.at(i));
     }
 
-    for(size_t i = 0; i < 2 * (params.tpg.initNbRoots - params.tpg.nbActions); i++){
+    for(size_t i = 2 * params.tpg.nbActions; i < 2 * params.tpg.initNbRoots; i++){
         graph.addNewEdge(
             *teams.at(i / 2),
             *actions.at(rng.getUnsignedInt64(0, params.tpg.nbActions - 1)),
