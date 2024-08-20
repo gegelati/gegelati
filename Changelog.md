@@ -6,7 +6,9 @@ _2024.01.10_
 ### New features
 
 ### Changes
-* Add a new parameter to select the number of roots to initialise a TPG
+* Update to improve the diversity of the TPGs.
+  * Add a new parameter to select the number of roots to initialise a TPG.
+  * Add a new parameter to create new program during the mutation, during the training .
 
 * Add two parameters to the reset method of the learning environment. These parameters are used for environments that use specific initialization.
   * Parameter `iterationNumber`: an integer indicating the current iteration number when the `nbIterationsPerPolicyEvaluation` parameter is greater than 1, default value = 0.
