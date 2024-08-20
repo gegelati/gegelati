@@ -393,7 +393,7 @@ void File::ParametersParser::writeParametersToJson(
 
     root["mutation"]["prog"]["pNewProgram"] =
         params.mutation.prog.pNewProgram;
-    root["mutation"]["prog"]["pConstantMutation"].setComment(
+    root["mutation"]["prog"]["pNewProgram"].setComment(
         Mutator::ProgramParameters::pNewProgramComment,
         Json::commentBefore);
 

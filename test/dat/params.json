@@ -27,6 +27,7 @@
     },
     "prog": {
       "maxProgramSize": 40,
+      "pNewProgram": 0.0,
       "pDelete": 0.7,
       "pAdd": 0.7,
       "pMutate": 1.0,
