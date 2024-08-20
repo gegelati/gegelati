@@ -109,6 +109,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.nbRoots = (size_t)value.asUInt();
         return;
     }
+    if (param == "initNbRoots") {
+        params.mutation.tpg.initNbRoots = (size_t)value.asUInt();
+        return;
+    }
     if (param == "maxInitOutgoingEdges") {
         params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;
@@ -325,6 +329,10 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["nbRoots"] = params.mutation.tpg.nbRoots;
     root["mutation"]["tpg"]["nbRoots"].setComment(
         Mutator::TPGParameters::nbRootsComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["initNbRoots"] = params.mutation.tpg.initNbRoots;
+    root["mutation"]["tpg"]["initNbRoots"].setComment(
+        Mutator::TPGParameters::initNbRootsComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["pEdgeAddition"] =
         params.mutation.tpg.pEdgeAddition;

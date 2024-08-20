@@ -140,6 +140,12 @@ namespace Learn {
             // override the number of actions from the parameters.
             this->params.mutation.tpg.nbActions =
                 this->learningEnvironment.getNbActions();
+
+            // override the number of initial roots if set to 0
+            if(this->params.mutation.tpg.initNbRoots == 0){
+                this->params.mutation.tpg.initNbRoots = 
+                this->learningEnvironment.getNbActions(); // TODO Nb Surviving roots
+            }
         };
 
         /// Default destructor for polymorphism

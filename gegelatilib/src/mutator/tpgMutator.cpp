@@ -66,6 +66,9 @@ void Mutator::TPGMutator::initRandomTPG(
     if (params.tpg.nbActions < 2) {
         throw std::runtime_error("A TPG with a single action makes no sense.");
     }
+    if (params.tpg.initNbRoots < params.tpg.nbActions) {
+        throw std::runtime_error("The number of init roots should be above or equal to the number of actions.");
+    }
     // Empty graph
     graph.clear();
 
@@ -75,15 +78,18 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<std::shared_ptr<Program::Program>> programs;
     for (size_t i = 0; i < params.tpg.nbActions; i++) {
         actions.push_back(&(graph.addNewAction(i)));
+    }
+    for (size_t i = 0; i < params.tpg.initNbRoots; i++) {
         teams.push_back(&(graph.addNewTeam()));
     }
-    for (size_t i = 0; i < 2 * params.tpg.nbActions; i++) {
+    for (size_t i = 0; i < 2 * params.tpg.initNbRoots; i++) {
         programs.emplace_back(new Program::Program(graph.getEnvironment()));
         // RandomInit the Programs
         Mutator::ProgramMutator::initRandomProgram(*programs.back(), params,
                                                    rng);
     }
 
+ 
     // Connect each team with two distinct actions, through two distinct
     // programs Association here are determinists since randomness would
     // uselessly complicate the code while bringing no real value since anyway,
@@ -94,6 +100,14 @@ void Mutator::TPGMutator::initRandomTPG(
             *actions.at(((i / 2) + (i % 2)) % params.tpg.nbActions),
             programs.at(i));
     }
+
+    for(size_t i = 0; i < 2 * (params.tpg.initNbRoots - params.tpg.nbActions); i++){
+        graph.addNewEdge(
+            *teams.at(i / 2),
+            *actions.at(rng.getUnsignedInt64(0, params.tpg.nbActions - 1)),
+            programs.at(i));
+    }
+
 
     // Add additional connections to TPG
     // Team-by-Team
