@@ -142,11 +142,11 @@ namespace Learn {
                 this->learningEnvironment.getNbActions();
 
             // override the number of initial roots if set to 0
-            if(this->params.mutation.tpg.initNbRoots == 0){
-                this->params.mutation.tpg.initNbRoots = 
-                std::max((size_t)floor((1-this->params.ratioDeletedRoots) *
-                     (double)params.mutation.tpg.nbRoots),
-                     (size_t)this->learningEnvironment.getNbActions());
+            if (this->params.mutation.tpg.initNbRoots == 0) {
+                this->params.mutation.tpg.initNbRoots = std::max(
+                    (size_t)floor((1 - this->params.ratioDeletedRoots) *
+                                  (double)params.mutation.tpg.nbRoots),
+                    (size_t)this->learningEnvironment.getNbActions());
             }
         };
 

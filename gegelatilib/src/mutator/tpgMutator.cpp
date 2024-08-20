@@ -67,7 +67,8 @@ void Mutator::TPGMutator::initRandomTPG(
         throw std::runtime_error("A TPG with a single action makes no sense.");
     }
     if (params.tpg.initNbRoots < params.tpg.nbActions) {
-        throw std::runtime_error("The number of init roots should be above or equal to the number of actions.");
+        throw std::runtime_error("The number of init roots should be above or "
+                                 "equal to the number of actions.");
     }
     // Empty graph
     graph.clear();
@@ -89,7 +90,6 @@ void Mutator::TPGMutator::initRandomTPG(
                                                    rng);
     }
 
- 
     // Connect each team with two distinct actions, through two distinct
     // programs Association here are determinists since randomness would
     // uselessly complicate the code while bringing no real value since anyway,
@@ -101,13 +101,13 @@ void Mutator::TPGMutator::initRandomTPG(
             programs.at(i));
     }
 
-    for(size_t i = 2 * params.tpg.nbActions; i < 2 * params.tpg.initNbRoots; i++){
+    for (size_t i = 2 * params.tpg.nbActions; i < 2 * params.tpg.initNbRoots;
+         i++) {
         graph.addNewEdge(
             *teams.at(i / 2),
             *actions.at(rng.getUnsignedInt64(0, params.tpg.nbActions - 1)),
             programs.at(i));
     }
-
 
     // Add additional connections to TPG
     // Team-by-Team
@@ -347,15 +347,16 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
     do {
 
         // If a new program is created
-        if(rng.getDouble(0.0, 1.0) < params.prog.pNewProgram){
+        if (rng.getDouble(0.0, 1.0) < params.prog.pNewProgram) {
             Mutator::ProgramMutator::initRandomProgram(*newProg, params, rng);
-        } else {
-            // Mutate until something is mutated (i.e. the function returns true)
-            // And until the program behavior is changed
-            while (
-                !(Mutator::ProgramMutator::mutateProgram(*newProg, params, rng) &&
+        }
+        else {
+            // Mutate until something is mutated (i.e. the function returns
+            // true) And until the program behavior is changed
+            while (!(
+                Mutator::ProgramMutator::mutateProgram(*newProg, params, rng) &&
                 !(newProgCopy != nullptr &&
-                    newProg->hasIdenticalBehavior(*newProgCopy))))
+                  newProg->hasIdenticalBehavior(*newProgCopy))))
                 ;
         }
         // Check for uniqueness in archive

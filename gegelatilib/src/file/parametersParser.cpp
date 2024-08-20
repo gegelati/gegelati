@@ -391,11 +391,9 @@ void File::ParametersParser::writeParametersToJson(
         Mutator::ProgramParameters::pConstantMutationComment,
         Json::commentBefore);
 
-    root["mutation"]["prog"]["pNewProgram"] =
-        params.mutation.prog.pNewProgram;
+    root["mutation"]["prog"]["pNewProgram"] = params.mutation.prog.pNewProgram;
     root["mutation"]["prog"]["pNewProgram"].setComment(
-        Mutator::ProgramParameters::pNewProgramComment,
-        Json::commentBefore);
+        Mutator::ProgramParameters::pNewProgramComment, Json::commentBefore);
 
     root["mutation"]["prog"]["pDelete"] = params.mutation.prog.pDelete;
     root["mutation"]["prog"]["pDelete"].setComment(

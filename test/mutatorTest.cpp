@@ -869,7 +869,8 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
         newPrograms.front(), params, arch, rng))
         << "Mutating a Program behavior failed unexpectedly.";
 
-    std::cout<<1<<std::endl;;
+    std::cout << 1 << std::endl;
+    ;
     // Check the unicity against the Archive
     // Verify new program uniqueness
     Program::ProgramExecutionEngine pee(*newPrograms.front());
@@ -879,7 +880,6 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     ASSERT_TRUE(arch.areProgramResultsUnique(hashesAndResults))
         << "Mutated program associated to the edge should return a unique bid "
            "on the environment.";
-
 
     // Test again for the newProgram parameter
     Mutator::ProgramMutator::initRandomProgram(*progPointer, params, rng);
@@ -897,7 +897,8 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, {&vertex0}, {&vertex1},
                                             newPrograms, params, rng);
 
-    std::cout<<params.prog.pNewProgram<<std::endl;;
+    std::cout << params.prog.pNewProgram << std::endl;
+    ;
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         newPrograms.front(), params, arch, rng))
@@ -907,9 +908,8 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     // Verify new program uniqueness
     Program::ProgramExecutionEngine pee2(*newPrograms.front());
     result = pee2.executeProgram();
-    
-    hashesAndResults = {
-        {arch.getCombinedHash(e->getDataSources()), result}};
+
+    hashesAndResults = {{arch.getCombinedHash(e->getDataSources()), result}};
     ASSERT_TRUE(arch.areProgramResultsUnique(hashesAndResults))
         << "Mutated program associated to the edge should return a unique bid "
            "on the environment.";
