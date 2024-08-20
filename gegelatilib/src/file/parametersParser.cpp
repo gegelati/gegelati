@@ -174,6 +174,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.prog.pConstantMutation = value.asDouble();
         return;
     }
+    if (param == "pNewProgram") {
+        params.mutation.prog.pNewProgram = value.asDouble();
+        return;
+    }
     if (param == "minConstValue") {
         params.mutation.prog.minConstValue = value.asInt();
         return;
@@ -385,6 +389,12 @@ void File::ParametersParser::writeParametersToJson(
         params.mutation.prog.pConstantMutation;
     root["mutation"]["prog"]["pConstantMutation"].setComment(
         Mutator::ProgramParameters::pConstantMutationComment,
+        Json::commentBefore);
+
+    root["mutation"]["prog"]["pNewProgram"] =
+        params.mutation.prog.pNewProgram;
+    root["mutation"]["prog"]["pConstantMutation"].setComment(
+        Mutator::ProgramParameters::pNewProgramComment,
         Json::commentBefore);
 
     root["mutation"]["prog"]["pDelete"] = params.mutation.prog.pDelete;

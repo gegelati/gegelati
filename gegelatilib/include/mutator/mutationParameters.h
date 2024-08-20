@@ -188,6 +188,13 @@ namespace Mutator {
         double pConstantMutation = 0.5;
 
         /// JSon comment
+        inline static const std::string pNewProgramComment =
+            "// Probability of creating a new program.\n"
+            "// \"pNewProgram\" : 0.0, // Default value";
+        /// Probability of creating a new program
+        double pNewProgram = 0.0;
+
+        /// JSon comment
         inline static const std::string minConstValueComment =
             "// Minimum constant value possible.\n"
             "// \"minConstValue\" : -10, // Default value";
