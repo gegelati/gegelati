@@ -15,6 +15,7 @@
     "tpg": {
       "nbActions": 5,
       "nbRoots": 100,
+      "initNbRoots": 5,
       "maxInitOutgoingEdges": 3,
       "maxOutgoingEdges": 60,
       "pEdgeDeletion": 0.8,
