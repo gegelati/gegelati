@@ -95,18 +95,15 @@ void Mutator::TPGMutator::initRandomTPG(
     // uselessly complicate the code while bringing no real value since anyway,
     // Programs have been initialized randomly.
     for (size_t i = 0; i < 2 * nbActions; i++) {
-        graph.addNewEdge(
-            *teams.at(i / 2),
-            *actions.at(((i / 2) + (i % 2)) % nbActions),
-            programs.at(i));
+        graph.addNewEdge(*teams.at(i / 2),
+                         *actions.at(((i / 2) + (i % 2)) % nbActions),
+                         programs.at(i));
     }
 
-    for (size_t i = 2 * nbActions; i < 2 * params.tpg.initNbRoots;
-         i++) {
-        graph.addNewEdge(
-            *teams.at(i / 2),
-            *actions.at(rng.getUnsignedInt64(0, nbActions - 1)),
-            programs.at(i));
+    for (size_t i = 2 * nbActions; i < 2 * params.tpg.initNbRoots; i++) {
+        graph.addNewEdge(*teams.at(i / 2),
+                         *actions.at(rng.getUnsignedInt64(0, nbActions - 1)),
+                         programs.at(i));
     }
 
     // Add additional connections to TPG
@@ -452,7 +449,8 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
 void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                                       const Archive& archive,
                                       const Mutator::MutationParameters& params,
-                                      Mutator::RNG& rng, uint64_t nbActions, uint64_t maxNbThreads)
+                                      Mutator::RNG& rng, uint64_t nbActions,
+                                      uint64_t maxNbThreads)
 {
     // Get current vertex set (copy)
     auto vertices(graph.getVertices());
