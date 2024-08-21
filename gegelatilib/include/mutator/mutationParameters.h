@@ -59,10 +59,10 @@ namespace Mutator {
         inline static const std::string initNbRootsComment =
             "// Number of root TPGTeams at the initialisation of a "
             "TPGGraph.\n"
-            "// If 0, if will be init to the number of actions\n"
+            "// If 0, if will be init to the number of surviving roots\n"
             "// \"nbRoots\" : 0, // Default value";
         /// Number of root TPGTeams at the initialisation of a TPGGraph
-        /// If 0, if will be init to the number of actions
+        /// If 0, if will be init to the number of surviving roots
         size_t initNbRoots = 0;
 
         /// JSon comment
