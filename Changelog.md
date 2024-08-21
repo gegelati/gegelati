@@ -6,6 +6,8 @@ _2024.01.10_
 ### New features
 
 ### Changes
+* Remove the nbAction parameter that was not necessary since the number of action should not be a parameter that the user can change, it is fixed by the environment
+
 * Update to improve the diversity of the TPGs.
   * Add a new parameter to select the number of roots to initialise a TPG.
   * Add a new parameter to create new program during the mutation, during the training .
