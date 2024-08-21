@@ -818,8 +818,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.mutation.tpg.initNbRoots = le.getNbActions();
 
     // Initialize the tpg
-    Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng,
-                                       le.getNbActions());
+    Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng, le.getNbActions());
 
     // create the archive
     Archive archive;
