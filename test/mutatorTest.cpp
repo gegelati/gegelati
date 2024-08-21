@@ -565,7 +565,8 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     params.prog.minConstValue = 0;
     params.prog.maxConstValue = 1;
 
-    ASSERT_NO_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions))
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions))
         << "TPG Initialization failed.";
     auto vertexSet = tpg.getVertices();
     // Check number or vertex, roots, actions, teams, edges
@@ -615,18 +616,21 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
 
     // Cover bad parameterization error
     params.tpg.maxInitOutgoingEdges = 6;
-    ASSERT_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
-                 std::runtime_error)
+    ASSERT_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
+        std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
     params.tpg.maxInitOutgoingEdges = 0;
     nbActions = 1;
-    ASSERT_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
-                 std::runtime_error)
+    ASSERT_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
+        std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
     nbActions = 5;
     params.tpg.initNbRoots = 2;
-    ASSERT_THROW(Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
-                 std::runtime_error)
+    ASSERT_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
+        std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
 }
 
@@ -900,7 +904,6 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, {&vertex0}, {&vertex1},
                                             newPrograms, params, rng);
 
-
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         newPrograms.front(), params, arch, rng))
         << "Mutating a Program behavior failed unexpectedly.";
@@ -1111,7 +1114,8 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     }
 
     // Check the correct execution
-    ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(tpg, arch, params, rng, nbActions, 0))
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::populateTPG(tpg, arch, params, rng, nbActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
     ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots);

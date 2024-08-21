@@ -74,7 +74,8 @@ namespace Mutator {
          *        Or if nbAction is smaller than 1.
          */
         void initRandomTPG(TPG::TPGGraph& graph,
-                           const MutationParameters& params, Mutator::RNG& rng, uint64_t nbAction);
+                           const MutationParameters& params, Mutator::RNG& rng,
+                           uint64_t nbAction);
 
         /**
          * \brief Select a random outgoingEdge of the given TPGTeam and removes
