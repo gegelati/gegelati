@@ -73,7 +73,7 @@ void Learn::LearningAgent::init(uint64_t seed)
     this->rng.setSeed(seed);
 
     // Initialize the tpg
-    Mutator::TPGMutator::initRandomTPG(*this->tpg, params.mutation, this->rng);
+    Mutator::TPGMutator::initRandomTPG(*this->tpg, params.mutation, this->rng, this->learningEnvironment.getNbActions());
 
     // Clear the archive
     this->archive.clear();
@@ -231,7 +231,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(*this->tpg, this->archive,
-                                     this->params.mutation, this->rng,
+                                     this->params.mutation, this->rng, this->learningEnvironment.getNbActions(),
                                      maxNbThreads);
     for (auto logger : loggers) {
         logger.get().logAfterPopulateTPG();

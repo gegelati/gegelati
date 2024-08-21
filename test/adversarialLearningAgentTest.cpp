@@ -234,7 +234,6 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.maxNbEvaluationPerPolicy = 0;
     params.nbGenerations = 10;
     params.mutation.tpg.nbRoots = 30;
-    params.mutation.tpg.nbActions = 3;
     params.mutation.tpg.maxInitOutgoingEdges = 3;
     params.mutation.tpg.maxOutgoingEdges = 10;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;

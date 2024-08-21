@@ -57,16 +57,16 @@
 
 void Mutator::TPGMutator::initRandomTPG(
     TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-    Mutator::RNG& rng)
+    Mutator::RNG& rng, uint64_t nbActions)
 {
-    if (params.tpg.maxInitOutgoingEdges > params.tpg.nbActions) {
+    if (params.tpg.maxInitOutgoingEdges > nbActions) {
         throw std::runtime_error("Maximum initial number of outgoing edges "
                                  "cannot exceed the number of action");
     }
-    if (params.tpg.nbActions < 2) {
+    if (nbActions < 2) {
         throw std::runtime_error("A TPG with a single action makes no sense.");
     }
-    if (params.tpg.initNbRoots < params.tpg.nbActions) {
+    if (params.tpg.initNbRoots < nbActions) {
         throw std::runtime_error("The number of init roots should be above or "
                                  "equal to the number of actions.");
     }
@@ -77,7 +77,7 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGAction*> actions;
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
-    for (size_t i = 0; i < params.tpg.nbActions; i++) {
+    for (size_t i = 0; i < nbActions; i++) {
         actions.push_back(&(graph.addNewAction(i)));
     }
     for (size_t i = 0; i < params.tpg.initNbRoots; i++) {
@@ -90,22 +90,22 @@ void Mutator::TPGMutator::initRandomTPG(
                                                    rng);
     }
 
-    // Connect each team with two distinct actions, through two distinct
+    // Connect each team with two distinct actions, thr²ough two distinct
     // programs Association here are determinists since randomness would
     // uselessly complicate the code while bringing no real value since anyway,
     // Programs have been initialized randomly.
-    for (size_t i = 0; i < 2 * params.tpg.nbActions; i++) {
+    for (size_t i = 0; i < 2 * nbActions; i++) {
         graph.addNewEdge(
             *teams.at(i / 2),
-            *actions.at(((i / 2) + (i % 2)) % params.tpg.nbActions),
+            *actions.at(((i / 2) + (i % 2)) % nbActions),
             programs.at(i));
     }
 
-    for (size_t i = 2 * params.tpg.nbActions; i < 2 * params.tpg.initNbRoots;
+    for (size_t i = 2 * nbActions; i < 2 * params.tpg.initNbRoots;
          i++) {
         graph.addNewEdge(
             *teams.at(i / 2),
-            *actions.at(rng.getUnsignedInt64(0, params.tpg.nbActions - 1)),
+            *actions.at(rng.getUnsignedInt64(0, nbActions - 1)),
             programs.at(i));
     }
 
@@ -163,7 +163,7 @@ void Mutator::TPGMutator::initRandomTPG(
             graph.addNewEdge(*team,
                              *actions.at(((selectedProgramIndex / 2) +
                                           (selectedProgramIndex % 2)) %
-                                         params.tpg.nbActions),
+                                         nbActions),
                              programs.at(selectedProgramIndex));
         }
     }
@@ -452,7 +452,7 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
 void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                                       const Archive& archive,
                                       const Mutator::MutationParameters& params,
-                                      Mutator::RNG& rng, uint64_t maxNbThreads)
+                                      Mutator::RNG& rng, uint64_t nbActions, uint64_t maxNbThreads)
 {
     // Get current vertex set (copy)
     auto vertices(graph.getVertices());
@@ -472,7 +472,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
     if (rootTeams.size() == 0) {
-        initRandomTPG(graph, params, rng);
+        initRandomTPG(graph, params, rng, nbActions);
         vertices = graph.getVertices();
         rootVertices = graph.getRootVertices();
         rootTeams.clear();

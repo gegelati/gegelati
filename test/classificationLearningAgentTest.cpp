@@ -186,7 +186,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     cla.init(0);
     TPG::TPGGraph& graph = *cla.getTPGGraph();
     Mutator::TPGMutator::populateTPG(graph, cla.getArchive(), params.mutation,
-                                     cla.getRNG());
+                                     cla.getRNG(), fle.getNbActions());
 
     // Get roots
     auto roots = graph.getRootVertices();

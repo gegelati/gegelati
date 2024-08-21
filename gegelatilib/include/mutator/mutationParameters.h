@@ -46,14 +46,6 @@ namespace Mutator {
      */
     typedef struct TPGParameters
     {
-        /// JSon comment
-        inline static const std::string nbActionsComment =
-            "// Number of TPGAction vertex of the initialized TPGGraph.\n"
-            "// This parameter is generally automatically set by the "
-            "LearningEnvironment.\n"
-            "// /* \"nbActions\" : 0,*/ // Commented by default";
-        /// Number of TPGAction vertex of the initialized TPGGraph.
-        size_t nbActions = 0;
 
         /// JSon comment
         inline static const std::string nbRootsComment =

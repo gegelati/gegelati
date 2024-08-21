@@ -13,7 +13,6 @@
   "nbProgramConstant": 5,
   "mutation": {
     "tpg": {
-      "nbActions": 5,
       "nbRoots": 100,
       "initNbRoots": 5,
       "maxInitOutgoingEdges": 3,

@@ -101,10 +101,6 @@ void File::ParametersParser::setParameterFromString(
     Learn::LearningParameters& params, const std::string& param,
     Json::Value const& value)
 {
-    if (param == "nbActions") {
-        params.mutation.tpg.nbActions = (size_t)value.asUInt();
-        return;
-    }
     if (param == "nbRoots") {
         params.mutation.tpg.nbRoots = (size_t)value.asUInt();
         return;
@@ -325,10 +321,6 @@ void File::ParametersParser::writeParametersToJson(
         params.mutation.tpg.maxOutgoingEdges;
     root["mutation"]["tpg"]["maxOutgoingEdges"].setComment(
         Mutator::TPGParameters::maxOutgoingEdgesComment, Json::commentBefore);
-
-    root["mutation"]["tpg"]["nbActions"] = params.mutation.tpg.nbActions;
-    root["mutation"]["tpg"]["nbActions"].setComment(
-        Mutator::TPGParameters::nbActionsComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["nbRoots"] = params.mutation.tpg.nbRoots;
     root["mutation"]["tpg"]["nbRoots"].setComment(

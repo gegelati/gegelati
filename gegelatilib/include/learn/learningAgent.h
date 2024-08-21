@@ -137,9 +137,6 @@ namespace Learn {
               tpg(factory.createTPGGraph(env)), params{p},
               archive(p.archiveSize, p.archivingProbability)
         {
-            // override the number of actions from the parameters.
-            this->params.mutation.tpg.nbActions =
-                this->learningEnvironment.getNbActions();
 
             // override the number of initial roots if set to 0
             if (this->params.mutation.tpg.initNbRoots == 0) {
