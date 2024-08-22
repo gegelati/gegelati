@@ -177,6 +177,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     params.mutation.tpg.maxInitOutgoingEdges = 2;
     params.ratioDeletedRoots = 0.50;
     params.mutation.tpg.nbRoots = 50; // Param used in decimation
+    params.mutation.tpg.initNbRoots = 3;
     params.nbThreads = 4;
 
     Learn::ClassificationLearningAgent cla(fle, set, params);
@@ -185,7 +186,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     cla.init(0);
     TPG::TPGGraph& graph = *cla.getTPGGraph();
     Mutator::TPGMutator::populateTPG(graph, cla.getArchive(), params.mutation,
-                                     cla.getRNG());
+                                     cla.getRNG(), fle.getNbActions());
 
     // Get roots
     auto roots = graph.getRootVertices();

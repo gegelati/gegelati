@@ -64,7 +64,7 @@ TEST(LearningParametersTest, readConfigFile)
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(10, root["mutation"]["tpg"].size())
         << "Wrong number of elements in parsed json file";
-    ASSERT_EQ(8, root["mutation"]["prog"].size())
+    ASSERT_EQ(9, root["mutation"]["prog"].size())
         << "Wrong number of elements in parsed json file";
 }
 
@@ -99,7 +99,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(200, params.nbGenerations);
     ASSERT_EQ(true, params.doValidation);
     ASSERT_EQ(100, params.mutation.tpg.nbRoots);
-    ASSERT_EQ(5, params.mutation.tpg.nbActions);
+    ASSERT_EQ(5, params.mutation.tpg.initNbRoots);
     ASSERT_EQ(3, params.mutation.tpg.maxInitOutgoingEdges);
     ASSERT_EQ(60, params.mutation.tpg.maxOutgoingEdges);
     ASSERT_EQ(0.8, params.mutation.tpg.pEdgeDeletion);
@@ -109,6 +109,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.3, params.mutation.tpg.pEdgeDestinationChange);
     ASSERT_EQ(0.6, params.mutation.tpg.pEdgeDestinationIsAction);
     ASSERT_EQ(40, params.mutation.prog.maxProgramSize);
+    ASSERT_EQ(0.0, params.mutation.prog.pNewProgram);
     ASSERT_EQ(0.7, params.mutation.prog.pDelete);
     ASSERT_EQ(0.7, params.mutation.prog.pAdd);
     ASSERT_EQ(1.0, params.mutation.prog.pMutate);
@@ -202,7 +203,6 @@ TEST(LearningParametersTest, writeParametersToJson)
               params2.mutation.tpg.maxInitOutgoingEdges);
     ASSERT_EQ(params.mutation.tpg.maxOutgoingEdges,
               params2.mutation.tpg.maxOutgoingEdges);
-    ASSERT_EQ(params.mutation.tpg.nbActions, params2.mutation.tpg.nbActions);
     ASSERT_EQ(params.mutation.tpg.nbRoots, params2.mutation.tpg.nbRoots);
     ASSERT_EQ(params.mutation.tpg.pEdgeAddition,
               params2.mutation.tpg.pEdgeAddition);
