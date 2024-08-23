@@ -57,8 +57,11 @@
 
 void Mutator::TPGMutator::initRandomTPG(
     TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-    Mutator::RNG& rng, uint64_t nbActions)
+    Mutator::RNG& rng, std::vector<uint64_t> vectActions)
 {
+
+    uint64_t nbActions = std::accumulate(vectActions.begin(), vectActions.end(), 0);
+
     if (params.tpg.maxInitOutgoingEdges > nbActions) {
         throw std::runtime_error("Maximum initial number of outgoing edges "
                                  "cannot exceed the number of action");
@@ -77,8 +80,10 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGAction*> actions;
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
-    for (size_t i = 0; i < nbActions; i++) {
-        actions.push_back(&(graph.addNewAction(i)));
+    for (size_t actionID = 0; actionID < vectActions.size(); actionID++) {
+        for(size_t actionValue = 0; actionValue < vectActions[actionID]; actionValue++){
+            actions.push_back(&(graph.addNewAction(actionID, actionValue)));
+        }
     }
     for (size_t i = 0; i < params.tpg.initNbRoots; i++) {
         teams.push_back(&(graph.addNewTeam()));
@@ -90,7 +95,7 @@ void Mutator::TPGMutator::initRandomTPG(
                                                    rng);
     }
 
-    // Connect each team with two distinct actions, thr²ough two distinct
+    // Connect each team with two distinct actions, through two distinct
     // programs Association here are determinists since randomness would
     // uselessly complicate the code while bringing no real value since anyway,
     // Programs have been initialized randomly.
@@ -449,7 +454,7 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
 void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                                       const Archive& archive,
                                       const Mutator::MutationParameters& params,
-                                      Mutator::RNG& rng, uint64_t nbActions,
+                                      Mutator::RNG& rng, std::vector<uint64_t> vectActions,
                                       uint64_t maxNbThreads)
 {
     // Get current vertex set (copy)
@@ -470,7 +475,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
     if (rootTeams.size() == 0) {
-        initRandomTPG(graph, params, rng, nbActions);
+        initRandomTPG(graph, params, rng, vectActions);
         vertices = graph.getVertices();
         rootVertices = graph.getRootVertices();
         rootTeams.clear();

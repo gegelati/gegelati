@@ -75,7 +75,7 @@ void Learn::LearningAgent::init(uint64_t seed)
     // Initialize the tpg
     Mutator::TPGMutator::initRandomTPG(
         *this->tpg, params.mutation, this->rng,
-        this->learningEnvironment.getNbActions());
+        this->learningEnvironment.getVectActions());
 
     // Clear the archive
     this->archive.clear();
@@ -142,12 +142,22 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         uint64_t nbActions = 0;
         while (!le.isTerminal() &&
                nbActions < this->params.maxNbActionsPerEval) {
-            // Get the action
-            uint64_t actionID =
-                ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())
-                    ->getActionID();
+            // Get the actions
+            std::vector<std::int64_t> rawActionsID 
+                = tee.executeFromRoot(*root, le.getVectActions().size(), 10); // TODO
+
+            // Browse the raw list of actions and replace the "-1" action by the initial value.
+            std::vector<std::uint64_t> actionsID;
+            for(size_t i = 0; i < actionsID.size(); i++){
+                if(rawActionsID[i] == -1){
+                    rawActionsID[i] = le.getInitActions()[i];
+                } else{
+                    rawActionsID[i] = actionsID[i];
+                }
+            }
+
             // Do it
-            le.doAction(actionID);
+            le.doActions(actionsID);
             // Count actions
             nbActions++;
         }
@@ -234,7 +244,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(
         *this->tpg, this->archive, this->params.mutation, this->rng,
-        this->learningEnvironment.getNbActions(), maxNbThreads);
+        this->learningEnvironment.getVectActions(), maxNbThreads);
     for (auto logger : loggers) {
         logger.get().logAfterPopulateTPG();
     }

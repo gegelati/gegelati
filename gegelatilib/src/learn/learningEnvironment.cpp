@@ -49,8 +49,32 @@ bool Learn::LearningEnvironment::isCopyable() const
 
 void Learn::LearningEnvironment::doAction(uint64_t actionID)
 {
-    if (actionID >= this->nbActions) {
+    if (vectActions.size() > 1){
+        throw std::runtime_error("The vector of actions contain more than one action, doAction() method should not be called. Use doActions() instead.");
+    }
+
+    if (actionID >= this->getNbActions()) {
         throw std::runtime_error("Given action ID exceeds the number of "
                                  "actions for this learning environment.");
+    }
+}
+
+
+void Learn::LearningEnvironment::doActions(std::vector<uint64_t> vectActionID)
+{
+    if (vectActionID.size() != this->vectActions.size()) {
+        throw std::runtime_error("Vector of action ID given is not the same size as the vector of actions wanted");
+    }
+
+    // If vectActionID contain only one action, the doAction method is called instead
+    if(vectActionID.size() == 1){
+        this->doAction(vectActionID[0]);
+    }
+
+    for(auto index = 0; index < vectActionID.size(); index++){
+        if (vectActionID[index] >= this->vectActions[index]) {
+            throw std::runtime_error("Given action ID " + std::to_string(index) + " exceeds the number of "
+                                     "actions for this learning environment.");
+        }
     }
 }

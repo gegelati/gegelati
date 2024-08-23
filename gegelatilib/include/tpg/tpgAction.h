@@ -52,20 +52,29 @@ namespace TPG {
     {
 
         /**
-         * \brief Integer number abstracting the selected action.
+         * \brief Integer number abstracting the ID of selected action.
          *
          * It is up to the used of a TPGGraph to associate the code to each
          * actionID.
          */
         const uint64_t actionID;
 
+        /**
+         * \brief Integer number abstracting the value of selected action.
+         *
+         * It is up to the used of a TPGGraph to associate the code to each
+         * actionValue.
+         */
+        const uint64_t actionValue;
+
       public:
         /**
          * \brief Main constructor of a TPGAction.
          *
          * \param[in] id integer stored as the actionID of the TPGAction.
+         * \param[in] value integer stored as the actionValue of the TPGAction.
          */
-        TPGAction(const uint64_t id) : actionID{id} {};
+        TPGAction(const uint64_t id, const uint64_t value) : actionID{id}, actionValue{value} {};
 
         /**
          * \brief Specialization throwing an std::runtime_exception.
@@ -83,6 +92,16 @@ namespace TPG {
         uint64_t getActionID() const
         {
             return this->actionID;
+        };
+
+        /**
+         * \brief Get the action Value associated to the TPGAction.
+         *
+         * \return the integer Value of the TPGAction.
+         */
+        uint64_t getActionValue() const
+        {
+            return this->actionValue;
         };
     };
 }; // namespace TPG

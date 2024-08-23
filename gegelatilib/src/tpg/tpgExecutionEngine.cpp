@@ -40,6 +40,7 @@
 
 #include "program/programExecutionEngine.h"
 #include "tpg/tpgEdge.h"
+#include "tpg/tpgTeam.h"
 
 #include "tpg/tpgExecutionEngine.h"
 
@@ -72,67 +73,77 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     return result;
 }
 
-const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team)
-{
-    // Copy outgoing edge list
-    const std::list<TPG::TPGEdge*>& outgoingEdges = team.getOutgoingEdges();
+void TPG::TPGExecutionEngine::executeTeam(
+    const TPGVertex* currentTeam, std::vector<const TPGVertex*>& visitedTeams,
+    std::vector<std::int64_t>* actionsTaken, uint64_t nbEdgesActivated){
+    
+    // Add current team to the visited teams.
+    visitedTeams.push_back(currentTeam);
 
-    // Note: No need to exclude previously visited edges as the graph is now
-    // assumed to be acyclic.
+    // Copy outgoing edge list.
+    const std::list<TPG::TPGEdge*>& outgoingEdges = currentTeam->getOutgoingEdges();
 
-#ifdef DEBUG
-    std::cout << "New team :" << &team << std::endl;
-#endif
+    double nbTeamActivated = 0;
+    double nbEdgeActivated = 0;
 
-    // Evaluate all TPGEdge
-    // First
-    TPGEdge* bestEdge = *outgoingEdges.begin();
-    double bestBid = this->evaluateEdge(*bestEdge);
-#ifdef DEBUG
-    std::cout << "R = " << bestBid << "*" << std::endl;
-#endif
-    // Others
-    for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
-         iter++) {
-        TPGEdge* edge = *iter;
+    // Calcul the bids of all teams.
+    std::vector<std::pair<TPG::TPGEdge*, double>> resultsBid;
+    for (auto edge: outgoingEdges) {
+        // Calcul program bid.
         double bid = this->evaluateEdge(*edge);
-#ifdef DEBUG
-        std::cout << "R = " << bid;
-#endif
-        if (bid >= bestBid) {
-#ifdef DEBUG
-            std::cout << "*" << std::endl;
-#endif
-            bestEdge = edge;
-            bestBid = bid;
-        }
-        else {
-#ifdef DEBUG
-            std::cout << std::endl;
-#endif
+        resultsBid.push_back(std::make_pair(edge, bid));
+    };
+    
+    
+    // Sort the results.
+    std::sort(resultsBid.begin(), resultsBid.end(),
+                [](const std::pair<TPG::TPGEdge*, double>& a,
+                    const std::pair<TPG::TPGEdge*, double>& b) {
+                    return a.second >= b.second;
+                });
+
+
+    // For all TPGEdge evaluated.
+    for (size_t i = 0; i < resultsBid.size() && nbEdgeActivated < nbEdgesActivated; i++) {
+        nbEdgeActivated++;
+
+        // Get the pair with the edge and the bid.
+        auto destination = resultsBid[i].first->getDestination();
+    
+        // If edge destination is an action
+        if(dynamic_cast<const TPGTeam*>(destination)){
+            const TPGAction* action = (const TPGAction*)(destination);
+
+            // Save the action value if the action ID is choosen for the first time.
+            if((*actionsTaken)[action->getActionID()] == -1){
+                (*actionsTaken)[action->getActionID()] = action->getActionValue();
+            }
+            
+        // Else if the no team has been activated yet.
+        } else if(nbTeamActivated < 1){
+            nbTeamActivated++;
+
+            // Only if the team has not already been visited
+            if(std::find(visitedTeams.begin(), visitedTeams.end(), destination) == visitedTeams.end()){
+
+                // If edge destination is a team, launch recursively the method
+                executeTeam((const TPGTeam*)(destination), visitedTeams, actionsTaken, nbEdgesActivated);
+            }
         }
     }
-
-    return *bestEdge;
 }
 
-const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngine::
-    executeFromRoot(const TPGVertex& root)
+
+const std::vector<int64_t> TPG::TPGExecutionEngine::
+    executeFromRoot(const TPGVertex& root, uint64_t nbActionsID, uint64_t nbEdgesActivated)
 {
     const TPGVertex* currentVertex = &root;
-
     std::vector<const TPGVertex*> visitedVertices;
-    visitedVertices.push_back(currentVertex);
 
-    // Browse the TPG until a TPGAction is reached.
-    while (dynamic_cast<const TPG::TPGTeam*>(currentVertex)) {
-        // Get the next edge
-        const TPGEdge& edge =
-            this->evaluateTeam(*(const TPGTeam*)currentVertex);
-        // update currentVertex and backup in visitedVertex.
-        currentVertex = edge.getDestination();
-        visitedVertices.push_back(currentVertex);
-    }
+    // An action value must be positive, so -1 for an action mean that no action value is choosen yet.
+    std::vector<std::int64_t> actionsTaken(nbActionsID, -1);
 
-    return visitedVertices;
+    executeTeam(dynamic_cast<const TPGTeam*>(currentVertex), visitedVertices, &actionsTaken, nbEdgesActivated);
+
+    return actionsTaken;
 }

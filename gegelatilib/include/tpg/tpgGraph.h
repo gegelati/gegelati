@@ -139,10 +139,11 @@ namespace TPG {
          * The new TPGAction is added to the back of the vertices list.
          * The TPGAction is created using the TPGFactory of the TPGGraph.
          *
-         * \param[in] actionID the identifier to associate to the TPGAction.
+         * \param[in] actionID the ID identifier to associate to the TPGAction.
+         * * \param[in] actionValue the Value identifier to associate to the TPGAction.
          * \return a const reference to the newly created TPGAction.
          */
-        const TPGAction& addNewAction(uint64_t actionID);
+        const TPGAction& addNewAction(uint64_t actionID, uint64_t actionValue);
 
         /**
          * \brief Get the number of TPGVertex contained in the TPGGraph.

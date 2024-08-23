@@ -109,7 +109,7 @@ namespace File {
          * This map is used to ensure that identical actions are not created
          * more than once.
          */
-        std::map<uint64_t, const TPG::TPGVertex*> actionID;
+        std::map<std::string, const TPG::TPGVertex*> actionID;
 
         /**
          * \brief Map associating actions to the corresponding action ID
@@ -117,7 +117,7 @@ namespace File {
          * This map is here is used to access the correct TPGVertex while
          * linking an action.
          */
-        std::map<uint64_t, uint64_t> actionLabel;
+        std::map<uint64_t, std::string> actionLabel;
 
         /**
          * \brief string used to spot the end of a line in the program

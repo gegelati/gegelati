@@ -48,9 +48,9 @@ TPG::TPGTeam* TPG::TPGFactory::createTPGTeam() const
     return new TPG::TPGTeam();
 }
 
-TPG::TPGAction* TPG::TPGFactory::createTPGAction(const uint64_t id) const
+TPG::TPGAction* TPG::TPGFactory::createTPGAction(const uint64_t id, const uint64_t value) const
 {
-    return new TPG::TPGAction(id);
+    return new TPG::TPGAction(id, value);
 }
 
 std::unique_ptr<TPG::TPGEdge> TPG::TPGFactory::createTPGEdge(
