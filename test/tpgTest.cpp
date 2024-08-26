@@ -223,7 +223,7 @@ TEST_F(TPGTest, TPGFactory)
     std::unique_ptr<TPG::TPGEdge> edge;
     std::unique_ptr<TPG::TPGExecutionEngine> tee;
 
-    ASSERT_NO_THROW(action = factory.createTPGAction(0))
+    ASSERT_NO_THROW(action = factory.createTPGAction(0, 0))
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(action, nullptr) << "Created TPGAction should not be null.";
 

@@ -186,7 +186,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     cla.init(0);
     TPG::TPGGraph& graph = *cla.getTPGGraph();
     Mutator::TPGMutator::populateTPG(graph, cla.getArchive(), params.mutation,
-                                     cla.getRNG(), fle.getNbActions());
+                                     cla.getRNG(), fle.getVectActions());
 
     // Get roots
     auto roots = graph.getRootVertices();
@@ -256,7 +256,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     // Add an additional
     // - root action (should not be removed, despite having the worst score)
     // - team root (will be removed with the same score)
-    const TPG::TPGVertex& actionRoot = graph.addNewAction(0);
+    const TPG::TPGVertex& actionRoot = graph.addNewAction(0, 0);
     const TPG::TPGVertex& teamRoot = graph.addNewTeam();
 
     uint64_t originalNbVertices = graph.getNbVertices();

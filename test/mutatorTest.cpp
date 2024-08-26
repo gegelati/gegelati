@@ -557,7 +557,9 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     TPG::TPGGraph tpg(*e);
     Mutator::MutationParameters params;
 
-    uint64_t nbActions = 5;
+    std::vector<size_t> vectActions(1, 5);
+    uint64_t nbActions = vectActions[0];
+    
     params.tpg.initNbRoots = 5;
     params.tpg.maxInitOutgoingEdges = 4;
     params.prog.maxProgramSize = 96;
@@ -566,7 +568,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     params.prog.maxConstValue = 1;
 
     ASSERT_NO_THROW(
-        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions))
+        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, vectActions))
         << "TPG Initialization failed.";
     auto vertexSet = tpg.getVertices();
     // Check number or vertex, roots, actions, teams, edges
@@ -617,19 +619,20 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     // Cover bad parameterization error
     params.tpg.maxInitOutgoingEdges = 6;
     ASSERT_THROW(
-        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
+        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, vectActions),
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
-    params.tpg.maxInitOutgoingEdges = 0;
-    nbActions = 1;
-    ASSERT_THROW(
-        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
-        std::runtime_error)
-        << "TPG Initialization should fail with bad parameters.";
-    nbActions = 5;
+
     params.tpg.initNbRoots = 2;
     ASSERT_THROW(
-        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
+        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, vectActions),
+        std::runtime_error)
+        << "TPG Initialization should fail with bad parameters.";
+
+    params.tpg.maxInitOutgoingEdges = 0;
+    vectActions = std::vector<size_t>(1, 1);
+    ASSERT_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, vectActions),
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
 }
@@ -765,7 +768,7 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
     params.prog.minConstValue = 0;
     params.prog.maxConstValue = 1;
     Mutator::ProgramMutator::initRandomProgram(*progPointer, params, rng);
-    tee.executeFromRoot(vertex0);
+    tee.executeFromRoot(vertex0, {0}, 1);
 
     // Mutate (params selected for code coverage)
     params.prog.pAdd = 0.5;
@@ -822,7 +825,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam)
     Archive arch;
     TPG::TPGExecutionEngine tee(*e, &arch);
     Mutator::ProgramMutator::initRandomProgram(*progPointer, params, rng);
-    tee.executeFromRoot(vertex0);
+    tee.executeFromRoot(vertex0, {0}, 1);
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
@@ -860,7 +863,7 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     params.prog.maxConstValue = 1;
 
     Mutator::ProgramMutator::initRandomProgram(*progPointer, params, rng);
-    tee.executeFromRoot(vertex0);
+    tee.executeFromRoot(vertex0, {0}, 1);
 
     // Mutate (params selected for code coverage)
     params.prog.pAdd = 0.5;
@@ -928,7 +931,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 
     Mutator::MutationParameters params;
 
-    uint64_t nbActions = 4;
+    std::vector<size_t> vectActions(1, 4);
     params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
@@ -948,11 +951,11 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     params.prog.maxConstValue = 10;
     Archive arch;
 
-    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
+    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, vectActions);
     // fill the archive before populating to test uniqueness of new prog
     TPG::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
-        tee.executeFromRoot(*rootVertex);
+        tee.executeFromRoot(*rootVertex, {0}, 1);
     }
 
     // Create a list of Programs to mutate
@@ -976,7 +979,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 
     Mutator::MutationParameters params;
 
-    uint64_t nbActions = 4;
+    std::vector<size_t> vectActions(1, 4);
     params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
@@ -996,11 +999,11 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     params.prog.maxConstValue = 10;
     Archive arch;
 
-    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
+    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, vectActions);
     // fill the archive before populating to test uniqueness of new prog
     TPG::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
-        tee.executeFromRoot(*rootVertex);
+        tee.executeFromRoot(*rootVertex, {0}, 1);
     }
 
     // Create a list of Programs to mutate
@@ -1023,7 +1026,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
     Mutator::MutationParameters params;
 
-    uint64_t nbActions = 4;
+    std::vector<size_t> vectActions(1, 4);
     params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
@@ -1043,11 +1046,11 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     params.prog.maxConstValue = 10;
     Archive arch;
 
-    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
+    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, vectActions);
     // fill the archive before populating to test uniqueness of new prog
     TPG::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
-        tee.executeFromRoot(*rootVertex);
+        tee.executeFromRoot(*rootVertex, {0}, 1);
     }
 
     // Create a list of Programs to mutate
@@ -1086,7 +1089,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
 
     Mutator::MutationParameters params;
 
-    uint64_t nbActions = 4;
+    std::vector<size_t> vectActions(1, 4);
     params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
@@ -1106,16 +1109,16 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     params.prog.maxConstValue = 10;
     Archive arch;
 
-    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
+    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, vectActions);
     // fill the archive before populating to test uniqueness of new prog
     TPG::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
-        tee.executeFromRoot(*rootVertex);
+        tee.executeFromRoot(*rootVertex, {0}, 1);
     }
 
     // Check the correct execution
     ASSERT_NO_THROW(
-        Mutator::TPGMutator::populateTPG(tpg, arch, params, rng, nbActions, 0))
+        Mutator::TPGMutator::populateTPG(tpg, arch, params, rng, vectActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
     ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots);
@@ -1123,6 +1126,6 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     // Increase coverage with a TPG that has no root team
     TPG::TPGGraph tpg2(*e);
     ASSERT_NO_THROW(
-        Mutator::TPGMutator::populateTPG(tpg2, arch, params, rng, nbActions, 0))
+        Mutator::TPGMutator::populateTPG(tpg2, arch, params, rng, vectActions, 0))
         << "Populating an empty TPG failed.";
 }

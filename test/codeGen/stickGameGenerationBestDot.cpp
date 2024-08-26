@@ -196,8 +196,7 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
 #endif
         inferenceGegelati =
             (int)(((const TPG::TPGAction*)tee
-                       ->executeFromRoot(*tpg->getRootVertices().back())
-                       .back())
+                       ->executeFromRoot(*tpg->getRootVertices().back(), {0}, 1).second[0])
                       ->getActionID());
         ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
             << "Error inference of Stick Game has changed";

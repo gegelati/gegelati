@@ -520,7 +520,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), a, params.mutation,
-                                     la.getRNG(), le.getNbActions(), 1);
+                                     la.getRNG(), le.getVectActions(), 1);
     size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(la.trainOneGeneration(4))
@@ -750,7 +750,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     le.reset();
     TPG::TPGExecutionEngine tee(tpg.getEnvironment());
     std::vector<const TPG::TPGVertex*> pathOrigin =
-        tee.executeFromRoot(*(tpg.getRootVertices().at(0)));
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0)), le.getInitActions(), params.nbEdgesActivable).first;
 
     // Clear introns
     tpg.clearProgramIntrons();
@@ -768,7 +768,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
 
     // Check that the behavior is identical (empirically, not really foolproof)
     std::vector<const TPG::TPGVertex*> pathNoIntrons =
-        tee.executeFromRoot(*(tpg.getRootVertices().at(0)));
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0)), le.getInitActions(), params.nbEdgesActivable).first;
 
     ASSERT_EQ(pathOrigin.size(), pathNoIntrons.size())
         << "Path length in TPG before and after inton removal is not "
@@ -819,7 +819,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 
     // Initialize the tpg
     Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng,
-                                       le.getNbActions());
+                                       le.getVectActions());
 
     // create the archive
     Archive archive;
@@ -1096,7 +1096,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), a, params.mutation,
-                                     pla.getRNG(), le.getNbActions());
+                                     pla.getRNG(), le.getVectActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4))
@@ -1131,7 +1131,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), a, params.mutation,
-                                     pla.getRNG(), le.getNbActions());
+                                     pla.getRNG(), le.getVectActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4))
