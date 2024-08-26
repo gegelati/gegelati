@@ -59,7 +59,7 @@ namespace TPG {
         virtual TPGTeam* createTPGTeam() const override;
 
         ///  Specialization of the method returning a TPGActionInstrumented
-        virtual TPGAction* createTPGAction(const uint64_t id) const override;
+        virtual TPGAction* createTPGAction(const uint64_t id, const uint64_t value) const override;
 
         ///  Specialization of the method returning a TPGEdgeInstrumented
         virtual std::unique_ptr<TPGEdge> createTPGEdge(

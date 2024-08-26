@@ -128,8 +128,9 @@ namespace TPG {
          * \param[in] actionsTaken vector of int64_t of actions taken.
          * \param[in] nbEdgesActivated number of TPGEdge that can be activated.
          *
+         * \return the edges that have been traversed.
          */
-          virtual void executeTeam(
+          virtual std::vector<const TPGEdge*> executeTeam(
                 const TPG::TPGVertex* currentTeam, std::vector<const TPG::TPGVertex*>& visitedTeams,
                 std::vector<std::int64_t>* actionsTaken, uint64_t nbEdgesActivated);
 
@@ -140,14 +141,14 @@ namespace TPG {
          * following the TPGEdge proposing the best bids.
          *
          * \param[in] root the TPGVertex from which the execution will start.
-         * \param[in] nbActionsID the number of action ID that can be choosen by the root.
+         * \param[in] initActions the vector of initial action that can are choosen by default by the root.
          * \param[in] nbEdgesActivated the number of edges that can be activated by team. A team can only activate a single other team.
          * \return a vector containing all the TPGVertex traversed during the
          *         evaluation of the TPGGraph. The TPGAction resulting from the
          *         TPGGraph execution is at the end of the returned vector.
          */
-        virtual const std::vector<int64_t> executeFromRoot(
-            const TPGVertex& root, uint64_t nbActionsID, uint64_t nbEdgesActivated);
+        virtual std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> executeFromRoot(
+            const TPGVertex& root, const std::vector<size_t> initActions, uint64_t nbEdgesActivated);
     };
 }; // namespace TPG
 

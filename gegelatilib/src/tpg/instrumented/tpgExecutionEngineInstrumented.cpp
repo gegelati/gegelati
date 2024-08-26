@@ -45,28 +45,40 @@ double TPG::TPGExecutionEngineInstrumented::evaluateEdge(const TPGEdge& edge)
     return TPGExecutionEngine::evaluateEdge(edge);
 }
 
-const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(
-    const TPGTeam& team)
+std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngineInstrumented::executeTeam(
+    const TPGVertex* currentTeam, std::vector<const TPGVertex*>& visitedVertices,
+    std::vector<std::int64_t>* actionsTaken, uint64_t nbEdgesActivated)
 {
-    dynamic_cast<const TPGTeamInstrumented&>(team).incrementNbVisits();
 
-    const TPGEdge& winningEdge = TPGExecutionEngine::evaluateTeam(team);
-    dynamic_cast<const TPGEdgeInstrumented&>(winningEdge)
-        .incrementNbTraversal();
-    return winningEdge;
+    dynamic_cast<const TPG::TPGTeamInstrumented*>(currentTeam)->incrementNbVisits();
+
+    std::vector<const TPGEdge*> winningEdges = TPGExecutionEngine::executeTeam(currentTeam, visitedVertices, actionsTaken, nbEdgesActivated);
+    for (const TPGEdge* edge : winningEdges) {
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge)->incrementNbVisits();
+    }
+    return winningEdges;
 }
 
-const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngineInstrumented::
-    executeFromRoot(const TPG::TPGVertex& root)
+std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> TPG::TPGExecutionEngineInstrumented::executeFromRoot(
+    const TPG::TPGVertex& root, const std::vector<size_t> initActions, uint64_t nbEdgesActivated)
 {
-    const std::vector<const TPG::TPGVertex*> result =
-        TPGExecutionEngine::executeFromRoot(root);
+    auto result = TPGExecutionEngine::executeFromRoot(root, initActions, nbEdgesActivated);
 
-    // Increment action visit
-    dynamic_cast<const TPGActionInstrumented*>(result.back())
-        ->incrementNbVisits();
 
-    this->traceHistory.push_back(result);
+    // Get only the visited Teams
+    std::vector<const TPG::TPGVertex*> visitedTeams;
+    std::copy_if(result.first.begin(), result.first.end(), std::back_inserter(visitedTeams), [](const TPG::TPGVertex* vertex) {
+        return dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr;
+    });
+
+    // Increment actions visit
+    for (auto vertex : result.first) {
+        if (auto* action = dynamic_cast<const TPG::TPGActionInstrumented*>(vertex)) {
+            action->incrementNbVisits();
+        }
+    }
+
+    this->traceHistory.push_back(visitedTeams);
 
     return result;
 }
