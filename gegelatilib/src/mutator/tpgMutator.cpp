@@ -60,7 +60,7 @@ void Mutator::TPGMutator::initRandomTPG(
     Mutator::RNG& rng, std::vector<uint64_t> vectActions)
 {
 
-    uint64_t nbActions = std::accumulate(vectActions.begin(), vectActions.end(), 0);
+    uint64_t nbActions = std::accumulate(vectActions.begin(), vectActions.end(), (uint64_t)0);
 
     if (params.tpg.maxInitOutgoingEdges > nbActions) {
         throw std::runtime_error("Maximum initial number of outgoing edges "
@@ -80,9 +80,9 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGAction*> actions;
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
-    for (size_t actionID = 0; actionID < vectActions.size(); actionID++) {
-        for(size_t actionValue = 0; actionValue < vectActions[actionID]; actionValue++){
-            actions.push_back(&(graph.addNewAction(actionID, actionValue)));
+    for (size_t actionClass = 0; actionClass < vectActions.size(); actionClass++) {
+        for(size_t actionID = 0; actionID < vectActions[actionClass]; actionID++){
+            actions.push_back(&(graph.addNewAction(actionClass, actionID)));
         }
     }
     for (size_t i = 0; i < params.tpg.initNbRoots; i++) {

@@ -73,12 +73,20 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     return result;
 }
 
-void TPG::TPGExecutionEngine::executeTeam(
-    const TPGVertex* currentTeam, std::vector<const TPGVertex*>& visitedTeams,
+std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngine::executeTeam(
+    const TPGVertex* currentTeam, std::vector<const TPGVertex*>& visitedVertices,
     std::vector<std::int64_t>* actionsTaken, uint64_t nbEdgesActivated){
     
-    // Add current team to the visited teams.
-    visitedTeams.push_back(currentTeam);
+    std::vector<const TPGEdge*> traversedEdges;
+
+    // If "-1" is not anymore, it means all actions have been choosen.
+    // Since we only consider the first action activated, we don't need to execute more teams.
+    if (actionsTaken && std::find(actionsTaken->begin(), actionsTaken->end(), -1) == actionsTaken->end()) {
+        return traversedEdges;
+    }
+
+    // Add current team to the visited vertices.
+    visitedVertices.push_back(currentTeam);
 
     // Copy outgoing edge list.
     const std::list<TPG::TPGEdge*>& outgoingEdges = currentTeam->getOutgoingEdges();
@@ -111,39 +119,62 @@ void TPG::TPGExecutionEngine::executeTeam(
         auto destination = resultsBid[i].first->getDestination();
     
         // If edge destination is an action
-        if(dynamic_cast<const TPGTeam*>(destination)){
+        if(dynamic_cast<const TPGAction*>(destination)){
             const TPGAction* action = (const TPGAction*)(destination);
 
             // Save the action value if the action ID is choosen for the first time.
             if((*actionsTaken)[action->getActionID()] == -1){
-                (*actionsTaken)[action->getActionID()] = action->getActionValue();
+                (*actionsTaken)[action->getActionID()] = action->getActionClass();
             }
+
+            // Add the action the the visited vertices and the edge to the traversed edges.
+            visitedVertices.push_back(destination);
+            traversedEdges.push_back(resultsBid[i].first);
             
         // Else if the no team has been activated yet.
         } else if(nbTeamActivated < 1){
             nbTeamActivated++;
 
-            // Only if the team has not already been visited
-            if(std::find(visitedTeams.begin(), visitedTeams.end(), destination) == visitedTeams.end()){
+            // Only if the team has not already been visited.
+            if(std::find(visitedVertices.begin(), visitedVertices.end(), destination) == visitedVertices.end()){
 
-                // If edge destination is a team, launch recursively the method
-                executeTeam((const TPGTeam*)(destination), visitedTeams, actionsTaken, nbEdgesActivated);
+                // Add the edge to the traversed edges.
+                traversedEdges.push_back(resultsBid[i].first);
+
+                // If edge destination is a team, launch recursively the method.
+                executeTeam((const TPGTeam*)(destination), visitedVertices, actionsTaken, nbEdgesActivated);
             }
         }
     }
+
+    return traversedEdges;
+
 }
 
 
-const std::vector<int64_t> TPG::TPGExecutionEngine::
-    executeFromRoot(const TPGVertex& root, uint64_t nbActionsID, uint64_t nbEdgesActivated)
+std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> TPG::TPGExecutionEngine::
+    executeFromRoot(const TPGVertex& root, const std::vector<size_t> initActions, uint64_t nbEdgesActivated)
 {
     const TPGVertex* currentVertex = &root;
     std::vector<const TPGVertex*> visitedVertices;
 
     // An action value must be positive, so -1 for an action mean that no action value is choosen yet.
-    std::vector<std::int64_t> actionsTaken(nbActionsID, -1);
+    std::vector<std::int64_t> rawActionsTaken(initActions.size(), -1);
 
-    executeTeam(dynamic_cast<const TPGTeam*>(currentVertex), visitedVertices, &actionsTaken, nbEdgesActivated);
+    executeTeam(dynamic_cast<const TPGTeam*>(currentVertex), visitedVertices, &rawActionsTaken, nbEdgesActivated);
 
-    return actionsTaken;
+
+    // Browse the raw list of actions and replace the "-1" action by the initial value.
+    std::vector<size_t> actionsTaken;
+    for(size_t i = 0; i < rawActionsTaken.size(); i++){
+        if(rawActionsTaken[i] == -1){
+            actionsTaken[i] = (size_t)initActions[i];
+        } else{
+            actionsTaken[i] = rawActionsTaken[i];
+        }
+    }
+
+    auto results = std::make_pair(visitedVertices, actionsTaken);
+
+    return results;
 }

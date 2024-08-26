@@ -143,18 +143,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         while (!le.isTerminal() &&
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the actions
-            std::vector<std::int64_t> rawActionsID 
-                = tee.executeFromRoot(*root, le.getVectActions().size(), 10); // TODO
-
-            // Browse the raw list of actions and replace the "-1" action by the initial value.
-            std::vector<std::uint64_t> actionsID;
-            for(size_t i = 0; i < actionsID.size(); i++){
-                if(rawActionsID[i] == -1){
-                    rawActionsID[i] = le.getInitActions()[i];
-                } else{
-                    rawActionsID[i] = actionsID[i];
-                }
-            }
+            std::vector<size_t> actionsID 
+                = tee.executeFromRoot(*root, le.getInitActions(), 10).second; // TODO
 
             // Do it
             le.doActions(actionsID);

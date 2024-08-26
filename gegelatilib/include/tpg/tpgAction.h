@@ -52,7 +52,7 @@ namespace TPG {
     {
 
         /**
-         * \brief Integer number abstracting the ID of selected action.
+         * \brief Integer number abstracting the ID of selected action. (depending on it class)
          *
          * It is up to the used of a TPGGraph to associate the code to each
          * actionID.
@@ -60,21 +60,21 @@ namespace TPG {
         const uint64_t actionID;
 
         /**
-         * \brief Integer number abstracting the value of selected action.
+         * \brief Integer number abstracting the class of selected action.
          *
          * It is up to the used of a TPGGraph to associate the code to each
-         * actionValue.
+         * actionClass.
          */
-        const uint64_t actionValue;
+        const uint64_t actionClass;
 
       public:
         /**
          * \brief Main constructor of a TPGAction.
          *
-         * \param[in] id integer stored as the actionID of the TPGAction.
-         * \param[in] value integer stored as the actionValue of the TPGAction.
+         * \param[in] actID integer stored as the actionID of the TPGAction.
+         * \param[in] actClass integer stored as the actionClass of the TPGAction.
          */
-        TPGAction(const uint64_t id, const uint64_t value) : actionID{id}, actionValue{value} {};
+        TPGAction(const uint64_t actID, const uint64_t actClass) : actionID{actID}, actionClass{actClass} {};
 
         /**
          * \brief Specialization throwing an std::runtime_exception.
@@ -95,13 +95,13 @@ namespace TPG {
         };
 
         /**
-         * \brief Get the action Value associated to the TPGAction.
+         * \brief Get the action Class associated to the TPGAction.
          *
-         * \return the integer Value of the TPGAction.
+         * \return the integer Class of the TPGAction.
          */
-        uint64_t getActionValue() const
+        uint64_t getActionClass() const
         {
-            return this->actionValue;
+            return this->actionClass;
         };
     };
 }; // namespace TPG

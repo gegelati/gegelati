@@ -150,7 +150,7 @@ namespace Learn {
         /**
          * \brief Get the number of actions available for this
          * LearningEnvironment.
-         * For Multi-Action cases, this method return the number of couple (actionID, actionValue) possible.
+         * For Multi-Action cases, this method return the number of couple (actionID, actionClass) possible.
          * To get the number of different action, use getVectActions().
          *
          * \return the integer value of the nbAction attribute.
