@@ -180,7 +180,7 @@ namespace Learn {
 
                 // Get the actions
                 std::vector<size_t> actionsID 
-                    = tee.executeFromRoot(*root, le.getInitActions(), 10).second; // TODO
+                    = tee.executeFromRoot(*root, le.getInitActions(), params.nbEdgesActivable).second; // TODO
                 // Do it
                 le.doActions(actionsID);
                 // Count actions

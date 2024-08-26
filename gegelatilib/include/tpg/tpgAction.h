@@ -73,8 +73,9 @@ namespace TPG {
          *
          * \param[in] actID integer stored as the actionID of the TPGAction.
          * \param[in] actClass integer stored as the actionClass of the TPGAction.
+         * Default value = 0. To avoid specified 0 in single action cases.
          */
-        TPGAction(const uint64_t actID, const uint64_t actClass) : actionID{actID}, actionClass{actClass} {};
+        TPGAction(const uint64_t actID, const uint64_t actClass=0) : actionID{actID}, actionClass{actClass} {};
 
         /**
          * \brief Specialization throwing an std::runtime_exception.

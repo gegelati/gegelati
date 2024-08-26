@@ -145,6 +145,11 @@ namespace Learn {
                                   (double)params.mutation.tpg.nbRoots),
                     (size_t)this->learningEnvironment.getNbActions());
             }
+
+            // Override the number of edges available if set to 0
+            if(this->params.nbEdgesActivable == 0){
+                this->params.nbEdgesActivable = (this->learningEnvironment.getVectActions().size() == 1) ? 1 : 2;
+            }
         };
 
         /// Default destructor for polymorphism

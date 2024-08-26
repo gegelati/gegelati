@@ -218,6 +218,10 @@ void File::ParametersParser::setParameterFromString(
         params.nbRegisters = (size_t)value.asUInt();
         return;
     }
+    if (param == "nbEdgesActivable") {
+        params.nbEdgesActivable = (size_t)value.asUInt();
+        return;
+    }
     if (param == "nbThreads") {
         params.nbThreads = (size_t)value.asUInt();
         return;
@@ -294,6 +298,10 @@ void File::ParametersParser::writeParametersToJson(
     root["nbRegisters"] = params.nbRegisters;
     root["nbRegisters"].setComment(
         Learn::LearningParameters::nbRegistersComment, Json::commentBefore);
+
+    root["nbEdgesActivable"] = params.nbEdgesActivable;
+    root["nbEdgesActivable"].setComment(
+        Learn::LearningParameters::nbEdgesActivableComment, Json::commentBefore);
 
     root["nbThreads"] = params.nbThreads;
     root["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,

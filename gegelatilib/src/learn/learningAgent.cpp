@@ -144,7 +144,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the actions
             std::vector<size_t> actionsID 
-                = tee.executeFromRoot(*root, le.getInitActions(), 10).second; // TODO
+                = tee.executeFromRoot(*root, le.getInitActions(), params.nbEdgesActivable).second; // TODO
 
             // Do it
             le.doActions(actionsID);
