@@ -200,6 +200,7 @@ TEST_F(adversarialLearningAgentTest, EvalJob)
         << "Average score should not exceed the score of a perfect layer.";
 
     auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
+
     ASSERT_NO_THROW(result = la.evaluateJob(tee, *jobs.front(), 0,
                                             Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root in adversarial mode failed.";

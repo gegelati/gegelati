@@ -82,7 +82,7 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<std::shared_ptr<Program::Program>> programs;
     for (size_t actionClass = 0; actionClass < vectActions.size(); actionClass++) {
         for(size_t actionID = 0; actionID < vectActions[actionClass]; actionID++){
-            actions.push_back(&(graph.addNewAction(actionClass, actionID)));
+            actions.push_back(&(graph.addNewAction(actionID, actionClass)));
         }
     }
     for (size_t i = 0; i < params.tpg.initNbRoots; i++) {

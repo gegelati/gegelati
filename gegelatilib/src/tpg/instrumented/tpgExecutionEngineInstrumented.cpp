@@ -54,7 +54,9 @@ std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngineInstrumented::executeTea
 
     std::vector<const TPGEdge*> winningEdges = TPGExecutionEngine::executeTeam(currentTeam, visitedVertices, actionsTaken, nbEdgesActivated);
     for (const TPGEdge* edge : winningEdges) {
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge)->incrementNbVisits();
+        if(dynamic_cast<const TPGAction*>(edge->getDestination()) != nullptr){
+        }
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge)->incrementNbTraversal();
     }
     return winningEdges;
 }
@@ -64,13 +66,6 @@ std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> TPG::TPGExecu
 {
     auto result = TPGExecutionEngine::executeFromRoot(root, initActions, nbEdgesActivated);
 
-
-    // Get only the visited Teams
-    std::vector<const TPG::TPGVertex*> visitedTeams;
-    std::copy_if(result.first.begin(), result.first.end(), std::back_inserter(visitedTeams), [](const TPG::TPGVertex* vertex) {
-        return dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr;
-    });
-
     // Increment actions visit
     for (auto vertex : result.first) {
         if (auto* action = dynamic_cast<const TPG::TPGActionInstrumented*>(vertex)) {
@@ -78,7 +73,7 @@ std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> TPG::TPGExecu
         }
     }
 
-    this->traceHistory.push_back(visitedTeams);
+    this->traceHistory.push_back(result.first);
 
     return result;
 }

@@ -101,15 +101,17 @@ std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngine::executeTeam(
         double bid = this->evaluateEdge(*edge);
         resultsBid.push_back(std::make_pair(edge, bid));
     };
-    
-    
+
+    // Sorting with ">=" is not possible, a sort with "<" then reverse is used instead.
     // Sort the results.
     std::sort(resultsBid.begin(), resultsBid.end(),
                 [](const std::pair<TPG::TPGEdge*, double>& a,
                     const std::pair<TPG::TPGEdge*, double>& b) {
-                    return a.second >= b.second;
+                    return a.second < b.second;
                 });
 
+    // Reverse
+    std::reverse(resultsBid.begin(), resultsBid.end());
 
     // For all TPGEdge evaluated.
     for (size_t i = 0; i < resultsBid.size() && nbEdgeActivated < nbEdgesActivated; i++) {
@@ -117,14 +119,14 @@ std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngine::executeTeam(
 
         // Get the pair with the edge and the bid.
         auto destination = resultsBid[i].first->getDestination();
-    
+
         // If edge destination is an action
         if(dynamic_cast<const TPGAction*>(destination)){
             const TPGAction* action = (const TPGAction*)(destination);
 
             // Save the action value if the action ID is choosen for the first time.
-            if((*actionsTaken)[action->getActionID()] == -1){
-                (*actionsTaken)[action->getActionID()] = action->getActionClass();
+            if((*actionsTaken)[action->getActionClass()] == -1){
+                (*actionsTaken)[action->getActionClass()] = action->getActionID();
             }
 
             // Add the action the the visited vertices and the edge to the traversed edges.
@@ -140,7 +142,6 @@ std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngine::executeTeam(
 
                 // Add the edge to the traversed edges.
                 traversedEdges.push_back(resultsBid[i].first);
-
                 // If edge destination is a team, launch recursively the method.
                 executeTeam((const TPGTeam*)(destination), visitedVertices, actionsTaken, nbEdgesActivated);
             }
@@ -168,9 +169,9 @@ std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> TPG::TPGExecu
     std::vector<size_t> actionsTaken;
     for(size_t i = 0; i < rawActionsTaken.size(); i++){
         if(rawActionsTaken[i] == -1){
-            actionsTaken[i] = (size_t)initActions[i];
+            actionsTaken.push_back((size_t)initActions[i]);
         } else{
-            actionsTaken[i] = rawActionsTaken[i];
+            actionsTaken.push_back(rawActionsTaken[i]);
         }
     }
 
