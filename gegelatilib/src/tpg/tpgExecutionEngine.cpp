@@ -154,7 +154,7 @@ std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngine::executeTeam(
 
 
 std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> TPG::TPGExecutionEngine::
-    executeFromRoot(const TPGVertex& root, const std::vector<size_t> initActions, uint64_t nbEdgesActivated)
+    executeFromRoot(const TPGVertex& root, const std::vector<size_t>& initActions, uint64_t nbEdgesActivated)
 {
     const TPGVertex* currentVertex = &root;
     std::vector<const TPGVertex*> visitedVertices;

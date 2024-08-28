@@ -148,7 +148,7 @@ namespace TPG {
          *         TPGGraph execution is at the end of the returned vector.
          */
         virtual std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> executeFromRoot(
-            const TPGVertex& root, const std::vector<size_t> initActions, uint64_t nbEdgesActivated);
+            const TPGVertex& root, const std::vector<size_t>& initActions, uint64_t nbEdgesActivated);
     };
 }; // namespace TPG
 

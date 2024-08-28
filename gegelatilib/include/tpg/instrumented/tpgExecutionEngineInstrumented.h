@@ -100,7 +100,7 @@ namespace TPG {
          * visits of the reached TPGAction.
          */
         std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> executeFromRoot(
-            const TPGVertex& root, const std::vector<size_t> initActions, uint64_t nbEdgesActivated) override;
+            const TPGVertex& root, const std::vector<size_t>& initActions, uint64_t nbEdgesActivated) override;
 
         /// Get all previous execution traces.
         const std::vector<std::vector<const TPGVertex*>>& getTraceHistory()

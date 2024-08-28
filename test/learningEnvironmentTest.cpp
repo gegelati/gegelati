@@ -37,6 +37,7 @@
 
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
+#include "learn/gridWorld.h"
 
 TEST(LearningEnvironmentTest, Constructor)
 {
@@ -95,9 +96,18 @@ TEST(LearningEnvironmentTest, Clonable)
 
 TEST(LearningEnvironmentTest, getNbAction)
 {
+    // Test with single action environment
     StickGameWithOpponent le;
 
     ASSERT_EQ(le.getNbActions(), 3) << "Number of action is incorrect";
+
+    // Test with multi-actions environment
+    GridWorld marlLe;
+
+    ASSERT_EQ(marlLe.getNbActions(), 6) << "Total number of actions is incorrect";
+    ASSERT_EQ(marlLe.getVectActions(), std::vector<size_t>(2, 3)) << "Vector of actions is incorrect";
+    ASSERT_EQ(marlLe.getInitActions(), std::vector<size_t>(2, 1)) << "Vector of init actions is incorrect";
+
 }
 
 TEST(LearningEnvironmentTest, getDataSource)
@@ -126,6 +136,17 @@ TEST(LearningEnvironmentTest, doAction)
     std::shared_ptr<const int> nbSticks =
         (le.getDataSources().at(1).get().getDataAt(typeid(int), 0))
             .getSharedPointer<const int>();
+
+
+    // Doing the same thing with doActions should lead to same result
+    le.reset();
+
+    ASSERT_NO_THROW(le.doActions(std::vector<size_t>(1, 1)))
+        << "Remove 2 stick after game init should not fail with doActions.";
+    nbSticks =
+        (le.getDataSources().at(1).get().getDataAt(typeid(int), 0))
+            .getSharedPointer<const int>();
+
     // Remove 2 sticks brings us to 19 sticks
     // Other player removes between 1 and 3 sticks
     // thus, number of remaining sticks is within 18 and 16

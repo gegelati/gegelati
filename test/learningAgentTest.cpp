@@ -61,12 +61,14 @@
 #include "learn/learningParameters.h"
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameWithOpponent.h"
+#include "learn/gridWorld.h"
 
 class LearningAgentTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
     StickGameWithOpponent le;
+    GridWorld marlLe;
     Learn::LearningParameters params;
 
     virtual void SetUp()
@@ -134,6 +136,27 @@ TEST_F(LearningAgentTest, InitNbRoots)
     ASSERT_EQ(la.getTPGGraph()->getNbRootVertices(), 42)
         << "Initialization of the LearningAgent should have a number of roots "
            "equal to the number specify";
+}
+
+TEST_F(LearningAgentTest, InitNbEdgesAvailable)
+{
+    params.mutation.tpg.initNbRoots = 42;
+    Learn::LearningAgent la(le, set, params);
+
+    la.init();
+
+    ASSERT_EQ(la.getParams().nbEdgesActivable, 1)
+        << "Parameters of LearningAgent after initialisation should have the attribute nbEdgesActivable set to 1 for single action environment.";
+
+    
+    Learn::LearningAgent marlLa(marlLe, set, params);
+
+    marlLa.init();
+
+    ASSERT_EQ(marlLa.getParams().nbEdgesActivable, 2)
+        << "Parameters of LearningAgent after initialisation should have the attribute nbEdgesActivable set to 2 for multi action environment.";
+
+
 }
 
 TEST_F(LearningAgentTest, addLogger)
@@ -696,9 +719,45 @@ TEST_F(LearningAgentTest, TrainInstrumented)
               107);
 }
 
-TEST_F(LearningAgentTest, KeepBestPolicy)
+
+// Similar to previous test, but verifications of graphs properties are here to
+// ensure the result of the training is identical on all OSes and Compilers, even for multi-action cases.
+TEST_F(LearningAgentTest, TrainMARLPortability)
 {
     params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+
+    Learn::LearningAgent la(marlLe, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    ASSERT_EQ(tpg.getNbVertices(), 37)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 25)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 119)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 7086172217659134612)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
+TEST_F(LearningAgentTest, KeepBestPolicy)
+{
+    params.archiveSize = 1;
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 1;

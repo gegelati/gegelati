@@ -105,6 +105,7 @@ void Mutator::TPGMutator::initRandomTPG(
                          programs.at(i));
     }
 
+    // Now that, for each team, two actions are connect, all other teams are connected randomly to actions.
     for (size_t i = 2 * nbActions; i < 2 * params.tpg.initNbRoots; i++) {
         graph.addNewEdge(*teams.at(i / 2),
                          *actions.at(rng.getUnsignedInt64(0, nbActions - 1)),
