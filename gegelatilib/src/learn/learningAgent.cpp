@@ -67,6 +67,16 @@ Mutator::RNG& Learn::LearningAgent::getRNG()
     return this->rng;
 }
 
+Learn::LearningParameters& Learn::LearningAgent::getParams()
+{
+    return this->params;
+}
+
+void Learn::LearningAgent::setParams(LearningParameters& params)
+{
+    this->params = params;
+}
+
 void Learn::LearningAgent::init(uint64_t seed)
 {
     // Initialize Randomness
@@ -144,14 +154,13 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the actions
             std::vector<size_t> actionsID 
-                = tee.executeFromRoot(*root, le.getInitActions(), params.nbEdgesActivable).second; // TODO
+                = tee.executeFromRoot(*root, le.getInitActions(), this->params.nbEdgesActivable).second;
 
             // Do it
             le.doActions(actionsID);
             // Count actions
             nbActions++;
         }
-
         // Update results
         result += le.getScore();
     }
