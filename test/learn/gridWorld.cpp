@@ -1,7 +1,7 @@
 
 
 #include <iostream>
-#include"gridworld.h"
+#include "gridworld.h"
 
 void GridWorld::reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber, uint64_t generationNumber){
 

@@ -91,7 +91,7 @@ namespace TPG {
          */
         virtual std::vector<const TPGEdge*> executeTeam(
               const TPG::TPGVertex* currentTeam, std::vector<const TPG::TPGVertex*>& visitedTeams,
-              std::vector<std::int64_t>* actionsTaken, uint64_t nbEdgesActivated);
+              std::vector<std::int64_t>* actionsTaken, uint64_t nbEdgesActivated) override;
         /**
          * \brief Specialization of the evaluateTeam function.
          *
