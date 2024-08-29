@@ -56,12 +56,12 @@
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 
+#include "learn/gridWorld.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameWithOpponent.h"
-#include "learn/gridWorld.h"
 
 class LearningAgentTest : public ::testing::Test
 {
@@ -146,17 +146,32 @@ TEST_F(LearningAgentTest, InitNbEdgesAvailable)
     la.init();
 
     ASSERT_EQ(la.getParams().nbEdgesActivable, 1)
-        << "Parameters of LearningAgent after initialisation should have the attribute nbEdgesActivable set to 1 for single action environment.";
+        << "Parameters of LearningAgent after initialisation should have the "
+           "attribute nbEdgesActivable set to 1 for single action environment.";
 
-    
     Learn::LearningAgent marlLa(marlLe, set, params);
 
     marlLa.init();
 
     ASSERT_EQ(marlLa.getParams().nbEdgesActivable, 2)
-        << "Parameters of LearningAgent after initialisation should have the attribute nbEdgesActivable set to 2 for multi action environment.";
+        << "Parameters of LearningAgent after initialisation should have the "
+           "attribute nbEdgesActivable set to 2 for multi action environment.";
+}
 
+TEST_F(LearningAgentTest, setParams)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    Learn::LearningAgent la(le, set, params);
 
+    params.archiveSize = 100;
+
+    ASSERT_EQ(la.getParams().archiveSize, 50)
+        << "Parameters of LearningAgent should not have changed.";
+    la.setParams(params);
+
+    ASSERT_EQ(la.getParams().archiveSize, 100)
+        << "Parameters of LearningAgent should have changed.";
 }
 
 TEST_F(LearningAgentTest, addLogger)
@@ -719,9 +734,9 @@ TEST_F(LearningAgentTest, TrainInstrumented)
               107);
 }
 
-
 // Similar to previous test, but verifications of graphs properties are here to
-// ensure the result of the training is identical on all OSes and Compilers, even for multi-action cases.
+// ensure the result of the training is identical on all OSes and Compilers,
+// even for multi-action cases.
 TEST_F(LearningAgentTest, TrainMARLPortability)
 {
     params.archiveSize = 50;
@@ -809,7 +824,9 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     le.reset();
     TPG::TPGExecutionEngine tee(tpg.getEnvironment());
     std::vector<const TPG::TPGVertex*> pathOrigin =
-        tee.executeFromRoot(*(tpg.getRootVertices().at(0)), le.getInitActions(), params.nbEdgesActivable).first;
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0)), le.getInitActions(),
+                            params.nbEdgesActivable)
+            .first;
 
     // Clear introns
     tpg.clearProgramIntrons();
@@ -827,7 +844,9 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
 
     // Check that the behavior is identical (empirically, not really foolproof)
     std::vector<const TPG::TPGVertex*> pathNoIntrons =
-        tee.executeFromRoot(*(tpg.getRootVertices().at(0)), le.getInitActions(), params.nbEdgesActivable).first;
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0)), le.getInitActions(),
+                            params.nbEdgesActivable)
+            .first;
 
     ASSERT_EQ(pathOrigin.size(), pathNoIntrons.size())
         << "Path length in TPG before and after inton removal is not "

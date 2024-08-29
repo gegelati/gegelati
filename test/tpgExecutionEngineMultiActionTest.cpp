@@ -112,10 +112,10 @@ class TPGExecutionEngineTestMultiAction : public ::testing::Test
         // Create a TPG
         // (T= Team, Ai-j= Action of class i and ID j)
         //
-        // T0------>T1------>T2       T4
-        // |       /| \      |        | 
-        // v      / v  \     v        v
-        // A0-0<-'  A0-1 `->A1-0     A1-1
+        // T0------>T1------>T2       T3
+        // |       /| \      |        | \ 
+        // v      / v  \     v        v  \ 
+        // A0-0<-'  A0-1 `->A1-0     A1-1 `->A1-0
         //
         // With four action and four teams
         for (int i = 0; i < 4; i++) {
@@ -145,7 +145,6 @@ class TPGExecutionEngineTestMultiAction : public ::testing::Test
                                          *tpg->getVertices().at(6),
                                          progPointers.at(7)));
 
-        
         // Add new outgoing edge to another team
         edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(3),
                                          *tpg->getVertices().at(6),
@@ -184,13 +183,15 @@ TEST_F(TPGExecutionEngineTestMultiAction, EvaluateTeam)
     TPG::TPGExecutionEngine tpee(*e);
 
     std::vector<int64_t> initActions(2, -1);
-    std::vector<const TPG::TPGVertex *> visitedVertices;
+    std::vector<const TPG::TPGVertex*> visitedVertices;
 
-    std::vector<const TPG::TPGEdge *> result;
-    ASSERT_NO_THROW(result = tpee.executeTeam(
-                        tpg->getVertices().at(1), visitedVertices, &initActions, 2);)
+    std::vector<const TPG::TPGEdge*> result;
+    ASSERT_NO_THROW(result =
+                        tpee.executeTeam(tpg->getVertices().at(1),
+                                         visitedVertices, &initActions, 2);)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
-    // Expected result is edge between T1 -> T2 (with 9.0) and edge between T1 -> A0-0 (with 6.0)
+    // Expected result is edge between T1 -> T2 (with 9.0) and edge between T1
+    // -> A0-0 (with 6.0)
     ASSERT_EQ(result[0], edges.at(5))
         << "Edge selected during team evaluation is incorrect.";
     ASSERT_EQ(result[1], edges.at(1))
@@ -204,15 +205,16 @@ TEST_F(TPGExecutionEngineTestMultiAction, EvaluateFromRootZero)
     std::vector<uint64_t> initActions(2, 2);
     uint64_t nbEdgesActivaible = 2;
 
-    std::pair<std::vector<const TPG::TPGVertex *>, std::vector<uint64_t>> result;
+    std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> result;
 
     ASSERT_NO_THROW(result =
-                        tpee.executeFromRoot(*tpg->getRootVertices().at(0), initActions, nbEdgesActivaible))
+                        tpee.executeFromRoot(*tpg->getRootVertices().at(0),
+                                             initActions, nbEdgesActivaible))
         << "Execution of a TPGGraph from a valid root failed.";
 
-    std::vector<const TPG::TPGVertex *> visitedVertexResult = result.first;
+    std::vector<const TPG::TPGVertex*> visitedVertexResult = result.first;
     std::vector<uint64_t> actionResult = result.second;
-    
+
     // Check the traversed path of T0
     ASSERT_EQ(visitedVertexResult.size(), 6)
         << "Size of the traversed path during the execution of the TPGGraph is "
@@ -225,18 +227,17 @@ TEST_F(TPGExecutionEngineTestMultiAction, EvaluateFromRootZero)
     ASSERT_EQ(visitedVertexResult.at(2), tpg->getVertices().at(2))
         << "2nd element of the traversed path during execution is incorrect.";
     ASSERT_EQ(visitedVertexResult.at(3), tpg->getVertices().at(6))
-        << "2nd element of the traversed path during execution is incorrect.";
+        << "3rd element of the traversed path during execution is incorrect.";
     ASSERT_EQ(visitedVertexResult.at(4), tpg->getVertices().at(5))
-        << "2nd element of the traversed path during execution is incorrect.";
+        << "4th element of the traversed path during execution is incorrect.";
     ASSERT_EQ(visitedVertexResult.at(5), tpg->getVertices().at(4))
-        << "2nd element of the traversed path during execution is incorrect.";
+        << "5th element of the traversed path during execution is incorrect.";
 
     ASSERT_EQ(actionResult.size(), initActions.size())
-        << "Action results should have the same size has the initActions vector.";
-    ASSERT_EQ(actionResult[0], 1)
-        << "Action of class 0 choosen is incorrect.";
-    ASSERT_EQ(actionResult[1], 0)
-        << "Action of class 1 choosen is incorrect.";
+        << "Action results should have the same size has the initActions "
+           "vector.";
+    ASSERT_EQ(actionResult[0], 1) << "Action of class 0 choosen is incorrect.";
+    ASSERT_EQ(actionResult[1], 0) << "Action of class 1 choosen is incorrect.";
 }
 
 TEST_F(TPGExecutionEngineTestMultiAction, EvaluateFromRootOne)
@@ -265,9 +266,11 @@ TEST_F(TPGExecutionEngineTestMultiAction, EvaluateFromRootOne)
         << "0th element (i.e. the root) of the traversed path during execution "
            "is incorrect.";
     ASSERT_EQ(visitedVertexResult.at(1), tpg->getVertices().at(6))
-        << "1st element of the traversed path during execution is incorrect. Bids are equal but this edges was added after, so it has the priority.";
+        << "2nd element of the traversed path during execution is incorrect. "
+           "Bids are equal but this edges was added after, so it has the "
+           "priority.";
     ASSERT_EQ(visitedVertexResult.at(2), tpg->getVertices().at(7))
-        << "1st element of the traversed path during execution is incorrect.";
+        << "3rd element of the traversed path during execution is incorrect.";
 
     ASSERT_EQ(actionResult.size(), initActions.size())
         << "Action results should have the same size has the initActions "
@@ -276,4 +279,58 @@ TEST_F(TPGExecutionEngineTestMultiAction, EvaluateFromRootOne)
         << "Action of class 0 choosen is incorrect. It should take the value "
            "in the initActions vector";
     ASSERT_EQ(actionResult[1], 0) << "Action of class 1 choosen is incorrect.";
+}
+
+TEST_F(TPGExecutionEngineTestMultiAction, EarlyExit)
+{
+
+    progPointers.push_back(
+        std::shared_ptr<Program::Program>(new Program::Program(*e)));
+
+    // Add new outgoing edge between T3 -> T0
+    edges.push_back(&tpg->addNewEdge(*tpg->getVertices().at(3),
+                                     *tpg->getVertices().at(0),
+                                     progPointers.at(9)));
+
+    makeProgramReturn(*progPointers.at(0), 10); // T0->A0-0
+    makeProgramReturn(*progPointers.at(8), 0);  // T3->A1-0
+    makeProgramReturn(*progPointers.at(9), 2);  // T3->T1
+
+    TPG::TPGExecutionEngine tpee(*e);
+
+    std::vector<uint64_t> initActions(2, 2);
+    uint64_t nbEdgesActivaible = 2;
+
+    std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> result;
+
+    ASSERT_NO_THROW(result =
+                        tpee.executeFromRoot(*tpg->getRootVertices().at(0),
+                                             initActions, nbEdgesActivaible))
+        << "Execution of a TPGGraph from a valid root failed.";
+
+    std::vector<const TPG::TPGVertex*> visitedVertexResult = result.first;
+    std::vector<uint64_t> actionResult = result.second;
+
+    // Check the traversed path of T3
+    ASSERT_EQ(visitedVertexResult.size(), 4)
+        << "Size of the traversed path during the execution of the TPGGraph is "
+           "not as expected. If higher, probably because the early exit did "
+           "not worked";
+    ASSERT_EQ(visitedVertexResult.at(0), tpg->getVertices().at(3))
+        << "0th element (i.e. the root) of the traversed path during execution "
+           "is incorrect.";
+    ASSERT_EQ(visitedVertexResult.at(1), tpg->getVertices().at(7))
+        << "1st element of the traversed path during execution is incorrect.";
+    ASSERT_EQ(visitedVertexResult.at(2), tpg->getVertices().at(0))
+        << "2nd element of the traversed path during execution is incorrect.";
+    ASSERT_EQ(visitedVertexResult.at(3), tpg->getVertices().at(4))
+        << "3rd element of the traversed path during execution is incorrect.";
+
+    ASSERT_EQ(actionResult.size(), initActions.size())
+        << "Action results should have the same size has the initActions "
+           "vector.";
+    ASSERT_EQ(actionResult[0], 0)
+        << "Action of class 0 choosen is incorrect. It should take the value "
+           "in the initActions vector";
+    ASSERT_EQ(actionResult[1], 1) << "Action of class 1 choosen is incorrect.";
 }
