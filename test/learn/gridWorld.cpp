@@ -39,7 +39,7 @@ bool GridWorld::positionAvailable(size_t pos_x, size_t pos_y){
 
 }
 
-void GridWorld::doActions(std::vector<size_t> vectActionID){
+void GridWorld::doActions(std::vector<uint64_t> vectActionID){
 
     // vectActionID[0] is Left / None / Right for (0, 1, 2)
     // vectActionID[1] is Up / None / Down for (0, 1, 2)

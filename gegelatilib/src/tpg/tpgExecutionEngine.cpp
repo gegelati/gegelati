@@ -153,8 +153,8 @@ std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngine::executeTeam(
 }
 
 
-std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> TPG::TPGExecutionEngine::
-    executeFromRoot(const TPGVertex& root, const std::vector<size_t>& initActions, uint64_t nbEdgesActivated)
+std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> TPG::TPGExecutionEngine::
+    executeFromRoot(const TPGVertex& root, const std::vector<uint64_t>& initActions, uint64_t nbEdgesActivated)
 {
     const TPGVertex* currentVertex = &root;
     std::vector<const TPGVertex*> visitedVertices;
@@ -166,10 +166,10 @@ std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> TPG::TPGExecu
 
 
     // Browse the raw list of actions and replace the "-1" action by the initial value.
-    std::vector<size_t> actionsTaken;
-    for(size_t i = 0; i < rawActionsTaken.size(); i++){
+    std::vector<uint64_t> actionsTaken;
+    for(uint64_t i = 0; i < rawActionsTaken.size(); i++){
         if(rawActionsTaken[i] == -1){
-            actionsTaken.push_back((size_t)initActions[i]);
+            actionsTaken.push_back((uint64_t)initActions[i]);
         } else{
             actionsTaken.push_back(rawActionsTaken[i]);
         }

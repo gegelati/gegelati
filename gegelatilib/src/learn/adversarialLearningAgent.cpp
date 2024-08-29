@@ -151,7 +151,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
         while (!ale.isTerminal() &&
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the actions
-            std::vector<size_t> actionsID 
+            std::vector<uint64_t> actionsID 
                 = tee.executeFromRoot(*((const TPG::TPGTeam*)*rootsIterator), le.getInitActions(), params.nbEdgesActivable).second; // TODO
 
             // Do it
