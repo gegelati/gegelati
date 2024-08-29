@@ -183,9 +183,12 @@ TEST_F(TPGExecutionEngineTestMultiAction, EvaluateTeam)
 {
     TPG::TPGExecutionEngine tpee(*e);
 
+    std::vector<int64_t> initActions(2, -1);
+    std::vector<const TPG::TPGVertex *> visitedVertices;
+
     std::vector<const TPG::TPGEdge *> result;
     ASSERT_NO_THROW(result = tpee.executeTeam(
-                        tpg->getVertices().at(1), std::vector<const TPG::TPGVertex *>(), &std::vector<int64_t>(2, -1), 2);)
+                        tpg->getVertices().at(1), visitedVertices, initActions, 2);)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 9.0) and edge between T1 -> A0-0 (with 6.0)
     ASSERT_EQ(result[0], edges.at(5))
