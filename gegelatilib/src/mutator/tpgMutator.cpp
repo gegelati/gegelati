@@ -80,8 +80,8 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGAction*> actions;
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
-    for (size_t actionClass = 0; actionClass < vectActions.size(); actionClass++) {
-        for(size_t actionID = 0; actionID < vectActions[actionClass]; actionID++){
+    for (uint64_t actionClass = 0; actionClass < vectActions.size(); actionClass++) {
+        for(uint64_t actionID = 0; actionID < vectActions[actionClass]; actionID++){
             actions.push_back(&(graph.addNewAction(actionID, actionClass)));
         }
     }

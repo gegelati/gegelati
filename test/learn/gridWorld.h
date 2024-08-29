@@ -52,7 +52,7 @@ class GridWorld : public Learn::LearningEnvironment{
         /// @param pos_x Coordonate on axis x
         /// @param pos_y Coordonate on axis y
         /// @return boolean that indicate if the position is available
-        bool positionAvailable(size_t pos_x, size_t pos_y);
+        bool positionAvailable(uint64_t pos_x, uint64_t pos_y);
 
         /// Inherited via LearningEnvironment
         virtual void doActions(std::vector<uint64_t> vectActionID) override;

@@ -557,7 +557,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     TPG::TPGGraph tpg(*e);
     Mutator::MutationParameters params;
 
-    std::vector<size_t> vectActions(2, 5);
+    std::vector<uint64_t> vectActions(2, 5);
     uint64_t nbActions = vectActions[0] + vectActions[1];
     
     params.tpg.initNbRoots = 20;
@@ -630,7 +630,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         << "TPG Initialization should fail with bad parameters.";
 
     params.tpg.maxInitOutgoingEdges = 0;
-    vectActions = std::vector<size_t>(1, 1);
+    vectActions = std::vector<uint64_t>(1, 1);
     ASSERT_THROW(
         Mutator::TPGMutator::initRandomTPG(tpg, params, rng, vectActions),
         std::runtime_error)
@@ -931,7 +931,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 
     Mutator::MutationParameters params;
 
-    std::vector<size_t> vectActions(1, 4);
+    std::vector<uint64_t> vectActions(1, 4);
     params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
@@ -979,7 +979,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 
     Mutator::MutationParameters params;
 
-    std::vector<size_t> vectActions(1, 4);
+    std::vector<uint64_t> vectActions(1, 4);
     params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
@@ -1026,7 +1026,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
     Mutator::MutationParameters params;
 
-    std::vector<size_t> vectActions(1, 4);
+    std::vector<uint64_t> vectActions(1, 4);
     params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
@@ -1089,7 +1089,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
 
     Mutator::MutationParameters params;
 
-    std::vector<size_t> vectActions(1, 4);
+    std::vector<uint64_t> vectActions(1, 4);
     params.tpg.initNbRoots = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
