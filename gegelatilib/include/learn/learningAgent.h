@@ -150,7 +150,7 @@ namespace Learn {
             // Override the number of edges available if set to 0
             // Number of edges available is set to 1 for a single action environment and 2 for a multi-action environment.
             if(this->params.nbEdgesActivable == 0){
-                this->params.nbEdgesActivable = (this->learningEnvironment.getVectActions().size() == 1) ? 1 : 2;
+                this->params.nbEdgesActivable = (size_t)(this->learningEnvironment.getVectActions().size() == 1) ? 1 : 2;
             }
         };
 

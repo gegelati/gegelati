@@ -222,9 +222,11 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
     ASSERT_EQ(t1a0->getNbVisits(), 0)
         << "Edge should not have been traversed before.";
 
+    std::vector<int64_t> initActions(1, -1);
+    std::vector<const TPG::TPGVertex *> visitedVertices;
     const TPG::TPGEdge* result = NULL;
     ASSERT_NO_THROW(result = tpeei.executeTeam(
-                        tpg->getVertices().at(1), std::vector<const TPG::TPGVertex *>(), &std::vector<int64_t>(1, -1), 1)[0];)
+                        tpg->getVertices().at(1), visitedVertices, &initActions, 1)[0];)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))

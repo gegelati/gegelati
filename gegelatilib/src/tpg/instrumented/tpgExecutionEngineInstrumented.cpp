@@ -61,8 +61,8 @@ std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngineInstrumented::executeTea
     return winningEdges;
 }
 
-std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> TPG::TPGExecutionEngineInstrumented::executeFromRoot(
-    const TPG::TPGVertex& root, const std::vector<size_t>& initActions, uint64_t nbEdgesActivated)
+std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> TPG::TPGExecutionEngineInstrumented::executeFromRoot(
+    const TPG::TPGVertex& root, const std::vector<uint64_t>& initActions, uint64_t nbEdgesActivated)
 {
     auto result = TPGExecutionEngine::executeFromRoot(root, initActions, nbEdgesActivated);
 

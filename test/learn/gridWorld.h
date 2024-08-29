@@ -19,15 +19,15 @@ class GridWorld : public Learn::LearningEnvironment{
          *  - 2 is bad output
          *  - 3 are unaccessible tiles
          */ 
-        std::vector<std::vector<size_t>> grid = {{ 0, 0, 0, 2},
+        std::vector<std::vector<uint64_t>> grid = {{ 0, 0, 0, 2},
                                                 { 0, 0, 3, 3},
                                                 { 0, 0, 0, 1}};
 
         /// Size of the grid
-        std::vector<size_t> size = {4, 3};
+        std::vector<uint64_t> size = {4, 3};
 
         /// Position of the agent
-        std::vector<size_t> agentCoord = {0 , 0};
+        std::vector<uint64_t> agentCoord = {0 , 0};
 
         /// True if the episode is terminated
         bool terminated = false;
@@ -40,7 +40,7 @@ class GridWorld : public Learn::LearningEnvironment{
 
     public:
 
-        GridWorld() : LearningEnvironment(std::vector<size_t>(2, 3), std::vector<size_t>(2, 1)), currentState(2) {};
+        GridWorld() : LearningEnvironment(std::vector<uint64_t>(2, 3), std::vector<uint64_t>(2, 1)), currentState(2) {};
 
         GridWorld(const GridWorld& other) = default;
 
@@ -52,10 +52,10 @@ class GridWorld : public Learn::LearningEnvironment{
         /// @param pos_x Coordonate on axis x
         /// @param pos_y Coordonate on axis y
         /// @return boolean that indicate if the position is available
-        bool positionAvailable(size_t pos_x, size_t pos_y);
+        bool positionAvailable(uint64_t pos_x, uint64_t pos_y);
 
         /// Inherited via LearningEnvironment
-        virtual void doActions(std::vector<size_t> vectActionID) override;
+        virtual void doActions(std::vector<uint64_t> vectActionID) override;
 
         /// Inherited via LearningEnvironment
         virtual double getScore() const override;

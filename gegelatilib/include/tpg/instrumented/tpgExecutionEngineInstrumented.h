@@ -91,7 +91,7 @@ namespace TPG {
          */
         virtual std::vector<const TPGEdge*> executeTeam(
               const TPG::TPGVertex* currentTeam, std::vector<const TPG::TPGVertex*>& visitedTeams,
-              std::vector<std::int64_t>* actionsTaken, uint64_t nbEdgesActivated);
+              std::vector<std::int64_t>* actionsTaken, uint64_t nbEdgesActivated) override;
         /**
          * \brief Specialization of the evaluateTeam function.
          *
@@ -99,8 +99,8 @@ namespace TPG {
          * TPGExecutionEngine, this specialization increments the number of
          * visits of the reached TPGAction.
          */
-        std::pair<std::vector<const TPG::TPGVertex*>, std::vector<size_t>> executeFromRoot(
-            const TPGVertex& root, const std::vector<size_t>& initActions, uint64_t nbEdgesActivated) override;
+        std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> executeFromRoot(
+            const TPGVertex& root, const std::vector<uint64_t>& initActions, uint64_t nbEdgesActivated) override;
 
         /// Get all previous execution traces.
         const std::vector<std::vector<const TPGVertex*>>& getTraceHistory()

@@ -1,7 +1,7 @@
 
 
 #include <iostream>
-#include"gridworld.h"
+#include "gridWorld.h"
 
 void GridWorld::reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber, uint64_t generationNumber){
 
@@ -17,7 +17,7 @@ void GridWorld::reset(size_t seed, Learn::LearningMode mode, uint16_t iterationN
     currentState.setDataAt(typeid(int), 1, (int)agentCoord[1] + 1);
 }
 
-bool GridWorld::positionAvailable(size_t pos_x, size_t pos_y){
+bool GridWorld::positionAvailable(uint64_t pos_x, uint64_t pos_y){
 
     // position unavailable on axis x
     if(pos_x == size[0] || pos_x == -1){
@@ -39,13 +39,13 @@ bool GridWorld::positionAvailable(size_t pos_x, size_t pos_y){
 
 }
 
-void GridWorld::doActions(std::vector<size_t> vectActionID){
+void GridWorld::doActions(std::vector<uint64_t> vectActionID){
 
     // vectActionID[0] is Left / None / Right for (0, 1, 2)
     // vectActionID[1] is Up / None / Down for (0, 1, 2)
-    if(positionAvailable(agentCoord[0] - (vectActionID[0] - (size_t)1), agentCoord[1]  - (vectActionID[1] - (size_t)1))){
-        agentCoord[0] -= (vectActionID[0] - (size_t)1);
-        agentCoord[1] -= (vectActionID[1] - (size_t)1);
+    if(positionAvailable(agentCoord[0] - (vectActionID[0] - (uint64_t)1), agentCoord[1]  - (vectActionID[1] - (uint64_t)1))){
+        agentCoord[0] -= (vectActionID[0] - (uint64_t)1);
+        agentCoord[1] -= (vectActionID[1] - (uint64_t)1);
     }
 
     // Reward is always -1 except when an output is reached

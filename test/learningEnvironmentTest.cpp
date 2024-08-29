@@ -105,8 +105,8 @@ TEST(LearningEnvironmentTest, getNbAction)
     GridWorld marlLe;
 
     ASSERT_EQ(marlLe.getNbActions(), 6) << "Total number of actions is incorrect";
-    ASSERT_EQ(marlLe.getVectActions(), std::vector<size_t>(2, 3)) << "Vector of actions is incorrect";
-    ASSERT_EQ(marlLe.getInitActions(), std::vector<size_t>(2, 1)) << "Vector of init actions is incorrect";
+    ASSERT_EQ(marlLe.getVectActions(), std::vector<uint64_t>(2, 3)) << "Vector of actions is incorrect";
+    ASSERT_EQ(marlLe.getInitActions(), std::vector<uint64_t>(2, 1)) << "Vector of init actions is incorrect";
 
 }
 
@@ -141,7 +141,7 @@ TEST(LearningEnvironmentTest, doAction)
     // Doing the same thing with doActions should lead to same result
     le.reset();
 
-    ASSERT_NO_THROW(le.doActions(std::vector<size_t>(1, 1)))
+    ASSERT_NO_THROW(le.doActions(std::vector<uint64_t>(1, 1)))
         << "Remove 2 stick after game init should not fail with doActions.";
     nbSticks =
         (le.getDataSources().at(1).get().getDataAt(typeid(int), 0))
