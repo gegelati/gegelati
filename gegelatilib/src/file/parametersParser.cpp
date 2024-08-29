@@ -301,7 +301,8 @@ void File::ParametersParser::writeParametersToJson(
 
     root["nbEdgesActivable"] = params.nbEdgesActivable;
     root["nbEdgesActivable"].setComment(
-        Learn::LearningParameters::nbEdgesActivableComment, Json::commentBefore);
+        Learn::LearningParameters::nbEdgesActivableComment,
+        Json::commentBefore);
 
     root["nbThreads"] = params.nbThreads;
     root["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,

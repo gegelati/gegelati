@@ -48,7 +48,8 @@ TPG::TPGTeam* TPG::TPGFactory::createTPGTeam() const
     return new TPG::TPGTeam();
 }
 
-TPG::TPGAction* TPG::TPGFactory::createTPGAction(const uint64_t actID, const uint64_t actClass) const
+TPG::TPGAction* TPG::TPGFactory::createTPGAction(const uint64_t actID,
+                                                 const uint64_t actClass) const
 {
     return new TPG::TPGAction(actID, actClass);
 }

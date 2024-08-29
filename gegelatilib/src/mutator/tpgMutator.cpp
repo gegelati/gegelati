@@ -60,7 +60,8 @@ void Mutator::TPGMutator::initRandomTPG(
     Mutator::RNG& rng, std::vector<uint64_t> vectActions)
 {
 
-    uint64_t nbActions = std::accumulate(vectActions.begin(), vectActions.end(), (uint64_t)0);
+    uint64_t nbActions =
+        std::accumulate(vectActions.begin(), vectActions.end(), (uint64_t)0);
 
     if (params.tpg.maxInitOutgoingEdges > nbActions) {
         throw std::runtime_error("Maximum initial number of outgoing edges "
@@ -80,8 +81,10 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGAction*> actions;
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
-    for (uint64_t actionClass = 0; actionClass < vectActions.size(); actionClass++) {
-        for(uint64_t actionID = 0; actionID < vectActions[actionClass]; actionID++){
+    for (uint64_t actionClass = 0; actionClass < vectActions.size();
+         actionClass++) {
+        for (uint64_t actionID = 0; actionID < vectActions[actionClass];
+             actionID++) {
             actions.push_back(&(graph.addNewAction(actionID, actionClass)));
         }
     }
@@ -105,7 +108,8 @@ void Mutator::TPGMutator::initRandomTPG(
                          programs.at(i));
     }
 
-    // Now that, for each team, two actions are connect, all other teams are connected randomly to actions.
+    // Now that, for each team, two actions are connect, all other teams are
+    // connected randomly to actions.
     for (size_t i = 2 * nbActions; i < 2 * params.tpg.initNbRoots; i++) {
         graph.addNewEdge(*teams.at(i / 2),
                          *actions.at(rng.getUnsignedInt64(0, nbActions - 1)),
@@ -455,7 +459,8 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
 void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                                       const Archive& archive,
                                       const Mutator::MutationParameters& params,
-                                      Mutator::RNG& rng, std::vector<uint64_t> vectActions,
+                                      Mutator::RNG& rng,
+                                      std::vector<uint64_t> vectActions,
                                       uint64_t maxNbThreads)
 {
     // Get current vertex set (copy)

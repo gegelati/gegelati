@@ -129,9 +129,11 @@ void TPG::ExecutionStats::analyzeInferenceTrace(
 
     // Get only the visited Teams
     std::vector<const TPG::TPGVertex*> visitedTeams;
-    std::copy_if(trace.begin(), trace.end(), std::back_inserter(visitedTeams), [](const TPG::TPGVertex* vertex) {
-        return dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr;
-    });
+    std::copy_if(trace.begin(), trace.end(), std::back_inserter(visitedTeams),
+                 [](const TPG::TPGVertex* vertex) {
+                     return dynamic_cast<const TPG::TPGTeam*>(vertex) !=
+                            nullptr;
+                 });
 
     uint64_t nbEvaluatedTeams = visitedTeams.size();
     // Remove the action vertex at the end
@@ -147,8 +149,8 @@ void TPG::ExecutionStats::analyzeInferenceTrace(
             // Edges leading to a previously visited teams (including the
             // current team) are not evaluated
             auto endSearchIt = it + 1;
-            if (std::find(visitedTeams.begin(), endSearchIt, edge->getDestination()) !=
-                endSearchIt)
+            if (std::find(visitedTeams.begin(), endSearchIt,
+                          edge->getDestination()) != endSearchIt)
                 continue;
 
             nbEvaluatedPrograms++;

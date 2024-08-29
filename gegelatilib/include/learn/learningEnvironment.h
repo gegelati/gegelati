@@ -38,8 +38,8 @@
 
 #include "data/dataHandler.h"
 #include <cstdint>
-#include <vector>
 #include <numeric>
+#include <vector>
 
 namespace Learn {
 
@@ -84,9 +84,8 @@ namespace Learn {
         /// LearningEnvironment.
         const std::vector<uint64_t> vectActions;
 
-
-          /// Initial values of the actions if actions are not taken by a TPG.
-          const std::vector<uint64_t> initActions;
+        /// Initial values of the actions if actions are not taken by a TPG.
+        const std::vector<uint64_t> initActions;
 
         /// Make the default copy constructor protected.
         LearningEnvironment(const LearningEnvironment& other) = default;
@@ -106,27 +105,36 @@ namespace Learn {
          *
          * \param[in] nbAct number of actions that will be usable for
          * interacting with this LearningEnviromnent.
-         * \param[in] initAct init value of action if the TPG do not choose any action
-         * default value set to 0.
-         * 
+         * \param[in] initAct init value of action if the TPG do not choose any
+         * action default value set to 0.
+         *
          */
-        LearningEnvironment(uint64_t nbAct, uint64_t initAct = 0) : vectActions{nbAct}, initActions{initAct} {};
+        LearningEnvironment(uint64_t nbAct, uint64_t initAct = 0)
+            : vectActions{nbAct}, initActions{initAct} {};
 
         /**
          * \brief Constructor for LearningEnviroment.
          *
          * \param[in] vectAct vector of actions that will be usable for
          * interacting with this LearningEnviromnent.
-         * \param[in] initAct init values of action if the TPG do not choose an action
-         * default value set to a vector with size equal to vectAct and fill with zeros.
+         * \param[in] initAct init values of action if the TPG do not choose an
+         * action default value set to a vector with size equal to vectAct and
+         * fill with zeros.
          */
-        LearningEnvironment(std::vector<uint64_t> vectAct, std::vector<uint64_t> initAct = std::vector<uint64_t>())
-            : vectActions{vectAct},
-              initActions{initAct.empty() ? std::vector<uint64_t>(vectAct.size(), 0) : initAct} {
-                if(this->initActions.size() != this->vectActions.size()){
-                    throw std::runtime_error("Vector of actions and vector of initial actions should have the same size.");
-                }
-              };
+        LearningEnvironment(
+            std::vector<uint64_t> vectAct,
+            std::vector<uint64_t> initAct = std::vector<uint64_t>())
+            : vectActions{vectAct}, initActions{initAct.empty()
+                                                    ? std::vector<uint64_t>(
+                                                          vectAct.size(), 0)
+                                                    : initAct}
+        {
+            if (this->initActions.size() != this->vectActions.size()) {
+                throw std::runtime_error(
+                    "Vector of actions and vector of initial actions should "
+                    "have the same size.");
+            }
+        };
 
         /**
          * \brief Get a copy of the LearningEnvironment.
@@ -150,14 +158,16 @@ namespace Learn {
         /**
          * \brief Get the number of actions available for this
          * LearningEnvironment.
-         * For Multi-Action cases, this method return the number of couple (actionID, actionClass) possible.
-         * To get the number of different action, use getVectActions().
+         * For Multi-Action cases, this method return the number of couple
+         * (actionID, actionClass) possible. To get the number of different
+         * action, use getVectActions().
          *
          * \return the integer value of the nbAction attribute.
          */
         uint64_t getNbActions() const
         {
-            return std::accumulate(vectActions.begin(), vectActions.end(), uint64_t(0));
+            return std::accumulate(vectActions.begin(), vectActions.end(),
+                                   uint64_t(0));
         };
 
         /**
@@ -182,14 +192,12 @@ namespace Learn {
             return initActions;
         };
 
-
-
         /**
          * \brief Execute a single action on the LearningEnvironment.
          *
-         * The purpose of this method is to execute a single action, represented by
-         * an actionId comprised between 0 and nbActions - 1.
-         * The LearningEnvironment implementation only checks that the given
+         * The purpose of this method is to execute a single action, represented
+         * by an actionId comprised between 0 and nbActions - 1. The
+         * LearningEnvironment implementation only checks that the given
          * actionID is comprised between 0 and nbActions - 1.
          * It is the responsibility of this method to call the updateHash
          * method on dataSources whose content have been affected by the action.
@@ -204,18 +212,21 @@ namespace Learn {
          * \brief Execute actions on the LearningEnvironment.
          *
          * The purpose of this method is to execute actions, represented by
-         * a vector of actionId comprised, for actionId i between 0 and vectActions[i] - 1.
-         * The LearningEnvironment implementation only checks that the given
-         * actionID is comprised, for actionId i between 0 and vectActions[i] - 1.
-         * It is the responsibility of this method to call the updateHash
-         * method on dataSources whose content have been affected by the action.
-         * 
-         * If the size of the vector is one, this method launches the method doAction(uint64_t actionID),
-         * the actionID being the only integer in the vector.
+         * a vector of actionId comprised, for actionId i between 0 and
+         * vectActions[i] - 1. The LearningEnvironment implementation only
+         * checks that the given actionID is comprised, for actionId i between 0
+         * and vectActions[i] - 1. It is the responsibility of this method to
+         * call the updateHash method on dataSources whose content have been
+         * affected by the action.
+         *
+         * If the size of the vector is one, this method launches the method
+         * doAction(uint64_t actionID), the actionID being the only integer in
+         * the vector.
          *
          * \param[in] vectActionID the vector integer numbers of each actions to
          * execute.
-         * \throw std::runtime_error if the actionsID[i] exceeds vectActions[i] - 1.
+         * \throw std::runtime_error if the actionsID[i] exceeds vectActions[i]
+         * - 1.
          */
         virtual void doActions(std::vector<std::uint64_t> vectActionID);
 

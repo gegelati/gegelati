@@ -52,7 +52,8 @@ namespace TPG {
     {
 
         /**
-         * \brief Integer number abstracting the ID of selected action. (depending on it class)
+         * \brief Integer number abstracting the ID of selected action.
+         * (depending on it class)
          *
          * It is up to the used of a TPGGraph to associate the code to each
          * actionID.
@@ -72,10 +73,12 @@ namespace TPG {
          * \brief Main constructor of a TPGAction.
          *
          * \param[in] actID integer stored as the actionID of the TPGAction.
-         * \param[in] actClass integer stored as the actionClass of the TPGAction.
-         * Default value = 0. To avoid specified 0 in single action cases.
+         * \param[in] actClass integer stored as the actionClass of the
+         * TPGAction. Default value = 0. To avoid specified 0 in single action
+         * cases.
          */
-        TPGAction(const uint64_t actID, const uint64_t actClass=0) : actionID{actID}, actionClass{actClass} {};
+        TPGAction(const uint64_t actID, const uint64_t actClass = 0)
+            : actionID{actID}, actionClass{actClass} {};
 
         /**
          * \brief Specialization throwing an std::runtime_exception.

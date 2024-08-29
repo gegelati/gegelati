@@ -559,7 +559,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
 
     std::vector<uint64_t> vectActions(2, 5);
     uint64_t nbActions = vectActions[0] + vectActions[1];
-    
+
     params.tpg.initNbRoots = 20;
     params.tpg.maxInitOutgoingEdges = 4;
     params.prog.maxProgramSize = 96;
@@ -1117,15 +1117,15 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     }
 
     // Check the correct execution
-    ASSERT_NO_THROW(
-        Mutator::TPGMutator::populateTPG(tpg, arch, params, rng, vectActions, 0))
+    ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(tpg, arch, params, rng,
+                                                     vectActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
     ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots);
 
     // Increase coverage with a TPG that has no root team
     TPG::TPGGraph tpg2(*e);
-    ASSERT_NO_THROW(
-        Mutator::TPGMutator::populateTPG(tpg2, arch, params, rng, vectActions, 0))
+    ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(tpg2, arch, params, rng,
+                                                     vectActions, 0))
         << "Populating an empty TPG failed.";
 }

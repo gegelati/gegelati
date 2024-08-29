@@ -79,7 +79,8 @@ const TPG::TPGTeam& TPG::TPGGraph::addNewTeam()
     return (const TPGTeam&)(*this->vertices.back());
 }
 
-const TPG::TPGAction& TPG::TPGGraph::addNewAction(uint64_t actionID, uint64_t actionClass)
+const TPG::TPGAction& TPG::TPGGraph::addNewAction(uint64_t actionID,
+                                                  uint64_t actionClass)
 {
     this->vertices.push_back(factory->createTPGAction(actionID, actionClass));
     return (const TPGAction&)(*this->vertices.back());

@@ -62,7 +62,8 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
     fprintf(pFile,
             "%sA%" PRIu64 " [fillcolor=\"#ff3366\" shape=box margin=0.03 "
             "width=0 height=0 label=\"%" PRIu64 "-%" PRIu64 "\"]\n",
-            this->offset.c_str(), nbActions++, action.getActionClass(), action.getActionID());
+            this->offset.c_str(), nbActions++, action.getActionClass(),
+            action.getActionID());
     return nbActions - 1;
 }
 

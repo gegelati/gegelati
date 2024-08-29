@@ -140,11 +140,12 @@ namespace TPG {
          * The TPGAction is created using the TPGFactory of the TPGGraph.
          *
          * \param[in] actionID the ID identifier to associate to the TPGAction.
-         * \param[in] actionClass the Class identifier to associate to the TPGAction. 
-         * Default value set to 0 for single action cases;
-         * \return a const reference to the newly created TPGAction.
+         * \param[in] actionClass the Class identifier to associate to the
+         * TPGAction. Default value set to 0 for single action cases; \return a
+         * const reference to the newly created TPGAction.
          */
-        const TPGAction& addNewAction(uint64_t actionID, uint64_t actionClass=0);
+        const TPGAction& addNewAction(uint64_t actionID,
+                                      uint64_t actionClass = 0);
 
         /**
          * \brief Get the number of TPGVertex contained in the TPGGraph.

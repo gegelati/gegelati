@@ -45,30 +45,39 @@ double TPG::TPGExecutionEngineInstrumented::evaluateEdge(const TPGEdge& edge)
     return TPGExecutionEngine::evaluateEdge(edge);
 }
 
-std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngineInstrumented::executeTeam(
-    const TPGVertex* currentTeam, std::vector<const TPGVertex*>& visitedVertices,
-    std::vector<std::int64_t>* actionsTaken, uint64_t nbEdgesActivated)
+std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngineInstrumented::
+    executeTeam(const TPGVertex* currentTeam,
+                std::vector<const TPGVertex*>& visitedVertices,
+                std::vector<std::int64_t>* actionsTaken,
+                uint64_t nbEdgesActivated)
 {
 
-    dynamic_cast<const TPG::TPGTeamInstrumented*>(currentTeam)->incrementNbVisits();
+    dynamic_cast<const TPG::TPGTeamInstrumented*>(currentTeam)
+        ->incrementNbVisits();
 
-    std::vector<const TPGEdge*> winningEdges = TPGExecutionEngine::executeTeam(currentTeam, visitedVertices, actionsTaken, nbEdgesActivated);
+    std::vector<const TPGEdge*> winningEdges = TPGExecutionEngine::executeTeam(
+        currentTeam, visitedVertices, actionsTaken, nbEdgesActivated);
     for (const TPGEdge* edge : winningEdges) {
-        if(dynamic_cast<const TPGAction*>(edge->getDestination()) != nullptr){
+        if (dynamic_cast<const TPGAction*>(edge->getDestination()) != nullptr) {
         }
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge)->incrementNbTraversal();
+        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge)
+            ->incrementNbTraversal();
     }
     return winningEdges;
 }
 
-std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> TPG::TPGExecutionEngineInstrumented::executeFromRoot(
-    const TPG::TPGVertex& root, const std::vector<uint64_t>& initActions, uint64_t nbEdgesActivated)
+std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> TPG::
+    TPGExecutionEngineInstrumented::executeFromRoot(
+        const TPG::TPGVertex& root, const std::vector<uint64_t>& initActions,
+        uint64_t nbEdgesActivated)
 {
-    auto result = TPGExecutionEngine::executeFromRoot(root, initActions, nbEdgesActivated);
+    auto result = TPGExecutionEngine::executeFromRoot(root, initActions,
+                                                      nbEdgesActivated);
 
     // Increment actions visit
     for (auto vertex : result.first) {
-        if (auto* action = dynamic_cast<const TPG::TPGActionInstrumented*>(vertex)) {
+        if (auto* action =
+                dynamic_cast<const TPG::TPGActionInstrumented*>(vertex)) {
             action->incrementNbVisits();
         }
     }

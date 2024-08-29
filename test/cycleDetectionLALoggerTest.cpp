@@ -89,8 +89,8 @@ class CycleDetectionLoggerTest : public ::testing::Test
 
         auto res1 = new Learn::EvaluationResult(5, 2);
         auto res2 = new Learn::EvaluationResult(10, 2);
-        auto v1(new TPG::TPGAction(0,0));
-        auto v2(new TPG::TPGAction(0,0));
+        auto v1(new TPG::TPGAction(0, 0));
+        auto v2(new TPG::TPGAction(0, 0));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
                                  const TPG::TPGVertex*>(res1, v1));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
@@ -174,7 +174,7 @@ TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
 
     std::vector<const TPG::TPGAction*> actions;
     for (auto idx = 0; idx < 2; idx++) {
-        actions.push_back(&tpg->addNewAction(0,0));
+        actions.push_back(&tpg->addNewAction(0, 0));
     }
 
     // tree 1

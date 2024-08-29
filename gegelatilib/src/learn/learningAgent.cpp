@@ -153,8 +153,10 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         while (!le.isTerminal() &&
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the actions
-            std::vector<uint64_t> actionsID 
-                = tee.executeFromRoot(*root, le.getInitActions(), this->params.nbEdgesActivable).second;
+            std::vector<uint64_t> actionsID =
+                tee.executeFromRoot(*root, le.getInitActions(),
+                                    this->params.nbEdgesActivable)
+                    .second;
 
             // Do it
             le.doActions(actionsID);

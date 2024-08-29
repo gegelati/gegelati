@@ -215,9 +215,12 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
         std::string action_label = matches[2];
         uint64_t action_number = std::stoi(matches[1]);
 
-        // Action label contain the actionID and actionClass with format "ActionValue-actionID"
-        uint64_t currActionClass = std::stoi(action_label.substr(0, action_label.find('-')));
-        uint64_t currActionID = std::stoi(action_label.substr(action_label.find('-') + 1));
+        // Action label contain the actionID and actionClass with format
+        // "ActionValue-actionID"
+        uint64_t currActionClass =
+            std::stoi(action_label.substr(0, action_label.find('-')));
+        uint64_t currActionID =
+            std::stoi(action_label.substr(action_label.find('-') + 1));
 
         // elmt points to the action with the same label as the action we are
         // parsing
@@ -225,7 +228,8 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
         if (elmt == actionID.end()) {
             // create a new action and insert it if none was previously found
             this->actionID.insert(std::pair<std::string, const TPG::TPGVertex*>(
-                action_label, &this->tpg.addNewAction(currActionID, currActionClass)));
+                action_label,
+                &this->tpg.addNewAction(currActionID, currActionClass)));
         }
         this->actionLabel.insert(
             std::pair<uint64_t, std::string>(action_number, action_label));

@@ -139,7 +139,8 @@ namespace Learn {
         {
 
             // override the number of initial roots if set to 0
-            // Number of initial roots is set to the max between the number of surviving roots and the number of actions
+            // Number of initial roots is set to the max between the number of
+            // surviving roots and the number of actions
             if (this->params.mutation.tpg.initNbRoots == 0) {
                 this->params.mutation.tpg.initNbRoots = std::max(
                     (size_t)floor((1 - this->params.ratioDeletedRoots) *
@@ -148,9 +149,14 @@ namespace Learn {
             }
 
             // Override the number of edges available if set to 0
-            // Number of edges available is set to 1 for a single action environment and 2 for a multi-action environment.
-            if(this->params.nbEdgesActivable == 0){
-                this->params.nbEdgesActivable = (size_t)(this->learningEnvironment.getVectActions().size() == 1) ? 1 : 2;
+            // Number of edges available is set to 1 for a single action
+            // environment and 2 for a multi-action environment.
+            if (this->params.nbEdgesActivable == 0) {
+                this->params.nbEdgesActivable =
+                    (size_t)(this->learningEnvironment.getVectActions()
+                                 .size() == 1)
+                        ? 1
+                        : 2;
             }
         };
 
@@ -185,14 +191,12 @@ namespace Learn {
          */
         Mutator::RNG& getRNG();
 
-
         /**
          * \brief Getter for the LearningParameters used by the LearningAgent.
          *
          * \return Get a reference to the RNG.
          */
         LearningParameters& getParams();
-
 
         /**
          * \brief Setter for the LearningParameters used by the LearningAgent.

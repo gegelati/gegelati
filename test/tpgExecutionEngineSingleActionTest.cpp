@@ -215,11 +215,12 @@ TEST_F(TPGExecutionEngineTestSingleAction, EvaluateTeam)
     TPG::TPGExecutionEngine tpee(*e);
 
     std::vector<int64_t> initActions(2, -1);
-    std::vector<const TPG::TPGVertex *> visitedVertices;
+    std::vector<const TPG::TPGVertex*> visitedVertices;
 
     const TPG::TPGEdge* result = NULL;
-    ASSERT_NO_THROW(result = tpee.executeTeam(
-                        tpg->getVertices().at(1), visitedVertices, &initActions, 1)[0];)
+    ASSERT_NO_THROW(result =
+                        tpee.executeTeam(tpg->getVertices().at(1),
+                                         visitedVertices, &initActions, 1)[0];)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
@@ -232,8 +233,9 @@ TEST_F(TPGExecutionEngineTestSingleAction, EvaluateFromRoot)
 
     std::vector<const TPG::TPGVertex*> result;
 
-    ASSERT_NO_THROW(result =
-                        tpee.executeFromRoot(*tpg->getRootVertices().at(0), {0}, 1).first)
+    ASSERT_NO_THROW(
+        result =
+            tpee.executeFromRoot(*tpg->getRootVertices().at(0), {0}, 1).first)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)
