@@ -116,6 +116,19 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
     return result;
 }
 
+
+
+const uint64_t TPG::TPGGraph::getNbEdgesActivaible() const{
+    return this->nbEdgesActivaible;
+}
+
+
+
+void TPG::TPGGraph::setNbEdgesActivaible(uint64_t newNbEdgesAvailable){
+    this->nbEdgesActivaible = newNbEdgesAvailable;
+}
+
+
 bool TPG::TPGGraph::hasVertex(const TPG::TPGVertex& vertex) const
 {
     return std::find(this->vertices.cbegin(), this->vertices.cend(), &vertex) !=

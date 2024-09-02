@@ -186,6 +186,21 @@ namespace TPG {
         const std::vector<const TPGVertex*> getRootVertices() const;
 
         /**
+         * \brief Get the nbEdgesActivaible attribute.
+         *
+         * \return an integer that represents nbEdgesActivaible
+         */
+        const uint64_t getNbEdgesActivaible() const;
+
+
+        /**
+         * \brief Set the nbEdgesActivaible attribute.
+         *
+         * \param[in] newNbEdgesAvailable new value of nbEdgesAvailable.
+         */
+        void setNbEdgesActivaible(uint64_t newNbEdgesAvailable);
+
+        /**
          * \brief Check whether a given vertex exists in the TPGGraph.
          *
          * \param[in] vertex the TPG::TPGVertex whose presence in the TPGGraph
@@ -320,6 +335,13 @@ namespace TPG {
          * \brief Set of TPGEdge composing the TPGGraph.
          */
         std::list<std::unique_ptr<TPGEdge>> edges;
+
+        /**
+         * \brief Number of edges activaible at each evaluation team.
+         * Only one edge pointing a team can be activated but the number of edges pointing an action is limited by this parameter.
+         * By default, this value is set to 1 for single action cases and 2 for multi action cases.
+         */
+        uint64_t nbEdgesActivaible = 1;
 
         /**
          * \brief Find the non-const iterator to a vertex of the graph from

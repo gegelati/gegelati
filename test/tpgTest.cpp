@@ -737,3 +737,17 @@ TEST_F(TPGTest, TPGAffectationOperator)
     ASSERT_NO_THROW(TPG::TPGGraph& destination = source)
         << "The affectation operator is never supposed to fail";
 }
+
+TEST_F(TPGTest, TPGGraphSetNbEdgesAvailable)
+{
+    
+    TPG::TPGGraph tpg(*e);
+
+    ASSERT_EQ(tpg.getNbEdgesActivaible(), 1) 
+        << "Number of edges activaible after initialisation should be equal to one.";
+
+    tpg.setNbEdgesActivaible(2);
+
+    ASSERT_EQ(tpg.getNbEdgesActivaible(), 2) 
+        << "Number of edges activaible after setter should be equal to two.";
+}

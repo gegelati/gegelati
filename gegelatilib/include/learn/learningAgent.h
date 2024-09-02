@@ -140,7 +140,7 @@ namespace Learn {
 
             // override the number of initial roots if set to 0
             // Number of initial roots is set to the max between the number of
-            // surviving roots and the number of actions
+            // surviving roots and the number of actions.
             if (this->params.mutation.tpg.initNbRoots == 0) {
                 this->params.mutation.tpg.initNbRoots = std::max(
                     (size_t)floor((1 - this->params.ratioDeletedRoots) *
@@ -158,6 +158,9 @@ namespace Learn {
                         ? 1
                         : 2;
             }
+
+            // Set the number of edges aivailable to the tpg graph.
+            this->tpg->setNbEdgesActivaible((uint64_t)this->params.nbEdgesActivable);
         };
 
         /// Default destructor for polymorphism
