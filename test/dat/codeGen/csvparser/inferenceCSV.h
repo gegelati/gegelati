@@ -83,6 +83,6 @@ void errorPrint(int action, int expect, CsvRow* row, double* tab);
  * it means that the TPG has not been reset correctly
  */
 
-int inferenceCSV(char* filename, int (*inferenceTPG)(void));
+int inferenceCSV(char* filename, void (*inferenceTPG)(int* action));
 
 #endif // INFERENCE_CSV_H

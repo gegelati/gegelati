@@ -118,14 +118,14 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
 
 
 
-const uint64_t TPG::TPGGraph::getNbEdgesActivaible() const{
-    return this->nbEdgesActivaible;
+const uint64_t TPG::TPGGraph::getNbEdgesActivable() const{
+    return this->nbEdgesActivable;
 }
 
 
 
-void TPG::TPGGraph::setNbEdgesActivaible(uint64_t newNbEdgesAvailable){
-    this->nbEdgesActivaible = newNbEdgesAvailable;
+void TPG::TPGGraph::setNbEdgesActivable(uint64_t newNbEdgesAvailable){
+    this->nbEdgesActivable = newNbEdgesAvailable;
 }
 
 

@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     double tab[1];
     in1 = tab;
     int expectedVal;
-    int action;
+    int action[1] = {0};
     if (argc == 1) {
         expectedVal = -1;
         in1[0] = 4.5;
@@ -61,16 +61,16 @@ int main(int argc, char* argv[])
         }
     }
 
-    action = inferenceTPG();
+    inferenceTPG(action);
 #ifdef DEBUG
-    printf("action : %d\n", action);
+    printf("action : %d\n", action[0]);
 #endif // DEBUG
-    if (expectedVal != -1 && action != expectedVal) {
+    if (expectedVal != -1 && action[0] != expectedVal) {
         return ERROR_INFERENCE;
     }
 
-    action = inferenceTPG();
-    if (expectedVal != -1 && action != expectedVal) {
+    inferenceTPG(action);
+    if (expectedVal != -1 && action[0] != expectedVal) {
         return ERROR_RESET;
     }
 

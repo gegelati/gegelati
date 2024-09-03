@@ -55,5 +55,6 @@ int main(int argc, char* argv[])
                         "filename of the data.\n");
         return 3;
     }
+
     return inferenceCSV(argv[1], inferenceTPG);
 }

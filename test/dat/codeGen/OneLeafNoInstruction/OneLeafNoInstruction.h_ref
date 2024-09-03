@@ -9,6 +9,6 @@
 
 #include <stdlib.h>
 
-int inferenceTPG();
+void inferenceTPG(int* action);
 
 #endif

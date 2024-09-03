@@ -47,11 +47,11 @@ void errorPrint(int action, int expect, CsvRow* row, double* tab)
     printf("\n");
 }
 
-int inferenceCSV(char* filename, int (*inferenceTPG)(void))
+int inferenceCSV(char* filename, void (*inferenceTPG)(int* action))
 {
     double* tab = in1;
     int expectedVal;
-    int action;
+    int action[1] = {0};
     CsvParser* csvparser = CsvParser_new(filename, " ", 0);
     CsvRow* row;
 
@@ -63,18 +63,18 @@ int inferenceCSV(char* filename, int (*inferenceTPG)(void))
             tab[i - 1] = strtod(rowFields[i], NULL);
         }
 
-        action = inferenceTPG();
+        inferenceTPG(action);
 #ifdef DEBUG
         printf("action : %d\n", action);
 #endif // DEBUG
-        if (action != expectedVal) {
-            errorPrint(action, expectedVal, row, tab);
+        if (action[0] != expectedVal) {
+            errorPrint(action[0], expectedVal, row, tab);
             return ERROR_INFERENCE;
         }
 
-        action = inferenceTPG();
-        if (action != expectedVal) {
-            errorPrint(action, expectedVal, row, tab);
+        inferenceTPG(action);
+        if (action[0] != expectedVal) {
+            errorPrint(action[0], expectedVal, row, tab);
             return ERROR_RESET;
         }
 

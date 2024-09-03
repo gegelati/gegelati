@@ -743,11 +743,11 @@ TEST_F(TPGTest, TPGGraphSetNbEdgesAvailable)
     
     TPG::TPGGraph tpg(*e);
 
-    ASSERT_EQ(tpg.getNbEdgesActivaible(), 1) 
-        << "Number of edges activaible after initialisation should be equal to one.";
+    ASSERT_EQ(tpg.getNbEdgesActivable(), 1) 
+        << "Number of edges Activable after initialisation should be equal to one.";
 
-    tpg.setNbEdgesActivaible(2);
+    tpg.setNbEdgesActivable(2);
 
-    ASSERT_EQ(tpg.getNbEdgesActivaible(), 2) 
-        << "Number of edges activaible after setter should be equal to two.";
+    ASSERT_EQ(tpg.getNbEdgesActivable(), 2) 
+        << "Number of edges Activable after setter should be equal to two.";
 }

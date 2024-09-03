@@ -203,13 +203,13 @@ TEST_F(TPGExecutionEngineTestMultiAction, EvaluateFromRootZero)
     TPG::TPGExecutionEngine tpee(*e);
 
     std::vector<uint64_t> initActions(2, 2);
-    uint64_t nbEdgesActivaible = 2;
+    uint64_t nbEdgesActivable = 2;
 
     std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> result;
 
     ASSERT_NO_THROW(result =
                         tpee.executeFromRoot(*tpg->getRootVertices().at(0),
-                                             initActions, nbEdgesActivaible))
+                                             initActions, nbEdgesActivable))
         << "Execution of a TPGGraph from a valid root failed.";
 
     std::vector<const TPG::TPGVertex*> visitedVertexResult = result.first;
@@ -246,13 +246,13 @@ TEST_F(TPGExecutionEngineTestMultiAction, EvaluateFromRootOne)
     TPG::TPGExecutionEngine tpee(*e);
 
     std::vector<uint64_t> initActions(2, 2);
-    uint64_t nbEdgesActivaible = 2;
+    uint64_t nbEdgesActivable = 2;
 
     std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> result;
 
     ASSERT_NO_THROW(result =
                         tpee.executeFromRoot(*tpg->getRootVertices().at(1),
-                                             initActions, nbEdgesActivaible))
+                                             initActions, nbEdgesActivable))
         << "Execution of a TPGGraph from a valid root failed.";
 
     std::vector<const TPG::TPGVertex*> visitedVertexResult = result.first;
@@ -299,13 +299,13 @@ TEST_F(TPGExecutionEngineTestMultiAction, EarlyExit)
     TPG::TPGExecutionEngine tpee(*e);
 
     std::vector<uint64_t> initActions(2, 2);
-    uint64_t nbEdgesActivaible = 2;
+    uint64_t nbEdgesActivable = 2;
 
     std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> result;
 
     ASSERT_NO_THROW(result =
                         tpee.executeFromRoot(*tpg->getRootVertices().at(0),
-                                             initActions, nbEdgesActivaible))
+                                             initActions, nbEdgesActivable))
         << "Execution of a TPGGraph from a valid root failed.";
 
     std::vector<const TPG::TPGVertex*> visitedVertexResult = result.first;

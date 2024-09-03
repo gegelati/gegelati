@@ -92,11 +92,17 @@ void CodeGen::TPGSwitchGenerationEngine::generateAction(
     const TPG::TPGAction& action)
 {
     uint64_t id = action.getActionID();
-    fileMain << "\t\t\treturn " << id << ";" << std::endl;
+    fileMain << "\t\t\t*action = " << id << ";" << std::endl;
 }
 
 void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
 {
+
+    if(this->tpg.getNbEdgesActivable() != 1){
+        throw std::runtime_error("The number of Activable edges should not be different to 1 for the switch codeGen."
+                                 "It has not been implemented yet on switch, please use the stack codeGen for multiAction TPGs.");
+    }
+
     initTpgFile();
     initHeaderFile();
 
@@ -111,14 +117,17 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
     fileMain << "};" << std::endl << std::endl;
 
     // generate inference function
-    fileMain << "int inferenceTPG() {" << std::endl;
+    fileMain << "void inferenceTPG(int* action) {" << std::endl;
 
     // start graph on root
     fileMain << "\tenum vertices currentVertex = "
              << vertexName(*tpg.getRootVertices().at(0)) << ";" << std::endl;
 
+    // Init the action to INT_MIN
+    fileMain << "\t*action = INT_MIN;" << std::endl;
+
     // generate switch case to navigate the graph
-    fileMain << "\twhile(1) {" << std::endl;
+    fileMain << "\twhile(*action == INT_MIN) {" << std::endl;
     fileMain << "\t\tswitch (currentVertex) {" << std::endl;
     for (auto vertex : vertices) {
         fileMain << "\t\tcase " << vertexName(*vertex) << ": {" << std::endl;
@@ -167,7 +176,7 @@ void CodeGen::TPGSwitchGenerationEngine::initTpgFile()
 void CodeGen::TPGSwitchGenerationEngine::initHeaderFile()
 {
     fileMainH << "#include <stdlib.h>\n\n"
-              << "int inferenceTPG();\n";
+              << "void inferenceTPG(int* action);\n";
 }
 
 std::string CodeGen::TPGSwitchGenerationEngine::vertexName(
