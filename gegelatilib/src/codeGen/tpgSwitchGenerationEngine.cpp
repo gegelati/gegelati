@@ -98,9 +98,12 @@ void CodeGen::TPGSwitchGenerationEngine::generateAction(
 void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
 {
 
-    if(this->tpg.getNbEdgesActivable() != 1){
-        throw std::runtime_error("The number of Activable edges should not be different to 1 for the switch codeGen."
-                                 "It has not been implemented yet on switch, please use the stack codeGen for multiAction TPGs.");
+    if (this->tpg.getNbEdgesActivable() != 1) {
+        throw std::runtime_error(
+            "The number of Activable edges should not be different to 1 for "
+            "the switch codeGen."
+            "It has not been implemented yet on switch, please use the stack "
+            "codeGen for multiAction TPGs.");
     }
 
     initTpgFile();

@@ -740,14 +740,15 @@ TEST_F(TPGTest, TPGAffectationOperator)
 
 TEST_F(TPGTest, TPGGraphSetNbEdgesAvailable)
 {
-    
+
     TPG::TPGGraph tpg(*e);
 
-    ASSERT_EQ(tpg.getNbEdgesActivable(), 1) 
-        << "Number of edges Activable after initialisation should be equal to one.";
+    ASSERT_EQ(tpg.getNbEdgesActivable(), 1)
+        << "Number of edges Activable after initialisation should be equal to "
+           "one.";
 
     tpg.setNbEdgesActivable(2);
 
-    ASSERT_EQ(tpg.getNbEdgesActivable(), 2) 
+    ASSERT_EQ(tpg.getNbEdgesActivable(), 2)
         << "Number of edges Activable after setter should be equal to two.";
 }

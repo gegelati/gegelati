@@ -192,7 +192,6 @@ namespace TPG {
          */
         const uint64_t getNbEdgesActivable() const;
 
-
         /**
          * \brief Set the nbEdgesActivable attribute.
          *
@@ -338,8 +337,10 @@ namespace TPG {
 
         /**
          * \brief Number of edges Activable at each evaluation team.
-         * Only one edge pointing a team can be activated but the number of edges pointing an action is limited by this parameter.
-         * By default, this value is set to 1 for single action cases and 2 for multi action cases.
+         * Only one edge pointing a team can be activated but the number of
+         * edges pointing an action is limited by this parameter. By default,
+         * this value is set to 1 for single action cases and 2 for multi action
+         * cases.
          */
         uint64_t nbEdgesActivable = 1;
 

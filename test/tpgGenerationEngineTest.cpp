@@ -766,9 +766,8 @@ TEST_F(TPGGenerationEngineTest, codeGenMultiActionSwitchDisabled)
 {
     tpg->setNbEdgesActivable(2);
 
-    CodeGen::TPGGenerationEngineFactory factory(                           
-        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
-            switchMode); 
+    CodeGen::TPGGenerationEngineFactory factory(
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::switchMode);
 
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1, 0));
     const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(1, 1));
@@ -802,20 +801,18 @@ TEST_F(TPGGenerationEngineTest, codeGenMultiActionSwitchDisabled)
 
     tpgGen = factory.create("TwoLeavesMultiAction", *tpg, "./src/");
 
-    ASSERT_THROW(tpgGen->generateTPGGraph(),
-                 std::runtime_error)
+    ASSERT_THROW(tpgGen->generateTPGGraph(), std::runtime_error)
         << "Generation of code should fail on stack mode with a multiAction "
            "case.";
 }
 
-TEST_F(TPGGenerationEngineTest, TwoLeavesStackMultiAction) 
+TEST_F(TPGGenerationEngineTest, TwoLeavesStackMultiAction)
 {
 
     tpg->setNbEdgesActivable(2);
-    
-    CodeGen::TPGGenerationEngineFactory factory(                           
-        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
-            stackMode);  
+
+    CodeGen::TPGGenerationEngineFactory factory(
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::stackMode);
 
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1, 0));
     const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(1, 1));
@@ -836,7 +833,6 @@ TEST_F(TPGGenerationEngineTest, TwoLeavesStackMultiAction)
     prog2L1.setInstructionIndex(0);
     prog2L1.setOperand(0, 1, 0);
     prog2L1.setOperand(1, 1, 2);
-
 
     tpg->addNewEdge(*root, *leaf, prog1);
     tpg->addNewEdge(*root, *leaf2, prog2);
@@ -856,19 +852,20 @@ TEST_F(TPGGenerationEngineTest, TwoLeavesStackMultiAction)
         << "Error while compiling the test TwoLeaves MultiAction.";
     cmdExec += "TwoLeavesMultiAction" + executableExtension;
 
-    ASSERT_EQ(system((cmdExec + path + "/TwoLeavesMultiAction/DataTwoLeavesMultiAction.csv").c_str()),
+    ASSERT_EQ(system((cmdExec + path +
+                      "/TwoLeavesMultiAction/DataTwoLeavesMultiAction.csv")
+                         .c_str()),
               0)
         << "Error wrong action returned in test TwoLeaves.";
 };
 
-TEST_F(TPGGenerationEngineTest, FourLeavesStackMultiAction) 
+TEST_F(TPGGenerationEngineTest, FourLeavesStackMultiAction)
 {
 
     tpg->setNbEdgesActivable(2);
-    
-    CodeGen::TPGGenerationEngineFactory factory(                           
-        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
-            stackMode);  
+
+    CodeGen::TPGGenerationEngineFactory factory(
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::stackMode);
 
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1, 0));
     const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2, 0));
@@ -913,11 +910,11 @@ TEST_F(TPGGenerationEngineTest, FourLeavesStackMultiAction)
     tpg->addNewEdge(*root, *leaf3, prog3);
     tpg->addNewEdge(*root, *leaf4, prog4);
 
-
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
         << "number of root is not 1 in FourLeaves";
 
-    ASSERT_EQ(tpg->getNbVertices(), 5) << "bad number of vertices in FourLeaves";
+    ASSERT_EQ(tpg->getNbVertices(), 5)
+        << "bad number of vertices in FourLeaves";
 
     ASSERT_EQ(tpg->getEdges().size(), 4) << "bad number of edges in FourLeaves";
 
@@ -930,7 +927,9 @@ TEST_F(TPGGenerationEngineTest, FourLeavesStackMultiAction)
         << "Error while compiling the test TwoLeaves MultiAction.";
     cmdExec += "FourLeavesMultiAction" + executableExtension;
 
-    ASSERT_EQ(system((cmdExec + path + "/FourLeavesMultiAction/DataFourLeavesMultiAction.csv").c_str()),
+    ASSERT_EQ(system((cmdExec + path +
+                      "/FourLeavesMultiAction/DataFourLeavesMultiAction.csv")
+                         .c_str()),
               0)
         << "Error wrong action returned in test FourLeaves.";
 };

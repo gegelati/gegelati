@@ -73,7 +73,8 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     }
     else if (dynamic_cast<const TPG::TPGAction*>(destination) != nullptr) {
         auto a = dynamic_cast<const TPG::TPGAction*>(destination);
-        destinationName = 'A' + std::to_string(a->getActionClass()) + "_" + std::to_string(a->getActionID());
+        destinationName = 'A' + std::to_string(a->getActionClass()) + "_" +
+                          std::to_string(a->getActionID());
     }
 
     fileMain << "\t\t\t{" << destinationName << "Vert, P" << progID << ", "
@@ -112,13 +113,15 @@ void CodeGen::TPGStackGenerationEngine::generateAction(
     uint64_t id = action.getActionID();
     uint64_t actClass = action.getActionClass();
     // print prototype and declaration of the function
-    fileMain << "void A" << actClass << "_" << id << "(int* action){" << std::endl;
-    fileMainH << "void A" << actClass << "_" << id << "(int* action);" << std::endl;
+    fileMain << "void A" << actClass << "_" << id << "(int* action){"
+             << std::endl;
+    fileMainH << "void A" << actClass << "_" << id << "(int* action);"
+              << std::endl;
 
     // print definition of the function
-    fileMain << "\tif(action["<< actClass <<"] == INT_MIN){"<< std::endl;
+    fileMain << "\tif(action[" << actClass << "] == INT_MIN){" << std::endl;
 
-    fileMain << "\t\taction["<< actClass <<"] = " << id << ";" << std::endl;
+    fileMain << "\t\taction[" << actClass << "] = " << id << ";" << std::endl;
     fileMain << "\t}\n" << std::endl;
     fileMain << "}\n" << std::endl;
 }
@@ -154,8 +157,10 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
     int nbActionClass = 0;
     for (auto vertex : this->tpg.getVertices()) {
         if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr) {
-            if((*(const TPG::TPGAction*)vertex).getActionClass() + 1 > nbActionClass){
-                nbActionClass = (int)(*(const TPG::TPGAction*)vertex).getActionClass() + 1;
+            if ((*(const TPG::TPGAction*)vertex).getActionClass() + 1 >
+                nbActionClass) {
+                nbActionClass =
+                    (int)(*(const TPG::TPGAction*)vertex).getActionClass() + 1;
             }
         }
     }
@@ -177,12 +182,11 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
              << "}\n\n"
 
              << "void executeFromVertex(void (*ptr_f)(int*), int *action){\n"
-             << initAction
-             << "\tptr_f(action);\n"
+             << initAction << "\tptr_f(action);\n"
              << "\n}\n\n"
              << std::endl;
 
-    if(this->tpg.getNbEdgesActivable() == 1){
+    if (this->tpg.getNbEdgesActivable() == 1) {
 
         fileMain << "void executeTeam(Edge* e, int nbEdge, int* action){\n"
                  << "\tint idxBest = -1;\n"
@@ -191,7 +195,8 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
                  << "\t\tdouble r = e[idx].ptr_prog();\n"
                  << "\t\tr = (isnan(r)) ? -INFINITY : r;\n"
                  << "\t\tif(r >= bestResult) {\n"
-                 << "\t\t\t// If the result is better than best result, put the result on best and the former best on second best\n"
+                 << "\t\t\t// If the result is better than best result, put "
+                    "the result on best and the former best on second best\n"
                  << "\t\t\tbestResult = r;\n"
                  << "\t\t\tidxBest = idx;\n"
                  << "\t\t}\n"
@@ -199,9 +204,9 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
                  << "\te[idxBest].ptr_vertex(action);\n"
                  << "}\n"
                  << std::endl;
+    }
+    else if (this->tpg.getNbEdgesActivable() == 2) {
 
-    } else if (this->tpg.getNbEdgesActivable() == 2){
-        
         fileMain << "void executeTeam(Edge* e, int nbEdge, int* action){\n"
                  << "\tint idxBest = -1, idxSecondBest = -1;\n"
                  << "\tdouble bestResult1 = -INFINITY;\n"
@@ -213,14 +218,16 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
 
                  << "\t\tif(r >= bestResult2 && idx != idxBest) {\n"
                  << "\t\t\tif(r >= bestResult1) {\n"
-                 << "\t\t\t\t// If the result is better than best result, put the result on best and the former best on second best\n"
+                 << "\t\t\t\t// If the result is better than best result, put "
+                    "the result on best and the former best on second best\n"
                  << "\t\t\t\tbestResult2 = bestResult1;\n"
                  << "\t\t\t\tidxSecondBest = idxBest;\n"
 
                  << "\t\t\t\tbestResult1 = r;\n"
                  << "\t\t\t\tidxBest = idx;\n"
                  << "\t\t\t} else {\n"
-                 << "\t\t\t\t// If the result is better than second best result, put the result on second best\n"
+                 << "\t\t\t\t// If the result is better than second best "
+                    "result, put the result on second best\n"
                  << "\t\t\t\tbestResult2 = r;\n"
                  << "\t\t\t\tidxSecondBest = idx;\n"
                  << "\t\t\t}\n"
@@ -231,8 +238,10 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
 
                  << "}\n"
                  << std::endl;
-    } else {
-        throw std::runtime_error("The number of Activable edges should not be higher than 2 for the codeGen "
+    }
+    else {
+        throw std::runtime_error("The number of Activable edges should not be "
+                                 "higher than 2 for the codeGen "
                                  "It has not been implemented yet.");
     }
 }

@@ -160,7 +160,8 @@ namespace Learn {
             }
 
             // Set the number of edges aivailable to the tpg graph.
-            this->tpg->setNbEdgesActivable((uint64_t)this->params.nbEdgesActivable);
+            this->tpg->setNbEdgesActivable(
+                (uint64_t)this->params.nbEdgesActivable);
         };
 
         /// Default destructor for polymorphism

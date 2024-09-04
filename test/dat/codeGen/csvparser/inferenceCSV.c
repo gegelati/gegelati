@@ -109,7 +109,8 @@ int inferenceCSVMultiAction(char* filename, void (*inferenceTPG)(int* action))
         if (action[0] != expectedVal1) {
             errorPrint(action[0], expectedVal1, row, tab);
             return ERROR_INFERENCE;
-        } else if (action[1] != expectedVal2){
+        }
+        else if (action[1] != expectedVal2) {
             errorPrint(action[1], expectedVal2, row, tab);
             return ERROR_INFERENCE;
         }
@@ -118,7 +119,8 @@ int inferenceCSVMultiAction(char* filename, void (*inferenceTPG)(int* action))
         if (action[0] != expectedVal1) {
             errorPrint(action[0], expectedVal1, row, tab);
             return ERROR_RESET;
-        } else if (action[1] != expectedVal2) {
+        }
+        else if (action[1] != expectedVal2) {
             errorPrint(action[1], expectedVal2, row, tab);
             return ERROR_RESET;
         }
