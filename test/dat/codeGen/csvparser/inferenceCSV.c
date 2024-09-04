@@ -41,13 +41,13 @@ void errorPrint(int action, int expect, CsvRow* row, double* tab)
 {
     const char** rowFields = CsvParser_getFields(row);
     printf("action : %d but expect %d for data : ", action, expect);
-    for (int i = 1; i < CsvParser_getNumFields(row); i++) {
-        printf(" %s(%lf)", rowFields[i], tab[i - 1]);
+    for (int i = 2; i < CsvParser_getNumFields(row); i++) {
+        printf(" %s(%lf)", rowFields[i], tab[i - 2]);
     }
     printf("\n");
 }
 
-int inferenceCSV(char* filename, void (*inferenceTPG)(int* action))
+int inferenceCSVSingleAction(char* filename, void (*inferenceTPG)(int* action))
 {
     double* tab = in1;
     int expectedVal;
@@ -75,6 +75,51 @@ int inferenceCSV(char* filename, void (*inferenceTPG)(int* action))
         inferenceTPG(action);
         if (action[0] != expectedVal) {
             errorPrint(action[0], expectedVal, row, tab);
+            return ERROR_RESET;
+        }
+
+        CsvParser_destroy_row(row);
+    }
+    CsvParser_destroy(csvparser);
+    return 0;
+}
+
+int inferenceCSVMultiAction(char* filename, void (*inferenceTPG)(int* action))
+{
+    double* tab = in1;
+    int expectedVal1;
+    int expectedVal2;
+    int action[2] = {0};
+    CsvParser* csvparser = CsvParser_new(filename, " ", 0);
+    CsvRow* row;
+
+    while ((row = CsvParser_getRow(csvparser))) {
+        const char** rowFields = CsvParser_getFields(row);
+        expectedVal1 = strtol(rowFields[0], NULL, 10);
+        expectedVal2 = strtol(rowFields[1], NULL, 10);
+
+        for (int i = 2; i < CsvParser_getNumFields(row); i++) {
+            tab[i - 2] = strtod(rowFields[i], NULL);
+        }
+
+        inferenceTPG(action);
+#ifdef DEBUG
+        printf("action : %d\n", action);
+#endif // DEBUG
+        if (action[0] != expectedVal1) {
+            errorPrint(action[0], expectedVal1, row, tab);
+            return ERROR_INFERENCE;
+        } else if (action[1] != expectedVal2){
+            errorPrint(action[1], expectedVal2, row, tab);
+            return ERROR_INFERENCE;
+        }
+
+        inferenceTPG(action);
+        if (action[0] != expectedVal1) {
+            errorPrint(action[0], expectedVal1, row, tab);
+            return ERROR_RESET;
+        } else if (action[1] != expectedVal2) {
+            errorPrint(action[1], expectedVal2, row, tab);
             return ERROR_RESET;
         }
 

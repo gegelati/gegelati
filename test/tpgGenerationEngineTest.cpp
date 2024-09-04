@@ -761,4 +761,178 @@ TEST_BOTH_MODE(ThreeTeamsThreeLeaves, {
         << "Error wrong action returned in test "
            "ThreeTeamsThreeLeaves.";
 });
+
+TEST_F(TPGGenerationEngineTest, codeGenMultiActionSwitchDisabled)
+{
+    tpg->setNbEdgesActivable(2);
+
+    CodeGen::TPGGenerationEngineFactory factory(                           
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
+            switchMode); 
+
+    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1, 0));
+    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(1, 1));
+    const TPG::TPGVertex* root = (&tpg->addNewTeam());
+
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    Program::Line& prog1L1 = prog1->addNewLine();
+    // reg[0] = in1[0] + in1[1];
+    prog1L1.setDestinationIndex(0);
+    prog1L1.setInstructionIndex(0);
+    prog1L1.setOperand(0, 1, 0);
+    prog1L1.setOperand(1, 1, 1);
+
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    Program::Line& prog2L1 = prog2->addNewLine();
+    // reg[0] = in1[0] + in1[2];
+    prog2L1.setDestinationIndex(0);
+    prog2L1.setInstructionIndex(0);
+    prog2L1.setOperand(0, 1, 0);
+    prog2L1.setOperand(1, 1, 2);
+
+    tpg->addNewEdge(*root, *leaf, prog1);
+    tpg->addNewEdge(*root, *leaf2, prog2);
+
+    ASSERT_EQ(tpg->getNbRootVertices(), 1)
+        << "number of root is not 1 in TwoLeaves";
+
+    ASSERT_EQ(tpg->getNbVertices(), 3) << "bad number of vertices in TwoLeaves";
+
+    ASSERT_EQ(tpg->getEdges().size(), 2) << "bad number of edges in TwoLeaves";
+
+    tpgGen = factory.create("TwoLeavesMultiAction", *tpg, "./src/");
+
+    ASSERT_THROW(tpgGen->generateTPGGraph(),
+                 std::runtime_error)
+        << "Generation of code should fail on stack mode with a multiAction "
+           "case.";
+}
+
+TEST_F(TPGGenerationEngineTest, TwoLeavesStackMultiAction) 
+{
+
+    tpg->setNbEdgesActivable(2);
+    
+    CodeGen::TPGGenerationEngineFactory factory(                           
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
+            stackMode);  
+
+    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1, 0));
+    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(1, 1));
+    const TPG::TPGVertex* root = (&tpg->addNewTeam());
+
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    Program::Line& prog1L1 = prog1->addNewLine();
+    // reg[0] = in1[0] + in1[1];
+    prog1L1.setDestinationIndex(0);
+    prog1L1.setInstructionIndex(0);
+    prog1L1.setOperand(0, 1, 0);
+    prog1L1.setOperand(1, 1, 1);
+
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    Program::Line& prog2L1 = prog2->addNewLine();
+    // reg[0] = in1[0] + in1[2];
+    prog2L1.setDestinationIndex(0);
+    prog2L1.setInstructionIndex(0);
+    prog2L1.setOperand(0, 1, 0);
+    prog2L1.setOperand(1, 1, 2);
+
+
+    tpg->addNewEdge(*root, *leaf, prog1);
+    tpg->addNewEdge(*root, *leaf2, prog2);
+    ASSERT_EQ(tpg->getNbRootVertices(), 1)
+        << "number of root is not 1 in TwoLeaves";
+
+    ASSERT_EQ(tpg->getNbVertices(), 3) << "bad number of vertices in TwoLeaves";
+
+    ASSERT_EQ(tpg->getEdges().size(), 2) << "bad number of edges in TwoLeaves";
+
+    tpgGen = factory.create("TwoLeavesMultiAction", *tpg, "./src/");
+    tpgGen->generateTPGGraph();
+    // call the destructor to close the file
+    tpgGen.reset();
+    cmdCompile += "TwoLeavesMultiAction";
+    ASSERT_EQ(system(cmdCompile.c_str()), 0)
+        << "Error while compiling the test TwoLeaves MultiAction.";
+    cmdExec += "TwoLeavesMultiAction" + executableExtension;
+
+    ASSERT_EQ(system((cmdExec + path + "/TwoLeavesMultiAction/DataTwoLeavesMultiAction.csv").c_str()),
+              0)
+        << "Error wrong action returned in test TwoLeaves.";
+};
+
+TEST_F(TPGGenerationEngineTest, FourLeavesStackMultiAction) 
+{
+
+    tpg->setNbEdgesActivable(2);
+    
+    CodeGen::TPGGenerationEngineFactory factory(                           
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
+            stackMode);  
+
+    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1, 0));
+    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2, 0));
+    const TPG::TPGVertex* leaf3 = (&tpg->addNewAction(1, 1));
+    const TPG::TPGVertex* leaf4 = (&tpg->addNewAction(2, 1));
+    const TPG::TPGVertex* root = (&tpg->addNewTeam());
+
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    Program::Line& prog1L1 = prog1->addNewLine();
+    // reg[0] = in1[0] + in1[1];
+    prog1L1.setDestinationIndex(0);
+    prog1L1.setInstructionIndex(0);
+    prog1L1.setOperand(0, 1, 0);
+    prog1L1.setOperand(1, 1, 1);
+
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    Program::Line& prog2L1 = prog2->addNewLine();
+    // reg[0] = in1[0] + in1[2];
+    prog2L1.setDestinationIndex(0);
+    prog2L1.setInstructionIndex(0);
+    prog2L1.setOperand(0, 1, 0);
+    prog2L1.setOperand(1, 1, 2);
+
+    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e));
+    Program::Line& prog3L1 = prog3->addNewLine();
+    // reg[0] = in1[1] + in1[3];
+    prog3L1.setDestinationIndex(0);
+    prog3L1.setInstructionIndex(0);
+    prog3L1.setOperand(0, 1, 1);
+    prog3L1.setOperand(1, 1, 3);
+
+    const std::shared_ptr<Program::Program> prog4(new Program::Program(*e));
+    Program::Line& prog4L1 = prog4->addNewLine();
+    // reg[0] = in1[1] - in1[3];
+    prog4L1.setDestinationIndex(0);
+    prog4L1.setInstructionIndex(0);
+    prog4L1.setOperand(0, 1, 1);
+    prog4L1.setOperand(1, 1, 4);
+
+    tpg->addNewEdge(*root, *leaf, prog1);
+    tpg->addNewEdge(*root, *leaf2, prog2);
+    tpg->addNewEdge(*root, *leaf3, prog3);
+    tpg->addNewEdge(*root, *leaf4, prog4);
+
+
+    ASSERT_EQ(tpg->getNbRootVertices(), 1)
+        << "number of root is not 1 in FourLeaves";
+
+    ASSERT_EQ(tpg->getNbVertices(), 5) << "bad number of vertices in FourLeaves";
+
+    ASSERT_EQ(tpg->getEdges().size(), 4) << "bad number of edges in FourLeaves";
+
+    tpgGen = factory.create("FourLeavesMultiAction", *tpg, "./src/");
+    tpgGen->generateTPGGraph();
+    // call the destructor to close the file
+    tpgGen.reset();
+    cmdCompile += "FourLeavesMultiAction";
+    ASSERT_EQ(system(cmdCompile.c_str()), 0)
+        << "Error while compiling the test TwoLeaves MultiAction.";
+    cmdExec += "FourLeavesMultiAction" + executableExtension;
+
+    ASSERT_EQ(system((cmdExec + path + "/FourLeavesMultiAction/DataFourLeavesMultiAction.csv").c_str()),
+              0)
+        << "Error wrong action returned in test FourLeaves.";
+};
+
 #endif // CODE_GENERATION

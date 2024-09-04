@@ -57,5 +57,5 @@ int main(int argc, char* argv[])
         return 4;
     }
 
-    return inferenceCSV(argv[1], inferenceTPG);
+    return inferenceCSVSingleAction(argv[1], inferenceTPG);
 }
