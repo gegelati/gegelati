@@ -88,9 +88,8 @@ namespace TPG {
          * TPGExecutionEngine, this specialization increments the number of
          * uses of a TPGAction if the action is inserted in actionsTaken.
          */
-        void executeAction(
-            const TPG::TPGVertex* currentAction,
-            std::vector<std::int64_t>* actionsTaken) override;
+        void executeAction(const TPG::TPGVertex* currentAction,
+                           std::vector<std::int64_t>* actionsTaken) override;
 
         /**
          * \brief Specialization of the executeTeam function.

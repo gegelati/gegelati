@@ -846,7 +846,8 @@ TEST_F(TPGGenerationEngineTest, codeGenMultiActionStackToMuchEdgesActivable)
     tpgGen = factory.create("TwoLeavesMultiAction", *tpg, "./src/");
 
     ASSERT_THROW(tpgGen->generateTPGGraph(), std::runtime_error)
-        << "Generation of code should fail on stack mode with the nbEdgesActivable set to three.";
+        << "Generation of code should fail on stack mode with the "
+           "nbEdgesActivable set to three.";
 }
 
 TEST_F(TPGGenerationEngineTest, TwoLeavesStackMultiAction)

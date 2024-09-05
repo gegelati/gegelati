@@ -73,14 +73,15 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     return result;
 }
 
-void TPG::TPGExecutionEngine::executeAction(const TPGVertex* currentAction, std::vector<std::int64_t>* actionsTaken){
+void TPG::TPGExecutionEngine::executeAction(
+    const TPGVertex* currentAction, std::vector<std::int64_t>* actionsTaken)
+{
 
     const TPGAction* action = (const TPGAction*)(currentAction);
     // Save the action value if the action ID is choosen for the first
     // time.
     if ((*actionsTaken)[action->getActionClass()] == -1) {
-        (*actionsTaken)[action->getActionClass()] =
-            action->getActionID();
+        (*actionsTaken)[action->getActionClass()] = action->getActionID();
     }
 }
 

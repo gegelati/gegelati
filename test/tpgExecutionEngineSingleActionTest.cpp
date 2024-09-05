@@ -217,9 +217,10 @@ TEST_F(TPGExecutionEngineTestSingleAction, EvaluateAction)
     std::vector<int64_t> actionsTaken(1, -1);
     std::vector<const TPG::TPGVertex*> visitedVertices;
 
-    ASSERT_NO_THROW(tpee.executeAction(tpg->getVertices().at(4), &actionsTaken);)
+    ASSERT_NO_THROW(
+        tpee.executeAction(tpg->getVertices().at(4), &actionsTaken);)
         << "Evaluation of a valid TPGAction with no exclusion failed.";
-    
+
     ASSERT_EQ(actionsTaken[0], 0)
         << "Action activated during action evaluation is incorrect.";
 }

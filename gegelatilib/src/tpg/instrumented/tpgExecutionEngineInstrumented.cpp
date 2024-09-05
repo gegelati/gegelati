@@ -45,9 +45,12 @@ double TPG::TPGExecutionEngineInstrumented::evaluateEdge(const TPGEdge& edge)
     return TPGExecutionEngine::evaluateEdge(edge);
 }
 
-void TPG::TPGExecutionEngineInstrumented::executeAction(const TPGVertex* currentAction, std::vector<std::int64_t>* actionsTaken){
+void TPG::TPGExecutionEngineInstrumented::executeAction(
+    const TPGVertex* currentAction, std::vector<std::int64_t>* actionsTaken)
+{
 
-    const TPGActionInstrumented* action = (const TPGActionInstrumented*)(currentAction);
+    const TPGActionInstrumented* action =
+        (const TPGActionInstrumented*)(currentAction);
     // Save the action value if the action ID is choosen for the first
     // time.
     if ((*actionsTaken)[action->getActionClass()] == -1) {
@@ -55,7 +58,6 @@ void TPG::TPGExecutionEngineInstrumented::executeAction(const TPGVertex* current
     }
 
     TPGExecutionEngine::executeAction(currentAction, actionsTaken);
-
 }
 
 std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngineInstrumented::
