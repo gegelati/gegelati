@@ -363,8 +363,8 @@ TEST_F(TPGExecutionEngineTestMultiAction, ActionRoot)
     ASSERT_EQ(actionResult.size(), initActions.size())
         << "Action results should have the same size has the initActions "
            "vector.";
-    ASSERT_EQ(actionResult[0], 0)
-        << "Action of class 0 choosen is incorrect.";
-    ASSERT_EQ(actionResult[1], 2) << "Action of class 1 choosen is incorrect. It should take the value "
+    ASSERT_EQ(actionResult[0], 0) << "Action of class 0 choosen is incorrect.";
+    ASSERT_EQ(actionResult[1], 2)
+        << "Action of class 1 choosen is incorrect. It should take the value "
            "in the initActions vector.";
 }
