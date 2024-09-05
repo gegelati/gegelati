@@ -177,8 +177,16 @@ std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> TPG::
     // value is choosen yet.
     std::vector<std::int64_t> rawActionsTaken(initActions.size(), -1);
 
-    executeTeam(dynamic_cast<const TPGTeam*>(currentVertex), visitedVertices,
-                &rawActionsTaken, nbEdgesActivated);
+    // Execute the team only if it is really a team
+    if(dynamic_cast<const TPGTeam*>(currentVertex)){
+        executeTeam(dynamic_cast<const TPGTeam*>(currentVertex), visitedVertices,
+                    &rawActionsTaken, nbEdgesActivated);
+    } else {
+        const TPGAction* action = (const TPGAction*)currentVertex;
+        visitedVertices.push_back(currentVertex);
+        rawActionsTaken[action->getActionClass()] = action->getActionID();
+    }
+
 
     // Browse the raw list of actions and replace the "-1" action by the initial
     // value.

@@ -334,3 +334,37 @@ TEST_F(TPGExecutionEngineTestMultiAction, EarlyExit)
            "in the initActions vector";
     ASSERT_EQ(actionResult[1], 1) << "Action of class 1 choosen is incorrect.";
 }
+
+TEST_F(TPGExecutionEngineTestMultiAction, ActionRoot)
+{
+
+    TPG::TPGExecutionEngine tpee(*e);
+
+    std::vector<uint64_t> initActions(2, 2);
+    uint64_t nbEdgesActivable = 2;
+
+    std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> result;
+
+    ASSERT_NO_THROW(result =
+                        tpee.executeFromRoot(*tpg->getVertices().at(4),
+                                             initActions, nbEdgesActivable))
+        << "Execution of a TPGGraph from a valid root failed.";
+
+    std::vector<const TPG::TPGVertex*> visitedVertexResult = result.first;
+    std::vector<uint64_t> actionResult = result.second;
+
+    // Check the traversed path of A0-0
+    ASSERT_EQ(visitedVertexResult.size(), 1)
+        << "The root is an action, the result should have only one element";
+    ASSERT_EQ(visitedVertexResult.at(0), tpg->getVertices().at(4))
+        << "0th element (i.e. the root) of the traversed path during execution "
+           "is incorrect.";
+
+    ASSERT_EQ(actionResult.size(), initActions.size())
+        << "Action results should have the same size has the initActions "
+           "vector.";
+    ASSERT_EQ(actionResult[0], 0)
+        << "Action of class 0 choosen is incorrect.";
+    ASSERT_EQ(actionResult[1], 2) << "Action of class 1 choosen is incorrect. It should take the value "
+           "in the initActions vector.";
+}
