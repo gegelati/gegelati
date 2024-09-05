@@ -115,10 +115,8 @@ namespace TPG {
          * activated for the first time.
          *
          *
-         * \param[in] currentTeam the TPGAction evaluated. \param[in]
-         * actionsTaken vector of int64_t of actions taken.
-         *
-         * \return the edges that have been traversed.
+         * \param[in] currentAction the TPGAction evaluated.
+         * \param[in] actionsTaken vector of int64_t of actions taken.
          */
         virtual void executeAction(const TPG::TPGVertex* currentAction,
                                    std::vector<std::int64_t>* actionsTaken);
