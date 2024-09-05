@@ -45,6 +45,16 @@ void TPG::TPGVertexInstrumentation::incrementNbVisits() const
     this->nbVisits++;
 }
 
+uint64_t TPG::TPGVertexInstrumentation::getNbUses() const
+{
+    return this->nbUses;
+}
+
+void TPG::TPGVertexInstrumentation::incrementNbUses() const
+{
+    this->nbUses++;
+}
+
 void TPG::TPGVertexInstrumentation::reset() const
 {
     this->nbVisits = 0;

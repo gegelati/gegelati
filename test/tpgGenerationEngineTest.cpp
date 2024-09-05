@@ -802,8 +802,51 @@ TEST_F(TPGGenerationEngineTest, codeGenMultiActionSwitchDisabled)
     tpgGen = factory.create("TwoLeavesMultiAction", *tpg, "./src/");
 
     ASSERT_THROW(tpgGen->generateTPGGraph(), std::runtime_error)
-        << "Generation of code should fail on stack mode with a multiAction "
+        << "Generation of code should fail on switch mode with a multiAction "
            "case.";
+}
+
+TEST_F(TPGGenerationEngineTest, codeGenMultiActionStackToMuchEdgesActivable)
+{
+    tpg->setNbEdgesActivable(3);
+
+    CodeGen::TPGGenerationEngineFactory factory(
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::stackMode);
+
+    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1, 0));
+    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(1, 1));
+    const TPG::TPGVertex* root = (&tpg->addNewTeam());
+
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    Program::Line& prog1L1 = prog1->addNewLine();
+    // reg[0] = in1[0] + in1[1];
+    prog1L1.setDestinationIndex(0);
+    prog1L1.setInstructionIndex(0);
+    prog1L1.setOperand(0, 1, 0);
+    prog1L1.setOperand(1, 1, 1);
+
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    Program::Line& prog2L1 = prog2->addNewLine();
+    // reg[0] = in1[0] + in1[2];
+    prog2L1.setDestinationIndex(0);
+    prog2L1.setInstructionIndex(0);
+    prog2L1.setOperand(0, 1, 0);
+    prog2L1.setOperand(1, 1, 2);
+
+    tpg->addNewEdge(*root, *leaf, prog1);
+    tpg->addNewEdge(*root, *leaf2, prog2);
+
+    ASSERT_EQ(tpg->getNbRootVertices(), 1)
+        << "number of root is not 1 in TwoLeaves";
+
+    ASSERT_EQ(tpg->getNbVertices(), 3) << "bad number of vertices in TwoLeaves";
+
+    ASSERT_EQ(tpg->getEdges().size(), 2) << "bad number of edges in TwoLeaves";
+
+    tpgGen = factory.create("TwoLeavesMultiAction", *tpg, "./src/");
+
+    ASSERT_THROW(tpgGen->generateTPGGraph(), std::runtime_error)
+        << "Generation of code should fail on stack mode with the nbEdgesActivable set to three.";
 }
 
 TEST_F(TPGGenerationEngineTest, TwoLeavesStackMultiAction)

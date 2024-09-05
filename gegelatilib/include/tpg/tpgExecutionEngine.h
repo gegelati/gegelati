@@ -109,6 +109,22 @@ namespace TPG {
         virtual double evaluateEdge(const TPGEdge& edge);
 
         /**
+         * \brief Execute an action.
+         *
+         * The action value of an activated action is saved if the action ID is
+         * activated for the first time.
+         *
+         *
+         * \param[in] currentTeam the TPGAction evaluated. \param[in] actionsTaken
+         * vector of int64_t of actions taken.
+         *
+         * \return the edges that have been traversed.
+         */
+        virtual void executeAction(
+            const TPG::TPGVertex* currentAction,
+            std::vector<std::int64_t>* actionsTaken);
+
+        /**
          * \brief Execute all the Program of the outgoing TPGEdge of the
          * TPGTeam.
          *

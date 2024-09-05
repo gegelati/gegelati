@@ -73,6 +73,17 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     return result;
 }
 
+void TPG::TPGExecutionEngine::executeAction(const TPGVertex* currentAction, std::vector<std::int64_t>* actionsTaken){
+
+    const TPGAction* action = (const TPGAction*)(currentAction);
+    // Save the action value if the action ID is choosen for the first
+    // time.
+    if ((*actionsTaken)[action->getActionClass()] == -1) {
+        (*actionsTaken)[action->getActionClass()] =
+            action->getActionID();
+    }
+}
+
 std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngine::executeTeam(
     const TPGVertex* currentTeam,
     std::vector<const TPGVertex*>& visitedVertices,
@@ -128,14 +139,7 @@ std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngine::executeTeam(
 
         // If edge destination is an action
         if (dynamic_cast<const TPGAction*>(destination)) {
-            const TPGAction* action = (const TPGAction*)(destination);
-
-            // Save the action value if the action ID is choosen for the first
-            // time.
-            if ((*actionsTaken)[action->getActionClass()] == -1) {
-                (*actionsTaken)[action->getActionClass()] =
-                    action->getActionID();
-            }
+            executeAction(destination, actionsTaken);
 
             // Add the action the the visited vertices and the edge to the
             // traversed edges.

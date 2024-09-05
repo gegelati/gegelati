@@ -210,17 +210,31 @@ TEST_F(TPGExecutionEngineTestSingleAction, ArchiveUsage)
         << "No recording was added to the archive.";
 }
 
+TEST_F(TPGExecutionEngineTestSingleAction, EvaluateAction)
+{
+    TPG::TPGExecutionEngine tpee(*e);
+
+    std::vector<int64_t> actionsTaken(1, -1);
+    std::vector<const TPG::TPGVertex*> visitedVertices;
+
+    ASSERT_NO_THROW(tpee.executeAction(tpg->getVertices().at(4), &actionsTaken);)
+        << "Evaluation of a valid TPGAction with no exclusion failed.";
+    
+    ASSERT_EQ(actionsTaken[0], 0)
+        << "Action activated during action evaluation is incorrect.";
+}
+
 TEST_F(TPGExecutionEngineTestSingleAction, EvaluateTeam)
 {
     TPG::TPGExecutionEngine tpee(*e);
 
-    std::vector<int64_t> initActions(2, -1);
+    std::vector<int64_t> actionsTaken(1, -1);
     std::vector<const TPG::TPGVertex*> visitedVertices;
 
     const TPG::TPGEdge* result = NULL;
     ASSERT_NO_THROW(result =
                         tpee.executeTeam(tpg->getVertices().at(1),
-                                         visitedVertices, &initActions, 1)[0];)
+                                         visitedVertices, &actionsTaken, 1)[0];)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))

@@ -82,6 +82,17 @@ namespace TPG {
         double evaluateEdge(const TPGEdge& edge) override;
 
         /**
+         * \brief Specialization of the executeAction function.
+         *
+         * In addition to calling the executeTeam method from
+         * TPGExecutionEngine, this specialization increments the number of
+         * uses of a TPGAction if the action is inserted in actionsTaken.
+         */
+        void executeAction(
+            const TPG::TPGVertex* currentAction,
+            std::vector<std::int64_t>* actionsTaken) override;
+
+        /**
          * \brief Specialization of the executeTeam function.
          *
          * In addition to calling the executeTeam method from
@@ -89,7 +100,7 @@ namespace TPG {
          * visits of the evaluated TPGTeam and the number of traversal of the
          * TPGEdge with the winning bid.
          */
-        virtual std::vector<const TPGEdge*> executeTeam(
+        std::vector<const TPGEdge*> executeTeam(
             const TPG::TPGVertex* currentTeam,
             std::vector<const TPG::TPGVertex*>& visitedTeams,
             std::vector<std::int64_t>* actionsTaken,
