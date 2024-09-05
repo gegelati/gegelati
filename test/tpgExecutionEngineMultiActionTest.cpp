@@ -360,6 +360,9 @@ TEST_F(TPGExecutionEngineTestMultiAction, ActionRoot)
         << "0th element (i.e. the root) of the traversed path during execution "
            "is incorrect.";
 
+    ASSERT_NO_THROW((const TPG::TPGAction*)visitedVertexResult.at(0))
+        << "The visited vertex should be an action";
+
     ASSERT_EQ(actionResult.size(), initActions.size())
         << "Action results should have the same size has the initActions "
            "vector.";
