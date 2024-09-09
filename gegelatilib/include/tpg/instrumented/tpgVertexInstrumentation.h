@@ -59,17 +59,6 @@ namespace TPG {
         void incrementNbVisits() const;
 
         /**
-         * \brief Get the number of time a TPGVertexInstrumentation was used.
-         */
-        uint64_t getNbUses() const;
-
-        /**
-         * \brief Add one to the number of uses for this
-         * TPGVertexInstrumented.
-         */
-        void incrementNbUses() const;
-
-        /**
          *  \brief Reset the instrumentation attributes.
          */
         void reset() const;
