@@ -4,6 +4,8 @@
 _2024.01.10_
 
 ### New features
+* Gegelati is now able to supporte environment with multiple discrete actions.
+  * To do this, a new parameter is added to select the number of edges that are activated per team. The value is by default set to one in single action environment (to keep the same behavior) and set to two in multi action environment.
 
 ### Changes
 * Remove the nbAction parameter that was not necessary since the number of action should not be a parameter that the user can change, it is fixed by the environment
