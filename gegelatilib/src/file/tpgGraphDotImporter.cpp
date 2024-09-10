@@ -44,7 +44,7 @@ const std::string File::TPGGraphDotImporter::programRegex(
 const std::string File::TPGGraphDotImporter::instructionRegex(
     "I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D");
 const std::string File::TPGGraphDotImporter::actionRegex(
-    "A([0-9]+)\\x20\\x5B.*=\"([0-9]+)\"\\x5D");
+    "A([0-9]+)\\x20\\x5B.*=\"(.*)\"\\x5D");
 const std::string File::TPGGraphDotImporter::linkProgramInstructionRegex(
     "P([0-9]+)\\x20->\\x20I([0-9]+).*");
 const std::string File::TPGGraphDotImporter::linkProgramActionRegex(
@@ -212,19 +212,27 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
 {
     if (!this->lastLine.empty() && !matches.empty()) {
         // the regex matches two groups (action number and action label)
-        uint64_t action_label = std::stoi(matches[2]);
+        std::string action_label = matches[2];
         uint64_t action_number = std::stoi(matches[1]);
+
+        // Action label contain the actionID and actionClass with format
+        // "ActionValue-actionID"
+        uint64_t currActionClass =
+            std::stoi(action_label.substr(0, action_label.find('-')));
+        uint64_t currActionID =
+            std::stoi(action_label.substr(action_label.find('-') + 1));
 
         // elmt points to the action with the same label as the action we are
         // parsing
         auto elmt = actionID.find(action_label);
         if (elmt == actionID.end()) {
             // create a new action and insert it if none was previously found
-            this->actionID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(
-                action_label, &this->tpg.addNewAction(action_label)));
+            this->actionID.insert(std::pair<std::string, const TPG::TPGVertex*>(
+                action_label,
+                &this->tpg.addNewAction(currActionID, currActionClass)));
         }
         this->actionLabel.insert(
-            std::pair<uint64_t, uint64_t>(action_number, action_label));
+            std::pair<uint64_t, std::string>(action_number, action_label));
     }
 }
 

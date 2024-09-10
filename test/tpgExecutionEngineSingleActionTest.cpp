@@ -54,7 +54,7 @@
 #define PARAM_FLOAT_PRECISION (float)(int16_t(1) / (float)(-INT16_MIN))
 #endif
 
-class TPGExecutionEngineTest : public ::testing::Test
+class TPGExecutionEngineTestSingleAction : public ::testing::Test
 {
   protected:
     const size_t size1{24};
@@ -172,7 +172,7 @@ class TPGExecutionEngineTest : public ::testing::Test
     }
 };
 
-TEST_F(TPGExecutionEngineTest, ConstructorDestructor)
+TEST_F(TPGExecutionEngineTestSingleAction, ConstructorDestructor)
 {
     TPG::TPGExecutionEngine* tpee;
 
@@ -182,7 +182,7 @@ TEST_F(TPGExecutionEngineTest, ConstructorDestructor)
     ASSERT_NO_THROW(delete tpee) << "Deletion of a TPGExecutionEngine failed.";
 }
 
-TEST_F(TPGExecutionEngineTest, EvaluateEdge)
+TEST_F(TPGExecutionEngineTestSingleAction, EvaluateEdge)
 {
     TPG::TPGExecutionEngine tpee(*e);
 
@@ -199,7 +199,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateEdge)
            "failed.";
 }
 
-TEST_F(TPGExecutionEngineTest, ArchiveUsage)
+TEST_F(TPGExecutionEngineTestSingleAction, ArchiveUsage)
 {
     TPG::TPGExecutionEngine tpee(*e, &a);
 
@@ -210,27 +210,47 @@ TEST_F(TPGExecutionEngineTest, ArchiveUsage)
         << "No recording was added to the archive.";
 }
 
-TEST_F(TPGExecutionEngineTest, EvaluateTeam)
+TEST_F(TPGExecutionEngineTestSingleAction, EvaluateAction)
 {
     TPG::TPGExecutionEngine tpee(*e);
 
+    std::vector<int64_t> actionsTaken(1, -1);
+    std::vector<const TPG::TPGVertex*> visitedVertices;
+
+    ASSERT_NO_THROW(
+        tpee.executeAction(tpg->getVertices().at(4), &actionsTaken);)
+        << "Evaluation of a valid TPGAction with no exclusion failed.";
+
+    ASSERT_EQ(actionsTaken[0], 0)
+        << "Action activated during action evaluation is incorrect.";
+}
+
+TEST_F(TPGExecutionEngineTestSingleAction, EvaluateTeam)
+{
+    TPG::TPGExecutionEngine tpee(*e);
+
+    std::vector<int64_t> actionsTaken(1, -1);
+    std::vector<const TPG::TPGVertex*> visitedVertices;
+
     const TPG::TPGEdge* result = NULL;
-    ASSERT_NO_THROW(result = &tpee.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)));)
+    ASSERT_NO_THROW(result =
+                        tpee.executeTeam(tpg->getVertices().at(1),
+                                         visitedVertices, &actionsTaken, 1)[0];)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
         << "Edge selected during team evaluation is incorrect.";
 }
 
-TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
+TEST_F(TPGExecutionEngineTestSingleAction, EvaluateFromRoot)
 {
     TPG::TPGExecutionEngine tpee(*e);
 
     std::vector<const TPG::TPGVertex*> result;
 
-    ASSERT_NO_THROW(result =
-                        tpee.executeFromRoot(*tpg->getRootVertices().at(0)))
+    ASSERT_NO_THROW(
+        result =
+            tpee.executeFromRoot(*tpg->getRootVertices().at(0), {0}, 1).first)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)

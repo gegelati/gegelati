@@ -139,10 +139,13 @@ namespace TPG {
          * The new TPGAction is added to the back of the vertices list.
          * The TPGAction is created using the TPGFactory of the TPGGraph.
          *
-         * \param[in] actionID the identifier to associate to the TPGAction.
-         * \return a const reference to the newly created TPGAction.
+         * \param[in] actionID the ID identifier to associate to the TPGAction.
+         * \param[in] actionClass the Class identifier to associate to the
+         * TPGAction. Default value set to 0 for single action cases; \return a
+         * const reference to the newly created TPGAction.
          */
-        const TPGAction& addNewAction(uint64_t actionID);
+        const TPGAction& addNewAction(uint64_t actionID,
+                                      uint64_t actionClass = 0);
 
         /**
          * \brief Get the number of TPGVertex contained in the TPGGraph.
@@ -181,6 +184,20 @@ namespace TPG {
          * graph.
          */
         const std::vector<const TPGVertex*> getRootVertices() const;
+
+        /**
+         * \brief Get the nbEdgesActivable attribute.
+         *
+         * \return an integer that represents nbEdgesActivable
+         */
+        const uint64_t getNbEdgesActivable() const;
+
+        /**
+         * \brief Set the nbEdgesActivable attribute.
+         *
+         * \param[in] newNbEdgesAvailable new value of nbEdgesAvailable.
+         */
+        void setNbEdgesActivable(uint64_t newNbEdgesAvailable);
 
         /**
          * \brief Check whether a given vertex exists in the TPGGraph.
@@ -317,6 +334,15 @@ namespace TPG {
          * \brief Set of TPGEdge composing the TPGGraph.
          */
         std::list<std::unique_ptr<TPGEdge>> edges;
+
+        /**
+         * \brief Number of edges Activable at each evaluation team.
+         * Only one edge pointing a team can be activated but the number of
+         * edges pointing an action is limited by this parameter. By default,
+         * this value is set to 1 for single action cases and 2 for multi action
+         * cases.
+         */
+        uint64_t nbEdgesActivable = 1;
 
         /**
          * \brief Find the non-const iterator to a vertex of the graph from

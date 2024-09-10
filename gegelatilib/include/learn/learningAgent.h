@@ -139,12 +139,29 @@ namespace Learn {
         {
 
             // override the number of initial roots if set to 0
+            // Number of initial roots is set to the max between the number of
+            // surviving roots and the number of actions.
             if (this->params.mutation.tpg.initNbRoots == 0) {
                 this->params.mutation.tpg.initNbRoots = std::max(
                     (size_t)floor((1 - this->params.ratioDeletedRoots) *
                                   (double)params.mutation.tpg.nbRoots),
                     (size_t)this->learningEnvironment.getNbActions());
             }
+
+            // Override the number of edges available if set to 0
+            // Number of edges available is set to 1 for a single action
+            // environment and 2 for a multi-action environment.
+            if (this->params.nbEdgesActivable == 0) {
+                this->params.nbEdgesActivable =
+                    (size_t)(this->learningEnvironment.getVectActions()
+                                 .size() == 1)
+                        ? 1
+                        : 2;
+            }
+
+            // Set the number of edges aivailable to the tpg graph.
+            this->tpg->setNbEdgesActivable(
+                (uint64_t)this->params.nbEdgesActivable);
         };
 
         /// Default destructor for polymorphism
@@ -177,6 +194,20 @@ namespace Learn {
          * \return Get a reference to the RNG.
          */
         Mutator::RNG& getRNG();
+
+        /**
+         * \brief Getter for the LearningParameters used by the LearningAgent.
+         *
+         * \return Get a reference to the RNG.
+         */
+        LearningParameters& getParams();
+
+        /**
+         * \brief Setter for the LearningParameters used by the LearningAgent.
+         *
+         * \param[in] newParams New params set to the LearningAgent.
+         */
+        void setParams(LearningParameters& newParams);
 
         /**
          * \brief Adds a LALogger to the loggers vector.

@@ -39,7 +39,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "TwoLeaves.h"
+#include "TwoLeavesMultiAction.h"
 #include "csvparser.h"
 #include "inferenceCSV.h"
 
@@ -47,7 +47,7 @@ double* in1;
 
 int main(int argc, char* argv[])
 {
-    double tab[3];
+    double tab[4];
     in1 = tab;
 
     if (argc != 2) {
@@ -56,5 +56,5 @@ int main(int argc, char* argv[])
         return 3;
     }
 
-    return inferenceCSVSingleAction(argv[1], inferenceTPG);
+    return inferenceCSVMultiAction(argv[1], inferenceTPG);
 }

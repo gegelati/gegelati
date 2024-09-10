@@ -169,6 +169,21 @@ namespace Learn {
         size_t nbProgramConstant = 0;
 
         /// JSon comment
+        inline static const std::string nbEdgesActivableComment =
+            "// Number of edges that can be activated during a team "
+            "evaluation.\n"
+            "// Even if more than one edge can be activated, only one team can "
+            "be.\n"
+            "// If set to 0, it will be set to one for single action cases and "
+            "two for multi action cases.\n"
+            "// \"nbEdgesActivable\" : 0, // Default value";
+        /// Number of edges activable for the team evaluation.
+        /// Even if more than one edge can be activated, only one team can be.
+        /// If set to 0, it will be set to one for single action cases and two
+        /// for multi action cases.
+        size_t nbEdgesActivable = 0;
+
+        /// JSon comment
         inline static const std::string nbThreadsComment =
             "// [Only used in ParallelLearningAgent and child classes.]\n"
             "// Number of threads used for the training process.\n"

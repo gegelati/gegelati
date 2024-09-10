@@ -92,9 +92,12 @@ namespace TPG {
          *
          * This method allocates and returns a new TPGAction.
          *
-         * \param[in] id integer stored as the actionID of the TPGAction.
+         * \param[in] actID integer stored as the actionID of the TPGAction.
+         * \param[in] actClass integer stored as the actionClass of the
+         * TPGAction.
          */
-        virtual TPGAction* createTPGAction(const uint64_t id) const;
+        virtual TPGAction* createTPGAction(const uint64_t actID,
+                                           const uint64_t actClass) const;
 
         /**
          * \brief Create a TPGEdge for a TPGGraph.

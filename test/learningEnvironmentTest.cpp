@@ -35,6 +35,7 @@
 
 #include <gtest/gtest.h>
 
+#include "learn/gridWorld.h"
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
 
@@ -75,6 +76,34 @@ class FakeLearningEnvironment : public Learn::LearningEnvironment
     }
 };
 
+// Create a fake MarlLearningEnvironment for testing purpose.
+class FakeMarlLearningEnvironment : public Learn::LearningEnvironment
+{
+    Data::PrimitiveTypeArray<int> data;
+
+  public:
+    FakeMarlLearningEnvironment(std::vector<uint64_t> initActions)
+        : LearningEnvironment(std::vector<uint64_t>(2, 2), initActions),
+          data(3){};
+    void reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber,
+               uint64_t generationNumber){};
+    std::vector<std::reference_wrapper<const Data::DataHandler>>
+    getDataSources()
+    {
+        std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
+        vect.push_back(data);
+        return vect;
+    }
+    double getScore() const
+    {
+        return 0.0;
+    }
+    bool isTerminal() const
+    {
+        return false;
+    }
+};
+
 TEST(LearningEnvironmentTest, Clonable)
 {
     Learn::LearningEnvironment* le = new FakeLearningEnvironment();
@@ -93,11 +122,33 @@ TEST(LearningEnvironmentTest, Clonable)
     delete le;
 }
 
+TEST(LearningEnvironmentTest, initActions)
+{
+    Learn::LearningEnvironment* le = NULL;
+
+    ASSERT_THROW(
+        le = new FakeMarlLearningEnvironment(std::vector<uint64_t>(3, 2)),
+        std::runtime_error)
+        << "Construction of the Learning Environment should have failed with "
+           "wrong initActions vector size.";
+}
+
 TEST(LearningEnvironmentTest, getNbAction)
 {
+    // Test with single action environment
     StickGameWithOpponent le;
 
     ASSERT_EQ(le.getNbActions(), 3) << "Number of action is incorrect";
+
+    // Test with multi-actions environment
+    GridWorld marlLe;
+
+    ASSERT_EQ(marlLe.getNbActions(), 6)
+        << "Total number of actions is incorrect";
+    ASSERT_EQ(marlLe.getVectActions(), std::vector<uint64_t>(2, 3))
+        << "Vector of actions is incorrect";
+    ASSERT_EQ(marlLe.getInitActions(), std::vector<uint64_t>(2, 1))
+        << "Vector of init actions is incorrect";
 }
 
 TEST(LearningEnvironmentTest, getDataSource)
@@ -126,6 +177,15 @@ TEST(LearningEnvironmentTest, doAction)
     std::shared_ptr<const int> nbSticks =
         (le.getDataSources().at(1).get().getDataAt(typeid(int), 0))
             .getSharedPointer<const int>();
+
+    // Doing the same thing with doActions should lead to same result
+    le.reset();
+
+    ASSERT_NO_THROW(le.doActions(std::vector<uint64_t>(1, 1)))
+        << "Remove 2 stick after game init should not fail with doActions.";
+    nbSticks = (le.getDataSources().at(1).get().getDataAt(typeid(int), 0))
+                   .getSharedPointer<const int>();
+
     // Remove 2 sticks brings us to 19 sticks
     // Other player removes between 1 and 3 sticks
     // thus, number of remaining sticks is within 18 and 16
@@ -135,6 +195,20 @@ TEST(LearningEnvironmentTest, doAction)
 
     // Check the illegal action
     ASSERT_THROW(le.doAction(3), std::runtime_error)
+        << "Illegal action not detected as such.";
+
+    FakeMarlLearningEnvironment marlLe(std::vector<uint64_t>(2, 2));
+    ASSERT_NO_THROW(marlLe.doActions(std::vector<uint64_t>{1, 1}))
+        << "Going right after game init should not fail.";
+
+    // Check the illegal action
+    ASSERT_THROW(marlLe.doAction(3), std::runtime_error)
+        << "Illegal action not detected as such.";
+    ASSERT_THROW(marlLe.doActions(std::vector<uint64_t>(3, 1)),
+                 std::runtime_error)
+        << "Illegal action not detected as such.";
+    ASSERT_THROW(marlLe.doActions(std::vector<uint64_t>(2, 5)),
+                 std::runtime_error)
         << "Illegal action not detected as such.";
 }
 

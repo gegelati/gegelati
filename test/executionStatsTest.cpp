@@ -223,7 +223,8 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = 10
         // P8 = 12
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
+            execEngine->executeFromRoot(*tpg->getVertices().at(0), {0}, 1)
+                .first));
 
         //  - T0 -> T1 -> A1
         data->setDataAt(typeid(double), 10, 10);
@@ -233,7 +234,8 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = 10
         // P8 = 12
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
+            execEngine->executeFromRoot(*tpg->getVertices().at(0), {0}, 1)
+                .first));
 
         //  - T0 -> T1 -> T2 -> A2
         data->setDataAt(typeid(double), 12, 13);
@@ -243,7 +245,8 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = 10
         // P8 = -18
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
+            execEngine->executeFromRoot(*tpg->getVertices().at(0), {0}, 1)
+                .first));
     }
 
     virtual void TearDown() override

@@ -29,12 +29,13 @@ int bestProgram(double *results, int nb) {
 
 enum vertices {A0, T1, };
 
-int inferenceTPG() {
+void inferenceTPG(int* action) {
 	enum vertices currentVertex = T1;
-	while(1) {
+	*action = INT_MIN;
+	while(*action == INT_MIN) {
 		switch (currentVertex) {
 		case A0: {
-			return 1;
+			*action = 1;
 			break;
 		}
 		case T1: {

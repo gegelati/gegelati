@@ -11,6 +11,7 @@
   "nbGenerations": 200,
   "doValidation": true,
   "nbProgramConstant": 5,
+  "nbEdgesActivable": 0,
   "mutation": {
     "tpg": {
       "nbRoots": 100,

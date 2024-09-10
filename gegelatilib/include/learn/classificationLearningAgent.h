@@ -177,12 +177,14 @@ namespace Learn {
             uint64_t nbActions = 0;
             while (!le.isTerminal() &&
                    nbActions < this->params.maxNbActionsPerEval) {
-                // Get the action
-                uint64_t actionID =
-                    ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())
-                        ->getActionID();
+
+                // Get the actions
+                std::vector<uint64_t> actionsID =
+                    tee.executeFromRoot(*root, le.getInitActions(),
+                                        this->params.nbEdgesActivable)
+                        .second; // TODO
                 // Do it
-                le.doAction(actionID);
+                le.doActions(actionsID);
                 // Count actions
                 nbActions++;
             }

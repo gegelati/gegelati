@@ -73,7 +73,8 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     }
     else if (dynamic_cast<const TPG::TPGAction*>(destination) != nullptr) {
         auto a = dynamic_cast<const TPG::TPGAction*>(destination);
-        destinationName = 'A' + std::to_string(a->getActionID());
+        destinationName = 'A' + std::to_string(a->getActionClass()) + "_" +
+                          std::to_string(a->getActionID());
     }
 
     fileMain << "\t\t\t{" << destinationName << "Vert, P" << progID << ", "
@@ -84,8 +85,8 @@ void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 {
     uint64_t id = findVertexID(team);
     // print prototype and declaration of the function
-    fileMain << "void* T" << id << "(int* action){" << std::endl;
-    fileMainH << "void* T" << id << "(int* action);" << std::endl;
+    fileMain << "void T" << id << "(int* action){" << std::endl;
+    fileMainH << "void T" << id << "(int* action);" << std::endl;
     // generate static array
     fileMain << "\tstatic Edge e[] = {" << std::endl;
     auto list = team.getOutgoingEdges();
@@ -103,26 +104,32 @@ void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     // appel des fonction d'exécution
     fileMain << "\tint nbEdge = " << team.getOutgoingEdges().size() << ";"
              << std::endl;
-    fileMain << "\treturn executeTeam(e,nbEdge);\n}\n" << std::endl;
+    fileMain << "\texecuteTeam(e, nbEdge, action);\n}\n" << std::endl;
 }
 
 void CodeGen::TPGStackGenerationEngine::generateAction(
     const TPG::TPGAction& action)
 {
     uint64_t id = action.getActionID();
+    uint64_t actClass = action.getActionClass();
     // print prototype and declaration of the function
-    fileMain << "void* A" << id << "(int* action){" << std::endl;
-    fileMainH << "void* A" << id << "(int* action);" << std::endl;
+    fileMain << "void A" << actClass << "_" << id << "(int* action){"
+             << std::endl;
+    fileMainH << "void A" << actClass << "_" << id << "(int* action);"
+              << std::endl;
 
     // print definition of the function
-    fileMain << "\t*action = " << id << ";" << std::endl;
-    fileMain << "\treturn NULL;\n}\n" << std::endl;
+    fileMain << "\tif(action[" << actClass << "] == INT_MIN){" << std::endl;
+
+    fileMain << "\t\taction[" << actClass << "] = " << id << ";" << std::endl;
+    fileMain << "\t}\n" << std::endl;
+    fileMain << "}\n" << std::endl;
 }
 
 void CodeGen::TPGStackGenerationEngine::setRoot(const TPG::TPGVertex& team)
 {
-    fileMainH << "\nextern void* (*root)(int* action);" << std::endl;
-    fileMain << "void* (*root)(int* action) = T" << findVertexID(team) << ";"
+    fileMainH << "\nextern void (*root)(int* action);" << std::endl;
+    fileMain << "void (*root)(int*) = T" << findVertexID(team) << ";"
              << std::endl;
 }
 
@@ -147,6 +154,22 @@ void CodeGen::TPGStackGenerationEngine::generateTPGGraph()
 
 void CodeGen::TPGStackGenerationEngine::initTpgFile()
 {
+    int nbActionClass = 0;
+    for (auto vertex : this->tpg.getVertices()) {
+        if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr) {
+            if ((*(const TPG::TPGAction*)vertex).getActionClass() + 1 >
+                nbActionClass) {
+                nbActionClass =
+                    (int)(*(const TPG::TPGAction*)vertex).getActionClass() + 1;
+            }
+        }
+    }
+
+    std::string initAction = "";
+    for (int i = 0; i < nbActionClass; ++i) {
+        initAction += "\taction[" + std::to_string(i) + "] = INT_MIN;\n";
+    }
+
     fileMain << "#include <limits.h> \n"
              << "#include <assert.h>\n"
              << "#include <stdio.h>\n"
@@ -154,50 +177,73 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
              << "#include <stdbool.h>\n"
              << "#include <math.h>\n\n"
 
-             << "int inferenceTPG(){\n"
-             << "\treturn executeFromVertex(root);\n"
+             << "void inferenceTPG(int *action){\n"
+             << "\texecuteFromVertex(root, action);\n"
              << "}\n\n"
 
-             << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
-             << "\tvoid*(*f)(int*action) = ptr_f;\n"
-             << "\tint action = INT_MIN;\n"
-             << "\twhile (f!=NULL){\n"
-             << "\t\tf= (void*(*)(int*)) (f(&action));\n"
-             << "\t}\n"
-             << "\treturn action;\n}\n\n"
-
-             << "void* executeTeam(Edge* e, int nbEdge){\n"
-             << "\tint idxNext = execute(e, nbEdge); \n"
-             << "\tif(idxNext != -1) {\n"
-             << "\t\treturn e[idxNext].ptr_vertex;\n"
-             << "\t}\n"
-             << "\treturn NULL;\n"
-             << "}\n\n"
-
-             << "int execute(Edge* e, int nbEdge){\n"
-             << "\tdouble bestResult;\n"
-             << "\tint idxNext = 0;\n"
-             << "\tint idx;\n"
-             << "\tdouble r;\n\n"
-
-             << "\tbestResult = e[idxNext].ptr_prog();\n"
-             << "\tbestResult = (isnan(bestResult)) ? -INFINITY : bestResult;\n"
-             << "\tidx = idxNext + 1;\n\n"
-
-             << "\t// Check if there is another edge with a better result\n"
-             << "\twhile (idx < nbEdge){\n"
-
-             << "\t\tr = e[idx].ptr_prog();\n"
-             << "\t\tr = (isnan(r)) ? -INFINITY : r;\n"
-             << "\t\tif (r >= bestResult){\n"
-             << "\t\t\tbestResult = r;\n"
-             << "\t\t\tidxNext = idx;\n"
-             << "\t\t}\n"
-             << "\t\tidx++;\n"
-             << "\t}\n"
-             << "\treturn idxNext;\n"
-             << "}\n"
+             << "void executeFromVertex(void (*ptr_f)(int*), int *action){\n"
+             << initAction << "\tptr_f(action);\n"
+             << "\n}\n\n"
              << std::endl;
+
+    if (this->tpg.getNbEdgesActivable() == 1) {
+
+        fileMain << "void executeTeam(Edge* e, int nbEdge, int* action){\n"
+                 << "\tint idxBest = -1;\n"
+                 << "\tdouble bestResult = -INFINITY;\n"
+                 << "\tfor (int idx = 0; idx < nbEdge; ++idx) {\n"
+                 << "\t\tdouble r = e[idx].ptr_prog();\n"
+                 << "\t\tr = (isnan(r)) ? -INFINITY : r;\n"
+                 << "\t\tif(r >= bestResult) {\n"
+                 << "\t\t\t// If the result is better than best result, put "
+                    "the result on best and the former best on second best\n"
+                 << "\t\t\tbestResult = r;\n"
+                 << "\t\t\tidxBest = idx;\n"
+                 << "\t\t}\n"
+                 << "\t}\n"
+                 << "\te[idxBest].ptr_vertex(action);\n"
+                 << "}\n"
+                 << std::endl;
+    }
+    else if (this->tpg.getNbEdgesActivable() == 2) {
+
+        fileMain << "void executeTeam(Edge* e, int nbEdge, int* action){\n"
+                 << "\tint idxBest = -1, idxSecondBest = -1;\n"
+                 << "\tdouble bestResult1 = -INFINITY;\n"
+                 << "\tdouble bestResult2 = -INFINITY;\n"
+
+                 << "\tfor (int idx = 0; idx < nbEdge; ++idx) {\n"
+                 << "\t\tdouble r = e[idx].ptr_prog();\n"
+                 << "\t\tr = (isnan(r)) ? -INFINITY : r;\n"
+
+                 << "\t\tif(r >= bestResult2 && idx != idxBest) {\n"
+                 << "\t\t\tif(r >= bestResult1) {\n"
+                 << "\t\t\t\t// If the result is better than best result, put "
+                    "the result on best and the former best on second best\n"
+                 << "\t\t\t\tbestResult2 = bestResult1;\n"
+                 << "\t\t\t\tidxSecondBest = idxBest;\n"
+
+                 << "\t\t\t\tbestResult1 = r;\n"
+                 << "\t\t\t\tidxBest = idx;\n"
+                 << "\t\t\t} else {\n"
+                 << "\t\t\t\t// If the result is better than second best "
+                    "result, put the result on second best\n"
+                 << "\t\t\t\tbestResult2 = r;\n"
+                 << "\t\t\t\tidxSecondBest = idx;\n"
+                 << "\t\t\t}\n"
+                 << "\t\t}\n"
+                 << "\t}\n"
+                 << "\te[idxBest].ptr_vertex(action);\n"
+                 << "\te[idxSecondBest].ptr_vertex(action);\n"
+
+                 << "}\n"
+                 << std::endl;
+    }
+    else {
+        throw std::runtime_error("The number of Activable edges should not be "
+                                 "higher than 2 for the codeGen "
+                                 "It has not been implemented yet.");
+    }
 }
 
 void CodeGen::TPGStackGenerationEngine::initHeaderFile()
@@ -215,13 +261,12 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
               << "typedef struct Edge {\n"
               << "\tVertex destination;\n"
               << "\tdouble (*ptr_prog)();\n"
-              << "\tvoid* (*ptr_vertex)(int* action);\n"
+              << "\tvoid (*ptr_vertex)(int* action);\n"
               << "}Edge;\n\n"
 
-              << "int inferenceTPG();\n"
-              << "int executeFromVertex(void*(*)(int*action));\n"
-              << "void* executeTeam(Edge* e, int nbEdge);\n"
-              << "int execute(Edge* e, int nbEdge);\n"
+              << "void inferenceTPG(int *action);\n"
+              << "void executeFromVertex(void (*)(int*), int *action);\n"
+              << "void executeTeam(Edge* e, int nbEdge, int *action);\n"
               << std::endl;
 }
 
@@ -234,6 +279,8 @@ std::string CodeGen::TPGStackGenerationEngine::vertexName(
     }
     else {
         vertexName << "A"
+                   << dynamic_cast<const TPG::TPGAction*>(&v)->getActionClass()
+                   << "_"
                    << dynamic_cast<const TPG::TPGAction*>(&v)->getActionID();
     }
     return vertexName.str();

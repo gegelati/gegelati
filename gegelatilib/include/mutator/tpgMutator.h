@@ -68,14 +68,14 @@ namespace Mutator {
          * \param[in,out] graph the initialized TPGGraph.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
-         * \param[in] nbAction number of actions that will be usable for
+         * \param[in] vectActions vector of actions that will be usable for
          * interacting with this LearningEnviromnent.
          * \throw std::runtime_error if maxInitOutgoingEdges exceeds nbAction.
          *        Or if nbAction is smaller than 1.
          */
         void initRandomTPG(TPG::TPGGraph& graph,
                            const MutationParameters& params, Mutator::RNG& rng,
-                           uint64_t nbAction);
+                           const std::vector<uint64_t>& vectActions);
 
         /**
          * \brief Select a random outgoingEdge of the given TPGTeam and removes
@@ -263,7 +263,7 @@ namespace Mutator {
          *            mutated Program behavior.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
-         * \param[in] nbAction number of actions that will be usable for
+         * \param[in] nbAction vector of actions that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] maxNbThreads Integer parameter controlling the number of
          * threads used for parallel execution. Possible values are:
@@ -275,7 +275,7 @@ namespace Mutator {
         void populateTPG(
             TPG::TPGGraph& graph, const Archive& archive,
             const Mutator::MutationParameters& params, Mutator::RNG& rng,
-            uint64_t nbActions,
+            const std::vector<uint64_t>& vectActions,
             uint64_t maxNbThreads = std::thread::hardware_concurrency());
     }; // namespace TPGMutator
 };     // namespace Mutator

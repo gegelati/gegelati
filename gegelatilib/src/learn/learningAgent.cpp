@@ -67,6 +67,16 @@ Mutator::RNG& Learn::LearningAgent::getRNG()
     return this->rng;
 }
 
+Learn::LearningParameters& Learn::LearningAgent::getParams()
+{
+    return this->params;
+}
+
+void Learn::LearningAgent::setParams(LearningParameters& newParams)
+{
+    this->params = newParams;
+}
+
 void Learn::LearningAgent::init(uint64_t seed)
 {
     // Initialize Randomness
@@ -75,7 +85,7 @@ void Learn::LearningAgent::init(uint64_t seed)
     // Initialize the tpg
     Mutator::TPGMutator::initRandomTPG(
         *this->tpg, params.mutation, this->rng,
-        this->learningEnvironment.getNbActions());
+        this->learningEnvironment.getVectActions());
 
     // Clear the archive
     this->archive.clear();
@@ -142,16 +152,17 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         uint64_t nbActions = 0;
         while (!le.isTerminal() &&
                nbActions < this->params.maxNbActionsPerEval) {
-            // Get the action
-            uint64_t actionID =
-                ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())
-                    ->getActionID();
+            // Get the actions
+            std::vector<uint64_t> actionsID =
+                tee.executeFromRoot(*root, le.getInitActions(),
+                                    this->params.nbEdgesActivable)
+                    .second;
+
             // Do it
-            le.doAction(actionID);
+            le.doActions(actionsID);
             // Count actions
             nbActions++;
         }
-
         // Update results
         result += le.getScore();
     }
@@ -234,7 +245,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(
         *this->tpg, this->archive, this->params.mutation, this->rng,
-        this->learningEnvironment.getNbActions(), maxNbThreads);
+        this->learningEnvironment.getVectActions(), maxNbThreads);
     for (auto logger : loggers) {
         logger.get().logAfterPopulateTPG();
     }
@@ -282,10 +293,15 @@ void Learn::LearningAgent::decimateWorstRoots(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
         preservedActionRoots;
 
+    // Determine the numbers of roots to delete
+    int nbRootsToDelete =
+        std::max((this->tpg->getNbRootVertices() - params.mutation.tpg.nbRoots),
+                 (uint64_t)0) +
+        (int)floor(this->params.ratioDeletedRoots *
+                   (double)params.mutation.tpg.nbRoots);
+
     auto i = 0;
-    while (i < floor(this->params.ratioDeletedRoots *
-                     (double)params.mutation.tpg.nbRoots) &&
-           results.size() > 0) {
+    while (i < nbRootsToDelete && results.size() > 0) {
         // If the root is an action, do not remove it!
         const TPG::TPGVertex* root = results.begin()->second;
         if (dynamic_cast<const TPG::TPGAction*>(root) == nullptr) {

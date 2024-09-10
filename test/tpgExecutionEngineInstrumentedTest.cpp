@@ -222,9 +222,12 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
     ASSERT_EQ(t1a0->getNbVisits(), 0)
         << "Edge should not have been traversed before.";
 
+    std::vector<int64_t> initActions(1, -1);
+    std::vector<const TPG::TPGVertex*> visitedVertices;
     const TPG::TPGEdge* result = NULL;
-    ASSERT_NO_THROW(result = &tpeei.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)));)
+    ASSERT_NO_THROW(result =
+                        tpeei.executeTeam(tpg->getVertices().at(1),
+                                          visitedVertices, &initActions, 1)[0];)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
@@ -252,8 +255,9 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
     ASSERT_EQ(action->getNbVisits(), 0)
         << "Nb visit before evaluation is incorrect.";
 
-    ASSERT_NO_THROW(result =
-                        tpeei.executeFromRoot(*tpg->getRootVertices().at(0)))
+    ASSERT_NO_THROW(
+        result =
+            tpeei.executeFromRoot(*tpg->getRootVertices().at(0), {0}, 1).first)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)
@@ -276,8 +280,8 @@ TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors)
     ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
         << "Trace history isn't empty before execution.";
 
-    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
-    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
+    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0), {0}, 1).first;
+    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0), {0}, 1).first;
 
     ASSERT_EQ(tpeei.getTraceHistory().size(), 2)
         << "Wrong number of recorded traces.";

@@ -77,6 +77,11 @@ namespace TPG {
         /// Attribute is mutable because all TPGVertex are seen as const outside
         /// from their TPGGraph.
         mutable std::atomic_uint64_t nbVisits;
+
+        /// Number of a time a TPGVertex has been used
+        /// Attribute is mutable because all TPGVertex are seen as const outside
+        /// from their TPGGraph.
+        mutable std::atomic_uint64_t nbUses;
     };
 } // namespace TPG
 

@@ -79,9 +79,10 @@ const TPG::TPGTeam& TPG::TPGGraph::addNewTeam()
     return (const TPGTeam&)(*this->vertices.back());
 }
 
-const TPG::TPGAction& TPG::TPGGraph::addNewAction(uint64_t actionID)
+const TPG::TPGAction& TPG::TPGGraph::addNewAction(uint64_t actionID,
+                                                  uint64_t actionClass)
 {
-    this->vertices.push_back(factory->createTPGAction(actionID));
+    this->vertices.push_back(factory->createTPGAction(actionID, actionClass));
     return (const TPGAction&)(*this->vertices.back());
 }
 
@@ -113,6 +114,16 @@ const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
                      return vertex->getIncomingEdges().size() == 0;
                  });
     return result;
+}
+
+const uint64_t TPG::TPGGraph::getNbEdgesActivable() const
+{
+    return this->nbEdgesActivable;
+}
+
+void TPG::TPGGraph::setNbEdgesActivable(uint64_t newNbEdgesAvailable)
+{
+    this->nbEdgesActivable = newNbEdgesAvailable;
 }
 
 bool TPG::TPGGraph::hasVertex(const TPG::TPGVertex& vertex) const
@@ -160,7 +171,8 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
         this->addNewTeam();
     }
     else if (dynamic_cast<const TPG::TPGAction*>(&vertex) != nullptr) {
-        this->addNewAction(((TPGAction&)vertex).getActionID());
+        const TPGAction action = (const TPGAction&)vertex;
+        this->addNewAction(action.getActionID(), action.getActionClass());
     }
 
     // Get the new vertex
