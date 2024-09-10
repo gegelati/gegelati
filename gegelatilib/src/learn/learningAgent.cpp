@@ -298,7 +298,7 @@ void Learn::LearningAgent::decimateWorstRoots(
         std::max((this->tpg->getNbRootVertices() - params.mutation.tpg.nbRoots),
                  (uint64_t)0) +
         (int)floor(this->params.ratioDeletedRoots *
-              (double)params.mutation.tpg.nbRoots);
+                   (double)params.mutation.tpg.nbRoots);
 
     auto i = 0;
     while (i < nbRootsToDelete && results.size() > 0) {
