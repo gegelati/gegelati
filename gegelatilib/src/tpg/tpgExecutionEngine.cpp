@@ -77,7 +77,7 @@ void TPG::TPGExecutionEngine::executeAction(
     const TPGVertex* currentAction, std::vector<std::int64_t>* actionsTaken)
 {
 
-    const TPGAction* action = (const TPGAction*)(currentAction);
+    auto action = (const TPGAction*)(currentAction);
     // Save the action value if the action ID is choosen for the first
     // time.
     if ((*actionsTaken)[action->getActionClass()] == -1) {
@@ -188,7 +188,7 @@ std::pair<std::vector<const TPG::TPGVertex*>, std::vector<uint64_t>> TPG::
                     visitedVertices, &rawActionsTaken, nbEdgesActivated);
     }
     else {
-        const TPGAction* action = (const TPGAction*)currentVertex;
+        auto action = (const TPGAction*)currentVertex;
         visitedVertices.push_back(currentVertex);
         rawActionsTaken[action->getActionClass()] = action->getActionID();
     }

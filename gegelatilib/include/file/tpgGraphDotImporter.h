@@ -109,7 +109,7 @@ namespace File {
          * This map is used to ensure that identical actions are not created
          * more than once.
          */
-        std::map<std::string, const TPG::TPGVertex*> actionID;
+        std::map<std::string, const TPG::TPGVertex*, std::less<>> actionID;
 
         /**
          * \brief Map associating actions to the corresponding action ID

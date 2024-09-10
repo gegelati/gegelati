@@ -207,7 +207,7 @@ namespace Learn {
          *
          * \param[in] params New params set to the LearningAgent.
          */
-        void setParams(LearningParameters& params);
+        void setParams(LearningParameters& newParams);
 
         /**
          * \brief Adds a LALogger to the loggers vector.

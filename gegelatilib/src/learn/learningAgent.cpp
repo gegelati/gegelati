@@ -72,9 +72,9 @@ Learn::LearningParameters& Learn::LearningAgent::getParams()
     return this->params;
 }
 
-void Learn::LearningAgent::setParams(LearningParameters& params)
+void Learn::LearningAgent::setParams(LearningParameters& newParams)
 {
-    this->params = params;
+    this->params = newParams;
 }
 
 void Learn::LearningAgent::init(uint64_t seed)
@@ -297,7 +297,7 @@ void Learn::LearningAgent::decimateWorstRoots(
     int nbRootsToDelete =
         std::max((this->tpg->getNbRootVertices() - params.mutation.tpg.nbRoots),
                  (uint64_t)0) +
-        floor(this->params.ratioDeletedRoots *
+        (int)floor(this->params.ratioDeletedRoots *
               (double)params.mutation.tpg.nbRoots);
 
     auto i = 0;

@@ -171,7 +171,7 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
         this->addNewTeam();
     }
     else if (dynamic_cast<const TPG::TPGAction*>(&vertex) != nullptr) {
-        TPGAction action = ((TPGAction&)vertex);
+        const TPGAction action = (const TPGAction&)vertex;
         this->addNewAction(action.getActionID(), action.getActionClass());
     }
 

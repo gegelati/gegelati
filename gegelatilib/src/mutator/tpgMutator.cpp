@@ -57,7 +57,7 @@
 
 void Mutator::TPGMutator::initRandomTPG(
     TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-    Mutator::RNG& rng, std::vector<uint64_t> vectActions)
+    Mutator::RNG& rng, const std::vector<uint64_t>& vectActions)
 {
 
     uint64_t nbActions =
@@ -460,7 +460,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                                       const Archive& archive,
                                       const Mutator::MutationParameters& params,
                                       Mutator::RNG& rng,
-                                      std::vector<uint64_t> vectActions,
+                                      const std::vector<uint64_t>& vectActions,
                                       uint64_t maxNbThreads)
 {
     // Get current vertex set (copy)

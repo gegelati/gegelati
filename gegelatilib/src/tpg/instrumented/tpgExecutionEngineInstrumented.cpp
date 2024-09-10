@@ -58,8 +58,6 @@ std::vector<const TPG::TPGEdge*> TPG::TPGExecutionEngineInstrumented::
     std::vector<const TPGEdge*> winningEdges = TPGExecutionEngine::executeTeam(
         currentTeam, visitedVertices, actionsTaken, nbEdgesActivated);
     for (const TPGEdge* edge : winningEdges) {
-        if (dynamic_cast<const TPGAction*>(edge->getDestination()) != nullptr) {
-        }
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge)
             ->incrementNbTraversal();
     }

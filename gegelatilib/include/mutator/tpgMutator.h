@@ -75,7 +75,7 @@ namespace Mutator {
          */
         void initRandomTPG(TPG::TPGGraph& graph,
                            const MutationParameters& params, Mutator::RNG& rng,
-                           std::vector<uint64_t> vectActions);
+                           const std::vector<uint64_t>& vectActions);
 
         /**
          * \brief Select a random outgoingEdge of the given TPGTeam and removes
@@ -275,7 +275,7 @@ namespace Mutator {
         void populateTPG(
             TPG::TPGGraph& graph, const Archive& archive,
             const Mutator::MutationParameters& params, Mutator::RNG& rng,
-            std::vector<uint64_t> vectActions,
+            const std::vector<uint64_t>& vectActions,
             uint64_t maxNbThreads = std::thread::hardware_concurrency());
     }; // namespace TPGMutator
 };     // namespace Mutator

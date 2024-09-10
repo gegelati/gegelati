@@ -122,8 +122,8 @@ namespace Learn {
          * fill with zeros.
          */
         LearningEnvironment(
-            std::vector<uint64_t> vectAct,
-            std::vector<uint64_t> initAct = std::vector<uint64_t>())
+            const std::vector<uint64_t>& vectAct,
+            const std::vector<uint64_t>& initAct = std::vector<uint64_t>())
             : vectActions{vectAct}, initActions{initAct.empty()
                                                     ? std::vector<uint64_t>(
                                                           vectAct.size(), 0)
