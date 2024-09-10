@@ -205,7 +205,7 @@ namespace Learn {
         /**
          * \brief Setter for the LearningParameters used by the LearningAgent.
          *
-         * \param[in] params New params set to the LearningAgent.
+         * \param[in] newParams New params set to the LearningAgent.
          */
         void setParams(LearningParameters& newParams);
 
