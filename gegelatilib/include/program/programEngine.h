@@ -70,8 +70,9 @@ namespace Program {
         // accessed addresses.
 
         /// @brief TODO
-        std::unordered_map<const Program*, std::shared_ptr<Data::PrimitiveTypeArray<double>>> mapMemoryRegisters;
-
+        std::unordered_map<const Program*,
+                           std::shared_ptr<Data::PrimitiveTypeArray<double>>>
+            mapMemoryRegisters;
 
         /// Data sources from the environment used for archiving a program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>
@@ -94,8 +95,10 @@ namespace Program {
          * \param[in] env The Environment in which the Program will be executed.
          */
         ProgramEngine(const Environment& env)
-            : programCounter{0}, registers{std::make_shared<Data::PrimitiveTypeArray<double>>(env.getNbRegisters())}, program{NULL},
-              dataSources{env.getDataSources()}
+            : programCounter{0},
+              registers{std::make_shared<Data::PrimitiveTypeArray<double>>(
+                  env.getNbRegisters())},
+              program{NULL}, dataSources{env.getDataSources()}
         {
             // Setup the data sources
             dataScsConstsAndRegs.push_back(*this->registers);
@@ -130,7 +133,9 @@ namespace Program {
         ProgramEngine(const Program& prog,
                       const std::vector<std::reference_wrapper<T>>& dataSrc)
             : programCounter{0},
-              registers{std::make_shared<Data::PrimitiveTypeArray<double>>(prog.getEnvironment().getNbRegisters())}, program{NULL}
+              registers{std::make_shared<Data::PrimitiveTypeArray<double>>(
+                  prog.getEnvironment().getNbRegisters())},
+              program{NULL}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
@@ -288,18 +293,20 @@ namespace Program {
         virtual void iterateThroughtProgram(const bool ignoreException);
 
         /**
-         * \brief Function that reset all the memory registers that have been creating during the execution.
+         * \brief Function that reset all the memory registers that have been
+         * creating during the execution.
          */
         virtual void resetAllMemoryRegisters();
 
-        
         /**
-         * \brief Getter that return the a const reference of the map of memory registers.
-         * 
+         * \brief Getter that return the a const reference of the map of memory
+         * registers.
+         *
          * \return the const reference of the map of memory registers.
          */
-        virtual const std::unordered_map<const Program*, std::shared_ptr<Data::PrimitiveTypeArray<double>>>& getMapMemoryRegisters();
-
+        virtual const std::unordered_map<
+            const Program*, std::shared_ptr<Data::PrimitiveTypeArray<double>>>&
+        getMapMemoryRegisters();
     };
 
     template <class T>

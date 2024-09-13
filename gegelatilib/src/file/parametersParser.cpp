@@ -305,7 +305,8 @@ void File::ParametersParser::writeParametersToJson(
 
     root["useMemoryRegisters"] = params.useMemoryRegisters;
     root["useMemoryRegisters"].setComment(
-        Learn::LearningParameters::useMemoryRegistersComment, Json::commentBefore);
+        Learn::LearningParameters::useMemoryRegistersComment,
+        Json::commentBefore);
 
     root["nbEdgesActivable"] = params.nbEdgesActivable;
     root["nbEdgesActivable"].setComment(

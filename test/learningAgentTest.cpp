@@ -770,7 +770,6 @@ TEST_F(LearningAgentTest, TrainMARLPortability)
         << "Graph does not have the expected determinst characteristics.";
 }
 
-
 // Similar to previous test, but verifications of graphs properties are here to
 // ensure the result of the training is identical on all OSes and Compilers,
 // even for memory cases.

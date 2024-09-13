@@ -47,13 +47,15 @@ void Program::ProgramEngine::setProgram(const Program& prog)
 
         // If found, get the registers.
         this->registers = it->second;
-    } else {
+    }
+    else {
 
         // Else, create the registers and add them to the map.
-        this->mapMemoryRegisters[&prog] = std::make_shared<Data::PrimitiveTypeArray<double>>(prog.getEnvironment().getNbRegisters());
+        this->mapMemoryRegisters[&prog] =
+            std::make_shared<Data::PrimitiveTypeArray<double>>(
+                prog.getEnvironment().getNbRegisters());
         this->registers = this->mapMemoryRegisters[&prog];
     }
-    
 
     // Set the registers.
     this->dataScsConstsAndRegs.front() = *this->registers;
@@ -99,8 +101,7 @@ void Program::ProgramEngine::setProgram(const Program& prog)
     // set the program
     this->program = &prog;
 
-
-    if(!prog.getEnvironment().isMemoryRegisters()){
+    if (!prog.getEnvironment().isMemoryRegisters()) {
         this->registers->resetData();
     }
 
@@ -208,12 +209,15 @@ void Program::ProgramEngine::iterateThroughtProgram(const bool ignoreException)
 
 void Program::ProgramEngine::resetAllMemoryRegisters()
 {
-    for (auto it = mapMemoryRegisters.begin(); it != mapMemoryRegisters.end(); ++it) {
+    for (auto it = mapMemoryRegisters.begin(); it != mapMemoryRegisters.end();
+         ++it) {
         it->second->resetData();
     }
 }
 
-const std::unordered_map<const Program::Program *, std::shared_ptr<Data::PrimitiveTypeArray<double>>>& Program::ProgramEngine::getMapMemoryRegisters()
+const std::unordered_map<const Program::Program*,
+                         std::shared_ptr<Data::PrimitiveTypeArray<double>>>&
+Program::ProgramEngine::getMapMemoryRegisters()
 {
     return this->mapMemoryRegisters;
 }

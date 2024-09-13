@@ -68,7 +68,8 @@ class ProgramEngineWithMemoryTest : public ::testing::Test
             .setDataAt(typeid(double), 25, value0);
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
-        set.add(*(new Instructions::LambdaInstruction<double, double>([](double a, double b) -> double { return a - b; })));
+        set.add(*(new Instructions::LambdaInstruction<double, double>(
+            [](double a, double b) -> double { return a - b; })));
 
         e = new Environment(set, vect, 8, 0, true);
         p = new Program::Program(*e);
@@ -97,11 +98,10 @@ TEST_F(ProgramEngineWithMemoryTest, mapMemoryRegisterSize)
 {
     Program::ProgramExecutionEngine progExecEng(*p);
 
-
     ASSERT_EQ(progExecEng.getMapMemoryRegisters().size(), 1)
-        << "The size of mapMemoryRegisters should be of size 1 after setting one program.";
+        << "The size of mapMemoryRegisters should be of size 1 after setting "
+           "one program.";
 
-    
     Program::Program p1(*e);
     progExecEng.setProgram(p1);
 
@@ -112,52 +112,71 @@ TEST_F(ProgramEngineWithMemoryTest, mapMemoryRegisterSize)
     progExecEng.setProgram(p3);
 
     ASSERT_EQ(progExecEng.getMapMemoryRegisters().size(), 4)
-        << "The size of mapMemoryRegisters should be of size 1 after setting four programs.";
+        << "The size of mapMemoryRegisters should be of size 1 after setting "
+           "four programs.";
 }
 
 TEST_F(ProgramEngineWithMemoryTest, mapMemoryRegisterFill)
 {
 
-
     Program::ProgramExecutionEngine progExecEng(*p);
 
     progExecEng.setProgram(*p);
 
-    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters().at(p)->getDataAt(typeid(double), 0).getSharedPointer<const double>(), 0)
+    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters()
+                  .at(p)
+                  ->getDataAt(typeid(double), 0)
+                  .getSharedPointer<const double>(),
+              0)
         << "The value of the register should be equal to 0 before iteration";
 
     progExecEng.iterateThroughtProgram(false);
-    
-    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters().at(p)->getDataAt(typeid(double), 0).getSharedPointer<const double>(), -1.0)
-        << "The value of the register should be equal to 8.65 after one iteration";
 
+    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters()
+                  .at(p)
+                  ->getDataAt(typeid(double), 0)
+                  .getSharedPointer<const double>(),
+              -1.0)
+        << "The value of the register should be equal to 8.65 after one "
+           "iteration";
 
     progExecEng.setProgram(*p);
-    progExecEng.iterateThroughtProgram(false);  
+    progExecEng.iterateThroughtProgram(false);
 
-    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters().at(p)->getDataAt(typeid(double), 0).getSharedPointer<const double>(), -2.0)
-        << "The value of the register should be equal to 8.65 after one iteration";
+    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters()
+                  .at(p)
+                  ->getDataAt(typeid(double), 0)
+                  .getSharedPointer<const double>(),
+              -2.0)
+        << "The value of the register should be equal to 8.65 after one "
+           "iteration";
 }
-
 
 TEST_F(ProgramEngineWithMemoryTest, mapMemoryRegisterReset)
 {
 
-
     Program::ProgramExecutionEngine progExecEng(*p);
-
 
     progExecEng.setProgram(*p);
 
     progExecEng.iterateThroughtProgram(false);
-    progExecEng.iterateThroughtProgram(false);  
+    progExecEng.iterateThroughtProgram(false);
 
-    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters().at(p)->getDataAt(typeid(double), 0).getSharedPointer<const double>(), -2.0)
-        << "The value of the register should be equal to 8.65 after one iteration";
+    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters()
+                  .at(p)
+                  ->getDataAt(typeid(double), 0)
+                  .getSharedPointer<const double>(),
+              -2.0)
+        << "The value of the register should be equal to 8.65 after one "
+           "iteration";
 
     progExecEng.resetAllMemoryRegisters();
 
-    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters().at(p)->getDataAt(typeid(double), 0).getSharedPointer<const double>(), 0)
-        << "The value of the register should be equal to 8.65 after one iteration";
+    ASSERT_EQ((double)*progExecEng.getMapMemoryRegisters()
+                  .at(p)
+                  ->getDataAt(typeid(double), 0)
+                  .getSharedPointer<const double>(),
+              0)
+        << "The value of the register should be equal to 8.65 after one "
+           "iteration";
 }
-

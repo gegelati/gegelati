@@ -51,7 +51,7 @@ void Program::ProgramExecutionEngine::executeCurrentLine()
     double result = instruction.execute(operands);
 
     this->registers->setDataAt(typeid(double), line.getDestinationIndex(),
-                              result);
+                               result);
 }
 
 double Program::ProgramExecutionEngine::executeProgram(

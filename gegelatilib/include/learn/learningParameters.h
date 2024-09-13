@@ -170,7 +170,8 @@ namespace Learn {
 
         /// JSon comment
         inline static const std::string useMemoryRegistersComment =
-            "// Boolean indicating if the registers are memory registers of no.\n"
+            "// Boolean indicating if the registers are memory registers of "
+            "no.\n"
             "// \"useMemoryRegisters\" : false, // Default value";
         /// Number of registers for the Program execution
         bool useMemoryRegisters = false;
