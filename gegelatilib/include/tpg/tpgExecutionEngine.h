@@ -93,6 +93,13 @@ namespace TPG {
         void setArchive(Archive* newArchive);
 
         /**
+         * \brief Function that reset all the memory registers that have been creating during the execution.
+         * 
+         * The function call the resetAllMemoryRegisters function of the programExecutionEngine attribute.
+         */
+        virtual void resetAllMemoryRegisters();
+
+        /**
          * \brief Execute the Program associated to an Edge and returns the
          * obtained double.
          *

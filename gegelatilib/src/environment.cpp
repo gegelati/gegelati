@@ -169,6 +169,10 @@ size_t Environment::getNbRegisters() const
     return this->nbRegisters;
 }
 
+bool Environment::isMemoryRegisters() const{
+    return this->useMemoryRegisters;
+}
+
 size_t Environment::getNbConstant() const
 {
     return this->nbConstants;

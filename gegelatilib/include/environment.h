@@ -93,6 +93,9 @@ class Environment
     /// Number of registers
     const size_t nbRegisters;
 
+    /// True if the memory is used, else false
+    const bool useMemoryRegisters;
+
     /// Number of constants
     const size_t nbConstants;
 
@@ -191,15 +194,16 @@ class Environment
      * be used in this Environment.
      * \param[in] nbRegs the number of double registers in this Environment.
      * \param[in] nbConst the number of program's constants in this Environment.
+     * \param[in] useMemoryRegs the boolean indicating if the memory registers are used or not is this Environment.
      */
     Environment(
         const Instructions::Set& iSet,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dHandlers,
-        const size_t nbRegs, const size_t nbConst = 0)
+        const size_t nbRegs, const size_t nbConst = 0, bool useMemoryRegs = false)
         : instructionSet{filterInstructionSet(iSet, nbRegs, nbConst,
                                               dHandlers)},
-          dataSources{dHandlers}, nbRegisters{nbRegs}, nbConstants{nbConst},
+          dataSources{dHandlers}, nbRegisters{nbRegs}, useMemoryRegisters{useMemoryRegs}, nbConstants{nbConst},
           fakeRegisters(nbRegs), fakeConstants(nbConst),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
@@ -237,6 +241,13 @@ class Environment
      * \return the value of the nbParameters attribute.
      */
     size_t getNbConstant() const;
+
+    /**
+     * \brief Get the information if the registers used memory or no.
+     * 
+     * \return True if memory is used, else false.
+     */
+    bool isMemoryRegisters() const;
 
     /**
      * \brief Get the size of the number of Instruction within the

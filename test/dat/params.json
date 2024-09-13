@@ -7,6 +7,7 @@
   "nbIterationsPerJob": 31,
   "maxNbEvaluationPerPolicy": 100,
   "nbRegisters": 3,
+  "useMemoryRegisters": false,
   "nbThreads": 2,
   "nbGenerations": 200,
   "doValidation": true,

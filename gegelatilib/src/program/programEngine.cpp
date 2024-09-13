@@ -40,6 +40,24 @@
 
 void Program::ProgramEngine::setProgram(const Program& prog)
 {
+
+    // Try to find the program in the map.
+    auto it = this->mapMemoryRegisters.find(&prog);
+    if (it != this->mapMemoryRegisters.end()) {
+
+        // If found, get the registers.
+        this->registers = it->second;
+    } else {
+
+        // Else, create the registers and add them to the map.
+        this->mapMemoryRegisters[&prog] = std::make_shared<Data::PrimitiveTypeArray<double>>(prog.getEnvironment().getNbRegisters());
+        this->registers = this->mapMemoryRegisters[&prog];
+    }
+    
+
+    // Set the registers.
+    this->dataScsConstsAndRegs.front() = *this->registers;
+
     // are constants used here ?
     size_t offset = 1;
     if (prog.getEnvironment().getNbConstant() > 0) {
@@ -80,8 +98,11 @@ void Program::ProgramEngine::setProgram(const Program& prog)
     }
     // set the program
     this->program = &prog;
-    // Reset Registers (in case it is not done when they are constructed)
-    this->registers.resetData();
+
+
+    if(!prog.getEnvironment().isMemoryRegisters()){
+        this->registers->resetData();
+    }
 
     // Reset the counters
     this->programCounter = 0;
@@ -183,4 +204,16 @@ void Program::ProgramEngine::iterateThroughtProgram(const bool ignoreException)
         // Increment the programCounter.
         hasNext = this->next();
     };
+}
+
+void Program::ProgramEngine::resetAllMemoryRegisters()
+{
+    for (auto it = mapMemoryRegisters.begin(); it != mapMemoryRegisters.end(); ++it) {
+        it->second->resetData();
+    }
+}
+
+const std::unordered_map<const Program::Program *, std::shared_ptr<Data::PrimitiveTypeArray<double>>>& Program::ProgramEngine::getMapMemoryRegisters()
+{
+    return this->mapMemoryRegisters;
 }

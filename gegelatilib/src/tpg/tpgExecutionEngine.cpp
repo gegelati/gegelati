@@ -49,6 +49,11 @@ void TPG::TPGExecutionEngine::setArchive(Archive* newArchive)
     this->archive = newArchive;
 }
 
+void TPG::TPGExecutionEngine::resetAllMemoryRegisters()
+{
+    this->progExecutionEngine.resetAllMemoryRegisters();
+}
+
 double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
 {
     // Get the program

@@ -770,6 +770,45 @@ TEST_F(LearningAgentTest, TrainMARLPortability)
         << "Graph does not have the expected determinst characteristics.";
 }
 
+
+// Similar to previous test, but verifications of graphs properties are here to
+// ensure the result of the training is identical on all OSes and Compilers,
+// even for memory cases.
+TEST_F(LearningAgentTest, TrainMemoryPortability)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.useMemoryRegisters = true;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+
+    Learn::LearningAgent la(le, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    ASSERT_EQ(tpg.getNbVertices(), 29)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 94)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 10828301062365825159)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
 TEST_F(LearningAgentTest, KeepBestPolicy)
 {
     params.archiveSize = 1;

@@ -142,6 +142,9 @@ std::shared_ptr<Learn::EvaluationResult> Learn::AdversarialLearningAgent::
         // Reset the learning Environment
         ale.reset(hash, mode);
 
+        // Reset the memory registers.
+        tee.resetAllMemoryRegisters();
+
         uint64_t nbActions = 0;
 
         auto roots = ((AdversarialJob&)job).getRoots();

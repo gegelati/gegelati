@@ -149,6 +149,9 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         // Reset the learning Environment
         le.reset(hash, mode, iterationNumber, generationNumber);
 
+        // Reset the memory registers.
+        tee.resetAllMemoryRegisters();
+
         uint64_t nbActions = 0;
         while (!le.isTerminal() &&
                nbActions < this->params.maxNbActionsPerEval) {

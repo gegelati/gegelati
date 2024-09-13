@@ -169,6 +169,13 @@ namespace Learn {
         size_t nbProgramConstant = 0;
 
         /// JSon comment
+        inline static const std::string useMemoryRegistersComment =
+            "// Boolean indicating if the registers are memory registers of no.\n"
+            "// \"useMemoryRegisters\" : false, // Default value";
+        /// Number of registers for the Program execution
+        bool useMemoryRegisters = false;
+
+        /// JSon comment
         inline static const std::string nbEdgesActivableComment =
             "// Number of edges that can be activated during a team "
             "evaluation.\n"

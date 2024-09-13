@@ -133,7 +133,7 @@ namespace Learn {
                       const LearningParameters& p,
                       const TPG::TPGFactory& factory = TPG::TPGFactory())
             : learningEnvironment{le}, env(iSet, le.getDataSources(),
-                                           p.nbRegisters, p.nbProgramConstant),
+                                           p.nbRegisters, p.nbProgramConstant, p.useMemoryRegisters),
               tpg(factory.createTPGGraph(env)), params{p},
               archive(p.archiveSize, p.archivingProbability)
         {

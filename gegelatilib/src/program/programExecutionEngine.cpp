@@ -50,21 +50,19 @@ void Program::ProgramExecutionEngine::executeCurrentLine()
 
     double result = instruction.execute(operands);
 
-    this->registers.setDataAt(typeid(double), line.getDestinationIndex(),
+    this->registers->setDataAt(typeid(double), line.getDestinationIndex(),
                               result);
 }
 
 double Program::ProgramExecutionEngine::executeProgram(
     const bool ignoreException)
 {
-    // Reset registers and programCounter
-    this->registers.resetData();
 
     iterateThroughtProgram(ignoreException);
 
     // Returns the 0-indexed register.
     // cast to primitiveType<double> to enable cast to double.
-    return *(this->registers.getDataAt(typeid(double), 0)
+    return *(this->registers->getDataAt(typeid(double), 0)
                  .getSharedPointer<const double>());
 }
 
