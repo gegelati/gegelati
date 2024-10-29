@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2024) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2024)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
