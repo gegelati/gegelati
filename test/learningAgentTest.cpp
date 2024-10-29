@@ -1,11 +1,11 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2023) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2024) :
  *
  * QuentinVacher <98522623+QuentinVacher-rl@users.noreply.github.com> (2023)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2023)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2023 - 2024)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -122,6 +122,18 @@ TEST_F(LearningAgentTest, Init)
 
     ASSERT_NO_THROW(la.init())
         << "Initialization of the LearningAgent should not fail.";
+}
+
+TEST_F(LearningAgentTest, InitNbRoots)
+{
+    params.mutation.tpg.initNbRoots = 42;
+    Learn::LearningAgent la(le, set, params);
+
+    la.init();
+
+    ASSERT_EQ(la.getTPGGraph()->getNbRootVertices(), 42)
+        << "Initialization of the LearningAgent should have a number of roots "
+           "equal to the number specify";
 }
 
 TEST_F(LearningAgentTest, addLogger)
@@ -508,7 +520,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), a, params.mutation,
-                                     la.getRNG(), 1);
+                                     la.getRNG(), le.getNbActions(), 1);
     size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(la.trainOneGeneration(4))
@@ -590,14 +602,13 @@ TEST_F(LearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 31)
+    ASSERT_EQ(tpg.getNbVertices(), 29)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 25)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 106)
+    ASSERT_EQ(tpg.getEdges().size(), 92)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              14825295448422883263u)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8778232462724898875)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -626,44 +637,63 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 31)
+    ASSERT_EQ(tpg.getNbVertices(), 29)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 25)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 106)
+    ASSERT_EQ(tpg.getEdges().size(), 92)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              14825295448422883263u)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8778232462724898875)
         << "Graph does not have the expected determinst characteristics.";
+
+    /*
+    //To help to refind the values if the determinism is changed by a update
+    for (const auto& edge : tpg.getEdges()) {
+        const TPG::TPGEdgeInstrumented* edgeInstrumented =
+            dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge.get());
+
+        if (edgeInstrumented != nullptr) {
+            std::cout << "NbVisits = " << edgeInstrumented->getNbVisits()
+                    << ", NbTraversal = " << edgeInstrumented->getNbTraversal()
+                    << std::endl;
+        }
+    }
+    for(auto vert: tpg.getVertices()){
+        std::cout<<dynamic_cast<const
+    TPG::TPGVertexInstrumentation*>(vert)->getNbVisits()<<std::endl;
+    }*/
 
     // Check number of visits of a few edges & vertices
     auto edgesIterator = tpg.getEdges().begin();
     const auto* edge1 = edgesIterator->get();
+
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(),
-        2151);
+        304);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(),
         0);
 
-    std::advance(edgesIterator, 38);
+    std::advance(edgesIterator, 3);
     const auto* edge2 = edgesIterator->get();
+
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbVisits(),
-        106);
+        107);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversal(),
-        106);
+        107);
 
     auto& verticesIterator = tpg.getVertices();
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(0))
                   ->getNbVisits(),
-              8488);
+              5533);
+
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
-                  verticesIterator.at(3))
+                  verticesIterator.at(5))
                   ->getNbVisits(),
-              2151);
+              107);
 }
 
 TEST_F(LearningAgentTest, KeepBestPolicy)
@@ -775,7 +805,6 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.archivingProbability = 1.0;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
-    params.mutation.tpg.nbActions = le.getNbActions();
     params.nbThreads = 1;
 
     Environment env(set, le.getDataSources(), 8, params.nbProgramConstant);
@@ -786,8 +815,11 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     Mutator::RNG rng;
     rng.setSeed(0);
 
+    params.mutation.tpg.initNbRoots = le.getNbActions();
+
     // Initialize the tpg
-    Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng);
+    Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng,
+                                       le.getNbActions());
 
     // create the archive
     Archive archive;
@@ -1064,7 +1096,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), a, params.mutation,
-                                     pla.getRNG());
+                                     pla.getRNG(), le.getNbActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4))
@@ -1099,7 +1131,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), a, params.mutation,
-                                     pla.getRNG());
+                                     pla.getRNG(), le.getNbActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4))

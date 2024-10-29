@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2023) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2024) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2023)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2024)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -46,14 +47,6 @@ namespace Mutator {
      */
     typedef struct TPGParameters
     {
-        /// JSon comment
-        inline static const std::string nbActionsComment =
-            "// Number of TPGAction vertex of the initialized TPGGraph.\n"
-            "// This parameter is generally automatically set by the "
-            "LearningEnvironment.\n"
-            "// /* \"nbActions\" : 0,*/ // Commented by default";
-        /// Number of TPGAction vertex of the initialized TPGGraph.
-        size_t nbActions = 0;
 
         /// JSon comment
         inline static const std::string nbRootsComment =
@@ -62,6 +55,16 @@ namespace Mutator {
             "// \"nbRoots\" : 100, // Default value";
         /// Number of root TPGTeams to maintain when populating the TPGGraph
         size_t nbRoots = 100;
+
+        /// JSon comment
+        inline static const std::string initNbRootsComment =
+            "// Number of root TPGTeams at the initialisation of a "
+            "TPGGraph.\n"
+            "// If 0, if will be init to the number of surviving roots\n"
+            "// \"nbRoots\" : 0, // Default value";
+        /// Number of root TPGTeams at the initialisation of a TPGGraph
+        /// If 0, if will be init to the number of surviving roots
+        size_t initNbRoots = 0;
 
         /// JSon comment
         inline static const std::string maxInitOutgoingEdgesComment =
@@ -176,6 +179,13 @@ namespace Mutator {
             "// \"pConstantMutation\" : 0.5, // Default value";
         /// Probability of each constant to be mutated
         double pConstantMutation = 0.5;
+
+        /// JSon comment
+        inline static const std::string pNewProgramComment =
+            "// Probability of creating a new program.\n"
+            "// \"pNewProgram\" : 0.0, // Default value";
+        /// Probability of creating a new program
+        double pNewProgram = 0.0;
 
         /// JSon comment
         inline static const std::string minConstValueComment =

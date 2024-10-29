@@ -13,8 +13,8 @@
   "nbProgramConstant": 5,
   "mutation": {
     "tpg": {
-      "nbActions": 5,
       "nbRoots": 100,
+      "initNbRoots": 5,
       "maxInitOutgoingEdges": 3,
       "maxOutgoingEdges": 60,
       "pEdgeDeletion": 0.8,
@@ -26,6 +26,7 @@
     },
     "prog": {
       "maxProgramSize": 40,
+      "pNewProgram": 0.0,
       "pDelete": 0.7,
       "pAdd": 0.7,
       "pMutate": 1.0,

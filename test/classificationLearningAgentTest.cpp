@@ -1,9 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2024) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2024)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -177,6 +178,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     params.mutation.tpg.maxInitOutgoingEdges = 2;
     params.ratioDeletedRoots = 0.50;
     params.mutation.tpg.nbRoots = 50; // Param used in decimation
+    params.mutation.tpg.initNbRoots = 3;
     params.nbThreads = 4;
 
     Learn::ClassificationLearningAgent cla(fle, set, params);
@@ -185,7 +187,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     cla.init(0);
     TPG::TPGGraph& graph = *cla.getTPGGraph();
     Mutator::TPGMutator::populateTPG(graph, cla.getArchive(), params.mutation,
-                                     cla.getRNG());
+                                     cla.getRNG(), fle.getNbActions());
 
     // Get roots
     auto roots = graph.getRootVertices();

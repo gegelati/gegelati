@@ -1,9 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2024) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2024)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -101,12 +102,12 @@ void File::ParametersParser::setParameterFromString(
     Learn::LearningParameters& params, const std::string& param,
     Json::Value const& value)
 {
-    if (param == "nbActions") {
-        params.mutation.tpg.nbActions = (size_t)value.asUInt();
-        return;
-    }
     if (param == "nbRoots") {
         params.mutation.tpg.nbRoots = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "initNbRoots") {
+        params.mutation.tpg.initNbRoots = (size_t)value.asUInt();
         return;
     }
     if (param == "maxInitOutgoingEdges") {
@@ -168,6 +169,10 @@ void File::ParametersParser::setParameterFromString(
     }
     if (param == "pConstantMutation") {
         params.mutation.prog.pConstantMutation = value.asDouble();
+        return;
+    }
+    if (param == "pNewProgram") {
+        params.mutation.prog.pNewProgram = value.asDouble();
         return;
     }
     if (param == "minConstValue") {
@@ -318,13 +323,13 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["maxOutgoingEdges"].setComment(
         Mutator::TPGParameters::maxOutgoingEdgesComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["nbActions"] = params.mutation.tpg.nbActions;
-    root["mutation"]["tpg"]["nbActions"].setComment(
-        Mutator::TPGParameters::nbActionsComment, Json::commentBefore);
-
     root["mutation"]["tpg"]["nbRoots"] = params.mutation.tpg.nbRoots;
     root["mutation"]["tpg"]["nbRoots"].setComment(
         Mutator::TPGParameters::nbRootsComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["initNbRoots"] = params.mutation.tpg.initNbRoots;
+    root["mutation"]["tpg"]["initNbRoots"].setComment(
+        Mutator::TPGParameters::initNbRootsComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["pEdgeAddition"] =
         params.mutation.tpg.pEdgeAddition;
@@ -378,6 +383,10 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["prog"]["pConstantMutation"].setComment(
         Mutator::ProgramParameters::pConstantMutationComment,
         Json::commentBefore);
+
+    root["mutation"]["prog"]["pNewProgram"] = params.mutation.prog.pNewProgram;
+    root["mutation"]["prog"]["pNewProgram"].setComment(
+        Mutator::ProgramParameters::pNewProgramComment, Json::commentBefore);
 
     root["mutation"]["prog"]["pDelete"] = params.mutation.prog.pDelete;
     root["mutation"]["prog"]["pDelete"].setComment(

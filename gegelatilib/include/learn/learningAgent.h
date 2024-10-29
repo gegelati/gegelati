@@ -1,10 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2023) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2024) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2023)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2023 - 2024)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -137,9 +137,14 @@ namespace Learn {
               tpg(factory.createTPGGraph(env)), params{p},
               archive(p.archiveSize, p.archivingProbability)
         {
-            // override the number of actions from the parameters.
-            this->params.mutation.tpg.nbActions =
-                this->learningEnvironment.getNbActions();
+
+            // override the number of initial roots if set to 0
+            if (this->params.mutation.tpg.initNbRoots == 0) {
+                this->params.mutation.tpg.initNbRoots = std::max(
+                    (size_t)floor((1 - this->params.ratioDeletedRoots) *
+                                  (double)params.mutation.tpg.nbRoots),
+                    (size_t)this->learningEnvironment.getNbActions());
+            }
         };
 
         /// Default destructor for polymorphism

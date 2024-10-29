@@ -1,9 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2024) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2024)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -123,6 +124,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     params.nbIterationsPerPolicyEvaluation = 20;
     params.nbIterationsPerJob = 2;
     params.ratioDeletedRoots = 0.4;
+    params.mutation.tpg.initNbRoots = 3;
     size_t agentsPerEval = 5;
     Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
     // 5 agents per job, 2 eval per job, 20 per root
@@ -233,7 +235,6 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     params.maxNbEvaluationPerPolicy = 0;
     params.nbGenerations = 10;
     params.mutation.tpg.nbRoots = 30;
-    params.mutation.tpg.nbActions = 3;
     params.mutation.tpg.maxInitOutgoingEdges = 3;
     params.mutation.tpg.maxOutgoingEdges = 10;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
@@ -249,13 +250,13 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 25)
+    ASSERT_EQ(tpg.getNbVertices(), 22)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 17)
+    ASSERT_EQ(tpg.getNbRootVertices(), 15)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 102)
+    ASSERT_EQ(tpg.getEdges().size(), 110)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 9442226923705130763u)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 1087076143828398529)
         << "Graph does not have the expected determinst characteristics.";
 }
 
