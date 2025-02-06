@@ -57,6 +57,7 @@ class TPGInstrumentedTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     Environment* e = NULL;
+    Learn::LearningParameters params;
     std::shared_ptr<Program::Program> progPointer;
 
     virtual void SetUp()
@@ -70,7 +71,9 @@ class TPGInstrumentedTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        e = new Environment(set, vect, 8, 5);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 1;
+        e = new Environment(set, params, vect);
         progPointer =
             std::shared_ptr<Program::Program>(new Program::Program(*e));
     }

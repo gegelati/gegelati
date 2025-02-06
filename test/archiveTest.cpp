@@ -57,6 +57,7 @@ class ArchiveTest : public ::testing::Test
     Instructions::Set set;
     Environment* e;
     Program::Program* p;
+    Learn::LearningParameters params;
 
     virtual void SetUp()
     {
@@ -70,7 +71,9 @@ class ArchiveTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        e = new Environment(set, vect, 8, 5);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect);
         p = new Program::Program(*e);
     }
 

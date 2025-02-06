@@ -45,6 +45,7 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/instruction.h"
 #include "instructions/set.h"
+#include "learn/learningParameters.h"
 
 /// LineSize structure to be used within the Environment.
 typedef struct LineSize
@@ -86,9 +87,14 @@ class Environment
     /// Set of Instruction used by Program running within this Environment.
     const Instructions::Set instructionSet;
 
+    /// Parameters for the learning process
+    const Learn::LearningParameters params;
+
     /// List of DataHandler that can be accessed within this Environment.
     const std::vector<std::reference_wrapper<const Data::DataHandler>>
         dataSources;
+
+
 
     /// Number of registers
     const size_t nbRegisters;
@@ -187,42 +193,47 @@ class Environment
      *
      * \param[in] iSet the Instructions::Set whose Instruction will be used in
      * this Environment.
+     * \param[in] p the LearningParameter used, storing all metaparameters.
      * \param[in] dHandlers the list of DataHandler that will
      * be used in this Environment.
-     * \param[in] nbRegs the number of double registers in this Environment.
-     * \param[in] nbConst the number of program's constants in this Environment.
      */
     Environment(
-        const Instructions::Set& iSet,
+        const Instructions::Set& iSet, const Learn::LearningParameters& p,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandlers,
-        const size_t nbRegs, const size_t nbConst = 0)
-        : instructionSet{filterInstructionSet(iSet, nbRegs, nbConst,
+            dHandlers)
+        : instructionSet{filterInstructionSet(iSet, p.nbRegisters, p.nbProgramConstant,
                                               dHandlers)},
-          dataSources{dHandlers}, nbRegisters{nbRegs}, nbConstants{nbConst},
-          fakeRegisters(nbRegs), fakeConstants(nbConst),
+          params{p},
+          dataSources{dHandlers}, nbRegisters{p.nbRegisters}, nbConstants{p.nbProgramConstant},
+          fakeRegisters(p.nbRegisters), fakeConstants(p.nbProgramConstant),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
           nbDataSources{
               dHandlers.size() +
-              (nbConst > 0 ? 2
+              (p.nbProgramConstant > 0 ? 2
                            : 1)}, // if Constants are used, we need an extra
                                   // datasource to store them in the environment
           largestAddressSpace{
-              computeLargestAddressSpace(nbRegs, nbConst, dHandlers)},
+              computeLargestAddressSpace(p.nbRegisters, p.nbProgramConstant, dHandlers)},
           lineSize{computeLineSize(*this)}
     {
         this->fakeDataSources.push_back(
             (std::reference_wrapper<const Data::DataHandler>)this
                 ->fakeRegisters);
 
-        if (nbConst > 0) {
+        if (p.nbProgramConstant > 0) {
             this->fakeDataSources.push_back(this->fakeConstants);
         }
 
         for (auto& elem : this->dataSources)
             this->fakeDataSources.push_back(elem);
     };
+
+
+    /**
+     * \brief Get the instance of parameters used
+     */
+    const Learn::LearningParameters& getParams() const;
 
     /**
      * \brief Get the size of the number of registers of this Environment.

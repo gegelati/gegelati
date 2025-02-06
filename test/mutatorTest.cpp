@@ -69,6 +69,7 @@ class MutatorTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     Environment* e;
+    Learn::LearningParameters params;
     Program::Program* p;
     std::shared_ptr<Program::Program> progPointer;
 
@@ -95,8 +96,9 @@ class MutatorTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
 
         // the environment and the programs have 5 Constant parameters
-        int nb_const = 5;
-        e = new Environment(set, vect, 8, nb_const);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect);
         p = new Program::Program(*e);
         progPointer =
             std::shared_ptr<Program::Program>(new Program::Program(*e));
@@ -292,7 +294,7 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
                 return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
             })));
 
-    Environment e2(set, vect, 8, 5);
+    Environment e2(set, params, vect);
     Program::Program p2(e2);
 
     Program::ProgramExecutionEngine pEE(p2);
@@ -491,7 +493,7 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior)
             return (cos(a + b + c));
         })));
 
-    Environment e2(set, vect, 8, 5);
+    Environment e2(set, params, vect);
     Program::Program p2(e2);
 
     Program::ProgramExecutionEngine pEE(p2);

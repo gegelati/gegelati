@@ -62,6 +62,7 @@ class TPGExecutionEngineTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     Environment* e = NULL;
+    Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
     TPG::TPGGraph* tpg;
@@ -100,7 +101,9 @@ class TPGExecutionEngineTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
-        e = new Environment(set, vect, 8, 1);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 1;
+        e = new Environment(set, params, vect);
         tpg = new TPG::TPGGraph(*e);
 
         // Create 9 programs

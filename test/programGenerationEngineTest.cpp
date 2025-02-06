@@ -57,6 +57,7 @@ class ProgramGenerationEngineTest : public ::testing::Test
     const size_t size1{32};
     Instructions::Set set;
     Environment* e = nullptr;
+    Learn::LearningParameters params;
     Environment* envWithConstant = nullptr;
     Program::Program* p = nullptr;
     Program::Program* p2 = nullptr;
@@ -78,12 +79,15 @@ class ProgramGenerationEngineTest : public ::testing::Test
             sub, "$0 = $1 - $2;")));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
-        e = new Environment(set, vect, 8);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 0;
+        e = new Environment(set, params, vect);
 
         set.add(*(new Instructions::LambdaInstruction<Data::Constant, double>(
             addConstant, "$0 = (double)($1) - $2;")));
 
-        envWithConstant = new Environment(set, vect, 8, 5);
+        params.nbProgramConstant = 5;
+        envWithConstant = new Environment(set, params, vect);
         p = new Program::Program(*e);
         p2 = new Program::Program(*e);
         p3 = new Program::Program(*envWithConstant);

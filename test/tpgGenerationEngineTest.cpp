@@ -66,6 +66,7 @@ class TPGGenerationEngineTest : public ::testing::Test
     const size_t s1{8};
     Instructions::Set set;
     Environment* e = nullptr;
+    Learn::LearningParameters params;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     Data::PrimitiveTypeArray<double> currentState{s1};
     std::unique_ptr<CodeGen::TPGGenerationEngine> tpgGen = nullptr;
@@ -85,7 +86,9 @@ class TPGGenerationEngineTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             sub, "$0 = $1 - $2;")));
 
-        e = new Environment(set, data, 8);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 0;
+        e = new Environment(set, params, data);
         tpg = new TPG::TPGGraph(*e);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";

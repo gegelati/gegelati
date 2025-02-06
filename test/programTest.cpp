@@ -54,6 +54,7 @@ class ProgramTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     Environment* e;
+    Learn::LearningParameters params;
 
     virtual void SetUp()
     {
@@ -68,7 +69,9 @@ class ProgramTest : public ::testing::Test
         };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        e = new Environment(set, vect, 8, 5);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect);
     }
 
     virtual void TearDown()
@@ -282,7 +285,7 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
                 return a[0] * b[0] + a[1] * b[1];
             }));
 
-    Environment localE(set, vect, 8, 5);
+    Environment localE(set, params, vect);
 
     // Create a program with 2 introns
     Program::Program p(localE);
@@ -342,7 +345,7 @@ TEST_F(ProgramTest, clearIntrons)
                 return a[0] * b[0] + a[1] * b[1];
             }));
 
-    Environment localE(set, vect, 8, 5);
+    Environment localE(set, params, vect);
 
     // Create a program with 2 introns
     Program::Program p(localE);
@@ -450,7 +453,7 @@ TEST_F(ProgramTest, HasIdenticalBehavior)
     localSet.add(*(new Instructions::AddPrimitiveType<double>()));
     localSet.add(*(new Instructions::AddPrimitiveType<int>()));
     localSet.add(*(new Instructions::MultByConstant<int>()));
-    Environment localEnv(localSet, vect, 8, 5);
+    Environment localEnv(localSet, params, vect);
 
     // Create 2 Programs
     Program::Program p1(localEnv), p2(localEnv);

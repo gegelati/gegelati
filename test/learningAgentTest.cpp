@@ -807,7 +807,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.nbThreads = 1;
 
-    Environment env(set, le.getDataSources(), 8, params.nbProgramConstant);
+    Environment env(set, params, le.getDataSources());
 
     TPG::TPGGraph tpg(env);
 

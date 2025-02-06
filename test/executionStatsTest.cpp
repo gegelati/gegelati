@@ -92,7 +92,10 @@ class ExecutionStatsTest : public ::testing::Test
         vect.emplace_back(*data);
 
         // Environment
-        e = new Environment(set, vect, 8, 5);
+        Learn::LearningParameters params;
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect);
 
         // Setup execution engine
         execEngine = new TPG::TPGExecutionEngineInstrumented(*e);

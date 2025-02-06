@@ -164,6 +164,11 @@ const LineSize Environment::computeLineSize(const Environment& env)
     return result;
 }
 
+
+const Learn::LearningParameters& Environment::getParams() const{
+    return params;
+}
+
 size_t Environment::getNbRegisters() const
 {
     return this->nbRegisters;

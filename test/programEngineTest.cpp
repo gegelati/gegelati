@@ -62,6 +62,7 @@ class ProgramEngineTest : public ::testing::Test
     Instructions::Set set;
     Environment* e;
     Program::Program* p;
+    Learn::LearningParameters params;
 
     virtual void SetUp()
     {
@@ -104,7 +105,9 @@ class ProgramEngineTest : public ::testing::Test
                 return res / 4.0;
             }));
 
-        e = new Environment(set, vect, 8, 5);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect);
         p = new Program::Program(*e);
 
         Program::Line& l0 = p->addNewLine();
@@ -296,9 +299,10 @@ TEST_F(ProgramEngineTest, setProgram)
     std::vector<std::reference_wrapper<const Data::DataHandler>> otherVect;
     otherVect.push_back(
         *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
-    Environment otherE(set, otherVect, 2);
+    params.nbRegisters = 2;
+    params.nbProgramConstant = 0;
+    Environment otherE(set, params, otherVect);
     Program::Program p3(otherE);
-
     ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error)
         << "Setting a Program with an incompatible Environment should not be "
            "possible.";
