@@ -90,7 +90,7 @@ class StickGameWithOpponent : public Learn::LearningEnvironment
     virtual LearningEnvironment* clone() const override;
 
     // Inherited via LearningEnvironment
-    virtual void doAction(uint64_t actionID) override;
+    virtual void doAction(double actionID) override;
 
     // Inherited via LearningEnvironment
     virtual void reset(size_t seed = 0,

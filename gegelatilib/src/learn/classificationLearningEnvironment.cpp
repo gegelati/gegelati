@@ -39,7 +39,7 @@
 
 #include "learn/classificationLearningEnvironment.h"
 
-void Learn::ClassificationLearningEnvironment::doAction(uint64_t actionID)
+void Learn::ClassificationLearningEnvironment::doAction(double actionID)
 {
     // Base method
     LearningEnvironment::doAction(actionID);

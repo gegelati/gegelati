@@ -373,7 +373,10 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
 
         // If the result is not unique, do another mutation.
         allUnique = archive.areProgramResultsUnique(hashesAndResults);
-    } while (!allUnique);
+        
+        // Do not use Archive right now if the environment is continuous 
+        // TODO Update that
+    } while (!allUnique && newProg->getEnvironment().getNbContinuousActions() ==0);
 }
 
 void Mutator::TPGMutator::mutateNewProgramBehaviors(

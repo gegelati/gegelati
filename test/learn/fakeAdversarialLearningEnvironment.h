@@ -63,7 +63,7 @@ class FakeAdversarialLearningEnvironment
 
     ~FakeAdversarialLearningEnvironment(){};
 
-    void doAction(uint64_t actionId) override
+    void doAction(double actionId) override
     {
         // we just ignore this action
         nbTurns++;

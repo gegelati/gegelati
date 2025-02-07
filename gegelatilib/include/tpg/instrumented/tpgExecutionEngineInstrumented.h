@@ -97,8 +97,8 @@ namespace TPG {
          * TPGExecutionEngine, this specialization increments the number of
          * visits of the reached TPGAction.
          */
-        const std::vector<const TPGVertex*> executeFromRoot(
-            const TPGVertex& root) override;
+        const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> 
+              executeFromRoot(const TPG::TPGVertex& root, const std::vector<uint64_t>& initActions={0}) override;
 
         /// Get all previous execution traces.
         const std::vector<std::vector<const TPGVertex*>>& getTraceHistory()

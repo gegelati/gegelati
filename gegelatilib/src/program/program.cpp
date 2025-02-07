@@ -135,6 +135,11 @@ bool Program::Program::isIntron(uint64_t index) const
         .second; // throws std::out_of_range on bad index.
 }
 
+bool Program::Program::isActionProgram() const
+{
+    return actionProgram;
+}
+
 uint64_t Program::Program::identifyIntrons()
 {
     // Create fake registers to identify accessed addresses.
@@ -146,6 +151,11 @@ uint64_t Program::Program::identifyIntrons()
     std::set<uint64_t> usefulRegisters;
     // Start with only register 0
     usefulRegisters.insert(0);
+
+    // With continuous actions, add all the registers needed (TODO add difference program link to action and to team for efficacity)
+    for(size_t idx = 0; idx < this->environment.getNbContinuousActions() && actionProgram; idx++){
+        usefulRegisters.insert(idx+1);
+    }
 
     // Scan program lines backward
     auto backIter = this->lines.rbegin();

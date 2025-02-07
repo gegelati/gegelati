@@ -142,12 +142,12 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         uint64_t nbActions = 0;
         while (!le.isTerminal() &&
                nbActions < this->params.maxNbActionsPerEval) {
-            // Get the action
-            uint64_t actionID =
-                ((const TPG::TPGAction*)tee.executeFromRoot(*root).back())
-                    ->getActionID();
+            // Get the actions
+            std::vector<double> actionsID =
+                tee.executeFromRoot(*root, le.getInitActions())
+                    .second;
             // Do it
-            le.doAction(actionID);
+            le.doActions(actionsID);
             // Count actions
             nbActions++;
         }

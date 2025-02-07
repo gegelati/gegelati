@@ -56,17 +56,17 @@ const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(
     return winningEdge;
 }
 
-const std::vector<const TPG::TPGVertex*> TPG::TPGExecutionEngineInstrumented::
-    executeFromRoot(const TPG::TPGVertex& root)
+const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::TPGExecutionEngineInstrumented::
+    executeFromRoot(const TPG::TPGVertex& root, const std::vector<uint64_t>& initActions)
 {
-    const std::vector<const TPG::TPGVertex*> result =
-        TPGExecutionEngine::executeFromRoot(root);
+    const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> result =
+        TPGExecutionEngine::executeFromRoot(root, initActions);
 
     // Increment action visit
-    dynamic_cast<const TPGActionInstrumented*>(result.back())
+    dynamic_cast<const TPGActionInstrumented*>(result.first.back())
         ->incrementNbVisits();
 
-    this->traceHistory.push_back(result);
+    this->traceHistory.push_back(result.first);
 
     return result;
 }

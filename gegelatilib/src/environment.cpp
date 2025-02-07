@@ -179,6 +179,10 @@ size_t Environment::getNbConstant() const
     return this->nbConstants;
 }
 
+size_t Environment::getNbContinuousActions() const{
+    return nbContinuousActions;
+}
+
 size_t Environment::getNbInstructions() const
 {
     return this->nbInstructions;

@@ -257,7 +257,7 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
         << "Nb visit before evaluation is incorrect.";
 
     ASSERT_NO_THROW(result =
-                        tpeei.executeFromRoot(*tpg->getRootVertices().at(0)))
+                        tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)
@@ -280,8 +280,8 @@ TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors)
     ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
         << "Trace history isn't empty before execution.";
 
-    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
-    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
+    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first;
+    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first;
 
     ASSERT_EQ(tpeei.getTraceHistory().size(), 2)
         << "Wrong number of recorded traces.";

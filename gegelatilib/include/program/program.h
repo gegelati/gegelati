@@ -55,6 +55,9 @@ namespace Program {
         /// Environment within which the Program will be executed.
         const Environment& environment;
 
+        /// Boolean indicating if true that the program is an action program, if false that it is a context program
+        bool actionProgram = true;
+
         /**
          * \brief Lines of the program and intron property.
          *
@@ -226,6 +229,13 @@ namespace Program {
          * \throw std::out_of_range if the index is too large.
          */
         bool isIntron(uint64_t index) const;
+
+        /**
+         * \brief Checks wether the current program is or not an action program.
+         * 
+         * \return true if the procram is an action program.
+         */
+        bool isActionProgram() const;
 
         /**
          * \brief Scan the Line of the Program to identify introns.

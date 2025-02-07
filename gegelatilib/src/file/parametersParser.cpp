@@ -227,6 +227,11 @@ void File::ParametersParser::setParameterFromString(
         params.doValidation = value.asBool();
         return;
     }
+    
+    if (param == "activationFunction") {
+        params.activationFunction = value.asString();
+        return;
+    }
     // we didn't recognize the symbol
     std::cerr << "Ignoring unknown parameter " << param << std::endl;
 }
@@ -261,6 +266,11 @@ void File::ParametersParser::writeParametersToJson(
     root["doValidation"] = params.doValidation;
     root["doValidation"].setComment(
         Learn::LearningParameters::doValidationComment, Json::commentBefore);
+
+
+    root["activationFunction"] = params.activationFunction;
+    root["activationFunction"].setComment(
+        Learn::LearningParameters::activationFunctionComment, Json::commentBefore);
 
     root["maxNbActionsPerEval"] = params.maxNbActionsPerEval;
     root["maxNbActionsPerEval"].setComment(

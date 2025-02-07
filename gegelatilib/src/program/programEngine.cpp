@@ -184,3 +184,16 @@ void Program::ProgramEngine::iterateThroughtProgram(const bool ignoreException)
         hasNext = this->next();
     };
 }
+
+
+std::vector<double> Program::ProgramEngine::getRegisterValues(uint64_t nbRegisters){
+
+
+    std::vector<double> registerValues;
+    // Return the register + 1 to keep the first one for bids.
+    for(int i=0; i < nbRegisters; i++){
+        registerValues.push_back(*(this->registers.getDataAt(typeid(double), i)
+                        .getSharedPointer<const double>()));
+    }
+    return registerValues;
+}

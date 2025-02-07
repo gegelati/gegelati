@@ -750,7 +750,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     le.reset();
     TPG::TPGExecutionEngine tee(tpg.getEnvironment());
     std::vector<const TPG::TPGVertex*> pathOrigin =
-        tee.executeFromRoot(*(tpg.getRootVertices().at(0)));
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0))).first;
 
     // Clear introns
     tpg.clearProgramIntrons();
@@ -768,7 +768,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
 
     // Check that the behavior is identical (empirically, not really foolproof)
     std::vector<const TPG::TPGVertex*> pathNoIntrons =
-        tee.executeFromRoot(*(tpg.getRootVertices().at(0)));
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0))).first;
 
     ASSERT_EQ(pathOrigin.size(), pathNoIntrons.size())
         << "Path length in TPG before and after inton removal is not "

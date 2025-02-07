@@ -47,7 +47,7 @@ Learn::LearningEnvironment* StickGameWithOpponent::clone() const
     return (Learn::LearningEnvironment*)new StickGameWithOpponent(*this);
 }
 
-void StickGameWithOpponent::doAction(uint64_t actionID)
+void StickGameWithOpponent::doAction(double actionID)
 {
     LearningEnvironment::doAction(actionID);
 

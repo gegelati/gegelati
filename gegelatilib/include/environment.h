@@ -112,6 +112,9 @@ class Environment
     /// DataHandler whost type corresponds to the programs constants.
     const Data::ConstantHandler fakeConstants;
 
+    /// Number of continuous actions
+    const size_t nbContinuousActions;
+
     /// Number of Instruction in the Instructions::Set.
     const size_t nbInstructions;
 
@@ -196,11 +199,12 @@ class Environment
      * \param[in] p the LearningParameter used, storing all metaparameters.
      * \param[in] dHandlers the list of DataHandler that will
      * be used in this Environment.
+     * \param[in] nbContinuousAct number of continuous actions in the LearningEnvironment, default value is 0.
      */
     Environment(
         const Instructions::Set& iSet, const Learn::LearningParameters& p,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandlers)
+            dHandlers, size_t nbContinuousAct = 0)
         : instructionSet{filterInstructionSet(iSet, p.nbRegisters, p.nbProgramConstant,
                                               dHandlers)},
           params{p},
@@ -208,6 +212,7 @@ class Environment
           fakeRegisters(p.nbRegisters), fakeConstants(p.nbProgramConstant),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
+          nbContinuousActions{nbContinuousAct},
           nbDataSources{
               dHandlers.size() +
               (p.nbProgramConstant > 0 ? 2
@@ -248,6 +253,13 @@ class Environment
      * \return the value of the nbParameters attribute.
      */
     size_t getNbConstant() const;
+
+    /**
+     * \brief Get the number of continuous actions.
+     *
+     * \return the value of the nbContinuousActions attribute.
+     */
+    size_t getNbContinuousActions() const;
 
     /**
      * \brief Get the size of the number of Instruction within the

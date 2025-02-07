@@ -132,7 +132,7 @@ namespace Learn {
         LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet,
                       const LearningParameters& p,
                       const TPG::TPGFactory& factory = TPG::TPGFactory())
-            : learningEnvironment{le}, env(iSet, p, le.getDataSources()),
+            : learningEnvironment{le}, env(iSet, p, le.getDataSources(), (le.isDiscrete()) ? 0 : le.getNbActions()),
               tpg(factory.createTPGGraph(env)), params{p},
               archive(p.archiveSize, p.archivingProbability)
         {

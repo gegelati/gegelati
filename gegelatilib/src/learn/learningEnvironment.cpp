@@ -47,10 +47,37 @@ bool Learn::LearningEnvironment::isCopyable() const
     return false;
 }
 
-void Learn::LearningEnvironment::doAction(uint64_t actionID)
+void Learn::LearningEnvironment::doAction(double actionID)
 {
-    if (actionID >= this->nbActions) {
+    if (nbActions > 1 && !isDiscreteEnvironment) {
+        throw std::runtime_error(
+            "With more than one continuous action, doAction() "
+            "method should not be called. Use doActions() instead.");
+    }
+
+    if (actionID >= this->getNbActions()) {
         throw std::runtime_error("Given action ID exceeds the number of "
                                  "actions for this learning environment.");
     }
+}
+
+void Learn::LearningEnvironment::doActions(std::vector<double> vectActionID)
+{
+    
+    // If vectActionID contain only one action, the doAction method is called
+    // instead
+    if (vectActionID.size() == 1) {
+        this->doAction(vectActionID[0]);
+    } else {
+
+        if(!isDiscreteEnvironment){
+            throw std::runtime_error("Gegelati does not support multiple Discrete actions for now");
+        }
+
+        if (vectActionID.size() != nbActions) {
+            throw std::runtime_error("Vector of action ID given is not the same "
+                                    "size as the number of actions wanted");
+        }
+    }
+
 }

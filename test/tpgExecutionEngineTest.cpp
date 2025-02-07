@@ -233,7 +233,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
     std::vector<const TPG::TPGVertex*> result;
 
     ASSERT_NO_THROW(result =
-                        tpee.executeFromRoot(*tpg->getRootVertices().at(0)))
+                        tpee.executeFromRoot(*tpg->getRootVertices().at(0)).first)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)
