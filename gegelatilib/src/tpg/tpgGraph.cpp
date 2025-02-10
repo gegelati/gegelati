@@ -234,8 +234,15 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 
     (*this->findVertex(iterator->get()->getSource()))
         ->removeOutgoingEdge(iterator->get());
-    (*this->findVertex(iterator->get()->getDestination()))
+
+    auto destination = iterator->get()->getDestination();
+    (*this->findVertex(destination))
         ->removeIncomingEdge(iterator->get());
+
+    // If destination is an action and should became a root, it is deleted if the environment is continuous
+    if(dynamic_cast<const TPG::TPGAction*>(destination) != nullptr && destination->getIncomingEdges().size() == 0 && env.getNbContinuousActions() > 0){
+        this->removeVertex(*destination);
+    }
     // Remove the edge
     this->edges.erase(iterator);
 }

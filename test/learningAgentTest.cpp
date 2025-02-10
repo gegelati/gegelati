@@ -61,12 +61,14 @@
 #include "learn/learningParameters.h"
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameWithOpponent.h"
+#include "learn/fakeMultiContinuousLearningEnvironment.h"
 
 class LearningAgentTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
     StickGameWithOpponent le;
+    FakeMultiContinuousLearningEnvironment cle;
     Learn::LearningParameters params;
 
     virtual void SetUp()
@@ -779,6 +781,42 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     }
 }
 
+TEST_F(LearningAgentTest, TrainOnegenerationContinuous)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 3;
+    params.ratioDeletedRoots =
+        0.95; // high number to force the apparition of root action.
+    params.nbThreads = 1;
+
+    Learn::LearningAgent la(cle, set, params);
+
+
+    la.init();
+    // Do the populate call to keep know the number of initial vertex
+    Archive a(0);
+    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), a, params.mutation,
+                                     la.getRNG(), cle.getNbActions());
+    size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
+    // Seed selected so that an action becomes a root during next generation
+    ASSERT_NO_THROW(la.trainOneGeneration(4))
+        << "Training for one generation failed.";
+    // Check the number of vertex in the graph.
+    // Must be initial number of vertex - number of root removed - 1 (for action root removed)
+    ASSERT_EQ(la.getTPGGraph()->getNbVertices(),
+              initialNbVertex - 1 -
+                  floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+        << "Number of remaining is under the number of roots from the "
+           "TPGGraph.";
+    // Train a second generation, because most roots were removed, a root
+    // actions have appeared and the training algorithm will attempt to remove
+    // them.
+    ASSERT_NO_THROW(la.trainOneGeneration(0))
+        << "Training for one generation failed.";
+}
+
 TEST_F(ParallelLearningAgentTest, Constructor)
 {
     Learn::ParallelLearningAgent* pla;
@@ -1258,3 +1296,5 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
         << "A single root TPGVertex should remain in the TPGGraph when keeping "
            "the best policy only";
 }
+
+
