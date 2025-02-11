@@ -128,7 +128,7 @@ void Mutator::TPGMutator::initRandomTPG(
     // programs Association here are determinists since randomness would
     // uselessly complicate the code while bringing no real value since anyway,
     // Programs have been initialized randomly.
-    for (size_t i = 0; i < 2 * std::min(nbActions, params.tpg.initNbTeams);
+    for (size_t i = 0; i < 2 * std::min((size_t)nbActions, params.tpg.initNbTeams);
          i++) {
         graph.addNewEdge(*teams.at(i / 2),
                          *actions.at(((i / 2) + (i % 2)) % nbActions),
