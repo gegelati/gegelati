@@ -311,12 +311,14 @@ void Learn::LearningAgent::decimateWorstRoots(
             i--; // no vertex was actually removed
         }
         else if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr 
-                 && nbActionRoots < ceil(0.01 * nbExpectedRoots)){
+                 && nbActionRoots < ceil(params.mutation.tpg.minProportionActionOrTeam * nbExpectedRoots)
+                 && actionCanBeErased){
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
         }
         else if (dynamic_cast<const TPG::TPGTeam*>(root) != nullptr 
-                 && nbTeamRoots < ceil(0.01 * nbExpectedRoots)){
+                 && nbTeamRoots < ceil(params.mutation.tpg.minProportionActionOrTeam * nbExpectedRoots)
+                 && actionCanBeErased){
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
         }

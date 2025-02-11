@@ -14,7 +14,7 @@
   "mutation": {
     "tpg": {
       "nbRoots": 100,
-      "initNbRoots": 5,
+      "initNbTeams": 5,
       "maxInitOutgoingEdges": 3,
       "maxOutgoingEdges": 60,
       "pEdgeDeletion": 0.8,

@@ -178,7 +178,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     params.mutation.tpg.maxInitOutgoingEdges = 2;
     params.ratioDeletedRoots = 0.50;
     params.mutation.tpg.nbRoots = 50; // Param used in decimation
-    params.mutation.tpg.initNbRoots = 3;
+    params.mutation.tpg.initNbTeams = 3;
     params.nbThreads = 4;
 
     Learn::ClassificationLearningAgent cla(fle, set, params);

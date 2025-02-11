@@ -561,7 +561,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 5;
-    params.tpg.initNbRoots = 5;
+    params.tpg.initNbTeams = 5;
     params.tpg.maxInitOutgoingEdges = 4;
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
@@ -630,7 +630,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
     nbActions = 5;
-    params.tpg.initNbRoots = 2;
+    params.tpg.initNbTeams = 2;
     ASSERT_THROW(
         Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
         std::runtime_error)
@@ -932,7 +932,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 4;
-    params.tpg.initNbRoots = 4;
+    params.tpg.initNbTeams = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
@@ -980,7 +980,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 4;
-    params.tpg.initNbRoots = 4;
+    params.tpg.initNbTeams = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
@@ -1027,7 +1027,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 4;
-    params.tpg.initNbRoots = 4;
+    params.tpg.initNbTeams = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
@@ -1090,7 +1090,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 4;
-    params.tpg.initNbRoots = 4;
+    params.tpg.initNbTeams = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;

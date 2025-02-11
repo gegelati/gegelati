@@ -126,9 +126,9 @@ TEST_F(LearningAgentTest, Init)
         << "Initialization of the LearningAgent should not fail.";
 }
 
-TEST_F(LearningAgentTest, InitNbRoots)
+TEST_F(LearningAgentTest, initNbTeams)
 {
-    params.mutation.tpg.initNbRoots = 42;
+    params.mutation.tpg.initNbTeams = 42;
     Learn::LearningAgent la(le, set, params);
 
     la.init();
@@ -854,7 +854,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     Mutator::RNG rng;
     rng.setSeed(0);
 
-    params.mutation.tpg.initNbRoots = le.getNbActions();
+    params.mutation.tpg.initNbTeams = le.getNbActions();
 
     // Initialize the tpg
     Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng,

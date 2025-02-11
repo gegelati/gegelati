@@ -106,14 +106,20 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.nbRoots = (size_t)value.asUInt();
         return;
     }
-    if (param == "initNbRoots") {
-        params.mutation.tpg.initNbRoots = (size_t)value.asUInt();
+    if (param == "initNbTeams") {
+        params.mutation.tpg.initNbTeams = (size_t)value.asUInt();
         return;
     }
     if (param == "initNbActions") {
         params.mutation.tpg.initNbActions = (size_t)value.asUInt();
         return;
     }
+
+    if (param == "minProportionActionOrTeam") {
+        params.mutation.tpg.minProportionActionOrTeam = (double)value.asDouble();
+        return;
+    }
+
     if (param == "maxInitOutgoingEdges") {
         params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;
@@ -350,12 +356,16 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["nbRoots"].setComment(
         Mutator::TPGParameters::nbRootsComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["initNbRoots"] = params.mutation.tpg.initNbRoots;
-    root["mutation"]["tpg"]["initNbRoots"].setComment(
-        Mutator::TPGParameters::initNbRootsComment, Json::commentBefore);
+    root["mutation"]["tpg"]["initNbTeams"] = params.mutation.tpg.initNbTeams;
+    root["mutation"]["tpg"]["initNbTeams"].setComment(
+        Mutator::TPGParameters::initNbTeamsComment, Json::commentBefore);
     root["mutation"]["tpg"]["initNbActions"] = params.mutation.tpg.initNbActions;
     root["mutation"]["tpg"]["initNbActions"].setComment(
         Mutator::TPGParameters::initNbActionsComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["minProportionActionOrTeam"] = params.mutation.tpg.minProportionActionOrTeam;
+    root["mutation"]["tpg"]["minProportionActionOrTeam"].setComment(
+        Mutator::TPGParameters::minProportionActionOrTeamComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["pEdgeAddition"] =
         params.mutation.tpg.pEdgeAddition;

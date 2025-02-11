@@ -100,7 +100,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(200, params.nbGenerations);
     ASSERT_EQ(true, params.doValidation);
     ASSERT_EQ(100, params.mutation.tpg.nbRoots);
-    ASSERT_EQ(5, params.mutation.tpg.initNbRoots);
+    ASSERT_EQ(5, params.mutation.tpg.initNbTeams);
     ASSERT_EQ(3, params.mutation.tpg.maxInitOutgoingEdges);
     ASSERT_EQ(60, params.mutation.tpg.maxOutgoingEdges);
     ASSERT_EQ(0.8, params.mutation.tpg.pEdgeDeletion);

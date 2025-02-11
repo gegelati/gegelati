@@ -124,7 +124,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     params.nbIterationsPerPolicyEvaluation = 20;
     params.nbIterationsPerJob = 2;
     params.ratioDeletedRoots = 0.4;
-    params.mutation.tpg.initNbRoots = 3;
+    params.mutation.tpg.initNbTeams = 3;
     size_t agentsPerEval = 5;
     Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
     // 5 agents per job, 2 eval per job, 20 per root

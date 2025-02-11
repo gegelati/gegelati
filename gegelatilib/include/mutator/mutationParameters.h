@@ -57,20 +57,28 @@ namespace Mutator {
         size_t nbRoots = 100;
 
         /// JSon comment
-        inline static const std::string initNbRootsComment =
+        inline static const std::string initNbTeamsComment =
             "// Number of root TPGTeams at the initialisation of a "
             "TPGGraph.\n"
             "// If 0, if will be init to the number of surviving roots\n"
             "// \"nbRoots\" : 0, // Default value";
         /// Number of root TPGTeams at the initialisation of a TPGGraph
         /// If 0, if will be init to the number of surviving roots
-        size_t initNbRoots = 0;
+        size_t initNbTeams = 0;
         /// JSon comment
         inline static const std::string initNbActionsComment =
             "//  Number of actions vertex at the initialisation of a TPGGraph\n"
             "// \"initNbActions\" : 10, // Default value";
         /// Number of actions vertex at the initialisation of a TPGGraph
         size_t initNbActions = 10;
+
+
+        /// JSon comment
+        inline static const std::string minProportionActionOrTeamComment = 
+            "// Minimum proportion of action roots or teams roots to keep at each generation\n"
+            "// \"minProportionActionOrTeam\" : 0.0, // Default value";
+        /// Minimum proportion of action roots or teams roots to keep at each generation
+        double minProportionActionOrTeam = 0.0;
 
         /// JSon comment
         inline static const std::string maxInitOutgoingEdgesComment =

@@ -64,7 +64,7 @@ void Log::LABasicLogger::logHeader()
 {
     // First line of header
     //*this << std::left;
-    *this << std::setw(2 * colWidth) << " " << std::setw(colWidth) << "Train";
+    *this << std::setw(5 * colWidth) << " " << std::setw(colWidth) << "Train";
     if (doValidation) {
         *this << std::setw(2 * colWidth) << " " << std::setw(1 * colWidth)
               << "Valid";

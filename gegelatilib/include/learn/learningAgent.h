@@ -138,8 +138,8 @@ namespace Learn {
         {
 
             // override the number of initial roots if set to 0
-            if (this->params.mutation.tpg.initNbRoots == 0) {
-                this->params.mutation.tpg.initNbRoots = std::max(
+            if (this->params.mutation.tpg.initNbTeams == 0) {
+                this->params.mutation.tpg.initNbTeams = std::max(
                     (size_t)floor((1 - this->params.ratioDeletedRoots) *
                                   (double)params.mutation.tpg.nbRoots),
                     (size_t)this->learningEnvironment.getNbActions());
