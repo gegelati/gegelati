@@ -87,7 +87,7 @@ class ProgramTest : public ::testing::Test
 TEST_F(ProgramTest, ProgramConstructor)
 {
     Program::Program* p;
-    ASSERT_NO_THROW({ p = new Program::Program(*e); })
+    ASSERT_NO_THROW({ p = new Program::Program(*e, false); })
         << "Something went wrong when constructing a Program with a valid "
            "Environment.";
 
@@ -98,7 +98,7 @@ TEST_F(ProgramTest, ProgramConstructor)
 
 TEST_F(ProgramTest, ProgramGetEnvironment)
 {
-    Program::Program p(*e);
+    Program::Program p(*e, false);
 
     ASSERT_EQ(&p.getEnvironment(), e)
         << "Environment of a Program differs from the one given at "
@@ -107,7 +107,7 @@ TEST_F(ProgramTest, ProgramGetEnvironment)
 
 TEST_F(ProgramTest, AddEmptyLineAtKnownPosition)
 {
-    Program::Program* p = new Program::Program(*e);
+    Program::Program* p = new Program::Program(*e, false);
     Program::Line* l;
     ASSERT_NO_THROW(l = &p->addNewLine(0);)
         << "Inserting a single empty line at position 0 in an empty program "
@@ -144,7 +144,7 @@ TEST_F(ProgramTest, AddEmptyLineAtKnownPosition)
 
 TEST_F(ProgramTest, AddEmptyLineAndDestruction)
 {
-    Program::Program* p = new Program::Program(*e);
+    Program::Program* p = new Program::Program(*e, false);
     Program::Line* l;
     ASSERT_NO_THROW(l = &p->addNewLine();)
         << "Inserting a single empty line in an empty program should not be an "
@@ -168,7 +168,7 @@ TEST_F(ProgramTest, AddEmptyLineAndDestruction)
 
 TEST_F(ProgramTest, CopyConstructor)
 {
-    Program::Program* p0 = new Program::Program(*e);
+    Program::Program* p0 = new Program::Program(*e, false);
     Program::Line& l = p0->addNewLine();
 
     // Initialize some line attributes
@@ -209,7 +209,7 @@ TEST_F(ProgramTest, CopyConstructor)
 
 TEST_F(ProgramTest, ProgramSwapLines)
 {
-    Program::Program p(*e);
+    Program::Program p(*e, false);
 
     std::vector<Program::Line*> lines;
     for (auto i = 0; i < 10; i++) {
@@ -232,7 +232,7 @@ TEST_F(ProgramTest, ProgramSwapLines)
 
 TEST_F(ProgramTest, getProgramNbLines)
 {
-    Program::Program p(*e);
+    Program::Program p(*e, false);
     ASSERT_EQ(p.getNbLines(), 0) << "Empty program nb lines should be 0.";
     p.addNewLine();
     ASSERT_EQ(p.getNbLines(), 1)
@@ -241,7 +241,7 @@ TEST_F(ProgramTest, getProgramNbLines)
 
 TEST_F(ProgramTest, GetProgramLine)
 {
-    Program::Program p(*e);
+    Program::Program p(*e, false);
     Program::Line& l1 = p.addNewLine();
     Program::Line& l2 = p.addNewLine();
     Program::Line& l3 = p.addNewLine();
@@ -263,7 +263,7 @@ TEST_F(ProgramTest, GetProgramLine)
 
 TEST_F(ProgramTest, RemoveProgramLine)
 {
-    Program::Program p(*e);
+    Program::Program p(*e, false);
     Program::Line& l1 = p.addNewLine();
     Program::Line& l2 = p.addNewLine();
     Program::Line& l3 = p.addNewLine();
@@ -288,7 +288,7 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
     Environment localE(set, params, vect);
 
     // Create a program with 2 introns
-    Program::Program p(localE);
+    Program::Program p(localE, false);
     Program::Line& l1 = p.addNewLine();
     Program::Line& l2 = p.addNewLine();
     Program::Line& l3 = p.addNewLine();
@@ -348,7 +348,7 @@ TEST_F(ProgramTest, clearIntrons)
     Environment localE(set, params, vect);
 
     // Create a program with 2 introns
-    Program::Program p(localE);
+    Program::Program p(localE, false);
     Program::Line& l1 = p.addNewLine();
     Program::Line& l2 = p.addNewLine();
     Program::Line& l3 = p.addNewLine();
@@ -418,7 +418,7 @@ TEST_F(ProgramTest, clearIntrons)
 TEST_F(ProgramTest, constants)
 {
     // Create a program with constants
-    Program::Program p(*e);
+    Program::Program p(*e, false);
 
     // add some constants to the program (-2,-1,0,1)
     for (int j = 0; j < 4; j++) {
@@ -456,7 +456,7 @@ TEST_F(ProgramTest, HasIdenticalBehavior)
     Environment localEnv(localSet, params, vect);
 
     // Create 2 Programs
-    Program::Program p1(localEnv), p2(localEnv);
+    Program::Program p1(localEnv, false), p2(localEnv, false);
 
     // Check that they are identical when empty
     ASSERT_TRUE(p1.hasIdenticalBehavior(p2))

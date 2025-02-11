@@ -788,8 +788,9 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuous)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
     params.ratioDeletedRoots =
-        0.95; // high number to force the apparition of root action.
+        0.5; // high number to force the apparition of root action.
     params.nbThreads = 1;
+    params.mutation.tpg.initNbActions = 2;
 
     Learn::LearningAgent la(cle, set, params);
 
@@ -804,9 +805,9 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuous)
     ASSERT_NO_THROW(la.trainOneGeneration(4))
         << "Training for one generation failed.";
     // Check the number of vertex in the graph.
-    // Must be initial number of vertex - number of root removed - 1 (for action root removed)
+    // Must be initial number of vertex - number of root removed
     ASSERT_EQ(la.getTPGGraph()->getNbVertices(),
-              initialNbVertex - 1 -
+              initialNbVertex -
                   floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "TPGGraph.";

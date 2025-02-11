@@ -178,7 +178,7 @@ TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateStack)
 {
     auto& team = tpg->addNewTeam();
     auto& action = tpg->addNewAction(0);
-    tpg->addNewEdge(team, action, std::make_shared<Program::Program>(*e));
+    tpg->addNewEdge(team, action, std::make_shared<Program::Program>(*e, false));
 
     CodeGen::TPGGenerationEngineFactory factoryStack(
         CodeGen::TPGGenerationEngineFactory::generationEngineMode::stackMode);
@@ -217,7 +217,7 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
 
-    const std::shared_ptr<Program::Program> progA(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> progA(new Program::Program(*e, false));
 
     tpg->addNewEdge(*root, *leaf, progA);
 
@@ -293,7 +293,7 @@ TEST_BOTH_MODE(OneLeaf, {
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
 
-    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e, false));
     Program::Line& prog1L1 = prog1->addNewLine();
     // reg[0] = in1[0] - reg[1]
     prog1L1.setDestinationIndex(0);
@@ -332,7 +332,7 @@ TEST_BOTH_MODE(TwoLeaves, {
     const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
 
-    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e, false));
     Program::Line& prog1L1 = prog1->addNewLine();
     // reg[0] = in1[0] + in1[1];
     prog1L1.setDestinationIndex(0);
@@ -340,7 +340,7 @@ TEST_BOTH_MODE(TwoLeaves, {
     prog1L1.setOperand(0, 1, 0);
     prog1L1.setOperand(1, 1, 1);
 
-    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e, false));
     Program::Line& prog2L1 = prog2->addNewLine();
     // reg[0] = in1[0] + in1[2];
     prog2L1.setDestinationIndex(0);
@@ -380,7 +380,7 @@ TEST_BOTH_MODE(ThreeLeaves, {
     const TPG::TPGVertex* leaf3 = (&tpg->addNewAction(3));
     const TPG::TPGVertex* root = (&tpg->addNewTeam());
 
-    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e, false));
     Program::Line& prog1L1 = prog1->addNewLine();
     // reg[0] = in1[0] + in1[1];
     prog1L1.setDestinationIndex(0);
@@ -388,7 +388,7 @@ TEST_BOTH_MODE(ThreeLeaves, {
     prog1L1.setOperand(0, 1, 0);
     prog1L1.setOperand(1, 1, 1);
 
-    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e, false));
     Program::Line& prog2L1 = prog2->addNewLine();
     // reg[0] = in1[0] + in1[2];
     prog2L1.setDestinationIndex(0);
@@ -396,7 +396,7 @@ TEST_BOTH_MODE(ThreeLeaves, {
     prog2L1.setOperand(0, 1, 0);
     prog2L1.setOperand(1, 1, 2);
 
-    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e, false));
     Program::Line& prog3L1 = prog3->addNewLine();
     // reg[0] = in1[0] + in1[3];
     prog3L1.setDestinationIndex(0);
@@ -438,7 +438,7 @@ TEST_BOTH_MODE(OneTeamOneLeaf, {
     const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
 
-    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e, false));
     Program::Line& prog1L1 = prog1->addNewLine();
     // reg[0] = in1[0] + reg[1];
     prog1L1.setDestinationIndex(0);
@@ -446,7 +446,7 @@ TEST_BOTH_MODE(OneTeamOneLeaf, {
     prog1L1.setOperand(0, 1, 0);
     prog1L1.setOperand(1, 0, 1);
 
-    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e, false));
     Program::Line& prog2L1 = prog2->addNewLine();
     // reg[0] = in1[0] - in1[1];
     prog2L1.setDestinationIndex(0);
@@ -488,7 +488,7 @@ TEST_BOTH_MODE(OneTeamTwoLeaves, {
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
     const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
 
-    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e, false));
     Program::Line& prog1L1 = prog1->addNewLine();
     // reg[0] = in1[0] - reg[1];
     prog1L1.setDestinationIndex(0);
@@ -496,7 +496,7 @@ TEST_BOTH_MODE(OneTeamTwoLeaves, {
     prog1L1.setOperand(0, 1, 0);
     prog1L1.setOperand(1, 0, 1);
 
-    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e, false));
     Program::Line& prog2L1 = prog2->addNewLine();
     // reg[0] = in1[0] - in1[1];
     prog2L1.setDestinationIndex(0);
@@ -504,7 +504,7 @@ TEST_BOTH_MODE(OneTeamTwoLeaves, {
     prog2L1.setOperand(0, 1, 0);
     prog2L1.setOperand(1, 1, 1);
 
-    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e, false));
     Program::Line& prog3L1 = prog3->addNewLine();
     // reg[0] = in1[0] + in1[1];
     prog3L1.setDestinationIndex(0);
@@ -548,7 +548,7 @@ TEST_BOTH_MODE(TwoTeams, {
     const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
     const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
 
-    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e, false));
     Program::Line& prog1L1 = prog1->addNewLine();
     // reg[0] = in1[0] + in1[1];
     prog1L1.setDestinationIndex(0);
@@ -556,7 +556,7 @@ TEST_BOTH_MODE(TwoTeams, {
     prog1L1.setOperand(0, 1, 0);
     prog1L1.setOperand(1, 1, 1);
 
-    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e, false));
     Program::Line& prog2L1 = prog2->addNewLine();
     // reg[0] = in1[1] + in1[2];
     prog2L1.setDestinationIndex(0);
@@ -564,7 +564,7 @@ TEST_BOTH_MODE(TwoTeams, {
     prog2L1.setOperand(0, 1, 1);
     prog2L1.setOperand(1, 1, 2);
 
-    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e, false));
     Program::Line& prog3L1 = prog3->addNewLine();
     // reg[0] = in1[1] + in1[3];
     prog3L1.setDestinationIndex(0);
@@ -572,7 +572,7 @@ TEST_BOTH_MODE(TwoTeams, {
     prog3L1.setOperand(0, 1, 1);
     prog3L1.setOperand(1, 1, 3);
 
-    const std::shared_ptr<Program::Program> prog4(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog4(new Program::Program(*e, false));
     Program::Line& prog4L1 = prog4->addNewLine();
     // reg[0] = in1[1] + in1[4];
     prog4L1.setDestinationIndex(0);
@@ -616,7 +616,7 @@ TEST_BOTH_MODE(TwoTeamsNegativeBid, {
     const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
     const TPG::TPGVertex* leaf3 = (&tpg->addNewAction(3));
 
-    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e, false));
     Program::Line& prog1L1 = prog1->addNewLine();
     // reg[0] = in1[0] + in1[1];
     prog1L1.setDestinationIndex(0);
@@ -624,7 +624,7 @@ TEST_BOTH_MODE(TwoTeamsNegativeBid, {
     prog1L1.setOperand(0, 1, 0);
     prog1L1.setOperand(1, 1, 1);
 
-    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e, false));
     Program::Line& prog2L1 = prog2->addNewLine();
     // reg[0] = in1[1] - in1[2];
     prog2L1.setDestinationIndex(0);
@@ -632,7 +632,7 @@ TEST_BOTH_MODE(TwoTeamsNegativeBid, {
     prog2L1.setOperand(0, 1, 1);
     prog2L1.setOperand(1, 1, 2);
 
-    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e, false));
     Program::Line& prog3L1 = prog3->addNewLine();
     // reg[0] = in1[1] + in1[3];
     prog3L1.setDestinationIndex(0);
@@ -640,7 +640,7 @@ TEST_BOTH_MODE(TwoTeamsNegativeBid, {
     prog3L1.setOperand(0, 1, 1);
     prog3L1.setOperand(1, 1, 3);
 
-    const std::shared_ptr<Program::Program> prog4(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog4(new Program::Program(*e, false));
     Program::Line& prog4L1 = prog4->addNewLine();
     // reg[0] = in1[1] + in1[4];
     prog4L1.setDestinationIndex(0);
@@ -648,7 +648,7 @@ TEST_BOTH_MODE(TwoTeamsNegativeBid, {
     prog4L1.setOperand(0, 1, 1);
     prog4L1.setOperand(1, 1, 4);
 
-    const std::shared_ptr<Program::Program> prog5(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog5(new Program::Program(*e, false));
     Program::Line& prog5L1 = prog5->addNewLine();
     // reg[0] = in1[1] + in1[6];
     prog5L1.setDestinationIndex(0);
@@ -708,12 +708,12 @@ TEST_BOTH_MODE(ThreeTeamsThreeLeaves, {
     const TPG::TPGVertex* T2 = (&tpg->addNewTeam());
     const TPG::TPGVertex* T3 = (&tpg->addNewTeam());
 
-    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e));
-    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e));
-    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e));
-    const std::shared_ptr<Program::Program> prog4(new Program::Program(*e));
-    const std::shared_ptr<Program::Program> prog5(new Program::Program(*e));
-    const std::shared_ptr<Program::Program> prog6(new Program::Program(*e));
+    const std::shared_ptr<Program::Program> prog1(new Program::Program(*e, false));
+    const std::shared_ptr<Program::Program> prog2(new Program::Program(*e, false));
+    const std::shared_ptr<Program::Program> prog3(new Program::Program(*e, false));
+    const std::shared_ptr<Program::Program> prog4(new Program::Program(*e, false));
+    const std::shared_ptr<Program::Program> prog5(new Program::Program(*e, false));
+    const std::shared_ptr<Program::Program> prog6(new Program::Program(*e, false));
 
     setProgLine(prog1, 0);
     // reg[0] = in1[0] + reg[1] (reg[1] = 0)

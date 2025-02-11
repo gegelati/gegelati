@@ -101,7 +101,7 @@ class ImporterTest : public ::testing::Test
         // Create 10 programs
         for (int i = 0; i < 9; i++) {
             std::shared_ptr<Program::Program> p =
-                std::make_shared<Program::Program>(*e);
+                std::make_shared<Program::Program>(*e, false);
             for (int j = 0; j < 5; j++) {
                 p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
                                                         j, {j - 2});

@@ -110,6 +110,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.initNbRoots = (size_t)value.asUInt();
         return;
     }
+    if (param == "initNbActions") {
+        params.mutation.tpg.initNbActions = (size_t)value.asUInt();
+        return;
+    }
     if (param == "maxInitOutgoingEdges") {
         params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;
@@ -143,6 +147,15 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.pEdgeDestinationIsAction = value.asDouble();
         return;
     }
+    if (param == "useActionProgram") {
+        params.mutation.tpg.useActionProgram = value.asBool();
+        return;
+    }
+    if (param == "probaContextOverActionProgram") {
+        params.mutation.tpg.probaContextOverActionProgram = (double)value.asDouble();
+        return;
+    }
+
     if (param == "maxProgramSize") {
         params.mutation.prog.maxProgramSize = (size_t)value.asUInt();
         return;
@@ -340,6 +353,9 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["initNbRoots"] = params.mutation.tpg.initNbRoots;
     root["mutation"]["tpg"]["initNbRoots"].setComment(
         Mutator::TPGParameters::initNbRootsComment, Json::commentBefore);
+    root["mutation"]["tpg"]["initNbActions"] = params.mutation.tpg.initNbActions;
+    root["mutation"]["tpg"]["initNbActions"].setComment(
+        Mutator::TPGParameters::initNbActionsComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["pEdgeAddition"] =
         params.mutation.tpg.pEdgeAddition;
@@ -367,6 +383,17 @@ void File::ParametersParser::writeParametersToJson(
         params.mutation.tpg.pProgramMutation;
     root["mutation"]["tpg"]["pProgramMutation"].setComment(
         Mutator::TPGParameters::pProgramMutationComment, Json::commentBefore);
+
+
+    root["mutation"]["tpg"]["useActionProgram"] = params.mutation.tpg.useActionProgram;
+    root["mutation"]["tpg"]["useActionProgram"].setComment(
+        Mutator::TPGParameters::useActionProgramComment,
+        Json::commentBefore);
+
+    root["mutation"]["tpg"]["probaContextOverActionProgram"] = params.mutation.tpg.probaContextOverActionProgram;
+    root["mutation"]["tpg"]["probaContextOverActionProgram"].setComment(
+        Mutator::TPGParameters::probaContextOverActionProgramComment, Json::commentBefore);
+
 
     // Mutation.program parameters
     root["mutation"]["prog"]["maxConstValue"] =

@@ -158,6 +158,7 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         // Get the next edge
         edge = &this->evaluateTeam(*(const TPGTeam*)currentVertex);
 
+        Program::Program p = currentVertex->getOutgoingEdges().front()->getProgram();
         // update currentVertex and backup in visitedVertex.
         currentVertex = edge->getDestination();
         visitedVertices.push_back(currentVertex);
@@ -171,12 +172,23 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
     // If continuous action are used, the n actions taken are the value 1 to n+1 in the last executed register.
     if(env.getNbContinuousActions() > 0){
 
-        // Re-evaluate the last edge to get the register values.
-        // TODO Wont work if memory is added
-        this->evaluateEdge(*edge);
+        // True if the action contain a TPGActionEdge
+        if(currentVertex->getOutgoingEdges().size() > 0){
+            this->evaluateEdge(*currentVertex->getOutgoingEdges().front());
 
-        std::vector<double> actionsTaken = progExecutionEngine.getRegisterValues(env.getNbContinuousActions() + 1);
-        actionsTaken.erase(actionsTaken.begin());
+            Program::Program p = currentVertex->getOutgoingEdges().front()->getProgram();
+
+            // Get the register values
+            actionsTaken = progExecutionEngine.getRegisterValues(env.getNbContinuousActions());
+        } else {
+            // Re-evaluate the last edge to get the register values.
+            // TODO Wont work if memory is added
+            this->evaluateEdge(*edge);
+
+            // Get the register values + the bid and erase the bid
+            actionsTaken = progExecutionEngine.getRegisterValues(env.getNbContinuousActions() + 1);
+            actionsTaken.erase(actionsTaken.begin());
+        }
 
         this->applyActivationFunctionOnActions(actionsTaken);
 

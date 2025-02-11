@@ -78,7 +78,7 @@ class TPGTest : public ::testing::Test
         params.nbProgramConstant = 1;
         e = new Environment(set, params, vect);
         progPointer =
-            std::shared_ptr<Program::Program>(new Program::Program(*e));
+            std::shared_ptr<Program::Program>(new Program::Program(*e, false));
     }
 
     virtual void TearDown()
@@ -189,7 +189,7 @@ TEST_F(TPGTest, TPGEdgeGetSetProgram)
            "the one given at construction.";
 
     // program is a mutable attribute of the Edge.
-    std::shared_ptr<Program::Program> progPointer2(new Program::Program(*e));
+    std::shared_ptr<Program::Program> progPointer2(new Program::Program(*e, false));
     constEdge.setProgram(progPointer2);
     ASSERT_EQ(&constEdge.getProgram(), progPointer2.get())
         << "Program accessor on TPGEdge returns a Program different from the "

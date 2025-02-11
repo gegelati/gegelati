@@ -84,7 +84,7 @@ class PolicyStatsTest : public ::testing::Test
         // Create 8 programs
         for (int i = 0; i < 8; i++) {
             progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+                std::shared_ptr<Program::Program>(new Program::Program(*e, false)));
         }
 
         // Create a TPG

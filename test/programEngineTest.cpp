@@ -108,7 +108,7 @@ class ProgramEngineTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
         e = new Environment(set, params, vect);
-        p = new Program::Program(*e);
+        p = new Program::Program(*e, false);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(
@@ -289,7 +289,7 @@ TEST_F(ProgramEngineTest, setProgram)
     Program::ProgramExecutionEngine progExecEng(*p);
 
     // Create a new program
-    Program::Program p2(*e);
+    Program::Program p2(*e, false);
 
     ASSERT_NO_THROW(progExecEng.setProgram(p2))
         << "Setting a new Program with a valid Environment for a "
@@ -302,7 +302,7 @@ TEST_F(ProgramEngineTest, setProgram)
     params.nbRegisters = 2;
     params.nbProgramConstant = 0;
     Environment otherE(set, params, otherVect);
-    Program::Program p3(otherE);
+    Program::Program p3(otherE, false);
     ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error)
         << "Setting a Program with an incompatible Environment should not be "
            "possible.";

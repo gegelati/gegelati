@@ -77,6 +77,25 @@ namespace Mutator {
         void initRandomTPG(TPG::TPGGraph& graph,
                            const MutationParameters& params, Mutator::RNG& rng,
                            uint64_t nbAction);
+        /**
+         * \brief Copy and mutate the TPGActionEdge of a TPGAction vertex 
+         *
+         * This function take a TPGAction, copy its program and mutate it
+         *
+         * \param[in,out] graph the TPGGraph within which the team and edge are
+         *                stored.
+         * \param[in,out] newPrograms List of new Program created during
+         *                mutations of the TPGTeam. The behavior of these
+         *                Program must be mutated to complete the mutation
+         *                process.
+         * \param[in] action the TPGAction whose actionEdges will be altered.
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        void mutateTPGAction(
+            TPG::TPGGraph& graph, const TPG::TPGAction& action,
+            std::list<std::shared_ptr<Program::Program>>& newPrograms,
+            const Mutator::MutationParameters& params, Mutator::RNG& rng);
 
         /**
          * \brief Select a random outgoingEdge of the given TPGTeam and removes

@@ -1,8 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,16 +33,26 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/tpgAction.h"
 #include "tpg/tpgActionEdge.h"
-#include <stdexcept>
 
-void TPG::TPGAction::addOutgoingEdge(TPGEdge* edge)
+const TPG::TPGVertex* TPG::TPGActionEdge::getDestination() const
 {
-    if(dynamic_cast<TPGActionEdge*>(edge) == nullptr){
-        throw std::runtime_error(
-            "Cannot add an outgoing edge to an Action vertex.");
-    } else {
-        TPGVertex::addOutgoingEdge(edge);
-    }
+    throw std::runtime_error(
+        "Action Edge cannot have a destination");
+}
+
+void TPG::TPGActionEdge::setDestination(TPGVertex* newDestination)
+{
+    throw std::runtime_error(
+        "Action Edge cannot have a destination");
+}
+
+void TPG::TPGActionEdge::setActionClass(uint64_t newActionClass)
+{
+    this->actionClass = newActionClass;
+}
+
+uint64_t TPG::TPGActionEdge::getActionClass() const
+{
+    return this->actionClass;
 }

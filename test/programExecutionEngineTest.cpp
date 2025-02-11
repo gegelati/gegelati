@@ -109,7 +109,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
         e = new Environment(set, params, vect);
-        p = new Program::Program(*e);
+        p = new Program::Program(*e, false);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(

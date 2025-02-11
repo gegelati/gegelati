@@ -169,12 +169,29 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
 
     // Copy the outgoing edges (if any).
     for (auto edge : vertex.getOutgoingEdges()) {
-        this->addNewEdge(*newVertex, *(edge->getDestination()),
-                         edge->getProgramSharedPointer());
+
+        if(dynamic_cast<TPG::TPGActionEdge*>(edge) != nullptr){
+            
+            // If action edge, create new action edge, else create new standard edge.
+            TPG::TPGActionEdge* actionEdge = dynamic_cast<TPGActionEdge*>(edge);
+            this->addNewActionEdge(*newVertex, actionEdge->getProgramSharedPointer(), actionEdge->getActionClass());
+
+        /*} else if(dynamic_cast<const TPG::TPGAction*>(edge->getDestination()) != nullptr) {
+
+            // If destination is a TPGAction, clone it.
+            const TPG::TPGVertex& newDestination = cloneVertex(*edge->getDestination());
+            this->addNewEdge(*newVertex, newDestination,
+                             edge->getProgramSharedPointer());*/
+        } else {
+            this->addNewEdge(*newVertex, *(edge->getDestination()),
+                             edge->getProgramSharedPointer());
+        }
     }
 
     return *newVertex;
 }
+
+
 
 const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
     const TPGVertex& src, const TPGVertex& dest,
@@ -213,12 +230,79 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
     return newEdge;
 }
 
+
+const TPG::TPGEdge& TPG::TPGGraph::addNewActionEdge(
+    const TPGVertex& src, const std::shared_ptr<Program::Program> prog, uint64_t actionClass)
+{
+    // Check the TPGVertex existence within the graph.
+    auto srcVertex =
+        std::find_if(this->vertices.begin(), this->vertices.end(),
+                     [&src](TPG::TPGVertex* other) { return other == &src; });
+    if (srcVertex == this->vertices.end()) {
+        throw std::runtime_error("Attempting to add a TPGActionEdge with a vertex "
+                                 "not present in the TPGGraph.");
+    } else if (dynamic_cast<TPG::TPGAction*>(*srcVertex) == nullptr){
+        throw std::runtime_error("Attempting to add a TPGActionEdge with a vertex "
+                                 "that is a team.");
+    }
+
+    // Create the edge
+    this->edges.push_back(factory->createTPGActionEdge(&src, prog, actionClass));
+    TPGEdge& newEdge = *(this->edges.back());
+
+    (*srcVertex)->addOutgoingEdge(&newEdge);
+
+    // return the new edge
+    return newEdge;
+}
+
+
+
 const std::list<std::unique_ptr<TPG::TPGEdge>>& TPG::TPGGraph::getEdges() const
 {
     return this->edges;
 }
 
 void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
+{
+
+    // Get the edge (if it is in the graph)
+    auto iterator = std::find_if(this->edges.begin(), this->edges.end(),
+                                 [&edge](std::unique_ptr<TPG::TPGEdge>& other) {
+                                     return &edge == other.get();
+                                 });
+
+    // Disconnect the edge from the vertices
+    if (iterator == this->edges.end()) {
+        throw std::runtime_error(
+            "Cannot erase a edge that does not belong to the graph");
+    }
+
+    if(dynamic_cast<const TPGActionEdge*>(iterator->get()) != nullptr){
+        return this->removeActionEdge(edge);
+    }
+
+    (*this->findVertex(iterator->get()->getSource()))
+        ->removeOutgoingEdge(iterator->get());
+
+    auto destination = iterator->get()->getDestination();
+    (*this->findVertex(destination))
+        ->removeIncomingEdge(iterator->get());
+
+    // If destination is an action and should became a root, it is deleted if the environment is continuous and does not use action program
+    if(!env.getParams().mutation.tpg.useActionProgram && 
+       env.getNbContinuousActions() > 0 && 
+       dynamic_cast<const TPG::TPGAction*>(destination) != nullptr && 
+       destination->getIncomingEdges().size() == 0){
+
+        this->removeVertex(*destination);
+    }
+
+    // Remove the edge
+    this->edges.erase(iterator);
+}
+
+void TPG::TPGGraph::removeActionEdge(const TPGEdge& edge)
 {
     // Get the edge (if it is in the graph)
     auto iterator = std::find_if(this->edges.begin(), this->edges.end(),
@@ -234,15 +318,7 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 
     (*this->findVertex(iterator->get()->getSource()))
         ->removeOutgoingEdge(iterator->get());
-
-    auto destination = iterator->get()->getDestination();
-    (*this->findVertex(destination))
-        ->removeIncomingEdge(iterator->get());
-
-    // If destination is an action and should became a root, it is deleted if the environment is continuous
-    if(dynamic_cast<const TPG::TPGAction*>(destination) != nullptr && destination->getIncomingEdges().size() == 0 && env.getNbContinuousActions() > 0){
-        this->removeVertex(*destination);
-    }
+    
     // Remove the edge
     this->edges.erase(iterator);
 }
@@ -254,6 +330,11 @@ const TPG::TPGEdge& TPG::TPGGraph::cloneEdge(const TPGEdge& edge)
         throw std::runtime_error(
             "Cannot duplicate an Edge not belonging to the graph.");
     }
+    else if (dynamic_cast<TPGActionEdge*>(iterEdge->get()) != nullptr) {
+        TPG::TPGActionEdge* actionEdge = dynamic_cast<TPGActionEdge*>(iterEdge->get());
+        return this->addNewActionEdge(*actionEdge->getSource(),
+                                      actionEdge->getProgramSharedPointer(), actionEdge->getActionClass());
+    } 
     else {
         return this->addNewEdge(*iterEdge->get()->getSource(),
                                 *iterEdge->get()->getDestination(),

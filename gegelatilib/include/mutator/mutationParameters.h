@@ -65,6 +65,12 @@ namespace Mutator {
         /// Number of root TPGTeams at the initialisation of a TPGGraph
         /// If 0, if will be init to the number of surviving roots
         size_t initNbRoots = 0;
+        /// JSon comment
+        inline static const std::string initNbActionsComment =
+            "//  Number of actions vertex at the initialisation of a TPGGraph\n"
+            "// \"initNbActions\" : 10, // Default value";
+        /// Number of actions vertex at the initialisation of a TPGGraph
+        size_t initNbActions = 10;
 
         /// JSon comment
         inline static const std::string maxInitOutgoingEdgesComment =
@@ -105,6 +111,13 @@ namespace Mutator {
         double pProgramMutation = 0.2;
 
         /// JSon comment
+        inline static const std::string probaContextOverActionProgramComment =
+            "// When an edge is mutate, the choice between action and context program is based on this\n"
+            "// \"probaContextOverActionProgram\" : 0.5, // Default value";
+        ///  When an edge is mutate, the choice between action and context program is based on this
+        double probaContextOverActionProgram = 0.5;
+
+        /// JSon comment
         inline static const std::string
             forceProgramBehaviorChangeOnMutationComment =
                 "// When a Program is mutated, makes sure its behavior is no "
@@ -131,6 +144,15 @@ namespace Mutator {
             "// \"pEdgeDestinationIsAction\" : 0.5, // Default value";
         /// Probability of the new destination of a TPGEdge to be a TPGAction.
         double pEdgeDestinationIsAction = 0.5;
+
+        /// JSon comment
+        inline static const std::string useActionProgramComment =
+            "// Create action program, instead of using context program to select continuous action(s)"
+            ".\n"
+            "// \"useActionProgram\" : false, // Default value";
+        /// Create action program, instead of using context program to select continuous action(s)
+        bool useActionProgram = false;
+
     } TPGParameters;
 
     /**

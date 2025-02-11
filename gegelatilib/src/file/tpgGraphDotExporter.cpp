@@ -68,6 +68,10 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 
 void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 {
+    if(dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr){
+        return;
+    }
+
     uint64_t srcID = this->findVertexID(*edge.getSource());
     uint64_t progID;
 

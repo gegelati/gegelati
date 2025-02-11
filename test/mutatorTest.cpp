@@ -99,9 +99,9 @@ class MutatorTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
         e = new Environment(set, params, vect);
-        p = new Program::Program(*e);
+        p = new Program::Program(*e, false);
         progPointer =
-            std::shared_ptr<Program::Program>(new Program::Program(*e));
+            std::shared_ptr<Program::Program>(new Program::Program(*e, false));
     }
 
     virtual void TearDown()
@@ -295,7 +295,7 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
             })));
 
     Environment e2(set, params, vect);
-    Program::Program p2(e2);
+    Program::Program p2(e2, false);
 
     Program::ProgramExecutionEngine pEE(p2);
 
@@ -494,7 +494,7 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior)
         })));
 
     Environment e2(set, params, vect);
-    Program::Program p2(e2);
+    Program::Program p2(e2, false);
 
     Program::ProgramExecutionEngine pEE(p2);
 

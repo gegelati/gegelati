@@ -56,7 +56,7 @@ namespace Program {
         const Environment& environment;
 
         /// Boolean indicating if true that the program is an action program, if false that it is a context program
-        bool actionProgram = true;
+        bool actionProgram;
 
         /**
          * \brief Lines of the program and intron property.
@@ -87,10 +87,11 @@ namespace Program {
          * \brief Main constructor of the Program.
          *
          * \param[in] e the reference to the Environment that will be referenced
+         * \param[in] actProgram boolean specifying if the program is action or context
          * in the Program attributes.
          */
-        Program(const Environment& e)
-            : environment{e}, constants{e.getNbConstant()}
+        Program(const Environment& e, bool actProgram)
+            : environment{e}, constants{e.getNbConstant()}, actionProgram{actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.
         };
@@ -105,7 +106,30 @@ namespace Program {
          */
         Program(const Program& other)
             : environment{other.environment}, lines{other.lines},
-              constants{other.constants}
+              constants{other.constants}, actionProgram{other.actionProgram}
+        {
+            // Replace lines with their copy
+            // Keep intro info
+            std::transform(
+                lines.begin(), lines.end(), lines.begin(),
+                [](std::pair<Line*, bool>& otherLine)
+                    -> std::pair<Line*, bool> {
+                    return {new Line(*(otherLine.first)), otherLine.second};
+                });
+        };
+
+        /**
+         * \brief Copy constructor of the Program.
+         *
+         * This copy constructor realises a deep copy of the Line of the given
+         * Program, instead of the default shallow copy.
+         *
+         * \param[in] other a const reference the the copied Program.
+         * \param[in] actProgram boolean specifying if the program is action or context
+         */
+        Program(const Program& other, bool actProgram)
+            : environment{other.environment}, lines{other.lines},
+              constants{other.constants}, actionProgram{actProgram}
         {
             // Replace lines with their copy
             // Keep intro info

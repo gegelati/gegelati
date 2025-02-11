@@ -88,9 +88,9 @@ class ProgramGenerationEngineTest : public ::testing::Test
 
         params.nbProgramConstant = 5;
         envWithConstant = new Environment(set, params, vect);
-        p = new Program::Program(*e);
-        p2 = new Program::Program(*e);
-        p3 = new Program::Program(*envWithConstant);
+        p = new Program::Program(*e, false);
+        p2 = new Program::Program(*e, false);
+        p3 = new Program::Program(*envWithConstant, false);
 
 #if defined(_MSC_VER) || (__MINGW32__)
         // Set working directory to BIN_DIR_PATH where the "src" directory was

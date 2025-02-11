@@ -75,7 +75,7 @@ class TPGInstrumentedTest : public ::testing::Test
         params.nbProgramConstant = 1;
         e = new Environment(set, params, vect);
         progPointer =
-            std::shared_ptr<Program::Program>(new Program::Program(*e));
+            std::shared_ptr<Program::Program>(new Program::Program(*e, false));
     }
 
     virtual void TearDown()

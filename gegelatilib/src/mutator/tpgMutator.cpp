@@ -60,17 +60,30 @@ void Mutator::TPGMutator::initRandomTPG(
     TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
     Mutator::RNG& rng, uint64_t nbActions)
 {
-    if (params.tpg.maxInitOutgoingEdges > nbActions) {
-        throw std::runtime_error("Maximum initial number of outgoing edges "
-                                 "cannot exceed the number of action");
+
+    if(graph.getEnvironment().getNbContinuousActions() == 0){
+        if (params.tpg.maxInitOutgoingEdges > nbActions) {
+            throw std::runtime_error("Maximum initial number of outgoing edges "
+                                    "cannot exceed the number of action");
+        }
+        if (nbActions < 2) {
+            throw std::runtime_error("A TPG with a single action makes no sense.");
+        }
+
+        if (params.tpg.initNbRoots < nbActions) {
+            throw std::runtime_error("The number of init roots should be above or "
+                                    "equal to the number of actions.");
+        }
+    } else if (graph.getEnvironment().getNbRegisters() < nbActions + (int)!params.tpg.useActionProgram) {
+        throw std::runtime_error("The number of registers is below the number of values outputted.");
+    } else {
+        // If no error but case with continuous actions, nbActions is set to the number of action vertex created
+        nbActions = params.tpg.initNbActions;
     }
-    if (nbActions < 2) {
-        throw std::runtime_error("A TPG with a single action makes no sense.");
-    }
-    if (params.tpg.initNbRoots < nbActions) {
-        throw std::runtime_error("The number of init roots should be above or "
-                                 "equal to the number of actions.");
-    }
+
+
+
+
     // Empty graph
     graph.clear();
 
@@ -78,24 +91,36 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGAction*> actions;
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
+
     for (size_t i = 0; i < nbActions; i++) {
         actions.push_back(&(graph.addNewAction(i)));
+
+        if(graph.getEnvironment().getNbContinuousActions() > 0 && params.tpg.useActionProgram){
+
+            // Specify action program
+            std::shared_ptr<Program::Program> p = std::make_shared<Program::Program>(graph.getEnvironment(), true);
+            // RandomInit the Programs
+            Mutator::ProgramMutator::initRandomProgram(*p, params, rng);
+            // Create the action edge
+            graph.addNewActionEdge(*actions.at(i), p, 0);
+        }
     }
     for (size_t i = 0; i < params.tpg.initNbRoots; i++) {
         teams.push_back(&(graph.addNewTeam()));
     }
     for (size_t i = 0; i < 2 * params.tpg.initNbRoots; i++) {
-        programs.emplace_back(new Program::Program(graph.getEnvironment()));
+        // Specify context program
+        programs.emplace_back(new Program::Program(graph.getEnvironment(), false));
         // RandomInit the Programs
         Mutator::ProgramMutator::initRandomProgram(*programs.back(), params,
                                                    rng);
     }
 
-    // Connect each team with two distinct actions, thr²ough two distinct
+    // Connect each team with two distinct actions, through two distinct
     // programs Association here are determinists since randomness would
     // uselessly complicate the code while bringing no real value since anyway,
     // Programs have been initialized randomly.
-    for (size_t i = 0; i < 2 * nbActions; i++) {
+    for (size_t i = 0; i < 2 * std::min(nbActions, params.tpg.initNbRoots) ; i++) {
         graph.addNewEdge(*teams.at(i / 2),
                          *actions.at(((i / 2) + (i % 2)) % nbActions),
                          programs.at(i));
@@ -167,6 +192,22 @@ void Mutator::TPGMutator::initRandomTPG(
     }
 }
 
+void Mutator::TPGMutator::mutateTPGAction(
+    TPG::TPGGraph& graph, const TPG::TPGAction& action,
+    std::list<std::shared_ptr<Program::Program>>& newPrograms,
+    const Mutator::MutationParameters& params, Mutator::RNG& rng)
+{
+    // copy program
+    std::shared_ptr<Program::Program> newProg(
+        new Program::Program(action.getOutgoingEdges().front()->getProgram(), true));
+
+    // Add it to the list of new Program to be mutated.
+    newPrograms.push_back(newProg);
+
+    // Set the mutated program to the edge
+    action.getOutgoingEdges().front()->setProgram(newProg);
+}
+
 void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph,
                                            const TPG::TPGTeam& team,
                                            Mutator::RNG& rng)
@@ -189,14 +230,15 @@ void Mutator::TPGMutator::addRandomEdge(
     TPG::TPGGraph& graph, const TPG::TPGTeam& team,
     const std::list<const TPG::TPGEdge*>& preExistingEdges, Mutator::RNG& rng)
 {
-    // Pick an edge (excluding ones from the team and edges with the team as a
-    // destination)
+    // Pick an edge (excluding ones from the team, edges with the team as a
+    // destination and the edges that are action edges)
     auto pickableEdges(preExistingEdges);
     // cf erase-remove idiom
     pickableEdges.erase(
         std::remove_if(pickableEdges.begin(), pickableEdges.end(),
                        [&team](const TPG::TPGEdge* edge) -> bool {
-                           return edge->getSource() == &team ||
+                           return dynamic_cast<const TPG::TPGActionEdge*>(edge) != nullptr ||
+                                  edge->getSource() == &team ||
                                   edge->getDestination() == &team;
                        }),
         pickableEdges.end());
@@ -236,6 +278,8 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     if (targetAction) {
         target = preExistingActions.at(
             rng.getUnsignedInt64(0, preExistingActions.size() - 1));
+        //target = &graph.cloneVertex(*preExistingActions.at(
+        //    rng.getUnsignedInt64(0, preExistingActions.size() - 1)));
     }
     else {
         target = preExistingTeams.at(
@@ -254,9 +298,19 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
     const Mutator::MutationParameters& params, Mutator::RNG& rng)
 {
+
+    if(graph.getEnvironment().getNbContinuousActions() > 0
+       && params.tpg.useActionProgram
+       && dynamic_cast<const TPG::TPGAction*>(edge->getDestination()) != nullptr 
+       && rng.getDouble(0.0, 1.0) < params.tpg.probaContextOverActionProgram){
+
+        return mutateTPGAction(graph, *dynamic_cast<const TPG::TPGAction*>(edge->getDestination()), 
+                               newPrograms, params, rng);
+    }
+
     // copy program
     std::shared_ptr<Program::Program> newProg(
-        new Program::Program(edge->getProgram()));
+        new Program::Program(edge->getProgram(), false));
 
     // Add it to the list of new Program to be mutated.
     newPrograms.push_back(newProg);
@@ -301,7 +355,6 @@ void Mutator::TPGMutator::mutateTPGTeam(
                proba > rng.getDouble(0.0, 1.0)) {
             // Add an edge (by duplication of an existing one)
             addRandomEdge(graph, team, preExistingEdges, rng);
-
             // Decrement the proba of adding another edge
             proba *= params.tpg.pEdgeAddition;
         }
@@ -337,7 +390,7 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
     if (params.tpg.forceProgramBehaviorChangeOnMutation) {
         // Copy the program to check that its behavior is changed before
         // verifying its unicity against the archive
-        newProgCopy = std::make_shared<Program::Program>(*newProg);
+        newProgCopy = std::make_shared<Program::Program>(*newProg, newProg->isActionProgram());
     }
 
     bool allUnique;
@@ -461,7 +514,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Get current root teams (copy)
     auto rootVertices(graph.getRootVertices());
     // Get root Teams
-    std::vector<const TPG::TPGTeam*> rootTeams;
+    std::vector<const TPG::TPGVertex*> rootTeams;
     std::for_each(rootVertices.begin(), rootVertices.end(),
                   [&rootTeams](const TPG::TPGVertex* vertex) {
                       if (dynamic_cast<const TPG::TPGTeam*>(vertex) !=
@@ -510,19 +563,32 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Create an empty list to store Programs to mutate.
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
+    // Use root teams only except if continuous actions and action programs are used.
+    auto rootUsed = rootTeams;
+    if(graph.getEnvironment().getNbContinuousActions() > 0 && params.tpg.useActionProgram){
+        rootUsed = rootVertices;
+    }
+
     // While the target is not reached, add new teams
     uint64_t currentNumberOfRoot = rootVertices.size();
     while (params.tpg.nbRoots > currentNumberOfRoot) {
         // Select a random existing root
         uint64_t clonedRootIndex =
-            rng.getUnsignedInt64(0, rootTeams.size() - 1);
+            rng.getUnsignedInt64(0, rootVertices.size() - 1);
         // clone it (the vertex and all its outgoing edges)
-        const TPG::TPGTeam& newRoot = (const TPG::TPGTeam&)graph.cloneVertex(
-            *rootTeams.at(clonedRootIndex));
+        const TPG::TPGVertex& newRoot = (const TPG::TPGVertex&)graph.cloneVertex(
+            *rootVertices.at(clonedRootIndex));
+
         // Apply mutations to the root
-        mutateTPGTeam(graph, archive, newRoot, preExistingTeams,
-                      preExistingActions, preExistingEdges, newPrograms, params,
-                      rng);
+        if(dynamic_cast<const TPG::TPGTeam*>(&newRoot) != nullptr){
+            mutateTPGTeam(graph, archive, (const TPG::TPGTeam&)newRoot, preExistingTeams,
+                        preExistingActions, preExistingEdges, newPrograms, params,
+                        rng);
+        } else {
+            mutateTPGAction(graph, (const TPG::TPGAction&)newRoot, 
+                            newPrograms, params, rng);
+        }
+
         // Check the new number of roots
         // Needed since preExisting root may be subsumed by new ones.
         currentNumberOfRoot = graph.getNbRootVertices();

@@ -116,7 +116,7 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
             progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+                std::shared_ptr<Program::Program>(new Program::Program(*e, false)));
         }
 
         // Create a TPG

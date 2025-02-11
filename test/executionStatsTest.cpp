@@ -102,7 +102,7 @@ class ExecutionStatsTest : public ::testing::Test
 
         // Create 8 programs
         for (int i = 0; i < 8; i++) {
-            progPointers.push_back(std::make_shared<Program::Program>(*e));
+            progPointers.push_back(std::make_shared<Program::Program>(*e, false));
         }
 
         // Create a TPG

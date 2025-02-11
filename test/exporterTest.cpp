@@ -96,7 +96,7 @@ class ExporterTest : public ::testing::Test
         // Create 10 programs
         for (int i = 0; i < 8; i++) {
             std::shared_ptr<Program::Program> p =
-                std::make_shared<Program::Program>(*e);
+                std::make_shared<Program::Program>(*e, false);
             for (int j = 0; j < constant_size; j++) {
                 p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
                                                         j, {j - 2});
