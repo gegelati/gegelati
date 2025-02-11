@@ -105,6 +105,7 @@
 #include <tpg/policyStats.h>
 #include <tpg/tpgAbstractEngine.h>
 #include <tpg/tpgAction.h>
+#include <tpg/tpgActionEdge.h>
 #include <tpg/tpgEdge.h>
 #include <tpg/tpgExecutionEngine.h>
 #include <tpg/tpgFactory.h>
