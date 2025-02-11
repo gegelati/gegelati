@@ -48,29 +48,35 @@ void TPG::TPGExecutionEngine::setArchive(Archive* newArchive)
     this->archive = newArchive;
 }
 
-void TPG::TPGExecutionEngine::applyActivationFunctionOnActions(std::vector<double>& actionsTaken)
+void TPG::TPGExecutionEngine::applyActivationFunctionOnActions(
+    std::vector<double>& actionsTaken)
 {
 
-    for(int i = 0; i < actionsTaken.size(); i++){
-        if(std::isnan(actionsTaken[i])){
+    for (int i = 0; i < actionsTaken.size(); i++) {
+        if (std::isnan(actionsTaken[i])) {
             actionsTaken[i] = -std::numeric_limits<double>::infinity();
         }
     }
 
     // Sigmoid function
-    if(env.getParams().activationFunction == "sigmoid"){
-        for(size_t i=0; i<actionsTaken.size(); i++){
+    if (env.getParams().activationFunction == "sigmoid") {
+        for (size_t i = 0; i < actionsTaken.size(); i++) {
             actionsTaken[i] = 1.0 / (1.0 + std::exp(-actionsTaken[i]));
         }
-    } else if(env.getParams().activationFunction == "tanh"){
-        std::transform(actionsTaken.begin(), actionsTaken.end(), actionsTaken.begin(), [](double x) { return std::tanh(x); });
-
-    } else if(env.getParams().activationFunction == "none"){
+    }
+    else if (env.getParams().activationFunction == "tanh") {
+        std::transform(actionsTaken.begin(), actionsTaken.end(),
+                       actionsTaken.begin(),
+                       [](double x) { return std::tanh(x); });
+    }
+    else if (env.getParams().activationFunction == "none") {
         for (double& actionTaken : actionsTaken) {
             actionTaken = std::clamp(actionTaken, -1.0, 1.0);
         }
-    } else {
-        throw std::runtime_error("Activation function for converting continuous actions not known");
+    }
+    else {
+        throw std::runtime_error(
+            "Activation function for converting continuous actions not known");
     }
 }
 
@@ -152,50 +158,58 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
     std::vector<const TPGVertex*> visitedVertices;
     visitedVertices.push_back(currentVertex);
 
-
     // Browse the TPG until a TPGAction is reached.
     while (dynamic_cast<const TPG::TPGTeam*>(currentVertex)) {
         // Get the next edge
         edge = &this->evaluateTeam(*(const TPGTeam*)currentVertex);
 
-        Program::Program p = currentVertex->getOutgoingEdges().front()->getProgram();
+        Program::Program p =
+            currentVertex->getOutgoingEdges().front()->getProgram();
         // update currentVertex and backup in visitedVertex.
         currentVertex = edge->getDestination();
         visitedVertices.push_back(currentVertex);
     }
 
-
     // An action value must be positive, so -1 for an action mean that no action
     // value is choosen yet.
     std::vector<double> actionsTaken(env.getNbContinuousActions(), 0.0);
 
-    // If continuous action are used, the n actions taken are the value 1 to n+1 in the last executed register.
-    if(env.getNbContinuousActions() > 0){
+    // If continuous action are used, the n actions taken are the value 1 to n+1
+    // in the last executed register.
+    if (env.getNbContinuousActions() > 0) {
 
         // True if the action contain a TPGActionEdge
-        if(currentVertex->getOutgoingEdges().size() > 0){
+        if (currentVertex->getOutgoingEdges().size() > 0) {
             this->evaluateEdge(*currentVertex->getOutgoingEdges().front());
 
-            Program::Program p = currentVertex->getOutgoingEdges().front()->getProgram();
+            Program::Program p =
+                currentVertex->getOutgoingEdges().front()->getProgram();
 
             // Get the register values
-            actionsTaken = progExecutionEngine.getRegisterValues(env.getNbContinuousActions());
-        } else {
+            actionsTaken = progExecutionEngine.getRegisterValues(
+                env.getNbContinuousActions());
+        }
+        else {
             // Re-evaluate the last edge to get the register values.
             // TODO Wont work if memory is added
             this->evaluateEdge(*edge);
 
             // Get the register values + the bid and erase the bid
-            actionsTaken = progExecutionEngine.getRegisterValues(env.getNbContinuousActions() + 1);
+            actionsTaken = progExecutionEngine.getRegisterValues(
+                env.getNbContinuousActions() + 1);
             actionsTaken.erase(actionsTaken.begin());
         }
 
         this->applyActivationFunctionOnActions(actionsTaken);
 
-        return std::make_pair(visitedVertices, actionsTaken);;
-    } else {
-        return std::make_pair(visitedVertices, std::vector<double>{static_cast<double>(dynamic_cast<const TPG::TPGAction*>(currentVertex)->getActionID())});
+        return std::make_pair(visitedVertices, actionsTaken);
+        ;
     }
-
-
+    else {
+        return std::make_pair(
+            visitedVertices,
+            std::vector<double>{static_cast<double>(
+                dynamic_cast<const TPG::TPGAction*>(currentVertex)
+                    ->getActionID())});
+    }
 }

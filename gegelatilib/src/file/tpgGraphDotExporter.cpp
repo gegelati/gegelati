@@ -68,7 +68,7 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 
 void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 {
-    if(dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr){
+    if (dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr) {
         return;
     }
 

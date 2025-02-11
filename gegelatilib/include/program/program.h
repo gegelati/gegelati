@@ -55,7 +55,8 @@ namespace Program {
         /// Environment within which the Program will be executed.
         const Environment& environment;
 
-        /// Boolean indicating if true that the program is an action program, if false that it is a context program
+        /// Boolean indicating if true that the program is an action program, if
+        /// false that it is a context program
         bool actionProgram;
 
         /**
@@ -87,11 +88,12 @@ namespace Program {
          * \brief Main constructor of the Program.
          *
          * \param[in] e the reference to the Environment that will be referenced
-         * \param[in] actProgram boolean specifying if the program is action or context
-         * in the Program attributes.
+         * \param[in] actProgram boolean specifying if the program is action or
+         * context in the Program attributes.
          */
         Program(const Environment& e, bool actProgram)
-            : environment{e}, constants{e.getNbConstant()}, actionProgram{actProgram}
+            : environment{e}, constants{e.getNbConstant()}, actionProgram{
+                                                                actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.
         };
@@ -125,7 +127,8 @@ namespace Program {
          * Program, instead of the default shallow copy.
          *
          * \param[in] other a const reference the the copied Program.
-         * \param[in] actProgram boolean specifying if the program is action or context
+         * \param[in] actProgram boolean specifying if the program is action or
+         * context
          */
         Program(const Program& other, bool actProgram)
             : environment{other.environment}, lines{other.lines},
@@ -256,7 +259,7 @@ namespace Program {
 
         /**
          * \brief Checks wether the current program is or not an action program.
-         * 
+         *
          * \return true if the procram is an action program.
          */
         bool isActionProgram() const;

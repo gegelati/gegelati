@@ -115,8 +115,8 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
-            progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e, false)));
+            progPointers.push_back(std::shared_ptr<Program::Program>(
+                new Program::Program(*e, false)));
         }
 
         // Create a TPG
@@ -256,8 +256,8 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
     ASSERT_EQ(action->getNbVisits(), 0)
         << "Nb visit before evaluation is incorrect.";
 
-    ASSERT_NO_THROW(result =
-                        tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first)
+    ASSERT_NO_THROW(
+        result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)

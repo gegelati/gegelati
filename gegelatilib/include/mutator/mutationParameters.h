@@ -72,12 +72,13 @@ namespace Mutator {
         /// Number of actions vertex at the initialisation of a TPGGraph
         size_t initNbActions = 10;
 
-
         /// JSon comment
-        inline static const std::string minProportionActionOrTeamComment = 
-            "// Minimum proportion of action roots or teams roots to keep at each generation\n"
+        inline static const std::string minProportionActionOrTeamComment =
+            "// Minimum proportion of action roots or teams roots to keep at "
+            "each generation\n"
             "// \"minProportionActionOrTeam\" : 0.0, // Default value";
-        /// Minimum proportion of action roots or teams roots to keep at each generation
+        /// Minimum proportion of action roots or teams roots to keep at each
+        /// generation
         double minProportionActionOrTeam = 0.0;
 
         /// JSon comment
@@ -120,9 +121,11 @@ namespace Mutator {
 
         /// JSon comment
         inline static const std::string probaContextOverActionProgramComment =
-            "// When an edge is mutate, the choice between action and context program is based on this\n"
+            "// When an edge is mutate, the choice between action and context "
+            "program is based on this\n"
             "// \"probaContextOverActionProgram\" : 0.5, // Default value";
-        ///  When an edge is mutate, the choice between action and context program is based on this
+        ///  When an edge is mutate, the choice between action and context
+        ///  program is based on this
         double probaContextOverActionProgram = 0.5;
 
         /// JSon comment
@@ -155,10 +158,12 @@ namespace Mutator {
 
         /// JSon comment
         inline static const std::string useActionProgramComment =
-            "// Create action program, instead of using context program to select continuous action(s)"
+            "// Create action program, instead of using context program to "
+            "select continuous action(s)"
             ".\n"
             "// \"useActionProgram\" : false, // Default value";
-        /// Create action program, instead of using context program to select continuous action(s)
+        /// Create action program, instead of using context program to select
+        /// continuous action(s)
         bool useActionProgram = false;
 
     } TPGParameters;

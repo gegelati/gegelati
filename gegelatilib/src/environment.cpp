@@ -164,8 +164,8 @@ const LineSize Environment::computeLineSize(const Environment& env)
     return result;
 }
 
-
-const Learn::LearningParameters& Environment::getParams() const{
+const Learn::LearningParameters& Environment::getParams() const
+{
     return params;
 }
 
@@ -179,7 +179,8 @@ size_t Environment::getNbConstant() const
     return this->nbConstants;
 }
 
-size_t Environment::getNbContinuousActions() const{
+size_t Environment::getNbContinuousActions() const
+{
     return nbContinuousActions;
 }
 

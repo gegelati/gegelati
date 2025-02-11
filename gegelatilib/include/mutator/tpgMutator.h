@@ -78,7 +78,7 @@ namespace Mutator {
                            const MutationParameters& params, Mutator::RNG& rng,
                            uint64_t nbAction);
         /**
-         * \brief Copy and mutate the TPGActionEdge of a TPGAction vertex 
+         * \brief Copy and mutate the TPGActionEdge of a TPGAction vertex
          *
          * This function take a TPGAction, copy its program and mutate it
          *

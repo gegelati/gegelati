@@ -56,12 +56,12 @@
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 
+#include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameWithOpponent.h"
-#include "learn/fakeMultiContinuousLearningEnvironment.h"
 
 class LearningAgentTest : public ::testing::Test
 {
@@ -794,7 +794,6 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuous)
 
     Learn::LearningAgent la(cle, set, params);
 
-
     la.init();
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
@@ -1297,5 +1296,3 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
         << "A single root TPGVertex should remain in the TPGGraph when keeping "
            "the best policy only";
 }
-
-

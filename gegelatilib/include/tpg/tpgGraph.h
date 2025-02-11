@@ -212,7 +212,6 @@ namespace TPG {
          */
         const TPGVertex& cloneVertex(const TPGVertex& vertex);
 
-
         /**
          * \brief Add a new TPGEdge to the TPGGraph.
          *
@@ -252,7 +251,9 @@ namespace TPG {
          *                           exist in the TPGGraph, or if the
          *							             source is a TPGTeam.
          */
-        const TPGEdge& addNewActionEdge(const TPGVertex& src, const std::shared_ptr<Program::Program> prog, uint64_t actionClass);
+        const TPGEdge& addNewActionEdge(
+            const TPGVertex& src, const std::shared_ptr<Program::Program> prog,
+            uint64_t actionClass);
 
         /**
          * \brief Get a const reference to the edges of the TPGGraph.

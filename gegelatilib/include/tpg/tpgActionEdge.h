@@ -62,22 +62,25 @@ namespace TPG {
          *            edge.
          */
         TPGActionEdge(const TPGVertex* src,
-                const std::shared_ptr<Program::Program> prog, uint64_t actClass)
-            : TPGEdge{src, NULL, prog}, actionClass(actClass) {};
+                      const std::shared_ptr<Program::Program> prog,
+                      uint64_t actClass)
+            : TPGEdge{src, NULL, prog}, actionClass(actClass){};
 
         /**
-         * \brief Override of the tpgEdge function because there should not be destination to action edge
+         * \brief Override of the tpgEdge function because there should not be
+         * destination to action edge
          */
         const TPGVertex* getDestination() const override;
 
         /**
-         * \brief Override of the tpgEdge function because there should not be destination to action edge
+         * \brief Override of the tpgEdge function because there should not be
+         * destination to action edge
          */
         void setDestination(TPGVertex* newDestination) override;
 
         /**
          * \brief set a new action class
-         * 
+         *
          * \param[in] newActionClass new action
          */
         void setActionClass(uint64_t newActionClass);
@@ -86,13 +89,11 @@ namespace TPG {
          * \brief get the action class
          */
         uint64_t getActionClass() const;
-      
 
         /// Delete the default constructor.
         TPGActionEdge() = delete;
 
       protected:
-
         /// @brief action class of the edge
         uint64_t actionClass;
     };

@@ -116,7 +116,8 @@ void File::ParametersParser::setParameterFromString(
     }
 
     if (param == "minProportionActionOrTeam") {
-        params.mutation.tpg.minProportionActionOrTeam = (double)value.asDouble();
+        params.mutation.tpg.minProportionActionOrTeam =
+            (double)value.asDouble();
         return;
     }
 
@@ -158,7 +159,8 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
     if (param == "probaContextOverActionProgram") {
-        params.mutation.tpg.probaContextOverActionProgram = (double)value.asDouble();
+        params.mutation.tpg.probaContextOverActionProgram =
+            (double)value.asDouble();
         return;
     }
 
@@ -246,7 +248,7 @@ void File::ParametersParser::setParameterFromString(
         params.doValidation = value.asBool();
         return;
     }
-    
+
     if (param == "activationFunction") {
         params.activationFunction = value.asString();
         return;
@@ -286,10 +288,10 @@ void File::ParametersParser::writeParametersToJson(
     root["doValidation"].setComment(
         Learn::LearningParameters::doValidationComment, Json::commentBefore);
 
-
     root["activationFunction"] = params.activationFunction;
     root["activationFunction"].setComment(
-        Learn::LearningParameters::activationFunctionComment, Json::commentBefore);
+        Learn::LearningParameters::activationFunctionComment,
+        Json::commentBefore);
 
     root["maxNbActionsPerEval"] = params.maxNbActionsPerEval;
     root["maxNbActionsPerEval"].setComment(
@@ -359,13 +361,16 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["initNbTeams"] = params.mutation.tpg.initNbTeams;
     root["mutation"]["tpg"]["initNbTeams"].setComment(
         Mutator::TPGParameters::initNbTeamsComment, Json::commentBefore);
-    root["mutation"]["tpg"]["initNbActions"] = params.mutation.tpg.initNbActions;
+    root["mutation"]["tpg"]["initNbActions"] =
+        params.mutation.tpg.initNbActions;
     root["mutation"]["tpg"]["initNbActions"].setComment(
         Mutator::TPGParameters::initNbActionsComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["minProportionActionOrTeam"] = params.mutation.tpg.minProportionActionOrTeam;
+    root["mutation"]["tpg"]["minProportionActionOrTeam"] =
+        params.mutation.tpg.minProportionActionOrTeam;
     root["mutation"]["tpg"]["minProportionActionOrTeam"].setComment(
-        Mutator::TPGParameters::minProportionActionOrTeamComment, Json::commentBefore);
+        Mutator::TPGParameters::minProportionActionOrTeamComment,
+        Json::commentBefore);
 
     root["mutation"]["tpg"]["pEdgeAddition"] =
         params.mutation.tpg.pEdgeAddition;
@@ -394,16 +399,16 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["pProgramMutation"].setComment(
         Mutator::TPGParameters::pProgramMutationComment, Json::commentBefore);
 
-
-    root["mutation"]["tpg"]["useActionProgram"] = params.mutation.tpg.useActionProgram;
+    root["mutation"]["tpg"]["useActionProgram"] =
+        params.mutation.tpg.useActionProgram;
     root["mutation"]["tpg"]["useActionProgram"].setComment(
-        Mutator::TPGParameters::useActionProgramComment,
-        Json::commentBefore);
+        Mutator::TPGParameters::useActionProgramComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["probaContextOverActionProgram"] = params.mutation.tpg.probaContextOverActionProgram;
+    root["mutation"]["tpg"]["probaContextOverActionProgram"] =
+        params.mutation.tpg.probaContextOverActionProgram;
     root["mutation"]["tpg"]["probaContextOverActionProgram"].setComment(
-        Mutator::TPGParameters::probaContextOverActionProgramComment, Json::commentBefore);
-
+        Mutator::TPGParameters::probaContextOverActionProgramComment,
+        Json::commentBefore);
 
     // Mutation.program parameters
     root["mutation"]["prog"]["maxConstValue"] =

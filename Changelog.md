@@ -9,7 +9,7 @@ _2024.10.29_
 * Remove the nbAction parameter that was not necessary since the number of action should not be a parameter that the user can change, it is fixed by the environment
 
 * Update to improve the diversity of the TPGs.
-  * Add a new parameter `initNbRoots` to select the number of roots to initialise a TPG.
+  * Add a new parameter `initNbTeams` to select the number of roots to initialise a TPG.
   * Add a new parameter `pNewProgram` to create new program during the mutation, during the training.
 
 * Add two parameters to the reset method of the learning environment. These parameters are used for environments that use specific initialization.

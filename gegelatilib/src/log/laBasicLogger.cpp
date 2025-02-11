@@ -105,16 +105,15 @@ void Log::LABasicLogger::logAfterPopulateTPG()
 
     auto roots = this->learningAgent.getTPGGraph()->getRootVertices();
 
-    uint64_t nbTeamsR = std::count_if(roots.begin(), roots.end(),
-        [](const TPG::TPGVertex* roots) {
+    uint64_t nbTeamsR = std::count_if(
+        roots.begin(), roots.end(), [](const TPG::TPGVertex* roots) {
             return dynamic_cast<const TPG::TPGTeam*>(roots) != nullptr;
         });
 
     uint64_t nbActionsR = roots.size() - nbTeamsR;
 
-    *this << std::setw(colWidth) << nbActionsR
-          << std::setw(colWidth) << nbTeamsR ;
-
+    *this << std::setw(colWidth) << nbActionsR << std::setw(colWidth)
+          << nbTeamsR;
 
     chronoFromNow();
 }

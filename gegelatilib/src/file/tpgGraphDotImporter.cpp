@@ -171,7 +171,8 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
             pos1 = this->lastLine.find("|", pos);
         }
         // create new program with the correct amount of constants
-        Program::Program* p = new Program::Program(this->tpg.getEnvironment(), true);
+        Program::Program* p =
+            new Program::Program(this->tpg.getEnvironment(), true);
         // set the previously read constants
         for (int i = 0; i < v_constant.size(); i++) {
             p->getConstantHandler().setDataAt(typeid(Data::Constant), i,

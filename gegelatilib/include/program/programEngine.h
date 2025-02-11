@@ -283,12 +283,12 @@ namespace Program {
          */
         virtual void iterateThroughtProgram(const bool ignoreException);
 
-
-            /**
+        /**
          * \brief Return the current registers value of the program indicated.
-         * 
-         * \param nbRegisters The number of register values that are taken (starting from the register 0)
-         * 
+         *
+         * \param nbRegisters The number of register values that are taken
+         * (starting from the register 0)
+         *
          * \return a vector containing the different value of the registers.
          */
         virtual std::vector<double> getRegisterValues(uint64_t nbRegisters);

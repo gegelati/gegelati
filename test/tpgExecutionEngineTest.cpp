@@ -80,7 +80,7 @@ class TPGExecutionEngineTest : public ::testing::Test
         auto& line = prog.addNewLine();
         // do an multby constant with DHandler 0
         line.setInstructionIndex(1);
-        line.setOperand(0, 2, 0);    // Dhandler 0 location 0
+        line.setOperand(0, 2, 0);        // Dhandler 0 location 0
         line.setOperand(1, 1, index);    // CHandler at location "index"
         line.setDestinationIndex(index); // index-th register dest
         prog.getConstantHandler().setDataAt(typeid(Data::Constant), index,
@@ -109,8 +109,8 @@ class TPGExecutionEngineTest : public ::testing::Test
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
-            progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e, false)));
+            progPointers.push_back(std::shared_ptr<Program::Program>(
+                new Program::Program(*e, false)));
         }
 
         // Create a TPG
@@ -233,8 +233,8 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
 
     std::vector<const TPG::TPGVertex*> result;
 
-    ASSERT_NO_THROW(result =
-                        tpee.executeFromRoot(*tpg->getRootVertices().at(0)).first)
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).first)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)
@@ -251,34 +251,31 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
         << "2nd element of the traversed path during execution is incorrect.";
 }
 
-
 TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuous)
 {
-    
-    makeProgramReturn(*progPointers.at(2), 1, 1); // Program from A2
-    makeProgramReturn(*progPointers.at(2), -1, 2); // Program from A2
 
+    makeProgramReturn(*progPointers.at(2), 1, 1);  // Program from A2
+    makeProgramReturn(*progPointers.at(2), -1, 2); // Program from A2
 
     Environment continuousEnv(set, params, vect, 2);
     TPG::TPGExecutionEngine tpee(continuousEnv);
 
     std::vector<double> result;
 
-    ASSERT_NO_THROW(result =
-                        tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 2)
         << "Size of the number of action should be equal to 2";
-    ASSERT_EQ(result.at(0), 1.0)
-        << "First action value should be 1.";
-    ASSERT_EQ(result.at(1), -1.0)
-        << "Second action value should be -0.2.";
+    ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
+    ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -0.2.";
 }
 
 TEST_F(TPGExecutionEngineTest, ApplyNoneActivationFunctionOnActions)
 {
-    std::vector<double> valuesNone{10.0, 0.2, -4.0, std::numeric_limits<double>::quiet_NaN()};
+    std::vector<double> valuesNone{10.0, 0.2, -4.0,
+                                   std::numeric_limits<double>::quiet_NaN()};
 
     params.activationFunction = "none";
     Environment envNone(set, params, vect);
@@ -292,7 +289,8 @@ TEST_F(TPGExecutionEngineTest, ApplyNoneActivationFunctionOnActions)
 
 TEST_F(TPGExecutionEngineTest, ApplyTanhActivationFunctionOnActions)
 {
-    std::vector<double> valuesNone{10.0, 0.2, -4.0, std::numeric_limits<double>::quiet_NaN()};
+    std::vector<double> valuesNone{10.0, 0.2, -4.0,
+                                   std::numeric_limits<double>::quiet_NaN()};
 
     params.activationFunction = "tanh";
     Environment envNone(set, params, vect);
@@ -300,13 +298,15 @@ TEST_F(TPGExecutionEngineTest, ApplyTanhActivationFunctionOnActions)
 
     tpeeNone.applyActivationFunctionOnActions(valuesNone);
     // Check the value are right
-    ASSERT_EQ(valuesNone, std::vector<double>({std::tanh(10.0), std::tanh(0.2), std::tanh(-4.0), -1.0}))
+    ASSERT_EQ(valuesNone, std::vector<double>({std::tanh(10.0), std::tanh(0.2),
+                                               std::tanh(-4.0), -1.0}))
         << "Values should be the output of sigmoid";
 }
 
 TEST_F(TPGExecutionEngineTest, ApplySigmoidActivationFunctionOnActions)
 {
-    std::vector<double> valuesNone{10.0, 0.2, -4.0, std::numeric_limits<double>::quiet_NaN()};
+    std::vector<double> valuesNone{10.0, 0.2, -4.0,
+                                   std::numeric_limits<double>::quiet_NaN()};
 
     params.activationFunction = "sigmoid";
     Environment envNone(set, params, vect);
@@ -314,6 +314,9 @@ TEST_F(TPGExecutionEngineTest, ApplySigmoidActivationFunctionOnActions)
 
     tpeeNone.applyActivationFunctionOnActions(valuesNone);
     // Check the value are right
-    ASSERT_EQ(valuesNone, std::vector<double>({1.0 / (1.0 + std::exp(-10.0)), 1.0 / (1.0 + std::exp(-0.2)), 1.0 / (1.0 + std::exp(4.0)), 0.0}))
+    ASSERT_EQ(valuesNone,
+              std::vector<double>({1.0 / (1.0 + std::exp(-10.0)),
+                                   1.0 / (1.0 + std::exp(-0.2)),
+                                   1.0 / (1.0 + std::exp(4.0)), 0.0}))
         << "Values should be the output of sigmoid";
 }

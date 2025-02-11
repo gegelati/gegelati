@@ -61,8 +61,8 @@ namespace TPG {
         Archive* archive;
 
         /**
-         * \brief Environment used  
-         */  
+         * \brief Environment used
+         */
         const Environment& env;
 
         /**
@@ -99,10 +99,11 @@ namespace TPG {
 
         /**
          * \brief Apply a sigmoid function on all the actions
-         * 
+         *
          * \param[in] actionsTaken a reference to the action taken
          */
-        void applyActivationFunctionOnActions(std::vector<double>& actionsTaken);
+        void applyActivationFunctionOnActions(
+            std::vector<double>& actionsTaken);
 
         /**
          * \brief Execute the Program associated to an Edge and returns the
@@ -151,9 +152,9 @@ namespace TPG {
          *         TPGGraph execution is at the end of the returned vector.
          */
         virtual const std::pair<std::vector<const TPG::TPGVertex*>,
-                          std::vector<double>> 
+                                std::vector<double>>
         executeFromRoot(const TPGVertex& root,
-                        const std::vector<uint64_t>& initActions={0});
+                        const std::vector<uint64_t>& initActions = {0});
     };
 }; // namespace TPG
 

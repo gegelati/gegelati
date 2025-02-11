@@ -63,21 +63,23 @@ void Learn::LearningEnvironment::doAction(double actionID)
 
 void Learn::LearningEnvironment::doActions(std::vector<double> vectActionID)
 {
-    
+
     // If vectActionID contain only one action, the doAction method is called
     // instead
     if (vectActionID.size() == 1) {
         this->doAction(vectActionID[0]);
-    } else {
+    }
+    else {
 
-        if(!isDiscreteEnvironment){
-            throw std::runtime_error("Gegelati does not support multiple Discrete actions for now");
+        if (!isDiscreteEnvironment) {
+            throw std::runtime_error(
+                "Gegelati does not support multiple Discrete actions for now");
         }
 
         if (vectActionID.size() != nbActions) {
-            throw std::runtime_error("Vector of action ID given is not the same "
-                                    "size as the number of actions wanted");
+            throw std::runtime_error(
+                "Vector of action ID given is not the same "
+                "size as the number of actions wanted");
         }
     }
-
 }

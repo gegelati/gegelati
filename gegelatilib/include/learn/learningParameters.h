@@ -188,12 +188,13 @@ namespace Learn {
          */
         size_t nbThreads = std::thread::hardware_concurrency();
 
-
         /// JSon comment
         inline static const std::string activationFunctionComment =
-            "// string that indicate the activation function used for continuous actions \n"
+            "// string that indicate the activation function used for "
+            "continuous actions \n"
             "// \"activationFunction\" : 'none', // Default value";
-        /// string that indicate the activation function used for continuous actions
+        /// string that indicate the activation function used for continuous
+        /// actions
         std::string activationFunction = "none";
 
         /// JSon comment

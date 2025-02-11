@@ -40,10 +40,11 @@
 
 void TPG::TPGAction::addOutgoingEdge(TPGEdge* edge)
 {
-    if(dynamic_cast<TPGActionEdge*>(edge) == nullptr){
+    if (dynamic_cast<TPGActionEdge*>(edge) == nullptr) {
         throw std::runtime_error(
             "Cannot add an outgoing edge to an Action vertex.");
-    } else {
+    }
+    else {
         TPGVertex::addOutgoingEdge(edge);
     }
 }

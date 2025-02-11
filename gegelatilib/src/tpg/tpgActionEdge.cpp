@@ -37,14 +37,12 @@
 
 const TPG::TPGVertex* TPG::TPGActionEdge::getDestination() const
 {
-    throw std::runtime_error(
-        "Action Edge cannot have a destination");
+    throw std::runtime_error("Action Edge cannot have a destination");
 }
 
 void TPG::TPGActionEdge::setDestination(TPGVertex* newDestination)
 {
-    throw std::runtime_error(
-        "Action Edge cannot have a destination");
+    throw std::runtime_error("Action Edge cannot have a destination");
 }
 
 void TPG::TPGActionEdge::setActionClass(uint64_t newActionClass)

@@ -102,7 +102,10 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
 
     // Create a TPGExecutionEngine
     Environment privateEnv(this->env.getInstructionSet(), params,
-                           privateLearningEnvironment->getDataSources(),  (privateLearningEnvironment->isDiscrete()) ? 0 : privateLearningEnvironment->getNbActions());
+                           privateLearningEnvironment->getDataSources(),
+                           (privateLearningEnvironment->isDiscrete())
+                               ? 0
+                               : privateLearningEnvironment->getNbActions());
     std::unique_ptr<TPG::TPGExecutionEngine> tee =
         this->tpg->getFactory().createTPGExecutionEngine(privateEnv, NULL);
 

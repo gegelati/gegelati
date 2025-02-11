@@ -44,8 +44,7 @@
 /**
  * \brief Multi Continuous Learning Environment for testing purpose
  */
-class FakeMultiContinuousLearningEnvironment
-    : public Learn::LearningEnvironment
+class FakeMultiContinuousLearningEnvironment : public Learn::LearningEnvironment
 {
   protected:
     Data::PrimitiveTypeArray<int> data;
@@ -66,9 +65,9 @@ class FakeMultiContinuousLearningEnvironment
 
     void doActions(std::vector<double> actions) override
     {
-        
-        for(double act: actions){
-            if(act != 0.0){
+
+        for (double act : actions) {
+            if (act != 0.0) {
                 nbPositivesActions++;
             }
         }
@@ -79,7 +78,8 @@ class FakeMultiContinuousLearningEnvironment
     void reset(size_t seed = 0,
                Learn::LearningMode mode = Learn::LearningMode::TRAINING,
                uint16_t iterationNumber = 0,
-               uint64_t generationNumber = 0) override{
+               uint64_t generationNumber = 0) override
+    {
         nbTurns = 0;
         nbPositivesActions = 0;
     };
@@ -98,8 +98,7 @@ class FakeMultiContinuousLearningEnvironment
         return nbTurns == 10;
     }
 
-    double getScore()
-        const override
+    double getScore() const override
     {
         return (double)nbPositivesActions;
     }

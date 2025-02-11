@@ -62,7 +62,6 @@ TEST(EnvironmentTest, Constructor)
     vect.push_back(d1);
     vect.push_back(d2);
 
-
     Learn::LearningParameters params;
     params.nbRegisters = 8;
     params.nbProgramConstant = 5;
@@ -94,7 +93,6 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction)
 
     // Add an invalid instruction to the set to test the filtering mechanism
     set.add(*(new Instructions::AddPrimitiveType<bool>()));
-
 
     Learn::LearningParameters params;
     params.nbRegisters = 8;
@@ -151,7 +149,6 @@ TEST(EnvironmentTest, computeLineSize)
     auto minus = [](double a, double b) -> double { return a - b; };
     set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-    
     Learn::LearningParameters params;
     params.nbRegisters = 8;
     params.nbProgramConstant = 5;

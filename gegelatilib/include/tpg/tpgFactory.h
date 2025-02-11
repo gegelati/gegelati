@@ -116,16 +116,16 @@ namespace TPG {
         /**
          * \brief Create a TPGActionEdge for a TPGGraph.
          *
-         * This method allocates and returns a new TPGActionEdge cat into a TPGEdge.
-         * The TPGEdge is returned as a unique_ptr.
+         * This method allocates and returns a new TPGActionEdge cat into a
+         * TPGEdge. The TPGEdge is returned as a unique_ptr.
          *
-         * \param[in] src pointer to the source TPGVertex of the edge. It must be an action
-         * \param[in] prog the shared pointer to the Program associated to the
-         *            edge.
-         * \param[in] actionClass of the actionEdge
+         * \param[in] src pointer to the source TPGVertex of the edge. It must
+         * be an action \param[in] prog the shared pointer to the Program
+         * associated to the edge. \param[in] actionClass of the actionEdge
          */
         virtual std::unique_ptr<TPGEdge> createTPGActionEdge(
-            const TPGVertex* src, const std::shared_ptr<Program::Program> prog, uint64_t actionClass) const;
+            const TPGVertex* src, const std::shared_ptr<Program::Program> prog,
+            uint64_t actionClass) const;
 
         /**
          * \brief Create a TPGExecutionEngine for a TPGGraph produced by this

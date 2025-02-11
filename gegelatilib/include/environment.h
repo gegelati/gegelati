@@ -94,8 +94,6 @@ class Environment
     const std::vector<std::reference_wrapper<const Data::DataHandler>>
         dataSources;
 
-
-
     /// Number of registers
     const size_t nbRegisters;
 
@@ -199,27 +197,30 @@ class Environment
      * \param[in] p the LearningParameter used, storing all metaparameters.
      * \param[in] dHandlers the list of DataHandler that will
      * be used in this Environment.
-     * \param[in] nbContinuousAct number of continuous actions in the LearningEnvironment, default value is 0.
+     * \param[in] nbContinuousAct number of continuous actions in the
+     * LearningEnvironment, default value is 0.
      */
     Environment(
         const Instructions::Set& iSet, const Learn::LearningParameters& p,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandlers, size_t nbContinuousAct = 0)
-        : instructionSet{filterInstructionSet(iSet, p.nbRegisters, p.nbProgramConstant,
-                                              dHandlers)},
-          params{p},
-          dataSources{dHandlers}, nbRegisters{p.nbRegisters}, nbConstants{p.nbProgramConstant},
-          fakeRegisters(p.nbRegisters), fakeConstants(p.nbProgramConstant),
+            dHandlers,
+        size_t nbContinuousAct = 0)
+        : instructionSet{filterInstructionSet(iSet, p.nbRegisters,
+                                              p.nbProgramConstant, dHandlers)},
+          params{p}, dataSources{dHandlers}, nbRegisters{p.nbRegisters},
+          nbConstants{p.nbProgramConstant}, fakeRegisters(p.nbRegisters),
+          fakeConstants(p.nbProgramConstant),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
           nbContinuousActions{nbContinuousAct},
           nbDataSources{
               dHandlers.size() +
-              (p.nbProgramConstant > 0 ? 2
-                           : 1)}, // if Constants are used, we need an extra
-                                  // datasource to store them in the environment
-          largestAddressSpace{
-              computeLargestAddressSpace(p.nbRegisters, p.nbProgramConstant, dHandlers)},
+              (p.nbProgramConstant > 0
+                   ? 2
+                   : 1)}, // if Constants are used, we need an extra
+                          // datasource to store them in the environment
+          largestAddressSpace{computeLargestAddressSpace(
+              p.nbRegisters, p.nbProgramConstant, dHandlers)},
           lineSize{computeLineSize(*this)}
     {
         this->fakeDataSources.push_back(
@@ -233,7 +234,6 @@ class Environment
         for (auto& elem : this->dataSources)
             this->fakeDataSources.push_back(elem);
     };
-
 
     /**
      * \brief Get the instance of parameters used
