@@ -179,14 +179,6 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
                                    actionEdge->getProgramSharedPointer(),
                                    actionEdge->getActionClass());
 
-            /*} else if(dynamic_cast<const
-               TPG::TPGAction*>(edge->getDestination()) != nullptr) {
-
-                // If destination is a TPGAction, clone it.
-                const TPG::TPGVertex& newDestination =
-               cloneVertex(*edge->getDestination());
-                this->addNewEdge(*newVertex, newDestination,
-                                 edge->getProgramSharedPointer());*/
         }
         else {
             this->addNewEdge(*newVertex, *(edge->getDestination()),
@@ -296,7 +288,7 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 
     // If destination is an action and should became a root, it is deleted if
     // the environment is continuous and does not use action program
-    if (!env.getParams().mutation.tpg.useActionProgram &&
+    if (//!env.getParams().mutation.tpg.useActionProgram &&
         env.getNbContinuousActions() > 0 &&
         dynamic_cast<const TPG::TPGAction*>(destination) != nullptr &&
         destination->getIncomingEdges().size() == 0) {

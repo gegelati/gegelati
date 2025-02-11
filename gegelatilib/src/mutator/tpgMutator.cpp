@@ -71,11 +71,6 @@ void Mutator::TPGMutator::initRandomTPG(
                 "A TPG with a single action makes no sense.");
         }
 
-        if (params.tpg.initNbTeams < nbActions) {
-            throw std::runtime_error(
-                "The number of init roots should be above or "
-                "equal to the number of actions.");
-        }
     }
     else if (graph.getEnvironment().getNbRegisters() <
              nbActions + (int)!params.tpg.useActionProgram) {
@@ -86,6 +81,13 @@ void Mutator::TPGMutator::initRandomTPG(
         // If no error but case with continuous actions, nbActions is set to the
         // number of action vertex created
         nbActions = params.tpg.initNbActions;
+    }
+
+    
+    if (params.tpg.initNbTeams < nbActions) {
+        throw std::runtime_error(
+            "The number of init roots should be above or "
+            "equal to the number of actions.");
     }
 
     // Empty graph
@@ -315,28 +317,36 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
             nullptr &&
         rng.getDouble(0.0, 1.0) < params.tpg.probaContextOverActionProgram) {
 
-        return mutateTPGAction(
-            graph, *dynamic_cast<const TPG::TPGAction*>(edge->getDestination()),
-            newPrograms, params, rng);
+
+        // Clone the randomly selected action
+        const TPG::TPGAction& newAction = (const TPG::TPGAction&)graph.cloneVertex(*edge->getDestination());
+
+        mutateTPGAction(graph, newAction, newPrograms, 
+                               params, rng);
+
+        // Set the action
+        graph.setEdgeDestination(*edge, newAction);
+    } else {
+
+        // copy program
+        std::shared_ptr<Program::Program> newProg(
+            new Program::Program(edge->getProgram(), false));
+
+        // Add it to the list of new Program to be mutated.
+        newPrograms.push_back(newProg);
+
+        // Set the mutated program to the edge
+        edge->setProgram(newProg);
+
+        // Edge target modification
+        // As it Stephen kelly's work, Edge target modification is conditionned
+        // to the modification of the prealable Edge.Program behavior.
+        if (rng.getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationChange) {
+            mutateEdgeDestination(graph, edge, preExistingTeams, preExistingActions,
+                                params, rng);
+        }
     }
 
-    // copy program
-    std::shared_ptr<Program::Program> newProg(
-        new Program::Program(edge->getProgram(), false));
-
-    // Add it to the list of new Program to be mutated.
-    newPrograms.push_back(newProg);
-
-    // Set the mutated program to the edge
-    edge->setProgram(newProg);
-
-    // Edge target modification
-    // As it Stephen kelly's work, Edge target modification is conditionned
-    // to the modification of the prealable Edge.Program behavior.
-    if (rng.getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationChange) {
-        mutateEdgeDestination(graph, edge, preExistingTeams, preExistingActions,
-                              params, rng);
-    }
 }
 
 void Mutator::TPGMutator::mutateTPGTeam(
@@ -577,10 +587,10 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Create an empty list to store Programs to mutate.
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
-    // Use root teams only except if continuous actions and action programs are
+    // Use always root teams for now. SKIP only except if continuous actions and action programs are
     // used.
     auto rootUsed = rootTeams;
-    if (graph.getEnvironment().getNbContinuousActions() > 0 &&
+    if (false && graph.getEnvironment().getNbContinuousActions() > 0 &&
         params.tpg.useActionProgram) {
         rootUsed = rootVertices;
     }
