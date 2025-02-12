@@ -139,6 +139,12 @@ void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
         for (auto outEdge : outEdgesToRemove) {
             this->removeEdge(*outEdge);
         }
+    }
+
+    // Remove edge for action can launch again remove vertex.
+    // Check again if the vertex is in the graph before deleting.
+    iterator = this->findVertex(&vertex);
+    if (iterator != this->vertices.end()) {
         // Free the memory of the vertex
         delete *iterator;
         // Remove the pointer from the list.

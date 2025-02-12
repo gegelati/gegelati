@@ -288,8 +288,8 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        target = preExistingActions.at(
-            rng.getUnsignedInt64(0, preExistingActions.size() - 1));
+        target = &graph.cloneVertex(*preExistingActions.at(
+            rng.getUnsignedInt64(0, preExistingActions.size() - 1)));
         // target = &graph.cloneVertex(*preExistingActions.at(
         //     rng.getUnsignedInt64(0, preExistingActions.size() - 1)));
     }
@@ -315,7 +315,7 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
         params.tpg.useActionProgram &&
         dynamic_cast<const TPG::TPGAction*>(edge->getDestination()) !=
             nullptr &&
-        rng.getDouble(0.0, 1.0) < params.tpg.probaContextOverActionProgram) {
+        rng.getDouble(0.0, 1.0) > params.tpg.probaContextOverActionProgram) {
 
 
         // Clone the randomly selected action
@@ -600,11 +600,11 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     while (params.tpg.nbRoots > currentNumberOfRoot) {
         // Select a random existing root
         uint64_t clonedRootIndex =
-            rng.getUnsignedInt64(0, rootVertices.size() - 1);
+            rng.getUnsignedInt64(0, rootUsed.size() - 1);
         // clone it (the vertex and all its outgoing edges)
         const TPG::TPGVertex& newRoot =
             (const TPG::TPGVertex&)graph.cloneVertex(
-                *rootVertices.at(clonedRootIndex));
+                *rootUsed.at(clonedRootIndex));
 
         // Apply mutations to the root
         if (dynamic_cast<const TPG::TPGTeam*>(&newRoot) != nullptr) {
