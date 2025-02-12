@@ -53,6 +53,11 @@ void TPG::PolicyStats::clear()
     this->nbUsePerProgram.clear();
     this->nbUsePerTPGTeam.clear();
     this->nbUsePerTPGAction.clear();
+    this->nbUsePerActionProgram.clear();
+    this->nbLinesPerActionProgram.clear();
+    this->nbIntronPerActionProgram.clear();
+    this->nbUsagePerInstructionActionProg.clear();
+    this->nbUsagePerDataLocationActionProg.clear();
 }
 
 void TPG::PolicyStats::setEnvironment(const Environment& env)
@@ -65,12 +70,19 @@ void TPG::PolicyStats::setEnvironment(const Environment& env)
         environment->getFakeDataSources().end());
 }
 
-void TPG::PolicyStats::analyzeLine(const Program::Line* line)
+void TPG::PolicyStats::analyzeLine(const Program::Line* line, bool actionProgram)
 {
     // Count number of use of each instruction
     auto instructionIdx = line->getInstructionIndex();
-    this->nbUsagePerInstruction[instructionIdx]++; // Create key if it does not
-                                                   // exist yet.
+
+    if(actionProgram){
+        this->nbUsagePerInstructionActionProg[instructionIdx]++; // Create key if it does not
+                                            // exist yet.
+    } else {
+
+        this->nbUsagePerInstruction[instructionIdx]++; // Create key if it does not
+                                                    // exist yet.
+    }
 
     // Count number of access for each location
     const Instructions::Instruction& instruction =
@@ -92,9 +104,16 @@ void TPG::PolicyStats::analyzeLine(const Program::Line* line)
             dHandler.getAddressesAccessed(operandType, scaledLocation);
         // Fill attribute
         for (size_t accessedLocation : accessedLocations) {
-            this->nbUsagePerDataLocation[{
-                rawOperand.first,
-                accessedLocation}]++; // create key if it does not exists.
+            if(actionProgram){
+                this->nbUsagePerDataLocationActionProg[{
+                    rawOperand.first,
+                    accessedLocation}]++; // create key if it does not exists.
+            } else {
+                this->nbUsagePerDataLocation[{
+                    rawOperand.first,
+                    accessedLocation}]++; // create key if it does not exists.
+            }
+
         }
     }
 }
@@ -108,25 +127,36 @@ void TPG::PolicyStats::analyzeProgram(const Program::Program* prog)
         programIterator->second++;
         return;
     }
-
     // Else, this is a new program: analyze it
-    this->nbUsePerProgram.emplace(prog, 1);
 
-    // Count the number of lines
-    this->nbLinesPerProgram.push_back(prog->getNbLines());
+    if(prog->isActionProgram()){
+        this->nbUsePerActionProgram.emplace(prog, 1);
+        // Count the number of lines
+        this->nbLinesPerActionProgram.push_back(prog->getNbLines());
+    }else {
+        this->nbUsePerProgram.emplace(prog, 1);
+        // Count the number of lines
+        this->nbLinesPerProgram.push_back(prog->getNbLines());
+    }
+
 
     // Count the number of intron lines
     size_t nbIntronLines = 0;
     for (auto lineIdx = 0; lineIdx < prog->getNbLines(); lineIdx++) {
         if (!prog->isIntron(lineIdx)) {
             const Program::Line& line = prog->getLine(lineIdx);
-            this->analyzeLine(&line);
+            this->analyzeLine(&line, prog->isActionProgram());
         }
         else {
             nbIntronLines++;
         }
     }
-    this->nbIntronPerProgram.push_back(nbIntronLines);
+    if(prog->isActionProgram()){
+        this->nbIntronPerActionProgram.push_back(nbIntronLines);
+    } else {
+        this->nbIntronPerProgram.push_back(nbIntronLines);
+
+    }
 }
 
 void TPG::PolicyStats::analyzeTPGTeam(const TPG::TPGTeam* team)
@@ -184,7 +214,13 @@ void TPG::PolicyStats::analyzePolicy(const TPG::TPGVertex* root)
             }
 
             if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr) {
-                this->analyzeTPGAction((const TPG::TPGAction*)vertex);
+                const TPG::TPGAction* action = (const TPG::TPGAction*)vertex;
+                this->analyzeTPGAction(action);
+
+
+                for(auto edge: action->getOutgoingEdges()){
+                    this->analyzeProgram(&edge->getProgram());
+                }
             }
         }
         depth++;
@@ -209,7 +245,7 @@ std::ostream& TPG::operator<<(std::ostream& os,
     os << "Teams:\t\t" << policyStats.nbDistinctTeams << std::endl;
     os << "Edges:\t\t" << sumVec(policyStats.nbOutgoingEdgesPerTeam)
        << std::endl;
-    os << "Actions:\t" << policyStats.nbUsagePerActionID.size() << std::endl;
+    os << "Actions:\t" << policyStats.nbUsePerTPGAction.size() << std::endl;
 
     os << "Stages\t\t" << policyStats.maxPolicyDepth << std::endl;
     os << "Vertex/stage:\t";
@@ -234,7 +270,7 @@ std::ostream& TPG::operator<<(std::ostream& os,
                   });
     os << std::endl;
 
-    os << std::endl << "## Program info" << std::endl;
+    os << std::endl << "## Context Program info" << std::endl;
     os << "Programs:\t" << policyStats.nbUsePerProgram.size() << std::endl;
     os << "Line/prog:\t" << averageVec(policyStats.nbLinesPerProgram)
        << std::endl;
@@ -263,6 +299,7 @@ std::ostream& TPG::operator<<(std::ostream& os,
                       os << "{" << val.first << "," << val.second << "}";
                   });
     os << std::endl << std::endl;
+
 
     os << "## Data info";
     size_t currentDHandler =
@@ -294,6 +331,73 @@ std::ostream& TPG::operator<<(std::ostream& os,
             }
             os << "{" << entry.first.second << "," << entry.second << "} ";
         });
+
+        // Assume that if no action program used, we are not using them
+        if(policyStats.nbUsePerActionProgram.size() > 0)
+        {
+            os << std::endl  << std::endl 
+            << std::endl << "## Action Program info" << std::endl;
+            os << "Programs:\t" << policyStats.nbUsePerActionProgram.size() << std::endl;
+            os << "Line/prog:\t" << averageVec(policyStats.nbLinesPerActionProgram)
+            << std::endl;
+            os << "Intr/prog:\t" << averageVec(policyStats.nbIntronPerActionProgram)
+            << std::endl;
+            os << "Use/prog:\t"
+            << (double)std::accumulate(
+                    policyStats.nbUsePerActionProgram.cbegin(),
+                    policyStats.nbUsePerActionProgram.cend(), size_t(0),
+                    [](size_t accu, const auto& val) { return accu + val.second; }) /
+                    (double)policyStats.nbUsePerActionProgram.size()
+            << std::endl;
+
+            os << "Use/instr:\t"
+            << (double)std::accumulate(
+                    policyStats.nbUsagePerInstructionActionProg.cbegin(),
+                    policyStats.nbUsagePerInstructionActionProg.cend(), size_t(0),
+                    [](size_t accu, const std::pair<size_t, size_t>& val) {
+                        return accu + val.second;
+                    }) /
+                    (double)policyStats.nbUsagePerInstructionActionProg.size();
+            os << ": ";
+            std::for_each(policyStats.nbUsagePerInstructionActionProg.cbegin(),
+                        policyStats.nbUsagePerInstructionActionProg.cend(),
+                        [&os](const auto& val) {
+                            os << "{" << val.first << "," << val.second << "}";
+                        });
+            os << std::endl << std::endl;
+
+
+            os << "## Data info";
+            size_t currentDHandler =
+                policyStats.nbUsagePerDataLocationActionProg.begin()->first.first - 1;
+
+            std::for_each(
+                policyStats.nbUsagePerDataLocationActionProg.cbegin(),
+                policyStats.nbUsagePerDataLocationActionProg.cend(),
+                [&os, &currentDHandler, &policyStats](const auto& entry) {
+                    if (entry.first.first != currentDHandler) {
+                        os << "\n\n### DataHandler " << entry.first.first << std::endl;
+                        currentDHandler = entry.first.first;
+                        size_t nbLocation = 0;
+                        auto nbAccess = std::accumulate(
+                            policyStats.nbUsagePerDataLocationActionProg.cbegin(),
+                            policyStats.nbUsagePerDataLocationActionProg.cend(), size_t(0),
+                            [&currentDHandler, &nbLocation](size_t accu,
+                                                            const auto& val) {
+                                if (val.first.first == currentDHandler) {
+                                    nbLocation++;
+                                    return accu + val.second;
+                                }
+                                else {
+                                    return accu;
+                                }
+                            });
+                        os << "Accesses:\t" << nbAccess << std::endl;
+                        os << "Locations:\t" << nbLocation << std::endl;
+                    }
+                    os << "{" << entry.first.second << "," << entry.second << "} ";
+                });
+        }
 
     return os;
 }
