@@ -698,6 +698,78 @@ TEST_F(LearningAgentTest, TrainInstrumented)
               107);
 }
 
+// Similar to previous test, but with continuous actions and no action programs
+TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.mutation.tpg.useActionProgram = false;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+
+    Learn::LearningAgent la(cle, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    ASSERT_EQ(tpg.getNbVertices(), 42)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 110)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 17526842444085678365)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
+// Similar to previous test, but with continuous actions and no action programs
+TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.mutation.tpg.useActionProgram = true;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+
+    Learn::LearningAgent la(cle, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    ASSERT_EQ(tpg.getNbVertices(), 68)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 140)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 5931894788059644131)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
 TEST_F(LearningAgentTest, KeepBestPolicy)
 {
     params.archiveSize = 50;
