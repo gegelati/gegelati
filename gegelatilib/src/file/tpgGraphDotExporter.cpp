@@ -59,18 +59,16 @@ void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 {
 
-    uint64_t actionID = this->findVertexID(action);
+    uint64_t actionNumber = this->findVertexID(action);
 
-    
-    auto outgoingEdges = action.getOutgoingEdges();
+    uint64_t actionID = action.getActionID();
+    if(tpg.getEnvironment().getNbContinuousActions() > 0){
+        actionID = actionNumber;
+    }
 
     // Create a string stream to build the label
     std::ostringstream labelStream;
-
-    // Iterate through outgoingEdges and extract actionClass
-
     labelStream << actionID;
-
 
 
 
@@ -81,11 +79,11 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
     fprintf(pFile,
             "%sA%" PRIu64 " [fillcolor=\"#ff3366\" shape=box margin=0.03 "
             "width=0 height=0 label=\"%s\"]\n",
-            offset.c_str(), actionID, label.c_str());
+            offset.c_str(), actionNumber, label.c_str());
     
 
 
-    return actionID;
+    return actionNumber;
 }
 
 
@@ -194,6 +192,24 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
 {
     // Print root actions (and keep the ids)
     auto rootVertices = tpg.getRootVertices();
+    std::vector<uint64_t> rootActionIDs;
+    for (const TPG::TPGVertex* rootVertex : rootVertices) {
+        if (dynamic_cast<const TPG::TPGAction*>(rootVertex) != nullptr) {
+            rootActionIDs.push_back(
+                this->printTPGAction(*(const TPG::TPGAction*)rootVertex));
+        }
+    }
+
+    
+
+    // Print all edges
+    auto& edges = this->tpg.getEdges();
+    for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
+        if(dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) != nullptr){
+            this->printTPGEdge(*edge.get());
+        }
+    }
+
 
     // Rank all the roots
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
@@ -203,7 +219,10 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
             fprintf(pFile, "T%" PRIu64 " ", this->findVertexID(*rootVertex));
         }
     }
-
+    // Action root
+    for (auto rootActionId : rootActionIDs) {
+        fprintf(pFile, "A%" PRIu64 " ", rootActionId);
+    }
     fprintf(pFile, "}\n");
     this->offset = "";
     fprintf(pFile, "%s}\n", this->offset.c_str());
@@ -211,6 +230,7 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
 
 void File::TPGGraphDotExporter::print()
 {
+
     // Print the graph header
     this->printTPGGraphHeader();
 
@@ -219,8 +239,6 @@ void File::TPGGraphDotExporter::print()
     for (const TPG::TPGVertex* vertex : vertices) {
         if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
             this->printTPGTeam(*(const TPG::TPGTeam*)vertex);
-        } else {
-            this->printTPGAction(*(const TPG::TPGAction*)vertex);
         }
     }
 
@@ -234,7 +252,9 @@ void File::TPGGraphDotExporter::print()
     // Print all edges
     auto& edges = this->tpg.getEdges();
     for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
-        this->printTPGEdge(*edge.get());
+        if(dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) == nullptr){
+            this->printTPGEdge(*edge.get());
+        }
     }
 
     // Print footer
