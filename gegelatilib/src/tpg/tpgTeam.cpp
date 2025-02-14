@@ -1,9 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2024) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
- * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2024)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -35,57 +34,17 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TPG_ACTION_H
-#define TPG_ACTION_H
+#include "tpg/tpgTeam.h"
+#include "tpg/tpgActionEdge.h"
+#include <stdexcept>
 
-#include <cstdint>
-
-#include "tpg/tpgVertex.h"
-
-namespace TPG {
-    /**
-     * \brief Class representing an Action of a TPGGraph.
-     *
-     * An action is a leaf vertex of a TPG associated to an action of the
-     * learning agent within its environment.
-     */
-    class TPGAction : public TPGVertex
-    {
-
-        /**
-         * \brief Integer number abstracting the selected action.
-         *
-         * It is up to the used of a TPGGraph to associate the code to each
-         * actionID.
-         */
-        const uint64_t actionID;
-
-      public:
-        /**
-         * \brief Main constructor of a TPGAction.
-         *
-         * \param[in] id integer stored as the actionID of the TPGAction.
-         */
-        TPGAction(const uint64_t id) : actionID{id} {};
-
-        /**
-         * \brief Specialization throwing an std::runtime_exception.
-         *
-         * Since the TPGAction is intented to be a leaf TPGVertex, no outgoing
-         * TPGEdge can be added to it.
-         */
-        virtual void addOutgoingEdge(TPGEdge* edge) override;
-
-        /**
-         * \brief Get the action ID associated to the TPGAction.
-         *
-         * \return the integer ID of the TPGAction.
-         */
-        uint64_t getActionID() const
-        {
-            return this->actionID;
-        };
-    };
-}; // namespace TPG
-
-#endif
+void TPG::TPGTeam::addOutgoingEdge(TPGEdge* edge)
+{
+    if (dynamic_cast<TPGActionEdge*>(edge) != nullptr) {
+        throw std::runtime_error(
+            "Cannot add an action edge to an Action team.");
+    }
+    else {
+        TPGVertex::addOutgoingEdge(edge);
+    }
+}

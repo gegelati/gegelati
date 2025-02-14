@@ -106,8 +106,8 @@ void Log::LABasicLogger::logAfterPopulateTPG()
     auto roots = this->learningAgent.getTPGGraph()->getRootVertices();
 
     uint64_t nbTeamsR = std::count_if(
-        roots.begin(), roots.end(), [](const TPG::TPGVertex* roots) {
-            return dynamic_cast<const TPG::TPGTeam*>(roots) != nullptr;
+        roots.begin(), roots.end(), [](const TPG::TPGVertex* root) {
+            return dynamic_cast<const TPG::TPGTeam*>(root) != nullptr;
         });
 
     uint64_t nbActionsR = roots.size() - nbTeamsR;

@@ -276,6 +276,8 @@ TEST_F(ProgramTest, RemoveProgramLine)
         << "Removing a non-existing line should throw an exception.";
 }
 
+
+
 TEST_F(ProgramTest, identifyIntronsAndIsIntron)
 {
     // Create a new environment with instruction accessing arrays
@@ -331,6 +333,143 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
     ASSERT_TRUE(p.isIntron(2))
         << "Line 2 wrongfully detected as not an intron.";
     ASSERT_FALSE(p.isIntron(3)) << "Line 3 wrongfully detected as an intron.";
+
+    // cleanup
+    delete (&set.getInstruction(2));
+}
+
+TEST_F(ProgramTest, identifyContinuousIntronsAndIsIntronNoActionProgram)
+{
+    // Create a new environment with instruction accessing arrays
+    set.add(
+        *new Instructions::LambdaInstruction<const double[2], const double[2]>(
+            [](const double a[2], const double b[2]) {
+                return a[0] * b[0] + a[1] * b[1];
+            }));
+
+    Environment localE(set, params, vect, 3);
+
+    // Create a program with 2 introns
+    Program::Program p(localE, false);
+    Program::Line& l1 = p.addNewLine();
+    Program::Line& l2 = p.addNewLine();
+    Program::Line& l3 = p.addNewLine();
+    Program::Line& l4 = p.addNewLine();
+    Program::Line& l5 = p.addNewLine();
+
+    // L5: Register 1 = func(Register {1,2}, DataSource_1{[4],[5]})
+    l5.setDestinationIndex(1);
+    l5.setOperand(0, 0, 1);
+    l5.setOperand(1, 1, 4);
+    l5.setInstructionIndex(2); // Lambda
+
+    // L4: Register 0 = func(Register {1,2}, DataSource_1{[4],[5]})
+    l4.setDestinationIndex(0);
+    l4.setOperand(0, 0, 1);
+    l4.setOperand(1, 1, 4);
+    l4.setInstructionIndex(2); // Lambda
+
+    // L3: Register 3 = Datasource_1[0] + DataSource_1[0] (Intron)
+    l3.setDestinationIndex(3);
+    l3.setOperand(0, 1, 0);
+    l3.setOperand(1, 1, 0);
+    l3.setInstructionIndex(0);
+
+    // L2: Register 1 = Datasource_1[2] + DataSource_1[2]
+    l2.setDestinationIndex(1);
+    l2.setOperand(0, 1, 2);
+    l2.setOperand(1, 1, 2);
+    l2.setInstructionIndex(0);
+
+    // L1: Register 0 = Register 1 * constant (Intron)
+    l1.setDestinationIndex(0);
+    l1.setOperand(0, 0, 1);
+    l1.setInstructionIndex(1); // MultByConst
+
+    // Identify introns
+    uint64_t nbIntrons = 0;
+    ASSERT_NO_THROW(nbIntrons = p.identifyIntrons())
+        << "Identification of intron lines failed unexpectedly.";
+    ASSERT_EQ(nbIntrons, 1)
+        << "Number of identified introns is not as expected.";
+
+    // Check which line is an intron
+    ASSERT_TRUE(p.isIntron(0))
+        << "Line 0 wrongfully detected as not an intron.";
+    ASSERT_FALSE(p.isIntron(1)) << "Line 1 wrongfully detected as an intron.";
+    ASSERT_FALSE(p.isIntron(2))
+        << "Line 2 wrongfully detected as an intron.";
+    ASSERT_FALSE(p.isIntron(3)) << "Line 3 wrongfully detected as an intron.";
+    ASSERT_FALSE(p.isIntron(4)) << "Line 4 wrongfully detected as an intron.";
+
+    // cleanup
+    delete (&set.getInstruction(2));
+}
+
+TEST_F(ProgramTest, identifyContinuousIntronsAndIsIntronWithActionProgram)
+{
+    // Create a new environment with instruction accessing arrays
+    set.add(
+        *new Instructions::LambdaInstruction<const double[2], const double[2]>(
+            [](const double a[2], const double b[2]) {
+                return a[0] * b[0] + a[1] * b[1];
+            }));
+
+    params.mutation.tpg.useActionProgram = true;
+    Environment localE(set, params, vect, 3);
+
+    // Create a program with 2 introns
+    Program::Program p(localE, true);
+    Program::Line& l1 = p.addNewLine();
+    Program::Line& l2 = p.addNewLine();
+    Program::Line& l3 = p.addNewLine();
+    Program::Line& l4 = p.addNewLine();
+    Program::Line& l5 = p.addNewLine();
+
+    // L5: Register 1 = func(Register {1,2}, DataSource_1{[4],[5]})
+    l5.setDestinationIndex(1);
+    l5.setOperand(0, 0, 1);
+    l5.setOperand(1, 1, 4);
+    l5.setInstructionIndex(2); // Lambda
+
+    // L4: Register 0 = func(Register {1,2}, DataSource_1{[4],[5]})
+    l4.setDestinationIndex(0);
+    l4.setOperand(0, 0, 1);
+    l4.setOperand(1, 1, 4);
+    l4.setInstructionIndex(2); // Lambda
+
+    // L3: Register 3 = Datasource_1[0] + DataSource_1[0] (Intron)
+    l3.setDestinationIndex(3);
+    l3.setOperand(0, 1, 0);
+    l3.setOperand(1, 1, 0);
+    l3.setInstructionIndex(0);
+
+    // L2: Register 1 = Datasource_1[2] + DataSource_1[2]
+    l2.setDestinationIndex(1);
+    l2.setOperand(0, 1, 2);
+    l2.setOperand(1, 1, 2);
+    l2.setInstructionIndex(0);
+
+    // L1: Register 0 = Register 1 * constant (Intron)
+    l1.setDestinationIndex(0);
+    l1.setOperand(0, 0, 1);
+    l1.setInstructionIndex(1); // MultByConst
+
+    // Identify introns
+    uint64_t nbIntrons = 0;
+    ASSERT_NO_THROW(nbIntrons = p.identifyIntrons())
+        << "Identification of intron lines failed unexpectedly.";
+    ASSERT_EQ(nbIntrons, 2)
+        << "Number of identified introns is not as expected.";
+
+    // Check which line is an intron
+    ASSERT_TRUE(p.isIntron(0))
+        << "Line 0 wrongfully detected as not an intron.";
+    ASSERT_FALSE(p.isIntron(1)) << "Line 1 wrongfully detected as an intron.";
+    ASSERT_TRUE(p.isIntron(2))
+        << "Line 2 wrongfully detected as not an intron.";
+    ASSERT_FALSE(p.isIntron(3)) << "Line 3 wrongfully detected as an intron.";
+    ASSERT_FALSE(p.isIntron(4)) << "Line 4 wrongfully detected as an intron.";
 
     // cleanup
     delete (&set.getInstruction(2));
@@ -544,4 +683,25 @@ TEST_F(ProgramTest, HasIdenticalBehavior)
     delete &localSet.getInstruction(0);
     delete &localSet.getInstruction(1);
     delete &localSet.getInstruction(2);
+}
+
+
+TEST_F(ProgramTest, isActionProgram)
+{
+    Program::Program p0(*e, false);
+    Program::Program p1(*e, true);
+
+    ASSERT_EQ(p0.isActionProgram(), false)
+        << "Program should not be action program.";
+    ASSERT_EQ(p1.isActionProgram(), true)
+        << "Program should be action program.";
+
+    
+    Program::Program p2(p0, true);
+    Program::Program p3(p0);
+
+    ASSERT_EQ(p2.isActionProgram(), true)
+        << "Program should not be action program.";
+    ASSERT_EQ(p3.isActionProgram(), false)
+        << "Program should be action program.";
 }

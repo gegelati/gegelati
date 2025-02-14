@@ -65,6 +65,7 @@ class FakeMultiContinuousLearningEnvironment : public Learn::LearningEnvironment
 
     void doActions(std::vector<double> actions) override
     {
+        LearningEnvironment::doActions(actions);
 
         for (double act : actions) {
             if (act != 0.0) {

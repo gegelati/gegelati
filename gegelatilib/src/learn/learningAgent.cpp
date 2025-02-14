@@ -282,8 +282,6 @@ void Learn::LearningAgent::decimateWorstRoots(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
         preservedRoots;
 
-    // Action roots can be erased in all continuous cases.
-    bool actionCanBeErased = !learningEnvironment.isDiscrete();
 
     // Estimate the number of expected roots to keep
     size_t nbExpectedRoots = floor(this->params.ratioDeletedRoots *
@@ -294,8 +292,7 @@ void Learn::LearningAgent::decimateWorstRoots(
 
         // If the root is an action, do not remove it!
         const TPG::TPGVertex* root = results.begin()->second;
-        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr &&
-            !actionCanBeErased) {
+        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
         }

@@ -46,6 +46,12 @@ namespace TPG {
      */
     class TPGTeam : public TPGVertex
     {
+        public: 
+            /**
+             * \brief Specialization throwing an std::runtime_exception if a TPGActionEdge is added to a TPGTeam.
+             *
+             */
+            virtual void addOutgoingEdge(TPGEdge* edge);
     };
 
 }; // namespace TPG

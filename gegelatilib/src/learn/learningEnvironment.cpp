@@ -34,6 +34,7 @@
  */
 
 #include <stdexcept>
+#include <iostream>
 
 #include "learn/learningEnvironment.h"
 
@@ -70,8 +71,7 @@ void Learn::LearningEnvironment::doActions(std::vector<double> vectActionID)
         this->doAction(vectActionID[0]);
     }
     else {
-
-        if (!isDiscreteEnvironment) {
+        if (isDiscreteEnvironment) {
             throw std::runtime_error(
                 "Gegelati does not support multiple Discrete actions for now");
         }

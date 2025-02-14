@@ -724,13 +724,13 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 38)
+    ASSERT_EQ(tpg.getNbVertices(), 35)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 110)
+    ASSERT_EQ(tpg.getEdges().size(), 100)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 17526842444085678365)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 17057427773954294832)
         << "Graph does not have the expected determinst characteristics.";
 }
 

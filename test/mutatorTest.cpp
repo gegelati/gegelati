@@ -635,6 +635,101 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
+
+
+}
+
+
+TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
+{
+    
+    Mutator::RNG rng;
+    Mutator::MutationParameters& mutParams = params.mutation;
+    mutParams.tpg.initNbTeams = 20;
+    mutParams.tpg.initNbActions = 10;
+    mutParams.tpg.maxInitOutgoingEdges = 4;
+    mutParams.prog.maxProgramSize = 96;
+    mutParams.prog.pConstantMutation = 0.5;
+    mutParams.prog.minConstValue = 0;
+    mutParams.prog.maxConstValue = 1;
+    params.nbRegisters = 8;
+
+    // Error on number of registers
+    rng.setSeed(0);
+    params.mutation.tpg.useActionProgram = false;
+    uint64_t nbActions = 8;
+    Environment ce0(set, params, vect, nbActions);
+    TPG::TPGGraph tpg0(ce0);
+    ASSERT_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg0, mutParams, rng, nbActions),
+        std::runtime_error)
+        << "TPG Initialization should fail with bad parameters.";
+
+    // No error
+    rng.setSeed(0);
+    nbActions = 7;
+    Environment ce1(set, params, vect, nbActions);
+    TPG::TPGGraph tpg1(ce1);
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg1, mutParams, rng, nbActions))
+        << "TPG Initialization should not fail.";
+
+    // Error on number of registers
+    rng.setSeed(0);
+    params.mutation.tpg.useActionProgram = true;
+    nbActions = 9;
+    Environment ce2(set, params, vect, nbActions);
+    TPG::TPGGraph tpg2(ce2);
+    ASSERT_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg2, mutParams, rng, nbActions),
+        std::runtime_error)
+        << "TPG Initialization should fail with bad parameters.";
+
+    // Error on number of registers
+    rng.setSeed(0);
+    nbActions = 8;
+    Environment ce3(set, params, vect, nbActions);
+    TPG::TPGGraph tpg3(ce3);
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg3, mutParams, rng, nbActions))
+        << "TPG Initialization should fail with bad parameters.";
+
+
+    auto vertexSet = tpg3.getVertices();
+    // Check number or vertex, roots, actions, teams, edges
+    ASSERT_EQ(vertexSet.size(), mutParams.tpg.initNbActions + mutParams.tpg.initNbTeams)
+        << "Number of vertices after initialization is incorrect.";
+    ASSERT_EQ(tpg3.getRootVertices().size(), mutParams.tpg.initNbTeams)
+        << "Number of root vertices after initialization is incorrect.";
+    ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
+                            [](const TPG::TPGVertex* vert) {
+                                return dynamic_cast<const TPG::TPGAction*>(
+                                           vert) != nullptr;
+                            }),
+              mutParams.tpg.initNbActions)
+        << "Number of action vertex in the graph is incorrect.";
+    ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
+                            [](const TPG::TPGVertex* vert) {
+                                return dynamic_cast<const TPG::TPGTeam*>(
+                                           vert) != nullptr;
+                            }),
+              mutParams.tpg.initNbTeams)
+        << "Number of team vertex in the graph is incorrect.";
+    ASSERT_GE(tpg3.getEdges().size(), 2 * mutParams.tpg.initNbTeams + mutParams.tpg.initNbActions)
+        << "Insufficient number of edges in the initialized TPG.";
+    ASSERT_LE(tpg3.getEdges().size(),
+              mutParams.tpg.initNbTeams * mutParams.tpg.maxInitOutgoingEdges + mutParams.tpg.initNbActions)
+        << "Too many edges in the initialized TPG.";
+
+    // Check number of Programs.
+    std::set<Program::Program*> programs;
+    std::for_each(tpg3.getEdges().begin(), tpg3.getEdges().end(),
+                  [&programs](const std::unique_ptr<TPG::TPGEdge>& edge) {
+                      programs.insert(&edge->getProgram());
+                  });
+    ASSERT_EQ(programs.size(), 2 * mutParams.tpg.initNbTeams + mutParams.tpg.initNbActions)
+        << "Number of distinct program in the TPG is incorrect.";
+    
 }
 
 TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
@@ -785,6 +880,105 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
     // Check that progPointer use count was decreased since the mutated program
     // is a copy of the original
     ASSERT_EQ(progPointer.use_count(), 1)
+        << "Shared pointer should no longer be used inside the TPG after "
+           "mutation.";
+}
+
+TEST_F(MutatorTest, TPGMutatorMutateAction)
+{
+    
+    Mutator::RNG rng;
+    rng.setSeed(0);
+
+    params.mutation.tpg.useActionProgram = true;
+    uint64_t nbActions = 8;
+    Environment ce(set, params, vect, nbActions);
+
+    
+    std::shared_ptr<Program::Program> progPointer1 =
+        std::shared_ptr<Program::Program>(new Program::Program(ce, true));
+
+    // Init a TPG
+    TPG::TPGGraph tpg(ce);
+    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+    const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const TPG::TPGEdge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
+
+        // Init its program and fill the archive
+    Mutator::MutationParameters params;
+    Archive arch;
+    TPG::TPGExecutionEngine tee(ce, &arch);
+    params.prog.maxProgramSize = 96;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
+    Mutator::ProgramMutator::initRandomProgram(*progPointer1, params, rng);
+    tee.executeFromRoot(vertex0);
+
+
+    std::list<std::shared_ptr<Program::Program>> newPrograms;
+    ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGAction(
+        tpg, vertex1, newPrograms, params, rng));
+
+    // Check that progPointer use count was decreased since the mutated program
+    // is a copy of the original
+    ASSERT_EQ(progPointer1.use_count(), 1)
+        << "Shared pointer should no longer be used inside the TPG after "
+           "mutation.";
+
+}
+
+
+TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction){
+    
+    
+    Mutator::RNG rng;
+    rng.setSeed(0);
+
+    params.mutation.tpg.useActionProgram = true;
+    uint64_t nbActions = 8;
+    Environment ce(set, params, vect, nbActions);
+
+    
+    std::shared_ptr<Program::Program> progPointer1 =
+        std::shared_ptr<Program::Program>(new Program::Program(ce, true));
+
+    // Init a TPG
+    TPG::TPGGraph tpg(ce);
+    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
+    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
+    const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const TPG::TPGEdge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
+
+        // Init its program and fill the archive
+    Mutator::MutationParameters params;
+    Archive arch;
+    TPG::TPGExecutionEngine tee(ce, &arch);
+    params.prog.maxProgramSize = 96;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 1;
+    params.tpg.probaContextOverActionProgram = 0;
+    params.tpg.useActionProgram = true;
+    Mutator::ProgramMutator::initRandomProgram(*progPointer1, params, rng);
+    tee.executeFromRoot(vertex0);
+
+
+    std::list<std::shared_ptr<Program::Program>> newPrograms;
+    ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(
+        tpg, &edge0, {&vertex0}, {&vertex1}, newPrograms, params, rng));
+
+
+
+    ASSERT_EQ(tpg.getNbVertices(), 3)
+        << "Action should have been duplicated.";
+
+    tpg.removeVertex(vertex1);
+
+    // Check that progPointer use count was decreased since the mutated program
+    // is a copy of the original
+    ASSERT_EQ(progPointer1.use_count(), 1)
         << "Shared pointer should no longer be used inside the TPG after "
            "mutation.";
 }

@@ -72,14 +72,6 @@ namespace Mutator {
         /// Number of actions vertex at the initialisation of a TPGGraph
         size_t initNbActions = 10;
 
-        /// JSon comment
-        inline static const std::string minProportionActionOrTeamComment =
-            "// Minimum proportion of action roots or teams roots to keep at "
-            "each generation\n"
-            "// \"minProportionActionOrTeam\" : 0.0, // Default value";
-        /// Minimum proportion of action roots or teams roots to keep at each
-        /// generation
-        double minProportionActionOrTeam = 0.0;
 
         /// JSon comment
         inline static const std::string maxInitOutgoingEdgesComment =

@@ -380,3 +380,19 @@ TEST_F(ProgramEngineTest, iterateThroughtProgram)
         << "Program line using a incorrect Instruction index should not "
            "interrupt the Execution when ignored.";
 }
+
+TEST_F(ProgramEngineTest, getRegisterValues)
+{
+    
+    Program::ProgramExecutionEngine progExecEng(*p);
+    progExecEng.iterateThroughtProgram(false);
+
+    std::vector<double> regsValue;
+
+    ASSERT_NO_THROW(regsValue = progExecEng.getRegisterValues(8))
+        << "Fail to get the register values";
+
+    ASSERT_EQ(regsValue, std::vector<double>({8.6500000238418568,  4.3250000119209284, 0, 0, 0,  2.0250000119209286, 0, 0}))
+        << "Register values are incorrect";
+
+}

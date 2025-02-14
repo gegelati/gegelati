@@ -248,10 +248,10 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
     ASSERT_EQ(result.at(2), tpg->getVertices().at(2))
         << "2nd element of the traversed path during execution is incorrect.";
     ASSERT_EQ(result.at(3), tpg->getVertices().at(6))
-        << "2nd element of the traversed path during execution is incorrect.";
+        << "3rd element of the traversed path during execution is incorrect.";
 }
 
-TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuous)
+TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousNoActionProg)
 {
 
     makeProgramReturn(*progPointers.at(2), 1, 1);  // Program from A2
@@ -269,54 +269,79 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuous)
     ASSERT_EQ(result.size(), 2)
         << "Size of the number of action should be equal to 2";
     ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
-    ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -0.2.";
+    ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
 }
 
-TEST_F(TPGExecutionEngineTest, ApplyNoneActivationFunctionOnActions)
+
+TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
 {
+    // Add an action edge to action A3
+    Environment continuousEnv(set, params, vect, 2);
+    std::shared_ptr<Program::Program> p = std::make_shared<Program::Program>(continuousEnv, true);
+    TPG::TPGExecutionEngine tpee(continuousEnv);
+
+    tpg->addNewActionEdge(*tpg->getVertices().at(6), p, 0);
+    makeProgramReturn(*p, 1, 0);
+    makeProgramReturn(*p, -1, 1); 
+
+    std::vector<double> result;
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
+        << "Execution of a TPGGraph from a valid root failed.";
+    // Check the traversed path
+    ASSERT_EQ(result.size(), 2)
+        << "Size of the number of action should be equal to 2";
+    ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
+    ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
+}
+
+TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
+{
+    // Test for None
     std::vector<double> valuesNone{10.0, 0.2, -4.0,
                                    std::numeric_limits<double>::quiet_NaN()};
-
     params.activationFunction = "none";
-    Environment envNone(set, params, vect);
-    TPG::TPGExecutionEngine tpeeNone(envNone);
+    TPG::TPGExecutionEngine tpeeNone(Environment(set, params, vect));
 
-    tpeeNone.applyActivationFunctionOnActions(valuesNone);
+    ASSERT_NO_THROW(tpeeNone.applyActivationFunctionOnActions(valuesNone)) << "None activation function failed";
     // Check the value are right
     ASSERT_EQ(valuesNone, std::vector<double>({1.0, 0.2, -1.0, -1.0}))
         << "Values should be clip in [-1, 1]";
-}
 
-TEST_F(TPGExecutionEngineTest, ApplyTanhActivationFunctionOnActions)
-{
-    std::vector<double> valuesNone{10.0, 0.2, -4.0,
+
+    // Test for Tanh
+    std::vector<double> valuesTanh{10.0, 0.2, -4.0,
                                    std::numeric_limits<double>::quiet_NaN()};
-
     params.activationFunction = "tanh";
-    Environment envNone(set, params, vect);
-    TPG::TPGExecutionEngine tpeeNone(envNone);
+    TPG::TPGExecutionEngine tpeeTanh(Environment(set, params, vect));
 
-    tpeeNone.applyActivationFunctionOnActions(valuesNone);
+    ASSERT_NO_THROW(tpeeTanh.applyActivationFunctionOnActions(valuesTanh)) << "None activation function failed";
     // Check the value are right
-    ASSERT_EQ(valuesNone, std::vector<double>({std::tanh(10.0), std::tanh(0.2),
+    ASSERT_EQ(valuesTanh, std::vector<double>({std::tanh(10.0), std::tanh(0.2),
                                                std::tanh(-4.0), -1.0}))
-        << "Values should be the output of sigmoid";
-}
+        << "Values should be the output of tanh";
 
-TEST_F(TPGExecutionEngineTest, ApplySigmoidActivationFunctionOnActions)
-{
-    std::vector<double> valuesNone{10.0, 0.2, -4.0,
+
+    // Test for Sigmoid
+    std::vector<double> valuesSigmoid{10.0, 0.2, -4.0,
                                    std::numeric_limits<double>::quiet_NaN()};
-
     params.activationFunction = "sigmoid";
-    Environment envNone(set, params, vect);
-    TPG::TPGExecutionEngine tpeeNone(envNone);
+    TPG::TPGExecutionEngine tpeeSigmoid(Environment(set, params, vect));
 
-    tpeeNone.applyActivationFunctionOnActions(valuesNone);
+    ASSERT_NO_THROW(tpeeSigmoid.applyActivationFunctionOnActions(valuesSigmoid)) << "None activation function failed";
     // Check the value are right
-    ASSERT_EQ(valuesNone,
+    ASSERT_EQ(valuesSigmoid,
               std::vector<double>({1.0 / (1.0 + std::exp(-10.0)),
                                    1.0 / (1.0 + std::exp(-0.2)),
                                    1.0 / (1.0 + std::exp(4.0)), 0.0}))
         << "Values should be the output of sigmoid";
+
+
+    // Test for wrong activation function
+    params.activationFunction = "WrongActivationFunction";
+    TPG::TPGExecutionEngine tpeeWrong(Environment(set, params, vect));
+
+    ASSERT_THROW(tpeeWrong.applyActivationFunctionOnActions(valuesNone), std::runtime_error)
+        << "Activation function should not work with wrong activation function";
+
 }
