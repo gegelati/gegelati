@@ -66,8 +66,14 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine()
 void CodeGen::ProgramGenerationEngine::generateProgram(
     uint64_t progID, const bool ignoreException)
 {
-    fileC << "\ndouble P" << progID << "(){" << std::endl;
-    fileH << "double P" << progID << "();" << std::endl;
+    fileC << "\ndouble";
+    fileH << "double";
+    if(program->getEnvironment().getNbContinuousActions() > 0 && program->isActionProgram()){
+        fileC << "*";
+        fileH << "*";
+    }
+    fileC << " P" << progID << "(){" << std::endl;
+    fileH << " P" << progID << "();" << std::endl;
 
     // instantiate register
     fileC << "\tdouble " << nameRegVariable << "["
@@ -99,7 +105,11 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
           << std::endl;
     fileC << "#endif" << std::endl;
 #endif
-    fileC << "\treturn reg[0];\n}" << std::endl;
+    fileC << "\treturn ";
+    if(program->getEnvironment().getNbContinuousActions() > 0 && program->isActionProgram()){
+        fileC << "&";
+    }
+    fileC << "reg[0];\n}" << std::endl;
 }
 
 std::string CodeGen::ProgramGenerationEngine::completeFormat(

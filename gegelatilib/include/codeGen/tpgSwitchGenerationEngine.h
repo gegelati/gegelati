@@ -71,6 +71,13 @@ namespace CodeGen {
          */
         virtual void initHeaderFile();
 
+        /**
+         * \brief function printing activation function code in the C files.
+         * 
+         * This function print the activation function in the param file of the Environment instance.
+         */
+        virtual void initActivationFunction();
+
       public:
         /**
          * \brief Main constructor of the class.
