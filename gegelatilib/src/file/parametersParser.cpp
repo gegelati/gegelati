@@ -118,6 +118,37 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;
     }
+
+    if (param == "nbActionEdgeInit") {
+        params.mutation.tpg.nbActionEdgeInit =  (size_t)value.asUInt();
+        return;
+    }
+
+    if (param == "useMultiActionProgram") {
+        params.mutation.tpg.useMultiActionProgram = value.asBool();
+        return;
+    }
+    if (param == "pChangeActionClass") {
+        params.mutation.tpg.pChangeActionClass = (double)value.asDouble();
+        return;
+    }
+    if (param == "pActionEdgeDeletion") {
+        params.mutation.tpg.pActionEdgeDeletion = value.asDouble();
+        return;
+    }
+    if (param == "pActionEdgeAddition") {
+        params.mutation.tpg.pActionEdgeAddition = value.asDouble();
+        return;
+    }
+    if (param == "pMutateActionProgram") {
+        params.mutation.tpg.pMutateActionProgram = value.asDouble();
+        return;
+    }
+    if (param == "pSwapActionProgram") {
+        params.mutation.tpg.pSwapActionProgram = value.asDouble();
+        return;
+    }
+
     if (param == "maxOutgoingEdges") {
         params.mutation.tpg.maxOutgoingEdges = (size_t)value.asUInt();
         return;
@@ -341,6 +372,40 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["maxInitOutgoingEdges"].setComment(
         Mutator::TPGParameters::maxInitOutgoingEdgesComment,
         Json::commentBefore);
+
+
+    root["mutation"]["tpg"]["nbActionEdgeInit"] =
+        params.mutation.tpg.nbActionEdgeInit;
+    root["mutation"]["tpg"]["nbActionEdgeInit"].setComment(
+        Mutator::TPGParameters::nbActionEdgeInitComment,
+        Json::commentBefore);
+
+    root["mutation"]["tpg"]["useMultiActionProgram"] = params.mutation.tpg.useMultiActionProgram;
+    root["mutation"]["tpg"]["useMultiActionProgram"].setComment(
+        Mutator::TPGParameters::useMultiActionProgramComment,
+        Json::commentBefore);
+
+    root["mutation"]["tpg"]["pChangeActionClass"] = params.mutation.tpg.pChangeActionClass;
+    root["mutation"]["tpg"]["pChangeActionClass"].setComment(
+        Mutator::TPGParameters::pChangeActionClassComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["pActionEdgeAddition"] =
+        params.mutation.tpg.pActionEdgeAddition;
+    root["mutation"]["tpg"]["pActionEdgeAddition"].setComment(
+        Mutator::TPGParameters::pActionEdgeAdditionComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["pActionEdgeDeletion"] =
+        params.mutation.tpg.pActionEdgeDeletion;
+    root["mutation"]["tpg"]["pActionEdgeDeletion"].setComment(
+        Mutator::TPGParameters::pActionEdgeDeletionComment, Json::commentBefore);
+
+
+    root["mutation"]["tpg"]["pMutateActionProgram"] = params.mutation.tpg.pMutateActionProgram;
+    root["mutation"]["tpg"]["pMutateActionProgram"].setComment(
+        Mutator::TPGParameters::pMutateActionProgramComment, Json::commentBefore);
+    root["mutation"]["tpg"]["pSwapActionProgram"] = params.mutation.tpg.pSwapActionProgram;
+    root["mutation"]["tpg"]["pSwapActionProgram"].setComment(
+        Mutator::TPGParameters::pSwapActionProgramComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["maxOutgoingEdges"] =
         params.mutation.tpg.maxOutgoingEdges;

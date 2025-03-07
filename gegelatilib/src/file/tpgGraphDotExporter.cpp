@@ -68,7 +68,20 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 
     // Create a string stream to build the label
     std::ostringstream labelStream;
-    labelStream << actionID;
+
+    auto outgoingEdges = action.getOutgoingEdges();
+    if(tpg.getEnvironment().getParams().mutation.tpg.useMultiActionProgram){
+        for (auto it = outgoingEdges.begin(); it != outgoingEdges.end(); ++it) {
+            if (it != outgoingEdges.begin()) {
+                labelStream << "-"; // Add separator between actionClasses
+            }
+            auto actionClass = dynamic_cast<const TPG::TPGActionEdge*>(*it)->getActionClass();
+            labelStream << actionClass;
+        }
+    } else {
+        labelStream << actionID;
+    }
+
 
 
 
@@ -110,6 +123,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
         fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n",
                 this->offset.c_str(), progID, progID);
         if(dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr){
+
             fprintf(pFile, "%sA%" PRIu64 " -> P%" PRIu64 "\n",
                     this->offset.c_str(), srcID, progID);
 
@@ -131,8 +145,14 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
         }
     }
     else {
-        fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 "\n", this->offset.c_str(),
-                srcID, progID);
+
+        if(dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr){
+            fprintf(pFile, "%sA%" PRIu64 " ->  P%" PRIu64 "\n", this->offset.c_str(),
+                    srcID, progID);
+        } else {
+            fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 "\n", this->offset.c_str(),
+                    srcID, progID);
+        }
     }
 }
 

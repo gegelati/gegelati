@@ -36,6 +36,7 @@
 #include <algorithm>
 
 #include "tpg/tpgVertex.h"
+#include "tpg/tpgActionEdge.h"
 
 const std::list<TPG::TPGEdge*>& TPG::TPGVertex::getIncomingEdges() const
 {
@@ -80,4 +81,44 @@ void TPG::TPGVertex::addOutgoingEdge(TPG::TPGEdge* edge)
 void TPG::TPGVertex::removeOutgoingEdge(TPG::TPGEdge* edge)
 {
     this->outgoingEdges.remove(edge);
+}
+
+const std::set<uint64_t>& TPG::TPGVertex::getAssessedActions() const
+{
+    return this->assessedActions;
+}
+
+void TPG::TPGVertex::updateAssessedActions()
+{
+    assessedActions.clear();
+    for (TPGEdge* edge : this->outgoingEdges) {
+        if (auto* actionEdge = dynamic_cast<TPGActionEdge*>(edge)) {
+            // If the edge is an action edge, insert its action class
+            assessedActions.insert(actionEdge->getActionClass());
+        } else {
+            // Otherwise, insert all assessed actions from the destination
+            const auto& destinationActions = edge->getDestination()->getAssessedActions();
+            assessedActions.insert(destinationActions.begin(), destinationActions.end());
+        }
+
+        // If all actions are stored, no need to search for more
+        if(assessedActions.size() == edge->getProgram().getEnvironment().getNbContinuousActions()){
+            return;
+        }
+    }
+}
+
+bool TPG::TPGVertex::hasSameAssessedActions(std::set<uint64_t> actions) const {
+    
+    // Temporary set to store the intersection
+    std::set<uint64_t> intersectionResult;
+
+    // Compute the intersection
+    std::set_intersection(
+        actions.begin(), actions.end(),
+        assessedActions.begin(), assessedActions.end(),
+        std::inserter(intersectionResult, intersectionResult.begin())
+    );
+
+    return !intersectionResult.empty();
 }

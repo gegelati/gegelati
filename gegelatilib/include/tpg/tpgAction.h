@@ -60,6 +60,7 @@ namespace TPG {
          */
         const uint64_t actionID;
 
+
       public:
         /**
          * \brief Main constructor of a TPGAction.
@@ -85,6 +86,12 @@ namespace TPG {
         {
             return this->actionID;
         };
+
+
+        /**
+         * \brief Order the actionEdges of the action depending on the actionClass of the edges
+         */
+        void orderActionEdges();
     };
 }; // namespace TPG
 

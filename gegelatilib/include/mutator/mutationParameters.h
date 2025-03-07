@@ -84,6 +84,55 @@ namespace Mutator {
         size_t maxInitOutgoingEdges = 3;
 
         /// JSon comment
+        inline static const std::string useMultiActionProgramComment =
+            "// Create multiple action program, instead of one outputting multiple action in a single program"
+            ".\n"
+            "// \"useMultiActionProgram\" : false, // Default value";
+        /// Create multiple action program, instead of one outputting multiple action in a single program
+        bool useMultiActionProgram = false;
+
+        /// JSon comment
+        inline static const std::string pChangeActionClassComment =
+            "//  Probablity of changing the action edge by any other action edge in the graph\n"
+            "// \"pChangeActionClass\" : 0.1, // Default value";
+        ///  Probablity of changing the action edge by any other action edge in the graph
+        double pChangeActionClass = 0.1;
+        /// JSon comment
+        inline static const std::string pActionEdgeDeletionComment =
+            "// Probability of deleting an outgoing ActionEdge of a Action.\n"
+            "// \"pActionEdgeDeletion\" : 0.7, // Default value";
+        /// Probability of deleting an outgoing TPGEdge of a TPGTeam.
+        double pActionEdgeDeletion = 0.7;
+
+        /// JSon comment
+        inline static const std::string pActionEdgeAdditionComment =
+            "// Probability of adding an outgoing Action Edge to a Action.\n"
+            "// \"pActionEdgeAddition\" : 0.7, // Default value";
+        /// Probability of adding an outgoing TPGEdge to a TPGTeam.
+        double pActionEdgeAddition = 0.7;
+
+        /// JSon comment
+        inline static const std::string pMutateActionProgramComment =
+            "//  Probablity of mutation the program on the action edge\n"
+            "// \"pMutateActionProgram\" : 0.1, // Default value";
+        ///  Probablity of mutation the program on the action edge
+        double pMutateActionProgram = 0.1;
+
+        /// JSon comment
+        inline static const std::string pSwapActionProgramComment =
+            "//  Probablity of swapping two action edge within the same action vertex\n"
+            "// \"pSwapActionProgram\" : 0.1, // Default value";
+        ///  Probablity of swapping two action edge within the same action vertex
+        double pSwapActionProgram = 0.1;
+
+        /// JSon comment
+        inline static const std::string nbActionEdgeInitComment =
+            "// Number of edge per action vertex at initialisation\n"
+            "// \"nbActionEdgeInit\" : 1, // Default value";
+        /// Init each team with one edge per action
+        size_t nbActionEdgeInit = 1;
+
+        /// JSon comment
         inline static const std::string maxOutgoingEdgesComment =
             "// Maximum number of outgoing edge during TPGGraph mutations.\n"
             "// \"maxOutgoingEdges\" : 5, // Default value";

@@ -37,6 +37,9 @@
 #define TPG_VERTEX_H
 
 #include <list>
+#include <set>
+#include <cinttypes>
+
 
 namespace TPG {
     // Declare class to make it usable as an attribute.
@@ -109,6 +112,24 @@ namespace TPG {
          */
         virtual void removeOutgoingEdge(TPG::TPGEdge* edge);
 
+        
+        /**
+         * \brief return assessed actions
+         */
+        virtual const std::set<uint64_t>& getAssessedActions() const;
+
+        /**
+         * \brief Update the assessed actions
+         */
+        virtual void updateAssessedActions();
+
+        /**
+         * \brief compare the set given and the assessed actions of the vertex
+         * 
+         * If the intersection is empty, return false, else true
+         */
+        virtual bool hasSameAssessedActions(std::set<uint64_t> actions) const;
+
       protected:
         /**
          * \brief Protected default constructor to forbid the instanciation of
@@ -125,6 +146,11 @@ namespace TPG {
          * \brief Set of outgoing TPGEdge of the TPGVertex.
          */
         std::list<TPG::TPGEdge*> outgoingEdges;
+
+        /**
+         * \brief Set of assessed actions by the team
+         */
+        std::set<uint64_t> assessedActions;
     };
 }; // namespace TPG
 

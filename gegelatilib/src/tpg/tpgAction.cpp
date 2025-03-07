@@ -48,3 +48,16 @@ void TPG::TPGAction::addOutgoingEdge(TPGEdge* edge)
         TPGVertex::addOutgoingEdge(edge);
     }
 }
+
+void TPG::TPGAction::orderActionEdges(){
+
+
+    this->outgoingEdges.sort([](TPG::TPGEdge* edge1, TPG::TPGEdge* edge2) {
+        // Utiliser static_cast pour convertir TPGEdge* en TPGActionEdge*
+        TPG::TPGActionEdge* actionEdge1 = static_cast<TPG::TPGActionEdge*>(edge1);
+        TPG::TPGActionEdge* actionEdge2 = static_cast<TPG::TPGActionEdge*>(edge2);
+
+        // Comparer actionClass
+        return actionEdge1->getActionClass() < actionEdge2->getActionClass();
+    });
+}

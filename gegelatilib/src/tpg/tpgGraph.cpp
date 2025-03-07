@@ -35,6 +35,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#include <queue>
+
 #include <algorithm>
 #include <stdexcept>
 #include <type_traits>
@@ -191,6 +193,8 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
                              edge->getProgramSharedPointer());
         }
     }
+
+    newVertex->updateAssessedActions();
 
     return *newVertex;
 }
@@ -418,5 +422,105 @@ void TPG::TPGGraph::clearProgramIntrons()
 {
     for (auto& edge : this->edges) {
         edge.get()->getProgram().clearIntrons();
+    }
+}
+
+void TPG::TPGGraph::setActionClassEdge(const TPGEdge* edge, uint64_t newActionClass)
+{
+    auto it = this->findEdge(edge);
+
+    if (it != this->edges.end()) {
+        if(dynamic_cast<TPG::TPGActionEdge*>(it->get()) == nullptr){
+            throw std::runtime_error(
+                "Trying to set an action class on a context edge");
+        }
+        // Found the edge, modify it as needed
+        dynamic_cast<TPG::TPGActionEdge*>(it->get())->setActionClass(newActionClass);
+    } else {
+        throw std::runtime_error(
+            "Edges not in the graph.");
+    }
+
+}
+
+
+void TPG::TPGGraph::updateAssessedActions(const TPG::TPGVertex* vertex) {
+    std::queue<const TPG::TPGVertex*> vertexToUpdate;
+    vertexToUpdate.push(vertex);
+
+    while (!vertexToUpdate.empty()) {
+        // Get the front vertex in the queue
+        auto currentVertex = vertexToUpdate.front();
+        vertexToUpdate.pop();
+
+        // Find the vertex to get the non-const reference
+        auto it = this->findVertex(currentVertex);
+        if (it != this->vertices.end()) {
+            // Add the vertices leading to the current vertex to the queue
+            for (auto incomingEdge : (*it)->getIncomingEdges()) {
+                vertexToUpdate.push(incomingEdge->getSource());
+            }
+
+            // Update assessed actions for the current vertex
+            (*it)->updateAssessedActions();
+        } else {
+            throw std::runtime_error(
+                "Vertex to assess actions not in the graph.");
+        }
+    }
+}
+
+void TPG::TPGGraph::updateAllAssessedActions() {
+
+
+
+    for(auto& edge: edges){
+        if(dynamic_cast<TPG::TPGActionEdge*>(edge.get()) == nullptr){
+            auto vertexIterator = this->findVertex(edge->getDestination());
+            if (vertexIterator == this->vertices.end()) {
+                std::cout<<"errrooor destination"<<std::endl;
+            }
+        }
+
+
+    }
+
+    for(auto& edge: edges){
+        auto vertexIterator = this->findVertex(edge->getSource());
+        if (vertexIterator == this->vertices.end()) {
+            std::cout<<"errrooor source"<<std::endl;
+        }
+    }
+
+
+    for(auto& vertices: vertices){
+        if(dynamic_cast<TPG::TPGAction*>(vertices) != nullptr){
+            if (vertices->getIncomingEdges().size() == 0) {
+                std::cout<<"errrooor source action"<<std::endl;
+            }
+        }
+    }
+
+
+    // Launch update method for all actions. 
+    // All teams should be linked to actions, even not directly.
+    for(auto vertex: this->vertices){
+        if(dynamic_cast<TPGAction*>(vertex) != nullptr){
+            this->updateAssessedActions(vertex);
+        }
+    }
+}
+
+
+void TPG::TPGGraph::orderActionEdges(const TPG::TPGAction* action)
+{
+    auto it = this->findVertex(action);
+
+    if (it != this->vertices.end()) {
+        // Found the vertex, modify it as needed
+        dynamic_cast<TPG::TPGAction*>(*it)->orderActionEdges();
+    } else {
+        throw std::runtime_error(
+            "Action to order not in the graph.");
     }
 }
