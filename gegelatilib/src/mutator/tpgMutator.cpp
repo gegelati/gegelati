@@ -100,7 +100,7 @@ void Mutator::TPGMutator::initRandomTPG(
     }
 
     
-    if (params.tpg.initNbTeams < nbActions) {
+    if (params.tpg.initNbTeams < nbActions && !params.tpg.useActionProgram) {
         throw std::runtime_error(
             "The number of init roots should be above or "
             "equal to the number of actions.");
@@ -702,7 +702,8 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         // Do not use Archive right now if the environment is continuous
         // TODO Update that
     } while (!allUnique &&
-             newProg->getEnvironment().getNbContinuousActions() == 0);
+             newProg->getEnvironment().getNbContinuousActions() == 0 && 
+             !params.tpg.useMultiActionProgram);
 }
 
 void Mutator::TPGMutator::mutateNewProgramBehaviors(
@@ -799,7 +800,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // If the graph doesn't contain any root teams, call the init procedure.
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
-    if (rootTeams.size() == 0) {
+    if (rootTeams.size() == 0 && !params.tpg.useActionProgram) {
         initRandomTPG(graph, params, rng, nbActions);
         vertices = graph.getVertices();
         rootVertices = graph.getRootVertices();
@@ -808,6 +809,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                       [&rootTeams](const TPG::TPGVertex* vertex) {
                           rootTeams.push_back((const TPG::TPGTeam*)vertex);
                       });
+        std::cout<<"Root team size 0, might be an issue here"<<std::endl;
     }
 
     // Pre compute liste of available TPGTeam and TPGActions
@@ -839,7 +841,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Use always root teams for now. SKIP only except if continuous actions and action programs are
     // used.
     auto rootUsed = rootTeams;
-    if (false && graph.getEnvironment().getNbContinuousActions() > 0 &&
+    if (params.tpg.useActionProgram && graph.getEnvironment().getNbContinuousActions() > 0 &&
         params.tpg.useActionProgram) {
         rootUsed = rootVertices;
     }

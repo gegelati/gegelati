@@ -157,12 +157,10 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
 
     std::vector<const TPGVertex*> visitedVertices;
     visitedVertices.push_back(currentVertex);
-
     // Browse the TPG until a TPGAction is reached.
     while (dynamic_cast<const TPG::TPGTeam*>(currentVertex)) {
         // Get the next edge
         edge = &this->evaluateTeam(*(const TPGTeam*)currentVertex);
-
         Program::Program p =
             currentVertex->getOutgoingEdges().front()->getProgram();
         // update currentVertex and backup in visitedVertex.
@@ -173,13 +171,23 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
     // An action value must be positive, so -1 for an action mean that no action
     // value is choosen yet.
     std::vector<double> actionsTaken(env.getNbContinuousActions(), 0.0);
-
     // If continuous action are used, the n actions taken are the value 1 to n+1
     // in the last executed register.
     if (env.getNbContinuousActions() > 0) {
 
-        // True if the action contain a TPGActionEdge
-        if (currentVertex->getOutgoingEdges().size() > 0) {
+        // True if the action contain multiple TPGActionEdge
+        if (currentVertex->getOutgoingEdges().size() > 1 || env.getParams().mutation.tpg.useMultiActionProgram) {
+
+            for(auto edge: currentVertex->getOutgoingEdges()){
+                auto actionEdge = dynamic_cast<TPGActionEdge*>(edge);
+
+                // Evaluate the edge and set the action value
+                actionsTaken[actionEdge->getActionClass()] = this->evaluateEdge(*actionEdge);
+            }
+
+        }
+        // True if the action contain one TPGActionEdge
+        else if (currentVertex->getOutgoingEdges().size() == 1) {
             this->evaluateEdge(*currentVertex->getOutgoingEdges().front());
 
             Program::Program p =
@@ -203,7 +211,7 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         this->applyActivationFunctionOnActions(actionsTaken);
 
         return std::make_pair(visitedVertices, actionsTaken);
-        ;
+        
     }
     else {
         return std::make_pair(

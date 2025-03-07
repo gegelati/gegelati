@@ -292,7 +292,7 @@ void Learn::LearningAgent::decimateWorstRoots(
 
         // If the root is an action, do not remove it!
         const TPG::TPGVertex* root = results.begin()->second;
-        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
+        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr && !this->params.mutation.tpg.useActionProgram) {
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
         }

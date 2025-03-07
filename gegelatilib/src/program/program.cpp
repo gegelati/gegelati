@@ -154,7 +154,7 @@ uint64_t Program::Program::identifyIntrons()
 
     // With continuous actions, add all the registers needed (TODO add
     // difference program link to action and to team for efficacity)
-    if(actionProgram || !this->environment.getParams().mutation.tpg.useActionProgram){
+    if((actionProgram && !this->environment.getParams().mutation.tpg.useMultiActionProgram) || !this->environment.getParams().mutation.tpg.useActionProgram){
         for (size_t idx = 0;
             idx < this->environment.getNbContinuousActions(); idx++) {
             usefulRegisters.insert(idx + (int)!this->environment.getParams().mutation.tpg.useActionProgram);

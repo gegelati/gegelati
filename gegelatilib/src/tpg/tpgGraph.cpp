@@ -474,33 +474,6 @@ void TPG::TPGGraph::updateAllAssessedActions() {
 
 
 
-    for(auto& edge: edges){
-        if(dynamic_cast<TPG::TPGActionEdge*>(edge.get()) == nullptr){
-            auto vertexIterator = this->findVertex(edge->getDestination());
-            if (vertexIterator == this->vertices.end()) {
-                std::cout<<"errrooor destination"<<std::endl;
-            }
-        }
-
-
-    }
-
-    for(auto& edge: edges){
-        auto vertexIterator = this->findVertex(edge->getSource());
-        if (vertexIterator == this->vertices.end()) {
-            std::cout<<"errrooor source"<<std::endl;
-        }
-    }
-
-
-    for(auto& vertices: vertices){
-        if(dynamic_cast<TPG::TPGAction*>(vertices) != nullptr){
-            if (vertices->getIncomingEdges().size() == 0) {
-                std::cout<<"errrooor source action"<<std::endl;
-            }
-        }
-    }
-
 
     // Launch update method for all actions. 
     // All teams should be linked to actions, even not directly.

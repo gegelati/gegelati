@@ -139,8 +139,8 @@ namespace Learn {
               archive(p.archiveSize, p.archivingProbability)
         {
 
-            // override the number of initial roots if set to 0
-            if (this->params.mutation.tpg.initNbTeams == 0) {
+            // override the number of initial roots if set to 0 without action program
+            if (this->params.mutation.tpg.initNbTeams == 0 && !this->params.mutation.tpg.useActionProgram) {
                 size_t nbActions = this->learningEnvironment.isDiscrete() ? (size_t)this->learningEnvironment.getNbActions() : params.mutation.tpg.initNbActions;
                 this->params.mutation.tpg.initNbTeams = std::max(
                     (size_t)floor((1 - this->params.ratioDeletedRoots) *
