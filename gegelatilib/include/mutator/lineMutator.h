@@ -47,6 +47,26 @@ namespace Mutator {
      * Namespace containing all functions to apply randomness to a Program::Line
      */
     namespace LineMutator {
+
+        /**
+         * Randomly change the value of the indicated constant
+         * 
+         * \param[in,out] line the Program::Line whose attributes are being
+         * altered.
+         * \param[in] index index of the constant
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        void changeConstantAt(Program::Line& line, uint64_t index, Mutator::RNG& rng);
+
+        /**
+         * Randomly change all the constant of the line
+         * 
+         * \param[in,out] line the Program::Line whose attributes are being
+         * altered.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        void initRandomConstants(Program::Line& line, Mutator::RNG& rng);
+
         /**
          * \brief Randomly initializes a Program::Line.
          *

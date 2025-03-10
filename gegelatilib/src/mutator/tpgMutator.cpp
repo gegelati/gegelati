@@ -873,7 +873,6 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         currentNumberOfRoot = graph.getNbRootVertices();
     }
 
-    graph.updateAllAssessedActions();
 
     // Mutate the new Programs
     mutateNewProgramBehaviors(maxNbThreads, newPrograms, rng, params, archive);

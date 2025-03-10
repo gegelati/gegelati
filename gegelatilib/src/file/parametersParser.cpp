@@ -192,6 +192,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.prog.maxProgramSize = (size_t)value.asUInt();
         return;
     }
+    if (param == "initProgramSize") {
+        params.mutation.prog.initProgramSize = (size_t)value.asUInt();
+        return;
+    }
     if (param == "pDelete") {
         params.mutation.prog.pDelete = value.asDouble();
         return;
@@ -221,11 +225,11 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
     if (param == "minConstValue") {
-        params.mutation.prog.minConstValue = value.asInt();
+        params.mutation.prog.minConstValue = value.asDouble();
         return;
     }
     if (param == "maxConstValue") {
-        params.mutation.prog.maxConstValue = value.asInt();
+        params.mutation.prog.maxConstValue = value.asDouble();
         return;
     }
     if (param == "archiveSize") {
@@ -472,6 +476,11 @@ void File::ParametersParser::writeParametersToJson(
         params.mutation.prog.maxProgramSize;
     root["mutation"]["prog"]["maxProgramSize"].setComment(
         Mutator::ProgramParameters::maxProgramSizeComment, Json::commentBefore);
+
+        root["mutation"]["prog"]["initProgramSize"] =
+        params.mutation.prog.initProgramSize;
+    root["mutation"]["prog"]["initProgramSize"].setComment(
+        Mutator::ProgramParameters::initProgramSizeComment, Json::commentBefore);
 
     root["mutation"]["prog"]["minConstValue"] =
         params.mutation.prog.minConstValue;

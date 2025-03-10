@@ -290,7 +290,7 @@ void Learn::LearningAgent::decimateWorstRoots(
     auto i = 0;
     while (i < nbExpectedRoots && results.size() > 0) {
 
-        // If the root is an action, do not remove it!
+        // If the root is an action, do not remove it in discrete environment!
         const TPG::TPGVertex* root = results.begin()->second;
         if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr && !this->params.mutation.tpg.useActionProgram) {
             preservedRoots.insert(*results.begin());

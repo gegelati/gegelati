@@ -40,6 +40,7 @@
 
 #include <functional>
 
+#include "data/constant.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
@@ -102,6 +103,15 @@ namespace Instructions {
          * of operands needed to execute an Instruction in the Set.
          */
         unsigned int getMaxNbOperands() const;
+
+        /**
+         * \brief Get the maximum number of constants for Instruction currently
+         * contained in the Set.
+         *
+         * \return the unsigned int value corresponding to the largest number
+         * of constants needed to execute an Instruction in the Set.
+         */
+        unsigned int getMaxNbConstants() const;
     };
 } // namespace Instructions
 

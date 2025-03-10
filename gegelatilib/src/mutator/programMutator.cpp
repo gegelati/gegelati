@@ -50,12 +50,12 @@ void Mutator::ProgramMutator::initRandomProgram(
     Data::Constant c_value;
     for (int i = 0; i < p.getEnvironment().getNbConstant(); i++) {
         c_value = {
-            rng.getInt32(params.prog.minConstValue, params.prog.maxConstValue)};
+            rng.getDouble(params.prog.minConstValue, params.prog.maxConstValue)};
         p.getConstantHandler().setDataAt(typeid(Data::Constant), i, c_value);
     }
 
     // Select the number of line randomly
-    const uint64_t nbLine = rng.getUnsignedInt64(1, params.prog.maxProgramSize);
+    const uint64_t nbLine = rng.getUnsignedInt64(1, params.prog.initProgramSize);
     // Insert them
     while (p.getNbLines() < nbLine) {
         insertRandomLine(p, rng);
@@ -117,11 +117,16 @@ bool Mutator::ProgramMutator::alterRandomLine(Program::Program& p,
 bool Mutator::ProgramMutator::alterRandomConstant(
     Program::Program& p, const MutationParameters& params, Mutator::RNG& rng)
 {
-    const uint64_t constant_idx =
-        rng.getUnsignedInt64(0, p.getEnvironment().getNbConstant() - 1);
-    p.getConstantHandler().setDataAt(
-        typeid(Data::Constant), constant_idx,
-        {rng.getInt32(params.prog.minConstValue, params.prog.maxConstValue)});
+    const uint64_t line_idx =
+        rng.getUnsignedInt64(0, p.getNbLines() - 1);
+
+    if(p.getLine(line_idx).getNbConstants() == 0){
+        return false;
+    }
+
+    const uint64_t const_idx = rng.getUnsignedInt64(0, p.getLine(line_idx).getNbConstants() - 1);
+
+    Mutator::LineMutator::changeConstantAt(p.getLine(line_idx), const_idx, rng);
     return true;
 }
 

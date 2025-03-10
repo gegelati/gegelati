@@ -222,6 +222,13 @@ namespace Mutator {
         size_t maxProgramSize = 96;
 
         /// JSon comment
+        inline static const std::string initProgramSizeComment =
+            "// Number of Line within the Program of the TPG at the initialisation.\n"
+            "// \"initProgramSize\" : 10, // Default value";
+        /// Initial number of Line within the Program of the TPGGraph.
+        size_t initProgramSize = 10;
+
+        /// JSon comment
         inline static const std::string pDeleteComment =
             "// Probability of deleting a line of the Program.\n"
             "// \"pDelete\" : 0.5, // Default value";
@@ -268,14 +275,14 @@ namespace Mutator {
             "// Minimum constant value possible.\n"
             "// \"minConstValue\" : -10, // Default value";
         /// Minimum constant value possible
-        int32_t minConstValue = -100;
+        double minConstValue = -1.0;
 
         /// JSon comment
         inline static const std::string maxConstValueComment =
             "// Maximum constant value possible.\n"
             "// \"maxConstValue\" : 100, // Default value";
         /// Maximum constant value possible
-        int32_t maxConstValue = 100;
+        double maxConstValue = 1.0;
     } ProgramParameters;
 
     /**

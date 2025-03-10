@@ -40,6 +40,43 @@
 #include "environment.h"
 #include "mutator/lineMutator.h"
 
+
+void Mutator::LineMutator::changeConstantAt(Program::Line& line, uint64_t index, Mutator::RNG& rng){
+    // Sample the new value
+    double delta = rng.getDouble(
+        0.5, 1.5
+    );
+    if(delta > 1) delta = delta * 2 - 1;
+
+
+    double currentConstantValue = line.getConstantAt(index);
+
+    double newConstantValue = currentConstantValue * delta;
+
+    if(0.1 > rng.getDouble(0, 1)){
+        newConstantValue = -newConstantValue;
+    }
+    // Set it
+    line.getConstantHandler().setDataAt(
+        typeid(Data::Constant), index,
+        {newConstantValue});
+}
+
+void Mutator::LineMutator::initRandomConstants(Program::Line& line, Mutator::RNG& rng){
+    for(auto idx = 0; idx < line.getEnvironment().getInstructionSet().getMaxNbConstants(); idx++){
+        // Sample the new value
+
+        Mutator::ProgramParameters param = line.getEnvironment().getParams().mutation.prog;
+
+        double newConstantValue = rng.getDouble(param.minConstValue, param.maxConstValue);
+        // Set it
+        line.getConstantHandler().setDataAt(
+            typeid(Data::Constant), idx,
+            {newConstantValue});
+    }
+}
+
+
 /**
  * \brief Function to initialize a single operand of a Program::Line.
  *
@@ -157,6 +194,9 @@ void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line,
     line.setInstructionIndex(
         instructionIndex); // Should never throw.. but I did not deactivate the
                            // check anyway.
+
+    // Init the constants values
+    initRandomConstants(line, rng);
 
     // Select operands needed by the instruction
     uint64_t operandIdx = 0;

@@ -34,24 +34,25 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "data/constant.h"
+ #include "data/constant.h"
 
-Data::Constant::operator int32_t() const
-{
-    return this->value;
-}
-
-Data::Constant::operator double() const
-{
-    return (double)this->value;
-}
-
-bool Data::Constant::operator==(const Constant& other) const
-{
-    return this->value == other.value;
-}
-
-bool Data::Constant::operator!=(const Constant& other) const
-{
-    return this->value != other.value;
-}
+ Data::Constant::operator int32_t() const
+ {
+     return (int32_t)this->value;
+ }
+ 
+ Data::Constant::operator double() const
+ {
+     return this->value;
+ }
+ 
+ bool Data::Constant::operator==(const Constant& other) const
+ {
+     return this->value == other.value;
+ }
+ 
+ bool Data::Constant::operator!=(const Constant& other) const
+ {
+     return this->value != other.value;
+ }
+ 

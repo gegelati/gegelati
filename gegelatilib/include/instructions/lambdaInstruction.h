@@ -42,6 +42,7 @@
 #include <typeinfo>
 
 #include "data/untypedSharedPtr.h"
+#include "data/constant.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
@@ -216,6 +217,16 @@ namespace Instructions {
             this->operandTypes.push_back(typeid(First));
             // Fold expression to push all other types
             (this->operandTypes.push_back(typeid(Rest)), ...);
+            this->setUpOperandNoConst();
+        }
+        void setUpOperandNoConst()
+        {
+            for(auto op: this->operandTypes){
+                if(op.get() != typeid(Data::Constant)){
+                    this->operandTypesNoConst.push_back(op);    
+                }
+            }
+            
         }
     };
 }; // namespace Instructions

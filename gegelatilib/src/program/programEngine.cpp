@@ -121,25 +121,52 @@ const Instructions::Instruction& Program::ProgramEngine::getCurrentInstruction()
     // is too large.
 }
 
+
 const void Program::ProgramEngine::fetchCurrentOperands(
-    std::vector<Data::UntypedSharedPtr>& operands) const
+    std::vector<Data::UntypedSharedPtr>& operands) const 
 {
     const Line& line = this->getCurrentLine(); // throw std::out_of_range
     const Instructions::Instruction& instruction =
         this->getCurrentInstruction(); // throw std::out_of_range
 
+    uint64_t indexConst = 0;
+
+
     // Get as many operands as required by the instruction.
-    for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
-        const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
-            line.getOperand(i).first); // Throws std::out_of_range
-        const uint64_t operandLocation = getOperandLocation(i);
+    for (uint64_t i = 0; i < instruction.getNbOperandsWithConst(); i++) {
+
         const std::type_info& operandType =
-            instruction.getOperandTypes().at(i).get();
-        Data::UntypedSharedPtr data =
-            dataSource.getDataAt(operandType, operandLocation);
-        operands.push_back(data);
+            instruction.getOperandTypesWithConst().at(i).get();
+
+        if(operandType == typeid(Data::Constant)){
+
+            
+            //double constantValue = double(*line.cGetConstantHandler().getDataAt(
+            //        operandType, indexConst).getSharedPointer<Data::Constant>());
+
+            //lineConstants.setDataAt(typeid(Data::Constant), indexConst, Data::Constant{constantValue});
+
+            //Data::UntypedSharedPtr data =
+            //    lineConstants.getDataAt(operandType, indexConst);
+            
+            operands.push_back(line.cGetConstantHandler().getDataAt(
+                operandType, indexConst));
+            indexConst++;
+
+
+        } else {
+
+            const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
+                line.getOperand(i).first); // Throws std::out_of_range
+            const uint64_t operandLocation = getOperandLocation(i);
+            Data::UntypedSharedPtr data =
+                dataSource.getDataAt(operandType, operandLocation);
+            operands.push_back(data);
+        }
+
     }
 }
+
 
 uint64_t Program::ProgramEngine::getOperandLocation(uint64_t idxOp) const
 {
