@@ -55,7 +55,8 @@ void Mutator::ProgramMutator::initRandomProgram(
     }
 
     // Select the number of line randomly
-    const uint64_t nbLine = rng.getUnsignedInt64(1, params.prog.initProgramSize);
+    //const uint64_t nbLine = rng.getUnsignedInt64(1, params.prog.initProgramSize);
+    const uint64_t nbLine = params.prog.initProgramSize;
     // Insert them
     while (p.getNbLines() < nbLine) {
         insertRandomLine(p, rng);

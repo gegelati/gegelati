@@ -161,6 +161,11 @@ namespace Program {
         ~Program();
 
         /**
+         * \brief Add a new line to the Program at the end of the program.
+         */
+        void addNewLine(Line newLine);
+
+        /**
          * \brief Add a new line to the Program with only 0 bits.
          *
          * The new line is inserted at the end of the program.

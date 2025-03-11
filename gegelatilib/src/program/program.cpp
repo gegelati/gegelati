@@ -53,6 +53,16 @@ Program::Program::~Program()
     }
 }
 
+
+void Program::Program::addNewLine(Line newLine)
+{
+    //this->addNewLine(this->getNbLines());
+
+    Line* newLinePtr = new Line(newLine);
+    // new line is not marked as an intron by default
+    this->lines.push_back({newLinePtr, false});
+}
+
 Program::Line& Program::Program::addNewLine()
 {
     return this->addNewLine(this->getNbLines());

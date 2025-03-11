@@ -329,6 +329,23 @@ namespace Mutator {
             const Archive& archive);
 
         /**
+         * \brief do a crossover to create a new MAPLE agent
+         * 
+         * \param[in] graph current Graph
+         * \param[in] child new action
+         * \param[in] parent parents of the new action
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * 
+         */
+        void crossTPGAction(
+            TPG::TPGGraph& graph,
+            const TPG::TPGAction* child,
+            std::vector<const TPG::TPGAction*> parents,
+            const Mutator::MutationParameters& params,
+            Mutator::RNG& rng);
+
+        /**
          * \brief Create new root TPGTeam within the TPGGraph.
          *
          * This function create and add new root TPGTeam to the TPGGraph
