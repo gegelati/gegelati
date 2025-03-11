@@ -244,6 +244,16 @@ void File::ParametersParser::setParameterFromString(
         params.nbIterationsPerPolicyEvaluation = value.asUInt64();
         return;
     }
+    if (param == "nbIterationsPerPolicyValidation") {
+        params.nbIterationsPerPolicyValidation = value.asUInt64();
+        return;
+    }
+
+    if (param == "stepValidation") {
+        params.stepValidation = (size_t)value.asUInt();
+        return;
+    }
+
     if (param == "maxNbActionsPerEval") {
         params.maxNbActionsPerEval = value.asUInt64();
         return;
@@ -345,6 +355,14 @@ void File::ParametersParser::writeParametersToJson(
     root["nbIterationsPerPolicyEvaluation"].setComment(
         Learn::LearningParameters::nbIterationsPerPolicyEvaluationComment,
         Json::commentBefore);
+    root["nbIterationsPerPolicyValidation"] =
+        params.nbIterationsPerPolicyValidation;
+    root["nbIterationsPerPolicyValidation"].setComment(
+        Learn::LearningParameters::nbIterationsPerPolicyValidationComment,
+        Json::commentBefore);
+    root["stepValidation"] = params.stepValidation;
+    root["stepValidation"].setComment(
+        Learn::LearningParameters::stepValidationComment, Json::commentBefore);
 
     root["nbProgramConstant"] = params.nbProgramConstant;
     root["nbProgramConstant"].setComment(

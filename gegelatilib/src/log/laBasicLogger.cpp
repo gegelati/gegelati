@@ -136,9 +136,13 @@ void Log::LABasicLogger::logAfterValidate(
 {
     validTime = getDurationFrom(*checkpoint);
 
-    // being in this method means validation is active, and so we are sure we
-    // can log results
-    logResults(results);
+    if(results.size() > 0){
+        // being in this method means validation is active, and so we are sure we
+        // can log results
+        logResults(results);
+    } else {
+        *this << std::setw(3*colWidth) << " ";
+    }
 }
 
 void Log::LABasicLogger::logEndOfTraining()

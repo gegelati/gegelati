@@ -128,10 +128,11 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // Init results
     double result = 0.0;
 
+    // Number of evaluations
+    uint64_t nbEvaluation = (mode == LearningMode::TRAINING) ? this->params.nbIterationsPerPolicyEvaluation:this->params.nbIterationsPerPolicyValidation;
+
     // Evaluate nbIteration times
-    for (auto iterationNumber = 0;
-         iterationNumber < this->params.nbIterationsPerPolicyEvaluation;
-         iterationNumber++) {
+    for (auto iterationNumber = 0; iterationNumber < nbEvaluation; iterationNumber++) {
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
         uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
@@ -158,8 +159,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // Create the EvaluationResult
     auto evaluationResult =
         std::shared_ptr<EvaluationResult>(new EvaluationResult(
-            result / (double)params.nbIterationsPerPolicyEvaluation,
-            params.nbIterationsPerPolicyEvaluation));
+            result / (double)nbEvaluation,
+            nbEvaluation));
 
     // Combine it with previous one if any
     if (previousEval != nullptr) {
@@ -259,8 +260,11 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
-        auto validationResults =
-            evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> validationResults;
+
+        if(generationNumber % params.stepValidation == 0 || generationNumber == params.nbGenerations - 1){
+            validationResults = evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
+        }
         for (auto logger : loggers) {
             logger.get().logAfterValidate(validationResults);
         }

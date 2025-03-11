@@ -88,6 +88,17 @@ namespace Learn {
          */
         uint64_t nbIterationsPerPolicyEvaluation = 5;
 
+
+        /// JSon comment
+        inline static const std::string nbIterationsPerPolicyValidationComment =
+            "// Number of evaluation of each root per generation.\n"
+            "// \"nbIterationsPerPolicyValidation\" : 5, // Default value";
+        /**
+         * \brief Number of evaluation of each policy per generation for validation.
+         */
+        uint64_t nbIterationsPerPolicyValidation = 5;
+
+
         /// JSon comment
         inline static const std::string maxNbActionsPerEvalComment =
             "// Maximum number of actions performed on the learning "
@@ -206,6 +217,13 @@ namespace Learn {
         /// Boolean set to true if the user wants a validation after each
         /// training, and false otherwise
         bool doValidation = false;
+
+        /// JSon comment
+        inline static const std::string stepValidationComment =
+            "// Value to indicate how many generation between each validation step\n"
+            "// \"stepValidation\" : 1, // Default value";
+        /// Value to indicate how many generation between each validation step
+        uint64_t stepValidation = 1;
     } LearningParameters;
 }; // namespace Learn
 
