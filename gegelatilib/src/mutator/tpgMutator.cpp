@@ -784,12 +784,11 @@ void Mutator::TPGMutator::crossTPGAction(
     const Mutator::MutationParameters& params,
     Mutator::RNG& rng)
 {
-    double probaFullCrossover = 0.9;
     for(size_t actionID = 0; actionID < graph.getEnvironment().getNbContinuousActions(); actionID++){
 
         if(parents.at(0)->getAssessedActions().count(actionID) > 0 &&
            parents.at(1)->getAssessedActions().count(actionID) > 0 &&
-           probaFullCrossover > rng.getDouble(0, 1)){
+           params.tpg.probaCrossPrograms > rng.getDouble(0, 1)){
 
             std::shared_ptr<Program::Program> newProg =
                 std::make_shared<Program::Program>(graph.getEnvironment(), true);
@@ -924,9 +923,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     }
 
 
-    double crossoverProportion = 0.8;
     uint64_t nbRootsToCreate = params.tpg.nbRoots - rootVertices.size();
-    uint64_t nbRootsToCreateWithCrossover = nbRootsToCreate * crossoverProportion;
+    uint64_t nbRootsToCreateWithCrossover = nbRootsToCreate * params.tpg.proportionCrossAgents;
     uint64_t nbRootsToCreateWithMutation = nbRootsToCreate - nbRootsToCreateWithCrossover;
 
     // While the target is not reached, add new teams

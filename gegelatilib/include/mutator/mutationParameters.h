@@ -84,14 +84,6 @@ namespace Mutator {
         size_t maxInitOutgoingEdges = 3;
 
         /// JSon comment
-        inline static const std::string useMultiActionProgramComment =
-            "// Create multiple action program, instead of one outputting multiple action in a single program"
-            ".\n"
-            "// \"useMultiActionProgram\" : false, // Default value";
-        /// Create multiple action program, instead of one outputting multiple action in a single program
-        bool useMultiActionProgram = false;
-
-        /// JSon comment
         inline static const std::string pChangeActionClassComment =
             "//  Probablity of changing the action edge by any other action edge in the graph\n"
             "// \"pChangeActionClass\" : 0.1, // Default value";
@@ -207,6 +199,36 @@ namespace Mutator {
         /// continuous action(s)
         bool useActionProgram = false;
 
+        /// JSon comment
+        inline static const std::string useMultiActionProgramComment =
+            "// Create multiple action program, instead of one outputting multiple action in a single program"
+            ".\n"
+            "// \"useMultiActionProgram\" : false, // Default value";
+        /// Create multiple action program, instead of one outputting multiple action in a single program
+        bool useMultiActionProgram = false;
+
+        /// JSon comment
+        inline static const std::string proportionCrossAgentsComment =
+            "// Proportion of new agents created with crossover instead of mutation.\n"
+            "// \"proportionCrossAgents\" : 0.0, // Default value";
+        /// Proportion of new agents created with crossover instead of mutation.
+        double proportionCrossAgents = 0.0;
+
+        /// JSon comment
+        inline static const std::string probaCrossProgramsComment =
+            "// Proportion of new programs created threw crossover.\n"
+            "// \"probaCrossPrograms\" : 0.0, // Default value";
+        /// Proportion of new programs created threw crossover.
+        double probaCrossPrograms = 0.0;
+
+        /// JSon comment
+        inline static const std::string typeProgramCrossoverComment = 
+            "// Type of program crossovers done.\n"
+            "// \"typeProgramCrossover\" : \"onePoint\"";
+        /// Type of program crossovers done.
+        std::string typeProgramCrossover = "onePoint";
+
+
     } TPGParameters;
 
     /**
@@ -283,6 +305,9 @@ namespace Mutator {
             "// \"maxConstValue\" : 100, // Default value";
         /// Maximum constant value possible
         double maxConstValue = 1.0;
+
+
+
     } ProgramParameters;
 
     /**
