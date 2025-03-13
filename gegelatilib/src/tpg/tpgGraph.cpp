@@ -184,7 +184,7 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
             // edge.
             TPG::TPGActionEdge* actionEdge = dynamic_cast<TPGActionEdge*>(edge);
             this->addNewActionEdge(*newVertex,
-                                   actionEdge->getProgramSharedPointer(),
+                                    std::make_shared<Program::Program>(*actionEdge->getProgramSharedPointer()),
                                    actionEdge->getActionClass());
 
         }
@@ -338,11 +338,11 @@ const TPG::TPGEdge& TPG::TPGGraph::cloneEdge(const TPGEdge& edge)
         throw std::runtime_error(
             "Cannot duplicate an Edge not belonging to the graph.");
     }
-    else if (dynamic_cast<TPGActionEdge*>(iterEdge->get()) != nullptr) {
-        TPG::TPGActionEdge* actionEdge =
-            dynamic_cast<TPGActionEdge*>(iterEdge->get());
+    else if (dynamic_cast<const TPGActionEdge*>(iterEdge->get()) != nullptr) {
+        const TPG::TPGActionEdge* actionEdge =
+            dynamic_cast<const TPGActionEdge*>(iterEdge->get());
         return this->addNewActionEdge(*actionEdge->getSource(),
-                                      actionEdge->getProgramSharedPointer(),
+                                      std::make_shared<Program::Program>(*iterEdge->get()->getProgramSharedPointer()),
                                       actionEdge->getActionClass());
     }
     else {

@@ -182,7 +182,7 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
                 auto actionEdge = dynamic_cast<TPGActionEdge*>(edge);
 
                 // Evaluate the edge and set the action value
-                actionsTaken[actionEdge->getActionClass()] = this->evaluateEdge(*actionEdge);
+                actionsTaken[actionEdge->getActionClass()] = this->evaluateEdge(*edge);
             }
 
         }

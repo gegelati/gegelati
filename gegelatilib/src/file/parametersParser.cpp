@@ -209,8 +209,12 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.prog.maxProgramSize = (size_t)value.asUInt();
         return;
     }
-    if (param == "initProgramSize") {
-        params.mutation.prog.initProgramSize = (size_t)value.asUInt();
+    if (param == "initMinProgramSize") {
+        params.mutation.prog.initMinProgramSize = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "initMaxProgramSize") {
+        params.mutation.prog.initMaxProgramSize = (size_t)value.asUInt();
         return;
     }
     if (param == "pDelete") {
@@ -532,10 +536,15 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["prog"]["maxProgramSize"].setComment(
         Mutator::ProgramParameters::maxProgramSizeComment, Json::commentBefore);
 
-        root["mutation"]["prog"]["initProgramSize"] =
-        params.mutation.prog.initProgramSize;
-    root["mutation"]["prog"]["initProgramSize"].setComment(
-        Mutator::ProgramParameters::initProgramSizeComment, Json::commentBefore);
+    root["mutation"]["prog"]["initMinProgramSize"] =
+        params.mutation.prog.initMinProgramSize;
+    root["mutation"]["prog"]["initMinProgramSize"].setComment(
+        Mutator::ProgramParameters::initMinProgramSizeComment, Json::commentBefore);
+
+    root["mutation"]["prog"]["initMaxProgramSize"] =
+        params.mutation.prog.initMaxProgramSize;
+    root["mutation"]["prog"]["initMaxProgramSize"].setComment(
+        Mutator::ProgramParameters::initMaxProgramSizeComment, Json::commentBefore);
 
     root["mutation"]["prog"]["minConstValue"] =
         params.mutation.prog.minConstValue;

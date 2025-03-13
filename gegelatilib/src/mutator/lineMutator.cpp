@@ -195,6 +195,8 @@ void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line,
         instructionIndex); // Should never throw.. but I did not deactivate the
                            // check anyway.
 
+    // Get the number of constant in the instruction
+    line.setNbConstants(instruction.getNbConstants());
     // Init the constants values
     initRandomConstants(line, rng);
 
@@ -235,6 +237,11 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
         const Instructions::Instruction& instruction =
             line.getEnvironment().getInstructionSet().getInstruction(
                 newInstructionIndex);
+
+
+        // Get the number of constant in the instruction
+        line.setNbConstants(instruction.getNbConstants());
+
         for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
             const std::type_info& type =
                 instruction.getOperandTypes().at(i).get();

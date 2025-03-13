@@ -55,8 +55,7 @@ void Mutator::ProgramMutator::initRandomProgram(
     }
 
     // Select the number of line randomly
-    //const uint64_t nbLine = rng.getUnsignedInt64(1, params.prog.initProgramSize);
-    const uint64_t nbLine = params.prog.initProgramSize;
+    const uint64_t nbLine = rng.getUnsignedInt64(params.prog.initMinProgramSize, params.prog.initMaxProgramSize);
     // Insert them
     while (p.getNbLines() < nbLine) {
         insertRandomLine(p, rng);
@@ -158,8 +157,7 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
     }
 
     // mutate the programs constants if they exists
-    if (p.getEnvironment().getNbConstant() > 0 &&
-        rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation) {
+    if (rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation) {
         anyMutation = true;
         alterRandomConstant(p, params, rng);
     }
