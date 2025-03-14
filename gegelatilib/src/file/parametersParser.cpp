@@ -283,6 +283,15 @@ void File::ParametersParser::setParameterFromString(
         params.ratioDeletedRoots = value.asDouble();
         return;
     }
+    if (param == "useTournamentSelection") {
+        params.useTournamentSelection = value.asBool();
+        return;
+    }
+    if (param == "sizeTournament") {
+        params.sizeTournament = value.asUInt64();
+        return;
+    }
+
     if (param == "nbGenerations") {
         params.nbGenerations = value.asUInt64();
         return;
@@ -401,6 +410,15 @@ void File::ParametersParser::writeParametersToJson(
     root["ratioDeletedRoots"] = params.ratioDeletedRoots;
     root["ratioDeletedRoots"].setComment(
         Learn::LearningParameters::ratioDeletedRootsComment,
+        Json::commentBefore);
+
+    root["useTournamentSelection"] = params.useTournamentSelection;
+    root["useTournamentSelection"].setComment(
+        Learn::LearningParameters::useTournamentSelectionComment,
+        Json::commentBefore);
+    root["sizeTournament"] = params.sizeTournament;
+    root["sizeTournament"].setComment(
+        Learn::LearningParameters::sizeTournamentComment,
         Json::commentBefore);
 
     // Mutation.tpg parameters

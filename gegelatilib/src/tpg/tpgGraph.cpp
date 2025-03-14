@@ -497,3 +497,15 @@ void TPG::TPGGraph::orderActionEdges(const TPG::TPGAction* action)
             "Action to order not in the graph.");
     }
 }
+
+void TPG::TPGGraph::setToBeDeleted(const TPG::TPGVertex* vertex){
+    auto it = this->findVertex(vertex);
+
+    if (it != this->vertices.end()) {
+        // Found the vertex, modify it as needed
+        dynamic_cast<TPG::TPGAction*>(*it)->setToBeDeleted(true);
+    } else {
+        throw std::runtime_error(
+            "Action to order not in the graph.");
+    }
+}

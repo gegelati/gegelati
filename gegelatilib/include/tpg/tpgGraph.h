@@ -369,6 +369,13 @@ namespace TPG {
          */
         void orderActionEdges(const TPG::TPGAction* action);
 
+        /**
+         * Set the vertex to be deleted (during reproduction process)
+         * 
+         * \param[in] vertex to set to delete
+         */
+        void setToBeDeleted(const TPG::TPGVertex* vertex);
+
       protected:
         /// Environment of the TPGGraph
         const Environment& env;
@@ -408,6 +415,8 @@ namespace TPG {
          */
         std::list<std::unique_ptr<TPGEdge>>::iterator findEdge(
             const TPGEdge* edge);
+
+
 
     };
 }; // namespace TPG

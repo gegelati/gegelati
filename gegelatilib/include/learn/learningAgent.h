@@ -295,6 +295,23 @@ namespace Learn {
 
         /**
          * \brief Removes from the TPGGraph the root TPGVertex with the worst
+         * results with tournament selection.
+         *
+         * The given multimap is updated by removing entries corresponding to
+         * decimated vertices.
+         *
+         * The resultsPerRoot attribute is updated to remove results associated
+         * to removed vertices.
+         *
+         * \param[in,out] results a multimap containing root TPGVertex
+         * associated to their score during an evaluation.
+         */
+        virtual void decimateWithTournament(
+            std::multimap<std::shared_ptr<EvaluationResult>,
+                          const TPG::TPGVertex*>& results);
+
+        /**
+         * \brief Removes from the TPGGraph the root TPGVertex with the worst
          * results.
          *
          * The given multimap is updated by removing entries corresponding to

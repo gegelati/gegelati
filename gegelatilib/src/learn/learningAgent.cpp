@@ -275,10 +275,60 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
     }
 }
 
+void Learn::LearningAgent::decimateWithTournament(
+    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
+        results)
+{
+
+
+    // Create subMap of results with keeping the best agents.
+    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> subResults;
+    auto it = results.begin();
+    for (size_t i = 0; i < results.size() * params.ratioDeletedRoots && it != results.end(); ++i, ++it) {
+        subResults.insert(*it);
+    }
+
+    // Convert the subMap into a vector for easier manipulation
+    std::vector<std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>> elements(subResults.begin(), subResults.end());
+    for (size_t i = 0; i < subResults.size(); i += params.sizeTournament) {
+        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> subMap;
+        
+        // Fill subMap with a size corresponding to the hardness of the tournament.
+        for (size_t j = i; j < i + params.sizeTournament && j < subResults.size(); ++j) {
+
+            uint64_t index = rng.getUnsignedInt64(0, elements.size() - 1);
+
+            subMap.insert(elements[index]);
+
+            std::swap(elements[index], elements.back());
+            elements.pop_back();
+        }
+
+        // After the subMap is filled, erased the worse results from it, from the graph, and from the original results.
+        while(subMap.size() != 1){
+            tpg->removeVertex(*subMap.begin()->second);
+
+            subMap.erase(subMap.begin());
+
+            auto itRes = results.find(subMap.begin()->first);
+            if(itRes != results.end()) {
+                results.erase(itRes);
+            }
+        }
+
+        tpg->setToBeDeleted(subMap.begin()->second);
+    }
+}
+
 void Learn::LearningAgent::decimateWorstRoots(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
         results)
 {
+
+    if(params.useTournamentSelection){
+        return decimateWithTournament(results);
+    }
+
     // Some actions may be encountered but not removed while scanning the
     // results map they should be re-inserted to the list before leaving the
     // method.

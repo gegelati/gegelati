@@ -122,3 +122,11 @@ bool TPG::TPGVertex::hasSameAssessedActions(std::set<uint64_t> actions) const {
 
     return !intersectionResult.empty();
 }
+
+void TPG::TPGVertex::setToBeDeleted(bool status){
+    this->toBeDeleted = status;
+}
+
+bool TPG::TPGVertex::isToBeDeleted() const{
+    return this->toBeDeleted;
+}

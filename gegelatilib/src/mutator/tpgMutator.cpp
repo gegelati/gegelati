@@ -967,8 +967,17 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         rootUsed = rootVertices;
     }
 
+    if (graph.getEnvironment().getParams().useTournamentSelection) {
+        rootUsed.erase(
+            std::remove_if(rootUsed.begin(), rootUsed.end(),
+                           [](const TPG::TPGVertex* vertex) -> bool {
+                               return !vertex->isToBeDeleted();}),
+                               rootUsed.end());
+    }
 
-    uint64_t nbRootsToCreate = params.tpg.nbRoots - rootVertices.size();
+
+
+    uint64_t nbRootsToCreate = params.tpg.nbRoots - rootVertices.size() + rootUsed.size();
     uint64_t nbRootsToCreateWithCrossover = nbRootsToCreate * params.tpg.proportionCrossAgents;
     uint64_t nbRootsToCreateWithMutation = nbRootsToCreate - nbRootsToCreateWithCrossover;
 
@@ -999,25 +1008,42 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         nbRootsCreated++;
     }
 
+    std::vector<const TPG::TPGVertex*> rootUsedParents1 = rootUsed;
+    std::vector<const TPG::TPGVertex*> rootUsedParents2;
+    if(graph.getEnvironment().getParams().useTournamentSelection){
+        // Divide root used into two subVector with half of the roots, randomly selected.
+        for(size_t idx = 0; idx < rootUsed.size() / 2; idx++){
+            auto root = rootUsedParents1.at(rng.getUnsignedInt64(0, rootUsedParents1.size() - 1));
+    
+            rootUsedParents2.push_back(root);
+            std::swap(root, rootUsedParents1.back());
+            rootUsedParents1.pop_back();
+        }
+    } else {
+        rootUsedParents2 = rootUsed;
+    }
+
+
+
     nbRootsCreated = 0;
     while (nbRootsCreated < nbRootsToCreateWithCrossover) {
 
-
+        // Not really clean but efficient switching between tournament and not tournament selection
         // Select a random existing root
         uint64_t clonedRootIndex1 =
-            rng.getUnsignedInt64(0, rootUsed.size() - 1);
+            rng.getUnsignedInt64(0, rootUsedParents1.size() - 1);
         // Select a random existing root
         uint64_t clonedRootIndex2 =
-            rng.getUnsignedInt64(0, rootUsed.size() - 2);
+            rng.getUnsignedInt64(0, rootUsedParents2.size() - 2 + graph.getEnvironment().getParams().useTournamentSelection);
         
         // Be sure it is different
-        if(clonedRootIndex1 == clonedRootIndex2){
+        if(clonedRootIndex1 == clonedRootIndex2 && !graph.getEnvironment().getParams().useTournamentSelection){
             clonedRootIndex2++;
         }
 
         // Get parents and create childs
         std::vector<const TPG::TPGAction*> childs{&graph.addNewAction(0), &graph.addNewAction(0)};
-        std::vector<const TPG::TPGAction*> parents{(const TPG::TPGAction*)rootUsed.at(clonedRootIndex1), (const TPG::TPGAction*)rootUsed.at(clonedRootIndex2)};
+        std::vector<const TPG::TPGAction*> parents{(const TPG::TPGAction*)rootUsedParents1.at(clonedRootIndex1), (const TPG::TPGAction*)rootUsedParents2.at(clonedRootIndex2)};
         crossTPGAction(graph, childs, parents, params, rng);
 
         for(auto child: childs){
@@ -1031,6 +1057,10 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         // Check the new number of roots
         // Needed since preExisting root may be subsumed by new ones.
         nbRootsCreated += 2;
+    }
+
+    for(auto root: rootUsed){
+        graph.removeVertex(*root);
     }
 
     // Mutate the new Programs

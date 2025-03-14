@@ -118,6 +118,21 @@ namespace Learn {
         /// generation.
         double ratioDeletedRoots = 0.5;
 
+
+        /// JSon comment
+        inline static const std::string useTournamentSelectionComment =
+            "// If tournament of simple selection is used.\n"
+            "// \"useTournamentSelection\" : false, // Default value";
+        /// If tournament of simple selection is used.
+        bool useTournamentSelection = false;
+
+        /// JSon comment
+        inline static const std::string sizeTournamentComment =
+            "// Size of tournament if tournament selection is used.\n"
+            "// \"sizeTournament\" : 0.5, // Default value";
+        /// Size of tournament if tournament selection is used.
+        uint64_t sizeTournament = 0.5;
+
         /// JSon comment
         inline static const std::string nbGenerationsComment =
             "// Number of generations of the training.\n"

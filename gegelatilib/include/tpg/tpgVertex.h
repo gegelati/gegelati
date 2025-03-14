@@ -130,12 +130,27 @@ namespace TPG {
          */
         virtual bool hasSameAssessedActions(std::set<uint64_t> actions) const;
 
+        /**
+         * Set if the vertex should be deleted during evolution process. 
+         * 
+         * \param[in] status boolean to indicate if the vertex should be deleted.
+         */
+        virtual void setToBeDeleted(bool status);
+
+        /**
+         * Return if the vertex should be deleted during evolution process. 
+         */
+        virtual bool isToBeDeleted() const; 
+
       protected:
         /**
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          */
         TPGVertex(){};
+
+        /// True if the vertex should be deleted during evolution process
+        bool toBeDeleted = false;
 
         /**
          * \brief Set of incoming TPGEdge of the TPGVertex.
