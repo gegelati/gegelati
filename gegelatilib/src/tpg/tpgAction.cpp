@@ -61,3 +61,22 @@ void TPG::TPGAction::orderActionEdges(){
         return actionEdge1->getActionClass() < actionEdge2->getActionClass();
     });
 }
+
+std::shared_ptr<Program::Program> TPG::TPGAction::getProgramSharedPtr(uint64_t actionClass) const {
+
+    // Search the edge with the searched action class
+    auto it = std::find_if(
+        outgoingEdges.begin(), outgoingEdges.end(),
+        [actionClass](TPG::TPGEdge* edge) {
+            return static_cast<TPG::TPGActionEdge*>(edge)->getActionClass() == actionClass;
+        }
+    );
+
+    // If action founded, return the shared pointer, else return nullptr
+    if(it != outgoingEdges.end()){
+        return (*it)->getProgramSharedPointer();
+    } else {
+        return nullptr;
+    }
+
+}

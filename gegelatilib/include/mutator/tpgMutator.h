@@ -328,39 +328,21 @@ namespace Mutator {
             Mutator::RNG& rng, const Mutator::MutationParameters& params,
             const Archive& archive);
 
-        /**
-         * \brief do a crossover by creating a new program with a two-point crossover from the programs of the two parents.
-         * 
-         * \param[in] graph current Graph
-         * \param[in] child new action
-         * \param[in] actionID ID of the edges copied
-         * \param[in] parent parents of the new action
-         * \param[in] params Probability parameters for the mutation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         * 
-         */
-        void crossTwoPoint(
-            TPG::TPGGraph& graph,
-            const TPG::TPGAction* child,
-            size_t actionID,
-            std::vector<const TPG::TPGAction*> parents,
-            const Mutator::MutationParameters& params,
-            Mutator::RNG& rng);
 
         /**
-         * \brief do a crossover by creating a new program with a one-point crossover from the programs of the two parents.
+         * \brief do a crossover by creating a new program for each child, with a block from each parent.
          * 
          * \param[in] graph current Graph
-         * \param[in] child new action
+         * \param[in] childs new actions
          * \param[in] actionID ID of the edges copied
          * \param[in] parent parents of the new action
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * 
          */
-        void crossOnePoint(
+        void crossProgram(
             TPG::TPGGraph& graph,
-            const TPG::TPGAction* child,
+            std::vector<const TPG::TPGAction*> childs,
             size_t actionID,
             std::vector<const TPG::TPGAction*> parents,
             const Mutator::MutationParameters& params,
@@ -370,7 +352,7 @@ namespace Mutator {
          * \brief do a crossover on the edges, without creating new programs
          * 
          * \param[in] graph current Graph
-         * \param[in] child new action
+         * \param[in] childs new actions
          * \param[in] actionID ID of the edges copied
          * \param[in] parent parents of the new action
          * \param[in] params Probability parameters for the mutation.
@@ -379,7 +361,7 @@ namespace Mutator {
          */
         void crossEdges(
             TPG::TPGGraph& graph,
-            const TPG::TPGAction* child,
+            std::vector<const TPG::TPGAction*> childs,
             size_t actionID,
             std::vector<const TPG::TPGAction*> parents,
             const Mutator::MutationParameters& params,
@@ -389,7 +371,7 @@ namespace Mutator {
          * \brief do a crossover to create a new MAPLE agent
          * 
          * \param[in] graph current Graph
-         * \param[in] child new action
+         * \param[in] childs new actions
          * \param[in] parent parents of the new action
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
@@ -397,7 +379,7 @@ namespace Mutator {
          */
         void crossTPGAction(
             TPG::TPGGraph& graph,
-            const TPG::TPGAction* child,
+            std::vector<const TPG::TPGAction*> childs,
             std::vector<const TPG::TPGAction*> parents,
             const Mutator::MutationParameters& params,
             Mutator::RNG& rng);

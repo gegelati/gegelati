@@ -42,6 +42,7 @@
 #include <stdexcept>
 #include <thread>
 #include <vector>
+#include <array>
 
 #include "archive.h"
 
@@ -777,136 +778,99 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
     }
 }
 
-
-void Mutator::TPGMutator::crossTwoPoint(
+void Mutator::TPGMutator::crossProgram(
     TPG::TPGGraph& graph,
-    const TPG::TPGAction* child,
+    std::vector<const TPG::TPGAction*> childs,
     size_t actionID,
     std::vector<const TPG::TPGAction*> parents,
     const Mutator::MutationParameters& params,
     Mutator::RNG& rng)
 {
-    std::shared_ptr<Program::Program> newProg =
-    std::make_shared<Program::Program>(graph.getEnvironment(), true);
+    // Create new empty programs
+    std::array<std::shared_ptr<Program::Program>, 2> newProgs = {
+        std::make_shared<Program::Program>(graph.getEnvironment(), true),
+        std::make_shared<Program::Program>(graph.getEnvironment(), true)
+    };
 
-    // Search the program of the first parent
-    auto edges1 = parents.at(0)->getOutgoingEdges();
-    auto it1 = std::find_if(
-        edges1.begin(), edges1.end(),
-        [actionID](TPG::TPGEdge* edges1) {
-            return static_cast<TPG::TPGActionEdge*>(edges1)->getActionClass() == actionID;
-        }
-    );
-    auto program1 = (*it1)->getProgram();
+    // Get the programs of the parents, it should alreay be checked that program exist.
+    std::array<std::shared_ptr<Program::Program>, 2> parentProgs = {
+        parents.at(0)->getProgramSharedPtr(actionID),
+        parents.at(1)->getProgramSharedPtr(actionID)
+    };
 
-    // Search the program of the second parent
-    auto edges2 = parents.at(1)->getOutgoingEdges();
-    auto it2 = std::find_if(
-        edges2.begin(), edges2.end(),
-        [actionID](TPG::TPGEdge* edges2) {
-            return static_cast<TPG::TPGActionEdge*>(edges2)->getActionClass() == actionID;
-        }
-    );
-    auto program2 = (*it2)->getProgram();
+    std::array<uint64_t, 2> cutStart, cutEnd, sizeProgs;
 
-    if(program1.getNbLines() != program2.getNbLines()){
-        throw std::runtime_error("One point crossover require same number of lines between both parents");
-    }
+    // Select random index for the crossover
+    for (int i = 0; i < 2; i++) {
+        if (parentProgs[i]->getNbLines() < 2) return; // If a program has only one line, crossover cannot happen.
 
-    // Add each corresponding lines
-    size_t cut1 = rng.getUnsignedInt64(0, program1.getNbLines() - 2);
-    size_t cut2 = rng.getUnsignedInt64(cut1 + 1, program1.getNbLines() - 2);
-    for(size_t indexLine = 0; indexLine < program1.getNbLines(); indexLine++){
-        if(indexLine < cut1 || indexLine >  cut2){
-            newProg->addNewLine(program1.getLine(indexLine));
-        } else {
-            newProg->addNewLine(program2.getLine(indexLine));
+        cutStart[i] = rng.getUnsignedInt64(0, parentProgs[i]->getNbLines() - 1);
+        cutEnd[i] = rng.getUnsignedInt64(0, parentProgs[i]->getNbLines() - 2);
+        if (cutEnd[i] == cutStart[i]) {
+            cutEnd[i]++;
+        } else if (cutEnd[i] < cutStart[i]) {
+            std::swap(cutStart[i], cutEnd[i]);
         }
     }
 
-    // Add the new program
-    graph.addNewActionEdge(*child, newProg, actionID);
-}
-
-void Mutator::TPGMutator::crossOnePoint(
-    TPG::TPGGraph& graph,
-    const TPG::TPGAction* child,
-    size_t actionID,
-    std::vector<const TPG::TPGAction*> parents,
-    const Mutator::MutationParameters& params,
-    Mutator::RNG& rng)
-{
-    std::shared_ptr<Program::Program> newProg =
-    std::make_shared<Program::Program>(graph.getEnvironment(), true);
-
-    // Search the program of the first parent
-    auto edges1 = parents.at(0)->getOutgoingEdges();
-    auto it1 = std::find_if(
-        edges1.begin(), edges1.end(),
-        [actionID](TPG::TPGEdge* edges1) {
-            return static_cast<TPG::TPGActionEdge*>(edges1)->getActionClass() == actionID;
-        }
-    );
-    auto program1 = (*it1)->getProgram();
-
-    // Search the program of the second parent
-    auto edges2 = parents.at(1)->getOutgoingEdges();
-    auto it2 = std::find_if(
-        edges2.begin(), edges2.end(),
-        [actionID](TPG::TPGEdge* edges2) {
-            return static_cast<TPG::TPGActionEdge*>(edges2)->getActionClass() == actionID;
-        }
-    );
-    auto program2 = (*it2)->getProgram();
-
-    if(program1.getNbLines() != program2.getNbLines()){
-        throw std::runtime_error("One point crossover require same number of lines between both parents");
+    // Compute program size of the children
+    for (int i = 0; i < 2; i++) {
+        sizeProgs[i] = parentProgs[i]->getNbLines() - (cutEnd[i] - cutStart[i]) + (cutEnd[1 - i] - cutStart[1 - i]);
     }
 
-    // Add each corresponding lines
-    size_t cut = rng.getUnsignedInt64(0, program1.getNbLines() - 1);
-    for(size_t indexLine = 0; indexLine < program1.getNbLines(); indexLine++){
-        if(indexLine < cut){
-            newProg->addNewLine(program1.getLine(indexLine));
-        } else {
-            newProg->addNewLine(program2.getLine(indexLine));
+    // Create new programs with the cut
+    for (int childIdx = 0; childIdx < 2; childIdx++) {
+        auto& newProg = newProgs[childIdx];
+        auto& parent1 = parentProgs[childIdx];
+        auto& parent2 = parentProgs[1 - childIdx];
+        uint64_t start1 = cutStart[childIdx], end1 = cutEnd[childIdx];
+        uint64_t start2 = cutStart[1 - childIdx], end2 = cutEnd[1 - childIdx];
+
+        for (size_t idx = 0; idx < sizeProgs[childIdx]; idx++) {
+            if (idx < start1) {
+                newProg->addNewLine(parent1->getLine(idx));
+            } else if (idx >= start1 + (end2 - start2)) {
+                newProg->addNewLine(parent1->getLine(idx + (end1 - start1) - (end2 - start2)));
+            } else {
+                newProg->addNewLine(parent2->getLine(idx - start1 + start2));
+            }
         }
     }
 
-    // Add the new program
-    graph.addNewActionEdge(*child, newProg, actionID);
+    // Add the new programs to the child.
+    for (int i = 0; i < 2; i++) {
+        graph.addNewActionEdge(*childs.at(i), newProgs[i], actionID);
+    }
+
 }
 
 void Mutator::TPGMutator::crossEdges(
     TPG::TPGGraph& graph,
-    const TPG::TPGAction* child,
+    std::vector<const TPG::TPGAction*> childs,
     size_t actionID,
     std::vector<const TPG::TPGAction*> parents,
     const Mutator::MutationParameters& params,
     Mutator::RNG& rng)
 {
-    const TPG::TPGAction* parentUsed = parents.at(rng.getUnsignedInt64(0, parents.size() - 1));
-    auto edges = parentUsed->getOutgoingEdges();
+    uint64_t firstParentIndex = rng.getUnsignedInt64(0, 1);
+    std::vector<uint64_t> parentsIndex = {firstParentIndex, 1 - firstParentIndex};
 
-    // Search the edge
-    auto it = std::find_if(
-        edges.begin(), edges.end(),
-        [actionID](TPG::TPGEdge* edge) {
-            return static_cast<TPG::TPGActionEdge*>(edge)->getActionClass() == actionID;
+    for(size_t childIndex = 0; childIndex < 2; childIndex++){
+        
+        // get the program
+        std::shared_ptr<Program::Program> prog = parents.at(parentsIndex[childIndex])->getProgramSharedPtr(actionID);
+
+        // Only add the edge if the program is founded.
+        if(prog != nullptr){
+            graph.addNewActionEdge(*childs.at(0), prog, actionID);
         }
-    );
 
-    // Action founded, add it to the child
-    if(it != edges.end()){
-        graph.addNewActionEdge(
-            *child, (*it)->getProgramSharedPointer(), actionID
-        );
     }
 }
 
 void Mutator::TPGMutator::crossTPGAction(
     TPG::TPGGraph& graph,
-    const TPG::TPGAction* child,
+    std::vector<const TPG::TPGAction*> childs,
     std::vector<const TPG::TPGAction*> parents,
     const Mutator::MutationParameters& params,
     Mutator::RNG& rng)
@@ -917,11 +881,9 @@ void Mutator::TPGMutator::crossTPGAction(
         if(parents.at(0)->getAssessedActions().count(actionID) > 0 &&
            parents.at(1)->getAssessedActions().count(actionID) > 0 &&
            params.tpg.probaCrossPrograms > rng.getDouble(0, 1)){
-
-            if(params.tpg.typeProgramCrossover == "onePoint"){
-                crossOnePoint(graph, child, actionID, parents, params, rng);
-            } else if(params.tpg.typeProgramCrossover == "TwoPoint"){
-                crossTwoPoint(graph, child, actionID, parents, params, rng);
+            
+            if(params.tpg.typeProgramCrossover == "standard"){
+                crossProgram(graph, childs, actionID, parents, params, rng);
             } else {
                 throw std::runtime_error("params.mutation.tpg.typeProgramCrossover not found");
             }
@@ -929,7 +891,7 @@ void Mutator::TPGMutator::crossTPGAction(
 
 
         } else {
-            crossEdges(graph, child, actionID, parents, params, rng);
+            crossEdges(graph, childs, actionID, parents, params, rng);
         }
 
     }
@@ -1053,18 +1015,22 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
             clonedRootIndex2++;
         }
 
-        const TPG::TPGAction& newAction = graph.addNewAction(0);
-        crossTPGAction(graph, &newAction, {(const TPG::TPGAction*)rootUsed.at(clonedRootIndex1), (const TPG::TPGAction*)rootUsed.at(clonedRootIndex2)}, params, rng);
+        // Get parents and create childs
+        std::vector<const TPG::TPGAction*> childs{&graph.addNewAction(0), &graph.addNewAction(0)};
+        std::vector<const TPG::TPGAction*> parents{(const TPG::TPGAction*)rootUsed.at(clonedRootIndex1), (const TPG::TPGAction*)rootUsed.at(clonedRootIndex2)};
+        crossTPGAction(graph, childs, parents, params, rng);
 
-        if(newAction.getOutgoingEdges().size() == 0){
-            graph.removeVertex(newAction);
-            nbRootsCreated--;
+        for(auto child: childs){
+            if(child->getOutgoingEdges().size() == 0){
+                graph.removeVertex(*child);
+                nbRootsCreated--;
+            }
         }
 
 
         // Check the new number of roots
         // Needed since preExisting root may be subsumed by new ones.
-        nbRootsCreated++;
+        nbRootsCreated += 2;
     }
 
     // Mutate the new Programs

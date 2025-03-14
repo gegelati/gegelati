@@ -41,6 +41,7 @@
 #include <cstdint>
 
 #include "tpg/tpgVertex.h"
+#include "program/program.h"
 
 namespace TPG {
     /**
@@ -76,6 +77,14 @@ namespace TPG {
          * TPGEdge can be added to it.
          */
         virtual void addOutgoingEdge(TPGEdge* edge) override;
+
+
+        /**
+         * \brief Return the shared pointer corresponding to the action class
+         * 
+         * Return a shared_ptr pointing to the Program linked to the action class. The shared_ptr is set to nullptr if the action is not founded 
+         */
+        virtual std::shared_ptr<Program::Program> getProgramSharedPtr(uint64_t actionClass) const ;
 
         /**
          * \brief Get the action ID associated to the TPGAction.
