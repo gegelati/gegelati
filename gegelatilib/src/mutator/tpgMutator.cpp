@@ -967,7 +967,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         rootUsed = rootVertices;
     }
 
-    if (graph.getEnvironment().getParams().useTournamentSelection) {
+    bool useTournamentSelection = graph.getEnvironment().getParams().useTournamentSelection;
+    if (useTournamentSelection) {
         rootUsed.erase(
             std::remove_if(rootUsed.begin(), rootUsed.end(),
                            [](const TPG::TPGVertex* vertex) -> bool {
@@ -977,7 +978,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
 
 
-    uint64_t nbRootsToCreate = params.tpg.nbRoots - rootVertices.size() + rootUsed.size();
+    uint64_t nbRootsToCreate = params.tpg.nbRoots - rootVertices.size() + (rootUsed.size() * useTournamentSelection);
     uint64_t nbRootsToCreateWithCrossover = nbRootsToCreate * params.tpg.proportionCrossAgents;
     uint64_t nbRootsToCreateWithMutation = nbRootsToCreate - nbRootsToCreateWithCrossover;
 
@@ -1010,7 +1011,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
     std::vector<const TPG::TPGVertex*> rootUsedParents1 = rootUsed;
     std::vector<const TPG::TPGVertex*> rootUsedParents2;
-    if(graph.getEnvironment().getParams().useTournamentSelection){
+    if(useTournamentSelection){
         // Divide root used into two subVector with half of the roots, randomly selected.
         for(size_t idx = 0; idx < rootUsed.size() / 2; idx++){
             auto root = rootUsedParents1.at(rng.getUnsignedInt64(0, rootUsedParents1.size() - 1));
@@ -1034,10 +1035,10 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
             rng.getUnsignedInt64(0, rootUsedParents1.size() - 1);
         // Select a random existing root
         uint64_t clonedRootIndex2 =
-            rng.getUnsignedInt64(0, rootUsedParents2.size() - 2 + graph.getEnvironment().getParams().useTournamentSelection);
+            rng.getUnsignedInt64(0, rootUsedParents2.size() - 2 + useTournamentSelection);
         
         // Be sure it is different
-        if(clonedRootIndex1 == clonedRootIndex2 && !graph.getEnvironment().getParams().useTournamentSelection){
+        if(clonedRootIndex1 == clonedRootIndex2 && !useTournamentSelection){
             clonedRootIndex2++;
         }
 
@@ -1060,7 +1061,9 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     }
 
     for(auto root: rootUsed){
-        graph.removeVertex(*root);
+        if(root->isToBeDeleted()){
+            graph.removeVertex(*root);
+        }
     }
 
     // Mutate the new Programs
