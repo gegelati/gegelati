@@ -800,18 +800,35 @@ void Mutator::TPGMutator::crossProgram(
 
     std::array<uint64_t, 2> cutStart, cutEnd, sizeProgs;
 
-    // Select random index for the crossover
-    for (int i = 0; i < 2; i++) {
-        if (parentProgs[i]->getNbLines() < 2) return; // If a program has only one line, crossover cannot happen.
+    // if the sum of the parents program size is above the max size, the size of the cross lines is the same for both parents.
+    bool specialCase = parentProgs[0]->getNbLines() + parentProgs[1]->getNbLines() >= params.prog.maxProgramSize;
 
-        cutStart[i] = rng.getUnsignedInt64(0, parentProgs[i]->getNbLines() - 1);
-        cutEnd[i] = rng.getUnsignedInt64(0, parentProgs[i]->getNbLines() - 2);
+    // Select random index for the crossover, normal case
+    for (int i = 0; i < 2; i++) {
+
+        uint64_t nbLines = parentProgs[i]->getNbLines();
+        if(specialCase){
+            nbLines = std::min(parentProgs[0]->getNbLines(), parentProgs[1]->getNbLines());
+        }
+
+        if (nbLines < 2) return; // If a program has only one line, crossover cannot happen.
+
+        cutStart[i] = rng.getUnsignedInt64(0, nbLines - 1);
+        cutEnd[i] = rng.getUnsignedInt64(0, nbLines - 2);
         if (cutEnd[i] == cutStart[i]) {
             cutEnd[i]++;
         } else if (cutEnd[i] < cutStart[i]) {
             std::swap(cutStart[i], cutEnd[i]);
         }
+
+        if(specialCase){
+            cutStart[1] = cutStart[0];
+            cutEnd[1] = cutEnd[0];
+            break;
+        }
     }
+
+
 
     // Compute program size of the children
     for (int i = 0; i < 2; i++) {
@@ -969,6 +986,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
     bool useTournamentSelection = graph.getEnvironment().getParams().useTournamentSelection;
     if (useTournamentSelection) {
+        // The root not set to be deleted are not used during evolution
         rootUsed.erase(
             std::remove_if(rootUsed.begin(), rootUsed.end(),
                            [](const TPG::TPGVertex* vertex) -> bool {
