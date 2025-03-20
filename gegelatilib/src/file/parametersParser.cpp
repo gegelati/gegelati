@@ -188,8 +188,8 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
 
-    if (param == "proportionCrossAgents") {
-        params.mutation.tpg.proportionCrossAgents =
+    if (param == "probaCrossAgents") {
+        params.mutation.tpg.probaCrossAgents =
             (double)value.asDouble();
         return;
     }
@@ -524,10 +524,10 @@ void File::ParametersParser::writeParametersToJson(
         Json::commentBefore);
 
         
-    root["mutation"]["tpg"]["proportionCrossAgents"] =
-        params.mutation.tpg.proportionCrossAgents;
-    root["mutation"]["tpg"]["proportionCrossAgents"].setComment(
-        Mutator::TPGParameters::proportionCrossAgentsComment,
+    root["mutation"]["tpg"]["probaCrossAgents"] =
+        params.mutation.tpg.probaCrossAgents;
+    root["mutation"]["tpg"]["probaCrossAgents"].setComment(
+        Mutator::TPGParameters::probaCrossAgentsComment,
         Json::commentBefore);
 
     root["mutation"]["tpg"]["probaCrossPrograms"] =

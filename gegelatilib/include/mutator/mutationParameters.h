@@ -208,11 +208,11 @@ namespace Mutator {
         bool useMultiActionProgram = false;
 
         /// JSon comment
-        inline static const std::string proportionCrossAgentsComment =
+        inline static const std::string probaCrossAgentsComment =
             "// Proportion of new agents created with crossover instead of mutation.\n"
-            "// \"proportionCrossAgents\" : 0.0, // Default value";
+            "// \"probaCrossAgents\" : 0.0, // Default value";
         /// Proportion of new agents created with crossover instead of mutation.
-        double proportionCrossAgents = 0.0;
+        double probaCrossAgents = 0.0;
 
         /// JSon comment
         inline static const std::string probaCrossProgramsComment =

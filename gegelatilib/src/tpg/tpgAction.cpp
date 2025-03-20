@@ -35,7 +35,6 @@
  */
 
 #include "tpg/tpgAction.h"
-#include "tpg/tpgActionEdge.h"
 #include <stdexcept>
 
 void TPG::TPGAction::addOutgoingEdge(TPGEdge* edge)
@@ -62,7 +61,7 @@ void TPG::TPGAction::orderActionEdges(){
     });
 }
 
-std::shared_ptr<Program::Program> TPG::TPGAction::getProgramSharedPtr(uint64_t actionClass) const {
+TPG::TPGActionEdge* TPG::TPGAction::getEdgeOfAction(uint64_t actionClass) const {
 
     // Search the edge with the searched action class
     auto it = std::find_if(
@@ -74,7 +73,7 @@ std::shared_ptr<Program::Program> TPG::TPGAction::getProgramSharedPtr(uint64_t a
 
     // If action founded, return the shared pointer, else return nullptr
     if(it != outgoingEdges.end()){
-        return (*it)->getProgramSharedPointer();
+        return (TPG::TPGActionEdge*)(*it);
     } else {
         return nullptr;
     }

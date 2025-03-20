@@ -287,7 +287,6 @@ void Mutator::TPGMutator::addRandomActionEdge(
         pickableEdges.end()
     );
 
-    //std::cout<<pickableEdges.size()<<std::endl;
 
     if(pickableEdges.size() == 0){
         // Chances are really low but the pickableEdges can be empty
@@ -782,10 +781,10 @@ void Mutator::TPGMutator::crossProgram(
     TPG::TPGGraph& graph,
     std::vector<const TPG::TPGAction*> childs,
     size_t actionID,
-    std::vector<const TPG::TPGAction*> parents,
     const Mutator::MutationParameters& params,
     Mutator::RNG& rng)
 {
+
     // Create new empty programs
     std::array<std::shared_ptr<Program::Program>, 2> newProgs = {
         std::make_shared<Program::Program>(graph.getEnvironment(), true),
@@ -793,22 +792,22 @@ void Mutator::TPGMutator::crossProgram(
     };
 
     // Get the programs of the parents, it should alreay be checked that program exist.
-    std::array<std::shared_ptr<Program::Program>, 2> parentProgs = {
-        parents.at(0)->getProgramSharedPtr(actionID),
-        parents.at(1)->getProgramSharedPtr(actionID)
+    std::array<std::shared_ptr<Program::Program>, 2> originProgs = {
+        childs.at(0)->getEdgeOfAction(actionID)->getProgramSharedPointer(),
+        childs.at(1)->getEdgeOfAction(actionID)->getProgramSharedPointer()
     };
 
     std::array<uint64_t, 2> cutStart, cutEnd, sizeProgs;
 
     // if the sum of the parents program size is above the max size, the size of the cross lines is the same for both parents.
-    bool specialCase = parentProgs[0]->getNbLines() + parentProgs[1]->getNbLines() >= params.prog.maxProgramSize;
+    bool specialCase = originProgs[0]->getNbLines() + originProgs[1]->getNbLines() >= params.prog.maxProgramSize;
 
     // Select random index for the crossover, normal case
     for (int i = 0; i < 2; i++) {
 
-        uint64_t nbLines = parentProgs[i]->getNbLines();
+        uint64_t nbLines = originProgs[i]->getNbLines();
         if(specialCase){
-            nbLines = std::min(parentProgs[0]->getNbLines(), parentProgs[1]->getNbLines());
+            nbLines = std::min(originProgs[0]->getNbLines(), originProgs[1]->getNbLines());
         }
 
         if (nbLines < 2) return; // If a program has only one line, crossover cannot happen.
@@ -832,14 +831,14 @@ void Mutator::TPGMutator::crossProgram(
 
     // Compute program size of the children
     for (int i = 0; i < 2; i++) {
-        sizeProgs[i] = parentProgs[i]->getNbLines() - (cutEnd[i] - cutStart[i]) + (cutEnd[1 - i] - cutStart[1 - i]);
+        sizeProgs[i] = originProgs[i]->getNbLines() - (cutEnd[i] - cutStart[i]) + (cutEnd[1 - i] - cutStart[1 - i]);
     }
 
     // Create new programs with the cut
     for (int childIdx = 0; childIdx < 2; childIdx++) {
         auto& newProg = newProgs[childIdx];
-        auto& parent1 = parentProgs[childIdx];
-        auto& parent2 = parentProgs[1 - childIdx];
+        auto& parent1 = originProgs[childIdx];
+        auto& parent2 = originProgs[1 - childIdx];
         uint64_t start1 = cutStart[childIdx], end1 = cutEnd[childIdx];
         uint64_t start2 = cutStart[1 - childIdx], end2 = cutEnd[1 - childIdx];
 
@@ -857,6 +856,7 @@ void Mutator::TPGMutator::crossProgram(
     // Add the new programs to the child.
     for (int i = 0; i < 2; i++) {
         graph.addNewActionEdge(*childs.at(i), newProgs[i], actionID);
+        graph.removeActionEdge(*childs.at(i)->getEdgeOfAction(actionID));
     }
 
 }
@@ -865,42 +865,57 @@ void Mutator::TPGMutator::crossEdges(
     TPG::TPGGraph& graph,
     std::vector<const TPG::TPGAction*> childs,
     size_t actionID,
-    std::vector<const TPG::TPGAction*> parents,
     const Mutator::MutationParameters& params,
     Mutator::RNG& rng)
 {
-    uint64_t firstParentIndex = rng.getUnsignedInt64(0, 1);
-    std::vector<uint64_t> parentsIndex = {firstParentIndex, 1 - firstParentIndex};
 
-    for(size_t childIndex = 0; childIndex < 2; childIndex++){
-        
-        // get the program
-        std::shared_ptr<Program::Program> prog = parents.at(parentsIndex[childIndex])->getProgramSharedPtr(actionID);
 
-        // Only add the edge if the program is founded.
-        if(prog != nullptr){
-            graph.addNewActionEdge(*childs.at(0), prog, actionID);
-        }
+    // get the edges
+    TPG::TPGActionEdge* edge1 = childs.at(0)->getEdgeOfAction(actionID);
+    TPG::TPGActionEdge* edge2 = childs.at(1)->getEdgeOfAction(actionID);
 
+    // Only add the edge if the action is founded.
+    if(edge1 != nullptr){
+        graph.addNewActionEdge(*childs.at(1), edge1->getProgramSharedPointer(), actionID);
+        graph.removeActionEdge(*edge1);
+    }
+    
+    // Only add the edge if the action is founded.
+    if(edge2 != nullptr){
+        graph.addNewActionEdge(*childs.at(0), edge2->getProgramSharedPointer(), actionID);
+        graph.removeActionEdge(*edge2);
     }
 }
 
 void Mutator::TPGMutator::crossTPGAction(
     TPG::TPGGraph& graph,
     std::vector<const TPG::TPGAction*> childs,
-    std::vector<const TPG::TPGAction*> parents,
     const Mutator::MutationParameters& params,
     Mutator::RNG& rng)
 {
-    for(size_t actionID = 0; actionID < graph.getEnvironment().getNbContinuousActions(); actionID++){
+
+    std::vector<uint64_t> indexUsed;
+    uint64_t indexAction;
+    
+    // Always do at least one crossover, except is the proba is at zero (mearning we don't want any crossover)
+    double proba = (params.tpg.probaCrossAgents != 0) ? 1: 0;
+    while(indexUsed.size() < graph.getEnvironment().getNbContinuousActions()  && proba > rng.getDouble(0.0, 1.0)){
+
+
+        // Select the action ID
+        do {
+            indexAction = rng.getUnsignedInt64(0, graph.getEnvironment().getNbContinuousActions()-1);
+        } while(std::find(indexUsed.begin(), indexUsed.end(), indexAction) != indexUsed.end()) ;
+
+        indexUsed.push_back(indexAction);
 
         // A crossover at program level can be done only the both parents assessed the action concerned
-        if(parents.at(0)->getAssessedActions().count(actionID) > 0 &&
-           parents.at(1)->getAssessedActions().count(actionID) > 0 &&
-           params.tpg.probaCrossPrograms > rng.getDouble(0, 1)){
+        if(childs.at(0)->getAssessedActions().count(indexAction) > 0 &&
+        childs.at(1)->getAssessedActions().count(indexAction) > 0 &&
+        params.tpg.probaCrossPrograms > rng.getDouble(0, 1)){
             
             if(params.tpg.typeProgramCrossover == "standard"){
-                crossProgram(graph, childs, actionID, parents, params, rng);
+                crossProgram(graph, childs, indexAction, params, rng);
             } else {
                 throw std::runtime_error("params.mutation.tpg.typeProgramCrossover not found");
             }
@@ -908,10 +923,16 @@ void Mutator::TPGMutator::crossTPGAction(
 
 
         } else {
-            crossEdges(graph, childs, actionID, parents, params, rng);
+            crossEdges(graph, childs, indexAction, params, rng);
         }
-
+        proba *= params.tpg.probaCrossAgents;
     }
+
+    for(auto child: childs){
+        graph.updateAssessedActions(child);
+    }
+
+
 }
 
 void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
@@ -946,7 +967,6 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                       [&rootTeams](const TPG::TPGVertex* vertex) {
                           rootTeams.push_back((const TPG::TPGTeam*)vertex);
                       });
-        std::cout<<"Root team size 0, might be an issue here"<<std::endl;
     }
 
     // Pre compute liste of available TPGTeam and TPGActions
@@ -997,35 +1017,6 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
 
     uint64_t nbRootsToCreate = params.tpg.nbRoots - rootVertices.size() + (rootUsed.size() * useTournamentSelection);
-    uint64_t nbRootsToCreateWithCrossover = nbRootsToCreate * params.tpg.proportionCrossAgents;
-    uint64_t nbRootsToCreateWithMutation = nbRootsToCreate - nbRootsToCreateWithCrossover;
-
-    // While the target is not reached, add new teams
-    uint64_t nbRootsCreated = 0;
-    while (nbRootsCreated < nbRootsToCreateWithMutation) {
-        // Select a random existing root
-        uint64_t clonedRootIndex =
-            rng.getUnsignedInt64(0, rootUsed.size() - 1);
-        // clone it (the vertex and all its outgoing edges)
-        const TPG::TPGVertex& newRoot =
-            (const TPG::TPGVertex&)graph.cloneVertex(
-                *rootUsed.at(clonedRootIndex));
-
-        // Apply mutations to the root
-        if (dynamic_cast<const TPG::TPGTeam*>(&newRoot) != nullptr) {
-            mutateTPGTeam(graph, archive, (const TPG::TPGTeam&)newRoot,
-                          preExistingTeams, preExistingActions,
-                          preExistingEdges, newPrograms, params, rng);
-        }
-        else {
-            mutateTPGAction(graph, (const TPG::TPGAction&)newRoot, preExistingActions, preExistingEdges, newPrograms,
-                            params, rng);
-        }
-
-        // Check the new number of roots
-        // Needed since preExisting root may be subsumed by new ones.
-        nbRootsCreated++;
-    }
 
     std::vector<const TPG::TPGVertex*> rootUsedParents1 = rootUsed;
     std::vector<const TPG::TPGVertex*> rootUsedParents2;
@@ -1044,8 +1035,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
 
 
-    nbRootsCreated = 0;
-    while (nbRootsCreated < nbRootsToCreateWithCrossover) {
+    uint64_t nbRootsCreated = 0;
+    while (nbRootsCreated < nbRootsToCreate) {
 
         // Not really clean but efficient switching between tournament and not tournament selection
         // Select a random existing root
@@ -1060,15 +1051,23 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
             clonedRootIndex2++;
         }
 
-        // Get parents and create childs
-        std::vector<const TPG::TPGAction*> childs{&graph.addNewAction(0), &graph.addNewAction(0)};
-        std::vector<const TPG::TPGAction*> parents{(const TPG::TPGAction*)rootUsedParents1.at(clonedRootIndex1), (const TPG::TPGAction*)rootUsedParents2.at(clonedRootIndex2)};
-        crossTPGAction(graph, childs, parents, params, rng);
+        const TPG::TPGAction* child1 = (const TPG::TPGAction*)(&graph.cloneVertex(*rootUsedParents1.at(clonedRootIndex1)));
+        const TPG::TPGAction* child2 = (const TPG::TPGAction*)(&graph.cloneVertex(*rootUsedParents2.at(clonedRootIndex2)));
 
+        // Get parents and create childs
+        std::vector<const TPG::TPGAction*> childs{child1, child2};
+
+        // Do the crossover over the childs
+        crossTPGAction(graph, childs, params, rng);
+
+        // Do the mutation over the childs
         for(auto child: childs){
             if(child->getOutgoingEdges().size() == 0){
                 graph.removeVertex(*child);
                 nbRootsCreated--;
+            } else {
+                mutateTPGAction(graph, *child, preExistingActions, preExistingEdges, newPrograms,
+                                params, rng);
             }
         }
 

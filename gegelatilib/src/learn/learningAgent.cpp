@@ -280,43 +280,49 @@ void Learn::LearningAgent::decimateWithTournament(
         results)
 {
 
+    size_t nbAgentsInTournament = results.size() - (params.mutation.tpg.nbRoots * (1-params.ratioDeletedRoots));
 
-    // Create subMap of results with keeping the best agents.
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> subResults;
+    // Create subVector of results without the best agents.
+    std::vector<std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>> elements;
     auto it = results.begin();
-    for (size_t i = 0; i < results.size() * params.ratioDeletedRoots && it != results.end(); ++i, ++it) {
-        subResults.insert(*it);
+    for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
+        elements.push_back(*it++);
     }
 
-    // Convert the subMap into a vector for easier manipulation
-    std::vector<std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>> elements(subResults.begin(), subResults.end());
-    for (size_t i = 0; i < subResults.size(); i += params.sizeTournament) {
+    for (size_t i = 0; i < nbAgentsInTournament; i += params.sizeTournament) {
         std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> subMap;
         
         // Fill subMap with a size corresponding to the hardness of the tournament.
-        for (size_t j = i; j < i + params.sizeTournament && j < subResults.size(); ++j) {
+        for (size_t j = i; j < i + params.sizeTournament && j < nbAgentsInTournament; ++j) {
 
             uint64_t index = rng.getUnsignedInt64(0, elements.size() - 1);
 
             subMap.insert(elements[index]);
 
-            std::swap(elements[index], elements.back());
-            elements.pop_back();
+            elements.erase(elements.begin() + index);
         }
 
         // After the subMap is filled, erased the worse results from it, from the graph, and from the original results.
         while(subMap.size() != 1){
             tpg->removeVertex(*subMap.begin()->second);
 
-            subMap.erase(subMap.begin());
 
             auto itRes = results.find(subMap.begin()->first);
-            if(itRes != results.end()) {
-                results.erase(itRes);
-            }
-        }
+            auto range = results.equal_range(subMap.begin()->first);
 
+            subMap.erase(subMap.begin());
+            
+        }
+        
         tpg->setToBeDeleted(subMap.begin()->second);
+    }
+
+    // Delete from results and resultsPerRoot
+    auto itDel = results.begin();
+    for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
+        this->resultsPerRoot.erase(itDel->second);
+        results.erase(itDel++);
+        
     }
 }
 

@@ -41,6 +41,7 @@
 #include <cstdint>
 
 #include "tpg/tpgVertex.h"
+#include "tpg/tpgActionEdge.h"
 #include "program/program.h"
 
 namespace TPG {
@@ -80,11 +81,11 @@ namespace TPG {
 
 
         /**
-         * \brief Return the shared pointer corresponding to the action class
+         * \brief Return the action edge corresponding to the action class
          * 
-         * Return a shared_ptr pointing to the Program linked to the action class. The shared_ptr is set to nullptr if the action is not founded 
+         * Return a pointer pointing to the edge linked to the action class. The pointer is set to nullptr if the action is not founded 
          */
-        virtual std::shared_ptr<Program::Program> getProgramSharedPtr(uint64_t actionClass) const ;
+        virtual TPG::TPGActionEdge* getEdgeOfAction(uint64_t actionClass) const ;
 
         /**
          * \brief Get the action ID associated to the TPGAction.

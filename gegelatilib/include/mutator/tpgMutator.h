@@ -335,7 +335,6 @@ namespace Mutator {
          * \param[in] graph current Graph
          * \param[in] childs new actions
          * \param[in] actionID ID of the edges copied
-         * \param[in] parent parents of the new action
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * 
@@ -344,7 +343,6 @@ namespace Mutator {
             TPG::TPGGraph& graph,
             std::vector<const TPG::TPGAction*> childs,
             size_t actionID,
-            std::vector<const TPG::TPGAction*> parents,
             const Mutator::MutationParameters& params,
             Mutator::RNG& rng);
 
@@ -354,7 +352,6 @@ namespace Mutator {
          * \param[in] graph current Graph
          * \param[in] childs new actions
          * \param[in] actionID ID of the edges copied
-         * \param[in] parent parents of the new action
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * 
@@ -363,7 +360,6 @@ namespace Mutator {
             TPG::TPGGraph& graph,
             std::vector<const TPG::TPGAction*> childs,
             size_t actionID,
-            std::vector<const TPG::TPGAction*> parents,
             const Mutator::MutationParameters& params,
             Mutator::RNG& rng);
 
@@ -372,7 +368,6 @@ namespace Mutator {
          * 
          * \param[in] graph current Graph
          * \param[in] childs new actions
-         * \param[in] parent parents of the new action
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * 
@@ -380,7 +375,6 @@ namespace Mutator {
         void crossTPGAction(
             TPG::TPGGraph& graph,
             std::vector<const TPG::TPGAction*> childs,
-            std::vector<const TPG::TPGAction*> parents,
             const Mutator::MutationParameters& params,
             Mutator::RNG& rng);
 
