@@ -857,6 +857,7 @@ void Mutator::TPGMutator::crossProgram(
     for (int i = 0; i < 2; i++) {
         graph.addNewActionEdge(*childs.at(i), newProgs[i], actionID);
         graph.removeActionEdge(*childs.at(i)->getEdgeOfAction(actionID));
+        newProgs[i]->identifyIntrons();
     }
 
 }
