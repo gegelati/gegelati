@@ -49,7 +49,12 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     if (findProgramID(p, progID)) {
         progGenerationEngine.generateProgram(progID);
     }
-    fileMain << "P" << progID << "()";
+
+    if(this->tpg.getEnvironment().getNbContinuousActions() > 0 && p.isActionProgram()){
+        fileMain << "P" << progID << "(actions)";
+    } else {
+        fileMain << "P" << progID << "()";
+    }
 }
 
 void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
@@ -131,12 +136,12 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
 
     // generate inference function
     if(this->tpg.getEnvironment().getNbContinuousActions() > 0){
-        fileMain << "double* "; 
+        fileMain << "void "; 
     } else {
         fileMain << "int "; 
     }
 
-    fileMain << "inferenceTPG() {\n";
+    fileMain << "inferenceTPG(double* actions) {\n"<<std::endl;
 
     // start graph on root
     fileMain << "\tenum vertices currentVertex = "
@@ -193,12 +198,12 @@ void CodeGen::TPGSwitchGenerationEngine::initHeaderFile()
     fileMainH << "#include <stdlib.h>\n\n";
 
     if(this->tpg.getEnvironment().getNbContinuousActions() > 0){
-        fileMainH << "double* "; 
+        fileMainH << "void "; 
     } else {
         fileMainH << "int "; 
     }
 
-    fileMainH << "inferenceTPG();\n";
+    fileMainH << "inferenceTPG(double* actions);\n"<<std::endl;
 }
 
 void CodeGen::TPGSwitchGenerationEngine::initActivationFunction()
