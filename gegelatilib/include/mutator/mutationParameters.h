@@ -228,6 +228,36 @@ namespace Mutator {
         /// Type of program crossovers done.
         std::string typeProgramCrossover = "onePoint";
 
+        /// JSon comment
+        inline static const std::string modeCrossoverComment =
+            "// Mode of crossover, can be either classic, onlyOne or genLinked"
+            ".\n"
+            "// \"modeCrossoverComment\" : \"classic\", // Default value";
+        /// Mode of crossover, can be either classic, onlyOne or genLinked
+        std::string  modeCrossover = "classic";
+
+        /// JSon comment
+        inline static const std::string probaCrossOverMutComment =
+            "// probability of new agents created with crossover instead of mutation (in onlyOne mode).\n"
+            "// \"probaCrossOverMut\" : 0.0, // Default value";
+        /// probability of new agents created with crossover instead of mutation (in onlyOne mode).
+        double probaCrossOverMut = 0.0;
+
+        
+        /// JSon comment
+        inline static const std::string genCrossComment =
+            "// Number of consecuitive generations with only crossover (in genLinked mode).\n"
+            "// \"genCross\" : 5, // Default value";
+        /// Number of consecuitive generations with only crossover (in genLinked mode).
+        size_t genCross = 5;
+        /// JSon comment
+
+        inline static const std::string genMutComment =
+            "// Number of consecuitive generations with only mutations (in genLinked mode).\n"
+            "// \"genMut\" : 5, // Default value";
+        /// Number of consecuitive generations with only mutations (in genLinked mode).
+        size_t genMut = 5;
+
 
     } TPGParameters;
 

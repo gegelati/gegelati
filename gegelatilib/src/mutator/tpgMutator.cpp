@@ -939,7 +939,7 @@ void Mutator::TPGMutator::crossTPGAction(
 void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                                       const Archive& archive,
                                       const Mutator::MutationParameters& params,
-                                      Mutator::RNG& rng, uint64_t nbActions,
+                                      Mutator::RNG& rng, uint64_t nbGenerations,
                                       uint64_t maxNbThreads)
 {
     // Get current vertex set (copy)
@@ -960,7 +960,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
     if (rootTeams.size() == 0 && !params.tpg.useActionProgram) {
-        initRandomTPG(graph, params, rng, nbActions);
+        initRandomTPG(graph, params, rng, nbGenerations);
         vertices = graph.getVertices();
         rootVertices = graph.getRootVertices();
         rootTeams.clear();
@@ -1058,19 +1058,65 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         // Get parents and create childs
         std::vector<const TPG::TPGAction*> childs{child1, child2};
 
-        // Do the crossover over the childs
-        crossTPGAction(graph, childs, params, rng);
+        if(params.tpg.modeCrossover == "classic"){
+            
+            // Do the crossover over the childs
+            crossTPGAction(graph, childs, params, rng);
 
-        // Do the mutation over the childs
-        for(auto child: childs){
-            if(child->getOutgoingEdges().size() == 0){
-                graph.removeVertex(*child);
-                nbRootsCreated--;
-            } else {
-                mutateTPGAction(graph, *child, preExistingActions, preExistingEdges, newPrograms,
-                                params, rng);
+            // Do the mutation over the childs
+            for(auto child: childs){
+                if(child->getOutgoingEdges().size() == 0){
+                    graph.removeVertex(*child);
+                    nbRootsCreated--;
+                } else {
+                    mutateTPGAction(graph, *child, preExistingActions, preExistingEdges, newPrograms,
+                                    params, rng);
+                }
             }
         }
+        // Do the crossover over the childs
+        else if(params.tpg.modeCrossover == "onlyOne"){
+            bool doCrossover = params.tpg.probaCrossOverMut > rng.getDouble(0.0, 1.0);
+            if(doCrossover){
+                crossTPGAction(graph, childs, params, rng);
+            }
+    
+            // Do the mutation over the childs
+            for(auto child: childs){
+                if(child->getOutgoingEdges().size() == 0){
+                    graph.removeVertex(*child);
+                    nbRootsCreated--;
+                } else if(!doCrossover){
+                    mutateTPGAction(graph, *child, preExistingActions, preExistingEdges, newPrograms,
+                                    params, rng);
+                }
+            }
+        } else if(params.tpg.modeCrossover == "genLinked"){
+
+            uint64_t indexMutOrCross = nbGenerations % (params.tpg.genCross + params.tpg.genMut);
+            if(indexMutOrCross < params.tpg.genCross){
+                crossTPGAction(graph, childs, params, rng);
+                
+                for(auto child: childs){
+                    if(child->getOutgoingEdges().size() == 0){
+                        graph.removeVertex(*child);
+                        nbRootsCreated--;
+                    }
+                }
+            } else {
+            // Do the mutation over the childs
+            for(auto child: childs){
+                mutateTPGAction(graph, *child, preExistingActions, preExistingEdges, newPrograms,
+                                params, rng);
+
+                }
+            }
+
+
+        } else {
+            throw std::runtime_error("Mode crossover not founded");
+        }
+
 
 
         // Check the new number of roots

@@ -234,7 +234,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(
         *this->tpg, this->archive, this->params.mutation, this->rng,
-        this->learningEnvironment.getNbActions(), maxNbThreads);
+        generationNumber, maxNbThreads);
     for (auto logger : loggers) {
         logger.get().logAfterPopulateTPG();
     }
