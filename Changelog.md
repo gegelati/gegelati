@@ -1,5 +1,16 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_yyyy.mm.dd_
+
+### New features
+
+### Changes
+* Update CMake minimum version to avoid annoying warning or deprecation errors with latest versions.
+
+### Bug fix
+
+
 ## Release version 1.4.0 - Erbaba Cedrina flavor
 _2024.10.29_
 
