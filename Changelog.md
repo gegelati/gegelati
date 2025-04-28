@@ -7,6 +7,7 @@ _yyyy.mm.dd_
 
 ### Changes
 * Update CMake minimum version to avoid annoying warning or deprecation errors with latest versions.
+* During coverage test with gcovr, ignore negative hits following [gcovr issue 68080](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68080).
 
 ### Bug fix
 
