@@ -1,5 +1,5 @@
 # Minimum version for CXX17 support.
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8...4.0)
 
 # This CMakeLists was freely adapted by Karol Desnos from
 # https://github.com/robotology/how-to-export-cpp-library

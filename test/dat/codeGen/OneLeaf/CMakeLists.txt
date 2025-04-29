@@ -1,5 +1,5 @@
 #doc in ../README.md
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8...4.0)
 set(PROJECT_NAME CodeGen_GEGELATI)
 
 project(${PROJECT_NAME} LANGUAGES C)
