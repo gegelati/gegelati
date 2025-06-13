@@ -78,7 +78,7 @@ void Mutator::TPGMutator::initRandomTPG(
 
     }
     else if (graph.getEnvironment().getNbRegisters() <
-             nbActions + (int)!params.tpg.useActionProgram) {
+             nbActions + (int)!params.tpg.useActionProgram && !params.tpg.useMultiActionProgram) {
         throw std::runtime_error(
             "The number of registers is below the number of values outputted.");
     }

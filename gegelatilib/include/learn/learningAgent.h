@@ -363,7 +363,7 @@ namespace Learn {
          *
          * \param[in] results Map from the evaluateAllRoots method.
          */
-        void updateEvaluationRecords(
+        virtual void updateEvaluationRecords(
             const std::multimap<std::shared_ptr<EvaluationResult>,
                                 const TPG::TPGVertex*>& results);
 
