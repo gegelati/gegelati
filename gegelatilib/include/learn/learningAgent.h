@@ -137,16 +137,7 @@ namespace Learn {
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
               tpg(factory.createTPGGraph(env)), params{p},
               archive(p.archiveSize, p.archivingProbability)
-        {
-
-            // override the number of initial roots if set to 0 without action program
-            if (this->params.mutation.tpg.initNbTeams == 0 && !this->params.mutation.tpg.useActionProgram) {
-                size_t nbActions = this->learningEnvironment.isDiscrete() ? (size_t)this->learningEnvironment.getNbActions() : params.mutation.tpg.initNbActions;
-                this->params.mutation.tpg.initNbTeams = std::max(
-                    (size_t)floor((1 - this->params.ratioDeletedRoots) *
-                                  (double)params.mutation.tpg.nbRoots), nbActions);
-            }
-        };
+        { };
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -302,6 +293,9 @@ namespace Learn {
          *
          * The resultsPerRoot attribute is updated to remove results associated
          * to removed vertices.
+         * 
+         * The tournament selection is not secured when the ratioTeamOverAction is between 0 and 1
+         * It can be used, but it could happen that one "population" take over the other one
          *
          * \param[in,out] results a multimap containing root TPGVertex
          * associated to their score during an evaluation.

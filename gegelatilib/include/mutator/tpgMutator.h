@@ -45,6 +45,19 @@
 
 namespace Mutator {
     namespace TPGMutator {
+
+        /**
+         * \brief Initialize a random TPGAction Vertex
+         *
+         * \param[in,out] graph the initialized TPGGraph.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        const TPG::TPGAction* initActionVertex(
+            TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
+            Mutator::RNG& rng
+        );
+
         /**
          * \brief Initialize a random TPGGraph.
          *

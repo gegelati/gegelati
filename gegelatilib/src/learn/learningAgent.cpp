@@ -339,7 +339,6 @@ void Learn::LearningAgent::decimateWorstRoots(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
         results)
 {
-
     if(params.useTournamentSelection){
         return decimateWithTournament(results);
     }
@@ -352,9 +351,15 @@ void Learn::LearningAgent::decimateWorstRoots(
         preservedRoots;
 
 
-    // Estimate the number of expected roots to keep
+    // Estimate the number of expected roots to delete
     size_t nbExpectedRoots = floor(this->params.ratioDeletedRoots *
                                    (double)params.mutation.tpg.nbRoots);
+
+    // Get the maximum number of teams and actions deletable
+    size_t nbTeamsDeleted = 0;
+    size_t nbActionsDeleted = 0;
+    size_t maxNbTeamsToDelete = nbExpectedRoots * this->params.mutation.tpg.ratioTeamsOverActions;
+    size_t maxNbActionsoDelete = nbExpectedRoots - maxNbTeamsToDelete;
 
     auto i = 0;
     while (i < nbExpectedRoots && results.size() > 0) {
@@ -364,8 +369,28 @@ void Learn::LearningAgent::decimateWorstRoots(
         if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr && !this->params.mutation.tpg.useActionProgram) {
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
-        }
-        else {
+
+        // This conditions avoid deleting all the teams or all the actions
+        // This is usefull is the ratioTeamsOverActions is between 0 and 1.
+        } else if (dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) != nullptr
+                   && nbTeamsDeleted >= maxNbTeamsToDelete){
+
+            preservedRoots.insert(*results.begin());
+            i--; // no vertex was actually removed
+        } else if (dynamic_cast<const TPG::TPGAction*>(results.begin()->second) != nullptr
+                   && nbActionsDeleted >= maxNbActionsoDelete){
+
+            preservedRoots.insert(*results.begin());
+            i--; // no vertex was actually removed
+
+        } else {
+            // Incremente the number of actions and teams deleted.
+            if(dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) != nullptr){
+                nbTeamsDeleted++;
+            } else {
+                nbActionsDeleted++;
+            }
+
             tpg->removeVertex(*results.begin()->second);
             // Removed stored result (if any)
             this->resultsPerRoot.erase(results.begin()->second);

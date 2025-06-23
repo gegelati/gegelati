@@ -298,7 +298,7 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 
     // If destination is an action and should became a root, it is deleted if
     // the environment is continuous and does not use action program
-    if (//!env.getParams().mutation.tpg.useActionProgram &&
+    if (env.getParams().mutation.tpg.useActionProgram &&
         env.getNbContinuousActions() > 0 &&
         dynamic_cast<const TPG::TPGAction*>(destination) != nullptr &&
         destination->getIncomingEdges().size() == 0) {
@@ -503,7 +503,7 @@ void TPG::TPGGraph::setToBeDeleted(const TPG::TPGVertex* vertex){
 
     if (it != this->vertices.end()) {
         // Found the vertex, modify it as needed
-        dynamic_cast<TPG::TPGAction*>(*it)->setToBeDeleted(true);
+        (*it)->setToBeDeleted(true);
     } else {
         throw std::runtime_error(
             "Action to order not in the graph.");
