@@ -207,27 +207,6 @@ namespace Mutator {
         /// Create multiple action program, instead of one outputting multiple action in a single program
         bool useMultiActionProgram = false;
 
-        /// JSon comment
-        inline static const std::string probaCrossAgentsComment =
-            "// Proportion of new agents created with crossover instead of mutation.\n"
-            "// \"probaCrossAgents\" : 0.0, // Default value";
-        /// Proportion of new agents created with crossover instead of mutation.
-        double probaCrossAgents = 0.0;
-
-        /// JSon comment
-        inline static const std::string probaCrossProgramsComment =
-            "// Proportion of new programs created threw crossover.\n"
-            "// \"probaCrossPrograms\" : 0.0, // Default value";
-        /// Proportion of new programs created threw crossover.
-        double probaCrossPrograms = 0.0;
-
-        /// JSon comment
-        inline static const std::string typeProgramCrossoverComment = 
-            "// Type of program crossovers done.\n"
-            "// \"typeProgramCrossover\" : \"onePoint\"";
-        /// Type of program crossovers done.
-        std::string typeProgramCrossover = "onePoint";
-
 
     } TPGParameters;
 

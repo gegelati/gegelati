@@ -330,55 +330,6 @@ namespace Mutator {
 
 
         /**
-         * \brief do a crossover by creating a new program for each child, with a block from each parent.
-         * 
-         * \param[in] graph current Graph
-         * \param[in] childs new actions
-         * \param[in] actionID ID of the edges copied
-         * \param[in] params Probability parameters for the mutation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         * 
-         */
-        void crossProgram(
-            TPG::TPGGraph& graph,
-            std::vector<const TPG::TPGAction*> childs,
-            size_t actionID,
-            const Mutator::MutationParameters& params,
-            Mutator::RNG& rng);
-
-        /**
-         * \brief do a crossover on the edges, without creating new programs
-         * 
-         * \param[in] graph current Graph
-         * \param[in] childs new actions
-         * \param[in] actionID ID of the edges copied
-         * \param[in] params Probability parameters for the mutation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         * 
-         */
-        void crossEdges(
-            TPG::TPGGraph& graph,
-            std::vector<const TPG::TPGAction*> childs,
-            size_t actionID,
-            const Mutator::MutationParameters& params,
-            Mutator::RNG& rng);
-
-        /**
-         * \brief do a crossover to create a new MAPLE agent
-         * 
-         * \param[in] graph current Graph
-         * \param[in] childs new actions
-         * \param[in] params Probability parameters for the mutation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         * 
-         */
-        void crossTPGAction(
-            TPG::TPGGraph& graph,
-            std::vector<const TPG::TPGAction*> childs,
-            const Mutator::MutationParameters& params,
-            Mutator::RNG& rng);
-
-        /**
          * \brief Create new root TPGTeam within the TPGGraph.
          *
          * This function create and add new root TPGTeam to the TPGGraph

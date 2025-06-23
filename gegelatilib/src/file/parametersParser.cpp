@@ -188,21 +188,6 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
 
-    if (param == "probaCrossAgents") {
-        params.mutation.tpg.probaCrossAgents =
-            (double)value.asDouble();
-        return;
-    }
-    if (param == "probaCrossPrograms") {
-        params.mutation.tpg.probaCrossPrograms =
-            (double)value.asDouble();
-        return;
-    }
-    if (param == "typeProgramCrossover") {
-        params.mutation.tpg.typeProgramCrossover =
-            value.asString();
-        return;
-    }
        
 
     if (param == "maxProgramSize") {
@@ -522,26 +507,6 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["probaContextOverActionProgram"].setComment(
         Mutator::TPGParameters::probaContextOverActionProgramComment,
         Json::commentBefore);
-
-        
-    root["mutation"]["tpg"]["probaCrossAgents"] =
-        params.mutation.tpg.probaCrossAgents;
-    root["mutation"]["tpg"]["probaCrossAgents"].setComment(
-        Mutator::TPGParameters::probaCrossAgentsComment,
-        Json::commentBefore);
-
-    root["mutation"]["tpg"]["probaCrossPrograms"] =
-        params.mutation.tpg.probaCrossPrograms;
-    root["mutation"]["tpg"]["probaCrossPrograms"].setComment(
-        Mutator::TPGParameters::probaCrossProgramsComment,
-        Json::commentBefore);
-
-    root["mutation"]["tpg"]["typeProgramCrossover"] =
-        params.mutation.tpg.typeProgramCrossover;
-    root["mutation"]["tpg"]["typeProgramCrossover"].setComment(
-        Mutator::TPGParameters::typeProgramCrossoverComment,
-        Json::commentBefore);
-
 
     // Mutation.program parameters
     root["mutation"]["prog"]["maxConstValue"] =
