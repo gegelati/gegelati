@@ -41,6 +41,11 @@ double Learn::EvaluationResult::getResult() const
     return this->result;
 }
 
+double Learn::EvaluationResult::getUtility() const
+{
+    return this->utility;
+}
+
 size_t Learn::EvaluationResult::getNbEvaluation() const
 {
     return this->nbEvaluation;
@@ -62,6 +67,11 @@ Learn::EvaluationResult& Learn::EvaluationResult::operator+=(
         this->result = this->result * (double)this->nbEvaluation +
                        other.result * (double)other.nbEvaluation;
         this->result /= (double)this->nbEvaluation + (double)other.nbEvaluation;
+
+        // Weighted addition of utility
+        this->utility = this->utility * (double)this->nbEvaluation +
+                       other.utility * (double)other.nbEvaluation;
+        this->utility /= (double)this->nbEvaluation + (double)other.nbEvaluation;
 
         // Addition ot nbEvaluation
         this->nbEvaluation += other.nbEvaluation;

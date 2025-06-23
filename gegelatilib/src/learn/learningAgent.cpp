@@ -87,6 +87,7 @@ void Learn::LearningAgent::init(uint64_t seed)
 void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 {
     logger.doValidation = this->params.doValidation;
+    logger.useUtility = this->learningEnvironment.isUsingUtility();
     // logs for example the headers of the columns the logger will print
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
 }
@@ -128,6 +129,9 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // Init results
     double result = 0.0;
 
+    // Init utility
+    double utility = 0.0;
+
     // Number of evaluations
     uint64_t nbEvaluation = (mode == LearningMode::TRAINING) ? this->params.nbIterationsPerPolicyEvaluation:this->params.nbIterationsPerPolicyValidation;
 
@@ -154,13 +158,18 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
         // Update results
         result += le.getScore();
+        // Update utility if used.
+        if(le.isUsingUtility()){
+            utility += le.getUtility();
+        }
     }
 
     // Create the EvaluationResult
     auto evaluationResult =
         std::shared_ptr<EvaluationResult>(new EvaluationResult(
             result / (double)nbEvaluation,
-            nbEvaluation));
+            nbEvaluation,
+            utility / (double)nbEvaluation));
 
     // Combine it with previous one if any
     if (previousEval != nullptr) {

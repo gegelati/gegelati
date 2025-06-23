@@ -48,6 +48,11 @@ bool Learn::LearningEnvironment::isCopyable() const
     return false;
 }
 
+bool Learn::LearningEnvironment::isUsingUtility() const
+{
+    return false;
+}
+
 void Learn::LearningEnvironment::doAction(double actionID)
 {
     if (nbActions > 1 && !isDiscreteEnvironment) {

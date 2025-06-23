@@ -126,6 +126,11 @@ namespace Log {
         bool doValidation = false;
 
         /**
+         * Boolean telling the logger if the LearningEnvironment returns also a utility with the score
+         */
+        bool useUtility = false;
+
+        /**
          * \brief Constructor defining a given output and setting start and
          * checkpoint as now. Default output is cout.
          *

@@ -45,6 +45,24 @@ void Log::LABasicLogger::logResults(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results)
 {
+    if(useUtility){
+        auto iter = results.begin();
+        double min = iter->first->getUtility();
+        std::advance(iter, results.size() - 1);
+        double max = iter->first->getUtility();
+        double avg = std::accumulate(
+            results.begin(), results.end(), 0.0,
+            [](double acc,
+            std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                        const TPG::TPGVertex*>
+                pair) -> double { return acc + pair.first->getUtility(); });
+        avg /= (double)results.size();
+        *this << std::setw(colWidth) << min << std::setw(colWidth) << avg
+            << std::setw(colWidth) << max;
+    }
+
+
+
     auto iter = results.begin();
     double min = iter->first->getResult();
     std::advance(iter, results.size() - 1);
@@ -64,23 +82,38 @@ void Log::LABasicLogger::logHeader()
 {
     // First line of header
     //*this << std::left;
-    *this << std::setw(5 * colWidth) << " " << std::setw(colWidth) << "Train";
+    
+    *this << std::setw(5 * colWidth) << " " ;
+    if(useUtility) *this << std::setw((int)(1.5*colWidth)) << " ";
+    *this << std::setw(colWidth) << "Train";
     if (doValidation) {
-        *this << std::setw(2 * colWidth) << " " << std::setw(1 * colWidth)
-              << "Valid";
+        *this << std::setw(2.5 * colWidth) << " ";
+        if(useUtility) *this << std::setw((int)(3 * colWidth)) << "  ";
+        *this << "Valid";
     }
     *this << std::endl;
 
     // Second line of header
     //*this << std::right;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
-          << std::setw(colWidth) << "NbActR" << std::setw(colWidth) << "NbTeamR"
-          << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
-          << std::setw(colWidth) << "Max";
-    if (doValidation) {
-        *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
-              << std::setw(colWidth) << "Max";
+          << std::setw(colWidth) << "NbActR" << std::setw(colWidth) << "NbTeamR";
+    
+    if(useUtility){
+        *this << std::setw(colWidth) << "U Min" << std::setw(colWidth) << "U Avg"
+              << std::setw(colWidth) << "U Max";
     }
+    *this << std::setw(colWidth) << "R Min" << std::setw(colWidth) << "R Avg"
+          << std::setw(colWidth) << "R Max";
+
+    if (doValidation) {
+        if(useUtility){
+            *this << std::setw(colWidth) << "U Min" << std::setw(colWidth) << "U Avg"
+                << std::setw(colWidth) << "U Max";
+        }
+        *this << std::setw(colWidth) << "R Min" << std::setw(colWidth) << "R Avg"
+            << std::setw(colWidth) << "R Max";
+    }
+
     *this << std::setw(colWidth) << "T_mutat" << std::setw(colWidth)
           << "T_eval";
     if (doValidation) {
@@ -141,7 +174,9 @@ void Log::LABasicLogger::logAfterValidate(
         // can log results
         logResults(results);
     } else {
-        *this << std::setw(3*colWidth) << " ";
+        size_t multiplier = 3;
+        if(useUtility) multiplier *= 2;
+        *this << std::setw(multiplier*colWidth) << " ";
     }
 }
 
