@@ -137,10 +137,12 @@ void Mutator::TPGMutator::initRandomTPG(
         nbActions = (1 - params.tpg.ratioTeamsOverActions) * params.tpg.nbRoots;
     }
 
+    if(params.tpg.useActionProgram && !params.tpg.teamAccessAllActions && params.tpg.ratioTeamsOverActions == 1){
+        throw std::runtime_error("Parameter only allow teams to select action roots, but there is not action roots considering the ratio!");
+    }
+
     uint64_t initNbTeams = params.tpg.ratioTeamsOverActions * params.tpg.nbRoots;
     uint64_t initNbActions = params.tpg.nbRoots - initNbTeams;
-    
-    std::cout<<initNbTeams<< " " << initNbActions<<std::endl;
 
     if (initNbTeams < nbActions && !params.tpg.useActionProgram) {
         throw std::runtime_error(
@@ -619,6 +621,7 @@ void Mutator::TPGMutator::mutateTPGTeam(
         double proba = 1.0;
         while (team.getOutgoingEdges().size() > 2 &&
                proba > rng.getDouble(0.0, 1.0)) {
+
             removeRandomEdge(graph, team, rng);
 
             // Decrement the proba of removing another edge
@@ -822,14 +825,15 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                       });
     }
 
-    // Pre compute liste of available TPGTeam and TPGActions
+    // Pre compute liste of available TPGTeam and TPGActions, TPGActions are only roots
     std::vector<const TPG::TPGTeam*> preExistingTeams;
     std::vector<const TPG::TPGAction*> preExistingActions;
 
     std::for_each(
         vertices.begin(), vertices.end(),
-        [&preExistingActions, &preExistingTeams](const TPG::TPGVertex* target) {
-            if (dynamic_cast<const TPG::TPGAction*>(target) != nullptr) {
+        [&preExistingActions, &preExistingTeams, &params](const TPG::TPGVertex* target) {
+            if (dynamic_cast<const TPG::TPGAction*>(target) != nullptr
+                && (target->getIncomingEdges().size() == 0 || params.tpg.teamAccessAllActions)) {
                 preExistingActions.push_back((const TPG::TPGAction*)target);
             }
             else {

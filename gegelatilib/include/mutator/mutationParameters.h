@@ -200,6 +200,18 @@ namespace Mutator {
         /// Create multiple action program, instead of one outputting multiple action in a single program
         bool useMultiActionProgram = false;
 
+        /// JSon comment
+        inline static const std::string teamAccessAllActionsComment =
+            "// During mutation of a team, setting this parameter to true allow a team\n"
+            "//to change destination toward any other actions. If set to false, it can only\n"
+            "//change destination toward a root action.\n"
+            "// \"teamAccessAllActions\" : true, // Default value";
+        /// During mutation of a team, setting this parameter to true allow a team
+        /// to change destination toward any other actions. If set to false, it can only
+        /// change destination toward a root action.
+        bool teamAccessAllActions = true;
+        
+
 
     } TPGParameters;
 

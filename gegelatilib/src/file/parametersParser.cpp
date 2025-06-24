@@ -124,6 +124,11 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.useMultiActionProgram = value.asBool();
         return;
     }
+    if (param == "teamAccessAllActions") {
+        params.mutation.tpg.teamAccessAllActions = value.asBool();
+        return;
+    }
+    
     if (param == "pChangeActionClass") {
         params.mutation.tpg.pChangeActionClass = (double)value.asDouble();
         return;
@@ -425,6 +430,10 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["useMultiActionProgram"] = params.mutation.tpg.useMultiActionProgram;
     root["mutation"]["tpg"]["useMultiActionProgram"].setComment(
         Mutator::TPGParameters::useMultiActionProgramComment,
+        Json::commentBefore);
+    root["mutation"]["tpg"]["teamAccessAllActions"] = params.mutation.tpg.teamAccessAllActions;
+    root["mutation"]["tpg"]["teamAccessAllActions"].setComment(
+        Mutator::TPGParameters::teamAccessAllActionsComment,
         Json::commentBefore);
 
     root["mutation"]["tpg"]["pChangeActionClass"] = params.mutation.tpg.pChangeActionClass;
