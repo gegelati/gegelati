@@ -119,7 +119,8 @@ void Log::LABasicLogger::logHeader()
     if (doValidation) {
         *this << std::setw(colWidth) << "T_valid";
     }
-    *this << std::setw(colWidth) << "T_total" << std::endl;
+    *this << std::setw(colWidth) << "T_decim" << std::setw(colWidth)
+          << "T_total" << std::endl;
 }
 
 void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
@@ -159,7 +160,7 @@ void Log::LABasicLogger::logAfterEvaluate(
 
     logResults(results);
 
-    // resets checkpoint to be able to show validation time if there is some
+    // resets checkpoint to be able to show decimation time if there is some
     chronoFromNow();
 }
 
@@ -180,6 +181,13 @@ void Log::LABasicLogger::logAfterValidate(
     }
 }
 
+void Log::LABasicLogger::logAfterDecimate(){
+    decimationTime = getDurationFrom(*checkpoint);
+
+    // resets checkpoint to be able to show validation time if there is some
+    chronoFromNow();
+}
+
 void Log::LABasicLogger::logEndOfTraining()
 {
     *this << std::setw(colWidth) << mutationTime;
@@ -187,5 +195,6 @@ void Log::LABasicLogger::logEndOfTraining()
     if (doValidation) {
         *this << std::setw(colWidth) << validTime;
     }
+    *this << std::setw(colWidth) << decimationTime;
     *this << std::setw(colWidth) << getDurationFrom(*start) << std::endl;
 }

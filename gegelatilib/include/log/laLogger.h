@@ -96,6 +96,12 @@ namespace Log {
          */
         double validTime = 0;
 
+        /**
+         * Keeps the duration of the decimation to be able to log it
+         * some time after it is computed.
+         */
+        double decimationTime = 0;
+
         /// LearningAgent logged by the LALogger
         Learn::LearningAgent& learningAgent;
 
