@@ -38,6 +38,7 @@
 
 #include <inttypes.h>
 #include <queue>
+#include <unordered_set>
 
 #include "data/hash.h"
 #include "learn/evaluationResult.h"
@@ -285,55 +286,76 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 }
 
 void Learn::LearningAgent::decimateWithTournament(
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
-        results)
+    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results)
 {
+    size_t nbToKeep = params.mutation.tpg.nbRoots * (1 - params.ratioDeletedRoots);
+    size_t nbAgentsInTournament = results.size() - nbToKeep;
 
-    size_t nbAgentsInTournament = results.size() - (params.mutation.tpg.nbRoots * (1-params.ratioDeletedRoots));
-
-    // Create subVector of results without the best agents.
+    // Copie les premiers agents à supprimer (ceux en bas du classement)
     std::vector<std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>> elements;
     auto it = results.begin();
-    for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
-        elements.push_back(*it++);
+    for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i, ++it) {
+        elements.push_back(*it);
     }
 
+    // Shuffle avec le RNG custom
+    for (size_t i = elements.size() - 1; i > 0; --i) {
+        size_t j = rng.getUnsignedInt64(0, i);  // Choix aléatoire entre 0 et i inclus
+        std::swap(elements[i], elements[j]);
+    }
+
+    std::unordered_set<const TPG::TPGVertex*> toDelete;
+    std::unordered_set<std::shared_ptr<EvaluationResult>> erasedResults;
+
+    // Tournois
     for (size_t i = 0; i < nbAgentsInTournament; i += params.sizeTournament) {
-        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> subMap;
-        
-        // Fill subMap with a size corresponding to the hardness of the tournament.
-        for (size_t j = i; j < i + params.sizeTournament && j < nbAgentsInTournament; ++j) {
+        size_t end = std::min(i + params.sizeTournament, nbAgentsInTournament);
+        auto subrangeBegin = elements.begin() + i;
+        auto subrangeEnd = elements.begin() + end;
 
-            uint64_t index = rng.getUnsignedInt64(0, elements.size() - 1);
+        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> subMap(
+            subrangeBegin, subrangeEnd
+        );
 
-            subMap.insert(elements[index]);
-
-            elements.erase(elements.begin() + index);
+        // Supprime tous sauf le meilleur
+        while (subMap.size() > 1) {
+            auto itWorst = subMap.begin();
+            toDelete.insert(itWorst->second);
+            erasedResults.insert(itWorst->first);
+            subMap.erase(itWorst);
         }
 
-        // After the subMap is filled, erased the worse results from it, from the graph, and from the original results.
-        while(subMap.size() != 1){
-            tpg->removeVertex(*subMap.begin()->second);
-
-
-            auto itRes = results.find(subMap.begin()->first);
-            auto range = results.equal_range(subMap.begin()->first);
-
-            subMap.erase(subMap.begin());
-            
-        }
-        
+        // Le survivant est marqué pour suppression logique
         tpg->setToBeDeleted(subMap.begin()->second);
     }
 
-    // Delete from results and resultsPerRoot
-    auto itDel = results.begin();
-    for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
-        this->resultsPerRoot.erase(itDel->second);
-        results.erase(itDel++);
-        
+    // Suppression des sommets et nettoyage des structures
+                std::shared_ptr<std::chrono::time_point<std::chrono::system_clock,
+                                                std::chrono::nanoseconds>> checkpoint = std::make_shared<std::chrono::time_point<
+        std::chrono::system_clock, std::chrono::nanoseconds>>( std::chrono::system_clock::now());
+    for (const auto* v : toDelete) {
+        tpg->removeVertex(*v);
+     
+    }
+
+                    std::shared_ptr<std::chrono::time_point<std::chrono::system_clock,
+                                                std::chrono::nanoseconds>> checkpoint2 = std::make_shared<std::chrono::time_point<
+        std::chrono::system_clock, std::chrono::nanoseconds>>( std::chrono::system_clock::now());
+
+    for (const auto* v : toDelete) {
+     
+        this->resultsPerRoot.erase(v);
+    }
+
+    std::cout<<"timme  "<<((std::chrono::duration<double>)(*checkpoint2 - *checkpoint)).count()<<" lll"; 
+
+    // Nettoyage de la multimap
+    for (const auto& eval : erasedResults) {
+        auto range = results.equal_range(eval);
+        results.erase(range.first, range.second);
     }
 }
+
 
 void Learn::LearningAgent::decimateWorstRoots(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&

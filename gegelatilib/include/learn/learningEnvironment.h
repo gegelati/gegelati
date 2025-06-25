@@ -281,7 +281,7 @@ namespace Learn {
          *
          * \return the current utility for the LearningEnvironment.
          */
-        virtual double getUtility() const = 0;
+        virtual double getUtility() const;
 
         /**
          * \brief Method for checking if the LearningEnvironment has reached a

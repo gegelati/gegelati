@@ -59,13 +59,12 @@
 
 const TPG::TPGAction* Mutator::TPGMutator::initActionVertex(
     TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-    Mutator::RNG& rng
-)
+    Mutator::RNG& rng, double nbActionEdgeInit)
 {
     const TPG::TPGAction* action = &(graph.addNewAction(0));
 
     std::set<uint64_t> actionUsed;
-    for(size_t j = 0; j < params.tpg.nbActionEdgeInit; j++){
+    for(size_t j = 0; j < nbActionEdgeInit; j++){
         
         // Create a program and specify action program
         std::shared_ptr<Program::Program> p =
@@ -115,7 +114,7 @@ void Mutator::TPGMutator::initRandomTPG(
 
     }
     else if (graph.getEnvironment().getNbRegisters() <
-             nbActions + (int)!params.tpg.useActionProgram) {
+             nbActions + (int)!params.tpg.useActionProgram && !params.tpg.useMultiActionProgram) {
         throw std::runtime_error(
             "The number of registers is below the number of values outputted.");
     }
@@ -165,7 +164,7 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<std::shared_ptr<Program::Program>> programs;
 
     for (size_t i = 0; i < initNbActions + 2 * initNbTeams; i++) {
-        actions.push_back(initActionVertex(graph, params, rng));
+        actions.push_back(initActionVertex(graph, params, rng, nbActionEdgeInit));
     }
     for (size_t i = 0; i < initNbTeams; i++) {
         teams.push_back(&(graph.addNewTeam()));
@@ -802,11 +801,11 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     std::vector<const TPG::TPGVertex*> rootTeams;
     std::vector<const TPG::TPGVertex*> rootActions;
     std::for_each(rootVertices.begin(), rootVertices.end(),
-                  [&rootTeams, &rootActions](const TPG::TPGVertex* vertex) {
+                  [&rootTeams, &rootActions, &params](const TPG::TPGVertex* vertex) {
                       if (dynamic_cast<const TPG::TPGTeam*>(vertex) !=
                           nullptr) {
                           rootTeams.push_back((const TPG::TPGTeam*)vertex);
-                      } else {
+                      } else if(params.tpg.useActionProgram){
                           rootActions.push_back((const TPG::TPGAction*)vertex);
                       }
                   });
@@ -865,7 +864,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                            [](const TPG::TPGVertex* vertex) -> bool {
                                return !vertex->isToBeDeleted();}),
                                teamsClonable.end());
-        
+
         actionsClonable.erase(
             std::remove_if(actionsClonable.begin(), actionsClonable.end(),
                             [](const TPG::TPGVertex* vertex) -> bool {
@@ -891,7 +890,6 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         mutateTPGTeam(graph, archive, (const TPG::TPGTeam&)newRoot,
                         preExistingTeams, preExistingActions,
                         preExistingEdges, newPrograms, params, rng);
-
         // Increase the new number of roots
         nbTeamsCreated++;
     }
@@ -918,7 +916,6 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         // Increase the new number of roots
         nbActionsCreated++;
     }
-
 
     // Remove root to be deleted
     for(auto root: rootVertices){

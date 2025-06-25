@@ -62,7 +62,7 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
     uint64_t actionNumber = this->findVertexID(action);
 
     uint64_t actionID = action.getActionID();
-    if(tpg.getEnvironment().getNbContinuousActions() > 0){
+    if(tpg.getEnvironment().getParams().mutation.tpg.useActionProgram){
         actionID = actionNumber;
     }
 
@@ -132,8 +132,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
             auto* dest = edge.getDestination();
             
             if (dest && dynamic_cast<const TPG::TPGAction*>(dest) != nullptr) {
-                uint64_t actionID =
-                    printTPGAction(*(const TPG::TPGAction*)edge.getDestination());
+                uint64_t actionID = printTPGAction(*(const TPG::TPGAction*)edge.getDestination());
                 fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n",
                         this->offset.c_str(), srcID, progID, actionID);
             }
@@ -217,6 +216,8 @@ void File::TPGGraphDotExporter::printTPGGraphHeader()
 
 void File::TPGGraphDotExporter::printTPGGraphFooter()
 {
+
+
     // Print root actions (and keep the ids)
     auto rootVertices = tpg.getRootVertices();
     std::vector<uint64_t> rootActionIDs;
@@ -227,9 +228,7 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
         }
     }
 
-    
-
-    // Print all edges
+    // Print all action edges
     auto& edges = this->tpg.getEdges();
     for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
         if(dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) != nullptr){
@@ -276,13 +275,14 @@ void File::TPGGraphDotExporter::print()
     // generations.
     this->programID.erase(this->programID.begin(), this->programID.end());
 
-    // Print all edges
+    // Print all context edges
     auto& edges = this->tpg.getEdges();
     for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
         if(dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) == nullptr){
             this->printTPGEdge(*edge.get());
         }
     }
+
 
     // Print footer
     this->printTPGGraphFooter();
@@ -317,24 +317,27 @@ void File::TPGGraphDotExporter::printSubGraph(const TPG::TPGVertex* root)
         visitedVertices.push_back(vertex);
 
         // Print it if it is a team (actions are printed with edges)
-        const TPG::TPGTeam* team = nullptr;
-        if ((team = dynamic_cast<const TPG::TPGTeam*>(vertex)) != nullptr) {
+        if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
             this->printTPGTeam(*(const TPG::TPGTeam*)vertex);
+        } else {
+            this->printTPGAction(*(const TPG::TPGAction*)vertex);
+        }
+						
 
-            // Put its outgoing edge in the list for later print.
-            // Edges must be printed after their destination team has been
-            // written.
-            for (auto edge : team->getOutgoingEdges()) {
-                edgesToPrint.push_back(edge);
+        // Put its outgoing edge in the list for later print.
+        // Edges must be printed after their destination team has been
+        // written.
+        for (auto edge : vertex->getOutgoingEdges()) {
+            edgesToPrint.push_back(edge);
 
-                // If the edge destination is a Team, put it in the list of
-                // vertex to be visited.
+            // If the edge destination is a Team, put it in the list of
+            // vertex to be visited.
+            if(dynamic_cast<TPG::TPGActionEdge*>(edge) == nullptr){
                 const TPG::TPGVertex* dest = edge->getDestination();
-                if (dynamic_cast<const TPG::TPGTeam*>(dest) != nullptr &&
-                    std::find(visitedVertices.begin(), visitedVertices.end(),
-                              dest) == visitedVertices.end() &&
+                if (std::find(visitedVertices.begin(), visitedVertices.end(),
+                                dest) == visitedVertices.end() &&
                     std::find(verticesToVisit.begin(), verticesToVisit.end(),
-                              dest) == verticesToVisit.end()) {
+                                dest) == verticesToVisit.end()) {
                     verticesToVisit.push_back(dest);
                 }
             }

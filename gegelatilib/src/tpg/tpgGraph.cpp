@@ -273,6 +273,9 @@ const std::list<std::unique_ptr<TPG::TPGEdge>>& TPG::TPGGraph::getEdges() const
 
 void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 {
+    if (dynamic_cast<const TPGActionEdge*>(&edge) != nullptr) {
+        return this->removeActionEdge(edge);
+    }
 
     // Get the edge (if it is in the graph)
     auto iterator = std::find_if(this->edges.begin(), this->edges.end(),
@@ -286,9 +289,6 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
             "Cannot erase a edge that does not belong to the graph");
     }
 
-    if (dynamic_cast<const TPGActionEdge*>(iterator->get()) != nullptr) {
-        return this->removeActionEdge(edge);
-    }
 
     (*this->findVertex(iterator->get()->getSource()))
         ->removeOutgoingEdge(iterator->get());
@@ -298,8 +298,7 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 
     // If destination is an action and should became a root, it is deleted if
     // the environment is continuous and does not use action program
-    if (env.getParams().mutation.tpg.useActionProgram &&
-        env.getNbContinuousActions() > 0 &&
+    if (env.getNbContinuousActions() > 0 &&
         dynamic_cast<const TPG::TPGAction*>(destination) != nullptr &&
         destination->getIncomingEdges().size() == 0) {
 

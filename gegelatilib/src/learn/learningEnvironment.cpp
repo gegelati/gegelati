@@ -88,3 +88,10 @@ void Learn::LearningEnvironment::doActions(std::vector<double> vectActionID)
         }
     }
 }
+
+double Learn::LearningEnvironment::getUtility() const
+{
+    throw std::runtime_error(
+        "Utility should not be call except if 'isUsingUtility' is override to return true."
+        "\nIn that case, this method should be override too.");
+}

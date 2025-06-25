@@ -282,18 +282,15 @@ void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
 {
     // Creating a edge from a team to an action
     if (!this->lastLine.empty() && !matches.empty()) {
-        std::cout<<"found action edge"<<std::endl;
         uint64_t act_in = std::stoi(matches[1]);
         uint64_t program = std::stoi(matches[2]);
 
         // get the action depending on its label
         auto action_it = this->actionID.find(act_in);
         if (action_it != this->actionID.end()) {
-            std::cout<<"found action edge2"<<std::endl;
             // find the program to add to the edge
             auto p_it = programID.find(program);
             if (action_it != this->actionID.end() && p_it != programID.end()) {
-                    std::cout<<"found action edge3"<<std::endl;
                 const TPG::TPGVertex* action = action_it->second;
 
                 uint64_t actionClass = this->actionClasses.at(action).at(action->getOutgoingEdges().size());
@@ -432,8 +429,6 @@ bool File::TPGGraphDotImporter::readLineFromFile()
     else {
         this->lastLine = buffer;
     }
-
-    std::cout<<lastLine<<std::endl;
 
     // Trouver la position de "//"
     size_t pos = this->lastLine.find("//");

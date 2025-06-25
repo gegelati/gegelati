@@ -52,10 +52,11 @@ namespace Mutator {
          * \param[in,out] graph the initialized TPGGraph.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in] nbActionEdgeInit number of edges to init the action vertex with
          */
         const TPG::TPGAction* initActionVertex(
             TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-            Mutator::RNG& rng
+            Mutator::RNG& rng, double nbActionEdgeInit
         );
 
         /**

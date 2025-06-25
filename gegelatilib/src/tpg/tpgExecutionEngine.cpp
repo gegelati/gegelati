@@ -176,7 +176,7 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
     if (env.getNbContinuousActions() > 0) {
 
         // True if the action contain multiple TPGActionEdge
-        if (currentVertex->getOutgoingEdges().size() > 1 || env.getParams().mutation.tpg.useMultiActionProgram) {
+        if (env.getParams().mutation.tpg.useMultiActionProgram) {
 
             for(auto edge: currentVertex->getOutgoingEdges()){
                 auto actionEdge = dynamic_cast<TPGActionEdge*>(edge);
