@@ -456,11 +456,10 @@ TEST_F(LearningAgentTest, DecimateWorstRoots)
 
     la.init();
 
-    // Remove two teams (first and last) to make the first action a root
+    // Remove the first team to make the first action a root
     TPG::TPGGraph& graph = *la.getTPGGraph();
     auto roots = graph.getRootVertices();
     graph.removeVertex(*roots.at(0));
-    graph.removeVertex(*roots.at(le.getNbActions() - 1));
 
     // Check that the action is now a root
     roots = graph.getRootVertices();
@@ -593,13 +592,13 @@ TEST_F(LearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 27)
+    ASSERT_EQ(tpg.getNbVertices(), 31)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 85)
+    ASSERT_EQ(tpg.getEdges().size(), 97)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 15788780790033520032U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 5859956592162044951U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -628,13 +627,13 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 29)
+    ASSERT_EQ(tpg.getNbVertices(), 31)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 25)
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 92)
+    ASSERT_EQ(tpg.getEdges().size(), 97)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8778232462724898875)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 5859956592162044951U)
         << "Graph does not have the expected determinst characteristics.";
 
     /*
@@ -660,31 +659,31 @@ TEST_F(LearningAgentTest, TrainInstrumented)
 
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(),
-        304);
+        89);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(),
         0);
 
-    std::advance(edgesIterator, 3);
+    std::advance(edgesIterator, 4);
     const auto* edge2 = edgesIterator->get();
 
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbVisits(),
-        107);
+        63);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversal(),
-        107);
+        60);
 
     auto& verticesIterator = tpg.getVertices();
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(0))
                   ->getNbVisits(),
-              5533);
+              4050);
 
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(5))
                   ->getNbVisits(),
-              107);
+              63);
 }
 
 // Similar to previous test, but with continuous actions and no action programs
@@ -713,13 +712,13 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 27)
+    ASSERT_EQ(tpg.getNbVertices(), 42)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 29)
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 100)
+    ASSERT_EQ(tpg.getEdges().size(), 103)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 17057427773954294832)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 14473162429471605144U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -749,13 +748,13 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 69)
+    ASSERT_EQ(tpg.getNbVertices(), 61)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 25)
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 143)
+    ASSERT_EQ(tpg.getEdges().size(), 136)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 7005533250685197605)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 6844759558533588550U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -842,7 +841,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     }
 }
 
-TEST_F(LearningAgentTest, TrainOnegenerationContinuous)
+TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
 {
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
@@ -859,12 +858,13 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuous)
     Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), a, params.mutation,
                                      la.getRNG(), cle.getNbActions());
     size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
+
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(la.trainOneGeneration(4))
         << "Training for one generation failed.";
     // Check the number of vertex in the graph.
-    // Must be initial number of vertex - number of root removed
-    ASSERT_EQ(la.getTPGGraph()->getNbVertices(),
+    // Must be lower or equal to initial number of vertex - number of root removed (since some actions vertex are removed too)
+    ASSERT_LE(la.getTPGGraph()->getNbVertices(),
               initialNbVertex -
                   floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
