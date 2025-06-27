@@ -91,6 +91,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
     fileMain << "\t\t\tint best = bestProgram(" << teamName << "Scores, "
              << edges.size() << ");" << std::endl;
     fileMain << "\t\t\tcurrentVertex = next[best];" << std::endl;
+    fileMain << "\t\t\tbreak;" << std::endl;
 }
 
 void CodeGen::TPGSwitchGenerationEngine::generateAction(
@@ -108,7 +109,8 @@ void CodeGen::TPGSwitchGenerationEngine::generateAction(
         fileMain << ");" << std::endl;
     } else {
         uint64_t id = action.getActionID();
-        fileMain << "\t\t\treturn " << id << ";" << std::endl;
+        fileMain << "\t\t\tactions[0] = " << id << ";" << std::endl;
+        fileMain << "\t\t\treturn;" << std::endl;
     }
 
     
@@ -135,13 +137,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
     fileMain << "};" << std::endl << std::endl;
 
     // generate inference function
-    if(this->tpg.getEnvironment().getNbContinuousActions() > 0){
-        fileMain << "void "; 
-    } else {
-        fileMain << "int "; 
-    }
-
-    fileMain << "inferenceTPG(double* actions) {\n"<<std::endl;
+    fileMain << "void inferenceTPG(double* actions) {\n"<<std::endl;
 
     // start graph on root
     fileMain << "\tenum vertices currentVertex = "
@@ -158,7 +154,6 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
         else if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr) {
             generateAction(*(const TPG::TPGAction*)vertex);
         }
-        fileMain << "\t\t\tbreak;" << std::endl;
         fileMain << "\t\t}" << std::endl;
     }
     fileMain << "\t\t}" << std::endl;
@@ -197,13 +192,7 @@ void CodeGen::TPGSwitchGenerationEngine::initHeaderFile()
 {
     fileMainH << "#include <stdlib.h>\n\n";
 
-    if(this->tpg.getEnvironment().getNbContinuousActions() > 0){
-        fileMainH << "void "; 
-    } else {
-        fileMainH << "int "; 
-    }
-
-    fileMainH << "inferenceTPG(double* actions);\n"<<std::endl;
+    fileMainH << "void inferenceTPG(double* actions);\n"<<std::endl;
 }
 
 void CodeGen::TPGSwitchGenerationEngine::initActivationFunction()

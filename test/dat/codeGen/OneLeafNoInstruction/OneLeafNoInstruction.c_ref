@@ -29,13 +29,14 @@ int bestProgram(double *results, int nb) {
 
 enum vertices {A0, T1, };
 
-int inferenceTPG() {
+void inferenceTPG(double* actions) {
+
 	enum vertices currentVertex = T1;
 	while(1) {
 		switch (currentVertex) {
 		case A0: {
-			return 1;
-			break;
+			actions[0] = 1;
+			return;
 		}
 		case T1: {
 			const enum vertices next[1] = { A0,  };

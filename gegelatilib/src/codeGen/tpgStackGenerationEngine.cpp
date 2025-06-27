@@ -84,8 +84,8 @@ void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 {
     uint64_t id = findVertexID(team);
     // print prototype and declaration of the function
-    fileMain << "void* T" << id << "(int* action){" << std::endl;
-    fileMainH << "void* T" << id << "(int* action);" << std::endl;
+    fileMain << "void* T" << id << "(double* action){" << std::endl;
+    fileMainH << "void* T" << id << "(double* action);" << std::endl;
     // generate static array
     fileMain << "\tstatic Edge e[] = {" << std::endl;
     auto list = team.getOutgoingEdges();
@@ -111,9 +111,8 @@ void CodeGen::TPGStackGenerationEngine::generateAction(
 {
     uint64_t id = action.getActionID();
     // print prototype and declaration of the function
-    fileMain << "void* A" << id << "(int* action){" << std::endl;
-    fileMainH << "void* A" << id << "(int* action);" << std::endl;
-
+    fileMain << "void* A" << id << "(double* action){" << std::endl;
+    fileMainH << "void* A" << id << "(double* action);" << std::endl;
     // print definition of the function
     fileMain << "\t*action = " << id << ";" << std::endl;
     fileMain << "\treturn NULL;\n}\n" << std::endl;
@@ -121,8 +120,8 @@ void CodeGen::TPGStackGenerationEngine::generateAction(
 
 void CodeGen::TPGStackGenerationEngine::setRoot(const TPG::TPGVertex& team)
 {
-    fileMainH << "\nextern void* (*root)(int* action);" << std::endl;
-    fileMain << "void* (*root)(int* action) = T" << findVertexID(team) << ";"
+    fileMainH << "\nextern void* (*root)(double* action);" << std::endl;
+    fileMain << "void* (*root)(double* action) = T" << findVertexID(team) << ";"
              << std::endl;
 }
 
@@ -131,7 +130,6 @@ void CodeGen::TPGStackGenerationEngine::generateTPGGraph()
     initTpgFile();
     initHeaderFile();
 
-    std::map<const TPG::TPGTeam*, std::list<TPG::TPGEdge*>> graph;
     auto vertices = this->tpg.getVertices();
     // give an id for each team of the graph
     for (auto vertex : vertices) {
@@ -154,17 +152,16 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
              << "#include <stdbool.h>\n"
              << "#include <math.h>\n\n"
 
-             << "int inferenceTPG(){\n"
-             << "\treturn executeFromVertex(root);\n"
+             << "void inferenceTPG(double* action){\n"
+             << "\texecuteFromVertex(root, action);\n"
              << "}\n\n"
 
-             << "int executeFromVertex(void*(*ptr_f)(int*action)){\n"
-             << "\tvoid*(*f)(int*action) = ptr_f;\n"
-             << "\tint action = INT_MIN;\n"
+             << "void executeFromVertex(void*(*ptr_f)(double*), double* action){\n"
+             << "\tvoid*(*f)(double*) = ptr_f;\n"
              << "\twhile (f!=NULL){\n"
-             << "\t\tf= (void*(*)(int*)) (f(&action));\n"
+             << "\t\tf = (void*(*)(double*)) (f(action));\n"
              << "\t}\n"
-             << "\treturn action;\n}\n\n"
+             << "}\n\n"
 
              << "void* executeTeam(Edge* e, int nbEdge){\n"
              << "\tint idxNext = execute(e, nbEdge); \n"
@@ -184,9 +181,7 @@ void CodeGen::TPGStackGenerationEngine::initTpgFile()
              << "\tbestResult = (isnan(bestResult)) ? -INFINITY : bestResult;\n"
              << "\tidx = idxNext + 1;\n\n"
 
-             << "\t// Check if there is another edge with a better result\n"
              << "\twhile (idx < nbEdge){\n"
-
              << "\t\tr = e[idx].ptr_prog();\n"
              << "\t\tr = (isnan(r)) ? -INFINITY : r;\n"
              << "\t\tif (r >= bestResult){\n"
@@ -206,20 +201,18 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
 
     fileMainH << "typedef enum Vertex {";
     for (auto vertex : this->tpg.getVertices()) {
-        fileMainH << vertexName(*vertex) << "Vert"
-                  << ", ";
+        fileMainH << vertexName(*vertex) << "Vert" << ", ";
     }
 
     fileMainH << "} Vertex;\n\n"
-
               << "typedef struct Edge {\n"
               << "\tVertex destination;\n"
               << "\tdouble (*ptr_prog)();\n"
-              << "\tvoid* (*ptr_vertex)(int* action);\n"
+              << "\tvoid* (*ptr_vertex)(double* action);\n"
               << "}Edge;\n\n"
 
-              << "int inferenceTPG();\n"
-              << "int executeFromVertex(void*(*)(int*action));\n"
+              << "void inferenceTPG(double* action);\n"
+              << "void executeFromVertex(void*(*)(double*), double* action);\n"
               << "void* executeTeam(Edge* e, int nbEdge);\n"
               << "int execute(Edge* e, int nbEdge);\n"
               << std::endl;
