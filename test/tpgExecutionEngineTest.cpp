@@ -301,7 +301,8 @@ TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
     std::vector<double> valuesNone{10.0, 0.2, -4.0,
                                    std::numeric_limits<double>::quiet_NaN()};
     params.activationFunction = "none";
-    TPG::TPGExecutionEngine tpeeNone(Environment(set, params, vect));
+    Environment envNone(set, params, vect);
+    TPG::TPGExecutionEngine tpeeNone(envNone);
 
     ASSERT_NO_THROW(tpeeNone.applyActivationFunctionOnActions(valuesNone)) << "None activation function failed";
     // Check the value are right
@@ -313,7 +314,8 @@ TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
     std::vector<double> valuesTanh{10.0, 0.2, -4.0,
                                    std::numeric_limits<double>::quiet_NaN()};
     params.activationFunction = "tanh";
-    TPG::TPGExecutionEngine tpeeTanh(Environment(set, params, vect));
+    Environment envTanh(set, params, vect);
+    TPG::TPGExecutionEngine tpeeTanh(envTanh);
 
     ASSERT_NO_THROW(tpeeTanh.applyActivationFunctionOnActions(valuesTanh)) << "None activation function failed";
     // Check the value are right
@@ -326,7 +328,8 @@ TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
     std::vector<double> valuesSigmoid{10.0, 0.2, -4.0,
                                    std::numeric_limits<double>::quiet_NaN()};
     params.activationFunction = "sigmoid";
-    TPG::TPGExecutionEngine tpeeSigmoid(Environment(set, params, vect));
+    Environment envSigmoid(set, params, vect);
+    TPG::TPGExecutionEngine tpeeSigmoid(envSigmoid);
 
     ASSERT_NO_THROW(tpeeSigmoid.applyActivationFunctionOnActions(valuesSigmoid)) << "None activation function failed";
     // Check the value are right
@@ -339,7 +342,8 @@ TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
 
     // Test for wrong activation function
     params.activationFunction = "WrongActivationFunction";
-    TPG::TPGExecutionEngine tpeeWrong(Environment(set, params, vect));
+    Environment envWrong(set, params, vect);
+    TPG::TPGExecutionEngine tpeeWrong(envWrong);
 
     ASSERT_THROW(tpeeWrong.applyActivationFunctionOnActions(valuesNone), std::runtime_error)
         << "Activation function should not work with wrong activation function";
