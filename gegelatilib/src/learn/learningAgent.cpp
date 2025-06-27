@@ -309,7 +309,8 @@ void Learn::LearningAgent::decimateWithTournament(
 
     // Tournois
     for (size_t i = 0; i < nbAgentsInTournament; i += params.sizeTournament) {
-        size_t end = std::min(i + params.sizeTournament, nbAgentsInTournament);
+        size_t end = std::min(static_cast<size_t>(i + params.sizeTournament),
+                      nbAgentsInTournament);
         auto subrangeBegin = elements.begin() + i;
         auto subrangeEnd = elements.begin() + end;
 
@@ -571,7 +572,7 @@ std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
 
     if (tpgGraph->getNbRootVertices() > 0) {
         return std::make_shared<Learn::Job>(
-            Learn::Job({vertex}, archiveSeed, idx));
+            Learn::Job(vertex, archiveSeed, idx));
     }
     return nullptr;
 }
