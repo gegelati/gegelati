@@ -89,11 +89,14 @@ class MutatorTest : public ::testing::Test
             [](double a, double b) -> double { return a - b; };
         std::function<double(double, double)> add =
             [](double a, double b) -> double { return a + b; };
+        std::function<double(double, double, Data::Constant)> addConst =
+            [](double a, double b, Data::Constant c) -> double { return a + b * (double)c; };
 
         set.add(*(new Instructions::MultByConstant<double>()));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
+        set.add(*(new Instructions::LambdaInstruction<double, double, Data::Constant>(addConst)));
 
         // the environment and the programs have 5 Constant parameters
         params.nbRegisters = 8;
@@ -147,14 +150,14 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1)
     // Operand 0= (0, 12) => 12th register
     // Covers: correct instruction, correct operand type (register), additional
     // uneeded operand (not register)
-    ASSERT_EQ(l0.getInstructionIndex(), 3)
+    ASSERT_EQ(l0.getInstructionIndex(), 2)
         << "Selected pseudo-random instructionIndex changed with a known seed.";
     ASSERT_EQ(l0.getDestinationIndex(), 6)
         << "Selected pseudo-random destinationIndex changed with a known seed.";
     ASSERT_EQ(l0.getOperand(0).first, 0)
         << "Selected pseudo-random operand data source index changed with a "
            "known seed.";
-    ASSERT_EQ(l0.getOperand(0).second, 12)
+    ASSERT_EQ(l0.getOperand(0).second, 15)
         << "Selected pseudo-random operand location changed with a known seed.";
 
     // Add another pseudo-random lines to the program
@@ -165,9 +168,9 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1)
     ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l1, rng))
         << "Pseudo-Random correct line initialization failed within an "
            "environment where failure should not be possible.";
-    ASSERT_EQ(l1.getInstructionIndex(), 3)
+    ASSERT_EQ(l1.getInstructionIndex(), 2)
         << "Selected pseudo-random instructionIndex changed with a known seed.";
-    ASSERT_EQ(l1.getOperand(0).first, 0)
+    ASSERT_EQ(l1.getOperand(0).first, 3)
         << "Selected pseudo-random operand data source index changed with a "
            "known seed.";
 
@@ -188,7 +191,7 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1)
     ASSERT_NO_THROW(Mutator::LineMutator::initRandomCorrectLine(l4, rng))
         << "Pseudo-Random correct line initialization failed within an "
            "environment where failure should not be possible.";
-    ASSERT_EQ(l4.getInstructionIndex(), 3)
+    ASSERT_EQ(l4.getInstructionIndex(), 4)
         << "Selected pseudo-random instructionIndex changed with a known seed.";
     ASSERT_EQ(l4.getOperand(1).first, 3)
         << "Selected pseudo-random operand data source index changed with a "
@@ -214,7 +217,7 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
     rng.setSeed(5);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getInstructionIndex(), 2)
+    ASSERT_EQ(l0.getInstructionIndex(), 1)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
@@ -223,21 +226,21 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
     rng.setSeed(29);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getDestinationIndex(), 3)
+    ASSERT_EQ(l0.getDestinationIndex(), 0)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter operand 0 data source
-    // i=2, d=3, op0=(3,0), op1=(0,0)
+    // i=2, d=3, op0=(0,0), op1=(0,0)
     rng.setSeed(8);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getOperand(0).first, 3)
+    ASSERT_EQ(l0.getOperand(0).first, 0)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter operand 0 location
-    // i=2, d=3, op0=(3,17), op1=(0,0)
+    // i=2, d=3, op0=(0,17), op1=(0,0)
     rng.setSeed(1);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
@@ -246,39 +249,39 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter operand 1 data source
-    // i=2, d=3, op0=(3,17), op1=(3,0)
-    rng.setSeed(323);
+    // i=2, d=3, op0=(0,17), op1=(8,0)
+    rng.setSeed(320);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getOperand(1).first, 3)
+    ASSERT_EQ(l0.getOperand(1).first, 0)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter operand 1 location
-    // i=2, d=3, op0=(3,17), op1=(3,28)
+    // i=2, d=3, op0=(0,17), op1=(0,8)
     rng.setSeed(2);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getOperand(1).second, 28)
+    ASSERT_EQ(l0.getOperand(1).second, 8)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
     // Alter instruction index
-    // i=1, d=3, op0=(3,17), op1=(3,28)
-    rng.setSeed(5);
+    // i=4, d=0, op0=(0,28), op1=(0,8)
+    rng.setSeed(6);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getInstructionIndex(), 1)
+    ASSERT_EQ(l0.getInstructionIndex(), 4)
         << "Alteration with known seed changed its result.";
-    ASSERT_EQ(l0.getDestinationIndex(), 3)
+    ASSERT_EQ(l0.getDestinationIndex(), 0)
         << "Alteration with known seed changed its result.";
-    ASSERT_EQ(l0.getOperand(0).first, 3)
+    ASSERT_EQ(l0.getOperand(0).first, 0)
         << "Alteration with known seed changed its result.";
-    ASSERT_EQ(l0.getOperand(0).second, 17)
+    ASSERT_EQ(l0.getOperand(0).second, 28)
         << "Alteration with known seed changed its result.";
-    ASSERT_EQ(l0.getOperand(1).first, 3)
+    ASSERT_EQ(l0.getOperand(1).first, 0)
         << "Alteration with known seed changed its result.";
-    ASSERT_EQ(l0.getOperand(1).second, 28)
+    ASSERT_EQ(l0.getOperand(1).second, 8)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 }
@@ -308,7 +311,7 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
     rng.setSeed(5);
     ASSERT_NO_THROW(Mutator::LineMutator::alterCorrectLine(l0, rng))
         << "Line mutation of a correct instruction should not throw.";
-    ASSERT_EQ(l0.getInstructionIndex(), 1)
+    ASSERT_EQ(l0.getInstructionIndex(), 4)
         << "Alteration with known seed changed its result.";
     ASSERT_NO_THROW(pEE.executeProgram()) << "Altered line is not executable.";
 
@@ -455,7 +458,8 @@ TEST_F(MutatorTest, ProgramMutatorInitProgram)
     rng.setSeed(0);
 
     Mutator::MutationParameters params;
-    params.prog.maxProgramSize = 96;
+    params.prog.initMaxProgramSize = 96;
+    params.prog.initMinProgramSize = 1;
     params.prog.maxConstValue = 10;
     params.prog.minConstValue = 0;
 
@@ -466,7 +470,7 @@ TEST_F(MutatorTest, ProgramMutatorInitProgram)
 
     ASSERT_NO_THROW(Mutator::ProgramMutator::initRandomProgram(*p, params, rng))
         << "Non-Empty Program Random init failed";
-    ASSERT_EQ(p->getNbLines(), 38)
+    ASSERT_EQ(p->getNbLines(), 64)
         << "Random number of line is not as expected (with known seed).";
 
     // Count lines marked as introns (with a known seed).
@@ -478,7 +482,7 @@ TEST_F(MutatorTest, ProgramMutatorInitProgram)
     }
 
     // Check nb intron lines with a known seed.
-    ASSERT_EQ(nbIntrons, 36);
+    ASSERT_EQ(nbIntrons, 63);
 }
 
 TEST_F(MutatorTest, ProgramMutatorMutateBehavior)
@@ -572,9 +576,9 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         << "TPG Initialization failed.";
     auto vertexSet = tpg.getVertices();
     // Check number or vertex, roots, actions, teams, edges
-    ASSERT_EQ(vertexSet.size(), 2 * nbActions)
+    ASSERT_EQ(vertexSet.size(), nbActions + params.tpg.nbRoots)
         << "Number of vertices after initialization is incorrect.";
-    ASSERT_EQ(tpg.getRootVertices().size(), nbActions)
+    ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const TPG::TPGVertex* vert) {
@@ -588,12 +592,12 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
                                 return dynamic_cast<const TPG::TPGTeam*>(
                                            vert) != nullptr;
                             }),
-              nbActions)
+              params.tpg.nbRoots)
         << "Number of team vertex in the graph is incorrect.";
-    ASSERT_GE(tpg.getEdges().size(), 2 * nbActions)
+    ASSERT_GE(tpg.getEdges().size(), 2 * params.tpg.nbRoots)
         << "Insufficient number of edges in the initialized TPG.";
     ASSERT_LE(tpg.getEdges().size(),
-              nbActions * params.tpg.maxInitOutgoingEdges)
+              params.tpg.nbRoots * params.tpg.maxInitOutgoingEdges)
         << "Too many edges in the initialized TPG.";
 
     // Check number of Programs.
@@ -602,7 +606,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
                   [&programs](const std::unique_ptr<TPG::TPGEdge>& edge) {
                       programs.insert(&edge->getProgram());
                   });
-    ASSERT_EQ(programs.size(), nbActions * 2)
+    ASSERT_EQ(programs.size(), params.tpg.nbRoots * 2)
         << "Number of distinct program in the TPG is incorrect.";
     // Check that no team has the same program twice
     for (auto team : tpg.getRootVertices()) {
@@ -628,7 +632,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
-    nbActions = 5;
 
 
 }
@@ -689,7 +692,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
 
     auto vertexSet = tpg3.getVertices();
     // Check number or vertex, roots, actions, teams, edges
-    ASSERT_EQ(vertexSet.size(), mutParams.tpg.nbRoots)
+    ASSERT_EQ(vertexSet.size(), mutParams.tpg.nbRoots * 3)
         << "Number of vertices after initialization is incorrect.";
     ASSERT_EQ(tpg3.getRootVertices().size(), mutParams.tpg.nbRoots)
         << "Number of root vertices after initialization is incorrect.";
@@ -698,7 +701,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
                                 return dynamic_cast<const TPG::TPGAction*>(
                                            vert) != nullptr;
                             }),
-              mutParams.tpg.nbRoots)
+              mutParams.tpg.nbRoots*2)
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const TPG::TPGVertex* vert) {
@@ -707,10 +710,10 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
                             }),
               mutParams.tpg.nbRoots)
         << "Number of team vertex in the graph is incorrect.";
-    ASSERT_GE(tpg3.getEdges().size(), mutParams.tpg.nbRoots)
+    ASSERT_GE(tpg3.getEdges().size(), mutParams.tpg.nbRoots * 2)
         << "Insufficient number of edges in the initialized TPG.";
     ASSERT_LE(tpg3.getEdges().size(),
-             mutParams.tpg.nbRoots)
+             mutParams.tpg.nbRoots * (mutParams.tpg.maxInitOutgoingEdges + 1))
         << "Too many edges in the initialized TPG.";
 
     // Check number of Programs.
@@ -719,7 +722,8 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
                   [&programs](const std::unique_ptr<TPG::TPGEdge>& edge) {
                       programs.insert(&edge->getProgram());
                   });
-    ASSERT_EQ(programs.size(), mutParams.tpg.nbRoots)
+    // 2 contexts programs and 2 actions program per roots
+    ASSERT_EQ(programs.size(), 4 * mutParams.tpg.nbRoots)
         << "Number of distinct program in the TPG is incorrect.";
     
 }
