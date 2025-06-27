@@ -318,7 +318,7 @@ bool Program::Program::hasIdenticalBehavior(const Program& other) const
                         thisLine.getInstructionIndex());
 
                 // Check operands
-                for (auto operandIdx = 0;
+                for (unsigned int operandIdx = 0;
                      operandIdx < instruction.getNbOperands(); operandIdx++) {
                     // Is the operand from the Constant data source.
                     if (thisLine.getOperand(operandIdx).first == 1) {

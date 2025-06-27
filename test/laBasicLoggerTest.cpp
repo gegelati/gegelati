@@ -134,6 +134,10 @@ TEST_F(LABasicLoggerTest, logHeader)
     l.doValidation = true;
     l.logHeader();
 
+    // we log a third header with validation column
+    l.useUtility = true;
+    l.logHeader();
+
     // now we will check the header logged correctly
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
@@ -152,9 +156,17 @@ TEST_F(LABasicLoggerTest, logHeader)
     ASSERT_EQ("Max", result[7]);
     ASSERT_EQ("T_mutat", result[8]);
     ASSERT_EQ("T_eval", result[9]);
-    ASSERT_EQ("T_total", result[10]);
-    ASSERT_EQ("Valid", result[12]);
-    ASSERT_EQ("T_valid", result[25]);
+    ASSERT_EQ("T_decim", result[10]);
+    ASSERT_EQ("T_total", result[11]);
+    ASSERT_EQ("Valid", result[13]);
+    ASSERT_EQ("Avg", result[22]);
+    ASSERT_EQ("T_valid", result[26]);
+    ASSERT_EQ("U_Min", result[35]);
+    ASSERT_EQ("U_Avg", result[36]);
+    ASSERT_EQ("U_Max", result[37]);
+    ASSERT_EQ("R_Min", result[38]);
+    ASSERT_EQ("R_Avg", result[39]);
+    ASSERT_EQ("R_Max", result[40]);
 }
 
 TEST_F(LABasicLoggerTest, logNewGeneration)
@@ -172,9 +184,9 @@ TEST_F(LABasicLoggerTest, logNewGeneration)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 9 because we skip the header
-    ASSERT_EQ("42", result[11]);
-    ASSERT_EQ(result.size(), 11 + 1);
+    // index 12 because we skip the header
+    ASSERT_EQ("42", result[12]);
+    ASSERT_EQ(result.size(), 12 + 1);
 }
 
 TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
@@ -191,8 +203,12 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 8 because we skip the header
-    ASSERT_EQ("6", result[11])
+    // index 12 because we skip the header
+    ASSERT_EQ("18", result[12])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ("0", result[13])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ("15", result[14])
         << "Unexpected number of vertices was printed in the log.";
 }
 
@@ -209,10 +225,10 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 8 because we skip the header
-    ASSERT_DOUBLE_EQ(5.00, std::stod(result[11]));
-    ASSERT_DOUBLE_EQ(7.50, std::stod(result[12]));
-    ASSERT_DOUBLE_EQ(10.00, std::stod(result[13]));
+    // index 12+ because we skip the header
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[12]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[13]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[14]));
 }
 
 TEST_F(LABasicLoggerTest, logAfterValidate)
@@ -228,10 +244,10 @@ TEST_F(LABasicLoggerTest, logAfterValidate)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 8+ because we skip the header
-    ASSERT_DOUBLE_EQ(5.00, std::stod(result[11]));
-    ASSERT_DOUBLE_EQ(7.50, std::stod(result[12]));
-    ASSERT_DOUBLE_EQ(10.00, std::stod(result[13]));
+    // index 12+ because we skip the header
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[12]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[13]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[14]));
 }
 
 TEST_F(LABasicLoggerTest, logAfterDecimate)
@@ -276,20 +292,22 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 12+ because we skip the headers and the eval stats
-    double mutatTime = std::stod(result[14]);
-    double evalTime = std::stod(result[15]);
-    double validTime = std::stod(result[16]);
-    double totTime = std::stod(result[16]);
+    // index 15+ because we skip the headers and the eval stats
+    double mutatTime = std::stod(result[15]);
+    double evalTime = std::stod(result[16]);
+    double decimTime = std::stod(result[17]);
+    double validTime = std::stod(result[18]);
+    double totTime = std::stod(result[19]);
     ASSERT_GE(mutatTime, 0) << "Eval duration should be positive";
     ASSERT_GE(evalTime, 0) << "Eval duration should be positive";
+    ASSERT_GE(decimTime, 0) << "Valid duration should be positive";
     ASSERT_GE(validTime, 0) << "Valid duration should be positive";
     ASSERT_GE(totTime, evalTime)
         << "Total time should be the largest duration !";
     ASSERT_GE(totTime, timeToWaitMili / 1000)
         << "Total time should be larger than the time we waited !";
 
-    // Size is headerSize (9) + log size (7 + 3)
-    ASSERT_EQ(result.size(), 11 + 10)
-        << "logEndOfTraining with and without valid should have 4+3=7 elements";
+    // Size is headerSize (12) + log size (8 + 4)
+    ASSERT_EQ(result.size(), 12 + 12)
+        << "logEndOfTraining with and without valid should have 8+4=12 elements";
 }

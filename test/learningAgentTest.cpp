@@ -126,17 +126,6 @@ TEST_F(LearningAgentTest, Init)
         << "Initialization of the LearningAgent should not fail.";
 }
 
-TEST_F(LearningAgentTest, initNbTeams)
-{
-    params.mutation.tpg.initNbTeams = 42;
-    Learn::LearningAgent la(le, set, params);
-
-    la.init();
-
-    ASSERT_EQ(la.getTPGGraph()->getNbRootVertices(), 42)
-        << "Initialization of the LearningAgent should have a number of roots "
-           "equal to the number specify";
-}
 
 TEST_F(LearningAgentTest, addLogger)
 {
@@ -604,13 +593,13 @@ TEST_F(LearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 29)
+    ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 25)
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 92)
+    ASSERT_EQ(tpg.getEdges().size(), 85)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8778232462724898875)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 15788780790033520032U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -724,9 +713,9 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 35)
+    ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+    ASSERT_EQ(tpg.getNbRootVertices(), 29)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 100)
         << "Graph does not have the expected determinst characteristics.";
@@ -862,8 +851,6 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuous)
     params.ratioDeletedRoots =
         0.5; // high number to force the apparition of root action.
     params.nbThreads = 1;
-    params.mutation.tpg.initNbActions = 2;
-
     Learn::LearningAgent la(cle, set, params);
 
     la.init();
@@ -924,8 +911,6 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     // Initialize Randomness
     Mutator::RNG rng;
     rng.setSeed(0);
-
-    params.mutation.tpg.initNbTeams = le.getNbActions();
 
     // Initialize the tpg
     Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng,

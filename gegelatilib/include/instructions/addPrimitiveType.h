@@ -121,6 +121,8 @@ namespace Instructions {
     {
         this->operandTypes.push_back(typeid(T));
         this->operandTypes.push_back(typeid(T));
+        this->operandTypesNoConst.push_back(typeid(T));
+        this->operandTypesNoConst.push_back(typeid(T));
     }
 } // namespace Instructions
 

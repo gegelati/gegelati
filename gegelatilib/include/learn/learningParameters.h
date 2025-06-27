@@ -129,9 +129,9 @@ namespace Learn {
         /// JSon comment
         inline static const std::string sizeTournamentComment =
             "// Size of tournament if tournament selection is used.\n"
-            "// \"sizeTournament\" : 0.5, // Default value";
+            "// \"sizeTournament\" : 5, // Default value";
         /// Size of tournament if tournament selection is used.
-        uint64_t sizeTournament = 0.5;
+        uint64_t sizeTournament = 5;
 
         /// JSon comment
         inline static const std::string nbGenerationsComment =

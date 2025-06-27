@@ -53,10 +53,11 @@ namespace Mutator {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in] nbActionEdgeInit number of edges to init the action vertex with
+         * \param[in] actionID actionID of the action.
          */
         const TPG::TPGAction* initActionVertex(
             TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-            Mutator::RNG& rng, double nbActionEdgeInit
+            Mutator::RNG& rng, uint64_t nbActionEdgeInit, uint64_t actionID
         );
 
         /**
@@ -342,6 +343,23 @@ namespace Mutator {
             Mutator::RNG& rng, const Mutator::MutationParameters& params,
             const Archive& archive);
 
+        /**
+         * \brief With tournamenent selection, some agents can be cloned but will be deleted at the end of the mutation process
+         * So they need to be removed from the preExisting lists. 
+         * 
+         * On the other hand, the rest of the preExisting agents will not be removed, but can not be cloned,
+         * So they need to be removed from the clonable lists.
+         * 
+         * \param[in] preExistingTeams the TPGTeam candidates for destination.
+         * \param[in] preExistingActions the TPGAction candidates for
+         *            destination.
+         */
+        void updateClonableAndExistingVertexForTournament(
+            std::vector<const TPG::TPGTeam *>& teamsClonable,
+            std::vector<const TPG::TPGAction*>& actionsClonable,
+            std::vector<const TPG::TPGTeam*>& preExistingTeams,
+            std::vector<const TPG::TPGAction*>& preExistingActions
+        );
 
         /**
          * \brief Create new root TPGTeam within the TPGGraph.

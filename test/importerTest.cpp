@@ -104,7 +104,7 @@ class ImporterTest : public ::testing::Test
                 std::make_shared<Program::Program>(*e, false);
             for (int j = 0; j < 5; j++) {
                 p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
-                                                        j, {j - 2});
+                                                        j, {(double)(j - 2)});
             }
             progPointers.push_back(p);
         }

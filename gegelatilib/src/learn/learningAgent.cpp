@@ -288,7 +288,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 void Learn::LearningAgent::decimateWithTournament(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results)
 {
-    size_t nbToKeep = params.mutation.tpg.nbRoots * (1 - params.ratioDeletedRoots);
+    size_t nbToKeep = (size_t)(params.mutation.tpg.nbRoots * (1 - params.ratioDeletedRoots));
     size_t nbAgentsInTournament = results.size() - nbToKeep;
 
     // Copie les premiers agents à supprimer (ceux en bas du classement)
@@ -374,13 +374,13 @@ void Learn::LearningAgent::decimateWorstRoots(
 
 
     // Estimate the number of expected roots to delete
-    size_t nbExpectedRoots = floor(this->params.ratioDeletedRoots *
-                                   (double)params.mutation.tpg.nbRoots);
+    size_t nbExpectedRoots = (size_t)floor(this->params.ratioDeletedRoots *
+                                           (double)params.mutation.tpg.nbRoots);
 
     // Get the maximum number of teams and actions deletable
     size_t nbTeamsDeleted = 0;
     size_t nbActionsDeleted = 0;
-    size_t maxNbTeamsToDelete = nbExpectedRoots * this->params.mutation.tpg.ratioTeamsOverActions;
+    size_t maxNbTeamsToDelete = (size_t)((double)nbExpectedRoots * this->params.mutation.tpg.ratioTeamsOverActions);
     size_t maxNbActionsoDelete = nbExpectedRoots - maxNbTeamsToDelete;
 
     auto i = 0;

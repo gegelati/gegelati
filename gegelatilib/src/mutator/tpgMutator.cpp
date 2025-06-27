@@ -59,9 +59,9 @@
 
 const TPG::TPGAction* Mutator::TPGMutator::initActionVertex(
     TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-    Mutator::RNG& rng, double nbActionEdgeInit)
+    Mutator::RNG& rng, uint64_t nbActionEdgeInit, uint64_t actionID)
 {
-    const TPG::TPGAction* action = &(graph.addNewAction(0));
+    const TPG::TPGAction* action = &(graph.addNewAction(actionID));
 
     std::set<uint64_t> actionUsed;
     for(size_t j = 0; j < nbActionEdgeInit; j++){
@@ -77,7 +77,7 @@ const TPG::TPGAction* Mutator::TPGMutator::initActionVertex(
         // Find an action class not already used by this action 
         uint64_t actionClass;
         do{
-            actionClass = rng.getInt32(0, graph.getEnvironment().getNbContinuousActions() - 1);}
+            actionClass = rng.getUnsignedInt64(0, graph.getEnvironment().getNbContinuousActions() - 1);}
         while(actionUsed.find(actionClass) != actionUsed.end());
         actionUsed.insert(actionClass);
 
@@ -99,6 +99,8 @@ void Mutator::TPGMutator::initRandomTPG(
 
     // Number of action edge per action vertex.
     uint64_t nbActionEdgeInit = params.tpg.nbActionEdgeInit;
+    uint64_t initNbTeams = (uint64_t)(params.tpg.ratioTeamsOverActions * params.tpg.nbRoots);
+    uint64_t initNbActions = nbActions;
 
     if (graph.getEnvironment().getNbContinuousActions() == 0) {
         nbActionEdgeInit = 0;
@@ -131,29 +133,18 @@ void Mutator::TPGMutator::initRandomTPG(
             throw std::runtime_error("Maximum initial number of outgoing action edges "
                                 "cannot exceed the number of action");
         }
-        // If no error but case with continuous actions, nbActions is set to the
-        // number of action vertex created
-        nbActions = (1 - params.tpg.ratioTeamsOverActions) * params.tpg.nbRoots;
+
+        initNbActions = params.tpg.nbRoots - initNbTeams + 2 * initNbTeams;
     }
 
     if(params.tpg.useActionProgram && !params.tpg.teamAccessAllActions && params.tpg.ratioTeamsOverActions == 1){
         throw std::runtime_error("Parameter only allow teams to select action roots, but there is not action roots considering the ratio!");
     }
 
-    uint64_t initNbTeams = params.tpg.ratioTeamsOverActions * params.tpg.nbRoots;
-    uint64_t initNbActions = params.tpg.nbRoots - initNbTeams;
-
-    if (initNbTeams < nbActions && !params.tpg.useActionProgram) {
-        throw std::runtime_error(
-            "The number of init roots should be above or "
-            "equal to the number of actions.");
-    }
-
     if(params.tpg.maxInitOutgoingEdges < 2 && initNbTeams > 0){
         throw std::runtime_error(
             "A team should have at least two edges at initialisation.");
     }
-
 
     // Empty graph
     graph.clear();
@@ -163,8 +154,8 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
 
-    for (size_t i = 0; i < initNbActions + 2 * initNbTeams; i++) {
-        actions.push_back(initActionVertex(graph, params, rng, nbActionEdgeInit));
+    for (size_t i = 0; i < initNbActions ; i++) {
+        actions.push_back(initActionVertex(graph, params, rng, nbActionEdgeInit, i));
     }
     for (size_t i = 0; i < initNbTeams; i++) {
         teams.push_back(&(graph.addNewTeam()));
@@ -182,7 +173,7 @@ void Mutator::TPGMutator::initRandomTPG(
         Mutator::ProgramMutator::initRandomProgram(*programs.back(), params,
                                                    rng);
         graph.addNewEdge(*teams.at(i / 2),
-                         *actions.at(i),
+                         *actions.at(i % initNbActions),
                          programs.at(i));
     }
 
@@ -238,7 +229,7 @@ void Mutator::TPGMutator::initRandomTPG(
 
             // Add the connection
             graph.addNewEdge(*team,
-                             *actions.at(rng.getUnsignedInt64(0, 2 * initNbTeams - 1)),
+                             *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
                              programs.at(selectedProgramIndex));
         }
     }
@@ -380,9 +371,9 @@ void Mutator::TPGMutator::swapActionEdges(
         action.getAssessedActions().size() < graph.getEnvironment().getNbContinuousActions() &&
         params.tpg.pChangeActionClass > rng.getDouble(0.0, 1.0)) {
  
-        uint64_t newActionID = rng.getInt32(0, graph.getEnvironment().getNbContinuousActions() - 1);
+        uint64_t newActionID = rng.getUnsignedInt64(0, graph.getEnvironment().getNbContinuousActions() - 1);
         while(action.getAssessedActions().find(newActionID) != action.getAssessedActions().end()){
-             newActionID = rng.getInt32(0, graph.getEnvironment().getNbContinuousActions() - 1);
+             newActionID = rng.getUnsignedInt64(0, graph.getEnvironment().getNbContinuousActions() - 1);
         }
  
         actionEdge->setActionClass(newActionID);
@@ -786,6 +777,42 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
     }
 }
 
+void Mutator::TPGMutator::updateClonableAndExistingVertexForTournament(
+    std::vector<const TPG::TPGTeam *>& teamsClonable,
+    std::vector<const TPG::TPGAction*>& actionsClonable,
+    std::vector<const TPG::TPGTeam*>& preExistingTeams,
+    std::vector<const TPG::TPGAction*>& preExistingActions
+)
+{
+    // The root not set to be deleted are not used during evolution
+    teamsClonable.erase(
+        std::remove_if(teamsClonable.begin(), teamsClonable.end(),
+                        [](const TPG::TPGVertex* vertex) -> bool {
+                            return !vertex->isToBeDeleted();}),
+                            teamsClonable.end());
+
+    actionsClonable.erase(
+        std::remove_if(actionsClonable.begin(), actionsClonable.end(),
+                        [](const TPG::TPGVertex* vertex) -> bool {
+                            return !vertex->isToBeDeleted();}),
+                            actionsClonable.end());
+
+
+    // Erase the vertex set to be deleted to the list of pre existing vertex.
+    // They are only used for being a new destination
+    preExistingTeams.erase(
+        std::remove_if(preExistingTeams.begin(), preExistingTeams.end(),
+                        [](const TPG::TPGVertex* vertex) -> bool {
+                            return vertex->isToBeDeleted();}),
+                            preExistingTeams.end());
+
+    preExistingActions.erase(
+        std::remove_if(preExistingActions.begin(), preExistingActions.end(),
+                        [](const TPG::TPGVertex* vertex) -> bool {
+                            return vertex->isToBeDeleted();}),
+                            preExistingActions.end());
+}
+
 
 void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                                       const Archive& archive,
@@ -798,8 +825,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Get current root teams (copy)
     auto rootVertices(graph.getRootVertices());
     // Get root Teams
-    std::vector<const TPG::TPGVertex*> rootTeams;
-    std::vector<const TPG::TPGVertex*> rootActions;
+    std::vector<const TPG::TPGTeam*> rootTeams;
+    std::vector<const TPG::TPGAction*> rootActions;
     std::for_each(rootVertices.begin(), rootVertices.end(),
                   [&rootTeams, &rootActions, &params](const TPG::TPGVertex* vertex) {
                       if (dynamic_cast<const TPG::TPGTeam*>(vertex) !=
@@ -852,51 +879,39 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Create an empty list to store Programs to mutate.
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
-    // Choose between only root teams or root teams and action
-    auto teamsClonable = rootTeams;
-    auto actionsClonable = rootActions;
+    // Create list of teams and actions clonable
+    std::vector<const TPG::TPGTeam *> teamsClonable = rootTeams;
+    std::vector<const TPG::TPGAction *> actionsClonable = rootActions;
 
     bool useTournamentSelection = graph.getEnvironment().getParams().useTournamentSelection;
     if (useTournamentSelection) {
-        // The root not set to be deleted are not used during evolution
-        teamsClonable.erase(
-            std::remove_if(teamsClonable.begin(), teamsClonable.end(),
-                           [](const TPG::TPGVertex* vertex) -> bool {
-                               return !vertex->isToBeDeleted();}),
-                               teamsClonable.end());
-
-        actionsClonable.erase(
-            std::remove_if(actionsClonable.begin(), actionsClonable.end(),
-                            [](const TPG::TPGVertex* vertex) -> bool {
-                                return !vertex->isToBeDeleted();}),
-                                actionsClonable.end());
+        // Update the list of clonable and preExisting Vertices because of the tournmanent selection
+        updateClonableAndExistingVertexForTournament(teamsClonable, actionsClonable, preExistingTeams, preExistingActions);
     }
 
     // Create the new teams root
-    uint64_t nbTeamsCreated = 0;
-    uint64_t nbTeamsToCreate = params.tpg.nbRoots * params.tpg.ratioTeamsOverActions - rootTeams.size() + (teamsClonable.size() * useTournamentSelection);
-    while (nbTeamsCreated < nbTeamsToCreate) {
+    uint64_t nbTeamsToCreate = (uint64_t)(params.tpg.nbRoots * params.tpg.ratioTeamsOverActions) - rootTeams.size() + (teamsClonable.size() * useTournamentSelection);
+    uint64_t nbExpectedRoots = graph.getNbRootVertices() + nbTeamsToCreate;
+    while (graph.getNbRootVertices() < nbExpectedRoots) {
 
         // Select a random existing root
         uint64_t clonedRootIndex =
             rng.getUnsignedInt64(0, teamsClonable.size() - 1);
 
         // clone it (the vertex and all its outgoing edges)
-        const TPG::TPGVertex& newRoot =
-            (const TPG::TPGVertex&)graph.cloneVertex(
+        const TPG::TPGTeam& newRoot =
+            (const TPG::TPGTeam&)graph.cloneVertex(
                 *teamsClonable.at(clonedRootIndex));
 
         // Apply mutations to the root
-        mutateTPGTeam(graph, archive, (const TPG::TPGTeam&)newRoot,
+        mutateTPGTeam(graph, archive, newRoot,
                         preExistingTeams, preExistingActions,
                         preExistingEdges, newPrograms, params, rng);
-        // Increase the new number of roots
-        nbTeamsCreated++;
     }
 
     // Create the new action roots
     uint64_t nbActionsCreated = 0;
-    uint64_t nbActionsToCreate = params.tpg.nbRoots * (1 - params.tpg.ratioTeamsOverActions) - rootActions.size() + (actionsClonable.size() * useTournamentSelection);
+    uint64_t nbActionsToCreate = (uint64_t)(params.tpg.nbRoots * (1 - params.tpg.ratioTeamsOverActions)) - rootActions.size() + (actionsClonable.size() * useTournamentSelection);
     while (nbActionsCreated < nbActionsToCreate) {
 
         // Select a random existing root
@@ -904,12 +919,12 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
             rng.getUnsignedInt64(0, rootActions.size() - 1);
 
         // clone it (the vertex and all its outgoing edges)
-        const TPG::TPGVertex& newRoot =
-            (const TPG::TPGVertex&)graph.cloneVertex(
+        const TPG::TPGAction& newRoot =
+            (const TPG::TPGAction&)graph.cloneVertex(
                 *rootActions.at(clonedRootIndex));
 
         // Apply mutations to the root
-        mutateTPGAction(graph, (const TPG::TPGAction&)newRoot, preExistingActions, preExistingEdges,newPrograms,
+        mutateTPGAction(graph, newRoot, preExistingActions, preExistingEdges,newPrograms,
                         params, rng);
 
         

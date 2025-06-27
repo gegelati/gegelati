@@ -87,7 +87,7 @@ void Log::LABasicLogger::logHeader()
     if(useUtility) *this << std::setw((int)(1.5*colWidth)) << " ";
     *this << std::setw(colWidth) << "Train";
     if (doValidation) {
-        *this << std::setw(2.5 * colWidth) << " ";
+        *this << std::setw((int)(2.5 * colWidth)) << " ";
         if(useUtility) *this << std::setw((int)(3 * colWidth)) << "  ";
         *this << "Valid";
     }
@@ -99,19 +99,26 @@ void Log::LABasicLogger::logHeader()
           << std::setw(colWidth) << "NbActR" << std::setw(colWidth) << "NbTeamR";
     
     if(useUtility){
-        *this << std::setw(colWidth) << "U Min" << std::setw(colWidth) << "U Avg"
-              << std::setw(colWidth) << "U Max";
+        *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth) << "U_Avg"
+              << std::setw(colWidth) << "U_Max";
+        *this << std::setw(colWidth) << "R_Min" << std::setw(colWidth) << "R_Avg"
+              << std::setw(colWidth) << "R_Max";
+    } else {
+        *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
+              << std::setw(colWidth) << "Max";
     }
-    *this << std::setw(colWidth) << "R Min" << std::setw(colWidth) << "R Avg"
-          << std::setw(colWidth) << "R Max";
+
 
     if (doValidation) {
         if(useUtility){
-            *this << std::setw(colWidth) << "U Min" << std::setw(colWidth) << "U Avg"
-                << std::setw(colWidth) << "U Max";
+            *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth) << "U_Avg"
+                  << std::setw(colWidth) << "U_Max";
+            *this << std::setw(colWidth) << "R_Min" << std::setw(colWidth) << "R_Avg"
+                  << std::setw(colWidth) << "R_Max";
+        } else {
+            *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
+                  << std::setw(colWidth) << "Max";
         }
-        *this << std::setw(colWidth) << "R Min" << std::setw(colWidth) << "R Avg"
-            << std::setw(colWidth) << "R Max";
     }
 
     *this << std::setw(colWidth) << "T_mutat" << std::setw(colWidth)

@@ -63,7 +63,7 @@ void Mutator::LineMutator::changeConstantAt(Program::Line& line, uint64_t index,
 }
 
 void Mutator::LineMutator::initRandomConstants(Program::Line& line, Mutator::RNG& rng){
-    for(auto idx = 0; idx < line.getEnvironment().getInstructionSet().getMaxNbConstants(); idx++){
+    for(unsigned int idx = 0; idx < line.getEnvironment().getInstructionSet().getMaxNbConstants(); idx++){
         // Sample the new value
 
         Mutator::ProgramParameters param = line.getEnvironment().getParams().mutation.prog;

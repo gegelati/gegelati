@@ -45,7 +45,7 @@ void Learn::ClassificationLearningEnvironment::doAction(double actionID)
     LearningEnvironment::doAction(actionID);
 
     // Classification table update
-    this->classificationTable.at(this->currentClass).at(actionID)++;
+    this->classificationTable.at(this->currentClass).at((uint64_t)actionID)++;
 }
 
 const std::vector<std::vector<uint64_t>>& Learn::

@@ -124,7 +124,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
     params.nbIterationsPerPolicyEvaluation = 20;
     params.nbIterationsPerJob = 2;
     params.ratioDeletedRoots = 0.4;
-    params.mutation.tpg.initNbTeams = 3;
+    params.mutation.tpg.nbRoots = 3;
     size_t agentsPerEval = 5;
     Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
     // 5 agents per job, 2 eval per job, 20 per root
@@ -252,11 +252,11 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     TPG::TPGGraph& tpg = *la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 22)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 15)
+    ASSERT_EQ(tpg.getNbRootVertices(), 16)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 110)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 1087076143828398529)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 3758696898685704499U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
