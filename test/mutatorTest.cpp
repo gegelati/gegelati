@@ -561,7 +561,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 5;
-    params.tpg.initNbTeams = 5;
     params.tpg.maxInitOutgoingEdges = 4;
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
@@ -630,11 +629,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
     nbActions = 5;
-    params.tpg.initNbTeams = 2;
-    ASSERT_THROW(
-        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
-        std::runtime_error)
-        << "TPG Initialization should fail with bad parameters.";
 
 
 }
@@ -645,8 +639,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     
     Mutator::RNG rng;
     Mutator::MutationParameters& mutParams = params.mutation;
-    mutParams.tpg.initNbTeams = 20;
-    mutParams.tpg.initNbActions = 10;
     mutParams.tpg.maxInitOutgoingEdges = 4;
     mutParams.prog.maxProgramSize = 96;
     mutParams.prog.pConstantMutation = 0.5;
@@ -697,28 +689,28 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
 
     auto vertexSet = tpg3.getVertices();
     // Check number or vertex, roots, actions, teams, edges
-    ASSERT_EQ(vertexSet.size(), mutParams.tpg.initNbActions + mutParams.tpg.initNbTeams)
+    ASSERT_EQ(vertexSet.size(), mutParams.tpg.nbRoots)
         << "Number of vertices after initialization is incorrect.";
-    ASSERT_EQ(tpg3.getRootVertices().size(), mutParams.tpg.initNbTeams)
+    ASSERT_EQ(tpg3.getRootVertices().size(), mutParams.tpg.nbRoots)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const TPG::TPGVertex* vert) {
                                 return dynamic_cast<const TPG::TPGAction*>(
                                            vert) != nullptr;
                             }),
-              mutParams.tpg.initNbActions)
+              mutParams.tpg.nbRoots)
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const TPG::TPGVertex* vert) {
                                 return dynamic_cast<const TPG::TPGTeam*>(
                                            vert) != nullptr;
                             }),
-              mutParams.tpg.initNbTeams)
+              mutParams.tpg.nbRoots)
         << "Number of team vertex in the graph is incorrect.";
-    ASSERT_GE(tpg3.getEdges().size(), 2 * mutParams.tpg.initNbTeams + mutParams.tpg.initNbActions)
+    ASSERT_GE(tpg3.getEdges().size(), mutParams.tpg.nbRoots)
         << "Insufficient number of edges in the initialized TPG.";
     ASSERT_LE(tpg3.getEdges().size(),
-              mutParams.tpg.initNbTeams * mutParams.tpg.maxInitOutgoingEdges + mutParams.tpg.initNbActions)
+             mutParams.tpg.nbRoots)
         << "Too many edges in the initialized TPG.";
 
     // Check number of Programs.
@@ -727,7 +719,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
                   [&programs](const std::unique_ptr<TPG::TPGEdge>& edge) {
                       programs.insert(&edge->getProgram());
                   });
-    ASSERT_EQ(programs.size(), 2 * mutParams.tpg.initNbTeams + mutParams.tpg.initNbActions)
+    ASSERT_EQ(programs.size(), mutParams.tpg.nbRoots)
         << "Number of distinct program in the TPG is incorrect.";
     
 }
@@ -1126,7 +1118,6 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 4;
-    params.tpg.initNbTeams = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
@@ -1174,7 +1165,6 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 4;
-    params.tpg.initNbTeams = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
@@ -1221,7 +1211,6 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 4;
-    params.tpg.initNbTeams = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;
@@ -1284,7 +1273,6 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 4;
-    params.tpg.initNbTeams = 4;
     params.tpg.maxInitOutgoingEdges = 3;
     params.prog.maxProgramSize = 96;
     params.tpg.nbRoots = 7;

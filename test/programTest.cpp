@@ -561,7 +561,7 @@ TEST_F(ProgramTest, constants)
 
     // add some constants to the program (-2,-1,0,1)
     for (int j = 0; j < 4; j++) {
-        p.getConstantHandler().setDataAt(typeid(Data::Constant), j, {j - 2});
+        p.getConstantHandler().setDataAt(typeid(Data::Constant), j, {double(j - 2)});
     }
 
     auto constants = p.getConstantHandler();

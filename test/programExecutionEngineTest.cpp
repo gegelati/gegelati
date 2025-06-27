@@ -131,7 +131,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
         l2.setOperand(1, 1, 0);    // 2nd operand: parameter 0.
         p->getConstantHandler().setDataAt(
             typeid(Data::Constant), 0,
-            {static_cast<int32_t>(
+            {static_cast<double>(
                 value0)});         // Parameter is set to value1 (=2.3f) => 2
         l2.setDestinationIndex(0); // Destination is register at index 0
 
@@ -141,7 +141,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
         l3.setOperand(1, 1, 1);    // 2nd operand: 1st parameter.
         p->getConstantHandler().setDataAt(
             typeid(Data::Constant), 1,
-            {static_cast<int32_t>(
+            {static_cast<double>(
                 value1)});         // Parameter is set to value1 (=1.2f) => 1
         l3.setDestinationIndex(0); // Destination is register at index 0
 

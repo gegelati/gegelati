@@ -84,7 +84,7 @@ class TPGExecutionEngineTest : public ::testing::Test
         line.setOperand(1, 1, index);    // CHandler at location "index"
         line.setDestinationIndex(index); // index-th register dest
         prog.getConstantHandler().setDataAt(typeid(Data::Constant), index,
-                                            {static_cast<int32_t>(value)});
+                                            {static_cast<double>(value)});
     }
 
     virtual void SetUp()

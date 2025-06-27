@@ -101,8 +101,6 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(200, params.nbGenerations);
     ASSERT_EQ(true, params.doValidation);
     ASSERT_EQ(100, params.mutation.tpg.nbRoots);
-    ASSERT_EQ(3, params.mutation.tpg.initNbActions);
-    ASSERT_EQ(5, params.mutation.tpg.initNbTeams);
     ASSERT_EQ(3, params.mutation.tpg.maxInitOutgoingEdges);
     ASSERT_EQ(60, params.mutation.tpg.maxOutgoingEdges);
     ASSERT_EQ(0.8, params.mutation.tpg.pEdgeDeletion);
@@ -220,10 +218,6 @@ TEST(LearningParametersTest, writeParametersToJson)
               params2.mutation.tpg.pEdgeDestinationIsAction);
     ASSERT_EQ(params.mutation.tpg.pProgramMutation,
               params2.mutation.tpg.pProgramMutation);
-    ASSERT_EQ(params.mutation.tpg.initNbActions,
-              params2.mutation.tpg.initNbActions);
-    ASSERT_EQ(params.mutation.tpg.initNbTeams,
-              params2.mutation.tpg.initNbTeams);
     ASSERT_EQ(params.mutation.tpg.probaContextOverActionProgram,
               params2.mutation.tpg.probaContextOverActionProgram);
     ASSERT_EQ(params.mutation.tpg.useActionProgram,
