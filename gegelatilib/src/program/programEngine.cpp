@@ -37,6 +37,8 @@
 
 #include "program/programEngine.h"
 #include "data/constantHandler.h"
+#include "instructions/multByConstant.h"
+
 
 void Program::ProgramEngine::setProgram(const Program& prog)
 {
@@ -138,16 +140,10 @@ const void Program::ProgramEngine::fetchCurrentOperands(
         const std::type_info& operandType =
             instruction.getOperandTypesWithConst().at(i).get();
 
-        if(operandType == typeid(Data::Constant)){
-
-            
-            //double constantValue = double(*line.cGetConstantHandler().getDataAt(
-            //        operandType, indexConst).getSharedPointer<Data::Constant>());
-
-            //lineConstants.setDataAt(typeid(Data::Constant), indexConst, Data::Constant{constantValue});
-
-            //Data::UntypedSharedPtr data =
-            //    lineConstants.getDataAt(operandType, indexConst);
+        //template <class T>;
+        if(operandType == typeid(Data::Constant) && 
+            dynamic_cast<const Instructions::IAbstractMultByConstant*>(&instruction) == nullptr)
+        {
             
             operands.push_back(line.cGetConstantHandler().getDataAt(
                 operandType, indexConst));

@@ -105,6 +105,10 @@ class ProgramExecutionEngineTest : public ::testing::Test
                 }
                 return res / 4.0;
             }));
+        set.add(*new Instructions::LambdaInstruction<double, double, Data::Constant>(
+            [](double a, double b, Data::Constant c) {
+                return a + b * (double)c;
+            }));
 
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
@@ -168,6 +172,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
         delete (&set.getInstruction(3));
+        delete (&set.getInstruction(4));
     }
 };
 
@@ -240,7 +245,8 @@ TEST_F(ProgramExecutionEngineTest, execute)
 
     double r6 = (value0 + value1 + value0 + value0) / 4;
     double r1 = value0 + r6;
-    double r0 = r1 * ((int)value1);
+    double r0 = r1 * ((double)value1);
+
     r0 = r0 * value2 + r1 * value3;
 
     ASSERT_NO_THROW(result = progExecEng.executeProgram())
@@ -253,7 +259,7 @@ TEST_F(ProgramExecutionEngineTest, execute)
     Program::Line& l5 = p->addNewLine();
     // Instruction 4 does not exist. Must deactivate checks to write this
     // instruction
-    l5.setInstructionIndex(4, false);
+    l5.setInstructionIndex(5, false);
     ASSERT_THROW(progExecEng.executeProgram(), std::out_of_range)
         << "Program line using a incorrect Instruction index should throw an "
            "exception.";

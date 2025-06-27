@@ -104,6 +104,10 @@ class ProgramEngineTest : public ::testing::Test
                 }
                 return res / 4.0;
             }));
+        set.add(*new Instructions::LambdaInstruction<double, double, Data::Constant>(
+            [](double a, double b, Data::Constant c) {
+                return a + b * (double)c;
+            }));
 
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
@@ -368,9 +372,9 @@ TEST_F(ProgramEngineTest, iterateThroughtProgram)
 
     // Introduce a new line in the program to test the throw
     Program::Line& l5 = p->addNewLine();
-    // Instruction 4 does not exist. Must deactivate checks to write this
+    // Instruction 5 does not exist. Must deactivate checks to write this
     // instruction
-    l5.setInstructionIndex(4, false);
+    l5.setInstructionIndex(5, false);
     ASSERT_THROW(progExecEng.iterateThroughtProgram(false), std::out_of_range)
         << "Iterate throught a program that contain a line using an incorrect "
            "Instruction index should throw an exception.";
@@ -392,7 +396,7 @@ TEST_F(ProgramEngineTest, getRegisterValues)
     ASSERT_NO_THROW(regsValue = progExecEng.getRegisterValues(8))
         << "Fail to get the register values";
 
-    ASSERT_EQ(regsValue, std::vector<double>({8.6500000238418568,  4.3250000119209284, 0, 0, 0,  2.0250000119209286, 0, 0}))
+    ASSERT_EQ(regsValue, std::vector<double>({9.0825001281499862,  4.3250000119209284, 0, 0, 0,  2.0250000119209286, 0, 0}))
         << "Register values are incorrect";
 
 }

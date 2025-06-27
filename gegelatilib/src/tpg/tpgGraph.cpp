@@ -184,7 +184,7 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
             // edge.
             TPG::TPGActionEdge* actionEdge = dynamic_cast<TPGActionEdge*>(edge);
             this->addNewActionEdge(*newVertex,
-                                    std::make_shared<Program::Program>(*actionEdge->getProgramSharedPointer()),
+                                   actionEdge->getProgramSharedPointer(),
                                    actionEdge->getActionClass());
 
         }
@@ -342,7 +342,7 @@ const TPG::TPGEdge& TPG::TPGGraph::cloneEdge(const TPGEdge& edge)
         const TPG::TPGActionEdge* actionEdge =
             dynamic_cast<const TPGActionEdge*>(iterEdge->get());
         return this->addNewActionEdge(*actionEdge->getSource(),
-                                      std::make_shared<Program::Program>(*iterEdge->get()->getProgramSharedPointer()),
+                                      iterEdge->get()->getProgramSharedPointer(),
                                       actionEdge->getActionClass());
     }
     else {
