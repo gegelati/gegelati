@@ -1,5 +1,17 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_yyyy.mm.dd_
+
+### New features
+
+### Changes
+* Update CMake minimum version to avoid annoying warning or deprecation errors with latest versions.
+* During coverage test with gcovr, ignore negative hits following [gcovr issue 68080](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68080).
+
+### Bug fix
+
+
 ## Release version 1.4.0 - Erbaba Cedrina flavor
 _2024.10.29_
 

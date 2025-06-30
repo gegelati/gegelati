@@ -303,7 +303,7 @@ jobs:
         run: |
           cd bin
           ./bin/runTests
-          gcovr -r .. -s --sonarqube=sonarqube.xml 
+          gcovr -r .. -s --sonarqube=sonarqube.xml --gcov-ignore-parse-errors=negative_hits.warn
           sed 's/ branchesToCover=\"[0-9]\+\" coveredBranches=\"[0-9]\+\"/ /g' sonarqube.xml > sonarqubecleaned.xml # Remove condition coverage info from report, only line coverage interests us.
       - name: Run sonar-scanner
         env:
