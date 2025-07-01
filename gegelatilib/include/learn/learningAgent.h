@@ -335,7 +335,7 @@ namespace Learn {
          * \param[in] printProgressBar select whether a progress bar will be
          * printed in the console. \return the number of completed generations.
          */
-        uint64_t train(volatile bool& altTraining, bool printProgressBar);
+        virtual uint64_t train(volatile bool& altTraining, bool printProgressBar);
 
         /**
          * \brief Update the bestRoot and resultsPerRoot attributes.
@@ -357,7 +357,7 @@ namespace Learn {
          *
          * \param[in] results Map from the evaluateAllRoots method.
          */
-        void updateEvaluationRecords(
+        virtual void updateEvaluationRecords(
             const std::multimap<std::shared_ptr<EvaluationResult>,
                                 const TPG::TPGVertex*>& results);
 
@@ -369,7 +369,7 @@ namespace Learn {
          * been tested. To use for example when there is a scoring policy
          * change.
          */
-        void forgetPreviousResults();
+        virtual void forgetPreviousResults();
 
         /**
          * \brief This method update the best score reached at the last
@@ -377,7 +377,7 @@ namespace Learn {
          *
          * \param[in] results Map from the evaluateAllRoots method.
          */
-        void updateBestScoreLastGen(
+        virtual void updateBestScoreLastGen(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           const TPG::TPGVertex*>& results);
 
@@ -386,7 +386,7 @@ namespace Learn {
          *
          * \return double of bestScoreLastGen attribute.
          */
-        double getBestScoreLastGen() const;
+        virtual double getBestScoreLastGen() const;
 
         /**
          * \brief Get the best root TPG::Vertex encountered since the last init.
@@ -396,7 +396,7 @@ namespace Learn {
          *
          * \return a reference to the bestRoot attribute.
          */
-        const std::pair<const TPG::TPGVertex*,
+        virtual const std::pair<const TPG::TPGVertex*,
                         std::shared_ptr<EvaluationResult>>&
         getBestRoot() const;
 
@@ -406,7 +406,7 @@ namespace Learn {
          * If the TPGVertex referenced in the bestRoot attribute is no longer
          * a TPGVertex of the TPGGraph, nothing happens.
          */
-        void keepBestPolicy();
+        virtual void keepBestPolicy();
 
         /**
          * \brief Takes a given TPGVertex and creates a job containing it.
@@ -450,7 +450,7 @@ namespace Learn {
          *
          * \param[in] seed the seed given to the TPGMutator.
          */
-        void init(uint64_t seed = 0);
+        virtual void init(uint64_t seed = 0);
     };
 }; // namespace Learn
 

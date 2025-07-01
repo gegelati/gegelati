@@ -932,11 +932,13 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     }
 
     // Create the new action roots
+    // With rounding number, nbActionsToCreate can be -1, which we dont want.
     uint64_t nbActionsCreated = 0;
     uint64_t nbActionsToCreate =
-        (uint64_t)(params.tpg.nbRoots *
+        std::max((int64_t)((uint64_t)(params.tpg.nbRoots *
                    (1 - params.tpg.ratioTeamsOverActions)) -
-        rootActions.size() + (actionsClonable.size() * useTournamentSelection);
+        rootActions.size() + (actionsClonable.size() * useTournamentSelection)), (int64_t)0);
+
     while (nbActionsCreated < nbActionsToCreate) {
 
         // Select a random existing root
