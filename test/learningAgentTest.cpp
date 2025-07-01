@@ -563,6 +563,13 @@ TEST_F(LearningAgentTest, Train)
     alt = true;
     ASSERT_NO_THROW(la.train(alt, true))
         << "Using the boolean reference to stop the training should not fail.";
+        
+    // For coverage
+    params.doValidation = true;
+    params.stepValidation = 2;
+    bool alt = false;
+    ASSERT_NO_THROW(la.train(alt, true))
+        << "Using the boolean reference to stop the training should not fail.";
 }
 
 // Similar to previous test, but verifications of graphs properties are here to
