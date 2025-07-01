@@ -91,6 +91,9 @@ TEST(LearningEnvironmentTest, Clonable)
     le->getDataSources();
     le->getScore();
     le->isTerminal();
+    ASSERT_THROW(le->getUtility(), std::runtime_error)
+        << "Default behavior of getUtility should throw an exception.";
+    
 
     delete le;
 }

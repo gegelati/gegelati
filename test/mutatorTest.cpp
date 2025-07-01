@@ -1020,6 +1020,132 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
            "mutation.";
 }
 
+TEST_F(MutatorTest, TPGMutatorRemoveRandomActionEdge)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGAction& action = tpg.addNewAction(0);
+    auto prog1 = std::make_shared<Program::Program>(*e, true);
+    auto prog2 = std::make_shared<Program::Program>(*e, true);
+    tpg.addNewActionEdge(action, prog1, 0);
+    tpg.addNewActionEdge(action, prog2, 1);
+
+    Mutator::RNG rng;
+    rng.setSeed(0);
+
+    size_t before = action.getOutgoingEdges().size();
+    ASSERT_NO_THROW(Mutator::TPGMutator::removeRandomActionEdge(tpg, action, rng));
+    ASSERT_EQ(action.getOutgoingEdges().size(), before - 1);
+}
+
+TEST_F(MutatorTest, TPGMutatorAddRandomActionEdge)
+{
+    // Prepare a TPGAction and a list of candidate edges
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGAction& action = tpg.addNewAction(0);
+    auto prog1 = std::make_shared<Program::Program>(*e, true);
+    auto prog2 = std::make_shared<Program::Program>(*e, true);
+    const TPG::TPGAction& action2 = tpg.addNewAction(1);
+    tpg.addNewActionEdge(action, prog1, 0);
+    tpg.addNewActionEdge(action2, prog2, 1);
+
+    std::list<const TPG::TPGEdge*> edges;
+    for (auto& edge : tpg.getEdges()) {
+        edges.push_back(edge.get());
+    }
+
+    Mutator::RNG rng;
+    rng.setSeed(0);
+
+    // Can add an edge without throwing (even if nothing changes if no edge is pickable)
+    ASSERT_NO_THROW(Mutator::TPGMutator::addRandomActionEdge(tpg, action, edges, rng));
+
+    edges.clear();
+    // Can add an edge without throwing (even if nothing changes if no edge is pickable)
+    ASSERT_NO_THROW(Mutator::TPGMutator::addRandomActionEdge(tpg, action, edges, rng));
+}
+
+TEST_F(MutatorTest, TPGMutatorSwapActionEdges)
+{
+    // Prepare a TPGAction with at least 3 outgoing edges
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGAction& action = tpg.addNewAction(0);
+    auto prog1 = std::make_shared<Program::Program>(*e, true);
+    auto prog2 = std::make_shared<Program::Program>(*e, true);
+    auto prog3 = std::make_shared<Program::Program>(*e, true);
+    tpg.addNewActionEdge(action, prog1, 0);
+    tpg.addNewActionEdge(action, prog2, 1);
+    tpg.addNewActionEdge(action, prog3, 2);
+
+    Mutator::RNG rng;
+    // Set a known seed to ensure deterministic behavior and have equality during random choice of swapping
+    // Should be change if determinism is changed
+    rng.setSeed(4);
+
+    // We check that the swapActionEdges function works correctly
+    auto before = std::vector<uint64_t>();
+    for (auto edge : action.getOutgoingEdges()) {
+        before.push_back(dynamic_cast<TPG::TPGActionEdge*>(edge)->getActionClass());
+    }
+    ASSERT_NO_THROW(Mutator::TPGMutator::swapActionEdges(tpg, action, rng));
+    auto after = std::vector<uint64_t>();
+    for (auto edge : action.getOutgoingEdges()) {
+        after.push_back(dynamic_cast<TPG::TPGActionEdge*>(edge)->getActionClass());
+    }
+    // There must be at least one change
+    ASSERT_NE(before, after);
+}
+
+TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
+{
+    // Teste la mutation d'une action avec useMultiActionProgram
+    Mutator::RNG rng;
+    rng.setSeed(0);
+
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.pActionEdgeDeletion = 0.7;
+    params.mutation.tpg.pActionEdgeAddition = 0.7;
+    params.mutation.tpg.pSwapActionProgram = 0.7;
+    params.mutation.tpg.pMutateActionProgram = 0.7;
+    
+    uint64_t nbActions = 5;
+    Environment ce(set, params, vect, nbActions);
+
+    TPG::TPGGraph tpg(ce);
+    const TPG::TPGAction* action = &tpg.addNewAction(0);
+    const TPG::TPGAction* actionUnused = &tpg.addNewAction(1);
+    auto prog1 = std::make_shared<Program::Program>(ce, true);
+    auto prog2 = std::make_shared<Program::Program>(ce, true);
+    auto prog3 = std::make_shared<Program::Program>(ce, true);
+    auto prog4 = std::make_shared<Program::Program>(ce, true);
+    tpg.addNewActionEdge(*action, prog1, 0);
+    tpg.addNewActionEdge(*action, prog2, 1);
+    tpg.addNewActionEdge(*actionUnused, prog3, 2);
+    tpg.addNewActionEdge(*actionUnused, prog4, 1);
+
+
+
+    std::list<std::shared_ptr<Program::Program>> newPrograms;
+    std::list<const TPG::TPGEdge*> preExistingEdges;
+    std::for_each(
+        tpg.getEdges().begin(), tpg.getEdges().end(),
+        [&preExistingEdges](const std::unique_ptr<TPG::TPGEdge>& edge) {
+            preExistingEdges.push_back(edge.get());
+        });
+
+
+    // Do it several times to cover all branches
+    for(size_t i = 0; i < 5; i++){
+        const TPG::TPGAction* copiedAction = dynamic_cast<const TPG::TPGAction*>(&tpg.cloneVertex(*action));
+
+        // Check that all branches are covered (deletion, addition, swap, mutation)
+        ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGAction(
+            tpg, *copiedAction, preExistingEdges, newPrograms, params.mutation, rng));
+
+    }
+
+}
+
 TEST_F(MutatorTest, TPGMutatorMutateAction)
 {
     
@@ -1055,7 +1181,7 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGAction(
-        tpg, vertex1, {&vertex1}, {&edge0}, newPrograms, params, rng));
+        tpg, vertex1, {&edge0}, newPrograms, params, rng));
 
     // Check that progPointer use count was decreased since the mutated program
     // is a copy of the original
@@ -1065,6 +1191,31 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
 
 }
 
+TEST_F(MutatorTest, TPGMutatorMutateTPGActionEdge_MultiAction)
+{
+    // Teste la mutation d'une action edge avec useMultiActionProgram
+    Mutator::RNG rng;
+    rng.setSeed(1);
+
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.pChangeActionClass = 1.0; // Pour forcer le changement d'actionClass
+    uint64_t nbActions = 3;
+    Environment ce(set, params, vect, nbActions);
+
+    TPG::TPGGraph tpg(ce);
+    const TPG::TPGAction& action = tpg.addNewAction(0);
+    auto prog = std::make_shared<Program::Program>(ce, true);
+    tpg.addNewActionEdge(action, prog, 0);
+    tpg.addNewActionEdge(action, std::make_shared<Program::Program>(ce, true), 1);
+
+    std::list<std::shared_ptr<Program::Program>> newPrograms;
+    auto edge = dynamic_cast<TPG::TPGActionEdge*>(*action.getOutgoingEdges().begin());
+
+    // On vérifie que le changement d'actionClass est bien tenté
+    ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGActionEdge(
+        tpg, action, edge, newPrograms, params.mutation, rng));
+}
 
 TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction){
     
@@ -1454,4 +1605,168 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     ASSERT_NO_THROW(
         Mutator::TPGMutator::populateTPG(tpg2, arch, params, rng, nbActions, 0))
         << "Populating an empty TPG failed.";
+}
+
+
+TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
+{
+    Mutator::RNG rng;
+    rng.setSeed(0);
+
+    uint64_t nbActions = 5;
+    Environment ce(set, params, vect, nbActions);
+
+    TPG::TPGGraph tpg(ce);
+
+    Mutator::MutationParameters params;
+
+    params.tpg.maxInitOutgoingEdges = 3;
+    params.prog.maxProgramSize = 96;
+    params.tpg.nbRoots = 10;
+    params.tpg.useActionProgram = true;
+    params.tpg.useMultiActionProgram = true;
+    params.tpg.ratioTeamsOverActions = 0.5;
+    // Proba as in Kelly's paper
+    params.tpg.pEdgeDeletion = 0.7;
+    params.tpg.pEdgeAddition = 0.7;
+    params.tpg.pProgramMutation = 0.2;
+    params.tpg.pEdgeDestinationChange = 0.1;
+    params.tpg.pEdgeDestinationIsAction = 0.5;
+    params.prog.pAdd = 0.5;
+    params.prog.pDelete = 0.5;
+    params.prog.pMutate = 1.0;
+    params.prog.pSwap = 1.0;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 10;
+    Archive arch;
+
+    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
+    // fill the archive before populating to test uniqueness of new prog
+    TPG::TPGExecutionEngine tee(*e, &arch);
+    for (auto rootVertex : tpg.getRootVertices()) {
+        tee.executeFromRoot(*rootVertex);
+    }
+
+    // Check the correct execution
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::populateTPG(tpg, arch, params, rng, nbActions, 0))
+        << "Populating a TPG failed.";
+    // Check the number of roots
+    ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots);
+
+    size_t nbActionsRoots = 0;
+    size_t nbTeamsRoots = 0;
+    for (const auto& root : tpg.getRootVertices()) {
+        if (dynamic_cast<const TPG::TPGAction*>(root)) {
+            nbActionsRoots++;
+        } else if (dynamic_cast<const TPG::TPGTeam*>(root)) {
+            nbTeamsRoots++;
+        }
+    }
+    // Check the ratio of teams over actions
+    ASSERT_EQ(nbTeamsRoots, params.tpg.nbRoots * params.tpg.ratioTeamsOverActions)
+        << "The number of team roots is not as expected.";
+    ASSERT_EQ(nbActionsRoots, params.tpg.nbRoots - nbTeamsRoots)
+        << "The number of action roots is not as expected.";
+
+}
+
+TEST_F(MutatorTest, TPGMutatorUpdateClonableAndExistingVertexForTournament)
+{
+    // Create dummy teams and actions, some marked as to be deleted
+    TPG::TPGGraph tpg(*e);
+    auto* team1 = &tpg.addNewTeam();
+    auto* team2 = &tpg.addNewTeam();
+    auto* action1 = &tpg.addNewAction(0);
+    auto* action2 = &tpg.addNewAction(1);
+
+    // Mark team1 and action1 as to be deleted, team2 and action2 as not
+    tpg.setToBeDeleted(team1);
+    tpg.setToBeDeleted(action1);
+
+    // Prepare vectors as expected by the function
+    std::vector<const TPG::TPGTeam*> teamsClonable = {team1, team2};
+    std::vector<const TPG::TPGAction*> actionsClonable = {action1, action2};
+    std::vector<const TPG::TPGTeam*> preExistingTeams = {team1, team2};
+    std::vector<const TPG::TPGAction*> preExistingActions = {action1, action2};
+
+    // Call the function under test
+    Mutator::TPGMutator::updateClonableAndExistingVertexForTournament(
+        teamsClonable, actionsClonable, preExistingTeams, preExistingActions);
+
+    // Only elements marked as to be deleted should remain in clonable,
+    // and only elements NOT marked as to be deleted should remain in preExisting
+    ASSERT_EQ(teamsClonable.size(), 1);
+    ASSERT_EQ(teamsClonable[0], team1);
+    ASSERT_EQ(actionsClonable.size(), 1);
+    ASSERT_EQ(actionsClonable[0], action1);
+    ASSERT_EQ(preExistingTeams.size(), 1);
+    ASSERT_EQ(preExistingTeams[0], team2);
+    ASSERT_EQ(preExistingActions.size(), 1);
+    ASSERT_EQ(preExistingActions[0], action2);
+}
+
+TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
+{
+       Mutator::RNG rng;
+    rng.setSeed(0);
+
+    uint64_t nbActions = 5;
+    params.useTournamentSelection = true;
+    params.sizeTournament = 3;
+    Environment ce(set, params, vect, nbActions);
+
+    TPG::TPGGraph tpg(ce);
+
+    Mutator::MutationParameters params;
+
+    params.tpg.maxInitOutgoingEdges = 3;
+    params.prog.maxProgramSize = 96;
+    params.tpg.nbRoots = 10;
+    params.tpg.useActionProgram = true;
+    params.tpg.useMultiActionProgram = true;
+    params.tpg.ratioTeamsOverActions = 0.5;
+    // Proba as in Kelly's paper
+    params.tpg.pEdgeDeletion = 0.7;
+    params.tpg.pEdgeAddition = 0.7;
+    params.tpg.pProgramMutation = 0.2;
+    params.tpg.pEdgeDestinationChange = 0.1;
+    params.tpg.pEdgeDestinationIsAction = 0.5;
+    params.prog.pAdd = 0.5;
+    params.prog.pDelete = 0.5;
+    params.prog.pMutate = 1.0;
+    params.prog.pSwap = 1.0;
+    params.prog.pConstantMutation = 0.5;
+    params.prog.minConstValue = 0;
+    params.prog.maxConstValue = 10;
+    Archive arch;
+
+    Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
+    // fill the archive before populating to test uniqueness of new prog
+    TPG::TPGExecutionEngine tee(*e, &arch);
+    for (auto rootVertex : tpg.getRootVertices()) {
+        tee.executeFromRoot(*rootVertex);
+        if(rng.getUnsignedInt64(0, 1) > 0.4) {
+            // Randomly mark some vertices as to be deleted
+            tpg.setToBeDeleted(rootVertex);
+        }
+    }
+
+    
+
+    // Check the correct execution
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::populateTPG(tpg, arch, params, rng, nbActions, 0))
+        << "Populating a TPG failed.";
+    // Check the number of roots
+    ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots);
+
+
+    for(const auto& root : tpg.getRootVertices()) {
+        // Check that the root vertices are not marked as to be deleted
+        ASSERT_FALSE(root->isToBeDeleted())
+            << "Root vertex should not be marked as to be deleted after populate.";
+    }
+
 }

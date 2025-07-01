@@ -161,15 +161,12 @@ namespace Mutator {
          *                stored.
          * \param[in] action the TPGAction whose actionEdges will be altered.
          * \param[in] team the TPGTeam source of TPGAction
-         * \param[in] preExistingActions the TPGAction candidates for
-         *            destination.
          * \param[in] preExistingEdges the already existing edges
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void mutateTPGAction(
             TPG::TPGGraph& graph, const TPG::TPGAction& action,
-            const std::vector<const TPG::TPGAction*>& preExistingActions,
             std::list<const TPG::TPGEdge*> preExistingEdges,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
             const Mutator::MutationParameters& params, Mutator::RNG& rng);

@@ -297,7 +297,6 @@ void Mutator::TPGMutator::addRandomActionEdge(
         pickableEdges.end()
     );
 
-
     if(pickableEdges.size() == 0){
         // Chances are really low but the pickableEdges can be empty
         return;
@@ -396,7 +395,6 @@ void Mutator::TPGMutator::swapActionEdges(
  
  void Mutator::TPGMutator::mutateTPGAction(
      TPG::TPGGraph& graph, const TPG::TPGAction& action,
-     const std::vector<const TPG::TPGAction*>& preExistingActions,
      std::list<const TPG::TPGEdge*> preExistingEdges,
      std::list<std::shared_ptr<Program::Program>>& newPrograms,
      const Mutator::MutationParameters& params, Mutator::RNG& rng)
@@ -408,7 +406,7 @@ void Mutator::TPGMutator::swapActionEdges(
          while (action.getOutgoingEdges().size() > 1 &&
              proba > rng.getDouble(0.0, 1.0)) {
              removeRandomActionEdge(graph, action, rng);
- 
+
              // Decrement the proba of removing another edge
              proba *= params.tpg.pActionEdgeDeletion;
  
@@ -421,7 +419,6 @@ void Mutator::TPGMutator::swapActionEdges(
          proba = params.tpg.pActionEdgeAddition;
          while (action.getOutgoingEdges().size() < graph.getEnvironment().getNbContinuousActions() &&
              proba > rng.getDouble(0.0, 1.0)) {
- 
              // Add an edge (by duplication of an existing one)
              addRandomActionEdge(graph, action, preExistingEdges, rng);
  
@@ -585,7 +582,7 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
         // Clone the randomly selected action
         const TPG::TPGAction& newAction = (const TPG::TPGAction&)graph.cloneVertex(*edge->getDestination());
 
-        mutateTPGAction(graph, newAction, preExistingActions, preExistingEdges, newPrograms, 
+        mutateTPGAction(graph, newAction, preExistingEdges, newPrograms, 
                                params, rng);
 
         // Set the action
@@ -935,7 +932,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                 *rootActions.at(clonedRootIndex));
 
         // Apply mutations to the root
-        mutateTPGAction(graph, newRoot, preExistingActions, preExistingEdges,newPrograms,
+        mutateTPGAction(graph, newRoot, preExistingEdges,newPrograms,
                         params, rng);
 
         
