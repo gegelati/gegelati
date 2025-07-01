@@ -295,6 +295,44 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
     ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
 }
 
+TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
+{
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.useActionProgram = true;
+
+    // Add an action edge to action A3
+    Environment continuousEnv(set, params, vect, 2);
+    std::shared_ptr<Program::Program> p0 = std::make_shared<Program::Program>(continuousEnv, true);
+    std::shared_ptr<Program::Program> p1 = std::make_shared<Program::Program>(continuousEnv, true);
+    TPG::TPGExecutionEngine tpee(continuousEnv);
+
+    tpg->addNewActionEdge(*tpg->getVertices().at(6), p0, 0);
+    makeProgramReturn(*p0, 1, 0);
+
+    std::vector<double> result;
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
+        << "Execution of a TPGGraph from a valid root failed.";
+    // Check the traversed path
+    ASSERT_EQ(result.size(), 2)
+        << "Size of the number of action should be equal to 2";
+    ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
+    ASSERT_EQ(result.at(1), 0.0) << "Second action value should be 0.";
+
+    // Add a second action edge to action A3
+    tpg->addNewActionEdge(*tpg->getVertices().at(6), p1, 1);
+    makeProgramReturn(*p1, -1, 0); 
+
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
+        << "Execution of a TPGGraph from a valid root failed.";
+    // Check the traversed path
+    ASSERT_EQ(result.size(), 2)
+        << "Size of the number of action should be equal to 2";
+    ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
+    ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
+}
+
 TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
 {
     // Test for None

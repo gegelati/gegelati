@@ -291,23 +291,23 @@ void Learn::LearningAgent::decimateWithTournament(
     size_t nbToKeep = (size_t)(params.mutation.tpg.nbRoots * (1 - params.ratioDeletedRoots));
     size_t nbAgentsInTournament = results.size() - nbToKeep;
 
-    // Copie les premiers agents à supprimer (ceux en bas du classement)
+    // Copy the first agents to remove (those at the bottom of the ranking)
     std::vector<std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>> elements;
     auto it = results.begin();
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i, ++it) {
         elements.push_back(*it);
     }
 
-    // Shuffle avec le RNG custom
+    // Shuffle with custom RNG
     for (size_t i = elements.size() - 1; i > 0; --i) {
-        size_t j = rng.getUnsignedInt64(0, i);  // Choix aléatoire entre 0 et i inclus
+        size_t j = rng.getUnsignedInt64(0, i);  // Random index in [0, i]
         std::swap(elements[i], elements[j]);
     }
 
     std::unordered_set<const TPG::TPGVertex*> toDelete;
     std::unordered_set<std::shared_ptr<EvaluationResult>> erasedResults;
 
-    // Tournois
+    // Tournament selection
     for (size_t i = 0; i < nbAgentsInTournament; i += params.sizeTournament) {
         size_t end = std::min(static_cast<size_t>(i + params.sizeTournament),
                       nbAgentsInTournament);
@@ -318,7 +318,7 @@ void Learn::LearningAgent::decimateWithTournament(
             subrangeBegin, subrangeEnd
         );
 
-        // Supprime tous sauf le meilleur
+        // Delete everything but the best
         while (subMap.size() > 1) {
             auto itWorst = subMap.begin();
             toDelete.insert(itWorst->second);
@@ -326,31 +326,21 @@ void Learn::LearningAgent::decimateWithTournament(
             subMap.erase(itWorst);
         }
 
-        // Le survivant est marqué pour suppression logique
+        // This is a logical deletion, the vertex will be removed later
         tpg->setToBeDeleted(subMap.begin()->second);
     }
 
-    // Suppression des sommets et nettoyage des structures
-                std::shared_ptr<std::chrono::time_point<std::chrono::system_clock,
-                                                std::chrono::nanoseconds>> checkpoint = std::make_shared<std::chrono::time_point<
-        std::chrono::system_clock, std::chrono::nanoseconds>>( std::chrono::system_clock::now());
+    // Delete the vertices marked for deletion
     for (const auto* v : toDelete) {
         tpg->removeVertex(*v);
      
     }
 
-                    std::shared_ptr<std::chrono::time_point<std::chrono::system_clock,
-                                                std::chrono::nanoseconds>> checkpoint2 = std::make_shared<std::chrono::time_point<
-        std::chrono::system_clock, std::chrono::nanoseconds>>( std::chrono::system_clock::now());
-
     for (const auto* v : toDelete) {
-     
         this->resultsPerRoot.erase(v);
     }
 
-    std::cout<<"timme  "<<((std::chrono::duration<double>)(*checkpoint2 - *checkpoint)).count()<<" lll"; 
-
-    // Nettoyage de la multimap
+    // Cleaning the multimap
     for (const auto& eval : erasedResults) {
         auto range = results.equal_range(eval);
         results.erase(range.first, range.second);

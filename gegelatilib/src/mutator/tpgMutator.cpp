@@ -101,6 +101,7 @@ void Mutator::TPGMutator::initRandomTPG(
     uint64_t nbActionEdgeInit = params.tpg.nbActionEdgeInit;
     uint64_t initNbTeams = (uint64_t)(params.tpg.ratioTeamsOverActions * params.tpg.nbRoots);
     uint64_t initNbActions = nbActions;
+    uint64_t nbActionNotRoots = nbActions;
 
     if (graph.getEnvironment().getNbContinuousActions() == 0) {
         nbActionEdgeInit = 0;
@@ -114,6 +115,12 @@ void Mutator::TPGMutator::initRandomTPG(
                 "A TPG with a single action makes no sense.");
         }
 
+        if(params.tpg.useActionProgram || params.tpg.useMultiActionProgram){
+            throw std::runtime_error(
+                "Cannot use action program or multi action program with no "
+                "action continuous available.");
+        }
+
     }
     else if (graph.getEnvironment().getNbRegisters() <
              nbActions + (int)!params.tpg.useActionProgram && !params.tpg.useMultiActionProgram) {
@@ -121,6 +128,11 @@ void Mutator::TPGMutator::initRandomTPG(
             "The number of registers is below the number of values outputted.");
     }
     else {
+
+        if(params.tpg.useActionProgram && !params.tpg.teamAccessAllActions && params.tpg.ratioTeamsOverActions == 1){
+            throw std::runtime_error("Parameter only allow teams to select action roots, but there is not action roots considering the ratio!");
+        }
+
         // No action edge.
         if(!params.tpg.useActionProgram){
             nbActionEdgeInit = 0;
@@ -134,12 +146,10 @@ void Mutator::TPGMutator::initRandomTPG(
                                 "cannot exceed the number of action");
         }
 
-        initNbActions = params.tpg.nbRoots - initNbTeams + 2 * initNbTeams;
+        nbActionNotRoots = 2 * initNbTeams;
+        initNbActions = params.tpg.nbRoots - initNbTeams + nbActionNotRoots;
     }
 
-    if(params.tpg.useActionProgram && !params.tpg.teamAccessAllActions && params.tpg.ratioTeamsOverActions == 1){
-        throw std::runtime_error("Parameter only allow teams to select action roots, but there is not action roots considering the ratio!");
-    }
 
     if(params.tpg.maxInitOutgoingEdges < 2 && initNbTeams > 0){
         throw std::runtime_error(
@@ -153,6 +163,7 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGAction*> actions;
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
+
 
     for (size_t i = 0; i < initNbActions ; i++) {
         actions.push_back(initActionVertex(graph, params, rng, nbActionEdgeInit, i));
@@ -173,7 +184,7 @@ void Mutator::TPGMutator::initRandomTPG(
         Mutator::ProgramMutator::initRandomProgram(*programs.back(), params,
                                                    rng);
         graph.addNewEdge(*teams.at(i / 2),
-                         *actions.at(i % initNbActions),
+                         *actions.at(i % nbActionNotRoots),
                          programs.at(i));
     }
 
@@ -229,7 +240,7 @@ void Mutator::TPGMutator::initRandomTPG(
 
             // Add the connection
             graph.addNewEdge(*team,
-                             *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
+                             *actions.at(rng.getUnsignedInt64(0, nbActionNotRoots - 1)),
                              programs.at(selectedProgramIndex));
         }
     }

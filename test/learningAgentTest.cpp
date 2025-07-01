@@ -1353,3 +1353,168 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
         << "A single root TPGVertex should remain in the TPGGraph when keeping "
            "the best policy only";
 }
+
+TEST_F(LearningAgentTest, EvaluateJobWithUtility)
+{
+    // Fake env to use utilisty
+    class UtilityEnv : public StickGameWithOpponent {
+    public:
+        bool isUsingUtility() const override { return true; }
+        double getUtility() const override { return 42.0; }
+    } utilityEnv;
+
+    params.nbIterationsPerPolicyEvaluation = 2;
+    Learn::LearningAgent la(utilityEnv, set, params);
+    la.init();
+
+    Archive a;
+    TPG::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
+    auto job = *la.makeJob(la.getTPGGraph()->getRootVertices().at(0), Learn::LearningMode::TRAINING);
+
+    // Check that the job can be evaluated without throwing an exception
+    ASSERT_NO_THROW({
+        auto res = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, utilityEnv);
+        ASSERT_GE(res->getUtility(), 0.0);
+    });
+}
+
+TEST_F(LearningAgentTest, DecimateWorstRootsActionsQuota)
+{
+    // We force the ratio to quickly reach quotas
+    params.mutation.tpg.nbRoots = 10;
+    params.ratioDeletedRoots = 0.5;
+    params.mutation.tpg.ratioTeamsOverActions = 0.7;
+    params.mutation.tpg.useActionProgram = true; // To make action vertices removed too.
+    Learn::LearningAgent la(cle, set, params);
+    la.init();
+
+    std::shared_ptr<TPG::TPGGraph> tpg = la.getTPGGraph();
+
+    // Set teams at a lower score than actions
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> results;
+    double scoreActions = 10.0;
+    double scoreTeams = 0.0;
+    for (auto* root : tpg->getRootVertices()) {
+        if(dynamic_cast<const TPG::TPGAction*>(root) != nullptr){
+            results.emplace(std::make_shared<Learn::EvaluationResult>(scoreActions++, 1), root);
+        } else {
+            results.emplace(std::make_shared<Learn::EvaluationResult>(scoreTeams++, 1), root);
+        }
+    }
+
+    ASSERT_NO_THROW(la.decimateWorstRoots(results));
+
+    size_t nbTeams = 0;
+    size_t nbActions = 0;
+    for(auto root: tpg->getRootVertices()){
+        if(dynamic_cast<const TPG::TPGTeam*>(root) != nullptr){
+            nbTeams++;
+        } else if(dynamic_cast<const TPG::TPGAction*>(root) != nullptr){
+            nbActions++;    
+        }
+    }
+    ASSERT_EQ(nbTeams, 4)
+        << "After decimation, the number of teams should be 3.";
+    ASSERT_EQ(nbActions, 1)
+        << "After decimation, the number of actions should be 2.";
+}
+
+
+TEST_F(LearningAgentTest, DecimateWorstRootsTeamsQuota)
+{
+    // We force the ratio to quickly reach quotas
+    params.mutation.tpg.nbRoots = 10;
+    params.ratioDeletedRoots = 0.5;
+    params.mutation.tpg.ratioTeamsOverActions = 0.5;
+    params.mutation.tpg.useActionProgram = true; // To make action vertices removed too.
+    Learn::LearningAgent la(cle, set, params);
+    la.init();
+
+    std::shared_ptr<TPG::TPGGraph> tpg = la.getTPGGraph();
+
+    // Set teams at a higher score than actions
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> results;
+    double scoreActions = 0.0;
+    double scoreTeams = 10.0;
+    for (auto* root : tpg->getRootVertices()) {
+        if(dynamic_cast<const TPG::TPGAction*>(root) != nullptr){
+            results.emplace(std::make_shared<Learn::EvaluationResult>(scoreActions++, 1), root);
+        } else {
+            results.emplace(std::make_shared<Learn::EvaluationResult>(scoreTeams++, 1), root);
+        }
+    }
+
+    // We call the method, which must go through the quota branches for actions
+    // Since we have 3 actions and 7 teams, and we delete half of the roots,
+    // Normally 3 actions and 2 teams should be deleted, but the ratio should allow
+    // Only 1 action to be deleted, and 4 teams.
+    ASSERT_NO_THROW(la.decimateWorstRoots(results));
+
+    size_t nbTeams = 0;
+    size_t nbActions = 0;
+    for(auto root: tpg->getRootVertices()){
+        if(dynamic_cast<const TPG::TPGTeam*>(root) != nullptr){
+            nbTeams++;
+        } else if(dynamic_cast<const TPG::TPGAction*>(root) != nullptr){
+            nbActions++;    
+        }
+    }
+
+    std::cout<<nbTeams<<" teams and "<<nbActions<<" after before decimation."<<std::endl;
+    ASSERT_EQ(nbTeams, 3)
+        << "After decimation, the number of teams should be 3.";
+    ASSERT_EQ(nbActions, 2)
+        << "After decimation, the number of actions should be 2.";
+}
+
+TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
+{
+    Learn::LearningAgent la(le, set, params);
+    la.init();
+    TPG::TPGTeam fakeTeam;
+    ASSERT_THROW(
+        la.evaluateOneRoot(0, Learn::LearningMode::TRAINING, &fakeTeam),
+        std::runtime_error
+    );
+}
+
+
+TEST_F(LearningAgentTest, DecimateWithTournamentSelection)
+{
+    params.useTournamentSelection = true;
+    params.mutation.tpg.nbRoots = 30;
+    params.ratioDeletedRoots = 0.7;
+    params.sizeTournament = 4;
+    Learn::LearningAgent la(le, set, params);
+    la.init();
+
+    // Create a set of roots with different scores
+    auto roots = la.getTPGGraph()->getRootVertices();
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> results;
+    double score = 0.0;
+    for (auto* root : roots) {
+        results.emplace(std::make_shared<Learn::EvaluationResult>(score++, 1), root);
+    }
+
+    // Call decimateWorstRoots, which should use tournament selection
+    ASSERT_NO_THROW(la.decimateWorstRoots(results));
+
+    // Check that the number of roots is reduced
+    // The number of roots was 30. With a ratio of 0.7, only 9 should remain as there were.
+    // 21 roots should have been played in the tournament.
+    // With a size tournament of 4, we should do 6 selections, 5 with 4 roots and one with 1 root.
+    // Thus, 6 roots should survived the tournamenent, leading to 15 roots remaining.
+    ASSERT_EQ(la.getTPGGraph()->getNbRootVertices(), 15)
+        << "After decimation with tournament selection, the number of roots "
+           "should be reduced to 15.";
+
+    size_t nbToDelete = 0;
+    for(auto root: la.getTPGGraph()->getRootVertices()){
+        if(root->isToBeDeleted()){
+            nbToDelete++;
+        }
+    }
+    ASSERT_EQ(nbToDelete, 6)
+        << "After decimation with tournament selection, the number of roots "
+           "marked for deletion should be 6.";   
+}

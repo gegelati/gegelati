@@ -262,6 +262,9 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewActionEdge(
 
     (*srcVertex)->addOutgoingEdge(&newEdge);
 
+    // Update the assessed actions of the source vertex
+    (*srcVertex)->updateAssessedActions();
+
     // return the new edge
     return newEdge;
 }
@@ -474,7 +477,6 @@ void TPG::TPGGraph::updateAllAssessedActions() {
 
 
 
-
     // Launch update method for all actions. 
     // All teams should be linked to actions, even not directly.
     for(auto vertex: this->vertices){
@@ -483,7 +485,17 @@ void TPG::TPGGraph::updateAllAssessedActions() {
         }
     }
 }
+void TPG::TPGGraph::setToBeDeleted(const TPG::TPGVertex* vertex){
+    auto it = this->findVertex(vertex);
 
+    if (it != this->vertices.end()) {
+        // Found the vertex, modify it as needed
+        (*it)->setToBeDeleted(true);
+    } else {
+        throw std::runtime_error(
+            "Action to order not in the graph.");
+    }
+}
 
 void TPG::TPGGraph::orderActionEdges(const TPG::TPGAction* action)
 {
@@ -498,14 +510,4 @@ void TPG::TPGGraph::orderActionEdges(const TPG::TPGAction* action)
     }
 }
 
-void TPG::TPGGraph::setToBeDeleted(const TPG::TPGVertex* vertex){
-    auto it = this->findVertex(vertex);
 
-    if (it != this->vertices.end()) {
-        // Found the vertex, modify it as needed
-        (*it)->setToBeDeleted(true);
-    } else {
-        throw std::runtime_error(
-            "Action to order not in the graph.");
-    }
-}

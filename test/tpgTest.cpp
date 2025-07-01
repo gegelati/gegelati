@@ -355,6 +355,13 @@ TEST_F(TPGTest, TPGGraphAddEdge)
     ASSERT_THROW(tpg.addNewEdge(vertex1, vertex0, progPointer),
                  std::runtime_error)
         << "Adding an edge from an Action should have failed.";
+
+    TPG::TPGVertex* vertex3 = tpg.getFactory().createTPGTeam();
+    std::unique_ptr<TPG::TPGEdge> edge = tpg.getFactory().createTPGActionEdge(&vertex1, progPointer, 0);
+    ASSERT_THROW(vertex3->addOutgoingEdge(edge.get()),
+                 std::runtime_error)
+        << "Adding an action edge from a TPGVertex that is not an action "
+           "should have failed.";
 }
 
 
@@ -880,4 +887,203 @@ TEST_F(TPGTest, TPGAffectationOperator)
 
     ASSERT_NO_THROW(TPG::TPGGraph& destination = source)
         << "The affectation operator is never supposed to fail";
+}
+
+TEST_F(TPGTest, TPGActionOutgoingEdge)
+{
+    // Create a TPGAction
+    TPG::TPGAction action(42);
+
+    // Try to add a non-TPGActionEdge outgoing edge (should throw)
+    TPG::TPGTeam team;
+    TPG::TPGEdge edge(&team, &action, progPointer);
+    ASSERT_THROW(action.addOutgoingEdge(&edge), std::runtime_error);
+
+    // Add valid TPGActionEdges with different actionClass
+    TPG::TPGActionEdge* edge0 = new TPG::TPGActionEdge(&action, progPointer, 2);
+    TPG::TPGActionEdge* edge1 = new TPG::TPGActionEdge(&action, progPointer, 1);
+    TPG::TPGActionEdge* edge2 = new TPG::TPGActionEdge(&action, progPointer, 3);
+
+    // Add them as outgoing edges (should not throw)
+    ASSERT_NO_THROW(action.addOutgoingEdge(edge0));
+    ASSERT_NO_THROW(action.addOutgoingEdge(edge1));
+    ASSERT_NO_THROW(action.addOutgoingEdge(edge2));
+
+    // Test orderActionEdges (should sort by actionClass)
+    action.orderActionEdges();
+    auto it = action.getOutgoingEdges().begin();
+    ASSERT_EQ(static_cast<TPG::TPGActionEdge*>(*it)->getActionClass(), 1); ++it;
+    ASSERT_EQ(static_cast<TPG::TPGActionEdge*>(*it)->getActionClass(), 2); ++it;
+    ASSERT_EQ(static_cast<TPG::TPGActionEdge*>(*it)->getActionClass(), 3);
+
+    // Test getEdgeOfAction for existing and non-existing actionClass
+    ASSERT_EQ(action.getEdgeOfAction(2), edge0);
+    ASSERT_EQ(action.getEdgeOfAction(1), edge1);
+    ASSERT_EQ(action.getEdgeOfAction(3), edge2);
+    ASSERT_EQ(action.getEdgeOfAction(99), nullptr);
+
+    // Clean up
+    delete edge0;
+    delete edge1;
+    delete edge2;
+}
+
+TEST_F(TPGTest, TPGVertexHasSameAssessedActions)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGAction* action = &tpg.addNewAction(0);
+    tpg.addNewActionEdge(*action, progPointer, 1);
+    tpg.addNewActionEdge(*action, progPointer, 2);
+    tpg.addNewActionEdge(*action, progPointer, 3);
+
+
+    // Case 1: Intersection is not empty (should return true)
+    std::set<uint64_t> testSet1 = {2, 4, 5};
+    ASSERT_TRUE(action->hasSameAssessedActions(testSet1))
+        << "hasSameAssessedActions should return true when intersection is not empty.";
+
+    // Case 2: Intersection is empty (should return false)
+    std::set<uint64_t> testSet2 = {4, 5, 6};
+    ASSERT_FALSE(action->hasSameAssessedActions(testSet2))
+        << "hasSameAssessedActions should return false when intersection is empty.";
+
+    // Case 3: Exact match (should return true)
+    std::set<uint64_t> testSet3 = {1, 2, 3};
+    ASSERT_TRUE(action->hasSameAssessedActions(testSet3))
+        << "hasSameAssessedActions should return true when sets are identical.";
+
+    // Case 4: Partial overlap (should return true)
+    std::set<uint64_t> testSet4 = {3};
+    ASSERT_TRUE(action->hasSameAssessedActions(testSet4))
+        << "hasSameAssessedActions should return true when there is a single common element.";
+
+    // Case 5: Empty input set (should return false)
+    std::set<uint64_t> testSet5;
+    ASSERT_FALSE(action->hasSameAssessedActions(testSet5))
+        << "hasSameAssessedActions should return false when input set is empty.";
+
+    // Case 6: Empty assessedActions (should return false)
+    TPG::TPGTeam emptyTeam;
+    std::set<uint64_t> testSet6 = {1, 2};
+    ASSERT_FALSE(emptyTeam.hasSameAssessedActions(testSet6))
+        << "hasSameAssessedActions should return false when assessedActions is empty.";
+}
+
+TEST_F(TPGTest, TPGGraphSetActionClassEdge)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGAction& action = tpg.addNewAction(0);
+
+    // Add an action edge
+    const TPG::TPGEdge& edge = tpg.addNewActionEdge(action, progPointer, 1);
+    // Change the action class
+    ASSERT_NO_THROW(tpg.setActionClassEdge(&edge, 42));
+    // Check that the action class was updated
+    const auto* actionEdge = dynamic_cast<const TPG::TPGActionEdge*>(&edge);
+    ASSERT_NE(actionEdge, nullptr);
+    ASSERT_EQ(actionEdge->getActionClass(), 42);
+
+    // Try to set action class on a non-action edge (should throw)
+    const TPG::TPGTeam& team = tpg.addNewTeam();
+    const TPG::TPGEdge& normalEdge = tpg.addNewEdge(team, action, progPointer);
+    ASSERT_THROW(tpg.setActionClassEdge(&normalEdge, 5), std::runtime_error);
+
+    // Try to set action class on an edge not in the graph (should throw)
+    TPG::TPGActionEdge fakeEdge(&action, progPointer, 0);
+    ASSERT_THROW(tpg.setActionClassEdge(&fakeEdge, 7), std::runtime_error);
+}
+
+TEST_F(TPGTest, TPGGraphUpdateAssessedActions)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGAction& action1 = tpg.addNewAction(0);
+    const TPG::TPGEdge& edge1 = tpg.addNewActionEdge(action1, progPointer, 1);
+    const TPG::TPGEdge& edge2 = tpg.addNewActionEdge(action1, progPointer, 2);
+
+    // Should update without throwing
+    ASSERT_NO_THROW(tpg.updateAssessedActions(&action1));
+    // Check that assessedActions contains the correct action classes: 1 and 2
+    const auto& assessed = action1.getAssessedActions();
+    ASSERT_TRUE(assessed.find(1) != assessed.end());
+    ASSERT_TRUE(assessed.find(2) != assessed.end());
+    ASSERT_FALSE(assessed.find(0) != assessed.end());
+
+
+    const TPG::TPGAction& action2 = tpg.addNewAction(0);
+    const TPG::TPGEdge& edge3 = tpg.addNewActionEdge(action2, progPointer, 1);
+    const TPG::TPGEdge& edge4 = tpg.addNewActionEdge(action2, progPointer, 3);
+
+    // Vertex should contain action 1, 2 and 3 now.
+    const TPG::TPGVertex& vertex = tpg.addNewTeam();
+    tpg.addNewEdge(vertex, action2, progPointer);
+    tpg.addNewEdge(vertex, action1, progPointer);
+
+
+    // Should update without throwing
+    ASSERT_NO_THROW(tpg.updateAssessedActions(&action2));
+    // Check that assessedActions contains the correct action classes
+    const auto& assessed2 = vertex.getAssessedActions();
+    ASSERT_TRUE(assessed2.find(1) != assessed2.end());
+    ASSERT_TRUE(assessed2.find(2) != assessed2.end());
+    ASSERT_TRUE(assessed2.find(3) != assessed2.end());
+
+    // Try with a vertex not in the graph (should throw)
+    TPG::TPGAction fakeAction(99);
+    ASSERT_THROW(tpg.updateAssessedActions(&fakeAction), std::runtime_error);
+}
+
+TEST_F(TPGTest, TPGGraphUpdateAllAssessedActions)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGAction& action1 = tpg.addNewAction(0);
+    const TPG::TPGAction& action2 = tpg.addNewAction(1);
+    tpg.addNewActionEdge(action1, progPointer, 1);
+    tpg.addNewActionEdge(action2, progPointer, 2);
+
+    // Should update all actions without throwing
+    ASSERT_NO_THROW(tpg.updateAllAssessedActions());
+    // Check that both actions have their assessedActions updated
+    ASSERT_TRUE(action1.getAssessedActions().find(1) != action1.getAssessedActions().end());
+    ASSERT_TRUE(action2.getAssessedActions().find(2) != action2.getAssessedActions().end());
+}
+
+TEST_F(TPGTest, TPGGraphSetToBeDeleted)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGTeam& team = tpg.addNewTeam();
+
+    // Should set toBeDeleted without throwing
+    ASSERT_NO_THROW(tpg.setToBeDeleted(&team));
+    ASSERT_TRUE(team.isToBeDeleted());
+
+    // Try with a vertex not in the graph (should throw)
+    TPG::TPGTeam fakeTeam;
+    ASSERT_THROW(tpg.setToBeDeleted(&fakeTeam), std::runtime_error);
+}
+
+TEST_F(TPGTest, TPGGraphOrderActionEdges)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGAction& action = tpg.addNewAction(0);
+
+    // Add several action edges with different actionClass values
+    tpg.addNewActionEdge(action, progPointer, 5);
+    tpg.addNewActionEdge(action, progPointer, 2);
+    tpg.addNewActionEdge(action, progPointer, 9);
+
+    // Call orderActionEdges (should not throw)
+    ASSERT_NO_THROW(tpg.orderActionEdges(&action));
+
+    // Check that the outgoing edges are now ordered by actionClass
+    std::vector<uint64_t> actionClasses;
+    for (auto* edge : action.getOutgoingEdges()) {
+        auto* actionEdge = dynamic_cast<TPG::TPGActionEdge*>(edge);
+        ASSERT_NE(actionEdge, nullptr);
+        actionClasses.push_back(actionEdge->getActionClass());
+    }
+    ASSERT_TRUE(std::is_sorted(actionClasses.begin(), actionClasses.end()));
+
+    // Try with an action not in the graph (should throw)
+    TPG::TPGAction fakeAction(42);
+    ASSERT_THROW(tpg.orderActionEdges(&fakeAction), std::runtime_error);
 }

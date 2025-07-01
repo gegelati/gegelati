@@ -238,9 +238,7 @@ namespace Program {
          */
         uint64_t getNbConstants() const;
         /** 
-         * \brief set a new number of constants in the program.
-         * 
-         * If the number is different from before, the DataHandler of constant is reseted to 0 values
+         * \brief set a new number of constants in the line.
          * 
          * \param[in] newNbConstants set the new number of constants in the program
          */
