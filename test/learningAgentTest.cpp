@@ -567,7 +567,7 @@ TEST_F(LearningAgentTest, Train)
     // For coverage
     params.doValidation = true;
     params.stepValidation = 2;
-    bool alt = false;
+    alt = false;
     ASSERT_NO_THROW(la.train(alt, true))
         << "Using the boolean reference to stop the training should not fail.";
 }
