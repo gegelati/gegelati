@@ -178,13 +178,13 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         // True if the action contain multiple TPGActionEdge
         if (env.getParams().mutation.tpg.useMultiActionProgram) {
 
-            for(auto edge: currentVertex->getOutgoingEdges()){
+            for (auto edge : currentVertex->getOutgoingEdges()) {
                 auto actionEdge = dynamic_cast<TPGActionEdge*>(edge);
 
                 // Evaluate the edge and set the action value
-                actionsTaken[actionEdge->getActionClass()] = this->evaluateEdge(*edge);
+                actionsTaken[actionEdge->getActionClass()] =
+                    this->evaluateEdge(*edge);
             }
-
         }
         // True if the action contain one TPGActionEdge
         else if (currentVertex->getOutgoingEdges().size() == 1) {
@@ -211,7 +211,6 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         this->applyActivationFunctionOnActions(actionsTaken);
 
         return std::make_pair(visitedVertices, actionsTaken);
-        
     }
     else {
         return std::make_pair(

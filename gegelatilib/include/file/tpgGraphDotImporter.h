@@ -93,10 +93,9 @@ namespace File {
          */
         std::map<uint64_t, const TPG::TPGVertex*> vertexID;
 
-
-
         /**
-         * \brief Map associating pointers to TPGAction to a vector of integer action class.
+         * \brief Map associating pointers to TPGAction to a vector of integer
+         * action class.
          */
         std::map<const TPG::TPGVertex*, std::vector<uint64_t>> actionClasses;
 
@@ -312,7 +311,6 @@ namespace File {
          * A0 -> P22					Should pass
          */
         static const std::string linkActionProgramRegex;
-
 
         /**
          * \brief contains the regex to identify a Team -> Program Link

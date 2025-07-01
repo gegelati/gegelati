@@ -33,8 +33,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
 #include "learn/learningEnvironment.h"
 
@@ -92,6 +92,7 @@ void Learn::LearningEnvironment::doActions(std::vector<double> vectActionID)
 double Learn::LearningEnvironment::getUtility() const
 {
     throw std::runtime_error(
-        "Utility should not be call except if 'isUsingUtility' is override to return true."
+        "Utility should not be call except if 'isUsingUtility' is override to "
+        "return true."
         "\nIn that case, this method should be override too.");
 }

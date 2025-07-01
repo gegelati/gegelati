@@ -63,7 +63,6 @@ unsigned int Instructions::Instruction::getNbOperands() const
     return (unsigned int)this->operandTypesNoConst.size();
 }
 
-
 const std::vector<std::reference_wrapper<const std::type_info>>& Instruction::
     getOperandTypesWithConst() const
 {
@@ -80,8 +79,8 @@ unsigned int Instructions::Instruction::getNbConstants() const
     unsigned int nbConstants = 0;
 
     // Get the number of constant in the instruction
-    for(auto operandType: this->operandTypes){
-        if(operandType.get() == typeid(Data::Constant)){
+    for (auto operandType : this->operandTypes) {
+        if (operandType.get() == typeid(Data::Constant)) {
             nbConstants++;
         }
     }

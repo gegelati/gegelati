@@ -35,8 +35,8 @@
 
 #include <algorithm>
 
-#include "tpg/tpgVertex.h"
 #include "tpg/tpgActionEdge.h"
+#include "tpg/tpgVertex.h"
 
 const std::list<TPG::TPGEdge*>& TPG::TPGVertex::getIncomingEdges() const
 {
@@ -95,38 +95,44 @@ void TPG::TPGVertex::updateAssessedActions()
         if (auto* actionEdge = dynamic_cast<TPGActionEdge*>(edge)) {
             // If the edge is an action edge, insert its action class
             assessedActions.insert(actionEdge->getActionClass());
-        } else {
+        }
+        else {
             // Otherwise, insert all assessed actions from the destination
-            const auto& destinationActions = edge->getDestination()->getAssessedActions();
-            assessedActions.insert(destinationActions.begin(), destinationActions.end());
+            const auto& destinationActions =
+                edge->getDestination()->getAssessedActions();
+            assessedActions.insert(destinationActions.begin(),
+                                   destinationActions.end());
         }
 
         // If all actions are stored, no need to search for more
-        if(assessedActions.size() == edge->getProgram().getEnvironment().getNbContinuousActions()){
+        if (assessedActions.size() ==
+            edge->getProgram().getEnvironment().getNbContinuousActions()) {
             return;
         }
     }
 }
 
-bool TPG::TPGVertex::hasSameAssessedActions(std::set<uint64_t> actions) const {
-    
+bool TPG::TPGVertex::hasSameAssessedActions(std::set<uint64_t> actions) const
+{
+
     // Temporary set to store the intersection
     std::set<uint64_t> intersectionResult;
 
     // Compute the intersection
     std::set_intersection(
-        actions.begin(), actions.end(),
-        assessedActions.begin(), assessedActions.end(),
-        std::inserter(intersectionResult, intersectionResult.begin())
-    );
+        actions.begin(), actions.end(), assessedActions.begin(),
+        assessedActions.end(),
+        std::inserter(intersectionResult, intersectionResult.begin()));
 
     return !intersectionResult.empty();
 }
 
-void TPG::TPGVertex::setToBeDeleted(bool status){
+void TPG::TPGVertex::setToBeDeleted(bool status)
+{
     this->toBeDeleted = status;
 }
 
-bool TPG::TPGVertex::isToBeDeleted() const{
+bool TPG::TPGVertex::isToBeDeleted() const
+{
     return this->toBeDeleted;
 }

@@ -336,42 +336,43 @@ namespace TPG {
          */
         void clearProgramIntrons();
 
-        
         /**
          * \brief set a new action class to a TPGActionEdge
-         * 
+         *
          * \param[in] edge TPGActionEdge changed
          * \param[in] newActionClass new action class
          */
         void setActionClassEdge(const TPGEdge* edge, uint64_t newActionClass);
-        
+
         /**
-         * Update the assessed actions of the current vertex, and all the incomming edges
-         * 
+         * Update the assessed actions of the current vertex, and all the
+         * incomming edges
+         *
          * \param[in] vertex TPGVertex to order
          */
         void updateAssessedActions(const TPG::TPGVertex* vertex);
 
         /**
          * Update the assessed actions of the all graph.
-         * 
-         * This is to be use only at the initialisation, the complexity could be really high after
-         * 
-         * This method basically execute "updateAssessedActions" for all the TPGActions in the graph
+         *
+         * This is to be use only at the initialisation, the complexity could be
+         * really high after
+         *
+         * This method basically execute "updateAssessedActions" for all the
+         * TPGActions in the graph
          */
         void updateAllAssessedActions();
-    
 
         /**
          * Order the ActionEdge of the given action
-         * 
+         *
          * \param[in] action TPGAction to order
          */
         void orderActionEdges(const TPG::TPGAction* action);
 
         /**
          * Set the vertex to be deleted (during reproduction process)
-         * 
+         *
          * \param[in] vertex to set to delete
          */
         void setToBeDeleted(const TPG::TPGVertex* vertex);
@@ -415,9 +416,6 @@ namespace TPG {
          */
         std::list<std::unique_ptr<TPGEdge>>::iterator findEdge(
             const TPGEdge* edge);
-
-
-
     };
 }; // namespace TPG
 

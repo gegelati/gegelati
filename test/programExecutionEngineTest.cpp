@@ -105,7 +105,8 @@ class ProgramExecutionEngineTest : public ::testing::Test
                 }
                 return res / 4.0;
             }));
-        set.add(*new Instructions::LambdaInstruction<double, double, Data::Constant>(
+        set.add(*new Instructions::LambdaInstruction<double, double,
+                                                     Data::Constant>(
             [](double a, double b, Data::Constant c) {
                 return a + b * (double)c;
             }));

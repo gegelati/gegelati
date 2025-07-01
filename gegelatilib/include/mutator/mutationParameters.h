@@ -59,12 +59,13 @@ namespace Mutator {
         /// JSon comment
         inline static const std::string ratioTeamsOverActionsComment =
             "// Ratio of teams roots over the number of actions roots.\n"
-            "// If set to 1, there will be no action roots, if set to 0, there will be no team root.\n"
+            "// If set to 1, there will be no action roots, if set to 0, there "
+            "will be no team root.\n"
             "// \"ratioTeamsOverActions\" : 1.0, // Default value";
         /// Ratio of teams roots over the number of actions roots.
-        /// If set to 1, there will be no action roots, if set to 0, there will be no team root.
+        /// If set to 1, there will be no action roots, if set to 0, there will
+        /// be no team root.
         double ratioTeamsOverActions = 1.0;
-
 
         /// JSon comment
         inline static const std::string maxInitOutgoingEdgesComment =
@@ -78,9 +79,11 @@ namespace Mutator {
 
         /// JSon comment
         inline static const std::string pChangeActionClassComment =
-            "//  Probablity of changing the action edge by any other action edge in the graph\n"
+            "//  Probablity of changing the action edge by any other action "
+            "edge in the graph\n"
             "// \"pChangeActionClass\" : 0.1, // Default value";
-        ///  Probablity of changing the action edge by any other action edge in the graph
+        ///  Probablity of changing the action edge by any other action edge in
+        ///  the graph
         double pChangeActionClass = 0.1;
         /// JSon comment
         inline static const std::string pActionEdgeDeletionComment =
@@ -105,9 +108,11 @@ namespace Mutator {
 
         /// JSon comment
         inline static const std::string pSwapActionProgramComment =
-            "//  Probablity of swapping two action edge within the same action vertex\n"
+            "//  Probablity of swapping two action edge within the same action "
+            "vertex\n"
             "// \"pSwapActionProgram\" : 0.1, // Default value";
-        ///  Probablity of swapping two action edge within the same action vertex
+        ///  Probablity of swapping two action edge within the same action
+        ///  vertex
         double pSwapActionProgram = 0.1;
 
         /// JSon comment
@@ -194,24 +199,26 @@ namespace Mutator {
 
         /// JSon comment
         inline static const std::string useMultiActionProgramComment =
-            "// Create multiple action program, instead of one outputting multiple action in a single program"
+            "// Create multiple action program, instead of one outputting "
+            "multiple action in a single program"
             ".\n"
             "// \"useMultiActionProgram\" : false, // Default value";
-        /// Create multiple action program, instead of one outputting multiple action in a single program
+        /// Create multiple action program, instead of one outputting multiple
+        /// action in a single program
         bool useMultiActionProgram = false;
 
         /// JSon comment
         inline static const std::string teamAccessAllActionsComment =
-            "// During mutation of a team, setting this parameter to true allow a team\n"
-            "//to change destination toward any other actions. If set to false, it can only\n"
+            "// During mutation of a team, setting this parameter to true "
+            "allow a team\n"
+            "//to change destination toward any other actions. If set to "
+            "false, it can only\n"
             "//change destination toward a root action.\n"
             "// \"teamAccessAllActions\" : true, // Default value";
-        /// During mutation of a team, setting this parameter to true allow a team
-        /// to change destination toward any other actions. If set to false, it can only
-        /// change destination toward a root action.
+        /// During mutation of a team, setting this parameter to true allow a
+        /// team to change destination toward any other actions. If set to
+        /// false, it can only change destination toward a root action.
         bool teamAccessAllActions = true;
-        
-
 
     } TPGParameters;
 
@@ -229,14 +236,16 @@ namespace Mutator {
 
         /// JSon comment
         inline static const std::string initMinProgramSizeComment =
-            "// Initial minimum number of Line within the Program of the TPGGraph.\n"
+            "// Initial minimum number of Line within the Program of the "
+            "TPGGraph.\n"
             "// \"initMinProgramSize\" : 1, // Default value";
         /// Initial minimum number of Line within the Program of the TPGGraph.
         size_t initMinProgramSize = 1;
 
         /// JSon comment
         inline static const std::string initMaxProgramSizeComment =
-            "// Initial maximum number of Line within the Program of the TPGGraph.\n"
+            "// Initial maximum number of Line within the Program of the "
+            "TPGGraph.\n"
             "// \"initMaxProgramSize\" : 10, // Default value";
         /// Initial maximum number of Line within the Program of the TPGGraph.
         size_t initMaxProgramSize = 10;
@@ -296,8 +305,6 @@ namespace Mutator {
             "// \"maxConstValue\" : 100, // Default value";
         /// Maximum constant value possible
         double maxConstValue = 1.0;
-
-
 
     } ProgramParameters;
 

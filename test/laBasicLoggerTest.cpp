@@ -308,6 +308,6 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
         << "Total time should be larger than the time we waited !";
 
     // Size is headerSize (12) + log size (8 + 4)
-    ASSERT_EQ(result.size(), 12 + 12)
-        << "logEndOfTraining with and without valid should have 8+4=12 elements";
+    ASSERT_EQ(result.size(), 12 + 12) << "logEndOfTraining with and without "
+                                         "valid should have 8+4=12 elements";
 }

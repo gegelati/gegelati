@@ -70,8 +70,9 @@ Learn::EvaluationResult& Learn::EvaluationResult::operator+=(
 
         // Weighted addition of utility
         this->utility = this->utility * (double)this->nbEvaluation +
-                       other.utility * (double)other.nbEvaluation;
-        this->utility /= (double)this->nbEvaluation + (double)other.nbEvaluation;
+                        other.utility * (double)other.nbEvaluation;
+        this->utility /=
+            (double)this->nbEvaluation + (double)other.nbEvaluation;
 
         // Addition ot nbEvaluation
         this->nbEvaluation += other.nbEvaluation;

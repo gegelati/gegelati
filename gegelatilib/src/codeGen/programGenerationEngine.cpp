@@ -66,16 +66,16 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine()
 void CodeGen::ProgramGenerationEngine::generateProgram(
     uint64_t progID, const bool ignoreException)
 {
-    if(program->getEnvironment().getNbContinuousActions() > 0 && program->isActionProgram()){
-    
+    if (program->getEnvironment().getNbContinuousActions() > 0 &&
+        program->isActionProgram()) {
+
         fileC << "\nvoid P" << progID << "(double* actions){" << std::endl;
         fileH << "void P" << progID << "(double* actions);" << std::endl;
-    } else {
+    }
+    else {
         fileC << "\ndouble P" << progID << "(){" << std::endl;
         fileH << "double P" << progID << "();" << std::endl;
     }
-
-
 
     // instantiate register
     fileC << "\tdouble " << nameRegVariable << "["
@@ -107,11 +107,15 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
           << std::endl;
     fileC << "#endif" << std::endl;
 #endif
-    
-    if(program->getEnvironment().getNbContinuousActions() > 0 && program->isActionProgram()){
-        fileC << "\tactions = &reg[0];\n}"<<std::endl;;
-    } else {
-        fileC << "\treturn reg[0];\n}"<<std::endl;;
+
+    if (program->getEnvironment().getNbContinuousActions() > 0 &&
+        program->isActionProgram()) {
+        fileC << "\tactions = &reg[0];\n}" << std::endl;
+        ;
+    }
+    else {
+        fileC << "\treturn reg[0];\n}" << std::endl;
+        ;
     }
 }
 

@@ -156,8 +156,8 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
             pos4 = this->lastLine.find("|", pos3);
             for (;;) {
                 if (pos4 != std::string::npos) {
-                    v_constant.push_back(
-                        std::stod(this->lastLine.substr(pos3, pos4 - pos3))); // Convertit la chaîne en double
+                    v_constant.push_back(std::stod(this->lastLine.substr(
+                        pos3, pos4 - pos3))); // Convertit la chaîne en double
                 }
                 else {
                     break;
@@ -254,7 +254,8 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
 
         // Split the string by the delimiter '-'
         while (std::getline(ss, token, '-')) {
-            numbers.push_back(std::stoull(token)); // Convert the token to uint64_t and store it
+            numbers.push_back(std::stoull(
+                token)); // Convert the token to uint64_t and store it
         }
         // elmt points to the action with the same label as the action we are
         // parsing
@@ -262,21 +263,19 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
         if (elmt == actionID.end()) {
 
             uint64_t currActionID = action_number;
-            if(tpg.getEnvironment().getNbContinuousActions() == 0){
+            if (tpg.getEnvironment().getNbContinuousActions() == 0) {
                 currActionID = std::stoi(action_label);
             }
 
             // create a new action and insert it if none was previously found
             this->actionID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(
-                action_number,
-                &this->tpg.addNewAction(currActionID)));
+                action_number, &this->tpg.addNewAction(currActionID)));
         }
         this->actionClasses.insert(
-            std::pair<const TPG::TPGVertex*, std::vector<uint64_t>>(this->tpg.getVertices().back(), numbers));
-
+            std::pair<const TPG::TPGVertex*, std::vector<uint64_t>>(
+                this->tpg.getVertices().back(), numbers));
     }
 }
-
 
 void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
 {
@@ -293,7 +292,8 @@ void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
             if (action_it != this->actionID.end() && p_it != programID.end()) {
                 const TPG::TPGVertex* action = action_it->second;
 
-                uint64_t actionClass = this->actionClasses.at(action).at(action->getOutgoingEdges().size());
+                uint64_t actionClass = this->actionClasses.at(action).at(
+                    action->getOutgoingEdges().size());
                 std::shared_ptr<Program::Program> p = p_it->second;
 
                 this->tpg.addNewActionEdge(*action, p, actionClass);
@@ -404,7 +404,6 @@ void File::TPGGraphDotImporter::importGraph()
     bool read = true;
     while (read) {
         read = this->readLineFromFile();
-        
     }
 }
 
@@ -448,8 +447,7 @@ bool File::TPGGraphDotImporter::readLineFromFile()
     else if (std::regex_search(this->lastLine, matches, testProgramDeclare)) {
         readProgram(matches);
     }
-    else if (std::regex_search(usedLine, matches,
-                               testInstructionDeclare)) {
+    else if (std::regex_search(usedLine, matches, testInstructionDeclare)) {
         readLine(matches);
     }
     else if (std::regex_search(this->lastLine, matches, testLinkPI)) {

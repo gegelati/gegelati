@@ -50,17 +50,18 @@ namespace Mutator {
 
         /**
          * Randomly change the value of the indicated constant
-         * 
+         *
          * \param[in,out] line the Program::Line whose attributes are being
          * altered.
          * \param[in] index index of the constant
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void changeConstantAt(Program::Line& line, uint64_t index, Mutator::RNG& rng);
+        void changeConstantAt(Program::Line& line, uint64_t index,
+                              Mutator::RNG& rng);
 
         /**
          * Randomly change all the constant of the line
-         * 
+         *
          * \param[in,out] line the Program::Line whose attributes are being
          * altered.
          * \param[in] rng Random Number Generator used in the mutation process.

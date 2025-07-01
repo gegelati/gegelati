@@ -160,7 +160,6 @@ namespace Program {
          */
         ~Program();
 
-
         /**
          * \brief Add a new line to the Program with only 0 bits.
          *
@@ -248,15 +247,15 @@ namespace Program {
          */
         Line& getLine(uint64_t index);
 
-
-        /** 
-         * \brief Return a vector corresponding to each constant in all the lines of the program
+        /**
+         * \brief Return a vector corresponding to each constant in all the
+         * lines of the program
          */
         std::vector<double> getLineConstants() const;
 
-        /** 
+        /**
          * \brief Set the current constants of all the lines in the program.
-         * 
+         *
          * \param[in] newConstants Vector of values to set to the constants
          */
         void setLineConstants(std::vector<double>& newConstants);

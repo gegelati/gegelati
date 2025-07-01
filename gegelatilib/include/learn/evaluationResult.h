@@ -36,8 +36,8 @@
 #ifndef EVALUATION_RESULT_H
 #define EVALUATION_RESULT_H
 
-#include <memory>
 #include <cmath>
+#include <memory>
 
 namespace Learn {
     /**
@@ -82,8 +82,8 @@ namespace Learn {
          * \param[in] uti the double value representing the utility of an
          * evaluation.
          */
-        EvaluationResult(const double& res, const size_t& nbEval, 
-                         const double& uti=std::nan(""))
+        EvaluationResult(const double& res, const size_t& nbEval,
+                         const double& uti = std::nan(""))
             : result{res}, utility{uti}, nbEvaluation{nbEval} {};
 
         /**

@@ -145,54 +145,55 @@ void CodeGen::TPGStackGenerationEngine::generateTPGGraph()
 
 void CodeGen::TPGStackGenerationEngine::initTpgFile()
 {
-    fileMain << "#include <limits.h> \n"
-             << "#include <assert.h>\n"
-             << "#include <stdio.h>\n"
-             << "#include <stdint.h>\n"
-             << "#include <stdbool.h>\n"
-             << "#include <math.h>\n\n"
+    fileMain
+        << "#include <limits.h> \n"
+        << "#include <assert.h>\n"
+        << "#include <stdio.h>\n"
+        << "#include <stdint.h>\n"
+        << "#include <stdbool.h>\n"
+        << "#include <math.h>\n\n"
 
-             << "void inferenceTPG(double* action){\n"
-             << "\texecuteFromVertex(root, action);\n"
-             << "}\n\n"
+        << "void inferenceTPG(double* action){\n"
+        << "\texecuteFromVertex(root, action);\n"
+        << "}\n\n"
 
-             << "void executeFromVertex(void*(*ptr_f)(double*), double* action){\n"
-             << "\tvoid*(*f)(double*) = ptr_f;\n"
-             << "\twhile (f!=NULL){\n"
-             << "\t\tf = (void*(*)(double*)) (f(action));\n"
-             << "\t}\n"
-             << "}\n\n"
+        << "void executeFromVertex(void*(*ptr_f)(double*), double* action){\n"
+        << "\tvoid*(*f)(double*) = ptr_f;\n"
+        << "\twhile (f!=NULL){\n"
+        << "\t\tf = (void*(*)(double*)) (f(action));\n"
+        << "\t}\n"
+        << "}\n\n"
 
-             << "void* executeTeam(Edge* e, int nbEdge){\n"
-             << "\tint idxNext = execute(e, nbEdge); \n"
-             << "\tif(idxNext != -1) {\n"
-             << "\t\treturn e[idxNext].ptr_vertex;\n"
-             << "\t}\n"
-             << "\treturn NULL;\n"
-             << "}\n\n"
+        << "void* executeTeam(Edge* e, int nbEdge){\n"
+        << "\tint idxNext = execute(e, nbEdge); \n"
+        << "\tif(idxNext != -1) {\n"
+        << "\t\treturn e[idxNext].ptr_vertex;\n"
+        << "\t}\n"
+        << "\treturn NULL;\n"
+        << "}\n\n"
 
-             << "int execute(Edge* e, int nbEdge){\n"
-             << "\tdouble bestResult;\n"
-             << "\tint idxNext = 0;\n"
-             << "\tint idx;\n"
-             << "\tdouble r;\n\n"
+        << "int execute(Edge* e, int nbEdge){\n"
+        << "\tdouble bestResult;\n"
+        << "\tint idxNext = 0;\n"
+        << "\tint idx;\n"
+        << "\tdouble r;\n\n"
 
-             << "\tbestResult = e[idxNext].ptr_prog();\n"
-             << "\tbestResult = (isnan(bestResult)) ? -INFINITY : bestResult;\n"
-             << "\tidx = idxNext + 1;\n\n"
+        << "\tbestResult = e[idxNext].ptr_prog();\n"
+        << "\tbestResult = (isnan(bestResult)) ? -INFINITY : bestResult;\n"
+        << "\tidx = idxNext + 1;\n\n"
 
-             << "\twhile (idx < nbEdge){\n"
-             << "\t\tr = e[idx].ptr_prog();\n"
-             << "\t\tr = (isnan(r)) ? -INFINITY : r;\n"
-             << "\t\tif (r >= bestResult){\n"
-             << "\t\t\tbestResult = r;\n"
-             << "\t\t\tidxNext = idx;\n"
-             << "\t\t}\n"
-             << "\t\tidx++;\n"
-             << "\t}\n"
-             << "\treturn idxNext;\n"
-             << "}\n"
-             << std::endl;
+        << "\twhile (idx < nbEdge){\n"
+        << "\t\tr = e[idx].ptr_prog();\n"
+        << "\t\tr = (isnan(r)) ? -INFINITY : r;\n"
+        << "\t\tif (r >= bestResult){\n"
+        << "\t\t\tbestResult = r;\n"
+        << "\t\t\tidxNext = idx;\n"
+        << "\t\t}\n"
+        << "\t\tidx++;\n"
+        << "\t}\n"
+        << "\treturn idxNext;\n"
+        << "}\n"
+        << std::endl;
 }
 
 void CodeGen::TPGStackGenerationEngine::initHeaderFile()
@@ -201,7 +202,8 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
 
     fileMainH << "typedef enum Vertex {";
     for (auto vertex : this->tpg.getVertices()) {
-        fileMainH << vertexName(*vertex) << "Vert" << ", ";
+        fileMainH << vertexName(*vertex) << "Vert"
+                  << ", ";
     }
 
     fileMainH << "} Vertex;\n\n"

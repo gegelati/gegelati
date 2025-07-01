@@ -134,10 +134,13 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     double utility = 0.0;
 
     // Number of evaluations
-    uint64_t nbEvaluation = (mode == LearningMode::TRAINING) ? this->params.nbIterationsPerPolicyEvaluation:this->params.nbIterationsPerPolicyValidation;
+    uint64_t nbEvaluation = (mode == LearningMode::TRAINING)
+                                ? this->params.nbIterationsPerPolicyEvaluation
+                                : this->params.nbIterationsPerPolicyValidation;
 
     // Evaluate nbIteration times
-    for (auto iterationNumber = 0; iterationNumber < nbEvaluation; iterationNumber++) {
+    for (auto iterationNumber = 0; iterationNumber < nbEvaluation;
+         iterationNumber++) {
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
         uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
@@ -160,17 +163,15 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         // Update results
         result += le.getScore();
         // Update utility if used.
-        if(le.isUsingUtility()){
+        if (le.isUsingUtility()) {
             utility += le.getUtility();
         }
     }
 
     // Create the EvaluationResult
-    auto evaluationResult =
-        std::shared_ptr<EvaluationResult>(new EvaluationResult(
-            result / (double)nbEvaluation,
-            nbEvaluation,
-            utility / (double)nbEvaluation));
+    auto evaluationResult = std::shared_ptr<EvaluationResult>(
+        new EvaluationResult(result / (double)nbEvaluation, nbEvaluation,
+                             utility / (double)nbEvaluation));
 
     // Combine it with previous one if any
     if (previousEval != nullptr) {
@@ -270,10 +271,14 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 
     // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
-        std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> validationResults;
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                      const TPG::TPGVertex*>
+            validationResults;
 
-        if(generationNumber % params.stepValidation == 0 || generationNumber == params.nbGenerations - 1){
-            validationResults = evaluateAllRoots(generationNumber, Learn::LearningMode::VALIDATION);
+        if (generationNumber % params.stepValidation == 0 ||
+            generationNumber == params.nbGenerations - 1) {
+            validationResults = evaluateAllRoots(
+                generationNumber, Learn::LearningMode::VALIDATION);
         }
         for (auto logger : loggers) {
             logger.get().logAfterValidate(validationResults);
@@ -286,21 +291,26 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
 }
 
 void Learn::LearningAgent::decimateWithTournament(
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>& results)
+    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
+        results)
 {
-    size_t nbToKeep = (size_t)(params.mutation.tpg.nbRoots * (1 - params.ratioDeletedRoots));
+    size_t nbToKeep =
+        (size_t)(params.mutation.tpg.nbRoots * (1 - params.ratioDeletedRoots));
     size_t nbAgentsInTournament = results.size() - nbToKeep;
 
     // Copy the first agents to remove (those at the bottom of the ranking)
-    std::vector<std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>> elements;
+    std::vector<
+        std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>>
+        elements;
     auto it = results.begin();
-    for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i, ++it) {
+    for (size_t i = 0; i < nbAgentsInTournament && it != results.end();
+         ++i, ++it) {
         elements.push_back(*it);
     }
 
     // Shuffle with custom RNG
     for (size_t i = elements.size() - 1; i > 0; --i) {
-        size_t j = rng.getUnsignedInt64(0, i);  // Random index in [0, i]
+        size_t j = rng.getUnsignedInt64(0, i); // Random index in [0, i]
         std::swap(elements[i], elements[j]);
     }
 
@@ -310,13 +320,12 @@ void Learn::LearningAgent::decimateWithTournament(
     // Tournament selection
     for (size_t i = 0; i < nbAgentsInTournament; i += params.sizeTournament) {
         size_t end = std::min(static_cast<size_t>(i + params.sizeTournament),
-                      nbAgentsInTournament);
+                              nbAgentsInTournament);
         auto subrangeBegin = elements.begin() + i;
         auto subrangeEnd = elements.begin() + end;
 
-        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*> subMap(
-            subrangeBegin, subrangeEnd
-        );
+        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
+            subMap(subrangeBegin, subrangeEnd);
 
         // Delete everything but the best
         while (subMap.size() > 1) {
@@ -333,7 +342,6 @@ void Learn::LearningAgent::decimateWithTournament(
     // Delete the vertices marked for deletion
     for (const auto* v : toDelete) {
         tpg->removeVertex(*v);
-     
     }
 
     for (const auto* v : toDelete) {
@@ -347,12 +355,11 @@ void Learn::LearningAgent::decimateWithTournament(
     }
 }
 
-
 void Learn::LearningAgent::decimateWorstRoots(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
         results)
 {
-    if(params.useTournamentSelection){
+    if (params.useTournamentSelection) {
         return decimateWithTournament(results);
     }
 
@@ -363,7 +370,6 @@ void Learn::LearningAgent::decimateWorstRoots(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
         preservedRoots;
 
-
     // Estimate the number of expected roots to delete
     size_t nbExpectedRoots = (size_t)floor(this->params.ratioDeletedRoots *
                                            (double)params.mutation.tpg.nbRoots);
@@ -371,7 +377,9 @@ void Learn::LearningAgent::decimateWorstRoots(
     // Get the maximum number of teams and actions deletable
     size_t nbTeamsDeleted = 0;
     size_t nbActionsDeleted = 0;
-    size_t maxNbTeamsToDelete = (size_t)((double)nbExpectedRoots * this->params.mutation.tpg.ratioTeamsOverActions);
+    size_t maxNbTeamsToDelete =
+        (size_t)((double)nbExpectedRoots *
+                 this->params.mutation.tpg.ratioTeamsOverActions);
     size_t maxNbActionsoDelete = nbExpectedRoots - maxNbTeamsToDelete;
 
     auto i = 0;
@@ -379,28 +387,35 @@ void Learn::LearningAgent::decimateWorstRoots(
 
         // If the root is an action, do not remove it in discrete environment!
         const TPG::TPGVertex* root = results.begin()->second;
-        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr && !this->params.mutation.tpg.useActionProgram) {
+        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr &&
+            !this->params.mutation.tpg.useActionProgram) {
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
 
-        // This conditions avoid deleting all the teams or all the actions
-        // This is usefull is the ratioTeamsOverActions is between 0 and 1.
-        } else if (dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) != nullptr
-                   && nbTeamsDeleted >= maxNbTeamsToDelete){
+            // This conditions avoid deleting all the teams or all the actions
+            // This is usefull is the ratioTeamsOverActions is between 0 and 1.
+        }
+        else if (dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) !=
+                     nullptr &&
+                 nbTeamsDeleted >= maxNbTeamsToDelete) {
 
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
-        } else if (dynamic_cast<const TPG::TPGAction*>(results.begin()->second) != nullptr
-                   && nbActionsDeleted >= maxNbActionsoDelete){
+        }
+        else if (dynamic_cast<const TPG::TPGAction*>(results.begin()->second) !=
+                     nullptr &&
+                 nbActionsDeleted >= maxNbActionsoDelete) {
 
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
-
-        } else {
+        }
+        else {
             // Incremente the number of actions and teams deleted.
-            if(dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) != nullptr){
+            if (dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) !=
+                nullptr) {
                 nbTeamsDeleted++;
-            } else {
+            }
+            else {
                 nbActionsDeleted++;
             }
 

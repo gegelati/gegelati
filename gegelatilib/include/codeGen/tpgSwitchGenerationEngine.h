@@ -73,8 +73,9 @@ namespace CodeGen {
 
         /**
          * \brief function printing activation function code in the C files.
-         * 
-         * This function print the activation function in the param file of the Environment instance.
+         *
+         * This function print the activation function in the param file of the
+         * Environment instance.
          */
         virtual void initActivationFunction();
 

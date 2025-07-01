@@ -39,7 +39,6 @@
 #include "data/constantHandler.h"
 #include "instructions/multByConstant.h"
 
-
 void Program::ProgramEngine::setProgram(const Program& prog)
 {
     // are constants used here ?
@@ -123,9 +122,8 @@ const Instructions::Instruction& Program::ProgramEngine::getCurrentInstruction()
     // is too large.
 }
 
-
 const void Program::ProgramEngine::fetchCurrentOperands(
-    std::vector<Data::UntypedSharedPtr>& operands) const 
+    std::vector<Data::UntypedSharedPtr>& operands) const
 {
     const Line& line = this->getCurrentLine(); // throw std::out_of_range
     const Instructions::Instruction& instruction =
@@ -133,24 +131,22 @@ const void Program::ProgramEngine::fetchCurrentOperands(
 
     uint64_t indexConst = 0;
 
-
     // Get as many operands as required by the instruction.
     for (uint64_t i = 0; i < instruction.getNbOperandsWithConst(); i++) {
 
         const std::type_info& operandType =
             instruction.getOperandTypesWithConst().at(i).get();
 
-        //template <class T>;
-        if(operandType == typeid(Data::Constant) && 
-            dynamic_cast<const Instructions::IAbstractMultByConstant*>(&instruction) == nullptr)
-        {
-            
-            operands.push_back(line.cGetConstantHandler().getDataAt(
-                operandType, indexConst));
+        // template <class T>;
+        if (operandType == typeid(Data::Constant) &&
+            dynamic_cast<const Instructions::IAbstractMultByConstant*>(
+                &instruction) == nullptr) {
+
+            operands.push_back(
+                line.cGetConstantHandler().getDataAt(operandType, indexConst));
             indexConst++;
-
-
-        } else {
+        }
+        else {
 
             const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
                 line.getOperand(i).first); // Throws std::out_of_range
@@ -159,10 +155,8 @@ const void Program::ProgramEngine::fetchCurrentOperands(
                 dataSource.getDataAt(operandType, operandLocation);
             operands.push_back(data);
         }
-
     }
 }
-
 
 uint64_t Program::ProgramEngine::getOperandLocation(uint64_t idxOp) const
 {

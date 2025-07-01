@@ -136,8 +136,7 @@ namespace Learn {
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
               tpg(factory.createTPGGraph(env)), params{p},
-              archive(p.archiveSize, p.archivingProbability)
-        { };
+              archive(p.archiveSize, p.archivingProbability){};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -293,9 +292,10 @@ namespace Learn {
          *
          * The resultsPerRoot attribute is updated to remove results associated
          * to removed vertices.
-         * 
-         * The tournament selection is not secured when the ratioTeamOverAction is between 0 and 1
-         * It can be used, but it could happen that one "population" take over the other one
+         *
+         * The tournament selection is not secured when the ratioTeamOverAction
+         * is between 0 and 1 It can be used, but it could happen that one
+         * "population" take over the other one
          *
          * \param[in,out] results a multimap containing root TPGVertex
          * associated to their score during an evaluation.

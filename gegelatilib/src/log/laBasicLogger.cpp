@@ -45,7 +45,7 @@ void Log::LABasicLogger::logResults(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results)
 {
-    if(useUtility){
+    if (useUtility) {
         auto iter = results.begin();
         double min = iter->first->getUtility();
         std::advance(iter, results.size() - 1);
@@ -53,15 +53,13 @@ void Log::LABasicLogger::logResults(
         double avg = std::accumulate(
             results.begin(), results.end(), 0.0,
             [](double acc,
-            std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                        const TPG::TPGVertex*>
-                pair) -> double { return acc + pair.first->getUtility(); });
+               std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                         const TPG::TPGVertex*>
+                   pair) -> double { return acc + pair.first->getUtility(); });
         avg /= (double)results.size();
         *this << std::setw(colWidth) << min << std::setw(colWidth) << avg
-            << std::setw(colWidth) << max;
+              << std::setw(colWidth) << max;
     }
-
-
 
     auto iter = results.begin();
     double min = iter->first->getResult();
@@ -82,13 +80,15 @@ void Log::LABasicLogger::logHeader()
 {
     // First line of header
     //*this << std::left;
-    
-    *this << std::setw(5 * colWidth) << " " ;
-    if(useUtility) *this << std::setw((int)(1.5*colWidth)) << " ";
+
+    *this << std::setw(5 * colWidth) << " ";
+    if (useUtility)
+        *this << std::setw((int)(1.5 * colWidth)) << " ";
     *this << std::setw(colWidth) << "Train";
     if (doValidation) {
         *this << std::setw((int)(2.5 * colWidth)) << " ";
-        if(useUtility) *this << std::setw((int)(3 * colWidth)) << "  ";
+        if (useUtility)
+            *this << std::setw((int)(3 * colWidth)) << "  ";
         *this << "Valid";
     }
     *this << std::endl;
@@ -96,28 +96,30 @@ void Log::LABasicLogger::logHeader()
     // Second line of header
     //*this << std::right;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
-          << std::setw(colWidth) << "NbActR" << std::setw(colWidth) << "NbTeamR";
-    
-    if(useUtility){
-        *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth) << "U_Avg"
-              << std::setw(colWidth) << "U_Max";
-        *this << std::setw(colWidth) << "R_Min" << std::setw(colWidth) << "R_Avg"
-              << std::setw(colWidth) << "R_Max";
-    } else {
+          << std::setw(colWidth) << "NbActR" << std::setw(colWidth)
+          << "NbTeamR";
+
+    if (useUtility) {
+        *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth)
+              << "U_Avg" << std::setw(colWidth) << "U_Max";
+        *this << std::setw(colWidth) << "R_Min" << std::setw(colWidth)
+              << "R_Avg" << std::setw(colWidth) << "R_Max";
+    }
+    else {
         *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
               << std::setw(colWidth) << "Max";
     }
 
-
     if (doValidation) {
-        if(useUtility){
-            *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth) << "U_Avg"
-                  << std::setw(colWidth) << "U_Max";
-            *this << std::setw(colWidth) << "R_Min" << std::setw(colWidth) << "R_Avg"
-                  << std::setw(colWidth) << "R_Max";
-        } else {
-            *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
-                  << std::setw(colWidth) << "Max";
+        if (useUtility) {
+            *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth)
+                  << "U_Avg" << std::setw(colWidth) << "U_Max";
+            *this << std::setw(colWidth) << "R_Min" << std::setw(colWidth)
+                  << "R_Avg" << std::setw(colWidth) << "R_Max";
+        }
+        else {
+            *this << std::setw(colWidth) << "Min" << std::setw(colWidth)
+                  << "Avg" << std::setw(colWidth) << "Max";
         }
     }
 
@@ -177,18 +179,21 @@ void Log::LABasicLogger::logAfterValidate(
 {
     validTime = getDurationFrom(*checkpoint);
 
-    if(results.size() > 0){
-        // being in this method means validation is active, and so we are sure we
-        // can log results
+    if (results.size() > 0) {
+        // being in this method means validation is active, and so we are sure
+        // we can log results
         logResults(results);
-    } else {
+    }
+    else {
         size_t multiplier = 3;
-        if(useUtility) multiplier *= 2;
-        *this << std::setw(multiplier*colWidth) << " ";
+        if (useUtility)
+            multiplier *= 2;
+        *this << std::setw(multiplier * colWidth) << " ";
     }
 }
 
-void Log::LABasicLogger::logAfterDecimate(){
+void Log::LABasicLogger::logAfterDecimate()
+{
     decimationTime = getDurationFrom(*checkpoint);
 
     // resets checkpoint to be able to show validation time if there is some

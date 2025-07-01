@@ -53,8 +53,6 @@ Program::Program::~Program()
     }
 }
 
-
-
 Program::Line& Program::Program::addNewLine()
 {
     return this->addNewLine(this->getNbLines());
@@ -156,14 +154,15 @@ uint64_t Program::Program::identifyIntrons()
 
     // With continuous actions, add all the registers needed (TODO add
     // difference program link to action and to team for efficacity)
-    if((actionProgram && !this->environment.getParams().mutation.tpg.useMultiActionProgram) || !this->environment.getParams().mutation.tpg.useActionProgram){
-        for (size_t idx = 0;
-            idx < this->environment.getNbContinuousActions(); idx++) {
-            usefulRegisters.insert(idx + (int)!this->environment.getParams().mutation.tpg.useActionProgram);
+    if ((actionProgram &&
+         !this->environment.getParams().mutation.tpg.useMultiActionProgram) ||
+        !this->environment.getParams().mutation.tpg.useActionProgram) {
+        for (size_t idx = 0; idx < this->environment.getNbContinuousActions();
+             idx++) {
+            usefulRegisters.insert(idx + (int)!this->environment.getParams()
+                                             .mutation.tpg.useActionProgram);
         }
     }
-
-
 
     // Scan program lines backward
     auto backIter = this->lines.rbegin();
@@ -236,14 +235,15 @@ const Data::Constant Program::Program::getConstantAt(size_t index) const
     return *value;
 }
 
-
 std::vector<double> Program::Program::getLineConstants() const
 {
     std::vector<double> constants;
-    for(size_t idxLine = 0; idxLine < this->getNbLines(); idxLine++){
+    for (size_t idxLine = 0; idxLine < this->getNbLines(); idxLine++) {
         auto& line = getLine(idxLine);
 
-        for(size_t idx = 0; idx < this->environment.getInstructionSet().getMaxNbConstants(); idx++){
+        for (size_t idx = 0;
+             idx < this->environment.getInstructionSet().getMaxNbConstants();
+             idx++) {
             constants.push_back((double)line.getConstantAt(idx));
         }
     }
@@ -252,21 +252,21 @@ std::vector<double> Program::Program::getLineConstants() const
 
 void Program::Program::setLineConstants(std::vector<double>& newConstants)
 {
-    size_t i=0;
-    for(size_t idxLine = 0; idxLine < this->getNbLines(); idxLine++){
+    size_t i = 0;
+    for (size_t idxLine = 0; idxLine < this->getNbLines(); idxLine++) {
         auto& line = getLine(idxLine);
 
-        for(size_t idx=0; idx < this->environment.getInstructionSet().getMaxNbConstants(); idx++){
+        for (size_t idx = 0;
+             idx < this->environment.getInstructionSet().getMaxNbConstants();
+             idx++) {
 
             double newConstantValue = newConstants.at(i);
 
-            line.getConstantHandler().setDataAt(
-                typeid(Data::Constant), idx,
-                {newConstantValue});
+            line.getConstantHandler().setDataAt(typeid(Data::Constant), idx,
+                                                {newConstantValue});
 
-            i++;    
+            i++;
         }
-
     }
 }
 

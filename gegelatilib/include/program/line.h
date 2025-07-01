@@ -62,7 +62,8 @@ namespace Program {
         /// DataHandlers of the Environment, and a location within it.)
         std::pair<uint64_t, uint64_t>* const operands;
 
-        /// Number of constants (TODO Change for weights) contained by the program.
+        /// Number of constants (TODO Change for weights) contained by the
+        /// program.
         uint64_t nbConstants = 0;
 
         /**
@@ -72,8 +73,6 @@ namespace Program {
          *	 Data::DataHandler
          **/
         Data::ConstantHandler constants;
-
-
 
         /// Delete the default constructor.
         Line() = delete;
@@ -92,7 +91,7 @@ namespace Program {
               operands{(std::pair<uint64_t, uint64_t>*)calloc(
                   env.getMaxNbOperands(),
                   sizeof(std::pair<uint64_t, uint64_t>))},
-                  constants{env.getInstructionSet().getMaxNbConstants()} {};
+              constants{env.getInstructionSet().getMaxNbConstants()} {};
 
         /**
          * \brief Copy constructor of a Line performing a deep copy.
@@ -106,8 +105,7 @@ namespace Program {
             : environment{other.environment},
               instructionIndex{other.instructionIndex},
               destinationIndex{other.destinationIndex},
-              constants{other.constants},
-              nbConstants{other.nbConstants},
+              constants{other.constants}, nbConstants{other.nbConstants},
               operands{(std::pair<uint64_t, uint64_t>*)calloc(
                   other.environment.getMaxNbOperands(),
                   sizeof(std::pair<uint64_t, uint64_t>))}
@@ -232,15 +230,15 @@ namespace Program {
         bool setOperand(const uint64_t idx, const uint64_t dataIndex,
                         const uint64_t location, const bool check = true);
 
-
         /**
          * \brief Get the number of constants in the line.
          */
         uint64_t getNbConstants() const;
-        /** 
+        /**
          * \brief set a new number of constants in the line.
-         * 
-         * \param[in] newNbConstants set the new number of constants in the program
+         *
+         * \param[in] newNbConstants set the new number of constants in the
+         * program
          */
         void setNbConstants(uint64_t newNbConstants);
         /**
@@ -274,7 +272,6 @@ namespace Program {
          *	\return the value of the constant at the given index
          */
         const Data::Constant getConstantAt(size_t index) const;
-
 
         /**
          * \brief Comparison operator between Line.

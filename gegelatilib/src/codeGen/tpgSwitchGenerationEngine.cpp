@@ -50,9 +50,11 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
         progGenerationEngine.generateProgram(progID);
     }
 
-    if(this->tpg.getEnvironment().getNbContinuousActions() > 0 && p.isActionProgram()){
+    if (this->tpg.getEnvironment().getNbContinuousActions() > 0 &&
+        p.isActionProgram()) {
         fileMain << "P" << progID << "(actions)";
-    } else {
+    }
+    else {
         fileMain << "P" << progID << "()";
     }
 }
@@ -98,23 +100,18 @@ void CodeGen::TPGSwitchGenerationEngine::generateAction(
     const TPG::TPGAction& action)
 {
 
+    if (action.getOutgoingEdges().size() > 0) {
 
-
-    if(action.getOutgoingEdges().size() > 0){
-
-        
         fileMain << "\t\t\treturn activationFunction(";
         auto edge = action.getOutgoingEdges().front();
         generateEdge(*edge);
         fileMain << ");" << std::endl;
-    } else {
+    }
+    else {
         uint64_t id = action.getActionID();
         fileMain << "\t\t\tactions[0] = " << id << ";" << std::endl;
         fileMain << "\t\t\treturn;" << std::endl;
     }
-
-    
-
 }
 
 void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
@@ -122,7 +119,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
     initTpgFile();
     initHeaderFile();
 
-    if(this->tpg.getEnvironment().getNbContinuousActions() > 0){
+    if (this->tpg.getEnvironment().getNbContinuousActions() > 0) {
         initActivationFunction();
     }
 
@@ -137,7 +134,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
     fileMain << "};" << std::endl << std::endl;
 
     // generate inference function
-    fileMain << "void inferenceTPG(double* actions) {\n"<<std::endl;
+    fileMain << "void inferenceTPG(double* actions) {\n" << std::endl;
 
     // start graph on root
     fileMain << "\tenum vertices currentVertex = "
@@ -192,35 +189,36 @@ void CodeGen::TPGSwitchGenerationEngine::initHeaderFile()
 {
     fileMainH << "#include <stdlib.h>\n\n";
 
-    fileMainH << "void inferenceTPG(double* actions);\n"<<std::endl;
+    fileMainH << "void inferenceTPG(double* actions);\n" << std::endl;
 }
 
 void CodeGen::TPGSwitchGenerationEngine::initActivationFunction()
 {
-            
+
     fileMainH << "void activationFunction(double *actions);";
 
-    fileMain 
-        << "void activationFunction(double *actions) {\n"
-        << "\tfor (size_t i = 0; i < "<<this->tpg.getEnvironment().getNbContinuousActions()<<"; i++) {\n"
-        << "\t\tif(isnan(actions[i])) actions[i] = -INFINITY;\n\n";
+    fileMain << "void activationFunction(double *actions) {\n"
+             << "\tfor (size_t i = 0; i < "
+             << this->tpg.getEnvironment().getNbContinuousActions()
+             << "; i++) {\n"
+             << "\t\tif(isnan(actions[i])) actions[i] = -INFINITY;\n\n";
 
-    if(this->tpg.getEnvironment().getParams().activationFunction == "none"){
-        fileMain
-            << "\t\tif (actions[i] > 1.0) actions[i] = 1.0;\n"
-            << "\t\telse if (actions[i] < -1.0) actions[i] = -1.0;\n";
+    if (this->tpg.getEnvironment().getParams().activationFunction == "none") {
+        fileMain << "\t\tif (actions[i] > 1.0) actions[i] = 1.0;\n"
+                 << "\t\telse if (actions[i] < -1.0) actions[i] = -1.0;\n";
     }
 
-    else if(this->tpg.getEnvironment().getParams().activationFunction == "sigmoid"){
+    else if (this->tpg.getEnvironment().getParams().activationFunction ==
+             "sigmoid") {
         fileMain << "\t\tactions[i] = 1.0 / (1.0 + exp(-actions[i]));\n";
     }
 
-    
-    else if(this->tpg.getEnvironment().getParams().activationFunction == "tanh"){
+    else if (this->tpg.getEnvironment().getParams().activationFunction ==
+             "tanh") {
         fileMain << "\t\tactions[i] = tanh(actions[i]);\n";
     }
 
-    fileMain << "\t}\n}\n"<< std::endl;
+    fileMain << "\t}\n}\n" << std::endl;
 }
 
 std::string CodeGen::TPGSwitchGenerationEngine::vertexName(

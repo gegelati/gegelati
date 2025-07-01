@@ -36,9 +36,9 @@
 
 #include <gtest/gtest.h>
 
+#include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
-#include "learn/fakeMultiContinuousLearningEnvironment.h"
 
 TEST(LearningEnvironmentTest, Constructor)
 {
@@ -93,7 +93,6 @@ TEST(LearningEnvironmentTest, Clonable)
     le->isTerminal();
     ASSERT_THROW(le->getUtility(), std::runtime_error)
         << "Default behavior of getUtility should throw an exception.";
-    
 
     delete le;
 }
@@ -144,7 +143,8 @@ TEST(LearningEnvironmentTest, doAction)
 
     FakeMultiContinuousLearningEnvironment cle;
     ASSERT_THROW(cle.doAction(1), std::runtime_error)
-        << "Trying to do a single action in a multi-action environment should fail.";
+        << "Trying to do a single action in a multi-action environment should "
+           "fail.";
 }
 
 TEST(LearningEnvironmentTest, doActions)
@@ -161,8 +161,7 @@ TEST(LearningEnvironmentTest, doActions)
     ASSERT_THROW(cle.doActions({1.0, 1.0, 1.0, 1.0}), std::runtime_error)
         << "Should fail, too much actions.";
 
-    ASSERT_NO_THROW(cle.doActions({1.0, 1.0, 1.0}))
-        << "Should not fail.";
+    ASSERT_NO_THROW(cle.doActions({1.0, 1.0, 1.0})) << "Should not fail.";
 }
 
 TEST(LearningEnvironmentTest, getScoreAndIsTerminal)

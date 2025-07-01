@@ -40,9 +40,9 @@
 
 #include <cstdint>
 
-#include "tpg/tpgVertex.h"
-#include "tpg/tpgActionEdge.h"
 #include "program/program.h"
+#include "tpg/tpgActionEdge.h"
+#include "tpg/tpgVertex.h"
 
 namespace TPG {
     /**
@@ -62,7 +62,6 @@ namespace TPG {
          */
         const uint64_t actionID;
 
-
       public:
         /**
          * \brief Main constructor of a TPGAction.
@@ -79,13 +78,13 @@ namespace TPG {
          */
         virtual void addOutgoingEdge(TPGEdge* edge) override;
 
-
         /**
          * \brief Return the action edge corresponding to the action class
-         * 
-         * Return a pointer pointing to the edge linked to the action class. The pointer is set to nullptr if the action is not founded 
+         *
+         * Return a pointer pointing to the edge linked to the action class. The
+         * pointer is set to nullptr if the action is not founded
          */
-        virtual TPG::TPGActionEdge* getEdgeOfAction(uint64_t actionClass) const ;
+        virtual TPG::TPGActionEdge* getEdgeOfAction(uint64_t actionClass) const;
 
         /**
          * \brief Get the action ID associated to the TPGAction.
@@ -97,9 +96,9 @@ namespace TPG {
             return this->actionID;
         };
 
-
         /**
-         * \brief Order the actionEdges of the action depending on the actionClass of the edges
+         * \brief Order the actionEdges of the action depending on the
+         * actionClass of the edges
          */
         void orderActionEdges();
     };

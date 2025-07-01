@@ -104,7 +104,8 @@ class ProgramEngineTest : public ::testing::Test
                 }
                 return res / 4.0;
             }));
-        set.add(*new Instructions::LambdaInstruction<double, double, Data::Constant>(
+        set.add(*new Instructions::LambdaInstruction<double, double,
+                                                     Data::Constant>(
             [](double a, double b, Data::Constant c) {
                 return a + b * (double)c;
             }));
@@ -387,7 +388,7 @@ TEST_F(ProgramEngineTest, iterateThroughtProgram)
 
 TEST_F(ProgramEngineTest, getRegisterValues)
 {
-    
+
     Program::ProgramExecutionEngine progExecEng(*p);
     progExecEng.iterateThroughtProgram(false);
 
@@ -396,7 +397,8 @@ TEST_F(ProgramEngineTest, getRegisterValues)
     ASSERT_NO_THROW(regsValue = progExecEng.getRegisterValues(8))
         << "Fail to get the register values";
 
-    ASSERT_EQ(regsValue, std::vector<double>({9.0825001281499862,  4.3250000119209284, 0, 0, 0,  2.0250000119209286, 0, 0}))
+    ASSERT_EQ(regsValue,
+              std::vector<double>({9.0825001281499862, 4.3250000119209284, 0, 0,
+                                   0, 2.0250000119209286, 0, 0}))
         << "Register values are incorrect";
-
 }

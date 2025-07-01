@@ -116,7 +116,7 @@ void File::ParametersParser::setParameterFromString(
     }
 
     if (param == "nbActionEdgeInit") {
-        params.mutation.tpg.nbActionEdgeInit =  (size_t)value.asUInt();
+        params.mutation.tpg.nbActionEdgeInit = (size_t)value.asUInt();
         return;
     }
 
@@ -128,7 +128,7 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.teamAccessAllActions = value.asBool();
         return;
     }
-    
+
     if (param == "pChangeActionClass") {
         params.mutation.tpg.pChangeActionClass = (double)value.asDouble();
         return;
@@ -188,8 +188,6 @@ void File::ParametersParser::setParameterFromString(
             (double)value.asDouble();
         return;
     }
-
-       
 
     if (param == "maxProgramSize") {
         params.mutation.prog.maxProgramSize = (size_t)value.asUInt();
@@ -404,8 +402,7 @@ void File::ParametersParser::writeParametersToJson(
         Json::commentBefore);
     root["sizeTournament"] = params.sizeTournament;
     root["sizeTournament"].setComment(
-        Learn::LearningParameters::sizeTournamentComment,
-        Json::commentBefore);
+        Learn::LearningParameters::sizeTournamentComment, Json::commentBefore);
 
     // Mutation.tpg parameters
     root["mutation"]["tpg"]["forceProgramBehaviorChangeOnMutation"] =
@@ -420,41 +417,46 @@ void File::ParametersParser::writeParametersToJson(
         Mutator::TPGParameters::maxInitOutgoingEdgesComment,
         Json::commentBefore);
 
-
     root["mutation"]["tpg"]["nbActionEdgeInit"] =
         params.mutation.tpg.nbActionEdgeInit;
     root["mutation"]["tpg"]["nbActionEdgeInit"].setComment(
-        Mutator::TPGParameters::nbActionEdgeInitComment,
-        Json::commentBefore);
+        Mutator::TPGParameters::nbActionEdgeInitComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["useMultiActionProgram"] = params.mutation.tpg.useMultiActionProgram;
+    root["mutation"]["tpg"]["useMultiActionProgram"] =
+        params.mutation.tpg.useMultiActionProgram;
     root["mutation"]["tpg"]["useMultiActionProgram"].setComment(
         Mutator::TPGParameters::useMultiActionProgramComment,
         Json::commentBefore);
-    root["mutation"]["tpg"]["teamAccessAllActions"] = params.mutation.tpg.teamAccessAllActions;
+    root["mutation"]["tpg"]["teamAccessAllActions"] =
+        params.mutation.tpg.teamAccessAllActions;
     root["mutation"]["tpg"]["teamAccessAllActions"].setComment(
         Mutator::TPGParameters::teamAccessAllActionsComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["pChangeActionClass"] = params.mutation.tpg.pChangeActionClass;
+    root["mutation"]["tpg"]["pChangeActionClass"] =
+        params.mutation.tpg.pChangeActionClass;
     root["mutation"]["tpg"]["pChangeActionClass"].setComment(
         Mutator::TPGParameters::pChangeActionClassComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["pActionEdgeAddition"] =
         params.mutation.tpg.pActionEdgeAddition;
     root["mutation"]["tpg"]["pActionEdgeAddition"].setComment(
-        Mutator::TPGParameters::pActionEdgeAdditionComment, Json::commentBefore);
+        Mutator::TPGParameters::pActionEdgeAdditionComment,
+        Json::commentBefore);
 
     root["mutation"]["tpg"]["pActionEdgeDeletion"] =
         params.mutation.tpg.pActionEdgeDeletion;
     root["mutation"]["tpg"]["pActionEdgeDeletion"].setComment(
-        Mutator::TPGParameters::pActionEdgeDeletionComment, Json::commentBefore);
+        Mutator::TPGParameters::pActionEdgeDeletionComment,
+        Json::commentBefore);
 
-
-    root["mutation"]["tpg"]["pMutateActionProgram"] = params.mutation.tpg.pMutateActionProgram;
+    root["mutation"]["tpg"]["pMutateActionProgram"] =
+        params.mutation.tpg.pMutateActionProgram;
     root["mutation"]["tpg"]["pMutateActionProgram"].setComment(
-        Mutator::TPGParameters::pMutateActionProgramComment, Json::commentBefore);
-    root["mutation"]["tpg"]["pSwapActionProgram"] = params.mutation.tpg.pSwapActionProgram;
+        Mutator::TPGParameters::pMutateActionProgramComment,
+        Json::commentBefore);
+    root["mutation"]["tpg"]["pSwapActionProgram"] =
+        params.mutation.tpg.pSwapActionProgram;
     root["mutation"]["tpg"]["pSwapActionProgram"].setComment(
         Mutator::TPGParameters::pSwapActionProgramComment, Json::commentBefore);
 
@@ -467,9 +469,11 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["nbRoots"].setComment(
         Mutator::TPGParameters::nbRootsComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["ratioTeamsOverActions"] = params.mutation.tpg.ratioTeamsOverActions;
+    root["mutation"]["tpg"]["ratioTeamsOverActions"] =
+        params.mutation.tpg.ratioTeamsOverActions;
     root["mutation"]["tpg"]["ratioTeamsOverActions"].setComment(
-        Mutator::TPGParameters::ratioTeamsOverActionsComment, Json::commentBefore);
+        Mutator::TPGParameters::ratioTeamsOverActionsComment,
+        Json::commentBefore);
 
     root["mutation"]["tpg"]["pEdgeAddition"] =
         params.mutation.tpg.pEdgeAddition;
@@ -523,12 +527,14 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["prog"]["initMinProgramSize"] =
         params.mutation.prog.initMinProgramSize;
     root["mutation"]["prog"]["initMinProgramSize"].setComment(
-        Mutator::ProgramParameters::initMinProgramSizeComment, Json::commentBefore);
+        Mutator::ProgramParameters::initMinProgramSizeComment,
+        Json::commentBefore);
 
     root["mutation"]["prog"]["initMaxProgramSize"] =
         params.mutation.prog.initMaxProgramSize;
     root["mutation"]["prog"]["initMaxProgramSize"].setComment(
-        Mutator::ProgramParameters::initMaxProgramSizeComment, Json::commentBefore);
+        Mutator::ProgramParameters::initMaxProgramSizeComment,
+        Json::commentBefore);
 
     root["mutation"]["prog"]["minConstValue"] =
         params.mutation.prog.minConstValue;

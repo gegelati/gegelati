@@ -62,7 +62,7 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
     uint64_t actionNumber = this->findVertexID(action);
 
     uint64_t actionID = action.getActionID();
-    if(tpg.getEnvironment().getParams().mutation.tpg.useActionProgram){
+    if (tpg.getEnvironment().getParams().mutation.tpg.useActionProgram) {
         actionID = actionNumber;
     }
 
@@ -70,20 +70,19 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
     std::ostringstream labelStream;
 
     auto outgoingEdges = action.getOutgoingEdges();
-    if(tpg.getEnvironment().getParams().mutation.tpg.useMultiActionProgram){
+    if (tpg.getEnvironment().getParams().mutation.tpg.useMultiActionProgram) {
         for (auto it = outgoingEdges.begin(); it != outgoingEdges.end(); ++it) {
             if (it != outgoingEdges.begin()) {
                 labelStream << "-"; // Add separator between actionClasses
             }
-            auto actionClass = dynamic_cast<const TPG::TPGActionEdge*>(*it)->getActionClass();
+            auto actionClass =
+                dynamic_cast<const TPG::TPGActionEdge*>(*it)->getActionClass();
             labelStream << actionClass;
         }
-    } else {
+    }
+    else {
         labelStream << actionID;
     }
-
-
-
 
     // Get the complete label as a string
     std::string label = labelStream.str();
@@ -93,16 +92,12 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
             "%sA%" PRIu64 " [fillcolor=\"#ff3366\" shape=box margin=0.03 "
             "width=0 height=0 label=\"%s\"]\n",
             offset.c_str(), actionNumber, label.c_str());
-    
-
 
     return actionNumber;
 }
 
-
 void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 {
-
 
     uint64_t srcID = this->findVertexID(*edge.getSource());
     uint64_t progID;
@@ -111,7 +106,9 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
     if (this->findProgramID(edge.getProgram(), progID)) {
 
         // First time thie Program is encountered
-        fprintf(pFile, "%sP%" PRIu64 " [fillcolor=\"#cccccc\" shape=point label=\"%d\"] //",
+        fprintf(pFile,
+                "%sP%" PRIu64
+                " [fillcolor=\"#cccccc\" shape=point label=\"%d\"] //",
                 this->offset.c_str(), progID, p.isActionProgram() ? 1 : 0);
         // add next the content of the constant data handler in a comment (//)
         for (int i = 0; i < p.getEnvironment().getNbConstant(); i++) {
@@ -122,35 +119,39 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
         printProgram(p);
         fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n",
                 this->offset.c_str(), progID, progID);
-        if(dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr){
+        if (dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr) {
 
             fprintf(pFile, "%sA%" PRIu64 " -> P%" PRIu64 "\n",
                     this->offset.c_str(), srcID, progID);
+        }
+        else {
 
-        } else {
-                
             auto* dest = edge.getDestination();
-            
+
             if (dest && dynamic_cast<const TPG::TPGAction*>(dest) != nullptr) {
-                uint64_t actionID = printTPGAction(*(const TPG::TPGAction*)edge.getDestination());
-                fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n",
+                uint64_t actionID = printTPGAction(
+                    *(const TPG::TPGAction*)edge.getDestination());
+                fprintf(pFile,
+                        "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n",
                         this->offset.c_str(), srcID, progID, actionID);
             }
             else {
                 uint64_t destID = findVertexID(*edge.getDestination());
-                fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 " -> T%" PRIu64 "\n",
+                fprintf(pFile,
+                        "%sT%" PRIu64 " -> P%" PRIu64 " -> T%" PRIu64 "\n",
                         this->offset.c_str(), srcID, progID, destID);
             }
         }
     }
     else {
 
-        if(dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr){
-            fprintf(pFile, "%sA%" PRIu64 " ->  P%" PRIu64 "\n", this->offset.c_str(),
-                    srcID, progID);
-        } else {
-            fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 "\n", this->offset.c_str(),
-                    srcID, progID);
+        if (dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr) {
+            fprintf(pFile, "%sA%" PRIu64 " ->  P%" PRIu64 "\n",
+                    this->offset.c_str(), srcID, progID);
+        }
+        else {
+            fprintf(pFile, "%sT%" PRIu64 " -> P%" PRIu64 "\n",
+                    this->offset.c_str(), srcID, progID);
         }
     }
 }
@@ -182,10 +183,10 @@ void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
     }
     fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"] //",
             this->offset.c_str(), progID, programContent.c_str());
-    
+
     // add next the content of the constant data handler in a comment (//)
     auto constants = program.getLineConstants();
-    for (auto constantValue: constants) {
+    for (auto constantValue : constants) {
         fprintf(pFile, "%f|", constantValue);
     }
     fprintf(pFile, "\n");
@@ -217,7 +218,6 @@ void File::TPGGraphDotExporter::printTPGGraphHeader()
 void File::TPGGraphDotExporter::printTPGGraphFooter()
 {
 
-
     // Print root actions (and keep the ids)
     auto rootVertices = tpg.getRootVertices();
     std::vector<uint64_t> rootActionIDs;
@@ -231,11 +231,10 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
     // Print all action edges
     auto& edges = this->tpg.getEdges();
     for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
-        if(dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) != nullptr){
+        if (dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) != nullptr) {
             this->printTPGEdge(*edge.get());
         }
     }
-
 
     // Rank all the roots
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
@@ -278,11 +277,10 @@ void File::TPGGraphDotExporter::print()
     // Print all context edges
     auto& edges = this->tpg.getEdges();
     for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
-        if(dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) == nullptr){
+        if (dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) == nullptr) {
             this->printTPGEdge(*edge.get());
         }
     }
-
 
     // Print footer
     this->printTPGGraphFooter();
@@ -319,10 +317,10 @@ void File::TPGGraphDotExporter::printSubGraph(const TPG::TPGVertex* root)
         // Print it if it is a team (actions are printed with edges)
         if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
             this->printTPGTeam(*(const TPG::TPGTeam*)vertex);
-        } else {
+        }
+        else {
             this->printTPGAction(*(const TPG::TPGAction*)vertex);
         }
-						
 
         // Put its outgoing edge in the list for later print.
         // Edges must be printed after their destination team has been
@@ -332,12 +330,12 @@ void File::TPGGraphDotExporter::printSubGraph(const TPG::TPGVertex* root)
 
             // If the edge destination is a Team, put it in the list of
             // vertex to be visited.
-            if(dynamic_cast<TPG::TPGActionEdge*>(edge) == nullptr){
+            if (dynamic_cast<TPG::TPGActionEdge*>(edge) == nullptr) {
                 const TPG::TPGVertex* dest = edge->getDestination();
                 if (std::find(visitedVertices.begin(), visitedVertices.end(),
-                                dest) == visitedVertices.end() &&
+                              dest) == visitedVertices.end() &&
                     std::find(verticesToVisit.begin(), verticesToVisit.end(),
-                                dest) == verticesToVisit.end()) {
+                              dest) == verticesToVisit.end()) {
                     verticesToVisit.push_back(dest);
                 }
             }

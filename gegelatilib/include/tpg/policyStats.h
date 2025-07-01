@@ -125,7 +125,6 @@ namespace TPG {
          */
         std::map<size_t, size_t> nbUsagePerInstruction;
 
-
         /**
          * Each entry of this map associates an Instruction identifier from
          * an instruction set with the total number of times it was used in
@@ -142,7 +141,6 @@ namespace TPG {
          */
         std::map<std::pair<size_t, size_t>, size_t> nbUsagePerDataLocation;
 
-
         /**
          * Each entry of this map associates a data location with the total
          * number of times it was accessed by non-intron lines of analyzed
@@ -150,7 +148,8 @@ namespace TPG {
          * Each data location is itself represented with a pair consisting of
          * the data source index, and the location within this data source.
          */
-        std::map<std::pair<size_t, size_t>, size_t> nbUsagePerDataLocationActionProg;
+        std::map<std::pair<size_t, size_t>, size_t>
+            nbUsagePerDataLocationActionProg;
 
         /// Number of outgoing TPGEdge of per TPGTeam of the TPGGraph.
         std::vector<size_t> nbOutgoingEdgesPerTeam;
@@ -200,9 +199,10 @@ namespace TPG {
          * The method updates the following stats:
          * - Total number of usage of each Instruction.
          * - Total number of access for each location.
-         * 
+         *
          * \param[in] line line analized
-         * \param[in] actionProgram boolean to indicate if the program is an action program or a context program
+         * \param[in] actionProgram boolean to indicate if the program is an
+         * action program or a context program
          */
         void analyzeLine(const Program::Line* line, bool actionProgram = false);
 

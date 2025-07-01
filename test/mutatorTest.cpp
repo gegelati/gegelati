@@ -90,13 +90,17 @@ class MutatorTest : public ::testing::Test
         std::function<double(double, double)> add =
             [](double a, double b) -> double { return a + b; };
         std::function<double(double, double, Data::Constant)> addConst =
-            [](double a, double b, Data::Constant c) -> double { return a + b * (double)c; };
+            [](double a, double b, Data::Constant c) -> double {
+            return a + b * (double)c;
+        };
 
         set.add(*(new Instructions::MultByConstant<double>()));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
-        set.add(*(new Instructions::LambdaInstruction<double, double, Data::Constant>(addConst)));
+        set.add(*(
+            new Instructions::LambdaInstruction<double, double, Data::Constant>(
+                addConst)));
 
         // the environment and the programs have 5 Constant parameters
         params.nbRegisters = 8;
@@ -633,7 +637,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
 
-
     // Test coverage: maxInitOutgoingEdges < 2 and initNbTeams > 0
     nbActions = 10;
     params.tpg.ratioTeamsOverActions = 0.5;
@@ -644,7 +647,8 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         std::runtime_error)
         << "Should throw when maxInitOutgoingEdges < 2 and teams exist.";
 
-    // Test coverage: ratioTeamsOverActions = 1, useActionProgram = true, teamAccessAllActions = false
+    // Test coverage: ratioTeamsOverActions = 1, useActionProgram = true,
+    // teamAccessAllActions = false
     params.tpg.maxInitOutgoingEdges = 2;
     params.tpg.nbRoots = 4;
     params.tpg.ratioTeamsOverActions = 1.0;
@@ -654,7 +658,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
         std::runtime_error)
         << "Should throw with useActionProgram enabled.";
-
 
     // Test coverage: useMultiActionProgram
     params.tpg.maxInitOutgoingEdges = 2;
@@ -666,13 +669,11 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
         std::runtime_error)
         << "Should throw with useMultiActionProgram enabled.";
-
 }
-
 
 TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
 {
-    
+
     Mutator::RNG rng;
     Mutator::MutationParameters& mutParams = params.mutation;
     mutParams.tpg.maxInitOutgoingEdges = 4;
@@ -723,21 +724,23 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
         Mutator::TPGMutator::initRandomTPG(tpg3, mutParams, rng, nbActions))
         << "TPG Initialization should fail with bad parameters.";
 
-
     auto vertexSet = tpg3.getVertices();
     // Check number or vertex, roots, actions, teams, edges
-    ASSERT_EQ(vertexSet.size(), mutParams.tpg.nbRoots * 3 * mutParams.tpg.ratioTeamsOverActions
-              + mutParams.tpg.nbRoots * (1-mutParams.tpg.ratioTeamsOverActions))
+    ASSERT_EQ(vertexSet.size(),
+              mutParams.tpg.nbRoots * 3 * mutParams.tpg.ratioTeamsOverActions +
+                  mutParams.tpg.nbRoots *
+                      (1 - mutParams.tpg.ratioTeamsOverActions))
         << "Number of vertices after initialization is incorrect.";
     ASSERT_EQ(tpg3.getRootVertices().size(), mutParams.tpg.nbRoots)
         << "Number of root vertices after initialization is incorrect.";
-    ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
-                            [](const TPG::TPGVertex* vert) {
-                                return dynamic_cast<const TPG::TPGAction*>(
-                                           vert) != nullptr;
-                            }),
-              mutParams.tpg.nbRoots * 2 * mutParams.tpg.ratioTeamsOverActions
-              + mutParams.tpg.nbRoots * (1-mutParams.tpg.ratioTeamsOverActions))
+    ASSERT_EQ(
+        std::count_if(vertexSet.begin(), vertexSet.end(),
+                      [](const TPG::TPGVertex* vert) {
+                          return dynamic_cast<const TPG::TPGAction*>(vert) !=
+                                 nullptr;
+                      }),
+        mutParams.tpg.nbRoots * 2 * mutParams.tpg.ratioTeamsOverActions +
+            mutParams.tpg.nbRoots * (1 - mutParams.tpg.ratioTeamsOverActions))
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const TPG::TPGVertex* vert) {
@@ -749,7 +752,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     ASSERT_GE(tpg3.getEdges().size(), mutParams.tpg.nbRoots * 2)
         << "Insufficient number of edges in the initialized TPG.";
     ASSERT_LE(tpg3.getEdges().size(),
-             mutParams.tpg.nbRoots * (mutParams.tpg.maxInitOutgoingEdges + 1))
+              mutParams.tpg.nbRoots * (mutParams.tpg.maxInitOutgoingEdges + 1))
         << "Too many edges in the initialized TPG.";
 
     // Check number of Programs.
@@ -758,11 +761,14 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
                   [&programs](const std::unique_ptr<TPG::TPGEdge>& edge) {
                       programs.insert(&edge->getProgram());
                   });
-    // 2 contexts programs and 2 actions program per roots for team roots, one program for action roots
-    ASSERT_EQ(programs.size(), 4 * mutParams.tpg.nbRoots * mutParams.tpg.ratioTeamsOverActions
-              + mutParams.tpg.nbRoots * (1-mutParams.tpg.ratioTeamsOverActions))
+    // 2 contexts programs and 2 actions program per roots for team roots, one
+    // program for action roots
+    ASSERT_EQ(programs.size(),
+              4 * mutParams.tpg.nbRoots * mutParams.tpg.ratioTeamsOverActions +
+                  mutParams.tpg.nbRoots *
+                      (1 - mutParams.tpg.ratioTeamsOverActions))
         << "Number of distinct program in the TPG is incorrect.";
-    
+
     // Test coverage: useMultiActionProgram
     mutParams.tpg.useMultiActionProgram = true;
     mutParams.tpg.useActionProgram = true;
@@ -779,24 +785,20 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
         Mutator::TPGMutator::initRandomTPG(tpg4, mutParams, rng, nbActions))
         << "Should not throw with teamAccessAllActions enabled.";
 
-
-
     params.nbRegisters = 8;
     mutParams.tpg.useActionProgram = true;
     mutParams.tpg.teamAccessAllActions = false;
     mutParams.tpg.ratioTeamsOverActions = 1.0;
     Environment ce5(set, params, vect, 4);
     TPG::TPGGraph tpg5(ce5);
-    ASSERT_THROW(
-        Mutator::TPGMutator::initRandomTPG(tpg5, mutParams, rng, 4), std::runtime_error)
+    ASSERT_THROW(Mutator::TPGMutator::initRandomTPG(tpg5, mutParams, rng, 4),
+                 std::runtime_error)
         << "Should throw when nbContinuousActions == 0.";
-
 }
-
 
 TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
 {
-    
+
     Mutator::RNG rng;
     Mutator::MutationParameters& mutParams = params.mutation;
     mutParams.tpg.maxInitOutgoingEdges = 4;
@@ -805,7 +807,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
     mutParams.prog.minConstValue = 0;
     mutParams.prog.maxConstValue = 1;
     params.nbRegisters = 8;
-
 
     // Error on number of registers
     rng.setSeed(0);
@@ -831,7 +832,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
         Mutator::TPGMutator::initRandomTPG(tpg3, mutParams, rng, nbActions))
         << "TPG Initialization should fail with bad parameters.";
 
-
     auto vertexSet = tpg3.getVertices();
     // Check number or vertex, roots, actions, teams, edges
     ASSERT_EQ(vertexSet.size(), mutParams.tpg.nbRoots)
@@ -849,11 +849,12 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
                             [](const TPG::TPGVertex* vert) {
                                 return dynamic_cast<const TPG::TPGTeam*>(
                                            vert) != nullptr;
-                            }), 0)
+                            }),
+              0)
         << "Number of team vertex in the graph is incorrect.";
-    ASSERT_EQ(tpg3.getEdges().size(), mutParams.tpg.nbRoots * params.mutation.tpg.nbActionEdgeInit)
+    ASSERT_EQ(tpg3.getEdges().size(),
+              mutParams.tpg.nbRoots * params.mutation.tpg.nbActionEdgeInit)
         << "Number of edges in the initialized TPG is incorrect.";
-
 
     // Check number of Programs.
     std::set<Program::Program*> programs;
@@ -862,11 +863,10 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
                       programs.insert(&edge->getProgram());
                   });
     // 2 contexts programs and 2 actions program per roots
-    ASSERT_EQ(programs.size(), mutParams.tpg.nbRoots * params.mutation.tpg.nbActionEdgeInit)
+    ASSERT_EQ(programs.size(),
+              mutParams.tpg.nbRoots * params.mutation.tpg.nbActionEdgeInit)
         << "Number of distinct program in the TPG is incorrect.";
-
 }
-
 
 TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
 {
@@ -1011,7 +1011,8 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(
-        tpg, &edge0, {&vertex0}, {&vertex1}, {&edge0}, newPrograms, params, rng));
+        tpg, &edge0, {&vertex0}, {&vertex1}, {&edge0}, newPrograms, params,
+        rng));
 
     // Check that progPointer use count was decreased since the mutated program
     // is a copy of the original
@@ -1033,7 +1034,8 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomActionEdge)
     rng.setSeed(0);
 
     size_t before = action.getOutgoingEdges().size();
-    ASSERT_NO_THROW(Mutator::TPGMutator::removeRandomActionEdge(tpg, action, rng));
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::removeRandomActionEdge(tpg, action, rng));
     ASSERT_EQ(action.getOutgoingEdges().size(), before - 1);
 }
 
@@ -1056,12 +1058,16 @@ TEST_F(MutatorTest, TPGMutatorAddRandomActionEdge)
     Mutator::RNG rng;
     rng.setSeed(0);
 
-    // Can add an edge without throwing (even if nothing changes if no edge is pickable)
-    ASSERT_NO_THROW(Mutator::TPGMutator::addRandomActionEdge(tpg, action, edges, rng));
+    // Can add an edge without throwing (even if nothing changes if no edge is
+    // pickable)
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::addRandomActionEdge(tpg, action, edges, rng));
 
     edges.clear();
-    // Can add an edge without throwing (even if nothing changes if no edge is pickable)
-    ASSERT_NO_THROW(Mutator::TPGMutator::addRandomActionEdge(tpg, action, edges, rng));
+    // Can add an edge without throwing (even if nothing changes if no edge is
+    // pickable)
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::addRandomActionEdge(tpg, action, edges, rng));
 }
 
 TEST_F(MutatorTest, TPGMutatorSwapActionEdges)
@@ -1077,19 +1083,22 @@ TEST_F(MutatorTest, TPGMutatorSwapActionEdges)
     tpg.addNewActionEdge(action, prog3, 2);
 
     Mutator::RNG rng;
-    // Set a known seed to ensure deterministic behavior and have equality during random choice of swapping
-    // Should be change if determinism is changed
+    // Set a known seed to ensure deterministic behavior and have equality
+    // during random choice of swapping Should be change if determinism is
+    // changed
     rng.setSeed(4);
 
     // We check that the swapActionEdges function works correctly
     auto before = std::vector<uint64_t>();
     for (auto edge : action.getOutgoingEdges()) {
-        before.push_back(dynamic_cast<TPG::TPGActionEdge*>(edge)->getActionClass());
+        before.push_back(
+            dynamic_cast<TPG::TPGActionEdge*>(edge)->getActionClass());
     }
     ASSERT_NO_THROW(Mutator::TPGMutator::swapActionEdges(tpg, action, rng));
     auto after = std::vector<uint64_t>();
     for (auto edge : action.getOutgoingEdges()) {
-        after.push_back(dynamic_cast<TPG::TPGActionEdge*>(edge)->getActionClass());
+        after.push_back(
+            dynamic_cast<TPG::TPGActionEdge*>(edge)->getActionClass());
     }
     // There must be at least one change
     ASSERT_NE(before, after);
@@ -1107,7 +1116,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
     params.mutation.tpg.pActionEdgeAddition = 0.7;
     params.mutation.tpg.pSwapActionProgram = 0.7;
     params.mutation.tpg.pMutateActionProgram = 0.7;
-    
+
     uint64_t nbActions = 5;
     Environment ce(set, params, vect, nbActions);
 
@@ -1123,8 +1132,6 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
     tpg.addNewActionEdge(*actionUnused, prog3, 2);
     tpg.addNewActionEdge(*actionUnused, prog4, 1);
 
-
-
     std::list<std::shared_ptr<Program::Program>> newPrograms;
     std::list<const TPG::TPGEdge*> preExistingEdges;
     std::for_each(
@@ -1133,22 +1140,22 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
             preExistingEdges.push_back(edge.get());
         });
 
-
     // Do it several times to cover all branches
-    for(size_t i = 0; i < 5; i++){
-        const TPG::TPGAction* copiedAction = dynamic_cast<const TPG::TPGAction*>(&tpg.cloneVertex(*action));
+    for (size_t i = 0; i < 5; i++) {
+        const TPG::TPGAction* copiedAction =
+            dynamic_cast<const TPG::TPGAction*>(&tpg.cloneVertex(*action));
 
-        // Check that all branches are covered (deletion, addition, swap, mutation)
+        // Check that all branches are covered (deletion, addition, swap,
+        // mutation)
         ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGAction(
-            tpg, *copiedAction, preExistingEdges, newPrograms, params.mutation, rng));
-
+            tpg, *copiedAction, preExistingEdges, newPrograms, params.mutation,
+            rng));
     }
-
 }
 
 TEST_F(MutatorTest, TPGMutatorMutateAction)
 {
-    
+
     Mutator::RNG rng;
     rng.setSeed(0);
 
@@ -1156,7 +1163,6 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
     uint64_t nbActions = 8;
     Environment ce(set, params, vect, nbActions);
 
-    
     std::shared_ptr<Program::Program> progPointer1 =
         std::shared_ptr<Program::Program>(new Program::Program(ce, true));
 
@@ -1167,7 +1173,7 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
     const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
     const TPG::TPGEdge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
 
-        // Init its program and fill the archive
+    // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
     TPG::TPGExecutionEngine tee(ce, &arch);
@@ -1178,7 +1184,6 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
     Mutator::ProgramMutator::initRandomProgram(*progPointer1, params, rng);
     tee.executeFromRoot(vertex0);
 
-
     std::list<std::shared_ptr<Program::Program>> newPrograms;
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGAction(
         tpg, vertex1, {&edge0}, newPrograms, params, rng));
@@ -1188,7 +1193,6 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
     ASSERT_EQ(progPointer1.use_count(), 1)
         << "Shared pointer should no longer be used inside the TPG after "
            "mutation.";
-
 }
 
 TEST_F(MutatorTest, TPGMutatorMutateTPGActionEdge_MultiAction)
@@ -1199,7 +1203,8 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGActionEdge_MultiAction)
 
     params.mutation.tpg.useActionProgram = true;
     params.mutation.tpg.useMultiActionProgram = true;
-    params.mutation.tpg.pChangeActionClass = 1.0; // Pour forcer le changement d'actionClass
+    params.mutation.tpg.pChangeActionClass =
+        1.0; // Pour forcer le changement d'actionClass
     uint64_t nbActions = 3;
     Environment ce(set, params, vect, nbActions);
 
@@ -1207,19 +1212,21 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGActionEdge_MultiAction)
     const TPG::TPGAction& action = tpg.addNewAction(0);
     auto prog = std::make_shared<Program::Program>(ce, true);
     tpg.addNewActionEdge(action, prog, 0);
-    tpg.addNewActionEdge(action, std::make_shared<Program::Program>(ce, true), 1);
+    tpg.addNewActionEdge(action, std::make_shared<Program::Program>(ce, true),
+                         1);
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
-    auto edge = dynamic_cast<TPG::TPGActionEdge*>(*action.getOutgoingEdges().begin());
+    auto edge =
+        dynamic_cast<TPG::TPGActionEdge*>(*action.getOutgoingEdges().begin());
 
     // On vérifie que le changement d'actionClass est bien tenté
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGActionEdge(
         tpg, action, edge, newPrograms, params.mutation, rng));
 }
 
-TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction){
-    
-    
+TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction)
+{
+
     Mutator::RNG rng;
     rng.setSeed(0);
 
@@ -1227,7 +1234,6 @@ TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction){
     uint64_t nbActions = 8;
     Environment ce(set, params, vect, nbActions);
 
-    
     std::shared_ptr<Program::Program> progPointer1 =
         std::shared_ptr<Program::Program>(new Program::Program(ce, true));
 
@@ -1238,7 +1244,7 @@ TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction){
     const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
     const TPG::TPGEdge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
 
-        // Init its program and fill the archive
+    // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
     TPG::TPGExecutionEngine tee(ce, &arch);
@@ -1251,15 +1257,12 @@ TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction){
     Mutator::ProgramMutator::initRandomProgram(*progPointer1, params, rng);
     tee.executeFromRoot(vertex0);
 
-
     std::list<std::shared_ptr<Program::Program>> newPrograms;
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(
-        tpg, &edge0, {&vertex0}, {&vertex1}, {&edge0}, newPrograms, params, rng));
+        tpg, &edge0, {&vertex0}, {&vertex1}, {&edge0}, newPrograms, params,
+        rng));
 
-
-
-    ASSERT_EQ(tpg.getNbVertices(), 3)
-        << "Action should have been duplicated.";
+    ASSERT_EQ(tpg.getNbVertices(), 3) << "Action should have been duplicated.";
 
     tpg.removeVertex(vertex1);
 
@@ -1355,8 +1358,8 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
-    Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, {&vertex0}, {&vertex1}, {&edge0},
-                                            newPrograms, params, rng);
+    Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, {&vertex0}, {&vertex1},
+                                            {&edge0}, newPrograms, params, rng);
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         newPrograms.front(), params, arch, rng))
@@ -1385,8 +1388,8 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
     newPrograms.clear();
 
-    Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, {&vertex0}, {&vertex1}, {&edge0},
-                                            newPrograms, params, rng);
+    Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, {&vertex0}, {&vertex1},
+                                            {&edge0}, newPrograms, params, rng);
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         newPrograms.front(), params, arch, rng))
@@ -1607,7 +1610,6 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
         << "Populating an empty TPG failed.";
 }
 
-
 TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
 {
     Mutator::RNG rng;
@@ -1660,16 +1662,17 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
     for (const auto& root : tpg.getRootVertices()) {
         if (dynamic_cast<const TPG::TPGAction*>(root)) {
             nbActionsRoots++;
-        } else if (dynamic_cast<const TPG::TPGTeam*>(root)) {
+        }
+        else if (dynamic_cast<const TPG::TPGTeam*>(root)) {
             nbTeamsRoots++;
         }
     }
     // Check the ratio of teams over actions
-    ASSERT_EQ(nbTeamsRoots, params.tpg.nbRoots * params.tpg.ratioTeamsOverActions)
+    ASSERT_EQ(nbTeamsRoots,
+              params.tpg.nbRoots * params.tpg.ratioTeamsOverActions)
         << "The number of team roots is not as expected.";
     ASSERT_EQ(nbActionsRoots, params.tpg.nbRoots - nbTeamsRoots)
         << "The number of action roots is not as expected.";
-
 }
 
 TEST_F(MutatorTest, TPGMutatorUpdateClonableAndExistingVertexForTournament)
@@ -1696,7 +1699,8 @@ TEST_F(MutatorTest, TPGMutatorUpdateClonableAndExistingVertexForTournament)
         teamsClonable, actionsClonable, preExistingTeams, preExistingActions);
 
     // Only elements marked as to be deleted should remain in clonable,
-    // and only elements NOT marked as to be deleted should remain in preExisting
+    // and only elements NOT marked as to be deleted should remain in
+    // preExisting
     ASSERT_EQ(teamsClonable.size(), 1);
     ASSERT_EQ(teamsClonable[0], team1);
     ASSERT_EQ(actionsClonable.size(), 1);
@@ -1709,7 +1713,7 @@ TEST_F(MutatorTest, TPGMutatorUpdateClonableAndExistingVertexForTournament)
 
 TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 {
-       Mutator::RNG rng;
+    Mutator::RNG rng;
     rng.setSeed(0);
 
     uint64_t nbActions = 5;
@@ -1747,13 +1751,11 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     TPG::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
-        if(rng.getUnsignedInt64(0, 1) > 0.4) {
+        if (rng.getUnsignedInt64(0, 1) > 0.4) {
             // Randomly mark some vertices as to be deleted
             tpg.setToBeDeleted(rootVertex);
         }
     }
-
-    
 
     // Check the correct execution
     ASSERT_NO_THROW(
@@ -1762,11 +1764,10 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     // Check the number of roots
     ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots);
 
-
-    for(const auto& root : tpg.getRootVertices()) {
+    for (const auto& root : tpg.getRootVertices()) {
         // Check that the root vertices are not marked as to be deleted
         ASSERT_FALSE(root->isToBeDeleted())
-            << "Root vertex should not be marked as to be deleted after populate.";
+            << "Root vertex should not be marked as to be deleted after "
+               "populate.";
     }
-
 }

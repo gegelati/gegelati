@@ -41,8 +41,8 @@
 #include <functional>
 #include <typeinfo>
 
-#include "data/untypedSharedPtr.h"
 #include "data/constant.h"
+#include "data/untypedSharedPtr.h"
 #include "instructions/instruction.h"
 
 namespace Instructions {
@@ -221,12 +221,11 @@ namespace Instructions {
         }
         void setUpOperandNoConst()
         {
-            for(auto op: this->operandTypes){
-                if(op.get() != typeid(Data::Constant)){
-                    this->operandTypesNoConst.push_back(op);    
+            for (auto op : this->operandTypes) {
+                if (op.get() != typeid(Data::Constant)) {
+                    this->operandTypesNoConst.push_back(op);
                 }
             }
-            
         }
     };
 }; // namespace Instructions

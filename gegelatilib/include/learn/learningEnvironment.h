@@ -142,10 +142,11 @@ namespace Learn {
         virtual bool isCopyable() const;
 
         /**
-         * \brief Is the LearningEnvrionment using a utility in addition to the reward.
-         * Information needed for the logs.
-         * 
-         * \return true if the LearningEnvironment is using utility. Default implementation returns false.
+         * \brief Is the LearningEnvrionment using a utility in addition to the
+         * reward. Information needed for the logs.
+         *
+         * \return true if the LearningEnvironment is using utility. Default
+         * implementation returns false.
          */
         virtual bool isUsingUtility() const;
 
@@ -272,7 +273,6 @@ namespace Learn {
          * \return the current score for the LearningEnvironment.
          */
         virtual double getScore() const = 0;
-
 
         /**
          * \brief Returns the current utility of the Environment.

@@ -36,10 +36,9 @@
 #ifndef TPG_VERTEX_H
 #define TPG_VERTEX_H
 
+#include <cinttypes>
 #include <list>
 #include <set>
-#include <cinttypes>
-
 
 namespace TPG {
     // Declare class to make it usable as an attribute.
@@ -112,7 +111,6 @@ namespace TPG {
          */
         virtual void removeOutgoingEdge(TPG::TPGEdge* edge);
 
-        
         /**
          * \brief return assessed actions
          */
@@ -125,22 +123,23 @@ namespace TPG {
 
         /**
          * \brief compare the set given and the assessed actions of the vertex
-         * 
+         *
          * If the intersection is empty, return false, else true
          */
         virtual bool hasSameAssessedActions(std::set<uint64_t> actions) const;
 
         /**
-         * Set if the vertex should be deleted during evolution process. 
-         * 
-         * \param[in] status boolean to indicate if the vertex should be deleted.
+         * Set if the vertex should be deleted during evolution process.
+         *
+         * \param[in] status boolean to indicate if the vertex should be
+         * deleted.
          */
         virtual void setToBeDeleted(bool status);
 
         /**
-         * Return if the vertex should be deleted during evolution process. 
+         * Return if the vertex should be deleted during evolution process.
          */
-        virtual bool isToBeDeleted() const; 
+        virtual bool isToBeDeleted() const;
 
       protected:
         /**

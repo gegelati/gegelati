@@ -49,9 +49,11 @@
 namespace Instructions {
 
     /**
-     * \brief Templace class for making casting from Instruction to MultByConst easier.
+     * \brief Templace class for making casting from Instruction to MultByConst
+     * easier.
      */
-    class IAbstractMultByConstant {
+    class IAbstractMultByConstant
+    {
       public:
         virtual ~IAbstractMultByConstant() = default;
     };
@@ -60,7 +62,8 @@ namespace Instructions {
      * \brief Template class for multiplying a unique argument of type T by a
      * constant parameter.
      */
-    template <class T> class MultByConstant : public Instruction, public IAbstractMultByConstant
+    template <class T>
+    class MultByConstant : public Instruction, public IAbstractMultByConstant
     {
         static_assert(std::is_fundamental<T>::value,
                       "Template class MultByConstParam<> can only be used for "

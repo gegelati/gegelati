@@ -48,34 +48,37 @@ void TPG::TPGAction::addOutgoingEdge(TPGEdge* edge)
     }
 }
 
-void TPG::TPGAction::orderActionEdges(){
-
+void TPG::TPGAction::orderActionEdges()
+{
 
     this->outgoingEdges.sort([](TPG::TPGEdge* edge1, TPG::TPGEdge* edge2) {
         // Utiliser static_cast pour convertir TPGEdge* en TPGActionEdge*
-        TPG::TPGActionEdge* actionEdge1 = static_cast<TPG::TPGActionEdge*>(edge1);
-        TPG::TPGActionEdge* actionEdge2 = static_cast<TPG::TPGActionEdge*>(edge2);
+        TPG::TPGActionEdge* actionEdge1 =
+            static_cast<TPG::TPGActionEdge*>(edge1);
+        TPG::TPGActionEdge* actionEdge2 =
+            static_cast<TPG::TPGActionEdge*>(edge2);
 
         // Comparer actionClass
         return actionEdge1->getActionClass() < actionEdge2->getActionClass();
     });
 }
 
-TPG::TPGActionEdge* TPG::TPGAction::getEdgeOfAction(uint64_t actionClass) const {
+TPG::TPGActionEdge* TPG::TPGAction::getEdgeOfAction(uint64_t actionClass) const
+{
 
     // Search the edge with the searched action class
     auto it = std::find_if(
         outgoingEdges.begin(), outgoingEdges.end(),
         [actionClass](TPG::TPGEdge* edge) {
-            return static_cast<TPG::TPGActionEdge*>(edge)->getActionClass() == actionClass;
-        }
-    );
+            return static_cast<TPG::TPGActionEdge*>(edge)->getActionClass() ==
+                   actionClass;
+        });
 
     // If action founded, return the shared pointer, else return nullptr
-    if(it != outgoingEdges.end()){
+    if (it != outgoingEdges.end()) {
         return (TPG::TPGActionEdge*)(*it);
-    } else {
+    }
+    else {
         return nullptr;
     }
-
 }

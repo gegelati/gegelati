@@ -69,8 +69,12 @@ class ProgramTest : public ::testing::Test
         };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
         std::function<double(double, double, Data::Constant)> addConst =
-            [](double a, double b, Data::Constant c) -> double { return a + b * (double)c; };
-        set.add(*(new Instructions::LambdaInstruction<double, double, Data::Constant>(addConst)));
+            [](double a, double b, Data::Constant c) -> double {
+            return a + b * (double)c;
+        };
+        set.add(*(
+            new Instructions::LambdaInstruction<double, double, Data::Constant>(
+                addConst)));
 
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
@@ -279,8 +283,6 @@ TEST_F(ProgramTest, RemoveProgramLine)
         << "Removing a non-existing line should throw an exception.";
 }
 
-
-
 TEST_F(ProgramTest, identifyIntronsAndIsIntron)
 {
     // Create a new environment with instruction accessing arrays
@@ -400,8 +402,7 @@ TEST_F(ProgramTest, identifyContinuousIntronsAndIsIntronNoActionProgram)
     ASSERT_TRUE(p.isIntron(0))
         << "Line 0 wrongfully detected as not an intron.";
     ASSERT_FALSE(p.isIntron(1)) << "Line 1 wrongfully detected as an intron.";
-    ASSERT_FALSE(p.isIntron(2))
-        << "Line 2 wrongfully detected as an intron.";
+    ASSERT_FALSE(p.isIntron(2)) << "Line 2 wrongfully detected as an intron.";
     ASSERT_FALSE(p.isIntron(3)) << "Line 3 wrongfully detected as an intron.";
     ASSERT_FALSE(p.isIntron(4)) << "Line 4 wrongfully detected as an intron.";
 
@@ -564,7 +565,8 @@ TEST_F(ProgramTest, constants)
 
     // add some constants to the program (-2,-1,0,1)
     for (int j = 0; j < 4; j++) {
-        p.getConstantHandler().setDataAt(typeid(Data::Constant), j, {double(j - 2)});
+        p.getConstantHandler().setDataAt(typeid(Data::Constant), j,
+                                         {double(j - 2)});
     }
 
     auto constants = p.getConstantHandler();
@@ -688,7 +690,6 @@ TEST_F(ProgramTest, HasIdenticalBehavior)
     delete &localSet.getInstruction(2);
 }
 
-
 TEST_F(ProgramTest, isActionProgram)
 {
     Program::Program p0(*e, false);
@@ -699,7 +700,6 @@ TEST_F(ProgramTest, isActionProgram)
     ASSERT_EQ(p1.isActionProgram(), true)
         << "Program should be action program.";
 
-    
     Program::Program p2(p0, true);
     Program::Program p3(p0);
 
@@ -717,7 +717,6 @@ TEST_F(ProgramTest, SetLineConstants)
     l1.setInstructionIndex(2);
     l1.setNbConstants(l1.getNbConstants());
 
-    
     Program::Line& l2 = p.addNewLine();
     l2.setInstructionIndex(2);
     l2.setNbConstants(l2.getNbConstants());
