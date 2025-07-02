@@ -336,18 +336,22 @@ void Mutator::TPGMutator::swapActionEdges(TPG::TPGGraph& graph,
     TPG::TPGEdge* edge1 = nullptr;
     TPG::TPGEdge* edge2 = nullptr;
     size_t currentIndex = 0;
+    auto it = action.getOutgoingEdges().begin();
 
-    for (auto it = action.getOutgoingEdges().begin();
-         it != action.getOutgoingEdges().end(); ++it, ++currentIndex) {
+    while(it != action.getOutgoingEdges().end() && (edge1 == nullptr || edge2 == nullptr)) {
         if (currentIndex == index1) {
             edge1 = *it;
         }
         else if (currentIndex == index2) {
             edge2 = *it;
         }
-        if (edge1 && edge2) {
-            break; // Stop as soon as both edges are found
-        }
+        ++it;
+        currentIndex++;
+    }
+
+    if(edge1 == nullptr || edge2 == nullptr) {
+        throw std::runtime_error("Failed to find two distinct action edges "
+                                 "for swapping.");
     }
 
     // Extract and swap action classes
@@ -509,10 +513,11 @@ void Mutator::TPGMutator::addRandomEdge(
     pickableEdges.erase(
         std::remove_if(pickableEdges.begin(), pickableEdges.end(),
                        [&team](const TPG::TPGEdge* edge) -> bool {
-                           return dynamic_cast<const TPG::TPGActionEdge*>(
-                                      edge) != nullptr ||
-                                  edge->getSource() == &team ||
-                                  edge->getDestination() == &team;
+                           return edge == nullptr ||
+                                  dynamic_cast<const TPG::TPGActionEdge*>(
+                                        edge) != nullptr ||
+                                        edge->getSource() == &team ||
+                                        edge->getDestination() == &team;
                        }),
         pickableEdges.end());
 

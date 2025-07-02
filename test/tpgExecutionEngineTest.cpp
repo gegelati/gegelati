@@ -275,6 +275,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousNoActionProg)
 TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
 {
     // Add an action edge to action A3
+    params.mutation.tpg.useActionProgram = true;
     Environment continuousEnv(set, params, vect, 2);
     std::shared_ptr<Program::Program> p =
         std::make_shared<Program::Program>(continuousEnv, true);

@@ -187,9 +187,12 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
                                    actionEdge->getProgramSharedPointer(),
                                    actionEdge->getActionClass());
         }
-        else {
+        else if (edge != nullptr){
             this->addNewEdge(*newVertex, *(edge->getDestination()),
                              edge->getProgramSharedPointer());
+        } else {
+            throw std::runtime_error(
+                "Edge copied should not be a nullptr.");
         }
     }
 
