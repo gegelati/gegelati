@@ -766,6 +766,50 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
         << "Graph does not have the expected determinst characteristics.";
 }
 
+// Similar to previous test, but with MATPG solution (no need for MAPLE because it is included in MATPG)
+TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.ratioDeletedRoots = 0.8;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.teamAccessAllActions = false;
+    params.mutation.tpg.ratioTeamsOverActions = 0.3333;
+    params.useTournamentSelection = true;
+    params.sizeTournament = 3;
+    params.mutation.tpg.nbRoots = 100;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+
+    Learn::LearningAgent la(cle, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+    
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    ASSERT_EQ(tpg.getNbVertices(), 80)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 46)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 240)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 16407631106212178981U)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
+
 TEST_F(LearningAgentTest, KeepBestPolicy)
 {
     params.archiveSize = 50;

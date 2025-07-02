@@ -131,10 +131,9 @@ void Mutator::TPGMutator::initRandomTPG(
     else {
 
         if (params.tpg.useActionProgram && !params.tpg.teamAccessAllActions &&
-            params.tpg.ratioTeamsOverActions == 1) {
+            params.tpg.ratioTeamsOverActions == 1.0) {
             throw std::runtime_error(
-                "Parameter only allow teams to select action roots, but there "
-                "is not action roots considering the ratio!");
+                "If there is no action roots, teams should have access to all actions");
         }
 
         // No action edge.
@@ -550,8 +549,13 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        target = preExistingActions.at(
-            rng.getUnsignedInt64(0, preExistingActions.size() - 1));
+        if(params.tpg.teamAccessAllActions){
+            target = preExistingActions.at(
+                rng.getUnsignedInt64(0, preExistingActions.size() - 1));
+        } else {
+            target = &graph.cloneVertex(*preExistingActions.at(
+                rng.getUnsignedInt64(0, preExistingActions.size() - 1)));
+        }
     }
     else {
         target = preExistingTeams.at(

@@ -715,9 +715,9 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
 
-    // Error on number of registers
     rng.setSeed(0);
     nbActions = 8;
+    params.mutation.tpg.teamAccessAllActions = true;
     Environment ce3(set, params, vect, nbActions);
     TPG::TPGGraph tpg3(ce3);
     ASSERT_NO_THROW(
