@@ -623,6 +623,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.nbThreads = 3;
 
     Learn::LearningAgent la(le, set, params, TPG::TPGInstrumentedFactory());
 
@@ -708,6 +709,7 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.nbThreads = 3;
 
     Learn::LearningAgent la(cle, set, params);
 
@@ -745,6 +747,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.nbThreads = 3;
 
     Learn::LearningAgent la(cle, set, params);
 
@@ -783,6 +786,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     params.useTournamentSelection = true;
     params.sizeTournament = 3;
     params.mutation.tpg.nbRoots = 100;
+    params.nbThreads = 3;
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
@@ -799,13 +803,13 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 80)
+    ASSERT_EQ(tpg.getNbVertices(), 83)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 46)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 240)
+    ASSERT_EQ(tpg.getEdges().size(), 243)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 16407631106212178981U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 10116507800519844753U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
