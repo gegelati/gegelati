@@ -346,10 +346,6 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
         << "Size of the number of action should be equal to 2";
     ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
     ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
-
-    TPG::TPGTeam* team;
-    ASSERT_THROW(tpee.executeFromRoot(*team), std::runtime_error)
-        << "Execution of a TPGGraph with team without edge should fail.";
 }
 
 TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)

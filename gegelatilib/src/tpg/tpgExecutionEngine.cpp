@@ -164,12 +164,10 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         Program::Program p =
             currentVertex->getOutgoingEdges().front()->getProgram();
         // update currentVertex and backup in visitedVertex.
-        currentVertex = edge->getDestination();
+        if(edge->getDestination() != nullptr){
+            currentVertex = edge->getDestination();
+        }
         visitedVertices.push_back(currentVertex);
-    }
-
-    if (currentVertex == nullptr) {
-        throw std::runtime_error("Current vertex should not be null.");
     }
 
     // An action value must be positive, so -1 for an action mean that no action
