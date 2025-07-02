@@ -103,12 +103,6 @@ void TPG::TPGVertex::updateAssessedActions()
             assessedActions.insert(destinationActions.begin(),
                                    destinationActions.end());
         }
-
-        // If all actions are stored, no need to search for more
-        if (assessedActions.size() ==
-            edge->getProgram().getEnvironment().getNbContinuousActions()) {
-            return;
-        }
     }
 }
 

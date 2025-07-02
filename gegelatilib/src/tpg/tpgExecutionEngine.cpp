@@ -180,35 +180,44 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         // True if the action contain multiple TPGActionEdge
         if (env.getParams().mutation.tpg.useMultiActionProgram) {
 
-            for (auto edge : currentVertex->getOutgoingEdges()) {
-                auto actionEdge = dynamic_cast<TPGActionEdge*>(edge);
+            if(currentVertex != nullptr){
+                for (auto edge : currentVertex->getOutgoingEdges()) {
+                    auto actionEdge = dynamic_cast<TPGActionEdge*>(edge);
 
-                // Evaluate the edge and set the action value
-                actionsTaken[actionEdge->getActionClass()] =
-                    this->evaluateEdge(*edge);
+                    // Evaluate the edge and set the action value
+                    actionsTaken[actionEdge->getActionClass()] =
+                        this->evaluateEdge(*edge);
+                }
             }
+
         }
         // True if the action contain one TPGActionEdge
         else if (env.getParams().mutation.tpg.useActionProgram) {
 
-            if (currentVertex->getOutgoingEdges().size() != 1) {
-                throw std::runtime_error("Current vertex is a TPGAction, it "
-                                         "should have exactly one edge.");
+            if(currentVertex != nullptr){
+
+                if (currentVertex->getOutgoingEdges().size() != 1) {
+                    throw std::runtime_error("Current vertex is a TPGAction, it "
+                                            "should have exactly one edge.");
+                }
+
+                this->evaluateEdge(*currentVertex->getOutgoingEdges().front());
+
+                Program::Program p =
+                    currentVertex->getOutgoingEdges().front()->getProgram();
+
+                // Get the register values
+                actionsTaken = progExecutionEngine.getRegisterValues(
+                    env.getNbContinuousActions());
             }
 
-            this->evaluateEdge(*currentVertex->getOutgoingEdges().front());
-
-            Program::Program p =
-                currentVertex->getOutgoingEdges().front()->getProgram();
-
-            // Get the register values
-            actionsTaken = progExecutionEngine.getRegisterValues(
-                env.getNbContinuousActions());
         }
         else {
-            // Re-evaluate the last edge to get the register values.
-            // TODO Wont work if memory is added
-            this->evaluateEdge(*edge);
+            if(edge != nullptr){
+                // Re-evaluate the last edge to get the register values.
+                // TODO Wont work if memory is added
+                this->evaluateEdge(*edge);
+            }
 
             // Get the register values + the bid and erase the bid
             actionsTaken = progExecutionEngine.getRegisterValues(
@@ -221,10 +230,12 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         return std::make_pair(visitedVertices, actionsTaken);
     }
     else {
+        std::vector<double> actionID;
+        if(currentVertex != nullptr){
+            actionID.push_back((double)dynamic_cast<const TPG::TPGAction*>(currentVertex)->getActionID());
+        }
         return std::make_pair(
             visitedVertices,
-            std::vector<double>{static_cast<double>(
-                dynamic_cast<const TPG::TPGAction*>(currentVertex)
-                    ->getActionID())});
+            actionID);
     }
 }
