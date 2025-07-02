@@ -182,12 +182,6 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         // True if the action contain multiple TPGActionEdge
         if (env.getParams().mutation.tpg.useMultiActionProgram) {
 
-            if(dynamic_cast<const TPG::TPGAction*>(currentVertex) == nullptr) {
-                throw std::runtime_error(
-                    "Current vertex is not a TPGAction, but multi-action "
-                    "program is used");
-            }
-
             for (auto edge : currentVertex->getOutgoingEdges()) {
                 auto actionEdge = dynamic_cast<TPGActionEdge*>(edge);
 
@@ -199,11 +193,6 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         // True if the action contain one TPGActionEdge
         else if (env.getParams().mutation.tpg.useActionProgram) {
 
-            if(dynamic_cast<const TPG::TPGAction*>(currentVertex) == nullptr) {
-                throw std::runtime_error(
-                    "Current vertex is not a TPGAction, but action program is "
-                    "used");
-            }
             if(currentVertex->getOutgoingEdges().size() != 1) {
                 throw std::runtime_error(
                     "Current vertex is a TPGAction, it should have exactly one edge.");

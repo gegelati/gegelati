@@ -102,9 +102,6 @@ void TPG::TPGVertex::updateAssessedActions()
                 edge->getDestination()->getAssessedActions();
             assessedActions.insert(destinationActions.begin(),
                                    destinationActions.end());
-        } else {
-            throw std::runtime_error(
-                "TPGVertex::updateAssessedActions: Edge is nullptr.");
         }
 
         // If all actions are stored, no need to search for more

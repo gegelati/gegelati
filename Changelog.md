@@ -25,7 +25,7 @@ Continuous Multi-Action Reinforcement Learning'.
   A distinction is added between utility and reward. In some benchmark environments, such as MuJoCo, the usual scores are compared to those in other environments. However, it can sometimes be helpful to change the reward to improve learning.
     The utility is the classic score used to compare algorithms.
     The reward is the actual score used for the learning process.
-    If the 'isUsingUtility' function is not overrite by your LearningEnvironment, no distinction will be made (i.e. the option will not be used).
+    If the 'isUsingUtility' function is not overridden by your LearningEnvironment, no distinction will be made (i.e. the option will not be used).
 
 ### Bug fix
 

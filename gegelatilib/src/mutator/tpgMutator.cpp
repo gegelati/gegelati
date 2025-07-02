@@ -328,30 +328,21 @@ void Mutator::TPGMutator::swapActionEdges(TPG::TPGGraph& graph,
         rng.getUnsignedInt64(0, action.getOutgoingEdges().size() - 1);
     size_t index2 =
         rng.getUnsignedInt64(0, action.getOutgoingEdges().size() - 2);
-    if (index1 == index2) {
+    if (index2 == index1) {
         index2++;
     }
 
-    // Use a single iterator to traverse and identify both edges
-    TPG::TPGEdge* edge1 = nullptr;
-    TPG::TPGEdge* edge2 = nullptr;
-    size_t currentIndex = 0;
-    auto it = action.getOutgoingEdges().begin();
+    // Get iterators to the selected edges
+    auto it1 = action.getOutgoingEdges().begin();
+    std::advance(it1, index1);
+    auto it2 = action.getOutgoingEdges().begin();
+    std::advance(it2, index2);
 
-    while(it != action.getOutgoingEdges().end() && (edge1 == nullptr || edge2 == nullptr)) {
-        if (currentIndex == index1) {
-            edge1 = *it;
-        }
-        else if (currentIndex == index2) {
-            edge2 = *it;
-        }
-        ++it;
-        currentIndex++;
-    }
+    TPG::TPGEdge* edge1 = *it1;
+    TPG::TPGEdge* edge2 = *it2;
 
-    if(edge1 == nullptr || edge2 == nullptr) {
-        throw std::runtime_error("Failed to find two distinct action edges "
-                                 "for swapping.");
+    if (edge1 == nullptr || edge2 == nullptr) {
+        throw std::runtime_error("Failed to find two distinct action edges for swapping.");
     }
 
     // Extract and swap action classes
