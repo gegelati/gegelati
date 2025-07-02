@@ -335,7 +335,8 @@ namespace Learn {
          * \param[in] printProgressBar select whether a progress bar will be
          * printed in the console. \return the number of completed generations.
          */
-        virtual uint64_t train(volatile bool& altTraining, bool printProgressBar);
+        virtual uint64_t train(volatile bool& altTraining,
+                               bool printProgressBar);
 
         /**
          * \brief Update the bestRoot and resultsPerRoot attributes.
@@ -397,7 +398,7 @@ namespace Learn {
          * \return a reference to the bestRoot attribute.
          */
         virtual const std::pair<const TPG::TPGVertex*,
-                        std::shared_ptr<EvaluationResult>>&
+                                std::shared_ptr<EvaluationResult>>&
         getBestRoot() const;
 
         /**

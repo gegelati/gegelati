@@ -296,20 +296,16 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
     ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
 
     TPG::TPGAction* action = new TPG::TPGAction(0);
-    ASSERT_THROW(
-        tpee.executeFromRoot(*action),
-        std::runtime_error)
+    ASSERT_THROW(tpee.executeFromRoot(*action), std::runtime_error)
         << "Execution of a TPGGraph with action without edge should fail.";
-
 
     std::shared_ptr<Program::Program> p0 =
         std::make_shared<Program::Program>(continuousEnv, true);
     tpg->addNewActionEdge(*tpg->getVertices().at(6), p0, 0);
-    ASSERT_THROW(
-        tpee.executeFromRoot(*tpg->getRootVertices().at(0)),
-        std::runtime_error)
-        << "Execution of a TPGGraph with action with more than one edge should fail.";
-
+    ASSERT_THROW(tpee.executeFromRoot(*tpg->getRootVertices().at(0)),
+                 std::runtime_error)
+        << "Execution of a TPGGraph with action with more than one edge should "
+           "fail.";
 }
 
 TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
@@ -351,13 +347,9 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
     ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
     ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
 
-
     TPG::TPGTeam* team;
-    ASSERT_THROW(
-        tpee.executeFromRoot(*team),
-        std::runtime_error)
+    ASSERT_THROW(tpee.executeFromRoot(*team), std::runtime_error)
         << "Execution of a TPGGraph with team without edge should fail.";
-
 }
 
 TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)

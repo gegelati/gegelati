@@ -975,7 +975,6 @@ TEST_F(TPGTest, TPGVertexHasSameAssessedActions)
     ASSERT_FALSE(emptyTeam.hasSameAssessedActions(testSet6))
         << "hasSameAssessedActions should return false when assessedActions is "
            "empty.";
-
 }
 
 TEST_F(TPGTest, TPGGraphSetActionClassEdge)

@@ -563,7 +563,7 @@ TEST_F(LearningAgentTest, Train)
     alt = true;
     ASSERT_NO_THROW(la.train(alt, true))
         << "Using the boolean reference to stop the training should not fail.";
-        
+
     // For coverage
     params.doValidation = true;
     params.stepValidation = 2;
@@ -769,7 +769,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
         << "Graph does not have the expected determinst characteristics.";
 }
 
-// Similar to previous test, but with MATPG solution (no need for MAPLE because it is included in MATPG)
+// Similar to previous test, but with MATPG solution (no need for MAPLE because
+// it is included in MATPG)
 TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
 {
     params.archiveSize = 50;
@@ -797,7 +798,6 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     la.init();
     bool alt = false;
     la.train(alt, false);
-    
 
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
@@ -809,10 +809,10 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 243)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 10116507800519844753U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              10116507800519844753U)
         << "Graph does not have the expected determinst characteristics.";
 }
-
 
 TEST_F(LearningAgentTest, KeepBestPolicy)
 {

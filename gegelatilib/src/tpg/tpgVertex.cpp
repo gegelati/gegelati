@@ -96,7 +96,7 @@ void TPG::TPGVertex::updateAssessedActions()
             // If the edge is an action edge, insert its action class
             assessedActions.insert(actionEdge->getActionClass());
         }
-        else if (edge != nullptr){
+        else if (edge != nullptr) {
             // Otherwise, insert all assessed actions from the destination
             const auto& destinationActions =
                 edge->getDestination()->getAssessedActions();

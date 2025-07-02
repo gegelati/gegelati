@@ -168,7 +168,7 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         visitedVertices.push_back(currentVertex);
     }
 
-    if(currentVertex == nullptr) {
+    if (currentVertex == nullptr) {
         throw std::runtime_error("Current vertex should not be null.");
     }
 
@@ -193,9 +193,9 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         // True if the action contain one TPGActionEdge
         else if (env.getParams().mutation.tpg.useActionProgram) {
 
-            if(currentVertex->getOutgoingEdges().size() != 1) {
-                throw std::runtime_error(
-                    "Current vertex is a TPGAction, it should have exactly one edge.");
+            if (currentVertex->getOutgoingEdges().size() != 1) {
+                throw std::runtime_error("Current vertex is a TPGAction, it "
+                                         "should have exactly one edge.");
             }
 
             this->evaluateEdge(*currentVertex->getOutgoingEdges().front());

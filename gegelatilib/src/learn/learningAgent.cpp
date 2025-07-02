@@ -353,10 +353,8 @@ void Learn::LearningAgent::decimateWithTournament(
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
         this->resultsPerRoot.erase(itDel->second);
         results.erase(itDel++);
-        
     }
 }
-
 
 void Learn::LearningAgent::decimateWorstRoots(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&

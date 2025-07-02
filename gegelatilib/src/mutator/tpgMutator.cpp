@@ -132,8 +132,8 @@ void Mutator::TPGMutator::initRandomTPG(
 
         if (params.tpg.useActionProgram && !params.tpg.teamAccessAllActions &&
             params.tpg.ratioTeamsOverActions == 1.0) {
-            throw std::runtime_error(
-                "If there is no action roots, teams should have access to all actions");
+            throw std::runtime_error("If there is no action roots, teams "
+                                     "should have access to all actions");
         }
 
         // No action edge.
@@ -342,7 +342,8 @@ void Mutator::TPGMutator::swapActionEdges(TPG::TPGGraph& graph,
     TPG::TPGEdge* edge2 = *it2;
 
     if (edge1 == nullptr || edge2 == nullptr) {
-        throw std::runtime_error("Failed to find two distinct action edges for swapping.");
+        throw std::runtime_error(
+            "Failed to find two distinct action edges for swapping.");
     }
 
     // Extract and swap action classes
@@ -506,9 +507,9 @@ void Mutator::TPGMutator::addRandomEdge(
                        [&team](const TPG::TPGEdge* edge) -> bool {
                            return edge == nullptr ||
                                   dynamic_cast<const TPG::TPGActionEdge*>(
-                                        edge) != nullptr ||
-                                        edge->getSource() == &team ||
-                                        edge->getDestination() == &team;
+                                      edge) != nullptr ||
+                                  edge->getSource() == &team ||
+                                  edge->getDestination() == &team;
                        }),
         pickableEdges.end());
 
@@ -545,10 +546,11 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        if(params.tpg.teamAccessAllActions){
+        if (params.tpg.teamAccessAllActions) {
             target = preExistingActions.at(
                 rng.getUnsignedInt64(0, preExistingActions.size() - 1));
-        } else {
+        }
+        else {
             target = &graph.cloneVertex(*preExistingActions.at(
                 rng.getUnsignedInt64(0, preExistingActions.size() - 1)));
         }
@@ -936,8 +938,10 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     uint64_t nbActionsCreated = 0;
     uint64_t nbActionsToCreate =
         std::max((int64_t)((uint64_t)(params.tpg.nbRoots *
-                   (1 - params.tpg.ratioTeamsOverActions)) -
-        rootActions.size() + (actionsClonable.size() * useTournamentSelection)), (int64_t)0);
+                                      (1 - params.tpg.ratioTeamsOverActions)) -
+                           rootActions.size() +
+                           (actionsClonable.size() * useTournamentSelection)),
+                 (int64_t)0);
 
     while (nbActionsCreated < nbActionsToCreate) {
 
