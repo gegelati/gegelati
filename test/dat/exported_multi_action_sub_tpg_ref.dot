@@ -9,7 +9,7 @@ digraph{
 		T2 [fillcolor="#66ddff"]
 		A3 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="1-2"]
 		T4 [fillcolor="#66ddff"]
-		A5 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="1"]
+		A5 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="1-2"]
 		P0 [fillcolor="#cccccc" shape=point label="0"] //-2|-1|0|1|2|
 		I0 [shape=box style=invis label="0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n"] //0.000000|0.000000|0.000000|
 		P0 -> I0[style=invis]
@@ -44,7 +44,7 @@ digraph{
 		P7 [fillcolor="#cccccc" shape=point label="0"] //-2|-1|0|1|2|
 		I7 [shape=box style=invis label=""] //
 		P7 -> I7[style=invis]
-		A5 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="1"]
+		A5 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="1-2"]
 		T2 -> P7 -> A5
 		P8 [fillcolor="#cccccc" shape=point label="0"] //-2|-1|0|1|2|
 		I8 [shape=box style=invis label=""] //
@@ -57,7 +57,7 @@ digraph{
 		P10 [fillcolor="#cccccc" shape=point label="0"] //-2|-1|0|1|2|
 		I10 [shape=box style=invis label=""] //
 		P10 -> I10[style=invis]
-		A5 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="1"]
+		A5 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="1-2"]
 		T4 -> P10 -> A5
 		P11 [fillcolor="#cccccc" shape=point label="0"] //-2|-1|0|1|2|
 		I11 [shape=box style=invis label=""] //
@@ -67,4 +67,5 @@ digraph{
 		I12 [shape=box style=invis label=""] //
 		P12 -> I12[style=invis]
 		A5 -> P12
+		A5 ->  P9
 }

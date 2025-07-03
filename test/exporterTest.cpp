@@ -309,6 +309,7 @@ TEST_F(ExporterTest, printMultiActionProgSubGraph)
     tpg->addNewActionEdge(*tpg->getVertices().at(5), progPointers.at(currentNbPrograms + 4), 2);
 
     tpg->addNewActionEdge(*tpg->getVertices().at(6), progPointers.at(currentNbPrograms + 5), 1);
+    tpg->addNewActionEdge(*tpg->getVertices().at(6), progPointers.at(currentNbPrograms + 4), 2);
 
     File::TPGGraphDotExporter dotExporter("exported_multi_action_sub_tpg.dot", *tpg);
     
