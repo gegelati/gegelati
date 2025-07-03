@@ -341,11 +341,6 @@ void Mutator::TPGMutator::swapActionEdges(TPG::TPGGraph& graph,
     TPG::TPGEdge* edge1 = *it1;
     TPG::TPGEdge* edge2 = *it2;
 
-    if (edge1 == nullptr || edge2 == nullptr) {
-        throw std::runtime_error(
-            "Failed to find two distinct action edges for swapping.");
-    }
-
     // Extract and swap action classes
     auto actionClass1 =
         dynamic_cast<TPG::TPGActionEdge*>(edge1)->getActionClass();

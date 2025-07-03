@@ -90,8 +90,8 @@ class LABasicLoggerTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
 
-        auto res1 = new Learn::EvaluationResult(5, 2);
-        auto res2 = new Learn::EvaluationResult(10, 2);
+        auto res1 = new Learn::EvaluationResult(5, 2, 2);
+        auto res2 = new Learn::EvaluationResult(10, 2, 4);
         auto v1(new TPG::TPGAction(0));
         auto v2(new TPG::TPGAction(0));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
@@ -218,6 +218,9 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
     Log::LABasicLogger l(*la, strStr);
 
     l.logAfterEvaluate(results);
+
+    l.useUtility = true;
+    l.logAfterEvaluate(results);
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
@@ -229,6 +232,17 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
     ASSERT_DOUBLE_EQ(5.00, std::stod(result[12]));
     ASSERT_DOUBLE_EQ(7.50, std::stod(result[13]));
     ASSERT_DOUBLE_EQ(10.00, std::stod(result[14]));
+
+    // Utility then reward values
+    ASSERT_DOUBLE_EQ(2.00, std::stod(result[15]));
+    ASSERT_DOUBLE_EQ(3.00, std::stod(result[16]));
+    ASSERT_DOUBLE_EQ(4.00, std::stod(result[17]));
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[18]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[19]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[20]));
+
+
+
 }
 
 TEST_F(LABasicLoggerTest, logAfterValidate)
@@ -237,7 +251,15 @@ TEST_F(LABasicLoggerTest, logAfterValidate)
     Log::LABasicLogger l(*la, strStr);
 
     l.logAfterValidate(results);
+
+    auto r(results);
+    r.clear();
+    l.logAfterValidate(r);
+    l.useUtility = true;
+    l.logAfterValidate(r);
+
     std::string s = strStr.str();
+
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
     std::istringstream iss(s);
@@ -248,6 +270,9 @@ TEST_F(LABasicLoggerTest, logAfterValidate)
     ASSERT_DOUBLE_EQ(5.00, std::stod(result[12]));
     ASSERT_DOUBLE_EQ(7.50, std::stod(result[13]));
     ASSERT_DOUBLE_EQ(10.00, std::stod(result[14]));
+
+    // Result size should not have increased with cleared results.
+    ASSERT_EQ(result.size(), 15);
 }
 
 TEST_F(LABasicLoggerTest, logAfterDecimate)

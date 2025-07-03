@@ -11,7 +11,7 @@ digraph{
 		T4 [fillcolor="#66ddff"]
 		A5 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="2"]
 		P0 [fillcolor="#cccccc" shape=point label="0"] //-2|-1|0|1|2|
-		I0 [shape=box style=invis label="0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n"] //
+		I0 [shape=box style=invis label="0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n0|1&0|1#0|0&#92;n"] //0.000000|0.000000|0.000000|
 		P0 -> I0[style=invis]
 		A1 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="0"]
 		T0 -> P0 -> A1

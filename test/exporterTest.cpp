@@ -69,6 +69,7 @@ class ExporterTest : public ::testing::Test
 
     TPG::TPGGraph* tpg;
     std::vector<const TPG::TPGEdge*> edges;
+    size_t constant_size = 5;
 
     virtual void SetUp()
     {
@@ -85,12 +86,16 @@ class ExporterTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+        set.add(*(
+            new Instructions::LambdaInstruction<double, double, Data::Constant>(
+                [](double a, double b, Data::Constant c) -> double {
+            return a + b * (double)c;
+        })));
 
-        size_t constant_size = 5;
 
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
-        e = new Environment(set, params, vect);
+        e = new Environment(set, params, vect, 3);
         tpg = new TPG::TPGGraph(*e);
 
         // Create 10 programs
@@ -202,6 +207,54 @@ TEST_F(ExporterTest, print)
         << "File export was executed without error.";
 }
 
+TEST_F(ExporterTest, printSingleActionProgGraph)
+{
+    // Create 5 programs
+    int currentNbPrograms = progPointers.size();
+    for (int i = 0; i < 5; i++) {
+        std::shared_ptr<Program::Program> p =
+            std::make_shared<Program::Program>(*e, false);
+        for (int j = 0; j < constant_size; j++) {
+            p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
+                                                    j, {(double)(j - 2)});
+        }
+        progPointers.push_back(p);
+    }
+
+    // add constant instructions to at least one program.
+    for (int i = 8; i < 10; i++) {
+        Program::Line& l = progPointers.at(i).get()->addNewLine();
+        l.setInstructionIndex(2);
+        l.setDestinationIndex(1);
+        l.setOperand(0, 0, 1);
+
+        Program::Line& l2 = progPointers.at(i).get()->addNewLine();
+        l2.setInstructionIndex(2);
+        l2.setDestinationIndex(1);
+        l2.setOperand(0, 0, 1);
+
+        std::vector<double> constants = {0.5 * i, -0.5 * i};
+        progPointers.at(i).get()->setLineConstants(constants);
+    }
+
+    // Add one action edge to each action
+    for (int i = 4; i < 9; i++){
+        tpg->addNewActionEdge(*tpg->getVertices().at(i), progPointers.at(currentNbPrograms+i-4), i % e->getNbContinuousActions());
+    }
+
+    File::TPGGraphDotExporter dotExporter("exported_single_action_tpg.dot", *tpg);
+    
+    ASSERT_NO_THROW(dotExporter.print())
+        << "File export was executed without error.";
+
+
+    // Compare the two files
+    ASSERT_TRUE(compare_files("exported_single_action_tpg.dot",
+                              TESTS_DAT_PATH "exported_single_action_tpg_ref.dot"))
+        << "Differences between reference file and exported "
+           "file were detected.";
+}
+
 TEST_F(ExporterTest, printSubGraph)
 {
     File::TPGGraphDotExporter dotExporter("exported_subtpg.dot", *tpg);
@@ -212,6 +265,59 @@ TEST_F(ExporterTest, printSubGraph)
     // Compare the file with a golden ref
     ASSERT_TRUE(compare_files("exported_subtpg.dot",
                               TESTS_DAT_PATH "exported_subtpg_ref.dot"))
+        << "Differences between reference file and exported "
+           "file were detected.";
+}
+
+
+TEST_F(ExporterTest, printMultiActionProgSubGraph)
+{
+    // Create 6 programs
+    int currentNbPrograms = progPointers.size();
+    for (int i = 0; i < 6; i++) {
+        std::shared_ptr<Program::Program> p =
+            std::make_shared<Program::Program>(*e, false);
+        for (int j = 0; j < constant_size; j++) {
+            p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
+                                                    j, {(double)(j - 2)});
+        }
+        progPointers.push_back(p);
+    }
+
+    // add constant instructions to at least one program.
+    for (int i = 8; i < 10; i++) {
+        Program::Line& l = progPointers.at(i).get()->addNewLine();
+        l.setInstructionIndex(2);
+        l.setDestinationIndex(1);
+        l.setOperand(0, 0, 1);
+
+        Program::Line& l2 = progPointers.at(i).get()->addNewLine();
+        l2.setInstructionIndex(2);
+        l2.setDestinationIndex(1);
+        l2.setOperand(0, 0, 1);
+
+        std::vector<double> constants = {0.5 * i, -0.5 * i};
+        progPointers.at(i).get()->setLineConstants(constants);
+    }
+
+    // Add three action edges to first action, two to second and one to third
+    tpg->addNewActionEdge(*tpg->getVertices().at(4), progPointers.at(currentNbPrograms), 0);
+    tpg->addNewActionEdge(*tpg->getVertices().at(4), progPointers.at(currentNbPrograms + 1), 1);
+    tpg->addNewActionEdge(*tpg->getVertices().at(4), progPointers.at(currentNbPrograms + 2), 2);
+
+    tpg->addNewActionEdge(*tpg->getVertices().at(5), progPointers.at(currentNbPrograms + 3), 1);
+    tpg->addNewActionEdge(*tpg->getVertices().at(5), progPointers.at(currentNbPrograms + 4), 2);
+
+    tpg->addNewActionEdge(*tpg->getVertices().at(6), progPointers.at(currentNbPrograms + 5), 1);
+
+    File::TPGGraphDotExporter dotExporter("exported_multi_action_sub_tpg.dot", *tpg);
+    
+    ASSERT_NO_THROW(dotExporter.printSubGraph(tpg->getVertices().at(0)))
+        << "File export was executed without error.";
+
+    // Compare the two files
+    ASSERT_TRUE(compare_files("exported_multi_action_sub_tpg.dot",
+                              TESTS_DAT_PATH "exported_multi_action_sub_tpg_ref.dot"))
         << "Differences between reference file and exported "
            "file were detected.";
 }

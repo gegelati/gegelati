@@ -62,7 +62,7 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
     uint64_t actionNumber = this->findVertexID(action);
 
     uint64_t actionID = action.getActionID();
-    if (tpg.getEnvironment().getParams().mutation.tpg.useActionProgram) {
+    if (action.getOutgoingEdges().size() != 0) {
         actionID = actionNumber;
     }
 
@@ -70,7 +70,7 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
     std::ostringstream labelStream;
 
     auto outgoingEdges = action.getOutgoingEdges();
-    if (tpg.getEnvironment().getParams().mutation.tpg.useMultiActionProgram) {
+    if (action.getOutgoingEdges().size() != 0) {
         for (auto it = outgoingEdges.begin(); it != outgoingEdges.end(); ++it) {
             if (it != outgoingEdges.begin()) {
                 labelStream << "-"; // Add separator between actionClasses

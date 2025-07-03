@@ -45,35 +45,27 @@ void Log::LABasicLogger::logResults(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results)
 {
-    if (useUtility) {
+    auto logStat = [&](auto getter) {
         auto iter = results.begin();
-        double min = iter->first->getUtility();
+        double min = (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
         std::advance(iter, results.size() - 1);
-        double max = iter->first->getUtility();
+        double max = (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
         double avg = std::accumulate(
             results.begin(), results.end(), 0.0,
-            [](double acc,
-               std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                         const TPG::TPGVertex*>
-                   pair) -> double { return acc + pair.first->getUtility(); });
+            [getter](double acc,
+                     const std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                     const TPG::TPGVertex*>& pair) {
+                return acc + (pair.first.get()->*getter)();
+            });
         avg /= (double)results.size();
         *this << std::setw(colWidth) << min << std::setw(colWidth) << avg
               << std::setw(colWidth) << max;
-    }
+    };
 
-    auto iter = results.begin();
-    double min = iter->first->getResult();
-    std::advance(iter, results.size() - 1);
-    double max = iter->first->getResult();
-    double avg = std::accumulate(
-        results.begin(), results.end(), 0.0,
-        [](double acc,
-           std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                     const TPG::TPGVertex*>
-               pair) -> double { return acc + pair.first->getResult(); });
-    avg /= (double)results.size();
-    *this << std::setw(colWidth) << min << std::setw(colWidth) << avg
-          << std::setw(colWidth) << max;
+    if (useUtility) {
+        logStat(&Learn::EvaluationResult::getUtility);
+    }
+    logStat(&Learn::EvaluationResult::getResult);
 }
 
 void Log::LABasicLogger::logHeader()
