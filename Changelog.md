@@ -8,24 +8,25 @@ _yyyy.mm.dd_
 ### Changes
 * Update CMake minimum version to avoid annoying warning or deprecation errors with latest versions.
 * During coverage test with gcovr, ignore negative hits following [gcovr issue 68080](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68080).
-Implement the new features proposed in the GECCO2025 paper. 'MAPLE: Multi-Action Programs through Linear Evolution for
+* Implement the new features proposed in the GECCO2025 paper. 'MAPLE: Multi-Action Programs through Linear Evolution for
 Continuous Multi-Action Reinforcement Learning'.
   * Change TPG so that it can assess the environment with multi-continuous actions by outputting the values of the register of the last program.
-  For continuous tasks, add the possibility of dividing the context and action programs, as proposed in 'Benchmarking Genetic Programming in a Multi-Action Reinforcement Learning Locomotion Task'.
-    Context programs output a bid for teams only.
-    Action programs output multiple action values (one per register) and are only for actions.
-  Implementation of MAPLE and MATPG (Multi-Action TPG).
-    Instead of one action program outputting all the continuous actions, an action vertex can have multiple action programs, each assessing one specific action.
-  Because actions can now have programs, new mutations specific to action vertices have been added.
-    - removing an action edge
-    - adding an action edge (with an action class that has not yet been assessed by the action vertex).
-    Switching the action class between two action edges.
-    Mutating an action class with another action class not already assessed by the action vertex.
-  To improve diversity, tournament selection can be used instead of classic selection.
-  A distinction is added between utility and reward. In some benchmark environments, such as MuJoCo, the usual scores are compared to those in other environments. However, it can sometimes be helpful to change the reward to improve learning.
-    The utility is the classic score used to compare algorithms.
-    The reward is the actual score used for the learning process.
-    If the 'isUsingUtility' function is not overridden by your LearningEnvironment, no distinction will be made (i.e. the option will not be used).
+  * For continuous tasks, add the possibility of dividing the context and action programs, as proposed in 'Benchmarking Genetic Programming in a Multi-Action Reinforcement Learning Locomotion Task'.
+    * Context programs output a bid for teams only.
+    * Action programs output multiple action values (one per register) and are only for actions.
+  * Implementation of MAPLE and MATPG (Multi-Action TPG).
+    * Instead of one action program outputting all the continuous actions, an action vertex can have multiple action programs, each assessing one specific action.
+  * Because actions can now have programs, new mutations specific to action vertices have been added.
+    * Removing an action edge
+    * Adding an action edge (with an action class that has not yet been assessed by the action vertex).
+    * Switching the action class between two action edges.
+    * Mutating an action class with another action class not already assessed by the action vertex.
+  * To improve diversity, tournament selection can be used instead of classic selection.
+  * A distinction is added between utility and reward. In some benchmark environments, such as MuJoCo, the usual scores are compared to   those in other environments. However, it can sometimes be helpful to change the reward to improve learning.
+    * The utility is the classic score used to compare algorithms.
+    * The reward is the actual score used for the learning process.
+    * If the 'isUsingUtility' function is not overridden by your LearningEnvironment, no distinction will be made (i.e. the option will not be used).
+  * Two different values can be choosen for the number of episode for training and for validation, also a validation can be done each X training generation to avoid having to much computation time only for validation
 
 ### Bug fix
 
