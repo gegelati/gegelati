@@ -2,13 +2,19 @@
 #include <numeric>
 #include "tpg/policyStats.h"
 
-// Helper struct to group stats for a program type
+/// Helper struct to group stats for a program type
 struct ProgramTypeStats {
+    /// Map from Program pointer to usage count.
     const std::map<const Program::Program*, size_t>* nbUsePerProgram;
+    /// Vector of line counts per program.
     const std::vector<size_t>* nbLinesPerProgram;
+    /// Vector of intron line counts per program.
     const std::vector<size_t>* nbIntronPerProgram;
+    /// Map from instruction index to usage count.
     const std::map<size_t, size_t>* nbUsagePerInstruction;
+    /// Map from data location to usage count.
     const std::map<std::pair<size_t, size_t>, size_t>* nbUsagePerDataLocation;
+    /// Label for the program type ("Context" or "Action").
     const char* label;
 };
 
