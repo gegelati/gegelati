@@ -27,4 +27,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN})
 set(target OneTeamThreeLeavesContOneActProg)
 add_executable(${target} ${SRC}${target}.c ${SRC}${target}_program.c main${target}.c ../csvparser/csvparser.c ../csvparser/inferenceCSVMultiAct.c)
 
-target_link_libraries(${target} m)
+if(UNIX OR APPLE)
+    target_link_libraries(${target} m)
+endif()

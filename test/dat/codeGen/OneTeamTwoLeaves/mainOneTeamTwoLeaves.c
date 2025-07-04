@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "oneTeamTwoLeaves.h"
+#include "OneTeamTwoLeaves.h"
 #include "csvparser.h"
 #include "inferenceCSV.h"
 
