@@ -89,9 +89,8 @@ class ExporterTest : public ::testing::Test
         set.add(*(
             new Instructions::LambdaInstruction<double, double, Data::Constant>(
                 [](double a, double b, Data::Constant c) -> double {
-            return a + b * (double)c;
-        })));
-
+                    return a + b * (double)c;
+                })));
 
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
@@ -215,8 +214,8 @@ TEST_F(ExporterTest, printSingleActionProgGraph)
         std::shared_ptr<Program::Program> p =
             std::make_shared<Program::Program>(*e, false);
         for (int j = 0; j < constant_size; j++) {
-            p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
-                                                    j, {(double)(j - 2)});
+            p.get()->getConstantHandler().setDataAt(typeid(Data::Constant), j,
+                                                    {(double)(j - 2)});
         }
         progPointers.push_back(p);
     }
@@ -238,19 +237,21 @@ TEST_F(ExporterTest, printSingleActionProgGraph)
     }
 
     // Add one action edge to each action
-    for (int i = 4; i < 9; i++){
-        tpg->addNewActionEdge(*tpg->getVertices().at(i), progPointers.at(currentNbPrograms+i-4), i % e->getNbContinuousActions());
+    for (int i = 4; i < 9; i++) {
+        tpg->addNewActionEdge(*tpg->getVertices().at(i),
+                              progPointers.at(currentNbPrograms + i - 4),
+                              i % e->getNbContinuousActions());
     }
 
-    File::TPGGraphDotExporter dotExporter("exported_single_action_tpg.dot", *tpg);
-    
+    File::TPGGraphDotExporter dotExporter("exported_single_action_tpg.dot",
+                                          *tpg);
+
     ASSERT_NO_THROW(dotExporter.print())
         << "File export was executed without error.";
 
-
     // Compare the two files
-    ASSERT_TRUE(compare_files("exported_single_action_tpg.dot",
-                              TESTS_DAT_PATH "exported_single_action_tpg_ref.dot"))
+    ASSERT_TRUE(compare_files("exported_single_action_tpg.dot", TESTS_DAT_PATH
+                              "exported_single_action_tpg_ref.dot"))
         << "Differences between reference file and exported "
            "file were detected.";
 }
@@ -269,7 +270,6 @@ TEST_F(ExporterTest, printSubGraph)
            "file were detected.";
 }
 
-
 TEST_F(ExporterTest, printMultiActionProgSubGraph)
 {
     // Create 6 programs
@@ -278,8 +278,8 @@ TEST_F(ExporterTest, printMultiActionProgSubGraph)
         std::shared_ptr<Program::Program> p =
             std::make_shared<Program::Program>(*e, false);
         for (int j = 0; j < constant_size; j++) {
-            p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
-                                                    j, {(double)(j - 2)});
+            p.get()->getConstantHandler().setDataAt(typeid(Data::Constant), j,
+                                                    {(double)(j - 2)});
         }
         progPointers.push_back(p);
     }
@@ -301,24 +301,33 @@ TEST_F(ExporterTest, printMultiActionProgSubGraph)
     }
 
     // Add three action edges to first action, two to second and one to third
-    tpg->addNewActionEdge(*tpg->getVertices().at(4), progPointers.at(currentNbPrograms), 0);
-    tpg->addNewActionEdge(*tpg->getVertices().at(4), progPointers.at(currentNbPrograms + 1), 1);
-    tpg->addNewActionEdge(*tpg->getVertices().at(4), progPointers.at(currentNbPrograms + 2), 2);
+    tpg->addNewActionEdge(*tpg->getVertices().at(4),
+                          progPointers.at(currentNbPrograms), 0);
+    tpg->addNewActionEdge(*tpg->getVertices().at(4),
+                          progPointers.at(currentNbPrograms + 1), 1);
+    tpg->addNewActionEdge(*tpg->getVertices().at(4),
+                          progPointers.at(currentNbPrograms + 2), 2);
 
-    tpg->addNewActionEdge(*tpg->getVertices().at(5), progPointers.at(currentNbPrograms + 3), 1);
-    tpg->addNewActionEdge(*tpg->getVertices().at(5), progPointers.at(currentNbPrograms + 4), 2);
+    tpg->addNewActionEdge(*tpg->getVertices().at(5),
+                          progPointers.at(currentNbPrograms + 3), 1);
+    tpg->addNewActionEdge(*tpg->getVertices().at(5),
+                          progPointers.at(currentNbPrograms + 4), 2);
 
-    tpg->addNewActionEdge(*tpg->getVertices().at(6), progPointers.at(currentNbPrograms + 5), 1);
-    tpg->addNewActionEdge(*tpg->getVertices().at(6), progPointers.at(currentNbPrograms + 4), 2);
+    tpg->addNewActionEdge(*tpg->getVertices().at(6),
+                          progPointers.at(currentNbPrograms + 5), 1);
+    tpg->addNewActionEdge(*tpg->getVertices().at(6),
+                          progPointers.at(currentNbPrograms + 4), 2);
 
-    File::TPGGraphDotExporter dotExporter("exported_multi_action_sub_tpg.dot", *tpg);
-    
+    File::TPGGraphDotExporter dotExporter("exported_multi_action_sub_tpg.dot",
+                                          *tpg);
+
     ASSERT_NO_THROW(dotExporter.printSubGraph(tpg->getVertices().at(0)))
         << "File export was executed without error.";
 
     // Compare the two files
     ASSERT_TRUE(compare_files("exported_multi_action_sub_tpg.dot",
-                              TESTS_DAT_PATH "exported_multi_action_sub_tpg_ref.dot"))
+                              TESTS_DAT_PATH
+                              "exported_multi_action_sub_tpg_ref.dot"))
         << "Differences between reference file and exported "
            "file were detected.";
 }

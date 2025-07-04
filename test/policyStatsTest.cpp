@@ -137,24 +137,22 @@ class PolicyStatsTest : public ::testing::Test
                                          progPointers.at(7)));
 
         // Add new Action Edges to A0
-        edges.push_back(&tpg->addNewActionEdge(
-            *tpg->getVertices().at(4), progPointers.at(8), 1
-        ));
-        edges.push_back(&tpg->addNewActionEdge(
-            *tpg->getVertices().at(4), progPointers.at(9), 2
-        ));
+        edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(4),
+                                               progPointers.at(8), 1));
+        edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(4),
+                                               progPointers.at(9), 2));
 
         // Add new Action Edges to A2
-        edges.push_back(&tpg->addNewActionEdge(
-            *tpg->getVertices().at(6), progPointers.at(10), 0
-        ));
+        edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(6),
+                                               progPointers.at(10), 0));
 
         // Check the characteristics
         ASSERT_EQ(tpg->getNbVertices(), 8);
         ASSERT_EQ(tpg->getEdges().size(), 12);
         ASSERT_EQ(tpg->getRootVertices().size(), 2);
 
-        // Add instructions to 2 context programs and the same to two action programs
+        // Add instructions to 2 context programs and the same to two action
+        // programs
 
         // Program 0 (referenced by two edges)
         Program::Line* l = &progPointers.at(0).get()->addNewLine();
@@ -186,7 +184,6 @@ class PolicyStatsTest : public ::testing::Test
         l->setOperand(1, 2, 12);   // Array[12 .. 15]
 
         progPointers.at(1).get()->identifyIntrons();
-
 
         // Program 0 (referenced by two edges)
         l = &progPointers.at(8).get()->addNewLine();
@@ -310,7 +307,6 @@ TEST_F(PolicyStatsTest, AnalyzeProgram)
         ASSERT_EQ(ps.nbUsagePerDataLocation, content)
             << "Incorrect attribute value after analyzing a Program.";
 
-
         ASSERT_NO_THROW(ps.analyzeProgram(progPointers.at(8).get()))
             << "Analysis of a valid Program failed unexpectedly.";
 
@@ -325,7 +321,8 @@ TEST_F(PolicyStatsTest, AnalyzeProgram)
             << "Incorrect attribute value after analyzing a Program.";
         ASSERT_EQ(ps.nbUsePerActionProgram.size(), 1)
             << "Incorrect attribute value after analyzing a Program.";
-        ASSERT_EQ(ps.nbUsePerActionProgram.begin()->first, progPointers.at(8).get())
+        ASSERT_EQ(ps.nbUsePerActionProgram.begin()->first,
+                  progPointers.at(8).get())
             << "Incorrect attribute value after analyzing a Program.";
         ASSERT_EQ(ps.nbUsePerActionProgram.begin()->second, i + 1)
             << "Incorrect attribute value after analyzing a Program.";
@@ -349,8 +346,6 @@ TEST_F(PolicyStatsTest, AnalyzeProgram)
             {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{2, 2}, 2}};
         ASSERT_EQ(ps.nbUsagePerDataLocationActionProg, content2)
             << "Incorrect attribute value after analyzing a Program.";
-
-        
     }
 }
 
@@ -439,7 +434,6 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
         }
     }
 
-    
     std::vector<size_t> nbLinesPerActionProgram{3, 1, 0};
     ASSERT_EQ(ps.nbLinesPerActionProgram, nbLinesPerActionProgram);
 
@@ -447,17 +441,20 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
     ASSERT_EQ(ps.nbIntronPerActionProgram, nbIntronPerActionProgram);
 
     std::map<size_t, size_t> nbUsagePerInstructionActionProg{{1, 1}, {2, 2}};
-    ASSERT_EQ(ps.nbUsagePerInstructionActionProg, nbUsagePerInstructionActionProg);
+    ASSERT_EQ(ps.nbUsagePerInstructionActionProg,
+              nbUsagePerInstructionActionProg);
 
-    std::map<std::pair<size_t, size_t>, size_t> nbUsagePerDataLocationActionProg{
-        {{0, 1}, 2}, {{0, 2}, 1},  {{0, 3}, 1},
-        {{2, 2}, 2}, {{2, 10}, 1}, {{2, 12}, 1}};
-    ASSERT_EQ(ps.nbUsagePerDataLocationActionProg, nbUsagePerDataLocationActionProg);
+    std::map<std::pair<size_t, size_t>, size_t>
+        nbUsagePerDataLocationActionProg{{{0, 1}, 2},  {{0, 2}, 1},
+                                         {{0, 3}, 1},  {{2, 2}, 2},
+                                         {{2, 10}, 1}, {{2, 12}, 1}};
+    ASSERT_EQ(ps.nbUsagePerDataLocationActionProg,
+              nbUsagePerDataLocationActionProg);
 
     std::vector<size_t> nbUsePerActionProgram{1, 1, 1};
     for (auto i = 0; i < nbUsePerActionProgram.size(); i++) {
         if (nbUsePerActionProgram[i] > 0) {
-            ASSERT_EQ(ps.nbUsePerActionProgram.at(progPointers.at(i+8).get()),
+            ASSERT_EQ(ps.nbUsePerActionProgram.at(progPointers.at(i + 8).get()),
                       nbUsePerActionProgram[i]);
         }
     }
@@ -505,7 +502,6 @@ TEST_F(PolicyStatsTest, Clear)
     ASSERT_TRUE(ps.nbIntronPerActionProgram.empty());
     ASSERT_TRUE(ps.nbUsagePerInstructionActionProg.empty());
     ASSERT_TRUE(ps.nbUsagePerDataLocationActionProg.empty());
-
 }
 
 TEST_F(PolicyStatsTest, InsertOperator)

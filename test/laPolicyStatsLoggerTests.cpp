@@ -38,9 +38,9 @@
 #include <gtest/gtest.h>
 
 #include "instructions/addPrimitiveType.h"
+#include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningAgent.h"
 #include "learn/stickGameWithOpponent.h"
-#include "learn/fakeMultiContinuousLearningEnvironment.h"
 
 #include "log/laPolicyStatsLogger.h"
 
@@ -144,7 +144,6 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluate)
            "bestRoot) should result in new log being written.";
 }
 
-
 TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithActionProg)
 {
 
@@ -191,7 +190,6 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithActionProg)
         << "Training a new generation (which deterministically creates a new "
            "bestRoot) should result in new log being written.";
 }
-
 
 TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithMAPLE)
 {

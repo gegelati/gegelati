@@ -39,7 +39,8 @@
 #include "util/timestamp.h"
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
-const std::regex CodeGen::ProgramGenerationEngine::constant_regex("(\\%[0-9]*)");
+const std::regex CodeGen::ProgramGenerationEngine::constant_regex(
+    "(\\%[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
 const std::string CodeGen::ProgramGenerationEngine::nameConstantVariable("cst");
 const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
@@ -68,13 +69,16 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
     uint64_t progID, const bool ignoreException)
 {
     if (program->getEnvironment().getNbContinuousActions() > 0 &&
-        !program->getEnvironment().getParams().mutation.tpg.useMultiActionProgram &&
-        program->getEnvironment().getParams().mutation.tpg.useActionProgram && 
+        !program->getEnvironment()
+             .getParams()
+             .mutation.tpg.useMultiActionProgram &&
+        program->getEnvironment().getParams().mutation.tpg.useActionProgram &&
         program->isActionProgram()) {
 
         fileC << "\nvoid P" << progID << "(double* actions){" << std::endl;
         fileH << "void P" << progID << "(double* actions);" << std::endl;
-    } else {
+    }
+    else {
         fileC << "\ndouble P" << progID << "(){" << std::endl;
         fileH << "double P" << progID << "();" << std::endl;
     }
@@ -110,21 +114,25 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
     fileC << "#endif" << std::endl;
 #endif
 
-
     // Single Action program are used, and this program is an action program
     if (program->getEnvironment().getNbContinuousActions() > 0 &&
-        !program->getEnvironment().getParams().mutation.tpg.useMultiActionProgram &&
-        program->getEnvironment().getParams().mutation.tpg.useActionProgram && 
+        !program->getEnvironment()
+             .getParams()
+             .mutation.tpg.useMultiActionProgram &&
+        program->getEnvironment().getParams().mutation.tpg.useActionProgram &&
         program->isActionProgram()) {
 
-        for(size_t idx = 0; idx < program->getEnvironment().getNbContinuousActions(); idx++){
+        for (size_t idx = 0;
+             idx < program->getEnvironment().getNbContinuousActions(); idx++) {
 
-            fileC << "\tactions[" << idx << "] = reg[" << idx << "];" << std::endl;
+            fileC << "\tactions[" << idx << "] = reg[" << idx << "];"
+                  << std::endl;
         }
         fileC << "}" << std::endl;
 
-    // Classic case (context program) or MATPG / MAPLE Case
-    } else {
+        // Classic case (context program) or MATPG / MAPLE Case
+    }
+    else {
         fileC << "\treturn reg[0];\n}" << std::endl;
     }
 }

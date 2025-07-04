@@ -647,7 +647,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         std::runtime_error)
         << "Should throw when maxInitOutgoingEdges < 2 and teams exist.";
 
-    
     params.tpg.maxInitOutgoingEdges = 2;
     params.tpg.nbRoots = 4;
     params.tpg.ratioTeamsOverActions = 0.5;

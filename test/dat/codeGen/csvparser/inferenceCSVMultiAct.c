@@ -38,7 +38,8 @@
 #include <math.h>
 extern double* in1;
 
-static double round3(double x) {
+static double round3(double x)
+{
     return round(x * 1000.0) / 1000.0;
 }
 
@@ -77,14 +78,14 @@ int inferenceCSV(char* filename, void (*inferenceTPG)(double*))
         printf("action : %d\n", (int)action[0]);
 #endif // DEBUG
         printf("\n Output %lf %lf %lf  ", action[0], action[1], action[2]);
-        printf("\n Expected %lf %lf %lf  ", expectedVal0, expectedVal1, expectedVal2);
+        printf("\n Expected %lf %lf %lf  ", expectedVal0, expectedVal1,
+               expectedVal2);
         if (round3(action[0]) != round3(expectedVal0) ||
             round3(action[1]) != round3(expectedVal1) ||
             round3(action[2]) != round3(expectedVal2)) {
             errorPrint((int)action[0], expectedVal0, row, tab);
             return ERROR_INFERENCE;
         }
-
 
         CsvParser_destroy_row(row);
     }

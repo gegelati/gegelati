@@ -47,9 +47,11 @@ void Log::LABasicLogger::logResults(
 {
     auto logStat = [&](auto getter) {
         auto iter = results.begin();
-        double min = (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
+        double min =
+            (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
         std::advance(iter, results.size() - 1);
-        double max = (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
+        double max =
+            (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
         double avg = std::accumulate(
             results.begin(), results.end(), 0.0,
             [getter](double acc,

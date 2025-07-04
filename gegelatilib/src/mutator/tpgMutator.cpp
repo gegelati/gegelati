@@ -161,9 +161,11 @@ void Mutator::TPGMutator::initRandomTPG(
             "A team should have at least two edges at initialisation.");
     }
 
-    if (!params.tpg.useActionProgram && params.tpg.ratioTeamsOverActions != 1.0){
+    if (!params.tpg.useActionProgram &&
+        params.tpg.ratioTeamsOverActions != 1.0) {
         throw std::runtime_error(
-            "The ratio of team should be one when no action program are used (we do not want action root at the initialisation).");
+            "The ratio of team should be one when no action program are used "
+            "(we do not want action root at the initialisation).");
     }
 
     // Empty graph

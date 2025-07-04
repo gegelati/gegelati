@@ -61,7 +61,6 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 
     progGenerationEngine.setProgram(p);
 
-
     if (findProgramID(p, progID)) {
         progGenerationEngine.generateProgram(progID, false);
     }

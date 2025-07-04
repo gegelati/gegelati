@@ -240,9 +240,6 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
     ASSERT_DOUBLE_EQ(5.00, std::stod(result[18]));
     ASSERT_DOUBLE_EQ(7.50, std::stod(result[19]));
     ASSERT_DOUBLE_EQ(10.00, std::stod(result[20]));
-
-
-
 }
 
 TEST_F(LABasicLoggerTest, logAfterValidate)

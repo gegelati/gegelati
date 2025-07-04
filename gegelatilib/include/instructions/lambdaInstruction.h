@@ -72,11 +72,14 @@ namespace Instructions {
          * \param[in] function the c++ std::function that will be executed for
          * this Instruction. Check the constructor with only the function as
          * parameter for more details.
-         * \param[in] useProgConst If true, the constant used are the ones of the program, else the ones of the line
+         * \param[in] useProgConst If true, the constant used are the ones of
+         * the program, else the ones of the line
          */
         LambdaInstruction(std::function<double(First, Rest...)> function,
-                          const std::string& printTemplate = "", bool useProgConst = false)
-            : Instructions::Instruction(printTemplate), func{function}, useProgramConstant(useProgConst)
+                          const std::string& printTemplate = "",
+                          bool useProgConst = false)
+            : Instructions::Instruction(printTemplate), func{function},
+              useProgramConstant(useProgConst)
         {
             setUpOperand();
         };
@@ -89,7 +92,8 @@ namespace Instructions {
         const std::function<double(const First, const Rest...)> func;
 
         /**
-         * \brief If true, the constant used are the ones of the program, else the ones of the line
+         * \brief If true, the constant used are the ones of the program, else
+         * the ones of the line
          */
         const bool useProgramConstant;
 
@@ -106,10 +110,13 @@ namespace Instructions {
          * this Instruction. The function must have the same types in its
          * argument list as specified by the template parameters. (checked at
          * compile time)
-         * \param[in] useProgConst If true, the constant used are the ones of the program, else the ones of the line
+         * \param[in] useProgConst If true, the constant used are the ones of
+         * the program, else the ones of the line
          */
-        LambdaInstruction(std::function<double(First, Rest...)> function, bool useProgConst = false)
-            : Instructions::Instruction(), func{function}, useProgramConstant(useProgConst)
+        LambdaInstruction(std::function<double(First, Rest...)> function,
+                          bool useProgConst = false)
+            : Instructions::Instruction(), func{function},
+              useProgramConstant(useProgConst)
         {
             setUpOperand();
         };
