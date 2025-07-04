@@ -38,8 +38,6 @@ namespace {
                 stats.nbUsePerProgram->cend(), size_t(0),
                 [](size_t accu, const auto& val) { return accu + val.second; }
             ) / (double)stats.nbUsePerProgram->size();
-        } else {
-            os << "0";
         }
         os << std::endl;
 
@@ -52,8 +50,6 @@ namespace {
                     return accu + val.second;
                 }
             ) / (double)stats.nbUsagePerInstruction->size();
-        } else {
-            os << "0";
         }
         os << ": ";
         for (const auto& val : *stats.nbUsagePerInstruction) {
@@ -215,8 +211,10 @@ void TPG::PolicyStats::analyzePolicy(const TPG::TPGVertex* root)
             }
             if (auto action = dynamic_cast<const TPG::TPGAction*>(vertex)) {
                 this->analyzeTPGAction(action);
-                for (auto edge : action->getOutgoingEdges()) {
-                    this->analyzeProgram(&edge->getProgram());
+                if(this-> nbUsePerTPGAction[action] == 1){
+                    for (auto edge : action->getOutgoingEdges()) {
+                        this->analyzeProgram(&edge->getProgram());
+                    }
                 }
             }
         }
@@ -252,8 +250,6 @@ std::ostream& TPG::operator<<(std::ostream& os, const TPG::PolicyStats& policySt
             [](size_t accu, std::pair<size_t, size_t> val) {
                 return accu + val.second;
             }) / (double)policyStats.nbUsagePerActionID.size();
-    } else {
-        os << "0";
     }
     os << ": ";
     for (const auto& val : policyStats.nbUsagePerActionID) {
