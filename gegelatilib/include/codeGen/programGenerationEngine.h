@@ -192,11 +192,9 @@ namespace CodeGen {
          *            correct by construction, and any exception is re-thrown
          *            for higher-level handling, thus stopping the program.
          *            Exception thrown by getCurrentLine are never ignored.
-         * \param[in] isDestAnAction When true, indicate that the destination of the program is an action, this is usefull for continuous case with no action program
          */
         void generateProgram(uint64_t progID,
-                             const bool ignoreException = false,
-                             bool isDestAnAction = false);
+                             const bool ignoreException = false);
 
       protected:
         /**

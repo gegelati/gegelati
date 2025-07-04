@@ -712,11 +712,11 @@ TEST_BOTH_MODE(TwoTeamsNegativeBid, {
 });
 
 static void setProgLine(const std::shared_ptr<Program::Program> prog,
-                        int operand)
+                        int operand, int reg=0)
 {
     Program::Line& line = prog->addNewLine();
     // reg[0] = in1[operand] + reg[8] (= 0)
-    line.setDestinationIndex(0);
+    line.setDestinationIndex(reg);
     line.setInstructionIndex(0);
     line.setOperand(0, 1, operand);
     line.setOperand(1, 0, 1);
@@ -792,4 +792,298 @@ TEST_BOTH_MODE(ThreeTeamsThreeLeaves, {
         << "Error wrong action returned in test "
            "ThreeTeamsThreeLeaves.";
 });
+
+TEST_F(TPGGenerationEngineTest, OneTeamsThreeLeavesSwitchContinuousOneActionprog)
+{                                                                          
+    CodeGen::TPGGenerationEngineFactory factory(                           
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
+            switchMode);                                                   
+    
+    params.activationFunction="tanh";
+    params.mutation.tpg.useActionProgram = true;
+    Environment ce(set, params, data, 3);
+    TPG::TPGGraph ctpg = (ce);
+
+    const TPG::TPGVertex* A1 = (&ctpg.addNewAction(1));
+    const TPG::TPGVertex* A2 = (&ctpg.addNewAction(2));
+    const TPG::TPGVertex* A0 = (&ctpg.addNewAction(0));
+    const TPG::TPGVertex* T1 = (&ctpg.addNewTeam());
+
+    const std::shared_ptr<Program::Program> prog1(
+        new Program::Program(ce, false));
+    const std::shared_ptr<Program::Program> prog2(
+        new Program::Program(ce, false));
+    const std::shared_ptr<Program::Program> prog3(
+        new Program::Program(ce, false));
+    const std::shared_ptr<Program::Program> prog4(
+        new Program::Program(ce, true));
+    const std::shared_ptr<Program::Program> prog5(
+        new Program::Program(ce, true));
+    const std::shared_ptr<Program::Program> prog6(
+        new Program::Program(ce, true));
+
+    setProgLine(prog1, 0);
+    // reg[0] = in1[0] + reg[1] (reg[1] = 0)
+    setProgLine(prog2, 1);
+    // reg[0] = in1[1] + reg[1] (reg[1] = 0)
+    setProgLine(prog3, 2);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+
+    setProgLine(prog4, 0, 0);
+    // reg[0] = in1[0] + reg[1] (reg[1] = 0)
+    setProgLine(prog4, 1, 1);
+    // reg[1] = in1[1] + reg[1] (reg[1] = 0)
+    setProgLine(prog4, 2, 2);
+    // reg[2] = in1[2] + reg[1] (reg[1] = 0)
+
+    setProgLine(prog5, 3, 0);
+    // reg[0] = in1[0] + reg[1] (reg[1] = 0)
+    setProgLine(prog5, 4, 1);
+    // reg[1] = in1[1] + reg[1] (reg[1] = 0)
+    setProgLine(prog5, 5, 2);
+    // reg[2] = in1[2] + reg[1] (reg[1] = 0)
+
+    setProgLine(prog6, 0, 0);
+    // reg[0] = in1[0] + reg[1] (reg[1] = 0)
+    setProgLine(prog6, 3, 1);
+    // reg[1] = in1[1] + reg[1] (reg[1] = 0)
+    setProgLine(prog6, 5, 2);
+    // reg[2] = in1[2] + reg[1] (reg[1] = 0)
+
+    ctpg.addNewEdge(*T1, *A1, prog1);
+    ctpg.addNewEdge(*T1, *A2, prog2);
+    ctpg.addNewEdge(*T1, *A0, prog3);
+
+    ctpg.addNewActionEdge(*A0, prog4, 0);
+    ctpg.addNewActionEdge(*A1, prog5, 1);
+    ctpg.addNewActionEdge(*A2, prog6, 2);
+
+    ASSERT_EQ(ctpg.getNbRootVertices(), 1)
+        << "number of root is not 1 in OneTeamThreeLeavesContOneActProg";
+
+    ASSERT_EQ(ctpg.getNbVertices(), 4)
+        << "bad number of vertices in OneTeamThreeLeavesContOneActProg";
+
+    ASSERT_EQ(ctpg.getEdges().size(), 6)
+        << "bad number of edges in OneTeamThreeLeavesContOneActProg";
+
+
+    tpgGen = factory.create("OneTeamThreeLeavesContOneActProg", ctpg, "./src/");
+    tpgGen->generateTPGGraph();
+    // call the destructor to close the file
+    tpgGen.reset();
+    cmdCompile += "OneTeamThreeLeavesContOneActProg";
+    ASSERT_EQ(system(cmdCompile.c_str()), 0)
+        << "Error while compiling the test OneTeamThreeLeavesContOneActProg";
+
+    cmdExec += "OneTeamThreeLeavesContOneActProg" + executableExtension;
+
+    ASSERT_EQ(system((cmdExec + path +
+                      "/OneTeamThreeLeavesContOneActProg/"
+                      "DataOneTeamThreeLeavesContOneActProg.csv")
+                         .c_str()),
+              0)
+        << "Error wrong action returned in test "
+           "OneTeamThreeLeavesContOneActProg.";
+}     
+
+TEST_F(TPGGenerationEngineTest, OneTeamsTwoLeavesSwitchContinuousMultiActionProg)
+{                                                                          
+    CodeGen::TPGGenerationEngineFactory factory(                           
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
+            switchMode);                                                   
+    
+    params.activationFunction="sigmoid";
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    Environment ce(set, params, data, 3);
+    TPG::TPGGraph ctpg = (ce);
+
+    const TPG::TPGVertex* A1 = (&ctpg.addNewAction(1));
+    const TPG::TPGVertex* A0 = (&ctpg.addNewAction(0));
+    const TPG::TPGVertex* T1 = (&ctpg.addNewTeam());
+
+    const std::shared_ptr<Program::Program> prog1(
+        new Program::Program(ce, false));
+    const std::shared_ptr<Program::Program> prog2(
+        new Program::Program(ce, false));
+    const std::shared_ptr<Program::Program> prog3(
+        new Program::Program(ce, false));
+    const std::shared_ptr<Program::Program> prog4(
+        new Program::Program(ce, true));
+    const std::shared_ptr<Program::Program> prog5(
+        new Program::Program(ce, true));
+    const std::shared_ptr<Program::Program> prog6(
+        new Program::Program(ce, true));
+    const std::shared_ptr<Program::Program> prog7(
+        new Program::Program(ce, true));
+
+    setProgLine(prog1, 0);
+    // reg[0] = in1[0] + reg[1] (reg[1] = 0)
+    setProgLine(prog2, 1);
+    // reg[0] = in1[1] + reg[1] (reg[1] = 0)
+    setProgLine(prog3, 2);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    setProgLine(prog4, 3);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    setProgLine(prog5, 4);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    setProgLine(prog6, 5);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    setProgLine(prog7, 6);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+
+
+    ctpg.addNewEdge(*T1, *A1, prog1);
+    ctpg.addNewEdge(*T1, *A0, prog2);
+
+    ctpg.addNewActionEdge(*A0, prog3, 0);
+    ctpg.addNewActionEdge(*A0, prog4, 1);
+    ctpg.addNewActionEdge(*A0, prog5, 2);
+
+    ctpg.addNewActionEdge(*A1, prog6, 1);
+    ctpg.addNewActionEdge(*A1, prog7, 2);
+
+    ASSERT_EQ(ctpg.getNbRootVertices(), 1)
+        << "number of root is not 1 in OneTeamsTwoLeavesSwitchContinuousMultiActionProg";
+
+    ASSERT_EQ(ctpg.getNbVertices(), 3)
+        << "bad number of vertices in OneTeamsTwoLeavesSwitchContinuousMultiActionProg";
+
+    ASSERT_EQ(ctpg.getEdges().size(), 7)
+        << "bad number of edges in OneTeamsTwoLeavesSwitchContinuousMultiActionProg";
+
+
+    tpgGen = factory.create("OneTeamsTwoLeavesSwitchContinuousMultiActionProg", ctpg, "./src/");
+    tpgGen->generateTPGGraph();
+    // call the destructor to close the file
+    tpgGen.reset();
+    cmdCompile += "OneTeamsTwoLeavesSwitchContinuousMultiActionProg";
+    ASSERT_EQ(system(cmdCompile.c_str()), 0)
+        << "Error while compiling the test OneTeamsTwoLeavesSwitchContinuousMultiActionProg";
+
+    cmdExec += "OneTeamsTwoLeavesSwitchContinuousMultiActionProg" + executableExtension;
+
+    ASSERT_EQ(system((cmdExec + path +
+                      "/OneTeamsTwoLeavesSwitchContinuousMultiActionProg/"
+                      "DataOneTeamsTwoLeavesSwitchContinuousMultiActionprog.csv")
+                         .c_str()),
+              0)
+        << "Error wrong action returned in test "
+           "OneTeamsTwoLeavesSwitchContinuousMultiActionProg.";
+}  
+
+
+TEST_F(TPGGenerationEngineTest, OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone)
+{                                                                          
+    CodeGen::TPGGenerationEngineFactory factory(                           
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
+            switchMode);                                                   
+    
+    params.activationFunction="none";
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    Environment ce(set, params, data, 3);
+    TPG::TPGGraph ctpg = (ce);
+
+    const TPG::TPGVertex* A1 = (&ctpg.addNewAction(1));
+    const TPG::TPGVertex* A0 = (&ctpg.addNewAction(0));
+    const TPG::TPGVertex* T1 = (&ctpg.addNewTeam());
+
+    const std::shared_ptr<Program::Program> prog1(
+        new Program::Program(ce, false));
+    const std::shared_ptr<Program::Program> prog2(
+        new Program::Program(ce, false));
+    const std::shared_ptr<Program::Program> prog3(
+        new Program::Program(ce, false));
+    const std::shared_ptr<Program::Program> prog4(
+        new Program::Program(ce, true));
+    const std::shared_ptr<Program::Program> prog5(
+        new Program::Program(ce, true));
+    const std::shared_ptr<Program::Program> prog6(
+        new Program::Program(ce, true));
+    const std::shared_ptr<Program::Program> prog7(
+        new Program::Program(ce, true));
+
+    setProgLine(prog1, 0);
+    // reg[0] = in1[0] + reg[1] (reg[1] = 0)
+    setProgLine(prog2, 1);
+    // reg[0] = in1[1] + reg[1] (reg[1] = 0)
+    setProgLine(prog3, 2);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    setProgLine(prog4, 3);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    setProgLine(prog5, 4);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    setProgLine(prog6, 5);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    setProgLine(prog7, 6);
+    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+
+
+    ctpg.addNewEdge(*T1, *A1, prog1);
+    ctpg.addNewEdge(*T1, *A0, prog2);
+
+    ctpg.addNewActionEdge(*A0, prog3, 0);
+    ctpg.addNewActionEdge(*A0, prog4, 1);
+    ctpg.addNewActionEdge(*A0, prog5, 2);
+
+    ctpg.addNewActionEdge(*A1, prog6, 1);
+    ctpg.addNewActionEdge(*A1, prog7, 2);
+
+    ASSERT_EQ(ctpg.getNbRootVertices(), 1)
+        << "number of root is not 1 in OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone";
+
+    ASSERT_EQ(ctpg.getNbVertices(), 3)
+        << "bad number of vertices in OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone";
+
+    ASSERT_EQ(ctpg.getEdges().size(), 7)
+        << "bad number of edges in OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone";
+
+
+    tpgGen = factory.create("OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone", ctpg, "./src/");
+    tpgGen->generateTPGGraph();
+    // call the destructor to close the file
+    tpgGen.reset();
+    cmdCompile += "OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone";
+    ASSERT_EQ(system(cmdCompile.c_str()), 0)
+        << "Error while compiling the test OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone";
+
+    cmdExec += "OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone" + executableExtension;
+
+    ASSERT_EQ(system((cmdExec + path +
+                      "/OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone/"
+                      "DataOneTeamsTwoLeavesSwitchContinuousMultiActionProgNone.csv")
+                         .c_str()),
+              0)
+        << "Error wrong action returned in test "
+           "OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone.";
+}     
+
+TEST_F(TPGGenerationEngineTest, WrongTPGContinuous)
+{                                                                          
+    CodeGen::TPGGenerationEngineFactory factory(                           
+        CodeGen::TPGGenerationEngineFactory::generationEngineMode::        
+            switchMode);                                                   
+    
+    params.mutation.tpg.useActionProgram = false;
+    params.mutation.tpg.useMultiActionProgram = false;
+    Environment ce(set, params, data, 3);
+    TPG::TPGGraph ctpg = (ce);
+    ASSERT_THROW(tpgGen = factory.create("wrong", ctpg, "./src/"), std::runtime_error)
+        << "Construction of codeGen with continuous action but no action program should fail.";
+
+    params.mutation.tpg.useActionProgram = true;
+    params.activationFunction="missed";
+    Environment ce2(set, params, data, 3);
+    TPG::TPGGraph ctpg2 = (ce2);
+
+    tpgGen = factory.create("wrong", ctpg2, "./src/");
+    ASSERT_THROW(tpgGen->generateTPGGraph(), std::runtime_error)
+        << "Construction of codeGen with no activation function should fail.";
+    
+}     
+
+
+
 #endif // CODE_GENERATION

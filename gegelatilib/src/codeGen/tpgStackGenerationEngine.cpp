@@ -60,14 +60,10 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     uint64_t progID;
 
     progGenerationEngine.setProgram(p);
-    
-    bool isDestinationAnAction = false;
-    if(dynamic_cast<const TPG::TPGActionEdge*>(&edge) == nullptr && dynamic_cast<const TPG::TPGAction*>(edge.getDestination()) != nullptr){
-        isDestinationAnAction = true;
-    }
+
 
     if (findProgramID(p, progID)) {
-        progGenerationEngine.generateProgram(progID, false, isDestinationAnAction);
+        progGenerationEngine.generateProgram(progID, false);
     }
 
     std::string destinationName;

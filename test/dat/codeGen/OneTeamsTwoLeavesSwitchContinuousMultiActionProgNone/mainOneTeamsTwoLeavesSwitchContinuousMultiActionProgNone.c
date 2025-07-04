@@ -38,15 +38,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "oneTeamTwoLeaves.h"
+#include "oneTeamsTwoLeavesSwitchContinuousMultiActionProgNone.h"
 #include "csvparser.h"
-#include "inferenceCSV.h"
+#include "inferenceCSVMultiAct.h"
 
 double* in1;
 
 int main(int argc, char* argv[])
 {
-    double tab[2];
+    double tab[8];
     in1 = tab;
 
     if (argc != 2) {

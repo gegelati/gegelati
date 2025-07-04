@@ -65,7 +65,7 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine()
 }
 
 void CodeGen::ProgramGenerationEngine::generateProgram(
-    uint64_t progID, const bool ignoreException, bool isDestAnAction)
+    uint64_t progID, const bool ignoreException)
 {
     if (program->getEnvironment().getNbContinuousActions() > 0 &&
         !program->getEnvironment().getParams().mutation.tpg.useMultiActionProgram &&
@@ -116,7 +116,13 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
         !program->getEnvironment().getParams().mutation.tpg.useMultiActionProgram &&
         program->getEnvironment().getParams().mutation.tpg.useActionProgram && 
         program->isActionProgram()) {
-        fileC << "\tactions = &reg[0];\n}" << std::endl;
+
+        for(size_t idx = 0; idx < program->getEnvironment().getNbContinuousActions(); idx++){
+
+            fileC << "\tactions[" << idx << "] = reg[" << idx << "];" << std::endl;
+        }
+        fileC << "}" << std::endl;
+
     // Classic case (context program) or MATPG / MAPLE Case
     } else {
         fileC << "\treturn reg[0];\n}" << std::endl;

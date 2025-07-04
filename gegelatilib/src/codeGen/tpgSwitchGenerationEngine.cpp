@@ -47,16 +47,13 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
     progGenerationEngine.setProgram(p);
 
     bool isDestinationAnAction = false;
-    if(dynamic_cast<const TPG::TPGActionEdge*>(&edge) == nullptr && dynamic_cast<const TPG::TPGAction*>(edge.getDestination()) != nullptr){
-        isDestinationAnAction = true;
-    }
 
     if (findProgramID(p, progID)) {
-        progGenerationEngine.generateProgram(progID, false, isDestinationAnAction);
+        progGenerationEngine.generateProgram(progID, false);
     }
 
     if (this->tpg.getEnvironment().getNbContinuousActions() > 0 &&
-        p.isActionProgram()) {
+        p.isActionProgram() && !this->tpg.getEnvironment().getParams().mutation.tpg.useMultiActionProgram) {
         fileMain << "P" << progID << "(actions)";
     } else {
         fileMain << "P" << progID << "()";
@@ -240,6 +237,8 @@ void CodeGen::TPGSwitchGenerationEngine::initActivationFunction()
     else if (this->tpg.getEnvironment().getParams().activationFunction ==
              "tanh") {
         fileMain << "\t\tactions[i] = tanh(actions[i]);\n";
+    } else {
+        throw std::runtime_error("Activation function for codeGen not found.");
     }
 
     fileMain << "\t}\n}\n" << std::endl;
