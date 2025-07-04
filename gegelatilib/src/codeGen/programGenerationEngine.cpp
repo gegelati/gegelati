@@ -39,6 +39,7 @@
 #include "util/timestamp.h"
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
+const std::regex CodeGen::ProgramGenerationEngine::constant_regex("(\\%[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
 const std::string CodeGen::ProgramGenerationEngine::nameConstantVariable("cst");
 const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
@@ -64,15 +65,16 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine()
 }
 
 void CodeGen::ProgramGenerationEngine::generateProgram(
-    uint64_t progID, const bool ignoreException)
+    uint64_t progID, const bool ignoreException, bool isDestAnAction)
 {
     if (program->getEnvironment().getNbContinuousActions() > 0 &&
+        !program->getEnvironment().getParams().mutation.tpg.useMultiActionProgram &&
+        program->getEnvironment().getParams().mutation.tpg.useActionProgram && 
         program->isActionProgram()) {
 
         fileC << "\nvoid P" << progID << "(double* actions){" << std::endl;
         fileH << "void P" << progID << "(double* actions);" << std::endl;
-    }
-    else {
+    } else {
         fileC << "\ndouble P" << progID << "(){" << std::endl;
         fileH << "double P" << progID << "();" << std::endl;
     }
@@ -108,14 +110,16 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
     fileC << "#endif" << std::endl;
 #endif
 
+
+    // Single Action program are used, and this program is an action program
     if (program->getEnvironment().getNbContinuousActions() > 0 &&
+        !program->getEnvironment().getParams().mutation.tpg.useMultiActionProgram &&
+        program->getEnvironment().getParams().mutation.tpg.useActionProgram && 
         program->isActionProgram()) {
         fileC << "\tactions = &reg[0];\n}" << std::endl;
-        ;
-    }
-    else {
+    // Classic case (context program) or MATPG / MAPLE Case
+    } else {
         fileC << "\treturn reg[0];\n}" << std::endl;
-        ;
     }
 }
 
@@ -127,6 +131,7 @@ std::string CodeGen::ProgramGenerationEngine::completeFormat(
         this->getCurrentLine(); // throw std::out_of_range
     std::string codeLine(printTemplate);
     std::string operandValue;
+    std::string constantValue;
     for (auto itr = std::sregex_iterator(printTemplate.begin(),
                                          printTemplate.end(), operand_regex);
          itr != std::sregex_iterator(); ++itr) {
@@ -145,6 +150,17 @@ std::string CodeGen::ProgramGenerationEngine::completeFormat(
                            std::to_string(line.getDestinationIndex()) + "]";
         }
         codeLine.replace(pos, match.size(), operandValue);
+    }
+
+    for (auto itr = std::sregex_iterator(printTemplate.begin(),
+                                         printTemplate.end(), constant_regex);
+         itr != std::sregex_iterator(); ++itr) {
+        const std::string& match = (*itr).str();
+        auto pos = codeLine.find(match);
+        // get number after character '%'
+        int idx = std::stoi(match.substr(1));
+        constantValue = std::to_string((double)line.getConstantAt(idx));
+        codeLine.replace(pos, match.size(), constantValue);
     }
     return codeLine;
 }

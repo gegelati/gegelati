@@ -48,6 +48,10 @@ CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
                                                        filenameProg,
                                                    tpg.getEnvironment(), path}
 {
+    if(tpg.getEnvironment().getNbContinuousActions() > 0 && !tpg.getEnvironment().getParams().mutation.tpg.useActionProgram) {
+        throw std::runtime_error ("Code gen is not available for continuous case with no action programs");
+    }
+
     this->fileMain.open(path + filename + ".c", std::ofstream::out);
     this->fileMainH.open(path + filename + ".h", std::ofstream::out);
     if (!fileMain.is_open() || !fileMainH.is_open()) {

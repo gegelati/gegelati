@@ -647,13 +647,21 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         std::runtime_error)
         << "Should throw when maxInitOutgoingEdges < 2 and teams exist.";
 
-    // Test coverage: ratioTeamsOverActions = 1, useActionProgram = true,
-    // teamAccessAllActions = false
+    
     params.tpg.maxInitOutgoingEdges = 2;
     params.tpg.nbRoots = 4;
+    params.tpg.ratioTeamsOverActions = 0.5;
+    params.tpg.useActionProgram = false;
+    params.tpg.teamAccessAllActions = false;
+    ASSERT_THROW(
+        Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
+        std::runtime_error)
+        << "Should throw bad parameters.";
+
+    // Test coverage: ratioTeamsOverActions = 1, useActionProgram = true,
+    // teamAccessAllActions = false
     params.tpg.ratioTeamsOverActions = 1.0;
     params.tpg.useActionProgram = true;
-    params.tpg.teamAccessAllActions = false;
     ASSERT_THROW(
         Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions),
         std::runtime_error)
@@ -698,6 +706,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     // No error
     rng.setSeed(0);
     nbActions = 7;
+    params.mutation.tpg.useActionProgram = true;
     Environment ce1(set, params, vect, nbActions);
     TPG::TPGGraph tpg1(ce1);
     ASSERT_NO_THROW(
@@ -706,7 +715,6 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
 
     // Error on number of registers
     rng.setSeed(0);
-    params.mutation.tpg.useActionProgram = true;
     nbActions = 9;
     Environment ce2(set, params, vect, nbActions);
     TPG::TPGGraph tpg2(ce2);

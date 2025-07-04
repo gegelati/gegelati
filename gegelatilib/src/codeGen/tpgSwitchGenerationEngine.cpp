@@ -46,15 +46,19 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 
     progGenerationEngine.setProgram(p);
 
+    bool isDestinationAnAction = false;
+    if(dynamic_cast<const TPG::TPGActionEdge*>(&edge) == nullptr && dynamic_cast<const TPG::TPGAction*>(edge.getDestination()) != nullptr){
+        isDestinationAnAction = true;
+    }
+
     if (findProgramID(p, progID)) {
-        progGenerationEngine.generateProgram(progID);
+        progGenerationEngine.generateProgram(progID, false, isDestinationAnAction);
     }
 
     if (this->tpg.getEnvironment().getNbContinuousActions() > 0 &&
         p.isActionProgram()) {
         fileMain << "P" << progID << "(actions)";
-    }
-    else {
+    } else {
         fileMain << "P" << progID << "()";
     }
 }
@@ -92,6 +96,8 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 
     fileMain << "\t\t\tint best = bestProgram(" << teamName << "Scores, "
              << edges.size() << ");" << std::endl;
+    
+             
     fileMain << "\t\t\tcurrentVertex = next[best];" << std::endl;
     fileMain << "\t\t\tbreak;" << std::endl;
 }
@@ -99,14 +105,32 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 void CodeGen::TPGSwitchGenerationEngine::generateAction(
     const TPG::TPGAction& action)
 {
+    // Multi action program case for continuous actions -> should be easy
+    if(action.getOutgoingEdges().size() > 0 &&
+       this->tpg.getEnvironment().getParams().mutation.tpg.useMultiActionProgram){
 
-    if (action.getOutgoingEdges().size() > 0) {
+        for(auto edge: action.getOutgoingEdges()){
+            // The edge is necessarily an action edge.
+            TPG::TPGActionEdge* actionEdge = dynamic_cast<TPG::TPGActionEdge*>(edge);
+            uint64_t id = actionEdge->getActionClass();
 
-        fileMain << "\t\t\treturn activationFunction(";
+            fileMain << "\t\t\tactions["<< id << "] = ";
+            generateEdge(*edge);
+            fileMain << ";" << std::endl;
+        }
+        fileMain << "\t\t\treturn activationFunction(actions);" << std::endl;
+
+    }
+    // Single action program case for continuous actions
+    else if (action.getOutgoingEdges().size() > 0) {
+
+        fileMain << "\t\t\t";
         auto edge = action.getOutgoingEdges().front();
         generateEdge(*edge);
-        fileMain << ");" << std::endl;
+        fileMain << ";\n\t\t\treturn activationFunction(actions);" << std::endl;
+    
     }
+    // Discrete case
     else {
         uint64_t id = action.getActionID();
         fileMain << "\t\t\tactions[0] = " << id << ";" << std::endl;
