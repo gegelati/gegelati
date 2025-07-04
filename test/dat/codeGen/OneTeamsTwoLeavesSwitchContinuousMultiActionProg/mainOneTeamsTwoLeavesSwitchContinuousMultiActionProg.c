@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "oneTeamsTwoLeavesSwitchContinuousMultiActionProg.h"
+#include "OneTeamsTwoLeavesSwitchContinuousMultiActionProg.h"
 #include "csvparser.h"
 #include "inferenceCSVMultiAct.h"
 

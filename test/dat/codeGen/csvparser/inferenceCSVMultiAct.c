@@ -60,7 +60,6 @@ int inferenceCSV(char* filename, void (*inferenceTPG)(double*))
     double expectedVal2;
     double* action = malloc(sizeof(double) * 3);
     CsvParser* csvparser = CsvParser_new(filename, " ", 0);
-    printf(filename);
     CsvRow* row;
 
     while ((row = CsvParser_getRow(csvparser))) {
