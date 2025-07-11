@@ -74,32 +74,31 @@ void CodeGen::TPGSwitchGenerationEngine::generateTeam(const TPG::TPGTeam& team)
         nextVertices.push_back(edge->getDestination());
 
     // Destinations
-    fileMain << "\t\t\tconst enum vertices next[" << edges.size() << "] = { ";
+    fileMain << "\t\t\t\tconst enum vertices next[" << edges.size() << "] = { ";
     for (auto nextVertex : nextVertices) {
         fileMain << vertexName(*nextVertex) << ", ";
     }
     fileMain << " };" << std::endl << std::endl;
 
     // score array
-    fileMain << "\t\t\tdouble " << vertexName(team) << "Scores["
+    fileMain << "\t\t\t\tdouble " << vertexName(team) << "Scores["
              << team.getOutgoingEdges().size() << "];" << std::endl;
 
     fileMain << std::endl;
 
     int i = 0;
     for (const auto* edge : edges) {
-        fileMain << "\t\t\t" << teamName << "Scores[" << i << "] = ";
+        fileMain << "\t\t\t\t" << teamName << "Scores[" << i << "] = ";
         ++i;
         generateEdge(*edge);
         fileMain << ";" << std::endl;
     }
     fileMain << std::endl;
 
-    fileMain << "\t\t\tint best = bestProgram(" << teamName << "Scores, "
+    fileMain << "\t\t\t\tint best = bestProgram(" << teamName << "Scores, "
              << edges.size() << ");" << std::endl;
 
-    fileMain << "\t\t\tcurrentVertex = next[best];" << std::endl;
-    fileMain << "\t\t\tbreak;" << std::endl;
+    fileMain << "\t\t\t\tcurrentVertex = next[best];" << std::endl;
 }
 
 void CodeGen::TPGSwitchGenerationEngine::generateAction(
@@ -117,25 +116,25 @@ void CodeGen::TPGSwitchGenerationEngine::generateAction(
                 dynamic_cast<TPG::TPGActionEdge*>(edge);
             uint64_t id = actionEdge->getActionClass();
 
-            fileMain << "\t\t\tactions[" << id << "] = ";
+            fileMain << "\t\t\t\tactions[" << id << "] = ";
             generateEdge(*edge);
             fileMain << ";" << std::endl;
         }
-        fileMain << "\t\t\treturn activationFunction(actions);" << std::endl;
+        fileMain << "\t\t\t\treturn activationFunction(actions);" << std::endl;
     }
     // Single action program case for continuous actions
     else if (action.getOutgoingEdges().size() > 0) {
 
-        fileMain << "\t\t\t";
+        fileMain << "\t\t\t\t";
         auto edge = action.getOutgoingEdges().front();
         generateEdge(*edge);
-        fileMain << ";\n\t\t\treturn activationFunction(actions);" << std::endl;
+        fileMain << ";\n\t\t\t\treturn activationFunction(actions);" << std::endl;
     }
     // Discrete case
     else {
         uint64_t id = action.getActionID();
-        fileMain << "\t\t\tactions[0] = " << id << ";" << std::endl;
-        fileMain << "\t\t\treturn;" << std::endl;
+        fileMain << "\t\t\t\tactions[0] = " << id << ";" << std::endl;
+        fileMain << "\t\t\t\treturn;" << std::endl;
     }
 }
 
@@ -172,11 +171,12 @@ void CodeGen::TPGSwitchGenerationEngine::generateTPGGraph()
         fileMain << "\t\tcase " << vertexName(*vertex) << ": {" << std::endl;
         if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
             generateTeam(*(const TPG::TPGTeam*)vertex);
+            fileMain << "\t\t\t\tbreak;" << std::endl;
         }
         else if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr) {
             generateAction(*(const TPG::TPGAction*)vertex);
         }
-        fileMain << "\t\t}" << std::endl;
+        fileMain << "\t\t\t}" << std::endl;
     }
     fileMain << "\t\t}" << std::endl;
     fileMain << "\t}" << std::endl;
