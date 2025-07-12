@@ -43,7 +43,7 @@ void Program::ProgramEngine::setProgram(const Program& prog)
 {
     // are constants used here ?
     size_t offset = 1;
-    if (prog.getEnvironment().getNbConstant() > 0) {
+    if (prog.getEnvironment().getParams().nbProgramConstant > 0) {
         // replace programs constants if already existing
         dataScsConstsAndRegs.at(1) = prog.cGetConstantHandler();
         // increment offset for the datahandlers verification

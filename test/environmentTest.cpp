@@ -194,10 +194,10 @@ TEST(EnvironmentTest, Size_tAttributeAccessors)
     params.nbProgramConstant = 5;
     Environment e(set, params, vect);
 
-    ASSERT_EQ(e.getNbRegisters(), 8)
+    ASSERT_EQ(e.getParams().nbRegisters, 8)
         << "Number of registers of the Environment does not correspond to the "
            "one given during construction.";
-    ASSERT_EQ(e.getNbConstant(), 5)
+    ASSERT_EQ(e.getParams().nbProgramConstant, 5)
         << "Number of Constants of the Environment does not correspond to the "
            "one given during construction.";
     ASSERT_EQ(e.getNbInstructions(), 3)

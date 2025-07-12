@@ -303,7 +303,7 @@ bool Program::Program::hasIdenticalBehavior(const Program& other) const
 
             // If lines are referencing Constant, compare the values
             // of these Constants
-            if (this->environment.getNbConstant() > 0) {
+            if (this->environment.getParams().nbProgramConstant > 0) {
                 // Get Instruction
                 const Instructions::Instruction& instruction =
                     this->environment.getInstructionSet().getInstruction(

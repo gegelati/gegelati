@@ -111,7 +111,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
                 " [fillcolor=\"#cccccc\" shape=point label=\"%d\"] //",
                 this->offset.c_str(), progID, p.isActionProgram() ? 1 : 0);
         // add next the content of the constant data handler in a comment (//)
-        for (int i = 0; i < p.getEnvironment().getNbConstant(); i++) {
+        for (int i = 0; i < p.getEnvironment().getParams().nbProgramConstant; i++) {
             fprintf(pFile, "%d|", static_cast<int>(p.getConstantAt(i)));
         }
         fprintf(pFile, "\n");

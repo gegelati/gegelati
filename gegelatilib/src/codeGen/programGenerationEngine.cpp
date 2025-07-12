@@ -85,16 +85,16 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
 
     // instantiate register
     fileC << "\tdouble " << nameRegVariable << "["
-          << program->getEnvironment().getNbRegisters() << "] = {";
-    for (int i = 0; i < program->getEnvironment().getNbRegisters(); ++i) {
+          << program->getEnvironment().getParams().nbRegisters << "] = {";
+    for (int i = 0; i < program->getEnvironment().getParams().nbRegisters; ++i) {
         fileC << "0";
-        if (i < program->getEnvironment().getNbRegisters() - 1) {
+        if (i < program->getEnvironment().getParams().nbRegisters - 1) {
             fileC << ", ";
         }
     }
     fileC << "};" << std::endl;
-    if (program->getEnvironment().getNbConstant() > 0) {
-        size_t nbCst = program->getEnvironment().getNbConstant();
+    if (program->getEnvironment().getParams().nbProgramConstant > 0) {
+        size_t nbCst = program->getEnvironment().getParams().nbProgramConstant;
         fileC << "\tint32_t " << nameConstantVariable << "[" << nbCst
               << "] = {";
         for (int i = 0; i < nbCst; ++i) {
@@ -269,12 +269,12 @@ std::string CodeGen::ProgramGenerationEngine::getNameSourceData(
     if (idx == 0) {
         nameDataSource = nameRegVariable;
     }
-    else if (this->program->getEnvironment().getNbConstant() > 0 && idx == 1) {
+    else if (this->program->getEnvironment().getParams().nbProgramConstant > 0 && idx == 1) {
         nameDataSource = nameConstantVariable;
     }
     else {
         uint64_t varNumber = idx;
-        if (this->program->getEnvironment().getNbConstant() > 0) {
+        if (this->program->getEnvironment().getParams().nbProgramConstant > 0) {
             varNumber--;
         }
         nameDataSource = nameDataVariable + std::to_string(varNumber);

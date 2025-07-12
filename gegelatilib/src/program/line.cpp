@@ -51,7 +51,7 @@ uint64_t Program::Line::getDestinationIndex() const
 
 bool Program::Line::setDestinationIndex(uint64_t dest, bool check)
 {
-    if (check && dest >= this->environment.getNbRegisters()) {
+    if (check && dest >= this->environment.getParams().nbRegisters) {
         return false;
     }
     this->destinationIndex = dest;

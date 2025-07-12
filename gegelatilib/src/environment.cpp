@@ -125,7 +125,7 @@ const LineSize Environment::computeLineSize(const Environment& env)
 {
     // $ ceil(log2(i))+ ceil(log2(n)) + m * (ceil(log2(nb_{ src })) +
     // ceil(log2(largestAddressSpace)) + p * sizeof(Param)_{inByte} * 8$
-    const size_t n = env.getNbRegisters();
+    const size_t n = env.getParams().nbRegisters;
 
     const size_t i = env.getNbInstructions();
 
@@ -167,16 +167,6 @@ const LineSize Environment::computeLineSize(const Environment& env)
 const Learn::LearningParameters& Environment::getParams() const
 {
     return params;
-}
-
-size_t Environment::getNbRegisters() const
-{
-    return this->nbRegisters;
-}
-
-size_t Environment::getNbConstant() const
-{
-    return this->nbConstants;
 }
 
 size_t Environment::getNbContinuousActions() const

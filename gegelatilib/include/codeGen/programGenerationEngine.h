@@ -123,7 +123,7 @@ namespace CodeGen {
                                 const std::string& path = "./")
             : ProgramEngine(env), dataPrinter()
         {
-            openFile(filename, path, env.getNbConstant());
+            openFile(filename, path, env.getParams().nbProgramConstant);
         }
 
         /**
@@ -149,7 +149,7 @@ namespace CodeGen {
                                 const std::string& path = "./")
             : ProgramEngine(p), dataPrinter()
         {
-            openFile(filename, path, p.getEnvironment().getNbConstant());
+            openFile(filename, path, p.getEnvironment().getParams().nbProgramConstant);
             setProgram(p);
         }
 

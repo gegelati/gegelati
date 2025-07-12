@@ -122,7 +122,7 @@ void Mutator::TPGMutator::initRandomTPG(
                 "action continuous available.");
         }
     }
-    else if (graph.getEnvironment().getNbRegisters() <
+    else if (graph.getEnvironment().getParams().nbRegisters <
                  nbActions + (int)!params.tpg.useActionProgram &&
              !params.tpg.useMultiActionProgram) {
         throw std::runtime_error(

@@ -241,20 +241,6 @@ class Environment
     const Learn::LearningParameters& getParams() const;
 
     /**
-     * \brief Get the size of the number of registers of this Environment.
-     *
-     * \return the value of the nbRegisters attribute.
-     */
-    size_t getNbRegisters() const;
-
-    /**
-     * \brief Get the number of constants used by programs.
-     *
-     * \return the value of the nbParameters attribute.
-     */
-    size_t getNbConstant() const;
-
-    /**
      * \brief Get the number of continuous actions.
      *
      * \return the value of the nbContinuousActions attribute.

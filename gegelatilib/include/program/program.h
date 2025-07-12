@@ -92,7 +92,7 @@ namespace Program {
          * context in the Program attributes.
          */
         Program(const Environment& e, bool actProgram)
-            : environment{e}, constants{e.getNbConstant()}, actionProgram{
+            : environment{e}, constants{e.getParams().nbProgramConstant}, actionProgram{
                                                                 actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.

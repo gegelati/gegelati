@@ -48,7 +48,7 @@ void Mutator::ProgramMutator::initRandomProgram(
 
     // insert random constants in the program
     Data::Constant c_value;
-    for (int i = 0; i < p.getEnvironment().getNbConstant(); i++) {
+    for (int i = 0; i < p.getEnvironment().getParams().nbProgramConstant; i++) {
         c_value = {rng.getDouble(params.prog.minConstValue,
                                  params.prog.maxConstValue)};
         p.getConstantHandler().setDataAt(typeid(Data::Constant), i, c_value);

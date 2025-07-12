@@ -90,13 +90,13 @@ namespace Program {
          * \param[in] env The Environment in which the Program will be executed.
          */
         ProgramEngine(const Environment& env)
-            : programCounter{0}, registers{env.getNbRegisters()}, program{NULL},
+            : programCounter{0}, registers{env.getParams().nbRegisters}, program{NULL},
               dataSources{env.getDataSources()}
         {
             // Setup the data sources
             dataScsConstsAndRegs.push_back(this->registers);
 
-            if (env.getNbConstant() > 0) {
+            if (env.getParams().nbProgramConstant > 0) {
                 dataScsConstsAndRegs.push_back(env.getFakeDataSources().at(1));
             }
 
@@ -126,7 +126,7 @@ namespace Program {
         ProgramEngine(const Program& prog,
                       const std::vector<std::reference_wrapper<T>>& dataSrc)
             : programCounter{0},
-              registers{prog.getEnvironment().getNbRegisters()}, program{NULL}
+              registers{prog.getEnvironment().getParams().nbRegisters}, program{NULL}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
@@ -134,7 +134,7 @@ namespace Program {
             // Setup the data sources
             this->dataScsConstsAndRegs.push_back(this->registers);
 
-            if (prog.getEnvironment().getNbConstant() > 0) {
+            if (prog.getEnvironment().getParams().nbProgramConstant > 0) {
                 this->dataScsConstsAndRegs.push_back(
                     prog.cGetConstantHandler());
             }
@@ -305,7 +305,7 @@ namespace Program {
         this->dataSources = dataSrc;
         // we need this offset to push the constant at the first
         size_t offset =
-            this->program->getEnvironment().getNbConstant() > 0 ? 2 : 1;
+            this->program->getEnvironment().getParams().nbProgramConstant > 0 ? 2 : 1;
         if (offset == 2) {
             this->dataScsConstsAndRegs.at(1) =
                 this->program->cGetConstantHandler();

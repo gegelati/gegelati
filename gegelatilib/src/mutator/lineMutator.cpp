@@ -181,7 +181,7 @@ void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line,
 
     // Select and set a destinationIndex. (can not fail)
     uint64_t destinationIndex =
-        rng.getUnsignedInt64(0, env.getNbRegisters() - 1);
+        rng.getUnsignedInt64(0, env.getParams().nbRegisters - 1);
     line.setDestinationIndex(
         destinationIndex); // Should never throw.. but I did not deactivate the
                            // check anyway.
@@ -271,7 +271,7 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
         // Select a random destination (different from the current one)
         const uint64_t currentDestinationIndex = line.getDestinationIndex();
         uint64_t newDestinationIndex =
-            rng.getUnsignedInt64(0, line.getEnvironment().getNbRegisters() - 2);
+            rng.getUnsignedInt64(0, line.getEnvironment().getParams().nbRegisters - 2);
         newDestinationIndex +=
             (newDestinationIndex >= currentDestinationIndex) ? 1 : 0;
         line.setDestinationIndex(newDestinationIndex);
