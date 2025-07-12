@@ -239,7 +239,7 @@ namespace Instructions {
         std::vector<std::reference_wrapper<const std::type_info>> operandTypes;
         /**
          * \brief List of the types of the operands needed to execute the
-         * instruction.
+         * instruction, however, compared to "operantTypes" above, it will exclude instrunction using line constants.
          */
         std::vector<std::reference_wrapper<const std::type_info>>
             operandTypesNoConst;

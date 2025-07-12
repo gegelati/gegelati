@@ -50,7 +50,7 @@ namespace Instructions {
 
     /**
      * \brief Templace class for making casting from Instruction to MultByConst
-     * easier.
+     * easier. This is usefull because MultByConstant can use multiple types, and avoid having to cast in each specific possible usage of multByConst.
      */
     class IAbstractMultByConstant
     {
