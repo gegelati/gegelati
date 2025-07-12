@@ -115,7 +115,7 @@ namespace File {
          * This map is used to ensure that identical actions are not created
          * more than once.
          */
-        std::map<uint64_t, const TPG::TPGAction*, std::less<>> actionID;
+        std::map<uint64_t, const TPG::TPGAction*> actionID;
 
         /**
          * \brief string used to spot the end of a line in the program
