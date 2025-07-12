@@ -548,16 +548,18 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        if (params.tpg.teamAccessAllActions) {
-            target = preExistingActions.at(
-                rng.getUnsignedInt64(0, preExistingActions.size() - 1));
-        }
-        else {
-            target = &graph.cloneVertex(*preExistingActions.at(
-                rng.getUnsignedInt64(0, preExistingActions.size() - 1)));
+        if(preExistingActions.size() > 0){
+            if (params.tpg.teamAccessAllActions) {
+                target = preExistingActions.at(
+                    rng.getUnsignedInt64(0, preExistingActions.size() - 1));
+            }
+            else {
+                target = &graph.cloneVertex(*preExistingActions.at(
+                    rng.getUnsignedInt64(0, preExistingActions.size() - 1)));
+            }
         }
     }
-    else {
+    else if (preExistingTeams.size() > 0) {
         target = preExistingTeams.at(
             rng.getUnsignedInt64(0, preExistingTeams.size() - 1));
     }

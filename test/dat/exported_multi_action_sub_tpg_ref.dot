@@ -67,5 +67,5 @@ digraph{
 		I12 [shape=box style=invis label=""] //
 		P12 -> I12[style=invis]
 		A5 -> P12
-		A5 ->  P9
+		A5 -> P9
 }

@@ -295,7 +295,6 @@ void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
                 uint64_t actionClass = this->actionClasses.at(action).at(
                     action->getOutgoingEdges().size());
                 std::shared_ptr<Program::Program> p = p_it->second;
-
                 this->tpg.addNewActionEdge(*action, p, actionClass);
             }
         }

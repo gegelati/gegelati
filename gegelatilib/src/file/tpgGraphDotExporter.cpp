@@ -146,7 +146,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
     else {
 
         if (dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr) {
-            fprintf(pFile, "%sA%" PRIu64 " ->  P%" PRIu64 "\n",
+            fprintf(pFile, "%sA%" PRIu64 " -> P%" PRIu64 "\n",
                     this->offset.c_str(), srcID, progID);
         }
         else {
