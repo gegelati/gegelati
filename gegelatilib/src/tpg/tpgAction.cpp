@@ -58,7 +58,7 @@ void TPG::TPGAction::orderActionEdges()
         TPG::TPGActionEdge* actionEdge2 =
             static_cast<TPG::TPGActionEdge*>(edge2);
 
-        // Comparer actionClass
+        // Compare actionClass
         return actionEdge1->getActionClass() < actionEdge2->getActionClass();
     });
 }
