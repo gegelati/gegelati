@@ -46,12 +46,13 @@ namespace TPG {
 
     /**
      * \brief Class representing ActionEdges of the Tangled Program Graphs.
-     * 
+     *
      * The source of an TPGActionEdge can not be a TPGTeam, only a TPGAction.
      * A TPGActionEdge does not have a destination.
-     * 
-     * It also has an action class corresponding to the continuous actions class it is assessing.
-     * This action class is only used for multi-action program cases.
+     *
+     * It also has an action class corresponding to the continuous actions class
+     * it is assessing. This action class is only used for multi-action program
+     * cases.
      */
     class TPGActionEdge : public TPGEdge
     {
