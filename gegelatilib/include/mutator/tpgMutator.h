@@ -287,7 +287,7 @@ namespace Mutator {
          * \param[in] team the source TPGTeam of the edge.
          * \param[in] preExistingTeams the TPGTeam candidates for destination.
          * \param[in] preExistingActions the TPGAction candidates for
-         * \param[in] preExistingEdge the TPGEdge candidates for cloning.
+         * \param[in] preExistingEdges the TPGEdge candidates for cloning.
          *            destination.
          * \param[in,out] newPrograms List of new Program created during
          *                mutations of the TPGTeam. The behavior of these

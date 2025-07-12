@@ -82,7 +82,7 @@ namespace TPG {
          * \brief Return the action edge corresponding to the action class
          *
          * Return a pointer pointing to the edge linked to the action class. The
-         * pointer is set to nullptr if the action is not founded
+         * pointer is set to nullptr if the action is not found.
          */
         virtual TPG::TPGActionEdge* getEdgeOfAction(uint64_t actionClass) const;
 

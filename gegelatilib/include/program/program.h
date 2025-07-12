@@ -55,8 +55,13 @@ namespace Program {
         /// Environment within which the Program will be executed.
         const Environment& environment;
 
-        /// Boolean indicating if true that the program is an action program, if
-        /// false that it is a context program
+        /**
+         * \brief Boolean indicating if true that the program is an action program, if
+         * false that it is a context program
+         * 
+         * An action program is a program used for taking continuous actions, in contrast with classic, or context programs, that output a bid.
+         * An Action program source must be a TPGAction.
+         */
         bool actionProgram;
 
         /**
@@ -111,7 +116,7 @@ namespace Program {
               constants{other.constants}, actionProgram{other.actionProgram}
         {
             // Replace lines with their copy
-            // Keep intro info
+            // Keep intron info
             std::transform(
                 lines.begin(), lines.end(), lines.begin(),
                 [](std::pair<Line*, bool>& otherLine)
