@@ -268,12 +268,12 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
             }
 
             // create a new action and insert it if none was previously found
-            this->actionID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(
-                action_number, &this->tpg.addNewAction(currActionID)));
+            this->actionID.insert(std::pair<uint64_t, const TPG::TPGAction*>(
+                action_number, dynamic_cast<const TPG::TPGAction*>(&this->tpg.addNewAction(currActionID))));
         }
         this->actionClasses.insert(
-            std::pair<const TPG::TPGVertex*, std::vector<uint64_t>>(
-                this->tpg.getVertices().back(), numbers));
+            std::pair<const TPG::TPGAction*, std::vector<uint64_t>>(
+                dynamic_cast<const TPG::TPGAction*>(this->tpg.getVertices().back()), numbers));
     }
 }
 
@@ -290,7 +290,7 @@ void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
             // find the program to add to the edge
             auto p_it = programID.find(program);
             if (action_it != this->actionID.end() && p_it != programID.end()) {
-                const TPG::TPGVertex* action = action_it->second;
+                const TPG::TPGAction* action = action_it->second;
 
                 uint64_t actionClass = this->actionClasses.at(action).at(
                     action->getOutgoingEdges().size());
