@@ -145,8 +145,8 @@ namespace TPG {
          * following the TPGEdge proposing the best bids.
          *
          * \param[in] root the TPGVertex from which the execution will start.
-         * \param[in] initActions the vector of initial action that can are
-         * choosen by default by the root.
+         * \param[in] initActions the vector of initial action that can be
+         * chosen by default by the root.
          * \return a vector containing all the TPGVertex traversed during the
          *         evaluation of the TPGGraph. The TPGAction resulting from the
          *         TPGGraph execution is at the end of the returned vector.
