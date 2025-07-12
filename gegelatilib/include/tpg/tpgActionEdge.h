@@ -51,6 +51,7 @@ namespace TPG {
      * A TPGActionEdge does not have a destination.
      * 
      * It also has an action class corresponding to the continuous actions class it is assessing.
+     * This action class is only used for multi-action program cases.
      */
     class TPGActionEdge : public TPGEdge
     {
