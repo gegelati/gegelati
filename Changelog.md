@@ -4,10 +4,6 @@
 _yyyy.mm.dd_
 
 ### New features
-
-### Changes
-* Update CMake minimum version to avoid annoying warning or deprecation errors with latest versions.
-* During coverage test with gcovr, ignore negative hits following [gcovr issue 68080](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68080).
 * Implement the new features proposed in the GECCO2025 paper. 'MAPLE: Multi-Action Programs through Linear Evolution for
 Continuous Multi-Action Reinforcement Learning'.
   * Change TPG so that it can assess the environment with multi-continuous actions by outputting the values of the register of the last program.
@@ -27,6 +23,10 @@ Continuous Multi-Action Reinforcement Learning'.
     * The reward is the actual score used for the learning process.
     * If the 'isUsingUtility' function is not overridden by your LearningEnvironment, no distinction will be made (i.e. the option will not be used).
   * Two different values can be choosen for the number of episode for training and for validation, also a validation can be done each X training generation to avoid having to much computation time only for validation
+
+### Changes
+* Update CMake minimum version to avoid annoying warning or deprecation errors with latest versions.
+* During coverage test with gcovr, ignore negative hits following [gcovr issue 68080](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68080).
 
 ### Bug fix
 
