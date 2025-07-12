@@ -120,8 +120,10 @@ namespace TPG {
          * TPGEdge. The TPGEdge is returned as a unique_ptr.
          *
          * \param[in] src pointer to the source TPGVertex of the edge. It must
-         * be an action \param[in] prog the shared pointer to the Program
-         * associated to the edge. \param[in] actionClass of the actionEdge
+         * be an action.
+         * \param[in] prog the shared pointer to the Program associated to 
+         * the edge. 
+         * \param[in] actionClass of the actionEdge
          */
         virtual std::unique_ptr<TPGEdge> createTPGActionEdge(
             const TPGVertex* src, const std::shared_ptr<Program::Program> prog,

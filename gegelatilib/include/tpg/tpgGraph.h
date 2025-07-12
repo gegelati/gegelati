@@ -248,8 +248,7 @@ namespace TPG {
          * \param[in] actionClass of the actionEdge
          * \return a const reference to the created TPGEdge.
          * \throw std::runtime_error In case the TPGVertex does not
-         *                           exist in the TPGGraph, or if the
-         *							             source is a TPGTeam.
+         * exist in the TPGGraph, or if the source is a TPGTeam.
          */
         const TPGEdge& addNewActionEdge(
             const TPGVertex& src, const std::shared_ptr<Program::Program> prog,

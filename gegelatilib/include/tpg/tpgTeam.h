@@ -52,7 +52,7 @@ namespace TPG {
          * TPGActionEdge is added to a TPGTeam.
          *
          */
-        virtual void addOutgoingEdge(TPGEdge* edge);
+        virtual void addOutgoingEdge(TPGEdge* edge) override;
     };
 
 }; // namespace TPG

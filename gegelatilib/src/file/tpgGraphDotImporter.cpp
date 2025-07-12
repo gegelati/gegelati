@@ -157,7 +157,7 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
             for (;;) {
                 if (pos4 != std::string::npos) {
                     v_constant.push_back(std::stod(this->lastLine.substr(
-                        pos3, pos4 - pos3))); // Convertit la chaîne en double
+                        pos3, pos4 - pos3))); // Convert String to double
                 }
                 else {
                     break;

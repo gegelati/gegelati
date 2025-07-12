@@ -52,13 +52,13 @@ void TPG::TPGAction::orderActionEdges()
 {
 
     this->outgoingEdges.sort([](TPG::TPGEdge* edge1, TPG::TPGEdge* edge2) {
-        // Utiliser static_cast pour convertir TPGEdge* en TPGActionEdge*
+        // Use static_cast to convert TPGEdge* into TPGActionEdge*
         TPG::TPGActionEdge* actionEdge1 =
             static_cast<TPG::TPGActionEdge*>(edge1);
         TPG::TPGActionEdge* actionEdge2 =
             static_cast<TPG::TPGActionEdge*>(edge2);
 
-        // Comparer actionClass
+        // Compare actionClass
         return actionEdge1->getActionClass() < actionEdge2->getActionClass();
     });
 }
@@ -74,7 +74,7 @@ TPG::TPGActionEdge* TPG::TPGAction::getEdgeOfAction(uint64_t actionClass) const
                    actionClass;
         });
 
-    // If action founded, return the shared pointer, else return nullptr
+    // If action found, return the shared pointer, else return nullptr
     if (it != outgoingEdges.end()) {
         return (TPG::TPGActionEdge*)(*it);
     }
