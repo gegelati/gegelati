@@ -52,7 +52,7 @@ void TPG::TPGAction::orderActionEdges()
 {
 
     this->outgoingEdges.sort([](TPG::TPGEdge* edge1, TPG::TPGEdge* edge2) {
-        // Utiliser static_cast pour convertir TPGEdge* en TPGActionEdge*
+        // Use static_cast to convert TPGEdge* into TPGActionEdge*
         TPG::TPGActionEdge* actionEdge1 =
             static_cast<TPG::TPGActionEdge*>(edge1);
         TPG::TPGActionEdge* actionEdge2 =
