@@ -110,9 +110,10 @@ namespace Learn {
          * \param[in] nbAct number of actions that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] isDiscreteEnv Boolean indicating if this environment uses
-         * discrete or continuous actions. \param[in] initAct init values of
-         * action if the TPG do not choose a continuous action. Default value
-         * set to a vector with size equal to nbAct and fill with zeros.
+         * discrete or continuous actions. 
+         * \param[in] initAct init values of action if the TPG do not choose a
+         * continuous action. Default value set to a vector with size equal to 
+         * nbAct and fill with zeros.
          */
         LearningEnvironment(
             uint64_t nbAct, bool isDiscreteEnv = true,

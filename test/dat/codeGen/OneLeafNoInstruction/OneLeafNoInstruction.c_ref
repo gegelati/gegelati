@@ -35,20 +35,20 @@ void inferenceTPG(double* actions) {
 	while(1) {
 		switch (currentVertex) {
 		case A0: {
-			actions[0] = 1;
-			return;
-		}
+				actions[0] = 1;
+				return;
+			}
 		case T1: {
-			const enum vertices next[1] = { A0,  };
+				const enum vertices next[1] = { A0,  };
 
-			double T1Scores[1];
+				double T1Scores[1];
 
-			T1Scores[0] = P0();
+				T1Scores[0] = P0();
 
-			int best = bestProgram(T1Scores, 1);
-			currentVertex = next[best];
-			break;
-		}
+				int best = bestProgram(T1Scores, 1);
+				currentVertex = next[best];
+				break;
+			}
 		}
 	}
 }
