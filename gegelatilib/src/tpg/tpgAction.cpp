@@ -74,7 +74,7 @@ TPG::TPGActionEdge* TPG::TPGAction::getEdgeOfAction(uint64_t actionClass) const
                    actionClass;
         });
 
-    // If action founded, return the shared pointer, else return nullptr
+    // If action found, return the shared pointer, else return nullptr
     if (it != outgoingEdges.end()) {
         return (TPG::TPGActionEdge*)(*it);
     }
