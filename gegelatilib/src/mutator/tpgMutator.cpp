@@ -537,7 +537,7 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     const Mutator::MutationParameters& params, Mutator::RNG& rng)
 {
     // Pick an edge among preexisting vertices
-    const TPG::TPGVertex* target = NULL;
+    const TPG::TPGVertex* target = nullptr;
 
     // Should the new target be an action or a team
     bool targetAction =
@@ -564,9 +564,11 @@ void Mutator::TPGMutator::mutateEdgeDestination(
             rng.getUnsignedInt64(0, preExistingTeams.size() - 1));
     }
 
-    // Change the target
-    // Changing the target should not fail.
-    graph.setEdgeDestination(*edge, *target);
+    if(target != nullptr){
+        // Change the target
+        // Changing the target should not fail.
+        graph.setEdgeDestination(*edge, *target);
+    }
 }
 
 void Mutator::TPGMutator::mutateOutgoingEdge(
