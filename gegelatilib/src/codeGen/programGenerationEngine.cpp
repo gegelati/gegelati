@@ -86,8 +86,7 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
     // instantiate register
     fileC << "\tdouble " << nameRegVariable << "["
           << program->getEnvironment().getParams().nbRegisters << "] = {";
-    for (int i = 0; i < program->getEnvironment().getParams().nbRegisters;
-         ++i) {
+    for (int i = 0; i < program->getEnvironment().getParams().nbRegisters; ++i) {
         fileC << "0";
         if (i < program->getEnvironment().getParams().nbRegisters - 1) {
             fileC << ", ";
@@ -270,9 +269,7 @@ std::string CodeGen::ProgramGenerationEngine::getNameSourceData(
     if (idx == 0) {
         nameDataSource = nameRegVariable;
     }
-    else if (this->program->getEnvironment().getParams().nbProgramConstant >
-                 0 &&
-             idx == 1) {
+    else if (this->program->getEnvironment().getParams().nbProgramConstant > 0 && idx == 1) {
         nameDataSource = nameConstantVariable;
     }
     else {

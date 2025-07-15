@@ -90,8 +90,8 @@ namespace Program {
          * \param[in] env The Environment in which the Program will be executed.
          */
         ProgramEngine(const Environment& env)
-            : programCounter{0}, registers{env.getParams().nbRegisters},
-              program{NULL}, dataSources{env.getDataSources()}
+            : programCounter{0}, registers{env.getParams().nbRegisters}, program{NULL},
+              dataSources{env.getDataSources()}
         {
             // Setup the data sources
             dataScsConstsAndRegs.push_back(this->registers);
@@ -126,8 +126,7 @@ namespace Program {
         ProgramEngine(const Program& prog,
                       const std::vector<std::reference_wrapper<T>>& dataSrc)
             : programCounter{0},
-              registers{prog.getEnvironment().getParams().nbRegisters},
-              program{NULL}
+              registers{prog.getEnvironment().getParams().nbRegisters}, program{NULL}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
@@ -306,9 +305,7 @@ namespace Program {
         this->dataSources = dataSrc;
         // we need this offset to push the constant at the first
         size_t offset =
-            this->program->getEnvironment().getParams().nbProgramConstant > 0
-                ? 2
-                : 1;
+            this->program->getEnvironment().getParams().nbProgramConstant > 0 ? 2 : 1;
         if (offset == 2) {
             this->dataScsConstsAndRegs.at(1) =
                 this->program->cGetConstantHandler();

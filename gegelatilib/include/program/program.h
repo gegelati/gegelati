@@ -56,12 +56,11 @@ namespace Program {
         const Environment& environment;
 
         /**
-         * \brief Boolean indicating if true that the program is an action
-         * program, if false that it is a context program
-         *
-         * An action program is a program used for taking continuous actions, in
-         * contrast with classic, or context programs, that output a bid. An
-         * Action program source must be a TPGAction.
+         * \brief Boolean indicating if true that the program is an action program, if
+         * false that it is a context program
+         * 
+         * An action program is a program used for taking continuous actions, in contrast with classic, or context programs, that output a bid.
+         * An Action program source must be a TPGAction.
          */
         bool actionProgram;
 
@@ -98,8 +97,8 @@ namespace Program {
          * context in the Program attributes.
          */
         Program(const Environment& e, bool actProgram)
-            : environment{e}, constants{e.getParams().nbProgramConstant},
-              actionProgram{actProgram}
+            : environment{e}, constants{e.getParams().nbProgramConstant}, actionProgram{
+                                                                actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.
         };

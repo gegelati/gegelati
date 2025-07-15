@@ -270,8 +270,8 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
         // DestinationIndex
         // Select a random destination (different from the current one)
         const uint64_t currentDestinationIndex = line.getDestinationIndex();
-        uint64_t newDestinationIndex = rng.getUnsignedInt64(
-            0, line.getEnvironment().getParams().nbRegisters - 2);
+        uint64_t newDestinationIndex =
+            rng.getUnsignedInt64(0, line.getEnvironment().getParams().nbRegisters - 2);
         newDestinationIndex +=
             (newDestinationIndex >= currentDestinationIndex) ? 1 : 0;
         line.setDestinationIndex(newDestinationIndex);
