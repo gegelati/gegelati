@@ -548,7 +548,7 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        if(preExistingActions.size() > 0){
+        if (preExistingActions.size() > 0) {
             if (params.tpg.teamAccessAllActions) {
                 target = preExistingActions.at(
                     rng.getUnsignedInt64(0, preExistingActions.size() - 1));
@@ -564,7 +564,7 @@ void Mutator::TPGMutator::mutateEdgeDestination(
             rng.getUnsignedInt64(0, preExistingTeams.size() - 1));
     }
 
-    if(target != nullptr){
+    if (target != nullptr) {
         // Change the target
         // Changing the target should not fail.
         graph.setEdgeDestination(*edge, *target);

@@ -269,11 +269,14 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
 
             // create a new action and insert it if none was previously found
             this->actionID.insert(std::pair<uint64_t, const TPG::TPGAction*>(
-                action_number, dynamic_cast<const TPG::TPGAction*>(&this->tpg.addNewAction(currActionID))));
+                action_number, dynamic_cast<const TPG::TPGAction*>(
+                                   &this->tpg.addNewAction(currActionID))));
         }
         this->actionClasses.insert(
             std::pair<const TPG::TPGAction*, std::vector<uint64_t>>(
-                dynamic_cast<const TPG::TPGAction*>(this->tpg.getVertices().back()), numbers));
+                dynamic_cast<const TPG::TPGAction*>(
+                    this->tpg.getVertices().back()),
+                numbers));
     }
 }
 

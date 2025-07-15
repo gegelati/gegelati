@@ -56,11 +56,13 @@ namespace Learn {
         double result;
 
         /**
-         * Double value for the utility. Utility is used only if the LearningEnvironment override the specific method.
-         * The utility represent a score needed for logs but not for learning. 
-         * 
-         * It can be used for comparison with different results rules for example.
-         */ 
+         * Double value for the utility. Utility is used only if the
+         * LearningEnvironment override the specific method. The utility
+         * represent a score needed for logs but not for learning.
+         *
+         * It can be used for comparison with different results rules for
+         * example.
+         */
 
         double utility;
 

@@ -346,10 +346,12 @@ namespace TPG {
         /**
          * Update the assessed actions of the current vertex, and all the
          * incomming edges
-         * 
-         * Used only for continuous cases with multi-action program per TPGAction.
-         * 
-         * Assessed actions represent the set of action class used by the vertex.
+         *
+         * Used only for continuous cases with multi-action program per
+         * TPGAction.
+         *
+         * Assessed actions represent the set of action class used by the
+         * vertex.
          *
          * \param[in] vertex TPGVertex to order
          */

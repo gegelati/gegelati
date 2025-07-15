@@ -128,7 +128,8 @@ void CodeGen::TPGSwitchGenerationEngine::generateAction(
         fileMain << "\t\t\t\t";
         auto edge = action.getOutgoingEdges().front();
         generateEdge(*edge);
-        fileMain << ";\n\t\t\t\treturn activationFunction(actions);" << std::endl;
+        fileMain << ";\n\t\t\t\treturn activationFunction(actions);"
+                 << std::endl;
     }
     // Discrete case
     else {

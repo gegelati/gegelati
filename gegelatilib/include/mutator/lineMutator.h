@@ -117,5 +117,5 @@ namespace Mutator {
          */
         void alterCorrectLine(Program::Line& line, Mutator::RNG& rng);
     } // namespace LineMutator
-};    // namespace Mutator
+}; // namespace Mutator
 #endif
