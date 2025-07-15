@@ -564,7 +564,7 @@ void Mutator::TPGMutator::mutateEdgeDestination(
             rng.getUnsignedInt64(0, preExistingTeams.size() - 1));
     }
 
-    if(target != nullptr){
+    if (target != nullptr) {
         // Change the target
         // Changing the target should not fail.
         graph.setEdgeDestination(*edge, *target);
