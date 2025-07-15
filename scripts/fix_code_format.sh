@@ -90,6 +90,21 @@ if ! $CLANG_FORMAT -version; then
 	exit 1
 fi
 
+# Check for uncommitted changes before formatting
+git update-index -q --refresh
+if ! git diff-index --quiet HEAD --; then
+	echo "Error: Git repository contains uncommitted modifications."
+	echo "These changes would be lost when the script reverts formatting changes."
+	echo ""
+	echo "Options to resolve this:"
+	echo "  1. Commit your changes first: git commit -am 'Your message'"
+	echo "  2. Use --keepChanges to preserve formatting without committing"
+	echo "  3. Use --doCommit to commit both your changes and formatting"
+	echo ""
+	echo "Aborting to prevent data loss."
+	exit 1
+fi
+
 
 # Get all source files recursively
 ALL_SRC_FILES=$(find ${SRC_FOLDERS} -regex ${EXTENSION_REGEX})
