@@ -62,7 +62,6 @@ namespace Program {
         /// DataHandlers of the Environment, and a location within it.)
         std::pair<uint64_t, uint64_t>* const operands;
 
-
         /// Delete the default constructor.
         Line() = delete;
 

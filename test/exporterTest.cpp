@@ -97,8 +97,8 @@ class ExporterTest : public ::testing::Test
             std::shared_ptr<Program::Program> p =
                 std::make_shared<Program::Program>(*e, false);
             for (int j = 0; j < constant_size; j++) {
-                p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
-                                                        j, {(double)(j - 2) / 3});
+                p.get()->getConstantHandler().setDataAt(
+                    typeid(Data::Constant), j, {(double)(j - 2) / 3});
             }
             progPointers.push_back(p);
         }
@@ -210,7 +210,7 @@ TEST_F(ExporterTest, printSingleActionProgGraph)
             std::make_shared<Program::Program>(*e, false);
         for (int j = 0; j < constant_size; j++) {
             p.get()->getConstantHandler().setDataAt(typeid(Data::Constant), j,
-                                                    {(double)(j - 2)/3});
+                                                    {(double)(j - 2) / 3});
         }
         progPointers.push_back(p);
     }
@@ -271,7 +271,7 @@ TEST_F(ExporterTest, printMultiActionProgSubGraph)
             std::make_shared<Program::Program>(*e, false);
         for (int j = 0; j < constant_size; j++) {
             p.get()->getConstantHandler().setDataAt(typeid(Data::Constant), j,
-                                                    {(double)(j - 2)/3});
+                                                    {(double)(j - 2) / 3});
         }
         progPointers.push_back(p);
     }

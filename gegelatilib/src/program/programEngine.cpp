@@ -143,7 +143,6 @@ const void Program::ProgramEngine::fetchCurrentOperands(
         Data::UntypedSharedPtr data =
             dataSource.getDataAt(operandType, operandLocation);
         operands.push_back(data);
-    
     }
 }
 

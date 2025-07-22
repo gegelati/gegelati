@@ -294,39 +294,39 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
     Program::Line& l3 = p.addNewLine();
     Program::Line& l4 = p.addNewLine();
 
-    std::cout<<1<<std::endl;
+    std::cout << 1 << std::endl;
 
     // L4: Register 0 = func(Register {1,2}, DataSource_1{[4],[5]})
     l4.setDestinationIndex(0);
     l4.setOperand(0, 0, 1);
     l4.setOperand(1, 1, 4);
     l4.setInstructionIndex(2); // Lambda
-std::cout<<2<<std::endl;
+    std::cout << 2 << std::endl;
     // L3: Register 3 = Datasource_1[0] + DataSource_1[0] (Intron)
     l3.setDestinationIndex(3);
     l3.setOperand(0, 1, 0);
     l3.setOperand(1, 1, 0);
     l3.setInstructionIndex(0);
-std::cout<<3<<std::endl;
+    std::cout << 3 << std::endl;
     // L2: Register 1 = Datasource_1[2] + DataSource_1[2]
     l2.setDestinationIndex(1);
     l2.setOperand(0, 1, 2);
     l2.setOperand(1, 1, 2);
     l2.setInstructionIndex(0);
-std::cout<<4<<std::endl;
+    std::cout << 4 << std::endl;
     // L1: Register 0 = Register 1 * constant (Intron)
     l1.setDestinationIndex(0);
     l1.setOperand(0, 0, 1);
     l1.setInstructionIndex(1); // MultByConst
-std::cout<<5<<std::endl;
+    std::cout << 5 << std::endl;
     // Identify introns
     uint64_t nbIntrons = 0;
     ASSERT_NO_THROW(nbIntrons = p.identifyIntrons())
         << "Identification of intron lines failed unexpectedly.";
-        std::cout<<6<<std::endl;
+    std::cout << 6 << std::endl;
     ASSERT_EQ(nbIntrons, 2)
         << "Number of identified introns is not as expected.";
-std::cout<<6<<std::endl;
+    std::cout << 6 << std::endl;
     // Check which line is an intron
     ASSERT_TRUE(p.isIntron(0))
         << "Line 0 wrongfully detected as not an intron.";
@@ -334,7 +334,7 @@ std::cout<<6<<std::endl;
     ASSERT_TRUE(p.isIntron(2))
         << "Line 2 wrongfully detected as not an intron.";
     ASSERT_FALSE(p.isIntron(3)) << "Line 3 wrongfully detected as an intron.";
-std::cout<<7<<std::endl;
+    std::cout << 7 << std::endl;
     // cleanup
     delete (&set.getInstruction(2));
 }

@@ -418,7 +418,8 @@ bool File::TPGGraphDotImporter::readLineFromFile()
     else if (std::regex_search(this->lastLine, matches, testProgramDeclare)) {
         readProgram(matches);
     }
-    else if (std::regex_search(this->lastLine, matches, testInstructionDeclare)) {
+    else if (std::regex_search(this->lastLine, matches,
+                               testInstructionDeclare)) {
         readLine(matches);
     }
     else if (std::regex_search(this->lastLine, matches, testLinkPI)) {

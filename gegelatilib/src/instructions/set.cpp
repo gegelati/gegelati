@@ -65,4 +65,3 @@ unsigned int Instructions::Set::getMaxNbOperands() const
     }
     return res;
 }
-

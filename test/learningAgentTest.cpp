@@ -730,8 +730,7 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 94)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              4479928206478652248U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 4479928206478652248U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -768,7 +767,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 143)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 13533704402962106053U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              13533704402962106053U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -812,8 +812,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 221)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              7720633690943106983U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 7720633690943106983U)
         << "Graph does not have the expected determinst characteristics.";
 }
 

@@ -103,8 +103,8 @@ class ImporterTest : public ::testing::Test
             std::shared_ptr<Program::Program> p =
                 std::make_shared<Program::Program>(*e, false);
             for (int j = 0; j < 5; j++) {
-                p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
-                                                        j, {(double)(j - 2)/3});
+                p.get()->getConstantHandler().setDataAt(
+                    typeid(Data::Constant), j, {(double)(j - 2) / 3});
             }
             progPointers.push_back(p);
         }
@@ -389,15 +389,15 @@ TEST_F(ImporterTest, importGraph)
         << "The second part of the operand changed";
 
     // checking the program's parameters
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(0)), -2/3)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(0)), -2 / 3)
         << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(1)), -1/3)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(1)), -1 / 3)
         << "The constant changed";
     ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(2)), 0)
         << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(3)), 1/3)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(3)), 1 / 3)
         << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(4)), 2/3)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(4)), 2 / 3)
         << "The constant changed";
 }
 

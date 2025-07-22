@@ -40,7 +40,6 @@
 #include "environment.h"
 #include "mutator/lineMutator.h"
 
-
 /**
  * \brief Function to initialize a single operand of a Program::Line.
  *
