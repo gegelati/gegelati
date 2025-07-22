@@ -118,16 +118,28 @@ bool Mutator::ProgramMutator::alterRandomLine(Program::Program& p,
 bool Mutator::ProgramMutator::alterRandomConstant(
     Program::Program& p, const MutationParameters& params, Mutator::RNG& rng)
 {
-    const uint64_t line_idx = rng.getUnsignedInt64(0, p.getNbLines() - 1);
+    const uint64_t constant_idx =
+        rng.getUnsignedInt64(0, p.getEnvironment().getParams().nbProgramConstant - 1);
+    
 
-    if (p.getLine(line_idx).getNbConstants() == 0) {
-        return false;
+    // Sample the new value
+    double delta = rng.getDouble(0.5, 1.5);
+    if (delta > 1)
+        delta = delta * 2 - 1;
+
+    double currentConstantValue = p.getConstantAt(constant_idx);
+
+    double newConstantValue = currentConstantValue * delta;
+
+    if (0.1 > rng.getDouble(0, 1)) {
+        newConstantValue = -newConstantValue;
     }
 
-    const uint64_t const_idx =
-        rng.getUnsignedInt64(0, p.getLine(line_idx).getNbConstants() - 1);
+    p.getConstantHandler().setDataAt(
+        typeid(Data::Constant), constant_idx,
+        {newConstantValue});
 
-    Mutator::LineMutator::changeConstantAt(p.getLine(line_idx), const_idx, rng);
+
     return true;
 }
 
@@ -158,7 +170,7 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
     }
 
     // mutate the programs constants if they exists
-    if (rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation) {
+    if (p.getEnvironment().getParams().nbProgramConstant > 0 && rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation) {
         anyMutation = true;
         alterRandomConstant(p, params, rng);
     }
@@ -167,6 +179,5 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
     if (anyMutation) {
         p.identifyIntrons();
     }
-
     return anyMutation;
 }

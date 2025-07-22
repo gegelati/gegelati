@@ -147,29 +147,6 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
                 }
             }
             p->identifyIntrons();
-
-            std::string::size_type pos3;
-            std::string::size_type pos4;
-            // read constants
-            std::vector<double> v_constant;
-            pos3 = this->lastLine.find("//") + 2;
-            pos4 = this->lastLine.find("|", pos3);
-            for (;;) {
-                if (pos4 != std::string::npos) {
-                    v_constant.push_back(std::stod(this->lastLine.substr(
-                        pos3, pos4 - pos3))); // Convert String to double
-                }
-                else {
-                    break;
-                }
-                pos3 = pos4 + 1;
-                pos4 = this->lastLine.find("|", pos3);
-            }
-            // set the previously read constants
-            p->setLineConstants(v_constant);
-            this->programID.insert(
-                std::pair<uint64_t, std::shared_ptr<Program::Program>>(
-                    std::stoi(matches[1]), p));
         }
     }
 }
@@ -431,14 +408,6 @@ bool File::TPGGraphDotImporter::readLineFromFile()
         this->lastLine = buffer;
     }
 
-    // Trouver la position de "//"
-    size_t pos = this->lastLine.find("//");
-    std::string usedLine;
-    if (pos != std::string::npos) {
-        // Garder uniquement la partie avant "//"
-        usedLine = this->lastLine.substr(0, pos);
-    }
-
     // check the line shape and parse it
     if (std::regex_search(this->lastLine, matches, testTeamDeclare)) {
         readTeam(matches);
@@ -449,7 +418,7 @@ bool File::TPGGraphDotImporter::readLineFromFile()
     else if (std::regex_search(this->lastLine, matches, testProgramDeclare)) {
         readProgram(matches);
     }
-    else if (std::regex_search(usedLine, matches, testInstructionDeclare)) {
+    else if (std::regex_search(this->lastLine, matches, testInstructionDeclare)) {
         readLine(matches);
     }
     else if (std::regex_search(this->lastLine, matches, testLinkPI)) {

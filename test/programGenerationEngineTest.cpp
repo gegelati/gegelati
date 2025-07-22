@@ -74,25 +74,15 @@ class ProgramGenerationEngineTest : public ::testing::Test
         };
         auto sub = [](double a, double b) -> double { return a - b; };
 
-        auto addConst = [](double a, double b, Data::Constant c) -> double {
-            return a + b * (double)c;
-        };
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             add, "$0 = $1 + $2;")));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             sub, "$0 = $1 - $2;")));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
-        set.add(*(
-            new Instructions::LambdaInstruction<double, double, Data::Constant>(
-                addConst, "$0 = $1 + $2 * %0;")));
-
         params.nbRegisters = 8;
         params.nbProgramConstant = 0;
         e = new Environment(set, params, vect);
-
-        set.add(*(new Instructions::LambdaInstruction<Data::Constant, double>(
-            addConstant, "$0 = (double)($1) - $2;", true)));
 
         params.nbProgramConstant = 5;
         envWithConstant = new Environment(set, params, vect);
@@ -141,9 +131,6 @@ class ProgramGenerationEngineTest : public ::testing::Test
         l4.setOperand(0, 0, 0);    // 1st operand: 0th and 1st registers.
         l4.setOperand(1, 1, 5);    // 2nd operand : parameter 6.
         l4.setDestinationIndex(0); // Destination is register at index 0
-
-        std::vector<double> valueConstants = {0.5, 0.0, 0.0, 0.0, 0.0};
-        p->setLineConstants(valueConstants);
 
         Program::Line& P2l0 = p2->addNewLine();
         P2l0.setInstructionIndex(2); // Instruction is add(not printable).
@@ -260,9 +247,6 @@ TEST_F(ProgramGenerationEngineTest, generateProgram)
     ASSERT_THROW(engine.generateProgram(2), std::runtime_error)
         << "Should be able to generate the program contain an instruction not "
            "printable";
-
-    ASSERT_NO_THROW(engineForConstant.generateProgram(3))
-        << "Fail to generate a program with constant";
 }
 
 TEST_F(ProgramGenerationEngineTest, initOperandCurrentLine)

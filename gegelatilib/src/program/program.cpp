@@ -174,10 +174,8 @@ uint64_t Program::Program::identifyIntrons()
         if (destinationRegister != usefulRegisters.end()) {
             // The Line is useful (i.e. not an introns)
             backIter->second = false;
-
             // Remove the destination register from the list of useful operands
             usefulRegisters.erase(*destinationRegister);
-
             // Add register operands to the list of useful registers
             const Instructions::Instruction& instruction =
                 this->environment.getInstructionSet().getInstruction(
@@ -233,41 +231,6 @@ const Data::Constant Program::Program::getConstantAt(size_t index) const
         this->constants.getDataAt(typeid(Data::Constant), index)
             .getSharedPointer<const Data::Constant>();
     return *value;
-}
-
-std::vector<double> Program::Program::getLineConstants() const
-{
-    std::vector<double> constants;
-    for (size_t idxLine = 0; idxLine < this->getNbLines(); idxLine++) {
-        auto& line = getLine(idxLine);
-
-        for (size_t idx = 0;
-             idx < this->environment.getInstructionSet().getMaxNbConstants();
-             idx++) {
-            constants.push_back((double)line.getConstantAt(idx));
-        }
-    }
-    return constants;
-}
-
-void Program::Program::setLineConstants(std::vector<double>& newConstants)
-{
-    size_t i = 0;
-    for (size_t idxLine = 0; idxLine < this->getNbLines(); idxLine++) {
-        auto& line = getLine(idxLine);
-
-        for (size_t idx = 0;
-             idx < this->environment.getInstructionSet().getMaxNbConstants();
-             idx++) {
-
-            double newConstantValue = newConstants.at(i);
-
-            line.getConstantHandler().setDataAt(typeid(Data::Constant), idx,
-                                                {newConstantValue});
-
-            i++;
-        }
-    }
 }
 
 bool Program::Program::hasIdenticalBehavior(const Program& other) const

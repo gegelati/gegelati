@@ -250,13 +250,13 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 22)
+    ASSERT_EQ(tpg.getNbVertices(), 23)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 16)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 110)
+    ASSERT_EQ(tpg.getEdges().size(), 125)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 3758696898685704499U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 2757301394746222351U)
         << "Graph does not have the expected determinst characteristics.";
 }
 

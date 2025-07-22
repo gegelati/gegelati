@@ -146,7 +146,6 @@ std::string CodeGen::ProgramGenerationEngine::completeFormat(
         this->getCurrentLine(); // throw std::out_of_range
     std::string codeLine(printTemplate);
     std::string operandValue;
-    std::string constantValue;
     for (auto itr = std::sregex_iterator(printTemplate.begin(),
                                          printTemplate.end(), operand_regex);
          itr != std::sregex_iterator(); ++itr) {
@@ -165,17 +164,6 @@ std::string CodeGen::ProgramGenerationEngine::completeFormat(
                            std::to_string(line.getDestinationIndex()) + "]";
         }
         codeLine.replace(pos, match.size(), operandValue);
-    }
-
-    for (auto itr = std::sregex_iterator(printTemplate.begin(),
-                                         printTemplate.end(), constant_regex);
-         itr != std::sregex_iterator(); ++itr) {
-        const std::string& match = (*itr).str();
-        auto pos = codeLine.find(match);
-        // get number after character '%'
-        int idx = std::stoi(match.substr(1));
-        constantValue = std::to_string((double)line.getConstantAt(idx));
-        codeLine.replace(pos, match.size(), constantValue);
     }
     return codeLine;
 }

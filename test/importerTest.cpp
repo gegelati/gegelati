@@ -91,11 +91,6 @@ class ImporterTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-        set.add(*(
-            new Instructions::LambdaInstruction<double, double, Data::Constant>(
-                [](double a, double b, Data::Constant c) -> double {
-                    return a + b * (double)c;
-                })));
 
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
@@ -109,7 +104,7 @@ class ImporterTest : public ::testing::Test
                 std::make_shared<Program::Program>(*e, false);
             for (int j = 0; j < 5; j++) {
                 p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
-                                                        j, {(double)(j - 2)});
+                                                        j, {(double)(j - 2)/3});
             }
             progPointers.push_back(p);
         }
@@ -133,9 +128,6 @@ class ImporterTest : public ::testing::Test
             l2.setInstructionIndex(2);
             l2.setDestinationIndex(1);
             l2.setOperand(0, 0, 1);
-
-            std::vector<double> constants = {0.5 * i, -0.5 * i};
-            progPointers.at(i).get()->setLineConstants(constants);
         }
 
         // Create a TPG
@@ -397,40 +389,16 @@ TEST_F(ImporterTest, importGraph)
         << "The second part of the operand changed";
 
     // checking the program's parameters
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(0)), -2)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(0)), -2/3)
         << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(1)), -1)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(1)), -1/3)
         << "The constant changed";
     ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(2)), 0)
         << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(3)), 1)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(3)), 1/3)
         << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(4)), 2)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(4)), 2/3)
         << "The constant changed";
-
-    // Check the line's constants. Since there is three lines, the program
-    // should contains three line's constants fixed at 0.
-    ASSERT_EQ(p.getLineConstants().size(), 3)
-        << "The number of line's constants changed";
-    ASSERT_EQ(p.getLineConstants().at(0), 0.0)
-        << "The first line's constant changed";
-    ASSERT_EQ(p.getLineConstants().at(1), 0.0)
-        << "The second line's constant changed";
-    ASSERT_EQ(p.getLineConstants().at(2), 0.0)
-        << "The third line's constant changed";
-
-    // Check the line's constants of the second program. Since there is two
-    // lines, the program should contains two line's constants fixed at 0.5 and
-    // -0.5.
-    auto it3 = tpg_copy->getEdges().begin();
-    ++it3;
-    Program::Program& p2 = (*it3)->getProgram();
-    ASSERT_EQ(p2.getLineConstants().size(), 2)
-        << "The number of line's constants changed";
-    ASSERT_EQ(p2.getLineConstants().at(0), 0.5)
-        << "The first line's constant changed";
-    ASSERT_EQ(p2.getLineConstants().at(1), -0.5)
-        << "The second line's constant changed";
 }
 
 TEST_F(ImporterTest, readLineFromFile)

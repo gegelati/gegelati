@@ -41,7 +41,6 @@
 #include <functional>
 #include <typeinfo>
 
-#include "data/constant.h"
 #include "data/untypedSharedPtr.h"
 #include "instructions/instruction.h"
 
@@ -72,14 +71,10 @@ namespace Instructions {
          * \param[in] function the c++ std::function that will be executed for
          * this Instruction. Check the constructor with only the function as
          * parameter for more details.
-         * \param[in] useProgConst If true, the constant used are the ones of
-         * the program, else the ones of the line
          */
         LambdaInstruction(std::function<double(First, Rest...)> function,
-                          const std::string& printTemplate = "",
-                          bool useProgConst = false)
-            : Instructions::Instruction(printTemplate), func{function},
-              useProgramConstant(useProgConst)
+                          const std::string& printTemplate = "")
+            : Instructions::Instruction(printTemplate), func{function}
         {
             setUpOperand();
         };
@@ -90,12 +85,6 @@ namespace Instructions {
          * \brief Function executed for this Instruction.
          */
         const std::function<double(const First, const Rest...)> func;
-
-        /**
-         * \brief If true, the constant used are the ones of the program, else
-         * the ones of the line
-         */
-        const bool useProgramConstant;
 
       public:
         /**
@@ -110,13 +99,9 @@ namespace Instructions {
          * this Instruction. The function must have the same types in its
          * argument list as specified by the template parameters. (checked at
          * compile time)
-         * \param[in] useProgConst If true, the constant used are the ones of
-         * the program, else the ones of the line
          */
-        LambdaInstruction(std::function<double(First, Rest...)> function,
-                          bool useProgConst = false)
-            : Instructions::Instruction(), func{function},
-              useProgramConstant(useProgConst)
+        LambdaInstruction(std::function<double(First, Rest...)> function)
+            : Instructions::Instruction(), func{function}
         {
             setUpOperand();
         };
@@ -231,15 +216,6 @@ namespace Instructions {
             this->operandTypes.push_back(typeid(First));
             // Fold expression to push all other types
             (this->operandTypes.push_back(typeid(Rest)), ...);
-            this->setUpOperandNoConst();
-        }
-        void setUpOperandNoConst()
-        {
-            for (auto op : this->operandTypes) {
-                if (op.get() != typeid(Data::Constant) || useProgramConstant) {
-                    this->operandTypesNoConst.push_back(op);
-                }
-            }
         }
     };
 }; // namespace Instructions

@@ -68,13 +68,6 @@ class ProgramTest : public ::testing::Test
             return a - b;
         };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-        std::function<double(double, double, Data::Constant)> addConst =
-            [](double a, double b, Data::Constant c) -> double {
-            return a + b * (double)c;
-        };
-        set.add(*(
-            new Instructions::LambdaInstruction<double, double, Data::Constant>(
-                addConst)));
 
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
@@ -301,36 +294,39 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
     Program::Line& l3 = p.addNewLine();
     Program::Line& l4 = p.addNewLine();
 
+    std::cout<<1<<std::endl;
+
     // L4: Register 0 = func(Register {1,2}, DataSource_1{[4],[5]})
     l4.setDestinationIndex(0);
     l4.setOperand(0, 0, 1);
     l4.setOperand(1, 1, 4);
     l4.setInstructionIndex(2); // Lambda
-
+std::cout<<2<<std::endl;
     // L3: Register 3 = Datasource_1[0] + DataSource_1[0] (Intron)
     l3.setDestinationIndex(3);
     l3.setOperand(0, 1, 0);
     l3.setOperand(1, 1, 0);
     l3.setInstructionIndex(0);
-
+std::cout<<3<<std::endl;
     // L2: Register 1 = Datasource_1[2] + DataSource_1[2]
     l2.setDestinationIndex(1);
     l2.setOperand(0, 1, 2);
     l2.setOperand(1, 1, 2);
     l2.setInstructionIndex(0);
-
+std::cout<<4<<std::endl;
     // L1: Register 0 = Register 1 * constant (Intron)
     l1.setDestinationIndex(0);
     l1.setOperand(0, 0, 1);
     l1.setInstructionIndex(1); // MultByConst
-
+std::cout<<5<<std::endl;
     // Identify introns
     uint64_t nbIntrons = 0;
     ASSERT_NO_THROW(nbIntrons = p.identifyIntrons())
         << "Identification of intron lines failed unexpectedly.";
+        std::cout<<6<<std::endl;
     ASSERT_EQ(nbIntrons, 2)
         << "Number of identified introns is not as expected.";
-
+std::cout<<6<<std::endl;
     // Check which line is an intron
     ASSERT_TRUE(p.isIntron(0))
         << "Line 0 wrongfully detected as not an intron.";
@@ -338,7 +334,7 @@ TEST_F(ProgramTest, identifyIntronsAndIsIntron)
     ASSERT_TRUE(p.isIntron(2))
         << "Line 2 wrongfully detected as not an intron.";
     ASSERT_FALSE(p.isIntron(3)) << "Line 3 wrongfully detected as an intron.";
-
+std::cout<<7<<std::endl;
     // cleanup
     delete (&set.getInstruction(2));
 }
@@ -707,61 +703,4 @@ TEST_F(ProgramTest, isActionProgram)
         << "Program should not be action program.";
     ASSERT_EQ(p3.isActionProgram(), false)
         << "Program should be action program.";
-}
-
-TEST_F(ProgramTest, SetLineConstants)
-{
-    // Create a program with 2 lines
-    Program::Program p(*e, false);
-    Program::Line& l1 = p.addNewLine();
-    l1.setInstructionIndex(2);
-    l1.setNbConstants(l1.getNbConstants());
-
-    Program::Line& l2 = p.addNewLine();
-    l2.setInstructionIndex(2);
-    l2.setNbConstants(l2.getNbConstants());
-
-    // Set some initial constants in both lines
-    l1.getConstantHandler().setDataAt(typeid(Data::Constant), 0, {1.0});
-    l2.getConstantHandler().setDataAt(typeid(Data::Constant), 0, {2.0});
-
-    // Prepare new constants vector (one per line, per constant)
-    std::vector<double> newConstants;
-    for (size_t i = 0; i < p.getNbLines(); ++i) {
-        // For each line, set the constant to 42.0 + i
-        newConstants.push_back(42.0 + i);
-    }
-
-    // Set the new constants
-    p.setLineConstants(newConstants);
-
-    // Check that the constants were updated
-    for (size_t i = 0; i < p.getNbLines(); ++i) {
-        ASSERT_EQ((double)p.getLine(i).getConstantAt(0), 42.0 + i)
-            << "Constant for line " << i << " was not set correctly.";
-    }
-}
-
-TEST_F(ProgramTest, GetLineConstants)
-{
-    // Create a program with 2 lines
-    Program::Program p(*e, false);
-    Program::Line& l1 = p.addNewLine();
-    l1.setInstructionIndex(2);
-    l1.setNbConstants(l1.getNbConstants());
-    Program::Line& l2 = p.addNewLine();
-    l2.setInstructionIndex(2);
-    l2.setNbConstants(l2.getNbConstants());
-
-    // Set some constants in both lines
-    l1.getConstantHandler().setDataAt(typeid(Data::Constant), 0, {5.5});
-    l2.getConstantHandler().setDataAt(typeid(Data::Constant), 0, {7.7});
-
-    // Retrieve constants using getLineConstants
-    std::vector<double> constants = p.getLineConstants();
-
-    // There should be one constant per line (assuming getMaxNbConstants() == 1)
-    ASSERT_EQ(constants.size(), 2);
-    ASSERT_DOUBLE_EQ(constants[0], 5.5);
-    ASSERT_DOUBLE_EQ(constants[1], 7.7);
 }

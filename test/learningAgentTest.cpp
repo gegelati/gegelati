@@ -93,6 +93,7 @@ class LearningAgentTest : public ::testing::Test
         params.mutation.prog.pConstantMutation = 0.5;
         params.mutation.prog.minConstValue = 0;
         params.mutation.prog.maxConstValue = 1;
+        params.nbProgramConstant = 5;
     }
 
     virtual void TearDown()
@@ -599,13 +600,13 @@ TEST_F(LearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 31)
+    ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 97)
+    ASSERT_EQ(tpg.getEdges().size(), 86)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 5859956592162044951U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 786532405746195131U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -635,23 +636,25 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 31)
+    ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 97)
+    ASSERT_EQ(tpg.getEdges().size(), 86)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 5859956592162044951U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 786532405746195131U)
         << "Graph does not have the expected determinst characteristics.";
 
     /*
-    //To help to refind the values if the determinism is changed by a update
+    //To help to refind the values if the determinism is changed by an update
+    size_t idx = 0;
     for (const auto& edge : tpg.getEdges()) {
         const TPG::TPGEdgeInstrumented* edgeInstrumented =
             dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge.get());
 
         if (edgeInstrumented != nullptr) {
-            std::cout << "NbVisits = " << edgeInstrumented->getNbVisits()
+            std::cout << "Idx = " << idx++
+                    << ", NbVisits = " << edgeInstrumented->getNbVisits()
                     << ", NbTraversal = " << edgeInstrumented->getNbTraversal()
                     << std::endl;
         }
@@ -667,26 +670,26 @@ TEST_F(LearningAgentTest, TrainInstrumented)
 
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(),
-        89);
+        63);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(),
         0);
 
-    std::advance(edgesIterator, 4);
+    std::advance(edgesIterator, 21);
     const auto* edge2 = edgesIterator->get();
 
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbVisits(),
-        63);
+        87);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversal(),
-        60);
+        4);
 
     auto& verticesIterator = tpg.getVertices();
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(0))
                   ->getNbVisits(),
-              4050);
+              3327);
 
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(5))
@@ -721,14 +724,14 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 42)
+    ASSERT_EQ(tpg.getNbVertices(), 39)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 103)
+    ASSERT_EQ(tpg.getEdges().size(), 94)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              14473162429471605144U)
+              4479928206478652248U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -759,13 +762,13 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 61)
+    ASSERT_EQ(tpg.getNbVertices(), 67)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 136)
+    ASSERT_EQ(tpg.getEdges().size(), 143)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 6844759558533588550U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 13533704402962106053U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -803,14 +806,14 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 83)
+    ASSERT_EQ(tpg.getNbVertices(), 76)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 46)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 243)
+    ASSERT_EQ(tpg.getEdges().size(), 221)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              10116507800519844753U)
+              7720633690943106983U)
         << "Graph does not have the expected determinst characteristics.";
 }
 

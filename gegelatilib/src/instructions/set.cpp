@@ -66,12 +66,3 @@ unsigned int Instructions::Set::getMaxNbOperands() const
     return res;
 }
 
-unsigned int Instructions::Set::getMaxNbConstants() const
-{
-    unsigned int res = 0;
-    for (auto instruction : this->instructions) {
-        unsigned int nb = instruction.get().getNbConstants();
-        res = (nb > res) ? nb : res;
-    }
-    return res;
-}

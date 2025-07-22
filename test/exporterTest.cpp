@@ -86,11 +86,6 @@ class ExporterTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-        set.add(*(
-            new Instructions::LambdaInstruction<double, double, Data::Constant>(
-                [](double a, double b, Data::Constant c) -> double {
-                    return a + b * (double)c;
-                })));
 
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
@@ -103,7 +98,7 @@ class ExporterTest : public ::testing::Test
                 std::make_shared<Program::Program>(*e, false);
             for (int j = 0; j < constant_size; j++) {
                 p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
-                                                        j, {(double)(j - 2)});
+                                                        j, {(double)(j - 2) / 3});
             }
             progPointers.push_back(p);
         }
@@ -215,7 +210,7 @@ TEST_F(ExporterTest, printSingleActionProgGraph)
             std::make_shared<Program::Program>(*e, false);
         for (int j = 0; j < constant_size; j++) {
             p.get()->getConstantHandler().setDataAt(typeid(Data::Constant), j,
-                                                    {(double)(j - 2)});
+                                                    {(double)(j - 2)/3});
         }
         progPointers.push_back(p);
     }
@@ -231,9 +226,6 @@ TEST_F(ExporterTest, printSingleActionProgGraph)
         l2.setInstructionIndex(2);
         l2.setDestinationIndex(1);
         l2.setOperand(0, 0, 1);
-
-        std::vector<double> constants = {0.5 * i, -0.5 * i};
-        progPointers.at(i).get()->setLineConstants(constants);
     }
 
     // Add one action edge to each action
@@ -279,7 +271,7 @@ TEST_F(ExporterTest, printMultiActionProgSubGraph)
             std::make_shared<Program::Program>(*e, false);
         for (int j = 0; j < constant_size; j++) {
             p.get()->getConstantHandler().setDataAt(typeid(Data::Constant), j,
-                                                    {(double)(j - 2)});
+                                                    {(double)(j - 2)/3});
         }
         progPointers.push_back(p);
     }
@@ -295,9 +287,6 @@ TEST_F(ExporterTest, printMultiActionProgSubGraph)
         l2.setInstructionIndex(2);
         l2.setDestinationIndex(1);
         l2.setOperand(0, 0, 1);
-
-        std::vector<double> constants = {0.5 * i, -0.5 * i};
-        progPointers.at(i).get()->setLineConstants(constants);
     }
 
     // Add three action edges to first action, two to second and one to third

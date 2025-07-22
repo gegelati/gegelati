@@ -27,6 +27,10 @@ Continuous Multi-Action Reinforcement Learning'.
 ### Changes
 * Update CMake minimum version to avoid annoying warning or deprecation errors with latest versions.
 * During coverage test with gcovr, ignore negative hits following [gcovr issue 68080](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68080).
+* Mutation system of the constant is changed to copy the one proposed in autoML-zero.
+  * The constant value is either multiplied or divided by a random number between 1 and 2.
+  * The sign of the constant is then flipped with 0.1 probability.
+  * The constant are changed from int to double.
 
 ### Bug fix
 

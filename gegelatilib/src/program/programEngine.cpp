@@ -132,29 +132,18 @@ const void Program::ProgramEngine::fetchCurrentOperands(
     uint64_t indexConst = 0;
 
     // Get as many operands as required by the instruction.
-    for (uint64_t i = 0; i < instruction.getNbOperandsWithConst(); i++) {
+    for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
 
         const std::type_info& operandType =
-            instruction.getOperandTypesWithConst().at(i).get();
+            instruction.getOperandTypes().at(i).get();
 
-        // template <class T>;
-        if (operandType == typeid(Data::Constant) &&
-            dynamic_cast<const Instructions::IAbstractMultByConstant*>(
-                &instruction) == nullptr) {
-
-            operands.push_back(
-                line.cGetConstantHandler().getDataAt(operandType, indexConst));
-            indexConst++;
-        }
-        else {
-
-            const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
-                line.getOperand(i).first); // Throws std::out_of_range
-            const uint64_t operandLocation = getOperandLocation(i);
-            Data::UntypedSharedPtr data =
-                dataSource.getDataAt(operandType, operandLocation);
-            operands.push_back(data);
-        }
+        const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
+            line.getOperand(i).first); // Throws std::out_of_range
+        const uint64_t operandLocation = getOperandLocation(i);
+        Data::UntypedSharedPtr data =
+            dataSource.getDataAt(operandType, operandLocation);
+        operands.push_back(data);
+    
     }
 }
 

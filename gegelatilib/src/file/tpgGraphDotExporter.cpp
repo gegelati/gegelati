@@ -113,7 +113,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
         // add next the content of the constant data handler in a comment (//)
         for (int i = 0; i < p.getEnvironment().getParams().nbProgramConstant;
              i++) {
-            fprintf(pFile, "%d|", static_cast<int>(p.getConstantAt(i)));
+            fprintf(pFile, "%f|", static_cast<double>(p.getConstantAt(i)));
         }
         fprintf(pFile, "\n");
         // print the program content :
@@ -182,15 +182,8 @@ void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
 
         programContent += "&#92;n";
     }
-    fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"] //",
+    fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"] \n",
             this->offset.c_str(), progID, programContent.c_str());
-
-    // add next the content of the constant data handler in a comment (//)
-    auto constants = program.getLineConstants();
-    for (auto constantValue : constants) {
-        fprintf(pFile, "%f|", constantValue);
-    }
-    fprintf(pFile, "\n");
 }
 
 void File::TPGGraphDotExporter::printTPGGraphHeader()

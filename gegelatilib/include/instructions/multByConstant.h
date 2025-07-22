@@ -134,8 +134,6 @@ namespace Instructions {
     {
         this->operandTypes.push_back(typeid(T));
         this->operandTypes.push_back(typeid(Data::Constant));
-        this->operandTypesNoConst.push_back(typeid(T));
-        this->operandTypesNoConst.push_back(typeid(Data::Constant));
     }
 } // namespace Instructions
 #endif // INST_MULT_BY_CONST_H

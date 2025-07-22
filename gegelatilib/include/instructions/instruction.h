@@ -169,34 +169,6 @@ namespace Instructions {
         unsigned int getNbOperands() const;
 
         /**
-         * \brief Get the list of operand types needed by the Instruction, with
-         * the constants.
-         *
-         * \return a const reference on the list of operand type_info of the
-         * Instruction, with the constants.
-         */
-        const std::vector<std::reference_wrapper<const std::type_info>>&
-        getOperandTypesWithConst() const;
-
-        /**
-         * \brief Get the number of operands required to execute the
-         * Instruction, with the constants.
-         *
-         * \return an unsigned int value corresponding to the number of operands
-         * required by the Instruction, with the constants.
-         */
-        unsigned int getNbOperandsWithConst() const;
-
-        /**
-         * \brief Get the number of constants required to execute the
-         * Instruction.
-         *
-         * \return an unsigned int value corresponding to the number of
-         * constants required by the Instruction.
-         */
-        unsigned int getNbConstants() const;
-
-        /**
          * \brief Check if a given vector contains elements whose types
          * corresponds to the types of the Instruction operands.
          *
@@ -237,13 +209,6 @@ namespace Instructions {
          * instruction.
          */
         std::vector<std::reference_wrapper<const std::type_info>> operandTypes;
-        /**
-         * \brief List of the types of the operands needed to execute the
-         * instruction, however, compared to "operantTypes" above, it will
-         * exclude instrunction using line constants.
-         */
-        std::vector<std::reference_wrapper<const std::type_info>>
-            operandTypesNoConst;
     };
 
 } // namespace Instructions

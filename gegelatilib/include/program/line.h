@@ -62,17 +62,6 @@ namespace Program {
         /// DataHandlers of the Environment, and a location within it.)
         std::pair<uint64_t, uint64_t>* const operands;
 
-        /// Number of constants (TODO Change for weights) contained by the
-        /// program.
-        uint64_t nbConstants = 0;
-
-        /**
-         *   \brief Constants of the Line
-         *
-         *   A Line contains a set of constants in a dedicated
-         *	 Data::DataHandler
-         **/
-        Data::ConstantHandler constants;
 
         /// Delete the default constructor.
         Line() = delete;
@@ -90,8 +79,7 @@ namespace Program {
             : environment{env}, instructionIndex{0}, destinationIndex{0},
               operands{(std::pair<uint64_t, uint64_t>*)calloc(
                   env.getMaxNbOperands(),
-                  sizeof(std::pair<uint64_t, uint64_t>))},
-              constants{env.getInstructionSet().getMaxNbConstants()} {};
+                  sizeof(std::pair<uint64_t, uint64_t>))} {};
 
         /**
          * \brief Copy constructor of a Line performing a deep copy.
@@ -105,7 +93,6 @@ namespace Program {
             : environment{other.environment},
               instructionIndex{other.instructionIndex},
               destinationIndex{other.destinationIndex},
-              constants{other.constants}, nbConstants{other.nbConstants},
               operands{(std::pair<uint64_t, uint64_t>*)calloc(
                   other.environment.getMaxNbOperands(),
                   sizeof(std::pair<uint64_t, uint64_t>))}
@@ -229,50 +216,6 @@ namespace Program {
          */
         bool setOperand(const uint64_t idx, const uint64_t dataIndex,
                         const uint64_t location, const bool check = true);
-
-        /**
-         * \brief Get the number of constants in the line.
-         */
-        uint64_t getNbConstants() const;
-        /**
-         * \brief set a new number of constants in the line.
-         *
-         * \param[in] newNbConstants set the new number of constants in the
-         * program
-         */
-        void setNbConstants(uint64_t newNbConstants);
-        /**
-         *  \brief get the constantHandler object of the Line
-         *
-         *  This method gives a reference to the constantHandler associated
-         *  with the Line
-         *
-         *  \return the constantHandler of the program
-         */
-        Data::ConstantHandler& getConstantHandler();
-
-        /**
-         *  \brief get a const reference to the constantHandler object of the
-         * Line
-         *
-         *  This method gives a const reference to the constantHandler
-         * associated with the Line
-         *
-         *  \return the constantHandler of the Line through a const reference
-         */
-        const Data::ConstantHandler& cGetConstantHandler() const;
-
-        /**
-         *	\brief Get the value of a constant at a given index
-         *
-         *	Although this method is not required as the data is accessible from
-         *	the constantHandler, it allows a shortcut and add readability.
-         *
-         *	\param[in] index the position at which we access the constant
-         *	\return the value of the constant at the given index
-         */
-        const Data::Constant getConstantAt(size_t index) const;
-
         /**
          * \brief Comparison operator between Line.
          *
