@@ -179,8 +179,7 @@ namespace Learn {
                    nbActions < this->params.maxNbActionsPerEval) {
                 // Get the actions
                 std::vector<double> actionsID =
-                    tee.executeFromRoot(*root, le.getInitActions())
-                        .second; // TODO
+                    tee.executeFromRoot(*root, le.getInitActions()).second;
                 // Do it
                 le.doActions(actionsID);
                 // Count actions

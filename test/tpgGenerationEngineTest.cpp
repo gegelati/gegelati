@@ -238,7 +238,6 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
     // call the destructor to close the file
     tpgGen.reset();
 
-    return;
     std::vector<std::string> fileGenerated{
         "OneLeafNoInstruction.c", "OneLeafNoInstruction.h",
         "OneLeafNoInstruction_program.c", "OneLeafNoInstruction_program.h"};

@@ -118,12 +118,12 @@ namespace Program {
         {
             // Replace lines with their copy
             // Keep intron info
-            std::transform(
-                lines.begin(), lines.end(), lines.begin(),
-                [](std::pair<Line*, bool>& otherLine)
-                    -> std::pair<Line*, bool> {
-                    return {new Line(*(otherLine.first)), otherLine.second};
-                });
+            std::transform(lines.begin(), lines.end(), lines.begin(),
+                           [](std::pair<Line*, bool>& otherLine)
+                               -> std::pair<Line*, bool> {
+                               return {new Line(*(otherLine.first)),
+                                       otherLine.second};
+                           });
         };
 
         /**
@@ -142,12 +142,12 @@ namespace Program {
         {
             // Replace lines with their copy
             // Keep intro info
-            std::transform(
-                lines.begin(), lines.end(), lines.begin(),
-                [](std::pair<Line*, bool>& otherLine)
-                    -> std::pair<Line*, bool> {
-                    return {new Line(*(otherLine.first)), otherLine.second};
-                });
+            std::transform(lines.begin(), lines.end(), lines.begin(),
+                           [](std::pair<Line*, bool>& otherLine)
+                               -> std::pair<Line*, bool> {
+                               return {new Line(*(otherLine.first)),
+                                       otherLine.second};
+                           });
         };
 
         /**

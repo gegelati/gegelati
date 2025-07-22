@@ -152,8 +152,10 @@ uint64_t Program::Program::identifyIntrons()
     // Start with only register 0
     usefulRegisters.insert(0);
 
-    // With continuous actions, add all the registers needed (TODO add
-    // difference program link to action and to team for efficacity)
+    // With continuous actions, add all the registers needed for continuous
+    // actions If the destination of the program was known, the intron detection
+    // could be optimize Registers for continuous does not need to be take into
+    // account for program only linked to teams.
     if ((actionProgram &&
          !this->environment.getParams().mutation.tpg.useMultiActionProgram) ||
         !this->environment.getParams().mutation.tpg.useActionProgram) {
