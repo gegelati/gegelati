@@ -45,47 +45,85 @@ void Log::LABasicLogger::logResults(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results)
 {
-    auto iter = results.begin();
-    double min = iter->first->getResult();
-    std::advance(iter, results.size() - 1);
-    double max = iter->first->getResult();
-    double avg = std::accumulate(
-        results.begin(), results.end(), 0.0,
-        [](double acc,
-           std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                     const TPG::TPGVertex*>
-               pair) -> double { return acc + pair.first->getResult(); });
-    avg /= (double)results.size();
-    *this << std::setw(colWidth) << min << std::setw(colWidth) << avg
-          << std::setw(colWidth) << max;
+    auto logStat = [&](auto getter) {
+        auto iter = results.begin();
+        double min =
+            (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
+        std::advance(iter, results.size() - 1);
+        double max =
+            (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
+        double avg = std::accumulate(
+            results.begin(), results.end(), 0.0,
+            [getter](double acc,
+                     const std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                     const TPG::TPGVertex*>& pair) {
+                return acc + (pair.first.get()->*getter)();
+            });
+        avg /= (double)results.size();
+        *this << std::setw(colWidth) << min << std::setw(colWidth) << avg
+              << std::setw(colWidth) << max;
+    };
+
+    if (useUtility) {
+        logStat(&Learn::EvaluationResult::getUtility);
+    }
+    logStat(&Learn::EvaluationResult::getResult);
 }
 
 void Log::LABasicLogger::logHeader()
 {
     // First line of header
     //*this << std::left;
-    *this << std::setw(2 * colWidth) << " " << std::setw(colWidth) << "Train";
+
+    *this << std::setw(5 * colWidth) << " ";
+    if (useUtility)
+        *this << std::setw((int)(1.5 * colWidth)) << " ";
+    *this << std::setw(colWidth) << "Train";
     if (doValidation) {
-        *this << std::setw(2 * colWidth) << " " << std::setw(1 * colWidth)
-              << "Valid";
+        *this << std::setw((int)(2.5 * colWidth)) << " ";
+        if (useUtility)
+            *this << std::setw((int)(3 * colWidth)) << "  ";
+        *this << "Valid";
     }
     *this << std::endl;
 
     // Second line of header
     //*this << std::right;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
-          << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
-          << std::setw(colWidth) << "Max";
-    if (doValidation) {
+          << std::setw(colWidth) << "NbActR" << std::setw(colWidth)
+          << "NbTeamR";
+
+    if (useUtility) {
+        *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth)
+              << "U_Avg" << std::setw(colWidth) << "U_Max";
+        *this << std::setw(colWidth) << "R_Min" << std::setw(colWidth)
+              << "R_Avg" << std::setw(colWidth) << "R_Max";
+    }
+    else {
         *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
               << std::setw(colWidth) << "Max";
     }
+
+    if (doValidation) {
+        if (useUtility) {
+            *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth)
+                  << "U_Avg" << std::setw(colWidth) << "U_Max";
+            *this << std::setw(colWidth) << "R_Min" << std::setw(colWidth)
+                  << "R_Avg" << std::setw(colWidth) << "R_Max";
+        }
+        else {
+            *this << std::setw(colWidth) << "Min" << std::setw(colWidth)
+                  << "Avg" << std::setw(colWidth) << "Max";
+        }
+    }
+
     *this << std::setw(colWidth) << "T_mutat" << std::setw(colWidth)
           << "T_eval";
     if (doValidation) {
         *this << std::setw(colWidth) << "T_valid";
     }
-    *this << std::setw(colWidth) << "T_total" << std::endl;
+    *this << std::setw(colWidth) << "T_decim" << std::setw(colWidth)
+          << "T_total" << std::endl;
 }
 
 void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
@@ -102,6 +140,18 @@ void Log::LABasicLogger::logAfterPopulateTPG()
     *this << std::setw(colWidth)
           << this->learningAgent.getTPGGraph()->getNbVertices();
 
+    auto roots = this->learningAgent.getTPGGraph()->getRootVertices();
+
+    uint64_t nbTeamsR = std::count_if(
+        roots.begin(), roots.end(), [](const TPG::TPGVertex* root) {
+            return dynamic_cast<const TPG::TPGTeam*>(root) != nullptr;
+        });
+
+    uint64_t nbActionsR = roots.size() - nbTeamsR;
+
+    *this << std::setw(colWidth) << nbActionsR << std::setw(colWidth)
+          << nbTeamsR;
+
     chronoFromNow();
 }
 
@@ -113,7 +163,7 @@ void Log::LABasicLogger::logAfterEvaluate(
 
     logResults(results);
 
-    // resets checkpoint to be able to show validation time if there is some
+    // resets checkpoint to be able to show decimation time if there is some
     chronoFromNow();
 }
 
@@ -123,9 +173,25 @@ void Log::LABasicLogger::logAfterValidate(
 {
     validTime = getDurationFrom(*checkpoint);
 
-    // being in this method means validation is active, and so we are sure we
-    // can log results
-    logResults(results);
+    if (results.size() > 0) {
+        // being in this method means validation is active, and so we are sure
+        // we can log results
+        logResults(results);
+    }
+    else {
+        size_t multiplier = 3;
+        if (useUtility)
+            multiplier *= 2;
+        *this << std::setw(multiplier * colWidth) << " ";
+    }
+}
+
+void Log::LABasicLogger::logAfterDecimate()
+{
+    decimationTime = getDurationFrom(*checkpoint);
+
+    // resets checkpoint to be able to show validation time if there is some
+    chronoFromNow();
 }
 
 void Log::LABasicLogger::logEndOfTraining()
@@ -135,5 +201,6 @@ void Log::LABasicLogger::logEndOfTraining()
     if (doValidation) {
         *this << std::setw(colWidth) << validTime;
     }
+    *this << std::setw(colWidth) << decimationTime;
     *this << std::setw(colWidth) << getDurationFrom(*start) << std::endl;
 }

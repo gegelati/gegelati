@@ -38,6 +38,7 @@
 #include <gtest/gtest.h>
 
 #include "instructions/addPrimitiveType.h"
+#include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningAgent.h"
 #include "learn/stickGameWithOpponent.h"
 
@@ -48,6 +49,7 @@ class LAPolicyStatsLoggerTest : public ::testing::Test
   protected:
     Instructions::Set set;
     StickGameWithOpponent le;
+    FakeMultiContinuousLearningEnvironment cle;
     Learn::LearningParameters params;
     Learn::LearningAgent* la;
 
@@ -102,6 +104,100 @@ TEST_F(LAPolicyStatsLoggerTest, Constructor)
 
 TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluate)
 {
+    // Train one generatio before adding the logger.
+    uint64_t genNumber = 42;
+    la->init(2);
+    la->trainOneGeneration(genNumber);
+
+    // add the Logger
+    std::stringstream strStr;
+    Log::LAPolicyStatsLogger log(*la, strStr);
+
+    ASSERT_NO_THROW(log.logNewGeneration(genNumber))
+        << "This call should not throw any exception.";
+    // No need to give anything as a parameter.
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        emptyMap;
+    ASSERT_NO_THROW(log.logAfterDecimate())
+        << "Logging after an evaluation failed unexpectedly.";
+
+    ASSERT_GT(strStr.str().size(), 100)
+        << "String logged by the LAPolicyStatsLogger should be long.";
+
+    auto length = strStr.str().size();
+
+    ASSERT_NO_THROW(log.logAfterDecimate())
+        << "Logging a second time after an evaluation failed unexpectedly.";
+
+    ASSERT_EQ(strStr.str().size(), length)
+        << "Second call to logAfterEvaluate should not log anything new, the "
+           "bestRoot not having been replaced.";
+
+    // Train a new gen (calls the log)
+    ASSERT_NO_THROW(la->trainOneGeneration(
+        genNumber + 1)) // +1 deterministically creates a new bestRoot.
+        << "Training a new generation should not cause any problem.";
+
+    ASSERT_GT(strStr.str().size(), length)
+        << "Training a new generation (which deterministically creates a new "
+           "bestRoot) should result in new log being written.";
+}
+
+TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithActionProg)
+{
+
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.ratioTeamsOverActions = 0.5;
+    Learn::LearningAgent cla(cle, set, params);
+    // Train one generatio before adding the logger.
+    uint64_t genNumber = 42;
+    la->init(2);
+    la->trainOneGeneration(genNumber);
+
+    // add the Logger
+    std::stringstream strStr;
+    Log::LAPolicyStatsLogger log(*la, strStr);
+
+    ASSERT_NO_THROW(log.logNewGeneration(genNumber))
+        << "This call should not throw any exception.";
+    // No need to give anything as a parameter.
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        emptyMap;
+    ASSERT_NO_THROW(log.logAfterDecimate())
+        << "Logging after an evaluation failed unexpectedly.";
+
+    ASSERT_GT(strStr.str().size(), 100)
+        << "String logged by the LAPolicyStatsLogger should be long.";
+
+    auto length = strStr.str().size();
+
+    ASSERT_NO_THROW(log.logAfterDecimate())
+        << "Logging a second time after an evaluation failed unexpectedly.";
+
+    ASSERT_EQ(strStr.str().size(), length)
+        << "Second call to logAfterEvaluate should not log anything new, the "
+           "bestRoot not having been replaced.";
+
+    // Train a new gen (calls the log)
+    ASSERT_NO_THROW(la->trainOneGeneration(
+        genNumber + 1)) // +1 deterministically creates a new bestRoot.
+        << "Training a new generation should not cause any problem.";
+
+    ASSERT_GT(strStr.str().size(), length)
+        << "Training a new generation (which deterministically creates a new "
+           "bestRoot) should result in new log being written.";
+}
+
+TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithMAPLE)
+{
+
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.ratioTeamsOverActions = 1.0;
+    Learn::LearningAgent cla(cle, set, params);
     // Train one generatio before adding the logger.
     uint64_t genNumber = 42;
     la->init(2);

@@ -122,7 +122,7 @@ std::string Instruction::getPrintablePrimitiveOperandType(
         type = cm[2].str();
     }
     if (type == DEMANGLE_TYPEID_NAME(typeid(Data::Constant).name())) {
-        type = "int32_t";
+        type = "double";
     }
     // Default case
     return type;

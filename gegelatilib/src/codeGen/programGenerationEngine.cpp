@@ -39,6 +39,8 @@
 #include "util/timestamp.h"
 
 const std::regex CodeGen::ProgramGenerationEngine::operand_regex("(\\$[0-9]*)");
+const std::regex CodeGen::ProgramGenerationEngine::constant_regex(
+    "(\\%[0-9]*)");
 const std::string CodeGen::ProgramGenerationEngine::nameRegVariable("reg");
 const std::string CodeGen::ProgramGenerationEngine::nameConstantVariable("cst");
 const std::string CodeGen::ProgramGenerationEngine::nameDataVariable("in");
@@ -66,21 +68,34 @@ void CodeGen::ProgramGenerationEngine::generateCurrentLine()
 void CodeGen::ProgramGenerationEngine::generateProgram(
     uint64_t progID, const bool ignoreException)
 {
-    fileC << "\ndouble P" << progID << "(){" << std::endl;
-    fileH << "double P" << progID << "();" << std::endl;
+    if (program->getEnvironment().getNbContinuousActions() > 0 &&
+        !program->getEnvironment()
+             .getParams()
+             .mutation.tpg.useMultiActionProgram &&
+        program->getEnvironment().getParams().mutation.tpg.useActionProgram &&
+        program->isActionProgram()) {
+
+        fileC << "\nvoid P" << progID << "(double* actions){" << std::endl;
+        fileH << "void P" << progID << "(double* actions);" << std::endl;
+    }
+    else {
+        fileC << "\ndouble P" << progID << "(){" << std::endl;
+        fileH << "double P" << progID << "();" << std::endl;
+    }
 
     // instantiate register
     fileC << "\tdouble " << nameRegVariable << "["
-          << program->getEnvironment().getNbRegisters() << "] = {";
-    for (int i = 0; i < program->getEnvironment().getNbRegisters(); ++i) {
+          << program->getEnvironment().getParams().nbRegisters << "] = {";
+    for (int i = 0; i < program->getEnvironment().getParams().nbRegisters;
+         ++i) {
         fileC << "0";
-        if (i < program->getEnvironment().getNbRegisters() - 1) {
+        if (i < program->getEnvironment().getParams().nbRegisters - 1) {
             fileC << ", ";
         }
     }
     fileC << "};" << std::endl;
-    if (program->getEnvironment().getNbConstant() > 0) {
-        size_t nbCst = program->getEnvironment().getNbConstant();
+    if (program->getEnvironment().getParams().nbProgramConstant > 0) {
+        size_t nbCst = program->getEnvironment().getParams().nbProgramConstant;
         fileC << "\tint32_t " << nameConstantVariable << "[" << nbCst
               << "] = {";
         for (int i = 0; i < nbCst; ++i) {
@@ -99,7 +114,28 @@ void CodeGen::ProgramGenerationEngine::generateProgram(
           << std::endl;
     fileC << "#endif" << std::endl;
 #endif
-    fileC << "\treturn reg[0];\n}" << std::endl;
+
+    // Single Action program are used, and this program is an action program
+    if (program->getEnvironment().getNbContinuousActions() > 0 &&
+        !program->getEnvironment()
+             .getParams()
+             .mutation.tpg.useMultiActionProgram &&
+        program->getEnvironment().getParams().mutation.tpg.useActionProgram &&
+        program->isActionProgram()) {
+
+        for (size_t idx = 0;
+             idx < program->getEnvironment().getNbContinuousActions(); idx++) {
+
+            fileC << "\tactions[" << idx << "] = reg[" << idx << "];"
+                  << std::endl;
+        }
+        fileC << "}" << std::endl;
+
+        // Classic case (context program) or MATPG / MAPLE Case
+    }
+    else {
+        fileC << "\treturn reg[0];\n}" << std::endl;
+    }
 }
 
 std::string CodeGen::ProgramGenerationEngine::completeFormat(
@@ -222,12 +258,14 @@ std::string CodeGen::ProgramGenerationEngine::getNameSourceData(
     if (idx == 0) {
         nameDataSource = nameRegVariable;
     }
-    else if (this->program->getEnvironment().getNbConstant() > 0 && idx == 1) {
+    else if (this->program->getEnvironment().getParams().nbProgramConstant >
+                 0 &&
+             idx == 1) {
         nameDataSource = nameConstantVariable;
     }
     else {
         uint64_t varNumber = idx;
-        if (this->program->getEnvironment().getNbConstant() > 0) {
+        if (this->program->getEnvironment().getParams().nbProgramConstant > 0) {
             varNumber--;
         }
         nameDataSource = nameDataVariable + std::to_string(varNumber);

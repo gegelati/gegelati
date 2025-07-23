@@ -93,7 +93,7 @@ namespace Learn {
          * the currentClass attribute. Refresh of the data should be implemented
          * by the child class, hence the pure virtual method.
          */
-        virtual void doAction(uint64_t actionID) override = 0;
+        virtual void doAction(double actionID) override = 0;
 
         /**
          * \brief Default scoring for classificationLearningEnvironment.

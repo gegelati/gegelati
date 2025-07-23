@@ -67,6 +67,7 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     Environment* e = NULL;
+    Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
     TPG::TPGGraph* tpg;
@@ -87,7 +88,7 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
         line.setOperand(1, 1, 0);    // CHandler at location 0
         line.setDestinationIndex(0); // 0th register dest
         prog.getConstantHandler().setDataAt(typeid(Data::Constant), 0,
-                                            {static_cast<int32_t>(value)});
+                                            {static_cast<double>(value)});
     }
 
     virtual void SetUp()
@@ -105,14 +106,17 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
-        e = new Environment(set, vect, 8, 1);
+
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 1;
+        e = new Environment(set, params, vect);
         tpg = new TPG::TPGGraph(
             *e, std::make_unique<TPG::TPGInstrumentedFactory>());
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
-            progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+            progPointers.push_back(std::shared_ptr<Program::Program>(
+                new Program::Program(*e, false)));
         }
 
         // Create a TPG
@@ -252,8 +256,8 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
     ASSERT_EQ(action->getNbVisits(), 0)
         << "Nb visit before evaluation is incorrect.";
 
-    ASSERT_NO_THROW(result =
-                        tpeei.executeFromRoot(*tpg->getRootVertices().at(0)))
+    ASSERT_NO_THROW(
+        result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)
@@ -276,8 +280,8 @@ TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors)
     ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
         << "Trace history isn't empty before execution.";
 
-    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
-    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0));
+    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first;
+    result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first;
 
     ASSERT_EQ(tpeei.getTraceHistory().size(), 2)
         << "Wrong number of recorded traces.";

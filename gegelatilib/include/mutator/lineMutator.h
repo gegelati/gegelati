@@ -47,6 +47,7 @@ namespace Mutator {
      * Namespace containing all functions to apply randomness to a Program::Line
      */
     namespace LineMutator {
+
         /**
          * \brief Randomly initializes a Program::Line.
          *
@@ -96,5 +97,5 @@ namespace Mutator {
          */
         void alterCorrectLine(Program::Line& line, Mutator::RNG& rng);
     } // namespace LineMutator
-};    // namespace Mutator
+}; // namespace Mutator
 #endif

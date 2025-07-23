@@ -59,6 +59,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     const size_t s1{9};
     Instructions::Set set;
     Environment* e;
+    Learn::LearningParameters params;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     Data::PrimitiveTypeArray<double> currentState{s1};
     TPG::TPGGraph* tpg;
@@ -111,8 +112,8 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
             cond, "$0 = ($1) < ($2) ? -1*($1) : ($1);")));
 
         data.push_back(currentState);
-
-        e = new Environment(set, data, 8);
+        params.nbRegisters = 8;
+        e = new Environment(set, params, data);
         tpg = new TPG::TPGGraph(*e);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";

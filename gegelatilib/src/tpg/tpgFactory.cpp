@@ -61,6 +61,13 @@ std::unique_ptr<TPG::TPGEdge> TPG::TPGFactory::createTPGEdge(
     return std::make_unique<TPG::TPGEdge>(src, dest, prog);
 }
 
+std::unique_ptr<TPG::TPGEdge> TPG::TPGFactory::createTPGActionEdge(
+    const TPGVertex* src, const std::shared_ptr<Program::Program> prog,
+    uint64_t actionClass) const
+{
+    return std::make_unique<TPG::TPGActionEdge>(src, prog, actionClass);
+}
+
 std::unique_ptr<TPG::TPGExecutionEngine> TPG::TPGFactory::
     createTPGExecutionEngine(const Environment& env, Archive* arch) const
 {

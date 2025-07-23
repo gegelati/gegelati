@@ -89,6 +89,16 @@ namespace Learn {
         uint64_t nbIterationsPerPolicyEvaluation = 5;
 
         /// JSon comment
+        inline static const std::string nbIterationsPerPolicyValidationComment =
+            "// Number of evaluation of each root per generation.\n"
+            "// \"nbIterationsPerPolicyValidation\" : 5, // Default value";
+        /**
+         * \brief Number of evaluation of each policy per generation for
+         * validation.
+         */
+        uint64_t nbIterationsPerPolicyValidation = 5;
+
+        /// JSon comment
         inline static const std::string maxNbActionsPerEvalComment =
             "// Maximum number of actions performed on the learning "
             "environment during the\n"
@@ -106,6 +116,20 @@ namespace Learn {
         /// Percentage of deleted (and regenerated) root TPGVertex at each
         /// generation.
         double ratioDeletedRoots = 0.5;
+
+        /// JSon comment
+        inline static const std::string useTournamentSelectionComment =
+            "// If tournament of simple selection is used.\n"
+            "// \"useTournamentSelection\" : false, // Default value";
+        /// If tournament of simple selection is used.
+        bool useTournamentSelection = false;
+
+        /// JSon comment
+        inline static const std::string sizeTournamentComment =
+            "// Size of tournament if tournament selection is used.\n"
+            "// \"sizeTournament\" : 5, // Default value";
+        /// Size of tournament if tournament selection is used.
+        uint64_t sizeTournament = 5;
 
         /// JSon comment
         inline static const std::string nbGenerationsComment =
@@ -189,6 +213,15 @@ namespace Learn {
         size_t nbThreads = std::thread::hardware_concurrency();
 
         /// JSon comment
+        inline static const std::string activationFunctionComment =
+            "// string that indicate the activation function used for "
+            "continuous actions \n"
+            "// \"activationFunction\" : 'none', // Default value";
+        /// string that indicate the activation function used for continuous
+        /// actions
+        std::string activationFunction = "none";
+
+        /// JSon comment
         inline static const std::string doValidationComment =
             "// Boolean used to activate an evaluation of the surviving roots "
             "in validation\n"
@@ -197,6 +230,14 @@ namespace Learn {
         /// Boolean set to true if the user wants a validation after each
         /// training, and false otherwise
         bool doValidation = false;
+
+        /// JSon comment
+        inline static const std::string stepValidationComment =
+            "// Value to indicate how many generation between each validation "
+            "step\n"
+            "// \"stepValidation\" : 1, // Default value";
+        /// Value to indicate how many generation between each validation step
+        uint64_t stepValidation = 1;
     } LearningParameters;
 }; // namespace Learn
 

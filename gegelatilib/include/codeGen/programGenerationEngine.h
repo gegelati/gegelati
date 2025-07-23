@@ -66,6 +66,10 @@ namespace CodeGen {
         /// Instruction.
         static const std::regex operand_regex;
 
+        /// regex used to identify constant in the printTemplate of an
+        /// Instruction.
+        static const std::regex constant_regex;
+
         /**
          * \brief Name given to the global variable in generated files.
          *
@@ -119,7 +123,7 @@ namespace CodeGen {
                                 const std::string& path = "./")
             : ProgramEngine(env), dataPrinter()
         {
-            openFile(filename, path, env.getNbConstant());
+            openFile(filename, path, env.getParams().nbProgramConstant);
         }
 
         /**
@@ -145,7 +149,8 @@ namespace CodeGen {
                                 const std::string& path = "./")
             : ProgramEngine(p), dataPrinter()
         {
-            openFile(filename, path, p.getEnvironment().getNbConstant());
+            openFile(filename, path,
+                     p.getEnvironment().getParams().nbProgramConstant);
             setProgram(p);
         }
 

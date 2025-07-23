@@ -96,6 +96,12 @@ namespace Log {
          */
         double validTime = 0;
 
+        /**
+         * Keeps the duration of the decimation to be able to log it
+         * some time after it is computed.
+         */
+        double decimationTime = 0;
+
         /// LearningAgent logged by the LALogger
         Learn::LearningAgent& learningAgent;
 
@@ -124,6 +130,12 @@ namespace Log {
          * Boolean telling the logger if the training will make a validation
          */
         bool doValidation = false;
+
+        /**
+         * Boolean telling the logger if the LearningEnvironment returns also a
+         * utility with the score
+         */
+        bool useUtility = false;
 
         /**
          * \brief Constructor defining a given output and setting start and

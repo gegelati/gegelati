@@ -94,6 +94,12 @@ namespace File {
         std::map<uint64_t, const TPG::TPGVertex*> vertexID;
 
         /**
+         * \brief Map associating pointers to TPGAction to a vector of integer
+         * action class.
+         */
+        std::map<const TPG::TPGAction*, std::vector<uint64_t>> actionClasses;
+
+        /**
          * \brief Map associating pointers to Program to an integer ID.
          *
          * This map is used to associate an unique id to a tpg program and to
@@ -109,15 +115,7 @@ namespace File {
          * This map is used to ensure that identical actions are not created
          * more than once.
          */
-        std::map<uint64_t, const TPG::TPGVertex*> actionID;
-
-        /**
-         * \brief Map associating actions to the corresponding action ID
-         *
-         * This map is here is used to access the correct TPGVertex while
-         * linking an action.
-         */
-        std::map<uint64_t, uint64_t> actionLabel;
+        std::map<uint64_t, const TPG::TPGAction*> actionID;
 
         /**
          * \brief string used to spot the end of a line in the program
@@ -291,6 +289,30 @@ namespace File {
         static const std::string linkProgramTeamRegex;
 
         /**
+         * \brief contains the regex to identify a Team -> Program -> Action
+         * Link
+         *
+         * this regex values
+         * "A([0-9]+)\\x20->\\x20P([0-9]+).*"
+         *
+         * Explanation :
+         *
+         * A[0-9]+       looks for a A followed by a number. the number will be
+         * stored in a group
+         * \\x20	        looks for a whitespace
+         * ->			looks for the sequence '->'
+         * \\x20	        looks for a whitespace
+         * P[0-9]+       looks for a P followed by a number. the number will be
+         * stored in a group
+         * .*			the following can be any sequence of character
+         *
+         * Example:
+         * A22 -> I22[style=invis]			Should not pass
+         * A0 -> P22					Should pass
+         */
+        static const std::string linkActionProgramRegex;
+
+        /**
          * \brief contains the regex to identify a Team -> Program Link
          * the outgoing program vertex must already have been linked
          *
@@ -356,6 +378,11 @@ namespace File {
         void readLinkTeamProgramAction(std::smatch& matches);
 
         /**
+         * \brief reads a link declaration and creates a action edge
+         */
+        void readLinkActionProgram(std::smatch& matches);
+
+        /**
          * \brief reads a link declaration and creates a team to team edge
          */
         void readLinkTeamProgramTeam(std::smatch& matches);
@@ -403,7 +430,7 @@ namespace File {
          * \brief Maximum number of characters that can be read in a single
          * line.
          */
-        static const unsigned int MAX_READ_SIZE = 4096;
+        static const unsigned int MAX_READ_SIZE = 131072;
 
         /**
          * Destructor for the importer.

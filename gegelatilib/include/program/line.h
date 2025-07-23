@@ -215,7 +215,6 @@ namespace Program {
          */
         bool setOperand(const uint64_t idx, const uint64_t dataIndex,
                         const uint64_t location, const bool check = true);
-
         /**
          * \brief Comparison operator between Line.
          *

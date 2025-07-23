@@ -63,6 +63,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
   protected:
     Instructions::Set set;
     Environment* e = nullptr;
+    Learn::LearningParameters params;
     StickGameAdversarial* le = nullptr;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     TPG::TPGGraph* tpg = nullptr;
@@ -109,7 +110,9 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 
         le = new StickGameAdversarial();
         data = {le->getDataSources().at(0), le->getDataSources().at(1)};
-        e = new Environment(set, le->getDataSources(), 8);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 0;
+        e = new Environment(set, params, le->getDataSources());
         tpg = new TPG::TPGGraph(*e);
         tee = new TPG::TPGExecutionEngine(*e);
         dot = new File::TPGGraphDotImporter(
@@ -195,10 +198,8 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
         inferenceGegelati =
-            (int)(((const TPG::TPGAction*)tee
-                       ->executeFromRoot(*tpg->getRootVertices().back())
-                       .back())
-                      ->getActionID());
+            (int)((tee->executeFromRoot(*tpg->getRootVertices().back()))
+                      .second[0]);
         ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
             << "Error inference of Stick Game has changed";
         le->doAction(inferenceGegelati);

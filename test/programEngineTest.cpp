@@ -62,6 +62,7 @@ class ProgramEngineTest : public ::testing::Test
     Instructions::Set set;
     Environment* e;
     Program::Program* p;
+    Learn::LearningParameters params;
 
     virtual void SetUp()
     {
@@ -103,9 +104,16 @@ class ProgramEngineTest : public ::testing::Test
                 }
                 return res / 4.0;
             }));
+        set.add(*new Instructions::LambdaInstruction<double, double,
+                                                     Data::Constant>(
+            [](double a, double b, Data::Constant c) {
+                return a + b * (double)c;
+            }));
 
-        e = new Environment(set, vect, 8, 5);
-        p = new Program::Program(*e);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect);
+        p = new Program::Program(*e, false);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(
@@ -127,7 +135,7 @@ class ProgramEngineTest : public ::testing::Test
         l2.setOperand(1, 1, 0);    // 2nd operand: parameter 0.
         p->getConstantHandler().setDataAt(
             typeid(Data::Constant), 0,
-            {static_cast<int32_t>(
+            {static_cast<double>(
                 value0)});         // Parameter is set to value1 (=2.3f) => 2
         l2.setDestinationIndex(0); // Destination is register at index 0
 
@@ -137,7 +145,7 @@ class ProgramEngineTest : public ::testing::Test
         l3.setOperand(1, 1, 1);    // 2nd operand: 1st parameter.
         p->getConstantHandler().setDataAt(
             typeid(Data::Constant), 1,
-            {static_cast<int32_t>(
+            {static_cast<double>(
                 value1)});         // Parameter is set to value1 (=1.2f) => 1
         l3.setDestinationIndex(0); // Destination is register at index 0
 
@@ -286,7 +294,7 @@ TEST_F(ProgramEngineTest, setProgram)
     Program::ProgramExecutionEngine progExecEng(*p);
 
     // Create a new program
-    Program::Program p2(*e);
+    Program::Program p2(*e, false);
 
     ASSERT_NO_THROW(progExecEng.setProgram(p2))
         << "Setting a new Program with a valid Environment for a "
@@ -296,9 +304,10 @@ TEST_F(ProgramEngineTest, setProgram)
     std::vector<std::reference_wrapper<const Data::DataHandler>> otherVect;
     otherVect.push_back(
         *(new Data::PrimitiveTypeArray<int>((unsigned int)size2)));
-    Environment otherE(set, otherVect, 2);
-    Program::Program p3(otherE);
-
+    params.nbRegisters = 2;
+    params.nbProgramConstant = 0;
+    Environment otherE(set, params, otherVect);
+    Program::Program p3(otherE, false);
     ASSERT_THROW(progExecEng.setProgram(p3), std::runtime_error)
         << "Setting a Program with an incompatible Environment should not be "
            "possible.";
@@ -364,9 +373,9 @@ TEST_F(ProgramEngineTest, iterateThroughtProgram)
 
     // Introduce a new line in the program to test the throw
     Program::Line& l5 = p->addNewLine();
-    // Instruction 4 does not exist. Must deactivate checks to write this
+    // Instruction 5 does not exist. Must deactivate checks to write this
     // instruction
-    l5.setInstructionIndex(4, false);
+    l5.setInstructionIndex(5, false);
     ASSERT_THROW(progExecEng.iterateThroughtProgram(false), std::out_of_range)
         << "Iterate throught a program that contain a line using an incorrect "
            "Instruction index should throw an exception.";
@@ -375,4 +384,21 @@ TEST_F(ProgramEngineTest, iterateThroughtProgram)
     ASSERT_NO_THROW(progExecEng.iterateThroughtProgram(true))
         << "Program line using a incorrect Instruction index should not "
            "interrupt the Execution when ignored.";
+}
+
+TEST_F(ProgramEngineTest, getRegisterValues)
+{
+
+    Program::ProgramExecutionEngine progExecEng(*p);
+    progExecEng.iterateThroughtProgram(false);
+
+    std::vector<double> regsValue;
+
+    ASSERT_NO_THROW(regsValue = progExecEng.getRegisterValues(8))
+        << "Fail to get the register values";
+
+    ASSERT_EQ(regsValue,
+              std::vector<double>({9.0825001281499862, 4.3250000119209284, 0, 0,
+                                   0, 2.0250000119209286, 0, 0}))
+        << "Register values are incorrect";
 }

@@ -36,6 +36,7 @@
 
 #include <gtest/gtest.h>
 
+#include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
 
@@ -58,7 +59,7 @@ class FakeLearningEnvironment : public Learn::LearningEnvironment
   public:
     FakeLearningEnvironment() : LearningEnvironment(2), data(3){};
     void reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber,
-               uint64_t generationNumber){};
+               uint64_t generationNumber) {};
     std::vector<std::reference_wrapper<const Data::DataHandler>>
     getDataSources()
     {
@@ -90,6 +91,8 @@ TEST(LearningEnvironmentTest, Clonable)
     le->getDataSources();
     le->getScore();
     le->isTerminal();
+    ASSERT_THROW(le->getUtility(), std::runtime_error)
+        << "Default behavior of getUtility should throw an exception.";
 
     delete le;
 }
@@ -137,6 +140,28 @@ TEST(LearningEnvironmentTest, doAction)
     // Check the illegal action
     ASSERT_THROW(le.doAction(3), std::runtime_error)
         << "Illegal action not detected as such.";
+
+    FakeMultiContinuousLearningEnvironment cle;
+    ASSERT_THROW(cle.doAction(1), std::runtime_error)
+        << "Trying to do a single action in a multi-action environment should "
+           "fail.";
+}
+
+TEST(LearningEnvironmentTest, doActions)
+{
+    StickGameWithOpponent le;
+
+    ASSERT_THROW(le.doActions({1.0, 1.0}), std::runtime_error)
+        << "Should fail.";
+
+    FakeMultiContinuousLearningEnvironment cle;
+    ASSERT_THROW(cle.doActions({1.0, 1.0}), std::runtime_error)
+        << "Should fail, not enough actions.";
+
+    ASSERT_THROW(cle.doActions({1.0, 1.0, 1.0, 1.0}), std::runtime_error)
+        << "Should fail, too much actions.";
+
+    ASSERT_NO_THROW(cle.doActions({1.0, 1.0, 1.0})) << "Should not fail.";
 }
 
 TEST(LearningEnvironmentTest, getScoreAndIsTerminal)

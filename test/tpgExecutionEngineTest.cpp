@@ -62,6 +62,7 @@ class TPGExecutionEngineTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     Environment* e = NULL;
+    Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
     TPG::TPGGraph* tpg;
@@ -72,17 +73,18 @@ class TPGExecutionEngineTest : public ::testing::Test
      * Populate the program instructions so that it returns the given value.
      *
      * \param[in] value a double value between 0 and 10.
+     * \param[in] value a int value between 0 and 8.
      */
-    void makeProgramReturn(Program::Program& prog, double value)
+    void makeProgramReturn(Program::Program& prog, double value, int index = 0)
     {
         auto& line = prog.addNewLine();
         // do an multby constant with DHandler 0
         line.setInstructionIndex(1);
-        line.setOperand(0, 2, 0);    // Dhandler 0 location 0
-        line.setOperand(1, 1, 0);    // CHandler at location 0
-        line.setDestinationIndex(0); // 0th register dest
-        prog.getConstantHandler().setDataAt(typeid(Data::Constant), 0,
-                                            {static_cast<int32_t>(value)});
+        line.setOperand(0, 2, 0);        // Dhandler 0 location 0
+        line.setOperand(1, 1, index);    // CHandler at location "index"
+        line.setDestinationIndex(index); // index-th register dest
+        prog.getConstantHandler().setDataAt(typeid(Data::Constant), index,
+                                            {static_cast<double>(value)});
     }
 
     virtual void SetUp()
@@ -100,19 +102,21 @@ class TPGExecutionEngineTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
-        e = new Environment(set, vect, 8, 1);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 3;
+        e = new Environment(set, params, vect);
         tpg = new TPG::TPGGraph(*e);
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
-            progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+            progPointers.push_back(std::shared_ptr<Program::Program>(
+                new Program::Program(*e, false)));
         }
 
         // Create a TPG
         // (T= Team, A= Action)
         //
-        // T0---->T1---->T2     T4
+        // T0---->T1---->T2     T3
         // |     /| \    |      |
         // v    / v  \   v      v
         // A0<-'  A1  `->A2     A3
@@ -229,8 +233,8 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
 
     std::vector<const TPG::TPGVertex*> result;
 
-    ASSERT_NO_THROW(result =
-                        tpee.executeFromRoot(*tpg->getRootVertices().at(0)))
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).first)
         << "Execution of a TPGGraph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)
@@ -244,5 +248,157 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
     ASSERT_EQ(result.at(2), tpg->getVertices().at(2))
         << "2nd element of the traversed path during execution is incorrect.";
     ASSERT_EQ(result.at(3), tpg->getVertices().at(6))
-        << "2nd element of the traversed path during execution is incorrect.";
+        << "3rd element of the traversed path during execution is incorrect.";
+}
+
+TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousNoActionProg)
+{
+
+    makeProgramReturn(*progPointers.at(2), 1, 1);  // Program from A2
+    makeProgramReturn(*progPointers.at(2), -1, 2); // Program from A2
+
+    Environment continuousEnv(set, params, vect, 2);
+    TPG::TPGExecutionEngine tpee(continuousEnv);
+
+    std::vector<double> result;
+
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
+        << "Execution of a TPGGraph from a valid root failed.";
+    // Check the traversed path
+    ASSERT_EQ(result.size(), 2)
+        << "Size of the number of action should be equal to 2";
+    ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
+    ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
+}
+
+TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
+{
+    // Add an action edge to action A3
+    params.mutation.tpg.useActionProgram = true;
+    Environment continuousEnv(set, params, vect, 2);
+    std::shared_ptr<Program::Program> p =
+        std::make_shared<Program::Program>(continuousEnv, true);
+    TPG::TPGExecutionEngine tpee(continuousEnv);
+
+    tpg->addNewActionEdge(*tpg->getVertices().at(6), p, 0);
+    makeProgramReturn(*p, 1, 0);
+    makeProgramReturn(*p, -1, 1);
+
+    std::vector<double> result;
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
+        << "Execution of a TPGGraph from a valid root failed.";
+    // Check the traversed path
+    ASSERT_EQ(result.size(), 2)
+        << "Size of the number of action should be equal to 2";
+    ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
+    ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
+
+    TPG::TPGAction* action = new TPG::TPGAction(0);
+    ASSERT_THROW(tpee.executeFromRoot(*action), std::runtime_error)
+        << "Execution of a TPGGraph with action without edge should fail.";
+
+    std::shared_ptr<Program::Program> p0 =
+        std::make_shared<Program::Program>(continuousEnv, true);
+    tpg->addNewActionEdge(*tpg->getVertices().at(6), p0, 0);
+    ASSERT_THROW(tpee.executeFromRoot(*tpg->getRootVertices().at(0)),
+                 std::runtime_error)
+        << "Execution of a TPGGraph with action with more than one edge should "
+           "fail.";
+}
+
+TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
+{
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.useActionProgram = true;
+
+    // Add an action edge to action A3
+    Environment continuousEnv(set, params, vect, 2);
+    std::shared_ptr<Program::Program> p0 =
+        std::make_shared<Program::Program>(continuousEnv, true);
+    std::shared_ptr<Program::Program> p1 =
+        std::make_shared<Program::Program>(continuousEnv, true);
+    TPG::TPGExecutionEngine tpee(continuousEnv);
+
+    tpg->addNewActionEdge(*tpg->getVertices().at(6), p0, 0);
+    makeProgramReturn(*p0, 1, 0);
+
+    std::vector<double> result;
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
+        << "Execution of a TPGGraph from a valid root failed.";
+    // Check the traversed path
+    ASSERT_EQ(result.size(), 2)
+        << "Size of the number of action should be equal to 2";
+    ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
+    ASSERT_EQ(result.at(1), 0.0) << "Second action value should be 0.";
+
+    // Add a second action edge to action A3
+    tpg->addNewActionEdge(*tpg->getVertices().at(6), p1, 1);
+    makeProgramReturn(*p1, -1, 0);
+
+    ASSERT_NO_THROW(
+        result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
+        << "Execution of a TPGGraph from a valid root failed.";
+    // Check the traversed path
+    ASSERT_EQ(result.size(), 2)
+        << "Size of the number of action should be equal to 2";
+    ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
+    ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
+}
+
+TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
+{
+    // Test for None
+    std::vector<double> valuesNone{10.0, 0.2, -4.0,
+                                   std::numeric_limits<double>::quiet_NaN()};
+    params.activationFunction = "none";
+    Environment envNone(set, params, vect);
+    TPG::TPGExecutionEngine tpeeNone(envNone);
+
+    ASSERT_NO_THROW(tpeeNone.applyActivationFunctionOnActions(valuesNone))
+        << "None activation function failed";
+    // Check the value are right
+    ASSERT_EQ(valuesNone, std::vector<double>({1.0, 0.2, -1.0, -1.0}))
+        << "Values should be clip in [-1, 1]";
+
+    // Test for Tanh
+    std::vector<double> valuesTanh{10.0, 0.2, -4.0,
+                                   std::numeric_limits<double>::quiet_NaN()};
+    params.activationFunction = "tanh";
+    Environment envTanh(set, params, vect);
+    TPG::TPGExecutionEngine tpeeTanh(envTanh);
+
+    ASSERT_NO_THROW(tpeeTanh.applyActivationFunctionOnActions(valuesTanh))
+        << "None activation function failed";
+    // Check the value are right
+    ASSERT_EQ(valuesTanh, std::vector<double>({std::tanh(10.0), std::tanh(0.2),
+                                               std::tanh(-4.0), -1.0}))
+        << "Values should be the output of tanh";
+
+    // Test for Sigmoid
+    std::vector<double> valuesSigmoid{10.0, 0.2, -4.0,
+                                      std::numeric_limits<double>::quiet_NaN()};
+    params.activationFunction = "sigmoid";
+    Environment envSigmoid(set, params, vect);
+    TPG::TPGExecutionEngine tpeeSigmoid(envSigmoid);
+
+    ASSERT_NO_THROW(tpeeSigmoid.applyActivationFunctionOnActions(valuesSigmoid))
+        << "None activation function failed";
+    // Check the value are right
+    ASSERT_EQ(valuesSigmoid,
+              std::vector<double>({1.0 / (1.0 + std::exp(-10.0)),
+                                   1.0 / (1.0 + std::exp(-0.2)),
+                                   1.0 / (1.0 + std::exp(4.0)), 0.0}))
+        << "Values should be the output of sigmoid";
+
+    // Test for wrong activation function
+    params.activationFunction = "WrongActivationFunction";
+    Environment envWrong(set, params, vect);
+    TPG::TPGExecutionEngine tpeeWrong(envWrong);
+
+    ASSERT_THROW(tpeeWrong.applyActivationFunctionOnActions(valuesNone),
+                 std::runtime_error)
+        << "Activation function should not work with wrong activation function";
 }

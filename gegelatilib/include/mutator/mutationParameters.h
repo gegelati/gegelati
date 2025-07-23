@@ -57,14 +57,15 @@ namespace Mutator {
         size_t nbRoots = 100;
 
         /// JSon comment
-        inline static const std::string initNbRootsComment =
-            "// Number of root TPGTeams at the initialisation of a "
-            "TPGGraph.\n"
-            "// If 0, if will be init to the number of surviving roots\n"
-            "// \"nbRoots\" : 0, // Default value";
-        /// Number of root TPGTeams at the initialisation of a TPGGraph
-        /// If 0, if will be init to the number of surviving roots
-        size_t initNbRoots = 0;
+        inline static const std::string ratioTeamsOverActionsComment =
+            "// Ratio of teams roots over the number of actions roots.\n"
+            "// If set to 1, there will be no action roots, if set to 0, there "
+            "will be no team root.\n"
+            "// \"ratioTeamsOverActions\" : 1.0, // Default value";
+        /// Ratio of teams roots over the number of actions roots.
+        /// If set to 1, there will be no action roots, if set to 0, there will
+        /// be no team root.
+        double ratioTeamsOverActions = 1.0;
 
         /// JSon comment
         inline static const std::string maxInitOutgoingEdgesComment =
@@ -75,6 +76,51 @@ namespace Mutator {
         /// Maximum number of TPGEdge connected to each TPGTeam of the TPGGraph
         /// when initialized.
         size_t maxInitOutgoingEdges = 3;
+
+        /// JSon comment
+        inline static const std::string pChangeActionClassComment =
+            "//  Probablity of changing the action edge by any other action "
+            "edge in the graph\n"
+            "// \"pChangeActionClass\" : 0.1, // Default value";
+        ///  Probablity of changing the action edge by any other action edge in
+        ///  the graph
+        double pChangeActionClass = 0.1;
+        /// JSon comment
+        inline static const std::string pActionEdgeDeletionComment =
+            "// Probability of deleting an outgoing ActionEdge of a Action.\n"
+            "// \"pActionEdgeDeletion\" : 0.7, // Default value";
+        /// Probability of deleting an outgoing TPGEdge of a TPGTeam.
+        double pActionEdgeDeletion = 0.7;
+
+        /// JSon comment
+        inline static const std::string pActionEdgeAdditionComment =
+            "// Probability of adding an outgoing Action Edge to a Action.\n"
+            "// \"pActionEdgeAddition\" : 0.7, // Default value";
+        /// Probability of adding an outgoing TPGEdge to a TPGTeam.
+        double pActionEdgeAddition = 0.7;
+
+        /// JSon comment
+        inline static const std::string pMutateActionProgramComment =
+            "//  Probablity of mutation the program on the action edge\n"
+            "// \"pMutateActionProgram\" : 0.1, // Default value";
+        ///  Probablity of mutation the program on the action edge
+        double pMutateActionProgram = 0.1;
+
+        /// JSon comment
+        inline static const std::string pSwapActionProgramComment =
+            "//  Probablity of swapping two action edge within the same action "
+            "vertex\n"
+            "// \"pSwapActionProgram\" : 0.1, // Default value";
+        ///  Probablity of swapping two action edge within the same action
+        ///  vertex
+        double pSwapActionProgram = 0.1;
+
+        /// JSon comment
+        inline static const std::string nbActionEdgeInitComment =
+            "// Number of edge per action vertex at initialisation\n"
+            "// \"nbActionEdgeInit\" : 1, // Default value";
+        /// Init each team with one edge per action
+        size_t nbActionEdgeInit = 1;
 
         /// JSon comment
         inline static const std::string maxOutgoingEdgesComment =
@@ -105,6 +151,15 @@ namespace Mutator {
         double pProgramMutation = 0.2;
 
         /// JSon comment
+        inline static const std::string probaContextOverActionProgramComment =
+            "// When an edge is mutate, the choice between action and context "
+            "program is based on this\n"
+            "// \"probaContextOverActionProgram\" : 0.5, // Default value";
+        ///  When an edge is mutate, the choice between action and context
+        ///  program is based on this
+        double probaContextOverActionProgram = 0.5;
+
+        /// JSon comment
         inline static const std::string
             forceProgramBehaviorChangeOnMutationComment =
                 "// When a Program is mutated, makes sure its behavior is no "
@@ -131,6 +186,40 @@ namespace Mutator {
             "// \"pEdgeDestinationIsAction\" : 0.5, // Default value";
         /// Probability of the new destination of a TPGEdge to be a TPGAction.
         double pEdgeDestinationIsAction = 0.5;
+
+        /// JSon comment
+        inline static const std::string useActionProgramComment =
+            "// Create action program, instead of using context program to "
+            "select continuous action(s)"
+            ".\n"
+            "// \"useActionProgram\" : false, // Default value";
+        /// Create action program, instead of using context program to select
+        /// continuous action(s)
+        bool useActionProgram = false;
+
+        /// JSon comment
+        inline static const std::string useMultiActionProgramComment =
+            "// Create multiple action program, instead of one outputting "
+            "multiple action in a single program"
+            ".\n"
+            "// \"useMultiActionProgram\" : false, // Default value";
+        /// Create multiple action program, instead of one outputting multiple
+        /// action in a single program
+        bool useMultiActionProgram = false;
+
+        /// JSon comment
+        inline static const std::string teamAccessAllActionsComment =
+            "// During mutation of a team, setting this parameter to true "
+            "allow a team\n"
+            "//to change destination toward any other actions. If set to "
+            "false, it can only\n"
+            "//change destination toward a root action.\n"
+            "// \"teamAccessAllActions\" : true, // Default value";
+        /// During mutation of a team, setting this parameter to true allow a
+        /// team to change destination toward any other actions. If set to
+        /// false, it can only change destination toward a root action.
+        bool teamAccessAllActions = true;
+
     } TPGParameters;
 
     /**
@@ -144,6 +233,22 @@ namespace Mutator {
             "// \"maxProgramSize\" : 96, // Default value";
         /// Maximum number of Line within the Program of the TPGGraph.
         size_t maxProgramSize = 96;
+
+        /// JSon comment
+        inline static const std::string initMinProgramSizeComment =
+            "// Initial minimum number of Line within the Program of the "
+            "TPGGraph.\n"
+            "// \"initMinProgramSize\" : 1, // Default value";
+        /// Initial minimum number of Line within the Program of the TPGGraph.
+        size_t initMinProgramSize = 1;
+
+        /// JSon comment
+        inline static const std::string initMaxProgramSizeComment =
+            "// Initial maximum number of Line within the Program of the "
+            "TPGGraph.\n"
+            "// \"initMaxProgramSize\" : 10, // Default value";
+        /// Initial maximum number of Line within the Program of the TPGGraph.
+        size_t initMaxProgramSize = 10;
 
         /// JSon comment
         inline static const std::string pDeleteComment =
@@ -190,16 +295,17 @@ namespace Mutator {
         /// JSon comment
         inline static const std::string minConstValueComment =
             "// Minimum constant value possible.\n"
-            "// \"minConstValue\" : -10, // Default value";
+            "// \"minConstValue\" : -1.0, // Default value";
         /// Minimum constant value possible
-        int32_t minConstValue = -100;
+        double minConstValue = -1.0;
 
         /// JSon comment
         inline static const std::string maxConstValueComment =
             "// Maximum constant value possible.\n"
-            "// \"maxConstValue\" : 100, // Default value";
+            "// \"maxConstValue\" : 1.0, // Default value";
         /// Maximum constant value possible
-        int32_t maxConstValue = 100;
+        double maxConstValue = 1.0;
+
     } ProgramParameters;
 
     /**

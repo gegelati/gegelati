@@ -245,7 +245,7 @@ TEST(InstructionsTest, getPrintablePrimitiveOperandType)
 {
     Instructions::Instruction* i = new Instructions::MultByConstant<double>();
     ASSERT_EQ(i->getPrintablePrimitiveOperandType(0), "double");
-    ASSERT_EQ(i->getPrintablePrimitiveOperandType(1), "int32_t");
+    ASSERT_EQ(i->getPrintablePrimitiveOperandType(1), "double");
     delete i;
 }
 

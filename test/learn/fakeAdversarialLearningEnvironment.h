@@ -63,7 +63,7 @@ class FakeAdversarialLearningEnvironment
 
     ~FakeAdversarialLearningEnvironment(){};
 
-    void doAction(uint64_t actionId) override
+    void doAction(double actionId) override
     {
         // we just ignore this action
         nbTurns++;
@@ -72,7 +72,7 @@ class FakeAdversarialLearningEnvironment
     void reset(size_t seed = 0,
                Learn::LearningMode mode = Learn::LearningMode::TRAINING,
                uint16_t iterationNumber = 0,
-               uint64_t generationNumber = 0) override{
+               uint64_t generationNumber = 0) override {
         // we just ignore the reset
     };
     std::vector<std::reference_wrapper<const Data::DataHandler>>

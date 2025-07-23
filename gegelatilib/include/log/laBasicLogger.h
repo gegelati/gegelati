@@ -130,9 +130,7 @@ namespace Log {
          *
          * \brief Does nothing in this logger.
          */
-        virtual void logAfterDecimate() override{
-            // nothing to log
-        };
+        virtual void logAfterDecimate() override;
 
         /**
          * Inherited via LaLogger.

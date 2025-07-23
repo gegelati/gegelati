@@ -65,6 +65,7 @@ class ImporterTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     Environment* e = NULL;
+    Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
     File::TPGGraphDotExporter* dotExporter = NULL;
 
@@ -90,17 +91,20 @@ class ImporterTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
-        e = new Environment(set, vect, 8, 5);
+
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect, 3);
         tpg = new TPG::TPGGraph(*e);
         tpg_copy = new TPG::TPGGraph(*e);
 
-        // Create 10 programs
-        for (int i = 0; i < 9; i++) {
+        // Create 12 programs
+        for (int i = 0; i < 12; i++) {
             std::shared_ptr<Program::Program> p =
-                std::make_shared<Program::Program>(*e);
+                std::make_shared<Program::Program>(*e, false);
             for (int j = 0; j < 5; j++) {
-                p.get()->getConstantHandler().setDataAt(typeid(Data::Constant),
-                                                        j, {j - 2});
+                p.get()->getConstantHandler().setDataAt(
+                    typeid(Data::Constant), j, {(double)(j - 2) / 3});
             }
             progPointers.push_back(p);
         }
@@ -111,6 +115,19 @@ class ImporterTest : public ::testing::Test
             l.setInstructionIndex(0);
             l.setDestinationIndex(1);
             l.setOperand(0, 0, 1);
+        }
+
+        // add constant instructions to at least one program.
+        for (int i = 1; i < 2; i++) {
+            Program::Line& l = progPointers.at(i).get()->addNewLine();
+            l.setInstructionIndex(2);
+            l.setDestinationIndex(1);
+            l.setOperand(0, 0, 1);
+
+            Program::Line& l2 = progPointers.at(i).get()->addNewLine();
+            l2.setInstructionIndex(2);
+            l2.setDestinationIndex(1);
+            l2.setOperand(0, 0, 1);
         }
 
         // Create a TPG
@@ -164,9 +181,24 @@ class ImporterTest : public ::testing::Test
                                          *tpg->getVertices().at(6),
                                          progPointers.at(7)));
 
+        // Add new Action Edges to A0
+        edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(4),
+                                               progPointers.at(9), 2));
+        edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(4),
+                                               progPointers.at(10), 1));
+
+        // Add new Action Edges to A2
+        edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(6),
+                                               progPointers.at(11), 0));
+        if (dynamic_cast<const TPG::TPGAction*>(tpg->getVertices().at(4))) {
+            // If the vertex is an action, we can order its edges
+            tpg->orderActionEdges(
+                dynamic_cast<const TPG::TPGAction*>(tpg->getVertices().at(4)));
+        }
+
         // Check the characteristics
         ASSERT_EQ(tpg->getNbVertices(), 9);
-        ASSERT_EQ(tpg->getEdges().size(), 10);
+        ASSERT_EQ(tpg->getEdges().size(), 13);
         ASSERT_EQ(tpg->getRootVertices().size(), 2);
 
         // Save the graph in a dot file.
@@ -269,10 +301,57 @@ TEST_F(ImporterTest, importGraph)
     // Check the imported graph characteristics
     ASSERT_EQ(tpg_copy->getNbVertices(), 9)
         << "the wrong number of vertices have been created.";
-    ASSERT_EQ(tpg_copy->getEdges().size(), 10)
+    ASSERT_EQ(tpg_copy->getEdges().size(), 13)
         << "the wrong number of edges have been created.";
     ASSERT_EQ(tpg_copy->getRootVertices().size(), 2)
         << "the wrong number of root teams have been created.";
+
+    // Check action edges
+    // Action A0
+    const TPG::TPGVertex* action1 = tpg_copy->getVertices().at(4);
+    ASSERT_NE(dynamic_cast<const TPG::TPGAction*>(action1), nullptr)
+        << "The vertex at index 4 should be an action.";
+    // If the vertex is an action, we can order its edges
+    const TPG::TPGAction* action1_casted =
+        dynamic_cast<const TPG::TPGAction*>(action1);
+    ASSERT_EQ(action1_casted->getOutgoingEdges().size(), 2)
+        << "The action A0 should have two action edges";
+
+    auto it = action1_casted->getOutgoingEdges().begin();
+    ASSERT_NE(dynamic_cast<const TPG::TPGActionEdge*>(*it), nullptr)
+        << "The first outgoing edge of action A0 should be an action edge.";
+    ASSERT_EQ(dynamic_cast<const TPG::TPGActionEdge*>(*it)->getActionClass(), 1)
+        << "The action edge class should be 1.";
+
+    ++it;
+    ASSERT_NE(dynamic_cast<const TPG::TPGActionEdge*>(*it), nullptr)
+        << "The second outgoing edge of action A0 should be an action edge.";
+    ASSERT_EQ(dynamic_cast<const TPG::TPGActionEdge*>(*it)->getActionClass(), 2)
+        << "The action edge class should be 2.";
+
+    // Action A1
+    const TPG::TPGVertex* action2 = tpg_copy->getVertices().at(5);
+    ASSERT_NE(dynamic_cast<const TPG::TPGAction*>(action2), nullptr)
+        << "The vertex at index 5 should be an action.";
+    // If the vertex is an action, we can order its edges
+    const TPG::TPGAction* action2_casted =
+        dynamic_cast<const TPG::TPGAction*>(action2);
+    ASSERT_EQ(action2_casted->getOutgoingEdges().size(), 0)
+        << "The action A1 should not have any action edges";
+
+    // Action A2
+    const TPG::TPGVertex* action3 = tpg_copy->getVertices().at(6);
+    ASSERT_NE(dynamic_cast<const TPG::TPGAction*>(action3), nullptr)
+        << "The vertex at index 6 should be an action.";
+    // If the vertex is an action, we can order its edges
+    const TPG::TPGAction* action3_casted =
+        dynamic_cast<const TPG::TPGAction*>(action3);
+    ASSERT_EQ(action3_casted->getOutgoingEdges().size(), 1)
+        << "The action A2 should have one action edge.";
+
+    auto it2 = action3_casted->getOutgoingEdges().begin();
+    ASSERT_NE(dynamic_cast<const TPG::TPGActionEdge*>(*it2), nullptr)
+        << "The outgoing edge of action A1 should be an action edge.";
 
     // check that the imported program is the same as the one written in the
     // file.
@@ -310,15 +389,15 @@ TEST_F(ImporterTest, importGraph)
         << "The second part of the operand changed";
 
     // checking the program's parameters
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(0)), -2)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(0)), -2 / 3)
         << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(1)), -1)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(1)), -1 / 3)
         << "The constant changed";
     ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(2)), 0)
         << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(3)), 1)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(3)), 1 / 3)
         << "The constant changed";
-    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(4)), 2)
+    ASSERT_EQ(static_cast<int32_t>(p.getConstantAt(4)), 2 / 3)
         << "The constant changed";
 }
 

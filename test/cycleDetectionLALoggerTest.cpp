@@ -178,21 +178,28 @@ TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
     }
 
     // tree 1
-    tpg->addNewEdge(*teams[0], *teams[1],
-                    std::make_shared<Program::Program>(la->getEnvironment()));
-    tpg->addNewEdge(*teams[0], *teams[2],
-                    std::make_shared<Program::Program>(la->getEnvironment()));
-    tpg->addNewEdge(*teams[1], *teams[3],
-                    std::make_shared<Program::Program>(la->getEnvironment()));
-    tpg->addNewEdge(*teams[2], *teams[3],
-                    std::make_shared<Program::Program>(la->getEnvironment()));
-    tpg->addNewEdge(*teams[3], *actions[0],
-                    std::make_shared<Program::Program>(la->getEnvironment()));
+    tpg->addNewEdge(
+        *teams[0], *teams[1],
+        std::make_shared<Program::Program>(la->getEnvironment(), false));
+    tpg->addNewEdge(
+        *teams[0], *teams[2],
+        std::make_shared<Program::Program>(la->getEnvironment(), false));
+    tpg->addNewEdge(
+        *teams[1], *teams[3],
+        std::make_shared<Program::Program>(la->getEnvironment(), false));
+    tpg->addNewEdge(
+        *teams[2], *teams[3],
+        std::make_shared<Program::Program>(la->getEnvironment(), false));
+    tpg->addNewEdge(
+        *teams[3], *actions[0],
+        std::make_shared<Program::Program>(la->getEnvironment(), false));
 
-    tpg->addNewEdge(*teams[4], *teams[5],
-                    std::make_shared<Program::Program>(la->getEnvironment()));
-    tpg->addNewEdge(*teams[5], *actions[1],
-                    std::make_shared<Program::Program>(la->getEnvironment()));
+    tpg->addNewEdge(
+        *teams[4], *teams[5],
+        std::make_shared<Program::Program>(la->getEnvironment(), false));
+    tpg->addNewEdge(
+        *teams[5], *actions[1],
+        std::make_shared<Program::Program>(la->getEnvironment(), false));
 
     // Check cycle detection again
     strStr.str(std::string()); // clear the string
@@ -219,8 +226,9 @@ TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
     //        v     v
     //        A0    A1
 
-    tpg->addNewEdge(*teams[3], *teams[0],
-                    std::make_shared<Program::Program>(la->getEnvironment()));
+    tpg->addNewEdge(
+        *teams[3], *teams[0],
+        std::make_shared<Program::Program>(la->getEnvironment(), false));
 
     // Check cycle detection again
     strStr.str(std::string()); // clear the string
@@ -243,8 +251,9 @@ TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
 
     // Add a new team and edge
     teams.push_back(&(tpg->addNewTeam()));
-    tpg->addNewEdge(*teams[6], *teams[1],
-                    std::make_shared<Program::Program>(la->getEnvironment()));
+    tpg->addNewEdge(
+        *teams[6], *teams[1],
+        std::make_shared<Program::Program>(la->getEnvironment(), false));
 
     // Check cycle detection again
     strStr.str(std::string()); // clear the string

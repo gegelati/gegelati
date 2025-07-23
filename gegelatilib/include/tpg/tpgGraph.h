@@ -233,6 +233,26 @@ namespace TPG {
          */
         const TPGEdge& addNewEdge(const TPGVertex& src, const TPGVertex& dest,
                                   const std::shared_ptr<Program::Program> prog);
+        /**
+         * \brief Add a new TPGActionEdge to the TPGGraph.
+         *
+         * Add a new TPGActionEdge to the TPGGraph, between the give vertex is
+         * associated the given Program. The newly created TPGEdge is
+         * inserted in the outgoing edges list of the connected
+         * TPGVertex.
+         * The TPGActionEdge is created using the TPGFactory of the TPGGraph.
+         *
+         * \param[in] src the source TPGVertex of the newly created TPGEdge.
+         * \param[in] prog shared pointer to the Program associated to the newly
+         *                 created TPGEdge.
+         * \param[in] actionClass of the actionEdge
+         * \return a const reference to the created TPGEdge.
+         * \throw std::runtime_error In case the TPGVertex does not
+         * exist in the TPGGraph, or if the source is a TPGTeam.
+         */
+        const TPGEdge& addNewActionEdge(
+            const TPGVertex& src, const std::shared_ptr<Program::Program> prog,
+            uint64_t actionClass);
 
         /**
          * \brief Get a const reference to the edges of the TPGGraph.
@@ -253,6 +273,19 @@ namespace TPG {
          *                           exist in the TPGGraph.
          */
         void removeEdge(const TPGEdge& edge);
+
+        /**
+         * \brief Remove a TPGActionEdge from the TPGGraph.
+         *
+         * If the edge is connected to TPGVertex within the graph, they are
+         * updated.
+         *
+         * \param[in] edge a const reference to the TPGActionEdge to remove.
+         *
+         * \throw std::runtime_error In case one of the TPGEdges does not
+         *                           exist in the TPGGraph.
+         */
+        void removeActionEdge(const TPGEdge& edge);
 
         /**
          * Duplicate a TPGEdge from the TPGGraph.
@@ -301,6 +334,53 @@ namespace TPG {
          * TPGGraph and removes all intron instructions from them.
          */
         void clearProgramIntrons();
+
+        /**
+         * \brief set a new action class to a TPGActionEdge
+         *
+         * \param[in] edge TPGActionEdge changed
+         * \param[in] newActionClass new action class
+         */
+        void setActionClassEdge(const TPGEdge* edge, uint64_t newActionClass);
+
+        /**
+         * Update the assessed actions of the current vertex, and all the
+         * incomming edges
+         *
+         * Used only for continuous cases with multi-action program per
+         * TPGAction.
+         *
+         * Assessed actions represent the set of action class used by the
+         * vertex.
+         *
+         * \param[in] vertex TPGVertex to order
+         */
+        void updateAssessedActions(const TPG::TPGVertex* vertex);
+
+        /**
+         * Update the assessed actions of the all graph.
+         *
+         * This is to be use only at the initialisation, the complexity could be
+         * really high after
+         *
+         * This method basically execute "updateAssessedActions" for all the
+         * TPGActions in the graph
+         */
+        void updateAllAssessedActions();
+
+        /**
+         * Order the ActionEdge of the given action
+         *
+         * \param[in] action TPGAction to order
+         */
+        void orderActionEdges(const TPG::TPGAction* action);
+
+        /**
+         * Set the vertex to be deleted (during reproduction process)
+         *
+         * \param[in] vertex to set to delete
+         */
+        void setToBeDeleted(const TPG::TPGVertex* vertex);
 
       protected:
         /// Environment of the TPGGraph

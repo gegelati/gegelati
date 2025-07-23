@@ -39,6 +39,46 @@
 
 void TPG::TPGAction::addOutgoingEdge(TPGEdge* edge)
 {
-    throw std::runtime_error(
-        "Cannot add an outgoing edge to an Action vertex.");
+    if (dynamic_cast<TPGActionEdge*>(edge) == nullptr) {
+        throw std::runtime_error(
+            "Cannot add an outgoing edge to an Action vertex.");
+    }
+    else {
+        TPGVertex::addOutgoingEdge(edge);
+    }
+}
+
+void TPG::TPGAction::orderActionEdges()
+{
+
+    this->outgoingEdges.sort([](TPG::TPGEdge* edge1, TPG::TPGEdge* edge2) {
+        // Use static_cast to convert TPGEdge* into TPGActionEdge*
+        TPG::TPGActionEdge* actionEdge1 =
+            static_cast<TPG::TPGActionEdge*>(edge1);
+        TPG::TPGActionEdge* actionEdge2 =
+            static_cast<TPG::TPGActionEdge*>(edge2);
+
+        // Compare actionClass
+        return actionEdge1->getActionClass() < actionEdge2->getActionClass();
+    });
+}
+
+TPG::TPGActionEdge* TPG::TPGAction::getEdgeOfAction(uint64_t actionClass) const
+{
+
+    // Search the edge with the searched action class
+    auto it = std::find_if(
+        outgoingEdges.begin(), outgoingEdges.end(),
+        [actionClass](TPG::TPGEdge* edge) {
+            return static_cast<TPG::TPGActionEdge*>(edge)->getActionClass() ==
+                   actionClass;
+        });
+
+    // If action found, return the shared pointer, else return nullptr
+    if (it != outgoingEdges.end()) {
+        return (TPG::TPGActionEdge*)(*it);
+    }
+    else {
+        return nullptr;
+    }
 }

@@ -57,6 +57,7 @@ class ProgramGenerationEngineTest : public ::testing::Test
     const size_t size1{32};
     Instructions::Set set;
     Environment* e = nullptr;
+    Learn::LearningParameters params;
     Environment* envWithConstant = nullptr;
     Program::Program* p = nullptr;
     Program::Program* p2 = nullptr;
@@ -72,21 +73,22 @@ class ProgramGenerationEngineTest : public ::testing::Test
             return (double)(a) + b;
         };
         auto sub = [](double a, double b) -> double { return a - b; };
+
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             add, "$0 = $1 + $2;")));
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             sub, "$0 = $1 - $2;")));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
-        e = new Environment(set, vect, 8);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 0;
+        e = new Environment(set, params, vect);
 
-        set.add(*(new Instructions::LambdaInstruction<Data::Constant, double>(
-            addConstant, "$0 = (double)($1) - $2;")));
-
-        envWithConstant = new Environment(set, vect, 8, 5);
-        p = new Program::Program(*e);
-        p2 = new Program::Program(*e);
-        p3 = new Program::Program(*envWithConstant);
+        params.nbProgramConstant = 5;
+        envWithConstant = new Environment(set, params, vect);
+        p = new Program::Program(*e, false);
+        p2 = new Program::Program(*e, false);
+        p3 = new Program::Program(*envWithConstant, false);
 
 #if defined(_MSC_VER) || (__MINGW32__)
         // Set working directory to BIN_DIR_PATH where the "src" directory was
@@ -95,8 +97,8 @@ class ProgramGenerationEngineTest : public ::testing::Test
 #endif
 
         Program::Line& l0 = p->addNewLine();
-        l0.setInstructionIndex(0); // Instruction is add.
-        // Reg[5] = in1[0] + in1[1];
+        l0.setInstructionIndex(3); // Instruction is add.
+        // Reg[5] = in1[0] + in1[1] * 0.5;
         l0.setOperand(0, 1, 0);    // 1st operand: parameter 0.
         l0.setOperand(1, 1, 1);    // 2nd operand: parameter 1.
         l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
@@ -138,7 +140,7 @@ class ProgramGenerationEngineTest : public ::testing::Test
         P2l0.setDestinationIndex(5); // Destination is register at index 5 (6th)
 
         Program::Line& P3l0 = p3->addNewLine();
-        P3l0.setInstructionIndex(3); // Instruction is add.
+        P3l0.setInstructionIndex(4); // Instruction is add.
         // Reg[5] = cst[0] + in1[1];
         P3l0.setOperand(0, 1, 1);    // 1st operand: constant 0.
         P3l0.setOperand(1, 2, 1);    // 2nd operand: parameter 1.
@@ -245,9 +247,6 @@ TEST_F(ProgramGenerationEngineTest, generateProgram)
     ASSERT_THROW(engine.generateProgram(2), std::runtime_error)
         << "Should be able to generate the program contain an instruction not "
            "printable";
-
-    ASSERT_NO_THROW(engineForConstant.generateProgram(3))
-        << "Fail to generate a program with constant";
 }
 
 TEST_F(ProgramGenerationEngineTest, initOperandCurrentLine)

@@ -49,7 +49,7 @@ namespace Data {
         /**
          *	\brief the value of the Constant
          */
-        int32_t value;
+        double value;
 
         /**
          *	\brief const casts of a Constant to a 32 bits integer
