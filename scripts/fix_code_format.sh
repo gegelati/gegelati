@@ -119,6 +119,8 @@ function format_files() {
 	# Scan files one by one
 	for SRC_FILE in $SRC_FILES; do
 		echo "Format $SRC_FILE."
+		# Convert EOL to Unix format before formatting
+		sed -i 's/\r$//' "$SRC_FILE"
 		$CLANG_FORMAT -i --style=file $SRC_FILE
 	done
 }

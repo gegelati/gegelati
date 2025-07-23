@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2022 - 2025) :
  *
  * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
