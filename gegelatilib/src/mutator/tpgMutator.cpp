@@ -557,14 +557,14 @@ void Mutator::TPGMutator::mutateEdgeDestination(
                 target = &graph.cloneVertex(*preExistingActions.at(
                     rng.getUnsignedInt64(0, preExistingActions.size() - 1)));
             }
+            // Change the target
+            // Changing the target should not fail.
+            graph.setEdgeDestination(*edge, *target);
         }
     }
     else if (preExistingTeams.size() > 0) {
         target = preExistingTeams.at(
             rng.getUnsignedInt64(0, preExistingTeams.size() - 1));
-    }
-
-    if (target != nullptr) {
         // Change the target
         // Changing the target should not fail.
         graph.setEdgeDestination(*edge, *target);
