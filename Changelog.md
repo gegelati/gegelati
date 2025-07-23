@@ -4,6 +4,7 @@
 _yyyy.mm.dd_
 
 ### New features
+* **These changes alter the deterministic outputs of trainings.**
 * Implement the new features proposed in the GECCO2025 paper. 'MAPLE: Multi-Action Programs through Linear Evolution for
 Continuous Multi-Action Reinforcement Learning'.
   * Change TPG so that it can assess the environment with multi-continuous actions by outputting the values of the register of the last program.
