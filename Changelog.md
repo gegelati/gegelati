@@ -24,6 +24,7 @@ Continuous Multi-Action Reinforcement Learning'.
     * The reward is the actual score used for the learning process.
     * If the 'isUsingUtility' function is not overridden by your LearningEnvironment, no distinction will be made (i.e. the option will not be used).
   * Two different values can be choosen for the number of episode for training and for validation, also a validation can be done each X training generation to avoid having to much computation time only for validation
+* Version of imported dot file is now verified. If less then the currently supported minimal version, an exception is thrown.
 
 ### Changes
 * Update CMake minimum version to avoid annoying warning or deprecation errors with latest versions.

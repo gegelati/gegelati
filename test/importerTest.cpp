@@ -402,6 +402,13 @@ TEST_F(ImporterTest, importGraph)
         << "The constant changed";
 }
 
+TEST_F(ImporterTest, importOldGraph)
+{
+    ASSERT_THROW(File::TPGGraphDotImporter dotImporter(
+                     TESTS_DAT_PATH "exported_tpg_old.dot", *e, *tpg_copy),
+                 std::runtime_error);
+}
+
 TEST_F(ImporterTest, readLineFromFile)
 {
     std::ofstream myfile;
