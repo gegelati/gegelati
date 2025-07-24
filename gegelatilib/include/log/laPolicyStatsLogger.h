@@ -61,7 +61,7 @@ namespace Log {
         const TPG::TPGVertex* lastBestRoot = nullptr;
 
         /// Number of the current generation.
-        uint64_t generationNumber;
+        uint64_t generationNumber = 0;
 
       public:
         /**
