@@ -41,7 +41,7 @@ const std::string File::TPGGraphDotImporter::lineSeparator("&#92;n");
 const std::string File::TPGGraphDotImporter::teamRegex(
     "T([0-9]+)\\x20\\x5B.*\\x5D");
 const std::string File::TPGGraphDotImporter::programRegex(
-    "P([0-9]+)\\x20\\x5B.*label=\"(.*)\"*\\x5D");
+    R"(P([0-9]+)\x20\x5B(?:.*label=\"(.*?)\")?.*?\x5D)");
 const std::string File::TPGGraphDotImporter::instructionRegex(
     "I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D");
 const std::string File::TPGGraphDotImporter::actionRegex(
@@ -176,7 +176,12 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
         }
 
         // Get if the program is an action or context program.
-        bool isActionProgram = std::stoi(matches[2]);
+        bool isActionProgram = false;
+        if(matches.size() > 2 && matches[2].matched){
+            isActionProgram = std::stoi(matches[2]);
+        } else {
+            std::cout<<"No label found for program, deprecating. Default value 'context program'"<<std::endl;
+        }
 
         // create new program with the correct amount of constants
         Program::Program* p =
@@ -408,7 +413,7 @@ void File::TPGGraphDotImporter::importGraph()
             (majorVersion == supportedMajorVersion &&
              minorVersion == supportedMinorVersion &&
              patchVersion < supportedPatchVersion)) {
-            std::cerr << "Error: The file was exported with an older version "
+            std::cerr << "Deprecating: The file was exported with an older version "
                          "of GEGELATI (v"
                       << majorVersion << "." << minorVersion << "."
                       << patchVersion
@@ -416,8 +421,8 @@ void File::TPGGraphDotImporter::importGraph()
                          "current importer version (v"
                       << supportedMajorVersion << "." << supportedMinorVersion
                       << "." << supportedPatchVersion << ")." << std::endl;
-            throw std::runtime_error(
-                "The file was exported with an unsupported GEGELATI version.");
+            //throw std::runtime_error(
+            //    "The file was exported with an unsupported GEGELATI version.");
         }
     }
     else {
