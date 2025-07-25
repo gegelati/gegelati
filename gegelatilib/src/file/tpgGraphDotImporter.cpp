@@ -179,8 +179,6 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
         bool isActionProgram = false;
         if(matches.size() > 2 && matches[2].matched){
             isActionProgram = std::stoi(matches[2]);
-        } else {
-            std::cout<<"No label found for program, deprecating. Default value 'context program'"<<std::endl;
         }
 
         // create new program with the correct amount of constants
