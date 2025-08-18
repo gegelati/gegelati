@@ -356,6 +356,17 @@ namespace File {
         void readProgram(std::smatch& matches);
 
         /**
+         * \brief reads the version of the dot file and returns it in the
+         * parameters.
+         *
+         * \param[out] major the major version of the dot file
+         * \param[out] minor the minor version of the dot file
+         * \param[out] patch the patch version of the dot file
+         * \return true if the version was found, false otherwise.
+         */
+        bool getExportedVersion(int& major, int& minor, int& patch);
+
+        /**
          * \brief dumps the header of the dot file
          *
          * The header of the dot file contains no relevant informations to build
@@ -403,6 +414,13 @@ namespace File {
         bool readLineFromFile();
 
       public:
+        /// \brief The major version supported by the importer.
+        static const int supportedMajorVersion = 2;
+        /// \brief The minor version supported by the importer.
+        static const int supportedMinorVersion = 0;
+        /// \brief The patch version supported by the importer.
+        static const int supportedPatchVersion = 0;
+
         /**
          * \brief Constructor for the importer.
          *

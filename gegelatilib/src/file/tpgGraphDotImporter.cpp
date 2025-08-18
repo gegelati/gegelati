@@ -41,7 +41,7 @@ const std::string File::TPGGraphDotImporter::lineSeparator("&#92;n");
 const std::string File::TPGGraphDotImporter::teamRegex(
     "T([0-9]+)\\x20\\x5B.*\\x5D");
 const std::string File::TPGGraphDotImporter::programRegex(
-    "P([0-9]+)\\x20\\x5B.*label=\"(.*)\"*\\x5D");
+    R"(P([0-9]+)\x20\x5B(?:.*label=\"(.*?)\")?.*?\x5D)");
 const std::string File::TPGGraphDotImporter::instructionRegex(
     "I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D");
 const std::string File::TPGGraphDotImporter::actionRegex(
@@ -176,7 +176,10 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
         }
 
         // Get if the program is an action or context program.
-        bool isActionProgram = std::stoi(matches[2]);
+        bool isActionProgram = false;
+        if (matches.size() > 2 && matches[2].matched) {
+            isActionProgram = std::stoi(matches[2]);
+        }
 
         // create new program with the correct amount of constants
         Program::Program* p =
@@ -190,6 +193,27 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
             std::pair<uint64_t, std::shared_ptr<Program::Program>>(
                 std::stoi(matches[1]), p));
     }
+}
+
+bool File::TPGGraphDotImporter::getExportedVersion(int& major, int& minor,
+                                                   int& patch)
+{
+    char buffer[MAX_READ_SIZE];
+    pFile.clear();
+    pFile.seekg(0);
+    if (!pFile.getline(buffer, MAX_READ_SIZE))
+        return false;
+    std::string line(buffer);
+    std::regex versionRegex(
+        R"(// File exported with GEGELATI v(\d+)\.(\d+)\.(\d+))");
+    std::smatch matches;
+    if (std::regex_search(line, matches, versionRegex)) {
+        major = std::stoi(matches[1]);
+        minor = std::stoi(matches[2]);
+        patch = std::stoi(matches[3]);
+        return true;
+    }
+    return false;
 }
 
 void File::TPGGraphDotImporter::dumpTPGGraphHeader()
@@ -369,9 +393,6 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
 
 void File::TPGGraphDotImporter::importGraph()
 {
-    // force seek at the beginning of file.
-    pFile.seekg(1);
-
     // clear every storing objects
     this->tpg.clear();
     this->vertexID.clear();
@@ -380,6 +401,40 @@ void File::TPGGraphDotImporter::importGraph()
     this->programID.clear();
 
     // skip header
+    int majorVersion = 0;
+    int minorVersion = 0;
+    int patchVersion = 0;
+    if (this->getExportedVersion(majorVersion, minorVersion, patchVersion)) {
+        if (majorVersion < supportedMajorVersion ||
+            (majorVersion == supportedMajorVersion &&
+             minorVersion < supportedMinorVersion) ||
+            (majorVersion == supportedMajorVersion &&
+             minorVersion == supportedMinorVersion &&
+             patchVersion < supportedPatchVersion)) {
+            std::cerr
+                << "Deprecating: The file was exported with an older version "
+                   "of GEGELATI (v"
+                << majorVersion << "." << minorVersion << "." << patchVersion
+                << "). Some features are no longer supported in the "
+                   "current importer version (v"
+                << supportedMajorVersion << "." << supportedMinorVersion << "."
+                << supportedPatchVersion << ")." << std::endl;
+            // throw std::runtime_error(
+            //     "The file was exported with an unsupported GEGELATI
+            //     version.");
+        }
+    }
+    else {
+        std::cerr
+            << "Warning: The file does not contain a version header. "
+               "Assuming it is compatible with the current importer version."
+            << std::endl;
+    }
+
+    // force seek at the beginning of file.
+    pFile.seekg(0);
+
+    // Skip header
     this->dumpTPGGraphHeader();
     bool read = true;
     while (read) {

@@ -402,6 +402,19 @@ TEST_F(ImporterTest, importGraph)
         << "The constant changed";
 }
 
+TEST_F(ImporterTest, importOldGraph)
+{
+    testing::internal::CaptureStderr();
+
+    File::TPGGraphDotImporter dotImporter(
+        TESTS_DAT_PATH "exported_tpg_old_ref.dot", *e, *tpg_copy);
+
+    std::string output = testing::internal::GetCapturedStderr();
+
+    // Check if "deprecating" appears in the output
+    ASSERT_NE(output.find("Deprecating"), std::string::npos);
+}
+
 TEST_F(ImporterTest, readLineFromFile)
 {
     std::ofstream myfile;

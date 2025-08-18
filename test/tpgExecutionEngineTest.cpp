@@ -66,7 +66,7 @@ class TPGExecutionEngineTest : public ::testing::Test
     Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
-    TPG::TPGGraph* tpg;
+    TPG::TPGGraph* tpg = 0;
     std::vector<const TPG::TPGEdge*> edges;
     Archive a;
 
