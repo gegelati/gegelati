@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -44,10 +45,16 @@
 CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
                                                   const TPG::TPGGraph& tpg,
                                                   const std::string& path)
-    : TPGAbstractEngine(tpg), progGenerationEngine{filename + "_" +
-                                                       filenameProg,
-                                                   tpg.getEnvironment(), path}
+    : TPGAbstractEngine(tpg),
+      progGenerationEngine{filename + "_" + filenameProg, tpg.getEnvironment(),
+                           path}
 {
+    if (tpg.getEnvironment().getNbContinuousActions() > 0 &&
+        !tpg.getEnvironment().getParams().mutation.tpg.useActionProgram) {
+        throw std::runtime_error("Code gen is not available for continuous "
+                                 "case with no action programs");
+    }
+
     this->fileMain.open(path + filename + ".c", std::ofstream::out);
     this->fileMainH.open(path + filename + ".h", std::ofstream::out);
     if (!fileMain.is_open() || !fileMainH.is_open()) {

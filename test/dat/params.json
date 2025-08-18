@@ -1,4 +1,5 @@
 {
+  "activationFunction": "none",
   "archiveSize": 50,
   "archivingProbability": 0.5,
   "nbIterationsPerPolicyEvaluation": 50,
@@ -14,7 +15,8 @@
   "mutation": {
     "tpg": {
       "nbRoots": 100,
-      "initNbRoots": 5,
+      "initNbActions": 3,
+      "initNbTeams": 5,
       "maxInitOutgoingEdges": 3,
       "maxOutgoingEdges": 60,
       "pEdgeDeletion": 0.8,
@@ -22,7 +24,9 @@
       "pProgramMutation": 0.8,
       "forceProgramBehaviorChangeOnMutation": true,
       "pEdgeDestinationChange": 0.3,
-      "pEdgeDestinationIsAction": 0.6
+      "pEdgeDestinationIsAction": 0.6,
+      "probaContextOverActionProgram": 0.5,
+      "useActionProgram": false
     },
     "prog": {
       "maxProgramSize": 40,

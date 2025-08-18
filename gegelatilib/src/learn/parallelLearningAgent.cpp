@@ -1,9 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -101,10 +102,11 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                            : this->learningEnvironment.clone();
 
     // Create a TPGExecutionEngine
-    Environment privateEnv(this->env.getInstructionSet(),
+    Environment privateEnv(this->env.getInstructionSet(), params,
                            privateLearningEnvironment->getDataSources(),
-                           this->env.getNbRegisters(),
-                           this->env.getNbConstant());
+                           (privateLearningEnvironment->isDiscrete())
+                               ? 0
+                               : privateLearningEnvironment->getNbActions());
     std::unique_ptr<TPG::TPGExecutionEngine> tee =
         this->tpg->getFactory().createTPGExecutionEngine(privateEnv, NULL);
 

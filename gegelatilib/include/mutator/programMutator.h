@@ -185,6 +185,6 @@ namespace Mutator {
         bool mutateProgram(Program::Program& p,
                            const MutationParameters& params, Mutator::RNG& rng);
     }; // namespace ProgramMutator
-};     // namespace Mutator
+}; // namespace Mutator
 
 #endif

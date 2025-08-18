@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -61,6 +62,11 @@ namespace TPG {
         Archive* archive;
 
         /**
+         * \brief Environment used
+         */
+        const Environment& env;
+
+        /**
          * \brief ProgramExecutionEngine for executing Programs of edges.
          *
          * Keeping this ProgramExecutionEngine as an attribute avoids wasting
@@ -80,7 +86,7 @@ namespace TPG {
          *                 will be made.
          */
         TPGExecutionEngine(const Environment& env, Archive* arch = NULL)
-            : progExecutionEngine(env), archive{arch} {};
+            : progExecutionEngine(env), env{env}, archive{arch} {};
 
         ///  Default virtual destructor
         virtual ~TPGExecutionEngine() = default;
@@ -91,6 +97,14 @@ namespace TPG {
          * \param[in] newArchive A pointer (possibly NULL) to an Archive.
          */
         void setArchive(Archive* newArchive);
+
+        /**
+         * \brief Apply a sigmoid function on all the actions
+         *
+         * \param[in] actionsTaken a reference to the action taken
+         */
+        void applyActivationFunctionOnActions(
+            std::vector<double>& actionsTaken);
 
         /**
          * \brief Execute the Program associated to an Edge and returns the
@@ -132,12 +146,16 @@ namespace TPG {
          * following the TPGEdge proposing the best bids.
          *
          * \param[in] root the TPGVertex from which the execution will start.
+         * \param[in] initActions the vector of initial action that can be
+         * chosen by default by the root.
          * \return a vector containing all the TPGVertex traversed during the
          *         evaluation of the TPGGraph. The TPGAction resulting from the
          *         TPGGraph execution is at the end of the returned vector.
          */
-        virtual const std::vector<const TPGVertex*> executeFromRoot(
-            const TPGVertex& root);
+        virtual const std::pair<std::vector<const TPG::TPGVertex*>,
+                                std::vector<double>>
+        executeFromRoot(const TPGVertex& root,
+                        const std::vector<uint64_t>& initActions = {0});
     };
 }; // namespace TPG
 

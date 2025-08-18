@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -116,7 +117,7 @@ namespace TPG {
          *
          * \return a const pointer to the destination TPGVertex.
          */
-        const TPGVertex* getDestination() const;
+        virtual const TPGVertex* getDestination() const;
 
         /**
          * \brief Set a new destination TPGVertex to the TPGEdge.
@@ -124,7 +125,7 @@ namespace TPG {
          * \param[in] newDestination the new TPGVertex to register as the
          * destination.
          */
-        void setDestination(TPGVertex* newDestination);
+        virtual void setDestination(TPGVertex* newDestination);
 
       protected:
         /// Pointer to the source TPGVertex of this TPGEdge

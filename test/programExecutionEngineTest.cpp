@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -62,6 +63,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     Environment* e;
+    Learn::LearningParameters params;
     Program::Program* p;
 
     virtual void SetUp()
@@ -104,9 +106,16 @@ class ProgramExecutionEngineTest : public ::testing::Test
                 }
                 return res / 4.0;
             }));
+        set.add(*new Instructions::LambdaInstruction<double, double,
+                                                     Data::Constant>(
+            [](double a, double b, Data::Constant c) {
+                return a + b * (double)c;
+            }));
 
-        e = new Environment(set, vect, 8, 5);
-        p = new Program::Program(*e);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect);
+        p = new Program::Program(*e, false);
 
         Program::Line& l0 = p->addNewLine();
         l0.setInstructionIndex(
@@ -128,7 +137,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
         l2.setOperand(1, 1, 0);    // 2nd operand: parameter 0.
         p->getConstantHandler().setDataAt(
             typeid(Data::Constant), 0,
-            {static_cast<int32_t>(
+            {static_cast<double>(
                 value0)});         // Parameter is set to value1 (=2.3f) => 2
         l2.setDestinationIndex(0); // Destination is register at index 0
 
@@ -138,7 +147,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
         l3.setOperand(1, 1, 1);    // 2nd operand: 1st parameter.
         p->getConstantHandler().setDataAt(
             typeid(Data::Constant), 1,
-            {static_cast<int32_t>(
+            {static_cast<double>(
                 value1)});         // Parameter is set to value1 (=1.2f) => 1
         l3.setDestinationIndex(0); // Destination is register at index 0
 
@@ -165,6 +174,7 @@ class ProgramExecutionEngineTest : public ::testing::Test
         delete (&set.getInstruction(1));
         delete (&set.getInstruction(2));
         delete (&set.getInstruction(3));
+        delete (&set.getInstruction(4));
     }
 };
 
@@ -237,7 +247,8 @@ TEST_F(ProgramExecutionEngineTest, execute)
 
     double r6 = (value0 + value1 + value0 + value0) / 4;
     double r1 = value0 + r6;
-    double r0 = r1 * ((int)value1);
+    double r0 = r1 * ((double)value1);
+
     r0 = r0 * value2 + r1 * value3;
 
     ASSERT_NO_THROW(result = progExecEng.executeProgram())
@@ -250,7 +261,7 @@ TEST_F(ProgramExecutionEngineTest, execute)
     Program::Line& l5 = p->addNewLine();
     // Instruction 4 does not exist. Must deactivate checks to write this
     // instruction
-    l5.setInstructionIndex(4, false);
+    l5.setInstructionIndex(5, false);
     ASSERT_THROW(progExecEng.executeProgram(), std::out_of_range)
         << "Program line using a incorrect Instruction index should throw an "
            "exception.";

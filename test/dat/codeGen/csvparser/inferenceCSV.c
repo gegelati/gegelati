@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2025) :
  *
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -47,11 +48,11 @@ void errorPrint(int action, int expect, CsvRow* row, double* tab)
     printf("\n");
 }
 
-int inferenceCSV(char* filename, int (*inferenceTPG)(void))
+int inferenceCSV(char* filename, void (*inferenceTPG)(double*))
 {
     double* tab = in1;
     int expectedVal;
-    int action;
+    double* action = malloc(sizeof(double));
     CsvParser* csvparser = CsvParser_new(filename, " ", 0);
     CsvRow* row;
 
@@ -63,18 +64,18 @@ int inferenceCSV(char* filename, int (*inferenceTPG)(void))
             tab[i - 1] = strtod(rowFields[i], NULL);
         }
 
-        action = inferenceTPG();
+        inferenceTPG(action);
 #ifdef DEBUG
-        printf("action : %d\n", action);
+        printf("action : %d\n", (int)action[0]);
 #endif // DEBUG
-        if (action != expectedVal) {
-            errorPrint(action, expectedVal, row, tab);
+        if ((int)action[0] != expectedVal) {
+            errorPrint((int)action[0], expectedVal, row, tab);
             return ERROR_INFERENCE;
         }
 
-        action = inferenceTPG();
-        if (action != expectedVal) {
-            errorPrint(action, expectedVal, row, tab);
+        inferenceTPG(action);
+        if ((int)action[0] != expectedVal) {
+            errorPrint((int)action[0], expectedVal, row, tab);
             return ERROR_RESET;
         }
 

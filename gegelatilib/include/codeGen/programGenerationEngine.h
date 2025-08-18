@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -66,6 +67,10 @@ namespace CodeGen {
         /// Instruction.
         static const std::regex operand_regex;
 
+        /// regex used to identify constant in the printTemplate of an
+        /// Instruction.
+        static const std::regex constant_regex;
+
         /**
          * \brief Name given to the global variable in generated files.
          *
@@ -119,7 +124,7 @@ namespace CodeGen {
                                 const std::string& path = "./")
             : ProgramEngine(env), dataPrinter()
         {
-            openFile(filename, path, env.getNbConstant());
+            openFile(filename, path, env.getParams().nbProgramConstant);
         }
 
         /**
@@ -145,7 +150,8 @@ namespace CodeGen {
                                 const std::string& path = "./")
             : ProgramEngine(p), dataPrinter()
         {
-            openFile(filename, path, p.getEnvironment().getNbConstant());
+            openFile(filename, path,
+                     p.getEnvironment().getParams().nbProgramConstant);
             setProgram(p);
         }
 

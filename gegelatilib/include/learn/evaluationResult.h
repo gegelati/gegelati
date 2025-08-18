@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -36,6 +37,7 @@
 #ifndef EVALUATION_RESULT_H
 #define EVALUATION_RESULT_H
 
+#include <cmath>
 #include <memory>
 
 namespace Learn {
@@ -53,6 +55,17 @@ namespace Learn {
       protected:
         /// Double value for the result.
         double result;
+
+        /**
+         * Double value for the utility. Utility is used only if the
+         * LearningEnvironment override the specific method. The utility
+         * represent a score needed for logs but not for learning.
+         *
+         * It can be used for comparison with different results rules for
+         * example.
+         */
+
+        double utility;
 
         /// Number of evaluation leading to this result.
         size_t nbEvaluation;
@@ -75,15 +88,24 @@ namespace Learn {
          * evaluation.
          * \param[in] nbEval Integer value representing the number of
          * evaluation leading to the recorded score.
+         * \param[in] uti the double value representing the utility of an
+         * evaluation.
          */
-        EvaluationResult(const double& res, const size_t& nbEval)
-            : result{res}, nbEvaluation{nbEval} {};
+        EvaluationResult(const double& res, const size_t& nbEval,
+                         const double& uti = std::nan(""))
+            : result{res}, utility{uti}, nbEvaluation{nbEval} {};
 
         /**
          * \brief Virtual method to get the default double equivalent of
-         * the EvaluationResult.
+         * the reward of the EvaluationResult.
          */
         virtual double getResult() const;
+
+        /**
+         * \brief Virtual method to get the default double equivalent of
+         * the utility of the EvaluationResult.
+         */
+        virtual double getUtility() const;
 
         /**
          * \brief Virtual method to get the default number of evaluation of

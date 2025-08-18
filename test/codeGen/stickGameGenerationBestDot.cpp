@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2023) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2021 - 2023)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -63,6 +64,7 @@ class StickGameGenerationBestDotTest : public ::testing::Test
   protected:
     Instructions::Set set;
     Environment* e = nullptr;
+    Learn::LearningParameters params;
     StickGameAdversarial* le = nullptr;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     TPG::TPGGraph* tpg = nullptr;
@@ -109,7 +111,9 @@ class StickGameGenerationBestDotTest : public ::testing::Test
 
         le = new StickGameAdversarial();
         data = {le->getDataSources().at(0), le->getDataSources().at(1)};
-        e = new Environment(set, le->getDataSources(), 8);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 0;
+        e = new Environment(set, params, le->getDataSources());
         tpg = new TPG::TPGGraph(*e);
         tee = new TPG::TPGExecutionEngine(*e);
         dot = new File::TPGGraphDotImporter(
@@ -195,10 +199,8 @@ TEST_F(StickGameGenerationBestDotTest, BestTPG)
         inferenceCodeGen = WEXITSTATUS(status);
 #endif
         inferenceGegelati =
-            (int)(((const TPG::TPGAction*)tee
-                       ->executeFromRoot(*tpg->getRootVertices().back())
-                       .back())
-                      ->getActionID());
+            (int)((tee->executeFromRoot(*tpg->getRootVertices().back()))
+                      .second[0]);
         ASSERT_EQ(inferenceCodeGen, inferenceGegelati)
             << "Error inference of Stick Game has changed";
         le->doAction(inferenceGegelati);

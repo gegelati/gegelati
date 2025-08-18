@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -45,6 +46,7 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/instruction.h"
 #include "instructions/set.h"
+#include "learn/learningParameters.h"
 
 /// LineSize structure to be used within the Environment.
 typedef struct LineSize
@@ -86,6 +88,9 @@ class Environment
     /// Set of Instruction used by Program running within this Environment.
     const Instructions::Set instructionSet;
 
+    /// Parameters for the learning process
+    const Learn::LearningParameters params;
+
     /// List of DataHandler that can be accessed within this Environment.
     const std::vector<std::reference_wrapper<const Data::DataHandler>>
         dataSources;
@@ -105,6 +110,9 @@ class Environment
 
     /// DataHandler whost type corresponds to the programs constants.
     const Data::ConstantHandler fakeConstants;
+
+    /// Number of continuous actions
+    const size_t nbContinuousActions;
 
     /// Number of Instruction in the Instructions::Set.
     const size_t nbInstructions;
@@ -187,36 +195,40 @@ class Environment
      *
      * \param[in] iSet the Instructions::Set whose Instruction will be used in
      * this Environment.
+     * \param[in] p the LearningParameter used, storing all metaparameters.
      * \param[in] dHandlers the list of DataHandler that will
      * be used in this Environment.
-     * \param[in] nbRegs the number of double registers in this Environment.
-     * \param[in] nbConst the number of program's constants in this Environment.
+     * \param[in] nbContinuousAct number of continuous actions in the
+     * LearningEnvironment, default value is 0.
      */
     Environment(
-        const Instructions::Set& iSet,
+        const Instructions::Set& iSet, const Learn::LearningParameters& p,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dHandlers,
-        const size_t nbRegs, const size_t nbConst = 0)
-        : instructionSet{filterInstructionSet(iSet, nbRegs, nbConst,
-                                              dHandlers)},
-          dataSources{dHandlers}, nbRegisters{nbRegs}, nbConstants{nbConst},
-          fakeRegisters(nbRegs), fakeConstants(nbConst),
+        size_t nbContinuousAct = 0)
+        : instructionSet{filterInstructionSet(iSet, p.nbRegisters,
+                                              p.nbProgramConstant, dHandlers)},
+          params{p}, dataSources{dHandlers}, nbRegisters{p.nbRegisters},
+          nbConstants{p.nbProgramConstant}, fakeRegisters(p.nbRegisters),
+          fakeConstants(p.nbProgramConstant),
           nbInstructions{instructionSet.getNbInstructions()},
           maxNbOperands{instructionSet.getMaxNbOperands()},
+          nbContinuousActions{nbContinuousAct},
           nbDataSources{
               dHandlers.size() +
-              (nbConst > 0 ? 2
-                           : 1)}, // if Constants are used, we need an extra
-                                  // datasource to store them in the environment
-          largestAddressSpace{
-              computeLargestAddressSpace(nbRegs, nbConst, dHandlers)},
+              (p.nbProgramConstant > 0
+                   ? 2
+                   : 1)}, // if Constants are used, we need an extra
+                          // datasource to store them in the environment
+          largestAddressSpace{computeLargestAddressSpace(
+              p.nbRegisters, p.nbProgramConstant, dHandlers)},
           lineSize{computeLineSize(*this)}
     {
         this->fakeDataSources.push_back(
             (std::reference_wrapper<const Data::DataHandler>)this
                 ->fakeRegisters);
 
-        if (nbConst > 0) {
+        if (p.nbProgramConstant > 0) {
             this->fakeDataSources.push_back(this->fakeConstants);
         }
 
@@ -225,18 +237,16 @@ class Environment
     };
 
     /**
-     * \brief Get the size of the number of registers of this Environment.
-     *
-     * \return the value of the nbRegisters attribute.
+     * \brief Get the instance of parameters used
      */
-    size_t getNbRegisters() const;
+    const Learn::LearningParameters& getParams() const;
 
     /**
-     * \brief Get the number of constants used by programs.
+     * \brief Get the number of continuous actions.
      *
-     * \return the value of the nbParameters attribute.
+     * \return the value of the nbContinuousActions attribute.
      */
-    size_t getNbConstant() const;
+    size_t getNbContinuousActions() const;
 
     /**
      * \brief Get the size of the number of Instruction within the

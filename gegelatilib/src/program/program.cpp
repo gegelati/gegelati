@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -135,6 +136,11 @@ bool Program::Program::isIntron(uint64_t index) const
         .second; // throws std::out_of_range on bad index.
 }
 
+bool Program::Program::isActionProgram() const
+{
+    return actionProgram;
+}
+
 uint64_t Program::Program::identifyIntrons()
 {
     // Create fake registers to identify accessed addresses.
@@ -147,6 +153,20 @@ uint64_t Program::Program::identifyIntrons()
     // Start with only register 0
     usefulRegisters.insert(0);
 
+    // With continuous actions, add all the registers needed for continuous
+    // actions If the destination of the program was known, the intron detection
+    // could be optimize Registers for continuous does not need to be take into
+    // account for program only linked to teams.
+    if ((actionProgram &&
+         !this->environment.getParams().mutation.tpg.useMultiActionProgram) ||
+        !this->environment.getParams().mutation.tpg.useActionProgram) {
+        for (size_t idx = 0; idx < this->environment.getNbContinuousActions();
+             idx++) {
+            usefulRegisters.insert(idx + (int)!this->environment.getParams()
+                                             .mutation.tpg.useActionProgram);
+        }
+    }
+
     // Scan program lines backward
     auto backIter = this->lines.rbegin();
     while (backIter != this->lines.rend()) {
@@ -157,10 +177,8 @@ uint64_t Program::Program::identifyIntrons()
         if (destinationRegister != usefulRegisters.end()) {
             // The Line is useful (i.e. not an introns)
             backIter->second = false;
-
             // Remove the destination register from the list of useful operands
             usefulRegisters.erase(*destinationRegister);
-
             // Add register operands to the list of useful registers
             const Instructions::Instruction& instruction =
                 this->environment.getInstructionSet().getInstruction(
@@ -251,14 +269,14 @@ bool Program::Program::hasIdenticalBehavior(const Program& other) const
 
             // If lines are referencing Constant, compare the values
             // of these Constants
-            if (this->environment.getNbConstant() > 0) {
+            if (this->environment.getParams().nbProgramConstant > 0) {
                 // Get Instruction
                 const Instructions::Instruction& instruction =
                     this->environment.getInstructionSet().getInstruction(
                         thisLine.getInstructionIndex());
 
                 // Check operands
-                for (auto operandIdx = 0;
+                for (unsigned int operandIdx = 0;
                      operandIdx < instruction.getNbOperands(); operandIdx++) {
                     // Is the operand from the Constant data source.
                     if (thisLine.getOperand(operandIdx).first == 1) {

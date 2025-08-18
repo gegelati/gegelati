@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -41,6 +42,11 @@ double Learn::EvaluationResult::getResult() const
     return this->result;
 }
 
+double Learn::EvaluationResult::getUtility() const
+{
+    return this->utility;
+}
+
 size_t Learn::EvaluationResult::getNbEvaluation() const
 {
     return this->nbEvaluation;
@@ -62,6 +68,12 @@ Learn::EvaluationResult& Learn::EvaluationResult::operator+=(
         this->result = this->result * (double)this->nbEvaluation +
                        other.result * (double)other.nbEvaluation;
         this->result /= (double)this->nbEvaluation + (double)other.nbEvaluation;
+
+        // Weighted addition of utility
+        this->utility = this->utility * (double)this->nbEvaluation +
+                        other.utility * (double)other.nbEvaluation;
+        this->utility /=
+            (double)this->nbEvaluation + (double)other.nbEvaluation;
 
         // Addition ot nbEvaluation
         this->nbEvaluation += other.nbEvaluation;

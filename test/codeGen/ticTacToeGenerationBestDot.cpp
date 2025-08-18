@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2023) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2021 - 2023)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -59,6 +60,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     const size_t s1{9};
     Instructions::Set set;
     Environment* e;
+    Learn::LearningParameters params;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     Data::PrimitiveTypeArray<double> currentState{s1};
     TPG::TPGGraph* tpg;
@@ -111,8 +113,8 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
             cond, "$0 = ($1) < ($2) ? -1*($1) : ($1);")));
 
         data.push_back(currentState);
-
-        e = new Environment(set, data, 8);
+        params.nbRegisters = 8;
+        e = new Environment(set, params, data);
         tpg = new TPG::TPGGraph(*e);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";

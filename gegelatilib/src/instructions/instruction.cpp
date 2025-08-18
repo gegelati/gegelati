@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -122,7 +123,7 @@ std::string Instruction::getPrintablePrimitiveOperandType(
         type = cm[2].str();
     }
     if (type == DEMANGLE_TYPEID_NAME(typeid(Data::Constant).name())) {
-        type = "int32_t";
+        type = "double";
     }
     // Default case
     return type;

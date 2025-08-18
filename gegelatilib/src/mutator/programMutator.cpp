@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -48,14 +49,15 @@ void Mutator::ProgramMutator::initRandomProgram(
 
     // insert random constants in the program
     Data::Constant c_value;
-    for (int i = 0; i < p.getEnvironment().getNbConstant(); i++) {
-        c_value = {
-            rng.getInt32(params.prog.minConstValue, params.prog.maxConstValue)};
+    for (int i = 0; i < p.getEnvironment().getParams().nbProgramConstant; i++) {
+        c_value = {rng.getDouble(params.prog.minConstValue,
+                                 params.prog.maxConstValue)};
         p.getConstantHandler().setDataAt(typeid(Data::Constant), i, c_value);
     }
 
     // Select the number of line randomly
-    const uint64_t nbLine = rng.getUnsignedInt64(1, params.prog.maxProgramSize);
+    const uint64_t nbLine = rng.getUnsignedInt64(
+        params.prog.initMinProgramSize, params.prog.initMaxProgramSize);
     // Insert them
     while (p.getNbLines() < nbLine) {
         insertRandomLine(p, rng);
@@ -117,11 +119,25 @@ bool Mutator::ProgramMutator::alterRandomLine(Program::Program& p,
 bool Mutator::ProgramMutator::alterRandomConstant(
     Program::Program& p, const MutationParameters& params, Mutator::RNG& rng)
 {
-    const uint64_t constant_idx =
-        rng.getUnsignedInt64(0, p.getEnvironment().getNbConstant() - 1);
-    p.getConstantHandler().setDataAt(
-        typeid(Data::Constant), constant_idx,
-        {rng.getInt32(params.prog.minConstValue, params.prog.maxConstValue)});
+    const uint64_t constant_idx = rng.getUnsignedInt64(
+        0, p.getEnvironment().getParams().nbProgramConstant - 1);
+
+    // Sample the new value
+    double delta = rng.getDouble(0.5, 1.5);
+    if (delta > 1)
+        delta = delta * 2 - 1;
+
+    double currentConstantValue = p.getConstantAt(constant_idx);
+
+    double newConstantValue = currentConstantValue * delta;
+
+    if (0.1 > rng.getDouble(0, 1)) {
+        newConstantValue = -newConstantValue;
+    }
+
+    p.getConstantHandler().setDataAt(typeid(Data::Constant), constant_idx,
+                                     {newConstantValue});
+
     return true;
 }
 
@@ -152,7 +168,7 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
     }
 
     // mutate the programs constants if they exists
-    if (p.getEnvironment().getNbConstant() > 0 &&
+    if (p.getEnvironment().getParams().nbProgramConstant > 0 &&
         rng.getDouble(0.0, 1.0) < params.prog.pConstantMutation) {
         anyMutation = true;
         alterRandomConstant(p, params, rng);
@@ -162,6 +178,5 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
     if (anyMutation) {
         p.identifyIntrons();
     }
-
     return anyMutation;
 }

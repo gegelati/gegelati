@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -125,7 +126,7 @@ const LineSize Environment::computeLineSize(const Environment& env)
 {
     // $ ceil(log2(i))+ ceil(log2(n)) + m * (ceil(log2(nb_{ src })) +
     // ceil(log2(largestAddressSpace)) + p * sizeof(Param)_{inByte} * 8$
-    const size_t n = env.getNbRegisters();
+    const size_t n = env.getParams().nbRegisters;
 
     const size_t i = env.getNbInstructions();
 
@@ -164,14 +165,14 @@ const LineSize Environment::computeLineSize(const Environment& env)
     return result;
 }
 
-size_t Environment::getNbRegisters() const
+const Learn::LearningParameters& Environment::getParams() const
 {
-    return this->nbRegisters;
+    return params;
 }
 
-size_t Environment::getNbConstant() const
+size_t Environment::getNbContinuousActions() const
 {
-    return this->nbConstants;
+    return nbContinuousActions;
 }
 
 size_t Environment::getNbInstructions() const

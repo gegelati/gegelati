@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -49,10 +50,22 @@
 namespace Instructions {
 
     /**
+     * \brief Templace class for making casting from Instruction to MultByConst
+     * easier. This is usefull because MultByConstant can use multiple types,
+     * and avoid having to cast in each specific possible usage of multByConst.
+     */
+    class IAbstractMultByConstant
+    {
+      public:
+        virtual ~IAbstractMultByConstant() = default;
+    };
+
+    /**
      * \brief Template class for multiplying a unique argument of type T by a
      * constant parameter.
      */
-    template <class T> class MultByConstant : public Instruction
+    template <class T>
+    class MultByConstant : public Instruction, public IAbstractMultByConstant
     {
         static_assert(std::is_fundamental<T>::value,
                       "Template class MultByConstParam<> can only be used for "

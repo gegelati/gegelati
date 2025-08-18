@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -36,7 +37,9 @@
 #ifndef TPG_VERTEX_H
 #define TPG_VERTEX_H
 
+#include <cinttypes>
 #include <list>
+#include <set>
 
 namespace TPG {
     // Declare class to make it usable as an attribute.
@@ -109,12 +112,45 @@ namespace TPG {
          */
         virtual void removeOutgoingEdge(TPG::TPGEdge* edge);
 
+        /**
+         * \brief return assessed actions
+         */
+        virtual const std::set<uint64_t>& getAssessedActions() const;
+
+        /**
+         * \brief Update the assessed actions
+         */
+        virtual void updateAssessedActions();
+
+        /**
+         * \brief compare the set given and the assessed actions of the vertex
+         *
+         * If the intersection is empty, return false, else true
+         */
+        virtual bool hasSameAssessedActions(std::set<uint64_t> actions) const;
+
+        /**
+         * Set if the vertex should be deleted during evolution process.
+         *
+         * \param[in] status boolean to indicate if the vertex should be
+         * deleted.
+         */
+        virtual void setToBeDeleted(bool status);
+
+        /**
+         * Return if the vertex should be deleted during evolution process.
+         */
+        virtual bool isToBeDeleted() const;
+
       protected:
         /**
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          */
         TPGVertex(){};
+
+        /// True if the vertex should be deleted during evolution process
+        bool toBeDeleted = false;
 
         /**
          * \brief Set of incoming TPGEdge of the TPGVertex.
@@ -125,6 +161,11 @@ namespace TPG {
          * \brief Set of outgoing TPGEdge of the TPGVertex.
          */
         std::list<TPG::TPGEdge*> outgoingEdges;
+
+        /**
+         * \brief Set of assessed actions by the team
+         */
+        std::set<uint64_t> assessedActions;
     };
 }; // namespace TPG
 

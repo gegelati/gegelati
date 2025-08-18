@@ -1,8 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2024) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2024)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2024 - 2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -39,13 +39,13 @@
 
 #include "learn/classificationLearningEnvironment.h"
 
-void Learn::ClassificationLearningEnvironment::doAction(uint64_t actionID)
+void Learn::ClassificationLearningEnvironment::doAction(double actionID)
 {
     // Base method
     LearningEnvironment::doAction(actionID);
 
     // Classification table update
-    this->classificationTable.at(this->currentClass).at(actionID)++;
+    this->classificationTable.at(this->currentClass).at((uint64_t)actionID)++;
 }
 
 const std::vector<std::vector<uint64_t>>& Learn::

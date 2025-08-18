@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -40,17 +41,19 @@ const std::string File::TPGGraphDotImporter::lineSeparator("&#92;n");
 const std::string File::TPGGraphDotImporter::teamRegex(
     "T([0-9]+)\\x20\\x5B.*\\x5D");
 const std::string File::TPGGraphDotImporter::programRegex(
-    "P([0-9]+)\\x20\\x5B.*\\x5D");
+    R"(P([0-9]+)\x20\x5B(?:.*label=\"(.*?)\")?.*?\x5D)");
 const std::string File::TPGGraphDotImporter::instructionRegex(
     "I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D");
 const std::string File::TPGGraphDotImporter::actionRegex(
-    "A([0-9]+)\\x20\\x5B.*=\"([0-9]+)\"\\x5D");
+    "A([0-9]+)\\x20\\x5B.*=\"(.*)\"\\x5D");
 const std::string File::TPGGraphDotImporter::linkProgramInstructionRegex(
     "P([0-9]+)\\x20->\\x20I([0-9]+).*");
 const std::string File::TPGGraphDotImporter::linkProgramActionRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20A([0-9]+).*");
 const std::string File::TPGGraphDotImporter::linkProgramTeamRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*");
+const std::string File::TPGGraphDotImporter::linkActionProgramRegex(
+    "A([0-9]+)\\x20->\\x20P([0-9]+).*");
 const std::string File::TPGGraphDotImporter::addLinkProgramRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)");
 
@@ -92,6 +95,7 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
 
         auto p_it = programID.find(prog_label);
         if (p_it != programID.end() && !label.empty()) {
+
             std::shared_ptr<Program::Program> p = p_it->second;
             // stores the whole program
             std::string instruction;
@@ -162,7 +166,7 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
         for (;;) {
             if (pos1 != std::string::npos) {
                 v_constant.push_back(
-                    {std::stoi(this->lastLine.substr(pos, pos1 - pos))});
+                    {std::stod(this->lastLine.substr(pos, pos1 - pos))});
             }
             else {
                 break;
@@ -170,8 +174,16 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
             pos = pos1 + 1;
             pos1 = this->lastLine.find("|", pos);
         }
+
+        // Get if the program is an action or context program.
+        bool isActionProgram = false;
+        if (matches.size() > 2 && matches[2].matched) {
+            isActionProgram = std::stoi(matches[2]);
+        }
+
         // create new program with the correct amount of constants
-        Program::Program* p = new Program::Program(this->tpg.getEnvironment());
+        Program::Program* p =
+            new Program::Program(this->tpg.getEnvironment(), isActionProgram);
         // set the previously read constants
         for (int i = 0; i < v_constant.size(); i++) {
             p->getConstantHandler().setDataAt(typeid(Data::Constant), i,
@@ -181,6 +193,27 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
             std::pair<uint64_t, std::shared_ptr<Program::Program>>(
                 std::stoi(matches[1]), p));
     }
+}
+
+bool File::TPGGraphDotImporter::getExportedVersion(int& major, int& minor,
+                                                   int& patch)
+{
+    char buffer[MAX_READ_SIZE];
+    pFile.clear();
+    pFile.seekg(0);
+    if (!pFile.getline(buffer, MAX_READ_SIZE))
+        return false;
+    std::string line(buffer);
+    std::regex versionRegex(
+        R"(// File exported with GEGELATI v(\d+)\.(\d+)\.(\d+))");
+    std::smatch matches;
+    if (std::regex_search(line, matches, versionRegex)) {
+        major = std::stoi(matches[1]);
+        minor = std::stoi(matches[2]);
+        patch = std::stoi(matches[3]);
+        return true;
+    }
+    return false;
 }
 
 void File::TPGGraphDotImporter::dumpTPGGraphHeader()
@@ -207,24 +240,69 @@ void File::TPGGraphDotImporter::readTeam(std::smatch& matches)
             std::stoi(matches[1]), &this->tpg.addNewTeam()));
     }
 }
-
 void File::TPGGraphDotImporter::readAction(std::smatch& matches)
 {
     if (!this->lastLine.empty() && !matches.empty()) {
         // the regex matches two groups (action number and action label)
-        uint64_t action_label = std::stoi(matches[2]);
+        std::string action_label = matches[2];
         uint64_t action_number = std::stoi(matches[1]);
 
+        // Vector to store the extracted numbers
+        std::vector<uint64_t> numbers;
+
+        // Use a stringstream to parse the input
+        std::stringstream ss(action_label);
+        std::string token;
+
+        // Split the string by the delimiter '-'
+        while (std::getline(ss, token, '-')) {
+            numbers.push_back(std::stoull(
+                token)); // Convert the token to uint64_t and store it
+        }
         // elmt points to the action with the same label as the action we are
         // parsing
-        auto elmt = actionID.find(action_label);
+        auto elmt = actionID.find(action_number);
         if (elmt == actionID.end()) {
+
+            uint64_t currActionID = action_number;
+            if (tpg.getEnvironment().getNbContinuousActions() == 0) {
+                currActionID = std::stoi(action_label);
+            }
+
             // create a new action and insert it if none was previously found
-            this->actionID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(
-                action_label, &this->tpg.addNewAction(action_label)));
+            this->actionID.insert(std::pair<uint64_t, const TPG::TPGAction*>(
+                action_number, dynamic_cast<const TPG::TPGAction*>(
+                                   &this->tpg.addNewAction(currActionID))));
         }
-        this->actionLabel.insert(
-            std::pair<uint64_t, uint64_t>(action_number, action_label));
+        this->actionClasses.insert(
+            std::pair<const TPG::TPGAction*, std::vector<uint64_t>>(
+                dynamic_cast<const TPG::TPGAction*>(
+                    this->tpg.getVertices().back()),
+                numbers));
+    }
+}
+
+void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
+{
+    // Creating a edge from a team to an action
+    if (!this->lastLine.empty() && !matches.empty()) {
+        uint64_t act_in = std::stoi(matches[1]);
+        uint64_t program = std::stoi(matches[2]);
+
+        // get the action depending on its label
+        auto action_it = this->actionID.find(act_in);
+        if (action_it != this->actionID.end()) {
+            // find the program to add to the edge
+            auto p_it = programID.find(program);
+            if (action_it != this->actionID.end() && p_it != programID.end()) {
+                const TPG::TPGAction* action = action_it->second;
+
+                uint64_t actionClass = this->actionClasses.at(action).at(
+                    action->getOutgoingEdges().size());
+                std::shared_ptr<Program::Program> p = p_it->second;
+                this->tpg.addNewActionEdge(*action, p, actionClass);
+            }
+        }
     }
 }
 
@@ -237,10 +315,9 @@ void File::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch& matches)
         uint64_t act_out = std::stoi(matches[3]);
 
         // get the action depending on its label
-        auto action_lab = this->actionLabel.find(act_out);
-        if (action_lab != this->actionLabel.end()) {
+        auto action_it = this->actionID.find(act_out);
+        if (action_it != this->actionID.end()) {
             auto team_it = this->vertexID.find(team_in);
-            auto action_it = this->actionID.find(action_lab->second);
             // find the program to add to the edge
             auto p_it = programID.find(program);
             if (team_it != vertexID.end() &&
@@ -316,17 +393,48 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
 
 void File::TPGGraphDotImporter::importGraph()
 {
-    // force seek at the beginning of file.
-    pFile.seekg(0);
-
     // clear every storing objects
     this->tpg.clear();
     this->vertexID.clear();
     this->actionID.clear();
-    this->actionLabel.clear();
+    this->actionClasses.clear();
     this->programID.clear();
 
     // skip header
+    int majorVersion = 0;
+    int minorVersion = 0;
+    int patchVersion = 0;
+    if (this->getExportedVersion(majorVersion, minorVersion, patchVersion)) {
+        if (majorVersion < supportedMajorVersion ||
+            (majorVersion == supportedMajorVersion &&
+             minorVersion < supportedMinorVersion) ||
+            (majorVersion == supportedMajorVersion &&
+             minorVersion == supportedMinorVersion &&
+             patchVersion < supportedPatchVersion)) {
+            std::cerr
+                << "Deprecating: The file was exported with an older version "
+                   "of GEGELATI (v"
+                << majorVersion << "." << minorVersion << "." << patchVersion
+                << "). Some features are no longer supported in the "
+                   "current importer version (v"
+                << supportedMajorVersion << "." << supportedMinorVersion << "."
+                << supportedPatchVersion << ")." << std::endl;
+            // throw std::runtime_error(
+            //     "The file was exported with an unsupported GEGELATI
+            //     version.");
+        }
+    }
+    else {
+        std::cerr
+            << "Warning: The file does not contain a version header. "
+               "Assuming it is compatible with the current importer version."
+            << std::endl;
+    }
+
+    // force seek at the beginning of file.
+    pFile.seekg(0);
+
+    // Skip header
     this->dumpTPGGraphHeader();
     bool read = true;
     while (read) {
@@ -344,6 +452,7 @@ bool File::TPGGraphDotImporter::readLineFromFile()
     std::regex testInstructionDeclare(this->instructionRegex);
     std::regex testLinkPI(this->linkProgramInstructionRegex);
     std::regex testLinkTPA(this->linkProgramActionRegex);
+    std::regex testLinkAP(this->linkActionProgramRegex);
     std::regex testLinkTPT(this->linkProgramTeamRegex);
     std::regex testLinkTP(this->addLinkProgramRegex);
 
@@ -383,6 +492,9 @@ bool File::TPGGraphDotImporter::readLineFromFile()
     }
     else if (std::regex_search(this->lastLine, matches, testLinkTP)) {
         readLinkTeamProgram(matches);
+    }
+    else if (std::regex_search(this->lastLine, matches, testLinkAP)) {
+        readLinkActionProgram(matches);
     }
     else {
         return false;

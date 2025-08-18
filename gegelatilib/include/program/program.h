@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -56,6 +57,16 @@ namespace Program {
         const Environment& environment;
 
         /**
+         * \brief Boolean indicating if true that the program is an action
+         * program, if false that it is a context program
+         *
+         * An action program is a program used for taking continuous actions, in
+         * contrast with classic, or context programs, that output a bid. An
+         * Action program source must be a TPGAction.
+         */
+        bool actionProgram;
+
+        /**
          * \brief Lines of the program and intron property.
          *
          * Each element of this vector stores a pointer to a Line, and a
@@ -84,10 +95,12 @@ namespace Program {
          * \brief Main constructor of the Program.
          *
          * \param[in] e the reference to the Environment that will be referenced
-         * in the Program attributes.
+         * \param[in] actProgram boolean specifying if the program is action or
+         * context in the Program attributes.
          */
-        Program(const Environment& e)
-            : environment{e}, constants{e.getNbConstant()}
+        Program(const Environment& e, bool actProgram)
+            : environment{e}, constants{e.getParams().nbProgramConstant},
+              actionProgram{actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.
         };
@@ -102,16 +115,40 @@ namespace Program {
          */
         Program(const Program& other)
             : environment{other.environment}, lines{other.lines},
-              constants{other.constants}
+              constants{other.constants}, actionProgram{other.actionProgram}
+        {
+            // Replace lines with their copy
+            // Keep intron info
+            std::transform(lines.begin(), lines.end(), lines.begin(),
+                           [](std::pair<Line*, bool>& otherLine)
+                               -> std::pair<Line*, bool> {
+                               return {new Line(*(otherLine.first)),
+                                       otherLine.second};
+                           });
+        };
+
+        /**
+         * \brief Copy constructor of the Program.
+         *
+         * This copy constructor realises a deep copy of the Line of the given
+         * Program, instead of the default shallow copy.
+         *
+         * \param[in] other a const reference the the copied Program.
+         * \param[in] actProgram boolean specifying if the program is action or
+         * context
+         */
+        Program(const Program& other, bool actProgram)
+            : environment{other.environment}, lines{other.lines},
+              constants{other.constants}, actionProgram{actProgram}
         {
             // Replace lines with their copy
             // Keep intro info
-            std::transform(
-                lines.begin(), lines.end(), lines.begin(),
-                [](std::pair<Line*, bool>& otherLine)
-                    -> std::pair<Line*, bool> {
-                    return {new Line(*(otherLine.first)), otherLine.second};
-                });
+            std::transform(lines.begin(), lines.end(), lines.begin(),
+                           [](std::pair<Line*, bool>& otherLine)
+                               -> std::pair<Line*, bool> {
+                               return {new Line(*(otherLine.first)),
+                                       otherLine.second};
+                           });
         };
 
         /**
@@ -226,6 +263,13 @@ namespace Program {
          * \throw std::out_of_range if the index is too large.
          */
         bool isIntron(uint64_t index) const;
+
+        /**
+         * \brief Checks wether the current program is or not an action program.
+         *
+         * \return true if the procram is an action program.
+         */
+        bool isActionProgram() const;
 
         /**
          * \brief Scan the Line of the Program to identify introns.

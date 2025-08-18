@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -49,6 +50,7 @@ class PolicyStatsTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     Environment* e = NULL;
+    Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
     TPG::TPGGraph* tpg;
@@ -76,12 +78,18 @@ class PolicyStatsTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<double>((unsigned int)25)));
 
         // Environment
-        e = new Environment(set, vect, 8, 5);
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect);
 
-        // Create 8 programs
+        // Create 8 context programs and 3 action programs
         for (int i = 0; i < 8; i++) {
-            progPointers.push_back(
-                std::shared_ptr<Program::Program>(new Program::Program(*e)));
+            progPointers.push_back(std::shared_ptr<Program::Program>(
+                new Program::Program(*e, false)));
+        }
+        for (int i = 0; i < 3; i++) {
+            progPointers.push_back(std::shared_ptr<Program::Program>(
+                new Program::Program(*e, true)));
         }
 
         // Create a TPG
@@ -91,6 +99,9 @@ class PolicyStatsTest : public ::testing::Test
         // |     /| \    |       |
         // v    / v  \   v       v
         // A0<-'  A1  `->A2     A3
+        // | \           |
+        // v  \          v
+        // P1  `->P2     P3
         //
         // With four action and four teams
         // All Edges have a unique Program, except T1->A0 and T0->A0 which
@@ -126,12 +137,23 @@ class PolicyStatsTest : public ::testing::Test
                                          *tpg->getVertices().at(6),
                                          progPointers.at(7)));
 
+        // Add new Action Edges to A0
+        edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(4),
+                                               progPointers.at(8), 1));
+        edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(4),
+                                               progPointers.at(9), 2));
+
+        // Add new Action Edges to A2
+        edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(6),
+                                               progPointers.at(10), 0));
+
         // Check the characteristics
         ASSERT_EQ(tpg->getNbVertices(), 8);
-        ASSERT_EQ(tpg->getEdges().size(), 9);
+        ASSERT_EQ(tpg->getEdges().size(), 12);
         ASSERT_EQ(tpg->getRootVertices().size(), 2);
 
-        // Add instructions to 2 programs
+        // Add instructions to 2 context programs and the same to two action
+        // programs
 
         // Program 0 (referenced by two edges)
         Program::Line* l = &progPointers.at(0).get()->addNewLine();
@@ -163,6 +185,37 @@ class PolicyStatsTest : public ::testing::Test
         l->setOperand(1, 2, 12);   // Array[12 .. 15]
 
         progPointers.at(1).get()->identifyIntrons();
+
+        // Program 0 (referenced by two edges)
+        l = &progPointers.at(8).get()->addNewLine();
+        // Intron
+        l->setInstructionIndex(3); // MultByConst
+        l->setDestinationIndex(4); // Register[4]
+        l->setOperand(0, 0, 0);    // Array[0]
+        l->setOperand(1, 1, 0);    // Constant[0]
+
+        l = &progPointers.at(8).get()->addNewLine();
+        l->setInstructionIndex(1); // Add
+        l->setDestinationIndex(1); // Register[1]
+        l->setOperand(0, 2, 2);    // Array[2]
+        l->setOperand(1, 0, 13);   // Register[5]
+
+        l = &progPointers.at(8).get()->addNewLine();
+        l->setInstructionIndex(2); // Lambda
+        l->setDestinationIndex(0); // Register[0]
+        l->setOperand(0, 2, 2);    // Array[2]
+        l->setOperand(1, 0, 1);    // Register[1 .. 3]
+
+        progPointers.at(8).get()->identifyIntrons();
+
+        // Program 1 (referenced by one edge)
+        l = &progPointers.at(9).get()->addNewLine();
+        l->setInstructionIndex(2); // Lambda
+        l->setDestinationIndex(0); // Register[0]
+        l->setOperand(0, 2, 10);   // Array[10]
+        l->setOperand(1, 2, 12);   // Array[12 .. 15]
+
+        progPointers.at(9).get()->identifyIntrons();
     }
 
     virtual void TearDown()
@@ -254,6 +307,46 @@ TEST_F(PolicyStatsTest, AnalyzeProgram)
             {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{2, 2}, 2}};
         ASSERT_EQ(ps.nbUsagePerDataLocation, content)
             << "Incorrect attribute value after analyzing a Program.";
+
+        ASSERT_NO_THROW(ps.analyzeProgram(progPointers.at(8).get()))
+            << "Analysis of a valid Program failed unexpectedly.";
+
+        // Check analysis results
+        ASSERT_EQ(ps.nbLinesPerActionProgram.size(), 1)
+            << "Incorrect attribute value after analyzing a Program.";
+        ASSERT_EQ(ps.nbLinesPerActionProgram.at(0), 3)
+            << "Incorrect attribute value after analyzing a Program.";
+        ASSERT_EQ(ps.nbIntronPerActionProgram.size(), 1)
+            << "Incorrect attribute value after analyzing a Program.";
+        ASSERT_EQ(ps.nbIntronPerActionProgram.at(0), 1)
+            << "Incorrect attribute value after analyzing a Program.";
+        ASSERT_EQ(ps.nbUsePerActionProgram.size(), 1)
+            << "Incorrect attribute value after analyzing a Program.";
+        ASSERT_EQ(ps.nbUsePerActionProgram.begin()->first,
+                  progPointers.at(8).get())
+            << "Incorrect attribute value after analyzing a Program.";
+        ASSERT_EQ(ps.nbUsePerActionProgram.begin()->second, i + 1)
+            << "Incorrect attribute value after analyzing a Program.";
+        // Only non intron are counted
+        ASSERT_EQ(ps.nbUsagePerInstructionActionProg.size(), 2)
+            << "Incorrect attribute value after analyzing a Program.";
+        auto iter3 = ps.nbUsagePerInstructionActionProg.begin();
+        ASSERT_EQ(iter3->first, 1)
+            << "Incorrect attribute value after analyzing a Program.";
+        ASSERT_EQ(iter3->second, 1)
+            << "Incorrect attribute value after analyzing a Program.";
+        iter3++;
+        ASSERT_EQ(iter3->first, 2)
+            << "Incorrect attribute value after analyzing a Program.";
+        ASSERT_EQ(iter3->second, 1)
+            << "Incorrect attribute value after analyzing a Program.";
+        ASSERT_EQ(ps.nbUsagePerDataLocationActionProg.size(), 4)
+            << "Incorrect attribute value after analyzing a Program.";
+        auto iter4 = ps.nbUsagePerDataLocationActionProg.begin();
+        std::map<std::pair<size_t, size_t>, size_t> content2 = {
+            {{0, 1}, 2}, {{0, 2}, 1}, {{0, 3}, 1}, {{2, 2}, 2}};
+        ASSERT_EQ(ps.nbUsagePerDataLocationActionProg, content2)
+            << "Incorrect attribute value after analyzing a Program.";
     }
 }
 
@@ -342,6 +435,31 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
         }
     }
 
+    std::vector<size_t> nbLinesPerActionProgram{3, 1, 0};
+    ASSERT_EQ(ps.nbLinesPerActionProgram, nbLinesPerActionProgram);
+
+    std::vector<size_t> nbIntronPerActionProgram{1, 0, 0};
+    ASSERT_EQ(ps.nbIntronPerActionProgram, nbIntronPerActionProgram);
+
+    std::map<size_t, size_t> nbUsagePerInstructionActionProg{{1, 1}, {2, 2}};
+    ASSERT_EQ(ps.nbUsagePerInstructionActionProg,
+              nbUsagePerInstructionActionProg);
+
+    std::map<std::pair<size_t, size_t>, size_t>
+        nbUsagePerDataLocationActionProg{{{0, 1}, 2},  {{0, 2}, 1},
+                                         {{0, 3}, 1},  {{2, 2}, 2},
+                                         {{2, 10}, 1}, {{2, 12}, 1}};
+    ASSERT_EQ(ps.nbUsagePerDataLocationActionProg,
+              nbUsagePerDataLocationActionProg);
+
+    std::vector<size_t> nbUsePerActionProgram{1, 1, 1};
+    for (auto i = 0; i < nbUsePerActionProgram.size(); i++) {
+        if (nbUsePerActionProgram[i] > 0) {
+            ASSERT_EQ(ps.nbUsePerActionProgram.at(progPointers.at(i + 8).get()),
+                      nbUsePerActionProgram[i]);
+        }
+    }
+
     std::vector<size_t> nbUsePerTPGTeam{1, 1, 1};
     for (auto i = 0; i < nbUsePerTPGTeam.size(); i++) {
         ASSERT_EQ(ps.nbUsePerTPGTeam.at(
@@ -380,6 +498,11 @@ TEST_F(PolicyStatsTest, Clear)
     ASSERT_TRUE(ps.nbUsePerProgram.empty());
     ASSERT_TRUE(ps.nbUsePerTPGTeam.empty());
     ASSERT_TRUE(ps.nbUsePerTPGAction.empty());
+    ASSERT_TRUE(ps.nbUsePerActionProgram.empty());
+    ASSERT_TRUE(ps.nbLinesPerActionProgram.empty());
+    ASSERT_TRUE(ps.nbIntronPerActionProgram.empty());
+    ASSERT_TRUE(ps.nbUsagePerInstructionActionProg.empty());
+    ASSERT_TRUE(ps.nbUsagePerDataLocationActionProg.empty());
 }
 
 TEST_F(PolicyStatsTest, InsertOperator)

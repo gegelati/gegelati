@@ -1,9 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
  * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -70,6 +71,14 @@ namespace CodeGen {
          * stack of visited edges.
          */
         virtual void initHeaderFile();
+
+        /**
+         * \brief function printing activation function code in the C files.
+         *
+         * This function print the activation function in the param file of the
+         * Environment instance.
+         */
+        virtual void initActivationFunction();
 
       public:
         /**

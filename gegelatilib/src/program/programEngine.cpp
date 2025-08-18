@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2023) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2023)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -37,12 +38,13 @@
 
 #include "program/programEngine.h"
 #include "data/constantHandler.h"
+#include "instructions/multByConstant.h"
 
 void Program::ProgramEngine::setProgram(const Program& prog)
 {
     // are constants used here ?
     size_t offset = 1;
-    if (prog.getEnvironment().getNbConstant() > 0) {
+    if (prog.getEnvironment().getParams().nbProgramConstant > 0) {
         // replace programs constants if already existing
         dataScsConstsAndRegs.at(1) = prog.cGetConstantHandler();
         // increment offset for the datahandlers verification
@@ -128,13 +130,17 @@ const void Program::ProgramEngine::fetchCurrentOperands(
     const Instructions::Instruction& instruction =
         this->getCurrentInstruction(); // throw std::out_of_range
 
+    uint64_t indexConst = 0;
+
     // Get as many operands as required by the instruction.
     for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
+
+        const std::type_info& operandType =
+            instruction.getOperandTypes().at(i).get();
+
         const Data::DataHandler& dataSource = this->dataScsConstsAndRegs.at(
             line.getOperand(i).first); // Throws std::out_of_range
         const uint64_t operandLocation = getOperandLocation(i);
-        const std::type_info& operandType =
-            instruction.getOperandTypes().at(i).get();
         Data::UntypedSharedPtr data =
             dataSource.getDataAt(operandType, operandLocation);
         operands.push_back(data);
@@ -183,4 +189,17 @@ void Program::ProgramEngine::iterateThroughtProgram(const bool ignoreException)
         // Increment the programCounter.
         hasNext = this->next();
     };
+}
+
+std::vector<double> Program::ProgramEngine::getRegisterValues(
+    uint64_t nbRegisters)
+{
+
+    std::vector<double> registerValues;
+    // Return the register + 1 to keep the first one for bids.
+    for (int i = 0; i < nbRegisters; i++) {
+        registerValues.push_back(*(this->registers.getDataAt(typeid(double), i)
+                                       .getSharedPointer<const double>()));
+    }
+    return registerValues;
 }

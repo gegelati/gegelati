@@ -1,5 +1,5 @@
 # Minimum version for CXX17 support.
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8...4.0)
 
 # This CMakeLists was freely adapted by Karol Desnos from
 # https://github.com/robotology/how-to-export-cpp-library
@@ -41,7 +41,7 @@ set(PROJECT_NAME GEGELATI)
 
 project(${PROJECT_NAME}
         LANGUAGES CXX
-        VERSION 1.4.0)
+        VERSION 2.0.0)
 string(TOLOWER ${PROJECT_NAME} project_name)
 set(LIB_SOURCE_DIRECTORY ${project_name}lib)
 
@@ -139,7 +139,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # - InstallBasicPackageFiles (http://robotology.github.io/ycm/gh-pages/v0.8/module/InstallBasicPackageFiles.html)
 # - AddUninstallTarget (http://robotology.github.io/ycm/gh-pages/v0.8/module/AddUninstallTarget.html)
 # - AddInstallRPATHSupport (http://robotology.github.io/ycm/gh-pages/v0.8/module/AddInstallRPATHSupport.html)
-# from YCM. Files are under the cmake subdirectory.
+# from YCM. Files are under the cmake subdirectory.
 # See https://github.com/robotology/ycm/
 # If you don't want to ship these files with your code (recommended), you can
 # instead depend on YCM.

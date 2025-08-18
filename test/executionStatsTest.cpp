@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2022 - 2025) :
  *
  * Elinor Montmasson <elinor.montmasson@gmail.com> (2022)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -92,14 +93,18 @@ class ExecutionStatsTest : public ::testing::Test
         vect.emplace_back(*data);
 
         // Environment
-        e = new Environment(set, vect, 8, 5);
+        Learn::LearningParameters params;
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 5;
+        e = new Environment(set, params, vect);
 
         // Setup execution engine
         execEngine = new TPG::TPGExecutionEngineInstrumented(*e);
 
         // Create 8 programs
         for (int i = 0; i < 8; i++) {
-            progPointers.push_back(std::make_shared<Program::Program>(*e));
+            progPointers.push_back(
+                std::make_shared<Program::Program>(*e, false));
         }
 
         // Create a TPG
@@ -223,7 +228,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = 10
         // P8 = 12
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
+            execEngine->executeFromRoot(*tpg->getVertices().at(0)).first));
 
         //  - T0 -> T1 -> A1
         data->setDataAt(typeid(double), 10, 10);
@@ -233,7 +238,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = 10
         // P8 = 12
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
+            execEngine->executeFromRoot(*tpg->getVertices().at(0)).first));
 
         //  - T0 -> T1 -> T2 -> A2
         data->setDataAt(typeid(double), 12, 13);
@@ -243,7 +248,7 @@ class ExecutionStatsTest : public ::testing::Test
         // P2 = 10
         // P8 = -18
         ASSERT_NO_THROW(inferenceTraces.push_back(
-            execEngine->executeFromRoot(*tpg->getVertices().at(0))));
+            execEngine->executeFromRoot(*tpg->getVertices().at(0)).first));
     }
 
     virtual void TearDown() override

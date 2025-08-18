@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -96,6 +97,12 @@ namespace Log {
          */
         double validTime = 0;
 
+        /**
+         * Keeps the duration of the decimation to be able to log it
+         * some time after it is computed.
+         */
+        double decimationTime = 0;
+
         /// LearningAgent logged by the LALogger
         Learn::LearningAgent& learningAgent;
 
@@ -124,6 +131,12 @@ namespace Log {
          * Boolean telling the logger if the training will make a validation
          */
         bool doValidation = false;
+
+        /**
+         * Boolean telling the logger if the LearningEnvironment returns also a
+         * utility with the score
+         */
+        bool useUtility = false;
 
         /**
          * \brief Constructor defining a given output and setting start and

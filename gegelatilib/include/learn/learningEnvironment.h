@@ -1,8 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2024) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2024)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2025)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2024 - 2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -87,6 +87,14 @@ namespace Learn {
         /// Make the default copy constructor protected.
         LearningEnvironment(const LearningEnvironment& other) = default;
 
+        /// Boolean indicating if this environment uses discrete or continuous
+        /// actions.
+        const bool isDiscreteEnvironment;
+
+        /// Initial values of the continuous actions if actions are not taken by
+        /// a TPG.
+        const std::vector<uint64_t> initActions;
+
       public:
         /**
          * \brief Delete the default constructor of a LearningEnvironment.
@@ -101,8 +109,19 @@ namespace Learn {
          *
          * \param[in] nbAct number of actions that will be usable for
          * interacting with this LearningEnviromnent.
+         * \param[in] isDiscreteEnv Boolean indicating if this environment uses
+         * discrete or continuous actions.
+         * \param[in] initAct init values of action if the TPG do not choose a
+         * continuous action. Default value set to a vector with size equal to
+         * nbAct and fill with zeros.
          */
-        LearningEnvironment(uint64_t nbAct) : nbActions{nbAct} {};
+        LearningEnvironment(
+            uint64_t nbAct, bool isDiscreteEnv = true,
+            const std::vector<uint64_t>& initAct = std::vector<uint64_t>())
+            : nbActions{nbAct}, isDiscreteEnvironment{isDiscreteEnv},
+              initActions{initAct.empty() && !isDiscreteEnv
+                              ? std::vector<uint64_t>(nbAct, 0)
+                              : initAct} {};
 
         /**
          * \brief Get a copy of the LearningEnvironment.
@@ -124,6 +143,15 @@ namespace Learn {
         virtual bool isCopyable() const;
 
         /**
+         * \brief Is the LearningEnvrionment using a utility in addition to the
+         * reward. Information needed for the logs.
+         *
+         * \return true if the LearningEnvironment is using utility. Default
+         * implementation returns false.
+         */
+        virtual bool isUsingUtility() const;
+
+        /**
          * \brief Get the number of actions available for this
          * LearningEnvironment.
          *
@@ -135,6 +163,28 @@ namespace Learn {
         };
 
         /**
+         * \brief Get the vector of initial actions available for this
+         * LearningEnvironment.
+         *
+         * \return the vector integer value of the initActions attribute.
+         */
+        const std::vector<uint64_t>& getInitActions() const
+        {
+            return initActions;
+        };
+
+        /**
+         * \brief Get the information of the nature of the environment action
+         * type.
+         *
+         * \return true if the actions are discrete, either continuous.
+         */
+        const bool isDiscrete() const
+        {
+            return isDiscreteEnvironment;
+        }
+
+        /**
          * \brief Execute an action on the LearningEnvironment.
          *
          * The purpose of this method is to execute an action, represented by
@@ -144,11 +194,33 @@ namespace Learn {
          * It is the responsibility of this method to call the updateHash
          * method on dataSources whose content have been affected by the action.
          *
-         * \param[in] actionID the integer number representing the action to
+         * \param[in] actionID the double value representing the action to
          * execute.
          * \throw std::runtime_error if the actionID exceeds nbActions - 1.
          */
-        virtual void doAction(uint64_t actionID);
+        virtual void doAction(double actionID);
+
+        /**
+         * \brief Execute actions on the LearningEnvironment.
+         *
+         * The purpose of this method is to execute actions, represented by
+         * a vector of actionId comprised, for actionId i between 0 and
+         * vectActions[i] - 1. The LearningEnvironment implementation only
+         * checks that the given actionID is comprised, for actionId i between 0
+         * and vectActions[i] - 1. It is the responsibility of this method to
+         * call the updateHash method on dataSources whose content have been
+         * affected by the action.
+         *
+         * If the size of the vector is one, this method launches the method
+         * doAction(double actionID), the actionID being the only integer in
+         * the vector.
+         *
+         * \param[in] vectActionID the vector integer numbers of each actions to
+         * execute.
+         * \throw std::runtime_error if the actionsID[i] exceeds vectActions[i]
+         * - 1.
+         */
+        virtual void doActions(std::vector<double> vectActionID);
 
         /**
          * \brief Reset the LearningEnvironment.
@@ -202,6 +274,15 @@ namespace Learn {
          * \return the current score for the LearningEnvironment.
          */
         virtual double getScore() const = 0;
+
+        /**
+         * \brief Returns the current utility of the Environment.
+         *
+         * The returned utility is only an information to be used for logs.
+         *
+         * \return the current utility for the LearningEnvironment.
+         */
+        virtual double getUtility() const;
 
         /**
          * \brief Method for checking if the LearningEnvironment has reached a

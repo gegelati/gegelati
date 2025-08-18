@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -38,12 +39,12 @@
 
 Data::Constant::operator int32_t() const
 {
-    return this->value;
+    return (int32_t)this->value;
 }
 
 Data::Constant::operator double() const
 {
-    return (double)this->value;
+    return this->value;
 }
 
 bool Data::Constant::operator==(const Constant& other) const

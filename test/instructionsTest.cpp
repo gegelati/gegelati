@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -245,7 +246,7 @@ TEST(InstructionsTest, getPrintablePrimitiveOperandType)
 {
     Instructions::Instruction* i = new Instructions::MultByConstant<double>();
     ASSERT_EQ(i->getPrintablePrimitiveOperandType(0), "double");
-    ASSERT_EQ(i->getPrintablePrimitiveOperandType(1), "int32_t");
+    ASSERT_EQ(i->getPrintablePrimitiveOperandType(1), "double");
     delete i;
 }
 

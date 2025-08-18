@@ -1,11 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2024) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
- * QuentinVacher <98522623+QuentinVacher-rl@users.noreply.github.com> (2023)
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2023 - 2024)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2023 - 2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -56,6 +55,7 @@
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 
+#include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
@@ -67,6 +67,7 @@ class LearningAgentTest : public ::testing::Test
   protected:
     Instructions::Set set;
     StickGameWithOpponent le;
+    FakeMultiContinuousLearningEnvironment cle;
     Learn::LearningParameters params;
 
     virtual void SetUp()
@@ -91,6 +92,7 @@ class LearningAgentTest : public ::testing::Test
         params.mutation.prog.pConstantMutation = 0.5;
         params.mutation.prog.minConstValue = 0;
         params.mutation.prog.maxConstValue = 1;
+        params.nbProgramConstant = 5;
     }
 
     virtual void TearDown()
@@ -122,18 +124,6 @@ TEST_F(LearningAgentTest, Init)
 
     ASSERT_NO_THROW(la.init())
         << "Initialization of the LearningAgent should not fail.";
-}
-
-TEST_F(LearningAgentTest, InitNbRoots)
-{
-    params.mutation.tpg.initNbRoots = 42;
-    Learn::LearningAgent la(le, set, params);
-
-    la.init();
-
-    ASSERT_EQ(la.getTPGGraph()->getNbRootVertices(), 42)
-        << "Initialization of the LearningAgent should have a number of roots "
-           "equal to the number specify";
 }
 
 TEST_F(LearningAgentTest, addLogger)
@@ -465,11 +455,10 @@ TEST_F(LearningAgentTest, DecimateWorstRoots)
 
     la.init();
 
-    // Remove two teams (first and last) to make the first action a root
+    // Remove the first team to make the first action a root
     TPG::TPGGraph& graph = *la.getTPGGraph();
     auto roots = graph.getRootVertices();
     graph.removeVertex(*roots.at(0));
-    graph.removeVertex(*roots.at(le.getNbActions() - 1));
 
     // Check that the action is now a root
     roots = graph.getRootVertices();
@@ -574,6 +563,14 @@ TEST_F(LearningAgentTest, Train)
     alt = true;
     ASSERT_NO_THROW(la.train(alt, true))
         << "Using the boolean reference to stop the training should not fail.";
+
+    // For coverage
+    params.doValidation = true;
+    params.stepValidation = 2;
+    Learn::LearningAgent la2(le, set, params);
+    alt = false;
+    ASSERT_NO_THROW(la2.train(alt, true))
+        << "Using the boolean reference to stop the training should not fail.";
 }
 
 // Similar to previous test, but verifications of graphs properties are here to
@@ -602,13 +599,13 @@ TEST_F(LearningAgentTest, TrainPortability)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 29)
+    ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 25)
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 92)
+    ASSERT_EQ(tpg.getEdges().size(), 86)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8778232462724898875)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 786532405746195131U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -626,6 +623,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.nbThreads = 3;
 
     Learn::LearningAgent la(le, set, params, TPG::TPGInstrumentedFactory());
 
@@ -637,23 +635,25 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 29)
+    ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 25)
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 92)
+    ASSERT_EQ(tpg.getEdges().size(), 86)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8778232462724898875)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 786532405746195131U)
         << "Graph does not have the expected determinst characteristics.";
 
     /*
-    //To help to refind the values if the determinism is changed by a update
+    //To help to refind the values if the determinism is changed by an update
+    size_t idx = 0;
     for (const auto& edge : tpg.getEdges()) {
         const TPG::TPGEdgeInstrumented* edgeInstrumented =
             dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge.get());
 
         if (edgeInstrumented != nullptr) {
-            std::cout << "NbVisits = " << edgeInstrumented->getNbVisits()
+            std::cout << "Idx = " << idx++
+                    << ", NbVisits = " << edgeInstrumented->getNbVisits()
                     << ", NbTraversal = " << edgeInstrumented->getNbTraversal()
                     << std::endl;
         }
@@ -669,31 +669,150 @@ TEST_F(LearningAgentTest, TrainInstrumented)
 
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(),
-        304);
+        63);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(),
         0);
 
-    std::advance(edgesIterator, 3);
+    std::advance(edgesIterator, 21);
     const auto* edge2 = edgesIterator->get();
 
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbVisits(),
-        107);
+        87);
     ASSERT_EQ(
         dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversal(),
-        107);
+        4);
 
     auto& verticesIterator = tpg.getVertices();
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(0))
                   ->getNbVisits(),
-              5533);
+              3327);
 
     ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
                   verticesIterator.at(5))
                   ->getNbVisits(),
-              107);
+              63);
+}
+
+// Similar to previous test, but with continuous actions and no action programs
+TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.mutation.tpg.useActionProgram = false;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.nbThreads = 3;
+
+    Learn::LearningAgent la(cle, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    ASSERT_EQ(tpg.getNbVertices(), 39)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 94)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 4479928206478652248U)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
+// Similar to previous test, but with continuous actions and no action programs
+TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.mutation.tpg.useActionProgram = true;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.nbThreads = 3;
+
+    Learn::LearningAgent la(cle, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    ASSERT_EQ(tpg.getNbVertices(), 67)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 143)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              13533704402962106053U)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
+// Similar to previous test, but with MATPG solution (no need for MAPLE because
+// it is included in MATPG)
+TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.ratioDeletedRoots = 0.8;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.teamAccessAllActions = false;
+    params.mutation.tpg.ratioTeamsOverActions = 0.3333;
+    params.useTournamentSelection = true;
+    params.sizeTournament = 3;
+    params.mutation.tpg.nbRoots = 100;
+    params.nbThreads = 3;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+
+    Learn::LearningAgent la(cle, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    ASSERT_EQ(tpg.getNbVertices(), 76)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 46)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 221)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 7720633690943106983U)
+        << "Graph does not have the expected determinst characteristics.";
 }
 
 TEST_F(LearningAgentTest, KeepBestPolicy)
@@ -750,7 +869,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     le.reset();
     TPG::TPGExecutionEngine tee(tpg.getEnvironment());
     std::vector<const TPG::TPGVertex*> pathOrigin =
-        tee.executeFromRoot(*(tpg.getRootVertices().at(0)));
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0))).first;
 
     // Clear introns
     tpg.clearProgramIntrons();
@@ -768,7 +887,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
 
     // Check that the behavior is identical (empirically, not really foolproof)
     std::vector<const TPG::TPGVertex*> pathNoIntrons =
-        tee.executeFromRoot(*(tpg.getRootVertices().at(0)));
+        tee.executeFromRoot(*(tpg.getRootVertices().at(0))).first;
 
     ASSERT_EQ(pathOrigin.size(), pathNoIntrons.size())
         << "Path length in TPG before and after inton removal is not "
@@ -777,6 +896,42 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
         ASSERT_EQ(pathOrigin.at(idx), pathNoIntrons.at(idx))
             << "Path element in TPGGraph changed when removing introns.";
     }
+}
+
+TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 3;
+    params.ratioDeletedRoots =
+        0.5; // high number to force the apparition of root action.
+    params.nbThreads = 1;
+    Learn::LearningAgent la(cle, set, params);
+
+    la.init();
+    // Do the populate call to keep know the number of initial vertex
+    Archive a(0);
+    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), a, params.mutation,
+                                     la.getRNG(), cle.getNbActions());
+    size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
+
+    // Seed selected so that an action becomes a root during next generation
+    ASSERT_NO_THROW(la.trainOneGeneration(4))
+        << "Training for one generation failed.";
+    // Check the number of vertex in the graph.
+    // Must be lower or equal to initial number of vertex - number of root
+    // removed (since some actions vertex are removed too)
+    ASSERT_LE(la.getTPGGraph()->getNbVertices(),
+              initialNbVertex -
+                  floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+        << "Number of remaining is under the number of roots from the "
+           "TPGGraph.";
+    // Train a second generation, because most roots were removed, a root
+    // actions have appeared and the training algorithm will attempt to remove
+    // them.
+    ASSERT_NO_THROW(la.trainOneGeneration(0))
+        << "Training for one generation failed.";
 }
 
 TEST_F(ParallelLearningAgentTest, Constructor)
@@ -807,15 +962,13 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.nbThreads = 1;
 
-    Environment env(set, le.getDataSources(), 8, params.nbProgramConstant);
+    Environment env(set, params, le.getDataSources());
 
     TPG::TPGGraph tpg(env);
 
     // Initialize Randomness
     Mutator::RNG rng;
     rng.setSeed(0);
-
-    params.mutation.tpg.initNbRoots = le.getNbActions();
 
     // Initialize the tpg
     Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng,
@@ -1257,4 +1410,198 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
     ASSERT_EQ(pla.getTPGGraph()->getNbRootVertices(), 1)
         << "A single root TPGVertex should remain in the TPGGraph when keeping "
            "the best policy only";
+}
+
+TEST_F(LearningAgentTest, EvaluateJobWithUtility)
+{
+    // Fake env to use utilisty
+    class UtilityEnv : public StickGameWithOpponent
+    {
+      public:
+        bool isUsingUtility() const override
+        {
+            return true;
+        }
+        double getUtility() const override
+        {
+            return 42.0;
+        }
+    } utilityEnv;
+
+    params.nbIterationsPerPolicyEvaluation = 2;
+    Learn::LearningAgent la(utilityEnv, set, params);
+    la.init();
+
+    Archive a;
+    TPG::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
+    auto job = *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
+                           Learn::LearningMode::TRAINING);
+
+    // Check that the job can be evaluated without throwing an exception
+    ASSERT_NO_THROW({
+        auto res = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING,
+                                  utilityEnv);
+        ASSERT_GE(res->getUtility(), 0.0);
+    });
+}
+
+TEST_F(LearningAgentTest, DecimateWorstRootsActionsQuota)
+{
+    // We force the ratio to quickly reach quotas
+    params.mutation.tpg.nbRoots = 10;
+    params.ratioDeletedRoots = 0.5;
+    params.mutation.tpg.ratioTeamsOverActions = 0.7;
+    params.mutation.tpg.useActionProgram =
+        true; // To make action vertices removed too.
+    Learn::LearningAgent la(cle, set, params);
+    la.init();
+
+    std::shared_ptr<TPG::TPGGraph> tpg = la.getTPGGraph();
+
+    // Set teams at a lower score than actions
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        results;
+    double scoreActions = 10.0;
+    double scoreTeams = 0.0;
+    for (auto* root : tpg->getRootVertices()) {
+        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
+            results.emplace(
+                std::make_shared<Learn::EvaluationResult>(scoreActions++, 1),
+                root);
+        }
+        else {
+            results.emplace(
+                std::make_shared<Learn::EvaluationResult>(scoreTeams++, 1),
+                root);
+        }
+    }
+
+    ASSERT_NO_THROW(la.decimateWorstRoots(results));
+
+    size_t nbTeams = 0;
+    size_t nbActions = 0;
+    for (auto root : tpg->getRootVertices()) {
+        if (dynamic_cast<const TPG::TPGTeam*>(root) != nullptr) {
+            nbTeams++;
+        }
+        else if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
+            nbActions++;
+        }
+    }
+    ASSERT_EQ(nbTeams, 4)
+        << "After decimation, the number of teams should be 3.";
+    ASSERT_EQ(nbActions, 1)
+        << "After decimation, the number of actions should be 2.";
+}
+
+TEST_F(LearningAgentTest, DecimateWorstRootsTeamsQuota)
+{
+    // We force the ratio to quickly reach quotas
+    params.mutation.tpg.nbRoots = 10;
+    params.ratioDeletedRoots = 0.5;
+    params.mutation.tpg.ratioTeamsOverActions = 0.5;
+    params.mutation.tpg.useActionProgram =
+        true; // To make action vertices removed too.
+    Learn::LearningAgent la(cle, set, params);
+    la.init();
+
+    std::shared_ptr<TPG::TPGGraph> tpg = la.getTPGGraph();
+
+    // Set teams at a higher score than actions
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        results;
+    double scoreActions = 0.0;
+    double scoreTeams = 10.0;
+    for (auto* root : tpg->getRootVertices()) {
+        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
+            results.emplace(
+                std::make_shared<Learn::EvaluationResult>(scoreActions++, 1),
+                root);
+        }
+        else {
+            results.emplace(
+                std::make_shared<Learn::EvaluationResult>(scoreTeams++, 1),
+                root);
+        }
+    }
+
+    // We call the method, which must go through the quota branches for actions
+    // Since we have 3 actions and 7 teams, and we delete half of the roots,
+    // Normally 3 actions and 2 teams should be deleted, but the ratio should
+    // allow Only 1 action to be deleted, and 4 teams.
+    ASSERT_NO_THROW(la.decimateWorstRoots(results));
+
+    size_t nbTeams = 0;
+    size_t nbActions = 0;
+    for (auto root : tpg->getRootVertices()) {
+        if (dynamic_cast<const TPG::TPGTeam*>(root) != nullptr) {
+            nbTeams++;
+        }
+        else if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
+            nbActions++;
+        }
+    }
+
+    std::cout << nbTeams << " teams and " << nbActions
+              << " after before decimation." << std::endl;
+    ASSERT_EQ(nbTeams, 3)
+        << "After decimation, the number of teams should be 3.";
+    ASSERT_EQ(nbActions, 2)
+        << "After decimation, the number of actions should be 2.";
+}
+
+TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
+{
+    Learn::LearningAgent la(le, set, params);
+    la.init();
+    TPG::TPGTeam fakeTeam;
+    ASSERT_THROW(
+        la.evaluateOneRoot(0, Learn::LearningMode::TRAINING, &fakeTeam),
+        std::runtime_error);
+}
+
+TEST_F(LearningAgentTest, DecimateWithTournamentSelection)
+{
+    params.useTournamentSelection = true;
+    params.mutation.tpg.nbRoots = 30;
+    params.ratioDeletedRoots = 0.7;
+    params.sizeTournament = 4;
+    Learn::LearningAgent la(le, set, params);
+    la.init();
+
+    // Create a set of roots with different scores
+    auto roots = la.getTPGGraph()->getRootVertices();
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        results;
+    double score = 0.0;
+    for (auto* root : roots) {
+        results.emplace(std::make_shared<Learn::EvaluationResult>(score++, 1),
+                        root);
+    }
+
+    // Call decimateWorstRoots, which should use tournament selection
+    ASSERT_NO_THROW(la.decimateWorstRoots(results));
+
+    // Check that the number of roots is reduced
+    // The number of roots was 30. With a ratio of 0.7, only 9 should remain as
+    // there were. 21 roots should have been played in the tournament. With a
+    // size tournament of 4, we should do 6 selections, 5 with 4 roots and one
+    // with 1 root. Thus, 6 roots should survived the tournamenent, leading to
+    // 15 roots remaining.
+    ASSERT_EQ(la.getTPGGraph()->getNbRootVertices(), 15)
+        << "After decimation with tournament selection, the number of roots "
+           "should be reduced to 15.";
+
+    size_t nbToDelete = 0;
+    for (auto root : la.getTPGGraph()->getRootVertices()) {
+        if (root->isToBeDeleted()) {
+            nbToDelete++;
+        }
+    }
+    ASSERT_EQ(nbToDelete, 6)
+        << "After decimation with tournament selection, the number of roots "
+           "marked for deletion should be 6.";
 }

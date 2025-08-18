@@ -1,9 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -90,8 +91,8 @@ class LABasicLoggerTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
 
-        auto res1 = new Learn::EvaluationResult(5, 2);
-        auto res2 = new Learn::EvaluationResult(10, 2);
+        auto res1 = new Learn::EvaluationResult(5, 2, 2);
+        auto res2 = new Learn::EvaluationResult(10, 2, 4);
         auto v1(new TPG::TPGAction(0));
         auto v2(new TPG::TPGAction(0));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
@@ -134,6 +135,10 @@ TEST_F(LABasicLoggerTest, logHeader)
     l.doValidation = true;
     l.logHeader();
 
+    // we log a third header with validation column
+    l.useUtility = true;
+    l.logHeader();
+
     // now we will check the header logged correctly
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
@@ -145,14 +150,24 @@ TEST_F(LABasicLoggerTest, logHeader)
     ASSERT_EQ("Train", result[0]);
     ASSERT_EQ("Gen", result[1]);
     ASSERT_EQ("NbVert", result[2]);
-    ASSERT_EQ("Min", result[3]);
-    ASSERT_EQ("Avg", result[4]);
-    ASSERT_EQ("Max", result[5]);
-    ASSERT_EQ("T_mutat", result[6]);
-    ASSERT_EQ("T_eval", result[7]);
-    ASSERT_EQ("T_total", result[8]);
-    ASSERT_EQ("Valid", result[10]);
-    ASSERT_EQ("T_valid", result[21]);
+    ASSERT_EQ("NbActR", result[3]);
+    ASSERT_EQ("NbTeamR", result[4]);
+    ASSERT_EQ("Min", result[5]);
+    ASSERT_EQ("Avg", result[6]);
+    ASSERT_EQ("Max", result[7]);
+    ASSERT_EQ("T_mutat", result[8]);
+    ASSERT_EQ("T_eval", result[9]);
+    ASSERT_EQ("T_decim", result[10]);
+    ASSERT_EQ("T_total", result[11]);
+    ASSERT_EQ("Valid", result[13]);
+    ASSERT_EQ("Avg", result[22]);
+    ASSERT_EQ("T_valid", result[26]);
+    ASSERT_EQ("U_Min", result[35]);
+    ASSERT_EQ("U_Avg", result[36]);
+    ASSERT_EQ("U_Max", result[37]);
+    ASSERT_EQ("R_Min", result[38]);
+    ASSERT_EQ("R_Avg", result[39]);
+    ASSERT_EQ("R_Max", result[40]);
 }
 
 TEST_F(LABasicLoggerTest, logNewGeneration)
@@ -170,9 +185,9 @@ TEST_F(LABasicLoggerTest, logNewGeneration)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 9 because we skip the header
-    ASSERT_EQ("42", result[9]);
-    ASSERT_EQ(result.size(), 9 + 1);
+    // index 12 because we skip the header
+    ASSERT_EQ("42", result[12]);
+    ASSERT_EQ(result.size(), 12 + 1);
 }
 
 TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
@@ -189,8 +204,12 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 8 because we skip the header
-    ASSERT_EQ("6", result[9])
+    // index 12 because we skip the header
+    ASSERT_EQ("18", result[12])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ("0", result[13])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ("15", result[14])
         << "Unexpected number of vertices was printed in the log.";
 }
 
@@ -200,6 +219,9 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
     Log::LABasicLogger l(*la, strStr);
 
     l.logAfterEvaluate(results);
+
+    l.useUtility = true;
+    l.logAfterEvaluate(results);
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
@@ -207,10 +229,18 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 8 because we skip the header
-    ASSERT_DOUBLE_EQ(5.00, std::stod(result[9]));
-    ASSERT_DOUBLE_EQ(7.50, std::stod(result[10]));
-    ASSERT_DOUBLE_EQ(10.00, std::stod(result[11]));
+    // index 12+ because we skip the header
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[12]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[13]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[14]));
+
+    // Utility then reward values
+    ASSERT_DOUBLE_EQ(2.00, std::stod(result[15]));
+    ASSERT_DOUBLE_EQ(3.00, std::stod(result[16]));
+    ASSERT_DOUBLE_EQ(4.00, std::stod(result[17]));
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[18]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[19]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[20]));
 }
 
 TEST_F(LABasicLoggerTest, logAfterValidate)
@@ -219,17 +249,28 @@ TEST_F(LABasicLoggerTest, logAfterValidate)
     Log::LABasicLogger l(*la, strStr);
 
     l.logAfterValidate(results);
+
+    auto r(results);
+    r.clear();
+    l.logAfterValidate(r);
+    l.useUtility = true;
+    l.logAfterValidate(r);
+
     std::string s = strStr.str();
+
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
     std::istringstream iss(s);
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 8+ because we skip the header
-    ASSERT_DOUBLE_EQ(5.00, std::stod(result[9]));
-    ASSERT_DOUBLE_EQ(7.50, std::stod(result[10]));
-    ASSERT_DOUBLE_EQ(10.00, std::stod(result[11]));
+    // index 12+ because we skip the header
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[12]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[13]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[14]));
+
+    // Result size should not have increased with cleared results.
+    ASSERT_EQ(result.size(), 15);
 }
 
 TEST_F(LABasicLoggerTest, logAfterDecimate)
@@ -274,20 +315,22 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
 
-    // index 12+ because we skip the headers and the eval stats
-    double mutatTime = std::stod(result[12]);
-    double evalTime = std::stod(result[13]);
-    double validTime = std::stod(result[14]);
-    double totTime = std::stod(result[14]);
+    // index 15+ because we skip the headers and the eval stats
+    double mutatTime = std::stod(result[15]);
+    double evalTime = std::stod(result[16]);
+    double decimTime = std::stod(result[17]);
+    double validTime = std::stod(result[18]);
+    double totTime = std::stod(result[19]);
     ASSERT_GE(mutatTime, 0) << "Eval duration should be positive";
     ASSERT_GE(evalTime, 0) << "Eval duration should be positive";
+    ASSERT_GE(decimTime, 0) << "Valid duration should be positive";
     ASSERT_GE(validTime, 0) << "Valid duration should be positive";
     ASSERT_GE(totTime, evalTime)
         << "Total time should be the largest duration !";
     ASSERT_GE(totTime, timeToWaitMili / 1000)
         << "Total time should be larger than the time we waited !";
 
-    // Size is headerSize (9) + log size (7 + 3)
-    ASSERT_EQ(result.size(), 9 + 10)
-        << "logEndOfTraining with and without valid should have 4+3=7 elements";
+    // Size is headerSize (12) + log size (8 + 4)
+    ASSERT_EQ(result.size(), 12 + 12) << "logEndOfTraining with and without "
+                                         "valid should have 8+4=12 elements";
 }

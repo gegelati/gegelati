@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,6 +34,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#include <iostream>
 #include <stdexcept>
 
 #include "learn/learningEnvironment.h"
@@ -47,10 +49,51 @@ bool Learn::LearningEnvironment::isCopyable() const
     return false;
 }
 
-void Learn::LearningEnvironment::doAction(uint64_t actionID)
+bool Learn::LearningEnvironment::isUsingUtility() const
 {
-    if (actionID >= this->nbActions) {
+    return false;
+}
+
+void Learn::LearningEnvironment::doAction(double actionID)
+{
+    if (nbActions > 1 && !isDiscreteEnvironment) {
+        throw std::runtime_error(
+            "With more than one continuous action, doAction() "
+            "method should not be called. Use doActions() instead.");
+    }
+
+    if (actionID >= this->getNbActions()) {
         throw std::runtime_error("Given action ID exceeds the number of "
                                  "actions for this learning environment.");
     }
+}
+
+void Learn::LearningEnvironment::doActions(std::vector<double> vectActionID)
+{
+
+    // If vectActionID contain only one action, the doAction method is called
+    // instead
+    if (vectActionID.size() == 1) {
+        this->doAction(vectActionID[0]);
+    }
+    else {
+        if (isDiscreteEnvironment) {
+            throw std::runtime_error(
+                "Gegelati does not support multiple Discrete actions for now");
+        }
+
+        if (vectActionID.size() != nbActions) {
+            throw std::runtime_error(
+                "Vector of action ID given is not the same "
+                "size as the number of actions wanted");
+        }
+    }
+}
+
+double Learn::LearningEnvironment::getUtility() const
+{
+    throw std::runtime_error(
+        "Utility should not be call except if 'isUsingUtility' is override to "
+        "return true."
+        "\nIn that case, this method should be override too.");
 }
