@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
 ## Release version 2.0.0 - Fragogola flavor
-_2025.07.23_
+_2025.08.18_
 
 ### New features
 * **These changes alter the deterministic outputs of trainings.**
