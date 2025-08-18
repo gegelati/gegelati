@@ -177,7 +177,7 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
 
         // Get if the program is an action or context program.
         bool isActionProgram = false;
-        if(matches.size() > 2 && matches[2].matched){
+        if (matches.size() > 2 && matches[2].matched) {
             isActionProgram = std::stoi(matches[2]);
         }
 
@@ -411,16 +411,17 @@ void File::TPGGraphDotImporter::importGraph()
             (majorVersion == supportedMajorVersion &&
              minorVersion == supportedMinorVersion &&
              patchVersion < supportedPatchVersion)) {
-            std::cerr << "Deprecating: The file was exported with an older version "
-                         "of GEGELATI (v"
-                      << majorVersion << "." << minorVersion << "."
-                      << patchVersion
-                      << "). Some features are no longer supported in the "
-                         "current importer version (v"
-                      << supportedMajorVersion << "." << supportedMinorVersion
-                      << "." << supportedPatchVersion << ")." << std::endl;
-            //throw std::runtime_error(
-            //    "The file was exported with an unsupported GEGELATI version.");
+            std::cerr
+                << "Deprecating: The file was exported with an older version "
+                   "of GEGELATI (v"
+                << majorVersion << "." << minorVersion << "." << patchVersion
+                << "). Some features are no longer supported in the "
+                   "current importer version (v"
+                << supportedMajorVersion << "." << supportedMinorVersion << "."
+                << supportedPatchVersion << ")." << std::endl;
+            // throw std::runtime_error(
+            //     "The file was exported with an unsupported GEGELATI
+            //     version.");
         }
     }
     else {
