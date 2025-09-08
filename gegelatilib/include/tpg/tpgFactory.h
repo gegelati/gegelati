@@ -89,7 +89,7 @@ namespace TPG {
          * 
          * \param[in] vertexID unique identifier of the TPGVertex.
          */
-        virtual TPGTeam* createTPGTeam(const uint64_t vertexID) const;
+        virtual std::unique_ptr<TPGTeam> createTPGTeam(const uint64_t vertexID) const;
 
         /**
          * \brief Create a TPGAction for a TPGGraph.
@@ -99,7 +99,7 @@ namespace TPG {
          * \param[in] vertexID unique identifier of the TPGVertex.
          * \param[in] id integer stored as the actionID of the TPGAction.
          */
-        virtual TPGAction* createTPGAction(const uint64_t vertexID, const uint64_t id) const;
+        virtual std::unique_ptr<TPGAction> createTPGAction(const uint64_t vertexID, const uint64_t id) const;
 
         /**
          * \brief Create a TPGEdge for a TPGGraph.

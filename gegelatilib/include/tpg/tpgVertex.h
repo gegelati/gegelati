@@ -45,12 +45,16 @@ namespace TPG {
     // Declare class to make it usable as an attribute.
     class TPGEdge;
 
+
+    static uint64_t COUNT_VERTEX_IDS = 0;
+
     /**
      * \brief Abstract class representing the vertices of a TPGGraph
      */
     class TPGVertex
     {
       public:
+
         /// Default polymorphic destructor
         virtual ~TPGVertex() = default;
 
@@ -174,7 +178,10 @@ namespace TPG {
          */
         std::set<uint64_t> assessedActions;
 
-        uint64_t vertexID; ///< Unique identifier of the TPGVertex
+        /**
+         * \brief Unique identifier of the TPGVertex.
+         */
+        uint64_t vertexID;
     };
 }; // namespace TPG
 

@@ -46,15 +46,15 @@ std::shared_ptr<TPG::TPGGraph> TPG::TPGInstrumentedFactory::createTPGGraph(
         env, std::make_unique<TPGInstrumentedFactory>());
 }
 
-TPG::TPGTeam* TPG::TPGInstrumentedFactory::createTPGTeam(const uint64_t vertexID) const
+std::unique_ptr<TPG::TPGTeam> TPG::TPGInstrumentedFactory::createTPGTeam(const uint64_t vertexID) const
 {
-    return new TPGTeamInstrumented(vertexID);
+    return std::make_unique<TPGTeamInstrumented>(vertexID);
 }
 
-TPG::TPGAction* TPG::TPGInstrumentedFactory::createTPGAction(
+std::unique_ptr<TPG::TPGAction> TPG::TPGInstrumentedFactory::createTPGAction(
     const uint64_t vertexID, const uint64_t id) const
 {
-    return new TPGActionInstrumented(vertexID, id);
+    return std::make_unique<TPGActionInstrumented>(vertexID, id);
 }
 
 std::unique_ptr<TPG::TPGEdge> TPG::TPGInstrumentedFactory::createTPGEdge(

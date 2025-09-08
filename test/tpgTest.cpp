@@ -245,8 +245,8 @@ TEST_F(TPGTest, TPGFactory)
 {
     TPG::TPGFactory factory;
 
-    TPG::TPGAction* action;
-    TPG::TPGTeam* team;
+    std::unique_ptr<TPG::TPGAction> action;
+    std::unique_ptr<TPG::TPGTeam> team;
     std::unique_ptr<TPG::TPGEdge> edge;
     std::unique_ptr<TPG::TPGEdge> actionEdge;
     std::unique_ptr<TPG::TPGExecutionEngine> tee;
@@ -259,12 +259,12 @@ TEST_F(TPGTest, TPGFactory)
         << "TPGGraphELementFactory could not build a TPGTeam.";
     ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
 
-    ASSERT_NO_THROW(edge = factory.createTPGEdge(team, action, progPointer))
+    ASSERT_NO_THROW(edge = factory.createTPGEdge(team.get(), action.get(), progPointer))
         << "TPGGraphELementFactory could not build a TPGEdge.";
     ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
 
     ASSERT_NO_THROW(actionEdge =
-                        factory.createTPGActionEdge(action, progPointer, 0))
+                        factory.createTPGActionEdge(action.get(), progPointer, 0))
         << "TPGGraphELementFactory could not build a TPGActionEdge.";
     ASSERT_NE(actionEdge.get(), nullptr)
         << "Created TPGActionEdge should not be null.";
@@ -273,9 +273,6 @@ TEST_F(TPGTest, TPGFactory)
         << "TPGGraphELementFactory could not build a TPGExecutionEngine.";
     ASSERT_NE(tee.get(), nullptr)
         << "Created TPGExecutionEngine should not be null.";
-
-    delete team;
-    delete action;
 }
 
 TEST_F(TPGTest, TPGGraphAddTPGVertex)
@@ -361,7 +358,7 @@ TEST_F(TPGTest, TPGGraphAddEdge)
                  std::runtime_error)
         << "Adding an edge from an Action should have failed.";
 
-    TPG::TPGVertex* vertex3 = tpg.getFactory().createTPGTeam(0);
+    std::unique_ptr<TPG::TPGTeam> vertex3 = tpg.getFactory().createTPGTeam(0);
     std::unique_ptr<TPG::TPGEdge> edge =
         tpg.getFactory().createTPGActionEdge(&vertex1, progPointer, 0);
     ASSERT_THROW(vertex3->addOutgoingEdge(edge.get()), std::runtime_error)
