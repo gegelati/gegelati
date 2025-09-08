@@ -99,8 +99,8 @@ TEST_F(TPGTest, TPGTeamAndTPGActionConstructorsDestructors)
     TPG::TPGVertex* team;
     TPG::TPGVertex* action;
 
-    ASSERT_NO_THROW(team = new TPG::TPGTeam());
-    ASSERT_NO_THROW(action = new TPG::TPGAction(0));
+    ASSERT_NO_THROW(team = new TPG::TPGTeam(0));
+    ASSERT_NO_THROW(action = new TPG::TPGAction(1, 0));
 
     ASSERT_NO_THROW(delete team);
     ASSERT_NO_THROW(delete action);
@@ -108,8 +108,8 @@ TEST_F(TPGTest, TPGTeamAndTPGActionConstructorsDestructors)
 
 TEST_F(TPGTest, TPGEdgeConstructorDestructor)
 {
-    TPG::TPGTeam team;
-    TPG::TPGAction action(0);
+    TPG::TPGTeam team(0);
+    TPG::TPGAction action(1, 0);
 
     TPG::TPGEdge* edge;
 
@@ -120,8 +120,8 @@ TEST_F(TPGTest, TPGEdgeConstructorDestructor)
 
 TEST_F(TPGTest, TPGVertexEdgesSettersGetters)
 {
-    TPG::TPGTeam team;
-    TPG::TPGAction action(0);
+    TPG::TPGTeam team(0);
+    TPG::TPGAction action(1, 0);
 
     TPG::TPGEdge edge(&team, &action, progPointer);
 
@@ -182,8 +182,8 @@ TEST_F(TPGTest, TPGVertexEdgesSettersGetters)
 
 TEST_F(TPGTest, TPGEdgeGetSetProgram)
 {
-    TPG::TPGTeam team;
-    TPG::TPGAction action(0);
+    TPG::TPGTeam team(0);
+    TPG::TPGAction action(1, 0);
 
     const TPG::TPGEdge constEdge(&team, &action, progPointer);
     const Program::Program& constProg = constEdge.getProgram();
@@ -202,8 +202,8 @@ TEST_F(TPGTest, TPGEdgeGetSetProgram)
 
 TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination)
 {
-    TPG::TPGTeam team0, team1;
-    TPG::TPGAction action0(0), action1(1);
+    TPG::TPGTeam team0(0), team1(1);
+    TPG::TPGAction action0(0, 1), action1(1, 0);
 
     TPG::TPGEdge edge(&team0, &action0, progPointer);
 
@@ -224,7 +224,7 @@ TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination)
 
 TEST_F(TPGTest, TPGActionEdgeGetSet)
 {
-    TPG::TPGAction action0(0);
+    TPG::TPGAction action0(0, 0);
 
     TPG::TPGActionEdge actionEdge(&action0, progPointer, 0);
 
@@ -251,11 +251,11 @@ TEST_F(TPGTest, TPGFactory)
     std::unique_ptr<TPG::TPGEdge> actionEdge;
     std::unique_ptr<TPG::TPGExecutionEngine> tee;
 
-    ASSERT_NO_THROW(action = factory.createTPGAction(0))
+    ASSERT_NO_THROW(action = factory.createTPGAction(0, 0))
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(action, nullptr) << "Created TPGAction should not be null.";
 
-    ASSERT_NO_THROW(team = factory.createTPGTeam())
+    ASSERT_NO_THROW(team = factory.createTPGTeam(0))
         << "TPGGraphELementFactory could not build a TPGTeam.";
     ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
 
@@ -312,7 +312,7 @@ TEST_F(TPGTest, TPGGraphHasVertex)
     ASSERT_NO_THROW(a = &tpg.addNewAction(0))
         << "Adding a new Action to a TPGGraph failed.";
 
-    TPG::TPGAction external(12);
+    TPG::TPGAction external(0, 12);
 
     ASSERT_TRUE(tpg.hasVertex(*t))
         << "A TPGVertex from the TPGGraph was not detected as such.";
@@ -350,7 +350,7 @@ TEST_F(TPGTest, TPGGraphAddEdge)
     ASSERT_NO_THROW(tpg.addNewEdge(vertex0, vertex1, progPointer))
         << "Adding an edge between a team and an action failed.";
     // Add with a vertex not in the graph.
-    TPG::TPGAction vertex2(2);
+    TPG::TPGAction vertex2(0, 2);
     ASSERT_THROW(tpg.addNewEdge(vertex0, vertex2, progPointer),
                  std::runtime_error)
         << "Adding an edge with a vertex not from the graph should have "
@@ -361,7 +361,7 @@ TEST_F(TPGTest, TPGGraphAddEdge)
                  std::runtime_error)
         << "Adding an edge from an Action should have failed.";
 
-    TPG::TPGVertex* vertex3 = tpg.getFactory().createTPGTeam();
+    TPG::TPGVertex* vertex3 = tpg.getFactory().createTPGTeam(0);
     std::unique_ptr<TPG::TPGEdge> edge =
         tpg.getFactory().createTPGActionEdge(&vertex1, progPointer, 0);
     ASSERT_THROW(vertex3->addOutgoingEdge(edge.get()), std::runtime_error)
@@ -378,7 +378,7 @@ TEST_F(TPGTest, TPGGraphAddActionEdge)
     ASSERT_NO_THROW(tpg.addNewActionEdge(vertex1, progPointer, 0))
         << "Adding an action edge from an action failed.";
     // Add with a vertex not in the graph.
-    TPG::TPGAction vertex2(2);
+    TPG::TPGAction vertex2(0, 2);
     ASSERT_THROW(tpg.addNewActionEdge(vertex2, progPointer, 0),
                  std::runtime_error)
         << "Adding an edge with a vertex not from the graph should have "
@@ -532,7 +532,7 @@ TEST_F(TPGTest, TPGGraphRemoveVertex)
         << "Remaining vertex after removal is not correct.";
 
     // Try to remove a vertex not from the graph
-    TPG::TPGAction vertex3(3);
+    TPG::TPGAction vertex3(0, 3);
     ASSERT_NO_THROW(tpg.removeVertex(vertex3))
         << "Removing a vertex from the graph (although it is not inside) "
            "throwed an exception.";
@@ -669,7 +669,7 @@ TEST_F(TPGTest, TPGGraphCloneVertex)
            "connected with an edge using it.";
 
     // Clone a vertex not from the graph
-    TPG::TPGVertex* vertex2 = new TPG::TPGAction(1);
+    TPG::TPGVertex* vertex2 = new TPG::TPGAction(0, 1);
     ASSERT_THROW(tpg.cloneVertex(*vertex2), std::runtime_error)
         << "Cloning a vertex that does not belong to the TPGGraph should not "
            "be possible.";
@@ -895,10 +895,10 @@ TEST_F(TPGTest, TPGAffectationOperator)
 TEST_F(TPGTest, TPGActionOutgoingEdge)
 {
     // Create a TPGAction
-    TPG::TPGAction action(42);
+    TPG::TPGAction action(0, 42);
 
     // Try to add a non-TPGActionEdge outgoing edge (should throw)
-    TPG::TPGTeam team;
+    TPG::TPGTeam team(0);
     TPG::TPGEdge edge(&team, &action, progPointer);
     ASSERT_THROW(action.addOutgoingEdge(&edge), std::runtime_error);
 
@@ -971,7 +971,7 @@ TEST_F(TPGTest, TPGVertexHasSameAssessedActions)
            "empty.";
 
     // Case 6: Empty assessedActions (should return false)
-    TPG::TPGTeam emptyTeam;
+    TPG::TPGTeam emptyTeam(0);
     std::set<uint64_t> testSet6 = {1, 2};
     ASSERT_FALSE(emptyTeam.hasSameAssessedActions(testSet6))
         << "hasSameAssessedActions should return false when assessedActions is "
@@ -1035,7 +1035,7 @@ TEST_F(TPGTest, TPGGraphUpdateAssessedActions)
     ASSERT_TRUE(assessed2.find(3) != assessed2.end());
 
     // Try with a vertex not in the graph (should throw)
-    TPG::TPGAction fakeAction(99);
+    TPG::TPGAction fakeAction(0, 99);
     ASSERT_THROW(tpg.updateAssessedActions(&fakeAction), std::runtime_error);
 }
 
@@ -1066,7 +1066,7 @@ TEST_F(TPGTest, TPGGraphSetToBeDeleted)
     ASSERT_TRUE(team.isToBeDeleted());
 
     // Try with a vertex not in the graph (should throw)
-    TPG::TPGTeam fakeTeam;
+    TPG::TPGTeam fakeTeam(0);
     ASSERT_THROW(tpg.setToBeDeleted(&fakeTeam), std::runtime_error);
 }
 
@@ -1093,6 +1093,6 @@ TEST_F(TPGTest, TPGGraphOrderActionEdges)
     ASSERT_TRUE(std::is_sorted(actionClasses.begin(), actionClasses.end()));
 
     // Try with an action not in the graph (should throw)
-    TPG::TPGAction fakeAction(42);
+    TPG::TPGAction fakeAction(0, 42);
     ASSERT_THROW(tpg.orderActionEdges(&fakeAction), std::runtime_error);
 }

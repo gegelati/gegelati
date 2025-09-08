@@ -93,8 +93,8 @@ class LABasicLoggerTest : public ::testing::Test
 
         auto res1 = new Learn::EvaluationResult(5, 2, 2);
         auto res2 = new Learn::EvaluationResult(10, 2, 4);
-        auto v1(new TPG::TPGAction(0));
-        auto v2(new TPG::TPGAction(0));
+        auto v1(new TPG::TPGAction(0, 0));
+        auto v2(new TPG::TPGAction(1, 0));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
                                  const TPG::TPGVertex*>(res1, v1));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,

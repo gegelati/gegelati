@@ -364,7 +364,7 @@ TEST_F(LearningAgentTest, UpdateEvaluationRecords)
         << "Best root not updated properly.";
 
     // Update with a root not from the graph
-    TPG::TPGTeam fakeRoot;
+    TPG::TPGTeam fakeRoot(0);
     ASSERT_NO_THROW(la.updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(3.0, 10), &fakeRoot}}));
     ASSERT_EQ(la.getBestRoot().first, &fakeRoot)
@@ -1556,7 +1556,7 @@ TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
 {
     Learn::LearningAgent la(le, set, params);
     la.init();
-    TPG::TPGTeam fakeTeam;
+    TPG::TPGTeam fakeTeam(0);
     ASSERT_THROW(
         la.evaluateOneRoot(0, Learn::LearningMode::TRAINING, &fakeTeam),
         std::runtime_error);
