@@ -86,17 +86,20 @@ namespace TPG {
          * \brief Create a TPGTeam for a TPGGraph.
          *
          * This method allocates and returns a new TPGTeam.
+         * 
+         * \param[in] vertexID unique identifier of the TPGVertex.
          */
-        virtual TPGTeam* createTPGTeam() const;
+        virtual TPGTeam* createTPGTeam(const uint64_t vertexID) const;
 
         /**
          * \brief Create a TPGAction for a TPGGraph.
          *
          * This method allocates and returns a new TPGAction.
          *
+         * \param[in] vertexID unique identifier of the TPGVertex.
          * \param[in] id integer stored as the actionID of the TPGAction.
          */
-        virtual TPGAction* createTPGAction(const uint64_t id) const;
+        virtual TPGAction* createTPGAction(const uint64_t vertexID, const uint64_t id) const;
 
         /**
          * \brief Create a TPGEdge for a TPGGraph.

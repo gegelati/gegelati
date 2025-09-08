@@ -142,12 +142,19 @@ namespace TPG {
          */
         virtual bool isToBeDeleted() const;
 
+        /**
+         * \brief Get the unique identifier of the TPGVertex.
+         *
+         * \return the integer ID of the TPGVertex.
+         */
+        uint64_t getVertexID() const;
+
       protected:
         /**
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          */
-        TPGVertex(){};
+        TPGVertex(const uint64_t vertexID) : vertexID(vertexID) {};
 
         /// True if the vertex should be deleted during evolution process
         bool toBeDeleted = false;
@@ -166,6 +173,8 @@ namespace TPG {
          * \brief Set of assessed actions by the team
          */
         std::set<uint64_t> assessedActions;
+
+        uint64_t vertexID; ///< Unique identifier of the TPGVertex
     };
 }; // namespace TPG
 

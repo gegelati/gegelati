@@ -131,3 +131,8 @@ bool TPG::TPGVertex::isToBeDeleted() const
 {
     return this->toBeDeleted;
 }
+
+uint64_t TPG::TPGVertex::getVertexID() const
+{
+    return this->vertexID;
+}

@@ -48,6 +48,14 @@ namespace TPG {
     class TPGTeam : public TPGVertex
     {
       public:
+
+        /**
+         * \brief Main constructor of a TPGTeam.
+         *
+         * \param[in] vertexID unique identifier of the TPGVertex.
+         */
+        TPGTeam(const uint64_t vertexID) : TPGVertex(vertexID) {};
+
         /**
          * \brief Specialization throwing an std::runtime_exception if a
          * TPGActionEdge is added to a TPGTeam.

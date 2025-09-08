@@ -47,6 +47,12 @@ namespace TPG {
     class TPGTeamInstrumented : public TPG::TPGTeam,
                                 public TPG::TPGVertexInstrumentation
     {
+        public:
+            /// Main constructor for TPGTeamInstrumented.
+            /// see TPGTeam constructor for more details.
+            TPGTeamInstrumented(const uint64_t vertexID) : TPGTeam(vertexID)
+            {
+            }
     };
 } // namespace TPG
 

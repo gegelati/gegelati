@@ -400,15 +400,23 @@ namespace TPG {
         std::list<std::unique_ptr<TPGEdge>> edges;
 
         /**
+         * \brief Count of TPGVertex in the TPGGraph.
+         */
+        uint64_t countVertexID = 0;
+
+        /**
+         * \brief Map of all vertices IDs currently used in the graph with the associated vertex.
+         */
+        std::map<uint64_t, TPG::TPGVertex*> mapVertexIDs;
+
+        /**
          * \brief Find the non-const iterator to a vertex of the graph from
          * its const pointer.
          *
          * \param[in] vertex the const pointer to the TPGVertex.
-         * \return the iterator on the vertices attribute, at the position of
-         *         the searched vertex pointer. If the given vertex pointer is
-         *         not in the vertices, then vertices.end() is returned.
+         * \return The pointer to the vertex if found, nullptr otherwise.
          */
-        std::list<TPGVertex*>::iterator findVertex(const TPGVertex* vertex);
+        TPG::TPGVertex* findVertex(const TPGVertex* vertex);
 
         /**
          * \brief Find the non-const iterator to an edge of the graph from
