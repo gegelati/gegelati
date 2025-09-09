@@ -55,17 +55,17 @@ std::unique_ptr<TPG::TPGAction> TPG::TPGFactory::createTPGAction(const uint64_t 
 }
 
 std::unique_ptr<TPG::TPGEdge> TPG::TPGFactory::createTPGEdge(
-    const TPGVertex* src, const TPGVertex* dest,
+    const uint64_t edgeID, const TPGVertex* src, const TPGVertex* dest,
     const std::shared_ptr<Program::Program> prog) const
 {
-    return std::make_unique<TPG::TPGEdge>(src, dest, prog);
+    return std::make_unique<TPG::TPGEdge>(edgeID, src, dest, prog);
 }
 
 std::unique_ptr<TPG::TPGEdge> TPG::TPGFactory::createTPGActionEdge(
-    const TPGVertex* src, const std::shared_ptr<Program::Program> prog,
+    const uint64_t edgeID, const TPGVertex* src, const std::shared_ptr<Program::Program> prog,
     uint64_t actionClass) const
 {
-    return std::make_unique<TPG::TPGActionEdge>(src, prog, actionClass);
+    return std::make_unique<TPG::TPGActionEdge>(edgeID, src, prog, actionClass);
 }
 
 std::unique_ptr<TPG::TPGExecutionEngine> TPG::TPGFactory::

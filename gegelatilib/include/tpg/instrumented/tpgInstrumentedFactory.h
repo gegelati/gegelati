@@ -63,7 +63,7 @@ namespace TPG {
 
         ///  Specialization of the method returning a TPGEdgeInstrumented
         virtual std::unique_ptr<TPGEdge> createTPGEdge(
-            const TPGVertex* src, const TPGVertex* dest,
+            const uint64_t edgeID, const TPGVertex* src, const TPGVertex* dest,
             const std::shared_ptr<Program::Program> prog) const override;
 
         ///  Specialization of the method returning a

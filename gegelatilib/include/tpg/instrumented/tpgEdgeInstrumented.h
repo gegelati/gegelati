@@ -51,9 +51,9 @@ namespace TPG {
     {
       public:
         /// Default constructor
-        TPGEdgeInstrumented(const TPGVertex* src, const TPGVertex* dest,
+        TPGEdgeInstrumented(const uint64_t edgeID, const TPGVertex* src, const TPGVertex* dest,
                             const std::shared_ptr<Program::Program> prog)
-            : TPGEdge(src, dest, prog), nbVisits{0}, nbTraversal{0}
+            : TPGEdge(edgeID, src, dest, prog), nbVisits{0}, nbTraversal{0}
         {
         }
 

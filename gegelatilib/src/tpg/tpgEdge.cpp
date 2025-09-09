@@ -70,3 +70,14 @@ void TPG::TPGEdge::setDestination(TPGVertex* newDestination)
 {
     this->destination = newDestination;
 }
+
+uint64_t TPG::TPGEdge::getEdgeID() const
+{
+    return this->edgeID;
+}
+
+
+bool TPG::operator<(const TPG::TPGEdge& a, const TPG::TPGEdge& b)
+{
+    return a.getEdgeID() < b.getEdgeID();
+}

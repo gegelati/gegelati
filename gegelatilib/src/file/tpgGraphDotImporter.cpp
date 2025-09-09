@@ -364,7 +364,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
         uint64_t program = std::stoi(matches[2]);
 
         // find edge
-        const std::list<std::unique_ptr<TPG::TPGEdge>>& edges =
+        const auto& edges =
             this->tpg.getEdges();
 
         // find one of the selected program edges :

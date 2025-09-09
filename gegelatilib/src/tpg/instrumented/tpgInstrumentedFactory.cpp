@@ -58,10 +58,10 @@ std::unique_ptr<TPG::TPGAction> TPG::TPGInstrumentedFactory::createTPGAction(
 }
 
 std::unique_ptr<TPG::TPGEdge> TPG::TPGInstrumentedFactory::createTPGEdge(
-    const TPGVertex* src, const TPGVertex* dest,
+    const uint64_t edgeID, const TPGVertex* src, const TPGVertex* dest,
     const std::shared_ptr<Program::Program> prog) const
 {
-    auto ptr = std::make_unique<TPG::TPGEdgeInstrumented>(src, dest, prog);
+    auto ptr = std::make_unique<TPG::TPGEdgeInstrumented>(edgeID, src, dest, prog);
     return ptr;
 }
 

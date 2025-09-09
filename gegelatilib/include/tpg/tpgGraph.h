@@ -39,6 +39,7 @@
 #define TPG_GRAPH_H
 
 #include <list>
+#include <set>
 
 #include "environment.h"
 #include "tpg/tpgAction.h"
@@ -46,8 +47,20 @@
 #include "tpg/tpgFactory.h"
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
+#include "util/genericComparator.h"
 
 namespace TPG {
+
+    /**
+     * \brief Static variable used to assign unique IDs to TPGVertex
+     */
+    static uint64_t COUNT_VERTEX_IDS = 0;
+
+    /**
+     * \brief Static variable used to assign unique IDs to TPGEdge
+     */
+    static uint64_t COUNT_EDGE_IDS = 0;
+
     /**
      * \brief Class for storing a Tangled-Program-Graph.
      */
@@ -259,7 +272,7 @@ namespace TPG {
          *
          * \return a const reference to the edges attribute.
          */
-        const std::list<std::unique_ptr<TPGEdge>>& getEdges() const;
+        const std::set<std::unique_ptr<TPG::TPGEdge>, UniqueLess<TPG::TPGEdge>>& getEdges() const;
 
         /**
          * \brief Remove a TPGEdge from the TPGGraph.
@@ -390,26 +403,14 @@ namespace TPG {
         const std::unique_ptr<TPGFactory> factory;
 
         /**
-         * \brief Set of TPGEdge composing the TPGGraph.
+         * \brief Set of all edges currently used in the graph.
          */
-        std::list<std::unique_ptr<TPGEdge>> edges;
+        std::set<std::unique_ptr<TPGEdge>, UniqueLess<TPGEdge>> edges;
 
         /**
-         * \brief Map of all vertices IDs currently used in the graph with the associated vertex.
+         * \brief Set of all vertices currently used in the graph.
          */
-        std::map<uint64_t, std::unique_ptr<TPGVertex>> vertices;
-
-        /**
-         * \brief Find the non-const iterator to an edge of the graph from
-         * its const pointer.
-         *
-         * \param[in] edge the const pointer to the TPGEdge.
-         * \return the iterator on the edges attribute, at the position of
-         *         the searched edge pointer. If the given vertex pointer is
-         *         not in the vertices, then vertices.end() is returned.
-         */
-        std::list<std::unique_ptr<TPGEdge>>::iterator findEdge(
-            const TPGEdge* edge);
+        std::set<std::unique_ptr<TPGVertex>, UniqueLess<TPGVertex>> vertices;
     };
 }; // namespace TPG
 

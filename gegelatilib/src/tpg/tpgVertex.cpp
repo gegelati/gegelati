@@ -136,3 +136,8 @@ uint64_t TPG::TPGVertex::getVertexID() const
 {
     return this->vertexID;
 }
+
+bool TPG::operator<(const TPG::TPGVertex& a, const TPG::TPGVertex& b)
+{
+    return a.getVertexID() < b.getVertexID();
+}

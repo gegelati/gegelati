@@ -60,14 +60,15 @@ namespace TPG {
          * This constructor does not register the created TPGEdge in the
          * list of incoming or outgoing edges of the given TPGVertex.
          *
+         * \param[in] edgeID the unique identifier of the TPGEdge.
          * \param[in] src pointer to the source TPGVertex of the edge.
          * \param[in] dest pointer to the destination TPGVertex of the edge.
          * \param[in] prog the shared pointer to the Program associated to the
          *            edge.
          */
-        TPGEdge(const TPGVertex* src, const TPGVertex* dest,
+        TPGEdge(const uint64_t edgeID, const TPGVertex* src, const TPGVertex* dest,
                 const std::shared_ptr<Program::Program> prog)
-            : source{src}, destination{dest}, program{prog} {};
+            : edgeID(edgeID), source{src}, destination{dest}, program{prog} {};
 
         /**
          * \brief Get a const reference to the Program of the TPGEdge.
@@ -127,6 +128,14 @@ namespace TPG {
          */
         virtual void setDestination(TPGVertex* newDestination);
 
+
+        /**
+         * \brief Get the unique identifier of the TPGEdge.
+         *
+         * \return the integer ID of the TPGEdge..
+         */
+        virtual uint64_t getEdgeID() const;
+
       protected:
         /// Pointer to the source TPGVertex of this TPGEdge
         const TPGVertex* source;
@@ -140,9 +149,22 @@ namespace TPG {
         /// mutations.
         mutable std::shared_ptr<Program::Program> program;
 
+
+        /**
+         * \brief Unique identifier of the TPGEdge.
+         */
+        uint64_t edgeID;
+
         /// Delete the default constructor.
         TPGEdge() = delete;
     };
+
+    /**
+     * \brief Comparison function to enable sorting of TPGVertex with
+     * STL.
+     */
+    bool operator<(const TPGEdge& a, const TPGEdge& b);
+
 }; // namespace TPG
 
 #endif

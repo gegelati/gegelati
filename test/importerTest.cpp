@@ -356,7 +356,7 @@ TEST_F(ImporterTest, importGraph)
 
     // check that the imported program is the same as the one written in the
     // file.
-    Program::Program& p = tpg_copy->getEdges().front().get()->getProgram();
+    Program::Program& p = tpg_copy->getEdges().begin()->get()->getProgram();
     ASSERT_EQ(p.getNbLines(), 3)
         << "The number of lines of the copied program dismatch";
     // checking the first line

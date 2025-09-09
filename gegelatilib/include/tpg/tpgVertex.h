@@ -46,8 +46,6 @@ namespace TPG {
     class TPGEdge;
 
 
-    static uint64_t COUNT_VERTEX_IDS = 0;
-
     /**
      * \brief Abstract class representing the vertices of a TPGGraph
      */
@@ -151,7 +149,7 @@ namespace TPG {
          *
          * \return the integer ID of the TPGVertex.
          */
-        uint64_t getVertexID() const;
+        virtual uint64_t getVertexID() const;
 
       protected:
         /**
@@ -183,6 +181,15 @@ namespace TPG {
          */
         uint64_t vertexID;
     };
+
+    
+    /**
+     * \brief Comparison function to enable sorting of TPGVertex with
+     * STL.
+     */
+    bool operator<(const TPGVertex& a, const TPGVertex& b);
+
 }; // namespace TPG
+
 
 #endif
