@@ -44,7 +44,6 @@
 
 void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
 {
-    uint64_t name = this->findVertexID(team);
     // Color is different for roots
     std::string color;
     if (team.getIncomingEdges().size() == 0) {
@@ -55,12 +54,12 @@ void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
     }
 
     fprintf(pFile, "%sT%" PRIu64 " [fillcolor=\"%s\"]\n", this->offset.c_str(),
-            name, color.c_str());
+            team.getVertexID(), color.c_str());
 }
 uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 {
 
-    uint64_t actionNumber = this->findVertexID(action);
+    uint64_t actionNumber = action.getVertexID();
 
     uint64_t actionID = action.getActionID();
     if (action.getOutgoingEdges().size() != 0) {
@@ -100,11 +99,11 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
 void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 {
 
-    uint64_t srcID = this->findVertexID(*edge.getSource());
-    uint64_t progID;
+    uint64_t srcID = edge.getSource()->getVertexID();
 
     Program::Program& p = edge.getProgram();
-    if (this->findProgramID(edge.getProgram(), progID)) {
+    uint64_t progID = p.getProgramID();
+    if (this->programIDIsNew(progID)) {
 
         // First time thie Program is encountered
         fprintf(pFile,
@@ -138,7 +137,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
                         this->offset.c_str(), srcID, progID, actionID);
             }
             else {
-                uint64_t destID = findVertexID(*edge.getDestination());
+                uint64_t destID = edge.getDestination()->getVertexID();
                 fprintf(pFile,
                         "%sT%" PRIu64 " -> P%" PRIu64 " -> T%" PRIu64 "\n",
                         this->offset.c_str(), srcID, progID, destID);
@@ -160,8 +159,6 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 
 void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
 {
-    uint64_t progID;
-    this->findProgramID(program, progID);
     std::string programContent = "";
     for (int i = 0; i < program.getNbLines(); i++) {
         const Program::Line& l = program.getLine(i);
@@ -184,7 +181,7 @@ void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
         programContent += "&#92;n";
     }
     fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"] \n",
-            this->offset.c_str(), progID, programContent.c_str());
+            this->offset.c_str(), program.getProgramID(), programContent.c_str());
 }
 
 void File::TPGGraphDotExporter::printTPGGraphHeader()
@@ -236,7 +233,7 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
     // Team root ids
     for (const TPG::TPGVertex* rootVertex : rootVertices) {
         if (dynamic_cast<const TPG::TPGTeam*>(rootVertex) != nullptr) {
-            fprintf(pFile, "T%" PRIu64 " ", this->findVertexID(*rootVertex));
+            fprintf(pFile, "T%" PRIu64 " ", rootVertex->getVertexID());
         }
     }
     // Action root

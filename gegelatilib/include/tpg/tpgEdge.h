@@ -60,15 +60,14 @@ namespace TPG {
          * This constructor does not register the created TPGEdge in the
          * list of incoming or outgoing edges of the given TPGVertex.
          *
-         * \param[in] edgeID the unique identifier of the TPGEdge.
          * \param[in] src pointer to the source TPGVertex of the edge.
          * \param[in] dest pointer to the destination TPGVertex of the edge.
          * \param[in] prog the shared pointer to the Program associated to the
          *            edge.
          */
-        TPGEdge(const uint64_t edgeID, const TPGVertex* src, const TPGVertex* dest,
+        TPGEdge(const TPGVertex* src, const TPGVertex* dest,
                 const std::shared_ptr<Program::Program> prog)
-            : edgeID(edgeID), source{src}, destination{dest}, program{prog} {};
+            : edgeID(COUNT_EDGE_ID++), source{src}, destination{dest}, program{prog} {};
 
         /**
          * \brief Get a const reference to the Program of the TPGEdge.
@@ -136,6 +135,33 @@ namespace TPG {
          */
         virtual uint64_t getEdgeID() const;
 
+        /**
+         * \brief Set a new unique identifier to the TPGEdge.
+         *
+         * \param[in] newID the new integer ID to set to the TPGEdge.
+         */
+        virtual void setEdgeID(uint64_t newID);
+
+        /**
+         * \brief Reset the edge ID counter.
+         *
+         * This method is mainly used for testing purpose to ensure that
+         * edge IDs are predictable.
+         * 
+         * \param[in] newValue the value to which the edge ID counter should be set.
+         */
+        static void setEdgeIDCounter(uint64_t newValue);
+
+        /**
+         * \brief Get the current value of the edge ID counter.
+         *
+         * This method is mainly used for testing purpose to ensure that
+         * edge IDs are predictable.
+         *
+         * \return the current value of the edge ID counter.
+         */
+        static uint64_t getEdgeIDCounter() { return COUNT_EDGE_ID; }
+
       protected:
         /// Pointer to the source TPGVertex of this TPGEdge
         const TPGVertex* source;
@@ -154,6 +180,8 @@ namespace TPG {
          * \brief Unique identifier of the TPGEdge.
          */
         uint64_t edgeID;
+
+        static uint64_t COUNT_EDGE_ID;
 
         /// Delete the default constructor.
         TPGEdge() = delete;

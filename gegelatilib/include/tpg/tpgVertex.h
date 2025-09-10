@@ -38,6 +38,7 @@
 #define TPG_VERTEX_H
 
 #include <cinttypes>
+#include <iostream>
 #include <list>
 #include <set>
 
@@ -151,12 +152,39 @@ namespace TPG {
          */
         virtual uint64_t getVertexID() const;
 
+        /**
+         * \brief Set a new unique identifier to the TPGVertex.
+         *
+         * \param[in] newID the new integer ID to set to the TPGVertex.
+         */
+        virtual void setVertexID(uint64_t newID);
+
+        /**
+         * \brief Reset the vertex ID counter.
+         *
+         * This method is mainly used for testing purpose to ensure that
+         * vertex IDs are predictable.
+         *
+         * \param[in] newValue the value to which the vertex ID counter should be set.
+         */
+        static void setVertexIDCounter(uint64_t newValue);
+
+        /**
+         * \brief Get the current value of the vertex ID counter.
+         *
+         * This method is mainly used for testing purpose to ensure that
+         * vertex IDs are predictable.
+         * 
+         * \return the current value of the vertex ID counter.
+         */
+        static uint64_t getVertexIDCounter() { return COUNT_VERTEX_ID; }
+
       protected:
         /**
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          */
-        TPGVertex(const uint64_t vertexID) : vertexID(vertexID) {};
+        TPGVertex() : vertexID(COUNT_VERTEX_ID++) {};
 
         /// True if the vertex should be deleted during evolution process
         bool toBeDeleted = false;
@@ -180,6 +208,9 @@ namespace TPG {
          * \brief Unique identifier of the TPGVertex.
          */
         uint64_t vertexID;
+
+        /// \brief Counter for the number of TPGVertex instances.
+        static uint64_t COUNT_VERTEX_ID;
     };
 
     

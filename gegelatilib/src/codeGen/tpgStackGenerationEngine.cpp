@@ -58,32 +58,31 @@ CodeGen::TPGStackGenerationEngine::~TPGStackGenerationEngine()
 void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 {
     const Program::Program& p = edge.getProgram();
-    uint64_t progID;
 
     progGenerationEngine.setProgram(p);
 
-    if (findProgramID(p, progID)) {
-        progGenerationEngine.generateProgram(progID, false);
+    if (programIDIsNew(p.getProgramID())) {
+        progGenerationEngine.generateProgram(p.getProgramID(), false);
     }
 
     std::string destinationName;
     const TPG::TPGVertex* destination = edge.getDestination();
 
     if (dynamic_cast<const TPG::TPGTeam*>(destination) != nullptr) {
-        destinationName = 'T' + std::to_string(findVertexID(*destination));
+        destinationName = 'T' + std::to_string(destination->getVertexID());
     }
     else if (dynamic_cast<const TPG::TPGAction*>(destination) != nullptr) {
         auto a = dynamic_cast<const TPG::TPGAction*>(destination);
         destinationName = 'A' + std::to_string(a->getActionID());
     }
 
-    fileMain << "\t\t\t{" << destinationName << "Vert, P" << progID << ", "
+    fileMain << "\t\t\t{" << destinationName << "Vert, P" << p.getProgramID() << ", "
              << destinationName << "}";
 }
 
 void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
 {
-    uint64_t id = findVertexID(team);
+    uint64_t id = team.getVertexID();
     // print prototype and declaration of the function
     fileMain << "void* T" << id << "(double* action){" << std::endl;
     fileMainH << "void* T" << id << "(double* action);" << std::endl;
@@ -122,7 +121,7 @@ void CodeGen::TPGStackGenerationEngine::generateAction(
 void CodeGen::TPGStackGenerationEngine::setRoot(const TPG::TPGVertex& team)
 {
     fileMainH << "\nextern void* (*root)(double* action);" << std::endl;
-    fileMain << "void* (*root)(double* action) = T" << findVertexID(team) << ";"
+    fileMain << "void* (*root)(double* action) = T" << team.getVertexID() << ";"
              << std::endl;
 }
 
@@ -225,7 +224,7 @@ std::string CodeGen::TPGStackGenerationEngine::vertexName(
 {
     std::ostringstream vertexName;
     if (dynamic_cast<const TPG::TPGTeam*>(&v) != nullptr) {
-        vertexName << "T" << findVertexID(v);
+        vertexName << "T" << v.getVertexID();
     }
     else {
         vertexName << "A"

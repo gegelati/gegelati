@@ -39,6 +39,13 @@
 #include "tpg/tpgActionEdge.h"
 #include "tpg/tpgVertex.h"
 
+uint64_t TPG::TPGVertex::COUNT_VERTEX_ID = 0;
+
+void TPG::TPGVertex::setVertexIDCounter(uint64_t newValue)
+{
+    COUNT_VERTEX_ID = newValue;
+}
+
 const std::list<TPG::TPGEdge*>& TPG::TPGVertex::getIncomingEdges() const
 {
     return this->incomingEdges;
@@ -135,6 +142,11 @@ bool TPG::TPGVertex::isToBeDeleted() const
 uint64_t TPG::TPGVertex::getVertexID() const
 {
     return this->vertexID;
+}
+
+void TPG::TPGVertex::setVertexID(uint64_t newID)
+{
+    this->vertexID = newID;
 }
 
 bool TPG::operator<(const TPG::TPGVertex& a, const TPG::TPGVertex& b)

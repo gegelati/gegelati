@@ -66,16 +66,15 @@ namespace TPG {
          * This constructor does not register the created TPGEdge in the
          * list of incoming or outgoing edges of the given TPGVertex.
          *
-         * \param[in] edgeID the unique identifier of the TPGEdge.
          * \param[in] src pointer to the source TPGVertex of the edge.
          * \param[in] prog the shared pointer to the Program associated to the
          * \param[in] actClass actionClass of the TPGActionEdge
          *            edge.
          */
-        TPGActionEdge(const uint64_t edgeID, const TPGVertex* src,
+        TPGActionEdge(const TPGVertex* src,
                       const std::shared_ptr<Program::Program> prog,
                       uint64_t actClass)
-            : TPGEdge{edgeID, src, NULL, prog}, actionClass(actClass){};
+            : TPGEdge{src, NULL, prog}, actionClass(actClass){};
 
         /**
          * \brief Override of the tpgEdge function because there should not be

@@ -51,15 +51,6 @@
 
 namespace TPG {
 
-    /**
-     * \brief Static variable used to assign unique IDs to TPGVertex
-     */
-    static uint64_t COUNT_VERTEX_IDS = 0;
-
-    /**
-     * \brief Static variable used to assign unique IDs to TPGEdge
-     */
-    static uint64_t COUNT_EDGE_IDS = 0;
 
     /**
      * \brief Class for storing a Tangled-Program-Graph.
@@ -75,7 +66,12 @@ namespace TPG {
          */
         TPGGraph(const Environment& e,
                  std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>())
-            : env{e}, factory{std::move(f)} {};
+            : env{e}, factory{std::move(f)} 
+            {
+                TPG::TPGVertex::setVertexIDCounter(0);
+                TPG::TPGEdge::setEdgeIDCounter(0);
+                Program::Program::setProgramIDCounter(0);
+            }
 
         /**
          * \brief delete copy constructor
@@ -134,6 +130,7 @@ namespace TPG {
          * \return a reference to the TPGFactory.
          */
         const TPGFactory& getFactory() const;
+
 
         /**
          * \brief Create a new TPGTeam and add it to the vertices of the
@@ -394,6 +391,28 @@ namespace TPG {
          * \param[in] vertex to set to delete
          */
         void setToBeDeleted(const TPG::TPGVertex* vertex);
+
+        /**
+         * \brief Set a new ID to a vertex
+         * 
+         * An error is thrown if the vertex does not belong to the graph
+         * An error is thrown if the newID is already used
+         * 
+         * \param[in] vertex the vertex to change ID
+         * \param[in] newID the new ID to set
+         */
+        void setNewVertexID(const TPG::TPGVertex& vertex, uint64_t newID);
+
+        /**
+         * \brief Set a new ID to an edge
+         * 
+         * An error is thrown if the edge does not belong to the graph
+         * An error is thrown if the newID is already used
+         * 
+         * \param[in] edge the edge to change ID
+         * \param[in] newID the new ID to set
+         */
+        void setNewEdgeID(const TPG::TPGEdge& edge, uint64_t newID);
 
       protected:
         /// Environment of the TPGGraph

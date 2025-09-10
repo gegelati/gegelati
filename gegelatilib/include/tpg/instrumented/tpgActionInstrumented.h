@@ -50,7 +50,7 @@ namespace TPG {
       public:
         /// Main constructor for TPGActionInstrumented.
         /// see TPGAction constructor for more details.
-        TPGActionInstrumented(const uint64_t vertexID, const uint64_t id) : TPGAction(vertexID, id)
+        TPGActionInstrumented(const uint64_t id) : TPGAction(id)
         {
         }
     };

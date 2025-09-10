@@ -942,7 +942,7 @@ TEST_F(MutatorTest, TPGMutatorAddRandomEdge)
            "destination.";
 
     // Force a failure
-    TPG::TPGEdge newEdge(TPG::COUNT_EDGE_IDS++, &vertex0, &vertex1, progPointer);
+    TPG::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
     ASSERT_THROW(
         Mutator::TPGMutator::addRandomEdge(tpg, vertex2, {&newEdge}, rng),
         std::runtime_error)

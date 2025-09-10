@@ -50,6 +50,7 @@ namespace Program {
      * \brief The Program class contains a list of program lines that can be
      * executed within a well defined Environment.
      */
+
     class Program
     {
       protected:
@@ -65,6 +66,15 @@ namespace Program {
          * Action program source must be a TPGAction.
          */
         bool actionProgram;
+
+
+        /// \brief Counter for the number of Program instances.
+        static uint64_t COUNT_PROGRAM_ID;
+
+        /**
+         * \brief Unique identifier of the Program.
+         */
+        uint64_t programID;
 
         /**
          * \brief Lines of the program and intron property.
@@ -99,7 +109,7 @@ namespace Program {
          * context in the Program attributes.
          */
         Program(const Environment& e, bool actProgram)
-            : environment{e}, constants{e.getParams().nbProgramConstant},
+            : environment{e}, programID{COUNT_PROGRAM_ID++}, constants{e.getParams().nbProgramConstant},
               actionProgram{actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.
@@ -115,7 +125,7 @@ namespace Program {
          */
         Program(const Program& other)
             : environment{other.environment}, lines{other.lines},
-              constants{other.constants}, actionProgram{other.actionProgram}
+              programID{other.programID}, constants{other.constants}, actionProgram{other.actionProgram}
         {
             // Replace lines with their copy
             // Keep intron info
@@ -323,6 +333,40 @@ namespace Program {
          * \param[in] other the Program whose behavior is compared.
          */
         bool hasIdenticalBehavior(const Program& other) const;
+
+        /**
+         * \brief Get the unique identifier of the Program.
+         *
+         * \return the unique identifier of the Program.
+         */
+        uint64_t getProgramID() const;
+
+        /**
+         * \brief Set a new unique identifier to the Program.
+         *
+         * \param[in] newID the new integer ID to set to the Program.
+         */
+        virtual void setProgramID(uint64_t newID);
+
+        /**
+         * \brief Reset the program ID counter.
+         *
+         * This method is mainly used for testing purpose to ensure that
+         * program IDs are predictable.
+         * 
+         * \param[in] newValue the value to which the program ID counter should be set.
+         */
+        static void setProgramIDCounter(uint64_t newValue);
+
+        /**
+         * \brief Get the current value of the program ID counter.
+         *
+         * This method is mainly used for testing purpose to ensure that
+         * program IDs are predictable.
+         *
+         * \return the current value of the program ID counter.
+         */
+        static uint64_t getProgramIDCounter() { return COUNT_PROGRAM_ID; }
     };
 } // namespace Program
 #endif

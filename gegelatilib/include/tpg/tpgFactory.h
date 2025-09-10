@@ -86,35 +86,31 @@ namespace TPG {
          * \brief Create a TPGTeam for a TPGGraph.
          *
          * This method allocates and returns a new TPGTeam.
-         * 
-         * \param[in] vertexID unique identifier of the TPGVertex.
          */
-        virtual std::unique_ptr<TPGTeam> createTPGTeam(const uint64_t vertexID) const;
+        virtual std::unique_ptr<TPGTeam> createTPGTeam() const;
 
         /**
          * \brief Create a TPGAction for a TPGGraph.
          *
          * This method allocates and returns a new TPGAction.
          *
-         * \param[in] vertexID unique identifier of the TPGVertex.
          * \param[in] id integer stored as the actionID of the TPGAction.
          */
-        virtual std::unique_ptr<TPGAction> createTPGAction(const uint64_t vertexID, const uint64_t id) const;
+        virtual std::unique_ptr<TPGAction> createTPGAction(const uint64_t id) const;
 
         /**
          * \brief Create a TPGEdge for a TPGGraph.
          *
          * This method allocates and returns a new TPGEdge.
          * The TPGEdge is returned as a unique_ptr.
-         *
-         * \param[in] edgeID unique identifier of the TPGEdge.
+         * 
          * \param[in] src pointer to the source TPGVertex of the edge.
          * \param[in] dest pointer to the destination TPGVertex of the edge.
          * \param[in] prog the shared pointer to the Program associated to the
          *            edge.
          */
         virtual std::unique_ptr<TPGEdge> createTPGEdge(
-            const uint64_t edgeID, const TPGVertex* src, const TPGVertex* dest,
+            const TPGVertex* src, const TPGVertex* dest,
             const std::shared_ptr<Program::Program> prog) const;
 
         /**
@@ -123,7 +119,6 @@ namespace TPG {
          * This method allocates and returns a new TPGActionEdge cat into a
          * TPGEdge. The TPGEdge is returned as a unique_ptr.
          *
-         * \param[in] edgeID unique identifier of the TPGEdge.
          * \param[in] src pointer to the source TPGVertex of the edge. It must
          * be an action.
          * \param[in] prog the shared pointer to the Program associated to
@@ -131,7 +126,7 @@ namespace TPG {
          * \param[in] actionClass of the actionEdge
          */
         virtual std::unique_ptr<TPGEdge> createTPGActionEdge(
-            const uint64_t edgeID, const TPGVertex* src, const std::shared_ptr<Program::Program> prog,
+            const TPGVertex* src, const std::shared_ptr<Program::Program> prog,
             uint64_t actionClass) const;
 
         /**

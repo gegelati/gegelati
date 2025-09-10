@@ -45,6 +45,9 @@
 
 #include "program/program.h"
 
+
+uint64_t Program::Program::COUNT_PROGRAM_ID = 0;
+
 Program::Program::~Program()
 {
     while (!lines.empty()) {
@@ -312,4 +315,22 @@ bool Program::Program::hasIdenticalBehavior(const Program& other) const
 
     // Everything was identical, return true
     return true;
+}
+
+uint64_t Program::Program::getProgramID() const
+{
+    return this->programID;
+}
+
+void Program::Program::setProgramID(uint64_t newID)
+{
+    if(newID >= COUNT_PROGRAM_ID) {
+        COUNT_PROGRAM_ID = newID + 1;
+    }
+    this->programID = newID;
+}
+
+void Program::Program::setProgramIDCounter(uint64_t newValue)
+{
+    COUNT_PROGRAM_ID = newValue;
 }

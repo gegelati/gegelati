@@ -51,10 +51,8 @@ namespace TPG {
 
         /**
          * \brief Main constructor of a TPGTeam.
-         *
-         * \param[in] vertexID unique identifier of the TPGVertex.
          */
-        TPGTeam(const uint64_t vertexID) : TPGVertex(vertexID) {};
+        TPGTeam() : TPGVertex() {};
 
         /**
          * \brief Specialization throwing an std::runtime_exception if a

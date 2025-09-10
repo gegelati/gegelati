@@ -46,22 +46,22 @@ std::shared_ptr<TPG::TPGGraph> TPG::TPGInstrumentedFactory::createTPGGraph(
         env, std::make_unique<TPGInstrumentedFactory>());
 }
 
-std::unique_ptr<TPG::TPGTeam> TPG::TPGInstrumentedFactory::createTPGTeam(const uint64_t vertexID) const
+std::unique_ptr<TPG::TPGTeam> TPG::TPGInstrumentedFactory::createTPGTeam() const
 {
-    return std::make_unique<TPGTeamInstrumented>(vertexID);
+    return std::make_unique<TPGTeamInstrumented>();
 }
 
 std::unique_ptr<TPG::TPGAction> TPG::TPGInstrumentedFactory::createTPGAction(
-    const uint64_t vertexID, const uint64_t id) const
+    const uint64_t id) const
 {
-    return std::make_unique<TPGActionInstrumented>(vertexID, id);
+    return std::make_unique<TPGActionInstrumented>(id);
 }
 
 std::unique_ptr<TPG::TPGEdge> TPG::TPGInstrumentedFactory::createTPGEdge(
-    const uint64_t edgeID, const TPGVertex* src, const TPGVertex* dest,
+    const TPGVertex* src, const TPGVertex* dest,
     const std::shared_ptr<Program::Program> prog) const
 {
-    auto ptr = std::make_unique<TPG::TPGEdgeInstrumented>(edgeID, src, dest, prog);
+    auto ptr = std::make_unique<TPG::TPGEdgeInstrumented>(src, dest, prog);
     return ptr;
 }
 

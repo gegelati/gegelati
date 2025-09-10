@@ -115,7 +115,7 @@ TEST(JobTest, getRootsAndRoot)
 
     TPG::TPGVertex* tpg = nullptr;
     // we define a non-null tpg to check the content of the job later
-    TPG::TPGVertex* tpg2 = new TPG::TPGAction(0, 0);
+    TPG::TPGVertex* tpg2 = new TPG::TPGAction(0);
 
     job = new Learn::AdversarialJob({tpg});
     job2 = new Learn::Job(tpg);
@@ -149,7 +149,7 @@ TEST(JobTest, operatorGet)
 
     TPG::TPGVertex* tpg = nullptr;
     // we define a non-null tpg to check the content of the job later
-    TPG::TPGVertex* tpg2 = new TPG::TPGAction(0, 0);
+    TPG::TPGVertex* tpg2 = new TPG::TPGAction(0);
 
     job = new Learn::AdversarialJob({tpg, tpg2});
 

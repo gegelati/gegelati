@@ -35,6 +35,18 @@
 
 #include "tpg/tpgEdge.h"
 
+uint64_t TPG::TPGEdge::COUNT_EDGE_ID = 0;
+
+void TPG::TPGEdge::setEdgeIDCounter(uint64_t newValue)
+{
+    COUNT_EDGE_ID = newValue;
+}
+
+void TPG::TPGEdge::setEdgeID(uint64_t newID)
+{
+    this->edgeID = newID;
+}
+
 Program::Program& TPG::TPGEdge::getProgram() const
 {
     return *this->program;

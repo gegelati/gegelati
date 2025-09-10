@@ -56,14 +56,14 @@ namespace TPG {
             const Environment& env) const override;
 
         ///  Specialization of the method returning a TPGTeamInstrumented
-        virtual std::unique_ptr<TPGTeam> createTPGTeam(const uint64_t vertexID) const override;
+        virtual std::unique_ptr<TPGTeam> createTPGTeam() const override;
 
         ///  Specialization of the method returning a TPGActionInstrumented
-        virtual std::unique_ptr<TPGAction> createTPGAction(const uint64_t vertexID, const uint64_t id) const override;
+        virtual std::unique_ptr<TPGAction> createTPGAction(const uint64_t id) const override;
 
         ///  Specialization of the method returning a TPGEdgeInstrumented
         virtual std::unique_ptr<TPGEdge> createTPGEdge(
-            const uint64_t edgeID, const TPGVertex* src, const TPGVertex* dest,
+            const TPGVertex* src, const TPGVertex* dest,
             const std::shared_ptr<Program::Program> prog) const override;
 
         ///  Specialization of the method returning a
