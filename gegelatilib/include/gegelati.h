@@ -47,8 +47,9 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
-#include <util/timestamp.h>
+#include <util/counterReset.h>
 #include <util/genericComparator.h>
+#include <util/timestamp.h>
 
 #include <data/array2DWrapper.h>
 #include <data/arrayWrapper.h>

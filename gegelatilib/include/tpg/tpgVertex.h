@@ -42,6 +42,8 @@
 #include <list>
 #include <set>
 
+struct CounterReset;
+
 namespace TPG {
     // Declare class to make it usable as an attribute.
     class TPGEdge;
@@ -159,15 +161,6 @@ namespace TPG {
          */
         virtual void setVertexID(uint64_t newID);
 
-        /**
-         * \brief Reset the vertex ID counter.
-         *
-         * This method is mainly used for testing purpose to ensure that
-         * vertex IDs are predictable.
-         *
-         * \param[in] newValue the value to which the vertex ID counter should be set.
-         */
-        static void setVertexIDCounter(uint64_t newValue);
 
         /**
          * \brief Get the current value of the vertex ID counter.
@@ -177,14 +170,15 @@ namespace TPG {
          * 
          * \return the current value of the vertex ID counter.
          */
-        static uint64_t getVertexIDCounter() { return COUNT_VERTEX_ID; }
+        static uint64_t getVertexIDCounter();
+
 
       protected:
         /**
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          */
-        TPGVertex() : vertexID(COUNT_VERTEX_ID++) {};
+        TPGVertex() : vertexID(incrementeCounter()) {std::cout<<"Vertex created with ID "<<TPG::TPGVertex::getVertexIDCounter()<<std::endl;};
 
         /// True if the vertex should be deleted during evolution process
         bool toBeDeleted = false;
@@ -209,8 +203,19 @@ namespace TPG {
          */
         uint64_t vertexID;
 
-        /// \brief Counter for the number of TPGVertex instances.
-        inline static uint64_t COUNT_VERTEX_ID = 0;
+        /**
+         * \brief Incremente the vertex ID counter and return the new value.
+         */
+        static uint64_t incrementeCounter();
+
+        /**
+         * \brief Reset the vertex ID counter.
+         *
+         * This method set the ID counter to a new value.
+         * It can quickly lead to segmentation fault if not used carefully.
+         */
+        static void resetVertexIDCounter();
+        friend struct ::CounterReset;
     };
 
     

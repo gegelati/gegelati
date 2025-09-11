@@ -49,6 +49,7 @@
 #include "tpg/instrumented/tpgInstrumentedFactory.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 #include "tpg/tpgGraph.h"
+#include "util/counterReset.h"
 
 class TPGInstrumentedTest : public ::testing::Test
 {
@@ -63,6 +64,8 @@ class TPGInstrumentedTest : public ::testing::Test
 
     virtual void SetUp()
     {
+        
+        CounterReset::counterReset();
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
         vect.push_back(

@@ -90,10 +90,6 @@ void TPG::TPGGraph::setNewVertexID(const TPG::TPGVertex& vertex, uint64_t newID)
     // Modify the ID
     vertexIterator->get()->setVertexID(newID);
 
-    // Update the ID counter if needed
-    if (newID >= TPG::TPGVertex::getVertexIDCounter()) {
-        TPG::TPGVertex::setVertexIDCounter(newID + 1);
-    }
 }
 
 const TPG::TPGTeam& TPG::TPGGraph::addNewTeam()
@@ -247,10 +243,7 @@ void TPG::TPGGraph::setNewEdgeID(const TPG::TPGEdge& edge, uint64_t newID)
     // Modify the ID
     edgeIterator->get()->setEdgeID(newID);
 
-    // Update the ID counter if needed
-    if (newID >= TPG::TPGEdge::getEdgeIDCounter()) {
-        TPG::TPGEdge::setEdgeIDCounter(newID + 1);
-    }
+
 }
 
 const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(

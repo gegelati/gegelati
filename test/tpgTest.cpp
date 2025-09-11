@@ -53,6 +53,8 @@
 
 #include "tpg/tpgFactory.h"
 
+#include "util/counterReset.h"
+
 class TPGTest : public ::testing::Test
 {
   protected:
@@ -67,6 +69,7 @@ class TPGTest : public ::testing::Test
 
     virtual void SetUp()
     {
+        CounterReset::counterReset();
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
         vect.push_back(

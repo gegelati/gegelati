@@ -54,6 +54,10 @@
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameAdversarial.h"
 
+#include "tpg/tpgVertex.h"
+
+#include "util/counterReset.h"
+
 class adversarialLearningAgentTest : public ::testing::Test
 {
   protected:
@@ -63,6 +67,7 @@ class adversarialLearningAgentTest : public ::testing::Test
 
     virtual void SetUp()
     {
+        CounterReset::counterReset();
         set.add(*(new Instructions::AddPrimitiveType<int>()));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
@@ -256,8 +261,15 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 125)
         << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 173)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 1084)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 506)
+        << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 2757301394746222351U)
         << "Graph does not have the expected determinst characteristics.";
+
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)

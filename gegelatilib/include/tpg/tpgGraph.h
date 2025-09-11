@@ -67,11 +67,7 @@ namespace TPG {
         TPGGraph(const Environment& e,
                  std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>())
             : env{e}, factory{std::move(f)} 
-            {
-                TPG::TPGVertex::setVertexIDCounter(0);
-                TPG::TPGEdge::setEdgeIDCounter(0);
-                Program::Program::setProgramIDCounter(0);
-            }
+            {}
 
         /**
          * \brief delete copy constructor

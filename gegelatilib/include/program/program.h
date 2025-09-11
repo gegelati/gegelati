@@ -41,9 +41,13 @@
 #include <algorithm>
 #include <vector>
 
+
 #include "data/constantHandler.h"
 #include "environment.h"
 #include "program/line.h"
+
+
+struct CounterReset;
 
 namespace Program {
     /**
@@ -68,14 +72,6 @@ namespace Program {
         bool actionProgram;
 
 
-        /// \brief Counter for the number of Program instances.
-        inline static uint64_t COUNT_PROGRAM_ID = 0;
-
-        /**
-         * \brief Unique identifier of the Program.
-         */
-        uint64_t programID;
-
         /**
          * \brief Lines of the program and intron property.
          *
@@ -97,6 +93,26 @@ namespace Program {
          **/
         Data::ConstantHandler constants;
 
+
+        /**
+         * \brief Unique identifier of the Program.
+         */
+        uint64_t programID;
+
+        /**
+         * \brief Incremente the program ID counter and return the new value.
+         */
+        static uint64_t incrementeCounter();
+
+        /**
+         * \brief Reset the program ID counter.
+         *
+         * This method set the ID counter to a new value.
+         * It can quickly lead to segmentation fault if not used carefully.
+         */
+        static void resetProgramIDCounter();
+        friend struct ::CounterReset;
+
         /// Delete the default constructor.
         Program() = delete;
 
@@ -109,7 +125,7 @@ namespace Program {
          * context in the Program attributes.
          */
         Program(const Environment& e, bool actProgram)
-            : environment{e}, programID{COUNT_PROGRAM_ID++}, constants{e.getParams().nbProgramConstant},
+            : environment{e}, programID{incrementeCounter()}, constants{e.getParams().nbProgramConstant},
               actionProgram{actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.
@@ -148,7 +164,7 @@ namespace Program {
          * context
          */
         Program(const Program& other, bool actProgram)
-            : environment{other.environment}, lines{other.lines},
+            : environment{other.environment}, programID{incrementeCounter()}, lines{other.lines},
               constants{other.constants}, actionProgram{actProgram}
         {
             // Replace lines with their copy
@@ -348,15 +364,6 @@ namespace Program {
          */
         virtual void setProgramID(uint64_t newID);
 
-        /**
-         * \brief Reset the program ID counter.
-         *
-         * This method is mainly used for testing purpose to ensure that
-         * program IDs are predictable.
-         * 
-         * \param[in] newValue the value to which the program ID counter should be set.
-         */
-        static void setProgramIDCounter(uint64_t newValue);
 
         /**
          * \brief Get the current value of the program ID counter.
@@ -366,7 +373,7 @@ namespace Program {
          *
          * \return the current value of the program ID counter.
          */
-        static uint64_t getProgramIDCounter() { return COUNT_PROGRAM_ID; }
+        static uint64_t getProgramIDCounter();
     };
 } // namespace Program
 #endif

@@ -41,6 +41,9 @@
 
 #include "program/program.h"
 
+
+struct CounterReset;
+
 namespace TPG {
     // Declare class to make it usable as an attribute.
     class TPGVertex;
@@ -67,7 +70,7 @@ namespace TPG {
          */
         TPGEdge(const TPGVertex* src, const TPGVertex* dest,
                 const std::shared_ptr<Program::Program> prog)
-            : edgeID(COUNT_EDGE_ID++), source{src}, destination{dest}, program{prog} {};
+            : edgeID(incrementeCounter()), source{src}, destination{dest}, program{prog} {};
 
         /**
          * \brief Get a const reference to the Program of the TPGEdge.
@@ -143,16 +146,6 @@ namespace TPG {
         virtual void setEdgeID(uint64_t newID);
 
         /**
-         * \brief Reset the edge ID counter.
-         *
-         * This method is mainly used for testing purpose to ensure that
-         * edge IDs are predictable.
-         * 
-         * \param[in] newValue the value to which the edge ID counter should be set.
-         */
-        static void setEdgeIDCounter(uint64_t newValue);
-
-        /**
          * \brief Get the current value of the edge ID counter.
          *
          * This method is mainly used for testing purpose to ensure that
@@ -160,7 +153,7 @@ namespace TPG {
          *
          * \return the current value of the edge ID counter.
          */
-        static uint64_t getEdgeIDCounter() { return COUNT_EDGE_ID; }
+        static uint64_t getEdgeIDCounter();
 
       protected:
         /// Pointer to the source TPGVertex of this TPGEdge
@@ -181,8 +174,19 @@ namespace TPG {
          */
         uint64_t edgeID;
 
-        /// \brief Counter for the number of TPGEdge instances.
-        inline static uint64_t COUNT_EDGE_ID = 0;
+        /**
+         * \brief Incremente the edge ID counter and return the new value.
+         */
+        static uint64_t incrementeCounter();
+
+        /**
+         * \brief Reset the edge ID counter.
+         *
+         * This method set the ID counter to a new value.
+         * It can quickly lead to segmentation fault if not used carefully.
+         */
+        static void resetEdgeIDCounter();
+        friend struct ::CounterReset;
 
         /// Delete the default constructor.
         TPGEdge() = delete;

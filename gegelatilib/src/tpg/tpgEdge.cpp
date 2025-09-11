@@ -35,14 +35,33 @@
 
 #include "tpg/tpgEdge.h"
 
-void TPG::TPGEdge::setEdgeIDCounter(uint64_t newValue)
+// Declaration of static edge ID Counter in local here because it creates error in the .h file for MSVC compiler
+// See: https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
+uint64_t COUNT_EDGE_ID = 0;
+
+uint64_t TPG::TPGEdge::incrementeCounter()
 {
-    COUNT_EDGE_ID = newValue;
+    return COUNT_EDGE_ID++;
+}
+
+uint64_t TPG::TPGEdge::getEdgeIDCounter()
+{
+    return COUNT_EDGE_ID;
+}
+
+void TPG::TPGEdge::resetEdgeIDCounter()
+{
+    COUNT_EDGE_ID = 0;
 }
 
 void TPG::TPGEdge::setEdgeID(uint64_t newID)
 {
     this->edgeID = newID;
+
+    // Update the ID counter if needed
+    if (newID >= COUNT_EDGE_ID) {
+        COUNT_EDGE_ID = newID + 1;
+    }
 }
 
 Program::Program& TPG::TPGEdge::getProgram() const
@@ -83,9 +102,8 @@ void TPG::TPGEdge::setDestination(TPGVertex* newDestination)
 
 uint64_t TPG::TPGEdge::getEdgeID() const
 {
-    return this->edgeID;
+    return edgeID; 
 }
-
 
 bool TPG::operator<(const TPG::TPGEdge& a, const TPG::TPGEdge& b)
 {
