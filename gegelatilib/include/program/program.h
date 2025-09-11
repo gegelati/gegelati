@@ -69,7 +69,7 @@ namespace Program {
 
 
         /// \brief Counter for the number of Program instances.
-        static uint64_t COUNT_PROGRAM_ID;
+        inline static uint64_t COUNT_PROGRAM_ID = 0;
 
         /**
          * \brief Unique identifier of the Program.

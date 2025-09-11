@@ -35,8 +35,6 @@
 
 #include "tpg/tpgEdge.h"
 
-uint64_t TPG::TPGEdge::COUNT_EDGE_ID = 0;
-
 void TPG::TPGEdge::setEdgeIDCounter(uint64_t newValue)
 {
     COUNT_EDGE_ID = newValue;

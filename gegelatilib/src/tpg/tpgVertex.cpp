@@ -39,8 +39,6 @@
 #include "tpg/tpgActionEdge.h"
 #include "tpg/tpgVertex.h"
 
-uint64_t TPG::TPGVertex::COUNT_VERTEX_ID = 0;
-
 void TPG::TPGVertex::setVertexIDCounter(uint64_t newValue)
 {
     COUNT_VERTEX_ID = newValue;

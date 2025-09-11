@@ -210,7 +210,7 @@ namespace TPG {
         uint64_t vertexID;
 
         /// \brief Counter for the number of TPGVertex instances.
-        static uint64_t COUNT_VERTEX_ID;
+        inline static uint64_t COUNT_VERTEX_ID = 0;
     };
 
     

@@ -181,7 +181,8 @@ namespace TPG {
          */
         uint64_t edgeID;
 
-        static uint64_t COUNT_EDGE_ID;
+        /// \brief Counter for the number of TPGEdge instances.
+        inline static uint64_t COUNT_EDGE_ID = 0;
 
         /// Delete the default constructor.
         TPGEdge() = delete;

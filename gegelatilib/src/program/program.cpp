@@ -45,9 +45,6 @@
 
 #include "program/program.h"
 
-
-uint64_t Program::Program::COUNT_PROGRAM_ID = 0;
-
 Program::Program::~Program()
 {
     while (!lines.empty()) {
