@@ -40,6 +40,7 @@
 #include <set>
 #include <stdexcept>
 #include <typeinfo>
+#include <atomic>
 
 #include "data/primitiveTypeArray.h"
 
@@ -48,7 +49,7 @@
 // Declaration of static program ID Counter in local here because it creates
 // error in the .h file for MSVC compiler See:
 // https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
-uint64_t COUNT_PROGRAM_ID = 0;
+std::atomic_uint64_t COUNT_PROGRAM_ID = 0;
 
 Program::Program::~Program()
 {
