@@ -4,7 +4,8 @@
 
 template <typename T>
 /** \brief A comparator for unique_ptr that compares the pointed-to values. */
-struct UniqueLess {
+struct UniqueLess
+{
 
     /**
      * \brief Type alias to signal that this comparator is transparent.
@@ -15,7 +16,8 @@ struct UniqueLess {
      * \brief Compare two unique_ptr by comparing the pointed-to values.
      */
     bool operator()(const std::unique_ptr<T>& a,
-                    const std::unique_ptr<T>& b) const {
+                    const std::unique_ptr<T>& b) const
+    {
         return *a < *b;
     }
 
@@ -23,8 +25,8 @@ struct UniqueLess {
      * \brief Compare a unique_ptr and a raw pointer by comparing the
      * pointed-to values.
      */
-    bool operator()(const std::unique_ptr<T>& a,
-                    const T* b) const {
+    bool operator()(const std::unique_ptr<T>& a, const T* b) const
+    {
         return *a < *b;
     }
 
@@ -32,8 +34,8 @@ struct UniqueLess {
      * \brief Compare a raw pointer and a unique_ptr by comparing the
      * pointed-to values.
      */
-    bool operator()(const T* a,
-                    const std::unique_ptr<T>& b) const {
+    bool operator()(const T* a, const std::unique_ptr<T>& b) const
+    {
         return *a < *b;
     }
 };

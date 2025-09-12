@@ -48,11 +48,10 @@ namespace TPG {
     class TPGTeam : public TPGVertex
     {
       public:
-
         /**
          * \brief Main constructor of a TPGTeam.
          */
-        TPGTeam() : TPGVertex() {};
+        TPGTeam() : TPGVertex(){};
 
         /**
          * \brief Specialization throwing an std::runtime_exception if a

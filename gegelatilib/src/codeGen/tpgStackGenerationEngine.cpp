@@ -76,8 +76,8 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
         destinationName = 'A' + std::to_string(a->getActionID());
     }
 
-    fileMain << "\t\t\t{" << destinationName << "Vert, P" << p.getProgramID() << ", "
-             << destinationName << "}";
+    fileMain << "\t\t\t{" << destinationName << "Vert, P" << p.getProgramID()
+             << ", " << destinationName << "}";
 }
 
 void CodeGen::TPGStackGenerationEngine::generateTeam(const TPG::TPGTeam& team)
@@ -202,7 +202,8 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
 
     fileMainH << "typedef enum Vertex {";
     for (auto vertex : this->tpg.getVertices()) {
-        fileMainH << vertexName(*vertex) << "Vert" << ", ";
+        fileMainH << vertexName(*vertex) << "Vert"
+                  << ", ";
     }
 
     fileMainH << "} Vertex;\n\n"

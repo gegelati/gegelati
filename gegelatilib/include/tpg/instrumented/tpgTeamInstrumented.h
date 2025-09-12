@@ -47,12 +47,12 @@ namespace TPG {
     class TPGTeamInstrumented : public TPG::TPGTeam,
                                 public TPG::TPGVertexInstrumentation
     {
-        public:
-            /// Main constructor for TPGTeamInstrumented.
-            /// see TPGTeam constructor for more details.
-            TPGTeamInstrumented() : TPGTeam()
-            {
-            }
+      public:
+        /// Main constructor for TPGTeamInstrumented.
+        /// see TPGTeam constructor for more details.
+        TPGTeamInstrumented() : TPGTeam()
+        {
+        }
     };
 } // namespace TPG
 

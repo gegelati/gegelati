@@ -394,6 +394,6 @@ namespace Mutator {
             uint64_t nbActions,
             uint64_t maxNbThreads = std::thread::hardware_concurrency());
     }; // namespace TPGMutator
-}; // namespace Mutator
+};     // namespace Mutator
 
 #endif

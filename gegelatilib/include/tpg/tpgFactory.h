@@ -96,14 +96,15 @@ namespace TPG {
          *
          * \param[in] id integer stored as the actionID of the TPGAction.
          */
-        virtual std::unique_ptr<TPGAction> createTPGAction(const uint64_t id) const;
+        virtual std::unique_ptr<TPGAction> createTPGAction(
+            const uint64_t id) const;
 
         /**
          * \brief Create a TPGEdge for a TPGGraph.
          *
          * This method allocates and returns a new TPGEdge.
          * The TPGEdge is returned as a unique_ptr.
-         * 
+         *
          * \param[in] src pointer to the source TPGVertex of the edge.
          * \param[in] dest pointer to the destination TPGVertex of the edge.
          * \param[in] prog the shared pointer to the Program associated to the

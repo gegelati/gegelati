@@ -48,11 +48,13 @@ TEST(loggerTest, Constructor)
 TEST(loggerTest, log)
 {
     Log::Logger l;
-    ASSERT_NO_THROW(l << "test1" << "test2" << std::endl);
+    ASSERT_NO_THROW(l << "test1"
+                      << "test2" << std::endl);
     std::stringstream strStr;
 
     Log::Logger l2(strStr);
-    ASSERT_NO_THROW(l2 << "test3" << "test4" << std::endl);
+    ASSERT_NO_THROW(l2 << "test3"
+                       << "test4" << std::endl);
     ASSERT_EQ("test3test4\n", strStr.str());
 
     l2 << std::endl;

@@ -37,11 +37,11 @@
 
 bool TPG::TPGAbstractEngine::programIDIsNew(const uint64_t& progID)
 {
-    if(this->programID.find(progID) == this->programID.end()) {
+    if (this->programID.find(progID) == this->programID.end()) {
         this->programID.insert(progID);
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
-

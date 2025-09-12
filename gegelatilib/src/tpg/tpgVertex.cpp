@@ -39,9 +39,9 @@
 #include "tpg/tpgActionEdge.h"
 #include "tpg/tpgVertex.h"
 
-
-// Declaration of static vertex ID Counter in local here because it creates error in the .h file for MSVC compiler
-// See: https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
+// Declaration of static vertex ID Counter in local here because it creates
+// error in the .h file for MSVC compiler See:
+// https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
 static uint64_t COUNT_VERTEX_ID = 0;
 
 uint64_t TPG::TPGVertex::incrementeCounter()
@@ -162,7 +162,7 @@ void TPG::TPGVertex::setVertexID(uint64_t newID)
     this->vertexID = newID;
 
     // Update the ID counter if needed
-    if (newID >= COUNT_VERTEX_ID){
+    if (newID >= COUNT_VERTEX_ID) {
         COUNT_VERTEX_ID = newID + 1;
     }
 }

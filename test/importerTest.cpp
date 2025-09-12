@@ -81,7 +81,7 @@ class ImporterTest : public ::testing::Test
 
     virtual void SetUp()
     {
-        
+
         CounterReset::counterReset();
         // Setup environment
         vect.push_back(

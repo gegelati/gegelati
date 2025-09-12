@@ -78,7 +78,7 @@ class MutatorTest : public ::testing::Test
 
     virtual void SetUp()
     {
-        
+
         CounterReset::counterReset();
         vect.push_back(
             *(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));

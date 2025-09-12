@@ -277,8 +277,8 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
 
             // create a new action and insert it if none was previously found
             this->actionID.insert(std::pair<uint64_t, const TPG::TPGAction*>(
-                action_number, dynamic_cast<const TPG::TPGAction*>(
-                                   &newAction)));
+                action_number,
+                dynamic_cast<const TPG::TPGAction*>(&newAction)));
 
             this->tpg.setNewVertexID(newAction, action_number);
         }
@@ -372,14 +372,13 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
         uint64_t program = std::stoi(matches[2]);
 
         // find edge
-        const auto& edges =
-            this->tpg.getEdges();
+        const auto& edges = this->tpg.getEdges();
 
         // find one of the selected program edges :
         auto p_it = programID.find(program);
         if (p_it != programID.end()) {
             std::shared_ptr<Program::Program> p = p_it->second;
-            
+
             p->setProgramID(p_it->first);
 
             auto edge_it =

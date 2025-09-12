@@ -48,14 +48,12 @@ namespace TPG {
     // Declare class to make it usable as an attribute.
     class TPGEdge;
 
-
     /**
      * \brief Abstract class representing the vertices of a TPGGraph
      */
     class TPGVertex
     {
       public:
-
         /// Default polymorphic destructor
         virtual ~TPGVertex() = default;
 
@@ -161,24 +159,22 @@ namespace TPG {
          */
         virtual void setVertexID(uint64_t newID);
 
-
         /**
          * \brief Get the current value of the vertex ID counter.
          *
          * This method is mainly used for testing purpose to ensure that
          * vertex IDs are predictable.
-         * 
+         *
          * \return the current value of the vertex ID counter.
          */
         static uint64_t getVertexIDCounter();
-
 
       protected:
         /**
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          */
-        TPGVertex() : vertexID(incrementeCounter()) {};
+        TPGVertex() : vertexID(incrementeCounter()){};
 
         /// True if the vertex should be deleted during evolution process
         bool toBeDeleted = false;
@@ -218,7 +214,6 @@ namespace TPG {
         friend struct ::CounterReset;
     };
 
-    
     /**
      * \brief Comparison function to enable sorting of TPGVertex with
      * STL.
@@ -226,6 +221,5 @@ namespace TPG {
     bool operator<(const TPGVertex& a, const TPGVertex& b);
 
 }; // namespace TPG
-
 
 #endif

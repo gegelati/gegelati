@@ -45,8 +45,9 @@
 
 #include "program/program.h"
 
-// Declaration of static program ID Counter in local here because it creates error in the .h file for MSVC compiler
-// See: https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
+// Declaration of static program ID Counter in local here because it creates
+// error in the .h file for MSVC compiler See:
+// https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
 uint64_t COUNT_PROGRAM_ID = 0;
 
 Program::Program::~Program()
@@ -326,7 +327,7 @@ uint64_t Program::Program::getProgramID() const
 void Program::Program::setProgramID(uint64_t newID)
 {
     this->programID = newID;
-    if(newID >= COUNT_PROGRAM_ID) {
+    if (newID >= COUNT_PROGRAM_ID) {
         COUNT_PROGRAM_ID = newID + 1;
     }
 }

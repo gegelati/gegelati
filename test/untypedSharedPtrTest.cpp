@@ -53,9 +53,9 @@ class UntypedSharedPtrTest : public ::testing::Test
     {
     };
 
-    virtual void SetUp() {};
+    virtual void SetUp(){};
 
-    virtual void TearDown() {};
+    virtual void TearDown(){};
 };
 
 TEST_F(UntypedSharedPtrTest, ConstructorDestructorClassical)

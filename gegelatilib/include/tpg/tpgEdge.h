@@ -41,7 +41,6 @@
 
 #include "program/program.h"
 
-
 struct CounterReset;
 
 namespace TPG {
@@ -70,7 +69,8 @@ namespace TPG {
          */
         TPGEdge(const TPGVertex* src, const TPGVertex* dest,
                 const std::shared_ptr<Program::Program> prog)
-            : edgeID(incrementeCounter()), source{src}, destination{dest}, program{prog} {};
+            : edgeID(incrementeCounter()), source{src},
+              destination{dest}, program{prog} {};
 
         /**
          * \brief Get a const reference to the Program of the TPGEdge.
@@ -130,7 +130,6 @@ namespace TPG {
          */
         virtual void setDestination(TPGVertex* newDestination);
 
-
         /**
          * \brief Get the unique identifier of the TPGEdge.
          *
@@ -167,7 +166,6 @@ namespace TPG {
         /// This attribute is mutable to enable its modification during
         /// mutations.
         mutable std::shared_ptr<Program::Program> program;
-
 
         /**
          * \brief Unique identifier of the TPGEdge.

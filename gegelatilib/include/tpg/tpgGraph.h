@@ -51,7 +51,6 @@
 
 namespace TPG {
 
-
     /**
      * \brief Class for storing a Tangled-Program-Graph.
      */
@@ -66,8 +65,9 @@ namespace TPG {
          */
         TPGGraph(const Environment& e,
                  std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>())
-            : env{e}, factory{std::move(f)} 
-            {}
+            : env{e}, factory{std::move(f)}
+        {
+        }
 
         /**
          * \brief delete copy constructor
@@ -126,7 +126,6 @@ namespace TPG {
          * \return a reference to the TPGFactory.
          */
         const TPGFactory& getFactory() const;
-
 
         /**
          * \brief Create a new TPGTeam and add it to the vertices of the
@@ -265,7 +264,8 @@ namespace TPG {
          *
          * \return a const reference to the edges attribute.
          */
-        const std::set<std::unique_ptr<TPG::TPGEdge>, UniqueLess<TPG::TPGEdge>>& getEdges() const;
+        const std::set<std::unique_ptr<TPG::TPGEdge>, UniqueLess<TPG::TPGEdge>>&
+        getEdges() const;
 
         /**
          * \brief Remove a TPGEdge from the TPGGraph.
@@ -390,10 +390,10 @@ namespace TPG {
 
         /**
          * \brief Set a new ID to a vertex
-         * 
+         *
          * An error is thrown if the vertex does not belong to the graph
          * An error is thrown if the newID is already used
-         * 
+         *
          * \param[in] vertex the vertex to change ID
          * \param[in] newID the new ID to set
          */
@@ -401,10 +401,10 @@ namespace TPG {
 
         /**
          * \brief Set a new ID to an edge
-         * 
+         *
          * An error is thrown if the edge does not belong to the graph
          * An error is thrown if the newID is already used
-         * 
+         *
          * \param[in] edge the edge to change ID
          * \param[in] newID the new ID to set
          */

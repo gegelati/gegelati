@@ -64,7 +64,7 @@ class TPGInstrumentedTest : public ::testing::Test
 
     virtual void SetUp()
     {
-        
+
         CounterReset::counterReset();
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
@@ -208,7 +208,8 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
     ASSERT_EQ(typeid(*team), typeid(TPG::TPGTeamInstrumented))
         << "Team built by the TPGInstrumentedFactory has an incorrect type.";
 
-    ASSERT_NO_THROW(edge = factory.createTPGEdge(team.get(), action.get(), progPointer))
+    ASSERT_NO_THROW(
+        edge = factory.createTPGEdge(team.get(), action.get(), progPointer))
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
     ASSERT_EQ(typeid(*edge), typeid(TPG::TPGEdgeInstrumented))

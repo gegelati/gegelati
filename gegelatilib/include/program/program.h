@@ -41,11 +41,9 @@
 #include <algorithm>
 #include <vector>
 
-
 #include "data/constantHandler.h"
 #include "environment.h"
 #include "program/line.h"
-
 
 struct CounterReset;
 
@@ -71,7 +69,6 @@ namespace Program {
          */
         bool actionProgram;
 
-
         /**
          * \brief Lines of the program and intron property.
          *
@@ -92,7 +89,6 @@ namespace Program {
          *	 Data::DataHandler
          **/
         Data::ConstantHandler constants;
-
 
         /**
          * \brief Unique identifier of the Program.
@@ -125,8 +121,9 @@ namespace Program {
          * context in the Program attributes.
          */
         Program(const Environment& e, bool actProgram)
-            : environment{e}, programID{incrementeCounter()}, constants{e.getParams().nbProgramConstant},
-              actionProgram{actProgram}
+            : environment{e}, programID{incrementeCounter()},
+              constants{e.getParams().nbProgramConstant}, actionProgram{
+                                                              actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.
         };
@@ -141,16 +138,17 @@ namespace Program {
          */
         Program(const Program& other)
             : environment{other.environment}, lines{other.lines},
-              programID{other.programID}, constants{other.constants}, actionProgram{other.actionProgram}
+              programID{other.programID}, constants{other.constants},
+              actionProgram{other.actionProgram}
         {
             // Replace lines with their copy
             // Keep intron info
-            std::transform(lines.begin(), lines.end(), lines.begin(),
-                           [](std::pair<Line*, bool>& otherLine)
-                               -> std::pair<Line*, bool> {
-                               return {new Line(*(otherLine.first)),
-                                       otherLine.second};
-                           });
+            std::transform(
+                lines.begin(), lines.end(), lines.begin(),
+                [](std::pair<Line*, bool>& otherLine)
+                    -> std::pair<Line*, bool> {
+                    return {new Line(*(otherLine.first)), otherLine.second};
+                });
         };
 
         /**
@@ -164,17 +162,18 @@ namespace Program {
          * context
          */
         Program(const Program& other, bool actProgram)
-            : environment{other.environment}, programID{incrementeCounter()}, lines{other.lines},
-              constants{other.constants}, actionProgram{actProgram}
+            : environment{other.environment}, programID{incrementeCounter()},
+              lines{other.lines}, constants{other.constants}, actionProgram{
+                                                                  actProgram}
         {
             // Replace lines with their copy
             // Keep intro info
-            std::transform(lines.begin(), lines.end(), lines.begin(),
-                           [](std::pair<Line*, bool>& otherLine)
-                               -> std::pair<Line*, bool> {
-                               return {new Line(*(otherLine.first)),
-                                       otherLine.second};
-                           });
+            std::transform(
+                lines.begin(), lines.end(), lines.begin(),
+                [](std::pair<Line*, bool>& otherLine)
+                    -> std::pair<Line*, bool> {
+                    return {new Line(*(otherLine.first)), otherLine.second};
+                });
         };
 
         /**
@@ -363,7 +362,6 @@ namespace Program {
          * \param[in] newID the new integer ID to set to the Program.
          */
         virtual void setProgramID(uint64_t newID);
-
 
         /**
          * \brief Get the current value of the program ID counter.

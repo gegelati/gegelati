@@ -82,7 +82,7 @@ namespace TPG {
         /**
          * \brief Method to find if the given Program is already in the
          * programID set.
-         * 
+         *
          * \return A boolean value indicating whether the returned ID is a new
          * one (true), or one found in the programID map (false).
          */

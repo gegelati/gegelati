@@ -73,7 +73,7 @@ class LearningAgentTest : public ::testing::Test
 
     virtual void SetUp()
     {
-        
+
         CounterReset::counterReset();
         set.add(*(new Instructions::AddPrimitiveType<int>()));
         set.add(*(new Instructions::AddPrimitiveType<double>()));

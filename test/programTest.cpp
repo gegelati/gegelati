@@ -58,8 +58,6 @@ class ProgramTest : public ::testing::Test
     Environment* e;
     Learn::LearningParameters params;
 
-
-
     virtual void SetUp()
     {
         CounterReset::counterReset();
@@ -710,20 +708,15 @@ TEST_F(ProgramTest, isActionProgram)
         << "Program should be action program.";
 }
 
-
 TEST_F(ProgramTest, ProgramID)
 {
     Program::Program p0(*e, false);
     Program::Program p1(*e, true);
     Program::Program p2(*e, true);
 
-    
-    ASSERT_EQ(p0.getProgramID(), 0)
-        << "ID of program is incorrect.";
-    ASSERT_EQ(p1.getProgramID(), 1)
-        << "ID of program is incorrect.";
-    ASSERT_EQ(p2.getProgramID(), 2)
-        << "ID of program is incorrect.";
+    ASSERT_EQ(p0.getProgramID(), 0) << "ID of program is incorrect.";
+    ASSERT_EQ(p1.getProgramID(), 1) << "ID of program is incorrect.";
+    ASSERT_EQ(p2.getProgramID(), 2) << "ID of program is incorrect.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 3)
         << "ID counter is incorrect.";
 
@@ -731,7 +724,6 @@ TEST_F(ProgramTest, ProgramID)
 
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 0)
         << "ID counter is incorrect.";
-
 
     ASSERT_NO_THROW(p1.setProgramID(5))
         << "Setting a correct value for id should not throw";

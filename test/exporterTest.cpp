@@ -54,7 +54,6 @@
 
 #include "file/tpgGraphDotExporter.h"
 
-
 #include "goldenReferenceComparison.h"
 
 class ExporterTest : public ::testing::Test
@@ -76,7 +75,7 @@ class ExporterTest : public ::testing::Test
 
     virtual void SetUp()
     {
-        
+
         CounterReset::counterReset();
         // Setup environment
         vect.push_back(

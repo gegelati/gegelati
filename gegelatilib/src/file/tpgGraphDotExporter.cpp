@@ -181,7 +181,8 @@ void File::TPGGraphDotExporter::printProgram(const Program::Program& program)
         programContent += "&#92;n";
     }
     fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"] \n",
-            this->offset.c_str(), program.getProgramID(), programContent.c_str());
+            this->offset.c_str(), program.getProgramID(),
+            programContent.c_str());
 }
 
 void File::TPGGraphDotExporter::printTPGGraphHeader()

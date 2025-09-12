@@ -269,7 +269,6 @@ TEST_F(adversarialLearningAgentTest, TrainPortability)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 2757301394746222351U)
         << "Graph does not have the expected determinst characteristics.";
-
 }
 
 TEST_F(adversarialLearningAgentTest, EvalAllRootsSequential)
