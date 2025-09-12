@@ -178,7 +178,7 @@ namespace TPG {
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          */
-        TPGVertex() : vertexID(incrementeCounter()) {std::cout<<"Vertex created with ID "<<TPG::TPGVertex::getVertexIDCounter()<<std::endl;};
+        TPGVertex() : vertexID(incrementeCounter()) {};
 
         /// True if the vertex should be deleted during evolution process
         bool toBeDeleted = false;

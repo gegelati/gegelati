@@ -1096,3 +1096,93 @@ TEST_F(TPGTest, TPGGraphOrderActionEdges)
     TPG::TPGAction fakeAction(42);
     ASSERT_THROW(tpg.orderActionEdges(&fakeAction), std::runtime_error);
 }
+
+TEST_F(TPGTest, TPGGraphVertexID)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGTeam& team0 = tpg.addNewTeam();
+    const TPG::TPGTeam& team1 = tpg.addNewTeam();
+    const TPG::TPGAction& action0 = tpg.addNewAction(0);
+
+    
+    ASSERT_EQ(team0.getVertexID(), 0)
+        << "ID of vertex is incorrect.";
+    ASSERT_EQ(team1.getVertexID(), 1)
+        << "ID of vertex is incorrect.";
+    ASSERT_EQ(action0.getVertexID(), 2)
+        << "ID of vertex is incorrect.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 3)
+        << "ID counter is incorrect.";
+
+    CounterReset::counterReset();
+
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 0)
+        << "ID counter is incorrect.";
+
+
+    ASSERT_NO_THROW(tpg.setNewVertexID(action0, 5))
+        << "Setting a correct value for id should not throw";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 6)
+        << "ID counter is incorrect.";
+
+    ASSERT_THROW(tpg.setNewVertexID(action0, 0), std::runtime_error)
+        << "Setting an incorrect value for id should throw";
+
+    TPG::TPGTeam fakeTeam;
+    ASSERT_NO_THROW(fakeTeam.setVertexID(10))
+        << "Setting a correct value for id should not throw";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 11)
+        << "ID counter is incorrect.";
+
+    ASSERT_THROW(tpg.setNewVertexID(fakeTeam, 12), std::runtime_error)
+        << "Setting a new ID for an inexisting vertex should throw";
+
+}
+
+TEST_F(TPGTest, TPGGraphEdgeID)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGTeam& team0 = tpg.addNewTeam();
+    const TPG::TPGTeam& team1 = tpg.addNewTeam();
+    const TPG::TPGAction& action0 = tpg.addNewAction(0);
+
+
+
+    const TPG::TPGEdge& edge0 = tpg.addNewEdge(team0, team1, progPointer);
+    const TPG::TPGEdge& edge1 = tpg.addNewEdge(team1, action0, progPointer);
+    const TPG::TPGEdge& edge2 = tpg.addNewActionEdge(action0, progPointer, 0);
+
+    
+    ASSERT_EQ(edge0.getEdgeID(), 0)
+        << "ID of edge is incorrect.";
+    ASSERT_EQ(edge1.getEdgeID(), 1)
+        << "ID of edge is incorrect.";
+    ASSERT_EQ(edge2.getEdgeID(), 2)
+        << "ID of edge is incorrect.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 3)
+        << "ID counter is incorrect.";
+
+    CounterReset::counterReset();
+
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 0)
+        << "ID counter is incorrect.";
+
+
+    ASSERT_NO_THROW(tpg.setNewEdgeID(edge1, 5))
+        << "Setting a correct value for id should not throw";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 6)
+        << "ID counter is incorrect.";
+
+    ASSERT_THROW(tpg.setNewEdgeID(edge2, 0), std::runtime_error)
+        << "Setting an incorrect value for id should throw";
+
+    TPG::TPGEdge fakeEdge(NULL, NULL, nullptr);
+    ASSERT_NO_THROW(fakeEdge.setEdgeID(10))
+        << "Setting a correct value for id should not throw";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 11)
+        << "ID counter is incorrect.";
+
+    ASSERT_THROW(tpg.setNewEdgeID(fakeEdge, 12), std::runtime_error)
+        << "Setting a new ID for an inexisting vertex should throw";
+
+}
