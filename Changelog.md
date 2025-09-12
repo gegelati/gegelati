@@ -1,5 +1,13 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_yyyy.mm.dd_
+
+### Changes 
+* Add unique IDs for TPGVertex, TPGEdges and Program.
+  * The IDs for TPGVertex and TPGEdges are used to reduce the complexity of the decimateRoot method, using a set to store the TPGVertex and TPGEdges instead of a list.
+  * The Ids for TPGVertex and Program are used in the CodeGen and the dot file generator to name the objects. It will also be useful to follow the history of this objects.
+
 ## Release version 2.0.0 - Fragogola flavor
 _2025.08.18_
 
