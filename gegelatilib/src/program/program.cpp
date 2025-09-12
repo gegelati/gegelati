@@ -41,6 +41,7 @@
 #include <set>
 #include <stdexcept>
 #include <typeinfo>
+#include <atomic>
 
 #include "data/primitiveTypeArray.h"
 
