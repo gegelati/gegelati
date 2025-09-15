@@ -909,7 +909,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     std::vector<const TPG::TPGAction*> actionsClonable = rootActions;
 
     bool useTournamentSelection =
-        graph.getEnvironment().getParams().useTournamentSelection;
+        true;
     if (useTournamentSelection) {
         // Update the list of clonable and preExisting Vertices because of the
         // tournmanent selection

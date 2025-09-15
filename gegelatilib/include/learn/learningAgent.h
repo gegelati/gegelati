@@ -54,6 +54,10 @@
 #include "learn/job.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
+
+#include "selector/selector.h"
+#include "selector/tournamentSelector.h"
+#include "selector/truncationSelector.h"
 namespace Learn {
 
     /**
@@ -78,26 +82,8 @@ namespace Learn {
         /// TPGGraph built during the learning process.
         std::shared_ptr<TPG::TPGGraph> tpg;
 
-        /// Pointer to the best root encountered during training, together with
-        /// its EvaluationResult.
-        std::pair<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>
-            bestRoot{nullptr, nullptr};
-
-        /**
-         * \brief Map associating root TPG::TPGVertex to their EvaluationResult.
-         *
-         * If a given TPGVertex is evaluated several times, its
-         * EvaluationResult may be updated with the newer results.
-         *
-         * Whenever a TPGVertex is removed from the TPGGraph, its
-         * EvaluationResult should also be removed from this map.
-         *
-         * This map may be used to avoid reevaluating a root that was already
-         * evaluated more than LearningParameters::maxNbEvaluationPerPolicy
-         * times.
-         */
-        std::map<const TPG::TPGVertex*, std::shared_ptr<EvaluationResult>>
-            resultsPerRoot;
+        /// Selector used for the selection process
+        std::unique_ptr<Selector::Selector> selector;
 
         /// Random Number Generator for this Learning Agent
         Mutator::RNG rng;
@@ -113,10 +99,6 @@ namespace Learn {
          * are used for each step.
          */
         std::vector<std::reference_wrapper<Log::LALogger>> loggers;
-
-        /// double corresponding to the best score reached at the last
-        /// generation
-        double bestScoreLastGen = 0.0;
 
       public:
         /**
@@ -135,8 +117,19 @@ namespace Learn {
             : learningEnvironment{le},
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
-              tpg(factory.createTPGGraph(env)), params{p},
-              archive(p.archiveSize, p.archivingProbability){};
+              tpg(factory.createTPGGraph(env)), 
+              params{p},
+              archive(p.archiveSize, p.archivingProbability) {
+
+                // There is probably a cleaner way to do that, but using the factory was an issue.
+                if (p.selection.selectionMode == "truncation") {
+                    selector = std::make_unique<Selector::TruncationSelector>(tpg, p.selection);
+                } else if (p.selection.selectionMode == "tournament") {
+                    selector = std::make_unique<Selector::TournamentSelector>(tpg, p.selection);
+                } else {
+                    throw std::runtime_error("Selection mode not found");
+                }
+              };
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -305,23 +298,6 @@ namespace Learn {
                           const TPG::TPGVertex*>& results);
 
         /**
-         * \brief Removes from the TPGGraph the root TPGVertex with the worst
-         * results.
-         *
-         * The given multimap is updated by removing entries corresponding to
-         * decimated vertices.
-         *
-         * The resultsPerRoot attribute is updated to remove results associated
-         * to removed vertices.
-         *
-         * \param[in,out] results a multimap containing root TPGVertex
-         * associated to their score during an evaluation.
-         */
-        virtual void decimateWorstRoots(
-            std::multimap<std::shared_ptr<EvaluationResult>,
-                          const TPG::TPGVertex*>& results);
-
-        /**
          * \brief Train the TPGGraph for a given number of generation.
          *
          * The method trains the TPGGraph for a given number of generation,
@@ -338,29 +314,7 @@ namespace Learn {
         virtual uint64_t train(volatile bool& altTraining,
                                bool printProgressBar);
 
-        /**
-         * \brief Update the bestRoot and resultsPerRoot attributes.
-         *
-         * This method updates the value of the bestRoot attribute with the
-         * TPG::Vertex given as an argument in the following cases:
-         * - The given EvaluationResult is greater than the one of the current
-         *   bestRoot.
-         * - The current bestRoot is a nullptr.
-         * - The current bestRoot has been removed from the TPG::TPGGraph
-         *   managed by the LearningAgent.
-         *
-         * It should be noted that the last case alone (i.e. without validating
-         * the first one) indicates a great variability of the evaluation
-         * process as it means that a vertex currently known as the best root
-         * from previous generations, with an EvaluationResult never beaten,
-         * was removed from the graph in a following generation, beaten by root
-         * vertex with lower scores than the current record.
-         *
-         * \param[in] results Map from the evaluateAllRoots method.
-         */
-        virtual void updateEvaluationRecords(
-            const std::multimap<std::shared_ptr<EvaluationResult>,
-                                const TPG::TPGVertex*>& results);
+
 
         /**
          * \brief This method resets the previous registered scores per root.
@@ -371,23 +325,6 @@ namespace Learn {
          * change.
          */
         virtual void forgetPreviousResults();
-
-        /**
-         * \brief This method update the best score reached at the last
-         * generation trained.
-         *
-         * \param[in] results Map from the evaluateAllRoots method.
-         */
-        virtual void updateBestScoreLastGen(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results);
-
-        /**
-         * \brief Get the best score reached at the last generation trained
-         *
-         * \return double of bestScoreLastGen attribute.
-         */
-        virtual double getBestScoreLastGen() const;
 
         /**
          * \brief Get the best root TPG::Vertex encountered since the last init.

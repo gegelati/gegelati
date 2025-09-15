@@ -40,6 +40,7 @@
 #define LEARNING_PARAMETERS_H
 
 #include "mutator/mutationParameters.h"
+#include "selector/selectionParameters.h"
 #include <thread>
 
 namespace Learn {
@@ -55,6 +56,9 @@ namespace Learn {
         /// MutationParameters for controlling stochastic aspects of the
         /// learning process.
         Mutator::MutationParameters mutation;
+
+        /// SelectionParameters for controlling selection aspects of the learning process.
+        Selector::SelectionParameters selection;
 
         /// JSon comment
         inline static const std::string archiveSizeComment =
@@ -108,29 +112,6 @@ namespace Learn {
         /// Maximum number of actions performed on the learning environment
         /// during the each evaluation of a root
         uint64_t maxNbActionsPerEval = 1000;
-
-        /// JSon comment
-        inline static const std::string ratioDeletedRootsComment =
-            "// Percentage of deleted (and regenerated) root TPGVertex at each "
-            "generation.\n"
-            "// \"ratioDeletedRoots\" : 0.5, // Default value";
-        /// Percentage of deleted (and regenerated) root TPGVertex at each
-        /// generation.
-        double ratioDeletedRoots = 0.5;
-
-        /// JSon comment
-        inline static const std::string useTournamentSelectionComment =
-            "// If tournament of simple selection is used.\n"
-            "// \"useTournamentSelection\" : false, // Default value";
-        /// If tournament of simple selection is used.
-        bool useTournamentSelection = false;
-
-        /// JSon comment
-        inline static const std::string sizeTournamentComment =
-            "// Size of tournament if tournament selection is used.\n"
-            "// \"sizeTournament\" : 5, // Default value";
-        /// Size of tournament if tournament selection is used.
-        uint64_t sizeTournament = 5;
 
         /// JSon comment
         inline static const std::string nbGenerationsComment =

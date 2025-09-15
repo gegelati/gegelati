@@ -81,8 +81,8 @@ void Learn::LearningAgent::init(uint64_t seed)
     // Clear the archive
     this->archive.clear();
 
-    // Clear the best root
-    this->bestRoot = {nullptr, nullptr};
+    // Clear the best agent in the selector
+    this->selector->forgetPreviousResult();
 }
 
 void Learn::LearningAgent::addLogger(Log::LALogger& logger)
@@ -99,8 +99,8 @@ bool Learn::LearningAgent::isRootEvalSkipped(
 {
     // Has the root already been evaluated more times than
     // params.maxNbEvaluationPerPolicy
-    const auto& iter = this->resultsPerRoot.find(&root);
-    if (iter != this->resultsPerRoot.end()) {
+    const auto& iter = this->selector->getResultsPerRoot().find(&root);
+    if (iter != this->selector->getResultsPerRoot().end()) {
         // The root has already been evaluated
         previousResult = iter->second;
         return iter->second->getNbEvaluation() >=
@@ -257,13 +257,10 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
         logger.get().logAfterEvaluate(results);
     }
 
-    // Save the best score of this generation
-    this->updateBestScoreLastGen(results);
-
     // Remove worst performing roots
-    decimateWorstRoots(results);
-    // Update the best
-    this->updateEvaluationRecords(results);
+    this->selector->doSelection(results, this->rng);
+    // Update the evaluation records
+    this->selector->updateEvaluationRecords(results);
 
     for (auto logger : loggers) {
         logger.get().logAfterDecimate();
@@ -294,144 +291,7 @@ void Learn::LearningAgent::decimateWithTournament(
     std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
         results)
 {
-    size_t nbToKeep =
-        (size_t)(params.mutation.tpg.nbRoots * (1 - params.ratioDeletedRoots));
-    size_t nbAgentsInTournament = results.size() - nbToKeep;
 
-    // Copy the first agents to remove (those at the bottom of the ranking)
-    std::vector<
-        std::pair<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>>
-        elements;
-    auto it = results.begin();
-    for (size_t i = 0; i < nbAgentsInTournament && it != results.end();
-         ++i, ++it) {
-        elements.push_back(*it);
-    }
-
-    // Shuffle with custom RNG
-    for (size_t i = elements.size() - 1; i > 0; --i) {
-        size_t j = rng.getUnsignedInt64(0, i); // Random index in [0, i]
-        std::swap(elements[i], elements[j]);
-    }
-
-    std::vector<const TPG::TPGVertex*> toDelete;
-    std::vector<std::shared_ptr<EvaluationResult>> erasedResults;
-
-    // Tournament selection
-    for (size_t i = 0; i < nbAgentsInTournament; i += params.sizeTournament) {
-        size_t end = std::min(static_cast<size_t>(i + params.sizeTournament),
-                              nbAgentsInTournament);
-        auto subrangeBegin = elements.begin() + i;
-        auto subrangeEnd = elements.begin() + end;
-
-        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
-            subMap(subrangeBegin, subrangeEnd);
-
-        // Delete everything but the best
-        while (subMap.size() > 1) {
-            auto itWorst = subMap.begin();
-            toDelete.push_back(itWorst->second);
-            erasedResults.push_back(itWorst->first);
-            subMap.erase(itWorst);
-        }
-
-        // This is a logical deletion, the vertex will be removed later
-        tpg->setToBeDeleted(subMap.begin()->second);
-    }
-
-    // Delete the vertices marked for deletion
-    for (const auto* v : toDelete) {
-        tpg->removeVertex(*v);
-    }
-
-    for (const auto* v : toDelete) {
-        this->resultsPerRoot.erase(v);
-    }
-
-    // Delete from results and resultsPerRoot
-    auto itDel = results.begin();
-    for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
-        this->resultsPerRoot.erase(itDel->second);
-        results.erase(itDel++);
-    }
-}
-
-void Learn::LearningAgent::decimateWorstRoots(
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
-        results)
-{
-    if (params.useTournamentSelection) {
-        return decimateWithTournament(results);
-    }
-
-    // Some actions may be encountered but not removed while scanning the
-    // results map they should be re-inserted to the list before leaving the
-    // method.
-    // Teams and actions are not removed also if there is 1% of teams or actions
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
-        preservedRoots;
-
-    // Estimate the number of expected roots to delete
-    size_t nbExpectedRoots = (size_t)floor(this->params.ratioDeletedRoots *
-                                           (double)params.mutation.tpg.nbRoots);
-
-    // Get the maximum number of teams and actions deletable
-    size_t nbTeamsDeleted = 0;
-    size_t nbActionsDeleted = 0;
-    size_t maxNbTeamsToDelete =
-        (size_t)((double)nbExpectedRoots *
-                 this->params.mutation.tpg.ratioTeamsOverActions);
-    size_t maxNbActionsoDelete = nbExpectedRoots - maxNbTeamsToDelete;
-
-    auto i = 0;
-    while (i < nbExpectedRoots && results.size() > 0) {
-
-        // If the root is an action, do not remove it in discrete environment!
-        const TPG::TPGVertex* root = results.begin()->second;
-        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr &&
-            !this->params.mutation.tpg.useActionProgram) {
-            preservedRoots.insert(*results.begin());
-            i--; // no vertex was actually removed
-
-            // This conditions avoid deleting all the teams or all the actions
-            // This is usefull is the ratioTeamsOverActions is between 0 and 1.
-        }
-        else if (dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) !=
-                     nullptr &&
-                 nbTeamsDeleted >= maxNbTeamsToDelete) {
-
-            preservedRoots.insert(*results.begin());
-            i--; // no vertex was actually removed
-        }
-        else if (dynamic_cast<const TPG::TPGAction*>(results.begin()->second) !=
-                     nullptr &&
-                 nbActionsDeleted >= maxNbActionsoDelete) {
-
-            preservedRoots.insert(*results.begin());
-            i--; // no vertex was actually removed
-        }
-        else {
-            // Incremente the number of actions and teams deleted.
-            if (dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) !=
-                nullptr) {
-                nbTeamsDeleted++;
-            }
-            else {
-                nbActionsDeleted++;
-            }
-
-            tpg->removeVertex(*results.begin()->second);
-            // Removed stored result (if any)
-            this->resultsPerRoot.erase(results.begin()->second);
-        }
-        results.erase(results.begin());
-
-        // Increment loop counter
-        i++;
-    }
-
-    // Restore root actions
-    results.insert(preservedRoots.begin(), preservedRoots.end());
 }
 
 uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
@@ -478,88 +338,16 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
     return generationNumber;
 }
 
-void Learn::LearningAgent::updateEvaluationRecords(
-    const std::multimap<std::shared_ptr<EvaluationResult>,
-                        const TPG::TPGVertex*>& results)
-{
-    { // Update resultsPerRoot
-        for (auto result : results) {
-            auto mapIterator = this->resultsPerRoot.find(result.second);
-            if (mapIterator == this->resultsPerRoot.end()) {
-                // First time this root is evaluated
-                this->resultsPerRoot.emplace(result.second, result.first);
-            }
-            else if (result.first != mapIterator->second) {
-                // This root has already been evaluated.
-                // If the received result pointer is different from the one
-                // stored in the map, update the one in the map by replacing it
-                // with the new one (which was combined with the pre-existing
-                // one in evalRoot)
-                mapIterator->second = result.first;
-                // If the received result is associated to the current bestRoot,
-                // update it.
-                if (result.second == this->bestRoot.first) {
-                    this->bestRoot.second = result.first;
-                }
-            }
-        }
-    }
-
-    { // Update bestRoot
-        auto iterator = --results.end();
-        const std::shared_ptr<EvaluationResult> evaluation = iterator->first;
-        const TPG::TPGVertex* candidate = iterator->second;
-        // Test the three replacement cases
-        // from the simpler to the most complex to test
-        if (this->bestRoot.first == nullptr         // NULL case
-            || *this->bestRoot.second < *evaluation // new high-score case
-            || !this->tpg->hasVertex(
-                   *this->bestRoot.first) // bestRoot disappearance
-        ) {
-            // Replace the best root
-            this->bestRoot = {candidate, evaluation};
-        }
-
-        // Otherwise do nothing
-    }
-}
-
 const std::pair<const TPG::TPGVertex*,
                 std::shared_ptr<Learn::EvaluationResult>>&
 Learn::LearningAgent::getBestRoot() const
 {
-    return this->bestRoot;
-}
-
-void Learn::LearningAgent::updateBestScoreLastGen(
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results)
-{
-    auto iterator = --results.end();
-    bestScoreLastGen = iterator->first->getResult();
-}
-
-double Learn::LearningAgent::getBestScoreLastGen() const
-{
-    return bestScoreLastGen;
+    return this->selector->getBestRoot();
 }
 
 void Learn::LearningAgent::keepBestPolicy()
 {
-    // Evaluate all roots
-    if (this->tpg->hasVertex(*this->bestRoot.first)) {
-        auto bestRootVertex = this->bestRoot.first;
 
-        // Remove all but the best root from the tpg
-        while (this->tpg->getNbRootVertices() != 1) {
-            auto roots = this->tpg->getRootVertices();
-            for (auto root : roots) {
-                if (root != bestRootVertex) {
-                    tpg->removeVertex(*root);
-                }
-            }
-        }
-    }
 }
 
 std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
@@ -600,7 +388,5 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
 
 void Learn::LearningAgent::forgetPreviousResults()
 {
-    resultsPerRoot.clear();
-    bestRoot.first = nullptr;
-    bestRoot.second = nullptr;
+
 }

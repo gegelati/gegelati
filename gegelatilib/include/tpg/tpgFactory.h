@@ -45,6 +45,7 @@
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgTeam.h"
 
+
 namespace TPG {
 
     // Declare the TPGGraph class to be used as a parameter.

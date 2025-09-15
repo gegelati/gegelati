@@ -88,7 +88,32 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
                     }
                 }
             }
-            continue;
+        } else if (key == "selection"){
+            // we have a subtree of selection : parameters like selection.xxx.xxx
+            for (std::string const& key2 : root[key].getMemberNames()) {
+                if (key2 == "truncation") {
+                    // we're on a selection.truncation.xxx parameter
+                    for (std::string const& key3 :
+                         root[key][key2].getMemberNames()) {
+                        Json::Value value = root[key][key2][key3];
+                        setParameterFromString(params, key3, value);
+                    }
+                }
+                else if (key2 == "tournament") {
+                    // we're on a selection.tournament.xxx parameter
+                    for (std::string const& key3 :
+                            root[key][key2].getMemberNames()) {
+                        Json::Value value = root[key][key2][key3];
+                        setParameterFromString(params, key3, value);
+                    }
+                }
+                if (root[key][key2].size() == 0) {
+                    // we're on a selection.xxx paramter.
+                    Json::Value value = root[key2];
+                    setParameterFromString(params, key2, value);
+                }
+
+            }
         }
         if (root[key].size() == 0) {
             // we have a parameter without subtree (as a leaf)
@@ -102,6 +127,61 @@ void File::ParametersParser::setParameterFromString(
     Learn::LearningParameters& params, const std::string& param,
     Json::Value const& value)
 {
+
+    if (param == "activationFunction") {
+        params.activationFunction = value.asString();
+        return;
+    }
+    if (param == "archiveSize") {
+        params.archiveSize = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "archivingProbability") {
+        params.archivingProbability = value.asDouble();
+        return;
+    }
+    if (param == "doValidation") {
+        params.doValidation = value.asBool();
+        return;
+    }
+    if (param == "nbIterationsPerPolicyEvaluation") {
+        params.nbIterationsPerPolicyEvaluation = value.asUInt64();
+        return;
+    }
+    if (param == "nbIterationsPerPolicyValidation") {
+        params.nbIterationsPerPolicyValidation = value.asUInt64();
+        return;
+    }
+    if (param == "nbRegisters") {
+        params.nbRegisters = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "nbThreads") {
+        params.nbThreads = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "nbGenerations") {
+        params.nbGenerations = value.asUInt64();
+        return;
+    }
+    if (param == "nbIterationsPerJob") {
+        params.nbIterationsPerJob = value.asUInt64();
+        return;
+    }
+    if (param == "maxNbActionsPerEval") {
+        params.maxNbActionsPerEval = value.asUInt64();
+        return;
+    }
+    if (param == "maxNbEvaluationPerPolicy") {
+        params.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "stepValidation") {
+        params.stepValidation = (size_t)value.asUInt();
+        return;
+    }
+
+
     if (param == "nbRoots") {
         params.mutation.tpg.nbRoots = (size_t)value.asUInt();
         return;
@@ -114,12 +194,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;
     }
-
     if (param == "nbActionEdgeInit") {
         params.mutation.tpg.nbActionEdgeInit = (size_t)value.asUInt();
         return;
     }
-
     if (param == "useMultiActionProgram") {
         params.mutation.tpg.useMultiActionProgram = value.asBool();
         return;
@@ -128,7 +206,6 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.teamAccessAllActions = value.asBool();
         return;
     }
-
     if (param == "pChangeActionClass") {
         params.mutation.tpg.pChangeActionClass = (double)value.asDouble();
         return;
@@ -149,7 +226,6 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.pSwapActionProgram = value.asDouble();
         return;
     }
-
     if (param == "maxOutgoingEdges") {
         params.mutation.tpg.maxOutgoingEdges = (size_t)value.asUInt();
         return;
@@ -237,74 +313,25 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.prog.maxConstValue = value.asDouble();
         return;
     }
-    if (param == "archiveSize") {
-        params.archiveSize = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "archivingProbability") {
-        params.archivingProbability = value.asDouble();
-        return;
-    }
-    if (param == "nbIterationsPerPolicyEvaluation") {
-        params.nbIterationsPerPolicyEvaluation = value.asUInt64();
-        return;
-    }
-    if (param == "nbIterationsPerPolicyValidation") {
-        params.nbIterationsPerPolicyValidation = value.asUInt64();
-        return;
-    }
 
-    if (param == "stepValidation") {
-        params.stepValidation = (size_t)value.asUInt();
-        return;
-    }
 
-    if (param == "maxNbActionsPerEval") {
-        params.maxNbActionsPerEval = value.asUInt64();
+    if (param == "selectionMode") {
+        params.selection.selectionMode = value.asString();
         return;
     }
     if (param == "ratioDeletedRoots") {
-        params.ratioDeletedRoots = value.asDouble();
+        params.selection.truncation.ratioDeletedRoots = value.asDouble();
         return;
     }
-    if (param == "useTournamentSelection") {
-        params.useTournamentSelection = value.asBool();
+    if (param == "ratioSavedRoots") {
+        params.selection.tournament.ratioSavedRoots = value.asDouble();
         return;
     }
     if (param == "sizeTournament") {
-        params.sizeTournament = value.asUInt64();
+        params.selection.tournament.sizeTournament = value.asUInt64();
         return;
     }
 
-    if (param == "nbGenerations") {
-        params.nbGenerations = value.asUInt64();
-        return;
-    }
-    if (param == "nbIterationsPerJob") {
-        params.nbIterationsPerJob = value.asUInt64();
-        return;
-    }
-    if (param == "maxNbEvaluationPerPolicy") {
-        params.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "nbRegisters") {
-        params.nbRegisters = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "nbThreads") {
-        params.nbThreads = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "doValidation") {
-        params.doValidation = value.asBool();
-        return;
-    }
-
-    if (param == "activationFunction") {
-        params.activationFunction = value.asString();
-        return;
-    }
     // we didn't recognize the symbol
     std::cerr << "Ignoring unknown parameter " << param << std::endl;
 }
@@ -391,18 +418,6 @@ void File::ParametersParser::writeParametersToJson(
     root["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,
                                  Json::commentBefore);
 
-    root["ratioDeletedRoots"] = params.ratioDeletedRoots;
-    root["ratioDeletedRoots"].setComment(
-        Learn::LearningParameters::ratioDeletedRootsComment,
-        Json::commentBefore);
-
-    root["useTournamentSelection"] = params.useTournamentSelection;
-    root["useTournamentSelection"].setComment(
-        Learn::LearningParameters::useTournamentSelectionComment,
-        Json::commentBefore);
-    root["sizeTournament"] = params.sizeTournament;
-    root["sizeTournament"].setComment(
-        Learn::LearningParameters::sizeTournamentComment, Json::commentBefore);
 
     // Mutation.tpg parameters
     root["mutation"]["tpg"]["forceProgramBehaviorChangeOnMutation"] =
@@ -566,6 +581,20 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["prog"]["pSwap"] = params.mutation.prog.pSwap;
     root["mutation"]["prog"]["pSwap"].setComment(
         Mutator::ProgramParameters::pSwapComment, Json::commentBefore);
+
+
+    root["selection"]["selectionMode"] = params.selection.selectionMode;
+    root["selection"]["selectionMode"].setComment(
+        Selector::SelectionParameters::selectionModeComment, Json::commentBefore);
+    root["selection"]["truncation"]["ratioDeletedRoots"] = params.selection.truncation.ratioDeletedRoots;
+    root["selection"]["truncation"]["ratioDeletedRoots"].setComment(
+        Selector::TruncationParameters::ratioDeletedRootsComment, Json::commentBefore);
+    root["selection"]["tournament"]["ratioSavedRoots"] = params.selection.tournament.ratioSavedRoots;
+    root["selection"]["tournament"]["ratioSavedRoots"].setComment(
+        Selector::TournamentParameters::ratioSavedRootsComment, Json::commentBefore);
+    root["selection"]["tournament"]["sizeTournament"] = params.selection.tournament.sizeTournament;
+    root["selection"]["tournament"]["sizeTournament"].setComment(
+        Selector::TournamentParameters::sizeTournamentComment, Json::commentBefore);
 
     // Write to the output stream
     std::ofstream writtenFile(path);
