@@ -202,8 +202,7 @@ void CodeGen::TPGStackGenerationEngine::initHeaderFile()
 
     fileMainH << "typedef enum Vertex {";
     for (auto vertex : this->tpg.getVertices()) {
-        fileMainH << vertexName(*vertex) << "Vert"
-                  << ", ";
+        fileMainH << vertexName(*vertex) << "Vert" << ", ";
     }
 
     fileMainH << "} Vertex;\n\n"

@@ -69,8 +69,8 @@ namespace TPG {
          */
         TPGEdge(const TPGVertex* src, const TPGVertex* dest,
                 const std::shared_ptr<Program::Program> prog)
-            : edgeID(incrementeCounter()), source{src},
-              destination{dest}, program{prog} {};
+            : edgeID(incrementeCounter()), source{src}, destination{dest},
+              program{prog} {};
 
         /**
          * \brief Get a const reference to the Program of the TPGEdge.

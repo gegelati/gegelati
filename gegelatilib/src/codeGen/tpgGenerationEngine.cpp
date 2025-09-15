@@ -45,9 +45,9 @@
 CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
                                                   const TPG::TPGGraph& tpg,
                                                   const std::string& path)
-    : TPGAbstractEngine(tpg), progGenerationEngine{filename + "_" +
-                                                       filenameProg,
-                                                   tpg.getEnvironment(), path}
+    : TPGAbstractEngine(tpg),
+      progGenerationEngine{filename + "_" + filenameProg, tpg.getEnvironment(),
+                           path}
 {
     if (tpg.getEnvironment().getNbContinuousActions() > 0 &&
         !tpg.getEnvironment().getParams().mutation.tpg.useActionProgram) {

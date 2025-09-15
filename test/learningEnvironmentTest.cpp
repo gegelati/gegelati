@@ -59,7 +59,7 @@ class FakeLearningEnvironment : public Learn::LearningEnvironment
   public:
     FakeLearningEnvironment() : LearningEnvironment(2), data(3){};
     void reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber,
-               uint64_t generationNumber){};
+               uint64_t generationNumber) {};
     std::vector<std::reference_wrapper<const Data::DataHandler>>
     getDataSources()
     {

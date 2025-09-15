@@ -122,8 +122,8 @@ namespace Program {
          */
         Program(const Environment& e, bool actProgram)
             : environment{e}, programID{incrementeCounter()},
-              constants{e.getParams().nbProgramConstant}, actionProgram{
-                                                              actProgram}
+              constants{e.getParams().nbProgramConstant},
+              actionProgram{actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.
         };
@@ -143,12 +143,12 @@ namespace Program {
         {
             // Replace lines with their copy
             // Keep intron info
-            std::transform(
-                lines.begin(), lines.end(), lines.begin(),
-                [](std::pair<Line*, bool>& otherLine)
-                    -> std::pair<Line*, bool> {
-                    return {new Line(*(otherLine.first)), otherLine.second};
-                });
+            std::transform(lines.begin(), lines.end(), lines.begin(),
+                           [](std::pair<Line*, bool>& otherLine)
+                               -> std::pair<Line*, bool> {
+                               return {new Line(*(otherLine.first)),
+                                       otherLine.second};
+                           });
         };
 
         /**
@@ -163,17 +163,17 @@ namespace Program {
          */
         Program(const Program& other, bool actProgram)
             : environment{other.environment}, programID{incrementeCounter()},
-              lines{other.lines}, constants{other.constants}, actionProgram{
-                                                                  actProgram}
+              lines{other.lines}, constants{other.constants},
+              actionProgram{actProgram}
         {
             // Replace lines with their copy
             // Keep intro info
-            std::transform(
-                lines.begin(), lines.end(), lines.begin(),
-                [](std::pair<Line*, bool>& otherLine)
-                    -> std::pair<Line*, bool> {
-                    return {new Line(*(otherLine.first)), otherLine.second};
-                });
+            std::transform(lines.begin(), lines.end(), lines.begin(),
+                           [](std::pair<Line*, bool>& otherLine)
+                               -> std::pair<Line*, bool> {
+                               return {new Line(*(otherLine.first)),
+                                       otherLine.second};
+                           });
         };
 
         /**
