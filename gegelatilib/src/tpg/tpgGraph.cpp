@@ -45,11 +45,7 @@
 
 TPG::TPGGraph::~TPGGraph()
 {
-    // Just delete the vertices.
-    // Edges will be deleted during their container destruction.
-    for (TPG::TPGVertex* vertex : this->vertices) {
-        delete vertex;
-    }
+    clear();
 }
 
 TPG::TPGGraph& TPG::TPGGraph::operator=(TPGGraph model)
@@ -60,10 +56,8 @@ TPG::TPGGraph& TPG::TPGGraph::operator=(TPGGraph model)
 
 void TPG::TPGGraph::clear()
 {
-    // Remove all vertices
-    while (this->vertices.size() > 0) {
-        this->removeVertex(*this->vertices.front());
-    }
+    this->vertices.clear();
+    this->edges.clear();
 }
 
 const Environment& TPG::TPGGraph::getEnvironment() const
@@ -76,16 +70,38 @@ const TPG::TPGFactory& TPG::TPGGraph::getFactory() const
     return *this->factory;
 }
 
+void TPG::TPGGraph::setNewVertexID(const TPG::TPGVertex& vertex, uint64_t newID)
+{
+    // Check that the vertex to modify exists in the graph
+    auto vertexIterator = vertices.find(&vertex);
+    if (vertexIterator == this->vertices.end() ||
+        vertexIterator->get() != &vertex) {
+        throw std::runtime_error(
+            "The vertex to modify does not exist in the TPGGraph.");
+    }
+
+    // Check that no other vertex has the same ID
+    for (const auto& vptr : vertices) {
+        if (vptr.get() != &vertex && vptr->getVertexID() == newID) {
+            throw std::runtime_error("Another vertex with the same ID already "
+                                     "exists in the TPGGraph.");
+        }
+    }
+
+    // Modify the ID
+    vertexIterator->get()->setVertexID(newID);
+}
+
 const TPG::TPGTeam& TPG::TPGGraph::addNewTeam()
 {
-    this->vertices.push_back(factory->createTPGTeam());
-    return (const TPGTeam&)(*this->vertices.back());
+    this->vertices.insert(factory->createTPGTeam());
+    return (const TPGTeam&)(*this->vertices.rbegin()->get());
 }
 
 const TPG::TPGAction& TPG::TPGGraph::addNewAction(uint64_t actionID)
 {
-    this->vertices.push_back(factory->createTPGAction(actionID));
-    return (const TPGAction&)(*this->vertices.back());
+    this->vertices.insert(factory->createTPGAction(actionID));
+    return (const TPGAction&)(*this->vertices.rbegin()->get());
 }
 
 size_t TPG::TPGGraph::getNbVertices() const
@@ -95,40 +111,48 @@ size_t TPG::TPGGraph::getNbVertices() const
 
 const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getVertices() const
 {
-    std::vector<const TPG::TPGVertex*> result(this->vertices.size());
-    std::copy(this->vertices.begin(), this->vertices.end(), result.begin());
+    std::vector<const TPG::TPGVertex*> result;
+    result.reserve(this->vertices.size());
+
+    std::transform(this->vertices.begin(), this->vertices.end(),
+                   std::back_inserter(result),
+                   [](const std::unique_ptr<TPGVertex>& v) { return v.get(); });
+
     return result;
 }
 
 uint64_t TPG::TPGGraph::getNbRootVertices() const
 {
     return std::count_if(this->vertices.begin(), this->vertices.end(),
-                         [](const TPGVertex* vertex) {
-                             return vertex->getIncomingEdges().size() == 0;
+                         [](const std::unique_ptr<TPGVertex>& vertex) {
+                             return vertex->getIncomingEdges().empty();
                          });
 }
 
 const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
 {
     std::vector<const TPG::TPGVertex*> result;
-    std::copy_if(this->vertices.begin(), this->vertices.end(),
-                 std::back_inserter(result), [](TPGVertex* vertex) {
-                     return vertex->getIncomingEdges().size() == 0;
-                 });
+    for (auto& vertex : this->vertices) {
+        if (vertex->getIncomingEdges().empty()) {
+            result.push_back(vertex.get());
+        }
+    }
     return result;
 }
 
-bool TPG::TPGGraph::hasVertex(const TPG::TPGVertex& vertex) const
+bool TPG::TPGGraph::hasVertex(const TPGVertex& vertex) const
 {
-    return std::find(this->vertices.cbegin(), this->vertices.cend(), &vertex) !=
-           this->vertices.cend();
+    return std::any_of(vertices.begin(), vertices.end(),
+                       [&vertex](const std::unique_ptr<TPGVertex>& vptr) {
+                           return vptr.get() == &vertex;
+                       });
 }
 
 void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 {
     // Remove the vertex based on a pointer comparison.
-    auto iterator = this->findVertex(&vertex);
-    if (iterator != this->vertices.end()) {
+    auto iterator = vertices.find(&vertex);
+    if (iterator != this->vertices.end() && iterator->get() == &vertex) {
         // Remove all connected edges.
         // copy inEdges set for removal
         // (because iterating on the modified set is not a good idea).
@@ -145,10 +169,8 @@ void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 
     // Remove edge for action can launch again remove vertex.
     // Check again if the vertex is in the graph before deleting.
-    iterator = this->findVertex(&vertex);
-    if (iterator != this->vertices.end()) {
-        // Free the memory of the vertex
-        delete *iterator;
+    iterator = vertices.find(&vertex);
+    if (iterator != this->vertices.end() && iterator->get() == &vertex) {
         // Remove the pointer from the list.
         this->vertices.erase(iterator);
     }
@@ -157,8 +179,9 @@ void TPG::TPGGraph::removeVertex(const TPGVertex& vertex)
 const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
 {
     // Check that the vertex to clone exists in the graph
-    auto vertexIterator = this->findVertex(&vertex);
-    if (vertexIterator == this->vertices.end()) {
+    auto vertexIterator = vertices.find(&vertex);
+    if (vertexIterator == this->vertices.end() ||
+        vertexIterator->get() != &vertex) {
         throw std::runtime_error(
             "The vertex to clone does not exist in the TPGGraph.");
     }
@@ -173,7 +196,7 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
     }
 
     // Get the new vertex
-    TPGVertex* newVertex = this->vertices.back();
+    TPGVertex* newVertex = this->vertices.rbegin()->get();
 
     // Copy the outgoing edges (if any).
     for (auto edge : vertex.getOutgoingEdges()) {
@@ -201,26 +224,44 @@ const TPG::TPGVertex& TPG::TPGGraph::cloneVertex(const TPGVertex& vertex)
     return *newVertex;
 }
 
+void TPG::TPGGraph::setNewEdgeID(const TPG::TPGEdge& edge, uint64_t newID)
+{
+    // Check that the edge to modify exists in the graph
+    auto edgeIterator = edges.find(&edge);
+    if (edgeIterator == this->edges.end() || edgeIterator->get() != &edge) {
+        throw std::runtime_error(
+            "The edge to modify does not exist in the TPGGraph.");
+    }
+
+    // Check that no other edge has the same ID
+    for (const auto& eptr : edges) {
+        if (eptr.get() != &edge && eptr->getEdgeID() == newID) {
+            throw std::runtime_error("Another edge with the same ID already "
+                                     "exists in the TPGGraph.");
+        }
+    }
+
+    // Modify the ID
+    edgeIterator->get()->setEdgeID(newID);
+}
+
 const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
     const TPGVertex& src, const TPGVertex& dest,
     const std::shared_ptr<Program::Program> prog)
 {
     // Check the TPGVertex existence within the graph.
-    auto srcVertex =
-        std::find_if(this->vertices.begin(), this->vertices.end(),
-                     [&src](TPG::TPGVertex* other) { return other == &src; });
-    auto dstVertex =
-        std::find_if(this->vertices.begin(), this->vertices.end(),
-                     [&dest](TPG::TPGVertex* other) { return other == &dest; });
-    if (dstVertex == this->vertices.end() ||
-        srcVertex == this->vertices.end()) {
+    auto srcVertex = this->vertices.find(&src);
+    auto dstVertex = this->vertices.find(&dest);
+
+    if (dstVertex == this->vertices.end() || dstVertex->get() != &dest ||
+        srcVertex == this->vertices.end() || srcVertex->get() != &src) {
         throw std::runtime_error("Attempting to add a TPGEdge between vertices "
                                  "not present in the TPGGraph.");
     }
 
     // Create the edge
-    this->edges.push_back(factory->createTPGEdge(&src, &dest, prog));
-    TPGEdge& newEdge = *(this->edges.back());
+    this->edges.insert(factory->createTPGEdge(&src, &dest, prog));
+    TPGEdge& newEdge = *(this->edges.rbegin()->get());
 
     // Add the edged to the Vertices
     try {
@@ -229,7 +270,7 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
     }
     catch (std::runtime_error& e) {
         // Remove the edge before re-throwing
-        this->edges.pop_back();
+        this->edges.erase(std::prev(this->edges.end()));
         throw e;
     }
     (*dstVertex)->addIncomingEdge(&newEdge);
@@ -243,24 +284,22 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewActionEdge(
     uint64_t actionClass)
 {
     // Check the TPGVertex existence within the graph.
-    auto srcVertex =
-        std::find_if(this->vertices.begin(), this->vertices.end(),
-                     [&src](TPG::TPGVertex* other) { return other == &src; });
-    if (srcVertex == this->vertices.end()) {
+    auto srcVertex = this->vertices.find(&src);
+
+    if (srcVertex == this->vertices.end() || srcVertex->get() != &src) {
         throw std::runtime_error(
             "Attempting to add a TPGActionEdge with a vertex "
             "not present in the TPGGraph.");
     }
-    else if (dynamic_cast<TPG::TPGAction*>(*srcVertex) == nullptr) {
+    else if (dynamic_cast<TPG::TPGAction*>(srcVertex->get()) == nullptr) {
         throw std::runtime_error(
             "Attempting to add a TPGActionEdge with a vertex "
             "that is a team.");
     }
 
     // Create the edge
-    this->edges.push_back(
-        factory->createTPGActionEdge(&src, prog, actionClass));
-    TPGEdge& newEdge = *(this->edges.back());
+    this->edges.insert(factory->createTPGActionEdge(&src, prog, actionClass));
+    TPGEdge& newEdge = *(this->edges.rbegin()->get());
 
     (*srcVertex)->addOutgoingEdge(&newEdge);
 
@@ -271,7 +310,8 @@ const TPG::TPGEdge& TPG::TPGGraph::addNewActionEdge(
     return newEdge;
 }
 
-const std::list<std::unique_ptr<TPG::TPGEdge>>& TPG::TPGGraph::getEdges() const
+const std::set<std::unique_ptr<TPG::TPGEdge>, UniqueLess<TPG::TPGEdge>>& TPG::
+    TPGGraph::getEdges() const
 {
     return this->edges;
 }
@@ -280,13 +320,10 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 {
 
     // Get the edge (if it is in the graph)
-    auto iterator = std::find_if(this->edges.begin(), this->edges.end(),
-                                 [&edge](std::unique_ptr<TPG::TPGEdge>& other) {
-                                     return &edge == other.get();
-                                 });
+    auto iterator = this->edges.find(&edge);
 
     // Disconnect the edge from the vertices
-    if (iterator == this->edges.end()) {
+    if (iterator == this->edges.end() || iterator->get() != &edge) {
         throw std::runtime_error(
             "Cannot erase a edge that does not belong to the graph");
     }
@@ -295,11 +332,11 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
         return this->removeActionEdge(edge);
     }
 
-    (*this->findVertex(iterator->get()->getSource()))
+    (*this->vertices.find(iterator->get()->getSource()))
         ->removeOutgoingEdge(iterator->get());
 
     auto destination = iterator->get()->getDestination();
-    (*this->findVertex(destination))->removeIncomingEdge(iterator->get());
+    (*this->vertices.find(destination))->removeIncomingEdge(iterator->get());
 
     // If destination is an action and should became a root, it is deleted if
     // the environment is continuous and does not use action program
@@ -317,18 +354,15 @@ void TPG::TPGGraph::removeEdge(const TPGEdge& edge)
 void TPG::TPGGraph::removeActionEdge(const TPGEdge& edge)
 {
     // Get the edge (if it is in the graph)
-    auto iterator = std::find_if(this->edges.begin(), this->edges.end(),
-                                 [&edge](std::unique_ptr<TPG::TPGEdge>& other) {
-                                     return &edge == other.get();
-                                 });
+    auto iterator = this->edges.find(&edge);
 
     // Disconnect the edge from the vertices
-    if (iterator == this->edges.end()) {
+    if (iterator == this->edges.end() || iterator->get() != &edge) {
         throw std::runtime_error(
             "Cannot erase a edge that does not belong to the graph");
     }
 
-    (*this->findVertex(iterator->get()->getSource()))
+    (*this->vertices.find(iterator->get()->getSource()))
         ->removeOutgoingEdge(iterator->get());
 
     // Remove the edge
@@ -337,8 +371,8 @@ void TPG::TPGGraph::removeActionEdge(const TPGEdge& edge)
 
 const TPG::TPGEdge& TPG::TPGGraph::cloneEdge(const TPGEdge& edge)
 {
-    auto iterEdge = findEdge(&edge);
-    if (iterEdge == this->edges.end()) {
+    auto iterEdge = this->edges.find(&edge);
+    if (iterEdge == this->edges.end() || iterEdge->get() != &edge) {
         throw std::runtime_error(
             "Cannot duplicate an Edge not belonging to the graph.");
     }
@@ -361,14 +395,15 @@ bool TPG::TPGGraph::setEdgeDestination(const TPGEdge& edge,
                                        const TPGVertex& newDest)
 {
     // Find the edge and vertex
-    auto iterNewDestination = findVertex(&newDest);
-    auto iterEdge = findEdge(&edge);
+    auto iterNewDestination = this->vertices.find(&newDest);
+    auto iterEdge = this->edges.find(&edge);
     if (iterNewDestination != this->vertices.end() &&
-        iterEdge != this->edges.end()) {
+        iterEdge != this->edges.end() &&
+        iterNewDestination->get() == &newDest && iterEdge->get() == &edge) {
         // Unregister the edge from the old destination
         const TPG::TPGVertex* oldDestination =
             iterEdge->get()->getDestination();
-        auto iterOldDest = findVertex(oldDestination);
+        auto iterOldDest = this->vertices.find(oldDestination);
         // finding the vertex should not fail. Otherwise, the exception for
         // next line would be well deserved since it means an edge in the
         // graph is connected to a vertex not in the graph.
@@ -376,7 +411,7 @@ bool TPG::TPGGraph::setEdgeDestination(const TPGEdge& edge,
         // Register the edge to the new destination
         (*iterNewDestination)->addIncomingEdge(iterEdge->get());
         // Set the destination
-        iterEdge->get()->setDestination(*iterNewDestination);
+        iterEdge->get()->setDestination(iterNewDestination->get());
         return true;
     }
     else {
@@ -387,12 +422,13 @@ bool TPG::TPGGraph::setEdgeDestination(const TPGEdge& edge,
 bool TPG::TPGGraph::setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc)
 {
     // Find the edge and vertex
-    auto iterNewSrc = findVertex(&newSrc);
-    auto iterEdge = findEdge(&edge);
-    if (iterNewSrc != this->vertices.end() && iterEdge != this->edges.end()) {
+    auto iterNewSrc = this->vertices.find(&newSrc);
+    auto iterEdge = this->edges.find(&edge);
+    if (iterNewSrc != this->vertices.end() && iterEdge != this->edges.end() &&
+        iterNewSrc->get() == &newSrc && iterEdge->get() == &edge) {
         // Unregister the edge from the old source
         const TPG::TPGVertex* oldSrc = iterEdge->get()->getSource();
-        auto iterOldSrc = findVertex(oldSrc);
+        auto iterOldSrc = this->vertices.find(oldSrc);
         // finding the vertex should not fail. Otherwise, the exception for
         // next line would be well deserved since it means an edge in the
         // graph is connected to a vertex not in the graph.
@@ -400,27 +436,12 @@ bool TPG::TPGGraph::setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc)
         // Register the edge to the new source
         (*iterNewSrc)->addOutgoingEdge(iterEdge->get());
         // Set the destination
-        iterEdge->get()->setSource(*(iterNewSrc));
+        iterEdge->get()->setSource(iterNewSrc->get());
         return true;
     }
     else {
         return false;
     }
-}
-
-std::list<TPG::TPGVertex*>::iterator TPG::TPGGraph::findVertex(
-    const TPG::TPGVertex* vertex)
-{
-    return std::find(this->vertices.begin(), this->vertices.end(), vertex);
-}
-
-std::list<std::unique_ptr<TPG::TPGEdge>>::iterator TPG::TPGGraph::findEdge(
-    const TPGEdge* edge)
-{
-    return std::find_if(this->edges.begin(), this->edges.end(),
-                        [&edge](std::unique_ptr<TPG::TPGEdge>& other) {
-                            return other.get() == edge;
-                        });
 }
 
 void TPG::TPGGraph::clearProgramIntrons()
@@ -433,9 +454,9 @@ void TPG::TPGGraph::clearProgramIntrons()
 void TPG::TPGGraph::setActionClassEdge(const TPGEdge* edge,
                                        uint64_t newActionClass)
 {
-    auto it = this->findEdge(edge);
+    auto it = this->edges.find(edge);
 
-    if (it != this->edges.end()) {
+    if (it != this->edges.end() && it->get() == edge) {
         if (dynamic_cast<TPG::TPGActionEdge*>(it->get()) == nullptr) {
             throw std::runtime_error(
                 "Trying to set an action class on a context edge");
@@ -460,8 +481,8 @@ void TPG::TPGGraph::updateAssessedActions(const TPG::TPGVertex* vertex)
         vertexToUpdate.pop();
 
         // Find the vertex to get the non-const reference
-        auto it = this->findVertex(currentVertex);
-        if (it != this->vertices.end()) {
+        auto it = this->vertices.find(currentVertex);
+        if (it != this->vertices.end() && it->get() == currentVertex) {
             // Add the vertices leading to the current vertex to the queue
             for (auto incomingEdge : (*it)->getIncomingEdges()) {
                 vertexToUpdate.push(incomingEdge->getSource());
@@ -482,17 +503,17 @@ void TPG::TPGGraph::updateAllAssessedActions()
 
     // Launch update method for all actions.
     // All teams should be linked to actions, even not directly.
-    for (auto vertex : this->vertices) {
-        if (dynamic_cast<TPGAction*>(vertex) != nullptr) {
-            this->updateAssessedActions(vertex);
+    for (const auto& vertex : this->vertices) {
+        if (dynamic_cast<TPGAction*>(vertex.get()) != nullptr) {
+            this->updateAssessedActions(vertex.get());
         }
     }
 }
 void TPG::TPGGraph::setToBeDeleted(const TPG::TPGVertex* vertex)
 {
-    auto it = this->findVertex(vertex);
+    auto it = this->vertices.find(vertex);
 
-    if (it != this->vertices.end()) {
+    if (it != this->vertices.end() && it->get() == vertex) {
         // Found the vertex, modify it as needed
         (*it)->setToBeDeleted(true);
     }
@@ -503,11 +524,11 @@ void TPG::TPGGraph::setToBeDeleted(const TPG::TPGVertex* vertex)
 
 void TPG::TPGGraph::orderActionEdges(const TPG::TPGAction* action)
 {
-    auto it = this->findVertex(action);
+    auto it = this->vertices.find(action);
 
-    if (it != this->vertices.end()) {
+    if (it != this->vertices.end() && it->get() == action) {
         // Found the vertex, modify it as needed
-        dynamic_cast<TPG::TPGAction*>(*it)->orderActionEdges();
+        dynamic_cast<TPG::TPGAction*>(it->get())->orderActionEdges();
     }
     else {
         throw std::runtime_error("Action to order not in the graph.");

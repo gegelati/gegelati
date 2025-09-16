@@ -45,11 +45,14 @@
 #include "environment.h"
 #include "program/line.h"
 
+struct CounterReset;
+
 namespace Program {
     /**
      * \brief The Program class contains a list of program lines that can be
      * executed within a well defined Environment.
      */
+
     class Program
     {
       protected:
@@ -87,6 +90,25 @@ namespace Program {
          **/
         Data::ConstantHandler constants;
 
+        /**
+         * \brief Unique identifier of the Program.
+         */
+        uint64_t programID;
+
+        /**
+         * \brief Incremente the program ID counter and return the new value.
+         */
+        static uint64_t incrementeCounter();
+
+        /**
+         * \brief Reset the program ID counter.
+         *
+         * This method set the ID counter to a new value.
+         * It can quickly lead to segmentation fault if not used carefully.
+         */
+        static void resetProgramIDCounter();
+        friend struct ::CounterReset;
+
         /// Delete the default constructor.
         Program() = delete;
 
@@ -99,7 +121,8 @@ namespace Program {
          * context in the Program attributes.
          */
         Program(const Environment& e, bool actProgram)
-            : environment{e}, constants{e.getParams().nbProgramConstant},
+            : environment{e}, programID{incrementeCounter()},
+              constants{e.getParams().nbProgramConstant},
               actionProgram{actProgram}
         {
             constants.resetData(); // force all constant to 0 at first.
@@ -115,7 +138,8 @@ namespace Program {
          */
         Program(const Program& other)
             : environment{other.environment}, lines{other.lines},
-              constants{other.constants}, actionProgram{other.actionProgram}
+              programID{other.programID}, constants{other.constants},
+              actionProgram{other.actionProgram}
         {
             // Replace lines with their copy
             // Keep intron info
@@ -138,8 +162,9 @@ namespace Program {
          * context
          */
         Program(const Program& other, bool actProgram)
-            : environment{other.environment}, lines{other.lines},
-              constants{other.constants}, actionProgram{actProgram}
+            : environment{other.environment}, programID{incrementeCounter()},
+              lines{other.lines}, constants{other.constants},
+              actionProgram{actProgram}
         {
             // Replace lines with their copy
             // Keep intro info
@@ -323,6 +348,30 @@ namespace Program {
          * \param[in] other the Program whose behavior is compared.
          */
         bool hasIdenticalBehavior(const Program& other) const;
+
+        /**
+         * \brief Get the unique identifier of the Program.
+         *
+         * \return the unique identifier of the Program.
+         */
+        uint64_t getProgramID() const;
+
+        /**
+         * \brief Set a new unique identifier to the Program.
+         *
+         * \param[in] newID the new integer ID to set to the Program.
+         */
+        virtual void setProgramID(uint64_t newID);
+
+        /**
+         * \brief Get the current value of the program ID counter.
+         *
+         * This method is mainly used for testing purpose to ensure that
+         * program IDs are predictable.
+         *
+         * \return the current value of the program ID counter.
+         */
+        static uint64_t getProgramIDCounter();
     };
 } // namespace Program
 #endif

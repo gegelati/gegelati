@@ -62,6 +62,7 @@
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameWithOpponent.h"
 
+#include "util/counterReset.h"
 class LearningAgentTest : public ::testing::Test
 {
   protected:
@@ -72,6 +73,8 @@ class LearningAgentTest : public ::testing::Test
 
     virtual void SetUp()
     {
+
+        CounterReset::counterReset();
         set.add(*(new Instructions::AddPrimitiveType<int>()));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
@@ -605,6 +608,12 @@ TEST_F(LearningAgentTest, TrainPortability)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 86)
         << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 147)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 596)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 346)
+        << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 786532405746195131U)
         << "Graph does not have the expected determinst characteristics.";
 }
@@ -640,6 +649,12 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 86)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 147)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 596)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 346)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 786532405746195131U)
         << "Graph does not have the expected determinst characteristics.";
@@ -729,6 +744,12 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 94)
         << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 205)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 675)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 364)
+        << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 4479928206478652248U)
         << "Graph does not have the expected determinst characteristics.";
 }
@@ -765,6 +786,12 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 143)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 278)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 817)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 505)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
               13533704402962106053U)
@@ -810,6 +837,12 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     ASSERT_EQ(tpg.getNbRootVertices(), 46)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 221)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 2104)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 7736)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 4050)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 7720633690943106983U)
         << "Graph does not have the expected determinst characteristics.";

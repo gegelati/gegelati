@@ -58,6 +58,7 @@
 #include "program/programExecutionEngine.h"
 #include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"
+#include "util/counterReset.h"
 
 class MutatorTest : public ::testing::Test
 {
@@ -77,6 +78,8 @@ class MutatorTest : public ::testing::Test
 
     virtual void SetUp()
     {
+
+        CounterReset::counterReset();
         vect.push_back(
             *(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
         vect.push_back(

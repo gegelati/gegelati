@@ -50,6 +50,7 @@
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
+#include "util/counterReset.h"
 
 #include "file/tpgGraphDotExporter.h"
 
@@ -74,6 +75,8 @@ class ExporterTest : public ::testing::Test
 
     virtual void SetUp()
     {
+
+        CounterReset::counterReset();
         // Setup environment
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));

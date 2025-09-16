@@ -68,7 +68,7 @@ namespace TPG {
          *
          * \param[in] id integer stored as the actionID of the TPGAction.
          */
-        TPGAction(const uint64_t id) : actionID{id} {};
+        TPGAction(const uint64_t id) : TPGVertex(), actionID{id} {};
 
         /**
          * \brief Specialization throwing an std::runtime_exception.

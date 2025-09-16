@@ -39,6 +39,7 @@
 #define TPG_GRAPH_H
 
 #include <list>
+#include <set>
 
 #include "environment.h"
 #include "tpg/tpgAction.h"
@@ -46,8 +47,10 @@
 #include "tpg/tpgFactory.h"
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
+#include "util/genericComparator.h"
 
 namespace TPG {
+
     /**
      * \brief Class for storing a Tangled-Program-Graph.
      */
@@ -62,7 +65,9 @@ namespace TPG {
          */
         TPGGraph(const Environment& e,
                  std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>())
-            : env{e}, factory{std::move(f)} {};
+            : env{e}, factory{std::move(f)}
+        {
+        }
 
         /**
          * \brief delete copy constructor
@@ -259,7 +264,8 @@ namespace TPG {
          *
          * \return a const reference to the edges attribute.
          */
-        const std::list<std::unique_ptr<TPGEdge>>& getEdges() const;
+        const std::set<std::unique_ptr<TPG::TPGEdge>, UniqueLess<TPG::TPGEdge>>&
+        getEdges() const;
 
         /**
          * \brief Remove a TPGEdge from the TPGGraph.
@@ -382,6 +388,28 @@ namespace TPG {
          */
         void setToBeDeleted(const TPG::TPGVertex* vertex);
 
+        /**
+         * \brief Set a new ID to a vertex
+         *
+         * An error is thrown if the vertex does not belong to the graph
+         * An error is thrown if the newID is already used
+         *
+         * \param[in] vertex the vertex to change ID
+         * \param[in] newID the new ID to set
+         */
+        void setNewVertexID(const TPG::TPGVertex& vertex, uint64_t newID);
+
+        /**
+         * \brief Set a new ID to an edge
+         *
+         * An error is thrown if the edge does not belong to the graph
+         * An error is thrown if the newID is already used
+         *
+         * \param[in] edge the edge to change ID
+         * \param[in] newID the new ID to set
+         */
+        void setNewEdgeID(const TPG::TPGEdge& edge, uint64_t newID);
+
       protected:
         /// Environment of the TPGGraph
         const Environment& env;
@@ -390,37 +418,14 @@ namespace TPG {
         const std::unique_ptr<TPGFactory> factory;
 
         /**
-         * \brief Set of TPGVertex composing the TPGGraph.
+         * \brief Set of all edges currently used in the graph.
          */
-        std::list<TPGVertex*> vertices;
+        std::set<std::unique_ptr<TPGEdge>, UniqueLess<TPGEdge>> edges;
 
         /**
-         * \brief Set of TPGEdge composing the TPGGraph.
+         * \brief Set of all vertices currently used in the graph.
          */
-        std::list<std::unique_ptr<TPGEdge>> edges;
-
-        /**
-         * \brief Find the non-const iterator to a vertex of the graph from
-         * its const pointer.
-         *
-         * \param[in] vertex the const pointer to the TPGVertex.
-         * \return the iterator on the vertices attribute, at the position of
-         *         the searched vertex pointer. If the given vertex pointer is
-         *         not in the vertices, then vertices.end() is returned.
-         */
-        std::list<TPGVertex*>::iterator findVertex(const TPGVertex* vertex);
-
-        /**
-         * \brief Find the non-const iterator to an edge of the graph from
-         * its const pointer.
-         *
-         * \param[in] edge the const pointer to the TPGEdge.
-         * \return the iterator on the edges attribute, at the position of
-         *         the searched edge pointer. If the given vertex pointer is
-         *         not in the vertices, then vertices.end() is returned.
-         */
-        std::list<std::unique_ptr<TPGEdge>>::iterator findEdge(
-            const TPGEdge* edge);
+        std::set<std::unique_ptr<TPGVertex>, UniqueLess<TPGVertex>> vertices;
     };
 }; // namespace TPG
 

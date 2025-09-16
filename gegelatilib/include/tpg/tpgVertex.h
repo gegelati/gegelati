@@ -38,8 +38,11 @@
 #define TPG_VERTEX_H
 
 #include <cinttypes>
+#include <iostream>
 #include <list>
 #include <set>
+
+struct CounterReset;
 
 namespace TPG {
     // Declare class to make it usable as an attribute.
@@ -142,12 +145,36 @@ namespace TPG {
          */
         virtual bool isToBeDeleted() const;
 
+        /**
+         * \brief Get the unique identifier of the TPGVertex.
+         *
+         * \return the integer ID of the TPGVertex.
+         */
+        virtual uint64_t getVertexID() const;
+
+        /**
+         * \brief Set a new unique identifier to the TPGVertex.
+         *
+         * \param[in] newID the new integer ID to set to the TPGVertex.
+         */
+        virtual void setVertexID(uint64_t newID);
+
+        /**
+         * \brief Get the current value of the vertex ID counter.
+         *
+         * This method is mainly used for testing purpose to ensure that
+         * vertex IDs are predictable.
+         *
+         * \return the current value of the vertex ID counter.
+         */
+        static uint64_t getVertexIDCounter();
+
       protected:
         /**
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          */
-        TPGVertex(){};
+        TPGVertex() : vertexID(incrementeCounter()){};
 
         /// True if the vertex should be deleted during evolution process
         bool toBeDeleted = false;
@@ -166,7 +193,33 @@ namespace TPG {
          * \brief Set of assessed actions by the team
          */
         std::set<uint64_t> assessedActions;
+
+        /**
+         * \brief Unique identifier of the TPGVertex.
+         */
+        uint64_t vertexID;
+
+        /**
+         * \brief Incremente the vertex ID counter and return the new value.
+         */
+        static uint64_t incrementeCounter();
+
+        /**
+         * \brief Reset the vertex ID counter.
+         *
+         * This method set the ID counter to a new value.
+         * It can quickly lead to segmentation fault if not used carefully.
+         */
+        static void resetVertexIDCounter();
+        friend struct ::CounterReset;
     };
+
+    /**
+     * \brief Comparison function to enable sorting of TPGVertex with
+     * STL.
+     */
+    bool operator<(const TPGVertex& a, const TPGVertex& b);
+
 }; // namespace TPG
 
 #endif

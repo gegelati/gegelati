@@ -49,6 +49,7 @@
 #include "tpg/instrumented/tpgInstrumentedFactory.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 #include "tpg/tpgGraph.h"
+#include "util/counterReset.h"
 
 class TPGInstrumentedTest : public ::testing::Test
 {
@@ -63,6 +64,8 @@ class TPGInstrumentedTest : public ::testing::Test
 
     virtual void SetUp()
     {
+
+        CounterReset::counterReset();
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
         vect.push_back(
@@ -188,8 +191,8 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
 {
     TPG::TPGInstrumentedFactory factory;
 
-    TPG::TPGAction* action;
-    TPG::TPGTeam* team;
+    std::unique_ptr<TPG::TPGAction> action;
+    std::unique_ptr<TPG::TPGTeam> team;
     std::unique_ptr<TPG::TPGEdge> edge;
     std::unique_ptr<TPG::TPGExecutionEngine> tee;
 
@@ -205,7 +208,8 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
     ASSERT_EQ(typeid(*team), typeid(TPG::TPGTeamInstrumented))
         << "Team built by the TPGInstrumentedFactory has an incorrect type.";
 
-    ASSERT_NO_THROW(edge = factory.createTPGEdge(team, action, progPointer))
+    ASSERT_NO_THROW(
+        edge = factory.createTPGEdge(team.get(), action.get(), progPointer))
         << "TPGGraphELementFactory could not build a TPGAction.";
     ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
     ASSERT_EQ(typeid(*edge), typeid(TPG::TPGEdgeInstrumented))
@@ -216,9 +220,6 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
     ASSERT_NE(tee.get(), nullptr) << "Created TPGEdge should not be null.";
     ASSERT_EQ(typeid(*tee), typeid(TPG::TPGExecutionEngineInstrumented))
         << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
-
-    delete team;
-    delete action;
 }
 
 TEST_F(TPGInstrumentedTest, TPGGraphAddTPGVertexAndEdge)

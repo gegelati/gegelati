@@ -236,8 +236,12 @@ void File::TPGGraphDotImporter::dumpTPGGraphHeader()
 void File::TPGGraphDotImporter::readTeam(std::smatch& matches)
 {
     if (!this->lastLine.empty() && !matches.empty()) {
+        const auto& newTeam = this->tpg.addNewTeam();
+
         this->vertexID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(
-            std::stoi(matches[1]), &this->tpg.addNewTeam()));
+            std::stoi(matches[1]), &newTeam));
+
+        this->tpg.setNewVertexID(newTeam, std::stoi(matches[1]));
     }
 }
 void File::TPGGraphDotImporter::readAction(std::smatch& matches)
@@ -269,10 +273,14 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
                 currActionID = std::stoi(action_label);
             }
 
+            const auto& newAction = this->tpg.addNewAction(currActionID);
+
             // create a new action and insert it if none was previously found
             this->actionID.insert(std::pair<uint64_t, const TPG::TPGAction*>(
-                action_number, dynamic_cast<const TPG::TPGAction*>(
-                                   &this->tpg.addNewAction(currActionID))));
+                action_number,
+                dynamic_cast<const TPG::TPGAction*>(&newAction)));
+
+            this->tpg.setNewVertexID(newAction, action_number);
         }
         this->actionClasses.insert(
             std::pair<const TPG::TPGAction*, std::vector<uint64_t>>(
@@ -364,13 +372,14 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
         uint64_t program = std::stoi(matches[2]);
 
         // find edge
-        const std::list<std::unique_ptr<TPG::TPGEdge>>& edges =
-            this->tpg.getEdges();
+        const auto& edges = this->tpg.getEdges();
 
         // find one of the selected program edges :
         auto p_it = programID.find(program);
         if (p_it != programID.end()) {
             std::shared_ptr<Program::Program> p = p_it->second;
+
+            p->setProgramID(p_it->first);
 
             auto edge_it =
                 std::find_if(edges.begin(), edges.end(),
@@ -383,7 +392,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
                 auto team_it = this->vertexID.find(team_in);
                 if (team_it != this->vertexID.end()) {
                     const TPG::TPGVertex* team = team_it->second;
-                    this->tpg.addNewEdge(
+                    auto edge = this->tpg.addNewEdge(
                         *team, *(edge_it->get()->getDestination()), p);
                 }
             }

@@ -53,6 +53,8 @@
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgVertex.h"
 
+#include "util/counterReset.h"
+
 #include "codeGen/tpgGenerationEngineFactory.h"
 #include "codeGen/tpgStackGenerationEngine.h"
 #include "codeGen/tpgSwitchGenerationEngine.h"
@@ -75,6 +77,9 @@ class TPGGenerationEngineTest : public ::testing::Test
 
     virtual void SetUp()
     {
+
+        CounterReset::counterReset();
+
         path = TESTS_DAT_PATH;
         path += "codeGen";
 
@@ -925,13 +930,13 @@ TEST_F(TPGGenerationEngineTest,
     setProgLine(prog3, 2);
     // reg[0] = in1[2] + reg[1] (reg[1] = 0)
     setProgLine(prog4, 3);
-    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    // reg[0] = in1[3] + reg[1] (reg[1] = 0)
     setProgLine(prog5, 4);
-    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    // reg[0] = in1[4] + reg[1] (reg[1] = 0)
     setProgLine(prog6, 5);
-    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    // reg[0] = in1[5] + reg[1] (reg[1] = 0)
     setProgLine(prog7, 6);
-    // reg[0] = in1[2] + reg[1] (reg[1] = 0)
+    // reg[0] = in1[6] + reg[1] (reg[1] = 0)
 
     ctpg.addNewEdge(*T1, *A1, prog1);
     ctpg.addNewEdge(*T1, *A0, prog2);

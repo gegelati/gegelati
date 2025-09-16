@@ -53,6 +53,8 @@
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
 
+#include "util/counterReset.h"
+
 #include "file/tpgGraphDotExporter.h"
 #include "file/tpgGraphDotImporter.h"
 
@@ -79,6 +81,8 @@ class ImporterTest : public ::testing::Test
 
     virtual void SetUp()
     {
+
+        CounterReset::counterReset();
         // Setup environment
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
@@ -356,7 +360,7 @@ TEST_F(ImporterTest, importGraph)
 
     // check that the imported program is the same as the one written in the
     // file.
-    Program::Program& p = tpg_copy->getEdges().front().get()->getProgram();
+    Program::Program& p = tpg_copy->getEdges().begin()->get()->getProgram();
     ASSERT_EQ(p.getNbLines(), 3)
         << "The number of lines of the copied program dismatch";
     // checking the first line
