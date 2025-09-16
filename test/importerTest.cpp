@@ -419,6 +419,14 @@ TEST_F(ImporterTest, importOldGraph)
     ASSERT_NE(output.find("Deprecating"), std::string::npos);
 }
 
+TEST_F(ImporterTest, importTrainedGraph)
+{
+    File::TPGGraphDotImporter dotImporter(TESTS_DAT_PATH "exported_trained_tpg_ref.dot", *e, *tpg_copy);
+
+    // assert that we can import a tpg graph from a file
+    ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
+}
+
 TEST_F(ImporterTest, readLineFromFile)
 {
     std::ofstream myfile;

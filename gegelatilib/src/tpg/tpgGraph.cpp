@@ -88,8 +88,10 @@ void TPG::TPGGraph::setNewVertexID(const TPG::TPGVertex& vertex, uint64_t newID)
         }
     }
 
-    // Modify the ID
-    vertexIterator->get()->setVertexID(newID);
+    // Modify the ID, but removed and add again the vertex for that.
+    auto tmp = vertices.extract(vertexIterator);
+    tmp.value()->setVertexID(newID);
+    vertices.insert(std::move(tmp));
 }
 
 const TPG::TPGTeam& TPG::TPGGraph::addNewTeam()
@@ -241,8 +243,10 @@ void TPG::TPGGraph::setNewEdgeID(const TPG::TPGEdge& edge, uint64_t newID)
         }
     }
 
-    // Modify the ID
-    edgeIterator->get()->setEdgeID(newID);
+    // Modify the ID, but removed and add again the edge for that.
+    auto tmp = edges.extract(edgeIterator);
+    tmp.value()->setEdgeID(newID);
+    edges.insert(std::move(tmp));
 }
 
 const TPG::TPGEdge& TPG::TPGGraph::addNewEdge(
