@@ -13,15 +13,15 @@ void Selector::TruncationSelector::doSelection(std::multimap<std::shared_ptr<Lea
         preservedRoots;
 
     // Estimate the number of expected roots to delete
-    size_t nbExpectedRoots = (size_t)floor(this->params.truncation.ratioDeletedRoots *
-                                           (double)100);
+    size_t nbExpectedRoots = (size_t)floor(this->params.selection.truncation.ratioDeletedRoots *
+                                           (double)this->params.mutation.tpg.nbRoots);
 
     // Get the maximum number of teams and actions deletable
     size_t nbTeamsDeleted = 0;
     size_t nbActionsDeleted = 0;
     size_t maxNbTeamsToDelete =
         (size_t)((double)nbExpectedRoots *
-                 0.2);
+                 this->params.mutation.tpg.ratioTeamsOverActions);
     size_t maxNbActionsoDelete = nbExpectedRoots - maxNbTeamsToDelete;
 
     auto i = 0;
@@ -30,7 +30,7 @@ void Selector::TruncationSelector::doSelection(std::multimap<std::shared_ptr<Lea
         // If the root is an action, do not remove it in discrete environment!
         const TPG::TPGVertex* root = results.begin()->second;
         if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr &&
-            !true) {
+            !this->params.mutation.tpg.useActionProgram) {
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
 

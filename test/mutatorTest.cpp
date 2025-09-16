@@ -1720,8 +1720,8 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     rng.setSeed(0);
 
     uint64_t nbActions = 5;
-    params.useTournamentSelection = true;
-    params.sizeTournament = 3;
+    params.selection.selectionMode = "tournament";
+    params.selection.tournament.sizeTournament = 3;
     Environment ce(set, params, vect, nbActions);
 
     TPG::TPGGraph tpg(ce);

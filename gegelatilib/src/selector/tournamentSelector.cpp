@@ -6,7 +6,7 @@ void Selector::TournamentSelector::doSelection(std::multimap<std::shared_ptr<Lea
                 const TPG::TPGVertex*>& results, Mutator::RNG& rng)
 {
     size_t nbToKeep =
-        (size_t)(100 * params.tournament.ratioSavedRoots);
+        (size_t)(params.mutation.tpg.nbRoots * params.selection.tournament.ratioSavedRoots);
     size_t nbAgentsInTournament = results.size() - nbToKeep;
 
     // Copy the first agents to remove (those at the bottom of the ranking)
@@ -29,8 +29,8 @@ void Selector::TournamentSelector::doSelection(std::multimap<std::shared_ptr<Lea
     std::vector<std::shared_ptr<Learn::EvaluationResult>> erasedResults;
 
     // Tournament selection
-    for (size_t i = 0; i < nbAgentsInTournament; i += params.tournament.sizeTournament) {
-        size_t end = std::min(static_cast<size_t>(i + params.tournament.sizeTournament),
+    for (size_t i = 0; i < nbAgentsInTournament; i += params.selection.tournament.sizeTournament) {
+        size_t end = std::min(static_cast<size_t>(i + params.selection.tournament.sizeTournament),
                               nbAgentsInTournament);
         auto subrangeBegin = elements.begin() + i;
         auto subrangeEnd = elements.begin() + end;
@@ -47,12 +47,12 @@ void Selector::TournamentSelector::doSelection(std::multimap<std::shared_ptr<Lea
         }
 
         // This is a logical deletion, the vertex will be removed later
-        graph->setToBeDeleted(subMap.begin()->second);
+        this->graph->setToBeDeleted(subMap.begin()->second);
     }
 
     // Delete the vertices marked for deletion
     for (const auto* v : toDelete) {
-        graph->removeVertex(*v);
+        this->graph->removeVertex(*v);
     }
 
     for (const auto* v : toDelete) {

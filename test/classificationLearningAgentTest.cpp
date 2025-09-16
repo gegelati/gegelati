@@ -141,7 +141,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
         << "Average score should not exceed the score of a perfect player.";
 
     // Record this result
-    cla.updateEvaluationRecords(
+    cla.getSelector()->updateEvaluationRecords(
         {{result1, cla.getTPGGraph()->getRootVertices().at(0)}});
 
     // Reevaluate to check that the previous result1 is not returned.
@@ -155,7 +155,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
     ASSERT_NE(result1, result2);
 
     // Record this result
-    cla.updateEvaluationRecords(
+    cla.getSelector()->updateEvaluationRecords(
         {{result2, cla.getTPGGraph()->getRootVertices().at(0)}});
 
     // Reevaluate to check that the previous result2 is returned.
@@ -169,14 +169,14 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
     ASSERT_EQ(result3, result2);
 }
 
-TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
+TEST_F(ClassificationLearningAgentTest, DoSelection)
 {
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
     params.mutation.tpg.maxInitOutgoingEdges = 2;
-    params.ratioDeletedRoots = 0.50;
+    params.selection.truncation.ratioDeletedRoots = 0.50;
     params.mutation.tpg.nbRoots = 50; // Param used in decimation
     params.nbThreads = 4;
 
@@ -202,7 +202,7 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
     }
 
     // Do the decimation (must fail)
-    ASSERT_THROW(cla.decimateWorstRoots(results), std::runtime_error)
+    ASSERT_THROW(cla.getSelector()->doSelection(results, cla.getRNG()), std::runtime_error)
         << "Decimating worst roots should fail with EvaluationResults instead "
            "of ClassificationEvaluationResults.";
 
@@ -274,14 +274,14 @@ TEST_F(ClassificationLearningAgentTest, DecimateWorstRoots)
         &teamRoot);
 
     // Do the decimation
-    ASSERT_NO_THROW(cla.decimateWorstRoots(classifResults))
+    ASSERT_NO_THROW(cla.getSelector()->doSelection(classifResults, cla.getRNG()))
         << "Decimating worst roots should not fail with "
            "ClassificationEvaluationResults.";
 
     // Check the number of remaining vertices.
     ASSERT_EQ(cla.getTPGGraph()->getNbVertices(),
               originalNbVertices - std::ceil(params.mutation.tpg.nbRoots *
-                                             (1.0 - params.ratioDeletedRoots)));
+                                             (1.0 - params.selection.truncation.ratioDeletedRoots)));
 
     // Check the presence of savedRoots among remaining roots.
     // i.e. check that their good result1 for one class saved them from

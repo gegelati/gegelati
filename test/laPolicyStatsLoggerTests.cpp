@@ -75,7 +75,7 @@ class LAPolicyStatsLoggerTest : public ::testing::Test
         params.archivingProbability = 0.5;
         params.maxNbActionsPerEval = 11;
         params.nbIterationsPerPolicyEvaluation = 3;
-        params.ratioDeletedRoots =
+        params.selection.truncation.ratioDeletedRoots =
             0.95; // high number to force the apparition of root action.
         params.nbThreads = 1;
 

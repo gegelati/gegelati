@@ -86,13 +86,17 @@ const std::pair<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>
     return this->bestRoot;
 }
 
-void Selector::Selector::forgetPreviousResult()
+void Selector::Selector::forgetPreviousResults()
 {
     this->resultsPerRoot.clear();
     this->bestRoot.first = nullptr;
     this->bestRoot.second = nullptr;
 }
 
+std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& Selector::Selector::getResultsPerRootnc()
+{
+    return this->resultsPerRoot;
+}
 const std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& Selector::Selector::getResultsPerRoot() const
 {
     return this->resultsPerRoot;

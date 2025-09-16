@@ -83,7 +83,7 @@ namespace Learn {
         std::shared_ptr<TPG::TPGGraph> tpg;
 
         /// Selector used for the selection process
-        std::unique_ptr<Selector::Selector> selector;
+        std::shared_ptr<Selector::Selector> selector;
 
         /// Random Number Generator for this Learning Agent
         Mutator::RNG rng;
@@ -121,11 +121,11 @@ namespace Learn {
               params{p},
               archive(p.archiveSize, p.archivingProbability) {
 
-                // There is probably a cleaner way to do that, but using the factory was an issue.
+                // There is probably a cleaner way to do that, but using the factory was creating import issues.
                 if (p.selection.selectionMode == "truncation") {
-                    selector = std::make_unique<Selector::TruncationSelector>(tpg, p.selection);
+                    selector = std::make_shared<Selector::TruncationSelector>(tpg, p);
                 } else if (p.selection.selectionMode == "tournament") {
-                    selector = std::make_unique<Selector::TournamentSelector>(tpg, p.selection);
+                    selector = std::make_shared<Selector::TournamentSelector>(tpg, p);
                 } else {
                     throw std::runtime_error("Selection mode not found");
                 }
@@ -140,6 +140,13 @@ namespace Learn {
          * \return Get a shared_pointer to the TPGGraph.
          */
         std::shared_ptr<TPG::TPGGraph> getTPGGraph();
+
+        /**
+         * \brief Getter for the Selector built by the LearningAgent.
+         *
+         * \return Get a shared_pointer to the Selector.
+         */
+        std::shared_ptr<Selector::Selector> getSelector();
 
         /**
          * \brief Getter for the Archive filled by the LearningAgent
@@ -277,27 +284,6 @@ namespace Learn {
         virtual void trainOneGeneration(uint64_t generationNumber);
 
         /**
-         * \brief Removes from the TPGGraph the root TPGVertex with the worst
-         * results with tournament selection.
-         *
-         * The given multimap is updated by removing entries corresponding to
-         * decimated vertices.
-         *
-         * The resultsPerRoot attribute is updated to remove results associated
-         * to removed vertices.
-         *
-         * The tournament selection is not secured when the ratioTeamOverAction
-         * is between 0 and 1 It can be used, but it could happen that one
-         * "population" take over the other one
-         *
-         * \param[in,out] results a multimap containing root TPGVertex
-         * associated to their score during an evaluation.
-         */
-        virtual void decimateWithTournament(
-            std::multimap<std::shared_ptr<EvaluationResult>,
-                          const TPG::TPGVertex*>& results);
-
-        /**
          * \brief Train the TPGGraph for a given number of generation.
          *
          * The method trains the TPGGraph for a given number of generation,
@@ -313,38 +299,6 @@ namespace Learn {
          */
         virtual uint64_t train(volatile bool& altTraining,
                                bool printProgressBar);
-
-
-
-        /**
-         * \brief This method resets the previous registered scores per root.
-         *
-         * Resets resultsPerRoot so that, in the next training,
-         * the current roots will be considered as if they had never
-         * been tested. To use for example when there is a scoring policy
-         * change.
-         */
-        virtual void forgetPreviousResults();
-
-        /**
-         * \brief Get the best root TPG::Vertex encountered since the last init.
-         *
-         * The returned pointers may be nullptr if no generation was trained
-         * since the last init.
-         *
-         * \return a reference to the bestRoot attribute.
-         */
-        virtual const std::pair<const TPG::TPGVertex*,
-                                std::shared_ptr<EvaluationResult>>&
-        getBestRoot() const;
-
-        /**
-         * \brief This method keeps only the bestRoot policy in the TPGGraph.
-         *
-         * If the TPGVertex referenced in the bestRoot attribute is no longer
-         * a TPGVertex of the TPGGraph, nothing happens.
-         */
-        virtual void keepBestPolicy();
 
         /**
          * \brief Takes a given TPGVertex and creates a job containing it.

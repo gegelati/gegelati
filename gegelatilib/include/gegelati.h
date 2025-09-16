@@ -106,6 +106,7 @@
 #include <program/programExecutionEngine.h>
 
 #include <selector/selector.h>
+#include <selector/classificationSelector.h>
 #include <selector/tournamentSelector.h>
 #include <selector/truncationSelector.h>
 

@@ -63,9 +63,15 @@ TEST(LearningParametersTest, readConfigFile)
     File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
     ASSERT_EQ(14, root.size())
         << "Wrong number of elements in parsed json file";
-    ASSERT_EQ(13, root["mutation"]["tpg"].size())
-        << "Wrong number of elements in parsed json file";
     ASSERT_EQ(9, root["mutation"]["prog"].size())
+        << "Wrong number of elements in parsed json file";
+    ASSERT_EQ(11, root["mutation"]["tpg"].size())
+        << "Wrong number of elements in parsed json file";
+    ASSERT_EQ(3, root["selection"].size())
+        << "Wrong number of elements in parsed json file";
+    ASSERT_EQ(2, root["selection"]["tournament"].size())
+        << "Wrong number of elements in parsed json file";
+    ASSERT_EQ(1, root["selection"]["truncation"].size())
         << "Wrong number of elements in parsed json file";
 }
 
@@ -93,7 +99,6 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(50, params.nbIterationsPerPolicyEvaluation);
     ASSERT_EQ(31, params.nbIterationsPerJob);
     ASSERT_EQ(5, params.maxNbActionsPerEval);
-    ASSERT_EQ(0.85, params.ratioDeletedRoots);
     ASSERT_EQ(100, params.maxNbEvaluationPerPolicy);
     ASSERT_EQ(3.0, params.nbRegisters);
     ASSERT_EQ(5, params.nbProgramConstant);
@@ -120,6 +125,10 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.5, params.mutation.prog.pConstantMutation);
     ASSERT_EQ(-10, params.mutation.prog.minConstValue);
     ASSERT_EQ(10, params.mutation.prog.maxConstValue);
+    ASSERT_EQ("tournament", params.selection.selectionMode);
+    ASSERT_EQ(0.85, params.selection.truncation.ratioDeletedRoots);
+    ASSERT_EQ(0.15, params.selection.tournament.ratioSavedRoots);
+    ASSERT_EQ(3, params.selection.tournament.sizeTournament);
 
     // check default parameters
     Learn::LearningParameters params2;
@@ -184,7 +193,6 @@ TEST(LearningParametersTest, writeParametersToJson)
     ASSERT_EQ(params.nbProgramConstant, params2.nbProgramConstant);
     ASSERT_EQ(params.nbRegisters, params2.nbRegisters);
     ASSERT_EQ(params.nbThreads, params2.nbThreads);
-    ASSERT_EQ(params.ratioDeletedRoots, params2.ratioDeletedRoots);
 
     // Mutation prog parameters
     ASSERT_EQ(params.mutation.prog.maxConstValue,
@@ -222,4 +230,10 @@ TEST(LearningParametersTest, writeParametersToJson)
               params2.mutation.tpg.probaContextOverActionProgram);
     ASSERT_EQ(params.mutation.tpg.useActionProgram,
               params2.mutation.tpg.useActionProgram);
+
+    // Selection parameters
+    ASSERT_EQ(params.selection.selectionMode, params2.selection.selectionMode);
+    ASSERT_EQ(params.selection.tournament.ratioSavedRoots, params2.selection.tournament.ratioSavedRoots);
+    ASSERT_EQ(params.selection.tournament.sizeTournament, params2.selection.tournament.sizeTournament);
+    ASSERT_EQ(params.selection.truncation.ratioDeletedRoots, params2.selection.truncation.ratioDeletedRoots);
 }

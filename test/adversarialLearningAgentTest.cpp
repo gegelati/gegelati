@@ -72,7 +72,7 @@ class adversarialLearningAgentTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
         // Proba as in Kelly's paper
-        params.ratioDeletedRoots = 0.5;
+        params.selection.truncation.ratioDeletedRoots = 0.5;
         params.mutation.tpg.maxInitOutgoingEdges = 3;
         params.mutation.prog.maxProgramSize = 96;
         params.mutation.tpg.nbRoots = 15;
@@ -110,7 +110,7 @@ TEST_F(adversarialLearningAgentTest, MakeJob)
 {
     params.nbIterationsPerPolicyEvaluation = 20;
     params.nbIterationsPerJob = 2;
-    params.ratioDeletedRoots = 0.4;
+    params.selection.truncation.ratioDeletedRoots = 0.4;
     size_t agentsPerEval = 5;
     Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
 
@@ -128,7 +128,7 @@ TEST_F(adversarialLearningAgentTest, MakeJobs)
 {
     params.nbIterationsPerPolicyEvaluation = 20;
     params.nbIterationsPerJob = 2;
-    params.ratioDeletedRoots = 0.4;
+    params.selection.truncation.ratioDeletedRoots = 0.4;
     params.mutation.tpg.nbRoots = 3;
     size_t agentsPerEval = 5;
     Learn::AdversarialLearningAgent la(le, set, params, agentsPerEval);
@@ -418,7 +418,7 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     }
 
     // Check determinism of bestRoot score
-    ASSERT_EQ(la.getBestRoot().second, laSequential.getBestRoot().second);
+    ASSERT_EQ(la.getSelector()->getBestRoot().second, laSequential.getSelector()->getBestRoot().second);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
@@ -457,8 +457,8 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     }
 
     // Check determinism of bestRoot score
-    ASSERT_EQ(laSequential.getBestRoot().second,
-              laParallel.getBestRoot().second);
+    ASSERT_EQ(laSequential.getSelector()->getBestRoot().second,
+              laParallel.getSelector()->getBestRoot().second);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)

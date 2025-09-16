@@ -53,6 +53,12 @@ std::shared_ptr<TPG::TPGGraph> Learn::LearningAgent::getTPGGraph()
     return this->tpg;
 }
 
+std::shared_ptr<Selector::Selector> Learn::LearningAgent::getSelector()
+{
+    return this->selector;
+}
+
+
 const Archive& Learn::LearningAgent::getArchive() const
 {
     return this->archive;
@@ -82,7 +88,7 @@ void Learn::LearningAgent::init(uint64_t seed)
     this->archive.clear();
 
     // Clear the best agent in the selector
-    this->selector->forgetPreviousResult();
+    this->selector->forgetPreviousResults();
 }
 
 void Learn::LearningAgent::addLogger(Log::LALogger& logger)
@@ -258,7 +264,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
     }
 
     // Remove worst performing roots
-    this->selector->doSelection(results, this->rng);
+    this->selector->doSelection(results,rng);
     // Update the evaluation records
     this->selector->updateEvaluationRecords(results);
 
@@ -285,13 +291,6 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
     for (auto logger : loggers) {
         logger.get().logEndOfTraining();
     }
-}
-
-void Learn::LearningAgent::decimateWithTournament(
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
-        results)
-{
-
 }
 
 uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
@@ -338,18 +337,6 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
     return generationNumber;
 }
 
-const std::pair<const TPG::TPGVertex*,
-                std::shared_ptr<Learn::EvaluationResult>>&
-Learn::LearningAgent::getBestRoot() const
-{
-    return this->selector->getBestRoot();
-}
-
-void Learn::LearningAgent::keepBestPolicy()
-{
-
-}
-
 std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
     const TPG::TPGVertex* vertex, Learn::LearningMode mode, int idx,
     TPG::TPGGraph* tpgGraph)
@@ -384,9 +371,4 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
         jobs.push(job);
     }
     return jobs;
-}
-
-void Learn::LearningAgent::forgetPreviousResults()
-{
-
 }

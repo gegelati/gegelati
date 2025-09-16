@@ -162,7 +162,7 @@ TEST_F(LearningAgentTest, IsRootEvalSkipped)
 
     // Add an EvaluationResult artificially
     result1 = std::make_shared<Learn::EvaluationResult>(1.0, 1);
-    la.updateEvaluationRecords(
+    la.getSelector()->updateEvaluationRecords(
         {{result1, la.getTPGGraph()->getRootVertices().at(0)}});
 
     // Test the root again
@@ -177,7 +177,7 @@ TEST_F(LearningAgentTest, IsRootEvalSkipped)
 
     // Update the EvaluationResult artificially
     result2 = std::make_shared<Learn::EvaluationResult>(1.0, 2);
-    la.updateEvaluationRecords(
+    la.getSelector()->updateEvaluationRecords(
         {{result2, la.getTPGGraph()->getRootVertices().at(0)}});
 
     // Test the root again.
@@ -322,71 +322,71 @@ TEST_F(LearningAgentTest, UpdateEvaluationRecords)
     Learn::LearningAgent la(le, set, params);
 
     // Check null at build
-    ASSERT_EQ(la.getBestRoot().first, nullptr)
+    ASSERT_EQ(la.getSelector()->getBestRoot().first, nullptr)
         << "Best root should be a nullptr after building a new LearningAgent.";
-    ASSERT_EQ(la.getBestRoot().second, nullptr)
+    ASSERT_EQ(la.getSelector()->getBestRoot().second, nullptr)
         << "Best root EvaluationResult should be a nullptr after building a "
            "new LearningAgent.";
 
     // Check null at init
     la.init();
-    ASSERT_EQ(la.getBestRoot().first, nullptr)
+    ASSERT_EQ(la.getSelector()->getBestRoot().first, nullptr)
         << "Best root should be a nullptr after init of a LearningAgent.";
-    ASSERT_EQ(la.getBestRoot().second, nullptr)
+    ASSERT_EQ(la.getSelector()->getBestRoot().second, nullptr)
         << "Best root EvaluationResult should be a nullptr after init of a "
            "LearningAgent.";
 
     // Update with a fake result for a root of the graph
     auto rootVertices = la.getTPGGraph()->getRootVertices();
     const TPG::TPGVertex* root = *rootVertices.begin();
-    ASSERT_NO_THROW(la.updateEvaluationRecords(
+    ASSERT_NO_THROW(la.getSelector()->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(1.0, 10), root}}));
-    ASSERT_EQ(la.getBestRoot().first, root)
+    ASSERT_EQ(la.getSelector()->getBestRoot().first, root)
         << "Best root not updated properly.";
-    ASSERT_EQ(la.getBestRoot().second->getResult(), 1.0)
+    ASSERT_EQ(la.getSelector()->getBestRoot().second->getResult(), 1.0)
         << "Best root not updated properly.";
 
     // Update with a fake better result for another root of the graph
     const TPG::TPGVertex* root2 =
         *(la.getTPGGraph()->getRootVertices().begin() + 1);
-    ASSERT_NO_THROW(la.updateEvaluationRecords(
+    ASSERT_NO_THROW(la.getSelector()->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(2.0, 10), root2}}));
-    ASSERT_EQ(la.getBestRoot().first, root2)
+    ASSERT_EQ(la.getSelector()->getBestRoot().first, root2)
         << "Best root not updated properly.";
-    ASSERT_EQ(la.getBestRoot().second->getResult(), 2.0)
+    ASSERT_EQ(la.getSelector()->getBestRoot().second->getResult(), 2.0)
         << "Best root not updated properly.";
 
     // Update with a fake worse result for another root of the graph
     const TPG::TPGVertex* root3 =
         *(la.getTPGGraph()->getRootVertices().begin() + 2);
-    ASSERT_NO_THROW(la.updateEvaluationRecords(
+    ASSERT_NO_THROW(la.getSelector()->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(1.5, 10), root3}}));
-    ASSERT_EQ(la.getBestRoot().first, root2)
+    ASSERT_EQ(la.getSelector()->getBestRoot().first, root2)
         << "Best root not updated properly.";
-    ASSERT_EQ(la.getBestRoot().second->getResult(), 2.0)
+    ASSERT_EQ(la.getSelector()->getBestRoot().second->getResult(), 2.0)
         << "Best root not updated properly.";
 
     // Update with a root not from the graph
     TPG::TPGTeam fakeRoot;
-    ASSERT_NO_THROW(la.updateEvaluationRecords(
+    ASSERT_NO_THROW(la.getSelector()->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(3.0, 10), &fakeRoot}}));
-    ASSERT_EQ(la.getBestRoot().first, &fakeRoot)
+    ASSERT_EQ(la.getSelector()->getBestRoot().first, &fakeRoot)
         << "Best root not updated properly.";
-    ASSERT_EQ(la.getBestRoot().second->getResult(), 3.0)
+    ASSERT_EQ(la.getSelector()->getBestRoot().second->getResult(), 3.0)
         << "Best root not updated properly.";
 
     // Update with a worse EvaluationResult (but still updated because previous
     // Root is not in the TPGGraph
     auto sharedPtr = std::make_shared<Learn::EvaluationResult>(1.5, 10);
-    ASSERT_NO_THROW(la.updateEvaluationRecords({{sharedPtr, root3}}));
-    ASSERT_EQ(la.getBestRoot().first, root3)
+    ASSERT_NO_THROW(la.getSelector()->updateEvaluationRecords({{sharedPtr, root3}}));
+    ASSERT_EQ(la.getSelector()->getBestRoot().first, root3)
         << "Best root not updated properly.";
-    ASSERT_EQ(la.getBestRoot().second->getResult(), 1.5)
+    ASSERT_EQ(la.getSelector()->getBestRoot().second->getResult(), 1.5)
         << "Best root not updated properly.";
 
     // Update with the EvaluationResult already registered in the resultsPerRoot
     // map (for code coverage)
-    ASSERT_NO_THROW(la.updateEvaluationRecords({{sharedPtr, root3}}));
+    ASSERT_NO_THROW(la.getSelector()->updateEvaluationRecords({{sharedPtr, root3}}));
 }
 
 TEST_F(LearningAgentTest, forgetPreviousResults)
@@ -396,7 +396,7 @@ TEST_F(LearningAgentTest, forgetPreviousResults)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
     params.mutation.tpg.maxInitOutgoingEdges = 2;
-    params.ratioDeletedRoots = 0.50;
+    params.selection.truncation.ratioDeletedRoots = 0.50;
     params.mutation.tpg.nbRoots = 10;
     params.nbRegisters = 4;
 
@@ -406,50 +406,50 @@ TEST_F(LearningAgentTest, forgetPreviousResults)
     // Update with a fake result for a root of the graph
     auto rootVertices = la.getTPGGraph()->getRootVertices();
     const TPG::TPGVertex* root = *rootVertices.begin();
-    ASSERT_NO_THROW(la.updateEvaluationRecords(
+    ASSERT_NO_THROW(la.getSelector()->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(1.0, 10), root}}));
-    ASSERT_EQ(la.getBestRoot().second->getResult(), 1.0)
+    ASSERT_EQ(la.getSelector()->getBestRoot().second->getResult(), 1.0)
         << "Best root not updated properly.";
-    ASSERT_NO_THROW(*la.getBestRoot().second +=
+    ASSERT_NO_THROW(*la.getSelector()->getBestRoot().second +=
                     Learn::EvaluationResult(2.0, 10));
-    ASSERT_EQ(la.getBestRoot().second->getResult(), 1.5)
+    ASSERT_EQ(la.getSelector()->getBestRoot().second->getResult(), 1.5)
         << "Best root not updated properly.";
 
     // Looks for the eval record the Learning Agent should keep
     std::shared_ptr<Learn::EvaluationResult> previousEval;
-    la.isRootEvalSkipped(*la.getBestRoot().first, previousEval);
+    la.isRootEvalSkipped(*la.getSelector()->getBestRoot().first, previousEval);
 
     ASSERT_NE(nullptr, previousEval)
         << "Learning agent should remember the last score of the root.";
 
     // Forgets the eval record
-    ASSERT_NO_THROW(la.forgetPreviousResults())
+    ASSERT_NO_THROW(la.getSelector()->forgetPreviousResults())
         << "forgetPreviousResults throws exception.";
 
     // Looks for the eval record the Learning Agent should keep
-    la.isRootEvalSkipped(*la.getBestRoot().first, previousEval);
+    la.isRootEvalSkipped(*la.getSelector()->getBestRoot().first, previousEval);
 
     ASSERT_EQ(nullptr, previousEval)
         << "Learning agent should have forgotten the last score of the root";
 
-    ASSERT_EQ(nullptr, la.getBestRoot().first)
+    ASSERT_EQ(nullptr, la.getSelector()->getBestRoot().first)
         << "Learning agent should have forgotten the best root";
 
-    ASSERT_EQ(nullptr, la.getBestRoot().second)
+    ASSERT_EQ(nullptr, la.getSelector()->getBestRoot().second)
         << "Learning agent should have forgotten the last score of the root";
 
     ASSERT_NO_THROW(la.trainOneGeneration(0))
         << "trainOneGeneration doesn't work after a forgetPreviousResults";
 }
 
-TEST_F(LearningAgentTest, DecimateWorstRoots)
+TEST_F(LearningAgentTest, DoSelection)
 {
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
     params.mutation.tpg.maxInitOutgoingEdges = 2;
-    params.ratioDeletedRoots = 0.50;
+    params.selection.truncation.ratioDeletedRoots = 0.50;
     params.mutation.tpg.nbRoots =
         le.getNbActions() - 1; // Param used in decimation
     params.nbRegisters = 4;
@@ -479,14 +479,14 @@ TEST_F(LearningAgentTest, DecimateWorstRoots)
     }
 
     // Do the decimation
-    ASSERT_NO_THROW(la.decimateWorstRoots(results))
+    ASSERT_NO_THROW(la.getSelector()->doSelection(results, la.getRNG()))
         << "Decimating worst roots failed.";
 
     // Check the number of remaining roots.
     // Initial number of vertex - 2 removed vertices - deleted roots.
     ASSERT_EQ(la.getTPGGraph()->getNbVertices(),
               (le.getNbActions() * 2) - 2 -
-                  params.ratioDeletedRoots * ((le.getNbActions() - 1)));
+                  params.selection.truncation.ratioDeletedRoots * ((le.getNbActions() - 1)));
 }
 
 TEST_F(LearningAgentTest, TrainOnegeneration)
@@ -495,7 +495,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
-    params.ratioDeletedRoots =
+    params.selection.truncation.ratioDeletedRoots =
         0.95; // high number to force the apparition of root action.
 
     // we will validate in order to cover validation log
@@ -521,7 +521,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // Must be initial number of vertex - number of root removed
     ASSERT_EQ(la.getTPGGraph()->getNbVertices(),
               initialNbVertex -
-                  floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+                  floor(params.selection.truncation.ratioDeletedRoots * params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "TPGGraph.";
     // Train a second generation, because most roots were removed, a root
@@ -530,11 +530,8 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     ASSERT_NO_THROW(la.trainOneGeneration(0))
         << "Training for one generation failed.";
 
-    // Check that bestScoreLastGen has been set
-    ASSERT_NE(la.getBestScoreLastGen(), 0.0);
-
     // Check that bestRoot has been set
-    ASSERT_NE(la.getBestRoot().first, nullptr);
+    ASSERT_NE(la.getSelector()->getBestRoot().first, nullptr);
 
     o.close();
     std::ifstream i("tempFileForTest", std::ofstream::in);
@@ -553,7 +550,7 @@ TEST_F(LearningAgentTest, Train)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 3;
 
     Learn::LearningAgent la(le, set, params);
@@ -584,7 +581,7 @@ TEST_F(LearningAgentTest, TrainPortability)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 20;
     params.mutation.tpg.nbRoots = 30;
     // A root may be evaluated at most for 3 generations
@@ -625,7 +622,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 20;
     params.mutation.tpg.nbRoots = 30;
     // A root may be evaluated at most for 3 generations
@@ -718,7 +715,7 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 20;
     params.mutation.tpg.nbRoots = 30;
     params.mutation.tpg.useActionProgram = false;
@@ -761,7 +758,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 20;
     params.mutation.tpg.nbRoots = 30;
     params.mutation.tpg.useActionProgram = true;
@@ -806,15 +803,15 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.8;
     params.nbGenerations = 20;
     params.mutation.tpg.nbRoots = 30;
     params.mutation.tpg.useActionProgram = true;
     params.mutation.tpg.useMultiActionProgram = true;
     params.mutation.tpg.teamAccessAllActions = false;
     params.mutation.tpg.ratioTeamsOverActions = 0.3333;
-    params.useTournamentSelection = true;
-    params.sizeTournament = 3;
+    params.selection.selectionMode = "tournament";
+    params.selection.tournament.sizeTournament = 3;
+    params.selection.tournament.ratioSavedRoots = 0.2;
     params.mutation.tpg.nbRoots = 100;
     params.nbThreads = 3;
     // A root may be evaluated at most for 3 generations
@@ -827,24 +824,33 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     la.init();
     bool alt = false;
     la.train(alt, false);
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+
+    // Useful when determinism is changed
+    /*std::cout<<tpg.getNbVertices()<<" "
+             <<tpg.getNbRootVertices()<<" "
+             <<tpg.getEdges().size()<<" "
+             <<TPG::TPGVertex::getVertexIDCounter()<<" "
+             <<TPG::TPGEdge::getEdgeIDCounter()<<" "
+             <<Program::Program::getProgramIDCounter()<<" "
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
 
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 76)
+    ASSERT_EQ(tpg.getNbVertices(), 85)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 46)
+    ASSERT_EQ(tpg.getNbRootVertices(), 47)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 221)
+    ASSERT_EQ(tpg.getEdges().size(), 252)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 2104)
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 2082)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 7736)
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 7684)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Program::Program::getProgramIDCounter(), 4050)
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 4029)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 7720633690943106983U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 15888887781757087774U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -854,7 +860,7 @@ TEST_F(LearningAgentTest, KeepBestPolicy)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 1;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 5;
 
     Learn::LearningAgent la(le, set, params);
@@ -862,7 +868,7 @@ TEST_F(LearningAgentTest, KeepBestPolicy)
     bool alt = false;
     la.train(alt, true);
 
-    ASSERT_NO_THROW(la.keepBestPolicy())
+    ASSERT_NO_THROW(la.getSelector()->keepBestPolicy())
         << "Keeping the best policy after training should not fail.";
     ASSERT_EQ(la.getTPGGraph()->getNbRootVertices(), 1)
         << "A single root TPGVertex should remain in the TPGGraph when keeping "
@@ -875,7 +881,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 1;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 5;
 
     Learn::LearningAgent la(le, set, params);
@@ -883,7 +889,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     bool alt = false;
     la.train(alt, false);
 
-    la.keepBestPolicy();
+    la.getSelector()->keepBestPolicy();
 
     TPG::TPGGraph& tpg = *la.getTPGGraph();
 
@@ -937,7 +943,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
-    params.ratioDeletedRoots =
+    params.selection.truncation.ratioDeletedRoots =
         0.5; // high number to force the apparition of root action.
     params.nbThreads = 1;
     Learn::LearningAgent la(cle, set, params);
@@ -957,7 +963,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     // removed (since some actions vertex are removed too)
     ASSERT_LE(la.getTPGGraph()->getNbVertices(),
               initialNbVertex -
-                  floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+                  floor(params.selection.truncation.ratioDeletedRoots * params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "TPGGraph.";
     // Train a second generation, because most roots were removed, a root
@@ -1115,11 +1121,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
         iterSequential++;
     }
 
-    // Check determinism of bestScoreLastGen
-    ASSERT_EQ(la.getBestScoreLastGen(), plaSequential.getBestScoreLastGen());
-
     // Check determinism of bestRoot score
-    ASSERT_EQ(la.getBestRoot().second, plaSequential.getBestRoot().second);
+    ASSERT_EQ(la.getSelector()->getBestRoot().second, plaSequential.getSelector()->getBestRoot().second);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
@@ -1157,13 +1160,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
         iterParallel++;
     }
 
-    // Check determinism of bestScoreLastGen
-    ASSERT_EQ(plaSequential.getBestScoreLastGen(),
-              plaParallel.getBestScoreLastGen());
-
     // Check determinism of bestRoot score
-    ASSERT_EQ(plaSequential.getBestRoot().second,
-              plaParallel.getBestRoot().second);
+    ASSERT_EQ(plaSequential.getSelector()->getBestRoot().second,
+              plaParallel.getSelector()->getBestRoot().second);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)
@@ -1272,7 +1271,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
-    params.ratioDeletedRoots =
+    params.selection.truncation.ratioDeletedRoots =
         0.95; // high number to force the apparition of root action.
     params.nbThreads = 1;
 
@@ -1291,7 +1290,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     // Must be initial number of vertex - number of root removed
     ASSERT_EQ(pla.getTPGGraph()->getNbVertices(),
               initialNbVertex -
-                  floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+                  floor(params.selection.truncation.ratioDeletedRoots * params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "TPGGraph.";
     // Train a second generation, because most roots were removed, a root
@@ -1307,7 +1306,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
-    params.ratioDeletedRoots =
+    params.selection.truncation.ratioDeletedRoots =
         0.95; // high number to force the apparition of root action.
     params.nbThreads = 4;
 
@@ -1326,7 +1325,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     // Must be initial number of vertex - number of root removed
     ASSERT_EQ(pla.getTPGGraph()->getNbVertices(),
               initialNbVertex -
-                  floor(params.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+                  floor(params.selection.truncation.ratioDeletedRoots * params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "TPGGraph.";
 }
@@ -1337,7 +1336,7 @@ TEST_F(ParallelLearningAgentTest, TrainSequential)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 3;
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 2;
@@ -1361,7 +1360,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallel)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 3;
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 2;
@@ -1385,7 +1384,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     // Set a large number of generations and roots
     // so that the chances of something going wrong is higher.
     params.nbGenerations = 20;
@@ -1428,7 +1427,7 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 1;
-    params.ratioDeletedRoots = 0.2;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 5;
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 2;
@@ -1438,7 +1437,7 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
     bool alt = false;
     pla.train(alt, true);
 
-    ASSERT_NO_THROW(pla.keepBestPolicy())
+    ASSERT_NO_THROW(pla.getSelector()->keepBestPolicy())
         << "Keeping the best policy after training should not fail.";
     ASSERT_EQ(pla.getTPGGraph()->getNbRootVertices(), 1)
         << "A single root TPGVertex should remain in the TPGGraph when keeping "
@@ -1482,7 +1481,7 @@ TEST_F(LearningAgentTest, DecimateWorstRootsActionsQuota)
 {
     // We force the ratio to quickly reach quotas
     params.mutation.tpg.nbRoots = 10;
-    params.ratioDeletedRoots = 0.5;
+    params.selection.truncation.ratioDeletedRoots = 0.5;
     params.mutation.tpg.ratioTeamsOverActions = 0.7;
     params.mutation.tpg.useActionProgram =
         true; // To make action vertices removed too.
@@ -1510,7 +1509,7 @@ TEST_F(LearningAgentTest, DecimateWorstRootsActionsQuota)
         }
     }
 
-    ASSERT_NO_THROW(la.decimateWorstRoots(results));
+    ASSERT_NO_THROW(la.getSelector()->doSelection(results, la.getRNG()));
 
     size_t nbTeams = 0;
     size_t nbActions = 0;
@@ -1528,11 +1527,11 @@ TEST_F(LearningAgentTest, DecimateWorstRootsActionsQuota)
         << "After decimation, the number of actions should be 2.";
 }
 
-TEST_F(LearningAgentTest, DecimateWorstRootsTeamsQuota)
+TEST_F(LearningAgentTest, DoSelectionTeamsQuota)
 {
     // We force the ratio to quickly reach quotas
     params.mutation.tpg.nbRoots = 10;
-    params.ratioDeletedRoots = 0.5;
+    params.selection.truncation.ratioDeletedRoots = 0.5;
     params.mutation.tpg.ratioTeamsOverActions = 0.5;
     params.mutation.tpg.useActionProgram =
         true; // To make action vertices removed too.
@@ -1564,7 +1563,7 @@ TEST_F(LearningAgentTest, DecimateWorstRootsTeamsQuota)
     // Since we have 3 actions and 7 teams, and we delete half of the roots,
     // Normally 3 actions and 2 teams should be deleted, but the ratio should
     // allow Only 1 action to be deleted, and 4 teams.
-    ASSERT_NO_THROW(la.decimateWorstRoots(results));
+    ASSERT_NO_THROW(la.getSelector()->doSelection(results, la.getRNG()));
 
     size_t nbTeams = 0;
     size_t nbActions = 0;
@@ -1597,10 +1596,10 @@ TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
 
 TEST_F(LearningAgentTest, DecimateWithTournamentSelection)
 {
-    params.useTournamentSelection = true;
+    params.selection.selectionMode = "tournament";
     params.mutation.tpg.nbRoots = 30;
-    params.ratioDeletedRoots = 0.7;
-    params.sizeTournament = 4;
+    params.selection.tournament.ratioSavedRoots = 0.3;
+    params.selection.tournament.sizeTournament = 4;
     Learn::LearningAgent la(le, set, params);
     la.init();
 
@@ -1615,8 +1614,8 @@ TEST_F(LearningAgentTest, DecimateWithTournamentSelection)
                         root);
     }
 
-    // Call decimateWorstRoots, which should use tournament selection
-    ASSERT_NO_THROW(la.decimateWorstRoots(results));
+    // Call doSelection, which should use tournament selection
+    ASSERT_NO_THROW(la.getSelector()->doSelection(results, la.getRNG()));
 
     // Check that the number of roots is reduced
     // The number of roots was 30. With a ratio of 0.7, only 9 should remain as

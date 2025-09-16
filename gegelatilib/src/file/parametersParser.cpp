@@ -109,7 +109,7 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
                 }
                 if (root[key][key2].size() == 0) {
                     // we're on a selection.xxx paramter.
-                    Json::Value value = root[key2];
+                    Json::Value value = root[key][key2];
                     setParameterFromString(params, key2, value);
                 }
 

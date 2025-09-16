@@ -77,7 +77,7 @@ namespace Selector {
             "// Percentage of root TPGVertex saved from the tournament at each generation.\n"
             "// \"ratioSavedRoots\" : 0.05, // Default value";
         /// Percentage of root TPGVertex saved from the tournament at each generation.
-        double ratioSavedRoots = 5;
+        double ratioSavedRoots = 0.5;
 
     } TournamentParameters;
 
@@ -89,13 +89,13 @@ namespace Selector {
 
         /// JSon comment
         inline static const std::string selectionModeComment =
-            "// Selection mode used. Available mode are:\n"
-            "//   - Truncation"
-            "//   - Tournament"
+            "// Selection mode used. Available modes are:\n"
+            "//   - \"truncation\"\n"
+            "//   - \"tournament\"\n"
             "// \"selectionMode\" : Truncation, // Default value";
         /// Selection mode used. Available mode are:
-        ///   - Truncation"
-        ///   - Tournament"
+        ///   - "truncation"
+        ///   - "tournament"
         std::string selectionMode = "truncation";
 
         /// Parameters for TruncationSelector

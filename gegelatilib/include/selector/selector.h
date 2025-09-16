@@ -19,8 +19,8 @@ namespace Selector {
             /// TPGGraph on which the TPGVertex can be selected or deleted.
             std::shared_ptr<TPG::TPGGraph> graph;
 
-            /// Parameters for the selection TODO make selectionParameters class
-            SelectionParameters params;
+            /// Parameters for the selection
+            const Learn::LearningParameters& params;
 
 
             /// Pointer to the best root encountered during training, together with
@@ -52,7 +52,7 @@ namespace Selector {
              * \param[in] graph shared pointer of the graph on which the selection is done.
              * \param[in] params parameters used by the Selector.
              */
-            Selector(std::shared_ptr<TPG::TPGGraph> graph, const SelectionParameters& params)
+            Selector(std::shared_ptr<TPG::TPGGraph> graph, const Learn::LearningParameters& params)
             : graph{graph}, params{params} {}
 
             /**
@@ -154,8 +154,13 @@ namespace Selector {
              * been tested. To use for example when there is a scoring policy
              * change.
              */
-            virtual void forgetPreviousResult();
+            virtual void forgetPreviousResults();
 
+
+            /**
+             * \brief Return the resultsPerRoot map.
+             */
+            virtual std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& getResultsPerRootnc();
             /**
              * \brief Return the resultsPerRoot map.
              */
