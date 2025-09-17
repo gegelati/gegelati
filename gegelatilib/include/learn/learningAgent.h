@@ -280,8 +280,10 @@ namespace Learn {
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
+         * \param[in] doPopulate boolean to indicate if the populateTPG method should be called. This parameter is used to avoid populating at the last generation of a training.
+         * 
          */
-        virtual void trainOneGeneration(uint64_t generationNumber);
+        virtual void trainOneGeneration(uint64_t generationNumber, bool doPopulate = true);
 
         /**
          * \brief Train the TPGGraph for a given number of generation.

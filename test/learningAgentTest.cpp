@@ -515,7 +515,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
                                      la.getRNG(), le.getNbActions(), 1);
     size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
-    ASSERT_NO_THROW(la.trainOneGeneration(4))
+    ASSERT_NO_THROW(la.trainOneGeneration(4, false))
         << "Training for one generation failed.";
     // Check the number of vertex in the graph.
     // Must be initial number of vertex - number of root removed
@@ -569,6 +569,7 @@ TEST_F(LearningAgentTest, Train)
     params.stepValidation = 2;
     Learn::LearningAgent la2(le, set, params);
     alt = false;
+    la2.init();
     ASSERT_NO_THROW(la2.train(alt, true))
         << "Using the boolean reference to stop the training should not fail.";
 }
@@ -1284,7 +1285,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
                                      pla.getRNG(), le.getNbActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
-    ASSERT_NO_THROW(pla.trainOneGeneration(4))
+    ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
         << "Training for one generation failed.";
     // Check the number of vertex in the graph.
     // Must be initial number of vertex - number of root removed
@@ -1319,7 +1320,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
                                      pla.getRNG(), le.getNbActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
-    ASSERT_NO_THROW(pla.trainOneGeneration(4))
+    ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
         << "Training for one generation failed.";
     // Check the number of vertex in the graph.
     // Must be initial number of vertex - number of root removed

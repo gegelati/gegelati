@@ -155,13 +155,13 @@ TEST_F(LABasicLoggerTest, logHeader)
     ASSERT_EQ("Min", result[5]);
     ASSERT_EQ("Avg", result[6]);
     ASSERT_EQ("Max", result[7]);
-    ASSERT_EQ("T_mutat", result[8]);
-    ASSERT_EQ("T_eval", result[9]);
-    ASSERT_EQ("T_decim", result[10]);
+    ASSERT_EQ("T_eval", result[8]);
+    ASSERT_EQ("T_decim", result[9]);
+    ASSERT_EQ("T_mutat", result[10]);
     ASSERT_EQ("T_total", result[11]);
     ASSERT_EQ("Valid", result[13]);
     ASSERT_EQ("Avg", result[22]);
-    ASSERT_EQ("T_valid", result[26]);
+    ASSERT_EQ("T_valid", result[25]);
     ASSERT_EQ("U_Min", result[35]);
     ASSERT_EQ("U_Avg", result[36]);
     ASSERT_EQ("U_Max", result[37]);

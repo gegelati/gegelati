@@ -84,6 +84,11 @@ void Learn::LearningAgent::init(uint64_t seed)
         *this->tpg, params.mutation, this->rng,
         this->learningEnvironment.getNbActions());
 
+    // Populate Sequentially
+    Mutator::TPGMutator::populateTPG(
+        *this->tpg, this->archive, this->params.mutation, this->rng,
+        this->learningEnvironment.getNbActions(), maxNbThreads);
+
     // Clear the archive
     this->archive.clear();
 
@@ -242,18 +247,10 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneRoot(
     return avgScore;
 }
 
-void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
+void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber, bool doPopulate)
 {
     for (auto logger : loggers) {
         logger.get().logNewGeneration(generationNumber);
-    }
-
-    // Populate Sequentially
-    Mutator::TPGMutator::populateTPG(
-        *this->tpg, this->archive, this->params.mutation, this->rng,
-        this->learningEnvironment.getNbActions(), maxNbThreads);
-    for (auto logger : loggers) {
-        logger.get().logAfterPopulateTPG();
     }
 
     // Evaluate
@@ -288,6 +285,17 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber)
         }
     }
 
+    if(doPopulate){
+        // Populate Sequentially
+        Mutator::TPGMutator::populateTPG(
+            *this->tpg, this->archive, this->params.mutation, this->rng,
+            this->learningEnvironment.getNbActions(), maxNbThreads);
+    }
+
+    for (auto logger : loggers) {
+        logger.get().logAfterPopulateTPG();
+    }
+
     for (auto logger : loggers) {
         logger.get().logEndOfTraining();
     }
@@ -301,7 +309,7 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
 
     while (!altTraining && generationNumber < this->params.nbGenerations) {
         // Train one generation
-        trainOneGeneration(generationNumber);
+        trainOneGeneration(generationNumber, generationNumber != this->params.nbGenerations - 1);
         generationNumber++;
 
         // Print progressBar (homemade, probably not ideal)
