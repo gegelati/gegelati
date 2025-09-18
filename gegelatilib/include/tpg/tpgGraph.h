@@ -176,6 +176,31 @@ namespace TPG {
         uint64_t getNbRootVertices() const;
 
         /**
+         * \brief Get vector of const pointer to the root actions of the
+         * TPGGraph.
+         *
+         * Content of the retrieved vector is valid only as long as no non-const
+         * method is called on the TPG. The returned vector is the
+         * current set of actions.
+         *
+         * \return a vector containing pointers to the root actions of the
+         * graph.
+         */
+        const std::vector<const TPGAction*> getRootActions() const;
+        /**
+         * \brief Get vector of const pointer to the root teams of the
+         * TPGGraph.
+         *
+         * Content of the retrieved vector is valid only as long as no non-const
+         * method is called on the TPG. The returned vector is the
+         * current set of teams.
+         *
+         * \return a vector containing pointers to the root teams of the
+         * graph.
+         */
+        const std::vector<const TPGTeam*> getRootTeams() const;
+
+        /**
          * \brief Get vector of const pointer to the root vertices of the
          * TPGGraph.
          *

@@ -176,6 +176,7 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
 
+
     for (size_t i = 0; i < initNbActions; i++) {
         actions.push_back(
             initActionVertex(graph, params, rng, nbActionEdgeInit, i));

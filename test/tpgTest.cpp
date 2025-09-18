@@ -620,6 +620,16 @@ TEST_F(TPGTest, TPGGraphGetRootVertices)
         << "Number of roots of the TPG is incorrect.";
     ASSERT_EQ(tpg.getRootVertices().at(0), &vertex0)
         << "Vertex classified as root is incorrect.";
+
+    const TPG::TPGVertex& vertex2 = tpg.addNewTeam();
+    const TPG::TPGAction& vertex3 = tpg.addNewAction(1);
+    ASSERT_EQ(tpg.getRootVertices().size(), 3)
+        << "Number of roots of the TPG is incorrect.";
+    ASSERT_EQ(tpg.getRootTeams().size(), 2)
+        << "Number of roots teams of the TPG is incorrect.";
+    ASSERT_EQ(tpg.getRootActions().size(), 1)
+        << "Number of roots actions of the TPG is incorrect.";
+
 }
 
 TEST_F(TPGTest, TPGGraphCloneVertex)

@@ -151,14 +151,14 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithActionProg)
     params.mutation.tpg.useMultiActionProgram = true;
     params.mutation.tpg.ratioTeamsOverActions = 0.5;
     Learn::LearningAgent cla(cle, set, params);
-    // Train one generatio before adding the logger.
+    // Train one generation before adding the logger.
     uint64_t genNumber = 42;
-    la->init(2);
-    la->trainOneGeneration(genNumber);
+    cla.init(2);
+    cla.trainOneGeneration(genNumber);
 
     // add the Logger
     std::stringstream strStr;
-    Log::LAPolicyStatsLogger log(*la, strStr);
+    Log::LAPolicyStatsLogger log(cla, strStr);
 
     ASSERT_NO_THROW(log.logNewGeneration(genNumber))
         << "This call should not throw any exception.";
@@ -180,9 +180,8 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithActionProg)
     ASSERT_EQ(strStr.str().size(), length)
         << "Second call to logAfterEvaluate should not log anything new, the "
            "bestRoot not having been replaced.";
-
     // Train a new gen (calls the log)
-    ASSERT_NO_THROW(la->trainOneGeneration(
+    ASSERT_NO_THROW(cla.trainOneGeneration(
         genNumber + 1)) // +1 deterministically creates a new bestRoot.
         << "Training a new generation should not cause any problem.";
 
@@ -198,14 +197,14 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithMAPLE)
     params.mutation.tpg.useMultiActionProgram = true;
     params.mutation.tpg.ratioTeamsOverActions = 1.0;
     Learn::LearningAgent cla(cle, set, params);
-    // Train one generatio before adding the logger.
+    // Train one generation before adding the logger.
     uint64_t genNumber = 42;
-    la->init(2);
-    la->trainOneGeneration(genNumber);
+    cla.init(2);
+    cla.trainOneGeneration(genNumber);
 
     // add the Logger
     std::stringstream strStr;
-    Log::LAPolicyStatsLogger log(*la, strStr);
+    Log::LAPolicyStatsLogger log(cla, strStr);
 
     ASSERT_NO_THROW(log.logNewGeneration(genNumber))
         << "This call should not throw any exception.";
@@ -229,7 +228,7 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithMAPLE)
            "bestRoot not having been replaced.";
 
     // Train a new gen (calls the log)
-    ASSERT_NO_THROW(la->trainOneGeneration(
+    ASSERT_NO_THROW(cla.trainOneGeneration(
         genNumber + 1)) // +1 deterministically creates a new bestRoot.
         << "Training a new generation should not cause any problem.";
 
