@@ -86,7 +86,7 @@ void Learn::LearningAgent::init(uint64_t seed)
 
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(
-        *this->tpg, this->archive, this->params.mutation, this->rng,
+        *this->tpg, *this->selector, this->archive, this->params.mutation, this->rng,
         this->learningEnvironment.getNbActions(), maxNbThreads);
 
     // Clear the archive
@@ -288,7 +288,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber, bool do
     if(doPopulate){
         // Populate Sequentially
         Mutator::TPGMutator::populateTPG(
-            *this->tpg, this->archive, this->params.mutation, this->rng,
+            *this->tpg, *this->selector, this->archive, this->params.mutation, this->rng,
             this->learningEnvironment.getNbActions(), maxNbThreads);
     }
 

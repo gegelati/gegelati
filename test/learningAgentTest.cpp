@@ -511,7 +511,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
 
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), a, params.mutation,
+    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), *la.getSelector(), a, params.mutation,
                                      la.getRNG(), le.getNbActions(), 1);
     size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
@@ -952,7 +952,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     la.init();
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), a, params.mutation,
+    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), *la.getSelector(), a, params.mutation,
                                      la.getRNG(), cle.getNbActions());
     size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
 
@@ -1281,7 +1281,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     pla.init();
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), a, params.mutation,
+    Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), *pla.getSelector(), a, params.mutation,
                                      pla.getRNG(), le.getNbActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
@@ -1316,7 +1316,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     pla.init();
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), a, params.mutation,
+    Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), *pla.getSelector(), a, params.mutation,
                                      pla.getRNG(), le.getNbActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation

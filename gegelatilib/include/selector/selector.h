@@ -6,6 +6,7 @@
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 #include "selector/selectionParameters.h"
+#include "selector/selectionContext.h"
 #include "tpg/tpgGraph.h"
 
 namespace Selector {
@@ -43,6 +44,15 @@ namespace Selector {
              */
             std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>
                 resultsPerRoot;
+
+            /**
+             * \brief context used by the TPGMutator to populate the TPGGraph.
+             * 
+             * The context contains various data needed for the creation of the new population and is update in the updateContext methods.
+             * 
+             * This method can be override by the different selectors to specify the data to each case.
+             */
+            SelectionContext context;
 
         public:
 
@@ -160,11 +170,15 @@ namespace Selector {
             /**
              * \brief Return the resultsPerRoot map.
              */
-            virtual std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& getResultsPerRootnc();
-            /**
-             * \brief Return the resultsPerRoot map.
-             */
             virtual const std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& getResultsPerRoot() const;
+
+            /**
+             * \brief Update the SelectionContext structure and return it.
+             * 
+             * The context contains data needed for the creation of the new population.
+             * This method create the vectors of clonable vertices, preExistingVertices, preExistingEdges and the number of Vertices to create.
+             */
+            virtual const SelectionContext& updateContext();
     };
 }; // namespace Selector
 

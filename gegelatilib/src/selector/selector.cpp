@@ -93,11 +93,104 @@ void Selector::Selector::forgetPreviousResults()
     this->bestRoot.second = nullptr;
 }
 
-std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& Selector::Selector::getResultsPerRootnc()
-{
-    return this->resultsPerRoot;
-}
 const std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& Selector::Selector::getResultsPerRoot() const
 {
     return this->resultsPerRoot;
 }
+
+const Selector::SelectionContext& Selector::Selector::updateContext()
+{
+    // Get current vertex set (copy)
+    auto vertices(graph->getVertices());
+    // Get current root teams (copy)
+    auto rootVertices(graph->getRootVertices());
+
+    // Create list of teams and actions clonable
+    this->context.teamsClonable.clear();
+    this->context.actionsClonable.clear();
+    for(auto root: rootVertices){
+        if (dynamic_cast<const TPG::TPGTeam*>(root) != nullptr) {
+            this->context.teamsClonable.push_back((const TPG::TPGTeam*)root);
+        }
+        else if (params.mutation.tpg.useActionProgram) {
+            this->context.actionsClonable.push_back((const TPG::TPGAction*)root);
+        }
+    
+    }
+    uint64_t nbRootTeams = this->context.teamsClonable.size();
+    uint64_t nbRootActions = this->context.actionsClonable.size();
+
+    // Fill the list of available TPGTeam and TPGActions, TPGActions are only roots if they are not accessible by the teams
+    this->context.preExistingTeams.clear();
+    this->context.preExistingActions.clear();
+    for(auto vertex: vertices){
+        if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr && (params.mutation.tpg.teamAccessAllActions || vertex->getIncomingEdges().size() == 0)){
+                this->context.preExistingActions.push_back((const TPG::TPGAction*)vertex);   
+        }
+        else if(dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
+            this->context.preExistingTeams.push_back((const TPG::TPGTeam*)vertex);
+        }
+    }
+
+    // Fill the list of pre existing edges before mutations (copy)
+    this->context.preExistingEdges.clear();
+    auto& preExistingEdges = this->context.preExistingEdges;
+    std::for_each(
+        this->graph->getEdges().begin(), this->graph->getEdges().end(),
+        [&preExistingEdges](const std::unique_ptr<TPG::TPGEdge>& edge) {
+            preExistingEdges.push_back(edge.get());
+        });
+
+
+    bool useTournamentSelection = (params.selection.selectionMode == "tournament");
+
+    if(useTournamentSelection){
+        // The root not set to be deleted are not used during evolution
+        this->context.teamsClonable.erase(
+            std::remove_if(this->context.teamsClonable.begin(), this->context.teamsClonable.end(),
+                        [](const TPG::TPGVertex* vertex) -> bool {
+                            return !vertex->isToBeDeleted();
+                        }),
+            this->context.teamsClonable.end());
+
+        this->context.actionsClonable.erase(
+            std::remove_if(this->context.actionsClonable.begin(), this->context.actionsClonable.end(),
+                        [](const TPG::TPGVertex* vertex) -> bool {
+                            return !vertex->isToBeDeleted();
+                        }),
+            this->context.actionsClonable.end());
+
+        // Erase the vertex set to be deleted to the list of pre existing vertex.
+        // They are only used for being a new destination
+        this->context.preExistingTeams.erase(
+            std::remove_if(this->context.preExistingTeams.begin(), this->context.preExistingTeams.end(),
+                        [](const TPG::TPGVertex* vertex) -> bool {
+                            return vertex->isToBeDeleted();
+                        }),
+            this->context.preExistingTeams.end());
+
+        this->context.preExistingActions.erase(
+            std::remove_if(this->context.preExistingActions.begin(), this->context.preExistingActions.end(),
+                        [](const TPG::TPGVertex* vertex) -> bool {
+                            return vertex->isToBeDeleted();
+                        }),
+            this->context.preExistingActions.end());
+
+    }
+
+
+    this->context.nbTeamsToCreate =
+        (uint64_t)(params.mutation.tpg.nbRoots * params.mutation.tpg.ratioTeamsOverActions) -
+        nbRootTeams + (this->context.teamsClonable.size() * useTournamentSelection);
+
+        
+    this->context.nbActionsToCreate =
+        std::max((int64_t)((uint64_t)(params.mutation.tpg.nbRoots *
+                                        (1 - params.mutation.tpg.ratioTeamsOverActions)) -
+                            nbRootActions +
+                            (this->context.actionsClonable.size() * useTournamentSelection)),
+                    (int64_t)0);
+
+    return context;
+}
+

@@ -185,7 +185,7 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
     // Initialize and populate the TPG
     cla.init(0);
     TPG::TPGGraph& graph = *cla.getTPGGraph();
-    Mutator::TPGMutator::populateTPG(graph, cla.getArchive(), params.mutation,
+    Mutator::TPGMutator::populateTPG(graph, *cla.getSelector(), cla.getArchive(), params.mutation,
                                      cla.getRNG(), fle.getNbActions());
 
     // Get roots

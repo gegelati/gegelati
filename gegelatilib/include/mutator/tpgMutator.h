@@ -42,6 +42,7 @@
 #include "archive.h"
 #include "mutator/mutationParameters.h"
 #include "tpg/tpgGraph.h"
+#include "selector/selector.h"
 
 namespace Mutator {
     namespace TPGMutator {
@@ -375,6 +376,7 @@ namespace Mutator {
          * targetted number of root teams, nothing happens.
          *
          * \param[in,out] graph the TPGGraph to mutate.
+         * \param[in] selector the Selector of the learningAgent.
          * \param[in] archive Archive used to assess the uniqueness of the
          *            mutated Program behavior.
          * \param[in] params Probability parameters for the mutation.
@@ -389,7 +391,8 @@ namespace Mutator {
          *   - `n > 1`: Set the number of threads explicitly.
          */
         void populateTPG(
-            TPG::TPGGraph& graph, const Archive& archive,
+            TPG::TPGGraph& graph, Selector::Selector& selector,
+            const Archive& archive,
             const Mutator::MutationParameters& params, Mutator::RNG& rng,
             uint64_t nbActions,
             uint64_t maxNbThreads = std::thread::hardware_concurrency());
