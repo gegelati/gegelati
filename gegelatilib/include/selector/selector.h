@@ -179,6 +179,13 @@ namespace Selector {
              * This method create the vectors of clonable vertices, preExistingVertices, preExistingEdges and the number of Vertices to create.
              */
             virtual const SelectionContext& updateContext();
+
+            /**
+             * \brief Method to call at the end of TPGMutator::populateTPG to erase the parents that are useless after the population
+             * 
+             * This method does nothing with the classic selector.
+             */
+            virtual void deleteUselessParents();
     };
 }; // namespace Selector
 

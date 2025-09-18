@@ -20,6 +20,14 @@ namespace Selector {
      */
     class TournamentSelector : public Selector
     {
+        protected:
+
+            /**
+             * @brief set of TPGVertex filled during the selection process, containing the vertices that went through the tournament en survived it.
+             * The TPGVertex in the set will be deleted at the end of the TPGMutator::PopulateTPG method.
+             */
+            std::set<const TPG::TPGVertex*> verticesToDelete;
+
         public:
 
             /**
@@ -54,11 +62,23 @@ namespace Selector {
                 const TPG::TPGVertex*>& results, Mutator::RNG& rng) override;
 
             /**
-             * \brief Specialization of updateContext for tournament puposes
+             * \brief Specialization of updateContext for tournament purposes
              * 
              * The method will remove the elite agents from the clonableVertices vectors, and will remove the not elite agents from the preExistingVertices vectors
              */
             virtual const SelectionContext& updateContext() override;
+
+            /**
+             * \brief Specialization of deleteUselessParents for tournament purposes
+             * 
+             * This method erase the agents that have survived the tournaments and have generated new offsprings.
+             */
+            virtual void deleteUselessParents() override;
+
+            /**
+             * \brief getter of the verticesToDelete set.
+             */
+            virtual const std::set<const TPG::TPGVertex*>& getVerticesToDelete();
     };
 }; // namespace Selector
 

@@ -1628,13 +1628,10 @@ TEST_F(LearningAgentTest, DecimateWithTournamentSelection)
         << "After decimation with tournament selection, the number of roots "
            "should be reduced to 15.";
 
-    size_t nbToDelete = 0;
-    for (auto root : la.getTPGGraph()->getRootVertices()) {
-        if (root->isToBeDeleted()) {
-            nbToDelete++;
-        }
-    }
-    ASSERT_EQ(nbToDelete, 6)
+    ASSERT_TRUE(dynamic_cast<Selector::TournamentSelector*>(la.getSelector().get()) != nullptr)
+        << "Selector for tournament selection should be a TournamentSelector";
+
+    ASSERT_EQ(dynamic_cast<Selector::TournamentSelector*>(la.getSelector().get())->getVerticesToDelete().size(), 6)
         << "After decimation with tournament selection, the number of roots "
-           "marked for deletion should be 6.";
+           "registered for deletion should be 6.";
 }

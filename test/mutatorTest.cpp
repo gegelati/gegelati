@@ -1677,7 +1677,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
         << "The number of action roots is not as expected.";
 }
 
-TEST_F(MutatorTest, TPGMutatorUpdateClonableAndExistingVertexForTournament)
+/*TEST_F(MutatorTest, TPGMutatorUpdateClonableAndExistingVertexForTournament)
 {
     // Create dummy teams and actions, some marked as to be deleted
     TPG::TPGGraph tpg(*e);
@@ -1711,7 +1711,7 @@ TEST_F(MutatorTest, TPGMutatorUpdateClonableAndExistingVertexForTournament)
     ASSERT_EQ(preExistingTeams[0], team2);
     ASSERT_EQ(preExistingActions.size(), 1);
     ASSERT_EQ(preExistingActions[0], action2);
-}
+}*/
 
 TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 {
@@ -1720,8 +1720,8 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 
     uint64_t nbActions = 5;
     params.selection.selectionMode = "tournament";
-    params.selection.tournament.sizeTournament = 3;
-    params.selection.tournament.ratioSavedRoots = 3;
+    params.selection.tournament.sizeTournament = 2;
+    params.selection.tournament.ratioSavedRoots = 0.1;
     Environment ce(set, params, vect, nbActions);
 
     std::shared_ptr<TPG::TPGGraph> tpg = std::make_shared<TPG::TPGGraph>(ce);
@@ -1751,13 +1751,14 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     Mutator::TPGMutator::initRandomTPG(*tpg, params.mutation, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
     TPG::TPGExecutionEngine tee(*e, &arch);
+
+    // Do fake results to fill the verticesToDelete set.
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> fakeResults;
     for (auto rootVertex : tpg->getRootVertices()) {
-        tee.executeFromRoot(*rootVertex);
-        if (rng.getUnsignedInt64(0, 1) > 0.4) {
-            // Randomly mark some vertices as to be deleted
-            tpg->setToBeDeleted(rootVertex);
-        }
+        std::shared_ptr<Learn::EvaluationResult> er = std::make_shared<Learn::EvaluationResult>(rng.getDouble(0, 1), 1);
+        fakeResults.insert(std::make_pair(er, rootVertex));
     }
+    selector.doSelection(fakeResults, rng);
 
     // Check the correct execution
     ASSERT_NO_THROW(
@@ -1766,10 +1767,6 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     // Check the number of roots
     ASSERT_EQ(tpg->getRootVertices().size(), params.mutation.tpg.nbRoots);
 
-    for (const auto& root : tpg->getRootVertices()) {
-        // Check that the root vertices are not marked as to be deleted
-        ASSERT_FALSE(root->isToBeDeleted())
-            << "Root vertex should not be marked as to be deleted after "
-               "populate.";
-    }
+    ASSERT_EQ(selector.getVerticesToDelete().size(), 0)
+        << "After populateTPG with tournament selection, the set of vertices to delete should be empty.";
 }

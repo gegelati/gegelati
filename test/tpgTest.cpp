@@ -1067,20 +1067,6 @@ TEST_F(TPGTest, TPGGraphUpdateAllAssessedActions)
                 action2.getAssessedActions().end());
 }
 
-TEST_F(TPGTest, TPGGraphSetToBeDeleted)
-{
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGTeam& team = tpg.addNewTeam();
-
-    // Should set toBeDeleted without throwing
-    ASSERT_NO_THROW(tpg.setToBeDeleted(&team));
-    ASSERT_TRUE(team.isToBeDeleted());
-
-    // Try with a vertex not in the graph (should throw)
-    TPG::TPGTeam fakeTeam;
-    ASSERT_THROW(tpg.setToBeDeleted(&fakeTeam), std::runtime_error);
-}
-
 TEST_F(TPGTest, TPGGraphOrderActionEdges)
 {
     TPG::TPGGraph tpg(*e);

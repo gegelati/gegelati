@@ -898,18 +898,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         nbActionsCreated++;
     }
 
-    // Remove root to be deleted
-    for (auto root : context->teamsClonable) {
-        if (root->isToBeDeleted()) {
-            graph.removeVertex(*root);
-        }
-    }
-    for (auto root : context->actionsClonable) {
-        if (root->isToBeDeleted()) {
-            graph.removeVertex(*root);
-        }
-    }
-    //selector.deleteUselessParents();
+    
+    selector.deleteUselessParents();
 
     // Mutate the new Programs
     mutateNewProgramBehaviors(maxNbThreads, newPrograms, rng, params, archive);
