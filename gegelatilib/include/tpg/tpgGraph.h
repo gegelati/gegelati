@@ -407,13 +407,6 @@ namespace TPG {
         void orderActionEdges(const TPG::TPGAction* action);
 
         /**
-         * Set the vertex to be deleted (during reproduction process)
-         *
-         * \param[in] vertex to set to delete
-         */
-        void setToBeDeleted(const TPG::TPGVertex* vertex);
-
-        /**
          * \brief Set a new ID to a vertex
          *
          * An error is thrown if the vertex does not belong to the graph

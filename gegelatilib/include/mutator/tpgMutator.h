@@ -341,25 +341,6 @@ namespace Mutator {
             const Archive& archive);
 
         /**
-         * \brief With tournamenent selection, some agents can be cloned but
-         * will be deleted at the end of the mutation process So they need to be
-         * removed from the preExisting lists.
-         *
-         * On the other hand, the rest of the preExisting agents will not be
-         * removed, but can not be cloned, So they need to be removed from the
-         * clonable lists.
-         *
-         * \param[in] preExistingTeams the TPGTeam candidates for destination.
-         * \param[in] preExistingActions the TPGAction candidates for
-         *            destination.
-         */
-        void updateClonableAndExistingVertexForTournament(
-            std::vector<const TPG::TPGTeam*>& teamsClonable,
-            std::vector<const TPG::TPGAction*>& actionsClonable,
-            std::vector<const TPG::TPGTeam*>& preExistingTeams,
-            std::vector<const TPG::TPGAction*>& preExistingActions);
-
-        /**
          * \brief Create new root TPGTeam within the TPGGraph.
          *
          * This function create and add new root TPGTeam to the TPGGraph

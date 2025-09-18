@@ -531,18 +531,6 @@ void TPG::TPGGraph::updateAllAssessedActions()
         }
     }
 }
-void TPG::TPGGraph::setToBeDeleted(const TPG::TPGVertex* vertex)
-{
-    auto it = this->vertices.find(vertex);
-
-    if (it != this->vertices.end() && it->get() == vertex) {
-        // Found the vertex, modify it as needed
-        (*it)->setToBeDeleted(true);
-    }
-    else {
-        throw std::runtime_error("Action to order not in the graph.");
-    }
-}
 
 void TPG::TPGGraph::orderActionEdges(const TPG::TPGAction* action)
 {

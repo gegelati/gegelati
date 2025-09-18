@@ -799,44 +799,6 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
     }
 }
 
-void Mutator::TPGMutator::updateClonableAndExistingVertexForTournament(
-    std::vector<const TPG::TPGTeam*>& teamsClonable,
-    std::vector<const TPG::TPGAction*>& actionsClonable,
-    std::vector<const TPG::TPGTeam*>& preExistingTeams,
-    std::vector<const TPG::TPGAction*>& preExistingActions)
-{
-    // The root not set to be deleted are not used during evolution
-    teamsClonable.erase(
-        std::remove_if(teamsClonable.begin(), teamsClonable.end(),
-                       [](const TPG::TPGVertex* vertex) -> bool {
-                           return !vertex->isToBeDeleted();
-                       }),
-        teamsClonable.end());
-
-    actionsClonable.erase(
-        std::remove_if(actionsClonable.begin(), actionsClonable.end(),
-                       [](const TPG::TPGVertex* vertex) -> bool {
-                           return !vertex->isToBeDeleted();
-                       }),
-        actionsClonable.end());
-
-    // Erase the vertex set to be deleted to the list of pre existing vertex.
-    // They are only used for being a new destination
-    preExistingTeams.erase(
-        std::remove_if(preExistingTeams.begin(), preExistingTeams.end(),
-                       [](const TPG::TPGVertex* vertex) -> bool {
-                           return vertex->isToBeDeleted();
-                       }),
-        preExistingTeams.end());
-
-    preExistingActions.erase(
-        std::remove_if(preExistingActions.begin(), preExistingActions.end(),
-                       [](const TPG::TPGVertex* vertex) -> bool {
-                           return vertex->isToBeDeleted();
-                       }),
-        preExistingActions.end());
-}
-
 void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                                       Selector::Selector& selector,
                                       const Archive& archive,
