@@ -157,6 +157,13 @@ namespace Selector {
                 std::shared_ptr<Learn::EvaluationResult>>& getBestRoot() const;
 
             /**
+             * \brief Getter for the TPGGraph built by the LearningAgent.
+             *
+             * \return Get a shared_pointer to the TPGGraph.
+             */
+            virtual std::shared_ptr<TPG::TPGGraph> getGraph();
+
+            /**
              * \brief This method resets the previous registered scores per root.
              *
              * Resets resultsPerRoot so that, in the next training,

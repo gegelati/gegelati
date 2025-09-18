@@ -93,6 +93,12 @@ void Selector::Selector::forgetPreviousResults()
     this->bestRoot.second = nullptr;
 }
 
+std::shared_ptr<TPG::TPGGraph> Selector::Selector::getGraph()
+{
+    return this->graph;
+}
+
+
 const std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& Selector::Selector::getResultsPerRoot() const
 {
     return this->resultsPerRoot;

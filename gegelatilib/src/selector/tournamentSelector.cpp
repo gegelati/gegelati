@@ -51,7 +51,7 @@ void Selector::TournamentSelector::doSelection(std::multimap<std::shared_ptr<Lea
         }
 
         // This is a logical deletion, the vertex will be removed later
-        this->verticesToDelete.insert(subMap.begin()->second);
+        this->addToVerticesToDelete(subMap.begin()->second);
     }
 
 
@@ -62,6 +62,11 @@ void Selector::TournamentSelector::doSelection(std::multimap<std::shared_ptr<Lea
         this->resultsPerRoot.erase(itDel->second);
         results.erase(itDel++);
     }
+}
+
+void Selector::TournamentSelector::addToVerticesToDelete(const TPG::TPGVertex* vertex)
+{
+    this->verticesToDelete.insert(vertex);
 }
 
 const Selector::SelectionContext& Selector::TournamentSelector::updateContext()

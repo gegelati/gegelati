@@ -1677,42 +1677,6 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
         << "The number of action roots is not as expected.";
 }
 
-/*TEST_F(MutatorTest, TPGMutatorUpdateClonableAndExistingVertexForTournament)
-{
-    // Create dummy teams and actions, some marked as to be deleted
-    TPG::TPGGraph tpg(*e);
-    auto* team1 = &tpg.addNewTeam();
-    auto* team2 = &tpg.addNewTeam();
-    auto* action1 = &tpg.addNewAction(0);
-    auto* action2 = &tpg.addNewAction(1);
-
-    // Mark team1 and action1 as to be deleted, team2 and action2 as not
-    tpg.setToBeDeleted(team1);
-    tpg.setToBeDeleted(action1);
-
-    // Prepare vectors as expected by the function
-    std::vector<const TPG::TPGTeam*> teamsClonable = {team1, team2};
-    std::vector<const TPG::TPGAction*> actionsClonable = {action1, action2};
-    std::vector<const TPG::TPGTeam*> preExistingTeams = {team1, team2};
-    std::vector<const TPG::TPGAction*> preExistingActions = {action1, action2};
-
-    // Call the function under test
-    Mutator::TPGMutator::updateClonableAndExistingVertexForTournament(
-        teamsClonable, actionsClonable, preExistingTeams, preExistingActions);
-
-    // Only elements marked as to be deleted should remain in clonable,
-    // and only elements NOT marked as to be deleted should remain in
-    // preExisting
-    ASSERT_EQ(teamsClonable.size(), 1);
-    ASSERT_EQ(teamsClonable[0], team1);
-    ASSERT_EQ(actionsClonable.size(), 1);
-    ASSERT_EQ(actionsClonable[0], action1);
-    ASSERT_EQ(preExistingTeams.size(), 1);
-    ASSERT_EQ(preExistingTeams[0], team2);
-    ASSERT_EQ(preExistingActions.size(), 1);
-    ASSERT_EQ(preExistingActions[0], action2);
-}*/
-
 TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 {
     Mutator::RNG rng;

@@ -62,11 +62,19 @@ namespace Selector {
                 const TPG::TPGVertex*>& results, Mutator::RNG& rng) override;
 
             /**
+             * \brief add a vertex to the verticesToDelete set.
+             * 
+             * \param[in] vertex TPGVertex added to the vertices to remove
+             */
+            void addToVerticesToDelete(const TPG::TPGVertex* vertex);
+
+            /**
              * \brief Specialization of updateContext for tournament purposes
              * 
              * The method will remove the elite agents from the clonableVertices vectors, and will remove the not elite agents from the preExistingVertices vectors
              */
             virtual const SelectionContext& updateContext() override;
+
 
             /**
              * \brief Specialization of deleteUselessParents for tournament purposes
