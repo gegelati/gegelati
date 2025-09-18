@@ -56,6 +56,7 @@
 #include "program/line.h"
 #include "program/program.h"
 #include "program/programExecutionEngine.h"
+#include "selector/tournamentSelector.h"
 #include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"
 #include "util/counterReset.h"
@@ -1720,6 +1721,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     uint64_t nbActions = 5;
     params.selection.selectionMode = "tournament";
     params.selection.tournament.sizeTournament = 3;
+    params.selection.tournament.ratioSavedRoots = 3;
     Environment ce(set, params, vect, nbActions);
 
     std::shared_ptr<TPG::TPGGraph> tpg = std::make_shared<TPG::TPGGraph>(ce);
@@ -1744,7 +1746,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     params.mutation.prog.minConstValue = 0;
     params.mutation.prog.maxConstValue = 10;
     Archive arch;
-    Selector::Selector selector(tpg, params);
+    Selector::TournamentSelector selector(tpg, params);
 
     Mutator::TPGMutator::initRandomTPG(*tpg, params.mutation, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog

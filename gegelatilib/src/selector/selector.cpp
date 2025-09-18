@@ -142,54 +142,16 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
         });
 
 
-    bool useTournamentSelection = (params.selection.selectionMode == "tournament");
-
-    if(useTournamentSelection){
-        // The root not set to be deleted are not used during evolution
-        this->context.teamsClonable.erase(
-            std::remove_if(this->context.teamsClonable.begin(), this->context.teamsClonable.end(),
-                        [](const TPG::TPGVertex* vertex) -> bool {
-                            return !vertex->isToBeDeleted();
-                        }),
-            this->context.teamsClonable.end());
-
-        this->context.actionsClonable.erase(
-            std::remove_if(this->context.actionsClonable.begin(), this->context.actionsClonable.end(),
-                        [](const TPG::TPGVertex* vertex) -> bool {
-                            return !vertex->isToBeDeleted();
-                        }),
-            this->context.actionsClonable.end());
-
-        // Erase the vertex set to be deleted to the list of pre existing vertex.
-        // They are only used for being a new destination
-        this->context.preExistingTeams.erase(
-            std::remove_if(this->context.preExistingTeams.begin(), this->context.preExistingTeams.end(),
-                        [](const TPG::TPGVertex* vertex) -> bool {
-                            return vertex->isToBeDeleted();
-                        }),
-            this->context.preExistingTeams.end());
-
-        this->context.preExistingActions.erase(
-            std::remove_if(this->context.preExistingActions.begin(), this->context.preExistingActions.end(),
-                        [](const TPG::TPGVertex* vertex) -> bool {
-                            return vertex->isToBeDeleted();
-                        }),
-            this->context.preExistingActions.end());
-
-    }
-
 
     this->context.nbTeamsToCreate =
         (uint64_t)(params.mutation.tpg.nbRoots * params.mutation.tpg.ratioTeamsOverActions) -
-        nbRootTeams + (this->context.teamsClonable.size() * useTournamentSelection);
+        nbRootTeams;
 
         
     this->context.nbActionsToCreate =
         std::max((int64_t)((uint64_t)(params.mutation.tpg.nbRoots *
                                         (1 - params.mutation.tpg.ratioTeamsOverActions)) -
-                            nbRootActions +
-                            (this->context.actionsClonable.size() * useTournamentSelection)),
-                    (int64_t)0);
+                            nbRootActions), (int64_t)0);
 
     return context;
 }

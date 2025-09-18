@@ -52,6 +52,13 @@ namespace Selector {
              */
             virtual void doSelection(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                 const TPG::TPGVertex*>& results, Mutator::RNG& rng) override;
+
+            /**
+             * \brief Specialization of updateContext for tournament puposes
+             * 
+             * The method will remove the elite agents from the clonableVertices vectors, and will remove the not elite agents from the preExistingVertices vectors
+             */
+            virtual const SelectionContext& updateContext() override;
     };
 }; // namespace Selector
 
