@@ -142,7 +142,6 @@ bool TPG::TPGVertex::hasSameAssessedActions(std::set<uint64_t> actions) const
     return !intersectionResult.empty();
 }
 
-
 uint64_t TPG::TPGVertex::getVertexID() const
 {
     return this->vertexID;

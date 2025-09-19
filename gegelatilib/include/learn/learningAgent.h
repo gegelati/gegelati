@@ -117,19 +117,24 @@ namespace Learn {
             : learningEnvironment{le},
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
-              tpg(factory.createTPGGraph(env)), 
-              params{p},
-              archive(p.archiveSize, p.archivingProbability) {
+              tpg(factory.createTPGGraph(env)), params{p},
+              archive(p.archiveSize, p.archivingProbability)
+        {
 
-                // There is probably a cleaner way to do that, but using the factory was creating import issues.
-                if (p.selection.selectionMode == "truncation") {
-                    selector = std::make_shared<Selector::TruncationSelector>(tpg, p);
-                } else if (p.selection.selectionMode == "tournament") {
-                    selector = std::make_shared<Selector::TournamentSelector>(tpg, p);
-                } else {
-                    throw std::runtime_error("Selection mode not found");
-                }
-              };
+            // There is probably a cleaner way to do that, but using the factory
+            // was creating import issues.
+            if (p.selection.selectionMode == "truncation") {
+                selector =
+                    std::make_shared<Selector::TruncationSelector>(tpg, p);
+            }
+            else if (p.selection.selectionMode == "tournament") {
+                selector =
+                    std::make_shared<Selector::TournamentSelector>(tpg, p);
+            }
+            else {
+                throw std::runtime_error("Selection mode not found");
+            }
+        };
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -280,10 +285,13 @@ namespace Learn {
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
-         * \param[in] doPopulate boolean to indicate if the populateTPG method should be called. This parameter is used to avoid populating at the last generation of a training.
-         * 
+         * \param[in] doPopulate boolean to indicate if the populateTPG method
+         * should be called. This parameter is used to avoid populating at the
+         * last generation of a training.
+         *
          */
-        virtual void trainOneGeneration(uint64_t generationNumber, bool doPopulate = true);
+        virtual void trainOneGeneration(uint64_t generationNumber,
+                                        bool doPopulate = true);
 
         /**
          * \brief Train the TPGGraph for a given number of generation.

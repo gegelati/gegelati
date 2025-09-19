@@ -233,7 +233,10 @@ TEST(LearningParametersTest, writeParametersToJson)
 
     // Selection parameters
     ASSERT_EQ(params.selection.selectionMode, params2.selection.selectionMode);
-    ASSERT_EQ(params.selection.tournament.ratioSavedRoots, params2.selection.tournament.ratioSavedRoots);
-    ASSERT_EQ(params.selection.tournament.sizeTournament, params2.selection.tournament.sizeTournament);
-    ASSERT_EQ(params.selection.truncation.ratioDeletedRoots, params2.selection.truncation.ratioDeletedRoots);
+    ASSERT_EQ(params.selection.tournament.ratioSavedRoots,
+              params2.selection.tournament.ratioSavedRoots);
+    ASSERT_EQ(params.selection.tournament.sizeTournament,
+              params2.selection.tournament.sizeTournament);
+    ASSERT_EQ(params.selection.truncation.ratioDeletedRoots,
+              params2.selection.truncation.ratioDeletedRoots);
 }

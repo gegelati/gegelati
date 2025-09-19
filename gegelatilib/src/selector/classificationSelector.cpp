@@ -3,8 +3,10 @@
 #include "selector/classificationSelector.h"
 #include "learn/classificationEvaluationResult.h"
 
-void Selector::ClassificationSelector::doSelection(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                const TPG::TPGVertex*>& results, Mutator::RNG& rng)
+void Selector::ClassificationSelector::doSelection(
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>& results,
+    Mutator::RNG& rng)
 {
     // Check that results are ClassificationEvaluationResults.
     // (also throws on empty results)
@@ -17,34 +19,31 @@ void Selector::ClassificationSelector::doSelection(std::multimap<std::shared_ptr
 
     // Compute the number of root to keep/delete base on each criterion
     uint64_t totalNbRoot = this->graph->getNbRootVertices();
-    uint64_t nbRootsToDelete =
-        (uint64_t)floor(this->params.selection.truncation.ratioDeletedRoots * totalNbRoot);
+    uint64_t nbRootsToDelete = (uint64_t)floor(
+        this->params.selection.truncation.ratioDeletedRoots * totalNbRoot);
     uint64_t nbRootsToKeep = (totalNbRoot - nbRootsToDelete);
 
     // Keep ~half+ of the roots based on their general score on
     // all class.
     // and ~half- of the roots on a per class score (none if nbRoots to keep
     // < 2*nb class)
-    uint64_t nbRootsKeptPerClass =
-        (nbRootsToKeep / this->nbActions) / 2;
+    uint64_t nbRootsKeptPerClass = (nbRootsToKeep / this->nbActions) / 2;
     uint64_t nbRootsKeptGeneralScore =
-        nbRootsToKeep -
-        this->nbActions * nbRootsKeptPerClass;
+        nbRootsToKeep - this->nbActions * nbRootsKeptPerClass;
 
     // Build a list of roots to keep
     std::vector<const TPG::TPGVertex*> rootsToKeep;
 
     // Insert roots to keep per class
-    for (uint64_t classIdx = 0;
-            classIdx < this->nbActions; classIdx++) {
+    for (uint64_t classIdx = 0; classIdx < this->nbActions; classIdx++) {
         // Fill a map with the roots and the score of the specific class as
         // ID.
         std::multimap<double, const TPG::TPGVertex*> sortedRoot;
         std::for_each(
             results.begin(), results.end(),
-            [&sortedRoot,
-                &classIdx](const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                        const TPG::TPGVertex*>& res) {
+            [&sortedRoot, &classIdx](
+                const std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                const TPG::TPGVertex*>& res) {
                 sortedRoot.emplace(
                     ((Learn::ClassificationEvaluationResult*)res.first.get())
                         ->getScorePerClass()
@@ -58,7 +57,7 @@ void Selector::ClassificationSelector::doSelection(std::multimap<std::shared_ptr
         for (auto i = 0; i < nbRootsKeptPerClass; i++) {
             // If the root is not already marked to be kept
             if (std::find(rootsToKeep.begin(), rootsToKeep.end(),
-                            iterator->second) == rootsToKeep.end()) {
+                          iterator->second) == rootsToKeep.end()) {
                 rootsToKeep.push_back(iterator->second);
             }
             // Advance the iterator no matter what.
@@ -71,11 +70,10 @@ void Selector::ClassificationSelector::doSelection(std::multimap<std::shared_ptr
 
     // Insert remaining roots to keep
     auto iterator = results.rbegin();
-    while (rootsToKeep.size() < nbRootsToKeep &&
-            iterator != results.rend()) {
+    while (rootsToKeep.size() < nbRootsToKeep && iterator != results.rend()) {
         // If the root is not already marked to be kept
         if (std::find(rootsToKeep.begin(), rootsToKeep.end(),
-                        iterator->second) == rootsToKeep.end()) {
+                      iterator->second) == rootsToKeep.end()) {
             rootsToKeep.push_back(iterator->second);
         }
         // Advance the iterator no matter what.
@@ -91,7 +89,7 @@ void Selector::ClassificationSelector::doSelection(std::multimap<std::shared_ptr
     std::for_each(
         allRoots.begin(), allRoots.end(),
         [&rootsToKeep, &tpgRef, &resultsPerRootRef,
-            &results](const TPG::TPGVertex* vert) {
+         &results](const TPG::TPGVertex* vert) {
             // Do not remove actions
             if (dynamic_cast<const TPG::TPGAction*>(vert) == nullptr &&
                 std::find(rootsToKeep.begin(), rootsToKeep.end(), vert) ==
@@ -103,7 +101,7 @@ void Selector::ClassificationSelector::doSelection(std::multimap<std::shared_ptr
 
                 // Update results also
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                const TPG::TPGVertex*>::iterator iter =
+                              const TPG::TPGVertex*>::iterator iter =
                     results.begin();
                 while (iter != results.end()) {
                     if (iter->second == vert) {

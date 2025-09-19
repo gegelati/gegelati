@@ -44,7 +44,8 @@
 
 namespace Selector {
     /**
-     * \brief Structure holding all parameters affecting mutations of Truncation Selection
+     * \brief Structure holding all parameters affecting mutations of Truncation
+     * Selection
      */
     typedef struct TruncationParameters
     {
@@ -60,7 +61,8 @@ namespace Selector {
     } TruncationParameters;
 
     /**
-     * \brief Structure holding all parameters affecting mutations of Truncation Selection
+     * \brief Structure holding all parameters affecting mutations of Truncation
+     * Selection
      */
     typedef struct TournamentParameters
     {
@@ -74,9 +76,11 @@ namespace Selector {
 
         /// JSon comment
         inline static const std::string ratioSavedRootsComment =
-            "// Percentage of root TPGVertex saved from the tournament at each generation.\n"
+            "// Percentage of root TPGVertex saved from the tournament at each "
+            "generation.\n"
             "// \"ratioSavedRoots\" : 0.05, // Default value";
-        /// Percentage of root TPGVertex saved from the tournament at each generation.
+        /// Percentage of root TPGVertex saved from the tournament at each
+        /// generation.
         double ratioSavedRoots = 0.5;
 
     } TournamentParameters;
@@ -103,6 +107,6 @@ namespace Selector {
         /// Parameters for ProgramMutator
         TournamentParameters tournament;
     } SelectionParameters;
-} // namespace Mutator
+} // namespace Selector
 
 #endif

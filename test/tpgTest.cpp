@@ -629,7 +629,6 @@ TEST_F(TPGTest, TPGGraphGetRootVertices)
         << "Number of roots teams of the TPG is incorrect.";
     ASSERT_EQ(tpg.getRootActions().size(), 1)
         << "Number of roots actions of the TPG is incorrect.";
-
 }
 
 TEST_F(TPGTest, TPGGraphCloneVertex)

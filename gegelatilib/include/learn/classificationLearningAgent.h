@@ -93,9 +93,11 @@ namespace Learn {
             ClassificationLearningEnvironment& le,
             const Instructions::Set& iSet, const LearningParameters& p,
             const TPG::TPGFactory& factory = TPG::TPGFactory())
-            : BaseLearningAgent(le, iSet, p, factory){
-                this->selector = std::make_shared<Selector::ClassificationSelector>(this->tpg, this->params, le.getNbActions());
-            };
+            : BaseLearningAgent(le, iSet, p, factory)
+        {
+            this->selector = std::make_shared<Selector::ClassificationSelector>(
+                this->tpg, this->params, le.getNbActions());
+        };
 
         /**
          * \brief Specialization of the evaluateJob method for classification
@@ -109,7 +111,6 @@ namespace Learn {
             TPG::TPGExecutionEngine& tee, const Job& root,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const override;
-
     };
 
     template <class BaseLearningAgent>

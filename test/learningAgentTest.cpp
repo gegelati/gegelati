@@ -316,8 +316,6 @@ TEST_F(LearningAgentTest, GetEnvironment)
         << "Getting the environment of the learning agent failed unexpectedly.";
 }
 
-
-
 TEST_F(LearningAgentTest, TrainOnegeneration)
 {
     params.archiveSize = 50;
@@ -340,8 +338,9 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
 
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), *la.getSelector(), a, params.mutation,
-                                     la.getRNG(), le.getNbActions(), 1);
+    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), *la.getSelector(), a,
+                                     params.mutation, la.getRNG(),
+                                     le.getNbActions(), 1);
     size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(la.trainOneGeneration(4, false))
@@ -350,7 +349,8 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // Must be initial number of vertex - number of root removed
     ASSERT_EQ(la.getTPGGraph()->getNbVertices(),
               initialNbVertex -
-                  floor(params.selection.truncation.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+                  floor(params.selection.truncation.ratioDeletedRoots *
+                        params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "TPGGraph.";
     // Train a second generation, because most roots were removed, a root
@@ -684,7 +684,6 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
         << "Graph does not have the expected determinst characteristics.";
 }
 
-
 TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
 {
     params.archiveSize = 50;
@@ -761,8 +760,9 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     la.init();
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), *la.getSelector(), a, params.mutation,
-                                     la.getRNG(), cle.getNbActions());
+    Mutator::TPGMutator::populateTPG(*la.getTPGGraph(), *la.getSelector(), a,
+                                     params.mutation, la.getRNG(),
+                                     cle.getNbActions());
     size_t initialNbVertex = la.getTPGGraph()->getNbVertices();
 
     // Seed selected so that an action becomes a root during next generation
@@ -773,7 +773,8 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     // removed (since some actions vertex are removed too)
     ASSERT_LE(la.getTPGGraph()->getNbVertices(),
               initialNbVertex -
-                  floor(params.selection.truncation.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+                  floor(params.selection.truncation.ratioDeletedRoots *
+                        params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "TPGGraph.";
     // Train a second generation, because most roots were removed, a root
@@ -932,7 +933,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     }
 
     // Check determinism of bestRoot score
-    ASSERT_EQ(la.getSelector()->getBestRoot().second, plaSequential.getSelector()->getBestRoot().second);
+    ASSERT_EQ(la.getSelector()->getBestRoot().second,
+              plaSequential.getSelector()->getBestRoot().second);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
@@ -1090,8 +1092,9 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     pla.init();
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), *pla.getSelector(), a, params.mutation,
-                                     pla.getRNG(), le.getNbActions());
+    Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), *pla.getSelector(), a,
+                                     params.mutation, pla.getRNG(),
+                                     le.getNbActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
@@ -1100,7 +1103,8 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     // Must be initial number of vertex - number of root removed
     ASSERT_EQ(pla.getTPGGraph()->getNbVertices(),
               initialNbVertex -
-                  floor(params.selection.truncation.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+                  floor(params.selection.truncation.ratioDeletedRoots *
+                        params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "TPGGraph.";
     // Train a second generation, because most roots were removed, a root
@@ -1125,8 +1129,9 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     pla.init();
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), *pla.getSelector(), a, params.mutation,
-                                     pla.getRNG(), le.getNbActions());
+    Mutator::TPGMutator::populateTPG(*pla.getTPGGraph(), *pla.getSelector(), a,
+                                     params.mutation, pla.getRNG(),
+                                     le.getNbActions());
     size_t initialNbVertex = pla.getTPGGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
@@ -1135,7 +1140,8 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     // Must be initial number of vertex - number of root removed
     ASSERT_EQ(pla.getTPGGraph()->getNbVertices(),
               initialNbVertex -
-                  floor(params.selection.truncation.ratioDeletedRoots * params.mutation.tpg.nbRoots))
+                  floor(params.selection.truncation.ratioDeletedRoots *
+                        params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "TPGGraph.";
 }
@@ -1286,7 +1292,6 @@ TEST_F(LearningAgentTest, EvaluateJobWithUtility)
         ASSERT_GE(res->getUtility(), 0.0);
     });
 }
-
 
 TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
 {

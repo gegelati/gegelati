@@ -176,7 +176,6 @@ void Mutator::TPGMutator::initRandomTPG(
     std::vector<const TPG::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
 
-
     for (size_t i = 0; i < initNbActions; i++) {
         actions.push_back(
             initActionVertex(graph, params, rng, nbActionEdgeInit, i));
@@ -812,7 +811,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // If the graph doesn't contain any clonable teams, call the init procedure.
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
-    if (context->teamsClonable.size() == 0 && !params.tpg.useActionProgram && graph.getNbVertices() < params.tpg.nbRoots) {
+    if (context->teamsClonable.size() == 0 && !params.tpg.useActionProgram &&
+        graph.getNbVertices() < params.tpg.nbRoots) {
         initRandomTPG(graph, params, rng, nbActions);
         context = &selector.updateContext();
     }
@@ -821,7 +821,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
     // Create the new teams root
-    uint64_t nbExpectedRoots = graph.getNbRootVertices() + context->nbTeamsToCreate;
+    uint64_t nbExpectedRoots =
+        graph.getNbRootVertices() + context->nbTeamsToCreate;
     while (graph.getNbRootVertices() < nbExpectedRoots) {
 
         // Select a random existing root
@@ -834,8 +835,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
 
         // Apply mutations to the root
         mutateTPGTeam(graph, archive, newRoot, context->preExistingTeams,
-                      context->preExistingActions, context->preExistingEdges, newPrograms, params,
-                      rng);
+                      context->preExistingActions, context->preExistingEdges,
+                      newPrograms, params, rng);
     }
 
     // Create the new action roots
@@ -853,14 +854,13 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                 *context->actionsClonable.at(clonedRootIndex));
 
         // Apply mutations to the root
-        mutateTPGAction(graph, newRoot, context->preExistingEdges, newPrograms, params,
-                        rng);
+        mutateTPGAction(graph, newRoot, context->preExistingEdges, newPrograms,
+                        params, rng);
 
         // Increase the new number of roots
         nbActionsCreated++;
     }
 
-    
     selector.deleteUselessParents();
 
     // Mutate the new Programs

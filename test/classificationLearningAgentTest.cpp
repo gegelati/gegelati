@@ -185,7 +185,8 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
     // Initialize and populate the TPG
     cla.init(0);
     TPG::TPGGraph& graph = *cla.getTPGGraph();
-    Mutator::TPGMutator::populateTPG(graph, *cla.getSelector(), cla.getArchive(), params.mutation,
+    Mutator::TPGMutator::populateTPG(graph, *cla.getSelector(),
+                                     cla.getArchive(), params.mutation,
                                      cla.getRNG(), fle.getNbActions());
 
     // Get roots
@@ -202,7 +203,8 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
     }
 
     // Do the decimation (must fail)
-    ASSERT_THROW(cla.getSelector()->doSelection(results, cla.getRNG()), std::runtime_error)
+    ASSERT_THROW(cla.getSelector()->doSelection(results, cla.getRNG()),
+                 std::runtime_error)
         << "Decimating worst roots should fail with EvaluationResults instead "
            "of ClassificationEvaluationResults.";
 
@@ -274,14 +276,17 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
         &teamRoot);
 
     // Do the decimation
-    ASSERT_NO_THROW(cla.getSelector()->doSelection(classifResults, cla.getRNG()))
+    ASSERT_NO_THROW(
+        cla.getSelector()->doSelection(classifResults, cla.getRNG()))
         << "Decimating worst roots should not fail with "
            "ClassificationEvaluationResults.";
 
     // Check the number of remaining vertices.
-    ASSERT_EQ(cla.getTPGGraph()->getNbVertices(),
-              originalNbVertices - std::ceil(params.mutation.tpg.nbRoots *
-                                             (1.0 - params.selection.truncation.ratioDeletedRoots)));
+    ASSERT_EQ(
+        cla.getTPGGraph()->getNbVertices(),
+        originalNbVertices -
+            std::ceil(params.mutation.tpg.nbRoots *
+                      (1.0 - params.selection.truncation.ratioDeletedRoots)));
 
     // Check the presence of savedRoots among remaining roots.
     // i.e. check that their good result1 for one class saved them from

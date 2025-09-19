@@ -12,23 +12,24 @@ namespace Selector {
      */
     class ClassificationSelector : public Selector
     {
-        protected:
+      protected:
+        /// Number of actions in the LearningEnvironment
+        uint64_t nbActions;
 
-            /// Number of actions in the LearningEnvironment
-            uint64_t nbActions;
-
-        public:
-
-            /**
-             * \brief Constructor for ClassificationSelector.
-             * 
-             * \param[in] graph shared pointer of the graph on which the selection is done.
-             * \param[in] params parameters used by the Selector.
-             * \param[in] nbActions number of actions in the LearningEnvironment.
-             */
-            ClassificationSelector(std::shared_ptr<TPG::TPGGraph> graph, const Learn::LearningParameters& params, uint64_t nbActions)
-            : Selector{graph, params}, nbActions{nbActions} {}
-
+      public:
+        /**
+         * \brief Constructor for ClassificationSelector.
+         *
+         * \param[in] graph shared pointer of the graph on which the selection
+         * is done. \param[in] params parameters used by the Selector.
+         * \param[in] nbActions number of actions in the LearningEnvironment.
+         */
+        ClassificationSelector(std::shared_ptr<TPG::TPGGraph> graph,
+                               const Learn::LearningParameters& params,
+                               uint64_t nbActions)
+            : Selector{graph, params}, nbActions{nbActions}
+        {
+        }
 
         /**
          * \brief Specialization of the doSelection method for
@@ -57,9 +58,11 @@ namespace Selector {
          * The results map is updated by the method to keep only the results of
          * non-decimated roots.
          */
-            virtual void doSelection(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                const TPG::TPGVertex*>& results, Mutator::RNG& rng) override;
+        virtual void doSelection(
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>& results,
+            Mutator::RNG& rng) override;
     };
-}; // nameSpace Select
+}; // namespace Selector
 
 #endif // CLASSIFICATION_SELECTOR_H

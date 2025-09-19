@@ -41,8 +41,8 @@
 
 #include "archive.h"
 #include "mutator/mutationParameters.h"
-#include "tpg/tpgGraph.h"
 #include "selector/selector.h"
+#include "tpg/tpgGraph.h"
 
 namespace Mutator {
     namespace TPGMutator {
@@ -373,9 +373,8 @@ namespace Mutator {
          */
         void populateTPG(
             TPG::TPGGraph& graph, Selector::Selector& selector,
-            const Archive& archive,
-            const Mutator::MutationParameters& params, Mutator::RNG& rng,
-            uint64_t nbActions,
+            const Archive& archive, const Mutator::MutationParameters& params,
+            Mutator::RNG& rng, uint64_t nbActions,
             uint64_t maxNbThreads = std::thread::hardware_concurrency());
     }; // namespace TPGMutator
 }; // namespace Mutator

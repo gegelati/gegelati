@@ -58,7 +58,6 @@ std::shared_ptr<Selector::Selector> Learn::LearningAgent::getSelector()
     return this->selector;
 }
 
-
 const Archive& Learn::LearningAgent::getArchive() const
 {
     return this->archive;
@@ -86,8 +85,8 @@ void Learn::LearningAgent::init(uint64_t seed)
 
     // Populate Sequentially
     Mutator::TPGMutator::populateTPG(
-        *this->tpg, *this->selector, this->archive, this->params.mutation, this->rng,
-        this->learningEnvironment.getNbActions(), maxNbThreads);
+        *this->tpg, *this->selector, this->archive, this->params.mutation,
+        this->rng, this->learningEnvironment.getNbActions(), maxNbThreads);
 
     // Clear the archive
     this->archive.clear();
@@ -247,7 +246,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneRoot(
     return avgScore;
 }
 
-void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber, bool doPopulate)
+void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
+                                              bool doPopulate)
 {
     for (auto logger : loggers) {
         logger.get().logNewGeneration(generationNumber);
@@ -261,7 +261,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber, bool do
     }
 
     // Remove worst performing roots
-    this->selector->doSelection(results,rng);
+    this->selector->doSelection(results, rng);
     // Update the evaluation records
     this->selector->updateEvaluationRecords(results);
 
@@ -285,11 +285,11 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber, bool do
         }
     }
 
-    if(doPopulate){
+    if (doPopulate) {
         // Populate Sequentially
         Mutator::TPGMutator::populateTPG(
-            *this->tpg, *this->selector, this->archive, this->params.mutation, this->rng,
-            this->learningEnvironment.getNbActions(), maxNbThreads);
+            *this->tpg, *this->selector, this->archive, this->params.mutation,
+            this->rng, this->learningEnvironment.getNbActions(), maxNbThreads);
     }
 
     for (auto logger : loggers) {
@@ -309,7 +309,8 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
 
     while (!altTraining && generationNumber < this->params.nbGenerations) {
         // Train one generation
-        trainOneGeneration(generationNumber, generationNumber != this->params.nbGenerations - 1);
+        trainOneGeneration(generationNumber,
+                           generationNumber != this->params.nbGenerations - 1);
         generationNumber++;
 
         // Print progressBar (homemade, probably not ideal)

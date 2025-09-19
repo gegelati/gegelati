@@ -88,8 +88,10 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
                     }
                 }
             }
-        } else if (key == "selection"){
-            // we have a subtree of selection : parameters like selection.xxx.xxx
+        }
+        else if (key == "selection") {
+            // we have a subtree of selection : parameters like
+            // selection.xxx.xxx
             for (std::string const& key2 : root[key].getMemberNames()) {
                 if (key2 == "truncation") {
                     // we're on a selection.truncation.xxx parameter
@@ -102,7 +104,7 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
                 else if (key2 == "tournament") {
                     // we're on a selection.tournament.xxx parameter
                     for (std::string const& key3 :
-                            root[key][key2].getMemberNames()) {
+                         root[key][key2].getMemberNames()) {
                         Json::Value value = root[key][key2][key3];
                         setParameterFromString(params, key3, value);
                     }
@@ -112,7 +114,6 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
                     Json::Value value = root[key][key2];
                     setParameterFromString(params, key2, value);
                 }
-
             }
         }
         if (root[key].size() == 0) {
@@ -180,7 +181,6 @@ void File::ParametersParser::setParameterFromString(
         params.stepValidation = (size_t)value.asUInt();
         return;
     }
-
 
     if (param == "nbRoots") {
         params.mutation.tpg.nbRoots = (size_t)value.asUInt();
@@ -314,7 +314,6 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
 
-
     if (param == "selectionMode") {
         params.selection.selectionMode = value.asString();
         return;
@@ -417,7 +416,6 @@ void File::ParametersParser::writeParametersToJson(
     root["nbThreads"] = params.nbThreads;
     root["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,
                                  Json::commentBefore);
-
 
     // Mutation.tpg parameters
     root["mutation"]["tpg"]["forceProgramBehaviorChangeOnMutation"] =
@@ -582,19 +580,25 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["prog"]["pSwap"].setComment(
         Mutator::ProgramParameters::pSwapComment, Json::commentBefore);
 
-
     root["selection"]["selectionMode"] = params.selection.selectionMode;
     root["selection"]["selectionMode"].setComment(
-        Selector::SelectionParameters::selectionModeComment, Json::commentBefore);
-    root["selection"]["truncation"]["ratioDeletedRoots"] = params.selection.truncation.ratioDeletedRoots;
+        Selector::SelectionParameters::selectionModeComment,
+        Json::commentBefore);
+    root["selection"]["truncation"]["ratioDeletedRoots"] =
+        params.selection.truncation.ratioDeletedRoots;
     root["selection"]["truncation"]["ratioDeletedRoots"].setComment(
-        Selector::TruncationParameters::ratioDeletedRootsComment, Json::commentBefore);
-    root["selection"]["tournament"]["ratioSavedRoots"] = params.selection.tournament.ratioSavedRoots;
+        Selector::TruncationParameters::ratioDeletedRootsComment,
+        Json::commentBefore);
+    root["selection"]["tournament"]["ratioSavedRoots"] =
+        params.selection.tournament.ratioSavedRoots;
     root["selection"]["tournament"]["ratioSavedRoots"].setComment(
-        Selector::TournamentParameters::ratioSavedRootsComment, Json::commentBefore);
-    root["selection"]["tournament"]["sizeTournament"] = params.selection.tournament.sizeTournament;
+        Selector::TournamentParameters::ratioSavedRootsComment,
+        Json::commentBefore);
+    root["selection"]["tournament"]["sizeTournament"] =
+        params.selection.tournament.sizeTournament;
     root["selection"]["tournament"]["sizeTournament"].setComment(
-        Selector::TournamentParameters::sizeTournamentComment, Json::commentBefore);
+        Selector::TournamentParameters::sizeTournamentComment,
+        Json::commentBefore);
 
     // Write to the output stream
     std::ofstream writtenFile(path);

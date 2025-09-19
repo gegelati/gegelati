@@ -122,9 +122,8 @@ void Log::LABasicLogger::logHeader()
     if (doValidation) {
         *this << std::setw(colWidth) << "T_valid";
     }
-    *this << std::setw(colWidth) << "T_decim" 
-          << std::setw(colWidth) << "T_mutat" 
-          << std::setw(colWidth) << "T_total" << std::endl;
+    *this << std::setw(colWidth) << "T_decim" << std::setw(colWidth)
+          << "T_mutat" << std::setw(colWidth) << "T_total" << std::endl;
 }
 
 void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)

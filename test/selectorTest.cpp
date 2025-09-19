@@ -41,14 +41,14 @@
 #include <gtest/gtest.h>
 #include <numeric>
 
+#include "instructions/addPrimitiveType.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
-#include "instructions/addPrimitiveType.h"
 
-#include "selector/selector.h"
 #include "selector/selectionContext.h"
+#include "selector/selector.h"
 #include "selector/tournamentSelector.h"
 #include "selector/truncationSelector.h"
 #include "util/counterReset.h"
@@ -74,7 +74,7 @@ class SelectorTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<int>((unsigned int)size1)));
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size2)));
-    
+
         set.add(*(new Instructions::AddPrimitiveType<int>()));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
@@ -123,7 +123,6 @@ TEST_F(SelectorTest, Constructor)
     ASSERT_NO_THROW(delete selector) << "Destruction of the selector failed.";
 }
 
-
 TEST_F(SelectorTest, KeepBestPolicy)
 {
     params.archiveSize = 50;
@@ -146,7 +145,6 @@ TEST_F(SelectorTest, KeepBestPolicy)
         << "A single root TPGVertex should remain in the TPGGraph when keeping "
            "the best policy only";
 }
-
 
 TEST_F(SelectorTest, UpdateEvaluationRecords)
 {
@@ -320,7 +318,8 @@ TEST_F(SelectorTest, DoSelection)
     // Initial number of vertex - 2 removed vertices - deleted roots.
     ASSERT_EQ(graph.getNbVertices(),
               (le.getNbActions() * 2) - 2 -
-                  params.selection.truncation.ratioDeletedRoots * ((le.getNbActions() - 1)));
+                  params.selection.truncation.ratioDeletedRoots *
+                      ((le.getNbActions() - 1)));
 }
 
 TEST_F(SelectorTest, DecimateWorstRootsActionsQuota)
@@ -432,7 +431,6 @@ TEST_F(SelectorTest, DoSelectionTeamsQuota)
         << "After decimation, the number of actions should be 2.";
 }
 
-
 TEST_F(SelectorTest, DecimateWithTournamentSelection)
 {
     params.selection.selectionMode = "tournament";
@@ -442,8 +440,8 @@ TEST_F(SelectorTest, DecimateWithTournamentSelection)
     Learn::LearningAgent tournamentLA(le, set, params);
     tournamentLA.init();
 
-
-    std::shared_ptr<Selector::Selector> tournamentSelector = tournamentLA.getSelector();
+    std::shared_ptr<Selector::Selector> tournamentSelector =
+        tournamentLA.getSelector();
 
     // Create a set of roots with different scores
     auto roots = tournamentSelector->getGraph()->getRootVertices();
@@ -457,7 +455,8 @@ TEST_F(SelectorTest, DecimateWithTournamentSelection)
     }
 
     // Call doSelection, which should use tournament selection
-    ASSERT_NO_THROW(tournamentSelector->doSelection(results, tournamentLA.getRNG()));
+    ASSERT_NO_THROW(
+        tournamentSelector->doSelection(results, tournamentLA.getRNG()));
 
     // Check that the number of roots is reduced
     // The number of roots was 30. With a ratio of 0.7, only 9 should remain as
@@ -469,10 +468,15 @@ TEST_F(SelectorTest, DecimateWithTournamentSelection)
         << "After decimation with tournament selection, the number of roots "
            "should be reduced to 15.";
 
-    ASSERT_TRUE(dynamic_cast<Selector::TournamentSelector*>(tournamentSelector.get()) != nullptr)
+    ASSERT_TRUE(dynamic_cast<Selector::TournamentSelector*>(
+                    tournamentSelector.get()) != nullptr)
         << "Selector for tournament selection should be a TournamentSelector";
 
-    ASSERT_EQ(dynamic_cast<Selector::TournamentSelector*>(tournamentSelector.get())->getVerticesToDelete().size(), 6)
+    ASSERT_EQ(
+        dynamic_cast<Selector::TournamentSelector*>(tournamentSelector.get())
+            ->getVerticesToDelete()
+            .size(),
+        6)
         << "After decimation with tournament selection, the number of roots "
            "registered for deletion should be 6.";
 }
@@ -503,30 +507,40 @@ TEST_F(SelectorTest, UpdateContext)
 
     // TeamsClonable: should contain root teams
     ASSERT_FALSE(context.teamsClonable.empty())
-        << "teamsClonable should not be empty because at least one team is a root.";
-    ASSERT_TRUE(std::find(context.teamsClonable.begin(), context.teamsClonable.end(), team1) != context.teamsClonable.end()
-             || std::find(context.teamsClonable.begin(), context.teamsClonable.end(), team2) != context.teamsClonable.end())
-        << "At least one of team1 or team2 should be present in teamsClonable since both were created as root teams.";
+        << "teamsClonable should not be empty because at least one team is a "
+           "root.";
+    ASSERT_TRUE(
+        std::find(context.teamsClonable.begin(), context.teamsClonable.end(),
+                  team1) != context.teamsClonable.end() ||
+        std::find(context.teamsClonable.begin(), context.teamsClonable.end(),
+                  team2) != context.teamsClonable.end())
+        << "At least one of team1 or team2 should be present in teamsClonable "
+           "since both were created as root teams.";
 
     // ActionsClonable: root actions only (action2 is root, action1 is not)
     ASSERT_EQ(context.actionsClonable.size(), 1)
-        << "Only action2 should be clonable, since action1 has an incoming edge.";
+        << "Only action2 should be clonable, since action1 has an incoming "
+           "edge.";
     ASSERT_EQ(context.actionsClonable.front(), action2)
         << "The only root action expected in actionsClonable is action2.";
 
     // Pre-existing teams: both teams
     ASSERT_EQ(context.preExistingTeams.size(), 2)
         << "Both team1 and team2 should be listed as preExistingTeams.";
-    ASSERT_NE(std::find(context.preExistingTeams.begin(), context.preExistingTeams.end(), team1),
+    ASSERT_NE(std::find(context.preExistingTeams.begin(),
+                        context.preExistingTeams.end(), team1),
               context.preExistingTeams.end())
         << "team1 should appear in preExistingTeams.";
-    ASSERT_NE(std::find(context.preExistingTeams.begin(), context.preExistingTeams.end(), team2),
+    ASSERT_NE(std::find(context.preExistingTeams.begin(),
+                        context.preExistingTeams.end(), team2),
               context.preExistingTeams.end())
         << "team2 should appear in preExistingTeams.";
 
-    // Pre-existing actions: action2 is root, action1 has an incoming edge so excluded
+    // Pre-existing actions: action2 is root, action1 has an incoming edge so
+    // excluded
     ASSERT_EQ(context.preExistingActions.size(), 1)
-        << "Only action2 should be listed as a preExistingAction, since action1 has an incoming edge.";
+        << "Only action2 should be listed as a preExistingAction, since "
+           "action1 has an incoming edge.";
     ASSERT_EQ(context.preExistingActions.front(), action2)
         << "The only action expected in preExistingActions is action2.";
 
@@ -538,14 +552,17 @@ TEST_F(SelectorTest, UpdateContext)
 
     // NbTeamsToCreate & NbActionsToCreate
     // With nbRoots=2 and ratioTeamsOverActions=0.5:
-    // ExpectedTeams = 1, nbRootTeams = 2 → nbTeamsToCreate = (1 - 2) = 0 (since it's unsigned)
-    // ExpectedActions = 1, nbRootActions = 1 → nbActionsToCreate = 0
-    ASSERT_EQ(context.nbTeamsToCreate, (uint64_t)(1 - context.teamsClonable.size()))
-        << "nbTeamsToCreate should reflect the deficit between expected root teams and actual root teams.";
+    // ExpectedTeams = 1, nbRootTeams = 2 → nbTeamsToCreate = (1 - 2) = 0 (since
+    // it's unsigned) ExpectedActions = 1, nbRootActions = 1 → nbActionsToCreate
+    // = 0
+    ASSERT_EQ(context.nbTeamsToCreate,
+              (uint64_t)(1 - context.teamsClonable.size()))
+        << "nbTeamsToCreate should reflect the deficit between expected root "
+           "teams and actual root teams.";
     ASSERT_EQ(context.nbActionsToCreate, 0)
-        << "nbActionsToCreate should be zero since the expected number of root actions equals the actual number.";
+        << "nbActionsToCreate should be zero since the expected number of root "
+           "actions equals the actual number.";
 }
-
 
 TEST_F(SelectorTest, UpdateContextTournament)
 {
@@ -609,17 +626,15 @@ TEST_F(SelectorTest, DeleteUselessParents)
     selector.addToVerticesToDelete(action1);
 
     ASSERT_EQ(selector.getVerticesToDelete().size(), 2)
-        <<"The selector should have 2 vertices in the verticesToDelete set.";
+        << "The selector should have 2 vertices in the verticesToDelete set.";
     ASSERT_EQ(graph->getNbRootVertices(), 4)
-        <<"The graph should have 4 roots.";
+        << "The graph should have 4 roots.";
 
     selector.deleteUselessParents();
 
     ASSERT_EQ(selector.getVerticesToDelete().size(), 0)
-        <<"After deleting useless parents, the selector should have 0 vertices in the verticesToDelete set.";
+        << "After deleting useless parents, the selector should have 0 "
+           "vertices in the verticesToDelete set.";
     ASSERT_EQ(graph->getNbRootVertices(), 2)
-        <<"After deleting useless parents, the graph should have 2 roots.";
-
-
-
+        << "After deleting useless parents, the graph should have 2 roots.";
 }

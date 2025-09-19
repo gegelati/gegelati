@@ -194,7 +194,8 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::AdversarialLearningAgent::
     // if champions is empty fills it with the first roots come
     if (champions.size() == 0) {
         for (int i = 0;
-             i <= (double)roots.size() * (1.0 - params.selection.truncation.ratioDeletedRoots);
+             i <= (double)roots.size() *
+                      (1.0 - params.selection.truncation.ratioDeletedRoots);
              i++) {
             champions.emplace_back(roots[i]);
         }

@@ -57,7 +57,8 @@ namespace Learn {
         /// learning process.
         Mutator::MutationParameters mutation;
 
-        /// SelectionParameters for controlling selection aspects of the learning process.
+        /// SelectionParameters for controlling selection aspects of the
+        /// learning process.
         Selector::SelectionParameters selection;
 
         /// JSon comment

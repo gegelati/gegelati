@@ -2,12 +2,15 @@
 
 #include "selector/selector.h"
 
-void Selector::Selector::doSelection(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-    const TPG::TPGVertex*>& results, Mutator::RNG& rng)
+void Selector::Selector::doSelection(
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>& results,
+    Mutator::RNG& rng)
 {
-    throw std::runtime_error("Selection with main selector is not allowed, subclasses like TruncationSelector should be used.");    
+    throw std::runtime_error(
+        "Selection with main selector is not allowed, subclasses like "
+        "TruncationSelector should be used.");
 }
-
 
 void Selector::Selector::keepBestPolicy()
 {
@@ -27,7 +30,8 @@ void Selector::Selector::keepBestPolicy()
     }
 }
 
-void Selector::Selector::updateEvaluationRecords(const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+void Selector::Selector::updateEvaluationRecords(
+    const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         const TPG::TPGVertex*>& results)
 {
     // Update resultsPerRoot
@@ -35,10 +39,10 @@ void Selector::Selector::updateEvaluationRecords(const std::multimap<std::shared
 
     // Update bestRoot
     this->updateBestRoot(results);
-
 }
 
-void Selector::Selector::updateResultsPerRoot(const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+void Selector::Selector::updateResultsPerRoot(
+    const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         const TPG::TPGVertex*>& results)
 {
     for (auto result : results) {
@@ -63,7 +67,8 @@ void Selector::Selector::updateResultsPerRoot(const std::multimap<std::shared_pt
     }
 }
 
-void Selector::Selector::updateBestRoot(const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+void Selector::Selector::updateBestRoot(
+    const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         const TPG::TPGVertex*>& results)
 {
     auto iterator = --results.end();
@@ -73,15 +78,17 @@ void Selector::Selector::updateBestRoot(const std::multimap<std::shared_ptr<Lear
     // from the simpler to the most complex to test
     if (this->bestRoot.first == nullptr         // NULL case
         || *this->bestRoot.second < *evaluation // new high-score case
-        || !this->graph->hasVertex(
-            *this->bestRoot.first) // bestRoot disappearance
+        ||
+        !this->graph->hasVertex(*this->bestRoot.first) // bestRoot disappearance
     ) {
         // Replace the best root
         this->bestRoot = {candidate, evaluation};
     }
 }
 
-const std::pair<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& Selector::Selector::getBestRoot() const
+const std::pair<const TPG::TPGVertex*,
+                std::shared_ptr<Learn::EvaluationResult>>&
+Selector::Selector::getBestRoot() const
 {
     return this->bestRoot;
 }
@@ -98,8 +105,8 @@ std::shared_ptr<TPG::TPGGraph> Selector::Selector::getGraph()
     return this->graph;
 }
 
-
-const std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>& Selector::Selector::getResultsPerRoot() const
+const std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>&
+Selector::Selector::getResultsPerRoot() const
 {
     return this->resultsPerRoot;
 }
@@ -114,27 +121,32 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
     // Create list of teams and actions clonable
     this->context.teamsClonable.clear();
     this->context.actionsClonable.clear();
-    for(auto root: rootVertices){
+    for (auto root : rootVertices) {
         if (dynamic_cast<const TPG::TPGTeam*>(root) != nullptr) {
             this->context.teamsClonable.push_back((const TPG::TPGTeam*)root);
         }
         else if (params.mutation.tpg.useActionProgram) {
-            this->context.actionsClonable.push_back((const TPG::TPGAction*)root);
+            this->context.actionsClonable.push_back(
+                (const TPG::TPGAction*)root);
         }
-    
     }
     uint64_t nbRootTeams = this->context.teamsClonable.size();
     uint64_t nbRootActions = this->context.actionsClonable.size();
 
-    // Fill the list of available TPGTeam and TPGActions, TPGActions are only roots if they are not accessible by the teams
+    // Fill the list of available TPGTeam and TPGActions, TPGActions are only
+    // roots if they are not accessible by the teams
     this->context.preExistingTeams.clear();
     this->context.preExistingActions.clear();
-    for(auto vertex: vertices){
-        if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr && (params.mutation.tpg.teamAccessAllActions || vertex->getIncomingEdges().size() == 0)){
-                this->context.preExistingActions.push_back((const TPG::TPGAction*)vertex);   
+    for (auto vertex : vertices) {
+        if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr &&
+            (params.mutation.tpg.teamAccessAllActions ||
+             vertex->getIncomingEdges().size() == 0)) {
+            this->context.preExistingActions.push_back(
+                (const TPG::TPGAction*)vertex);
         }
-        else if(dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
-            this->context.preExistingTeams.push_back((const TPG::TPGTeam*)vertex);
+        else if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
+            this->context.preExistingTeams.push_back(
+                (const TPG::TPGTeam*)vertex);
         }
     }
 
@@ -147,17 +159,16 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
             preExistingEdges.push_back(edge.get());
         });
 
-
-
     this->context.nbTeamsToCreate =
-        (uint64_t)(params.mutation.tpg.nbRoots * params.mutation.tpg.ratioTeamsOverActions) -
+        (uint64_t)(params.mutation.tpg.nbRoots *
+                   params.mutation.tpg.ratioTeamsOverActions) -
         nbRootTeams;
 
-        
-    this->context.nbActionsToCreate =
-        std::max((int64_t)((uint64_t)(params.mutation.tpg.nbRoots *
-                                        (1 - params.mutation.tpg.ratioTeamsOverActions)) -
-                            nbRootActions), (int64_t)0);
+    this->context.nbActionsToCreate = std::max(
+        (int64_t)((uint64_t)(params.mutation.tpg.nbRoots *
+                             (1 - params.mutation.tpg.ratioTeamsOverActions)) -
+                  nbRootActions),
+        (int64_t)0);
 
     return context;
 }
@@ -166,4 +177,3 @@ void Selector::Selector::deleteUselessParents()
 {
     // Does nothing with the default selector.
 }
-

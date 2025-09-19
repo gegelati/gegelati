@@ -418,7 +418,8 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     }
 
     // Check determinism of bestRoot score
-    ASSERT_EQ(la.getSelector()->getBestRoot().second, laSequential.getSelector()->getBestRoot().second);
+    ASSERT_EQ(la.getSelector()->getBestRoot().second,
+              laSequential.getSelector()->getBestRoot().second);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)

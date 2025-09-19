@@ -1600,16 +1600,16 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     }
 
     // Check the correct execution
-    ASSERT_NO_THROW(
-        Mutator::TPGMutator::populateTPG(*tpg, selector, arch, params.mutation, rng, nbActions, 0))
+    ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(
+        *tpg, selector, arch, params.mutation, rng, nbActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
     ASSERT_EQ(tpg->getRootVertices().size(), params.mutation.tpg.nbRoots);
 
     // Increase coverage with a TPG that has no root team
     TPG::TPGGraph tpg2(*e);
-    ASSERT_NO_THROW(
-        Mutator::TPGMutator::populateTPG(tpg2, selector, arch, params.mutation, rng, nbActions, 0))
+    ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(
+        tpg2, selector, arch, params.mutation, rng, nbActions, 0))
         << "Populating an empty TPG failed.";
 }
 
@@ -1653,8 +1653,8 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
     }
 
     // Check the correct execution
-    ASSERT_NO_THROW(
-        Mutator::TPGMutator::populateTPG(*tpg, selector, arch, params.mutation, rng, nbActions, 0))
+    ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(
+        *tpg, selector, arch, params.mutation, rng, nbActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
     ASSERT_EQ(tpg->getRootVertices().size(), params.mutation.tpg.nbRoots);
@@ -1670,8 +1670,8 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
         }
     }
     // Check the ratio of teams over actions
-    ASSERT_EQ(nbTeamsRoots,
-              params.mutation.tpg.nbRoots * params.mutation.tpg.ratioTeamsOverActions)
+    ASSERT_EQ(nbTeamsRoots, params.mutation.tpg.nbRoots *
+                                params.mutation.tpg.ratioTeamsOverActions)
         << "The number of team roots is not as expected.";
     ASSERT_EQ(nbActionsRoots, params.mutation.tpg.nbRoots - nbTeamsRoots)
         << "The number of action roots is not as expected.";
@@ -1717,20 +1717,24 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     TPG::TPGExecutionEngine tee(*e, &arch);
 
     // Do fake results to fill the verticesToDelete set.
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> fakeResults;
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        fakeResults;
     for (auto rootVertex : tpg->getRootVertices()) {
-        std::shared_ptr<Learn::EvaluationResult> er = std::make_shared<Learn::EvaluationResult>(rng.getDouble(0, 1), 1);
+        std::shared_ptr<Learn::EvaluationResult> er =
+            std::make_shared<Learn::EvaluationResult>(rng.getDouble(0, 1), 1);
         fakeResults.insert(std::make_pair(er, rootVertex));
     }
     selector.doSelection(fakeResults, rng);
 
     // Check the correct execution
-    ASSERT_NO_THROW(
-        Mutator::TPGMutator::populateTPG(*tpg, selector, arch, params.mutation, rng, nbActions, 0))
+    ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(
+        *tpg, selector, arch, params.mutation, rng, nbActions, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
     ASSERT_EQ(tpg->getRootVertices().size(), params.mutation.tpg.nbRoots);
 
     ASSERT_EQ(selector.getVerticesToDelete().size(), 0)
-        << "After populateTPG with tournament selection, the set of vertices to delete should be empty.";
+        << "After populateTPG with tournament selection, the set of vertices "
+           "to delete should be empty.";
 }

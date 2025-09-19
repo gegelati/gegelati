@@ -133,7 +133,8 @@ const std::vector<const TPG::TPGAction*> TPG::TPGGraph::getRootActions() const
 {
     std::vector<const TPG::TPGAction*> result;
     for (auto& vertex : this->vertices) {
-        if (vertex->getIncomingEdges().empty() && dynamic_cast<const TPG::TPGAction*>(vertex.get()) != nullptr) {
+        if (vertex->getIncomingEdges().empty() &&
+            dynamic_cast<const TPG::TPGAction*>(vertex.get()) != nullptr) {
             result.push_back(dynamic_cast<const TPG::TPGAction*>(vertex.get()));
         }
     }
@@ -144,7 +145,8 @@ const std::vector<const TPG::TPGTeam*> TPG::TPGGraph::getRootTeams() const
 {
     std::vector<const TPG::TPGTeam*> result;
     for (auto& vertex : this->vertices) {
-        if (vertex->getIncomingEdges().empty() && dynamic_cast<const TPG::TPGTeam*>(vertex.get()) != nullptr) {
+        if (vertex->getIncomingEdges().empty() &&
+            dynamic_cast<const TPG::TPGTeam*>(vertex.get()) != nullptr) {
             result.push_back(dynamic_cast<const TPG::TPGTeam*>(vertex.get()));
         }
     }
