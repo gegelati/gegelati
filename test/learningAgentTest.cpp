@@ -119,7 +119,8 @@ TEST_F(LearningAgentTest, Constructor)
     ASSERT_NO_THROW(delete la) << "Destruction of the LearningAgent failed.";
 
     params.selection.selectionMode = "wrongSelector";
-    ASSERT_THROW(la = new Learn::LearningAgent(le, set, params), std::runtime_error)
+    ASSERT_THROW(la = new Learn::LearningAgent(le, set, params),
+                 std::runtime_error)
         << "Construction of the learningAgent with wrong selector should fail.";
 }
 
@@ -131,7 +132,6 @@ TEST_F(LearningAgentTest, Init)
 
     ASSERT_NO_THROW(la.init())
         << "Initialization of the LearningAgent should not fail.";
-    
 }
 
 TEST_F(LearningAgentTest, addLogger)
