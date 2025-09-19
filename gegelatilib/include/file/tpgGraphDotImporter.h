@@ -54,6 +54,7 @@
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
+#include "util/counterReset.h"
 
 namespace File {
     /**
