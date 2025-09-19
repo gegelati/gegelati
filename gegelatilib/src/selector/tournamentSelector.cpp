@@ -44,10 +44,12 @@ void Selector::TournamentSelector::doSelection(std::multimap<std::shared_ptr<Lea
         while (subMap.size() > 1) {
             auto itWorst = subMap.begin();
             erasedResults.push_back(itWorst->first);
-            subMap.erase(itWorst);
-
+            
             // Remove the vertex from the graph as well
             this->graph->removeVertex(*itWorst->second);
+
+            subMap.erase(itWorst);
+
         }
 
         // This is a logical deletion, the vertex will be removed later
