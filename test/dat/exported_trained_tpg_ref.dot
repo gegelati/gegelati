@@ -1,0 +1,28 @@
+
+digraph{
+	graph[pad = "0.212, 0.055" bgcolor = lightgray]
+	node[shape=circle style = filled label = ""]
+		T1111 [fillcolor="#1199bb"]
+		P2512 [fillcolor="#cccccc" shape=point label="0"] //-2.884066|-1.378237|-0.357673|-5.640320|13.935862|
+		I2512 [shape=box style=invis label="3|6&2|0#0|2&#92;n7|0&0|6#2|4&#92;n"] 
+		P2512 -> I2512[style=invis]
+		A1000 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="0"]
+		T1111 -> P2512 -> A1000
+		P2513 [fillcolor="#cccccc" shape=point label="0"] //1.498939|2.077431|-3.422993|-3.529973|-3.229409|
+		I2513 [shape=box style=invis label="4|6&0|3#2|5&#92;n0|0&2|0#0|6&#92;n"] 
+		P2513 -> I2513[style=invis]
+		A1014 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="14"]
+		T1111 -> P2513 -> A1014
+		P2514 [fillcolor="#cccccc" shape=point label="0"] //3.779531|2.409131|-3.105208|-4.182041|2.746801|
+		I2514 [shape=box style=invis label="10|0&2|3#1|2&#92;n"] 
+		P2514 -> I2514[style=invis]
+		A1006 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="6"]
+		T1111 -> P2514 -> A1006
+		T1111 -> P2514
+		P2515 [fillcolor="#cccccc" shape=point label="0"] //-6.184516|-7.134451|7.825519|9.304875|-3.092014|
+		I2515 [shape=box style=invis label="10|0&2|6#1|3&#92;n"] 
+		P2515 -> I2515[style=invis]
+		A1013 [fillcolor="#ff3366" shape=box margin=0.03 width=0 height=0 label="13"]
+		T1111 -> P2515 -> A1013
+		{ rank= same T1111 }
+}
