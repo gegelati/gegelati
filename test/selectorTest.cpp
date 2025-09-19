@@ -123,6 +123,19 @@ TEST_F(SelectorTest, Constructor)
     ASSERT_NO_THROW(delete selector) << "Destruction of the selector failed.";
 }
 
+TEST_F(SelectorTest, doAbstractSelection)
+{
+    std::shared_ptr<TPG::TPGGraph> graph = std::make_shared<TPG::TPGGraph>(*e);
+
+    Selector::Selector selector(graph, params);
+
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex *> results;
+    Mutator::RNG rng;
+    ASSERT_THROW(selector.doSelection(results, rng), std::runtime_error)
+        << "Doing a selection with the Selector::Selector shoudl throw";
+}
+
+
 TEST_F(SelectorTest, KeepBestPolicy)
 {
     params.archiveSize = 50;
