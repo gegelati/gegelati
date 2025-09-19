@@ -549,12 +549,13 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     if (targetAction) {
         if (context->preExistingActions.size() > 0) {
             if (params.tpg.teamAccessAllActions) {
-                target = context->preExistingActions.at(
-                    rng.getUnsignedInt64(0, context->preExistingActions.size() - 1));
+                target = context->preExistingActions.at(rng.getUnsignedInt64(
+                    0, context->preExistingActions.size() - 1));
             }
             else {
-                target = &graph.cloneVertex(*context->preExistingActions.at(
-                    rng.getUnsignedInt64(0, context->preExistingActions.size() - 1)));
+                target = &graph.cloneVertex(
+                    *context->preExistingActions.at(rng.getUnsignedInt64(
+                        0, context->preExistingActions.size() - 1)));
             }
             // Change the target
             // Changing the target should not fail.
@@ -594,8 +595,7 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
         const TPG::TPGAction& newAction =
             (const TPG::TPGAction&)graph.cloneVertex(*edge->getDestination());
 
-        mutateTPGAction(graph, newAction, context, newPrograms, params,
-                        rng);
+        mutateTPGAction(graph, newAction, context, newPrograms, params, rng);
 
         // Set the action
         graph.setEdgeDestination(*edge, newAction);
@@ -656,8 +656,8 @@ void Mutator::TPGMutator::mutateTPGTeam(
                 // Edge->Program bid modification
                 if (rng.getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
                     // Mutate the edge
-                    mutateOutgoingEdge(graph, edge, context,
-                                       newPrograms, params, rng);
+                    mutateOutgoingEdge(graph, edge, context, newPrograms,
+                                       params, rng);
                     anyMutationDone = true;
                 }
             }
@@ -827,8 +827,8 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
             *context->teamsClonable.at(clonedRootIndex));
 
         // Apply mutations to the root
-        mutateTPGTeam(graph, archive, newRoot, context,
-                      newPrograms, params, rng);
+        mutateTPGTeam(graph, archive, newRoot, context, newPrograms, params,
+                      rng);
     }
 
     // Create the new action roots
@@ -846,8 +846,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                 *context->actionsClonable.at(clonedRootIndex));
 
         // Apply mutations to the root
-        mutateTPGAction(graph, newRoot, context, newPrograms,
-                        params, rng);
+        mutateTPGAction(graph, newRoot, context, newPrograms, params, rng);
 
         // Increase the new number of roots
         nbActionsCreated++;

@@ -922,13 +922,15 @@ TEST_F(MutatorTest, TPGMutatorAddRandomEdge)
     const TPG::TPGAction& vertex3 = tpg.addNewAction(1);
     const TPG::TPGAction& vertex4 = tpg.addNewAction(2);
 
-    
     Selector::SelectionContext context;
-    context.preExistingEdges.push_back(&tpg.addNewEdge(vertex0, vertex1, progPointer));
-    context.preExistingEdges.push_back(&tpg.addNewEdge(vertex0, vertex2, progPointer));
-    context.preExistingEdges.push_back(&tpg.addNewEdge(vertex0, vertex3, progPointer));
-    context.preExistingEdges.push_back(&tpg.addNewEdge(vertex2, vertex4, progPointer));
-
+    context.preExistingEdges.push_back(
+        &tpg.addNewEdge(vertex0, vertex1, progPointer));
+    context.preExistingEdges.push_back(
+        &tpg.addNewEdge(vertex0, vertex2, progPointer));
+    context.preExistingEdges.push_back(
+        &tpg.addNewEdge(vertex0, vertex3, progPointer));
+    context.preExistingEdges.push_back(
+        &tpg.addNewEdge(vertex2, vertex4, progPointer));
 
     Mutator::RNG rng;
     rng.setSeed(0);
@@ -1021,15 +1023,13 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
-
     Selector::SelectionContext context;
     context.preExistingTeams.push_back(&vertex0);
     context.preExistingActions.push_back(&vertex1);
     context.preExistingEdges.push_back(&edge0);
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(
-        tpg, &edge0, &context, newPrograms, params,
-        rng));
+        tpg, &edge0, &context, newPrograms, params, rng));
 
     // Check that progPointer use count was decreased since the mutated program
     // is a copy of the original
@@ -1152,11 +1152,10 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
     Selector::SelectionContext context;
-    std::for_each(
-        tpg.getEdges().begin(), tpg.getEdges().end(),
-        [&context](const std::unique_ptr<TPG::TPGEdge>& edge) {
-            context.preExistingEdges.push_back(edge.get());
-        });
+    std::for_each(tpg.getEdges().begin(), tpg.getEdges().end(),
+                  [&context](const std::unique_ptr<TPG::TPGEdge>& edge) {
+                      context.preExistingEdges.push_back(edge.get());
+                  });
 
     // Do it several times to cover all branches
     for (size_t i = 0; i < 5; i++) {
@@ -1166,8 +1165,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
         // Check that all branches are covered (deletion, addition, swap,
         // mutation)
         ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGAction(
-            tpg, *copiedAction, &context, newPrograms, params.mutation,
-            rng));
+            tpg, *copiedAction, &context, newPrograms, params.mutation, rng));
     }
 }
 
@@ -1285,8 +1283,7 @@ TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction)
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateOutgoingEdge(
-        tpg, &edge0, &context, newPrograms, params,
-        rng));
+        tpg, &edge0, &context, newPrograms, params, rng));
 
     ASSERT_EQ(tpg.getNbVertices(), 3) << "Action should have been duplicated.";
 
@@ -1339,7 +1336,6 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam)
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
-
     Selector::SelectionContext context;
     context.preExistingTeams = {&vertex0, &vertex4};
     context.preExistingActions = {&vertex1, &vertex2, &vertex3};
@@ -1389,13 +1385,13 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
 
-    
     Selector::SelectionContext context;
     context.preExistingTeams.push_back(&vertex0);
     context.preExistingActions.push_back(&vertex1);
     context.preExistingEdges.push_back(&edge0);
 
-    Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, &context, newPrograms, params, rng);
+    Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, &context, newPrograms,
+                                            params, rng);
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         newPrograms.front(), params, arch, rng))
@@ -1424,13 +1420,13 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
     newPrograms.clear();
 
-    
     Selector::SelectionContext context2;
     context2.preExistingTeams.push_back(&vertex0);
     context2.preExistingActions.push_back(&vertex1);
     context2.preExistingEdges.push_back(&edge0);
 
-    Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, &context2, newPrograms, params, rng);
+    Mutator::TPGMutator::mutateOutgoingEdge(tpg, &edge0, &context2, newPrograms,
+                                            params, rng);
 
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
         newPrograms.front(), params, arch, rng))
