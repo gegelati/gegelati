@@ -282,11 +282,11 @@ void Mutator::TPGMutator::removeRandomActionEdge(TPG::TPGGraph& graph,
 
 void Mutator::TPGMutator::addRandomActionEdge(
     TPG::TPGGraph& graph, const TPG::TPGAction& action,
-    const std::list<const TPG::TPGEdge*>& preExistingEdges, Mutator::RNG& rng)
+    const Selector::SelectionContext* context, Mutator::RNG& rng)
 {
     // Pick an edge (excluding ones from the team and edges with the team as a
     // destination)
-    auto pickableEdges(preExistingEdges);
+    auto pickableEdges(context->preExistingEdges);
     // cf erase-remove idiom
     pickableEdges.erase(
         std::remove_if(pickableEdges.begin(), pickableEdges.end(),
@@ -397,7 +397,7 @@ void Mutator::TPGMutator::mutateTPGActionEdge(
 
 void Mutator::TPGMutator::mutateTPGAction(
     TPG::TPGGraph& graph, const TPG::TPGAction& action,
-    std::list<const TPG::TPGEdge*> preExistingEdges,
+    const Selector::SelectionContext* context,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
     const Mutator::MutationParameters& params, Mutator::RNG& rng)
 {
@@ -422,7 +422,7 @@ void Mutator::TPGMutator::mutateTPGAction(
                    graph.getEnvironment().getNbContinuousActions() &&
                proba > rng.getDouble(0.0, 1.0)) {
             // Add an edge (by duplication of an existing one)
-            addRandomActionEdge(graph, action, preExistingEdges, rng);
+            addRandomActionEdge(graph, action, context, rng);
 
             // Decrement the proba of adding another edge
             proba *= params.tpg.pActionEdgeAddition;
@@ -498,11 +498,11 @@ void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph,
 
 void Mutator::TPGMutator::addRandomEdge(
     TPG::TPGGraph& graph, const TPG::TPGTeam& team,
-    const std::list<const TPG::TPGEdge*>& preExistingEdges, Mutator::RNG& rng)
+    const Selector::SelectionContext* context, Mutator::RNG& rng)
 {
     // Pick an edge (excluding ones from the team, edges with the team as a
     // destination and the edges that are action edges)
-    auto pickableEdges(preExistingEdges);
+    auto pickableEdges(context->preExistingEdges);
     // cf erase-remove idiom
     pickableEdges.erase(
         std::remove_if(pickableEdges.begin(), pickableEdges.end(),
@@ -532,8 +532,7 @@ void Mutator::TPGMutator::addRandomEdge(
 
 void Mutator::TPGMutator::mutateEdgeDestination(
     TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
-    const std::vector<const TPG::TPGTeam*>& preExistingTeams,
-    const std::vector<const TPG::TPGAction*>& preExistingActions,
+    const Selector::SelectionContext* context,
     const Mutator::MutationParameters& params, Mutator::RNG& rng)
 {
     // Pick an edge among preexisting vertices
@@ -548,23 +547,23 @@ void Mutator::TPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        if (preExistingActions.size() > 0) {
+        if (context->preExistingActions.size() > 0) {
             if (params.tpg.teamAccessAllActions) {
-                target = preExistingActions.at(
-                    rng.getUnsignedInt64(0, preExistingActions.size() - 1));
+                target = context->preExistingActions.at(
+                    rng.getUnsignedInt64(0, context->preExistingActions.size() - 1));
             }
             else {
-                target = &graph.cloneVertex(*preExistingActions.at(
-                    rng.getUnsignedInt64(0, preExistingActions.size() - 1)));
+                target = &graph.cloneVertex(*context->preExistingActions.at(
+                    rng.getUnsignedInt64(0, context->preExistingActions.size() - 1)));
             }
             // Change the target
             // Changing the target should not fail.
             graph.setEdgeDestination(*edge, *target);
         }
     }
-    else if (preExistingTeams.size() > 0) {
-        target = preExistingTeams.at(
-            rng.getUnsignedInt64(0, preExistingTeams.size() - 1));
+    else if (context->preExistingTeams.size() > 0) {
+        target = context->preExistingTeams.at(
+            rng.getUnsignedInt64(0, context->preExistingTeams.size() - 1));
         // Change the target
         // Changing the target should not fail.
         graph.setEdgeDestination(*edge, *target);
@@ -573,9 +572,7 @@ void Mutator::TPGMutator::mutateEdgeDestination(
 
 void Mutator::TPGMutator::mutateOutgoingEdge(
     TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
-    const std::vector<const TPG::TPGTeam*>& preExistingTeams,
-    const std::vector<const TPG::TPGAction*>& preExistingActions,
-    const std::list<const TPG::TPGEdge*>& preExistingEdges,
+    const Selector::SelectionContext* context,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
     const Mutator::MutationParameters& params, Mutator::RNG& rng)
 {
@@ -597,7 +594,7 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
         const TPG::TPGAction& newAction =
             (const TPG::TPGAction&)graph.cloneVertex(*edge->getDestination());
 
-        mutateTPGAction(graph, newAction, preExistingEdges, newPrograms, params,
+        mutateTPGAction(graph, newAction, context, newPrograms, params,
                         rng);
 
         // Set the action
@@ -612,17 +609,14 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
         // As it Stephen kelly's work, Edge target modification is conditionned
         // to the modification of the prealable Edge.Program behavior.
         if (rng.getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationChange) {
-            mutateEdgeDestination(graph, edge, preExistingTeams,
-                                  preExistingActions, params, rng);
+            mutateEdgeDestination(graph, edge, context, params, rng);
         }
     }
 }
 
 void Mutator::TPGMutator::mutateTPGTeam(
     TPG::TPGGraph& graph, const Archive& archive, const TPG::TPGTeam& team,
-    const std::vector<const TPG::TPGTeam*>& preExistingTeams,
-    const std::vector<const TPG::TPGAction*>& preExistingActions,
-    const std::list<const TPG::TPGEdge*>& preExistingEdges,
+    const Selector::SelectionContext* context,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
     const Mutator::MutationParameters& params, Mutator::RNG& rng)
 {
@@ -646,7 +640,7 @@ void Mutator::TPGMutator::mutateTPGTeam(
         while (team.getOutgoingEdges().size() < params.tpg.maxOutgoingEdges &&
                proba > rng.getDouble(0.0, 1.0)) {
             // Add an edge (by duplication of an existing one)
-            addRandomEdge(graph, team, preExistingEdges, rng);
+            addRandomEdge(graph, team, context, rng);
             // Decrement the proba of adding another edge
             proba *= params.tpg.pEdgeAddition;
         }
@@ -662,8 +656,7 @@ void Mutator::TPGMutator::mutateTPGTeam(
                 // Edge->Program bid modification
                 if (rng.getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
                     // Mutate the edge
-                    mutateOutgoingEdge(graph, edge, preExistingTeams,
-                                       preExistingActions, preExistingEdges,
+                    mutateOutgoingEdge(graph, edge, context,
                                        newPrograms, params, rng);
                     anyMutationDone = true;
                 }
@@ -834,8 +827,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
             *context->teamsClonable.at(clonedRootIndex));
 
         // Apply mutations to the root
-        mutateTPGTeam(graph, archive, newRoot, context->preExistingTeams,
-                      context->preExistingActions, context->preExistingEdges,
+        mutateTPGTeam(graph, archive, newRoot, context,
                       newPrograms, params, rng);
     }
 
@@ -854,7 +846,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                 *context->actionsClonable.at(clonedRootIndex));
 
         // Apply mutations to the root
-        mutateTPGAction(graph, newRoot, context->preExistingEdges, newPrograms,
+        mutateTPGAction(graph, newRoot, context, newPrograms,
                         params, rng);
 
         // Increase the new number of roots

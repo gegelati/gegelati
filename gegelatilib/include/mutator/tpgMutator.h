@@ -112,12 +112,12 @@ namespace Mutator {
          *
          * \param[in,out] graph the TPGGraph within which the action is stored.
          * \param[in] action the TPGAction whose outgoingEdges will be altered.
-         * \param[in] preExistingEdges the TPGEdge candidates for cloning.
+         * \param[in] context SelectorContext containing necessary information for mutations.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void addRandomActionEdge(
             TPG::TPGGraph& graph, const TPG::TPGAction& action,
-            const std::list<const TPG::TPGEdge*>& preExistingActionEdges,
+            const Selector::SelectionContext* context,
             Mutator::RNG& rng);
 
         /**
@@ -162,13 +162,13 @@ namespace Mutator {
          *                stored.
          * \param[in] action the TPGAction whose actionEdges will be altered.
          * \param[in] team the TPGTeam source of TPGAction
-         * \param[in] preExistingEdges the already existing edges
+         * \param[in] context SelectorContext containing necessary information for mutations.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void mutateTPGAction(
             TPG::TPGGraph& graph, const TPG::TPGAction& action,
-            std::list<const TPG::TPGEdge*> preExistingEdges,
+            const Selector::SelectionContext* context,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
             const Mutator::MutationParameters& params, Mutator::RNG& rng);
 
@@ -198,12 +198,12 @@ namespace Mutator {
          *
          * \param[in,out] graph the TPGGraph within which the team is stored.
          * \param[in] team the TPGTeam whose outgoingEdges will be altered.
-         * \param[in] preExistingEdge the TPGEdge candidates for cloning.
+         * \param[in] context SelectorContext containing necessary information for mutations.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void addRandomEdge(
             TPG::TPGGraph& graph, const TPG::TPGTeam& team,
-            const std::list<const TPG::TPGEdge*>& preExistingEdges,
+            const Selector::SelectionContext* context,
             Mutator::RNG& rng);
 
         /**
@@ -224,16 +224,13 @@ namespace Mutator {
          * \param[in,out] graph the TPGGraph within which the team and edge are
          *                stored.
          * \param[in] edge the TPGEdge whose destination will be altered.
-         * \param[in] preExistingTeams the TPGTeam candidates for destination.
-         * \param[in] preExistingActions the TPGAction candidates for
-         *            destination.
+         * \param[in] context SelectorContext containing necessary information for mutations.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void mutateEdgeDestination(
             TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
-            const std::vector<const TPG::TPGTeam*>& preExistingTeams,
-            const std::vector<const TPG::TPGAction*>& preExistingActions,
+            const Selector::SelectionContext* context,
             const Mutator::MutationParameters& params, Mutator::RNG& rng);
 
         /**
@@ -248,10 +245,7 @@ namespace Mutator {
          * \param[in,out] graph the TPGGraph within which the team and edge are
          *                stored.
          * \param[in] edge the TPGEdge whose destination will be altered.
-         * \param[in] preExistingTeams the TPGTeam candidates for destination.
-         * \param[in] preExistingActions the TPGAction candidates for
-         *            destination.
-         * \param[in] preExistingEdge the TPGEdge candidates for cloning.
+         * \param[in] context SelectorContext containing necessary information for mutations.
          * \param[in,out] newPrograms List of new Program created during
          *                mutations of the TPGTeam. The behavior of these
          *                Program must be mutated to complete the mutation
@@ -261,9 +255,7 @@ namespace Mutator {
          */
         void mutateOutgoingEdge(
             TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
-            const std::vector<const TPG::TPGTeam*>& preExistingTeams,
-            const std::vector<const TPG::TPGAction*>& preExistingActions,
-            const std::list<const TPG::TPGEdge*>& preExistingEdges,
+            const Selector::SelectionContext* context,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
             const Mutator::MutationParameters& params, Mutator::RNG& rng);
 
@@ -286,9 +278,7 @@ namespace Mutator {
          * \param[in] archive Archive used to assess the uniqueness of the
          *            mutated Program behavior.
          * \param[in] team the source TPGTeam of the edge.
-         * \param[in] preExistingTeams the TPGTeam candidates for destination.
-         * \param[in] preExistingActions the TPGAction candidates for
-         * \param[in] preExistingEdges the TPGEdge candidates for cloning.
+         * \param[in] context SelectorContext containing necessary information for mutations.
          *            destination.
          * \param[in,out] newPrograms List of new Program created during
          *                mutations of the TPGTeam. The behavior of these
@@ -300,9 +290,7 @@ namespace Mutator {
         void mutateTPGTeam(
             TPG::TPGGraph& graph, const Archive& archive,
             const TPG::TPGTeam& team,
-            const std::vector<const TPG::TPGTeam*>& preExistingTeams,
-            const std::vector<const TPG::TPGAction*>& preExistingActions,
-            const std::list<const TPG::TPGEdge*>& preExistingEdges,
+            const Selector::SelectionContext* context,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
             const Mutator::MutationParameters& params, Mutator::RNG& rng);
 
