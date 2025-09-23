@@ -183,7 +183,7 @@ TEST_F(LABasicLoggerTest, logNewGeneration)
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
     std::istringstream iss(s);
-    for (std::string s2; iss >> s2;){
+    for (std::string s2; iss >> s2;) {
         result.push_back(s2);
     }
 
