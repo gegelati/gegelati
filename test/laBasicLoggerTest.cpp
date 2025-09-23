@@ -176,18 +176,27 @@ TEST_F(LABasicLoggerTest, logNewGeneration)
     Log::LABasicLogger l(*la, strStr);
     uint64_t nbGen = 42;
 
+    la->init();
     l.logNewGeneration(nbGen);
 
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
     std::istringstream iss(s);
-    for (std::string s2; iss >> s2;)
+    for (std::string s2; iss >> s2;){
         result.push_back(s2);
+    }
 
     // index 12 because we skip the header
     ASSERT_EQ("42", result[12]);
-    ASSERT_EQ(result.size(), 12 + 1);
+    // index 12 because we skip the header
+    ASSERT_EQ("18", result[13])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ("0", result[14])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ("15", result[15])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ(result.size(), 12 + 4);
 }
 
 TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
@@ -203,14 +212,7 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
     std::istringstream iss(s);
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
-
-    // index 12 because we skip the header
-    ASSERT_EQ("18", result[12])
-        << "Unexpected number of vertices was printed in the log.";
-    ASSERT_EQ("0", result[13])
-        << "Unexpected number of vertices was printed in the log.";
-    ASSERT_EQ("15", result[14])
-        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ(result.size(), 12);
 }
 
 TEST_F(LABasicLoggerTest, logAfterEvaluate)

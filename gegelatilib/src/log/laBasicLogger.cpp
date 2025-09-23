@@ -129,13 +129,6 @@ void Log::LABasicLogger::logHeader()
 void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
 {
     *this << std::setw(colWidth) << generationNumber;
-    // resets checkpoint to be able to show evaluation time
-    chronoFromNow();
-}
-
-void Log::LABasicLogger::logAfterPopulateTPG()
-{
-    this->mutationTime = getDurationFrom(*checkpoint);
 
     *this << std::setw(colWidth)
           << this->learningAgent.getTPGGraph()->getNbVertices();
@@ -151,6 +144,14 @@ void Log::LABasicLogger::logAfterPopulateTPG()
 
     *this << std::setw(colWidth) << nbActionsR << std::setw(colWidth)
           << nbTeamsR;
+
+    // resets checkpoint to be able to show evaluation time
+    chronoFromNow();
+}
+
+void Log::LABasicLogger::logAfterPopulateTPG()
+{
+    this->mutationTime = getDurationFrom(*checkpoint);
 
     chronoFromNow();
 }
