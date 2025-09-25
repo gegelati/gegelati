@@ -73,8 +73,10 @@ namespace Selector {
 
         /**
          * \brief This method execute the doSelection method.
-         * 
-         * However if a double population of team and action roots is used (for MATPG case basically), it launch the doSelection two times, once with the team results, and once with the action results
+         *
+         * However if a double population of team and action roots is used (for
+         * MATPG case basically), it launch the doSelection two times, once with
+         * the team results, and once with the action results
          *
          * \param[in,out] results a multimap containing root TPGVertex
          * associated to their score during an evaluation.

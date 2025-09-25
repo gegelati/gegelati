@@ -47,9 +47,9 @@ namespace Selector {
 
         /**
          * \brief override of doSelection method.
-         * 
+         *
          * Reset the verticesToDelete list
-         * 
+         *
          * \param[in,out] results a multimap containing root TPGVertex
          * associated to their score during an evaluation.
          * \param[in] rng Random Number Generator used in the mutation process.

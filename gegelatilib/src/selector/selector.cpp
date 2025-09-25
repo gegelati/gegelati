@@ -3,17 +3,20 @@
 #include "selector/selector.h"
 
 void Selector::Selector::launchSelection(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results,
-            Mutator::RNG& rng)
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>& results,
+    Mutator::RNG& rng)
 {
     // Preparing multi-population selection....
-    if(params.mutation.tpg.ratioTeamsOverActions != 0.0 && params.mutation.tpg.ratioTeamsOverActions != 1.0){
+    if (params.mutation.tpg.ratioTeamsOverActions != 0.0 &&
+        params.mutation.tpg.ratioTeamsOverActions != 1.0) {
 
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*> resultsTeam;
+                      const TPG::TPGVertex*>
+            resultsTeam;
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*> resultsAction;
+                      const TPG::TPGVertex*>
+            resultsAction;
 
         // Split the results into result of team and result of action
         for (const auto& p : results) {
@@ -31,8 +34,8 @@ void Selector::Selector::launchSelection(
         results.clear();
         results.insert(resultsTeam.begin(), resultsTeam.end());
         results.insert(resultsAction.begin(), resultsAction.end());
-
-    } else {
+    }
+    else {
         this->doSelection(results, rng);
     }
 }

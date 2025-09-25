@@ -684,13 +684,13 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 2484)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 12684047652704315032U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              12684047652704315032U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
-
-// Similar to previous test, but with MATPG solution and tournament (no need for MAPLE because
-// it is included in MATPG)
+// Similar to previous test, but with MATPG solution and tournament (no need for
+// MAPLE because it is included in MATPG)
 TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
 {
     params.archiveSize = 50;

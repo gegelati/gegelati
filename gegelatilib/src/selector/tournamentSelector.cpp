@@ -3,9 +3,9 @@
 #include "selector/tournamentSelector.h"
 
 void Selector::TournamentSelector::launchSelection(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results,
-            Mutator::RNG& rng)
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>& results,
+    Mutator::RNG& rng)
 {
 
     // Clear the set of vertices to delete.
@@ -20,8 +20,8 @@ void Selector::TournamentSelector::doSelection(
     Mutator::RNG& rng)
 {
 
-    size_t nbToKeep = (size_t)(results.size() *
-                               params.selection.tournament.ratioSavedRoots);
+    size_t nbToKeep =
+        (size_t)(results.size() * params.selection.tournament.ratioSavedRoots);
     size_t nbAgentsInTournament = results.size() - nbToKeep;
 
     // Copy the first agents to remove (those at the bottom of the ranking)
