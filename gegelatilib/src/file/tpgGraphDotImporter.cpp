@@ -280,15 +280,11 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
                 action_number,
                 dynamic_cast<const TPG::TPGAction*>(&newAction)));
 
-
             this->tpg.setNewVertexID(newAction, action_number);
-
 
             this->actionClasses.insert(
                 std::pair<const TPG::TPGAction*, std::vector<uint64_t>>(
-                    dynamic_cast<const TPG::TPGAction*>(
-                        &newAction),
-                    numbers));
+                    dynamic_cast<const TPG::TPGAction*>(&newAction), numbers));
         }
     }
 }
