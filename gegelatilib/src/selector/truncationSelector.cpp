@@ -18,33 +18,10 @@ void Selector::TruncationSelector::doSelection(
     // Estimate the number of expected roots to delete
     size_t nbExpectedRoots =
         (size_t)floor(this->params.selection.truncation.ratioDeletedRoots *
-                      (double)this->params.mutation.tpg.nbRoots);
+                      (double)results.size());
 
-    // Get the maximum number of teams and actions deletable
-    size_t nbTeamsDeleted = 0;
-    size_t nbActionsDeleted = 0;
-    size_t maxNbTeamsToDelete =
-        (size_t)((double)nbExpectedRoots *
-                 this->params.mutation.tpg.ratioTeamsOverActions);
-    size_t maxNbActionsoDelete = nbExpectedRoots - maxNbTeamsToDelete;
-
-    bool usingTeamAndActionRoots =
-        this->params.mutation.tpg.ratioTeamsOverActions > 0 &&
-        this->params.mutation.tpg.ratioTeamsOverActions < 1;
     auto i = 0;
-    size_t nbRootTeams;
-    size_t nbRootActions;
     while (i < nbExpectedRoots && results.size() > 0) {
-
-        nbRootTeams = this->graph->getRootTeams().size();
-        nbRootActions = this->graph->getRootActions().size();
-        if (usingTeamAndActionRoots && nbRootActions == 1 && nbRootTeams == 1) {
-            std::cerr << "Both actions and teams reached a number of one root "
-                         "and the selection is still processing, consider "
-                         "reducing the ratio"
-                      << std::endl;
-            break;
-        }
 
         // If the root is an action, do not remove it in discrete environment!
         const TPG::TPGVertex* root = results.begin()->second;
@@ -53,34 +30,7 @@ void Selector::TruncationSelector::doSelection(
             preservedRoots.insert(*results.begin());
             i--; // no vertex was actually removed
         }
-        // This conditions avoid deleting all the teams or all the actions
-        // This is usefull is the ratioTeamsOverActions is between 0 and 1.
-        else if (dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) !=
-                     nullptr &&
-                 (nbTeamsDeleted >= maxNbTeamsToDelete ||
-                  (usingTeamAndActionRoots && nbRootTeams == 1))) {
-
-            preservedRoots.insert(*results.begin());
-            i--; // no vertex was actually removed
-        }
-        else if (dynamic_cast<const TPG::TPGAction*>(results.begin()->second) !=
-                     nullptr &&
-                 (nbActionsDeleted >= maxNbActionsoDelete ||
-                  (usingTeamAndActionRoots && nbRootActions == 1))) {
-
-            preservedRoots.insert(*results.begin());
-            i--; // no vertex was actually removed
-        }
         else {
-            // Incremente the number of actions and teams deleted.
-            if (dynamic_cast<const TPG::TPGTeam*>(results.begin()->second) !=
-                nullptr) {
-                nbTeamsDeleted++;
-            }
-            else {
-                nbActionsDeleted++;
-            }
-
             graph->removeVertex(*results.begin()->second);
             // Removed stored result (if any)
             this->resultsPerRoot.erase(results.begin()->second);

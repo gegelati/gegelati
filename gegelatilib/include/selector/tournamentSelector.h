@@ -46,6 +46,20 @@ namespace Selector {
         }
 
         /**
+         * \brief override of doSelection method.
+         * 
+         * Reset the verticesToDelete list
+         * 
+         * \param[in,out] results a multimap containing root TPGVertex
+         * associated to their score during an evaluation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void launchSelection(
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>& results,
+            Mutator::RNG& rng) override;
+
+        /**
          * \brief override of doSelection method
          *
          * A small proportion X of the best agents is kept and saved from the

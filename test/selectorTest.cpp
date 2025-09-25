@@ -336,12 +336,12 @@ TEST_F(SelectorTest, DoSelection)
                       ((le.getNbActions() - 1)));
 }
 
-TEST_F(SelectorTest, DecimateWorstRootsActionsQuota)
+TEST_F(SelectorTest, DoSelectionActionsQuota)
 {
     // We force the ratio to quickly reach quotas
-    params.mutation.tpg.nbRoots = 10;
+    params.mutation.tpg.nbRoots = 20;
     params.selection.truncation.ratioDeletedRoots = 0.5;
-    params.mutation.tpg.ratioTeamsOverActions = 0.7;
+    params.mutation.tpg.ratioTeamsOverActions = 0.6;
     params.mutation.tpg.useActionProgram =
         true; // To make action vertices removed too.
     Learn::LearningAgent cla(cle, set, params);
@@ -370,7 +370,7 @@ TEST_F(SelectorTest, DecimateWorstRootsActionsQuota)
         }
     }
 
-    ASSERT_NO_THROW(selector->doSelection(results, cla.getRNG()));
+    ASSERT_NO_THROW(selector->launchSelection(results, cla.getRNG()));
 
     size_t nbTeams = 0;
     size_t nbActions = 0;
@@ -382,67 +382,10 @@ TEST_F(SelectorTest, DecimateWorstRootsActionsQuota)
             nbActions++;
         }
     }
-    ASSERT_EQ(nbTeams, 4)
-        << "After decimation, the number of teams should be 4.";
-    ASSERT_EQ(nbActions, 1)
-        << "After decimation, the number of actions should be 1.";
-}
-
-TEST_F(SelectorTest, DoSelectionTeamsQuota)
-{
-    params.mutation.tpg.nbRoots = 10;
-    params.selection.truncation.ratioDeletedRoots = 0.5;
-    params.mutation.tpg.ratioTeamsOverActions = 0.5;
-    params.mutation.tpg.useActionProgram = true;
-    Learn::LearningAgent cla(cle, set, params);
-    cla.init();
-
-    std::shared_ptr<Selector::Selector> selector = cla.getSelector();
-
-    std::shared_ptr<TPG::TPGGraph> graph = selector->getGraph();
-
-    // Set teams at a higher score than actions
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
-        results;
-    double scoreActions = 0.0;
-    double scoreTeams = 10.0;
-    for (auto* root : graph->getRootVertices()) {
-        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
-            results.emplace(
-                std::make_shared<Learn::EvaluationResult>(scoreActions++, 1),
-                root);
-        }
-        else {
-            results.emplace(
-                std::make_shared<Learn::EvaluationResult>(scoreTeams++, 1),
-                root);
-        }
-    }
-
-    // We call the method, which must go through the quota branches for actions
-    // Since we have 3 actions and 7 teams, and we delete half of the roots,
-    // Normally 3 actions and 2 teams should be deleted, but the ratio should
-    // allow Only 1 action to be deleted, and 4 teams.
-    ASSERT_NO_THROW(cla.getSelector()->doSelection(results, cla.getRNG()));
-
-    size_t nbTeams = 0;
-    size_t nbActions = 0;
-    for (auto root : graph->getRootVertices()) {
-        if (dynamic_cast<const TPG::TPGTeam*>(root) != nullptr) {
-            nbTeams++;
-        }
-        else if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
-            nbActions++;
-        }
-    }
-
-    std::cout << nbTeams << " teams and " << nbActions
-              << " after before decimation." << std::endl;
-    ASSERT_EQ(nbTeams, 3)
-        << "After decimation, the number of teams should be 3.";
-    ASSERT_EQ(nbActions, 2)
-        << "After decimation, the number of actions should be 2.";
+    ASSERT_EQ(nbTeams, 6)
+        << "After decimation, the number of teams should be 6.";
+    ASSERT_EQ(nbActions, 4)
+        << "After decimation, the number of actions should be 4.";
 }
 
 TEST_F(SelectorTest, DecimateWithTournamentSelection)

@@ -644,6 +644,65 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     params.mutation.tpg.useMultiActionProgram = true;
     params.mutation.tpg.teamAccessAllActions = false;
     params.mutation.tpg.ratioTeamsOverActions = 0.3333;
+    params.selection.selectionMode = "truncation";
+    params.selection.truncation.ratioDeletedRoots = 0.5;
+    params.mutation.tpg.nbRoots = 100;
+    params.nbThreads = 3;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+
+    Learn::LearningAgent la(cle, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+
+    // Useful when determinism is changed
+    /*std::cout<<tpg.getNbVertices()<<" "
+             <<tpg.getNbRootVertices()<<" "
+             <<tpg.getEdges().size()<<" "
+             <<TPG::TPGVertex::getVertexIDCounter()<<" "
+             <<TPG::TPGEdge::getEdgeIDCounter()<<" "
+             <<Program::Program::getProgramIDCounter()<<" "
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    ASSERT_EQ(tpg.getNbVertices(), 82)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 51)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 248)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 1303)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 4600)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 2484)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 12684047652704315032U)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
+
+// Similar to previous test, but with MATPG solution and tournament (no need for MAPLE because
+// it is included in MATPG)
+TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.teamAccessAllActions = false;
+    params.mutation.tpg.ratioTeamsOverActions = 0.3333;
     params.selection.selectionMode = "tournament";
     params.selection.tournament.sizeTournament = 3;
     params.selection.tournament.ratioSavedRoots = 0.2;
@@ -673,19 +732,19 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    ASSERT_EQ(tpg.getNbVertices(), 82)
+    ASSERT_EQ(tpg.getNbVertices(), 77)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 47)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 244)
+    ASSERT_EQ(tpg.getEdges().size(), 226)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 2060)
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 2029)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 7524)
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 7294)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Program::Program::getProgramIDCounter(), 3992)
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 3923)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 7818657185421572718U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8799467424931131222U)
         << "Graph does not have the expected determinst characteristics.";
 }
 

@@ -2,15 +2,25 @@
 
 #include "selector/tournamentSelector.h"
 
+void Selector::TournamentSelector::launchSelection(
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>& results,
+            Mutator::RNG& rng)
+{
+
+    // Clear the set of vertices to delete.
+    this->verticesToDelete.clear();
+
+    Selector::Selector::launchSelection(results, rng);
+}
+
 void Selector::TournamentSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results,
     Mutator::RNG& rng)
 {
-    // Clear the set of vertices to delete.
-    this->verticesToDelete.clear();
 
-    size_t nbToKeep = (size_t)(params.mutation.tpg.nbRoots *
+    size_t nbToKeep = (size_t)(results.size() *
                                params.selection.tournament.ratioSavedRoots);
     size_t nbAgentsInTournament = results.size() - nbToKeep;
 

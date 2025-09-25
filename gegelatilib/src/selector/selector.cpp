@@ -2,6 +2,41 @@
 
 #include "selector/selector.h"
 
+void Selector::Selector::launchSelection(
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*>& results,
+            Mutator::RNG& rng)
+{
+    // Preparing multi-population selection....
+    if(params.mutation.tpg.ratioTeamsOverActions != 0.0 && params.mutation.tpg.ratioTeamsOverActions != 1.0){
+
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*> resultsTeam;
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          const TPG::TPGVertex*> resultsAction;
+
+        // Split the results into result of team and result of action
+        for (const auto& p : results) {
+            if (dynamic_cast<const TPG::TPGAction*>(p.second))
+                resultsAction.insert(p);
+            else
+                resultsTeam.insert(p);
+        }
+
+        // Do selection for sub map
+        this->doSelection(resultsAction, rng);
+        this->doSelection(resultsTeam, rng);
+
+        // Fusing the results
+        results.clear();
+        results.insert(resultsTeam.begin(), resultsTeam.end());
+        results.insert(resultsAction.begin(), resultsAction.end());
+
+    } else {
+        this->doSelection(results, rng);
+    }
+}
+
 void Selector::Selector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results,

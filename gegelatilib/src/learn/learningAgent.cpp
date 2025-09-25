@@ -261,7 +261,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
     }
 
     // Remove worst performing roots
-    this->selector->doSelection(results, rng);
+    this->selector->launchSelection(results, rng);
     // Update the evaluation records
     this->selector->updateEvaluationRecords(results);
 
