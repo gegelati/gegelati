@@ -103,11 +103,11 @@ namespace Selector {
             "// Selection mode used. Available modes are:\n"
             "//   - \"truncation\"\n"
             "//   - \"tournament\"\n"
-            "// \"selectionMode\" : Truncation, // Default value";
+            "// \"_selectionMode\" : Truncation, // Default value";
         /// Selection mode used. Available mode are:
         ///   - "truncation"
         ///   - "tournament"
-        std::string selectionMode = "truncation";
+        std::string _selectionMode = "truncation";
 
         /// Parameters for TruncationSelector
         TruncationParameters truncation;

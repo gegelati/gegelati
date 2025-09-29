@@ -123,11 +123,11 @@ namespace Learn {
 
             // There is probably a cleaner way to do that, but using the factory
             // was creating import issues.
-            if (p.selection.selectionMode == "truncation") {
+            if (p.selection._selectionMode == "truncation") {
                 selector =
                     std::make_shared<Selector::TruncationSelector>(tpg, p);
             }
-            else if (p.selection.selectionMode == "tournament") {
+            else if (p.selection._selectionMode == "tournament") {
                 selector =
                     std::make_shared<Selector::TournamentSelector>(tpg, p);
             }

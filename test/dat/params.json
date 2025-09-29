@@ -45,6 +45,6 @@
     "truncation":{
       "ratioDeletedRoots": 0.85,
     },
-    "selectionMode": "tournament",
+    "_selectionMode": "tournament",
   },
 }

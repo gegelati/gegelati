@@ -390,7 +390,7 @@ TEST_F(SelectorTest, DoSelectionActionsQuota)
 
 TEST_F(SelectorTest, DecimateWithTournamentSelection)
 {
-    params.selection.selectionMode = "tournament";
+    params.selection._selectionMode = "tournament";
     params.mutation.tpg.nbRoots = 30;
     params.selection.tournament.ratioSavedRoots = 0.3;
     params.selection.tournament.sizeTournament = 4;

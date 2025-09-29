@@ -125,7 +125,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.5, params.mutation.prog.pConstantMutation);
     ASSERT_EQ(-10, params.mutation.prog.minConstValue);
     ASSERT_EQ(10, params.mutation.prog.maxConstValue);
-    ASSERT_EQ("tournament", params.selection.selectionMode);
+    ASSERT_EQ("tournament", params.selection._selectionMode);
     ASSERT_EQ(0.85, params.selection.truncation.ratioDeletedRoots);
     ASSERT_EQ(0.15, params.selection.tournament.ratioSavedRoots);
     ASSERT_EQ(3, params.selection.tournament.sizeTournament);
@@ -232,7 +232,7 @@ TEST(LearningParametersTest, writeParametersToJson)
               params2.mutation.tpg.useActionProgram);
 
     // Selection parameters
-    ASSERT_EQ(params.selection.selectionMode, params2.selection.selectionMode);
+    ASSERT_EQ(params.selection._selectionMode, params2.selection._selectionMode);
     ASSERT_EQ(params.selection.tournament.ratioSavedRoots,
               params2.selection.tournament.ratioSavedRoots);
     ASSERT_EQ(params.selection.tournament.sizeTournament,

@@ -1716,7 +1716,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     rng.setSeed(0);
 
     uint64_t nbActions = 5;
-    params.selection.selectionMode = "tournament";
+    params.selection._selectionMode = "tournament";
     params.selection.tournament.sizeTournament = 2;
     params.selection.tournament.ratioSavedRoots = 0.1;
     Environment ce(set, params, vect, nbActions);

@@ -118,7 +118,7 @@ TEST_F(LearningAgentTest, Constructor)
 
     ASSERT_NO_THROW(delete la) << "Destruction of the LearningAgent failed.";
 
-    params.selection.selectionMode = "wrongSelector";
+    params.selection._selectionMode = "wrongSelector";
     ASSERT_THROW(la = new Learn::LearningAgent(le, set, params),
                  std::runtime_error)
         << "Construction of the learningAgent with wrong selector should fail.";
@@ -644,7 +644,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     params.mutation.tpg.useMultiActionProgram = true;
     params.mutation.tpg.teamAccessAllActions = false;
     params.mutation.tpg.ratioTeamsOverActions = 0.3333;
-    params.selection.selectionMode = "truncation";
+    params.selection._selectionMode = "truncation";
     params.selection.truncation.ratioDeletedRoots = 0.5;
     params.mutation.tpg.nbRoots = 100;
     params.nbThreads = 3;
@@ -703,7 +703,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
     params.mutation.tpg.useMultiActionProgram = true;
     params.mutation.tpg.teamAccessAllActions = false;
     params.mutation.tpg.ratioTeamsOverActions = 0.3333;
-    params.selection.selectionMode = "tournament";
+    params.selection._selectionMode = "tournament";
     params.selection.tournament.sizeTournament = 3;
     params.selection.tournament.ratioSavedRoots = 0.2;
     params.mutation.tpg.nbRoots = 100;

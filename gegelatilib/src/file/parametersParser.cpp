@@ -314,8 +314,8 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
 
-    if (param == "selectionMode") {
-        params.selection.selectionMode = value.asString();
+    if (param == "_selectionMode") {
+        params.selection._selectionMode = value.asString();
         return;
     }
     if (param == "ratioDeletedRoots") {
@@ -580,8 +580,8 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["prog"]["pSwap"].setComment(
         Mutator::ProgramParameters::pSwapComment, Json::commentBefore);
 
-    root["selection"]["selectionMode"] = params.selection.selectionMode;
-    root["selection"]["selectionMode"].setComment(
+    root["selection"]["_selectionMode"] = params.selection._selectionMode;
+    root["selection"]["_selectionMode"].setComment(
         Selector::SelectionParameters::selectionModeComment,
         Json::commentBefore);
     root["selection"]["truncation"]["ratioDeletedRoots"] =
