@@ -197,11 +197,11 @@ void Log::LABasicLogger::logAfterDecimate()
 
 void Log::LABasicLogger::logEndOfTraining()
 {
-    *this << std::setw(colWidth) << mutationTime;
     *this << std::setw(colWidth) << evalTime;
     if (doValidation) {
         *this << std::setw(colWidth) << validTime;
     }
     *this << std::setw(colWidth) << decimationTime;
+    *this << std::setw(colWidth) << mutationTime;
     *this << std::setw(colWidth) << getDurationFrom(*start) << std::endl;
 }
