@@ -41,6 +41,7 @@
     "tournament":{
       "ratioSavedRoots": 0.15,
       "sizeTournament": 3,
+      "areElitesReproductible": true,
     },
     "truncation":{
       "ratioDeletedRoots": 0.85,

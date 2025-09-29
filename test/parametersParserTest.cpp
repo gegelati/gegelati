@@ -69,7 +69,7 @@ TEST(LearningParametersTest, readConfigFile)
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(3, root["selection"].size())
         << "Wrong number of elements in parsed json file";
-    ASSERT_EQ(2, root["selection"]["tournament"].size())
+    ASSERT_EQ(3, root["selection"]["tournament"].size())
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(1, root["selection"]["truncation"].size())
         << "Wrong number of elements in parsed json file";
@@ -129,6 +129,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.85, params.selection.truncation.ratioDeletedRoots);
     ASSERT_EQ(0.15, params.selection.tournament.ratioSavedRoots);
     ASSERT_EQ(3, params.selection.tournament.sizeTournament);
+    ASSERT_EQ(true, params.selection.tournament.areElitesReproductible);
 
     // check default parameters
     Learn::LearningParameters params2;
@@ -234,6 +235,8 @@ TEST(LearningParametersTest, writeParametersToJson)
     // Selection parameters
     ASSERT_EQ(params.selection._selectionMode,
               params2.selection._selectionMode);
+    ASSERT_EQ(params.selection.tournament.areElitesReproductible,
+              params2.selection.tournament.areElitesReproductible);
     ASSERT_EQ(params.selection.tournament.ratioSavedRoots,
               params2.selection.tournament.ratioSavedRoots);
     ASSERT_EQ(params.selection.tournament.sizeTournament,

@@ -330,6 +330,10 @@ void File::ParametersParser::setParameterFromString(
         params.selection.tournament.sizeTournament = value.asUInt64();
         return;
     }
+    if (param == "areElitesReproductible") {
+        params.selection.tournament.areElitesReproductible = value.asBool();
+        return;
+    }
 
     // we didn't recognize the symbol
     std::cerr << "Ignoring unknown parameter " << param << std::endl;
@@ -598,6 +602,11 @@ void File::ParametersParser::writeParametersToJson(
         params.selection.tournament.sizeTournament;
     root["selection"]["tournament"]["sizeTournament"].setComment(
         Selector::TournamentParameters::sizeTournamentComment,
+        Json::commentBefore);
+    root["selection"]["tournament"]["areElitesReproductible"] =
+        params.selection.tournament.areElitesReproductible;
+    root["selection"]["tournament"]["areElitesReproductible"].setComment(
+        Selector::TournamentParameters::areElitesReproductibleComment,
         Json::commentBefore);
 
     // Write to the output stream
