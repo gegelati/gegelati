@@ -747,7 +747,6 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8799467424931131222U)
         << "Graph does not have the expected determinst characteristics.";
 
-
     params.selection.tournament.areElitesReproductible = true;
     Learn::LearningAgent la2(cle, set, params);
 
@@ -770,7 +769,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 7671)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la2.getRNG().getUnsignedInt64(0, UINT64_MAX), 6159334631906362531U)
+    ASSERT_EQ(la2.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              6159334631906362531U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
