@@ -232,7 +232,8 @@ TEST(LearningParametersTest, writeParametersToJson)
               params2.mutation.tpg.useActionProgram);
 
     // Selection parameters
-    ASSERT_EQ(params.selection._selectionMode, params2.selection._selectionMode);
+    ASSERT_EQ(params.selection._selectionMode,
+              params2.selection._selectionMode);
     ASSERT_EQ(params.selection.tournament.ratioSavedRoots,
               params2.selection.tournament.ratioSavedRoots);
     ASSERT_EQ(params.selection.tournament.sizeTournament,
