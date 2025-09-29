@@ -83,6 +83,13 @@ namespace Selector {
         /// generation.
         double ratioSavedRoots = 0.5;
 
+        /// JSon comment
+        inline static const std::string areElitesReproductibleComment =
+            "// Indicates if the elites are used in the reproduction process.\n"
+            "// \"areElitesReproductible\" : false, // Default value";
+        /// Indicates if the elites are used in the reproduction process.
+        bool areElitesReproductible = false;
+
     } TournamentParameters;
 
     /**

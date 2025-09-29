@@ -90,26 +90,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
 
     const auto& verticesToDeleteRef = this->verticesToDelete;
 
-    // The root not set to be deleted are not used during evolution
-    this->context.teamsClonable.erase(
-        std::remove_if(
-            this->context.teamsClonable.begin(),
-            this->context.teamsClonable.end(),
-            [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
-                return verticesToDeleteRef.find(vertex) ==
-                       verticesToDeleteRef.end();
-            }),
-        this->context.teamsClonable.end());
 
-    this->context.actionsClonable.erase(
-        std::remove_if(
-            this->context.actionsClonable.begin(),
-            this->context.actionsClonable.end(),
-            [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
-                return verticesToDeleteRef.find(vertex) ==
-                       verticesToDeleteRef.end();
-            }),
-        this->context.actionsClonable.end());
 
     // Erase the vertex set to be deleted to the list of pre existing vertex.
     // They are only used for being a new destination
@@ -132,6 +113,37 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
                        verticesToDeleteRef.end();
             }),
         this->context.preExistingActions.end());
+
+
+    if(!params.selection.tournament.areElitesReproductible){
+        // The root not set to be deleted are not used during evolution
+        this->context.teamsClonable.erase(
+            std::remove_if(
+                this->context.teamsClonable.begin(),
+                this->context.teamsClonable.end(),
+                [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
+                    return verticesToDeleteRef.find(vertex) ==
+                        verticesToDeleteRef.end();
+                }),
+            this->context.teamsClonable.end());
+
+        this->context.actionsClonable.erase(
+            std::remove_if(
+                this->context.actionsClonable.begin(),
+                this->context.actionsClonable.end(),
+                [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
+                    return verticesToDeleteRef.find(vertex) ==
+                        verticesToDeleteRef.end();
+                }),
+            this->context.actionsClonable.end());
+    } else {
+        if(this->context.teamsClonable.size() > 0){
+            this->context.nbTeamsToCreate -= this->context.preExistingTeams.size();
+        }
+        if(this->context.actionsClonable.size() > 0){
+            this->context.nbActionsToCreate -= this->context.preExistingActions.size();
+        }
+    }
 
     this->context.nbTeamsToCreate += this->context.teamsClonable.size();
     this->context.nbActionsToCreate += this->context.actionsClonable.size();

@@ -746,6 +746,32 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8799467424931131222U)
         << "Graph does not have the expected determinst characteristics.";
+
+
+    params.selection.tournament.areElitesReproductible = true;
+    Learn::LearningAgent la2(cle, set, params);
+
+    la2.init();
+    la2.train(alt, false);
+    TPG::TPGGraph& tpg2 = *la2.getTPGGraph();
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    ASSERT_EQ(tpg2.getNbVertices(), 77)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg2.getNbRootVertices(), 46)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg2.getEdges().size(), 233)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 3980)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 14384)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 7671)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la2.getRNG().getUnsignedInt64(0, UINT64_MAX), 6159334631906362531U)
+        << "Graph does not have the expected determinst characteristics.";
 }
 
 TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
