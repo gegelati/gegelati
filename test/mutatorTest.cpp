@@ -1837,9 +1837,9 @@ TEST_F(MutatorTest, TPGMutatorCrossProgram)
     rng.setSeed(1);
 
     Mutator::MutationParameters params;
-    params.prog.maxProgramSize = 64;
+    params.prog.maxProgramSize = 10;
     params.prog.initMaxProgramSize = 10;
-    params.prog.initMinProgramSize = 4;
+    params.prog.initMinProgramSize = 6;
     params.prog.maxConstValue = 10;
     params.prog.minConstValue = 0;
 
