@@ -7,6 +7,8 @@ _yyyy.mm.dd_
 * Add unique IDs for TPGVertex, TPGEdges and Program.
   * The IDs for TPGVertex and TPGEdges are used to reduce the complexity of the decimateRoot method, using a set to store the TPGVertex and TPGEdges instead of a list.
   * The Ids for TPGVertex and Program are used in the CodeGen and the dot file generator to name the objects. It will also be useful to follow the history of this objects.
+* Add the Selection module
+  * To make easier the implementation of future selection algorithm, a selection module is added, responsible of all the selection task down by the learning agent, the most important one being the selection of the best/worst agents at each generation.
 
 ## Release version 2.0.0 - Fragogola flavor
 _2025.08.18_
