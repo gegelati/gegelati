@@ -3,6 +3,11 @@
 ## Release version x.y.z
 _yyyy.mm.dd_
 
+### New features
+* Crossovers can now be applied to MAPLE agents, two types of crossover are possible.
+  * "Edge Crossover" which switch the edges of two MAPLE agents, but only edges with the same actionID.
+  * "Program Crossover", instead of switching the edges, new programs are created with a One-Point LGP crossover.
+
 ### Changes 
 * Add unique IDs for TPGVertex, TPGEdges and Program.
   * The IDs for TPGVertex and TPGEdges are used to reduce the complexity of the decimateRoot method, using a set to store the TPGVertex and TPGEdges instead of a list.
