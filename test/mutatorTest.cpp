@@ -1829,7 +1829,7 @@ TEST_F(MutatorTest, TPGMutatorCrossEdgesSwapPrograms)
     ASSERT_EQ(progA1_after.get(), p0.get()) << "a1 should now point to p0 after crossEdges";
 }
 
-TEST_F(MutatorTest, TPGMutatorCrossProgramCreatesNewPrograms)
+TEST_F(MutatorTest, TPGMutatorCrossProgram)
 {
     Environment ce(set, params, vect, 2);
     TPG::TPGGraph graph(ce);

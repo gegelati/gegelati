@@ -39,9 +39,11 @@
 #ifndef SET_H
 #define SET_H
 
+#include <cstdint>
 #include <functional>
 
 #include "instructions/instruction.h"
+
 
 namespace Instructions {
     /**
