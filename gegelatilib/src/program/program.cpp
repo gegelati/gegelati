@@ -79,6 +79,16 @@ Program::Line& Program::Program::addNewLine(const uint64_t idx)
     return *newLine;
 }
 
+
+void Program::Program::addNewLine(Line newLine)
+{
+    //this->addNewLine(this->getNbLines());
+
+    Line* newLinePtr = new Line(newLine);
+    // new line is not marked as an intron by default
+    this->lines.push_back({newLinePtr, false});
+}
+
 void Program::Program::clearIntrons()
 {
     size_t index = 0;

@@ -188,6 +188,20 @@ namespace Mutator {
         double pEdgeDestinationIsAction = 0.5;
 
         /// JSon comment
+        inline static const std::string pCrossAgentsComment =
+            "// Probability of doing a crossover with two MAPLE agents (edge crossover by default).\n"
+            "// \"pCrossAgents\" : 0.0, // Default value";
+        /// Probability of doing a crossover with two MAPLE agents (edge crossover by default).
+        double pCrossAgents = 0.0;
+
+        /// JSon comment
+        inline static const std::string pCrossProgramsComment =
+            "// When doing a crossover with two MAPLE agents, probability to do a program crossover instead of an edge crossover.\n"
+            "// \"pCrossPrograms\" : 0.0, // Default value";
+        /// When doing a crossover with two MAPLE agents, probability to do a program crossover instead of an edge crossover.
+        double pCrossPrograms = 0.0;
+
+        /// JSon comment
         inline static const std::string useActionProgramComment =
             "// Create action program, instead of using context program to "
             "select continuous action(s)"

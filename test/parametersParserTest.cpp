@@ -65,7 +65,7 @@ TEST(LearningParametersTest, readConfigFile)
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(9, root["mutation"]["prog"].size())
         << "Wrong number of elements in parsed json file";
-    ASSERT_EQ(11, root["mutation"]["tpg"].size())
+    ASSERT_EQ(22, root["mutation"]["tpg"].size())
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(3, root["selection"].size())
         << "Wrong number of elements in parsed json file";
@@ -105,6 +105,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(2.0, params.nbThreads);
     ASSERT_EQ(200, params.nbGenerations);
     ASSERT_EQ(true, params.doValidation);
+
     ASSERT_EQ(100, params.mutation.tpg.nbRoots);
     ASSERT_EQ(3, params.mutation.tpg.maxInitOutgoingEdges);
     ASSERT_EQ(60, params.mutation.tpg.maxOutgoingEdges);
@@ -116,6 +117,18 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.6, params.mutation.tpg.pEdgeDestinationIsAction);
     ASSERT_EQ(0.5, params.mutation.tpg.probaContextOverActionProgram);
     ASSERT_EQ(false, params.mutation.tpg.useActionProgram);
+    ASSERT_EQ(0.2, params.mutation.tpg.ratioTeamsOverActions);
+    ASSERT_EQ(0.3, params.mutation.tpg.pChangeActionClass);
+    ASSERT_EQ(0.3, params.mutation.tpg.pActionEdgeDeletion);
+    ASSERT_EQ(0.4, params.mutation.tpg.pActionEdgeAddition);
+    ASSERT_EQ(0.5, params.mutation.tpg.pMutateActionProgram);
+    ASSERT_EQ(0.9, params.mutation.tpg.pSwapActionProgram);
+    ASSERT_EQ(3, params.mutation.tpg.nbActionEdgeInit);
+    ASSERT_EQ(0.2, params.mutation.tpg.pCrossAgents);
+    ASSERT_EQ(0.5, params.mutation.tpg.pCrossPrograms);
+    ASSERT_EQ(true, params.mutation.tpg.useMultiActionProgram);
+    ASSERT_EQ(false, params.mutation.tpg.teamAccessAllActions);
+
     ASSERT_EQ(40, params.mutation.prog.maxProgramSize);
     ASSERT_EQ(0.0, params.mutation.prog.pNewProgram);
     ASSERT_EQ(0.7, params.mutation.prog.pDelete);
@@ -125,6 +138,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(0.5, params.mutation.prog.pConstantMutation);
     ASSERT_EQ(-10, params.mutation.prog.minConstValue);
     ASSERT_EQ(10, params.mutation.prog.maxConstValue);
+
     ASSERT_EQ("tournament", params.selection._selectionMode);
     ASSERT_EQ(0.85, params.selection.truncation.ratioDeletedRoots);
     ASSERT_EQ(0.15, params.selection.tournament.ratioSavedRoots);
@@ -231,6 +245,28 @@ TEST(LearningParametersTest, writeParametersToJson)
               params2.mutation.tpg.probaContextOverActionProgram);
     ASSERT_EQ(params.mutation.tpg.useActionProgram,
               params2.mutation.tpg.useActionProgram);
+    ASSERT_EQ(params.mutation.tpg.ratioTeamsOverActions,
+              params2.mutation.tpg.ratioTeamsOverActions);
+    ASSERT_EQ(params.mutation.tpg.pChangeActionClass,
+              params2.mutation.tpg.pChangeActionClass);
+    ASSERT_EQ(params.mutation.tpg.pActionEdgeAddition,
+              params2.mutation.tpg.pActionEdgeAddition);
+    ASSERT_EQ(params.mutation.tpg.pActionEdgeDeletion,
+              params2.mutation.tpg.pActionEdgeDeletion);
+    ASSERT_EQ(params.mutation.tpg.pMutateActionProgram,
+              params2.mutation.tpg.pMutateActionProgram);
+    ASSERT_EQ(params.mutation.tpg.pSwapActionProgram,
+              params2.mutation.tpg.pSwapActionProgram);
+    ASSERT_EQ(params.mutation.tpg.nbActionEdgeInit,
+              params2.mutation.tpg.nbActionEdgeInit);
+    ASSERT_EQ(params.mutation.tpg.pCrossAgents,
+              params2.mutation.tpg.pCrossAgents);
+    ASSERT_EQ(params.mutation.tpg.pCrossPrograms,
+              params2.mutation.tpg.pCrossPrograms);
+    ASSERT_EQ(params.mutation.tpg.useMultiActionProgram,
+              params2.mutation.tpg.useMultiActionProgram);
+    ASSERT_EQ(params.mutation.tpg.teamAccessAllActions,
+              params2.mutation.tpg.teamAccessAllActions);
 
     // Selection parameters
     ASSERT_EQ(params.selection._selectionMode,
