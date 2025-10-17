@@ -39,6 +39,7 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <typeinfo>
