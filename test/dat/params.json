@@ -23,7 +23,18 @@
       "pEdgeDestinationChange": 0.3,
       "pEdgeDestinationIsAction": 0.6,
       "probaContextOverActionProgram": 0.5,
-      "useActionProgram": false
+      "useActionProgram": false,
+      "ratioTeamsOverActions": 0.2,
+      "pChangeActionClass": 0.3,
+      "pActionEdgeDeletion": 0.3,
+      "pActionEdgeAddition": 0.4,
+      "pMutateActionProgram": 0.5,
+      "pSwapActionProgram": 0.9,
+      "nbActionEdgeInit": 3,
+      "pCrossAgents": 0.2,
+      "pCrossPrograms": 0.5,
+      "useMultiActionProgram": true,
+      "teamAccessAllActions": false
     },
     "prog": {
       "maxProgramSize": 40,
