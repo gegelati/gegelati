@@ -265,13 +265,11 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
     if (param == "pCrossAgents") {
-        params.mutation.tpg.pCrossAgents =
-            (double)value.asDouble();
+        params.mutation.tpg.pCrossAgents = (double)value.asDouble();
         return;
     }
     if (param == "pCrossPrograms") {
-        params.mutation.tpg.pCrossPrograms =
-            (double)value.asDouble();
+        params.mutation.tpg.pCrossPrograms = (double)value.asDouble();
         return;
     }
 
@@ -539,18 +537,15 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["probaContextOverActionProgram"].setComment(
         Mutator::TPGParameters::probaContextOverActionProgramComment,
         Json::commentBefore);
-        
-    root["mutation"]["tpg"]["pCrossAgents"] =
-        params.mutation.tpg.pCrossAgents;
+
+    root["mutation"]["tpg"]["pCrossAgents"] = params.mutation.tpg.pCrossAgents;
     root["mutation"]["tpg"]["pCrossAgents"].setComment(
-        Mutator::TPGParameters::pCrossAgentsComment,
-        Json::commentBefore);
+        Mutator::TPGParameters::pCrossAgentsComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["pCrossPrograms"] =
         params.mutation.tpg.pCrossPrograms;
     root["mutation"]["tpg"]["pCrossPrograms"].setComment(
-        Mutator::TPGParameters::pCrossProgramsComment,
-        Json::commentBefore);
+        Mutator::TPGParameters::pCrossProgramsComment, Json::commentBefore);
 
     // Mutation.program parameters
     root["mutation"]["prog"]["maxConstValue"] =

@@ -79,10 +79,9 @@ Program::Line& Program::Program::addNewLine(const uint64_t idx)
     return *newLine;
 }
 
-
 void Program::Program::addNewLine(Line newLine)
 {
-    //this->addNewLine(this->getNbLines());
+    // this->addNewLine(this->getNbLines());
 
     Line* newLinePtr = new Line(newLine);
     // new line is not marked as an intron by default

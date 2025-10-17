@@ -478,64 +478,64 @@ void Mutator::TPGMutator::mutateTPGAction(
     graph.orderActionEdges(&action);
 }
 
-
-
 void Mutator::TPGMutator::crossProgram(
-    TPG::TPGGraph& graph,
-    std::vector<const TPG::TPGAction*> childs,
-    size_t actionID,
-    const Mutator::MutationParameters& params,
+    TPG::TPGGraph& graph, std::vector<const TPG::TPGAction*> childs,
+    size_t actionID, const Mutator::MutationParameters& params,
     Mutator::RNG& rng)
 {
 
     // Create new empty programs
     std::array<std::shared_ptr<Program::Program>, 2> newProgs = {
         std::make_shared<Program::Program>(graph.getEnvironment(), true),
-        std::make_shared<Program::Program>(graph.getEnvironment(), true)
-    };
+        std::make_shared<Program::Program>(graph.getEnvironment(), true)};
 
-    // Get the programs of the parents, it should alreay be checked that program exist.
+    // Get the programs of the parents, it should alreay be checked that program
+    // exist.
     std::array<std::shared_ptr<Program::Program>, 2> originProgs = {
         childs.at(0)->getEdgeOfAction(actionID)->getProgramSharedPointer(),
-        childs.at(1)->getEdgeOfAction(actionID)->getProgramSharedPointer()
-    };
-
+        childs.at(1)->getEdgeOfAction(actionID)->getProgramSharedPointer()};
 
     std::array<uint64_t, 2> cutStart, cutEnd, sizeProgs;
 
-    // if the sum of the parents program size is above the max size, the size of the cross lines is the same for both parents.
-    bool specialCase = originProgs[0]->getNbLines() + originProgs[1]->getNbLines() >= params.prog.maxProgramSize;
+    // if the sum of the parents program size is above the max size, the size of
+    // the cross lines is the same for both parents.
+    bool specialCase =
+        originProgs[0]->getNbLines() + originProgs[1]->getNbLines() >=
+        params.prog.maxProgramSize;
 
     // Select random index for the crossover, normal case
     for (int i = 0; i < 2; i++) {
 
         uint64_t nbLines = originProgs[i]->getNbLines();
-        if(specialCase){
-            nbLines = std::min(originProgs[0]->getNbLines(), originProgs[1]->getNbLines());
+        if (specialCase) {
+            nbLines = std::min(originProgs[0]->getNbLines(),
+                               originProgs[1]->getNbLines());
         }
 
-        if (nbLines < 2) return; // If a program has only one line, crossover cannot happen.
+        if (nbLines < 2)
+            return; // If a program has only one line, crossover cannot happen.
 
         cutStart[i] = rng.getUnsignedInt64(0, nbLines - 1);
         cutEnd[i] = rng.getUnsignedInt64(0, nbLines - 2);
         if (cutEnd[i] == cutStart[i]) {
             cutEnd[i]++;
-        } else if (cutEnd[i] < cutStart[i]) {
+        }
+        else if (cutEnd[i] < cutStart[i]) {
             std::swap(cutStart[i], cutEnd[i]);
         }
 
-        if(specialCase){
+        if (specialCase) {
             cutStart[1] = cutStart[0];
             cutEnd[1] = cutEnd[0];
             break;
         }
     }
 
-
-
     // Compute program size of the children
     for (int i = 0; i < 2; i++) {
-        sizeProgs[i] = originProgs[i]->getNbLines() - (cutEnd[i] - cutStart[i]) + (cutEnd[1 - i] - cutStart[1 - i]);
+        sizeProgs[i] = originProgs[i]->getNbLines() -
+                       (cutEnd[i] - cutStart[i]) +
+                       (cutEnd[1 - i] - cutStart[1 - i]);
     }
 
     // Create new programs with the cut
@@ -549,9 +549,12 @@ void Mutator::TPGMutator::crossProgram(
         for (size_t idx = 0; idx < sizeProgs[childIdx]; idx++) {
             if (idx < start1) {
                 newProg->addNewLine(parent1->getLine(idx));
-            } else if (idx >= start1 + (end2 - start2)) {
-                newProg->addNewLine(parent1->getLine(idx + (end1 - start1) - (end2 - start2)));
-            } else {
+            }
+            else if (idx >= start1 + (end2 - start2)) {
+                newProg->addNewLine(
+                    parent1->getLine(idx + (end1 - start1) - (end2 - start2)));
+            }
+            else {
                 newProg->addNewLine(parent2->getLine(idx - start1 + start2));
             }
         }
@@ -563,73 +566,74 @@ void Mutator::TPGMutator::crossProgram(
         graph.removeActionEdge(*childs.at(i)->getEdgeOfAction(actionID));
         newProgs[i]->identifyIntrons();
     }
-
 }
 
-void Mutator::TPGMutator::crossEdges(
-    TPG::TPGGraph& graph,
-    std::vector<const TPG::TPGAction*> childs,
-    size_t actionID,
-    const Mutator::MutationParameters& params,
-    Mutator::RNG& rng)
+void Mutator::TPGMutator::crossEdges(TPG::TPGGraph& graph,
+                                     std::vector<const TPG::TPGAction*> childs,
+                                     size_t actionID,
+                                     const Mutator::MutationParameters& params,
+                                     Mutator::RNG& rng)
 {
-
 
     // get the edges
     TPG::TPGActionEdge* edge1 = childs.at(0)->getEdgeOfAction(actionID);
     TPG::TPGActionEdge* edge2 = childs.at(1)->getEdgeOfAction(actionID);
 
     // Only add the edge if the action is founded.
-    if(edge1 != nullptr){
-        graph.addNewActionEdge(*childs.at(1), edge1->getProgramSharedPointer(), actionID);
+    if (edge1 != nullptr) {
+        graph.addNewActionEdge(*childs.at(1), edge1->getProgramSharedPointer(),
+                               actionID);
         graph.removeActionEdge(*edge1);
     }
-    
+
     // Only add the edge if the action is founded.
-    if(edge2 != nullptr){
-        graph.addNewActionEdge(*childs.at(0), edge2->getProgramSharedPointer(), actionID);
+    if (edge2 != nullptr) {
+        graph.addNewActionEdge(*childs.at(0), edge2->getProgramSharedPointer(),
+                               actionID);
         graph.removeActionEdge(*edge2);
     }
 }
 
 void Mutator::TPGMutator::crossTPGAction(
-    TPG::TPGGraph& graph,
-    std::vector<const TPG::TPGAction*> childs,
-    const Mutator::MutationParameters& params,
-    Mutator::RNG& rng)
+    TPG::TPGGraph& graph, std::vector<const TPG::TPGAction*> childs,
+    const Mutator::MutationParameters& params, Mutator::RNG& rng)
 {
 
     std::vector<uint64_t> indexUsed;
     uint64_t indexAction;
-    
-    // Always do at least one crossover, except is the proba is at zero (mearning we don't want any crossover)
-    double proba = (params.tpg.pCrossAgents != 0) ? 1: 0;
-    while(indexUsed.size() < graph.getEnvironment().getNbContinuousActions()  && proba > rng.getDouble(0.0, 1.0)){
 
+    // Always do at least one crossover, except is the proba is at zero
+    // (mearning we don't want any crossover)
+    double proba = (params.tpg.pCrossAgents != 0) ? 1 : 0;
+    while (indexUsed.size() < graph.getEnvironment().getNbContinuousActions() &&
+           proba > rng.getDouble(0.0, 1.0)) {
 
         // Select the action ID
         do {
-            indexAction = rng.getUnsignedInt64(0, graph.getEnvironment().getNbContinuousActions()-1);
-        } while(std::find(indexUsed.begin(), indexUsed.end(), indexAction) != indexUsed.end()) ;
+            indexAction = rng.getUnsignedInt64(
+                0, graph.getEnvironment().getNbContinuousActions() - 1);
+        } while (std::find(indexUsed.begin(), indexUsed.end(), indexAction) !=
+                 indexUsed.end());
 
         indexUsed.push_back(indexAction);
 
-        // A crossover at program level can be done only the both parents assessed the action concerned
-        if(childs.at(0)->getAssessedActions().count(indexAction) > 0 &&
-        childs.at(1)->getAssessedActions().count(indexAction) > 0 &&
-        params.tpg.pCrossPrograms > rng.getDouble(0, 1)){
+        // A crossover at program level can be done only the both parents
+        // assessed the action concerned
+        if (childs.at(0)->getAssessedActions().count(indexAction) > 0 &&
+            childs.at(1)->getAssessedActions().count(indexAction) > 0 &&
+            params.tpg.pCrossPrograms > rng.getDouble(0, 1)) {
             crossProgram(graph, childs, indexAction, params, rng);
-        } else {
+        }
+        else {
             crossEdges(graph, childs, indexAction, params, rng);
         }
         proba *= params.tpg.pCrossAgents;
     }
 
-    for(auto child: childs){
+    for (auto child : childs) {
         graph.updateAssessedActions(child);
     }
 }
-
 
 void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph,
                                            const TPG::TPGTeam& team,
@@ -984,16 +988,18 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                       rng);
     }
 
-    // Divide root used into two subVector with half of the roots, randomly selected.
-    std::vector<const TPG::TPGAction*> subActionsClonable1(context->actionsClonable);
+    // Divide root used into two subVector with half of the roots, randomly
+    // selected.
+    std::vector<const TPG::TPGAction*> subActionsClonable1(
+        context->actionsClonable);
     std::vector<const TPG::TPGAction*> subActionsClonable2;
-    for(size_t idx = 0; idx < context->actionsClonable.size() / 2; idx++){
-        auto root = subActionsClonable1.at(rng.getUnsignedInt64(0, subActionsClonable1.size() - 1));
+    for (size_t idx = 0; idx < context->actionsClonable.size() / 2; idx++) {
+        auto root = subActionsClonable1.at(
+            rng.getUnsignedInt64(0, subActionsClonable1.size() - 1));
         subActionsClonable2.push_back(root);
         std::swap(root, subActionsClonable1.back());
         subActionsClonable1.pop_back();
     }
-
 
     // Create the new action roots
     // With rounding number, nbActionsToCreate can be -1, which we dont want.
@@ -1004,34 +1010,37 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         uint64_t clonedRootIndex1 =
             rng.getUnsignedInt64(0, subActionsClonable1.size() - 1);
         std::vector<const TPG::TPGAction*> childs = {
-            (const TPG::TPGAction*)(&graph.cloneVertex(*subActionsClonable1.at(clonedRootIndex1)))
-        };
-        
+            (const TPG::TPGAction*)(&graph.cloneVertex(
+                *subActionsClonable1.at(clonedRootIndex1)))};
 
-        // Be sure we have agents in both sub lists, and we still have at least two agents to create
-        if(subActionsClonable2.size() > 0 && nbActionsCreated < context->nbActionsToCreate - 1){
-            
-            uint64_t clonedRootIndex2 = 
+        // Be sure we have agents in both sub lists, and we still have at least
+        // two agents to create
+        if (subActionsClonable2.size() > 0 &&
+            nbActionsCreated < context->nbActionsToCreate - 1) {
+
+            uint64_t clonedRootIndex2 =
                 rng.getUnsignedInt64(0, subActionsClonable2.size() - 1);
 
             // clone the child
-            childs.push_back((const TPG::TPGAction*)(&graph.cloneVertex(*subActionsClonable2.at(clonedRootIndex2))));
+            childs.push_back((const TPG::TPGAction*)(&graph.cloneVertex(
+                *subActionsClonable2.at(clonedRootIndex2))));
 
             // Do the crossover over the childs
             crossTPGAction(graph, childs, params, rng);
         }
-        
+
         // Do the mutation over the childs
-        for(auto child: childs){
-            if(child->getOutgoingEdges().size() == 0){
+        for (auto child : childs) {
+            if (child->getOutgoingEdges().size() == 0) {
                 graph.removeVertex(*child);
-            } else {
+            }
+            else {
                 // Apply mutations to the root and increase the number of roots
-                mutateTPGAction(graph, *child, context, newPrograms, params, rng);
+                mutateTPGAction(graph, *child, context, newPrograms, params,
+                                rng);
                 nbActionsCreated++;
             }
         }
-
     }
 
     selector.deleteUselessParents();

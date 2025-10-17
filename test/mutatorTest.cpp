@@ -1790,7 +1790,8 @@ TEST_F(MutatorTest, TPGMutatorCrossEdgesSwapPrograms)
     const TPG::TPGAction* a0 = &(graph.addNewAction(0));
     const TPG::TPGAction* a1 = &(graph.addNewAction(1));
 
-    // Create two distinct programs and attach them as action edges for actionID = 0
+    // Create two distinct programs and attach them as action edges for actionID
+    // = 0
     auto p0 = std::make_shared<Program::Program>(graph.getEnvironment(), true);
     auto p1 = std::make_shared<Program::Program>(graph.getEnvironment(), true);
 
@@ -1814,9 +1815,11 @@ TEST_F(MutatorTest, TPGMutatorCrossEdgesSwapPrograms)
 
     // Perform crossEdges which should effectively swap the action-edge programs
     std::vector<const TPG::TPGAction*> childs = {a0, a1};
-    ASSERT_NO_THROW(Mutator::TPGMutator::crossEdges(graph, childs, 0, params, rng));
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::crossEdges(graph, childs, 0, params, rng));
 
-    // After crossEdges: a0's edge should now hold p1 and a1's edge should hold p0
+    // After crossEdges: a0's edge should now hold p1 and a1's edge should hold
+    // p0
     auto edgeA0_after = a0->getEdgeOfAction(0);
     auto edgeA1_after = a1->getEdgeOfAction(0);
     ASSERT_NE(edgeA0_after, nullptr);
@@ -1825,8 +1828,10 @@ TEST_F(MutatorTest, TPGMutatorCrossEdgesSwapPrograms)
     auto progA0_after = edgeA0_after->getProgramSharedPointer();
     auto progA1_after = edgeA1_after->getProgramSharedPointer();
 
-    ASSERT_EQ(progA0_after.get(), p1.get()) << "a0 should now point to p1 after crossEdges";
-    ASSERT_EQ(progA1_after.get(), p0.get()) << "a1 should now point to p0 after crossEdges";
+    ASSERT_EQ(progA0_after.get(), p1.get())
+        << "a0 should now point to p1 after crossEdges";
+    ASSERT_EQ(progA1_after.get(), p0.get())
+        << "a1 should now point to p0 after crossEdges";
 }
 
 TEST_F(MutatorTest, TPGMutatorCrossProgram)
@@ -1843,14 +1848,15 @@ TEST_F(MutatorTest, TPGMutatorCrossProgram)
     params.prog.maxConstValue = 10;
     params.prog.minConstValue = 0;
 
-
     // Create two parent actions
     const TPG::TPGAction* parent0 = &(graph.addNewAction(0));
     const TPG::TPGAction* parent1 = &(graph.addNewAction(1));
 
     // Create two parent programs (ensure they have multiple lines)
-    auto parentProg0 = std::make_shared<Program::Program>(graph.getEnvironment(), true);
-    auto parentProg1 = std::make_shared<Program::Program>(graph.getEnvironment(), true);
+    auto parentProg0 =
+        std::make_shared<Program::Program>(graph.getEnvironment(), true);
+    auto parentProg1 =
+        std::make_shared<Program::Program>(graph.getEnvironment(), true);
     Mutator::ProgramMutator::initRandomProgram(*parentProg0, params, rng);
     Mutator::ProgramMutator::initRandomProgram(*parentProg1, params, rng);
 
@@ -1864,21 +1870,24 @@ TEST_F(MutatorTest, TPGMutatorCrossProgram)
     ASSERT_GE(sizeParent0, 2u);
     ASSERT_GE(sizeParent1, 2u);
 
-    // Prepare children actions: create two new actions which will receive the children
+    // Prepare children actions: create two new actions which will receive the
+    // children
     const TPG::TPGAction* child0 = &(graph.addNewAction(2));
     const TPG::TPGAction* child1 = &(graph.addNewAction(3));
 
-    // Add dummy edges to children for the same actionID so crossProgram can set them.
-    // Use copies of parent programs initially to ensure edge exists.
+    // Add dummy edges to children for the same actionID so crossProgram can set
+    // them. Use copies of parent programs initially to ensure edge exists.
     graph.addNewActionEdge(*child0, parentProg0, 0);
     graph.addNewActionEdge(*child1, parentProg1, 0);
 
     std::vector<const TPG::TPGAction*> childs = {child0, child1};
 
     // Call crossProgram: it should create new program objects for each child
-    ASSERT_NO_THROW(Mutator::TPGMutator::crossProgram(graph, childs, 0, params, rng));
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::crossProgram(graph, childs, 0, params, rng));
 
-    // After crossProgram, the childrens' program pointers must NOT be the exact same as parents (new programs)
+    // After crossProgram, the childrens' program pointers must NOT be the exact
+    // same as parents (new programs)
     auto c0edge = child0->getEdgeOfAction(0);
     auto c1edge = child1->getEdgeOfAction(0);
     ASSERT_NE(c0edge, nullptr);
@@ -1887,8 +1896,10 @@ TEST_F(MutatorTest, TPGMutatorCrossProgram)
     auto c0prog = c0edge->getProgramSharedPointer();
     auto c1prog = c1edge->getProgramSharedPointer();
 
-    ASSERT_NE(c0prog.get(), parentProg0.get()) << "child 0 must have a new program (not parent0 pointer)";
-    ASSERT_NE(c1prog.get(), parentProg1.get()) << "child 1 must have a new program (not parent1 pointer)";
+    ASSERT_NE(c0prog.get(), parentProg0.get())
+        << "child 0 must have a new program (not parent0 pointer)";
+    ASSERT_NE(c1prog.get(), parentProg1.get())
+        << "child 1 must have a new program (not parent1 pointer)";
 
     // Programs must be non-empty and respect maxProgramSize
     ASSERT_GT(c0prog->getNbLines(), 0u);
@@ -1906,24 +1917,29 @@ TEST_F(MutatorTest, TPGMutatorCrossTPGAction)
 
     Mutator::MutationParameters params;
     // Force cross operations to happen
-    params.tpg.pCrossAgents = 0.9;   // allow repeated attempts
-    params.tpg.pCrossPrograms = 0.9; // prefer program-level crossover when possible
+    params.tpg.pCrossAgents = 0.9; // allow repeated attempts
+    params.tpg.pCrossPrograms =
+        0.9; // prefer program-level crossover when possible
     params.prog.maxProgramSize = 64;
     params.prog.initMaxProgramSize = 8;
     params.prog.initMinProgramSize = 4;
     params.prog.maxConstValue = 10;
     params.prog.minConstValue = 0;
 
-
-    // create two parents that assess the same actions (we'll ensure both assess action 0 and 1)
+    // create two parents that assess the same actions (we'll ensure both assess
+    // action 0 and 1)
     const TPG::TPGAction* p0 = &(graph.addNewAction(0));
     const TPG::TPGAction* p1 = &(graph.addNewAction(1));
 
     // Make programs for actions 0 and 1 for both parents and attach them
-    auto pp00 = std::make_shared<Program::Program>(graph.getEnvironment(), true);
-    auto pp01 = std::make_shared<Program::Program>(graph.getEnvironment(), true);
-    auto pp10 = std::make_shared<Program::Program>(graph.getEnvironment(), true);
-    auto pp11 = std::make_shared<Program::Program>(graph.getEnvironment(), true);
+    auto pp00 =
+        std::make_shared<Program::Program>(graph.getEnvironment(), true);
+    auto pp01 =
+        std::make_shared<Program::Program>(graph.getEnvironment(), true);
+    auto pp10 =
+        std::make_shared<Program::Program>(graph.getEnvironment(), true);
+    auto pp11 =
+        std::make_shared<Program::Program>(graph.getEnvironment(), true);
 
     Mutator::ProgramMutator::initRandomProgram(*pp00, params, rng);
     Mutator::ProgramMutator::initRandomProgram(*pp01, params, rng);
@@ -1948,15 +1964,23 @@ TEST_F(MutatorTest, TPGMutatorCrossTPGAction)
 
     std::vector<const TPG::TPGAction*> childs = {p0, p1};
 
-    // Run crossTPGAction: with pCrossAgents=1.0 and pCrossPrograms=1.0 we expect at least one crossover.
-    ASSERT_NO_THROW(Mutator::TPGMutator::crossTPGAction(graph, childs, params, rng));
+    // Run crossTPGAction: with pCrossAgents=1.0 and pCrossPrograms=1.0 we
+    // expect at least one crossover.
+    ASSERT_NO_THROW(
+        Mutator::TPGMutator::crossTPGAction(graph, childs, params, rng));
 
-    // After crossover, at least one of the action-program pointers should have changed
+    // After crossover, at least one of the action-program pointers should have
+    // changed
     bool changed = false;
-    if (p0->getEdgeOfAction(0)->getProgramSharedPointer().get() != before_p0_a0) changed = true;
-    if (p0->getEdgeOfAction(1)->getProgramSharedPointer().get() != before_p0_a1) changed = true;
-    if (p1->getEdgeOfAction(0)->getProgramSharedPointer().get() != before_p1_a0) changed = true;
-    if (p1->getEdgeOfAction(1)->getProgramSharedPointer().get() != before_p1_a1) changed = true;
+    if (p0->getEdgeOfAction(0)->getProgramSharedPointer().get() != before_p0_a0)
+        changed = true;
+    if (p0->getEdgeOfAction(1)->getProgramSharedPointer().get() != before_p0_a1)
+        changed = true;
+    if (p1->getEdgeOfAction(0)->getProgramSharedPointer().get() != before_p1_a0)
+        changed = true;
+    if (p1->getEdgeOfAction(1)->getProgramSharedPointer().get() != before_p1_a1)
+        changed = true;
 
-    ASSERT_TRUE(changed) << "crossTPGAction should change at least one child's action program/pointer";
+    ASSERT_TRUE(changed) << "crossTPGAction should change at least one child's "
+                            "action program/pointer";
 }

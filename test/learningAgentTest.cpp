@@ -667,7 +667,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
              <<TPG::TPGVertex::getVertexIDCounter()<<" "
              <<TPG::TPGEdge::getEdgeIDCounter()<<" "
              <<Program::Program::getProgramIDCounter()<<" "
-             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/;
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/
+    ;
 
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
@@ -684,8 +685,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 2506)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              1975743868576999154U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 1975743868576999154U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -727,7 +727,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
              <<TPG::TPGVertex::getVertexIDCounter()<<" "
              <<TPG::TPGEdge::getEdgeIDCounter()<<" "
              <<Program::Program::getProgramIDCounter()<<" "
-             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/;
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/
+    ;
 
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
@@ -813,7 +814,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithCrossingMAPLE)
              <<TPG::TPGVertex::getVertexIDCounter()<<" "
              <<TPG::TPGEdge::getEdgeIDCounter()<<" "
              <<Program::Program::getProgramIDCounter()<<" "
-             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/;
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/
+    ;
 
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
@@ -830,8 +832,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithCrossingMAPLE)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 2546)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              8433195571775175959U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8433195571775175959U)
         << "Graph does not have the expected determinst characteristics.";
 }
 

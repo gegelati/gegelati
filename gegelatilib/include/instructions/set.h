@@ -44,7 +44,6 @@
 
 #include "instructions/instruction.h"
 
-
 namespace Instructions {
     /**
      * \brief Class for storing a set of Instruction.

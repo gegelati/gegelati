@@ -213,10 +213,9 @@ namespace Program {
          */
         Line& addNewLine(const uint64_t idx);
 
-
         /**
          * \brief Add a new line to the Program at the end of the program.
-         * 
+         *
          * \param[in] newLine new Line added to the program
          */
         void addNewLine(Line newLine);
