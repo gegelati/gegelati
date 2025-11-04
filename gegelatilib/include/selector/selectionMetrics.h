@@ -58,10 +58,21 @@ namespace Selector {
          */
         virtual double getUtility() const;
 
+        
+        /**
+         * \brief Init the metrics for the agent in the learning environment.
+         * 
+         * This method is called at the beginning of the evaluateJob method.
+         * 
+         * \param[in] agent the TPGVertex representing the agent.
+         * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
+         */
+        virtual void initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment);
+
         /**
          * \brief Extract metrics from the agent in the learning environment.
          * 
-         * This method is called at every step of the environment evaluation
+         * This method is called at every step of the environment evaluation.
          * 
          * \param[in] agent the TPGVertex representing the agent.
          * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
@@ -71,7 +82,7 @@ namespace Selector {
         /**
          * \brief Extract metrics from the agent in the learning environment.
          * 
-         * This method is called at the end of every episode of the environment evaluation
+         * This method is called at the end of every episode of the environment evaluation.
          * 
          * \param[in] agent the TPGVertex representing the agent.
          * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
@@ -79,33 +90,26 @@ namespace Selector {
         virtual void extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment);
 
         /**
-         * \brief Polymorphic addition assignement operator for
-         * SelectionMetrics.
-         *
-         * \throw std::runtime_error in case the other SelectionMetrics and
-         * this have a different typeid.
+         * \brief Perform a weighted sum between this SelectionMetrics and another.
+         * 
+         * \param[in] other the other SelectionMetrics to combine with this.
+         * \param[in] nbEvaluation the number of evaluation used to obtain this SelectionMetrics.
+         * \param[in] nbEvaluationOther the number of evaluation used to obtain the other SelectionMetrics.
          */
-        virtual SelectionMetrics& operator+=(const SelectionMetrics& other);
-
-        /**
-         * \brief Polymorphic multiplication assignement operator for
-         * SelectionMetrics.
-         */
-        virtual SelectionMetrics& operator*=(double factor);
+        virtual void weightedSum(std::shared_ptr<SelectionMetrics> other, size_t nbEvaluation, size_t nbEvaluationOther);
 
         /**
          * \brief Polymorphic division assignement operator for
-         * SelectionMetrics.
+         * EvaluationResult.
          */
         virtual SelectionMetrics& operator/=(double factor);
-
     };
     
     /**
      * \brief Comparison function to enable sorting of SelectionMetrics with
      * STL.
      */
-    bool operator<(std::shared_ptr<Selector::SelectionMetrics> a, std::shared_ptr<Selector::SelectionMetrics> b);
+    bool operator<(std::shared_ptr<SelectionMetrics> a, std::shared_ptr<SelectionMetrics> b);
 
 }; // namespace Selector
 

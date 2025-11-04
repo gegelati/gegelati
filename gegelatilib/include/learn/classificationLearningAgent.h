@@ -133,6 +133,7 @@ namespace Learn {
         }
 
         std::shared_ptr<Selector::SelectionMetrics> selectionMetrics = this->selector->createSelectionMetrics();
+        selectionMetrics->initMetrics(root, le);
 
         // Evaluate nbIteration times
         for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation;

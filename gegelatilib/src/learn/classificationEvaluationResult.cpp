@@ -42,11 +42,11 @@ std::shared_ptr<Selector::SelectionMetrics> Learn::ClassificationEvaluationResul
     // allocating a new shared_ptr. Reset it at each call.
     Selector::SelectionMetrics average;
 
-    for (const auto& metric : selectionMetricsPerClass) {
+    /*for (const auto& metric : selectionMetricsPerClass) {
         average += (*metric);
     }
 
-    average /= static_cast<double>(selectionMetricsPerClass.size());
+    average /= static_cast<double>(selectionMetricsPerClass.size());*/
 
     return std::make_shared<Selector::SelectionMetrics>(average);
 }
@@ -66,7 +66,7 @@ Learn::EvaluationResult& Learn::ClassificationEvaluationResult::operator+=(
     const EvaluationResult& other)
 {
     // Super call to detect type mismatch.
-    EvaluationResult::operator+=(other);
+    /*EvaluationResult::operator+=(other);
 
     // If types are identical, add per-class metrics
     if (typeid(*this) == typeid(other)) {
@@ -106,7 +106,7 @@ Learn::EvaluationResult& Learn::ClassificationEvaluationResult::operator+=(
 
         // Update the global selectionMetrics by computing average across all classes
         this->selectionMetrics = computeAverageMetrics(this->selectionMetricsPerClass);
-    }
+    }*/
 
     return *this;
 }

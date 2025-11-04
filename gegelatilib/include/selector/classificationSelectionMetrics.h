@@ -44,7 +44,11 @@ namespace Selector {
          */
         ClassificationSelectionMetrics(const std::vector<double>& scorePerClass, const std::vector<size_t>& nbEvalPerClass)
             : SelectionMetrics(std::accumulate(scorePerClass.cbegin(), scorePerClass.cend(), 0.0) /
-                      scorePerClass.size()), scorePerClass{scorePerClass}, nbEvalPerClass{nbEvalPerClass} {};
+                      scorePerClass.size()), scorePerClass{scorePerClass}, nbEvalPerClass{nbEvalPerClass} {
+                        if(scorePerClass.size() != nbEvalPerClass.size()){
+                          throw std::runtime_error("Number of class missmatch.");
+                        }
+                      };
 
         /**
          * Return the score per class of the agent.
@@ -57,29 +61,33 @@ namespace Selector {
         virtual const std::vector<size_t>& getNbEvalPerClassPerClass() const;
 
         /**
-         * \brief Extract metrics from the agent in the learning environment.
+         * \brief Specializaation of the initialisation of the metrics.
          * 
-         * This method is called at the end of every episode of the environment evaluation
+         * \param[in] agent the TPGVertex representing the agent.
+         * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
+         */
+        void initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment) override;
+
+        /**
+         * \brief Specializaation of the extraction of the metrics at the end of an episode.
          * 
          * \param[in] agent the TPGVertex representing the agent.
          * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
          */
         void extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment) override;
 
+
         /**
-         * \brief Polymorphic addition assignement operator for
-         * SelectionMetrics.
-         *
-         * \throw std::runtime_error in case the other SelectionMetrics and
-         * this have a different typeid.
+         * \brief Specialization of weightedSum method to add the score per class and nbEvalPerClass
          */
-        virtual SelectionMetrics& operator+=(const SelectionMetrics& other) override;
+        virtual void weightedSum(std::shared_ptr<SelectionMetrics> other, size_t nbEvaluation, size_t nbEvaluationOther) override;
+
 
         /**
          * \brief Polymorphic multiplication assignement operator for
          * SelectionMetrics.
          */
-        virtual SelectionMetrics& operator*=(double factor) override;
+        virtual SelectionMetrics& operator/=(double factor) override;
 
     };
 

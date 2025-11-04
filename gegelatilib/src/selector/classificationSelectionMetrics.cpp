@@ -5,6 +5,13 @@
 #include "selector/classificationSelectionMetrics.h"
 #include "learn/classificationLearningEnvironment.h"
 
+
+void Selector::ClassificationSelectionMetrics::initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
+{
+    this->scorePerClass.resize(learningEnvironment.getNbActions(), 0.0);
+    this->nbEvalPerClass.resize(learningEnvironment.getNbActions(), 0.0);
+}
+
 void Selector::ClassificationSelectionMetrics::extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
 {
     // Update results
@@ -54,51 +61,36 @@ const std::vector<size_t>& Selector::ClassificationSelectionMetrics::getNbEvalPe
     return this->nbEvalPerClass;
 }
 
-Selector::SelectionMetrics& Selector::ClassificationSelectionMetrics::operator+=(
-    const Selector::SelectionMetrics& other)
-{
-    // Type Check (Must be done in all override)
-    // This test will succeed in child class.
-    const std::type_info& thisType = typeid(*this);
-    if (typeid(other) != thisType) {
-        throw std::runtime_error("Type mismatch between SelectionMetrics.");
+
+void Selector::ClassificationSelectionMetrics::weightedSum(std::shared_ptr<SelectionMetrics> other, size_t nbEvaluation, size_t nbEvaluationOther){
+
+    // To update main score and utility, and check type issues
+    SelectionMetrics::weightedSum(other, nbEvaluation, nbEvaluationOther);
+
+    const auto& castedOther = static_cast<const Selector::ClassificationSelectionMetrics&>(*other);
+    if(this->scorePerClass.size() != castedOther.scorePerClass.size()){
+        throw std::runtime_error("Number of classes is not the same.");
+    }
+    
+    for(size_t idx = 0; idx < this->scorePerClass.size(); idx++){
+        // Weighted sum of the score per class.
+        this->scorePerClass[idx] = this->scorePerClass[idx] * (double)this->nbEvalPerClass[idx] + castedOther.scorePerClass[idx] * (double)castedOther.nbEvalPerClass[idx];
+        this->nbEvalPerClass[idx] += castedOther.nbEvalPerClass[idx];
+
+        this->scorePerClass[idx] /= (double)this->nbEvalPerClass[idx];
     }
 
-    const auto& castedOther = static_cast<const Selector::ClassificationSelectionMetrics&>(other);
-    // If the added type is Selector::SelectionMetrics
-    if (thisType == typeid(Selector::ClassificationSelectionMetrics)) {
-        this->score += castedOther.score;
-        this->utility += castedOther.utility;
-
-        if(this->scorePerClass.size() != castedOther.scorePerClass.size()){
-            throw std::runtime_error("Number of classes is not the same.");
-        }
-
-        for(size_t idx = 0; idx < this->scorePerClass.size(); idx++){
-            this->scorePerClass[idx] += castedOther.scorePerClass[idx];
-        }
-
-        
-        if(this->nbEvalPerClass.size() != castedOther.nbEvalPerClass.size()){
-            throw std::runtime_error("Number of classes is not the same.");
-        }
-
-        for(size_t idx = 0; idx < this->nbEvalPerClass.size(); idx++){
-            this->nbEvalPerClass[idx] += castedOther.nbEvalPerClass[idx];
-        }
-    }
-
-    return *this;
+    
 }
 
 
-Selector::SelectionMetrics& Selector::ClassificationSelectionMetrics::operator*=(double factor)
+Selector::SelectionMetrics& Selector::ClassificationSelectionMetrics::operator/=(double factor)
 {
-    this->score *= factor;
-    this->utility *= factor;
+    this->score /= factor;
+    this->utility /= factor;
 
     for(double& scoreClass: this->scorePerClass){
-        scoreClass *= factor;
+        scoreClass /= factor;
     }
     return *this;
 }

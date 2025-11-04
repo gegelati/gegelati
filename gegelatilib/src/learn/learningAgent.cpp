@@ -149,6 +149,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
                                 : this->params.nbIterationsPerPolicyValidation;
 
     std::shared_ptr<Selector::SelectionMetrics> selectionMetrics = this->selector->createSelectionMetrics();
+    selectionMetrics->initMetrics(root, le);
 
     // Evaluate nbIteration times
     for (auto iterationNumber = 0; iterationNumber < nbEvaluation;

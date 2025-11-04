@@ -59,17 +59,9 @@ Learn::EvaluationResult& Learn::EvaluationResult::operator+=(
 
     // If the added type is Learn::EvaluationResult
     if (thisType == typeid(Learn::EvaluationResult)) {
-        // Create copies of both metrics
-        std::shared_ptr<Selector::SelectionMetrics> tempCurrentMetrics = this->selectionMetrics;
-        Selector::SelectionMetrics tempOtherMetrics(*other.selectionMetrics);
-        
-        // Perform weighted operations
-        (*tempCurrentMetrics) *= (double)this->nbEvaluation;
-        tempOtherMetrics *= (double)other.nbEvaluation;
-        (*tempCurrentMetrics) += tempOtherMetrics;
-        (*tempCurrentMetrics) /= (double)(this->nbEvaluation + other.nbEvaluation);
-        
-        this->selectionMetrics = tempCurrentMetrics;
+
+        // Update selectionMetrics
+        this->selectionMetrics->weightedSum(other.selectionMetrics, this->nbEvaluation, other.nbEvaluation);
         
         // Addition of nbEvaluation
         this->nbEvaluation = this->nbEvaluation + other.nbEvaluation;

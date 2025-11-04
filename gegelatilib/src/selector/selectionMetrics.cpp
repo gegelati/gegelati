@@ -12,6 +12,11 @@ double Selector::SelectionMetrics::getUtility() const
     return utility;
 }
 
+void Selector::SelectionMetrics::initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
+{
+    // Does not do anything
+}
+
 void Selector::SelectionMetrics::extractMetricsStep(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
 {
     // Does not do anything
@@ -28,39 +33,28 @@ void Selector::SelectionMetrics::extractMetricsEpisode(const TPG::TPGVertex* age
     }
 }
 
-Selector::SelectionMetrics& Selector::SelectionMetrics::operator+=(
-    const Selector::SelectionMetrics& other)
-{
-    // Type Check (Must be done in all override)
-    // This test will succeed in child class.
-    const std::type_info& thisType = typeid(*this);
-    if (typeid(other) != thisType) {
+void Selector::SelectionMetrics::weightedSum(std::shared_ptr<SelectionMetrics> other, size_t nbEvaluation, size_t nbEvaluationOther){
+
+    if (typeid(*this) != typeid(*other)) {
         throw std::runtime_error("Type mismatch between SelectionMetrics.");
     }
 
-    // If the added type is Selector::SelectionMetrics
-    if (thisType == typeid(Selector::SelectionMetrics)) {
-        this->score += other.score;
-        this->utility += other.utility;
-    }
+    this->score = this->score * (double)nbEvaluation + other->score * (double)nbEvaluationOther;
+    this->score /= (double)(nbEvaluation + nbEvaluationOther);
 
-    return *this;
+    this->utility = this->score * (double)nbEvaluation + other->utility * (double)nbEvaluationOther;
+    this->utility /= (double)(nbEvaluation + nbEvaluationOther);
 }
 
-Selector::SelectionMetrics& Selector::SelectionMetrics::operator*=(double factor)
-{
-    this->score *= factor;
-    this->utility *= factor;
-    return *this;
-}
 
 Selector::SelectionMetrics& Selector::SelectionMetrics::operator/=(double factor)
 {
-    return this->operator*=(1.0 / factor);
+    this->score /= factor;
+    this->utility /= factor;
+    return *this;
 }
 
-
-bool Selector::operator<(std::shared_ptr<Selector::SelectionMetrics> a, std::shared_ptr<Selector::SelectionMetrics> b)
+bool Selector::operator<(std::shared_ptr<SelectionMetrics> a, std::shared_ptr<SelectionMetrics> b)
 {
     return a->getScore() < b->getScore();
 }
