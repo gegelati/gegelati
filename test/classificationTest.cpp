@@ -48,12 +48,12 @@
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 
-#include "learn/classificationLearningAgent.h"
+#include "learn/learningAgent.h"
 #include "selector/classificationSelectionMetrics.h"
 
 #include "learn/fakeClassificationLearningEnvironment.h"
 
-class ClassificationLearningAgentTest : public ::testing::Test
+class ClassificationTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
@@ -90,28 +90,26 @@ class ClassificationLearningAgentTest : public ::testing::Test
     }
 };
 
-TEST_F(ClassificationLearningAgentTest, Constructor)
+TEST_F(ClassificationTest, Constructor)
 {
-    Learn::ClassificationLearningAgent<Learn::LearningAgent>* cla;
+    Learn::LearningAgent* la;
 
     // Build with Learn::LearningAgent
     ASSERT_NO_THROW(
-        cla = new Learn::ClassificationLearningAgent<Learn::LearningAgent>(
+        la = new Learn::LearningAgent(
             fle, set, params))
-        << "Error when building a ClassificationLearningAgent.";
-    ASSERT_NO_THROW(delete cla)
-        << "Error when deleting a ClassificationLearningAgent";
-
+        << "Error when building a LearningAgent with classification "
+           "environment.";
     // Build with Learn::ParallelLearningAgent
-    Learn::ClassificationLearningAgent<Learn::ParallelLearningAgent>* pcla;
-    ASSERT_NO_THROW(pcla = new Learn::ClassificationLearningAgent<
-                        Learn::ParallelLearningAgent>(fle, set, params))
-        << "Error when building a ClassificationLearningAgent.";
-    ASSERT_NO_THROW(delete pcla)
-        << "Error when deleting a ClassificationLearningAgent";
+    ASSERT_TRUE(dynamic_cast<Selector::ClassificationSelector*>(
+                    la->getSelector().get()) != nullptr)
+        << "Selector should be a classification selector";
+    ASSERT_NO_THROW(delete la)
+        << "Error when deleting a LearningAgent with classification environment";
+
 }
 
-TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
+TEST_F(ClassificationTest, EvaluateRoot)
 {
     params.archiveSize = 50;
     params.archivingProbability = 1.0;
@@ -124,17 +122,17 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
     params.maxNbEvaluationPerPolicy =
         2 * params.nbIterationsPerPolicyEvaluation;
 
-    Learn::ClassificationLearningAgent cla(fle, set, params);
+    Learn::LearningAgent la(fle, set, params);
     Archive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
-    TPG::TPGExecutionEngine tee(cla.getTPGGraph()->getEnvironment(), &a);
+    TPG::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
 
-    cla.init();
+    la.init();
     std::shared_ptr<Learn::EvaluationResult> result1;
-    ASSERT_NO_THROW(result1 = cla.evaluateJob(
+    ASSERT_NO_THROW(result1 = la.evaluateJob(
                         tee,
-                        *cla.makeJob(cla.getTPGGraph()->getRootVertices().at(0),
+                        *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
                                      Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
@@ -142,35 +140,35 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
         << "Average score should not exceed the score of a perfect player.";
 
     // Record this result
-    cla.getSelector()->updateEvaluationRecords(
-        {{result1, cla.getTPGGraph()->getRootVertices().at(0)}});
+    la.getSelector()->updateEvaluationRecords(
+        {{result1, la.getTPGGraph()->getRootVertices().at(0)}});
 
     // Reevaluate to check that the previous result1 is not returned.
     std::shared_ptr<Learn::EvaluationResult> result2;
-    ASSERT_NO_THROW(result2 = cla.evaluateJob(
+    ASSERT_NO_THROW(result2 = la.evaluateJob(
                         tee,
-                        *cla.makeJob(cla.getTPGGraph()->getRootVertices().at(0),
+                        *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
                                      Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
     ASSERT_NE(result1, result2);
 
     // Record this result
-    cla.getSelector()->updateEvaluationRecords(
-        {{result2, cla.getTPGGraph()->getRootVertices().at(0)}});
+    la.getSelector()->updateEvaluationRecords(
+        {{result2, la.getTPGGraph()->getRootVertices().at(0)}});
 
     // Reevaluate to check that the previous result2 is returned.
     std::shared_ptr<Learn::EvaluationResult> result3;
-    ASSERT_NO_THROW(result3 = cla.evaluateJob(
+    ASSERT_NO_THROW(result3 = la.evaluateJob(
                         tee,
-                        *cla.makeJob(cla.getTPGGraph()->getRootVertices().at(0),
+                        *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
                                      Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result3, result2);
 }
 
-TEST_F(ClassificationLearningAgentTest, DoSelection)
+TEST_F(ClassificationTest, DoSelection)
 {
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
@@ -181,14 +179,14 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
     params.mutation.tpg.nbRoots = 50; // Param used in decimation
     params.nbThreads = 4;
 
-    Learn::ClassificationLearningAgent cla(fle, set, params);
+    Learn::LearningAgent la(fle, set, params);
 
     // Initialize and populate the TPG
-    cla.init(0);
-    TPG::TPGGraph& graph = *cla.getTPGGraph();
-    Mutator::TPGMutator::populateTPG(graph, *cla.getSelector(),
-                                     cla.getArchive(), params.mutation,
-                                     cla.getRNG(), fle.getNbActions());
+    la.init(0);
+    TPG::TPGGraph& graph = *la.getTPGGraph();
+    Mutator::TPGMutator::populateTPG(graph, *la.getSelector(),
+                                     la.getArchive(), params.mutation,
+                                     la.getRNG(), fle.getNbActions());
 
     // Get roots
     auto roots = graph.getRootVertices();
@@ -205,10 +203,10 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
     }
 
     // Do the decimation (must fail)
-    ASSERT_THROW(cla.getSelector()->doSelection(results, cla.getRNG()),
+    ASSERT_THROW(la.getSelector()->doSelection(results, la.getRNG()),
                  std::runtime_error)
-        << "Decimating worst roots should fail with EvaluationResults instead "
-           "of ClassificationEvaluationResults.";
+        << "Decimating worst roots should fail with SelectionMetrics instead "
+           "of ClassificationSelectionMetrics.";
 
     // Create and fill results for each "root" artificially with
     // ClassificationEvaluationResults
@@ -286,13 +284,13 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
 
     // Do the decimation
     ASSERT_NO_THROW(
-        cla.getSelector()->doSelection(classifResults, cla.getRNG()))
+        la.getSelector()->doSelection(classifResults, la.getRNG()))
         << "Decimating worst roots should not fail with "
            "ClassificationEvaluationResults.";
 
     // Check the number of remaining vertices.
     ASSERT_EQ(
-        cla.getTPGGraph()->getNbVertices(),
+        la.getTPGGraph()->getNbVertices(),
         originalNbVertices -
             std::ceil(params.mutation.tpg.nbRoots *
                       (1.0 - params.selection.truncation.ratioDeletedRoots)));
@@ -300,7 +298,7 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
     // Check the presence of savedRoots among remaining roots.
     // i.e. check that their good result1 for one class saved them from
     // decimation.
-    auto remainingRoots = cla.getTPGGraph()->getRootVertices();
+    auto remainingRoots = la.getTPGGraph()->getRootVertices();
     for (const TPG::TPGVertex* savedRoot : savedRoots) {
         ASSERT_TRUE(std::find(remainingRoots.begin(), remainingRoots.end(),
                               savedRoot) != remainingRoots.end())

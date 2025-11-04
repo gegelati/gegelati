@@ -50,11 +50,13 @@
 #include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"
 
+#include "learn/classificationLearningEnvironment.h"
 #include "learn/evaluationResult.h"
 #include "learn/job.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 
+#include "selector/classificationSelector.h"
 #include "selector/selector.h"
 #include "selector/tournamentSelector.h"
 #include "selector/truncationSelector.h"
@@ -123,7 +125,11 @@ namespace Learn {
 
             // There is probably a cleaner way to do that, but using the factory
             // was creating import issues.
-            if (p.selection._selectionMode == "truncation") {
+            if (dynamic_cast<ClassificationLearningEnvironment*>(&le) != nullptr){
+                this->selector = std::make_shared<Selector::ClassificationSelector>(
+                    this->tpg, this->params, le.getNbActions());
+            }
+            else if (p.selection._selectionMode == "truncation") {
                 selector =
                     std::make_shared<Selector::TruncationSelector>(tpg, p);
             }

@@ -84,8 +84,6 @@
 //#include <learn/adversarialLearningAgent.h>
 //#include <learn/adversarialLearningEnvironment.h>
 
-#include <learn/classificationEvaluationResult.h>
-#include <learn/classificationLearningAgent.h>
 #include <learn/classificationLearningEnvironment.h>
 
 #include <log/cycleDetectionLALogger.h>

@@ -14,12 +14,12 @@ void Selector::ClassificationSelector::doSelection(
                   const TPG::TPGVertex*>& results,
     Mutator::RNG& rng)
 {
-    // Check that results are ClassificationEvaluationResults.
+    // Check that results are ClassificationSelectionMetrics is used.
     // (also throws on empty results)
     const Learn::EvaluationResult* result = results.begin()->first.get();
     if (typeid(ClassificationSelectionMetrics) != typeid(*result->getSelectionMetrics().get())) {
         throw std::runtime_error(
-            "ClassificationLearningAgent can not decimate worst roots for "
+            "Can not decimate worst roots for "
             "results whose metrics type is not ClassificationSelectionMetrics.");
     }
 
