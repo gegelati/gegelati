@@ -122,7 +122,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
     // new ones). Warning: in ClassificationLearningEnvironment, the number of
     // evaluation corresponds to the total number of action.
     params.maxNbEvaluationPerPolicy =
-        2 * params.nbIterationsPerPolicyEvaluation * params.maxNbActionsPerEval;
+        2 * params.nbIterationsPerPolicyEvaluation;
 
     Learn::ClassificationLearningAgent cla(fle, set, params);
     Archive a; // For testing purposes, normally, the archive from the

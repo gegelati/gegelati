@@ -429,11 +429,21 @@ TEST_F(LearningAgentTest, TrainPortability)
     la.init();
     bool alt = false;
     la.train(alt, false);
+    TPG::TPGGraph& tpg = *la.getTPGGraph();
+
+    // Useful when determinism is changed
+    /*std::cout<<tpg.getNbVertices()<<" "
+             <<tpg.getNbRootVertices()<<" "
+             <<tpg.getEdges().size()<<" "
+             <<TPG::TPGVertex::getVertexIDCounter()<<" "
+             <<TPG::TPGEdge::getEdgeIDCounter()<<" "
+             <<Program::Program::getProgramIDCounter()<<" "
+
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
 
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
