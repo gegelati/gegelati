@@ -106,7 +106,10 @@
 #include <program/programExecutionEngine.h>
 
 #include <selector/classificationSelector.h>
+#include <selector/classificationSelectionMetrics.h>
+//#include <selector/mapElites/mapElitesSelector.h>
 #include <selector/selectionContext.h>
+#include <selector/selectionMetrics.h>
 #include <selector/selector.h>
 #include <selector/tournamentSelector.h>
 #include <selector/truncationSelector.h>

@@ -86,11 +86,11 @@ void Learn::AdversarialLearningAgent::evaluateAllRootsInParallelCompileResults(
                 // first time we encounter the results of this root
                 resultsPerRootMap.emplace(
                     root, std::make_shared<EvaluationResult>(EvaluationResult(
-                              res->getScoreOf(i), res->getNbEvaluation())));
+                              res->getSelectionMetricsOf(i), res->getNbEvaluation())));
             }
             else {
                 // there is already a score for this root, let's do an addition
-                (*iterator->second) += EvaluationResult(res->getScoreOf(i),
+                (*iterator->second) += EvaluationResult(res->getSelectionMetricsOf(i),
                                                         res->getNbEvaluation());
             }
 

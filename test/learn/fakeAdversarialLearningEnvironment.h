@@ -93,7 +93,11 @@ class FakeAdversarialLearningEnvironment
         const override
     {
         return std::make_shared<Learn::AdversarialEvaluationResult>(
-            Learn::AdversarialEvaluationResult({-1, 1, 2}));
+            Learn::AdversarialEvaluationResult({
+                std::make_shared<Selector::SelectionMetrics>(-1),
+                std::make_shared<Selector::SelectionMetrics>(1),
+                std::make_shared<Selector::SelectionMetrics>(2),
+            }));
     }
 
     bool isCopyable() const override

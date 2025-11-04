@@ -84,7 +84,7 @@ namespace Learn {
          */
         double getScore() const override
         {
-            return getScores()->getScoreOf(0);
+            return getScores()->getSelectionMetricsOf(0)->getScore();
         }
     };
 

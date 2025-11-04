@@ -50,6 +50,11 @@ void Selector::Selector::doSelection(
         "TruncationSelector should be used.");
 }
 
+std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::createSelectionMetrics()
+{
+    return std::make_shared<SelectionMetrics>();
+}
+
 void Selector::Selector::keepBestPolicy()
 {
     // Evaluate all roots

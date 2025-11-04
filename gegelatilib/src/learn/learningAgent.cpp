@@ -148,6 +148,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
                                 ? this->params.nbIterationsPerPolicyEvaluation
                                 : this->params.nbIterationsPerPolicyValidation;
 
+    std::shared_ptr<Selector::SelectionMetrics> selectionMetrics = this->selector->createSelectionMetrics();
+
     // Evaluate nbIteration times
     for (auto iterationNumber = 0; iterationNumber < nbEvaluation;
          iterationNumber++) {
@@ -168,20 +170,20 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
             le.doActions(actionsID);
             // Count actions
             nbActions++;
-        }
 
-        // Update results
-        result += le.getScore();
-        // Update utility if used.
-        if (le.isUsingUtility()) {
-            utility += le.getUtility();
+            // Extract the metrics.
+            selectionMetrics->extractMetricsStep(root, le);
         }
     }
 
+
+    // Extract the metrics.
+    selectionMetrics->extractMetricsEpisode(root, le);
+    (*selectionMetrics) /= (double)nbEvaluation;
+
     // Create the EvaluationResult
     auto evaluationResult = std::shared_ptr<EvaluationResult>(
-        new EvaluationResult(result / (double)nbEvaluation, nbEvaluation,
-                             utility / (double)nbEvaluation));
+        new EvaluationResult(selectionMetrics, nbEvaluation));
 
     // Combine it with previous one if any
     if (previousEval != nullptr) {

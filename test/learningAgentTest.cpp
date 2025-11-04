@@ -166,7 +166,7 @@ TEST_F(LearningAgentTest, IsRootEvalSkipped)
                                    "that has not been evaluated before.";
 
     // Add an EvaluationResult artificially
-    result1 = std::make_shared<Learn::EvaluationResult>(1.0, 1);
+    result1 = std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(1.0), 1);
     la.getSelector()->updateEvaluationRecords(
         {{result1, la.getTPGGraph()->getRootVertices().at(0)}});
 
@@ -181,7 +181,7 @@ TEST_F(LearningAgentTest, IsRootEvalSkipped)
            "evaluated enough times before.";
 
     // Update the EvaluationResult artificially
-    result2 = std::make_shared<Learn::EvaluationResult>(1.0, 2);
+    result2 = std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(1.0), 2);
     la.getSelector()->updateEvaluationRecords(
         {{result2, la.getTPGGraph()->getRootVertices().at(0)}});
 
@@ -249,7 +249,7 @@ TEST_F(LearningAgentTest, EvalRoot)
     ASSERT_NO_THROW(
         result = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
-    ASSERT_LE(result->getResult(), 1.0)
+    ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
 }
 
@@ -271,7 +271,7 @@ TEST_F(LearningAgentTest, EvaluateOneRoot)
         result = la.evaluateOneRoot(0, Learn::LearningMode::TRAINING,
                                     la.getTPGGraph()->getRootVertices().at(0)))
         << "Evaluation from a root failed.";
-    ASSERT_LE(result->getResult(), 1.0)
+    ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
 }
 
@@ -990,7 +990,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
                                      Learn::LearningMode::TRAINING, 0, &tpg),
                         0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
-    ASSERT_LE(result->getResult(), 1.0)
+    ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
 }
 
@@ -1077,7 +1077,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     auto iter = results.begin();
     auto iterSequential = resultsSequential.begin();
     while (iter != results.end()) {
-        ASSERT_EQ(iter->first->getResult(), iterSequential->first->getResult())
+        ASSERT_EQ(iter->first->getSelectionMetrics()->getScore(), iterSequential->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iter++;
@@ -1116,8 +1116,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     iterSequential = resultsSequential.begin();
     auto iterParallel = resultsParallel.begin();
     while (iterSequential != resultsSequential.end()) {
-        ASSERT_EQ(iterSequential->first->getResult(),
-                  iterParallel->first->getResult())
+        ASSERT_EQ(iterSequential->first->getSelectionMetrics()->getScore(),
+                  iterParallel->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iterSequential++;
@@ -1186,7 +1186,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     auto iter = results.begin();
     auto iterSequential = resultsSequential.begin();
     while (iter != results.end()) {
-        ASSERT_EQ(iter->first->getResult(), iterSequential->first->getResult())
+        ASSERT_EQ(iter->first->getSelectionMetrics()->getScore(), iterSequential->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iter++;
@@ -1211,8 +1211,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     iterSequential = resultsSequential.begin();
     auto iterParallel = resultsParallel.begin();
     while (iterSequential != resultsSequential.end()) {
-        ASSERT_EQ(iterSequential->first->getResult(),
-                  iterParallel->first->getResult())
+        ASSERT_EQ(iterSequential->first->getSelectionMetrics()->getScore(),
+                  iterParallel->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iterSequential++;
@@ -1441,7 +1441,7 @@ TEST_F(LearningAgentTest, EvaluateJobWithUtility)
     ASSERT_NO_THROW({
         auto res = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING,
                                   utilityEnv);
-        ASSERT_GE(res->getUtility(), 0.0);
+        ASSERT_GE(res->getSelectionMetrics()->getUtility(), 0.0);
     });
 }
 

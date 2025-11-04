@@ -133,11 +133,7 @@ namespace Learn {
             return previousEval;
         }
 
-        // Init results
-        std::vector<double> result(this->learningEnvironment.getNbActions(),
-                                   0.0);
-        std::vector<size_t> nbEvalPerClass(
-            this->learningEnvironment.getNbActions(), 0);
+        std::shared_ptr<Selector::SelectionMetrics> selectionMetrics = this->selector->createSelectionMetrics();
 
         // Evaluate nbIteration times
         for (auto i = 0; i < this->params.nbIterationsPerPolicyEvaluation;
@@ -161,53 +157,15 @@ namespace Learn {
                 nbActions++;
             }
 
-            // Update results
-            const auto& classificationTable =
-                ((ClassificationLearningEnvironment&)le)
-                    .getClassificationTable();
-            // for each class
-            for (uint64_t classIdx = 0; classIdx < classificationTable.size();
-                 classIdx++) {
-                uint64_t truePositive =
-                    classificationTable.at(classIdx).at(classIdx);
-                uint64_t falseNegative =
-                    std::accumulate(classificationTable.at(classIdx).begin(),
-                                    classificationTable.at(classIdx).end(),
-                                    (uint64_t)0) -
-                    truePositive;
-                uint64_t falsePositive = 0;
-                std::for_each(
-                    classificationTable.begin(), classificationTable.end(),
-                    [&classIdx, &falsePositive](
-                        const std::vector<uint64_t>& classifForClass) {
-                        falsePositive += classifForClass.at(classIdx);
-                    });
-                falsePositive -= truePositive;
+            selectionMetrics->extractMetricsEpisode(root, le);
 
-                double recall = (double)truePositive /
-                                (double)(truePositive + falseNegative);
-                double precision = (double)truePositive /
-                                   (double)(truePositive + falsePositive);
-                // If true positive is 0, set score to 0.
-                double fScore = (truePositive != 0) ? 2 * (precision * recall) /
-                                                          (precision + recall)
-                                                    : 0.0;
-                result.at(classIdx) += fScore;
-
-                nbEvalPerClass.at(classIdx) += truePositive + falseNegative;
-            }
         }
 
-        // Before returning the EvaluationResult, divide the result per class by
-        // the number of iteration
-        const LearningParameters& p = this->params;
-        std::for_each(result.begin(), result.end(), [p](double& val) {
-            val /= (double)p.nbIterationsPerPolicyEvaluation;
-        });
+        (*selectionMetrics) /= this->params.nbIterationsPerPolicyEvaluation;
 
         // Create the EvaluationResult
         auto evaluationResult = std::shared_ptr<EvaluationResult>(
-            new ClassificationEvaluationResult(result, nbEvalPerClass));
+            new EvaluationResult(selectionMetrics, this->params.nbIterationsPerPolicyEvaluation));
 
         // Combine it with previous one if any
         if (previousEval != nullptr) {

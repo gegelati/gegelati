@@ -53,10 +53,10 @@ namespace Learn {
     {
       protected:
         /**
-         * \brief Vector storing a double score per class (i.e. per Action) of
+         * \brief Vector storing a metric per class (i.e. per Action) of
          * a classification LearningEnvironment.
          */
-        std::vector<double> scorePerClass;
+        std::vector<std::shared_ptr<Selector::SelectionMetrics>> selectionMetricsPerClass;
 
         /**
          * \brief Vector storing the number of evaluation for each class
@@ -75,30 +75,37 @@ namespace Learn {
          * stored in a ClassificationEvaluationResult corresponds to the total
          * number of times any action was performed.
          *
-         * \param[in] scores a vector of double storing per-class scores.
+         * \param[in] selectionMetricsPerClass a vector of metrics storing per-class metrics.
          * \param[in] nbEvalPerClass a vector of integer storing per-class
          * number of evaluations.
          */
         ClassificationEvaluationResult(
-            const std::vector<double>& scores,
+            const std::vector<std::shared_ptr<Selector::SelectionMetrics>>& selectionMetricsPerClass,
             const std::vector<size_t>& nbEvalPerClass)
-            : EvaluationResult(
-                  std::accumulate(scores.cbegin(), scores.cend(), 0.0) /
-                      scores.size(),
+            : EvaluationResult(computeAverageMetrics(selectionMetricsPerClass),
                   std::accumulate(nbEvalPerClass.cbegin(),
                                   nbEvalPerClass.cend(), size_t(0))),
-              scorePerClass(scores), nbEvaluationPerClass(nbEvalPerClass)
+              selectionMetricsPerClass(selectionMetricsPerClass), nbEvaluationPerClass(nbEvalPerClass)
         {
-            if (scores.size() != nbEvalPerClass.size()) {
+            if (selectionMetricsPerClass.size() != nbEvalPerClass.size()) {
                 throw std::runtime_error(
-                    "Mismatch between scores and nbEvalPerClass vector sizes.");
+                    "Mismatch between selectionMetrics and nbEvalPerClass vector sizes.");
             }
         };
 
         /**
+         * \brief Compute the average SelectionMetrics from a vector of
+         * SelectionMetrics.
+         * 
+         * \param[in] selectionMetricsPerClass vector of SelectionMetrics to
+         * average.
+         */
+        std::shared_ptr<Selector::SelectionMetrics> computeAverageMetrics(const std::vector<std::shared_ptr<Selector::SelectionMetrics>>& selectionMetricsPerClass);
+
+        /**
          * \brief Get a const ref to the scorePerClass attribute.
          */
-        const std::vector<double>& getScorePerClass() const;
+        const std::vector<std::shared_ptr<Selector::SelectionMetrics>>& getSelectionMetricsPerClassPerClass() const;
 
         /**
          * \brief Get a const ref to the nbEvaluationPerClass attribute.

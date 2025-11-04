@@ -202,14 +202,14 @@ TEST_F(adversarialLearningAgentTest, EvalJob)
         result = la.evaluateJob(tee, job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root in no parallel and no adversarial mode "
            "failed.";
-    ASSERT_LE(result->getResult(), 1.0)
+    ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect layer.";
 
     auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
     ASSERT_NO_THROW(result = la.evaluateJob(tee, *jobs.front(), 0,
                                             Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root in adversarial mode failed.";
-    ASSERT_LE(result->getResult(), 1.0)
+    ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect layer.";
 }
 
@@ -361,13 +361,13 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsGoodResults)
 
     auto iter = result.begin();
     ASSERT_EQ(firstRoot, iter->second) << "Wrong root has 1st place.";
-    ASSERT_EQ(-0.5, iter++->first->getResult())
+    ASSERT_EQ(-0.5, iter++->first->getSelectionMetrics()->getScore())
         << "Wrong score for 1st root after an eval.";
     ASSERT_EQ(secondRoot, iter->second) << "Wrong root has 2nd place.";
-    ASSERT_EQ(0.75, iter++->first->getResult())
+    ASSERT_EQ(0.75, iter++->first->getSelectionMetrics()->getScore())
         << "Wrong score for 2nd root after an eval.";
     ASSERT_EQ(thirdRoot, iter->second) << "Wrong root has 3rd place.";
-    ASSERT_EQ(1.75, iter->first->getResult())
+    ASSERT_EQ(1.75, iter->first->getSelectionMetrics()->getScore())
         << "Wrong score for 3rd root after an eval.";
 }
 
@@ -410,7 +410,7 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     auto iter = results.begin();
     auto iterSequential = resultsSequential.begin();
     while (iter != results.end()) {
-        ASSERT_EQ(iter->first->getResult(), iterSequential->first->getResult())
+        ASSERT_EQ(iter->first->getSelectionMetrics()->getScore(), iterSequential->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iter++;
@@ -449,8 +449,8 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     iterSequential = resultsSequential.begin();
     auto iterParallel = resultsParallel.begin();
     while (iterSequential != resultsSequential.end()) {
-        ASSERT_EQ(iterSequential->first->getResult(),
-                  iterParallel->first->getResult())
+        ASSERT_EQ(iterSequential->first->getSelectionMetrics()->getScore(),
+                  iterParallel->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iterSequential++;
@@ -519,7 +519,7 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     auto iter = results.begin();
     auto iterSequential = resultsSequential.begin();
     while (iter != results.end()) {
-        ASSERT_EQ(iter->first->getResult(), iterSequential->first->getResult())
+        ASSERT_EQ(iter->first->getSelectionMetrics()->getScore(), iterSequential->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iter++;
@@ -544,8 +544,8 @@ TEST_F(adversarialLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     iterSequential = resultsSequential.begin();
     auto iterParallel = resultsParallel.begin();
     while (iterSequential != resultsSequential.end()) {
-        ASSERT_EQ(iterSequential->first->getResult(),
-                  iterParallel->first->getResult())
+        ASSERT_EQ(iterSequential->first->getSelectionMetrics()->getScore(),
+                  iterParallel->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iterSequential++;

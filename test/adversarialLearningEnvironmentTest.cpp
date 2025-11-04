@@ -118,9 +118,9 @@ TEST(AdversarialLearningEnvironmentTest, getScoresAndgetScore)
     le->doAction(0);
     le->doAction(1);
 
-    ASSERT_EQ(1.0, le->getScores()->getScoreOf(0));
-    ASSERT_EQ(0.0, le->getScores()->getScoreOf(1));
-    ASSERT_DOUBLE_EQ(le->getScore(), le->getScores()->getScoreOf(0));
+    ASSERT_EQ(1.0, le->getScores()->getSelectionMetricsOf(0)->getScore());
+    ASSERT_EQ(0.0, le->getScores()->getSelectionMetricsOf(1)->getScore());
+    ASSERT_DOUBLE_EQ(le->getScore(), le->getScores()->getSelectionMetricsOf(0)->getScore());
 
     le->reset();
     // now makes the first player loose with a forbidden move to check the order
@@ -136,9 +136,9 @@ TEST(AdversarialLearningEnvironmentTest, getScoresAndgetScore)
     le->doAction(0);
     le->doAction(2);
 
-    ASSERT_EQ(-1.0, le->getScores()->getScoreOf(0));
-    ASSERT_EQ(1.0, le->getScores()->getScoreOf(1));
-    ASSERT_DOUBLE_EQ(le->getScore(), le->getScores()->getScoreOf(0));
+    ASSERT_EQ(-1.0, le->getScores()->getSelectionMetricsOf(0)->getScore());
+    ASSERT_EQ(1.0, le->getScores()->getSelectionMetricsOf(1)->getScore());
+    ASSERT_DOUBLE_EQ(le->getScore(), le->getScores()->getSelectionMetricsOf(0)->getScore());
 
     delete le;
 }

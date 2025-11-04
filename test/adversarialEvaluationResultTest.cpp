@@ -53,22 +53,26 @@ TEST(AdversarialEvaluationResultTest, Constructor)
 
     ASSERT_NO_THROW(delete er)
         << "Destruction of the Adversarial Learning Result failed.";
-
-    ASSERT_NO_THROW(er = new Learn::AdversarialEvaluationResult({1, 2, 6}, 5))
+    
+    ASSERT_NO_THROW(er = new Learn::AdversarialEvaluationResult({
+        std::make_shared<Selector::SelectionMetrics>(1),
+        std::make_shared<Selector::SelectionMetrics>(2),
+        std::make_shared<Selector::SelectionMetrics>(6),
+    }, 5))
         << "Construction of the Adversarial Learning Result failed.";
 
     ASSERT_EQ(3, er->getSize()) << "The adversarial evaluation result doesn't "
                                    "have the right size after construction.";
-    ASSERT_EQ(3, er->getResult()) // should simply be the first value
+    ASSERT_EQ(3, er->getSelectionMetrics()->getScore())
         << "The adversarial evaluation result doesn't have the right value "
            "after construction.";
-    ASSERT_EQ(1, er->getScoreOf(0))
+    ASSERT_EQ(1, er->getSelectionMetricsOf(0)->getScore())
         << "The adversarial evaluation result doesn't have the right value "
            "after construction.";
-    ASSERT_EQ(2, er->getScoreOf(1))
+    ASSERT_EQ(2, er->getSelectionMetricsOf(1)->getScore())
         << "The adversarial evaluation result doesn't have the right value "
            "after construction.";
-    ASSERT_EQ(6, er->getScoreOf(2))
+    ASSERT_EQ(6, er->getSelectionMetricsOf(2)->getScore())
         << "The adversarial evaluation result doesn't have the right value "
            "after construction.";
     ASSERT_EQ(5, er->getNbEvaluation())
@@ -81,9 +85,22 @@ TEST(AdversarialEvaluationResultTest, Constructor)
 
 TEST(AdversarialEvaluationResultTest, operatorPlusEqual)
 {
-    Learn::AdversarialEvaluationResult er({2, 5, 10}, 10);
-    Learn::AdversarialEvaluationResult er2({0.5, 2, 4}, 5);
-    Learn::AdversarialEvaluationResult er3({0.5, 2, 4, 5}, 5);
+    Learn::AdversarialEvaluationResult er({
+        std::make_shared<Selector::SelectionMetrics>(2),
+        std::make_shared<Selector::SelectionMetrics>(5),
+        std::make_shared<Selector::SelectionMetrics>(10),
+    }, 10);
+    Learn::AdversarialEvaluationResult er2({
+        std::make_shared<Selector::SelectionMetrics>(0.5),
+        std::make_shared<Selector::SelectionMetrics>(2),
+        std::make_shared<Selector::SelectionMetrics>(4),
+    }, 5);
+    Learn::AdversarialEvaluationResult er3({
+        std::make_shared<Selector::SelectionMetrics>(0.5),
+        std::make_shared<Selector::SelectionMetrics>(2),
+        std::make_shared<Selector::SelectionMetrics>(4),
+        std::make_shared<Selector::SelectionMetrics>(5),
+    }, 5);
     Learn::EvaluationResult er4(0, 5);
 
     ASSERT_NO_THROW(er += er2)
@@ -93,11 +110,11 @@ TEST(AdversarialEvaluationResultTest, operatorPlusEqual)
     ASSERT_EQ(15, er.getNbEvaluation())
         << "Adversarial Evaluation Result doesn't have the right number of "
            "evaluations after sum.";
-    ASSERT_EQ(1.5, er.getScoreOf(0)) << "Adversarial Evaluation Result doesn't "
+    ASSERT_EQ(1.5, er.getSelectionMetricsOf(0)->getScore()) << "Adversarial Evaluation Result doesn't "
                                         "have the right value after sum.";
-    ASSERT_EQ(4, er.getScoreOf(1)) << "Adversarial Evaluation Result doesn't "
+    ASSERT_EQ(4, er.getSelectionMetricsOf(1)->getScore()) << "Adversarial Evaluation Result doesn't "
                                       "have the right value after sum.";
-    ASSERT_EQ(8, er.getScoreOf(2)) << "Adversarial Evaluation Result doesn't "
+    ASSERT_EQ(8, er.getSelectionMetricsOf(2)->getScore()) << "Adversarial Evaluation Result doesn't "
                                       "have the right value after sum.";
     ASSERT_THROW(er += er3, std::runtime_error)
         << "Adding Adversarial Evaluation Results of different sizes should "
@@ -109,7 +126,11 @@ TEST(AdversarialEvaluationResultTest, operatorPlusEqual)
 
 TEST(AdversarialEvaluationResultTest, operatorDivideEqual)
 {
-    Learn::AdversarialEvaluationResult er({4, 8, 10}, 10);
+    Learn::AdversarialEvaluationResult er({
+        std::make_shared<Selector::SelectionMetrics>(4),
+        std::make_shared<Selector::SelectionMetrics>(8),
+        std::make_shared<Selector::SelectionMetrics>(10)
+    }, 10);
 
     ASSERT_NO_THROW(er /= 2)
         << "Division of an Adversarial Evaluation Result failed.";
@@ -118,10 +139,10 @@ TEST(AdversarialEvaluationResultTest, operatorDivideEqual)
     ASSERT_EQ(10, er.getNbEvaluation())
         << "Adversarial Evaluation Result doesn't have the right number of "
            "evaluations after division.";
-    ASSERT_EQ(2, er.getScoreOf(0)) << "Adversarial Evaluation Result doesn't "
+    ASSERT_EQ(2, er.getSelectionMetricsOf(0)->getScore()) << "Adversarial Evaluation Result doesn't "
                                       "have the right value after division.";
-    ASSERT_EQ(4, er.getScoreOf(1)) << "Adversarial Evaluation Result doesn't "
+    ASSERT_EQ(4, er.getSelectionMetricsOf(1)->getScore()) << "Adversarial Evaluation Result doesn't "
                                       "have the right value after division.";
-    ASSERT_EQ(5, er.getScoreOf(2)) << "Adversarial Evaluation Result doesn't "
+    ASSERT_EQ(5, er.getSelectionMetricsOf(2)->getScore()) << "Adversarial Evaluation Result doesn't "
                                       "have the right value after division.";
 }

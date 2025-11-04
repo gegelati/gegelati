@@ -1,7 +1,13 @@
 
 
 #include "selector/classificationSelector.h"
-#include "learn/classificationEvaluationResult.h"
+#include "selector/classificationSelectionMetrics.h"
+
+
+std::shared_ptr<Selector::SelectionMetrics> Selector::ClassificationSelector::createSelectionMetrics()
+{
+    return std::make_shared<ClassificationSelectionMetrics>();
+}
 
 void Selector::ClassificationSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -11,10 +17,10 @@ void Selector::ClassificationSelector::doSelection(
     // Check that results are ClassificationEvaluationResults.
     // (also throws on empty results)
     const Learn::EvaluationResult* result = results.begin()->first.get();
-    if (typeid(Learn::ClassificationEvaluationResult) != typeid(*result)) {
+    if (typeid(ClassificationSelectionMetrics) != typeid(*result->getSelectionMetrics().get())) {
         throw std::runtime_error(
             "ClassificationLearningAgent can not decimate worst roots for "
-            "results whose type is not ClassificationEvaluationResult.");
+            "results whose metrics type is not ClassificationSelectionMetrics.");
     }
 
     // Compute the number of root to keep/delete base on each criterion
@@ -45,9 +51,8 @@ void Selector::ClassificationSelector::doSelection(
                 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
                                 const TPG::TPGVertex*>& res) {
                 sortedRoot.emplace(
-                    ((Learn::ClassificationEvaluationResult*)res.first.get())
-                        ->getScorePerClass()
-                        .at(classIdx),
+                    ((ClassificationSelectionMetrics*)res.first->getSelectionMetrics().get())
+                        ->getScorePerClass().at(classIdx),
                     res.second);
             });
 

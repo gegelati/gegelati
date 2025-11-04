@@ -52,7 +52,7 @@ void Log::LAPolicyStatsLogger::logAfterDecimate()
         *this << "Generation " << this->generationNumber << " - Score "
               << this->learningAgent.getSelector()
                      ->getBestRoot()
-                     .second->getResult()
+                     .second->getSelectionMetrics()->getScore()
               << std::endl
               << std::endl;
         TPG::PolicyStats ps;

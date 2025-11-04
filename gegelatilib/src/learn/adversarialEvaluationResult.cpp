@@ -36,9 +36,9 @@
 
 #include "learn/adversarialEvaluationResult.h"
 
-double Learn::AdversarialEvaluationResult::getScoreOf(int index)
+std::shared_ptr<Selector::SelectionMetrics> Learn::AdversarialEvaluationResult::getSelectionMetricsOf(int index)
 {
-    return scores[index];
+    return this->multiSelectionMetrics.at(index);
 }
 
 Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator+=(
@@ -51,25 +51,41 @@ Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator+=(
         throw std::runtime_error("Type mismatch between EvaluationResults.");
     }
 
-    auto otherConverted = (const AdversarialEvaluationResult&)other;
+    const AdversarialEvaluationResult& otherConverted =
+        static_cast<const AdversarialEvaluationResult&>(other);
 
     // Size Check
-    if (otherConverted.scores.size() != this->scores.size()) {
+    if (otherConverted.multiSelectionMetrics.size() != this->multiSelectionMetrics.size()) {
         throw std::runtime_error(
             "Size mismatch between AdversarialEvaluationResults.");
     }
 
-    // If the added type is Learn::EvaluationResult
     // Weighted addition of results
-    for (int i = 0; i < scores.size(); i++) {
-        this->scores[i] =
-            this->scores[i] * (double)this->nbEvaluation +
-            otherConverted.scores[i] * (double)otherConverted.nbEvaluation;
-        this->scores[i] /=
-            (double)this->nbEvaluation + (double)otherConverted.nbEvaluation;
+    const double totalEval = (double)(this->nbEvaluation + otherConverted.nbEvaluation);
+    for (size_t i = 0; i < multiSelectionMetrics.size(); i++) {
+        auto& curPtr = this->multiSelectionMetrics[i];
+        const auto& otherPtr = otherConverted.multiSelectionMetrics[i];
+
+        if (!curPtr) {
+            throw std::runtime_error("Null SelectionMetrics pointer encountered 2.");
+        }
+        if (!curPtr || !otherPtr) {
+            throw std::runtime_error("Null SelectionMetrics pointer encountered.");
+        }
+
+        // Scale current in-place by its weight
+        (*curPtr) *= (double)this->nbEvaluation;
+
+        // Make a temporary copy of other (stack copy, avoids modifying other)
+        Selector::SelectionMetrics tempOther(*otherPtr);
+        tempOther *= (double)otherConverted.nbEvaluation;
+
+        // Add and normalize, all in-place on current metric
+        (*curPtr) += tempOther;
+        (*curPtr) /= totalEval;
     }
 
-    // Addition ot nbEvaluation
+    // Addition of nbEvaluation
     this->nbEvaluation += otherConverted.nbEvaluation;
 
     return *this;
@@ -78,22 +94,31 @@ Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator+=(
 Learn::EvaluationResult& Learn::AdversarialEvaluationResult::operator/=(
     double divisor)
 {
-    for (double& val : scores) {
-        val /= divisor;
+    for (auto& ptr : multiSelectionMetrics) {
+        if (!ptr) {
+            throw std::runtime_error("Null SelectionMetrics pointer encountered.");
+        }
+        (*ptr) /= divisor;
     }
     return *this;
 }
 
-double Learn::AdversarialEvaluationResult::getResult() const
+std::shared_ptr<Selector::SelectionMetrics> Learn::AdversarialEvaluationResult::getSelectionMetrics() const
 {
-    double mean = 0;
-    for (auto score : scores) {
-        mean += score;
+    // Aggregated result kept in a static local to return a reference without
+    // allocating a new shared_ptr. Reset it at each call.
+    Selector::SelectionMetrics average;
+
+    for (const auto& metric : multiSelectionMetrics) {
+        average += (*metric);
     }
-    return mean / getSize();
+
+    average /= static_cast<double>(getSize());
+
+    return std::make_shared<Selector::SelectionMetrics>(average);
 }
 
 size_t Learn::AdversarialEvaluationResult::getSize() const
 {
-    return scores.size();
+    return multiSelectionMetrics.size();
 }

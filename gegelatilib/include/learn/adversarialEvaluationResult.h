@@ -55,44 +55,32 @@ namespace Learn {
     class AdversarialEvaluationResult : public EvaluationResult
     {
       protected:
-        /// The scores of the roots, in the order in which they participated.
-        std::vector<double> scores;
+        /// The selectionMetric of the roots, in the order in which they participated.
+        std::vector<std::shared_ptr<Selector::SelectionMetrics>> multiSelectionMetrics;
 
       public:
         /**
          * \brief Base constructor of EvaluationResult, allowing to set scores
          * and the number of evaluations.
          *
-         * @param[in] res The scores of the roots in the order.
+         * @param[in] multiSelectionMetrics The metrics of the roots in the order.
          * @param[in] nbEval The number of evaluations that have been done to
          * get these scores. Default is 1 as we can guess user only did 1
          * iteration.
          */
-        AdversarialEvaluationResult(std::initializer_list<double> res,
+        AdversarialEvaluationResult(std::initializer_list<std::shared_ptr<Selector::SelectionMetrics>> multiSelectionMetrics,
                                     size_t nbEval = 1)
-            : EvaluationResult(*res.begin(), nbEval), scores(res)
+            : EvaluationResult(*multiSelectionMetrics.begin(), nbEval), multiSelectionMetrics(multiSelectionMetrics)
         {
         }
 
-        /**
-         * \brief Constructor initializing scores as empty.
-         *
-         * @param[in] size The size of scores i.e. number of evaluated agents.
-         * @param[in] nbEval The number of evaluations that have been done to
-         * get these scores. Default is 0, as we have no score, we have no eval.
-         */
-        AdversarialEvaluationResult(size_t size, size_t nbEval = 0)
-            : EvaluationResult(0, nbEval), scores(size, 0)
-        {
-        }
 
         /**
-         * \brief Simple getter of the score of a single root, given its index.
+         * \brief Simple getter of the selectionMetrics of a single root, given its index.
          *
          * @param[in] index The index of the root in the results list.
-         * @return The score corresponding to this index.
          */
-        double getScoreOf(int index);
+        std::shared_ptr<Selector::SelectionMetrics> getSelectionMetricsOf(int index);
 
         /**
          * \brief Polymorphic addition assignement operator for
@@ -115,13 +103,13 @@ namespace Learn {
         virtual EvaluationResult& operator/=(double divisor);
 
         /**
-         * \brief Returns the mean of the scores, used for example in a simple
+         * \brief Returns the mean of the selectionMetrics, used for example in a simple
          * learning agent as the root will play against itself. In this
          * situation getting the mean of the scores would be relevant.
          *
-         * @return The mean of the scores contained in this object.
+         * @return The mean of the selectionMetrics contained in this object.
          */
-        double getResult() const override;
+        virtual std::shared_ptr<Selector::SelectionMetrics> getSelectionMetrics() const override;
 
         /**
          * \brief Getter fot the size of scores.

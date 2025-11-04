@@ -137,7 +137,7 @@ std::shared_ptr<Learn::AdversarialEvaluationResult> StickGameAdversarial::
     }
 
     return std::make_shared<Learn::AdversarialEvaluationResult>(
-        Learn::AdversarialEvaluationResult({scoreFirst, scoreSecond}));
+        Learn::AdversarialEvaluationResult({std::make_shared<Selector::SelectionMetrics>(scoreFirst), std::make_shared<Selector::SelectionMetrics>(scoreSecond)}));
 }
 
 bool StickGameAdversarial::isTerminal() const

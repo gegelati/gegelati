@@ -6,6 +6,7 @@
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 #include "selector/selectionContext.h"
+#include "selector/selectionMetrics.h"
 #include "selector/selectionParameters.h"
 #include "tpg/tpgGraph.h"
 
@@ -105,8 +106,16 @@ namespace Selector {
                           const TPG::TPGVertex*>& results,
             Mutator::RNG& rng);
 
+
         /**
-         * \brief This method keeps only the bestRoot policy in the TPGGraph.
+         * Creates and return an instance of SelectionMetrics
+         * 
+         * The purpose of this method is to be override by new selection algorithms to use specific metrics.
+         */
+        virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics();
+
+        /**
+         * \brief This method keeps only the bes tRoot policy in the TPGGraph.
          *
          * If the TPGVertex referenced in the bestRoot attribute is no longer
          * a TPGVertex of the TPGGraph, nothing happens.

@@ -49,6 +49,7 @@
 #include "learn/learningParameters.h"
 
 #include "learn/classificationLearningAgent.h"
+#include "selector/classificationSelectionMetrics.h"
 
 #include "learn/fakeClassificationLearningEnvironment.h"
 
@@ -137,7 +138,7 @@ TEST_F(ClassificationLearningAgentTest, EvaluateRoot)
                                      Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
-    ASSERT_LE(result1->getResult(), 1.0)
+    ASSERT_LE(result1->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
 
     // Record this result
@@ -199,7 +200,8 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
         results;
     double result = 0.0;
     for (const TPG::TPGVertex* root : roots) {
-        results.emplace(new Learn::EvaluationResult(result++, 1), root);
+        results.emplace(new Learn::EvaluationResult(
+                std::make_shared<Selector::SelectionMetrics>(result++), 1), root);
     }
 
     // Do the decimation (must fail)
@@ -222,10 +224,12 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
                                    0.33 / (fle.getNbActions() - 1) *
                                        fle.getNbActions());
         scores.at(0) = 0.0;
-        std::vector<size_t> nbEval(fle.getNbActions(), 1);
+        std::vector<size_t> nbEvals(fle.getNbActions(), 1);
+
+        auto selectionMetrics = std::make_shared<Selector::ClassificationSelectionMetrics>(scores, nbEvals);
 
         classifResults.emplace(
-            new Learn::ClassificationEvaluationResult(scores, nbEval), root);
+            new Learn::EvaluationResult(selectionMetrics, 1), root);
     }
 
     // Change score for 4 roots, so that
@@ -251,8 +255,11 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
         std::vector<double> scores(fle.getNbActions(), 0.0);
         scores.at(0) = 0.25 * (idx + 1.0);
         std::vector<size_t> nbEvals(fle.getNbActions(), 10);
+
+        auto selectionMetrics = std::make_shared<Selector::ClassificationSelectionMetrics>(scores, nbEvals);
+        
         classifResults.emplace(
-            new Learn::ClassificationEvaluationResult(scores, nbEvals), root);
+            new Learn::EvaluationResult(selectionMetrics, 1), root);
     }
 
     // Add an additional
@@ -265,14 +272,16 @@ TEST_F(ClassificationLearningAgentTest, DoSelection)
 
     // Create a poor score for the action and team root
     classifResults.emplace(
-        new Learn::ClassificationEvaluationResult(
+        new Learn::EvaluationResult(
+            std::make_shared<Selector::ClassificationSelectionMetrics>(
             std::vector<double>(fle.getNbActions(), 0.0),
-            std::vector<size_t>(fle.getNbActions(), size_t(10))),
+            std::vector<size_t>(fle.getNbActions(), size_t(10))), 1),
         &actionRoot);
     classifResults.emplace(
-        new Learn::ClassificationEvaluationResult(
+        new Learn::EvaluationResult(
+            std::make_shared<Selector::ClassificationSelectionMetrics>(
             std::vector<double>(fle.getNbActions(), 0.0),
-            std::vector<size_t>(fle.getNbActions(), size_t(10))),
+            std::vector<size_t>(fle.getNbActions(), size_t(10))), 1),
         &teamRoot);
 
     // Do the decimation

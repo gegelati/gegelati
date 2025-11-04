@@ -36,10 +36,24 @@
 
 #include "learn/classificationEvaluationResult.h"
 
-const std::vector<double>& Learn::ClassificationEvaluationResult::
-    getScorePerClass() const
+std::shared_ptr<Selector::SelectionMetrics> Learn::ClassificationEvaluationResult::computeAverageMetrics(const std::vector<std::shared_ptr<Selector::SelectionMetrics>>& selectionMetricsPerClass)
 {
-    return this->scorePerClass;
+    // Aggregated result kept in a static local to return a reference without
+    // allocating a new shared_ptr. Reset it at each call.
+    Selector::SelectionMetrics average;
+
+    for (const auto& metric : selectionMetricsPerClass) {
+        average += (*metric);
+    }
+
+    average /= static_cast<double>(selectionMetricsPerClass.size());
+
+    return std::make_shared<Selector::SelectionMetrics>(average);
+}
+
+const std::vector<std::shared_ptr<Selector::SelectionMetrics>>& Learn::ClassificationEvaluationResult::getSelectionMetricsPerClassPerClass() const
+{
+    return this->selectionMetricsPerClass;
 }
 
 const std::vector<size_t>& Learn::ClassificationEvaluationResult::
@@ -54,40 +68,44 @@ Learn::EvaluationResult& Learn::ClassificationEvaluationResult::operator+=(
     // Super call to detect type mismatch.
     EvaluationResult::operator+=(other);
 
-    // If types are identical, add per-class scores
+    // If types are identical, add per-class metrics
     if (typeid(*this) == typeid(other)) {
         const ClassificationEvaluationResult& otherEval =
-            (const ClassificationEvaluationResult&)other;
-        if (this->scorePerClass.size() != otherEval.scorePerClass.size()) {
+            static_cast<const ClassificationEvaluationResult&>(other);
+        if (this->selectionMetricsPerClass.size() != otherEval.selectionMetricsPerClass.size()) {
             throw std::runtime_error(
-                "Number of score per class is different between the added "
+                "Number of metrics per class is different between the added "
                 "ClassificationEvaluationResult.");
         }
 
-        for (auto idx = 0; idx < this->scorePerClass.size(); idx++) {
-            // Weighted sum of scores.
-            this->scorePerClass.at(idx) =
-                this->scorePerClass.at(idx) *
-                    (double)this->nbEvaluationPerClass.at(idx) +
-                otherEval.scorePerClass.at(idx) *
-                    (double)otherEval.nbEvaluationPerClass.at(idx);
-            this->scorePerClass.at(idx) /=
-                (double)this->nbEvaluationPerClass.at(idx) +
-                (double)otherEval.nbEvaluationPerClass.at(idx);
-            ;
+        for (auto idx = 0; idx < this->selectionMetricsPerClass.size(); idx++) {
+            auto& curMetrics = this->selectionMetricsPerClass.at(idx);
+            const auto& otherMetrics = otherEval.selectionMetricsPerClass.at(idx);
 
-            // Sum of number of evaluation per class
+            // Scale current metrics by its weight
+            (*curMetrics) *= (double)this->nbEvaluationPerClass.at(idx);
+
+            // Make a temporary copy of other metrics
+            Selector::SelectionMetrics tempMetrics(*otherMetrics);
+            tempMetrics *= (double)otherEval.nbEvaluationPerClass.at(idx);
+
+            // Add weighted metrics
+            (*curMetrics) += tempMetrics;
+
+            // Normalize by total evaluations
+            (*curMetrics) /= (double)(this->nbEvaluationPerClass.at(idx) + 
+                                    otherEval.nbEvaluationPerClass.at(idx));
+
+            // Sum number of evaluations per class
             this->nbEvaluationPerClass.at(idx) +=
                 otherEval.nbEvaluationPerClass.at(idx);
         }
 
-        // Update global score
-        this->result = std::accumulate(this->scorePerClass.cbegin(),
-                                       this->scorePerClass.cend(), 0.0) /
-                       (double)this->scorePerClass.size();
-
-        // Update global number of evaluation
+        // Update global number of evaluations
         this->nbEvaluation += otherEval.nbEvaluation;
+
+        // Update the global selectionMetrics by computing average across all classes
+        this->selectionMetrics = computeAverageMetrics(this->selectionMetricsPerClass);
     }
 
     return *this;
