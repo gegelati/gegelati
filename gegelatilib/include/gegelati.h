@@ -79,10 +79,10 @@
 #include <learn/learningParameters.h>
 #include <learn/parallelLearningAgent.h>
 
-#include <learn/adversarialEvaluationResult.h>
-#include <learn/adversarialJob.h>
-#include <learn/adversarialLearningAgent.h>
-#include <learn/adversarialLearningEnvironment.h>
+//#include <learn/adversarialEvaluationResult.h>
+//#include <learn/adversarialJob.h>
+//#include <learn/adversarialLearningAgent.h>
+//#include <learn/adversarialLearningEnvironment.h>
 
 #include <learn/classificationEvaluationResult.h>
 #include <learn/classificationLearningAgent.h>

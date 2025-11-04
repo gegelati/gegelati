@@ -312,8 +312,6 @@ namespace Learn {
 
         /**
          * \brief Takes a given TPGVertex and creates a job containing it.
-         * Useful for example in adversarial mode where a job could contain a
-         * match of several roots.
          *
          * \param[in] vertex the TPGVertex stemming a TPGGraph to be evaluated.
          * \param[in] mode the mode of the training, determining for example

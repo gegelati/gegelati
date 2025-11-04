@@ -121,8 +121,7 @@ namespace Learn {
                                         LearningMode mode,
                                         LearningEnvironment& le) const
     {
-        // Only consider the first root of jobs as we are not in adversarial
-        // mode
+        // Only consider the first root of jobs
         const TPG::TPGVertex* root = job.getRoot();
 
         // Skip the root evaluation process if enough evaluations were already

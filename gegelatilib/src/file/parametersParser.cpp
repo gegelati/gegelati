@@ -165,10 +165,6 @@ void File::ParametersParser::setParameterFromString(
         params.nbGenerations = value.asUInt64();
         return;
     }
-    if (param == "nbIterationsPerJob") {
-        params.nbIterationsPerJob = value.asUInt64();
-        return;
-    }
     if (param == "maxNbActionsPerEval") {
         params.maxNbActionsPerEval = value.asUInt64();
         return;
@@ -396,11 +392,6 @@ void File::ParametersParser::writeParametersToJson(
     root["nbGenerations"] = params.nbGenerations;
     root["nbGenerations"].setComment(
         Learn::LearningParameters::nbGenerationsComment, Json::commentBefore);
-
-    root["nbIterationsPerJob"] = params.nbIterationsPerJob;
-    root["nbIterationsPerJob"].setComment(
-        Learn::LearningParameters::nbIterationsPerJobComment,
-        Json::commentBefore);
 
     root["nbIterationsPerPolicyEvaluation"] =
         params.nbIterationsPerPolicyEvaluation;

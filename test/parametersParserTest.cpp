@@ -61,7 +61,7 @@ TEST(LearningParametersTest, readConfigFile)
         << "Ill-formed parameters file should result in no root filling";
 
     File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
-    ASSERT_EQ(14, root.size())
+    ASSERT_EQ(15, root.size())
         << "Wrong number of elements in parsed json file";
     ASSERT_EQ(9, root["mutation"]["prog"].size())
         << "Wrong number of elements in parsed json file";
@@ -97,7 +97,8 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(50, params.archiveSize);
     ASSERT_EQ(0.5, params.archivingProbability);
     ASSERT_EQ(50, params.nbIterationsPerPolicyEvaluation);
-    ASSERT_EQ(31, params.nbIterationsPerJob);
+    ASSERT_EQ(50, params.nbIterationsPerPolicyValidation);
+    ASSERT_EQ(4, params.stepValidation);
     ASSERT_EQ(5, params.maxNbActionsPerEval);
     ASSERT_EQ(100, params.maxNbEvaluationPerPolicy);
     ASSERT_EQ(3.0, params.nbRegisters);
@@ -161,8 +162,6 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(params2.doValidation, false)
         << "Default validation should be false";
     ASSERT_EQ(params2.nbRegisters, 8) << "Bad parameter should be ignored";
-    ASSERT_EQ(params2.nbIterationsPerJob, 1)
-        << "Default nbIterationsPerJob should be 1";
 }
 
 TEST(LearningParametersTest, loadParametersFromJson)
@@ -202,9 +201,12 @@ TEST(LearningParametersTest, writeParametersToJson)
     ASSERT_EQ(params.maxNbEvaluationPerPolicy,
               params2.maxNbEvaluationPerPolicy);
     ASSERT_EQ(params.nbGenerations, params2.nbGenerations);
-    ASSERT_EQ(params.nbIterationsPerJob, params2.nbIterationsPerJob);
     ASSERT_EQ(params.nbIterationsPerPolicyEvaluation,
               params2.nbIterationsPerPolicyEvaluation);
+    ASSERT_EQ(params.nbIterationsPerPolicyValidation,
+              params2.nbIterationsPerPolicyValidation);
+    ASSERT_EQ(params.stepValidation,
+              params2.stepValidation);
     ASSERT_EQ(params.nbProgramConstant, params2.nbProgramConstant);
     ASSERT_EQ(params.nbRegisters, params2.nbRegisters);
     ASSERT_EQ(params.nbThreads, params2.nbThreads);

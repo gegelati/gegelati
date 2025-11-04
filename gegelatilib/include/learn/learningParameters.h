@@ -86,11 +86,6 @@ namespace Learn {
          * In LearningAgent and ParallelLearningAgent it is just the number of
          * times the evaluations are repeated (that can produce a more
          * representative result in non-deterministic environments).
-         * In adversarial mode, that represents the minimum number of evaluation
-         * of each root. Each root will be evaluated in several jobs, each job
-         * can be evaluated several times, but the total number of times a root
-         * appears in an evaluation will be nbIterationsPerPolicyEvaluation or
-         * a bit higher.
          */
         uint64_t nbIterationsPerPolicyEvaluation = 5;
 
@@ -132,34 +127,6 @@ namespace Learn {
         /// Maximum number of times a given policy (i.e. a root TPGVertex) is
         /// evaluated.
         size_t maxNbEvaluationPerPolicy = 1000;
-
-        /// JSon comment
-        inline static const std::string nbIterationsPerJobComment =
-            "// [Only used in AdversarialLearningAgent.]\n"
-            "// Number of times each job is evaluated in the learning "
-            "process.\n"
-            "// Each root may belong to several jobs, hence this parameter "
-            "should be lower\n"
-            "// than the nbIterationsPerPolicyEvaluation parameter.\n"
-            "// \"nbIterationsPerJob\" : 1, // Default value";
-        /**
-         * \brief Number of evaluations done for each job.
-         *
-         * In some situations where the environments is not determinist,
-         * i.e. if the agent does exactly the same thing at the same moment
-         * but he can still make different scores in different runs, then it
-         * can be a good thing to evaluate several times a single job. It will
-         * statistically be more representative of the job.
-         *
-         * Note than in LearningAgent and ParallelLearningAgent it is currently
-         * unused as the number of eval per job will simply be
-         * nbIterationsPerPolicyEvaluation.
-         *
-         * The default value is to 1, that means a given job will be evaluated
-         * a single time and there will be as many jobs as
-         * nbIterationsPerPolicyEvaluation.
-         */
-        size_t nbIterationsPerJob = 1;
 
         /// JSon comment
         inline static const std::string nbRegistersComment =
