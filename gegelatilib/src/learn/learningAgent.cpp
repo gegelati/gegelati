@@ -173,7 +173,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
             nbActions++;
 
             // Extract the metrics.
-            selectionMetrics->extractMetricsStep(root, le);
+            selectionMetrics->extractMetricsStep(root, actionsID, le);
         }
 
         // Extract the metrics.

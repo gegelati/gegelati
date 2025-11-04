@@ -2,18 +2,22 @@
 
 #include "selector/mapElites/mapElitesSelectionMetrics.h"
 
+const std::map<std::shared_ptr<const Selector::MapElites::MapElitesDescriptor>, std::vector<double>>& Selector::MapElites::MapElitesSelectionMetrics::getMapDescriptors() const
+{
+    return mapDescriptors;
+}
 
 void Selector::MapElites::MapElitesSelectionMetrics::initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
 {
     for(auto pair: mapDescriptors){
-        pair.second.resize(pair.first.getSize(agent, learningEnvironment), 0.0);
+        pair.second.resize(pair.first->getSize(learningEnvironment), 0.0);
     }
 }
 
 void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsStep(const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment)
 {
     for(auto pair: mapDescriptors){
-        std::vector<double> valuesExtracted = pair.first.extractMetricsStep(agent, actionValues, learningEnvironment);
+        std::vector<double> valuesExtracted = pair.first->extractMetricsStep(agent, actionValues, learningEnvironment);
 
         for(size_t idx = 0; idx < valuesExtracted.size(); idx++){
             pair.second[idx] += valuesExtracted[idx];
@@ -24,7 +28,7 @@ void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsStep(const TP
 void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
 {
     for(auto pair: mapDescriptors){
-        std::vector<double> valuesExtracted = pair.first.extractMetricsEpisode(agent, learningEnvironment);
+        std::vector<double> valuesExtracted = pair.first->extractMetricsEpisode(agent, learningEnvironment);
 
         for(size_t idx = 0; idx < valuesExtracted.size(); idx++){
             pair.second[idx] += valuesExtracted[idx];

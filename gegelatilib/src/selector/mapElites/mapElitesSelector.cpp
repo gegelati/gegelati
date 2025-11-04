@@ -3,6 +3,13 @@
 #include "selector/mapElites/mapElitesSelector.h"
 
 
+void Selector::MapElites::MapElitesSelector::addArchiveFromDescriptor(std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le, size_t nbBins)
+{
+    std::pair<size_t, size_t> minAndMaxRange = descriptor->getMinAndMaxRange(le);
+    size_t nbDescriptors = descriptor->getSize(le);
+    mapEliteArchives.insert({descriptor, std::make_shared<MapElitesArchive>(nbBins, nbDescriptors, minAndMaxRange.first, minAndMaxRange.second)});
+}
+
 void Selector::MapElites::MapElitesSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                     const TPG::TPGVertex*>& results,
@@ -11,7 +18,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
 
     // Clear values reevaluated
     for(auto& pair: this->mapEliteArchives){
-        MapElitesArchive* mapEliteArchive = pair.second;
+        std::shared_ptr<MapElitesArchive> mapEliteArchive = pair.second;
         for(auto it = results.begin(); it != results.end(); it++){
             // The root is already in the archive
             if(mapEliteArchive->containsRoot(it->second)){
@@ -22,8 +29,8 @@ void Selector::MapElites::MapElitesSelector::doSelection(
     }
 
     for(auto& pair: this->mapEliteArchives){
-        const MapElitesDescriptor descriptor = pair.first;
-        MapElitesArchive* mapEliteArchive = pair.second;
+        std::shared_ptr<const MapElitesDescriptor> descriptor = pair.first;
+        std::shared_ptr<MapElitesArchive> mapEliteArchive = pair.second;
 
         std::vector<const TPG::TPGVertex*> verticesToDelete;
 
@@ -82,5 +89,5 @@ void Selector::MapElites::MapElitesSelector::doSelection(
 
 const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::updateContext()
 {
-
+    return Selector::updateContext();
 }

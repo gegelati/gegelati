@@ -8,41 +8,44 @@
 #include "selector/mapElites/mapElitesSelectionMetrics.h"
 #include "selector/selector.h"
 
+#include "learn/learningEnvironment.h"
+
 namespace Selector {
     namespace MapElites {
 
         /**
-         * \brief Selection class that will do a selection with a tournament.
-         *
-         * A small proportion X of the best agents is kept and saved from the
-         * tournament, X is an hyperparameter.
-         *
-         * The remaining of the population is randomly put in tournament tables of
-         * size Y, Y is an hyperparameter. The best agents of each tournment is
-         * selected, the others are deleted.
-         *
-         * During mutation process, the best agents saved are not used in the
-         * mutation process, only the survivors of the tournament. However this
-         * survivors are deleted after the offspring creation.
+         * \brief Selection class that will do a selection with a Map Elites
+         * algorithm.
+         * 
+         * The different archives are stored in the mapEliteArchives attribute,
+         * each archive corresponding to a descriptor.
          */
         class MapElitesSelector : public Selector::Selector
         {
         protected:
 
-
-            std::map<MapElitesDescriptor, MapElitesArchive*> mapEliteArchives;
+            /// Map of descriptor to their corresponding archive
+            std::map<std::shared_ptr<const MapElitesDescriptor>, std::shared_ptr<MapElitesArchive>> mapEliteArchives;
         public:
             /**
              * \brief Constructor for Selector.
              *
              * \param[in] graph shared pointer of the graph on which the selection
-             * is done. \param[in] params parameters used by the Selector.
+             * is done. 
+             * \param[in] params parameters used by the Selector.
              */
             MapElitesSelector(std::shared_ptr<TPG::TPGGraph> graph,
                             const Learn::LearningParameters& params)
                 : Selector::Selector{graph, params} {}
 
-            virtual void addArchiveFromDescriptor(MapElitesDescriptor descriptor);
+            /**
+             * \brief Add an archive for a given descriptor.
+             * 
+             * \param[in] descriptor the descriptor to add an archive for.
+             * \param[in] le the learning environment used to get size and ranges.
+             * \param[in] nbBins the number of bins per descriptor.
+             */
+            virtual void addArchiveFromDescriptor(std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le, size_t nbBins);
 
             /**
              * \brief override of doSelection method

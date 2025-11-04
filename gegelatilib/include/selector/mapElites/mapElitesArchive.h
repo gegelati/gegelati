@@ -15,19 +15,44 @@
 namespace Selector {
     namespace MapElites {
 
-
+        /**
+         * \brief Class representing a Map Elites archive.
+         * 
+         * The archive is represented as a multi-dimensional grid, where each cell
+         * can store an EvaluationResult and its corresponding agent.
+         */
         class MapElitesArchive{
             protected:
+
+                /// @brief Number of bins per descriptor
                 uint64_t nbBinPerDescriptor;
+
+                /// @brief Number of descriptors for this archive
                 uint64_t nbDescriptors;
+
+                /// @brief Minimum value for the descriptors
                 double minValue;
+
+                /// @brief Maximum value for the descriptors
                 double maxValue;
+
+                /// @brief Limits of the bins for the descriptors
                 std::vector<double> archiveLimits;
+
+                /// @brief The archive storing evaluation results and their corresponding root TPGVertex
                 std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>> archive;
 
             public:
 
-                MapElitesArchive(size_t nbBinPerDescriptor, size_t nbDescriptors, size_t minValue, size_t maxValue)
+                /**
+                 * \brief Constructor of the MapElitesArchive
+                 * 
+                 * \param[in] nbBinPerDescriptor Number of bins per descriptor
+                 * \param[in] nbDescriptors Number of descriptors for this archive
+                 * \param[in] minValue Minimum value for the descriptors
+                 * \param[in] maxValue Maximum value for the descriptors
+                 */
+                MapElitesArchive(size_t nbBinPerDescriptor, size_t nbDescriptors, double minValue, double maxValue)
                     : nbBinPerDescriptor{nbBinPerDescriptor}, nbDescriptors{nbDescriptors}, minValue{minValue}, maxValue{maxValue}
                 {
                     if(nbBinPerDescriptor > 0 && nbDescriptors > 0){
@@ -35,44 +60,117 @@ namespace Selector {
                     }
 
                     for (size_t idx = 1; idx <= nbBinPerDescriptor; ++idx) {
-                        archiveLimits.push_back((double)idx / (double)nbBinPerDescriptor);
+                        archiveLimits.push_back( (double)idx * (maxValue - minValue) / (double)nbBinPerDescriptor + minValue);
                     }
                 }
 
+                /**
+                 * \brief Get the size of the archive
+                 */
                 uint64_t size() const;
 
+                /**
+                 * \brief Get the dimensions of the archive
+                 */
                 std::pair<uint64_t, uint64_t> getDimensions() const;
 
+                /**
+                 * \brief Get all the archive content
+                 */
                 virtual const std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>>& getAllArchive() const;
 
+
+                /**
+                 * \brief Get the archive content at given indices
+                 * 
+                 * \param[in] indices the indices to get the archive content from
+                 */
                 virtual const std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>& 
                     getArchiveAt(const std::vector<uint64_t>& indices) const;
 
 
-
+                /**
+                 * \brief Get the archive content at given descriptors
+                 * 
+                 * \param[in] descriptors the descriptors to get the archive content from
+                 */
                 virtual const std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>& getArchiveFromDescriptors(
                     const std::vector<double>& descriptors) const; 
 
+                /**
+                 * \brief Set the archive content at given indices
+                 * 
+                 * \param[in] vertex the TPGVertex to set in the archive
+                 * \param[in] eval the EvaluationResult to set in the archive
+                 * \param[in] indices the indices to set the archive content at
+                 */
                 virtual void setArchiveAt(
                     const TPG::TPGVertex* vertex,
                     std::shared_ptr<Learn::EvaluationResult> eval,
                     const std::vector<uint64_t>& indices);
             
+                /**
+                 * \brief Set the archive content at given descriptors
+                 *  
+                 * \param[in] vertex the TPGVertex to set in the archive
+                 * \param[in] eval the EvaluationResult to set in the archive
+                 * \param[in] descriptors the descriptors to set the archive content at
+                 */
                 virtual void setArchiveFromDescriptors(
                     const TPG::TPGVertex* vertex, 
                     std::shared_ptr<Learn::EvaluationResult> eval, 
                     const std::vector<double>& descriptors);  
 
+                /**
+                 * \brief Get the index in one dimension of the archive from a value
+                 * 
+                 * \param[in] value the value to get the index from
+                 */
                 virtual uint64_t getIndexArchive(double value) const;
+
+                /**
+                 * \brief Compute the linear index from multi-dimensional indices
+                 * 
+                 * \param[in] indices the multi-dimensional indices to compute the linear index from
+                 */
                 virtual uint64_t computeLinearIndex(const std::vector<uint64_t>& indices) const;
 
-
+                /**
+                 * \brief Initialize a CSV file to store the archive content
+                 * 
+                 * \param[in] path the path to the CSV file
+                 */
                 virtual void initCSVarchive(std::string path) const ;
+
+                /**
+                 * \brief Update the CSV file with the current archive content
+                 * 
+                 * \param[in] path the path to the CSV file
+                 * \param[in] generationNumber the current generation number
+                 */
                 virtual void updateCSVArchive(std::string path, uint64_t generationNumber) const;
 
+                /**
+                 * \brief Check if the archive contains a root TPGVertex
+                 * 
+                 * \param[in] root the root TPGVertex to check
+                 */
                 virtual bool containsRoot(const TPG::TPGVertex* root) const;
 
+                /**
+                 * \brief Remove a root TPGVertex from the archive if its number of evaluation is below maxNbEvaluation
+                 * 
+                 * \param[in] root the root TPGVertex to remove
+                 * \param[in] maxNbEvaluation the maximum number of evaluation allowed
+                 */
                 virtual void removeRootFromArchiveIfNotComplete(const TPG::TPGVertex* root, size_t maxNbEvaluation);
+
+                /**
+                 * \brief Remove a root TPGVertex from the archive
+                 * 
+                 * \param[in] root the root TPGVertex to remove
+                 * \param[in] maxNbEvaluation the maximum number of evaluation allowed
+                 */
                 virtual void removeRootFromArchive(const TPG::TPGVertex* root, size_t maxNbEvaluation);
 
 

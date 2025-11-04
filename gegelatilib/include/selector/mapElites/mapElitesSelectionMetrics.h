@@ -25,24 +25,25 @@ namespace Selector {
              * \brief Map storing a descriptor and a Vector storing a double value per descriptor (i.e. per Action) of
              * a classification LearningEnvironment.
              */
-            std::map<MapElitesDescriptor, std::vector<double>> mapDescriptors;
+            std::map<std::shared_ptr<const MapElitesDescriptor>, std::vector<double>> mapDescriptors;
 
         public:
 
             /**
-             * \brief Default constructor
+             * \brief Default constructor of MapEliteselectionMetrics with a vector of descriptors.
+             * 
+             * \param[in] descriptors the vector of descriptors to use.
              */
-            MapElitesSelectionMetrics(std::vector<MapElitesDescriptor> descriptors){
+            MapElitesSelectionMetrics(std::vector<std::shared_ptr<const MapElitesDescriptor>> descriptors){
                 for(auto descriptor: descriptors){
-                    mapDescriptors.insert(descriptor, {});
+                    mapDescriptors.insert({descriptor, {}});
                 }
             }
 
             /**
-             * \brief Constructor with score and utility initialization.
+             * \brief Constructor of MapEliteselectionMetrics with a vector of scores.
              *
-             * \param[in] scorePerClass the vector of score obtained by the agent per class.
-             * \param[in] nbEvalPerClass the vector of number of evaluation per class.
+             * \param[in] scores the vector of score obtained by the agent.
              */
             MapElitesSelectionMetrics(const std::vector<double>& scores)
                 : SelectionMetrics(std::accumulate(scores.cbegin(), scores.cend(), 0.0) / scores.size()) {};
@@ -50,7 +51,7 @@ namespace Selector {
             /**
              * \brief Get a const ref to the scorePerClass attribute.
              */
-            const std::map<MapElitesDescriptor, std::vector<double>>& getMapDescriptors() const;
+            const std::map<std::shared_ptr<const MapElitesDescriptor>, std::vector<double>>& getMapDescriptors() const;
 
             /**
              * \brief Specialization of the initialisation of the metrics.

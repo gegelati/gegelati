@@ -67,7 +67,7 @@ namespace Selector {
          * \param[in] agent the TPGVertex representing the agent.
          * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
          */
-        virtual void initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment);
+        virtual void initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment) {};
 
         /**
          * \brief Extract metrics from the agent in the learning environment.
@@ -78,7 +78,7 @@ namespace Selector {
          * \param[in] actionValues the action values taken by the agent.
          * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
          */
-        virtual void extractMetricsStep(const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment);
+        virtual void extractMetricsStep(const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment) {};
 
         /**
          * \brief Extract metrics from the agent in the learning environment.

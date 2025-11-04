@@ -12,17 +12,6 @@ double Selector::SelectionMetrics::getUtility() const
     return utility;
 }
 
-void Selector::SelectionMetrics::initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
-{
-    // Does not do anything
-}
-
-void Selector::SelectionMetrics::extractMetricsStep(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
-{
-    // Does not do anything
-}
-
-
 void Selector::SelectionMetrics::extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
 {
     // Update score
