@@ -18,22 +18,26 @@ namespace Selector {
 
         class MapElitesArchive{
             protected:
-                const ArchiveParametrization& archiveParams;
-                uint64_t dim1;
-                uint64_t dim2;
+                uint64_t nbBinPerDescriptor;
+                uint64_t nbDescriptors;
+                double minValue;
+                double maxValue;
+                std::vector<double> archiveLimits;
                 std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>> archive;
 
             public:
 
-                MapElitesArchive(const ArchiveParametrization& archiveParams)
-                    : archiveParams{archiveParams}, dim1{archiveParams.archiveLimits.size()}, dim2{archiveParams.nbDescriptors * archiveParams.nbDescriptorsAnalysis}
+                MapElitesArchive(size_t nbBinPerDescriptor, size_t nbDescriptors, size_t minValue, size_t maxValue)
+                    : nbBinPerDescriptor{nbBinPerDescriptor}, nbDescriptors{nbDescriptors}, minValue{minValue}, maxValue{maxValue}
                 {
-                    if(dim1 > 0 && dim2 > 0){
-                        archive.resize(std::pow(dim1, dim2));
+                    if(nbBinPerDescriptor > 0 && nbDescriptors > 0){
+                        archive.resize(std::pow(nbBinPerDescriptor, nbDescriptors));
+                    }
+
+                    for (size_t idx = 1; idx <= nbBinPerDescriptor; ++idx) {
+                        archiveLimits.push_back((double)idx / (double)nbBinPerDescriptor);
                     }
                 }
-
-                const ArchiveParametrization& getArchiveParams() {return archiveParams;}
 
                 uint64_t size() const;
 

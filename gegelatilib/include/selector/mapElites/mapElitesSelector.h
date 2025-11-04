@@ -5,6 +5,7 @@
 
 #include "selector/mapElites/mapElitesArchive.h"
 #include "selector/mapElites/mapElitesDescriptor.h"
+#include "selector/mapElites/mapElitesSelectionMetrics.h"
 #include "selector/selector.h"
 
 namespace Selector {
@@ -41,6 +42,7 @@ namespace Selector {
                             const Learn::LearningParameters& params)
                 : Selector::Selector{graph, params} {}
 
+            virtual void addArchiveFromDescriptor(MapElitesDescriptor descriptor);
 
             /**
              * \brief override of doSelection method

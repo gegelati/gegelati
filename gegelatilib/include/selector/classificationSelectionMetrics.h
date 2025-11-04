@@ -61,18 +61,12 @@ namespace Selector {
         virtual const std::vector<size_t>& getNbEvalPerClassPerClass() const;
 
         /**
-         * \brief Specializaation of the initialisation of the metrics.
-         * 
-         * \param[in] agent the TPGVertex representing the agent.
-         * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
+         * \brief Specialization of the initialisation of the metrics.
          */
         void initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment) override;
 
         /**
-         * \brief Specializaation of the extraction of the metrics at the end of an episode.
-         * 
-         * \param[in] agent the TPGVertex representing the agent.
-         * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
+         * \brief Specialization of the extraction of the metrics at the end of an episode.
          */
         void extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment) override;
 

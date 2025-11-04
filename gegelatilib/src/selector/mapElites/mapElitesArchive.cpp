@@ -1,6 +1,5 @@
+
 #include "selector/mapElites/mapElitesArchive.h"
-
-
 
 uint64_t Selector::MapElites::MapElitesArchive::size() const
 {
@@ -9,7 +8,7 @@ uint64_t Selector::MapElites::MapElitesArchive::size() const
 
 std::pair<uint64_t, uint64_t> Selector::MapElites::MapElitesArchive::getDimensions() const
 {
-    return std::make_pair(dim1, dim2);
+    return std::make_pair(nbBinPerDescriptor, nbDescriptors);
 }
 
 const std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>>& Selector::MapElites::MapElitesArchive::getAllArchive() const
@@ -20,10 +19,10 @@ const std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG:
 uint64_t Selector::MapElites::MapElitesArchive::getIndexArchive(double value) const
 {
     uint64_t idx = 0;
-    while (idx < archiveParams.archiveLimits.size() && value > archiveParams.archiveLimits[idx]) {
+    while (idx < archiveLimits.size() && value > archiveLimits[idx]) {
         idx++;
     }
-    return idx >= dim1 ? dim1 - 1 : idx;
+    return idx >= nbBinPerDescriptor ? nbBinPerDescriptor - 1 : idx;
 }
 
 uint64_t Selector::MapElites::MapElitesArchive::computeLinearIndex(const std::vector<uint64_t>& indices) const
@@ -31,9 +30,9 @@ uint64_t Selector::MapElites::MapElitesArchive::computeLinearIndex(const std::ve
     uint64_t index = 0;
     uint64_t multiplier = 1;
 
-    for (int i = dim2 - 1; i >= 0; --i) {
+    for (int i = nbDescriptors - 1; i >= 0; --i) {
         index += indices[i] * multiplier;
-        multiplier *= dim1;
+        multiplier *= nbDescriptors;
     }
 
     return index;
@@ -43,7 +42,7 @@ const std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
 Selector::MapElites::MapElitesArchive::getArchiveFromDescriptors(const std::vector<double>& descriptors) const
 {
     std::vector<uint64_t> indices;
-    for (uint64_t i = 0; i < dim2; ++i) {
+    for (uint64_t i = 0; i < nbDescriptors; ++i) {
         indices.push_back(getIndexArchive(descriptors[i]));
     }
 
@@ -56,7 +55,7 @@ void Selector::MapElites::MapElitesArchive::setArchiveFromDescriptors(
     const std::vector<double>& descriptors)
 {
     std::vector<uint64_t> indices;
-    for (uint64_t i = 0; i < dim2; ++i) {
+    for (uint64_t i = 0; i < nbDescriptors; ++i) {
         indices.push_back(getIndexArchive(descriptors[i]));
     }
 
@@ -87,21 +86,21 @@ void Selector::MapElites::MapElitesArchive::initCSVarchive(std::string path) con
 
     outFile << "generation";
 
-    std::vector<size_t> indices(dim2, 0);
-    size_t total = std::pow(dim1, dim2);
+    std::vector<size_t> indices(nbDescriptors, 0);
+    size_t total = std::pow(nbBinPerDescriptor, nbDescriptors);
     for (size_t count = 0; count < total; ++count) {
 
         std::string key;
-        for (size_t i = 0; i < dim2; ++i) {
+        for (size_t i = 0; i < nbDescriptors; ++i) {
             key += std::to_string(indices[i]);
-            if (i != dim2 - 1)
+            if (i != nbDescriptors - 1)
                 key += "_";
         }
         outFile << "," << key;
 
 
-        for (int i = dim2 - 1; i >= 0; --i) {
-            if (++indices[i] < dim1)
+        for (int i = nbDescriptors - 1; i >= 0; --i) {
+            if (++indices[i] < nbBinPerDescriptor)
                 break;
             indices[i] = 0;
         }
@@ -120,19 +119,19 @@ void Selector::MapElites::MapElitesArchive::updateCSVArchive(std::string path, u
 
     outFile << generationNumber;
 
-    std::vector<size_t> indices(dim2, 0);
-    size_t total = std::pow(dim1, dim2);
+    std::vector<size_t> indices(nbDescriptors, 0);
+    size_t total = std::pow(nbBinPerDescriptor, nbDescriptors);
     for (size_t count = 0; count < total; ++count) {
         const auto& elem = archive[computeLinearIndex(indices)];
 
         if (elem.second != nullptr) {
-            outFile << "," << elem.first->getResult();
+            outFile << "," << elem.first->getSelectionMetrics()->getScore();
         } else {
             outFile << ",nan";
         }
 
-        for (int i = dim2 - 1; i >= 0; --i) {
-            if (++indices[i] < dim1)
+        for (int i = nbDescriptors - 1; i >= 0; --i) {
+            if (++indices[i] < nbBinPerDescriptor)
                 break;
             indices[i] = 0;
         }
@@ -140,9 +139,9 @@ void Selector::MapElites::MapElitesArchive::updateCSVArchive(std::string path, u
 
     if (generationNumber == 0) {
         outFile << ",";
-        for (size_t i = 0; i < archiveParams.archiveLimits.size(); ++i) {
-            outFile << archiveParams.archiveLimits[i];
-            if (i != archiveParams.archiveLimits.size() - 1)
+        for (size_t i = 0; i < archiveLimits.size(); ++i) {
+            outFile << archiveLimits[i];
+            if (i != archiveLimits.size() - 1)
                 outFile << ";";
         }
     }

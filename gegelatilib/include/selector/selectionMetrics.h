@@ -75,9 +75,10 @@ namespace Selector {
          * This method is called at every step of the environment evaluation.
          * 
          * \param[in] agent the TPGVertex representing the agent.
+         * \param[in] actionValues the action values taken by the agent.
          * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
          */
-        virtual void extractMetricsStep(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment);
+        virtual void extractMetricsStep(const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment);
 
         /**
          * \brief Extract metrics from the agent in the learning environment.
