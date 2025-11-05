@@ -177,7 +177,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         }
 
         // Extract the metrics.
-        selectionMetrics->extractMetricsEpisode(root, le);
+        selectionMetrics->extractMetricsEpisode(root, nbActions, le);
     }
 
 

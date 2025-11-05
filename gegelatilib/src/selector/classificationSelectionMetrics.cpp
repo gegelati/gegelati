@@ -12,7 +12,7 @@ void Selector::ClassificationSelectionMetrics::initMetrics(const TPG::TPGVertex*
     this->nbEvalPerClass.resize(learningEnvironment.getNbActions(), 0.0);
 }
 
-void Selector::ClassificationSelectionMetrics::extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
+void Selector::ClassificationSelectionMetrics::extractMetricsEpisode(const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment)
 {
     // Update results
     const auto& classificationTable =

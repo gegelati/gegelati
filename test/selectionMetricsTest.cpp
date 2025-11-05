@@ -83,7 +83,7 @@ TEST(SelectionMetricsTest, ExtractMetricsEpisodeAddsScoreAndUtility)
 
 
     // Call extraction
-    metrics.extractMetricsEpisode(nullptr, env);
+    metrics.extractMetricsEpisode(nullptr, 0, env);
 
     // score and utility should be incremented
     ASSERT_DOUBLE_EQ(metrics.getScore(), 4.5);
@@ -204,7 +204,7 @@ TEST(ClassificationSelectionMetricsTest, InitAndExtractEpisode)
     ASSERT_EQ(metrics.getNbEvalPerClassPerClass().size(), 2);
 
     // extract should compute f-scores per class and number of evals
-    metrics.extractMetricsEpisode(nullptr, env);
+    metrics.extractMetricsEpisode(nullptr, 0, env);
 
     // class 0: TP=2 FN=1 FP=0 => precision=1 recall=2/3 => fscore=4/5 = 0.8
     ASSERT_EQ(metrics.getScorePerClass().at(0), 0.8);

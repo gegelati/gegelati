@@ -16,8 +16,8 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::MapElites::MapElitesSelect
 
 void Selector::MapElites::MapElitesSelector::addArchiveFromDescriptor(std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le)
 {
-    std::pair<size_t, size_t> minAndMaxRange = descriptor->getMinAndMaxRange(le);
-    mapEliteArchives.insert({descriptor, std::make_shared<MapElitesArchive>(descriptor->getNbBinPerDescriptors(), descriptor->getNbDescriptors(le), minAndMaxRange.first, minAndMaxRange.second)});
+    std::pair<size_t, size_t> minAndMaxRange = descriptor->getMinAndMaxRange();
+    mapEliteArchives.insert({descriptor, std::make_shared<MapElitesArchive>(descriptor->getNbBinPerDescriptors(), descriptor->getNbDescriptors(), minAndMaxRange.first, minAndMaxRange.second)});
 }
 
 void Selector::MapElites::MapElitesSelector::doSelection(

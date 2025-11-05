@@ -9,47 +9,80 @@
 namespace Selector {
     namespace MapElites {
 
-        /// \brief Structure representing a descriptor for Map Elites selection.
-        struct MapElitesDescriptor
+        /**
+         * \brief Abstract class representing a descriptor for Map Elites selection.
+         * 
+         * This class need to be inherrit to create specific descriptors.
+         * Example of descriptors are given in selector/mapElites/mapElitesDefaultDescriptors
+         */
+        class MapElitesDescriptor
         {
             
+            protected:
+
+                /// Number of bins per descriptor
+                size_t nbBins;
+
+                /// Number of descriptor
+                size_t nbDescriptors;
+
+                /// Minimum value in the archive
+                double minRange;
+
+                /// Maximum value in the archive
+                double maxRange; 
+
             public:
                 
                 /**
-                 * \brief Get the min and max range of the descriptor.
+                 * \brief Constructor for MapElitesDescriptor
                  * 
-                 * \param[in] learningEnvironment the learning environment used to get the ranges.
+                 * \param[in] nbBins the number of bins per descriptor
                  */
-                virtual std::pair<size_t, size_t> getMinAndMaxRange(const Learn::LearningEnvironment& learningEnvironment) const = 0;
+                MapElitesDescriptor(size_t nbBins = 3) : nbBins(nbBins) {}
+
+                /**
+                 * \brief initiate the descriptor attribute (such as nbDescriptors and min/max ranges)
+                 * 
+                 * \param[in] graph current graph
+                 * \param[in] learningEnvironment the learning environment used 
+                 */
+                virtual void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment) = 0;
+
+                /**
+                 * \brief Get the min and max range of the descriptor.
+                 */
+                virtual std::pair<double, double> getMinAndMaxRange() const {return std::make_pair(minRange, maxRange);};
 
                 /**
                  * \brief Get the number of the descriptor.
-                 * 
-                 * \param[in] learningEnvironment the learning environment used to get the size.
                  */
-                virtual size_t getNbDescriptors(const Learn::LearningEnvironment& learningEnvironment) const = 0;
+                virtual size_t getNbDescriptors() const {return nbDescriptors;};
 
                 /**
                  * \brief get the number of bins per descriptor
                  */
-                virtual size_t getNbBinPerDescriptors() const = 0;
+                virtual size_t getNbBinPerDescriptors() const {return nbBins;};
 
                 /**
                  * \brief Extract the metrics at each step of the evaluation.
                  * 
+                 * \param[in] metrics vector of current extracted metrics
                  * \param[in] agent the TPGVertex being evaluated.
                  * \param[in] actionValues the action values taken by the agent at this step.
                  * \param[in] learningEnvironment the learning environment used to get the metrics.
                  */
-                virtual std::vector<double> extractMetricsStep(const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment) const = 0;
+                virtual void extractMetricsStep(std::vector<double>& metrics, const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment) const {};
 
                 /**
                  * \brief Extract the metrics at the end of the evaluation episode.
                  * 
+                 * \param[in] metrics vector of current extracted metrics
                  * \param[in] agent the TPGVertex being evaluated.
+                 * \param[in] nbStepsExecuted number of steps executed at the end of the episode.
                  * \param[in] learningEnvironment the learning environment used to get the metrics.
                  */
-                virtual std::vector<double> extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment) const = 0;
+                virtual void extractMetricsEpisode(std::vector<double>& metrics, const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment) const {};
         };
 
     }; // namespace MapElites

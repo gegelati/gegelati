@@ -66,7 +66,7 @@ namespace Selector {
             /**
              * \brief Specialization of the extraction of the metrics at the end of an episode.
              */
-            void extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment) override;
+            void extractMetricsEpisode(const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment) override;
 
 
             /**

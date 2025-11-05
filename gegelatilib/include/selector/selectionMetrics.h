@@ -86,9 +86,10 @@ namespace Selector {
          * This method is called at the end of every episode of the environment evaluation.
          * 
          * \param[in] agent the TPGVertex representing the agent.
+         * \param[in] nbStepsExecuted number of steps executed at the end of the episode.
          * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
          */
-        virtual void extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment);
+        virtual void extractMetricsEpisode(const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment);
 
         /**
          * \brief Perform a weighted sum between this SelectionMetrics and another.

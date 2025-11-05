@@ -12,7 +12,7 @@ double Selector::SelectionMetrics::getUtility() const
     return utility;
 }
 
-void Selector::SelectionMetrics::extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
+void Selector::SelectionMetrics::extractMetricsEpisode(const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment)
 {
     // Update score
     this->score += learningEnvironment.getScore();
