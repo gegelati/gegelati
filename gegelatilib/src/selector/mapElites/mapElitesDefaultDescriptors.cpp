@@ -2,10 +2,9 @@
 
 #include "selector/mapElites/mapElitesDefaultDescriptors.h"
 
-void Selector::MapElites::DefaultDescriptors::ActionValues::initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment, size_t nbBins)
+void Selector::MapElites::DefaultDescriptors::ActionValues::initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment)
 {
     this->init = true;
-    this->nbBins = nbBins;
     this->minRange = 0.0;
     this->maxRange = 1.0;
     this->nbDescriptors = learningEnvironment.getNbActions();

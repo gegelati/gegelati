@@ -32,7 +32,7 @@ uint64_t Selector::MapElites::MapElitesArchive::computeLinearIndex(const std::ve
 
     for (int i = nbDescriptors - 1; i >= 0; --i) {
         index += indices[i] * multiplier;
-        multiplier *= nbDescriptors;
+        multiplier *= nbBinPerDescriptor;
     }
 
     return index;
@@ -44,7 +44,9 @@ Selector::MapElites::MapElitesArchive::getArchiveFromDescriptors(const std::vect
     std::vector<uint64_t> indices;
     for (uint64_t i = 0; i < nbDescriptors; ++i) {
         indices.push_back(getIndexArchive(descriptors[i]));
-    }
+    };
+
+    
 
     return archive[computeLinearIndex(indices)];
 }
@@ -185,4 +187,16 @@ void Selector::MapElites::MapElitesArchive::removeRootFromArchive(const TPG::TPG
             break;
         }
     }
+}
+
+std::set<const TPG::TPGVertex*> Selector::MapElites::MapElitesArchive::getVerticesInArchive()
+{
+    std::set<const TPG::TPGVertex*> verticesInArchive;
+    for(const auto& pair: archive){
+        if(pair.second != nullptr){
+            verticesInArchive.insert(pair.second);
+        }
+    }
+
+    return verticesInArchive;
 }

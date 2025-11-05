@@ -174,6 +174,11 @@ namespace Selector {
                  */
                 virtual void removeRootFromArchive(const TPG::TPGVertex* root, size_t maxNbEvaluation);
 
+                /**
+                 * \brief Return a set with the current vectors in the archive.
+                 */
+                virtual std::set<const TPG::TPGVertex*> getVerticesInArchive();
+
 
     };
     

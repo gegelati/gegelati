@@ -20,9 +20,6 @@ namespace Selector {
             
             protected:
 
-                /// Number of bins per descriptor
-                size_t nbBins;
-
                 /// Number of descriptor
                 size_t nbDescriptors;
 
@@ -47,9 +44,8 @@ namespace Selector {
                  * 
                  * \param[in] graph current graph
                  * \param[in] learningEnvironment the learning environment used 
-                 * \param[in] nbBins number of bins for the archive
                  */
-                virtual void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment, size_t nbBins = 0) = 0;
+                virtual void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment) = 0;
 
                 /**
                  * \brief Get the min and max range of the descriptor.
@@ -60,12 +56,6 @@ namespace Selector {
                  * \brief Get the number of the descriptor.
                  */
                 virtual size_t getNbDescriptors() const {return this->nbDescriptors;};
-
-                /**
-                 * \brief get the number of bins per descriptor
-                 */
-                virtual size_t getNbBinPerDescriptors() const {return this->nbBins;};
-
                 /**
                  * \brief Extract the metrics at each step of the evaluation.
                  * 

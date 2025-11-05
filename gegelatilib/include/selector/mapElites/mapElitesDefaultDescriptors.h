@@ -24,7 +24,7 @@ namespace Selector {
                     /**
                      * \brief Specialisation of initDescriptor
                      */
-                    virtual void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment, size_t nbBins) override;
+                    virtual void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment) override;
 
                     /**
                      * \brief Specialisation of extractMetricsStep

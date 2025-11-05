@@ -1,4 +1,5 @@
 
+#include "selector/mapElites/cvtMapElitesArchive.h"
 #include "selector/mapElites/mapElitesArchive.h"
 #include "selector/mapElites/mapElitesSelector.h"
 
@@ -36,10 +37,16 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::MapElites::MapElitesSelect
     return std::make_shared<MapElitesSelectionMetrics>(descriptors);
 }
 
-void Selector::MapElites::MapElitesSelector::addArchiveFromDescriptor(std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le)
+void Selector::MapElites::MapElitesSelector::addArchiveFromDescriptor(size_t nbBins, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le)
 {
     std::pair<size_t, size_t> minAndMaxRange = descriptor->getMinAndMaxRange();
-    mapEliteArchives.insert({descriptor, std::make_shared<MapElitesArchive>(descriptor->getNbBinPerDescriptors(), descriptor->getNbDescriptors(), minAndMaxRange.first, minAndMaxRange.second)});
+    mapEliteArchives.insert({descriptor, std::make_shared<MapElitesArchive>(nbBins, descriptor->getNbDescriptors(), minAndMaxRange.first, minAndMaxRange.second)});
+}
+
+void Selector::MapElites::MapElitesSelector::addCvtArchiveFromDescriptor(size_t nbCentroids, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le, Mutator::RNG& rng, size_t nbIterationInit, size_t nbDotsInit, double a1, double b1, double a2, double b2)
+{
+    std::pair<size_t, size_t> minAndMaxRange = descriptor->getMinAndMaxRange();
+    mapEliteArchives.insert({descriptor, std::make_shared<CvtMapElitesArchive>(rng, nbCentroids, descriptor->getNbDescriptors(), minAndMaxRange.first, minAndMaxRange.second, nbIterationInit, nbDotsInit, a1, b1, a2, b2)});
 }
 
 void Selector::MapElites::MapElitesSelector::doSelection(
@@ -117,4 +124,34 @@ void Selector::MapElites::MapElitesSelector::doSelection(
             ++it;
         }
     }
+}
+
+
+const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::updateContext()
+{
+    Selector::Selector::updateContext();
+
+    // Get all the vertices in the different archives
+    std::set<const TPG::TPGVertex*> verticesInAllArchives;
+    for(auto& pair: this->mapEliteArchives){
+        std::set<const TPG::TPGVertex*> verticesInArchive = pair.second->getVerticesInArchive();
+        verticesInAllArchives.insert(verticesInArchive.begin(), verticesInArchive.end());
+    }
+
+    // Get the number of team agent and action agent.
+    size_t nbTeamsInArchives = 0;
+    size_t nbActionsInArchives = 0;
+    for(auto& vertex: verticesInAllArchives){
+        if(dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr){
+            nbTeamsInArchives++;
+        } else {
+            nbActionsInArchives++;
+        }
+    }
+
+    // Update the number of team and archive to create.
+    this->context.nbTeamsToCreate += nbTeamsInArchives;
+    this->context.nbActionsToCreate += nbActionsInArchives;
+
+    return this->context;
 }
