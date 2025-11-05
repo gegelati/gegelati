@@ -226,12 +226,11 @@ namespace Selector {
         virtual const SelectionContext& updateContext();
 
         /**
-         * \brief Method to call at the end of TPGMutator::populateTPG to erase
-         * the parents that are useless after the population
+         * \brief Method to call at the end of TPGMutator::populateTPG
          *
-         * This method does nothing with the classic selector.
+         * This method does nothing with the default selector.
          */
-        virtual void deleteUselessParents();
+        virtual void updateAfterPopulate() {};
     };
 }; // namespace Selector
 

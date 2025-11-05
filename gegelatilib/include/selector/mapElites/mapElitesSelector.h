@@ -38,14 +38,21 @@ namespace Selector {
                             const Learn::LearningParameters& params)
                 : Selector::Selector{graph, params} {}
 
+
+            /**
+             * Specialization of createSelectionMetrics
+             * 
+             * Creates and return an instance of MapElitesSelectionMetrics
+             */
+            virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics();
+
             /**
              * \brief Add an archive for a given descriptor.
              * 
              * \param[in] descriptor the descriptor to add an archive for.
              * \param[in] le the learning environment used to get size and ranges.
-             * \param[in] nbBins the number of bins per descriptor.
              */
-            virtual void addArchiveFromDescriptor(std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le, size_t nbBins);
+            virtual void addArchiveFromDescriptor(std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le);
 
             /**
              * \brief override of doSelection method
@@ -59,17 +66,13 @@ namespace Selector {
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                             const TPG::TPGVertex*>& results,
                 Mutator::RNG& rng) override;
-
-            /**
-             * \brief Specialization of updateContext for tournament purposes
-             *
-             * The method will remove the elite agents from the clonableVertices
-             * vectors, and will remove the not elite agents from the
-             * preExistingVertices vectors
-             */
-            virtual const SelectionContext& updateContext() override;
         };
     }; // namespace MapElites
+
+    /**
+     * To make the selector accessible from both Selector::MapElites and from Selector
+     */
+    using MapElitesSelector = MapElites::MapElitesSelector;
 }; // namespace Selector
 
 #endif // MAP_ELITES_SELECTOR_H

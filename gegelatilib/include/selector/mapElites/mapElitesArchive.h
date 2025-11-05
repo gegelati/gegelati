@@ -24,22 +24,22 @@ namespace Selector {
         class MapElitesArchive{
             protected:
 
-                /// @brief Number of bins per descriptor
+                /// Number of bins per descriptor
                 uint64_t nbBinPerDescriptor;
 
-                /// @brief Number of descriptors for this archive
+                /// Number of descriptors for this archive
                 uint64_t nbDescriptors;
 
-                /// @brief Minimum value for the descriptors
+                /// Minimum value for the descriptors
                 double minValue;
 
-                /// @brief Maximum value for the descriptors
+                /// Maximum value for the descriptors
                 double maxValue;
 
-                /// @brief Limits of the bins for the descriptors
+                /// Limits of the bins for the descriptors
                 std::vector<double> archiveLimits;
 
-                /// @brief The archive storing evaluation results and their corresponding root TPGVertex
+                /// The archive storing evaluation results and their corresponding root TPGVertex
                 std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>> archive;
 
             public:

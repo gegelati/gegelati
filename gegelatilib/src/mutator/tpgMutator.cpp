@@ -1043,7 +1043,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
         }
     }
 
-    selector.deleteUselessParents();
+    selector.updateAfterPopulate();
 
     // Mutate the new Programs
     mutateNewProgramBehaviors(maxNbThreads, newPrograms, rng, params, archive);

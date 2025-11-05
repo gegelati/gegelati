@@ -565,7 +565,7 @@ TEST_F(SelectorTest, UpdateContextTournament)
         << "The only preExisting action expected is action2.";
 }
 
-TEST_F(SelectorTest, DeleteUselessParents)
+TEST_F(SelectorTest, updateAfterPopulate)
 {
     params.mutation.tpg.useActionProgram = true;
 
@@ -587,7 +587,7 @@ TEST_F(SelectorTest, DeleteUselessParents)
     ASSERT_EQ(graph->getNbRootVertices(), 4)
         << "The graph should have 4 roots.";
 
-    selector.deleteUselessParents();
+    selector.updateAfterPopulate();
 
     ASSERT_EQ(selector.getVerticesToDelete().size(), 0)
         << "After deleting useless parents, the selector should have 0 "

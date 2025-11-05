@@ -215,8 +215,3 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
 
     return context;
 }
-
-void Selector::Selector::deleteUselessParents()
-{
-    // Does nothing with the default selector.
-}

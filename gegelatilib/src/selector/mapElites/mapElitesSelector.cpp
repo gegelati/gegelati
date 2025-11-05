@@ -1,13 +1,23 @@
 
-
+#include "selector/mapElites/mapElitesArchive.h"
 #include "selector/mapElites/mapElitesSelector.h"
 
 
-void Selector::MapElites::MapElitesSelector::addArchiveFromDescriptor(std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le, size_t nbBins)
+std::shared_ptr<Selector::SelectionMetrics> Selector::MapElites::MapElitesSelector::createSelectionMetrics()
+{
+    std::vector<std::shared_ptr<const MapElitesDescriptor>> descriptors;
+
+    for(auto& pair: this->mapEliteArchives){
+        descriptors.push_back(pair.first);
+    }
+
+    return std::make_shared<MapElitesSelectionMetrics>(descriptors);
+}
+
+void Selector::MapElites::MapElitesSelector::addArchiveFromDescriptor(std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le)
 {
     std::pair<size_t, size_t> minAndMaxRange = descriptor->getMinAndMaxRange(le);
-    size_t nbDescriptors = descriptor->getSize(le);
-    mapEliteArchives.insert({descriptor, std::make_shared<MapElitesArchive>(nbBins, nbDescriptors, minAndMaxRange.first, minAndMaxRange.second)});
+    mapEliteArchives.insert({descriptor, std::make_shared<MapElitesArchive>(descriptor->getNbBinPerDescriptors(), descriptor->getNbDescriptors(le), minAndMaxRange.first, minAndMaxRange.second)});
 }
 
 void Selector::MapElites::MapElitesSelector::doSelection(
@@ -42,7 +52,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
             // Get the selectionMetrics (casted) and root
             auto metrics = std::dynamic_pointer_cast<MapElitesSelectionMetrics>(it->first->getSelectionMetrics());
             if (metrics == nullptr) {
-                throw std::runtime_error("Evalresult should be castable to MapElitesSelectionMetrics");
+                throw std::runtime_error("SelectionMetrics should be castable to MapElitesSelectionMetrics");
             }
             const TPG::TPGVertex* root = it->second;
 
@@ -85,9 +95,4 @@ void Selector::MapElites::MapElitesSelector::doSelection(
             ++it;
         }
     }
-}
-
-const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::updateContext()
-{
-    return Selector::updateContext();
 }

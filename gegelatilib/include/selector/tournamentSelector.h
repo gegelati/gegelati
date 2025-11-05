@@ -103,12 +103,12 @@ namespace Selector {
         virtual const SelectionContext& updateContext() override;
 
         /**
-         * \brief Specialization of deleteUselessParents for tournament purposes
+         * \brief Specialization of updateAfterPopulate for tournament purposes
          *
          * This method erase the agents that have survived the tournaments and
          * have generated new offsprings.
          */
-        virtual void deleteUselessParents() override;
+        virtual void updateAfterPopulate() override;
 
         /**
          * \brief getter of the verticesToDelete set.

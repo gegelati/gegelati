@@ -14,22 +14,25 @@ namespace Selector {
         {
             
             public:
-
+                
                 /**
                  * \brief Get the min and max range of the descriptor.
                  * 
                  * \param[in] learningEnvironment the learning environment used to get the ranges.
-                 * \return a pair containing the min and max range.
                  */
                 virtual std::pair<size_t, size_t> getMinAndMaxRange(const Learn::LearningEnvironment& learningEnvironment) const = 0;
 
                 /**
-                 * \brief Get the size of the descriptor.
+                 * \brief Get the number of the descriptor.
                  * 
                  * \param[in] learningEnvironment the learning environment used to get the size.
-                 * \return the size of the descriptor.
                  */
-                virtual size_t getSize(const Learn::LearningEnvironment& learningEnvironment) const = 0;
+                virtual size_t getNbDescriptors(const Learn::LearningEnvironment& learningEnvironment) const = 0;
+
+                /**
+                 * \brief get the number of bins per descriptor
+                 */
+                virtual size_t getNbBinPerDescriptors() const = 0;
 
                 /**
                  * \brief Extract the metrics at each step of the evaluation.
@@ -37,7 +40,6 @@ namespace Selector {
                  * \param[in] agent the TPGVertex being evaluated.
                  * \param[in] actionValues the action values taken by the agent at this step.
                  * \param[in] learningEnvironment the learning environment used to get the metrics.
-                 * \return a vector of double values representing the metrics extracted.
                  */
                 virtual std::vector<double> extractMetricsStep(const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment) const = 0;
 
@@ -46,7 +48,6 @@ namespace Selector {
                  * 
                  * \param[in] agent the TPGVertex being evaluated.
                  * \param[in] learningEnvironment the learning environment used to get the metrics.
-                 * \return a vector of double values representing the metrics extracted.
                  */
                 virtual std::vector<double> extractMetricsEpisode(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment) const = 0;
         };

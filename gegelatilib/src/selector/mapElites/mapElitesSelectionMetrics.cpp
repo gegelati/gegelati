@@ -10,7 +10,7 @@ const std::map<std::shared_ptr<const Selector::MapElites::MapElitesDescriptor>, 
 void Selector::MapElites::MapElitesSelectionMetrics::initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
 {
     for(auto pair: mapDescriptors){
-        pair.second.resize(pair.first->getSize(learningEnvironment), 0.0);
+        pair.second.resize(pair.first->getNbDescriptors(learningEnvironment), 0.0);
     }
 }
 

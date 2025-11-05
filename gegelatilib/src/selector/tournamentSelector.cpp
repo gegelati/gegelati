@@ -151,7 +151,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
     return context;
 }
 
-void Selector::TournamentSelector::deleteUselessParents()
+void Selector::TournamentSelector::updateAfterPopulate()
 {
     // Remove vertex to be deleted
     for (auto vertex : this->verticesToDelete) {
