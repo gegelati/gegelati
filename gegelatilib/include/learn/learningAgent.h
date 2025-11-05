@@ -56,11 +56,7 @@
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 
-#include "selector/classificationSelector.h"
-#include "selector/selector.h"
-#include "selector/tournamentSelector.h"
-#include "selector/truncationSelector.h"
-#include "selector/mapElites/mapElitesSelector.h"
+#include "selector/selectorFactory.h"
 namespace Learn {
 
     /**
@@ -120,32 +116,9 @@ namespace Learn {
             : learningEnvironment{le},
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
-              tpg(factory.createTPGGraph(env)), params{p},
-              archive(p.archiveSize, p.archivingProbability)
-        {
-
-            // There is probably a cleaner way to do that, but using the factory
-            // was creating import issues.
-            if (dynamic_cast<ClassificationLearningEnvironment*>(&le) != nullptr){
-                this->selector = std::make_shared<Selector::ClassificationSelector>(
-                    this->tpg, this->params, le.getNbActions());
-            }
-            else if (p.selection._selectionMode == "truncation") {
-                selector =
-                    std::make_shared<Selector::TruncationSelector>(tpg, p);
-            }
-            else if (p.selection._selectionMode == "tournament") {
-                selector =
-                    std::make_shared<Selector::TournamentSelector>(tpg, p);
-            }
-            else if (p.selection._selectionMode == "mapElites") {
-                selector =
-                    std::make_shared<Selector::MapElitesSelector>(tpg, p);
-            }
-            else {
-                throw std::runtime_error("Selection mode not found");
-            }
-        };
+              archive(p.archiveSize, p.archivingProbability),
+              params{p}, tpg(factory.createTPGGraph(env)), selector{Selector::selectorFactory(tpg, le, p)}
+               {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
