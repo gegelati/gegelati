@@ -106,6 +106,7 @@
 #include <selector/classificationSelector.h>
 #include <selector/classificationSelectionMetrics.h>
 #include <selector/mapElites/mapElitesArchive.h>
+#include <selector/mapElites/mapElitesDefaultDescriptors.h>
 #include <selector/mapElites/mapElitesDescriptor.h>
 #include <selector/mapElites/mapElitesSelector.h>
 #include <selector/mapElites/mapElitesSelectionMetrics.h>

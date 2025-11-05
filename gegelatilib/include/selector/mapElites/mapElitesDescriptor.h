@@ -32,37 +32,39 @@ namespace Selector {
                 /// Maximum value in the archive
                 double maxRange; 
 
+                /// Boolean value to check if the initDescriptor method has been executed.
+                bool init = false;
+
             public:
-                
+
                 /**
-                 * \brief Constructor for MapElitesDescriptor
-                 * 
-                 * \param[in] nbBins the number of bins per descriptor
+                 * \brief method that return if the initDescriptor method has been executed
                  */
-                MapElitesDescriptor(size_t nbBins = 3) : nbBins(nbBins) {}
+                virtual bool isInit() const {return this->init;};
 
                 /**
                  * \brief initiate the descriptor attribute (such as nbDescriptors and min/max ranges)
                  * 
                  * \param[in] graph current graph
                  * \param[in] learningEnvironment the learning environment used 
+                 * \param[in] nbBins number of bins for the archive
                  */
-                virtual void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment) = 0;
+                virtual void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment, size_t nbBins = 0) = 0;
 
                 /**
                  * \brief Get the min and max range of the descriptor.
                  */
-                virtual std::pair<double, double> getMinAndMaxRange() const {return std::make_pair(minRange, maxRange);};
+                virtual std::pair<double, double> getMinAndMaxRange() const {return std::make_pair(this->minRange, this->maxRange);};
 
                 /**
                  * \brief Get the number of the descriptor.
                  */
-                virtual size_t getNbDescriptors() const {return nbDescriptors;};
+                virtual size_t getNbDescriptors() const {return this->nbDescriptors;};
 
                 /**
                  * \brief get the number of bins per descriptor
                  */
-                virtual size_t getNbBinPerDescriptors() const {return nbBins;};
+                virtual size_t getNbBinPerDescriptors() const {return this->nbBins;};
 
                 /**
                  * \brief Extract the metrics at each step of the evaluation.

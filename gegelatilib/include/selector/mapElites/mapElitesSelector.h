@@ -38,6 +38,18 @@ namespace Selector {
                             const Learn::LearningParameters& params)
                 : Selector::Selector{graph, params} {}
 
+            
+            /**
+             * \brief Get the archive corresponding to a given descriptor.
+             * 
+             * \param[in] descriptor the descriptor to get the archive for.
+             */
+            virtual std::shared_ptr<const MapElitesArchive> getMapElitesArchiveAt(std::shared_ptr<const MapElitesDescriptor> descriptor);
+
+            /**
+             * \brief Get all the map elites archives.
+             */
+            virtual const std::map<std::shared_ptr<const MapElitesDescriptor>, std::shared_ptr<MapElitesArchive>>& getMapElitesArchives();
 
             /**
              * Specialization of createSelectionMetrics

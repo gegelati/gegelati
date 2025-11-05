@@ -3,11 +3,33 @@
 #include "selector/mapElites/mapElitesSelector.h"
 
 
+std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::MapElites::MapElitesSelector::getMapElitesArchiveAt(std::shared_ptr<const MapElitesDescriptor> descriptor)
+{
+    if(this->mapEliteArchives.find(descriptor) == this->mapEliteArchives.end()){
+        throw std::runtime_error("No archive found for the given descriptor");
+    }
+    return this->mapEliteArchives.at(descriptor);
+}
+
+const std::map<std::shared_ptr<const Selector::MapElites::MapElitesDescriptor>, std::shared_ptr<Selector::MapElites::MapElitesArchive>>& Selector::MapElites::MapElitesSelector::getMapElitesArchives()
+{
+    return this->mapEliteArchives;
+}
+
+
+
 std::shared_ptr<Selector::SelectionMetrics> Selector::MapElites::MapElitesSelector::createSelectionMetrics()
 {
+    if(this->mapEliteArchives.size() == 0){
+        throw std::runtime_error("No Descriptors have been added to mapElites!");
+    }
+
     std::vector<std::shared_ptr<const MapElitesDescriptor>> descriptors;
 
     for(auto& pair: this->mapEliteArchives){
+        if(!pair.first->isInit()){
+            throw std::runtime_error("A descriptor is not initialized");
+        }
         descriptors.push_back(pair.first);
     }
 

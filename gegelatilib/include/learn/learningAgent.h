@@ -60,6 +60,7 @@
 #include "selector/selector.h"
 #include "selector/tournamentSelector.h"
 #include "selector/truncationSelector.h"
+#include "selector/mapElites/mapElitesSelector.h"
 namespace Learn {
 
     /**
@@ -136,6 +137,10 @@ namespace Learn {
             else if (p.selection._selectionMode == "tournament") {
                 selector =
                     std::make_shared<Selector::TournamentSelector>(tpg, p);
+            }
+            else if (p.selection._selectionMode == "mapElites") {
+                selector =
+                    std::make_shared<Selector::MapElitesSelector>(tpg, p);
             }
             else {
                 throw std::runtime_error("Selection mode not found");

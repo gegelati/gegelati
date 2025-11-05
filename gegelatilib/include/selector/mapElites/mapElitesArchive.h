@@ -55,6 +55,7 @@ namespace Selector {
                 MapElitesArchive(size_t nbBinPerDescriptor, size_t nbDescriptors, double minValue, double maxValue)
                     : nbBinPerDescriptor{nbBinPerDescriptor}, nbDescriptors{nbDescriptors}, minValue{minValue}, maxValue{maxValue}
                 {
+
                     if(nbBinPerDescriptor > 0 && nbDescriptors > 0){
                         archive.resize(std::pow(nbBinPerDescriptor, nbDescriptors));
                     }

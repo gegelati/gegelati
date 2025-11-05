@@ -9,7 +9,7 @@ const std::map<std::shared_ptr<const Selector::MapElites::MapElitesDescriptor>, 
 
 void Selector::MapElites::MapElitesSelectionMetrics::initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment)
 {
-    for(auto pair: mapDescriptors){
+    for(auto& pair: mapDescriptors){
         pair.second.resize(pair.first->getNbDescriptors(), 0.0);
     }
 }
@@ -23,6 +23,8 @@ void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsStep(const TP
 
 void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsEpisode(const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment)
 {
+    SelectionMetrics::extractMetricsEpisode(agent, nbStepsExecuted, learningEnvironment);
+
     for(auto& pair: mapDescriptors){
         pair.first->extractMetricsEpisode(pair.second, agent, nbStepsExecuted, learningEnvironment);
     }

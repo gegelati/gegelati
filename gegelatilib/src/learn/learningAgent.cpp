@@ -180,7 +180,6 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         selectionMetrics->extractMetricsEpisode(root, nbActions, le);
     }
 
-
     (*selectionMetrics) /= (double)nbEvaluation;
 
     // Create the EvaluationResult
