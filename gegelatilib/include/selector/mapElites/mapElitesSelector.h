@@ -20,7 +20,7 @@ namespace Selector {
          * The different archives are stored in the mapEliteArchives attribute,
          * each archive corresponding to a descriptor.
          */
-        class MapElitesSelector : public Selector::Selector
+        class MapElitesSelector : public Selector
         {
         protected:
 
@@ -36,7 +36,7 @@ namespace Selector {
              */
             MapElitesSelector(std::shared_ptr<TPG::TPGGraph> graph,
                             const Learn::LearningParameters& params)
-                : Selector::Selector{graph, params} {}
+                : Selector{graph, params} {}
 
             
             /**
