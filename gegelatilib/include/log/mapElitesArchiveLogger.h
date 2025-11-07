@@ -60,7 +60,7 @@ namespace Log {
       protected:
 
         /// archive of the mapElitesSelector
-        Selector::MapElites::MapElitesArchive& archive;
+        const Selector::MapElites::MapElitesArchive& archive;
 
         /// If first generation if finished or not.
         bool firstGenerationEnded = false;
@@ -74,7 +74,7 @@ namespace Log {
          * \param[in] out The output stream the logger will send
          * elements to.
          */
-        explicit MapElitesArchiveLogger(Selector::MapElites::MapElitesArchive& archive, Learn::LearningAgent& la,
+        explicit MapElitesArchiveLogger(const Selector::MapElites::MapElitesArchive& archive, Learn::LearningAgent& la,
                                std::ostream& out = std::cout)
             : LALogger(la, out), archive{archive}
         {

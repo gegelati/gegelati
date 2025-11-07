@@ -142,19 +142,11 @@ namespace Selector {
                 virtual uint64_t computeLinearIndex(const std::vector<uint64_t>& indices) const;
 
                 /**
-                 * \brief Initialize a CSV file to store the archive content
+                 * \brief Compute the multi-dimensional indices from linear index
                  * 
-                 * \param[in] path the path to the CSV file
+                 * \param[in] index the linear index to compute
                  */
-                virtual void initCSVarchive(std::string path) const ;
-
-                /**
-                 * \brief Update the CSV file with the current archive content
-                 * 
-                 * \param[in] path the path to the CSV file
-                 * \param[in] generationNumber the current generation number
-                 */
-                virtual void updateCSVArchive(std::string path, uint64_t generationNumber) const;
+                virtual std::vector<uint64_t> computeIndices(uint64_t index) const;
 
                 /**
                  * \brief Check if the archive contains a root TPGVertex

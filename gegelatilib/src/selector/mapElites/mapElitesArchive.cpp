@@ -43,6 +43,16 @@ uint64_t Selector::MapElites::MapElitesArchive::computeLinearIndex(const std::ve
     return index;
 }
 
+std::vector<uint64_t> Selector::MapElites::MapElitesArchive::computeIndices(uint64_t index) const
+{
+    std::vector<uint64_t> indices(nbDescriptors, 0);
+    for (int i = nbDescriptors - 1; i >= 0; --i) {
+        indices[i] = index % nbBinPerDescriptor;
+        index /= nbBinPerDescriptor;
+    }
+    return indices;
+}
+
 const std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>& 
 Selector::MapElites::MapElitesArchive::getArchiveFromDescriptors(const std::vector<double>& descriptors) const
 {
@@ -50,8 +60,6 @@ Selector::MapElites::MapElitesArchive::getArchiveFromDescriptors(const std::vect
     for (uint64_t i = 0; i < nbDescriptors; ++i) {
         indices.push_back(getIndexArchive(descriptors[i]));
     };
-
-    
 
     return archive[computeLinearIndex(indices)];
 }
@@ -81,80 +89,6 @@ void Selector::MapElites::MapElitesArchive::setArchiveAt(
     const std::vector<uint64_t>& indices)
 {
     archive[computeLinearIndex(indices)] = std::make_pair(eval, vertex);
-}
-
-
-void Selector::MapElites::MapElitesArchive::initCSVarchive(std::string path) const {
-    std::ofstream outFile(path);
-    if (!outFile.is_open()) {
-        std::cerr << "Archive file could not be created " << path << std::endl;
-        return;
-    }
-
-    outFile << "generation";
-
-    std::vector<size_t> indices(nbDescriptors, 0);
-    size_t total = std::pow(nbBinPerDescriptor, nbDescriptors);
-    for (size_t count = 0; count < total; ++count) {
-
-        std::string key;
-        for (size_t i = 0; i < nbDescriptors; ++i) {
-            key += std::to_string(indices[i]);
-            if (i != nbDescriptors - 1)
-                key += "_";
-        }
-        outFile << "," << key;
-
-
-        for (int i = nbDescriptors - 1; i >= 0; --i) {
-            if (++indices[i] < nbBinPerDescriptor)
-                break;
-            indices[i] = 0;
-        }
-    }
-
-    outFile << ",archiveRange\n";
-    outFile.close();
-}
-
-void Selector::MapElites::MapElitesArchive::updateCSVArchive(std::string path, uint64_t generationNumber) const {
-    std::ofstream outFile(path, std::ios::app);
-    if (!outFile.is_open()) {
-        std::cerr << "Archive file not found " << path << std::endl;
-        return;
-    }
-
-    outFile << generationNumber;
-
-    std::vector<size_t> indices(nbDescriptors, 0);
-    size_t total = std::pow(nbBinPerDescriptor, nbDescriptors);
-    for (size_t count = 0; count < total; ++count) {
-        const auto& elem = archive[computeLinearIndex(indices)];
-
-        if (elem.second != nullptr) {
-            outFile << "," << elem.first->getSelectionMetrics()->getScore();
-        } else {
-            outFile << ",nan";
-        }
-
-        for (int i = nbDescriptors - 1; i >= 0; --i) {
-            if (++indices[i] < nbBinPerDescriptor)
-                break;
-            indices[i] = 0;
-        }
-    }
-
-    if (generationNumber == 0) {
-        outFile << ",";
-        for (size_t i = 0; i < archiveLimits.size(); ++i) {
-            outFile << archiveLimits[i];
-            if (i != archiveLimits.size() - 1)
-                outFile << ";";
-        }
-    }
-
-    outFile << "\n";
-    outFile.close();
 }
 
 

@@ -144,16 +144,10 @@ namespace Selector {
                     std::shared_ptr<Learn::EvaluationResult> eval, 
                     const std::vector<double>& descriptors) override;  
 
-
                 /**
-                 * \brief Initialize CSV archive file
+                 * \brief Return the centroids used by the CVT.
                  */
-                virtual void initCSVarchive(std::string path) const override;
-
-                /**
-                 * \brief Update CSV archive file
-                 */
-                virtual void updateCSVArchive(std::string path, uint64_t generationNumber) const override;
+                virtual const std::vector<std::vector<double>>& getCentroids() const;
 
         };
     };

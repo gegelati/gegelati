@@ -71,7 +71,6 @@ void Selector::MapElites::CvtMapElitesArchive::initialize_cvt(Mutator::RNG& rng)
     for (size_t iter = 0; iter < this->nbIterationInit; ++iter) {
 
         // print progress with a line overrite at each iteration
-        std::cout << "\rIteration " << iter + 1 << "/" << this->nbIterationInit << " (centroids initialized: " << j.size() << ")"<< std::flush;
         std::vector<std::vector<double>> samples(this->nbDotsInit);
         std::vector<std::vector<std::vector<double>>> assignments(this->nbCentroids);
 
@@ -104,75 +103,6 @@ void Selector::MapElites::CvtMapElitesArchive::initialize_cvt(Mutator::RNG& rng)
         }
     }
     std::cout<<std::endl;  
-}
-
-void Selector::MapElites::CvtMapElitesArchive::initCSVarchive(std::string archivePath) const {
-    // 1. Archive file (header with indices)
-    std::ofstream outArchive(archivePath);
-    if (!outArchive.is_open()) {
-        std::cerr << "Archive file could not be created: " << archivePath << std::endl;
-        return;
-    }
-
-    outArchive << "generation";
-    for (size_t i = 0; i < centroids.size(); ++i) {
-        outArchive << "," << i;  // Use centroid ID as column name
-    }
-    outArchive << "\n";
-    outArchive.close();
-
-    // Create centroidsPath by replacing "archive" with "centroids" in archivePath
-    std::string centroidsPath = archivePath;
-    size_t pos = centroidsPath.find("archive");
-    if (pos != std::string::npos) {
-        centroidsPath.replace(pos, 7, "centroids");
-    }
-
-    // 2. Centroids file (centroid coordinates)
-    std::ofstream outCentroids(centroidsPath);
-    if (!outCentroids.is_open()) {
-        std::cerr << "Centroids file could not be created: " << centroidsPath << std::endl;
-        return;
-    }
-
-    outCentroids << "centroid_id";
-    for (size_t d = 0; d < centroids[0].size(); ++d) {
-        outCentroids << ",dim" << d;
-    }
-    outCentroids << "\n";
-
-    for (size_t i = 0; i < centroids.size(); ++i) {
-        outCentroids << i;
-        for (double val : centroids[i]) {
-            outCentroids << "," << val;
-        }
-        outCentroids << "\n";
-    }
-
-    outCentroids.close();
-}
-
-
-void Selector::MapElites::CvtMapElitesArchive::updateCSVArchive(std::string path, uint64_t generationNumber) const {
-    std::ofstream outFile(path, std::ios::app);
-    if (!outFile.is_open()) {
-        std::cerr << "Archive file not found: " << path << std::endl;
-        return;
-    }
-
-    outFile << generationNumber;
-
-    for (size_t i = 0; i < archive.size(); ++i) {
-        const auto& elem = archive[i];
-        if (elem.second != nullptr) {
-            outFile << "," << elem.first->getSelectionMetrics()->getScore();
-        } else {
-            outFile << ",nan";
-        }
-    }
-
-    outFile << "\n";
-    outFile.close();
 }
 
 const std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>& 
@@ -209,4 +139,9 @@ size_t Selector::MapElites::CvtMapElitesArchive::getIndexForDescriptor(const std
 
 
     return bestIndex;
+}
+
+const std::vector<std::vector<double>>& Selector::MapElites::CvtMapElitesArchive::getCentroids() const
+{
+    return centroids;
 }

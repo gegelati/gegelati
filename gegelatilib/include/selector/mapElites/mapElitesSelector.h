@@ -3,7 +3,6 @@
 #ifndef MAP_ELITES_SELECTOR_H
 #define MAP_ELITES_SELECTOR_H
 
-#include "selector/mapElites/cvtMapElitesArchive.h"
 #include "selector/mapElites/mapElitesArchive.h"
 #include "selector/mapElites/mapElitesDescriptor.h"
 #include "selector/mapElites/mapElitesSelectionMetrics.h"

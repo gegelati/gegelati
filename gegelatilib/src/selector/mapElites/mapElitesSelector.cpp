@@ -1,4 +1,5 @@
 
+#include "selector/mapElites/cvtMapElitesArchive.h"
 #include "selector/mapElites/mapElitesSelector.h"
 
 
@@ -86,7 +87,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
             std::vector<double> descriptorUsed(metrics->getMapDescriptors().at(descriptor));
 
             // Get the saved evaluation and root
-            std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> pairSaved = mapEliteArchive->getArchiveFromDescriptors(descriptorUsed);
+            const std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>& pairSaved = mapEliteArchive->getArchiveFromDescriptors(descriptorUsed);
 
             // The value saved in the archive is better than the current root
             // There is also a verification that the root is not the same
@@ -101,8 +102,6 @@ void Selector::MapElites::MapElitesSelector::doSelection(
                 mapEliteArchive->setArchiveFromDescriptors(root, it->first, descriptorUsed);
             }
         }
-
-        std::cout<<"  nv "<<numberNewValues<<"  ";
     }
 
     for (auto it = results.begin(); it != results.end(); ) {

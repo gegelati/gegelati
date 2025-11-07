@@ -38,8 +38,10 @@
 #include <iomanip>
 #include <numeric>
 
-#include "log/mapElitesArchiveLogger.h"
+#include "learn/learningAgent.h"
 #include "selector/mapElites/mapElitesArchive.h"
+#include "selector/mapElites/cvtMapElitesArchive.h"
+#include "log/mapElitesArchiveLogger.h"
 
 void Log::MapElitesArchiveLogger::logHeader()
 {
@@ -47,30 +49,42 @@ void Log::MapElitesArchiveLogger::logHeader()
     size_t nbBinPerDescriptor = archive.getDimensions().first;
     size_t nbDescriptors = archive.getDimensions().second;
 
+    // Always log the "generation" column first
     *this << "generation";
 
-    std::vector<size_t> indices(nbDescriptors, 0);
-    size_t total = std::pow(nbBinPerDescriptor, nbDescriptors);
-    for (size_t count = 0; count < total; ++count) {
-
-        std::string key;
-        for (size_t i = 0; i < nbDescriptors; ++i) {
-            key += std::to_string(indices[i]);
-            if (i != nbDescriptors - 1)
-                key += "_";
-        }
-        *this << "," << key;
-
-
-        for (int i = nbDescriptors - 1; i >= 0; --i) {
-            if (++indices[i] < nbBinPerDescriptor)
-                break;
-            indices[i] = 0;
+    // Handle CvtMapElitesArchive case
+    if (const auto* cvtArchive = dynamic_cast<const Selector::MapElites::CvtMapElitesArchive*>(&archive))
+    {
+        const auto& centroids = cvtArchive->getCentroids();
+        for (size_t i = 0; i < centroids.size(); ++i)
+        {
+            *this << "," << i << "(";
+            for (size_t j = 0; j < centroids[i].size(); ++j)
+            {
+                *this << centroids[i][j];
+                if (j != centroids[i].size() - 1)
+                    *this << ";";
+            }
+            *this << ")";
         }
     }
-
-    *this << ",archiveRange\n";
-
+    // Handle default MapElitesArchive case
+    else
+    {
+        for (uint64_t count = 0; count < archive.size(); ++count)
+        {
+            std::string key;
+            const auto indices = archive.computeIndices(count);
+            for (size_t idx = 0; idx < indices.size(); ++idx)
+            {
+                if (idx != 0)
+                    key += "_";
+                key += std::to_string(indices[idx]);
+            }
+            *this << "," << key;
+        }
+        *this << ",archiveRange" << std::endl;
+    }
 }
 
 
@@ -81,30 +95,21 @@ void Log::MapElitesArchiveLogger::logNewGeneration(uint64_t& generationNumber)
 
 void Log::MapElitesArchiveLogger::logEndOfTraining()
 {
-    
     size_t nbBinPerDescriptor = archive.getDimensions().first;
     size_t nbDescriptors = archive.getDimensions().second;
     std::vector<double> archiveLimits = archive.getArchiveLimits();
 
-    std::vector<size_t> indices(nbDescriptors, 0);
-    size_t total = std::pow(nbBinPerDescriptor, nbDescriptors);
-    for (size_t count = 0; count < total; ++count) {
-        const auto& elem = archive.getArchiveAt(indices);
-
+    for (size_t i = 0; i < archive.size(); ++i) {
+        const auto& elem = archive.getAllArchive()[i];
         if (elem.second != nullptr) {
             *this << "," << elem.first->getSelectionMetrics()->getScore();
         } else {
             *this << ",nan";
         }
-
-        for (int i = nbDescriptors - 1; i >= 0; --i) {
-            if (++indices[i] < nbBinPerDescriptor)
-                break;
-            indices[i] = 0;
-        }
     }
 
-    if (!this->firstGenerationEnded) {
+
+    if (dynamic_cast<const Selector::MapElites::CvtMapElitesArchive*>(&archive) != nullptr && !this->firstGenerationEnded) {
         *this << ",";
         for (size_t i = 0; i < archiveLimits.size(); ++i) {
             *this << archiveLimits[i];
@@ -114,5 +119,5 @@ void Log::MapElitesArchiveLogger::logEndOfTraining()
         firstGenerationEnded = true;
     }
 
-    *this << "\n";
+    *this << std::endl;;
 }
