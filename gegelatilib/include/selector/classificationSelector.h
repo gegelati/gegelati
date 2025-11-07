@@ -21,7 +21,8 @@ namespace Selector {
          * \brief Constructor for ClassificationSelector.
          *
          * \param[in] graph shared pointer of the graph on which the selection
-         * is done. \param[in] params parameters used by the Selector.
+         * is done.
+         * \param[in] params parameters used by the Selector.
          * \param[in] nbActions number of actions in the LearningEnvironment.
          */
         ClassificationSelector(std::shared_ptr<TPG::TPGGraph> graph,

@@ -73,8 +73,10 @@ namespace Learn {
          * evaluateAllRootsInParallelCompileResults.
          *
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
-         * evaluation. \param[in] results Map to store the resulting score of
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * \param[in] results Map to store the resulting score of
          * evaluated roots.
          */
         virtual void evaluateAllRootsInParallel(
@@ -131,17 +133,23 @@ namespace Learn {
          * parallel evaluation of roots.
          *
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
-         * evaluation. \param[in,out] jobsToProcess Ordered list of jobs of
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * \param[in,out] jobsToProcess Ordered list of jobs of
          * TPGVertex to process, stored as a pair with an id filling the
          * archiveMap. The jobs are groups of roots that shall be agents in the
          * same simulation, there is only 1 root if there is no adversarial
          * (e.g. if the environmnent is not multiplayer).
          * \param[in] rootsToProcessMutex Mutex protecting the
-         * rootsToProcess \param[in] resultsPerRootMap Map to store the
-         * resulting score of evaluated roots. \param[in] resultsPerRootMapMutex
-         * Mutex protecting the results. \param[in,out] archiveMap Map
-         * storing the exhaustiveArchive to be merged. \param[in]
+         * rootsToProcess
+         * \param[in] resultsPerRootMap Map to store the
+         * resulting score of evaluated roots.
+         * \param[in] resultsPerRootMapMutex
+         * Mutex protecting the results.
+         * \param[in,out] archiveMap Map
+         * storing the exhaustiveArchive to be merged.
+         * \param[in] 
          * archiveMapMutex Mutex protecting the archiveMap.
          * \param[in] useMainEnvironment Boolean that is true if we use the
          * declared LearningEnvironment, otherwise the method will clone it.
@@ -207,7 +215,8 @@ namespace Learn {
          * root vertex to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
         std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>

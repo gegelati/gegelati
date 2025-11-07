@@ -54,7 +54,8 @@ namespace Mutator {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in] nbActionEdgeInit number of edges to init the action vertex
-         * with \param[in] actionID actionID of the action.
+         * with
+         * \param[in] actionID actionID of the action.
          */
         const TPG::TPGAction* initActionVertex(
             TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
@@ -113,7 +114,8 @@ namespace Mutator {
          * \param[in,out] graph the TPGGraph within which the action is stored.
          * \param[in] action the TPGAction whose outgoingEdges will be altered.
          * \param[in] context SelectorContext containing necessary information
-         * for mutations. \param[in] rng Random Number Generator used in the
+         * for mutations.
+         * \param[in] rng Random Number Generator used in the
          * mutation process.
          */
         void addRandomActionEdge(TPG::TPGGraph& graph,
@@ -164,8 +166,10 @@ namespace Mutator {
          * \param[in] action the TPGAction whose actionEdges will be altered.
          * \param[in] team the TPGTeam source of TPGAction
          * \param[in] context SelectorContext containing necessary information
-         * for mutations. \param[in] params Probability parameters for the
-         * mutation. \param[in] rng Random Number Generator used in the mutation
+         * for mutations.
+         * \param[in] params Probability parameters for the
+         * mutation.
+         * \param[in] rng Random Number Generator used in the mutation
          * process.
          */
         void mutateTPGAction(
@@ -248,7 +252,8 @@ namespace Mutator {
          * \param[in,out] graph the TPGGraph within which the team is stored.
          * \param[in] team the TPGTeam whose outgoingEdges will be altered.
          * \param[in] context SelectorContext containing necessary information
-         * for mutations. \param[in] rng Random Number Generator used in the
+         * for mutations.
+         * \param[in] rng Random Number Generator used in the
          * mutation process.
          */
         void addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team,
@@ -274,8 +279,10 @@ namespace Mutator {
          *                stored.
          * \param[in] edge the TPGEdge whose destination will be altered.
          * \param[in] context SelectorContext containing necessary information
-         * for mutations. \param[in] params Probability parameters for the
-         * mutation. \param[in] rng Random Number Generator used in the mutation
+         * for mutations.
+         * \param[in] params Probability parameters for the
+         * mutation.
+         * \param[in] rng Random Number Generator used in the mutation
          * process.
          */
         void mutateEdgeDestination(TPG::TPGGraph& graph,
@@ -297,10 +304,13 @@ namespace Mutator {
          *                stored.
          * \param[in] edge the TPGEdge whose destination will be altered.
          * \param[in] context SelectorContext containing necessary information
-         * for mutations. \param[in,out] newPrograms List of new Program created
+         * for mutations.
+         * \param[in,out] newPrograms List of new Program created
          * during mutations of the TPGTeam. The behavior of these Program must
-         * be mutated to complete the mutation process. \param[in] params
-         * Probability parameters for the mutation. \param[in] rng Random Number
+         * be mutated to complete the mutation process.
+         * \param[in] params
+         * Probability parameters for the mutation.
+         * \param[in] rng Random Number
          * Generator used in the mutation process.
          */
         void mutateOutgoingEdge(
@@ -329,7 +339,8 @@ namespace Mutator {
          *            mutated Program behavior.
          * \param[in] team the source TPGTeam of the edge.
          * \param[in] context SelectorContext containing necessary information
-         * for mutations. destination. \param[in,out] newPrograms List of new
+         * for mutations. destination.
+         * \param[in,out] newPrograms List of new
          * Program created during mutations of the TPGTeam. The behavior of
          * these Program must be mutated to complete the mutation process.
          * \param[in] params Probability parameters for the mutation.

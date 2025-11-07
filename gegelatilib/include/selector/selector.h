@@ -64,7 +64,8 @@ namespace Selector {
          * \brief Constructor for Selector.
          *
          * \param[in] graph shared pointer of the graph on which the selection
-         * is done. \param[in] params parameters used by the Selector.
+         * is done.
+         * \param[in] params parameters used by the Selector.
          */
         Selector(std::shared_ptr<TPG::TPGGraph> graph,
                  const Learn::LearningParameters& params)

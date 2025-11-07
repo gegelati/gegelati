@@ -43,7 +43,7 @@ namespace Selector {
                  * \brief initiate the descriptor attribute (such as nbDescriptors and min/max ranges)
                  * 
                  * \param[in] graph current graph
-                 * \param[in] learningEnvironment the learning environment used 
+                 * \param[in] learningEnvironment the learning environment used
                  */
                 virtual void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment) = 0;
 
