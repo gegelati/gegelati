@@ -3,6 +3,7 @@
 #ifndef MAP_ELITES_SELECTOR_H
 #define MAP_ELITES_SELECTOR_H
 
+#include "selector/mapElites/cvtMapElitesArchive.h"
 #include "selector/mapElites/mapElitesArchive.h"
 #include "selector/mapElites/mapElitesDescriptor.h"
 #include "selector/mapElites/mapElitesSelectionMetrics.h"
@@ -56,7 +57,7 @@ namespace Selector {
              * 
              * Creates and return an instance of MapElitesSelectionMetrics
              */
-            virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics();
+            virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics() override;
 
             /**
              * \brief Add an archive for a given descriptor.

@@ -1,6 +1,4 @@
 
-#include "selector/mapElites/cvtMapElitesArchive.h"
-#include "selector/mapElites/mapElitesArchive.h"
 #include "selector/mapElites/mapElitesSelector.h"
 
 

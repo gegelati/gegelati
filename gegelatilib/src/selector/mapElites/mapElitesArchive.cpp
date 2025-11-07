@@ -11,6 +11,11 @@ std::pair<uint64_t, uint64_t> Selector::MapElites::MapElitesArchive::getDimensio
     return std::make_pair(nbBinPerDescriptor, nbDescriptors);
 }
 
+std::vector<double> Selector::MapElites::MapElitesArchive::getArchiveLimits() const
+{
+    return this->archiveLimits;
+}
+
 const std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>>& Selector::MapElites::MapElitesArchive::getAllArchive() const
 {
     return archive;

@@ -76,6 +76,11 @@ namespace Selector {
                 std::pair<uint64_t, uint64_t> getDimensions() const;
 
                 /**
+                 * \brief get the archive limits
+                 */
+                std::vector<double> getArchiveLimits() const;
+
+                /**
                  * \brief Get all the archive content
                  */
                 virtual const std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>>& getAllArchive() const;
