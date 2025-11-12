@@ -128,7 +128,7 @@ void Selector::MapElites::MapElitesArchive::removeRootFromArchive(const TPG::TPG
     }
 }
 
-std::set<const TPG::TPGVertex*> Selector::MapElites::MapElitesArchive::getVerticesInArchive()
+std::set<const TPG::TPGVertex*> Selector::MapElites::MapElitesArchive::getVerticesInArchive() const 
 {
     std::set<const TPG::TPGVertex*> verticesInArchive;
     for(const auto& pair: archive){

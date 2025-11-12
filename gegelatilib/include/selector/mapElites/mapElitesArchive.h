@@ -174,7 +174,7 @@ namespace Selector {
                 /**
                  * \brief Return a set with the current vectors in the archive.
                  */
-                virtual std::set<const TPG::TPGVertex*> getVerticesInArchive();
+                virtual std::set<const TPG::TPGVertex*> getVerticesInArchive() const;
 
 
     };

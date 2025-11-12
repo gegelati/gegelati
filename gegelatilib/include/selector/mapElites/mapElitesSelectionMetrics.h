@@ -43,10 +43,19 @@ namespace Selector {
             /**
              * \brief Constructor of MapEliteselectionMetrics with a vector of scores.
              *
-             * \param[in] scores the vector of score obtained by the agent.
+             * \param[in] score the score obtained by the agent.
+             * \param[in] mapDescriptors the map of descriptors associated to their descriptor values.
              */
-            MapElitesSelectionMetrics(const std::vector<double>& scores)
-                : SelectionMetrics(std::accumulate(scores.cbegin(), scores.cend(), 0.0) / scores.size()) {};
+            MapElitesSelectionMetrics(double score, const std::map<std::shared_ptr<const MapElitesDescriptor>, std::vector<double>>& mapDescriptors)
+                : SelectionMetrics(score), mapDescriptors(mapDescriptors) {};
+
+            /**
+             * \brief Constructor of MapEliteselectionMetrics with a vector of scores.
+             *
+             * \param[in] score the score obtained by the agent.
+             */
+            MapElitesSelectionMetrics(double score)
+                : SelectionMetrics(score) {};
 
             /**
              * \brief Get a const ref to the scorePerClass attribute.

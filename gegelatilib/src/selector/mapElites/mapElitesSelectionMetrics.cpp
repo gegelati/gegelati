@@ -62,7 +62,7 @@ Selector::SelectionMetrics& Selector::MapElites::MapElitesSelectionMetrics::oper
     this->score /= factor;
     this->utility /= factor;
 
-    for(auto pair: this->mapDescriptors){
+    for(auto& pair: this->mapDescriptors){
         for(size_t idx = 0; idx < pair.second.size(); idx++){
             pair.second[idx] /= factor;
         }
