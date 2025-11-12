@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include "instructions/addPrimitiveType.h"
+#include "instructions/lambdaInstruction.h"
 #include "selector/mapElites/mapElitesArchive.h"
 
 
@@ -8,6 +10,15 @@ protected:
     const size_t desc = 2;
     const double minV = 0.0;
     const double maxV = 10.0;
+
+    std::shared_ptr<TPG::TPGGraph> graph;
+    const TPG::TPGVertex* dummyAgent;
+    Environment* e = NULL;
+    Learn::LearningParameters params;
+    Instructions::Set set;
+    const size_t size1{24};
+    const size_t size2{32};
+    std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 
     Selector::MapElites::MapElitesArchive* archive;
 
@@ -19,6 +30,23 @@ protected:
     void SetUp() override {
         archive = new Selector::MapElites::MapElitesArchive(bins, desc, minV, maxV);
         dummyEval = std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(1), 0);
+
+        
+        vect.push_back(
+            *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
+        vect.push_back(
+            *(new Data::PrimitiveTypeArray<float>((unsigned int)size2)));
+
+        set.add(*(new Instructions::AddPrimitiveType<float>()));
+        auto minus = [](double a, double b) -> double { return a - b; };
+        set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
+
+        params.nbRegisters = 8;
+        params.nbProgramConstant = 1;
+        e = new Environment(set, params, vect, 3);
+        graph = std::make_shared<TPG::TPGGraph>(*e);
+        dummyVertex = &graph->addNewTeam();
+        dummyVertex2 = &graph->addNewTeam();
     }
 
     void TearDown() override {
