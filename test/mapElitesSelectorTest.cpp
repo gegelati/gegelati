@@ -259,6 +259,9 @@ TEST_F(MapElitesSelectorTest, DoSelectionReplaces) {
 
 TEST_F(MapElitesSelectorTest, TwoArchives) {
     FakeMultiContinuousLearningEnvironment le;
+    params.mutation.tpg.useActionProgram = true;
+    params.mutation.tpg.useMultiActionProgram = true;
+    params.mutation.tpg.ratioTeamsOverActions = 0.0;
 
     // We need a second descriptor instance for the second archive
     auto descriptorB = std::make_shared<Selector::MapElites::DefaultDescriptors::ActionValues>();
@@ -344,7 +347,7 @@ TEST_F(MapElitesSelectorTest, TwoArchives) {
 
     // --- Verify clonable count ---
     auto ctx = selector->updateContext();
-    EXPECT_EQ(ctx.teamsClonable.size(), 3u); // vA, vB, vAB
+    EXPECT_EQ(ctx.actionsClonable.size(), 3u); // vA, vB, vAB
 
     EXPECT_EQ(graph->getNbRootVertices(), 3u); // vA, vB, vAB
 }
