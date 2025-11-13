@@ -303,10 +303,10 @@ TEST_F(MapElitesSelectorTest, TwoArchives) {
     };
 
 
-    const TPG::TPGVertex* vA    = &graph->addNewTeam();
-    const TPG::TPGVertex* vB    = &graph->addNewTeam();
-    const TPG::TPGVertex* vAB   = &graph->addNewTeam();
-    const TPG::TPGVertex* vNone = &graph->addNewTeam();
+    const TPG::TPGVertex* vA    = &graph->addNewAction();
+    const TPG::TPGVertex* vB    = &graph->addNewAction();
+    const TPG::TPGVertex* vAB   = &graph->addNewAction();
+    const TPG::TPGVertex* vNone = &graph->addNewAction();
 
     auto mA    = std::make_shared<Selector::MapElites::MapElitesSelectionMetrics>(50.0, mapA);
     auto mB    = std::make_shared<Selector::MapElites::MapElitesSelectionMetrics>(50.0, mapB);
