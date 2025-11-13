@@ -113,6 +113,19 @@ TEST_F(MapElitesSelectorTest, DoSelectionNoCrashOnEmptyResults) {
     EXPECT_NO_THROW(selector->doSelection(results, rng));
 }
 
+TEST_F(MapElitesSelectorTest, DoSelectionCrashWrongMetrics) {
+    FakeMultiContinuousLearningEnvironment le;
+    selector->addArchiveFromDescriptor(5, descriptor, le);
+
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*> results;
+    
+    auto metrics = std::make_shared<Selector::SelectionMetrics>(100.0);
+    auto eval = std::make_shared<Learn::EvaluationResult>(metrics, 1u);
+    const TPG::TPGVertex* root = &graph->addNewTeam();
+    results.insert({eval, root});
+    EXPECT_THROW(selector->doSelection(results, rng), std::runtime_error);
+}
+
 
 TEST_F(MapElitesSelectorTest, DoSelectionInserts) {
     // Prepare a learning env and add a grid archive for our descriptor

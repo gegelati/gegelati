@@ -39,6 +39,21 @@ protected:
     }
 };
 
+class FakeDescriptor : public Selector::MapElites::MapElitesDescriptor
+{
+    void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment) override {}
+};
+
+TEST_F(MapElitesDescriptorsTest, EmptyMethods)
+{
+    FakeDescriptor fakeD;
+    const TPG::TPGVertex* fakeAgent = nullptr;
+
+    std::vector<double> metrics(1, 0.0);
+    fakeD.extractMetricsStep(metrics, fakeAgent, {0.4, 0.2, 1.0}, env);
+    fakeD.extractMetricsEpisode(metrics, fakeAgent, 4, env);
+}
+
 TEST_F(MapElitesDescriptorsTest, InitDescriptorMarksInitAndSetsValues) {
     EXPECT_FALSE(descriptor->isInit());
 

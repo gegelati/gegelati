@@ -138,3 +138,7 @@ TEST_F(MapElitesArchiveTest, LinearIndexConsistency) {
         EXPECT_EQ(i, back) << "Linear index consistency failed at index " << i;
     }
 }
+
+TEST_F(MapElitesArchiveTest, getAllArchive) {
+    ASSERT_NO_THROW(archive->getAllArchive());
+}
