@@ -161,7 +161,7 @@ namespace Log {
         /**
          * \brief Logs the header (e.g. column names) of this logger.
          */
-        virtual void logHeader() {};
+        virtual void logHeader() { /* Empty because sub-class does not need to inherrit from it.*/ };
 
         /**
          * \brief Method called by the LearningAgent at the start of a
@@ -170,14 +170,14 @@ namespace Log {
          * \param[in] generationNumber The number of the current
          * generation.
          */
-        virtual void logNewGeneration(uint64_t& generationNumber) {};
+        virtual void logNewGeneration(uint64_t& generationNumber) { /* Empty because sub-class does not need to inherrit from it.*/ };
 
         /**
          * \brief Method called by the Learning Agent right after
          * PopulateTPG is done.
          *
          */
-        virtual void logAfterPopulateTPG() {};
+        virtual void logAfterPopulateTPG() { /* Empty because sub-class does not need to inherrit from it.*/ };
 
         /**
          * \brief Method called by the Learning Agent right after the evaluation
@@ -188,13 +188,13 @@ namespace Log {
 
         virtual void logAfterEvaluate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) {};
+                          const TPG::TPGVertex*>& results) { /* Empty because sub-class does not need to inherrit from it.*/ };
 
         /**
          * \brief Method called by the Learning Agent right after the decimation
          * is done.
          */
-        virtual void logAfterDecimate() {};
+        virtual void logAfterDecimate() { /* Empty because sub-class does not need to inherrit from it.*/ };
 
         /**
          * \brief Method called by the Learning Agent right after the validation
@@ -204,12 +204,12 @@ namespace Log {
          */
         virtual void logAfterValidate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) {};
+                          const TPG::TPGVertex*>& results) { /* Empty because sub-class does not need to inherrit from it.*/ };
 
         /**
          * \brief Method called by the Learning Agent when the training is done
          */
-        virtual void logEndOfTraining() {};
+        virtual void logEndOfTraining() { /* Empty because sub-class does not need to inherrit from it.*/ };
     };
 } // namespace Log
 

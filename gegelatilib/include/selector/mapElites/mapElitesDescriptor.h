@@ -64,7 +64,7 @@ namespace Selector {
                  * \param[in] actionValues the action values taken by the agent at this step.
                  * \param[in] learningEnvironment the learning environment used to get the metrics.
                  */
-                virtual void extractMetricsStep(std::vector<double>& metrics, const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment) const {};
+                virtual void extractMetricsStep(std::vector<double>& metrics, const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment) const { /* Empty because sub-class does not need to inherrit from it.*/ };
 
                 /**
                  * \brief Extract the metrics at the end of the evaluation episode.
@@ -74,7 +74,7 @@ namespace Selector {
                  * \param[in] nbStepsExecuted number of steps executed at the end of the episode.
                  * \param[in] learningEnvironment the learning environment used to get the metrics.
                  */
-                virtual void extractMetricsEpisode(std::vector<double>& metrics, const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment) const {};
+                virtual void extractMetricsEpisode(std::vector<double>& metrics, const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment) const { /* Empty because sub-class does not need to inherrit from it.*/ };
         };
 
     }; // namespace MapElites

@@ -231,7 +231,7 @@ namespace Selector {
          *
          * This method does nothing with the default selector.
          */
-        virtual void updateAfterPopulate() {};
+        virtual void updateAfterPopulate() { /* Empty because sub-class does not need to inherrit from it.*/ };
     };
 }; // namespace Selector
 

@@ -620,6 +620,9 @@ TEST_F(SelectorTest, FactorySelector)
     ASSERT_NO_THROW(selector = Selector::selectorFactory(graph, le, params));
     ASSERT_TRUE(std::dynamic_pointer_cast<Selector::MapElitesSelector>(selector) != nullptr);
 
+    params.mutation.tpg.ratioTeamsOverActions = 0.5;
+    ASSERT_THROW(selector = Selector::selectorFactory(graph, le, params), std::runtime_error);
+
     params.selection._selectionMode = "fake";
     ASSERT_THROW(selector = Selector::selectorFactory(graph, le, params), std::runtime_error);
 }
