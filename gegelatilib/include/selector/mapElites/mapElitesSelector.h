@@ -94,7 +94,7 @@ namespace Selector {
              * CVT initialization.
              * \param[in] nbIterationInit number of iterations for the
              * CVT initialization.
-             * \param[in] nbDotsInit number of dots for the CVT 
+             * \param[in] nbDotsInit number of dots for the CVT
              * initialization.
              * \param[in] a1 CVT default parameter.
              * \param[in] b1 CVT default parameter.

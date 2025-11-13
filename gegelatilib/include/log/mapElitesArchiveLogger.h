@@ -68,8 +68,9 @@ namespace Log {
          *
          * \param[in] archive archive of a mapElitesSelector whose information
          * will be logger by the logger
-         * \param[in] la LearningAgent whose information will be logged by the LABasicLogger.
-         * \param[in] out The output stream the logger will send elements to.
+         * \param[in] la LearningAgent whose information will be logged by the
+         * LABasicLogger. \param[in] out The output stream the logger will send
+         * elements to.
          */
         explicit MapElitesArchiveLogger(
             const Selector::MapElites::MapElitesArchive& archive,
