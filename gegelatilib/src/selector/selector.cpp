@@ -50,7 +50,8 @@ void Selector::Selector::doSelection(
         "TruncationSelector should be used.");
 }
 
-std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::createSelectionMetrics()
+std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::
+    createSelectionMetrics()
 {
     return std::make_shared<SelectionMetrics>();
 }

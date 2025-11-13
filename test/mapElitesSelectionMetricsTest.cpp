@@ -1,16 +1,18 @@
-#include <gtest/gtest.h>
+#include "selector/mapElites/mapElitesSelectionMetrics.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "selector/mapElites/mapElitesSelectionMetrics.h"
-#include "selector/mapElites/mapElitesDefaultDescriptors.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
+#include "selector/mapElites/mapElitesDefaultDescriptors.h"
 #include "tpg/tpgGraph.h"
+#include <gtest/gtest.h>
 
-class MapElitesSelectionMetricsTest : public ::testing::Test {
-protected:
+class MapElitesSelectionMetricsTest : public ::testing::Test
+{
+  protected:
     std::shared_ptr<TPG::TPGGraph> graph;
     FakeMultiContinuousLearningEnvironment env;
-    std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues> descriptor;
+    std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues>
+        descriptor;
     const TPG::TPGVertex* dummyAgent;
     Environment* e = NULL;
     Learn::LearningParameters params;
@@ -19,7 +21,8 @@ protected:
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 
-    void SetUp() override {
+    void SetUp() override
+    {
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
         vect.push_back(
@@ -35,25 +38,29 @@ protected:
         graph = std::make_shared<TPG::TPGGraph>(*e);
         dummyAgent = &graph->addNewTeam();
 
-        descriptor = std::make_shared<Selector::MapElites::DefaultDescriptors::ActionValues>();
+        descriptor = std::make_shared<
+            Selector::MapElites::DefaultDescriptors::ActionValues>();
         descriptor->initDescriptor(*graph, env);
     }
 };
 
-TEST_F(MapElitesSelectionMetricsTest, ConstructorScoreOnly_HasNoDescriptors) {
+TEST_F(MapElitesSelectionMetricsTest, ConstructorScoreOnly_HasNoDescriptors)
+{
     Selector::MapElites::MapElitesSelectionMetrics m(42.0);
     EXPECT_DOUBLE_EQ(m.getScore(), 42.0);
     EXPECT_TRUE(m.getMapDescriptors().empty());
 }
 
-TEST_F(MapElitesSelectionMetricsTest, ConstructorWithDescriptors_HasKeys) {
-    Selector::MapElites::MapElitesSelectionMetrics m({ descriptor });
+TEST_F(MapElitesSelectionMetricsTest, ConstructorWithDescriptors_HasKeys)
+{
+    Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
     ASSERT_EQ(m.getMapDescriptors().size(), 1u);
     EXPECT_NE(m.getMapDescriptors().count(descriptor), 0u);
 }
 
-TEST_F(MapElitesSelectionMetricsTest, InitMetrics_ResizesDescriptorVectors) {
-    Selector::MapElites::MapElitesSelectionMetrics m({ descriptor });
+TEST_F(MapElitesSelectionMetricsTest, InitMetrics_ResizesDescriptorVectors)
+{
+    Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
 
     m.initMetrics(dummyAgent, env);
 
@@ -62,14 +69,16 @@ TEST_F(MapElitesSelectionMetricsTest, InitMetrics_ResizesDescriptorVectors) {
 
     const auto& vec = map.at(descriptor);
     EXPECT_EQ(vec.size(), descriptor->getNbDescriptors());
-    EXPECT_TRUE(std::all_of(vec.begin(), vec.end(), [](double v){ return v == 0.0; }));
+    EXPECT_TRUE(
+        std::all_of(vec.begin(), vec.end(), [](double v) { return v == 0.0; }));
 }
 
-TEST_F(MapElitesSelectionMetricsTest, ExtractMetricsStep_FillsDescriptorValues) {
-    Selector::MapElites::MapElitesSelectionMetrics m({ descriptor });
+TEST_F(MapElitesSelectionMetricsTest, ExtractMetricsStep_FillsDescriptorValues)
+{
+    Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
     m.initMetrics(dummyAgent, env);
 
-    std::vector<double> actions = { 1.0, -2.0, 3.0 };
+    std::vector<double> actions = {1.0, -2.0, 3.0};
     m.extractMetricsStep(dummyAgent, actions, env);
 
     const auto& vec = m.getMapDescriptors().at(descriptor);
@@ -77,12 +86,15 @@ TEST_F(MapElitesSelectionMetricsTest, ExtractMetricsStep_FillsDescriptorValues) 
     // ActionValues descriptor computes absolute values average incrementally,
     // so just check we got non-zero and correct size
     EXPECT_EQ(vec.size(), descriptor->getNbDescriptors());
-    bool anyNonZero = std::any_of(vec.begin(), vec.end(), [](double v){ return v > 0.0; });
+    bool anyNonZero =
+        std::any_of(vec.begin(), vec.end(), [](double v) { return v > 0.0; });
     EXPECT_TRUE(anyNonZero);
 }
 
-TEST_F(MapElitesSelectionMetricsTest, ExtractMetricsEpisode_ForwardsToDescriptor) {
-    Selector::MapElites::MapElitesSelectionMetrics m({ descriptor });
+TEST_F(MapElitesSelectionMetricsTest,
+       ExtractMetricsEpisode_ForwardsToDescriptor)
+{
+    Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
     m.initMetrics(dummyAgent, env);
 
     double beforeScore = m.getScore();
@@ -94,13 +106,21 @@ TEST_F(MapElitesSelectionMetricsTest, ExtractMetricsEpisode_ForwardsToDescriptor
     EXPECT_NE(beforeScore, -1); // sanity check only
 }
 
-TEST_F(MapElitesSelectionMetricsTest, WeightedSum_MergesScoresAndDescriptorValues) {
-    std::map<std::shared_ptr<const Selector::MapElites::MapElitesDescriptor>, std::vector<double>> mapA = {{descriptor, {2.0, 2.0, 2.0}}};
-    std::map<std::shared_ptr<const Selector::MapElites::MapElitesDescriptor>, std::vector<double>> mapB = {{descriptor, {4.0, 4.0, 4.0}}};
+TEST_F(MapElitesSelectionMetricsTest,
+       WeightedSum_MergesScoresAndDescriptorValues)
+{
+    std::map<std::shared_ptr<const Selector::MapElites::MapElitesDescriptor>,
+             std::vector<double>>
+        mapA = {{descriptor, {2.0, 2.0, 2.0}}};
+    std::map<std::shared_ptr<const Selector::MapElites::MapElitesDescriptor>,
+             std::vector<double>>
+        mapB = {{descriptor, {4.0, 4.0, 4.0}}};
     Selector::MapElites::MapElitesSelectionMetrics A(10, mapA);
     Selector::MapElites::MapElitesSelectionMetrics B(20, mapB);
 
-    A.weightedSum(std::make_shared<Selector::MapElites::MapElitesSelectionMetrics>(B), 1, 1);
+    A.weightedSum(
+        std::make_shared<Selector::MapElites::MapElitesSelectionMetrics>(B), 1,
+        1);
 
     EXPECT_DOUBLE_EQ(A.getScore(), 15.0);
 
@@ -109,27 +129,33 @@ TEST_F(MapElitesSelectionMetricsTest, WeightedSum_MergesScoresAndDescriptorValue
     }
 }
 
-TEST_F(MapElitesSelectionMetricsTest, WeightedSum_ThrowsOnMismatchedVectorSize) {
-    Selector::MapElites::MapElitesSelectionMetrics A({ descriptor });
-    Selector::MapElites::MapElitesSelectionMetrics B({ descriptor });
+TEST_F(MapElitesSelectionMetricsTest, WeightedSum_ThrowsOnMismatchedVectorSize)
+{
+    Selector::MapElites::MapElitesSelectionMetrics A({descriptor});
+    Selector::MapElites::MapElitesSelectionMetrics B({descriptor});
 
     A.initMetrics(dummyAgent, env);
     B.initMetrics(dummyAgent, env);
 
-    auto &vecB = const_cast<std::vector<double>&>(B.getMapDescriptors().at(descriptor));
+    auto& vecB =
+        const_cast<std::vector<double>&>(B.getMapDescriptors().at(descriptor));
     vecB.push_back(999.0); // break size
 
     EXPECT_THROW(
-        A.weightedSum(std::make_shared<Selector::MapElites::MapElitesSelectionMetrics>(B), 1, 1),
-        std::runtime_error
-    );
+        A.weightedSum(
+            std::make_shared<Selector::MapElites::MapElitesSelectionMetrics>(B),
+            1, 1),
+        std::runtime_error);
 }
 
-TEST_F(MapElitesSelectionMetricsTest, OperatorDivide_AssignsToScoreUtilityAndVectors) {
-    Selector::MapElites::MapElitesSelectionMetrics m({ descriptor });
+TEST_F(MapElitesSelectionMetricsTest,
+       OperatorDivide_AssignsToScoreUtilityAndVectors)
+{
+    Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
 
     m.initMetrics(dummyAgent, env);
-    auto &vec = const_cast<std::vector<double>&>(m.getMapDescriptors().at(descriptor));
+    auto& vec =
+        const_cast<std::vector<double>&>(m.getMapDescriptors().at(descriptor));
     std::fill(vec.begin(), vec.end(), 5.0);
 
     m /= 2.0;
@@ -139,10 +165,11 @@ TEST_F(MapElitesSelectionMetricsTest, OperatorDivide_AssignsToScoreUtilityAndVec
     }
 }
 
-TEST_F(MapElitesSelectionMetricsTest, DescriptorKeysArePreservedAfterOperations) {
-    Selector::MapElites::MapElitesSelectionMetrics m({ descriptor });
+TEST_F(MapElitesSelectionMetricsTest, DescriptorKeysArePreservedAfterOperations)
+{
+    Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
     m.initMetrics(dummyAgent, env);
-    m.extractMetricsStep(dummyAgent, {1,2,3}, env);
+    m.extractMetricsStep(dummyAgent, {1, 2, 3}, env);
     m.extractMetricsEpisode(dummyAgent, 5, env);
     m /= 2.0;
 

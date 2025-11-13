@@ -39,9 +39,9 @@
 #include <numeric>
 
 #include "learn/learningAgent.h"
-#include "selector/mapElites/mapElitesArchive.h"
-#include "selector/mapElites/cvtMapElitesArchive.h"
 #include "log/mapElitesArchiveLogger.h"
+#include "selector/mapElites/cvtMapElitesArchive.h"
+#include "selector/mapElites/mapElitesArchive.h"
 
 void Log::MapElitesArchiveLogger::logHeader()
 {
@@ -53,30 +53,26 @@ void Log::MapElitesArchiveLogger::logHeader()
     *this << "generation";
 
     // Handle CvtMapElitesArchive case
-    if (const auto* cvtArchive = dynamic_cast<const Selector::MapElites::CvtMapElitesArchive*>(&archive))
-    {
+    if (const auto* cvtArchive =
+            dynamic_cast<const Selector::MapElites::CvtMapElitesArchive*>(
+                &archive)) {
         const auto& centroids = cvtArchive->getCentroids();
-        for (size_t i = 0; i < centroids.size(); ++i)
-        {
+        for (size_t i = 0; i < centroids.size(); ++i) {
             *this << "," << i << "(";
-            for (size_t j = 0; j < centroids[i].size(); ++j)
-            {
+            for (size_t j = 0; j < centroids[i].size(); ++j) {
                 *this << centroids[i][j];
                 if (j != centroids[i].size() - 1)
                     *this << ";";
             }
-            *this << ")" ;
+            *this << ")";
         }
     }
     // Handle default MapElitesArchive case
-    else
-    {
-        for (uint64_t count = 0; count < archive.size(); ++count)
-        {
+    else {
+        for (uint64_t count = 0; count < archive.size(); ++count) {
             std::string key;
             const auto indices = archive.computeIndices(count);
-            for (size_t idx = 0; idx < indices.size(); ++idx)
-            {
+            for (size_t idx = 0; idx < indices.size(); ++idx) {
                 if (idx != 0)
                     key += "_";
                 key += std::to_string(indices[idx]);
@@ -88,7 +84,6 @@ void Log::MapElitesArchiveLogger::logHeader()
 
     *this << std::endl;
 }
-
 
 void Log::MapElitesArchiveLogger::logNewGeneration(uint64_t& generationNumber)
 {
@@ -105,16 +100,18 @@ void Log::MapElitesArchiveLogger::logEndOfTraining()
         const auto& elem = archive.getAllArchive()[i];
         if (elem.second != nullptr) {
             *this << "," << elem.first->getSelectionMetrics()->getScore();
-        } else {
+        }
+        else {
             *this << ",nan";
         }
     }
 
-
-    if (dynamic_cast<const Selector::MapElites::CvtMapElitesArchive*>(&archive) == nullptr && !this->firstGenerationEnded) {
+    if (dynamic_cast<const Selector::MapElites::CvtMapElitesArchive*>(
+            &archive) == nullptr &&
+        !this->firstGenerationEnded) {
         *this << ",";
         for (size_t i = 0; i < archiveLimits.size(); ++i) {
-            
+
             *this << archiveLimits[i];
             if (i != archiveLimits.size() - 1)
                 *this << ";";
@@ -122,5 +119,6 @@ void Log::MapElitesArchiveLogger::logEndOfTraining()
         firstGenerationEnded = true;
     }
 
-    *this << std::endl;;
+    *this << std::endl;
+    ;
 }

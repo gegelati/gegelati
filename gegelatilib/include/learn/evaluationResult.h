@@ -54,7 +54,6 @@ namespace Learn {
     class EvaluationResult
     {
       protected:
-
         /**
          * Selection Metrics register in the evaluation results.
          */
@@ -81,14 +80,17 @@ namespace Learn {
          * \param[in] nbEval Integer value representing the number of
          * evaluation leading to the recorded score.
          */
-        EvaluationResult(std::shared_ptr<Selector::SelectionMetrics> selectionMetrics, const size_t& nbEval)
+        EvaluationResult(
+            std::shared_ptr<Selector::SelectionMetrics> selectionMetrics,
+            const size_t& nbEval)
             : selectionMetrics{selectionMetrics}, nbEvaluation{nbEval} {};
 
         /**
          * \brief Virtual method to get the default double equivalent of
          * the reward of the EvaluationResult.
          */
-        virtual std::shared_ptr<Selector::SelectionMetrics> getSelectionMetrics() const;
+        virtual std::shared_ptr<Selector::SelectionMetrics>
+        getSelectionMetrics() const;
 
         /**
          * \brief Virtual method to get the default number of evaluation of

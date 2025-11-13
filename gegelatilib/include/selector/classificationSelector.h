@@ -32,13 +32,13 @@ namespace Selector {
         {
         }
 
-
         /**
          * Specialization of createSelectionMetrics
-         * 
+         *
          * Creates and return an instance of ClassificationSelectionMetrics
          */
-        virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics() override;
+        virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics()
+            override;
 
         /**
          * \brief Specialization of the doSelection method for

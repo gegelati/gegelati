@@ -37,7 +37,8 @@
 
 #include "learn/evaluationResult.h"
 
-std::shared_ptr<Selector::SelectionMetrics> Learn::EvaluationResult::getSelectionMetrics() const
+std::shared_ptr<Selector::SelectionMetrics> Learn::EvaluationResult::
+    getSelectionMetrics() const
 {
     return this->selectionMetrics;
 }
@@ -61,8 +62,9 @@ Learn::EvaluationResult& Learn::EvaluationResult::operator+=(
     if (thisType == typeid(Learn::EvaluationResult)) {
 
         // Update selectionMetrics
-        this->selectionMetrics->weightedSum(other.selectionMetrics, this->nbEvaluation, other.nbEvaluation);
-        
+        this->selectionMetrics->weightedSum(
+            other.selectionMetrics, this->nbEvaluation, other.nbEvaluation);
+
         // Addition of nbEvaluation
         this->nbEvaluation = this->nbEvaluation + other.nbEvaluation;
     }

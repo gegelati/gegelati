@@ -205,8 +205,7 @@ TEST(LearningParametersTest, writeParametersToJson)
               params2.nbIterationsPerPolicyEvaluation);
     ASSERT_EQ(params.nbIterationsPerPolicyValidation,
               params2.nbIterationsPerPolicyValidation);
-    ASSERT_EQ(params.stepValidation,
-              params2.stepValidation);
+    ASSERT_EQ(params.stepValidation, params2.stepValidation);
     ASSERT_EQ(params.nbProgramConstant, params2.nbProgramConstant);
     ASSERT_EQ(params.nbRegisters, params2.nbRegisters);
     ASSERT_EQ(params.nbThreads, params2.nbThreads);

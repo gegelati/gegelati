@@ -3,20 +3,20 @@
 #ifndef SELECTION_METRICS_H
 #define SELECTION_METRICS_H
 
-#include "tpg/tpgGraph.h"
 #include "learn/learningEnvironment.h"
+#include "tpg/tpgGraph.h"
 
 namespace Selector {
     /**
      * \brief Class to extract metrics from either the agent or the environment.
      *
      * This metrics can be used to specify the selection of the selector.
-     * This class does not implement any metrics, it need to be override by the different selection methods.
+     * This class does not implement any metrics, it need to be override by the
+     * different selection methods.
      */
     class SelectionMetrics
     {
       protected:
-
         /**
          * Score obtained by the agent at the end of an episode
          */
@@ -33,7 +33,6 @@ namespace Selector {
         double utility = 0;
 
       public:
-
         /**
          * \brief Default constructor
          */
@@ -58,47 +57,63 @@ namespace Selector {
          */
         virtual double getUtility() const;
 
-        
         /**
          * \brief Init the metrics for the agent in the learning environment.
-         * 
+         *
          * This method is called at the beginning of the evaluateJob method.
-         * 
+         *
          * \param[in] agent the TPGVertex representing the agent.
-         * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
+         * \param[in] learningEnvironment the learning environment in which the
+         * agent is evaluated.
          */
-        virtual void initMetrics(const TPG::TPGVertex* agent, const Learn::LearningEnvironment& learningEnvironment) { /* Empty because sub-class does not need to inherrit from it.*/ };
+        virtual void initMetrics(
+            const TPG::TPGVertex* agent,
+            const Learn::LearningEnvironment& learningEnvironment) {
+            /* Empty because sub-class does not need to inherrit from it.*/
+        };
 
         /**
          * \brief Extract metrics from the agent in the learning environment.
-         * 
+         *
          * This method is called at every step of the environment evaluation.
-         * 
+         *
          * \param[in] agent the TPGVertex representing the agent.
          * \param[in] actionValues the action values taken by the agent.
-         * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
+         * \param[in] learningEnvironment the learning environment in which the
+         * agent is evaluated.
          */
-        virtual void extractMetricsStep(const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment) { /* Empty because sub-class does not need to inherrit from it.*/ };
+        virtual void extractMetricsStep(
+            const TPG::TPGVertex* agent, std::vector<double> actionValues,
+            const Learn::LearningEnvironment& learningEnvironment) {
+            /* Empty because sub-class does not need to inherrit from it.*/
+        };
 
         /**
          * \brief Extract metrics from the agent in the learning environment.
-         * 
-         * This method is called at the end of every episode of the environment evaluation.
-         * 
+         *
+         * This method is called at the end of every episode of the environment
+         * evaluation.
+         *
          * \param[in] agent the TPGVertex representing the agent.
-         * \param[in] nbStepsExecuted number of steps executed at the end of the episode.
-         * \param[in] learningEnvironment the learning environment in which the agent is evaluated.
+         * \param[in] nbStepsExecuted number of steps executed at the end of the
+         * episode. \param[in] learningEnvironment the learning environment in
+         * which the agent is evaluated.
          */
-        virtual void extractMetricsEpisode(const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment);
+        virtual void extractMetricsEpisode(
+            const TPG::TPGVertex* agent, size_t nbStepsExecuted,
+            const Learn::LearningEnvironment& learningEnvironment);
 
         /**
-         * \brief Perform a weighted sum between this SelectionMetrics and another.
-         * 
+         * \brief Perform a weighted sum between this SelectionMetrics and
+         * another.
+         *
          * \param[in] other the other SelectionMetrics to combine with this.
-         * \param[in] nbEvaluation the number of evaluation used to obtain this SelectionMetrics.
-         * \param[in] nbEvaluationOther the number of evaluation used to obtain the other SelectionMetrics.
+         * \param[in] nbEvaluation the number of evaluation used to obtain this
+         * SelectionMetrics. \param[in] nbEvaluationOther the number of
+         * evaluation used to obtain the other SelectionMetrics.
          */
-        virtual void weightedSum(std::shared_ptr<SelectionMetrics> other, size_t nbEvaluation, size_t nbEvaluationOther);
+        virtual void weightedSum(std::shared_ptr<SelectionMetrics> other,
+                                 size_t nbEvaluation, size_t nbEvaluationOther);
 
         /**
          * \brief Polymorphic division assignement operator for
@@ -106,12 +121,13 @@ namespace Selector {
          */
         virtual SelectionMetrics& operator/=(double factor);
     };
-    
+
     /**
      * \brief Comparison function to enable sorting of SelectionMetrics with
      * STL.
      */
-    bool operator<(std::shared_ptr<SelectionMetrics> a, std::shared_ptr<SelectionMetrics> b);
+    bool operator<(std::shared_ptr<SelectionMetrics> a,
+                   std::shared_ptr<SelectionMetrics> b);
 
 }; // namespace Selector
 

@@ -1755,7 +1755,10 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
         fakeResults;
     for (auto rootVertex : tpg->getRootVertices()) {
         std::shared_ptr<Learn::EvaluationResult> er =
-            std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(rng.getDouble(0, 1)), 1);
+            std::make_shared<Learn::EvaluationResult>(
+                std::make_shared<Selector::SelectionMetrics>(
+                    rng.getDouble(0, 1)),
+                1);
         fakeResults.insert(std::make_pair(er, rootVertex));
     }
     selector.doSelection(fakeResults, rng);

@@ -79,20 +79,19 @@
 #include <learn/learningParameters.h>
 #include <learn/parallelLearningAgent.h>
 
-//#include <learn/adversarialEvaluationResult.h>
-//#include <learn/adversarialJob.h>
-//#include <learn/adversarialLearningAgent.h>
-//#include <learn/adversarialLearningEnvironment.h>
+// #include <learn/adversarialEvaluationResult.h>
+// #include <learn/adversarialJob.h>
+// #include <learn/adversarialLearningAgent.h>
+// #include <learn/adversarialLearningEnvironment.h>
 
 #include <learn/classificationLearningEnvironment.h>
 
-
 #include <log/cycleDetectionLALogger.h>
-#include <log/mapElitesArchiveLogger.h>
 #include <log/laBasicLogger.h>
 #include <log/laLogger.h>
 #include <log/laPolicyStatsLogger.h>
 #include <log/logger.h>
+#include <log/mapElitesArchiveLogger.h>
 
 #include <mutator/lineMutator.h>
 #include <mutator/mutationParameters.h>
@@ -105,18 +104,18 @@
 #include <program/programEngine.h>
 #include <program/programExecutionEngine.h>
 
-#include <selector/classificationSelector.h>
 #include <selector/classificationSelectionMetrics.h>
+#include <selector/classificationSelector.h>
 #include <selector/mapElites/cvtMapElitesArchive.h>
 #include <selector/mapElites/mapElitesArchive.h>
 #include <selector/mapElites/mapElitesDefaultDescriptors.h>
 #include <selector/mapElites/mapElitesDescriptor.h>
-#include <selector/mapElites/mapElitesSelector.h>
 #include <selector/mapElites/mapElitesSelectionMetrics.h>
+#include <selector/mapElites/mapElitesSelector.h>
 #include <selector/selectionContext.h>
-#include <selector/selectorFactory.h>
 #include <selector/selectionMetrics.h>
 #include <selector/selector.h>
+#include <selector/selectorFactory.h>
 #include <selector/tournamentSelector.h>
 #include <selector/truncationSelector.h>
 

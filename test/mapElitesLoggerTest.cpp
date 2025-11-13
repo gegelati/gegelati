@@ -20,7 +20,8 @@ class MapElitesLoggerTest : public ::testing::Test
     Selector::MapElites::MapElitesArchive* archive;
 
     std::shared_ptr<Selector::MapElitesSelector> selector;
-    std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues> descriptor;
+    std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues>
+        descriptor;
 
     void SetUp() override
     {
@@ -59,9 +60,11 @@ class MapElitesLoggerTest : public ::testing::Test
 
         la = new Learn::LearningAgent(le, set, params);
 
-        selector = std::dynamic_pointer_cast<Selector::MapElitesSelector>(la->getSelector());
+        selector = std::dynamic_pointer_cast<Selector::MapElitesSelector>(
+            la->getSelector());
 
-        descriptor = std::make_shared<Selector::MapElites::DefaultDescriptors::ActionValues>();
+        descriptor = std::make_shared<
+            Selector::MapElites::DefaultDescriptors::ActionValues>();
         descriptor->initDescriptor(*la->getTPGGraph(), le);
     }
 
@@ -83,7 +86,8 @@ TEST_F(MapElitesLoggerTest, Constructor)
     }
 
     la->init(3);
-    auto cvtArchive = selector->addCvtArchiveFromDescriptor(4, descriptor, le, la->getRNG());
+    auto cvtArchive =
+        selector->addCvtArchiveFromDescriptor(4, descriptor, le, la->getRNG());
     Log::MapElitesArchiveLogger* cvtLog = nullptr;
     ASSERT_NO_THROW(cvtLog = new Log::MapElitesArchiveLogger(*cvtArchive, *la));
     if (cvtLog != nullptr) {
@@ -99,17 +103,21 @@ TEST_F(MapElitesLoggerTest, logHeader)
     // add the Logger
     std::stringstream strStr;
     Log::MapElitesArchiveLogger log(*archive, *la, strStr);
-    ASSERT_EQ(strStr.str(), "generation,0_0_0,0_0_1,0_1_0,0_1_1,1_0_0,1_0_1,1_1_0,1_1_1,archiveRange\n")
+    ASSERT_EQ(strStr.str(), "generation,0_0_0,0_0_1,0_1_0,0_1_1,1_0_0,1_0_1,1_"
+                            "1_0,1_1_1,archiveRange\n")
         << "Output of the archive is not as expected.";
 
-    
     la->init(3);
-    auto cvtArchive = selector->addCvtArchiveFromDescriptor(4, descriptor, le, la->getRNG());
-    
+    auto cvtArchive =
+        selector->addCvtArchiveFromDescriptor(4, descriptor, le, la->getRNG());
+
     // add the Logger, plot the deterministic values
     std::stringstream cvtStrStr;
     Log::MapElitesArchiveLogger cvtLog(*cvtArchive, *la, cvtStrStr);
-    ASSERT_EQ(cvtStrStr.str(), "generation,0(0.476939;0.776662;0.737521),1(0.5028;0.231641;0.730523),2(0.779164;0.519662;0.275792),3(0.229133;0.462147;0.256459)\n")
+    ASSERT_EQ(
+        cvtStrStr.str(),
+        "generation,0(0.476939;0.776662;0.737521),1(0.5028;0.231641;0.730523),"
+        "2(0.779164;0.519662;0.275792),3(0.229133;0.462147;0.256459)\n")
         << "Output of the archive is not as expected.";
 }
 
@@ -128,7 +136,6 @@ TEST_F(MapElitesLoggerTest, logNewGeneration)
     ASSERT_EQ(strStr.str().back(), '0') << "Generation value should be 0";
 }
 
-
 TEST_F(MapElitesLoggerTest, logEndOfTraining)
 {
 
@@ -141,7 +148,6 @@ TEST_F(MapElitesLoggerTest, logEndOfTraining)
     la->init(3);
     la->trainOneGeneration(0);
 
-
     std::string content = strStr.str();
     content.erase(content.length() - 1);
     std::string lastLine = content.substr(content.rfind('\n') + 1);
@@ -153,13 +159,12 @@ TEST_F(MapElitesLoggerTest, logEndOfTraining)
     content.erase(content.length() - 1);
     lastLine = content.substr(content.rfind('\n') + 1);
     ASSERT_EQ(lastLine, "1,10,nan,nan,nan,nan,nan,nan,nan");
-
-
 }
 TEST_F(MapElitesLoggerTest, logEndOfTrainingCvt)
 {
 
-    auto archive = selector->addCvtArchiveFromDescriptor(4, descriptor, le, la->getRNG());
+    auto archive =
+        selector->addCvtArchiveFromDescriptor(4, descriptor, le, la->getRNG());
 
     // add the Logger
     std::stringstream strStr;
@@ -167,7 +172,6 @@ TEST_F(MapElitesLoggerTest, logEndOfTrainingCvt)
 
     la->init(3);
     la->trainOneGeneration(0);
-
 
     std::string content = strStr.str();
     content.erase(content.length() - 1);

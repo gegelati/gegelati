@@ -64,7 +64,6 @@ TEST(JobTest, Constructor)
         << "Parameter archiveSeed did not have expected value after calling "
            "job constructor.";
 
-
     ASSERT_NO_THROW(delete job) << "Destruction of the Job failed.";
     ASSERT_NO_THROW(delete job2) << "Destruction of the Job failed.";
 }

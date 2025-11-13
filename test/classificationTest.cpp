@@ -95,18 +95,15 @@ TEST_F(ClassificationTest, Constructor)
     Learn::LearningAgent* la;
 
     // Build with Learn::LearningAgent
-    ASSERT_NO_THROW(
-        la = new Learn::LearningAgent(
-            fle, set, params))
+    ASSERT_NO_THROW(la = new Learn::LearningAgent(fle, set, params))
         << "Error when building a LearningAgent with classification "
            "environment.";
     // Build with Learn::ParallelLearningAgent
     ASSERT_TRUE(dynamic_cast<Selector::ClassificationSelector*>(
                     la->getSelector().get()) != nullptr)
         << "Selector should be a classification selector";
-    ASSERT_NO_THROW(delete la)
-        << "Error when deleting a LearningAgent with classification environment";
-
+    ASSERT_NO_THROW(delete la) << "Error when deleting a LearningAgent with "
+                                  "classification environment";
 }
 
 TEST_F(ClassificationTest, EvaluateRoot)
@@ -133,7 +130,7 @@ TEST_F(ClassificationTest, EvaluateRoot)
     ASSERT_NO_THROW(result1 = la.evaluateJob(
                         tee,
                         *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
-                                     Learn::LearningMode::TRAINING),
+                                    Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
     ASSERT_LE(result1->getSelectionMetrics()->getScore(), 1.0)
@@ -148,7 +145,7 @@ TEST_F(ClassificationTest, EvaluateRoot)
     ASSERT_NO_THROW(result2 = la.evaluateJob(
                         tee,
                         *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
-                                     Learn::LearningMode::TRAINING),
+                                    Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
     ASSERT_NE(result1, result2);
@@ -162,7 +159,7 @@ TEST_F(ClassificationTest, EvaluateRoot)
     ASSERT_NO_THROW(result3 = la.evaluateJob(
                         tee,
                         *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
-                                     Learn::LearningMode::TRAINING),
+                                    Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result3, result2);
@@ -184,9 +181,9 @@ TEST_F(ClassificationTest, DoSelection)
     // Initialize and populate the TPG
     la.init(0);
     TPG::TPGGraph& graph = *la.getTPGGraph();
-    Mutator::TPGMutator::populateTPG(graph, *la.getSelector(),
-                                     la.getArchive(), params.mutation,
-                                     la.getRNG(), fle.getNbActions());
+    Mutator::TPGMutator::populateTPG(graph, *la.getSelector(), la.getArchive(),
+                                     params.mutation, la.getRNG(),
+                                     fle.getNbActions());
 
     // Get roots
     auto roots = graph.getRootVertices();
@@ -198,8 +195,10 @@ TEST_F(ClassificationTest, DoSelection)
         results;
     double result = 0.0;
     for (const TPG::TPGVertex* root : roots) {
-        results.emplace(new Learn::EvaluationResult(
-                std::make_shared<Selector::SelectionMetrics>(result++), 1), root);
+        results.emplace(
+            new Learn::EvaluationResult(
+                std::make_shared<Selector::SelectionMetrics>(result++), 1),
+            root);
     }
 
     // Do the decimation (must fail)
@@ -224,10 +223,12 @@ TEST_F(ClassificationTest, DoSelection)
         scores.at(0) = 0.0;
         std::vector<size_t> nbEvals(fle.getNbActions(), 1);
 
-        auto selectionMetrics = std::make_shared<Selector::ClassificationSelectionMetrics>(scores, nbEvals);
+        auto selectionMetrics =
+            std::make_shared<Selector::ClassificationSelectionMetrics>(scores,
+                                                                       nbEvals);
 
-        classifResults.emplace(
-            new Learn::EvaluationResult(selectionMetrics, 1), root);
+        classifResults.emplace(new Learn::EvaluationResult(selectionMetrics, 1),
+                               root);
     }
 
     // Change score for 4 roots, so that
@@ -254,10 +255,12 @@ TEST_F(ClassificationTest, DoSelection)
         scores.at(0) = 0.25 * (idx + 1.0);
         std::vector<size_t> nbEvals(fle.getNbActions(), 10);
 
-        auto selectionMetrics = std::make_shared<Selector::ClassificationSelectionMetrics>(scores, nbEvals);
-        
-        classifResults.emplace(
-            new Learn::EvaluationResult(selectionMetrics, 1), root);
+        auto selectionMetrics =
+            std::make_shared<Selector::ClassificationSelectionMetrics>(scores,
+                                                                       nbEvals);
+
+        classifResults.emplace(new Learn::EvaluationResult(selectionMetrics, 1),
+                               root);
     }
 
     // Add an additional
@@ -272,19 +275,20 @@ TEST_F(ClassificationTest, DoSelection)
     classifResults.emplace(
         new Learn::EvaluationResult(
             std::make_shared<Selector::ClassificationSelectionMetrics>(
-            std::vector<double>(fle.getNbActions(), 0.0),
-            std::vector<size_t>(fle.getNbActions(), size_t(10))), 1),
+                std::vector<double>(fle.getNbActions(), 0.0),
+                std::vector<size_t>(fle.getNbActions(), size_t(10))),
+            1),
         &actionRoot);
     classifResults.emplace(
         new Learn::EvaluationResult(
             std::make_shared<Selector::ClassificationSelectionMetrics>(
-            std::vector<double>(fle.getNbActions(), 0.0),
-            std::vector<size_t>(fle.getNbActions(), size_t(10))), 1),
+                std::vector<double>(fle.getNbActions(), 0.0),
+                std::vector<size_t>(fle.getNbActions(), size_t(10))),
+            1),
         &teamRoot);
 
     // Do the decimation
-    ASSERT_NO_THROW(
-        la.getSelector()->doSelection(classifResults, la.getRNG()))
+    ASSERT_NO_THROW(la.getSelector()->doSelection(classifResults, la.getRNG()))
         << "Decimating worst roots should not fail with "
            "ClassificationEvaluationResults.";
 

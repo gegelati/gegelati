@@ -72,4 +72,3 @@ TEST(loggerTest, logWithFile)
 
     remove("tempFileForTest");
 }
-

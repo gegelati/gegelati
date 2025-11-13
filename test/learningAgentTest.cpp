@@ -166,7 +166,8 @@ TEST_F(LearningAgentTest, IsRootEvalSkipped)
                                    "that has not been evaluated before.";
 
     // Add an EvaluationResult artificially
-    result1 = std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(1.0), 1);
+    result1 = std::make_shared<Learn::EvaluationResult>(
+        std::make_shared<Selector::SelectionMetrics>(1.0), 1);
     la.getSelector()->updateEvaluationRecords(
         {{result1, la.getTPGGraph()->getRootVertices().at(0)}});
 
@@ -181,7 +182,8 @@ TEST_F(LearningAgentTest, IsRootEvalSkipped)
            "evaluated enough times before.";
 
     // Update the EvaluationResult artificially
-    result2 = std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(1.0), 2);
+    result2 = std::make_shared<Learn::EvaluationResult>(
+        std::make_shared<Selector::SelectionMetrics>(1.0), 2);
     la.getSelector()->updateEvaluationRecords(
         {{result2, la.getTPGGraph()->getRootVertices().at(0)}});
 
@@ -1087,7 +1089,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     auto iter = results.begin();
     auto iterSequential = resultsSequential.begin();
     while (iter != results.end()) {
-        ASSERT_EQ(iter->first->getSelectionMetrics()->getScore(), iterSequential->first->getSelectionMetrics()->getScore())
+        ASSERT_EQ(iter->first->getSelectionMetrics()->getScore(),
+                  iterSequential->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iter++;
@@ -1196,7 +1199,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     auto iter = results.begin();
     auto iterSequential = resultsSequential.begin();
     while (iter != results.end()) {
-        ASSERT_EQ(iter->first->getSelectionMetrics()->getScore(), iterSequential->first->getSelectionMetrics()->getScore())
+        ASSERT_EQ(iter->first->getSelectionMetrics()->getScore(),
+                  iterSequential->first->getSelectionMetrics()->getScore())
             << "Average score between sequential and parallel executions are "
                "differents.";
         iter++;

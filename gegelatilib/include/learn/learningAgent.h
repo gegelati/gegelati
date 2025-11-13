@@ -116,9 +116,9 @@ namespace Learn {
             : learningEnvironment{le},
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
-              archive(p.archiveSize, p.archivingProbability),
-              params{p}, tpg(factory.createTPGGraph(env)), selector{Selector::selectorFactory(tpg, le, p)}
-               {};
+              archive(p.archiveSize, p.archivingProbability), params{p},
+              tpg(factory.createTPGGraph(env)),
+              selector{Selector::selectorFactory(tpg, le, p)} {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;

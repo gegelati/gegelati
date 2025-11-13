@@ -12,33 +12,46 @@ namespace Selector {
         namespace DefaultDescriptors {
 
             /**
-             * Class for ActionValues descriptor. 
-             * 
-             * This descriptor is designed for continuous environments (an update could be made to be used on discrete environments too but it might not be useful).
-             * 
-             * It computs the average of the absolute of the action values over an episode.
+             * Class for ActionValues descriptor.
+             *
+             * This descriptor is designed for continuous environments (an
+             * update could be made to be used on discrete environments too but
+             * it might not be useful).
+             *
+             * It computs the average of the absolute of the action values over
+             * an episode.
              */
-            class ActionValues : public MapElitesDescriptor 
+            class ActionValues : public MapElitesDescriptor
             {
-                public:
-                    /**
-                     * \brief Specialisation of initDescriptor
-                     */
-                    virtual void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment) override;
+              public:
+                /**
+                 * \brief Specialisation of initDescriptor
+                 */
+                virtual void initDescriptor(const TPG::TPGGraph& graph,
+                                            const Learn::LearningEnvironment&
+                                                learningEnvironment) override;
 
-                    /**
-                     * \brief Specialisation of extractMetricsStep
-                     */
-                    virtual void extractMetricsStep(std::vector<double>& metrics, const TPG::TPGVertex* agent, std::vector<double> actionValues, const Learn::LearningEnvironment& learningEnvironment) const override;
+                /**
+                 * \brief Specialisation of extractMetricsStep
+                 */
+                virtual void extractMetricsStep(
+                    std::vector<double>& metrics, const TPG::TPGVertex* agent,
+                    std::vector<double> actionValues,
+                    const Learn::LearningEnvironment& learningEnvironment)
+                    const override;
 
-                    /**
-                     * \brief Specialisation of extractMetricsEpisode
-                     */
-                    virtual void extractMetricsEpisode(std::vector<double>& metrics, const TPG::TPGVertex* agent, size_t nbStepsExecuted, const Learn::LearningEnvironment& learningEnvironment) const override;
+                /**
+                 * \brief Specialisation of extractMetricsEpisode
+                 */
+                virtual void extractMetricsEpisode(
+                    std::vector<double>& metrics, const TPG::TPGVertex* agent,
+                    size_t nbStepsExecuted,
+                    const Learn::LearningEnvironment& learningEnvironment)
+                    const override;
             };
 
-        }; // DefaultDescriptors
-    }; // MapElites
-}; // Selector
+        }; // namespace DefaultDescriptors
+    }; // namespace MapElites
+}; // namespace Selector
 
-#endif //MAP_ELITES_DEFAULT_DESCRIPTORS_H
+#endif // MAP_ELITES_DEFAULT_DESCRIPTORS_H

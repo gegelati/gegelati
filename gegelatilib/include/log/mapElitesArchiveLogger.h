@@ -35,7 +35,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifndef MAP_ELITES_ARCHIVE_LOGGER_H
 #define MAP_ELITES_ARCHIVE_LOGGER_H
 
@@ -43,12 +42,11 @@
 
 #include "log/laLogger.h"
 
-
 namespace Selector {
     namespace MapElites {
         class MapElitesArchive;
     }
-}
+} // namespace Selector
 
 namespace Log {
 
@@ -58,24 +56,24 @@ namespace Log {
     class MapElitesArchiveLogger : public LALogger
     {
       protected:
-
         /// archive of the mapElitesSelector
         const Selector::MapElites::MapElitesArchive& archive;
 
         /// If first generation if finished or not.
         bool firstGenerationEnded = false;
+
       public:
         /**
          * \brief Same constructor as LaLogger. Default output is cout.
          *
-         * \param[in] archive archive of a mapElitesSelector whose information will be logger by the logger
-         * \param[in] la LearningAgent whose information will be logged by the
-         * LABasicLogger.
-         * \param[in] out The output stream the logger will send
-         * elements to.
+         * \param[in] archive archive of a mapElitesSelector whose information
+         * will be logger by the logger \param[in] la LearningAgent whose
+         * information will be logged by the LABasicLogger. \param[in] out The
+         * output stream the logger will send elements to.
          */
-        explicit MapElitesArchiveLogger(const Selector::MapElites::MapElitesArchive& archive, Learn::LearningAgent& la,
-                               std::ostream& out = std::cout)
+        explicit MapElitesArchiveLogger(
+            const Selector::MapElites::MapElitesArchive& archive,
+            Learn::LearningAgent& la, std::ostream& out = std::cout)
             : LALogger(la, out), archive{archive}
         {
 
@@ -89,7 +87,6 @@ namespace Log {
          * \brief Logs the header (column names) of the csv archive.
          */
         virtual void logHeader() override;
-
 
         /**
          * Inherited via LALogger.

@@ -3,65 +3,96 @@
 #include <gtest/gtest.h>
 #include <stdexcept>
 
+#include "learn/classificationLearningEnvironment.h"
 #include "selector/classificationSelectionMetrics.h"
 #include "selector/selectionMetrics.h"
-#include "learn/classificationLearningEnvironment.h"
 
 #include <memory>
 
 // Fake LearningEnvironment to test SelectionMetrics::extractMetricsEpisode
 class FakedLearningEnvironment : public Learn::LearningEnvironment
 {
-    private:
-        double m_score;
-        double m_utility;
-    public:
-        FakedLearningEnvironment(double score, double utility)
-                : Learn::LearningEnvironment(0), m_score(score), m_utility(utility)
-        {
-        }
+  private:
+    double m_score;
+    double m_utility;
 
-        virtual void reset(size_t seed = 0,
-                           Learn::LearningMode mode = Learn::LearningMode::TRAINING,
-                           uint16_t iterationNumber = 0,
-                           uint64_t generationNumber = 0) override {}
+  public:
+    FakedLearningEnvironment(double score, double utility)
+        : Learn::LearningEnvironment(0), m_score(score), m_utility(utility)
+    {
+    }
 
-        virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
-        getDataSources() override {return {};}
+    virtual void reset(size_t seed = 0,
+                       Learn::LearningMode mode = Learn::LearningMode::TRAINING,
+                       uint16_t iterationNumber = 0,
+                       uint64_t generationNumber = 0) override
+    {
+    }
 
-        virtual double getScore() const override { return m_score; }
+    virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
+    getDataSources() override
+    {
+        return {};
+    }
 
-        virtual double getUtility() const override { return m_utility; }
+    virtual double getScore() const override
+    {
+        return m_score;
+    }
 
-        virtual bool isTerminal() const override { return true; }
+    virtual double getUtility() const override
+    {
+        return m_utility;
+    }
 
-        virtual bool isUsingUtility() const override { return true; }
+    virtual bool isTerminal() const override
+    {
+        return true;
+    }
 
+    virtual bool isUsingUtility() const override
+    {
+        return true;
+    }
 };
 
-// Fake ClassificationLearningEnvironment for testing ClassificationSelectionMetrics
-class FakedClassificationLearningEnvironment : public Learn::ClassificationLearningEnvironment
+// Fake ClassificationLearningEnvironment for testing
+// ClassificationSelectionMetrics
+class FakedClassificationLearningEnvironment
+    : public Learn::ClassificationLearningEnvironment
 {
-    public:
-        FakedClassificationLearningEnvironment(uint64_t nbClass)
-                : Learn::ClassificationLearningEnvironment(nbClass) {}
+  public:
+    FakedClassificationLearningEnvironment(uint64_t nbClass)
+        : Learn::ClassificationLearningEnvironment(nbClass)
+    {
+    }
 
-        void setClassificationTable(const std::vector<std::vector<uint64_t>>& table)
-        { this->classificationTable = table; }
+    void setClassificationTable(const std::vector<std::vector<uint64_t>>& table)
+    {
+        this->classificationTable = table;
+    }
 
-        virtual void doAction(double actionID) override {}
-        virtual void reset(size_t seed = 0,
-                            Learn::LearningMode mode = Learn::LearningMode::TRAINING,
-                            uint16_t iterationNumber = 0,
-                            uint64_t generationNumber = 0) override {}
+    virtual void doAction(double actionID) override
+    {
+    }
+    virtual void reset(size_t seed = 0,
+                       Learn::LearningMode mode = Learn::LearningMode::TRAINING,
+                       uint16_t iterationNumber = 0,
+                       uint64_t generationNumber = 0) override
+    {
+    }
 
-        virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
-        getDataSources() override
-        { return {};}
+    virtual std::vector<std::reference_wrapper<const Data::DataHandler>>
+    getDataSources() override
+    {
+        return {};
+    }
 
-        virtual bool isTerminal() const override { return true; }
+    virtual bool isTerminal() const override
+    {
+        return true;
+    }
 };
-
 
 TEST(SelectionMetricsTest, DefaultAndParamConstructor)
 {
@@ -81,7 +112,6 @@ TEST(SelectionMetricsTest, ExtractMetricsEpisodeAddsScoreAndUtility)
     Selector::SelectionMetrics metrics(1.5, 2.5);
     FakedLearningEnvironment env(3.0, 1.0);
 
-
     // Call extraction
     metrics.extractMetricsEpisode(nullptr, 0, env);
 
@@ -100,11 +130,14 @@ TEST(SelectionMetricsTest, WeightedSumAndTypeMismatch)
     // score = (1*2 + 3*3) / 5 = 11/5 = 2.2
     ASSERT_EQ(m1->getScore(), 2.2);
     // utility computed by implementation (note: uses updated score in formula)
-    // utility = (score * 2 + other.utility * 3) / 5 = (2.2*2 + 5*3)/5 = 19.4/5 = 3.88
+    // utility = (score * 2 + other.utility * 3) / 5 = (2.2*2 + 5*3)/5 = 19.4/5
+    // = 3.88
     ASSERT_EQ(m1->getUtility(), 3.88);
 
     // Type mismatch should throw
-    auto classMetrics = std::make_shared<Selector::ClassificationSelectionMetrics>(std::vector<double>{1.0}, std::vector<size_t>{1});
+    auto classMetrics =
+        std::make_shared<Selector::ClassificationSelectionMetrics>(
+            std::vector<double>{1.0}, std::vector<size_t>{1});
     ASSERT_THROW(m1->weightedSum(classMetrics, 1, 1), std::runtime_error);
 }
 
@@ -124,19 +157,18 @@ TEST(SelectionMetricsTest, DivisionAssignAndCompare)
     ASSERT_DOUBLE_EQ(vec.front()->getScore(), 1.0);
 }
 
-
-
-
 TEST(ClassificationSelectionMetricsTest, Constructor)
 {
     std::shared_ptr<Selector::SelectionMetrics> metrics;
 
     ASSERT_NO_THROW(
-        metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3}))
+        metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(
+            std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3}))
         << "Building a ClassificationSelectionMetrics failed unexpectedly.";
 
     ASSERT_THROW(
-        metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3, 5}),
+        metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(
+            std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3, 5}),
         std::runtime_error)
         << "Building a ClassificationSelectionMetrics with vectors of "
            "different sizes should fail.";
@@ -144,7 +176,8 @@ TEST(ClassificationSelectionMetricsTest, Constructor)
 
 TEST(ClassificationSelectionMetricsTest, GetScore)
 {
-    auto metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3});
+    auto metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(
+        std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3});
 
     ASSERT_EQ(metrics->getScore(), (1.0 + 2.0) / 2.0)
         << "Getter returned an unexpected value.";
@@ -152,7 +185,8 @@ TEST(ClassificationSelectionMetricsTest, GetScore)
 
 TEST(ClassificationSelectionMetricsTest, GetScorePerClass)
 {
-    auto metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3});
+    auto metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(
+        std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3});
 
     ASSERT_EQ(metrics->getScorePerClass().size(), 2)
         << "Getter returned an unexpected value.";
@@ -166,7 +200,8 @@ TEST(ClassificationSelectionMetricsTest, GetScorePerClass)
 
 TEST(ClassificationSelectionMetricsTest, GetNbEvaluationPerClass)
 {
-    auto metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3});
+    auto metrics = std::make_shared<Selector::ClassificationSelectionMetrics>(
+        std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3});
 
     ASSERT_EQ(metrics->getNbEvalPerClassPerClass().size(), 2)
         << "Getter returned an unexpected value.";
@@ -178,13 +213,16 @@ TEST(ClassificationSelectionMetricsTest, GetNbEvaluationPerClass)
 
 TEST(ClassificationSelectionMetricsTest, WeightedSum)
 {
-    auto metrics1 = std::make_shared<Selector::ClassificationSelectionMetrics>(std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3});
-    auto metrics2 = std::make_shared<Selector::ClassificationSelectionMetrics>(std::vector<double>{2.0, 3.0}, std::vector<size_t>{2, 2});
+    auto metrics1 = std::make_shared<Selector::ClassificationSelectionMetrics>(
+        std::vector<double>{1.0, 2.0}, std::vector<size_t>{2, 3});
+    auto metrics2 = std::make_shared<Selector::ClassificationSelectionMetrics>(
+        std::vector<double>{2.0, 3.0}, std::vector<size_t>{2, 2});
 
     ASSERT_NO_THROW(metrics1->weightedSum(metrics2, 5, 4))
         << "Call to weightedSum failed unexpectedly.";
 
-    auto metrics3 = std::make_shared<Selector::ClassificationSelectionMetrics>(std::vector<double>{3.0, 4.0, 5.0}, std::vector<size_t>{2, 3, 4});
+    auto metrics3 = std::make_shared<Selector::ClassificationSelectionMetrics>(
+        std::vector<double>{3.0, 4.0, 5.0}, std::vector<size_t>{2, 3, 4});
     ASSERT_THROW(metrics1->weightedSum(metrics3, 5, 9), std::runtime_error)
         << "Call to weightedSum should not work with mismatched "
            "number of classes.";
@@ -195,8 +233,10 @@ TEST(ClassificationSelectionMetricsTest, InitAndExtractEpisode)
     Selector::ClassificationSelectionMetrics metrics;
     FakedClassificationLearningEnvironment env(2);
 
-    // Prepare classification table: class 0 guessed [2,1], class 1 guessed [0,3]
-    env.setClassificationTable(std::vector<std::vector<uint64_t>>{{2, 1}, {0, 3}});
+    // Prepare classification table: class 0 guessed [2,1], class 1 guessed
+    // [0,3]
+    env.setClassificationTable(
+        std::vector<std::vector<uint64_t>>{{2, 1}, {0, 3}});
 
     // init should resize internal vectors
     metrics.initMetrics(nullptr, env);

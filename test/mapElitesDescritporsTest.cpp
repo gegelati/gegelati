@@ -1,16 +1,18 @@
-#include <gtest/gtest.h>
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
-#include "selector/mapElites/mapElitesDescriptor.h"
-#include "selector/mapElites/mapElitesDefaultDescriptors.h"
-#include "tpg/tpgGraph.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
+#include "selector/mapElites/mapElitesDefaultDescriptors.h"
+#include "selector/mapElites/mapElitesDescriptor.h"
+#include "tpg/tpgGraph.h"
+#include <gtest/gtest.h>
 
-class MapElitesDescriptorsTest : public ::testing::Test {
-protected:
+class MapElitesDescriptorsTest : public ::testing::Test
+{
+  protected:
     std::shared_ptr<TPG::TPGGraph> graph;
     FakeMultiContinuousLearningEnvironment env;
-    std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues> descriptor;
+    std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues>
+        descriptor;
     const TPG::TPGVertex* dummyAgent;
     Environment* e = NULL;
     Learn::LearningParameters params;
@@ -19,7 +21,8 @@ protected:
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
 
-    void SetUp() override {
+    void SetUp() override
+    {
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
         vect.push_back(
@@ -35,13 +38,18 @@ protected:
         graph = std::make_shared<TPG::TPGGraph>(*e);
         dummyAgent = &graph->addNewTeam();
 
-        descriptor = std::make_shared<Selector::MapElites::DefaultDescriptors::ActionValues>();
+        descriptor = std::make_shared<
+            Selector::MapElites::DefaultDescriptors::ActionValues>();
     }
 };
 
 class FakeDescriptor : public Selector::MapElites::MapElitesDescriptor
 {
-    void initDescriptor(const TPG::TPGGraph& graph, const Learn::LearningEnvironment& learningEnvironment) override {}
+    void initDescriptor(
+        const TPG::TPGGraph& graph,
+        const Learn::LearningEnvironment& learningEnvironment) override
+    {
+    }
 };
 
 TEST_F(MapElitesDescriptorsTest, EmptyMethods)
@@ -54,7 +62,8 @@ TEST_F(MapElitesDescriptorsTest, EmptyMethods)
     fakeD.extractMetricsEpisode(metrics, fakeAgent, 4, env);
 }
 
-TEST_F(MapElitesDescriptorsTest, InitDescriptorMarksInitAndSetsValues) {
+TEST_F(MapElitesDescriptorsTest, InitDescriptorMarksInitAndSetsValues)
+{
     EXPECT_FALSE(descriptor->isInit());
 
     descriptor->initDescriptor(*graph, env);
@@ -67,19 +76,22 @@ TEST_F(MapElitesDescriptorsTest, InitDescriptorMarksInitAndSetsValues) {
     EXPECT_DOUBLE_EQ(range.second, 1.0);
 }
 
-TEST_F(MapElitesDescriptorsTest, InitDescriptorSetsCorrectDescriptorCount) {
+TEST_F(MapElitesDescriptorsTest, InitDescriptorSetsCorrectDescriptorCount)
+{
     descriptor->initDescriptor(*graph, env);
     EXPECT_EQ(descriptor->getNbDescriptors(), env.getNbActions());
 }
 
-TEST_F(MapElitesDescriptorsTest, ExtractMetricsStepAccumulatesAbsoluteActionValues) {
+TEST_F(MapElitesDescriptorsTest,
+       ExtractMetricsStepAccumulatesAbsoluteActionValues)
+{
     descriptor->initDescriptor(*graph, env);
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
     const TPG::TPGVertex* fakeAgent = nullptr;
 
-    std::vector<double> actions1 = {0.5, -0.2,  1.0};
+    std::vector<double> actions1 = {0.5, -0.2, 1.0};
     std::vector<double> actions2 = {0.1, -0.8, -0.4};
 
     descriptor->extractMetricsStep(metrics, fakeAgent, actions1, env);
@@ -90,7 +102,8 @@ TEST_F(MapElitesDescriptorsTest, ExtractMetricsStepAccumulatesAbsoluteActionValu
     EXPECT_DOUBLE_EQ(metrics[2], 1.0 + 0.4);
 }
 
-TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeConvertsSumToAverage) {
+TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeConvertsSumToAverage)
+{
     descriptor->initDescriptor(*graph, env);
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
@@ -111,7 +124,8 @@ TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeConvertsSumToAverage) {
     EXPECT_DOUBLE_EQ(metrics[2], (1.0 + 0.0 + 2.0 + 0.0) / 4.0);
 }
 
-TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeWithOneStep) {
+TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeWithOneStep)
+{
     descriptor->initDescriptor(*graph, env);
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
@@ -125,25 +139,27 @@ TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeWithOneStep) {
     EXPECT_DOUBLE_EQ(metrics[2], 1.5);
 }
 
-TEST_F(MapElitesDescriptorsTest, DoesNotCrashOnZeroMetricsBeforeEpisode) {
+TEST_F(MapElitesDescriptorsTest, DoesNotCrashOnZeroMetricsBeforeEpisode)
+{
     descriptor->initDescriptor(*graph, env);
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
     const TPG::TPGVertex* fakeAgent = nullptr;
-    EXPECT_NO_THROW(descriptor->extractMetricsEpisode(metrics, fakeAgent, 5, env));
+    EXPECT_NO_THROW(
+        descriptor->extractMetricsEpisode(metrics, fakeAgent, 5, env));
 
     for (double v : metrics) {
         EXPECT_DOUBLE_EQ(v, 0.0);
     }
 }
 
-TEST_F(MapElitesDescriptorsTest, ExtractMetricsStepIgnoresAgentAndEnvContent) {
+TEST_F(MapElitesDescriptorsTest, ExtractMetricsStepIgnoresAgentAndEnvContent)
+{
     descriptor->initDescriptor(*graph, env);
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
-    EXPECT_NO_THROW(
-        descriptor->extractMetricsStep(metrics, nullptr, {0.3, -0.3, 0.3}, env)
-    );
+    EXPECT_NO_THROW(descriptor->extractMetricsStep(metrics, nullptr,
+                                                   {0.3, -0.3, 0.3}, env));
 }

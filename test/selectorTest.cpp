@@ -42,15 +42,15 @@
 #include <numeric>
 
 #include "instructions/addPrimitiveType.h"
-#include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/fakeClassificationLearningEnvironment.h"
+#include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
 
-#include "selector/selectorFactory.h"
 #include "selector/selectionContext.h"
 #include "selector/selector.h"
+#include "selector/selectorFactory.h"
 #include "selector/tournamentSelector.h"
 #include "selector/truncationSelector.h"
 #include "util/counterReset.h"
@@ -187,48 +187,62 @@ TEST_F(SelectorTest, UpdateEvaluationRecords)
     auto rootVertices = selector->getGraph()->getRootVertices();
     const TPG::TPGVertex* root = *rootVertices.begin();
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
-        {{std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(1.0), 10), root}}));
+        {{std::make_shared<Learn::EvaluationResult>(
+              std::make_shared<Selector::SelectionMetrics>(1.0), 10),
+          root}}));
     ASSERT_EQ(selector->getBestRoot().first, root)
         << "Best root not updated properly.";
-    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(), 1.0)
+    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(),
+              1.0)
         << "Best root not updated properly.";
 
     // Update with a fake better result for another root of the graph
     const TPG::TPGVertex* root2 =
         *(selector->getGraph()->getRootVertices().begin() + 1);
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
-        {{std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(2.0), 10), root2}}));
+        {{std::make_shared<Learn::EvaluationResult>(
+              std::make_shared<Selector::SelectionMetrics>(2.0), 10),
+          root2}}));
     ASSERT_EQ(selector->getBestRoot().first, root2)
         << "Best root not updated properly.";
-    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(), 2.0)
+    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(),
+              2.0)
         << "Best root not updated properly.";
 
     // Update with a fake worse result for another root of the graph
     const TPG::TPGVertex* root3 =
         *(selector->getGraph()->getRootVertices().begin() + 2);
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
-        {{std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(1.5), 10), root3}}));
+        {{std::make_shared<Learn::EvaluationResult>(
+              std::make_shared<Selector::SelectionMetrics>(1.5), 10),
+          root3}}));
     ASSERT_EQ(selector->getBestRoot().first, root2)
         << "Best root not updated properly.";
-    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(), 2.0)
+    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(),
+              2.0)
         << "Best root not updated properly.";
 
     // Update with a root not from the graph
     TPG::TPGTeam fakeRoot;
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
-        {{std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(3.0), 10), &fakeRoot}}));
+        {{std::make_shared<Learn::EvaluationResult>(
+              std::make_shared<Selector::SelectionMetrics>(3.0), 10),
+          &fakeRoot}}));
     ASSERT_EQ(selector->getBestRoot().first, &fakeRoot)
         << "Best root not updated properly.";
-    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(), 3.0)
+    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(),
+              3.0)
         << "Best root not updated properly.";
 
     // Update with a worse EvaluationResult (but still updated because previous
     // Root is not in the TPGGraph
-    auto sharedPtr = std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(1.5), 10);
+    auto sharedPtr = std::make_shared<Learn::EvaluationResult>(
+        std::make_shared<Selector::SelectionMetrics>(1.5), 10);
     ASSERT_NO_THROW(selector->updateEvaluationRecords({{sharedPtr, root3}}));
     ASSERT_EQ(selector->getBestRoot().first, root3)
         << "Best root not updated properly.";
-    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(), 1.5)
+    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(),
+              1.5)
         << "Best root not updated properly.";
 
     // Update with the EvaluationResult already registered in the resultsPerRoot
@@ -255,12 +269,16 @@ TEST_F(SelectorTest, forgetPreviousResults)
     auto rootVertices = selector->getGraph()->getRootVertices();
     const TPG::TPGVertex* root = *rootVertices.begin();
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
-        {{std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(1.0), 10), root}}));
-    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(), 1.0)
+        {{std::make_shared<Learn::EvaluationResult>(
+              std::make_shared<Selector::SelectionMetrics>(1.0), 10),
+          root}}));
+    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(),
+              1.0)
         << "Best root not updated properly.";
-    ASSERT_NO_THROW(*selector->getBestRoot().second +=
-                    Learn::EvaluationResult(std::make_shared<Selector::SelectionMetrics>(2.0), 10));
-    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(), 1.5)
+    ASSERT_NO_THROW(*selector->getBestRoot().second += Learn::EvaluationResult(
+                        std::make_shared<Selector::SelectionMetrics>(2.0), 10));
+    ASSERT_EQ(selector->getBestRoot().second->getSelectionMetrics()->getScore(),
+              1.5)
         << "Best root not updated properly.";
 
     // Looks for the eval record the Learning Agent should keep
@@ -324,7 +342,10 @@ TEST_F(SelectorTest, DoSelection)
         results;
     double result = 0.0;
     for (const TPG::TPGVertex* root : roots) {
-        results.emplace(new Learn::EvaluationResult(std::make_shared<Selector::SelectionMetrics>(result++), 5), root);
+        results.emplace(
+            new Learn::EvaluationResult(
+                std::make_shared<Selector::SelectionMetrics>(result++), 5),
+            root);
     }
 
     // Do the decimation
@@ -362,13 +383,17 @@ TEST_F(SelectorTest, DoSelectionActionsQuota)
     double scoreTeams = 0.0;
     for (auto* root : graph->getRootVertices()) {
         if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
-            results.emplace(
-                std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(scoreActions++), 1),
-                root);
+            results.emplace(std::make_shared<Learn::EvaluationResult>(
+                                std::make_shared<Selector::SelectionMetrics>(
+                                    scoreActions++),
+                                1),
+                            root);
         }
         else {
             results.emplace(
-                std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(scoreTeams++), 1),
+                std::make_shared<Learn::EvaluationResult>(
+                    std::make_shared<Selector::SelectionMetrics>(scoreTeams++),
+                    1),
                 root);
         }
     }
@@ -410,8 +435,10 @@ TEST_F(SelectorTest, DecimateWithTournamentSelection)
         results;
     double score = 0.0;
     for (auto* root : roots) {
-        results.emplace(std::make_shared<Learn::EvaluationResult>(std::make_shared<Selector::SelectionMetrics>(score++), 1),
-                        root);
+        results.emplace(
+            std::make_shared<Learn::EvaluationResult>(
+                std::make_shared<Selector::SelectionMetrics>(score++), 1),
+            root);
     }
 
     // Call doSelection, which should use tournament selection
@@ -604,25 +631,31 @@ TEST_F(SelectorTest, FactorySelector)
     std::shared_ptr<TPG::TPGGraph> graph = std::make_shared<TPG::TPGGraph>(*e);
     std::shared_ptr<Selector::Selector> selector;
 
-
-    ASSERT_NO_THROW(selector = Selector::selectorFactory(graph, classifLe, params));
-    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::ClassificationSelector>(selector) != nullptr);
+    ASSERT_NO_THROW(selector =
+                        Selector::selectorFactory(graph, classifLe, params));
+    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::ClassificationSelector>(
+                    selector) != nullptr);
 
     params.selection._selectionMode = "truncation";
     ASSERT_NO_THROW(selector = Selector::selectorFactory(graph, le, params));
-    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::TruncationSelector>(selector) != nullptr);
+    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::TruncationSelector>(
+                    selector) != nullptr);
 
     params.selection._selectionMode = "tournament";
     ASSERT_NO_THROW(selector = Selector::selectorFactory(graph, le, params));
-    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::TournamentSelector>(selector) != nullptr);
+    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::TournamentSelector>(
+                    selector) != nullptr);
 
     params.selection._selectionMode = "mapElites";
     ASSERT_NO_THROW(selector = Selector::selectorFactory(graph, le, params));
-    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::MapElitesSelector>(selector) != nullptr);
+    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::MapElitesSelector>(
+                    selector) != nullptr);
 
     params.mutation.tpg.ratioTeamsOverActions = 0.5;
-    ASSERT_THROW(selector = Selector::selectorFactory(graph, le, params), std::runtime_error);
+    ASSERT_THROW(selector = Selector::selectorFactory(graph, le, params),
+                 std::runtime_error);
 
     params.selection._selectionMode = "fake";
-    ASSERT_THROW(selector = Selector::selectorFactory(graph, le, params), std::runtime_error);
+    ASSERT_THROW(selector = Selector::selectorFactory(graph, le, params),
+                 std::runtime_error);
 }

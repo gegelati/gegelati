@@ -107,11 +107,11 @@ namespace Selector {
                           const TPG::TPGVertex*>& results,
             Mutator::RNG& rng);
 
-
         /**
          * Creates and return an instance of SelectionMetrics
-         * 
-         * The purpose of this method is to be override by new selection algorithms to use specific metrics.
+         *
+         * The purpose of this method is to be override by new selection
+         * algorithms to use specific metrics.
          */
         virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics();
 
@@ -231,7 +231,9 @@ namespace Selector {
          *
          * This method does nothing with the default selector.
          */
-        virtual void updateAfterPopulate() { /* Empty because sub-class does not need to inherrit from it.*/ };
+        virtual void updateAfterPopulate() {
+            /* Empty because sub-class does not need to inherrit from it.*/
+        };
     };
 }; // namespace Selector
 

@@ -88,8 +88,10 @@ class CycleDetectionLoggerTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
 
-        auto res1 = new Learn::EvaluationResult(std::make_shared<Selector::SelectionMetrics>(5), 2);
-        auto res2 = new Learn::EvaluationResult(std::make_shared<Selector::SelectionMetrics>(10), 2);
+        auto res1 = new Learn::EvaluationResult(
+            std::make_shared<Selector::SelectionMetrics>(5), 2);
+        auto res2 = new Learn::EvaluationResult(
+            std::make_shared<Selector::SelectionMetrics>(10), 2);
         auto v1(new TPG::TPGAction(0));
         auto v2(new TPG::TPGAction(0));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
