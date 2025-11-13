@@ -138,7 +138,7 @@ TEST_F(LABasicLoggerTest, ParentEmptyMethods)
                   const TPG::TPGVertex*>
         emptyMap;
     log.logHeader();
-    size_t gen = 0;
+    uint64_t gen = 0;
     log.logNewGeneration(gen);
     log.logAfterPopulateTPG();
     log.logAfterEvaluate(emptyMap);

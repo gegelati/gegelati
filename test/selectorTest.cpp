@@ -43,10 +43,12 @@
 
 #include "instructions/addPrimitiveType.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
+#include "learn/fakeClassificationLearningEnvironment.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/stickGameWithOpponent.h"
 
+#include "selector/selectorFactory.h"
 #include "selector/selectionContext.h"
 #include "selector/selector.h"
 #include "selector/tournamentSelector.h"
@@ -60,6 +62,7 @@ class SelectorTest : public ::testing::Test
     Instructions::Set set;
     StickGameWithOpponent le;
     FakeMultiContinuousLearningEnvironment cle;
+    FakeClassificationLearningEnvironment classifLe;
     Learn::LearningParameters params;
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     std::shared_ptr<Program::Program> progPointer;
@@ -594,4 +597,29 @@ TEST_F(SelectorTest, updateAfterPopulate)
            "vertices in the verticesToDelete set.";
     ASSERT_EQ(graph->getNbRootVertices(), 2)
         << "After deleting useless parents, the graph should have 2 roots.";
+}
+
+TEST_F(SelectorTest, FactorySelector)
+{
+    std::shared_ptr<TPG::TPGGraph> graph = std::make_shared<TPG::TPGGraph>(*e);
+    std::shared_ptr<Selector::Selector> selector;
+
+
+    ASSERT_NO_THROW(selector = Selector::selectorFactory(graph, classifLe, params));
+    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::ClassificationSelector>(selector) != nullptr);
+
+    params.selection._selectionMode = "truncation";
+    ASSERT_NO_THROW(selector = Selector::selectorFactory(graph, le, params));
+    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::TruncationSelector>(selector) != nullptr);
+
+    params.selection._selectionMode = "tournament";
+    ASSERT_NO_THROW(selector = Selector::selectorFactory(graph, le, params));
+    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::TournamentSelector>(selector) != nullptr);
+
+    params.selection._selectionMode = "mapElites";
+    ASSERT_NO_THROW(selector = Selector::selectorFactory(graph, le, params));
+    ASSERT_TRUE(std::dynamic_pointer_cast<Selector::MapElitesSelector>(selector) != nullptr);
+
+    params.selection._selectionMode = "fake";
+    ASSERT_THROW(selector = Selector::selectorFactory(graph, le, params), std::runtime_error);
 }
