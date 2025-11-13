@@ -33,7 +33,8 @@ namespace Selector {
              * \brief Constructor for Selector.
              *
              * \param[in] graph shared pointer of the graph on which the
-             * selection is done. \param[in] params parameters used by the
+             * selection is done.
+             * \param[in] params parameters used by the
              * Selector.
              */
             MapElitesSelector(std::shared_ptr<TPG::TPGGraph> graph,
@@ -84,13 +85,19 @@ namespace Selector {
              * \brief Add a CVT archive for a given descriptor.
              *
              * \param[in] nbCentroids the number of centroids for the CVT
-             * archive. \param[in] descriptor the descriptor to add an archive
-             * for. \param[in] le the learning environment used to get size and
-             * ranges. \param[in] rng the random number generator used for the
-             * CVT initialization. \param[in] nbIterationInit number of
-             * iterations for the CVT initialization. \param[in] nbDotsInit
-             * number of dots for the CVT initialization. \param[in] a1 CVT
-             * default parameter. \param[in] b1 CVT default parameter.
+             * archive.
+             * \param[in] descriptor the descriptor to add an archive
+             * for.
+             * \param[in] le the learning environment used to get size and
+             * ranges.
+             * \param[in] rng the random number generator used for the
+             * CVT initialization.
+             * \param[in] nbIterationInit number of iterations for the
+             * CVT initialization.
+             * \param[in] nbDotsInit number of dots for the CVT 
+             * initialization.
+             * \param[in] a1 CVT default parameter.
+             * \param[in] b1 CVT default parameter.
              * \param[in] a2 CVT default parameter.
              * \param[in] b2 CVT default parameter.
              */

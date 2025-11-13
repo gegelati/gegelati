@@ -40,7 +40,8 @@ namespace Selector {
          * \brief Constructor with score and utility initialization.
          *
          * \param[in] scorePerClass the vector of score obtained by the agent
-         * per class. \param[in] nbEvalPerClass the vector of number of
+         * per class.
+         * \param[in] nbEvalPerClass the vector of number of
          * evaluation per class.
          */
         ClassificationSelectionMetrics(

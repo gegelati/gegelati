@@ -19,7 +19,8 @@ namespace Selector {
      * \brief Factory method to create the appropriate Selector
      *
      * \param[in] graph shared pointer of the TPGGraph on which the selection is
-     * done. \param[in] le LearningEnvironment used by the LearningAgent.
+     * done.
+     * \param[in] le LearningEnvironment used by the LearningAgent.
      * \param[in] params LearningParameters used
      */
     std::shared_ptr<Selector> selectorFactory(

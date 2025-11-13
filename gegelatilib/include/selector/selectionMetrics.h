@@ -96,7 +96,8 @@ namespace Selector {
          *
          * \param[in] agent the TPGVertex representing the agent.
          * \param[in] nbStepsExecuted number of steps executed at the end of the
-         * episode. \param[in] learningEnvironment the learning environment in
+         * episode.
+         * \param[in] learningEnvironment the learning environment in
          * which the agent is evaluated.
          */
         virtual void extractMetricsEpisode(
@@ -109,7 +110,8 @@ namespace Selector {
          *
          * \param[in] other the other SelectionMetrics to combine with this.
          * \param[in] nbEvaluation the number of evaluation used to obtain this
-         * SelectionMetrics. \param[in] nbEvaluationOther the number of
+         * SelectionMetrics.
+         * \param[in] nbEvaluationOther the number of
          * evaluation used to obtain the other SelectionMetrics.
          */
         virtual void weightedSum(std::shared_ptr<SelectionMetrics> other,

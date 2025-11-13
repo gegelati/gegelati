@@ -50,9 +50,12 @@ namespace Selector {
              * \param[in] minValue Minimum value for the descriptors
              * \param[in] maxValue Maximum value for the descriptors
              * \param[in] nbIterationInit Number of iterations for
-             * initialization \param[in] nbDotsInit Number of dots for
-             * initialization \param[in] a1 CVT parameter \param[in] b1 CVT
-             * parameter \param[in] a2 CVT parameter \param[in] b2 CVT parameter
+             * initialization
+             * \param[in] nbDotsInit Number of dots for initialization
+             * \param[in] a1 CVT parameter
+             * \param[in] b1 CVT parameter
+             * \param[in] a2 CVT parameter
+             * \param[in] b2 CVT parameter
              */
             CvtMapElitesArchive(Mutator::RNG& rng, size_t nbCentroids,
                                 size_t nbDescriptors, double minValue,

@@ -149,8 +149,7 @@ namespace Learn {
          * Mutex protecting the results.
          * \param[in,out] archiveMap Map
          * storing the exhaustiveArchive to be merged.
-         * \param[in]
-         * archiveMapMutex Mutex protecting the archiveMap.
+         * \param[in] archiveMapMutex Mutex protecting the archiveMap.
          * \param[in] useMainEnvironment Boolean that is true if we use the
          * declared LearningEnvironment, otherwise the method will clone it.
          */
