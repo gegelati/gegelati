@@ -65,7 +65,7 @@ namespace Selector {
              * \param[in] descriptor the descriptor to add an archive for.
              * \param[in] le the learning environment used to get size and ranges.
              */
-            virtual void addArchiveFromDescriptor(size_t nbBins, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le);
+            virtual std::shared_ptr<const MapElitesArchive> addArchiveFromDescriptor(size_t nbBins, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le);
 
             /**
              * \brief Add a CVT archive for a given descriptor.
@@ -81,7 +81,7 @@ namespace Selector {
              * \param[in] a2 CVT default parameter.
              * \param[in] b2 CVT default parameter.
              */
-            virtual void addCvtArchiveFromDescriptor(size_t nbCentroids, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le, Mutator::RNG& rng, size_t nbIterationInit = 300, size_t nbDotsInit = 1000, double a1 = 0.5, double b1 = 0.5, double a2 = 0.5, double b2 = 0.5);
+            virtual std::shared_ptr<const MapElitesArchive> addCvtArchiveFromDescriptor(size_t nbCentroids, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le, Mutator::RNG& rng, size_t nbIterationInit = 300, size_t nbDotsInit = 1000, double a1 = 0.5, double b1 = 0.5, double a2 = 0.5, double b2 = 0.5);
             
             /**
              * \brief override of doSelection method

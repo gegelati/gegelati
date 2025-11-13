@@ -115,6 +115,43 @@ class LABasicLoggerTest : public ::testing::Test
     }
 };
 
+
+
+TEST_F(LABasicLoggerTest, ParentContructor)
+{
+    Log::LALogger* l = nullptr;
+    ASSERT_NO_THROW(l = new Log::LALogger(*la));
+    if (l != nullptr) {
+        delete l;
+    }
+    ASSERT_NO_THROW(Log::LALogger l(*la, std::cerr));
+}
+
+TEST_F(LABasicLoggerTest, ParentEmptyMethods)
+{
+    std::stringstream strStr;
+    Log::LALogger log(*la, strStr);
+
+    // Explicit calls to empty method to force code coverage.
+    // These methods are called during la.trainOneGeneration
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        emptyMap;
+    log.logHeader();
+    size_t gen = 0;
+    log.logNewGeneration(gen);
+    log.logAfterPopulateTPG();
+    log.logAfterEvaluate(emptyMap);
+    log.logAfterDecimate();
+    log.logEndOfTraining();
+
+    // These methods are not called otherwise
+    log.logAfterValidate(emptyMap);
+
+    ASSERT_EQ(strStr.str().size(), 0)
+        << "Empty method should not generate any log.";
+}
+
 TEST_F(LABasicLoggerTest, Constructor)
 {
     Log::LABasicLogger* l = nullptr;

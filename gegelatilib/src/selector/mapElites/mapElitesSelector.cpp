@@ -36,16 +36,24 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::MapElites::MapElitesSelect
     return std::make_shared<MapElitesSelectionMetrics>(descriptors);
 }
 
-void Selector::MapElites::MapElitesSelector::addArchiveFromDescriptor(size_t nbBins, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le)
+std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::MapElites::MapElitesSelector::addArchiveFromDescriptor(size_t nbBins, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le)
 {
     std::pair<double, double> minAndMaxRange = descriptor->getMinAndMaxRange();
-    mapEliteArchives.insert({descriptor, std::make_shared<MapElitesArchive>(nbBins, descriptor->getNbDescriptors(), minAndMaxRange.first, minAndMaxRange.second)});
+    std::shared_ptr<MapElitesArchive> archive = std::make_shared<MapElitesArchive>(nbBins, descriptor->getNbDescriptors(), minAndMaxRange.first, minAndMaxRange.second);
+
+    mapEliteArchives.insert({descriptor, archive});
+
+    return archive;
 }
 
-void Selector::MapElites::MapElitesSelector::addCvtArchiveFromDescriptor(size_t nbCentroids, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le, Mutator::RNG& rng, size_t nbIterationInit, size_t nbDotsInit, double a1, double b1, double a2, double b2)
+std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::MapElites::MapElitesSelector::addCvtArchiveFromDescriptor(size_t nbCentroids, std::shared_ptr<const MapElitesDescriptor> descriptor, Learn::LearningEnvironment& le, Mutator::RNG& rng, size_t nbIterationInit, size_t nbDotsInit, double a1, double b1, double a2, double b2)
 {
     std::pair<double, double> minAndMaxRange = descriptor->getMinAndMaxRange();
-    mapEliteArchives.insert({descriptor, std::make_shared<CvtMapElitesArchive>(rng, nbCentroids, descriptor->getNbDescriptors(), minAndMaxRange.first, minAndMaxRange.second, nbIterationInit, nbDotsInit, a1, b1, a2, b2)});
+    std::shared_ptr<MapElitesArchive> archive = std::make_shared<CvtMapElitesArchive>(rng, nbCentroids, descriptor->getNbDescriptors(), minAndMaxRange.first, minAndMaxRange.second, nbIterationInit, nbDotsInit, a1, b1, a2, b2);
+
+    mapEliteArchives.insert({descriptor, archive});
+
+    return archive;
 }
 
 void Selector::MapElites::MapElitesSelector::doSelection(

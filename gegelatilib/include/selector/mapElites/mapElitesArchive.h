@@ -177,7 +177,7 @@ namespace Selector {
                 virtual std::set<const TPG::TPGVertex*> getVerticesInArchive() const;
 
 
-    };
+        };
     
 
     }; // namespace MapElites

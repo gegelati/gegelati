@@ -65,7 +65,7 @@ void Log::MapElitesArchiveLogger::logHeader()
                 if (j != centroids[i].size() - 1)
                     *this << ";";
             }
-            *this << ")";
+            *this << ")" ;
         }
     }
     // Handle default MapElitesArchive case
@@ -83,8 +83,10 @@ void Log::MapElitesArchiveLogger::logHeader()
             }
             *this << "," << key;
         }
-        *this << ",archiveRange" << std::endl;
+        *this << ",archiveRange";
     }
+
+    *this << std::endl;
 }
 
 
@@ -109,9 +111,10 @@ void Log::MapElitesArchiveLogger::logEndOfTraining()
     }
 
 
-    if (dynamic_cast<const Selector::MapElites::CvtMapElitesArchive*>(&archive) != nullptr && !this->firstGenerationEnded) {
+    if (dynamic_cast<const Selector::MapElites::CvtMapElitesArchive*>(&archive) == nullptr && !this->firstGenerationEnded) {
         *this << ",";
         for (size_t i = 0; i < archiveLimits.size(); ++i) {
+            
             *this << archiveLimits[i];
             if (i != archiveLimits.size() - 1)
                 *this << ";";
