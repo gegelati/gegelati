@@ -114,9 +114,9 @@ void Selector::MapElites::MapElitesSelector::doSelection(
                                          "to MapElitesSelectionMetrics");
             }
             const TPG::TPGVertex* root = it->second;
-
+      
             std::vector<double> descriptorUsed(
-                metrics->getMapDescriptors().at(descriptor));
+                metrics->getMapDescriptors().at(descriptor));  
 
             // Get the saved evaluation and root
             const std::pair<std::shared_ptr<Learn::EvaluationResult>,

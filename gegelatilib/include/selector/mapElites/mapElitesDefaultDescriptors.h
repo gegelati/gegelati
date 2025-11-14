@@ -32,6 +32,11 @@ namespace Selector {
                                                 learningEnvironment) override;
 
                 /**
+                 * \brief Specialisation of getName
+                 */                          
+                virtual std::string getName() const override;
+
+                /**
                  * \brief Specialisation of extractMetricsStep
                  */
                 virtual void extractMetricsStep(

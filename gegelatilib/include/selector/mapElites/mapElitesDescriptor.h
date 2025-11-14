@@ -54,6 +54,13 @@ namespace Selector {
                 const TPG::TPGGraph& graph,
                 const Learn::LearningEnvironment& learningEnvironment) = 0;
 
+
+
+            /**
+             * \brief abstract method returning the name of the descriptor.
+             */
+            virtual std::string getName() const = 0;
+
             /**
              * \brief Get the min and max range of the descriptor.
              */

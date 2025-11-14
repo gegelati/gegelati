@@ -12,6 +12,11 @@ void Selector::MapElites::DefaultDescriptors::ActionValues::initDescriptor(
     this->nbDescriptors = learningEnvironment.getNbActions();
 }
 
+std::string Selector::MapElites::DefaultDescriptors::ActionValues::getName() const
+{
+    return "ActionValues";
+}
+
 void Selector::MapElites::DefaultDescriptors::ActionValues::extractMetricsStep(
     std::vector<double>& metrics, const TPG::TPGVertex* agent,
     std::vector<double> actionValues,

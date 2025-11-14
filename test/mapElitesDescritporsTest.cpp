@@ -50,6 +50,7 @@ class FakeDescriptor : public Selector::MapElites::MapElitesDescriptor
         const Learn::LearningEnvironment& learningEnvironment) override
     {
     }
+    std::string getName() const override {return "None";}
 };
 
 TEST_F(MapElitesDescriptorsTest, EmptyMethods)
@@ -85,6 +86,7 @@ TEST_F(MapElitesDescriptorsTest, InitDescriptorSetsCorrectDescriptorCount)
 TEST_F(MapElitesDescriptorsTest,
        ExtractMetricsStepAccumulatesAbsoluteActionValues)
 {
+    ASSERT_EQ(descriptor->getName(), "ActionValues");
     descriptor->initDescriptor(*graph, env);
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
