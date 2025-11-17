@@ -151,14 +151,14 @@ TEST_F(MapElitesLoggerTest, logEndOfTraining)
     std::string content = strStr.str();
     content.erase(content.length() - 1);
     std::string lastLine = content.substr(content.rfind('\n') + 1);
-    ASSERT_EQ(lastLine, "0,10,nan,nan,nan,nan,nan,nan,nan,0.5;1");
+    ASSERT_EQ(lastLine, "0,0,10,10,nan,10,nan,nan,nan,0.5;1");
 
     la->trainOneGeneration(1);
 
     content = strStr.str();
     content.erase(content.length() - 1);
     lastLine = content.substr(content.rfind('\n') + 1);
-    ASSERT_EQ(lastLine, "1,10,nan,nan,nan,nan,nan,nan,nan");
+    ASSERT_EQ(lastLine, "1,0,10,10,20,10,20,20,30");
 }
 TEST_F(MapElitesLoggerTest, logEndOfTrainingCvt)
 {
@@ -176,12 +176,12 @@ TEST_F(MapElitesLoggerTest, logEndOfTrainingCvt)
     std::string content = strStr.str();
     content.erase(content.length() - 1);
     std::string lastLine = content.substr(content.rfind('\n') + 1);
-    ASSERT_EQ(lastLine, "0,nan,10,nan,nan");
+    ASSERT_EQ(lastLine, "0,10,10,10,nan");
 
     la->trainOneGeneration(1);
 
     content = strStr.str();
     content.erase(content.length() - 1);
     lastLine = content.substr(content.rfind('\n') + 1);
-    ASSERT_EQ(lastLine, "1,nan,10,nan,nan");
+    ASSERT_EQ(lastLine, "1,20,10,10,30");
 }
