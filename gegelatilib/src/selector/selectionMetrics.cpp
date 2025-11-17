@@ -41,13 +41,6 @@ void Selector::SelectionMetrics::weightedSum(
     this->utility /= (double)(nbEvaluation + nbEvaluationOther);
 }
 
-Selector::SelectionMetrics& Selector::SelectionMetrics::operator/=(
-    double factor)
-{
-    this->score /= factor;
-    this->utility /= factor;
-    return *this;
-}
 
 bool Selector::operator<(std::shared_ptr<SelectionMetrics> a,
                          std::shared_ptr<SelectionMetrics> b)

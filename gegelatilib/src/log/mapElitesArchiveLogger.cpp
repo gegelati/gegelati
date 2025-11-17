@@ -120,5 +120,4 @@ void Log::MapElitesArchiveLogger::logEndOfTraining()
     }
 
     *this << std::endl;
-    ;
 }

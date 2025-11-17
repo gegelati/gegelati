@@ -89,15 +89,3 @@ void Selector::ClassificationSelectionMetrics::weightedSum(
         this->scorePerClass[idx] /= (double)this->nbEvalPerClass[idx];
     }
 }
-
-Selector::SelectionMetrics& Selector::ClassificationSelectionMetrics::
-operator/=(double factor)
-{
-    this->score /= factor;
-    this->utility /= factor;
-
-    for (double& scoreClass : this->scorePerClass) {
-        scoreClass /= factor;
-    }
-    return *this;
-}

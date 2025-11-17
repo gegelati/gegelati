@@ -147,32 +147,3 @@ TEST_F(MapElitesSelectionMetricsTest, WeightedSum_ThrowsOnMismatchedVectorSize)
             1, 1),
         std::runtime_error);
 }
-
-TEST_F(MapElitesSelectionMetricsTest,
-       OperatorDivide_AssignsToScoreUtilityAndVectors)
-{
-    Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
-
-    m.initMetrics(dummyAgent, env);
-    auto& vec =
-        const_cast<std::vector<double>&>(m.getMapDescriptors().at(descriptor));
-    std::fill(vec.begin(), vec.end(), 5.0);
-
-    m /= 2.0;
-
-    for (double v : m.getMapDescriptors().at(descriptor)) {
-        EXPECT_DOUBLE_EQ(v, 2.5);
-    }
-}
-
-TEST_F(MapElitesSelectionMetricsTest, DescriptorKeysArePreservedAfterOperations)
-{
-    Selector::MapElites::MapElitesSelectionMetrics m({descriptor});
-    m.initMetrics(dummyAgent, env);
-    m.extractMetricsStep(dummyAgent, {1, 2, 3}, env);
-    m.extractMetricsEpisode(dummyAgent, 5, env);
-    m /= 2.0;
-
-    ASSERT_EQ(m.getMapDescriptors().size(), 1u);
-    EXPECT_EQ(m.getMapDescriptors().begin()->first, descriptor);
-}

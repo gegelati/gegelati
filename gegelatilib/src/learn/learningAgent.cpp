@@ -148,9 +148,10 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
                                 ? this->params.nbIterationsPerPolicyEvaluation
                                 : this->params.nbIterationsPerPolicyValidation;
 
-    std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
+    // Init global selection metric
+    std::shared_ptr<Selector::SelectionMetrics> globalSelectionMetrics =
         this->selector->createSelectionMetrics();
-    selectionMetrics->initMetrics(root, le);
+    globalSelectionMetrics->initMetrics(root, le);
 
     // Evaluate nbIteration times
     for (auto iterationNumber = 0; iterationNumber < nbEvaluation;
@@ -158,6 +159,11 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
         uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
+
+        // Init selectionMetrics for this episode.
+        std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
+            this->selector->createSelectionMetrics();
+        selectionMetrics->initMetrics(root, le);
 
         // Reset the learning Environment
         le.reset(hash, mode, iterationNumber, generationNumber);
@@ -179,13 +185,14 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
         // Extract the metrics.
         selectionMetrics->extractMetricsEpisode(root, nbActions, le);
-    }
 
-    (*selectionMetrics) /= (double)nbEvaluation;
+        // Add the extracted metrics to the total.
+        globalSelectionMetrics->weightedSum(selectionMetrics, iterationNumber, 1);
+    }
 
     // Create the EvaluationResult
     auto evaluationResult = std::shared_ptr<EvaluationResult>(
-        new EvaluationResult(selectionMetrics, nbEvaluation));
+        new EvaluationResult(globalSelectionMetrics, nbEvaluation));
 
     // Combine it with previous one if any
     if (previousEval != nullptr) {

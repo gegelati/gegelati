@@ -89,12 +89,6 @@ namespace Selector {
         virtual void weightedSum(std::shared_ptr<SelectionMetrics> other,
                                  size_t nbEvaluation,
                                  size_t nbEvaluationOther) override;
-
-        /**
-         * \brief Polymorphic multiplication assignement operator for
-         * SelectionMetrics.
-         */
-        virtual SelectionMetrics& operator/=(double factor) override;
     };
 
 }; // namespace Selector

@@ -59,29 +59,15 @@ void Selector::MapElites::MapElitesSelectionMetrics::weightedSum(
         if (it->second.size() != itOther->second.size()) {
             throw std::runtime_error("Number scores is not the same.");
         }
-
         for (size_t idx = 0; idx < it->second.size(); idx++) {
             // Weighted sum of the score per class.
             it->second[idx] = it->second[idx] * (double)nbEvaluation +
                               itOther->second[idx] * (double)nbEvaluationOther;
             it->second[idx] /= (double)(nbEvaluation + nbEvaluationOther);
+            
+           
         }
-
         it++;
         itOther++;
     }
-}
-
-Selector::SelectionMetrics& Selector::MapElites::MapElitesSelectionMetrics::
-operator/=(double factor)
-{
-    this->score /= factor;
-    this->utility /= factor;
-
-    for (auto& pair : this->mapDescriptors) {
-        for (size_t idx = 0; idx < pair.second.size(); idx++) {
-            pair.second[idx] /= factor;
-        }
-    }
-    return *this;
 }

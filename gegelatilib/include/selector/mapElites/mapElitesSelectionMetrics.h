@@ -108,11 +108,6 @@ namespace Selector {
                                      size_t nbEvaluation,
                                      size_t nbEvaluationOther) override;
 
-            /**
-             * \brief Polymorphic multiplication assignement operator for
-             * SelectionMetrics.
-             */
-            virtual SelectionMetrics& operator/=(double factor) override;
         };
     } // namespace MapElites
 

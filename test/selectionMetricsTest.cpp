@@ -141,22 +141,6 @@ TEST(SelectionMetricsTest, WeightedSumAndTypeMismatch)
     ASSERT_THROW(m1->weightedSum(classMetrics, 1, 1), std::runtime_error);
 }
 
-TEST(SelectionMetricsTest, DivisionAssignAndCompare)
-{
-    Selector::SelectionMetrics m(4.0, 6.0);
-    m /= 2.0;
-    ASSERT_DOUBLE_EQ(m.getScore(), 2.0);
-    ASSERT_DOUBLE_EQ(m.getUtility(), 3.0);
-
-    auto a = std::make_shared<Selector::SelectionMetrics>(1.0);
-    auto b = std::make_shared<Selector::SelectionMetrics>(2.0);
-    ASSERT_TRUE(a < b);
-
-    std::vector<std::shared_ptr<Selector::SelectionMetrics>> vec{b, a};
-    std::sort(vec.begin(), vec.end());
-    ASSERT_DOUBLE_EQ(vec.front()->getScore(), 1.0);
-}
-
 TEST(ClassificationSelectionMetricsTest, Constructor)
 {
     std::shared_ptr<Selector::SelectionMetrics> metrics;

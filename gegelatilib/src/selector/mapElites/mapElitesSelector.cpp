@@ -188,9 +188,14 @@ const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::
         }
     }
 
-    // Update the number of team and archive to create.
+    // Update the number of team and archive to create, difference with 0 is to avoid empty archive or unused vertex type.
+    if(nbActionsInArchives != 0){
+        this->context.nbActionsToCreate = (uint64_t)(params.mutation.tpg.nbRoots * (1 - params.mutation.tpg.ratioTeamsOverActions));
+    }
+    if(nbTeamsInArchives != 0){
+        this->context.nbTeamsToCreate = (uint64_t)(params.mutation.tpg.nbRoots * params.mutation.tpg.ratioTeamsOverActions);
+    }
     this->context.nbTeamsToCreate += nbTeamsInArchives;
-    this->context.nbActionsToCreate += nbActionsInArchives;
 
     return this->context;
 }
