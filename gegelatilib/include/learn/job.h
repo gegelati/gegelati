@@ -39,23 +39,29 @@
 #include <cstdint>
 #include <vector>
 
-#include "tpg/tpgVertex.h"
+#include "algorithm/agent.h"
+#include "algorithm/algorithm.h"
 
 namespace Learn {
     /**
-     * \brief This class embeds roots for the simulations.
+     * \brief This class embeds agents for the simulations.
      *
-     * The goal of the Job is to contain one root, so that each job
+     * The goal of the Job is to contain one agent, so that each job
      * will match with one simulation/evaluation. A basic learning agent will
-     * embed one root per job to do as many simulations as there are roots.
+     * embed one agent per job to do as many simulations as there are agents.
      */
     class Job
     {
       protected:
         /**
-         * The root contained in the job.
+         * The agent contained in the job.
          */
-        const TPG::TPGVertex* root;
+        std::shared_ptr<const Algorithm::Agent> agent;
+
+        /**
+         * The algorithm responsible of the agent.
+         */
+        std::shared_ptr<const Algorithm::Algorithm> algorithm;
 
         /**
          * Index associated to this job.
@@ -75,14 +81,15 @@ namespace Learn {
          * \brief Constructor enabling storing elements in the job so that the
          * Learning Agents will be able to use them later.
          *
-         * @param[in] root The root that will be encapsulated into the job.
+         * @param[in] agent The agent that will be encapsulated into the job.
+         * @param[in] algorithm The algorithm responsible of the agent.
          * @param[in] archiveSeed The archive seed that will be used with this
          * job.
          * @param[in] idx The index of this job.
          */
-        Job(const TPG::TPGVertex* root, uint64_t archiveSeed = 0,
+        Job(std::shared_ptr<const Algorithm::Agent> agent, std::shared_ptr<const Algorithm::Algorithm> algorithm, uint64_t archiveSeed = 0,
             uint64_t idx = 0)
-            : root(root), archiveSeed(archiveSeed), idx(idx)
+            : agent(agent), algorithm{algorithm}, archiveSeed(archiveSeed), idx(idx)
         {
         }
 
@@ -104,11 +111,18 @@ namespace Learn {
         uint64_t getArchiveSeed() const;
 
         /**
-         * \brief Getter of the root.
+         * \brief Getter of the agent.
          *
-         * @return The root embedded by the job.
+         * @return The agent embedded by the job.
          */
-        virtual const TPG::TPGVertex* getRoot() const;
+        virtual std::shared_ptr<const Algorithm::Agent> getAgent() const;
+
+        /**
+         * \brief Getter of the algorithm.
+         *
+         * @return The algorithm embedded by the job.
+         */
+        virtual std::shared_ptr<const Algorithm::Algorithm> getAlgorithm() const;
     };
 } // namespace Learn
 

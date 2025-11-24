@@ -93,7 +93,7 @@ class Archive
      * from a root TPGVertex in a TPGGraph is evaluated in parallel, the
      * randomEngine should be reset before each root.
      */
-    Mutator::RNG rng;
+    RNG::RNG rng;
 
     /**
      * \brief Storage for DataHandler copies used in recordings.

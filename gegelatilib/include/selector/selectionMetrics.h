@@ -3,8 +3,10 @@
 #ifndef SELECTION_METRICS_H
 #define SELECTION_METRICS_H
 
+#include "algorithm/agent.h"
 #include "learn/learningEnvironment.h"
 #include "tpg/tpgGraph.h"
+
 
 namespace Selector {
     /**
@@ -62,12 +64,12 @@ namespace Selector {
          *
          * This method is called at the beginning of the evaluateJob method.
          *
-         * \param[in] agent the TPGVertex representing the agent.
+         * \param[in] agent the agent representing the agent.
          * \param[in] learningEnvironment the learning environment in which the
          * agent is evaluated.
          */
         virtual void initMetrics(
-            const TPG::TPGVertex* agent,
+            std::shared_ptr<const Algorithm::Agent> agent,
             const Learn::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
@@ -77,13 +79,13 @@ namespace Selector {
          *
          * This method is called at every step of the environment evaluation.
          *
-         * \param[in] agent the TPGVertex representing the agent.
+         * \param[in] agent the agent representing the agent.
          * \param[in] actionValues the action values taken by the agent.
          * \param[in] learningEnvironment the learning environment in which the
          * agent is evaluated.
          */
         virtual void extractMetricsStep(
-            const TPG::TPGVertex* agent, std::vector<double> actionValues,
+            std::shared_ptr<const Algorithm::Agent> agent, std::vector<double> actionValues,
             const Learn::LearningEnvironment& learningEnvironment) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
@@ -94,14 +96,14 @@ namespace Selector {
          * This method is called at the end of every episode of the environment
          * evaluation.
          *
-         * \param[in] agent the TPGVertex representing the agent.
+         * \param[in] agent the agent representing the agent.
          * \param[in] nbStepsExecuted number of steps executed at the end of the
          * episode.
          * \param[in] learningEnvironment the learning environment in
          * which the agent is evaluated.
          */
         virtual void extractMetricsEpisode(
-            const TPG::TPGVertex* agent, size_t nbStepsExecuted,
+            std::shared_ptr<const Algorithm::Agent> agent, size_t nbStepsExecuted,
             const Learn::LearningEnvironment& learningEnvironment);
 
         /**

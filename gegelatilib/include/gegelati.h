@@ -51,8 +51,10 @@
 #include <util/genericComparator.h>
 #include <util/timestamp.h>
 
-#include <algorithm/algorithm.h>
 #include <algorithm/agent.h>
+#include <algorithm/algorithm.h>
+#include <algorithm/mutator.h>
+
 
 #include <data/array2DWrapper.h>
 #include <data/arrayWrapper.h>
@@ -98,7 +100,6 @@
 
 #include <mutator/lineMutator.h>
 #include <mutator/mutationParameters.h>
-#include <mutator/mutator.h>
 #include <mutator/programMutator.h>
 #include <mutator/rng.h>
 #include <mutator/tpgMutator.h>

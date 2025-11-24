@@ -11,7 +11,7 @@ class MapElitesSelectorTest : public ::testing::Test
   protected:
     const size_t size1{24};
     const size_t size2{32};
-    Mutator::RNG rng{42};
+    RNG::RNG rng{42};
     Learn::LearningParameters params;
     std::shared_ptr<TPG::TPGGraph> graph;
     Environment* e = NULL;

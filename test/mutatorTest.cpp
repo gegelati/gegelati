@@ -123,7 +123,7 @@ class MutatorTest : public ::testing::Test
 
 TEST_F(MutatorTest, RNG)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // With this seed, the current pseudo-random number generator returns 24
@@ -137,7 +137,7 @@ TEST_F(MutatorTest, RNG)
 
 TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // Add a pseudo-random lines to the program
@@ -206,7 +206,7 @@ TEST_F(MutatorTest, LineMutatorInitRandomCorrectLine1)
 
 TEST_F(MutatorTest, LineMutatorAlterLine)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     Program::ProgramExecutionEngine pEE(*p);
 
     // Add a 0 lines to the program
@@ -289,7 +289,7 @@ TEST_F(MutatorTest, LineMutatorAlterLine)
 
 TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
 
     // Setup for this test
     set.add(
@@ -341,7 +341,7 @@ TEST_F(MutatorTest, LineMutatorAlterLineWithCompositeOperands)
 TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine)
 {
     const uint64_t nbLines = 10;
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // Attempt removing on an empty program
@@ -365,7 +365,7 @@ TEST_F(MutatorTest, ProgramMutatorDeleteRandomLine)
 
 TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // Insert in empty program
@@ -397,7 +397,7 @@ TEST_F(MutatorTest, ProgramMutatorInsertRandomLine)
 
 TEST_F(MutatorTest, ProgramMutatorSwapRandomLines)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     std::vector<Program::Line*> lines;
@@ -439,7 +439,7 @@ TEST_F(MutatorTest, ProgramMutatorSwapRandomLines)
 
 TEST_F(MutatorTest, ProgramMutatorAlterRandomLine)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // Nothing on empty program
@@ -455,7 +455,7 @@ TEST_F(MutatorTest, ProgramMutatorAlterRandomLine)
 
 TEST_F(MutatorTest, ProgramMutatorInitProgram)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     Mutator::MutationParameters params;
@@ -488,7 +488,7 @@ TEST_F(MutatorTest, ProgramMutatorInitProgram)
 
 TEST_F(MutatorTest, ProgramMutatorMutateBehavior)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     // specific for this test
     // we need an instruction with three operands to
     // trigger a special condition in LineMutator
@@ -560,7 +560,7 @@ TEST_F(MutatorTest, ProgramMutatorMutateBehavior)
 
 TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
     TPG::TPGGraph tpg(*e);
     Mutator::MutationParameters params;
@@ -678,7 +678,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
 TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
 {
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     Mutator::MutationParameters& mutParams = params.mutation;
     mutParams.tpg.maxInitOutgoingEdges = 4;
     mutParams.prog.maxProgramSize = 96;
@@ -803,7 +803,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
 TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
 {
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     Mutator::MutationParameters& mutParams = params.mutation;
     mutParams.tpg.maxInitOutgoingEdges = 4;
     mutParams.prog.maxProgramSize = 96;
@@ -883,7 +883,7 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
     const TPG::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex2, progPointer);
     const TPG::TPGEdge& edge2 = tpg.addNewEdge(vertex0, vertex3, progPointer);
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
     ASSERT_NO_THROW(Mutator::TPGMutator::removeRandomEdge(tpg, vertex0, rng))
         << "Removing a random edge failed unexpectedly.";
@@ -932,7 +932,7 @@ TEST_F(MutatorTest, TPGMutatorAddRandomEdge)
     context.preExistingEdges.push_back(
         &tpg.addNewEdge(vertex2, vertex4, progPointer));
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
     // Run the add
     ASSERT_NO_THROW(
@@ -977,7 +977,7 @@ TEST_F(MutatorTest, TPGMutatorMutateEdgeDestination)
     context.preExistingTeams = {&vertex3, &vertex4};
     context.preExistingActions = {&vertex1, &vertex2};
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(2);
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateEdgeDestination(
         tpg, &edge1, &context, params, rng));
@@ -994,7 +994,7 @@ TEST_F(MutatorTest, TPGMutatorMutateEdgeDestination)
 
 TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // Init a TPG
@@ -1047,7 +1047,7 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomActionEdge)
     tpg.addNewActionEdge(action, prog1, 0);
     tpg.addNewActionEdge(action, prog2, 1);
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     size_t before = action.getOutgoingEdges().size();
@@ -1072,7 +1072,7 @@ TEST_F(MutatorTest, TPGMutatorAddRandomActionEdge)
         context.preExistingEdges.push_back(edge.get());
     }
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // Can add an edge without throwing (even if nothing changes if no edge is
@@ -1099,7 +1099,7 @@ TEST_F(MutatorTest, TPGMutatorSwapActionEdges)
     tpg.addNewActionEdge(action, prog2, 1);
     tpg.addNewActionEdge(action, prog3, 2);
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     // Set a known seed to ensure deterministic behavior and have equality
     // during random choice of swapping Should be change if determinism is
     // changed
@@ -1124,7 +1124,7 @@ TEST_F(MutatorTest, TPGMutatorSwapActionEdges)
 TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
 {
     // Teste la mutation d'une action avec useMultiActionProgram
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     params.mutation.tpg.useActionProgram = true;
@@ -1172,7 +1172,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
 TEST_F(MutatorTest, TPGMutatorMutateAction)
 {
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     params.mutation.tpg.useActionProgram = true;
@@ -1217,7 +1217,7 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
 TEST_F(MutatorTest, TPGMutatorMutateTPGActionEdge_MultiAction)
 {
     // Teste la mutation d'une action edge avec useMultiActionProgram
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(1);
 
     params.mutation.tpg.useActionProgram = true;
@@ -1246,7 +1246,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGActionEdge_MultiAction)
 TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction)
 {
 
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     params.mutation.tpg.useActionProgram = true;
@@ -1298,7 +1298,7 @@ TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction)
 
 TEST_F(MutatorTest, TPGMutatorMutateTeam)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // Create a TPG
@@ -1355,7 +1355,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam)
 
 TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // Init a TPG
@@ -1445,7 +1445,7 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
 TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     TPG::TPGGraph tpg(*e);
@@ -1492,7 +1492,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 
 TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     TPG::TPGGraph tpg(*e);
@@ -1539,7 +1539,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 
 TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
 
     TPG::TPGGraph tpg(*e);
 
@@ -1600,7 +1600,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
 TEST_F(MutatorTest, TPGMutatorPopulate)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     std::shared_ptr<TPG::TPGGraph> tpg = std::make_shared<TPG::TPGGraph>(*e);
@@ -1648,7 +1648,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
 
 TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     uint64_t nbActions = 5;
@@ -1712,7 +1712,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
 
 TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 {
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     uint64_t nbActions = 5;
@@ -1779,7 +1779,7 @@ TEST_F(MutatorTest, TPGMutatorCrossEdgesSwapPrograms)
 {
     Environment ce(set, params, vect, 2);
     TPG::TPGGraph graph(ce);
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     Mutator::MutationParameters params;
@@ -1841,7 +1841,7 @@ TEST_F(MutatorTest, TPGMutatorCrossProgram)
 {
     Environment ce(set, params, vect, 2);
     TPG::TPGGraph graph(ce);
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(1);
 
     Mutator::MutationParameters params;
@@ -1915,7 +1915,7 @@ TEST_F(MutatorTest, TPGMutatorCrossTPGAction)
 {
     Environment ce(set, params, vect, 2);
     TPG::TPGGraph graph(ce);
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(2);
 
     Mutator::MutationParameters params;

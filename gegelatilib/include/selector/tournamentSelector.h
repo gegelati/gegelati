@@ -58,7 +58,7 @@ namespace Selector {
         virtual void launchSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           const TPG::TPGVertex*>& results,
-            Mutator::RNG& rng) override;
+            RNG::RNG& rng) override;
 
         /**
          * \brief override of doSelection method
@@ -85,7 +85,7 @@ namespace Selector {
         virtual void doSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           const TPG::TPGVertex*>& results,
-            Mutator::RNG& rng) override;
+            RNG::RNG& rng) override;
 
         /**
          * \brief add a vertex to the verticesToDelete set.

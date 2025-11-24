@@ -40,7 +40,7 @@ namespace Selector {
         virtual void doSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           const TPG::TPGVertex*>& results,
-            Mutator::RNG& rng) override;
+            RNG::RNG& rng) override;
     };
 }; // namespace Selector
 

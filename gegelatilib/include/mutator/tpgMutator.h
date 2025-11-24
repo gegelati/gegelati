@@ -59,7 +59,7 @@ namespace Mutator {
          */
         const TPG::TPGAction* initActionVertex(
             TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-            Mutator::RNG& rng, uint64_t nbActionEdgeInit, uint64_t actionID);
+            RNG::RNG& rng, uint64_t nbActionEdgeInit, uint64_t actionID);
 
         /**
          * \brief Initialize a random TPGGraph.
@@ -91,7 +91,7 @@ namespace Mutator {
          *        Or if nbAction is smaller than 1.
          */
         void initRandomTPG(TPG::TPGGraph& graph,
-                           const MutationParameters& params, Mutator::RNG& rng,
+                           const MutationParameters& params, RNG::RNG& rng,
                            uint64_t nbAction);
 
         /**
@@ -104,7 +104,7 @@ namespace Mutator {
          */
         void removeRandomActionEdge(TPG::TPGGraph& graph,
                                     const TPG::TPGAction& action,
-                                    Mutator::RNG& rng);
+                                    RNG::RNG& rng);
 
         /**
          * \brief Add a new outgoing TPGActionEdge to the TPGTeam within the
@@ -121,7 +121,7 @@ namespace Mutator {
         void addRandomActionEdge(TPG::TPGGraph& graph,
                                  const TPG::TPGAction& action,
                                  const Selector::SelectionContext* context,
-                                 Mutator::RNG& rng);
+                                 RNG::RNG& rng);
 
         /**
          * \brief Swap two edges of TPGAction.
@@ -132,7 +132,7 @@ namespace Mutator {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void swapActionEdges(TPG::TPGGraph& graph, const TPG::TPGAction& action,
-                             Mutator::RNG& rng);
+                             RNG::RNG& rng);
 
         /**
          * \brief Mutate the edge of an action Vertex
@@ -150,7 +150,7 @@ namespace Mutator {
             TPG::TPGGraph& graph, const TPG::TPGAction& action,
             TPG::TPGActionEdge* actionEdge,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
-            const Mutator::MutationParameters& params, Mutator::RNG& rng);
+            const Mutator::MutationParameters& params, RNG::RNG& rng);
 
         /**
          * \brief Copy and mutate a TPGAction vertex
@@ -176,7 +176,7 @@ namespace Mutator {
             TPG::TPGGraph& graph, const TPG::TPGAction& action,
             const Selector::SelectionContext* context,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
-            const Mutator::MutationParameters& params, Mutator::RNG& rng);
+            const Mutator::MutationParameters& params, RNG::RNG& rng);
 
         /**
          * \brief do a crossover by creating a new program for each child, with
@@ -193,7 +193,7 @@ namespace Mutator {
                           std::vector<const TPG::TPGAction*> childs,
                           size_t actionID,
                           const Mutator::MutationParameters& params,
-                          Mutator::RNG& rng);
+                          RNG::RNG& rng);
 
         /**
          * \brief do a crossover on the edges, without creating new programs
@@ -209,7 +209,7 @@ namespace Mutator {
                         std::vector<const TPG::TPGAction*> childs,
                         size_t actionID,
                         const Mutator::MutationParameters& params,
-                        Mutator::RNG& rng);
+                        RNG::RNG& rng);
 
         /**
          * \brief do a crossover to create a new MAPLE agent
@@ -223,7 +223,7 @@ namespace Mutator {
         void crossTPGAction(TPG::TPGGraph& graph,
                             std::vector<const TPG::TPGAction*> childs,
                             const Mutator::MutationParameters& params,
-                            Mutator::RNG& rng);
+                            RNG::RNG& rng);
 
         /**
          * \brief Select a random outgoingEdge of the given TPGTeam and removes
@@ -234,7 +234,7 @@ namespace Mutator {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void removeRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team,
-                              Mutator::RNG& rng);
+                              RNG::RNG& rng);
 
         /**
          * \brief Add a new outgoing TPGEdge to the TPGTeam within the TPGGraph.
@@ -258,7 +258,7 @@ namespace Mutator {
          */
         void addRandomEdge(TPG::TPGGraph& graph, const TPG::TPGTeam& team,
                            const Selector::SelectionContext* context,
-                           Mutator::RNG& rng);
+                           RNG::RNG& rng);
 
         /**
          * \brief Change the destination of a TPGEdge to an randomly chosen
@@ -289,7 +289,7 @@ namespace Mutator {
                                    const TPG::TPGEdge* edge,
                                    const Selector::SelectionContext* context,
                                    const Mutator::MutationParameters& params,
-                                   Mutator::RNG& rng);
+                                   RNG::RNG& rng);
 
         /**
          * \brief Prepares the mutation of a TPGEdge.
@@ -317,7 +317,7 @@ namespace Mutator {
             TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
             const Selector::SelectionContext* context,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
-            const Mutator::MutationParameters& params, Mutator::RNG& rng);
+            const Mutator::MutationParameters& params, RNG::RNG& rng);
 
         /**
          * \brief Mutates a TPGTeam by stochastically adding, deleting, and
@@ -350,7 +350,7 @@ namespace Mutator {
             TPG::TPGGraph& graph, const Archive& archive,
             const TPG::TPGTeam& team, const Selector::SelectionContext* context,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
-            const Mutator::MutationParameters& params, Mutator::RNG& rng);
+            const Mutator::MutationParameters& params, RNG::RNG& rng);
 
         /**
          * \brief Mutate the behavior of a Program and ensure its unicity
@@ -365,7 +365,7 @@ namespace Mutator {
         void mutateProgramBehaviorAgainstArchive(
             std::shared_ptr<Program::Program>& newProg,
             const Mutator::MutationParameters& params, const Archive& archive,
-            Mutator::RNG& rng);
+            RNG::RNG& rng);
 
         /**
          * \brief Function mutating the behavior of the given list of Program.
@@ -383,7 +383,7 @@ namespace Mutator {
         void mutateNewProgramBehaviors(
             const uint64_t& maxNbThreads,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
-            Mutator::RNG& rng, const Mutator::MutationParameters& params,
+            RNG::RNG& rng, const Mutator::MutationParameters& params,
             const Archive& archive);
 
         /**
@@ -420,7 +420,7 @@ namespace Mutator {
         void populateTPG(
             TPG::TPGGraph& graph, Selector::Selector& selector,
             const Archive& archive, const Mutator::MutationParameters& params,
-            Mutator::RNG& rng, uint64_t nbActions,
+            RNG::RNG& rng, uint64_t nbActions,
             uint64_t maxNbThreads = std::thread::hardware_concurrency());
     }; // namespace TPGMutator
 }; // namespace Mutator

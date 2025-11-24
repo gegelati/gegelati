@@ -38,15 +38,21 @@
 
 uint64_t Learn::Job::getIdx() const
 {
-    return idx;
+    return this->idx;
 }
 
 uint64_t Learn::Job::getArchiveSeed() const
 {
-    return archiveSeed;
+    return this->archiveSeed;
 }
 
-const TPG::TPGVertex* Learn::Job::getRoot() const
+
+std::shared_ptr<const Algorithm::Agent> Learn::Job::getAgent() const
 {
-    return root;
+    return this->agent;
+}
+
+std::shared_ptr<const Algorithm::Algorithm> Learn::Job::getAlgorithm() const
+{
+    return this->algorithm;
 }

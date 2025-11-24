@@ -48,7 +48,7 @@ std::vector<double> Selector::MapElites::CvtMapElitesArchive::average(
 }
 
 std::vector<double> Selector::MapElites::CvtMapElitesArchive::random_point(
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
     std::vector<double> point(this->nbDescriptors);
     for (size_t i = 0; i < this->nbDescriptors; ++i)
@@ -75,7 +75,7 @@ size_t Selector::MapElites::CvtMapElitesArchive::nearest(
     return best_idx;
 }
 
-void Selector::MapElites::CvtMapElitesArchive::initialize_cvt(Mutator::RNG& rng)
+void Selector::MapElites::CvtMapElitesArchive::initialize_cvt(RNG::RNG& rng)
 {
     for (auto& c : centroids)
         c = random_point(rng);

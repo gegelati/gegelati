@@ -44,7 +44,7 @@
 /**
  * \brief Function to initialize a single operand of a Program::Line.
  *
- * This function uses the Mutator::RNG to set (if possible) the nth operand
+ * This function uses the RNG::RNG to set (if possible) the nth operand
  * pair of a given Line to a valid value according to the provided Environment
  * and the selected Instruction.
  *
@@ -64,7 +64,7 @@
 static bool initRandomCorrectLineOperand(
     const Instructions::Instruction& instruction, Program::Line& line,
     const uint64_t& operandIdx, const bool initOperandDataSource,
-    const bool initOperandLocation, const bool forceChange, Mutator::RNG& rng)
+    const bool initOperandLocation, const bool forceChange, RNG::RNG& rng)
 {
     const Environment& env = line.getEnvironment();
     uint64_t operandDataSourceIndex = line.getOperand(operandIdx).first;
@@ -140,7 +140,7 @@ static bool initRandomCorrectLineOperand(
 }
 
 void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line,
-                                                 Mutator::RNG& rng)
+                                                 RNG::RNG& rng)
 {
     const Environment& env = line.getEnvironment();
 
@@ -176,7 +176,7 @@ void Mutator::LineMutator::initRandomCorrectLine(Program::Line& line,
 }
 
 void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
-                                            Mutator::RNG& rng)
+                                            RNG::RNG& rng)
 {
     // Generate a random int to select the modified part of the line
     const LineSize lineSize = line.getEnvironment().getLineSize();

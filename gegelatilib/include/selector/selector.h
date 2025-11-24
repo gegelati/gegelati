@@ -87,7 +87,7 @@ namespace Selector {
         virtual void launchSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           const TPG::TPGVertex*>& results,
-            Mutator::RNG& rng);
+            RNG::RNG& rng);
 
         /**
          * \brief Removes from the TPGGraph the root TPGVertex.
@@ -105,7 +105,7 @@ namespace Selector {
         virtual void doSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           const TPG::TPGVertex*>& results,
-            Mutator::RNG& rng);
+            RNG::RNG& rng);
 
         /**
          * Creates and return an instance of SelectionMetrics
@@ -113,7 +113,7 @@ namespace Selector {
          * The purpose of this method is to be override by new selection
          * algorithms to use specific metrics.
          */
-        virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics();
+        virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics() const;
 
         /**
          * \brief This method keeps only the bes tRoot policy in the TPGGraph.

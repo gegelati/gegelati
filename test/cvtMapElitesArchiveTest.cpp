@@ -4,7 +4,7 @@
 class CvtMapElitesArchiveTest : public ::testing::Test
 {
   protected:
-    Mutator::RNG rng{42}; // fixed seed for deterministic behavior
+    RNG::RNG rng{42}; // fixed seed for deterministic behavior
     const size_t centroids = 6;
     const size_t descriptors = 3;
     const double minV = 0.0;
@@ -189,7 +189,7 @@ TEST_F(CvtMapElitesArchiveTest, InitializeCvtPopulatesWithinBounds)
 {
     // Create an archive with 0 iterations to get a minimal initial population
     // via initialize_cvt in constructor
-    Mutator::RNG localRng(999);
+    RNG::RNG localRng(999);
     Selector::MapElites::CvtMapElitesArchive arch(
         localRng, centroids, descriptors, minV, maxV, 0 /*iter*/, dots, a1, b1,
         a2, b2);

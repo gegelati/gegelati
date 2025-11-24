@@ -59,7 +59,7 @@
 
 const TPG::TPGAction* Mutator::TPGMutator::initActionVertex(
     TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-    Mutator::RNG& rng, uint64_t nbActionEdgeInit, uint64_t actionID)
+    RNG::RNG& rng, uint64_t nbActionEdgeInit, uint64_t actionID)
 {
     const TPG::TPGAction* action = &(graph.addNewAction(actionID));
 
@@ -94,7 +94,7 @@ const TPG::TPGAction* Mutator::TPGMutator::initActionVertex(
 
 void Mutator::TPGMutator::initRandomTPG(
     TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
-    Mutator::RNG& rng, uint64_t nbActions)
+    RNG::RNG& rng, uint64_t nbActions)
 {
 
     // Number of action edge per action vertex.
@@ -264,7 +264,7 @@ void Mutator::TPGMutator::initRandomTPG(
 
 void Mutator::TPGMutator::removeRandomActionEdge(TPG::TPGGraph& graph,
                                                  const TPG::TPGAction& action,
-                                                 Mutator::RNG& rng)
+                                                 RNG::RNG& rng)
 {
     // Pick an outgoing edge randomly,
     const std::list<TPG::TPGEdge*>& pickableEdges = action.getOutgoingEdges();
@@ -282,7 +282,7 @@ void Mutator::TPGMutator::removeRandomActionEdge(TPG::TPGGraph& graph,
 
 void Mutator::TPGMutator::addRandomActionEdge(
     TPG::TPGGraph& graph, const TPG::TPGAction& action,
-    const Selector::SelectionContext* context, Mutator::RNG& rng)
+    const Selector::SelectionContext* context, RNG::RNG& rng)
 {
     // Pick an edge (excluding ones from the team and edges with the team as a
     // destination)
@@ -327,7 +327,7 @@ void Mutator::TPGMutator::addRandomActionEdge(
 
 void Mutator::TPGMutator::swapActionEdges(TPG::TPGGraph& graph,
                                           const TPG::TPGAction& action,
-                                          Mutator::RNG& rng)
+                                          RNG::RNG& rng)
 {
 
     // Randomly select two edges
@@ -362,7 +362,7 @@ void Mutator::TPGMutator::mutateTPGActionEdge(
     TPG::TPGGraph& graph, const TPG::TPGAction& action,
     TPG::TPGActionEdge* actionEdge,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
-    const Mutator::MutationParameters& params, Mutator::RNG& rng)
+    const Mutator::MutationParameters& params, RNG::RNG& rng)
 {
 
     // copy program
@@ -399,7 +399,7 @@ void Mutator::TPGMutator::mutateTPGAction(
     TPG::TPGGraph& graph, const TPG::TPGAction& action,
     const Selector::SelectionContext* context,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
-    const Mutator::MutationParameters& params, Mutator::RNG& rng)
+    const Mutator::MutationParameters& params, RNG::RNG& rng)
 {
     if (params.tpg.useMultiActionProgram) {
         // 1. Remove randomly selected edges
@@ -481,7 +481,7 @@ void Mutator::TPGMutator::mutateTPGAction(
 void Mutator::TPGMutator::crossProgram(
     TPG::TPGGraph& graph, std::vector<const TPG::TPGAction*> childs,
     size_t actionID, const Mutator::MutationParameters& params,
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
 
     // Create new empty programs
@@ -572,7 +572,7 @@ void Mutator::TPGMutator::crossEdges(TPG::TPGGraph& graph,
                                      std::vector<const TPG::TPGAction*> childs,
                                      size_t actionID,
                                      const Mutator::MutationParameters& params,
-                                     Mutator::RNG& rng)
+                                     RNG::RNG& rng)
 {
 
     // get the edges
@@ -596,7 +596,7 @@ void Mutator::TPGMutator::crossEdges(TPG::TPGGraph& graph,
 
 void Mutator::TPGMutator::crossTPGAction(
     TPG::TPGGraph& graph, std::vector<const TPG::TPGAction*> childs,
-    const Mutator::MutationParameters& params, Mutator::RNG& rng)
+    const Mutator::MutationParameters& params, RNG::RNG& rng)
 {
 
     std::vector<uint64_t> indexUsed;
@@ -637,7 +637,7 @@ void Mutator::TPGMutator::crossTPGAction(
 
 void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph,
                                            const TPG::TPGTeam& team,
-                                           Mutator::RNG& rng)
+                                           RNG::RNG& rng)
 {
     // Pick an outgoing edge randomly,
     const std::list<TPG::TPGEdge*>& pickableEdges = team.getOutgoingEdges();
@@ -655,7 +655,7 @@ void Mutator::TPGMutator::removeRandomEdge(TPG::TPGGraph& graph,
 
 void Mutator::TPGMutator::addRandomEdge(
     TPG::TPGGraph& graph, const TPG::TPGTeam& team,
-    const Selector::SelectionContext* context, Mutator::RNG& rng)
+    const Selector::SelectionContext* context, RNG::RNG& rng)
 {
     // Pick an edge (excluding ones from the team, edges with the team as a
     // destination and the edges that are action edges)
@@ -690,7 +690,7 @@ void Mutator::TPGMutator::addRandomEdge(
 void Mutator::TPGMutator::mutateEdgeDestination(
     TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
     const Selector::SelectionContext* context,
-    const Mutator::MutationParameters& params, Mutator::RNG& rng)
+    const Mutator::MutationParameters& params, RNG::RNG& rng)
 {
     // Pick an edge among preexisting vertices
     const TPG::TPGVertex* target = nullptr;
@@ -732,7 +732,7 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
     TPG::TPGGraph& graph, const TPG::TPGEdge* edge,
     const Selector::SelectionContext* context,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
-    const Mutator::MutationParameters& params, Mutator::RNG& rng)
+    const Mutator::MutationParameters& params, RNG::RNG& rng)
 {
 
     // copy program
@@ -775,7 +775,7 @@ void Mutator::TPGMutator::mutateTPGTeam(
     TPG::TPGGraph& graph, const Archive& archive, const TPG::TPGTeam& team,
     const Selector::SelectionContext* context,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
-    const Mutator::MutationParameters& params, Mutator::RNG& rng)
+    const Mutator::MutationParameters& params, RNG::RNG& rng)
 {
     // 1. Remove randomly selected edges
     {
@@ -825,7 +825,7 @@ void Mutator::TPGMutator::mutateTPGTeam(
 void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
     std::shared_ptr<Program::Program>& newProg,
     const Mutator::MutationParameters& params, const Archive& archive,
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
     // If the Program behavior should be new after mutation:
     std::shared_ptr<Program::Program> newProgCopy(nullptr);
@@ -880,7 +880,7 @@ void Mutator::TPGMutator::mutateProgramBehaviorAgainstArchive(
 void Mutator::TPGMutator::mutateNewProgramBehaviors(
     const uint64_t& maxNbThreads,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
-    Mutator::RNG& rng, const Mutator::MutationParameters& params,
+    RNG::RNG& rng, const Mutator::MutationParameters& params,
     const Archive& archive)
 {
     // This is a computing intensive part of the mutation process
@@ -888,7 +888,7 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
     if (maxNbThreads <= 1) {
         // Sequential (kept for determinism check mostly)
         for (std::shared_ptr<Program::Program> newProg : newPrograms) {
-            Mutator::RNG privateRNG(rng.getUnsignedInt64(0, UINT64_MAX));
+            RNG::RNG privateRNG(rng.getUnsignedInt64(0, UINT64_MAX));
             mutateProgramBehaviorAgainstArchive(newProg, params, archive,
                                                 privateRNG);
         }
@@ -908,7 +908,7 @@ void Mutator::TPGMutator::mutateNewProgramBehaviors(
         // Function executed in threads
         auto parallelWorker = [&programsToMutate, &mutexMutation, &params,
                                &archive]() {
-            Mutator::RNG privateRNG;
+            RNG::RNG privateRNG;
             // While there is work to be done
             bool jobDone;
             do {
@@ -952,7 +952,7 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
                                       Selector::Selector& selector,
                                       const Archive& archive,
                                       const Mutator::MutationParameters& params,
-                                      Mutator::RNG& rng, uint64_t nbActions,
+                                      RNG::RNG& rng, uint64_t nbActions,
                                       uint64_t maxNbThreads)
 {
 

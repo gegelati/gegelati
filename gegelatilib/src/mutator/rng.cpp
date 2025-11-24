@@ -36,24 +36,24 @@
 #include "mutator/rng.h"
 #include "mutator/deterministicRandom.h"
 
-void Mutator::RNG::setSeed(uint64_t seed)
+void RNG::RNG::setSeed(uint64_t seed)
 {
     engine->seed(seed);
 }
 
-uint64_t Mutator::RNG::getUnsignedInt64(uint64_t min, uint64_t max)
+uint64_t RNG::RNG::getUnsignedInt64(uint64_t min, uint64_t max)
 {
     Mutator::uniform_int_distribution<uint64_t> distribution(min, max);
     return distribution(*engine);
 }
 
-int32_t Mutator::RNG::getInt32(int32_t min, int32_t max)
+int32_t RNG::RNG::getInt32(int32_t min, int32_t max)
 {
     Mutator::uniform_int_distribution<int32_t> distribution(min, max);
     return distribution(*engine);
 }
 
-double Mutator::RNG::getDouble(double min, double max)
+double RNG::RNG::getDouble(double min, double max)
 {
     Mutator::uniform_real_distribution<double> distribution(min, max);
     return distribution(*engine);

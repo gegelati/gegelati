@@ -12,7 +12,7 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::ClassificationSelector::
 void Selector::ClassificationSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results,
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
     // Check that results are ClassificationSelectionMetrics is used.
     // (also throws on empty results)

@@ -105,7 +105,7 @@ namespace Selector {
             addCvtArchiveFromDescriptor(
                 size_t nbCentroids,
                 std::shared_ptr<const MapElitesDescriptor> descriptor,
-                Learn::LearningEnvironment& le, Mutator::RNG& rng,
+                Learn::LearningEnvironment& le, RNG::RNG& rng,
                 size_t nbIterationInit = 300, size_t nbDotsInit = 1000,
                 double a1 = 0.5, double b1 = 0.5, double a2 = 0.5,
                 double b2 = 0.5);
@@ -122,7 +122,7 @@ namespace Selector {
             virtual void doSelection(
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                               const TPG::TPGVertex*>& results,
-                Mutator::RNG& rng) override;
+                RNG::RNG& rng) override;
 
             /**
              * \brief Specialization of updateContext for MapElites purposes

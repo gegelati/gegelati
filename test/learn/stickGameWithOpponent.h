@@ -64,7 +64,7 @@ class StickGameWithOpponent : public Learn::LearningEnvironment
     bool forbiddenMove;
 
     /// Randomness control
-    Mutator::RNG rng;
+    RNG::RNG rng;
 
   public:
     /**

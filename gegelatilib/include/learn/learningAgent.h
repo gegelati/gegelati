@@ -42,6 +42,8 @@
 #include <map>
 #include <queue>
 
+#include "algorithm/algorithm.h"
+
 #include "archive.h"
 #include "environment.h"
 #include "instructions/set.h"
@@ -56,7 +58,6 @@
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 
-#include "selector/selectorFactory.h"
 namespace Learn {
 
     /**
@@ -69,6 +70,9 @@ namespace Learn {
         /// LearningEnvironment with which the LearningAgent will interact.
         LearningEnvironment& learningEnvironment;
 
+        /// Vector of shared pointer of algorithms learned by the learning agent.
+        std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms;
+
         /// Environment for executing Program of the LearningAgent
         Environment env;
 
@@ -79,13 +83,10 @@ namespace Learn {
         LearningParameters params;
 
         /// TPGGraph built during the learning process.
-        std::shared_ptr<TPG::TPGGraph> tpg;
-
-        /// Selector used for the selection process
-        std::shared_ptr<Selector::Selector> selector;
+        std::shared_ptr<TPG::TPGGraph> graph;
 
         /// Random Number Generator for this Learning Agent
-        Mutator::RNG rng;
+        RNG::RNG rng;
 
         /// Control the maximum number of threads when running in parallel.
         uint64_t maxNbThreads = 1;
@@ -110,15 +111,33 @@ namespace Learn {
          * \param[in] factory The TPGFactory used to create the TPGGraph. A
          * default TPGFactory is used if none is provided.
          */
-        LearningAgent(LearningEnvironment& le, const Instructions::Set& iSet,
+        LearningAgent(LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms, const Instructions::Set& iSet,
                       const LearningParameters& p,
                       const TPG::TPGFactory& factory = TPG::TPGFactory())
-            : learningEnvironment{le},
+            : learningEnvironment{le}, algorithms{algorithms},
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
               archive(p.archiveSize, p.archivingProbability), params{p},
-              tpg(factory.createTPGGraph(env)),
-              selector{Selector::selectorFactory(tpg, le, p)} {};
+              graph(factory.createTPGGraph(env)) {};
+
+        /**
+         * \brief Constructor for LearningAgent.
+         *
+         * \param[in] le The LearningEnvironment for the TPG.
+         * \param[in] iSet Set of Instruction used to compose Programs in the
+         *            learning process.
+         * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * default TPGFactory is used if none is provided.
+         */
+        LearningAgent(LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm, const Instructions::Set& iSet,
+                      const LearningParameters& p,
+                      const TPG::TPGFactory& factory = TPG::TPGFactory())
+            : learningEnvironment{le}, algorithms{{algorithm}},
+              env(iSet, p, le.getDataSources(),
+                  (le.isDiscrete()) ? 0 : le.getNbActions()),
+              archive(p.archiveSize, p.archivingProbability), params{p},
+              graph(factory.createTPGGraph(env)) {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -128,14 +147,19 @@ namespace Learn {
          *
          * \return Get a shared_pointer to the TPGGraph.
          */
-        std::shared_ptr<TPG::TPGGraph> getTPGGraph();
+        std::shared_ptr<TPG::TPGGraph> getGraph();
 
         /**
-         * \brief Getter for the Selector built by the LearningAgent.
-         *
-         * \return Get a shared_pointer to the Selector.
+         * \brief Getter for the vector of algorithms
          */
-        std::shared_ptr<Selector::Selector> getSelector();
+        std::vector<std::shared_ptr<Selector::Selector>> getAlgorithms();
+
+        /**
+         * \brief return the a pointer of the algorithm at the specified index
+         * 
+         * \param[in] specified index
+         */
+        std::shared_ptr<Algorithm::Algorithm> getAlgorithmAt(size_t idx);
 
         /**
          * \brief Getter for the Archive filled by the LearningAgent
@@ -156,7 +180,7 @@ namespace Learn {
          *
          * \return Get a reference to the RNG.
          */
-        Mutator::RNG& getRNG();
+        RNG::RNG& getRNG();
 
         /**
          * \brief Adds a LALogger to the loggers vector.
@@ -203,31 +227,13 @@ namespace Learn {
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
 
-        /**
-         * \brief Method detecting whether a root should be evaluated again.
-         *
-         * Using the resultsPerRoot map and the
-         * params.maxNbEvaluationPerPolicy, this method checks whether a root
-         * should be evaluated again, or if sufficient evaluations were already
-         * performed.
-         *
-         * \param[in] root The root TPGVertex whose number of evaluation is
-         * checked.
-         * \param[out] previousResult the std::shared_ptr to the
-         * EvaluationResult of the root from the resultsPerRoot if any.
-         * \return true if the root has been evaluated enough times, false
-         * otherwise.
-         */
-        bool isRootEvalSkipped(
-            const TPG::TPGVertex& root,
-            std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
 
         /**
-         * \brief Evaluate all root TPGVertex of the TPGGraph.
+         * \brief Evaluate all agent of the algorithms.
          *
-         * This method calls the evaluateJob method for every root TPGVertex
-         * of the TPGGraph. The method returns a sorted map associating each
-         * root vertex to its average score, in ascending order or score.
+         * This method calls the evaluateJob method for every agent
+         * of the algorithms. The method returns a sorted map associating each
+         * agent to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
@@ -235,37 +241,34 @@ namespace Learn {
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              const TPG::TPGVertex*>
-        evaluateAllRoots(uint64_t generationNumber, LearningMode mode);
+                              std::shared_ptr<const Algorithm::Agent>>
+        evaluateAllAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
-         * \brief Evaluate one root TPGVertex of the TPGGraph.
+         * \brief Evaluate one agent.
          *
-         * This method calls the evaluateJob method for a specified TPGVertex of
-         * the TPGGraph. The method returns the average score of this root. It
-         * is important to note that the specified TPGVertex may be an internal
-         * or even a leaf vertex of the graph (i.e. not a root).
+         * This method calls the evaluateJob method for a specified Agebt
+         * The method returns the average score of this agent.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         * \param[in] root the evaluated TPGVertex of the TPGGraph.
-         * \return the averaged EvaluationResult for the given TPGVertex.
-         * \throws an exception in case the given root does not exist in the
-         * TPGGraph.
+         * \param[in] agent the evaluated Agent.
+         * \return the averaged EvaluationResult for the given Agent.
+         * \throws an exception in case the given agent does not exist.
          */
-        virtual std::shared_ptr<EvaluationResult> evaluateOneRoot(
+        virtual std::shared_ptr<EvaluationResult> evaluateOneAgent(
             uint64_t generationNumber, LearningMode mode,
-            const TPG::TPGVertex* root);
+            std::shared_ptr<const Algorithm::Agent> agent);
 
         /**
          * \brief Train the TPGGraph for one generation.
          *
          * Training for one generation includes:
          * - Populating the TPGGraph according to given MutationParameters.
-         * - Evaluating all roots of the TPGGraph. (call to evaluateAllRoots)
-         * - Removing from the TPGGraph the worst performing root TPGVertex.
+         * - Evaluating all agents of the TPGGraph. (call to evaluateAllRoots)
+         * - Removing from the Graph and Algorithms the worst performing agents.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
@@ -289,27 +292,25 @@ namespace Learn {
          * \param[in] altTraining a reference to a boolean value that can be
          * used to halt the training process before its completion.
          * \param[in] printProgressBar select whether a progress bar will be
-         * printed in the console. \return the number of completed generations.
+         * printed in the console. 
+         * \return the number of completed generations.
          */
         virtual uint64_t train(volatile bool& altTraining,
                                bool printProgressBar);
 
         /**
-         * \brief Takes a given TPGVertex and creates a job containing it.
+         * \brief Takes a given Agent and creates a job containing it.
          *
-         * \param[in] vertex the TPGVertex stemming a TPGGraph to be evaluated.
+         * \param[in] agent the Agent to be evaluated.
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
          * \param[in] idx The index of the job, can be used to organize a map
          * for example.
-         * \param[in] tpgGraph The TPG graph from which we will take the
-         * root.
          *
-         * \return A job representing the root.
+         * \return A job representing the agent.
          */
         virtual std::shared_ptr<Learn::Job> makeJob(
-            const TPG::TPGVertex* vertex, Learn::LearningMode mode, int idx = 0,
-            TPG::TPGGraph* tpgGraph = nullptr);
+            std::shared_ptr<const Algorithm::Agent> agent, Learn::LearningMode mode, int idx = 0);
 
         /**
          * \brief Puts all roots into jobs to be able to use them in simulation
@@ -317,19 +318,37 @@ namespace Learn {
          *
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
-         * \param[in] tpgGraph The TPG graph from which we will take the
-         * roots.
          *
          * @return A queue containing pointers of the newly created jobs.
          */
         virtual std::queue<std::shared_ptr<Learn::Job>> makeJobs(
-            Learn::LearningMode mode, TPG::TPGGraph* tpgGraph = nullptr);
+            Learn::LearningMode mode);
+
+        /**
+         * \brief find the algorithm corresponding to the given agent.
+         * 
+         * \param[in] agent agent from which the algorithm is found
+         * 
+         * \throw std::runtime_error if no algorithm contain the agent.
+         */
+        virtual std::shared_ptr<Algorithm::Algorithm> findCorrespondingAlgorithm(std::shared_ptr<const Algorithm::Agent> agent);
+
+        /**
+         * \brief launch the selection of the different algorithms
+         * 
+         * \param[in] results results of the evaluation
+         * \param[in] rng Random Number Generator for this Learning Agent.
+         */
+        virtual void launchAlgorithmsSelection(
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          std::shared_ptr<const Algorithm::Agent>>& results,
+            RNG::RNG& rng);
 
         /**
          * \brief Initialize the LearningAgent.
          *
          * Calls the TPGMutator::initRandomTPG function.
-         * Initialize the Mutator::RNG with the given seed.
+         * Initialize the RNG::RNG with the given seed.
          * Clears the Archive.
          *
          * \param[in] seed the seed given to the TPGMutator.

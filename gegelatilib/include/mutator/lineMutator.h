@@ -52,7 +52,7 @@ namespace Mutator {
         /**
          * \brief Randomly initializes a Program::Line.
          *
-         * Using the Mutator::RNG functions, this function initializes all
+         * Using the RNG::RNG functions, this function initializes all
          * attributes of the given Program::Line to randomly selected values.
          * The attributes are initialized in such a way that the created line
          * is executable within its Environment. This means that the
@@ -69,7 +69,7 @@ namespace Mutator {
          * dataSource that can successfully provide data for any of its
          * Instruction.
          */
-        void initRandomCorrectLine(Program::Line& line, Mutator::RNG& rng);
+        void initRandomCorrectLine(Program::Line& line, RNG::RNG& rng);
 
         /**
          * \brief This function randomly modifies the behavior of a
@@ -96,7 +96,7 @@ namespace Mutator {
          * altered.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void alterCorrectLine(Program::Line& line, Mutator::RNG& rng);
+        void alterCorrectLine(Program::Line& line, RNG::RNG& rng);
     } // namespace LineMutator
 }; // namespace Mutator
 #endif

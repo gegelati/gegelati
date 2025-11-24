@@ -5,7 +5,7 @@
 void Selector::TournamentSelector::launchSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results,
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
 
     // Clear the set of vertices to delete.
@@ -17,7 +17,7 @@ void Selector::TournamentSelector::launchSelection(
 void Selector::TournamentSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results,
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
 
     size_t nbToKeep =

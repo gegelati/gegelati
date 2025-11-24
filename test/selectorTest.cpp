@@ -135,7 +135,7 @@ TEST_F(SelectorTest, doAbstractSelection)
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>
         results;
-    Mutator::RNG rng;
+    RNG::RNG rng;
     ASSERT_THROW(selector.doSelection(results, rng), std::runtime_error)
         << "Doing a selection with the Selector::Selector shoudl throw";
 }

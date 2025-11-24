@@ -981,7 +981,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     TPG::TPGGraph tpg(env);
 
     // Initialize Randomness
-    Mutator::RNG rng;
+    RNG::RNG rng;
     rng.setSeed(0);
 
     // Initialize the tpg
@@ -1103,7 +1103,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
-        << "Mutator::RNG was called a different number of time in parallel and "
+        << "RNG::RNG was called a different number of time in parallel and "
            "sequential execution.";
 
     // Check archives
@@ -1143,7 +1143,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)
-        << "Mutator::RNG was called a different number of time in parallel and "
+        << "RNG::RNG was called a different number of time in parallel and "
            "sequential execution.";
 
     // Check archives
@@ -1209,7 +1209,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
-        << "Mutator::RNG was called a different number of time in parallel and "
+        << "RNG::RNG was called a different number of time in parallel and "
            "sequential execution.";
 
     // Check archives
@@ -1235,7 +1235,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)
-        << "Mutator::RNG was called a different number of time in parallel and "
+        << "RNG::RNG was called a different number of time in parallel and "
            "sequential execution.";
 
     // Check archives

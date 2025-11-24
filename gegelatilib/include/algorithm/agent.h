@@ -13,13 +13,23 @@ namespace Algorithm {
     {
     protected:
 
+        /// Attribute that specify if the agent can be mutated.
+        bool isMutable = true;
         
+        /// Unique ID of the agent.
+        uint64_t agentID;
 
     public:
 
         Agent()
             {};
 
+        virtual uint64_t getID() const;
+
+        /**
+         * \brief Method that return if the agent is valid for execution.
+         */
+        virtual bool isValid() const = 0;
     };
 }; // namespace Algorithm
 

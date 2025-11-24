@@ -12,7 +12,7 @@ double Selector::SelectionMetrics::getUtility() const
 }
 
 void Selector::SelectionMetrics::extractMetricsEpisode(
-    const TPG::TPGVertex* agent, size_t nbStepsExecuted,
+    std::shared_ptr<const Algorithm::Agent> agent, size_t nbStepsExecuted,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     // Update score

@@ -57,7 +57,7 @@ namespace Selector {
              * \param[in] a2 CVT parameter
              * \param[in] b2 CVT parameter
              */
-            CvtMapElitesArchive(Mutator::RNG& rng, size_t nbCentroids,
+            CvtMapElitesArchive(RNG::RNG& rng, size_t nbCentroids,
                                 size_t nbDescriptors, double minValue,
                                 double maxValue, size_t nbIterationInit,
                                 size_t nbDotsInit, double a1, double b1,
@@ -111,7 +111,7 @@ namespace Selector {
              *
              * \param[in] rng Random number generator
              */
-            std::vector<double> random_point(Mutator::RNG& rng);
+            std::vector<double> random_point(RNG::RNG& rng);
 
             /**
              * \brief Find the nearest centroid to a given point
@@ -127,7 +127,7 @@ namespace Selector {
              *
              * \param[in] rng Random number generator
              */
-            void initialize_cvt(Mutator::RNG& rng);
+            void initialize_cvt(RNG::RNG& rng);
 
             /**
              * \brief Get the index for given descriptors

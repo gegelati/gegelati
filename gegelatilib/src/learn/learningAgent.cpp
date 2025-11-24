@@ -48,14 +48,14 @@
 
 #include "learn/learningAgent.h"
 
-std::shared_ptr<TPG::TPGGraph> Learn::LearningAgent::getTPGGraph()
+std::shared_ptr<TPG::TPGGraph> Learn::LearningAgent::getGraph()
 {
-    return this->tpg;
+    return this->graph;
 }
 
-std::shared_ptr<Selector::Selector> Learn::LearningAgent::getSelector()
+std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::getAlgorithmAt(size_t idx)
 {
-    return this->selector;
+    return this->algorithms.at(idx);
 }
 
 const Archive& Learn::LearningAgent::getArchive() const
@@ -68,7 +68,7 @@ const Environment& Learn::LearningAgent::getEnvironment() const
     return this->env;
 }
 
-Mutator::RNG& Learn::LearningAgent::getRNG()
+RNG::RNG& Learn::LearningAgent::getRNG()
 {
     return this->rng;
 }
@@ -78,21 +78,9 @@ void Learn::LearningAgent::init(uint64_t seed)
     // Initialize Randomness
     this->rng.setSeed(seed);
 
-    // Initialize the tpg
-    Mutator::TPGMutator::initRandomTPG(
-        *this->tpg, params.mutation, this->rng,
-        this->learningEnvironment.getNbActions());
-
-    // Populate Sequentially
-    Mutator::TPGMutator::populateTPG(
-        *this->tpg, *this->selector, this->archive, this->params.mutation,
-        this->rng, this->learningEnvironment.getNbActions(), maxNbThreads);
-
-    // Clear the archive
-    this->archive.clear();
-
-    // Clear the best agent in the selector
-    this->selector->forgetPreviousResults();
+    for(auto algorithm: algorithms){
+        algorithm->init(this->rng, this->maxNbThreads);
+    }
 }
 
 void Learn::LearningAgent::addLogger(Log::LALogger& logger)
@@ -103,37 +91,20 @@ void Learn::LearningAgent::addLogger(Log::LALogger& logger)
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
 }
 
-bool Learn::LearningAgent::isRootEvalSkipped(
-    const TPG::TPGVertex& root,
-    std::shared_ptr<Learn::EvaluationResult>& previousResult) const
-{
-    // Has the root already been evaluated more times than
-    // params.maxNbEvaluationPerPolicy
-    const auto& iter = this->selector->getResultsPerRoot().find(&root);
-    if (iter != this->selector->getResultsPerRoot().end()) {
-        // The root has already been evaluated
-        previousResult = iter->second;
-        return iter->second->getNbEvaluation() >=
-               this->params.maxNbEvaluationPerPolicy;
-    }
-    else {
-        previousResult = nullptr;
-        return false;
-    }
-}
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     TPG::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber,
     Learn::LearningMode mode, LearningEnvironment& le) const
 {
-    // Only consider the first root of jobs
-    const TPG::TPGVertex* root = job.getRoot();
+    // Get the current agent and the current algorithm
+    std::shared_ptr<const Algorithm::Agent> agent = job.getAgent();
+    std::shared_ptr<const Algorithm::Algorithm> algorithm = job.getAlgorithm(); 
 
-    // Skip the root evaluation process if enough evaluations were already
+    // Skip the agent evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
     if (mode == LearningMode::TRAINING &&
-        this->isRootEvalSkipped(*root, previousEval)) {
+        algorithm->isAgentEvalSkipped(*agent, previousEval)) {
         return previousEval;
     }
 
@@ -150,8 +121,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
     // Init global selection metric
     std::shared_ptr<Selector::SelectionMetrics> globalSelectionMetrics =
-        this->selector->createSelectionMetrics();
-    globalSelectionMetrics->initMetrics(root, le);
+        algorithm->getSelectorCst()->createSelectionMetrics();
+    globalSelectionMetrics->initMetrics(agent, le);
 
     // Evaluate nbIteration times
     for (auto iterationNumber = 0; iterationNumber < nbEvaluation;
@@ -162,8 +133,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
         // Init selectionMetrics for this episode.
         std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
-            this->selector->createSelectionMetrics();
-        selectionMetrics->initMetrics(root, le);
+            algorithm->getSelectorCst()->createSelectionMetrics();
+        selectionMetrics->initMetrics(agent, le);
 
         // Reset the learning Environment
         le.reset(hash, mode, iterationNumber, generationNumber);
@@ -173,18 +144,18 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the actions
             std::vector<double> actionsID =
-                tee.executeFromRoot(*root, le.getInitActions()).second;
+                tee.executeFromRoot(*agent, le.getInitActions()).second;
             // Do it
             le.doActions(actionsID);
             // Count actions
             nbActions++;
 
             // Extract the metrics.
-            selectionMetrics->extractMetricsStep(root, actionsID, le);
+            selectionMetrics->extractMetricsStep(agent, actionsID, le);
         }
 
         // Extract the metrics.
-        selectionMetrics->extractMetricsEpisode(root, nbActions, le);
+        selectionMetrics->extractMetricsEpisode(agent, nbActions, le);
 
         // Add the extracted metrics to the total.
         globalSelectionMetrics->weightedSum(selectionMetrics, iterationNumber, 1);
@@ -201,60 +172,93 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     return evaluationResult;
 }
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
-Learn::LearningAgent::evaluateAllRoots(uint64_t generationNumber,
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
+Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
                                        Learn::LearningMode mode)
 {
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
-        result;
+    std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
+        results;
 
     // Create the TPGExecutionEngine for this evaluation.
     // The engine uses the Archive only in training mode.
     std::unique_ptr<TPG::TPGExecutionEngine> tee =
-        this->tpg->getFactory().createTPGExecutionEngine(
+        this->graph->getFactory().createTPGExecutionEngine(
             this->env,
             (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
-    auto roots = tpg->getRootVertices();
-    for (int i = 0; i < roots.size(); i++) {
-        auto job = makeJob(roots.at(i), mode);
+    auto roots = this->graph->getRootVertices();
+    auto jobs = this->makeJobs(mode);
+    while (!jobs.empty()){
+        auto job = jobs.front();
         this->archive.setRandomSeed(job->getArchiveSeed());
-        std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
+        std::shared_ptr<EvaluationResult> result = this->evaluateJob(
             *tee, *job, generationNumber, mode, this->learningEnvironment);
-        result.emplace(avgScore, (*job).getRoot());
+        results.emplace(result, (*job).getAgent());
+        jobs.pop();
     }
 
-    return result;
+    return results;
 }
 
-std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneRoot(
+std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
     uint64_t generationNumber, Learn::LearningMode mode,
-    const TPG::TPGVertex* root)
+    std::shared_ptr<const Algorithm::Agent> agent)
 {
-    // Retrieve the index of the root TPGVertex
-    const std::vector<const TPG::TPGVertex*> vertices = tpg->getVertices();
-    std::vector<const TPG::TPGVertex*>::const_iterator iterator =
-        std::find(vertices.begin(), vertices.end(), root);
-    if (iterator == vertices.end()) {
-        throw std::runtime_error("The vertex to evaluate does not exist in the "
-                                 "TPGGraph of the LearningAgent.");
-    }
+
 
     // Create the TPGExecutionEngine for this evaluation.
     // The engine uses the Archive only in training mode.
     std::unique_ptr<TPG::TPGExecutionEngine> tee =
-        this->tpg->getFactory().createTPGExecutionEngine(
+        this->graph->getFactory().createTPGExecutionEngine(
             this->env,
             (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
     // Create and evaluate the job
-    auto job = makeJob(*iterator, mode);
+    auto job = makeJob(agent, mode);
     this->archive.setRandomSeed(job->getArchiveSeed());
     std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
         *tee, *job, generationNumber, mode, this->learningEnvironment);
 
     // Return the result
     return avgScore;
+}
+
+void Learn::LearningAgent::launchAlgorithmsSelection(
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          std::shared_ptr<const Algorithm::Agent>>& results,
+            RNG::RNG& rng)
+{
+    if(this->algorithms.size() == 1){
+        this->algorithms.front()->getSelector()->doSelection(results, rng);
+
+        // Update the evaluation records
+        this->algorithms.front()->getSelector()->updateEvaluationRecords(results);
+    } else {
+
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+            std::shared_ptr<const Algorithm::Agent>>
+            resultsCopy(results);
+
+        results.clear();
+
+        for(auto algorithm: algorithms){
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                        std::shared_ptr<const Algorithm::Agent>>
+                resultsAlgo;
+            
+            for(const auto& result: resultsCopy){
+                if(algorithm->containsAgent(result.second)){
+                    resultsAlgo.insert(result);
+                }
+            }
+
+            algorithm->getSelector()->doSelection(resultsAlgo, rng);
+            results.insert(resultsAlgo.begin(), resultsAlgo.end());
+
+            // Update the evaluation records
+            this->algorithms.front()->getSelector()->updateEvaluationRecords(resultsAlgo);
+        }
+    }
 }
 
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
@@ -266,15 +270,13 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
 
     // Evaluate
     auto results =
-        this->evaluateAllRoots(generationNumber, LearningMode::TRAINING);
+        this->evaluateAllAgents(generationNumber, LearningMode::TRAINING);
     for (auto logger : loggers) {
         logger.get().logAfterEvaluate(results);
     }
 
     // Remove worst performing roots
-    this->selector->launchSelection(results, rng);
-    // Update the evaluation records
-    this->selector->updateEvaluationRecords(results);
+    this->launchAlgorithmsSelection(results, rng);
 
     for (auto logger : loggers) {
         logger.get().logAfterDecimate();
@@ -283,12 +285,12 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
     // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      const TPG::TPGVertex*>
+                      std::shared_ptr<const Algorithm::Agent>>
             validationResults;
 
         if (generationNumber % params.stepValidation == 0 ||
             generationNumber == params.nbGenerations - 1) {
-            validationResults = evaluateAllRoots(
+            validationResults = evaluateAllAgents(
                 generationNumber, Learn::LearningMode::VALIDATION);
         }
         for (auto logger : loggers) {
@@ -298,9 +300,9 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
 
     if (doPopulate) {
         // Populate Sequentially
-        Mutator::TPGMutator::populateTPG(
-            *this->tpg, *this->selector, this->archive, this->params.mutation,
-            this->rng, this->learningEnvironment.getNbActions(), maxNbThreads);
+        for(auto algorithm: algorithms){
+            algorithm->populate(this->rng, this->maxNbThreads);
+        }
     }
 
     for (auto logger : loggers) {
@@ -358,37 +360,43 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
 }
 
 std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
-    const TPG::TPGVertex* vertex, Learn::LearningMode mode, int idx,
-    TPG::TPGGraph* tpgGraph)
+    std::shared_ptr<const Algorithm::Agent> agent, 
+    Learn::LearningMode mode, int idx = 0)
 {
-    // sets the tpg to the Learning Agent's one if no one was specified
-    tpgGraph = tpgGraph == nullptr ? tpg.get() : tpgGraph;
 
-    // Before each root evaluation, set a new seed for the archive in
+    // Before each agent evaluation, set a new seed for the archive in
     // TRAINING Mode Else, archiving should be deactivate anyway
     uint64_t archiveSeed = 0;
     if (mode == LearningMode::TRAINING) {
         archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
     }
 
-    if (tpgGraph->getNbRootVertices() > 0) {
-        return std::make_shared<Learn::Job>(
-            Learn::Job(vertex, archiveSeed, idx));
-    }
-    return nullptr;
+    auto algorithm = this->findCorrespondingAlgorithm(agent);
+    return std::make_shared<Learn::Job>(
+        Learn::Job(agent, algorithm, archiveSeed, idx));
 }
 
 std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
-    Learn::LearningMode mode, TPG::TPGGraph* tpgGraph)
+    Learn::LearningMode mode)
 {
-    // sets the tpg to the Learning Agent's one if no one was specified
-    tpgGraph = tpgGraph == nullptr ? tpg.get() : tpgGraph;
-
     std::queue<std::shared_ptr<Learn::Job>> jobs;
-    auto roots = tpgGraph->getRootVertices();
-    for (int i = 0; i < roots.size(); i++) {
-        auto job = makeJob(roots.at(i), mode, i);
-        jobs.push(job);
+    size_t idx = 0;
+    for(auto algorithm: this->algorithms){
+        for(auto agent: algorithm->getAgentsCst()){
+            auto job = makeJob(agent, mode, idx);;
+            jobs.push(job);
+            idx++;
+        }
     }
     return jobs;
+}
+
+std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::findCorrespondingAlgorithm(std::shared_ptr<const Algorithm::Agent> agent){
+    for(auto algorithm: this->algorithms){
+        if(algorithm->containsAgent(agent)){
+            return algorithm;
+        }
+    }
+
+    throw std::runtime_error("Agent not found in any algorithm");
 }

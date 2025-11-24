@@ -5,7 +5,7 @@
 void Selector::TruncationSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results,
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
     // Some actions may be encountered but not removed while scanning the
     // results map they should be re-inserted to the list before leaving the

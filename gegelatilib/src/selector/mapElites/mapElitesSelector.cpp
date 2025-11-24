@@ -60,7 +60,7 @@ std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::
     MapElites::MapElitesSelector::addCvtArchiveFromDescriptor(
         size_t nbCentroids,
         std::shared_ptr<const MapElitesDescriptor> descriptor,
-        Learn::LearningEnvironment& le, Mutator::RNG& rng,
+        Learn::LearningEnvironment& le, RNG::RNG& rng,
         size_t nbIterationInit, size_t nbDotsInit, double a1, double b1,
         double a2, double b2)
 {
@@ -79,7 +79,7 @@ std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::
 void Selector::MapElites::MapElitesSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results,
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
 
     // Clear values reevaluated

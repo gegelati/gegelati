@@ -3,6 +3,7 @@
 #ifndef SELECTION_CONTEXT_H
 #define SELECTION_CONTEXT_H
 
+#include "algorithm/agent.h"
 #include "tpg/tpgGraph.h"
 
 namespace Selector {
@@ -40,6 +41,19 @@ namespace Selector {
 
         /// @brief number of TPGActions to be created by the TPGMutator
         uint64_t nbActionsToCreate;
+
+        
+
+        /// @brief vector sjared pointer of agent that are clonable by the
+        /// Mutator to fill the new population.
+        std::vector<std::shared_ptr<const Algorithm::Agent>> agentsClonable;
+
+
+        /// @brief vector of shared pointer of agent that can be new
+        /// destination for the new agents created by the Mutator.
+        std::vector<std::shared_ptr<const Algorithm::Agent>> preExistingAgents;
+
+        uint64_t nbAgentsToCreate;
     };
 }; // namespace Selector
 

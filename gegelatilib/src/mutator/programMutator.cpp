@@ -40,7 +40,7 @@
 #include "mutator/rng.h"
 
 void Mutator::ProgramMutator::initRandomProgram(
-    Program::Program& p, const MutationParameters& params, Mutator::RNG& rng)
+    Program::Program& p, const MutationParameters& params, RNG::RNG& rng)
 {
     // Empty the program
     while (p.getNbLines() > 0) {
@@ -68,7 +68,7 @@ void Mutator::ProgramMutator::initRandomProgram(
 }
 
 bool Mutator::ProgramMutator::deleteRandomLine(Program::Program& p,
-                                               Mutator::RNG& rng)
+                                               RNG::RNG& rng)
 {
     // Line cannot be removed from a program with a single line.
     if (p.getNbLines() <= 1) {
@@ -81,7 +81,7 @@ bool Mutator::ProgramMutator::deleteRandomLine(Program::Program& p,
 }
 
 void Mutator::ProgramMutator::insertRandomLine(Program::Program& p,
-                                               Mutator::RNG& rng)
+                                               RNG::RNG& rng)
 {
     uint64_t lineIndex = rng.getUnsignedInt64(0, p.getNbLines());
     Program::Line& line = p.addNewLine(lineIndex);
@@ -89,7 +89,7 @@ void Mutator::ProgramMutator::insertRandomLine(Program::Program& p,
 }
 
 bool Mutator::ProgramMutator::swapRandomLines(Program::Program& p,
-                                              Mutator::RNG& rng)
+                                              RNG::RNG& rng)
 {
     if (p.getNbLines() < 2) {
         return false;
@@ -105,7 +105,7 @@ bool Mutator::ProgramMutator::swapRandomLines(Program::Program& p,
 }
 
 bool Mutator::ProgramMutator::alterRandomLine(Program::Program& p,
-                                              Mutator::RNG& rng)
+                                              RNG::RNG& rng)
 {
     if (p.getNbLines() < 1) {
         return false;
@@ -117,7 +117,7 @@ bool Mutator::ProgramMutator::alterRandomLine(Program::Program& p,
 }
 
 bool Mutator::ProgramMutator::alterRandomConstant(
-    Program::Program& p, const MutationParameters& params, Mutator::RNG& rng)
+    Program::Program& p, const MutationParameters& params, RNG::RNG& rng)
 {
     const uint64_t constant_idx = rng.getUnsignedInt64(
         0, p.getEnvironment().getParams().nbProgramConstant - 1);
@@ -143,7 +143,7 @@ bool Mutator::ProgramMutator::alterRandomConstant(
 
 bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
                                             const MutationParameters& params,
-                                            Mutator::RNG& rng)
+                                            RNG::RNG& rng)
 {
     bool anyMutation = false;
     if (p.getNbLines() > 1 && rng.getDouble(0.0, 1.0) < params.prog.pDelete) {

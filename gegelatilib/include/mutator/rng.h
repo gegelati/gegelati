@@ -39,7 +39,7 @@
 #include <memory>
 #include <random>
 
-namespace Mutator {
+namespace RNG {
 
     /**
      * Class containing the (pseudo) Random Number Generator facilities to be

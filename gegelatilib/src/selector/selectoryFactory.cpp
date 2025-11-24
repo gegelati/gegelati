@@ -4,15 +4,12 @@
 
 std::shared_ptr<Selector::Selector> Selector::selectorFactory(
     const std::shared_ptr<TPG::TPGGraph> graph,
-    const Learn::LearningEnvironment& le,
     const Learn::LearningParameters& params)
 {
 
     // Create the corresponding selector
-    if (dynamic_cast<const Learn::ClassificationLearningEnvironment*>(&le) !=
-        nullptr) { // TODO better way for classifier
-        return std::make_shared<ClassificationSelector>(graph, params,
-                                                        le.getNbActions());
+    if (params.selection._selectionMode == "classification") {
+        return std::make_shared<ClassificationSelector>(graph, params, 1);
     }
     else if (params.selection._selectionMode == "truncation") {
         return std::make_shared<TruncationSelector>(graph, params);

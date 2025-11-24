@@ -5,7 +5,7 @@
 void Selector::Selector::launchSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results,
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
     // Preparing multi-population selection....
     if (params.mutation.tpg.ratioTeamsOverActions != 0.0 &&
@@ -43,7 +43,7 @@ void Selector::Selector::launchSelection(
 void Selector::Selector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>& results,
-    Mutator::RNG& rng)
+    RNG::RNG& rng)
 {
     throw std::runtime_error(
         "Selection with main selector is not allowed, subclasses like "
@@ -51,7 +51,7 @@ void Selector::Selector::doSelection(
 }
 
 std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::
-    createSelectionMetrics()
+    createSelectionMetrics() const
 {
     return std::make_shared<SelectionMetrics>();
 }

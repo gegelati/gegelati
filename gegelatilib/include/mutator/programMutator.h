@@ -65,14 +65,14 @@ namespace Mutator {
          */
         void initRandomProgram(Program::Program& p,
                                const MutationParameters& params,
-                               Mutator::RNG& rng);
+                               RNG::RNG& rng);
 
         /**
          * \brief Deletes a randomly selected Line of the given Program.
          *
          * Unless a single Line (or less) remains in the given Progeam, this
          * function randomly selects a line of the Program and deletes it.
-         * Random selection is based on the given Mutator::RNG.
+         * Random selection is based on the given RNG::RNG.
          *
          * This method does NOT update automatically the intron property of the
          * Lines of the Program. Hence, the resulting Program may not execute
@@ -83,7 +83,7 @@ namespace Mutator {
          * \return true if a line could be added, false otherwise.
          *
          */
-        bool deleteRandomLine(Program::Program& p, Mutator::RNG& rng);
+        bool deleteRandomLine(Program::Program& p, RNG::RNG& rng);
 
         /**
          * \brief Insert a new Line at a randomly selected position within the
@@ -92,7 +92,7 @@ namespace Mutator {
          * This function randomly selects a position in the Program.lines and
          * insert a randomly initialized line (using Mutator::Line::
          * initRandomCorrectLine).
-         * Random selection is based on the given Mutator::RNG.
+         * Random selection is based on the given RNG::RNG.
          *
          * This method does NOT update automatically the intron property of the
          * Lines of the Program. Hence, the resulting Program may not execute
@@ -102,7 +102,7 @@ namespace Mutator {
          * \param[in] rng Random Number Generator used in the mutation process.
          *
          */
-        void insertRandomLine(Program::Program& p, Mutator::RNG& rng);
+        void insertRandomLine(Program::Program& p, RNG::RNG& rng);
 
         /**
          * \brief Swap two randomly selected instructions within the given
@@ -110,7 +110,7 @@ namespace Mutator {
          *
          * This function selects two lines of the program randomly and swaps
          * them. If the given Program has less than two lines, nothing happens.
-         * Random selection is based on the given Mutator::RNG.
+         * Random selection is based on the given RNG::RNG.
          *
          * This method does NOT update automatically the intron property of the
          * Lines of the Program. Hence, the resulting Program may not execute
@@ -121,7 +121,7 @@ namespace Mutator {
          * \return true if the lines where successfully swapped, false if the
          *         Program has less than two lines.
          */
-        bool swapRandomLines(Program::Program& p, Mutator::RNG& rng);
+        bool swapRandomLines(Program::Program& p, RNG::RNG& rng);
 
         /**
          * \brief Alter a randomly selected Line in a given Program.
@@ -129,7 +129,7 @@ namespace Mutator {
          * If the given Program has more than 0 Line, this function selects a
          * Line (pseudo)-randomly in a given Program and calls the
          * Mutator::LineMutator:AlterCorrectLine function on it.
-         * Random selection is based on the given Mutator::RNG.
+         * Random selection is based on the given RNG::RNG.
          *
          * This method does NOT update automatically the intron property of the
          * Lines of the Program. Hence, the resulting Program may not execute
@@ -140,14 +140,14 @@ namespace Mutator {
          * \return true if a line was successfully altered, false if the
          *         Program has less than one line.
          */
-        bool alterRandomLine(Program::Program& p, Mutator::RNG& rng);
+        bool alterRandomLine(Program::Program& p, RNG::RNG& rng);
 
         /**
          * \brief Alter a program's constant.
          *
          * If the constants are used, this function selects one of them
          * in a pseudo-random way and modifies it
-         * Random selection is based on the given Mutator::RNG.
+         * Random selection is based on the given RNG::RNG.
          *
          * This method does NOT update automatically the intron property of the
          * Lines of the Program. Hence, the resulting Program may not execute
@@ -161,7 +161,7 @@ namespace Mutator {
          */
         bool alterRandomConstant(Program::Program& p,
                                  const MutationParameters& params,
-                                 Mutator::RNG& rng);
+                                 RNG::RNG& rng);
 
         /**
          * \brief Mutate the behavior of the Program with given probabilities.
@@ -183,7 +183,7 @@ namespace Mutator {
          * \return true if a modification was performed, false otherwise.
          */
         bool mutateProgram(Program::Program& p,
-                           const MutationParameters& params, Mutator::RNG& rng);
+                           const MutationParameters& params, RNG::RNG& rng);
     }; // namespace ProgramMutator
 }; // namespace Mutator
 
