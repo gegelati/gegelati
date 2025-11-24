@@ -42,6 +42,13 @@ namespace Algorithm {
         virtual const std::vector<std::shared_ptr<const Agent>> getAgentsCst() const;
 
         /**
+         * \brief method that indicate if the manager contains a specific agent.
+         * 
+         * \param[in] agent searched agent.
+         */
+        virtual bool containsAgent(std::shared_ptr<const Agent> agent) const;
+
+        /**
          * \brief Create a new Agent of the type used by the current algorithm.
          * 
          * \param[in] graph the TPGGraph associated with the Agent.

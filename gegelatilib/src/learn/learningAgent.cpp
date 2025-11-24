@@ -79,7 +79,7 @@ void Learn::LearningAgent::init(uint64_t seed)
     this->rng.setSeed(seed);
 
     for(auto algorithm: algorithms){
-        algorithm->init(this->rng, this->maxNbThreads);
+        algorithm->init(this->rng);
     }
 }
 
@@ -104,7 +104,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
     if (mode == LearningMode::TRAINING &&
-        algorithm->isAgentEvalSkipped(*agent, previousEval)) {
+        algorithm->isAgentEvalSkipped(agent, previousEval)) {
         return previousEval;
     }
 
@@ -144,7 +144,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the actions
             std::vector<double> actionsID =
-                tee.executeFromRoot(*agent, le.getInitActions()).second;
+                tee.executeFromRoot(agent, le.getInitActions()).second;
             // Do it
             le.doActions(actionsID);
             // Count actions

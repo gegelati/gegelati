@@ -3,6 +3,7 @@
 #ifndef SELECTOR_H
 #define SELECTOR_H
 
+#include "algorithm/agentManager.h"
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 #include "selector/selectionContext.h"
@@ -25,14 +26,14 @@ namespace Selector {
         /// Parameters for the selection
         const Learn::LearningParameters& params;
 
-        /// Pointer to the best root encountered during training, together with
+        /// Pointer to the best agent encountered during training, together with
         /// its EvaluationResult.
-        std::pair<const TPG::TPGVertex*,
+        std::pair<std::shared_ptr<const Algorithm::Agent>,
                   std::shared_ptr<Learn::EvaluationResult>>
-            bestRoot{nullptr, nullptr};
+            bestAgent{nullptr, nullptr};
 
         /**
-         * \brief Map associating root TPG::TPGVertex to their EvaluationResult.
+         * \brief Map associating agent TPG::TPGVertex to their EvaluationResult.
          *
          * If a given TPGVertex is evaluated several times, its
          * EvaluationResult may be updated with the newer results.
@@ -40,13 +41,13 @@ namespace Selector {
          * Whenever a TPGVertex is removed from the TPGGraph, its
          * EvaluationResult should also be removed from this map.
          *
-         * This map may be used to avoid reevaluating a root that was already
+         * This map may be used to avoid reevaluating a agent that was already
          * evaluated more than LearningParameters::maxNbEvaluationPerPolicy
          * times.
          */
-        std::map<const TPG::TPGVertex*,
+        std::map<std::shared_ptr<const Algorithm::Agent>,
                  std::shared_ptr<Learn::EvaluationResult>>
-            resultsPerRoot;
+            resultsPerAgent;
 
         /**
          * \brief context used by the TPGMutator to populate the TPGGraph.
@@ -59,52 +60,42 @@ namespace Selector {
          */
         SelectionContext context;
 
+        /**
+         * \brief manager of the used algorithm. The manager can delete or create agents in the algorithm population
+         */
+        std::shared_ptr<Algorithm::AgentManager> manager;
+
       public:
         /**
          * \brief Constructor for Selector.
          *
          * \param[in] graph shared pointer of the graph on which the selection
          * is done.
+         * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        Selector(std::shared_ptr<TPG::TPGGraph> graph,
+        Selector(std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
                  const Learn::LearningParameters& params)
-            : graph{graph}, params{params}
+            : graph{graph}, manager{manager}, params{params}
         {
         }
 
         /**
-         * \brief This method execute the doSelection method.
-         *
-         * However if a double population of team and action roots is used (for
-         * MATPG case basically), it launch the doSelection two times, once with
-         * the team results, and once with the action results
-         *
-         * \param[in,out] results a multimap containing root TPGVertex
-         * associated to their score during an evaluation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         */
-        virtual void launchSelection(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results,
-            RNG::RNG& rng);
-
-        /**
-         * \brief Removes from the TPGGraph the root TPGVertex.
+         * \brief Removes from the TPGGraph the agent TPGVertex.
          *
          * The given multimap is updated by removing entries corresponding to
          * decimated vertices.
          *
-         * The resultsPerRoot attribute is updated to remove results associated
+         * The resultsPerAgent attribute is updated to remove results associated
          * to removed vertices.
          *
-         * \param[in,out] results a multimap containing root TPGVertex
+         * \param[in,out] results a multimap containing agent TPGVertex
          * associated to their score during an evaluation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void doSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results,
+                          std::shared_ptr<const Algorithm::Agent>>& results,
             RNG::RNG& rng);
 
         /**
@@ -116,81 +107,81 @@ namespace Selector {
         virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics() const;
 
         /**
-         * \brief This method keeps only the bes tRoot policy in the TPGGraph.
+         * \brief This method keeps only the best agent policy in the TPGGraph.
          *
-         * If the TPGVertex referenced in the bestRoot attribute is no longer
+         * If the TPGVertex referenced in the bestAgent attribute is no longer
          * a TPGVertex of the TPGGraph, nothing happens.
          */
         virtual void keepBestPolicy();
 
         /**
-         * \brief Update the bestRoot and resultsPerRoot attributes.
+         * \brief Update the bestAgent and resultsPerAgent attributes.
          *
-         * This method updates the value of the bestRoot attribute with the
+         * This method updates the value of the bestAgent attribute with the
          * TPG::Vertex given as an argument in the following cases:
          * - The given EvaluationResult is greater than the one of the current
-         *   bestRoot.
-         * - The current bestRoot is a nullptr.
-         * - The current bestRoot has been removed from the TPG::TPGGraph
+         *   bestAgent.
+         * - The current bestAgent is a nullptr.
+         * - The current bestAgent has been removed from the TPG::TPGGraph
          *   managed by the LearningAgent.
          *
          * It should be noted that the last case alone (i.e. without validating
          * the first one) indicates a great variability of the evaluation
-         * process as it means that a vertex currently known as the best root
+         * process as it means that a vertex currently known as the best agent
          * from previous generations, with an EvaluationResult never beaten,
-         * was removed from the graph in a following generation, beaten by root
+         * was removed from the graph in a following generation, beaten by agent
          * vertex with lower scores than the current record.
          *
-         * \param[in] results Map from the evaluateAllRoots method.
+         * \param[in] results Map from the evaluateAllAgents method.
          */
         virtual void updateEvaluationRecords(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                const TPG::TPGVertex*>& results);
+                                std::shared_ptr<const Algorithm::Agent>>& results);
 
         /**
-         * \brief Update the resultsPerRoot.
+         * \brief Update the resultsPerAgent.
          *
-         * \param[in] results Map from the evaluateAllRoots method.
+         * \param[in] results Map from the evaluateAllAgents method.
          */
-        virtual void updateResultsPerRoot(
+        virtual void updateResultsPerAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                const TPG::TPGVertex*>& results);
+                                std::shared_ptr<const Algorithm::Agent>>& results);
 
         /**
-         * \brief Update the bestRoot attribute.
+         * \brief Update the bestAgent attribute.
          *
-         * This method updates the value of the bestRoot attribute with the
+         * This method updates the value of the bestAgent attribute with the
          * TPG::Vertex given as an argument in the following cases:
          * - The given EvaluationResult is greater than the one of the current
-         *   bestRoot.
-         * - The current bestRoot is a nullptr.
-         * - The current bestRoot has been removed from the TPG::TPGGraph
+         *   bestAgent.
+         * - The current bestAgent is a nullptr.
+         * - The current bestAgent has been removed from the TPG::TPGGraph
          *   managed by the LearningAgent.
          *
          * It should be noted that the last case alone (i.e. without validating
          * the first one) indicates a great variability of the evaluation
-         * process as it means that a vertex currently known as the best root
+         * process as it means that a vertex currently known as the best agent
          * from previous generations, with an EvaluationResult never beaten,
-         * was removed from the graph in a following generation, beaten by root
+         * was removed from the graph in a following generation, beaten by agent
          * vertex with lower scores than the current record.
          *
-         * \param[in] results Map from the evaluateAllRoots method.
+         * \param[in] results Map from the evaluateAllAgents method.
          */
-        virtual void updateBestRoot(
+        virtual void updateBestAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                const TPG::TPGVertex*>& results);
+                                std::shared_ptr<const Algorithm::Agent>>& results);
 
         /**
-         * \brief Get the best root TPG::Vertex encountered since the last init.
+         * \brief Get the best agent TPG::Vertex encountered since the last init.
          *
          * The returned pointers may be nullptr if no generation was trained
          * since the last init.
          *
-         * \return a reference to the bestRoot attribute.
+         * \return a reference to the bestAgent attribute.
          */
-        virtual const std::pair<const TPG::TPGVertex*,
+        virtual const std::pair<std::shared_ptr<const Algorithm::Agent>,
                                 std::shared_ptr<Learn::EvaluationResult>>&
-        getBestRoot() const;
+        getBestAgent() const;
 
         /**
          * \brief Getter for the TPGGraph built by the LearningAgent.
@@ -200,21 +191,21 @@ namespace Selector {
         virtual std::shared_ptr<TPG::TPGGraph> getGraph();
 
         /**
-         * \brief This method resets the previous registered scores per root.
+         * \brief This method resets the previous registered scores per agent.
          *
-         * Resets resultsPerRoot so that, in the next training,
-         * the current roots will be considered as if they had never
+         * Resets resultsPerAgent so that, in the next training,
+         * the current agents will be considered as if they had never
          * been tested. To use for example when there is a scoring policy
          * change.
          */
         virtual void forgetPreviousResults();
 
         /**
-         * \brief Return the resultsPerRoot map.
+         * \brief Return the resultsPerAgent map.
          */
-        virtual const std::map<const TPG::TPGVertex*,
+        virtual const std::map<std::shared_ptr<const Algorithm::Agent>,
                                std::shared_ptr<Learn::EvaluationResult>>&
-        getResultsPerRoot() const;
+        getResultsPerAgent() const;
 
         /**
          * \brief Update the SelectionContext structure and return it.

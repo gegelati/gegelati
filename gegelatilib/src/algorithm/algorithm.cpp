@@ -21,13 +21,13 @@ void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
 
 
 bool Algorithm::Algorithm::isAgentEvalSkipped(
-    const Agent& agent,
+    std::shared_ptr<const Agent> agent,
     std::shared_ptr<Learn::EvaluationResult>& previousResult) const
 {
     // Has the root already been evaluated more times than
     // params.maxNbEvaluationPerPolicy
-    const auto& iter = this->selector->getResultsPerRoot().find(&agent);
-    if (iter != this->selector->getResultsPerRoot().end()) {
+    const auto& iter = this->selector->getResultsPerAgent().find(agent);
+    if (iter != this->selector->getResultsPerAgent().end()) {
         // The root has already been evaluated
         previousResult = iter->second;
         return iter->second->getNbEvaluation() >=

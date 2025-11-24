@@ -2,47 +2,9 @@
 
 #include "selector/selector.h"
 
-void Selector::Selector::launchSelection(
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results,
-    RNG::RNG& rng)
-{
-    // Preparing multi-population selection....
-    if (params.mutation.tpg.ratioTeamsOverActions != 0.0 &&
-        params.mutation.tpg.ratioTeamsOverActions != 1.0) {
-
-        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      const TPG::TPGVertex*>
-            resultsTeam;
-        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      const TPG::TPGVertex*>
-            resultsAction;
-
-        // Split the results into result of team and result of action
-        for (const auto& p : results) {
-            if (dynamic_cast<const TPG::TPGAction*>(p.second))
-                resultsAction.insert(p);
-            else
-                resultsTeam.insert(p);
-        }
-
-        // Do selection for sub map
-        this->doSelection(resultsAction, rng);
-        this->doSelection(resultsTeam, rng);
-
-        // Fusing the results
-        results.clear();
-        results.insert(resultsTeam.begin(), resultsTeam.end());
-        results.insert(resultsAction.begin(), resultsAction.end());
-    }
-    else {
-        this->doSelection(results, rng);
-    }
-}
-
 void Selector::Selector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results,
+                  std::shared_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
     throw std::runtime_error(
@@ -58,16 +20,15 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::
 
 void Selector::Selector::keepBestPolicy()
 {
-    // Evaluate all roots
-    if (this->graph->hasVertex(*this->bestRoot.first)) {
-        auto bestRootVertex = this->bestRoot.first;
+    if (this->manager->containsAgent(this->bestAgent.first)) {
+        auto bestAgentVertex = this->bestAgent.first;
 
-        // Remove all but the best root from the graph
-        while (this->graph->getNbRootVertices() != 1) {
-            auto roots = this->graph->getRootVertices();
-            for (auto root : roots) {
-                if (root != bestRootVertex) {
-                    graph->removeVertex(*root);
+        // Remove all but the best agent from the graph
+        while (this->manager->getAgentsCst().size() != 1) {
+            auto agents = this->manager->getAgentsCst();
+            for (auto agent : agents) {
+                if (agent != bestAgentVertex) {
+                    this->manager->deleteAgent(agent, graph);
                 }
             }
         }
@@ -76,72 +37,72 @@ void Selector::Selector::keepBestPolicy()
 
 void Selector::Selector::updateEvaluationRecords(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        const TPG::TPGVertex*>& results)
+                        std::shared_ptr<const Algorithm::Agent>>& results)
 {
-    // Update resultsPerRoot
-    this->updateResultsPerRoot(results);
+    // Update resultsPerAgent
+    this->updateResultsPerAgent(results);
 
-    // Update bestRoot
-    this->updateBestRoot(results);
+    // Update bestAgent
+    this->updateBestAgent(results);
 }
 
-void Selector::Selector::updateResultsPerRoot(
+void Selector::Selector::updateResultsPerAgent(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        const TPG::TPGVertex*>& results)
+                        std::shared_ptr<const Algorithm::Agent>>& results)
 {
     for (auto result : results) {
-        auto mapIterator = this->resultsPerRoot.find(result.second);
-        if (mapIterator == this->resultsPerRoot.end()) {
-            // First time this root is evaluated
-            this->resultsPerRoot.emplace(result.second, result.first);
+        auto mapIterator = this->resultsPerAgent.find(result.second);
+        if (mapIterator == this->resultsPerAgent.end()) {
+            // First time this agent is evaluated
+            this->resultsPerAgent.emplace(result.second, result.first);
         }
         else if (result.first != mapIterator->second) {
-            // This root has already been evaluated.
+            // This agent has already been evaluated.
             // If the received result pointer is different from the one
             // stored in the map, update the one in the map by replacing it
             // with the new one (which was combined with the pre-existing
-            // one in evalRoot)
+            // one in evalAgent)
             mapIterator->second = result.first;
-            // If the received result is associated to the current bestRoot,
+            // If the received result is associated to the current bestAgent,
             // update it.
-            if (result.second == this->bestRoot.first) {
-                this->bestRoot.second = result.first;
+            if (result.second == this->bestAgent.first) {
+                this->bestAgent.second = result.first;
             }
         }
     }
 }
 
-void Selector::Selector::updateBestRoot(
+void Selector::Selector::updateBestAgent(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        const TPG::TPGVertex*>& results)
+                        std::shared_ptr<const Algorithm::Agent>>& results)
 {
     auto iterator = --results.end();
     const std::shared_ptr<Learn::EvaluationResult> evaluation = iterator->first;
-    const TPG::TPGVertex* candidate = iterator->second;
+    std::shared_ptr<const Algorithm::Agent> candidate = iterator->second;
     // Test the three replacement cases
     // from the simpler to the most complex to test
-    if (this->bestRoot.first == nullptr         // NULL case
-        || *this->bestRoot.second < *evaluation // new high-score case
+    if (this->bestAgent.first == nullptr         // NULL case
+        || *this->bestAgent.second < *evaluation // new high-score case
         ||
-        !this->graph->hasVertex(*this->bestRoot.first) // bestRoot disappearance
+        !this->manager->containsAgent(this->bestAgent.first) // bestAgent disappearance
     ) {
-        // Replace the best root
-        this->bestRoot = {candidate, evaluation};
+        // Replace the best agent
+        this->bestAgent = {candidate, evaluation};
     }
 }
 
-const std::pair<const TPG::TPGVertex*,
+const std::pair<std::shared_ptr<const Algorithm::Agent>,
                 std::shared_ptr<Learn::EvaluationResult>>&
-Selector::Selector::getBestRoot() const
+Selector::Selector::getBestAgent() const
 {
-    return this->bestRoot;
+    return this->bestAgent;
 }
 
 void Selector::Selector::forgetPreviousResults()
 {
-    this->resultsPerRoot.clear();
-    this->bestRoot.first = nullptr;
-    this->bestRoot.second = nullptr;
+    this->resultsPerAgent.clear();
+    this->bestAgent.first = nullptr;
+    this->bestAgent.second = nullptr;
 }
 
 std::shared_ptr<TPG::TPGGraph> Selector::Selector::getGraph()
@@ -149,36 +110,36 @@ std::shared_ptr<TPG::TPGGraph> Selector::Selector::getGraph()
     return this->graph;
 }
 
-const std::map<const TPG::TPGVertex*, std::shared_ptr<Learn::EvaluationResult>>&
-Selector::Selector::getResultsPerRoot() const
+const std::map<std::shared_ptr<const Algorithm::Agent>, std::shared_ptr<Learn::EvaluationResult>>&
+Selector::Selector::getResultsPerAgent() const
 {
-    return this->resultsPerRoot;
+    return this->resultsPerAgent;
 }
 
 const Selector::SelectionContext& Selector::Selector::updateContext()
 {
     // Get current vertex set (copy)
     auto vertices(graph->getVertices());
-    // Get current root teams (copy)
-    auto rootVertices(graph->getRootVertices());
+    // Get current agent teams (copy)
+    auto agentVertices(graph->getRootVertices());
 
     // Create list of teams and actions clonable
     this->context.teamsClonable.clear();
     this->context.actionsClonable.clear();
-    for (auto root : rootVertices) {
-        if (dynamic_cast<const TPG::TPGTeam*>(root) != nullptr) {
-            this->context.teamsClonable.push_back((const TPG::TPGTeam*)root);
+    for (auto agent : agentVertices) {
+        if (dynamic_cast<const TPG::TPGTeam*>(agent) != nullptr) {
+            this->context.teamsClonable.push_back((const TPG::TPGTeam*)agent);
         }
         else if (params.mutation.tpg.useActionProgram) {
             this->context.actionsClonable.push_back(
-                (const TPG::TPGAction*)root);
+                (const TPG::TPGAction*)agent);
         }
     }
-    uint64_t nbRootTeams = this->context.teamsClonable.size();
-    uint64_t nbRootActions = this->context.actionsClonable.size();
+    uint64_t nbAgentTeams = this->context.teamsClonable.size();
+    uint64_t nbAgentActions = this->context.actionsClonable.size();
 
     // Fill the list of available TPGTeam and TPGActions, TPGActions are only
-    // roots if they are not accessible by the teams
+    // agents if they are not accessible by the teams
     this->context.preExistingTeams.clear();
     this->context.preExistingActions.clear();
     for (auto vertex : vertices) {
@@ -206,12 +167,12 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
     this->context.nbTeamsToCreate =
         (uint64_t)(params.mutation.tpg.nbRoots *
                    params.mutation.tpg.ratioTeamsOverActions) -
-        nbRootTeams;
+        nbAgentTeams;
 
     this->context.nbActionsToCreate = std::max(
         (int64_t)((uint64_t)(params.mutation.tpg.nbRoots *
                              (1 - params.mutation.tpg.ratioTeamsOverActions)) -
-                  nbRootActions),
+                  nbAgentActions),
         (int64_t)0);
 
     return context;

@@ -110,7 +110,7 @@ namespace Algorithm {
          * otherwise.
          */
         bool isAgentEvalSkipped(
-            const Agent& agent,
+            std::shared_ptr<const Agent>,
             std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
 
 
