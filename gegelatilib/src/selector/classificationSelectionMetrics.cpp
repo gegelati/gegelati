@@ -6,7 +6,7 @@
 #include "selector/classificationSelectionMetrics.h"
 
 void Selector::ClassificationSelectionMetrics::initMetrics(
-    const TPG::TPGVertex* agent,
+    std::shared_ptr<const Algorithm::Agent> agent,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     this->scorePerClass.resize(learningEnvironment.getNbActions(), 0.0);
@@ -14,7 +14,7 @@ void Selector::ClassificationSelectionMetrics::initMetrics(
 }
 
 void Selector::ClassificationSelectionMetrics::extractMetricsEpisode(
-    const TPG::TPGVertex* agent, size_t nbStepsExecuted,
+    std::shared_ptr<const Algorithm::Agent> agent, size_t nbStepsExecuted,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     // Update results

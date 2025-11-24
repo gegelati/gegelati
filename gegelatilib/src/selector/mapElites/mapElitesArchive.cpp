@@ -19,7 +19,7 @@ std::vector<double> Selector::MapElites::MapElitesArchive::getArchiveLimits()
 }
 
 const std::vector<
-    std::pair<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>>&
+    std::pair<std::shared_ptr<Learn::EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>>&
 Selector::MapElites::MapElitesArchive::getAllArchive() const
 {
     return archive;
@@ -61,7 +61,7 @@ std::vector<uint64_t> Selector::MapElites::MapElitesArchive::computeIndices(
 }
 
 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                const TPG::TPGVertex*>&
+                std::shared_ptr<const Algorithm::Agent>>&
 Selector::MapElites::MapElitesArchive::getArchiveFromDescriptors(
     const std::vector<double>& descriptors) const
 {
@@ -74,7 +74,7 @@ Selector::MapElites::MapElitesArchive::getArchiveFromDescriptors(
 }
 
 void Selector::MapElites::MapElitesArchive::setArchiveFromDescriptors(
-    const TPG::TPGVertex* vertex, std::shared_ptr<Learn::EvaluationResult> eval,
+    std::shared_ptr<const Algorithm::Agent> vertex, std::shared_ptr<Learn::EvaluationResult> eval,
     const std::vector<double>& descriptors)
 {
     std::vector<uint64_t> indices;
@@ -86,7 +86,7 @@ void Selector::MapElites::MapElitesArchive::setArchiveFromDescriptors(
 }
 
 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                const TPG::TPGVertex*>&
+                std::shared_ptr<const Algorithm::Agent>>&
 Selector::MapElites::MapElitesArchive::getArchiveAt(
     const std::vector<uint64_t>& indices) const
 {
@@ -94,31 +94,31 @@ Selector::MapElites::MapElitesArchive::getArchiveAt(
 }
 
 void Selector::MapElites::MapElitesArchive::setArchiveAt(
-    const TPG::TPGVertex* vertex, std::shared_ptr<Learn::EvaluationResult> eval,
+    std::shared_ptr<const Algorithm::Agent> vertex, std::shared_ptr<Learn::EvaluationResult> eval,
     const std::vector<uint64_t>& indices)
 {
     archive[computeLinearIndex(indices)] = std::make_pair(eval, vertex);
 }
 
-bool Selector::MapElites::MapElitesArchive::containsRoot(
-    const TPG::TPGVertex* root) const
+bool Selector::MapElites::MapElitesArchive::containsAgent(
+    std::shared_ptr<const Algorithm::Agent> agent) const
 {
 
     for (const auto& pair : archive) {
-        if (pair.second == root) {
+        if (pair.second == agent) {
             return true;
         }
     }
     return false;
 }
 
-void Selector::MapElites::MapElitesArchive::removeRootFromArchiveIfNotComplete(
-    const TPG::TPGVertex* root, size_t maxNbEvaluation)
+void Selector::MapElites::MapElitesArchive::removeAgentFromArchiveIfNotComplete(
+    std::shared_ptr<const Algorithm::Agent> agent, size_t maxNbEvaluation)
 {
     for (auto it = archive.begin(); it != archive.end(); ++it) {
-        if (it->second == root) {
+        if (it->second == agent) {
             if (it->first->getNbEvaluation() < maxNbEvaluation) {
-                // Remove the root from the archive if it has been evaluated
+                // Remove the agent from the archive if it has been evaluated
                 // enough
                 it->first = nullptr;
                 it->second = nullptr; // Clear the vertex pointer
@@ -127,11 +127,11 @@ void Selector::MapElites::MapElitesArchive::removeRootFromArchiveIfNotComplete(
     }
 }
 
-void Selector::MapElites::MapElitesArchive::removeRootFromArchive(
-    const TPG::TPGVertex* root, size_t maxNbEvaluation)
+void Selector::MapElites::MapElitesArchive::removeAgentFromArchive(
+    std::shared_ptr<const Algorithm::Agent> agent, size_t maxNbEvaluation)
 {
     for (auto it = archive.begin(); it != archive.end(); ++it) {
-        if (it->second == root) {
+        if (it->second == agent) {
             it->first = nullptr;
             it->second = nullptr; // Clear the vertex pointer
             break;
@@ -139,10 +139,10 @@ void Selector::MapElites::MapElitesArchive::removeRootFromArchive(
     }
 }
 
-std::set<const TPG::TPGVertex*> Selector::MapElites::MapElitesArchive::
+std::set<std::shared_ptr<const Algorithm::Agent>> Selector::MapElites::MapElitesArchive::
     getVerticesInArchive() const
 {
-    std::set<const TPG::TPGVertex*> verticesInArchive;
+    std::set<std::shared_ptr<const Algorithm::Agent>> verticesInArchive;
     for (const auto& pair : archive) {
         if (pair.second != nullptr) {
             verticesInArchive.insert(pair.second);

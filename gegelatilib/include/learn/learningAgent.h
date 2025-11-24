@@ -105,6 +105,7 @@ namespace Learn {
          * \brief Constructor for LearningAgent.
          *
          * \param[in] le The LearningEnvironment for the TPG.
+         * \param[in] algorithms vector of algorithms learned by the learning agent
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
@@ -124,6 +125,7 @@ namespace Learn {
          * \brief Constructor for LearningAgent.
          *
          * \param[in] le The LearningEnvironment for the TPG.
+         * \param[in] algorithm algorithm learned by the learning agent
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.

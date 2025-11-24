@@ -30,7 +30,7 @@ namespace Selector {
          * it. The TPGVertex in the set will be deleted at the end of the
          * TPGMutator::PopulateTPG method.
          */
-        std::set<const TPG::TPGVertex*> verticesToDelete;
+        std::set<std::shared_ptr<const Algorithm::Agent>> verticesToDelete;
 
       public:
         /**
@@ -38,28 +38,14 @@ namespace Selector {
          *
          * \param[in] graph shared pointer of the graph on which the selection
          * is done.
+         * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        TournamentSelector(std::shared_ptr<TPG::TPGGraph> graph,
+        TournamentSelector(std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<Algorithm::AgentManager> manager, 
                            const Learn::LearningParameters& params)
-            : Selector{graph, params}
+            : Selector{graph, manager, params}
         {
         }
-
-        /**
-         * \brief override of doSelection method.
-         *
-         * Reset the verticesToDelete list
-         *
-         * \param[in,out] results a multimap containing root TPGVertex
-         * associated to their score during an evaluation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         */
-        virtual void launchSelection(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results,
-            RNG::RNG& rng) override;
-
         /**
          * \brief override of doSelection method
          *
@@ -78,13 +64,13 @@ namespace Selector {
          * is between 0 and 1 It can be used, but it could happen that one
          * "population" take over the other one
          *
-         * \param[in,out] results a multimap containing root TPGVertex
+         * \param[in,out] results a multimap containing agent
          * associated to their score during an evaluation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void doSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results,
+                          std::shared_ptr<const Algorithm::Agent>>& results,
             RNG::RNG& rng) override;
 
         /**
@@ -92,7 +78,7 @@ namespace Selector {
          *
          * \param[in] vertex TPGVertex added to the vertices to remove
          */
-        void addToVerticesToDelete(const TPG::TPGVertex* vertex);
+        void addToVerticesToDelete(std::shared_ptr<const Algorithm::Agent> vertex);
 
         /**
          * \brief Specialization of updateContext for tournament purposes
@@ -114,7 +100,7 @@ namespace Selector {
         /**
          * \brief getter of the verticesToDelete set.
          */
-        virtual const std::set<const TPG::TPGVertex*>& getVerticesToDelete();
+        virtual const std::set<std::shared_ptr<const Algorithm::Agent>>& getVerticesToDelete();
     };
 }; // namespace Selector
 

@@ -71,7 +71,7 @@ namespace Selector {
          * \brief Specialization of the initialisation of the metrics.
          */
         void initMetrics(
-            const TPG::TPGVertex* agent,
+            std::shared_ptr<const Algorithm::Agent> agent,
             const Learn::LearningEnvironment& learningEnvironment) override;
 
         /**
@@ -79,7 +79,7 @@ namespace Selector {
          * an episode.
          */
         void extractMetricsEpisode(
-            const TPG::TPGVertex* agent, size_t nbStepsExecuted,
+            std::shared_ptr<const Algorithm::Agent> agent, size_t nbStepsExecuted,
             const Learn::LearningEnvironment& learningEnvironment) override;
 
         /**

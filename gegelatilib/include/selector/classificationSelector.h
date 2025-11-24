@@ -22,13 +22,14 @@ namespace Selector {
          *
          * \param[in] graph shared pointer of the graph on which the selection
          * is done.
+         * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          * \param[in] nbActions number of actions in the LearningEnvironment.
          */
-        ClassificationSelector(std::shared_ptr<TPG::TPGGraph> graph,
+        ClassificationSelector(std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
                                const Learn::LearningParameters& params,
                                uint64_t nbActions)
-            : Selector{graph, params}, nbActions{nbActions}
+            : Selector{graph, manager, params}, nbActions{nbActions}
         {
         }
 
@@ -37,7 +38,7 @@ namespace Selector {
          *
          * Creates and return an instance of ClassificationSelectionMetrics
          */
-        virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics()
+        virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics() const
             override;
 
         /**
@@ -69,7 +70,7 @@ namespace Selector {
          */
         virtual void doSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results,
+                          std::shared_ptr<const Algorithm::Agent>>& results,
             RNG::RNG& rng) override;
     };
 }; // namespace Selector

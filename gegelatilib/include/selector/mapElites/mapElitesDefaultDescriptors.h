@@ -2,6 +2,7 @@
 #ifndef MAP_ELITES_DEFAULT_DESCRIPTORS_H
 #define MAP_ELITES_DEFAULT_DESCRIPTORS_H
 
+#include "algorithm/agent.h"
 #include "selector/mapElites/mapElitesDescriptor.h"
 #include "tpg/tpgGraph.h"
 
@@ -40,7 +41,7 @@ namespace Selector {
                  * \brief Specialisation of extractMetricsStep
                  */
                 virtual void extractMetricsStep(
-                    std::vector<double>& metrics, const TPG::TPGVertex* agent,
+                    std::vector<double>& metrics, std::shared_ptr<const Algorithm::Agent> agent,
                     std::vector<double> actionValues,
                     const Learn::LearningEnvironment& learningEnvironment)
                     const override;
@@ -49,7 +50,7 @@ namespace Selector {
                  * \brief Specialisation of extractMetricsEpisode
                  */
                 virtual void extractMetricsEpisode(
-                    std::vector<double>& metrics, const TPG::TPGVertex* agent,
+                    std::vector<double>& metrics, std::shared_ptr<const Algorithm::Agent> agent,
                     size_t nbStepsExecuted,
                     const Learn::LearningEnvironment& learningEnvironment)
                     const override;

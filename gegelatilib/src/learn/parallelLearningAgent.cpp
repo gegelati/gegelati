@@ -49,37 +49,19 @@
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, const TPG::TPGVertex*>
-Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
+Learn::ParallelLearningAgent::evaluateAllAgents(uint64_t generationNumber,
                                                Learn::LearningMode mode)
 {
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
         results;
 
     if (this->maxNbThreads <= 1 || !this->learningEnvironment.isCopyable()) {
-        // Sequential mode
-
-        // Create the TPGExecutionEngine
-        std::unique_ptr<TPG::TPGExecutionEngine> tee =
-            this->tpg->getFactory().createTPGExecutionEngine(
-                this->env,
-                (mode == LearningMode::TRAINING) ? &this->archive : NULL);
-
-        // Execute for all root
-        auto roots = this->tpg->getRootVertices();
-        for (int i = 0; i < roots.size(); i++) {
-            auto job = makeJob(roots.at(i), mode);
-
-            this->archive.setRandomSeed(job->getArchiveSeed());
-
-            std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
-                *tee, *job, generationNumber, mode, this->learningEnvironment);
-            results.emplace(avgScore, (*job).getRoot());
-        }
+        results = Learn::LearningAgent::evaluateAllAgents(generationNumber, mode);
     }
     else {
         // Parallel mode
-        evaluateAllRootsInParallel(generationNumber, mode, results);
+        evaluateAllAgentsInParallel(generationNumber, mode, results);
     }
 
     return results;
@@ -88,10 +70,10 @@ Learn::ParallelLearningAgent::evaluateAllRoots(uint64_t generationNumber,
 void Learn::ParallelLearningAgent::slaveEvalJobThread(
     uint64_t generationNumber, Learn::LearningMode mode,
     std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess,
-    std::mutex& rootsToProcessMutex,
+    std::mutex& agentsToProcessMutex,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Job>>>& resultsPerRootMap,
-    std::mutex& resultsPerRootMapMutex,
+                                 std::shared_ptr<Job>>>& resultsPerAgentMap,
+    std::mutex& resultsPerAgentMapMutex,
     std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex,
     bool useMainEnvironment)
 {
@@ -108,7 +90,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                                ? 0
                                : privateLearningEnvironment->getNbActions());
     std::unique_ptr<TPG::TPGExecutionEngine> tee =
-        this->tpg->getFactory().createTPGExecutionEngine(privateEnv, NULL);
+        this->graph->getFactory().createTPGExecutionEngine(privateEnv, NULL);
 
     int i = 0;
     // Pop a job
@@ -117,7 +99,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
         bool doProcess = false;
         std::shared_ptr<Learn::Job> jobToProcess;
         { // Mutuel exclusion zone
-            std::lock_guard<std::mutex> lock(rootsToProcessMutex);
+            std::lock_guard<std::mutex> lock(agentsToProcessMutex);
             if (!jobsToProcess.empty()) { // Additional verification after lock
                 jobToProcess = jobsToProcess.front();
                 jobsToProcess.pop();
@@ -128,7 +110,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
         // Processing to do?
         if (doProcess) {
             doProcess = false;
-            // Dedicated archive for the root
+            // Dedicated archive for the agent
             Archive* temporaryArchive = NULL;
             if (mode == LearningMode::TRAINING) {
                 temporaryArchive =
@@ -142,8 +124,8 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                                   *privateLearningEnvironment);
 
             { // Store result Mutual exclusion zone
-                std::lock_guard<std::mutex> lock(resultsPerRootMapMutex);
-                resultsPerRootMap.emplace(
+                std::lock_guard<std::mutex> lock(resultsPerAgentMapMutex);
+                resultsPerAgentMap.emplace(
                     jobToProcess->getIdx(),
                     std::make_pair(avgScore, jobToProcess));
             }
@@ -214,9 +196,9 @@ void Learn::ParallelLearningAgent::mergeArchiveMap(
     }
 }
 
-void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
+void Learn::ParallelLearningAgent::evaluateAllAgentsInParallel(
     uint64_t generationNumber, LearningMode mode,
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
+    std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>&
         results)
 {
     // Create Archive Map
@@ -226,26 +208,26 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallel(
              std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>
         resultsPerJobMap;
 
-    evaluateAllRootsInParallelExecute(generationNumber, mode, resultsPerJobMap,
+    evaluateAllAgentsInParallelExecute(generationNumber, mode, resultsPerJobMap,
                                       archiveMap);
 
-    evaluateAllRootsInParallelCompileResults(resultsPerJobMap, results,
+    evaluateAllAgentsInParallelCompileResults(resultsPerJobMap, results,
                                              archiveMap);
 }
-void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(
+void Learn::ParallelLearningAgent::evaluateAllAgentsInParallelExecute(
     uint64_t generationNumber, LearningMode mode,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Job>>>& resultsPerJobMap,
     std::map<uint64_t, Archive*>& archiveMap)
 {
     // Create and fill the queue for distributing work among threads
-    // each root is associated to its number in the list for enabling the
+    // each agent is associated to its number in the list for enabling the
     // determinism of stochastic archive storage.
     auto jobsToProcess = makeJobs(mode);
 
     // Create mutexes
-    std::mutex rootsToProcessMutex;
-    std::mutex resultsPerRootMutex;
+    std::mutex agentsToProcessMutex;
+    std::mutex resultsPerAgentMutex;
     std::mutex archiveMapMutex;
 
     // Create the threads
@@ -253,15 +235,15 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(
     for (auto i = 0; i < (this->maxNbThreads - 1); i++) {
         threads.emplace_back(std::thread(
             &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
-            mode, std::ref(jobsToProcess), std::ref(rootsToProcessMutex),
-            std::ref(resultsPerJobMap), std::ref(resultsPerRootMutex),
+            mode, std::ref(jobsToProcess), std::ref(agentsToProcessMutex),
+            std::ref(resultsPerJobMap), std::ref(resultsPerAgentMutex),
             std::ref(archiveMap), std::ref(archiveMapMutex), false));
     }
 
     // Work in the main thread also, using the main environment
     this->slaveEvalJobThread(generationNumber, mode, jobsToProcess,
-                             rootsToProcessMutex, resultsPerJobMap,
-                             resultsPerRootMutex, archiveMap, archiveMapMutex,
+                             agentsToProcessMutex, resultsPerJobMap,
+                             resultsPerAgentMutex, archiveMap, archiveMapMutex,
                              true);
 
     // Join the threads
@@ -270,17 +252,17 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(
     }
 }
 
-void Learn::ParallelLearningAgent::evaluateAllRootsInParallelCompileResults(
+void Learn::ParallelLearningAgent::evaluateAllAgentsInParallelCompileResults(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Job>>>& resultsPerJobMap,
-    std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>&
+    std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>&
         results,
     std::map<uint64_t, Archive*>& archiveMap)
 {
     // Merge the results
-    for (auto& resultPerRoot : resultsPerJobMap) {
-        results.emplace(resultPerRoot.second.first,
-                        (*resultPerRoot.second.second).getRoot());
+    for (auto& resultPerAgent : resultsPerJobMap) {
+        results.emplace(resultPerAgent.second.first,
+                        (*resultPerAgent.second.second).getAgent());
     }
 
     // Merge the archives

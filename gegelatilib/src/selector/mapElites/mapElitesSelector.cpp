@@ -78,7 +78,7 @@ std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::
 
 void Selector::MapElites::MapElitesSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results,
+                  std::shared_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
 
@@ -86,11 +86,11 @@ void Selector::MapElites::MapElitesSelector::doSelection(
     for (auto& pair : this->mapEliteArchives) {
         std::shared_ptr<MapElitesArchive> mapEliteArchive = pair.second;
         for (auto it = results.begin(); it != results.end(); it++) {
-            // The root is already in the archive
-            if (mapEliteArchive->containsRoot(it->second)) {
-                // The root has been reevaluated, delete it from the archive if
+            // The agent is already in the archive
+            if (mapEliteArchive->containsAgent(it->second)) {
+                // The agent has been reevaluated, delete it from the archive if
                 // it has not been evaluated enough times
-                mapEliteArchive->removeRootFromArchiveIfNotComplete(
+                mapEliteArchive->removeAgentFromArchiveIfNotComplete(
                     it->second, params.maxNbEvaluationPerPolicy);
             }
         }
@@ -100,59 +100,59 @@ void Selector::MapElites::MapElitesSelector::doSelection(
         std::shared_ptr<const MapElitesDescriptor> descriptor = pair.first;
         std::shared_ptr<MapElitesArchive> mapEliteArchive = pair.second;
 
-        std::vector<const TPG::TPGVertex*> verticesToDelete;
+        std::vector<std::shared_ptr<const Algorithm::Agent>> verticesToDelete;
 
         size_t numberNewValues = 0;
 
         for (auto it = results.rbegin(); it != results.rend(); ++it) {
 
-            // Get the selectionMetrics (casted) and root
+            // Get the selectionMetrics (casted) and agent
             auto metrics = std::dynamic_pointer_cast<MapElitesSelectionMetrics>(
                 it->first->getSelectionMetrics());
             if (metrics == nullptr) {
                 throw std::runtime_error("SelectionMetrics should be castable "
                                          "to MapElitesSelectionMetrics");
             }
-            const TPG::TPGVertex* root = it->second;
+            std::shared_ptr<const Algorithm::Agent> agent = it->second;
       
             std::vector<double> descriptorUsed(
                 metrics->getMapDescriptors().at(descriptor));  
 
-            // Get the saved evaluation and root
+            // Get the saved evaluation and agent
             const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                            const TPG::TPGVertex*>& pairSaved =
+                            std::shared_ptr<const Algorithm::Agent>>& pairSaved =
                 mapEliteArchive->getArchiveFromDescriptors(descriptorUsed);
 
-            // The value saved in the archive is better than the current root
-            // There is also a verification that the root is not the same
-            if (pairSaved.second != nullptr && pairSaved.second != root &&
+            // The value saved in the archive is better than the current agent
+            // There is also a verification that the agent is not the same
+            if (pairSaved.second != nullptr && pairSaved.second != agent &&
                 pairSaved.first->getSelectionMetrics()->getScore() >=
                     metrics->getScore()) {
                 // Nothing happened
 
-                // The current root is better than the values saved
+                // The current agent is better than the values saved
             }
-            else if (pairSaved.second != root) {
+            else if (pairSaved.second != agent) {
                 numberNewValues++;
 
                 // Saving
-                mapEliteArchive->setArchiveFromDescriptors(root, it->first,
+                mapEliteArchive->setArchiveFromDescriptors(agent, it->first,
                                                            descriptorUsed);
             }
         }
     }
 
     for (auto it = results.begin(); it != results.end();) {
-        bool containRoot = false;
+        bool containAgent = false;
         for (auto& pairArchive : this->mapEliteArchives) {
-            if (pairArchive.second->containsRoot(it->second)) {
-                containRoot = true;
+            if (pairArchive.second->containsAgent(it->second)) {
+                containAgent = true;
                 break;
             }
         }
 
-        if (!containRoot) {
-            this->resultsPerRoot.erase(it->second);
+        if (!containAgent) {
+            this->resultsPerAgent.erase(it->second);
             graph->removeVertex(*it->second);
             it = results.erase(it); // erase returns next iterator
         }
@@ -168,9 +168,9 @@ const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::
     Selector::Selector::updateContext();
 
     // Get all the vertices in the different archives
-    std::set<const TPG::TPGVertex*> verticesInAllArchives;
+    std::set<std::shared_ptr<const Algorithm::Agent>> verticesInAllArchives;
     for (auto& pair : this->mapEliteArchives) {
-        std::set<const TPG::TPGVertex*> verticesInArchive =
+        std::set<std::shared_ptr<const Algorithm::Agent>> verticesInArchive =
             pair.second->getVerticesInArchive();
         verticesInAllArchives.insert(verticesInArchive.begin(),
                                      verticesInArchive.end());
@@ -190,10 +190,10 @@ const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::
 
     // Update the number of team and archive to create, difference with 0 is to avoid empty archive or unused vertex type.
     if(nbActionsInArchives != 0){
-        this->context.nbActionsToCreate = (uint64_t)(params.mutation.tpg.nbRoots * (1 - params.mutation.tpg.ratioTeamsOverActions));
+        this->context.nbActionsToCreate = (uint64_t)(params.mutation.tpg.nbAgents * (1 - params.mutation.tpg.ratioTeamsOverActions));
     }
     if(nbTeamsInArchives != 0){
-        this->context.nbTeamsToCreate = (uint64_t)(params.mutation.tpg.nbRoots * params.mutation.tpg.ratioTeamsOverActions);
+        this->context.nbTeamsToCreate = (uint64_t)(params.mutation.tpg.nbAgents * params.mutation.tpg.ratioTeamsOverActions);
     }
     this->context.nbTeamsToCreate += nbTeamsInArchives;
 

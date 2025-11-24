@@ -124,7 +124,7 @@ void Selector::MapElites::CvtMapElitesArchive::initialize_cvt(RNG::RNG& rng)
 }
 
 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                const TPG::TPGVertex*>&
+                std::shared_ptr<const Algorithm::Agent>>&
 Selector::MapElites::CvtMapElitesArchive::getArchiveFromDescriptors(
     const std::vector<double>& descriptors) const
 {
@@ -133,7 +133,7 @@ Selector::MapElites::CvtMapElitesArchive::getArchiveFromDescriptors(
 }
 
 void Selector::MapElites::CvtMapElitesArchive::setArchiveFromDescriptors(
-    const TPG::TPGVertex* vertex, std::shared_ptr<Learn::EvaluationResult> eval,
+    std::shared_ptr<const Algorithm::Agent> vertex, std::shared_ptr<Learn::EvaluationResult> eval,
     const std::vector<double>& descriptors)
 {
     size_t idx = getIndexForDescriptor(descriptors);

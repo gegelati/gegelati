@@ -4,14 +4,14 @@
 #include "selector/classificationSelectionMetrics.h"
 
 std::shared_ptr<Selector::SelectionMetrics> Selector::ClassificationSelector::
-    createSelectionMetrics()
+    createSelectionMetrics() const
 {
     return std::make_shared<ClassificationSelectionMetrics>();
 }
 
 void Selector::ClassificationSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results,
+                  std::shared_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
     // Check that results are ClassificationSelectionMetrics is used.
@@ -19,39 +19,39 @@ void Selector::ClassificationSelector::doSelection(
     const Learn::EvaluationResult* result = results.begin()->first.get();
     if (typeid(ClassificationSelectionMetrics) !=
         typeid(*result->getSelectionMetrics().get())) {
-        throw std::runtime_error("Can not decimate worst roots for "
+        throw std::runtime_error("Can not decimate worst agents for "
                                  "results whose metrics type is not "
                                  "ClassificationSelectionMetrics.");
     }
 
-    // Compute the number of root to keep/delete base on each criterion
-    uint64_t totalNbRoot = this->graph->getNbRootVertices();
-    uint64_t nbRootsToDelete = (uint64_t)floor(
-        this->params.selection.truncation.ratioDeletedRoots * totalNbRoot);
-    uint64_t nbRootsToKeep = (totalNbRoot - nbRootsToDelete);
+    // Compute the number of agent to keep/delete base on each criterion
+    uint64_t totalNbAgent = this->manager->getAgentsCst().size();
+    uint64_t nbAgentsToDelete = (uint64_t)floor(
+        this->params.selection.truncation.ratioDeletedRoots * totalNbAgent);
+    uint64_t nbAgentsToKeep = (totalNbAgent - nbAgentsToDelete);
 
-    // Keep ~half+ of the roots based on their general score on
+    // Keep ~half+ of the agents based on their general score on
     // all class.
-    // and ~half- of the roots on a per class score (none if nbRoots to keep
+    // and ~half- of the agents on a per class score (none if nbAgents to keep
     // < 2*nb class)
-    uint64_t nbRootsKeptPerClass = (nbRootsToKeep / this->nbActions) / 2;
-    uint64_t nbRootsKeptGeneralScore =
-        nbRootsToKeep - this->nbActions * nbRootsKeptPerClass;
+    uint64_t nbAgentsKeptPerClass = (nbAgentsToKeep / this->nbActions) / 2;
+    uint64_t nbAgentsKeptGeneralScore =
+        nbAgentsToKeep - this->nbActions * nbAgentsKeptPerClass;
 
-    // Build a list of roots to keep
-    std::vector<const TPG::TPGVertex*> rootsToKeep;
+    // Build a list of agents to keep
+    std::vector<std::shared_ptr<const Algorithm::Agent>> agentsToKeep;
 
-    // Insert roots to keep per class
+    // Insert agents to keep per class
     for (uint64_t classIdx = 0; classIdx < this->nbActions; classIdx++) {
-        // Fill a map with the roots and the score of the specific class as
+        // Fill a map with the agents and the score of the specific class as
         // ID.
-        std::multimap<double, const TPG::TPGVertex*> sortedRoot;
+        std::multimap<double, std::shared_ptr<const Algorithm::Agent>> sortedAgent;
         std::for_each(
             results.begin(), results.end(),
-            [&sortedRoot, &classIdx](
+            [&sortedAgent, &classIdx](
                 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                const TPG::TPGVertex*>& res) {
-                sortedRoot.emplace(((ClassificationSelectionMetrics*)res.first
+                                std::shared_ptr<const Algorithm::Agent>>& res) {
+                sortedAgent.emplace(((ClassificationSelectionMetrics*)res.first
                                         ->getSelectionMetrics()
                                         .get())
                                        ->getScorePerClass()
@@ -59,60 +59,60 @@ void Selector::ClassificationSelector::doSelection(
                                    res.second);
             });
 
-        // Keep the best nbRootsKeptPerClass (or less for reasons explained
+        // Keep the best nbAgentsKeptPerClass (or less for reasons explained
         // in the loop)
-        auto iterator = sortedRoot.rbegin();
-        for (auto i = 0; i < nbRootsKeptPerClass; i++) {
-            // If the root is not already marked to be kept
-            if (std::find(rootsToKeep.begin(), rootsToKeep.end(),
-                          iterator->second) == rootsToKeep.end()) {
-                rootsToKeep.push_back(iterator->second);
+        auto iterator = sortedAgent.rbegin();
+        for (auto i = 0; i < nbAgentsKeptPerClass; i++) {
+            // If the agent is not already marked to be kept
+            if (std::find(agentsToKeep.begin(), agentsToKeep.end(),
+                          iterator->second) == agentsToKeep.end()) {
+                agentsToKeep.push_back(iterator->second);
             }
             // Advance the iterator no matter what.
-            // This means that if a root scores well for several classes
-            // it is kept only once anyway, but additional roots will not
+            // This means that if a agent scores well for several classes
+            // it is kept only once anyway, but additional agents will not
             // be kept for any of the concerned class.
             iterator++;
         }
     }
 
-    // Insert remaining roots to keep
+    // Insert remaining agents to keep
     auto iterator = results.rbegin();
-    while (rootsToKeep.size() < nbRootsToKeep && iterator != results.rend()) {
-        // If the root is not already marked to be kept
-        if (std::find(rootsToKeep.begin(), rootsToKeep.end(),
-                      iterator->second) == rootsToKeep.end()) {
-            rootsToKeep.push_back(iterator->second);
+    while (agentsToKeep.size() < nbAgentsToKeep && iterator != results.rend()) {
+        // If the agent is not already marked to be kept
+        if (std::find(agentsToKeep.begin(), agentsToKeep.end(),
+                      iterator->second) == agentsToKeep.end()) {
+            agentsToKeep.push_back(iterator->second);
         }
         // Advance the iterator no matter what.
         iterator++;
     }
 
     // Do the removal.
-    // Because of potential root actions, the preserved number of roots
+    // Because of potential agent actions, the preserved number of agents
     // may be higher than the given ratio.
-    auto allRoots = this->graph->getRootVertices();
-    auto& tpgRef = this->graph;
-    auto& resultsPerRootRef = this->resultsPerRoot;
+    auto allAgents = this->manager->getAgentsCst();
+    auto& graphRef = this->graph;
+    auto& managerRef = this->manager;
+    auto& resultsPerAgentRef = this->resultsPerAgent;
     std::for_each(
-        allRoots.begin(), allRoots.end(),
-        [&rootsToKeep, &tpgRef, &resultsPerRootRef,
-         &results](const TPG::TPGVertex* vert) {
-            // Do not remove actions
-            if (dynamic_cast<const TPG::TPGAction*>(vert) == nullptr &&
-                std::find(rootsToKeep.begin(), rootsToKeep.end(), vert) ==
-                    rootsToKeep.end()) {
-                tpgRef->removeVertex(*vert);
+        allAgents.begin(), allAgents.end(),
+        [&agentsToKeep, &graphRef, &resultsPerAgentRef, &managerRef,
+         &results](std::shared_ptr<const Algorithm::Agent> curragent) {
 
-                // Keep only results of non-decimated roots.
-                resultsPerRootRef.erase(vert);
+            if (std::find(agentsToKeep.begin(), agentsToKeep.end(), curragent) ==
+                    agentsToKeep.end()) {
+                managerRef->deleteAgent(curragent, graphRef);
+
+                // Keep only results of non-decimated agents.
+                resultsPerAgentRef.erase(curragent);
 
                 // Update results also
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                              const TPG::TPGVertex*>::iterator iter =
+                              std::shared_ptr<const Algorithm::Agent>>::iterator iter =
                     results.begin();
                 while (iter != results.end()) {
-                    if (iter->second == vert) {
+                    if (iter->second == curragent) {
                         results.erase(iter);
                         break;
                     }

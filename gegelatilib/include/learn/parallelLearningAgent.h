@@ -66,26 +66,26 @@ namespace Learn {
     {
       protected:
         /**
-         * \brief Method for evaluating all roots with parallelism.
+         * \brief Method for evaluating all agents with parallelism.
          *
          * The work is delegated in two distinct methods (this structure is
-         * made for inheritance purpose) : evaluateAllRootsInParallelExecute and
-         * evaluateAllRootsInParallelCompileResults.
+         * made for inheritance purpose) : evaluateAllAgentsInParallelExecute and
+         * evaluateAllAgentsInParallelCompileResults.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          * \param[in] results Map to store the resulting score of
-         * evaluated roots.
+         * evaluated agents.
          */
-        virtual void evaluateAllRootsInParallel(
+        virtual void evaluateAllAgentsInParallel(
             uint64_t generationNumber, LearningMode mode,
             std::multimap<std::shared_ptr<EvaluationResult>,
-                          const TPG::TPGVertex*>& results);
+                          std::shared_ptr<const Algorithm::Agent>>& results);
 
         /**
-         * \brief Subfunction of evaluateAllRootsInParallel which handles the
+         * \brief Subfunction of evaluateAllAgentsInParallel which handles the
          * creation of threads, their execution and junction.
          *
          * @param[in] generationNumber the integer number of the current
@@ -98,7 +98,7 @@ namespace Learn {
          * archive. These archive swill later be merged with the ones of the
          * other jobs.
          */
-        virtual void evaluateAllRootsInParallelExecute(
+        virtual void evaluateAllAgentsInParallelExecute(
             uint64_t generationNumber, LearningMode mode,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Job>>>&
@@ -106,31 +106,31 @@ namespace Learn {
             std::map<uint64_t, Archive*>& archiveMap);
 
         /**
-         * \brief Subfunction of evaluateAllRootsInParallel which handles the
+         * \brief Subfunction of evaluateAllAgentsInParallel which handles the
          * gathering of results and the merge of the archives.
          *
          * This method just emplaces results from resultsPerJobMap, as each
-         * job only contains 1 root is is quite easy.
+         * job only contains 1 agent is is quite easy.
          * The archive is merged with the mergeArchiveMap method.
          *
          * @param[in] resultsPerJobMap map linking the job number with its
          * results and itself.
-         * @param[out] results map linking single results to their root vertex.
+         * @param[out] results map linking single results to their agent vertex.
          * @param[in,out] archiveMap map linking the job number with its
          * gathered archive. These archive swill later be merged with the ones
          * of the other jobs.
          */
-        virtual void evaluateAllRootsInParallelCompileResults(
+        virtual void evaluateAllAgentsInParallelCompileResults(
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Job>>>&
                 resultsPerJobMap,
             std::multimap<std::shared_ptr<EvaluationResult>,
-                          const TPG::TPGVertex*>& results,
+                          std::shared_ptr<const Algorithm::Agent>>& results,
             std::map<uint64_t, Archive*>& archiveMap);
 
         /**
          * \brief Function implementing the behavior of slave threads during
-         * parallel evaluation of roots.
+         * parallel evaluation of agents.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
@@ -138,14 +138,14 @@ namespace Learn {
          * evaluation.
          * \param[in,out] jobsToProcess Ordered list of jobs of
          * TPGVertex to process, stored as a pair with an id filling the
-         * archiveMap. The jobs are groups of roots that shall be agents in the
-         * same simulation, there is only 1 root if there is no adversarial
+         * archiveMap. The jobs are groups of agents that shall be agents in the
+         * same simulation, there is only 1 agent if there is no adversarial
          * (e.g. if the environmnent is not multiplayer).
-         * \param[in] rootsToProcessMutex Mutex protecting the
-         * rootsToProcess
-         * \param[in] resultsPerRootMap Map to store the
-         * resulting score of evaluated roots.
-         * \param[in] resultsPerRootMapMutex
+         * \param[in] agentsToProcessMutex Mutex protecting the
+         * agentsToProcess
+         * \param[in] resultsPerAgentMap Map to store the
+         * resulting score of evaluated agents.
+         * \param[in] resultsPerAgentMapMutex
          * Mutex protecting the results.
          * \param[in,out] archiveMap Map
          * storing the exhaustiveArchive to be merged.
@@ -156,11 +156,11 @@ namespace Learn {
         void slaveEvalJobThread(
             uint64_t generationNumber, LearningMode mode,
             std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess,
-            std::mutex& rootsToProcessMutex,
+            std::mutex& agentsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Job>>>&
-                resultsPerRootMap,
-            std::mutex& resultsPerRootMapMutex,
+                resultsPerAgentMap,
+            std::mutex& resultsPerAgentMapMutex,
             std::map<uint64_t, Archive*>& archiveMap,
             std::mutex& archiveMapMutex, bool useMainEnvironment);
 
@@ -186,40 +186,64 @@ namespace Learn {
          * \param[in] le The LearningEnvironment for the TPG.
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
+         * \param[in] algorithms vector of algorithm learned by the learning agent
          * \param[in] p The LearningParameters for the LearningAgent.
          * \param[in] factory The TPGFactory used to create the TPGGraph. A
          * default TPGFactory is used if none is provided.
          */
         ParallelLearningAgent(
-            LearningEnvironment& le, const Instructions::Set& iSet,
+            LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms, const Instructions::Set& iSet,
             const LearningParameters& p,
             const TPG::TPGFactory& factory = TPG::TPGFactory())
-            : LearningAgent(le, iSet, p, factory)
+            : LearningAgent(le, algorithms, iSet, p, factory)
         {
             // overriding the maxNbThreads that basic LA defined to 1
             maxNbThreads = p.nbThreads;
         };
 
         /**
-         * \brief Evaluate all root TPGVertex of the TPGGraph.
+         * \brief Constructor for ParallelLearningAgent.
+         *
+         * Based on default constructor of LearningAgent
+         *
+         * \param[in] le The LearningEnvironment for the TPG.
+         * \param[in] iSet Set of Instruction used to compose Programs in the
+         *            learning process.
+         * \param[in] algorithm vector of algorithm learned by the learning agent
+         * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * default TPGFactory is used if none is provided.
+         */
+        ParallelLearningAgent(
+            LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm, const Instructions::Set& iSet,
+            const LearningParameters& p,
+            const TPG::TPGFactory& factory = TPG::TPGFactory())
+            : LearningAgent(le, algorithm, iSet, p, factory)
+        {
+            // overriding the maxNbThreads that basic LA defined to 1
+            maxNbThreads = p.nbThreads;
+        };
+
+        /**
+         * \brief Evaluate all agent TPGVertex of the TPGGraph.
          *
          * **Replaces the function from the base class LearningAgent.**
          *
-         * This method must always the same results as the evaluateAllRoots for
+         * This method must always the same results as the evaluateAllAgents for
          * a sequential execution. The Archive should also be updated in the
          * exact same manner.
          *
-         * This method calls the evaluateJob method for every root TPGVertex
+         * This method calls the evaluateJob method for every agent TPGVertex
          * of the TPGGraph. The method returns a sorted map associating each
-         * root vertex to its average score, in ascending order or score.
+         * agent vertex to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
-        std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>
-        evaluateAllRoots(uint64_t generationNumber, LearningMode mode) override;
+        std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
+        evaluateAllAgents(uint64_t generationNumber, LearningMode mode) override;
     };
 } // namespace Learn
 #endif

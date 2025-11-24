@@ -80,14 +80,14 @@ namespace Selector {
              * \brief Extract the metrics at each step of the evaluation.
              *
              * \param[in] metrics vector of current extracted metrics
-             * \param[in] agent the TPGVertex being evaluated.
+             * \param[in] agent the Agent being evaluated.
              * \param[in] actionValues the action values taken by the agent at
              * this step.
              * \param[in] learningEnvironment the learning environment used to
              * get the metrics.
              */
             virtual void extractMetricsStep(
-                std::vector<double>& metrics, const TPG::TPGVertex* agent,
+                std::vector<double>& metrics, std::shared_ptr<const Algorithm::Agent> agent,
                 std::vector<double> actionValues,
                 const Learn::LearningEnvironment& learningEnvironment) const {
                 /* Empty because sub-class does not need to inherrit from it.*/
@@ -97,14 +97,14 @@ namespace Selector {
              * \brief Extract the metrics at the end of the evaluation episode.
              *
              * \param[in] metrics vector of current extracted metrics
-             * \param[in] agent the TPGVertex being evaluated.
+             * \param[in] agent the Agent being evaluated.
              * \param[in] nbStepsExecuted number of steps executed at the end of
              * the episode.
              * \param[in] learningEnvironment the learning environment used to
              * get the metrics.
              */
             virtual void extractMetricsEpisode(
-                std::vector<double>& metrics, const TPG::TPGVertex* agent,
+                std::vector<double>& metrics, std::shared_ptr<const Algorithm::Agent> agent,
                 size_t nbStepsExecuted,
                 const Learn::LearningEnvironment& learningEnvironment) const {
                 /* Empty because sub-class does not need to inherrit from it.*/

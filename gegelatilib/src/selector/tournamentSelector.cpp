@@ -2,23 +2,12 @@
 
 #include "selector/tournamentSelector.h"
 
-void Selector::TournamentSelector::launchSelection(
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results,
-    RNG::RNG& rng)
-{
-
-    // Clear the set of vertices to delete.
-    this->verticesToDelete.clear();
-
-    Selector::Selector::launchSelection(results, rng);
-}
-
 void Selector::TournamentSelector::doSelection(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results,
+                  std::shared_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
+    this->verticesToDelete.clear();
 
     size_t nbToKeep =
         (size_t)(results.size() * params.selection.tournament.ratioSavedRoots);
@@ -26,7 +15,7 @@ void Selector::TournamentSelector::doSelection(
 
     // Copy the first agents to remove (those at the bottom of the ranking)
     std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>>
+                          std::shared_ptr<const Algorithm::Agent>>>
         elements;
     auto it = results.begin();
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end();
@@ -52,7 +41,7 @@ void Selector::TournamentSelector::doSelection(
         auto subrangeEnd = elements.begin() + end;
 
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      const TPG::TPGVertex*>
+                      std::shared_ptr<const Algorithm::Agent>>
             subMap(subrangeBegin, subrangeEnd);
 
         // Delete everything but the best
@@ -61,7 +50,7 @@ void Selector::TournamentSelector::doSelection(
             erasedResults.push_back(itWorst->first);
 
             // Remove the vertex from the graph as well
-            this->graph->removeVertex(*itWorst->second);
+            this->manager->deleteAgent(itWorst->second, this->graph);
 
             subMap.erase(itWorst);
         }
@@ -70,16 +59,16 @@ void Selector::TournamentSelector::doSelection(
         this->addToVerticesToDelete(subMap.begin()->second);
     }
 
-    // Delete from results and resultsPerRoot
+    // Delete from results and resultsPerAgent
     auto itDel = results.begin();
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
-        this->resultsPerRoot.erase(itDel->second);
+        this->resultsPerAgent.erase(itDel->second);
         results.erase(itDel++);
     }
 }
 
 void Selector::TournamentSelector::addToVerticesToDelete(
-    const TPG::TPGVertex* vertex)
+    std::shared_ptr<const Algorithm::Agent> vertex)
 {
     this->verticesToDelete.insert(vertex);
 }
@@ -96,7 +85,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
         std::remove_if(
             this->context.preExistingTeams.begin(),
             this->context.preExistingTeams.end(),
-            [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
+            [verticesToDeleteRef](std::shared_ptr<const Algorithm::Agent> vertex) -> bool {
                 return verticesToDeleteRef.find(vertex) !=
                        verticesToDeleteRef.end();
             }),
@@ -106,19 +95,19 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
         std::remove_if(
             this->context.preExistingActions.begin(),
             this->context.preExistingActions.end(),
-            [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
+            [verticesToDeleteRef](std::shared_ptr<const Algorithm::Agent> vertex) -> bool {
                 return verticesToDeleteRef.find(vertex) !=
                        verticesToDeleteRef.end();
             }),
         this->context.preExistingActions.end());
 
     if (!params.selection.tournament.areElitesReproductible) {
-        // The root not set to be deleted are not used during evolution
+        // The agent not set to be deleted are not used during evolution
         this->context.teamsClonable.erase(
             std::remove_if(
                 this->context.teamsClonable.begin(),
                 this->context.teamsClonable.end(),
-                [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
+                [verticesToDeleteRef](std::shared_ptr<const Algorithm::Agent> vertex) -> bool {
                     return verticesToDeleteRef.find(vertex) ==
                            verticesToDeleteRef.end();
                 }),
@@ -128,7 +117,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
             std::remove_if(
                 this->context.actionsClonable.begin(),
                 this->context.actionsClonable.end(),
-                [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
+                [verticesToDeleteRef](std::shared_ptr<const Algorithm::Agent> vertex) -> bool {
                     return verticesToDeleteRef.find(vertex) ==
                            verticesToDeleteRef.end();
                 }),
@@ -155,12 +144,12 @@ void Selector::TournamentSelector::updateAfterPopulate()
 {
     // Remove vertex to be deleted
     for (auto vertex : this->verticesToDelete) {
-        this->graph->removeVertex(*vertex);
+        this->manager->deleteAgent(vertex, this->graph);
     }
     this->verticesToDelete.clear();
 }
 
-const std::set<const TPG::TPGVertex*>& Selector::TournamentSelector::
+const std::set<std::shared_ptr<const Algorithm::Agent>>& Selector::TournamentSelector::
     getVerticesToDelete()
 {
     return this->verticesToDelete;

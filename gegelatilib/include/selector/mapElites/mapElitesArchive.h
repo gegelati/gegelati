@@ -40,9 +40,9 @@ namespace Selector {
             std::vector<double> archiveLimits;
 
             /// The archive storing evaluation results and their corresponding
-            /// root TPGVertex
+            /// agent
             std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                  const TPG::TPGVertex*>>
+                                  std::shared_ptr<const Algorithm::Agent>>>
                 archive;
 
           public:
@@ -93,7 +93,7 @@ namespace Selector {
              */
             virtual const std::vector<
                 std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>>&
+                          std::shared_ptr<const Algorithm::Agent>>>&
             getAllArchive() const;
 
             /**
@@ -102,7 +102,7 @@ namespace Selector {
              * \param[in] indices the indices to get the archive content from
              */
             virtual const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                    const TPG::TPGVertex*>&
+                                    std::shared_ptr<const Algorithm::Agent>>&
             getArchiveAt(const std::vector<uint64_t>& indices) const;
 
             /**
@@ -112,32 +112,32 @@ namespace Selector {
              * from
              */
             virtual const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                    const TPG::TPGVertex*>&
+                                    std::shared_ptr<const Algorithm::Agent>>&
             getArchiveFromDescriptors(
                 const std::vector<double>& descriptors) const;
 
             /**
              * \brief Set the archive content at given indices
              *
-             * \param[in] vertex the TPGVertex to set in the archive
+             * \param[in] agent the Agent to set in the archive
              * \param[in] eval the EvaluationResult to set in the archive
              * \param[in] indices the indices to set the archive content at
              */
             virtual void setArchiveAt(
-                const TPG::TPGVertex* vertex,
+                std::shared_ptr<const Algorithm::Agent> agent,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<uint64_t>& indices);
 
             /**
              * \brief Set the archive content at given descriptors
              *
-             * \param[in] vertex the TPGVertex to set in the archive
+             * \param[in] agent the Agent to set in the archive
              * \param[in] eval the EvaluationResult to set in the archive
              * \param[in] descriptors the descriptors to set the archive content
              * at
              */
             virtual void setArchiveFromDescriptors(
-                const TPG::TPGVertex* vertex,
+                std::shared_ptr<const Algorithm::Agent> agent,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<double>& descriptors);
 
@@ -165,37 +165,37 @@ namespace Selector {
             virtual std::vector<uint64_t> computeIndices(uint64_t index) const;
 
             /**
-             * \brief Check if the archive contains a root TPGVertex
+             * \brief Check if the archive contains a agent
              *
-             * \param[in] root the root TPGVertex to check
+             * \param[in] agent the agent to check
              */
-            virtual bool containsRoot(const TPG::TPGVertex* root) const;
+            virtual bool containsAgent(std::shared_ptr<const Algorithm::Agent> agent) const;
 
             /**
-             * \brief Remove a root TPGVertex from the archive if its number of
+             * \brief Remove a agent from the archive if its number of
              * evaluation is below maxNbEvaluation
              *
-             * \param[in] root the root TPGVertex to remove
+             * \param[in] agent the agent to remove
              * \param[in] maxNbEvaluation the maximum number of evaluation
              * allowed
              */
-            virtual void removeRootFromArchiveIfNotComplete(
-                const TPG::TPGVertex* root, size_t maxNbEvaluation);
+            virtual void removeAgentFromArchiveIfNotComplete(
+                std::shared_ptr<const Algorithm::Agent> agent, size_t maxNbEvaluation);
 
             /**
-             * \brief Remove a root TPGVertex from the archive
+             * \brief Remove a agent from the archive
              *
-             * \param[in] root the root TPGVertex to remove
+             * \param[in] agent the agent to remove
              * \param[in] maxNbEvaluation the maximum number of evaluation
              * allowed
              */
-            virtual void removeRootFromArchive(const TPG::TPGVertex* root,
+            virtual void removeAgentFromArchive(std::shared_ptr<const Algorithm::Agent> agent,
                                                size_t maxNbEvaluation);
 
             /**
              * \brief Return a set with the current vectors in the archive.
              */
-            virtual std::set<const TPG::TPGVertex*> getVerticesInArchive()
+            virtual std::set<std::shared_ptr<const Algorithm::Agent>> getVerticesInArchive()
                 const;
         };
 
