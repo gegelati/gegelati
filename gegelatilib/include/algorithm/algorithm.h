@@ -91,7 +91,7 @@ namespace Algorithm {
          * \param[in] rng deterministic random generator
          * \param[in] maxNbThreads maximum number of threads
          */
-        void populate(RNG::RNG& rng, size_t maxNbThreads);
+        virtual void populate(RNG::RNG& rng, size_t maxNbThreads);
 
 
         /**
@@ -109,10 +109,16 @@ namespace Algorithm {
          * \return true if the agent has been evaluated enough times, false
          * otherwise.
          */
-        bool isAgentEvalSkipped(
+        virtual bool isAgentEvalSkipped(
             std::shared_ptr<const Agent>,
             std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
 
+        /**
+         * \brief Method executing an Agent and outputting action values.
+         * 
+         * \param[in] agent The agent which is evaluated.
+         */
+        virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) = 0;
 
     };
 }; // namespace Algorithm
