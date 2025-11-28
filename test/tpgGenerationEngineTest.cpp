@@ -50,8 +50,8 @@
 #include "environment.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
-#include "tpg/tpgGraph.h"
-#include "tpg/tpgVertex.h"
+#include "evoGraph/graph.h"
+#include "evoGraph/vertex.h"
 
 #include "util/counterReset.h"
 

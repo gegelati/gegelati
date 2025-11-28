@@ -33,24 +33,24 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TPG_TEAM_INSTRUMENTED_H
-#define TPG_TEAM_INSTRUMENTED_H
+#ifndef TPG_ACTION_INSTRUMENTED_H
+#define TPG_ACTION_INSTRUMENTED_H
 
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
-#include "tpg/tpgTeam.h"
+#include "evoGraph/instrumented/vertexInstrumented.h"
+#include "evoGraph/action.h"
 
 namespace EvoGraph {
 
     /**
-     * \brief Instrumented TPGTeam
+     * \brief Instrumented Action
      */
-    class TPGTeamInstrumented : public EvoGraph::TPGTeam,
-                                public EvoGraph::VertexInstrumentation
+    class ActionInstrumented : public EvoGraph::Action,
+                                  public EvoGraph::VertexInstrumentation
     {
       public:
-        /// Main constructor for TPGTeamInstrumented.
-        /// see TPGTeam constructor for more details.
-        TPGTeamInstrumented() : TPGTeam()
+        /// Main constructor for ActionInstrumented.
+        /// see Action constructor for more details.
+        ActionInstrumented(const uint64_t id) : Action(id)
         {
         }
     };

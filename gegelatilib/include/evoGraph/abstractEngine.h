@@ -1,7 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,27 +33,61 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TPG_ACTION_INSTRUMENTED_H
-#define TPG_ACTION_INSTRUMENTED_H
+#ifndef TPG_ABSTRACT_ENGINE_H
+#define TPG_ABSTRACT_ENGINE_H
 
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
-#include "tpg/tpgAction.h"
+#include "program/program.h"
+#include "evoGraph/graph.h"
 
 namespace EvoGraph {
-
     /**
-     * \brief Instrumented Action
+     * \brief Abstract Class in charge of managing maps to give a unique ID
+     * for vertex and a program of a Graph.
+     *
      */
-    class ActionInstrumented : public EvoGraph::Action,
-                                  public EvoGraph::VertexInstrumentation
+    class AbstractEngine
     {
+
+      protected:
+        /**
+         * \brief Reference to the Graph whose content will be used to fill
+         * the maps.
+         */
+        const EvoGraph::Graph& tpg;
+
+        /**
+         * \brief Set of all program ID.
+         */
+        std::set<uint64_t> programID;
+
+        /**
+         * \brief Integer number used during export to associate a unique
+         * integer identifier to each Action.
+         *
+         * Identifier associated to Action are NOT preserved during multiple
+         * printing of a Graph.
+         */
+        uint64_t nbActions;
+
+        /**
+         * \brief Constructor for the abstract engine.
+         *
+         * \param[in] tpg const reference to the graph whose content will be
+         * used to fill the maps of IDs  (vertex and program).
+         */
+
+        AbstractEngine(const EvoGraph::Graph& tpg) : tpg{tpg}, nbActions{0} {};
+
       public:
-        /// Main constructor for ActionInstrumented.
-        /// see Action constructor for more details.
-        ActionInstrumented(const uint64_t id) : Action(id)
-        {
-        }
+        /**
+         * \brief Method to find if the given Program is already in the
+         * programID set.
+         *
+         * \return A boolean value indicating whether the returned ID is a new
+         * one (true), or one found in the programID map (false).
+         */
+
+        bool programIDIsNew(const uint64_t& progID);
     };
 } // namespace EvoGraph
-
-#endif
+#endif // TPG_ABSTRACT_ENGINE_H

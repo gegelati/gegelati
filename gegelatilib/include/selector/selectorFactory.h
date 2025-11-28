@@ -6,7 +6,7 @@
 #include "algorithm/agentManager.h"
 #include "learn/classificationLearningEnvironment.h"
 #include "learn/learningEnvironment.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 #include "selector/classificationSelector.h"
 #include "selector/mapElites/mapElitesSelector.h"

@@ -44,17 +44,17 @@
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstant.h"
 #include "program/program.h"
-#include "tpg/tpgAction.h"
-#include "tpg/tpgEdge.h"
-#include "tpg/tpgGraph.h"
-#include "tpg/tpgTeam.h"
-#include "tpg/tpgVertex.h"
+#include "evoGraph/action.h"
+#include "evoGraph/edge.h"
+#include "evoGraph/graph.h"
+#include "evoGraph/team.h"
+#include "evoGraph/vertex.h"
 
-#include "tpg/instrumented/tpgActionInstrumented.h"
-#include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
-#include "tpg/instrumented/tpgTeamInstrumented.h"
+#include "evoGraph/instrumented/actionInstrumented.h"
+#include "evoGraph/instrumented/edgeInstrumented.h"
+#include "evoGraph/instrumented/executionEngineInstrumented.h"
+#include "evoGraph/instrumented/factoryInstrumented.h"
+#include "evoGraph/instrumented/teamInstrumented.h"
 
 #ifndef PARAM_FLOAT_PRECISION
 #define PARAM_FLOAT_PRECISION (float)(int16_t(1) / (float)(-INT16_MIN))

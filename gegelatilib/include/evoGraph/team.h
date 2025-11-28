@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2021) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
- * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,61 +34,33 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TPG_ABSTRACT_ENGINE_H
-#define TPG_ABSTRACT_ENGINE_H
+#ifndef TPG_TEAM_H
+#define TPG_TEAM_H
 
-#include "program/program.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/vertex.h"
 
 namespace EvoGraph {
     /**
-     * \brief Abstract Class in charge of managing maps to give a unique ID
-     * for vertex and a program of a Graph.
+     * Class used to represent a Team of the Graph.
      *
+     * A Team is a non-leaf vertex of a Tangled-Program-Graph.
      */
-    class AbstractEngine
+    class TPGTeam : public Vertex
     {
-
-      protected:
-        /**
-         * \brief Reference to the Graph whose content will be used to fill
-         * the maps.
-         */
-        const EvoGraph::Graph& tpg;
-
-        /**
-         * \brief Set of all program ID.
-         */
-        std::set<uint64_t> programID;
-
-        /**
-         * \brief Integer number used during export to associate a unique
-         * integer identifier to each Action.
-         *
-         * Identifier associated to Action are NOT preserved during multiple
-         * printing of a Graph.
-         */
-        uint64_t nbActions;
-
-        /**
-         * \brief Constructor for the abstract engine.
-         *
-         * \param[in] tpg const reference to the graph whose content will be
-         * used to fill the maps of IDs  (vertex and program).
-         */
-
-        AbstractEngine(const EvoGraph::Graph& tpg) : tpg{tpg}, nbActions{0} {};
-
       public:
         /**
-         * \brief Method to find if the given Program is already in the
-         * programID set.
-         *
-         * \return A boolean value indicating whether the returned ID is a new
-         * one (true), or one found in the programID map (false).
+         * \brief Main constructor of a TPGTeam.
          */
+        TPGTeam() : Vertex(){};
 
-        bool programIDIsNew(const uint64_t& progID);
+        /**
+         * \brief Specialization throwing an std::runtime_exception if a
+         * ActionEdge is added to a TPGTeam.
+         *
+         */
+        virtual void addOutgoingEdge(Edge* edge) override;
     };
-} // namespace EvoGraph
-#endif // TPG_ABSTRACT_ENGINE_H
+
+}; // namespace EvoGraph
+
+#endif

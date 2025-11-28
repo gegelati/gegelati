@@ -44,10 +44,10 @@
 #include <string>
 
 #include "codeGen/programGenerationEngine.h"
-#include "tpg/tpgAbstractEngine.h"
-#include "tpg/tpgEdge.h"
-#include "tpg/tpgGraph.h"
-#include "tpg/tpgTeam.h"
+#include "evoGraph/abstractEngine.h"
+#include "evoGraph/edge.h"
+#include "evoGraph/graph.h"
+#include "evoGraph/team.h"
 
 namespace CodeGen {
     /**

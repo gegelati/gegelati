@@ -4,7 +4,7 @@
 #define SELECTION_CONTEXT_H
 
 #include "algorithm/agent.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 namespace Selector {
 

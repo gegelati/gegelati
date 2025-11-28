@@ -9,7 +9,7 @@
 #include "selector/selectionContext.h"
 #include "selector/selectionMetrics.h"
 #include "selector/selectionParameters.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 namespace Selector {
 

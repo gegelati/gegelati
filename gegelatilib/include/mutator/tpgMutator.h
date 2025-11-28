@@ -42,7 +42,7 @@
 #include "archive.h"
 #include "mutator/mutationParameters.h"
 #include "selector/selector.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 namespace Mutator {
     namespace TPGMutator {

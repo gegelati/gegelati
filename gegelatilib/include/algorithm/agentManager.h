@@ -6,7 +6,7 @@
 #include <memory>
 #include <ranges>
 
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 #include "algorithm/agent.h"
 #include "util/genericComparator.h"
 

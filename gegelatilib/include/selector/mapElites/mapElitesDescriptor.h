@@ -4,7 +4,7 @@
 
 #include "algorithm/agent.h"
 #include "learn/learningEnvironment.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 namespace Selector {
     namespace MapElites {

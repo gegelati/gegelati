@@ -4,8 +4,8 @@
 #define COUNTER_RESET_H
 
 #include "program/program.h"
-#include "tpg/tpgEdge.h"
-#include "tpg/tpgVertex.h"
+#include "evoGraph/edge.h"
+#include "evoGraph/vertex.h"
 
 /**
  * \brief Struct to reset static counters in classes.

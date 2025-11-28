@@ -46,9 +46,9 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
-#include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/instrumented/executionEngineInstrumented.h"
+#include "evoGraph/instrumented/factoryInstrumented.h"
+#include "evoGraph/graph.h"
 
 #include "tpg/instrumented/executionStats.h"
 

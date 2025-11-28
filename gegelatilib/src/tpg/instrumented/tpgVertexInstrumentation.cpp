@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
+#include "evoGraph/instrumented/vertexInstrumented.h"
 
 uint64_t EvoGraph::VertexInstrumentation::getNbVisits() const
 {

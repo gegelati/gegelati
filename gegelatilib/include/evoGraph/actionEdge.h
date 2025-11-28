@@ -41,7 +41,7 @@
 
 #include <memory>
 
-#include "tpg/tpgEdge.h"
+#include "evoGraph/edge.h"
 
 namespace EvoGraph {
     // Declare class to make it usable as an attribute.

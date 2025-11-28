@@ -40,10 +40,10 @@
 #include <memory>
 
 #include "archive.h"
-#include "tpg/tpgAction.h"
-#include "tpg/tpgActionEdge.h"
-#include "tpg/tpgEdge.h"
-#include "tpg/tpgTeam.h"
+#include "evoGraph/action.h"
+#include "evoGraph/actionEdge.h"
+#include "evoGraph/edge.h"
+#include "evoGraph/team.h"
 
 namespace EvoGraph {
 

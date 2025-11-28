@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/instrumented/executionStats.h"
+#include "evoGraph/instrumented/executionStats.h"
 
 #include <algorithm>
 #include <fstream>
@@ -42,10 +42,10 @@
 #include <vector>
 
 #include "program/program.h"
-#include "tpg/instrumented/tpgActionInstrumented.h"
-#include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgTeamInstrumented.h"
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
+#include "evoGraph/instrumented/actionInstrumented.h"
+#include "evoGraph/instrumented/edgeInstrumented.h"
+#include "evoGraph/instrumented/teamInstrumented.h"
+#include "evoGraph/instrumented/vertexInstrumented.h"
 
 void EvoGraph::ExecutionStats::analyzeProgram(
     std::map<uint64_t, uint64_t>& instructionCounts,

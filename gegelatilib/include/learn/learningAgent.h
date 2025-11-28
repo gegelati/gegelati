@@ -49,8 +49,8 @@
 #include "instructions/set.h"
 #include "log/laLogger.h"
 #include "mutator/mutationParameters.h"
-#include "tpg/tpgExecutionEngine.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/executionEngine.h"
+#include "evoGraph/graph.h"
 
 #include "learn/classificationLearningEnvironment.h"
 #include "learn/evaluationResult.h"

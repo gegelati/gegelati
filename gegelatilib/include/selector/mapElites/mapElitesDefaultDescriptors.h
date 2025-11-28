@@ -4,7 +4,7 @@
 
 #include "algorithm/agent.h"
 #include "selector/mapElites/mapElitesDescriptor.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 namespace Selector {
 

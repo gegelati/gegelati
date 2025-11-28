@@ -39,7 +39,7 @@
 #include <atomic>
 #include <cstddef>
 
-#include "tpg/tpgEdge.h"
+#include "evoGraph/edge.h"
 
 namespace EvoGraph {
 

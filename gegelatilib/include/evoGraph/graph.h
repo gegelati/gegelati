@@ -42,11 +42,11 @@
 #include <set>
 
 #include "environment.h"
-#include "tpg/tpgAction.h"
-#include "tpg/tpgEdge.h"
-#include "tpg/tpgFactory.h"
-#include "tpg/tpgTeam.h"
-#include "tpg/tpgVertex.h"
+#include "evoGraph/action.h"
+#include "evoGraph/edge.h"
+#include "evoGraph/factory.h"
+#include "evoGraph/team.h"
+#include "evoGraph/vertex.h"
 #include "util/genericComparator.h"
 
 namespace EvoGraph {

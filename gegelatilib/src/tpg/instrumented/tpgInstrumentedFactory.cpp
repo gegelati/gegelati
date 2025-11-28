@@ -33,11 +33,11 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
-#include "tpg/instrumented/tpgActionInstrumented.h"
-#include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/instrumented/tpgTeamInstrumented.h"
+#include "evoGraph/instrumented/factoryInstrumented.h"
+#include "evoGraph/instrumented/actionInstrumented.h"
+#include "evoGraph/instrumented/edgeInstrumented.h"
+#include "evoGraph/instrumented/executionEngineInstrumented.h"
+#include "evoGraph/instrumented/teamInstrumented.h"
 
 std::shared_ptr<EvoGraph::Graph> EvoGraph::TPGInstrumentedFactory::createGraph(
     const Environment& env) const

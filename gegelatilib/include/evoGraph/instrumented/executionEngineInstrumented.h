@@ -43,9 +43,9 @@
 
 #include "archive.h"
 #include "program/programExecutionEngine.h"
-#include "tpg/tpgExecutionEngine.h"
+#include "evoGraph/executionEngine.h"
 
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 namespace EvoGraph {
     /**

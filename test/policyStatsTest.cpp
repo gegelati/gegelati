@@ -42,7 +42,7 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
 
-#include "tpg/policyStats.h"
+#include "evoGraph/policyStats.h"
 
 class PolicyStatsTest : public ::testing::Test
 {

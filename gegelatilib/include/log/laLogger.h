@@ -45,7 +45,7 @@
 #include "algorithm/algorithm.h"
 #include "learn/evaluationResult.h"
 #include "log/logger.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 namespace Learn {
     class LearningAgent;

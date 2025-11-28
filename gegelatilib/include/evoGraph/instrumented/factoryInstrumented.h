@@ -36,8 +36,8 @@
 #ifndef TPG_INSTRUMENTED_FACTORY
 #define TPG_INSTRUMENTED_FACTORY
 
-#include "tpg/tpgFactory.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/factory.h"
+#include "evoGraph/graph.h"
 
 namespace EvoGraph {
 

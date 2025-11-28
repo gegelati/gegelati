@@ -3,7 +3,7 @@
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "selector/mapElites/mapElitesDefaultDescriptors.h"
 #include "selector/mapElites/mapElitesDescriptor.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 #include <gtest/gtest.h>
 
 class MapElitesDescriptorsTest : public ::testing::Test

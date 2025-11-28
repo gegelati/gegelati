@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/tpgAbstractEngine.h"
+#include "evoGraph/abstractEngine.h"
 
 bool EvoGraph::AbstractEngine::programIDIsNew(const uint64_t& progID)
 {

@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/instrumented/tpgEdgeInstrumented.h"
+#include "evoGraph/instrumented/edgeInstrumented.h"
 
 uint64_t EvoGraph::EdgeInstrumented::getNbVisits() const
 {

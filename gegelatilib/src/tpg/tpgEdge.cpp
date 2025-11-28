@@ -33,7 +33,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/tpgEdge.h"
+#include "evoGraph/edge.h"
 
 // Declaration of static edge ID Counter in local here because it creates error
 // in the .h file for MSVC compiler See:

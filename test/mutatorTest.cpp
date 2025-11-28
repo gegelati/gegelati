@@ -57,8 +57,8 @@
 #include "program/program.h"
 #include "program/programExecutionEngine.h"
 #include "selector/tournamentSelector.h"
-#include "tpg/tpgExecutionEngine.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/executionEngine.h"
+#include "evoGraph/graph.h"
 #include "util/counterReset.h"
 
 class MutatorTest : public ::testing::Test

@@ -41,7 +41,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 EvoGraph::Graph::~Graph()
 {

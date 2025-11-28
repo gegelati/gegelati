@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "learn/evaluationResult.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 namespace Selector {
     namespace MapElites {

@@ -43,12 +43,12 @@
 #include "instructions/set.h"
 #include "program/program.h"
 
-#include "tpg/instrumented/tpgActionInstrumented.h"
-#include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
-#include "tpg/instrumented/tpgTeamInstrumented.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/instrumented/actionInstrumented.h"
+#include "evoGraph/instrumented/edgeInstrumented.h"
+#include "evoGraph/instrumented/executionEngineInstrumented.h"
+#include "evoGraph/instrumented/factoryInstrumented.h"
+#include "evoGraph/instrumented/teamInstrumented.h"
+#include "evoGraph/graph.h"
 #include "util/counterReset.h"
 
 class TPGInstrumentedTest : public ::testing::Test

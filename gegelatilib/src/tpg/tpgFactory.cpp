@@ -34,9 +34,9 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/tpgFactory.h"
-#include "tpg/tpgExecutionEngine.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/factory.h"
+#include "evoGraph/executionEngine.h"
+#include "evoGraph/graph.h"
 
 std::shared_ptr<EvoGraph::Graph> EvoGraph::GraphFactory::createGraph(
     const Environment& env) const

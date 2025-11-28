@@ -43,13 +43,13 @@
 
 #include "log/laBasicLogger.h"
 
-#include "tpg/instrumented/tpgActionInstrumented.h"
-#include "tpg/instrumented/tpgEdgeInstrumented.h"
-#include "tpg/instrumented/tpgInstrumentedFactory.h"
-#include "tpg/instrumented/tpgTeamInstrumented.h"
-#include "tpg/instrumented/tpgVertexInstrumentation.h"
-#include "tpg/policyStats.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/instrumented/actionInstrumented.h"
+#include "evoGraph/instrumented/edgeInstrumented.h"
+#include "evoGraph/instrumented/factoryInstrumented.h"
+#include "evoGraph/instrumented/teamInstrumented.h"
+#include "evoGraph/instrumented/vertexInstrumented.h"
+#include "evoGraph/policyStats.h"
+#include "evoGraph/graph.h"
 
 #include "instructions/addPrimitiveType.h"
 #include "mutator/rng.h"

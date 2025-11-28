@@ -38,8 +38,8 @@
 
 #include <map>
 
-#include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/instrumented/executionEngineInstrumented.h"
+#include "evoGraph/graph.h"
 
 namespace EvoGraph {
 

@@ -1,8 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,33 +33,27 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TPG_TEAM_H
-#define TPG_TEAM_H
+#ifndef TPG_TEAM_INSTRUMENTED_H
+#define TPG_TEAM_INSTRUMENTED_H
 
-#include "tpg/tpgVertex.h"
+#include "evoGraph/instrumented/vertexInstrumented.h"
+#include "evoGraph/team.h"
 
 namespace EvoGraph {
+
     /**
-     * Class used to represent a Team of the Graph.
-     *
-     * A Team is a non-leaf vertex of a Tangled-Program-Graph.
+     * \brief Instrumented TPGTeam
      */
-    class TPGTeam : public Vertex
+    class TPGTeamInstrumented : public EvoGraph::TPGTeam,
+                                public EvoGraph::VertexInstrumentation
     {
       public:
-        /**
-         * \brief Main constructor of a TPGTeam.
-         */
-        TPGTeam() : Vertex(){};
-
-        /**
-         * \brief Specialization throwing an std::runtime_exception if a
-         * ActionEdge is added to a TPGTeam.
-         *
-         */
-        virtual void addOutgoingEdge(Edge* edge) override;
+        /// Main constructor for TPGTeamInstrumented.
+        /// see TPGTeam constructor for more details.
+        TPGTeamInstrumented() : TPGTeam()
+        {
+        }
     };
-
-}; // namespace EvoGraph
+} // namespace EvoGraph
 
 #endif

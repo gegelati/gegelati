@@ -41,8 +41,8 @@
 #include <cstdint>
 
 #include "program/program.h"
-#include "tpg/tpgActionEdge.h"
-#include "tpg/tpgVertex.h"
+#include "evoGraph/actionEdge.h"
+#include "evoGraph/vertex.h"
 
 namespace EvoGraph {
     /**

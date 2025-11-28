@@ -40,9 +40,9 @@
 #include <vector>
 
 #include "program/programExecutionEngine.h"
-#include "tpg/tpgEdge.h"
+#include "evoGraph/edge.h"
 
-#include "tpg/tpgExecutionEngine.h"
+#include "evoGraph/executionEngine.h"
 
 void EvoGraph::ExecutionEngine::setArchive(Archive* newArchive)
 {

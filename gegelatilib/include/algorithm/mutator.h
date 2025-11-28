@@ -8,7 +8,7 @@
 #include "algorithm/agentManager.h"
 #include "mutator/rng.h"
 #include "selector/selector.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 
 namespace Algorithm {
     /**

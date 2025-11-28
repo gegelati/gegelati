@@ -35,7 +35,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/tpgAction.h"
+#include "evoGraph/action.h"
 #include <stdexcept>
 
 void EvoGraph::Action::addOutgoingEdge(Edge* edge)

@@ -51,8 +51,8 @@
 #include "file/tpgGraphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
-#include "tpg/tpgGraph.h"
-#include "tpg/tpgVertex.h"
+#include "evoGraph/graph.h"
+#include "evoGraph/vertex.h"
 
 class TicTacToeGenerationBestDotTest : public ::testing::Test
 {

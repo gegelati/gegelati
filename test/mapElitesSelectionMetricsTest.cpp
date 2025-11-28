@@ -3,7 +3,7 @@
 #include "instructions/lambdaInstruction.h"
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "selector/mapElites/mapElitesDefaultDescriptors.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 #include <gtest/gtest.h>
 
 class MapElitesSelectionMetricsTest : public ::testing::Test

@@ -36,8 +36,8 @@
 
 #include <algorithm>
 
-#include "tpg/tpgActionEdge.h"
-#include "tpg/tpgVertex.h"
+#include "evoGraph/actionEdge.h"
+#include "evoGraph/vertex.h"
 
 // Declaration of static vertex ID Counter in local here because it creates
 // error in the .h file for MSVC compiler See:

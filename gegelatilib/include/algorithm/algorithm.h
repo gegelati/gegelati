@@ -9,7 +9,7 @@
 #include "algorithm/agentManager.h"
 #include "algorithm/mutator.h"
 #include "learn/learningParameters.h"
-#include "tpg/tpgGraph.h"
+#include "evoGraph/graph.h"
 #include "selector/selectorFactory.h"
 
 namespace Algorithm {

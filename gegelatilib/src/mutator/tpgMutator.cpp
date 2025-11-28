@@ -47,10 +47,10 @@
 #include "archive.h"
 
 #include "program/programExecutionEngine.h"
-#include "tpg/tpgAction.h"
-#include "tpg/tpgEdge.h"
-#include "tpg/tpgGraph.h"
-#include "tpg/tpgTeam.h"
+#include "evoGraph/action.h"
+#include "evoGraph/edge.h"
+#include "evoGraph/graph.h"
+#include "evoGraph/team.h"
 
 #include "mutator/mutationParameters.h"
 #include "mutator/programMutator.h"

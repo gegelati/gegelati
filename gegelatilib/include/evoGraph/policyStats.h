@@ -45,9 +45,9 @@
 
 #include "program/program.h"
 
-#include "tpg/tpgAction.h"
-#include "tpg/tpgGraph.h"
-#include "tpg/tpgTeam.h"
+#include "evoGraph/action.h"
+#include "evoGraph/graph.h"
+#include "evoGraph/team.h"
 
 namespace EvoGraph {
 

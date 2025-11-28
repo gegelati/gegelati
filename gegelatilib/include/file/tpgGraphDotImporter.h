@@ -49,11 +49,11 @@
 #include <string>
 
 #include "learn/learningEnvironment.h"
-#include "tpg/tpgAction.h"
-#include "tpg/tpgEdge.h"
-#include "tpg/tpgGraph.h"
-#include "tpg/tpgTeam.h"
-#include "tpg/tpgVertex.h"
+#include "evoGraph/action.h"
+#include "evoGraph/edge.h"
+#include "evoGraph/graph.h"
+#include "evoGraph/team.h"
+#include "evoGraph/vertex.h"
 #include "util/counterReset.h"
 
 namespace File {

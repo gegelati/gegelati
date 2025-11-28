@@ -124,24 +124,24 @@
 #include <selector/tournamentSelector.h>
 #include <selector/truncationSelector.h>
 
-#include <tpg/policyStats.h>
-#include <tpg/tpgAbstractEngine.h>
-#include <tpg/tpgAction.h>
-#include <tpg/tpgActionEdge.h>
-#include <tpg/tpgEdge.h>
-#include <tpg/tpgExecutionEngine.h>
-#include <tpg/tpgFactory.h>
-#include <tpg/tpgGraph.h>
-#include <tpg/tpgTeam.h>
-#include <tpg/tpgVertex.h>
+#include <evoGraph/policyStats.h>
+#include <evoGraph/abstractEngine.h>
+#include <evoGraph/action.h>
+#include <evoGraph/actionEdge.h>
+#include <evoGraph/edge.h>
+#include <evoGraph/executionEngine.h>
+#include <evoGraph/factory.h>
+#include <evoGraph/graph.h>
+#include <evoGraph/team.h>
+#include <evoGraph/vertex.h>
 
-#include <tpg/instrumented/executionStats.h>
-#include <tpg/instrumented/tpgActionInstrumented.h>
-#include <tpg/instrumented/tpgEdgeInstrumented.h>
-#include <tpg/instrumented/tpgExecutionEngineInstrumented.h>
-#include <tpg/instrumented/tpgInstrumentedFactory.h>
-#include <tpg/instrumented/tpgTeamInstrumented.h>
-#include <tpg/instrumented/tpgVertexInstrumentation.h>
+#include <evoGraph/instrumented/executionStats.h>
+#include <evoGraph/instrumented/actionInstrumented.h>
+#include <evoGraph/instrumented/edgeInstrumented.h>
+#include <evoGraph/instrumented/executionEngineInstrumented.h>
+#include <evoGraph/instrumented/factoryInstrumented.h>
+#include <evoGraph/instrumented/teamInstrumented.h>
+#include <evoGraph/instrumented/vertexInstrumented.h>
 
 #ifdef CODE_GENERATION
 #include <codeGen/programGenerationEngine.h>

@@ -38,7 +38,7 @@
 
 #include "algorithm/agent.h"
 #include "log/laLogger.h"
-#include "tpg/policyStats.h"
+#include "evoGraph/policyStats.h"
 
 namespace Log {
     /**

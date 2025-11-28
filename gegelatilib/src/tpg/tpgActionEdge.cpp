@@ -34,7 +34,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "tpg/tpgActionEdge.h"
+#include "evoGraph/actionEdge.h"
 
 const EvoGraph::Vertex* EvoGraph::ActionEdge::getDestination() const
 {
