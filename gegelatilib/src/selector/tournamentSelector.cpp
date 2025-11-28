@@ -68,9 +68,9 @@ void Selector::TournamentSelector::doSelection(
 }
 
 void Selector::TournamentSelector::addToVerticesToDelete(
-    std::shared_ptr<const Algorithm::Agent> vertex)
+    std::shared_ptr<const Algorithm::Agent> agent)
 {
-    this->verticesToDelete.insert(vertex);
+    this->agentsToDelete.insert(agent);
 }
 
 const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
@@ -85,7 +85,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
         std::remove_if(
             this->context.preExistingTeams.begin(),
             this->context.preExistingTeams.end(),
-            [verticesToDeleteRef](std::shared_ptr<const Algorithm::Agent> vertex) -> bool {
+            [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
                 return verticesToDeleteRef.find(vertex) !=
                        verticesToDeleteRef.end();
             }),
@@ -95,7 +95,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
         std::remove_if(
             this->context.preExistingActions.begin(),
             this->context.preExistingActions.end(),
-            [verticesToDeleteRef](std::shared_ptr<const Algorithm::Agent> vertex) -> bool {
+            [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
                 return verticesToDeleteRef.find(vertex) !=
                        verticesToDeleteRef.end();
             }),
@@ -107,7 +107,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
             std::remove_if(
                 this->context.teamsClonable.begin(),
                 this->context.teamsClonable.end(),
-                [verticesToDeleteRef](std::shared_ptr<const Algorithm::Agent> vertex) -> bool {
+                [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
                     return verticesToDeleteRef.find(vertex) ==
                            verticesToDeleteRef.end();
                 }),
@@ -117,7 +117,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
             std::remove_if(
                 this->context.actionsClonable.begin(),
                 this->context.actionsClonable.end(),
-                [verticesToDeleteRef](std::shared_ptr<const Algorithm::Agent> vertex) -> bool {
+                [verticesToDeleteRef](const TPG::TPGVertex* vertex) -> bool {
                     return verticesToDeleteRef.find(vertex) ==
                            verticesToDeleteRef.end();
                 }),
@@ -143,8 +143,8 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
 void Selector::TournamentSelector::updateAfterPopulate()
 {
     // Remove vertex to be deleted
-    for (auto vertex : this->verticesToDelete) {
-        this->manager->deleteAgent(vertex, this->graph);
+    for (auto agent : this->agentsToDelete) {
+        this->manager->deleteAgent(agent, this->graph);
     }
     this->verticesToDelete.clear();
 }
@@ -152,5 +152,5 @@ void Selector::TournamentSelector::updateAfterPopulate()
 const std::set<std::shared_ptr<const Algorithm::Agent>>& Selector::TournamentSelector::
     getVerticesToDelete()
 {
-    return this->verticesToDelete;
+    return this->agentsToDelete;
 }

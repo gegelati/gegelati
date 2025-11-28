@@ -159,7 +159,7 @@ namespace Learn {
         /**
          * \brief return the a pointer of the algorithm at the specified index
          * 
-         * \param[in] specified index
+         * \param[in] idx specified index
          */
         std::shared_ptr<Algorithm::Algorithm> getAlgorithmAt(size_t idx);
 

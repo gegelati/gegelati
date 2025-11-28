@@ -42,6 +42,7 @@
 #include <map>
 #include <ostream>
 
+#include "algorithm/algorithm.h"
 #include "learn/evaluationResult.h"
 #include "log/logger.h"
 #include "tpg/tpgGraph.h"
@@ -194,7 +195,7 @@ namespace Log {
 
         virtual void logAfterEvaluate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) {
+                          std::shared_ptr<const Algorithm::Agent>>& results) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
@@ -214,7 +215,7 @@ namespace Log {
          */
         virtual void logAfterValidate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) {
+                          std::shared_ptr<const Algorithm::Agent>>& results) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 

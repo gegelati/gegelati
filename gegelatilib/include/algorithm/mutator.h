@@ -46,8 +46,6 @@ namespace Algorithm {
          *            mutated Program behavior.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
-         * \param[in] nbAction number of actions that will be usable for
-         * interacting with this LearningEnviromnent.
          * \param[in] maxNbThreads Integer parameter controlling the number of
          * threads used for parallel execution. Possible values are:
          *   - default:  Let the runtime decide using

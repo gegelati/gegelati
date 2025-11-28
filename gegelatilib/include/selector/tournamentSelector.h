@@ -30,7 +30,15 @@ namespace Selector {
          * it. The TPGVertex in the set will be deleted at the end of the
          * TPGMutator::PopulateTPG method.
          */
-        std::set<std::shared_ptr<const Algorithm::Agent>> verticesToDelete;
+        std::set<const TPG::TPGVertex*> verticesToDelete;
+
+        /**
+         * @brief set of TPGVertex filled during the selection process,
+         * containing the vertices that went through the tournament en survived
+         * it. The TPGVertex in the set will be deleted at the end of the
+         * TPGMutator::PopulateTPG method.
+         */
+        std::set<std::shared_ptr<const Algorithm::Agent>> agentsToDelete;
 
       public:
         /**

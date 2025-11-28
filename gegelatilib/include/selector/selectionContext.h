@@ -53,6 +53,7 @@ namespace Selector {
         /// destination for the new agents created by the Mutator.
         std::vector<std::shared_ptr<const Algorithm::Agent>> preExistingAgents;
 
+        /// @brief number of agent to be created by the mutator
         uint64_t nbAgentsToCreate;
     };
 }; // namespace Selector

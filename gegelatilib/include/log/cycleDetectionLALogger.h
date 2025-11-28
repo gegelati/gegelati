@@ -88,43 +88,5 @@ namespace Log {
          * an output if there is one.
          */
         virtual void logAfterPopulateTPG() override;
-
-        /**
-         * Inherited via LaLogger.
-         *
-         * \brief Does nothing in this logger.
-         *
-         * \param[in] results scores of the evaluation.
-         */
-        virtual void logAfterEvaluate(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) override;
-
-        /**
-         * Inherited via LaLogger.
-         *
-         * \brief Does nothing in this logger.
-         */
-        virtual void logAfterDecimate() override;
-
-        /**
-         * Inherited via LaLogger.
-         *
-         * \brief Logs the min, avg and max score of the generation.
-         *
-         * If doValidation is true, no eval results are logged so that
-         * the logger can only show validation results.
-         *
-         * \param[in] results scores of the validation.
-         */
-        virtual void logAfterValidate(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) override;
-        /**
-         * Inherited via LaLogger
-         *
-         * \brief Does nothing in this logger.
-         */
-        virtual void logEndOfTraining() override;
     };
 }; // namespace Log

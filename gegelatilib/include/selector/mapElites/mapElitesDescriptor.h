@@ -2,6 +2,7 @@
 #ifndef MAP_ELITES_DESCRIPTORS_H
 #define MAP_ELITES_DESCRIPTORS_H
 
+#include "algorithm/agent.h"
 #include "learn/learningEnvironment.h"
 #include "tpg/tpgGraph.h"
 

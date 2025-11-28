@@ -36,29 +36,29 @@
 #ifndef LA_POLICY_STATS_LOGGER_H
 #define LA_POLICY_STATS_LOGGER_H
 
+#include "algorithm/agent.h"
 #include "log/laLogger.h"
 #include "tpg/policyStats.h"
-#include "tpg/tpgVertex.h"
 
 namespace Log {
     /**
      * \brief LALogger specialization using logging the PolicyStats information
-     * on the best root.
+     * on the best agent.
      *
-     * After each evaluation of the TPG root vertices by the LearningAgent, this
-     * LALogger logs the PolicyStats of the bestRoot into its output stream.
+     * After each evaluation of the agents by the LearningAgent, this
+     * LALogger logs the PolicyStats of the bestAgent into its output stream.
      */
     class LAPolicyStatsLogger : public LALogger
     {
       private:
         /**
-         * \brief Last best root TPG::TPGVertex whose policyStats was printed in
+         * \brief Last best agent whose policyStats was printed in
          * the log.
          *
-         * After each evaluation, the policyStats of a root is printed in the
-         * stream only if a new root is marked as the bestRoot.
+         * After each evaluation, the policyStats of an agent is printed in the
+         * stream only if a new agent is marked as the bestAgent.
          */
-        const TPG::TPGVertex* lastBestRoot = nullptr;
+        std::shared_ptr<const Algorithm::Agent> lastBestAgent = nullptr;
 
         /// Number of the current generation.
         uint64_t generationNumber = 0;

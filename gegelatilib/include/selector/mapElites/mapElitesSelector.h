@@ -65,7 +65,7 @@ namespace Selector {
              *
              * Creates and return an instance of MapElitesSelectionMetrics
              */
-            virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics()
+            virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics() const
                 override;
 
             /**

@@ -2,6 +2,7 @@
 #ifndef AGENT_H
 #define AGENT_H
 
+#include <cstdint>
 
 namespace Algorithm {
     /**
@@ -24,6 +25,9 @@ namespace Algorithm {
         Agent()
             {};
 
+        /**
+         * \brief return the ID of the agent.
+         */
         virtual uint64_t getID() const;
 
         /**

@@ -4,8 +4,7 @@
 void Algorithm::Mutator::mutatePopulation(
     std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
     const Archive& archive, const Learn::LearningParameters& params,
-    RNG::RNG& rng,
-    uint64_t maxNbThreads = std::thread::hardware_concurrency())
+    RNG::RNG& rng, uint64_t maxNbThread)
 {
 
     // If the graph doesn't contain any clonable teams, call the init procedure.

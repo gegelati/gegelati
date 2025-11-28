@@ -144,7 +144,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
                nbActions < this->params.maxNbActionsPerEval) {
             // Get the actions
             std::vector<double> actionsID =
-                tee.executeFromRoot(agent, le.getInitActions()).second;
+                algorithm->executeAgent(agent);
             // Do it
             le.doActions(actionsID);
             // Count actions
@@ -361,7 +361,7 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
 
 std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
     std::shared_ptr<const Algorithm::Agent> agent, 
-    Learn::LearningMode mode, int idx = 0)
+    Learn::LearningMode mode, int idx)
 {
 
     // Before each agent evaluation, set a new seed for the archive in

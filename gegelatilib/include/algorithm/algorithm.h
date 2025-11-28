@@ -44,15 +44,24 @@ namespace Algorithm {
         /**
          * \brief Main Algorithm constructor.
          * 
+         * \param[in] graph graph used by the learning agent
          * \param[in] params the LearningParameters used by the Algorithm.
+         * \param[in] manager Manager of the algorithm to store and maintain agents
+         * 
          */
-        Algorithm(std::shared_ptr<TPG::TPGGraph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager = std::make_shared<AgentManager>())
-               : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, params)} {};
+        Algorithm(std::shared_ptr<TPG::TPGGraph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager)
+               : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, manager, params)} {};
 
+        /// Constant getter for the manager
         virtual std::shared_ptr<const AgentManager> getManagerCst() const;
+
+        /// Constant getter for the selector
         virtual std::shared_ptr<const Selector::Selector> getSelectorCst() const;
 
+        /// Getter for the manager
         virtual std::shared_ptr<AgentManager> getManager();
+
+        /// Getter for the selector
         virtual std::shared_ptr<Selector::Selector> getSelector();
 
         /**
@@ -118,7 +127,7 @@ namespace Algorithm {
          * 
          * \param[in] agent The agent which is evaluated.
          */
-        virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) = 0;
+        virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) const = 0;
 
     };
 }; // namespace Algorithm

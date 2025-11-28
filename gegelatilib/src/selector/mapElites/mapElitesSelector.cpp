@@ -21,7 +21,7 @@ Selector::MapElites::MapElitesSelector::getMapElitesArchives()
 }
 
 std::shared_ptr<Selector::SelectionMetrics> Selector::MapElites::
-    MapElitesSelector::createSelectionMetrics()
+    MapElitesSelector::createSelectionMetrics() const
 {
     if (this->mapEliteArchives.size() == 0) {
         throw std::runtime_error(
@@ -153,7 +153,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
 
         if (!containAgent) {
             this->resultsPerAgent.erase(it->second);
-            graph->removeVertex(*it->second);
+            this->manager->deleteAgent(it->second, this->graph);
             it = results.erase(it); // erase returns next iterator
         }
         else {
@@ -180,20 +180,20 @@ const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::
     size_t nbTeamsInArchives = 0;
     size_t nbActionsInArchives = 0;
     for (auto& vertex : verticesInAllArchives) {
-        if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
-            nbTeamsInArchives++;
-        }
-        else {
+        //if (dynamic_cast<const Algorithm::Agent*>(vertex) != nullptr) {
+        //    nbTeamsInArchives++;
+        //}
+        //else {
             nbActionsInArchives++;
-        }
+        //}
     }
 
     // Update the number of team and archive to create, difference with 0 is to avoid empty archive or unused vertex type.
     if(nbActionsInArchives != 0){
-        this->context.nbActionsToCreate = (uint64_t)(params.mutation.tpg.nbAgents * (1 - params.mutation.tpg.ratioTeamsOverActions));
+        this->context.nbActionsToCreate = (uint64_t)(params.mutation.tpg.nbRoots * (1 - params.mutation.tpg.ratioTeamsOverActions));
     }
     if(nbTeamsInArchives != 0){
-        this->context.nbTeamsToCreate = (uint64_t)(params.mutation.tpg.nbAgents * params.mutation.tpg.ratioTeamsOverActions);
+        this->context.nbTeamsToCreate = (uint64_t)(params.mutation.tpg.nbRoots * params.mutation.tpg.ratioTeamsOverActions);
     }
     this->context.nbTeamsToCreate += nbTeamsInArchives;
 

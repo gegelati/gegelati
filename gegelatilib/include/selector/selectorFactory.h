@@ -3,6 +3,7 @@
 #ifndef SELECTOR_FACTORY_H
 #define SELECTOR_FACTORY_H
 
+#include "algorithm/agentManager.h"
 #include "learn/classificationLearningEnvironment.h"
 #include "learn/learningEnvironment.h"
 #include "tpg/tpgGraph.h"
@@ -18,12 +19,14 @@ namespace Selector {
     /**
      * \brief Factory method to create the appropriate Selector
      *
-     * \param[in] graph shared pointer of the TPGGraph on which the selection is
+     * \param[in] graph shared pointer of the Graph on which the selection is
      * done.
+     * \param[in] manager shared pointer of the manager used by the algorithm.
      * \param[in] params LearningParameters used
      */
     std::shared_ptr<Selector> selectorFactory(
         const std::shared_ptr<TPG::TPGGraph> graph,
+        const std::shared_ptr<Algorithm::AgentManager> manager,
         const Learn::LearningParameters& params);
 
 }; // namespace Selector

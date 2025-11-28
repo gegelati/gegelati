@@ -58,7 +58,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
     std::vector<const TPG::TPGVertex*> currentPath;
 
     // Add all roots to the set of vertex to visit
-    const auto tpg = this->learningAgent.getTPGGraph();
+    const auto tpg = this->learningAgent.getGraph();
     auto roots = tpg->getRootVertices();
     std::copy(roots.begin(), roots.end(), std::back_inserter(lifoToVisit));
 
@@ -118,28 +118,4 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
     if (this->logOnSuccess) {
         *this << "No cycle detected in this TPG.";
     }
-}
-
-void Log::CycleDetectionLALogger::logAfterEvaluate(
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results)
-{
-    // nothing to log
-}
-
-void Log::CycleDetectionLALogger::logAfterDecimate()
-{
-    // nothing to log
-}
-
-void Log::CycleDetectionLALogger::logAfterValidate(
-    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>& results)
-{
-    // nothing to log
-}
-
-void Log::CycleDetectionLALogger::logEndOfTraining()
-{
-    // nothing to log
 }

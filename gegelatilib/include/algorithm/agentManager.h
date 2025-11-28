@@ -27,10 +27,6 @@ namespace Algorithm {
         std::set<std::shared_ptr<Agent>, SharedLess<Agent>> agents;
 
     public:
-
-        AgentManager()
-            {};
-
         /**
          * \brief Get the current agents used by the algorithm.
          */
@@ -70,6 +66,7 @@ namespace Algorithm {
         /**
          * \brief Create a new Agent of the type used by the current algorithm.
          * 
+         * \param[in] agent the Agent to delete.
          * \param[in] graph the TPGGraph associated with the Agent.
          * 
          * \return a shared pointer to the created Agent.
