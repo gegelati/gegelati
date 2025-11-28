@@ -89,7 +89,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                            (privateLearningEnvironment->isDiscrete())
                                ? 0
                                : privateLearningEnvironment->getNbActions());
-    std::unique_ptr<TPG::TPGExecutionEngine> tee =
+    std::unique_ptr<EvoGraph::TPGExecutionEngine> tee =
         this->graph->getFactory().createTPGExecutionEngine(privateEnv, NULL);
 
     int i = 0;

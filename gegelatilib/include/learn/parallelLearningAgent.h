@@ -53,7 +53,7 @@
 
 namespace Learn {
     /**
-     * \brief  Class used to control the learning steps of a TPGGraph within
+     * \brief  Class used to control the learning steps of a Graph within
      * a given LearningEnvironment, with parallel executions for speedup
      * purposes.
      *
@@ -188,13 +188,13 @@ namespace Learn {
          *            learning process.
          * \param[in] algorithms vector of algorithm learned by the learning agent
          * \param[in] p The LearningParameters for the LearningAgent.
-         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * \param[in] factory The TPGFactory used to create the Graph. A
          * default TPGFactory is used if none is provided.
          */
         ParallelLearningAgent(
             LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms, const Instructions::Set& iSet,
             const LearningParameters& p,
-            const TPG::TPGFactory& factory = TPG::TPGFactory())
+            const EvoGraph::TPGFactory& factory = EvoGraph::TPGFactory())
             : LearningAgent(le, algorithms, iSet, p, factory)
         {
             // overriding the maxNbThreads that basic LA defined to 1
@@ -211,13 +211,13 @@ namespace Learn {
          *            learning process.
          * \param[in] algorithm vector of algorithm learned by the learning agent
          * \param[in] p The LearningParameters for the LearningAgent.
-         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * \param[in] factory The TPGFactory used to create the Graph. A
          * default TPGFactory is used if none is provided.
          */
         ParallelLearningAgent(
             LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm, const Instructions::Set& iSet,
             const LearningParameters& p,
-            const TPG::TPGFactory& factory = TPG::TPGFactory())
+            const EvoGraph::TPGFactory& factory = EvoGraph::TPGFactory())
             : LearningAgent(le, algorithm, iSet, p, factory)
         {
             // overriding the maxNbThreads that basic LA defined to 1
@@ -225,7 +225,7 @@ namespace Learn {
         };
 
         /**
-         * \brief Evaluate all agent TPGVertex of the TPGGraph.
+         * \brief Evaluate all agent TPGVertex of the Graph.
          *
          * **Replaces the function from the base class LearningAgent.**
          *
@@ -234,7 +234,7 @@ namespace Learn {
          * exact same manner.
          *
          * This method calls the evaluateJob method for every agent TPGVertex
-         * of the TPGGraph. The method returns a sorted map associating each
+         * of the Graph. The method returns a sorted map associating each
          * agent vertex to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current

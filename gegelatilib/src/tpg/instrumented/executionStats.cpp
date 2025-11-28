@@ -47,7 +47,7 @@
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 #include "tpg/instrumented/tpgVertexInstrumentation.h"
 
-void TPG::ExecutionStats::analyzeProgram(
+void EvoGraph::ExecutionStats::analyzeProgram(
     std::map<uint64_t, uint64_t>& instructionCounts,
     const Program::Program& program)
 {
@@ -57,7 +57,7 @@ void TPG::ExecutionStats::analyzeProgram(
     }
 }
 
-void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
+void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
 {
     this->avgNbExecutionPerInstruction.clear();
 
@@ -123,7 +123,7 @@ void TPG::ExecutionStats::analyzeInstrumentedGraph(const TPGGraph* graph)
     }
 }
 
-void TPG::ExecutionStats::analyzeInferenceTrace(
+void EvoGraph::ExecutionStats::analyzeInferenceTrace(
     const std::vector<const TPGVertex*>& trace)
 {
     uint64_t nbEvaluatedTeams = trace.size() - 1;
@@ -166,8 +166,8 @@ void TPG::ExecutionStats::analyzeInferenceTrace(
         this->distribUsedVertices[vertex]++;
 }
 
-void TPG::ExecutionStats::analyzeExecution(
-    const TPG::TPGExecutionEngineInstrumented& tee, const TPG::TPGGraph* graph)
+void EvoGraph::ExecutionStats::analyzeExecution(
+    const EvoGraph::TPGExecutionEngineInstrumented& tee, const EvoGraph::Graph* graph)
 {
     clearInferenceTracesStats();
     this->lastAnalyzedGraph = graph; // Will be used by writeStatsToJson()
@@ -178,57 +178,57 @@ void TPG::ExecutionStats::analyzeExecution(
         analyzeInferenceTrace(trace);
 }
 
-double TPG::ExecutionStats::getAvgEvaluatedTeams() const
+double EvoGraph::ExecutionStats::getAvgEvaluatedTeams() const
 {
     return this->avgEvaluatedTeams;
 }
-double TPG::ExecutionStats::getAvgEvaluatedPrograms() const
+double EvoGraph::ExecutionStats::getAvgEvaluatedPrograms() const
 {
     return this->avgEvaluatedPrograms;
 }
-double TPG::ExecutionStats::getAvgExecutedLines() const
+double EvoGraph::ExecutionStats::getAvgExecutedLines() const
 {
     return this->avgExecutedLines;
 }
-const std::map<size_t, double>& TPG::ExecutionStats::
+const std::map<size_t, double>& EvoGraph::ExecutionStats::
     getAvgNbExecutionPerInstruction() const
 {
     return this->avgNbExecutionPerInstruction;
 }
 
-const std::vector<TPG::TraceStats>& TPG::ExecutionStats::
+const std::vector<EvoGraph::TraceStats>& EvoGraph::ExecutionStats::
     getInferenceTracesStats() const
 {
     return this->inferenceTracesStats;
 }
 
-const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribEvaluatedTeams()
+const std::map<size_t, size_t>& EvoGraph::ExecutionStats::getDistribEvaluatedTeams()
     const
 {
     return this->distribEvaluatedTeams;
 }
-const std::map<size_t, size_t>& TPG::ExecutionStats::
+const std::map<size_t, size_t>& EvoGraph::ExecutionStats::
     getDistribEvaluatedPrograms() const
 {
     return this->distribEvaluatedPrograms;
 }
-const std::map<size_t, size_t>& TPG::ExecutionStats::getDistribExecutedLines()
+const std::map<size_t, size_t>& EvoGraph::ExecutionStats::getDistribExecutedLines()
     const
 {
     return this->distribExecutedLines;
 }
-const std::map<size_t, std::map<size_t, size_t>>& TPG::ExecutionStats::
+const std::map<size_t, std::map<size_t, size_t>>& EvoGraph::ExecutionStats::
     getDistribNbExecutionPerInstruction() const
 {
     return this->distribNbExecutionPerInstruction;
 }
-const std::map<const TPG::TPGVertex*, size_t>& TPG::ExecutionStats::
+const std::map<const EvoGraph::TPGVertex*, size_t>& EvoGraph::ExecutionStats::
     getDistribUsedVertices() const
 {
     return this->distribUsedVertices;
 }
 
-void TPG::ExecutionStats::clearInferenceTracesStats()
+void EvoGraph::ExecutionStats::clearInferenceTracesStats()
 {
     this->inferenceTracesStats.clear();
 
@@ -239,12 +239,12 @@ void TPG::ExecutionStats::clearInferenceTracesStats()
     this->distribUsedVertices.clear();
 }
 
-void TPG::ExecutionStats::writeStatsToJson(const char* filePath,
+void EvoGraph::ExecutionStats::writeStatsToJson(const char* filePath,
                                            bool noIndent) const
 {
     std::map<const TPGVertex*, unsigned int> vertexIndexes;
     if (this->lastAnalyzedGraph != nullptr) {
-        // Store the index of each vertex in the TPGGraph in a lookup table
+        // Store the index of each vertex in the Graph in a lookup table
         // to print the execution traces.
         auto graphVertices = this->lastAnalyzedGraph->getVertices();
         for (int i = 0; i < graphVertices.size(); i++) {

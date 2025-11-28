@@ -38,7 +38,7 @@ namespace Selector {
              * \param[in] params parameters used by the
              * Selector.
              */
-            MapElitesSelector(std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
+            MapElitesSelector(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
                               const Learn::LearningParameters& params)
                 : Selector{graph, manager, params}
             {

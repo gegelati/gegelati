@@ -55,7 +55,7 @@ void Log::LAPolicyStatsLogger::logAfterDecimate()
                      ->getScore()
               << std::endl
               << std::endl;
-        TPG::PolicyStats ps;
+        EvoGraph::PolicyStats ps;
         ps.setEnvironment(this->learningAgent.getGraph()->getEnvironment());
         ps.analyzePolicy(this->learningAgent.getGraph()->getVertices().front()); // TODO
         *this << ps << std::endl;

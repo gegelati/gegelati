@@ -28,13 +28,13 @@ namespace Algorithm {
         Mutator() {};
 
         /**
-         * \brief Initialize a random TPGGraph.
+         * \brief Initialize a random Graph.
          *
-         * \param[in,out] graph the initialized TPGGraph.
+         * \param[in,out] graph the initialized Graph.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomPopulation(std::shared_ptr<TPG::TPGGraph> graph, const Learn::LearningParameters& params, RNG::RNG& rng) = 0;
+        virtual void initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, RNG::RNG& rng) = 0;
 
         /**
          * \brief mutate the whole population, by dupplicating and adding new agents from the current algorithm.
@@ -54,7 +54,7 @@ namespace Algorithm {
          *   - `n > 1`: Set the number of threads explicitly.
          */
         virtual void mutatePopulation(
-            std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
             const Archive& archive, const Learn::LearningParameters& params,
             RNG::RNG& rng,
             uint64_t maxNbThreads = std::thread::hardware_concurrency());
@@ -70,7 +70,7 @@ namespace Algorithm {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, const Learn::LearningParameters& params, RNG::RNG& rng
         ) = 0;
 
         /**
@@ -84,7 +84,7 @@ namespace Algorithm {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            std::shared_ptr<const Agent> agent, std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, const Learn::LearningParameters& params, RNG::RNG& rng
         ) = 0;
     };
 }; // namespace Mutator

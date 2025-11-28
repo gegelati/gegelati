@@ -45,11 +45,11 @@
 
 namespace CodeGen {
     /**
-     * \brief Class in charge of generating the C code of a TPGGraph.
+     * \brief Class in charge of generating the C code of a Graph.
      *
-     * Each program of the TPGGraph is represented by a C function.
+     * Each program of the Graph is represented by a C function.
      * All the functions are regrouped in a file. Another file holds
-     * the required functions to iterate through the TPGGraph.
+     * the required functions to iterate through the Graph.
      */
     class TPGSwitchGenerationEngine : public CodeGen::TPGGenerationEngine
     {
@@ -87,14 +87,14 @@ namespace CodeGen {
          * \param[in] filename : filename of the file holding the main function
          *                of the generated program.
          *
-         * \param[in] tpg Environment in which the Program of the TPGGraph will
+         * \param[in] tpg Environment in which the Program of the Graph will
          *                be executed.
          *
          * \param[in] path to the folder in which the file are generated. If the
          * folder does not exist.
          */
         TPGSwitchGenerationEngine(const std::string& filename,
-                                  const TPG::TPGGraph& tpg,
+                                  const EvoGraph::Graph& tpg,
                                   const std::string& path = "./")
             : TPGGenerationEngine(filename, tpg, path){};
 
@@ -109,8 +109,8 @@ namespace CodeGen {
          * \brief function that creates the C files required to execute the TPG
          * without gegelati.
          *
-         * This function iterates trough the TPGGraph and create the required C
-         * code to represent each element of the TPGGraph.
+         * This function iterates trough the Graph and create the required C
+         * code to represent each element of the Graph.
          */
         virtual void generateTPGGraph();
 
@@ -128,7 +128,7 @@ namespace CodeGen {
          *
          * \param[in] edge that must be generated.
          */
-        virtual void generateEdge(const TPG::TPGEdge& edge);
+        virtual void generateEdge(const EvoGraph::TPGEdge& edge);
 
         /**
          * \brief Method for generating the code for a team of the graph.
@@ -140,7 +140,7 @@ namespace CodeGen {
          * \param[in] team const reference of the TPGTeam that must be
          * generated.
          */
-        virtual void generateTeam(const TPG::TPGTeam& team);
+        virtual void generateTeam(const EvoGraph::TPGTeam& team);
 
         /**
          * \brief Method for generating a action of the graph.
@@ -152,7 +152,7 @@ namespace CodeGen {
          * \param[in] action const reference of the TPGAction that must be
          * generated.
          */
-        virtual void generateAction(const TPG::TPGAction& action);
+        virtual void generateAction(const EvoGraph::TPGAction& action);
 
         /**
          * \brief Generate function name depending on the vertex type.
@@ -160,7 +160,7 @@ namespace CodeGen {
          * \param v vertex to be named.
          * \return std::string name of the vertex.
          */
-        std::string vertexName(const TPG::TPGVertex& v);
+        std::string vertexName(const EvoGraph::TPGVertex& v);
     };
 } // namespace CodeGen
 

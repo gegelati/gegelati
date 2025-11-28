@@ -238,7 +238,7 @@ void File::TPGGraphDotImporter::readTeam(std::smatch& matches)
     if (!this->lastLine.empty() && !matches.empty()) {
         const auto& newTeam = this->tpg.addNewTeam();
 
-        this->vertexID.insert(std::pair<uint64_t, const TPG::TPGVertex*>(
+        this->vertexID.insert(std::pair<uint64_t, const EvoGraph::TPGVertex*>(
             std::stoi(matches[1]), &newTeam));
 
         this->tpg.setNewVertexID(newTeam, std::stoi(matches[1]));
@@ -276,15 +276,15 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
             const auto& newAction = this->tpg.addNewAction(currActionID);
 
             // create a new action and insert it if none was previously found
-            this->actionID.insert(std::pair<uint64_t, const TPG::TPGAction*>(
+            this->actionID.insert(std::pair<uint64_t, const EvoGraph::TPGAction*>(
                 action_number,
-                dynamic_cast<const TPG::TPGAction*>(&newAction)));
+                dynamic_cast<const EvoGraph::TPGAction*>(&newAction)));
 
             this->tpg.setNewVertexID(newAction, action_number);
 
             this->actionClasses.insert(
-                std::pair<const TPG::TPGAction*, std::vector<uint64_t>>(
-                    dynamic_cast<const TPG::TPGAction*>(&newAction), numbers));
+                std::pair<const EvoGraph::TPGAction*, std::vector<uint64_t>>(
+                    dynamic_cast<const EvoGraph::TPGAction*>(&newAction), numbers));
         }
     }
 }
@@ -302,7 +302,7 @@ void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
             // find the program to add to the edge
             auto p_it = programID.find(program);
             if (action_it != this->actionID.end() && p_it != programID.end()) {
-                const TPG::TPGAction* action = action_it->second;
+                const EvoGraph::TPGAction* action = action_it->second;
 
                 uint64_t actionClass = this->actionClasses.at(action).at(
                     action->getOutgoingEdges().size());
@@ -329,8 +329,8 @@ void File::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch& matches)
             auto p_it = programID.find(program);
             if (team_it != vertexID.end() &&
                 action_it != this->actionID.end() && p_it != programID.end()) {
-                const TPG::TPGVertex* team = team_it->second;
-                const TPG::TPGVertex* action = action_it->second;
+                const EvoGraph::TPGVertex* team = team_it->second;
+                const EvoGraph::TPGVertex* action = action_it->second;
                 std::shared_ptr<Program::Program> p = p_it->second;
                 this->tpg.addNewEdge(*team, *action, p);
             }
@@ -356,8 +356,8 @@ void File::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch& matches)
             std::shared_ptr<Program::Program> p = p_it->second;
             if (t1_it != this->vertexID.end() &&
                 t2_it != this->vertexID.end()) {
-                const TPG::TPGVertex* team_i = t1_it->second;
-                const TPG::TPGVertex* team_o = t2_it->second;
+                const EvoGraph::TPGVertex* team_i = t1_it->second;
+                const EvoGraph::TPGVertex* team_o = t2_it->second;
                 this->tpg.addNewEdge(*team_i, *team_o, p);
             }
         }
@@ -382,7 +382,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
 
             auto edge_it =
                 std::find_if(edges.begin(), edges.end(),
-                             [p](const std::unique_ptr<TPG::TPGEdge>& other) {
+                             [p](const std::unique_ptr<EvoGraph::TPGEdge>& other) {
                                  return (&(other->getProgram()) == p.get());
                              });
             if (edge_it != edges.end()) // we got the corresponding edge :
@@ -390,7 +390,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
                 // then get the team :
                 auto team_it = this->vertexID.find(team_in);
                 if (team_it != this->vertexID.end()) {
-                    const TPG::TPGVertex* team = team_it->second;
+                    const EvoGraph::TPGVertex* team = team_it->second;
                     auto edge = this->tpg.addNewEdge(
                         *team, *(edge_it->get()->getDestination()), p);
                 }

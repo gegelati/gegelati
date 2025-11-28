@@ -71,8 +71,8 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
     Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
-    TPG::TPGGraph* tpg;
-    std::vector<const TPG::TPGEdge*> edges;
+    EvoGraph::Graph* tpg;
+    std::vector<const EvoGraph::TPGEdge*> edges;
     Archive a;
 
     /**
@@ -111,8 +111,8 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 1;
         e = new Environment(set, params, vect);
-        tpg = new TPG::TPGGraph(
-            *e, std::make_unique<TPG::TPGInstrumentedFactory>());
+        tpg = new EvoGraph::Graph(
+            *e, std::make_unique<EvoGraph::TPGInstrumentedFactory>());
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
@@ -185,10 +185,10 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
 
 TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateEdge)
 {
-    TPG::TPGExecutionEngineInstrumented tpeei(*e);
+    EvoGraph::TPGExecutionEngineInstrumented tpeei(*e);
 
-    const TPG::TPGEdgeInstrumented* edge =
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edges.at(0));
+    const EvoGraph::TPGEdgeInstrumented* edge =
+        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edges.at(0));
 
     ASSERT_EQ(edge->getNbTraversal(), 0)
         << "Edge should not have been visited before.";
@@ -206,14 +206,14 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateEdge)
 
 TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
 {
-    TPG::TPGExecutionEngineInstrumented tpeei(*e);
+    EvoGraph::TPGExecutionEngineInstrumented tpeei(*e);
 
-    const TPG::TPGTeamInstrumented* t1 =
-        dynamic_cast<const TPG::TPGTeamInstrumented*>(tpg->getVertices().at(1));
-    const TPG::TPGEdgeInstrumented* t1t2 =
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edges.at(5));
-    const TPG::TPGEdgeInstrumented* t1a0 =
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edges.at(7));
+    const EvoGraph::TPGTeamInstrumented* t1 =
+        dynamic_cast<const EvoGraph::TPGTeamInstrumented*>(tpg->getVertices().at(1));
+    const EvoGraph::TPGEdgeInstrumented* t1t2 =
+        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edges.at(5));
+    const EvoGraph::TPGEdgeInstrumented* t1a0 =
+        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edges.at(7));
 
     // Check initial instrumentation
     ASSERT_EQ(t1->getNbVisits(), 0) << "Vertex number of visits should be 0.";
@@ -227,9 +227,9 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
     ASSERT_EQ(t1a0->getNbVisits(), 0)
         << "Edge should not have been traversed before.";
 
-    const TPG::TPGEdge* result = NULL;
+    const EvoGraph::TPGEdge* result = NULL;
     ASSERT_NO_THROW(result = &tpeei.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)));)
+                        *(const EvoGraph::TPGTeam*)(tpg->getVertices().at(1)));)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
@@ -246,12 +246,12 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
 
 TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
 {
-    TPG::TPGExecutionEngineInstrumented tpeei(*e);
+    EvoGraph::TPGExecutionEngineInstrumented tpeei(*e);
 
-    std::vector<const TPG::TPGVertex*> result;
+    std::vector<const EvoGraph::TPGVertex*> result;
 
-    const TPG::TPGActionInstrumented* action =
-        dynamic_cast<const TPG::TPGActionInstrumented*>(
+    const EvoGraph::TPGActionInstrumented* action =
+        dynamic_cast<const EvoGraph::TPGActionInstrumented*>(
             tpg->getVertices().at(6));
 
     ASSERT_EQ(action->getNbVisits(), 0)
@@ -259,10 +259,10 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
 
     ASSERT_NO_THROW(
         result = tpeei.executeFromRoot(*tpg->getRootVertices().at(0)).first)
-        << "Execution of a TPGGraph from a valid root failed.";
+        << "Execution of a Graph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)
-        << "Size of the traversed path during the execution of the TPGGraph is "
+        << "Size of the traversed path during the execution of the Graph is "
            "not as expected.";
 
     ASSERT_EQ(result.at(3), tpg->getVertices().at(6))
@@ -275,8 +275,8 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
 
 TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors)
 {
-    TPG::TPGExecutionEngineInstrumented tpeei(*e);
-    std::vector<const TPG::TPGVertex*> result;
+    EvoGraph::TPGExecutionEngineInstrumented tpeei(*e);
+    std::vector<const EvoGraph::TPGVertex*> result;
 
     ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
         << "Trace history isn't empty before execution.";

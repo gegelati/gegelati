@@ -105,7 +105,7 @@ void Selector::Selector::forgetPreviousResults()
     this->bestAgent.second = nullptr;
 }
 
-std::shared_ptr<TPG::TPGGraph> Selector::Selector::getGraph()
+std::shared_ptr<EvoGraph::Graph> Selector::Selector::getGraph()
 {
     return this->graph;
 }
@@ -127,12 +127,12 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
     this->context.teamsClonable.clear();
     this->context.actionsClonable.clear();
     for (auto agent : agentVertices) {
-        if (dynamic_cast<const TPG::TPGTeam*>(agent) != nullptr) {
-            this->context.teamsClonable.push_back((const TPG::TPGTeam*)agent);
+        if (dynamic_cast<const EvoGraph::TPGTeam*>(agent) != nullptr) {
+            this->context.teamsClonable.push_back((const EvoGraph::TPGTeam*)agent);
         }
         else if (params.mutation.tpg.useActionProgram) {
             this->context.actionsClonable.push_back(
-                (const TPG::TPGAction*)agent);
+                (const EvoGraph::TPGAction*)agent);
         }
     }
     uint64_t nbAgentTeams = this->context.teamsClonable.size();
@@ -143,15 +143,15 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
     this->context.preExistingTeams.clear();
     this->context.preExistingActions.clear();
     for (auto vertex : vertices) {
-        if (dynamic_cast<const TPG::TPGAction*>(vertex) != nullptr &&
+        if (dynamic_cast<const EvoGraph::TPGAction*>(vertex) != nullptr &&
             (params.mutation.tpg.teamAccessAllActions ||
              vertex->getIncomingEdges().size() == 0)) {
             this->context.preExistingActions.push_back(
-                (const TPG::TPGAction*)vertex);
+                (const EvoGraph::TPGAction*)vertex);
         }
-        else if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
+        else if (dynamic_cast<const EvoGraph::TPGTeam*>(vertex) != nullptr) {
             this->context.preExistingTeams.push_back(
-                (const TPG::TPGTeam*)vertex);
+                (const EvoGraph::TPGTeam*)vertex);
         }
     }
 
@@ -160,7 +160,7 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
     auto& preExistingEdges = this->context.preExistingEdges;
     std::for_each(
         this->graph->getEdges().begin(), this->graph->getEdges().end(),
-        [&preExistingEdges](const std::unique_ptr<TPG::TPGEdge>& edge) {
+        [&preExistingEdges](const std::unique_ptr<EvoGraph::TPGEdge>& edge) {
             preExistingEdges.push_back(edge.get());
         });
 

@@ -47,31 +47,31 @@ namespace Algorithm {
         /**
          * \brief Create a new Agent of the type used by the current algorithm.
          * 
-         * \param[in] graph the TPGGraph associated with the Agent.
+         * \param[in] graph the Graph associated with the Agent.
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<Agent> createAgent(std::shared_ptr<TPG::TPGGraph> graph) = 0;
+        virtual std::shared_ptr<Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Copy a new Agent of the type used by the current algorithm.
          * 
          * \param[in] agent the Agent to copy.
-         * \param[in] graph the TPGGraph associated with the Agent.
+         * \param[in] graph the Graph associated with the Agent.
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<TPG::TPGGraph> graph) = 0;
+        virtual std::shared_ptr<Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Create a new Agent of the type used by the current algorithm.
          * 
          * \param[in] agent the Agent to delete.
-         * \param[in] graph the TPGGraph associated with the Agent.
+         * \param[in] graph the Graph associated with the Agent.
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<Agent> deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<TPG::TPGGraph> graph) = 0;
+        virtual std::shared_ptr<Agent> deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
     };
 }; // namespace Algorithm
 

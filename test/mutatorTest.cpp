@@ -562,7 +562,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
 {
     RNG::RNG rng;
     rng.setSeed(0);
-    TPG::TPGGraph tpg(*e);
+    EvoGraph::Graph tpg(*e);
     Mutator::MutationParameters params;
 
     uint64_t nbActions = 5;
@@ -582,15 +582,15 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     ASSERT_EQ(tpg.getRootVertices().size(), params.tpg.nbRoots)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
-                            [](const TPG::TPGVertex* vert) {
-                                return dynamic_cast<const TPG::TPGAction*>(
+                            [](const EvoGraph::TPGVertex* vert) {
+                                return dynamic_cast<const EvoGraph::TPGAction*>(
                                            vert) != nullptr;
                             }),
               nbActions)
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
-                            [](const TPG::TPGVertex* vert) {
-                                return dynamic_cast<const TPG::TPGTeam*>(
+                            [](const EvoGraph::TPGVertex* vert) {
+                                return dynamic_cast<const EvoGraph::TPGTeam*>(
                                            vert) != nullptr;
                             }),
               params.tpg.nbRoots)
@@ -604,7 +604,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
     // Check number of Programs.
     std::set<Program::Program*> programs;
     std::for_each(tpg.getEdges().begin(), tpg.getEdges().end(),
-                  [&programs](const std::unique_ptr<TPG::TPGEdge>& edge) {
+                  [&programs](const std::unique_ptr<EvoGraph::TPGEdge>& edge) {
                       programs.insert(&edge->getProgram());
                   });
     ASSERT_EQ(programs.size(), params.tpg.nbRoots * 2)
@@ -614,7 +614,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         std::set<Program::Program*> teamPrograms;
         std::for_each(team->getOutgoingEdges().begin(),
                       team->getOutgoingEdges().end(),
-                      [&teamPrograms](const TPG::TPGEdge* edge) {
+                      [&teamPrograms](const EvoGraph::TPGEdge* edge) {
                           teamPrograms.insert(&edge->getProgram());
                       });
         ASSERT_EQ(teamPrograms.size(), team->getOutgoingEdges().size())
@@ -693,7 +693,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     params.mutation.tpg.useActionProgram = false;
     uint64_t nbActions = 8;
     Environment ce0(set, params, vect, nbActions);
-    TPG::TPGGraph tpg0(ce0);
+    EvoGraph::Graph tpg0(ce0);
     ASSERT_THROW(
         Mutator::TPGMutator::initRandomTPG(tpg0, mutParams, rng, nbActions),
         std::runtime_error)
@@ -704,7 +704,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     nbActions = 7;
     params.mutation.tpg.useActionProgram = true;
     Environment ce1(set, params, vect, nbActions);
-    TPG::TPGGraph tpg1(ce1);
+    EvoGraph::Graph tpg1(ce1);
     ASSERT_NO_THROW(
         Mutator::TPGMutator::initRandomTPG(tpg1, mutParams, rng, nbActions))
         << "TPG Initialization should not fail.";
@@ -713,7 +713,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     rng.setSeed(0);
     nbActions = 9;
     Environment ce2(set, params, vect, nbActions);
-    TPG::TPGGraph tpg2(ce2);
+    EvoGraph::Graph tpg2(ce2);
     ASSERT_THROW(
         Mutator::TPGMutator::initRandomTPG(tpg2, mutParams, rng, nbActions),
         std::runtime_error)
@@ -723,7 +723,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     nbActions = 8;
     params.mutation.tpg.teamAccessAllActions = true;
     Environment ce3(set, params, vect, nbActions);
-    TPG::TPGGraph tpg3(ce3);
+    EvoGraph::Graph tpg3(ce3);
     ASSERT_NO_THROW(
         Mutator::TPGMutator::initRandomTPG(tpg3, mutParams, rng, nbActions))
         << "TPG Initialization should fail with bad parameters.";
@@ -739,16 +739,16 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(
         std::count_if(vertexSet.begin(), vertexSet.end(),
-                      [](const TPG::TPGVertex* vert) {
-                          return dynamic_cast<const TPG::TPGAction*>(vert) !=
+                      [](const EvoGraph::TPGVertex* vert) {
+                          return dynamic_cast<const EvoGraph::TPGAction*>(vert) !=
                                  nullptr;
                       }),
         mutParams.tpg.nbRoots * 2 * mutParams.tpg.ratioTeamsOverActions +
             mutParams.tpg.nbRoots * (1 - mutParams.tpg.ratioTeamsOverActions))
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
-                            [](const TPG::TPGVertex* vert) {
-                                return dynamic_cast<const TPG::TPGTeam*>(
+                            [](const EvoGraph::TPGVertex* vert) {
+                                return dynamic_cast<const EvoGraph::TPGTeam*>(
                                            vert) != nullptr;
                             }),
               mutParams.tpg.nbRoots * mutParams.tpg.ratioTeamsOverActions)
@@ -762,7 +762,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     // Check number of Programs.
     std::set<Program::Program*> programs;
     std::for_each(tpg3.getEdges().begin(), tpg3.getEdges().end(),
-                  [&programs](const std::unique_ptr<TPG::TPGEdge>& edge) {
+                  [&programs](const std::unique_ptr<EvoGraph::TPGEdge>& edge) {
                       programs.insert(&edge->getProgram());
                   });
     // 2 contexts programs and 2 actions program per roots for team roots, one
@@ -780,7 +780,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     mutParams.tpg.ratioTeamsOverActions = 0.5;
     nbActions = 8;
     Environment ce4(set, params, vect, nbActions);
-    TPG::TPGGraph tpg4(ce4);
+    EvoGraph::Graph tpg4(ce4);
 
     // Test coverage: teamAccessAllActions = true
     mutParams.tpg.useMultiActionProgram = false;
@@ -794,7 +794,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
     mutParams.tpg.teamAccessAllActions = false;
     mutParams.tpg.ratioTeamsOverActions = 1.0;
     Environment ce5(set, params, vect, 4);
-    TPG::TPGGraph tpg5(ce5);
+    EvoGraph::Graph tpg5(ce5);
     ASSERT_THROW(Mutator::TPGMutator::initRandomTPG(tpg5, mutParams, rng, 4),
                  std::runtime_error)
         << "Should throw when nbContinuousActions == 0.";
@@ -820,7 +820,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
     params.mutation.tpg.ratioTeamsOverActions = 0.0;
     uint64_t nbActions = 5;
     Environment ce2(set, params, vect, nbActions);
-    TPG::TPGGraph tpg2(ce2);
+    EvoGraph::Graph tpg2(ce2);
     ASSERT_THROW(
         Mutator::TPGMutator::initRandomTPG(tpg2, mutParams, rng, nbActions),
         std::runtime_error)
@@ -831,7 +831,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
     nbActions = 8;
     params.mutation.tpg.nbActionEdgeInit = 3;
     Environment ce3(set, params, vect, nbActions);
-    TPG::TPGGraph tpg3(ce3);
+    EvoGraph::Graph tpg3(ce3);
     ASSERT_NO_THROW(
         Mutator::TPGMutator::initRandomTPG(tpg3, mutParams, rng, nbActions))
         << "TPG Initialization should fail with bad parameters.";
@@ -843,15 +843,15 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
     ASSERT_EQ(tpg3.getRootVertices().size(), mutParams.tpg.nbRoots)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
-                            [](const TPG::TPGVertex* vert) {
-                                return dynamic_cast<const TPG::TPGAction*>(
+                            [](const EvoGraph::TPGVertex* vert) {
+                                return dynamic_cast<const EvoGraph::TPGAction*>(
                                            vert) != nullptr;
                             }),
               mutParams.tpg.nbRoots)
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
-                            [](const TPG::TPGVertex* vert) {
-                                return dynamic_cast<const TPG::TPGTeam*>(
+                            [](const EvoGraph::TPGVertex* vert) {
+                                return dynamic_cast<const EvoGraph::TPGTeam*>(
                                            vert) != nullptr;
                             }),
               0)
@@ -863,7 +863,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
     // Check number of Programs.
     std::set<Program::Program*> programs;
     std::for_each(tpg3.getEdges().begin(), tpg3.getEdges().end(),
-                  [&programs](const std::unique_ptr<TPG::TPGEdge>& edge) {
+                  [&programs](const std::unique_ptr<EvoGraph::TPGEdge>& edge) {
                       programs.insert(&edge->getProgram());
                   });
     // 2 contexts programs and 2 actions program per roots
@@ -874,14 +874,14 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
 
 TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
 {
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
-    const TPG::TPGTeam& vertex2 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex3 = tpg.addNewAction(1);
-    const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
-    const TPG::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex2, progPointer);
-    const TPG::TPGEdge& edge2 = tpg.addNewEdge(vertex0, vertex3, progPointer);
+    EvoGraph::Graph tpg(*e);
+    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::TPGTeam& vertex2 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex3 = tpg.addNewAction(1);
+    const EvoGraph::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex2, progPointer);
+    const EvoGraph::TPGEdge& edge2 = tpg.addNewEdge(vertex0, vertex3, progPointer);
 
     RNG::RNG rng;
     rng.setSeed(0);
@@ -892,21 +892,21 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
     // With known seed edge 0 was removed
     ASSERT_EQ(
         std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                      [&edge0](const std::unique_ptr<TPG::TPGEdge>& other) {
+                      [&edge0](const std::unique_ptr<EvoGraph::TPGEdge>& other) {
                           return &edge0 == other.get();
                       }),
         0)
         << "With a known seed, edge0 should be removed from the TPG.";
     ASSERT_EQ(
         std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                      [&edge1](const std::unique_ptr<TPG::TPGEdge>& other) {
+                      [&edge1](const std::unique_ptr<EvoGraph::TPGEdge>& other) {
                           return &edge1 == other.get();
                       }),
         1)
         << "With a known seed, edge1 should not be removed from the TPG.";
     ASSERT_EQ(
         std::count_if(tpg.getEdges().begin(), tpg.getEdges().end(),
-                      [&edge2](const std::unique_ptr<TPG::TPGEdge>& other) {
+                      [&edge2](const std::unique_ptr<EvoGraph::TPGEdge>& other) {
                           return &edge2 == other.get();
                       }),
         1)
@@ -915,12 +915,12 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
 
 TEST_F(MutatorTest, TPGMutatorAddRandomEdge)
 {
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
-    const TPG::TPGTeam& vertex2 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex3 = tpg.addNewAction(1);
-    const TPG::TPGAction& vertex4 = tpg.addNewAction(2);
+    EvoGraph::Graph tpg(*e);
+    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::TPGTeam& vertex2 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex3 = tpg.addNewAction(1);
+    const EvoGraph::TPGAction& vertex4 = tpg.addNewAction(2);
 
     Selector::SelectionContext context;
     context.preExistingEdges.push_back(
@@ -950,7 +950,7 @@ TEST_F(MutatorTest, TPGMutatorAddRandomEdge)
            "destination.";
 
     // Force a failure
-    TPG::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
+    EvoGraph::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
     context.preExistingEdges.push_back(&newEdge);
     ASSERT_THROW(
         Mutator::TPGMutator::addRandomEdge(tpg, vertex2, &context, rng),
@@ -960,15 +960,15 @@ TEST_F(MutatorTest, TPGMutatorAddRandomEdge)
 
 TEST_F(MutatorTest, TPGMutatorMutateEdgeDestination)
 {
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
-    const TPG::TPGAction& vertex2 = tpg.addNewAction(1);
-    const TPG::TPGTeam& vertex3 = tpg.addNewTeam();
-    const TPG::TPGTeam& vertex4 = tpg.addNewTeam();
+    EvoGraph::Graph tpg(*e);
+    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::TPGAction& vertex2 = tpg.addNewAction(1);
+    const EvoGraph::TPGTeam& vertex3 = tpg.addNewTeam();
+    const EvoGraph::TPGTeam& vertex4 = tpg.addNewTeam();
 
-    const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
-    const TPG::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex3, progPointer);
+    const EvoGraph::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex3, progPointer);
 
     Mutator::MutationParameters params;
     params.tpg.pEdgeDestinationIsAction = 0.5;
@@ -998,15 +998,15 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
     rng.setSeed(0);
 
     // Init a TPG
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
-    const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    EvoGraph::Graph tpg(*e);
+    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
     // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
-    TPG::TPGExecutionEngine tee(*e, &arch);
+    EvoGraph::TPGExecutionEngine tee(*e, &arch);
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
@@ -1040,8 +1040,8 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
 
 TEST_F(MutatorTest, TPGMutatorRemoveRandomActionEdge)
 {
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGAction& action = tpg.addNewAction(0);
+    EvoGraph::Graph tpg(*e);
+    const EvoGraph::TPGAction& action = tpg.addNewAction(0);
     auto prog1 = std::make_shared<Program::Program>(*e, true);
     auto prog2 = std::make_shared<Program::Program>(*e, true);
     tpg.addNewActionEdge(action, prog1, 0);
@@ -1059,11 +1059,11 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomActionEdge)
 TEST_F(MutatorTest, TPGMutatorAddRandomActionEdge)
 {
     // Prepare a TPGAction and a list of candidate edges
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGAction& action = tpg.addNewAction(0);
+    EvoGraph::Graph tpg(*e);
+    const EvoGraph::TPGAction& action = tpg.addNewAction(0);
     auto prog1 = std::make_shared<Program::Program>(*e, true);
     auto prog2 = std::make_shared<Program::Program>(*e, true);
-    const TPG::TPGAction& action2 = tpg.addNewAction(1);
+    const EvoGraph::TPGAction& action2 = tpg.addNewAction(1);
     tpg.addNewActionEdge(action, prog1, 0);
     tpg.addNewActionEdge(action2, prog2, 1);
 
@@ -1090,8 +1090,8 @@ TEST_F(MutatorTest, TPGMutatorAddRandomActionEdge)
 TEST_F(MutatorTest, TPGMutatorSwapActionEdges)
 {
     // Prepare a TPGAction with at least 3 outgoing edges
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGAction& action = tpg.addNewAction(0);
+    EvoGraph::Graph tpg(*e);
+    const EvoGraph::TPGAction& action = tpg.addNewAction(0);
     auto prog1 = std::make_shared<Program::Program>(*e, true);
     auto prog2 = std::make_shared<Program::Program>(*e, true);
     auto prog3 = std::make_shared<Program::Program>(*e, true);
@@ -1109,13 +1109,13 @@ TEST_F(MutatorTest, TPGMutatorSwapActionEdges)
     auto before = std::vector<uint64_t>();
     for (auto edge : action.getOutgoingEdges()) {
         before.push_back(
-            dynamic_cast<TPG::TPGActionEdge*>(edge)->getActionClass());
+            dynamic_cast<EvoGraph::TPGActionEdge*>(edge)->getActionClass());
     }
     ASSERT_NO_THROW(Mutator::TPGMutator::swapActionEdges(tpg, action, rng));
     auto after = std::vector<uint64_t>();
     for (auto edge : action.getOutgoingEdges()) {
         after.push_back(
-            dynamic_cast<TPG::TPGActionEdge*>(edge)->getActionClass());
+            dynamic_cast<EvoGraph::TPGActionEdge*>(edge)->getActionClass());
     }
     // There must be at least one change
     ASSERT_NE(before, after);
@@ -1137,9 +1137,9 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
     uint64_t nbActions = 5;
     Environment ce(set, params, vect, nbActions);
 
-    TPG::TPGGraph tpg(ce);
-    const TPG::TPGAction* action = &tpg.addNewAction(0);
-    const TPG::TPGAction* actionUnused = &tpg.addNewAction(1);
+    EvoGraph::Graph tpg(ce);
+    const EvoGraph::TPGAction* action = &tpg.addNewAction(0);
+    const EvoGraph::TPGAction* actionUnused = &tpg.addNewAction(1);
     auto prog1 = std::make_shared<Program::Program>(ce, true);
     auto prog2 = std::make_shared<Program::Program>(ce, true);
     auto prog3 = std::make_shared<Program::Program>(ce, true);
@@ -1153,14 +1153,14 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGAction_MultiAction)
 
     Selector::SelectionContext context;
     std::for_each(tpg.getEdges().begin(), tpg.getEdges().end(),
-                  [&context](const std::unique_ptr<TPG::TPGEdge>& edge) {
+                  [&context](const std::unique_ptr<EvoGraph::TPGEdge>& edge) {
                       context.preExistingEdges.push_back(edge.get());
                   });
 
     // Do it several times to cover all branches
     for (size_t i = 0; i < 5; i++) {
-        const TPG::TPGAction* copiedAction =
-            dynamic_cast<const TPG::TPGAction*>(&tpg.cloneVertex(*action));
+        const EvoGraph::TPGAction* copiedAction =
+            dynamic_cast<const EvoGraph::TPGAction*>(&tpg.cloneVertex(*action));
 
         // Check that all branches are covered (deletion, addition, swap,
         // mutation)
@@ -1183,16 +1183,16 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
         std::shared_ptr<Program::Program>(new Program::Program(ce, true));
 
     // Init a TPG
-    TPG::TPGGraph tpg(ce);
-    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
-    const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
-    const TPG::TPGEdge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
+    EvoGraph::Graph tpg(ce);
+    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::TPGEdge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
 
     // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
-    TPG::TPGExecutionEngine tee(ce, &arch);
+    EvoGraph::TPGExecutionEngine tee(ce, &arch);
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
@@ -1227,8 +1227,8 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGActionEdge_MultiAction)
     uint64_t nbActions = 3;
     Environment ce(set, params, vect, nbActions);
 
-    TPG::TPGGraph tpg(ce);
-    const TPG::TPGAction& action = tpg.addNewAction(0);
+    EvoGraph::Graph tpg(ce);
+    const EvoGraph::TPGAction& action = tpg.addNewAction(0);
     auto prog = std::make_shared<Program::Program>(ce, true);
     tpg.addNewActionEdge(action, prog, 0);
     tpg.addNewActionEdge(action, std::make_shared<Program::Program>(ce, true),
@@ -1236,7 +1236,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTPGActionEdge_MultiAction)
 
     std::list<std::shared_ptr<Program::Program>> newPrograms;
     auto edge =
-        dynamic_cast<TPG::TPGActionEdge*>(*action.getOutgoingEdges().begin());
+        dynamic_cast<EvoGraph::TPGActionEdge*>(*action.getOutgoingEdges().begin());
 
     // On vérifie que le changement d'actionClass est bien tenté
     ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGActionEdge(
@@ -1257,16 +1257,16 @@ TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction)
         std::shared_ptr<Program::Program>(new Program::Program(ce, true));
 
     // Init a TPG
-    TPG::TPGGraph tpg(ce);
-    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
-    const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
-    const TPG::TPGEdge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
+    EvoGraph::Graph tpg(ce);
+    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::TPGEdge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
 
     // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
-    TPG::TPGExecutionEngine tee(ce, &arch);
+    EvoGraph::TPGExecutionEngine tee(ce, &arch);
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
@@ -1302,16 +1302,16 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam)
     rng.setSeed(0);
 
     // Create a TPG
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
-    const TPG::TPGAction& vertex2 = tpg.addNewAction(1);
-    const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
-    const TPG::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex2, progPointer);
-    const TPG::TPGAction& vertex3 = tpg.addNewAction(2);
-    const TPG::TPGTeam& vertex4 = tpg.addNewTeam();
-    const TPG::TPGEdge& edge2 = tpg.addNewEdge(vertex4, vertex3, progPointer);
-    const TPG::TPGEdge& edge3 = tpg.addNewEdge(vertex0, vertex3, progPointer);
+    EvoGraph::Graph tpg(*e);
+    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::TPGAction& vertex2 = tpg.addNewAction(1);
+    const EvoGraph::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::TPGEdge& edge1 = tpg.addNewEdge(vertex0, vertex2, progPointer);
+    const EvoGraph::TPGAction& vertex3 = tpg.addNewAction(2);
+    const EvoGraph::TPGTeam& vertex4 = tpg.addNewTeam();
+    const EvoGraph::TPGEdge& edge2 = tpg.addNewEdge(vertex4, vertex3, progPointer);
+    const EvoGraph::TPGEdge& edge3 = tpg.addNewEdge(vertex0, vertex3, progPointer);
 
     Mutator::MutationParameters params;
     params.prog.maxProgramSize = 96;
@@ -1330,7 +1330,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam)
 
     // Init its program and fill the archive
     Archive arch;
-    TPG::TPGExecutionEngine tee(*e, &arch);
+    EvoGraph::TPGExecutionEngine tee(*e, &arch);
     Mutator::ProgramMutator::initRandomProgram(*progPointer, params, rng);
     tee.executeFromRoot(vertex0);
 
@@ -1359,15 +1359,15 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     rng.setSeed(0);
 
     // Init a TPG
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGTeam& vertex0 = tpg.addNewTeam();
-    const TPG::TPGAction& vertex1 = tpg.addNewAction(0);
-    const TPG::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    EvoGraph::Graph tpg(*e);
+    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
     // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
-    TPG::TPGExecutionEngine tee(*e, &arch);
+    EvoGraph::TPGExecutionEngine tee(*e, &arch);
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
@@ -1448,7 +1448,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    TPG::TPGGraph tpg(*e);
+    EvoGraph::Graph tpg(*e);
 
     Mutator::MutationParameters params;
 
@@ -1473,7 +1473,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    TPG::TPGExecutionEngine tee(*e, &arch);
+    EvoGraph::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1495,7 +1495,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    TPG::TPGGraph tpg(*e);
+    EvoGraph::Graph tpg(*e);
 
     Mutator::MutationParameters params;
 
@@ -1520,7 +1520,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    TPG::TPGExecutionEngine tee(*e, &arch);
+    EvoGraph::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1541,7 +1541,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 {
     RNG::RNG rng;
 
-    TPG::TPGGraph tpg(*e);
+    EvoGraph::Graph tpg(*e);
 
     Mutator::MutationParameters params;
 
@@ -1566,7 +1566,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    TPG::TPGExecutionEngine tee(*e, &arch);
+    EvoGraph::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1603,7 +1603,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    std::shared_ptr<TPG::TPGGraph> tpg = std::make_shared<TPG::TPGGraph>(*e);
+    std::shared_ptr<EvoGraph::Graph> tpg = std::make_shared<EvoGraph::Graph>(*e);
 
     uint64_t nbActions = 4;
     params.mutation.tpg.maxInitOutgoingEdges = 3;
@@ -1627,7 +1627,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
 
     Mutator::TPGMutator::initRandomTPG(*tpg, params.mutation, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    TPG::TPGExecutionEngine tee(*e, &arch);
+    EvoGraph::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg->getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1640,7 +1640,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
     ASSERT_EQ(tpg->getRootVertices().size(), params.mutation.tpg.nbRoots);
 
     // Increase coverage with a TPG that has no root team
-    TPG::TPGGraph tpg2(*e);
+    EvoGraph::Graph tpg2(*e);
     ASSERT_NO_THROW(Mutator::TPGMutator::populateTPG(
         tpg2, selector, arch, params.mutation, rng, nbActions, 0))
         << "Populating an empty TPG failed.";
@@ -1654,7 +1654,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
     uint64_t nbActions = 5;
     Environment ce(set, params, vect, nbActions);
 
-    std::shared_ptr<TPG::TPGGraph> tpg = std::make_shared<TPG::TPGGraph>(ce);
+    std::shared_ptr<EvoGraph::Graph> tpg = std::make_shared<EvoGraph::Graph>(ce);
 
     params.mutation.tpg.maxInitOutgoingEdges = 3;
     params.mutation.prog.maxProgramSize = 96;
@@ -1680,7 +1680,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
 
     Mutator::TPGMutator::initRandomTPG(*tpg, params.mutation, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    TPG::TPGExecutionEngine tee(*e, &arch);
+    EvoGraph::TPGExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg->getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1695,10 +1695,10 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
     size_t nbActionsRoots = 0;
     size_t nbTeamsRoots = 0;
     for (const auto& root : tpg->getRootVertices()) {
-        if (dynamic_cast<const TPG::TPGAction*>(root)) {
+        if (dynamic_cast<const EvoGraph::TPGAction*>(root)) {
             nbActionsRoots++;
         }
-        else if (dynamic_cast<const TPG::TPGTeam*>(root)) {
+        else if (dynamic_cast<const EvoGraph::TPGTeam*>(root)) {
             nbTeamsRoots++;
         }
     }
@@ -1721,7 +1721,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
     params.selection.tournament.ratioSavedRoots = 0.1;
     Environment ce(set, params, vect, nbActions);
 
-    std::shared_ptr<TPG::TPGGraph> tpg = std::make_shared<TPG::TPGGraph>(ce);
+    std::shared_ptr<EvoGraph::Graph> tpg = std::make_shared<EvoGraph::Graph>(ce);
 
     params.mutation.tpg.maxInitOutgoingEdges = 3;
     params.mutation.prog.maxProgramSize = 96;
@@ -1747,11 +1747,11 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 
     Mutator::TPGMutator::initRandomTPG(*tpg, params.mutation, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    TPG::TPGExecutionEngine tee(*e, &arch);
+    EvoGraph::TPGExecutionEngine tee(*e, &arch);
 
     // Do fake results to fill the verticesToDelete set.
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         fakeResults;
     for (auto rootVertex : tpg->getRootVertices()) {
         std::shared_ptr<Learn::EvaluationResult> er =
@@ -1778,7 +1778,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 TEST_F(MutatorTest, TPGMutatorCrossEdgesSwapPrograms)
 {
     Environment ce(set, params, vect, 2);
-    TPG::TPGGraph graph(ce);
+    EvoGraph::Graph graph(ce);
     RNG::RNG rng;
     rng.setSeed(0);
 
@@ -1790,8 +1790,8 @@ TEST_F(MutatorTest, TPGMutatorCrossEdgesSwapPrograms)
     params.prog.minConstValue = 0;
 
     // Create 2 action vertices with known ids (0 and 1)
-    const TPG::TPGAction* a0 = &(graph.addNewAction(0));
-    const TPG::TPGAction* a1 = &(graph.addNewAction(1));
+    const EvoGraph::TPGAction* a0 = &(graph.addNewAction(0));
+    const EvoGraph::TPGAction* a1 = &(graph.addNewAction(1));
 
     // Create two distinct programs and attach them as action edges for actionID
     // = 0
@@ -1817,7 +1817,7 @@ TEST_F(MutatorTest, TPGMutatorCrossEdgesSwapPrograms)
     ASSERT_EQ(progA1_before.get(), p1.get());
 
     // Perform crossEdges which should effectively swap the action-edge programs
-    std::vector<const TPG::TPGAction*> childs = {a0, a1};
+    std::vector<const EvoGraph::TPGAction*> childs = {a0, a1};
     ASSERT_NO_THROW(
         Mutator::TPGMutator::crossEdges(graph, childs, 0, params, rng));
 
@@ -1840,7 +1840,7 @@ TEST_F(MutatorTest, TPGMutatorCrossEdgesSwapPrograms)
 TEST_F(MutatorTest, TPGMutatorCrossProgram)
 {
     Environment ce(set, params, vect, 2);
-    TPG::TPGGraph graph(ce);
+    EvoGraph::Graph graph(ce);
     RNG::RNG rng;
     rng.setSeed(1);
 
@@ -1852,8 +1852,8 @@ TEST_F(MutatorTest, TPGMutatorCrossProgram)
     params.prog.minConstValue = 0;
 
     // Create two parent actions
-    const TPG::TPGAction* parent0 = &(graph.addNewAction(0));
-    const TPG::TPGAction* parent1 = &(graph.addNewAction(1));
+    const EvoGraph::TPGAction* parent0 = &(graph.addNewAction(0));
+    const EvoGraph::TPGAction* parent1 = &(graph.addNewAction(1));
 
     // Create two parent programs (ensure they have multiple lines)
     auto parentProg0 =
@@ -1875,15 +1875,15 @@ TEST_F(MutatorTest, TPGMutatorCrossProgram)
 
     // Prepare children actions: create two new actions which will receive the
     // children
-    const TPG::TPGAction* child0 = &(graph.addNewAction(2));
-    const TPG::TPGAction* child1 = &(graph.addNewAction(3));
+    const EvoGraph::TPGAction* child0 = &(graph.addNewAction(2));
+    const EvoGraph::TPGAction* child1 = &(graph.addNewAction(3));
 
     // Add dummy edges to children for the same actionID so crossProgram can set
     // them. Use copies of parent programs initially to ensure edge exists.
     graph.addNewActionEdge(*child0, parentProg0, 0);
     graph.addNewActionEdge(*child1, parentProg1, 0);
 
-    std::vector<const TPG::TPGAction*> childs = {child0, child1};
+    std::vector<const EvoGraph::TPGAction*> childs = {child0, child1};
 
     // Call crossProgram: it should create new program objects for each child
     ASSERT_NO_THROW(
@@ -1914,7 +1914,7 @@ TEST_F(MutatorTest, TPGMutatorCrossProgram)
 TEST_F(MutatorTest, TPGMutatorCrossTPGAction)
 {
     Environment ce(set, params, vect, 2);
-    TPG::TPGGraph graph(ce);
+    EvoGraph::Graph graph(ce);
     RNG::RNG rng;
     rng.setSeed(2);
 
@@ -1931,8 +1931,8 @@ TEST_F(MutatorTest, TPGMutatorCrossTPGAction)
 
     // create two parents that assess the same actions (we'll ensure both assess
     // action 0 and 1)
-    const TPG::TPGAction* p0 = &(graph.addNewAction(0));
-    const TPG::TPGAction* p1 = &(graph.addNewAction(1));
+    const EvoGraph::TPGAction* p0 = &(graph.addNewAction(0));
+    const EvoGraph::TPGAction* p1 = &(graph.addNewAction(1));
 
     // Make programs for actions 0 and 1 for both parents and attach them
     auto pp00 =
@@ -1965,7 +1965,7 @@ TEST_F(MutatorTest, TPGMutatorCrossTPGAction)
     auto before_p1_a0 = p1->getEdgeOfAction(0)->getProgramSharedPointer().get();
     auto before_p1_a1 = p1->getEdgeOfAction(1)->getProgramSharedPointer().get();
 
-    std::vector<const TPG::TPGAction*> childs = {p0, p1};
+    std::vector<const EvoGraph::TPGAction*> childs = {p0, p1};
 
     // Run crossTPGAction: with pCrossAgents=1.0 and pCrossPrograms=1.0 we
     // expect at least one crossover.

@@ -52,7 +52,7 @@ class LABasicLoggerTest : public ::testing::Test
     Instructions::Set set;
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
 
     StickGameWithOpponent le;
@@ -95,12 +95,12 @@ class LABasicLoggerTest : public ::testing::Test
             std::make_shared<Selector::SelectionMetrics>(5, 2), 2);
         auto res2 = new Learn::EvaluationResult(
             std::make_shared<Selector::SelectionMetrics>(10, 4), 2);
-        auto v1(new TPG::TPGAction(0));
-        auto v2(new TPG::TPGAction(0));
+        auto v1(new EvoGraph::TPGAction(0));
+        auto v2(new EvoGraph::TPGAction(0));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                 const TPG::TPGVertex*>(res1, v1));
+                                 const EvoGraph::TPGVertex*>(res1, v1));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                 const TPG::TPGVertex*>(res2, v2));
+                                 const EvoGraph::TPGVertex*>(res2, v2));
 
         la = new Learn::LearningAgent(le, set, params);
     }
@@ -135,7 +135,7 @@ TEST_F(LABasicLoggerTest, ParentEmptyMethods)
     // Explicit calls to empty method to force code coverage.
     // These methods are called during la.trainOneGeneration
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         emptyMap;
     log.logHeader();
     uint64_t gen = 0;

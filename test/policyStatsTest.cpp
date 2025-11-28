@@ -53,8 +53,8 @@ class PolicyStatsTest : public ::testing::Test
     Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
-    TPG::TPGGraph* tpg;
-    std::vector<const TPG::TPGEdge*> edges;
+    EvoGraph::Graph* tpg;
+    std::vector<const EvoGraph::TPGEdge*> edges;
 
     virtual void SetUp()
     {
@@ -106,7 +106,7 @@ class PolicyStatsTest : public ::testing::Test
         // With four action and four teams
         // All Edges have a unique Program, except T1->A0 and T0->A0 which
         // share the same program: progPointers.at(0)
-        tpg = new TPG::TPGGraph(*e);
+        tpg = new EvoGraph::Graph(*e);
         for (int i = 0; i < 4; i++) {
             tpg->addNewTeam();
         }
@@ -232,14 +232,14 @@ class PolicyStatsTest : public ::testing::Test
 
 TEST_F(PolicyStatsTest, SetEnvironment)
 {
-    TPG::PolicyStats ps;
+    EvoGraph::PolicyStats ps;
     ASSERT_NO_THROW(ps.setEnvironment(*e))
         << "Setting an Environment for the PolicyStats failed.";
 }
 
 TEST_F(PolicyStatsTest, AnalyzeLine)
 {
-    TPG::PolicyStats ps;
+    EvoGraph::PolicyStats ps;
     ps.setEnvironment(*e);
 
     ASSERT_NO_THROW(ps.analyzeLine(&progPointers.at(0)->getLine(0)))
@@ -263,7 +263,7 @@ TEST_F(PolicyStatsTest, AnalyzeLine)
 
 TEST_F(PolicyStatsTest, AnalyzeProgram)
 {
-    TPG::PolicyStats ps;
+    EvoGraph::PolicyStats ps;
     ps.setEnvironment(*e);
 
     // Do the analysis twice to check that analyzing the same program
@@ -352,12 +352,12 @@ TEST_F(PolicyStatsTest, AnalyzeProgram)
 
 TEST_F(PolicyStatsTest, AnalyzeTPGTeam)
 {
-    TPG::PolicyStats ps;
+    EvoGraph::PolicyStats ps;
     ps.setEnvironment(*e);
 
     for (auto i = 0; i < 2; i++) {
         ASSERT_NO_THROW(
-            ps.analyzeTPGTeam((const TPG::TPGTeam*)tpg->getVertices().at(0)))
+            ps.analyzeTPGTeam((const EvoGraph::TPGTeam*)tpg->getVertices().at(0)))
             << "Analysis of a valid TPGTeam failed unexpectedly.";
 
         // Check attributes
@@ -372,12 +372,12 @@ TEST_F(PolicyStatsTest, AnalyzeTPGTeam)
 
 TEST_F(PolicyStatsTest, AnalyzeTPGAction)
 {
-    TPG::PolicyStats ps;
+    EvoGraph::PolicyStats ps;
     ps.setEnvironment(*e);
 
     for (auto i = 0; i < 2; i++) {
         ASSERT_NO_THROW(ps.analyzeTPGAction(
-            (const TPG::TPGAction*)tpg->getVertices().at(4)))
+            (const EvoGraph::TPGAction*)tpg->getVertices().at(4)))
             << "Analysis of a valid TPGAction failed unexpectedly.";
 
         // Check attributes
@@ -393,7 +393,7 @@ TEST_F(PolicyStatsTest, AnalyzeTPGAction)
 
 TEST_F(PolicyStatsTest, AnalyzePolicy)
 {
-    TPG::PolicyStats ps;
+    EvoGraph::PolicyStats ps;
     ps.setEnvironment(*e);
 
     ASSERT_NO_THROW(ps.analyzePolicy(tpg->getVertices().at(0)))
@@ -463,21 +463,21 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
     std::vector<size_t> nbUsePerTPGTeam{1, 1, 1};
     for (auto i = 0; i < nbUsePerTPGTeam.size(); i++) {
         ASSERT_EQ(ps.nbUsePerTPGTeam.at(
-                      (const TPG::TPGTeam*)tpg->getVertices().at(i)),
+                      (const EvoGraph::TPGTeam*)tpg->getVertices().at(i)),
                   nbUsePerTPGTeam[i]);
     }
 
     std::vector<size_t> nbUsePerTPGAction{2, 1, 2};
     for (auto i = 0; i < nbUsePerTPGAction.size(); i++) {
         ASSERT_EQ(ps.nbUsePerTPGAction.at(
-                      (const TPG::TPGAction*)tpg->getVertices().at(i + 4)),
+                      (const EvoGraph::TPGAction*)tpg->getVertices().at(i + 4)),
                   nbUsePerTPGAction[i]);
     }
 }
 
 TEST_F(PolicyStatsTest, Clear)
 {
-    TPG::PolicyStats ps;
+    EvoGraph::PolicyStats ps;
     ps.setEnvironment(*e);
 
     ps.analyzePolicy(tpg->getVertices().at(0));
@@ -507,7 +507,7 @@ TEST_F(PolicyStatsTest, Clear)
 
 TEST_F(PolicyStatsTest, InsertOperator)
 {
-    TPG::PolicyStats ps;
+    EvoGraph::PolicyStats ps;
     ps.setEnvironment(*e);
 
     ps.analyzePolicy(tpg->getVertices().at(0));

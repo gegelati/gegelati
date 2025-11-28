@@ -13,7 +13,7 @@ class MapElitesSelectorTest : public ::testing::Test
     const size_t size2{32};
     RNG::RNG rng{42};
     Learn::LearningParameters params;
-    std::shared_ptr<TPG::TPGGraph> graph;
+    std::shared_ptr<EvoGraph::Graph> graph;
     Environment* e = NULL;
     Instructions::Set set;
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
@@ -36,7 +36,7 @@ class MapElitesSelectorTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 1;
         e = new Environment(set, params, vect, 3);
-        graph = std::make_shared<TPG::TPGGraph>(*e);
+        graph = std::make_shared<EvoGraph::Graph>(*e);
         selector = new Selector::MapElites::MapElitesSelector(graph, params);
         descriptor = std::make_shared<
             Selector::MapElites::DefaultDescriptors::ActionValues>();
@@ -126,7 +126,7 @@ TEST_F(MapElitesSelectorTest, DoSelectionNoCrashOnEmptyResults)
     selector->addArchiveFromDescriptor(5, descriptor, le);
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
     EXPECT_NO_THROW(selector->doSelection(results, rng));
 }
@@ -137,12 +137,12 @@ TEST_F(MapElitesSelectorTest, DoSelectionCrashWrongMetrics)
     selector->addArchiveFromDescriptor(5, descriptor, le);
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
 
     auto metrics = std::make_shared<Selector::SelectionMetrics>(100.0);
     auto eval = std::make_shared<Learn::EvaluationResult>(metrics, 1u);
-    const TPG::TPGVertex* root = &graph->addNewTeam();
+    const EvoGraph::TPGVertex* root = &graph->addNewTeam();
     results.insert({eval, root});
     EXPECT_THROW(selector->doSelection(results, rng), std::runtime_error);
 }
@@ -197,14 +197,14 @@ TEST_F(MapElitesSelectorTest, DoSelectionInserts)
     auto eval_low = std::make_shared<Learn::EvaluationResult>(metrics_low, 1u);
 
     // Fake (but validly non-null) root pointers. We won't dereference them.
-    const TPG::TPGVertex* root_high = &graph->addNewTeam();
-    const TPG::TPGVertex* root_low = &graph->addNewTeam();
+    const EvoGraph::TPGVertex* root_high = &graph->addNewTeam();
+    const EvoGraph::TPGVertex* root_low = &graph->addNewTeam();
 
     // Build the results multimap.
     // (doSelection processes results in reverse iteration order; for grid cells
     // being different both results will be inserted irrespective of ordering)
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
     results.insert({eval_high, root_high});
     results.insert({eval_low, root_low});
@@ -253,7 +253,7 @@ TEST_F(MapElitesSelectorTest, DoSelectionReplaces)
     }
     auto eval_existing =
         std::make_shared<Learn::EvaluationResult>(metrics_existing, 1u);
-    const TPG::TPGVertex* root_existing = &graph->addNewTeam();
+    const EvoGraph::TPGVertex* root_existing = &graph->addNewTeam();
 
     // Put the existing (low) value into the archive (simulating prior
     // generation). Note: archive is returned as shared_ptr<const
@@ -280,10 +280,10 @@ TEST_F(MapElitesSelectorTest, DoSelectionReplaces)
         map_new[descriptor] = desc_vec;
     }
     auto eval_new = std::make_shared<Learn::EvaluationResult>(metrics_new, 1u);
-    const TPG::TPGVertex* root_new = &graph->addNewTeam();
+    const EvoGraph::TPGVertex* root_new = &graph->addNewTeam();
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
     results.insert({eval_new, root_new});
     results.insert(
@@ -355,10 +355,10 @@ TEST_F(MapElitesSelectorTest, TwoArchives)
              std::vector<double>>
         mapNone = {{descriptor, cellNoneA}, {descriptorB, cellNoneB}};
 
-    const TPG::TPGVertex* vA = &graph->addNewAction(0);
-    const TPG::TPGVertex* vB = &graph->addNewAction(1);
-    const TPG::TPGVertex* vAB = &graph->addNewAction(2);
-    const TPG::TPGVertex* vNone = &graph->addNewAction(3);
+    const EvoGraph::TPGVertex* vA = &graph->addNewAction(0);
+    const EvoGraph::TPGVertex* vB = &graph->addNewAction(1);
+    const EvoGraph::TPGVertex* vAB = &graph->addNewAction(2);
+    const EvoGraph::TPGVertex* vNone = &graph->addNewAction(3);
 
     auto mA = std::make_shared<Selector::MapElites::MapElitesSelectionMetrics>(
         50.0, mapA);
@@ -377,7 +377,7 @@ TEST_F(MapElitesSelectorTest, TwoArchives)
 
     // Insert in results
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
     results.insert({eA, vA});
     results.insert({eB, vB});

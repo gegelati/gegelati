@@ -39,7 +39,7 @@
 #include <atomic>
 #include <cstddef>
 
-namespace TPG {
+namespace EvoGraph {
     /**
      * \brief Instrumentation code for TPGVertex class for instrumented
      * execution.
@@ -75,9 +75,9 @@ namespace TPG {
 
         /// Number of a time a TPGVertex has been visited
         /// Attribute is mutable because all TPGVertex are seen as const outside
-        /// from their TPGGraph.
+        /// from their Graph.
         mutable std::atomic_uint64_t nbVisits;
     };
-} // namespace TPG
+} // namespace EvoGraph
 
 #endif // !TPG_VERTEX_INSTRUMENTATION_H

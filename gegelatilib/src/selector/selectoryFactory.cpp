@@ -3,7 +3,7 @@
 #include "selector/selectorFactory.h"
 
 std::shared_ptr<Selector::Selector> Selector::selectorFactory(
-    const std::shared_ptr<TPG::TPGGraph> graph,
+    const std::shared_ptr<EvoGraph::Graph> graph,
     const std::shared_ptr<Algorithm::AgentManager> manager,
     const Learn::LearningParameters& params)
 {

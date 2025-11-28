@@ -47,7 +47,7 @@
 
 #include "tpg/tpgGraph.h"
 
-namespace TPG {
+namespace EvoGraph {
     /**
      * Specialization of the TPGExecutionEngine class.
      */
@@ -62,7 +62,7 @@ namespace TPG {
         /**
          * \brief Main constructor of the class.
          *
-         * \param[in] env Environment in which the Program of the TPGGraph will
+         * \param[in] env Environment in which the Program of the Graph will
          *                be executed.
          * \param[in] arch pointer to the Archive for storing recordings of
          *                 the Program Execution. By default, a NULL pointer is
@@ -90,7 +90,7 @@ namespace TPG {
          * visits of the evaluated TPGTeam and the number of traversal of the
          * TPGEdge with the winning bid.
          */
-        const TPG::TPGEdge& evaluateTeam(const TPGTeam& team) override;
+        const EvoGraph::TPGEdge& evaluateTeam(const TPGTeam& team) override;
         /**
          * \brief Specialization of the evaluateTeam function.
          *
@@ -98,8 +98,8 @@ namespace TPG {
          * TPGExecutionEngine, this specialization increments the number of
          * visits of the reached TPGAction.
          */
-        const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>>
-        executeFromRoot(const TPG::TPGVertex& root,
+        const std::pair<std::vector<const EvoGraph::TPGVertex*>, std::vector<double>>
+        executeFromRoot(const EvoGraph::TPGVertex& root,
                         const std::vector<uint64_t>& initActions = {
                             0}) override;
 
@@ -110,6 +110,6 @@ namespace TPG {
         /// Clear the trace history from all previous execution trace.
         void clearTraceHistory();
     };
-}; // namespace TPG
+}; // namespace EvoGraph
 
 #endif

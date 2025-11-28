@@ -43,7 +43,7 @@
 
 struct CounterReset;
 
-namespace TPG {
+namespace EvoGraph {
     // Declare class to make it usable as an attribute.
     class TPGVertex;
 
@@ -82,7 +82,7 @@ namespace TPG {
         /**
          * \brief Set a new Program for the TPGEdge.
          *
-         * This method is const to enable use outside of the TPGGraph which is
+         * This method is const to enable use outside of the Graph which is
          * the only class accessing the non-const TPGEdge. Since the program
          * pointer attribute is mutable, this method can successfully be used to
          * alter the program.
@@ -95,7 +95,7 @@ namespace TPG {
          * \brief Get the shared_pointer to the Program.
          *
          * This method is voluntarily non-const to make sure that only the
-         * TPGGraph containing the edge can use it.
+         * Graph containing the edge can use it.
          *
          * \return a copy of the program attribute.
          */
@@ -196,6 +196,6 @@ namespace TPG {
      */
     bool operator<(const TPGEdge& a, const TPGEdge& b);
 
-}; // namespace TPG
+}; // namespace EvoGraph
 
 #endif

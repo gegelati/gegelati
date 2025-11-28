@@ -42,7 +42,7 @@
 #include "file/tpgGraphDotExporter.h"
 #include "util/timestamp.h"
 
-void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
+void File::TPGGraphDotExporter::printTPGTeam(const EvoGraph::TPGTeam& team)
 {
     // Color is different for roots
     std::string color;
@@ -56,7 +56,7 @@ void File::TPGGraphDotExporter::printTPGTeam(const TPG::TPGTeam& team)
     fprintf(pFile, "%sT%" PRIu64 " [fillcolor=\"%s\"]\n", this->offset.c_str(),
             team.getVertexID(), color.c_str());
 }
-uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
+uint64_t File::TPGGraphDotExporter::printTPGAction(const EvoGraph::TPGAction& action)
 {
 
     uint64_t actionNumber = action.getVertexID();
@@ -76,7 +76,7 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
                 labelStream << "-"; // Add separator between actionClasses
             }
             auto actionClass =
-                dynamic_cast<const TPG::TPGActionEdge*>(*it)->getActionClass();
+                dynamic_cast<const EvoGraph::TPGActionEdge*>(*it)->getActionClass();
             labelStream << actionClass;
         }
     }
@@ -96,7 +96,7 @@ uint64_t File::TPGGraphDotExporter::printTPGAction(const TPG::TPGAction& action)
     return actionNumber;
 }
 
-void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
+void File::TPGGraphDotExporter::printTPGEdge(const EvoGraph::TPGEdge& edge)
 {
 
     uint64_t srcID = edge.getSource()->getVertexID();
@@ -120,7 +120,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
         printProgram(p);
         fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n",
                 this->offset.c_str(), progID, progID);
-        if (dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr) {
+        if (dynamic_cast<const EvoGraph::TPGActionEdge*>(&edge) != nullptr) {
 
             fprintf(pFile, "%sA%" PRIu64 " -> P%" PRIu64 "\n",
                     this->offset.c_str(), srcID, progID);
@@ -129,9 +129,9 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
 
             auto* dest = edge.getDestination();
 
-            if (dest && dynamic_cast<const TPG::TPGAction*>(dest) != nullptr) {
+            if (dest && dynamic_cast<const EvoGraph::TPGAction*>(dest) != nullptr) {
                 uint64_t actionID = printTPGAction(
-                    *(const TPG::TPGAction*)edge.getDestination());
+                    *(const EvoGraph::TPGAction*)edge.getDestination());
                 fprintf(pFile,
                         "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n",
                         this->offset.c_str(), srcID, progID, actionID);
@@ -146,7 +146,7 @@ void File::TPGGraphDotExporter::printTPGEdge(const TPG::TPGEdge& edge)
     }
     else {
 
-        if (dynamic_cast<const TPG::TPGActionEdge*>(&edge) != nullptr) {
+        if (dynamic_cast<const EvoGraph::TPGActionEdge*>(&edge) != nullptr) {
             fprintf(pFile, "%sA%" PRIu64 " -> P%" PRIu64 "\n",
                     this->offset.c_str(), srcID, progID);
         }
@@ -214,17 +214,17 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
     // Print root actions (and keep the ids)
     auto rootVertices = tpg.getRootVertices();
     std::vector<uint64_t> rootActionIDs;
-    for (const TPG::TPGVertex* rootVertex : rootVertices) {
-        if (dynamic_cast<const TPG::TPGAction*>(rootVertex) != nullptr) {
+    for (const EvoGraph::TPGVertex* rootVertex : rootVertices) {
+        if (dynamic_cast<const EvoGraph::TPGAction*>(rootVertex) != nullptr) {
             rootActionIDs.push_back(
-                this->printTPGAction(*(const TPG::TPGAction*)rootVertex));
+                this->printTPGAction(*(const EvoGraph::TPGAction*)rootVertex));
         }
     }
 
     // Print all action edges
     auto& edges = this->tpg.getEdges();
-    for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
-        if (dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) != nullptr) {
+    for (const std::unique_ptr<EvoGraph::TPGEdge>& edge : edges) {
+        if (dynamic_cast<const EvoGraph::TPGActionEdge*>(edge.get()) != nullptr) {
             this->printTPGEdge(*edge.get());
         }
     }
@@ -232,8 +232,8 @@ void File::TPGGraphDotExporter::printTPGGraphFooter()
     // Rank all the roots
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
     // Team root ids
-    for (const TPG::TPGVertex* rootVertex : rootVertices) {
-        if (dynamic_cast<const TPG::TPGTeam*>(rootVertex) != nullptr) {
+    for (const EvoGraph::TPGVertex* rootVertex : rootVertices) {
+        if (dynamic_cast<const EvoGraph::TPGTeam*>(rootVertex) != nullptr) {
             fprintf(pFile, "T%" PRIu64 " ", rootVertex->getVertexID());
         }
     }
@@ -254,9 +254,9 @@ void File::TPGGraphDotExporter::print()
 
     // Print all vertices
     auto vertices = this->tpg.getVertices();
-    for (const TPG::TPGVertex* vertex : vertices) {
-        if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
-            this->printTPGTeam(*(const TPG::TPGTeam*)vertex);
+    for (const EvoGraph::TPGVertex* vertex : vertices) {
+        if (dynamic_cast<const EvoGraph::TPGTeam*>(vertex) != nullptr) {
+            this->printTPGTeam(*(const EvoGraph::TPGTeam*)vertex);
         }
     }
 
@@ -269,8 +269,8 @@ void File::TPGGraphDotExporter::print()
 
     // Print all context edges
     auto& edges = this->tpg.getEdges();
-    for (const std::unique_ptr<TPG::TPGEdge>& edge : edges) {
-        if (dynamic_cast<const TPG::TPGActionEdge*>(edge.get()) == nullptr) {
+    for (const std::unique_ptr<EvoGraph::TPGEdge>& edge : edges) {
+        if (dynamic_cast<const EvoGraph::TPGActionEdge*>(edge.get()) == nullptr) {
             this->printTPGEdge(*edge.get());
         }
     }
@@ -282,7 +282,7 @@ void File::TPGGraphDotExporter::print()
     fflush(pFile);
 }
 
-void File::TPGGraphDotExporter::printSubGraph(const TPG::TPGVertex* root)
+void File::TPGGraphDotExporter::printSubGraph(const EvoGraph::TPGVertex* root)
 {
     // Print the graph header
     this->printTPGGraphHeader();
@@ -296,23 +296,23 @@ void File::TPGGraphDotExporter::printSubGraph(const TPG::TPGVertex* root)
 
     // Print edges stemming from the given root
     // Init a Breadth First scan
-    std::deque<const TPG::TPGVertex*> verticesToVisit;
+    std::deque<const EvoGraph::TPGVertex*> verticesToVisit;
     verticesToVisit.push_back(root);
-    std::vector<const TPG::TPGVertex*> visitedVertices;
-    std::vector<const TPG::TPGEdge*> edgesToPrint;
+    std::vector<const EvoGraph::TPGVertex*> visitedVertices;
+    std::vector<const EvoGraph::TPGEdge*> edgesToPrint;
 
     while (!verticesToVisit.empty()) {
         // Get first vertex
-        const TPG::TPGVertex* vertex = verticesToVisit.front();
+        const EvoGraph::TPGVertex* vertex = verticesToVisit.front();
         verticesToVisit.pop_front();
         visitedVertices.push_back(vertex);
 
         // Print it if it is a team (actions are printed with edges)
-        if (dynamic_cast<const TPG::TPGTeam*>(vertex) != nullptr) {
-            this->printTPGTeam(*(const TPG::TPGTeam*)vertex);
+        if (dynamic_cast<const EvoGraph::TPGTeam*>(vertex) != nullptr) {
+            this->printTPGTeam(*(const EvoGraph::TPGTeam*)vertex);
         }
         else {
-            this->printTPGAction(*(const TPG::TPGAction*)vertex);
+            this->printTPGAction(*(const EvoGraph::TPGAction*)vertex);
         }
 
         // Put its outgoing edge in the list for later print.
@@ -323,8 +323,8 @@ void File::TPGGraphDotExporter::printSubGraph(const TPG::TPGVertex* root)
 
             // If the edge destination is a Team, put it in the list of
             // vertex to be visited.
-            if (dynamic_cast<TPG::TPGActionEdge*>(edge) == nullptr) {
-                const TPG::TPGVertex* dest = edge->getDestination();
+            if (dynamic_cast<EvoGraph::TPGActionEdge*>(edge) == nullptr) {
+                const EvoGraph::TPGVertex* dest = edge->getDestination();
                 if (std::find(visitedVertices.begin(), visitedVertices.end(),
                               dest) == visitedVertices.end() &&
                     std::find(verticesToVisit.begin(), verticesToVisit.end(),
@@ -336,7 +336,7 @@ void File::TPGGraphDotExporter::printSubGraph(const TPG::TPGVertex* root)
     }
 
     // Print edges
-    for (const TPG::TPGEdge* edge : edgesToPrint) {
+    for (const EvoGraph::TPGEdge* edge : edgesToPrint) {
         this->printTPGEdge(*edge);
     }
 

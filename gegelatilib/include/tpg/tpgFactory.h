@@ -45,10 +45,10 @@
 #include "tpg/tpgEdge.h"
 #include "tpg/tpgTeam.h"
 
-namespace TPG {
+namespace EvoGraph {
 
-    // Declare the TPGGraph class to be used as a parameter.
-    class TPGGraph;
+    // Declare the Graph class to be used as a parameter.
+    class Graph;
 
     // Declare the TPGExecutionEngine class to be used as a parameter.
     class TPGExecutionEngine;
@@ -57,8 +57,8 @@ namespace TPG {
      * \brief Factory for creating all elements constituting a TPG.
      *
      * Using the factory design pattern, this class enables the creation of
-     * all elements composing a TPGGraph:
-     * - TPGGraph
+     * all elements composing a Graph:
+     * - Graph
      * - TPGTeam
      * - TPGAction
      * - TPGVertex
@@ -75,22 +75,22 @@ namespace TPG {
         virtual ~TPGFactory() = default;
 
         /**
-         * \brief Create a TPGGraph with this TPGFactory.
+         * \brief Create a Graph with this TPGFactory.
          *
-         * \param[in] env Environment used to build the TPGGraph.
+         * \param[in] env Environment used to build the Graph.
          */
-        virtual std::shared_ptr<TPGGraph> createTPGGraph(
+        virtual std::shared_ptr<Graph> createTPGGraph(
             const Environment& env) const;
 
         /**
-         * \brief Create a TPGTeam for a TPGGraph.
+         * \brief Create a TPGTeam for a Graph.
          *
          * This method allocates and returns a new TPGTeam.
          */
         virtual std::unique_ptr<TPGTeam> createTPGTeam() const;
 
         /**
-         * \brief Create a TPGAction for a TPGGraph.
+         * \brief Create a TPGAction for a Graph.
          *
          * This method allocates and returns a new TPGAction.
          *
@@ -100,7 +100,7 @@ namespace TPG {
             const uint64_t id) const;
 
         /**
-         * \brief Create a TPGEdge for a TPGGraph.
+         * \brief Create a TPGEdge for a Graph.
          *
          * This method allocates and returns a new TPGEdge.
          * The TPGEdge is returned as a unique_ptr.
@@ -115,7 +115,7 @@ namespace TPG {
             const std::shared_ptr<Program::Program> prog) const;
 
         /**
-         * \brief Create a TPGActionEdge for a TPGGraph.
+         * \brief Create a TPGActionEdge for a Graph.
          *
          * This method allocates and returns a new TPGActionEdge cat into a
          * TPGEdge. The TPGEdge is returned as a unique_ptr.
@@ -131,10 +131,10 @@ namespace TPG {
             uint64_t actionClass) const;
 
         /**
-         * \brief Create a TPGExecutionEngine for a TPGGraph produced by this
+         * \brief Create a TPGExecutionEngine for a Graph produced by this
          * TPGFactory.
          *
-         * \param[in] env Environment in which the Program of the TPGGraph will
+         * \param[in] env Environment in which the Program of the Graph will
          * be executed.
          * \param[in] arch pointer to the Archive for storing recordings of the
          * Program Execution. By default, a NULL pointer is given, meaning that
@@ -142,11 +142,11 @@ namespace TPG {
          *
          * \return the returned TPGExecutionEngine returned as an unique_ptr.
          */
-        virtual std::unique_ptr<TPG::TPGExecutionEngine>
+        virtual std::unique_ptr<EvoGraph::TPGExecutionEngine>
         createTPGExecutionEngine(const Environment& env,
                                  Archive* arch = NULL) const;
     };
 
-} // namespace TPG
+} // namespace EvoGraph
 
 #endif // !TPG_GRAPH_ELEMENT_FACTORY_H

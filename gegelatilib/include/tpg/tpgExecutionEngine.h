@@ -46,9 +46,9 @@
 
 #include "tpg/tpgGraph.h"
 
-namespace TPG {
+namespace EvoGraph {
     /**
-     * Class in charge of executing a TPGGraph.
+     * Class in charge of executing a Graph.
      *
      * This first implementation is purely sequential and does not parallelize
      * Program execution, nor executions of the TPG starting from several roots.
@@ -78,7 +78,7 @@ namespace TPG {
         /**
          * \brief Main constructor of the class.
          *
-         * \param[in] env Environment in which the Program of the TPGGraph will
+         * \param[in] env Environment in which the Program of the Graph will
          *                be executed.
          * \param[in] arch pointer to the Archive for storing recordings of
          *                 the Program Execution. By default, a NULL pointer is
@@ -135,12 +135,12 @@ namespace TPG {
          *         double value (and not excluded).
          *
          * \throw std::runtime_error in case the TPGTeam has no outgoing edge.
-         * This should not happen in a correctly constructed TPGGraph.
+         * This should not happen in a correctly constructed Graph.
          */
-        virtual const TPG::TPGEdge& evaluateTeam(const TPGTeam& team);
+        virtual const EvoGraph::TPGEdge& evaluateTeam(const TPGTeam& team);
 
         /**
-         * \brief Execute the TPGGraph starting from the given TPGVertex.
+         * \brief Execute the Graph starting from the given TPGVertex.
          *
          * This method browse the graph by successively evaluating Teams and
          * following the TPGEdge proposing the best bids.
@@ -149,14 +149,14 @@ namespace TPG {
          * \param[in] initActions the vector of initial action that can be
          * chosen by default by the root.
          * \return a vector containing all the TPGVertex traversed during the
-         *         evaluation of the TPGGraph. The TPGAction resulting from the
-         *         TPGGraph execution is at the end of the returned vector.
+         *         evaluation of the Graph. The TPGAction resulting from the
+         *         Graph execution is at the end of the returned vector.
          */
-        virtual const std::pair<std::vector<const TPG::TPGVertex*>,
+        virtual const std::pair<std::vector<const EvoGraph::TPGVertex*>,
                                 std::vector<double>>
         executeFromRoot(const TPGVertex& root,
                         const std::vector<uint64_t>& initActions = {0});
     };
-}; // namespace TPG
+}; // namespace EvoGraph
 
 #endif

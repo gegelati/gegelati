@@ -39,7 +39,7 @@
 #include "tpg/tpgActionEdge.h"
 #include <stdexcept>
 
-void TPG::TPGTeam::addOutgoingEdge(TPGEdge* edge)
+void EvoGraph::TPGTeam::addOutgoingEdge(TPGEdge* edge)
 {
     if (dynamic_cast<TPGActionEdge*>(edge) != nullptr) {
         throw std::runtime_error(

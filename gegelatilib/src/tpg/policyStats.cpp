@@ -137,7 +137,7 @@ namespace {
     }
 } // namespace
 
-void TPG::PolicyStats::clear()
+void EvoGraph::PolicyStats::clear()
 {
     this->maxPolicyDepth = 0;
     this->nbDistinctTeams = 0;
@@ -158,7 +158,7 @@ void TPG::PolicyStats::clear()
     this->nbUsagePerDataLocationActionProg.clear();
 }
 
-void TPG::PolicyStats::setEnvironment(const Environment& env)
+void EvoGraph::PolicyStats::setEnvironment(const Environment& env)
 {
     this->environment = &env;
     this->dataSourcesAndRegisters.insert(
@@ -167,7 +167,7 @@ void TPG::PolicyStats::setEnvironment(const Environment& env)
         environment->getFakeDataSources().end());
 }
 
-void TPG::PolicyStats::analyzeLine(const Program::Line* line,
+void EvoGraph::PolicyStats::analyzeLine(const Program::Line* line,
                                    bool actionProgram)
 {
     auto instructionIdx = line->getInstructionIndex();
@@ -202,7 +202,7 @@ void TPG::PolicyStats::analyzeLine(const Program::Line* line,
     }
 }
 
-void TPG::PolicyStats::analyzeProgram(const Program::Program* prog)
+void EvoGraph::PolicyStats::analyzeProgram(const Program::Program* prog)
 {
     // Check if the Program was already analyzed
     auto& nbUsePerProgram = prog->isActionProgram()
@@ -237,7 +237,7 @@ void TPG::PolicyStats::analyzeProgram(const Program::Program* prog)
     nbIntronPerProgram.push_back(nbIntronLines);
 }
 
-void TPG::PolicyStats::analyzeTPGTeam(const TPG::TPGTeam* team)
+void EvoGraph::PolicyStats::analyzeTPGTeam(const EvoGraph::TPGTeam* team)
 {
     size_t nbUse = ++this->nbUsePerTPGTeam[team];
     if (nbUse == 1) {
@@ -246,34 +246,34 @@ void TPG::PolicyStats::analyzeTPGTeam(const TPG::TPGTeam* team)
     }
 }
 
-void TPG::PolicyStats::analyzeTPGAction(const TPG::TPGAction* action)
+void EvoGraph::PolicyStats::analyzeTPGAction(const EvoGraph::TPGAction* action)
 {
     this->nbUsePerTPGAction[action]++;
     this->nbUsagePerActionID[action->getActionID()]++;
 }
 
-void TPG::PolicyStats::analyzePolicy(const TPG::TPGVertex* root)
+void EvoGraph::PolicyStats::analyzePolicy(const EvoGraph::TPGVertex* root)
 {
     size_t depth = 0;
-    std::vector<const TPG::TPGVertex*> stage[2];
+    std::vector<const EvoGraph::TPGVertex*> stage[2];
     stage[0].push_back(root);
     while (!stage[depth % 2].empty()) {
         this->nbTPGVertexPerDepthLevel[depth] = stage[depth % 2].size();
         auto& nextStage = stage[(depth + 1) % 2];
         nextStage.clear();
 
-        for (const TPG::TPGVertex* vertex : stage[depth % 2]) {
-            if (auto team = dynamic_cast<const TPG::TPGTeam*>(vertex)) {
+        for (const EvoGraph::TPGVertex* vertex : stage[depth % 2]) {
+            if (auto team = dynamic_cast<const EvoGraph::TPGTeam*>(vertex)) {
                 this->analyzeTPGTeam(team);
                 if (this->nbUsePerTPGTeam[team] == 1) {
-                    for (const TPG::TPGEdge* edge :
+                    for (const EvoGraph::TPGEdge* edge :
                          vertex->getOutgoingEdges()) {
                         this->analyzeProgram(&edge->getProgram());
                         nextStage.push_back(edge->getDestination());
                     }
                 }
             }
-            if (auto action = dynamic_cast<const TPG::TPGAction*>(vertex)) {
+            if (auto action = dynamic_cast<const EvoGraph::TPGAction*>(vertex)) {
                 this->analyzeTPGAction(action);
                 if (this->nbUsePerTPGAction[action] == 1) {
                     for (auto edge : action->getOutgoingEdges()) {
@@ -287,8 +287,8 @@ void TPG::PolicyStats::analyzePolicy(const TPG::TPGVertex* root)
     this->maxPolicyDepth = depth - 1;
 }
 
-std::ostream& TPG::operator<<(std::ostream& os,
-                              const TPG::PolicyStats& policyStats)
+std::ostream& EvoGraph::operator<<(std::ostream& os,
+                              const EvoGraph::PolicyStats& policyStats)
 {
     auto sumVec = [](const std::vector<size_t>& vec) {
         return std::accumulate(vec.cbegin(), vec.cend(), (size_t)0);

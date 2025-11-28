@@ -39,13 +39,13 @@
 #include "tpg/instrumented/tpgVertexInstrumentation.h"
 #include "tpg/tpgTeam.h"
 
-namespace TPG {
+namespace EvoGraph {
 
     /**
      * \brief Instrumented TPGTeam
      */
-    class TPGTeamInstrumented : public TPG::TPGTeam,
-                                public TPG::TPGVertexInstrumentation
+    class TPGTeamInstrumented : public EvoGraph::TPGTeam,
+                                public EvoGraph::TPGVertexInstrumentation
     {
       public:
         /// Main constructor for TPGTeamInstrumented.
@@ -54,6 +54,6 @@ namespace TPG {
         {
         }
     };
-} // namespace TPG
+} // namespace EvoGraph
 
 #endif

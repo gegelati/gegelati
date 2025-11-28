@@ -113,7 +113,7 @@ namespace CodeGen {
          * of the file that holds the programs of the TPG graph. The filename
          * holding the programs of the TPG is : 'filename'_program.c
          *
-         * \param[in] env a const reference to the Environment of the TPGGraph
+         * \param[in] env a const reference to the Environment of the Graph
          *
          * \param[in] path a const reference to the path in which the file must
          * be generated. By default, the file is generated in the current

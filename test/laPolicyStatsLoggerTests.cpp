@@ -117,7 +117,7 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluate)
         << "This call should not throw any exception.";
     // No need to give anything as a parameter.
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         emptyMap;
     ASSERT_NO_THROW(log.logAfterDecimate())
         << "Logging after an evaluation failed unexpectedly.";
@@ -164,7 +164,7 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithActionProg)
         << "This call should not throw any exception.";
     // No need to give anything as a parameter.
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         emptyMap;
     ASSERT_NO_THROW(log.logAfterDecimate())
         << "Logging after an evaluation failed unexpectedly.";
@@ -210,7 +210,7 @@ TEST_F(LAPolicyStatsLoggerTest, LogAfterEvaluateWithMAPLE)
         << "This call should not throw any exception.";
     // No need to give anything as a parameter.
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         emptyMap;
     ASSERT_NO_THROW(log.logAfterDecimate())
         << "Logging after an evaluation failed unexpectedly.";
@@ -245,7 +245,7 @@ TEST_F(LAPolicyStatsLoggerTest, EmptyMethods)
     // Explicit calls to empty method to force code coverage.
     // These methods are called during la.trainOneGeneration
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         emptyMap;
     log.logAfterPopulateTPG();
     log.logEndOfTraining();

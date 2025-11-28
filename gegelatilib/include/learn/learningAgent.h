@@ -61,7 +61,7 @@
 namespace Learn {
 
     /**
-     * \brief Class used to control the learning steps of a TPGGraph within
+     * \brief Class used to control the learning steps of a Graph within
      * a given LearningEnvironment.
      */
     class LearningAgent
@@ -82,8 +82,8 @@ namespace Learn {
         /// Parameters for the learning process
         LearningParameters params;
 
-        /// TPGGraph built during the learning process.
-        std::shared_ptr<TPG::TPGGraph> graph;
+        /// Graph built during the learning process.
+        std::shared_ptr<EvoGraph::Graph> graph;
 
         /// Random Number Generator for this Learning Agent
         RNG::RNG rng;
@@ -109,12 +109,12 @@ namespace Learn {
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
-         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * \param[in] factory The TPGFactory used to create the Graph. A
          * default TPGFactory is used if none is provided.
          */
         LearningAgent(LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms, const Instructions::Set& iSet,
                       const LearningParameters& p,
-                      const TPG::TPGFactory& factory = TPG::TPGFactory())
+                      const EvoGraph::TPGFactory& factory = EvoGraph::TPGFactory())
             : learningEnvironment{le}, algorithms{algorithms},
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
@@ -129,12 +129,12 @@ namespace Learn {
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
-         * \param[in] factory The TPGFactory used to create the TPGGraph. A
+         * \param[in] factory The TPGFactory used to create the Graph. A
          * default TPGFactory is used if none is provided.
          */
         LearningAgent(LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm, const Instructions::Set& iSet,
                       const LearningParameters& p,
-                      const TPG::TPGFactory& factory = TPG::TPGFactory())
+                      const EvoGraph::TPGFactory& factory = EvoGraph::TPGFactory())
             : learningEnvironment{le}, algorithms{{algorithm}},
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
@@ -145,11 +145,11 @@ namespace Learn {
         virtual ~LearningAgent() = default;
 
         /**
-         * \brief Getter for the TPGGraph built by the LearningAgent.
+         * \brief Getter for the Graph built by the LearningAgent.
          *
-         * \return Get a shared_pointer to the TPGGraph.
+         * \return Get a shared_pointer to the Graph.
          */
-        std::shared_ptr<TPG::TPGGraph> getGraph();
+        std::shared_ptr<EvoGraph::Graph> getGraph();
 
         /**
          * \brief Getter for the vector of algorithms
@@ -171,7 +171,7 @@ namespace Learn {
         const Archive& getArchive() const;
 
         /**
-         * \brief Accessor to the Environment of the TPGGraph.
+         * \brief Accessor to the Environment of the Graph.
          *
          * \return the const reference to the env attribute.
          */
@@ -199,7 +199,7 @@ namespace Learn {
         /**
          * \brief Evaluates policy starting from the given root.
          *
-         * The policy, that is, the TPGGraph execution starting from the given
+         * The policy, that is, the Graph execution starting from the given
          * TPGVertex is evaluated nbIteration times. The generationNumber is
          * combined with the current iteration number to generate a set of
          * seeds for evaluating the policy.
@@ -225,7 +225,7 @@ namespace Learn {
          * resultsPerRoot for this root (if any).
          */
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
-            TPG::TPGExecutionEngine& tee, const Job& job,
+            EvoGraph::TPGExecutionEngine& tee, const Job& job,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
 
@@ -265,11 +265,11 @@ namespace Learn {
             std::shared_ptr<const Algorithm::Agent> agent);
 
         /**
-         * \brief Train the TPGGraph for one generation.
+         * \brief Train the Graph for one generation.
          *
          * Training for one generation includes:
-         * - Populating the TPGGraph according to given MutationParameters.
-         * - Evaluating all agents of the TPGGraph. (call to evaluateAllRoots)
+         * - Populating the Graph according to given MutationParameters.
+         * - Evaluating all agents of the Graph. (call to evaluateAllRoots)
          * - Removing from the Graph and Algorithms the worst performing agents.
          *
          * \param[in] generationNumber the integer number of the current
@@ -283,13 +283,13 @@ namespace Learn {
                                         bool doPopulate = true);
 
         /**
-         * \brief Train the TPGGraph for a given number of generation.
+         * \brief Train the Graph for a given number of generation.
          *
-         * The method trains the TPGGraph for a given number of generation,
+         * The method trains the Graph for a given number of generation,
          * unless the referenced boolean value becomes false (evaluated at each
          * generation).
          * Optionally, a simple progress bar can be printed within the terminal.
-         * The TPGGraph is NOT (re)initialized before starting the training.
+         * The Graph is NOT (re)initialized before starting the training.
          *
          * \param[in] altTraining a reference to a boolean value that can be
          * used to halt the training process before its completion.

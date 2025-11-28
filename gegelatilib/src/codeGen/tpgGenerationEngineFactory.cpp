@@ -52,7 +52,7 @@ CodeGen::TPGGenerationEngineFactory::TPGGenerationEngineFactory(
 
 std::unique_ptr<CodeGen::TPGGenerationEngine> CodeGen::
     TPGGenerationEngineFactory::create(const std::string& filename,
-                                       const TPG::TPGGraph& tpg,
+                                       const EvoGraph::Graph& tpg,
                                        const std::string& path)
 {
     if (this->mode == stackMode) {

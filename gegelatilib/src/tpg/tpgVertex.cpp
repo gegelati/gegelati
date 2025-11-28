@@ -44,32 +44,32 @@
 // https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
 static uint64_t COUNT_VERTEX_ID = 0;
 
-uint64_t TPG::TPGVertex::incrementeCounter()
+uint64_t EvoGraph::TPGVertex::incrementeCounter()
 {
     return COUNT_VERTEX_ID++;
 }
 
-uint64_t TPG::TPGVertex::getVertexIDCounter()
+uint64_t EvoGraph::TPGVertex::getVertexIDCounter()
 {
     return COUNT_VERTEX_ID;
 }
 
-void TPG::TPGVertex::resetVertexIDCounter()
+void EvoGraph::TPGVertex::resetVertexIDCounter()
 {
     COUNT_VERTEX_ID = 0;
 }
 
-const std::list<TPG::TPGEdge*>& TPG::TPGVertex::getIncomingEdges() const
+const std::list<EvoGraph::TPGEdge*>& EvoGraph::TPGVertex::getIncomingEdges() const
 {
     return this->incomingEdges;
 }
 
-const std::list<TPG::TPGEdge*>& TPG::TPGVertex::getOutgoingEdges() const
+const std::list<EvoGraph::TPGEdge*>& EvoGraph::TPGVertex::getOutgoingEdges() const
 {
     return this->outgoingEdges;
 }
 
-void TPG::TPGVertex::addIncomingEdge(TPG::TPGEdge* edge)
+void EvoGraph::TPGVertex::addIncomingEdge(EvoGraph::TPGEdge* edge)
 {
     // Do nothing on NULL pointer
     if (edge != NULL) {
@@ -81,14 +81,14 @@ void TPG::TPGVertex::addIncomingEdge(TPG::TPGEdge* edge)
     }
 }
 
-void TPG::TPGVertex::removeIncomingEdge(TPG::TPGEdge* edge)
+void EvoGraph::TPGVertex::removeIncomingEdge(EvoGraph::TPGEdge* edge)
 {
     // No need to do special checks on the given pointer.
     // at worse, nothing happens.
     this->incomingEdges.remove(edge);
 }
 
-void TPG::TPGVertex::addOutgoingEdge(TPG::TPGEdge* edge)
+void EvoGraph::TPGVertex::addOutgoingEdge(EvoGraph::TPGEdge* edge)
 {
     // Do nothing on NULL pointer
     if (edge != NULL) {
@@ -99,17 +99,17 @@ void TPG::TPGVertex::addOutgoingEdge(TPG::TPGEdge* edge)
     }
 }
 
-void TPG::TPGVertex::removeOutgoingEdge(TPG::TPGEdge* edge)
+void EvoGraph::TPGVertex::removeOutgoingEdge(EvoGraph::TPGEdge* edge)
 {
     this->outgoingEdges.remove(edge);
 }
 
-const std::set<uint64_t>& TPG::TPGVertex::getAssessedActions() const
+const std::set<uint64_t>& EvoGraph::TPGVertex::getAssessedActions() const
 {
     return this->assessedActions;
 }
 
-void TPG::TPGVertex::updateAssessedActions()
+void EvoGraph::TPGVertex::updateAssessedActions()
 {
     assessedActions.clear();
     for (TPGEdge* edge : this->outgoingEdges) {
@@ -127,7 +127,7 @@ void TPG::TPGVertex::updateAssessedActions()
     }
 }
 
-bool TPG::TPGVertex::hasSameAssessedActions(std::set<uint64_t> actions) const
+bool EvoGraph::TPGVertex::hasSameAssessedActions(std::set<uint64_t> actions) const
 {
 
     // Temporary set to store the intersection
@@ -142,12 +142,12 @@ bool TPG::TPGVertex::hasSameAssessedActions(std::set<uint64_t> actions) const
     return !intersectionResult.empty();
 }
 
-uint64_t TPG::TPGVertex::getVertexID() const
+uint64_t EvoGraph::TPGVertex::getVertexID() const
 {
     return this->vertexID;
 }
 
-void TPG::TPGVertex::setVertexID(uint64_t newID)
+void EvoGraph::TPGVertex::setVertexID(uint64_t newID)
 {
     this->vertexID = newID;
 
@@ -157,7 +157,7 @@ void TPG::TPGVertex::setVertexID(uint64_t newID)
     }
 }
 
-bool TPG::operator<(const TPG::TPGVertex& a, const TPG::TPGVertex& b)
+bool EvoGraph::operator<(const EvoGraph::TPGVertex& a, const EvoGraph::TPGVertex& b)
 {
     return a.getVertexID() < b.getVertexID();
 }

@@ -26,7 +26,7 @@ namespace Selector {
          * \param[in] params parameters used by the Selector.
          * \param[in] nbActions number of actions in the LearningEnvironment.
          */
-        ClassificationSelector(std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
+        ClassificationSelector(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
                                const Learn::LearningParameters& params,
                                uint64_t nbActions)
             : Selector{graph, manager, params}, nbActions{nbActions}
@@ -56,7 +56,7 @@ namespace Selector {
          * score obtained over all classes.
          *
          * This per-class preservation is activated only if there is a
-         * sufficient number of root vertices in the TPGGraph after decimation
+         * sufficient number of root vertices in the Graph after decimation
          * to guarantee that all classes are preserved equally. In other word,
          * the same number of root is marked for preservation for each class,
          * which can only be achieved if the number of roots to preserve during

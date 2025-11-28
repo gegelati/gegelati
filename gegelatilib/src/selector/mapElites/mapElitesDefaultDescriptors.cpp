@@ -3,7 +3,7 @@
 #include "selector/mapElites/mapElitesDefaultDescriptors.h"
 
 void Selector::MapElites::DefaultDescriptors::ActionValues::initDescriptor(
-    const TPG::TPGGraph& graph,
+    const EvoGraph::Graph& graph,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     this->init = true;

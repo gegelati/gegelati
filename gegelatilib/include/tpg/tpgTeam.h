@@ -39,9 +39,9 @@
 
 #include "tpg/tpgVertex.h"
 
-namespace TPG {
+namespace EvoGraph {
     /**
-     * Class used to represent a Team of the TPGGraph.
+     * Class used to represent a Team of the Graph.
      *
      * A Team is a non-leaf vertex of a Tangled-Program-Graph.
      */
@@ -61,6 +61,6 @@ namespace TPG {
         virtual void addOutgoingEdge(TPGEdge* edge) override;
     };
 
-}; // namespace TPG
+}; // namespace EvoGraph
 
 #endif

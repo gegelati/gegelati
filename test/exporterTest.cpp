@@ -69,8 +69,8 @@ class ExporterTest : public ::testing::Test
     Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
-    TPG::TPGGraph* tpg;
-    std::vector<const TPG::TPGEdge*> edges;
+    EvoGraph::Graph* tpg;
+    std::vector<const EvoGraph::TPGEdge*> edges;
     size_t constant_size = 5;
 
     virtual void SetUp()
@@ -94,7 +94,7 @@ class ExporterTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
         e = new Environment(set, params, vect, 3);
-        tpg = new TPG::TPGGraph(*e);
+        tpg = new EvoGraph::Graph(*e);
 
         // Create 10 programs
         for (int i = 0; i < 8; i++) {

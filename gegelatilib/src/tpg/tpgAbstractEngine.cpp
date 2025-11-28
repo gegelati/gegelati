@@ -35,7 +35,7 @@
 
 #include "tpg/tpgAbstractEngine.h"
 
-bool TPG::TPGAbstractEngine::programIDIsNew(const uint64_t& progID)
+bool EvoGraph::TPGAbstractEngine::programIDIsNew(const uint64_t& progID)
 {
     if (this->programID.find(progID) == this->programID.end()) {
         this->programID.insert(progID);

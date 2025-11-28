@@ -20,8 +20,8 @@ namespace Selector {
     class Selector
     {
       protected:
-        /// TPGGraph on which the TPGVertex can be selected or deleted.
-        std::shared_ptr<TPG::TPGGraph> graph;
+        /// Graph on which the TPGVertex can be selected or deleted.
+        std::shared_ptr<EvoGraph::Graph> graph;
 
         /// Parameters for the selection
         const Learn::LearningParameters& params;
@@ -33,12 +33,12 @@ namespace Selector {
             bestAgent{nullptr, nullptr};
 
         /**
-         * \brief Map associating agent TPG::TPGVertex to their EvaluationResult.
+         * \brief Map associating agent EvoGraph::TPGVertex to their EvaluationResult.
          *
          * If a given TPGVertex is evaluated several times, its
          * EvaluationResult may be updated with the newer results.
          *
-         * Whenever a TPGVertex is removed from the TPGGraph, its
+         * Whenever a TPGVertex is removed from the Graph, its
          * EvaluationResult should also be removed from this map.
          *
          * This map may be used to avoid reevaluating a agent that was already
@@ -50,7 +50,7 @@ namespace Selector {
             resultsPerAgent;
 
         /**
-         * \brief context used by the TPGMutator to populate the TPGGraph.
+         * \brief context used by the TPGMutator to populate the Graph.
          *
          * The context contains various data needed for the creation of the new
          * population and is update in the updateContext methods.
@@ -74,14 +74,14 @@ namespace Selector {
          * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        Selector(std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
+        Selector(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
                  const Learn::LearningParameters& params)
             : graph{graph}, manager{manager}, params{params}
         {
         }
 
         /**
-         * \brief Removes from the TPGGraph the agent TPGVertex.
+         * \brief Removes from the Graph the agent TPGVertex.
          *
          * The given multimap is updated by removing entries corresponding to
          * decimated vertices.
@@ -107,10 +107,10 @@ namespace Selector {
         virtual std::shared_ptr<SelectionMetrics> createSelectionMetrics() const;
 
         /**
-         * \brief This method keeps only the best agent policy in the TPGGraph.
+         * \brief This method keeps only the best agent policy in the Graph.
          *
          * If the TPGVertex referenced in the bestAgent attribute is no longer
-         * a TPGVertex of the TPGGraph, nothing happens.
+         * a TPGVertex of the Graph, nothing happens.
          */
         virtual void keepBestPolicy();
 
@@ -118,11 +118,11 @@ namespace Selector {
          * \brief Update the bestAgent and resultsPerAgent attributes.
          *
          * This method updates the value of the bestAgent attribute with the
-         * TPG::Vertex given as an argument in the following cases:
+         * EvoGraph::Vertex given as an argument in the following cases:
          * - The given EvaluationResult is greater than the one of the current
          *   bestAgent.
          * - The current bestAgent is a nullptr.
-         * - The current bestAgent has been removed from the TPG::TPGGraph
+         * - The current bestAgent has been removed from the EvoGraph::Graph
          *   managed by the LearningAgent.
          *
          * It should be noted that the last case alone (i.e. without validating
@@ -151,11 +151,11 @@ namespace Selector {
          * \brief Update the bestAgent attribute.
          *
          * This method updates the value of the bestAgent attribute with the
-         * TPG::Vertex given as an argument in the following cases:
+         * EvoGraph::Vertex given as an argument in the following cases:
          * - The given EvaluationResult is greater than the one of the current
          *   bestAgent.
          * - The current bestAgent is a nullptr.
-         * - The current bestAgent has been removed from the TPG::TPGGraph
+         * - The current bestAgent has been removed from the EvoGraph::Graph
          *   managed by the LearningAgent.
          *
          * It should be noted that the last case alone (i.e. without validating
@@ -172,7 +172,7 @@ namespace Selector {
                                 std::shared_ptr<const Algorithm::Agent>>& results);
 
         /**
-         * \brief Get the best agent TPG::Vertex encountered since the last init.
+         * \brief Get the best agent EvoGraph::Vertex encountered since the last init.
          *
          * The returned pointers may be nullptr if no generation was trained
          * since the last init.
@@ -184,11 +184,11 @@ namespace Selector {
         getBestAgent() const;
 
         /**
-         * \brief Getter for the TPGGraph built by the LearningAgent.
+         * \brief Getter for the Graph built by the LearningAgent.
          *
-         * \return Get a shared_pointer to the TPGGraph.
+         * \return Get a shared_pointer to the Graph.
          */
-        virtual std::shared_ptr<TPG::TPGGraph> getGraph();
+        virtual std::shared_ptr<EvoGraph::Graph> getGraph();
 
         /**
          * \brief This method resets the previous registered scores per agent.

@@ -41,13 +41,13 @@
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
 #include "tpg/tpgGraph.h"
 
-namespace TPG {
+namespace EvoGraph {
 
     /**
      * \brief Store execution statistics of one inference trace.
      *
      * It contains :
-     * - the execution trace in a std::vector<const TPG::TPGVertex*>
+     * - the execution trace in a std::vector<const EvoGraph::TPGVertex*>
      * - the number of evaluated teams
      * - the number of evaluated programs
      * - the number of executed lines
@@ -57,7 +57,7 @@ namespace TPG {
     struct TraceStats
     {
         /// The inference trace.
-        const std::vector<const TPG::TPGVertex*> trace;
+        const std::vector<const EvoGraph::TPGVertex*> trace;
 
         /// Number of team evaluated.
         const uint64_t nbEvaluatedTeams;
@@ -72,34 +72,34 @@ namespace TPG {
 
     /**
      * \brief Utility class for extracting execution statistics
-     * from a TPGExecutionEngineInstrumented and an instrumented TPGGraph.
+     * from a TPGExecutionEngineInstrumented and an instrumented Graph.
      *
      * The main method of this class is analyzeExecution(), which will :
-     *  - retrieve from a TPGGraph the instrumented values and compute
+     *  - retrieve from a Graph the instrumented values and compute
      *  average execution statistics.
      *  - compute execution statistics for every inference done with a
      * TPGExecutionEngineInstrumented.
      *  - create distributions from statistics of analyzed traces.
      *
      * Before analyzing or even starting any inference, you must :
-     *  - use a TPGGraph associated to a TPGInstrumentedFactory.
-     *  - use a TPGExecutionEngineInstrumented that will execute the TPGGraph.
+     *  - use a Graph associated to a TPGInstrumentedFactory.
+     *  - use a TPGExecutionEngineInstrumented that will execute the Graph.
      *  - clear any previous instrumented data :
-     *      --> for the TPGGraph, use
+     *      --> for the Graph, use
      * TPGInstrumentedFactory::resetTPGGraphCounters().
      *      --> for the TPGExecutionEngineInstrumented, use its method
      * TPGExecutionEngineInstrumented::clearTraceHistory(). Otherwise, the
-     * results won't have any meaning. If you have never executed the TPGGraph
+     * results won't have any meaning. If you have never executed the Graph
      * or the TPGExecutionEngineInstrumented, resetting them isn't required.
      *
      * You can then execute the TPG for as many inferences as you like.
      *
-     * Then, use analyzeExecution() with the TPGGraph and
+     * Then, use analyzeExecution() with the Graph and
      * TPGExecutionEngineInstrumented, and access the statistics using the
      * provided getters and setters.
      *
      * Warning : the class deduces the number of inferences based on the sum
-     * of evaluation each root vertices had. If you executed your TPGGraph
+     * of evaluation each root vertices had. If you executed your Graph
      * starting from multiple roots, then remember that the average statistics
      * are based on ALL inferences, regardless of the root vertices used.
      *
@@ -178,10 +178,10 @@ namespace TPG {
          * distribUsedVertices[v] = y --> y inferences visited vertex pointed by
          * v.
          */
-        std::map<const TPG::TPGVertex*, size_t> distribUsedVertices;
+        std::map<const EvoGraph::TPGVertex*, size_t> distribUsedVertices;
 
         /// Graph used during last call to analyzeExecution
-        const TPGGraph* lastAnalyzedGraph = nullptr;
+        const Graph* lastAnalyzedGraph = nullptr;
 
       protected:
         /**
@@ -204,16 +204,16 @@ namespace TPG {
         virtual ~ExecutionStats() = default;
 
         /**
-         * \brief Analyze the average statistics of an instrumented TPGGraph
+         * \brief Analyze the average statistics of an instrumented Graph
          * execution.
          *
          * Results are stored in the average results class attributes.
          *
-         * \param[in] graph the analyzed TPGGraph*.
+         * \param[in] graph the analyzed Graph*.
          * \throws std::bad_cast if graph contains at least one non instrumented
          * vertex or edge.
          */
-        void analyzeInstrumentedGraph(const TPGGraph* graph);
+        void analyzeInstrumentedGraph(const Graph* graph);
 
         /**
          * \brief Analyze the execution statistics of one inference trace.
@@ -237,12 +237,12 @@ namespace TPG {
          * Previous results will be erased.
          *
          * \param[in] tee the TPGExecutionEngineInstrumented.
-         * \param[in] graph the TPGGraph executed with tee.
+         * \param[in] graph the Graph executed with tee.
          * \throws std::bad_cast if the graph contains a non instrumented vertex
          * or edge.
          */
-        void analyzeExecution(const TPG::TPGExecutionEngineInstrumented& tee,
-                              const TPGGraph* graph);
+        void analyzeExecution(const EvoGraph::TPGExecutionEngineInstrumented& tee,
+                              const Graph* graph);
 
         /// Get the average number of evaluated teams per inference.
         double getAvgEvaluatedTeams() const;
@@ -274,7 +274,7 @@ namespace TPG {
         getDistribNbExecutionPerInstruction() const;
 
         /// Get the distribution if the number of visit for each vertex.
-        const std::map<const TPG::TPGVertex*, size_t>& getDistribUsedVertices()
+        const std::map<const EvoGraph::TPGVertex*, size_t>& getDistribUsedVertices()
             const;
 
         /// Clear stored trace statistics and distributions.
@@ -348,7 +348,7 @@ namespace TPG {
          *                      "InstructionIndex" : nbExecution,
          *                  ...
          *                  },
-         *                  "trace" : [Array of vertex indexes in the TPGGraph]
+         *                  "trace" : [Array of vertex indexes in the Graph]
          *              },
          *              ...
          *          }
@@ -366,6 +366,6 @@ namespace TPG {
                               bool noIndent = false) const;
     };
 
-} // namespace TPG
+} // namespace EvoGraph
 
 #endif // EXECUTION_STATS_H

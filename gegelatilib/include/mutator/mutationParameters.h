@@ -44,7 +44,7 @@
 
 namespace Mutator {
     /**
-     * \brief Structure holding all parameters affecting mutations of TPGGraph.
+     * \brief Structure holding all parameters affecting mutations of Graph.
      */
     typedef struct TPGParameters
     {
@@ -52,9 +52,9 @@ namespace Mutator {
         /// JSon comment
         inline static const std::string nbRootsComment =
             "// Number of root TPGTeams to maintain when populating the "
-            "TPGGraph\n"
+            "Graph\n"
             "// \"nbRoots\" : 100, // Default value";
-        /// Number of root TPGTeams to maintain when populating the TPGGraph
+        /// Number of root TPGTeams to maintain when populating the Graph
         size_t nbRoots = 100;
 
         /// JSon comment
@@ -71,10 +71,10 @@ namespace Mutator {
         /// JSon comment
         inline static const std::string maxInitOutgoingEdgesComment =
             "// Maximum number of TPGEdge connected to each TPGTeam of the "
-            "TPGGraph when\n"
+            "Graph when\n"
             "// initialized.\n"
             "// \"maxInitOutgoingEdges\" : 3, // Default value";
-        /// Maximum number of TPGEdge connected to each TPGTeam of the TPGGraph
+        /// Maximum number of TPGEdge connected to each TPGTeam of the Graph
         /// when initialized.
         size_t maxInitOutgoingEdges = 3;
 
@@ -125,9 +125,9 @@ namespace Mutator {
 
         /// JSon comment
         inline static const std::string maxOutgoingEdgesComment =
-            "// Maximum number of outgoing edge during TPGGraph mutations.\n"
+            "// Maximum number of outgoing edge during Graph mutations.\n"
             "// \"maxOutgoingEdges\" : 5, // Default value";
-        /// Maximum number of outgoing edge during TPGGraph mutations.
+        /// Maximum number of outgoing edge during Graph mutations.
         size_t maxOutgoingEdges = 5;
 
         /// JSon comment
@@ -250,23 +250,23 @@ namespace Mutator {
         inline static const std::string maxProgramSizeComment =
             "// Maximum number of Line within the Program of the TPG.\n"
             "// \"maxProgramSize\" : 96, // Default value";
-        /// Maximum number of Line within the Program of the TPGGraph.
+        /// Maximum number of Line within the Program of the Graph.
         size_t maxProgramSize = 96;
 
         /// JSon comment
         inline static const std::string initMinProgramSizeComment =
             "// Initial minimum number of Line within the Program of the "
-            "TPGGraph.\n"
+            "Graph.\n"
             "// \"initMinProgramSize\" : 1, // Default value";
-        /// Initial minimum number of Line within the Program of the TPGGraph.
+        /// Initial minimum number of Line within the Program of the Graph.
         size_t initMinProgramSize = 1;
 
         /// JSon comment
         inline static const std::string initMaxProgramSizeComment =
             "// Initial maximum number of Line within the Program of the "
-            "TPGGraph.\n"
+            "Graph.\n"
             "// \"initMaxProgramSize\" : 10, // Default value";
-        /// Initial maximum number of Line within the Program of the TPGGraph.
+        /// Initial maximum number of Line within the Program of the Graph.
         size_t initMaxProgramSize = 10;
 
         /// JSon comment

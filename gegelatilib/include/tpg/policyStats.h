@@ -49,10 +49,10 @@
 #include "tpg/tpgGraph.h"
 #include "tpg/tpgTeam.h"
 
-namespace TPG {
+namespace EvoGraph {
 
     /**
-     * Utility class for extracting statistics from a policy within a TPGGraph.
+     * Utility class for extracting statistics from a policy within a Graph.
      *
      * The entry point for using this class is the analyzePolicy() method which
      * updates all attribute for a "tree" starting from a given root TPGVertex.
@@ -152,7 +152,7 @@ namespace TPG {
         std::map<std::pair<size_t, size_t>, size_t>
             nbUsagePerDataLocationActionProg;
 
-        /// Number of outgoing TPGEdge of per TPGTeam of the TPGGraph.
+        /// Number of outgoing TPGEdge of per TPGTeam of the Graph.
         std::vector<size_t> nbOutgoingEdgesPerTeam;
 
         /**
@@ -237,7 +237,7 @@ namespace TPG {
          * If a TPGTeam was already analyzed, it will not be analyzed again and
          * only the number of use per TPGTeam will be updated.
          */
-        void analyzeTPGTeam(const TPG::TPGTeam* team);
+        void analyzeTPGTeam(const EvoGraph::TPGTeam* team);
 
         /**
          * Analyze the given TPGAction.
@@ -249,12 +249,12 @@ namespace TPG {
          * If a TPGAction was already analyzed, it will not be analyzed again
          * and only the number of use per TPGAction will be updated.
          */
-        void analyzeTPGAction(const TPG::TPGAction* action);
+        void analyzeTPGAction(const EvoGraph::TPGAction* action);
 
         /**
          * Analyze the policy starting from the given TPGVertex.
          *
-         * This method explores the TPGGraph starting from the given TPGVertex,
+         * This method explores the Graph starting from the given TPGVertex,
          * and analyzes all TPGTeam, TPGAction and Program encountered along the
          * way.
          *
@@ -262,7 +262,7 @@ namespace TPG {
          * - Depth of the policy.
          * - Number of TPGTeam per depth level.
          */
-        void analyzePolicy(const TPG::TPGVertex* vertex);
+        void analyzePolicy(const EvoGraph::TPGVertex* vertex);
 
         friend std::ostream& operator<<(std::ostream& os,
                                         const PolicyStats& policyStats);
@@ -270,6 +270,6 @@ namespace TPG {
 
     /// Overload of the stream output operator for the PolicyStats class.
     std::ostream& operator<<(std::ostream& os, const PolicyStats& policyStats);
-} // namespace TPG
+} // namespace EvoGraph
 
 #endif

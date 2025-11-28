@@ -11,8 +11,8 @@ class MapElitesArchiveTest : public ::testing::Test
     const double minV = 0.0;
     const double maxV = 10.0;
 
-    std::shared_ptr<TPG::TPGGraph> graph;
-    const TPG::TPGVertex* dummyAgent;
+    std::shared_ptr<EvoGraph::Graph> graph;
+    const EvoGraph::TPGVertex* dummyAgent;
     Environment* e = NULL;
     Learn::LearningParameters params;
     Instructions::Set set;
@@ -23,8 +23,8 @@ class MapElitesArchiveTest : public ::testing::Test
     Selector::MapElites::MapElitesArchive* archive;
 
     // dummy vertex and evaluation
-    const TPG::TPGVertex* dummyVertex;
-    const TPG::TPGVertex* dummyVertex2;
+    const EvoGraph::TPGVertex* dummyVertex;
+    const EvoGraph::TPGVertex* dummyVertex2;
     std::shared_ptr<Learn::EvaluationResult> dummyEval;
 
     void SetUp() override
@@ -46,7 +46,7 @@ class MapElitesArchiveTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 1;
         e = new Environment(set, params, vect, 3);
-        graph = std::make_shared<TPG::TPGGraph>(*e);
+        graph = std::make_shared<EvoGraph::Graph>(*e);
         dummyVertex = &graph->addNewTeam();
         dummyVertex2 = &graph->addNewTeam();
     }

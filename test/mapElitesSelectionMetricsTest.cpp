@@ -9,11 +9,11 @@
 class MapElitesSelectionMetricsTest : public ::testing::Test
 {
   protected:
-    std::shared_ptr<TPG::TPGGraph> graph;
+    std::shared_ptr<EvoGraph::Graph> graph;
     FakeMultiContinuousLearningEnvironment env;
     std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues>
         descriptor;
-    const TPG::TPGVertex* dummyAgent;
+    const EvoGraph::TPGVertex* dummyAgent;
     Environment* e = NULL;
     Learn::LearningParameters params;
     Instructions::Set set;
@@ -35,7 +35,7 @@ class MapElitesSelectionMetricsTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 1;
         e = new Environment(set, params, vect, 3);
-        graph = std::make_shared<TPG::TPGGraph>(*e);
+        graph = std::make_shared<EvoGraph::Graph>(*e);
         dummyAgent = &graph->addNewTeam();
 
         descriptor = std::make_shared<

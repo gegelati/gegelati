@@ -44,12 +44,12 @@
 
 #include "tpg/tpgExecutionEngine.h"
 
-void TPG::TPGExecutionEngine::setArchive(Archive* newArchive)
+void EvoGraph::TPGExecutionEngine::setArchive(Archive* newArchive)
 {
     this->archive = newArchive;
 }
 
-void TPG::TPGExecutionEngine::applyActivationFunctionOnActions(
+void EvoGraph::TPGExecutionEngine::applyActivationFunctionOnActions(
     std::vector<double>& actionsTaken)
 {
 
@@ -81,7 +81,7 @@ void TPG::TPGExecutionEngine::applyActivationFunctionOnActions(
     }
 }
 
-double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
+double EvoGraph::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
 {
     // Get the program
     Program::Program& prog = edge.getProgram();
@@ -105,10 +105,10 @@ double TPG::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     return result;
 }
 
-const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team)
+const EvoGraph::TPGEdge& EvoGraph::TPGExecutionEngine::evaluateTeam(const TPGTeam& team)
 {
     // Copy outgoing edge list
-    const std::list<TPG::TPGEdge*>& outgoingEdges = team.getOutgoingEdges();
+    const std::list<EvoGraph::TPGEdge*>& outgoingEdges = team.getOutgoingEdges();
 
     // Note: No need to exclude previously visited edges as the graph is now
     // assumed to be acyclic.
@@ -149,7 +149,7 @@ const TPG::TPGEdge& TPG::TPGExecutionEngine::evaluateTeam(const TPGTeam& team)
     return *bestEdge;
 }
 
-const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
+const std::pair<std::vector<const EvoGraph::TPGVertex*>, std::vector<double>> EvoGraph::
     TPGExecutionEngine::executeFromRoot(
         const TPGVertex& root, const std::vector<uint64_t>& initActions)
 {
@@ -159,7 +159,7 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
     std::vector<const TPGVertex*> visitedVertices;
     visitedVertices.push_back(currentVertex);
     // Browse the TPG until a TPGAction is reached.
-    while (dynamic_cast<const TPG::TPGTeam*>(currentVertex)) {
+    while (dynamic_cast<const EvoGraph::TPGTeam*>(currentVertex)) {
         // Get the next edge
         edge = &this->evaluateTeam(*(const TPGTeam*)currentVertex);
         Program::Program p =
@@ -233,7 +233,7 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
         std::vector<double> actionID;
         if (currentVertex != nullptr) {
             actionID.push_back(
-                (double)dynamic_cast<const TPG::TPGAction*>(currentVertex)
+                (double)dynamic_cast<const EvoGraph::TPGAction*>(currentVertex)
                     ->getActionID());
         }
         return std::make_pair(visitedVertices, actionID);

@@ -39,10 +39,10 @@
 #include "program/program.h"
 #include "tpg/tpgGraph.h"
 
-namespace TPG {
+namespace EvoGraph {
     /**
      * \brief Abstract Class in charge of managing maps to give a unique ID
-     * for vertex and a program of a TPGGraph.
+     * for vertex and a program of a Graph.
      *
      */
     class TPGAbstractEngine
@@ -50,10 +50,10 @@ namespace TPG {
 
       protected:
         /**
-         * \brief Reference to the TPGGraph whose content will be used to fill
+         * \brief Reference to the Graph whose content will be used to fill
          * the maps.
          */
-        const TPG::TPGGraph& tpg;
+        const EvoGraph::Graph& tpg;
 
         /**
          * \brief Set of all program ID.
@@ -65,7 +65,7 @@ namespace TPG {
          * integer identifier to each TPGAction.
          *
          * Identifier associated to TPGAction are NOT preserved during multiple
-         * printing of a TPGGraph.
+         * printing of a Graph.
          */
         uint64_t nbActions;
 
@@ -76,7 +76,7 @@ namespace TPG {
          * used to fill the maps of IDs  (vertex and program).
          */
 
-        TPGAbstractEngine(const TPG::TPGGraph& tpg) : tpg{tpg}, nbActions{0} {};
+        TPGAbstractEngine(const EvoGraph::Graph& tpg) : tpg{tpg}, nbActions{0} {};
 
       public:
         /**
@@ -89,5 +89,5 @@ namespace TPG {
 
         bool programIDIsNew(const uint64_t& progID);
     };
-} // namespace TPG
+} // namespace EvoGraph
 #endif // TPG_ABSTRACT_ENGINE_H

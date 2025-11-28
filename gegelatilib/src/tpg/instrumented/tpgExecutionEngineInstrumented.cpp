@@ -40,13 +40,13 @@
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 
-double TPG::TPGExecutionEngineInstrumented::evaluateEdge(const TPGEdge& edge)
+double EvoGraph::TPGExecutionEngineInstrumented::evaluateEdge(const TPGEdge& edge)
 {
     dynamic_cast<const TPGEdgeInstrumented&>(edge).incrementNbVisits();
     return TPGExecutionEngine::evaluateEdge(edge);
 }
 
-const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(
+const EvoGraph::TPGEdge& EvoGraph::TPGExecutionEngineInstrumented::evaluateTeam(
     const TPGTeam& team)
 {
     dynamic_cast<const TPGTeamInstrumented&>(team).incrementNbVisits();
@@ -57,11 +57,11 @@ const TPG::TPGEdge& TPG::TPGExecutionEngineInstrumented::evaluateTeam(
     return winningEdge;
 }
 
-const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
+const std::pair<std::vector<const EvoGraph::TPGVertex*>, std::vector<double>> EvoGraph::
     TPGExecutionEngineInstrumented::executeFromRoot(
-        const TPG::TPGVertex& root, const std::vector<uint64_t>& initActions)
+        const EvoGraph::TPGVertex& root, const std::vector<uint64_t>& initActions)
 {
-    const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>>
+    const std::pair<std::vector<const EvoGraph::TPGVertex*>, std::vector<double>>
         result = TPGExecutionEngine::executeFromRoot(root, initActions);
 
     // Increment action visit
@@ -73,13 +73,13 @@ const std::pair<std::vector<const TPG::TPGVertex*>, std::vector<double>> TPG::
     return result;
 }
 
-const std::vector<std::vector<const TPG::TPGVertex*>>& TPG::
+const std::vector<std::vector<const EvoGraph::TPGVertex*>>& EvoGraph::
     TPGExecutionEngineInstrumented::getTraceHistory() const
 {
     return this->traceHistory;
 }
 
-void TPG::TPGExecutionEngineInstrumented::clearTraceHistory()
+void EvoGraph::TPGExecutionEngineInstrumented::clearTraceHistory()
 {
     this->traceHistory.clear();
 }

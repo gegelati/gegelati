@@ -53,9 +53,9 @@ void Log::CycleDetectionLALogger::logNewGeneration(uint64_t& generationNumber)
 void Log::CycleDetectionLALogger::logAfterPopulateTPG()
 {
     // Do a Depth First Search of the TPG from all roots.
-    std::set<const TPG::TPGVertex*> visitedVertices;
-    std::vector<const TPG::TPGVertex*> lifoToVisit;
-    std::vector<const TPG::TPGVertex*> currentPath;
+    std::set<const EvoGraph::TPGVertex*> visitedVertices;
+    std::vector<const EvoGraph::TPGVertex*> lifoToVisit;
+    std::vector<const EvoGraph::TPGVertex*> currentPath;
 
     // Add all roots to the set of vertex to visit
     const auto tpg = this->learningAgent.getGraph();
@@ -65,7 +65,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
     // Iterate on the stack
     while (!lifoToVisit.empty()) {
         // Pop first vertex
-        const TPG::TPGVertex* vertex = lifoToVisit.back();
+        const EvoGraph::TPGVertex* vertex = lifoToVisit.back();
         lifoToVisit.pop_back();
 
         // If vertex is null pointer, this means we need to unstack a vertex
@@ -80,7 +80,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
         visitedVertices.insert(vertex);
 
         // Scan outgoing edges
-        const TPG::TPGTeam* team = dynamic_cast<const TPG::TPGTeam*>(vertex);
+        const EvoGraph::TPGTeam* team = dynamic_cast<const EvoGraph::TPGTeam*>(vertex);
         if (team != nullptr) {
             // Push vertex in path
             currentPath.push_back(vertex);

@@ -72,9 +72,9 @@ class ImporterTest : public ::testing::Test
     std::vector<std::shared_ptr<Program::Program>> progPointers;
     File::TPGGraphDotExporter* dotExporter = NULL;
 
-    TPG::TPGGraph* tpg;
-    TPG::TPGGraph* tpg_copy;
-    std::vector<const TPG::TPGEdge*> edges;
+    EvoGraph::Graph* tpg;
+    EvoGraph::Graph* tpg_copy;
+    std::vector<const EvoGraph::TPGEdge*> edges;
 
     std::fstream failpfile;
     std::fstream pfile;
@@ -100,8 +100,8 @@ class ImporterTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
         e = new Environment(set, params, vect, 3);
-        tpg = new TPG::TPGGraph(*e);
-        tpg_copy = new TPG::TPGGraph(*e);
+        tpg = new EvoGraph::Graph(*e);
+        tpg_copy = new EvoGraph::Graph(*e);
 
         // Create 12 programs
         for (int i = 0; i < 12; i++) {
@@ -195,10 +195,10 @@ class ImporterTest : public ::testing::Test
         // Add new Action Edges to A2
         edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(6),
                                                progPointers.at(11), 0));
-        if (dynamic_cast<const TPG::TPGAction*>(tpg->getVertices().at(4))) {
+        if (dynamic_cast<const EvoGraph::TPGAction*>(tpg->getVertices().at(4))) {
             // If the vertex is an action, we can order its edges
             tpg->orderActionEdges(
-                dynamic_cast<const TPG::TPGAction*>(tpg->getVertices().at(4)));
+                dynamic_cast<const EvoGraph::TPGAction*>(tpg->getVertices().at(4)));
         }
 
         // Check the characteristics
@@ -313,49 +313,49 @@ TEST_F(ImporterTest, importGraph)
 
     // Check action edges
     // Action A0
-    const TPG::TPGVertex* action1 = tpg_copy->getVertices().at(4);
-    ASSERT_NE(dynamic_cast<const TPG::TPGAction*>(action1), nullptr)
+    const EvoGraph::TPGVertex* action1 = tpg_copy->getVertices().at(4);
+    ASSERT_NE(dynamic_cast<const EvoGraph::TPGAction*>(action1), nullptr)
         << "The vertex at index 4 should be an action.";
     // If the vertex is an action, we can order its edges
-    const TPG::TPGAction* action1_casted =
-        dynamic_cast<const TPG::TPGAction*>(action1);
+    const EvoGraph::TPGAction* action1_casted =
+        dynamic_cast<const EvoGraph::TPGAction*>(action1);
     ASSERT_EQ(action1_casted->getOutgoingEdges().size(), 2)
         << "The action A0 should have two action edges";
 
     auto it = action1_casted->getOutgoingEdges().begin();
-    ASSERT_NE(dynamic_cast<const TPG::TPGActionEdge*>(*it), nullptr)
+    ASSERT_NE(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it), nullptr)
         << "The first outgoing edge of action A0 should be an action edge.";
-    ASSERT_EQ(dynamic_cast<const TPG::TPGActionEdge*>(*it)->getActionClass(), 1)
+    ASSERT_EQ(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it)->getActionClass(), 1)
         << "The action edge class should be 1.";
 
     ++it;
-    ASSERT_NE(dynamic_cast<const TPG::TPGActionEdge*>(*it), nullptr)
+    ASSERT_NE(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it), nullptr)
         << "The second outgoing edge of action A0 should be an action edge.";
-    ASSERT_EQ(dynamic_cast<const TPG::TPGActionEdge*>(*it)->getActionClass(), 2)
+    ASSERT_EQ(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it)->getActionClass(), 2)
         << "The action edge class should be 2.";
 
     // Action A1
-    const TPG::TPGVertex* action2 = tpg_copy->getVertices().at(5);
-    ASSERT_NE(dynamic_cast<const TPG::TPGAction*>(action2), nullptr)
+    const EvoGraph::TPGVertex* action2 = tpg_copy->getVertices().at(5);
+    ASSERT_NE(dynamic_cast<const EvoGraph::TPGAction*>(action2), nullptr)
         << "The vertex at index 5 should be an action.";
     // If the vertex is an action, we can order its edges
-    const TPG::TPGAction* action2_casted =
-        dynamic_cast<const TPG::TPGAction*>(action2);
+    const EvoGraph::TPGAction* action2_casted =
+        dynamic_cast<const EvoGraph::TPGAction*>(action2);
     ASSERT_EQ(action2_casted->getOutgoingEdges().size(), 0)
         << "The action A1 should not have any action edges";
 
     // Action A2
-    const TPG::TPGVertex* action3 = tpg_copy->getVertices().at(6);
-    ASSERT_NE(dynamic_cast<const TPG::TPGAction*>(action3), nullptr)
+    const EvoGraph::TPGVertex* action3 = tpg_copy->getVertices().at(6);
+    ASSERT_NE(dynamic_cast<const EvoGraph::TPGAction*>(action3), nullptr)
         << "The vertex at index 6 should be an action.";
     // If the vertex is an action, we can order its edges
-    const TPG::TPGAction* action3_casted =
-        dynamic_cast<const TPG::TPGAction*>(action3);
+    const EvoGraph::TPGAction* action3_casted =
+        dynamic_cast<const EvoGraph::TPGAction*>(action3);
     ASSERT_EQ(action3_casted->getOutgoingEdges().size(), 1)
         << "The action A2 should have one action edge.";
 
     auto it2 = action3_casted->getOutgoingEdges().begin();
-    ASSERT_NE(dynamic_cast<const TPG::TPGActionEdge*>(*it2), nullptr)
+    ASSERT_NE(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it2), nullptr)
         << "The outgoing edge of action A1 should be an action edge.";
 
     // check that the imported program is the same as the one written in the
@@ -440,7 +440,7 @@ TEST_F(ImporterTest, importTrainedGraphContinuous)
 {
     params.nbProgramConstant = 10;
     e = new Environment(set, params, vect, 3);
-    tpg_copy = new TPG::TPGGraph(*e);
+    tpg_copy = new EvoGraph::Graph(*e);
 
     File::TPGGraphDotImporter dotImporter(
         TESTS_DAT_PATH "exported_trained_tpg_continuous_ref.dot", *e,

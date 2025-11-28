@@ -116,7 +116,7 @@ class SelectorTest : public ::testing::Test
 
 TEST_F(SelectorTest, Constructor)
 {
-    std::shared_ptr<TPG::TPGGraph> graph = std::make_shared<TPG::TPGGraph>(*e);
+    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
 
     Selector::Selector* selector;
 
@@ -128,12 +128,12 @@ TEST_F(SelectorTest, Constructor)
 
 TEST_F(SelectorTest, doAbstractSelection)
 {
-    std::shared_ptr<TPG::TPGGraph> graph = std::make_shared<TPG::TPGGraph>(*e);
+    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
 
     Selector::Selector selector(graph, params);
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
     RNG::RNG rng;
     ASSERT_THROW(selector.doSelection(results, rng), std::runtime_error)
@@ -159,7 +159,7 @@ TEST_F(SelectorTest, KeepBestPolicy)
     ASSERT_NO_THROW(selector->keepBestPolicy())
         << "Keeping the best policy after training should not fail.";
     ASSERT_EQ(selector->getGraph()->getNbRootVertices(), 1)
-        << "A single root TPGVertex should remain in the TPGGraph when keeping "
+        << "A single root TPGVertex should remain in the Graph when keeping "
            "the best policy only";
 }
 
@@ -185,7 +185,7 @@ TEST_F(SelectorTest, UpdateEvaluationRecords)
 
     // Update with a fake result for a root of the graph
     auto rootVertices = selector->getGraph()->getRootVertices();
-    const TPG::TPGVertex* root = *rootVertices.begin();
+    const EvoGraph::TPGVertex* root = *rootVertices.begin();
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(
               std::make_shared<Selector::SelectionMetrics>(1.0), 10),
@@ -197,7 +197,7 @@ TEST_F(SelectorTest, UpdateEvaluationRecords)
         << "Best root not updated properly.";
 
     // Update with a fake better result for another root of the graph
-    const TPG::TPGVertex* root2 =
+    const EvoGraph::TPGVertex* root2 =
         *(selector->getGraph()->getRootVertices().begin() + 1);
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(
@@ -210,7 +210,7 @@ TEST_F(SelectorTest, UpdateEvaluationRecords)
         << "Best root not updated properly.";
 
     // Update with a fake worse result for another root of the graph
-    const TPG::TPGVertex* root3 =
+    const EvoGraph::TPGVertex* root3 =
         *(selector->getGraph()->getRootVertices().begin() + 2);
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(
@@ -223,7 +223,7 @@ TEST_F(SelectorTest, UpdateEvaluationRecords)
         << "Best root not updated properly.";
 
     // Update with a root not from the graph
-    TPG::TPGTeam fakeRoot;
+    EvoGraph::TPGTeam fakeRoot;
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(
               std::make_shared<Selector::SelectionMetrics>(3.0), 10),
@@ -235,7 +235,7 @@ TEST_F(SelectorTest, UpdateEvaluationRecords)
         << "Best root not updated properly.";
 
     // Update with a worse EvaluationResult (but still updated because previous
-    // Root is not in the TPGGraph
+    // Root is not in the Graph
     auto sharedPtr = std::make_shared<Learn::EvaluationResult>(
         std::make_shared<Selector::SelectionMetrics>(1.5), 10);
     ASSERT_NO_THROW(selector->updateEvaluationRecords({{sharedPtr, root3}}));
@@ -267,7 +267,7 @@ TEST_F(SelectorTest, forgetPreviousResults)
 
     // Update with a fake result for a root of the graph
     auto rootVertices = selector->getGraph()->getRootVertices();
-    const TPG::TPGVertex* root = *rootVertices.begin();
+    const EvoGraph::TPGVertex* root = *rootVertices.begin();
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(
               std::make_shared<Selector::SelectionMetrics>(1.0), 10),
@@ -326,22 +326,22 @@ TEST_F(SelectorTest, DoSelection)
     std::shared_ptr<Selector::Selector> selector = la.getSelector();
 
     // Remove the first team to make the first action a root
-    TPG::TPGGraph& graph = *selector->getGraph();
+    EvoGraph::Graph& graph = *selector->getGraph();
     auto roots = graph.getRootVertices();
     graph.removeVertex(*roots.at(0));
 
     // Check that the action is now a root
     roots = graph.getRootVertices();
     auto* root = roots.at(0);
-    ASSERT_EQ(typeid(*root), typeid(TPG::TPGAction))
-        << "An action should have become a root of the TPGGraph.";
+    ASSERT_EQ(typeid(*root), typeid(EvoGraph::TPGAction))
+        << "An action should have become a root of the Graph.";
 
     // Create and fill results for each "root" artificially
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
     double result = 0.0;
-    for (const TPG::TPGVertex* root : roots) {
+    for (const EvoGraph::TPGVertex* root : roots) {
         results.emplace(
             new Learn::EvaluationResult(
                 std::make_shared<Selector::SelectionMetrics>(result++), 5),
@@ -373,16 +373,16 @@ TEST_F(SelectorTest, DoSelectionActionsQuota)
 
     std::shared_ptr<Selector::Selector> selector = cla.getSelector();
 
-    std::shared_ptr<TPG::TPGGraph> graph = selector->getGraph();
+    std::shared_ptr<EvoGraph::Graph> graph = selector->getGraph();
 
     // Set teams at a lower score than actions
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
     double scoreActions = 10.0;
     double scoreTeams = 0.0;
     for (auto* root : graph->getRootVertices()) {
-        if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
+        if (dynamic_cast<const EvoGraph::TPGAction*>(root) != nullptr) {
             results.emplace(std::make_shared<Learn::EvaluationResult>(
                                 std::make_shared<Selector::SelectionMetrics>(
                                     scoreActions++),
@@ -403,10 +403,10 @@ TEST_F(SelectorTest, DoSelectionActionsQuota)
     size_t nbTeams = 0;
     size_t nbActions = 0;
     for (auto root : graph->getRootVertices()) {
-        if (dynamic_cast<const TPG::TPGTeam*>(root) != nullptr) {
+        if (dynamic_cast<const EvoGraph::TPGTeam*>(root) != nullptr) {
             nbTeams++;
         }
-        else if (dynamic_cast<const TPG::TPGAction*>(root) != nullptr) {
+        else if (dynamic_cast<const EvoGraph::TPGAction*>(root) != nullptr) {
             nbActions++;
         }
     }
@@ -431,7 +431,7 @@ TEST_F(SelectorTest, DecimateWithTournamentSelection)
     // Create a set of roots with different scores
     auto roots = tournamentSelector->getGraph()->getRootVertices();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
     double score = 0.0;
     for (auto* root : roots) {
@@ -475,7 +475,7 @@ TEST_F(SelectorTest, UpdateContext)
     params.mutation.tpg.ratioTeamsOverActions = 0.5;
     params.mutation.tpg.teamAccessAllActions = false;
 
-    std::shared_ptr<TPG::TPGGraph> graph = std::make_shared<TPG::TPGGraph>(*e);
+    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
 
     // Create dummy teams and actions
     auto* team1 = &graph->addNewTeam();
@@ -556,7 +556,7 @@ TEST_F(SelectorTest, UpdateContextTournament)
     params.mutation.tpg.useActionProgram = true;
 
     // Create dummy teams and actions, some marked as to be deleted
-    std::shared_ptr<TPG::TPGGraph> graph = std::make_shared<TPG::TPGGraph>(*e);
+    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
     auto* team1 = &graph->addNewTeam();
     auto* team2 = &graph->addNewTeam();
     auto* action1 = &graph->addNewAction(0);
@@ -600,7 +600,7 @@ TEST_F(SelectorTest, updateAfterPopulate)
     params.mutation.tpg.useActionProgram = true;
 
     // Create dummy teams and actions, some marked as to be deleted
-    std::shared_ptr<TPG::TPGGraph> graph = std::make_shared<TPG::TPGGraph>(*e);
+    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
     auto* team1 = &graph->addNewTeam();
     auto* team2 = &graph->addNewTeam();
     auto* action1 = &graph->addNewAction(0);
@@ -628,7 +628,7 @@ TEST_F(SelectorTest, updateAfterPopulate)
 
 TEST_F(SelectorTest, FactorySelector)
 {
-    std::shared_ptr<TPG::TPGGraph> graph = std::make_shared<TPG::TPGGraph>(*e);
+    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
     std::shared_ptr<Selector::Selector> selector;
 
     ASSERT_NO_THROW(selector =

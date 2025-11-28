@@ -52,7 +52,7 @@ namespace Selector {
              * \param[in] learningEnvironment the learning environment used
              */
             virtual void initDescriptor(
-                const TPG::TPGGraph& graph,
+                const EvoGraph::Graph& graph,
                 const Learn::LearningEnvironment& learningEnvironment) = 0;
 
 

@@ -44,9 +44,9 @@
 #include "tpg/tpgActionEdge.h"
 #include "tpg/tpgVertex.h"
 
-namespace TPG {
+namespace EvoGraph {
     /**
-     * \brief Class representing an Action of a TPGGraph.
+     * \brief Class representing an Action of a Graph.
      *
      * An action is a leaf vertex of a TPG associated to an action of the
      * learning agent within its environment.
@@ -57,7 +57,7 @@ namespace TPG {
         /**
          * \brief Integer number abstracting the selected action.
          *
-         * It is up to the used of a TPGGraph to associate the code to each
+         * It is up to the used of a Graph to associate the code to each
          * actionID.
          */
         const uint64_t actionID;
@@ -84,7 +84,7 @@ namespace TPG {
          * Return a pointer pointing to the edge linked to the action class. The
          * pointer is set to nullptr if the action is not found.
          */
-        virtual TPG::TPGActionEdge* getEdgeOfAction(uint64_t actionClass) const;
+        virtual EvoGraph::TPGActionEdge* getEdgeOfAction(uint64_t actionClass) const;
 
         /**
          * \brief Get the action ID associated to the TPGAction.
@@ -102,6 +102,6 @@ namespace TPG {
          */
         void orderActionEdges();
     };
-}; // namespace TPG
+}; // namespace EvoGraph
 
 #endif

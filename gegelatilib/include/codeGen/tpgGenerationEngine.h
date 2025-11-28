@@ -51,11 +51,11 @@
 
 namespace CodeGen {
     /**
-     * \brief Class in charge of generating the C code of a TPGGraph.
+     * \brief Class in charge of generating the C code of a Graph.
      *
-     * Each program of the TPGGraph is represented by a C function.
+     * Each program of the Graph is represented by a C function.
      * All the functions are regrouped in a file. Another file holds
-     * the required functions to iterate through the TPGGraph.
+     * the required functions to iterate through the Graph.
      *
      * To use the generated code two code templates are provided in the
      * directory doc/codeGen. One template is for generic learning environment.
@@ -66,12 +66,12 @@ namespace CodeGen {
      * The repo gegelati apps give some example of the template code completed
      * for TicTacToe, Pendulum and StickGame.
      */
-    class TPGGenerationEngine : public TPG::TPGAbstractEngine
+    class TPGGenerationEngine : public EvoGraph::TPGAbstractEngine
     {
       protected:
         /**
          * String added at the end of the parameter filename to create the
-         * filename of the file with the programs of the TPGGraph.
+         * filename of the file with the programs of the Graph.
          */
         inline static const std::string filenameProg = "program";
 
@@ -113,14 +113,14 @@ namespace CodeGen {
          * \param[in] filename : filename of the file holding the main function
          *                of the generated program.
          *
-         * \param[in] tpg Environment in which the Program of the TPGGraph will
+         * \param[in] tpg Environment in which the Program of the Graph will
          *                be executed.
          *
          * \param[in] path to the folder in which the file are generated. If the
          * folder does not exist.
          */
         TPGGenerationEngine(const std::string& filename,
-                            const TPG::TPGGraph& tpg,
+                            const EvoGraph::Graph& tpg,
                             const std::string& path = "./");
 
         /**
@@ -134,8 +134,8 @@ namespace CodeGen {
          * \brief function that creates the C files required to execute the TPG
          * without gegelati.
          *
-         * This function iterates trough the TPGGraph and create the required C
-         * code to represent each element of the TPGGraph.
+         * This function iterates trough the Graph and create the required C
+         * code to represent each element of the Graph.
          */
         virtual void generateTPGGraph() = 0;
 
@@ -153,7 +153,7 @@ namespace CodeGen {
          *
          * \param[in] edge that must be generated.
          */
-        virtual void generateEdge(const TPG::TPGEdge& edge) = 0;
+        virtual void generateEdge(const EvoGraph::TPGEdge& edge) = 0;
 
         /**
          * \brief Method for generating the code for a team of the graph.
@@ -165,7 +165,7 @@ namespace CodeGen {
          * \param[in] team const reference of the TPGTeam that must be
          * generated.
          */
-        virtual void generateTeam(const TPG::TPGTeam& team) = 0;
+        virtual void generateTeam(const EvoGraph::TPGTeam& team) = 0;
 
         /**
          * \brief Method for generating a action of the graph.
@@ -177,7 +177,7 @@ namespace CodeGen {
          * \param[in] action const reference of the TPGAction that must be
          * generated.
          */
-        virtual void generateAction(const TPG::TPGAction& action) = 0;
+        virtual void generateAction(const EvoGraph::TPGAction& action) = 0;
     };
 } // namespace CodeGen
 

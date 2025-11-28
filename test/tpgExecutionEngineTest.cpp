@@ -66,8 +66,8 @@ class TPGExecutionEngineTest : public ::testing::Test
     Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
-    TPG::TPGGraph* tpg = 0;
-    std::vector<const TPG::TPGEdge*> edges;
+    EvoGraph::Graph* tpg = 0;
+    std::vector<const EvoGraph::TPGEdge*> edges;
     Archive a;
 
     /**
@@ -106,7 +106,7 @@ class TPGExecutionEngineTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 3;
         e = new Environment(set, params, vect);
-        tpg = new TPG::TPGGraph(*e);
+        tpg = new EvoGraph::Graph(*e);
 
         // Create 9 programs
         for (int i = 0; i < 9; i++) {
@@ -179,9 +179,9 @@ class TPGExecutionEngineTest : public ::testing::Test
 
 TEST_F(TPGExecutionEngineTest, ConstructorDestructor)
 {
-    TPG::TPGExecutionEngine* tpee;
+    EvoGraph::TPGExecutionEngine* tpee;
 
-    ASSERT_NO_THROW(tpee = new TPG::TPGExecutionEngine(*e))
+    ASSERT_NO_THROW(tpee = new EvoGraph::TPGExecutionEngine(*e))
         << "Construction of a TPGExecutionEngine failed.";
 
     ASSERT_NO_THROW(delete tpee) << "Deletion of a TPGExecutionEngine failed.";
@@ -189,7 +189,7 @@ TEST_F(TPGExecutionEngineTest, ConstructorDestructor)
 
 TEST_F(TPGExecutionEngineTest, EvaluateEdge)
 {
-    TPG::TPGExecutionEngine tpee(*e);
+    EvoGraph::TPGExecutionEngine tpee(*e);
 
     ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 5, PARAM_FLOAT_PRECISION)
         << "Evaluation of the program of an Edge failed.";
@@ -206,7 +206,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateEdge)
 
 TEST_F(TPGExecutionEngineTest, ArchiveUsage)
 {
-    TPG::TPGExecutionEngine tpee(*e, &a);
+    EvoGraph::TPGExecutionEngine tpee(*e, &a);
 
     ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 5, PARAM_FLOAT_PRECISION)
         << "Evaluation of the program of an Edge failed when result is "
@@ -217,11 +217,11 @@ TEST_F(TPGExecutionEngineTest, ArchiveUsage)
 
 TEST_F(TPGExecutionEngineTest, EvaluateTeam)
 {
-    TPG::TPGExecutionEngine tpee(*e);
+    EvoGraph::TPGExecutionEngine tpee(*e);
 
-    const TPG::TPGEdge* result = NULL;
+    const EvoGraph::TPGEdge* result = NULL;
     ASSERT_NO_THROW(result = &tpee.evaluateTeam(
-                        *(const TPG::TPGTeam*)(tpg->getVertices().at(1)));)
+                        *(const EvoGraph::TPGTeam*)(tpg->getVertices().at(1)));)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
@@ -230,16 +230,16 @@ TEST_F(TPGExecutionEngineTest, EvaluateTeam)
 
 TEST_F(TPGExecutionEngineTest, EvaluateFromRoot)
 {
-    TPG::TPGExecutionEngine tpee(*e);
+    EvoGraph::TPGExecutionEngine tpee(*e);
 
-    std::vector<const TPG::TPGVertex*> result;
+    std::vector<const EvoGraph::TPGVertex*> result;
 
     ASSERT_NO_THROW(
         result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).first)
-        << "Execution of a TPGGraph from a valid root failed.";
+        << "Execution of a Graph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 4)
-        << "Size of the traversed path during the execution of the TPGGraph is "
+        << "Size of the traversed path during the execution of the Graph is "
            "not as expected.";
     ASSERT_EQ(result.at(0), tpg->getVertices().at(0))
         << "0th element (i.e. the root) of the traversed path during execution "
@@ -259,13 +259,13 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousNoActionProg)
     makeProgramReturn(*progPointers.at(2), -1, 2); // Program from A2
 
     Environment continuousEnv(set, params, vect, 2);
-    TPG::TPGExecutionEngine tpee(continuousEnv);
+    EvoGraph::TPGExecutionEngine tpee(continuousEnv);
 
     std::vector<double> result;
 
     ASSERT_NO_THROW(
         result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
-        << "Execution of a TPGGraph from a valid root failed.";
+        << "Execution of a Graph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 2)
         << "Size of the number of action should be equal to 2";
@@ -280,7 +280,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
     Environment continuousEnv(set, params, vect, 2);
     std::shared_ptr<Program::Program> p =
         std::make_shared<Program::Program>(continuousEnv, true);
-    TPG::TPGExecutionEngine tpee(continuousEnv);
+    EvoGraph::TPGExecutionEngine tpee(continuousEnv);
 
     tpg->addNewActionEdge(*tpg->getVertices().at(6), p, 0);
     makeProgramReturn(*p, 1, 0);
@@ -289,23 +289,23 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
     std::vector<double> result;
     ASSERT_NO_THROW(
         result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
-        << "Execution of a TPGGraph from a valid root failed.";
+        << "Execution of a Graph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 2)
         << "Size of the number of action should be equal to 2";
     ASSERT_EQ(result.at(0), 1.0) << "First action value should be 1.";
     ASSERT_EQ(result.at(1), -1.0) << "Second action value should be -1.";
 
-    TPG::TPGAction* action = new TPG::TPGAction(0);
+    EvoGraph::TPGAction* action = new EvoGraph::TPGAction(0);
     ASSERT_THROW(tpee.executeFromRoot(*action), std::runtime_error)
-        << "Execution of a TPGGraph with action without edge should fail.";
+        << "Execution of a Graph with action without edge should fail.";
 
     std::shared_ptr<Program::Program> p0 =
         std::make_shared<Program::Program>(continuousEnv, true);
     tpg->addNewActionEdge(*tpg->getVertices().at(6), p0, 0);
     ASSERT_THROW(tpee.executeFromRoot(*tpg->getRootVertices().at(0)),
                  std::runtime_error)
-        << "Execution of a TPGGraph with action with more than one edge should "
+        << "Execution of a Graph with action with more than one edge should "
            "fail.";
 }
 
@@ -320,7 +320,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
         std::make_shared<Program::Program>(continuousEnv, true);
     std::shared_ptr<Program::Program> p1 =
         std::make_shared<Program::Program>(continuousEnv, true);
-    TPG::TPGExecutionEngine tpee(continuousEnv);
+    EvoGraph::TPGExecutionEngine tpee(continuousEnv);
 
     tpg->addNewActionEdge(*tpg->getVertices().at(6), p0, 0);
     makeProgramReturn(*p0, 1, 0);
@@ -328,7 +328,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
     std::vector<double> result;
     ASSERT_NO_THROW(
         result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
-        << "Execution of a TPGGraph from a valid root failed.";
+        << "Execution of a Graph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 2)
         << "Size of the number of action should be equal to 2";
@@ -341,7 +341,7 @@ TEST_F(TPGExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
 
     ASSERT_NO_THROW(
         result = tpee.executeFromRoot(*tpg->getRootVertices().at(0)).second)
-        << "Execution of a TPGGraph from a valid root failed.";
+        << "Execution of a Graph from a valid root failed.";
     // Check the traversed path
     ASSERT_EQ(result.size(), 2)
         << "Size of the number of action should be equal to 2";
@@ -356,7 +356,7 @@ TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
                                    std::numeric_limits<double>::quiet_NaN()};
     params.activationFunction = "none";
     Environment envNone(set, params, vect);
-    TPG::TPGExecutionEngine tpeeNone(envNone);
+    EvoGraph::TPGExecutionEngine tpeeNone(envNone);
 
     ASSERT_NO_THROW(tpeeNone.applyActivationFunctionOnActions(valuesNone))
         << "None activation function failed";
@@ -369,7 +369,7 @@ TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
                                    std::numeric_limits<double>::quiet_NaN()};
     params.activationFunction = "tanh";
     Environment envTanh(set, params, vect);
-    TPG::TPGExecutionEngine tpeeTanh(envTanh);
+    EvoGraph::TPGExecutionEngine tpeeTanh(envTanh);
 
     ASSERT_NO_THROW(tpeeTanh.applyActivationFunctionOnActions(valuesTanh))
         << "None activation function failed";
@@ -383,7 +383,7 @@ TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
                                       std::numeric_limits<double>::quiet_NaN()};
     params.activationFunction = "sigmoid";
     Environment envSigmoid(set, params, vect);
-    TPG::TPGExecutionEngine tpeeSigmoid(envSigmoid);
+    EvoGraph::TPGExecutionEngine tpeeSigmoid(envSigmoid);
 
     ASSERT_NO_THROW(tpeeSigmoid.applyActivationFunctionOnActions(valuesSigmoid))
         << "None activation function failed";
@@ -397,7 +397,7 @@ TEST_F(TPGExecutionEngineTest, ApplyActivationFunctionOnActions)
     // Test for wrong activation function
     params.activationFunction = "WrongActivationFunction";
     Environment envWrong(set, params, vect);
-    TPG::TPGExecutionEngine tpeeWrong(envWrong);
+    EvoGraph::TPGExecutionEngine tpeeWrong(envWrong);
 
     ASSERT_THROW(tpeeWrong.applyActivationFunctionOnActions(valuesNone),
                  std::runtime_error)

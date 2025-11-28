@@ -25,7 +25,7 @@ namespace Algorithm {
         std::shared_ptr<Mutator> mutator;
 
         /// Graph used by the algorithm
-        std::shared_ptr<TPG::TPGGraph> graph;
+        std::shared_ptr<EvoGraph::Graph> graph;
 
         /// Graph used by the algorithm
         std::shared_ptr<AgentManager> manager;
@@ -49,7 +49,7 @@ namespace Algorithm {
          * \param[in] manager Manager of the algorithm to store and maintain agents
          * 
          */
-        Algorithm(std::shared_ptr<TPG::TPGGraph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager)
+        Algorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager)
                : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, manager, params)} {};
 
         /// Constant getter for the manager

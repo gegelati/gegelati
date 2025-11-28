@@ -30,7 +30,7 @@ namespace Selector {
          * it. The TPGVertex in the set will be deleted at the end of the
          * TPGMutator::PopulateTPG method.
          */
-        std::set<const TPG::TPGVertex*> verticesToDelete;
+        std::set<const EvoGraph::TPGVertex*> verticesToDelete;
 
         /**
          * @brief set of TPGVertex filled during the selection process,
@@ -49,7 +49,7 @@ namespace Selector {
          * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        TournamentSelector(std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<Algorithm::AgentManager> manager, 
+        TournamentSelector(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<Algorithm::AgentManager> manager, 
                            const Learn::LearningParameters& params)
             : Selector{graph, manager, params}
         {

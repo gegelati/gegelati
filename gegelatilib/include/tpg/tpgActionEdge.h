@@ -43,7 +43,7 @@
 
 #include "tpg/tpgEdge.h"
 
-namespace TPG {
+namespace EvoGraph {
     // Declare class to make it usable as an attribute.
     class TPGVertex;
 
@@ -107,6 +107,6 @@ namespace TPG {
         /// @brief action class of the edge
         uint64_t actionClass;
     };
-}; // namespace TPG
+}; // namespace EvoGraph
 
 #endif

@@ -35,17 +35,17 @@
 
 #include "tpg/instrumented/tpgVertexInstrumentation.h"
 
-uint64_t TPG::TPGVertexInstrumentation::getNbVisits() const
+uint64_t EvoGraph::TPGVertexInstrumentation::getNbVisits() const
 {
     return this->nbVisits;
 }
 
-void TPG::TPGVertexInstrumentation::incrementNbVisits() const
+void EvoGraph::TPGVertexInstrumentation::incrementNbVisits() const
 {
     this->nbVisits++;
 }
 
-void TPG::TPGVertexInstrumentation::reset() const
+void EvoGraph::TPGVertexInstrumentation::reset() const
 {
     this->nbVisits = 0;
 }

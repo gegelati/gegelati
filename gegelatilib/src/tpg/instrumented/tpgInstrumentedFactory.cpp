@@ -39,45 +39,45 @@
 #include "tpg/instrumented/tpgExecutionEngineInstrumented.h"
 #include "tpg/instrumented/tpgTeamInstrumented.h"
 
-std::shared_ptr<TPG::TPGGraph> TPG::TPGInstrumentedFactory::createTPGGraph(
+std::shared_ptr<EvoGraph::Graph> EvoGraph::TPGInstrumentedFactory::createTPGGraph(
     const Environment& env) const
 {
-    return std::make_shared<TPG::TPGGraph>(
+    return std::make_shared<EvoGraph::Graph>(
         env, std::make_unique<TPGInstrumentedFactory>());
 }
 
-std::unique_ptr<TPG::TPGTeam> TPG::TPGInstrumentedFactory::createTPGTeam() const
+std::unique_ptr<EvoGraph::TPGTeam> EvoGraph::TPGInstrumentedFactory::createTPGTeam() const
 {
     return std::make_unique<TPGTeamInstrumented>();
 }
 
-std::unique_ptr<TPG::TPGAction> TPG::TPGInstrumentedFactory::createTPGAction(
+std::unique_ptr<EvoGraph::TPGAction> EvoGraph::TPGInstrumentedFactory::createTPGAction(
     const uint64_t id) const
 {
     return std::make_unique<TPGActionInstrumented>(id);
 }
 
-std::unique_ptr<TPG::TPGEdge> TPG::TPGInstrumentedFactory::createTPGEdge(
+std::unique_ptr<EvoGraph::TPGEdge> EvoGraph::TPGInstrumentedFactory::createTPGEdge(
     const TPGVertex* src, const TPGVertex* dest,
     const std::shared_ptr<Program::Program> prog) const
 {
-    auto ptr = std::make_unique<TPG::TPGEdgeInstrumented>(src, dest, prog);
+    auto ptr = std::make_unique<EvoGraph::TPGEdgeInstrumented>(src, dest, prog);
     return ptr;
 }
 
-std::unique_ptr<TPG::TPGExecutionEngine> TPG::TPGInstrumentedFactory::
+std::unique_ptr<EvoGraph::TPGExecutionEngine> EvoGraph::TPGInstrumentedFactory::
     createTPGExecutionEngine(const Environment& env, Archive* arch) const
 {
     return std::make_unique<TPGExecutionEngineInstrumented>(env, arch);
 }
 
-void TPG::TPGInstrumentedFactory::resetTPGGraphCounters(
-    const TPG::TPGGraph& tpg) const
+void EvoGraph::TPGInstrumentedFactory::resetTPGGraphCounters(
+    const EvoGraph::Graph& tpg) const
 {
     // Reset all vertices
-    for (const TPG::TPGVertex* vertex : tpg.getVertices()) {
-        const TPG::TPGVertexInstrumentation* vertexI =
-            dynamic_cast<const TPG::TPGVertexInstrumentation*>(vertex);
+    for (const EvoGraph::TPGVertex* vertex : tpg.getVertices()) {
+        const EvoGraph::TPGVertexInstrumentation* vertexI =
+            dynamic_cast<const EvoGraph::TPGVertexInstrumentation*>(vertex);
         if (vertexI != nullptr) {
             vertexI->reset();
         }
@@ -85,25 +85,25 @@ void TPG::TPGInstrumentedFactory::resetTPGGraphCounters(
 
     // Reset all edges
     for (const auto& edge : tpg.getEdges()) {
-        const TPG::TPGEdgeInstrumented* edgeI =
-            dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge.get());
+        const EvoGraph::TPGEdgeInstrumented* edgeI =
+            dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edge.get());
         if (edgeI != nullptr) {
             edgeI->reset();
         }
     }
 }
 
-void TPG::TPGInstrumentedFactory::clearUnusedTPGGraphElements(
-    TPG::TPGGraph& tpg) const
+void EvoGraph::TPGInstrumentedFactory::clearUnusedTPGGraphElements(
+    EvoGraph::Graph& tpg) const
 {
     // Remove unused vertices first
     // (this will remove a few edges as a side-effect)
     // Work on a copy of vertex list as the graph is modified during the for
     // loop.
-    std::vector<const TPG::TPGVertex*> vertices(tpg.getVertices());
-    for (const TPG::TPGVertex* vertex : vertices) {
-        const TPG::TPGVertexInstrumentation* vertexI =
-            dynamic_cast<const TPG::TPGVertexInstrumentation*>(vertex);
+    std::vector<const EvoGraph::TPGVertex*> vertices(tpg.getVertices());
+    for (const EvoGraph::TPGVertex* vertex : vertices) {
+        const EvoGraph::TPGVertexInstrumentation* vertexI =
+            dynamic_cast<const EvoGraph::TPGVertexInstrumentation*>(vertex);
         // If the vertex is instrumented AND was never visited
         if (vertexI != nullptr && vertexI->getNbVisits() == 0) {
             // remove it
@@ -112,15 +112,15 @@ void TPG::TPGInstrumentedFactory::clearUnusedTPGGraphElements(
     }
 
     // Remove un-traversed edges
-    std::vector<const TPG::TPGEdge*> edges;
+    std::vector<const EvoGraph::TPGEdge*> edges;
     // Copy the edge list before iteration
     for (auto& edge : tpg.getEdges()) {
         edges.push_back(edge.get());
     }
     // Iterate on the edge list
     for (auto edge : edges) {
-        const TPG::TPGEdgeInstrumented* edgeI =
-            dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge);
+        const EvoGraph::TPGEdgeInstrumented* edgeI =
+            dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edge);
         if (edgeI != nullptr && edgeI->getNbTraversal() == 0) {
             tpg.removeEdge(*edge);
         }

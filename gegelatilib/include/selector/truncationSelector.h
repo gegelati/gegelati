@@ -22,7 +22,7 @@ namespace Selector {
          * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        TruncationSelector(std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
+        TruncationSelector(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
                            const Learn::LearningParameters& params)
             : Selector{graph, manager, params}
         {

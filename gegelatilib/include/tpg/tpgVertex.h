@@ -44,12 +44,12 @@
 
 struct CounterReset;
 
-namespace TPG {
+namespace EvoGraph {
     // Declare class to make it usable as an attribute.
     class TPGEdge;
 
     /**
-     * \brief Abstract class representing the vertices of a TPGGraph
+     * \brief Abstract class representing the vertices of a Graph
      */
     class TPGVertex
     {
@@ -78,7 +78,7 @@ namespace TPG {
          * \param[in] edge the TPGEdge pointer to be added to the incomingEdges
          *                 Set.
          */
-        virtual void addIncomingEdge(TPG::TPGEdge* edge);
+        virtual void addIncomingEdge(EvoGraph::TPGEdge* edge);
 
         /**
          * \brief Removes the given incoming edge from the TPGVertex.
@@ -89,7 +89,7 @@ namespace TPG {
          *
          * \param[in] edge the TPGEdge to remove.
          */
-        virtual void removeIncomingEdge(TPG::TPGEdge* edge);
+        virtual void removeIncomingEdge(EvoGraph::TPGEdge* edge);
 
         /**
          * \brief Method to add an outgoing TPGEdge to the TPGVertex.
@@ -102,7 +102,7 @@ namespace TPG {
          * \param[in] edge the TPGEdge pointer to be added to the outgoingEdges
          *                 Set.
          */
-        virtual void addOutgoingEdge(TPG::TPGEdge* edge);
+        virtual void addOutgoingEdge(EvoGraph::TPGEdge* edge);
 
         /**
          * \brief Removes the given outgoing edge from the TPGVertex.
@@ -113,7 +113,7 @@ namespace TPG {
          *
          * \param[in] edge the TPGEdge to remove.
          */
-        virtual void removeOutgoingEdge(TPG::TPGEdge* edge);
+        virtual void removeOutgoingEdge(EvoGraph::TPGEdge* edge);
 
         /**
          * \brief return assessed actions
@@ -166,12 +166,12 @@ namespace TPG {
         /**
          * \brief Set of incoming TPGEdge of the TPGVertex.
          */
-        std::list<TPG::TPGEdge*> incomingEdges;
+        std::list<EvoGraph::TPGEdge*> incomingEdges;
 
         /**
          * \brief Set of outgoing TPGEdge of the TPGVertex.
          */
-        std::list<TPG::TPGEdge*> outgoingEdges;
+        std::list<EvoGraph::TPGEdge*> outgoingEdges;
 
         /**
          * \brief Set of assessed actions by the team
@@ -204,6 +204,6 @@ namespace TPG {
      */
     bool operator<(const TPGVertex& a, const TPGVertex& b);
 
-}; // namespace TPG
+}; // namespace EvoGraph
 
 #endif

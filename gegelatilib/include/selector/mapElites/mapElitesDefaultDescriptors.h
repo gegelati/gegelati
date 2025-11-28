@@ -28,7 +28,7 @@ namespace Selector {
                 /**
                  * \brief Specialisation of initDescriptor
                  */
-                virtual void initDescriptor(const TPG::TPGGraph& graph,
+                virtual void initDescriptor(const EvoGraph::Graph& graph,
                                             const Learn::LearningEnvironment&
                                                 learningEnvironment) override;
 

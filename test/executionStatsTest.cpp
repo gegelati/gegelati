@@ -61,12 +61,12 @@ class ExecutionStatsTest : public ::testing::Test
     Environment* e = nullptr;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
-    TPG::TPGGraph* tpg;
-    std::vector<const TPG::TPGEdge*> edges;
+    EvoGraph::Graph* tpg;
+    std::vector<const EvoGraph::TPGEdge*> edges;
 
-    TPG::TPGExecutionEngineInstrumented* execEngine;
+    EvoGraph::TPGExecutionEngineInstrumented* execEngine;
 
-    std::vector<std::vector<const TPG::TPGVertex*>> inferenceTraces;
+    std::vector<std::vector<const EvoGraph::TPGVertex*>> inferenceTraces;
 
     virtual void SetUp() override
     {
@@ -99,7 +99,7 @@ class ExecutionStatsTest : public ::testing::Test
         e = new Environment(set, params, vect);
 
         // Setup execution engine
-        execEngine = new TPG::TPGExecutionEngineInstrumented(*e);
+        execEngine = new EvoGraph::TPGExecutionEngineInstrumented(*e);
 
         // Create 8 programs
         for (int i = 0; i < 8; i++) {
@@ -125,8 +125,8 @@ class ExecutionStatsTest : public ::testing::Test
         // share the same program: progPointers.at(0)
 
         // The TPG is given a TPGInstrumentedFactory to enable instrumentation
-        tpg = new TPG::TPGGraph(
-            *e, std::make_unique<TPG::TPGInstrumentedFactory>());
+        tpg = new EvoGraph::Graph(
+            *e, std::make_unique<EvoGraph::TPGInstrumentedFactory>());
         for (int i = 0; i < 4; i++) {
             tpg->addNewTeam();
         }
@@ -267,7 +267,7 @@ class ExecutionStatsTest : public ::testing::Test
 
 TEST_F(ExecutionStatsTest, AnalyzeInstrumentedGraph)
 {
-    TPG::ExecutionStats executionStats;
+    EvoGraph::ExecutionStats executionStats;
     ASSERT_NO_THROW(executionStats.analyzeInstrumentedGraph(tpg))
         << "Analysis of a valid tpg execution failed unexpectedly.";
 
@@ -295,10 +295,10 @@ TEST_F(ExecutionStatsTest, AnalyzeInstrumentedGraph)
 TEST_F(ExecutionStatsTest, AnalyzeNotInstrumented)
 {
 
-    TPG::TPGGraph notInstrumented(*e);
+    EvoGraph::Graph notInstrumented(*e);
     notInstrumented.addNewTeam();
 
-    TPG::ExecutionStats executionStats;
+    EvoGraph::ExecutionStats executionStats;
     ASSERT_THROW(executionStats.analyzeInstrumentedGraph(&notInstrumented),
                  std::bad_cast)
         << "Analysis of not instrumented TPG didn't failed or did with an "
@@ -308,7 +308,7 @@ TEST_F(ExecutionStatsTest, AnalyzeNotInstrumented)
 TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace)
 {
 
-    TPG::ExecutionStats executionStats;
+    EvoGraph::ExecutionStats executionStats;
 
     ASSERT_EQ(executionStats.getInferenceTracesStats().size(), 0)
         << "Attribute inferenceTracesStats isn't empty at initialisation.";
@@ -323,7 +323,7 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace)
               inferenceTraces[2])
         << "Wrong analyzed execution trace in executionStats.";
 
-    const TPG::TraceStats& stats = executionStats.getInferenceTracesStats()[0];
+    const EvoGraph::TraceStats& stats = executionStats.getInferenceTracesStats()[0];
 
     ASSERT_EQ(stats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
     ASSERT_EQ(stats.nbEvaluatedPrograms, 7)
@@ -354,7 +354,7 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace)
             {2, {{5, 1}}},
             {3, {{2, 1}}},
         };
-    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices = {
+    std::map<const EvoGraph::TPGVertex*, size_t> expectedDistribUsedVertices = {
         {tpg->getVertices()[0], 1},
         {tpg->getVertices()[1], 1},
         {tpg->getVertices()[2], 1},
@@ -380,7 +380,7 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace)
 TEST_F(ExecutionStatsTest, ClearTracesStats)
 {
 
-    TPG::ExecutionStats executionStats;
+    EvoGraph::ExecutionStats executionStats;
     executionStats.analyzeInferenceTrace(inferenceTraces[2]);
     executionStats.analyzeInferenceTrace(inferenceTraces[1]);
 
@@ -410,7 +410,7 @@ TEST_F(ExecutionStatsTest, ClearTracesStats)
 TEST_F(ExecutionStatsTest, AnalyzeExecution)
 {
 
-    TPG::ExecutionStats executionStats;
+    EvoGraph::ExecutionStats executionStats;
 
     // This analyzed traces must be cleared by analyzeExecution()
     executionStats.analyzeInferenceTrace(inferenceTraces[1]);
@@ -442,7 +442,7 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution)
     ASSERT_EQ(executionStats.getAvgNbExecutionPerInstruction().at(3), 6.0 / 3.0)
         << "Incorrect attribute value after analyzing execution.";
 
-    const TPG::TraceStats& stats = executionStats.getInferenceTracesStats()[2];
+    const EvoGraph::TraceStats& stats = executionStats.getInferenceTracesStats()[2];
 
     ASSERT_EQ(stats.nbEvaluatedTeams, 3) << "Wrong number of evaluated teams.";
     ASSERT_EQ(stats.nbEvaluatedPrograms, 7)
@@ -474,7 +474,7 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution)
             {2, {{5, 3}}},
             {3, {{2, 3}}},
         };
-    std::map<const TPG::TPGVertex*, size_t> expectedDistribUsedVertices = {
+    std::map<const EvoGraph::TPGVertex*, size_t> expectedDistribUsedVertices = {
         {tpg->getVertices()[0], 3},
         {tpg->getVertices()[1], 3},
         {tpg->getVertices()[2], 1},
@@ -501,7 +501,7 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution)
 TEST_F(ExecutionStatsTest, WriteStatsToJson)
 {
 
-    TPG::ExecutionStats executionStats;
+    EvoGraph::ExecutionStats executionStats;
     executionStats.analyzeExecution(*execEngine, tpg);
 
     ASSERT_NO_THROW(executionStats.writeStatsToJson("execution_stats.json"))

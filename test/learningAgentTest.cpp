@@ -242,7 +242,7 @@ TEST_F(LearningAgentTest, EvalRoot)
     Archive a; // For testing purposes, notmally, the archive from the
                // LearningAgent is used.
 
-    TPG::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
+    EvoGraph::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result;
@@ -288,14 +288,14 @@ TEST_F(LearningAgentTest, EvalAllRoots)
 
     la.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         result;
     ASSERT_NO_THROW(result =
                         la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), la.getTPGGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
-           "TPGGraph.";
+           "Graph.";
 }
 
 TEST_F(LearningAgentTest, GetArchive)
@@ -359,7 +359,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
                   floor(params.selection.truncation.ratioDeletedRoots *
                         params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
-           "TPGGraph.";
+           "Graph.";
     // Train a second generation, because most roots were removed, a root
     // actions have appeared and the training algorithm will attempt to remove
     // them.
@@ -431,14 +431,14 @@ TEST_F(LearningAgentTest, TrainPortability)
     la.init();
     bool alt = false;
     la.train(alt, false);
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    EvoGraph::Graph& tpg = *la.getTPGGraph();
 
     // Useful when determinism is changed
     /*std::cout<<tpg.getNbVertices()<<" "
              <<tpg.getNbRootVertices()<<" "
              <<tpg.getEdges().size()<<" "
-             <<TPG::TPGVertex::getVertexIDCounter()<<" "
-             <<TPG::TPGEdge::getEdgeIDCounter()<<" "
+             <<EvoGraph::TPGVertex::getVertexIDCounter()<<" "
+             <<EvoGraph::TPGEdge::getEdgeIDCounter()<<" "
              <<Program::Program::getProgramIDCounter()<<" "
 
              <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
@@ -452,9 +452,9 @@ TEST_F(LearningAgentTest, TrainPortability)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 86)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 147)
+    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 147)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 596)
+    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 596)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 346)
         << "Graph does not have the expected determinst characteristics.";
@@ -478,7 +478,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 3;
 
-    Learn::LearningAgent la(le, set, params, TPG::TPGInstrumentedFactory());
+    Learn::LearningAgent la(le, set, params, EvoGraph::TPGInstrumentedFactory());
 
     la.init();
     bool alt = false;
@@ -487,16 +487,16 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    EvoGraph::Graph& tpg = *la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 86)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 147)
+    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 147)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 596)
+    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 596)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 346)
         << "Graph does not have the expected determinst characteristics.";
@@ -507,8 +507,8 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     //To help to refind the values if the determinism is changed by an update
     size_t idx = 0;
     for (const auto& edge : tpg.getEdges()) {
-        const TPG::TPGEdgeInstrumented* edgeInstrumented =
-            dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge.get());
+        const EvoGraph::TPGEdgeInstrumented* edgeInstrumented =
+            dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edge.get());
 
         if (edgeInstrumented != nullptr) {
             std::cout << "Idx = " << idx++
@@ -519,7 +519,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     }
     for(auto vert: tpg.getVertices()){
         std::cout<<dynamic_cast<const
-    TPG::TPGVertexInstrumentation*>(vert)->getNbVisits()<<std::endl;
+    EvoGraph::TPGVertexInstrumentation*>(vert)->getNbVisits()<<std::endl;
     }*/
 
     // Check number of visits of a few edges & vertices
@@ -527,29 +527,29 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     const auto* edge1 = edgesIterator->get();
 
     ASSERT_EQ(
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbVisits(),
+        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edge1)->getNbVisits(),
         63);
     ASSERT_EQ(
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge1)->getNbTraversal(),
+        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edge1)->getNbTraversal(),
         0);
 
     std::advance(edgesIterator, 21);
     const auto* edge2 = edgesIterator->get();
 
     ASSERT_EQ(
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbVisits(),
+        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edge2)->getNbVisits(),
         87);
     ASSERT_EQ(
-        dynamic_cast<const TPG::TPGEdgeInstrumented*>(edge2)->getNbTraversal(),
+        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edge2)->getNbTraversal(),
         4);
 
     auto& verticesIterator = tpg.getVertices();
-    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
+    ASSERT_EQ(dynamic_cast<const EvoGraph::TPGVertexInstrumentation*>(
                   verticesIterator.at(0))
                   ->getNbVisits(),
               3327);
 
-    ASSERT_EQ(dynamic_cast<const TPG::TPGVertexInstrumentation*>(
+    ASSERT_EQ(dynamic_cast<const EvoGraph::TPGVertexInstrumentation*>(
                   verticesIterator.at(5))
                   ->getNbVisits(),
               63);
@@ -581,16 +581,16 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    EvoGraph::Graph& tpg = *la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 39)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 94)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 205)
+    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 205)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 675)
+    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 675)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 364)
         << "Graph does not have the expected determinst characteristics.";
@@ -624,16 +624,16 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    EvoGraph::Graph& tpg = *la.getTPGGraph();
     ASSERT_EQ(tpg.getNbVertices(), 67)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 143)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 278)
+    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 278)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 817)
+    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 817)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 505)
         << "Graph does not have the expected determinst characteristics.";
@@ -670,14 +670,14 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     la.init();
     bool alt = false;
     la.train(alt, false);
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    EvoGraph::Graph& tpg = *la.getTPGGraph();
 
     // Useful when determinism is changed
     /*std::cout<<tpg.getNbVertices()<<" "
              <<tpg.getNbRootVertices()<<" "
              <<tpg.getEdges().size()<<" "
-             <<TPG::TPGVertex::getVertexIDCounter()<<" "
-             <<TPG::TPGEdge::getEdgeIDCounter()<<" "
+             <<EvoGraph::TPGVertex::getVertexIDCounter()<<" "
+             <<EvoGraph::TPGEdge::getEdgeIDCounter()<<" "
              <<Program::Program::getProgramIDCounter()<<" "
              <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/
     ;
@@ -691,9 +691,9 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 236)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 1318)
+    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 1318)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 4641)
+    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 4641)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 2506)
         << "Graph does not have the expected determinst characteristics.";
@@ -730,14 +730,14 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
     la.init();
     bool alt = false;
     la.train(alt, false);
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    EvoGraph::Graph& tpg = *la.getTPGGraph();
 
     // Useful when determinism is changed
     /*std::cout<<tpg.getNbVertices()<<" "
              <<tpg.getNbRootVertices()<<" "
              <<tpg.getEdges().size()<<" "
-             <<TPG::TPGVertex::getVertexIDCounter()<<" "
-             <<TPG::TPGEdge::getEdgeIDCounter()<<" "
+             <<EvoGraph::TPGVertex::getVertexIDCounter()<<" "
+             <<EvoGraph::TPGEdge::getEdgeIDCounter()<<" "
              <<Program::Program::getProgramIDCounter()<<" "
              <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/
     ;
@@ -751,9 +751,9 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 249)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 2000)
+    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 2000)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 7293)
+    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 7293)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 3911)
         << "Graph does not have the expected determinst characteristics.";
@@ -765,7 +765,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
 
     la2.init();
     la2.train(alt, false);
-    TPG::TPGGraph& tpg2 = *la2.getTPGGraph();
+    EvoGraph::Graph& tpg2 = *la2.getTPGGraph();
 
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
@@ -776,9 +776,9 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg2.getEdges().size(), 239)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 4011)
+    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 4011)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 14700)
+    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 14700)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 7769)
         << "Graph does not have the expected determinst characteristics.";
@@ -817,14 +817,14 @@ TEST_F(LearningAgentTest, TrainContinuousWithCrossingMAPLE)
     la.init();
     bool alt = false;
     la.train(alt, false);
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    EvoGraph::Graph& tpg = *la.getTPGGraph();
 
     // Useful when determinism is changed
     /*std::cout<<tpg.getNbVertices()<<" "
              <<tpg.getNbRootVertices()<<" "
              <<tpg.getEdges().size()<<" "
-             <<TPG::TPGVertex::getVertexIDCounter()<<" "
-             <<TPG::TPGEdge::getEdgeIDCounter()<<" "
+             <<EvoGraph::TPGVertex::getVertexIDCounter()<<" "
+             <<EvoGraph::TPGEdge::getEdgeIDCounter()<<" "
              <<Program::Program::getProgramIDCounter()<<" "
              <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/
     ;
@@ -838,9 +838,9 @@ TEST_F(LearningAgentTest, TrainContinuousWithCrossingMAPLE)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 150)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 1057)
+    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 1057)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 5280)
+    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 5280)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 2546)
         << "Graph does not have the expected determinst characteristics.";
@@ -864,10 +864,10 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
 
     la.getSelector()->keepBestPolicy();
 
-    TPG::TPGGraph& tpg = *la.getTPGGraph();
+    EvoGraph::Graph& tpg = *la.getTPGGraph();
 
     // Get policy stats
-    TPG::PolicyStats psOrigin;
+    EvoGraph::PolicyStats psOrigin;
     psOrigin.setEnvironment(tpg.getEnvironment());
     psOrigin.analyzePolicy(tpg.getRootVertices().at(0));
 
@@ -875,19 +875,19 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     ASSERT_GT(std::accumulate(psOrigin.nbIntronPerProgram.begin(),
                               psOrigin.nbIntronPerProgram.end(), size_t(0)),
               0)
-        << "TPGGraph has no introns in its programs after training.";
+        << "Graph has no introns in its programs after training.";
 
     // Record the behavior of the TPG with introns
     le.reset();
-    TPG::TPGExecutionEngine tee(tpg.getEnvironment());
-    std::vector<const TPG::TPGVertex*> pathOrigin =
+    EvoGraph::TPGExecutionEngine tee(tpg.getEnvironment());
+    std::vector<const EvoGraph::TPGVertex*> pathOrigin =
         tee.executeFromRoot(*(tpg.getRootVertices().at(0))).first;
 
     // Clear introns
     tpg.clearProgramIntrons();
 
     // Get new policy stats
-    TPG::PolicyStats psNoIntrons;
+    EvoGraph::PolicyStats psNoIntrons;
     psNoIntrons.setEnvironment(tpg.getEnvironment());
     psNoIntrons.analyzePolicy(tpg.getRootVertices().at(0));
 
@@ -895,10 +895,10 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
     ASSERT_EQ(std::accumulate(psNoIntrons.nbIntronPerProgram.begin(),
                               psNoIntrons.nbIntronPerProgram.end(), size_t(0)),
               0)
-        << "TPGGraph still contains introns after they were cleared.";
+        << "Graph still contains introns after they were cleared.";
 
     // Check that the behavior is identical (empirically, not really foolproof)
-    std::vector<const TPG::TPGVertex*> pathNoIntrons =
+    std::vector<const EvoGraph::TPGVertex*> pathNoIntrons =
         tee.executeFromRoot(*(tpg.getRootVertices().at(0))).first;
 
     ASSERT_EQ(pathOrigin.size(), pathNoIntrons.size())
@@ -906,7 +906,7 @@ TEST_F(LearningAgentTest, TPGGraphCleanProgramIntrons)
            "identical.";
     for (auto idx = 0; idx < pathOrigin.size(); idx++) {
         ASSERT_EQ(pathOrigin.at(idx), pathNoIntrons.at(idx))
-            << "Path element in TPGGraph changed when removing introns.";
+            << "Path element in Graph changed when removing introns.";
     }
 }
 
@@ -940,7 +940,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
                   floor(params.selection.truncation.ratioDeletedRoots *
                         params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
-           "TPGGraph.";
+           "Graph.";
     // Train a second generation, because most roots were removed, a root
     // actions have appeared and the training algorithm will attempt to remove
     // them.
@@ -978,7 +978,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 
     Environment env(set, params, le.getDataSources());
 
-    TPG::TPGGraph tpg(env);
+    EvoGraph::Graph tpg(env);
 
     // Initialize Randomness
     RNG::RNG rng;
@@ -992,7 +992,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     Archive archive;
 
     // The TPGExecutionEngine
-    TPG::TPGExecutionEngine tee(env, &archive);
+    EvoGraph::TPGExecutionEngine tee(env, &archive);
 
     std::shared_ptr<Learn::EvaluationResult> result;
     Learn::ParallelLearningAgent pla(le, set, params);
@@ -1018,14 +1018,14 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         result;
     ASSERT_NO_THROW(result =
                         pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), pla.getTPGGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
-           "TPGGraph.";
+           "Graph.";
 }
 
 TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
@@ -1040,14 +1040,14 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         result;
     ASSERT_NO_THROW(result =
                         pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), pla.getTPGGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
-           "TPGGraph.";
+           "Graph.";
 }
 
 TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
@@ -1272,7 +1272,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
                   floor(params.selection.truncation.ratioDeletedRoots *
                         params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
-           "TPGGraph.";
+           "Graph.";
     // Train a second generation, because most roots were removed, a root
     // actions have appeared and the training algorithm will attempt to remove
     // them.
@@ -1309,7 +1309,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
                   floor(params.selection.truncation.ratioDeletedRoots *
                         params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
-           "TPGGraph.";
+           "Graph.";
 }
 
 TEST_F(ParallelLearningAgentTest, TrainSequential)
@@ -1422,7 +1422,7 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
     ASSERT_NO_THROW(pla.getSelector()->keepBestPolicy())
         << "Keeping the best policy after training should not fail.";
     ASSERT_EQ(pla.getTPGGraph()->getNbRootVertices(), 1)
-        << "A single root TPGVertex should remain in the TPGGraph when keeping "
+        << "A single root TPGVertex should remain in the Graph when keeping "
            "the best policy only";
 }
 
@@ -1447,7 +1447,7 @@ TEST_F(LearningAgentTest, EvaluateJobWithUtility)
     la.init();
 
     Archive a;
-    TPG::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
+    EvoGraph::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
     auto job = *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
                            Learn::LearningMode::TRAINING);
 
@@ -1463,7 +1463,7 @@ TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
 {
     Learn::LearningAgent la(le, set, params);
     la.init();
-    TPG::TPGTeam fakeTeam;
+    EvoGraph::TPGTeam fakeTeam;
     ASSERT_THROW(
         la.evaluateOneRoot(0, Learn::LearningMode::TRAINING, &fakeTeam),
         std::runtime_error);

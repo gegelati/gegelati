@@ -38,7 +38,7 @@
 #include "tpg/tpgAction.h"
 #include <stdexcept>
 
-void TPG::TPGAction::addOutgoingEdge(TPGEdge* edge)
+void EvoGraph::TPGAction::addOutgoingEdge(TPGEdge* edge)
 {
     if (dynamic_cast<TPGActionEdge*>(edge) == nullptr) {
         throw std::runtime_error(
@@ -49,35 +49,35 @@ void TPG::TPGAction::addOutgoingEdge(TPGEdge* edge)
     }
 }
 
-void TPG::TPGAction::orderActionEdges()
+void EvoGraph::TPGAction::orderActionEdges()
 {
 
-    this->outgoingEdges.sort([](TPG::TPGEdge* edge1, TPG::TPGEdge* edge2) {
+    this->outgoingEdges.sort([](EvoGraph::TPGEdge* edge1, EvoGraph::TPGEdge* edge2) {
         // Use static_cast to convert TPGEdge* into TPGActionEdge*
-        TPG::TPGActionEdge* actionEdge1 =
-            static_cast<TPG::TPGActionEdge*>(edge1);
-        TPG::TPGActionEdge* actionEdge2 =
-            static_cast<TPG::TPGActionEdge*>(edge2);
+        EvoGraph::TPGActionEdge* actionEdge1 =
+            static_cast<EvoGraph::TPGActionEdge*>(edge1);
+        EvoGraph::TPGActionEdge* actionEdge2 =
+            static_cast<EvoGraph::TPGActionEdge*>(edge2);
 
         // Compare actionClass
         return actionEdge1->getActionClass() < actionEdge2->getActionClass();
     });
 }
 
-TPG::TPGActionEdge* TPG::TPGAction::getEdgeOfAction(uint64_t actionClass) const
+EvoGraph::TPGActionEdge* EvoGraph::TPGAction::getEdgeOfAction(uint64_t actionClass) const
 {
 
     // Search the edge with the searched action class
     auto it = std::find_if(
         outgoingEdges.begin(), outgoingEdges.end(),
-        [actionClass](TPG::TPGEdge* edge) {
-            return static_cast<TPG::TPGActionEdge*>(edge)->getActionClass() ==
+        [actionClass](EvoGraph::TPGEdge* edge) {
+            return static_cast<EvoGraph::TPGActionEdge*>(edge)->getActionClass() ==
                    actionClass;
         });
 
     // If action found, return the shared pointer, else return nullptr
     if (it != outgoingEdges.end()) {
-        return (TPG::TPGActionEdge*)(*it);
+        return (EvoGraph::TPGActionEdge*)(*it);
     }
     else {
         return nullptr;

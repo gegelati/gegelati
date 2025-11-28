@@ -43,7 +43,7 @@
 #include "util/timestamp.h"
 
 CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
-                                                  const TPG::TPGGraph& tpg,
+                                                  const EvoGraph::Graph& tpg,
                                                   const std::string& path)
     : TPGAbstractEngine(tpg),
       progGenerationEngine{filename + "_" + filenameProg, tpg.getEnvironment(),

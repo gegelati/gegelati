@@ -36,22 +36,22 @@
 
 #include "tpg/tpgActionEdge.h"
 
-const TPG::TPGVertex* TPG::TPGActionEdge::getDestination() const
+const EvoGraph::TPGVertex* EvoGraph::TPGActionEdge::getDestination() const
 {
     throw std::runtime_error("Action Edge cannot have a destination");
 }
 
-void TPG::TPGActionEdge::setDestination(TPGVertex* newDestination)
+void EvoGraph::TPGActionEdge::setDestination(TPGVertex* newDestination)
 {
     throw std::runtime_error("Action Edge cannot have a destination");
 }
 
-void TPG::TPGActionEdge::setActionClass(uint64_t newActionClass)
+void EvoGraph::TPGActionEdge::setActionClass(uint64_t newActionClass)
 {
     this->actionClass = newActionClass;
 }
 
-uint64_t TPG::TPGActionEdge::getActionClass() const
+uint64_t EvoGraph::TPGActionEdge::getActionClass() const
 {
     return this->actionClass;
 }

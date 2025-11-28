@@ -73,7 +73,7 @@ class TPGGenerationEngineTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     Data::PrimitiveTypeArray<double> currentState{s1};
     std::unique_ptr<CodeGen::TPGGenerationEngine> tpgGen = nullptr;
-    TPG::TPGGraph* tpg = nullptr;
+    EvoGraph::Graph* tpg = nullptr;
 
     virtual void SetUp()
     {
@@ -95,7 +95,7 @@ class TPGGenerationEngineTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 0;
         e = new Environment(set, params, data);
-        tpg = new TPG::TPGGraph(*e);
+        tpg = new EvoGraph::Graph(*e);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
 #if defined(_MSC_VER) || (__MINGW32__)
@@ -221,8 +221,8 @@ TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateNoMode)
 
 TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
 {
-    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const TPG::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> progA(
         new Program::Program(*e, false));
@@ -298,8 +298,8 @@ std::string executableExtension = " ";
     }
 
 TEST_BOTH_MODE(OneLeaf, {
-    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const TPG::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -337,9 +337,9 @@ TEST_BOTH_MODE(OneLeaf, {
 });
 
 TEST_BOTH_MODE(TwoLeaves, {
-    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
-    const TPG::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -386,10 +386,10 @@ TEST_BOTH_MODE(TwoLeaves, {
 
 TEST_BOTH_MODE(ThreeLeaves, {
     // P1 < P2 = P3
-    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
-    const TPG::TPGVertex* leaf3 = (&tpg->addNewAction(3));
-    const TPG::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::TPGVertex* leaf3 = (&tpg->addNewAction(3));
+    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -448,9 +448,9 @@ TEST_BOTH_MODE(ThreeLeaves, {
 });
 
 TEST_BOTH_MODE(OneTeamOneLeaf, {
-    const TPG::TPGVertex* root = (&tpg->addNewTeam());
-    const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
-    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -470,8 +470,8 @@ TEST_BOTH_MODE(OneTeamOneLeaf, {
     prog2L1.setOperand(0, 1, 0);
     prog2L1.setOperand(1, 1, 1);
 
-    TPG::TPGEdge edge1 = tpg->addNewEdge(*root, *T1, prog1);
-    TPG::TPGEdge edge2 = tpg->addNewEdge(*T1, *leaf, prog2);
+    EvoGraph::TPGEdge edge1 = tpg->addNewEdge(*root, *T1, prog1);
+    EvoGraph::TPGEdge edge2 = tpg->addNewEdge(*T1, *leaf, prog2);
 
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
         << "number of root is not 1 in OneTeamOneLeaf";
@@ -499,10 +499,10 @@ TEST_BOTH_MODE(OneTeamOneLeaf, {
 });
 
 TEST_BOTH_MODE(OneTeamTwoLeaves, {
-    const TPG::TPGVertex* root = (&tpg->addNewTeam());
-    const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
-    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -561,11 +561,11 @@ TEST_BOTH_MODE(OneTeamTwoLeaves, {
 });
 
 TEST_BOTH_MODE(TwoTeams, {
-    const TPG::TPGVertex* root = (&tpg->addNewTeam());
-    const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
-    const TPG::TPGVertex* T2 = (&tpg->addNewTeam());
-    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* T2 = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -632,12 +632,12 @@ TEST_BOTH_MODE(TwoTeams, {
 });
 
 TEST_BOTH_MODE(TwoTeamsNegativeBid, {
-    const TPG::TPGVertex* root = (&tpg->addNewTeam());
-    const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
-    const TPG::TPGVertex* T2 = (&tpg->addNewTeam());
-    const TPG::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const TPG::TPGVertex* leaf2 = (&tpg->addNewAction(2));
-    const TPG::TPGVertex* leaf3 = (&tpg->addNewAction(3));
+    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* T2 = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::TPGVertex* leaf3 = (&tpg->addNewAction(3));
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -729,12 +729,12 @@ static void setProgLine(const std::shared_ptr<Program::Program> prog,
 }
 
 TEST_BOTH_MODE(ThreeTeamsThreeLeaves, {
-    const TPG::TPGVertex* A1 = (&tpg->addNewAction(1));
-    const TPG::TPGVertex* A2 = (&tpg->addNewAction(2));
-    const TPG::TPGVertex* A0 = (&tpg->addNewAction(0));
-    const TPG::TPGVertex* T1 = (&tpg->addNewTeam());
-    const TPG::TPGVertex* T2 = (&tpg->addNewTeam());
-    const TPG::TPGVertex* T3 = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* A1 = (&tpg->addNewAction(1));
+    const EvoGraph::TPGVertex* A2 = (&tpg->addNewAction(2));
+    const EvoGraph::TPGVertex* A0 = (&tpg->addNewAction(0));
+    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* T2 = (&tpg->addNewTeam());
+    const EvoGraph::TPGVertex* T3 = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -808,12 +808,12 @@ TEST_F(TPGGenerationEngineTest,
     params.activationFunction = "tanh";
     params.mutation.tpg.useActionProgram = true;
     Environment ce(set, params, data, 3);
-    TPG::TPGGraph ctpg = (ce);
+    EvoGraph::Graph ctpg = (ce);
 
-    const TPG::TPGVertex* A1 = (&ctpg.addNewAction(1));
-    const TPG::TPGVertex* A2 = (&ctpg.addNewAction(2));
-    const TPG::TPGVertex* A0 = (&ctpg.addNewAction(0));
-    const TPG::TPGVertex* T1 = (&ctpg.addNewTeam());
+    const EvoGraph::TPGVertex* A1 = (&ctpg.addNewAction(1));
+    const EvoGraph::TPGVertex* A2 = (&ctpg.addNewAction(2));
+    const EvoGraph::TPGVertex* A0 = (&ctpg.addNewAction(0));
+    const EvoGraph::TPGVertex* T1 = (&ctpg.addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(ce, false));
@@ -902,11 +902,11 @@ TEST_F(TPGGenerationEngineTest,
     params.mutation.tpg.useActionProgram = true;
     params.mutation.tpg.useMultiActionProgram = true;
     Environment ce(set, params, data, 3);
-    TPG::TPGGraph ctpg = (ce);
+    EvoGraph::Graph ctpg = (ce);
 
-    const TPG::TPGVertex* A1 = (&ctpg.addNewAction(1));
-    const TPG::TPGVertex* A0 = (&ctpg.addNewAction(0));
-    const TPG::TPGVertex* T1 = (&ctpg.addNewTeam());
+    const EvoGraph::TPGVertex* A1 = (&ctpg.addNewAction(1));
+    const EvoGraph::TPGVertex* A0 = (&ctpg.addNewAction(0));
+    const EvoGraph::TPGVertex* T1 = (&ctpg.addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(ce, false));
@@ -993,11 +993,11 @@ TEST_F(TPGGenerationEngineTest,
     params.mutation.tpg.useActionProgram = true;
     params.mutation.tpg.useMultiActionProgram = true;
     Environment ce(set, params, data, 3);
-    TPG::TPGGraph ctpg = (ce);
+    EvoGraph::Graph ctpg = (ce);
 
-    const TPG::TPGVertex* A1 = (&ctpg.addNewAction(1));
-    const TPG::TPGVertex* A0 = (&ctpg.addNewAction(0));
-    const TPG::TPGVertex* T1 = (&ctpg.addNewTeam());
+    const EvoGraph::TPGVertex* A1 = (&ctpg.addNewAction(1));
+    const EvoGraph::TPGVertex* A0 = (&ctpg.addNewAction(0));
+    const EvoGraph::TPGVertex* T1 = (&ctpg.addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(ce, false));
@@ -1082,7 +1082,7 @@ TEST_F(TPGGenerationEngineTest, WrongTPGContinuous)
     params.mutation.tpg.useActionProgram = false;
     params.mutation.tpg.useMultiActionProgram = false;
     Environment ce(set, params, data, 3);
-    TPG::TPGGraph ctpg = (ce);
+    EvoGraph::Graph ctpg = (ce);
     ASSERT_THROW(tpgGen = factory.create("wrong", ctpg, "./src/"),
                  std::runtime_error)
         << "Construction of codeGen with continuous action but no action "
@@ -1091,7 +1091,7 @@ TEST_F(TPGGenerationEngineTest, WrongTPGContinuous)
     params.mutation.tpg.useActionProgram = true;
     params.activationFunction = "missed";
     Environment ce2(set, params, data, 3);
-    TPG::TPGGraph ctpg2 = (ce2);
+    EvoGraph::Graph ctpg2 = (ce2);
 
     tpgGen = factory.create("wrong", ctpg2, "./src/");
     ASSERT_THROW(tpgGen->generateTPGGraph(), std::runtime_error)

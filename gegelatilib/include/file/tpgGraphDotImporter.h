@@ -82,30 +82,30 @@ namespace File {
         Environment env;
 
         /**
-         * \brief TPGGraph imported from dot file.
+         * \brief Graph imported from dot file.
          */
-        TPG::TPGGraph& tpg;
+        EvoGraph::Graph& tpg;
 
         /**
          * \brief Map associating pointers to TPGVertex to an integer ID.
          *
          * This map is used to associate an unique id to a tpg vertex and to
-         * keep track of the pointers while restoring the TPGGraph described in
+         * keep track of the pointers while restoring the Graph described in
          * a dot file
          */
-        std::map<uint64_t, const TPG::TPGVertex*> vertexID;
+        std::map<uint64_t, const EvoGraph::TPGVertex*> vertexID;
 
         /**
          * \brief Map associating pointers to TPGAction to a vector of integer
          * action class.
          */
-        std::map<const TPG::TPGAction*, std::vector<uint64_t>> actionClasses;
+        std::map<const EvoGraph::TPGAction*, std::vector<uint64_t>> actionClasses;
 
         /**
          * \brief Map associating pointers to Program to an integer ID.
          *
          * This map is used to associate an unique id to a tpg program and to
-         * keep track of the pointers while restoring the TPGGraph described in
+         * keep track of the pointers while restoring the Graph described in
          * a dot file
          */
         std::map<uint64_t, std::shared_ptr<Program::Program>> programID;
@@ -117,7 +117,7 @@ namespace File {
          * This map is used to ensure that identical actions are not created
          * more than once.
          */
-        std::map<uint64_t, const TPG::TPGAction*> actionID;
+        std::map<uint64_t, const EvoGraph::TPGAction*> actionID;
 
         /**
          * \brief string used to spot the end of a line in the program
@@ -429,13 +429,13 @@ namespace File {
          * will be written.
          * \param[in] environment the environment in which the tpg Graph should
          * be built
-         * \param[in] tpgref a Reference to the TPGGraph to build from
+         * \param[in] tpgref a Reference to the Graph to build from
          * the .dot file
          * \throws std::runtime_error in case no file could be
          * opened at the given filePath.
          */
         TPGGraphDotImporter(const char* filePath, Environment environment,
-                            TPG::TPGGraph& tpgref)
+                            EvoGraph::Graph& tpgref)
             : env{environment}, tpg{tpgref}
         {
             pFile.open(filePath);

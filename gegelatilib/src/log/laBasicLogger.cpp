@@ -139,8 +139,8 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
     auto roots = this->learningAgent.getGraph()->getRootVertices();
 
     uint64_t nbTeamsR = std::count_if(
-        roots.begin(), roots.end(), [](const TPG::TPGVertex* root) {
-            return dynamic_cast<const TPG::TPGTeam*>(root) != nullptr;
+        roots.begin(), roots.end(), [](const EvoGraph::TPGVertex* root) {
+            return dynamic_cast<const EvoGraph::TPGTeam*>(root) != nullptr;
         });
 
     uint64_t nbActionsR = roots.size() - nbTeamsR;

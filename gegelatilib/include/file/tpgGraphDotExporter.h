@@ -53,10 +53,10 @@
 
 namespace File {
     /**
-     * \brief Class used to export a TPGGraph into a text file with the dot
+     * \brief Class used to export a Graph into a text file with the dot
      * format.
      */
-    class TPGGraphDotExporter : TPG::TPGAbstractEngine
+    class TPGGraphDotExporter : EvoGraph::TPGAbstractEngine
     {
       protected:
         /**
@@ -78,7 +78,7 @@ namespace File {
          *
          * \param[in] team the TPGTeam being printed.
          */
-        void printTPGTeam(const TPG::TPGTeam& team);
+        void printTPGTeam(const EvoGraph::TPGTeam& team);
 
         /**
          * \brief Print the dot content for the given TPGAction.
@@ -93,7 +93,7 @@ namespace File {
          * \param[in] action the TPGTeam being printed.
          * \return the identifier associated to this action.
          */
-        uint64_t printTPGAction(const TPG::TPGAction& action);
+        uint64_t printTPGAction(const EvoGraph::TPGAction& action);
 
         /**
          * \brief Prints the dot content for the given TPGEdge.
@@ -105,7 +105,7 @@ namespace File {
          *
          * \param[in] edge the TPGEdge being printed.
          */
-        void printTPGEdge(const TPG::TPGEdge& edge);
+        void printTPGEdge(const EvoGraph::TPGEdge& edge);
 
         /**
          * \brief Prints the dot content for the given Program.
@@ -151,8 +151,8 @@ namespace File {
          * \throws std::runtime_error in case no file could be opened at the
          * given filePath.
          */
-        TPGGraphDotExporter(const char* filePath, const TPG::TPGGraph& graph)
-            : TPG::TPGAbstractEngine(graph), pFile{NULL}, offset{""}
+        TPGGraphDotExporter(const char* filePath, const EvoGraph::Graph& graph)
+            : EvoGraph::TPGAbstractEngine(graph), pFile{NULL}, offset{""}
         {
             if ((pFile = fopen(filePath, "w")) == NULL) {
                 throw std::runtime_error("Could not open file " +
@@ -211,17 +211,17 @@ namespace File {
         }
 
         /**
-         * \brief Print the TPGGraph given when constructing the
+         * \brief Print the Graph given when constructing the
          * TPGGraphDotExporter into a dot file.
          */
         void print();
 
         /**
-         * \brief Print a sub-tree of the TPGGraph given when constructing the
+         * \brief Print a sub-tree of the Graph given when constructing the
          * TPGGraphDotExporter into a dot file.
          *
          * Contrary to the print() method, which prints the whole TPG, this
-         * method only prints the TPG stemming from the TPG::TPGVertex passed as
+         * method only prints the TPG stemming from the EvoGraph::TPGVertex passed as
          * a parameter. Hence, only vertices and programs connected to this
          * TPGVertex will be printed in the file, and all others will be
          * ignored.
@@ -229,7 +229,7 @@ namespace File {
          * \param[in] root The vertex used as a starting point to print a
          * connected TPG.
          */
-        void printSubGraph(const TPG::TPGVertex* root);
+        void printSubGraph(const EvoGraph::TPGVertex* root);
     };
 }; // namespace File
 

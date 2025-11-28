@@ -123,7 +123,7 @@ TEST_F(ClassificationTest, EvaluateRoot)
     Archive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
-    TPG::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
+    EvoGraph::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result1;
@@ -180,7 +180,7 @@ TEST_F(ClassificationTest, DoSelection)
 
     // Initialize and populate the TPG
     la.init(0);
-    TPG::TPGGraph& graph = *la.getTPGGraph();
+    EvoGraph::Graph& graph = *la.getTPGGraph();
     Mutator::TPGMutator::populateTPG(graph, *la.getSelector(), la.getArchive(),
                                      params.mutation, la.getRNG(),
                                      fle.getNbActions());
@@ -191,10 +191,10 @@ TEST_F(ClassificationTest, DoSelection)
     // Create and fill results for each "root" artificially with
     // EvaluationResults
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         results;
     double result = 0.0;
-    for (const TPG::TPGVertex* root : roots) {
+    for (const EvoGraph::TPGVertex* root : roots) {
         results.emplace(
             new Learn::EvaluationResult(
                 std::make_shared<Selector::SelectionMetrics>(result++), 1),
@@ -210,10 +210,10 @@ TEST_F(ClassificationTest, DoSelection)
     // Create and fill results for each "root" artificially with
     // ClassificationEvaluationResults
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const TPG::TPGVertex*>
+                  const EvoGraph::TPGVertex*>
         classifResults;
     result = 0.0;
-    for (const TPG::TPGVertex* root : roots) {
+    for (const EvoGraph::TPGVertex* root : roots) {
         // Init all scores to the same value
         // Their general score will be 0.33.
         // With score for 1st class to 0.0
@@ -237,14 +237,14 @@ TEST_F(ClassificationTest, DoSelection)
     // for 1st class (current code valid for 3 classes only because of 0.25
     // constant)
     ASSERT_EQ(fle.getNbActions(), 3);
-    std::vector<const TPG::TPGVertex*> savedRoots;
+    std::vector<const EvoGraph::TPGVertex*> savedRoots;
     for (auto idx = 0; idx < 4; idx++) {
         // Select a root results to erase-replace
         auto iterClassifResults = classifResults.begin();
         std::advance(iterClassifResults, 3 * idx);
 
         // get the root
-        const TPG::TPGVertex* root = iterClassifResults->second;
+        const EvoGraph::TPGVertex* root = iterClassifResults->second;
         savedRoots.push_back(root);
 
         // Remove from map
@@ -266,8 +266,8 @@ TEST_F(ClassificationTest, DoSelection)
     // Add an additional
     // - root action (should not be removed, despite having the worst score)
     // - team root (will be removed with the same score)
-    const TPG::TPGVertex& actionRoot = graph.addNewAction(0);
-    const TPG::TPGVertex& teamRoot = graph.addNewTeam();
+    const EvoGraph::TPGVertex& actionRoot = graph.addNewAction(0);
+    const EvoGraph::TPGVertex& teamRoot = graph.addNewTeam();
 
     uint64_t originalNbVertices = graph.getNbVertices();
 
@@ -303,7 +303,7 @@ TEST_F(ClassificationTest, DoSelection)
     // i.e. check that their good result1 for one class saved them from
     // decimation.
     auto remainingRoots = la.getTPGGraph()->getRootVertices();
-    for (const TPG::TPGVertex* savedRoot : savedRoots) {
+    for (const EvoGraph::TPGVertex* savedRoot : savedRoots) {
         ASSERT_TRUE(std::find(remainingRoots.begin(), remainingRoots.end(),
                               savedRoot) != remainingRoots.end())
             << "Roots with best classification score for 1st class were not "

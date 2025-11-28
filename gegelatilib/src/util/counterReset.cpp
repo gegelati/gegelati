@@ -3,7 +3,7 @@
 
 void CounterReset::counterReset()
 {
-    TPG::TPGVertex::resetVertexIDCounter();
-    TPG::TPGEdge::resetEdgeIDCounter();
+    EvoGraph::TPGVertex::resetVertexIDCounter();
+    EvoGraph::TPGEdge::resetEdgeIDCounter();
     Program::Program::resetProgramIDCounter();
 }

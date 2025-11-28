@@ -2,7 +2,7 @@
 #include "algorithm/mutator.h"
 
 void Algorithm::Mutator::mutatePopulation(
-    std::shared_ptr<TPG::TPGGraph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
     const Archive& archive, const Learn::LearningParameters& params,
     RNG::RNG& rng, uint64_t maxNbThread)
 {

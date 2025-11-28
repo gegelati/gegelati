@@ -63,7 +63,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     Learn::LearningParameters params;
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     Data::PrimitiveTypeArray<double> currentState{s1};
-    TPG::TPGGraph* tpg;
+    EvoGraph::Graph* tpg;
     File::TPGGraphDotImporter* dot = nullptr;
     std::unique_ptr<CodeGen::TPGGenerationEngine> tpgGen;
     std::string cmdCompile;
@@ -115,7 +115,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
         data.push_back(currentState);
         params.nbRegisters = 8;
         e = new Environment(set, params, data);
-        tpg = new TPG::TPGGraph(*e);
+        tpg = new EvoGraph::Graph(*e);
 
         cmdCompile = TESTS_DAT_PATH "codeGen/";
 #if defined(_MSC_VER) || defined(__MINGW32__)

@@ -41,7 +41,7 @@
 
 #include "tpg/tpgEdge.h"
 
-namespace TPG {
+namespace EvoGraph {
 
     /**
      * \brief Instrumented TPGEdge class to keep track of a TPG execution
@@ -92,15 +92,15 @@ namespace TPG {
         /// Number of a time a TPGEdge has been visited
         /// That is the number of time it caused an execution of its program.
         /// Attribute is mutable because all TPGEdge are seen as const outside
-        /// from their TPGGraph.
+        /// from their Graph.
         mutable std::atomic_uint64_t nbVisits;
 
         /// Number of a time a TPGEdge has been traversed
         /// That is the number of time its program produced the winning bid.
         /// Attribute is mutable because all TPGEdge are seen as const outside
-        /// from their TPGGraph.
+        /// from their Graph.
         mutable std::atomic_uint64_t nbTraversal;
     };
-} // namespace TPG
+} // namespace EvoGraph
 
 #endif // !TPG_EDGE_INSTRUMENTED_H
