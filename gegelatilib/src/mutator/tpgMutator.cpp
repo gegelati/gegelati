@@ -57,11 +57,11 @@
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 
-const EvoGraph::TPGAction* Mutator::TPGMutator::initActionVertex(
+const EvoGraph::Action* Mutator::TPGMutator::initActionVertex(
     EvoGraph::Graph& graph, const Mutator::MutationParameters& params,
     RNG::RNG& rng, uint64_t nbActionEdgeInit, uint64_t actionID)
 {
-    const EvoGraph::TPGAction* action = &(graph.addNewAction(actionID));
+    const EvoGraph::Action* action = &(graph.addNewAction(actionID));
 
     std::set<uint64_t> actionUsed;
     for (size_t j = 0; j < nbActionEdgeInit; j++) {
@@ -172,7 +172,7 @@ void Mutator::TPGMutator::initRandomTPG(
     graph.clear();
 
     // Create teams, programs and Actions
-    std::vector<const EvoGraph::TPGAction*> actions;
+    std::vector<const EvoGraph::Action*> actions;
     std::vector<const EvoGraph::TPGTeam*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
 
@@ -221,7 +221,7 @@ void Mutator::TPGMutator::initRandomTPG(
                     if (std::count_if(
                             team->getOutgoingEdges().begin(),
                             team->getOutgoingEdges().end(),
-                            [&iter, &programs](const EvoGraph::TPGEdge* edge) {
+                            [&iter, &programs](const EvoGraph::Edge* edge) {
                                 return &edge->getProgram() ==
                                        programs.at(*iter).get();
                             }) > 0) {
@@ -263,11 +263,11 @@ void Mutator::TPGMutator::initRandomTPG(
 }
 
 void Mutator::TPGMutator::removeRandomActionEdge(EvoGraph::Graph& graph,
-                                                 const EvoGraph::TPGAction& action,
+                                                 const EvoGraph::Action& action,
                                                  RNG::RNG& rng)
 {
     // Pick an outgoing edge randomly,
-    const std::list<EvoGraph::TPGEdge*>& pickableEdges = action.getOutgoingEdges();
+    const std::list<EvoGraph::Edge*>& pickableEdges = action.getOutgoingEdges();
 
     // Note: No need to take special care of Actions. Since cycles can not
     // appear in TPG with the current mutation process, there is no need to
@@ -276,12 +276,12 @@ void Mutator::TPGMutator::removeRandomActionEdge(EvoGraph::Graph& graph,
     // Pick a random edge
     auto iterSet = pickableEdges.begin();
     std::advance(iterSet, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
-    const EvoGraph::TPGEdge* removedEdge = *iterSet;
+    const EvoGraph::Edge* removedEdge = *iterSet;
     graph.removeActionEdge(*removedEdge);
 }
 
 void Mutator::TPGMutator::addRandomActionEdge(
-    EvoGraph::Graph& graph, const EvoGraph::TPGAction& action,
+    EvoGraph::Graph& graph, const EvoGraph::Action& action,
     const Selector::SelectionContext* context, RNG::RNG& rng)
 {
     // Pick an edge (excluding ones from the team and edges with the team as a
@@ -290,11 +290,11 @@ void Mutator::TPGMutator::addRandomActionEdge(
     // cf erase-remove idiom
     pickableEdges.erase(
         std::remove_if(pickableEdges.begin(), pickableEdges.end(),
-                       [&action](const EvoGraph::TPGEdge* edge) -> bool {
-                           if (dynamic_cast<const EvoGraph::TPGActionEdge*>(edge) !=
+                       [&action](const EvoGraph::Edge* edge) -> bool {
+                           if (dynamic_cast<const EvoGraph::ActionEdge*>(edge) !=
                                    nullptr &&
                                action.getAssessedActions().find(
-                                   dynamic_cast<const EvoGraph::TPGActionEdge*>(edge)
+                                   dynamic_cast<const EvoGraph::ActionEdge*>(edge)
                                        ->getActionClass()) ==
                                    action.getAssessedActions().end()) {
                                return edge->getSource() == &action;
@@ -314,19 +314,19 @@ void Mutator::TPGMutator::addRandomActionEdge(
     // (This code assumes that the set of pickable edge is never empty..
     // otherwise it will throw an exception. Possible solution if needed
     // initialize an entirely new program and pick a random target.)
-    std::list<const EvoGraph::TPGEdge*>::iterator iter = pickableEdges.begin();
+    std::list<const EvoGraph::Edge*>::iterator iter = pickableEdges.begin();
     std::advance(iter, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
-    const EvoGraph::TPGEdge* pickedEdge = *iter;
+    const EvoGraph::Edge* pickedEdge = *iter;
 
     // Create new edge from team and with the same ProgramSharedPointer
     // But with the team as its source
     // throw std::runtime_error if the edge is not from the graph;
-    const EvoGraph::TPGEdge& newEdge = graph.cloneEdge(*pickedEdge);
+    const EvoGraph::Edge& newEdge = graph.cloneEdge(*pickedEdge);
     graph.setEdgeSource(newEdge, action);
 }
 
 void Mutator::TPGMutator::swapActionEdges(EvoGraph::Graph& graph,
-                                          const EvoGraph::TPGAction& action,
+                                          const EvoGraph::Action& action,
                                           RNG::RNG& rng)
 {
 
@@ -345,22 +345,22 @@ void Mutator::TPGMutator::swapActionEdges(EvoGraph::Graph& graph,
     auto it2 = action.getOutgoingEdges().begin();
     std::advance(it2, index2);
 
-    EvoGraph::TPGEdge* edge1 = *it1;
-    EvoGraph::TPGEdge* edge2 = *it2;
+    EvoGraph::Edge* edge1 = *it1;
+    EvoGraph::Edge* edge2 = *it2;
 
     // Extract and swap action classes
     auto actionClass1 =
-        dynamic_cast<EvoGraph::TPGActionEdge*>(edge1)->getActionClass();
+        dynamic_cast<EvoGraph::ActionEdge*>(edge1)->getActionClass();
     auto actionClass2 =
-        dynamic_cast<EvoGraph::TPGActionEdge*>(edge2)->getActionClass();
+        dynamic_cast<EvoGraph::ActionEdge*>(edge2)->getActionClass();
 
     graph.setActionClassEdge(edge1, actionClass2);
     graph.setActionClassEdge(edge2, actionClass1);
 }
 
-void Mutator::TPGMutator::mutateTPGActionEdge(
-    EvoGraph::Graph& graph, const EvoGraph::TPGAction& action,
-    EvoGraph::TPGActionEdge* actionEdge,
+void Mutator::TPGMutator::mutateActionEdge(
+    EvoGraph::Graph& graph, const EvoGraph::Action& action,
+    EvoGraph::ActionEdge* actionEdge,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
     const Mutator::MutationParameters& params, RNG::RNG& rng)
 {
@@ -395,8 +395,8 @@ void Mutator::TPGMutator::mutateTPGActionEdge(
     }
 }
 
-void Mutator::TPGMutator::mutateTPGAction(
-    EvoGraph::Graph& graph, const EvoGraph::TPGAction& action,
+void Mutator::TPGMutator::mutateAction(
+    EvoGraph::Graph& graph, const EvoGraph::Action& action,
     const Selector::SelectionContext* context,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
     const Mutator::MutationParameters& params, RNG::RNG& rng)
@@ -460,13 +460,13 @@ void Mutator::TPGMutator::mutateTPGAction(
 
             indexUsed.push_back(index);
 
-            std::list<EvoGraph::TPGEdge*>::const_iterator iter =
+            std::list<EvoGraph::Edge*>::const_iterator iter =
                 action.getOutgoingEdges().begin();
             std::advance(iter, index);
-            EvoGraph::TPGActionEdge* actionEdge =
-                dynamic_cast<EvoGraph::TPGActionEdge*>(*iter);
+            EvoGraph::ActionEdge* actionEdge =
+                dynamic_cast<EvoGraph::ActionEdge*>(*iter);
 
-            mutateTPGActionEdge(graph, action, actionEdge, newPrograms, params,
+            mutateActionEdge(graph, action, actionEdge, newPrograms, params,
                                 rng);
 
             proba *= params.tpg.pMutateActionProgram;
@@ -479,7 +479,7 @@ void Mutator::TPGMutator::mutateTPGAction(
 }
 
 void Mutator::TPGMutator::crossProgram(
-    EvoGraph::Graph& graph, std::vector<const EvoGraph::TPGAction*> childs,
+    EvoGraph::Graph& graph, std::vector<const EvoGraph::Action*> childs,
     size_t actionID, const Mutator::MutationParameters& params,
     RNG::RNG& rng)
 {
@@ -569,15 +569,15 @@ void Mutator::TPGMutator::crossProgram(
 }
 
 void Mutator::TPGMutator::crossEdges(EvoGraph::Graph& graph,
-                                     std::vector<const EvoGraph::TPGAction*> childs,
+                                     std::vector<const EvoGraph::Action*> childs,
                                      size_t actionID,
                                      const Mutator::MutationParameters& params,
                                      RNG::RNG& rng)
 {
 
     // get the edges
-    EvoGraph::TPGActionEdge* edge1 = childs.at(0)->getEdgeOfAction(actionID);
-    EvoGraph::TPGActionEdge* edge2 = childs.at(1)->getEdgeOfAction(actionID);
+    EvoGraph::ActionEdge* edge1 = childs.at(0)->getEdgeOfAction(actionID);
+    EvoGraph::ActionEdge* edge2 = childs.at(1)->getEdgeOfAction(actionID);
 
     // Only add the edge if the action is founded.
     if (edge1 != nullptr) {
@@ -594,8 +594,8 @@ void Mutator::TPGMutator::crossEdges(EvoGraph::Graph& graph,
     }
 }
 
-void Mutator::TPGMutator::crossTPGAction(
-    EvoGraph::Graph& graph, std::vector<const EvoGraph::TPGAction*> childs,
+void Mutator::TPGMutator::crossAction(
+    EvoGraph::Graph& graph, std::vector<const EvoGraph::Action*> childs,
     const Mutator::MutationParameters& params, RNG::RNG& rng)
 {
 
@@ -640,7 +640,7 @@ void Mutator::TPGMutator::removeRandomEdge(EvoGraph::Graph& graph,
                                            RNG::RNG& rng)
 {
     // Pick an outgoing edge randomly,
-    const std::list<EvoGraph::TPGEdge*>& pickableEdges = team.getOutgoingEdges();
+    const std::list<EvoGraph::Edge*>& pickableEdges = team.getOutgoingEdges();
 
     // Note: No need to take special care of Actions. Since cycles can not
     // appear in TPG with the current mutation process, there is no need to
@@ -649,7 +649,7 @@ void Mutator::TPGMutator::removeRandomEdge(EvoGraph::Graph& graph,
     // Pick a random edge
     auto iterSet = pickableEdges.begin();
     std::advance(iterSet, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
-    const EvoGraph::TPGEdge* removedEdge = *iterSet;
+    const EvoGraph::Edge* removedEdge = *iterSet;
     graph.removeEdge(*removedEdge);
 }
 
@@ -663,9 +663,9 @@ void Mutator::TPGMutator::addRandomEdge(
     // cf erase-remove idiom
     pickableEdges.erase(
         std::remove_if(pickableEdges.begin(), pickableEdges.end(),
-                       [&team](const EvoGraph::TPGEdge* edge) -> bool {
+                       [&team](const EvoGraph::Edge* edge) -> bool {
                            return edge == nullptr ||
-                                  dynamic_cast<const EvoGraph::TPGActionEdge*>(
+                                  dynamic_cast<const EvoGraph::ActionEdge*>(
                                       edge) != nullptr ||
                                   edge->getSource() == &team ||
                                   edge->getDestination() == &team;
@@ -676,24 +676,24 @@ void Mutator::TPGMutator::addRandomEdge(
     // (This code assumes that the set of pickable edge is never empty..
     // otherwise it will throw an exception. Possible solution if needed
     // initialize an entirely new program and pick a random target.)
-    std::list<const EvoGraph::TPGEdge*>::iterator iter = pickableEdges.begin();
+    std::list<const EvoGraph::Edge*>::iterator iter = pickableEdges.begin();
     std::advance(iter, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
-    const EvoGraph::TPGEdge* pickedEdge = *iter;
+    const EvoGraph::Edge* pickedEdge = *iter;
 
     // Create new edge from team and with the same ProgramSharedPointer
     // But with the team as its source
     // throw std::runtime_error if the edge is not from the graph;
-    const EvoGraph::TPGEdge& newEdge = graph.cloneEdge(*pickedEdge);
+    const EvoGraph::Edge& newEdge = graph.cloneEdge(*pickedEdge);
     graph.setEdgeSource(newEdge, team);
 }
 
 void Mutator::TPGMutator::mutateEdgeDestination(
-    EvoGraph::Graph& graph, const EvoGraph::TPGEdge* edge,
+    EvoGraph::Graph& graph, const EvoGraph::Edge* edge,
     const Selector::SelectionContext* context,
     const Mutator::MutationParameters& params, RNG::RNG& rng)
 {
     // Pick an edge among preexisting vertices
-    const EvoGraph::TPGVertex* target = nullptr;
+    const EvoGraph::Vertex* target = nullptr;
 
     // Should the new target be an action or a team
     bool targetAction =
@@ -729,7 +729,7 @@ void Mutator::TPGMutator::mutateEdgeDestination(
 }
 
 void Mutator::TPGMutator::mutateOutgoingEdge(
-    EvoGraph::Graph& graph, const EvoGraph::TPGEdge* edge,
+    EvoGraph::Graph& graph, const EvoGraph::Edge* edge,
     const Selector::SelectionContext* context,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
     const Mutator::MutationParameters& params, RNG::RNG& rng)
@@ -744,15 +744,15 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
 
     if (graph.getEnvironment().getNbContinuousActions() > 0 &&
         params.tpg.useActionProgram &&
-        dynamic_cast<const EvoGraph::TPGAction*>(edge->getDestination()) !=
+        dynamic_cast<const EvoGraph::Action*>(edge->getDestination()) !=
             nullptr &&
         rng.getDouble(0.0, 1.0) > params.tpg.probaContextOverActionProgram) {
 
         // Clone the randomly selected action
-        const EvoGraph::TPGAction& newAction =
-            (const EvoGraph::TPGAction&)graph.cloneVertex(*edge->getDestination());
+        const EvoGraph::Action& newAction =
+            (const EvoGraph::Action&)graph.cloneVertex(*edge->getDestination());
 
-        mutateTPGAction(graph, newAction, context, newPrograms, params, rng);
+        mutateAction(graph, newAction, context, newPrograms, params, rng);
 
         // Set the action
         graph.setEdgeDestination(*edge, newAction);
@@ -809,7 +809,7 @@ void Mutator::TPGMutator::mutateTPGTeam(
         do {
             // Process edge-by-edge
             // And possibly modify their target
-            for (EvoGraph::TPGEdge* edge : team.getOutgoingEdges()) {
+            for (EvoGraph::Edge* edge : team.getOutgoingEdges()) {
                 // Edge->Program bid modification
                 if (rng.getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
                     // Mutate the edge
@@ -990,9 +990,9 @@ void Mutator::TPGMutator::populateTPG(EvoGraph::Graph& graph,
 
     // Divide root used into two subVector with half of the roots, randomly
     // selected.
-    std::vector<const EvoGraph::TPGAction*> subActionsClonable1(
+    std::vector<const EvoGraph::Action*> subActionsClonable1(
         context->actionsClonable);
-    std::vector<const EvoGraph::TPGAction*> subActionsClonable2;
+    std::vector<const EvoGraph::Action*> subActionsClonable2;
     for (size_t idx = 0; idx < context->actionsClonable.size() / 2; idx++) {
         auto root = subActionsClonable1.at(
             rng.getUnsignedInt64(0, subActionsClonable1.size() - 1));
@@ -1009,8 +1009,8 @@ void Mutator::TPGMutator::populateTPG(EvoGraph::Graph& graph,
         // Select two random existing roots
         uint64_t clonedRootIndex1 =
             rng.getUnsignedInt64(0, subActionsClonable1.size() - 1);
-        std::vector<const EvoGraph::TPGAction*> childs = {
-            (const EvoGraph::TPGAction*)(&graph.cloneVertex(
+        std::vector<const EvoGraph::Action*> childs = {
+            (const EvoGraph::Action*)(&graph.cloneVertex(
                 *subActionsClonable1.at(clonedRootIndex1)))};
 
         // Be sure we have agents in both sub lists, and we still have at least
@@ -1022,11 +1022,11 @@ void Mutator::TPGMutator::populateTPG(EvoGraph::Graph& graph,
                 rng.getUnsignedInt64(0, subActionsClonable2.size() - 1);
 
             // clone the child
-            childs.push_back((const EvoGraph::TPGAction*)(&graph.cloneVertex(
+            childs.push_back((const EvoGraph::Action*)(&graph.cloneVertex(
                 *subActionsClonable2.at(clonedRootIndex2))));
 
             // Do the crossover over the childs
-            crossTPGAction(graph, childs, params, rng);
+            crossAction(graph, childs, params, rng);
         }
 
         // Do the mutation over the childs
@@ -1036,7 +1036,7 @@ void Mutator::TPGMutator::populateTPG(EvoGraph::Graph& graph,
             }
             else {
                 // Apply mutations to the root and increase the number of roots
-                mutateTPGAction(graph, *child, context, newPrograms, params,
+                mutateAction(graph, *child, context, newPrograms, params,
                                 rng);
                 nbActionsCreated++;
             }

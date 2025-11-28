@@ -20,7 +20,7 @@ namespace Selector {
     class Selector
     {
       protected:
-        /// Graph on which the TPGVertex can be selected or deleted.
+        /// Graph on which the Vertex can be selected or deleted.
         std::shared_ptr<EvoGraph::Graph> graph;
 
         /// Parameters for the selection
@@ -33,12 +33,12 @@ namespace Selector {
             bestAgent{nullptr, nullptr};
 
         /**
-         * \brief Map associating agent EvoGraph::TPGVertex to their EvaluationResult.
+         * \brief Map associating agent EvoGraph::Vertex to their EvaluationResult.
          *
-         * If a given TPGVertex is evaluated several times, its
+         * If a given Vertex is evaluated several times, its
          * EvaluationResult may be updated with the newer results.
          *
-         * Whenever a TPGVertex is removed from the Graph, its
+         * Whenever a Vertex is removed from the Graph, its
          * EvaluationResult should also be removed from this map.
          *
          * This map may be used to avoid reevaluating a agent that was already
@@ -81,7 +81,7 @@ namespace Selector {
         }
 
         /**
-         * \brief Removes from the Graph the agent TPGVertex.
+         * \brief Removes from the Graph the agent Vertex.
          *
          * The given multimap is updated by removing entries corresponding to
          * decimated vertices.
@@ -89,7 +89,7 @@ namespace Selector {
          * The resultsPerAgent attribute is updated to remove results associated
          * to removed vertices.
          *
-         * \param[in,out] results a multimap containing agent TPGVertex
+         * \param[in,out] results a multimap containing agent Vertex
          * associated to their score during an evaluation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
@@ -109,8 +109,8 @@ namespace Selector {
         /**
          * \brief This method keeps only the best agent policy in the Graph.
          *
-         * If the TPGVertex referenced in the bestAgent attribute is no longer
-         * a TPGVertex of the Graph, nothing happens.
+         * If the Vertex referenced in the bestAgent attribute is no longer
+         * a Vertex of the Graph, nothing happens.
          */
         virtual void keepBestPolicy();
 

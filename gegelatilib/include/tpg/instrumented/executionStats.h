@@ -47,7 +47,7 @@ namespace EvoGraph {
      * \brief Store execution statistics of one inference trace.
      *
      * It contains :
-     * - the execution trace in a std::vector<const EvoGraph::TPGVertex*>
+     * - the execution trace in a std::vector<const EvoGraph::Vertex*>
      * - the number of evaluated teams
      * - the number of evaluated programs
      * - the number of executed lines
@@ -57,7 +57,7 @@ namespace EvoGraph {
     struct TraceStats
     {
         /// The inference trace.
-        const std::vector<const EvoGraph::TPGVertex*> trace;
+        const std::vector<const EvoGraph::Vertex*> trace;
 
         /// Number of team evaluated.
         const uint64_t nbEvaluatedTeams;
@@ -72,30 +72,30 @@ namespace EvoGraph {
 
     /**
      * \brief Utility class for extracting execution statistics
-     * from a TPGExecutionEngineInstrumented and an instrumented Graph.
+     * from a ExecutionEngineInstrumented and an instrumented Graph.
      *
      * The main method of this class is analyzeExecution(), which will :
      *  - retrieve from a Graph the instrumented values and compute
      *  average execution statistics.
      *  - compute execution statistics for every inference done with a
-     * TPGExecutionEngineInstrumented.
+     * ExecutionEngineInstrumented.
      *  - create distributions from statistics of analyzed traces.
      *
      * Before analyzing or even starting any inference, you must :
      *  - use a Graph associated to a TPGInstrumentedFactory.
-     *  - use a TPGExecutionEngineInstrumented that will execute the Graph.
+     *  - use a ExecutionEngineInstrumented that will execute the Graph.
      *  - clear any previous instrumented data :
      *      --> for the Graph, use
-     * TPGInstrumentedFactory::resetTPGGraphCounters().
-     *      --> for the TPGExecutionEngineInstrumented, use its method
-     * TPGExecutionEngineInstrumented::clearTraceHistory(). Otherwise, the
+     * TPGInstrumentedFactory::resetGraphCounters().
+     *      --> for the ExecutionEngineInstrumented, use its method
+     * ExecutionEngineInstrumented::clearTraceHistory(). Otherwise, the
      * results won't have any meaning. If you have never executed the Graph
-     * or the TPGExecutionEngineInstrumented, resetting them isn't required.
+     * or the ExecutionEngineInstrumented, resetting them isn't required.
      *
      * You can then execute the TPG for as many inferences as you like.
      *
      * Then, use analyzeExecution() with the Graph and
-     * TPGExecutionEngineInstrumented, and access the statistics using the
+     * ExecutionEngineInstrumented, and access the statistics using the
      * provided getters and setters.
      *
      * Warning : the class deduces the number of inferences based on the sum
@@ -178,7 +178,7 @@ namespace EvoGraph {
          * distribUsedVertices[v] = y --> y inferences visited vertex pointed by
          * v.
          */
-        std::map<const EvoGraph::TPGVertex*, size_t> distribUsedVertices;
+        std::map<const EvoGraph::Vertex*, size_t> distribUsedVertices;
 
         /// Graph used during last call to analyzeExecution
         const Graph* lastAnalyzedGraph = nullptr;
@@ -225,23 +225,23 @@ namespace EvoGraph {
          * Results are stored in a new TraceStats struct which is pushed back
          * in attribute inferenceTracesStats. Previous results will be erased.
          *
-         * \param[in] trace a vector<const TPGVertex*> of the analyzed inference
+         * \param[in] trace a vector<const Vertex*> of the analyzed inference
          * trace.
          */
-        void analyzeInferenceTrace(const std::vector<const TPGVertex*>& trace);
+        void analyzeInferenceTrace(const std::vector<const Vertex*>& trace);
 
         /**
          * \brief Analyze the execution statistics of multiple inferences
-         * done with a TPGExecutionEngineInstrumented.
+         * done with a ExecutionEngineInstrumented.
          *
          * Previous results will be erased.
          *
-         * \param[in] tee the TPGExecutionEngineInstrumented.
+         * \param[in] tee the ExecutionEngineInstrumented.
          * \param[in] graph the Graph executed with tee.
          * \throws std::bad_cast if the graph contains a non instrumented vertex
          * or edge.
          */
-        void analyzeExecution(const EvoGraph::TPGExecutionEngineInstrumented& tee,
+        void analyzeExecution(const EvoGraph::ExecutionEngineInstrumented& tee,
                               const Graph* graph);
 
         /// Get the average number of evaluated teams per inference.
@@ -274,7 +274,7 @@ namespace EvoGraph {
         getDistribNbExecutionPerInstruction() const;
 
         /// Get the distribution if the number of visit for each vertex.
-        const std::map<const EvoGraph::TPGVertex*, size_t>& getDistribUsedVertices()
+        const std::map<const EvoGraph::Vertex*, size_t>& getDistribUsedVertices()
             const;
 
         /// Clear stored trace statistics and distributions.

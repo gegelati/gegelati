@@ -93,7 +93,7 @@ void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
-    EvoGraph::TPGExecutionEngine& tee, const Job& job, uint64_t generationNumber,
+    EvoGraph::ExecutionEngine& tee, const Job& job, uint64_t generationNumber,
     Learn::LearningMode mode, LearningEnvironment& le) const
 {
     // Get the current agent and the current algorithm
@@ -179,10 +179,10 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
         results;
 
-    // Create the TPGExecutionEngine for this evaluation.
+    // Create the ExecutionEngine for this evaluation.
     // The engine uses the Archive only in training mode.
-    std::unique_ptr<EvoGraph::TPGExecutionEngine> tee =
-        this->graph->getFactory().createTPGExecutionEngine(
+    std::unique_ptr<EvoGraph::ExecutionEngine> tee =
+        this->graph->getFactory().createExecutionEngine(
             this->env,
             (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 
@@ -206,10 +206,10 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
 {
 
 
-    // Create the TPGExecutionEngine for this evaluation.
+    // Create the ExecutionEngine for this evaluation.
     // The engine uses the Archive only in training mode.
-    std::unique_ptr<EvoGraph::TPGExecutionEngine> tee =
-        this->graph->getFactory().createTPGExecutionEngine(
+    std::unique_ptr<EvoGraph::ExecutionEngine> tee =
+        this->graph->getFactory().createExecutionEngine(
             this->env,
             (mode == LearningMode::TRAINING) ? &this->archive : NULL);
 

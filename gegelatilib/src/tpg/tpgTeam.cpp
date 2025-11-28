@@ -39,13 +39,13 @@
 #include "tpg/tpgActionEdge.h"
 #include <stdexcept>
 
-void EvoGraph::TPGTeam::addOutgoingEdge(TPGEdge* edge)
+void EvoGraph::TPGTeam::addOutgoingEdge(Edge* edge)
 {
-    if (dynamic_cast<TPGActionEdge*>(edge) != nullptr) {
+    if (dynamic_cast<ActionEdge*>(edge) != nullptr) {
         throw std::runtime_error(
             "Cannot add an action edge to an Action team.");
     }
     else {
-        TPGVertex::addOutgoingEdge(edge);
+        Vertex::addOutgoingEdge(edge);
     }
 }

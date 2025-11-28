@@ -97,36 +97,36 @@ class TPGTest : public ::testing::Test
     }
 };
 
-TEST_F(TPGTest, TPGTeamAndTPGActionConstructorsDestructors)
+TEST_F(TPGTest, TPGTeamAndActionConstructorsDestructors)
 {
-    EvoGraph::TPGVertex* team;
-    EvoGraph::TPGVertex* action;
+    EvoGraph::Vertex* team;
+    EvoGraph::Vertex* action;
 
     ASSERT_NO_THROW(team = new EvoGraph::TPGTeam());
-    ASSERT_NO_THROW(action = new EvoGraph::TPGAction(0));
+    ASSERT_NO_THROW(action = new EvoGraph::Action(0));
 
     ASSERT_NO_THROW(delete team);
     ASSERT_NO_THROW(delete action);
 }
 
-TEST_F(TPGTest, TPGEdgeConstructorDestructor)
+TEST_F(TPGTest, EdgeConstructorDestructor)
 {
     EvoGraph::TPGTeam team;
-    EvoGraph::TPGAction action(0);
+    EvoGraph::Action action(0);
 
-    EvoGraph::TPGEdge* edge;
+    EvoGraph::Edge* edge;
 
-    ASSERT_NO_THROW(edge = new EvoGraph::TPGEdge(&team, &action, progPointer));
+    ASSERT_NO_THROW(edge = new EvoGraph::Edge(&team, &action, progPointer));
 
     ASSERT_NO_THROW(delete edge);
 }
 
-TEST_F(TPGTest, TPGVertexEdgesSettersGetters)
+TEST_F(TPGTest, VertexEdgesSettersGetters)
 {
     EvoGraph::TPGTeam team;
-    EvoGraph::TPGAction action(0);
+    EvoGraph::Action action(0);
 
-    EvoGraph::TPGEdge edge(&team, &action, progPointer);
+    EvoGraph::Edge edge(&team, &action, progPointer);
 
     ASSERT_NO_THROW(team.addOutgoingEdge(&edge))
         << "Adding an outgoing edge to a Team vertex failed.";
@@ -139,9 +139,9 @@ TEST_F(TPGTest, TPGVertexEdgesSettersGetters)
         << "Size of the outgoing edges of the node is incorrect.";
     ASSERT_EQ(std::count(team.getOutgoingEdges().begin(),
                          team.getOutgoingEdges().end(),
-                         (const EvoGraph::TPGEdge*)&edge),
+                         (const EvoGraph::Edge*)&edge),
               1)
-        << "TPGEdge pointer contained in the outgoingEdges is incorrect.";
+        << "Edge pointer contained in the outgoingEdges is incorrect.";
 
     // Add the same edge again.. Nothing should happen, but it should not fail.
     ASSERT_NO_THROW(team.addOutgoingEdge(&edge))
@@ -162,7 +162,7 @@ TEST_F(TPGTest, TPGVertexEdgesSettersGetters)
     ASSERT_EQ(std::count(action.getIncomingEdges().begin(),
                          action.getIncomingEdges().end(), &edge),
               1)
-        << "TPGEdge pointer contained in the outgoingEdges is incorrect.";
+        << "Edge pointer contained in the outgoingEdges is incorrect.";
 
     // Remove edges
     ASSERT_NO_THROW(team.removeOutgoingEdge(&edge))
@@ -183,15 +183,15 @@ TEST_F(TPGTest, TPGVertexEdgesSettersGetters)
            "fail.";
 }
 
-TEST_F(TPGTest, TPGEdgeGetSetProgram)
+TEST_F(TPGTest, EdgeGetSetProgram)
 {
     EvoGraph::TPGTeam team;
-    EvoGraph::TPGAction action(0);
+    EvoGraph::Action action(0);
 
-    const EvoGraph::TPGEdge constEdge(&team, &action, progPointer);
+    const EvoGraph::Edge constEdge(&team, &action, progPointer);
     const Program::Program& constProg = constEdge.getProgram();
     ASSERT_EQ(&constProg, progPointer.get())
-        << "Program accessor on const TPGEdge returns a Program different from "
+        << "Program accessor on const Edge returns a Program different from "
            "the one given at construction.";
 
     // program is a mutable attribute of the Edge.
@@ -199,98 +199,98 @@ TEST_F(TPGTest, TPGEdgeGetSetProgram)
         new Program::Program(*e, false));
     constEdge.setProgram(progPointer2);
     ASSERT_EQ(&constEdge.getProgram(), progPointer2.get())
-        << "Program accessor on TPGEdge returns a Program different from the "
+        << "Program accessor on Edge returns a Program different from the "
            "one set before.";
 }
 
-TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination)
+TEST_F(TPGTest, EdgeGetSetSourceAndDestination)
 {
     EvoGraph::TPGTeam team0, team1;
-    EvoGraph::TPGAction action0(1), action1(0);
+    EvoGraph::Action action0(1), action1(0);
 
-    EvoGraph::TPGEdge edge(&team0, &action0, progPointer);
+    EvoGraph::Edge edge(&team0, &action0, progPointer);
 
     ASSERT_EQ(&team0, edge.getSource())
-        << "Source of the TPGEdge differs from the one given at construction.";
+        << "Source of the Edge differs from the one given at construction.";
     ASSERT_EQ(&action0, edge.getDestination())
-        << "Destination of the TPGEdge differs from the one given at "
+        << "Destination of the Edge differs from the one given at "
            "construction.";
 
     edge.setSource(&team1);
     ASSERT_EQ(&team1, edge.getSource())
-        << "Source of the TPGEdge differs from the one set right before.";
+        << "Source of the Edge differs from the one set right before.";
 
     edge.setDestination(&action1);
     ASSERT_EQ(&action1, edge.getDestination())
-        << "Destination of the TPGEdge differs from the one set right before.";
+        << "Destination of the Edge differs from the one set right before.";
 }
 
-TEST_F(TPGTest, TPGActionEdgeGetSet)
+TEST_F(TPGTest, ActionEdgeGetSet)
 {
-    EvoGraph::TPGAction action0(0);
+    EvoGraph::Action action0(0);
 
-    EvoGraph::TPGActionEdge actionEdge(&action0, progPointer, 0);
+    EvoGraph::ActionEdge actionEdge(&action0, progPointer, 0);
 
     ASSERT_THROW(actionEdge.getDestination(), std::runtime_error)
-        << "TPGActionEdge does not have destination.";
+        << "ActionEdge does not have destination.";
     ASSERT_THROW(actionEdge.setDestination(&action0), std::runtime_error)
-        << "TPGActionEdge does not have destination.";
+        << "ActionEdge does not have destination.";
 
     ASSERT_EQ(actionEdge.getActionClass(), 0)
-        << "Action class of the TPGActionEdge is wrong";
+        << "Action class of the ActionEdge is wrong";
 
     actionEdge.setActionClass(1);
     ASSERT_EQ(actionEdge.getActionClass(), 1)
-        << "Action class of the TPGActionEdge has not been changed successfuly";
+        << "Action class of the ActionEdge has not been changed successfuly";
 }
 
-TEST_F(TPGTest, TPGFactory)
+TEST_F(TPGTest, GraphFactory)
 {
-    EvoGraph::TPGFactory factory;
+    EvoGraph::GraphFactory factory;
 
-    std::unique_ptr<EvoGraph::TPGAction> action;
+    std::unique_ptr<EvoGraph::Action> action;
     std::unique_ptr<EvoGraph::TPGTeam> team;
-    std::unique_ptr<EvoGraph::TPGEdge> edge;
-    std::unique_ptr<EvoGraph::TPGEdge> actionEdge;
-    std::unique_ptr<EvoGraph::TPGExecutionEngine> tee;
+    std::unique_ptr<EvoGraph::Edge> edge;
+    std::unique_ptr<EvoGraph::Edge> actionEdge;
+    std::unique_ptr<EvoGraph::ExecutionEngine> tee;
 
-    ASSERT_NO_THROW(action = factory.createTPGAction(0))
-        << "TPGGraphELementFactory could not build a TPGAction.";
-    ASSERT_NE(action, nullptr) << "Created TPGAction should not be null.";
+    ASSERT_NO_THROW(action = factory.createAction(0))
+        << "GraphELementFactory could not build a Action.";
+    ASSERT_NE(action, nullptr) << "Created Action should not be null.";
 
     ASSERT_NO_THROW(team = factory.createTPGTeam())
-        << "TPGGraphELementFactory could not build a TPGTeam.";
+        << "GraphELementFactory could not build a TPGTeam.";
     ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
 
     ASSERT_NO_THROW(
-        edge = factory.createTPGEdge(team.get(), action.get(), progPointer))
-        << "TPGGraphELementFactory could not build a TPGEdge.";
-    ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
+        edge = factory.createEdge(team.get(), action.get(), progPointer))
+        << "GraphELementFactory could not build a Edge.";
+    ASSERT_NE(edge.get(), nullptr) << "Created Edge should not be null.";
 
     ASSERT_NO_THROW(
-        actionEdge = factory.createTPGActionEdge(action.get(), progPointer, 0))
-        << "TPGGraphELementFactory could not build a TPGActionEdge.";
+        actionEdge = factory.createActionEdge(action.get(), progPointer, 0))
+        << "GraphELementFactory could not build a ActionEdge.";
     ASSERT_NE(actionEdge.get(), nullptr)
-        << "Created TPGActionEdge should not be null.";
+        << "Created ActionEdge should not be null.";
 
-    ASSERT_NO_THROW(tee = factory.createTPGExecutionEngine(*e, nullptr))
-        << "TPGGraphELementFactory could not build a TPGExecutionEngine.";
+    ASSERT_NO_THROW(tee = factory.createExecutionEngine(*e, nullptr))
+        << "GraphELementFactory could not build a ExecutionEngine.";
     ASSERT_NE(tee.get(), nullptr)
-        << "Created TPGExecutionEngine should not be null.";
+        << "Created ExecutionEngine should not be null.";
 }
 
-TEST_F(TPGTest, TPGGraphAddTPGVertex)
+TEST_F(TPGTest, GraphAddVertex)
 {
     EvoGraph::Graph tpg(*e);
     const EvoGraph::TPGTeam* t;
-    const EvoGraph::TPGAction* a;
+    const EvoGraph::Action* a;
     ASSERT_NO_THROW(t = &tpg.addNewTeam())
         << "Adding a new Team to a Graph failed.";
     ASSERT_NO_THROW(a = &tpg.addNewAction(0))
         << "Adding a new Action to a Graph failed.";
 }
 
-TEST_F(TPGTest, TPGGraphConstructorDestructor)
+TEST_F(TPGTest, GraphConstructorDestructor)
 {
     EvoGraph::Graph* tpg;
 
@@ -303,25 +303,25 @@ TEST_F(TPGTest, TPGGraphConstructorDestructor)
     ASSERT_NO_THROW(delete tpg) << "Destruction of a Graph failed.";
 }
 
-TEST_F(TPGTest, TPGGraphHasVertex)
+TEST_F(TPGTest, GraphHasVertex)
 {
     EvoGraph::Graph tpg(*e);
     const EvoGraph::TPGTeam* t;
-    const EvoGraph::TPGAction* a;
+    const EvoGraph::Action* a;
     ASSERT_NO_THROW(t = &tpg.addNewTeam())
         << "Adding a new Team to a Graph failed.";
     ASSERT_NO_THROW(a = &tpg.addNewAction(0))
         << "Adding a new Action to a Graph failed.";
 
-    EvoGraph::TPGAction external(12);
+    EvoGraph::Action external(12);
 
     ASSERT_TRUE(tpg.hasVertex(*t))
-        << "A TPGVertex from the Graph was not detected as such.";
+        << "A Vertex from the Graph was not detected as such.";
     ASSERT_FALSE(tpg.hasVertex(external))
-        << "A TPGVertex from the Graph was wrongfully detected as such.";
+        << "A Vertex from the Graph was wrongfully detected as such.";
 }
 
-TEST_F(TPGTest, TPGGraphGetNbVertices)
+TEST_F(TPGTest, GraphGetNbVertices)
 {
     EvoGraph::Graph tpg(*e);
     tpg.addNewTeam();
@@ -330,28 +330,28 @@ TEST_F(TPGTest, TPGGraphGetNbVertices)
         << "Number of vertices in the Graph is incorrect.";
 }
 
-TEST_F(TPGTest, TPGGraphGetVertices)
+TEST_F(TPGTest, GraphGetVertices)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex = tpg.addNewTeam();
-    const std::vector<const EvoGraph::TPGVertex*> vertices = tpg.getVertices();
+    const EvoGraph::Vertex& vertex = tpg.addNewTeam();
+    const std::vector<const EvoGraph::Vertex*> vertices = tpg.getVertices();
     ASSERT_EQ(vertices.size(), 1)
-        << "Size of the retrievd std::vector<TPGVertex> is incorrect.";
+        << "Size of the retrievd std::vector<Vertex> is incorrect.";
     ASSERT_EQ(vertices.front(), &vertex)
         << "Vertex in the retrieved vertices list does not correspond to the "
            "one added to the TPGGrapg (pointer comparison)";
 }
 
-TEST_F(TPGTest, TPGGraphAddEdge)
+TEST_F(TPGTest, GraphAddEdge)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
 
     ASSERT_NO_THROW(tpg.addNewEdge(vertex0, vertex1, progPointer))
         << "Adding an edge between a team and an action failed.";
     // Add with a vertex not in the graph.
-    EvoGraph::TPGAction vertex2(2);
+    EvoGraph::Action vertex2(2);
     ASSERT_THROW(tpg.addNewEdge(vertex0, vertex2, progPointer),
                  std::runtime_error)
         << "Adding an edge with a vertex not from the graph should have "
@@ -363,23 +363,23 @@ TEST_F(TPGTest, TPGGraphAddEdge)
         << "Adding an edge from an Action should have failed.";
 
     std::unique_ptr<EvoGraph::TPGTeam> vertex3 = tpg.getFactory().createTPGTeam();
-    std::unique_ptr<EvoGraph::TPGEdge> edge =
-        tpg.getFactory().createTPGActionEdge(&vertex1, progPointer, 0);
+    std::unique_ptr<EvoGraph::Edge> edge =
+        tpg.getFactory().createActionEdge(&vertex1, progPointer, 0);
     ASSERT_THROW(vertex3->addOutgoingEdge(edge.get()), std::runtime_error)
-        << "Adding an action edge from a TPGVertex that is not an action "
+        << "Adding an action edge from a Vertex that is not an action "
            "should have failed.";
 }
 
-TEST_F(TPGTest, TPGGraphAddActionEdge)
+TEST_F(TPGTest, GraphAddActionEdge)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
 
     ASSERT_NO_THROW(tpg.addNewActionEdge(vertex1, progPointer, 0))
         << "Adding an action edge from an action failed.";
     // Add with a vertex not in the graph.
-    EvoGraph::TPGAction vertex2(2);
+    EvoGraph::Action vertex2(2);
     ASSERT_THROW(tpg.addNewActionEdge(vertex2, progPointer, 0),
                  std::runtime_error)
         << "Adding an edge with a vertex not from the graph should have "
@@ -391,13 +391,13 @@ TEST_F(TPGTest, TPGGraphAddActionEdge)
         << "Adding an edge from an Action should have failed.";
 }
 
-TEST_F(TPGTest, TPGGraphGetEdges)
+TEST_F(TPGTest, GraphGetEdges)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
 
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
     ASSERT_EQ(tpg.getEdges().size(), 1)
         << "Edges of the graph have incorrect size after successful add.";
 
@@ -406,7 +406,7 @@ TEST_F(TPGTest, TPGGraphGetEdges)
     ASSERT_EQ(vertex0.getOutgoingEdges().size(), 1);
     ASSERT_EQ(std::count_if(vertex0.getOutgoingEdges().begin(),
                             vertex0.getOutgoingEdges().end(),
-                            [&edge](const EvoGraph::TPGEdge* other) {
+                            [&edge](const EvoGraph::Edge* other) {
                                 return other == &edge;
                             }),
               1);
@@ -415,7 +415,7 @@ TEST_F(TPGTest, TPGGraphGetEdges)
     ASSERT_EQ(vertex1.getIncomingEdges().size(), 1);
     ASSERT_EQ(std::count_if(vertex1.getIncomingEdges().begin(),
                             vertex1.getIncomingEdges().end(),
-                            [&edge](const EvoGraph::TPGEdge* other) {
+                            [&edge](const EvoGraph::Edge* other) {
                                 return other == &edge;
                             }),
               1);
@@ -429,13 +429,13 @@ TEST_F(TPGTest, TPGGraphGetEdges)
         << "Edges of the graph have incorrect size after unsuccessful add.";
 }
 
-TEST_F(TPGTest, TPGGraphRemoveEdge)
+TEST_F(TPGTest, GraphRemoveEdge)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
 
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
     // Remove the edge
     ASSERT_NO_THROW(tpg.removeEdge(edge))
@@ -457,13 +457,13 @@ TEST_F(TPGTest, TPGGraphRemoveEdge)
         << "Edge not in the graph should not be removable";
 }
 
-TEST_F(TPGTest, TPGGraphRemoveEdgeContinuous)
+TEST_F(TPGTest, GraphRemoveEdgeContinuous)
 {
     EvoGraph::Graph tpg(*ce);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
 
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
     // Remove the edge
     ASSERT_NO_THROW(tpg.removeEdge(edge))
@@ -485,13 +485,13 @@ TEST_F(TPGTest, TPGGraphRemoveEdgeContinuous)
         << "Edge not in the graph should not be removable";
 }
 
-TEST_F(TPGTest, TPGGraphRemoveActionEdge)
+TEST_F(TPGTest, GraphRemoveActionEdge)
 {
     EvoGraph::Graph tpg(*ce);
-    const EvoGraph::TPGAction& vertex = tpg.addNewAction(0);
+    const EvoGraph::Action& vertex = tpg.addNewAction(0);
 
-    const EvoGraph::TPGEdge& edge0 = tpg.addNewActionEdge(vertex, progPointer, 0);
-    const EvoGraph::TPGEdge& edge1 = tpg.addNewActionEdge(vertex, progPointer, 1);
+    const EvoGraph::Edge& edge0 = tpg.addNewActionEdge(vertex, progPointer, 0);
+    const EvoGraph::Edge& edge1 = tpg.addNewActionEdge(vertex, progPointer, 1);
 
     // Remove the edge
     ASSERT_NO_THROW(tpg.removeEdge(edge0))
@@ -515,31 +515,31 @@ TEST_F(TPGTest, TPGGraphRemoveActionEdge)
         << "Edge not in the graph should not be removable";
 }
 
-TEST_F(TPGTest, TPGGraphRemoveVertex)
+TEST_F(TPGTest, GraphRemoveVertex)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
     const EvoGraph::TPGTeam& vertex2 = tpg.addNewTeam();
 
     ASSERT_NO_THROW(tpg.removeVertex(vertex0))
         << "Removing a vertex from the graph failed.";
     ASSERT_EQ(tpg.getNbVertices(), 2)
         << "Number of vertices of the TPG is incorrect after removing a "
-           "TPGVertex.";
+           "Vertex.";
     ASSERT_EQ(tpg.getVertices().front(), &vertex1)
         << "Remaining vertex after removal is not correct.";
     ASSERT_EQ(tpg.getVertices().back(), &vertex2)
         << "Remaining vertex after removal is not correct.";
 
     // Try to remove a vertex not from the graph
-    EvoGraph::TPGAction vertex3(3);
+    EvoGraph::Action vertex3(3);
     ASSERT_NO_THROW(tpg.removeVertex(vertex3))
         << "Removing a vertex from the graph (although it is not inside) "
            "throwed an exception.";
     ASSERT_EQ(tpg.getNbVertices(), 2)
         << "Number of vertices of the TPG is incorrect after removing a "
-           "TPGVertex not from the graph.";
+           "Vertex not from the graph.";
 
     // Add a new edge to test removal of vertex connectet to an edge.
     tpg.addNewEdge(vertex2, vertex1, progPointer);
@@ -570,12 +570,12 @@ TEST_F(TPGTest, TPGGraphRemoveVertex)
            "disconnected from its destination.";
 }
 
-TEST_F(TPGTest, TPGGraphClear)
+TEST_F(TPGTest, GraphClear)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
     ASSERT_NO_THROW(tpg.clear()) << "Clearing a non empty graph failed.";
     ASSERT_EQ(tpg.getNbVertices(), 0)
@@ -584,45 +584,45 @@ TEST_F(TPGTest, TPGGraphClear)
         << "Cleared graph is not empty of edges as expected.";
 }
 
-TEST_F(TPGTest, TPGGraphClearProgramIntrons)
+TEST_F(TPGTest, GraphClearProgramIntrons)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
     // Test that the method doesn't fail.
     ASSERT_NO_THROW(tpg.clearProgramIntrons())
         << "Clearing the introns from the Graph programs failed.";
 
-    // Real test of TPG unmodified execution in TPGExecutionEngineTest
+    // Real test of TPG unmodified execution in ExecutionEngineTest
 }
 
-TEST_F(TPGTest, TPGGraphGetNbRootVertices)
+TEST_F(TPGTest, GraphGetNbRootVertices)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
     ASSERT_EQ(tpg.getNbRootVertices(), 1)
         << "Number of roots of the TPG is incorrect.";
 }
 
-TEST_F(TPGTest, TPGGraphGetRootVertices)
+TEST_F(TPGTest, GraphGetRootVertices)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGVertex& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(0);
+    const EvoGraph::Vertex& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
 
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
     ASSERT_EQ(tpg.getRootVertices().size(), 1)
         << "Number of roots of the TPG is incorrect.";
     ASSERT_EQ(tpg.getRootVertices().at(0), &vertex0)
         << "Vertex classified as root is incorrect.";
 
-    const EvoGraph::TPGVertex& vertex2 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex3 = tpg.addNewAction(1);
+    const EvoGraph::Vertex& vertex2 = tpg.addNewTeam();
+    const EvoGraph::Action& vertex3 = tpg.addNewAction(1);
     ASSERT_EQ(tpg.getRootVertices().size(), 3)
         << "Number of roots of the TPG is incorrect.";
     ASSERT_EQ(tpg.getRootTeams().size(), 2)
@@ -631,17 +631,17 @@ TEST_F(TPGTest, TPGGraphGetRootVertices)
         << "Number of roots actions of the TPG is incorrect.";
 }
 
-TEST_F(TPGTest, TPGGraphCloneVertex)
+TEST_F(TPGTest, GraphCloneVertex)
 {
     EvoGraph::Graph tpg(*e);
     const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(4);
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(4);
 
-    const EvoGraph::TPGEdge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
-    const EvoGraph::TPGEdge& edge1 = tpg.addNewActionEdge(vertex1, progPointer, 0);
+    const EvoGraph::Edge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Edge& edge1 = tpg.addNewActionEdge(vertex1, progPointer, 0);
 
     // Clone the team
-    const EvoGraph::TPGVertex* cloneVertex;
+    const EvoGraph::Vertex* cloneVertex;
     ASSERT_NO_THROW(cloneVertex = &tpg.cloneVertex(vertex0))
         << "Cloning a TPGTeamVertex of the Graph failed.";
     // Check that the clone vertex is in the graph
@@ -667,10 +667,10 @@ TEST_F(TPGTest, TPGGraphCloneVertex)
     // Duplicate the action (to increase code coverage)
     ASSERT_NO_THROW(tpg.cloneVertex(vertex1));
     // Check that the type is correct
-    const EvoGraph::TPGVertex* vertex = tpg.getVertices().at(3);
+    const EvoGraph::Vertex* vertex = tpg.getVertices().at(3);
     ASSERT_EQ(typeid(vertex1).name(), typeid(*vertex).name());
     ASSERT_EQ(vertex1.getActionID(),
-              ((EvoGraph::TPGAction*)tpg.getVertices().at(3))->getActionID());
+              ((EvoGraph::Action*)tpg.getVertices().at(3))->getActionID());
     ASSERT_EQ(tpg.getEdges().size(), 4)
         << "Number of edges of the graph after clone is incorrect.";
     // Check pointer usage was increased.
@@ -679,22 +679,22 @@ TEST_F(TPGTest, TPGGraphCloneVertex)
            "connected with an edge using it.";
 
     // Clone a vertex not from the graph
-    EvoGraph::TPGVertex* vertex2 = new EvoGraph::TPGAction(1);
+    EvoGraph::Vertex* vertex2 = new EvoGraph::Action(1);
     ASSERT_THROW(tpg.cloneVertex(*vertex2), std::runtime_error)
         << "Cloning a vertex that does not belong to the Graph should not "
            "be possible.";
 }
 
-TEST_F(TPGTest, TPGGraphCloneEdge)
+TEST_F(TPGTest, GraphCloneEdge)
 {
     EvoGraph::Graph tpg(*e);
     const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(4);
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
-    const EvoGraph::TPGEdge& actionEdge =
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(4);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Edge& actionEdge =
         tpg.addNewActionEdge(vertex1, progPointer, 0);
 
-    const EvoGraph::TPGEdge* clone = NULL;
+    const EvoGraph::Edge* clone = NULL;
     ASSERT_NO_THROW(clone = &tpg.cloneEdge(edge))
         << "Cloning an existing edge failed.";
     // Check that the new edge is correctly added to the graph
@@ -711,7 +711,7 @@ TEST_F(TPGTest, TPGGraphCloneEdge)
     // Check that the edge was correctly registered
     ASSERT_EQ(std::count_if(vertex0.getOutgoingEdges().begin(),
                             vertex0.getOutgoingEdges().end(),
-                            [&clone](const EvoGraph::TPGEdge* other) {
+                            [&clone](const EvoGraph::Edge* other) {
                                 return other == clone;
                             }),
               1)
@@ -719,7 +719,7 @@ TEST_F(TPGTest, TPGGraphCloneEdge)
            "edges.";
     ASSERT_EQ(std::count_if(vertex1.getIncomingEdges().begin(),
                             vertex1.getIncomingEdges().end(),
-                            [&clone](const EvoGraph::TPGEdge* other) {
+                            [&clone](const EvoGraph::Edge* other) {
                                 return other == clone;
                             }),
               1)
@@ -727,7 +727,7 @@ TEST_F(TPGTest, TPGGraphCloneEdge)
            "incoming edges.";
 
     // Check clone from action edge
-    const EvoGraph::TPGEdge* cloneActionEdge = NULL;
+    const EvoGraph::Edge* cloneActionEdge = NULL;
     ASSERT_NO_THROW(cloneActionEdge = &tpg.cloneEdge(actionEdge))
         << "Cloning an existing action edge failed.";
     // Check that the new edge is correctly added to the graph
@@ -736,12 +736,12 @@ TEST_F(TPGTest, TPGGraphCloneEdge)
     // Check the program use
     ASSERT_EQ(progPointer.use_count(), 5)
         << "Program pointer was not correctly registered to the edge clone.";
-    ASSERT_TRUE(dynamic_cast<const EvoGraph::TPGActionEdge*>(cloneActionEdge) !=
+    ASSERT_TRUE(dynamic_cast<const EvoGraph::ActionEdge*>(cloneActionEdge) !=
                 nullptr)
         << "Cloning the action edge did not create a action edge";
 
-    const EvoGraph::TPGActionEdge* cloneActionEdgeCast =
-        dynamic_cast<const EvoGraph::TPGActionEdge*>(cloneActionEdge);
+    const EvoGraph::ActionEdge* cloneActionEdgeCast =
+        dynamic_cast<const EvoGraph::ActionEdge*>(cloneActionEdge);
     // Check the edge source and destination
     ASSERT_EQ(cloneActionEdgeCast->getSource(), &vertex1)
         << "Clone action edge has an incorrect source.";
@@ -749,22 +749,22 @@ TEST_F(TPGTest, TPGGraphCloneEdge)
         << "Clone action edge has an incorrect action Class.";
 
     // Check throw behavior
-    EvoGraph::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
+    EvoGraph::Edge newEdge(&vertex0, &vertex1, progPointer);
     ASSERT_THROW(tpg.cloneEdge(newEdge), std::runtime_error)
         << "Cloning an edge not from the graph should not succeed.";
 
-    EvoGraph::TPGActionEdge newActionEdge(&vertex1, progPointer, 0);
+    EvoGraph::ActionEdge newActionEdge(&vertex1, progPointer, 0);
     ASSERT_THROW(tpg.cloneEdge(newActionEdge), std::runtime_error)
         << "Cloning an action edge not from the graph should not succeed.";
 }
 
-TEST_F(TPGTest, TPGGraphSetEdgeDestination)
+TEST_F(TPGTest, GraphSetEdgeDestination)
 {
     EvoGraph::Graph tpg(*e);
     const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(4);
-    const EvoGraph::TPGAction& vertex2 = tpg.addNewAction(4);
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(4);
+    const EvoGraph::Action& vertex2 = tpg.addNewAction(4);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
     // Change the destination of the edge
     ASSERT_TRUE(tpg.setEdgeDestination(edge, vertex2))
@@ -785,7 +785,7 @@ TEST_F(TPGTest, TPGGraphSetEdgeDestination)
     // Check that the edge was correctly registered
     ASSERT_EQ(std::count_if(vertex0.getOutgoingEdges().begin(),
                             vertex0.getOutgoingEdges().end(),
-                            [&edge](const EvoGraph::TPGEdge* other) {
+                            [&edge](const EvoGraph::Edge* other) {
                                 return other == &edge;
                             }),
               1)
@@ -793,7 +793,7 @@ TEST_F(TPGTest, TPGGraphSetEdgeDestination)
            "outgoing edges.";
     ASSERT_EQ(std::count_if(vertex2.getIncomingEdges().begin(),
                             vertex2.getIncomingEdges().end(),
-                            [&edge](const EvoGraph::TPGEdge* other) {
+                            [&edge](const EvoGraph::Edge* other) {
                                 return other == &edge;
                             }),
               1)
@@ -804,19 +804,19 @@ TEST_F(TPGTest, TPGGraphSetEdgeDestination)
         << "This vertex should not have incomingEdge after destination change.";
 
     // Check failure
-    EvoGraph::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
+    EvoGraph::Edge newEdge(&vertex0, &vertex1, progPointer);
     ASSERT_FALSE(tpg.setEdgeDestination(newEdge, vertex2))
         << "Changing destination of an edge not within the graph should not "
            "succeed.";
 }
 
-TEST_F(TPGTest, TPGGraphSetEdgeSource)
+TEST_F(TPGTest, GraphSetEdgeSource)
 {
     EvoGraph::Graph tpg(*e);
     const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = tpg.addNewAction(4);
+    const EvoGraph::Action& vertex1 = tpg.addNewAction(4);
     const EvoGraph::TPGTeam& vertex2 = tpg.addNewTeam();
-    const EvoGraph::TPGEdge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Edge& edge = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
     // Change the destination of the edge
     ASSERT_TRUE(tpg.setEdgeSource(edge, vertex2))
@@ -836,7 +836,7 @@ TEST_F(TPGTest, TPGGraphSetEdgeSource)
     // Check that the edge was correctly registered
     ASSERT_EQ(std::count_if(vertex2.getOutgoingEdges().begin(),
                             vertex2.getOutgoingEdges().end(),
-                            [&edge](const EvoGraph::TPGEdge* other) {
+                            [&edge](const EvoGraph::Edge* other) {
                                 return other == &edge;
                             }),
               1)
@@ -844,7 +844,7 @@ TEST_F(TPGTest, TPGGraphSetEdgeSource)
            "outgoing edges.";
     ASSERT_EQ(std::count_if(vertex1.getIncomingEdges().begin(),
                             vertex1.getIncomingEdges().end(),
-                            [&edge](const EvoGraph::TPGEdge* other) {
+                            [&edge](const EvoGraph::Edge* other) {
                                 return other == &edge;
                             }),
               1)
@@ -855,7 +855,7 @@ TEST_F(TPGTest, TPGGraphSetEdgeSource)
         << "This vertex should not have incomingEdge after source change.";
 
     // Check failure
-    EvoGraph::TPGEdge newEdge(&vertex0, &vertex1, progPointer);
+    EvoGraph::Edge newEdge(&vertex0, &vertex1, progPointer);
     ASSERT_FALSE(tpg.setEdgeSource(newEdge, vertex2))
         << "Changing source of an edge not within the graph should not "
            "succeed.";
@@ -868,12 +868,12 @@ TEST_F(TPGTest, TPGMoveOperator)
         new EvoGraph::Graph(*e); // creates an empty tpg graph
 
     const EvoGraph::TPGTeam& vertex0 = source.addNewTeam();
-    const EvoGraph::TPGAction& vertex1 = source.addNewAction(4);
+    const EvoGraph::Action& vertex1 = source.addNewAction(4);
     const EvoGraph::TPGTeam& vertex2 = source.addNewTeam();
-    const EvoGraph::TPGEdge& edge = source.addNewEdge(vertex0, vertex1, progPointer);
-    const EvoGraph::TPGEdge& edge2 =
+    const EvoGraph::Edge& edge = source.addNewEdge(vertex0, vertex1, progPointer);
+    const EvoGraph::Edge& edge2 =
         source.addNewEdge(vertex2, vertex1, progPointer);
-    const EvoGraph::TPGEdge& edge3 =
+    const EvoGraph::Edge& edge3 =
         source.addNewEdge(vertex0, vertex2, progPointer);
 
     /*
@@ -902,20 +902,20 @@ TEST_F(TPGTest, TPGAffectationOperator)
         << "The affectation operator is never supposed to fail";
 }
 
-TEST_F(TPGTest, TPGActionOutgoingEdge)
+TEST_F(TPGTest, ActionOutgoingEdge)
 {
-    // Create a TPGAction
-    EvoGraph::TPGAction action(42);
+    // Create a Action
+    EvoGraph::Action action(42);
 
-    // Try to add a non-TPGActionEdge outgoing edge (should throw)
+    // Try to add a non-ActionEdge outgoing edge (should throw)
     EvoGraph::TPGTeam team;
-    EvoGraph::TPGEdge edge(&team, &action, progPointer);
+    EvoGraph::Edge edge(&team, &action, progPointer);
     ASSERT_THROW(action.addOutgoingEdge(&edge), std::runtime_error);
 
-    // Add valid TPGActionEdges with different actionClass
-    EvoGraph::TPGActionEdge* edge0 = new EvoGraph::TPGActionEdge(&action, progPointer, 2);
-    EvoGraph::TPGActionEdge* edge1 = new EvoGraph::TPGActionEdge(&action, progPointer, 1);
-    EvoGraph::TPGActionEdge* edge2 = new EvoGraph::TPGActionEdge(&action, progPointer, 3);
+    // Add valid ActionEdges with different actionClass
+    EvoGraph::ActionEdge* edge0 = new EvoGraph::ActionEdge(&action, progPointer, 2);
+    EvoGraph::ActionEdge* edge1 = new EvoGraph::ActionEdge(&action, progPointer, 1);
+    EvoGraph::ActionEdge* edge2 = new EvoGraph::ActionEdge(&action, progPointer, 3);
 
     // Add them as outgoing edges (should not throw)
     ASSERT_NO_THROW(action.addOutgoingEdge(edge0));
@@ -925,11 +925,11 @@ TEST_F(TPGTest, TPGActionOutgoingEdge)
     // Test orderActionEdges (should sort by actionClass)
     action.orderActionEdges();
     auto it = action.getOutgoingEdges().begin();
-    ASSERT_EQ(static_cast<EvoGraph::TPGActionEdge*>(*it)->getActionClass(), 1);
+    ASSERT_EQ(static_cast<EvoGraph::ActionEdge*>(*it)->getActionClass(), 1);
     ++it;
-    ASSERT_EQ(static_cast<EvoGraph::TPGActionEdge*>(*it)->getActionClass(), 2);
+    ASSERT_EQ(static_cast<EvoGraph::ActionEdge*>(*it)->getActionClass(), 2);
     ++it;
-    ASSERT_EQ(static_cast<EvoGraph::TPGActionEdge*>(*it)->getActionClass(), 3);
+    ASSERT_EQ(static_cast<EvoGraph::ActionEdge*>(*it)->getActionClass(), 3);
 
     // Test getEdgeOfAction for existing and non-existing actionClass
     ASSERT_EQ(action.getEdgeOfAction(2), edge0);
@@ -943,10 +943,10 @@ TEST_F(TPGTest, TPGActionOutgoingEdge)
     delete edge2;
 }
 
-TEST_F(TPGTest, TPGVertexHasSameAssessedActions)
+TEST_F(TPGTest, VertexHasSameAssessedActions)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGAction* action = &tpg.addNewAction(0);
+    const EvoGraph::Action* action = &tpg.addNewAction(0);
     tpg.addNewActionEdge(*action, progPointer, 1);
     tpg.addNewActionEdge(*action, progPointer, 2);
     tpg.addNewActionEdge(*action, progPointer, 3);
@@ -988,36 +988,36 @@ TEST_F(TPGTest, TPGVertexHasSameAssessedActions)
            "empty.";
 }
 
-TEST_F(TPGTest, TPGGraphSetActionClassEdge)
+TEST_F(TPGTest, GraphSetActionClassEdge)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGAction& action = tpg.addNewAction(0);
+    const EvoGraph::Action& action = tpg.addNewAction(0);
 
     // Add an action edge
-    const EvoGraph::TPGEdge& edge = tpg.addNewActionEdge(action, progPointer, 1);
+    const EvoGraph::Edge& edge = tpg.addNewActionEdge(action, progPointer, 1);
     // Change the action class
     ASSERT_NO_THROW(tpg.setActionClassEdge(&edge, 42));
     // Check that the action class was updated
-    const auto* actionEdge = dynamic_cast<const EvoGraph::TPGActionEdge*>(&edge);
+    const auto* actionEdge = dynamic_cast<const EvoGraph::ActionEdge*>(&edge);
     ASSERT_NE(actionEdge, nullptr);
     ASSERT_EQ(actionEdge->getActionClass(), 42);
 
     // Try to set action class on a non-action edge (should throw)
     const EvoGraph::TPGTeam& team = tpg.addNewTeam();
-    const EvoGraph::TPGEdge& normalEdge = tpg.addNewEdge(team, action, progPointer);
+    const EvoGraph::Edge& normalEdge = tpg.addNewEdge(team, action, progPointer);
     ASSERT_THROW(tpg.setActionClassEdge(&normalEdge, 5), std::runtime_error);
 
     // Try to set action class on an edge not in the graph (should throw)
-    EvoGraph::TPGActionEdge fakeEdge(&action, progPointer, 0);
+    EvoGraph::ActionEdge fakeEdge(&action, progPointer, 0);
     ASSERT_THROW(tpg.setActionClassEdge(&fakeEdge, 7), std::runtime_error);
 }
 
-TEST_F(TPGTest, TPGGraphUpdateAssessedActions)
+TEST_F(TPGTest, GraphUpdateAssessedActions)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGAction& action1 = tpg.addNewAction(0);
-    const EvoGraph::TPGEdge& edge1 = tpg.addNewActionEdge(action1, progPointer, 1);
-    const EvoGraph::TPGEdge& edge2 = tpg.addNewActionEdge(action1, progPointer, 2);
+    const EvoGraph::Action& action1 = tpg.addNewAction(0);
+    const EvoGraph::Edge& edge1 = tpg.addNewActionEdge(action1, progPointer, 1);
+    const EvoGraph::Edge& edge2 = tpg.addNewActionEdge(action1, progPointer, 2);
 
     // Should update without throwing
     ASSERT_NO_THROW(tpg.updateAssessedActions(&action1));
@@ -1027,12 +1027,12 @@ TEST_F(TPGTest, TPGGraphUpdateAssessedActions)
     ASSERT_TRUE(assessed.find(2) != assessed.end());
     ASSERT_FALSE(assessed.find(0) != assessed.end());
 
-    const EvoGraph::TPGAction& action2 = tpg.addNewAction(0);
-    const EvoGraph::TPGEdge& edge3 = tpg.addNewActionEdge(action2, progPointer, 1);
-    const EvoGraph::TPGEdge& edge4 = tpg.addNewActionEdge(action2, progPointer, 3);
+    const EvoGraph::Action& action2 = tpg.addNewAction(0);
+    const EvoGraph::Edge& edge3 = tpg.addNewActionEdge(action2, progPointer, 1);
+    const EvoGraph::Edge& edge4 = tpg.addNewActionEdge(action2, progPointer, 3);
 
     // Vertex should contain action 1, 2 and 3 now.
-    const EvoGraph::TPGVertex& vertex = tpg.addNewTeam();
+    const EvoGraph::Vertex& vertex = tpg.addNewTeam();
     tpg.addNewEdge(vertex, action2, progPointer);
     tpg.addNewEdge(vertex, action1, progPointer);
 
@@ -1045,15 +1045,15 @@ TEST_F(TPGTest, TPGGraphUpdateAssessedActions)
     ASSERT_TRUE(assessed2.find(3) != assessed2.end());
 
     // Try with a vertex not in the graph (should throw)
-    EvoGraph::TPGAction fakeAction(99);
+    EvoGraph::Action fakeAction(99);
     ASSERT_THROW(tpg.updateAssessedActions(&fakeAction), std::runtime_error);
 }
 
-TEST_F(TPGTest, TPGGraphUpdateAllAssessedActions)
+TEST_F(TPGTest, GraphUpdateAllAssessedActions)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGAction& action1 = tpg.addNewAction(0);
-    const EvoGraph::TPGAction& action2 = tpg.addNewAction(1);
+    const EvoGraph::Action& action1 = tpg.addNewAction(0);
+    const EvoGraph::Action& action2 = tpg.addNewAction(1);
     tpg.addNewActionEdge(action1, progPointer, 1);
     tpg.addNewActionEdge(action2, progPointer, 2);
 
@@ -1066,10 +1066,10 @@ TEST_F(TPGTest, TPGGraphUpdateAllAssessedActions)
                 action2.getAssessedActions().end());
 }
 
-TEST_F(TPGTest, TPGGraphOrderActionEdges)
+TEST_F(TPGTest, GraphOrderActionEdges)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGAction& action = tpg.addNewAction(0);
+    const EvoGraph::Action& action = tpg.addNewAction(0);
 
     // Add several action edges with different actionClass values
     tpg.addNewActionEdge(action, progPointer, 5);
@@ -1082,38 +1082,38 @@ TEST_F(TPGTest, TPGGraphOrderActionEdges)
     // Check that the outgoing edges are now ordered by actionClass
     std::vector<uint64_t> actionClasses;
     for (auto* edge : action.getOutgoingEdges()) {
-        auto* actionEdge = dynamic_cast<EvoGraph::TPGActionEdge*>(edge);
+        auto* actionEdge = dynamic_cast<EvoGraph::ActionEdge*>(edge);
         ASSERT_NE(actionEdge, nullptr);
         actionClasses.push_back(actionEdge->getActionClass());
     }
     ASSERT_TRUE(std::is_sorted(actionClasses.begin(), actionClasses.end()));
 
     // Try with an action not in the graph (should throw)
-    EvoGraph::TPGAction fakeAction(42);
+    EvoGraph::Action fakeAction(42);
     ASSERT_THROW(tpg.orderActionEdges(&fakeAction), std::runtime_error);
 }
 
-TEST_F(TPGTest, TPGGraphVertexID)
+TEST_F(TPGTest, GraphVertexID)
 {
     EvoGraph::Graph tpg(*e);
     const EvoGraph::TPGTeam& team0 = tpg.addNewTeam();
     const EvoGraph::TPGTeam& team1 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& action0 = tpg.addNewAction(0);
+    const EvoGraph::Action& action0 = tpg.addNewAction(0);
 
     ASSERT_EQ(team0.getVertexID(), 0) << "ID of vertex is incorrect.";
     ASSERT_EQ(team1.getVertexID(), 1) << "ID of vertex is incorrect.";
     ASSERT_EQ(action0.getVertexID(), 2) << "ID of vertex is incorrect.";
-    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 3)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 3)
         << "ID counter is incorrect.";
 
     CounterReset::counterReset();
 
-    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 0)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 0)
         << "ID counter is incorrect.";
 
     ASSERT_NO_THROW(tpg.setNewVertexID(action0, 5))
         << "Setting a correct value for id should not throw";
-    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 6)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 6)
         << "ID counter is incorrect.";
 
     ASSERT_THROW(tpg.setNewVertexID(action0, 0), std::runtime_error)
@@ -1122,47 +1122,47 @@ TEST_F(TPGTest, TPGGraphVertexID)
     EvoGraph::TPGTeam fakeTeam;
     ASSERT_NO_THROW(fakeTeam.setVertexID(10))
         << "Setting a correct value for id should not throw";
-    ASSERT_EQ(EvoGraph::TPGVertex::getVertexIDCounter(), 11)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 11)
         << "ID counter is incorrect.";
 
     ASSERT_THROW(tpg.setNewVertexID(fakeTeam, 12), std::runtime_error)
         << "Setting a new ID for an inexisting vertex should throw";
 }
 
-TEST_F(TPGTest, TPGGraphEdgeID)
+TEST_F(TPGTest, GraphEdgeID)
 {
     EvoGraph::Graph tpg(*e);
     const EvoGraph::TPGTeam& team0 = tpg.addNewTeam();
     const EvoGraph::TPGTeam& team1 = tpg.addNewTeam();
-    const EvoGraph::TPGAction& action0 = tpg.addNewAction(0);
+    const EvoGraph::Action& action0 = tpg.addNewAction(0);
 
-    const EvoGraph::TPGEdge& edge0 = tpg.addNewEdge(team0, team1, progPointer);
-    const EvoGraph::TPGEdge& edge1 = tpg.addNewEdge(team1, action0, progPointer);
-    const EvoGraph::TPGEdge& edge2 = tpg.addNewActionEdge(action0, progPointer, 0);
+    const EvoGraph::Edge& edge0 = tpg.addNewEdge(team0, team1, progPointer);
+    const EvoGraph::Edge& edge1 = tpg.addNewEdge(team1, action0, progPointer);
+    const EvoGraph::Edge& edge2 = tpg.addNewActionEdge(action0, progPointer, 0);
 
     ASSERT_EQ(edge0.getEdgeID(), 0) << "ID of edge is incorrect.";
     ASSERT_EQ(edge1.getEdgeID(), 1) << "ID of edge is incorrect.";
     ASSERT_EQ(edge2.getEdgeID(), 2) << "ID of edge is incorrect.";
-    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 3)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 3)
         << "ID counter is incorrect.";
 
     CounterReset::counterReset();
 
-    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 0)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 0)
         << "ID counter is incorrect.";
 
     ASSERT_NO_THROW(tpg.setNewEdgeID(edge1, 5))
         << "Setting a correct value for id should not throw";
-    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 6)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 6)
         << "ID counter is incorrect.";
 
     ASSERT_THROW(tpg.setNewEdgeID(edge2, 0), std::runtime_error)
         << "Setting an incorrect value for id should throw";
 
-    EvoGraph::TPGEdge fakeEdge(NULL, NULL, nullptr);
+    EvoGraph::Edge fakeEdge(NULL, NULL, nullptr);
     ASSERT_NO_THROW(fakeEdge.setEdgeID(10))
         << "Setting a correct value for id should not throw";
-    ASSERT_EQ(EvoGraph::TPGEdge::getEdgeIDCounter(), 11)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 11)
         << "ID counter is incorrect.";
 
     ASSERT_THROW(tpg.setNewEdgeID(fakeEdge, 12), std::runtime_error)

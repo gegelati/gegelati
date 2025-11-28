@@ -20,26 +20,26 @@ namespace Selector {
         /// TPGMutator to fill the new population.
         std::vector<const EvoGraph::TPGTeam*> teamsClonable;
 
-        /// @brief vector of pointers of const TPGAction that are clonable by
+        /// @brief vector of pointers of const Action that are clonable by
         /// the TPGMutator to fill the new population.
-        std::vector<const EvoGraph::TPGAction*> actionsClonable;
+        std::vector<const EvoGraph::Action*> actionsClonable;
 
         /// @brief vector of pointers of const TPGTeams that can be new
         /// destination for the new roots created by the TPGMutator.
         std::vector<const EvoGraph::TPGTeam*> preExistingTeams;
 
-        /// @brief vector of pointers of const TPGAction that can be new
+        /// @brief vector of pointers of const Action that can be new
         /// destination for the new roots created by the TPGMutator.
-        std::vector<const EvoGraph::TPGAction*> preExistingActions;
+        std::vector<const EvoGraph::Action*> preExistingActions;
 
-        /// @brief list of pointers of const TPGEdges that can be used during
+        /// @brief list of pointers of const Edges that can be used during
         /// the mutation process of the TPGMutator
-        std::list<const EvoGraph::TPGEdge*> preExistingEdges;
+        std::list<const EvoGraph::Edge*> preExistingEdges;
 
         /// @brief number of TPGTeams to be created by the TPGMutator
         uint64_t nbTeamsToCreate;
 
-        /// @brief number of TPGActions to be created by the TPGMutator
+        /// @brief number of Actions to be created by the TPGMutator
         uint64_t nbActionsToCreate;
 
         

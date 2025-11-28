@@ -132,22 +132,22 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
         }
         else if (params.mutation.tpg.useActionProgram) {
             this->context.actionsClonable.push_back(
-                (const EvoGraph::TPGAction*)agent);
+                (const EvoGraph::Action*)agent);
         }
     }
     uint64_t nbAgentTeams = this->context.teamsClonable.size();
     uint64_t nbAgentActions = this->context.actionsClonable.size();
 
-    // Fill the list of available TPGTeam and TPGActions, TPGActions are only
+    // Fill the list of available TPGTeam and Actions, Actions are only
     // agents if they are not accessible by the teams
     this->context.preExistingTeams.clear();
     this->context.preExistingActions.clear();
     for (auto vertex : vertices) {
-        if (dynamic_cast<const EvoGraph::TPGAction*>(vertex) != nullptr &&
+        if (dynamic_cast<const EvoGraph::Action*>(vertex) != nullptr &&
             (params.mutation.tpg.teamAccessAllActions ||
              vertex->getIncomingEdges().size() == 0)) {
             this->context.preExistingActions.push_back(
-                (const EvoGraph::TPGAction*)vertex);
+                (const EvoGraph::Action*)vertex);
         }
         else if (dynamic_cast<const EvoGraph::TPGTeam*>(vertex) != nullptr) {
             this->context.preExistingTeams.push_back(
@@ -160,7 +160,7 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
     auto& preExistingEdges = this->context.preExistingEdges;
     std::for_each(
         this->graph->getEdges().begin(), this->graph->getEdges().end(),
-        [&preExistingEdges](const std::unique_ptr<EvoGraph::TPGEdge>& edge) {
+        [&preExistingEdges](const std::unique_ptr<EvoGraph::Edge>& edge) {
             preExistingEdges.push_back(edge.get());
         });
 

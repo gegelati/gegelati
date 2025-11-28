@@ -56,7 +56,7 @@ namespace File {
      * \brief Class used to export a Graph into a text file with the dot
      * format.
      */
-    class TPGGraphDotExporter : EvoGraph::TPGAbstractEngine
+    class GraphDotExporter : EvoGraph::AbstractEngine
     {
       protected:
         /**
@@ -81,31 +81,31 @@ namespace File {
         void printTPGTeam(const EvoGraph::TPGTeam& team);
 
         /**
-         * \brief Print the dot content for the given TPGAction.
+         * \brief Print the dot content for the given Action.
          *
          * Content is printed directly into the file opened by the class
          * constructor, or by a call to setNewFilePath.
          * This method returns the identifier associated to the printed action
-         * so that the print TPGEdge method can target this TPGAction. Indeed,
+         * so that the print Edge method can target this Action. Indeed,
          * contrary to TPGTeam which have a unique ID, each action is printed on
-         * the fly, with a unique ID, when a TPGEdge is targetting this action.
+         * the fly, with a unique ID, when a Edge is targetting this action.
          *
          * \param[in] action the TPGTeam being printed.
          * \return the identifier associated to this action.
          */
-        uint64_t printTPGAction(const EvoGraph::TPGAction& action);
+        uint64_t printAction(const EvoGraph::Action& action);
 
         /**
-         * \brief Prints the dot content for the given TPGEdge.
+         * \brief Prints the dot content for the given Edge.
          * Prints the program index followed by its contants if the constants
          * are used.
          *
          * the program is printed under the format :
          * Pindex [fillcolor=\#cccccc shape = point] //constant1|...|constant_n
          *
-         * \param[in] edge the TPGEdge being printed.
+         * \param[in] edge the Edge being printed.
          */
-        void printTPGEdge(const EvoGraph::TPGEdge& edge);
+        void printEdge(const EvoGraph::Edge& edge);
 
         /**
          * \brief Prints the dot content for the given Program.
@@ -130,7 +130,7 @@ namespace File {
          * This method prints preliminary content that must be printed into the
          * dot file before any vertex or edge.
          */
-        void printTPGGraphHeader();
+        void printGraphHeader();
 
         /**
          * \brief Prints footer content in the dot file.
@@ -138,7 +138,7 @@ namespace File {
          * This method prints finalization content that must be printed into the
          * dot file after all vertices and edges.
          */
-        void printTPGGraphFooter();
+        void printGraphFooter();
 
       public:
         /**
@@ -151,8 +151,8 @@ namespace File {
          * \throws std::runtime_error in case no file could be opened at the
          * given filePath.
          */
-        TPGGraphDotExporter(const char* filePath, const EvoGraph::Graph& graph)
-            : EvoGraph::TPGAbstractEngine(graph), pFile{NULL}, offset{""}
+        GraphDotExporter(const char* filePath, const EvoGraph::Graph& graph)
+            : EvoGraph::AbstractEngine(graph), pFile{NULL}, offset{""}
         {
             if ((pFile = fopen(filePath, "w")) == NULL) {
                 throw std::runtime_error("Could not open file " +
@@ -164,17 +164,17 @@ namespace File {
          * Disable copy construction.
          *
          * Until we see the need for it, there si no reason to enable
-         * copy-construction of TPGGraphDotExporter.
+         * copy-construction of GraphDotExporter.
          */
-        TPGGraphDotExporter(const TPGGraphDotExporter& other) = delete;
+        GraphDotExporter(const GraphDotExporter& other) = delete;
 
         /**
-         * Disable TPGGraphDotExporter default assignment operator.
+         * Disable GraphDotExporter default assignment operator.
          *
          * Until we see the need for it, there si no reason to enable assignment
-         * operator of TPGGraphDotExporter.
+         * operator of GraphDotExporter.
          */
-        TPGGraphDotExporter& operator=(const TPGGraphDotExporter& other) =
+        GraphDotExporter& operator=(const GraphDotExporter& other) =
             delete;
 
         /**
@@ -182,7 +182,7 @@ namespace File {
          *
          * Closes the file.
          */
-        ~TPGGraphDotExporter()
+        ~GraphDotExporter()
         {
             if (pFile != NULL) {
                 fclose(pFile);
@@ -212,24 +212,24 @@ namespace File {
 
         /**
          * \brief Print the Graph given when constructing the
-         * TPGGraphDotExporter into a dot file.
+         * GraphDotExporter into a dot file.
          */
         void print();
 
         /**
          * \brief Print a sub-tree of the Graph given when constructing the
-         * TPGGraphDotExporter into a dot file.
+         * GraphDotExporter into a dot file.
          *
          * Contrary to the print() method, which prints the whole TPG, this
-         * method only prints the TPG stemming from the EvoGraph::TPGVertex passed as
+         * method only prints the TPG stemming from the EvoGraph::Vertex passed as
          * a parameter. Hence, only vertices and programs connected to this
-         * TPGVertex will be printed in the file, and all others will be
+         * Vertex will be printed in the file, and all others will be
          * ignored.
          *
          * \param[in] root The vertex used as a starting point to print a
          * connected TPG.
          */
-        void printSubGraph(const EvoGraph::TPGVertex* root);
+        void printSubGraph(const EvoGraph::Vertex* root);
     };
 }; // namespace File
 

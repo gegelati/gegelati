@@ -49,7 +49,7 @@ class CycleDetectionLoggerTest : public ::testing::Test
     Instructions::Set set;
 
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const EvoGraph::TPGVertex*>
+                  const EvoGraph::Vertex*>
         results;
 
     StickGameWithOpponent le;
@@ -92,12 +92,12 @@ class CycleDetectionLoggerTest : public ::testing::Test
             std::make_shared<Selector::SelectionMetrics>(5), 2);
         auto res2 = new Learn::EvaluationResult(
             std::make_shared<Selector::SelectionMetrics>(10), 2);
-        auto v1(new EvoGraph::TPGAction(0));
-        auto v2(new EvoGraph::TPGAction(0));
+        auto v1(new EvoGraph::Action(0));
+        auto v2(new EvoGraph::Action(0));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                 const EvoGraph::TPGVertex*>(res1, v1));
+                                 const EvoGraph::Vertex*>(res1, v1));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                 const EvoGraph::TPGVertex*>(res2, v2));
+                                 const EvoGraph::Vertex*>(res2, v2));
 
         la = new Learn::LearningAgent(le, set, params);
     }
@@ -133,7 +133,7 @@ TEST_F(CycleDetectionLoggerTest, EmptyMethods)
     // Call to all empty methods
     l.logAfterDecimate();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const EvoGraph::TPGVertex*>
+                  const EvoGraph::Vertex*>
         results;
     l.logAfterEvaluate(results);
     l.logAfterValidate(results);
@@ -168,14 +168,14 @@ TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
     //       v     v
     //       A0    A1
 
-    auto tpg = la->getTPGGraph();
+    auto tpg = la->getGraph();
     tpg->clear();
     std::vector<const EvoGraph::TPGTeam*> teams;
     for (auto idx = 0; idx < 6; idx++) {
         teams.push_back(&(tpg->addNewTeam()));
     }
 
-    std::vector<const EvoGraph::TPGAction*> actions;
+    std::vector<const EvoGraph::Action*> actions;
     for (auto idx = 0; idx < 2; idx++) {
         actions.push_back(&tpg->addNewAction(0));
     }

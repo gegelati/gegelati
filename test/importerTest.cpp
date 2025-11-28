@@ -70,11 +70,11 @@ class ImporterTest : public ::testing::Test
     Environment* e = NULL;
     Learn::LearningParameters params;
     std::vector<std::shared_ptr<Program::Program>> progPointers;
-    File::TPGGraphDotExporter* dotExporter = NULL;
+    File::GraphDotExporter* dotExporter = NULL;
 
     EvoGraph::Graph* tpg;
     EvoGraph::Graph* tpg_copy;
-    std::vector<const EvoGraph::TPGEdge*> edges;
+    std::vector<const EvoGraph::Edge*> edges;
 
     std::fstream failpfile;
     std::fstream pfile;
@@ -195,10 +195,10 @@ class ImporterTest : public ::testing::Test
         // Add new Action Edges to A2
         edges.push_back(&tpg->addNewActionEdge(*tpg->getVertices().at(6),
                                                progPointers.at(11), 0));
-        if (dynamic_cast<const EvoGraph::TPGAction*>(tpg->getVertices().at(4))) {
+        if (dynamic_cast<const EvoGraph::Action*>(tpg->getVertices().at(4))) {
             // If the vertex is an action, we can order its edges
             tpg->orderActionEdges(
-                dynamic_cast<const EvoGraph::TPGAction*>(tpg->getVertices().at(4)));
+                dynamic_cast<const EvoGraph::Action*>(tpg->getVertices().at(4)));
         }
 
         // Check the characteristics
@@ -207,7 +207,7 @@ class ImporterTest : public ::testing::Test
         ASSERT_EQ(tpg->getRootVertices().size(), 2);
 
         // Save the graph in a dot file.
-        File::TPGGraphDotExporter dotexporter("exported_tpg.dot", *tpg);
+        File::GraphDotExporter dotexporter("exported_tpg.dot", *tpg);
         dotexporter.print();
 
         failpfile.open("fail_file.dot", std::fstream::out);
@@ -263,7 +263,7 @@ class ImporterTest : public ::testing::Test
                                          progPointers.at(8)));
 
         // Save the graph in a dot file.
-        File::TPGGraphDotExporter exporter2("exported_tpg2.dot", *tpg);
+        File::GraphDotExporter exporter2("exported_tpg2.dot", *tpg);
         exporter2.print();
     }
 
@@ -280,25 +280,25 @@ class ImporterTest : public ::testing::Test
 
 TEST_F(ImporterTest, Constructor)
 {
-    File::TPGGraphDotImporter* dotImporter;
-    ASSERT_NO_THROW(dotImporter = new File::TPGGraphDotImporter(
+    File::GraphDotImporter* dotImporter;
+    ASSERT_NO_THROW(dotImporter = new File::GraphDotImporter(
                         "exported_tpg.dot", *e, *tpg_copy))
-        << "The TPGGraphDotExporter could not be constructed with a valid file "
+        << "The GraphDotExporter could not be constructed with a valid file "
            "path.";
 
     ASSERT_NO_THROW(delete dotImporter;)
-        << "TPGGraphDotExporter could not be deleted.";
+        << "GraphDotExporter could not be deleted.";
 
-    ASSERT_THROW(dotImporter = new File::TPGGraphDotImporter(
+    ASSERT_THROW(dotImporter = new File::GraphDotImporter(
                      "XXX://INVALID_PATH", *e, *tpg_copy),
                  std::runtime_error)
-        << "The TPGGraphDotExplorer construction should fail with an invalid "
+        << "The GraphDotExplorer construction should fail with an invalid "
            "path.";
 }
 
 TEST_F(ImporterTest, importGraph)
 {
-    File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
+    File::GraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
 
     // assert that we can import a tpg graph from a file
     ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
@@ -313,49 +313,49 @@ TEST_F(ImporterTest, importGraph)
 
     // Check action edges
     // Action A0
-    const EvoGraph::TPGVertex* action1 = tpg_copy->getVertices().at(4);
-    ASSERT_NE(dynamic_cast<const EvoGraph::TPGAction*>(action1), nullptr)
+    const EvoGraph::Vertex* action1 = tpg_copy->getVertices().at(4);
+    ASSERT_NE(dynamic_cast<const EvoGraph::Action*>(action1), nullptr)
         << "The vertex at index 4 should be an action.";
     // If the vertex is an action, we can order its edges
-    const EvoGraph::TPGAction* action1_casted =
-        dynamic_cast<const EvoGraph::TPGAction*>(action1);
+    const EvoGraph::Action* action1_casted =
+        dynamic_cast<const EvoGraph::Action*>(action1);
     ASSERT_EQ(action1_casted->getOutgoingEdges().size(), 2)
         << "The action A0 should have two action edges";
 
     auto it = action1_casted->getOutgoingEdges().begin();
-    ASSERT_NE(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it), nullptr)
+    ASSERT_NE(dynamic_cast<const EvoGraph::ActionEdge*>(*it), nullptr)
         << "The first outgoing edge of action A0 should be an action edge.";
-    ASSERT_EQ(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it)->getActionClass(), 1)
+    ASSERT_EQ(dynamic_cast<const EvoGraph::ActionEdge*>(*it)->getActionClass(), 1)
         << "The action edge class should be 1.";
 
     ++it;
-    ASSERT_NE(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it), nullptr)
+    ASSERT_NE(dynamic_cast<const EvoGraph::ActionEdge*>(*it), nullptr)
         << "The second outgoing edge of action A0 should be an action edge.";
-    ASSERT_EQ(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it)->getActionClass(), 2)
+    ASSERT_EQ(dynamic_cast<const EvoGraph::ActionEdge*>(*it)->getActionClass(), 2)
         << "The action edge class should be 2.";
 
     // Action A1
-    const EvoGraph::TPGVertex* action2 = tpg_copy->getVertices().at(5);
-    ASSERT_NE(dynamic_cast<const EvoGraph::TPGAction*>(action2), nullptr)
+    const EvoGraph::Vertex* action2 = tpg_copy->getVertices().at(5);
+    ASSERT_NE(dynamic_cast<const EvoGraph::Action*>(action2), nullptr)
         << "The vertex at index 5 should be an action.";
     // If the vertex is an action, we can order its edges
-    const EvoGraph::TPGAction* action2_casted =
-        dynamic_cast<const EvoGraph::TPGAction*>(action2);
+    const EvoGraph::Action* action2_casted =
+        dynamic_cast<const EvoGraph::Action*>(action2);
     ASSERT_EQ(action2_casted->getOutgoingEdges().size(), 0)
         << "The action A1 should not have any action edges";
 
     // Action A2
-    const EvoGraph::TPGVertex* action3 = tpg_copy->getVertices().at(6);
-    ASSERT_NE(dynamic_cast<const EvoGraph::TPGAction*>(action3), nullptr)
+    const EvoGraph::Vertex* action3 = tpg_copy->getVertices().at(6);
+    ASSERT_NE(dynamic_cast<const EvoGraph::Action*>(action3), nullptr)
         << "The vertex at index 6 should be an action.";
     // If the vertex is an action, we can order its edges
-    const EvoGraph::TPGAction* action3_casted =
-        dynamic_cast<const EvoGraph::TPGAction*>(action3);
+    const EvoGraph::Action* action3_casted =
+        dynamic_cast<const EvoGraph::Action*>(action3);
     ASSERT_EQ(action3_casted->getOutgoingEdges().size(), 1)
         << "The action A2 should have one action edge.";
 
     auto it2 = action3_casted->getOutgoingEdges().begin();
-    ASSERT_NE(dynamic_cast<const EvoGraph::TPGActionEdge*>(*it2), nullptr)
+    ASSERT_NE(dynamic_cast<const EvoGraph::ActionEdge*>(*it2), nullptr)
         << "The outgoing edge of action A1 should be an action edge.";
 
     // check that the imported program is the same as the one written in the
@@ -410,7 +410,7 @@ TEST_F(ImporterTest, importOldGraph)
 {
     testing::internal::CaptureStderr();
 
-    File::TPGGraphDotImporter dotImporter(
+    File::GraphDotImporter dotImporter(
         TESTS_DAT_PATH "exported_tpg_old_ref.dot", *e, *tpg_copy);
 
     std::string output = testing::internal::GetCapturedStderr();
@@ -421,7 +421,7 @@ TEST_F(ImporterTest, importOldGraph)
 
 TEST_F(ImporterTest, importTrainedGraph)
 {
-    File::TPGGraphDotImporter dotImporter(
+    File::GraphDotImporter dotImporter(
         TESTS_DAT_PATH "exported_trained_tpg_ref.dot", *e, *tpg_copy);
 
     // assert that we can import a tpg graph from a file
@@ -442,7 +442,7 @@ TEST_F(ImporterTest, importTrainedGraphContinuous)
     e = new Environment(set, params, vect, 3);
     tpg_copy = new EvoGraph::Graph(*e);
 
-    File::TPGGraphDotImporter dotImporter(
+    File::GraphDotImporter dotImporter(
         TESTS_DAT_PATH "exported_trained_tpg_continuous_ref.dot", *e,
         *tpg_copy);
 
@@ -461,15 +461,15 @@ TEST_F(ImporterTest, importTrainedGraphContinuous)
 TEST_F(ImporterTest, readLineFromFile)
 {
     std::ofstream myfile;
-    File::TPGGraphDotImporter* dotImporter;
+    File::GraphDotImporter* dotImporter;
 
     // Create a file where some lines are longer than the limit set in the
     // importer.
     myfile.open("wrongfile.dot");
-    for (int i = 0; i < File::TPGGraphDotImporter::MAX_READ_SIZE + 1; i++)
+    for (int i = 0; i < File::GraphDotImporter::MAX_READ_SIZE + 1; i++)
         myfile << "aa";
     myfile.close();
-    ASSERT_THROW(dotImporter = new File::TPGGraphDotImporter("wrongfile.dot",
+    ASSERT_THROW(dotImporter = new File::GraphDotImporter("wrongfile.dot",
                                                              *e, *tpg_copy),
                  std::ifstream::failure)
         << "Reading more than MAX_READ_SIZE(1024) should fail -- function "
@@ -478,7 +478,7 @@ TEST_F(ImporterTest, readLineFromFile)
 
 TEST_F(ImporterTest, setNewFilePath)
 {
-    File::TPGGraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
+    File::GraphDotImporter dotImporter("exported_tpg.dot", *e, *tpg_copy);
 
     // assert that we can import a tpg graph from a file
     ASSERT_NO_THROW(dotImporter.setNewFilePath("exported_tpg2.dot"))

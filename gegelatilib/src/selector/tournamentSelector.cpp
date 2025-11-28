@@ -85,7 +85,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
         std::remove_if(
             this->context.preExistingTeams.begin(),
             this->context.preExistingTeams.end(),
-            [verticesToDeleteRef](const EvoGraph::TPGVertex* vertex) -> bool {
+            [verticesToDeleteRef](const EvoGraph::Vertex* vertex) -> bool {
                 return verticesToDeleteRef.find(vertex) !=
                        verticesToDeleteRef.end();
             }),
@@ -95,7 +95,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
         std::remove_if(
             this->context.preExistingActions.begin(),
             this->context.preExistingActions.end(),
-            [verticesToDeleteRef](const EvoGraph::TPGVertex* vertex) -> bool {
+            [verticesToDeleteRef](const EvoGraph::Vertex* vertex) -> bool {
                 return verticesToDeleteRef.find(vertex) !=
                        verticesToDeleteRef.end();
             }),
@@ -107,7 +107,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
             std::remove_if(
                 this->context.teamsClonable.begin(),
                 this->context.teamsClonable.end(),
-                [verticesToDeleteRef](const EvoGraph::TPGVertex* vertex) -> bool {
+                [verticesToDeleteRef](const EvoGraph::Vertex* vertex) -> bool {
                     return verticesToDeleteRef.find(vertex) ==
                            verticesToDeleteRef.end();
                 }),
@@ -117,7 +117,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
             std::remove_if(
                 this->context.actionsClonable.begin(),
                 this->context.actionsClonable.end(),
-                [verticesToDeleteRef](const EvoGraph::TPGVertex* vertex) -> bool {
+                [verticesToDeleteRef](const EvoGraph::Vertex* vertex) -> bool {
                     return verticesToDeleteRef.find(vertex) ==
                            verticesToDeleteRef.end();
                 }),

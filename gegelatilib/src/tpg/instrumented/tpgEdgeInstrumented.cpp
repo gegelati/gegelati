@@ -35,27 +35,27 @@
 
 #include "tpg/instrumented/tpgEdgeInstrumented.h"
 
-uint64_t EvoGraph::TPGEdgeInstrumented::getNbVisits() const
+uint64_t EvoGraph::EdgeInstrumented::getNbVisits() const
 {
     return this->nbVisits;
 }
 
-void EvoGraph::TPGEdgeInstrumented::incrementNbVisits() const
+void EvoGraph::EdgeInstrumented::incrementNbVisits() const
 {
     this->nbVisits++;
 }
 
-uint64_t EvoGraph::TPGEdgeInstrumented::getNbTraversal() const
+uint64_t EvoGraph::EdgeInstrumented::getNbTraversal() const
 {
     return this->nbTraversal;
 }
 
-void EvoGraph::TPGEdgeInstrumented::incrementNbTraversal() const
+void EvoGraph::EdgeInstrumented::incrementNbTraversal() const
 {
     this->nbTraversal++;
 }
 
-void EvoGraph::TPGEdgeInstrumented::reset() const
+void EvoGraph::EdgeInstrumented::reset() const
 {
     this->nbTraversal = 0;
     this->nbVisits = 0;

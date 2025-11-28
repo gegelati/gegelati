@@ -40,22 +40,22 @@
 // https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
 uint64_t COUNT_EDGE_ID = 0;
 
-uint64_t EvoGraph::TPGEdge::incrementeCounter()
+uint64_t EvoGraph::Edge::incrementeCounter()
 {
     return COUNT_EDGE_ID++;
 }
 
-uint64_t EvoGraph::TPGEdge::getEdgeIDCounter()
+uint64_t EvoGraph::Edge::getEdgeIDCounter()
 {
     return COUNT_EDGE_ID;
 }
 
-void EvoGraph::TPGEdge::resetEdgeIDCounter()
+void EvoGraph::Edge::resetEdgeIDCounter()
 {
     COUNT_EDGE_ID = 0;
 }
 
-void EvoGraph::TPGEdge::setEdgeID(uint64_t newID)
+void EvoGraph::Edge::setEdgeID(uint64_t newID)
 {
     this->edgeID = newID;
 
@@ -65,48 +65,48 @@ void EvoGraph::TPGEdge::setEdgeID(uint64_t newID)
     }
 }
 
-Program::Program& EvoGraph::TPGEdge::getProgram() const
+Program::Program& EvoGraph::Edge::getProgram() const
 {
     return *this->program;
 }
 
-void EvoGraph::TPGEdge::setProgram(
+void EvoGraph::Edge::setProgram(
     const std::shared_ptr<Program::Program> prog) const
 {
     this->program = prog;
 }
 
-std::shared_ptr<Program::Program> EvoGraph::TPGEdge::getProgramSharedPointer()
+std::shared_ptr<Program::Program> EvoGraph::Edge::getProgramSharedPointer()
 {
     return this->program;
 }
 
-const EvoGraph::TPGVertex* EvoGraph::TPGEdge::getSource() const
+const EvoGraph::Vertex* EvoGraph::Edge::getSource() const
 {
     return this->source;
 }
 
-void EvoGraph::TPGEdge::setSource(TPGVertex* newSource)
+void EvoGraph::Edge::setSource(Vertex* newSource)
 {
     this->source = newSource;
 }
 
-const EvoGraph::TPGVertex* EvoGraph::TPGEdge::getDestination() const
+const EvoGraph::Vertex* EvoGraph::Edge::getDestination() const
 {
     return this->destination;
 }
 
-void EvoGraph::TPGEdge::setDestination(TPGVertex* newDestination)
+void EvoGraph::Edge::setDestination(Vertex* newDestination)
 {
     this->destination = newDestination;
 }
 
-uint64_t EvoGraph::TPGEdge::getEdgeID() const
+uint64_t EvoGraph::Edge::getEdgeID() const
 {
     return edgeID;
 }
 
-bool EvoGraph::operator<(const EvoGraph::TPGEdge& a, const EvoGraph::TPGEdge& b)
+bool EvoGraph::operator<(const EvoGraph::Edge& a, const EvoGraph::Edge& b)
 {
     return a.getEdgeID() < b.getEdgeID();
 }

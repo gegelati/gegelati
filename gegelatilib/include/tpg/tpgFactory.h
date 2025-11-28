@@ -50,8 +50,8 @@ namespace EvoGraph {
     // Declare the Graph class to be used as a parameter.
     class Graph;
 
-    // Declare the TPGExecutionEngine class to be used as a parameter.
-    class TPGExecutionEngine;
+    // Declare the ExecutionEngine class to be used as a parameter.
+    class ExecutionEngine;
 
     /**
      * \brief Factory for creating all elements constituting a TPG.
@@ -60,26 +60,26 @@ namespace EvoGraph {
      * all elements composing a Graph:
      * - Graph
      * - TPGTeam
-     * - TPGAction
-     * - TPGVertex
+     * - Action
+     * - Vertex
      *
-     * The factory also enables the creation of TPGExecutionEngine.
+     * The factory also enables the creation of ExecutionEngine.
      *
      * This implementation returns the default type for each kind of element.
      */
-    class TPGFactory
+    class GraphFactory
     {
 
       public:
         ///  Default virtual destructor.
-        virtual ~TPGFactory() = default;
+        virtual ~GraphFactory() = default;
 
         /**
-         * \brief Create a Graph with this TPGFactory.
+         * \brief Create a Graph with this GraphFactory.
          *
          * \param[in] env Environment used to build the Graph.
          */
-        virtual std::shared_ptr<Graph> createTPGGraph(
+        virtual std::shared_ptr<Graph> createGraph(
             const Environment& env) const;
 
         /**
@@ -90,49 +90,49 @@ namespace EvoGraph {
         virtual std::unique_ptr<TPGTeam> createTPGTeam() const;
 
         /**
-         * \brief Create a TPGAction for a Graph.
+         * \brief Create a Action for a Graph.
          *
-         * This method allocates and returns a new TPGAction.
+         * This method allocates and returns a new Action.
          *
-         * \param[in] id integer stored as the actionID of the TPGAction.
+         * \param[in] id integer stored as the actionID of the Action.
          */
-        virtual std::unique_ptr<TPGAction> createTPGAction(
+        virtual std::unique_ptr<Action> createAction(
             const uint64_t id) const;
 
         /**
-         * \brief Create a TPGEdge for a Graph.
+         * \brief Create a Edge for a Graph.
          *
-         * This method allocates and returns a new TPGEdge.
-         * The TPGEdge is returned as a unique_ptr.
+         * This method allocates and returns a new Edge.
+         * The Edge is returned as a unique_ptr.
          *
-         * \param[in] src pointer to the source TPGVertex of the edge.
-         * \param[in] dest pointer to the destination TPGVertex of the edge.
+         * \param[in] src pointer to the source Vertex of the edge.
+         * \param[in] dest pointer to the destination Vertex of the edge.
          * \param[in] prog the shared pointer to the Program associated to the
          *            edge.
          */
-        virtual std::unique_ptr<TPGEdge> createTPGEdge(
-            const TPGVertex* src, const TPGVertex* dest,
+        virtual std::unique_ptr<Edge> createEdge(
+            const Vertex* src, const Vertex* dest,
             const std::shared_ptr<Program::Program> prog) const;
 
         /**
-         * \brief Create a TPGActionEdge for a Graph.
+         * \brief Create a ActionEdge for a Graph.
          *
-         * This method allocates and returns a new TPGActionEdge cat into a
-         * TPGEdge. The TPGEdge is returned as a unique_ptr.
+         * This method allocates and returns a new ActionEdge cat into a
+         * Edge. The Edge is returned as a unique_ptr.
          *
-         * \param[in] src pointer to the source TPGVertex of the edge. It must
+         * \param[in] src pointer to the source Vertex of the edge. It must
          * be an action.
          * \param[in] prog the shared pointer to the Program associated to
          * the edge.
          * \param[in] actionClass of the actionEdge
          */
-        virtual std::unique_ptr<TPGEdge> createTPGActionEdge(
-            const TPGVertex* src, const std::shared_ptr<Program::Program> prog,
+        virtual std::unique_ptr<Edge> createActionEdge(
+            const Vertex* src, const std::shared_ptr<Program::Program> prog,
             uint64_t actionClass) const;
 
         /**
-         * \brief Create a TPGExecutionEngine for a Graph produced by this
-         * TPGFactory.
+         * \brief Create a ExecutionEngine for a Graph produced by this
+         * GraphFactory.
          *
          * \param[in] env Environment in which the Program of the Graph will
          * be executed.
@@ -140,10 +140,10 @@ namespace EvoGraph {
          * Program Execution. By default, a NULL pointer is given, meaning that
          * no recording of the execution will be made.
          *
-         * \return the returned TPGExecutionEngine returned as an unique_ptr.
+         * \return the returned ExecutionEngine returned as an unique_ptr.
          */
-        virtual std::unique_ptr<EvoGraph::TPGExecutionEngine>
-        createTPGExecutionEngine(const Environment& env,
+        virtual std::unique_ptr<EvoGraph::ExecutionEngine>
+        createExecutionEngine(const Environment& env,
                                  Archive* arch = NULL) const;
     };
 

@@ -54,7 +54,7 @@ class PolicyStatsTest : public ::testing::Test
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
     EvoGraph::Graph* tpg;
-    std::vector<const EvoGraph::TPGEdge*> edges;
+    std::vector<const EvoGraph::Edge*> edges;
 
     virtual void SetUp()
     {
@@ -370,21 +370,21 @@ TEST_F(PolicyStatsTest, AnalyzeTPGTeam)
     }
 }
 
-TEST_F(PolicyStatsTest, AnalyzeTPGAction)
+TEST_F(PolicyStatsTest, AnalyzeAction)
 {
     EvoGraph::PolicyStats ps;
     ps.setEnvironment(*e);
 
     for (auto i = 0; i < 2; i++) {
-        ASSERT_NO_THROW(ps.analyzeTPGAction(
-            (const EvoGraph::TPGAction*)tpg->getVertices().at(4)))
-            << "Analysis of a valid TPGAction failed unexpectedly.";
+        ASSERT_NO_THROW(ps.analyzeAction(
+            (const EvoGraph::Action*)tpg->getVertices().at(4)))
+            << "Analysis of a valid Action failed unexpectedly.";
 
         // Check attributes
-        ASSERT_EQ(ps.nbUsePerTPGAction.size(), 1);
-        ASSERT_EQ(ps.nbUsePerTPGAction.begin()->first,
+        ASSERT_EQ(ps.nbUsePerAction.size(), 1);
+        ASSERT_EQ(ps.nbUsePerAction.begin()->first,
                   tpg->getVertices().at(4));
-        ASSERT_EQ(ps.nbUsePerTPGAction.begin()->second, i + 1);
+        ASSERT_EQ(ps.nbUsePerAction.begin()->second, i + 1);
         ASSERT_EQ(ps.nbUsagePerActionID.size(), 1);
         ASSERT_EQ(ps.nbUsagePerActionID.begin()->first, 0);
         ASSERT_EQ(ps.nbUsagePerActionID.begin()->second, i + 1);
@@ -403,9 +403,9 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
     ASSERT_EQ(ps.maxPolicyDepth, 3);
     ASSERT_EQ(ps.nbDistinctTeams, 3);
 
-    std::map<size_t, size_t> nbTPGVertexPerLevel{
+    std::map<size_t, size_t> nbVertexPerLevel{
         {0, 1}, {1, 2}, {2, 4}, {3, 1}};
-    ASSERT_EQ(ps.nbTPGVertexPerDepthLevel, nbTPGVertexPerLevel);
+    ASSERT_EQ(ps.nbVertexPerDepthLevel, nbVertexPerLevel);
 
     std::vector<size_t> nbLinesPerProgram{3, 0, 1, 0, 0, 0};
     ASSERT_EQ(ps.nbLinesPerProgram, nbLinesPerProgram);
@@ -467,11 +467,11 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
                   nbUsePerTPGTeam[i]);
     }
 
-    std::vector<size_t> nbUsePerTPGAction{2, 1, 2};
-    for (auto i = 0; i < nbUsePerTPGAction.size(); i++) {
-        ASSERT_EQ(ps.nbUsePerTPGAction.at(
-                      (const EvoGraph::TPGAction*)tpg->getVertices().at(i + 4)),
-                  nbUsePerTPGAction[i]);
+    std::vector<size_t> nbUsePerAction{2, 1, 2};
+    for (auto i = 0; i < nbUsePerAction.size(); i++) {
+        ASSERT_EQ(ps.nbUsePerAction.at(
+                      (const EvoGraph::Action*)tpg->getVertices().at(i + 4)),
+                  nbUsePerAction[i]);
     }
 }
 
@@ -488,7 +488,7 @@ TEST_F(PolicyStatsTest, Clear)
     ASSERT_EQ(ps.maxPolicyDepth, 0);
     ASSERT_EQ(ps.nbDistinctTeams, 0);
 
-    ASSERT_TRUE(ps.nbTPGVertexPerDepthLevel.empty());
+    ASSERT_TRUE(ps.nbVertexPerDepthLevel.empty());
     ASSERT_TRUE(ps.nbLinesPerProgram.empty());
     ASSERT_TRUE(ps.nbIntronPerProgram.empty());
     ASSERT_TRUE(ps.nbOutgoingEdgesPerTeam.empty());
@@ -497,7 +497,7 @@ TEST_F(PolicyStatsTest, Clear)
     ASSERT_TRUE(ps.nbUsagePerDataLocation.empty());
     ASSERT_TRUE(ps.nbUsePerProgram.empty());
     ASSERT_TRUE(ps.nbUsePerTPGTeam.empty());
-    ASSERT_TRUE(ps.nbUsePerTPGAction.empty());
+    ASSERT_TRUE(ps.nbUsePerAction.empty());
     ASSERT_TRUE(ps.nbUsePerActionProgram.empty());
     ASSERT_TRUE(ps.nbLinesPerActionProgram.empty());
     ASSERT_TRUE(ps.nbIntronPerActionProgram.empty());

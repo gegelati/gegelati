@@ -25,17 +25,17 @@ namespace Selector {
     {
       protected:
         /**
-         * @brief set of TPGVertex filled during the selection process,
+         * @brief set of Vertex filled during the selection process,
          * containing the vertices that went through the tournament en survived
-         * it. The TPGVertex in the set will be deleted at the end of the
+         * it. The Vertex in the set will be deleted at the end of the
          * TPGMutator::PopulateTPG method.
          */
-        std::set<const EvoGraph::TPGVertex*> verticesToDelete;
+        std::set<const EvoGraph::Vertex*> verticesToDelete;
 
         /**
-         * @brief set of TPGVertex filled during the selection process,
+         * @brief set of Vertex filled during the selection process,
          * containing the vertices that went through the tournament en survived
-         * it. The TPGVertex in the set will be deleted at the end of the
+         * it. The Vertex in the set will be deleted at the end of the
          * TPGMutator::PopulateTPG method.
          */
         std::set<std::shared_ptr<const Algorithm::Agent>> agentsToDelete;
@@ -84,7 +84,7 @@ namespace Selector {
         /**
          * \brief add a vertex to the verticesToDelete set.
          *
-         * \param[in] vertex TPGVertex added to the vertices to remove
+         * \param[in] vertex Vertex added to the vertices to remove
          */
         void addToVerticesToDelete(std::shared_ptr<const Algorithm::Agent> vertex);
 

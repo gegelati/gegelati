@@ -109,17 +109,17 @@ namespace Learn {
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
-         * \param[in] factory The TPGFactory used to create the Graph. A
-         * default TPGFactory is used if none is provided.
+         * \param[in] factory The GraphFactory used to create the Graph. A
+         * default GraphFactory is used if none is provided.
          */
         LearningAgent(LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms, const Instructions::Set& iSet,
                       const LearningParameters& p,
-                      const EvoGraph::TPGFactory& factory = EvoGraph::TPGFactory())
+                      const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le}, algorithms{algorithms},
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
               archive(p.archiveSize, p.archivingProbability), params{p},
-              graph(factory.createTPGGraph(env)) {};
+              graph(factory.createGraph(env)) {};
 
         /**
          * \brief Constructor for LearningAgent.
@@ -129,17 +129,17 @@ namespace Learn {
          * \param[in] iSet Set of Instruction used to compose Programs in the
          *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
-         * \param[in] factory The TPGFactory used to create the Graph. A
-         * default TPGFactory is used if none is provided.
+         * \param[in] factory The GraphFactory used to create the Graph. A
+         * default GraphFactory is used if none is provided.
          */
         LearningAgent(LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm, const Instructions::Set& iSet,
                       const LearningParameters& p,
-                      const EvoGraph::TPGFactory& factory = EvoGraph::TPGFactory())
+                      const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le}, algorithms{{algorithm}},
               env(iSet, p, le.getDataSources(),
                   (le.isDiscrete()) ? 0 : le.getNbActions()),
               archive(p.archiveSize, p.archivingProbability), params{p},
-              graph(factory.createTPGGraph(env)) {};
+              graph(factory.createGraph(env)) {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -200,13 +200,13 @@ namespace Learn {
          * \brief Evaluates policy starting from the given root.
          *
          * The policy, that is, the Graph execution starting from the given
-         * TPGVertex is evaluated nbIteration times. The generationNumber is
+         * Vertex is evaluated nbIteration times. The generationNumber is
          * combined with the current iteration number to generate a set of
          * seeds for evaluating the policy.
          *
          * The method is const to enable potential parallel calls to it.
          *
-         * \param[in] tee The TPGExecutionEngine to use.
+         * \param[in] tee The ExecutionEngine to use.
          * \param[in] job The job containing the root and archiveSeed for
          * the evaluation.
          * \param[in] generationNumber the integer number of the current
@@ -225,7 +225,7 @@ namespace Learn {
          * resultsPerRoot for this root (if any).
          */
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
-            EvoGraph::TPGExecutionEngine& tee, const Job& job,
+            EvoGraph::ExecutionEngine& tee, const Job& job,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
 

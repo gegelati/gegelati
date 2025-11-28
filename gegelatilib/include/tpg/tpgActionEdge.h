@@ -45,48 +45,48 @@
 
 namespace EvoGraph {
     // Declare class to make it usable as an attribute.
-    class TPGVertex;
+    class Vertex;
 
     /**
      * \brief Class representing ActionEdges of the Tangled Program Graphs.
      *
-     * The source of an TPGActionEdge can not be a TPGTeam, only a TPGAction.
-     * A TPGActionEdge does not have a destination.
+     * The source of an ActionEdge can not be a TPGTeam, only a Action.
+     * A ActionEdge does not have a destination.
      *
      * It also has an action class corresponding to the continuous actions class
      * it is assessing. This action class is only used for multi-action program
      * cases.
      */
-    class TPGActionEdge : public TPGEdge
+    class ActionEdge : public Edge
     {
       public:
         /**
-         * \brief Main constructor of the TPGEdge class.
+         * \brief Main constructor of the Edge class.
          *
-         * This constructor does not register the created TPGEdge in the
-         * list of incoming or outgoing edges of the given TPGVertex.
+         * This constructor does not register the created Edge in the
+         * list of incoming or outgoing edges of the given Vertex.
          *
-         * \param[in] src pointer to the source TPGVertex of the edge.
+         * \param[in] src pointer to the source Vertex of the edge.
          * \param[in] prog the shared pointer to the Program associated to the
-         * \param[in] actClass actionClass of the TPGActionEdge
+         * \param[in] actClass actionClass of the ActionEdge
          *            edge.
          */
-        TPGActionEdge(const TPGVertex* src,
+        ActionEdge(const Vertex* src,
                       const std::shared_ptr<Program::Program> prog,
                       uint64_t actClass)
-            : TPGEdge{src, NULL, prog}, actionClass(actClass){};
+            : Edge{src, NULL, prog}, actionClass(actClass){};
 
         /**
          * \brief Override of the tpgEdge function because there should not be
          * destination to action edge
          */
-        const TPGVertex* getDestination() const override;
+        const Vertex* getDestination() const override;
 
         /**
          * \brief Override of the tpgEdge function because there should not be
          * destination to action edge
          */
-        void setDestination(TPGVertex* newDestination) override;
+        void setDestination(Vertex* newDestination) override;
 
         /**
          * \brief set a new action class
@@ -101,7 +101,7 @@ namespace EvoGraph {
         uint64_t getActionClass() const;
 
         /// Delete the default constructor.
-        TPGActionEdge() = delete;
+        ActionEdge() = delete;
 
       protected:
         /// @brief action class of the edge

@@ -45,7 +45,7 @@ namespace EvoGraph {
      * for vertex and a program of a Graph.
      *
      */
-    class TPGAbstractEngine
+    class AbstractEngine
     {
 
       protected:
@@ -62,9 +62,9 @@ namespace EvoGraph {
 
         /**
          * \brief Integer number used during export to associate a unique
-         * integer identifier to each TPGAction.
+         * integer identifier to each Action.
          *
-         * Identifier associated to TPGAction are NOT preserved during multiple
+         * Identifier associated to Action are NOT preserved during multiple
          * printing of a Graph.
          */
         uint64_t nbActions;
@@ -76,7 +76,7 @@ namespace EvoGraph {
          * used to fill the maps of IDs  (vertex and program).
          */
 
-        TPGAbstractEngine(const EvoGraph::Graph& tpg) : tpg{tpg}, nbActions{0} {};
+        AbstractEngine(const EvoGraph::Graph& tpg) : tpg{tpg}, nbActions{0} {};
 
       public:
         /**

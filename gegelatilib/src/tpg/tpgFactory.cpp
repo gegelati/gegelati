@@ -38,39 +38,39 @@
 #include "tpg/tpgExecutionEngine.h"
 #include "tpg/tpgGraph.h"
 
-std::shared_ptr<EvoGraph::Graph> EvoGraph::TPGFactory::createTPGGraph(
+std::shared_ptr<EvoGraph::Graph> EvoGraph::GraphFactory::createGraph(
     const Environment& env) const
 {
-    return std::make_shared<EvoGraph::Graph>(env, std::make_unique<TPGFactory>());
+    return std::make_shared<EvoGraph::Graph>(env, std::make_unique<GraphFactory>());
 }
 
-std::unique_ptr<EvoGraph::TPGTeam> EvoGraph::TPGFactory::createTPGTeam() const
+std::unique_ptr<EvoGraph::TPGTeam> EvoGraph::GraphFactory::createTPGTeam() const
 {
     return std::make_unique<EvoGraph::TPGTeam>();
 }
 
-std::unique_ptr<EvoGraph::TPGAction> EvoGraph::TPGFactory::createTPGAction(
+std::unique_ptr<EvoGraph::Action> EvoGraph::GraphFactory::createAction(
     const uint64_t id) const
 {
-    return std::make_unique<EvoGraph::TPGAction>(id);
+    return std::make_unique<EvoGraph::Action>(id);
 }
 
-std::unique_ptr<EvoGraph::TPGEdge> EvoGraph::TPGFactory::createTPGEdge(
-    const TPGVertex* src, const TPGVertex* dest,
+std::unique_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createEdge(
+    const Vertex* src, const Vertex* dest,
     const std::shared_ptr<Program::Program> prog) const
 {
-    return std::make_unique<EvoGraph::TPGEdge>(src, dest, prog);
+    return std::make_unique<EvoGraph::Edge>(src, dest, prog);
 }
 
-std::unique_ptr<EvoGraph::TPGEdge> EvoGraph::TPGFactory::createTPGActionEdge(
-    const TPGVertex* src, const std::shared_ptr<Program::Program> prog,
+std::unique_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createActionEdge(
+    const Vertex* src, const std::shared_ptr<Program::Program> prog,
     uint64_t actionClass) const
 {
-    return std::make_unique<EvoGraph::TPGActionEdge>(src, prog, actionClass);
+    return std::make_unique<EvoGraph::ActionEdge>(src, prog, actionClass);
 }
 
-std::unique_ptr<EvoGraph::TPGExecutionEngine> EvoGraph::TPGFactory::
-    createTPGExecutionEngine(const Environment& env, Archive* arch) const
+std::unique_ptr<EvoGraph::ExecutionEngine> EvoGraph::GraphFactory::
+    createExecutionEngine(const Environment& env, Archive* arch) const
 {
-    return std::make_unique<EvoGraph::TPGExecutionEngine>(env, arch);
+    return std::make_unique<EvoGraph::ExecutionEngine>(env, arch);
 }

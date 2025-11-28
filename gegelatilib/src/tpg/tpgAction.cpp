@@ -38,46 +38,46 @@
 #include "tpg/tpgAction.h"
 #include <stdexcept>
 
-void EvoGraph::TPGAction::addOutgoingEdge(TPGEdge* edge)
+void EvoGraph::Action::addOutgoingEdge(Edge* edge)
 {
-    if (dynamic_cast<TPGActionEdge*>(edge) == nullptr) {
+    if (dynamic_cast<ActionEdge*>(edge) == nullptr) {
         throw std::runtime_error(
             "Cannot add an outgoing edge to an Action vertex.");
     }
     else {
-        TPGVertex::addOutgoingEdge(edge);
+        Vertex::addOutgoingEdge(edge);
     }
 }
 
-void EvoGraph::TPGAction::orderActionEdges()
+void EvoGraph::Action::orderActionEdges()
 {
 
-    this->outgoingEdges.sort([](EvoGraph::TPGEdge* edge1, EvoGraph::TPGEdge* edge2) {
-        // Use static_cast to convert TPGEdge* into TPGActionEdge*
-        EvoGraph::TPGActionEdge* actionEdge1 =
-            static_cast<EvoGraph::TPGActionEdge*>(edge1);
-        EvoGraph::TPGActionEdge* actionEdge2 =
-            static_cast<EvoGraph::TPGActionEdge*>(edge2);
+    this->outgoingEdges.sort([](EvoGraph::Edge* edge1, EvoGraph::Edge* edge2) {
+        // Use static_cast to convert Edge* into ActionEdge*
+        EvoGraph::ActionEdge* actionEdge1 =
+            static_cast<EvoGraph::ActionEdge*>(edge1);
+        EvoGraph::ActionEdge* actionEdge2 =
+            static_cast<EvoGraph::ActionEdge*>(edge2);
 
         // Compare actionClass
         return actionEdge1->getActionClass() < actionEdge2->getActionClass();
     });
 }
 
-EvoGraph::TPGActionEdge* EvoGraph::TPGAction::getEdgeOfAction(uint64_t actionClass) const
+EvoGraph::ActionEdge* EvoGraph::Action::getEdgeOfAction(uint64_t actionClass) const
 {
 
     // Search the edge with the searched action class
     auto it = std::find_if(
         outgoingEdges.begin(), outgoingEdges.end(),
-        [actionClass](EvoGraph::TPGEdge* edge) {
-            return static_cast<EvoGraph::TPGActionEdge*>(edge)->getActionClass() ==
+        [actionClass](EvoGraph::Edge* edge) {
+            return static_cast<EvoGraph::ActionEdge*>(edge)->getActionClass() ==
                    actionClass;
         });
 
     // If action found, return the shared pointer, else return nullptr
     if (it != outgoingEdges.end()) {
-        return (EvoGraph::TPGActionEdge*)(*it);
+        return (EvoGraph::ActionEdge*)(*it);
     }
     else {
         return nullptr;

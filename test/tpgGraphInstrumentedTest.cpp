@@ -93,21 +93,21 @@ class TPGInstrumentedTest : public ::testing::Test
 };
 
 TEST_F(TPGInstrumentedTest,
-       TPGTeamInstrumentedAndTPGActionInstrumentedConstructorsDestructors)
+       TPGTeamInstrumentedAndActionInstrumentedConstructorsDestructors)
 {
-    EvoGraph::TPGVertex* team;
-    EvoGraph::TPGVertex* action;
+    EvoGraph::Vertex* team;
+    EvoGraph::Vertex* action;
 
     ASSERT_NO_THROW(team = new EvoGraph::TPGTeamInstrumented());
-    ASSERT_NO_THROW(action = new EvoGraph::TPGActionInstrumented(0));
+    ASSERT_NO_THROW(action = new EvoGraph::ActionInstrumented(0));
 
     ASSERT_NO_THROW(delete team);
     ASSERT_NO_THROW(delete action);
 }
 
-TEST_F(TPGInstrumentedTest, TPGVertexInstrumentationSettersAndGetters)
+TEST_F(TPGInstrumentedTest, VertexInstrumentationSettersAndGetters)
 {
-    // Test TPGVertexInstrumentation through its TPGTeamInstrumented
+    // Test VertexInstrumentation through its TPGTeamInstrumented
     // specialization.
     EvoGraph::TPGTeamInstrumented team;
 
@@ -131,59 +131,59 @@ TEST_F(TPGInstrumentedTest, TPGVertexInstrumentationSettersAndGetters)
            "be 0 after a reset.";
 }
 
-TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedConstructorsDestructors)
+TEST_F(TPGInstrumentedTest, EdgeInstrumentedConstructorsDestructors)
 {
     EvoGraph::TPGTeam team;
-    EvoGraph::TPGAction action(1);
-    EvoGraph::TPGEdge* edge;
+    EvoGraph::Action action(1);
+    EvoGraph::Edge* edge;
 
     ASSERT_NO_THROW(
-        edge = new EvoGraph::TPGEdgeInstrumented(&team, &action, progPointer));
+        edge = new EvoGraph::EdgeInstrumented(&team, &action, progPointer));
 
     ASSERT_NO_THROW(delete edge);
 }
 
-TEST_F(TPGInstrumentedTest, TPGEdgeInstrumentedSettersAndGetters)
+TEST_F(TPGInstrumentedTest, EdgeInstrumentedSettersAndGetters)
 {
     EvoGraph::TPGTeam team;
-    EvoGraph::TPGAction action(1);
-    EvoGraph::TPGEdgeInstrumented edge(&team, &action, progPointer);
+    EvoGraph::Action action(1);
+    EvoGraph::EdgeInstrumented edge(&team, &action, progPointer);
 
     ASSERT_EQ(edge.getNbVisits(), 0)
-        << "Number of visit on a newly constructed TPGEdgeInstrumented should "
+        << "Number of visit on a newly constructed EdgeInstrumented should "
            "be 0.";
 
     ASSERT_EQ(edge.getNbTraversal(), 0)
-        << "Number of traversal on a newly constructed TPGEdgeInstrumented "
+        << "Number of traversal on a newly constructed EdgeInstrumented "
            "should "
            "be 0.";
 
     ASSERT_NO_THROW(edge.incrementNbVisits())
-        << "Increment of number of visits on a TPGEdgeInstrumented should not "
+        << "Increment of number of visits on a EdgeInstrumented should not "
            "fail.";
 
     ASSERT_EQ(edge.getNbVisits(), 1)
-        << "Number of visit of a TPGEdgeInstrumented should "
+        << "Number of visit of a EdgeInstrumented should "
            "be 1 after an increment.";
 
     ASSERT_NO_THROW(edge.incrementNbTraversal())
-        << "Increment of number of traversal on a TPGEdgeInstrumented should "
+        << "Increment of number of traversal on a EdgeInstrumented should "
            "not "
            "fail.";
 
     ASSERT_EQ(edge.getNbTraversal(), 1)
-        << "Number of traversal of a TPGEdgeInstrumented should "
+        << "Number of traversal of a EdgeInstrumented should "
            "be 1 after an increment.";
 
     ASSERT_NO_THROW(edge.reset()) << "Reset of instrumentation counter should "
-                                     "not fail on a TPGEdgeInstrumented.";
+                                     "not fail on a EdgeInstrumented.";
 
     ASSERT_EQ(edge.getNbVisits(), 0)
-        << "Number of visit of a TPGEdgeInstrumented should "
+        << "Number of visit of a EdgeInstrumented should "
            "be 0 after a reset.";
 
     ASSERT_EQ(edge.getNbTraversal(), 0)
-        << "Number of traversal of a TPGEdgeInstrumented should "
+        << "Number of traversal of a EdgeInstrumented should "
            "be 0 after a reset.";
 }
 
@@ -191,43 +191,43 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
 {
     EvoGraph::TPGInstrumentedFactory factory;
 
-    std::unique_ptr<EvoGraph::TPGAction> action;
+    std::unique_ptr<EvoGraph::Action> action;
     std::unique_ptr<EvoGraph::TPGTeam> team;
-    std::unique_ptr<EvoGraph::TPGEdge> edge;
-    std::unique_ptr<EvoGraph::TPGExecutionEngine> tee;
+    std::unique_ptr<EvoGraph::Edge> edge;
+    std::unique_ptr<EvoGraph::ExecutionEngine> tee;
 
-    ASSERT_NO_THROW(action = factory.createTPGAction(0))
-        << "TPGFactory could not build a TPGAction.";
-    ASSERT_NE(action, nullptr) << "Created TPGAction should not be null.";
-    ASSERT_EQ(typeid(*action), typeid(EvoGraph::TPGActionInstrumented))
+    ASSERT_NO_THROW(action = factory.createAction(0))
+        << "GraphFactory could not build a Action.";
+    ASSERT_NE(action, nullptr) << "Created Action should not be null.";
+    ASSERT_EQ(typeid(*action), typeid(EvoGraph::ActionInstrumented))
         << "Action built by the TPGInstrumentedFactory has an incorrect type.";
 
     ASSERT_NO_THROW(team = factory.createTPGTeam())
-        << "TPGGraphELementFactory could not build a TPGAction.";
+        << "GraphELementFactory could not build a Action.";
     ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
     ASSERT_EQ(typeid(*team), typeid(EvoGraph::TPGTeamInstrumented))
         << "Team built by the TPGInstrumentedFactory has an incorrect type.";
 
     ASSERT_NO_THROW(
-        edge = factory.createTPGEdge(team.get(), action.get(), progPointer))
-        << "TPGGraphELementFactory could not build a TPGAction.";
-    ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
-    ASSERT_EQ(typeid(*edge), typeid(EvoGraph::TPGEdgeInstrumented))
+        edge = factory.createEdge(team.get(), action.get(), progPointer))
+        << "GraphELementFactory could not build a Action.";
+    ASSERT_NE(edge.get(), nullptr) << "Created Edge should not be null.";
+    ASSERT_EQ(typeid(*edge), typeid(EvoGraph::EdgeInstrumented))
         << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
 
-    ASSERT_NO_THROW(tee = factory.createTPGExecutionEngine(*e, nullptr))
-        << "TPGGraphELementFactory could not build a TPGExecutionEngine.";
-    ASSERT_NE(tee.get(), nullptr) << "Created TPGEdge should not be null.";
-    ASSERT_EQ(typeid(*tee), typeid(EvoGraph::TPGExecutionEngineInstrumented))
+    ASSERT_NO_THROW(tee = factory.createExecutionEngine(*e, nullptr))
+        << "GraphELementFactory could not build a ExecutionEngine.";
+    ASSERT_NE(tee.get(), nullptr) << "Created Edge should not be null.";
+    ASSERT_EQ(typeid(*tee), typeid(EvoGraph::ExecutionEngineInstrumented))
         << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
 }
 
-TEST_F(TPGInstrumentedTest, TPGGraphAddTPGVertexAndEdge)
+TEST_F(TPGInstrumentedTest, GraphAddVertexAndEdge)
 {
     EvoGraph::Graph tpg(*e, std::make_unique<EvoGraph::TPGInstrumentedFactory>());
     const EvoGraph::TPGTeam* t;
-    const EvoGraph::TPGAction* a;
-    const EvoGraph::TPGEdge* e;
+    const EvoGraph::Action* a;
+    const EvoGraph::Edge* e;
 
     ASSERT_NO_THROW(t = &tpg.addNewTeam())
         << "Adding a new Team to a Graph failed.";
@@ -236,11 +236,11 @@ TEST_F(TPGInstrumentedTest, TPGGraphAddTPGVertexAndEdge)
 
     ASSERT_NO_THROW(a = &tpg.addNewAction(0))
         << "Adding a new Action to a Graph failed.";
-    ASSERT_EQ(typeid(*a), typeid(EvoGraph::TPGActionInstrumented))
+    ASSERT_EQ(typeid(*a), typeid(EvoGraph::ActionInstrumented))
         << "Action built by the TPGInstrumentedFactory has an incorrect type.";
 
     ASSERT_NO_THROW(e = &tpg.addNewEdge(*t, *a, progPointer));
-    ASSERT_EQ(typeid(*e), typeid(EvoGraph::TPGEdgeInstrumented))
+    ASSERT_EQ(typeid(*e), typeid(EvoGraph::EdgeInstrumented))
         << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
 }
 
@@ -250,10 +250,10 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
     EvoGraph::Graph tpg(*e, std::make_unique<EvoGraph::TPGInstrumentedFactory>());
     const EvoGraph::TPGTeamInstrumented& t =
         dynamic_cast<const EvoGraph::TPGTeamInstrumented&>(tpg.addNewTeam());
-    const EvoGraph::TPGActionInstrumented& a =
-        dynamic_cast<const EvoGraph::TPGActionInstrumented&>(tpg.addNewAction(0));
-    const EvoGraph::TPGEdgeInstrumented& e =
-        dynamic_cast<const EvoGraph::TPGEdgeInstrumented&>(
+    const EvoGraph::ActionInstrumented& a =
+        dynamic_cast<const EvoGraph::ActionInstrumented&>(tpg.addNewAction(0));
+    const EvoGraph::EdgeInstrumented& e =
+        dynamic_cast<const EvoGraph::EdgeInstrumented&>(
             tpg.addNewEdge(t, a, progPointer));
 
     // Increment counters
@@ -271,7 +271,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
     // Do the reset
     ASSERT_NO_THROW(
         dynamic_cast<const EvoGraph::TPGInstrumentedFactory&>(tpg.getFactory())
-            .resetTPGGraphCounters(tpg));
+            .resetGraphCounters(tpg));
 
     // Check result
     ASSERT_EQ(t.getNbVisits(), 0);
@@ -305,47 +305,47 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryCleanTPG)
         t[i] = dynamic_cast<const EvoGraph::TPGTeamInstrumented*>(&tpg.addNewTeam());
     }
 
-    const EvoGraph::TPGActionInstrumented* a[3];
+    const EvoGraph::ActionInstrumented* a[3];
     for (auto i = 0; i < 3; i++) {
-        a[i] = dynamic_cast<const EvoGraph::TPGActionInstrumented*>(
+        a[i] = dynamic_cast<const EvoGraph::ActionInstrumented*>(
             &tpg.addNewAction(i));
     }
 
-    const EvoGraph::TPGEdgeInstrumented* e[7];
+    const EvoGraph::EdgeInstrumented* e[7];
     // T0->T1
-    e[0] = dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(
+    e[0] = dynamic_cast<const EvoGraph::EdgeInstrumented*>(
         &tpg.addNewEdge(*t[0], *t[1], progPointer));
     t[0]->incrementNbVisits();
     e[0]->incrementNbVisits();
     e[0]->incrementNbTraversal();
     // T0->A0 (traversed)
-    e[1] = dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(
+    e[1] = dynamic_cast<const EvoGraph::EdgeInstrumented*>(
         &tpg.addNewEdge(*t[0], *a[0], progPointer));
     e[1]->incrementNbVisits();
     e[1]->incrementNbTraversal();
     a[0]->incrementNbVisits();
     // T1->T2
-    e[2] = dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(
+    e[2] = dynamic_cast<const EvoGraph::EdgeInstrumented*>(
         &tpg.addNewEdge(*t[1], *t[2], progPointer));
     t[1]->incrementNbVisits();
     e[2]->incrementNbVisits();
     e[2]->incrementNbTraversal();
     // T2->A1
-    e[3] = dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(
+    e[3] = dynamic_cast<const EvoGraph::EdgeInstrumented*>(
         &tpg.addNewEdge(*t[2], *a[1], progPointer));
     t[2]->incrementNbVisits();
     e[3]->incrementNbVisits();
     e[3]->incrementNbTraversal();
     a[1]->incrementNbVisits();
     // T1->T3
-    e[4] = dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(
+    e[4] = dynamic_cast<const EvoGraph::EdgeInstrumented*>(
         &tpg.addNewEdge(*t[1], *t[3], progPointer));
     e[4]->incrementNbVisits();
     // T3->A2
-    e[5] = dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(
+    e[5] = dynamic_cast<const EvoGraph::EdgeInstrumented*>(
         &tpg.addNewEdge(*t[3], *a[2], progPointer));
     // T0->A0 (traversed)
-    e[6] = dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(
+    e[6] = dynamic_cast<const EvoGraph::EdgeInstrumented*>(
         &tpg.addNewEdge(*t[0], *a[0], progPointer));
     e[1]->incrementNbVisits();
 
@@ -359,7 +359,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryCleanTPG)
 
     ASSERT_NO_THROW(
         dynamic_cast<const EvoGraph::TPGInstrumentedFactory&>(tpg.getFactory())
-            .clearUnusedTPGGraphElements(tpg));
+            .clearUnusedGraphElements(tpg));
 
     ASSERT_EQ(tpg.getNbVertices(), 5)
         << "Number of vertices of the Graph after being cleaned is not as "

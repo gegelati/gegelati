@@ -61,10 +61,10 @@ namespace EvoGraph {
          * \brief Main Graph constructor.
          *
          * \param[in] e the Environment for the Graph.
-         * \param[in] f the TPGFactory used to create the graph elements.
+         * \param[in] f the GraphFactory used to create the graph elements.
          */
         Graph(const Environment& e,
-                 std::unique_ptr<TPGFactory> f = std::make_unique<TPGFactory>())
+                 std::unique_ptr<GraphFactory> f = std::make_unique<GraphFactory>())
             : env{e}, factory{std::move(f)}
         {
         }
@@ -87,7 +87,7 @@ namespace EvoGraph {
         /**
          *	\brief Helper function for move constructor.
          *
-         *	Swaps the TPGGraphs objects.
+         *	Swaps the Graphs objects.
          */
         friend inline void swap(Graph& a, Graph& b)
         {
@@ -121,37 +121,37 @@ namespace EvoGraph {
         const Environment& getEnvironment() const;
 
         /**
-         * \brief Get a reference to the TPGFactory of the Graph.
+         * \brief Get a reference to the GraphFactory of the Graph.
          *
-         * \return a reference to the TPGFactory.
+         * \return a reference to the GraphFactory.
          */
-        const TPGFactory& getFactory() const;
+        const GraphFactory& getFactory() const;
 
         /**
          * \brief Create a new TPGTeam and add it to the vertices of the
          * Graph.
          *
          * The new TPGTeam is added to the back of the vertices list.
-         * The TPGTeam is created using the TPGFactory of the Graph.
+         * The TPGTeam is created using the GraphFactory of the Graph.
          *
          * \return a const reference to the newly created TPGTeam.
          */
         const TPGTeam& addNewTeam();
 
         /**
-         * \brief Create a new TPGAction and add it to the vertices of the
+         * \brief Create a new Action and add it to the vertices of the
          * Graph.
          *
-         * The new TPGAction is added to the back of the vertices list.
-         * The TPGAction is created using the TPGFactory of the Graph.
+         * The new Action is added to the back of the vertices list.
+         * The Action is created using the GraphFactory of the Graph.
          *
-         * \param[in] actionID the identifier to associate to the TPGAction.
-         * \return a const reference to the newly created TPGAction.
+         * \param[in] actionID the identifier to associate to the Action.
+         * \return a const reference to the newly created Action.
          */
-        const TPGAction& addNewAction(uint64_t actionID);
+        const Action& addNewAction(uint64_t actionID);
 
         /**
-         * \brief Get the number of TPGVertex contained in the Graph.
+         * \brief Get the number of Vertex contained in the Graph.
          *
          * \return the size of the vertices attribute.
          */
@@ -166,12 +166,12 @@ namespace EvoGraph {
          *
          * \return a vector containing pointers to the vertices of the graph.
          */
-        const std::vector<const TPGVertex*> getVertices() const;
+        const std::vector<const Vertex*> getVertices() const;
 
         /**
          * \brief Get the number of rootVertices of the Graph.
          *
-         * \return the number of TPGVertex in the graph with no incomingEdge.
+         * \return the number of Vertex in the graph with no incomingEdge.
          */
         uint64_t getNbRootVertices() const;
 
@@ -186,7 +186,7 @@ namespace EvoGraph {
          * \return a vector containing pointers to the root actions of the
          * graph.
          */
-        const std::vector<const TPGAction*> getRootActions() const;
+        const std::vector<const Action*> getRootActions() const;
         /**
          * \brief Get vector of const pointer to the root teams of the
          * Graph.
@@ -211,77 +211,77 @@ namespace EvoGraph {
          * \return a vector containing pointers to the root vertices of the
          * graph.
          */
-        const std::vector<const TPGVertex*> getRootVertices() const;
+        const std::vector<const Vertex*> getRootVertices() const;
 
         /**
          * \brief Check whether a given vertex exists in the Graph.
          *
-         * \param[in] vertex the EvoGraph::TPGVertex whose presence in the Graph
+         * \param[in] vertex the EvoGraph::Vertex whose presence in the Graph
          * is checked.
          * \return true if the vertex exists in the Graph, false otherwise.
          */
-        bool hasVertex(const EvoGraph::TPGVertex& vertex) const;
+        bool hasVertex(const EvoGraph::Vertex& vertex) const;
 
         /**
-         * \brief Remove a TPGVertex from the Graph and destroy it.
+         * \brief Remove a Vertex from the Graph and destroy it.
          *
-         * If the edge is connected to TPGEdges within the graph, they are also
+         * If the edge is connected to Edges within the graph, they are also
          * removed and destroyed.
          *
-         * \param[in] vertex a const reference to the TPGVertex to remove.
+         * \param[in] vertex a const reference to the Vertex to remove.
          */
-        void removeVertex(const TPGVertex& vertex);
+        void removeVertex(const Vertex& vertex);
 
         /**
-         * \brief Clone a TPGVertex of the graph and all its outgoing TPGEdge.
+         * \brief Clone a Vertex of the graph and all its outgoing Edge.
          *
-         * \param[in] vertex the const reference to the TPGVertex to clone.
-         * \return a const reference to the new TPGVertex.
+         * \param[in] vertex the const reference to the Vertex to clone.
+         * \return a const reference to the new Vertex.
          * \throw std::runtime_error if the given vertex does not belong to the
          * Graph.
          */
-        const TPGVertex& cloneVertex(const TPGVertex& vertex);
+        const Vertex& cloneVertex(const Vertex& vertex);
 
         /**
-         * \brief Add a new TPGEdge to the Graph.
+         * \brief Add a new Edge to the Graph.
          *
-         * Add a new TPGEdge to the Graph, between the two given TPGVertex
-         * and associated with the given Program. The newly created TPGEdge is
+         * Add a new Edge to the Graph, between the two given Vertex
+         * and associated with the given Program. The newly created Edge is
          * inserted in the incoming and outgoing edges lists of the connected
-         * TPGVertex.
-         * The TPGEdge is created using the TPGFactory of the Graph.
+         * Vertex.
+         * The Edge is created using the GraphFactory of the Graph.
          *
-         * \param[in] src the source TPGVertex of the newly created TPGEdge.
-         * \param[in] dest the destination TPGVertex of the newly created
-         *                TPGEdge.
+         * \param[in] src the source Vertex of the newly created Edge.
+         * \param[in] dest the destination Vertex of the newly created
+         *                Edge.
          * \param[in] prog shared pointer to the Program associated to the newly
-         *                 created TPGEdge.
-         * \return a const reference to the created TPGEdge.
-         * \throw std::runtime_error In case one of the TPGVertex does not
+         *                 created Edge.
+         * \return a const reference to the created Edge.
+         * \throw std::runtime_error In case one of the Vertex does not
          *                           exist in the Graph, or if the
-         *							destination is a TPGAction.
+         *							destination is a Action.
          */
-        const TPGEdge& addNewEdge(const TPGVertex& src, const TPGVertex& dest,
+        const Edge& addNewEdge(const Vertex& src, const Vertex& dest,
                                   const std::shared_ptr<Program::Program> prog);
         /**
-         * \brief Add a new TPGActionEdge to the Graph.
+         * \brief Add a new ActionEdge to the Graph.
          *
-         * Add a new TPGActionEdge to the Graph, between the give vertex is
-         * associated the given Program. The newly created TPGEdge is
+         * Add a new ActionEdge to the Graph, between the give vertex is
+         * associated the given Program. The newly created Edge is
          * inserted in the outgoing edges list of the connected
-         * TPGVertex.
-         * The TPGActionEdge is created using the TPGFactory of the Graph.
+         * Vertex.
+         * The ActionEdge is created using the GraphFactory of the Graph.
          *
-         * \param[in] src the source TPGVertex of the newly created TPGEdge.
+         * \param[in] src the source Vertex of the newly created Edge.
          * \param[in] prog shared pointer to the Program associated to the newly
-         *                 created TPGEdge.
+         *                 created Edge.
          * \param[in] actionClass of the actionEdge
-         * \return a const reference to the created TPGEdge.
-         * \throw std::runtime_error In case the TPGVertex does not
+         * \return a const reference to the created Edge.
+         * \throw std::runtime_error In case the Vertex does not
          * exist in the Graph, or if the source is a TPGTeam.
          */
-        const TPGEdge& addNewActionEdge(
-            const TPGVertex& src, const std::shared_ptr<Program::Program> prog,
+        const Edge& addNewActionEdge(
+            const Vertex& src, const std::shared_ptr<Program::Program> prog,
             uint64_t actionClass);
 
         /**
@@ -289,104 +289,104 @@ namespace EvoGraph {
          *
          * \return a const reference to the edges attribute.
          */
-        const std::set<std::unique_ptr<EvoGraph::TPGEdge>, UniqueLess<EvoGraph::TPGEdge>>&
+        const std::set<std::unique_ptr<EvoGraph::Edge>, UniqueLess<EvoGraph::Edge>>&
         getEdges() const;
 
         /**
-         * \brief Remove a TPGEdge from the Graph.
+         * \brief Remove a Edge from the Graph.
          *
-         * If the edge is connected to TPGVertex within the graph, they are
+         * If the edge is connected to Vertex within the graph, they are
          * updated.
          *
-         * \param[in] edge a const reference to the TPGEdge to remove.
+         * \param[in] edge a const reference to the Edge to remove.
          *
-         * \throw std::runtime_error In case one of the TPGEdges does not
+         * \throw std::runtime_error In case one of the Edges does not
          *                           exist in the Graph.
          */
-        void removeEdge(const TPGEdge& edge);
+        void removeEdge(const Edge& edge);
 
         /**
-         * \brief Remove a TPGActionEdge from the Graph.
+         * \brief Remove a ActionEdge from the Graph.
          *
-         * If the edge is connected to TPGVertex within the graph, they are
+         * If the edge is connected to Vertex within the graph, they are
          * updated.
          *
-         * \param[in] edge a const reference to the TPGActionEdge to remove.
+         * \param[in] edge a const reference to the ActionEdge to remove.
          *
-         * \throw std::runtime_error In case one of the TPGEdges does not
+         * \throw std::runtime_error In case one of the Edges does not
          *                           exist in the Graph.
          */
-        void removeActionEdge(const TPGEdge& edge);
+        void removeActionEdge(const Edge& edge);
 
         /**
-         * Duplicate a TPGEdge from the Graph.
+         * Duplicate a Edge from the Graph.
          *
-         * This method creates a perfect copy of the given TPGEdge, that is
-         * a TPGEdge with the same source, destination and program shared
+         * This method creates a perfect copy of the given Edge, that is
+         * a Edge with the same source, destination and program shared
          * pointer.
          *
          * \param[in] edge a const reference to the TPGedge to duplicate.
-         * \return a const reference to the newly created TPGEdge.
-         * \throw std::runtime_error if the given TPGEdge does not belong to
+         * \return a const reference to the newly created Edge.
+         * \throw std::runtime_error if the given Edge does not belong to
          * the Graph.
          */
-        const TPGEdge& cloneEdge(const TPGEdge& edge);
+        const Edge& cloneEdge(const Edge& edge);
 
         /**
          * \brief Change the destination of the Edge to the given target.
          *
-         * Change the destination TPGVertex of a TPGEdge to a given TPGVertex.
-         * This function updates the TPGEdge attributes as well as those of all
-         * impacted TPGVertex.
-         * \param[in] edge a const reference to the modified TPGEdge.
-         * \param[in] newDest a const reference to the destination TPGVertex.
+         * Change the destination Vertex of a Edge to a given Vertex.
+         * This function updates the Edge attributes as well as those of all
+         * impacted Vertex.
+         * \param[in] edge a const reference to the modified Edge.
+         * \param[in] newDest a const reference to the destination Vertex.
          * \return true if the given edge and vertex are part of the graph, and
          * the operation was successful, false otherwise.
          */
-        bool setEdgeDestination(const TPGEdge& edge, const TPGVertex& newDest);
+        bool setEdgeDestination(const Edge& edge, const Vertex& newDest);
 
         /**
-         * \brief Change the source of the TPGEdge to the given vertex.
+         * \brief Change the source of the Edge to the given vertex.
          *
-         * Change the source TPGVertex of a TPGEdge to a given TPGVertex.
-         * This function updates the TPGEdge attributes as well as those of all
-         * impacted TPGVertex.
-         * \param[in] edge a const reference to the modified TPGEdge.
-         * \param[in] newSrc a const reference to the new source TPGVertex.
+         * Change the source Vertex of a Edge to a given Vertex.
+         * This function updates the Edge attributes as well as those of all
+         * impacted Vertex.
+         * \param[in] edge a const reference to the modified Edge.
+         * \param[in] newSrc a const reference to the new source Vertex.
          * \return true if the given edge and vertex are part of the graph, and
          * the operation was successful, false otherwise.
          */
-        bool setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc);
+        bool setEdgeSource(const Edge& edge, const Vertex& newSrc);
 
         /**
          * \brief Clear all intron instructions in the Program of the Graph.
          *
-         * This method scans all the Programs associated to the TPGEdge of the
+         * This method scans all the Programs associated to the Edge of the
          * Graph and removes all intron instructions from them.
          */
         void clearProgramIntrons();
 
         /**
-         * \brief set a new action class to a TPGActionEdge
+         * \brief set a new action class to a ActionEdge
          *
-         * \param[in] edge TPGActionEdge changed
+         * \param[in] edge ActionEdge changed
          * \param[in] newActionClass new action class
          */
-        void setActionClassEdge(const TPGEdge* edge, uint64_t newActionClass);
+        void setActionClassEdge(const Edge* edge, uint64_t newActionClass);
 
         /**
          * Update the assessed actions of the current vertex, and all the
          * incomming edges
          *
          * Used only for continuous cases with multi-action program per
-         * TPGAction.
+         * Action.
          *
          * Assessed actions represent the set of action class used by the
          * vertex.
          *
-         * \param[in] vertex TPGVertex to order
+         * \param[in] vertex Vertex to order
          */
-        void updateAssessedActions(const EvoGraph::TPGVertex* vertex);
+        void updateAssessedActions(const EvoGraph::Vertex* vertex);
 
         /**
          * Update the assessed actions of the all graph.
@@ -395,16 +395,16 @@ namespace EvoGraph {
          * really high after
          *
          * This method basically execute "updateAssessedActions" for all the
-         * TPGActions in the graph
+         * Actions in the graph
          */
         void updateAllAssessedActions();
 
         /**
          * Order the ActionEdge of the given action
          *
-         * \param[in] action TPGAction to order
+         * \param[in] action Action to order
          */
-        void orderActionEdges(const EvoGraph::TPGAction* action);
+        void orderActionEdges(const EvoGraph::Action* action);
 
         /**
          * \brief Set a new ID to a vertex
@@ -415,7 +415,7 @@ namespace EvoGraph {
          * \param[in] vertex the vertex to change ID
          * \param[in] newID the new ID to set
          */
-        void setNewVertexID(const EvoGraph::TPGVertex& vertex, uint64_t newID);
+        void setNewVertexID(const EvoGraph::Vertex& vertex, uint64_t newID);
 
         /**
          * \brief Set a new ID to an edge
@@ -426,24 +426,24 @@ namespace EvoGraph {
          * \param[in] edge the edge to change ID
          * \param[in] newID the new ID to set
          */
-        void setNewEdgeID(const EvoGraph::TPGEdge& edge, uint64_t newID);
+        void setNewEdgeID(const EvoGraph::Edge& edge, uint64_t newID);
 
       protected:
         /// Environment of the Graph
         const Environment& env;
 
-        /// TPGFactory of the Graph
-        const std::unique_ptr<TPGFactory> factory;
+        /// GraphFactory of the Graph
+        const std::unique_ptr<GraphFactory> factory;
 
         /**
          * \brief Set of all edges currently used in the graph.
          */
-        std::set<std::unique_ptr<TPGEdge>, UniqueLess<TPGEdge>> edges;
+        std::set<std::unique_ptr<Edge>, UniqueLess<Edge>> edges;
 
         /**
          * \brief Set of all vertices currently used in the graph.
          */
-        std::set<std::unique_ptr<TPGVertex>, UniqueLess<TPGVertex>> vertices;
+        std::set<std::unique_ptr<Vertex>, UniqueLess<Vertex>> vertices;
     };
 }; // namespace EvoGraph
 

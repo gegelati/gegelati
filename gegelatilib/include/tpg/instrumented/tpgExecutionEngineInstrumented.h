@@ -49,14 +49,14 @@
 
 namespace EvoGraph {
     /**
-     * Specialization of the TPGExecutionEngine class.
+     * Specialization of the ExecutionEngine class.
      */
-    class TPGExecutionEngineInstrumented : public TPGExecutionEngine
+    class ExecutionEngineInstrumented : public ExecutionEngine
     {
       protected:
         /// History of all previous execution traces. New traces are pushed
         /// back.
-        std::vector<std::vector<const TPGVertex*>> traceHistory;
+        std::vector<std::vector<const Vertex*>> traceHistory;
 
       public:
         /**
@@ -69,42 +69,42 @@ namespace EvoGraph {
          *                 given, meaning that no recording of the execution
          *                 will be made.
          */
-        TPGExecutionEngineInstrumented(const Environment& env,
+        ExecutionEngineInstrumented(const Environment& env,
                                        Archive* arch = NULL)
-            : TPGExecutionEngine(env, arch){};
+            : ExecutionEngine(env, arch){};
 
         /**
          * \brief Specialization of the evaluateEdge function.
          *
          * In addition to calling the evaluateEdge method from
-         * TPGExecutionEngine, this specialization increments the number of
-         * visits of the evaluated TPGEdge.
+         * ExecutionEngine, this specialization increments the number of
+         * visits of the evaluated Edge.
          */
-        double evaluateEdge(const TPGEdge& edge) override;
+        double evaluateEdge(const Edge& edge) override;
 
         /**
          * \brief Specialization of the evaluateTeam function.
          *
          * In addition to calling the evaluateTeam method from
-         * TPGExecutionEngine, this specialization increments the number of
+         * ExecutionEngine, this specialization increments the number of
          * visits of the evaluated TPGTeam and the number of traversal of the
-         * TPGEdge with the winning bid.
+         * Edge with the winning bid.
          */
-        const EvoGraph::TPGEdge& evaluateTeam(const TPGTeam& team) override;
+        const EvoGraph::Edge& evaluateTeam(const TPGTeam& team) override;
         /**
          * \brief Specialization of the evaluateTeam function.
          *
          * In addition to calling the executeFromRoot method from
-         * TPGExecutionEngine, this specialization increments the number of
-         * visits of the reached TPGAction.
+         * ExecutionEngine, this specialization increments the number of
+         * visits of the reached Action.
          */
-        const std::pair<std::vector<const EvoGraph::TPGVertex*>, std::vector<double>>
-        executeFromRoot(const EvoGraph::TPGVertex& root,
+        const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>>
+        executeFromRoot(const EvoGraph::Vertex& root,
                         const std::vector<uint64_t>& initActions = {
                             0}) override;
 
         /// Get all previous execution traces.
-        const std::vector<std::vector<const TPGVertex*>>& getTraceHistory()
+        const std::vector<std::vector<const Vertex*>>& getTraceHistory()
             const;
 
         /// Clear the trace history from all previous execution trace.

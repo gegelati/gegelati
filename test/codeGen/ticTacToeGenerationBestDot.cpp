@@ -64,7 +64,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> data;
     Data::PrimitiveTypeArray<double> currentState{s1};
     EvoGraph::Graph* tpg;
-    File::TPGGraphDotImporter* dot = nullptr;
+    File::GraphDotImporter* dot = nullptr;
     std::unique_ptr<CodeGen::TPGGenerationEngine> tpgGen;
     std::string cmdCompile;
     std::string cmdExec{"\"./bin/"};
@@ -157,14 +157,14 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
 
 TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
 {
-    dot = new File::TPGGraphDotImporter(TESTS_DAT_PATH "TicTacToe_out_best.dot",
+    dot = new File::GraphDotImporter(TESTS_DAT_PATH "TicTacToe_out_best.dot",
                                         *e, *tpg);
     ASSERT_NO_THROW(dot->importGraph())
         << "Failed to Import the graph to test inference of TicTacToe";
 
     CodeGen::TPGGenerationEngineFactory factory;
     tpgGen = factory.create("TicTacToeBest_TPG", *tpg, "./src/");
-    ASSERT_NO_THROW(tpgGen->generateTPGGraph())
+    ASSERT_NO_THROW(tpgGen->generateGraph())
         << "Fail to generate the C file to test TicTacToe";
     // call destructor to close generated files
     tpgGen.reset();

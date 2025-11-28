@@ -55,7 +55,7 @@ namespace EvoGraph {
      * Utility class for extracting statistics from a policy within a Graph.
      *
      * The entry point for using this class is the analyzePolicy() method which
-     * updates all attribute for a "tree" starting from a given root TPGVertex.
+     * updates all attribute for a "tree" starting from a given root Vertex.
      *
      * To analyze different policies with a single PolicyStats instance, the
      * clear() method should be called between calls to analyzePolicy().
@@ -79,7 +79,7 @@ namespace EvoGraph {
          * \brief Number of time a Program was analyzed.
          *
          * When analyzing a policy, this number corresponds to
-         * the number of TPGEdge referencing a Program.
+         * the number of Edge referencing a Program.
          */
         std::map<const Program::Program*, size_t> nbUsePerProgram;
 
@@ -87,7 +87,7 @@ namespace EvoGraph {
          * \brief Number of time a Program was analyzed.
          *
          * When analyzing a policy, this number corresponds to
-         * the number of TPGEdge referencing a Program.
+         * the number of Edge referencing a Program.
          */
         std::map<const Program::Program*, size_t> nbUsePerActionProgram;
 
@@ -95,17 +95,17 @@ namespace EvoGraph {
          * \brief Number of time a TPGTeam was analyzed.
          *
          * When analyzing a policy, this number corresponds to
-         * the number of times this TPGTeam is the destination of a TPGEdge.
+         * the number of times this TPGTeam is the destination of a Edge.
          */
         std::map<const TPGTeam*, size_t> nbUsePerTPGTeam;
 
         /**
-         * \brief Number of time a TPGAction was analyzed.
+         * \brief Number of time a Action was analyzed.
          *
          * When analyzing a policy, this number corresponds to
-         * the number of times this TPGAction is the destination of a TPGEdge.
+         * the number of times this Action is the destination of a Edge.
          */
-        std::map<const TPGAction*, size_t> nbUsePerTPGAction;
+        std::map<const Action*, size_t> nbUsePerAction;
 
         /// Number of lines of analyzed Program.
         std::vector<size_t> nbLinesPerProgram;
@@ -152,7 +152,7 @@ namespace EvoGraph {
         std::map<std::pair<size_t, size_t>, size_t>
             nbUsagePerDataLocationActionProg;
 
-        /// Number of outgoing TPGEdge of per TPGTeam of the Graph.
+        /// Number of outgoing Edge of per TPGTeam of the Graph.
         std::vector<size_t> nbOutgoingEdgesPerTeam;
 
         /**
@@ -171,7 +171,7 @@ namespace EvoGraph {
          * A TPGTeam may appear several time in a single policy, but only its
          * "lowest" level is counted here.
          */
-        std::map<size_t, size_t> nbTPGVertexPerDepthLevel;
+        std::map<size_t, size_t> nbVertexPerDepthLevel;
 
         /// Number of distinct TPGTeams per policy.
         size_t nbDistinctTeams = 0;
@@ -231,7 +231,7 @@ namespace EvoGraph {
          *
          * The method updates the following stats:
          * - Number of use per TPGTeam.
-         * - Number of outgoing TPGEdge per TPGTeam.
+         * - Number of outgoing Edge per TPGTeam.
          * - Total number of distinct TPGTeam in the policy.
          *
          * If a TPGTeam was already analyzed, it will not be analyzed again and
@@ -240,29 +240,29 @@ namespace EvoGraph {
         void analyzeTPGTeam(const EvoGraph::TPGTeam* team);
 
         /**
-         * Analyze the given TPGAction.
+         * Analyze the given Action.
          *
          * The method updates the following stats:
-         * - Number of use per TPGAction.
+         * - Number of use per Action.
          * - Total number of usage per action.
          *
-         * If a TPGAction was already analyzed, it will not be analyzed again
-         * and only the number of use per TPGAction will be updated.
+         * If a Action was already analyzed, it will not be analyzed again
+         * and only the number of use per Action will be updated.
          */
-        void analyzeTPGAction(const EvoGraph::TPGAction* action);
+        void analyzeAction(const EvoGraph::Action* action);
 
         /**
-         * Analyze the policy starting from the given TPGVertex.
+         * Analyze the policy starting from the given Vertex.
          *
-         * This method explores the Graph starting from the given TPGVertex,
-         * and analyzes all TPGTeam, TPGAction and Program encountered along the
+         * This method explores the Graph starting from the given Vertex,
+         * and analyzes all TPGTeam, Action and Program encountered along the
          * way.
          *
          * The method updates the following stats:
          * - Depth of the policy.
          * - Number of TPGTeam per depth level.
          */
-        void analyzePolicy(const EvoGraph::TPGVertex* vertex);
+        void analyzePolicy(const EvoGraph::Vertex* vertex);
 
         friend std::ostream& operator<<(std::ostream& os,
                                         const PolicyStats& policyStats);

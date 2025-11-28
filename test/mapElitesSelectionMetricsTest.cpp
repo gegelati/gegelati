@@ -13,7 +13,7 @@ class MapElitesSelectionMetricsTest : public ::testing::Test
     FakeMultiContinuousLearningEnvironment env;
     std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues>
         descriptor;
-    const EvoGraph::TPGVertex* dummyAgent;
+    const EvoGraph::Vertex* dummyAgent;
     Environment* e = NULL;
     Learn::LearningParameters params;
     Instructions::Set set;

@@ -51,10 +51,10 @@ namespace Selector {
     {
         /// JSon comment
         inline static const std::string ratioDeletedRootsComment =
-            "// Percentage of deleted (and regenerated) root TPGVertex at each "
+            "// Percentage of deleted (and regenerated) root Vertex at each "
             "generation.\n"
             "// \"ratioDeletedRoots\" : 0.5, // Default value";
-        /// Percentage of deleted (and regenerated) root TPGVertex at each
+        /// Percentage of deleted (and regenerated) root Vertex at each
         /// generation.
         double ratioDeletedRoots = 0.5;
 
@@ -76,10 +76,10 @@ namespace Selector {
 
         /// JSon comment
         inline static const std::string ratioSavedRootsComment =
-            "// Percentage of root TPGVertex saved from the tournament at each "
+            "// Percentage of root Vertex saved from the tournament at each "
             "generation.\n"
             "// \"ratioSavedRoots\" : 0.05, // Default value";
-        /// Percentage of root TPGVertex saved from the tournament at each
+        /// Percentage of root Vertex saved from the tournament at each
         /// generation.
         double ratioSavedRoots = 0.5;
 

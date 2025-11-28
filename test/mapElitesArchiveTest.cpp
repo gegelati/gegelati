@@ -12,7 +12,7 @@ class MapElitesArchiveTest : public ::testing::Test
     const double maxV = 10.0;
 
     std::shared_ptr<EvoGraph::Graph> graph;
-    const EvoGraph::TPGVertex* dummyAgent;
+    const EvoGraph::Vertex* dummyAgent;
     Environment* e = NULL;
     Learn::LearningParameters params;
     Instructions::Set set;
@@ -23,8 +23,8 @@ class MapElitesArchiveTest : public ::testing::Test
     Selector::MapElites::MapElitesArchive* archive;
 
     // dummy vertex and evaluation
-    const EvoGraph::TPGVertex* dummyVertex;
-    const EvoGraph::TPGVertex* dummyVertex2;
+    const EvoGraph::Vertex* dummyVertex;
+    const EvoGraph::Vertex* dummyVertex2;
     std::shared_ptr<Learn::EvaluationResult> dummyEval;
 
     void SetUp() override

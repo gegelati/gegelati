@@ -65,7 +65,7 @@ namespace Program {
          *
          * An action program is a program used for taking continuous actions, in
          * contrast with classic, or context programs, that output a bid. An
-         * Action program source must be a TPGAction.
+         * Action program source must be a Action.
          */
         bool actionProgram;
 

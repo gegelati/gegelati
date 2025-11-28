@@ -45,45 +45,45 @@ struct CounterReset;
 
 namespace EvoGraph {
     // Declare class to make it usable as an attribute.
-    class TPGVertex;
+    class Vertex;
 
     /**
      * \brief Class representing edges of the Tangled Program Graphs.
      */
-    class TPGEdge
+    class Edge
     {
       public:
         /// Default virtual destructor (for polymorphism)
-        virtual ~TPGEdge() = default;
+        virtual ~Edge() = default;
 
         /**
-         * \brief Main constructor of the TPGEdge class.
+         * \brief Main constructor of the Edge class.
          *
-         * This constructor does not register the created TPGEdge in the
-         * list of incoming or outgoing edges of the given TPGVertex.
+         * This constructor does not register the created Edge in the
+         * list of incoming or outgoing edges of the given Vertex.
          *
-         * \param[in] src pointer to the source TPGVertex of the edge.
-         * \param[in] dest pointer to the destination TPGVertex of the edge.
+         * \param[in] src pointer to the source Vertex of the edge.
+         * \param[in] dest pointer to the destination Vertex of the edge.
          * \param[in] prog the shared pointer to the Program associated to the
          *            edge.
          */
-        TPGEdge(const TPGVertex* src, const TPGVertex* dest,
+        Edge(const Vertex* src, const Vertex* dest,
                 const std::shared_ptr<Program::Program> prog)
             : edgeID(incrementeCounter()), source{src}, destination{dest},
               program{prog} {};
 
         /**
-         * \brief Get a const reference to the Program of the TPGEdge.
+         * \brief Get a const reference to the Program of the Edge.
          *
-         * \return a const reference to the Program of the TPGEdge.
+         * \return a const reference to the Program of the Edge.
          */
         Program::Program& getProgram() const;
 
         /**
-         * \brief Set a new Program for the TPGEdge.
+         * \brief Set a new Program for the Edge.
          *
          * This method is const to enable use outside of the Graph which is
-         * the only class accessing the non-const TPGEdge. Since the program
+         * the only class accessing the non-const Edge. Since the program
          * pointer attribute is mutable, this method can successfully be used to
          * alter the program.
          *
@@ -102,45 +102,45 @@ namespace EvoGraph {
         std::shared_ptr<Program::Program> getProgramSharedPointer();
 
         /**
-         * \brief Get the source TPGVertex of the TPGEdge.
+         * \brief Get the source Vertex of the Edge.
          *
-         * \return a const pointer to the source TPGVertex.
+         * \return a const pointer to the source Vertex.
          */
-        const TPGVertex* getSource() const;
+        const Vertex* getSource() const;
 
         /**
-         * \brief Set a new source TPGVertex to the TPGEdge.
+         * \brief Set a new source Vertex to the Edge.
          *
-         * \param[in] newSource the new TPGVertex  to register as the source.
+         * \param[in] newSource the new Vertex  to register as the source.
          */
-        void setSource(TPGVertex* newSource);
+        void setSource(Vertex* newSource);
 
         /**
-         * \brief Get the destination TPGVertex of the TPGEdge.
+         * \brief Get the destination Vertex of the Edge.
          *
-         * \return a const pointer to the destination TPGVertex.
+         * \return a const pointer to the destination Vertex.
          */
-        virtual const TPGVertex* getDestination() const;
+        virtual const Vertex* getDestination() const;
 
         /**
-         * \brief Set a new destination TPGVertex to the TPGEdge.
+         * \brief Set a new destination Vertex to the Edge.
          *
-         * \param[in] newDestination the new TPGVertex to register as the
+         * \param[in] newDestination the new Vertex to register as the
          * destination.
          */
-        virtual void setDestination(TPGVertex* newDestination);
+        virtual void setDestination(Vertex* newDestination);
 
         /**
-         * \brief Get the unique identifier of the TPGEdge.
+         * \brief Get the unique identifier of the Edge.
          *
-         * \return the integer ID of the TPGEdge..
+         * \return the integer ID of the Edge..
          */
         virtual uint64_t getEdgeID() const;
 
         /**
-         * \brief Set a new unique identifier to the TPGEdge.
+         * \brief Set a new unique identifier to the Edge.
          *
-         * \param[in] newID the new integer ID to set to the TPGEdge.
+         * \param[in] newID the new integer ID to set to the Edge.
          */
         virtual void setEdgeID(uint64_t newID);
 
@@ -155,20 +155,20 @@ namespace EvoGraph {
         static uint64_t getEdgeIDCounter();
 
       protected:
-        /// Pointer to the source TPGVertex of this TPGEdge
-        const TPGVertex* source;
+        /// Pointer to the source Vertex of this Edge
+        const Vertex* source;
 
-        /// Pointer to the destination TPGVertex of this TPGEdge
-        const TPGVertex* destination;
+        /// Pointer to the destination Vertex of this Edge
+        const Vertex* destination;
 
         /// Shared pointer to the Program to execute when evaluating the bid
-        /// of this TPGEdge.
+        /// of this Edge.
         /// This attribute is mutable to enable its modification during
         /// mutations.
         mutable std::shared_ptr<Program::Program> program;
 
         /**
-         * \brief Unique identifier of the TPGEdge.
+         * \brief Unique identifier of the Edge.
          */
         uint64_t edgeID;
 
@@ -187,14 +187,14 @@ namespace EvoGraph {
         friend struct ::CounterReset;
 
         /// Delete the default constructor.
-        TPGEdge() = delete;
+        Edge() = delete;
     };
 
     /**
-     * \brief Comparison function to enable sorting of TPGVertex with
+     * \brief Comparison function to enable sorting of Vertex with
      * STL.
      */
-    bool operator<(const TPGEdge& a, const TPGEdge& b);
+    bool operator<(const Edge& a, const Edge& b);
 
 }; // namespace EvoGraph
 

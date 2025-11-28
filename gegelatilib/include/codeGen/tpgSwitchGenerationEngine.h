@@ -112,7 +112,7 @@ namespace CodeGen {
          * This function iterates trough the Graph and create the required C
          * code to represent each element of the Graph.
          */
-        virtual void generateTPGGraph();
+        virtual void generateGraph();
 
       protected:
         /**
@@ -128,13 +128,13 @@ namespace CodeGen {
          *
          * \param[in] edge that must be generated.
          */
-        virtual void generateEdge(const EvoGraph::TPGEdge& edge);
+        virtual void generateEdge(const EvoGraph::Edge& edge);
 
         /**
          * \brief Method for generating the code for a team of the graph.
          *
          * This method generates the C function that represents a team.
-         * Each function representing a team contains a static array of TPGEdge
+         * Each function representing a team contains a static array of Edge
          * and calls the function executeTeam(Edge*, int).
          *
          * \param[in] team const reference of the TPGTeam that must be
@@ -149,10 +149,10 @@ namespace CodeGen {
          * The generated function return a NULL pointer and write the action in
          * the pointer given as parameter.
          *
-         * \param[in] action const reference of the TPGAction that must be
+         * \param[in] action const reference of the Action that must be
          * generated.
          */
-        virtual void generateAction(const EvoGraph::TPGAction& action);
+        virtual void generateAction(const EvoGraph::Action& action);
 
         /**
          * \brief Generate function name depending on the vertex type.
@@ -160,7 +160,7 @@ namespace CodeGen {
          * \param v vertex to be named.
          * \return std::string name of the vertex.
          */
-        std::string vertexName(const EvoGraph::TPGVertex& v);
+        std::string vertexName(const EvoGraph::Vertex& v);
     };
 } // namespace CodeGen
 

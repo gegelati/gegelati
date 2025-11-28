@@ -41,64 +41,64 @@
 
 namespace EvoGraph {
 
-    /// Specialization of the TPGFactory class producing TPGTeamInstrumented,
-    /// TPGActionInstrumented, TPGEdgeInstrumented, and
-    /// TPGExecutionEngineInstrumented
+    /// Specialization of the GraphFactory class producing TPGTeamInstrumented,
+    /// ActionInstrumented, EdgeInstrumented, and
+    /// ExecutionEngineInstrumented
     ///
     /// Also contains a helper function for resetting the instrumentation of a
     /// Graph.
-    class TPGInstrumentedFactory : public TPGFactory
+    class TPGInstrumentedFactory : public GraphFactory
     {
       public:
         /// Specialization of the method returing the Graph with a
         /// TPGInstrumentedFactory as an attribute.
-        virtual std::shared_ptr<Graph> createTPGGraph(
+        virtual std::shared_ptr<Graph> createGraph(
             const Environment& env) const override;
 
         ///  Specialization of the method returning a TPGTeamInstrumented
         virtual std::unique_ptr<TPGTeam> createTPGTeam() const override;
 
-        ///  Specialization of the method returning a TPGActionInstrumented
-        virtual std::unique_ptr<TPGAction> createTPGAction(
+        ///  Specialization of the method returning a ActionInstrumented
+        virtual std::unique_ptr<Action> createAction(
             const uint64_t id) const override;
 
-        ///  Specialization of the method returning a TPGEdgeInstrumented
-        virtual std::unique_ptr<TPGEdge> createTPGEdge(
-            const TPGVertex* src, const TPGVertex* dest,
+        ///  Specialization of the method returning a EdgeInstrumented
+        virtual std::unique_ptr<Edge> createEdge(
+            const Vertex* src, const Vertex* dest,
             const std::shared_ptr<Program::Program> prog) const override;
 
         ///  Specialization of the method returning a
-        ///  TPGExecutionEngineInstrumented
-        virtual std::unique_ptr<TPGExecutionEngine> createTPGExecutionEngine(
+        ///  ExecutionEngineInstrumented
+        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(
             const Environment& env, Archive* arch = NULL) const override;
         /**
          * \brief Reset all visit and traversal counters of a Graph.
          *
          * \param[in] tpg the Graph whose TPGTeamInstrumented,
-         * TPGActionInstrumented, and TPGEdgeInstrumented will be reseted.The
+         * ActionInstrumented, and EdgeInstrumented will be reseted.The
          * Graph is const since all instrumentation counters are mutable.
          */
-        void resetTPGGraphCounters(const EvoGraph::Graph& tpg) const;
+        void resetGraphCounters(const EvoGraph::Graph& tpg) const;
 
         /**
          * \brief Removes from the Graph the vertices and edges that were
          * never visited (since the last reset).
          *
          * This method removes from the Graph:
-         * - The TPGVertex with a number of visit equal to zero.
-         * - The TPGEdge with a number of traversal equal to zero.
+         * - The Vertex with a number of visit equal to zero.
+         * - The Edge with a number of traversal equal to zero.
          *
-         * The method will do nothing on a Graph whose TPGVertex and TPGEdge
-         * are not TPGVertexInstrumentation and TPGEdgeInstrumented
+         * The method will do nothing on a Graph whose Vertex and Edge
+         * are not VertexInstrumentation and EdgeInstrumented
          * specializations.
          *
-         * Beware, this function may remove TPGAction from the Graph, thus
+         * Beware, this function may remove Action from the Graph, thus
          * making it improper for future training.
          *
          * \param[in] tpg Reference to the Graph whose
-         * TPGVertexInstrumentation and TPGEdge will be removed.
+         * VertexInstrumentation and Edge will be removed.
          */
-        void clearUnusedTPGGraphElements(EvoGraph::Graph& tpg) const;
+        void clearUnusedGraphElements(EvoGraph::Graph& tpg) const;
     };
 } // namespace EvoGraph
 

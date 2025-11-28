@@ -124,7 +124,7 @@ namespace Learn {
             "root will be\n"
             "// fixed, and no further evaluation will be done.\n"
             "// \"maxNbEvaluationPerPolicy\" : 1000, // Default value";
-        /// Maximum number of times a given policy (i.e. a root TPGVertex) is
+        /// Maximum number of times a given policy (i.e. a root Vertex) is
         /// evaluated.
         size_t maxNbEvaluationPerPolicy = 1000;
 

@@ -41,20 +41,20 @@
 
 namespace EvoGraph {
     /**
-     * \brief Instrumentation code for TPGVertex class for instrumented
+     * \brief Instrumentation code for Vertex class for instrumented
      * execution.
      */
-    class TPGVertexInstrumentation
+    class VertexInstrumentation
     {
       public:
         /**
-         * \brief Get the number of time a TPGVertexInstrumentation was visited.
+         * \brief Get the number of time a VertexInstrumentation was visited.
          */
         uint64_t getNbVisits() const;
 
         /**
          * \brief Add one to the number of visits for this
-         * TPGVertexInstrumented.
+         * VertexInstrumented.
          */
         void incrementNbVisits() const;
 
@@ -69,12 +69,12 @@ namespace EvoGraph {
          *
          * This constructor initializes the instrumentation attributes.
          */
-        TPGVertexInstrumentation() : nbVisits{0}
+        VertexInstrumentation() : nbVisits{0}
         {
         }
 
-        /// Number of a time a TPGVertex has been visited
-        /// Attribute is mutable because all TPGVertex are seen as const outside
+        /// Number of a time a Vertex has been visited
+        /// Attribute is mutable because all Vertex are seen as const outside
         /// from their Graph.
         mutable std::atomic_uint64_t nbVisits;
     };

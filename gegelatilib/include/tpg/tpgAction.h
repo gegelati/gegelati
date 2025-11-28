@@ -51,7 +51,7 @@ namespace EvoGraph {
      * An action is a leaf vertex of a TPG associated to an action of the
      * learning agent within its environment.
      */
-    class TPGAction : public TPGVertex
+    class Action : public Vertex
     {
 
         /**
@@ -64,19 +64,19 @@ namespace EvoGraph {
 
       public:
         /**
-         * \brief Main constructor of a TPGAction.
+         * \brief Main constructor of a Action.
          *
-         * \param[in] id integer stored as the actionID of the TPGAction.
+         * \param[in] id integer stored as the actionID of the Action.
          */
-        TPGAction(const uint64_t id) : TPGVertex(), actionID{id} {};
+        Action(const uint64_t id) : Vertex(), actionID{id} {};
 
         /**
          * \brief Specialization throwing an std::runtime_exception.
          *
-         * Since the TPGAction is intented to be a leaf TPGVertex, no outgoing
-         * TPGEdge can be added to it.
+         * Since the Action is intented to be a leaf Vertex, no outgoing
+         * Edge can be added to it.
          */
-        virtual void addOutgoingEdge(TPGEdge* edge) override;
+        virtual void addOutgoingEdge(Edge* edge) override;
 
         /**
          * \brief Return the action edge corresponding to the action class
@@ -84,12 +84,12 @@ namespace EvoGraph {
          * Return a pointer pointing to the edge linked to the action class. The
          * pointer is set to nullptr if the action is not found.
          */
-        virtual EvoGraph::TPGActionEdge* getEdgeOfAction(uint64_t actionClass) const;
+        virtual EvoGraph::ActionEdge* getEdgeOfAction(uint64_t actionClass) const;
 
         /**
-         * \brief Get the action ID associated to the TPGAction.
+         * \brief Get the action ID associated to the Action.
          *
-         * \return the integer ID of the TPGAction.
+         * \return the integer ID of the Action.
          */
         uint64_t getActionID() const
         {

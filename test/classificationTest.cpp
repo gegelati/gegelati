@@ -123,13 +123,13 @@ TEST_F(ClassificationTest, EvaluateRoot)
     Archive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
-    EvoGraph::TPGExecutionEngine tee(la.getTPGGraph()->getEnvironment(), &a);
+    EvoGraph::ExecutionEngine tee(la.getGraph()->getEnvironment(), &a);
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result1;
     ASSERT_NO_THROW(result1 = la.evaluateJob(
                         tee,
-                        *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
+                        *la.makeJob(la.getGraph()->getRootVertices().at(0),
                                     Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
@@ -138,13 +138,13 @@ TEST_F(ClassificationTest, EvaluateRoot)
 
     // Record this result
     la.getSelector()->updateEvaluationRecords(
-        {{result1, la.getTPGGraph()->getRootVertices().at(0)}});
+        {{result1, la.getGraph()->getRootVertices().at(0)}});
 
     // Reevaluate to check that the previous result1 is not returned.
     std::shared_ptr<Learn::EvaluationResult> result2;
     ASSERT_NO_THROW(result2 = la.evaluateJob(
                         tee,
-                        *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
+                        *la.makeJob(la.getGraph()->getRootVertices().at(0),
                                     Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
@@ -152,13 +152,13 @@ TEST_F(ClassificationTest, EvaluateRoot)
 
     // Record this result
     la.getSelector()->updateEvaluationRecords(
-        {{result2, la.getTPGGraph()->getRootVertices().at(0)}});
+        {{result2, la.getGraph()->getRootVertices().at(0)}});
 
     // Reevaluate to check that the previous result2 is returned.
     std::shared_ptr<Learn::EvaluationResult> result3;
     ASSERT_NO_THROW(result3 = la.evaluateJob(
                         tee,
-                        *la.makeJob(la.getTPGGraph()->getRootVertices().at(0),
+                        *la.makeJob(la.getGraph()->getRootVertices().at(0),
                                     Learn::LearningMode::TRAINING),
                         0, Learn::LearningMode::TRAINING, fle))
         << "Evaluation from a root failed.";
@@ -180,7 +180,7 @@ TEST_F(ClassificationTest, DoSelection)
 
     // Initialize and populate the TPG
     la.init(0);
-    EvoGraph::Graph& graph = *la.getTPGGraph();
+    EvoGraph::Graph& graph = *la.getGraph();
     Mutator::TPGMutator::populateTPG(graph, *la.getSelector(), la.getArchive(),
                                      params.mutation, la.getRNG(),
                                      fle.getNbActions());
@@ -191,10 +191,10 @@ TEST_F(ClassificationTest, DoSelection)
     // Create and fill results for each "root" artificially with
     // EvaluationResults
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const EvoGraph::TPGVertex*>
+                  const EvoGraph::Vertex*>
         results;
     double result = 0.0;
-    for (const EvoGraph::TPGVertex* root : roots) {
+    for (const EvoGraph::Vertex* root : roots) {
         results.emplace(
             new Learn::EvaluationResult(
                 std::make_shared<Selector::SelectionMetrics>(result++), 1),
@@ -210,10 +210,10 @@ TEST_F(ClassificationTest, DoSelection)
     // Create and fill results for each "root" artificially with
     // ClassificationEvaluationResults
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const EvoGraph::TPGVertex*>
+                  const EvoGraph::Vertex*>
         classifResults;
     result = 0.0;
-    for (const EvoGraph::TPGVertex* root : roots) {
+    for (const EvoGraph::Vertex* root : roots) {
         // Init all scores to the same value
         // Their general score will be 0.33.
         // With score for 1st class to 0.0
@@ -237,14 +237,14 @@ TEST_F(ClassificationTest, DoSelection)
     // for 1st class (current code valid for 3 classes only because of 0.25
     // constant)
     ASSERT_EQ(fle.getNbActions(), 3);
-    std::vector<const EvoGraph::TPGVertex*> savedRoots;
+    std::vector<const EvoGraph::Vertex*> savedRoots;
     for (auto idx = 0; idx < 4; idx++) {
         // Select a root results to erase-replace
         auto iterClassifResults = classifResults.begin();
         std::advance(iterClassifResults, 3 * idx);
 
         // get the root
-        const EvoGraph::TPGVertex* root = iterClassifResults->second;
+        const EvoGraph::Vertex* root = iterClassifResults->second;
         savedRoots.push_back(root);
 
         // Remove from map
@@ -266,8 +266,8 @@ TEST_F(ClassificationTest, DoSelection)
     // Add an additional
     // - root action (should not be removed, despite having the worst score)
     // - team root (will be removed with the same score)
-    const EvoGraph::TPGVertex& actionRoot = graph.addNewAction(0);
-    const EvoGraph::TPGVertex& teamRoot = graph.addNewTeam();
+    const EvoGraph::Vertex& actionRoot = graph.addNewAction(0);
+    const EvoGraph::Vertex& teamRoot = graph.addNewTeam();
 
     uint64_t originalNbVertices = graph.getNbVertices();
 
@@ -294,7 +294,7 @@ TEST_F(ClassificationTest, DoSelection)
 
     // Check the number of remaining vertices.
     ASSERT_EQ(
-        la.getTPGGraph()->getNbVertices(),
+        la.getGraph()->getNbVertices(),
         originalNbVertices -
             std::ceil(params.mutation.tpg.nbRoots *
                       (1.0 - params.selection.truncation.ratioDeletedRoots)));
@@ -302,8 +302,8 @@ TEST_F(ClassificationTest, DoSelection)
     // Check the presence of savedRoots among remaining roots.
     // i.e. check that their good result1 for one class saved them from
     // decimation.
-    auto remainingRoots = la.getTPGGraph()->getRootVertices();
-    for (const EvoGraph::TPGVertex* savedRoot : savedRoots) {
+    auto remainingRoots = la.getGraph()->getRootVertices();
+    for (const EvoGraph::Vertex* savedRoot : savedRoots) {
         ASSERT_TRUE(std::find(remainingRoots.begin(), remainingRoots.end(),
                               savedRoot) != remainingRoots.end())
             << "Roots with best classification score for 1st class were not "

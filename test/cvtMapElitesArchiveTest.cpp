@@ -15,8 +15,8 @@ class CvtMapElitesArchiveTest : public ::testing::Test
 
     Selector::MapElites::CvtMapElitesArchive* archive;
 
-    const EvoGraph::TPGVertex* v1;
-    const EvoGraph::TPGVertex* v2;
+    const EvoGraph::Vertex* v1;
+    const EvoGraph::Vertex* v2;
     std::shared_ptr<Learn::EvaluationResult> eval1;
     std::shared_ptr<Learn::EvaluationResult> eval2;
 

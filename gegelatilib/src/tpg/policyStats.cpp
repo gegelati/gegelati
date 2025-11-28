@@ -141,7 +141,7 @@ void EvoGraph::PolicyStats::clear()
 {
     this->maxPolicyDepth = 0;
     this->nbDistinctTeams = 0;
-    this->nbTPGVertexPerDepthLevel.clear();
+    this->nbVertexPerDepthLevel.clear();
     this->nbLinesPerProgram.clear();
     this->nbIntronPerProgram.clear();
     this->nbOutgoingEdgesPerTeam.clear();
@@ -150,7 +150,7 @@ void EvoGraph::PolicyStats::clear()
     this->nbUsagePerDataLocation.clear();
     this->nbUsePerProgram.clear();
     this->nbUsePerTPGTeam.clear();
-    this->nbUsePerTPGAction.clear();
+    this->nbUsePerAction.clear();
     this->nbUsePerActionProgram.clear();
     this->nbLinesPerActionProgram.clear();
     this->nbIntronPerActionProgram.clear();
@@ -246,36 +246,36 @@ void EvoGraph::PolicyStats::analyzeTPGTeam(const EvoGraph::TPGTeam* team)
     }
 }
 
-void EvoGraph::PolicyStats::analyzeTPGAction(const EvoGraph::TPGAction* action)
+void EvoGraph::PolicyStats::analyzeAction(const EvoGraph::Action* action)
 {
-    this->nbUsePerTPGAction[action]++;
+    this->nbUsePerAction[action]++;
     this->nbUsagePerActionID[action->getActionID()]++;
 }
 
-void EvoGraph::PolicyStats::analyzePolicy(const EvoGraph::TPGVertex* root)
+void EvoGraph::PolicyStats::analyzePolicy(const EvoGraph::Vertex* root)
 {
     size_t depth = 0;
-    std::vector<const EvoGraph::TPGVertex*> stage[2];
+    std::vector<const EvoGraph::Vertex*> stage[2];
     stage[0].push_back(root);
     while (!stage[depth % 2].empty()) {
-        this->nbTPGVertexPerDepthLevel[depth] = stage[depth % 2].size();
+        this->nbVertexPerDepthLevel[depth] = stage[depth % 2].size();
         auto& nextStage = stage[(depth + 1) % 2];
         nextStage.clear();
 
-        for (const EvoGraph::TPGVertex* vertex : stage[depth % 2]) {
+        for (const EvoGraph::Vertex* vertex : stage[depth % 2]) {
             if (auto team = dynamic_cast<const EvoGraph::TPGTeam*>(vertex)) {
                 this->analyzeTPGTeam(team);
                 if (this->nbUsePerTPGTeam[team] == 1) {
-                    for (const EvoGraph::TPGEdge* edge :
+                    for (const EvoGraph::Edge* edge :
                          vertex->getOutgoingEdges()) {
                         this->analyzeProgram(&edge->getProgram());
                         nextStage.push_back(edge->getDestination());
                     }
                 }
             }
-            if (auto action = dynamic_cast<const EvoGraph::TPGAction*>(vertex)) {
-                this->analyzeTPGAction(action);
-                if (this->nbUsePerTPGAction[action] == 1) {
+            if (auto action = dynamic_cast<const EvoGraph::Action*>(vertex)) {
+                this->analyzeAction(action);
+                if (this->nbUsePerAction[action] == 1) {
                     for (auto edge : action->getOutgoingEdges()) {
                         this->analyzeProgram(&edge->getProgram());
                     }
@@ -299,11 +299,11 @@ std::ostream& EvoGraph::operator<<(std::ostream& os,
     os << "Teams:\t\t" << policyStats.nbDistinctTeams << std::endl;
     os << "Edges:\t\t" << sumVec(policyStats.nbOutgoingEdgesPerTeam)
        << std::endl;
-    os << "Actions:\t" << policyStats.nbUsePerTPGAction.size() << std::endl;
+    os << "Actions:\t" << policyStats.nbUsePerAction.size() << std::endl;
 
     os << "Stages\t\t" << policyStats.maxPolicyDepth << std::endl;
     os << "Vertex/stage:\t";
-    for (auto& nbVertexPerStage : policyStats.nbTPGVertexPerDepthLevel) {
+    for (auto& nbVertexPerStage : policyStats.nbVertexPerDepthLevel) {
         os << "{" << nbVertexPerStage.first << "," << nbVertexPerStage.second
            << "} ";
     }

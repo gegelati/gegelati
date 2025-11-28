@@ -137,7 +137,7 @@ namespace Learn {
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          * \param[in,out] jobsToProcess Ordered list of jobs of
-         * TPGVertex to process, stored as a pair with an id filling the
+         * Vertex to process, stored as a pair with an id filling the
          * archiveMap. The jobs are groups of agents that shall be agents in the
          * same simulation, there is only 1 agent if there is no adversarial
          * (e.g. if the environmnent is not multiplayer).
@@ -188,13 +188,13 @@ namespace Learn {
          *            learning process.
          * \param[in] algorithms vector of algorithm learned by the learning agent
          * \param[in] p The LearningParameters for the LearningAgent.
-         * \param[in] factory The TPGFactory used to create the Graph. A
-         * default TPGFactory is used if none is provided.
+         * \param[in] factory The GraphFactory used to create the Graph. A
+         * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
             LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms, const Instructions::Set& iSet,
             const LearningParameters& p,
-            const EvoGraph::TPGFactory& factory = EvoGraph::TPGFactory())
+            const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : LearningAgent(le, algorithms, iSet, p, factory)
         {
             // overriding the maxNbThreads that basic LA defined to 1
@@ -211,13 +211,13 @@ namespace Learn {
          *            learning process.
          * \param[in] algorithm vector of algorithm learned by the learning agent
          * \param[in] p The LearningParameters for the LearningAgent.
-         * \param[in] factory The TPGFactory used to create the Graph. A
-         * default TPGFactory is used if none is provided.
+         * \param[in] factory The GraphFactory used to create the Graph. A
+         * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
             LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm, const Instructions::Set& iSet,
             const LearningParameters& p,
-            const EvoGraph::TPGFactory& factory = EvoGraph::TPGFactory())
+            const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : LearningAgent(le, algorithm, iSet, p, factory)
         {
             // overriding the maxNbThreads that basic LA defined to 1
@@ -225,7 +225,7 @@ namespace Learn {
         };
 
         /**
-         * \brief Evaluate all agent TPGVertex of the Graph.
+         * \brief Evaluate all agent Vertex of the Graph.
          *
          * **Replaces the function from the base class LearningAgent.**
          *
@@ -233,7 +233,7 @@ namespace Learn {
          * a sequential execution. The Archive should also be updated in the
          * exact same manner.
          *
-         * This method calls the evaluateJob method for every agent TPGVertex
+         * This method calls the evaluateJob method for every agent Vertex
          * of the Graph. The method returns a sorted map associating each
          * agent vertex to its average score, in ascending order or score.
          *

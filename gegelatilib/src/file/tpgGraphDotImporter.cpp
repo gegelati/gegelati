@@ -37,27 +37,27 @@
 
 #include "file/tpgGraphDotImporter.h"
 
-const std::string File::TPGGraphDotImporter::lineSeparator("&#92;n");
-const std::string File::TPGGraphDotImporter::teamRegex(
+const std::string File::GraphDotImporter::lineSeparator("&#92;n");
+const std::string File::GraphDotImporter::teamRegex(
     "T([0-9]+)\\x20\\x5B.*\\x5D");
-const std::string File::TPGGraphDotImporter::programRegex(
+const std::string File::GraphDotImporter::programRegex(
     R"(P([0-9]+)\x20\x5B(?:.*label=\"(.*?)\")?.*?\x5D)");
-const std::string File::TPGGraphDotImporter::instructionRegex(
+const std::string File::GraphDotImporter::instructionRegex(
     "I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D");
-const std::string File::TPGGraphDotImporter::actionRegex(
+const std::string File::GraphDotImporter::actionRegex(
     "A([0-9]+)\\x20\\x5B.*=\"(.*)\"\\x5D");
-const std::string File::TPGGraphDotImporter::linkProgramInstructionRegex(
+const std::string File::GraphDotImporter::linkProgramInstructionRegex(
     "P([0-9]+)\\x20->\\x20I([0-9]+).*");
-const std::string File::TPGGraphDotImporter::linkProgramActionRegex(
+const std::string File::GraphDotImporter::linkProgramActionRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20A([0-9]+).*");
-const std::string File::TPGGraphDotImporter::linkProgramTeamRegex(
+const std::string File::GraphDotImporter::linkProgramTeamRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*");
-const std::string File::TPGGraphDotImporter::linkActionProgramRegex(
+const std::string File::GraphDotImporter::linkActionProgramRegex(
     "A([0-9]+)\\x20->\\x20P([0-9]+).*");
-const std::string File::TPGGraphDotImporter::addLinkProgramRegex(
+const std::string File::GraphDotImporter::addLinkProgramRegex(
     "T([0-9]+)\\x20->\\x20P([0-9]+)");
 
-void File::TPGGraphDotImporter::readOperands(std::string& str, Program::Line& l)
+void File::GraphDotImporter::readOperands(std::string& str, Program::Line& l)
 {
     std::string::size_type pos = 0;
     std::string::size_type pos2;
@@ -85,7 +85,7 @@ void File::TPGGraphDotImporter::readOperands(std::string& str, Program::Line& l)
     }
 }
 
-void File::TPGGraphDotImporter::readLine(std::smatch& matches)
+void File::GraphDotImporter::readLine(std::smatch& matches)
 {
     // a line is stored in the .dot file with the following format
     // inst_idx|dest_idx&op1_param1|op1_param2#...#opN_param1|opN_param2
@@ -152,7 +152,7 @@ void File::TPGGraphDotImporter::readLine(std::smatch& matches)
     }
 }
 
-void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
+void File::GraphDotImporter::readProgram(std::smatch& matches)
 {
     if (!this->lastLine.empty() && !matches.empty()) {
         // Program definition :
@@ -195,7 +195,7 @@ void File::TPGGraphDotImporter::readProgram(std::smatch& matches)
     }
 }
 
-bool File::TPGGraphDotImporter::getExportedVersion(int& major, int& minor,
+bool File::GraphDotImporter::getExportedVersion(int& major, int& minor,
                                                    int& patch)
 {
     char buffer[MAX_READ_SIZE];
@@ -216,7 +216,7 @@ bool File::TPGGraphDotImporter::getExportedVersion(int& major, int& minor,
     return false;
 }
 
-void File::TPGGraphDotImporter::dumpTPGGraphHeader()
+void File::GraphDotImporter::dumpGraphHeader()
 {
 
     char buffer[MAX_READ_SIZE];
@@ -233,18 +233,18 @@ void File::TPGGraphDotImporter::dumpTPGGraphHeader()
     }
 }
 
-void File::TPGGraphDotImporter::readTeam(std::smatch& matches)
+void File::GraphDotImporter::readTeam(std::smatch& matches)
 {
     if (!this->lastLine.empty() && !matches.empty()) {
         const auto& newTeam = this->tpg.addNewTeam();
 
-        this->vertexID.insert(std::pair<uint64_t, const EvoGraph::TPGVertex*>(
+        this->vertexID.insert(std::pair<uint64_t, const EvoGraph::Vertex*>(
             std::stoi(matches[1]), &newTeam));
 
         this->tpg.setNewVertexID(newTeam, std::stoi(matches[1]));
     }
 }
-void File::TPGGraphDotImporter::readAction(std::smatch& matches)
+void File::GraphDotImporter::readAction(std::smatch& matches)
 {
     if (!this->lastLine.empty() && !matches.empty()) {
         // the regex matches two groups (action number and action label)
@@ -276,20 +276,20 @@ void File::TPGGraphDotImporter::readAction(std::smatch& matches)
             const auto& newAction = this->tpg.addNewAction(currActionID);
 
             // create a new action and insert it if none was previously found
-            this->actionID.insert(std::pair<uint64_t, const EvoGraph::TPGAction*>(
+            this->actionID.insert(std::pair<uint64_t, const EvoGraph::Action*>(
                 action_number,
-                dynamic_cast<const EvoGraph::TPGAction*>(&newAction)));
+                dynamic_cast<const EvoGraph::Action*>(&newAction)));
 
             this->tpg.setNewVertexID(newAction, action_number);
 
             this->actionClasses.insert(
-                std::pair<const EvoGraph::TPGAction*, std::vector<uint64_t>>(
-                    dynamic_cast<const EvoGraph::TPGAction*>(&newAction), numbers));
+                std::pair<const EvoGraph::Action*, std::vector<uint64_t>>(
+                    dynamic_cast<const EvoGraph::Action*>(&newAction), numbers));
         }
     }
 }
 
-void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
+void File::GraphDotImporter::readLinkActionProgram(std::smatch& matches)
 {
     // Creating a edge from a team to an action
     if (!this->lastLine.empty() && !matches.empty()) {
@@ -302,7 +302,7 @@ void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
             // find the program to add to the edge
             auto p_it = programID.find(program);
             if (action_it != this->actionID.end() && p_it != programID.end()) {
-                const EvoGraph::TPGAction* action = action_it->second;
+                const EvoGraph::Action* action = action_it->second;
 
                 uint64_t actionClass = this->actionClasses.at(action).at(
                     action->getOutgoingEdges().size());
@@ -313,7 +313,7 @@ void File::TPGGraphDotImporter::readLinkActionProgram(std::smatch& matches)
     }
 }
 
-void File::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch& matches)
+void File::GraphDotImporter::readLinkTeamProgramAction(std::smatch& matches)
 {
     // Creating a edge from a team to an action
     if (!this->lastLine.empty() && !matches.empty()) {
@@ -329,8 +329,8 @@ void File::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch& matches)
             auto p_it = programID.find(program);
             if (team_it != vertexID.end() &&
                 action_it != this->actionID.end() && p_it != programID.end()) {
-                const EvoGraph::TPGVertex* team = team_it->second;
-                const EvoGraph::TPGVertex* action = action_it->second;
+                const EvoGraph::Vertex* team = team_it->second;
+                const EvoGraph::Vertex* action = action_it->second;
                 std::shared_ptr<Program::Program> p = p_it->second;
                 this->tpg.addNewEdge(*team, *action, p);
             }
@@ -338,7 +338,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgramAction(std::smatch& matches)
     }
 }
 
-void File::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch& matches)
+void File::GraphDotImporter::readLinkTeamProgramTeam(std::smatch& matches)
 {
     // creating a edge between two teams
     if (!this->lastLine.empty() && !matches.empty()) {
@@ -356,15 +356,15 @@ void File::TPGGraphDotImporter::readLinkTeamProgramTeam(std::smatch& matches)
             std::shared_ptr<Program::Program> p = p_it->second;
             if (t1_it != this->vertexID.end() &&
                 t2_it != this->vertexID.end()) {
-                const EvoGraph::TPGVertex* team_i = t1_it->second;
-                const EvoGraph::TPGVertex* team_o = t2_it->second;
+                const EvoGraph::Vertex* team_i = t1_it->second;
+                const EvoGraph::Vertex* team_o = t2_it->second;
                 this->tpg.addNewEdge(*team_i, *team_o, p);
             }
         }
     }
 }
 
-void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
+void File::GraphDotImporter::readLinkTeamProgram(std::smatch& matches)
 {
     if (!this->lastLine.empty() && !matches.empty()) {
         uint64_t team_in = std::stoi(matches[1]);
@@ -382,7 +382,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
 
             auto edge_it =
                 std::find_if(edges.begin(), edges.end(),
-                             [p](const std::unique_ptr<EvoGraph::TPGEdge>& other) {
+                             [p](const std::unique_ptr<EvoGraph::Edge>& other) {
                                  return (&(other->getProgram()) == p.get());
                              });
             if (edge_it != edges.end()) // we got the corresponding edge :
@@ -390,7 +390,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
                 // then get the team :
                 auto team_it = this->vertexID.find(team_in);
                 if (team_it != this->vertexID.end()) {
-                    const EvoGraph::TPGVertex* team = team_it->second;
+                    const EvoGraph::Vertex* team = team_it->second;
                     auto edge = this->tpg.addNewEdge(
                         *team, *(edge_it->get()->getDestination()), p);
                 }
@@ -399,7 +399,7 @@ void File::TPGGraphDotImporter::readLinkTeamProgram(std::smatch& matches)
     }
 }
 
-void File::TPGGraphDotImporter::importGraph()
+void File::GraphDotImporter::importGraph()
 {
     // clear every storing objects
     this->tpg.clear();
@@ -443,14 +443,14 @@ void File::TPGGraphDotImporter::importGraph()
     pFile.seekg(0);
 
     // Skip header
-    this->dumpTPGGraphHeader();
+    this->dumpGraphHeader();
     bool read = true;
     while (read) {
         read = this->readLineFromFile();
     }
 }
 
-bool File::TPGGraphDotImporter::readLineFromFile()
+bool File::GraphDotImporter::readLineFromFile()
 {
     char buffer[MAX_READ_SIZE];
 
@@ -510,7 +510,7 @@ bool File::TPGGraphDotImporter::readLineFromFile()
     return true;
 }
 
-void File::TPGGraphDotImporter::setNewFilePath(const char* newFilePath)
+void File::GraphDotImporter::setNewFilePath(const char* newFilePath)
 {
     //  Close previous file
     pFile.close();

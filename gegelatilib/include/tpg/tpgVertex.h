@@ -46,74 +46,74 @@ struct CounterReset;
 
 namespace EvoGraph {
     // Declare class to make it usable as an attribute.
-    class TPGEdge;
+    class Edge;
 
     /**
      * \brief Abstract class representing the vertices of a Graph
      */
-    class TPGVertex
+    class Vertex
     {
       public:
         /// Default polymorphic destructor
-        virtual ~TPGVertex() = default;
+        virtual ~Vertex() = default;
 
         /**
-         * \brief Get a const reference to incoming edges of this TPGVertex.
+         * \brief Get a const reference to incoming edges of this Vertex.
          */
-        const std::list<TPGEdge*>& getIncomingEdges() const;
+        const std::list<Edge*>& getIncomingEdges() const;
 
         /**
-         * \brief Get a const reference to outgoing edges of this TPGVertex.
+         * \brief Get a const reference to outgoing edges of this Vertex.
          */
-        const std::list<TPGEdge*>& getOutgoingEdges() const;
+        const std::list<Edge*>& getOutgoingEdges() const;
 
         /**
-         * \brief Method to add an incoming TPGEdge to the TPGVertex.
+         * \brief Method to add an incoming Edge to the Vertex.
          *
-         * Since the incomingEdges set is a std::set, the same TPGEdge pointer
+         * Since the incomingEdges set is a std::set, the same Edge pointer
          * can not be added twice to the set.
-         * This method does not register the TPGVertex as the destination of the
-         * TPGEdge.
+         * This method does not register the Vertex as the destination of the
+         * Edge.
          *
-         * \param[in] edge the TPGEdge pointer to be added to the incomingEdges
+         * \param[in] edge the Edge pointer to be added to the incomingEdges
          *                 Set.
          */
-        virtual void addIncomingEdge(EvoGraph::TPGEdge* edge);
+        virtual void addIncomingEdge(EvoGraph::Edge* edge);
 
         /**
-         * \brief Removes the given incoming edge from the TPGVertex.
+         * \brief Removes the given incoming edge from the Vertex.
          *
          * If the given pointer is NULL or if the given edge is not in the
-         * set of the TPGVertex, nothing happens. Otherwise, the edge is
+         * set of the Vertex, nothing happens. Otherwise, the edge is
          * removed.
          *
-         * \param[in] edge the TPGEdge to remove.
+         * \param[in] edge the Edge to remove.
          */
-        virtual void removeIncomingEdge(EvoGraph::TPGEdge* edge);
+        virtual void removeIncomingEdge(EvoGraph::Edge* edge);
 
         /**
-         * \brief Method to add an outgoing TPGEdge to the TPGVertex.
+         * \brief Method to add an outgoing Edge to the Vertex.
          *
-         * Since the outgoingEdges set is a std::set, the same TPGEdge pointer
+         * Since the outgoingEdges set is a std::set, the same Edge pointer
          * can not be added twice to the set.
-         * This method does not register the TPGVertex as the spource of the
-         * TPGEdge.
+         * This method does not register the Vertex as the spource of the
+         * Edge.
          *
-         * \param[in] edge the TPGEdge pointer to be added to the outgoingEdges
+         * \param[in] edge the Edge pointer to be added to the outgoingEdges
          *                 Set.
          */
-        virtual void addOutgoingEdge(EvoGraph::TPGEdge* edge);
+        virtual void addOutgoingEdge(EvoGraph::Edge* edge);
 
         /**
-         * \brief Removes the given outgoing edge from the TPGVertex.
+         * \brief Removes the given outgoing edge from the Vertex.
          *
          * If the given pointer is NULL or if the given edge is not in the
-         * set of the TPGVertex, nothing happens. Otherwise, the edge is
+         * set of the Vertex, nothing happens. Otherwise, the edge is
          * removed.
          *
-         * \param[in] edge the TPGEdge to remove.
+         * \param[in] edge the Edge to remove.
          */
-        virtual void removeOutgoingEdge(EvoGraph::TPGEdge* edge);
+        virtual void removeOutgoingEdge(EvoGraph::Edge* edge);
 
         /**
          * \brief return assessed actions
@@ -133,16 +133,16 @@ namespace EvoGraph {
         virtual bool hasSameAssessedActions(std::set<uint64_t> actions) const;
 
         /**
-         * \brief Get the unique identifier of the TPGVertex.
+         * \brief Get the unique identifier of the Vertex.
          *
-         * \return the integer ID of the TPGVertex.
+         * \return the integer ID of the Vertex.
          */
         virtual uint64_t getVertexID() const;
 
         /**
-         * \brief Set a new unique identifier to the TPGVertex.
+         * \brief Set a new unique identifier to the Vertex.
          *
-         * \param[in] newID the new integer ID to set to the TPGVertex.
+         * \param[in] newID the new integer ID to set to the Vertex.
          */
         virtual void setVertexID(uint64_t newID);
 
@@ -161,17 +161,17 @@ namespace EvoGraph {
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          */
-        TPGVertex() : vertexID(incrementeCounter()){};
+        Vertex() : vertexID(incrementeCounter()){};
 
         /**
-         * \brief Set of incoming TPGEdge of the TPGVertex.
+         * \brief Set of incoming Edge of the Vertex.
          */
-        std::list<EvoGraph::TPGEdge*> incomingEdges;
+        std::list<EvoGraph::Edge*> incomingEdges;
 
         /**
-         * \brief Set of outgoing TPGEdge of the TPGVertex.
+         * \brief Set of outgoing Edge of the Vertex.
          */
-        std::list<EvoGraph::TPGEdge*> outgoingEdges;
+        std::list<EvoGraph::Edge*> outgoingEdges;
 
         /**
          * \brief Set of assessed actions by the team
@@ -179,7 +179,7 @@ namespace EvoGraph {
         std::set<uint64_t> assessedActions;
 
         /**
-         * \brief Unique identifier of the TPGVertex.
+         * \brief Unique identifier of the Vertex.
          */
         uint64_t vertexID;
 
@@ -199,10 +199,10 @@ namespace EvoGraph {
     };
 
     /**
-     * \brief Comparison function to enable sorting of TPGVertex with
+     * \brief Comparison function to enable sorting of Vertex with
      * STL.
      */
-    bool operator<(const TPGVertex& a, const TPGVertex& b);
+    bool operator<(const Vertex& a, const Vertex& b);
 
 }; // namespace EvoGraph
 

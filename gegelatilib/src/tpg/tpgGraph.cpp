@@ -65,12 +65,12 @@ const Environment& EvoGraph::Graph::getEnvironment() const
     return this->env;
 }
 
-const EvoGraph::TPGFactory& EvoGraph::Graph::getFactory() const
+const EvoGraph::GraphFactory& EvoGraph::Graph::getFactory() const
 {
     return *this->factory;
 }
 
-void EvoGraph::Graph::setNewVertexID(const EvoGraph::TPGVertex& vertex, uint64_t newID)
+void EvoGraph::Graph::setNewVertexID(const EvoGraph::Vertex& vertex, uint64_t newID)
 {
     // Check that the vertex to modify exists in the graph
     auto vertexIterator = vertices.find(&vertex);
@@ -100,10 +100,10 @@ const EvoGraph::TPGTeam& EvoGraph::Graph::addNewTeam()
     return (const TPGTeam&)(*this->vertices.rbegin()->get());
 }
 
-const EvoGraph::TPGAction& EvoGraph::Graph::addNewAction(uint64_t actionID)
+const EvoGraph::Action& EvoGraph::Graph::addNewAction(uint64_t actionID)
 {
-    this->vertices.insert(factory->createTPGAction(actionID));
-    return (const TPGAction&)(*this->vertices.rbegin()->get());
+    this->vertices.insert(factory->createAction(actionID));
+    return (const Action&)(*this->vertices.rbegin()->get());
 }
 
 size_t EvoGraph::Graph::getNbVertices() const
@@ -111,14 +111,14 @@ size_t EvoGraph::Graph::getNbVertices() const
     return this->vertices.size();
 }
 
-const std::vector<const EvoGraph::TPGVertex*> EvoGraph::Graph::getVertices() const
+const std::vector<const EvoGraph::Vertex*> EvoGraph::Graph::getVertices() const
 {
-    std::vector<const EvoGraph::TPGVertex*> result;
+    std::vector<const EvoGraph::Vertex*> result;
     result.reserve(this->vertices.size());
 
     std::transform(this->vertices.begin(), this->vertices.end(),
                    std::back_inserter(result),
-                   [](const std::unique_ptr<TPGVertex>& v) { return v.get(); });
+                   [](const std::unique_ptr<Vertex>& v) { return v.get(); });
 
     return result;
 }
@@ -126,18 +126,18 @@ const std::vector<const EvoGraph::TPGVertex*> EvoGraph::Graph::getVertices() con
 uint64_t EvoGraph::Graph::getNbRootVertices() const
 {
     return std::count_if(this->vertices.begin(), this->vertices.end(),
-                         [](const std::unique_ptr<TPGVertex>& vertex) {
+                         [](const std::unique_ptr<Vertex>& vertex) {
                              return vertex->getIncomingEdges().empty();
                          });
 }
 
-const std::vector<const EvoGraph::TPGAction*> EvoGraph::Graph::getRootActions() const
+const std::vector<const EvoGraph::Action*> EvoGraph::Graph::getRootActions() const
 {
-    std::vector<const EvoGraph::TPGAction*> result;
+    std::vector<const EvoGraph::Action*> result;
     for (auto& vertex : this->vertices) {
         if (vertex->getIncomingEdges().empty() &&
-            dynamic_cast<const EvoGraph::TPGAction*>(vertex.get()) != nullptr) {
-            result.push_back(dynamic_cast<const EvoGraph::TPGAction*>(vertex.get()));
+            dynamic_cast<const EvoGraph::Action*>(vertex.get()) != nullptr) {
+            result.push_back(dynamic_cast<const EvoGraph::Action*>(vertex.get()));
         }
     }
     return result;
@@ -155,9 +155,9 @@ const std::vector<const EvoGraph::TPGTeam*> EvoGraph::Graph::getRootTeams() cons
     return result;
 }
 
-const std::vector<const EvoGraph::TPGVertex*> EvoGraph::Graph::getRootVertices() const
+const std::vector<const EvoGraph::Vertex*> EvoGraph::Graph::getRootVertices() const
 {
-    std::vector<const EvoGraph::TPGVertex*> result;
+    std::vector<const EvoGraph::Vertex*> result;
     for (auto& vertex : this->vertices) {
         if (vertex->getIncomingEdges().empty()) {
             result.push_back(vertex.get());
@@ -166,15 +166,15 @@ const std::vector<const EvoGraph::TPGVertex*> EvoGraph::Graph::getRootVertices()
     return result;
 }
 
-bool EvoGraph::Graph::hasVertex(const TPGVertex& vertex) const
+bool EvoGraph::Graph::hasVertex(const Vertex& vertex) const
 {
     return std::any_of(vertices.begin(), vertices.end(),
-                       [&vertex](const std::unique_ptr<TPGVertex>& vptr) {
+                       [&vertex](const std::unique_ptr<Vertex>& vptr) {
                            return vptr.get() == &vertex;
                        });
 }
 
-void EvoGraph::Graph::removeVertex(const TPGVertex& vertex)
+void EvoGraph::Graph::removeVertex(const Vertex& vertex)
 {
     // Remove the vertex based on a pointer comparison.
     auto iterator = vertices.find(&vertex);
@@ -182,12 +182,12 @@ void EvoGraph::Graph::removeVertex(const TPGVertex& vertex)
         // Remove all connected edges.
         // copy inEdges set for removal
         // (because iterating on the modified set is not a good idea).
-        std::list<TPGEdge*> inEdgesToRemove = (*iterator)->getIncomingEdges();
+        std::list<Edge*> inEdgesToRemove = (*iterator)->getIncomingEdges();
         for (auto inEdge : inEdgesToRemove) {
             this->removeEdge(*inEdge);
         }
         // copy outEdges set for removal
-        std::list<TPGEdge*> outEdgesToRemove = (*iterator)->getOutgoingEdges();
+        std::list<Edge*> outEdgesToRemove = (*iterator)->getOutgoingEdges();
         for (auto outEdge : outEdgesToRemove) {
             this->removeEdge(*outEdge);
         }
@@ -202,7 +202,7 @@ void EvoGraph::Graph::removeVertex(const TPGVertex& vertex)
     }
 }
 
-const EvoGraph::TPGVertex& EvoGraph::Graph::cloneVertex(const TPGVertex& vertex)
+const EvoGraph::Vertex& EvoGraph::Graph::cloneVertex(const Vertex& vertex)
 {
     // Check that the vertex to clone exists in the graph
     auto vertexIterator = vertices.find(&vertex);
@@ -217,21 +217,21 @@ const EvoGraph::TPGVertex& EvoGraph::Graph::cloneVertex(const TPGVertex& vertex)
     if (dynamic_cast<const EvoGraph::TPGTeam*>(&vertex) != nullptr) {
         this->addNewTeam();
     }
-    else if (dynamic_cast<const EvoGraph::TPGAction*>(&vertex) != nullptr) {
-        this->addNewAction(((TPGAction&)vertex).getActionID());
+    else if (dynamic_cast<const EvoGraph::Action*>(&vertex) != nullptr) {
+        this->addNewAction(((Action&)vertex).getActionID());
     }
 
     // Get the new vertex
-    TPGVertex* newVertex = this->vertices.rbegin()->get();
+    Vertex* newVertex = this->vertices.rbegin()->get();
 
     // Copy the outgoing edges (if any).
     for (auto edge : vertex.getOutgoingEdges()) {
 
-        if (dynamic_cast<EvoGraph::TPGActionEdge*>(edge) != nullptr) {
+        if (dynamic_cast<EvoGraph::ActionEdge*>(edge) != nullptr) {
 
             // If action edge, create new action edge, else create new standard
             // edge.
-            EvoGraph::TPGActionEdge* actionEdge = dynamic_cast<TPGActionEdge*>(edge);
+            EvoGraph::ActionEdge* actionEdge = dynamic_cast<ActionEdge*>(edge);
             this->addNewActionEdge(*newVertex,
                                    actionEdge->getProgramSharedPointer(),
                                    actionEdge->getActionClass());
@@ -250,7 +250,7 @@ const EvoGraph::TPGVertex& EvoGraph::Graph::cloneVertex(const TPGVertex& vertex)
     return *newVertex;
 }
 
-void EvoGraph::Graph::setNewEdgeID(const EvoGraph::TPGEdge& edge, uint64_t newID)
+void EvoGraph::Graph::setNewEdgeID(const EvoGraph::Edge& edge, uint64_t newID)
 {
     // Check that the edge to modify exists in the graph
     auto edgeIterator = edges.find(&edge);
@@ -273,23 +273,23 @@ void EvoGraph::Graph::setNewEdgeID(const EvoGraph::TPGEdge& edge, uint64_t newID
     edges.insert(std::move(tmp));
 }
 
-const EvoGraph::TPGEdge& EvoGraph::Graph::addNewEdge(
-    const TPGVertex& src, const TPGVertex& dest,
+const EvoGraph::Edge& EvoGraph::Graph::addNewEdge(
+    const Vertex& src, const Vertex& dest,
     const std::shared_ptr<Program::Program> prog)
 {
-    // Check the TPGVertex existence within the graph.
+    // Check the Vertex existence within the graph.
     auto srcVertex = this->vertices.find(&src);
     auto dstVertex = this->vertices.find(&dest);
 
     if (dstVertex == this->vertices.end() || dstVertex->get() != &dest ||
         srcVertex == this->vertices.end() || srcVertex->get() != &src) {
-        throw std::runtime_error("Attempting to add a TPGEdge between vertices "
+        throw std::runtime_error("Attempting to add a Edge between vertices "
                                  "not present in the Graph.");
     }
 
     // Create the edge
-    this->edges.insert(factory->createTPGEdge(&src, &dest, prog));
-    TPGEdge& newEdge = *(this->edges.rbegin()->get());
+    this->edges.insert(factory->createEdge(&src, &dest, prog));
+    Edge& newEdge = *(this->edges.rbegin()->get());
 
     // Add the edged to the Vertices
     try {
@@ -307,27 +307,27 @@ const EvoGraph::TPGEdge& EvoGraph::Graph::addNewEdge(
     return newEdge;
 }
 
-const EvoGraph::TPGEdge& EvoGraph::Graph::addNewActionEdge(
-    const TPGVertex& src, const std::shared_ptr<Program::Program> prog,
+const EvoGraph::Edge& EvoGraph::Graph::addNewActionEdge(
+    const Vertex& src, const std::shared_ptr<Program::Program> prog,
     uint64_t actionClass)
 {
-    // Check the TPGVertex existence within the graph.
+    // Check the Vertex existence within the graph.
     auto srcVertex = this->vertices.find(&src);
 
     if (srcVertex == this->vertices.end() || srcVertex->get() != &src) {
         throw std::runtime_error(
-            "Attempting to add a TPGActionEdge with a vertex "
+            "Attempting to add a ActionEdge with a vertex "
             "not present in the Graph.");
     }
-    else if (dynamic_cast<EvoGraph::TPGAction*>(srcVertex->get()) == nullptr) {
+    else if (dynamic_cast<EvoGraph::Action*>(srcVertex->get()) == nullptr) {
         throw std::runtime_error(
-            "Attempting to add a TPGActionEdge with a vertex "
+            "Attempting to add a ActionEdge with a vertex "
             "that is a team.");
     }
 
     // Create the edge
-    this->edges.insert(factory->createTPGActionEdge(&src, prog, actionClass));
-    TPGEdge& newEdge = *(this->edges.rbegin()->get());
+    this->edges.insert(factory->createActionEdge(&src, prog, actionClass));
+    Edge& newEdge = *(this->edges.rbegin()->get());
 
     (*srcVertex)->addOutgoingEdge(&newEdge);
 
@@ -338,13 +338,13 @@ const EvoGraph::TPGEdge& EvoGraph::Graph::addNewActionEdge(
     return newEdge;
 }
 
-const std::set<std::unique_ptr<EvoGraph::TPGEdge>, UniqueLess<EvoGraph::TPGEdge>>& EvoGraph::
+const std::set<std::unique_ptr<EvoGraph::Edge>, UniqueLess<EvoGraph::Edge>>& EvoGraph::
     Graph::getEdges() const
 {
     return this->edges;
 }
 
-void EvoGraph::Graph::removeEdge(const TPGEdge& edge)
+void EvoGraph::Graph::removeEdge(const Edge& edge)
 {
 
     // Get the edge (if it is in the graph)
@@ -356,7 +356,7 @@ void EvoGraph::Graph::removeEdge(const TPGEdge& edge)
             "Cannot erase a edge that does not belong to the graph");
     }
 
-    if (dynamic_cast<const TPGActionEdge*>(iterator->get()) != nullptr) {
+    if (dynamic_cast<const ActionEdge*>(iterator->get()) != nullptr) {
         return this->removeActionEdge(edge);
     }
 
@@ -369,7 +369,7 @@ void EvoGraph::Graph::removeEdge(const TPGEdge& edge)
     // If destination is an action and should became a root, it is deleted if
     // the environment is continuous and does not use action program
     if (env.getNbContinuousActions() > 0 &&
-        dynamic_cast<const EvoGraph::TPGAction*>(destination) != nullptr &&
+        dynamic_cast<const EvoGraph::Action*>(destination) != nullptr &&
         destination->getIncomingEdges().size() == 0) {
 
         this->removeVertex(*destination);
@@ -379,7 +379,7 @@ void EvoGraph::Graph::removeEdge(const TPGEdge& edge)
     this->edges.erase(iterator);
 }
 
-void EvoGraph::Graph::removeActionEdge(const TPGEdge& edge)
+void EvoGraph::Graph::removeActionEdge(const Edge& edge)
 {
     // Get the edge (if it is in the graph)
     auto iterator = this->edges.find(&edge);
@@ -397,16 +397,16 @@ void EvoGraph::Graph::removeActionEdge(const TPGEdge& edge)
     this->edges.erase(iterator);
 }
 
-const EvoGraph::TPGEdge& EvoGraph::Graph::cloneEdge(const TPGEdge& edge)
+const EvoGraph::Edge& EvoGraph::Graph::cloneEdge(const Edge& edge)
 {
     auto iterEdge = this->edges.find(&edge);
     if (iterEdge == this->edges.end() || iterEdge->get() != &edge) {
         throw std::runtime_error(
             "Cannot duplicate an Edge not belonging to the graph.");
     }
-    else if (dynamic_cast<const TPGActionEdge*>(iterEdge->get()) != nullptr) {
-        const EvoGraph::TPGActionEdge* actionEdge =
-            dynamic_cast<const TPGActionEdge*>(iterEdge->get());
+    else if (dynamic_cast<const ActionEdge*>(iterEdge->get()) != nullptr) {
+        const EvoGraph::ActionEdge* actionEdge =
+            dynamic_cast<const ActionEdge*>(iterEdge->get());
         return this->addNewActionEdge(
             *actionEdge->getSource(),
             iterEdge->get()->getProgramSharedPointer(),
@@ -419,8 +419,8 @@ const EvoGraph::TPGEdge& EvoGraph::Graph::cloneEdge(const TPGEdge& edge)
     }
 }
 
-bool EvoGraph::Graph::setEdgeDestination(const TPGEdge& edge,
-                                       const TPGVertex& newDest)
+bool EvoGraph::Graph::setEdgeDestination(const Edge& edge,
+                                       const Vertex& newDest)
 {
     // Find the edge and vertex
     auto iterNewDestination = this->vertices.find(&newDest);
@@ -429,7 +429,7 @@ bool EvoGraph::Graph::setEdgeDestination(const TPGEdge& edge,
         iterEdge != this->edges.end() &&
         iterNewDestination->get() == &newDest && iterEdge->get() == &edge) {
         // Unregister the edge from the old destination
-        const EvoGraph::TPGVertex* oldDestination =
+        const EvoGraph::Vertex* oldDestination =
             iterEdge->get()->getDestination();
         auto iterOldDest = this->vertices.find(oldDestination);
         // finding the vertex should not fail. Otherwise, the exception for
@@ -447,7 +447,7 @@ bool EvoGraph::Graph::setEdgeDestination(const TPGEdge& edge,
     }
 }
 
-bool EvoGraph::Graph::setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc)
+bool EvoGraph::Graph::setEdgeSource(const Edge& edge, const Vertex& newSrc)
 {
     // Find the edge and vertex
     auto iterNewSrc = this->vertices.find(&newSrc);
@@ -455,7 +455,7 @@ bool EvoGraph::Graph::setEdgeSource(const TPGEdge& edge, const TPGVertex& newSrc
     if (iterNewSrc != this->vertices.end() && iterEdge != this->edges.end() &&
         iterNewSrc->get() == &newSrc && iterEdge->get() == &edge) {
         // Unregister the edge from the old source
-        const EvoGraph::TPGVertex* oldSrc = iterEdge->get()->getSource();
+        const EvoGraph::Vertex* oldSrc = iterEdge->get()->getSource();
         auto iterOldSrc = this->vertices.find(oldSrc);
         // finding the vertex should not fail. Otherwise, the exception for
         // next line would be well deserved since it means an edge in the
@@ -479,18 +479,18 @@ void EvoGraph::Graph::clearProgramIntrons()
     }
 }
 
-void EvoGraph::Graph::setActionClassEdge(const TPGEdge* edge,
+void EvoGraph::Graph::setActionClassEdge(const Edge* edge,
                                        uint64_t newActionClass)
 {
     auto it = this->edges.find(edge);
 
     if (it != this->edges.end() && it->get() == edge) {
-        if (dynamic_cast<EvoGraph::TPGActionEdge*>(it->get()) == nullptr) {
+        if (dynamic_cast<EvoGraph::ActionEdge*>(it->get()) == nullptr) {
             throw std::runtime_error(
                 "Trying to set an action class on a context edge");
         }
         // Found the edge, modify it as needed
-        dynamic_cast<EvoGraph::TPGActionEdge*>(it->get())->setActionClass(
+        dynamic_cast<EvoGraph::ActionEdge*>(it->get())->setActionClass(
             newActionClass);
     }
     else {
@@ -498,9 +498,9 @@ void EvoGraph::Graph::setActionClassEdge(const TPGEdge* edge,
     }
 }
 
-void EvoGraph::Graph::updateAssessedActions(const EvoGraph::TPGVertex* vertex)
+void EvoGraph::Graph::updateAssessedActions(const EvoGraph::Vertex* vertex)
 {
-    std::queue<const EvoGraph::TPGVertex*> vertexToUpdate;
+    std::queue<const EvoGraph::Vertex*> vertexToUpdate;
     vertexToUpdate.push(vertex);
 
     while (!vertexToUpdate.empty()) {
@@ -532,19 +532,19 @@ void EvoGraph::Graph::updateAllAssessedActions()
     // Launch update method for all actions.
     // All teams should be linked to actions, even not directly.
     for (const auto& vertex : this->vertices) {
-        if (dynamic_cast<TPGAction*>(vertex.get()) != nullptr) {
+        if (dynamic_cast<Action*>(vertex.get()) != nullptr) {
             this->updateAssessedActions(vertex.get());
         }
     }
 }
 
-void EvoGraph::Graph::orderActionEdges(const EvoGraph::TPGAction* action)
+void EvoGraph::Graph::orderActionEdges(const EvoGraph::Action* action)
 {
     auto it = this->vertices.find(action);
 
     if (it != this->vertices.end() && it->get() == action) {
         // Found the vertex, modify it as needed
-        dynamic_cast<EvoGraph::TPGAction*>(it->get())->orderActionEdges();
+        dynamic_cast<EvoGraph::Action*>(it->get())->orderActionEdges();
     }
     else {
         throw std::runtime_error("Action to order not in the graph.");

@@ -83,14 +83,14 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
         useMainEnvironment ? &this->learningEnvironment
                            : this->learningEnvironment.clone();
 
-    // Create a TPGExecutionEngine
+    // Create a ExecutionEngine
     Environment privateEnv(this->env.getInstructionSet(), params,
                            privateLearningEnvironment->getDataSources(),
                            (privateLearningEnvironment->isDiscrete())
                                ? 0
                                : privateLearningEnvironment->getNbActions());
-    std::unique_ptr<EvoGraph::TPGExecutionEngine> tee =
-        this->graph->getFactory().createTPGExecutionEngine(privateEnv, NULL);
+    std::unique_ptr<EvoGraph::ExecutionEngine> tee =
+        this->graph->getFactory().createExecutionEngine(privateEnv, NULL);
 
     int i = 0;
     // Pop a job

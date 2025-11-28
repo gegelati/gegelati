@@ -13,7 +13,7 @@ class MapElitesDescriptorsTest : public ::testing::Test
     FakeMultiContinuousLearningEnvironment env;
     std::shared_ptr<Selector::MapElites::DefaultDescriptors::ActionValues>
         descriptor;
-    const EvoGraph::TPGVertex* dummyAgent;
+    const EvoGraph::Vertex* dummyAgent;
     Environment* e = NULL;
     Learn::LearningParameters params;
     Instructions::Set set;
@@ -56,7 +56,7 @@ class FakeDescriptor : public Selector::MapElites::MapElitesDescriptor
 TEST_F(MapElitesDescriptorsTest, EmptyMethods)
 {
     FakeDescriptor fakeD;
-    const EvoGraph::TPGVertex* fakeAgent = nullptr;
+    const EvoGraph::Vertex* fakeAgent = nullptr;
 
     std::vector<double> metrics(1, 0.0);
     fakeD.extractMetricsStep(metrics, fakeAgent, {0.4, 0.2, 1.0}, env);
@@ -91,7 +91,7 @@ TEST_F(MapElitesDescriptorsTest,
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
-    const EvoGraph::TPGVertex* fakeAgent = nullptr;
+    const EvoGraph::Vertex* fakeAgent = nullptr;
 
     std::vector<double> actions1 = {0.5, -0.2, 1.0};
     std::vector<double> actions2 = {0.1, -0.8, -0.4};
@@ -110,7 +110,7 @@ TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeConvertsSumToAverage)
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
-    const EvoGraph::TPGVertex* fakeAgent = nullptr;
+    const EvoGraph::Vertex* fakeAgent = nullptr;
 
     // Simulate 4 steps
     descriptor->extractMetricsStep(metrics, fakeAgent, {0.4, 0.2, 1.0}, env);
@@ -132,7 +132,7 @@ TEST_F(MapElitesDescriptorsTest, ExtractMetricsEpisodeWithOneStep)
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
-    const EvoGraph::TPGVertex* fakeAgent = nullptr;
+    const EvoGraph::Vertex* fakeAgent = nullptr;
     descriptor->extractMetricsStep(metrics, fakeAgent, {0.7, 0.3, 1.5}, env);
     descriptor->extractMetricsEpisode(metrics, fakeAgent, 1, env);
 
@@ -147,7 +147,7 @@ TEST_F(MapElitesDescriptorsTest, DoesNotCrashOnZeroMetricsBeforeEpisode)
     size_t n = descriptor->getNbDescriptors();
     std::vector<double> metrics(n, 0.0);
 
-    const EvoGraph::TPGVertex* fakeAgent = nullptr;
+    const EvoGraph::Vertex* fakeAgent = nullptr;
     EXPECT_NO_THROW(
         descriptor->extractMetricsEpisode(metrics, fakeAgent, 5, env));
 

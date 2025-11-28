@@ -90,7 +90,7 @@ class Archive
      * The randomness engine should be reset with a new seed before entering a
      * parallelizable part of the computations (even if these computations are
      * done sequentially). As a more concrete example, if each policy starting
-     * from a root TPGVertex in a Graph is evaluated in parallel, the
+     * from a root Vertex in a Graph is evaluated in parallel, the
      * randomEngine should be reset before each root.
      */
     RNG::RNG rng;

@@ -61,7 +61,7 @@ namespace File {
      * \brief Class used to import a TPG graph from a dot file.
      * It should be able to import a whole Learning agent object.
      */
-    class TPGGraphDotImporter
+    class GraphDotImporter
     {
       protected:
         /**
@@ -87,19 +87,19 @@ namespace File {
         EvoGraph::Graph& tpg;
 
         /**
-         * \brief Map associating pointers to TPGVertex to an integer ID.
+         * \brief Map associating pointers to Vertex to an integer ID.
          *
          * This map is used to associate an unique id to a tpg vertex and to
          * keep track of the pointers while restoring the Graph described in
          * a dot file
          */
-        std::map<uint64_t, const EvoGraph::TPGVertex*> vertexID;
+        std::map<uint64_t, const EvoGraph::Vertex*> vertexID;
 
         /**
-         * \brief Map associating pointers to TPGAction to a vector of integer
+         * \brief Map associating pointers to Action to a vector of integer
          * action class.
          */
-        std::map<const EvoGraph::TPGAction*, std::vector<uint64_t>> actionClasses;
+        std::map<const EvoGraph::Action*, std::vector<uint64_t>> actionClasses;
 
         /**
          * \brief Map associating pointers to Program to an integer ID.
@@ -111,13 +111,13 @@ namespace File {
         std::map<uint64_t, std::shared_ptr<Program::Program>> programID;
 
         /**
-         * \brief Map associating pointers to TPGVertex representing actions
+         * \brief Map associating pointers to Vertex representing actions
          * to the corresponding action
          *
          * This map is used to ensure that identical actions are not created
          * more than once.
          */
-        std::map<uint64_t, const EvoGraph::TPGAction*> actionID;
+        std::map<uint64_t, const EvoGraph::Action*> actionID;
 
         /**
          * \brief string used to spot the end of a line in the program
@@ -373,7 +373,7 @@ namespace File {
          * The header of the dot file contains no relevant informations to build
          * the model
          */
-        void dumpTPGGraphHeader();
+        void dumpGraphHeader();
 
         /**
          * \brief reads and creates a TPGTeam.
@@ -381,7 +381,7 @@ namespace File {
         void readTeam(std::smatch& matches);
 
         /**
-         * \brief reads and creates a TPGAction.
+         * \brief reads and creates a Action.
          */
         void readAction(std::smatch& matches);
 
@@ -434,7 +434,7 @@ namespace File {
          * \throws std::runtime_error in case no file could be
          * opened at the given filePath.
          */
-        TPGGraphDotImporter(const char* filePath, Environment environment,
+        GraphDotImporter(const char* filePath, Environment environment,
                             EvoGraph::Graph& tpgref)
             : env{environment}, tpg{tpgref}
         {
@@ -457,7 +457,7 @@ namespace File {
          *
          * Closes the file.
          */
-        ~TPGGraphDotImporter()
+        ~GraphDotImporter()
         {
             if (pFile.is_open()) {
                 pFile.close();

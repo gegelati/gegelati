@@ -44,21 +44,21 @@
 namespace EvoGraph {
 
     /**
-     * \brief Instrumented TPGEdge class to keep track of a TPG execution
+     * \brief Instrumented Edge class to keep track of a TPG execution
      * statistics.
      */
-    class TPGEdgeInstrumented : public TPGEdge
+    class EdgeInstrumented : public Edge
     {
       public:
         /// Default constructor
-        TPGEdgeInstrumented(const TPGVertex* src, const TPGVertex* dest,
+        EdgeInstrumented(const Vertex* src, const Vertex* dest,
                             const std::shared_ptr<Program::Program> prog)
-            : TPGEdge(src, dest, prog), nbVisits{0}, nbTraversal{0}
+            : Edge(src, dest, prog), nbVisits{0}, nbTraversal{0}
         {
         }
 
         /**
-         * \brief Get the number of time a TPGEdge was visited.
+         * \brief Get the number of time a Edge was visited.
          *
          * That is the number of time it caused an execution of its program.
          */
@@ -66,12 +66,12 @@ namespace EvoGraph {
 
         /**
          * \brief Add one to the number of visits for this
-         * TPGEdge
+         * Edge
          */
         void incrementNbVisits() const;
 
         /**
-         * \brief Get the number of time a TPGEdge was traversed.
+         * \brief Get the number of time a Edge was traversed.
          *
          * That is the number of time its program produced the winning bid.
          */
@@ -79,7 +79,7 @@ namespace EvoGraph {
 
         /**
          * \brief Add one to the number of traversal for this
-         * TPGEdge
+         * Edge
          */
         void incrementNbTraversal() const;
 
@@ -89,15 +89,15 @@ namespace EvoGraph {
         void reset() const;
 
       protected:
-        /// Number of a time a TPGEdge has been visited
+        /// Number of a time a Edge has been visited
         /// That is the number of time it caused an execution of its program.
-        /// Attribute is mutable because all TPGEdge are seen as const outside
+        /// Attribute is mutable because all Edge are seen as const outside
         /// from their Graph.
         mutable std::atomic_uint64_t nbVisits;
 
-        /// Number of a time a TPGEdge has been traversed
+        /// Number of a time a Edge has been traversed
         /// That is the number of time its program produced the winning bid.
-        /// Attribute is mutable because all TPGEdge are seen as const outside
+        /// Attribute is mutable because all Edge are seen as const outside
         /// from their Graph.
         mutable std::atomic_uint64_t nbTraversal;
     };

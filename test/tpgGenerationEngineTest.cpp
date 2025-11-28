@@ -221,8 +221,8 @@ TEST_F(TPGGenerationEngineTest, TPGGenerationEngineFactoryCreateNoMode)
 
 TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
 {
-    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::Vertex* root = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> progA(
         new Program::Program(*e, false));
@@ -240,7 +240,7 @@ TEST_F(TPGGenerationEngineTest, OneLeafNoInstruction)
 
     CodeGen::TPGGenerationEngineFactory factory;
     tpgGen = factory.create("OneLeafNoInstruction", *tpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
 
@@ -298,8 +298,8 @@ std::string executableExtension = " ";
     }
 
 TEST_BOTH_MODE(OneLeaf, {
-    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::Vertex* root = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -322,7 +322,7 @@ TEST_BOTH_MODE(OneLeaf, {
     ASSERT_EQ(tpg->getEdges().size(), 1) << "bad number of edges in OneLeaf";
 
     tpgGen = factory.create("OneLeaf", *tpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
     cmdCompile += "OneLeaf";
@@ -337,9 +337,9 @@ TEST_BOTH_MODE(OneLeaf, {
 });
 
 TEST_BOTH_MODE(TwoLeaves, {
-    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
-    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::Vertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::Vertex* root = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -370,7 +370,7 @@ TEST_BOTH_MODE(TwoLeaves, {
     ASSERT_EQ(tpg->getEdges().size(), 2) << "bad number of edges in TwoLeaves";
 
     tpgGen = factory.create("TwoLeaves", *tpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
     cmdCompile += "TwoLeaves";
@@ -386,10 +386,10 @@ TEST_BOTH_MODE(TwoLeaves, {
 
 TEST_BOTH_MODE(ThreeLeaves, {
     // P1 < P2 = P3
-    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
-    const EvoGraph::TPGVertex* leaf3 = (&tpg->addNewAction(3));
-    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::Vertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::Vertex* leaf3 = (&tpg->addNewAction(3));
+    const EvoGraph::Vertex* root = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -432,7 +432,7 @@ TEST_BOTH_MODE(ThreeLeaves, {
         << "bad number of edges in ThreeLeaves.";
 
     tpgGen = factory.create("ThreeLeaves", *tpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
     cmdCompile += "ThreeLeaves";
@@ -448,9 +448,9 @@ TEST_BOTH_MODE(ThreeLeaves, {
 });
 
 TEST_BOTH_MODE(OneTeamOneLeaf, {
-    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::Vertex* root = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* leaf = (&tpg->addNewAction(1));
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -470,8 +470,8 @@ TEST_BOTH_MODE(OneTeamOneLeaf, {
     prog2L1.setOperand(0, 1, 0);
     prog2L1.setOperand(1, 1, 1);
 
-    EvoGraph::TPGEdge edge1 = tpg->addNewEdge(*root, *T1, prog1);
-    EvoGraph::TPGEdge edge2 = tpg->addNewEdge(*T1, *leaf, prog2);
+    EvoGraph::Edge edge1 = tpg->addNewEdge(*root, *T1, prog1);
+    EvoGraph::Edge edge2 = tpg->addNewEdge(*T1, *leaf, prog2);
 
     ASSERT_EQ(tpg->getNbRootVertices(), 1)
         << "number of root is not 1 in OneTeamOneLeaf";
@@ -483,7 +483,7 @@ TEST_BOTH_MODE(OneTeamOneLeaf, {
         << "bad number of edges in OneTeamOneLeaf";
 
     tpgGen = factory.create("OneTeamOneLeaf", *tpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
     cmdCompile += "OneTeamOneLeaf";
@@ -499,10 +499,10 @@ TEST_BOTH_MODE(OneTeamOneLeaf, {
 });
 
 TEST_BOTH_MODE(OneTeamTwoLeaves, {
-    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::Vertex* root = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::Vertex* leaf2 = (&tpg->addNewAction(2));
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -544,7 +544,7 @@ TEST_BOTH_MODE(OneTeamTwoLeaves, {
         << "bad number of edges in OneTeamTwoLeaves";
 
     tpgGen = factory.create("OneTeamTwoLeaves", *tpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
     cmdCompile += "OneTeamTwoLeaves";
@@ -561,11 +561,11 @@ TEST_BOTH_MODE(OneTeamTwoLeaves, {
 });
 
 TEST_BOTH_MODE(TwoTeams, {
-    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* T2 = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::Vertex* root = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* T2 = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::Vertex* leaf2 = (&tpg->addNewAction(2));
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -616,7 +616,7 @@ TEST_BOTH_MODE(TwoTeams, {
     ASSERT_EQ(tpg->getEdges().size(), 4) << "bad number of edges in TwoTeams";
 
     tpgGen = factory.create("TwoTeams", *tpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
 
@@ -632,12 +632,12 @@ TEST_BOTH_MODE(TwoTeams, {
 });
 
 TEST_BOTH_MODE(TwoTeamsNegativeBid, {
-    const EvoGraph::TPGVertex* root = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* T2 = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* leaf = (&tpg->addNewAction(1));
-    const EvoGraph::TPGVertex* leaf2 = (&tpg->addNewAction(2));
-    const EvoGraph::TPGVertex* leaf3 = (&tpg->addNewAction(3));
+    const EvoGraph::Vertex* root = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* T2 = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* leaf = (&tpg->addNewAction(1));
+    const EvoGraph::Vertex* leaf2 = (&tpg->addNewAction(2));
+    const EvoGraph::Vertex* leaf3 = (&tpg->addNewAction(3));
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -700,7 +700,7 @@ TEST_BOTH_MODE(TwoTeamsNegativeBid, {
         << "bad number of edges in TwoTeamsNegativeBid";
 
     tpgGen = factory.create("TwoTeamsNegativeBid", *tpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
 
@@ -729,12 +729,12 @@ static void setProgLine(const std::shared_ptr<Program::Program> prog,
 }
 
 TEST_BOTH_MODE(ThreeTeamsThreeLeaves, {
-    const EvoGraph::TPGVertex* A1 = (&tpg->addNewAction(1));
-    const EvoGraph::TPGVertex* A2 = (&tpg->addNewAction(2));
-    const EvoGraph::TPGVertex* A0 = (&tpg->addNewAction(0));
-    const EvoGraph::TPGVertex* T1 = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* T2 = (&tpg->addNewTeam());
-    const EvoGraph::TPGVertex* T3 = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* A1 = (&tpg->addNewAction(1));
+    const EvoGraph::Vertex* A2 = (&tpg->addNewAction(2));
+    const EvoGraph::Vertex* A0 = (&tpg->addNewAction(0));
+    const EvoGraph::Vertex* T1 = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* T2 = (&tpg->addNewTeam());
+    const EvoGraph::Vertex* T3 = (&tpg->addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(*e, false));
@@ -781,7 +781,7 @@ TEST_BOTH_MODE(ThreeTeamsThreeLeaves, {
         << "bad number of edges in ThreeTeamsThreeLeaves";
 
     tpgGen = factory.create("ThreeTeamsThreeLeaves", *tpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
     cmdCompile += "ThreeTeamsThreeLeaves";
@@ -810,10 +810,10 @@ TEST_F(TPGGenerationEngineTest,
     Environment ce(set, params, data, 3);
     EvoGraph::Graph ctpg = (ce);
 
-    const EvoGraph::TPGVertex* A1 = (&ctpg.addNewAction(1));
-    const EvoGraph::TPGVertex* A2 = (&ctpg.addNewAction(2));
-    const EvoGraph::TPGVertex* A0 = (&ctpg.addNewAction(0));
-    const EvoGraph::TPGVertex* T1 = (&ctpg.addNewTeam());
+    const EvoGraph::Vertex* A1 = (&ctpg.addNewAction(1));
+    const EvoGraph::Vertex* A2 = (&ctpg.addNewAction(2));
+    const EvoGraph::Vertex* A0 = (&ctpg.addNewAction(0));
+    const EvoGraph::Vertex* T1 = (&ctpg.addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(ce, false));
@@ -874,7 +874,7 @@ TEST_F(TPGGenerationEngineTest,
         << "bad number of edges in OneTeamThreeLeavesContOneActProg";
 
     tpgGen = factory.create("OneTeamThreeLeavesContOneActProg", ctpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
     cmdCompile += "OneTeamThreeLeavesContOneActProg";
@@ -904,9 +904,9 @@ TEST_F(TPGGenerationEngineTest,
     Environment ce(set, params, data, 3);
     EvoGraph::Graph ctpg = (ce);
 
-    const EvoGraph::TPGVertex* A1 = (&ctpg.addNewAction(1));
-    const EvoGraph::TPGVertex* A0 = (&ctpg.addNewAction(0));
-    const EvoGraph::TPGVertex* T1 = (&ctpg.addNewTeam());
+    const EvoGraph::Vertex* A1 = (&ctpg.addNewAction(1));
+    const EvoGraph::Vertex* A0 = (&ctpg.addNewAction(0));
+    const EvoGraph::Vertex* T1 = (&ctpg.addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(ce, false));
@@ -962,7 +962,7 @@ TEST_F(TPGGenerationEngineTest,
 
     tpgGen = factory.create("OneTeamsTwoLeavesSwitchContinuousMultiActionProg",
                             ctpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
     cmdCompile += "OneTeamsTwoLeavesSwitchContinuousMultiActionProg";
@@ -995,9 +995,9 @@ TEST_F(TPGGenerationEngineTest,
     Environment ce(set, params, data, 3);
     EvoGraph::Graph ctpg = (ce);
 
-    const EvoGraph::TPGVertex* A1 = (&ctpg.addNewAction(1));
-    const EvoGraph::TPGVertex* A0 = (&ctpg.addNewAction(0));
-    const EvoGraph::TPGVertex* T1 = (&ctpg.addNewTeam());
+    const EvoGraph::Vertex* A1 = (&ctpg.addNewAction(1));
+    const EvoGraph::Vertex* A0 = (&ctpg.addNewAction(0));
+    const EvoGraph::Vertex* T1 = (&ctpg.addNewTeam());
 
     const std::shared_ptr<Program::Program> prog1(
         new Program::Program(ce, false));
@@ -1053,7 +1053,7 @@ TEST_F(TPGGenerationEngineTest,
 
     tpgGen = factory.create(
         "OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone", ctpg, "./src/");
-    tpgGen->generateTPGGraph();
+    tpgGen->generateGraph();
     // call the destructor to close the file
     tpgGen.reset();
     cmdCompile += "OneTeamsTwoLeavesSwitchContinuousMultiActionProgNone";
@@ -1094,7 +1094,7 @@ TEST_F(TPGGenerationEngineTest, WrongTPGContinuous)
     EvoGraph::Graph ctpg2 = (ce2);
 
     tpgGen = factory.create("wrong", ctpg2, "./src/");
-    ASSERT_THROW(tpgGen->generateTPGGraph(), std::runtime_error)
+    ASSERT_THROW(tpgGen->generateGraph(), std::runtime_error)
         << "Construction of codeGen with no activation function should fail.";
 }
 

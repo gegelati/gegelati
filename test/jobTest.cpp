@@ -44,7 +44,7 @@ TEST(JobTest, Constructor)
     Learn::Job* job = nullptr;
     Learn::Job* job2 = nullptr;
 
-    EvoGraph::TPGVertex* tpg = nullptr;
+    EvoGraph::Vertex* tpg = nullptr;
 
     ASSERT_NO_THROW(job = new Learn::Job(tpg))
         << "Construction of the Job failed.";
@@ -72,7 +72,7 @@ TEST(JobTest, getRoot)
 {
     Learn::Job* job2 = nullptr;
 
-    EvoGraph::TPGVertex* tpg = nullptr;
+    EvoGraph::Vertex* tpg = nullptr;
 
     job2 = new Learn::Job(tpg);
 

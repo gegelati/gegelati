@@ -64,7 +64,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
     const auto roots = graph->getRootVertices();
     uint64_t nbInferences = std::accumulate(
         roots.cbegin(), roots.cend(), (uint64_t)0,
-        [](uint64_t accu, const TPGVertex* vertex) {
+        [](uint64_t accu, const Vertex* vertex) {
             const auto& rootTeam =
                 dynamic_cast<const TPGTeamInstrumented&>(*vertex);
             // Raise std::bad_cast if not an instrumented team
@@ -81,7 +81,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
     for (auto vertex : vertices) {
 
         // Skip non-team instrumented vertices
-        if (dynamic_cast<const TPGActionInstrumented*>(vertex))
+        if (dynamic_cast<const ActionInstrumented*>(vertex))
             continue;
 
         auto& team = dynamic_cast<const TPGTeamInstrumented&>(*vertex);
@@ -91,7 +91,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
 
         for (const auto* edge : team.getOutgoingEdges()) {
 
-            auto& instruEdge = dynamic_cast<const TPGEdgeInstrumented&>(*edge);
+            auto& instruEdge = dynamic_cast<const EdgeInstrumented&>(*edge);
             // Raise std::bad_cast if not an instrumented edge
 
             uint64_t nbEdgeEval = instruEdge.getNbVisits();
@@ -124,7 +124,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
 }
 
 void EvoGraph::ExecutionStats::analyzeInferenceTrace(
-    const std::vector<const TPGVertex*>& trace)
+    const std::vector<const Vertex*>& trace)
 {
     uint64_t nbEvaluatedTeams = trace.size() - 1;
     // Remove the action vertex at the end
@@ -167,7 +167,7 @@ void EvoGraph::ExecutionStats::analyzeInferenceTrace(
 }
 
 void EvoGraph::ExecutionStats::analyzeExecution(
-    const EvoGraph::TPGExecutionEngineInstrumented& tee, const EvoGraph::Graph* graph)
+    const EvoGraph::ExecutionEngineInstrumented& tee, const EvoGraph::Graph* graph)
 {
     clearInferenceTracesStats();
     this->lastAnalyzedGraph = graph; // Will be used by writeStatsToJson()
@@ -222,7 +222,7 @@ const std::map<size_t, std::map<size_t, size_t>>& EvoGraph::ExecutionStats::
 {
     return this->distribNbExecutionPerInstruction;
 }
-const std::map<const EvoGraph::TPGVertex*, size_t>& EvoGraph::ExecutionStats::
+const std::map<const EvoGraph::Vertex*, size_t>& EvoGraph::ExecutionStats::
     getDistribUsedVertices() const
 {
     return this->distribUsedVertices;
@@ -242,7 +242,7 @@ void EvoGraph::ExecutionStats::clearInferenceTracesStats()
 void EvoGraph::ExecutionStats::writeStatsToJson(const char* filePath,
                                            bool noIndent) const
 {
-    std::map<const TPGVertex*, unsigned int> vertexIndexes;
+    std::map<const Vertex*, unsigned int> vertexIndexes;
     if (this->lastAnalyzedGraph != nullptr) {
         // Store the index of each vertex in the Graph in a lookup table
         // to print the execution traces.

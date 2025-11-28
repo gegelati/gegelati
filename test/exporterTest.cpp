@@ -70,7 +70,7 @@ class ExporterTest : public ::testing::Test
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
     EvoGraph::Graph* tpg;
-    std::vector<const EvoGraph::TPGEdge*> edges;
+    std::vector<const EvoGraph::Edge*> edges;
     size_t constant_size = 5;
 
     virtual void SetUp()
@@ -181,25 +181,25 @@ class ExporterTest : public ::testing::Test
 
 TEST_F(ExporterTest, Constructor)
 {
-    File::TPGGraphDotExporter* dotExporter;
+    File::GraphDotExporter* dotExporter;
     ASSERT_NO_THROW(dotExporter =
-                        new File::TPGGraphDotExporter("exported_tpg.dot", *tpg))
-        << "The TPGGraphDotExporter could not be constructed with a valid file "
+                        new File::GraphDotExporter("exported_tpg.dot", *tpg))
+        << "The GraphDotExporter could not be constructed with a valid file "
            "path.";
 
     ASSERT_NO_THROW(delete dotExporter;)
-        << "TPGGraphDotExporter could not be deleted.";
+        << "GraphDotExporter could not be deleted.";
 
     ASSERT_THROW(dotExporter =
-                     new File::TPGGraphDotExporter("XXX://INVALID_PATH", *tpg),
+                     new File::GraphDotExporter("XXX://INVALID_PATH", *tpg),
                  std::runtime_error)
-        << "The TPGGraphDotExplorer construction should fail with an invalid "
+        << "The GraphDotExplorer construction should fail with an invalid "
            "path.";
 }
 
 TEST_F(ExporterTest, print)
 {
-    File::TPGGraphDotExporter dotExporter("exported_tpg.dot", *tpg);
+    File::GraphDotExporter dotExporter("exported_tpg.dot", *tpg);
 
     ASSERT_NO_THROW(dotExporter.print())
         << "File export was executed without error.";
@@ -239,7 +239,7 @@ TEST_F(ExporterTest, printSingleActionProgGraph)
                               i % e->getNbContinuousActions());
     }
 
-    File::TPGGraphDotExporter dotExporter("exported_single_action_tpg.dot",
+    File::GraphDotExporter dotExporter("exported_single_action_tpg.dot",
                                           *tpg);
 
     ASSERT_NO_THROW(dotExporter.print())
@@ -254,7 +254,7 @@ TEST_F(ExporterTest, printSingleActionProgGraph)
 
 TEST_F(ExporterTest, printSubGraph)
 {
-    File::TPGGraphDotExporter dotExporter("exported_subtpg.dot", *tpg);
+    File::GraphDotExporter dotExporter("exported_subtpg.dot", *tpg);
 
     ASSERT_NO_THROW(dotExporter.printSubGraph(tpg->getVertices().at(0)))
         << "File export was executed without error.";
@@ -311,7 +311,7 @@ TEST_F(ExporterTest, printMultiActionProgSubGraph)
     tpg->addNewActionEdge(*tpg->getVertices().at(6),
                           progPointers.at(currentNbPrograms + 4), 2);
 
-    File::TPGGraphDotExporter dotExporter("exported_multi_action_sub_tpg.dot",
+    File::GraphDotExporter dotExporter("exported_multi_action_sub_tpg.dot",
                                           *tpg);
 
     ASSERT_NO_THROW(dotExporter.printSubGraph(tpg->getVertices().at(0)))
@@ -329,7 +329,7 @@ TEST_F(ExporterTest, FileContentVerification)
 {
     // This Test checks the content of the exported file against a golden
     // reference.
-    File::TPGGraphDotExporter dotExporter("exported_tpg.dot", *tpg);
+    File::GraphDotExporter dotExporter("exported_tpg.dot", *tpg);
 
     dotExporter.print();
 

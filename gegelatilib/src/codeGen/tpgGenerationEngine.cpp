@@ -45,7 +45,7 @@
 CodeGen::TPGGenerationEngine::TPGGenerationEngine(const std::string& filename,
                                                   const EvoGraph::Graph& tpg,
                                                   const std::string& path)
-    : TPGAbstractEngine(tpg),
+    : AbstractEngine(tpg),
       progGenerationEngine{filename + "_" + filenameProg, tpg.getEnvironment(),
                            path}
 {

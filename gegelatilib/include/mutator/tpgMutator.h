@@ -48,7 +48,7 @@ namespace Mutator {
     namespace TPGMutator {
 
         /**
-         * \brief Initialize a random TPGAction Vertex
+         * \brief Initialize a random Action Vertex
          *
          * \param[in,out] graph the initialized Graph.
          * \param[in] params the Parameters for the mutation.
@@ -57,7 +57,7 @@ namespace Mutator {
          * with
          * \param[in] actionID actionID of the action.
          */
-        const EvoGraph::TPGAction* initActionVertex(
+        const EvoGraph::Action* initActionVertex(
             EvoGraph::Graph& graph, const Mutator::MutationParameters& params,
             RNG::RNG& rng, uint64_t nbActionEdgeInit, uint64_t actionID);
 
@@ -66,15 +66,15 @@ namespace Mutator {
          *
          * Following Stephen Kelly's PhD Thesis, the created Graph will
          * contain:
-         * - Exactly nbAction TPGAction vertices.
+         * - Exactly nbAction Action vertices.
          * - Exactly nbAction TPGTeam vertices
          * - Exactly 2*nbAction Programs
-         * - Between 2 and maxInitOutgoingEdges TPGEdge per TPGTeam, where
-         *   - Each TPGEdge connects a TPGTeam with a TPGAction.
-         *   - Each TPGTeam is connected to a TPGAction at most once.
-         *   - Each TPGTeam is connected to at least 2 distinct TPGAction
+         * - Between 2 and maxInitOutgoingEdges Edge per TPGTeam, where
+         *   - Each Edge connects a TPGTeam with a Action.
+         *   - Each TPGTeam is connected to a Action at most once.
+         *   - Each TPGTeam is connected to at least 2 distinct Action
          *   - Each Program is used at most once per TPGTeam.
-         *   - Each Program always leads to the same TPGAction.
+         *   - Each Program always leads to the same Action.
          *   - Each Program is approximately used the same number of time.
          * Hence, the maxInitOutgoingEdges value can not be greater than
          * nbAction.
@@ -95,43 +95,43 @@ namespace Mutator {
                            uint64_t nbAction);
 
         /**
-         * \brief Select a random outgoingEdge of the given TPGAction and
+         * \brief Select a random outgoingEdge of the given Action and
          * removes it from the Graph.
          *
          * \param[in,out] graph the Graph within which the team is stored.
-         * \param[in] action the TPGAction whose outgoingEdges will be altered.
+         * \param[in] action the Action whose outgoingEdges will be altered.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void removeRandomActionEdge(EvoGraph::Graph& graph,
-                                    const EvoGraph::TPGAction& action,
+                                    const EvoGraph::Action& action,
                                     RNG::RNG& rng);
 
         /**
-         * \brief Add a new outgoing TPGActionEdge to the TPGTeam within the
+         * \brief Add a new outgoing ActionEdge to the TPGTeam within the
          * Graph.
          *
          *
          * \param[in,out] graph the Graph within which the action is stored.
-         * \param[in] action the TPGAction whose outgoingEdges will be altered.
+         * \param[in] action the Action whose outgoingEdges will be altered.
          * \param[in] context SelectorContext containing necessary information
          * for mutations.
          * \param[in] rng Random Number Generator used in the
          * mutation process.
          */
         void addRandomActionEdge(EvoGraph::Graph& graph,
-                                 const EvoGraph::TPGAction& action,
+                                 const EvoGraph::Action& action,
                                  const Selector::SelectionContext* context,
                                  RNG::RNG& rng);
 
         /**
-         * \brief Swap two edges of TPGAction.
+         * \brief Swap two edges of Action.
          *
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
-         * \param[in] action the TPGAction whose actionEdges will be altered.
+         * \param[in] action the Action whose actionEdges will be altered.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void swapActionEdges(EvoGraph::Graph& graph, const EvoGraph::TPGAction& action,
+        void swapActionEdges(EvoGraph::Graph& graph, const EvoGraph::Action& action,
                              RNG::RNG& rng);
 
         /**
@@ -140,31 +140,31 @@ namespace Mutator {
          *
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
-         * \param[in] action the TPGAction whose actionEdges will be altered.
-         * \param[in] team the TPGTeam source of TPGAction
-         * \param[in] actionEdge the TPGActionEdge mutated
+         * \param[in] action the Action whose actionEdges will be altered.
+         * \param[in] team the TPGTeam source of Action
+         * \param[in] actionEdge the ActionEdge mutated
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void mutateTPGActionEdge(
-            EvoGraph::Graph& graph, const EvoGraph::TPGAction& action,
-            EvoGraph::TPGActionEdge* actionEdge,
+        void mutateActionEdge(
+            EvoGraph::Graph& graph, const EvoGraph::Action& action,
+            EvoGraph::ActionEdge* actionEdge,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
             const Mutator::MutationParameters& params, RNG::RNG& rng);
 
         /**
-         * \brief Copy and mutate a TPGAction vertex
+         * \brief Copy and mutate a Action vertex
          *
-         * This function take a TPGAction, copy it and mutate it.
+         * This function take a Action, copy it and mutate it.
          * It can randomly change one of the ActionEdges by another ActionEdges
-         * of another TPGAction, however it must be the same index of
+         * of another Action, however it must be the same index of
          * actionEdges. If not, it can randomly swap two actionEdges. If not, it
          * can mutate the program on the actionEdges.
          *
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
-         * \param[in] action the TPGAction whose actionEdges will be altered.
-         * \param[in] team the TPGTeam source of TPGAction
+         * \param[in] action the Action whose actionEdges will be altered.
+         * \param[in] team the TPGTeam source of Action
          * \param[in] context SelectorContext containing necessary information
          * for mutations.
          * \param[in] params Probability parameters for the
@@ -172,8 +172,8 @@ namespace Mutator {
          * \param[in] rng Random Number Generator used in the mutation
          * process.
          */
-        void mutateTPGAction(
-            EvoGraph::Graph& graph, const EvoGraph::TPGAction& action,
+        void mutateAction(
+            EvoGraph::Graph& graph, const EvoGraph::Action& action,
             const Selector::SelectionContext* context,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
             const Mutator::MutationParameters& params, RNG::RNG& rng);
@@ -190,7 +190,7 @@ namespace Mutator {
          *
          */
         void crossProgram(EvoGraph::Graph& graph,
-                          std::vector<const EvoGraph::TPGAction*> childs,
+                          std::vector<const EvoGraph::Action*> childs,
                           size_t actionID,
                           const Mutator::MutationParameters& params,
                           RNG::RNG& rng);
@@ -206,7 +206,7 @@ namespace Mutator {
          *
          */
         void crossEdges(EvoGraph::Graph& graph,
-                        std::vector<const EvoGraph::TPGAction*> childs,
+                        std::vector<const EvoGraph::Action*> childs,
                         size_t actionID,
                         const Mutator::MutationParameters& params,
                         RNG::RNG& rng);
@@ -220,8 +220,8 @@ namespace Mutator {
          * \param[in] rng Random Number Generator used in the mutation process.
          *
          */
-        void crossTPGAction(EvoGraph::Graph& graph,
-                            std::vector<const EvoGraph::TPGAction*> childs,
+        void crossAction(EvoGraph::Graph& graph,
+                            std::vector<const EvoGraph::Action*> childs,
                             const Mutator::MutationParameters& params,
                             RNG::RNG& rng);
 
@@ -237,16 +237,16 @@ namespace Mutator {
                               RNG::RNG& rng);
 
         /**
-         * \brief Add a new outgoing TPGEdge to the TPGTeam within the Graph.
+         * \brief Add a new outgoing Edge to the TPGTeam within the Graph.
          *
-         * This function adds a new outgoing TPGEdge to the TPGTeam by cloning
-         * a preExisting TPGEdge of the Graph. Since the graph may contain
-         * TPGEdge from previous mutations, the function receives a list of
-         * preExisting TPGEdge from which the TPGEdge to copy should be chosen
-         * randomly. Any TPGEdge already connected to the TPGTeam is also
-         * excluded from the candidates. If there is no valid TPGEdge candidate
+         * This function adds a new outgoing Edge to the TPGTeam by cloning
+         * a preExisting Edge of the Graph. Since the graph may contain
+         * Edge from previous mutations, the function receives a list of
+         * preExisting Edge from which the Edge to copy should be chosen
+         * randomly. Any Edge already connected to the TPGTeam is also
+         * excluded from the candidates. If there is no valid Edge candidate
          * this function will throw an exception (check code for more details).
-         * The new TPGEdge will have the same destination TPGVertex and Program
+         * The new Edge will have the same destination Vertex and Program
          * as the cloned one, but its source will be the give TPGTeam.
          *
          * \param[in,out] graph the Graph within which the team is stored.
@@ -261,23 +261,23 @@ namespace Mutator {
                            RNG::RNG& rng);
 
         /**
-         * \brief Change the destination of a TPGEdge to an randomly chosen
+         * \brief Change the destination of a Edge to an randomly chosen
          * target.
          *
-         * This function selects a random TPGVertex among given pre-existing
-         * vector of TPGTeam and TPGAction.
-         * The function randomly choses between a TPGAction and a TPGTeam, with
+         * This function selects a random Vertex among given pre-existing
+         * vector of TPGTeam and Action.
+         * The function randomly choses between a Action and a TPGTeam, with
          * the probabilities within the given MutationParameters. No
-         * verification is made on the content of pre-existing TPGVertex list.
+         * verification is made on the content of pre-existing Vertex list.
          * If one of this list contains the team itself, a self-loop may be
-         * created. A TPGVertex not belonging to the graph in these lists will
+         * created. A Vertex not belonging to the graph in these lists will
          * cause an exception within the Graph class though. If the current
          * destination of the edge is among the candidates, the new destination
          * may be the same as the old.
          *
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
-         * \param[in] edge the TPGEdge whose destination will be altered.
+         * \param[in] edge the Edge whose destination will be altered.
          * \param[in] context SelectorContext containing necessary information
          * for mutations.
          * \param[in] params Probability parameters for the
@@ -286,23 +286,23 @@ namespace Mutator {
          * process.
          */
         void mutateEdgeDestination(EvoGraph::Graph& graph,
-                                   const EvoGraph::TPGEdge* edge,
+                                   const EvoGraph::Edge* edge,
                                    const Selector::SelectionContext* context,
                                    const Mutator::MutationParameters& params,
                                    RNG::RNG& rng);
 
         /**
-         * \brief Prepares the mutation of a TPGEdge.
+         * \brief Prepares the mutation of a Edge.
          *
-         * This function creates a copy of the program associated to the TPGEdge
+         * This function creates a copy of the program associated to the Edge
          * in preparation of its mutation. The methods also takes care of
-         * stochastically mutating the destination of the TPGEdge. The copied
+         * stochastically mutating the destination of the Edge. The copied
          * program are referenced in the newProgram list, and their behavior
          * must be mutated after this function to complete the mutation process.
          *
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
-         * \param[in] edge the TPGEdge whose destination will be altered.
+         * \param[in] edge the Edge whose destination will be altered.
          * \param[in] context SelectorContext containing necessary information
          * for mutations.
          * \param[in,out] newPrograms List of new Program created
@@ -314,20 +314,20 @@ namespace Mutator {
          * Generator used in the mutation process.
          */
         void mutateOutgoingEdge(
-            EvoGraph::Graph& graph, const EvoGraph::TPGEdge* edge,
+            EvoGraph::Graph& graph, const EvoGraph::Edge* edge,
             const Selector::SelectionContext* context,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
             const Mutator::MutationParameters& params, RNG::RNG& rng);
 
         /**
          * \brief Mutates a TPGTeam by stochastically adding, deleting, and
-         * mutating the Program and destination of outgoing TPGEdge.
+         * mutating the Program and destination of outgoing Edge.
          *
          * This function successively:
-         * - removes outgoing TPGEdge from the TPGTeam,
-         * - adds outgoing TPGEdge to the TPGTeam
+         * - removes outgoing Edge from the TPGTeam,
+         * - adds outgoing Edge to the TPGTeam
          * - selects the Program whose behavior should be mutated, an mutates
-         * destination of outgoing TPGEdge. Mutation of the Program behavior is
+         * destination of outgoing Edge. Mutation of the Program behavior is
          * not performed in this function. Program to mutate are instead stored
          * in the newPrograms list for later mutation (potentially in parallel).
          * Probabilities in given MutationParameters are used to control
@@ -395,11 +395,11 @@ namespace Mutator {
          * existing root TPGTeams of the Graph.
          *
          * A few special cases are handled:
-         * If the set of root vertices of the Graph contains any TPGAction,
-         * this TPGAction is ignored when selecting a candidate for duplication.
+         * If the set of root vertices of the Graph contains any Action,
+         * this Action is ignored when selecting a candidate for duplication.
          * If the Graph does not have any root TPGTeam, it is reinitialized
          * entirely with the initRandomTPG function.
-         * If the given Graph already has more root TPGVertex than the
+         * If the given Graph already has more root Vertex than the
          * targetted number of root teams, nothing happens.
          *
          * \param[in,out] graph the Graph to mutate.

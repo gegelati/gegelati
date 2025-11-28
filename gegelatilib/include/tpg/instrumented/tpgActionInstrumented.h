@@ -42,15 +42,15 @@
 namespace EvoGraph {
 
     /**
-     * \brief Instrumented TPGAction
+     * \brief Instrumented Action
      */
-    class TPGActionInstrumented : public EvoGraph::TPGAction,
-                                  public EvoGraph::TPGVertexInstrumentation
+    class ActionInstrumented : public EvoGraph::Action,
+                                  public EvoGraph::VertexInstrumentation
     {
       public:
-        /// Main constructor for TPGActionInstrumented.
-        /// see TPGAction constructor for more details.
-        TPGActionInstrumented(const uint64_t id) : TPGAction(id)
+        /// Main constructor for ActionInstrumented.
+        /// see Action constructor for more details.
+        ActionInstrumented(const uint64_t id) : Action(id)
         {
         }
     };

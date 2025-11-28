@@ -66,7 +66,7 @@ namespace CodeGen {
      * The repo gegelati apps give some example of the template code completed
      * for TicTacToe, Pendulum and StickGame.
      */
-    class TPGGenerationEngine : public EvoGraph::TPGAbstractEngine
+    class TPGGenerationEngine : public EvoGraph::AbstractEngine
     {
       protected:
         /**
@@ -137,7 +137,7 @@ namespace CodeGen {
          * This function iterates trough the Graph and create the required C
          * code to represent each element of the Graph.
          */
-        virtual void generateTPGGraph() = 0;
+        virtual void generateGraph() = 0;
 
       protected:
         /**
@@ -153,13 +153,13 @@ namespace CodeGen {
          *
          * \param[in] edge that must be generated.
          */
-        virtual void generateEdge(const EvoGraph::TPGEdge& edge) = 0;
+        virtual void generateEdge(const EvoGraph::Edge& edge) = 0;
 
         /**
          * \brief Method for generating the code for a team of the graph.
          *
          * This method generates the C function that represents a team.
-         * Each function representing a team contains a static array of TPGEdge
+         * Each function representing a team contains a static array of Edge
          * and calls the function executeTeam(Edge*, int).
          *
          * \param[in] team const reference of the TPGTeam that must be
@@ -174,10 +174,10 @@ namespace CodeGen {
          * The generated function return a NULL pointer and write the action in
          * the pointer given as parameter.
          *
-         * \param[in] action const reference of the TPGAction that must be
+         * \param[in] action const reference of the Action that must be
          * generated.
          */
-        virtual void generateAction(const EvoGraph::TPGAction& action) = 0;
+        virtual void generateAction(const EvoGraph::Action& action) = 0;
     };
 } // namespace CodeGen
 

@@ -62,11 +62,11 @@ class ExecutionStatsTest : public ::testing::Test
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
     EvoGraph::Graph* tpg;
-    std::vector<const EvoGraph::TPGEdge*> edges;
+    std::vector<const EvoGraph::Edge*> edges;
 
-    EvoGraph::TPGExecutionEngineInstrumented* execEngine;
+    EvoGraph::ExecutionEngineInstrumented* execEngine;
 
-    std::vector<std::vector<const EvoGraph::TPGVertex*>> inferenceTraces;
+    std::vector<std::vector<const EvoGraph::Vertex*>> inferenceTraces;
 
     virtual void SetUp() override
     {
@@ -99,7 +99,7 @@ class ExecutionStatsTest : public ::testing::Test
         e = new Environment(set, params, vect);
 
         // Setup execution engine
-        execEngine = new EvoGraph::TPGExecutionEngineInstrumented(*e);
+        execEngine = new EvoGraph::ExecutionEngineInstrumented(*e);
 
         // Create 8 programs
         for (int i = 0; i < 8; i++) {
@@ -354,7 +354,7 @@ TEST_F(ExecutionStatsTest, AnalyzeInferenceTrace)
             {2, {{5, 1}}},
             {3, {{2, 1}}},
         };
-    std::map<const EvoGraph::TPGVertex*, size_t> expectedDistribUsedVertices = {
+    std::map<const EvoGraph::Vertex*, size_t> expectedDistribUsedVertices = {
         {tpg->getVertices()[0], 1},
         {tpg->getVertices()[1], 1},
         {tpg->getVertices()[2], 1},
@@ -474,7 +474,7 @@ TEST_F(ExecutionStatsTest, AnalyzeExecution)
             {2, {{5, 3}}},
             {3, {{2, 3}}},
         };
-    std::map<const EvoGraph::TPGVertex*, size_t> expectedDistribUsedVertices = {
+    std::map<const EvoGraph::Vertex*, size_t> expectedDistribUsedVertices = {
         {tpg->getVertices()[0], 3},
         {tpg->getVertices()[1], 3},
         {tpg->getVertices()[2], 1},

@@ -44,12 +44,12 @@
 
 #include "tpg/tpgExecutionEngine.h"
 
-void EvoGraph::TPGExecutionEngine::setArchive(Archive* newArchive)
+void EvoGraph::ExecutionEngine::setArchive(Archive* newArchive)
 {
     this->archive = newArchive;
 }
 
-void EvoGraph::TPGExecutionEngine::applyActivationFunctionOnActions(
+void EvoGraph::ExecutionEngine::applyActivationFunctionOnActions(
     std::vector<double>& actionsTaken)
 {
 
@@ -81,7 +81,7 @@ void EvoGraph::TPGExecutionEngine::applyActivationFunctionOnActions(
     }
 }
 
-double EvoGraph::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
+double EvoGraph::ExecutionEngine::evaluateEdge(const Edge& edge)
 {
     // Get the program
     Program::Program& prog = edge.getProgram();
@@ -105,10 +105,10 @@ double EvoGraph::TPGExecutionEngine::evaluateEdge(const TPGEdge& edge)
     return result;
 }
 
-const EvoGraph::TPGEdge& EvoGraph::TPGExecutionEngine::evaluateTeam(const TPGTeam& team)
+const EvoGraph::Edge& EvoGraph::ExecutionEngine::evaluateTeam(const TPGTeam& team)
 {
     // Copy outgoing edge list
-    const std::list<EvoGraph::TPGEdge*>& outgoingEdges = team.getOutgoingEdges();
+    const std::list<EvoGraph::Edge*>& outgoingEdges = team.getOutgoingEdges();
 
     // Note: No need to exclude previously visited edges as the graph is now
     // assumed to be acyclic.
@@ -117,9 +117,9 @@ const EvoGraph::TPGEdge& EvoGraph::TPGExecutionEngine::evaluateTeam(const TPGTea
     std::cout << "New team :" << &team << std::endl;
 #endif
 
-    // Evaluate all TPGEdge
+    // Evaluate all Edge
     // First
-    TPGEdge* bestEdge = *outgoingEdges.begin();
+    Edge* bestEdge = *outgoingEdges.begin();
     double bestBid = this->evaluateEdge(*bestEdge);
 #ifdef DEBUG
     std::cout << "R = " << bestBid << "*" << std::endl;
@@ -127,7 +127,7 @@ const EvoGraph::TPGEdge& EvoGraph::TPGExecutionEngine::evaluateTeam(const TPGTea
     // Others
     for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
          iter++) {
-        TPGEdge* edge = *iter;
+        Edge* edge = *iter;
         double bid = this->evaluateEdge(*edge);
 #ifdef DEBUG
         std::cout << "R = " << bid;
@@ -149,16 +149,16 @@ const EvoGraph::TPGEdge& EvoGraph::TPGExecutionEngine::evaluateTeam(const TPGTea
     return *bestEdge;
 }
 
-const std::pair<std::vector<const EvoGraph::TPGVertex*>, std::vector<double>> EvoGraph::
-    TPGExecutionEngine::executeFromRoot(
-        const TPGVertex& root, const std::vector<uint64_t>& initActions)
+const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>> EvoGraph::
+    ExecutionEngine::executeFromRoot(
+        const Vertex& root, const std::vector<uint64_t>& initActions)
 {
-    const TPGVertex* currentVertex = &root;
-    const TPGEdge* edge = nullptr;
+    const Vertex* currentVertex = &root;
+    const Edge* edge = nullptr;
 
-    std::vector<const TPGVertex*> visitedVertices;
+    std::vector<const Vertex*> visitedVertices;
     visitedVertices.push_back(currentVertex);
-    // Browse the TPG until a TPGAction is reached.
+    // Browse the TPG until a Action is reached.
     while (dynamic_cast<const EvoGraph::TPGTeam*>(currentVertex)) {
         // Get the next edge
         edge = &this->evaluateTeam(*(const TPGTeam*)currentVertex);
@@ -178,12 +178,12 @@ const std::pair<std::vector<const EvoGraph::TPGVertex*>, std::vector<double>> Ev
     // in the last executed register.
     if (env.getNbContinuousActions() > 0) {
 
-        // True if the action contain multiple TPGActionEdge
+        // True if the action contain multiple ActionEdge
         if (env.getParams().mutation.tpg.useMultiActionProgram) {
 
             if (currentVertex != nullptr) {
                 for (auto edge : currentVertex->getOutgoingEdges()) {
-                    auto actionEdge = dynamic_cast<TPGActionEdge*>(edge);
+                    auto actionEdge = dynamic_cast<ActionEdge*>(edge);
 
                     // Evaluate the edge and set the action value
                     actionsTaken[actionEdge->getActionClass()] =
@@ -191,14 +191,14 @@ const std::pair<std::vector<const EvoGraph::TPGVertex*>, std::vector<double>> Ev
                 }
             }
         }
-        // True if the action contain one TPGActionEdge
+        // True if the action contain one ActionEdge
         else if (env.getParams().mutation.tpg.useActionProgram) {
 
             if (currentVertex != nullptr) {
 
                 if (currentVertex->getOutgoingEdges().size() != 1) {
                     throw std::runtime_error(
-                        "Current vertex is a TPGAction, it "
+                        "Current vertex is a Action, it "
                         "should have exactly one edge.");
                 }
 
@@ -233,7 +233,7 @@ const std::pair<std::vector<const EvoGraph::TPGVertex*>, std::vector<double>> Ev
         std::vector<double> actionID;
         if (currentVertex != nullptr) {
             actionID.push_back(
-                (double)dynamic_cast<const EvoGraph::TPGAction*>(currentVertex)
+                (double)dynamic_cast<const EvoGraph::Action*>(currentVertex)
                     ->getActionID());
         }
         return std::make_pair(visitedVertices, actionID);

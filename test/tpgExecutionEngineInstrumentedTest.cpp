@@ -60,7 +60,7 @@
 #define PARAM_FLOAT_PRECISION (float)(int16_t(1) / (float)(-INT16_MIN))
 #endif
 
-class TPGExecutionEngineInstrumentedTest : public ::testing::Test
+class ExecutionEngineInstrumentedTest : public ::testing::Test
 {
   protected:
     const size_t size1{24};
@@ -72,7 +72,7 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
     std::vector<std::shared_ptr<Program::Program>> progPointers;
 
     EvoGraph::Graph* tpg;
-    std::vector<const EvoGraph::TPGEdge*> edges;
+    std::vector<const EvoGraph::Edge*> edges;
     Archive a;
 
     /**
@@ -183,12 +183,12 @@ class TPGExecutionEngineInstrumentedTest : public ::testing::Test
     }
 };
 
-TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateEdge)
+TEST_F(ExecutionEngineInstrumentedTest, EvaluateEdge)
 {
-    EvoGraph::TPGExecutionEngineInstrumented tpeei(*e);
+    EvoGraph::ExecutionEngineInstrumented tpeei(*e);
 
-    const EvoGraph::TPGEdgeInstrumented* edge =
-        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edges.at(0));
+    const EvoGraph::EdgeInstrumented* edge =
+        dynamic_cast<const EvoGraph::EdgeInstrumented*>(edges.at(0));
 
     ASSERT_EQ(edge->getNbTraversal(), 0)
         << "Edge should not have been visited before.";
@@ -204,16 +204,16 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateEdge)
         << "Edge should have been visited once after the evaluation.";
 }
 
-TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
+TEST_F(ExecutionEngineInstrumentedTest, EvaluateTeam)
 {
-    EvoGraph::TPGExecutionEngineInstrumented tpeei(*e);
+    EvoGraph::ExecutionEngineInstrumented tpeei(*e);
 
     const EvoGraph::TPGTeamInstrumented* t1 =
         dynamic_cast<const EvoGraph::TPGTeamInstrumented*>(tpg->getVertices().at(1));
-    const EvoGraph::TPGEdgeInstrumented* t1t2 =
-        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edges.at(5));
-    const EvoGraph::TPGEdgeInstrumented* t1a0 =
-        dynamic_cast<const EvoGraph::TPGEdgeInstrumented*>(edges.at(7));
+    const EvoGraph::EdgeInstrumented* t1t2 =
+        dynamic_cast<const EvoGraph::EdgeInstrumented*>(edges.at(5));
+    const EvoGraph::EdgeInstrumented* t1a0 =
+        dynamic_cast<const EvoGraph::EdgeInstrumented*>(edges.at(7));
 
     // Check initial instrumentation
     ASSERT_EQ(t1->getNbVisits(), 0) << "Vertex number of visits should be 0.";
@@ -227,7 +227,7 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
     ASSERT_EQ(t1a0->getNbVisits(), 0)
         << "Edge should not have been traversed before.";
 
-    const EvoGraph::TPGEdge* result = NULL;
+    const EvoGraph::Edge* result = NULL;
     ASSERT_NO_THROW(result = &tpeei.evaluateTeam(
                         *(const EvoGraph::TPGTeam*)(tpg->getVertices().at(1)));)
         << "Evaluation of a valid TPGTeam with no exclusion failed.";
@@ -244,14 +244,14 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateTeam)
     ASSERT_EQ(t1a0->getNbVisits(), 1) << "Edge should have been visited.";
 }
 
-TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
+TEST_F(ExecutionEngineInstrumentedTest, EvaluateFromRoot)
 {
-    EvoGraph::TPGExecutionEngineInstrumented tpeei(*e);
+    EvoGraph::ExecutionEngineInstrumented tpeei(*e);
 
-    std::vector<const EvoGraph::TPGVertex*> result;
+    std::vector<const EvoGraph::Vertex*> result;
 
-    const EvoGraph::TPGActionInstrumented* action =
-        dynamic_cast<const EvoGraph::TPGActionInstrumented*>(
+    const EvoGraph::ActionInstrumented* action =
+        dynamic_cast<const EvoGraph::ActionInstrumented*>(
             tpg->getVertices().at(6));
 
     ASSERT_EQ(action->getNbVisits(), 0)
@@ -273,10 +273,10 @@ TEST_F(TPGExecutionEngineInstrumentedTest, EvaluateFromRoot)
         << "Nb visit after evaluation is incorrect.";
 }
 
-TEST_F(TPGExecutionEngineInstrumentedTest, TraceHistoryAccessors)
+TEST_F(ExecutionEngineInstrumentedTest, TraceHistoryAccessors)
 {
-    EvoGraph::TPGExecutionEngineInstrumented tpeei(*e);
-    std::vector<const EvoGraph::TPGVertex*> result;
+    EvoGraph::ExecutionEngineInstrumented tpeei(*e);
+    std::vector<const EvoGraph::Vertex*> result;
 
     ASSERT_EQ(tpeei.getTraceHistory().size(), 0)
         << "Trace history isn't empty before execution.";

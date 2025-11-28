@@ -53,7 +53,7 @@ namespace EvoGraph {
      * This first implementation is purely sequential and does not parallelize
      * Program execution, nor executions of the TPG starting from several roots.
      */
-    class TPGExecutionEngine
+    class ExecutionEngine
     {
       protected:
         /**
@@ -85,11 +85,11 @@ namespace EvoGraph {
          *                 given, meaning that no recording of the execution
          *                 will be made.
          */
-        TPGExecutionEngine(const Environment& env, Archive* arch = NULL)
+        ExecutionEngine(const Environment& env, Archive* arch = NULL)
             : progExecutionEngine(env), env{env}, archive{arch} {};
 
         ///  Default virtual destructor
-        virtual ~TPGExecutionEngine() = default;
+        virtual ~ExecutionEngine() = default;
 
         /**
          * \brief Set a new Archive for storing Program results.
@@ -110,51 +110,51 @@ namespace EvoGraph {
          * \brief Execute the Program associated to an Edge and returns the
          * obtained double.
          *
-         * If an Archive is associated to the TPGExecutionEngine, the Program
+         * If an Archive is associated to the ExecutionEngine, the Program
          * result is recorded in it.
          *
          * If the value returned by the Program is NaN, then it is replaced with
          * a -inf value.
          *
-         * \param[in] edge the const ref to the TPGEdge whose Program will be
+         * \param[in] edge the const ref to the Edge whose Program will be
          * evaluated.
-         * \return the double value returned by the Program of the TPGEdge.
+         * \return the double value returned by the Program of the Edge.
          */
-        virtual double evaluateEdge(const TPGEdge& edge);
+        virtual double evaluateEdge(const Edge& edge);
 
         /**
-         * \brief Evaluate all the Program of the outgoing TPGEdge of the
+         * \brief Evaluate all the Program of the outgoing Edge of the
          *        TPGTeam.
          *
-         * This method evaluates the Programs of all outgoing TPGEdge of the
-         * TPGTeam, and returns the reference to the TPGEdge providing the
+         * This method evaluates the Programs of all outgoing Edge of the
+         * TPGTeam, and returns the reference to the Edge providing the
          * largest evaluation.
          *
-         * \param[in] team the TPGTeam whose outgoing TPGEdge are evaluated.
-         * \return the reference to the TPGEdge evaluated with the the highest
+         * \param[in] team the TPGTeam whose outgoing Edge are evaluated.
+         * \return the reference to the Edge evaluated with the the highest
          *         double value (and not excluded).
          *
          * \throw std::runtime_error in case the TPGTeam has no outgoing edge.
          * This should not happen in a correctly constructed Graph.
          */
-        virtual const EvoGraph::TPGEdge& evaluateTeam(const TPGTeam& team);
+        virtual const EvoGraph::Edge& evaluateTeam(const TPGTeam& team);
 
         /**
-         * \brief Execute the Graph starting from the given TPGVertex.
+         * \brief Execute the Graph starting from the given Vertex.
          *
          * This method browse the graph by successively evaluating Teams and
-         * following the TPGEdge proposing the best bids.
+         * following the Edge proposing the best bids.
          *
-         * \param[in] root the TPGVertex from which the execution will start.
+         * \param[in] root the Vertex from which the execution will start.
          * \param[in] initActions the vector of initial action that can be
          * chosen by default by the root.
-         * \return a vector containing all the TPGVertex traversed during the
-         *         evaluation of the Graph. The TPGAction resulting from the
+         * \return a vector containing all the Vertex traversed during the
+         *         evaluation of the Graph. The Action resulting from the
          *         Graph execution is at the end of the returned vector.
          */
-        virtual const std::pair<std::vector<const EvoGraph::TPGVertex*>,
+        virtual const std::pair<std::vector<const EvoGraph::Vertex*>,
                                 std::vector<double>>
-        executeFromRoot(const TPGVertex& root,
+        executeFromRoot(const Vertex& root,
                         const std::vector<uint64_t>& initActions = {0});
     };
 }; // namespace EvoGraph
