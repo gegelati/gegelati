@@ -72,7 +72,7 @@ namespace Algorithm {
         /**
          * \brief Get the current agents used by the algorithm.
          */
-        virtual const std::vector<std::shared_ptr<Agent>>& getAgents();
+        virtual const std::set<std::shared_ptr<Agent>, SharedLess<Agent>>& getAgents();
 
         /**
          * \brief Get the current agents used by the algorithm.
@@ -132,4 +132,4 @@ namespace Algorithm {
     };
 }; // namespace Algorithm
 
-#endif
+#endif // ALGORITHM_H

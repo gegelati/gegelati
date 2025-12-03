@@ -76,6 +76,31 @@ struct SharedLess
     {
         return *a < *b;
     }
+
+    /**
+     * \brief Compare two shared_ptr by comparing the pointed-to values.
+     */
+    bool operator()(const std::shared_ptr<const T>& a,
+                    const std::shared_ptr<T>& b) const
+    {
+        return *a < *b;
+    }
+    /**
+     * \brief Compare two shared_ptr by comparing the pointed-to values.
+     */
+    bool operator()(const std::shared_ptr<T>& a,
+                    const std::shared_ptr<const T>& b) const
+    {
+        return *a < *b;
+    }
+    /**
+     * \brief Compare two shared_ptr by comparing the pointed-to values.
+     */
+    bool operator()(const std::shared_ptr<const T>& a,
+                    const std::shared_ptr<const T>& b) const
+    {
+        return *a < *b;
+    }
 };
 
 #endif
