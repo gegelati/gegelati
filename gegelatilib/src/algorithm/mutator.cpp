@@ -35,8 +35,8 @@ void Algorithm::Mutator::mutatePopulation(
 
     
     // Create the new agents
-    uint64_t nbAgentsCreated = 0;
-    while (nbAgentsCreated < context.nbActionsToCreate) {
+    uint64_t nbAgentsToReach = manager->getAgents().size() + context.nbActionsToCreate;
+    while (manager->getAgents().size() < nbAgentsToReach) {
 
         // Clone one random offspring.
         uint64_t clonedRootIndex1 =
@@ -49,7 +49,7 @@ void Algorithm::Mutator::mutatePopulation(
         // Be sure we have agents in both sub lists, and we still have at least
         // two agents to create
         if (subAgentsClonable2.size() > 0 &&
-            nbAgentsCreated < context.nbActionsToCreate - 1) {
+            manager->getAgents().size() < nbAgentsToReach - 1) {
 
             uint64_t clonedRootIndex2 =
                 rng.getUnsignedInt64(0, subAgentsClonable2.size() - 1);
@@ -69,7 +69,6 @@ void Algorithm::Mutator::mutatePopulation(
             else {
                 // Apply mutations to the root and increase the number of roots
                 this->mutateAgent(offspring, graph, manager, context, newSubAgents, params, rng);
-                nbAgentsCreated++;
             }
         }
     }
