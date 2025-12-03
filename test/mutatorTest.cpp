@@ -590,7 +590,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPG)
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const EvoGraph::Vertex* vert) {
-                                return dynamic_cast<const EvoGraph::TPGTeam*>(
+                                return dynamic_cast<const EvoGraph::Team*>(
                                            vert) != nullptr;
                             }),
               params.tpg.nbRoots)
@@ -748,7 +748,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGContinuous)
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const EvoGraph::Vertex* vert) {
-                                return dynamic_cast<const EvoGraph::TPGTeam*>(
+                                return dynamic_cast<const EvoGraph::Team*>(
                                            vert) != nullptr;
                             }),
               mutParams.tpg.nbRoots * mutParams.tpg.ratioTeamsOverActions)
@@ -851,7 +851,7 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](const EvoGraph::Vertex* vert) {
-                                return dynamic_cast<const EvoGraph::TPGTeam*>(
+                                return dynamic_cast<const EvoGraph::Team*>(
                                            vert) != nullptr;
                             }),
               0)
@@ -875,9 +875,9 @@ TEST_F(MutatorTest, TPGMutatorInitRandomTPGMAPLE)
 TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex0 = tpg.addNewTeam();
     const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
-    const EvoGraph::TPGTeam& vertex2 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex2 = tpg.addNewTeam();
     const EvoGraph::Action& vertex3 = tpg.addNewAction(1);
     const EvoGraph::Edge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
     const EvoGraph::Edge& edge1 = tpg.addNewEdge(vertex0, vertex2, progPointer);
@@ -916,9 +916,9 @@ TEST_F(MutatorTest, TPGMutatorRemoveRandomEdge)
 TEST_F(MutatorTest, TPGMutatorAddRandomEdge)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex0 = tpg.addNewTeam();
     const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
-    const EvoGraph::TPGTeam& vertex2 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex2 = tpg.addNewTeam();
     const EvoGraph::Action& vertex3 = tpg.addNewAction(1);
     const EvoGraph::Action& vertex4 = tpg.addNewAction(2);
 
@@ -961,11 +961,11 @@ TEST_F(MutatorTest, TPGMutatorAddRandomEdge)
 TEST_F(MutatorTest, TPGMutatorMutateEdgeDestination)
 {
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex0 = tpg.addNewTeam();
     const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
     const EvoGraph::Action& vertex2 = tpg.addNewAction(1);
-    const EvoGraph::TPGTeam& vertex3 = tpg.addNewTeam();
-    const EvoGraph::TPGTeam& vertex4 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex3 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex4 = tpg.addNewTeam();
 
     const EvoGraph::Edge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
     const EvoGraph::Edge& edge1 = tpg.addNewEdge(vertex0, vertex3, progPointer);
@@ -999,7 +999,7 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
 
     // Init a TPG
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex0 = tpg.addNewTeam();
     const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
     const EvoGraph::Edge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
@@ -1184,7 +1184,7 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
 
     // Init a TPG
     EvoGraph::Graph tpg(ce);
-    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex0 = tpg.addNewTeam();
     const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
     const EvoGraph::Edge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
     const EvoGraph::Edge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
@@ -1258,7 +1258,7 @@ TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction)
 
     // Init a TPG
     EvoGraph::Graph tpg(ce);
-    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex0 = tpg.addNewTeam();
     const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
     const EvoGraph::Edge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
     const EvoGraph::Edge& edge1 = tpg.addNewActionEdge(vertex1, progPointer1, 0);
@@ -1303,13 +1303,13 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam)
 
     // Create a TPG
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex0 = tpg.addNewTeam();
     const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
     const EvoGraph::Action& vertex2 = tpg.addNewAction(1);
     const EvoGraph::Edge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
     const EvoGraph::Edge& edge1 = tpg.addNewEdge(vertex0, vertex2, progPointer);
     const EvoGraph::Action& vertex3 = tpg.addNewAction(2);
-    const EvoGraph::TPGTeam& vertex4 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex4 = tpg.addNewTeam();
     const EvoGraph::Edge& edge2 = tpg.addNewEdge(vertex4, vertex3, progPointer);
     const EvoGraph::Edge& edge3 = tpg.addNewEdge(vertex0, vertex3, progPointer);
 
@@ -1345,7 +1345,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam)
     // (only edge2 can be part of "preExistingEdges" since all other edges are
     // outgoing from vertex0, which would mean they are not pre-existing in
     // the mutation process.)
-    ASSERT_NO_THROW(Mutator::TPGMutator::mutateTPGTeam(
+    ASSERT_NO_THROW(Mutator::TPGMutator::mutateTeam(
         tpg, arch, vertex0, &context, newPrograms, params, rng))
         << "Mutate team should not fail in these conditions.";
 
@@ -1360,7 +1360,7 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
     // Init a TPG
     EvoGraph::Graph tpg(*e);
-    const EvoGraph::TPGTeam& vertex0 = tpg.addNewTeam();
+    const EvoGraph::Team& vertex0 = tpg.addNewTeam();
     const EvoGraph::Action& vertex1 = tpg.addNewAction(0);
     const EvoGraph::Edge& edge0 = tpg.addNewEdge(vertex0, vertex1, progPointer);
 
@@ -1698,7 +1698,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
         if (dynamic_cast<const EvoGraph::Action*>(root)) {
             nbActionsRoots++;
         }
-        else if (dynamic_cast<const EvoGraph::TPGTeam*>(root)) {
+        else if (dynamic_cast<const EvoGraph::Team*>(root)) {
             nbTeamsRoots++;
         }
     }

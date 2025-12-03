@@ -140,7 +140,7 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
 
     uint64_t nbTeamsR = std::count_if(
         roots.begin(), roots.end(), [](const EvoGraph::Vertex* root) {
-            return dynamic_cast<const EvoGraph::TPGTeam*>(root) != nullptr;
+            return dynamic_cast<const EvoGraph::Team*>(root) != nullptr;
         });
 
     uint64_t nbActionsR = roots.size() - nbTeamsR;

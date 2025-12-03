@@ -27,14 +27,9 @@ size_t Algorithm::Algorithm::getNbAgents() const
     return this->manager->getAgents().size();   
 }
 
-const std::set<std::shared_ptr<Algorithm::Agent>, SharedLess<Algorithm::Agent>>& Algorithm::Algorithm::getAgents()
+const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::Algorithm::getAgents() const
 {
     return this->manager->getAgents();
-}
-
-const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::Algorithm::getAgentsCst() const
-{
-    return this->manager->getAgentsCst();
 }
 
 bool Algorithm::Algorithm::containsAgent(std::shared_ptr<const Agent> agent) const
@@ -44,9 +39,10 @@ bool Algorithm::Algorithm::containsAgent(std::shared_ptr<const Agent> agent) con
 
 void Algorithm::Algorithm::init(RNG::RNG& rng)
 {
-    this->mutator->initRandomPopulation(this->graph, this->params, rng);
+    // Initialize a random population
+    this->mutator->initRandomPopulation(this->graph, this->manager, this->params, rng, this->nbActions);
 
-    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->archive, this->params, rng);
+    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->archive, this->params, rng, this->nbActions);
 
     // Clear the best agent in the selector
     this->selector->forgetPreviousResults();

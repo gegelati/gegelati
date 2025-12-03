@@ -66,7 +66,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
         roots.cbegin(), roots.cend(), (uint64_t)0,
         [](uint64_t accu, const Vertex* vertex) {
             const auto& rootTeam =
-                dynamic_cast<const TPGTeamInstrumented&>(*vertex);
+                dynamic_cast<const TeamInstrumented&>(*vertex);
             // Raise std::bad_cast if not an instrumented team
             return accu + rootTeam.getNbVisits();
         });
@@ -84,7 +84,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
         if (dynamic_cast<const ActionInstrumented*>(vertex))
             continue;
 
-        auto& team = dynamic_cast<const TPGTeamInstrumented&>(*vertex);
+        auto& team = dynamic_cast<const TeamInstrumented&>(*vertex);
         // Raise std::bad_cast if not an instrumented team
 
         nbEvaluatedTeams += team.getNbVisits();

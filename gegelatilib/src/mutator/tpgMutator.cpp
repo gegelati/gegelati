@@ -173,7 +173,7 @@ void Mutator::TPGMutator::initRandomTPG(
 
     // Create teams, programs and Actions
     std::vector<const EvoGraph::Action*> actions;
-    std::vector<const EvoGraph::TPGTeam*> teams;
+    std::vector<const EvoGraph::Team*> teams;
     std::vector<std::shared_ptr<Program::Program>> programs;
 
     for (size_t i = 0; i < initNbActions; i++) {
@@ -201,7 +201,7 @@ void Mutator::TPGMutator::initRandomTPG(
 
     // Add additional connections to TPG
     // Team-by-Team
-    for (const EvoGraph::TPGTeam* team : teams) {
+    for (const EvoGraph::Team* team : teams) {
         // Pick a number of additional outedge
         size_t nbAdditionalEdges =
             rng.getUnsignedInt64(0, params.tpg.maxInitOutgoingEdges - 2);
@@ -636,7 +636,7 @@ void Mutator::TPGMutator::crossAction(
 }
 
 void Mutator::TPGMutator::removeRandomEdge(EvoGraph::Graph& graph,
-                                           const EvoGraph::TPGTeam& team,
+                                           const EvoGraph::Team& team,
                                            RNG::RNG& rng)
 {
     // Pick an outgoing edge randomly,
@@ -654,7 +654,7 @@ void Mutator::TPGMutator::removeRandomEdge(EvoGraph::Graph& graph,
 }
 
 void Mutator::TPGMutator::addRandomEdge(
-    EvoGraph::Graph& graph, const EvoGraph::TPGTeam& team,
+    EvoGraph::Graph& graph, const EvoGraph::Team& team,
     const Selector::SelectionContext* context, RNG::RNG& rng)
 {
     // Pick an edge (excluding ones from the team, edges with the team as a
@@ -771,8 +771,8 @@ void Mutator::TPGMutator::mutateOutgoingEdge(
     }
 }
 
-void Mutator::TPGMutator::mutateTPGTeam(
-    EvoGraph::Graph& graph, const Archive& archive, const EvoGraph::TPGTeam& team,
+void Mutator::TPGMutator::mutateTeam(
+    EvoGraph::Graph& graph, const Archive& archive, const EvoGraph::Team& team,
     const Selector::SelectionContext* context,
     std::list<std::shared_ptr<Program::Program>>& newPrograms,
     const Mutator::MutationParameters& params, RNG::RNG& rng)
@@ -980,11 +980,11 @@ void Mutator::TPGMutator::populateTPG(EvoGraph::Graph& graph,
             rng.getUnsignedInt64(0, context->teamsClonable.size() - 1);
 
         // clone it (the vertex and all its outgoing edges)
-        const EvoGraph::TPGTeam& newRoot = (const EvoGraph::TPGTeam&)graph.cloneVertex(
+        const EvoGraph::Team& newRoot = (const EvoGraph::Team&)graph.cloneVertex(
             *context->teamsClonable.at(clonedRootIndex));
 
         // Apply mutations to the root
-        mutateTPGTeam(graph, archive, newRoot, context, newPrograms, params,
+        mutateTeam(graph, archive, newRoot, context, newPrograms, params,
                       rng);
     }
 

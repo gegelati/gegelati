@@ -105,7 +105,7 @@ double EvoGraph::ExecutionEngine::evaluateEdge(const Edge& edge)
     return result;
 }
 
-const EvoGraph::Edge& EvoGraph::ExecutionEngine::evaluateTeam(const TPGTeam& team)
+const EvoGraph::Edge& EvoGraph::ExecutionEngine::evaluateTeam(const Team& team)
 {
     // Copy outgoing edge list
     const std::list<EvoGraph::Edge*>& outgoingEdges = team.getOutgoingEdges();
@@ -159,9 +159,9 @@ const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>> EvoGr
     std::vector<const Vertex*> visitedVertices;
     visitedVertices.push_back(currentVertex);
     // Browse the TPG until a Action is reached.
-    while (dynamic_cast<const EvoGraph::TPGTeam*>(currentVertex)) {
+    while (dynamic_cast<const EvoGraph::Team*>(currentVertex)) {
         // Get the next edge
-        edge = &this->evaluateTeam(*(const TPGTeam*)currentVertex);
+        edge = &this->evaluateTeam(*(const Team*)currentVertex);
         Program::Program p =
             currentVertex->getOutgoingEdges().front()->getProgram();
         // update currentVertex and backup in visitedVertex.

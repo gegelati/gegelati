@@ -221,8 +221,8 @@ TEST_F(ExecutionEngineTest, EvaluateTeam)
 
     const EvoGraph::Edge* result = NULL;
     ASSERT_NO_THROW(result = &tpee.evaluateTeam(
-                        *(const EvoGraph::TPGTeam*)(tpg->getVertices().at(1)));)
-        << "Evaluation of a valid TPGTeam with no exclusion failed.";
+                        *(const EvoGraph::Team*)(tpg->getVertices().at(1)));)
+        << "Evaluation of a valid Team with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
         << "Edge selected during team evaluation is incorrect.";

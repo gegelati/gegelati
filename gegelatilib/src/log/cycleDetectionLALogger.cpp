@@ -80,7 +80,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
         visitedVertices.insert(vertex);
 
         // Scan outgoing edges
-        const EvoGraph::TPGTeam* team = dynamic_cast<const EvoGraph::TPGTeam*>(vertex);
+        const EvoGraph::Team* team = dynamic_cast<const EvoGraph::Team*>(vertex);
         if (team != nullptr) {
             // Push vertex in path
             currentPath.push_back(vertex);

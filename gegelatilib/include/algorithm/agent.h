@@ -15,9 +15,6 @@ namespace Algorithm {
     class Agent
     {
     protected:
-
-        /// Attribute that specify if the agent can be mutated.
-        bool isMutable = true;
         
         /// Unique ID of the agent.
         uint64_t agentID;
@@ -37,6 +34,8 @@ namespace Algorithm {
         friend struct ::CounterReset;
 
     public:
+
+
 
         Agent() : agentID(incrementeCounter()) {};
 

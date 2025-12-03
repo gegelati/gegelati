@@ -68,7 +68,7 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const EvoGraph::Edge& edge)
     std::string destinationName;
     const EvoGraph::Vertex* destination = edge.getDestination();
 
-    if (dynamic_cast<const EvoGraph::TPGTeam*>(destination) != nullptr) {
+    if (dynamic_cast<const EvoGraph::Team*>(destination) != nullptr) {
         destinationName = 'T' + std::to_string(destination->getVertexID());
     }
     else if (dynamic_cast<const EvoGraph::Action*>(destination) != nullptr) {
@@ -80,7 +80,7 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const EvoGraph::Edge& edge)
              << ", " << destinationName << "}";
 }
 
-void CodeGen::TPGStackGenerationEngine::generateTeam(const EvoGraph::TPGTeam& team)
+void CodeGen::TPGStackGenerationEngine::generateTeam(const EvoGraph::Team& team)
 {
     uint64_t id = team.getVertexID();
     // print prototype and declaration of the function
@@ -133,8 +133,8 @@ void CodeGen::TPGStackGenerationEngine::generateGraph()
     auto vertices = this->tpg.getVertices();
     // give an id for each team of the graph
     for (auto vertex : vertices) {
-        if (dynamic_cast<const EvoGraph::TPGTeam*>(vertex) != nullptr) {
-            generateTeam(*(const EvoGraph::TPGTeam*)vertex);
+        if (dynamic_cast<const EvoGraph::Team*>(vertex) != nullptr) {
+            generateTeam(*(const EvoGraph::Team*)vertex);
         }
         else if (dynamic_cast<const EvoGraph::Action*>(vertex) != nullptr) {
             generateAction(*(const EvoGraph::Action*)vertex);
@@ -223,7 +223,7 @@ std::string CodeGen::TPGStackGenerationEngine::vertexName(
     const EvoGraph::Vertex& v)
 {
     std::ostringstream vertexName;
-    if (dynamic_cast<const EvoGraph::TPGTeam*>(&v) != nullptr) {
+    if (dynamic_cast<const EvoGraph::Team*>(&v) != nullptr) {
         vertexName << "T" << v.getVertexID();
     }
     else {

@@ -27,15 +27,11 @@ namespace Algorithm {
         std::set<std::shared_ptr<Agent>, SharedLess<Agent>> agents;
 
     public:
-        /**
-         * \brief Get the current agents used by the algorithm.
-         */
-        virtual const std::set<std::shared_ptr<Agent>, SharedLess<Agent>>& getAgents();
 
         /**
          * \brief Get the current agents used by the algorithm.
          */
-        virtual const std::vector<std::shared_ptr<const Agent>> getAgentsCst() const;
+        virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const;
 
         /**
          * \brief method that indicate if the manager contains a specific agent.
@@ -51,7 +47,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Copy a new Agent of the type used by the current algorithm.
@@ -61,7 +57,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Create a new Agent of the type used by the current algorithm.
@@ -71,7 +67,12 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<Agent> deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual void deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+
+        /**
+         * \brief Clear all agents from the manager.
+         */
+        virtual void clearAgents();
     };
 }; // namespace Algorithm
 

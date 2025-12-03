@@ -382,7 +382,7 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
     std::queue<std::shared_ptr<Learn::Job>> jobs;
     size_t idx = 0;
     for(auto algorithm: this->algorithms){
-        for(auto agent: algorithm->getAgentsCst()){
+        for(auto agent: algorithm->getAgents()){
             auto job = makeJob(agent, mode, idx);;
             jobs.push(job);
             idx++;

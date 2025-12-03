@@ -94,10 +94,10 @@ void EvoGraph::Graph::setNewVertexID(const EvoGraph::Vertex& vertex, uint64_t ne
     vertices.insert(std::move(tmp));
 }
 
-const EvoGraph::TPGTeam& EvoGraph::Graph::addNewTeam()
+const EvoGraph::Team& EvoGraph::Graph::addNewTeam()
 {
-    this->vertices.insert(factory->createTPGTeam());
-    return (const TPGTeam&)(*this->vertices.rbegin()->get());
+    this->vertices.insert(factory->createTeam());
+    return (const Team&)(*this->vertices.rbegin()->get());
 }
 
 const EvoGraph::Action& EvoGraph::Graph::addNewAction(uint64_t actionID)
@@ -143,13 +143,13 @@ const std::vector<const EvoGraph::Action*> EvoGraph::Graph::getRootActions() con
     return result;
 }
 
-const std::vector<const EvoGraph::TPGTeam*> EvoGraph::Graph::getRootTeams() const
+const std::vector<const EvoGraph::Team*> EvoGraph::Graph::getRootTeams() const
 {
-    std::vector<const EvoGraph::TPGTeam*> result;
+    std::vector<const EvoGraph::Team*> result;
     for (auto& vertex : this->vertices) {
         if (vertex->getIncomingEdges().empty() &&
-            dynamic_cast<const EvoGraph::TPGTeam*>(vertex.get()) != nullptr) {
-            result.push_back(dynamic_cast<const EvoGraph::TPGTeam*>(vertex.get()));
+            dynamic_cast<const EvoGraph::Team*>(vertex.get()) != nullptr) {
+            result.push_back(dynamic_cast<const EvoGraph::Team*>(vertex.get()));
         }
     }
     return result;
@@ -214,7 +214,7 @@ const EvoGraph::Vertex& EvoGraph::Graph::cloneVertex(const Vertex& vertex)
 
     // Create a new Vertex
     // (at the end of the vertices list)
-    if (dynamic_cast<const EvoGraph::TPGTeam*>(&vertex) != nullptr) {
+    if (dynamic_cast<const EvoGraph::Team*>(&vertex) != nullptr) {
         this->addNewTeam();
     }
     else if (dynamic_cast<const EvoGraph::Action*>(&vertex) != nullptr) {

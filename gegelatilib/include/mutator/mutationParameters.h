@@ -51,10 +51,10 @@ namespace Mutator {
 
         /// JSon comment
         inline static const std::string nbRootsComment =
-            "// Number of root TPGTeams to maintain when populating the "
+            "// Number of root Teams to maintain when populating the "
             "Graph\n"
             "// \"nbRoots\" : 100, // Default value";
-        /// Number of root TPGTeams to maintain when populating the Graph
+        /// Number of root Teams to maintain when populating the Graph
         size_t nbRoots = 100;
 
         /// JSon comment
@@ -70,11 +70,11 @@ namespace Mutator {
 
         /// JSon comment
         inline static const std::string maxInitOutgoingEdgesComment =
-            "// Maximum number of Edge connected to each TPGTeam of the "
+            "// Maximum number of Edge connected to each Team of the "
             "Graph when\n"
             "// initialized.\n"
             "// \"maxInitOutgoingEdges\" : 3, // Default value";
-        /// Maximum number of Edge connected to each TPGTeam of the Graph
+        /// Maximum number of Edge connected to each Team of the Graph
         /// when initialized.
         size_t maxInitOutgoingEdges = 3;
 
@@ -90,14 +90,14 @@ namespace Mutator {
         inline static const std::string pActionEdgeDeletionComment =
             "// Probability of deleting an outgoing ActionEdge of a Action.\n"
             "// \"pActionEdgeDeletion\" : 0.7, // Default value";
-        /// Probability of deleting an outgoing Edge of a TPGTeam.
+        /// Probability of deleting an outgoing Edge of a Team.
         double pActionEdgeDeletion = 0.7;
 
         /// JSon comment
         inline static const std::string pActionEdgeAdditionComment =
             "// Probability of adding an outgoing Action Edge to a Action.\n"
             "// \"pActionEdgeAddition\" : 0.7, // Default value";
-        /// Probability of adding an outgoing Edge to a TPGTeam.
+        /// Probability of adding an outgoing Edge to a Team.
         double pActionEdgeAddition = 0.7;
 
         /// JSon comment
@@ -134,14 +134,14 @@ namespace Mutator {
         inline static const std::string pEdgeDeletionComment =
             "// Probability of deleting an outgoing Edge of a Team.\n"
             "// \"pEdgeDeletion\" : 0.7, // Default value";
-        /// Probability of deleting an outgoing Edge of a TPGTeam.
+        /// Probability of deleting an outgoing Edge of a Team.
         double pEdgeDeletion = 0.7;
 
         /// JSon comment
         inline static const std::string pEdgeAdditionComment =
             "// Probability of adding an outgoing Edge to a Team.\n"
             "// \"pEdgeAddition\" : 0.7, // Default value";
-        /// Probability of adding an outgoing Edge to a TPGTeam.
+        /// Probability of adding an outgoing Edge to a Team.
         double pEdgeAddition = 0.7;
 
         /// JSon comment

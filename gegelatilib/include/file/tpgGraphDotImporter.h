@@ -376,7 +376,7 @@ namespace File {
         void dumpGraphHeader();
 
         /**
-         * \brief reads and creates a TPGTeam.
+         * \brief reads and creates a Team.
          */
         void readTeam(std::smatch& matches);
 

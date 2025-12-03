@@ -21,8 +21,6 @@ namespace Algorithm {
     class Algorithm
     {
       protected:
-        /// Mutator used by the algorithm
-        std::shared_ptr<Mutator> mutator;
 
         /// Graph used by the algorithm
         std::shared_ptr<EvoGraph::Graph> graph;
@@ -39,6 +37,12 @@ namespace Algorithm {
         /// Archive used during the training process
         Archive archive;
 
+        /// Mutator used by the algorithm
+        std::shared_ptr<Mutator> mutator;
+
+        /// Number of actions available in the learning environment
+        size_t nbActions;
+
       public:
 
         /**
@@ -47,10 +51,12 @@ namespace Algorithm {
          * \param[in] graph graph used by the learning agent
          * \param[in] params the LearningParameters used by the Algorithm.
          * \param[in] manager Manager of the algorithm to store and maintain agents
+         * \param[in] mutator Mutator used by the algorithm to mutate the agents
+         * \param[in] nbActions number of actions that will be usable for
          * 
          */
-        Algorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager)
-               : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, manager, params)} {};
+        Algorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager, std::shared_ptr<Mutator> mutator, size_t nbActions)
+               : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, manager, params)}, mutator{mutator}, nbActions{nbActions} {};
 
         /// Constant getter for the manager
         virtual std::shared_ptr<const AgentManager> getManagerCst() const;
@@ -72,12 +78,7 @@ namespace Algorithm {
         /**
          * \brief Get the current agents used by the algorithm.
          */
-        virtual const std::set<std::shared_ptr<Agent>, SharedLess<Agent>>& getAgents();
-
-        /**
-         * \brief Get the current agents used by the algorithm.
-         */
-        virtual const std::vector<std::shared_ptr<const Agent>> getAgentsCst() const;
+        virtual const std::vector<std::shared_ptr<const Agent>> getAgents () const;
 
         /**
          * \brief method that indicate if the algorithm contains a specific agent.

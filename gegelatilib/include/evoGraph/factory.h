@@ -59,7 +59,7 @@ namespace EvoGraph {
      * Using the factory design pattern, this class enables the creation of
      * all elements composing a Graph:
      * - Graph
-     * - TPGTeam
+     * - Team
      * - Action
      * - Vertex
      *
@@ -83,11 +83,11 @@ namespace EvoGraph {
             const Environment& env) const;
 
         /**
-         * \brief Create a TPGTeam for a Graph.
+         * \brief Create a Team for a Graph.
          *
-         * This method allocates and returns a new TPGTeam.
+         * This method allocates and returns a new Team.
          */
-        virtual std::unique_ptr<TPGTeam> createTPGTeam() const;
+        virtual std::unique_ptr<Team> createTeam() const;
 
         /**
          * \brief Create a Action for a Graph.

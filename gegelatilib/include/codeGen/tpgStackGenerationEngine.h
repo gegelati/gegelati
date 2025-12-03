@@ -135,10 +135,10 @@ namespace CodeGen {
          * Each function representing a team contains a static array of Edge
          * and calls the function executeTeam(Edge*, int).
          *
-         * \param[in] team const reference of the TPGTeam that must be
+         * \param[in] team const reference of the Team that must be
          * generated.
          */
-        virtual void generateTeam(const EvoGraph::TPGTeam& team);
+        virtual void generateTeam(const EvoGraph::Team& team);
 
         /**
          * \brief Method for generating a action of the graph.

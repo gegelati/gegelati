@@ -45,17 +45,17 @@ namespace EvoGraph {
      *
      * A Team is a non-leaf vertex of a Tangled-Program-Graph.
      */
-    class TPGTeam : public Vertex
+    class Team : public Vertex
     {
       public:
         /**
-         * \brief Main constructor of a TPGTeam.
+         * \brief Main constructor of a Team.
          */
-        TPGTeam() : Vertex(){};
+        Team() : Vertex(){};
 
         /**
          * \brief Specialization throwing an std::runtime_exception if a
-         * ActionEdge is added to a TPGTeam.
+         * ActionEdge is added to a Team.
          *
          */
         virtual void addOutgoingEdge(Edge* edge) override;

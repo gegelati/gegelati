@@ -50,7 +50,7 @@ namespace EvoGraph {
     /**
      * \brief Class representing ActionEdges of the Tangled Program Graphs.
      *
-     * The source of an ActionEdge can not be a TPGTeam, only a Action.
+     * The source of an ActionEdge can not be a Team, only a Action.
      * A ActionEdge does not have a destination.
      *
      * It also has an action class corresponding to the continuous actions class

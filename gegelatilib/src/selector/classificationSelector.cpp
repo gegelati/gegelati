@@ -25,7 +25,7 @@ void Selector::ClassificationSelector::doSelection(
     }
 
     // Compute the number of agent to keep/delete base on each criterion
-    uint64_t totalNbAgent = this->manager->getAgentsCst().size();
+    uint64_t totalNbAgent = this->manager->getAgents().size();
     uint64_t nbAgentsToDelete = (uint64_t)floor(
         this->params.selection.truncation.ratioDeletedRoots * totalNbAgent);
     uint64_t nbAgentsToKeep = (totalNbAgent - nbAgentsToDelete);
@@ -91,7 +91,7 @@ void Selector::ClassificationSelector::doSelection(
     // Do the removal.
     // Because of potential agent actions, the preserved number of agents
     // may be higher than the given ratio.
-    auto allAgents = this->manager->getAgentsCst();
+    auto allAgents = this->manager->getAgents();
     auto& graphRef = this->graph;
     auto& managerRef = this->manager;
     auto& resultsPerAgentRef = this->resultsPerAgent;

@@ -67,13 +67,13 @@ namespace Mutator {
          * Following Stephen Kelly's PhD Thesis, the created Graph will
          * contain:
          * - Exactly nbAction Action vertices.
-         * - Exactly nbAction TPGTeam vertices
+         * - Exactly nbAction Team vertices
          * - Exactly 2*nbAction Programs
-         * - Between 2 and maxInitOutgoingEdges Edge per TPGTeam, where
-         *   - Each Edge connects a TPGTeam with a Action.
-         *   - Each TPGTeam is connected to a Action at most once.
-         *   - Each TPGTeam is connected to at least 2 distinct Action
-         *   - Each Program is used at most once per TPGTeam.
+         * - Between 2 and maxInitOutgoingEdges Edge per Team, where
+         *   - Each Edge connects a Team with a Action.
+         *   - Each Team is connected to a Action at most once.
+         *   - Each Team is connected to at least 2 distinct Action
+         *   - Each Program is used at most once per Team.
          *   - Each Program always leads to the same Action.
          *   - Each Program is approximately used the same number of time.
          * Hence, the maxInitOutgoingEdges value can not be greater than
@@ -107,7 +107,7 @@ namespace Mutator {
                                     RNG::RNG& rng);
 
         /**
-         * \brief Add a new outgoing ActionEdge to the TPGTeam within the
+         * \brief Add a new outgoing ActionEdge to the Team within the
          * Graph.
          *
          *
@@ -141,7 +141,7 @@ namespace Mutator {
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
          * \param[in] action the Action whose actionEdges will be altered.
-         * \param[in] team the TPGTeam source of Action
+         * \param[in] team the Team source of Action
          * \param[in] actionEdge the ActionEdge mutated
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
@@ -164,7 +164,7 @@ namespace Mutator {
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
          * \param[in] action the Action whose actionEdges will be altered.
-         * \param[in] team the TPGTeam source of Action
+         * \param[in] team the Team source of Action
          * \param[in] context SelectorContext containing necessary information
          * for mutations.
          * \param[in] params Probability parameters for the
@@ -226,37 +226,37 @@ namespace Mutator {
                             RNG::RNG& rng);
 
         /**
-         * \brief Select a random outgoingEdge of the given TPGTeam and removes
+         * \brief Select a random outgoingEdge of the given Team and removes
          * it from the Graph.
          *
          * \param[in,out] graph the Graph within which the team is stored.
-         * \param[in] team the TPGTeam whose outgoingEdges will be altered.
+         * \param[in] team the Team whose outgoingEdges will be altered.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void removeRandomEdge(EvoGraph::Graph& graph, const EvoGraph::TPGTeam& team,
+        void removeRandomEdge(EvoGraph::Graph& graph, const EvoGraph::Team& team,
                               RNG::RNG& rng);
 
         /**
-         * \brief Add a new outgoing Edge to the TPGTeam within the Graph.
+         * \brief Add a new outgoing Edge to the Team within the Graph.
          *
-         * This function adds a new outgoing Edge to the TPGTeam by cloning
+         * This function adds a new outgoing Edge to the Team by cloning
          * a preExisting Edge of the Graph. Since the graph may contain
          * Edge from previous mutations, the function receives a list of
          * preExisting Edge from which the Edge to copy should be chosen
-         * randomly. Any Edge already connected to the TPGTeam is also
+         * randomly. Any Edge already connected to the Team is also
          * excluded from the candidates. If there is no valid Edge candidate
          * this function will throw an exception (check code for more details).
          * The new Edge will have the same destination Vertex and Program
-         * as the cloned one, but its source will be the give TPGTeam.
+         * as the cloned one, but its source will be the give Team.
          *
          * \param[in,out] graph the Graph within which the team is stored.
-         * \param[in] team the TPGTeam whose outgoingEdges will be altered.
+         * \param[in] team the Team whose outgoingEdges will be altered.
          * \param[in] context SelectorContext containing necessary information
          * for mutations.
          * \param[in] rng Random Number Generator used in the
          * mutation process.
          */
-        void addRandomEdge(EvoGraph::Graph& graph, const EvoGraph::TPGTeam& team,
+        void addRandomEdge(EvoGraph::Graph& graph, const EvoGraph::Team& team,
                            const Selector::SelectionContext* context,
                            RNG::RNG& rng);
 
@@ -265,8 +265,8 @@ namespace Mutator {
          * target.
          *
          * This function selects a random Vertex among given pre-existing
-         * vector of TPGTeam and Action.
-         * The function randomly choses between a Action and a TPGTeam, with
+         * vector of Team and Action.
+         * The function randomly choses between a Action and a Team, with
          * the probabilities within the given MutationParameters. No
          * verification is made on the content of pre-existing Vertex list.
          * If one of this list contains the team itself, a self-loop may be
@@ -306,7 +306,7 @@ namespace Mutator {
          * \param[in] context SelectorContext containing necessary information
          * for mutations.
          * \param[in,out] newPrograms List of new Program created
-         * during mutations of the TPGTeam. The behavior of these Program must
+         * during mutations of the Team. The behavior of these Program must
          * be mutated to complete the mutation process.
          * \param[in] params
          * Probability parameters for the mutation.
@@ -320,12 +320,12 @@ namespace Mutator {
             const Mutator::MutationParameters& params, RNG::RNG& rng);
 
         /**
-         * \brief Mutates a TPGTeam by stochastically adding, deleting, and
+         * \brief Mutates a Team by stochastically adding, deleting, and
          * mutating the Program and destination of outgoing Edge.
          *
          * This function successively:
-         * - removes outgoing Edge from the TPGTeam,
-         * - adds outgoing Edge to the TPGTeam
+         * - removes outgoing Edge from the Team,
+         * - adds outgoing Edge to the Team
          * - selects the Program whose behavior should be mutated, an mutates
          * destination of outgoing Edge. Mutation of the Program behavior is
          * not performed in this function. Program to mutate are instead stored
@@ -337,18 +337,18 @@ namespace Mutator {
          *                stored.
          * \param[in] archive Archive used to assess the uniqueness of the
          *            mutated Program behavior.
-         * \param[in] team the source TPGTeam of the edge.
+         * \param[in] team the source Team of the edge.
          * \param[in] context SelectorContext containing necessary information
          * for mutations. destination.
          * \param[in,out] newPrograms List of new
-         * Program created during mutations of the TPGTeam. The behavior of
+         * Program created during mutations of the Team. The behavior of
          * these Program must be mutated to complete the mutation process.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void mutateTPGTeam(
+        void mutateTeam(
             EvoGraph::Graph& graph, const Archive& archive,
-            const EvoGraph::TPGTeam& team, const Selector::SelectionContext* context,
+            const EvoGraph::Team& team, const Selector::SelectionContext* context,
             std::list<std::shared_ptr<Program::Program>>& newPrograms,
             const Mutator::MutationParameters& params, RNG::RNG& rng);
 
@@ -387,17 +387,17 @@ namespace Mutator {
             const Archive& archive);
 
         /**
-         * \brief Create new root TPGTeam within the Graph.
+         * \brief Create new root Team within the Graph.
          *
-         * This function create and add new root TPGTeam to the Graph
+         * This function create and add new root Team to the Graph
          * until the targetted number of roots is reached. To create new root
-         * TPGTeam, the function uses mutation operators on duplicates of
-         * existing root TPGTeams of the Graph.
+         * Team, the function uses mutation operators on duplicates of
+         * existing root Teams of the Graph.
          *
          * A few special cases are handled:
          * If the set of root vertices of the Graph contains any Action,
          * this Action is ignored when selecting a candidate for duplication.
-         * If the Graph does not have any root TPGTeam, it is reinitialized
+         * If the Graph does not have any root Team, it is reinitialized
          * entirely with the initRandomTPG function.
          * If the given Graph already has more root Vertex than the
          * targetted number of root teams, nothing happens.

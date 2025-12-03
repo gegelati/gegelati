@@ -223,7 +223,7 @@ TEST_F(SelectorTest, UpdateEvaluationRecords)
         << "Best root not updated properly.";
 
     // Update with a root not from the graph
-    EvoGraph::TPGTeam fakeRoot;
+    EvoGraph::Team fakeRoot;
     ASSERT_NO_THROW(selector->updateEvaluationRecords(
         {{std::make_shared<Learn::EvaluationResult>(
               std::make_shared<Selector::SelectionMetrics>(3.0), 10),
@@ -403,7 +403,7 @@ TEST_F(SelectorTest, DoSelectionActionsQuota)
     size_t nbTeams = 0;
     size_t nbActions = 0;
     for (auto root : graph->getRootVertices()) {
-        if (dynamic_cast<const EvoGraph::TPGTeam*>(root) != nullptr) {
+        if (dynamic_cast<const EvoGraph::Team*>(root) != nullptr) {
             nbTeams++;
         }
         else if (dynamic_cast<const EvoGraph::Action*>(root) != nullptr) {

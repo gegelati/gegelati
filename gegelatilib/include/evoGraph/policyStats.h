@@ -92,12 +92,12 @@ namespace EvoGraph {
         std::map<const Program::Program*, size_t> nbUsePerActionProgram;
 
         /**
-         * \brief Number of time a TPGTeam was analyzed.
+         * \brief Number of time a Team was analyzed.
          *
          * When analyzing a policy, this number corresponds to
-         * the number of times this TPGTeam is the destination of a Edge.
+         * the number of times this Team is the destination of a Edge.
          */
-        std::map<const TPGTeam*, size_t> nbUsePerTPGTeam;
+        std::map<const Team*, size_t> nbUsePerTeam;
 
         /**
          * \brief Number of time a Action was analyzed.
@@ -152,7 +152,7 @@ namespace EvoGraph {
         std::map<std::pair<size_t, size_t>, size_t>
             nbUsagePerDataLocationActionProg;
 
-        /// Number of outgoing Edge of per TPGTeam of the Graph.
+        /// Number of outgoing Edge of per Team of the Graph.
         std::vector<size_t> nbOutgoingEdgesPerTeam;
 
         /**
@@ -166,14 +166,14 @@ namespace EvoGraph {
 
         /**
          * Each entry of this map represents a level deepth of the policy tree
-         * and the number of TPGTeam that "first" appeared within this level.
+         * and the number of Team that "first" appeared within this level.
          *
-         * A TPGTeam may appear several time in a single policy, but only its
+         * A Team may appear several time in a single policy, but only its
          * "lowest" level is counted here.
          */
         std::map<size_t, size_t> nbVertexPerDepthLevel;
 
-        /// Number of distinct TPGTeams per policy.
+        /// Number of distinct Teams per policy.
         size_t nbDistinctTeams = 0;
 
         /// Default constructor
@@ -227,17 +227,17 @@ namespace EvoGraph {
         void analyzeProgram(const Program::Program* prog);
 
         /**
-         * Analyze the given TPGTeam.
+         * Analyze the given Team.
          *
          * The method updates the following stats:
-         * - Number of use per TPGTeam.
-         * - Number of outgoing Edge per TPGTeam.
-         * - Total number of distinct TPGTeam in the policy.
+         * - Number of use per Team.
+         * - Number of outgoing Edge per Team.
+         * - Total number of distinct Team in the policy.
          *
-         * If a TPGTeam was already analyzed, it will not be analyzed again and
-         * only the number of use per TPGTeam will be updated.
+         * If a Team was already analyzed, it will not be analyzed again and
+         * only the number of use per Team will be updated.
          */
-        void analyzeTPGTeam(const EvoGraph::TPGTeam* team);
+        void analyzeTeam(const EvoGraph::Team* team);
 
         /**
          * Analyze the given Action.
@@ -255,12 +255,12 @@ namespace EvoGraph {
          * Analyze the policy starting from the given Vertex.
          *
          * This method explores the Graph starting from the given Vertex,
-         * and analyzes all TPGTeam, Action and Program encountered along the
+         * and analyzes all Team, Action and Program encountered along the
          * way.
          *
          * The method updates the following stats:
          * - Depth of the policy.
-         * - Number of TPGTeam per depth level.
+         * - Number of Team per depth level.
          */
         void analyzePolicy(const EvoGraph::Vertex* vertex);
 

@@ -1463,7 +1463,7 @@ TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
 {
     Learn::LearningAgent la(le, set, params);
     la.init();
-    EvoGraph::TPGTeam fakeTeam;
+    EvoGraph::Team fakeTeam;
     ASSERT_THROW(
         la.evaluateOneRoot(0, Learn::LearningMode::TRAINING, &fakeTeam),
         std::runtime_error);

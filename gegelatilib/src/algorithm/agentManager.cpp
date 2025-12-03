@@ -3,13 +3,9 @@
 #include "algorithm/agentManager.h"
 
 
-const std::set<std::shared_ptr<Algorithm::Agent>, SharedLess<Algorithm::Agent>>& Algorithm::AgentManager::getAgents()
-{
-    return this->agents;
-}
 
 
-const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::AgentManager::getAgentsCst() const
+const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::AgentManager::getAgents() const
 {
     std::vector<std::shared_ptr<const Algorithm::Agent>> constAgents;
 
@@ -31,4 +27,11 @@ bool Algorithm::AgentManager::containsAgent(std::shared_ptr<const Agent> agent) 
 {
     auto iterator = this->agents.find(agent);
     return iterator != this->agents.end() && *iterator == agent;
+}
+
+void Algorithm::AgentManager::clearAgents()
+{
+    for(auto agent: this->agents){
+        this->deleteAgent(agent, nullptr);
+    }
 }

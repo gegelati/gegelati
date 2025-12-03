@@ -44,9 +44,9 @@ std::shared_ptr<EvoGraph::Graph> EvoGraph::GraphFactory::createGraph(
     return std::make_shared<EvoGraph::Graph>(env, std::make_unique<GraphFactory>());
 }
 
-std::unique_ptr<EvoGraph::TPGTeam> EvoGraph::GraphFactory::createTPGTeam() const
+std::unique_ptr<EvoGraph::Team> EvoGraph::GraphFactory::createTeam() const
 {
-    return std::make_unique<EvoGraph::TPGTeam>();
+    return std::make_unique<EvoGraph::Team>();
 }
 
 std::unique_ptr<EvoGraph::Action> EvoGraph::GraphFactory::createAction(

@@ -71,14 +71,14 @@ namespace File {
         std::string offset;
 
         /**
-         * \brief Print the dot content for the given TPGTeam.
+         * \brief Print the dot content for the given Team.
          *
          * Content is printed directly into the file opened by the class
          * constructor, or by a call to setNewFilePath.
          *
-         * \param[in] team the TPGTeam being printed.
+         * \param[in] team the Team being printed.
          */
-        void printTPGTeam(const EvoGraph::TPGTeam& team);
+        void printTeam(const EvoGraph::Team& team);
 
         /**
          * \brief Print the dot content for the given Action.
@@ -87,10 +87,10 @@ namespace File {
          * constructor, or by a call to setNewFilePath.
          * This method returns the identifier associated to the printed action
          * so that the print Edge method can target this Action. Indeed,
-         * contrary to TPGTeam which have a unique ID, each action is printed on
+         * contrary to Team which have a unique ID, each action is printed on
          * the fly, with a unique ID, when a Edge is targetting this action.
          *
-         * \param[in] action the TPGTeam being printed.
+         * \param[in] action the Team being printed.
          * \return the identifier associated to this action.
          */
         uint64_t printAction(const EvoGraph::Action& action);

@@ -350,20 +350,20 @@ TEST_F(PolicyStatsTest, AnalyzeProgram)
     }
 }
 
-TEST_F(PolicyStatsTest, AnalyzeTPGTeam)
+TEST_F(PolicyStatsTest, AnalyzeTeam)
 {
     EvoGraph::PolicyStats ps;
     ps.setEnvironment(*e);
 
     for (auto i = 0; i < 2; i++) {
         ASSERT_NO_THROW(
-            ps.analyzeTPGTeam((const EvoGraph::TPGTeam*)tpg->getVertices().at(0)))
-            << "Analysis of a valid TPGTeam failed unexpectedly.";
+            ps.analyzeTeam((const EvoGraph::Team*)tpg->getVertices().at(0)))
+            << "Analysis of a valid Team failed unexpectedly.";
 
         // Check attributes
-        ASSERT_EQ(ps.nbUsePerTPGTeam.size(), 1);
-        ASSERT_EQ(ps.nbUsePerTPGTeam.begin()->first, tpg->getVertices().at(0));
-        ASSERT_EQ(ps.nbUsePerTPGTeam.begin()->second, i + 1);
+        ASSERT_EQ(ps.nbUsePerTeam.size(), 1);
+        ASSERT_EQ(ps.nbUsePerTeam.begin()->first, tpg->getVertices().at(0));
+        ASSERT_EQ(ps.nbUsePerTeam.begin()->second, i + 1);
         ASSERT_EQ(ps.nbOutgoingEdgesPerTeam.size(), 1);
         ASSERT_EQ(*ps.nbOutgoingEdgesPerTeam.begin(), 2);
         ASSERT_EQ(ps.nbDistinctTeams, 1);
@@ -460,11 +460,11 @@ TEST_F(PolicyStatsTest, AnalyzePolicy)
         }
     }
 
-    std::vector<size_t> nbUsePerTPGTeam{1, 1, 1};
-    for (auto i = 0; i < nbUsePerTPGTeam.size(); i++) {
-        ASSERT_EQ(ps.nbUsePerTPGTeam.at(
-                      (const EvoGraph::TPGTeam*)tpg->getVertices().at(i)),
-                  nbUsePerTPGTeam[i]);
+    std::vector<size_t> nbUsePerTeam{1, 1, 1};
+    for (auto i = 0; i < nbUsePerTeam.size(); i++) {
+        ASSERT_EQ(ps.nbUsePerTeam.at(
+                      (const EvoGraph::Team*)tpg->getVertices().at(i)),
+                  nbUsePerTeam[i]);
     }
 
     std::vector<size_t> nbUsePerAction{2, 1, 2};
@@ -496,7 +496,7 @@ TEST_F(PolicyStatsTest, Clear)
     ASSERT_TRUE(ps.nbUsagePerInstruction.empty());
     ASSERT_TRUE(ps.nbUsagePerDataLocation.empty());
     ASSERT_TRUE(ps.nbUsePerProgram.empty());
-    ASSERT_TRUE(ps.nbUsePerTPGTeam.empty());
+    ASSERT_TRUE(ps.nbUsePerTeam.empty());
     ASSERT_TRUE(ps.nbUsePerAction.empty());
     ASSERT_TRUE(ps.nbUsePerActionProgram.empty());
     ASSERT_TRUE(ps.nbLinesPerActionProgram.empty());

@@ -47,9 +47,9 @@ double EvoGraph::ExecutionEngineInstrumented::evaluateEdge(const Edge& edge)
 }
 
 const EvoGraph::Edge& EvoGraph::ExecutionEngineInstrumented::evaluateTeam(
-    const TPGTeam& team)
+    const Team& team)
 {
-    dynamic_cast<const TPGTeamInstrumented&>(team).incrementNbVisits();
+    dynamic_cast<const TeamInstrumented&>(team).incrementNbVisits();
 
     const Edge& winningEdge = ExecutionEngine::evaluateTeam(team);
     dynamic_cast<const EdgeInstrumented&>(winningEdge)

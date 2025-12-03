@@ -149,7 +149,7 @@ void EvoGraph::PolicyStats::clear()
     this->nbUsagePerInstruction.clear();
     this->nbUsagePerDataLocation.clear();
     this->nbUsePerProgram.clear();
-    this->nbUsePerTPGTeam.clear();
+    this->nbUsePerTeam.clear();
     this->nbUsePerAction.clear();
     this->nbUsePerActionProgram.clear();
     this->nbLinesPerActionProgram.clear();
@@ -237,9 +237,9 @@ void EvoGraph::PolicyStats::analyzeProgram(const Program::Program* prog)
     nbIntronPerProgram.push_back(nbIntronLines);
 }
 
-void EvoGraph::PolicyStats::analyzeTPGTeam(const EvoGraph::TPGTeam* team)
+void EvoGraph::PolicyStats::analyzeTeam(const EvoGraph::Team* team)
 {
-    size_t nbUse = ++this->nbUsePerTPGTeam[team];
+    size_t nbUse = ++this->nbUsePerTeam[team];
     if (nbUse == 1) {
         this->nbDistinctTeams++;
         this->nbOutgoingEdgesPerTeam.push_back(team->getOutgoingEdges().size());
@@ -263,9 +263,9 @@ void EvoGraph::PolicyStats::analyzePolicy(const EvoGraph::Vertex* root)
         nextStage.clear();
 
         for (const EvoGraph::Vertex* vertex : stage[depth % 2]) {
-            if (auto team = dynamic_cast<const EvoGraph::TPGTeam*>(vertex)) {
-                this->analyzeTPGTeam(team);
-                if (this->nbUsePerTPGTeam[team] == 1) {
+            if (auto team = dynamic_cast<const EvoGraph::Team*>(vertex)) {
+                this->analyzeTeam(team);
+                if (this->nbUsePerTeam[team] == 1) {
                     for (const EvoGraph::Edge* edge :
                          vertex->getOutgoingEdges()) {
                         this->analyzeProgram(&edge->getProgram());

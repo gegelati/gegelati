@@ -24,8 +24,8 @@ void Selector::Selector::keepBestPolicy()
         auto bestAgentVertex = this->bestAgent.first;
 
         // Remove all but the best agent from the graph
-        while (this->manager->getAgentsCst().size() != 1) {
-            auto agents = this->manager->getAgentsCst();
+        while (this->manager->getAgents().size() != 1) {
+            auto agents = this->manager->getAgents();
             for (auto agent : agents) {
                 if (agent != bestAgentVertex) {
                     this->manager->deleteAgent(agent, graph);
@@ -127,8 +127,8 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
     this->context.teamsClonable.clear();
     this->context.actionsClonable.clear();
     for (auto agent : agentVertices) {
-        if (dynamic_cast<const EvoGraph::TPGTeam*>(agent) != nullptr) {
-            this->context.teamsClonable.push_back((const EvoGraph::TPGTeam*)agent);
+        if (dynamic_cast<const EvoGraph::Team*>(agent) != nullptr) {
+            this->context.teamsClonable.push_back((const EvoGraph::Team*)agent);
         }
         else if (params.mutation.tpg.useActionProgram) {
             this->context.actionsClonable.push_back(
@@ -138,7 +138,7 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
     uint64_t nbAgentTeams = this->context.teamsClonable.size();
     uint64_t nbAgentActions = this->context.actionsClonable.size();
 
-    // Fill the list of available TPGTeam and Actions, Actions are only
+    // Fill the list of available Team and Actions, Actions are only
     // agents if they are not accessible by the teams
     this->context.preExistingTeams.clear();
     this->context.preExistingActions.clear();
@@ -149,9 +149,9 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
             this->context.preExistingActions.push_back(
                 (const EvoGraph::Action*)vertex);
         }
-        else if (dynamic_cast<const EvoGraph::TPGTeam*>(vertex) != nullptr) {
+        else if (dynamic_cast<const EvoGraph::Team*>(vertex) != nullptr) {
             this->context.preExistingTeams.push_back(
-                (const EvoGraph::TPGTeam*)vertex);
+                (const EvoGraph::Team*)vertex);
         }
     }
 

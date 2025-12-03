@@ -42,7 +42,7 @@
 #include "file/tpgGraphDotExporter.h"
 #include "util/timestamp.h"
 
-void File::GraphDotExporter::printTPGTeam(const EvoGraph::TPGTeam& team)
+void File::GraphDotExporter::printTeam(const EvoGraph::Team& team)
 {
     // Color is different for roots
     std::string color;
@@ -233,7 +233,7 @@ void File::GraphDotExporter::printGraphFooter()
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
     // Team root ids
     for (const EvoGraph::Vertex* rootVertex : rootVertices) {
-        if (dynamic_cast<const EvoGraph::TPGTeam*>(rootVertex) != nullptr) {
+        if (dynamic_cast<const EvoGraph::Team*>(rootVertex) != nullptr) {
             fprintf(pFile, "T%" PRIu64 " ", rootVertex->getVertexID());
         }
     }
@@ -255,8 +255,8 @@ void File::GraphDotExporter::print()
     // Print all vertices
     auto vertices = this->tpg.getVertices();
     for (const EvoGraph::Vertex* vertex : vertices) {
-        if (dynamic_cast<const EvoGraph::TPGTeam*>(vertex) != nullptr) {
-            this->printTPGTeam(*(const EvoGraph::TPGTeam*)vertex);
+        if (dynamic_cast<const EvoGraph::Team*>(vertex) != nullptr) {
+            this->printTeam(*(const EvoGraph::Team*)vertex);
         }
     }
 
@@ -308,8 +308,8 @@ void File::GraphDotExporter::printSubGraph(const EvoGraph::Vertex* root)
         visitedVertices.push_back(vertex);
 
         // Print it if it is a team (actions are printed with edges)
-        if (dynamic_cast<const EvoGraph::TPGTeam*>(vertex) != nullptr) {
-            this->printTPGTeam(*(const EvoGraph::TPGTeam*)vertex);
+        if (dynamic_cast<const EvoGraph::Team*>(vertex) != nullptr) {
+            this->printTeam(*(const EvoGraph::Team*)vertex);
         }
         else {
             this->printAction(*(const EvoGraph::Action*)vertex);

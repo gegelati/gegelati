@@ -42,15 +42,15 @@
 namespace EvoGraph {
 
     /**
-     * \brief Instrumented TPGTeam
+     * \brief Instrumented Team
      */
-    class TPGTeamInstrumented : public EvoGraph::TPGTeam,
+    class TeamInstrumented : public EvoGraph::Team,
                                 public EvoGraph::VertexInstrumentation
     {
       public:
-        /// Main constructor for TPGTeamInstrumented.
-        /// see TPGTeam constructor for more details.
-        TPGTeamInstrumented() : TPGTeam()
+        /// Main constructor for TeamInstrumented.
+        /// see Team constructor for more details.
+        TeamInstrumented() : Team()
         {
         }
     };

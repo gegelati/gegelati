@@ -128,15 +128,15 @@ namespace EvoGraph {
         const GraphFactory& getFactory() const;
 
         /**
-         * \brief Create a new TPGTeam and add it to the vertices of the
+         * \brief Create a new Team and add it to the vertices of the
          * Graph.
          *
-         * The new TPGTeam is added to the back of the vertices list.
-         * The TPGTeam is created using the GraphFactory of the Graph.
+         * The new Team is added to the back of the vertices list.
+         * The Team is created using the GraphFactory of the Graph.
          *
-         * \return a const reference to the newly created TPGTeam.
+         * \return a const reference to the newly created Team.
          */
-        const TPGTeam& addNewTeam();
+        const Team& addNewTeam();
 
         /**
          * \brief Create a new Action and add it to the vertices of the
@@ -198,7 +198,7 @@ namespace EvoGraph {
          * \return a vector containing pointers to the root teams of the
          * graph.
          */
-        const std::vector<const TPGTeam*> getRootTeams() const;
+        const std::vector<const Team*> getRootTeams() const;
 
         /**
          * \brief Get vector of const pointer to the root vertices of the
@@ -278,7 +278,7 @@ namespace EvoGraph {
          * \param[in] actionClass of the actionEdge
          * \return a const reference to the created Edge.
          * \throw std::runtime_error In case the Vertex does not
-         * exist in the Graph, or if the source is a TPGTeam.
+         * exist in the Graph, or if the source is a Team.
          */
         const Edge& addNewActionEdge(
             const Vertex& src, const std::shared_ptr<Program::Program> prog,

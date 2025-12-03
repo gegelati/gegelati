@@ -93,12 +93,12 @@ class TPGInstrumentedTest : public ::testing::Test
 };
 
 TEST_F(TPGInstrumentedTest,
-       TPGTeamInstrumentedAndActionInstrumentedConstructorsDestructors)
+       TeamInstrumentedAndActionInstrumentedConstructorsDestructors)
 {
     EvoGraph::Vertex* team;
     EvoGraph::Vertex* action;
 
-    ASSERT_NO_THROW(team = new EvoGraph::TPGTeamInstrumented());
+    ASSERT_NO_THROW(team = new EvoGraph::TeamInstrumented());
     ASSERT_NO_THROW(action = new EvoGraph::ActionInstrumented(0));
 
     ASSERT_NO_THROW(delete team);
@@ -107,33 +107,33 @@ TEST_F(TPGInstrumentedTest,
 
 TEST_F(TPGInstrumentedTest, VertexInstrumentationSettersAndGetters)
 {
-    // Test VertexInstrumentation through its TPGTeamInstrumented
+    // Test VertexInstrumentation through its TeamInstrumented
     // specialization.
-    EvoGraph::TPGTeamInstrumented team;
+    EvoGraph::TeamInstrumented team;
 
     ASSERT_EQ(team.getNbVisits(), 0)
-        << "Number of visit on a newly constructed TPGTeamInstrumented should "
+        << "Number of visit on a newly constructed TeamInstrumented should "
            "be 0.";
 
     ASSERT_NO_THROW(team.incrementNbVisits())
-        << "Increment of number of visits on a TPGTeamInstrumented should not "
+        << "Increment of number of visits on a TeamInstrumented should not "
            "fail.";
 
     ASSERT_EQ(team.getNbVisits(), 1)
-        << "Number of visit of a TPGTeamInstrumented should "
+        << "Number of visit of a TeamInstrumented should "
            "be 1 after an increment.";
 
     ASSERT_NO_THROW(team.reset()) << "Reset of instrumentation counter should "
-                                     "not fail on a TPGTeamInstrumented.";
+                                     "not fail on a TeamInstrumented.";
 
     ASSERT_EQ(team.getNbVisits(), 0)
-        << "Number of visit of a TPGTeamInstrumented should "
+        << "Number of visit of a TeamInstrumented should "
            "be 0 after a reset.";
 }
 
 TEST_F(TPGInstrumentedTest, EdgeInstrumentedConstructorsDestructors)
 {
-    EvoGraph::TPGTeam team;
+    EvoGraph::Team team;
     EvoGraph::Action action(1);
     EvoGraph::Edge* edge;
 
@@ -145,7 +145,7 @@ TEST_F(TPGInstrumentedTest, EdgeInstrumentedConstructorsDestructors)
 
 TEST_F(TPGInstrumentedTest, EdgeInstrumentedSettersAndGetters)
 {
-    EvoGraph::TPGTeam team;
+    EvoGraph::Team team;
     EvoGraph::Action action(1);
     EvoGraph::EdgeInstrumented edge(&team, &action, progPointer);
 
@@ -192,7 +192,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
     EvoGraph::TPGInstrumentedFactory factory;
 
     std::unique_ptr<EvoGraph::Action> action;
-    std::unique_ptr<EvoGraph::TPGTeam> team;
+    std::unique_ptr<EvoGraph::Team> team;
     std::unique_ptr<EvoGraph::Edge> edge;
     std::unique_ptr<EvoGraph::ExecutionEngine> tee;
 
@@ -202,10 +202,10 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
     ASSERT_EQ(typeid(*action), typeid(EvoGraph::ActionInstrumented))
         << "Action built by the TPGInstrumentedFactory has an incorrect type.";
 
-    ASSERT_NO_THROW(team = factory.createTPGTeam())
+    ASSERT_NO_THROW(team = factory.createTeam())
         << "GraphELementFactory could not build a Action.";
-    ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
-    ASSERT_EQ(typeid(*team), typeid(EvoGraph::TPGTeamInstrumented))
+    ASSERT_NE(team, nullptr) << "Created Team should not be null.";
+    ASSERT_EQ(typeid(*team), typeid(EvoGraph::TeamInstrumented))
         << "Team built by the TPGInstrumentedFactory has an incorrect type.";
 
     ASSERT_NO_THROW(
@@ -225,13 +225,13 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
 TEST_F(TPGInstrumentedTest, GraphAddVertexAndEdge)
 {
     EvoGraph::Graph tpg(*e, std::make_unique<EvoGraph::TPGInstrumentedFactory>());
-    const EvoGraph::TPGTeam* t;
+    const EvoGraph::Team* t;
     const EvoGraph::Action* a;
     const EvoGraph::Edge* e;
 
     ASSERT_NO_THROW(t = &tpg.addNewTeam())
         << "Adding a new Team to a Graph failed.";
-    ASSERT_EQ(typeid(*t), typeid(EvoGraph::TPGTeamInstrumented))
+    ASSERT_EQ(typeid(*t), typeid(EvoGraph::TeamInstrumented))
         << "Team built by the TPGInstrumentedFactory has an incorrect type.";
 
     ASSERT_NO_THROW(a = &tpg.addNewAction(0))
@@ -248,8 +248,8 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryReset)
 {
     // Add to the TPG
     EvoGraph::Graph tpg(*e, std::make_unique<EvoGraph::TPGInstrumentedFactory>());
-    const EvoGraph::TPGTeamInstrumented& t =
-        dynamic_cast<const EvoGraph::TPGTeamInstrumented&>(tpg.addNewTeam());
+    const EvoGraph::TeamInstrumented& t =
+        dynamic_cast<const EvoGraph::TeamInstrumented&>(tpg.addNewTeam());
     const EvoGraph::ActionInstrumented& a =
         dynamic_cast<const EvoGraph::ActionInstrumented&>(tpg.addNewAction(0));
     const EvoGraph::EdgeInstrumented& e =
@@ -300,9 +300,9 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactoryCleanTPG)
      */
 
     EvoGraph::Graph tpg(*e, std::make_unique<EvoGraph::TPGInstrumentedFactory>());
-    const EvoGraph::TPGTeamInstrumented* t[4];
+    const EvoGraph::TeamInstrumented* t[4];
     for (auto i = 0; i < 4; i++) {
-        t[i] = dynamic_cast<const EvoGraph::TPGTeamInstrumented*>(&tpg.addNewTeam());
+        t[i] = dynamic_cast<const EvoGraph::TeamInstrumented*>(&tpg.addNewTeam());
     }
 
     const EvoGraph::ActionInstrumented* a[3];

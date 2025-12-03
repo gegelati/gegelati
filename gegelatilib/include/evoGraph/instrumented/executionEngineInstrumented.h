@@ -87,10 +87,10 @@ namespace EvoGraph {
          *
          * In addition to calling the evaluateTeam method from
          * ExecutionEngine, this specialization increments the number of
-         * visits of the evaluated TPGTeam and the number of traversal of the
+         * visits of the evaluated Team and the number of traversal of the
          * Edge with the winning bid.
          */
-        const EvoGraph::Edge& evaluateTeam(const TPGTeam& team) override;
+        const EvoGraph::Edge& evaluateTeam(const Team& team) override;
         /**
          * \brief Specialization of the evaluateTeam function.
          *

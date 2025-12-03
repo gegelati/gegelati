@@ -64,7 +64,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const EvoGraph::Edge& edge
     }
 }
 
-void CodeGen::TPGSwitchGenerationEngine::generateTeam(const EvoGraph::TPGTeam& team)
+void CodeGen::TPGSwitchGenerationEngine::generateTeam(const EvoGraph::Team& team)
 {
     auto edges = team.getOutgoingEdges();
     auto teamName = vertexName(team);
@@ -148,7 +148,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateGraph()
         initActivationFunction();
     }
 
-    std::map<const EvoGraph::TPGTeam*, std::list<EvoGraph::Edge*>> graph;
+    std::map<const EvoGraph::Team*, std::list<EvoGraph::Edge*>> graph;
     auto vertices = this->tpg.getVertices();
 
     // generate enum of teams and actions for readability
@@ -170,8 +170,8 @@ void CodeGen::TPGSwitchGenerationEngine::generateGraph()
     fileMain << "\t\tswitch (currentVertex) {" << std::endl;
     for (auto vertex : vertices) {
         fileMain << "\t\tcase " << vertexName(*vertex) << ": {" << std::endl;
-        if (dynamic_cast<const EvoGraph::TPGTeam*>(vertex) != nullptr) {
-            generateTeam(*(const EvoGraph::TPGTeam*)vertex);
+        if (dynamic_cast<const EvoGraph::Team*>(vertex) != nullptr) {
+            generateTeam(*(const EvoGraph::Team*)vertex);
             fileMain << "\t\t\t\tbreak;" << std::endl;
         }
         else if (dynamic_cast<const EvoGraph::Action*>(vertex) != nullptr) {
@@ -254,7 +254,7 @@ std::string CodeGen::TPGSwitchGenerationEngine::vertexName(
     const EvoGraph::Vertex& v)
 {
     std::ostringstream vertexName;
-    if (dynamic_cast<const EvoGraph::TPGTeam*>(&v) != nullptr) {
+    if (dynamic_cast<const EvoGraph::Team*>(&v) != nullptr) {
         vertexName << "T";
     }
     else {

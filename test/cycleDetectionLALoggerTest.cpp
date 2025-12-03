@@ -170,7 +170,7 @@ TEST_F(CycleDetectionLoggerTest, logAfterPopulateTPG)
 
     auto tpg = la->getGraph();
     tpg->clear();
-    std::vector<const EvoGraph::TPGTeam*> teams;
+    std::vector<const EvoGraph::Team*> teams;
     for (auto idx = 0; idx < 6; idx++) {
         teams.push_back(&(tpg->addNewTeam()));
     }

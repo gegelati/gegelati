@@ -208,8 +208,8 @@ TEST_F(ExecutionEngineInstrumentedTest, EvaluateTeam)
 {
     EvoGraph::ExecutionEngineInstrumented tpeei(*e);
 
-    const EvoGraph::TPGTeamInstrumented* t1 =
-        dynamic_cast<const EvoGraph::TPGTeamInstrumented*>(tpg->getVertices().at(1));
+    const EvoGraph::TeamInstrumented* t1 =
+        dynamic_cast<const EvoGraph::TeamInstrumented*>(tpg->getVertices().at(1));
     const EvoGraph::EdgeInstrumented* t1t2 =
         dynamic_cast<const EvoGraph::EdgeInstrumented*>(edges.at(5));
     const EvoGraph::EdgeInstrumented* t1a0 =
@@ -229,8 +229,8 @@ TEST_F(ExecutionEngineInstrumentedTest, EvaluateTeam)
 
     const EvoGraph::Edge* result = NULL;
     ASSERT_NO_THROW(result = &tpeei.evaluateTeam(
-                        *(const EvoGraph::TPGTeam*)(tpg->getVertices().at(1)));)
-        << "Evaluation of a valid TPGTeam with no exclusion failed.";
+                        *(const EvoGraph::Team*)(tpg->getVertices().at(1)));)
+        << "Evaluation of a valid Team with no exclusion failed.";
     // Expected result is edge between T1 -> T2 (with 0.9)
     ASSERT_EQ(result, edges.at(5))
         << "Edge selected during team evaluation is incorrect.";

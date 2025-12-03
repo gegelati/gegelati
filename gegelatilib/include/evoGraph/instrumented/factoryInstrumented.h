@@ -41,7 +41,7 @@
 
 namespace EvoGraph {
 
-    /// Specialization of the GraphFactory class producing TPGTeamInstrumented,
+    /// Specialization of the GraphFactory class producing TeamInstrumented,
     /// ActionInstrumented, EdgeInstrumented, and
     /// ExecutionEngineInstrumented
     ///
@@ -55,8 +55,8 @@ namespace EvoGraph {
         virtual std::shared_ptr<Graph> createGraph(
             const Environment& env) const override;
 
-        ///  Specialization of the method returning a TPGTeamInstrumented
-        virtual std::unique_ptr<TPGTeam> createTPGTeam() const override;
+        ///  Specialization of the method returning a TeamInstrumented
+        virtual std::unique_ptr<Team> createTeam() const override;
 
         ///  Specialization of the method returning a ActionInstrumented
         virtual std::unique_ptr<Action> createAction(
@@ -74,7 +74,7 @@ namespace EvoGraph {
         /**
          * \brief Reset all visit and traversal counters of a Graph.
          *
-         * \param[in] tpg the Graph whose TPGTeamInstrumented,
+         * \param[in] tpg the Graph whose TeamInstrumented,
          * ActionInstrumented, and EdgeInstrumented will be reseted.The
          * Graph is const since all instrumentation counters are mutable.
          */

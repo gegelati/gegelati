@@ -124,20 +124,20 @@ namespace EvoGraph {
 
         /**
          * \brief Evaluate all the Program of the outgoing Edge of the
-         *        TPGTeam.
+         *        Team.
          *
          * This method evaluates the Programs of all outgoing Edge of the
-         * TPGTeam, and returns the reference to the Edge providing the
+         * Team, and returns the reference to the Edge providing the
          * largest evaluation.
          *
-         * \param[in] team the TPGTeam whose outgoing Edge are evaluated.
+         * \param[in] team the Team whose outgoing Edge are evaluated.
          * \return the reference to the Edge evaluated with the the highest
          *         double value (and not excluded).
          *
-         * \throw std::runtime_error in case the TPGTeam has no outgoing edge.
+         * \throw std::runtime_error in case the Team has no outgoing edge.
          * This should not happen in a correctly constructed Graph.
          */
-        virtual const EvoGraph::Edge& evaluateTeam(const TPGTeam& team);
+        virtual const EvoGraph::Edge& evaluateTeam(const Team& team);
 
         /**
          * \brief Execute the Graph starting from the given Vertex.
