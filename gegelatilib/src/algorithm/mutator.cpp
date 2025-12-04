@@ -3,15 +3,15 @@
 
 void Algorithm::Mutator::mutatePopulation(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
-    const Archive& archive, const Learn::LearningParameters& params,
-    RNG::RNG& rng, size_t nbActions, uint64_t maxNbThread)
+    const Learn::LearningParameters& params,
+    RNG::RNG& rng, size_t nbOutputs, uint64_t maxNbThread)
 {
 
     // If the graph doesn't contain any clonable teams, call the init procedure.
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
     if (selector->updateContext().teamsClonable.size() <= 1) {
-        initRandomPopulation(graph, manager, params, rng, nbActions);
+        initRandomPopulation(graph, manager, params, rng, nbOutputs);
         std::cerr<<"New population initialized during training because size was equal or below one"<<std::endl;
     } 
     const Selector::SelectionContext& context = selector->updateContext();

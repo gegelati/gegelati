@@ -40,20 +40,17 @@ bool Algorithm::Algorithm::containsAgent(std::shared_ptr<const Agent> agent) con
 void Algorithm::Algorithm::init(RNG::RNG& rng)
 {
     // Initialize a random population
-    this->mutator->initRandomPopulation(this->graph, this->manager, this->params, rng, this->nbActions);
+    this->mutator->initRandomPopulation(this->graph, this->manager, this->params, rng, this->nbOutputs);
 
-    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->archive, this->params, rng, this->nbActions);
+    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->params, rng, this->nbOutputs);
 
     // Clear the best agent in the selector
     this->selector->forgetPreviousResults();
-
-    // Clear the archive
-    this->archive.clear();
 }
 
 void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
 {
-    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->archive, this->params, rng, maxNbThreads);
+    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->params, rng, maxNbThreads);
 }
 
 

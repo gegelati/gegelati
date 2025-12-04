@@ -28,27 +28,38 @@ namespace Algorithm {
         Mutator() {};
 
         /**
-         * \brief Initialize a random Graph.
+         * \brief Initialize a random population.
          *
          * \param[in,out] graph the initialized Graph.
          * \param[in] manager the manager to change the agents.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
-         * \param[in] nbActions number of actions that will be usable for
+         * \param[in] nbOutputs number of outputs that will be usable for
          * interacting with this LearningEnviromnent.
          */
-        virtual void initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbActions) = 0;
+        virtual void initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbOutputs) = 0;
+
+        /**
+         * \brief Initialize a random Agent.
+         *
+         * \param[in,out] graph the Graph.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in] nbOutputs number of outputs that will be usable for
+         * interacting with this LearningEnviromnent.
+         */
+        virtual std::shared_ptr<const Agent> initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbOutputs) = 0;
+
         /**
          * \brief mutate the whole population, by dupplicating and adding new agents from the current algorithm.
          * 
          * \param[in] graph the graph to mutate.
          * \param[in] manager the manager to change the agents.
          * \param[in] selector the Selector of the learningAgent.
-         * \param[in] archive Archive used to assess the uniqueness of the
-         *            mutated Program behavior.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
-         * \param[in] nbActions number of actions that will be usable for
+         * \param[in] nbOutputs number of outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] maxNbThreads Integer parameter controlling the number of
          * threads used for parallel execution. Possible values are:
@@ -59,8 +70,8 @@ namespace Algorithm {
          */
         virtual void mutatePopulation(
             std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
-            const Archive& archive, const Learn::LearningParameters& params,
-            RNG::RNG& rng, size_t nbActions, uint64_t maxNbThreads = std::thread::hardware_concurrency());
+            const Learn::LearningParameters& params,
+            RNG::RNG& rng, size_t nbOutputs, uint64_t maxNbThreads = std::thread::hardware_concurrency());
         /**
          * \brief mutate a specific agent of an algorithm within a population
          * 

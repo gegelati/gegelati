@@ -11,14 +11,11 @@ namespace Algorithm {
     namespace TPG {
       
         /**
-         * \brief Abstract class representing a TPGAhent
+         * \brief Abstract class representing a TPGAgent
          */
         class TPGAgent : public Agent
         {
         protected:
-
-            /// Attribute that specify if the agent can be mutated.
-            bool isMutable = true;
 
             /// Vertex of the evolution graph that the agent represent.
             const EvoGraph::Vertex* vertex;
@@ -43,7 +40,6 @@ namespace Algorithm {
              * \param[in] newVertex the new vertex to set.
              */
             virtual void setVertex(const EvoGraph::Vertex& newVertex);
-
 
             /**
              * \brief Method that return if the agent's vertex is currently root.

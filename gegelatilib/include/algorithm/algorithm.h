@@ -33,15 +33,11 @@ namespace Algorithm {
 
         /// Selector used for the selection process
         std::shared_ptr<Selector::Selector> selector;
-
-        /// Archive used during the training process
-        Archive archive;
-
         /// Mutator used by the algorithm
         std::shared_ptr<Mutator> mutator;
 
-        /// Number of actions available in the learning environment
-        size_t nbActions;
+        /// Number of values to outputs 
+        size_t nbOutputs;
 
       public:
 
@@ -55,8 +51,8 @@ namespace Algorithm {
          * \param[in] nbActions number of actions that will be usable for
          * 
          */
-        Algorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager, std::shared_ptr<Mutator> mutator, size_t nbActions)
-               : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, manager, params)}, mutator{mutator}, nbActions{nbActions} {};
+        Algorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager, std::shared_ptr<Mutator> mutator, size_t nbOutputs)
+               : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, manager, params)}, mutator{mutator}, nbOutputs{nbOutputs} {};
 
         /// Constant getter for the manager
         virtual std::shared_ptr<const AgentManager> getManagerCst() const;

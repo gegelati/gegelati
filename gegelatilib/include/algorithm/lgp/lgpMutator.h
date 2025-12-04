@@ -1,0 +1,188 @@
+
+#ifndef LGP_MUTATOR_H
+#define LGP_MUTATOR_H
+
+#include <vector>
+#include <numeric>
+
+#include "algorithm/mutator.h"
+#include "algorithm/lgp/lgpAgent.h"
+#include "algorithm/lgp/lgpManager.h"
+#include "algorithm/lgp/lgpLineMutator.h"
+#include "mutator/programMutator.h"
+
+namespace Algorithm::LGP {
+
+    /**
+     * \brief Abstract class representing a Mutator used by an Algorithm.
+     * 
+     * Available algorithms are LGP, MAPLE, and LGP
+     */
+    class LGPMutator : public Mutator
+    {
+    protected:
+
+        /// Attribute that specify if the mutator implements crossover, depending on its algorithm.
+        bool isUsingCrossover = false;
+
+        LGPLineMutator lineMutator;
+
+    public:
+
+        LGPMutator(): Mutator(), lineMutator() {};
+
+        /**
+         * \brief Initialize LGP Population.
+         *
+         * \param[in,out] graph the initialized Graph.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in] nbActions number of actions that will be usable for
+         * interacting with this LearningEnviromnent.
+         */
+        virtual void initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbActions) override;
+
+        /**
+         * \brief Initialize a random Agent.
+         *
+         * \param[in,out] graph the Graph.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in] nbOutputs number of outputs that will be usable for
+         * interacting with this LearningEnviromnent.
+         */
+        virtual std::shared_ptr<const Agent> initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbOutputs) override;
+        
+
+
+        /**
+         * \brief mutate a specific agent of an algorithm within a population
+         * 
+         * \param[in,out] agents the Agent to crossover.
+         * \param[in,out] graph the graph to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] context context from the selection algorithm.
+         * \param[in] newSubAgents vector of new agents of sub algorithm created while crossing over the agents
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void crossoverAgents(
+            std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+        ) override;
+
+        /**
+         * \brief mutate a specific agent of an algorithm within a population
+         * 
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in,out] graph the graph to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] context context from the selection algorithm.
+         * \param[in] newSubAgents vector of new agents of sub algorithm created while mutating the agent
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void mutateAgent(
+            std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+        ) override;
+
+
+        /**
+         * \brief mutate a specific LGPagent of an algorithm within a population
+         * 
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual bool mutateLGPAgent(
+            std::shared_ptr<const LGPAgent> agent, std::shared_ptr<LGPManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng
+        );
+
+        /**
+         * \brief Deletes a randomly selected Line of the given Program.
+         *
+         * Unless a single Line (or less) remains in the given Progeam, this
+         * function randomly selects a line of the Program and deletes it.
+         * Random selection is based on the given RNG::RNG.
+         *
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \return true if a line could be added, false otherwise.
+         *
+         */
+        bool deleteRandomLine(std::shared_ptr<const LGPAgent> agent, std::shared_ptr<LGPManager> manager, RNG::RNG& rng);
+
+        /**
+         * \brief Insert a new Line at a randomly selected position within the
+         * given Program.
+         *
+         * This function randomly selects a position in the Program.lines and
+         * insert a randomly initialized line (using Mutator::Line::
+         * initRandomCorrectLine).
+         * Random selection is based on the given RNG::RNG.
+         *
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         *
+         */
+        void insertRandomLine(std::shared_ptr<const LGPAgent> agent, std::shared_ptr<LGPManager> manager, RNG::RNG& rng);
+
+        /**
+         * \brief Swap two randomly selected instructions within the given
+         * Program.
+         *
+         * This function selects two lines of the program randomly and swaps
+         * them. If the given Program has less than two lines, nothing happens.
+         * Random selection is based on the given RNG::RNG.
+         *
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \return true if the lines where successfully swapped, false if the
+         *         Program has less than two lines.
+         */
+        bool swapRandomLines(std::shared_ptr<const LGPAgent> agent, std::shared_ptr<LGPManager> manager, RNG::RNG& rng);
+
+        /**
+         * \brief Alter a randomly selected Line in a given Program.
+         *
+         * If the given Program has more than 0 Line, this function selects a
+         * Line (pseudo)-randomly in a given Program and calls the
+         * Mutator::LineMutator:AlterCorrectLine function on it.
+         * Random selection is based on the given RNG::RNG.
+         *
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \return true if a line was successfully altered, false if the
+         *         Program has less than one line.
+         */
+        bool alterRandomLine(std::shared_ptr<const LGPAgent> agent, std::shared_ptr<LGPManager> manager, RNG::RNG& rng);
+
+        /**
+         * \brief Alter a program's constant.
+         *
+         * If the constants are used, this function selects one of them
+         * in a pseudo-random way and modifies it
+         * Random selection is based on the given RNG::RNG.
+         *
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] params the mutation parameters
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \return true if a constant was successfully altered, false if the
+         *         Program has less than one line.
+         */
+        bool alterRandomConstant(std::shared_ptr<const LGPAgent> agent, std::shared_ptr<LGPManager> manager,
+                                 const Learn::LearningParameters& params,
+                                 RNG::RNG& rng);
+    };
+
+
+}; // namespace Mutator
+
+#endif // LGP_MUTATOR_H

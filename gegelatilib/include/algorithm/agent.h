@@ -47,7 +47,7 @@ namespace Algorithm {
         /**
          * \brief Method that return if the agent is valid for execution.
          */
-        virtual bool isValid() const = 0;
+        virtual bool isValid() const {return true;};
 
 
     

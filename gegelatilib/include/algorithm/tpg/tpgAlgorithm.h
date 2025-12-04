@@ -14,16 +14,11 @@ namespace Algorithm {
 
     namespace TPG {
         /**
-         * \brief Abstract class representing an Algorithm.
-         *
-         * Available algorithms are TPG, MAPLE, and LGP
+         * \brief Abstract class representing a TPGAlgorithm
          */
         class TPGAlgorithm : public Algorithm
         {
             protected:
-
-                /// Archive used during the training process
-                Archive archive;
 
             public:
 
@@ -44,7 +39,7 @@ namespace Algorithm {
                  * 
                  * \param[in] agent The agent which is evaluated.
                  */
-                virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) const;
+                virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) const override;
         };
     };
 }; // namespace TPG_Algorithm
