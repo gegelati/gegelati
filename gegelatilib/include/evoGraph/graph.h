@@ -52,7 +52,7 @@
 namespace EvoGraph {
 
     /**
-     * \brief Class for storing a Tangled-Program-Graph.
+     * \brief Class for storing a Evolutinary Graph.
      */
     class Graph
     {
@@ -246,7 +246,7 @@ namespace EvoGraph {
          * \brief Add a new Edge to the Graph.
          *
          * Add a new Edge to the Graph, between the two given Vertex
-         * and associated with the given Program. The newly created Edge is
+         * and associated with the given Agent Program. The newly created Edge is
          * inserted in the incoming and outgoing edges lists of the connected
          * Vertex.
          * The Edge is created using the GraphFactory of the Graph.
@@ -254,7 +254,7 @@ namespace EvoGraph {
          * \param[in] src the source Vertex of the newly created Edge.
          * \param[in] dest the destination Vertex of the newly created
          *                Edge.
-         * \param[in] prog shared pointer to the Program associated to the newly
+         * \param[in] programAgent shared pointer to the Agent Program associated to the newly
          *                 created Edge.
          * \return a const reference to the created Edge.
          * \throw std::runtime_error In case one of the Vertex does not
@@ -262,18 +262,18 @@ namespace EvoGraph {
          *							destination is a Action.
          */
         const Edge& addNewEdge(const Vertex& src, const Vertex& dest,
-                                  const std::shared_ptr<Program::Program> prog);
+                                  const std::shared_ptr<const Algorithm::Agent> programAgent);
         /**
          * \brief Add a new ActionEdge to the Graph.
          *
          * Add a new ActionEdge to the Graph, between the give vertex is
-         * associated the given Program. The newly created Edge is
+         * associated the given Agent Program. The newly created Edge is
          * inserted in the outgoing edges list of the connected
          * Vertex.
          * The ActionEdge is created using the GraphFactory of the Graph.
          *
          * \param[in] src the source Vertex of the newly created Edge.
-         * \param[in] prog shared pointer to the Program associated to the newly
+         * \param[in] programAgent shared pointer to the Agent Program associated to the newly
          *                 created Edge.
          * \param[in] actionClass of the actionEdge
          * \return a const reference to the created Edge.
@@ -281,7 +281,7 @@ namespace EvoGraph {
          * exist in the Graph, or if the source is a Team.
          */
         const Edge& addNewActionEdge(
-            const Vertex& src, const std::shared_ptr<Program::Program> prog,
+            const Vertex& src, const std::shared_ptr<const Algorithm::Agent> programAgent,
             uint64_t actionClass);
 
         /**
@@ -322,7 +322,7 @@ namespace EvoGraph {
          * Duplicate a Edge from the Graph.
          *
          * This method creates a perfect copy of the given Edge, that is
-         * a Edge with the same source, destination and program shared
+         * a Edge with the same source, destination and agent program shared
          * pointer.
          *
          * \param[in] edge a const reference to the TPGedge to duplicate.
@@ -359,14 +359,6 @@ namespace EvoGraph {
         bool setEdgeSource(const Edge& edge, const Vertex& newSrc);
 
         /**
-         * \brief Clear all intron instructions in the Program of the Graph.
-         *
-         * This method scans all the Programs associated to the Edge of the
-         * Graph and removes all intron instructions from them.
-         */
-        void clearProgramIntrons();
-
-        /**
          * \brief set a new action class to a ActionEdge
          *
          * \param[in] edge ActionEdge changed
@@ -378,7 +370,7 @@ namespace EvoGraph {
          * Update the assessed actions of the current vertex, and all the
          * incomming edges
          *
-         * Used only for continuous cases with multi-action program per
+         * Used only for continuous cases with multi-action per
          * Action.
          *
          * Assessed actions represent the set of action class used by the

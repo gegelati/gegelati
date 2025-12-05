@@ -42,8 +42,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "program/line.h"
-#include "program/program.h"
+#include "algorithm/lgp/lgpAgent.h"
 #include "evoGraph/abstractEngine.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
@@ -110,9 +109,9 @@ namespace File {
         /**
          * \brief Prints the dot content for the given Program.
          *
-         * \param[in] program the Program to be printed
+         * \param[in] lgpAgent the lgpAgent to be printed
          *
-         * a program is stored in the .dot file with the format :
+         * a lgpAgent is stored in the .dot file with the format :
          * line_1&#92;nline2&#92;nline3&#92;n...&#92;nline_N&#92;n
          *
          * a line is stored in the .dot file with the following format
@@ -122,7 +121,7 @@ namespace File {
          * dest_idx = destination index
          * op       = operand
          */
-        void printProgram(const Program::Program& program);
+        void printLGPAgent(std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent);
 
         /**
          * \brief Prints header content in the dot file.

@@ -67,14 +67,14 @@ namespace EvoGraph {
          * list of incoming or outgoing edges of the given Vertex.
          *
          * \param[in] src pointer to the source Vertex of the edge.
-         * \param[in] prog the shared pointer to the Program associated to the
+         * \param[in] agentProgram the shared pointer to the Action associated to the
          * \param[in] actClass actionClass of the ActionEdge
          *            edge.
          */
         ActionEdge(const Vertex* src,
-                      const std::shared_ptr<Program::Program> prog,
+                      const std::shared_ptr<const Algorithm::Agent> agentProgram,
                       uint64_t actClass)
-            : Edge{src, NULL, prog}, actionClass(actClass){};
+            : Edge{src, NULL, agentProgram}, actionClass(actClass){};
 
         /**
          * \brief Override of the tpgEdge function because there should not be

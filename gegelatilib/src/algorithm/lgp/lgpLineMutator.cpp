@@ -46,7 +46,7 @@ bool Algorithm::LGP::LGPLineMutator::initRandomCorrectLineOperand(
     const uint64_t& operandIdx, const bool initOperandDataSource,
     const bool initOperandLocation, const bool forceChange, RNG::RNG& rng)
 {
-    const Environment& env = line.getEnvironment();
+    const std::shared_ptr<const Environment>& env = line.getEnvironment();
     uint64_t operandDataSourceIndex = line.getOperand(operandIdx).first;
     bool operandFound = !initOperandDataSource;
 
@@ -64,10 +64,10 @@ bool Algorithm::LGP::LGPLineMutator::initRandomCorrectLineOperand(
         }
 
         while (!operandFound &&
-               operandDataSourceIndexes.size() < env.getNbDataSources()) {
+               operandDataSourceIndexes.size() < env->getNbDataSources()) {
             // Select an operandDataSourceIndex
             operandDataSourceIndex =
-                rng.getUnsignedInt64(0, (env.getNbDataSources() - 1) -
+                rng.getUnsignedInt64(0, (env->getNbDataSources() - 1) -
                                             operandDataSourceIndexes.size());
             // Correct the index with the number of already tested ones inferior
             // to it. This works because the set is ordered
@@ -81,7 +81,7 @@ bool Algorithm::LGP::LGPLineMutator::initRandomCorrectLineOperand(
             operandDataSourceIndexes.insert(operandDataSourceIndex);
             // check if the selected dataSource can provide the type requested
             // by the instruction
-            operandFound = env.getFakeDataSources()
+            operandFound = env->getFakeDataSources()
                                .at(operandDataSourceIndex)
                                .get()
                                .canHandle(operandType);
@@ -92,7 +92,7 @@ bool Algorithm::LGP::LGPLineMutator::initRandomCorrectLineOperand(
         operandFound = true;
         // Select a location
         operandDataSourceIndex = rng.getUnsignedInt64(
-            0, env.getNbDataSources() - 1 - ((forceChange) ? 1 : 0));
+            0, env->getNbDataSources() - 1 - ((forceChange) ? 1 : 0));
         if (forceChange &&
             operandDataSourceIndex >= line.getOperand(operandIdx).first) {
             operandDataSourceIndex += 1;
@@ -104,7 +104,7 @@ bool Algorithm::LGP::LGPLineMutator::initRandomCorrectLineOperand(
     if (operandFound && initOperandLocation) {
         // Select a location
         operandLocation = rng.getUnsignedInt64(
-            0, env.getLargestAddressSpace() - 1 - ((forceChange) ? 1 : 0));
+            0, env->getLargestAddressSpace() - 1 - ((forceChange) ? 1 : 0));
         if (forceChange &&
             operandLocation >= line.getOperand(operandIdx).second) {
             operandLocation += 1;
@@ -121,21 +121,21 @@ bool Algorithm::LGP::LGPLineMutator::initRandomCorrectLineOperand(
 
 void Algorithm::LGP::LGPLineMutator::initRandomCorrectLine(LGPLine& line, RNG::RNG& rng)
 {
-    const Environment& env = line.getEnvironment();
+    const std::shared_ptr<const Environment>& env = line.getEnvironment();
 
     // Select and set a destinationIndex. (can not fail)
     uint64_t destinationIndex =
-        rng.getUnsignedInt64(0, env.getParams().nbRegisters - 1);
+        rng.getUnsignedInt64(0, env->getParams().nbRegisters - 1);
     line.setDestinationIndex(
         destinationIndex); // Should never throw.. but I did not deactivate the
                            // check anyway.
 
     // Select an instruction.
     uint64_t instructionIndex =
-        rng.getUnsignedInt64(0, (env.getNbInstructions() - 1));
+        rng.getUnsignedInt64(0, (env->getNbInstructions() - 1));
     // Get the instruction
     const Instructions::Instruction& instruction =
-        env.getInstructionSet().getInstruction(instructionIndex);
+        env->getInstructionSet().getInstruction(instructionIndex);
     // Set the instructionIndex
     line.setInstructionIndex(
         instructionIndex); // Should never throw.. but I did not deactivate the
@@ -143,7 +143,7 @@ void Algorithm::LGP::LGPLineMutator::initRandomCorrectLine(LGPLine& line, RNG::R
 
     // Select operands needed by the instruction
     uint64_t operandIdx = 0;
-    for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
+    for (; operandIdx < env->getMaxNbOperands(); operandIdx++) {
 
         // Check if all operands were tested (and none were valid)
         initRandomCorrectLineOperand(instruction, line, operandIdx, true, true,
@@ -157,7 +157,7 @@ void Algorithm::LGP::LGPLineMutator::initRandomCorrectLine(LGPLine& line, RNG::R
 void Algorithm::LGP::LGPLineMutator::alterCorrectLine(LGPLine& line, RNG::RNG& rng)
 {
     // Generate a random int to select the modified part of the line
-    const LineSize lineSize = line.getEnvironment().getLineSize();
+    const LineSize lineSize = line.getEnvironment()->getLineSize();
     uint64_t selectedBit = rng.getUnsignedInt64(0, lineSize - 1);
 
     // Find the selected part
@@ -167,7 +167,7 @@ void Algorithm::LGP::LGPLineMutator::alterCorrectLine(LGPLine& line, RNG::RNG& r
         // Select a random Instruction (different from the current one)
         const uint64_t currentInstructionIndex = line.getInstructionIndex();
         uint64_t newInstructionIndex = rng.getUnsignedInt64(
-            0, line.getEnvironment().getNbInstructions() - 2);
+            0, line.getEnvironment()->getNbInstructions() - 2);
         newInstructionIndex +=
             (newInstructionIndex >= currentInstructionIndex) ? 1 : 0;
         line.setInstructionIndex(newInstructionIndex);
@@ -175,7 +175,7 @@ void Algorithm::LGP::LGPLineMutator::alterCorrectLine(LGPLine& line, RNG::RNG& r
         // Check if operands are compatible with the new instruction.
         // If not: mutate them
         const Instructions::Instruction& instruction =
-            line.getEnvironment().getInstructionSet().getInstruction(
+            line.getEnvironment()->getInstructionSet().getInstruction(
                 newInstructionIndex);
 
         for (uint64_t i = 0; i < instruction.getNbOperands(); i++) {
@@ -184,7 +184,7 @@ void Algorithm::LGP::LGPLineMutator::alterCorrectLine(LGPLine& line, RNG::RNG& r
             uint64_t dataSourceIndex = line.getOperand(i).first;
             bool isValid = false;
             const Data::DataHandler& dataSource = line.getEnvironment()
-                                                      .getFakeDataSources()
+                                                      ->getFakeDataSources()
                                                       .at(dataSourceIndex)
                                                       .get();
             isValid = dataSource.canHandle(type);
@@ -206,7 +206,7 @@ void Algorithm::LGP::LGPLineMutator::alterCorrectLine(LGPLine& line, RNG::RNG& r
         // Select a random destination (different from the current one)
         const uint64_t currentDestinationIndex = line.getDestinationIndex();
         uint64_t newDestinationIndex = rng.getUnsignedInt64(
-            0, line.getEnvironment().getParams().nbRegisters - 2);
+            0, line.getEnvironment()->getParams().nbRegisters - 2);
         newDestinationIndex +=
             (newDestinationIndex >= currentDestinationIndex) ? 1 : 0;
         line.setDestinationIndex(newDestinationIndex);
@@ -227,7 +227,7 @@ void Algorithm::LGP::LGPLineMutator::alterCorrectLine(LGPLine& line, RNG::RNG& r
         const uint64_t currentOperandLocation =
             line.getOperand(operandIndex).second;
         const Instructions::Instruction& instruction =
-            line.getEnvironment().getInstructionSet().getInstruction(
+            line.getEnvironment()->getInstructionSet().getInstruction(
                 line.getInstructionIndex());
 
         // Operands dataSourceIndex or Location

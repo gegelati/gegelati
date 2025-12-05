@@ -7,25 +7,42 @@
 
 #include "algorithm/mutator.h"
 #include "algorithm/tpg/tpgAgent.h"
+#include "algorithm/tpg/tpgManager.h"
 #include "mutator/programMutator.h"
 
 namespace Algorithm::TPG {
 
     /**
-     * \brief Abstract class representing a Mutator used by an Algorithm.
-     * 
-     * Available algorithms are TPG, MAPLE, and LGP
+     * \brief Class representing a TPGMutator
      */
     class TPGMutator : public Mutator
     {
     protected:
 
-        /// Attribute that specify if the mutator implements crossover, depending on its algorithm.
-        bool isUsingCrossover = false;
+        /// Name of the program algorithm associated with the TPG agents.
+        std::string programAlgorithmName;
 
     public:
 
-        TPGMutator(): Mutator() {};
+        TPGMutator(): Mutator() {
+            isUsingCrossover = false;
+        };
+
+
+
+        /**
+         * \brief Set the name of the program algorithm associated with the TPG agents.
+         * 
+         * \param[in] name the name of the program algorithm.
+         */
+        void setProgramAlgorithmName(const std::string& name) { this->programAlgorithmName = name; }
+
+        /**
+         * \brief Get the name of the program algorithm associated with the TPG agents.
+         * 
+         * \return the name of the program algorithm.
+         */
+        std::string getProgramAlgorithmName() const { return this->programAlgorithmName; }
 
         /**
          * \brief Initialize TPG Population.
@@ -146,6 +163,7 @@ namespace Algorithm::TPG {
      * \param[in,out] graph the Graph within which the team and edge are
      *                stored.
      * \param[in] edge the Edge whose destination will be altered.
+     * \param[in] manager the manager to change the agents.
      * \param[in] context SelectorContext containing necessary information
      * for mutations.
      * \param[in] newSubAgents vector of new agents of sub algorithm created while mutating the agent
@@ -156,6 +174,7 @@ namespace Algorithm::TPG {
      */
     void mutateOutgoingEdge(
         std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Edge* edge,
+        std::shared_ptr<AgentManager> manager,
         const Selector::SelectionContext& context,
         std::vector<std::shared_ptr<const Agent>> newSubAgents,
         const Learn::LearningParameters& params, RNG::RNG& rng);

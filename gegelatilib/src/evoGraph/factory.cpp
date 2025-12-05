@@ -57,16 +57,16 @@ std::unique_ptr<EvoGraph::Action> EvoGraph::GraphFactory::createAction(
 
 std::unique_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createEdge(
     const Vertex* src, const Vertex* dest,
-    const std::shared_ptr<Program::Program> prog) const
+    std::shared_ptr<const Algorithm::Agent> actionProgram) const
 {
-    return std::make_unique<EvoGraph::Edge>(src, dest, prog);
+    return std::make_unique<EvoGraph::Edge>(src, dest, actionProgram);
 }
 
 std::unique_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createActionEdge(
-    const Vertex* src, const std::shared_ptr<Program::Program> prog,
+    const Vertex* src, std::shared_ptr<const Algorithm::Agent> actionProgram,
     uint64_t actionClass) const
 {
-    return std::make_unique<EvoGraph::ActionEdge>(src, prog, actionClass);
+    return std::make_unique<EvoGraph::ActionEdge>(src, actionProgram, actionClass);
 }
 
 std::unique_ptr<EvoGraph::ExecutionEngine> EvoGraph::GraphFactory::

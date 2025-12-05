@@ -48,6 +48,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "algorithm/lgp/lgpAgent.h"
 #include "learn/learningEnvironment.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"

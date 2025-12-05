@@ -40,7 +40,7 @@
 
 #include "algorithm/lgp/lgpLine.h"
 
-const Environment& Algorithm::LGP::LGPLine::getEnvironment() const
+const std::shared_ptr<const Environment>& Algorithm::LGP::LGPLine::getEnvironment() const
 {
     return this->environment;
 }
@@ -52,7 +52,7 @@ uint64_t Algorithm::LGP::LGPLine::getDestinationIndex() const
 
 bool Algorithm::LGP::LGPLine::setDestinationIndex(uint64_t dest, bool check)
 {
-    if (check && dest >= this->environment.getParams().nbRegisters) {
+    if (check && dest >= this->environment->getParams().nbRegisters) {
         return false;
     }
     this->destinationIndex = dest;
@@ -66,7 +66,7 @@ uint64_t Algorithm::LGP::LGPLine::getInstructionIndex() const
 
 bool Algorithm::LGP::LGPLine::setInstructionIndex(uint64_t instr, bool check)
 {
-    if (check && instr >= this->environment.getNbInstructions()) {
+    if (check && instr >= this->environment->getNbInstructions()) {
         return false;
     }
     this->instructionIndex = instr;
@@ -76,7 +76,7 @@ bool Algorithm::LGP::LGPLine::setInstructionIndex(uint64_t instr, bool check)
 const std::pair<uint64_t, uint64_t>& Algorithm::LGP::LGPLine::getOperand(
     const uint64_t idx) const
 {
-    if (idx >= this->environment.getMaxNbOperands()) {
+    if (idx >= this->environment->getMaxNbOperands()) {
         throw std::range_error("Attempting to access an non-existing operand.");
     }
 
@@ -86,17 +86,17 @@ const std::pair<uint64_t, uint64_t>& Algorithm::LGP::LGPLine::getOperand(
 bool Algorithm::LGP::LGPLine::setOperand(const uint64_t idx, const uint64_t dataIndex,
                                const uint64_t location, const bool check)
 {
-    if (idx >= this->environment.getMaxNbOperands()) {
+    if (idx >= this->environment->getMaxNbOperands()) {
         throw std::range_error("Attempting to set an non-existing operand.");
     }
 
     if (check) {
         // Check data Index
-        if (dataIndex >= this->environment.getNbDataSources()) {
+        if (dataIndex >= this->environment->getNbDataSources()) {
             return false;
         }
         // Check location
-        if (location >= this->environment.getLargestAddressSpace()) {
+        if (location >= this->environment->getLargestAddressSpace()) {
             return false;
         }
     }
@@ -116,7 +116,7 @@ bool Algorithm::LGP::LGPLine::operator==(const LGPLine& other) const
     }
 
     // Compare operands
-    for (auto idx = 0; idx < this->getEnvironment().getMaxNbOperands(); idx++) {
+    for (auto idx = 0; idx < this->environment->getMaxNbOperands(); idx++) {
         if (this->operands[idx] != other.operands[idx]) {
             return false;
         }

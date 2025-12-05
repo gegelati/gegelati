@@ -22,7 +22,14 @@ namespace Algorithm {
 
         public:
 
-            TPGAgent(const EvoGraph::Vertex& vertex) : Agent(), vertex{&vertex} {};
+            /**
+             * \brief Main constructor of the TPGAgent.
+             *
+             * \param[in] vertex the Vertex that the TPGAgent will represent.
+             * \param[in] algorithmName name of the algorithm used.
+             */
+            TPGAgent(const EvoGraph::Vertex& vertex, std::string algorithmName) : Agent(algorithmName), vertex{&vertex} {
+            };
 
             /**
              * \brief Getter for the vertex that the agent represent

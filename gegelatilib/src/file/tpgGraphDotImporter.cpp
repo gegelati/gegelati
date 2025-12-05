@@ -306,8 +306,8 @@ void File::GraphDotImporter::readLinkActionProgram(std::smatch& matches)
 
                 uint64_t actionClass = this->actionClasses.at(action).at(
                     action->getOutgoingEdges().size());
-                std::shared_ptr<Program::Program> p = p_it->second;
-                this->tpg.addNewActionEdge(*action, p, actionClass);
+                /*std::shared_ptr<Program::Program> p = p_it->second;
+                this->tpg.addNewActionEdge(*action, p, actionClass);*/
             }
         }
     }
@@ -332,7 +332,7 @@ void File::GraphDotImporter::readLinkTeamProgramAction(std::smatch& matches)
                 const EvoGraph::Vertex* team = team_it->second;
                 const EvoGraph::Vertex* action = action_it->second;
                 std::shared_ptr<Program::Program> p = p_it->second;
-                this->tpg.addNewEdge(*team, *action, p);
+                /*this->tpg.addNewEdge(*team, *action, p);*/
             }
         }
     }
@@ -358,7 +358,7 @@ void File::GraphDotImporter::readLinkTeamProgramTeam(std::smatch& matches)
                 t2_it != this->vertexID.end()) {
                 const EvoGraph::Vertex* team_i = t1_it->second;
                 const EvoGraph::Vertex* team_o = t2_it->second;
-                this->tpg.addNewEdge(*team_i, *team_o, p);
+                /*this->tpg.addNewEdge(*team_i, *team_o, p);*/
             }
         }
     }
@@ -380,7 +380,7 @@ void File::GraphDotImporter::readLinkTeamProgram(std::smatch& matches)
 
             p->setProgramID(p_it->first);
 
-            auto edge_it =
+            /*auto edge_it =
                 std::find_if(edges.begin(), edges.end(),
                              [p](const std::unique_ptr<EvoGraph::Edge>& other) {
                                  return (&(other->getProgram()) == p.get());
@@ -394,7 +394,7 @@ void File::GraphDotImporter::readLinkTeamProgram(std::smatch& matches)
                     auto edge = this->tpg.addNewEdge(
                         *team, *(edge_it->get()->getDestination()), p);
                 }
-            }
+            }*/
         }
     }
 }

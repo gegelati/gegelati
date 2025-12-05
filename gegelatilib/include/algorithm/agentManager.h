@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <ranges>
+#include <string>
 
 #include "evoGraph/graph.h"
 #include "algorithm/agent.h"
@@ -26,12 +27,43 @@ namespace Algorithm {
         /// Current agents used by the algorithm
         std::set<std::shared_ptr<Agent>, SharedLess<Agent>> agents;
 
+        /// Sub-managers for sub-algorithms
+        std::map<std::string, std::shared_ptr<AgentManager>> subManagers;
+
+        /// Name of the algorithm.
+        std::string algorithmName;
+
     public:
 
         /**
          * \brief Get the current agents used by the algorithm.
          */
         virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const;
+
+
+        /**
+         * \brief Add a sub-manager to the current manager.
+         * 
+         * \param[in] subManager the sub-manager to add.
+         */
+        virtual void addSubManager(std::shared_ptr<AgentManager> subManager);
+
+        /**
+         * \brief return the subManager corresponding to the name of the algorithm given.
+         * 
+         * \param[in] nameAlgorithm name of the algorithm given.
+         */
+        virtual std::shared_ptr<AgentManager> getSubManager(std::string nameAlgorithm);
+
+        /**
+         * \brief Set the name of the algorithm.
+         */
+        void setAlgorithmName(std::string name) { this->algorithmName = name; }
+
+        /**
+         * \brief Return the name of the algorithm.
+         */
+        std::string getAlgorithmName() const { return this->algorithmName; }
 
         /**
          * \brief method that indicate if the manager contains a specific agent.

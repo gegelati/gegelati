@@ -42,6 +42,7 @@
 
 void CodeGen::TPGSwitchGenerationEngine::generateEdge(const EvoGraph::Edge& edge)
 {
+    /*
     const Program::Program& p = edge.getProgram();
 
     progGenerationEngine.setProgram(p);
@@ -62,6 +63,7 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const EvoGraph::Edge& edge
     else {
         fileMain << "P" << p.getProgramID() << "()";
     }
+        */
 }
 
 void CodeGen::TPGSwitchGenerationEngine::generateTeam(const EvoGraph::Team& team)

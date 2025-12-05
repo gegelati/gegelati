@@ -57,6 +57,7 @@
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 
+#if 0
 const EvoGraph::Action* Mutator::TPGMutator::initActionVertex(
     EvoGraph::Graph& graph, const Mutator::MutationParameters& params,
     RNG::RNG& rng, uint64_t nbActionEdgeInit, uint64_t actionID)
@@ -1048,3 +1049,5 @@ void Mutator::TPGMutator::populateTPG(EvoGraph::Graph& graph,
     // Mutate the new Programs
     mutateNewProgramBehaviors(maxNbThreads, newPrograms, rng, params, archive);
 }
+
+#endif

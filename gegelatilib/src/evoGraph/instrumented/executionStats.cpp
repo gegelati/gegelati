@@ -95,7 +95,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
             // Raise std::bad_cast if not an instrumented edge
 
             uint64_t nbEdgeEval = instruEdge.getNbVisits();
-            Program::Program& edgeProgram = instruEdge.getProgram();
+            /*Program::Program& edgeProgram = instruEdge.getProgram();
 
             // Evaluated edge => edge program executed
             if (nbEdgeEval > 0) {
@@ -108,7 +108,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
                     totalExecutionsPerInstruction[pair.first] +=
                         nbEdgeEval * pair.second;
                 }
-            }
+            }*/
         }
     }
 
@@ -145,9 +145,9 @@ void EvoGraph::ExecutionStats::analyzeInferenceTrace(
                 continue;
 
             nbEvaluatedPrograms++;
-            nbExecutedLines += edge->getProgram().getNbLines();
+            /*nbExecutedLines += edge->getProgram().getNbLines();
 
-            analyzeProgram(nbExecutionPerInstruction, edge->getProgram());
+            analyzeProgram(nbExecutionPerInstruction, edge->getProgram());*/
         }
     }
 

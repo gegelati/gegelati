@@ -22,7 +22,7 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPMutator::initRandomAg
 
     // insert random constants in the program
     Data::Constant c_value;
-    for (int i = 0; i < lgpAgent->getEnvironment().getParams().nbProgramConstant; i++) {
+    for (int i = 0; i < lgpAgent->getEnvironment()->getParams().nbProgramConstant; i++) {
         c_value = {rng.getDouble(params.mutation.prog.minConstValue,
                                  params.mutation.prog.maxConstValue)};
         lgpManager->setConstantAt(agent, i, c_value);
@@ -86,7 +86,7 @@ void Algorithm::LGP::LGPMutator::mutateAgent(
                   lgpManager->hasIdenticalBehavior(agent, agentCopy))));
         }
         // Check for uniqueness in archive
-        auto archivedDataHandlers = lgpManager->getArchive().getDataHandlers();
+        auto archivedDataHandlers = lgpManager->getArchive()->getDataHandlers();
         std::map<size_t, double> hashesAndResults;
         /*Program::ProgramExecutionEngine pee(*agent);
         for (std::pair<
@@ -100,7 +100,7 @@ void Algorithm::LGP::LGPMutator::mutateAgent(
         }*/
 
         // If the result is not unique, do another mutation.
-        allUnique = lgpManager->getArchive().areProgramResultsUnique(hashesAndResults);
+        allUnique = lgpManager->getArchive()->areProgramResultsUnique(hashesAndResults);
 
         // Do not use Archive right now if the environment is continuous
         // TODO Update that
@@ -134,7 +134,7 @@ bool Algorithm::LGP::LGPMutator::mutateLGPAgent(std::shared_ptr<const LGPAgent> 
     }
 
     // mutate the programs constants if they exists
-    if (agent->getEnvironment().getParams().nbProgramConstant > 0 &&
+    if (agent->getEnvironment()->getParams().nbProgramConstant > 0 &&
         rng.getDouble(0.0, 1.0) < params.mutation.prog.pConstantMutation) {
         anyMutation = true;
         alterRandomConstant(agent, manager, params, rng);

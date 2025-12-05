@@ -3,6 +3,7 @@
 #define AGENT_H
 
 #include <cstdint>
+#include <string>
 
 
 struct CounterReset;
@@ -16,8 +17,12 @@ namespace Algorithm {
     {
     protected:
         
+
         /// Unique ID of the agent.
         uint64_t agentID;
+
+        /// Name of the algorithm.
+        std::string algorithmName;
 
         /**
          * \brief Incremente the agent ID counter and return the new value.
@@ -36,8 +41,17 @@ namespace Algorithm {
     public:
 
 
+        /**
+         * \brief Constructor for the Agent.
+         * 
+         * \param[in] algorithmName name of the algorithm used by the Agent.
+         */
+        Agent(std::string algorithmName) : algorithmName(algorithmName), agentID(incrementeCounter()) {};
 
-        Agent() : agentID(incrementeCounter()) {};
+        /**
+         * \brief Return the name of the algorithm.
+         */
+        std::string getAlgorithmName() const { return this->algorithmName; }
 
         /**
          * \brief return the ID of the agent.

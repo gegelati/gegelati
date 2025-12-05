@@ -268,7 +268,7 @@ void EvoGraph::PolicyStats::analyzePolicy(const EvoGraph::Vertex* root)
                 if (this->nbUsePerTeam[team] == 1) {
                     for (const EvoGraph::Edge* edge :
                          vertex->getOutgoingEdges()) {
-                        this->analyzeProgram(&edge->getProgram());
+                        //this->analyzeProgram(&edge->getProgram());
                         nextStage.push_back(edge->getDestination());
                     }
                 }
@@ -277,7 +277,7 @@ void EvoGraph::PolicyStats::analyzePolicy(const EvoGraph::Vertex* root)
                 this->analyzeAction(action);
                 if (this->nbUsePerAction[action] == 1) {
                     for (auto edge : action->getOutgoingEdges()) {
-                        this->analyzeProgram(&edge->getProgram());
+                        //this->analyzeProgram(&edge->getProgram());
                     }
                 }
             }

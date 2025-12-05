@@ -39,6 +39,7 @@
 #include "mutator/mutationParameters.h"
 #include "mutator/rng.h"
 
+#if 0
 void Mutator::ProgramMutator::initRandomProgram(
     Program::Program& p, const MutationParameters& params, RNG::RNG& rng)
 {
@@ -180,3 +181,5 @@ bool Mutator::ProgramMutator::mutateProgram(Program::Program& p,
     }
     return anyMutation;
 }
+
+#endif

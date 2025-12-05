@@ -42,6 +42,7 @@
 #include "program/line.h"
 #include "program/program.h"
 
+#if 0
 namespace Mutator {
     /**
      * Namespace containing all functions to apply randomness to a
@@ -186,5 +187,7 @@ namespace Mutator {
                            const MutationParameters& params, RNG::RNG& rng);
     }; // namespace ProgramMutator
 }; // namespace Mutator
+
+#endif
 
 #endif

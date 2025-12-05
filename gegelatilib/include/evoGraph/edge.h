@@ -38,10 +38,15 @@
 #define TPG_EDGE_H
 
 #include <memory>
+#include <stdexcept>
 
 #include "program/program.h"
 
 struct CounterReset;
+
+namespace Algorithm{
+  class Agent;
+}
 
 namespace EvoGraph {
     // Declare class to make it usable as an attribute.
@@ -64,42 +69,32 @@ namespace EvoGraph {
          *
          * \param[in] src pointer to the source Vertex of the edge.
          * \param[in] dest pointer to the destination Vertex of the edge.
-         * \param[in] prog the shared pointer to the Program associated to the
+         * \param[in] agentProgram the shared pointer to the Agent Program associated to the
          *            edge.
          */
         Edge(const Vertex* src, const Vertex* dest,
-                const std::shared_ptr<Program::Program> prog)
+                const std::shared_ptr<const Algorithm::Agent> agentProgram)
             : edgeID(incrementeCounter()), source{src}, destination{dest},
-              program{prog} {};
+              program{agentProgram} {};
 
         /**
-         * \brief Get a const reference to the Program of the Edge.
+         * \brief Get a const shared pointer of the Agent Program of the Edge.
          *
-         * \return a const reference to the Program of the Edge.
+         * \return a const shared pointer of the Agent Program of the Edge.
          */
-        Program::Program& getProgram() const;
+        std::shared_ptr<const Algorithm::Agent> getProgram() const;
 
         /**
-         * \brief Set a new Program for the Edge.
+         * \brief Set a new Agent Program for the Edge.
          *
          * This method is const to enable use outside of the Graph which is
-         * the only class accessing the non-const Edge. Since the program
+         * the only class accessing the non-const Edge. Since the agent
          * pointer attribute is mutable, this method can successfully be used to
-         * alter the program.
+         * alter the agent.
          *
-         * \param[in] prog the new shared pointer to a Program.
+         * \param[in] agentProgram the new shared pointer to a Agent Program.
          */
-        void setProgram(const std::shared_ptr<Program::Program> prog) const;
-
-        /**
-         * \brief Get the shared_pointer to the Program.
-         *
-         * This method is voluntarily non-const to make sure that only the
-         * Graph containing the edge can use it.
-         *
-         * \return a copy of the program attribute.
-         */
-        std::shared_ptr<Program::Program> getProgramSharedPointer();
+        void setProgram(const std::shared_ptr<const Algorithm::Agent> agentProgram) const;
 
         /**
          * \brief Get the source Vertex of the Edge.
@@ -161,11 +156,11 @@ namespace EvoGraph {
         /// Pointer to the destination Vertex of this Edge
         const Vertex* destination;
 
-        /// Shared pointer to the Program to execute when evaluating the bid
+        /// Shared pointer to the Agent to execute when evaluating the bid
         /// of this Edge.
         /// This attribute is mutable to enable its modification during
         /// mutations.
-        mutable std::shared_ptr<Program::Program> program;
+        mutable std::shared_ptr<const Algorithm::Agent> program;
 
         /**
          * \brief Unique identifier of the Edge.

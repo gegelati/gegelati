@@ -9,12 +9,12 @@ std::vector<double> Algorithm::LGP::LGPAlgorithm::executeAgent(std::shared_ptr<c
 
 
 
-const Environment& Algorithm::LGP::LGPAlgorithm::getEnvironment() const
+ std::shared_ptr<const Environment> Algorithm::LGP::LGPAlgorithm::getEnvironment() const
 {
     return this->env;
 }
 
-const Archive& Algorithm::LGP::LGPAlgorithm::getArchive() const
+std::shared_ptr<const Archive> Algorithm::LGP::LGPAlgorithm::getArchive() const
 {
     return this->archive;
 }

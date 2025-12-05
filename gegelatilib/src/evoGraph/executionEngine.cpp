@@ -83,6 +83,7 @@ void EvoGraph::ExecutionEngine::applyActivationFunctionOnActions(
 
 double EvoGraph::ExecutionEngine::evaluateEdge(const Edge& edge)
 {
+    /*
     // Get the program
     Program::Program& prog = edge.getProgram();
 
@@ -102,7 +103,7 @@ double EvoGraph::ExecutionEngine::evaluateEdge(const Edge& edge)
                                     result);
     }
 
-    return result;
+    return result;*/
 }
 
 const EvoGraph::Edge& EvoGraph::ExecutionEngine::evaluateTeam(const Team& team)
@@ -162,8 +163,7 @@ const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>> EvoGr
     while (dynamic_cast<const EvoGraph::Team*>(currentVertex)) {
         // Get the next edge
         edge = &this->evaluateTeam(*(const Team*)currentVertex);
-        Program::Program p =
-            currentVertex->getOutgoingEdges().front()->getProgram();
+
         // update currentVertex and backup in visitedVertex.
         if (edge->getDestination() != nullptr) {
             currentVertex = edge->getDestination();
@@ -204,8 +204,6 @@ const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>> EvoGr
 
                 this->evaluateEdge(*currentVertex->getOutgoingEdges().front());
 
-                Program::Program p =
-                    currentVertex->getOutgoingEdges().front()->getProgram();
 
                 // Get the register values
                 actionsTaken = progExecutionEngine.getRegisterValues(

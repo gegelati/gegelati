@@ -65,7 +65,7 @@ namespace EvoGraph {
         ///  Specialization of the method returning a EdgeInstrumented
         virtual std::unique_ptr<Edge> createEdge(
             const Vertex* src, const Vertex* dest,
-            const std::shared_ptr<Program::Program> prog) const override;
+            const std::shared_ptr<const Algorithm::Agent> prog) const override;
 
         ///  Specialization of the method returning a
         ///  ExecutionEngineInstrumented

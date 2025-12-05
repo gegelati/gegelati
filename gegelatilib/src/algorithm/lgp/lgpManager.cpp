@@ -22,10 +22,17 @@ std::shared_ptr<const Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::cGet
     return std::dynamic_pointer_cast<const LGPAgent>(*iterator);
 }
 
+void Algorithm::LGP::LGPManager::init(std::shared_ptr<const Archive> archive, std::shared_ptr<const Environment> env, size_t nbOutputs)
+{
+    this->archive = archive;
+    this->env = env;
+    this->nbOutputs = nbOutputs;
+}
+
 std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
-    this->agents.insert(std::make_shared<LGPAgent>(this->env, this->nbOutputs));
-    return std::const_pointer_cast<const Algorithm::Agent>(*this->agents.rbegin());
+    this->agents.insert(std::make_shared<LGPAgent>(this->env, this->nbOutputs, this->getAlgorithmName()));
+    return *this->agents.rbegin();
 }
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
@@ -37,13 +44,13 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(st
         newAgent->addNewLine(castedAgent->getLine(idx));
     }
 
-    for(size_t idx = 0; idx < castedAgent->getEnvironment().getParams().nbProgramConstant; idx++){
+    for(size_t idx = 0; idx < castedAgent->getEnvironment()->getParams().nbProgramConstant; idx++){
         this->setConstantAt(newAgent, idx, castedAgent->getConstantAt(idx));
     }
 
     this->identifyIntrons(newAgent);
     this->agents.insert(newAgent);
-    return std::const_pointer_cast<const Algorithm::Agent>(*this->agents.rbegin());
+    return *this->agents.rbegin();
 }
 
 void Algorithm::LGP::LGPManager::deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
@@ -51,7 +58,7 @@ void Algorithm::LGP::LGPManager::deleteAgent(std::shared_ptr<const Agent> agent,
     this->agents.erase(this->getLGPAgentFromCst(agent));   
 }
 
-const Archive& Algorithm::LGP::LGPManager::getArchive() const 
+ std::shared_ptr<const Archive> Algorithm::LGP::LGPManager::getArchive() const 
 {
     return this->archive;
 }
@@ -95,7 +102,7 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(std::shared_ptr<const Agent
 
     // Create fake registers to identify accessed addresses.
     const Data::DataHandler& fakeRegisters =
-        this->env.getFakeDataSources().at(0);
+        this->env->getFakeDataSources().at(0);
     // Number of introns within the Program.
     uint64_t nbIntrons = 0;
     // Set of useful register
@@ -116,7 +123,7 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(std::shared_ptr<const Agent
             usefulRegisters.erase(*destinationRegister);
             // Add register operands to the list of useful registers
             const Instructions::Instruction& instruction =
-                this->env.getInstructionSet().getInstruction(
+                this->env->getInstructionSet().getInstruction(
                     currentLine.getInstructionIndex());
             size_t nbOperands = instruction.getNbOperands();
             for (auto idxOperand = 0; idxOperand < nbOperands; idxOperand++) {
@@ -200,7 +207,7 @@ bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(std::shared_ptr<const Agen
     }
 
     // Check constant values
-    for (size_t idx = 0; idx < this->env.getParams().nbProgramConstant; idx++) {
+    for (size_t idx = 0; idx < this->env->getParams().nbProgramConstant; idx++) {
         Data::Constant cst1 = lgpAgent1->getConstantAt(idx);
         Data::Constant cst2 = lgpAgent2->getConstantAt(idx);
         if (cst1 != cst2) {

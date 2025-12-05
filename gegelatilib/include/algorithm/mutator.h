@@ -3,6 +3,7 @@
 #define MUTATOR_H
 
 #include <vector>
+#include <string>
 
 #include "algorithm/agent.h"
 #include "algorithm/agentManager.h"
@@ -23,9 +24,42 @@ namespace Algorithm {
         /// Attribute that specify if the mutator implements crossover, depending on its algorithm.
         bool isUsingCrossover = false;
 
+        /// Name of the algorithm.
+        std::string algorithmName = "GenericMutator";
+
+        /// Sub-mutators for sub-algorithms
+        std::map<std::string, std::shared_ptr<Mutator>> subMutators;
+
     public:
 
         Mutator() {};
+
+
+        /**
+         * \brief Set the name of the algorithm.
+         */
+        void setAlgorithmName(std::string name) { this->algorithmName = name; }
+
+        /**
+         * \brief Return the name of the algorithm.
+         */
+        std::string getAlgorithmName() const { return this->algorithmName; }
+
+        
+        /**
+         * \brief Add a sub-mutator to the current mutator.
+         * 
+         * \param[in] subMutator the sub-mutator to add.
+         */
+        virtual void addSubMutator(std::shared_ptr<Mutator> subMutator);
+
+
+        /**
+         * \brief return the subMutator corresponding to the name of the algorithm given.
+         * 
+         * \param[in] nameAlgorithm name of the algorithm given.
+         */
+        virtual std::shared_ptr<Mutator> getSubMutator(std::string nameAlgorithm);
 
         /**
          * \brief Initialize a random population.

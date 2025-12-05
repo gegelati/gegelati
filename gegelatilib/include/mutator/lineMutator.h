@@ -43,6 +43,7 @@
 #include "mutator/rng.h"
 #include "program/line.h"
 
+#if 0
 namespace Mutator {
     /**
      * Namespace containing all functions to apply randomness to a Program::Line
@@ -99,4 +100,6 @@ namespace Mutator {
         void alterCorrectLine(Program::Line& line, RNG::RNG& rng);
     } // namespace LineMutator
 }; // namespace Mutator
+#endif
+
 #endif

@@ -24,7 +24,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     // Create teams, programs and Actions
     std::vector<const EvoGraph::Action*> actions;
     std::vector<const EvoGraph::Vertex*> teams;
-    std::vector<std::shared_ptr<Program::Program>> programs;
+    std::vector<std::shared_ptr<const Agent>> programAgent;
 
 
     for (size_t idx = 0; idx < nbOutputs; idx++) {
@@ -39,15 +39,16 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     // programs Association here are determinists since randomness would
     // uselessly complicate the code while bringing no real value since anyway,
     // Programs have been initialized randomly.
+    auto programMutator = this->getSubMutator(this->programAlgorithmName);
+    auto programManager = manager->getSubManager(this->programAlgorithmName);
     for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
-        // Create a program and specify context program
-        programs.emplace_back(
-            new Program::Program(graph->getEnvironment(), false));
-        // RandomInit the Programs
-        //Mutator::ProgramMutator::initRandomProgram(*programs.back(), params,
-        //                                           rng);
+
+        // Create a program agent
+        programAgent.push_back(programMutator->initRandomAgent(graph, programManager, params, rng, 1));
+
+        // Add the edge
         graph->addNewEdge(*teams.at(i / 2), *actions.at(i % nbOutputs),
-                         programs.at(i));
+                         programAgent.at(i));
     }
 
     // Add additional connections to TPG
@@ -64,7 +65,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
             int pickedProgram = 0;
             {
                 // Copy the list of programs
-                std::vector<int> availableChoices(programs.size());
+                std::vector<int> availableChoices(programAgent.size());
                 std::iota(availableChoices.begin(), availableChoices.end(), 0);
                 // Remove already connected ones
                 auto iter = availableChoices.begin();
@@ -72,9 +73,9 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
                     if (std::count_if(
                             team->getOutgoingEdges().begin(),
                             team->getOutgoingEdges().end(),
-                            [&iter, &programs](const EvoGraph::Edge* edge) {
-                                return &edge->getProgram() ==
-                                       programs.at(*iter).get();
+                            [&iter, &programAgent](const EvoGraph::Edge* edge) {
+                                return edge->getProgram() ==
+                                       programAgent.at(*iter);
                             }) > 0) {
                         iter = availableChoices.erase(iter);
                     }
@@ -95,8 +96,8 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
             // Select the least used program for the connection
             uint64_t selectedProgramIndex =
                 (pickedProgram > 1 &&
-                 programs.at(randomProgIndex[1]).use_count() <
-                     programs.at(randomProgIndex[0]).use_count())
+                 programAgent.at(randomProgIndex[1]).use_count() <
+                     programAgent.at(randomProgIndex[0]).use_count())
                     ? randomProgIndex[1]
                     : randomProgIndex[0];
 
@@ -104,7 +105,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
             graph->addNewEdge(
                 *team,
                 *actions.at(rng.getUnsignedInt64(0, nbOutputs - 1)),
-                programs.at(selectedProgramIndex));
+                programAgent.at(selectedProgramIndex));
         }
     }
 }
@@ -207,20 +208,20 @@ void Algorithm::TPG::TPGMutator::mutateEdgeDestination(
 
 void Algorithm::TPG::TPGMutator::mutateOutgoingEdge(
     std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Edge* edge,
+    std::shared_ptr<AgentManager> manager,
     const Selector::SelectionContext& context,
     std::vector<std::shared_ptr<const Agent>> newSubAgents,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-
+    auto originAgent = edge->getProgram();
     // copy program
-    std::shared_ptr<Program::Program> newProg(
-        new Program::Program(edge->getProgram(), false));
+    std::shared_ptr<const Algorithm::Agent> newAgent = manager->getSubManager(originAgent->getAlgorithmName())->copyAgent(originAgent, graph);
 
-    // Set the mutated program to the edge
-    edge->setProgram(newProg);
+    // Set the mutated agent to the edge
+    edge->setProgram(newAgent);
 
-    // Add it to the list of new Program to be mutated.
-    newSubAgents.push_back(newProg);
+    // Add it to the list of new agent to be mutated.
+    newSubAgents.push_back(newAgent);
 
     // Edge target modification
     // As it Stephen kelly's work, Edge target modification is conditionned
@@ -272,7 +273,7 @@ void Algorithm::TPG::TPGMutator::mutateAgent(
                 // Edge->Program bid modification
                 if (rng.getDouble(0.0, 1.0) < params.mutation.tpg.pProgramMutation) {
                     // Mutate the edge
-                    this->mutateOutgoingEdge(graph, edge, context, newSubAgents,
+                    this->mutateOutgoingEdge(graph, edge, manager, context, newSubAgents,
                                        params, rng);
                     anyMutationDone = true;
                 }

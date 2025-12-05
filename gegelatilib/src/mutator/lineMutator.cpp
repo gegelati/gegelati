@@ -41,6 +41,7 @@
 #include "environment.h"
 #include "mutator/lineMutator.h"
 
+#if 0
 /**
  * \brief Function to initialize a single operand of a Program::Line.
  *
@@ -272,3 +273,5 @@ void Mutator::LineMutator::alterCorrectLine(Program::Line& line,
         }
     }
 }
+
+#endif

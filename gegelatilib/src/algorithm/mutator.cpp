@@ -1,6 +1,20 @@
 
 #include "algorithm/mutator.h"
 
+void Algorithm::Mutator::addSubMutator(std::shared_ptr<Mutator> subMutator)
+{
+    this->subMutators.insert({subMutator->getAlgorithmName(), subMutator});
+}
+
+
+std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(std::string nameAlgorithm){
+    auto it = this->subMutators.find(nameAlgorithm);
+    if(it == this->subMutators.end()){
+        throw std::runtime_error("Algorithm::Mutator::getSubMutator subManager not found for the specific name");
+    }
+    return it->second;
+}
+
 void Algorithm::Mutator::mutatePopulation(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
     const Learn::LearningParameters& params,

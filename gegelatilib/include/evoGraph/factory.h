@@ -107,12 +107,12 @@ namespace EvoGraph {
          *
          * \param[in] src pointer to the source Vertex of the edge.
          * \param[in] dest pointer to the destination Vertex of the edge.
-         * \param[in] prog the shared pointer to the Program associated to the
+         * \param[in] actionProgram the shared pointer to the actionProgram associated to the
          *            edge.
          */
         virtual std::unique_ptr<Edge> createEdge(
             const Vertex* src, const Vertex* dest,
-            const std::shared_ptr<Program::Program> prog) const;
+            std::shared_ptr<const Algorithm::Agent> actionProgram) const;
 
         /**
          * \brief Create a ActionEdge for a Graph.
@@ -122,12 +122,12 @@ namespace EvoGraph {
          *
          * \param[in] src pointer to the source Vertex of the edge. It must
          * be an action.
-         * \param[in] prog the shared pointer to the Program associated to
+         * \param[in] actionProgram the shared pointer to the actionProgram associated to
          * the edge.
          * \param[in] actionClass of the actionEdge
          */
         virtual std::unique_ptr<Edge> createActionEdge(
-            const Vertex* src, const std::shared_ptr<Program::Program> prog,
+            const Vertex* src, std::shared_ptr<const Algorithm::Agent> actionProgram,
             uint64_t actionClass) const;
 
         /**

@@ -57,7 +57,7 @@ CodeGen::TPGStackGenerationEngine::~TPGStackGenerationEngine()
 
 void CodeGen::TPGStackGenerationEngine::generateEdge(const EvoGraph::Edge& edge)
 {
-    const Program::Program& p = edge.getProgram();
+    /*const Program::Program& p = edge.getProgram();
 
     progGenerationEngine.setProgram(p);
 
@@ -78,6 +78,7 @@ void CodeGen::TPGStackGenerationEngine::generateEdge(const EvoGraph::Edge& edge)
 
     fileMain << "\t\t\t{" << destinationName << "Vert, P" << p.getProgramID()
              << ", " << destinationName << "}";
+             */
 }
 
 void CodeGen::TPGStackGenerationEngine::generateTeam(const EvoGraph::Team& team)

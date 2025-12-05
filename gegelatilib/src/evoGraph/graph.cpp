@@ -233,12 +233,12 @@ const EvoGraph::Vertex& EvoGraph::Graph::cloneVertex(const Vertex& vertex)
             // edge.
             EvoGraph::ActionEdge* actionEdge = dynamic_cast<ActionEdge*>(edge);
             this->addNewActionEdge(*newVertex,
-                                   actionEdge->getProgramSharedPointer(),
+                                   actionEdge->getProgram(),
                                    actionEdge->getActionClass());
         }
         else if (edge != nullptr) {
             this->addNewEdge(*newVertex, *(edge->getDestination()),
-                             edge->getProgramSharedPointer());
+                             edge->getProgram());
         }
         else {
             throw std::runtime_error("Edge copied should not be a nullptr.");
@@ -275,7 +275,7 @@ void EvoGraph::Graph::setNewEdgeID(const EvoGraph::Edge& edge, uint64_t newID)
 
 const EvoGraph::Edge& EvoGraph::Graph::addNewEdge(
     const Vertex& src, const Vertex& dest,
-    const std::shared_ptr<Program::Program> prog)
+    const std::shared_ptr<const Algorithm::Agent> prog)
 {
     // Check the Vertex existence within the graph.
     auto srcVertex = this->vertices.find(&src);
@@ -308,7 +308,7 @@ const EvoGraph::Edge& EvoGraph::Graph::addNewEdge(
 }
 
 const EvoGraph::Edge& EvoGraph::Graph::addNewActionEdge(
-    const Vertex& src, const std::shared_ptr<Program::Program> prog,
+    const Vertex& src, const std::shared_ptr<const Algorithm::Agent> prog,
     uint64_t actionClass)
 {
     // Check the Vertex existence within the graph.
@@ -409,13 +409,13 @@ const EvoGraph::Edge& EvoGraph::Graph::cloneEdge(const Edge& edge)
             dynamic_cast<const ActionEdge*>(iterEdge->get());
         return this->addNewActionEdge(
             *actionEdge->getSource(),
-            iterEdge->get()->getProgramSharedPointer(),
+            iterEdge->get()->getProgram(),
             actionEdge->getActionClass());
     }
     else {
         return this->addNewEdge(*iterEdge->get()->getSource(),
                                 *iterEdge->get()->getDestination(),
-                                iterEdge->get()->getProgramSharedPointer());
+                                iterEdge->get()->getProgram());
     }
 }
 
@@ -469,13 +469,6 @@ bool EvoGraph::Graph::setEdgeSource(const Edge& edge, const Vertex& newSrc)
     }
     else {
         return false;
-    }
-}
-
-void EvoGraph::Graph::clearProgramIntrons()
-{
-    for (auto& edge : this->edges) {
-        edge.get()->getProgram().clearIntrons();
     }
 }
 

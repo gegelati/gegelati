@@ -101,23 +101,28 @@ void File::GraphDotExporter::printEdge(const EvoGraph::Edge& edge)
 
     uint64_t srcID = edge.getSource()->getVertexID();
 
-    Program::Program& p = edge.getProgram();
-    uint64_t progID = p.getProgramID();
+    std::shared_ptr<const Algorithm::Agent> agent = edge.getProgram();
+    auto lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(agent);
+    if(lgpAgent == nullptr){
+        throw std::runtime_error("File::GraphDotExporter::printEdge agentProgram is not an lgpAgent");
+    }
+
+    uint64_t progID = lgpAgent->getAgentID();
     if (this->programIDIsNew(progID)) {
 
         // First time thie Program is encountered
         fprintf(pFile,
                 "%sP%" PRIu64
                 " [fillcolor=\"#cccccc\" shape=point label=\"%d\"] //",
-                this->offset.c_str(), progID, p.isActionProgram() ? 1 : 0);
+                this->offset.c_str(), progID, 0);
         // add next the content of the constant data handler in a comment (//)
-        for (int i = 0; i < p.getEnvironment().getParams().nbProgramConstant;
+        for (int i = 0; i < lgpAgent->getEnvironment()->getParams().nbProgramConstant;
              i++) {
-            fprintf(pFile, "%f|", static_cast<double>(p.getConstantAt(i)));
+            fprintf(pFile, "%f|", static_cast<double>(lgpAgent->getConstantAt(i)));
         }
         fprintf(pFile, "\n");
         // print the program content :
-        printProgram(p);
+        printLGPAgent(lgpAgent);
         fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n",
                 this->offset.c_str(), progID, progID);
         if (dynamic_cast<const EvoGraph::ActionEdge*>(&edge) != nullptr) {
@@ -157,11 +162,11 @@ void File::GraphDotExporter::printEdge(const EvoGraph::Edge& edge)
     }
 }
 
-void File::GraphDotExporter::printProgram(const Program::Program& program)
+void File::GraphDotExporter::printLGPAgent(std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent)
 {
     std::string programContent = "";
-    for (int i = 0; i < program.getNbLines(); i++) {
-        const Program::Line& l = program.getLine(i);
+    for (int i = 0; i < lgpAgent->getNbLines(); i++) {
+        const Algorithm::LGP::LGPLine& l = lgpAgent->getLine(i);
         // instruction index
         programContent += std::to_string(l.getInstructionIndex());
         programContent += "|";
@@ -169,7 +174,7 @@ void File::GraphDotExporter::printProgram(const Program::Program& program)
         programContent += std::to_string(l.getDestinationIndex());
         programContent += "&";
         // instruction operands
-        for (int j = 0; j < l.getEnvironment().getMaxNbOperands(); j++) {
+        for (int j = 0; j < l.getEnvironment()->getMaxNbOperands(); j++) {
             std::pair<uint64_t, uint64_t> p = l.getOperand(j);
             if (j != 0)
                 programContent += "#";
@@ -181,7 +186,7 @@ void File::GraphDotExporter::printProgram(const Program::Program& program)
         programContent += "&#92;n";
     }
     fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"] \n",
-            this->offset.c_str(), program.getProgramID(),
+            this->offset.c_str(), lgpAgent->getAgentID(),
             programContent.c_str());
 }
 

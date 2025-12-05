@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 #include "algorithm/agent.h"
 #include "algorithm/agentManager.h"
@@ -11,7 +12,6 @@
 #include "learn/learningParameters.h"
 #include "evoGraph/graph.h"
 #include "selector/selectorFactory.h"
-
 namespace Algorithm {
     /**
      * \brief Abstract class representing an Algorithm.
@@ -39,6 +39,11 @@ namespace Algorithm {
         /// Number of values to outputs 
         size_t nbOutputs;
 
+        /// Sub-algorithms used by the algorithm
+        std::vector<std::shared_ptr<Algorithm>> subAlgorithms;
+        /// Name of the algorithm.
+        std::string algorithmName;
+
       public:
 
         /**
@@ -48,11 +53,28 @@ namespace Algorithm {
          * \param[in] params the LearningParameters used by the Algorithm.
          * \param[in] manager Manager of the algorithm to store and maintain agents
          * \param[in] mutator Mutator used by the algorithm to mutate the agents
-         * \param[in] nbActions number of actions that will be usable for
+         * \param[in] nbOutputs number of outputs that will be usable for
+         * interacting with this LearningEnviromnent.
+         * \param[in] algorithmName name of the algorithm used.
          * 
          */
-        Algorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager, std::shared_ptr<Mutator> mutator, size_t nbOutputs)
-               : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, manager, params)}, mutator{mutator}, nbOutputs{nbOutputs} {};
+        Algorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager, std::shared_ptr<Mutator> mutator, size_t nbOutputs, std::string algorithmName)
+               : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, manager, params)}, mutator{mutator}, nbOutputs{nbOutputs}, algorithmName(algorithmName) {
+                this->manager->setAlgorithmName(algorithmName);
+                this->mutator->setAlgorithmName(algorithmName);
+              };
+
+        /**
+         * \brief Return the name of the algorithm.
+         */
+        std::string getAlgorithmName() const { return this->algorithmName; }
+
+        /**
+         * \brief Add a sub-algorithm to the current algorithm.
+         * 
+         * \param[in] subAlgorithm the sub-algorithm to add.
+         */
+        void addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorithm);
 
         /// Constant getter for the manager
         virtual std::shared_ptr<const AgentManager> getManagerCst() const;
@@ -66,6 +88,9 @@ namespace Algorithm {
         /// Getter for the selector
         virtual std::shared_ptr<Selector::Selector> getSelector();
 
+        /// Getter for the mutator
+        virtual std::shared_ptr<Mutator> getMutator();
+      
         /**
          * \brief Get the current number of agents used by the algorithm.
          */
@@ -125,6 +150,13 @@ namespace Algorithm {
          * \param[in] agent The agent which is evaluated.
          */
         virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) const = 0;
+
+        
+
+        /**
+         * \brief Clear all the parts of agents that are not used, such as introns for LGPs
+         */
+        virtual void clearUnusedAgentParts() = 0;
 
     };
 }; // namespace Algorithm

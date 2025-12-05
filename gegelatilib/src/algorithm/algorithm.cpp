@@ -1,15 +1,21 @@
 
 #include "algorithm/algorithm.h"
 
+void Algorithm::Algorithm::addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorithm)
+{
+    this->subAlgorithms.push_back(subAlgorithm);
+    this->manager->addSubManager(subAlgorithm->getManager());
+    this->mutator->addSubMutator(subAlgorithm->getMutator());
+}
 
 std::shared_ptr<const Algorithm::AgentManager> Algorithm::Algorithm::getManagerCst() const
 {
-    return std::const_pointer_cast<const AgentManager>(this->manager);
+    return this->manager;
 }
 
 std::shared_ptr<const Selector::Selector> Algorithm::Algorithm::getSelectorCst() const
 {
-    return std::const_pointer_cast<const Selector::Selector>(this->selector);
+    return this->selector;
 }
 
 std::shared_ptr<Algorithm::AgentManager> Algorithm::Algorithm::getManager()
@@ -20,6 +26,11 @@ std::shared_ptr<Algorithm::AgentManager> Algorithm::Algorithm::getManager()
 std::shared_ptr<Selector::Selector> Algorithm::Algorithm::getSelector()
 {
     return this->selector;
+}
+
+std::shared_ptr<Algorithm::Mutator> Algorithm::Algorithm::getMutator()
+{
+    return this->mutator;
 }
 
 size_t Algorithm::Algorithm::getNbAgents() const

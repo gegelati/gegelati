@@ -59,7 +59,7 @@ std::unique_ptr<EvoGraph::Action> EvoGraph::TPGInstrumentedFactory::createAction
 
 std::unique_ptr<EvoGraph::Edge> EvoGraph::TPGInstrumentedFactory::createEdge(
     const Vertex* src, const Vertex* dest,
-    const std::shared_ptr<Program::Program> prog) const
+    const std::shared_ptr<const Algorithm::Agent> prog) const
 {
     auto ptr = std::make_unique<EvoGraph::EdgeInstrumented>(src, dest, prog);
     return ptr;

@@ -14,22 +14,24 @@
 namespace Algorithm::LGP {
 
     /**
-     * \brief Abstract class representing a Mutator used by an Algorithm.
-     * 
-     * Available algorithms are LGP, MAPLE, and LGP
+     * \brief Class representing a LGPMutator
      */
     class LGPMutator : public Mutator
     {
     protected:
 
-        /// Attribute that specify if the mutator implements crossover, depending on its algorithm.
-        bool isUsingCrossover = false;
-
+        /// LGPLineMutator used for mutating LGP lines.
         LGPLineMutator lineMutator;
 
     public:
 
-        LGPMutator(): Mutator(), lineMutator() {};
+        /**
+         * \brief Main LGPMutator constructor.
+         * 
+         */
+        LGPMutator(): Mutator(), lineMutator() {
+            isUsingCrossover = false;
+        };
 
         /**
          * \brief Initialize LGP Population.
