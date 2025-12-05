@@ -37,7 +37,7 @@ namespace Algorithm::TPG {
              * \param[in] dataSources the DataSources used by the LGPAlgorithm.
              * \param[in] algorithmName name of the algorithm used.
              */
-            TPGAlgorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, size_t nbOutputs, const Instructions::Set& iSet, std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, std::string algorithmName = "Team-Python-Game")
+            TPGAlgorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, size_t nbOutputs, const Instructions::Set& iSet, std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, std::string algorithmName = "TPG")
                 : Algorithm(graph, params, std::make_shared<TPGManager>(), std::make_shared<TPGMutator>(), nbOutputs, algorithmName) {
                 this->addLGPAlgorithm(graph, params, nbOutputs, iSet, dataSources);
             };

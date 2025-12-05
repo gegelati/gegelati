@@ -83,3 +83,16 @@ bool Algorithm::Algorithm::isAgentEvalSkipped(
         return false;
     }
 }
+
+std::shared_ptr<Algorithm::ExecutionEngine> Algorithm::Algorithm::createExecutionEngine()
+{
+    // Create the execution engine
+    auto executionEngine = std::make_shared<ExecutionEngine>(this->algorithmName);
+
+    // Add the sub execution engine of the corresponding sub algorithms
+    for(auto subAlgorithm: this->subAlgorithms){
+        executionEngine->addSubExecutionEngine(subAlgorithm->createExecutionEngine());
+    }
+
+    return executionEngine;
+}

@@ -12,6 +12,7 @@
 #include "learn/learningParameters.h"
 #include "evoGraph/graph.h"
 #include "selector/selectorFactory.h"
+#include "algorithm/executionEngine.h"
 namespace Algorithm {
     /**
      * \brief Abstract class representing an Algorithm.
@@ -151,12 +152,17 @@ namespace Algorithm {
          */
         virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) const = 0;
 
-        
-
         /**
          * \brief Clear all the parts of agents that are not used, such as introns for LGPs
          */
         virtual void clearUnusedAgentParts() = 0;
+
+        /**
+         * \brief create and return an execution engine for this algorithm.
+         * 
+         * The execution engine is also created with all the sub-execution engine corresponding to the sub-algorithms.
+         */
+        virtual std::shared_ptr<ExecutionEngine> createExecutionEngine();
 
     };
 }; // namespace Algorithm

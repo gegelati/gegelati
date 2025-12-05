@@ -25,7 +25,7 @@ namespace Algorithm {
         bool isUsingCrossover = false;
 
         /// Name of the algorithm.
-        std::string algorithmName = "GenericMutator";
+        std::string algorithmName;
 
         /// Sub-mutators for sub-algorithms
         std::map<std::string, std::shared_ptr<Mutator>> subMutators;
