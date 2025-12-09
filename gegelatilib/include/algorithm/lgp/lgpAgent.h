@@ -32,7 +32,7 @@ namespace Algorithm::LGP {
              * result, stored in the first register. Hence, skipping these lines
              * during a LGP execution can speed up the LGP execution.
              */
-            std::vector<std::pair<LGPLine*, bool>> lines;
+            std::vector<std::pair<std::shared_ptr<LGPLine>, bool>> lines;
 
 
             /**

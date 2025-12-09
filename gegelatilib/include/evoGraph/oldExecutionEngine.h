@@ -35,8 +35,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TPG_EXECUTION_ENGINE_H
-#define TPG_EXECUTION_ENGINE_H
+#ifndef OLD_TPG_EXECUTION_ENGINE_H
+#define OLD_TPG_EXECUTION_ENGINE_H
 
 #include <set>
 #include <vector>
@@ -54,7 +54,7 @@ namespace EvoGraph {
      * This first implementation is purely sequential and does not parallelize
      * Program execution, nor executions of the TPG starting from several roots.
      */
-    class ExecutionEngine
+    class OldExecutionEngine
     {
       protected:
         /**
@@ -86,11 +86,11 @@ namespace EvoGraph {
          *                 given, meaning that no recording of the execution
          *                 will be made.
          */
-        ExecutionEngine(const Environment& env, Archive* arch = NULL)
+        OldExecutionEngine(const Environment& env, Archive* arch = NULL)
             : progExecutionEngine(env), env{env}, archive{arch} {};
 
         ///  Default virtual destructor
-        virtual ~ExecutionEngine() = default;
+        virtual ~OldExecutionEngine() = default;
 
         /**
          * \brief Set a new Archive for storing Program results.
@@ -111,7 +111,7 @@ namespace EvoGraph {
          * \brief Execute the Program associated to an Edge and returns the
          * obtained double.
          *
-         * If an Archive is associated to the ExecutionEngine, the Program
+         * If an Archive is associated to the OldExecutionEngine, the Program
          * result is recorded in it.
          *
          * If the value returned by the Program is NaN, then it is replaced with

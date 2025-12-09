@@ -1,8 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2022 - 2025) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2021) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
- * Quentin Vacher <qvacher@insa-rennes.fr> (2024 - 2025)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
+ * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,43 +35,43 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "evoGraph/factory.h"
-#include "evoGraph/oldExecutionEngine.h"
-#include "evoGraph/graph.h"
+#include "algorithm/lgp/lgpExecutionEngine.h"
 
-std::shared_ptr<EvoGraph::Graph> EvoGraph::GraphFactory::createGraph(
-    const Environment& env) const
+void Algorithm::LGP::LGPExecutionEngine::executeCurrentLine()
 {
-    return std::make_shared<EvoGraph::Graph>(env, std::make_unique<GraphFactory>());
+    std::vector<Data::UntypedSharedPtr> operands;
+
+    // Get everything needed (may throw)
+    const LGPLine& line = this->getCurrentLine();
+    const Instructions::Instruction& instruction =
+        this->getCurrentInstruction();
+    this->fetchCurrentOperands(operands);
+
+    double result = instruction.execute(operands);
+
+    this->registers.setDataAt(typeid(double), line.getDestinationIndex(),
+                              result);
 }
 
-std::unique_ptr<EvoGraph::Team> EvoGraph::GraphFactory::createTeam() const
+std::vector<double> Algorithm::LGP::LGPExecutionEngine::execute()
 {
-    return std::make_unique<EvoGraph::Team>();
+    // Reset registers and programCounter
+    this->registers.resetData();
+
+    iterateThroughtProgram(this->ignoreException);
+
+    std::vector<double> result;
+    for(size_t idx = 0; idx < this->lgpExecutedAgent->getNbOutputs(); idx++){
+        // cast to primitiveType<double> to enable cast to double.
+        result.push_back(*(this->registers.getDataAt(typeid(double), 0)
+                 .getSharedPointer<const double>()));
+    }
+
+    // Returns the register values
+    return result;
 }
 
-std::unique_ptr<EvoGraph::Action> EvoGraph::GraphFactory::createAction(
-    const uint64_t id) const
+void Algorithm::LGP::LGPExecutionEngine::processLine()
 {
-    return std::make_unique<EvoGraph::Action>(id);
-}
-
-std::unique_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createEdge(
-    const Vertex* src, const Vertex* dest,
-    std::shared_ptr<const Algorithm::Agent> actionProgram) const
-{
-    return std::make_unique<EvoGraph::Edge>(src, dest, actionProgram);
-}
-
-std::unique_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createActionEdge(
-    const Vertex* src, std::shared_ptr<const Algorithm::Agent> actionProgram,
-    uint64_t actionClass) const
-{
-    return std::make_unique<EvoGraph::ActionEdge>(src, actionProgram, actionClass);
-}
-
-std::unique_ptr<EvoGraph::OldExecutionEngine> EvoGraph::GraphFactory::
-    createExecutionEngine(const Environment& env, Archive* arch) const
-{
-    return std::make_unique<EvoGraph::OldExecutionEngine>(env, arch);
+    this->executeCurrentLine();
 }

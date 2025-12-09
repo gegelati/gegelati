@@ -42,14 +42,14 @@
 #include "program/programExecutionEngine.h"
 #include "evoGraph/edge.h"
 
-#include "evoGraph/executionEngine.h"
+#include "evoGraph/oldExecutionEngine.h"
 
-void EvoGraph::ExecutionEngine::setArchive(Archive* newArchive)
+void EvoGraph::OldExecutionEngine::setArchive(Archive* newArchive)
 {
     this->archive = newArchive;
 }
 
-void EvoGraph::ExecutionEngine::applyActivationFunctionOnActions(
+void EvoGraph::OldExecutionEngine::applyActivationFunctionOnActions(
     std::vector<double>& actionsTaken)
 {
 
@@ -81,7 +81,7 @@ void EvoGraph::ExecutionEngine::applyActivationFunctionOnActions(
     }
 }
 
-double EvoGraph::ExecutionEngine::evaluateEdge(const Edge& edge)
+double EvoGraph::OldExecutionEngine::evaluateEdge(const Edge& edge)
 {
     /*
     // Get the program
@@ -106,7 +106,7 @@ double EvoGraph::ExecutionEngine::evaluateEdge(const Edge& edge)
     return result;*/
 }
 
-const EvoGraph::Edge& EvoGraph::ExecutionEngine::evaluateTeam(const Team& team)
+const EvoGraph::Edge& EvoGraph::OldExecutionEngine::evaluateTeam(const Team& team)
 {
     // Copy outgoing edge list
     const std::list<EvoGraph::Edge*>& outgoingEdges = team.getOutgoingEdges();
@@ -151,7 +151,7 @@ const EvoGraph::Edge& EvoGraph::ExecutionEngine::evaluateTeam(const Team& team)
 }
 
 const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>> EvoGraph::
-    ExecutionEngine::executeFromRoot(
+    OldExecutionEngine::executeFromRoot(
         const Vertex& root, const std::vector<uint64_t>& initActions)
 {
     const Vertex* currentVertex = &root;

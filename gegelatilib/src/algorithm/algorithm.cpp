@@ -1,6 +1,18 @@
 
 #include "algorithm/algorithm.h"
 
+
+
+std::shared_ptr<Algorithm::Algorithm> Algorithm::Algorithm::getSubAlgorithm(std::string nameAlgorithm)
+{
+    for (auto& subAlgorithm : this->subAlgorithms) {
+        if (subAlgorithm->getAlgorithmName() == nameAlgorithm) {
+            return subAlgorithm;
+        }
+    }
+    throw std::runtime_error("No sub-algorithm with name " + nameAlgorithm + " found.");
+}
+
 void Algorithm::Algorithm::addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorithm)
 {
     this->subAlgorithms.push_back(subAlgorithm);
@@ -82,17 +94,4 @@ bool Algorithm::Algorithm::isAgentEvalSkipped(
         previousResult = nullptr;
         return false;
     }
-}
-
-std::shared_ptr<Algorithm::ExecutionEngine> Algorithm::Algorithm::createExecutionEngine()
-{
-    // Create the execution engine
-    auto executionEngine = std::make_shared<ExecutionEngine>(this->algorithmName);
-
-    // Add the sub execution engine of the corresponding sub algorithms
-    for(auto subAlgorithm: this->subAlgorithms){
-        executionEngine->addSubExecutionEngine(subAlgorithm->createExecutionEngine());
-    }
-
-    return executionEngine;
 }

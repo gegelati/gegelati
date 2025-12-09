@@ -57,7 +57,7 @@
 #include "program/program.h"
 #include "program/programExecutionEngine.h"
 #include "selector/tournamentSelector.h"
-#include "evoGraph/executionEngine.h"
+#include "evoGraph/oldExecutionEngine.h"
 #include "evoGraph/graph.h"
 #include "util/counterReset.h"
 
@@ -1006,7 +1006,7 @@ TEST_F(MutatorTest, TPGMutatorMutateOutgoingEdge)
     // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
-    EvoGraph::ExecutionEngine tee(*e, &arch);
+    EvoGraph::OldExecutionEngine tee(*e, &arch);
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
@@ -1192,7 +1192,7 @@ TEST_F(MutatorTest, TPGMutatorMutateAction)
     // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
-    EvoGraph::ExecutionEngine tee(ce, &arch);
+    EvoGraph::OldExecutionEngine tee(ce, &arch);
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
@@ -1266,7 +1266,7 @@ TEST_F(MutatorTest, TPGMutatorOutgoingEdgeMutateAction)
     // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
-    EvoGraph::ExecutionEngine tee(ce, &arch);
+    EvoGraph::OldExecutionEngine tee(ce, &arch);
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
@@ -1330,7 +1330,7 @@ TEST_F(MutatorTest, TPGMutatorMutateTeam)
 
     // Init its program and fill the archive
     Archive arch;
-    EvoGraph::ExecutionEngine tee(*e, &arch);
+    EvoGraph::OldExecutionEngine tee(*e, &arch);
     Mutator::ProgramMutator::initRandomProgram(*progPointer, params, rng);
     tee.executeFromRoot(vertex0);
 
@@ -1367,7 +1367,7 @@ TEST_F(MutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     // Init its program and fill the archive
     Mutator::MutationParameters params;
     Archive arch;
-    EvoGraph::ExecutionEngine tee(*e, &arch);
+    EvoGraph::OldExecutionEngine tee(*e, &arch);
     params.prog.maxProgramSize = 96;
     params.prog.pConstantMutation = 0.5;
     params.prog.minConstValue = 0;
@@ -1473,7 +1473,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    EvoGraph::ExecutionEngine tee(*e, &arch);
+    EvoGraph::OldExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1520,7 +1520,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    EvoGraph::ExecutionEngine tee(*e, &arch);
+    EvoGraph::OldExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1566,7 +1566,7 @@ TEST_F(MutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
     Mutator::TPGMutator::initRandomTPG(tpg, params, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    EvoGraph::ExecutionEngine tee(*e, &arch);
+    EvoGraph::OldExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg.getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1627,7 +1627,7 @@ TEST_F(MutatorTest, TPGMutatorPopulate)
 
     Mutator::TPGMutator::initRandomTPG(*tpg, params.mutation, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    EvoGraph::ExecutionEngine tee(*e, &arch);
+    EvoGraph::OldExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg->getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1680,7 +1680,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateActionRoots)
 
     Mutator::TPGMutator::initRandomTPG(*tpg, params.mutation, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    EvoGraph::ExecutionEngine tee(*e, &arch);
+    EvoGraph::OldExecutionEngine tee(*e, &arch);
     for (auto rootVertex : tpg->getRootVertices()) {
         tee.executeFromRoot(*rootVertex);
     }
@@ -1747,7 +1747,7 @@ TEST_F(MutatorTest, TPGMutatorPopulateTPGWithTournamentSelection)
 
     Mutator::TPGMutator::initRandomTPG(*tpg, params.mutation, rng, nbActions);
     // fill the archive before populating to test uniqueness of new prog
-    EvoGraph::ExecutionEngine tee(*e, &arch);
+    EvoGraph::OldExecutionEngine tee(*e, &arch);
 
     // Do fake results to fill the verticesToDelete set.
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,

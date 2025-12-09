@@ -44,7 +44,7 @@
 
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
-#include "evoGraph/executionEngine.h"
+#include "evoGraph/oldExecutionEngine.h"
 
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
@@ -83,13 +83,13 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
         useMainEnvironment ? &this->learningEnvironment
                            : this->learningEnvironment.clone();
 
-    // Create a ExecutionEngine
+    // Create a OldExecutionEngine
     Environment privateEnv(this->env.getInstructionSet(), params,
                            privateLearningEnvironment->getDataSources(),
                            (privateLearningEnvironment->isDiscrete())
                                ? 0
                                : privateLearningEnvironment->getNbActions());
-    std::unique_ptr<EvoGraph::ExecutionEngine> tee =
+    std::unique_ptr<EvoGraph::OldExecutionEngine> tee =
         this->graph->getFactory().createExecutionEngine(privateEnv, NULL);
 
     int i = 0;

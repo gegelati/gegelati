@@ -43,7 +43,7 @@
 double EvoGraph::ExecutionEngineInstrumented::evaluateEdge(const Edge& edge)
 {
     dynamic_cast<const EdgeInstrumented&>(edge).incrementNbVisits();
-    return ExecutionEngine::evaluateEdge(edge);
+    return OldExecutionEngine::evaluateEdge(edge);
 }
 
 const EvoGraph::Edge& EvoGraph::ExecutionEngineInstrumented::evaluateTeam(
@@ -51,7 +51,7 @@ const EvoGraph::Edge& EvoGraph::ExecutionEngineInstrumented::evaluateTeam(
 {
     dynamic_cast<const TeamInstrumented&>(team).incrementNbVisits();
 
-    const Edge& winningEdge = ExecutionEngine::evaluateTeam(team);
+    const Edge& winningEdge = OldExecutionEngine::evaluateTeam(team);
     dynamic_cast<const EdgeInstrumented&>(winningEdge)
         .incrementNbTraversal();
     return winningEdge;
@@ -62,7 +62,7 @@ const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>> EvoGr
         const EvoGraph::Vertex& root, const std::vector<uint64_t>& initActions)
 {
     const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>>
-        result = ExecutionEngine::executeFromRoot(root, initActions);
+        result = OldExecutionEngine::executeFromRoot(root, initActions);
 
     // Increment action visit
     dynamic_cast<const ActionInstrumented*>(result.first.back())

@@ -194,7 +194,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
     std::unique_ptr<EvoGraph::Action> action;
     std::unique_ptr<EvoGraph::Team> team;
     std::unique_ptr<EvoGraph::Edge> edge;
-    std::unique_ptr<EvoGraph::ExecutionEngine> tee;
+    std::unique_ptr<EvoGraph::OldExecutionEngine> tee;
 
     ASSERT_NO_THROW(action = factory.createAction(0))
         << "GraphFactory could not build a Action.";
@@ -216,7 +216,7 @@ TEST_F(TPGInstrumentedTest, TPGInstrumentedFactory)
         << "Edge built by the TPGInstrumentedFactory has an incorrect type.";
 
     ASSERT_NO_THROW(tee = factory.createExecutionEngine(*e, nullptr))
-        << "GraphELementFactory could not build a ExecutionEngine.";
+        << "GraphELementFactory could not build a OldExecutionEngine.";
     ASSERT_NE(tee.get(), nullptr) << "Created Edge should not be null.";
     ASSERT_EQ(typeid(*tee), typeid(EvoGraph::ExecutionEngineInstrumented))
         << "Edge built by the TPGInstrumentedFactory has an incorrect type.";

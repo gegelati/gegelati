@@ -43,7 +43,7 @@
 #include <thread>
 
 #include "instructions/set.h"
-#include "evoGraph/executionEngine.h"
+#include "evoGraph/oldExecutionEngine.h"
 
 #include "learn/evaluationResult.h"
 #include "learn/job.h"

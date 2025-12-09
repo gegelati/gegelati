@@ -49,7 +49,7 @@
 #include "instructions/set.h"
 #include "log/laLogger.h"
 #include "mutator/mutationParameters.h"
-#include "evoGraph/executionEngine.h"
+#include "evoGraph/oldExecutionEngine.h"
 #include "evoGraph/graph.h"
 
 #include "learn/classificationLearningEnvironment.h"
@@ -206,7 +206,7 @@ namespace Learn {
          *
          * The method is const to enable potential parallel calls to it.
          *
-         * \param[in] tee The ExecutionEngine to use.
+         * \param[in] tee The OldExecutionEngine to use.
          * \param[in] job The job containing the root and archiveSeed for
          * the evaluation.
          * \param[in] generationNumber the integer number of the current
@@ -225,7 +225,7 @@ namespace Learn {
          * resultsPerRoot for this root (if any).
          */
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
-            EvoGraph::ExecutionEngine& tee, const Job& job,
+            EvoGraph::OldExecutionEngine& tee, const Job& job,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
 

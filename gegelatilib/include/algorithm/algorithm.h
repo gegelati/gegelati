@@ -44,6 +44,13 @@ namespace Algorithm {
         std::vector<std::shared_ptr<Algorithm>> subAlgorithms;
         /// Name of the algorithm.
         std::string algorithmName;
+        
+        /**
+         * \brief return the subAlgorithm corresponding to the name of the algorithm given.
+         * 
+         * \param[in] nameAlgorithm name of the algorithm given.
+         */
+        std::shared_ptr<Algorithm> getSubAlgorithm(std::string nameAlgorithm);     
 
       public:
 
@@ -76,6 +83,7 @@ namespace Algorithm {
          * \param[in] subAlgorithm the sub-algorithm to add.
          */
         void addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorithm);
+
 
         /// Constant getter for the manager
         virtual std::shared_ptr<const AgentManager> getManagerCst() const;
@@ -158,11 +166,11 @@ namespace Algorithm {
         virtual void clearUnusedAgentParts() = 0;
 
         /**
-         * \brief create and return an execution engine for this algorithm.
+         * \brief Create the execution engine associated with the algorithm.
          * 
-         * The execution engine is also created with all the sub-execution engine corresponding to the sub-algorithms.
+         * \return a shared pointer to the created execution engine.
          */
-        virtual std::shared_ptr<ExecutionEngine> createExecutionEngine();
+        virtual std::shared_ptr<ExecutionEngine> createExecutionEngine() = 0;
 
     };
 }; // namespace Algorithm

@@ -69,7 +69,7 @@ namespace EvoGraph {
 
         ///  Specialization of the method returning a
         ///  ExecutionEngineInstrumented
-        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(
+        virtual std::unique_ptr<OldExecutionEngine> createExecutionEngine(
             const Environment& env, Archive* arch = NULL) const override;
         /**
          * \brief Reset all visit and traversal counters of a Graph.

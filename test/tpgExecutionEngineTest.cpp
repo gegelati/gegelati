@@ -49,7 +49,7 @@
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
 
-#include "evoGraph/executionEngine.h"
+#include "evoGraph/oldExecutionEngine.h"
 
 #ifndef PARAM_FLOAT_PRECISION
 #define PARAM_FLOAT_PRECISION (float)(int16_t(1) / (float)(-INT16_MIN))
@@ -179,17 +179,17 @@ class ExecutionEngineTest : public ::testing::Test
 
 TEST_F(ExecutionEngineTest, ConstructorDestructor)
 {
-    EvoGraph::ExecutionEngine* tpee;
+    EvoGraph::OldExecutionEngine* tpee;
 
-    ASSERT_NO_THROW(tpee = new EvoGraph::ExecutionEngine(*e))
-        << "Construction of a ExecutionEngine failed.";
+    ASSERT_NO_THROW(tpee = new EvoGraph::OldExecutionEngine(*e))
+        << "Construction of a OldExecutionEngine failed.";
 
-    ASSERT_NO_THROW(delete tpee) << "Deletion of a ExecutionEngine failed.";
+    ASSERT_NO_THROW(delete tpee) << "Deletion of a OldExecutionEngine failed.";
 }
 
 TEST_F(ExecutionEngineTest, EvaluateEdge)
 {
-    EvoGraph::ExecutionEngine tpee(*e);
+    EvoGraph::OldExecutionEngine tpee(*e);
 
     ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 5, PARAM_FLOAT_PRECISION)
         << "Evaluation of the program of an Edge failed.";
@@ -206,7 +206,7 @@ TEST_F(ExecutionEngineTest, EvaluateEdge)
 
 TEST_F(ExecutionEngineTest, ArchiveUsage)
 {
-    EvoGraph::ExecutionEngine tpee(*e, &a);
+    EvoGraph::OldExecutionEngine tpee(*e, &a);
 
     ASSERT_NEAR(tpee.evaluateEdge(*edges.at(0)), 5, PARAM_FLOAT_PRECISION)
         << "Evaluation of the program of an Edge failed when result is "
@@ -217,7 +217,7 @@ TEST_F(ExecutionEngineTest, ArchiveUsage)
 
 TEST_F(ExecutionEngineTest, EvaluateTeam)
 {
-    EvoGraph::ExecutionEngine tpee(*e);
+    EvoGraph::OldExecutionEngine tpee(*e);
 
     const EvoGraph::Edge* result = NULL;
     ASSERT_NO_THROW(result = &tpee.evaluateTeam(
@@ -230,7 +230,7 @@ TEST_F(ExecutionEngineTest, EvaluateTeam)
 
 TEST_F(ExecutionEngineTest, EvaluateFromRoot)
 {
-    EvoGraph::ExecutionEngine tpee(*e);
+    EvoGraph::OldExecutionEngine tpee(*e);
 
     std::vector<const EvoGraph::Vertex*> result;
 
@@ -259,7 +259,7 @@ TEST_F(ExecutionEngineTest, EvaluateFromRootContinuousNoActionProg)
     makeProgramReturn(*progPointers.at(2), -1, 2); // Program from A2
 
     Environment continuousEnv(set, params, vect, 2);
-    EvoGraph::ExecutionEngine tpee(continuousEnv);
+    EvoGraph::OldExecutionEngine tpee(continuousEnv);
 
     std::vector<double> result;
 
@@ -280,7 +280,7 @@ TEST_F(ExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
     Environment continuousEnv(set, params, vect, 2);
     std::shared_ptr<Program::Program> p =
         std::make_shared<Program::Program>(continuousEnv, true);
-    EvoGraph::ExecutionEngine tpee(continuousEnv);
+    EvoGraph::OldExecutionEngine tpee(continuousEnv);
 
     tpg->addNewActionEdge(*tpg->getVertices().at(6), p, 0);
     makeProgramReturn(*p, 1, 0);
@@ -320,7 +320,7 @@ TEST_F(ExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
         std::make_shared<Program::Program>(continuousEnv, true);
     std::shared_ptr<Program::Program> p1 =
         std::make_shared<Program::Program>(continuousEnv, true);
-    EvoGraph::ExecutionEngine tpee(continuousEnv);
+    EvoGraph::OldExecutionEngine tpee(continuousEnv);
 
     tpg->addNewActionEdge(*tpg->getVertices().at(6), p0, 0);
     makeProgramReturn(*p0, 1, 0);
@@ -356,7 +356,7 @@ TEST_F(ExecutionEngineTest, ApplyActivationFunctionOnActions)
                                    std::numeric_limits<double>::quiet_NaN()};
     params.activationFunction = "none";
     Environment envNone(set, params, vect);
-    EvoGraph::ExecutionEngine tpeeNone(envNone);
+    EvoGraph::OldExecutionEngine tpeeNone(envNone);
 
     ASSERT_NO_THROW(tpeeNone.applyActivationFunctionOnActions(valuesNone))
         << "None activation function failed";
@@ -369,7 +369,7 @@ TEST_F(ExecutionEngineTest, ApplyActivationFunctionOnActions)
                                    std::numeric_limits<double>::quiet_NaN()};
     params.activationFunction = "tanh";
     Environment envTanh(set, params, vect);
-    EvoGraph::ExecutionEngine tpeeTanh(envTanh);
+    EvoGraph::OldExecutionEngine tpeeTanh(envTanh);
 
     ASSERT_NO_THROW(tpeeTanh.applyActivationFunctionOnActions(valuesTanh))
         << "None activation function failed";
@@ -383,7 +383,7 @@ TEST_F(ExecutionEngineTest, ApplyActivationFunctionOnActions)
                                       std::numeric_limits<double>::quiet_NaN()};
     params.activationFunction = "sigmoid";
     Environment envSigmoid(set, params, vect);
-    EvoGraph::ExecutionEngine tpeeSigmoid(envSigmoid);
+    EvoGraph::OldExecutionEngine tpeeSigmoid(envSigmoid);
 
     ASSERT_NO_THROW(tpeeSigmoid.applyActivationFunctionOnActions(valuesSigmoid))
         << "None activation function failed";
@@ -397,7 +397,7 @@ TEST_F(ExecutionEngineTest, ApplyActivationFunctionOnActions)
     // Test for wrong activation function
     params.activationFunction = "WrongActivationFunction";
     Environment envWrong(set, params, vect);
-    EvoGraph::ExecutionEngine tpeeWrong(envWrong);
+    EvoGraph::OldExecutionEngine tpeeWrong(envWrong);
 
     ASSERT_THROW(tpeeWrong.applyActivationFunctionOnActions(valuesNone),
                  std::runtime_error)

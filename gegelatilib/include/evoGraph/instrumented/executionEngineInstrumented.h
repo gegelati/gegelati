@@ -43,15 +43,15 @@
 
 #include "archive.h"
 #include "program/programExecutionEngine.h"
-#include "evoGraph/executionEngine.h"
+#include "evoGraph/oldExecutionEngine.h"
 
 #include "evoGraph/graph.h"
 
 namespace EvoGraph {
     /**
-     * Specialization of the ExecutionEngine class.
+     * Specialization of the OldExecutionEngine class.
      */
-    class ExecutionEngineInstrumented : public ExecutionEngine
+    class ExecutionEngineInstrumented : public OldExecutionEngine
     {
       protected:
         /// History of all previous execution traces. New traces are pushed
@@ -71,13 +71,13 @@ namespace EvoGraph {
          */
         ExecutionEngineInstrumented(const Environment& env,
                                        Archive* arch = NULL)
-            : ExecutionEngine(env, arch){};
+            : OldExecutionEngine(env, arch){};
 
         /**
          * \brief Specialization of the evaluateEdge function.
          *
          * In addition to calling the evaluateEdge method from
-         * ExecutionEngine, this specialization increments the number of
+         * OldExecutionEngine, this specialization increments the number of
          * visits of the evaluated Edge.
          */
         double evaluateEdge(const Edge& edge) override;
@@ -86,7 +86,7 @@ namespace EvoGraph {
          * \brief Specialization of the evaluateTeam function.
          *
          * In addition to calling the evaluateTeam method from
-         * ExecutionEngine, this specialization increments the number of
+         * OldExecutionEngine, this specialization increments the number of
          * visits of the evaluated Team and the number of traversal of the
          * Edge with the winning bid.
          */
@@ -95,7 +95,7 @@ namespace EvoGraph {
          * \brief Specialization of the evaluateTeam function.
          *
          * In addition to calling the executeFromRoot method from
-         * ExecutionEngine, this specialization increments the number of
+         * OldExecutionEngine, this specialization increments the number of
          * visits of the reached Action.
          */
         const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>>

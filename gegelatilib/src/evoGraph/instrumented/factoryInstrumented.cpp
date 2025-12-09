@@ -65,7 +65,7 @@ std::unique_ptr<EvoGraph::Edge> EvoGraph::TPGInstrumentedFactory::createEdge(
     return ptr;
 }
 
-std::unique_ptr<EvoGraph::ExecutionEngine> EvoGraph::TPGInstrumentedFactory::
+std::unique_ptr<EvoGraph::OldExecutionEngine> EvoGraph::TPGInstrumentedFactory::
     createExecutionEngine(const Environment& env, Archive* arch) const
 {
     return std::make_unique<ExecutionEngineInstrumented>(env, arch);

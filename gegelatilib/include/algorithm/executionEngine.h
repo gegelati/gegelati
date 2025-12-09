@@ -40,9 +40,12 @@ namespace Algorithm {
          * \brief Main ExecutionEngine constructor.
          * 
          * \param[in] executedAgent the agent to execute.
-         * \param[in] algorithmName name of the algorithm used.
          */
-        ExecutionEngine(std::shared_ptr<const Agent> executedAgent, std::string algorithmName): executedAgent{executedAgent}, algorithmName{algorithmName} {}
+        ExecutionEngine(std::shared_ptr<const Agent> executedAgent): executedAgent{executedAgent}, algorithmName{executedAgent->getAlgorithmName()} {
+            if(executedAgent->getAlgorithmName() != algorithmName){
+                throw std::runtime_error("Algorithm::ExecutionEngine::ExecutionEngine trying to set an agent from a different algorithm");
+            }
+        }
 
         /**
          * \brief Return the name of the algorithm.

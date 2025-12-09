@@ -44,7 +44,7 @@
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
-#include "evoGraph/executionEngine.h"
+#include "evoGraph/oldExecutionEngine.h"
 
 #include "learn/learningAgent.h"
 
@@ -93,7 +93,7 @@ void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
-    EvoGraph::ExecutionEngine& tee, const Job& job, uint64_t generationNumber,
+    EvoGraph::OldExecutionEngine& tee, const Job& job, uint64_t generationNumber,
     Learn::LearningMode mode, LearningEnvironment& le) const
 {
     // Get the current agent and the current algorithm
@@ -179,9 +179,9 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
         results;
 
-    // Create the ExecutionEngine for this evaluation.
+    // Create the OldExecutionEngine for this evaluation.
     // The engine uses the Archive only in training mode.
-    std::unique_ptr<EvoGraph::ExecutionEngine> tee =
+    std::unique_ptr<EvoGraph::OldExecutionEngine> tee =
         this->graph->getFactory().createExecutionEngine(
             this->env,
             (mode == LearningMode::TRAINING) ? &this->archive : NULL);
@@ -206,9 +206,9 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
 {
 
 
-    // Create the ExecutionEngine for this evaluation.
+    // Create the OldExecutionEngine for this evaluation.
     // The engine uses the Archive only in training mode.
-    std::unique_ptr<EvoGraph::ExecutionEngine> tee =
+    std::unique_ptr<EvoGraph::OldExecutionEngine> tee =
         this->graph->getFactory().createExecutionEngine(
             this->env,
             (mode == LearningMode::TRAINING) ? &this->archive : NULL);

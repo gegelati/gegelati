@@ -46,7 +46,7 @@
 
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
-#include "evoGraph/executionEngine.h"
+#include "evoGraph/oldExecutionEngine.h"
 #include "evoGraph/graph.h"
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
@@ -252,7 +252,7 @@ TEST_F(TPGTest, GraphFactory)
     std::unique_ptr<EvoGraph::Team> team;
     std::unique_ptr<EvoGraph::Edge> edge;
     std::unique_ptr<EvoGraph::Edge> actionEdge;
-    std::unique_ptr<EvoGraph::ExecutionEngine> tee;
+    std::unique_ptr<EvoGraph::OldExecutionEngine> tee;
 
     ASSERT_NO_THROW(action = factory.createAction(0))
         << "GraphELementFactory could not build a Action.";
@@ -274,9 +274,9 @@ TEST_F(TPGTest, GraphFactory)
         << "Created ActionEdge should not be null.";
 
     ASSERT_NO_THROW(tee = factory.createExecutionEngine(*e, nullptr))
-        << "GraphELementFactory could not build a ExecutionEngine.";
+        << "GraphELementFactory could not build a OldExecutionEngine.";
     ASSERT_NE(tee.get(), nullptr)
-        << "Created ExecutionEngine should not be null.";
+        << "Created OldExecutionEngine should not be null.";
 }
 
 TEST_F(TPGTest, GraphAddVertex)

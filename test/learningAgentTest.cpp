@@ -242,7 +242,7 @@ TEST_F(LearningAgentTest, EvalRoot)
     Archive a; // For testing purposes, notmally, the archive from the
                // LearningAgent is used.
 
-    EvoGraph::ExecutionEngine tee(la.getGraph()->getEnvironment(), &a);
+    EvoGraph::OldExecutionEngine tee(la.getGraph()->getEnvironment(), &a);
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result;
@@ -879,7 +879,7 @@ TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
 
     // Record the behavior of the TPG with introns
     le.reset();
-    EvoGraph::ExecutionEngine tee(tpg.getEnvironment());
+    EvoGraph::OldExecutionEngine tee(tpg.getEnvironment());
     std::vector<const EvoGraph::Vertex*> pathOrigin =
         tee.executeFromRoot(*(tpg.getRootVertices().at(0))).first;
 
@@ -991,8 +991,8 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     // create the archive
     Archive archive;
 
-    // The ExecutionEngine
-    EvoGraph::ExecutionEngine tee(env, &archive);
+    // The OldExecutionEngine
+    EvoGraph::OldExecutionEngine tee(env, &archive);
 
     std::shared_ptr<Learn::EvaluationResult> result;
     Learn::ParallelLearningAgent pla(le, set, params);
@@ -1447,7 +1447,7 @@ TEST_F(LearningAgentTest, EvaluateJobWithUtility)
     la.init();
 
     Archive a;
-    EvoGraph::ExecutionEngine tee(la.getGraph()->getEnvironment(), &a);
+    EvoGraph::OldExecutionEngine tee(la.getGraph()->getEnvironment(), &a);
     auto job = *la.makeJob(la.getGraph()->getRootVertices().at(0),
                            Learn::LearningMode::TRAINING);
 

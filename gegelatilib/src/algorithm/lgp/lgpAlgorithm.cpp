@@ -18,3 +18,8 @@ std::shared_ptr<const Archive> Algorithm::LGP::LGPAlgorithm::getArchive() const
 {
     return this->archive;
 }
+
+std::shared_ptr<Algorithm::ExecutionEngine> Algorithm::LGP::LGPAlgorithm::createExecutionEngine() 
+{
+    // To be implemented
+}

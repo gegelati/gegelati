@@ -68,6 +68,13 @@ namespace Algorithm::LGP {
              * \brief Clear all the parts of agents that are not used, such as introns for LGPs
              */
             virtual void clearUnusedAgentParts() override {};
+
+            /**
+             * \brief Create a new ExecutionEngine for this Algorithm.
+             * 
+             * \return a shared pointer to the created ExecutionEngine.
+             */
+            virtual std::shared_ptr<ExecutionEngine> createExecutionEngine() override;
         };
 }; // namespace LGP_Algorithm
 

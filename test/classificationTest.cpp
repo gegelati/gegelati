@@ -123,7 +123,7 @@ TEST_F(ClassificationTest, EvaluateRoot)
     Archive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
-    EvoGraph::ExecutionEngine tee(la.getGraph()->getEnvironment(), &a);
+    EvoGraph::OldExecutionEngine tee(la.getGraph()->getEnvironment(), &a);
 
     la.init();
     std::shared_ptr<Learn::EvaluationResult> result1;

@@ -5,8 +5,6 @@
 Algorithm::LGP::LGPAgent::~LGPAgent()
 {
     while (!lines.empty()) {
-        LGPLine* line = lines.back().first;
-        delete line;
         lines.pop_back();
     }
 }
@@ -30,7 +28,7 @@ Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::addNewLine(uint64_t idx)
     // Allocate the zero-filled memory
     LGPLine* newLine = new LGPLine(this->environment);
     // new line is not marked as an intron by default
-    this->lines.insert(lines.begin() + idx, {newLine, false});
+    this->lines.insert(this->lines.begin() + idx, {std::shared_ptr<LGPLine>(newLine), false});
 
     return *newLine;
 }
@@ -39,7 +37,7 @@ void Algorithm::LGP::LGPAgent::addNewLine(LGPLine newLine)
 {
     LGPLine* newLinePtr = new LGPLine(newLine);
     // new line is not marked as an intron by default
-    this->lines.push_back({newLinePtr, false});
+    this->lines.push_back({std::shared_ptr<LGPLine>(newLinePtr), false});
 }
 
 void Algorithm::LGP::LGPAgent::clearIntrons()
@@ -63,7 +61,6 @@ void Algorithm::LGP::LGPAgent::clearIntrons()
 
 void Algorithm::LGP::LGPAgent::removeLine(const uint64_t idx)
 {
-    delete this->lines.at(idx).first; // throws std::out_of_range on bad index.
     this->lines.erase(this->lines.begin() + idx);
 }
 
