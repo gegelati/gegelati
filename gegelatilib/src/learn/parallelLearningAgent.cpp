@@ -95,80 +95,88 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex,
     bool useMainEnvironment)
 {
+    try {
 
-    // Clone learningEnvironment
-    LearningEnvironment* privateLearningEnvironment =
-        useMainEnvironment ? &this->learningEnvironment
-                           : this->learningEnvironment.clone();
+        // Clone learningEnvironment
+        LearningEnvironment* privateLearningEnvironment =
+            useMainEnvironment ? &this->learningEnvironment
+                               : this->learningEnvironment.clone();
 
-    // Create a TPGExecutionEngine
-    Environment privateEnv(this->env.getInstructionSet(), params,
-                           privateLearningEnvironment->getDataSources(),
-                           (privateLearningEnvironment->isDiscrete())
-                               ? 0
-                               : privateLearningEnvironment->getNbActions());
-    std::unique_ptr<TPG::TPGExecutionEngine> tee =
-        this->tpg->getFactory().createTPGExecutionEngine(privateEnv, NULL);
+        // Create a TPGExecutionEngine
+        Environment privateEnv(
+            this->env.getInstructionSet(), params,
+            privateLearningEnvironment->getDataSources(),
+            (privateLearningEnvironment->isDiscrete())
+                ? 0
+                : privateLearningEnvironment->getNbActions());
+        std::unique_ptr<TPG::TPGExecutionEngine> tee =
+            this->tpg->getFactory().createTPGExecutionEngine(privateEnv, NULL);
 
-    int i = 0;
-    // Pop a job
-    while (!jobsToProcess.empty()) { // Thread safe access to size
-        i++;
-        bool doProcess = false;
-        std::shared_ptr<Learn::Job> jobToProcess;
-        { // Mutuel exclusion zone
-            std::lock_guard<std::mutex> lock(rootsToProcessMutex);
-            if (!jobsToProcess.empty()) { // Additional verification after lock
-                jobToProcess = jobsToProcess.front();
-                jobsToProcess.pop();
-                doProcess = true;
-            }
-        } // End of mutual exclusion zone
+        int i = 0;
+        // Pop a job
+        while (!jobsToProcess.empty()) { // Thread safe access to size
+            i++;
+            bool doProcess = false;
+            std::shared_ptr<Learn::Job> jobToProcess;
+            { // Mutuel exclusion zone
+                std::lock_guard<std::mutex> lock(rootsToProcessMutex);
+                if (!jobsToProcess
+                         .empty()) { // Additional verification after lock
+                    jobToProcess = jobsToProcess.front();
+                    jobsToProcess.pop();
+                    doProcess = true;
+                }
+            } // End of mutual exclusion zone
 
-        // Processing to do?
-        if (doProcess) {
-            doProcess = false;
-            // Dedicated archive for the root
-            Archive* temporaryArchive = NULL;
-            if (mode == LearningMode::TRAINING) {
-                temporaryArchive =
-                    new Archive(params.archiveSize, params.archivingProbability,
-                                jobToProcess->getArchiveSeed());
-            }
-            tee->setArchive(temporaryArchive);
+            // Processing to do?
+            if (doProcess) {
+                doProcess = false;
+                // Dedicated archive for the root
+                Archive* temporaryArchive = NULL;
+                if (mode == LearningMode::TRAINING) {
+                    temporaryArchive = new Archive(
+                        params.archiveSize, params.archivingProbability,
+                        jobToProcess->getArchiveSeed());
+                }
+                tee->setArchive(temporaryArchive);
 
-            std::shared_ptr<EvaluationResult> avgScore =
-                this->evaluateJob(*tee, *jobToProcess, generationNumber, mode,
-                                  *privateLearningEnvironment);
+                std::shared_ptr<EvaluationResult> avgScore =
+                    this->evaluateJob(*tee, *jobToProcess, generationNumber,
+                                      mode, *privateLearningEnvironment);
 
-            { // Store result Mutual exclusion zone
-                std::lock_guard<std::mutex> lock(resultsPerRootMapMutex);
-                resultsPerRootMap.emplace(
-                    jobToProcess->getIdx(),
-                    std::make_pair(avgScore, jobToProcess));
-            }
+                { // Store result Mutual exclusion zone
+                    std::lock_guard<std::mutex> lock(resultsPerRootMapMutex);
+                    resultsPerRootMap.emplace(
+                        jobToProcess->getIdx(),
+                        std::make_pair(avgScore, jobToProcess));
+                }
 
-            if (mode == LearningMode::TRAINING) {
-                { // Insertion archiveMap update mutual exclusion zone
-                    std::lock_guard<std::mutex> lock(archiveMapMutex);
-                    archiveMap.insert(
-                        {jobToProcess->getIdx(), temporaryArchive});
+                if (mode == LearningMode::TRAINING) {
+                    { // Insertion archiveMap update mutual exclusion zone
+                        std::lock_guard<std::mutex> lock(archiveMapMutex);
+                        archiveMap.insert(
+                            {jobToProcess->getIdx(), temporaryArchive});
+                    }
                 }
             }
         }
-    }
 
-    // Clean up
-    if (!useMainEnvironment) {
-        delete privateLearningEnvironment;
+        // Clean up
+        if (!useMainEnvironment) {
+            delete privateLearningEnvironment;
+        }
+    }
+    catch (const std::exception& ex) {
+        std::cerr << ex.what() << std::endl;
+        exit(EXIT_FAILURE);
     }
 }
 
 void Learn::ParallelLearningAgent::mergeArchiveMap(
     std::map<uint64_t, Archive*>& archiveMap)
 {
-    // Scan the archives backward, starting from the last to identify the
-    // last params.archiveSize recordings to keep (or less).
+    // Scan the archives backward, starting from the last to identify
+    // the last params.archiveSize recordings to keep (or less).
     auto reverseIterator = archiveMap.rbegin();
 
     uint64_t nbRecordings = 0;
@@ -239,8 +247,8 @@ void Learn::ParallelLearningAgent::evaluateAllRootsInParallelExecute(
     std::map<uint64_t, Archive*>& archiveMap)
 {
     // Create and fill the queue for distributing work among threads
-    // each root is associated to its number in the list for enabling the
-    // determinism of stochastic archive storage.
+    // each root is associated to its number in the list for enabling
+    // the determinism of stochastic archive storage.
     auto jobsToProcess = makeJobs(mode);
 
     // Create mutexes
