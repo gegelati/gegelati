@@ -42,6 +42,7 @@
 #include <memory>
 #include <typeinfo>
 #include <vector>
+#include <cstdint>
 
 #include "data/untypedSharedPtr.h"
 
