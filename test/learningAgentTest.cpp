@@ -1069,6 +1069,25 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
            "TPGGraph.";
 }
 
+TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelWithException)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 10;
+    params.nbThreads = 4;
+
+    le.setThrowExceptionForTests(true);
+    Learn::ParallelLearningAgent pla(le, set, params);
+
+    pla.init();
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        result;
+    ASSERT_DEATH(pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING), ".*")
+        << "Evaluation from a root failed.";
+}
+
 TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 {
     // Check that parallel execution leads to the exact same results as
