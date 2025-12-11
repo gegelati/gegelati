@@ -66,12 +66,15 @@ class StickGameWithOpponent : public Learn::LearningEnvironment
     /// Randomness control
     Mutator::RNG rng;
 
+    /// Throw Exception for tests
+    bool throwExceptionForTests;
+
   public:
     /**
      * Constructor.
      */
     StickGameWithOpponent()
-        : LearningEnvironment(3), remainingSticks(1), hints(3), win{false}
+        : LearningEnvironment(3), remainingSticks(1), hints(3), win{false}, throwExceptionForTests{false}
     {
         this->reset(0);
         // Set hints
@@ -109,6 +112,12 @@ class StickGameWithOpponent : public Learn::LearningEnvironment
 
     // Inherited via LearningEnvironment
     virtual bool isTerminal() const override;
+
+    /// @brief Set whether to throw an exception for tests/debugging.
+    ///
+    /// The exception is thrown at the beginning of doAction().
+    /// @param val 
+    void setThrowExceptionForTests(bool val);
 };
 
 #endif
