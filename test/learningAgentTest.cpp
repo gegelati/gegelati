@@ -1084,9 +1084,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelWithException)
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   const TPG::TPGVertex*>
         result;
-        ASSERT_DEATH(pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING), ".*")
+    ASSERT_DEATH(pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING), ".*")
         << "Evaluation from a root failed.";
-    
 }
 
 TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)

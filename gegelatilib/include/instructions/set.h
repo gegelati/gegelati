@@ -39,8 +39,8 @@
 #ifndef SET_H
 #define SET_H
 
-#include <functional>
 #include <cstdint>
+#include <functional>
 
 #include "instructions/instruction.h"
 

@@ -38,11 +38,11 @@
 #ifndef DATA_HANDLER_H
 #define DATA_HANDLER_H
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <typeinfo>
 #include <vector>
-#include <cstdint>
 
 #include "data/untypedSharedPtr.h"
 

@@ -74,7 +74,8 @@ class StickGameWithOpponent : public Learn::LearningEnvironment
      * Constructor.
      */
     StickGameWithOpponent()
-        : LearningEnvironment(3), remainingSticks(1), hints(3), win{false}, throwExceptionForTests{false}
+        : LearningEnvironment(3), remainingSticks(1), hints(3), win{false},
+          throwExceptionForTests{false}
     {
         this->reset(0);
         // Set hints
@@ -116,7 +117,7 @@ class StickGameWithOpponent : public Learn::LearningEnvironment
     /// @brief Set whether to throw an exception for tests/debugging.
     ///
     /// The exception is thrown at the beginning of doAction().
-    /// @param val 
+    /// @param val
     void setThrowExceptionForTests(bool val);
 };
 
