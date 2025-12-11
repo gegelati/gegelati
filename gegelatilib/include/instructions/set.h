@@ -40,6 +40,7 @@
 #define SET_H
 
 #include <functional>
+#include <cstdint>
 
 #include "instructions/instruction.h"
 
