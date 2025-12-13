@@ -43,7 +43,6 @@
 #include <thread>
 
 #include "instructions/set.h"
-#include "evoGraph/oldExecutionEngine.h"
 
 #include "learn/evaluationResult.h"
 #include "learn/job.h"
@@ -66,12 +65,14 @@ namespace Learn {
     {
       protected:
         /**
-         * \brief Method for evaluating all agents with parallelism.
+         * \brief Method for evaluating agents with parallelism.
          *
          * The work is delegated in two distinct methods (this structure is
-         * made for inheritance purpose) : evaluateAllAgentsInParallelExecute and
-         * evaluateAllAgentsInParallelCompileResults.
+         * made for inheritance purpose) : evaluateAgentsInParallelExecute and
+         * evaluateAgentsInParallelCompileResults.
          *
+         * \param[in] jobsToProcess Ordered list of jobs of
+         * Agents to process
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
@@ -79,8 +80,8 @@ namespace Learn {
          * \param[in] results Map to store the resulting score of
          * evaluated agents.
          */
-        virtual void evaluateAllAgentsInParallel(
-            uint64_t generationNumber, LearningMode mode,
+        virtual void evaluateAgentsInParallel(
+            std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::multimap<std::shared_ptr<EvaluationResult>,
                           std::shared_ptr<const Algorithm::Agent>>& results);
 
@@ -88,18 +89,20 @@ namespace Learn {
          * \brief Subfunction of evaluateAllAgentsInParallel which handles the
          * creation of threads, their execution and junction.
          *
-         * @param[in] generationNumber the integer number of the current
+         * \param[in] jobsToProcess Ordered list of jobs of
+         * Agents to process
+         * \param[in] generationNumber the integer number of the current
          * generation.
-         * @param[in] mode the LearningMode to use during the policy
+         * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         * @param[out] resultsPerJobMap map linking the job number with its
+         * \param[out] resultsPerJobMap map linking the job number with its
          * results and itself.
-         * @param[out] archiveMap map linking the job number with its gathered
+         * \param[out] archiveMap map linking the job number with its gathered
          * archive. These archive swill later be merged with the ones of the
          * other jobs.
          */
-        virtual void evaluateAllAgentsInParallelExecute(
-            uint64_t generationNumber, LearningMode mode,
+        virtual void evaluateAgentsInParallelExecute(
+            std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Job>>>&
                 resultsPerJobMap,
@@ -120,7 +123,7 @@ namespace Learn {
          * gathered archive. These archive swill later be merged with the ones
          * of the other jobs.
          */
-        virtual void evaluateAllAgentsInParallelCompileResults(
+        virtual void evaluateAgentsInParallelCompileResults(
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Job>>>&
                 resultsPerJobMap,
@@ -225,25 +228,23 @@ namespace Learn {
         };
 
         /**
-         * \brief Evaluate all agent Vertex of the Graph.
+         * \brief Evaluate all agent of an algorithm.
          *
          * **Replaces the function from the base class LearningAgent.**
          *
-         * This method must always the same results as the evaluateAllAgents for
+         * This method must always return the same results as the evaluateOneAlgorithmAgents for
          * a sequential execution. The Archive should also be updated in the
          * exact same manner.
-         *
-         * This method calls the evaluateJob method for every agent Vertex
-         * of the Graph. The method returns a sorted map associating each
-         * agent vertex to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
+         * \param[in] algorithm the algorithm to evaluate.
+         * 
          */
         std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
-        evaluateAllAgents(uint64_t generationNumber, LearningMode mode) override;
+        evaluateOneAlgorithmAgents(uint64_t generationNumber, LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm) override;
     };
 } // namespace Learn
 #endif

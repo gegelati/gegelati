@@ -22,7 +22,7 @@ const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::TPG::TPGMa
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
-    const EvoGraph::Vertex& vertex = graph->addNewTeam();
+    std::shared_ptr<const EvoGraph::Team> vertex = graph->addNewTeam();
     this->agents.insert(std::make_shared<TPGAgent>(vertex, this->getAlgorithmName()));
     return *this->agents.rbegin();
 }
@@ -33,8 +33,7 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(st
         throw std::runtime_error("TPGManager::copyAgent: trying to copy an agent that is not managed by this manager.");
     }
 
-    auto clonedVertex = graph->cloneVertex(
-        dynamic_cast<const TPGAgent&>(*agent).getVertex());
+    auto clonedVertex = graph->cloneVertex(*std::dynamic_pointer_cast<const TPGAgent>(agent)->getVertex());
     this->agents.insert(std::make_shared<TPGAgent>(clonedVertex, this->getAlgorithmName()));
     return *this->agents.rbegin();
 }
@@ -47,7 +46,7 @@ void Algorithm::TPG::TPGManager::deleteAgent(std::shared_ptr<const Agent> agent,
 
     // Do not remove action agents from the graph
     auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(agent);
-    graph->removeVertex(tpgAgent->getVertex());
+    graph->removeVertex(*tpgAgent->getVertex());
 
     auto iterator = this->agents.find(agent);
     this->agents.erase(iterator);   

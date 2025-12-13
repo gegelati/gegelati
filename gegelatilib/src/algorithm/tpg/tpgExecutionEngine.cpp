@@ -29,19 +29,19 @@ double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& ed
     return result;
 }
 
-const EvoGraph::Edge& Algorithm::TPG::TPGExecutionEngine::evaluateTeam(const EvoGraph::Team& team)
+std::shared_ptr<const EvoGraph::Edge> Algorithm::TPG::TPGExecutionEngine::evaluateTeam(const EvoGraph::Team& team)
 {
     // Copy outgoing edge list
-    const std::list<EvoGraph::Edge*>& outgoingEdges = team.getOutgoingEdges();
+    const auto& outgoingEdges = team.getOutgoingEdges();
 
     // Evaluate all Edge
     // First
-    EvoGraph::Edge* bestEdge = *outgoingEdges.begin();
+    std::shared_ptr<const EvoGraph::Edge> bestEdge = *outgoingEdges.begin();
     double bestBid = this->evaluateEdge(*bestEdge);
     // Others
     for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
          iter++) {
-        EvoGraph::Edge* edge = *iter;
+        std::shared_ptr<const EvoGraph::Edge> edge = *iter;
         double bid = this->evaluateEdge(*edge);
         if (bid >= bestBid) {
             bestEdge = edge;
@@ -51,7 +51,7 @@ const EvoGraph::Edge& Algorithm::TPG::TPGExecutionEngine::evaluateTeam(const Evo
         }
     }
 
-    return *bestEdge;
+    return bestEdge;
 }
 
 
@@ -61,15 +61,15 @@ std::vector<double> Algorithm::TPG::TPGExecutionEngine::execute()
     if(tpgAgent == nullptr){
         throw std::runtime_error("Algorithm::TPG::TPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
     }
-    const EvoGraph::Vertex* currentVertex = &tpgAgent->getVertex();
-    const EvoGraph::Edge* edge = nullptr;
+    std::shared_ptr<const EvoGraph::Vertex> currentVertex = tpgAgent->getVertex();
+    std::shared_ptr<const EvoGraph::Edge> edge = nullptr;
 
-    std::vector<const EvoGraph::Vertex*> visitedVertices;
+    std::vector<std::shared_ptr<const EvoGraph::Vertex>> visitedVertices;
     visitedVertices.push_back(currentVertex);
     // Browse the TPG until a Action is reached.
-    while (dynamic_cast<const EvoGraph::Team*>(currentVertex)) {
+    while (auto teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(currentVertex)) {
         // Get the next edge
-        edge = &this->evaluateTeam(*(const EvoGraph::Team*)currentVertex);
+        edge = this->evaluateTeam(*teamVertex);
 
         // update currentVertex and backup in visitedVertex.
         if (edge->getDestination() != nullptr) {
@@ -78,6 +78,6 @@ std::vector<double> Algorithm::TPG::TPGExecutionEngine::execute()
         visitedVertices.push_back(currentVertex);
     }
 
-    std::vector<double> actionID = {(double)dynamic_cast<const EvoGraph::Action*>(currentVertex)->getActionID()};
+    std::vector<double> actionID = {(double)std::dynamic_pointer_cast<const EvoGraph::Action>(currentVertex)->getActionID()};
     return actionID;
 }

@@ -2,9 +2,9 @@
 #include "algorithm/tpg/tpgAgent.h"
 
 
-const EvoGraph::Vertex& Algorithm::TPG::TPGAgent::getVertex() const
+std::shared_ptr<const EvoGraph::Vertex> Algorithm::TPG::TPGAgent::getVertex() const
 {
-    return *this->vertex;
+    return this->vertex;
 }
 
 bool Algorithm::TPG::TPGAgent::isValid() const
@@ -12,9 +12,9 @@ bool Algorithm::TPG::TPGAgent::isValid() const
     return this->vertex->getOutgoingEdges().size() > 2;
 }
 
-void Algorithm::TPG::TPGAgent::setVertex(const EvoGraph::Vertex& newVertex)
+void Algorithm::TPG::TPGAgent::setVertex(std::shared_ptr<const EvoGraph::Vertex> newVertex)
 {
-    this->vertex = &newVertex;
+    this->vertex = newVertex;
 }
 
 bool Algorithm::TPG::TPGAgent::isRoot() const

@@ -55,6 +55,7 @@
 #include <algorithm/algorithm.h>
 #include <algorithm/mutator.h>
 #include <algorithm/agentManager.h>
+#include <algorithm/executionEngine.h>
 
 #include <algorithm/lgp/lgpAlgorithm.h>
 #include <algorithm/lgp/lgpAgent.h>
@@ -62,11 +63,13 @@
 #include <algorithm/lgp/lgpMutator.h>
 #include <algorithm/lgp/lgpLine.h>
 #include <algorithm/lgp/lgpLineMutator.h>
+#include <algorithm/lgp/lgpExecutionEngine.h>
 
 #include <algorithm/tpg/tpgAlgorithm.h>
 #include <algorithm/tpg/tpgAgent.h>
 #include <algorithm/tpg/tpgManager.h>
 #include <algorithm/tpg/tpgMutator.h>
+#include <algorithm/tpg/tpgExecutionEngine.h>
 
 
 #include <data/array2DWrapper.h>

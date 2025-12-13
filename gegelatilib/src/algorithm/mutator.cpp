@@ -15,18 +15,29 @@ std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(std::strin
     return it->second;
 }
 
+void Algorithm::Mutator::updateSpecificContext(
+    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+    const Learn::LearningParameters& params,
+    RNG::RNG& rng, size_t nbOutputs)
+{
+    this->currentContext = &selector->updateContext();
+}
+
 void Algorithm::Mutator::mutatePopulation(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
     const Learn::LearningParameters& params,
     RNG::RNG& rng, size_t nbOutputs, uint64_t maxNbThread)
 {
 
+    this->updateSpecificContext(graph, manager, selector, params, rng, nbOutputs);
     // If the graph doesn't contain any clonable teams, call the init procedure.
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
-    if (selector->updateContext().teamsClonable.size() <= 1) {
-        initRandomPopulation(graph, manager, params, rng, nbOutputs);
+    if (this->currentContext->agentsClonable.size() <= 1) {
         std::cerr<<"New population initialized during training because size was equal or below one"<<std::endl;
+        std::cout<<algorithmName<<" "<<nbOutputs<<" "<<maxNbThread<<std::endl;
+        initRandomPopulation(graph, manager, params, rng, nbOutputs);
+        this->updateSpecificContext(graph, manager, selector, params, rng, nbOutputs);
     } 
     const Selector::SelectionContext& context = selector->updateContext();
    
@@ -36,7 +47,7 @@ void Algorithm::Mutator::mutatePopulation(
     // Divide agents clonable into two subVector with half of the agents, randomly
     // selected.
     std::vector<std::shared_ptr<const Algorithm::Agent>> subAgentsClonable2;
-    for (size_t idx = 0; idx < context.actionsClonable.size() / 2; idx++) {
+    for (size_t idx = 0; idx < context.agentsClonable.size() / 2; idx++) {
         auto agent = subAgentsClonable1.at(
             rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1));
         subAgentsClonable2.push_back(agent);
@@ -49,7 +60,7 @@ void Algorithm::Mutator::mutatePopulation(
 
     
     // Create the new agents
-    uint64_t nbAgentsToReach = manager->getAgents().size() + context.nbActionsToCreate;
+    uint64_t nbAgentsToReach = manager->getAgents().size() + context.nbAgentsToCreate;
     while (manager->getAgents().size() < nbAgentsToReach) {
 
         // Clone one random offspring.
@@ -87,5 +98,5 @@ void Algorithm::Mutator::mutatePopulation(
         }
     }
 
-    selector->updateAfterPopulate();
+    selector->updateAfterPopulate(graph);
 }

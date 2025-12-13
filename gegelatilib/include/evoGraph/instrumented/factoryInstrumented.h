@@ -56,15 +56,15 @@ namespace EvoGraph {
             const Environment& env) const override;
 
         ///  Specialization of the method returning a TeamInstrumented
-        virtual std::unique_ptr<Team> createTeam() const override;
+        virtual std::shared_ptr<Team> createTeam() const override;
 
         ///  Specialization of the method returning a ActionInstrumented
-        virtual std::unique_ptr<Action> createAction(
+        virtual std::shared_ptr<Action> createAction(
             const uint64_t id) const override;
 
         ///  Specialization of the method returning a EdgeInstrumented
-        virtual std::unique_ptr<Edge> createEdge(
-            const Vertex* src, const Vertex* dest,
+        virtual std::shared_ptr<Edge> createEdge(
+            std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
             const std::shared_ptr<const Algorithm::Agent> prog) const override;
 
         ///  Specialization of the method returning a
@@ -74,11 +74,11 @@ namespace EvoGraph {
         /**
          * \brief Reset all visit and traversal counters of a Graph.
          *
-         * \param[in] tpg the Graph whose TeamInstrumented,
+         * \param[in] graph the Graph whose TeamInstrumented,
          * ActionInstrumented, and EdgeInstrumented will be reseted.The
          * Graph is const since all instrumentation counters are mutable.
          */
-        void resetGraphCounters(const EvoGraph::Graph& tpg) const;
+        void resetGraphCounters(const EvoGraph::Graph& graph) const;
 
         /**
          * \brief Removes from the Graph the vertices and edges that were
@@ -95,10 +95,10 @@ namespace EvoGraph {
          * Beware, this function may remove Action from the Graph, thus
          * making it improper for future training.
          *
-         * \param[in] tpg Reference to the Graph whose
+         * \param[in] graph Reference to the Graph whose
          * VertexInstrumentation and Edge will be removed.
          */
-        void clearUnusedGraphElements(EvoGraph::Graph& tpg) const;
+        void clearUnusedGraphElements(EvoGraph::Graph& graph) const;
     };
 } // namespace EvoGraph
 

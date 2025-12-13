@@ -32,15 +32,13 @@ namespace Selector {
             /**
              * \brief Constructor for Selector.
              *
-             * \param[in] graph shared pointer of the graph on which the
-             * selection is done.
              * \param[in] manager Manager used by the algorithm
              * \param[in] params parameters used by the
              * Selector.
              */
-            MapElitesSelector(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
+            MapElitesSelector(std::shared_ptr<Algorithm::AgentManager> manager,
                               const Learn::LearningParameters& params)
-                : Selector{graph, manager, params}
+                : Selector{manager, params}
             {
             }
 
@@ -115,12 +113,14 @@ namespace Selector {
              * \brief override of doSelection method
              *
              *
+             * \param[in] graph the Graph on which selection is performed.
              * \param[in,out] results a multimap containing agent
              * associated to their score during an evaluation.
              * \param[in] rng Random Number Generator used in the mutation
              * process.
              */
             virtual void doSelection(
+                std::shared_ptr<EvoGraph::Graph> graph,
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                               std::shared_ptr<const Algorithm::Agent>>& results,
                 RNG::RNG& rng) override;

@@ -236,7 +236,7 @@ void File::GraphDotImporter::dumpGraphHeader()
 void File::GraphDotImporter::readTeam(std::smatch& matches)
 {
     if (!this->lastLine.empty() && !matches.empty()) {
-        const auto& newTeam = this->tpg.addNewTeam();
+        const auto& newTeam = *this->tpg.addNewTeam();
 
         this->vertexID.insert(std::pair<uint64_t, const EvoGraph::Vertex*>(
             std::stoi(matches[1]), &newTeam));
@@ -273,7 +273,7 @@ void File::GraphDotImporter::readAction(std::smatch& matches)
                 currActionID = std::stoi(action_label);
             }
 
-            const auto& newAction = this->tpg.addNewAction(currActionID);
+            const auto& newAction = *this->tpg.addNewAction(currActionID);
 
             // create a new action and insert it if none was previously found
             this->actionID.insert(std::pair<uint64_t, const EvoGraph::Action*>(

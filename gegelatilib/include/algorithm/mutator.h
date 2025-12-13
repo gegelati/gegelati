@@ -30,9 +30,27 @@ namespace Algorithm {
         /// Sub-mutators for sub-algorithms
         std::map<std::string, std::shared_ptr<Mutator>> subMutators;
 
+        /// Current context update by the selector in updateSpecificContext method.
+        const Selector::SelectionContext* currentContext = nullptr;
+
     public:
 
         Mutator() {};
+
+        /**
+         * \brief Update the context used by the TPGMutator to populate the Graph.
+         * 
+         * \param[in] graph the Graph.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] selector the Selector of the learningAgent.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in] nbOutputs number of outputs that will be usable for
+         */
+        virtual void updateSpecificContext(
+            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+            const Learn::LearningParameters& params,
+            RNG::RNG& rng, size_t nbOutputs);
 
 
         /**

@@ -20,8 +20,6 @@ namespace Selector {
     class Selector
     {
       protected:
-        /// Graph on which the Vertex can be selected or deleted.
-        std::shared_ptr<EvoGraph::Graph> graph;
 
         /// Parameters for the selection
         const Learn::LearningParameters& params;
@@ -69,14 +67,12 @@ namespace Selector {
         /**
          * \brief Constructor for Selector.
          *
-         * \param[in] graph shared pointer of the graph on which the selection
-         * is done.
          * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        Selector(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<Algorithm::AgentManager> manager,
+        Selector(std::shared_ptr<Algorithm::AgentManager> manager,
                  const Learn::LearningParameters& params)
-            : graph{graph}, manager{manager}, params{params}
+            : manager{manager}, params{params}
         {
         }
 
@@ -89,11 +85,13 @@ namespace Selector {
          * The resultsPerAgent attribute is updated to remove results associated
          * to removed vertices.
          *
+         * \param[in] graph the Graph on which selection is performed.
          * \param[in,out] results a multimap containing agent Vertex
          * associated to their score during an evaluation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void doSelection(
+            std::shared_ptr<EvoGraph::Graph> graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           std::shared_ptr<const Algorithm::Agent>>& results,
             RNG::RNG& rng);
@@ -111,8 +109,10 @@ namespace Selector {
          *
          * If the Vertex referenced in the bestAgent attribute is no longer
          * a Vertex of the Graph, nothing happens.
+         * 
+         * \param[in] graph the Graph on which selection is performed.
          */
-        virtual void keepBestPolicy();
+        virtual void keepBestPolicy(std::shared_ptr<EvoGraph::Graph> graph);
 
         /**
          * \brief Update the bestAgent and resultsPerAgent attributes.
@@ -184,13 +184,6 @@ namespace Selector {
         getBestAgent() const;
 
         /**
-         * \brief Getter for the Graph built by the LearningAgent.
-         *
-         * \return Get a shared_pointer to the Graph.
-         */
-        virtual std::shared_ptr<EvoGraph::Graph> getGraph();
-
-        /**
          * \brief This method resets the previous registered scores per agent.
          *
          * Resets resultsPerAgent so that, in the next training,
@@ -221,8 +214,10 @@ namespace Selector {
          * \brief Method to call at the end of TPGMutator::populateTPG
          *
          * This method does nothing with the default selector.
+         * 
+         * \param[in] graph the Graph on which selection is performed.
          */
-        virtual void updateAfterPopulate() {
+        virtual void updateAfterPopulate(std::shared_ptr<EvoGraph::Graph> graph) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
     };

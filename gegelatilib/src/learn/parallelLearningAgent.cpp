@@ -44,24 +44,27 @@
 
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
-#include "evoGraph/oldExecutionEngine.h"
 
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
-Learn::ParallelLearningAgent::evaluateAllAgents(uint64_t generationNumber,
-                                               Learn::LearningMode mode)
+Learn::ParallelLearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumber,
+                                               Learn::LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm)
 {
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
         results;
 
     if (this->maxNbThreads <= 1 || !this->learningEnvironment.isCopyable()) {
-        results = Learn::LearningAgent::evaluateAllAgents(generationNumber, mode);
+        results = Learn::LearningAgent::evaluateOneAlgorithmAgents(generationNumber, mode, algorithm);
     }
     else {
+        // Create and fill the queue for distributing work among threads
+        // each agent is associated to its number in the list for enabling the
+        // determinism of stochastic archive storage.
+        auto jobsToProcess = makeJobs(mode, algorithm);
         // Parallel mode
-        evaluateAllAgentsInParallel(generationNumber, mode, results);
+        evaluateAgentsInParallel(jobsToProcess, generationNumber, mode, results);
     }
 
     return results;
@@ -89,8 +92,9 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                            (privateLearningEnvironment->isDiscrete())
                                ? 0
                                : privateLearningEnvironment->getNbActions());
-    std::unique_ptr<EvoGraph::OldExecutionEngine> tee =
-        this->graph->getFactory().createExecutionEngine(privateEnv, NULL);
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = jobsToProcess.front()->getAlgorithm()->createExecutionEngine();
+    /*std::unique_ptr<Algorithm::ExecutionEngine> tee =
+        this->graph->getFactory().createExecutionEngine(privateEnv, NULL);*/
 
     int i = 0;
     // Pop a job
@@ -117,10 +121,10 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                     new Archive(params.archiveSize, params.archivingProbability,
                                 jobToProcess->getArchiveSeed());
             }
-            tee->setArchive(temporaryArchive);
+            //tee->setArchive(temporaryArchive);
 
             std::shared_ptr<EvaluationResult> avgScore =
-                this->evaluateJob(*tee, *jobToProcess, generationNumber, mode,
+                this->evaluateJob(*execEngine, *jobToProcess, generationNumber, mode,
                                   *privateLearningEnvironment);
 
             { // Store result Mutual exclusion zone
@@ -196,8 +200,8 @@ void Learn::ParallelLearningAgent::mergeArchiveMap(
     }
 }
 
-void Learn::ParallelLearningAgent::evaluateAllAgentsInParallel(
-    uint64_t generationNumber, LearningMode mode,
+void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
+    std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>&
         results)
 {
@@ -208,23 +212,18 @@ void Learn::ParallelLearningAgent::evaluateAllAgentsInParallel(
              std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>
         resultsPerJobMap;
 
-    evaluateAllAgentsInParallelExecute(generationNumber, mode, resultsPerJobMap,
+    evaluateAgentsInParallelExecute(jobsToProcess, generationNumber, mode, resultsPerJobMap,
                                       archiveMap);
 
-    evaluateAllAgentsInParallelCompileResults(resultsPerJobMap, results,
+    evaluateAgentsInParallelCompileResults(resultsPerJobMap, results,
                                              archiveMap);
 }
-void Learn::ParallelLearningAgent::evaluateAllAgentsInParallelExecute(
-    uint64_t generationNumber, LearningMode mode,
+void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
+    std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Job>>>& resultsPerJobMap,
     std::map<uint64_t, Archive*>& archiveMap)
 {
-    // Create and fill the queue for distributing work among threads
-    // each agent is associated to its number in the list for enabling the
-    // determinism of stochastic archive storage.
-    auto jobsToProcess = makeJobs(mode);
-
     // Create mutexes
     std::mutex agentsToProcessMutex;
     std::mutex resultsPerAgentMutex;
@@ -252,7 +251,7 @@ void Learn::ParallelLearningAgent::evaluateAllAgentsInParallelExecute(
     }
 }
 
-void Learn::ParallelLearningAgent::evaluateAllAgentsInParallelCompileResults(
+void Learn::ParallelLearningAgent::evaluateAgentsInParallelCompileResults(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Job>>>& resultsPerJobMap,
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>&

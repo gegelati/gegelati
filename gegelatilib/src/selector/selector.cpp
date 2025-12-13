@@ -3,6 +3,7 @@
 #include "selector/selector.h"
 
 void Selector::Selector::doSelection(
+    std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::shared_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
@@ -18,7 +19,7 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::
     return std::make_shared<SelectionMetrics>();
 }
 
-void Selector::Selector::keepBestPolicy()
+void Selector::Selector::keepBestPolicy(std::shared_ptr<EvoGraph::Graph> graph)
 {
     if (this->manager->containsAgent(this->bestAgent.first)) {
         auto bestAgentVertex = this->bestAgent.first;
@@ -105,11 +106,6 @@ void Selector::Selector::forgetPreviousResults()
     this->bestAgent.second = nullptr;
 }
 
-std::shared_ptr<EvoGraph::Graph> Selector::Selector::getGraph()
-{
-    return this->graph;
-}
-
 const std::map<std::shared_ptr<const Algorithm::Agent>, std::shared_ptr<Learn::EvaluationResult>>&
 Selector::Selector::getResultsPerAgent() const
 {
@@ -118,7 +114,7 @@ Selector::Selector::getResultsPerAgent() const
 
 const Selector::SelectionContext& Selector::Selector::updateContext()
 {
-    // Get current vertex set (copy)
+    /*/ Get current vertex set (copy)
     auto vertices(graph->getVertices());
     // Get current agent teams (copy)
     auto agentVertices(graph->getRootVertices());
@@ -173,7 +169,15 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
         (int64_t)((uint64_t)(params.mutation.tpg.nbRoots *
                              (1 - params.mutation.tpg.ratioTeamsOverActions)) -
                   nbAgentActions),
-        (int64_t)0);
+        (int64_t)0);*/
+    
+
+    this->context.agentsClonable = this->manager->getAgents();
+    this->context.preExistingAgents = this->manager->getAgents();
+    
+    this->context.nbAgentsToCreate =
+        (uint64_t)(params.mutation.tpg.nbRoots) -
+        this->context.preExistingAgents.size();
 
     return context;
 }

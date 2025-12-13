@@ -19,13 +19,10 @@ namespace Selector {
     /**
      * \brief Factory method to create the appropriate Selector
      *
-     * \param[in] graph shared pointer of the Graph on which the selection is
-     * done.
      * \param[in] manager shared pointer of the manager used by the algorithm.
      * \param[in] params LearningParameters used
      */
     std::shared_ptr<Selector> selectorFactory(
-        const std::shared_ptr<EvoGraph::Graph> graph,
         const std::shared_ptr<Algorithm::AgentManager> manager,
         const Learn::LearningParameters& params);
 

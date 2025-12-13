@@ -107,6 +107,12 @@ void Algorithm::LGP::LGPAgent::setIntronValue(uint64_t index, bool isIntron)
     this->lines.at(index).second = isIntron; 
 }
 
+
+Data::ConstantHandler& Algorithm::LGP::LGPAgent::getConstantHandler()
+{
+    return this->constants;
+}
+
 const Data::ConstantHandler& Algorithm::LGP::LGPAgent::cGetConstantHandler() const
 {
     return this->constants;

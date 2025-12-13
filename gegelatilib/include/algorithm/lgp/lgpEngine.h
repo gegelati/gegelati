@@ -226,7 +226,7 @@ namespace Algorithm::LGP {
          * \throw std::out_of_range if the programCounter exceeds the number of
          * lines of the program.
          */
-        const Algorithm::LGP::LGPLine& getCurrentLine() const;
+        const LGPLine& getCurrentLine() const;
 
         /**
          * \brief Get the Instruction corresponding to the current

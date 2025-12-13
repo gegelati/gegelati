@@ -16,7 +16,7 @@ namespace Algorithm::TPG {
     protected:
 
         /// Execution engine used to execute the program of the TPG agents
-        std::shared_ptr<ExecutionEngine> programExecutionEngine;
+        std::unique_ptr<ExecutionEngine> programExecutionEngine;
 
     public:
 
@@ -39,14 +39,14 @@ namespace Algorithm::TPG {
          * 
          * \param[in] programExecutionEngine the program execution engine.
          */
-        void setProgramExecutionEngine(std::shared_ptr<ExecutionEngine> programExecutionEngine) { this->programExecutionEngine = programExecutionEngine; }
+        void setProgramExecutionEngine(std::unique_ptr<ExecutionEngine> programExecutionEngine) { this->programExecutionEngine = std::move(programExecutionEngine); }
 
         /**
          * \brief Get the program execution engine associated with the TPG agents.
          * 
          * \return the program execution engine.
          */
-        std::shared_ptr<ExecutionEngine> getProgramExecutionEngine() const { return this->programExecutionEngine; }
+        ExecutionEngine& getProgramExecutionEngine() const { return *this->programExecutionEngine; }
 
         /**
          * \brief Execute the Program associated to an Edge and returns the
@@ -79,7 +79,7 @@ namespace Algorithm::TPG {
          * \throw std::runtime_error in case the Team has no outgoing edge.
          * This should not happen in a correctly constructed Graph.
          */
-        virtual const EvoGraph::Edge& evaluateTeam(const EvoGraph::Team& team);
+        virtual std::shared_ptr<const EvoGraph::Edge> evaluateTeam(const EvoGraph::Team& team);
 
         /**
          * \brief Execute the Graph starting from the vertex pointed by the given agent.

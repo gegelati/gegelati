@@ -52,24 +52,25 @@ namespace Algorithm {
          */
         std::shared_ptr<Algorithm> getSubAlgorithm(std::string nameAlgorithm);     
 
+        /**
+         * \brief return the subAlgorithm corresponding to the name of the algorithm given.
+         * 
+         * \param[in] nameAlgorithm name of the algorithm given.
+         */
+        std::shared_ptr<const Algorithm> cGetSubAlgorithm(std::string nameAlgorithm) const;     
       public:
 
         /**
          * \brief Main Algorithm constructor.
          * 
-         * \param[in] graph graph used by the learning agent
          * \param[in] params the LearningParameters used by the Algorithm.
-         * \param[in] manager Manager of the algorithm to store and maintain agents
-         * \param[in] mutator Mutator used by the algorithm to mutate the agents
          * \param[in] nbOutputs number of outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] algorithmName name of the algorithm used.
          * 
          */
-        Algorithm(std::shared_ptr<EvoGraph::Graph> graph, const Learn::LearningParameters& params, std::shared_ptr<AgentManager> manager, std::shared_ptr<Mutator> mutator, size_t nbOutputs, std::string algorithmName)
-               : params{params}, manager{manager}, selector{Selector::selectorFactory(graph, manager, params)}, mutator{mutator}, nbOutputs{nbOutputs}, algorithmName(algorithmName) {
-                this->manager->setAlgorithmName(algorithmName);
-                this->mutator->setAlgorithmName(algorithmName);
+        Algorithm(const Learn::LearningParameters& params, size_t nbOutputs, std::string algorithmName)
+               : params{params}, nbOutputs{nbOutputs}, algorithmName(algorithmName) {
               };
 
         /**
@@ -121,8 +122,10 @@ namespace Algorithm {
          * Initialize the algorithm
          * 
          * \param[in] rng deterministic random generator
+         * \param[in] le the LearningEnvironment used by the algorithm.
+         * \param[in] graph the EvoGraph::Graph used by the algorithm.
          */
-        virtual void init(RNG::RNG& rng);
+        virtual void init(RNG::RNG& rng, Learn::LearningEnvironment& le, std::shared_ptr<EvoGraph::Graph> graph);
 
 
         /**
@@ -170,7 +173,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created execution engine.
          */
-        virtual std::shared_ptr<ExecutionEngine> createExecutionEngine() = 0;
+        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const = 0;
 
     };
 }; // namespace Algorithm

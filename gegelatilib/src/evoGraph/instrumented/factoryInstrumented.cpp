@@ -46,22 +46,22 @@ std::shared_ptr<EvoGraph::Graph> EvoGraph::TPGInstrumentedFactory::createGraph(
         env, std::make_unique<TPGInstrumentedFactory>());
 }
 
-std::unique_ptr<EvoGraph::Team> EvoGraph::TPGInstrumentedFactory::createTeam() const
+std::shared_ptr<EvoGraph::Team> EvoGraph::TPGInstrumentedFactory::createTeam() const
 {
-    return std::make_unique<TeamInstrumented>();
+    return std::make_shared<TeamInstrumented>();
 }
 
-std::unique_ptr<EvoGraph::Action> EvoGraph::TPGInstrumentedFactory::createAction(
+std::shared_ptr<EvoGraph::Action> EvoGraph::TPGInstrumentedFactory::createAction(
     const uint64_t id) const
 {
-    return std::make_unique<ActionInstrumented>(id);
+    return std::make_shared<ActionInstrumented>(id);
 }
 
-std::unique_ptr<EvoGraph::Edge> EvoGraph::TPGInstrumentedFactory::createEdge(
-    const Vertex* src, const Vertex* dest,
+std::shared_ptr<EvoGraph::Edge> EvoGraph::TPGInstrumentedFactory::createEdge(
+    std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
     const std::shared_ptr<const Algorithm::Agent> prog) const
 {
-    auto ptr = std::make_unique<EvoGraph::EdgeInstrumented>(src, dest, prog);
+    auto ptr = std::make_shared<EvoGraph::EdgeInstrumented>(src, dest, prog);
     return ptr;
 }
 
@@ -72,19 +72,19 @@ std::unique_ptr<EvoGraph::OldExecutionEngine> EvoGraph::TPGInstrumentedFactory::
 }
 
 void EvoGraph::TPGInstrumentedFactory::resetGraphCounters(
-    const EvoGraph::Graph& tpg) const
+    const EvoGraph::Graph& graph) const
 {
     // Reset all vertices
-    for (const EvoGraph::Vertex* vertex : tpg.getVertices()) {
-        const EvoGraph::VertexInstrumentation* vertexI =
-            dynamic_cast<const EvoGraph::VertexInstrumentation*>(vertex);
+    for (std::shared_ptr<const EvoGraph::Vertex> vertex : graph.getVertices()) {
+        std::shared_ptr<const EvoGraph::VertexInstrumentation> vertexI =
+            std::dynamic_pointer_cast<const EvoGraph::VertexInstrumentation>(vertex);
         if (vertexI != nullptr) {
             vertexI->reset();
         }
     }
 
     // Reset all edges
-    for (const auto& edge : tpg.getEdges()) {
+    for (const auto& edge : graph.getEdges()) {
         const EvoGraph::EdgeInstrumented* edgeI =
             dynamic_cast<const EvoGraph::EdgeInstrumented*>(edge.get());
         if (edgeI != nullptr) {
@@ -94,27 +94,27 @@ void EvoGraph::TPGInstrumentedFactory::resetGraphCounters(
 }
 
 void EvoGraph::TPGInstrumentedFactory::clearUnusedGraphElements(
-    EvoGraph::Graph& tpg) const
+    EvoGraph::Graph& graph) const
 {
     // Remove unused vertices first
     // (this will remove a few edges as a side-effect)
     // Work on a copy of vertex list as the graph is modified during the for
     // loop.
-    std::vector<const EvoGraph::Vertex*> vertices(tpg.getVertices());
-    for (const EvoGraph::Vertex* vertex : vertices) {
-        const EvoGraph::VertexInstrumentation* vertexI =
-            dynamic_cast<const EvoGraph::VertexInstrumentation*>(vertex);
+    std::vector<std::shared_ptr<const EvoGraph::Vertex>> vertices(graph.getVertices());
+    for (std::shared_ptr<const EvoGraph::Vertex> vertex : vertices) {
+        std::shared_ptr<const EvoGraph::VertexInstrumentation> vertexI =
+            std::dynamic_pointer_cast<const EvoGraph::VertexInstrumentation>(vertex);
         // If the vertex is instrumented AND was never visited
         if (vertexI != nullptr && vertexI->getNbVisits() == 0) {
             // remove it
-            tpg.removeVertex(*vertex);
+            graph.removeVertex(*vertex);
         }
     }
 
     // Remove un-traversed edges
     std::vector<const EvoGraph::Edge*> edges;
     // Copy the edge list before iteration
-    for (auto& edge : tpg.getEdges()) {
+    for (auto& edge : graph.getEdges()) {
         edges.push_back(edge.get());
     }
     // Iterate on the edge list
@@ -122,7 +122,7 @@ void EvoGraph::TPGInstrumentedFactory::clearUnusedGraphElements(
         const EvoGraph::EdgeInstrumented* edgeI =
             dynamic_cast<const EvoGraph::EdgeInstrumented*>(edge);
         if (edgeI != nullptr && edgeI->getNbTraversal() == 0) {
-            tpg.removeEdge(*edge);
+            graph.removeEdge(*edge);
         }
     }
 }

@@ -72,7 +72,7 @@ namespace EvoGraph {
          * \param[in] agentProgram the shared pointer to the Agent Program associated to the
          *            edge.
          */
-        Edge(const Vertex* src, const Vertex* dest,
+        Edge(std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
                 const std::shared_ptr<const Algorithm::Agent> agentProgram)
             : edgeID(incrementeCounter()), source{src}, destination{dest},
               program{agentProgram} {};
@@ -101,21 +101,21 @@ namespace EvoGraph {
          *
          * \return a const pointer to the source Vertex.
          */
-        const Vertex* getSource() const;
+        std::shared_ptr<const Vertex> getSource() const;
 
         /**
          * \brief Set a new source Vertex to the Edge.
          *
          * \param[in] newSource the new Vertex  to register as the source.
          */
-        void setSource(Vertex* newSource);
+        void setSource(std::shared_ptr<const Vertex> newSource);
 
         /**
          * \brief Get the destination Vertex of the Edge.
          *
          * \return a const pointer to the destination Vertex.
          */
-        virtual const Vertex* getDestination() const;
+        virtual std::shared_ptr<const Vertex> getDestination() const;
 
         /**
          * \brief Set a new destination Vertex to the Edge.
@@ -123,7 +123,7 @@ namespace EvoGraph {
          * \param[in] newDestination the new Vertex to register as the
          * destination.
          */
-        virtual void setDestination(Vertex* newDestination);
+        virtual void setDestination(std::shared_ptr<const Vertex> newDestination);
 
         /**
          * \brief Get the unique identifier of the Edge.
@@ -151,10 +151,10 @@ namespace EvoGraph {
 
       protected:
         /// Pointer to the source Vertex of this Edge
-        const Vertex* source;
+        std::shared_ptr<const Vertex> source;
 
         /// Pointer to the destination Vertex of this Edge
-        const Vertex* destination;
+        std::shared_ptr<const Vertex> destination;
 
         /// Shared pointer to the Agent to execute when evaluating the bid
         /// of this Edge.

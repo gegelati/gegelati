@@ -25,7 +25,7 @@ namespace Algorithm {
             /// Archive used by the LGPAlgorithm
             std::shared_ptr<const Archive> archive;
 
-            /// Number of outpurs of the agents
+            /// Number of outputs of the agents
             size_t nbOutputs;
 
             /**
@@ -44,16 +44,14 @@ namespace Algorithm {
 
         public:
 
-            LGPManager(): AgentManager(){};
-
             /**
-             * \brief Initialize the LGPManager.
+             * \brief LGPManager constructor.
              * 
              * \param[in] archive the Archive used by the LGPAlgorithm.
-             * \param[in] env the Environment for executing LGP 
+             * \param[in] env the Environment for executing LGP
              * \param[in] nbOutputs number of outputs of the agents.
              */
-            virtual void init(std::shared_ptr<const Archive> archive, std::shared_ptr<const Environment> env, size_t nbOutputs);
+            LGPManager(std::shared_ptr<const Archive> archive, std::shared_ptr<const Environment> env, size_t nbOutputs): AgentManager(), archive(archive), env(env), nbOutputs(nbOutputs){};
 
             /**
              * \brief Create a new LGPAgent.

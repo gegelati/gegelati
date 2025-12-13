@@ -56,7 +56,7 @@ namespace Algorithm {
         /**
          * \brief return the ID of the agent.
          */
-        virtual uint64_t getAgentIDCounter();
+        static uint64_t getAgentIDCounter();
 
         /**
          * \brief Method that return if the agent is valid for execution.

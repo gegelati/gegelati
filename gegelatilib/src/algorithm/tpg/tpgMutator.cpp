@@ -1,6 +1,71 @@
 
 #include "algorithm/tpg/tpgMutator.h"
+#include <queue>
 
+
+void Algorithm::TPG::TPGMutator::updateSpecificContext(
+    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+    const Learn::LearningParameters& params,
+    RNG::RNG& rng, size_t nbOutputs)
+{
+    // Call parent method to update currentContext
+    Algorithm::Mutator::updateSpecificContext(graph, manager, selector, params, rng, nbOutputs);
+
+    // Update pre-existing elements
+    this->preExistingTeams.clear();
+    this->preExistingActions.clear();
+    this->preExistingEdges.clear();
+
+    std::set<std::shared_ptr<const EvoGraph::Edge>, SharedLess<EvoGraph::Edge>> usableEdges;
+    std::set<std::shared_ptr<const EvoGraph::Vertex>, SharedLess<EvoGraph::Vertex>> usableVertices;
+    std::queue<std::shared_ptr<const EvoGraph::Vertex>> toVisit;
+
+    // Initialize queue with vertices from all pre-existing agents
+    for (auto agentPtr : this->currentContext->preExistingAgents) {
+        if(auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(agentPtr)) {
+            toVisit.push(tpgAgent->getVertex());
+        } else {
+            throw std::runtime_error("TPGMutator::updateSpecificContext: an agent in the current context is not a TPGAgent.");
+
+        }
+
+    }
+
+    // BFS to collect all vertices reachable from pre-existing agents
+    while (!toVisit.empty()) {
+        std::shared_ptr<const EvoGraph::Vertex> vertex = toVisit.front();
+        toVisit.pop();
+
+        // Skip if already visited
+        if (usableVertices.find(vertex) != usableVertices.end()) {
+            continue;
+        }
+        usableVertices.insert(vertex);
+
+        // Add all connected vertices to the queue
+        // Outgoing edges: vertices that this vertex points to
+        for (auto edge : vertex->getOutgoingEdges()) {
+            auto destination = edge->getDestination();
+            if (usableVertices.find(destination) == usableVertices.end()) {
+                toVisit.push(destination);
+            }
+        }
+    }
+
+    for(auto vertex: usableVertices){
+        if(auto team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex)){
+            this->preExistingTeams.push_back(team);
+        } else if (auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(vertex)){
+            this->preExistingActions.push_back(action);
+        } else {
+            throw std::runtime_error("TPGMutator::updateSpecificContext: a vertex should be either a team or an action.");
+        }
+
+        usableEdges.insert(vertex->getOutgoingEdges().begin(), vertex->getOutgoingEdges().end());
+    }
+
+    this->preExistingEdges.insert(this->preExistingEdges.end(), usableEdges.begin(), usableEdges.end());
+}
 
 void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbOutputs)
 {
@@ -22,17 +87,16 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     manager->clearAgents();
 
     // Create teams, programs and Actions
-    std::vector<const EvoGraph::Action*> actions;
-    std::vector<const EvoGraph::Vertex*> teams;
+    std::vector<std::shared_ptr<const EvoGraph::Action>> actions;
+    std::vector<std::shared_ptr<const EvoGraph::Vertex>> teams;
     std::vector<std::shared_ptr<const Agent>> programAgent;
 
 
     for (size_t idx = 0; idx < nbOutputs; idx++) {
-        actions.push_back(&(graph->addNewAction(idx)));
+        actions.push_back(graph->addNewAction(idx));
     }
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
-        auto agent = manager->createAgent(graph);
-        teams.push_back(&std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph))->getVertex());
+        teams.push_back(std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph))->getVertex());
     }
 
     // Connect each team with two distinct actions, through two distinct
@@ -53,7 +117,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
 
     // Add additional connections to TPG
     // Team-by-Team
-    for (const EvoGraph::Vertex* team : teams) {
+    for (std::shared_ptr<const EvoGraph::Vertex> team : teams) {
         // Pick a number of additional outedge
         size_t nbAdditionalEdges =
             rng.getUnsignedInt64(0, params.mutation.tpg.maxInitOutgoingEdges - 2);
@@ -73,7 +137,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
                     if (std::count_if(
                             team->getOutgoingEdges().begin(),
                             team->getOutgoingEdges().end(),
-                            [&iter, &programAgent](const EvoGraph::Edge* edge) {
+                            [&iter, &programAgent](std::shared_ptr<const EvoGraph::Edge> edge) {
                                 return edge->getProgram() ==
                                        programAgent.at(*iter);
                             }) > 0) {
@@ -112,7 +176,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGMutator::initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbOutputs)
 {
-
+    return nullptr;
 }
 
 void Algorithm::TPG::TPGMutator::crossoverAgents(
@@ -128,7 +192,7 @@ void Algorithm::TPG::TPGMutator::removeRandomEdge(std::shared_ptr<EvoGraph::Grap
                                                 RNG::RNG& rng)
 {
     // Pick an outgoing edge randomly,
-    const std::list<EvoGraph::Edge*>& pickableEdges = team.getOutgoingEdges();
+    auto pickableEdges = team.getOutgoingEdges();
 
     // Note: No need to take special care of Actions. Since cycles can not
     // appear in TPG with the current mutation process, there is no need to
@@ -137,7 +201,7 @@ void Algorithm::TPG::TPGMutator::removeRandomEdge(std::shared_ptr<EvoGraph::Grap
     // Pick a random edge
     auto iterSet = pickableEdges.begin();
     std::advance(iterSet, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
-    const EvoGraph::Edge* removedEdge = *iterSet;
+    auto removedEdge = *iterSet;
     graph->removeEdge(*removedEdge);
 }
 
@@ -149,16 +213,16 @@ void Algorithm::TPG::TPGMutator::addRandomEdge(
 {
     // Pick an edge (excluding ones from the team, edges with the team as a
     // destination and the edges that are action edges)
-    auto pickableEdges(context.preExistingEdges);
+    auto pickableEdges(this->preExistingEdges);
     // cf erase-remove idiom
     pickableEdges.erase(
         std::remove_if(pickableEdges.begin(), pickableEdges.end(),
-                       [&team](const EvoGraph::Edge* edge) -> bool {
+                       [&team](std::shared_ptr<const EvoGraph::Edge> edge) -> bool {
                            return edge == nullptr ||
-                                  dynamic_cast<const EvoGraph::ActionEdge*>(
+                                  std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(
                                       edge) != nullptr ||
-                                  edge->getSource() == &team ||
-                                  edge->getDestination() == &team;
+                                  edge->getSource().get() == &team ||
+                                  edge->getDestination().get() == &team;
                        }),
         pickableEdges.end());
 
@@ -166,24 +230,23 @@ void Algorithm::TPG::TPGMutator::addRandomEdge(
     // (This code assumes that the set of pickable edge is never empty..
     // otherwise it will throw an exception. Possible solution if needed
     // initialize an entirely new program and pick a random target.)
-    std::list<const EvoGraph::Edge*>::iterator iter = pickableEdges.begin();
+    auto iter = pickableEdges.begin();
     std::advance(iter, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
-    const EvoGraph::Edge* pickedEdge = *iter;
+    std::shared_ptr<const EvoGraph::Edge> pickedEdge = *iter;
 
     // Create new edge from team and with the same ProgramSharedPointer
     // But with the team as its source
     // throw std::runtime_error if the edge is not from the graph;
-    const EvoGraph::Edge& newEdge = graph->cloneEdge(*pickedEdge);
-    graph->setEdgeSource(newEdge, team);
+    graph->setEdgeSource(*graph->cloneEdge(*pickedEdge), team);
 }
 
 void Algorithm::TPG::TPGMutator::mutateEdgeDestination(
-    std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Edge* edge,
+    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
     const Selector::SelectionContext& context,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     // Pick an edge among preexisting vertices
-    const EvoGraph::Vertex* target = nullptr;
+    std::shared_ptr<const EvoGraph::Vertex> target = nullptr;
 
     // Should the new target be an action or a team
     bool targetAction =
@@ -194,11 +257,11 @@ void Algorithm::TPG::TPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        target = context.preExistingActions.at(rng.getUnsignedInt64(
-            0, context.preExistingActions.size() - 1));
+        target = this->preExistingActions.at(rng.getUnsignedInt64(
+            0, this->preExistingActions.size() - 1));
     } else {
-        target = context.preExistingTeams.at(
-            rng.getUnsignedInt64(0, context.preExistingTeams.size() - 1));
+        target = this->preExistingTeams.at(
+            rng.getUnsignedInt64(0, this->preExistingTeams.size() - 1));
     }
 
     // Change the target
@@ -207,7 +270,7 @@ void Algorithm::TPG::TPGMutator::mutateEdgeDestination(
 }
 
 void Algorithm::TPG::TPGMutator::mutateOutgoingEdge(
-    std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Edge* edge,
+    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
     std::shared_ptr<AgentManager> manager,
     const Selector::SelectionContext& context,
     std::vector<std::shared_ptr<const Agent>> newSubAgents,
@@ -234,17 +297,17 @@ void Algorithm::TPG::TPGMutator::mutateOutgoingEdge(
 void Algorithm::TPG::TPGMutator::mutateAgent(
     std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    const EvoGraph::Vertex& vertex = std::dynamic_pointer_cast<const TPGAgent>(agent)->getVertex();
-    const EvoGraph::Team& team = *dynamic_cast<const EvoGraph::Team*>(&vertex);
+    std::shared_ptr<const EvoGraph::Vertex> vertex = std::dynamic_pointer_cast<const TPGAgent>(agent)->getVertex();
+    std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
 
     // 1. Remove randomly selected edges
     {
         // Keep at least two edges (otherwise the team is useless)
         double proba = 1.0;
-        while (team.getOutgoingEdges().size() > 2 &&
+        while (team->getOutgoingEdges().size() > 2 &&
                proba > rng.getDouble(0.0, 1.0)) {
 
-            this->removeRandomEdge(graph, team, rng);
+            this->removeRandomEdge(graph, *team, rng);
 
             // Decrement the proba of removing another edge
             proba *= params.mutation.tpg.pEdgeDeletion;
@@ -254,10 +317,10 @@ void Algorithm::TPG::TPGMutator::mutateAgent(
     // 2. Add random duplicated edge with the team as its source
     {
         double proba = 1.0;
-        while (team.getOutgoingEdges().size() < params.mutation.tpg.maxOutgoingEdges &&
+        while (team->getOutgoingEdges().size() < params.mutation.tpg.maxOutgoingEdges &&
                proba > rng.getDouble(0.0, 1.0)) {
             // Add an edge (by duplication of an existing one)
-            this->addRandomEdge(graph, team, context, rng);
+            this->addRandomEdge(graph, *team, context, rng);
             // Decrement the proba of adding another edge
             proba *= params.mutation.tpg.pEdgeAddition;
         }
@@ -269,7 +332,7 @@ void Algorithm::TPG::TPGMutator::mutateAgent(
         do {
             // Process edge-by-edge
             // And possibly modify their target
-            for (EvoGraph::Edge* edge : team.getOutgoingEdges()) {
+            for (std::shared_ptr<const EvoGraph::Edge> edge : team->getOutgoingEdges()) {
                 // Edge->Program bid modification
                 if (rng.getDouble(0.0, 1.0) < params.mutation.tpg.pProgramMutation) {
                     // Mutate the edge

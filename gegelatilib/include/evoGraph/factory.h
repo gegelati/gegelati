@@ -87,7 +87,7 @@ namespace EvoGraph {
          *
          * This method allocates and returns a new Team.
          */
-        virtual std::unique_ptr<Team> createTeam() const;
+        virtual std::shared_ptr<Team> createTeam() const;
 
         /**
          * \brief Create a Action for a Graph.
@@ -96,29 +96,29 @@ namespace EvoGraph {
          *
          * \param[in] id integer stored as the actionID of the Action.
          */
-        virtual std::unique_ptr<Action> createAction(
+        virtual std::shared_ptr<Action> createAction(
             const uint64_t id) const;
 
         /**
          * \brief Create a Edge for a Graph.
          *
          * This method allocates and returns a new Edge.
-         * The Edge is returned as a unique_ptr.
+         * The Edge is returned as a shared_ptr.
          *
          * \param[in] src pointer to the source Vertex of the edge.
          * \param[in] dest pointer to the destination Vertex of the edge.
          * \param[in] actionProgram the shared pointer to the actionProgram associated to the
          *            edge.
          */
-        virtual std::unique_ptr<Edge> createEdge(
-            const Vertex* src, const Vertex* dest,
+        virtual std::shared_ptr<Edge> createEdge(
+            std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
             std::shared_ptr<const Algorithm::Agent> actionProgram) const;
 
         /**
          * \brief Create a ActionEdge for a Graph.
          *
          * This method allocates and returns a new ActionEdge cat into a
-         * Edge. The Edge is returned as a unique_ptr.
+         * Edge. The Edge is returned as a shared_ptr.
          *
          * \param[in] src pointer to the source Vertex of the edge. It must
          * be an action.
@@ -126,8 +126,8 @@ namespace EvoGraph {
          * the edge.
          * \param[in] actionClass of the actionEdge
          */
-        virtual std::unique_ptr<Edge> createActionEdge(
-            const Vertex* src, std::shared_ptr<const Algorithm::Agent> actionProgram,
+        virtual std::shared_ptr<Edge> createActionEdge(
+            std::shared_ptr<const Vertex> src, std::shared_ptr<const Algorithm::Agent> actionProgram,
             uint64_t actionClass) const;
 
         /**

@@ -16,6 +16,7 @@ namespace Selector {
      */
     struct SelectionContext
     {
+        /*
         /// @brief vector of pointers of const Team that are clonable by the
         /// TPGMutator to fill the new population.
         std::vector<const EvoGraph::Team*> teamsClonable;
@@ -40,7 +41,7 @@ namespace Selector {
         uint64_t nbTeamsToCreate;
 
         /// @brief number of Actions to be created by the TPGMutator
-        uint64_t nbActionsToCreate;
+        uint64_t nbActionsToCreate;*/
 
         
 

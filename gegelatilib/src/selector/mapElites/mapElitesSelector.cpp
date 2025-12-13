@@ -77,6 +77,7 @@ std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::
 }
 
 void Selector::MapElites::MapElitesSelector::doSelection(
+    std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::shared_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
@@ -153,7 +154,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
 
         if (!containAgent) {
             this->resultsPerAgent.erase(it->second);
-            this->manager->deleteAgent(it->second, this->graph);
+            this->manager->deleteAgent(it->second, graph);
             it = results.erase(it); // erase returns next iterator
         }
         else {
@@ -168,34 +169,17 @@ const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::
     Selector::Selector::updateContext();
 
     // Get all the vertices in the different archives
-    std::set<std::shared_ptr<const Algorithm::Agent>> verticesInAllArchives;
+    std::set<std::shared_ptr<const Algorithm::Agent>> agentsInAllArchives;
     for (auto& pair : this->mapEliteArchives) {
-        std::set<std::shared_ptr<const Algorithm::Agent>> verticesInArchive =
+        std::set<std::shared_ptr<const Algorithm::Agent>> agentsInArchive =
             pair.second->getVerticesInArchive();
-        verticesInAllArchives.insert(verticesInArchive.begin(),
-                                     verticesInArchive.end());
+        agentsInAllArchives.insert(agentsInArchive.begin(),
+                                     agentsInArchive.end());
     }
 
-    // Get the number of team agent and action agent.
-    size_t nbTeamsInArchives = 0;
-    size_t nbActionsInArchives = 0;
-    for (auto& vertex : verticesInAllArchives) {
-        //if (dynamic_cast<const Algorithm::Agent*>(vertex) != nullptr) {
-        //    nbTeamsInArchives++;
-        //}
-        //else {
-            nbActionsInArchives++;
-        //}
+    if(agentsInAllArchives.size() != 0){
+        this->context.nbAgentsToCreate = (uint64_t)(params.mutation.tpg.nbRoots) + agentsInAllArchives.size();
     }
-
-    // Update the number of team and archive to create, difference with 0 is to avoid empty archive or unused vertex type.
-    if(nbActionsInArchives != 0){
-        this->context.nbActionsToCreate = (uint64_t)(params.mutation.tpg.nbRoots * (1 - params.mutation.tpg.ratioTeamsOverActions));
-    }
-    if(nbTeamsInArchives != 0){
-        this->context.nbTeamsToCreate = (uint64_t)(params.mutation.tpg.nbRoots * params.mutation.tpg.ratioTeamsOverActions);
-    }
-    this->context.nbTeamsToCreate += nbTeamsInArchives;
 
     return this->context;
 }

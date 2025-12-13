@@ -22,12 +22,35 @@ namespace Algorithm::TPG {
         /// Name of the program algorithm associated with the TPG agents.
         std::string programAlgorithmName;
 
+        /// Pre-existing teams elements used for mutation operations.
+        std::vector<std::shared_ptr<const EvoGraph::Team>> preExistingTeams;
+
+        /// Pre-existing actions elements used for mutation operations.
+        std::vector<std::shared_ptr<const EvoGraph::Action>> preExistingActions;
+
+        /// Pre-existing edges used for mutation operations.
+        std::vector<std::shared_ptr<const EvoGraph::Edge>> preExistingEdges;
+
     public:
 
         TPGMutator(): Mutator() {
             isUsingCrossover = false;
         };
 
+        /**
+         * \brief Update the context used by the TPGMutator to populate the Graph.
+         * 
+         * \param[in] graph the Graph.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] selector the Selector of the learningAgent.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in] nbOutputs number of outputs that will be usable for
+         */
+        virtual void updateSpecificContext(
+            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+            const Learn::LearningParameters& params,
+            RNG::RNG& rng, size_t nbOutputs) override;
 
 
         /**
@@ -146,7 +169,7 @@ namespace Algorithm::TPG {
      * process.
      */
     void mutateEdgeDestination(std::shared_ptr<EvoGraph::Graph> graph,
-                                const EvoGraph::Edge* edge,
+                                std::shared_ptr<const EvoGraph::Edge> edge,
                                 const Selector::SelectionContext& context,
                                 const Learn::LearningParameters& params,
                                 RNG::RNG& rng);
@@ -173,7 +196,7 @@ namespace Algorithm::TPG {
      * Generator used in the mutation process.
      */
     void mutateOutgoingEdge(
-        std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Edge* edge,
+        std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
         std::shared_ptr<AgentManager> manager,
         const Selector::SelectionContext& context,
         std::vector<std::shared_ptr<const Agent>> newSubAgents,

@@ -38,9 +38,9 @@
 #include "evoGraph/action.h"
 #include <stdexcept>
 
-void EvoGraph::Action::addOutgoingEdge(Edge* edge)
+void EvoGraph::Action::addOutgoingEdge(std::shared_ptr<const Edge> edge)
 {
-    if (dynamic_cast<ActionEdge*>(edge) == nullptr) {
+    if (std::dynamic_pointer_cast<const ActionEdge>(edge) == nullptr) {
         throw std::runtime_error(
             "Cannot add an outgoing edge to an Action vertex.");
     }
@@ -52,32 +52,32 @@ void EvoGraph::Action::addOutgoingEdge(Edge* edge)
 void EvoGraph::Action::orderActionEdges()
 {
 
-    this->outgoingEdges.sort([](EvoGraph::Edge* edge1, EvoGraph::Edge* edge2) {
+    this->outgoingEdges.sort([](std::shared_ptr<const EvoGraph::Edge> edge1, std::shared_ptr<const EvoGraph::Edge> edge2) {
         // Use static_cast to convert Edge* into ActionEdge*
-        EvoGraph::ActionEdge* actionEdge1 =
-            static_cast<EvoGraph::ActionEdge*>(edge1);
-        EvoGraph::ActionEdge* actionEdge2 =
-            static_cast<EvoGraph::ActionEdge*>(edge2);
+        std::shared_ptr<const EvoGraph::ActionEdge> actionEdge1 =
+            std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge1);
+        std::shared_ptr<const EvoGraph::ActionEdge> actionEdge2 =
+            std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge2);
 
         // Compare actionClass
         return actionEdge1->getActionClass() < actionEdge2->getActionClass();
     });
 }
 
-EvoGraph::ActionEdge* EvoGraph::Action::getEdgeOfAction(uint64_t actionClass) const
+std::shared_ptr<const EvoGraph::ActionEdge> EvoGraph::Action::getEdgeOfAction(uint64_t actionClass) const
 {
 
     // Search the edge with the searched action class
     auto it = std::find_if(
         outgoingEdges.begin(), outgoingEdges.end(),
-        [actionClass](EvoGraph::Edge* edge) {
-            return static_cast<EvoGraph::ActionEdge*>(edge)->getActionClass() ==
+        [actionClass](std::shared_ptr<const EvoGraph::Edge> edge) {
+            return std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge)->getActionClass() ==
                    actionClass;
         });
 
     // If action found, return the shared pointer, else return nullptr
     if (it != outgoingEdges.end()) {
-        return (EvoGraph::ActionEdge*)(*it);
+        return std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(*it);
     }
     else {
         return nullptr;

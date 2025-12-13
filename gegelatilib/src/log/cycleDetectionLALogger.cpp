@@ -60,7 +60,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
     // Add all roots to the set of vertex to visit
     const auto tpg = this->learningAgent.getGraph();
     auto roots = tpg->getRootVertices();
-    std::copy(roots.begin(), roots.end(), std::back_inserter(lifoToVisit));
+    //std::copy(roots.begin(), roots.end(), std::back_inserter(lifoToVisit)); TODO
 
     // Iterate on the stack
     while (!lifoToVisit.empty()) {
@@ -92,7 +92,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
             for (auto edge : team->getOutgoingEdges()) {
                 // Check if the destination is in the path
                 if (std::find(currentPath.begin(), currentPath.end(),
-                              edge->getDestination()) != currentPath.end()) {
+                              edge->getDestination().get()) != currentPath.end()) {
                     // A cycle was detected !
                     *this << "A cycle was detected in the TPG.";
 
@@ -101,7 +101,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
                 }
 
                 // Put the destination on the lifo
-                lifoToVisit.push_back(edge->getDestination());
+                lifoToVisit.push_back(edge->getDestination().get());
             }
         }
     }

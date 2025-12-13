@@ -4,8 +4,8 @@
 std::shared_ptr<Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::getLGPAgentFromCst(std::shared_ptr<const Agent> agent)
 {
     auto iterator = this->agents.find(agent);
-    if(iterator != this->agents.end() && *iterator == agent){
-        throw std::invalid_argument("LGPManager::copyAgent: the given agent is not managed by this manager.");
+    if(iterator == this->agents.end() || *iterator != agent){
+        throw std::invalid_argument("LGPManager::getLGPAgentFromCst: the given agent is not managed by this manager.");
     }
 
     return std::dynamic_pointer_cast<LGPAgent>(*iterator);
@@ -15,18 +15,11 @@ std::shared_ptr<Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::getLGPAgen
 std::shared_ptr<const Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::cGetLGPAgentFromCst(std::shared_ptr<const Agent> agent) const
 {
     auto iterator = this->agents.find(agent);
-    if(iterator != this->agents.end() && *iterator == agent){
-        throw std::invalid_argument("LGPManager::copyAgent: the given agent is not managed by this manager.");
+    if(iterator == this->agents.end() || *iterator != agent){
+        throw std::invalid_argument("LGPManager::cGetLGPAgentFromCst: the given agent is not managed by this manager.");
     }
 
     return std::dynamic_pointer_cast<const LGPAgent>(*iterator);
-}
-
-void Algorithm::LGP::LGPManager::init(std::shared_ptr<const Archive> archive, std::shared_ptr<const Environment> env, size_t nbOutputs)
-{
-    this->archive = archive;
-    this->env = env;
-    this->nbOutputs = nbOutputs;
 }
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
@@ -37,6 +30,7 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
+
     auto castedAgent = this->getLGPAgentFromCst(agent);
     auto newAgent = this->getLGPAgentFromCst(this->createAgent(graph));
 

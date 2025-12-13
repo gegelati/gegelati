@@ -36,12 +36,12 @@
 
 #include "evoGraph/actionEdge.h"
 
-const EvoGraph::Vertex* EvoGraph::ActionEdge::getDestination() const
+std::shared_ptr<const EvoGraph::Vertex> EvoGraph::ActionEdge::getDestination() const
 {
     throw std::runtime_error("Action Edge cannot have a destination");
 }
 
-void EvoGraph::ActionEdge::setDestination(Vertex* newDestination)
+void EvoGraph::ActionEdge::setDestination(std::shared_ptr<const Vertex> newDestination)
 {
     throw std::runtime_error("Action Edge cannot have a destination");
 }

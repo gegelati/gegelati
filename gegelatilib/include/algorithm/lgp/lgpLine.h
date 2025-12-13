@@ -232,4 +232,6 @@ namespace Algorithm::LGP {
     };
 }; // namespace Program
 
+
+
 #endif // LGP_LINE

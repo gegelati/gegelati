@@ -9,15 +9,15 @@ void Algorithm::LGP::LGPMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPMutator::initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbActions)
 {
-    auto agent = manager->createAgent(graph);
-    auto lgpAgent = std::dynamic_pointer_cast<const LGPAgent>(agent);
-    if(lgpAgent == nullptr){
-        throw std::invalid_argument("LGPMutator::initRandomAgent: the created agent is not a LGPAgent.");
-    }
-
     auto lgpManager = std::dynamic_pointer_cast<LGPManager>(manager);
     if(lgpManager == nullptr){
         throw std::invalid_argument("LGPMutator::initRandomAgent: the given manager is not a LGPManager.");
+    }
+    auto agent = lgpManager->createAgent(graph);
+
+    auto lgpAgent = std::dynamic_pointer_cast<const LGPAgent>(agent);
+    if(lgpAgent == nullptr){
+        throw std::invalid_argument("LGPMutator::initRandomAgent: the created agent is not a LGPAgent.");
     }
 
     // insert random constants in the program

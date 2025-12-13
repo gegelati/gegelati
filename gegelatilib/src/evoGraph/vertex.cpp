@@ -59,17 +59,17 @@ void EvoGraph::Vertex::resetVertexIDCounter()
     COUNT_VERTEX_ID = 0;
 }
 
-const std::list<EvoGraph::Edge*>& EvoGraph::Vertex::getIncomingEdges() const
+const std::list<std::shared_ptr<const EvoGraph::Edge>>& EvoGraph::Vertex::getIncomingEdges() const
 {
     return this->incomingEdges;
 }
 
-const std::list<EvoGraph::Edge*>& EvoGraph::Vertex::getOutgoingEdges() const
+const std::list<std::shared_ptr<const EvoGraph::Edge>>& EvoGraph::Vertex::getOutgoingEdges() const
 {
     return this->outgoingEdges;
 }
 
-void EvoGraph::Vertex::addIncomingEdge(EvoGraph::Edge* edge)
+void EvoGraph::Vertex::addIncomingEdge(std::shared_ptr<const Edge> edge)
 {
     // Do nothing on NULL pointer
     if (edge != NULL) {
@@ -81,14 +81,14 @@ void EvoGraph::Vertex::addIncomingEdge(EvoGraph::Edge* edge)
     }
 }
 
-void EvoGraph::Vertex::removeIncomingEdge(EvoGraph::Edge* edge)
+void EvoGraph::Vertex::removeIncomingEdge(std::shared_ptr<const Edge> edge)
 {
     // No need to do special checks on the given pointer.
     // at worse, nothing happens.
     this->incomingEdges.remove(edge);
 }
 
-void EvoGraph::Vertex::addOutgoingEdge(EvoGraph::Edge* edge)
+void EvoGraph::Vertex::addOutgoingEdge(std::shared_ptr<const Edge> edge)
 {
     // Do nothing on NULL pointer
     if (edge != NULL) {
@@ -99,7 +99,7 @@ void EvoGraph::Vertex::addOutgoingEdge(EvoGraph::Edge* edge)
     }
 }
 
-void EvoGraph::Vertex::removeOutgoingEdge(EvoGraph::Edge* edge)
+void EvoGraph::Vertex::removeOutgoingEdge(std::shared_ptr<const Edge> edge)
 {
     this->outgoingEdges.remove(edge);
 }
@@ -112,12 +112,12 @@ const std::set<uint64_t>& EvoGraph::Vertex::getAssessedActions() const
 void EvoGraph::Vertex::updateAssessedActions()
 {
     assessedActions.clear();
-    for (Edge* edge : this->outgoingEdges) {
-        if (auto* actionEdge = dynamic_cast<ActionEdge*>(edge)) {
+    for (std::shared_ptr<const Edge> edge : this->outgoingEdges) {
+        if (auto actionEdge = std::dynamic_pointer_cast<const ActionEdge>(edge)) {
             // If the edge is an action edge, insert its action class
             assessedActions.insert(actionEdge->getActionClass());
         }
-        else if (edge != nullptr) {
+        else {
             // Otherwise, insert all assessed actions from the destination
             const auto& destinationActions =
                 edge->getDestination()->getAssessedActions();

@@ -83,6 +83,7 @@ void EvoGraph::OldExecutionEngine::applyActivationFunctionOnActions(
 
 double EvoGraph::OldExecutionEngine::evaluateEdge(const Edge& edge)
 {
+    return 0;
     /*
     // Get the program
     Program::Program& prog = edge.getProgram();
@@ -109,7 +110,7 @@ double EvoGraph::OldExecutionEngine::evaluateEdge(const Edge& edge)
 const EvoGraph::Edge& EvoGraph::OldExecutionEngine::evaluateTeam(const Team& team)
 {
     // Copy outgoing edge list
-    const std::list<EvoGraph::Edge*>& outgoingEdges = team.getOutgoingEdges();
+    const std::list<EvoGraph::Edge*>& outgoingEdges = {};//team.getOutgoingEdges();
 
     // Note: No need to exclude previously visited edges as the graph is now
     // assumed to be acyclic.
@@ -166,7 +167,7 @@ const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>> EvoGr
 
         // update currentVertex and backup in visitedVertex.
         if (edge->getDestination() != nullptr) {
-            currentVertex = edge->getDestination();
+            currentVertex = nullptr; //edge->getDestination();
         }
         visitedVertices.push_back(currentVertex);
     }
@@ -183,11 +184,11 @@ const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>> EvoGr
 
             if (currentVertex != nullptr) {
                 for (auto edge : currentVertex->getOutgoingEdges()) {
-                    auto actionEdge = dynamic_cast<ActionEdge*>(edge);
+                    const ActionEdge* actionEdge =  nullptr; //dynamic_cast<ActionEdge*>(edge);
 
                     // Evaluate the edge and set the action value
-                    actionsTaken[actionEdge->getActionClass()] =
-                        this->evaluateEdge(*edge);
+                    //actionsTaken[actionEdge->getActionClass()] =
+                    //    this->evaluateEdge(*edge);
                 }
             }
         }

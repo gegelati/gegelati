@@ -49,7 +49,6 @@
 #include "instructions/set.h"
 #include "log/laLogger.h"
 #include "mutator/mutationParameters.h"
-#include "evoGraph/oldExecutionEngine.h"
 #include "evoGraph/graph.h"
 
 #include "learn/classificationLearningEnvironment.h"
@@ -145,6 +144,13 @@ namespace Learn {
         virtual ~LearningAgent() = default;
 
         /**
+         * \brief Add an algorithm to the learning agent.
+         * 
+         * \param[in] algorithm the algorithm to add.
+         */
+        void addAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm);
+
+        /**
          * \brief Getter for the Graph built by the LearningAgent.
          *
          * \return Get a shared_pointer to the Graph.
@@ -206,7 +212,7 @@ namespace Learn {
          *
          * The method is const to enable potential parallel calls to it.
          *
-         * \param[in] tee The OldExecutionEngine to use.
+         * \param[in] execEngine The ExecutionEngine to use.
          * \param[in] job The job containing the root and archiveSeed for
          * the evaluation.
          * \param[in] generationNumber the integer number of the current
@@ -225,7 +231,7 @@ namespace Learn {
          * resultsPerRoot for this root (if any).
          */
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
-            EvoGraph::OldExecutionEngine& tee, const Job& job,
+            Algorithm::ExecutionEngine& execEngine, const Job& job,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
 
@@ -245,6 +251,24 @@ namespace Learn {
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
                               std::shared_ptr<const Algorithm::Agent>>
         evaluateAllAgents(uint64_t generationNumber, LearningMode mode);
+
+        /**
+         * \brief Evaluate all agents of one algorithm.
+         *
+         * This method calls the evaluateJob method for every agent
+         * of one algorithm. The method returns a sorted map associating each
+         * agent to its average score, in ascending order or score.
+         *
+         * \param[in] generationNumber the integer number of the current
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * \param[in] algorithm the algorithm to evaluate.
+         */
+        virtual std::multimap<std::shared_ptr<EvaluationResult>,
+                              std::shared_ptr<const Algorithm::Agent>>
+        evaluateOneAlgorithmAgents(uint64_t generationNumber, LearningMode mode,
+                                 std::shared_ptr<Algorithm::Algorithm> algorithm);
 
         /**
          * \brief Evaluate one agent.
@@ -320,11 +344,12 @@ namespace Learn {
          *
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
+         * \param[in] algorithm the algorithm containing the agents to make jobs from
          *
          * @return A queue containing pointers of the newly created jobs.
          */
         virtual std::queue<std::shared_ptr<Learn::Job>> makeJobs(
-            Learn::LearningMode mode);
+            Learn::LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm = nullptr);
 
         /**
          * \brief find the algorithm corresponding to the given agent.
@@ -356,6 +381,13 @@ namespace Learn {
          * \param[in] seed the seed given to the TPGMutator.
          */
         virtual void init(uint64_t seed = 0);
+
+        /**
+         * \brief Method that indicate if the learning agent contains a specific algorithm.
+         * 
+         * \param[in] algorithm the algorithm to search.
+         */
+        virtual bool containsAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm);
     };
 }; // namespace Learn
 

@@ -71,22 +71,22 @@ namespace EvoGraph {
          * \param[in] actClass actionClass of the ActionEdge
          *            edge.
          */
-        ActionEdge(const Vertex* src,
+        ActionEdge(std::shared_ptr<const Vertex> src,
                       const std::shared_ptr<const Algorithm::Agent> agentProgram,
                       uint64_t actClass)
-            : Edge{src, NULL, agentProgram}, actionClass(actClass){};
+            : Edge{src, nullptr, agentProgram}, actionClass(actClass){};
 
         /**
          * \brief Override of the tpgEdge function because there should not be
          * destination to action edge
          */
-        const Vertex* getDestination() const override;
+        std::shared_ptr<const Vertex> getDestination() const override;
 
         /**
          * \brief Override of the tpgEdge function because there should not be
          * destination to action edge
          */
-        void setDestination(Vertex* newDestination) override;
+        void setDestination(std::shared_ptr<const Vertex> newDestination) override;
 
         /**
          * \brief set a new action class

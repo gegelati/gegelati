@@ -76,22 +76,22 @@ void EvoGraph::Edge::setProgram(
     this->program = program;
 }
 
-const EvoGraph::Vertex* EvoGraph::Edge::getSource() const
+std::shared_ptr<const EvoGraph::Vertex> EvoGraph::Edge::getSource() const
 {
     return this->source;
 }
 
-void EvoGraph::Edge::setSource(Vertex* newSource)
+void EvoGraph::Edge::setSource(std::shared_ptr<const EvoGraph::Vertex> newSource)
 {
     this->source = newSource;
 }
 
-const EvoGraph::Vertex* EvoGraph::Edge::getDestination() const
+std::shared_ptr<const EvoGraph::Vertex> EvoGraph::Edge::getDestination() const
 {
     return this->destination;
 }
 
-void EvoGraph::Edge::setDestination(Vertex* newDestination)
+void EvoGraph::Edge::setDestination(std::shared_ptr<const EvoGraph::Vertex> newDestination)
 {
     this->destination = newDestination;
 }

@@ -20,19 +20,10 @@ std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::getSubManager(
 
 const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::AgentManager::getAgents() const
 {
-    std::vector<std::shared_ptr<const Algorithm::Agent>> constAgents;
-
-    // Transform each element from shared_ptr<Agent> to shared_ptr<const Agent>
-    std::transform(
+    return std::vector<std::shared_ptr<const Algorithm::Agent>>(
         this->agents.begin(),
-        this->agents.end(),
-        std::back_inserter(constAgents),
-        [](const std::shared_ptr<Algorithm::Agent>& agent) {
-            return std::const_pointer_cast<const Algorithm::Agent>(agent);
-        }
+        this->agents.end()
     );
-
-    return constAgents;
 }
 
 

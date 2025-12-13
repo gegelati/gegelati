@@ -64,11 +64,11 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
     const auto roots = graph->getRootVertices();
     uint64_t nbInferences = std::accumulate(
         roots.cbegin(), roots.cend(), (uint64_t)0,
-        [](uint64_t accu, const Vertex* vertex) {
-            const auto& rootTeam =
-                dynamic_cast<const TeamInstrumented&>(*vertex);
+        [](uint64_t accu, std::shared_ptr<const Vertex> vertex) {
+            const auto rootTeam =
+                std::dynamic_pointer_cast<const TeamInstrumented>(vertex);
             // Raise std::bad_cast if not an instrumented team
-            return accu + rootTeam.getNbVisits();
+            return accu + rootTeam->getNbVisits();
         });
 
     uint64_t nbEvaluatedTeams = 0;
@@ -81,7 +81,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
     for (auto vertex : vertices) {
 
         // Skip non-team instrumented vertices
-        if (dynamic_cast<const ActionInstrumented*>(vertex))
+        if (std::dynamic_pointer_cast<const ActionInstrumented>(vertex))
             continue;
 
         auto& team = dynamic_cast<const TeamInstrumented&>(*vertex);
@@ -89,7 +89,7 @@ void EvoGraph::ExecutionStats::analyzeInstrumentedGraph(const Graph* graph)
 
         nbEvaluatedTeams += team.getNbVisits();
 
-        for (const auto* edge : team.getOutgoingEdges()) {
+        for (const auto edge : team.getOutgoingEdges()) {
 
             auto& instruEdge = dynamic_cast<const EdgeInstrumented&>(*edge);
             // Raise std::bad_cast if not an instrumented edge
@@ -139,13 +139,13 @@ void EvoGraph::ExecutionStats::analyzeInferenceTrace(
 
             // Edges leading to a previously visited teams (including the
             // current team) are not evaluated
-            auto endSearchIt = it + 1;
+            /*auto endSearchIt = it + 1;
             if (std::find(trace.begin(), endSearchIt, edge->getDestination()) !=
                 endSearchIt)
                 continue;
 
             nbEvaluatedPrograms++;
-            /*nbExecutedLines += edge->getProgram().getNbLines();
+            nbExecutedLines += edge->getProgram().getNbLines();
 
             analyzeProgram(nbExecutionPerInstruction, edge->getProgram());*/
         }
@@ -242,7 +242,7 @@ void EvoGraph::ExecutionStats::clearInferenceTracesStats()
 void EvoGraph::ExecutionStats::writeStatsToJson(const char* filePath,
                                            bool noIndent) const
 {
-    std::map<const Vertex*, unsigned int> vertexIndexes;
+    std::map<std::shared_ptr<const Vertex>, unsigned int> vertexIndexes;
     if (this->lastAnalyzedGraph != nullptr) {
         // Store the index of each vertex in the Graph in a lookup table
         // to print the execution traces.
@@ -286,9 +286,9 @@ void EvoGraph::ExecutionStats::writeStatsToJson(const char* filePath,
     }
 
     for (const auto& p : this->distribUsedVertices) {
-        size_t idxVertex = vertexIndexes[p.first];
+        /*size_t idxVertex = vertexIndexes[p.first];
         root["ExecutionStats"]["distributionUsedVertices"]
-            [std::to_string(idxVertex)] = p.second;
+            [std::to_string(idxVertex)] = p.second;*/
     }
 
     // Trace statistics
@@ -298,8 +298,8 @@ void EvoGraph::ExecutionStats::writeStatsToJson(const char* filePath,
 
         if (this->lastAnalyzedGraph != nullptr) {
             for (int j = 0; j < stats.trace.size(); j++) {
-                root["TracesStats"][nbTrace]["trace"][j] =
-                    vertexIndexes[stats.trace[j]];
+                //root["TracesStats"][nbTrace]["trace"][j] =
+                //    vertexIndexes[stats.trace[j]];
             }
         }
 

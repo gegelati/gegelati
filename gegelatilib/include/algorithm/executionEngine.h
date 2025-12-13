@@ -24,7 +24,7 @@ namespace Algorithm {
         std::string algorithmName;
 
         /// Sub-executionEngine for sub-algorithms
-        std::map<std::string, std::shared_ptr<ExecutionEngine>> subExecutionEngines;
+        std::map<std::string, std::unique_ptr<ExecutionEngine>> subExecutionEngines;
 
 
     public:
@@ -56,22 +56,6 @@ namespace Algorithm {
          * \brief Return the current agent executed.
          */
         virtual std::shared_ptr<const Agent> getExecutedAgent() const;
-
-    
-        /**
-         * \brief Add a sub-executionEngine to the current executionEngine.
-         * 
-         * \param[in] subExecutionEngine the sub-executionEngine to add.
-         */
-        virtual void addSubExecutionEngine(std::shared_ptr<ExecutionEngine> subExecutionEngine);
-
-
-        /**
-         * \brief return the sub-executionEngine corresponding to the name of the algorithm given.
-         * 
-         * \param[in] nameAlgorithm name of the algorithm given.
-         */
-        virtual std::shared_ptr<ExecutionEngine> getSubExecutionEngine(std::string nameAlgorithm);
 
 
         /**

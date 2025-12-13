@@ -3,6 +3,7 @@
 #include "selector/tournamentSelector.h"
 
 void Selector::TournamentSelector::doSelection(
+    std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::shared_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
@@ -50,7 +51,7 @@ void Selector::TournamentSelector::doSelection(
             erasedResults.push_back(itWorst->first);
 
             // Remove the vertex from the graph as well
-            this->manager->deleteAgent(itWorst->second, this->graph);
+            this->manager->deleteAgent(itWorst->second, graph);
 
             subMap.erase(itWorst);
         }
@@ -79,6 +80,7 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
 
     const auto& verticesToDeleteRef = this->verticesToDelete;
 
+    /*
     // Erase the vertex set to be deleted to the list of pre existing vertex.
     // They are only used for being a new destination
     this->context.preExistingTeams.erase(
@@ -135,16 +137,49 @@ const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
     }
 
     this->context.nbTeamsToCreate += this->context.teamsClonable.size();
-    this->context.nbActionsToCreate += this->context.actionsClonable.size();
+    this->context.nbActionsToCreate += this->context.actionsClonable.size();*/
+
+
+    const auto& agentsToDeleteRef = this->agentsToDelete;
+
+    this->context.preExistingAgents.erase(
+        std::remove_if(
+            this->context.preExistingAgents.begin(),
+            this->context.preExistingAgents.end(),
+            [agentsToDeleteRef](const std::shared_ptr<const Algorithm::Agent> agent) -> bool {
+                return agentsToDeleteRef.find(agent) !=
+                       agentsToDeleteRef.end();
+            }),
+        this->context.preExistingAgents.end());
+
+    if (!params.selection.tournament.areElitesReproductible) {
+        // The agent not set to be deleted are not used during evolution
+        this->context.agentsClonable.erase(
+            std::remove_if(
+                this->context.agentsClonable.begin(),
+                this->context.agentsClonable.end(),
+                [agentsToDeleteRef](const std::shared_ptr<const Algorithm::Agent> agent) -> bool {
+                    return agentsToDeleteRef.find(agent) ==
+                           agentsToDeleteRef.end();
+                }),
+            this->context.agentsClonable.end());
+    }
+    else if (this->context.agentsClonable.size() > 0) {
+        this->context.nbAgentsToCreate -=
+            this->context.preExistingAgents.size();
+    }
+
+    this->context.nbAgentsToCreate += this->context.agentsClonable.size();
+
 
     return context;
 }
 
-void Selector::TournamentSelector::updateAfterPopulate()
+void Selector::TournamentSelector::updateAfterPopulate(std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Remove vertex to be deleted
     for (auto agent : this->agentsToDelete) {
-        this->manager->deleteAgent(agent, this->graph);
+        this->manager->deleteAgent(agent, graph);
     }
     this->verticesToDelete.clear();
 }

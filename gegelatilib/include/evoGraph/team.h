@@ -56,9 +56,8 @@ namespace EvoGraph {
         /**
          * \brief Specialization throwing an std::runtime_exception if a
          * ActionEdge is added to a Team.
-         *
          */
-        virtual void addOutgoingEdge(Edge* edge) override;
+        virtual void addOutgoingEdge(std::shared_ptr<const Edge> edge) override;
     };
 
 }; // namespace EvoGraph

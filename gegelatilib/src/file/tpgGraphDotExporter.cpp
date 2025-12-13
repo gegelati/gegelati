@@ -76,7 +76,7 @@ uint64_t File::GraphDotExporter::printAction(const EvoGraph::Action& action)
                 labelStream << "-"; // Add separator between actionClasses
             }
             auto actionClass =
-                dynamic_cast<const EvoGraph::ActionEdge*>(*it)->getActionClass();
+                std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(*it)->getActionClass();
             labelStream << actionClass;
         }
     }
@@ -132,11 +132,11 @@ void File::GraphDotExporter::printEdge(const EvoGraph::Edge& edge)
         }
         else {
 
-            auto* dest = edge.getDestination();
+            auto dest = edge.getDestination();
 
-            if (dest && dynamic_cast<const EvoGraph::Action*>(dest) != nullptr) {
+            if (dest && std::dynamic_pointer_cast<const EvoGraph::Action>(dest) != nullptr) {
                 uint64_t actionID = printAction(
-                    *(const EvoGraph::Action*)edge.getDestination());
+                    *std::dynamic_pointer_cast<const EvoGraph::Action>(dest) );
                 fprintf(pFile,
                         "%sT%" PRIu64 " -> P%" PRIu64 " -> A%" PRIu64 "\n",
                         this->offset.c_str(), srcID, progID, actionID);
@@ -219,16 +219,16 @@ void File::GraphDotExporter::printGraphFooter()
     // Print root actions (and keep the ids)
     auto rootVertices = tpg.getRootVertices();
     std::vector<uint64_t> rootActionIDs;
-    for (const EvoGraph::Vertex* rootVertex : rootVertices) {
-        if (dynamic_cast<const EvoGraph::Action*>(rootVertex) != nullptr) {
+    for (const auto rootVertex : rootVertices) {
+        if (auto actionRoot =  std::dynamic_pointer_cast<const EvoGraph::Action>(rootVertex)) {
             rootActionIDs.push_back(
-                this->printAction(*(const EvoGraph::Action*)rootVertex));
+                this->printAction(*actionRoot));
         }
     }
 
     // Print all action edges
     auto& edges = this->tpg.getEdges();
-    for (const std::unique_ptr<EvoGraph::Edge>& edge : edges) {
+    for (const auto edge : edges) {
         if (dynamic_cast<const EvoGraph::ActionEdge*>(edge.get()) != nullptr) {
             this->printEdge(*edge.get());
         }
@@ -237,8 +237,8 @@ void File::GraphDotExporter::printGraphFooter()
     // Rank all the roots
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
     // Team root ids
-    for (const EvoGraph::Vertex* rootVertex : rootVertices) {
-        if (dynamic_cast<const EvoGraph::Team*>(rootVertex) != nullptr) {
+    for (const auto rootVertex : rootVertices) {
+        if (dynamic_cast<const EvoGraph::Team*>(rootVertex.get()) != nullptr) {
             fprintf(pFile, "T%" PRIu64 " ", rootVertex->getVertexID());
         }
     }
@@ -259,9 +259,9 @@ void File::GraphDotExporter::print()
 
     // Print all vertices
     auto vertices = this->tpg.getVertices();
-    for (const EvoGraph::Vertex* vertex : vertices) {
-        if (dynamic_cast<const EvoGraph::Team*>(vertex) != nullptr) {
-            this->printTeam(*(const EvoGraph::Team*)vertex);
+    for (const auto vertex : vertices) {
+        if (dynamic_cast<const EvoGraph::Team*>(vertex.get()) != nullptr) {
+            this->printTeam(*(const EvoGraph::Team*)vertex.get());
         }
     }
 
@@ -274,7 +274,7 @@ void File::GraphDotExporter::print()
 
     // Print all context edges
     auto& edges = this->tpg.getEdges();
-    for (const std::unique_ptr<EvoGraph::Edge>& edge : edges) {
+    for (const auto edge : edges) {
         if (dynamic_cast<const EvoGraph::ActionEdge*>(edge.get()) == nullptr) {
             this->printEdge(*edge.get());
         }
@@ -324,12 +324,12 @@ void File::GraphDotExporter::printSubGraph(const EvoGraph::Vertex* root)
         // Edges must be printed after their destination team has been
         // written.
         for (auto edge : vertex->getOutgoingEdges()) {
-            edgesToPrint.push_back(edge);
+            edgesToPrint.push_back(edge.get());
 
             // If the edge destination is a Team, put it in the list of
             // vertex to be visited.
-            if (dynamic_cast<EvoGraph::ActionEdge*>(edge) == nullptr) {
-                const EvoGraph::Vertex* dest = edge->getDestination();
+            if (dynamic_cast<const EvoGraph::ActionEdge*>(edge.get()) == nullptr) {
+                const EvoGraph::Vertex* dest = edge->getDestination().get();
                 if (std::find(visitedVertices.begin(), visitedVertices.end(),
                               dest) == visitedVertices.end() &&
                     std::find(verticesToVisit.begin(), verticesToVisit.end(),

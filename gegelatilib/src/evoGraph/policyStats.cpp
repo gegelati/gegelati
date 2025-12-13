@@ -266,10 +266,9 @@ void EvoGraph::PolicyStats::analyzePolicy(const EvoGraph::Vertex* root)
             if (auto team = dynamic_cast<const EvoGraph::Team*>(vertex)) {
                 this->analyzeTeam(team);
                 if (this->nbUsePerTeam[team] == 1) {
-                    for (const EvoGraph::Edge* edge :
-                         vertex->getOutgoingEdges()) {
+                    for (auto edge : vertex->getOutgoingEdges()) {
                         //this->analyzeProgram(&edge->getProgram());
-                        nextStage.push_back(edge->getDestination());
+                        nextStage.push_back(edge->getDestination().get());
                     }
                 }
             }

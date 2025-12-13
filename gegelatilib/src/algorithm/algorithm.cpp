@@ -2,8 +2,16 @@
 #include "algorithm/algorithm.h"
 
 
-
 std::shared_ptr<Algorithm::Algorithm> Algorithm::Algorithm::getSubAlgorithm(std::string nameAlgorithm)
+{
+    for (auto& subAlgorithm : this->subAlgorithms) {
+        if (subAlgorithm->getAlgorithmName() == nameAlgorithm) {
+            return subAlgorithm;
+        }
+    }
+    throw std::runtime_error("No sub-algorithm with name " + nameAlgorithm + " found.");
+}
+std::shared_ptr<const Algorithm::Algorithm> Algorithm::Algorithm::cGetSubAlgorithm(std::string nameAlgorithm) const
 {
     for (auto& subAlgorithm : this->subAlgorithms) {
         if (subAlgorithm->getAlgorithmName() == nameAlgorithm) {
@@ -16,8 +24,6 @@ std::shared_ptr<Algorithm::Algorithm> Algorithm::Algorithm::getSubAlgorithm(std:
 void Algorithm::Algorithm::addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorithm)
 {
     this->subAlgorithms.push_back(subAlgorithm);
-    this->manager->addSubManager(subAlgorithm->getManager());
-    this->mutator->addSubMutator(subAlgorithm->getMutator());
 }
 
 std::shared_ptr<const Algorithm::AgentManager> Algorithm::Algorithm::getManagerCst() const
@@ -60,8 +66,28 @@ bool Algorithm::Algorithm::containsAgent(std::shared_ptr<const Agent> agent) con
     return this->manager->containsAgent(agent);
 }
 
-void Algorithm::Algorithm::init(RNG::RNG& rng)
+void Algorithm::Algorithm::init(RNG::RNG& rng, Learn::LearningEnvironment& le, std::shared_ptr<EvoGraph::Graph> graph)
 {
+
+    if(this->mutator == nullptr) {
+        throw std::runtime_error("Mutator is not initialized in Algorithm " + this->algorithmName);
+    }
+    if(this->manager == nullptr) {
+        throw std::runtime_error("Manager is not initialized in Algorithm " + this->algorithmName);
+    }
+
+    this->graph = graph;
+
+    // Set the algorithm name to the components
+    this->manager->setAlgorithmName(algorithmName);
+    this->mutator->setAlgorithmName(algorithmName);
+    this->selector = Selector::selectorFactory(this->manager, this->params);
+
+    for (auto& subAlgorithm : this->subAlgorithms) {
+        subAlgorithm->init(rng, le, graph);
+        this->manager->addSubManager(subAlgorithm->getManager());
+        this->mutator->addSubMutator(subAlgorithm->getMutator());
+
     // Initialize a random population
     this->mutator->initRandomPopulation(this->graph, this->manager, this->params, rng, this->nbOutputs);
 
@@ -69,6 +95,8 @@ void Algorithm::Algorithm::init(RNG::RNG& rng)
 
     // Clear the best agent in the selector
     this->selector->forgetPreviousResults();
+
+    }
 }
 
 void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)

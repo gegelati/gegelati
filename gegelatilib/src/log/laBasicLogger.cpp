@@ -136,14 +136,9 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
     *this << std::setw(colWidth)
           << this->learningAgent.getGraph()->getNbVertices();
 
-    auto roots = this->learningAgent.getGraph()->getRootVertices();
+    uint64_t nbTeamsR = this->learningAgent.getGraph()->getRootTeams().size();
 
-    uint64_t nbTeamsR = std::count_if(
-        roots.begin(), roots.end(), [](const EvoGraph::Vertex* root) {
-            return dynamic_cast<const EvoGraph::Team*>(root) != nullptr;
-        });
-
-    uint64_t nbActionsR = roots.size() - nbTeamsR;
+    uint64_t nbActionsR = this->learningAgent.getGraph()->getNbRootVertices() - nbTeamsR;
 
     *this << std::setw(colWidth) << nbActionsR << std::setw(colWidth)
           << nbTeamsR;

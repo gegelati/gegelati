@@ -10,6 +10,7 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::ClassificationSelector::
 }
 
 void Selector::ClassificationSelector::doSelection(
+    std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::shared_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
@@ -92,7 +93,7 @@ void Selector::ClassificationSelector::doSelection(
     // Because of potential agent actions, the preserved number of agents
     // may be higher than the given ratio.
     auto allAgents = this->manager->getAgents();
-    auto& graphRef = this->graph;
+    auto& graphRef = graph;
     auto& managerRef = this->manager;
     auto& resultsPerAgentRef = this->resultsPerAgent;
     std::for_each(
