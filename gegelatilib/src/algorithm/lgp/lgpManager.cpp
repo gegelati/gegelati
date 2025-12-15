@@ -52,10 +52,6 @@ void Algorithm::LGP::LGPManager::deleteAgent(std::shared_ptr<const Agent> agent,
     this->agents.erase(this->getLGPAgentFromCst(agent));   
 }
 
- std::shared_ptr<const Archive> Algorithm::LGP::LGPManager::getArchive() const 
-{
-    return this->archive;
-}
 
 size_t Algorithm::LGP::LGPManager::getNbOutputs() const
 {

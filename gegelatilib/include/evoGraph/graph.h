@@ -364,7 +364,7 @@ namespace EvoGraph {
          * \param[in] edge ActionEdge changed
          * \param[in] newActionClass new action class
          */
-        void setActionClassEdge(const Edge* edge, uint64_t newActionClass);
+        void setActionClassEdge(std::shared_ptr<const Edge> edge, uint64_t newActionClass);
 
         /**
          * Update the assessed actions of the current vertex, and all the

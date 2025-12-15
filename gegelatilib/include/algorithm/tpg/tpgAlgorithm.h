@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "archive.h"
 #include "algorithm/algorithm.h"
 #include "algorithm/tpg/tpgManager.h"
 #include "algorithm/tpg/tpgMutator.h"
@@ -26,6 +27,9 @@ namespace Algorithm::TPG {
             /// Name of the program algorithm associated with the TPG agents.
             std::string programAlgorithmName;
 
+            /// Archive used during the training process
+            std::shared_ptr<Archive> archive;
+
         public:
 
             /**
@@ -38,7 +42,7 @@ namespace Algorithm::TPG {
              * \param[in] algorithmName name of the algorithm used.
              */
             TPGAlgorithm(const Learn::LearningParameters& params, size_t nbOutputs, const Instructions::Set& iSet, std::string algorithmName = "TPG")
-                : Algorithm(params, nbOutputs, algorithmName) {
+                : Algorithm(params, nbOutputs, algorithmName), archive{std::make_shared<Archive>(params.archiveSize, params.archivingProbability)} {
                 this->addLGPAlgorithm(params, 1, iSet);
             };
 
@@ -59,6 +63,10 @@ namespace Algorithm::TPG {
              */
             virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) const override;
 
+            /**
+             * \brief Get the Archive used by the LGPAlgorithm.
+             */
+            std::shared_ptr<const Archive> getArchive() const;
             
             /**
              * \brief Clear all the parts of agents that are not used, such as introns for LGPs

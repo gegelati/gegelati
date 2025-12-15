@@ -31,7 +31,7 @@ namespace Algorithm {
         std::map<std::string, std::shared_ptr<Mutator>> subMutators;
 
         /// Current context update by the selector in updateSpecificContext method.
-        const Selector::SelectionContext* currentContext = nullptr;
+        Selector::SelectionContext* currentContext = nullptr;
 
     public:
 

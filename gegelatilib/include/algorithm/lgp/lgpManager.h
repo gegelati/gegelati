@@ -22,9 +22,6 @@ namespace Algorithm {
             /// Environment for executing LGP 
             std::shared_ptr<const Environment> env;
 
-            /// Archive used by the LGPAlgorithm
-            std::shared_ptr<const Archive> archive;
-
             /// Number of outputs of the agents
             size_t nbOutputs;
 
@@ -47,11 +44,10 @@ namespace Algorithm {
             /**
              * \brief LGPManager constructor.
              * 
-             * \param[in] archive the Archive used by the LGPAlgorithm.
              * \param[in] env the Environment for executing LGP
              * \param[in] nbOutputs number of outputs of the agents.
              */
-            LGPManager(std::shared_ptr<const Archive> archive, std::shared_ptr<const Environment> env, size_t nbOutputs): AgentManager(), archive(archive), env(env), nbOutputs(nbOutputs){};
+            LGPManager(std::shared_ptr<const Environment> env, size_t nbOutputs): AgentManager(), env(env), nbOutputs(nbOutputs){};
 
             /**
              * \brief Create a new LGPAgent.
@@ -81,13 +77,6 @@ namespace Algorithm {
              * \return a shared pointer to the created Agent.
              */
             virtual void deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) override;
-
-            /**
-             * \brief Get the Archive used by the LGPManager.
-             * 
-             * \return a const reference to the Archive.
-             */
-            virtual std::shared_ptr<const Archive> getArchive() const;
 
             /**
              * \brief Get the number of outputs of the agents.

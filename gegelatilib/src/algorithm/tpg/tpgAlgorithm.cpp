@@ -19,6 +19,11 @@ void Algorithm::TPG::TPGAlgorithm::addLGPAlgorithm(const Learn::LearningParamete
 }
 
 
+std::shared_ptr<const Archive> Algorithm::TPG::TPGAlgorithm::getArchive() const
+{
+    return this->archive;
+}
+
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::TPG::TPGAlgorithm::createExecutionEngine() const
 {
     auto engine = std::make_unique<TPG::TPGExecutionEngine>(this->algorithmName);

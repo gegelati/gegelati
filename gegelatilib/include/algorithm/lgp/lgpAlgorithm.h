@@ -55,10 +55,6 @@ namespace Algorithm::LGP {
              */
             std::shared_ptr<const Environment> getEnvironment() const;
 
-            /**
-             * \brief Get the Archive used by the LGPAlgorithm.
-             */
-            std::shared_ptr<const Archive> getArchive() const;
 
             
             /**

@@ -20,7 +20,7 @@ void Algorithm::Mutator::updateSpecificContext(
     const Learn::LearningParameters& params,
     RNG::RNG& rng, size_t nbOutputs)
 {
-    this->currentContext = &selector->updateContext();
+    this->currentContext = new Selector::SelectionContext(selector->updateContext());
 }
 
 void Algorithm::Mutator::mutatePopulation(
@@ -34,10 +34,7 @@ void Algorithm::Mutator::mutatePopulation(
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
     if (this->currentContext->agentsClonable.size() <= 1) {
-        std::cerr<<"New population initialized during training because size was equal or below one"<<std::endl;
-        std::cout<<algorithmName<<" "<<nbOutputs<<" "<<maxNbThread<<std::endl;
-        initRandomPopulation(graph, manager, params, rng, nbOutputs);
-        this->updateSpecificContext(graph, manager, selector, params, rng, nbOutputs);
+        throw std::runtime_error("At least two agents should survive the selection");
     } 
     const Selector::SelectionContext& context = selector->updateContext();
    

@@ -210,11 +210,11 @@ std::shared_ptr<const EvoGraph::Vertex> EvoGraph::Graph::cloneVertex(const Verte
 
     // Create a new Vertex
     // (at the end of the vertices list)
-    if (dynamic_cast<const EvoGraph::Team*>(&vertex) != nullptr) {
+    if (std::dynamic_pointer_cast<const EvoGraph::Team>(*vertexIterator) != nullptr) {
         this->addNewTeam();
     }
-    else if (dynamic_cast<const EvoGraph::Action*>(&vertex) != nullptr) {
-        this->addNewAction(((Action&)vertex).getActionID());
+    else if (auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(*vertexIterator)) {
+        this->addNewAction(action->getActionID());
     }
 
     // Get the new vertex
@@ -314,7 +314,7 @@ std::shared_ptr<const EvoGraph::Edge> EvoGraph::Graph::addNewActionEdge(
             "Attempting to add a ActionEdge with a vertex "
             "not present in the Graph.");
     }
-    else if (dynamic_cast<EvoGraph::Action*>(srcVertex->get()) == nullptr) {
+    else if (std::dynamic_pointer_cast<EvoGraph::Action>(*srcVertex) == nullptr) {
         throw std::runtime_error(
             "Attempting to add a ActionEdge with a vertex "
             "that is a team.");
@@ -355,7 +355,7 @@ void EvoGraph::Graph::removeEdge(const Edge& edge)
             "Cannot erase a edge that does not belong to the graph");
     }
 
-    if (dynamic_cast<const ActionEdge*>(iterator->get()) != nullptr) {
+    if (std::dynamic_pointer_cast<const ActionEdge>(*iterator) != nullptr) {
         return this->removeActionEdge(edge);
     }
 
@@ -364,15 +364,6 @@ void EvoGraph::Graph::removeEdge(const Edge& edge)
 
     auto destination = iterator->get()->getDestination();
     (*this->vertices.find(destination))->removeIncomingEdge(*iterator);
-
-    // If destination is an action and should became a root, it is deleted if
-    // the environment is continuous and does not use action program
-    if (env.getNbContinuousActions() > 0 &&
-        std::dynamic_pointer_cast<const EvoGraph::Action>(destination) != nullptr &&
-        destination->getIncomingEdges().size() == 0) {
-
-        this->removeVertex(*destination);
-    }
 
     // Remove the edge
     this->edges.erase(iterator);
@@ -403,9 +394,7 @@ std::shared_ptr<const EvoGraph::Edge> EvoGraph::Graph::cloneEdge(const Edge& edg
         throw std::runtime_error(
             "Cannot duplicate an Edge not belonging to the graph.");
     }
-    else if (dynamic_cast<const ActionEdge*>(iterEdge->get()) != nullptr) {
-        const EvoGraph::ActionEdge* actionEdge =
-            dynamic_cast<const ActionEdge*>(iterEdge->get());
+    else if (auto actionEdge = std::dynamic_pointer_cast<const ActionEdge>(*iterEdge)) {
         return this->addNewActionEdge(
             *actionEdge->getSource(),
             iterEdge->get()->getProgram(),
@@ -471,18 +460,18 @@ bool EvoGraph::Graph::setEdgeSource(const Edge& edge, const Vertex& newSrc)
     }
 }
 
-void EvoGraph::Graph::setActionClassEdge(const Edge* edge,
+void EvoGraph::Graph::setActionClassEdge(std::shared_ptr<const Edge> edge,
                                        uint64_t newActionClass)
 {
     auto it = this->edges.find(edge);
 
-    if (it != this->edges.end() && it->get() == edge) {
-        if (dynamic_cast<EvoGraph::ActionEdge*>(it->get()) == nullptr) {
+    if (it != this->edges.end() && *it == edge) {
+        if (std::dynamic_pointer_cast<EvoGraph::ActionEdge>(*it) == nullptr) {
             throw std::runtime_error(
                 "Trying to set an action class on a context edge");
         }
         // Found the edge, modify it as needed
-        dynamic_cast<EvoGraph::ActionEdge*>(it->get())->setActionClass(
+        std::dynamic_pointer_cast<EvoGraph::ActionEdge>(*it)->setActionClass(
             newActionClass);
     }
     else {
@@ -524,7 +513,7 @@ void EvoGraph::Graph::updateAllAssessedActions()
     // Launch update method for all actions.
     // All teams should be linked to actions, even not directly.
     for (const auto& vertex : this->vertices) {
-        if (dynamic_cast<Action*>(vertex.get()) != nullptr) {
+        if (std::dynamic_pointer_cast<Action>(vertex) != nullptr) {
             this->updateAssessedActions(vertex);
         }
     }

@@ -108,8 +108,10 @@ namespace Algorithm::LGP {
             // Cannot use insert here because it dataSourcesAndRegisters
             // requires constnessand dataSrc data are not const...
             for (auto data : env.getDataSources()) {
+                
                 dataScsConstsAndRegs.push_back(data.get());
             }
+            
         }
 
         /**

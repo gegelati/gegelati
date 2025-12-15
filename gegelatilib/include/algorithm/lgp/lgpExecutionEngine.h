@@ -108,7 +108,7 @@ namespace Algorithm::LGP {
          * generated.
          */
         LGPExecutionEngine(std::shared_ptr<const LGPAgent> executedAgent)
-            : LGPExecutionEngine(executedAgent, executedAgent->getEnvironment()->getDataSources()){};
+            : LGPEngine(executedAgent){};
 
         /**
          * \brief Execute the current line of the program.
