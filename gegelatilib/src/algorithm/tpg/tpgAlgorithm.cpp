@@ -45,7 +45,7 @@ void Algorithm::TPG::TPGAlgorithm::init(RNG::RNG& rng, Learn::LearningEnvironmen
     std::shared_ptr<TPG::TPGMutator> tpgMutator = std::dynamic_pointer_cast<TPG::TPGMutator>(this->mutator);
     tpgMutator->setProgramAlgorithmName(this->programAlgorithmName);
 
-    this->manager = std::make_shared<TPG::TPGManager>();
+    this->manager = std::make_shared<TPG::TPGManager>(this->nbOutputs);
 
     Algorithm::Algorithm::init(rng, le, graph);
 }

@@ -2,12 +2,12 @@
 #include "algorithm/lgp/lgpMutator.h"
 
 
-void Algorithm::LGP::LGPMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbActions)
+void Algorithm::LGP::LGPMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
 
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPMutator::initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbActions)
+std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPMutator::initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     auto lgpManager = std::dynamic_pointer_cast<LGPManager>(manager);
     if(lgpManager == nullptr){
@@ -86,8 +86,8 @@ void Algorithm::LGP::LGPMutator::mutateAgent(
                   lgpManager->hasIdenticalBehavior(agent, agentCopy))));
         }
         // Check for uniqueness in archive
-        auto archivedDataHandlers = lgpManager->getArchive()->getDataHandlers();
-        std::map<size_t, double> hashesAndResults;
+        //auto archivedDataHandlers = lgpManager->getArchive()->getDataHandlers();
+        //std::map<size_t, double> hashesAndResults;
         /*Program::ProgramExecutionEngine pee(*agent);
         for (std::pair<
                  size_t,
@@ -100,7 +100,7 @@ void Algorithm::LGP::LGPMutator::mutateAgent(
         }*/
 
         // If the result is not unique, do another mutation.
-        allUnique = lgpManager->getArchive()->areProgramResultsUnique(hashesAndResults);
+        //allUnique = lgpManager->getArchive()->areProgramResultsUnique(hashesAndResults);
 
         // Do not use Archive right now if the environment is continuous
         // TODO Update that

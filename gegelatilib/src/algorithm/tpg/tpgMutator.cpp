@@ -6,10 +6,10 @@
 void Algorithm::TPG::TPGMutator::updateSpecificContext(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
     const Learn::LearningParameters& params,
-    RNG::RNG& rng, size_t nbOutputs)
+    RNG::RNG& rng)
 {
     // Call parent method to update currentContext
-    Algorithm::Mutator::updateSpecificContext(graph, manager, selector, params, rng, nbOutputs);
+    Algorithm::Mutator::updateSpecificContext(graph, manager, selector, params, rng);
 
     // Update pre-existing elements
     this->preExistingTeams.clear();
@@ -97,14 +97,14 @@ void Algorithm::TPG::TPGMutator::updateSpecificContext(
 
 }
 
-void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbOutputs)
+void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
 
-    if (params.mutation.tpg.maxInitOutgoingEdges > nbOutputs) {
+    if (params.mutation.tpg.maxInitOutgoingEdges > manager->getNbOutputs()) {
         throw std::runtime_error("Maximum initial number of outgoing edges "
                                     "cannot exceed the number of outputs");
     }
-    if (nbOutputs < 2) {
+    if (manager->getNbOutputs() < 2) {
         throw std::runtime_error(
             "A TPG with a single output makes no sense.");
     }
@@ -122,7 +122,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     std::vector<std::shared_ptr<const Agent>> programAgent;
 
 
-    for (size_t idx = 0; idx < nbOutputs; idx++) {
+    for (size_t idx = 0; idx < manager->getNbOutputs(); idx++) {
         actions.push_back(graph->addNewAction(idx));
     }
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
@@ -138,10 +138,10 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
 
         // Create a program agent
-        programAgent.push_back(programMutator->initRandomAgent(graph, programManager, params, rng, 1));
+        programAgent.push_back(programMutator->initRandomAgent(graph, programManager, params, rng));
 
         // Add the edge
-        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % nbOutputs),
+        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % manager->getNbOutputs()),
                          programAgent.at(i));
     }
 
@@ -198,13 +198,13 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
             // Add the connection
             graph->addNewEdge(
                 *team,
-                *actions.at(rng.getUnsignedInt64(0, nbOutputs - 1)),
+                *actions.at(rng.getUnsignedInt64(0, manager->getNbOutputs() - 1)),
                 programAgent.at(selectedProgramIndex));
         }
     }
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGMutator::initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbOutputs)
+std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGMutator::initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     return nullptr;
 }

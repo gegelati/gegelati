@@ -73,6 +73,12 @@ Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(std::shared_ptr<
     return this->getLGPAgentFromCst(agent)->addNewLine(index);
 }
 
+Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(std::shared_ptr<const LGPAgent> agent)
+{
+    return this->getLGPAgentFromCst(agent)->addNewLine(agent->getNbLines());
+}
+
+
 
 void Algorithm::LGP::LGPManager::swapLines(std::shared_ptr<const LGPAgent> agent, size_t index1, size_t index2)
 {
@@ -100,15 +106,15 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(std::shared_ptr<const Agent
     for(size_t idx = 0; idx < this->nbOutputs; idx++) {
         usefulRegisters.insert(idx);
     }
-
-    for(size_t idxLine = lgpAgent->getNbLines() - 1; idxLine > 0; idxLine--){
-        LGPLine& currentLine = lgpAgent->getLine(idxLine);
+    
+    for(int64_t idxLine = static_cast<int64_t>(lgpAgent->getNbLines()) - 1; idxLine >= 0; idxLine--){
+        LGPLine& currentLine = lgpAgent->getLine(static_cast<size_t>(idxLine));
 
         uint64_t destinationIndex = currentLine.getDestinationIndex();
         auto destinationRegister = usefulRegisters.find(destinationIndex);
         if (destinationRegister != usefulRegisters.end()) {
             // The LGPLine is useful (i.e. not an introns)
-            lgpAgent->setIntronValue(idxLine, false);
+            lgpAgent->setIntronValue(static_cast<size_t>(idxLine), false);
             // Remove the destination register from the list of useful operands
             usefulRegisters.erase(*destinationRegister);
             // Add register operands to the list of useful registers
@@ -140,7 +146,7 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(std::shared_ptr<const Agent
             // The destination of the line is not within useful registers
             // the line does not contribute to the result of the Program
             // it is an intron.
-            lgpAgent->setIntronValue(idxLine, true);
+            lgpAgent->setIntronValue(static_cast<size_t>(idxLine), true);
             nbIntrons++;
         }
     }

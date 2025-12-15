@@ -18,7 +18,7 @@ std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(std::strin
 void Algorithm::Mutator::updateSpecificContext(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
     const Learn::LearningParameters& params,
-    RNG::RNG& rng, size_t nbOutputs)
+    RNG::RNG& rng)
 {
     this->currentContext = new Selector::SelectionContext(selector->updateContext());
 }
@@ -26,10 +26,10 @@ void Algorithm::Mutator::updateSpecificContext(
 void Algorithm::Mutator::mutatePopulation(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
     const Learn::LearningParameters& params,
-    RNG::RNG& rng, size_t nbOutputs, uint64_t maxNbThread)
+    RNG::RNG& rng, uint64_t maxNbThread)
 {
 
-    this->updateSpecificContext(graph, manager, selector, params, rng, nbOutputs);
+    this->updateSpecificContext(graph, manager, selector, params, rng);
     // If the graph doesn't contain any clonable teams, call the init procedure.
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)

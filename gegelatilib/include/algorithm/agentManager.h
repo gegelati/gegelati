@@ -33,13 +33,27 @@ namespace Algorithm {
         /// Name of the algorithm.
         std::string algorithmName;
 
+        /// Number of outputs of the agents
+        size_t nbOutputs;
+
     public:
+
+        /**
+         * Constructor for agent manager
+         * 
+         * \param[in] nbOutputs Number of outputs of the agents
+         */
+        AgentManager(size_t nbOutputs) : nbOutputs{nbOutputs} {}
 
         /**
          * \brief Get the current agents used by the algorithm.
          */
         virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const;
 
+        /**
+         * \brief Return the number of outputs of the agents.
+         */
+        virtual size_t getNbOutputs() const {return nbOutputs; };
 
         /**
          * \brief Add a sub-manager to the current manager.

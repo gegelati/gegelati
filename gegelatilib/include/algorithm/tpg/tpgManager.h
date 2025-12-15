@@ -21,8 +21,10 @@ namespace Algorithm::TPG {
 
         /**
          * \brief Main TPGManager constructor.
+         * 
+         * \param[in] nbOutputs number of outputs of the agents.
          */
-        TPGManager() : AgentManager() {};
+        TPGManager(size_t nbOutputs) : AgentManager(nbOutputs) {};
 
         /**
          * \brief Get the current agents used by the algorithm.

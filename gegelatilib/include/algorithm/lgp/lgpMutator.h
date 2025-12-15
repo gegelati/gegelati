@@ -40,10 +40,8 @@ namespace Algorithm::LGP {
          * \param[in] manager the manager to change the agents.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
-         * \param[in] nbActions number of actions that will be usable for
-         * interacting with this LearningEnviromnent.
          */
-        virtual void initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbActions) override;
+        virtual void initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief Initialize a random Agent.
@@ -52,10 +50,8 @@ namespace Algorithm::LGP {
          * \param[in] manager the manager to change the agents.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
-         * \param[in] nbOutputs number of outputs that will be usable for
-         * interacting with this LearningEnviromnent.
          */
-        virtual std::shared_ptr<const Agent> initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, size_t nbOutputs) override;
+        virtual std::shared_ptr<const Agent> initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
         
 
 

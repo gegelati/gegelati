@@ -89,9 +89,9 @@ void Algorithm::Algorithm::init(RNG::RNG& rng, Learn::LearningEnvironment& le, s
         this->mutator->addSubMutator(subAlgorithm->getMutator());
 
     // Initialize a random population
-    this->mutator->initRandomPopulation(this->graph, this->manager, this->params, rng, this->nbOutputs);
+    this->mutator->initRandomPopulation(this->graph, this->manager, this->params, rng);
 
-    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->params, rng, this->nbOutputs);
+    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->params, rng);
 
     // Clear the best agent in the selector
     this->selector->forgetPreviousResults();

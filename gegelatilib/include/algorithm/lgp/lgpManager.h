@@ -22,8 +22,6 @@ namespace Algorithm {
             /// Environment for executing LGP 
             std::shared_ptr<const Environment> env;
 
-            /// Number of outputs of the agents
-            size_t nbOutputs;
 
             /**
              * \brief Get the LGPAgent from a const Agent pointer.
@@ -47,7 +45,7 @@ namespace Algorithm {
              * \param[in] env the Environment for executing LGP
              * \param[in] nbOutputs number of outputs of the agents.
              */
-            LGPManager(std::shared_ptr<const Environment> env, size_t nbOutputs): AgentManager(), env(env), nbOutputs(nbOutputs){};
+            LGPManager(std::shared_ptr<const Environment> env, size_t nbOutputs): AgentManager(nbOutputs), env(env){};
 
             /**
              * \brief Create a new LGPAgent.
@@ -111,6 +109,15 @@ namespace Algorithm {
              * \return a reference to the newly added LGPLine.
              */
             virtual LGPLine& addNewLine(std::shared_ptr<const LGPAgent> agent, size_t index);
+            
+            /**
+             * \brief Add a new line to the given agent at the end of the agent.
+             * 
+             * \param[in] agent the Agent to modify.
+             * 
+             * \return a reference to the newly added LGPLine.
+             */
+            virtual LGPLine& addNewLine(std::shared_ptr<const LGPAgent> agent);
 
             /**
              * \brief Swap two lines of the given agent.
