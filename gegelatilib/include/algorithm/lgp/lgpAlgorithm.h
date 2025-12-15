@@ -9,8 +9,6 @@
 #include "algorithm/lgp/lgpManager.h"
 #include "algorithm/lgp/lgpMutator.h"
 #include "algorithm/lgp/lgpAgent.h"
-#include "algorithm/lgp/lgpExecutionEngine.h"
-
 namespace Algorithm::LGP {
 
     /**
@@ -62,12 +60,6 @@ namespace Algorithm::LGP {
              */
             virtual void clearUnusedAgentParts() override {};
 
-            /**
-             * \brief Create a new ExecutionEngine for this Algorithm.
-             * 
-             * \return a shared pointer to the created ExecutionEngine.
-             */
-            virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const override;
 
             
             /**

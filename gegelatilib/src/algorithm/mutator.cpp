@@ -21,12 +21,30 @@ void Algorithm::Mutator::updateSpecificContext(
     RNG::RNG& rng)
 {
     this->currentContext = new Selector::SelectionContext(selector->updateContext());
+
+    
+    // Update the context of the subMutators
+    for(auto subMutPair: this->subMutators){
+        subMutPair.second->updateSpecificContext(graph, manager, selector, params, rng);
+    }
+}
+
+std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::Mutator::mutateSubAgents(
+    std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
+    std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, uint64_t maxNbThreads)
+{
+    std::vector<std::shared_ptr<const Agent>> newSubAgents;
+    for(auto agent: agents){
+        this->getSubMutator(agent->getAlgorithmName())->mutateAgent(
+            agent, graph, manager->getSubManager(agent->getAlgorithmName()), newSubAgents, params, rng);
+    }
+    return newSubAgents;
 }
 
 void Algorithm::Mutator::mutatePopulation(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
     const Learn::LearningParameters& params,
-    RNG::RNG& rng, uint64_t maxNbThread)
+    RNG::RNG& rng, uint64_t maxNbThreads)
 {
 
     this->updateSpecificContext(graph, manager, selector, params, rng);
@@ -80,7 +98,7 @@ void Algorithm::Mutator::mutatePopulation(
             offsprings.push_back(manager->copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph));
 
             // Do the crossover over the childs
-            this->crossoverAgents(offsprings, graph, manager, context, newSubAgents, params, rng);
+            this->crossoverAgents(offsprings, graph, manager, newSubAgents, params, rng);
         }
 
         // Do the mutation over the childs
@@ -90,10 +108,16 @@ void Algorithm::Mutator::mutatePopulation(
             }
             else {
                 // Apply mutations to the root and increase the number of roots
-                this->mutateAgent(offspring, graph, manager, context, newSubAgents, params, rng);
+                this->mutateAgent(offspring, graph, manager, newSubAgents, params, rng);
             }
         }
     }
+
+    // Mutate the new subAgents, because subAgents could create subAgents, the list is updated and a while loop is done until the vector is empty.
+    while(!newSubAgents.empty()){
+        newSubAgents = this->mutateSubAgents(newSubAgents, graph, manager, params, rng, maxNbThreads);
+    }
+    
 
     selector->updateAfterPopulate(graph);
 }

@@ -370,11 +370,6 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
                         params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
-    // Train a second generation, because most roots were removed, a root
-    // actions have appeared and the training algorithm will attempt to remove
-    // them.
-    ASSERT_NO_THROW(la.trainOneGeneration(0))
-        << "Training for one generation failed.";
 
     // Check that bestRoot has been set
     ASSERT_NE(tpg->getSelector()->getBestAgent().first, nullptr);

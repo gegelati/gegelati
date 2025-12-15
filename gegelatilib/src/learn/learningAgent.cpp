@@ -212,7 +212,7 @@ Learn::LearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumber,
         results;
 
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
-        algorithm->createExecutionEngine();
+        algorithm->getManager()->createExecutionEngine();
 
     auto jobs = this->makeJobs(mode, algorithm);
     while (!jobs.empty()){
@@ -235,7 +235,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
 
     // Create the execution engine of the agent.
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
-        this->findCorrespondingAlgorithm(agent)->createExecutionEngine();
+        this->findCorrespondingAlgorithm(agent)->getManager()->createExecutionEngine();
     /*std::unique_ptr<EvoGraph::OldExecutionEngine> tee =
         this->graph->getFactory().createExecutionEngine(
             this->env,

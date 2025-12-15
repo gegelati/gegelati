@@ -4,6 +4,7 @@
 
 #include "algorithm/agentManager.h"
 #include "algorithm/tpg/tpgAgent.h"
+#include "algorithm/tpg/tpgExecutionEngine.h"
 
 namespace Algorithm::TPG {
 
@@ -17,6 +18,12 @@ namespace Algorithm::TPG {
     class TPGManager : public AgentManager
     {
 
+    protected:
+    
+
+        /// Name of the program algorithm associated with the TPG agents.
+        std::string programAlgorithmName;
+
     public:
 
         /**
@@ -25,6 +32,13 @@ namespace Algorithm::TPG {
          * \param[in] nbOutputs number of outputs of the agents.
          */
         TPGManager(size_t nbOutputs) : AgentManager(nbOutputs) {};
+
+        /**
+         * \brief Set the name of the program algorithm associated with the TPG agents.
+         * 
+         * \param[in] name the name of the program algorithm.
+         */
+        void setProgramAlgorithmName(const std::string& name) { this->programAlgorithmName = name; }
 
         /**
          * \brief Get the current agents used by the algorithm.
@@ -59,6 +73,11 @@ namespace Algorithm::TPG {
          * \return a shared pointer to the created Agent.
          */
         virtual void deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+
+        /**
+         * \brief create and return a TPG execution engine.
+         */
+        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const override;
     };
 }; // namespace Algorithm
 

@@ -92,7 +92,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                            (privateLearningEnvironment->isDiscrete())
                                ? 0
                                : privateLearningEnvironment->getNbActions());
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = jobsToProcess.front()->getAlgorithm()->createExecutionEngine();
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = jobsToProcess.front()->getAlgorithm()->getManagerCst()->createExecutionEngine();
     /*std::unique_ptr<Algorithm::ExecutionEngine> tee =
         this->graph->getFactory().createExecutionEngine(privateEnv, NULL);*/
 

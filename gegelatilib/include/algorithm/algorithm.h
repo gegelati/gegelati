@@ -12,7 +12,6 @@
 #include "learn/learningParameters.h"
 #include "evoGraph/graph.h"
 #include "selector/selectorFactory.h"
-#include "algorithm/executionEngine.h"
 namespace Algorithm {
     /**
      * \brief Abstract class representing an Algorithm.
@@ -168,12 +167,6 @@ namespace Algorithm {
          */
         virtual void clearUnusedAgentParts() = 0;
 
-        /**
-         * \brief Create the execution engine associated with the algorithm.
-         * 
-         * \return a shared pointer to the created execution engine.
-         */
-        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const = 0;
 
     };
 }; // namespace Algorithm

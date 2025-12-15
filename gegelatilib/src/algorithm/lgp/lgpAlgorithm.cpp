@@ -14,10 +14,6 @@ std::vector<double> Algorithm::LGP::LGPAlgorithm::executeAgent(std::shared_ptr<c
     return this->env;
 }
 
-std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::LGP::LGPAlgorithm::createExecutionEngine() const
-{
-    return std::make_unique<LGPExecutionEngine>(*this->env, this->algorithmName);
-}
 
 void Algorithm::LGP::LGPAlgorithm::init(RNG::RNG& rng, Learn::LearningEnvironment& le, std::shared_ptr<EvoGraph::Graph> graph)
 {

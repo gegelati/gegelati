@@ -10,7 +10,6 @@
 #include "algorithm/tpg/tpgManager.h"
 #include "algorithm/tpg/tpgMutator.h"
 #include "algorithm/tpg/tpgAgent.h"
-#include "algorithm/tpg/tpgExecutionEngine.h"
 #include "algorithm/lgp/lgpAlgorithm.h"
 
 #include "learn/learningEnvironment.h"
@@ -72,11 +71,6 @@ namespace Algorithm::TPG {
              * \brief Clear all the parts of agents that are not used, such as introns for LGPs
              */
             virtual void clearUnusedAgentParts() override {};
-
-            /**
-             * \brief create and return a TPG execution engine.
-             */
-            virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const override;
 
             /**
              * \brief Initialize the algorithm.

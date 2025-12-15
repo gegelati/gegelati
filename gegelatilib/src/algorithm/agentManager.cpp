@@ -18,6 +18,14 @@ std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::getSubManager(
     return it->second;
 }
 
+std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::cGetSubManager(std::string nameAlgorithm) const{
+    auto it = this->subManagers.find(nameAlgorithm);
+    if(it == this->subManagers.end()){
+        throw std::runtime_error("Algorithm::AgentManager::getSubManager subManager not found for the specific name");
+    }
+    return it->second;
+}
+
 const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::AgentManager::getAgents() const
 {
     return std::vector<std::shared_ptr<const Algorithm::Agent>>(

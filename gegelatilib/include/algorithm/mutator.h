@@ -123,13 +123,12 @@ namespace Algorithm {
          * \param[in,out] agents the Agent to crossover.
          * \param[in,out] graph the graph to mutate.
          * \param[in] manager the manager to change the agents.
-         * \param[in] context context from the selection algorithm.
          * \param[in] newSubAgents vector of new agents of sub algorithm created while crossing over the agents
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) = 0;
 
         /**
@@ -138,13 +137,29 @@ namespace Algorithm {
          * \param[in,out] agent the Agent to mutate.
          * \param[in,out] graph the graph to mutate.
          * \param[in] manager the manager to change the agents.
-         * \param[in] context context from the selection algorithm.
          * \param[in] newSubAgents vector of new agents of sub algorithm created while mutating the agent
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng) = 0;
+            std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng) = 0;
+
+        /**
+         * \brief mutate new sub agents of sub algorithms created during the evolution process of the current algorithm
+         * 
+         * \param[in] agents vector of new agents of sub algorithm created while mutating the agent
+         * \param[in,out] graph the graph to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in] maxNbThreads Integer parameter controlling the number of
+         * threads used for parallel execution. Possible values are:
+         *   - default:  Let the runtime decide using
+         *               std::thread::hardware_concurrency().
+         *   - `0` and `1`: Do not use parallelism.
+         *   - `n > 1`: Set the number of threads explicitly.
+         */
+        virtual std::vector<std::shared_ptr<const Agent>> mutateSubAgents(std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, uint64_t maxNbThreads);
     };
 }; // namespace Mutator
 

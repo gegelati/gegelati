@@ -51,3 +51,15 @@ void Algorithm::TPG::TPGManager::deleteAgent(std::shared_ptr<const Agent> agent,
     auto iterator = this->agents.find(agent);
     this->agents.erase(iterator);   
 }
+
+
+std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::TPG::TPGManager::createExecutionEngine() const
+{
+    auto engine = std::make_unique<TPG::TPGExecutionEngine>(this->algorithmName);
+
+    engine->setProgramExecutionEngine(
+        std::move(this->cGetSubManager(this->programAlgorithmName)->createExecutionEngine())
+    );
+
+    return engine;
+}

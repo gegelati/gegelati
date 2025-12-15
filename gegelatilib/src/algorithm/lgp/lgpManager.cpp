@@ -215,3 +215,8 @@ bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(std::shared_ptr<const Agen
     return true;
 }
 
+
+std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::LGP::LGPManager::createExecutionEngine() const
+{
+    return std::make_unique<LGPExecutionEngine>(*this->env, this->algorithmName);
+}

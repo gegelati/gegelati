@@ -9,6 +9,7 @@
 
 #include "evoGraph/graph.h"
 #include "algorithm/agent.h"
+#include "algorithm/executionEngine.h"
 #include "util/genericComparator.h"
 
 namespace Algorithm {
@@ -70,6 +71,13 @@ namespace Algorithm {
         virtual std::shared_ptr<AgentManager> getSubManager(std::string nameAlgorithm);
 
         /**
+         * \brief return the subManager corresponding to the name of the algorithm given.
+         * 
+         * \param[in] nameAlgorithm name of the algorithm given.
+         */
+        virtual std::shared_ptr<AgentManager> cGetSubManager(std::string nameAlgorithm) const;
+
+        /**
          * \brief Set the name of the algorithm.
          */
         void setAlgorithmName(std::string name) { this->algorithmName = name; }
@@ -119,6 +127,13 @@ namespace Algorithm {
          * \brief Clear all agents from the manager.
          */
         virtual void clearAgents();
+
+        /**
+         * \brief Create the execution engine associated with the algorithm.
+         * 
+         * \return a shared pointer to the created execution engine.
+         */
+        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const = 0;
     };
 }; // namespace Algorithm
 

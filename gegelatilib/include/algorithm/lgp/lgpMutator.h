@@ -61,13 +61,12 @@ namespace Algorithm::LGP {
          * \param[in,out] agents the Agent to crossover.
          * \param[in,out] graph the graph to mutate.
          * \param[in] manager the manager to change the agents.
-         * \param[in] context context from the selection algorithm.
          * \param[in] newSubAgents vector of new agents of sub algorithm created while crossing over the agents
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) override;
 
         /**
@@ -76,13 +75,12 @@ namespace Algorithm::LGP {
          * \param[in,out] agent the Agent to mutate.
          * \param[in,out] graph the graph to mutate.
          * \param[in] manager the manager to change the agents.
-         * \param[in] context context from the selection algorithm.
          * \param[in] newSubAgents vector of new agents of sub algorithm created while mutating the agent
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) override;
 
 

@@ -31,9 +31,12 @@ namespace Algorithm::TPG {
         /// Pre-existing edges used for mutation operations.
         std::vector<std::shared_ptr<const EvoGraph::Edge>> preExistingEdges;
 
+        /// Archive used by this TPG
+        std::shared_ptr<const Archive> archive;
+
     public:
 
-        TPGMutator(): Mutator() {
+        TPGMutator(std::shared_ptr<const Archive> archive): Mutator(), archive{archive} {
             isUsingCrossover = false;
         };
 
@@ -93,13 +96,12 @@ namespace Algorithm::TPG {
          * \param[in,out] agents the Agent to crossover.
          * \param[in,out] graph the graph to mutate.
          * \param[in] manager the manager to change the agents.
-         * \param[in] context context from the selection algorithm.
          * \param[in] newSubAgents vector of new agents of sub algorithm created while crossing over the agents
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) override;
 
 
@@ -129,13 +131,11 @@ namespace Algorithm::TPG {
          *
          * \param[in,out] graph the Graph within which the team is stored.
          * \param[in] team the Team whose outgoingEdges will be altered.
-         * \param[in] context SelectorContext containing necessary information
          * for mutations.
          * \param[in] rng Random Number Generator used in the
          * mutation process.
          */
         void addRandomEdge(std::shared_ptr<EvoGraph::Graph>, const EvoGraph::Team& team,
-                            const Selector::SelectionContext& context,
                             RNG::RNG& rng);
 
         /**
@@ -156,8 +156,6 @@ namespace Algorithm::TPG {
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
          * \param[in] edge the Edge whose destination will be altered.
-         * \param[in] context SelectorContext containing necessary information
-         * for mutations.
          * \param[in] params Probability parameters for the
          * mutation.
          * \param[in] rng Random Number Generator used in the mutation
@@ -165,7 +163,6 @@ namespace Algorithm::TPG {
          */
         void mutateEdgeDestination(std::shared_ptr<EvoGraph::Graph> graph,
                                     std::shared_ptr<const EvoGraph::Edge> edge,
-                                    const Selector::SelectionContext& context,
                                     const Learn::LearningParameters& params,
                                     RNG::RNG& rng);
 
@@ -182,8 +179,6 @@ namespace Algorithm::TPG {
          *                stored.
          * \param[in] edge the Edge whose destination will be altered.
          * \param[in] manager the manager to change the agents.
-         * \param[in] context SelectorContext containing necessary information
-         * for mutations.
          * \param[in] newSubAgents vector of new agents of sub algorithm created while mutating the agent
          * \param[in] params
          * Probability parameters for the mutation.
@@ -193,8 +188,7 @@ namespace Algorithm::TPG {
         void mutateOutgoingEdge(
             std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
             std::shared_ptr<AgentManager> manager,
-            const Selector::SelectionContext& context,
-            std::vector<std::shared_ptr<const Agent>> newSubAgents,
+            std::vector<std::shared_ptr<const Agent>>& newSubAgents,
             const Learn::LearningParameters& params, RNG::RNG& rng);
 
             /**
@@ -203,15 +197,39 @@ namespace Algorithm::TPG {
              * \param[in,out] agent the Agent to mutate.
              * \param[in,out] graph the graph to mutate.
              * \param[in] manager the manager to change the agents.
-             * \param[in] context context from the selection algorithm.
              * \param[in] newSubAgents vector of new agents of sub algorithm created while mutating the agent
              * \param[in] params Probability parameters for the mutation.
              * \param[in] rng Random Number Generator used in the mutation process.
              */
             virtual void mutateAgent(
-                std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+                std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
             ) override;
+
+            
+            /**
+             * \brief Mutate the behavior of a Program and ensure its unicity
+             * against the given Archive.
+             *
+             * \param[in] agents vector of new agents of sub algorithm created while mutating the agent
+             * \param[in,out] graph the graph to mutate.
+             * \param[in] manager the manager to change the agents.
+             * \param[in] params Probability parameters for the mutation.
+             * \param[in] rng Random Number Generator used in the mutation process.
+             */
+            virtual void mutateProgramAgentAgainstArchive(
+                std::shared_ptr<const Agent> programAgent, std::shared_ptr<EvoGraph::Graph> graph, 
+                std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
+                RNG::RNG& rng);
+
+            /**
+             * \brief Specialization of mutateSubAgents method.
+             */
+            virtual std::vector<std::shared_ptr<const Agent>> mutateSubAgents(
+                std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
+                std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
+                RNG::RNG& rng, uint64_t maxNbThreads) override;
     };
+
 
 
 }; // namespace Mutator

@@ -24,16 +24,6 @@ std::shared_ptr<const Archive> Algorithm::TPG::TPGAlgorithm::getArchive() const
     return this->archive;
 }
 
-std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::TPG::TPGAlgorithm::createExecutionEngine() const
-{
-    auto engine = std::make_unique<TPG::TPGExecutionEngine>(this->algorithmName);
-
-    engine->setProgramExecutionEngine(
-        std::move(this->cGetSubAlgorithm(this->programAlgorithmName)->createExecutionEngine())
-    );
-
-    return engine;
-}
 
 void Algorithm::TPG::TPGAlgorithm::init(RNG::RNG& rng, Learn::LearningEnvironment& le, std::shared_ptr<EvoGraph::Graph> graph)
 {
@@ -46,6 +36,9 @@ void Algorithm::TPG::TPGAlgorithm::init(RNG::RNG& rng, Learn::LearningEnvironmen
     tpgMutator->setProgramAlgorithmName(this->programAlgorithmName);
 
     this->manager = std::make_shared<TPG::TPGManager>(this->nbOutputs);
+    std::shared_ptr<TPG::TPGManager> tpgManager = std::dynamic_pointer_cast<TPG::TPGManager>(this->mutator);
+    tpgManager->setProgramAlgorithmName(this->programAlgorithmName);
+
 
     Algorithm::Algorithm::init(rng, le, graph);
 }

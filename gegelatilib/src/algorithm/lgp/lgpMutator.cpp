@@ -43,13 +43,13 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPMutator::initRandomAg
 }
 
 void Algorithm::LGP::LGPMutator::crossoverAgents(
-    std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     /**NO CROSSOVER FOR NOW */
 }
 
 void Algorithm::LGP::LGPMutator::mutateAgent(
-    std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Selector::SelectionContext& context, std::vector<std::shared_ptr<const Agent>> newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     auto lgpManager = std::dynamic_pointer_cast<LGPManager>(manager);
     if(lgpManager == nullptr){
@@ -61,52 +61,8 @@ void Algorithm::LGP::LGPMutator::mutateAgent(
         throw std::invalid_argument("LGPMutator::initRandomAgent: the created agent is not a LGPAgent.");
     }
 
-    // If the lgp behavior should be new after mutation:
-    std::shared_ptr<const Agent> agentCopy(nullptr);
-    if (params.mutation.tpg.forceProgramBehaviorChangeOnMutation) {
-        // Copy the program to check that its behavior is changed before
-        // verifying its unicity against the archive
-        agentCopy = manager->copyAgent(agent, graph);
-    }
-
-    bool allUnique;
-    // Mutate behavior until it changes (against the archive).
-    do {
-
-        // If a new program is created
-        if (rng.getDouble(0.0, 1.0) < params.mutation.prog.pNewProgram) {
-            
-        }
-        else {
-            // Mutate until something is mutated (i.e. the function returns
-            // true) And until the program behavior is changed
-            while (!(
-                this->mutateLGPAgent(lgpAgent, lgpManager, params, rng) &&
-                !(agentCopy != nullptr &&
-                  lgpManager->hasIdenticalBehavior(agent, agentCopy))));
-        }
-        // Check for uniqueness in archive
-        //auto archivedDataHandlers = lgpManager->getArchive()->getDataHandlers();
-        //std::map<size_t, double> hashesAndResults;
-        /*Program::ProgramExecutionEngine pee(*agent);
-        for (std::pair<
-                 size_t,
-                 std::vector<std::reference_wrapper<const Data::DataHandler>>>
-                 archiveDatahandler : archivedDataHandlers) {
-            // Execute the mutated program on the archive data handlers
-            pee.setDataSources(archiveDatahandler.second);
-            double result = pee.executeProgram();
-            hashesAndResults.insert({archiveDatahandler.first, result});
-        }*/
-
-        // If the result is not unique, do another mutation.
-        //allUnique = lgpManager->getArchive()->areProgramResultsUnique(hashesAndResults);
-
-        // Do not use Archive right now if the environment is continuous
-        // TODO Update that
-    } while (!allUnique &&
-             (lgpManager->getNbOutputs() > 1 ||
-              params.mutation.tpg.useMultiActionProgram));
+    // Mutate until a mutation happen
+    while (!this->mutateLGPAgent(lgpAgent, lgpManager, params, rng));
 }
 
 bool Algorithm::LGP::LGPMutator::mutateLGPAgent(std::shared_ptr<const LGPAgent> agent, std::shared_ptr<LGPManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)

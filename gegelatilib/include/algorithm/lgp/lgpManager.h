@@ -4,6 +4,8 @@
 
 #include "algorithm/agentManager.h"
 #include "algorithm/lgp/lgpAgent.h"
+#include "algorithm/lgp/lgpExecutionEngine.h"
+
 
 namespace Algorithm {
 
@@ -156,6 +158,13 @@ namespace Algorithm {
              * \param[in] agent2 second lgp.
              */
             bool hasIdenticalBehavior(std::shared_ptr<const Agent> agent1, std::shared_ptr<const Agent> agent2) const;
+
+            /**
+             * \brief Create a new ExecutionEngine for this Algorithm.
+             * 
+             * \return a shared pointer to the created ExecutionEngine.
+             */
+            virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const override;
 
         };
     } // namespace LGP
