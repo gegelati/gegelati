@@ -379,13 +379,14 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
 {
     auto subMutator = this->getSubMutator(programAgent->getAlgorithmName());
 
+    std::vector<std::shared_ptr<const Agent>> newSubAgents;
     bool allUnique;
     // Mutate behavior until it changes (against the archive).
     do {
 
         // Mutate until something is mutated (i.e. the function returns
         // true) And until the program behavior is changed
-        subMutator->mutateAgent(programAgent, graph, manager, {}, params, rng);
+        subMutator->mutateAgent(programAgent, graph, manager, newSubAgents, params, rng);
 
         // Check for uniqueness in archive
         auto archivedDataHandlers = archive->getDataHandlers();

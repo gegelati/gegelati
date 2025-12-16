@@ -9,6 +9,7 @@
 #include <stdexcept>
 
 #include "algorithm/agent.h"
+#include "data/dataHandler.h"
 
 namespace Algorithm {
     /**
@@ -70,7 +71,19 @@ namespace Algorithm {
          */
         virtual std::vector<double> execute() = 0; 
 
+        /**
+         * \brief Method for changing the dataSources on which the agent will
+         * be executed.
+         *
+         * \param[in] dataSrc The vector of DataHandler references with which
+         * the Program will be executed.
+         */
+        
+        virtual void setDataSources(
+            const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSrc);
+
     }; // namespace ExecutionEngine
+
 }; // namespace Algorithm
 
 #endif // EXECUTION_ENGINE_H

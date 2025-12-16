@@ -194,9 +194,8 @@ namespace Algorithm::LGP {
          * \throws std::runtime_error if the Environment references by the
          * Program is incompatible with the given dataSources.
          */
-        template <class T>
-        void setDataSources(
-            const std::vector<std::reference_wrapper<T>>& dataSrc);
+        virtual void setDataSources(
+            const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSrc) override;
 
         /**
          * \brief Get the DataHandler of the ProgramExecutionEngine.
@@ -299,31 +298,7 @@ namespace Algorithm::LGP {
         virtual std::vector<double> getRegisterValues(uint64_t nbRegisters);
     };
 
-    template <class T>
-    inline void LGPEngine::setDataSources(
-        const std::vector<std::reference_wrapper<T>>& dataSrc)
-    {
-        // Check that T is either convertible to a const DataHandler
-        static_assert(std::is_convertible<T&, const Data::DataHandler&>::value);
 
-        // Replace the references in attributes
-        this->dataSources = dataSrc;
-        // we need this offset to push the constant at the first
-        size_t offset =
-            this->lgpExecutedAgent->getEnvironment()->getParams().nbProgramConstant > 0
-                ? 2
-                : 1;
-        if (offset == 2) {
-            this->dataScsConstsAndRegs.at(1) =
-                this->lgpExecutedAgent->cGetConstantHandler();
-        }
-        for (size_t idx = 0; idx < this->dataSources.size(); idx++) {
-            this->dataScsConstsAndRegs.at(idx + offset) = dataSrc.at(idx);
-        }
-
-        // Set program to check compatibility with new data source
-        this->setExecutedAgent(this->lgpExecutedAgent);
-    }
 } // namespace Algorithm::LGP
 
 #endif // LGP_ENGINE_H

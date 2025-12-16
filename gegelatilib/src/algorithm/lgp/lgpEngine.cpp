@@ -210,3 +210,26 @@ std::vector<double> Algorithm::LGP::LGPEngine::getRegisterValues(
     }
     return registerValues;
 }
+
+void Algorithm::LGP::LGPEngine::setDataSources(
+    const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSrc)
+{
+
+    // Replace the references in attributes
+    this->dataSources = dataSrc;
+    // we need this offset to push the constant at the first
+    size_t offset =
+        this->lgpExecutedAgent->getEnvironment()->getParams().nbProgramConstant > 0
+            ? 2
+            : 1;
+    if (offset == 2) {
+        this->dataScsConstsAndRegs.at(1) =
+            this->lgpExecutedAgent->cGetConstantHandler();
+    }
+    for (size_t idx = 0; idx < this->dataSources.size(); idx++) {
+        this->dataScsConstsAndRegs.at(idx + offset) = dataSrc.at(idx);
+    }
+
+    // Set program to check compatibility with new data source
+    this->setExecutedAgent(this->lgpExecutedAgent);
+}

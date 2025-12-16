@@ -14,3 +14,14 @@ void Algorithm::ExecutionEngine::setExecutedAgent(std::shared_ptr<const Agent> n
 
     this->executedAgent = newExecutedAgent;
 }
+
+
+void Algorithm::ExecutionEngine::setDataSources(
+    const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSrc)
+{
+    auto itSubExec = this->subExecutionEngines.begin();
+    while(itSubExec != this->subExecutionEngines.end()){
+        itSubExec->second->setDataSources(dataSrc);
+        itSubExec++;
+    }
+}

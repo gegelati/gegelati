@@ -253,7 +253,7 @@ TEST_F(LearningAgentTest, EvalAgent)
                // LearningAgent is used.
 
     la.init();
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->createExecutionEngine();
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager()->createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
     auto job = *la.makeJob(la.getAlgorithmAt(0)->getAgents().at(0),

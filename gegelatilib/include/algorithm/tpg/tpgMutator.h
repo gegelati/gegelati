@@ -36,6 +36,11 @@ namespace Algorithm::TPG {
 
     public:
 
+        /**
+         * \brief Constructor for TPGMutator
+         * 
+         * \param[in] archive Archive used by this TPG
+         */
         TPGMutator(std::shared_ptr<const Archive> archive): Mutator(), archive{archive} {
             isUsingCrossover = false;
         };
@@ -210,7 +215,7 @@ namespace Algorithm::TPG {
              * \brief Mutate the behavior of a Program and ensure its unicity
              * against the given Archive.
              *
-             * \param[in] agents vector of new agents of sub algorithm created while mutating the agent
+             * \param[in] programAgent program agents of sub algorithm created while mutating the agent
              * \param[in,out] graph the graph to mutate.
              * \param[in] manager the manager to change the agents.
              * \param[in] params Probability parameters for the mutation.
