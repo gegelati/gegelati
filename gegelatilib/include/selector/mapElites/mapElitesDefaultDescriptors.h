@@ -18,7 +18,7 @@ namespace Selector {
              * update could be made to be used on discrete environments too but
              * it might not be useful).
              *
-             * It computs the average of the absolute of the action values over
+             * It computes the average of the absolute of the action values over
              * an episode.
              */
             class ActionValues : public MapElitesDescriptor

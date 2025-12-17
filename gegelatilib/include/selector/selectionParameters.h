@@ -103,6 +103,7 @@ namespace Selector {
             "// Selection mode used. Available modes are:\n"
             "//   - \"truncation\"\n"
             "//   - \"tournament\"\n"
+            "//   - \"mapElites\"\n"
             "// \"_selectionMode\" : Truncation, // Default value";
         /// Selection mode used. Available mode are:
         ///   - "truncation"

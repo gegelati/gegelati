@@ -187,6 +187,7 @@ namespace TPG {
          * graph.
          */
         const std::vector<const TPGAction*> getRootActions() const;
+
         /**
          * \brief Get vector of const pointer to the root teams of the
          * TPGGraph.

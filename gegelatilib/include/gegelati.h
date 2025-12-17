@@ -79,6 +79,7 @@
 #include <learn/learningParameters.h>
 #include <learn/parallelLearningAgent.h>
 
+// Adversarial is deprecated
 // #include <learn/adversarialEvaluationResult.h>
 // #include <learn/adversarialJob.h>
 // #include <learn/adversarialLearningAgent.h>
