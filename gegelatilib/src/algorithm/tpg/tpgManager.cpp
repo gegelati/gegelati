@@ -2,6 +2,16 @@
 #include "algorithm/tpg/tpgManager.h"
 
 
+std::shared_ptr<Algorithm::TPG::TPGAgent> Algorithm::TPG::TPGManager::getTPGAgentFromCst(std::shared_ptr<const Agent> agent)
+{
+    auto iterator = this->agents.find(agent);
+    if(iterator == this->agents.end() || *iterator != agent){
+        throw std::invalid_argument("TPGManager::getTPPAgentFromCst: the given agent is not managed by this manager.");
+    }
+
+    return std::dynamic_pointer_cast<TPGAgent>(*iterator);
+}
+
 const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::TPG::TPGManager::getAgents() const
 {
     std::vector<std::shared_ptr<const Algorithm::Agent>> constAgents;
@@ -23,6 +33,12 @@ const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::TPG::TPGMa
 std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
     std::shared_ptr<const EvoGraph::Team> vertex = graph->addNewTeam();
+    this->agents.insert(std::make_shared<TPGAgent>(vertex, this->getAlgorithmName()));
+    return *this->agents.rbegin();
+}
+
+std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
+{
     this->agents.insert(std::make_shared<TPGAgent>(vertex, this->getAlgorithmName()));
     return *this->agents.rbegin();
 }
@@ -50,6 +66,16 @@ void Algorithm::TPG::TPGManager::deleteAgent(std::shared_ptr<const Agent> agent,
 
     auto iterator = this->agents.find(agent);
     this->agents.erase(iterator);   
+}
+
+void Algorithm::TPG::TPGManager::setVertex(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex)
+{
+    if(!graph->hasVertex(*vertex)){
+        throw std::runtime_error("TPGManager::setVertex: trying to set the vertex to an agent, but the vertex is not in the graph.");
+    }
+
+    // Set the vertex
+    this->getTPGAgentFromCst(agent)->setVertex(vertex);
 }
 
 

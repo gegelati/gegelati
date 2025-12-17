@@ -3,15 +3,21 @@
 #include "algorithm/tpg/tpgExecutionEngine.h"
 
 
+void Algorithm::TPG::TPGExecutionEngine::setArchive(std::shared_ptr<Archive> archive)
+{
+    this->archive = archive;
+}
+std::shared_ptr<Archive> Algorithm::TPG::TPGExecutionEngine::getArchive()
+{
+    return archive;
+}
 
 double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& edge)
 {
 
-    // Get the agent program
-    std::shared_ptr<const Algorithm::Agent> program = edge.getProgram();
 
     // Set the progExecutionEngine to the program
-    this->programExecutionEngine->setExecutedAgent(program);
+    this->programExecutionEngine->setExecutedAgent(edge.getProgram());
 
     // Execute the program.
     double result = this->programExecutionEngine->execute().front();

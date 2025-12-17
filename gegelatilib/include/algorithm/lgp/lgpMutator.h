@@ -46,12 +46,13 @@ namespace Algorithm::LGP {
         /**
          * \brief Initialize a random Agent.
          *
+         * \param[in] agent The agent initialized
          * \param[in,out] graph the Graph.
          * \param[in] manager the manager to change the agents.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::shared_ptr<const Agent> initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
         
 
 

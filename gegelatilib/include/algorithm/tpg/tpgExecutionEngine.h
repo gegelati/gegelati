@@ -6,6 +6,7 @@
 #include "algorithm/tpg/tpgAgent.h"
 #include "evoGraph/action.h"
 #include "evoGraph/team.h"
+#include "archive.h"
 
 namespace Algorithm::TPG {
     /**
@@ -17,6 +18,9 @@ namespace Algorithm::TPG {
 
         /// Execution engine used to execute the program of the TPG agents
         std::unique_ptr<ExecutionEngine> programExecutionEngine;
+
+        /// Archive used by the program agents.
+        std::shared_ptr<Archive> archive;
 
     public:
 
@@ -34,6 +38,18 @@ namespace Algorithm::TPG {
          */
         TPGExecutionEngine(std::shared_ptr<const Agent> executedAgent): ExecutionEngine(executedAgent) {}
 
+        /**
+         * Setter for the archive
+         * 
+         * \param[in] archive Archive used by the program agents.
+         */
+        void setArchive(std::shared_ptr<Archive> archive);
+
+        /**
+         * \brief getter for the archive.
+         */
+        std::shared_ptr<Archive> getArchive();
+        
         /**
          * \brief Set the program execution engine associated with the TPG agents.
          * 

@@ -5,6 +5,12 @@
 
 #include "algorithm/tpg/tpgMutator.h"
 
+
+void Algorithm::TPG::TPGMutator::setArchive(std::shared_ptr<Archive> archive)
+{
+    this->archive = archive;
+}
+
 void Algorithm::TPG::TPGMutator::updateSpecificContext(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
     const Learn::LearningParameters& params,
@@ -208,9 +214,8 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     }
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGMutator::initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    return nullptr;
 }
 
 void Algorithm::TPG::TPGMutator::crossoverAgents(

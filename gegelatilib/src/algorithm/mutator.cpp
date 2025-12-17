@@ -10,7 +10,7 @@ void Algorithm::Mutator::addSubMutator(std::shared_ptr<Mutator> subMutator)
 std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(std::string nameAlgorithm){
     auto it = this->subMutators.find(nameAlgorithm);
     if(it == this->subMutators.end()){
-        throw std::runtime_error("Algorithm::Mutator::getSubMutator subManager not found for the specific name");
+        throw std::runtime_error("Algorithm::Mutator::getSubMutator subMutator not found for the specific name");
     }
     return it->second;
 }
@@ -27,6 +27,16 @@ void Algorithm::Mutator::updateSpecificContext(
     for(auto subMutPair: this->subMutators){
         subMutPair.second->updateSpecificContext(graph, manager, selector, params, rng);
     }
+}
+
+std::shared_ptr<const Algorithm::Agent> Algorithm::Mutator::initRandomAgent(
+    std::shared_ptr<EvoGraph::Graph> graph,
+    std::shared_ptr<AgentManager> manager,
+    const Learn::LearningParameters& params, RNG::RNG& rng)
+{
+    auto agent = manager->createAgent(graph);
+    this->initRandomSpecificAgent(agent, graph, manager, params, rng);
+    return agent;
 }
 
 std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::Mutator::mutateSubAgents(
