@@ -50,7 +50,10 @@ class FakeDescriptor : public Selector::MapElites::MapElitesDescriptor
         const Learn::LearningEnvironment& learningEnvironment) override
     {
     }
-    std::string getName() const override {return "None";}
+    std::string getName() const override
+    {
+        return "None";
+    }
 };
 
 TEST_F(MapElitesDescriptorsTest, EmptyMethods)

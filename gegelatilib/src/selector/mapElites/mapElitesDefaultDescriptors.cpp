@@ -12,7 +12,8 @@ void Selector::MapElites::DefaultDescriptors::ActionValues::initDescriptor(
     this->nbDescriptors = learningEnvironment.getNbActions();
 }
 
-std::string Selector::MapElites::DefaultDescriptors::ActionValues::getName() const
+std::string Selector::MapElites::DefaultDescriptors::ActionValues::getName()
+    const
 {
     return "ActionValues";
 }

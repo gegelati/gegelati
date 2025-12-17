@@ -33,7 +33,7 @@ namespace Selector {
 
                 /**
                  * \brief Specialisation of getName
-                 */                          
+                 */
                 virtual std::string getName() const override;
 
                 /**

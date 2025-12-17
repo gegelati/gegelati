@@ -64,8 +64,6 @@ void Selector::MapElites::MapElitesSelectionMetrics::weightedSum(
             it->second[idx] = it->second[idx] * (double)nbEvaluation +
                               itOther->second[idx] * (double)nbEvaluationOther;
             it->second[idx] /= (double)(nbEvaluation + nbEvaluationOther);
-            
-           
         }
         it++;
         itOther++;

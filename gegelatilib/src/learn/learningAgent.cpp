@@ -187,7 +187,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         selectionMetrics->extractMetricsEpisode(root, nbActions, le);
 
         // Add the extracted metrics to the total.
-        globalSelectionMetrics->weightedSum(selectionMetrics, iterationNumber, 1);
+        globalSelectionMetrics->weightedSum(selectionMetrics, iterationNumber,
+                                            1);
     }
 
     // Create the EvaluationResult

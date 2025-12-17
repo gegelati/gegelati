@@ -54,8 +54,6 @@ namespace Selector {
                 const TPG::TPGGraph& graph,
                 const Learn::LearningEnvironment& learningEnvironment) = 0;
 
-
-
             /**
              * \brief abstract method returning the name of the descriptor.
              */

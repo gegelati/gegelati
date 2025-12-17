@@ -107,7 +107,6 @@ namespace Selector {
             virtual void weightedSum(std::shared_ptr<SelectionMetrics> other,
                                      size_t nbEvaluation,
                                      size_t nbEvaluationOther) override;
-
         };
     } // namespace MapElites
 
