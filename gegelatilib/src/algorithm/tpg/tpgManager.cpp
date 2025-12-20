@@ -62,7 +62,9 @@ void Algorithm::TPG::TPGManager::deleteAgent(std::shared_ptr<const Agent> agent,
 
     // Do not remove action agents from the graph
     auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(agent);
-    graph->removeVertex(*tpgAgent->getVertex());
+    if(std::dynamic_pointer_cast<const EvoGraph::Team>(tpgAgent->getVertex()) != nullptr){
+        graph->removeVertex(*tpgAgent->getVertex());
+    }
 
     auto iterator = this->agents.find(agent);
     this->agents.erase(iterator);   

@@ -72,10 +72,10 @@ Learn::ParallelLearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumb
 
 void Learn::ParallelLearningAgent::slaveEvalJobThread(
     uint64_t generationNumber, Learn::LearningMode mode,
-    std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess,
+    std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess,
     std::mutex& agentsToProcessMutex,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Job>>>& resultsPerAgentMap,
+                                 std::shared_ptr<Algorithm::Job>>>& resultsPerAgentMap,
     std::mutex& resultsPerAgentMapMutex,
     std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex,
     bool useMainEnvironment)
@@ -92,7 +92,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                            (privateLearningEnvironment->isDiscrete())
                                ? 0
                                : privateLearningEnvironment->getNbActions());
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = jobsToProcess.front()->getAlgorithm()->getManagerCst()->createExecutionEngine();
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = jobsToProcess.front()->getManager()->createExecutionEngine();
     /*std::unique_ptr<Algorithm::ExecutionEngine> tee =
         this->graph->getFactory().createExecutionEngine(privateEnv, NULL);*/
 
@@ -101,7 +101,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     while (!jobsToProcess.empty()) { // Thread safe access to size
         i++;
         bool doProcess = false;
-        std::shared_ptr<Learn::Job> jobToProcess;
+        std::shared_ptr<Algorithm::Job> jobToProcess;
         { // Mutuel exclusion zone
             std::lock_guard<std::mutex> lock(agentsToProcessMutex);
             if (!jobsToProcess.empty()) { // Additional verification after lock
@@ -201,7 +201,7 @@ void Learn::ParallelLearningAgent::mergeArchiveMap(
 }
 
 void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
-    std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
+    std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>&
         results)
 {
@@ -209,7 +209,7 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
     std::map<uint64_t, Archive*> archiveMap;
     // Create Map for results
     std::map<uint64_t,
-             std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Job>>>
+             std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Algorithm::Job>>>
         resultsPerJobMap;
 
     evaluateAgentsInParallelExecute(jobsToProcess, generationNumber, mode, resultsPerJobMap,
@@ -219,9 +219,9 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
                                              archiveMap);
 }
 void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
-    std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
+    std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Job>>>& resultsPerJobMap,
+                                 std::shared_ptr<Algorithm::Job>>>& resultsPerJobMap,
     std::map<uint64_t, Archive*>& archiveMap)
 {
     // Create mutexes
@@ -253,7 +253,7 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
 
 void Learn::ParallelLearningAgent::evaluateAgentsInParallelCompileResults(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Job>>>& resultsPerJobMap,
+                                 std::shared_ptr<Algorithm::Job>>>& resultsPerJobMap,
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>&
         results,
     std::map<uint64_t, Archive*>& archiveMap)

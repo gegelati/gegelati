@@ -45,7 +45,6 @@
 #include "instructions/set.h"
 
 #include "learn/evaluationResult.h"
-#include "learn/job.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
@@ -81,7 +80,7 @@ namespace Learn {
          * evaluated agents.
          */
         virtual void evaluateAgentsInParallel(
-            std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
+            std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::multimap<std::shared_ptr<EvaluationResult>,
                           std::shared_ptr<const Algorithm::Agent>>& results);
 
@@ -102,9 +101,9 @@ namespace Learn {
          * other jobs.
          */
         virtual void evaluateAgentsInParallelExecute(
-            std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
+            std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         std::shared_ptr<Job>>>&
+                                         std::shared_ptr<Algorithm::Job>>>&
                 resultsPerJobMap,
             std::map<uint64_t, Archive*>& archiveMap);
 
@@ -125,7 +124,7 @@ namespace Learn {
          */
         virtual void evaluateAgentsInParallelCompileResults(
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         std::shared_ptr<Job>>>&
+                                         std::shared_ptr<Algorithm::Job>>>&
                 resultsPerJobMap,
             std::multimap<std::shared_ptr<EvaluationResult>,
                           std::shared_ptr<const Algorithm::Agent>>& results,
@@ -158,10 +157,10 @@ namespace Learn {
          */
         void slaveEvalJobThread(
             uint64_t generationNumber, LearningMode mode,
-            std::queue<std::shared_ptr<Learn::Job>>& jobsToProcess,
+            std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess,
             std::mutex& agentsToProcessMutex,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                         std::shared_ptr<Job>>>&
+                                         std::shared_ptr<Algorithm::Job>>>&
                 resultsPerAgentMap,
             std::mutex& resultsPerAgentMapMutex,
             std::map<uint64_t, Archive*>& archiveMap,

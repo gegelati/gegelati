@@ -53,6 +53,7 @@
 
 #include <algorithm/agent.h>
 #include <algorithm/algorithm.h>
+#include <algorithm/job.h>
 #include <algorithm/mutator.h>
 #include <algorithm/agentManager.h>
 #include <algorithm/executionEngine.h>
@@ -94,7 +95,6 @@
 #include <instructions/set.h>
 
 #include <learn/evaluationResult.h>
-#include <learn/job.h>
 #include <learn/learningAgent.h>
 #include <learn/learningEnvironment.h>
 #include <learn/learningParameters.h>

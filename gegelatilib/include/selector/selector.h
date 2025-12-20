@@ -171,6 +171,26 @@ namespace Selector {
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                                 std::shared_ptr<const Algorithm::Agent>>& results);
 
+
+        /**
+         * \brief Method detecting whether an agent should be evaluated again.
+         *
+         * Using the resultsPerAgent map and the
+         * params.maxNbEvaluationPerPolicy, this method checks whether an agent
+         * should be evaluated again, or if sufficient evaluations were already
+         * performed.
+         *
+         * \param[in] agent The agent whose number of evaluation is
+         * checked.
+         * \param[out] previousResult the std::shared_ptr to the
+         * EvaluationResult of the agent from the resultsPerAgent if any.
+         * \return true if the agent has been evaluated enough times, false
+         * otherwise.
+         */
+        virtual bool isAgentEvalSkipped(
+            std::shared_ptr<const Algorithm::Agent>,
+            std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
+
         /**
          * \brief Get the best agent EvoGraph::Vertex encountered since the last init.
          *

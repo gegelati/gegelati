@@ -101,18 +101,18 @@ void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
-    Algorithm::ExecutionEngine& execEngine, const Job& job, uint64_t generationNumber,
+    Algorithm::ExecutionEngine& execEngine, const Algorithm::Job& job, uint64_t generationNumber,
     Learn::LearningMode mode, LearningEnvironment& le) const
 {
     // Get the current agent and the current algorithm
     std::shared_ptr<const Algorithm::Agent> agent = job.getAgent();
-    std::shared_ptr<const Algorithm::Algorithm> algorithm = job.getAlgorithm(); 
+    std::shared_ptr<const Selector::Selector> selector = job.getSelector(); 
 
     // Skip the agent evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
     if (mode == LearningMode::TRAINING &&
-        algorithm->isAgentEvalSkipped(agent, previousEval)) {
+        selector->isAgentEvalSkipped(agent, previousEval)) {
         return previousEval;
     }
 
@@ -134,7 +134,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
     // Init global selection metric
     std::shared_ptr<Selector::SelectionMetrics> globalSelectionMetrics =
-        algorithm->getSelectorCst()->createSelectionMetrics();
+        selector->createSelectionMetrics();
     globalSelectionMetrics->initMetrics(agent, le);
 
     // Evaluate nbIteration times
@@ -146,7 +146,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
         // Init selectionMetrics for this episode.
         std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
-            algorithm->getSelectorCst()->createSelectionMetrics();
+            selector->createSelectionMetrics();
         selectionMetrics->initMetrics(agent, le);
 
         // Reset the learning Environment
@@ -219,7 +219,7 @@ Learn::LearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumber,
     auto jobs = this->makeJobs(mode, algorithm);
     while (!jobs.empty()){
         auto job = jobs.front();
-        this->archive.setRandomSeed(job->getArchiveSeed());
+        algorithm->activeJob(*job);
         std::shared_ptr<EvaluationResult> result = this->evaluateJob(
             *execEngine, *job, generationNumber, mode, this->learningEnvironment);
         results.emplace(result, (*job).getAgent());
@@ -233,18 +233,18 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
     uint64_t generationNumber, Learn::LearningMode mode,
     std::shared_ptr<const Algorithm::Agent> agent)
 {
-
+    auto algorithm = this->findCorrespondingAlgorithm(agent);
 
     // Create the execution engine of the agent.
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
-        this->findCorrespondingAlgorithm(agent)->getManager()->createExecutionEngine();
+        algorithm->getManager()->createExecutionEngine();
     /*std::unique_ptr<EvoGraph::OldExecutionEngine> tee =
         this->graph->getFactory().createExecutionEngine(
             this->env,
             (mode == LearningMode::TRAINING) ? &this->archive : NULL);*/
 
     // Create and evaluate the job
-    auto job = makeJob(agent, mode);
+    auto job = algorithm->createJob(agent, mode, this->rng);
     this->archive.setRandomSeed(job->getArchiveSeed());
     std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
         *execEngine, *job, generationNumber, mode, this->learningEnvironment);
@@ -297,6 +297,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
     for (auto logger : loggers) {
         logger.get().logNewGeneration(generationNumber);
     }
+
 
     // Evaluate
     auto results =
@@ -389,27 +390,7 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
     return generationNumber;
 }
 
-std::shared_ptr<Learn::Job> Learn::LearningAgent::makeJob(
-    std::shared_ptr<const Algorithm::Agent> agent, 
-    Learn::LearningMode mode, int idx)
-{
-    if(agent == nullptr){
-        throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with a null agent.");
-    }
-
-    // Before each agent evaluation, set a new seed for the archive in
-    // TRAINING Mode Else, archiving should be deactivate anyway
-    uint64_t archiveSeed = 0;
-    if (mode == LearningMode::TRAINING) {
-        archiveSeed = this->rng.getUnsignedInt64(0, UINT64_MAX);
-    }
-
-    auto algorithm = this->findCorrespondingAlgorithm(agent);
-    return std::make_shared<Learn::Job>(
-        Learn::Job(agent, algorithm, archiveSeed, idx));
-}
-
-std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
+std::queue<std::shared_ptr<Algorithm::Job>> Learn::LearningAgent::makeJobs(
     Learn::LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm)
 {
     if(algorithm == nullptr && this->algorithms.size() == 1){
@@ -418,10 +399,10 @@ std::queue<std::shared_ptr<Learn::Job>> Learn::LearningAgent::makeJobs(
         throw std::runtime_error("LearningAgent::makeJobs: Multiple algorithms present in the learning agent, please specify one.");
     }
 
-    std::queue<std::shared_ptr<Learn::Job>> jobs;
+    std::queue<std::shared_ptr<Algorithm::Job>> jobs;
     size_t idx = 0;
     for(auto agent: algorithm->getAgents()){
-        auto job = makeJob(agent, mode, idx);;
+        auto job = algorithm->createJob(agent, mode, rng, idx);
         jobs.push(job);
         idx++;
     }

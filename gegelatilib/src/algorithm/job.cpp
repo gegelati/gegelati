@@ -34,25 +34,30 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "learn/job.h"
+#include "algorithm/job.h"
 
-uint64_t Learn::Job::getIdx() const
+uint64_t Algorithm::Job::getIdx() const
 {
     return this->idx;
 }
 
-uint64_t Learn::Job::getArchiveSeed() const
+uint64_t Algorithm::Job::getArchiveSeed() const
 {
     return this->archiveSeed;
 }
 
 
-std::shared_ptr<const Algorithm::Agent> Learn::Job::getAgent() const
+std::shared_ptr<const Algorithm::Agent> Algorithm::Job::getAgent() const
 {
     return this->agent;
 }
 
-std::shared_ptr<const Algorithm::Algorithm> Learn::Job::getAlgorithm() const
+std::shared_ptr<const Algorithm::AgentManager> Algorithm::Job::getManager() const
 {
-    return this->algorithm;
+    return this->manager;
+}
+
+std::shared_ptr<const Selector::Selector> Algorithm::Job::getSelector() const
+{
+    return this->selector;
 }

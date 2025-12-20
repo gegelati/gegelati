@@ -76,10 +76,18 @@ namespace Algorithm::TPG {
              * \brief Initialize the algorithm.
              */
             virtual void init(RNG::RNG& rng, Learn::LearningEnvironment& le, std::shared_ptr<EvoGraph::Graph> graph) override;
+
+            /**
+             * \brief active the current job by using the archive seed of the job and setting it to the algorithm archive.
+             */
+            virtual void activeJob(Job& job) override;
     };
 }; // namespace TPG_Algorithm
 
 namespace Algorithm{
+    /**
+     * To make the aglrotihm accessible from algorithm namespace
+     */
     using TPGAlgorithm = TPG::TPGAlgorithm;
 }
 

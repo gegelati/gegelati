@@ -88,13 +88,15 @@ void Algorithm::Algorithm::init(RNG::RNG& rng, Learn::LearningEnvironment& le, s
         this->manager->addSubManager(subAlgorithm->getManager());
         this->mutator->addSubMutator(subAlgorithm->getMutator());
 
-    // Initialize a random population
-    this->mutator->initRandomPopulation(this->graph, this->manager, this->params, rng);
+        // Initialize a random population
+        this->mutator->initRandomPopulation(this->graph, this->manager,
+                                            this->params, rng);
 
-    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->params, rng);
+        this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->params, rng);
 
-    // Clear the best agent in the selector
-    this->selector->forgetPreviousResults();
+
+        // Clear the best agent in the selector
+        this->selector->forgetPreviousResults();
 
     }
 }
@@ -105,21 +107,24 @@ void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
 }
 
 
-bool Algorithm::Algorithm::isAgentEvalSkipped(
-    std::shared_ptr<const Agent> agent,
-    std::shared_ptr<Learn::EvaluationResult>& previousResult) const
+
+std::shared_ptr<Algorithm::Job> Algorithm::Algorithm::createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode,  RNG::RNG& rng, int idx) const
 {
-    // Has the root already been evaluated more times than
-    // params.maxNbEvaluationPerPolicy
-    const auto& iter = this->selector->getResultsPerAgent().find(agent);
-    if (iter != this->selector->getResultsPerAgent().end()) {
-        // The root has already been evaluated
-        previousResult = iter->second;
-        return iter->second->getNbEvaluation() >=
-               this->params.maxNbEvaluationPerPolicy;
+    if(agent == nullptr || !this->containsAgent(agent)){
+        throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with a null agent or an agent not belonging to this algorithm.");
     }
-    else {
-        previousResult = nullptr;
-        return false;
+
+    // Before each agent evaluation, set a new seed for the archive in
+    // TRAINING Mode Else, archiving should be deactivate anyway
+    uint64_t archiveSeed = 0;
+    if (mode ==Learn::LearningMode::TRAINING) {
+        archiveSeed = rng.getUnsignedInt64(0, UINT64_MAX);
     }
+
+    return std::make_shared<Job>(agent, this->manager, this->selector, archiveSeed, idx);
+}
+
+void Algorithm::Algorithm::activeJob(Job& job)
+{
+    /* Nothing to active for classic jobs */
 }

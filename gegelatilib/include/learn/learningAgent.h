@@ -53,7 +53,6 @@
 
 #include "learn/classificationLearningEnvironment.h"
 #include "learn/evaluationResult.h"
-#include "learn/job.h"
 #include "learn/learningEnvironment.h"
 #include "learn/learningParameters.h"
 
@@ -231,7 +230,7 @@ namespace Learn {
          * resultsPerRoot for this root (if any).
          */
         virtual std::shared_ptr<EvaluationResult> evaluateJob(
-            Algorithm::ExecutionEngine& execEngine, const Job& job,
+            Algorithm::ExecutionEngine& execEngine, const Algorithm::Job& job,
             uint64_t generationNumber, LearningMode mode,
             LearningEnvironment& le) const;
 
@@ -325,20 +324,6 @@ namespace Learn {
                                bool printProgressBar);
 
         /**
-         * \brief Takes a given Agent and creates a job containing it.
-         *
-         * \param[in] agent the Agent to be evaluated.
-         * \param[in] mode the mode of the training, determining for example
-         * if we generate values that we only need for training.
-         * \param[in] idx The index of the job, can be used to organize a map
-         * for example.
-         *
-         * \return A job representing the agent.
-         */
-        virtual std::shared_ptr<Learn::Job> makeJob(
-            std::shared_ptr<const Algorithm::Agent> agent, Learn::LearningMode mode, int idx = 0);
-
-        /**
          * \brief Puts all roots into jobs to be able to use them in simulation
          * later.
          *
@@ -348,7 +333,7 @@ namespace Learn {
          *
          * @return A queue containing pointers of the newly created jobs.
          */
-        virtual std::queue<std::shared_ptr<Learn::Job>> makeJobs(
+        virtual std::queue<std::shared_ptr<Algorithm::Job>> makeJobs(
             Learn::LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm = nullptr);
 
         /**

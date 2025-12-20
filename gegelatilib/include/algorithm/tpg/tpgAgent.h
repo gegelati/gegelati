@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include "algorithm/agent.h"
+#include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
 
 namespace Algorithm {

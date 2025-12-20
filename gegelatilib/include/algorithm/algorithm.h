@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 
+#include "algorithm/job.h"
 #include "algorithm/agent.h"
 #include "algorithm/agentManager.h"
 #include "algorithm/mutator.h"
@@ -136,24 +137,6 @@ namespace Algorithm {
         virtual void populate(RNG::RNG& rng, size_t maxNbThreads);
 
 
-        /**
-         * \brief Method detecting whether an agent should be evaluated again.
-         *
-         * Using the resultsPerAgent map and the
-         * params.maxNbEvaluationPerPolicy, this method checks whether an agent
-         * should be evaluated again, or if sufficient evaluations were already
-         * performed.
-         *
-         * \param[in] agent The agent whose number of evaluation is
-         * checked.
-         * \param[out] previousResult the std::shared_ptr to the
-         * EvaluationResult of the agent from the resultsPerAgent if any.
-         * \return true if the agent has been evaluated enough times, false
-         * otherwise.
-         */
-        virtual bool isAgentEvalSkipped(
-            std::shared_ptr<const Agent>,
-            std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
 
         /**
          * \brief Method executing an Agent and outputting action values.
@@ -166,6 +149,27 @@ namespace Algorithm {
          * \brief Clear all the parts of agents that are not used, such as introns for LGPs
          */
         virtual void clearUnusedAgentParts() = 0;
+
+        /**
+         * \brief Takes a given Agent and creates a job containing it.
+         *
+         * \param[in] agent the Agent to be evaluated.
+         * \param[in] mode the mode of the training, determining for example
+         * if we generate values that we only need for training.
+         * \param[in] rng deterministic random generator
+         * \param[in] idx The index of the job, can be used to organize a map
+         * for example.
+         *
+         * \return A job representing the agent.
+         */
+        virtual std::shared_ptr<Job> createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
+
+        /**
+         * \brief active the current job.
+         * 
+         * \param[in] job current job to active
+         */
+        virtual void activeJob(Job& job);
 
 
     };

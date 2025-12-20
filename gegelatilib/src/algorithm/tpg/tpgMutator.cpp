@@ -373,7 +373,7 @@ void Algorithm::TPG::TPGMutator::mutateAgent(
                 anyMutationDone = true;
             }
         }
-    } while (!anyMutationDone);
+    } while (!anyMutationDone && params.mutation.tpg.pProgramMutation > 0);
 }
 
 
@@ -392,6 +392,7 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
         // Mutate until something is mutated (i.e. the function returns
         // true) And until the program behavior is changed
         subMutator->mutateAgent(programAgent, graph, manager, newSubAgents, params, rng);
+
 
         // Check for uniqueness in archive
         auto archivedDataHandlers = archive->getDataHandlers();

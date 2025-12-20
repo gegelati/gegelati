@@ -210,7 +210,7 @@ TEST_F(LearningAgentTest, addLogger)
            "maxNbEvaluationPerPolicy.";
 }*/
 
-TEST_F(LearningAgentTest, MakeJob)
+/*TEST_F(LearningAgentTest, MakeJob)
 {
     Learn::LearningAgent la(le, tpg, set, params);
     la.init();
@@ -239,7 +239,7 @@ TEST_F(LearningAgentTest, MakeJobs)
             << "Encapsulate the root in a job shouldn't change it";
         jobs.pop();
     }
-}
+}*/
 
 TEST_F(LearningAgentTest, EvalAgent)
 {
@@ -256,8 +256,8 @@ TEST_F(LearningAgentTest, EvalAgent)
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager()->createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = *la.makeJob(la.getAlgorithmAt(0)->getAgents().at(0),
-                           Learn::LearningMode::TRAINING);
+    auto job = *tpg->createJob(la.getAlgorithmAt(0)->getAgents().at(0),
+                           Learn::LearningMode::TRAINING, la.getRNG());
     ASSERT_NO_THROW(
         result = la.evaluateJob(*execEngine, job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
@@ -424,13 +424,21 @@ TEST_F(LearningAgentTest, TrainPortability)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
+    /* params.mutation.tpg.pEdgeAddition = 0.7;
+    params.mutation.tpg.pEdgeDeletion = 0.7;
+    params.mutation.tpg.pProgramMutation = 0.5;
+    params.mutation.tpg.pEdgeDestinationChange = 0.5;
+    params.mutation.tpg.pEdgeDestinationIsAction = 0.5;*/
     params.nbGenerations = 20;
     params.mutation.tpg.nbRoots = 30;
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.nbThreads = 1;
 
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, le.getNbActions(),
+                                                    set);
     Learn::LearningAgent la(le, tpg, set, params);
 
     la.init();

@@ -64,15 +64,13 @@ void Algorithm::Mutator::mutatePopulation(
     if (this->currentContext->agentsClonable.size() <= 1) {
         throw std::runtime_error("At least two agents should survive the selection");
     } 
-    const Selector::SelectionContext& context = selector->updateContext();
-   
     std::vector<std::shared_ptr<const Algorithm::Agent>> subAgentsClonable1(
-        context.agentsClonable);
+        this->currentContext->agentsClonable);
 
     // Divide agents clonable into two subVector with half of the agents, randomly
     // selected.
     std::vector<std::shared_ptr<const Algorithm::Agent>> subAgentsClonable2;
-    for (size_t idx = 0; idx < context.agentsClonable.size() / 2; idx++) {
+    for (size_t idx = 0; false && idx < this->currentContext->agentsClonable.size() / 2; idx++) {
         auto agent = subAgentsClonable1.at(
             rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1));
         subAgentsClonable2.push_back(agent);
@@ -85,7 +83,7 @@ void Algorithm::Mutator::mutatePopulation(
 
     
     // Create the new agents
-    uint64_t nbAgentsToReach = manager->getAgents().size() + context.nbAgentsToCreate;
+    uint64_t nbAgentsToReach = manager->getAgents().size() + this->currentContext->nbAgentsToCreate;
     while (manager->getAgents().size() < nbAgentsToReach) {
 
         // Clone one random offspring.
@@ -118,9 +116,11 @@ void Algorithm::Mutator::mutatePopulation(
             }
             else {
                 // Apply mutations to the root and increase the number of roots
-                this->mutateAgent(offspring, graph, manager, newSubAgents, params, rng);
+                this->mutateAgent(offspring, graph, manager, newSubAgents,
+                                  params, rng);
             }
         }
+
     }
 
     // Mutate the new subAgents, because subAgents could create subAgents, the list is updated and a while loop is done until the vector is empty.

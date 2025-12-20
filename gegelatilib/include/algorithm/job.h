@@ -39,10 +39,10 @@
 #include <cstdint>
 #include <vector>
 
-#include "algorithm/agent.h"
-#include "algorithm/algorithm.h"
+#include "algorithm/agentManager.h"
+#include "selector/selector.h"
 
-namespace Learn {
+namespace Algorithm {
     /**
      * \brief This class embeds agents for the simulations.
      *
@@ -56,12 +56,17 @@ namespace Learn {
         /**
          * The agent contained in the job.
          */
-        std::shared_ptr<const Algorithm::Agent> agent;
+        std::shared_ptr<const Agent> agent;
+        
+        /**
+         * The agent contained in the job.
+         */
+        std::shared_ptr<const AgentManager> manager;
 
         /**
-         * The algorithm responsible of the agent.
+         * The selector responsible of the agent.
          */
-        std::shared_ptr<const Algorithm::Algorithm> algorithm;
+        std::shared_ptr<const Selector::Selector> selector;
 
         /**
          * Index associated to this job.
@@ -82,14 +87,15 @@ namespace Learn {
          * Learning Agents will be able to use them later.
          *
          * @param[in] agent The agent that will be encapsulated into the job.
-         * @param[in] algorithm The algorithm responsible of the agent.
+         * @param[in] manager The agent Manager of the agent.
+         * @param[in] selector The selector responsible of the agent.
          * @param[in] archiveSeed The archive seed that will be used with this
          * job.
          * @param[in] idx The index of this job.
          */
-        Job(std::shared_ptr<const Algorithm::Agent> agent, std::shared_ptr<const Algorithm::Algorithm> algorithm, uint64_t archiveSeed = 0,
+        Job(std::shared_ptr<const Algorithm::Agent> agent, std::shared_ptr<const AgentManager> manager, std::shared_ptr<const Selector::Selector> selector, uint64_t archiveSeed = 0,
             uint64_t idx = 0)
-            : agent(agent), algorithm{algorithm}, archiveSeed(archiveSeed), idx(idx)
+            : agent(agent), manager{manager}, selector{selector}, archiveSeed(archiveSeed), idx(idx)
         {
         }
 
@@ -118,11 +124,19 @@ namespace Learn {
         virtual std::shared_ptr<const Algorithm::Agent> getAgent() const;
 
         /**
-         * \brief Getter of the algorithm.
+         * \brief Getter of the manager.
          *
-         * @return The algorithm embedded by the job.
+         * @return The manager embedded by the job.
          */
-        virtual std::shared_ptr<const Algorithm::Algorithm> getAlgorithm() const;
+        virtual std::shared_ptr<const Algorithm::AgentManager> getManager() const;
+
+        /**
+         * \brief Getter of the selector.
+         *
+         * @return The selector embedded by the job.
+         */
+        virtual std::shared_ptr<const Selector::Selector> getSelector() const;
+
     };
 } // namespace Learn
 

@@ -71,6 +71,9 @@ namespace Algorithm::LGP {
 
 
 namespace Algorithm{
+    /**
+     * To make the aglrotihm accessible from algorithm namespace
+     */
     using LGPAlgorithm = LGP::LGPAlgorithm;
 }
 

@@ -42,3 +42,8 @@ void Algorithm::TPG::TPGAlgorithm::init(RNG::RNG& rng, Learn::LearningEnvironmen
 
     Algorithm::Algorithm::init(rng, le, graph);
 }
+
+void Algorithm::TPG::TPGAlgorithm::activeJob(Job& job)
+{
+    this->archive->setRandomSeed(job.getArchiveSeed());
+}

@@ -9,7 +9,11 @@ std::shared_ptr<const EvoGraph::Vertex> Algorithm::TPG::TPGAgent::getVertex() co
 
 bool Algorithm::TPG::TPGAgent::isValid() const
 {
-    return this->vertex->getOutgoingEdges().size() > 2;
+    if(std::dynamic_pointer_cast<const EvoGraph::Team>(this->vertex) != nullptr){
+        return this->vertex->getOutgoingEdges().size() > 1;
+    } else {
+        return true;
+    }
 }
 
 void Algorithm::TPG::TPGAgent::setVertex(std::shared_ptr<const EvoGraph::Vertex> newVertex)

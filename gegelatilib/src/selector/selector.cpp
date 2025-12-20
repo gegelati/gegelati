@@ -181,3 +181,23 @@ const Selector::SelectionContext& Selector::Selector::updateContext()
 
     return context;
 }
+
+
+bool Selector::Selector::isAgentEvalSkipped(
+    std::shared_ptr<const Algorithm::Agent> agent,
+    std::shared_ptr<Learn::EvaluationResult>& previousResult) const
+{
+    // Has the root already been evaluated more times than
+    // params.maxNbEvaluationPerPolicy
+    const auto& iter = this->resultsPerAgent.find(agent);
+    if (iter != this->resultsPerAgent.end()) {
+        // The root has already been evaluated
+        previousResult = iter->second;
+        return iter->second->getNbEvaluation() >=
+               this->params.maxNbEvaluationPerPolicy;
+    }
+    else {
+        previousResult = nullptr;
+        return false;
+    }
+}
