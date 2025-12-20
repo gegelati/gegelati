@@ -27,6 +27,9 @@ namespace Algorithm {
         /// Sub-executionEngine for sub-algorithms
         std::map<std::string, std::unique_ptr<ExecutionEngine>> subExecutionEngines;
 
+        /// Boolean indicating if this executionEngine will be executed for training or testing purpose.
+        bool isTraining = false;
+
 
     public:
 
@@ -34,19 +37,28 @@ namespace Algorithm {
          * \brief Main ExecutionEngine constructor.
          * 
          * \param[in] algorithmName name of the algorithm used.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(std::string algorithmName): algorithmName{algorithmName} {}
+        ExecutionEngine(std::string algorithmName, bool isTraining = false): algorithmName{algorithmName}, isTraining{isTraining} {}
 
         /**
          * \brief Main ExecutionEngine constructor.
          * 
          * \param[in] executedAgent the agent to execute.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(std::shared_ptr<const Agent> executedAgent): executedAgent{executedAgent}, algorithmName{executedAgent->getAlgorithmName()} {
+        ExecutionEngine(std::shared_ptr<const Agent> executedAgent, bool isTraining = false): executedAgent{executedAgent}, algorithmName{executedAgent->getAlgorithmName()}, isTraining{isTraining} {
             if(executedAgent->getAlgorithmName() != algorithmName){
                 throw std::runtime_error("Algorithm::ExecutionEngine::ExecutionEngine trying to set an agent from a different algorithm");
             }
         }
+
+        /**
+         * \brief setter for the isTraining attribute. 
+         * 
+         * \param[in] isTraining new value of boolean isTraining
+         */
+        void setExecutionMode(bool isTraining);
 
         /**
          * \brief Return the name of the algorithm.
@@ -81,6 +93,15 @@ namespace Algorithm {
         
         virtual void setDataSources(
             const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSrc);
+
+        /**
+         * \brief Get the DataHandler of the ExecutionEngine.
+         *
+         * \return a vector containing references to the dataHandlers of the
+         * dataSourses attribute (i.e. without the registers)
+         */
+        virtual const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+        getDataSources() const = 0;
 
     }; // namespace ExecutionEngine
 

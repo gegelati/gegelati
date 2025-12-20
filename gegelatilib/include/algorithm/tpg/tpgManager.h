@@ -24,6 +24,9 @@ namespace Algorithm::TPG {
         /// Name of the program algorithm associated with the TPG agents.
         std::string programAlgorithmName;
 
+        /// Archive used by this TPG
+        std::reference_wrapper<Archive> archive;
+
 
         /**
          * \brief Get the TPGAgent from a const Agent pointer.
@@ -38,8 +41,9 @@ namespace Algorithm::TPG {
          * \brief Main TPGManager constructor.
          * 
          * \param[in] nbOutputs number of outputs of the agents.
+         * \param[in] archive Archive used by this TPG
          */
-        TPGManager(size_t nbOutputs) : AgentManager(nbOutputs) {};
+        TPGManager(size_t nbOutputs, Archive& archive) : AgentManager(nbOutputs), archive{archive} {};
 
         /**
          * \brief Set the name of the program algorithm associated with the TPG agents.
@@ -106,7 +110,7 @@ namespace Algorithm::TPG {
         /**
          * \brief create and return a TPG execution engine.
          */
-        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const override;
+        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(bool isTraining = false) const override;
     };
 }; // namespace Algorithm
 

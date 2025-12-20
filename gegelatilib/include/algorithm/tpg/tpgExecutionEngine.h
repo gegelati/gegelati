@@ -20,7 +20,7 @@ namespace Algorithm::TPG {
         std::unique_ptr<ExecutionEngine> programExecutionEngine;
 
         /// Archive used by the program agents.
-        std::shared_ptr<Archive> archive;
+        std::reference_wrapper<Archive> archive;
 
     public:
 
@@ -28,27 +28,31 @@ namespace Algorithm::TPG {
          * \brief TPGExecutionEngine constructor.
          * 
          * \param[in] algorithmName name of the algorithm used.
+         * \param[in] archive Archive used by the program agents.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        TPGExecutionEngine(std::string algorithmName): ExecutionEngine(algorithmName) {}
+        TPGExecutionEngine(std::string algorithmName, Archive& archive, bool isTraining = false): ExecutionEngine(algorithmName, isTraining), archive{archive} {}
 
         /**
          * \brief TPGExecutionEngine constructor.
          * 
          * \param[in] executedAgent the agent to execute.
+         * \param[in] archive Archive used by the program agents.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        TPGExecutionEngine(std::shared_ptr<const Agent> executedAgent): ExecutionEngine(executedAgent) {}
+        TPGExecutionEngine(std::shared_ptr<const Agent> executedAgent, Archive& archive, bool isTraining = false): ExecutionEngine(executedAgent, isTraining), archive{archive} {}
 
         /**
          * Setter for the archive
          * 
          * \param[in] archive Archive used by the program agents.
          */
-        void setArchive(std::shared_ptr<Archive> archive);
+        void setArchive(Archive& archive);
 
         /**
          * \brief getter for the archive.
          */
-        std::shared_ptr<Archive> getArchive();
+        Archive& getArchive();
         
         /**
          * \brief Set the program execution engine associated with the TPG agents.
@@ -108,6 +112,13 @@ namespace Algorithm::TPG {
          *         Graph execution is at the end of the returned vector.
          */
         virtual std::vector<double> execute() override; 
+
+        
+        /**
+         * \brief Inherrited from ExecutionEngine
+         */
+        virtual const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+        getDataSources() const override;
         
         
     }; 

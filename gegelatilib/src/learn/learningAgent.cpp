@@ -119,6 +119,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // Set the agent to execute
     execEngine.setExecutedAgent(agent);
 
+    execEngine.setExecutionMode(mode == LearningMode::TRAINING);
+
     // Init results
     double result = 0.0;
 

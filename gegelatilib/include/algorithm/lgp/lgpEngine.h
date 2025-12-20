@@ -93,9 +93,10 @@ namespace Algorithm::LGP {
          *
          * \param[in] env The Environment in which the Program will be executed.
          * \param[in] algorithmName name of the algorithm used.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPEngine(const Environment& env, std::string algorithmName)
-            : ExecutionEngine{algorithmName}, programCounter{0}, registers{env.getParams().nbRegisters},
+        LGPEngine(const Environment& env, std::string algorithmName, bool isTraining = false)
+            : ExecutionEngine{algorithmName, isTraining}, programCounter{0}, registers{env.getParams().nbRegisters},
               dataSources{env.getDataSources()}
         {
             // Setup the data sources
@@ -128,11 +129,12 @@ namespace Algorithm::LGP {
          * generated.
          * \param[in] dataSrc The DataHandler with which the Program
          * will be executed.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
         template <class T>
         LGPEngine(std::shared_ptr<const LGPAgent> executedAgent,
-                      const std::vector<std::reference_wrapper<T>>& dataSrc)
-            : ExecutionEngine{executedAgent}, programCounter{0},
+                      const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
+            : ExecutionEngine{executedAgent, isTraining}, programCounter{0},
               registers{executedAgent->getEnvironment()->getParams().nbRegisters}
         {
             // Check that T is either convertible to a const DataHandler
@@ -165,9 +167,10 @@ namespace Algorithm::LGP {
          *
          * \param[in] executedAgent the const Program that will be executed or
          * generated.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPEngine(std::shared_ptr<const LGPAgent> executedAgent)
-            : LGPEngine(executedAgent, executedAgent->getEnvironment()->getDataSources()){};
+        LGPEngine(std::shared_ptr<const LGPAgent> executedAgent, bool isTraining = false)
+            : LGPEngine(executedAgent, executedAgent->getEnvironment()->getDataSources(), isTraining){};
 
         /**
          * \brief operator parenthesis used when iterating through the program
@@ -198,13 +201,10 @@ namespace Algorithm::LGP {
             const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSrc) override;
 
         /**
-         * \brief Get the DataHandler of the ProgramExecutionEngine.
-         *
-         * \return a vector containing references to the dataHandlers of the
-         * dataSourses attribute (i.e. without the registers)
+         * \brief Inherrited from ExecutionEngine
          */
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-        getDataSources() const;
+        virtual const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+        getDataSources() const override;
 
         /**
          * \brief Increments the programCounter and checks for the end of the

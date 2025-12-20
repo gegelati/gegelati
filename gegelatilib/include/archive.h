@@ -41,10 +41,11 @@
 #include <map>
 #include <memory>
 #include <random>
+#include <functional>
 
 #include "data/dataHandler.h"
+#include "algorithm/agent.h"
 #include "mutator/rng.h"
-#include "program/program.h"
 
 /**
  * \brief Class used to store one recording of an Archive.
@@ -56,8 +57,8 @@
  */
 typedef struct ArchiveRecording
 {
-    /// Pointer to the Program. This pointer may point to a freed program.
-    const Program::Program* const prog;
+    /// Pointer to the agent Program. This pointer may point to a freed agent.
+    std::reference_wrapper<const Algorithm::Agent> const agent;
 
     /// Hash of the set of DataHandler for this recording
     const size_t dataHash;
@@ -117,7 +118,7 @@ class Archive
      *
      * The Map is used to speed the unicity tests.
      */
-    std::map<const Program::Program*, std::deque<ArchiveRecording>>
+    std::map<std::reference_wrapper<const Algorithm::Agent>, std::deque<ArchiveRecording>>
         recordingsPerProgram;
 
     /// Recordings of the Archive
@@ -200,7 +201,7 @@ class Archive
      * If an identical recording is already in the Archive (same hash, same
      * Program), the recording is not added.
      *
-     * \param[in] program the Program associated to this recording.
+     * \param[in] agent the agent Program associated to this recording.
      * \param[in] dHandler the set of dataHandler the Program worked on to
      *                     generate the associated result.
      * \param[in] result double value produced by the Program.
@@ -208,7 +209,7 @@ class Archive
      *                   insertion.
      */
     virtual void addRecording(
-        const Program::Program* const program,
+        const Algorithm::Agent& agent,
         const std::vector<std::reference_wrapper<const Data::DataHandler>>&
             dHandler,
         double result, bool forced = false);

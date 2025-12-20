@@ -3,14 +3,15 @@
 #include "algorithm/tpg/tpgExecutionEngine.h"
 
 
-void Algorithm::TPG::TPGExecutionEngine::setArchive(std::shared_ptr<Archive> archive)
+void Algorithm::TPG::TPGExecutionEngine::setArchive(Archive& archive)
 {
     this->archive = archive;
 }
-std::shared_ptr<Archive> Algorithm::TPG::TPGExecutionEngine::getArchive()
+Archive& Algorithm::TPG::TPGExecutionEngine::getArchive()
 {
     return archive;
 }
+
 
 double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& edge)
 {
@@ -26,11 +27,12 @@ double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& ed
     result = (std::isnan(result)) ? -std::numeric_limits<double>::infinity()
                                   : result;
 
+
     // Put the result in the archive before returning it.
-    /*if (this->archive != NULL) {
-        this->archive->addRecording(&prog, progExecutionEngine.getDataSources(),
+    if (this->isTraining) {
+        this->archive.get().addRecording(*edge.getProgram(), this->getDataSources(),
                                     result);
-    }*/
+    }
 
     return result;
 }
@@ -86,4 +88,10 @@ std::vector<double> Algorithm::TPG::TPGExecutionEngine::execute()
 
     std::vector<double> actionID = {(double)std::dynamic_pointer_cast<const EvoGraph::Action>(currentVertex)->getActionID()};
     return actionID;
+}
+
+
+const std::vector<std::reference_wrapper<const Data::DataHandler>>& Algorithm::TPG::TPGExecutionEngine::getDataSources() const
+{
+    return this->programExecutionEngine->getDataSources();
 }

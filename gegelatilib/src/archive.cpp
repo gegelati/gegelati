@@ -70,7 +70,7 @@ void Archive::setRandomSeed(size_t newSeed)
 }
 
 void Archive::addRecording(
-    const Program::Program* const program,
+    const Algorithm::Agent& agent,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dHandler,
     double result, bool forced)
@@ -96,16 +96,16 @@ void Archive::addRecording(
         }
 
         // Create and stores the recording
-        ArchiveRecording recording{program, hash, result};
+        ArchiveRecording recording{agent, hash, result};
         this->recordings.push_back(recording);
 
         // Update the recordings per Program
-        auto iterNbRecordings = this->recordingsPerProgram.find(program);
+        auto iterNbRecordings = this->recordingsPerProgram.find(agent);
         if (iterNbRecordings != this->recordingsPerProgram.end()) {
             iterNbRecordings->second.push_back(recording);
         }
         else {
-            this->recordingsPerProgram.insert({program, {recording}});
+            this->recordingsPerProgram.insert({agent, {recording}});
         }
 
         // Check if Archive max size was reached (or exceeded)
@@ -138,7 +138,7 @@ void Archive::addRecording(
 
             // Update the recordingsPerProgram of the corresponding Program,
             // and remove it if it was the last.
-            auto iter = this->recordingsPerProgram.find(rec.prog);
+            auto iter = this->recordingsPerProgram.find(rec.agent);
             iter->second.pop_front();
             if (iter->second.size() == 0) {
                 this->recordingsPerProgram.erase(iter);

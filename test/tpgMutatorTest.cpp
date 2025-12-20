@@ -125,7 +125,7 @@ class TpgMutatorTest : public ::testing::Test
         lgpMutator->setAlgorithmName("fakeLgp");
         lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpManager->createAgent(graph));
 
-        tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(nbActions);
+        tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(nbActions, *archive);
         tpgManager->setAlgorithmName("fakeTpg");
         tpgManager->addSubManager(lgpManager);
         tpgManager->setProgramAlgorithmName("fakeLgp");
@@ -586,12 +586,9 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
     params.mutation.prog.maxConstValue = 1;
 
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine();
-    auto tee =
-        dynamic_cast<Algorithm::TPG::TPGExecutionEngine*>(execEngine.get());
-    tee->setArchive(archive);
-    tee->setExecutedAgent(tpgManager->getAgents().at(0));
-    tee->execute();
+    auto execEngine = tpgManager->createExecutionEngine(true);
+    execEngine->setExecutedAgent(tpgManager->getAgents().at(0));
+    execEngine->execute();
 
     // Mutate (params selected for code coverage)
     params.mutation.prog.pAdd = 0.5;
@@ -908,12 +905,10 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
     params.mutation.prog.maxConstValue = 1;
 
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine();
-    auto tee =
-        dynamic_cast<Algorithm::TPG::TPGExecutionEngine*>(execEngine.get());
-    tee->setArchive(archive);
-    tee->setExecutedAgent(tpgManager->getAgents().at(0));
-    tee->execute();
+    auto execEngine = tpgManager->createExecutionEngine(true);
+    execEngine->setExecutedAgent(tpgManager->getAgents().at(0));
+    execEngine->execute();
+
 
     std::vector<std::shared_ptr<const Algorithm::Agent>> newPrograms;
 
@@ -954,12 +949,10 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     params.mutation.prog.maxConstValue = 1;
 
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine();
-    auto tee =
-        dynamic_cast<Algorithm::TPG::TPGExecutionEngine*>(execEngine.get());
-    tee->setArchive(archive);
-    tee->setExecutedAgent(tpgManager->getAgents().at(0));
-    tee->execute();
+    auto execEngine = tpgManager->createExecutionEngine(true);
+    execEngine->setExecutedAgent(tpgManager->getAgents().at(0));
+    execEngine->execute();
+
 
     // Mutate (params selected for code coverage)
     params.mutation.prog.pAdd = 0.5;
@@ -983,7 +976,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     // Check the unicity against the Archive
     // Verify new program uniqueness
     
-    execEngine = lgpManager->createExecutionEngine();
+    execEngine = lgpManager->createExecutionEngine(true);
     execEngine->setExecutedAgent(newPrograms.front());
     double result = execEngine->execute().at(0);
     std::map<size_t, double> hashesAndResults = {
@@ -1019,13 +1012,10 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 
     tpgMutator->initRandomPopulation(graph, tpgManager, params, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine();
-    auto tee =
-        dynamic_cast<Algorithm::TPG::TPGExecutionEngine*>(execEngine.get());
-    tee->setArchive(archive);
+    auto execEngine = tpgManager->createExecutionEngine(true);
     for (auto agent :tpgManager->getAgents()) {
-        tee->setExecutedAgent(agent);
-        tee->execute();
+        execEngine->setExecutedAgent(agent);
+        execEngine->execute();
     }
 
     // Create a list of Programs to mutate
@@ -1066,13 +1056,10 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 
     tpgMutator->initRandomPopulation(graph, tpgManager, params, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine();
-    auto tee =
-        dynamic_cast<Algorithm::TPG::TPGExecutionEngine*>(execEngine.get());
-    tee->setArchive(archive);
+    auto execEngine = tpgManager->createExecutionEngine(true);
     for (auto agent :tpgManager->getAgents()) {
-        tee->setExecutedAgent(agent);
-        tee->execute();
+        execEngine->setExecutedAgent(agent);
+        execEngine->execute();
     }
 
     // Create a list of Programs to mutate
@@ -1111,15 +1098,13 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     params.mutation.prog.maxConstValue = 10;
 
 
+
     tpgMutator->initRandomPopulation(graph, tpgManager, params, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine();
-    auto tee =
-        dynamic_cast<Algorithm::TPG::TPGExecutionEngine*>(execEngine.get());
-    tee->setArchive(archive);
+    auto execEngine = tpgManager->createExecutionEngine(true);
     for (auto agent :tpgManager->getAgents()) {
-        tee->setExecutedAgent(agent);
-        tee->execute();
+        execEngine->setExecutedAgent(agent);
+        execEngine->execute();
     }
 
 
@@ -1145,6 +1130,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
                   std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(newAgentsParallel.at(i))->getNbLines())
             << "Different number of line in mutatedPrograms.";
     }
+
 }
 
 TEST_F(TpgMutatorTest, TPGMutatorPopulate)
@@ -1174,13 +1160,10 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
 
     tpgMutator->initRandomPopulation(graph, tpgManager, params, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine();
-    auto tee =
-        dynamic_cast<Algorithm::TPG::TPGExecutionEngine*>(execEngine.get());
-    tee->setArchive(archive);
+    auto execEngine = tpgManager->createExecutionEngine(true);
     for (auto agent :tpgManager->getAgents()) {
-        tee->setExecutedAgent(agent);
-        tee->execute();
+        execEngine->setExecutedAgent(agent);
+        execEngine->execute();
     }
 
     // Check the correct execution
@@ -1193,7 +1176,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
 
     // Increase coverage with a TPG that has no root team
     std::shared_ptr<EvoGraph::Graph> graph2 = std::make_shared<EvoGraph::Graph>(*e);
-    auto tpgManager2 = std::make_shared<Algorithm::TPG::TPGManager>(nbActions);
+    auto tpgManager2 = std::make_shared<Algorithm::TPG::TPGManager>(nbActions, *archive);
     tpgManager2->setAlgorithmName("fakeTpg");
     tpgManager2->addSubManager(lgpManager);
     ASSERT_NO_THROW(tpgMutator->mutatePopulation(

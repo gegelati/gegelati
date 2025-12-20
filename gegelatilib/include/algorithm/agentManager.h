@@ -131,9 +131,11 @@ namespace Algorithm {
         /**
          * \brief Create the execution engine associated with the algorithm.
          * 
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
+         * 
          * \return a shared pointer to the created execution engine.
          */
-        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const = 0;
+        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(bool isTraining = false) const = 0;
     };
 }; // namespace Algorithm
 

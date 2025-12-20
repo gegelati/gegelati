@@ -25,3 +25,12 @@ void Algorithm::ExecutionEngine::setDataSources(
         itSubExec++;
     }
 }
+
+void Algorithm::ExecutionEngine::setExecutionMode(bool isTraining)
+{
+    this->isTraining = isTraining;
+
+    for(const auto& pairSubExecEngine: this->subExecutionEngines){
+        pairSubExecEngine.second->setExecutionMode(isTraining);
+    }
+}

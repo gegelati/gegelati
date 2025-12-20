@@ -161,10 +161,8 @@ namespace Algorithm {
 
             /**
              * \brief Create a new ExecutionEngine for this Algorithm.
-             * 
-             * \return a shared pointer to the created ExecutionEngine.
              */
-            virtual std::unique_ptr<ExecutionEngine> createExecutionEngine() const override;
+            virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(bool isTraining = false) const override;
 
         };
     } // namespace LGP

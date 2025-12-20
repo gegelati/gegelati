@@ -74,8 +74,9 @@ namespace Algorithm::LGP {
          *
          * \param[in] env The Environment in which the Program will be executed.
          * \param[in] algorithmName name of the algorithm used.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPExecutionEngine(const Environment& env, std::string algorithmName) : LGPEngine(env, algorithmName){};
+        LGPExecutionEngine(const Environment& env, std::string algorithmName, bool isTraining = false) : LGPEngine(env, algorithmName, isTraining){};
 
         /**
          * \brief Constructor of the class.
@@ -91,12 +92,13 @@ namespace Algorithm::LGP {
          * generated.
          * \param[in] dataSrc The DataHandler with which the Program
          * will be executed.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
         template <class T>
         LGPExecutionEngine(
             std::shared_ptr<const LGPAgent> executedAgent,
-            const std::vector<std::reference_wrapper<T>>& dataSrc)
-            : LGPEngine(executedAgent, dataSrc){};
+            const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
+            : LGPEngine(executedAgent, dataSrc, isTraining){};
 
         /**
          * \brief Constructor of the class.
@@ -106,9 +108,10 @@ namespace Algorithm::LGP {
          *
          * \param[in] executedAgent the const Program that will be executed or
          * generated.
+         * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPExecutionEngine(std::shared_ptr<const LGPAgent> executedAgent)
-            : LGPEngine(executedAgent){};
+        LGPExecutionEngine(std::shared_ptr<const LGPAgent> executedAgent, bool isTraining = false)
+            : LGPEngine(executedAgent, isTraining){};
 
         /**
          * \brief Execute the current line of the program.

@@ -37,15 +37,15 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
 
+#include "algorithm/lgp/lgpAgent.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "mutator/rng.h"
-#include "program/line.h"
-#include "program/program.h"
 
 #include "archive.h"
 
@@ -56,8 +56,8 @@ class ArchiveTest : public ::testing::Test
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    Environment* e;
-    Program::Program* p;
+    std::shared_ptr<const Environment> e;
+    std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent;
     Learn::LearningParameters params;
 
     virtual void SetUp()
@@ -74,14 +74,12 @@ class ArchiveTest : public ::testing::Test
 
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
-        e = new Environment(set, params, vect);
-        p = new Program::Program(*e, false);
+        e = std::make_shared<Environment>(set, params, vect);
+        lgpAgent = std::make_shared<const Algorithm::LGP::LGPAgent>(e, 1, "fakeLGP");
     }
 
     virtual void TearDown()
     {
-        delete p;
-        delete e;
         delete (&(vect.at(0).get()));
         delete (&(vect.at(1).get()));
         delete (&set.getInstruction(0));
@@ -120,7 +118,7 @@ TEST_F(ArchiveTest, AddRecordingTests)
     Archive archive(3, 1.0);
 
     // Add a fictive recording
-    ASSERT_NO_THROW(archive.addRecording(p, vect, 1.3))
+    ASSERT_NO_THROW(archive.addRecording(*lgpAgent, vect, 1.3))
         << "Adding a recording to the empty archive failed.";
 
     ASSERT_EQ(archive.getNbRecordings(), 1)
@@ -129,8 +127,8 @@ TEST_F(ArchiveTest, AddRecordingTests)
         << "Number or dataHandlers copied in the archive is incorrect.";
 
     // Add other recordings with the same DataHandlers
-    Program::Program p2(*e, false);
-    ASSERT_NO_THROW(archive.addRecording(&p2, vect, 0.3))
+    auto lgpAgent2 = std::make_shared<const Algorithm::LGP::LGPAgent>(e, 1, "fakeLGP");
+    ASSERT_NO_THROW(archive.addRecording(*lgpAgent2, vect, 0.3))
         << "Adding a recording to the non-empty archive failed.";
     ASSERT_EQ(archive.getNbRecordings(), 2)
         << "Number or recordings in the archive is incorrect.";
@@ -143,7 +141,7 @@ TEST_F(ArchiveTest, AddRecordingTests)
         (Data::PrimitiveTypeArray<int>&)vect.at(1).get();
 
     d.setDataAt(typeid(int), 2, 1337);
-    ASSERT_NO_THROW(archive.addRecording(p, vect, 0.2))
+    ASSERT_NO_THROW(archive.addRecording(*lgpAgent, vect, 0.2))
         << "Adding a recording to the non-empty archive failed.";
     ASSERT_EQ(archive.getNbRecordings(), 3)
         << "Number or recordings in the archive is incorrect.";
@@ -151,7 +149,7 @@ TEST_F(ArchiveTest, AddRecordingTests)
         << "Number or dataHandlers copied in the archive is incorrect.";
 
     // Reach the archive size limit.
-    ASSERT_NO_THROW(archive.addRecording(&p2, vect, 0.5))
+    ASSERT_NO_THROW(archive.addRecording(*lgpAgent2, vect, 0.5))
         << "Adding a recording to the full archive failed.";
     ASSERT_EQ(archive.getNbRecordings(), 3)
         << "Number or recordings in the archive is incorrect.";
@@ -159,8 +157,8 @@ TEST_F(ArchiveTest, AddRecordingTests)
         << "Number or dataHandlers copied in the archive is incorrect.";
 
     // Evict a recording again, and its DataHandler copy.
-    Program::Program p3(*e, false);
-    ASSERT_NO_THROW(archive.addRecording(&p3, vect, 1.5))
+    auto lgpAgent3 = std::make_shared<const Algorithm::LGP::LGPAgent>(e, 1, "fakeLGP");
+    ASSERT_NO_THROW(archive.addRecording(*lgpAgent3, vect, 1.5))
         << "Adding a recording to the full archive failed.";
     ASSERT_EQ(archive.getNbRecordings(), 3)
         << "Number or recordings in the archive is incorrect.";
@@ -180,7 +178,7 @@ TEST_F(ArchiveTest, AddRecordingWithProbabilityTests)
             dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
                 vect.at(1).get()))
             .setDataAt(typeid(int), 0, i);
-        ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i))
+        ASSERT_NO_THROW(archive.addRecording(*lgpAgent, vect, (double)i))
             << "Adding a recording to the archive failed.";
     }
     ASSERT_EQ(archive.getNbRecordings(), 4)
@@ -200,7 +198,7 @@ TEST_F(ArchiveTest, At)
             dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
                 vect.at(1).get()))
             .setDataAt(typeid(int), 0, i);
-        ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i))
+        ASSERT_NO_THROW(archive.addRecording(*lgpAgent, vect, (double)i))
             << "Adding a recording to the archive failed.";
     }
 
@@ -229,7 +227,7 @@ TEST_F(ArchiveTest, SetSeed)
             dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
                 vect.at(1).get()))
             .setDataAt(typeid(int), 0, i);
-        ASSERT_NO_THROW(archive.addRecording(p, vect, (double)i))
+        ASSERT_NO_THROW(archive.addRecording(*lgpAgent, vect, (double)i))
             << "Adding a recording to the archive failed.";
     }
     // With a seed set to 0, result is available in
@@ -249,17 +247,17 @@ TEST_F(ArchiveTest, areProgramResultsUnique)
                 vect.at(1).get()));
 
     // Add a few fictive recordings with p
-    archive.addRecording(p, vect, 1.0);
+    archive.addRecording(*lgpAgent, vect, 1.0);
     d.setDataAt(typeid(int), 2, 1337);
     size_t hash2 = archive.getCombinedHash(vect);
-    archive.addRecording(p, vect, 1.5);
+    archive.addRecording(*lgpAgent, vect, 1.5);
 
     // Add a few fictive recordings with p2
-    Program::Program p2(*e, false);
-    archive.addRecording(&p2, vect, 2.0);
+    auto lgpAgent2 = std::make_shared<const Algorithm::LGP::LGPAgent>(e, 1, "fakeLGP");
+    archive.addRecording(*lgpAgent2, vect, 2.0);
     d.setDataAt(typeid(int), 2, 42);
     size_t hash3 = archive.getCombinedHash(vect);
-    archive.addRecording(&p2, vect, 2.5);
+    archive.addRecording(*lgpAgent2, vect, 2.5);
 
     // results are entirely different
     std::map<size_t, double> hashesAndResults1 = {{hash1, 3.0}, {hash2, 3.5}};
@@ -280,15 +278,15 @@ TEST_F(ArchiveTest, DataHandlersAccessors)
     Archive archive(4);
 
     // Add a few fictive recordings
-    archive.addRecording(p, vect, 1.0);
-    archive.addRecording(p, vect, 1.5);
+    archive.addRecording(*lgpAgent, vect, 1.0);
+    archive.addRecording(*lgpAgent, vect, 1.5);
     Data::PrimitiveTypeArray<int>& d =
         const_cast<Data::PrimitiveTypeArray<int>&>(
             dynamic_cast<const Data::PrimitiveTypeArray<int>&>(
                 vect.at(1).get()));
     d.setDataAt(typeid(int), 2, 1337);
-    archive.addRecording(p, vect, 2.0);
-    archive.addRecording(p, vect, 2.3);
+    archive.addRecording(*lgpAgent, vect, 2.0);
+    archive.addRecording(*lgpAgent, vect, 2.3);
 
     ASSERT_TRUE(archive.hasDataHandlers(archive.getCombinedHash(vect)))
         << "Data handler should be detected as present within the archive.";
@@ -307,8 +305,8 @@ TEST_F(ArchiveTest, Clear)
         << "Clearing an empty archive should not fail.";
 
     // Add a few fictive recordings
-    archive.addRecording(p, vect, 1.0);
-    archive.addRecording(p, vect, 1.5);
+    archive.addRecording(*lgpAgent, vect, 1.0);
+    archive.addRecording(*lgpAgent, vect, 1.5);
 
     ASSERT_NO_THROW(archive.clear())
         << "Clearing a non-empty archive should not fail.";

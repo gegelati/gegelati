@@ -35,7 +35,7 @@ void Algorithm::TPG::TPGAlgorithm::init(RNG::RNG& rng, Learn::LearningEnvironmen
     std::shared_ptr<TPG::TPGMutator> tpgMutator = std::dynamic_pointer_cast<TPG::TPGMutator>(this->mutator);
     tpgMutator->setProgramAlgorithmName(this->programAlgorithmName);
 
-    this->manager = std::make_shared<TPG::TPGManager>(this->nbOutputs);
+    this->manager = std::make_shared<TPG::TPGManager>(this->nbOutputs, *this->archive);
     std::shared_ptr<TPG::TPGManager> tpgManager = std::dynamic_pointer_cast<TPG::TPGManager>(this->manager);
     tpgManager->setProgramAlgorithmName(this->programAlgorithmName);
 

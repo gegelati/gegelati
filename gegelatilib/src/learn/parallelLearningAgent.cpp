@@ -184,7 +184,7 @@ void Learn::ParallelLearningAgent::mergeArchiveMap(
                 reverseIterator->second->at(recordingIdx);
             // forced Insertion
             this->archive.addRecording(
-                recording.prog,
+                recording.agent,
                 reverseIterator->second->getDataHandlers().at(
                     recording.dataHash),
                 recording.result, true);
