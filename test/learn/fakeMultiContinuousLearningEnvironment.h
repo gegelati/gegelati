@@ -51,15 +51,18 @@ class FakeMultiContinuousLearningEnvironment : public Learn::LearningEnvironment
     int nbPositivesActions;
     int nbTurns;
 
+
   public:
     FakeMultiContinuousLearningEnvironment()
-        : LearningEnvironment(3, false), data(3), nbTurns(0)
+        : LearningEnvironment(Output::OutputHandler(std::vector<Output::Output>(3, Output::Output{-1.0, 1.0}))),
+        data(3), 
+        nbTurns(0)
     {
         reset();
         this->data.setDataAt(typeid(int), 0, 1);
         this->data.setDataAt(typeid(int), 1, 2);
         this->data.setDataAt(typeid(int), 2, 3);
-    };
+    }
 
     ~FakeMultiContinuousLearningEnvironment(){};
 
