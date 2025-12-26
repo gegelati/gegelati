@@ -103,7 +103,7 @@ class LearningAgentTest : public ::testing::Test
         params.mutation.prog.maxConstValue = 1;
         params.nbProgramConstant = 5;
 
-        tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, le.getNbActions(), set);
+        tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
     }
 
     virtual void TearDown()
@@ -138,7 +138,7 @@ TEST_F(LearningAgentTest, Init)
 
         
     params.selection._selectionMode = "wrongSelector";
-    tpg =  std::make_shared<Algorithm::TPGAlgorithm>(params, le.getNbActions(), set);
+    tpg =  std::make_shared<Algorithm::TPGAlgorithm>(params, set);
     Learn::LearningAgent la2(le, tpg, set, params);
 
     ASSERT_THROW(la2.init(), std::runtime_error)
@@ -356,7 +356,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     auto tpg = la.getAlgorithmAt(0);
-    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), tpg->getSelector(), params, la.getRNG(), le.getNbActions());
+    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), tpg->getSelector(), params, la.getRNG());
 
     size_t initialNbVertex = la.getGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
@@ -424,21 +424,14 @@ TEST_F(LearningAgentTest, TrainPortability)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
     params.selection.truncation.ratioDeletedRoots = 0.2;
-    /* params.mutation.tpg.pEdgeAddition = 0.7;
-    params.mutation.tpg.pEdgeDeletion = 0.7;
-    params.mutation.tpg.pProgramMutation = 0.5;
-    params.mutation.tpg.pEdgeDestinationChange = 0.5;
-    params.mutation.tpg.pEdgeDestinationIsAction = 0.5;*/
     params.nbGenerations = 20;
     params.mutation.tpg.nbRoots = 30;
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
-    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
-    params.nbThreads = 1;
+    params.nbThreads = 3;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, le.getNbActions(),
-                                                    set);
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
     Learn::LearningAgent la(le, tpg, set, params);
 
     la.init();
@@ -447,31 +440,31 @@ TEST_F(LearningAgentTest, TrainPortability)
     EvoGraph::Graph& tpg = *la.getGraph();
 
     // Useful when determinism is changed
-    std::cout<<tpg.getNbVertices()<<" "
+    /* std::cout << tpg.getNbVertices() << " "
              <<tpg.getNbRootVertices()<<" "
              <<tpg.getEdges().size()<<" "
              <<EvoGraph::Vertex::getVertexIDCounter()<<" "
              <<EvoGraph::Edge::getEdgeIDCounter()<<" "
              <<Algorithm::Agent::getAgentIDCounter()<<" "
 
-             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
 
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    ASSERT_EQ(tpg.getNbVertices(), 27)
+    ASSERT_EQ(tpg.getNbVertices(), 30)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 86)
+    ASSERT_EQ(tpg.getEdges().size(), 103)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 147)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 150)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 596)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 621)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 346)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 368)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 786532405746195131U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 4675012253163452921U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -584,6 +577,7 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 3;
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
 
     Learn::LearningAgent la(cle, tpg, set, params);
 
@@ -941,7 +935,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
 
-    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), tpg->getSelector(), params, la.getRNG(), le.getNbActions());
+    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), tpg->getSelector(), params, la.getRNG());
     size_t initialNbVertex = la.getGraph()->getNbVertices();
 
     // Seed selected so that an action becomes a root during next generation

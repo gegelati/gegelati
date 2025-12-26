@@ -79,7 +79,8 @@ class TpgMutatorTest : public ::testing::Test
 
     std::shared_ptr<Algorithm::TPG::TPGManager> tpgManager;
     std::shared_ptr<Algorithm::TPG::TPGMutator> tpgMutator;
-    uint64_t nbActions = 5;
+    Output::OutputHandler* actions;
+    Output::OutputHandler* lgpOutput;
 
     std::shared_ptr<Selector::TruncationSelector> selector;
 
@@ -87,6 +88,9 @@ class TpgMutatorTest : public ::testing::Test
 
     virtual void SetUp()
     {
+
+        actions = new Output::OutputHandler(5);
+        lgpOutput = new Output::OutputHandler(Output::Output());
 
         CounterReset::counterReset();
         vect.push_back(
@@ -119,13 +123,14 @@ class TpgMutatorTest : public ::testing::Test
 
         graph = std::make_shared<EvoGraph::Graph>(*e);
 
-        lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(e, 1);
+        
+        lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(e, *lgpOutput);
         lgpManager->setAlgorithmName("fakeLgp");
         lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>();
         lgpMutator->setAlgorithmName("fakeLgp");
         lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpManager->createAgent(graph));
 
-        tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(nbActions, *archive);
+        tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(*actions, *archive);
         tpgManager->setAlgorithmName("fakeTpg");
         tpgManager->addSubManager(lgpManager);
         tpgManager->setProgramAlgorithmName("fakeLgp");
@@ -170,6 +175,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
     RNG::RNG rng;
     rng.setSeed(0);
 
+
     params.mutation.tpg.maxInitOutgoingEdges = 4;
     params.mutation.prog.maxProgramSize = 96;
     params.mutation.prog.pConstantMutation = 0.5;
@@ -181,7 +187,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
         << "TPG Initialization failed.";
     auto vertexSet = graph->getVertices();
     // Check number or vertex, roots, actions, teams, edges
-    ASSERT_EQ(vertexSet.size(), nbActions + params.mutation.tpg.nbRoots)
+    ASSERT_EQ(vertexSet.size(), this->actions->front().getNbValues() + params.mutation.tpg.nbRoots)
         << "Number of vertices after initialization is incorrect.";
     ASSERT_EQ(graph->getRootVertices().size(), params.mutation.tpg.nbRoots)
         << "Number of root vertices after initialization is incorrect.";
@@ -190,7 +196,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
                                 return std::dynamic_pointer_cast<const EvoGraph::Action>(
                                            vert) != nullptr;
                             }),
-              nbActions)
+              this->actions->front().getNbValues())
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
                             [](std::shared_ptr<const EvoGraph::Vertex> vert) {
@@ -232,14 +238,14 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
     params.mutation.tpg.maxInitOutgoingEdges = 0;
-    nbActions = 1;
+    actions = new Output::OutputHandler(1);;
     ASSERT_THROW(
         tpgMutator->initRandomPopulation(graph, tpgManager, params, rng),
         std::runtime_error)
         << "TPG Initialization should fail with bad parameters.";
 
     // Test coverage: maxInitOutgoingEdges < 2 and initNbTeams > 0
-    nbActions = 10;
+    actions = new Output::OutputHandler(10);
     params.mutation.tpg.ratioTeamsOverActions = 0.5;
     params.mutation.tpg.nbRoots = 4;
     params.mutation.tpg.maxInitOutgoingEdges = 1;

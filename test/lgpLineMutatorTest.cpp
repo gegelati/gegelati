@@ -24,11 +24,14 @@ class LineMutatorTest : public ::testing::Test
     Learn::LearningParameters params;
     Algorithm::LGP::LGPLineMutator lineMutator;
     std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent;
+    Output::OutputHandler* lgpOutput;
 
     LineMutatorTest() : e{nullptr} {};
 
     virtual void SetUp()
     {
+        
+        lgpOutput = new Output::OutputHandler(Output::Output());
 
         CounterReset::counterReset();
         vect.push_back(
@@ -54,7 +57,7 @@ class LineMutatorTest : public ::testing::Test
         params.nbProgramConstant = 5;
         e = std::make_shared<Environment>(set, params, vect);
         programAgent =
-            std::make_shared<Algorithm::LGP::LGPAgent>(e, 1, "fake");
+            std::make_shared<Algorithm::LGP::LGPAgent>(e, *lgpOutput, "fake");
     }
 
     virtual void TearDown()
@@ -87,16 +90,20 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
     // uneeded operand (not register)
     ASSERT_EQ(l0.getInstructionIndex(), 3)
         << "Selected pseudo-random instructionIndex changed with a known seed.";
+
     ASSERT_EQ(l0.getDestinationIndex(), 6)
         << "Selected pseudo-random destinationIndex changed with a known seed.";
+
     ASSERT_EQ(l0.getOperand(0).first, 0)
         << "Selected pseudo-random operand data source index changed with a "
            "known seed.";
+
     ASSERT_EQ(l0.getOperand(0).second, 12)
         << "Selected pseudo-random operand location changed with a known seed.";
 
     // Add another pseudo-random lines to the program
     Algorithm::LGP::LGPLine& l1 = programAgent->addNewLine();
+
     // Additionally covers correct operand type from data source
     // Instruction if lambda instruction(plus)
     // first operand is register 0
@@ -112,7 +119,9 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
     // Add another pseudo-random lines to the program
     // Additionally covers nothing
     Algorithm::LGP::LGPLine& l2 = programAgent->addNewLine();
+
     Algorithm::LGP::LGPLine& l3 = programAgent->addNewLine();
+
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l2, rng))
         << "Pseudo-Random correct line initialization failed within an "
            "environment where failure should not be possible.";
@@ -132,10 +141,14 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
         << "Selected pseudo-random operand data source index changed with a "
            "known seed.";
 
+    Output::OutputHandler output = Output::OutputHandler(Output::Output());
     Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(programAgent);
+
+
     ASSERT_NO_THROW(lgpExecutionEngine.execute())
         << "Program with only correct random lines is unexpectedly not "
            "correct.";
+
 }
 
 TEST_F(LineMutatorTest, LineMutatorAlterLine)
@@ -232,7 +245,7 @@ TEST_F(LineMutatorTest, LineMutatorAlterLineWithCompositeOperands)
                 return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
             })));
     std::shared_ptr<const Environment> e2 = std::make_shared<Environment>(set, params, vect);
-    std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent2 = std::make_shared<Algorithm::LGP::LGPAgent>(e2, 1, "fake2");
+    std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent2 = std::make_shared<Algorithm::LGP::LGPAgent>(e2, *lgpOutput, "fake2");
 
     Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(programAgent2);
 
