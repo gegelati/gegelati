@@ -56,15 +56,10 @@ bool Learn::LearningEnvironment::isUsingUtility() const
 
 void Learn::LearningEnvironment::doAction(double actionID)
 {
-    if (nbActions > 1 && !isDiscreteEnvironment) {
+    if (this->actions->size() > 1) {
         throw std::runtime_error(
             "With more than one continuous action, doAction() "
             "method should not be called. Use doActions() instead.");
-    }
-
-    if (actionID >= this->getNbActions()) {
-        throw std::runtime_error("Given action ID exceeds the number of "
-                                 "actions for this learning environment.");
     }
 }
 
@@ -75,18 +70,6 @@ void Learn::LearningEnvironment::doActions(std::vector<double> vectActionID)
     // instead
     if (vectActionID.size() == 1) {
         this->doAction(vectActionID[0]);
-    }
-    else {
-        if (isDiscreteEnvironment) {
-            throw std::runtime_error(
-                "Gegelati does not support multiple Discrete actions for now");
-        }
-
-        if (vectActionID.size() != nbActions) {
-            throw std::runtime_error(
-                "Vector of action ID given is not the same "
-                "size as the number of actions wanted");
-        }
     }
 }
 

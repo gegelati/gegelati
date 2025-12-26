@@ -73,10 +73,12 @@ namespace Algorithm::LGP {
          * with the Environment given as a parameter.
          *
          * \param[in] env The Environment in which the Program will be executed.
+         * \param[in] outputs outputs that will be usable for
+         * interacting with this LearningEnviromnent.
          * \param[in] algorithmName name of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPExecutionEngine(const Environment& env, std::string algorithmName, bool isTraining = false) : LGPEngine(env, algorithmName, isTraining){};
+        LGPExecutionEngine(const Environment& env, const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false) : LGPEngine(env, outputs, algorithmName, isTraining){};
 
         /**
          * \brief Constructor of the class.
@@ -96,7 +98,7 @@ namespace Algorithm::LGP {
          */
         template <class T>
         LGPExecutionEngine(
-            std::shared_ptr<const LGPAgent> executedAgent,
+            std::shared_ptr<const LGPAgent> executedAgent, 
             const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
             : LGPEngine(executedAgent, dataSrc, isTraining){};
 

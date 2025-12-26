@@ -9,7 +9,7 @@ void Selector::MapElites::DefaultDescriptors::ActionValues::initDescriptor(
     this->init = true;
     this->minRange = 0.0;
     this->maxRange = 1.0;
-    this->nbDescriptors = learningEnvironment.getNbActions();
+    this->nbDescriptors = learningEnvironment.getActions()->size();
 }
 
 std::string Selector::MapElites::DefaultDescriptors::ActionValues::getName() const

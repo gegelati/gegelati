@@ -114,8 +114,7 @@ namespace Learn {
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le}, algorithms{algorithms},
-              env(iSet, p, le.getDataSources(),
-                  (le.isDiscrete()) ? 0 : le.getNbActions()),
+              env(iSet, p, le.getDataSources(), le.getActions()->sizeContinuous()),
               archive(p.archiveSize, p.archivingProbability), params{p},
               graph(factory.createGraph(env)) {};
 
@@ -134,8 +133,7 @@ namespace Learn {
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le}, algorithms{{algorithm}},
-              env(iSet, p, le.getDataSources(),
-                  (le.isDiscrete()) ? 0 : le.getNbActions()),
+              env(iSet, p, le.getDataSources(), le.getActions()->sizeContinuous()),
               archive(p.archiveSize, p.archivingProbability), params{p},
               graph(factory.createGraph(env)) {};
 

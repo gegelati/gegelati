@@ -11,6 +11,7 @@
 #include "algorithm/tpg/tpgMutator.h"
 #include "algorithm/tpg/tpgAgent.h"
 #include "algorithm/lgp/lgpAlgorithm.h"
+#include "algorithm/tpg/tpgJob.h"
 
 #include "learn/learningEnvironment.h"
 
@@ -35,25 +36,21 @@ namespace Algorithm::TPG {
              * \brief Main Algorithm constructor.
              * 
              * \param[in] params the LearningParameters used by the Algorithm.
-             * \param[in] nbOutputs number of outputs that will be usable for
-             * interacting with this LearningEnviromnent.
              * \param[in] iSet the Instruction Set used by the LGPAlgorithm.
              * \param[in] algorithmName name of the algorithm used.
              */
-            TPGAlgorithm(const Learn::LearningParameters& params, size_t nbOutputs, const Instructions::Set& iSet, std::string algorithmName = "TPG")
-                : Algorithm(params, nbOutputs, algorithmName), archive{std::make_shared<Archive>(params.archiveSize, params.archivingProbability)} {
-                this->addLGPAlgorithm(params, 1, iSet);
+            TPGAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet, std::string algorithmName = "TPG")
+                : Algorithm(params, algorithmName), archive{std::make_shared<Archive>(params.archiveSize, params.archivingProbability)}{
+                this->addLGPAlgorithm(params, iSet);
             };
 
             /**
              * \brief Add a LGP sub-algorithm to the TPGAlgorithm.
              * 
              * \param[in] params the LearningParameters used by the Algorithm.
-             * \param[in] nbOutputs number of outputs that will be usable for
-             * interacting with this LearningEnviromnent.
              * \param[in] iSet the Instruction Set used by the LGPAlgorithm.
              */
-            void addLGPAlgorithm(const Learn::LearningParameters& params, size_t nbOutputs, const Instructions::Set& iSet);
+            void addLGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet);
 
             /**
              * \brief Method executing an Agent and outputting action values.
@@ -75,8 +72,22 @@ namespace Algorithm::TPG {
             /**
              * \brief Initialize the algorithm.
              */
-            virtual void init(RNG::RNG& rng, Learn::LearningEnvironment& le, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
 
+            /**
+             * \brief Takes a given Agent and creates a job containing it.
+             *
+             * \param[in] agent the Agent to be evaluated.
+             * \param[in] mode the mode of the training, determining for example
+             * if we generate values that we only need for training.
+             * \param[in] rng deterministic random generator
+             * \param[in] idx The index of the job, can be used to organize a map
+             * for example.
+             *
+             * \return A job representing the agent.
+             */
+            virtual std::shared_ptr<Job> createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
+            
             /**
              * \brief active the current job by using the archive seed of the job and setting it to the algorithm archive.
              */

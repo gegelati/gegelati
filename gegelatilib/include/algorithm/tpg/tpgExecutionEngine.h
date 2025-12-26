@@ -22,25 +22,35 @@ namespace Algorithm::TPG {
         /// Archive used by the program agents.
         std::reference_wrapper<Archive> archive;
 
+        /// Action values selected
+        std::vector<double> actionValues;
+
+        /// Last values outputted by the program
+        std::vector<double> lastValues;
+
     public:
 
         /**
          * \brief TPGExecutionEngine constructor.
          * 
+         * \param[in] outputs outputs that will be usable for
+         * interacting with this LearningEnviromnent.
          * \param[in] algorithmName name of the algorithm used.
          * \param[in] archive Archive used by the program agents.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        TPGExecutionEngine(std::string algorithmName, Archive& archive, bool isTraining = false): ExecutionEngine(algorithmName, isTraining), archive{archive} {}
+        TPGExecutionEngine(const Output::OutputHandler& outputs, std::string algorithmName, Archive& archive, bool isTraining = false): ExecutionEngine(outputs, algorithmName, isTraining), archive{archive} {}
 
         /**
          * \brief TPGExecutionEngine constructor.
          * 
          * \param[in] executedAgent the agent to execute.
          * \param[in] archive Archive used by the program agents.
+         * \param[in] outputs outputs that will be usable for
+         * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        TPGExecutionEngine(std::shared_ptr<const Agent> executedAgent, Archive& archive, bool isTraining = false): ExecutionEngine(executedAgent, isTraining), archive{archive} {}
+        TPGExecutionEngine(std::shared_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, Archive& archive, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining), archive{archive} {}
 
         /**
          * Setter for the archive

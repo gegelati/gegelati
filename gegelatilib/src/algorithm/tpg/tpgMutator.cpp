@@ -110,18 +110,43 @@ void Algorithm::TPG::TPGMutator::updateSpecificContext(
 void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
 
-    if (params.mutation.tpg.maxInitOutgoingEdges > manager->getNbOutputs()) {
-        throw std::runtime_error("Maximum initial number of outgoing edges "
-                                    "cannot exceed the number of outputs");
+    auto outputs = manager->getOutputs();
+    size_t nbActionVertices = 1;
+    if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
+        throw std::runtime_error("TPGMutator::initRandomPopulation: TPG does not support mixed discrete and continuous outputs.");
+    } else if (outputs.sizeContinuous() != 0){
+
+        if(outputs.size() > params.nbRegisters + 1){
+            throw std::runtime_error("TPGMutator::initRandomPopulation: Number of continuous outputs exceeds the number of registers plus one.");
+        }
+
+    } else if (outputs.sizeDiscrete() != 0){
+        nbActionVertices = outputs.front().getNbValues();
+        
+        if (params.mutation.tpg.maxInitOutgoingEdges > outputs.front().getNbValues()) {
+            throw std::runtime_error("Maximum initial number of outgoing edges "
+                                        "cannot exceed the number of outputs");
+        }
+
+        if (outputs.front().getNbValues() < 2) {
+            throw std::runtime_error(
+                "A TPG with a single output makes no sense.");
+        }
+
+        if (outputs.size() != 1) {
+            throw std::runtime_error(
+                "TPG for discrete actions only supports one action"
+            );
+        }
+    } else {
+        throw std::runtime_error("TPGMutator::initRandomPopulation: No outputs defined.");
     }
-    if (manager->getNbOutputs() < 2) {
-        throw std::runtime_error(
-            "A TPG with a single output makes no sense.");
-    }
+    
     if (params.mutation.tpg.maxInitOutgoingEdges < 2) {
         throw std::runtime_error(
             "A team should have at least two edges at initialisation.");
     }
+
 
     // Empty agent manager
     manager->clearAgents();
@@ -132,7 +157,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     std::vector<std::shared_ptr<const Agent>> programAgent;
 
 
-    for (size_t idx = 0; idx < manager->getNbOutputs(); idx++) {
+    for (size_t idx = 0; idx < nbActionVertices; idx++) {
         actions.push_back(graph->addNewAction(idx));
     }
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
@@ -151,7 +176,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
         programAgent.push_back(programMutator->initRandomAgent(graph, programManager, params, rng));
 
         // Add the edge
-        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % manager->getNbOutputs()),
+        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % nbActionVertices),
                          programAgent.at(i));
     }
 
@@ -208,7 +233,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
             // Add the connection
             graph->addNewEdge(
                 *team,
-                *actions.at(rng.getUnsignedInt64(0, manager->getNbOutputs() - 1)),
+                *actions.at(rng.getUnsignedInt64(0, nbActionVertices - 1)),
                 programAgent.at(selectedProgramIndex));
         }
     }

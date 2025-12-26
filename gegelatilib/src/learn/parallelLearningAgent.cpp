@@ -45,6 +45,8 @@
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 
+#include "algorithm/tpg/tpgJob.h"
+
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
 
@@ -89,9 +91,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     // Create a OldExecutionEngine
     Environment privateEnv(this->env.getInstructionSet(), params,
                            privateLearningEnvironment->getDataSources(),
-                           (privateLearningEnvironment->isDiscrete())
-                               ? 0
-                               : privateLearningEnvironment->getNbActions());
+                           (privateLearningEnvironment->getActions()->sizeContinuous()));
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine = jobsToProcess.front()->getManager()->createExecutionEngine();
     /*std::unique_ptr<Algorithm::ExecutionEngine> tee =
         this->graph->getFactory().createExecutionEngine(privateEnv, NULL);*/
@@ -117,9 +117,12 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
             // Dedicated archive for the agent
             Archive* temporaryArchive = NULL;
             if (mode == LearningMode::TRAINING) {
+                if(std::dynamic_pointer_cast<Algorithm::TPG::TPGJob>(jobToProcess) == nullptr){
+                    throw std::runtime_error("bad archive creation error :(");
+                }
                 temporaryArchive =
                     new Archive(params.archiveSize, params.archivingProbability,
-                                jobToProcess->getArchiveSeed());
+                                std::dynamic_pointer_cast<Algorithm::TPG::TPGJob>(jobToProcess)->getArchiveSeed());
             }
             //tee->setArchive(temporaryArchive);
 

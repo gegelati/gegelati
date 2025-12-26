@@ -9,9 +9,9 @@ Algorithm::LGP::LGPAgent::~LGPAgent()
     }
 }
 
-size_t Algorithm::LGP::LGPAgent::getNbOutputs() const
+const Output::OutputHandler& Algorithm::LGP::LGPAgent::getOutputs() const
 {
-    return this->nbOutputs;
+    return this->outputs;
 }
 
 Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::addNewLine()

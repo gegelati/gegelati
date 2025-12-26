@@ -33,13 +33,11 @@ namespace Algorithm::LGP {
              * \brief Main Algorithm constructor.
              * 
              * \param[in] params the LearningParameters used by the Algorithm.
-             * \param[in] nbOutputs number of outputs that will be usable for
-             * interacting with this LearningEnviromnent.
              * \param[in] iSet the Instruction Set used by the LGPAlgorithm.
              * \param[in] algorithmName name of the algorithm used.
              */
-            LGPAlgorithm(const Learn::LearningParameters& params, size_t nbOutputs, const Instructions::Set& iSet, std::string algorithmName = "LGP")
-                : Algorithm(params, nbOutputs, algorithmName), iSet{iSet} {};
+            LGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet, std::string algorithmName = "LGP")
+                : Algorithm(params, algorithmName), iSet{iSet} {};
 
             /**
              * \brief Method executing an Agent and outputting action values.
@@ -65,7 +63,7 @@ namespace Algorithm::LGP {
             /**
              * \brief Initialize the algorithm.
              */
-            virtual void init(RNG::RNG& rng, Learn::LearningEnvironment& le, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
         };
 }; // namespace LGP_Algorithm
 

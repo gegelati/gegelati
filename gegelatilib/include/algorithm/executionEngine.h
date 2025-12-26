@@ -10,6 +10,7 @@
 
 #include "algorithm/agent.h"
 #include "data/dataHandler.h"
+#include "outputInfo.h"
 
 namespace Algorithm {
     /**
@@ -21,6 +22,9 @@ namespace Algorithm {
         /// Agent executed
         std::shared_ptr<const Agent> executedAgent;
 
+        /// Values to outputs 
+        const Output::OutputHandler& outputs;
+
         /// Name of the algorithm.
         std::string algorithmName;
 
@@ -31,23 +35,28 @@ namespace Algorithm {
         bool isTraining = false;
 
 
+
     public:
 
         /**
          * \brief Main ExecutionEngine constructor.
          * 
+         * \param[in] outputs outputs that will be usable for
+         * interacting with this LearningEnviromnent.
          * \param[in] algorithmName name of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(std::string algorithmName, bool isTraining = false): algorithmName{algorithmName}, isTraining{isTraining} {}
+        ExecutionEngine(const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false): algorithmName{algorithmName}, outputs{outputs}, isTraining{isTraining} {}
 
         /**
          * \brief Main ExecutionEngine constructor.
          * 
          * \param[in] executedAgent the agent to execute.
+         * \param[in] outputs outputs that will be usable for
+         * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(std::shared_ptr<const Agent> executedAgent, bool isTraining = false): executedAgent{executedAgent}, algorithmName{executedAgent->getAlgorithmName()}, isTraining{isTraining} {
+        ExecutionEngine(std::shared_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{executedAgent}, outputs{outputs}, algorithmName{executedAgent->getAlgorithmName()}, isTraining{isTraining} {
             if(executedAgent->getAlgorithmName() != algorithmName){
                 throw std::runtime_error("Algorithm::ExecutionEngine::ExecutionEngine trying to set an agent from a different algorithm");
             }

@@ -66,9 +66,9 @@ bool Algorithm::Algorithm::containsAgent(std::shared_ptr<const Agent> agent) con
     return this->manager->containsAgent(agent);
 }
 
-void Algorithm::Algorithm::init(RNG::RNG& rng, Learn::LearningEnvironment& le, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
-
+    this->outputs = outputs;
     if(this->mutator == nullptr) {
         throw std::runtime_error("Mutator is not initialized in Algorithm " + this->algorithmName);
     }
@@ -83,22 +83,23 @@ void Algorithm::Algorithm::init(RNG::RNG& rng, Learn::LearningEnvironment& le, s
     this->mutator->setAlgorithmName(algorithmName);
     this->selector = Selector::selectorFactory(this->manager, this->params);
 
+
     for (auto& subAlgorithm : this->subAlgorithms) {
-        subAlgorithm->init(rng, le, graph);
+        subAlgorithm->initAlgorithm(rng, outputs, dataSource, graph);
         this->manager->addSubManager(subAlgorithm->getManager());
         this->mutator->addSubMutator(subAlgorithm->getMutator());
-
-        // Initialize a random population
-        this->mutator->initRandomPopulation(this->graph, this->manager,
-                                            this->params, rng);
-
-        this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->params, rng);
-
-
-        // Clear the best agent in the selector
-        this->selector->forgetPreviousResults();
-
     }
+
+    // Clear the best agent in the selector
+    this->selector->forgetPreviousResults();
+
+}
+
+void Algorithm::Algorithm::initPopulation(RNG::RNG& rng)
+{
+    // Initialize a random population
+    this->mutator->initRandomPopulation(this->graph, this->manager,
+                                        this->params, rng);
 }
 
 void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
@@ -114,14 +115,8 @@ std::shared_ptr<Algorithm::Job> Algorithm::Algorithm::createJob(std::shared_ptr<
         throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with a null agent or an agent not belonging to this algorithm.");
     }
 
-    // Before each agent evaluation, set a new seed for the archive in
-    // TRAINING Mode Else, archiving should be deactivate anyway
-    uint64_t archiveSeed = 0;
-    if (mode ==Learn::LearningMode::TRAINING) {
-        archiveSeed = rng.getUnsignedInt64(0, UINT64_MAX);
-    }
 
-    return std::make_shared<Job>(agent, this->manager, this->selector, archiveSeed, idx);
+    return std::make_shared<Job>(agent, this->manager, this->selector, idx);
 }
 
 void Algorithm::Algorithm::activeJob(Job& job)

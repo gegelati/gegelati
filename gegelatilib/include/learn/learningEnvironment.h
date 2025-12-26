@@ -38,6 +38,7 @@
 #define LEARNING_ENVIRONMENT_H
 
 #include "data/dataHandler.h"
+#include "outputInfo.h"
 #include <cstdint>
 #include <vector>
 
@@ -80,20 +81,11 @@ namespace Learn {
     class LearningEnvironment
     {
       protected:
-        /// Number of actions available for interacting with this
-        /// LearningEnvironment
-        const uint64_t nbActions;
+        /// Handler storing the action
+        std::shared_ptr<Output::OutputHandler> actions;
 
         /// Make the default copy constructor protected.
         LearningEnvironment(const LearningEnvironment& other) = default;
-
-        /// Boolean indicating if this environment uses discrete or continuous
-        /// actions.
-        const bool isDiscreteEnvironment;
-
-        /// Initial values of the continuous actions if actions are not taken by
-        /// a TPG.
-        const std::vector<uint64_t> initActions;
 
       public:
         /**
@@ -107,21 +99,11 @@ namespace Learn {
         /**
          * \brief Constructor for LearningEnviroment.
          *
-         * \param[in] nbAct number of actions that will be usable for
+         * \param[in] actions that will be usable for
          * interacting with this LearningEnviromnent.
-         * \param[in] isDiscreteEnv Boolean indicating if this environment uses
-         * discrete or continuous actions.
-         * \param[in] initAct init values of action if the TPG do not choose a
-         * continuous action. Default value set to a vector with size equal to
-         * nbAct and fill with zeros.
          */
-        LearningEnvironment(
-            uint64_t nbAct, bool isDiscreteEnv = true,
-            const std::vector<uint64_t>& initAct = std::vector<uint64_t>())
-            : nbActions{nbAct}, isDiscreteEnvironment{isDiscreteEnv},
-              initActions{initAct.empty() && !isDiscreteEnv
-                              ? std::vector<uint64_t>(nbAct, 0)
-                              : initAct} {};
+        LearningEnvironment(Output::OutputHandler actions)
+            : actions{std::make_shared<Output::OutputHandler>(actions)} {};
 
         /**
          * \brief Get a copy of the LearningEnvironment.
@@ -152,37 +134,15 @@ namespace Learn {
         virtual bool isUsingUtility() const;
 
         /**
-         * \brief Get the number of actions available for this
+         * \brief Get the outputHandler of actions available for this
          * LearningEnvironment.
          *
          * \return the integer value of the nbAction attribute.
          */
-        uint64_t getNbActions() const
+        std::shared_ptr<Output::OutputHandler> getActions() const
         {
-            return this->nbActions;
+            return this->actions;
         };
-
-        /**
-         * \brief Get the vector of initial actions available for this
-         * LearningEnvironment.
-         *
-         * \return the vector integer value of the initActions attribute.
-         */
-        const std::vector<uint64_t>& getInitActions() const
-        {
-            return initActions;
-        };
-
-        /**
-         * \brief Get the information of the nature of the environment action
-         * type.
-         *
-         * \return true if the actions are discrete, either continuous.
-         */
-        const bool isDiscrete() const
-        {
-            return isDiscreteEnvironment;
-        }
 
         /**
          * \brief Execute an action on the LearningEnvironment.

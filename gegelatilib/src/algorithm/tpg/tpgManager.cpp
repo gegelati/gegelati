@@ -83,7 +83,7 @@ void Algorithm::TPG::TPGManager::setVertex(std::shared_ptr<const Agent> agent, s
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::TPG::TPGManager::createExecutionEngine(bool isTraining) const
 {
-    auto engine = std::make_unique<TPG::TPGExecutionEngine>(this->algorithmName, this->archive, isTraining);
+    auto engine = std::make_unique<TPG::TPGExecutionEngine>(this->outputs, this->algorithmName, this->archive, isTraining);
 
     engine->setProgramExecutionEngine(
         std::move(this->cGetSubManager(this->programAlgorithmName)->createExecutionEngine(isTraining))

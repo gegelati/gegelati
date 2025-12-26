@@ -73,11 +73,6 @@ namespace Algorithm {
          */
         const uint64_t idx;
 
-        /**
-         * Seed that will be used to randomize archive.
-         */
-        const uint64_t archiveSeed;
-
       public:
         /// Deleted default constructor.
         Job() = delete;
@@ -89,13 +84,11 @@ namespace Algorithm {
          * @param[in] agent The agent that will be encapsulated into the job.
          * @param[in] manager The agent Manager of the agent.
          * @param[in] selector The selector responsible of the agent.
-         * @param[in] archiveSeed The archive seed that will be used with this
-         * job.
          * @param[in] idx The index of this job.
          */
-        Job(std::shared_ptr<const Algorithm::Agent> agent, std::shared_ptr<const AgentManager> manager, std::shared_ptr<const Selector::Selector> selector, uint64_t archiveSeed = 0,
+        Job(std::shared_ptr<const Algorithm::Agent> agent, std::shared_ptr<const AgentManager> manager, std::shared_ptr<const Selector::Selector> selector,
             uint64_t idx = 0)
-            : agent(agent), manager{manager}, selector{selector}, archiveSeed(archiveSeed), idx(idx)
+            : agent(agent), manager{manager}, selector{selector}, idx(idx)
         {
         }
 
@@ -108,13 +101,6 @@ namespace Algorithm {
          * @return The index of the job.
          */
         uint64_t getIdx() const;
-
-        /**
-         * \brief Getter of archiveSeed.
-         *
-         * @return The archive seed of the job.
-         */
-        uint64_t getArchiveSeed() const;
 
         /**
          * \brief Getter of the agent.

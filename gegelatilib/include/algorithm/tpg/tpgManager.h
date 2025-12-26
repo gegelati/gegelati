@@ -40,10 +40,10 @@ namespace Algorithm::TPG {
         /**
          * \brief Main TPGManager constructor.
          * 
-         * \param[in] nbOutputs number of outputs of the agents.
+         * \param[in] outputs outputs of the agents.
          * \param[in] archive Archive used by this TPG
          */
-        TPGManager(size_t nbOutputs, Archive& archive) : AgentManager(nbOutputs), archive{archive} {};
+        TPGManager(const Output::OutputHandler& outputs, Archive& archive) : AgentManager(outputs), archive{archive} {};
 
         /**
          * \brief Set the name of the program algorithm associated with the TPG agents.

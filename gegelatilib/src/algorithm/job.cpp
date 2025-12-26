@@ -41,11 +41,6 @@ uint64_t Algorithm::Job::getIdx() const
     return this->idx;
 }
 
-uint64_t Algorithm::Job::getArchiveSeed() const
-{
-    return this->archiveSeed;
-}
-
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::Job::getAgent() const
 {

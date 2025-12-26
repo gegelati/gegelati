@@ -87,7 +87,8 @@ void Learn::LearningAgent::init(uint64_t seed)
     }
 
     for(auto algorithm: algorithms){
-        algorithm->init(this->rng, this->learningEnvironment, this->graph);
+        algorithm->initAlgorithm(this->rng, this->learningEnvironment.getActions(), this->learningEnvironment.getDataSources(), this->graph);
+        algorithm->initPopulation(this->rng);
     }
 }
 
@@ -245,7 +246,6 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
 
     // Create and evaluate the job
     auto job = algorithm->createJob(agent, mode, this->rng);
-    this->archive.setRandomSeed(job->getArchiveSeed());
     std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
         *execEngine, *job, generationNumber, mode, this->learningEnvironment);
 

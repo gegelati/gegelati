@@ -11,6 +11,7 @@
 #include "algorithm/agent.h"
 #include "algorithm/executionEngine.h"
 #include "util/genericComparator.h"
+#include "outputInfo.h"
 
 namespace Algorithm {
     /**
@@ -35,16 +36,16 @@ namespace Algorithm {
         std::string algorithmName;
 
         /// Number of outputs of the agents
-        size_t nbOutputs;
+        const Output::OutputHandler& outputs;
 
     public:
 
         /**
          * Constructor for agent manager
          * 
-         * \param[in] nbOutputs Number of outputs of the agents
+         * \param[in] outputs outputs of the agents
          */
-        AgentManager(size_t nbOutputs) : nbOutputs{nbOutputs} {}
+        AgentManager(const Output::OutputHandler& outputs) : outputs{outputs} {}
 
         /**
          * \brief Get the current agents used by the algorithm.
@@ -52,9 +53,9 @@ namespace Algorithm {
         virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const;
 
         /**
-         * \brief Return the number of outputs of the agents.
+         * \brief Return the outputs of the agents.
          */
-        virtual size_t getNbOutputs() const {return nbOutputs; };
+        virtual const Output::OutputHandler& getOutputs() const {return outputs; };
 
         /**
          * \brief Add a sub-manager to the current manager.

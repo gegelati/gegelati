@@ -58,10 +58,11 @@ std::vector<double> Algorithm::LGP::LGPExecutionEngine::execute()
     // Reset registers and programCounter
     this->registers.resetData();
 
+
     iterateThroughtProgram(this->ignoreException);
 
     std::vector<double> result;
-    for(size_t idx = 0; idx < this->lgpExecutedAgent->getNbOutputs(); idx++){
+    for(size_t idx = 0; idx < this->lgpExecutedAgent->getOutputs().size(); idx++){
         // cast to primitiveType<double> to enable cast to double.
         result.push_back(*(this->registers.getDataAt(typeid(double), 0)
                  .getSharedPointer<const double>()));

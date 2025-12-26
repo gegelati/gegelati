@@ -24,7 +24,7 @@ std::shared_ptr<const Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::cGet
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
-    this->agents.insert(std::make_shared<LGPAgent>(this->env, this->nbOutputs, this->getAlgorithmName()));
+    this->agents.insert(std::make_shared<LGPAgent>(this->env, this->outputs, this->getAlgorithmName()));
     return *this->agents.rbegin();
 }
 
@@ -53,9 +53,9 @@ void Algorithm::LGP::LGPManager::deleteAgent(std::shared_ptr<const Agent> agent,
 }
 
 
-size_t Algorithm::LGP::LGPManager::getNbOutputs() const
+const Output::OutputHandler& Algorithm::LGP::LGPManager::getOutputs() const
 {
-    return this->nbOutputs;
+    return this->outputs;
 }
 
 void Algorithm::LGP::LGPManager::setConstantAt(std::shared_ptr<const Agent> agent, size_t index, const Data::Constant& value)
@@ -103,7 +103,7 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(std::shared_ptr<const Agent
     uint64_t nbIntrons = 0;
     // Set of useful register
     std::set<uint64_t> usefulRegisters;
-    for(size_t idx = 0; idx < this->nbOutputs; idx++) {
+    for(size_t idx = 0; idx < this->outputs.size(); idx++) {
         usefulRegisters.insert(idx);
     }
     
@@ -218,5 +218,5 @@ bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(std::shared_ptr<const Agen
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::LGP::LGPManager::createExecutionEngine(bool isTraining) const
 {
-    return std::make_unique<LGPExecutionEngine>(*this->env, this->algorithmName, isTraining);
+    return std::make_unique<LGPExecutionEngine>(*this->env, this->outputs, this->algorithmName, isTraining);
 }

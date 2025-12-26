@@ -13,6 +13,8 @@
 #include "learn/learningParameters.h"
 #include "evoGraph/graph.h"
 #include "selector/selectorFactory.h"
+
+#include "outputInfo.h"
 namespace Algorithm {
     /**
      * \brief Abstract class representing an Algorithm.
@@ -37,8 +39,8 @@ namespace Algorithm {
         /// Mutator used by the algorithm
         std::shared_ptr<Mutator> mutator;
 
-        /// Number of values to outputs 
-        size_t nbOutputs;
+        /// Output informations
+        std::shared_ptr<const Output::OutputHandler> outputs;
 
         /// Sub-algorithms used by the algorithm
         std::vector<std::shared_ptr<Algorithm>> subAlgorithms;
@@ -64,13 +66,11 @@ namespace Algorithm {
          * \brief Main Algorithm constructor.
          * 
          * \param[in] params the LearningParameters used by the Algorithm.
-         * \param[in] nbOutputs number of outputs that will be usable for
-         * interacting with this LearningEnviromnent.
          * \param[in] algorithmName name of the algorithm used.
          * 
          */
-        Algorithm(const Learn::LearningParameters& params, size_t nbOutputs, std::string algorithmName)
-               : params{params}, nbOutputs{nbOutputs}, algorithmName(algorithmName) {
+        Algorithm(const Learn::LearningParameters& params, std::string algorithmName)
+               : params{params}, algorithmName(algorithmName) {
               };
 
         /**
@@ -122,11 +122,18 @@ namespace Algorithm {
          * Initialize the algorithm
          * 
          * \param[in] rng deterministic random generator
-         * \param[in] le the LearningEnvironment used by the algorithm.
+         * \param[in] outputs outputs needed for the algorithm.
+         * \param[in] dataSource input sources of the algorithm.
          * \param[in] graph the EvoGraph::Graph used by the algorithm.
          */
-        virtual void init(RNG::RNG& rng, Learn::LearningEnvironment& le, std::shared_ptr<EvoGraph::Graph> graph);
+        virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph);
 
+        /**
+         * Initialize the population of the algorithm
+         * 
+         * \param[in] rng deterministic random generator
+         */
+        virtual void initPopulation(RNG::RNG& rng);
 
         /**
          * \brief Method to start the population process of the algorithm
@@ -139,7 +146,7 @@ namespace Algorithm {
 
 
         /**
-         * \brief Method executing an Agent and outputting action values.
+         * \brief Method executing an Agent and outputting values.
          * 
          * \param[in] agent The agent which is evaluated.
          */

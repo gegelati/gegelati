@@ -92,11 +92,13 @@ namespace Algorithm::LGP {
          * with the Environment given as a parameter.
          *
          * \param[in] env The Environment in which the Program will be executed.
+         * \param[in] outputs outputs that will be usable for
+         * interacting with this LearningEnviromnent.
          * \param[in] algorithmName name of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPEngine(const Environment& env, std::string algorithmName, bool isTraining = false)
-            : ExecutionEngine{algorithmName, isTraining}, programCounter{0}, registers{env.getParams().nbRegisters},
+        LGPEngine(const Environment& env, const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false)
+            : ExecutionEngine{outputs, algorithmName, isTraining}, programCounter{0}, registers{env.getParams().nbRegisters},
               dataSources{env.getDataSources()}
         {
             // Setup the data sources
@@ -132,9 +134,9 @@ namespace Algorithm::LGP {
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
         template <class T>
-        LGPEngine(std::shared_ptr<const LGPAgent> executedAgent,
+        LGPEngine(std::shared_ptr<const LGPAgent> executedAgent, 
                       const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
-            : ExecutionEngine{executedAgent, isTraining}, programCounter{0},
+            : ExecutionEngine{executedAgent, executedAgent->getOutputs(), isTraining}, programCounter{0},
               registers{executedAgent->getEnvironment()->getParams().nbRegisters}
         {
             // Check that T is either convertible to a const DataHandler
@@ -169,7 +171,7 @@ namespace Algorithm::LGP {
          * generated.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPEngine(std::shared_ptr<const LGPAgent> executedAgent, bool isTraining = false)
+        LGPEngine(std::shared_ptr<const LGPAgent> executedAgent,  bool isTraining = false)
             : LGPEngine(executedAgent, executedAgent->getEnvironment()->getDataSources(), isTraining){};
 
         /**

@@ -8,6 +8,7 @@
 #include "algorithm/lgp/lgpLine.h"
 #include "environment.h"
 #include "data/constantHandler.h"
+#include "outputInfo.h"
 
 namespace Algorithm::LGP {
       
@@ -44,7 +45,7 @@ namespace Algorithm::LGP {
             Data::ConstantHandler constants;
 
             /// Number of outputs of the LGP
-            size_t nbOutputs;
+            const Output::OutputHandler& outputs;
 
             /// Delete the default constructor.
             LGPAgent() = delete;
@@ -55,11 +56,11 @@ namespace Algorithm::LGP {
              *
              * \param[in] e the reference to the Environment that will be referenced
              * by the LGPAgent.
-             * \param[in] nbOutputs the number of outputs of the LGP.
+             * \param[in] outputs outputs of the LGP.
              * \param[in] algorithmName name of the algorithm used.
              */
-            LGPAgent(const std::shared_ptr<const Environment>& e, size_t nbOutputs, std::string algorithmName)
-                : Agent(algorithmName), environment{e}, constants{e->getParams().nbProgramConstant}, nbOutputs{nbOutputs}
+            LGPAgent(const std::shared_ptr<const Environment>& e, const Output::OutputHandler& outputs, std::string algorithmName)
+                : Agent(algorithmName), environment{e}, constants{e->getParams().nbProgramConstant}, outputs{outputs}
             {
                 constants.resetData(); // force all constant to 0 at first.
             };
@@ -78,7 +79,7 @@ namespace Algorithm::LGP {
              *
              * \return the number of outputs of the LGP.
              */
-            size_t getNbOutputs() const;
+            const Output::OutputHandler& getOutputs() const;
 
             
             /**

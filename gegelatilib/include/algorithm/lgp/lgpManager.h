@@ -45,9 +45,9 @@ namespace Algorithm {
              * \brief LGPManager constructor.
              * 
              * \param[in] env the Environment for executing LGP
-             * \param[in] nbOutputs number of outputs of the agents.
+             * \param[in] outputs outputs of the agents.
              */
-            LGPManager(std::shared_ptr<const Environment> env, size_t nbOutputs): AgentManager(nbOutputs), env(env){};
+            LGPManager(std::shared_ptr<const Environment> env, const Output::OutputHandler& outputs): AgentManager(outputs), env(env){};
 
             /**
              * \brief Create a new LGPAgent.
@@ -83,7 +83,7 @@ namespace Algorithm {
              * 
              * \return the number of outputs.
              */
-            virtual size_t getNbOutputs() const;
+            virtual const Output::OutputHandler& getOutputs() const;
 
             /**
              * \brief Set the constant at the given index for the given agent.
