@@ -35,6 +35,14 @@ double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& ed
     return result;
 }
 
+void Algorithm::TPG::TPGExecutionEngine::setContinuousActionValues()
+{
+    if(this->outputs.sizeContinuous() != 0){
+        this->actionValues.clear();
+        this->actionValues.insert(this->actionValues.begin(), this->lastValues.begin() + 1, this->lastValues.end());
+    }
+}
+
 std::shared_ptr<const EvoGraph::Edge> Algorithm::TPG::TPGExecutionEngine::evaluateTeam(const EvoGraph::Team& team)
 {
     // Copy outgoing edge list
@@ -44,7 +52,7 @@ std::shared_ptr<const EvoGraph::Edge> Algorithm::TPG::TPGExecutionEngine::evalua
     // First
     std::shared_ptr<const EvoGraph::Edge> bestEdge = *outgoingEdges.begin();
     double bestBid = this->evaluateEdge(*bestEdge);
-    //this->setContinuousActionValues();
+    this->setContinuousActionValues();
 
     // Others
     for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
@@ -54,6 +62,7 @@ std::shared_ptr<const EvoGraph::Edge> Algorithm::TPG::TPGExecutionEngine::evalua
         if (bid >= bestBid) {
             bestEdge = edge;
             bestBid = bid;
+            this->setContinuousActionValues();
         }
         else {
         }
@@ -86,8 +95,10 @@ std::vector<double> Algorithm::TPG::TPGExecutionEngine::execute()
         visitedVertices.push_back(currentVertex);
     }
 
-    std::vector<double> actionID = {(double)std::dynamic_pointer_cast<const EvoGraph::Action>(currentVertex)->getActionID()};
-    return actionID;
+    if(this->outputs.sizeContinuous() == 0){
+        actionValues = {(double)std::dynamic_pointer_cast<const EvoGraph::Action>(currentVertex)->getActionID()};
+    }
+    return actionValues;
 }
 
 

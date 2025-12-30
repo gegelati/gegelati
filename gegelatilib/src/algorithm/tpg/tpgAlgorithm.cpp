@@ -51,6 +51,11 @@ void Algorithm::TPG::TPGAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<
     // Initialize program algorithm.
     auto& programAlgo = this->subAlgorithms.front();
     auto programOutput = std::make_shared<Output::OutputHandler>(Output::Output());
+
+    for(auto continuousOutput: this->outputs->getContinuousOutputs()){
+        programOutput->addOutput(continuousOutput);
+    }
+
     programAlgo->initAlgorithm(rng, programOutput, dataSource, graph);
     this->manager->addSubManager(programAlgo->getManager());
     this->mutator->addSubMutator(programAlgo->getMutator());

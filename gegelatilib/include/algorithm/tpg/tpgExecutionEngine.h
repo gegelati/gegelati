@@ -79,6 +79,11 @@ namespace Algorithm::TPG {
         ExecutionEngine& getProgramExecutionEngine() const { return *this->programExecutionEngine; }
 
         /**
+         * \brief set the continuous action values based on last values outputted.
+         */
+        virtual void setContinuousActionValues();
+
+        /**
          * \brief Execute the Program associated to an Edge and returns the
          * obtained double.
          *
