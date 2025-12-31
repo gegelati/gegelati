@@ -96,9 +96,11 @@ std::vector<double> Algorithm::TPG::TPGExecutionEngine::execute()
     }
 
     if(this->outputs.sizeContinuous() == 0){
-        actionValues = {(double)std::dynamic_pointer_cast<const EvoGraph::Action>(currentVertex)->getActionID()};
+        return {(double)std::dynamic_pointer_cast<const EvoGraph::Action>(currentVertex)->getActionID()};
+    } else {
+        /// TODO SET ACTIVATION FUNCTION
+        return Utils::ActivationFunctions::scaleOutputValues(actionValues, this->outputs, Utils::ActivationFunction::TANH);
     }
-    return actionValues;
 }
 
 

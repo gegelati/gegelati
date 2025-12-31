@@ -8,6 +8,8 @@
 #include "evoGraph/team.h"
 #include "archive.h"
 
+#include "util/activationFunctions.h"
+
 namespace Algorithm::TPG {
     /**
      * \brief class used to execute the agent of an algorithm

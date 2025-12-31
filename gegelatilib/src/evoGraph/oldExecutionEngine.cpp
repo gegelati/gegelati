@@ -35,7 +35,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include <algorithm>
 #include <set>
 #include <vector>
 
