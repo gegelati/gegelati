@@ -2,7 +2,7 @@
 
 #include "algorithm/tpg/tpgJob.h"
 
-uint64_t Algorithm::TPG::TPGJob::getArchiveSeed() const
+Archive& Algorithm::TPG::TPGJob::getArchive() const
 {
-    return this->archiveSeed;
+    return *this->archive;
 }

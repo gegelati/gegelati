@@ -18,7 +18,8 @@ namespace Algorithm::TPG {
             /**
              * Seed that will be used to randomize archive.
              */
-            const uint64_t archiveSeed;
+            Archive* archive;
+
 
         public:
 
@@ -29,22 +30,22 @@ namespace Algorithm::TPG {
              * @param[in] agent The agent that will be encapsulated into the job.
              * @param[in] manager The agent Manager of the agent.
              * @param[in] selector The selector responsible of the agent.
-             * @param[in] archiveSeed The archive seed that will be used with this
-             * job.
              * @param[in] idx The index of this job.
+             * @param[in] archive The archive associated to this job.
              */
-            TPGJob(std::shared_ptr<const Agent> agent, std::shared_ptr<const AgentManager> manager, std::shared_ptr<const Selector::Selector> selector, uint64_t archiveSeed = 0,
-                uint64_t idx = 0)
-                : Job(agent, manager, selector, idx), archiveSeed(archiveSeed)
+            TPGJob(std::shared_ptr<const Agent> agent, std::shared_ptr<const AgentManager> manager, std::shared_ptr<const Selector::Selector> selector,
+                uint64_t idx = 0, Archive* archive = nullptr)
+                : Job(agent, manager, selector, idx), archive(archive)
             {
             }
 
             /**
-             * \brief Getter of archiveSeed.
+             * \brief Getter of archive.
              *
-             * @return The archive seed of the job.
+             * @return The archive of the job.
              */
-            uint64_t getArchiveSeed() const;
+            Archive& getArchive() const;
+
     };
 };
 

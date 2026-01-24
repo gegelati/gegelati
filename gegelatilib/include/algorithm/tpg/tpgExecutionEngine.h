@@ -4,6 +4,7 @@
 
 #include "algorithm/executionEngine.h"
 #include "algorithm/tpg/tpgAgent.h"
+#include "algorithm/tpg/tpgJob.h"
 #include "evoGraph/action.h"
 #include "evoGraph/team.h"
 #include "archive.h"
@@ -65,6 +66,13 @@ namespace Algorithm::TPG {
          * \brief getter for the archive.
          */
         Archive& getArchive();
+
+        /**
+         * \brief Setup the execution engine with the given job.
+         * 
+         * \param[in] job the job to setup the execution engine with.
+         */
+        void setupJob(const Job& job) override;
         
         /**
          * \brief Set the program execution engine associated with the TPG agents.

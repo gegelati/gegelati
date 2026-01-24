@@ -16,6 +16,11 @@ void Algorithm::ExecutionEngine::setExecutedAgent(std::shared_ptr<const Agent> n
 }
 
 
+void Algorithm::ExecutionEngine::setupJob(const Algorithm::Job& job)
+{
+    this->setExecutedAgent(job.getAgent());
+}
+
 void Algorithm::ExecutionEngine::setDataSources(
     const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSrc)
 {

@@ -38,9 +38,18 @@
 
 #include <cstdint>
 #include <vector>
+#include <memory>
 
-#include "algorithm/agentManager.h"
-#include "selector/selector.h"
+#include "algorithm/agent.h"
+
+namespace Algorithm {
+    class AgentManager;  // Forward declaration
+}
+
+
+namespace Selector {
+    class Selector;  // Forward declaration
+}
 
 namespace Algorithm {
     /**
@@ -86,7 +95,7 @@ namespace Algorithm {
          * @param[in] selector The selector responsible of the agent.
          * @param[in] idx The index of this job.
          */
-        Job(std::shared_ptr<const Algorithm::Agent> agent, std::shared_ptr<const AgentManager> manager, std::shared_ptr<const Selector::Selector> selector,
+        Job(std::shared_ptr<const Agent> agent, std::shared_ptr<const AgentManager> manager, std::shared_ptr<const Selector::Selector> selector,
             uint64_t idx = 0)
             : agent(agent), manager{manager}, selector{selector}, idx(idx)
         {
@@ -107,14 +116,14 @@ namespace Algorithm {
          *
          * @return The agent embedded by the job.
          */
-        virtual std::shared_ptr<const Algorithm::Agent> getAgent() const;
+        virtual std::shared_ptr<const Agent> getAgent() const;
 
         /**
          * \brief Getter of the manager.
          *
          * @return The manager embedded by the job.
          */
-        virtual std::shared_ptr<const Algorithm::AgentManager> getManager() const;
+        virtual std::shared_ptr<const AgentManager> getManager() const;
 
         /**
          * \brief Getter of the selector.

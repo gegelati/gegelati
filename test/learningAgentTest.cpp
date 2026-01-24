@@ -256,10 +256,10 @@ TEST_F(LearningAgentTest, EvalAgent)
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager()->createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = *tpg->createJob(la.getAlgorithmAt(0)->getAgents().at(0),
+    auto job = tpg->createJob(la.getAlgorithmAt(0)->getAgents().at(0),
                            Learn::LearningMode::TRAINING, la.getRNG());
     ASSERT_NO_THROW(
-        result = la.evaluateJob(*execEngine, job, 0, Learn::LearningMode::TRAINING, le))
+        result = la.evaluateJob(*execEngine, *job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
@@ -294,6 +294,7 @@ TEST_F(LearningAgentTest, EvalAllRoots)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
 
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
     Learn::LearningAgent la(le, tpg, set, params);
 
     la.init();

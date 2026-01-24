@@ -86,12 +86,16 @@ namespace Algorithm::TPG {
              *
              * \return A job representing the agent.
              */
-            virtual std::shared_ptr<Job> createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
+            virtual std::shared_ptr<Job> createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const override;
+
             
             /**
-             * \brief active the current job by using the archive seed of the job and setting it to the algorithm archive.
+             * \brief Inherited method to update the algorithm after evaluation of a set of jobs.
+             * 
+             * Does the merging of the archives after evaluation.
              */
-            virtual void activeJob(Job& job) override;
+            virtual void updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode) override;
+            
     };
 }; // namespace TPG_Algorithm
 

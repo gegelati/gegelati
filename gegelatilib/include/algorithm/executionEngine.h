@@ -9,6 +9,7 @@
 #include <stdexcept>
 
 #include "algorithm/agent.h"
+#include "algorithm/job.h"
 #include "data/dataHandler.h"
 #include "outputInfo.h"
 
@@ -79,13 +80,19 @@ namespace Algorithm {
          */
         virtual std::shared_ptr<const Agent> getExecutedAgent() const;
 
-
         /**
          * \brief Set a new agent executed by the execution engine.
          * 
          * \param[in] newExecutedAgent new executed agent. 
          */
         virtual void setExecutedAgent(std::shared_ptr<const Agent> newExecutedAgent);
+
+        /**
+         * \brief Setup the execution engine with the given job.
+         * 
+         * \param[in] job the job to setup the execution engine with.
+         */
+        virtual void setupJob(const Job& job);
 
         /**
          * \brief execute the current agent saved

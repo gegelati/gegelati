@@ -64,9 +64,19 @@ Learn::ParallelLearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumb
         // Create and fill the queue for distributing work among threads
         // each agent is associated to its number in the list for enabling the
         // determinism of stochastic archive storage.
-        auto jobsToProcess = makeJobs(mode, algorithm);
+        std::vector<std::shared_ptr<Algorithm::Job>> jobsToProcess = makeJobs(mode, algorithm);
+
+        // Create a copy of jobsToProcess in a queue structure
+        std::queue<std::shared_ptr<Algorithm::Job>> jobsQueue;
+        for (const auto& job : jobsToProcess) {
+            jobsQueue.push(job);
+        }
+
         // Parallel mode
-        evaluateAgentsInParallel(jobsToProcess, generationNumber, mode, results);
+        evaluateAgentsInParallel(jobsQueue, generationNumber, mode, results);
+
+        // Update the algorithm after evaluation with the jobs processed
+        algorithm->updateAfterEvaluation(jobsToProcess, mode);
     }
 
     return results;
@@ -120,9 +130,9 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                 if(std::dynamic_pointer_cast<Algorithm::TPG::TPGJob>(jobToProcess) == nullptr){
                     throw std::runtime_error("bad archive creation error :(");
                 }
-                temporaryArchive =
+                /*temporaryArchive =
                     new Archive(params.archiveSize, params.archivingProbability,
-                                std::dynamic_pointer_cast<Algorithm::TPG::TPGJob>(jobToProcess)->getArchiveSeed());
+                                std::dynamic_pointer_cast<Algorithm::TPG::TPGJob>(jobToProcess)->getArchiveSeed());*/
             }
             //tee->setArchive(temporaryArchive);
 
@@ -137,7 +147,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                     std::make_pair(avgScore, jobToProcess));
             }
 
-            if (mode == LearningMode::TRAINING) {
+            if (mode == LearningMode::TRAINING && false) {
                 { // Insertion archiveMap update mutual exclusion zone
                     std::lock_guard<std::mutex> lock(archiveMapMutex);
                     archiveMap.insert(
@@ -210,6 +220,7 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
 {
     // Create Archive Map
     std::map<uint64_t, Archive*> archiveMap;
+    //std::map<uint64_t, ParallelismData*> algorithmDataMap;
     // Create Map for results
     std::map<uint64_t,
              std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Algorithm::Job>>>
@@ -268,5 +279,5 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelCompileResults(
     }
 
     // Merge the archives
-    this->mergeArchiveMap(archiveMap);
+    //this->mergeArchiveMap(archiveMap);
 }

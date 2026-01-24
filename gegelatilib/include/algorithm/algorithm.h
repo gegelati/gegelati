@@ -172,11 +172,13 @@ namespace Algorithm {
         virtual std::shared_ptr<Job> createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
 
         /**
-         * \brief active the current job.
+         * \brief Update the algorithm after evaluation of a set of jobs.
          * 
-         * \param[in] job current job to active
+         * \param[in] jobs the jobs that have been evaluated.
+         * \param[in] mode the mode of the training, determining for example
+         * if we generate values that we only need for training.
          */
-        virtual void activeJob(Job& job);
+        virtual void updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode);
 
 
     };

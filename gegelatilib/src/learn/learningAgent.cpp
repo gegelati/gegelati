@@ -47,6 +47,10 @@
 
 #include "learn/learningAgent.h"
 
+#include "archive.h"
+#include "algorithm/tpg/tpgJob.h"
+#include "algorithm/tpg/tpgAlgorithm.h"
+
 void Learn::LearningAgent::addAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm)
 {
     this->algorithms.push_back(algorithm);
@@ -117,9 +121,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         return previousEval;
     }
 
-    // Set the agent to execute
-    execEngine.setExecutedAgent(agent);
-
+    // Set the job to execute
+    execEngine.setupJob(job);
     execEngine.setExecutionMode(mode == LearningMode::TRAINING);
 
     // Init results
@@ -218,14 +221,15 @@ Learn::LearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumber,
         algorithm->getManager()->createExecutionEngine();
 
     auto jobs = this->makeJobs(mode, algorithm);
-    while (!jobs.empty()){
-        auto job = jobs.front();
-        algorithm->activeJob(*job);
+    for(auto job: jobs) {
         std::shared_ptr<EvaluationResult> result = this->evaluateJob(
             *execEngine, *job, generationNumber, mode, this->learningEnvironment);
         results.emplace(result, (*job).getAgent());
-        jobs.pop();
     }
+
+
+    // Update the algorithm after evaluation with the jobs processed
+    algorithm->updateAfterEvaluation(jobs, mode);
 
     return results;
 }
@@ -390,7 +394,7 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
     return generationNumber;
 }
 
-std::queue<std::shared_ptr<Algorithm::Job>> Learn::LearningAgent::makeJobs(
+std::vector<std::shared_ptr<Algorithm::Job>> Learn::LearningAgent::makeJobs(
     Learn::LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm)
 {
     if(algorithm == nullptr && this->algorithms.size() == 1){
@@ -399,11 +403,11 @@ std::queue<std::shared_ptr<Algorithm::Job>> Learn::LearningAgent::makeJobs(
         throw std::runtime_error("LearningAgent::makeJobs: Multiple algorithms present in the learning agent, please specify one.");
     }
 
-    std::queue<std::shared_ptr<Algorithm::Job>> jobs;
+    std::vector<std::shared_ptr<Algorithm::Job>> jobs;
     size_t idx = 0;
     for(auto agent: algorithm->getAgents()){
         auto job = algorithm->createJob(agent, mode, rng, idx);
-        jobs.push(job);
+        jobs.push_back(job);
         idx++;
     }
     return jobs;

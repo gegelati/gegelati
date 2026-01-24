@@ -65,7 +65,7 @@ void Algorithm::TPG::TPGAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<
 }
 
 
-std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode,  RNG::RNG& rng, int idx) const
+std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx) const
 {
     if(agent == nullptr || !this->containsAgent(agent)){
         throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with a null agent or an agent not belonging to this algorithm.");
@@ -73,19 +73,76 @@ std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(std::sha
 
     // Before each agent evaluation, set a new seed for the archive in
     // TRAINING Mode Else, archiving should be deactivate anyway
-    uint64_t archiveSeed = 0;
-    if (mode ==Learn::LearningMode::TRAINING) {
-        archiveSeed = rng.getUnsignedInt64(0, UINT64_MAX);
+    Archive* jobArchive = nullptr;
+    if (mode == Learn::LearningMode::TRAINING) {
+        size_t archiveSeed = rng.getUnsignedInt64(0, UINT64_MAX);
+        jobArchive = new Archive (this->params.archiveSize, this->params.archivingProbability, archiveSeed);
     }
 
-    return std::make_shared<TPGJob>(agent, this->manager, this->selector, archiveSeed, idx);
+
+    return std::make_shared<TPGJob>(agent, this->manager, this->selector, idx, jobArchive);
 }
 
-void Algorithm::TPG::TPGAlgorithm::activeJob(Job& job)
+void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode)
 {
-    if(dynamic_cast<TPGJob*>(&job) != nullptr){
-        this->archive->setRandomSeed(dynamic_cast<TPGJob*>(&job)->getArchiveSeed());
-    } else {
-        throw std::runtime_error("TPGAlgorithm::activeJob Job should be a TPGJob");
+    // Merge the archives
+    if (mode == Learn::LearningMode::TRAINING) {
+        // Build archive map
+        std::map<uint64_t, Archive*> archiveMap;
+        for (const auto& jobPtr : jobs) {
+            std::shared_ptr<const TPGJob> tpgJob = std::dynamic_pointer_cast<const TPGJob>(jobPtr);
+            if(tpgJob == nullptr){
+                throw std::runtime_error("Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation trying to update after evaluation with a job which is not a TPGJob");
+            }
+            archiveMap[jobPtr->getIdx()] = &tpgJob->getArchive();
+        }
+
+
+        // Scan the archives backward, starting from the last to identify the
+        // last params.archiveSize recordings to keep (or less).
+        auto reverseIterator = archiveMap.rbegin();
+
+        uint64_t nbRecordings = 0;
+        while (nbRecordings < this->params.archiveSize &&
+            reverseIterator != archiveMap.rend()) {
+            nbRecordings += reverseIterator->second->getNbRecordings();
+            reverseIterator++;
+        }
+
+        // Insert identified recordings into this->archive
+        while (reverseIterator != archiveMap.rbegin()) {
+            reverseIterator--;
+
+            auto i = reverseIterator->first;
+
+            // Skip recordings in the first archive if needed
+            uint64_t recordingIdx = 0;
+            while (nbRecordings > this->params.archiveSize) {
+                recordingIdx++;
+                nbRecordings--;
+            }
+
+            // Insert remaining recordings
+            while (recordingIdx < reverseIterator->second->getNbRecordings()) {
+                // Access in reverse order
+                const ArchiveRecording& recording =
+                    reverseIterator->second->at(recordingIdx);
+                // forced Insertion
+                this->archive->addRecording(
+                    recording.agent,
+                    reverseIterator->second->getDataHandlers().at(
+                        recording.dataHash),
+                    recording.result, true);
+                recordingIdx++;
+
+            }
+        }
+
+        // delete all archives
+        reverseIterator = archiveMap.rbegin();
+        while (reverseIterator != archiveMap.rend()) {
+            delete reverseIterator->second;
+            reverseIterator++;
+        }
     }
 }

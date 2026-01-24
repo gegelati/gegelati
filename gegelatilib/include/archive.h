@@ -133,15 +133,15 @@ class Archive
     /**
      * \brief Main constructor for Archive.
      *
+     * \param[in] size maximum number of recordings kept in the Archive.
      * \param[in] archivingProbability probability for each call to
      * addRecording to actually lead to a new recodring in the Archive.
-     * \param[in] size maximum number of recordings kept in the Archive.
      * \param[in] initialSeed Seed value for the randomEngine.
      */
     Archive(size_t size = 50, double archivingProbability = 1.0,
             size_t initialSeed = 0)
-        : archivingProbability{archivingProbability}, maxSize{size},
-          recordings(), rng(initialSeed){};
+        : maxSize{size}, rng(initialSeed), dataHandlers{}, recordingsPerProgram{},
+          recordings{}, archivingProbability{archivingProbability} {}
 
     /**
      * Disable Archive copy construction.

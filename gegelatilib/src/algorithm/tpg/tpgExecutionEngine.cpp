@@ -12,6 +12,15 @@ Archive& Algorithm::TPG::TPGExecutionEngine::getArchive()
     return archive;
 }
 
+void Algorithm::TPG::TPGExecutionEngine::setupJob(const Algorithm::Job& job)
+{
+    const TPGJob* tpgJob = dynamic_cast<const TPGJob*>(&job);
+    if(tpgJob == nullptr){
+        throw std::runtime_error("Algorithm::TPG::TPGExecutionEngine::setupJob trying to setup with a job which is not a TPGJob");
+    }
+    this->setArchive(tpgJob->getArchive());
+    this->setExecutedAgent(job.getAgent());
+}
 
 double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& edge)
 {

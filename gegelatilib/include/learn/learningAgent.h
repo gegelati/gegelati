@@ -329,9 +329,9 @@ namespace Learn {
          * if we generate values that we only need for training.
          * \param[in] algorithm the algorithm containing the agents to make jobs from
          *
-         * @return A queue containing pointers of the newly created jobs.
+         * @return A vector containing pointers of the newly created jobs.
          */
-        virtual std::queue<std::shared_ptr<Algorithm::Job>> makeJobs(
+        virtual std::vector<std::shared_ptr<Algorithm::Job>> makeJobs(
             Learn::LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm = nullptr);
 
         /**
