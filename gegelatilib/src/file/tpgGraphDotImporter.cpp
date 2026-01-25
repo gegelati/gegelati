@@ -70,7 +70,8 @@ void File::GraphDotImporter::readOperands(std::string& str, Program::Line& l)
     // operands are stored in str with the following format :
     // op1_param1|op1_param2#...|param_N
 
-    for (int i = 0; i < this->tpg.getEnvironment().getMaxNbOperands(); ++i) {
+    //for (int i = 0; i < this->tpg.getEnvironment().getMaxNbOperands(); ++i) { TODO
+    for (int i = 0; i < 0; ++i) {
         pos2 = str.find("|");
         dataIndex = std::stoi(str.substr(pos, pos2));
         pos2++; // skip the '|'
@@ -182,8 +183,8 @@ void File::GraphDotImporter::readProgram(std::smatch& matches)
         }
 
         // create new program with the correct amount of constants
-        Program::Program* p =
-            new Program::Program(this->tpg.getEnvironment(), isActionProgram);
+        Program::Program* p;
+            //new Program::Program(this->tpg.getEnvironment(), isActionProgram);
         // set the previously read constants
         for (int i = 0; i < v_constant.size(); i++) {
             p->getConstantHandler().setDataAt(typeid(Data::Constant), i,
@@ -269,9 +270,9 @@ void File::GraphDotImporter::readAction(std::smatch& matches)
         if (elmt == actionID.end()) {
 
             uint64_t currActionID = action_number;
-            if (tpg.getEnvironment().getNbContinuousActions() == 0) {
+            /*if (tpg.getEnvironment().getNbContinuousActions() == 0) {
                 currActionID = std::stoi(action_label);
-            }
+            }*/
 
             const auto& newAction = *this->tpg.addNewAction(currActionID);
 

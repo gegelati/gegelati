@@ -52,12 +52,6 @@ namespace Algorithm::TPG {
              */
             void addLGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet);
 
-            /**
-             * \brief Method executing an Agent and outputting action values.
-             * 
-             * \param[in] agent The agent which is evaluated.
-             */
-            virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) const override;
 
             /**
              * \brief Get the Archive used by the LGPAlgorithm.

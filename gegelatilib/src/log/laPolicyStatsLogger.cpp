@@ -56,7 +56,7 @@ void Log::LAPolicyStatsLogger::logAfterDecimate()
               << std::endl
               << std::endl;
         EvoGraph::PolicyStats ps;
-        ps.setEnvironment(this->learningAgent.getGraph()->getEnvironment());
+        //ps.setEnvironment(this->learningAgent.getGraph()->getEnvironment());
         ps.analyzePolicy(this->learningAgent.getGraph()->getVertices().front().get()); // TODO
         *this << ps << std::endl;
         *this << std::endl

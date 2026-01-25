@@ -39,12 +39,6 @@ namespace Algorithm::LGP {
             LGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet, std::string algorithmName = "LGP")
                 : Algorithm(params, algorithmName), iSet{iSet} {};
 
-            /**
-             * \brief Method executing an Agent and outputting action values.
-             * 
-             * \param[in] agent The agent which is evaluated.
-             */
-            virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) const override;
 
             /**
              * \brief Get the Environment used by the LGPAlgorithm.

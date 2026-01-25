@@ -50,9 +50,6 @@ namespace EvoGraph {
     // Declare the Graph class to be used as a parameter.
     class Graph;
 
-    // Declare the OldExecutionEngine class to be used as a parameter.
-    class OldExecutionEngine;
-
     /**
      * \brief Factory for creating all elements constituting a TPG.
      *
@@ -62,8 +59,6 @@ namespace EvoGraph {
      * - Team
      * - Action
      * - Vertex
-     *
-     * The factory also enables the creation of OldExecutionEngine.
      *
      * This implementation returns the default type for each kind of element.
      */
@@ -76,11 +71,8 @@ namespace EvoGraph {
 
         /**
          * \brief Create a Graph with this GraphFactory.
-         *
-         * \param[in] env Environment used to build the Graph.
          */
-        virtual std::shared_ptr<Graph> createGraph(
-            const Environment& env) const;
+        virtual std::shared_ptr<Graph> createGraph() const;
 
         /**
          * \brief Create a Team for a Graph.
@@ -130,21 +122,6 @@ namespace EvoGraph {
             std::shared_ptr<const Vertex> src, std::shared_ptr<const Algorithm::Agent> actionProgram,
             uint64_t actionClass) const;
 
-        /**
-         * \brief Create a OldExecutionEngine for a Graph produced by this
-         * GraphFactory.
-         *
-         * \param[in] env Environment in which the Program of the Graph will
-         * be executed.
-         * \param[in] arch pointer to the Archive for storing recordings of the
-         * Program Execution. By default, a NULL pointer is given, meaning that
-         * no recording of the execution will be made.
-         *
-         * \return the returned OldExecutionEngine returned as an unique_ptr.
-         */
-        virtual std::unique_ptr<EvoGraph::OldExecutionEngine>
-        createExecutionEngine(const Environment& env,
-                                 Archive* arch = NULL) const;
     };
 
 } // namespace EvoGraph

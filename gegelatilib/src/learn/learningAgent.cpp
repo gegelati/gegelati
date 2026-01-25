@@ -78,11 +78,6 @@ std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::getAlgorithmAt(size_
     return this->algorithms.at(idx);
 }
 
-const Environment& Learn::LearningAgent::getEnvironment() const
-{
-    return this->env;
-}
-
 RNG::RNG& Learn::LearningAgent::getRNG()
 {
     return this->rng;
@@ -261,10 +256,6 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
     // Create the execution engine of the agent.
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
         algorithm->getManager()->createExecutionEngine();
-    /*std::unique_ptr<EvoGraph::OldExecutionEngine> tee =
-        this->graph->getFactory().createExecutionEngine(
-            this->env,
-            (mode == LearningMode::TRAINING) ? &this->archive : NULL);*/
 
     // Create and evaluate the job
     auto job = algorithm->createJob(agent, mode, this->rng);

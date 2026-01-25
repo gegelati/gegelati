@@ -25,7 +25,7 @@ void Algorithm::TPG::TPGMutator::updateSpecificContext(
     this->preExistingActions.clear();
     this->preExistingEdges.clear();
 
-    /*std::set<std::shared_ptr<const EvoGraph::Edge>, SharedLess<EvoGraph::Edge>> usableEdges;
+    std::set<std::shared_ptr<const EvoGraph::Edge>, SharedLess<EvoGraph::Edge>> usableEdges;
     std::set<std::shared_ptr<const EvoGraph::Vertex>, SharedLess<EvoGraph::Vertex>> usableVertices;
     std::queue<std::shared_ptr<const EvoGraph::Vertex>> toVisit;
 
@@ -73,9 +73,9 @@ void Algorithm::TPG::TPGMutator::updateSpecificContext(
         usableEdges.insert(vertex->getOutgoingEdges().begin(), vertex->getOutgoingEdges().end());
     }
 
-    this->preExistingEdges.insert(this->preExistingEdges.end(), usableEdges.begin(), usableEdges.end());*/
+    this->preExistingEdges.insert(this->preExistingEdges.end(), usableEdges.begin(), usableEdges.end());
 
-    
+    /*
     // Get current vertex set (copy)
     auto vertices(graph->getVertices());
     // Get current agent teams (copy)
@@ -102,7 +102,7 @@ void Algorithm::TPG::TPGMutator::updateSpecificContext(
     this->preExistingEdges.clear();
     for(auto edge: graph->getEdges()){
         this->preExistingEdges.push_back(edge);
-    }
+    }*/
 
 
 }

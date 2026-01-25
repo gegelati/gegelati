@@ -41,7 +41,6 @@
 #include <list>
 #include <set>
 
-#include "environment.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/factory.h"
@@ -60,12 +59,10 @@ namespace EvoGraph {
         /**
          * \brief Main Graph constructor.
          *
-         * \param[in] e the Environment for the Graph.
          * \param[in] f the GraphFactory used to create the graph elements.
          */
-        Graph(const Environment& e,
-                 std::unique_ptr<GraphFactory> f = std::make_unique<GraphFactory>())
-            : env{e}, factory{std::move(f)}
+        Graph(std::unique_ptr<GraphFactory> f = std::make_unique<GraphFactory>())
+            : factory{std::move(f)}
         {
         }
 
@@ -79,7 +76,7 @@ namespace EvoGraph {
          *
          * \param[in] model the Graph to copy
          */
-        Graph(Graph&& model) noexcept : env{model.getEnvironment()}
+        Graph(Graph&& model) noexcept
         {
             swap(*this, model);
         }
@@ -112,13 +109,6 @@ namespace EvoGraph {
          * \brief Empty the Graph of all its content.
          */
         void clear();
-
-        /**
-         * \brief Accessor to the Environment of the Graph.
-         *
-         * \return the const reference to the env attribute.
-         */
-        const Environment& getEnvironment() const;
 
         /**
          * \brief Get a reference to the GraphFactory of the Graph.
@@ -421,8 +411,6 @@ namespace EvoGraph {
         void setNewEdgeID(const EvoGraph::Edge& edge, uint64_t newID);
 
       protected:
-        /// Environment of the Graph
-        const Environment& env;
 
         /// GraphFactory of the Graph
         const std::unique_ptr<GraphFactory> factory;

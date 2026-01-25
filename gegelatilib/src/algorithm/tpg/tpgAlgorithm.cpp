@@ -2,11 +2,6 @@
 #include "algorithm/tpg/tpgAlgorithm.h"
 
 
-std::vector<double> Algorithm::TPG::TPGAlgorithm::executeAgent(std::shared_ptr<const Agent> agent) const
-{
-    return {};
-}
-
 void Algorithm::TPG::TPGAlgorithm::addLGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet)
 {
     std::shared_ptr<LGP::LGPAlgorithm> lgpAlgorithm =

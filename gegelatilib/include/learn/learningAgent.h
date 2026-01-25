@@ -44,7 +44,6 @@
 
 #include "algorithm/algorithm.h"
 
-#include "environment.h"
 #include "instructions/set.h"
 #include "log/laLogger.h"
 #include "mutator/mutationParameters.h"
@@ -69,9 +68,6 @@ namespace Learn {
 
         /// Vector of shared pointer of algorithms learned by the learning agent.
         std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms;
-
-        /// Environment for executing Program of the LearningAgent
-        Environment env;
 
         /// Parameters for the learning process
         LearningParameters params;
@@ -113,8 +109,7 @@ namespace Learn {
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le}, algorithms{algorithms},
-              env(iSet, p, le.getDataSources(), le.getActions()->sizeContinuous()), params{p},
-              graph(factory.createGraph(env)) {};
+              params{p}, graph(factory.createGraph()) {};
 
         /**
          * \brief Constructor for LearningAgent.
@@ -130,9 +125,7 @@ namespace Learn {
         LearningAgent(LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm, const Instructions::Set& iSet,
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : learningEnvironment{le}, algorithms{{algorithm}},
-              env(iSet, p, le.getDataSources(), le.getActions()->sizeContinuous()), params{p},
-              graph(factory.createGraph(env)) {};
+            : LearningAgent(le, std::vector<std::shared_ptr<Algorithm::Algorithm>>{algorithm}, iSet, p, factory) {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -169,13 +162,6 @@ namespace Learn {
          * \param[in] idx specified index
          */
         std::shared_ptr<Algorithm::Algorithm> getAlgorithmAt(size_t idx);
-
-        /**
-         * \brief Accessor to the Environment of the Graph.
-         *
-         * \return the const reference to the env attribute.
-         */
-        const Environment& getEnvironment() const;
 
         /**
          * \brief Getter for the RNG used by the LearningAgent.

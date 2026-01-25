@@ -39,11 +39,10 @@
 #include "evoGraph/instrumented/executionEngineInstrumented.h"
 #include "evoGraph/instrumented/teamInstrumented.h"
 
-std::shared_ptr<EvoGraph::Graph> EvoGraph::TPGInstrumentedFactory::createGraph(
-    const Environment& env) const
+std::shared_ptr<EvoGraph::Graph> EvoGraph::TPGInstrumentedFactory::createGraph() const
 {
     return std::make_shared<EvoGraph::Graph>(
-        env, std::make_unique<TPGInstrumentedFactory>());
+        std::make_unique<TPGInstrumentedFactory>());
 }
 
 std::shared_ptr<EvoGraph::Team> EvoGraph::TPGInstrumentedFactory::createTeam() const
@@ -65,11 +64,6 @@ std::shared_ptr<EvoGraph::Edge> EvoGraph::TPGInstrumentedFactory::createEdge(
     return ptr;
 }
 
-std::unique_ptr<EvoGraph::OldExecutionEngine> EvoGraph::TPGInstrumentedFactory::
-    createExecutionEngine(const Environment& env, Archive* arch) const
-{
-    return std::make_unique<ExecutionEngineInstrumented>(env, arch);
-}
 
 void EvoGraph::TPGInstrumentedFactory::resetGraphCounters(
     const EvoGraph::Graph& graph) const

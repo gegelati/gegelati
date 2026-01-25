@@ -2,11 +2,6 @@
 #include "algorithm/lgp/lgpAlgorithm.h"
 
 
-std::vector<double> Algorithm::LGP::LGPAlgorithm::executeAgent(std::shared_ptr<const Agent> agent) const
-{
-    return {};
-}
-
 
 
  std::shared_ptr<const Environment> Algorithm::LGP::LGPAlgorithm::getEnvironment() const

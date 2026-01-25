@@ -145,7 +145,6 @@
 #include <evoGraph/action.h>
 #include <evoGraph/actionEdge.h>
 #include <evoGraph/edge.h>
-#include <evoGraph/oldExecutionEngine.h>
 #include <evoGraph/factory.h>
 #include <evoGraph/graph.h>
 #include <evoGraph/team.h>

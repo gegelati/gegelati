@@ -52,8 +52,7 @@ namespace EvoGraph {
       public:
         /// Specialization of the method returing the Graph with a
         /// TPGInstrumentedFactory as an attribute.
-        virtual std::shared_ptr<Graph> createGraph(
-            const Environment& env) const override;
+        virtual std::shared_ptr<Graph> createGraph() const override;
 
         ///  Specialization of the method returning a TeamInstrumented
         virtual std::shared_ptr<Team> createTeam() const override;
@@ -67,10 +66,6 @@ namespace EvoGraph {
             std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
             const std::shared_ptr<const Algorithm::Agent> prog) const override;
 
-        ///  Specialization of the method returning a
-        ///  ExecutionEngineInstrumented
-        virtual std::unique_ptr<OldExecutionEngine> createExecutionEngine(
-            const Environment& env, Archive* arch = NULL) const override;
         /**
          * \brief Reset all visit and traversal counters of a Graph.
          *

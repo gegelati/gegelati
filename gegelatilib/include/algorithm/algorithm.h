@@ -145,12 +145,6 @@ namespace Algorithm {
 
 
 
-        /**
-         * \brief Method executing an Agent and outputting values.
-         * 
-         * \param[in] agent The agent which is evaluated.
-         */
-        virtual std::vector<double> executeAgent(std::shared_ptr<const Agent> agent) const = 0;
 
         /**
          * \brief Clear all the parts of agents that are not used, such as introns for LGPs

@@ -60,11 +60,6 @@ void EvoGraph::Graph::clear()
     this->edges.clear();
 }
 
-const Environment& EvoGraph::Graph::getEnvironment() const
-{
-    return this->env;
-}
-
 const EvoGraph::GraphFactory& EvoGraph::Graph::getFactory() const
 {
     return *this->factory;

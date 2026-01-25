@@ -35,13 +35,11 @@
  */
 
 #include "evoGraph/factory.h"
-#include "evoGraph/oldExecutionEngine.h"
 #include "evoGraph/graph.h"
 
-std::shared_ptr<EvoGraph::Graph> EvoGraph::GraphFactory::createGraph(
-    const Environment& env) const
+std::shared_ptr<EvoGraph::Graph> EvoGraph::GraphFactory::createGraph() const
 {
-    return std::make_shared<EvoGraph::Graph>(env, std::make_unique<GraphFactory>());
+    return std::make_shared<EvoGraph::Graph>(std::make_unique<GraphFactory>());
 }
 
 std::shared_ptr<EvoGraph::Team> EvoGraph::GraphFactory::createTeam() const
@@ -67,10 +65,4 @@ std::shared_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createActionEdge(
     uint64_t actionClass) const
 {
     return std::make_shared<EvoGraph::ActionEdge>(src, actionProgram, actionClass);
-}
-
-std::unique_ptr<EvoGraph::OldExecutionEngine> EvoGraph::GraphFactory::
-    createExecutionEngine(const Environment& env, Archive* arch) const
-{
-    return std::make_unique<EvoGraph::OldExecutionEngine>(env, arch);
 }
