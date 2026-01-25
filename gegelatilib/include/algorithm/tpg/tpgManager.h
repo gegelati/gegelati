@@ -110,7 +110,7 @@ namespace Algorithm::TPG {
         /**
          * \brief create and return a TPG execution engine.
          */
-        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(bool isTraining = false) const override;
+        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources = {}, bool isTraining = false) const override;
     };
 }; // namespace Algorithm
 

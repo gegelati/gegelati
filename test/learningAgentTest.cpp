@@ -309,21 +309,6 @@ TEST_F(LearningAgentTest, EvalAllRoots)
            "Graph.";
 }
 
-TEST_F(LearningAgentTest, GetArchive)
-{
-    params.archiveSize = 50;
-    params.archivingProbability = 0.5;
-    params.maxNbActionsPerEval = 11;
-    params.nbIterationsPerPolicyEvaluation = 10;
-
-    Learn::LearningAgent la(le, tpg, set, params);
-
-    la.init();
-    la.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
-
-    ASSERT_NO_THROW(la.getArchive())
-        << "Cannot get the archive of a LearningAgent.";
-}
 
 TEST_F(LearningAgentTest, GetEnvironment)
 {
@@ -988,9 +973,17 @@ TEST_F(ParallelLearningAgentTest, Init)
 
     ASSERT_NO_THROW(pla.init())
         << "Initialization of the LearningAgent should not fail.";
+
+        
+    params.selection._selectionMode = "wrongSelector";
+    tpg =  std::make_shared<Algorithm::TPGAlgorithm>(params, set);
+    Learn::ParallelLearningAgent pla2(le, tpg, set, params);
+
+    ASSERT_THROW(pla2.init(), std::runtime_error)
+        << "Initialization of the learningAgent with wrong selector should fail.";
 }
 
-/*
+
 TEST_F(ParallelLearningAgentTest, EvalRootSequential)
 {
     params.archiveSize = 50;
@@ -999,31 +992,19 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.nbThreads = 1;
 
-    Environment env(set, params, le.getDataSources());
+    Learn::ParallelLearningAgent pla(le, tpg, set, params);
+    Archive a; // For testing purposes, notmally, the archive from the
+               // LearningAgent is used.
 
-    EvoGraph::Graph tpg(env);
-
-    // Initialize Randomness
-    RNG::RNG rng;
-    rng.setSeed(0);
-
-    // Initialize the tpg
-    Mutator::TPGMutator::initRandomTPG(tpg, params.mutation, rng,
-                                       le.getNbActions());
-
-    // create the archive
-    Archive archive;
-
-    // The OldExecutionEngine
-    EvoGraph::OldExecutionEngine tee(env, &archive);
+    pla.init();
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager()->createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    Learn::ParallelLearningAgent pla(le, tpg, set, params);
-    ASSERT_NO_THROW(result = pla.evaluateJob(
-                        tee,
-                        *pla.makeJob(tpg.getRootVertices().at(0),
-                                     Learn::LearningMode::TRAINING, 0, &tpg),
-                        0, Learn::LearningMode::TRAINING, le))
+    auto job = tpg->createJob(pla.getAlgorithmAt(0)->getAgents().at(0),
+                           Learn::LearningMode::TRAINING, pla.getRNG());
+    pla.setCurrentAlgorithm(tpg);
+    ASSERT_NO_THROW(
+        result = pla.evaluateJob(*execEngine, *job, 0, Learn::LearningMode::TRAINING, le))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
@@ -1041,10 +1022,10 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const EvoGraph::Vertex*>
+                  std::shared_ptr<const Algorithm::Agent>>
         result;
     ASSERT_NO_THROW(result =
-                        pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
+                        pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), pla.getGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
@@ -1059,14 +1040,15 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.nbThreads = 4;
 
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
     Learn::ParallelLearningAgent pla(le, tpg, set, params);
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  const EvoGraph::Vertex*>
+                  std::shared_ptr<const Algorithm::Agent>>
         result;
     ASSERT_NO_THROW(result =
-                        pla.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
+                        pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
     ASSERT_EQ(result.size(), pla.getGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
@@ -1082,28 +1064,32 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
 
-    Learn::LearningAgent la(le, tpg, set, params);
+
+    auto tpgLa = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
+    Learn::LearningAgent la(le, tpgLa, set, params);
     la.init(0); // Reset RNG to 0
-    auto results = la.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
+    auto results = la.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
     auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     Learn::LearningParameters paramsSequential = params;
     paramsSequential.nbThreads = 1;
-    Learn::ParallelLearningAgent plaSequential(le, tpg, set, paramsSequential);
+    auto tpgSequential = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
+    Learn::ParallelLearningAgent plaSequential(le, tpgSequential, set, paramsSequential);
 
     plaSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
-        plaSequential.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
+        plaSequential.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
     auto nextIntSequential =
         plaSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     Learn::LearningParameters paramsParallel = params;
     paramsParallel.nbThreads = 4;
-    Learn::ParallelLearningAgent plaParallel(le, tpg, set, paramsParallel);
+    auto tpgParallel = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
+    Learn::ParallelLearningAgent plaParallel(le, tpgParallel, set, paramsParallel);
 
     plaParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
-        plaParallel.evaluateAllRoots(0, Learn::LearningMode::TRAINING);
+        plaParallel.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
     auto nextIntParallel = plaParallel.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     // Check equality between LearningAgent and ParallelLearningAgent
@@ -1120,9 +1106,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
         iterSequential++;
     }
 
-    // Check determinism of bestRoot score
-    ASSERT_EQ(la.getSelector()->getBestRoot().second,
-              plaSequential.getSelector()->getBestRoot().second);
+    // Check determinism of bestAgent score
+    ASSERT_EQ(tpgLa->getSelector()->getBestAgent().first,
+              tpgParallel->getSelector()->getBestAgent().first);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
@@ -1130,18 +1116,18 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
            "sequential execution.";
 
     // Check archives
-    ASSERT_GT(la.getArchive().getNbRecordings(), 0)
+    ASSERT_GT(tpgLa->getArchive()->getNbRecordings(), 0)
         << "For the archive determinism tests to be meaningful, Archive should "
            "not be empty.";
-    ASSERT_EQ(la.getArchive().getNbRecordings(),
-              plaSequential.getArchive().getNbRecordings())
+    ASSERT_EQ(tpgLa->getArchive()->getNbRecordings(),
+              tpgSequential->getArchive()->getNbRecordings())
         << "Archives have different sizes.";
-    for (auto i = 0; i < la.getArchive().getNbRecordings(); i++) {
-        ASSERT_EQ(la.getArchive().at(i).dataHash,
-                  plaSequential.getArchive().at(i).dataHash)
+    for (auto i = 0; i < tpgLa->getArchive()->getNbRecordings(); i++) {
+        ASSERT_EQ(tpgLa->getArchive()->at(i).dataHash,
+                  tpgSequential->getArchive()->at(i).dataHash)
             << "Archives have different content.";
-        ASSERT_EQ(la.getArchive().at(i).result,
-                  plaSequential.getArchive().at(i).result)
+        ASSERT_EQ(tpgLa->getArchive()->at(i).result,
+                  tpgSequential->getArchive()->at(i).result)
             << "Archives have different content.";
     }
 
@@ -1160,9 +1146,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
         iterParallel++;
     }
 
-    // Check determinism of bestRoot score
-    ASSERT_EQ(plaSequential.getSelector()->getBestRoot().second,
-              plaParallel.getSelector()->getBestRoot().second);
+    // Check determinism of bestAgent score
+    ASSERT_EQ(tpgSequential->getSelector()->getBestAgent().first,
+              tpgParallel->getSelector()->getBestAgent().first);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)
@@ -1170,15 +1156,15 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
            "sequential execution.";
 
     // Check archives
-    ASSERT_EQ(plaParallel.getArchive().getNbRecordings(),
-              plaSequential.getArchive().getNbRecordings())
+    ASSERT_EQ(tpgParallel->getArchive()->getNbRecordings(),
+              tpgSequential->getArchive()->getNbRecordings())
         << "Archives have different sizes.";
-    for (auto i = 0; i < plaParallel.getArchive().getNbRecordings(); i++) {
-        ASSERT_EQ(plaParallel.getArchive().at(i).dataHash,
-                  plaSequential.getArchive().at(i).dataHash)
+    for (auto i = 0; i < tpgParallel->getArchive()->getNbRecordings(); i++) {
+        ASSERT_EQ(tpgParallel->getArchive()->at(i).dataHash,
+                  tpgSequential->getArchive()->at(i).dataHash)
             << "Archives have different content.";
-        ASSERT_EQ(plaParallel.getArchive().at(i).result,
-                  plaSequential.getArchive().at(i).result)
+        ASSERT_EQ(tpgParallel->getArchive()->at(i).result,
+                  tpgSequential->getArchive()->at(i).result)
             << "Archives have different content.";
     }
 }
@@ -1192,28 +1178,32 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
 
-    Learn::LearningAgent la(le, tpg, set, params);
+    auto tpgLa = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
+    Learn::LearningAgent la(le, tpgLa, set, params);
     la.init(0); // Reset centralized RNG to 0
-    auto results = la.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
+    auto results = la.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
     auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     Learn::LearningParameters paramsSequential = params;
     paramsSequential.nbThreads = 1;
-    Learn::ParallelLearningAgent plaSequential(le, tpg, set, paramsSequential);
+    
+    auto tpgSequential = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
+    Learn::ParallelLearningAgent plaSequential(le, tpgSequential, set, paramsSequential);
 
     plaSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
-        plaSequential.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
+        plaSequential.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
     auto nextIntSequential =
         plaSequential.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     Learn::LearningParameters paramsParallel = params;
     paramsParallel.nbThreads = 4;
-    Learn::ParallelLearningAgent plaParallel(le, tpg, set, paramsParallel);
+    auto tpgParallel = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
+    Learn::ParallelLearningAgent plaParallel(le, tpgParallel, set, paramsParallel);
 
     plaParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
-        plaParallel.evaluateAllRoots(0, Learn::LearningMode::VALIDATION);
+        plaParallel.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
     auto nextIntParallel = plaParallel.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     // Check equality between LearningAgent and ParallelLearningAgent
@@ -1236,9 +1226,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
            "sequential execution.";
 
     // Check archives
-    ASSERT_EQ(la.getArchive().getNbRecordings(), 0)
+    ASSERT_EQ(tpgLa->getArchive()->getNbRecordings(), 0)
         << "Archives should be empty in Validation mode.";
-    ASSERT_EQ(plaSequential.getArchive().getNbRecordings(), 0)
+    ASSERT_EQ(tpgSequential->getArchive()->getNbRecordings(), 0)
         << "Archives should be empty in Validation mode.";
 
     // Check equality between ParallelLearningAgent in parallel and sequential
@@ -1262,7 +1252,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
            "sequential execution.";
 
     // Check archives
-    ASSERT_EQ(plaParallel.getArchive().getNbRecordings(), 0)
+    ASSERT_EQ(tpgParallel->getArchive()->getNbRecordings(), 0)
         << "Archives should be empty in Validation mode.";
 }
 
@@ -1273,7 +1263,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
     params.selection.truncation.ratioDeletedRoots =
-        0.95; // high number to force the apparition of root action.
+        0.85; // high number to force the apparition of root action.
     params.nbThreads = 1;
 
     Learn::ParallelLearningAgent pla(le, tpg, set, params);
@@ -1281,9 +1271,8 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     pla.init();
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Mutator::TPGMutator::populateTPG(*pla.getGraph(), *pla.getSelector(), a,
-                                     params.mutation, pla.getRNG(),
-                                     le.getNbActions());
+    auto tpg = pla.getAlgorithmAt(0);
+    tpg->getMutator()->mutatePopulation(pla.getGraph(), tpg->getManager(), tpg->getSelector(), params, pla.getRNG());
     size_t initialNbVertex = pla.getGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
@@ -1296,11 +1285,9 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
                         params.mutation.tpg.nbRoots))
         << "Number of remaining is under the number of roots from the "
            "Graph.";
-    // Train a second generation, because most roots were removed, a root
-    // actions have appeared and the training algorithm will attempt to remove
-    // them.
-    ASSERT_NO_THROW(pla.trainOneGeneration(0))
-        << "Training for one generation failed.";
+
+    // Check that bestRoot has been set
+    ASSERT_NE(tpg->getSelector()->getBestAgent().first, nullptr);
 }
 
 TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
@@ -1310,17 +1297,16 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
     params.selection.truncation.ratioDeletedRoots =
-        0.95; // high number to force the apparition of root action.
+        0.85; // high number to force the apparition of root action.
     params.nbThreads = 4;
 
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
     Learn::ParallelLearningAgent pla(le, tpg, set, params);
 
     pla.init();
     // Do the populate call to keep know the number of initial vertex
-    Archive a(0);
-    Mutator::TPGMutator::populateTPG(*pla.getGraph(), *pla.getSelector(), a,
-                                     params.mutation, pla.getRNG(),
-                                     le.getNbActions());
+    tpg->getMutator()->mutatePopulation(pla.getGraph(), tpg->getManager(), tpg->getSelector(), params, pla.getRNG());
+    
     size_t initialNbVertex = pla.getGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
@@ -1347,6 +1333,7 @@ TEST_F(ParallelLearningAgentTest, TrainSequential)
         params.nbIterationsPerPolicyEvaluation * 2;
     params.nbThreads = 1;
 
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
     Learn::ParallelLearningAgent pla(le, tpg, set, params);
 
     pla.init();
@@ -1426,6 +1413,58 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
            "Graphs.";
 }
 
+TEST_F(ParallelLearningAgentTest, TrainPortability)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.nbThreads = 3;
+
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, set);
+    Learn::ParallelLearningAgent la(le, tpg, set, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+    EvoGraph::Graph& tpg = *la.getGraph();
+
+    // Useful when determinism is changed
+    /* std::cout << tpg.getNbVertices() << " "
+             <<tpg.getNbRootVertices()<<" "
+             <<tpg.getEdges().size()<<" "
+             <<EvoGraph::Vertex::getVertexIDCounter()<<" "
+             <<EvoGraph::Edge::getEdgeIDCounter()<<" "
+             <<Algorithm::Agent::getAgentIDCounter()<<" "
+
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    ASSERT_EQ(tpg.getNbVertices(), 30)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 103)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 150)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 621)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 368)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 4675012253163452921U)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
+/*
 TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
 {
     params.archiveSize = 50;

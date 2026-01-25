@@ -57,7 +57,7 @@ class FakeLearningEnvironment : public Learn::LearningEnvironment
     Data::PrimitiveTypeArray<int> data;
 
   public:
-    FakeLearningEnvironment() : LearningEnvironment(2), data(3){};
+    FakeLearningEnvironment() : LearningEnvironment(Output::OutputHandler(2)), data(3){};
     void reset(size_t seed, Learn::LearningMode mode, uint16_t iterationNumber,
                uint64_t generationNumber) {};
     std::vector<std::reference_wrapper<const Data::DataHandler>>
@@ -101,7 +101,7 @@ TEST(LearningEnvironmentTest, getNbAction)
 {
     StickGameWithOpponent le;
 
-    ASSERT_EQ(le.getNbActions(), 3) << "Number of action is incorrect";
+    ASSERT_EQ(le.getActions()->size(), 3) << "Number of action is incorrect";
 }
 
 TEST(LearningEnvironmentTest, getDataSource)

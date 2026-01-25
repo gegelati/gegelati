@@ -116,7 +116,7 @@ std::shared_ptr<Algorithm::Job> Algorithm::Algorithm::createJob(std::shared_ptr<
     }
 
 
-    return std::make_shared<Job>(agent, this->manager, this->selector, idx);
+    return std::make_shared<Job>(agent, idx);
 }
 
 void Algorithm::Algorithm::updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode)

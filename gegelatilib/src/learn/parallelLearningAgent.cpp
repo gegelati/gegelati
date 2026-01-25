@@ -46,25 +46,36 @@
 #include "mutator/tpgMutator.h"
 
 #include "algorithm/tpg/tpgJob.h"
+#include "algorithm/tpg/tpgExecutionEngine.h"
+#include "algorithm/lgp/lgpAgent.h"
 
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
 
+
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
-Learn::ParallelLearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumber,
-                                               Learn::LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm)
+Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
+                                               Learn::LearningMode mode)
 {
+
+
+    if(this->currentExecutedAlgorithm == nullptr){
+        throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: currentExecutedAlgorithm is not set.");
+    }
+    if(!this->containsAlgorithm(this->currentExecutedAlgorithm)){
+        throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: The learning agent does not contain the given algorithm.");
+    }
+
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
         results;
 
-    if (this->maxNbThreads <= 1 || !this->learningEnvironment.isCopyable()) {
-        results = Learn::LearningAgent::evaluateOneAlgorithmAgents(generationNumber, mode, algorithm);
+        
+    if (false && (this->maxNbThreads <= 1 || !this->learningEnvironment.isCopyable())) {
+        results = Learn::LearningAgent::evaluateCurrentAlgorithmAgents(generationNumber, mode);
     }
     else {
-        // Create and fill the queue for distributing work among threads
-        // each agent is associated to its number in the list for enabling the
-        // determinism of stochastic archive storage.
-        std::vector<std::shared_ptr<Algorithm::Job>> jobsToProcess = makeJobs(mode, algorithm);
+        // Create jobs to process
+        std::vector<std::shared_ptr<Algorithm::Job>> jobsToProcess = makeJobs(mode, this->currentExecutedAlgorithm);
 
         // Create a copy of jobsToProcess in a queue structure
         std::queue<std::shared_ptr<Algorithm::Job>> jobsQueue;
@@ -76,7 +87,7 @@ Learn::ParallelLearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumb
         evaluateAgentsInParallel(jobsQueue, generationNumber, mode, results);
 
         // Update the algorithm after evaluation with the jobs processed
-        algorithm->updateAfterEvaluation(jobsToProcess, mode);
+        this->currentExecutedAlgorithm->updateAfterEvaluation(jobsToProcess, mode);
     }
 
     return results;
@@ -89,7 +100,6 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Algorithm::Job>>>& resultsPerAgentMap,
     std::mutex& resultsPerAgentMapMutex,
-    std::map<uint64_t, Archive*>& archiveMap, std::mutex& archiveMapMutex,
     bool useMainEnvironment)
 {
 
@@ -98,62 +108,37 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
         useMainEnvironment ? &this->learningEnvironment
                            : this->learningEnvironment.clone();
 
-    // Create a OldExecutionEngine
-    Environment privateEnv(this->env.getInstructionSet(), params,
-                           privateLearningEnvironment->getDataSources(),
-                           (privateLearningEnvironment->getActions()->sizeContinuous()));
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = jobsToProcess.front()->getManager()->createExecutionEngine();
-    /*std::unique_ptr<Algorithm::ExecutionEngine> tee =
-        this->graph->getFactory().createExecutionEngine(privateEnv, NULL);*/
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = this->currentExecutedAlgorithm->getManager()->createExecutionEngine(privateLearningEnvironment->getDataSources());
 
-    int i = 0;
-    // Pop a job
-    while (!jobsToProcess.empty()) { // Thread safe access to size
-        i++;
+    // Pop a job and process it
+    while (true) {
         bool doProcess = false;
         std::shared_ptr<Algorithm::Job> jobToProcess;
-        { // Mutuel exclusion zone
+
+        { // Mutual exclusion zone: atomic job acquisition + engine creation
             std::lock_guard<std::mutex> lock(agentsToProcessMutex);
-            if (!jobsToProcess.empty()) { // Additional verification after lock
+            if (!jobsToProcess.empty()) {
                 jobToProcess = jobsToProcess.front();
                 jobsToProcess.pop();
                 doProcess = true;
             }
         } // End of mutual exclusion zone
 
-        // Processing to do?
-        if (doProcess) {
-            doProcess = false;
-            // Dedicated archive for the agent
-            Archive* temporaryArchive = NULL;
-            if (mode == LearningMode::TRAINING) {
-                if(std::dynamic_pointer_cast<Algorithm::TPG::TPGJob>(jobToProcess) == nullptr){
-                    throw std::runtime_error("bad archive creation error :(");
-                }
-                /*temporaryArchive =
-                    new Archive(params.archiveSize, params.archivingProbability,
-                                std::dynamic_pointer_cast<Algorithm::TPG::TPGJob>(jobToProcess)->getArchiveSeed());*/
-            }
-            //tee->setArchive(temporaryArchive);
+        // Exit if no more jobs
+        if (!doProcess) {
+            break;
+        }
 
-            std::shared_ptr<EvaluationResult> avgScore =
-                this->evaluateJob(*execEngine, *jobToProcess, generationNumber, mode,
-                                  *privateLearningEnvironment);
+        // Evaluate the job with its dedicated engine
+        std::shared_ptr<EvaluationResult> avgScore =
+            this->evaluateJob(*execEngine, *jobToProcess, generationNumber, mode,
+                              *privateLearningEnvironment);
 
-            { // Store result Mutual exclusion zone
-                std::lock_guard<std::mutex> lock(resultsPerAgentMapMutex);
-                resultsPerAgentMap.emplace(
-                    jobToProcess->getIdx(),
-                    std::make_pair(avgScore, jobToProcess));
-            }
-
-            if (mode == LearningMode::TRAINING && false) {
-                { // Insertion archiveMap update mutual exclusion zone
-                    std::lock_guard<std::mutex> lock(archiveMapMutex);
-                    archiveMap.insert(
-                        {jobToProcess->getIdx(), temporaryArchive});
-                }
-            }
+        { // Store result Mutual exclusion zone
+            std::lock_guard<std::mutex> lock(resultsPerAgentMapMutex);
+            resultsPerAgentMap.emplace(
+                jobToProcess->getIdx(),
+                std::make_pair(avgScore, jobToProcess));
         }
     }
 
@@ -163,85 +148,29 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     }
 }
 
-void Learn::ParallelLearningAgent::mergeArchiveMap(
-    std::map<uint64_t, Archive*>& archiveMap)
-{
-    // Scan the archives backward, starting from the last to identify the
-    // last params.archiveSize recordings to keep (or less).
-    auto reverseIterator = archiveMap.rbegin();
-
-    uint64_t nbRecordings = 0;
-    while (nbRecordings < this->params.archiveSize &&
-           reverseIterator != archiveMap.rend()) {
-        nbRecordings += reverseIterator->second->getNbRecordings();
-        reverseIterator++;
-    }
-
-    // Insert identified recordings into this->archive
-    while (reverseIterator != archiveMap.rbegin()) {
-        reverseIterator--;
-
-        auto i = reverseIterator->first;
-
-        // Skip recordings in the first archive if needed
-        uint64_t recordingIdx = 0;
-        while (nbRecordings > this->params.archiveSize) {
-            recordingIdx++;
-            nbRecordings--;
-        }
-
-        // Insert remaining recordings
-        while (recordingIdx < reverseIterator->second->getNbRecordings()) {
-            // Access in reverse order
-            const ArchiveRecording& recording =
-                reverseIterator->second->at(recordingIdx);
-            // forced Insertion
-            this->archive.addRecording(
-                recording.agent,
-                reverseIterator->second->getDataHandlers().at(
-                    recording.dataHash),
-                recording.result, true);
-            recordingIdx++;
-        }
-    }
-
-    // delete all archives
-    reverseIterator = archiveMap.rbegin();
-    while (reverseIterator != archiveMap.rend()) {
-        delete reverseIterator->second;
-        reverseIterator++;
-    }
-}
-
 void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
     std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>&
         results)
 {
-    // Create Archive Map
-    std::map<uint64_t, Archive*> archiveMap;
-    //std::map<uint64_t, ParallelismData*> algorithmDataMap;
     // Create Map for results
     std::map<uint64_t,
              std::pair<std::shared_ptr<EvaluationResult>, std::shared_ptr<Algorithm::Job>>>
         resultsPerJobMap;
 
-    evaluateAgentsInParallelExecute(jobsToProcess, generationNumber, mode, resultsPerJobMap,
-                                      archiveMap);
+    evaluateAgentsInParallelExecute(jobsToProcess, generationNumber, mode, resultsPerJobMap);
 
-    evaluateAgentsInParallelCompileResults(resultsPerJobMap, results,
-                                             archiveMap);
+    evaluateAgentsInParallelCompileResults(resultsPerJobMap, results);
+
 }
 void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
     std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
-                                 std::shared_ptr<Algorithm::Job>>>& resultsPerJobMap,
-    std::map<uint64_t, Archive*>& archiveMap)
+                                 std::shared_ptr<Algorithm::Job>>>& resultsPerJobMap)
 {
     // Create mutexes
     std::mutex agentsToProcessMutex;
     std::mutex resultsPerAgentMutex;
-    std::mutex archiveMapMutex;
 
     // Create the threads
     std::vector<std::thread> threads;
@@ -250,14 +179,13 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
             &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
             mode, std::ref(jobsToProcess), std::ref(agentsToProcessMutex),
             std::ref(resultsPerJobMap), std::ref(resultsPerAgentMutex),
-            std::ref(archiveMap), std::ref(archiveMapMutex), false));
+            false));
     }
 
     // Work in the main thread also, using the main environment
     this->slaveEvalJobThread(generationNumber, mode, jobsToProcess,
                              agentsToProcessMutex, resultsPerJobMap,
-                             resultsPerAgentMutex, archiveMap, archiveMapMutex,
-                             true);
+                             resultsPerAgentMutex, true);
 
     // Join the threads
     for (auto& thread : threads) {
@@ -269,15 +197,11 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelCompileResults(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Algorithm::Job>>>& resultsPerJobMap,
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>&
-        results,
-    std::map<uint64_t, Archive*>& archiveMap)
+        results)
 {
     // Merge the results
     for (auto& resultPerAgent : resultsPerJobMap) {
         results.emplace(resultPerAgent.second.first,
                         (*resultPerAgent.second.second).getAgent());
     }
-
-    // Merge the archives
-    //this->mergeArchiveMap(archiveMap);
 }

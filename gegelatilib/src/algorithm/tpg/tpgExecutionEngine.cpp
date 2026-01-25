@@ -18,7 +18,9 @@ void Algorithm::TPG::TPGExecutionEngine::setupJob(const Algorithm::Job& job)
     if(tpgJob == nullptr){
         throw std::runtime_error("Algorithm::TPG::TPGExecutionEngine::setupJob trying to setup with a job which is not a TPGJob");
     }
-    this->setArchive(tpgJob->getArchive());
+    if(this->isTraining){
+        this->setArchive(*tpgJob->getArchive());
+    }
     this->setExecutedAgent(job.getAgent());
 }
 

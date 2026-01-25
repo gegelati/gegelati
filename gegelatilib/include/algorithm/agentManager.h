@@ -132,11 +132,12 @@ namespace Algorithm {
         /**
          * \brief Create the execution engine associated with the algorithm.
          * 
+         * \param[in] dataSources the data sources to use for the execution engine.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          * 
          * \return a shared pointer to the created execution engine.
          */
-        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(bool isTraining = false) const = 0;
+        virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources = {}, bool isTraining = false) const = 0;
     };
 }; // namespace Algorithm
 

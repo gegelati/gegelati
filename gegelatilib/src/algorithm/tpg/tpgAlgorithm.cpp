@@ -79,8 +79,7 @@ std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(std::sha
         jobArchive = new Archive (this->params.archiveSize, this->params.archivingProbability, archiveSeed);
     }
 
-
-    return std::make_shared<TPGJob>(agent, this->manager, this->selector, idx, jobArchive);
+    return std::make_shared<TPGJob>(agent, idx, jobArchive);
 }
 
 void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode)
@@ -94,7 +93,7 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
             if(tpgJob == nullptr){
                 throw std::runtime_error("Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation trying to update after evaluation with a job which is not a TPGJob");
             }
-            archiveMap[jobPtr->getIdx()] = &tpgJob->getArchive();
+            archiveMap[jobPtr->getIdx()] = tpgJob->getArchive();
         }
 
 

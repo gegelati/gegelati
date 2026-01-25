@@ -592,7 +592,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
     params.mutation.prog.maxConstValue = 1;
 
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine(true);
+    auto execEngine = tpgManager->createExecutionEngine({}, true);
     execEngine->setExecutedAgent(tpgManager->getAgents().at(0));
     execEngine->execute();
 
@@ -911,7 +911,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
     params.mutation.prog.maxConstValue = 1;
 
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine(true);
+    auto execEngine = tpgManager->createExecutionEngine({}, true);
     execEngine->setExecutedAgent(tpgManager->getAgents().at(0));
     execEngine->execute();
 
@@ -955,7 +955,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     params.mutation.prog.maxConstValue = 1;
 
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine(true);
+    auto execEngine = tpgManager->createExecutionEngine({}, true);
     execEngine->setExecutedAgent(tpgManager->getAgents().at(0));
     execEngine->execute();
 
@@ -982,7 +982,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     // Check the unicity against the Archive
     // Verify new program uniqueness
     
-    execEngine = lgpManager->createExecutionEngine(true);
+    execEngine = lgpManager->createExecutionEngine({}, true);
     execEngine->setExecutedAgent(newPrograms.front());
     double result = execEngine->execute().at(0);
     std::map<size_t, double> hashesAndResults = {
@@ -1018,7 +1018,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
 
     tpgMutator->initRandomPopulation(graph, tpgManager, params, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine(true);
+    auto execEngine = tpgManager->createExecutionEngine({}, true);
     for (auto agent :tpgManager->getAgents()) {
         execEngine->setExecutedAgent(agent);
         execEngine->execute();
@@ -1062,7 +1062,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
 
     tpgMutator->initRandomPopulation(graph, tpgManager, params, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine(true);
+    auto execEngine = tpgManager->createExecutionEngine({}, true);
     for (auto agent :tpgManager->getAgents()) {
         execEngine->setExecutedAgent(agent);
         execEngine->execute();
@@ -1107,7 +1107,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
     tpgMutator->initRandomPopulation(graph, tpgManager, params, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine(true);
+    auto execEngine = tpgManager->createExecutionEngine({}, true);
     for (auto agent :tpgManager->getAgents()) {
         execEngine->setExecutedAgent(agent);
         execEngine->execute();
@@ -1166,7 +1166,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
 
     tpgMutator->initRandomPopulation(graph, tpgManager, params, rng);
     // Init its program and fill the archive
-    auto execEngine = tpgManager->createExecutionEngine(true);
+    auto execEngine = tpgManager->createExecutionEngine({}, true);
     for (auto agent :tpgManager->getAgents()) {
         execEngine->setExecutedAgent(agent);
         execEngine->execute();

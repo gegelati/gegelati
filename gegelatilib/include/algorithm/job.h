@@ -42,14 +42,6 @@
 
 #include "algorithm/agent.h"
 
-namespace Algorithm {
-    class AgentManager;  // Forward declaration
-}
-
-
-namespace Selector {
-    class Selector;  // Forward declaration
-}
 
 namespace Algorithm {
     /**
@@ -67,15 +59,6 @@ namespace Algorithm {
          */
         std::shared_ptr<const Agent> agent;
         
-        /**
-         * The agent contained in the job.
-         */
-        std::shared_ptr<const AgentManager> manager;
-
-        /**
-         * The selector responsible of the agent.
-         */
-        std::shared_ptr<const Selector::Selector> selector;
 
         /**
          * Index associated to this job.
@@ -91,13 +74,11 @@ namespace Algorithm {
          * Learning Agents will be able to use them later.
          *
          * @param[in] agent The agent that will be encapsulated into the job.
-         * @param[in] manager The agent Manager of the agent.
-         * @param[in] selector The selector responsible of the agent.
          * @param[in] idx The index of this job.
          */
-        Job(std::shared_ptr<const Agent> agent, std::shared_ptr<const AgentManager> manager, std::shared_ptr<const Selector::Selector> selector,
+        Job(std::shared_ptr<const Agent> agent,
             uint64_t idx = 0)
-            : agent(agent), manager{manager}, selector{selector}, idx(idx)
+            : agent(agent), idx(idx)
         {
         }
 
@@ -117,20 +98,6 @@ namespace Algorithm {
          * @return The agent embedded by the job.
          */
         virtual std::shared_ptr<const Agent> getAgent() const;
-
-        /**
-         * \brief Getter of the manager.
-         *
-         * @return The manager embedded by the job.
-         */
-        virtual std::shared_ptr<const AgentManager> getManager() const;
-
-        /**
-         * \brief Getter of the selector.
-         *
-         * @return The selector embedded by the job.
-         */
-        virtual std::shared_ptr<const Selector::Selector> getSelector() const;
 
     };
 } // namespace Learn

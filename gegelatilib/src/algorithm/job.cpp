@@ -46,13 +46,3 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::Job::getAgent() const
 {
     return this->agent;
 }
-
-std::shared_ptr<const Algorithm::AgentManager> Algorithm::Job::getManager() const
-{
-    return this->manager;
-}
-
-std::shared_ptr<const Selector::Selector> Algorithm::Job::getSelector() const
-{
-    return this->selector;
-}

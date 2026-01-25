@@ -44,7 +44,6 @@
 
 #include "algorithm/algorithm.h"
 
-#include "archive.h"
 #include "environment.h"
 #include "instructions/set.h"
 #include "log/laLogger.h"
@@ -74,9 +73,6 @@ namespace Learn {
         /// Environment for executing Program of the LearningAgent
         Environment env;
 
-        /// Archive used during the training process
-        Archive archive;
-
         /// Parameters for the learning process
         LearningParameters params;
 
@@ -98,6 +94,9 @@ namespace Learn {
          */
         std::vector<std::reference_wrapper<Log::LALogger>> loggers;
 
+        /// Currently executed algorithm during evaluation
+        std::shared_ptr<Algorithm::Algorithm> currentExecutedAlgorithm;
+
       public:
         /**
          * \brief Constructor for LearningAgent.
@@ -114,8 +113,7 @@ namespace Learn {
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le}, algorithms{algorithms},
-              env(iSet, p, le.getDataSources(), le.getActions()->sizeContinuous()),
-              archive(p.archiveSize, p.archivingProbability), params{p},
+              env(iSet, p, le.getDataSources(), le.getActions()->sizeContinuous()), params{p},
               graph(factory.createGraph(env)) {};
 
         /**
@@ -133,12 +131,18 @@ namespace Learn {
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le}, algorithms{{algorithm}},
-              env(iSet, p, le.getDataSources(), le.getActions()->sizeContinuous()),
-              archive(p.archiveSize, p.archivingProbability), params{p},
+              env(iSet, p, le.getDataSources(), le.getActions()->sizeContinuous()), params{p},
               graph(factory.createGraph(env)) {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
+
+        /**
+         * \brief Set the current executed algorithm during evaluation
+         * 
+         * \param[in] algorithm the algorithm to set as current executed algorithm
+         */
+        void setCurrentAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm);
 
         /**
          * \brief Add an algorithm to the learning agent.
@@ -165,13 +169,6 @@ namespace Learn {
          * \param[in] idx specified index
          */
         std::shared_ptr<Algorithm::Algorithm> getAlgorithmAt(size_t idx);
-
-        /**
-         * \brief Getter for the Archive filled by the LearningAgent
-         *
-         * \return a const reference to the Archive.
-         */
-        const Archive& getArchive() const;
 
         /**
          * \brief Accessor to the Environment of the Graph.
@@ -260,12 +257,10 @@ namespace Learn {
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         * \param[in] algorithm the algorithm to evaluate.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
                               std::shared_ptr<const Algorithm::Agent>>
-        evaluateOneAlgorithmAgents(uint64_t generationNumber, LearningMode mode,
-                                 std::shared_ptr<Algorithm::Algorithm> algorithm);
+        evaluateCurrentAlgorithmAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
          * \brief Evaluate one agent.

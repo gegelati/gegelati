@@ -51,6 +51,18 @@
 #include "algorithm/tpg/tpgJob.h"
 #include "algorithm/tpg/tpgAlgorithm.h"
 
+void Learn::LearningAgent::setCurrentAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm)
+{
+    if(algorithm == nullptr){
+        throw std::runtime_error("LearningAgent::setCurrentAlgorithm: given algorithm is a null pointer.");
+    }
+    if(std::find(this->algorithms.begin(), this->algorithms.end(), algorithm) == this->algorithms.end()){
+        throw std::runtime_error("LearningAgent::setCurrentAlgorithm: given algorithm is not part of the learning agent algorithms.");
+    }
+
+    this->currentExecutedAlgorithm = algorithm;
+}
+
 void Learn::LearningAgent::addAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm)
 {
     this->algorithms.push_back(algorithm);
@@ -64,11 +76,6 @@ std::shared_ptr<EvoGraph::Graph> Learn::LearningAgent::getGraph()
 std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::getAlgorithmAt(size_t idx)
 {
     return this->algorithms.at(idx);
-}
-
-const Archive& Learn::LearningAgent::getArchive() const
-{
-    return this->archive;
 }
 
 const Environment& Learn::LearningAgent::getEnvironment() const
@@ -109,9 +116,13 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     Algorithm::ExecutionEngine& execEngine, const Algorithm::Job& job, uint64_t generationNumber,
     Learn::LearningMode mode, LearningEnvironment& le) const
 {
+    if(this->currentExecutedAlgorithm == nullptr){
+        throw std::runtime_error("LearningAgent::evaluateJob: currentExecutedAlgorithm is not set.");
+    }
+
     // Get the current agent and the current algorithm
     std::shared_ptr<const Algorithm::Agent> agent = job.getAgent();
-    std::shared_ptr<const Selector::Selector> selector = job.getSelector(); 
+    std::shared_ptr<const Selector::Selector> selector = this->currentExecutedAlgorithm->getSelector();
 
     // Skip the agent evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
@@ -122,8 +133,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     }
 
     // Set the job to execute
-    execEngine.setupJob(job);
     execEngine.setExecutionMode(mode == LearningMode::TRAINING);
+    execEngine.setupJob(job);
 
     // Init results
     double result = 0.0;
@@ -196,8 +207,13 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
     std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
         results;
 
+
     for(auto algorithm: this->algorithms){
-        auto algoResults = this->evaluateOneAlgorithmAgents(generationNumber, mode, algorithm);
+        // set current executed algorithm
+        this->setCurrentAlgorithm(algorithm);
+
+        // Evaluate the algorithm agents and insert the results
+        auto algoResults = this->evaluateCurrentAlgorithmAgents(generationNumber, mode);
         results.insert(algoResults.begin(), algoResults.end());
     }
 
@@ -206,11 +222,13 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
 
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
-Learn::LearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumber,
-                                       Learn::LearningMode mode,
-                                       std::shared_ptr<Algorithm::Algorithm> algorithm)
+Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
+                                       Learn::LearningMode mode)
 {
-    if(!this->containsAlgorithm(algorithm)){
+    if(this->currentExecutedAlgorithm == nullptr){
+        throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: currentExecutedAlgorithm is not set.");
+    }
+    if(!this->containsAlgorithm(this->currentExecutedAlgorithm)){
         throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: The learning agent does not contain the given algorithm.");
     }
 
@@ -218,9 +236,9 @@ Learn::LearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumber,
         results;
 
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
-        algorithm->getManager()->createExecutionEngine();
+        this->currentExecutedAlgorithm->getManager()->createExecutionEngine();
 
-    auto jobs = this->makeJobs(mode, algorithm);
+    auto jobs = this->makeJobs(mode, this->currentExecutedAlgorithm);
     for(auto job: jobs) {
         std::shared_ptr<EvaluationResult> result = this->evaluateJob(
             *execEngine, *job, generationNumber, mode, this->learningEnvironment);
@@ -229,7 +247,7 @@ Learn::LearningAgent::evaluateOneAlgorithmAgents(uint64_t generationNumber,
 
 
     // Update the algorithm after evaluation with the jobs processed
-    algorithm->updateAfterEvaluation(jobs, mode);
+    this->currentExecutedAlgorithm->updateAfterEvaluation(jobs, mode);
 
     return results;
 }

@@ -28,14 +28,12 @@ namespace Algorithm::TPG {
              * Learning Agents will be able to use them later.
              *
              * @param[in] agent The agent that will be encapsulated into the job.
-             * @param[in] manager The agent Manager of the agent.
-             * @param[in] selector The selector responsible of the agent.
              * @param[in] idx The index of this job.
              * @param[in] archive The archive associated to this job.
              */
-            TPGJob(std::shared_ptr<const Agent> agent, std::shared_ptr<const AgentManager> manager, std::shared_ptr<const Selector::Selector> selector,
+            TPGJob(std::shared_ptr<const Agent> agent,
                 uint64_t idx = 0, Archive* archive = nullptr)
-                : Job(agent, manager, selector, idx), archive(archive)
+                : Job(agent, idx), archive(archive)
             {
             }
 
@@ -44,7 +42,7 @@ namespace Algorithm::TPG {
              *
              * @return The archive of the job.
              */
-            Archive& getArchive() const;
+            Archive* getArchive() const;
 
     };
 };

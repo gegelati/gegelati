@@ -96,39 +96,30 @@ namespace Learn {
          * evaluation.
          * \param[out] resultsPerJobMap map linking the job number with its
          * results and itself.
-         * \param[out] archiveMap map linking the job number with its gathered
-         * archive. These archive swill later be merged with the ones of the
-         * other jobs.
          */
         virtual void evaluateAgentsInParallelExecute(
             std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Algorithm::Job>>>&
-                resultsPerJobMap,
-            std::map<uint64_t, Archive*>& archiveMap);
+                resultsPerJobMap);
 
         /**
          * \brief Subfunction of evaluateAllAgentsInParallel which handles the
-         * gathering of results and the merge of the archives.
+         * gathering of results.
          *
          * This method just emplaces results from resultsPerJobMap, as each
          * job only contains 1 agent is is quite easy.
-         * The archive is merged with the mergeArchiveMap method.
          *
          * @param[in] resultsPerJobMap map linking the job number with its
          * results and itself.
          * @param[out] results map linking single results to their agent vertex.
-         * @param[in,out] archiveMap map linking the job number with its
-         * gathered archive. These archive swill later be merged with the ones
-         * of the other jobs.
          */
         virtual void evaluateAgentsInParallelCompileResults(
             std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                          std::shared_ptr<Algorithm::Job>>>&
                 resultsPerJobMap,
             std::multimap<std::shared_ptr<EvaluationResult>,
-                          std::shared_ptr<const Algorithm::Agent>>& results,
-            std::map<uint64_t, Archive*>& archiveMap);
+                          std::shared_ptr<const Algorithm::Agent>>& results);
 
         /**
          * \brief Function implementing the behavior of slave threads during
@@ -138,9 +129,8 @@ namespace Learn {
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         * \param[in,out] jobsToProcess Ordered list of jobs of
-         * Vertex to process, stored as a pair with an id filling the
-         * archiveMap. The jobs are groups of agents that shall be agents in the
+         * \param[in,out] jobsToProcess Ordered list of jobs. 
+         * The jobs are groups of agents that shall be agents in the
          * same simulation, there is only 1 agent if there is no adversarial
          * (e.g. if the environmnent is not multiplayer).
          * \param[in] agentsToProcessMutex Mutex protecting the
@@ -149,9 +139,6 @@ namespace Learn {
          * resulting score of evaluated agents.
          * \param[in] resultsPerAgentMapMutex
          * Mutex protecting the results.
-         * \param[in,out] archiveMap Map
-         * storing the exhaustiveArchive to be merged.
-         * \param[in] archiveMapMutex Mutex protecting the archiveMap.
          * \param[in] useMainEnvironment Boolean that is true if we use the
          * declared LearningEnvironment, otherwise the method will clone it.
          */
@@ -163,21 +150,7 @@ namespace Learn {
                                          std::shared_ptr<Algorithm::Job>>>&
                 resultsPerAgentMap,
             std::mutex& resultsPerAgentMapMutex,
-            std::map<uint64_t, Archive*>& archiveMap,
-            std::mutex& archiveMapMutex, bool useMainEnvironment);
-
-        /**
-         * \brief Method to merge several Archive created in parallel
-         * threads.
-         *
-         * The purpose of this method is to merhe several Archive
-         * into the archive attribute of this ParallelLearningAgent. This
-         * method is the key to obtain deterministic Archive even in a parallel
-         * context.
-         *
-         * \param[in,out] archiveMap Map storing the Archive to be merged.
-         */
-        void mergeArchiveMap(std::map<uint64_t, Archive*>& archiveMap);
+            bool useMainEnvironment);
 
       public:
         /**
@@ -232,18 +205,16 @@ namespace Learn {
          * **Replaces the function from the base class LearningAgent.**
          *
          * This method must always return the same results as the evaluateOneAlgorithmAgents for
-         * a sequential execution. The Archive should also be updated in the
-         * exact same manner.
+         * a sequential execution. 
          *
          * \param[in] generationNumber the integer number of the current
          * generation.
          * \param[in] mode the LearningMode to use during the policy
          * evaluation.
-         * \param[in] algorithm the algorithm to evaluate.
          * 
          */
         std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
-        evaluateOneAlgorithmAgents(uint64_t generationNumber, LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm) override;
+        evaluateCurrentAlgorithmAgents(uint64_t generationNumber, LearningMode mode) override;
     };
 } // namespace Learn
 #endif

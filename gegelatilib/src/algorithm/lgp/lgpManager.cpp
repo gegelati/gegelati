@@ -216,7 +216,13 @@ bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(std::shared_ptr<const Agen
 }
 
 
-std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::LGP::LGPManager::createExecutionEngine(bool isTraining) const
+std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::LGP::LGPManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const
 {
-    return std::make_unique<LGPExecutionEngine>(*this->env, this->outputs, this->algorithmName, isTraining);
+    if(dataSources.empty()) {
+        dataSources = this->env->getDataSources();
+    }
+    std::shared_ptr<const Environment> privateEnv =
+        std::make_shared<const Environment>(this->env->getInstructionSet(), this->env->getParams(),
+                                            dataSources, this->env->getNbContinuousActions());
+    return std::make_unique<LGPExecutionEngine>(*privateEnv, this->outputs, this->algorithmName, isTraining);
 }
