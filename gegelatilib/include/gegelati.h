@@ -66,6 +66,12 @@
 #include <algorithm/lgp/lgpLineMutator.h>
 #include <algorithm/lgp/lgpExecutionEngine.h>
 
+#include <algorithm/maple/mapleAgent.h>
+#include <algorithm/maple/mapleAlgorithm.h>
+#include <algorithm/maple/mapleExecutionEngine.h>
+#include <algorithm/maple/mapleManager.h>
+#include <algorithm/maple/mapleMutator.h>
+
 #include <algorithm/tpg/tpgAlgorithm.h>
 #include <algorithm/tpg/tpgAgent.h>
 #include <algorithm/tpg/tpgManager.h>
@@ -83,6 +89,25 @@
 #include <data/primitiveTypeArray.h>
 #include <data/primitiveTypeArray2D.h>
 #include <data/untypedSharedPtr.h>
+
+
+#include <evoGraph/policyStats.h>
+#include <evoGraph/abstractEngine.h>
+#include <evoGraph/action.h>
+#include <evoGraph/actionEdge.h>
+#include <evoGraph/edge.h>
+#include <evoGraph/factory.h>
+#include <evoGraph/graph.h>
+#include <evoGraph/team.h>
+#include <evoGraph/vertex.h>
+
+#include <evoGraph/instrumented/executionStats.h>
+#include <evoGraph/instrumented/actionInstrumented.h>
+#include <evoGraph/instrumented/edgeInstrumented.h>
+#include <evoGraph/instrumented/executionEngineInstrumented.h>
+#include <evoGraph/instrumented/factoryInstrumented.h>
+#include <evoGraph/instrumented/teamInstrumented.h>
+#include <evoGraph/instrumented/vertexInstrumented.h>
 
 #include <file/parametersParser.h>
 #include <file/tpgGraphDotExporter.h>
@@ -140,23 +165,10 @@
 #include <selector/tournamentSelector.h>
 #include <selector/truncationSelector.h>
 
-#include <evoGraph/policyStats.h>
-#include <evoGraph/abstractEngine.h>
-#include <evoGraph/action.h>
-#include <evoGraph/actionEdge.h>
-#include <evoGraph/edge.h>
-#include <evoGraph/factory.h>
-#include <evoGraph/graph.h>
-#include <evoGraph/team.h>
-#include <evoGraph/vertex.h>
-
-#include <evoGraph/instrumented/executionStats.h>
-#include <evoGraph/instrumented/actionInstrumented.h>
-#include <evoGraph/instrumented/edgeInstrumented.h>
-#include <evoGraph/instrumented/executionEngineInstrumented.h>
-#include <evoGraph/instrumented/factoryInstrumented.h>
-#include <evoGraph/instrumented/teamInstrumented.h>
-#include <evoGraph/instrumented/vertexInstrumented.h>
+#include <util/activationFunctions.h>
+#include <util/counterReset.h>
+#include <util/genericComparator.h>
+#include <util/timestamp.h>
 
 #ifdef CODE_GENERATION
 #include <codeGen/programGenerationEngine.h>
@@ -168,5 +180,6 @@
 
 #include <archive.h>
 #include <environment.h>
+#include <outputInfo.h>
 
 #endif
