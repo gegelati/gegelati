@@ -154,7 +154,7 @@ namespace Learn {
         /**
          * \brief Getter for the vector of algorithms
          */
-        std::vector<std::shared_ptr<Selector::Selector>> getAlgorithms();
+        const std::vector<std::shared_ptr<Algorithm::Algorithm>>& getAlgorithms();
 
         /**
          * \brief return the a pointer of the algorithm at the specified index

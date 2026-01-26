@@ -8,7 +8,8 @@ void Selector::TournamentSelector::doSelection(
                   std::shared_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
-    this->verticesToDelete.clear();
+    this->agentsToDelete.clear();
+
 
     size_t nbToKeep =
         (size_t)(results.size() * params.selection.tournament.ratioSavedRoots);

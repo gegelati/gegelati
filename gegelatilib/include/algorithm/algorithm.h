@@ -85,6 +85,8 @@ namespace Algorithm {
          */
         void addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorithm);
 
+        /// Constant getter for the graph
+        virtual std::shared_ptr<const EvoGraph::Graph> getGraph() const;
 
         /// Constant getter for the manager
         virtual std::shared_ptr<const AgentManager> getManagerCst() const;

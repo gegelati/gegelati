@@ -73,6 +73,11 @@ std::shared_ptr<EvoGraph::Graph> Learn::LearningAgent::getGraph()
     return this->graph;
 }
 
+const std::vector<std::shared_ptr<Algorithm::Algorithm>>& Learn::LearningAgent::getAlgorithms()
+{
+    return this->algorithms;
+}
+
 std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::getAlgorithmAt(size_t idx)
 {
     return this->algorithms.at(idx);

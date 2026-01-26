@@ -26,6 +26,11 @@ void Algorithm::Algorithm::addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorit
     this->subAlgorithms.push_back(subAlgorithm);
 }
 
+std::shared_ptr<const EvoGraph::Graph> Algorithm::Algorithm::getGraph() const
+{
+    return this->graph;
+}
+
 std::shared_ptr<const Algorithm::AgentManager> Algorithm::Algorithm::getManagerCst() const
 {
     return this->manager;

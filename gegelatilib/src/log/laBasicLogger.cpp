@@ -95,7 +95,7 @@ void Log::LABasicLogger::logHeader()
     //*this << std::right;
     *this << std::setw(colWidth) << "Gen" << std::setw(colWidth) << "NbVert"
           << std::setw(colWidth) << "NbActR" << std::setw(colWidth)
-          << "NbTeamR";
+          << "NbAgents";
 
     if (useUtility) {
         *this << std::setw(colWidth) << "U_Min" << std::setw(colWidth)
@@ -136,12 +136,16 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
     *this << std::setw(colWidth)
           << this->learningAgent.getGraph()->getNbVertices();
 
-    uint64_t nbTeamsR = this->learningAgent.getGraph()->getRootTeams().size();
+          
+    uint64_t nbAgents = 0;
+    for(auto algo : this->learningAgent.getAlgorithms()){
+        nbAgents += algo->getNbAgents();
+    }
 
-    uint64_t nbActionsR = this->learningAgent.getGraph()->getNbRootVertices() - nbTeamsR;
+    uint64_t nbActionsR = this->learningAgent.getGraph()->getRootActions().size();
 
     *this << std::setw(colWidth) << nbActionsR << std::setw(colWidth)
-          << nbTeamsR;
+          << nbAgents;
 
     // resets checkpoint to be able to show evaluation time
     chronoFromNow();

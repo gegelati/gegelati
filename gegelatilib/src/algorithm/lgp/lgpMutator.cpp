@@ -77,8 +77,14 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
     if(lgpManager == nullptr){
         throw std::invalid_argument("LGPMutator::initRandomAgent: the given manager is not a LGPManager.");
     }
+
+    if(lgpAgent1->getNbLines() < 2 || lgpAgent2->getNbLines() < 2){
+        return; // Crossover cannot be done if a program contains less than two lines
+    }
+
     
     std::array<uint64_t, 2> cutStart, cutEnd, sizeProgs;
+
 
     // if the sum of the program size is above the max size, the size of
     // the cross lines is the same for both program.
@@ -89,14 +95,10 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
     // Select random index for the crossover, normal case
     for (int i = 0; i < 2; i++) {
         uint64_t nbLines = lgpAgents[i]->getNbLines();
-        if (nbLines < 2)
-            return; // If a program has only one line, crossover cannot happen.
-
         if (specialCase) {
             nbLines = std::min(lgpAgents[0]->getNbLines(),
                                lgpAgents[1]->getNbLines());
         }
-
 
         cutStart[i] = rng.getUnsignedInt64(0, nbLines - 1);
         cutEnd[i] = rng.getUnsignedInt64(0, nbLines - 2);
@@ -132,7 +134,6 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
             lgpManager->removeLine(lgpAgents[i], j);
         }
     }
-
     // Create new programs with the cut
     for (int childIdx = 0; childIdx < 2; childIdx++) {
         auto& parent1 = lines[childIdx];
@@ -142,9 +143,11 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
 
         for (size_t idx = 0; idx < sizeProgs[childIdx]; idx++) {
             if (idx < start1) {
+
                 lgpManager->addNewLine(lgpAgents[childIdx], *parent1[idx]);
             }
             else if (idx >= start1 + (end2 - start2)) {
+
                 lgpManager->addNewLine(lgpAgents[childIdx], *parent1[idx + (end1 - start1) - (end2 - start2)]);
             }
             else {

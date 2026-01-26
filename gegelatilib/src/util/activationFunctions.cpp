@@ -31,16 +31,23 @@ std::vector<double> Utils::ActivationFunctions::softmax(const std::vector<double
 
 std::vector<double> Utils::ActivationFunctions::scaleOutputValues(const std::vector<double>& values, const Output::OutputHandler& outputs, Utils::ActivationFunction function)
 {
-    std::vector<double> scaledValues;
+    std::vector<double> scaledValues(values);
     std::vector<std::reference_wrapper<const Output::Output>> continuousOutputs(outputs.getContinuousOutputs());
 
     if(values.size() != continuousOutputs.size()){
         throw std::runtime_error("Utils::ActivationFunctions::scaleOutputValues Number of output values does not match the number of continuous outputs.");
     }
 
+    // Change nan values to -inf to avoid issues in scaling
+    for(size_t idx = 0; idx < scaledValues.size(); idx++){
+        if(std::isnan(scaledValues[idx])){
+            scaledValues[idx] = -std::numeric_limits<double>::infinity();
+        }
+    }
+
     // Softmax is vector-wide, not element-wise
     if (function == ActivationFunction::SOFTMAX) {
-        return softmax(values);
+        return softmax(scaledValues);
     }
 
     for(size_t idx = 0; idx < values.size(); idx++){
@@ -51,27 +58,26 @@ std::vector<double> Utils::ActivationFunctions::scaleOutputValues(const std::vec
 
         // If rangeMin is -inf or rangeMax is +inf, we cannot scale
         if(rangeMin == -std::numeric_limits<double>::infinity() || rangeMax == std::numeric_limits<double>::infinity()){
-            scaledValues.push_back(values[idx]);
             continue;
         }
 
         if(function == ActivationFunction::SIGMOID){
-            double sig = sigmoid(values[idx]);
+            double sig = sigmoid(scaledValues[idx]);
             // Scale sigmoid output [0, 1] to [rangeMin, rangeMax]
-            scaledValues.push_back(sig * (rangeMax - rangeMin) + rangeMin);
+            scaledValues[idx] = sig * (rangeMax - rangeMin) + rangeMin;
             
         } else if (function == ActivationFunction::TANH) {
-            double t = tanh(values[idx]);
+            double t = tanh(scaledValues[idx]);
             // Optimize for symmetric ranges (most common case)
             if (rangeMin == -rangeMax) {
-                scaledValues.push_back(t * rangeMax);
+                scaledValues[idx] = t * rangeMax;
             } else {
                 // General scaling for asymmetric ranges
                 double scaled = ((t + 1.0) / 2.0) * (rangeMax - rangeMin) + rangeMin;
-                scaledValues.push_back(scaled);
+                scaledValues[idx] = scaled;
             }
         } else if (function == ActivationFunction::CLAMP) {
-            scaledValues.push_back(std::clamp(values[idx], rangeMin, rangeMax));
+            scaledValues[idx] = std::clamp(scaledValues[idx], rangeMin, rangeMax);
         }
         
     }
