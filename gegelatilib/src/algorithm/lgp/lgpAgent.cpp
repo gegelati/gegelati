@@ -33,11 +33,10 @@ Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::addNewLine(uint64_t idx)
     return *newLine;
 }
 
-void Algorithm::LGP::LGPAgent::addNewLine(LGPLine newLine)
+void Algorithm::LGP::LGPAgent::addNewLine(const LGPLine& newLine)
 {
-    LGPLine* newLinePtr = new LGPLine(newLine);
     // new line is not marked as an intron by default
-    this->lines.push_back({std::shared_ptr<LGPLine>(newLinePtr), false});
+    this->lines.push_back({std::make_shared<LGPLine>(newLine), false});
 }
 
 void Algorithm::LGP::LGPAgent::clearIntrons()
@@ -82,6 +81,12 @@ const std::shared_ptr<const Environment>& Algorithm::LGP::LGPAgent::getEnvironme
 size_t Algorithm::LGP::LGPAgent::getNbLines() const
 {
     return this->lines.size();
+}
+
+std::shared_ptr<const Algorithm::LGP::LGPLine> Algorithm::LGP::LGPAgent::getLinePtr(uint64_t index) const
+{
+    return this->lines.at(index)
+                .first; // throws std::out_of_range on bad index.
 }
 
 const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::getLine(uint64_t index) const

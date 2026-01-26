@@ -132,6 +132,15 @@ namespace Output
             const Output& front() const;
 
     };
+
+    /**
+     *  \brief Converts continuous output values to discrete output values based on defined ranges.
+     * 
+     * \param continuousValues Vector of continuous output values.
+     * \param outputs Output handler containing output definitions.
+     * \return Vector of discrete output values.
+     */
+    void convertContinuousToDiscreteOutputs(std::vector<double>& continuousValues, const OutputHandler& outputs);
 };
 
 #endif

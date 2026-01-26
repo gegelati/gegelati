@@ -57,3 +57,23 @@ size_t Output::OutputHandler::sizeContinuous() const
 const Output::Output& Output::OutputHandler::front() const {
     return this->outputs.front();
 }
+
+void Output::convertContinuousToDiscreteOutputs(std::vector<double>& continuousValues, const OutputHandler& outputs)
+{
+    std::vector<std::reference_wrapper<const Output>> discreteOutputs = outputs.getDiscreteOutputs();
+    if(continuousValues.size() != discreteOutputs.size()){
+        throw std::runtime_error("Output::convertContinuousToDiscreteOutputs: Number of continuous values does not match number of discrete outputs.");
+    }
+
+    for(size_t idx = 0; idx < continuousValues.size(); idx++){
+        // clamp the value between 0 and nbValues -1, then round it to get the discrete value
+        const Output& output = discreteOutputs.at(idx);
+        double value = continuousValues.at(idx);
+        if(value < 0){
+            value = 0;
+        } else if (value > (double)(output.getNbValues() - 1)){
+            value = (double)(output.getNbValues() - 1);
+        }
+        continuousValues.at(idx) = static_cast<size_t>(std::round(value));
+    }
+}

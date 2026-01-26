@@ -62,14 +62,20 @@ std::vector<double> Algorithm::LGP::LGPExecutionEngine::execute()
     iterateThroughtProgram(this->ignoreException);
 
     std::vector<double> result;
-    for(size_t idx = 0; idx < this->lgpExecutedAgent->getOutputs().size(); idx++){
+    for(size_t idx = 0; idx < this->outputs.size(); idx++){
         // cast to primitiveType<double> to enable cast to double.
         result.push_back(*(this->registers.getDataAt(typeid(double), idx)
                  .getSharedPointer<const double>()));
     }
 
-    // Returns the register values
-    return result;
+    if(this->outputs.sizeContinuous() == 0){
+        Output::convertContinuousToDiscreteOutputs(result, this->outputs);
+        return result;
+    } else {
+        // Returns the register values
+        // TODO ACTIVATION FUNCTIONS
+        return Utils::ActivationFunctions::scaleOutputValues(result, this->outputs, Utils::ActivationFunction::TANH);
+    }
 }
 
 void Algorithm::LGP::LGPExecutionEngine::processLine()

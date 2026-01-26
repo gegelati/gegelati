@@ -49,6 +49,12 @@ std::vector<double> Utils::ActivationFunctions::scaleOutputValues(const std::vec
         double rangeMin = output.getRangeMin();
         double rangeMax = output.getRangeMax();
 
+        // If rangeMin is -inf or rangeMax is +inf, we cannot scale
+        if(rangeMin == -std::numeric_limits<double>::infinity() || rangeMax == std::numeric_limits<double>::infinity()){
+            scaledValues.push_back(values[idx]);
+            continue;
+        }
+
         if(function == ActivationFunction::SIGMOID){
             double sig = sigmoid(values[idx]);
             // Scale sigmoid output [0, 1] to [rangeMin, rangeMax]

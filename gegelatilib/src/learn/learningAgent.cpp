@@ -168,6 +168,11 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
             // Get the actions
             std::vector<double> actionsID =
                 execEngine.execute();
+
+            if (actionsID.front() != 0.0) {
+                int a = 2;
+            }
+
             // Do it
             le.doActions(actionsID);
             // Count actions

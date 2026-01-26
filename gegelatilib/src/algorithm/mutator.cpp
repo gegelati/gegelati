@@ -70,7 +70,7 @@ void Algorithm::Mutator::mutatePopulation(
     // Divide agents clonable into two subVector with half of the agents, randomly
     // selected.
     std::vector<std::shared_ptr<const Algorithm::Agent>> subAgentsClonable2;
-    for (size_t idx = 0; false && idx < this->currentContext->agentsClonable.size() / 2; idx++) {
+    for (size_t idx = 0; idx < this->currentContext->agentsClonable.size() / 2; idx++) {
         auto agent = subAgentsClonable1.at(
             rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1));
         subAgentsClonable2.push_back(agent);

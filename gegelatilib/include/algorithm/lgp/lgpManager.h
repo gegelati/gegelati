@@ -122,6 +122,14 @@ namespace Algorithm {
             virtual LGPLine& addNewLine(std::shared_ptr<const LGPAgent> agent);
 
             /**
+             * \brief Add a copy of the given line to the given agent at the end of the agent.
+             * 
+             * \param[in] agent the Agent to modify.
+             * \param[in] newLine the line to copy.
+             */
+            virtual void addNewLine(std::shared_ptr<const LGPAgent> agent, const LGPLine& newLine);
+
+            /**
              * \brief Swap two lines of the given agent.
              * 
              * \param[in] agent the Agent to modify.

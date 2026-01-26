@@ -42,6 +42,7 @@
 
 #include "data/primitiveTypeArray.h"
 #include "data/untypedSharedPtr.h"
+#include "util/activationFunctions.h"
 #include "algorithm/lgp/lgpEngine.h"
 
 namespace Algorithm::LGP {

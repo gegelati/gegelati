@@ -74,37 +74,6 @@ void Algorithm::TPG::TPGMutator::updateSpecificContext(
     }
 
     this->preExistingEdges.insert(this->preExistingEdges.end(), usableEdges.begin(), usableEdges.end());
-
-    /*
-    // Get current vertex set (copy)
-    auto vertices(graph->getVertices());
-    // Get current agent teams (copy)
-    auto agentVertices(graph->getRootVertices());
-
-    // Fill the list of available Team and Actions, Actions are only
-    // agents if they are not accessible by the teams
-    this->preExistingTeams.clear();
-    this->preExistingActions.clear();
-    for (auto vertex : vertices) {
-        if (std::dynamic_pointer_cast<const EvoGraph::Action>(vertex) != nullptr &&
-            (params.mutation.tpg.teamAccessAllActions ||
-             vertex->getIncomingEdges().size() == 0)) {
-            this->preExistingActions.push_back(
-                std::dynamic_pointer_cast<const EvoGraph::Action>(vertex));
-        }
-        else if (std::dynamic_pointer_cast<const EvoGraph::Team>(vertex) != nullptr) {
-            this->preExistingTeams.push_back(
-                std::dynamic_pointer_cast<const EvoGraph::Team>(vertex));
-        }
-    }
-
-    // Fill the list of pre existing edges before mutations (copy)
-    this->preExistingEdges.clear();
-    for(auto edge: graph->getEdges()){
-        this->preExistingEdges.push_back(edge);
-    }*/
-
-
 }
 
 void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
@@ -241,6 +210,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
 
 void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
+    // TODO
 }
 
 void Algorithm::TPG::TPGMutator::crossoverAgents(

@@ -78,6 +78,10 @@ Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(std::shared_ptr<
     return this->getLGPAgentFromCst(agent)->addNewLine(agent->getNbLines());
 }
 
+void Algorithm::LGP::LGPManager::addNewLine(std::shared_ptr<const LGPAgent> agent, const LGPLine& newLine)
+{
+    this->getLGPAgentFromCst(agent)->addNewLine(newLine);
+}
 
 
 void Algorithm::LGP::LGPManager::swapLines(std::shared_ptr<const LGPAgent> agent, size_t index1, size_t index2)

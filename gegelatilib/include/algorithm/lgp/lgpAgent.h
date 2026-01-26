@@ -106,9 +106,9 @@ namespace Algorithm::LGP {
             /**
              * \brief Add a new line to the LGP at the end of the LGP.
              *
-             * \param[in] newLine new LGPLine added to the LGP
+             * \param[in] newLine new LGPLine copied to the LGP
              */
-            void addNewLine(LGPLine newLine);
+            void addNewLine(const LGPLine& newLine);
 
             /**
              * \brief Clear all intron instructions in the LGP.
@@ -156,6 +156,18 @@ namespace Algorithm::LGP {
              * \return the number of line contained in the PrograLGPm.
              */
             size_t getNbLines() const;
+
+            /**
+             * \brief Get a const pointer to a LGPLine of the LGP.
+             * 
+             * \param[in] index The integer index of the retrieved LGPLine within the
+             * LGP.
+             * \return a const pointer to the indexed LGPLine of the
+             * LGP.
+             * 
+             * \throw std::out_of_range if the index is too large.
+             */
+            std::shared_ptr<const LGPLine> getLinePtr(uint64_t index) const;
 
             /**
              * \brief Get a const ref to a LGPLine of the LGP.
