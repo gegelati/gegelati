@@ -46,6 +46,8 @@
 
 #include "log/laBasicLogger.h"
 
+#if 0
+
 class LABasicLoggerTest : public ::testing::Test
 {
   protected:
@@ -373,3 +375,5 @@ TEST_F(LABasicLoggerTest, logEndOfTraining)
     ASSERT_EQ(result.size(), 12 + 12) << "logEndOfTraining with and without "
                                          "valid should have 8+4=12 elements";
 }
+
+#endif

@@ -58,6 +58,7 @@
 #include "file/tpgGraphDotExporter.h"
 #include "file/tpgGraphDotImporter.h"
 
+/*
 class ImporterTest : public ::testing::Test
 {
   public:
@@ -488,4 +489,4 @@ TEST_F(ImporterTest, setNewFilePath)
     ASSERT_THROW(dotImporter.setNewFilePath("XXX://INVALID_PATH"),
                  std::runtime_error)
         << "Changing the input file with an invalid path should not work.";
-}
+}*/

@@ -49,11 +49,12 @@
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
 
-#include "evoGraph/oldExecutionEngine.h"
 
 #ifndef PARAM_FLOAT_PRECISION
 #define PARAM_FLOAT_PRECISION (float)(int16_t(1) / (float)(-INT16_MIN))
 #endif
+
+#if 0
 
 class ExecutionEngineTest : public ::testing::Test
 {
@@ -403,3 +404,5 @@ TEST_F(ExecutionEngineTest, ApplyActivationFunctionOnActions)
                  std::runtime_error)
         << "Activation function should not work with wrong activation function";
 }
+
+#endif

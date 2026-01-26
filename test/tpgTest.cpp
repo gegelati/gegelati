@@ -47,7 +47,6 @@
 
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
-#include "evoGraph/oldExecutionEngine.h"
 #include "evoGraph/graph.h"
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
@@ -275,7 +274,7 @@ TEST_F(TPGTest, GraphFactory)
 
 TEST_F(TPGTest, GraphAddVertex)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     std::shared_ptr<const EvoGraph::Action> action;
     std::shared_ptr<const EvoGraph::Team> team;
     ASSERT_NO_THROW(team = tpg.addNewTeam())
@@ -288,7 +287,7 @@ TEST_F(TPGTest, GraphConstructorDestructor)
 {
     EvoGraph::Graph* tpg;
 
-    ASSERT_NO_THROW(tpg = new EvoGraph::Graph(*e))
+    ASSERT_NO_THROW(tpg = new EvoGraph::Graph())
         << "Error while calling a Graph constructor.";
 
     ASSERT_NE(tpg, nullptr)
@@ -299,7 +298,7 @@ TEST_F(TPGTest, GraphConstructorDestructor)
 
 TEST_F(TPGTest, GraphHasVertex)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     std::shared_ptr<const EvoGraph::Action> action;
     std::shared_ptr<const EvoGraph::Team> team;
     ASSERT_NO_THROW(team = tpg.addNewTeam())
@@ -317,7 +316,7 @@ TEST_F(TPGTest, GraphHasVertex)
 
 TEST_F(TPGTest, GraphGetNbVertices)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     tpg.addNewTeam();
     tpg.addNewAction(0);
     ASSERT_EQ(tpg.getNbVertices(), 2)
@@ -326,7 +325,7 @@ TEST_F(TPGTest, GraphGetNbVertices)
 
 TEST_F(TPGTest, GraphGetVertices)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     std::shared_ptr<const EvoGraph::Team> vertex = tpg.addNewTeam();
     const std::vector<std::shared_ptr<const EvoGraph::Vertex>> vertices = tpg.getVertices();
     ASSERT_EQ(vertices.size(), 1)
@@ -338,7 +337,7 @@ TEST_F(TPGTest, GraphGetVertices)
 
 TEST_F(TPGTest, GraphAddEdge)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(0);
 
@@ -365,7 +364,7 @@ TEST_F(TPGTest, GraphAddEdge)
 
 TEST_F(TPGTest, GraphAddActionEdge)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(0);
 
@@ -386,7 +385,7 @@ TEST_F(TPGTest, GraphAddActionEdge)
 
 TEST_F(TPGTest, GraphGetEdges)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(0);
 
@@ -424,7 +423,7 @@ TEST_F(TPGTest, GraphGetEdges)
 
 TEST_F(TPGTest, GraphRemoveEdge)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(0);
 
@@ -453,7 +452,7 @@ TEST_F(TPGTest, GraphRemoveEdge)
 
 TEST_F(TPGTest, GraphRemoveActionEdge)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex = tpg.addNewAction(0);
 
     const auto& edge0 = *tpg.addNewActionEdge(*vertex, programAgent, 0);
@@ -483,7 +482,7 @@ TEST_F(TPGTest, GraphRemoveActionEdge)
 
 TEST_F(TPGTest, GraphRemoveVertex)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(0);
     auto vertex2 = tpg.addNewTeam();
@@ -538,7 +537,7 @@ TEST_F(TPGTest, GraphRemoveVertex)
 
 TEST_F(TPGTest, GraphClear)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(0);
     auto edge = tpg.addNewEdge(*vertex0, *vertex1, programAgent);
@@ -552,7 +551,7 @@ TEST_F(TPGTest, GraphClear)
 
 TEST_F(TPGTest, GraphGetNbRootVertices)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(0);
     auto edge = tpg.addNewEdge(*vertex0, *vertex1, programAgent);
@@ -563,7 +562,7 @@ TEST_F(TPGTest, GraphGetNbRootVertices)
 
 TEST_F(TPGTest, GraphGetRootVertices)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(0);
 
@@ -585,7 +584,7 @@ TEST_F(TPGTest, GraphGetRootVertices)
 
 TEST_F(TPGTest, GraphCloneVertex)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(4);
 
@@ -639,7 +638,7 @@ TEST_F(TPGTest, GraphCloneVertex)
 
 TEST_F(TPGTest, GraphCloneEdge)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(4);
     auto edge = tpg.addNewEdge(*vertex0, *vertex1, programAgent);
@@ -712,7 +711,7 @@ TEST_F(TPGTest, GraphCloneEdge)
 
 TEST_F(TPGTest, GraphSetEdgeDestination)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(4);
     auto vertex2 = tpg.addNewAction(4);
@@ -764,7 +763,7 @@ TEST_F(TPGTest, GraphSetEdgeDestination)
 
 TEST_F(TPGTest, GraphSetEdgeSource)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(4);
     auto vertex2 = tpg.addNewTeam();
@@ -815,9 +814,9 @@ TEST_F(TPGTest, GraphSetEdgeSource)
 
 TEST_F(TPGTest, TPGMoveOperator)
 {
-    EvoGraph::Graph source(*e);
+    EvoGraph::Graph source;
     EvoGraph::Graph* destination =
-        new EvoGraph::Graph(*e); // creates an empty tpg graph
+        new EvoGraph::Graph(); // creates an empty tpg graph
 
     auto vertex0 = source.addNewTeam();
     auto vertex1 = source.addNewAction(4);
@@ -848,7 +847,7 @@ TEST_F(TPGTest, TPGMoveOperator)
 }
 TEST_F(TPGTest, TPGAffectationOperator)
 {
-    EvoGraph::Graph source(*e);
+    EvoGraph::Graph source;
 
     ASSERT_NO_THROW(EvoGraph::Graph& destination = source)
         << "The affectation operator is never supposed to fail";
@@ -893,7 +892,7 @@ TEST_F(TPGTest, ActionOutgoingEdge)
 
 TEST_F(TPGTest, VertexHasSameAssessedActions)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto action = tpg.addNewAction(0);
     tpg.addNewActionEdge(*action, programAgent, 1);
     tpg.addNewActionEdge(*action, programAgent, 2);
@@ -938,7 +937,7 @@ TEST_F(TPGTest, VertexHasSameAssessedActions)
 
 TEST_F(TPGTest, GraphSetActionClassEdge)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto action = tpg.addNewAction(0);
 
     // Add an action edge
@@ -962,7 +961,7 @@ TEST_F(TPGTest, GraphSetActionClassEdge)
 
 TEST_F(TPGTest, GraphUpdateAssessedActions)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto action1 = tpg.addNewAction(0);
     auto edge1 = tpg.addNewActionEdge(*action1, programAgent, 1);
     auto edge2 = tpg.addNewActionEdge(*action1, programAgent, 2);
@@ -999,7 +998,7 @@ TEST_F(TPGTest, GraphUpdateAssessedActions)
 
 TEST_F(TPGTest, GraphUpdateAllAssessedActions)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto action1 = tpg.addNewAction(0);
     auto action2 = tpg.addNewAction(1);
     tpg.addNewActionEdge(*action1, programAgent, 1);
@@ -1016,7 +1015,7 @@ TEST_F(TPGTest, GraphUpdateAllAssessedActions)
 
 TEST_F(TPGTest, GraphOrderActionEdges)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto action = tpg.addNewAction(0);
 
     // Add several action edges with different actionClass values
@@ -1043,7 +1042,7 @@ TEST_F(TPGTest, GraphOrderActionEdges)
 
 TEST_F(TPGTest, GraphVertexID)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto team0 = tpg.addNewTeam();
     auto team1 = tpg.addNewTeam();
     auto action0 = tpg.addNewAction(0);
@@ -1079,7 +1078,7 @@ TEST_F(TPGTest, GraphVertexID)
 
 TEST_F(TPGTest, GraphEdgeID)
 {
-    EvoGraph::Graph tpg(*e);
+    EvoGraph::Graph tpg;
     auto team0 = tpg.addNewTeam();
     auto team1 = tpg.addNewTeam();
     auto action0 = tpg.addNewAction(0);

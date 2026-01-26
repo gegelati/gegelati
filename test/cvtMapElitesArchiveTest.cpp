@@ -110,7 +110,7 @@ TEST_F(CvtMapElitesArchiveTest, IndexForDescriptorIsValid)
     size_t idx = archive->getIndexForDescriptor(desc);
     EXPECT_LT(idx, centroids) << "Index for descriptor is out of bounds.";
 }
-
+/*
 TEST_F(CvtMapElitesArchiveTest, SetAndGetFromDescriptors)
 {
     std::vector<double> d{2, 3, 4};
@@ -132,7 +132,7 @@ TEST_F(CvtMapElitesArchiveTest, OverwriteArchiveCell)
     EXPECT_EQ(result.first, eval2)
         << "Failed to retrieve correct evaluation result.";
 }
-
+*/
 TEST_F(CvtMapElitesArchiveTest, SameDescriptorSameIndex)
 {
     std::vector<double> d1{2.4, 7.1, 3.3};

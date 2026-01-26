@@ -121,7 +121,7 @@ class TpgMutatorTest : public ::testing::Test
         archive = std::make_shared<Archive>(params.archiveSize,
                                             params.archivingProbability);
 
-        graph = std::make_shared<EvoGraph::Graph>(*e);
+        graph = std::make_shared<EvoGraph::Graph>();
 
         
         lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(e, *lgpOutput);
@@ -1144,7 +1144,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
+    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>();
 
     uint64_t nbActions = 4;
     params.mutation.tpg.maxInitOutgoingEdges = 3;
@@ -1181,7 +1181,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
     ASSERT_EQ(tpgManager->getAgents().size(), params.mutation.tpg.nbRoots);
 
     // Increase coverage with a TPG that has no root team
-    std::shared_ptr<EvoGraph::Graph> graph2 = std::make_shared<EvoGraph::Graph>(*e);
+    std::shared_ptr<EvoGraph::Graph> graph2 = std::make_shared<EvoGraph::Graph>();
     auto tpgManager2 = std::make_shared<Algorithm::TPG::TPGManager>(nbActions, *archive);
     tpgManager2->setAlgorithmName("fakeTpg");
     tpgManager2->addSubManager(lgpManager);

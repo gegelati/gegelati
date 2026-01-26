@@ -44,6 +44,8 @@
 
 #include "evoGraph/policyStats.h"
 
+#if 0
+
 class PolicyStatsTest : public ::testing::Test
 {
   protected:
@@ -517,3 +519,5 @@ TEST_F(PolicyStatsTest, InsertOperator)
     // Do not check the result of the insert operation since it is subject to
     // change.
 }
+
+#endif

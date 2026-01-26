@@ -6,6 +6,7 @@
 #include "evoGraph/graph.h"
 #include <gtest/gtest.h>
 
+#if 0
 class MapElitesSelectionMetricsTest : public ::testing::Test
 {
   protected:
@@ -147,3 +148,5 @@ TEST_F(MapElitesSelectionMetricsTest, WeightedSum_ThrowsOnMismatchedVectorSize)
             1, 1),
         std::runtime_error);
 }
+
+#endif

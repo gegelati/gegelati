@@ -198,7 +198,7 @@ TEST_F(LgpMutatorTest, LGPMutatorInitAgent)
     params.mutation.prog.maxConstValue = 10;
     params.mutation.prog.minConstValue = 0;
 
-    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>(*e);
+    std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>();
 
     ASSERT_NO_THROW(lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpMutator->initRandomAgent(graph, lgpManager, params, rng)))
         << "Empty LGP Random init failed";

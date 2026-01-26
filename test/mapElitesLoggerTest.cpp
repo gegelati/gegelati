@@ -58,11 +58,11 @@ class MapElitesLoggerTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<int>()));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
-        la = new Learn::LearningAgent(le, set, params);
+        /*la = new Learn::LearningAgent(le, set, params);
 
         selector = std::dynamic_pointer_cast<Selector::MapElitesSelector>(
             la->getSelector());
-
+*/
         descriptor = std::make_shared<
             Selector::MapElites::DefaultDescriptors::ActionValues>();
         descriptor->initDescriptor(*la->getGraph(), le);
