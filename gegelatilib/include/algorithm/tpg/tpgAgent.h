@@ -7,9 +7,7 @@
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
 
-namespace Algorithm {
-
-    namespace TPG {
+namespace Algorithm::TPG {
       
         /**
          * \brief Abstract class representing a TPGAgent
@@ -55,7 +53,6 @@ namespace Algorithm {
             virtual bool isRoot() const;
         };
   
-    };
-}; // namespace Algorithm
+}; // namespace Algorithm::TPG
 
 #endif // TPG_AGENT

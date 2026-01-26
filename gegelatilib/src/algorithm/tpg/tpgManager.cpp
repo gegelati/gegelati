@@ -6,7 +6,7 @@ std::shared_ptr<Algorithm::TPG::TPGAgent> Algorithm::TPG::TPGManager::getTPGAgen
 {
     auto iterator = this->agents.find(agent);
     if(iterator == this->agents.end() || *iterator != agent){
-        throw std::invalid_argument("TPGManager::getTPPAgentFromCst: the given agent is not managed by this manager.");
+        throw std::invalid_argument("TPGManager::getTPGAgentFromCst: the given agent is not managed by this manager.");
     }
 
     return std::dynamic_pointer_cast<TPGAgent>(*iterator);
@@ -56,12 +56,8 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(st
 
 void Algorithm::TPG::TPGManager::deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    if(!this->containsAgent(agent)) {
-        throw std::runtime_error("TPGManager::deleteAgent: trying to delete an agent that is not managed by this manager.");
-    }
-
     // Do not remove action agents from the graph
-    auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(agent);
+    auto tpgAgent = this->getTPGAgentFromCst(agent);
     if(std::dynamic_pointer_cast<const EvoGraph::Team>(tpgAgent->getVertex()) != nullptr){
         graph->removeVertex(*tpgAgent->getVertex());
     }
