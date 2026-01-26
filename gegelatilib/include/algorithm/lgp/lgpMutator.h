@@ -29,9 +29,7 @@ namespace Algorithm::LGP {
          * \brief Main LGPMutator constructor.
          * 
          */
-        LGPMutator(): Mutator(), lineMutator() {
-            isUsingCrossover = false;
-        };
+        LGPMutator(): Mutator(), lineMutator() {};
 
         /**
          * \brief Initialize LGP Population.

@@ -21,8 +21,6 @@ namespace Algorithm {
     {
     protected:
 
-        /// Attribute that specify if the mutator implements crossover, depending on its algorithm.
-        bool isUsingCrossover = false;
 
         /// Name of the algorithm.
         std::string algorithmName;

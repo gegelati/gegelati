@@ -35,9 +35,3 @@ std::vector<double> Algorithm::Maple::MapleExecutionEngine::execute()
         return Utils::ActivationFunctions::scaleOutputValues(this->actionValues, this->outputs, Utils::ActivationFunction::TANH);
     }
 }
-
-
-const std::vector<std::reference_wrapper<const Data::DataHandler>>& Algorithm::TPG::TPGExecutionEngine::getDataSources() const
-{
-    return this->programExecutionEngine->getDataSources();
-}

@@ -1,53 +1,36 @@
 
-#ifndef TPG_MUTATOR_H
-#define TPG_MUTATOR_H
+#ifndef MAPLE_MUTATOR_H
+#define MAPLE_MUTATOR_H
 
 #include <vector>
 #include <numeric>
-#include <queue>
-#include <mutex>
 
+#include "algorithm/tpg/tpgMutator.h"
+#include "algorithm/maple/mapleAgent.h"
+#include "algorithm/maple/mapleManager.h"
 
-#include "algorithm/mutator.h"
-#include "algorithm/tpg/tpgAgent.h"
-#include "algorithm/tpg/tpgManager.h"
-#include "mutator/programMutator.h"
-
-namespace Algorithm::TPG {
+namespace Algorithm::Maple {
 
     /**
-     * \brief Class representing a TPGMutator
+     * \brief Class representing a MapleMutator
      */
-    class TPGMutator : public Mutator
+    class MapleMutator : public TPG::TPGMutator
     {
-    protected:
-
-        /// Name of the program algorithm associated with the TPG agents.
-        std::string programAlgorithmName;
-
-        /// Pre-existing teams elements used for mutation operations.
-        std::vector<std::shared_ptr<const EvoGraph::Team>> preExistingTeams;
-
-        /// Pre-existing actions elements used for mutation operations.
-        std::vector<std::shared_ptr<const EvoGraph::Action>> preExistingActions;
-
-        /// Pre-existing edges used for mutation operations.
-        std::vector<std::shared_ptr<const EvoGraph::Edge>> preExistingEdges;
-
-        /// Archive used by this TPG
-        std::shared_ptr<const Archive> archive;
 
     public:
 
         /**
-         * \brief Constructor for TPGMutator
+         * \brief Constructor for MapleMutator
          * 
-         * \param[in] archive Archive used by this TPG
+         * \param[in] archive Archive used by this algorithm
          */
-        TPGMutator(std::shared_ptr<const Archive> archive): Mutator(), archive{archive} {};
+        MapleMutator(std::shared_ptr<const Archive> archive): TPGMutator(archive){};
+
 
         /**
-         * \brief Update the context used by the TPGMutator to populate the Graph.
+         * \brief Update the context used by the MapleMutator to populate the Graph.
+         * 
+         * Run the method from TPGMutator, then check that there is no team, and that all edges are ActionEdge type.
          * 
          * \param[in] graph the Graph.
          * \param[in] manager the manager to change the agents.
@@ -60,20 +43,6 @@ namespace Algorithm::TPG {
             const Learn::LearningParameters& params,
             RNG::RNG& rng) override;
 
-
-        /**
-         * \brief Set the name of the program algorithm associated with the TPG agents.
-         * 
-         * \param[in] name the name of the program algorithm.
-         */
-        void setProgramAlgorithmName(const std::string& name) { this->programAlgorithmName = name; }
-
-        /**
-         * \brief Get the name of the program algorithm associated with the TPG agents.
-         * 
-         * \return the name of the program algorithm.
-         */
-        std::string getProgramAlgorithmName() const { return this->programAlgorithmName; }
 
         /**
          * \brief Initialize TPG Population.
@@ -112,21 +81,11 @@ namespace Algorithm::TPG {
         ) override;
 
 
-        /**
-         * \brief Select a random outgoingEdge of the given Vertex and removes
-         * it from the Graph.
-         *
-         * \param[in,out] graph the Graph within which the team is stored.
-         * \param[in] vertex the Vertex whose outgoingEdges will be altered.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         */
-        void removeRandomEdge(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Vertex& vertex,
-                                RNG::RNG& rng);
 
         /**
-         * \brief Add a new outgoing Edge to the Team within the Graph.
+         * \brief Add a new outgoing ActionEdge to the Action within the Graph.
          *
-         * This function adds a new outgoing Edge to the Team by cloning
+         * This function adds a new outgoing Edge to the ActionEdge by cloning
          * a preExisting Edge of the Graph. Since the graph may contain
          * Edge from previous mutations, the function receives a list of
          * preExisting Edge from which the Edge to copy should be chosen
@@ -134,44 +93,28 @@ namespace Algorithm::TPG {
          * excluded from the candidates. If there is no valid Edge candidate
          * this function will throw an exception (check code for more details).
          * The new Edge will have the same destination Vertex and Program
-         * as the cloned one, but its source will be the give Team.
+         * as the cloned one, but its source will be the give Action.
          *
          * \param[in,out] graph the Graph within which the team is stored.
-         * \param[in] team the Team whose outgoingEdges will be altered.
+         * \param[in] action the Action whose outgoingEdges will be altered.
          * for mutations.
          * \param[in] rng Random Number Generator used in the
          * mutation process.
          */
-        void addRandomEdge(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Team& team,
+        void addRandomEdge(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Action& action,
                             RNG::RNG& rng);
 
+
         /**
-         * \brief Change the destination of a Edge to an randomly chosen
-         * target.
-         *
-         * This function selects a random Vertex among given pre-existing
-         * vector of Team and Action.
-         * The function randomly choses between a Action and a Team, with
-         * the probabilities within the given MutationParameters. No
-         * verification is made on the content of pre-existing Vertex list.
-         * If one of this list contains the team itself, a self-loop may be
-         * created. A Vertex not belonging to the graph in these lists will
-         * cause an exception within the Graph class though. If the current
-         * destination of the edge is among the candidates, the new destination
-         * may be the same as the old.
+         * \brief Swap two edges of Action.
          *
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
-         * \param[in] edge the Edge whose destination will be altered.
-         * \param[in] params Probability parameters for the
-         * mutation.
-         * \param[in] rng Random Number Generator used in the mutation
-         * process.
+         * \param[in] action the Action whose actionEdges will be altered.
+         * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void mutateEdgeDestination(std::shared_ptr<EvoGraph::Graph> graph,
-                                    std::shared_ptr<const EvoGraph::Edge> edge,
-                                    const Learn::LearningParameters& params,
-                                    RNG::RNG& rng);
+        void swapActionEdges(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Action& action,
+                             RNG::RNG& rng);
 
         /**
          * \brief Prepares the mutation of a Edge.
@@ -185,6 +128,7 @@ namespace Algorithm::TPG {
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
          * \param[in] edge the Edge whose destination will be altered.
+         * \param[in] actionClasses the actionClasses used by the action responsible for the edge.
          * \param[in] manager the manager to change the agents.
          * \param[in] newSubAgents vector of new agents of sub algorithm created while mutating the agent
          * \param[in] params
@@ -194,7 +138,7 @@ namespace Algorithm::TPG {
          */
         void mutateOutgoingEdge(
             std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
-            std::shared_ptr<AgentManager> manager,
+            const std::set<size_t>& actionClasses, std::shared_ptr<AgentManager> manager,
             std::vector<std::shared_ptr<const Agent>>& newSubAgents,
             const Learn::LearningParameters& params, RNG::RNG& rng);
 
@@ -211,38 +155,6 @@ namespace Algorithm::TPG {
         virtual void mutateAgent(
             std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) override;
-
-        
-        /**
-         * \brief Mutate the behavior of a Program and ensure its unicity
-         * against the given Archive.
-         *
-         * \param[in] programAgent program agents of sub algorithm created while mutating the agent
-         * \param[in,out] graph the graph to mutate.
-         * \param[in] manager the manager to change the agents.
-         * \param[in] params Probability parameters for the mutation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         */
-        virtual void mutateProgramAgentAgainstArchive(
-            std::shared_ptr<const Agent> programAgent, std::shared_ptr<EvoGraph::Graph> graph, 
-            std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
-            RNG::RNG& rng);
-
-        /**
-         * \brief Specialization of mutateSubAgents method.
-         */
-        virtual std::vector<std::shared_ptr<const Agent>> mutateSubAgents(
-            std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
-            std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
-            RNG::RNG& rng, uint64_t maxNbThreads) override;
-
-        
-        /**
-         * Setter for the archive
-         * 
-         * \param[in] archive Archive used by the program agents.
-         */
-        void setArchive(std::shared_ptr<Archive> archive);
     };
 
 

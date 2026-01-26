@@ -1,7 +1,4 @@
 
-#include <queue>
-#include <mutex>
-
 
 #include "algorithm/tpg/tpgMutator.h"
 
@@ -210,7 +207,26 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
 
 void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    // TODO
+    auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph))->getVertex();
+
+    auto programMutator = this->getSubMutator(this->programAlgorithmName);
+    auto programManager = manager->getSubManager(this->programAlgorithmName);
+
+    // Get action vertices in the graph
+    std::vector<std::shared_ptr<const EvoGraph::Action>> actions;
+    for (const auto& vertex : graph->getVertices()) {
+        if (auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(vertex)) {
+            actions.push_back(action);
+        }
+    }
+
+    if(actions.size() == 0){
+        throw std::runtime_error("TPGMutator::initRandomSpecificAgent: No action vertices in the graph.");
+    }
+
+    // Add the edge
+    graph->addNewEdge(*tpgAgent, *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
+                        programMutator->initRandomAgent(graph, programManager, params, rng));
 }
 
 void Algorithm::TPG::TPGMutator::crossoverAgents(
@@ -222,11 +238,11 @@ void Algorithm::TPG::TPGMutator::crossoverAgents(
 
 
 void Algorithm::TPG::TPGMutator::removeRandomEdge(std::shared_ptr<EvoGraph::Graph> graph,
-                                                const EvoGraph::Team& team,
+                                                const EvoGraph::Vertex& vertex,
                                                 RNG::RNG& rng)
 {
     // Pick an outgoing edge randomly,
-    auto pickableEdges = team.getOutgoingEdges();
+    auto pickableEdges = vertex.getOutgoingEdges();
 
     // Note: No need to take special care of Actions. Since cycles can not
     // appear in TPG with the current mutation process, there is no need to

@@ -21,16 +21,36 @@ const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::Maple::Map
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::Maple::MapleManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
-    std::shared_ptr<const EvoGraph::Team> vertex = graph->addNewTeam();
-    this->agents.insert(std::make_shared<TPGAgent>(vertex, this->getAlgorithmName()));
+    std::shared_ptr<const EvoGraph::Action> vertex = graph->addNewAction(0);
+    this->agents.insert(std::make_shared<MapleAgent>(vertex, this->getAlgorithmName()));
     return *this->agents.rbegin();
 }
 
 
+std::shared_ptr<const Algorithm::Agent> Algorithm::Maple::MapleManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
+{
+    if(!std::dynamic_pointer_cast<const EvoGraph::Action>(vertex)){
+        throw std::runtime_error("MapleManager::createAgent: MapleAgent can only be created with action vertex.");
+    }
+    this->agents.insert(std::make_shared<MapleAgent>(vertex, this->getAlgorithmName()));
+    return *this->agents.rbegin();
+}
+
+std::shared_ptr<const Algorithm::Agent> Algorithm::Maple::MapleManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
+{
+    if(!this->containsAgent(agent)) {
+        throw std::runtime_error("MapleManager::copyAgent: trying to copy an agent that is not managed by this manager.");
+    }
+
+    auto clonedVertex = graph->cloneVertex(*std::dynamic_pointer_cast<const MapleAgent>(agent)->getVertex());
+    this->agents.insert(std::make_shared<MapleAgent>(clonedVertex, this->getAlgorithmName()));
+    return *this->agents.rbegin();
+}
+
 void Algorithm::Maple::MapleManager::deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Remove the action vertex from the graph
-    graph->removeVertex(*this->getTPGAgentFromCst(agent)->getVertex());
+    graph->removeVertex(*this->getMapleAgentFromCst(agent)->getVertex());
 
     auto iterator = this->agents.find(agent);
     this->agents.erase(iterator);   

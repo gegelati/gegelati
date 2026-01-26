@@ -44,6 +44,7 @@
 #include "log/laBasicLogger.h"
 
 #include "algorithm/tpg/tpgAlgorithm.h"
+#include "algorithm/maple/mapleAlgorithm.h"
 
 #include "evoGraph/instrumented/actionInstrumented.h"
 #include "evoGraph/instrumented/edgeInstrumented.h"
@@ -497,7 +498,7 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 144)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 12539348269636698672)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 12539348269636698672U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -840,64 +841,59 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
         << "Graph does not have the expected determinst characteristics.";
 }
 
-TEST_F(LearningAgentTest, TrainContinuousWithCrossingMAPLE)
+// Similar to previous test, but with continuous actions and no action programs
+TEST_F(LearningAgentTest, TrainContinuousMaple)
 {
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 20;
     params.mutation.tpg.nbRoots = 30;
-    params.mutation.tpg.useActionProgram = true;
-    params.mutation.tpg.useMultiActionProgram = true;
-    params.mutation.tpg.teamAccessAllActions = false;
-    params.mutation.tpg.ratioTeamsOverActions = 0.0;
-    params.mutation.tpg.pActionEdgeAddition = 0.7;
-    params.mutation.tpg.pActionEdgeDeletion = 0.7;
-    params.mutation.tpg.pCrossAgents = 0.7;
-    params.mutation.tpg.pCrossPrograms = 0.3;
-    params.selection._selectionMode = "truncation";
-    params.selection.truncation.ratioDeletedRoots = 0.5;
-    params.mutation.tpg.nbRoots = 100;
-    params.nbThreads = 3;
+    params.mutation.tpg.useActionProgram = false;
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.nbThreads = 1;
 
-    Learn::LearningAgent la(cle, tpg, set, params);
+    auto maple = std::make_shared<Algorithm::MapleAlgorithm>(params, set);
+    Learn::LearningAgent la(cle, maple, set, params);
 
     la.init();
     bool alt = false;
     la.train(alt, false);
-    EvoGraph::Graph& graph = *la.getGraph();
-
-    // Useful when determinism is changed
-    /*std::cout<<tpg.getNbVertices()<<" "
-             <<tpg.getNbRootVertices()<<" "
-             <<tpg.getEdges().size()<<" "
-             <<EvoGraph::Vertex::getVertexIDCounter()<<" "
-             <<EvoGraph::Edge::getEdgeIDCounter()<<" "
-             <<Program::Program::getProgramIDCounter()<<" "
-             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/
-    ;
 
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    ASSERT_EQ(graph.getNbVertices(), 50)
+    EvoGraph::Graph& tpg = *la.getGraph();
+
+
+    // Useful when determinism is changed
+    /*std::cout << tpg.getNbVertices() << " "
+             <<tpg.getNbRootVertices()<<" "
+             <<tpg.getEdges().size()<<" "
+             <<EvoGraph::Vertex::getVertexIDCounter()<<" "
+             <<EvoGraph::Edge::getEdgeIDCounter()<<" "
+             <<Algorithm::Agent::getAgentIDCounter()<<" "
+
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
+
+    ASSERT_EQ(tpg.getNbVertices(), 24)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(graph.getNbRootVertices(), 50)
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(graph.getEdges().size(), 150)
+    ASSERT_EQ(tpg.getEdges().size(), 52)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 1057)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 144)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 5280)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 327)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Program::Program::getProgramIDCounter(), 2546)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 289)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 8433195571775175959U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 15495395294461530304U)
         << "Graph does not have the expected determinst characteristics.";
 }
 /*

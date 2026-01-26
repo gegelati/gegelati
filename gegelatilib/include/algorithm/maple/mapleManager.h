@@ -2,7 +2,7 @@
 #ifndef MAPLE_AGENT_MANAGER_H
 #define MAPLE_AGENT_MANAGER_H
 
-#include "algorithm/tpg/tpgManager.h"
+#include "algorithm/Maple/MapleManager.h"
 #include "algorithm/maple/mapleAgent.h"
 #include "algorithm/maple/mapleExecutionEngine.h"
 
@@ -29,7 +29,7 @@ namespace Algorithm::Maple {
     public:
 
         /**
-         * \brief Main TPGManager constructor.
+         * \brief Main MapleManager constructor.
          * 
          * \param[in] outputs outputs of the agents.
          * \param[in] archive Archive used by this Maple
@@ -43,7 +43,7 @@ namespace Algorithm::Maple {
         virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const override;
 
         /**
-         * \brief Create a new TPGAgent.
+         * \brief Create a new MapleAgent.
          * 
          * \param[in] graph the Graph associated with the Agent.
          * 
@@ -51,9 +51,30 @@ namespace Algorithm::Maple {
          */
         virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
 
+        /**
+         * \brief Create a new MapleAgent on a specific vertex.
+         * Used for tests mostly
+         * 
+         * \param[in] vertex the vertex associated with the Agent.
+         * 
+         * \return a shared pointer to the created Agent.
+         */
+        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex) override;
+
 
         /**
-         * \brief Delete the TPGAgent.
+         * \brief Copy a MapleAgent.
+         * 
+         * \param[in] agent the Agent to copy.
+         * \param[in] graph the Graph associated with the Agent.
+         * 
+         * \return a shared pointer to the created Agent.
+         */
+        virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+
+
+        /**
+         * \brief Delete the MapleAgent.
          * 
          * \param[in] agent the Agent to delete.
          * \param[in] graph the Graph associated with the Agent.
@@ -64,7 +85,7 @@ namespace Algorithm::Maple {
 
 
         /**
-         * \brief create and return a TPG execution engine.
+         * \brief create and return a Maple execution engine.
          */
         virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources = {}, bool isTraining = false) const override;
     };
