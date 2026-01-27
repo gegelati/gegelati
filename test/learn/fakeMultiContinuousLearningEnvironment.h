@@ -64,6 +64,16 @@ class FakeMultiContinuousLearningEnvironment : public Learn::LearningEnvironment
         this->data.setDataAt(typeid(int), 2, 3);
     }
 
+    // Copy constructor
+    FakeMultiContinuousLearningEnvironment(
+        const FakeMultiContinuousLearningEnvironment& other)
+        : LearningEnvironment(other),
+          data(other.data),
+          nbPositivesActions(other.nbPositivesActions),
+          nbTurns(other.nbTurns)
+    {
+    }
+
     ~FakeMultiContinuousLearningEnvironment(){};
 
     void doActions(std::vector<double> actions) override
@@ -71,7 +81,7 @@ class FakeMultiContinuousLearningEnvironment : public Learn::LearningEnvironment
         LearningEnvironment::doActions(actions);
 
         for (double act : actions) {
-            if (act != 0.0) {
+            if (act > 0.0) {
                 nbPositivesActions++;
             }
         }
@@ -110,6 +120,14 @@ class FakeMultiContinuousLearningEnvironment : public Learn::LearningEnvironment
     bool isCopyable() const override
     {
         return true;
+    }
+
+
+    
+    LearningEnvironment* clone() const override
+    {
+        // Default copy constructor does the trick.
+        return (Learn::LearningEnvironment*)new FakeMultiContinuousLearningEnvironment(*this);
     }
 };
 

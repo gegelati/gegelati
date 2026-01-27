@@ -12,6 +12,12 @@ Archive& Algorithm::TPG::TPGExecutionEngine::getArchive()
     return archive;
 }
 
+void Algorithm::TPG::TPGExecutionEngine::setProgramExecutionEngine(std::unique_ptr<ExecutionEngine> programExecutionEngine){
+    std::string algorithmName = programExecutionEngine->getAlgorithmName();
+    this->subExecutionEngines.insert({algorithmName, std::move(programExecutionEngine)});
+    this->programExecutionEngine = this->subExecutionEngines.at(algorithmName).get();
+}
+
 void Algorithm::TPG::TPGExecutionEngine::setupJob(const Algorithm::Job& job)
 {
     const TPGJob* tpgJob = dynamic_cast<const TPGJob*>(&job);

@@ -404,9 +404,8 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
         // true) And until the program behavior is changed
         subMutator->mutateAgent(programAgent, graph, manager, newSubAgents, params, rng);
 
-
         // Check for uniqueness in archive
-        auto archivedDataHandlers = archive->getDataHandlers();
+        const auto& archivedDataHandlers = archive->getDataHandlers();
         std::map<size_t, double> hashesAndResults;
         std::unique_ptr<Algorithm::ExecutionEngine> execEngine = manager->createExecutionEngine();
         execEngine->setExecutedAgent(programAgent);

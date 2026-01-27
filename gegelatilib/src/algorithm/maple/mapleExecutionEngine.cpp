@@ -13,6 +13,7 @@ std::vector<double> Algorithm::Maple::MapleExecutionEngine::execute()
         throw std::runtime_error("Algorithm::Maple::MapleExecutionEngine::execute trying to execute a Maple agent which does not represent an action vertex");
     }
 
+    this->actionValues.clear();
     this->actionValues.resize(this->outputs.size(), 0.0);
     for(auto edge : actionVertex->getOutgoingEdges()){
 

@@ -30,10 +30,6 @@ void Algorithm::Maple::MapleAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_
     auto& programAlgo = this->subAlgorithms.front();
     auto programOutput = std::make_shared<Output::OutputHandler>(Output::Output());
 
-    for(size_t idx = 0; idx < this->outputs->sizeContinuous(); idx++){
-        programOutput->addOutput(Output::Output());
-    }
-
     programAlgo->initAlgorithm(rng, programOutput, dataSource, graph);
     this->manager->addSubManager(programAlgo->getManager());
     this->mutator->addSubMutator(programAlgo->getMutator());

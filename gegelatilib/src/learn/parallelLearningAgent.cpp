@@ -45,10 +45,6 @@
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
 
-#include "algorithm/tpg/tpgJob.h"
-#include "algorithm/tpg/tpgExecutionEngine.h"
-#include "algorithm/lgp/lgpAgent.h"
-
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
 

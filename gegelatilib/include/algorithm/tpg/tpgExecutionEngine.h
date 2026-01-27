@@ -20,7 +20,7 @@ namespace Algorithm::TPG {
     protected:
 
         /// Execution engine used to execute the program of the TPG agents
-        std::unique_ptr<ExecutionEngine> programExecutionEngine;
+        ExecutionEngine* programExecutionEngine;
 
         /// Archive used by the program agents.
         std::reference_wrapper<Archive> archive;
@@ -79,7 +79,7 @@ namespace Algorithm::TPG {
          * 
          * \param[in] programExecutionEngine the program execution engine.
          */
-        void setProgramExecutionEngine(std::unique_ptr<ExecutionEngine> programExecutionEngine) { this->programExecutionEngine = std::move(programExecutionEngine); }
+        void setProgramExecutionEngine(std::unique_ptr<ExecutionEngine> programExecutionEngine);
 
         /**
          * \brief Get the program execution engine associated with the TPG agents.

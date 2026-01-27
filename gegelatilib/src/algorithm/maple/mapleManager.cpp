@@ -61,8 +61,11 @@ std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::Maple::MapleManager::crea
 {
     auto engine = std::make_unique<Maple::MapleExecutionEngine>(this->outputs, this->algorithmName, this->archive, isTraining);
 
-    engine->setProgramExecutionEngine(
-        std::move(this->cGetSubManager(this->programAlgorithmName)->createExecutionEngine(dataSources, isTraining))
+    auto progEngine =
+        std::move(this->cGetSubManager(this->programAlgorithmName)
+                      ->createExecutionEngine(dataSources, isTraining));
+
+    engine->setProgramExecutionEngine(std::move(progEngine)
     );
 
     return engine;

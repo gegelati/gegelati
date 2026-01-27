@@ -120,7 +120,7 @@ void Algorithm::Maple::MapleMutator::addRandomEdge(
                             if (edge == nullptr || edge->getSource().get() == &action) {
                                 return true;
                             } else if (auto actionEdge = std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge)) {
-                                return action.getAssessedActions().find(actionEdge->getActionClass()) == action.getAssessedActions().end();
+                                return action.getAssessedActions().find(actionEdge->getActionClass()) != action.getAssessedActions().end();
                             }
                             return false;
                        }),
@@ -242,6 +242,7 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
 
         // Update assessed actions
         graph->updateAssessedActions(action);
+
     }
 
     // 3. swap randomly selected edges
@@ -282,7 +283,6 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
             anyMutationDone = true;
         }
     } while (!anyMutationDone && params.mutation.tpg.pMutateActionProgram != 0.0);
-
     graph->orderActionEdges(action);
 }
 
