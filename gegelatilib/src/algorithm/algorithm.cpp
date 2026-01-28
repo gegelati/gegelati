@@ -23,6 +23,12 @@ std::shared_ptr<const Algorithm::Algorithm> Algorithm::Algorithm::cGetSubAlgorit
 
 void Algorithm::Algorithm::addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorithm)
 {
+    // Throw if the sub-algorithm is already present
+    for (auto& existingSubAlgorithm : this->subAlgorithms) {
+        if (existingSubAlgorithm->getAlgorithmName() == subAlgorithm->getAlgorithmName()) {
+            throw std::runtime_error("Algorithm::addSubAlgorithm: Sub-algorithm with name " + subAlgorithm->getAlgorithmName() + " is already present.");
+        }
+    }
     this->subAlgorithms.push_back(subAlgorithm);
 }
 
