@@ -35,6 +35,10 @@ namespace Algorithm {
         /// Boolean indicating if this executionEngine will be executed for training or testing purpose.
         bool isTraining = false;
 
+        /// Data sources from the environment used for archiving a program.
+        std::vector<std::reference_wrapper<const Data::DataHandler>>
+            dataSources;
+
 
 
     public:

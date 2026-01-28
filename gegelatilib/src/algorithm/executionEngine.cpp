@@ -24,6 +24,7 @@ void Algorithm::ExecutionEngine::setupJob(const Algorithm::Job& job)
 void Algorithm::ExecutionEngine::setDataSources(
     const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSrc)
 {
+    this->dataSources = dataSrc;
     auto itSubExec = this->subExecutionEngines.begin();
     while(itSubExec != this->subExecutionEngines.end()){
         itSubExec->second->setDataSources(dataSrc);

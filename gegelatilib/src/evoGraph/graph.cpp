@@ -206,10 +206,10 @@ std::shared_ptr<const EvoGraph::Vertex> EvoGraph::Graph::cloneVertex(const Verte
     // Create a new Vertex
     // (at the end of the vertices list)
     if (std::dynamic_pointer_cast<const EvoGraph::Team>(*vertexIterator) != nullptr) {
-        this->addNewTeam();
+        this->addNewTeam((*vertexIterator)->getProgram());
     }
     else if (auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(*vertexIterator)) {
-        this->addNewAction(action->getActionID());
+        this->addNewAction(action->getActionID(), action->getProgram());
     }
 
     // Get the new vertex

@@ -70,10 +70,6 @@ namespace Algorithm::LGP {
         // Data::PrimitiveTypeArray<double> to keep track of
         // accessed addresses.
 
-        /// Data sources from the environment used for archiving a program.
-        std::vector<std::reference_wrapper<const Data::DataHandler>>
-            dataSources;
-
         /// Data sources (including registers) used in the Program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>
             dataScsConstsAndRegs;
@@ -98,9 +94,9 @@ namespace Algorithm::LGP {
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
         LGPEngine(const Environment& env, const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false)
-            : ExecutionEngine{outputs, algorithmName, isTraining}, programCounter{0}, registers{env.getParams().nbRegisters},
-              dataSources{env.getDataSources()}
+            : ExecutionEngine{outputs, algorithmName, isTraining}, programCounter{0}, registers{env.getParams().nbRegisters}
         {
+            dataSources = env.getDataSources();
             // Setup the data sources
             dataScsConstsAndRegs.push_back(this->registers);
 

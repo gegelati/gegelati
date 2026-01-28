@@ -45,10 +45,9 @@ double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& ed
 
     // Put the result in the archive before returning it.
     if (this->isTraining) {
-        this->archive.get().addRecording(*edge.getProgram(), this->getDataSources(),
+        this->archive.get().addRecording(*edge.getProgram(), this->programExecutionEngine->getDataSources(),
                                     result);
     }
-
     return result;
 }
 
@@ -123,5 +122,5 @@ std::vector<double> Algorithm::TPG::TPGExecutionEngine::execute()
 
 const std::vector<std::reference_wrapper<const Data::DataHandler>>& Algorithm::TPG::TPGExecutionEngine::getDataSources() const
 {
-    return this->programExecutionEngine->getDataSources();
+    return this->dataSources;
 }
