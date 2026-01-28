@@ -50,8 +50,11 @@ namespace EvoGraph {
       public:
         /**
          * \brief Main constructor of a Team.
+         * 
+         * \param[in] agentProgram the shared pointer to the Agent Program associated to the
+         *            Team.
          */
-        Team() : Vertex(){};
+        Team(const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : Vertex(agentProgram){};
 
         /**
          * \brief Specialization throwing an std::runtime_exception if a

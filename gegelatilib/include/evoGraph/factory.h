@@ -78,8 +78,10 @@ namespace EvoGraph {
          * \brief Create a Team for a Graph.
          *
          * This method allocates and returns a new Team.
+         * \param[in] programAgent shared pointer to the Agent Program associated to the newly
+         *                 created Team.
          */
-        virtual std::shared_ptr<Team> createTeam() const;
+        virtual std::shared_ptr<Team> createTeam(std::shared_ptr<const Algorithm::Agent> programAgent = nullptr) const;
 
         /**
          * \brief Create a Action for a Graph.
@@ -87,9 +89,11 @@ namespace EvoGraph {
          * This method allocates and returns a new Action.
          *
          * \param[in] id integer stored as the actionID of the Action.
+         * \param[in] programAgent shared pointer to the Agent Program associated to the newly
+         *                 created Action.
          */
         virtual std::shared_ptr<Action> createAction(
-            const uint64_t id) const;
+            const uint64_t id, std::shared_ptr<const Algorithm::Agent> programAgent = nullptr) const;
 
         /**
          * \brief Create a Edge for a Graph.

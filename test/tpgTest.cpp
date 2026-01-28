@@ -185,7 +185,7 @@ TEST_F(TPGTest, EdgeGetSetProgram)
     auto team = std::make_shared<EvoGraph::Team>();
     auto action = std::make_shared<EvoGraph::Action>(0);
 
-    std::shared_ptr<const EvoGraph::Edge> constEdge = std::make_shared<EvoGraph::Edge>(team, action, programAgent);
+    std::shared_ptr<EvoGraph::Edge> constEdge = std::make_shared<EvoGraph::Edge>(team, action, programAgent);
     auto constProg = constEdge->getProgram();
     ASSERT_EQ(constProg, programAgent)
         << "Program accessor on const Edge returns a Program different from "

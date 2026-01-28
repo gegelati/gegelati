@@ -67,8 +67,10 @@ namespace EvoGraph {
          * \brief Main constructor of a Action.
          *
          * \param[in] id integer stored as the actionID of the Action.
+         * \param[in] agentProgram the shared pointer to the Agent Program associated to the
+         *            Vertex.
          */
-        Action(const uint64_t id) : Vertex(), actionID{id} {};
+        Action(const uint64_t id, const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : Vertex(agentProgram), actionID{id} {};
 
         /**
          * \brief Specialization throwing an std::runtime_exception.

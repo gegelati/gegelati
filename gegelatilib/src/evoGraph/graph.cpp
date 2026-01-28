@@ -89,15 +89,15 @@ void EvoGraph::Graph::setNewVertexID(const EvoGraph::Vertex& vertex, uint64_t ne
     vertices.insert(std::move(tmp));
 }
 
-std::shared_ptr<const EvoGraph::Team> EvoGraph::Graph::addNewTeam()
+std::shared_ptr<const EvoGraph::Team> EvoGraph::Graph::addNewTeam(std::shared_ptr<const Algorithm::Agent> programAgent)
 {
-    this->vertices.insert(factory->createTeam());
+    this->vertices.insert(factory->createTeam(programAgent));
     return std::dynamic_pointer_cast<const Team>(*this->vertices.rbegin());
 }
 
-std::shared_ptr<const EvoGraph::Action> EvoGraph::Graph::addNewAction(uint64_t actionID)
+std::shared_ptr<const EvoGraph::Action> EvoGraph::Graph::addNewAction(uint64_t actionID, std::shared_ptr<const Algorithm::Agent> programAgent)
 {
-    this->vertices.insert(factory->createAction(actionID));
+    this->vertices.insert(factory->createAction(actionID, programAgent));
     return std::dynamic_pointer_cast<const Action>(*this->vertices.rbegin());
 }
 
@@ -381,6 +381,22 @@ void EvoGraph::Graph::removeActionEdge(const Edge& edge)
     // Remove the edge
     this->edges.erase(iterator);
 }
+
+
+void EvoGraph::Graph::setVertexProgram(const Vertex& vertex, std::shared_ptr<const Algorithm::Agent> programAgent)
+{
+    // Check the Vertex existence within the graph.
+    auto srcVertex = this->vertices.find(&vertex);
+
+    if (srcVertex == this->vertices.end() || srcVertex->get() != &vertex) {
+        throw std::runtime_error(
+            "Attempting to add a ActionEdge with a vertex "
+            "not present in the Graph.");
+    }
+
+    (*srcVertex)->setProgram(programAgent);
+}
+
 
 std::shared_ptr<const EvoGraph::Edge> EvoGraph::Graph::cloneEdge(const Edge& edge)
 {

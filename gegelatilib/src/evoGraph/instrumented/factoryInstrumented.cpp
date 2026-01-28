@@ -45,15 +45,15 @@ std::shared_ptr<EvoGraph::Graph> EvoGraph::TPGInstrumentedFactory::createGraph()
         std::make_unique<TPGInstrumentedFactory>());
 }
 
-std::shared_ptr<EvoGraph::Team> EvoGraph::TPGInstrumentedFactory::createTeam() const
+std::shared_ptr<EvoGraph::Team> EvoGraph::TPGInstrumentedFactory::createTeam(std::shared_ptr<const Algorithm::Agent> programAgent) const
 {
-    return std::make_shared<TeamInstrumented>();
+    return std::make_shared<TeamInstrumented>(programAgent);
 }
 
 std::shared_ptr<EvoGraph::Action> EvoGraph::TPGInstrumentedFactory::createAction(
-    const uint64_t id) const
+    const uint64_t id, std::shared_ptr<const Algorithm::Agent> programAgent) const
 {
-    return std::make_shared<ActionInstrumented>(id);
+    return std::make_shared<ActionInstrumented>(id, programAgent);
 }
 
 std::shared_ptr<EvoGraph::Edge> EvoGraph::TPGInstrumentedFactory::createEdge(
