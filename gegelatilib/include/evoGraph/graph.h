@@ -349,6 +349,15 @@ namespace EvoGraph {
         bool setEdgeSource(const Edge& edge, const Vertex& newSrc);
 
         /**
+         * \brief set a new program agent to a Edge
+         * 
+         * \param[in] edge a const reference to the modified Edge.
+         * \param[in] programAgent shared pointer to the Agent Program to set to the edge.
+         * \return true if the given edge is part of the graph, and
+         */
+        bool setEdgeProgram(const Edge& edge, std::shared_ptr<const Algorithm::Agent> programAgent);
+
+        /**
          * \brief set a new action class to a ActionEdge
          *
          * \param[in] edge ActionEdge changed

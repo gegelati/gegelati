@@ -40,8 +40,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "program/program.h"
-
 struct CounterReset;
 
 namespace Algorithm{
@@ -73,7 +71,7 @@ namespace EvoGraph {
          *            edge.
          */
         Edge(std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
-                const std::shared_ptr<const Algorithm::Agent> agentProgram)
+                const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr)
             : edgeID(incrementeCounter()), source{src}, destination{dest},
               program{agentProgram} {};
 
@@ -94,7 +92,7 @@ namespace EvoGraph {
          *
          * \param[in] agentProgram the new shared pointer to a Agent Program.
          */
-        void setProgram(const std::shared_ptr<const Algorithm::Agent> agentProgram) const;
+        void setProgram(std::shared_ptr<const Algorithm::Agent> agentProgram);
 
         /**
          * \brief Get the source Vertex of the Edge.
@@ -160,7 +158,7 @@ namespace EvoGraph {
         /// of this Edge.
         /// This attribute is mutable to enable its modification during
         /// mutations.
-        mutable std::shared_ptr<const Algorithm::Agent> program;
+        std::shared_ptr<const Algorithm::Agent> program;
 
         /**
          * \brief Unique identifier of the Edge.

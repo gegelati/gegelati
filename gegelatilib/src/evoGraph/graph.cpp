@@ -425,9 +425,7 @@ bool EvoGraph::Graph::setEdgeDestination(const Edge& edge,
         iterEdge->get()->setDestination(*iterNewDestination);
         return true;
     }
-    else {
-        return false;
-    }
+    return false;
 }
 
 bool EvoGraph::Graph::setEdgeSource(const Edge& edge, const Vertex& newSrc)
@@ -450,9 +448,21 @@ bool EvoGraph::Graph::setEdgeSource(const Edge& edge, const Vertex& newSrc)
         iterEdge->get()->setSource(*iterNewSrc);
         return true;
     }
-    else {
-        return false;
+    return false;
+    
+}
+
+
+bool EvoGraph::Graph::setEdgeProgram(const Edge& edge, std::shared_ptr<const Algorithm::Agent> programAgent)
+{
+    
+    auto iterEdge = this->edges.find(&edge);
+    if (iterEdge != this->edges.end() && iterEdge->get() == &edge) {
+        // Found the edge, modify it as needed
+        iterEdge->get()->setProgram(programAgent);
+        return true;
     }
+    return false;
 }
 
 void EvoGraph::Graph::setActionClassEdge(std::shared_ptr<const Edge> edge,

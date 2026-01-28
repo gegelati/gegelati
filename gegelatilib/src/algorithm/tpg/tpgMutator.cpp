@@ -329,7 +329,7 @@ void Algorithm::TPG::TPGMutator::mutateOutgoingEdge(
     std::shared_ptr<const Algorithm::Agent> newAgent = manager->getSubManager(originAgent->getAlgorithmName())->copyAgent(originAgent, graph);
 
     // Set the mutated agent to the edge
-    edge->setProgram(newAgent);
+    graph->setEdgeProgram(*edge, newAgent);
 
     // Add it to the list of new agent to be mutated.
     newSubAgents.push_back(newAgent);

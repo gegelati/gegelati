@@ -71,7 +71,7 @@ std::shared_ptr<const Algorithm::Agent> EvoGraph::Edge::getProgram() const
 }
 
 void EvoGraph::Edge::setProgram(
-    const std::shared_ptr<const Algorithm::Agent> program) const
+    std::shared_ptr<const Algorithm::Agent> program)
 {
     this->program = program;
 }
