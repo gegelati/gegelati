@@ -10,7 +10,6 @@
 #include "algorithm/tpg/tpgManager.h"
 #include "algorithm/tpg/tpgMutator.h"
 #include "algorithm/tpg/tpgAgent.h"
-#include "algorithm/lgp/lgpAlgorithm.h"
 #include "algorithm/tpg/tpgJob.h"
 
 #include "learn/learningEnvironment.h"
@@ -36,21 +35,29 @@ namespace Algorithm::TPG {
              * \brief Main Algorithm constructor.
              * 
              * \param[in] params the LearningParameters used by the Algorithm.
-             * \param[in] iSet the Instruction Set used by the LGPAlgorithm.
              * \param[in] algorithmName name of the algorithm used.
              */
-            TPGAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet, std::string algorithmName = "TPG")
-                : Algorithm(params, algorithmName), archive{std::make_shared<Archive>(params.archiveSize, params.archivingProbability)}{
-                this->addLGPAlgorithm(params, iSet);
+            TPGAlgorithm(const Learn::LearningParameters& params, std::string algorithmName = "TPG")
+                : Algorithm(params, algorithmName), archive{std::make_shared<Archive>(params.archiveSize, params.archivingProbability)}{};
+
+
+            /**
+             * \brief Main Algorithm constructor.
+             * 
+             * \param[in] params the LearningParameters used by the Algorithm.
+             * \param[in] programAlgorithm the sub-algorithm used to manipulate programs.
+             * \param[in] algorithmName name of the algorithm used.
+             */
+            TPGAlgorithm(const Learn::LearningParameters& params, std::shared_ptr<Algorithm> programAlgorithm, std::string algorithmName = "TPG")
+                : TPGAlgorithm(params, algorithmName){
+                this->setProgramAlgorithm(programAlgorithm);
             };
 
             /**
-             * \brief Add a LGP sub-algorithm to the TPGAlgorithm.
+             * \brief Add the program sub-algorithm to the TPGAlgorithm.
              * 
-             * \param[in] params the LearningParameters used by the Algorithm.
-             * \param[in] iSet the Instruction Set used by the LGPAlgorithm.
              */
-            void addLGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet);
+            void setProgramAlgorithm(std::shared_ptr<Algorithm> programAlgorithm);
 
 
             /**

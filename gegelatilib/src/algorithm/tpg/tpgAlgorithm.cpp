@@ -2,14 +2,12 @@
 #include "algorithm/tpg/tpgAlgorithm.h"
 
 
-void Algorithm::TPG::TPGAlgorithm::addLGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet)
+void Algorithm::TPG::TPGAlgorithm::setProgramAlgorithm(std::shared_ptr<Algorithm> programAlgorithm)
 {
-    std::shared_ptr<LGP::LGPAlgorithm> lgpAlgorithm =
-        std::make_shared<LGP::LGPAlgorithm>(params, iSet, this->algorithmName + "_LGP_Program");
-    Algorithm::Algorithm::addSubAlgorithm(lgpAlgorithm);
+    Algorithm::Algorithm::addSubAlgorithm(programAlgorithm);
 
     // Set program algorithm name
-    this->programAlgorithmName = lgpAlgorithm->getAlgorithmName();
+    this->programAlgorithmName = programAlgorithm->getAlgorithmName();
 }
 
 
@@ -23,9 +21,7 @@ void Algorithm::TPG::TPGAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<
 {
 
     this->outputs = outputs;
-    if(programAlgorithmName.empty()){
-        throw std::runtime_error("TPGAlgorithm::init: No program algorithm associated with the TPG agents.");
-    }
+    std::shared_ptr<Algorithm> programAlgo = this->getSubAlgorithm(this->programAlgorithmName);
 
     this->mutator = std::make_shared<TPG::TPGMutator>(this->archive);
     std::shared_ptr<TPG::TPGMutator> tpgMutator = std::dynamic_pointer_cast<TPG::TPGMutator>(this->mutator);
@@ -44,7 +40,6 @@ void Algorithm::TPG::TPGAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<
     this->selector = Selector::selectorFactory(this->manager, this->params);
 
     // Initialize program algorithm.
-    auto& programAlgo = this->subAlgorithms.front();
     auto programOutput = std::make_shared<Output::OutputHandler>(Output::Output());
 
     for(size_t idx = 0; idx < this->outputs->sizeContinuous(); idx++){

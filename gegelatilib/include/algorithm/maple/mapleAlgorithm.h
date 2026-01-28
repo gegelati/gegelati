@@ -22,11 +22,21 @@ namespace Algorithm::Maple {
              * \brief Main Algorithm constructor.
              * 
              * \param[in] params the LearningParameters used by the Algorithm.
-             * \param[in] iSet the Instruction Set used by the LGPAlgorithm.
              * \param[in] algorithmName name of the algorithm used.
              */
-            MapleAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet, std::string algorithmName = "MAPLE")
-                : TPG::TPGAlgorithm(params, iSet, algorithmName){
+            MapleAlgorithm(const Learn::LearningParameters& params, std::string algorithmName = "MAPLE")
+                : TPG::TPGAlgorithm(params, algorithmName){
+            };
+
+            /**
+             * \brief Main Algorithm constructor.
+             * 
+             * \param[in] params the LearningParameters used by the Algorithm.
+             * \param[in] programAlgorithm the sub-algorithm used to manipulate programs.
+             * \param[in] algorithmName name of the algorithm used.
+             */
+            MapleAlgorithm(const Learn::LearningParameters& params, std::shared_ptr<Algorithm> programAlgorithm, std::string algorithmName = "MAPLE")
+                : TPG::TPGAlgorithm(params, programAlgorithm, algorithmName){
             };
 
             

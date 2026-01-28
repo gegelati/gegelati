@@ -42,8 +42,6 @@
 #include <queue>
 #include <thread>
 
-#include "instructions/set.h"
-
 #include "learn/evaluationResult.h"
 #include "learn/learningAgent.h"
 #include "learn/learningEnvironment.h"
@@ -159,18 +157,16 @@ namespace Learn {
          * Based on default constructor of LearningAgent
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] iSet Set of Instruction used to compose Programs in the
-         *            learning process.
          * \param[in] algorithms vector of algorithm learned by the learning agent
          * \param[in] p The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
-            LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms, const Instructions::Set& iSet,
+            LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms,
             const LearningParameters& p,
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : LearningAgent(le, algorithms, iSet, p, factory)
+            : LearningAgent(le, algorithms, p, factory)
         {
             // overriding the maxNbThreads that basic LA defined to 1
             maxNbThreads = p.nbThreads;
@@ -182,18 +178,16 @@ namespace Learn {
          * Based on default constructor of LearningAgent
          *
          * \param[in] le The LearningEnvironment for the TPG.
-         * \param[in] iSet Set of Instruction used to compose Programs in the
-         *            learning process.
          * \param[in] algorithm vector of algorithm learned by the learning agent
          * \param[in] p The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
-            LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm, const Instructions::Set& iSet,
+            LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm,
             const LearningParameters& p,
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : LearningAgent(le, algorithm, iSet, p, factory)
+            : LearningAgent(le, algorithm, p, factory)
         {
             // overriding the maxNbThreads that basic LA defined to 1
             maxNbThreads = p.nbThreads;

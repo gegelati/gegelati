@@ -44,7 +44,6 @@
 
 #include "algorithm/algorithm.h"
 
-#include "instructions/set.h"
 #include "log/laLogger.h"
 #include "mutator/mutationParameters.h"
 #include "evoGraph/graph.h"
@@ -99,13 +98,11 @@ namespace Learn {
          *
          * \param[in] le The LearningEnvironment for the TPG.
          * \param[in] algorithms vector of algorithms learned by the learning agent
-         * \param[in] iSet Set of Instruction used to compose Programs in the
-         *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
-        LearningAgent(LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms, const Instructions::Set& iSet,
+        LearningAgent(LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms,
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le}, algorithms{algorithms},
@@ -116,16 +113,14 @@ namespace Learn {
          *
          * \param[in] le The LearningEnvironment for the TPG.
          * \param[in] algorithm algorithm learned by the learning agent
-         * \param[in] iSet Set of Instruction used to compose Programs in the
-         *            learning process.
          * \param[in] p The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
-        LearningAgent(LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm, const Instructions::Set& iSet,
+        LearningAgent(LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm,
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : LearningAgent(le, std::vector<std::shared_ptr<Algorithm::Algorithm>>{algorithm}, iSet, p, factory) {};
+            : LearningAgent(le, std::vector<std::shared_ptr<Algorithm::Algorithm>>{algorithm}, p, factory) {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
