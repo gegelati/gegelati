@@ -3,6 +3,12 @@
 #include "algorithm/atpg/atpgExecutionEngine.h"
 
 
+void Algorithm::ATPG::ATPGExecutionEngine::setActionProgramExecutionEngine(std::unique_ptr<ExecutionEngine> actionProgramExecutionEngine){
+    std::string algorithmName = actionProgramExecutionEngine->getAlgorithmName();
+    this->subExecutionEngines.insert({algorithmName, std::move(actionProgramExecutionEngine)});
+    this->actionProgramExecutionEngine = this->subExecutionEngines.at(algorithmName).get();
+}
+
 void Algorithm::ATPG::ATPGExecutionEngine::evaluateAction(const EvoGraph::Action& action)
 {
     // Set the progExecutionEngine to the program

@@ -7,6 +7,7 @@ void Algorithm::Mutator::addSubMutator(std::shared_ptr<Mutator> subMutator)
 }
 
 
+
 std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(std::string nameAlgorithm){
     auto it = this->subMutators.find(nameAlgorithm);
     if(it == this->subMutators.end()){
@@ -28,6 +29,50 @@ void Algorithm::Mutator::updateSpecificContext(
         subMutPair.second->updateSpecificContext(graph, manager, selector, params, rng);
     }
 }
+
+const Selector::SelectionContext& Algorithm::Mutator::getContext()
+{
+    return *this->currentContext;
+}
+
+void Algorithm::Mutator::initActionVertices(
+    std::shared_ptr<EvoGraph::Graph> graph,
+    std::shared_ptr<AgentManager> manager)
+    {
+        auto output = manager->getOutputs();
+        auto currentActions = graph->getActions();
+
+        // Get the existing action IDs
+        std::set<size_t> actionIDs;
+        for(const auto& action: currentActions){
+            actionIDs.insert(action->getActionID());
+        }
+
+        if(output.sizeContinuous() != 0 && output.sizeDiscrete() != 0){
+            throw std::runtime_error("Mutator::initActionVertices: Gegelati does not support mixed discrete and continuous outputs.");
+        } else if (output.sizeContinuous() != 0 || output.sizeDiscrete() > 1){
+            // continuous or multiple discrete outputs: one action vertex per output
+            for(size_t i = 0; i < output.size(); i++){
+
+                // Add only the missing action vertices
+                if(actionIDs.find(i) == actionIDs.end()){
+                    graph->addNewAction(i);
+                }
+            }
+        } else if (output.sizeDiscrete() == 1){
+            // Discrete outputs: one action vertex per takeable output value
+            size_t nbActionVertices = output.front().getNbValues();
+            for(size_t i = 0; i < nbActionVertices; i++){
+
+                // Add only the missing action vertices
+                if(actionIDs.find(i) == actionIDs.end()){
+                    graph->addNewAction(i);
+                }
+            }
+        } else {
+            throw std::runtime_error("Mutator::initActionVertices: No outputs defined in the manager.");
+        }
+    }
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::Mutator::initRandomAgent(
     std::shared_ptr<EvoGraph::Graph> graph,

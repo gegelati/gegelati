@@ -65,7 +65,7 @@ namespace Algorithm::ATPG {
          * evaluated.
          * \return the double value returned by the Program of the Action.
          */
-        virtual void evaluateAction(const EvoGraph::Action& edge);
+        virtual void evaluateAction(const EvoGraph::Action& action);
 
         /**
          * \brief Execute the Graph starting from the vertex pointed by the given agent.
@@ -83,8 +83,8 @@ namespace Algorithm::ATPG {
         /**
          * \brief Inherrited from ExecutionEngine
          */
-        virtual const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-        getDataSources() const override;
+        //virtual const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+        //getDataSources() const override;
         
         
     }; 
