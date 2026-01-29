@@ -61,6 +61,17 @@ namespace EvoGraph {
          * ActionEdge is added to a Team.
          */
         virtual void addOutgoingEdge(std::shared_ptr<const Edge> edge) override;
+
+        
+        /**
+         * \brief Order the edges pointing toward an action of the team depending.
+         */
+        void orderActionEdges();
+
+        /**
+         * \brief Update the assessed actions
+         */
+        virtual void updateAssessedActions() override;
     };
 
 }; // namespace EvoGraph

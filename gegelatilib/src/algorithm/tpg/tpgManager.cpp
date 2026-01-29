@@ -33,8 +33,7 @@ const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::TPG::TPGMa
 std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
     std::shared_ptr<const EvoGraph::Team> vertex = graph->addNewTeam();
-    this->agents.insert(std::make_shared<TPGAgent>(vertex, this->getAlgorithmName()));
-    return *this->agents.rbegin();
+    return this->createAgent(vertex);
 }
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
@@ -50,8 +49,7 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(st
     }
 
     auto clonedVertex = graph->cloneVertex(*std::dynamic_pointer_cast<const TPGAgent>(agent)->getVertex());
-    this->agents.insert(std::make_shared<TPGAgent>(clonedVertex, this->getAlgorithmName()));
-    return *this->agents.rbegin();
+    return this->createAgent(clonedVertex);
 }
 
 void Algorithm::TPG::TPGManager::deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)

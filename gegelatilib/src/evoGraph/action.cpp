@@ -49,20 +49,6 @@ void EvoGraph::Action::addOutgoingEdge(std::shared_ptr<const Edge> edge)
     }
 }
 
-void EvoGraph::Action::orderActionEdges()
-{
-
-    this->outgoingEdges.sort([](std::shared_ptr<const EvoGraph::Edge> edge1, std::shared_ptr<const EvoGraph::Edge> edge2) {
-        // Use static_cast to convert Edge* into ActionEdge*
-        std::shared_ptr<const EvoGraph::ActionEdge> actionEdge1 =
-            std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge1);
-        std::shared_ptr<const EvoGraph::ActionEdge> actionEdge2 =
-            std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge2);
-
-        // Compare actionClass
-        return actionEdge1->getActionClass() < actionEdge2->getActionClass();
-    });
-}
 
 std::shared_ptr<const EvoGraph::ActionEdge> EvoGraph::Action::getEdgeOfAction(uint64_t actionClass) const
 {
@@ -82,4 +68,11 @@ std::shared_ptr<const EvoGraph::ActionEdge> EvoGraph::Action::getEdgeOfAction(ui
     else {
         return nullptr;
     }
+}
+
+
+void EvoGraph::Action::updateAssessedActions()
+{
+    assessedActions.clear();
+    assessedActions.insert(this->actionID);
 }

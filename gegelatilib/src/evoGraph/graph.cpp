@@ -135,6 +135,18 @@ const std::vector<std::shared_ptr<const EvoGraph::Action>> EvoGraph::Graph::getR
     return result;
 }
 
+const std::vector<std::shared_ptr<const EvoGraph::Action>> EvoGraph::Graph::getActions() const
+{
+    std::vector<std::shared_ptr<const EvoGraph::Action>> result;
+    for (auto& vertex : this->vertices) {
+        auto castedVertex = std::dynamic_pointer_cast<const Action>(vertex);
+        if (castedVertex != nullptr) {
+            result.push_back(castedVertex);
+        }
+    }
+    return result;
+}
+
 const std::vector<std::shared_ptr<const EvoGraph::Team>> EvoGraph::Graph::getRootTeams() const
 {
     std::vector<std::shared_ptr<const EvoGraph::Team>> result;
@@ -540,15 +552,15 @@ void EvoGraph::Graph::updateAllAssessedActions()
     }
 }
 
-void EvoGraph::Graph::orderActionEdges(std::shared_ptr<const Action> action)
+void EvoGraph::Graph::orderActionEdges(std::shared_ptr<const Team> team)
 {
-    auto it = this->vertices.find(action);
+    auto it = this->vertices.find(team);
 
-    if (it != this->vertices.end() && *it == action) {
+    if (it != this->vertices.end() && *it == team) {
         // Found the vertex, modify it as needed
-        std::dynamic_pointer_cast<Action>(*it)->orderActionEdges();
+        std::dynamic_pointer_cast<Team>(*it)->orderActionEdges();
     }
     else {
-        throw std::runtime_error("Action to order not in the graph.");
+        throw std::runtime_error("Team to order not in the graph.");
     }
 }

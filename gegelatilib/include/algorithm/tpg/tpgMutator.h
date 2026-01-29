@@ -11,7 +11,6 @@
 #include "algorithm/mutator.h"
 #include "algorithm/tpg/tpgAgent.h"
 #include "algorithm/tpg/tpgManager.h"
-#include "mutator/programMutator.h"
 
 namespace Algorithm::TPG {
 
@@ -120,7 +119,7 @@ namespace Algorithm::TPG {
          * \param[in] vertex the Vertex whose outgoingEdges will be altered.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void removeRandomEdge(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Vertex& vertex,
+        virtual void removeRandomEdge(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Vertex& vertex,
                                 RNG::RNG& rng);
 
         /**
@@ -142,7 +141,7 @@ namespace Algorithm::TPG {
          * \param[in] rng Random Number Generator used in the
          * mutation process.
          */
-        void addRandomEdge(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Team& team,
+        virtual void addRandomEdge(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Team& team,
                             RNG::RNG& rng);
 
         /**
@@ -168,7 +167,7 @@ namespace Algorithm::TPG {
          * \param[in] rng Random Number Generator used in the mutation
          * process.
          */
-        void mutateEdgeDestination(std::shared_ptr<EvoGraph::Graph> graph,
+        virtual void mutateEdgeDestination(std::shared_ptr<EvoGraph::Graph> graph,
                                     std::shared_ptr<const EvoGraph::Edge> edge,
                                     const Learn::LearningParameters& params,
                                     RNG::RNG& rng);
@@ -192,7 +191,7 @@ namespace Algorithm::TPG {
          * \param[in] rng Random Number
          * Generator used in the mutation process.
          */
-        void mutateOutgoingEdge(
+        virtual void mutateOutgoingEdge(
             std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
             std::shared_ptr<AgentManager> manager,
             std::vector<std::shared_ptr<const Agent>>& newSubAgents,

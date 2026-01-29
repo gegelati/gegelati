@@ -184,6 +184,13 @@ namespace EvoGraph {
          * graph.
          */
         const std::vector<std::shared_ptr<const Action>> getRootActions() const;
+
+        /**
+         * \brief Get vector of const pointer to the actions of the
+         * Graph.
+         */
+        const std::vector<std::shared_ptr<const Action>> getActions() const;
+
         /**
          * \brief Get vector of const pointer to the root teams of the
          * Graph.
@@ -406,11 +413,11 @@ namespace EvoGraph {
         void updateAllAssessedActions();
 
         /**
-         * Order the ActionEdge of the given action
+         * Order the Edge pointing to an action of the given team
          *
-         * \param[in] action Action to order
+         * \param[in] team Team to order
          */
-        void orderActionEdges(std::shared_ptr<const Action> action);
+        void orderActionEdges(std::shared_ptr<const Team> team);
 
         /**
          * \brief Set a new ID to a vertex

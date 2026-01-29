@@ -43,15 +43,6 @@ namespace Algorithm::Maple {
         virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const override;
 
         /**
-         * \brief Create a new MapleAgent.
-         * 
-         * \param[in] graph the Graph associated with the Agent.
-         * 
-         * \return a shared pointer to the created Agent.
-         */
-        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
-
-        /**
          * \brief Create a new MapleAgent on a specific vertex.
          * Used for tests mostly
          * 
@@ -60,17 +51,6 @@ namespace Algorithm::Maple {
          * \return a shared pointer to the created Agent.
          */
         virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex) override;
-
-
-        /**
-         * \brief Copy a MapleAgent.
-         * 
-         * \param[in] agent the Agent to copy.
-         * \param[in] graph the Graph associated with the Agent.
-         * 
-         * \return a shared pointer to the created Agent.
-         */
-        virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
 
         /**

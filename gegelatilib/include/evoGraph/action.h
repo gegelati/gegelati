@@ -70,7 +70,9 @@ namespace EvoGraph {
          * \param[in] agentProgram the shared pointer to the Agent Program associated to the
          *            Vertex.
          */
-        Action(const uint64_t id, const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : Vertex(agentProgram), actionID{id} {};
+        Action(const uint64_t id, const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : Vertex(agentProgram), actionID{id} {
+            this->updateAssessedActions();
+        };
 
         /**
          * \brief Specialization throwing an std::runtime_exception.
@@ -99,10 +101,10 @@ namespace EvoGraph {
         };
 
         /**
-         * \brief Order the actionEdges of the action depending on the
-         * actionClass of the edges
+         * \brief Update the assessed actions
          */
-        void orderActionEdges();
+        virtual void updateAssessedActions() override;
+
     };
 }; // namespace EvoGraph
 

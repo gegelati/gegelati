@@ -8,23 +8,23 @@ std::vector<double> Algorithm::Maple::MapleExecutionEngine::execute()
     if(mapleAgent == nullptr){
         throw std::runtime_error("Algorithm::Maple::MapleExecutionEngine::execute trying to execute an agent which is not a Maple agent");
     }
-    std::shared_ptr<const EvoGraph::Action> actionVertex = std::dynamic_pointer_cast<const EvoGraph::Action>(mapleAgent->getVertex());
-    if(actionVertex == nullptr){
-        throw std::runtime_error("Algorithm::Maple::MapleExecutionEngine::execute trying to execute a Maple agent which does not represent an action vertex");
+    std::shared_ptr<const EvoGraph::Team> teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(mapleAgent->getVertex());
+    if(teamVertex == nullptr){
+        throw std::runtime_error("Algorithm::Maple::MapleExecutionEngine::execute trying to execute a Maple agent which does not represent a team vertex");
     }
 
     this->actionValues.clear();
     this->actionValues.resize(this->outputs.size(), 0.0);
-    for(auto edge : actionVertex->getOutgoingEdges()){
+    for(auto edge : teamVertex->getOutgoingEdges()){
 
         // Convert edge to actionEdge
-        auto actionEdge = std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge);
-        if(actionEdge == nullptr){
-            throw std::runtime_error("Algorithm::Maple::MapleExecutionEngine::execute: an outgoing edge of an action vertex is not an action edge.");
+        auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(edge->getDestination());
+        if(action == nullptr){
+            throw std::runtime_error("Algorithm::Maple::MapleExecutionEngine::execute: an outgoing edge does not lead to an action vertex.");
         }
 
         // Set action value for the action class
-        this->actionValues[actionEdge->getActionClass()] = this->evaluateEdge(*edge);
+        this->actionValues[action->getActionID()] = this->evaluateEdge(*edge);
     }
 
 

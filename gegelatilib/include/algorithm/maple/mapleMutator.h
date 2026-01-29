@@ -27,22 +27,6 @@ namespace Algorithm::Maple {
         MapleMutator(std::shared_ptr<const Archive> archive): TPGMutator(archive){};
 
 
-        /**
-         * \brief Update the context used by the MapleMutator to populate the Graph.
-         * 
-         * Run the method from TPGMutator, then check that there is no team, and that all edges are ActionEdge type.
-         * 
-         * \param[in] graph the Graph.
-         * \param[in] manager the manager to change the agents.
-         * \param[in] selector the Selector of the learningAgent.
-         * \param[in] params the Parameters for the mutation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         */
-        virtual void updateSpecificContext(
-            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
-            const Learn::LearningParameters& params,
-            RNG::RNG& rng) override;
-
 
         /**
          * \brief Initialize TPG Population.
@@ -83,9 +67,9 @@ namespace Algorithm::Maple {
 
 
         /**
-         * \brief Add a new outgoing ActionEdge to the Action within the Graph.
+         * \brief Add a new outgoing Edge to the team within the Graph.
          *
-         * This function adds a new outgoing Edge to the ActionEdge by cloning
+         * This function adds a new outgoing Edge to the team by cloning
          * a preExisting Edge of the Graph. Since the graph may contain
          * Edge from previous mutations, the function receives a list of
          * preExisting Edge from which the Edge to copy should be chosen
@@ -93,28 +77,49 @@ namespace Algorithm::Maple {
          * excluded from the candidates. If there is no valid Edge candidate
          * this function will throw an exception (check code for more details).
          * The new Edge will have the same destination Vertex and Program
-         * as the cloned one, but its source will be the give Action.
+         * as the cloned one, but its source will be the give Team.
          *
          * \param[in,out] graph the Graph within which the team is stored.
-         * \param[in] action the Action whose outgoingEdges will be altered.
+         * \param[in] team the team whose outgoingEdges will be altered.
          * for mutations.
          * \param[in] rng Random Number Generator used in the
          * mutation process.
          */
-        void addRandomEdge(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Action& action,
-                            RNG::RNG& rng);
+        void addRandomEdge(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Team& team,
+                            RNG::RNG& rng) override;
 
 
         /**
-         * \brief Swap two edges of Action.
+         * \brief Swap two edges of Team.
          *
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
-         * \param[in] action the Action whose actionEdges will be altered.
+         * \param[in] team the Team whose actionEdges will be altered.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        void swapActionEdges(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Action& action,
+        void swapEdges(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Team& team,
                              RNG::RNG& rng);
+
+
+        /**
+         * \brief Change the destination of a Edge to an randomly chosen
+         * action, among the available ones.
+         * 
+         * 
+         * \param[in,out] graph the Graph within which the team and edge are
+         *                stored.
+         * \param[in] edge the Edge whose destination will be altered.
+         * \param[in] actionClasses the actionClasses used by the action responsible for the edge.
+         * \param[in] params
+         * Probability parameters for the mutation.
+         * \param[in] rng Random Number
+         * Generator used in the mutation process.
+         */
+        virtual void mutateEdgeDestination(std::shared_ptr<EvoGraph::Graph> graph,
+                                    std::shared_ptr<const EvoGraph::Edge> edge,
+                                    const std::set<size_t>& actionClasses,
+                                    const Learn::LearningParameters& params,
+                                    RNG::RNG& rng);
 
         /**
          * \brief Prepares the mutation of a Edge.

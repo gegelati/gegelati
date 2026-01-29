@@ -126,23 +126,6 @@ bool EvoGraph::Vertex::hasProgram()
     return this->program != nullptr;
 }
 
-void EvoGraph::Vertex::updateAssessedActions()
-{
-    assessedActions.clear();
-    for (std::shared_ptr<const Edge> edge : this->outgoingEdges) {
-        if (auto actionEdge = std::dynamic_pointer_cast<const ActionEdge>(edge)) {
-            // If the edge is an action edge, insert its action class
-            assessedActions.insert(actionEdge->getActionClass());
-        }
-        else {
-            // Otherwise, insert all assessed actions from the destination
-            const auto& destinationActions =
-                edge->getDestination()->getAssessedActions();
-            assessedActions.insert(destinationActions.begin(),
-                                   destinationActions.end());
-        }
-    }
-}
 
 bool EvoGraph::Vertex::hasSameAssessedActions(std::set<uint64_t> actions) const
 {

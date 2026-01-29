@@ -49,6 +49,11 @@ namespace Algorithm {
             const Learn::LearningParameters& params,
             RNG::RNG& rng);
 
+        /**
+         * \brief Return a reference to the current context
+         */
+        virtual const Selector::SelectionContext& getContext();
+
 
         /**
          * \brief Set the name of the algorithm.
@@ -75,6 +80,23 @@ namespace Algorithm {
          * \param[in] nameAlgorithm name of the algorithm given.
          */
         virtual std::shared_ptr<Mutator> getSubMutator(std::string nameAlgorithm);
+
+
+        /**
+         * \brief Initialize a the action vertices.
+         * 
+         * This methods created only the action vertices that does not already exist in the graph
+         * 
+         * The action vertices are based on the outputs attribute of the manager. 
+         * If the outputs contain a single discrete output, an action vertex for each takeable output value is created.
+         * If the outputs contain multiple discrete or continuous outputs, an action vertex is created for each output.
+         * 
+         * However, Gegelati currently does not handle environment with discrete and continuous outputs. 
+         * 
+         * \param[in,out] graph the initialized Graph.
+         * \param[in] manager the manager to change the agents.
+         */
+        virtual void initActionVertices(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager);
 
         /**
          * \brief Initialize a random population.

@@ -36,6 +36,7 @@
  */
 
 #include "evoGraph/team.h"
+#include "evoGraph/action.h"
 #include "evoGraph/actionEdge.h"
 #include <stdexcept>
 
@@ -47,5 +48,44 @@ void EvoGraph::Team::addOutgoingEdge(std::shared_ptr<const Edge> edge)
     }
     else {
         Vertex::addOutgoingEdge(edge);
+    }
+}
+
+
+void EvoGraph::Team::orderActionEdges()
+{
+    // Take all the edges of the team, put the edges pointing towards team first, in the same order, then edges pointing towards action vertex, in order of actionID.
+    this->outgoingEdges.sort([](std::shared_ptr<const EvoGraph::Edge> edge1, std::shared_ptr<const EvoGraph::Edge> edge2) {
+        auto dest1 = edge1->getDestination();
+        auto dest2 = edge2->getDestination();
+
+        if(std::dynamic_pointer_cast<const EvoGraph::Team>(dest1) != nullptr &&
+           std::dynamic_pointer_cast<const EvoGraph::Action>(dest2) != nullptr) {
+            return true;
+        }
+        else if(std::dynamic_pointer_cast<const EvoGraph::Action>(dest1) != nullptr &&
+                std::dynamic_pointer_cast<const EvoGraph::Team>(dest2) != nullptr) {
+            return false;
+        }
+        else if(auto action1 = std::dynamic_pointer_cast<const EvoGraph::Action>(dest1)){
+
+            if(auto action2 = std::dynamic_pointer_cast<const EvoGraph::Action>(dest2)){
+                return action1->getActionID() < action2->getActionID();
+            }
+        }
+        return false;
+    });
+}
+
+
+void EvoGraph::Team::updateAssessedActions()
+{
+    assessedActions.clear();
+    for (std::shared_ptr<const Edge> edge : this->outgoingEdges) {
+        // Otherwise, insert all assessed actions from the destination
+        const auto& destinationActions =
+            edge->getDestination()->getAssessedActions();
+        assessedActions.insert(destinationActions.begin(),
+                                destinationActions.end());
     }
 }

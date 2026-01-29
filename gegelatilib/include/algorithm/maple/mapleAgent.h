@@ -25,11 +25,7 @@ namespace Algorithm::Maple {
              * \param[in] algorithmName name of the algorithm used.
              */
             MapleAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, std::string algorithmName) 
-            : TPGAgent(vertex, algorithmName) {
-                if (!std::dynamic_pointer_cast<const EvoGraph::Action>(vertex)) {
-                    throw std::runtime_error("MapleAgent can only be created with action vertex.");
-                }
-            };
+            : TPGAgent(vertex, algorithmName) {};
 
             /**
              * \brief Method that return if the agent is valid for execution.

@@ -152,7 +152,7 @@ namespace EvoGraph {
         /**
          * \brief Update the assessed actions
          */
-        virtual void updateAssessedActions();
+        virtual void updateAssessedActions() = 0;
 
         /**
          * \brief compare the set given and the assessed actions of the vertex
