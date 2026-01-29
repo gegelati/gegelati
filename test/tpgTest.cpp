@@ -224,24 +224,6 @@ TEST_F(TPGTest, EdgeGetSetSourceAndDestination)
         << "Destination of the Edge differs from the one set right before.";
 }
 
-TEST_F(TPGTest, ActionEdgeGetSet)
-{
-    auto action0 = std::make_shared<EvoGraph::Action>(1);
-
-    auto actionEdge = std::make_shared<EvoGraph::ActionEdge>(action0, programAgent, 0);
-
-    ASSERT_THROW(actionEdge->getDestination(), std::runtime_error)
-        << "ActionEdge does not have destination.";
-    ASSERT_THROW(actionEdge->setDestination(action0), std::runtime_error)
-        << "ActionEdge does not have destination.";
-
-    ASSERT_EQ(actionEdge->getActionClass(), 0)
-        << "Action class of the ActionEdge is wrong";
-
-    actionEdge->setActionClass(1);
-    ASSERT_EQ(actionEdge->getActionClass(), 1)
-        << "Action class of the ActionEdge has not been changed successfuly";
-}
 
 TEST_F(TPGTest, GraphFactory)
 {
@@ -265,11 +247,6 @@ TEST_F(TPGTest, GraphFactory)
         << "GraphELementFactory could not build a Edge.";
     ASSERT_NE(edge.get(), nullptr) << "Created Edge should not be null.";
 
-    ASSERT_NO_THROW(
-        actionEdge = factory.createActionEdge(action, programAgent, 0))
-        << "GraphELementFactory could not build a ActionEdge.";
-    ASSERT_NE(actionEdge.get(), nullptr)
-        << "Created ActionEdge should not be null.";
 }
 
 TEST_F(TPGTest, GraphAddVertex)
@@ -355,33 +332,8 @@ TEST_F(TPGTest, GraphAddEdge)
                  std::runtime_error)
         << "Adding an edge from an Action should have failed.";
 
-    auto vertex3 = tpg.getFactory().createTeam();
-    auto edge = tpg.getFactory().createActionEdge(vertex1, programAgent, 0);
-    ASSERT_THROW(vertex3->addOutgoingEdge(edge), std::runtime_error)
-        << "Adding an action edge from a Vertex that is not an action "
-           "should have failed.";
 }
 
-TEST_F(TPGTest, GraphAddActionEdge)
-{
-    EvoGraph::Graph tpg;
-    auto vertex0 = tpg.addNewTeam();
-    auto vertex1 = tpg.addNewAction(0);
-
-    ASSERT_NO_THROW(tpg.addNewActionEdge(*vertex1, programAgent, 0))
-        << "Adding an action edge from an action failed.";
-    // Add with a vertex not in the graph.
-    EvoGraph::Action vertex2(2);
-    ASSERT_THROW(tpg.addNewActionEdge(vertex2, programAgent, 0),
-                 std::runtime_error)
-        << "Adding an edge with a vertex not from the graph should have "
-           "failed.";
-
-    // Add the edge from a team
-    ASSERT_THROW(tpg.addNewActionEdge(*vertex0, programAgent, 0),
-                 std::runtime_error)
-        << "Adding an edge from an Action should have failed.";
-}
 
 TEST_F(TPGTest, GraphGetEdges)
 {
@@ -447,36 +399,6 @@ TEST_F(TPGTest, GraphRemoveEdge)
         << "Edge was not properly deleted, its shared pointer is still active.";
     // Remove an edge that does not exist anymore
     ASSERT_THROW(tpg.removeEdge(edge), std::runtime_error)
-        << "Edge not in the graph should not be removable";
-}
-
-TEST_F(TPGTest, GraphRemoveActionEdge)
-{
-    EvoGraph::Graph tpg;
-    auto vertex = tpg.addNewAction(0);
-
-    const auto& edge0 = *tpg.addNewActionEdge(*vertex, programAgent, 0);
-    const auto& edge1 = *tpg.addNewActionEdge(*vertex, programAgent, 1);
-
-    // Remove the edge
-    ASSERT_NO_THROW(tpg.removeEdge(edge0))
-        << "Edge from the graph could not be removed successfully with "
-           "removeEdge.";
-    // Check that the edge is no longer in the graph
-    ASSERT_EQ(tpg.getEdges().size(), 1)
-        << "Edge was not effectively removed from the graph.";
-    // Remove the edge
-    ASSERT_NO_THROW(tpg.removeActionEdge(edge1))
-        << "Edge from the graph could not be removed successfully with "
-           "removeActionEdge.";
-    // Check that the edge is no longer in the graph
-    ASSERT_EQ(tpg.getEdges().size(), 0)
-        << "Edge was not effectively removed from the graph.";
-    // Check that the edge was successfully deleted
-    ASSERT_EQ(programAgent.use_count(), 1)
-        << "Edge was not properly deleted, its shared pointer is still active.";
-    // Remove an edge that does not exist anymore
-    ASSERT_THROW(tpg.removeActionEdge(edge1), std::runtime_error)
         << "Edge not in the graph should not be removable";
 }
 
@@ -589,7 +511,6 @@ TEST_F(TPGTest, GraphCloneVertex)
     auto vertex1 = tpg.addNewAction(4);
 
     auto edge0 = tpg.addNewEdge(*vertex0, *vertex1, programAgent);
-    auto edge1 = tpg.addNewActionEdge(*vertex1, programAgent, 0);
 
     // Clone the team
     std::shared_ptr<const EvoGraph::Vertex> cloneVertex;
@@ -603,7 +524,7 @@ TEST_F(TPGTest, GraphCloneVertex)
     cloneVertex = tpg.getVertices().at(2); // to remove a compilation warning.
     // Check that the type is correct
     ASSERT_EQ(typeid(*vertex0), typeid(*cloneVertex));
-    ASSERT_EQ(tpg.getEdges().size(), 3)
+    ASSERT_EQ(tpg.getEdges().size(), 2)
         << "Number of edges of the graph after clone is incorrect.";
     auto destinationVertex =
         ((*cloneVertex->getOutgoingEdges().begin())->getDestination());
@@ -611,7 +532,7 @@ TEST_F(TPGTest, GraphCloneVertex)
         << "Cloned vertex is not connected to the correct other vertex in the "
            "Graph.";
     // Check pointer usage was increased.
-    ASSERT_EQ(programAgent.use_count(), 4)
+    ASSERT_EQ(programAgent.use_count(), 3)
         << "Shared pointer use count should increase after cloning a vertex "
            "connected with an edge using it.";
 
@@ -622,10 +543,10 @@ TEST_F(TPGTest, GraphCloneVertex)
     ASSERT_EQ(typeid(*vertex1).name(), typeid(*vertex).name());
     ASSERT_EQ(vertex1->getActionID(),
               std::dynamic_pointer_cast<const EvoGraph::Action>(tpg.getVertices().at(3))->getActionID());
-    ASSERT_EQ(tpg.getEdges().size(), 4)
+    ASSERT_EQ(tpg.getEdges().size(), 2)
         << "Number of edges of the graph after clone is incorrect.";
     // Check pointer usage was increased.
-    ASSERT_EQ(programAgent.use_count(), 5)
+    ASSERT_EQ(programAgent.use_count(), 3)
         << "Shared pointer use count should increase after cloning a vertex "
            "connected with an edge using it.";
 
@@ -642,17 +563,15 @@ TEST_F(TPGTest, GraphCloneEdge)
     auto vertex0 = tpg.addNewTeam();
     auto vertex1 = tpg.addNewAction(4);
     auto edge = tpg.addNewEdge(*vertex0, *vertex1, programAgent);
-    auto actionEdge =
-        tpg.addNewActionEdge(*vertex1, programAgent, 0);
 
     std::shared_ptr<const EvoGraph::Edge> clone;
     ASSERT_NO_THROW(clone = tpg.cloneEdge(*edge))
         << "Cloning an existing edge failed.";
     // Check that the new edge is correctly added to the graph
-    ASSERT_EQ(tpg.getEdges().size(), 3)
+    ASSERT_EQ(tpg.getEdges().size(), 2)
         << "Incorrect number of edges in the graph after clone.";
     // Check the program use
-    ASSERT_EQ(programAgent.use_count(), 4)
+    ASSERT_EQ(programAgent.use_count(), 3)
         << "Program pointer was not correctly registered to the edge clone.";
     // Check the edge source and destination
     ASSERT_EQ(clone->getSource(), vertex0)
@@ -677,36 +596,12 @@ TEST_F(TPGTest, GraphCloneEdge)
         << "Clone edge is not registered within its destination vertex "
            "incoming edges.";
 
-    // Check clone from action edge
-    std::shared_ptr<const EvoGraph::Edge> cloneActionEdge;
-    ASSERT_NO_THROW(cloneActionEdge = tpg.cloneEdge(*actionEdge))
-        << "Cloning an existing action edge failed.";
-    // Check that the new edge is correctly added to the graph
-    ASSERT_EQ(tpg.getEdges().size(), 4)
-        << "Incorrect number of edges in the graph after clone.";
-    // Check the program use
-    ASSERT_EQ(programAgent.use_count(), 5)
-        << "Program pointer was not correctly registered to the edge clone.";
-    ASSERT_TRUE(std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(cloneActionEdge) !=
-                nullptr)
-        << "Cloning the action edge did not create a action edge";
-
-    auto cloneActionEdgeCast =
-        std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(cloneActionEdge);
-    // Check the edge source and destination
-    ASSERT_EQ(cloneActionEdgeCast->getSource(), vertex1)
-        << "Clone action edge has an incorrect source.";
-    ASSERT_EQ(cloneActionEdgeCast->getActionClass(), 0)
-        << "Clone action edge has an incorrect action Class.";
 
     // Check throw behavior
     EvoGraph::Edge newEdge(vertex0, vertex1, programAgent);
     ASSERT_THROW(tpg.cloneEdge(newEdge), std::runtime_error)
         << "Cloning an edge not from the graph should not succeed.";
 
-    EvoGraph::ActionEdge newActionEdge(vertex1, programAgent, 0);
-    ASSERT_THROW(tpg.cloneEdge(newActionEdge), std::runtime_error)
-        << "Cloning an action edge not from the graph should not succeed.";
 }
 
 TEST_F(TPGTest, GraphSetEdgeDestination)
@@ -853,77 +748,44 @@ TEST_F(TPGTest, TPGAffectationOperator)
         << "The affectation operator is never supposed to fail";
 }
 
-TEST_F(TPGTest, ActionOutgoingEdge)
-{
-    // Create a Action
-    auto action = std::make_shared<EvoGraph::Action>(42);
-
-    // Try to add a non-ActionEdge outgoing edge (should throw)
-    auto team = std::make_shared<EvoGraph::Team>();
-    auto edge = std::make_shared<EvoGraph::Edge>(team, action, programAgent);
-    ASSERT_THROW(action->addOutgoingEdge(edge), std::runtime_error);
-
-    // Add valid ActionEdges with different actionClass
-    auto edge0 = std::make_shared<EvoGraph::ActionEdge>(action, programAgent, 2);
-    auto edge1 = std::make_shared<EvoGraph::ActionEdge>(action, programAgent, 1);
-    auto edge2 = std::make_shared<EvoGraph::ActionEdge>(action, programAgent, 3);
-
-    // Add them as outgoing edges (should not throw)
-    ASSERT_NO_THROW(action->addOutgoingEdge(edge0));
-    ASSERT_NO_THROW(action->addOutgoingEdge(edge1));
-    ASSERT_NO_THROW(action->addOutgoingEdge(edge2));
-
-    // Test orderActionEdges (should sort by actionClass)
-    //action->orderActionEdges();
-    auto it = action->getOutgoingEdges().begin();
-    ASSERT_EQ(std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(*it)->getActionClass(), 1);
-    ++it;
-    ASSERT_EQ(std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(*it)->getActionClass(), 2);
-    ++it;
-    ASSERT_EQ(std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(*it)->getActionClass(), 3);
-
-    // Test getEdgeOfAction for existing and non-existing actionClass
-    ASSERT_EQ(action->getEdgeOfAction(2), edge0);
-    ASSERT_EQ(action->getEdgeOfAction(1), edge1);
-    ASSERT_EQ(action->getEdgeOfAction(3), edge2);
-    ASSERT_EQ(action->getEdgeOfAction(99), nullptr);
-
-}
-
 TEST_F(TPGTest, VertexHasSameAssessedActions)
 {
     EvoGraph::Graph tpg;
-    auto action = tpg.addNewAction(0);
-    tpg.addNewActionEdge(*action, programAgent, 1);
-    tpg.addNewActionEdge(*action, programAgent, 2);
-    tpg.addNewActionEdge(*action, programAgent, 3);
+    auto team = tpg.addNewTeam();
+    auto action1 = tpg.addNewAction(1);
+    auto action2 = tpg.addNewAction(2);
+    auto action3 = tpg.addNewAction(3);
+    tpg.addNewEdge(*team, *action1, programAgent);
+    tpg.addNewEdge(*team, *action2, programAgent);
+    tpg.addNewEdge(*team, *action3, programAgent);
+    tpg.updateAssessedActions(team);
 
     // Case 1: Intersection is not empty (should return true)
     std::set<uint64_t> testSet1 = {2, 4, 5};
-    ASSERT_TRUE(action->hasSameAssessedActions(testSet1))
+    ASSERT_TRUE(team->hasSameAssessedActions(testSet1))
         << "hasSameAssessedActions should return true when intersection is not "
            "empty.";
 
     // Case 2: Intersection is empty (should return false)
     std::set<uint64_t> testSet2 = {4, 5, 6};
-    ASSERT_FALSE(action->hasSameAssessedActions(testSet2))
+    ASSERT_FALSE(team->hasSameAssessedActions(testSet2))
         << "hasSameAssessedActions should return false when intersection is "
            "empty.";
 
     // Case 3: Exact match (should return true)
     std::set<uint64_t> testSet3 = {1, 2, 3};
-    ASSERT_TRUE(action->hasSameAssessedActions(testSet3))
+    ASSERT_TRUE(team->hasSameAssessedActions(testSet3))
         << "hasSameAssessedActions should return true when sets are identical.";
 
     // Case 4: Partial overlap (should return true)
     std::set<uint64_t> testSet4 = {3};
-    ASSERT_TRUE(action->hasSameAssessedActions(testSet4))
+    ASSERT_TRUE(team->hasSameAssessedActions(testSet4))
         << "hasSameAssessedActions should return true when there is a single "
            "common element.";
 
     // Case 5: Empty input set (should return false)
     std::set<uint64_t> testSet5;
-    ASSERT_FALSE(action->hasSameAssessedActions(testSet5))
+    ASSERT_FALSE(team->hasSameAssessedActions(testSet5))
         << "hasSameAssessedActions should return false when input set is "
            "empty.";
 
@@ -935,56 +797,37 @@ TEST_F(TPGTest, VertexHasSameAssessedActions)
            "empty.";
 }
 
-TEST_F(TPGTest, GraphSetActionClassEdge)
-{
-    EvoGraph::Graph tpg;
-    auto action = tpg.addNewAction(0);
-
-    // Add an action edge
-    auto edge = tpg.addNewActionEdge(*action, programAgent, 1);
-    // Change the action class
-    ASSERT_NO_THROW(tpg.setActionClassEdge(edge, 42));
-    // Check that the action class was updated
-    auto actionEdge = std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge);
-    ASSERT_NE(actionEdge, nullptr);
-    ASSERT_EQ(actionEdge->getActionClass(), 42);
-
-    // Try to set action class on a non-action edge (should throw)
-    auto team = tpg.addNewTeam();
-    auto normalEdge = tpg.addNewEdge(*team, *action, programAgent);
-    ASSERT_THROW(tpg.setActionClassEdge(normalEdge, 5), std::runtime_error);
-
-    // Try to set action class on an edge not in the graph (should throw)
-    auto fakeEdge = std::make_shared<EvoGraph::ActionEdge>(action, programAgent, 0);
-    ASSERT_THROW(tpg.setActionClassEdge(fakeEdge, 7), std::runtime_error);
-}
 
 TEST_F(TPGTest, GraphUpdateAssessedActions)
 {
     EvoGraph::Graph tpg;
-    auto action1 = tpg.addNewAction(0);
-    auto edge1 = tpg.addNewActionEdge(*action1, programAgent, 1);
-    auto edge2 = tpg.addNewActionEdge(*action1, programAgent, 2);
+    auto team1 = tpg.addNewTeam(); 
+    auto action1 = tpg.addNewAction(1);
+    auto action2 = tpg.addNewAction(2);
+    tpg.addNewEdge(*team1, *action1, programAgent);
+    tpg.addNewEdge(*team1, *action2, programAgent);
 
     // Should update without throwing
-    ASSERT_NO_THROW(tpg.updateAssessedActions(action1));
+    ASSERT_NO_THROW(tpg.updateAssessedActions(team1));
     // Check that assessedActions contains the correct action classes: 1 and 2
-    const auto& assessed = action1->getAssessedActions();
+    const auto& assessed = team1->getAssessedActions();
     ASSERT_TRUE(assessed.find(1) != assessed.end());
     ASSERT_TRUE(assessed.find(2) != assessed.end());
     ASSERT_FALSE(assessed.find(0) != assessed.end());
 
-    auto action2 = tpg.addNewAction(0);
-    auto edge3 = tpg.addNewActionEdge(*action2, programAgent, 1);
-    auto edge4 = tpg.addNewActionEdge(*action2, programAgent, 3);
+    auto team2 = tpg.addNewTeam(); 
+    auto action3 = tpg.addNewAction(1);
+    auto action4 = tpg.addNewAction(3);
+    tpg.addNewEdge(*team2, *action3, programAgent);
+    tpg.addNewEdge(*team2, *action4, programAgent);
 
     // Vertex should contain action 1, 2 and 3 now.
     auto vertex = tpg.addNewTeam();
-    tpg.addNewEdge(*vertex, *action2, programAgent);
-    tpg.addNewEdge(*vertex, *action1, programAgent);
+    tpg.addNewEdge(*vertex, *team1, programAgent);
+    tpg.addNewEdge(*vertex, *team2, programAgent);
 
     // Should update without throwing
-    ASSERT_NO_THROW(tpg.updateAssessedActions(action2));
+    ASSERT_NO_THROW(tpg.updateAssessedActions(team2));
     // Check that assessedActions contains the correct action classes
     const auto& assessed2 = vertex->getAssessedActions();
     ASSERT_TRUE(assessed2.find(1) != assessed2.end());
@@ -999,45 +842,47 @@ TEST_F(TPGTest, GraphUpdateAssessedActions)
 TEST_F(TPGTest, GraphUpdateAllAssessedActions)
 {
     EvoGraph::Graph tpg;
-    auto action1 = tpg.addNewAction(0);
-    auto action2 = tpg.addNewAction(1);
-    tpg.addNewActionEdge(*action1, programAgent, 1);
-    tpg.addNewActionEdge(*action2, programAgent, 2);
+    auto team1 = tpg.addNewTeam(); 
+    auto action1 = tpg.addNewAction(1);
+    auto action2 = tpg.addNewAction(2);
+    tpg.addNewEdge(*team1, *action1, programAgent);
+    tpg.addNewEdge(*team1, *action2, programAgent);
 
     // Should update all actions without throwing
     ASSERT_NO_THROW(tpg.updateAllAssessedActions());
     // Check that both actions have their assessedActions updated
-    ASSERT_TRUE(action1->getAssessedActions().find(1) !=
-                action1->getAssessedActions().end());
-    ASSERT_TRUE(action2->getAssessedActions().find(2) !=
-                action2->getAssessedActions().end());
+    ASSERT_TRUE(team1->getAssessedActions().find(1) !=
+                team1->getAssessedActions().end());
+    ASSERT_TRUE(team1->getAssessedActions().find(2) !=
+                team1->getAssessedActions().end());
 }
 
 TEST_F(TPGTest, GraphOrderActionEdges)
 {
     EvoGraph::Graph tpg;
-    auto action = tpg.addNewAction(0);
-
-    // Add several action edges with different actionClass values
-    tpg.addNewActionEdge(*action, programAgent, 5);
-    tpg.addNewActionEdge(*action, programAgent, 2);
-    tpg.addNewActionEdge(*action, programAgent, 9);
+    auto team1 = tpg.addNewTeam(); 
+    auto action1 = tpg.addNewAction(5);
+    auto action2 = tpg.addNewAction(2);
+    auto action3 = tpg.addNewAction(9);
+    tpg.addNewEdge(*team1, *action1, programAgent);
+    tpg.addNewEdge(*team1, *action2, programAgent);
+    tpg.addNewEdge(*team1, *action3, programAgent);
 
     // Call orderActionEdges (should not throw)
-    //ASSERT_NO_THROW(tpg.orderActionEdges(action));
+    ASSERT_NO_THROW(tpg.orderActionEdges(team1));
 
     // Check that the outgoing edges are now ordered by actionClass
     std::vector<uint64_t> actionClasses;
-    for (auto edge : action->getOutgoingEdges()) {
-        auto actionEdge = std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge);
-        ASSERT_NE(actionEdge, nullptr);
-        actionClasses.push_back(actionEdge->getActionClass());
+    for (auto edge : team1->getOutgoingEdges()) {
+        auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(edge->getDestination());
+        ASSERT_NE(action, nullptr);
+        actionClasses.push_back(action->getActionID());
     }
     ASSERT_TRUE(std::is_sorted(actionClasses.begin(), actionClasses.end()));
 
     // Try with an action not in the graph (should throw)
-    auto fakeAction = std::make_shared<EvoGraph::Action>(99);
-    //ASSERT_THROW(tpg.orderActionEdges(fakeAction), std::runtime_error);
+    auto fakeTeam = std::make_shared<EvoGraph::Team>();
+    ASSERT_THROW(tpg.orderActionEdges(fakeTeam), std::runtime_error);
 }
 
 TEST_F(TPGTest, GraphVertexID)
@@ -1085,7 +930,7 @@ TEST_F(TPGTest, GraphEdgeID)
 
     auto edge0 = tpg.addNewEdge(*team0, *team1, programAgent);
     auto edge1 = tpg.addNewEdge(*team1, *action0, programAgent);
-    auto edge2 = tpg.addNewActionEdge(*action0, programAgent, 0);
+    auto edge2 = tpg.addNewEdge(*team1, *action0, programAgent);
 
     ASSERT_EQ(edge0->getEdgeID(), 0) << "ID of edge is incorrect.";
     ASSERT_EQ(edge1->getEdgeID(), 1) << "ID of edge is incorrect.";

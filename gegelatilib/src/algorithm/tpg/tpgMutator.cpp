@@ -269,8 +269,6 @@ void Algorithm::TPG::TPGMutator::addRandomEdge(
         std::remove_if(pickableEdges.begin(), pickableEdges.end(),
                        [&team](std::shared_ptr<const EvoGraph::Edge> edge) -> bool {
                            return edge == nullptr ||
-                                  std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(
-                                      edge) != nullptr ||
                                   edge->getSource().get() == &team ||
                                   edge->getDestination().get() == &team;
                        }),

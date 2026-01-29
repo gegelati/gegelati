@@ -94,7 +94,7 @@ namespace Algorithm::Maple {
          *
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
-         * \param[in] team the Team whose actionEdges will be altered.
+         * \param[in] team the Team whose edges will be altered.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         void swapEdges(std::shared_ptr<EvoGraph::Graph> graph, const EvoGraph::Team& team,

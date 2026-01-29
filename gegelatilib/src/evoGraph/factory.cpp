@@ -59,10 +59,3 @@ std::shared_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createEdge(
 {
     return std::make_shared<EvoGraph::Edge>(src, dest, actionProgram);
 }
-
-std::shared_ptr<EvoGraph::Edge> EvoGraph::GraphFactory::createActionEdge(
-    std::shared_ptr<const Vertex> src, std::shared_ptr<const Algorithm::Agent> actionProgram,
-    uint64_t actionClass) const
-{
-    return std::make_shared<EvoGraph::ActionEdge>(src, actionProgram, actionClass);
-}

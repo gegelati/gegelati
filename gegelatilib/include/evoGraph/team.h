@@ -56,11 +56,6 @@ namespace EvoGraph {
          */
         Team(const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : Vertex(agentProgram){};
 
-        /**
-         * \brief Specialization throwing an std::runtime_exception if a
-         * ActionEdge is added to a Team.
-         */
-        virtual void addOutgoingEdge(std::shared_ptr<const Edge> edge) override;
 
         
         /**

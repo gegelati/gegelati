@@ -36,7 +36,6 @@
 
 #include <algorithm>
 
-#include "evoGraph/actionEdge.h"
 #include "evoGraph/vertex.h"
 
 // Declaration of static vertex ID Counter in local here because it creates

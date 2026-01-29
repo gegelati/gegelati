@@ -230,21 +230,8 @@ std::shared_ptr<const EvoGraph::Vertex> EvoGraph::Graph::cloneVertex(const Verte
     // Copy the outgoing edges (if any).
     for (auto edge : vertex.getOutgoingEdges()) {
 
-        if (auto actionEdge = std::dynamic_pointer_cast<const ActionEdge>(edge)) {
-
-            // If action edge, create new action edge, else create new standard
-            // edge.
-            this->addNewActionEdge(*newVertex,
-                                   actionEdge->getProgram(),
-                                   actionEdge->getActionClass());
-        }
-        else if (edge != nullptr) {
-            this->addNewEdge(*newVertex, *(edge->getDestination()),
-                             edge->getProgram());
-        }
-        else {
-            throw std::runtime_error("Edge copied should not be a nullptr.");
-        }
+        this->addNewEdge(*newVertex, *(edge->getDestination()),
+                            edge->getProgram());
     }
 
     newVertex->updateAssessedActions();
@@ -309,36 +296,6 @@ std::shared_ptr<const EvoGraph::Edge> EvoGraph::Graph::addNewEdge(
     return *newEdge;
 }
 
-std::shared_ptr<const EvoGraph::Edge> EvoGraph::Graph::addNewActionEdge(
-    const Vertex& src, const std::shared_ptr<const Algorithm::Agent> prog,
-    uint64_t actionClass)
-{
-    // Check the Vertex existence within the graph.
-    auto srcVertex = this->vertices.find(&src);
-
-    if (srcVertex == this->vertices.end() || srcVertex->get() != &src) {
-        throw std::runtime_error(
-            "Attempting to add a ActionEdge with a vertex "
-            "not present in the Graph.");
-    }
-    else if (std::dynamic_pointer_cast<EvoGraph::Action>(*srcVertex) == nullptr) {
-        throw std::runtime_error(
-            "Attempting to add a ActionEdge with a vertex "
-            "that is a team.");
-    }
-
-    // Create the edge
-    this->edges.insert(factory->createActionEdge(*srcVertex, prog, actionClass));
-    auto newEdge = this->edges.rbegin();
-
-    (*srcVertex)->addOutgoingEdge(*newEdge);
-
-    // Update the assessed actions of the source vertex
-    (*srcVertex)->updateAssessedActions();
-
-    // return the new edge
-    return *newEdge;
-}
 
 const std::vector<std::shared_ptr<const EvoGraph::Edge>> EvoGraph::
     Graph::getEdges() const
@@ -362,33 +319,11 @@ void EvoGraph::Graph::removeEdge(const Edge& edge)
             "Cannot erase a edge that does not belong to the graph");
     }
 
-    if (std::dynamic_pointer_cast<const ActionEdge>(*iterator) != nullptr) {
-        return this->removeActionEdge(edge);
-    }
-
     (*this->vertices.find(iterator->get()->getSource()))
         ->removeOutgoingEdge(*iterator);
 
     auto destination = iterator->get()->getDestination();
     (*this->vertices.find(destination))->removeIncomingEdge(*iterator);
-
-    // Remove the edge
-    this->edges.erase(iterator);
-}
-
-void EvoGraph::Graph::removeActionEdge(const Edge& edge)
-{
-    // Get the edge (if it is in the graph)
-    auto iterator = this->edges.find(&edge);
-
-    // Disconnect the edge from the vertices
-    if (iterator == this->edges.end() || iterator->get() != &edge) {
-        throw std::runtime_error(
-            "Cannot erase a edge that does not belong to the graph");
-    }
-
-    (*this->vertices.find(iterator->get()->getSource()))
-        ->removeOutgoingEdge(*iterator);
 
     // Remove the edge
     this->edges.erase(iterator);
@@ -402,7 +337,7 @@ void EvoGraph::Graph::setVertexProgram(const Vertex& vertex, std::shared_ptr<con
 
     if (srcVertex == this->vertices.end() || srcVertex->get() != &vertex) {
         throw std::runtime_error(
-            "Attempting to add a ActionEdge with a vertex "
+            "Attempting to set an agent program to a vertex "
             "not present in the Graph.");
     }
 
@@ -417,17 +352,10 @@ std::shared_ptr<const EvoGraph::Edge> EvoGraph::Graph::cloneEdge(const Edge& edg
         throw std::runtime_error(
             "Cannot duplicate an Edge not belonging to the graph.");
     }
-    else if (auto actionEdge = std::dynamic_pointer_cast<const ActionEdge>(*iterEdge)) {
-        return this->addNewActionEdge(
-            *actionEdge->getSource(),
-            iterEdge->get()->getProgram(),
-            actionEdge->getActionClass());
-    }
-    else {
-        return this->addNewEdge(*iterEdge->get()->getSource(),
-                                *iterEdge->get()->getDestination(),
-                                iterEdge->get()->getProgram());
-    }
+    return this->addNewEdge(*iterEdge->get()->getSource(),
+                            *iterEdge->get()->getDestination(),
+                            iterEdge->get()->getProgram());
+    
 }
 
 bool EvoGraph::Graph::setEdgeDestination(const Edge& edge,
@@ -480,7 +408,6 @@ bool EvoGraph::Graph::setEdgeSource(const Edge& edge, const Vertex& newSrc)
     
 }
 
-
 bool EvoGraph::Graph::setEdgeProgram(const Edge& edge, std::shared_ptr<const Algorithm::Agent> programAgent)
 {
     
@@ -491,25 +418,6 @@ bool EvoGraph::Graph::setEdgeProgram(const Edge& edge, std::shared_ptr<const Alg
         return true;
     }
     return false;
-}
-
-void EvoGraph::Graph::setActionClassEdge(std::shared_ptr<const Edge> edge,
-                                       uint64_t newActionClass)
-{
-    auto it = this->edges.find(edge);
-
-    if (it != this->edges.end() && *it == edge) {
-        if (std::dynamic_pointer_cast<EvoGraph::ActionEdge>(*it) == nullptr) {
-            throw std::runtime_error(
-                "Trying to set an action class on a context edge");
-        }
-        // Found the edge, modify it as needed
-        std::dynamic_pointer_cast<EvoGraph::ActionEdge>(*it)->setActionClass(
-            newActionClass);
-    }
-    else {
-        throw std::runtime_error("Edges not in the graph.");
-    }
 }
 
 void EvoGraph::Graph::updateAssessedActions(std::shared_ptr<const EvoGraph::Vertex> vertex)

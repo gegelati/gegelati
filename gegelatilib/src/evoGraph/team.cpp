@@ -37,19 +37,8 @@
 
 #include "evoGraph/team.h"
 #include "evoGraph/action.h"
-#include "evoGraph/actionEdge.h"
+#include "evoGraph/edge.h"
 #include <stdexcept>
-
-void EvoGraph::Team::addOutgoingEdge(std::shared_ptr<const Edge> edge)
-{
-    if (std::dynamic_pointer_cast<const ActionEdge>(edge) != nullptr) {
-        throw std::runtime_error(
-            "Cannot add an action edge to an Action team.");
-    }
-    else {
-        Vertex::addOutgoingEdge(edge);
-    }
-}
 
 
 void EvoGraph::Team::orderActionEdges()

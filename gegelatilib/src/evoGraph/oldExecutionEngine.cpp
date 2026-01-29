@@ -183,7 +183,7 @@ const std::pair<std::vector<const EvoGraph::Vertex*>, std::vector<double>> EvoGr
 
             if (currentVertex != nullptr) {
                 for (auto edge : currentVertex->getOutgoingEdges()) {
-                    const ActionEdge* actionEdge =  nullptr; //dynamic_cast<ActionEdge*>(edge);
+                    //const ActionEdge* actionEdge =  nullptr; //dynamic_cast<ActionEdge*>(edge);
 
                     // Evaluate the edge and set the action value
                     //actionsTaken[actionEdge->getActionClass()] =

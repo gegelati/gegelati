@@ -41,7 +41,6 @@
 #include <cstdint>
 
 #include "program/program.h"
-#include "evoGraph/actionEdge.h"
 #include "evoGraph/vertex.h"
 
 namespace EvoGraph {
@@ -81,14 +80,6 @@ namespace EvoGraph {
          * Edge can be added to it.
          */
         virtual void addOutgoingEdge(std::shared_ptr<const Edge> edge) override;
-
-        /**
-         * \brief Return the action edge corresponding to the action class
-         *
-         * Return a pointer pointing to the edge linked to the action class. The
-         * pointer is set to nullptr if the action is not found.
-         */
-        virtual std::shared_ptr<const EvoGraph::ActionEdge> getEdgeOfAction(uint64_t actionClass) const;
 
         /**
          * \brief Get the action ID associated to the Action.

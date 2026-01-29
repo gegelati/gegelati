@@ -41,7 +41,6 @@
 
 #include "archive.h"
 #include "evoGraph/action.h"
-#include "evoGraph/actionEdge.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/team.h"
 
@@ -110,21 +109,6 @@ namespace EvoGraph {
             std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
             std::shared_ptr<const Algorithm::Agent> actionProgram) const;
 
-        /**
-         * \brief Create a ActionEdge for a Graph.
-         *
-         * This method allocates and returns a new ActionEdge cat into a
-         * Edge. The Edge is returned as a shared_ptr.
-         *
-         * \param[in] src pointer to the source Vertex of the edge. It must
-         * be an action.
-         * \param[in] actionProgram the shared pointer to the actionProgram associated to
-         * the edge.
-         * \param[in] actionClass of the actionEdge
-         */
-        virtual std::shared_ptr<Edge> createActionEdge(
-            std::shared_ptr<const Vertex> src, std::shared_ptr<const Algorithm::Agent> actionProgram,
-            uint64_t actionClass) const;
 
     };
 

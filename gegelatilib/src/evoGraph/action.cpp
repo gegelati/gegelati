@@ -40,34 +40,8 @@
 
 void EvoGraph::Action::addOutgoingEdge(std::shared_ptr<const Edge> edge)
 {
-    if (std::dynamic_pointer_cast<const ActionEdge>(edge) == nullptr) {
-        throw std::runtime_error(
+    throw std::runtime_error(
             "Cannot add an outgoing edge to an Action vertex.");
-    }
-    else {
-        Vertex::addOutgoingEdge(edge);
-    }
-}
-
-
-std::shared_ptr<const EvoGraph::ActionEdge> EvoGraph::Action::getEdgeOfAction(uint64_t actionClass) const
-{
-
-    // Search the edge with the searched action class
-    auto it = std::find_if(
-        outgoingEdges.begin(), outgoingEdges.end(),
-        [actionClass](std::shared_ptr<const EvoGraph::Edge> edge) {
-            return std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(edge)->getActionClass() ==
-                   actionClass;
-        });
-
-    // If action found, return the shared pointer, else return nullptr
-    if (it != outgoingEdges.end()) {
-        return std::dynamic_pointer_cast<const EvoGraph::ActionEdge>(*it);
-    }
-    else {
-        return nullptr;
-    }
 }
 
 

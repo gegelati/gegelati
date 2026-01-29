@@ -267,26 +267,7 @@ namespace EvoGraph {
          */
         std::shared_ptr<const EvoGraph::Edge> addNewEdge(const Vertex& src, const Vertex& dest,
                                   const std::shared_ptr<const Algorithm::Agent> programAgent);
-        /**
-         * \brief Add a new ActionEdge to the Graph.
-         *
-         * Add a new ActionEdge to the Graph, between the give vertex is
-         * associated the given Agent Program. The newly created Edge is
-         * inserted in the outgoing edges list of the connected
-         * Vertex.
-         * The ActionEdge is created using the GraphFactory of the Graph.
-         *
-         * \param[in] src the source Vertex of the newly created Edge.
-         * \param[in] programAgent shared pointer to the Agent Program associated to the newly
-         *                 created Edge.
-         * \param[in] actionClass of the actionEdge
-         * \return a const reference to the created Edge.
-         * \throw std::runtime_error In case the Vertex does not
-         * exist in the Graph, or if the source is a Team.
-         */
-        std::shared_ptr<const EvoGraph::Edge> addNewActionEdge(
-            const Vertex& src, const std::shared_ptr<const Algorithm::Agent> programAgent,
-            uint64_t actionClass);
+
 
         /**
          * \brief Get a const reference to the edges of the Graph.
@@ -308,19 +289,6 @@ namespace EvoGraph {
          *                           exist in the Graph.
          */
         void removeEdge(const Edge& edge);
-
-        /**
-         * \brief Remove a ActionEdge from the Graph.
-         *
-         * If the edge is connected to Vertex within the graph, they are
-         * updated.
-         *
-         * \param[in] edge a const reference to the ActionEdge to remove.
-         *
-         * \throw std::runtime_error In case one of the Edges does not
-         *                           exist in the Graph.
-         */
-        void removeActionEdge(const Edge& edge);
 
         /**
          * \brief Change the program agent of a Vertex
@@ -379,13 +347,6 @@ namespace EvoGraph {
          */
         bool setEdgeProgram(const Edge& edge, std::shared_ptr<const Algorithm::Agent> programAgent);
 
-        /**
-         * \brief set a new action class to a ActionEdge
-         *
-         * \param[in] edge ActionEdge changed
-         * \param[in] newActionClass new action class
-         */
-        void setActionClassEdge(std::shared_ptr<const Edge> edge, uint64_t newActionClass);
 
         /**
          * Update the assessed actions of the current vertex, and all the
