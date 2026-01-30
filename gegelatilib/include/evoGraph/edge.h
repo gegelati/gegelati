@@ -37,14 +37,10 @@
 #ifndef TPG_EDGE_H
 #define TPG_EDGE_H
 
-#include <memory>
-#include <stdexcept>
+#include "evoGraph/element.h"
 
 struct CounterReset;
 
-namespace Algorithm{
-  class Agent;
-}
 
 namespace EvoGraph {
     // Declare class to make it usable as an attribute.
@@ -53,7 +49,7 @@ namespace EvoGraph {
     /**
      * \brief Class representing edges of the Tangled Program Graphs.
      */
-    class Edge
+    class Edge : public Element
     {
       public:
         /// Default virtual destructor (for polymorphism)
@@ -72,27 +68,7 @@ namespace EvoGraph {
          */
         Edge(std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
                 const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr)
-            : edgeID(incrementeCounter()), source{src}, destination{dest},
-              program{agentProgram} {};
-
-        /**
-         * \brief Get a const shared pointer of the Agent Program of the Edge.
-         *
-         * \return a const shared pointer of the Agent Program of the Edge.
-         */
-        std::shared_ptr<const Algorithm::Agent> getProgram() const;
-
-        /**
-         * \brief Set a new Agent Program for the Edge.
-         *
-         * This method is const to enable use outside of the Graph which is
-         * the only class accessing the non-const Edge. Since the agent
-         * pointer attribute is mutable, this method can successfully be used to
-         * alter the agent.
-         *
-         * \param[in] agentProgram the new shared pointer to a Agent Program.
-         */
-        void setProgram(std::shared_ptr<const Algorithm::Agent> agentProgram);
+            : Element(agentProgram), edgeID(incrementeCounter()), source{src}, destination{dest} {};
 
         /**
          * \brief Get the source Vertex of the Edge.
@@ -153,12 +129,6 @@ namespace EvoGraph {
 
         /// Pointer to the destination Vertex of this Edge
         std::shared_ptr<const Vertex> destination;
-
-        /// Shared pointer to the Agent to execute when evaluating the bid
-        /// of this Edge.
-        /// This attribute is mutable to enable its modification during
-        /// mutations.
-        std::shared_ptr<const Algorithm::Agent> program;
 
         /**
          * \brief Unique identifier of the Edge.

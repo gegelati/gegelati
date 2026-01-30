@@ -46,6 +46,7 @@
 #include "evoGraph/factory.h"
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
+#include "evoGraph/element.h"
 #include "util/genericComparator.h"
 
 namespace EvoGraph {
@@ -227,6 +228,24 @@ namespace EvoGraph {
         bool hasVertex(const EvoGraph::Vertex& vertex) const;
 
         /**
+         * \brief Check whether a given edge exists in the Graph.
+         *
+         * \param[in] edge the EvoGraph::Edge whose presence in the Graph
+         * is checked.
+         * \return true if the edge exists in the Graph, false otherwise.
+         */
+        bool hasEdge(const EvoGraph::Edge& edge) const;
+
+        /**
+         * \brief Check whether a given element exists in the Graph.
+         *
+         * \param[in] element the EvoGraph::Element whose presence in the Graph
+         * is checked.
+         * \return true if the element exists in the Graph, false otherwise.
+         */
+        bool hasElement(const EvoGraph::Element& element) const;
+
+        /**
          * \brief Remove a Vertex from the Graph and destroy it.
          *
          * If the edge is connected to Edges within the graph, they are also
@@ -235,6 +254,17 @@ namespace EvoGraph {
          * \param[in] vertex a const reference to the Vertex to remove.
          */
         void removeVertex(const Vertex& vertex);
+
+
+        /**
+         * \brief Clone an element of the graph, either its a vertex or an edge.
+         *
+         * \param[in] element the const reference to the Element to clone.
+         * \return a const reference to the new Element.
+         * \throw std::runtime_error if the given element does not belong to the
+         * Graph.
+         */
+        std::shared_ptr<const EvoGraph::Element> cloneElement(const Element& element);
 
         /**
          * \brief Clone a Vertex of the graph and all its outgoing Edge.

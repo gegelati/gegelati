@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string>
 
+#include "evoGraph/element.h"
 
 struct CounterReset;
 namespace Algorithm {
@@ -17,12 +18,15 @@ namespace Algorithm {
     {
     protected:
         
+        /// Name of the algorithm.
+        std::string algorithmName;
+
+        /// Element of the evolution graph that the agent represent.
+        /// This element can stay a nullptr if it is not required by the agent.
+        std::shared_ptr<const EvoGraph::Element> element;
 
         /// Unique ID of the agent.
         uint64_t agentID;
-
-        /// Name of the algorithm.
-        std::string algorithmName;
 
         /**
          * \brief Incremente the agent ID counter and return the new value.
@@ -45,8 +49,9 @@ namespace Algorithm {
          * \brief Constructor for the Agent.
          * 
          * \param[in] algorithmName name of the algorithm used by the Agent.
+         * \param[in] element Element of the evolution graph that the agent represent.
          */
-        Agent(std::string algorithmName) : algorithmName(algorithmName), agentID(incrementeCounter()) {};
+        Agent(std::string algorithmName, std::shared_ptr<const EvoGraph::Element> element = nullptr) : algorithmName(algorithmName), element{element}, agentID(incrementeCounter()) {};
 
         /**
          * \brief Return the name of the algorithm.
@@ -64,6 +69,17 @@ namespace Algorithm {
         virtual bool isValid() const {return true;};
 
 
+        /**
+         * \brief Getter for the element that the agent represent
+         */
+        virtual std::shared_ptr<const EvoGraph::Element> getElement() const;
+
+        /**
+         * \brief Setter for the element that the agent represent
+         * 
+         * \param[in] newElement the new element to set.
+         */
+        virtual void setElement(std::shared_ptr<const EvoGraph::Element> newElement);
     
         /**
          * \brief Get the unique identifier of the Agent.

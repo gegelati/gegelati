@@ -33,13 +33,6 @@ namespace Algorithm::Maple {
             virtual bool isValid() const override;
 
             /**
-             * \brief Setter for the vertex that the agent represent
-             * 
-             * \param[in] newVertex the new vertex to set.
-             */
-            virtual void setVertex(std::shared_ptr<const EvoGraph::Vertex> newVertex) override;
-
-            /**
              * \brief Method that return if the agent's vertex is currently root.
              */
             virtual bool isRoot() const override;

@@ -50,14 +50,13 @@ namespace Algorithm::ATPG {
         void setActionProgramAlgorithmName(const std::string& name) { this->actionProgramAlgorithmName = name; }
 
         /**
-         * \brief Create a new TPGAgent on a specific vertex.
-         * Used for tests mostly
+         * \brief Create a new ATPGAgent on a specific element.
          * 
-         * \param[in] vertex the vertex associated with the Agent.
+         * \param[in] element the element associated with the Agent.
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex);
+        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Element> element) override;
 
 
         /**

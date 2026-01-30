@@ -67,25 +67,29 @@ namespace Algorithm::TPG {
         virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
 
         /**
-         * \brief Create a new TPGAgent on a specific vertex.
-         * Used for tests mostly
+         * \brief Create a new TPGAgent on a specific element.
+         * The element used can only be a EvoGraph::Team
          * 
-         * \param[in] vertex the vertex associated with the Agent.
+         * \param[in] element the element associated with the Agent.
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex);
+        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Element> element) override;
 
 
         /**
          * \brief Copy a TPGAgent.
          * 
+         * if element is not a nullptr, a copy of the team of the agent is done. 
+         * Element can only be a Team if set.
+         * 
          * \param[in] agent the Agent to copy.
          * \param[in] graph the Graph associated with the Agent.
+         * \param[in] element the element of the graph on which the Agent is associated.
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element = nullptr) override;
 
         /**
          * \brief Delete the TPGAgent.
@@ -103,9 +107,9 @@ namespace Algorithm::TPG {
          * 
          * \param[in] agent the Agent to delete.
          * \param[in] graph the Graph associated with the Agent.
-         * \param[in] vertex the vertex set to the agent.
+         * \param[in] element the vertex set to the agent.
          */
-        virtual void setVertex(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex);
+        virtual void setElement(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element);
 
         /**
          * \brief create and return a TPG execution engine.

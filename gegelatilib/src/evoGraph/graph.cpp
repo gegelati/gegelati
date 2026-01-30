@@ -177,6 +177,24 @@ bool EvoGraph::Graph::hasVertex(const Vertex& vertex) const
     return (iterator != this->vertices.end() && iterator->get() == &vertex);
 }
 
+
+bool EvoGraph::Graph::hasEdge(const EvoGraph::Edge& edge) const
+{
+    auto iterator = edges.find(&edge);
+    return (iterator != this->edges.end() && iterator->get() == &edge);
+}
+
+bool EvoGraph::Graph::hasElement(const EvoGraph::Element& element) const
+{
+    if(auto edge = dynamic_cast<const EvoGraph::Edge*>(&element)){
+        return hasEdge(*edge);
+    } else if (auto vertex = dynamic_cast<const EvoGraph::Vertex*>(&element)){
+        return hasVertex(*vertex);
+    } else {
+        return false;
+    }
+}
+
 void EvoGraph::Graph::removeVertex(const Vertex& vertex)
 {
     // Remove the vertex based on a pointer comparison.
@@ -202,6 +220,22 @@ void EvoGraph::Graph::removeVertex(const Vertex& vertex)
     if (iterator != this->vertices.end() && iterator->get() == &vertex) {
         // Remove the pointer from the list.
         this->vertices.erase(iterator);
+    }
+}
+
+std::shared_ptr<const EvoGraph::Element> EvoGraph::Graph::cloneElement(const Element& element)
+{
+    if(!this->hasElement(element)) {
+        throw std::runtime_error(
+            "The element to clone does not exist in the Graph.");
+    }
+    if(auto vertex = dynamic_cast<const EvoGraph::Vertex*>(&element)){
+        return this->cloneVertex(*vertex);
+    } else if (auto edge = dynamic_cast<const EvoGraph::Edge*>(&element)){
+        return this->cloneEdge(*edge);
+    } else {
+        throw std::runtime_error(
+            "The element to clone is neither a Vertex nor an Edge.");
     }
 }
 

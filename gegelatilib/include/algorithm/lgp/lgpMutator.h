@@ -31,6 +31,17 @@ namespace Algorithm::LGP {
          */
         LGPMutator(): Mutator(), lineMutator() {};
 
+
+        /**
+         * \brief Check if the configuration of the mutator is valid according to the given parameters.
+         * 
+         * This method is called before initializing the population.
+         * 
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] outputs the OutputHandler of the manager.
+         */
+        virtual bool isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const override;
+
         /**
          * \brief Initialize LGP Population.
          *

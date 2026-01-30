@@ -37,16 +37,9 @@
 #ifndef TPG_VERTEX_H
 #define TPG_VERTEX_H
 
-#include <memory>
-#include <cinttypes>
-#include <iostream>
-#include <list>
-#include <set>
+#include "evoGraph/element.h"
 
 struct CounterReset;
-namespace Algorithm{
-  class Agent;
-}
 
 namespace EvoGraph {
     // Declare class to make it usable as an attribute.
@@ -55,7 +48,7 @@ namespace EvoGraph {
     /**
      * \brief Abstract class representing the vertices of a Graph
      */
-    class Vertex
+    class Vertex : public Element
     {
       public:
         /// Default polymorphic destructor
@@ -119,31 +112,6 @@ namespace EvoGraph {
          */
         virtual void removeOutgoingEdge(std::shared_ptr<const Edge> edge);
 
-
-        /**
-         * \brief Get a const shared pointer of the Agent Program of the Vertex.
-         *
-         * \return a const shared pointer of the Agent Program of the Vertex.
-         */
-        std::shared_ptr<const Algorithm::Agent> getProgram() const;
-
-        /**
-         * \brief Set a new Agent Program for the Vertex.
-         *
-         * This method is const to enable use outside of the Graph which is
-         * the only class accessing the non-const Vertex. Since the agent
-         * pointer attribute is mutable, this method can successfully be used to
-         * alter the agent.
-         *
-         * \param[in] agentProgram the new shared pointer to a Agent Program.
-         */
-        void setProgram(std::shared_ptr<const Algorithm::Agent> agentProgram);
-
-        /**
-         * \brief return true if the vertex has a program agent
-         */
-        bool hasProgram();
-
         /**
          * \brief return assessed actions
          */
@@ -193,7 +161,7 @@ namespace EvoGraph {
          * \param[in] agentProgram the shared pointer to the Agent Program associated to the
          *            Vertex.
          */
-        Vertex(const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : program{agentProgram}, vertexID(incrementeCounter()){};
+        Vertex(const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : Element{agentProgram}, vertexID(incrementeCounter()){};
 
         /**
          * \brief Set of incoming Edge of the Vertex.
@@ -209,12 +177,6 @@ namespace EvoGraph {
          * \brief Set of assessed actions by the team
          */
         std::set<uint64_t> assessedActions;
-
-        /// Shared pointer to the Agent to execute when evaluating the bid
-        /// of this Edge.
-        /// This attribute is mutable to enable its modification during
-        /// mutations.
-       std::shared_ptr<const Algorithm::Agent> program;
 
         /**
          * \brief Unique identifier of the Vertex.

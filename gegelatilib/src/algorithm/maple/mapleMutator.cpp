@@ -2,21 +2,24 @@
 
 #include "algorithm/maple/mapleMutator.h"
 
-void Algorithm::Maple::MapleMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+bool Algorithm::Maple::MapleMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
 {
-
-    auto outputs = manager->getOutputs();
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("MapleMutator::initRandomPopulation: Maple does not support mixed discrete and continuous outputs.");
     } else if (outputs.sizeDiscrete() != 0 || outputs.sizeContinuous() != 0){
         if(params.mutation.tpg.nbActionEdgeInit > outputs.size()){
             throw std::runtime_error("MapleMutator::initRandomPopulation: Number of discrete outputs cannot be lower than the number of initial edges.");
-        }
+        }        
     } else if (outputs.size() == 0){
         throw std::runtime_error("TPGMutator::initRandomPopulation: No outputs defined.");
     }
+    return true;
+}
 
-    this->initActionVertices(graph, manager);
+void Algorithm::Maple::MapleMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+{
+    this->isConfigurationValid(params, manager->getOutputs());
+    this->initActionVertices(graph, manager->getOutputs().size());
 
     // Empty agent manager
     manager->clearAgents();
@@ -28,6 +31,11 @@ void Algorithm::Maple::MapleMutator::initRandomPopulation(std::shared_ptr<EvoGra
 
 void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
+    // First agent initialized, check configuration validity and create action vertices
+    if(manager->getAgents().size() == 1){
+        this->isConfigurationValid(params, manager->getOutputs());
+        this->initActionVertices(graph, manager->getOutputs().size());
+    }
 
     auto vertex = std::dynamic_pointer_cast<const MapleAgent>(agent)->getVertex();
     auto team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
@@ -40,14 +48,9 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(std::shared_ptr<con
     std::vector<uint64_t> availableActions(manager->getOutputs().size());
     std::iota(availableActions.begin(), availableActions.end(), uint64_t{0});
 
-    // Get graph actions vertex
-    auto actionVertices = graph->getActions();
 
-    // If not all the actions are in the graph, initialize them
-    if(actionVertices.size() < availableActions.size()){
-        this->initActionVertices(graph, manager);
-        actionVertices = graph->getActions();
-    }
+    // Get the actions vertices.
+    auto actionVertices = graph->getActions();
 
     size_t remaining = availableActions.size();
     for (size_t idxAction = 0; idxAction < params.mutation.tpg.nbActionEdgeInit; idxAction++) {

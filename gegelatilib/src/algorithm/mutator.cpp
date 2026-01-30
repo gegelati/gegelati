@@ -35,44 +35,34 @@ const Selector::SelectionContext& Algorithm::Mutator::getContext()
     return *this->currentContext;
 }
 
-void Algorithm::Mutator::initActionVertices(
-    std::shared_ptr<EvoGraph::Graph> graph,
-    std::shared_ptr<AgentManager> manager)
-    {
-        auto output = manager->getOutputs();
-        auto currentActions = graph->getActions();
+std::vector<std::shared_ptr<const EvoGraph::Action>> Algorithm::Mutator::initActionVertices(
+    std::shared_ptr<EvoGraph::Graph> graph, size_t nbActionVertices)
+{
+    // vector to store the actions
+    std::vector<std::shared_ptr<const EvoGraph::Action>> actions;
 
-        // Get the existing action IDs
-        std::set<size_t> actionIDs;
-        for(const auto& action: currentActions){
-            actionIDs.insert(action->getActionID());
+    // We want to fill actions with all thetd::vector<std::shared necessary actions.
+    // Create the missing actions, and add the already existing actions.
+    // PS:currentActions should be ordered by actionID, but in case it doesnt is, we check all the action vertices for each index.
+    
+    std::vector<std::shared_ptr<const EvoGraph::Action>> currentActions = graph->getActions();
+    for(size_t idx = 0; idx < nbActionVertices; idx++){
+        // find the action if it exists.
+        auto it = currentActions.begin();
+        while(it != currentActions.end() && (*it)->getActionID() != idx){
+            it++;
         }
 
-        if(output.sizeContinuous() != 0 && output.sizeDiscrete() != 0){
-            throw std::runtime_error("Mutator::initActionVertices: Gegelati does not support mixed discrete and continuous outputs.");
-        } else if (output.sizeContinuous() != 0 || output.sizeDiscrete() > 1){
-            // continuous or multiple discrete outputs: one action vertex per output
-            for(size_t i = 0; i < output.size(); i++){
-
-                // Add only the missing action vertices
-                if(actionIDs.find(i) == actionIDs.end()){
-                    graph->addNewAction(i);
-                }
-            }
-        } else if (output.sizeDiscrete() == 1){
-            // Discrete outputs: one action vertex per takeable output value
-            size_t nbActionVertices = output.front().getNbValues();
-            for(size_t i = 0; i < nbActionVertices; i++){
-
-                // Add only the missing action vertices
-                if(actionIDs.find(i) == actionIDs.end()){
-                    graph->addNewAction(i);
-                }
-            }
+        // If the action is found, add it and erase it from the vector, else create the vertex.
+        if(it == currentActions.end()){
+            actions.push_back(graph->addNewAction(idx));
         } else {
-            throw std::runtime_error("Mutator::initActionVertices: No outputs defined in the manager.");
+            actions.push_back((*it));
+            currentActions.erase(it);
         }
     }
+    return actions;
+}
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::Mutator::initRandomAgent(
     std::shared_ptr<EvoGraph::Graph> graph,

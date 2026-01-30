@@ -11,7 +11,6 @@ std::shared_ptr<Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::getLGPAgen
     return std::dynamic_pointer_cast<LGPAgent>(*iterator);
 }
 
-
 std::shared_ptr<const Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::cGetLGPAgentFromCst(std::shared_ptr<const Agent> agent) const
 {
     auto iterator = this->agents.find(agent);
@@ -28,11 +27,21 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(
     return *this->agents.rbegin();
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
+std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<const EvoGraph::Element> element)
 {
+    this->agents.insert(std::make_shared<LGPAgent>(this->env, this->outputs, this->getAlgorithmName()));
+    (*this->agents.rbegin())->setElement(element);
+    return *this->agents.rbegin();
+}
 
+std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element)
+{
+    // If element for copy is a nullptr, but the agent has an element, clone it.
+    if(element == nullptr && agent->getElement() != nullptr){
+        element = graph->cloneElement(*agent->getElement());
+    }
     auto castedAgent = this->getLGPAgentFromCst(agent);
-    auto newAgent = this->getLGPAgentFromCst(this->createAgent(graph));
+    auto newAgent = this->getLGPAgentFromCst(this->createAgent(element));
 
     for(size_t idx = 0; idx < castedAgent->getNbLines(); idx++){
         newAgent->addNewLine(castedAgent->getLine(idx));
@@ -51,7 +60,6 @@ void Algorithm::LGP::LGPManager::deleteAgent(std::shared_ptr<const Agent> agent,
 {
     this->agents.erase(this->getLGPAgentFromCst(agent));   
 }
-
 
 const Output::OutputHandler& Algorithm::LGP::LGPManager::getOutputs() const
 {
@@ -83,12 +91,10 @@ void Algorithm::LGP::LGPManager::addNewLine(std::shared_ptr<const LGPAgent> agen
     this->getLGPAgentFromCst(agent)->addNewLine(newLine);
 }
 
-
 void Algorithm::LGP::LGPManager::swapLines(std::shared_ptr<const LGPAgent> agent, size_t index1, size_t index2)
 {
     this->getLGPAgentFromCst(agent)->swapLines(index1, index2);
 }
-
 
 Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLine(std::shared_ptr<const LGPAgent> agent, size_t index)
 {

@@ -2,10 +2,8 @@
 #include <array>
 #include "algorithm/lgp/lgpMutator.h"
 
-
-void Algorithm::LGP::LGPMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+bool Algorithm::LGP::LGPMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
 {
-    auto outputs = manager->getOutputs();
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("LGPMutator::initRandomPopulation: LGP does not support mixed discrete and continuous outputs.");
     } else if (outputs.sizeContinuous() != 0){
@@ -19,6 +17,13 @@ void Algorithm::LGP::LGPMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     } else {
         throw std::runtime_error("LGPMutator::initRandomPopulation: No outputs defined.");
     }
+    return true;
+}
+
+void Algorithm::LGP::LGPMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+{
+    // Check configuration is valid
+    this->isConfigurationValid(params, manager->getOutputs());
 
     // Empty agent manager
     manager->clearAgents();
@@ -30,6 +35,11 @@ void Algorithm::LGP::LGPMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
 
 void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
+    // If first agent, check validity
+    if(manager->getAgents().size() == 1){
+        this->isConfigurationValid(params, manager->getOutputs());
+    }
+
     auto lgpManager = std::dynamic_pointer_cast<LGPManager>(manager);
     if(lgpManager == nullptr){
         throw std::invalid_argument("LGPMutator::initRandomAgent: the given manager is not a LGPManager.");

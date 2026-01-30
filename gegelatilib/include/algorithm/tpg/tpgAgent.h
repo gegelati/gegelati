@@ -14,10 +14,6 @@ namespace Algorithm::TPG {
          */
         class TPGAgent : public Agent
         {
-        protected:
-
-            /// Vertex of the evolution graph that the agent represent.
-            std::shared_ptr<const EvoGraph::Vertex> vertex;
 
         public:
 
@@ -27,13 +23,8 @@ namespace Algorithm::TPG {
              * \param[in] vertex the Vertex that the TPGAgent will represent.
              * \param[in] algorithmName name of the algorithm used.
              */
-            TPGAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, std::string algorithmName) : Agent(algorithmName), vertex{vertex} {
-            };
+            TPGAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, std::string algorithmName) : Agent(algorithmName, vertex) {};
 
-            /**
-             * \brief Getter for the vertex that the agent represent
-             */
-            virtual std::shared_ptr<const EvoGraph::Vertex> getVertex() const;
 
             /**
              * \brief Method that return if the agent is valid for execution.
@@ -41,11 +32,18 @@ namespace Algorithm::TPG {
             virtual bool isValid() const;
 
             /**
-             * \brief Setter for the vertex that the agent represent
+             * \brief Setter for the element that the agent represent
+             * This element should be a Team
              * 
-             * \param[in] newVertex the new vertex to set.
+             * \param[in] newElement the new element to set.
              */
-            virtual void setVertex(std::shared_ptr<const EvoGraph::Vertex> newVertex);
+            virtual void setElement(std::shared_ptr<const EvoGraph::Element> newElement) override;
+
+            
+            /**
+             * \brief Getter for the vertex that the agent represent
+             */
+            virtual std::shared_ptr<const EvoGraph::Vertex> getVertex() const;
 
             /**
              * \brief Method that return if the agent's vertex is currently root.

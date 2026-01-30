@@ -1,27 +1,37 @@
 
 #include "algorithm/tpg/tpgAgent.h"
 
-
-std::shared_ptr<const EvoGraph::Vertex> Algorithm::TPG::TPGAgent::getVertex() const
+void Algorithm::TPG::TPGAgent::setElement(std::shared_ptr<const EvoGraph::Element> newElement)
 {
-    return this->vertex;
+    auto newVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(newElement);
+    if(newVertex == nullptr){
+        throw std::runtime_error("TPGAgent::setElement element to set is not a Team");
+    }
+
+    this->element = newVertex;
 }
 
 bool Algorithm::TPG::TPGAgent::isValid() const
 {
-    if(std::dynamic_pointer_cast<const EvoGraph::Team>(this->vertex) != nullptr){
-        return this->vertex->getOutgoingEdges().size() > 1;
+    if(auto vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(this->element)){
+        return vertex->getOutgoingEdges().size() > 1;
     } else {
         return true;
     }
 }
 
-void Algorithm::TPG::TPGAgent::setVertex(std::shared_ptr<const EvoGraph::Vertex> newVertex)
-{
-    this->vertex = newVertex;
-}
 
 bool Algorithm::TPG::TPGAgent::isRoot() const
 {
-    return this->vertex->getIncomingEdges().size() == 0;
+    return std::dynamic_pointer_cast<const EvoGraph::Team>(this->element)->getIncomingEdges().size() == 0;
+}
+
+std::shared_ptr<const EvoGraph::Vertex> Algorithm::TPG::TPGAgent::getVertex() const
+{
+    std::shared_ptr<const EvoGraph::Team> vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(this->element);
+    if(vertex == nullptr){
+        throw std::runtime_error("TPGAgent::getVertex element is not a Team");
+    }
+    
+    return vertex;
 }

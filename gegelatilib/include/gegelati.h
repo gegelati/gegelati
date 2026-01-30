@@ -95,6 +95,7 @@
 #include <evoGraph/abstractEngine.h>
 #include <evoGraph/action.h>
 #include <evoGraph/edge.h>
+#include <evoGraph/element.h>
 #include <evoGraph/factory.h>
 #include <evoGraph/graph.h>
 #include <evoGraph/team.h>

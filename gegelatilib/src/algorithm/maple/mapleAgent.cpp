@@ -4,17 +4,12 @@
 bool Algorithm::Maple::MapleAgent::isValid() const
 {
     // Maple agent are valid if they represent an team vertex with at least one edge
-    if(std::dynamic_pointer_cast<const EvoGraph::Team>(this->vertex) != nullptr) {
-        return this->vertex->getOutgoingEdges().size() > 0;
+    if(auto vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(this->element)) {
+        return vertex->getOutgoingEdges().size() > 0;
     } else {
         return false;
     }
     
-}
-
-void Algorithm::Maple::MapleAgent::setVertex(std::shared_ptr<const EvoGraph::Vertex> newVertex)
-{
-    this->vertex = newVertex;
 }
 
 bool Algorithm::Maple::MapleAgent::isRoot() const

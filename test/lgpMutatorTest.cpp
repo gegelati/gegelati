@@ -21,6 +21,7 @@ class LgpMutatorTest : public ::testing::Test
     Instructions::Set set;
     std::shared_ptr<const Environment> e;
     Learn::LearningParameters params;
+    std::shared_ptr<EvoGraph::Graph> graph;
     Output::OutputHandler* lgpOutput;
     std::shared_ptr<Algorithm::LGP::LGPManager> lgpManager;
     std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent;
@@ -57,7 +58,8 @@ class LgpMutatorTest : public ::testing::Test
         lgpOutput = new Output::OutputHandler(Output::Output());
         lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(e, *lgpOutput);
         lgpManager->setAlgorithmName("fake");
-        lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpManager->createAgent(nullptr));
+
+        lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpManager->createAgent(graph));
         lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>();
     }
 
@@ -239,7 +241,7 @@ TEST_F(LgpMutatorTest, LGPMutatorMutateBehavior)
     std::shared_ptr<const Environment> e2 = std::make_shared<Environment>(set, params, vect);
     auto lgpManager2 = std::make_shared<Algorithm::LGP::LGPManager>(e2, *lgpOutput);
     lgpManager2->setAlgorithmName("fake");
-    std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent2 = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpManager2->createAgent(nullptr));
+    std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent2 = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpManager2->createAgent(graph));
 
     Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(lgpAgent);
     Algorithm::LGP::LGPLineMutator lineMutator;

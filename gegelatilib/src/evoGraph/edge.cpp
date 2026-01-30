@@ -65,17 +65,6 @@ void EvoGraph::Edge::setEdgeID(uint64_t newID)
     }
 }
 
-std::shared_ptr<const Algorithm::Agent> EvoGraph::Edge::getProgram() const
-{
-    return this->program;
-}
-
-void EvoGraph::Edge::setProgram(
-    std::shared_ptr<const Algorithm::Agent> program)
-{
-    this->program = program;
-}
-
 std::shared_ptr<const EvoGraph::Vertex> EvoGraph::Edge::getSource() const
 {
     return this->source;

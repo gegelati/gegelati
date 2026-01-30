@@ -103,16 +103,28 @@ namespace Algorithm {
          * \return a shared pointer to the created Agent.
          */
         virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        
+        /**
+         * \brief Create a new Agent of the type used by the current algorithm.
+         * 
+         * \param[in] element the element of the graph on which the Agent is associated.
+         * 
+         * \return a shared pointer to the created Agent.
+         */
+        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Element> element) = 0;
 
         /**
          * \brief Copy a new Agent of the type used by the current algorithm.
          * 
+         * By default, if element is set at nullptr, the algorithm implementation should create itself the corresponding element 
+         * 
          * \param[in] agent the Agent to copy.
          * \param[in] graph the Graph associated with the Agent.
+         * \param[in] element the element of the graph on which the Agent is associated.
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element = nullptr) = 0;
 
         /**
          * \brief Create a new Agent of the type used by the current algorithm.
@@ -123,6 +135,16 @@ namespace Algorithm {
          * \return a shared pointer to the created Agent.
          */
         virtual void deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+
+
+        /**
+         * \brief Set the element of an agent.
+         * 
+         * \param[in] agent the Agent to delete.
+         * \param[in] graph the Graph associated with the Agent.
+         * \param[in] element the vertex set to the agent.
+         */
+        virtual void setElement(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element);
 
         /**
          * \brief Clear all agents from the manager.

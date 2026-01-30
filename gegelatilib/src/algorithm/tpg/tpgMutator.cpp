@@ -73,11 +73,8 @@ void Algorithm::TPG::TPGMutator::updateSpecificContext(
     this->preExistingEdges.insert(this->preExistingEdges.end(), usableEdges.begin(), usableEdges.end());
 }
 
-void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+bool Algorithm::TPG::TPGMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
 {
-
-    auto outputs = manager->getOutputs();
-    size_t nbActionVertices = 1;
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("TPGMutator::initRandomPopulation: TPG does not support mixed discrete and continuous outputs.");
     } else if (outputs.sizeContinuous() != 0){
@@ -87,7 +84,6 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
         }
 
     } else if (outputs.sizeDiscrete() != 0){
-        nbActionVertices = outputs.front().getNbValues();
         
         if (params.mutation.tpg.maxInitOutgoingEdges > outputs.front().getNbValues()) {
             throw std::runtime_error("Maximum initial number of outgoing edges "
@@ -112,20 +108,26 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
         throw std::runtime_error(
             "A team should have at least two edges at initialisation.");
     }
+    return true;
+}
 
-
+void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+{
+    auto outputs = manager->getOutputs();
+    this->isConfigurationValid(params, outputs);
+    
     // Empty agent manager
     manager->clearAgents();
 
+    // Number of action vertices needed
+    size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? 1 : outputs.front().getNbValues();
+
     // Create teams, programs and Actions
-    std::vector<std::shared_ptr<const EvoGraph::Action>> actions;
+    std::vector<std::shared_ptr<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> teams;
     std::vector<std::shared_ptr<const Agent>> programAgent;
 
 
-    for (size_t idx = 0; idx < nbActionVertices; idx++) {
-        actions.push_back(graph->addNewAction(idx));
-    }
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
         teams.push_back(std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph))->getVertex());
     }
@@ -142,7 +144,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
         programAgent.push_back(programMutator->initRandomAgent(graph, programManager, params, rng));
 
         // Add the edge
-        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % nbActionVertices),
+        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % actions.size()),
                          programAgent.at(i));
     }
 
@@ -199,7 +201,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
             // Add the connection
             graph->addNewEdge(
                 *team,
-                *actions.at(rng.getUnsignedInt64(0, nbActionVertices - 1)),
+                *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
                 programAgent.at(selectedProgramIndex));
         }
     }
@@ -207,22 +209,21 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
 
 void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
+    // First agent is initialized, check validity of the configuration.
+    if(manager->getAgents().size() == 1){
+        this->isConfigurationValid(params, manager->getOutputs());
+        // Number of action vertices needed
+        size_t nbActionVertices = (manager->getOutputs().sizeDiscrete() == 0) ? 1 : manager->getOutputs().front().getNbValues();
+        this->initActionVertices(graph, nbActionVertices);
+    }
+
     auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph))->getVertex();
 
     auto programMutator = this->getSubMutator(this->programAlgorithmName);
     auto programManager = manager->getSubManager(this->programAlgorithmName);
 
-    // Get action vertices in the graph
-    std::vector<std::shared_ptr<const EvoGraph::Action>> actions;
-    for (const auto& vertex : graph->getVertices()) {
-        if (auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(vertex)) {
-            actions.push_back(action);
-        }
-    }
-
-    if(actions.size() == 0){
-        throw std::runtime_error("TPGMutator::initRandomSpecificAgent: No action vertices in the graph.");
-    }
+    // Get the actions vertices.
+    auto actions = graph->getActions();
 
     // Add the edge
     graph->addNewEdge(*tpgAgent, *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),

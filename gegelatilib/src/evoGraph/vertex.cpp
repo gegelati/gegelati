@@ -109,22 +109,6 @@ const std::set<uint64_t>& EvoGraph::Vertex::getAssessedActions() const
 }
 
 
-std::shared_ptr<const Algorithm::Agent> EvoGraph::Vertex::getProgram() const
-{
-    return this->program;
-}
-
-void EvoGraph::Vertex::setProgram(
-    std::shared_ptr<const Algorithm::Agent> program)
-{
-    this->program = program;
-}
-
-bool EvoGraph::Vertex::hasProgram()
-{
-    return this->program != nullptr;
-}
-
 
 bool EvoGraph::Vertex::hasSameAssessedActions(std::set<uint64_t> actions) const
 {

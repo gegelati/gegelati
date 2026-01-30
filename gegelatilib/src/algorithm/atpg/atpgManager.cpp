@@ -11,8 +11,13 @@ std::shared_ptr<Algorithm::ATPG::ATPGAgent> Algorithm::ATPG::ATPGManager::getATP
     return std::dynamic_pointer_cast<ATPGAgent>(*iterator);
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::ATPG::ATPGManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
+std::shared_ptr<const Algorithm::Agent> Algorithm::ATPG::ATPGManager::createAgent(std::shared_ptr<const EvoGraph::Element> element)
 {
+    std::shared_ptr<const EvoGraph::Team> vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(element);
+    if(vertex == nullptr){
+        throw std::runtime_error("ATPGManager::createAgent: trying to create an agent on an element from the graph that is not a team.");
+    }
+
     this->agents.insert(std::make_shared<ATPGAgent>(vertex, this->getAlgorithmName()));
     return *this->agents.rbegin();
 }

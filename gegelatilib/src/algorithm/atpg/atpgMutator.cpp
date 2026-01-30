@@ -3,70 +3,45 @@
 #include "algorithm/atpg/atpgMutator.h"
 
 void Algorithm::ATPG::ATPGMutator::updateSpecificContext(
-    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
-    const Learn::LearningParameters& params,
-    RNG::RNG& rng)
+            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+            const Learn::LearningParameters& params,
+            RNG::RNG& rng)
 {
-    // Call parent method to update currentContext
-    Algorithm::TPG::TPGMutator::updateSpecificContext(graph, manager, selector, params, rng);
+    TPG::TPGMutator::updateSpecificContext(graph, manager, selector, params, rng);
 
-    // Get preExistingVertex of context of action program algorithm
-    std::shared_ptr<Algorithm::Mutator> actionProgramMutator = this->getSubMutator(this->actionProgramAlgorithmName);
-    const std::vector<std::shared_ptr<const EvoGraph::Action>>& actionPrograms = actionProgramMutator->getContext().preExistingActions;
-    
-    std::set<std::shared_ptr<const EvoGraph::Action>, SharedLess<EvoGraph::Action>> uniqueActions;
-    if(params.mutation.tpg.teamAccessAllActions){
-        // Fill set with preExistingActions of ATPG
-        uniqueActions.insert(this->preExistingActions.begin(), this->preExistingActions.end());
-    }
-    // Fill set with preExistingAction of ActionAlgorithm
-    uniqueActions.insert(actionPrograms.begin(), actionPrograms.end());
-
-    this->preExistingActions.clear();
-    this->preExistingActions.insert(this->preExistingActions.begin(), uniqueActions.begin(), uniqueActions.end());
+    auto& algorithmName = this->actionProgramAlgorithmName;
+    // Remove teams that contains an action program
+    this->preExistingTeams.erase(
+        std::remove_if(
+            this->preExistingTeams.begin(),
+            this->preExistingTeams.end(),
+            [&algorithmName](const std::shared_ptr<const EvoGraph::Team>& vertex) {
+                return (vertex->getProgram() != nullptr && vertex->getProgram()->getAlgorithmName() == algorithmName);
+            }
+        ),
+        preExistingTeams.end()
+    );
 }
 
-void Algorithm::ATPG::ATPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+
+bool Algorithm::ATPG::ATPGMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
 {
-
-    auto outputs = manager->getOutputs();
-    size_t nbActionVertices = 1;
-    if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
-        throw std::runtime_error("TPGMutator::initRandomPopulation: TPG does not support mixed discrete and continuous outputs.");
-    } else if (outputs.sizeContinuous() != 0){
-
-        if(outputs.size() > params.nbRegisters + 1){
-            throw std::runtime_error("TPGMutator::initRandomPopulation: Number of continuous outputs exceeds the number of registers plus one.");
-        }
-
-    } else if (outputs.sizeDiscrete() != 0){
-        nbActionVertices = outputs.front().getNbValues();
-        
-        if (params.mutation.tpg.maxInitOutgoingEdges > outputs.front().getNbValues()) {
-            throw std::runtime_error("Maximum initial number of outgoing edges "
-                                        "cannot exceed the number of outputs");
-        }
-
-        if (outputs.front().getNbValues() < 2) {
-            throw std::runtime_error(
-                "A TPG with a single output makes no sense.");
-        }
-
-        if (outputs.size() != 1) {
-            throw std::runtime_error(
-                "TPG for discrete actions only supports one action"
-            );
-        }
-    } else {
-        throw std::runtime_error("TPGMutator::initRandomPopulation: No outputs defined.");
+    if(outputs.sizeContinuous() == 0 && outputs.sizeDiscrete() == 0){
+        throw std::runtime_error("ATPGMutator::initRandomPopulation: No outputs defined.");
     }
     
     if (params.mutation.tpg.maxInitOutgoingEdges < 2) {
         throw std::runtime_error(
             "A team should have at least two edges at initialisation.");
     }
+    return true;
+}
 
-
+void Algorithm::ATPG::ATPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+{
+    auto outputs = manager->getOutputs();
+    this->isConfigurationValid(params, outputs);
+    
     // Empty agent manager
     manager->clearAgents();
 
@@ -76,9 +51,6 @@ void Algorithm::ATPG::ATPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph
     std::vector<std::shared_ptr<const Agent>> programAgent;
 
 
-    for (size_t idx = 0; idx < nbActionVertices; idx++) {
-        actions.push_back(graph->addNewAction(idx));
-    }
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
         teams.push_back(std::dynamic_pointer_cast<const ATPGAgent>(manager->createAgent(graph))->getVertex());
     }
@@ -95,7 +67,7 @@ void Algorithm::ATPG::ATPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph
         programAgent.push_back(programMutator->initRandomAgent(graph, programManager, params, rng));
 
         // Add the edge
-        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % nbActionVertices),
+        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % actions.size()),
                          programAgent.at(i));
     }
 
@@ -152,7 +124,7 @@ void Algorithm::ATPG::ATPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph
             // Add the connection
             graph->addNewEdge(
                 *team,
-                *actions.at(rng.getUnsignedInt64(0, nbActionVertices - 1)),
+                *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
                 programAgent.at(selectedProgramIndex));
         }
     }
@@ -201,15 +173,24 @@ void Algorithm::ATPG::ATPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        target = this->preExistingActions.at(rng.getUnsignedInt64(
-            0, this->preExistingActions.size() - 1));
 
-        auto originAgent = target->getProgram();
+        const auto& subAgents = this->getSubMutator(this->actionProgramAlgorithmName)->getContext().preExistingAgents;
+
+        auto originAgent = subAgents.at(rng.getUnsignedInt64(
+            0, subAgents.size() - 1));
+
         // copy program
         std::shared_ptr<const Algorithm::Agent> newAgent = manager->getSubManager(originAgent->getAlgorithmName())->copyAgent(originAgent, graph);
 
-        // Set the mutated agent to the edge
-        //graph->setVertexProgram(whichVertex, newAgent);
+        newSubAgents.push_back(newAgent);
+
+        // Since newAgent is a copy of a program set on a vertex, its element must be a vertex too.
+        auto elementAgent = newAgent->getElement();
+        if(auto vertexAgent = std::dynamic_pointer_cast<const EvoGraph::Vertex>(elementAgent)){
+            target = vertexAgent;
+        } else {
+            throw std::runtime_error("ATPGMutator::mutateEdgeDestination: Action program's element is not a vertex.");
+        }
 
     } else {
         target = this->preExistingTeams.at(
@@ -241,6 +222,6 @@ void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
     // As it Stephen kelly's work, Edge target modification is conditionned
     // to the modification of the prealable Edge.Program behavior.
     if (rng.getDouble(0.0, 1.0) < params.mutation.tpg.pEdgeDestinationChange) {
-        //mutateEdgeDestination(graph, edge, params, rng);
+        mutateEdgeDestination(graph, edge, manager, newSubAgents, params, rng);
     }
 }

@@ -83,6 +83,16 @@ namespace Algorithm {
 
 
         /**
+         * \brief Check if the configuration of the mutator is valid according to the given parameters.
+         * 
+         * This method should be call before initializing the population.
+         * 
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] outputs the OutputHandler of the manager.
+         */
+        virtual bool isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const = 0;
+
+        /**
          * \brief Initialize a the action vertices.
          * 
          * This methods created only the action vertices that does not already exist in the graph
@@ -94,9 +104,9 @@ namespace Algorithm {
          * However, Gegelati currently does not handle environment with discrete and continuous outputs. 
          * 
          * \param[in,out] graph the initialized Graph.
-         * \param[in] manager the manager to change the agents.
+         * \param[in] nbActionVertices number of agents to create.
          */
-        virtual void initActionVertices(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager);
+        virtual std::vector<std::shared_ptr<const EvoGraph::Action>> initActionVertices(std::shared_ptr<EvoGraph::Graph> graph, size_t nbActionVertices);
 
         /**
          * \brief Initialize a random population.
