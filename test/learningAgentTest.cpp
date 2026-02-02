@@ -767,6 +767,74 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
         << "Graph does not have the expected determinst characteristics.";
 }
 
+// Similar to previous test, but with MATPG solution (no need for MAPLE because
+// it is included in MATPG)
+TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.mutation.tpg.useActionProgram = true;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.mutation.tpg.pMutateActionProgram = 0.9;
+    params.mutation.tpg.pProgramMutation = 0.6;
+    params.nbThreads = 1;
+
+    
+    auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
+    auto actionMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, actionLgp);
+    tpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, lgp, actionMaple);
+
+    auto standaloneLGP = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGP1");
+
+    auto standaloneLGPforMaple = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGP2");
+    auto standaloneMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, standaloneLGPforMaple, "Maple2");
+    std::vector<std::shared_ptr<Algorithm::Algorithm>> listAlgo = {tpg, standaloneLGP, standaloneMaple};
+    Learn::LearningAgent la(cle, listAlgo, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    EvoGraph::Graph& tpg = *la.getGraph();
+
+    // Useful when determinism is changed
+    std::cout << tpg.getNbVertices() << " "
+             <<tpg.getNbRootVertices()<<" "
+             <<tpg.getEdges().size()<<" "
+             <<EvoGraph::Vertex::getVertexIDCounter()<<" "
+             <<EvoGraph::Edge::getEdgeIDCounter()<<" "
+             <<Algorithm::Agent::getAgentIDCounter()<<" "
+
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;
+
+    ASSERT_EQ(tpg.getNbVertices(), 418)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 341)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 749)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 780)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1446)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1120)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              10356165115002185964U)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
 // Similar to previous test, but with MATPG solution and tournament (no need for
 // MAPLE because it is included in MATPG)
 TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
