@@ -163,10 +163,10 @@ void Selector::MapElites::MapElitesSelector::doSelection(
     }
 }
 
-const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::
-    updateContext()
+std::unique_ptr<Selector::SelectionContext> Selector::MapElites::MapElitesSelector::
+    updateContext() const
 {
-    Selector::Selector::updateContext();
+    std::unique_ptr<SelectionContext> context = std::move(Selector::Selector::updateContext());
 
     // Get all the vertices in the different archives
     std::set<std::shared_ptr<const Algorithm::Agent>> agentsInAllArchives;
@@ -178,8 +178,8 @@ const Selector::SelectionContext& Selector::MapElites::MapElitesSelector::
     }
 
     if(agentsInAllArchives.size() != 0){
-        this->context.nbAgentsToCreate = (uint64_t)(params.mutation.tpg.nbRoots) + agentsInAllArchives.size();
+        context->nbAgentsToCreate = (uint64_t)(params.mutation.tpg.nbRoots) + agentsInAllArchives.size();
     }
 
-    return this->context;
+    return context;
 }

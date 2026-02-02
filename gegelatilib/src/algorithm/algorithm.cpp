@@ -77,29 +77,22 @@ bool Algorithm::Algorithm::containsAgent(std::shared_ptr<const Agent> agent) con
     return this->manager->containsAgent(agent);
 }
 
+void Algorithm::Algorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) {
+    /*This method is not abstract, it is not necessary for an algorithm to have sub algorithms*/
+}
+
 void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     this->outputs = outputs;
-    if(this->mutator == nullptr) {
-        throw std::runtime_error("Mutator is not initialized in Algorithm " + this->algorithmName);
-    }
-    if(this->manager == nullptr) {
-        throw std::runtime_error("Manager is not initialized in Algorithm " + this->algorithmName);
-    }
-
     this->graph = graph;
 
-    // Set the algorithm name to the components
-    this->manager->setAlgorithmName(algorithmName);
-    this->mutator->setAlgorithmName(algorithmName);
+    this->initManager(outputs);
+
     this->selector = Selector::selectorFactory(this->manager, this->params);
 
+    this->initMutator();
 
-    for (auto& subAlgorithm : this->subAlgorithms) {
-        subAlgorithm->initAlgorithm(rng, outputs, dataSource, graph);
-        this->manager->addSubManager(subAlgorithm->getManager());
-        this->mutator->addSubMutator(subAlgorithm->getMutator());
-    }
+    this->initSubAlgorithms(rng, outputs, dataSource, graph);
 
     // Clear the best agent in the selector
     this->selector->forgetPreviousResults();
@@ -115,7 +108,8 @@ void Algorithm::Algorithm::initPopulation(RNG::RNG& rng)
 
 void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
 {
-    this->mutator->mutatePopulation(this->graph, this->manager, this->selector, this->params, rng, maxNbThreads);
+    this->mutator->mutatePopulation(this->graph, this->manager, this->params, rng, maxNbThreads);
+    this->selector->updateAfterPopulate(graph);
 }
 
 
@@ -125,7 +119,6 @@ std::shared_ptr<Algorithm::Job> Algorithm::Algorithm::createJob(std::shared_ptr<
     if(agent == nullptr || !this->containsAgent(agent)){
         throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with a null agent or an agent not belonging to this algorithm.");
     }
-
 
     return std::make_shared<Job>(agent, idx);
 }

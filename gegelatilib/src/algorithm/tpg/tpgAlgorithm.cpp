@@ -16,44 +16,41 @@ std::shared_ptr<const Archive> Algorithm::TPG::TPGAlgorithm::getArchive() const
     return this->archive;
 }
 
-
-void Algorithm::TPG::TPGAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::TPG::TPGAlgorithm::initManager(std::shared_ptr<const Output::OutputHandler> outputs)
 {
+    this->manager = std::make_shared<TPG::TPGManager>(*outputs);
+    this->manager->setAlgorithmName(algorithmName);
+}
 
-    this->outputs = outputs;
+void Algorithm::TPG::TPGAlgorithm::initMutator()
+{
+    this->mutator = std::make_shared<TPG::TPGMutator>(*this->selector, this->archive);
+    this->mutator->setAlgorithmName(algorithmName);
+}
+
+void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
+{
+    // Initialize program algorithm.
     std::shared_ptr<Algorithm> programAlgo = this->getSubAlgorithm(this->programAlgorithmName);
 
-    this->mutator = std::make_shared<TPG::TPGMutator>(this->archive);
-    std::shared_ptr<TPG::TPGMutator> tpgMutator = std::dynamic_pointer_cast<TPG::TPGMutator>(this->mutator);
-    tpgMutator->setProgramAlgorithmName(this->programAlgorithmName);
-
-    this->manager = std::make_shared<TPG::TPGManager>(*outputs, *this->archive);
-    std::shared_ptr<TPG::TPGManager> tpgManager = std::dynamic_pointer_cast<TPG::TPGManager>(this->manager);
-    tpgManager->setProgramAlgorithmName(this->programAlgorithmName);
-
-
-    this->graph = graph;
-
-    // Set the algorithm name to the components
-    this->manager->setAlgorithmName(algorithmName);
-    this->mutator->setAlgorithmName(algorithmName);
-    this->selector = Selector::selectorFactory(this->manager, this->params);
-
-    // Initialize program algorithm.
+    // Program output is only size 1, except for continuous outputs where we create more outputs (one per continuous output of the TPG)
     auto programOutput = std::make_shared<Output::OutputHandler>(Output::Output());
-
     for(size_t idx = 0; idx < this->outputs->sizeContinuous(); idx++){
         programOutput->addOutput(Output::Output());
     }
 
+    // Init program algorithm
     programAlgo->initAlgorithm(rng, programOutput, dataSource, graph);
+
+    // Add program manager and mutator to TPG manager and mutator
     this->manager->addSubManager(programAlgo->getManager());
+    std::shared_ptr<TPG::TPGManager> tpgManager = std::dynamic_pointer_cast<TPG::TPGManager>(this->manager);
+    tpgManager->setProgramAlgorithmName(this->programAlgorithmName);
+
     this->mutator->addSubMutator(programAlgo->getMutator());
-
-    // Clear the best agent in the selector
-    this->selector->forgetPreviousResults();
+    std::shared_ptr<TPG::TPGMutator> tpgMutator = std::dynamic_pointer_cast<TPG::TPGMutator>(this->mutator);
+    tpgMutator->setProgramAlgorithmName(this->programAlgorithmName);
 }
-
 
 std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx) const
 {

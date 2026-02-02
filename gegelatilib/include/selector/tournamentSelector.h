@@ -95,7 +95,7 @@ namespace Selector {
          * vectors, and will remove the not elite agents from the
          * preExistingVertices vectors
          */
-        virtual const SelectionContext& updateContext() override;
+        virtual std::unique_ptr<SelectionContext> updateContext() const override;
 
         /**
          * \brief Specialization of updateAfterPopulate for tournament purposes

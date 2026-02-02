@@ -27,21 +27,10 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(
     return *this->agents.rbegin();
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<const EvoGraph::Element> element)
+std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    this->agents.insert(std::make_shared<LGPAgent>(this->env, this->outputs, this->getAlgorithmName()));
-    (*this->agents.rbegin())->setElement(element);
-    return *this->agents.rbegin();
-}
-
-std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element)
-{
-    // If element for copy is a nullptr, but the agent has an element, clone it.
-    if(element == nullptr && agent->getElement() != nullptr){
-        element = graph->cloneElement(*agent->getElement());
-    }
     auto castedAgent = this->getLGPAgentFromCst(agent);
-    auto newAgent = this->getLGPAgentFromCst(this->createAgent(element));
+    auto newAgent = this->getLGPAgentFromCst(this->createAgent(graph));
 
     for(size_t idx = 0; idx < castedAgent->getNbLines(); idx++){
         newAgent->addNewLine(castedAgent->getLine(idx));

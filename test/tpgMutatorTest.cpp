@@ -126,21 +126,23 @@ class TpgMutatorTest : public ::testing::Test
         
         lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(e, *lgpOutput);
         lgpManager->setAlgorithmName("fakeLgp");
-        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>();
-        lgpMutator->setAlgorithmName("fakeLgp");
         lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpManager->createAgent(graph));
 
-        tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(*actions, *archive);
+        tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(*actions);
         tpgManager->setAlgorithmName("fakeTpg");
         tpgManager->addSubManager(lgpManager);
         tpgManager->setProgramAlgorithmName("fakeLgp");
 
-        tpgMutator = std::make_shared<Algorithm::TPG::TPGMutator>(archive);
+        selector = std::make_shared<Selector::TruncationSelector>(tpgManager, params);
+
+        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>(*selector);
+        lgpMutator->setAlgorithmName("fakeLgp");
+
+        tpgMutator = std::make_shared<Algorithm::TPG::TPGMutator>(*selector, archive);
         tpgMutator->addSubMutator(lgpMutator);
         tpgMutator->setAlgorithmName("fakeTpg");
         tpgMutator->setProgramAlgorithmName("fakeLgp");
 
-        selector = std::make_shared<Selector::TruncationSelector>(tpgManager, params);
     }
 
     virtual void TearDown()
@@ -516,7 +518,7 @@ TEST_F(TpgMutatorTest, TPGMutatorAddRandomEdge)
 
     RNG::RNG rng;
     rng.setSeed(0);
-    tpgMutator->updateSpecificContext(graph, tpgManager, selector, params, rng);
+    tpgMutator->updateSpecificContext(graph, tpgManager, params, rng);
     // Run the add
     ASSERT_NO_THROW(
         tpgMutator->addRandomEdge(graph, *vertex2, rng))
@@ -541,17 +543,15 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateEdgeDestination)
     std::shared_ptr<const EvoGraph::Team> vertex4 = graph->addNewTeam();
 
 
-    for(auto vertex: graph->getVertices()){
+    for(auto vertex: graph->getRootTeams()){
         tpgManager->createAgent(vertex);
     }
 
     params.mutation.tpg.pEdgeDestinationIsAction = 0.5;
-    
-
 
     RNG::RNG rng;
     rng.setSeed(2);
-    tpgMutator->updateSpecificContext(graph, tpgManager, selector, params, rng);
+    tpgMutator->updateSpecificContext(graph, tpgManager, params, rng);
 
     std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
     std::shared_ptr<const EvoGraph::Edge> edge0 = graph->addNewEdge(*vertex0, *vertex1, lgpAgent);
@@ -605,7 +605,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
 
     std::vector<std::shared_ptr<const Algorithm::Agent>> newPrograms;
 
-    tpgMutator->updateSpecificContext(graph, tpgManager, selector, params, rng);
+    tpgMutator->updateSpecificContext(graph, tpgManager, params, rng);
 
     ASSERT_NO_THROW(tpgMutator->mutateOutgoingEdge(
         graph, edge0, tpgManager, newPrograms, params, rng));
@@ -918,7 +918,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
 
     std::vector<std::shared_ptr<const Algorithm::Agent>> newPrograms;
 
-    tpgMutator->updateSpecificContext(graph, tpgManager, selector, params, rng);
+    tpgMutator->updateSpecificContext(graph, tpgManager, params, rng);
 
     auto newAgent = tpgManager->copyAgent(tpgManager->getAgents().at(0), graph);
 
@@ -969,7 +969,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
 
     std::vector<std::shared_ptr<const Algorithm::Agent>> newPrograms;
 
-    tpgMutator->updateSpecificContext(graph, tpgManager, selector, params, rng);
+    tpgMutator->updateSpecificContext(graph, tpgManager, params, rng);
 
     tpgMutator->mutateOutgoingEdge(graph, edge0, tpgManager, newPrograms,
                                             params, rng);
@@ -1174,7 +1174,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
 
     // Check the correct execution
     ASSERT_NO_THROW(tpgMutator->mutatePopulation(
-        graph, tpgManager, selector, params, rng, 0))
+        graph, tpgManager, params, rng, 0))
         << "Populating a TPG failed.";
     // Check the number of roots
     ASSERT_EQ(graph->getRootVertices().size(), params.mutation.tpg.nbRoots);
@@ -1182,11 +1182,11 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
 
     // Increase coverage with a TPG that has no root team
     std::shared_ptr<EvoGraph::Graph> graph2 = std::make_shared<EvoGraph::Graph>();
-    auto tpgManager2 = std::make_shared<Algorithm::TPG::TPGManager>(nbActions, *archive);
+    auto tpgManager2 = std::make_shared<Algorithm::TPG::TPGManager>(nbActions);
     tpgManager2->setAlgorithmName("fakeTpg");
     tpgManager2->addSubManager(lgpManager);
     ASSERT_NO_THROW(tpgMutator->mutatePopulation(
-        graph2, tpgManager2, selector, params, rng, 0))
+        graph2, tpgManager2, params, rng, 0))
         << "Populating an empty TPG failed.";
 }
 

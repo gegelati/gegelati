@@ -15,35 +15,7 @@ namespace Selector {
      * is filled with the data needed by the TPGMutator.
      */
     struct SelectionContext
-    {
-        /*
-        /// @brief vector of pointers of const Team that are clonable by the
-        /// TPGMutator to fill the new population.
-        std::vector<const EvoGraph::Team*> teamsClonable;
-
-        /// @brief vector of pointers of const Action that are clonable by
-        /// the TPGMutator to fill the new population.
-        std::vector<const EvoGraph::Action*> actionsClonable;*/
-
-        /// @brief vector of pointers of const Teams that can be new
-        /// destination for the new roots created by the TPGMutator.
-        std::vector<std::shared_ptr<const EvoGraph::Team>> preExistingTeams;
-
-        /// @brief vector of pointers of const Action that can be new
-        /// destination for the new roots created by the TPGMutator.
-        std::vector<std::shared_ptr<const EvoGraph::Action>> preExistingActions;
-
-        /// @brief list of pointers of const Edges that can be used during
-        /// the mutation process of the TPGMutator
-        std::vector<std::shared_ptr<const EvoGraph::Edge>> preExistingEdges;
-
-        /// @brief number of Teams to be created by the TPGMutator
-        //uint64_t nbTeamsToCreate;
-
-        /// @brief number of Actions to be created by the TPGMutator
-        //uint64_t nbActionsToCreate;
-
-        
+    {   
 
         /// @brief vector sjared pointer of agent that are clonable by the
         /// Mutator to fill the new population.

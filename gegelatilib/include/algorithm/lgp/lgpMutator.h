@@ -28,8 +28,9 @@ namespace Algorithm::LGP {
         /**
          * \brief Main LGPMutator constructor.
          * 
+         * \param[in] selector Reference to the current selector used by the algorithm.
          */
-        LGPMutator(): Mutator(), lineMutator() {};
+        LGPMutator(Selector::Selector& selector): Mutator(selector), lineMutator() {};
 
 
         /**
@@ -186,7 +187,17 @@ namespace Algorithm::LGP {
         bool alterRandomConstant(std::shared_ptr<const LGPAgent> agent, std::shared_ptr<LGPManager> manager,
                                  const Learn::LearningParameters& params,
                                  RNG::RNG& rng);
+
+        /**
+         * \brief Specialization of mutateSubAgents method.
+         * Doesnt do anything for LGP as LGP doesnt have subAgents.
+         */
+        void mutateSubAgents(
+            std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
+            std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
+            RNG::RNG& rng, uint64_t maxNbThreads) override {};
     };
+
 
 
 }; // namespace Mutator

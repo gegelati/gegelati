@@ -3,7 +3,6 @@
 #define ATPG_AGENT_MANAGER_H
 
 #include "algorithm/tpg/tpgManager.h"
-#include "algorithm/atpg/atpgAgent.h"
 #include "algorithm/atpg/atpgExecutionEngine.h"
 
 namespace Algorithm::ATPG {
@@ -24,23 +23,14 @@ namespace Algorithm::ATPG {
         /// Name of the action program algorithm associated with the ATPG agents.
         std::string actionProgramAlgorithmName;
 
-
-        /**
-         * \brief Get the ATPGAgent from a const Agent pointer.
-         * 
-         * \param[in] agent the Agent to cast.
-         */
-        virtual std::shared_ptr<ATPGAgent> getATPGAgentFromCst(std::shared_ptr<const Agent> agent);
-
     public:
 
         /**
          * \brief Main ATPGManager constructor.
          * 
          * \param[in] outputs outputs of the agents.
-         * \param[in] archive Archive used by this TPG
          */
-        ATPGManager(const Output::OutputHandler& outputs, Archive& archive) : TPGManager(outputs, archive) {};
+        ATPGManager(const Output::OutputHandler& outputs) : TPGManager(outputs) {};
 
         /**
          * \brief Set the name of the action program algorithm associated with the TPG agents.
@@ -48,15 +38,6 @@ namespace Algorithm::ATPG {
          * \param[in] name the name of the action program algorithm.
          */
         void setActionProgramAlgorithmName(const std::string& name) { this->actionProgramAlgorithmName = name; }
-
-        /**
-         * \brief Create a new ATPGAgent on a specific element.
-         * 
-         * \param[in] element the element associated with the Agent.
-         * 
-         * \return a shared pointer to the created Agent.
-         */
-        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Element> element) override;
 
 
         /**

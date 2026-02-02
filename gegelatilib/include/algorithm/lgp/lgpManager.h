@@ -59,25 +59,14 @@ namespace Algorithm {
             virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
 
             /**
-             * \brief Create a new LGPAgent.
-             * An LGP can be created with any element, even a nullptr.
-             * 
-             * \param[in] element the element associated with the Agent.
-             * 
-             * \return a shared pointer to the created Agent.
-             */
-            virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Element> element) override;
-
-            /**
              * \brief Copy a LGPAgent.
              * 
              * \param[in] agent the Agent to copy.
              * \param[in] graph the Graph associated with the Agent.
-             * \param[in] element the element of the graph on which the Agent is associated.
              * 
              * \return a shared pointer to the created Agent.
              */
-            virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element = nullptr) override;
+            virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
             /**
              * \brief Delete the LGPAgent.

@@ -9,13 +9,12 @@ void Algorithm::TPG::TPGMutator::setArchive(std::shared_ptr<Archive> archive)
 }
 
 void Algorithm::TPG::TPGMutator::updateSpecificContext(
-    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager,
     const Learn::LearningParameters& params,
     RNG::RNG& rng)
 {
     // Call parent method to update currentContext
-    Algorithm::Mutator::updateSpecificContext(graph, manager, selector, params, rng);
-
+    Algorithm::Mutator::updateSpecificContext(graph, manager, params, rng);
 
     // Update pre-existing elements
     this->preExistingTeams.clear();
@@ -111,46 +110,17 @@ bool Algorithm::TPG::TPGMutator::isConfigurationValid(const Learn::LearningParam
     return true;
 }
 
-void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::TPG::TPGMutator::addAditionnalEdges(
+            std::shared_ptr<EvoGraph::Graph> graph,
+            std::vector<std::shared_ptr<const EvoGraph::Vertex>> leafVertices,
+            std::vector<std::shared_ptr<const EvoGraph::Vertex>> rootVertices,
+            std::vector<std::shared_ptr<const Agent>> programAgent,
+            const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    auto outputs = manager->getOutputs();
-    this->isConfigurationValid(params, outputs);
     
-    // Empty agent manager
-    manager->clearAgents();
-
-    // Number of action vertices needed
-    size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? 1 : outputs.front().getNbValues();
-
-    // Create teams, programs and Actions
-    std::vector<std::shared_ptr<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
-    std::vector<std::shared_ptr<const EvoGraph::Vertex>> teams;
-    std::vector<std::shared_ptr<const Agent>> programAgent;
-
-
-    for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
-        teams.push_back(std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph))->getVertex());
-    }
-
-    // Connect each team with two distinct actions, through two distinct
-    // programs Association here are determinists since randomness would
-    // uselessly complicate the code while bringing no real value since anyway,
-    // Programs have been initialized randomly.
-    auto programMutator = this->getSubMutator(this->programAlgorithmName);
-    auto programManager = manager->getSubManager(this->programAlgorithmName);
-    for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
-
-        // Create a program agent
-        programAgent.push_back(programMutator->initRandomAgent(graph, programManager, params, rng));
-
-        // Add the edge
-        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % actions.size()),
-                         programAgent.at(i));
-    }
-
     // Add additional connections to TPG
     // Team-by-Team
-    for (std::shared_ptr<const EvoGraph::Vertex> team : teams) {
+    for (std::shared_ptr<const EvoGraph::Vertex> rootVertex : rootVertices) {
         // Pick a number of additional outedge
         size_t nbAdditionalEdges =
             rng.getUnsignedInt64(0, params.mutation.tpg.maxInitOutgoingEdges - 2);
@@ -168,8 +138,8 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
                 auto iter = availableChoices.begin();
                 while (iter < availableChoices.end()) {
                     if (std::count_if(
-                            team->getOutgoingEdges().begin(),
-                            team->getOutgoingEdges().end(),
+                            rootVertex->getOutgoingEdges().begin(),
+                            rootVertex->getOutgoingEdges().end(),
                             [&iter, &programAgent](std::shared_ptr<const EvoGraph::Edge> edge) {
                                 return edge->getProgram() ==
                                        programAgent.at(*iter);
@@ -200,11 +170,52 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
 
             // Add the connection
             graph->addNewEdge(
-                *team,
-                *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
+                *rootVertex,
+                *leafVertices.at(rng.getUnsignedInt64(0, leafVertices.size() - 1)),
                 programAgent.at(selectedProgramIndex));
         }
     }
+}
+
+void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+{
+    auto outputs = manager->getOutputs();
+    this->isConfigurationValid(params, outputs);
+    
+    // Empty agent manager
+    manager->clearAgents();
+
+    // Number of action vertices needed
+    size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? 1 : outputs.front().getNbValues();
+
+    // Create teams, programs and Actions
+    std::vector<std::shared_ptr<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
+    std::vector<std::shared_ptr<const EvoGraph::Vertex>> teams;
+    std::vector<std::shared_ptr<const Agent>> programAgents;
+
+
+    for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
+        teams.push_back(std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph))->getVertex());
+    }
+
+    // Connect each team with two distinct actions, through two distinct
+    // programs Association here are determinists since randomness would
+    // uselessly complicate the code while bringing no real value since anyway,
+    // Programs have been initialized randomly.
+    auto programMutator = this->getSubMutator(this->programAlgorithmName);
+    auto programManager = manager->getSubManager(this->programAlgorithmName);
+    for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
+
+        // Create a program agent
+        programAgents.push_back(programMutator->initRandomAgent(graph, programManager, params, rng));
+
+        // Add the edge
+        graph->addNewEdge(*teams.at(i / 2), *actions.at(i % actions.size()),
+                         programAgents.at(i));
+    }
+
+    std::vector<std::shared_ptr<const EvoGraph::Vertex>> actionsVertex(actions.begin(), actions.end());
+    this->addAditionnalEdges(graph, actionsVertex, teams, programAgents, params, rng);
 }
 
 void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
@@ -225,9 +236,12 @@ void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(std::shared_ptr<const A
     // Get the actions vertices.
     auto actions = graph->getActions();
 
-    // Add the edge
-    graph->addNewEdge(*tpgAgent, *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
-                        programMutator->initRandomAgent(graph, programManager, params, rng));
+    size_t nbEdges = rng.getUnsignedInt64(2, params.mutation.tpg.maxInitOutgoingEdges);
+    for(size_t idx = 0; idx < nbEdges; idx++){
+        // Add edge
+        graph->addNewEdge(*tpgAgent, *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
+                            programMutator->initRandomAgent(graph, programManager, params, rng));
+    }
 }
 
 void Algorithm::TPG::TPGMutator::crossoverAgents(
@@ -394,7 +408,7 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
 {
     auto subMutator = this->getSubMutator(programAgent->getAlgorithmName());
 
-    std::vector<std::shared_ptr<const Agent>> newSubAgents;
+    std::vector<std::shared_ptr<const Agent>> newSubAgents; //TODOTODOTODO
     bool allUnique;
     // Mutate behavior until it changes (against the archive).
     do {
@@ -425,7 +439,7 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
     } while (!allUnique);
 }
 
- std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::TPG::TPGMutator::mutateSubAgents(
+void Algorithm::TPG::TPGMutator::mutateSubAgents(
     std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
     std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
     RNG::RNG& rng, uint64_t maxNbThreads)
@@ -493,6 +507,4 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
             thread.join();
         }
     }
-
-    return {};
 }

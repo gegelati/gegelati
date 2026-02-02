@@ -343,7 +343,6 @@ const std::vector<std::shared_ptr<const EvoGraph::Edge>> EvoGraph::
 
 void EvoGraph::Graph::removeEdge(const Edge& edge)
 {
-
     // Get the edge (if it is in the graph)
     auto iterator = this->edges.find(&edge);
 

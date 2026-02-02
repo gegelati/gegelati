@@ -47,16 +47,6 @@ namespace Selector {
                  std::shared_ptr<Learn::EvaluationResult>>
             resultsPerAgent;
 
-        /**
-         * \brief context used by the TPGMutator to populate the Graph.
-         *
-         * The context contains various data needed for the creation of the new
-         * population and is update in the updateContext methods.
-         *
-         * This method can be override by the different selectors to specify the
-         * data to each case.
-         */
-        SelectionContext context;
 
         /**
          * \brief manager of the used algorithm. The manager can delete or create agents in the algorithm population
@@ -228,7 +218,7 @@ namespace Selector {
          * preExistingVertices, preExistingEdges and the number of Vertices to
          * create.
          */
-        virtual const SelectionContext& updateContext();
+        virtual std::unique_ptr<SelectionContext> updateContext() const;
 
         /**
          * \brief Method to call at the end of TPGMutator::populateTPG

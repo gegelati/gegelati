@@ -36,26 +36,44 @@ namespace Algorithm::TPG {
         /// Archive used by this TPG
         std::shared_ptr<const Archive> archive;
 
+        /**
+         * \brief Method called during initRandomPopulation
+         * This methods add additionnal edges between the root vertices and the leaf vertices created.
+         * 
+         * \param[in,out] graph the initialized Graph.
+         * \param[in] leafVertices the leaf vertices to connect.
+         * \param[in] rootVertices the root vertices to connect.
+         * \param[in] programAgent the program agents available in the graph.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void addAditionnalEdges(
+            std::shared_ptr<EvoGraph::Graph> graph,
+            std::vector<std::shared_ptr<const EvoGraph::Vertex>> leafVertices,
+            std::vector<std::shared_ptr<const EvoGraph::Vertex>> rootVertices,
+            std::vector<std::shared_ptr<const Agent>> programAgent,
+            const Learn::LearningParameters& params, RNG::RNG& rng);
+
     public:
 
         /**
          * \brief Constructor for TPGMutator
          * 
+         * \param[in] selector Reference to the current selector used by the algorithm.
          * \param[in] archive Archive used by this TPG
          */
-        TPGMutator(std::shared_ptr<const Archive> archive): Mutator(), archive{archive} {};
+        TPGMutator(Selector::Selector& selector, std::shared_ptr<const Archive> archive): Mutator(selector), archive{archive} {};
 
         /**
          * \brief Update the context used by the TPGMutator to populate the Graph.
          * 
          * \param[in] graph the Graph.
          * \param[in] manager the manager to change the agents.
-         * \param[in] selector the Selector of the learningAgent.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void updateSpecificContext(
-            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, 
             const Learn::LearningParameters& params,
             RNG::RNG& rng) override;
 
@@ -240,7 +258,7 @@ namespace Algorithm::TPG {
         /**
          * \brief Specialization of mutateSubAgents method.
          */
-        virtual std::vector<std::shared_ptr<const Agent>> mutateSubAgents(
+        virtual void mutateSubAgents(
             std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
             std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
             RNG::RNG& rng, uint64_t maxNbThreads) override;

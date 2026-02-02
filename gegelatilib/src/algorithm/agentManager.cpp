@@ -34,19 +34,6 @@ const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::AgentManag
     );
 }
 
-void Algorithm::AgentManager::setElement(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element)
-{
-    if(!graph->hasElement(*element)){
-        throw std::runtime_error("AgentManager::setElement: trying to set the element to an agent, but the element is not in the graph.");
-    }
-
-    if(!this->containsAgent(agent)){
-        throw std::runtime_error("AgentManager::setElement: Trying to set the element to an agent not present in the algorithm.");
-    }
-
-    // Set the element
-    (*this->agents.find(agent))->setElement(element);
-}
 
 bool Algorithm::AgentManager::containsAgent(std::shared_ptr<const Agent> agent) const
 {

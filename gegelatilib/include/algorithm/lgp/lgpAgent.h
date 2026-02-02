@@ -58,10 +58,9 @@ namespace Algorithm::LGP {
              * by the LGPAgent.
              * \param[in] outputs outputs of the LGP.
              * \param[in] algorithmName name of the algorithm used.
-             * \param[in] element the element on which the agent is set. Can be a nullptr if no elements are needed
              */
-            LGPAgent(const std::shared_ptr<const Environment>& e, const Output::OutputHandler& outputs, std::string algorithmName, std::shared_ptr<const EvoGraph::Element> element = nullptr)
-                : Agent(algorithmName, element), environment{e}, constants{e->getParams().nbProgramConstant}, outputs{outputs}
+            LGPAgent(const std::shared_ptr<const Environment>& e, const Output::OutputHandler& outputs, std::string algorithmName)
+                : Agent(algorithmName), environment{e}, constants{e->getParams().nbProgramConstant}, outputs{outputs}
             {
                 constants.resetData(); // force all constant to 0 at first.
             };

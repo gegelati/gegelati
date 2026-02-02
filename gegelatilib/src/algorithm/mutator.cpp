@@ -17,16 +17,16 @@ std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(std::strin
 }
 
 void Algorithm::Mutator::updateSpecificContext(
-    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager,
     const Learn::LearningParameters& params,
     RNG::RNG& rng)
 {
-    this->currentContext = new Selector::SelectionContext(selector->updateContext());
+    this->currentContext = std::move(this->selector.get().updateContext());
 
-    
     // Update the context of the subMutators
     for(auto subMutPair: this->subMutators){
-        subMutPair.second->updateSpecificContext(graph, manager, selector, params, rng);
+        auto subManager = manager->getSubManager(subMutPair.first);
+        subMutPair.second->updateSpecificContext(graph, subManager, params, rng);
     }
 }
 
@@ -74,25 +74,13 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::Mutator::initRandomAgent(
     return agent;
 }
 
-std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::Mutator::mutateSubAgents(
-    std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
-    std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, uint64_t maxNbThreads)
-{
-    std::vector<std::shared_ptr<const Agent>> newSubAgents;
-    for(auto agent: agents){
-        this->getSubMutator(agent->getAlgorithmName())->mutateAgent(
-            agent, graph, manager->getSubManager(agent->getAlgorithmName()), newSubAgents, params, rng);
-    }
-    return newSubAgents;
-}
-
 void Algorithm::Mutator::mutatePopulation(
-    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager,
     const Learn::LearningParameters& params,
     RNG::RNG& rng, uint64_t maxNbThreads)
 {
 
-    this->updateSpecificContext(graph, manager, selector, params, rng);
+    this->updateSpecificContext(graph, manager, params, rng);
     // If the graph doesn't contain any clonable teams, call the init procedure.
     // (note that execution of this code is not a very good sign.. maybe an
     // exception would be more appropriate?)
@@ -158,11 +146,6 @@ void Algorithm::Mutator::mutatePopulation(
 
     }
 
-    // Mutate the new subAgents, because subAgents could create subAgents, the list is updated and a while loop is done until the vector is empty.
-    while(!newSubAgents.empty()){
-        newSubAgents = this->mutateSubAgents(newSubAgents, graph, manager, params, rng, maxNbThreads);
-    }
-    
-
-    selector->updateAfterPopulate(graph);
+    // Mutate the new subAgents.
+    this->mutateSubAgents(newSubAgents, graph, manager, params, rng, maxNbThreads);
 }

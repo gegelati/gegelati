@@ -32,9 +32,8 @@ namespace Algorithm::Maple {
          * \brief Main MapleManager constructor.
          * 
          * \param[in] outputs outputs of the agents.
-         * \param[in] archive Archive used by this Maple
          */
-        MapleManager(const Output::OutputHandler& outputs, Archive& archive) : TPGManager(outputs, archive) {};
+        MapleManager(const Output::OutputHandler& outputs) : TPGManager(outputs) {};
 
 
         /**
@@ -43,13 +42,13 @@ namespace Algorithm::Maple {
         virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const override;
 
         /**
-         * \brief Create a new MapleAgent on a specific element.
+         * \brief Create a new MapleAgent on a specific vertex.
          * 
-         * \param[in] element the element associated with the Agent.
+         * \param[in] vertex the vertex associated with the Agent.
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Element> element) override;
+        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex) override;
 
 
         /**

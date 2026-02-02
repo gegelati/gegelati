@@ -14,6 +14,12 @@ namespace Algorithm::TPG {
          */
         class TPGAgent : public Agent
         {
+        protected:
+            
+
+            /// Element of the evolution graph that the agent represent.
+            /// This element can stay a nullptr if it is not required by the agent.
+            std::shared_ptr<const EvoGraph::Vertex> vertex;
 
         public:
 
@@ -23,7 +29,7 @@ namespace Algorithm::TPG {
              * \param[in] vertex the Vertex that the TPGAgent will represent.
              * \param[in] algorithmName name of the algorithm used.
              */
-            TPGAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, std::string algorithmName) : Agent(algorithmName, vertex) {};
+            TPGAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, std::string algorithmName) : vertex{vertex}, Agent(algorithmName) {};
 
 
             /**
@@ -32,12 +38,12 @@ namespace Algorithm::TPG {
             virtual bool isValid() const;
 
             /**
-             * \brief Setter for the element that the agent represent
-             * This element should be a Team
+             * \brief Setter for the vertex that the agent represent
+             * This vertex should be a Team
              * 
-             * \param[in] newElement the new element to set.
+             * \param[in] newVertex the new vertex to set.
              */
-            virtual void setElement(std::shared_ptr<const EvoGraph::Element> newElement) override;
+            virtual void setVertex(std::shared_ptr<const EvoGraph::Vertex> newVertex);
 
             
             /**

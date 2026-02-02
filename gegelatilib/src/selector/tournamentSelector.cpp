@@ -75,103 +75,42 @@ void Selector::TournamentSelector::addToVerticesToDelete(
     this->agentsToDelete.insert(agent);
 }
 
-const Selector::SelectionContext& Selector::TournamentSelector::updateContext()
+std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::updateContext() const 
 {
-    Selector::updateContext();
+    std::unique_ptr<SelectionContext> context = std::move(Selector::updateContext());
 
     const auto& verticesToDeleteRef = this->verticesToDelete;
 
-    /*
-    // Erase the vertex set to be deleted to the list of pre existing vertex.
-    // They are only used for being a new destination
-    this->context.preExistingTeams.erase(
-        std::remove_if(
-            this->context.preExistingTeams.begin(),
-            this->context.preExistingTeams.end(),
-            [verticesToDeleteRef](const EvoGraph::Vertex* vertex) -> bool {
-                return verticesToDeleteRef.find(vertex) !=
-                       verticesToDeleteRef.end();
-            }),
-        this->context.preExistingTeams.end());
-
-    this->context.preExistingActions.erase(
-        std::remove_if(
-            this->context.preExistingActions.begin(),
-            this->context.preExistingActions.end(),
-            [verticesToDeleteRef](const EvoGraph::Vertex* vertex) -> bool {
-                return verticesToDeleteRef.find(vertex) !=
-                       verticesToDeleteRef.end();
-            }),
-        this->context.preExistingActions.end());
-
-    if (!params.selection.tournament.areElitesReproductible) {
-        // The agent not set to be deleted are not used during evolution
-        this->context.teamsClonable.erase(
-            std::remove_if(
-                this->context.teamsClonable.begin(),
-                this->context.teamsClonable.end(),
-                [verticesToDeleteRef](const EvoGraph::Vertex* vertex) -> bool {
-                    return verticesToDeleteRef.find(vertex) ==
-                           verticesToDeleteRef.end();
-                }),
-            this->context.teamsClonable.end());
-
-        this->context.actionsClonable.erase(
-            std::remove_if(
-                this->context.actionsClonable.begin(),
-                this->context.actionsClonable.end(),
-                [verticesToDeleteRef](const EvoGraph::Vertex* vertex) -> bool {
-                    return verticesToDeleteRef.find(vertex) ==
-                           verticesToDeleteRef.end();
-                }),
-            this->context.actionsClonable.end());
-    }
-    else {
-        if (this->context.teamsClonable.size() > 0) {
-            this->context.nbTeamsToCreate -=
-                this->context.preExistingTeams.size();
-        }
-        if (this->context.actionsClonable.size() > 0) {
-            this->context.nbActionsToCreate -=
-                this->context.preExistingActions.size();
-        }
-    }
-
-    this->context.nbTeamsToCreate += this->context.teamsClonable.size();
-    this->context.nbActionsToCreate += this->context.actionsClonable.size();*/
-
-
     const auto& agentsToDeleteRef = this->agentsToDelete;
 
-    this->context.preExistingAgents.erase(
+    context->preExistingAgents.erase(
         std::remove_if(
-            this->context.preExistingAgents.begin(),
-            this->context.preExistingAgents.end(),
+            context->preExistingAgents.begin(),
+            context->preExistingAgents.end(),
             [agentsToDeleteRef](const std::shared_ptr<const Algorithm::Agent> agent) -> bool {
                 return agentsToDeleteRef.find(agent) !=
                        agentsToDeleteRef.end();
             }),
-        this->context.preExistingAgents.end());
+        context->preExistingAgents.end());
 
     if (!params.selection.tournament.areElitesReproductible) {
         // The agent not set to be deleted are not used during evolution
-        this->context.agentsClonable.erase(
+        context->agentsClonable.erase(
             std::remove_if(
-                this->context.agentsClonable.begin(),
-                this->context.agentsClonable.end(),
+                context->agentsClonable.begin(),
+                context->agentsClonable.end(),
                 [agentsToDeleteRef](const std::shared_ptr<const Algorithm::Agent> agent) -> bool {
                     return agentsToDeleteRef.find(agent) ==
                            agentsToDeleteRef.end();
                 }),
-            this->context.agentsClonable.end());
+            context->agentsClonable.end());
     }
-    else if (this->context.agentsClonable.size() > 0) {
-        this->context.nbAgentsToCreate -=
-            this->context.preExistingAgents.size();
+    else if (context->agentsClonable.size() > 0) {
+        context->nbAgentsToCreate -=
+            context->preExistingAgents.size();
     }
 
-    this->context.nbAgentsToCreate += this->context.agentsClonable.size();
-
+    context->nbAgentsToCreate += context->agentsClonable.size();
 
     return context;
 }

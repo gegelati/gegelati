@@ -20,21 +20,19 @@ namespace Algorithm::Maple {
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] algorithmName name of the algorithm used.
-         * \param[in] archive Archive used by the program agents.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        MapleExecutionEngine(const Output::OutputHandler& outputs, std::string algorithmName, Archive& archive, bool isTraining = false): TPGExecutionEngine(outputs, algorithmName, archive, isTraining) {}
+        MapleExecutionEngine(const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false): TPGExecutionEngine(outputs, algorithmName, isTraining) {}
 
         /**
          * \brief TPGExecutionEngine constructor.
          * 
          * \param[in] executedAgent the agent to execute.
-         * \param[in] archive Archive used by the program agents.
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        MapleExecutionEngine(std::shared_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, Archive& archive, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, archive, isTraining) {}
+        MapleExecutionEngine(std::shared_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, isTraining) {}
 
 
         /**

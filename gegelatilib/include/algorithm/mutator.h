@@ -28,24 +28,31 @@ namespace Algorithm {
         /// Sub-mutators for sub-algorithms
         std::map<std::string, std::shared_ptr<Mutator>> subMutators;
 
-        /// Current context update by the selector in updateSpecificContext method.
-        Selector::SelectionContext* currentContext = nullptr;
+        /// Pointer to the current context used by the mutator to populate the Graph.
+        std::unique_ptr<Selector::SelectionContext> currentContext;
+
+        /// Reference to the current context used by the mutator to populate the Graph.
+        std::reference_wrapper<const Selector::Selector> selector;
 
     public:
 
-        Mutator() {};
+        /**
+         * \brief Main Mutator constructor.
+         * 
+         * \param[in] selector Reference to the current selector used by the algorithm.
+         */
+        Mutator(const Selector::Selector& selector) : selector(selector) {};
 
         /**
          * \brief Update the context used by the TPGMutator to populate the Graph.
          * 
          * \param[in] graph the Graph.
          * \param[in] manager the manager to change the agents.
-         * \param[in] selector the Selector of the learningAgent.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void updateSpecificContext(
-            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager,
             const Learn::LearningParameters& params,
             RNG::RNG& rng);
 
@@ -149,7 +156,6 @@ namespace Algorithm {
          * 
          * \param[in] graph the graph to mutate.
          * \param[in] manager the manager to change the agents.
-         * \param[in] selector the Selector of the learningAgent.
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in] maxNbThreads Integer parameter controlling the number of
@@ -160,7 +166,7 @@ namespace Algorithm {
          *   - `n > 1`: Set the number of threads explicitly.
          */
         virtual void mutatePopulation(
-            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::shared_ptr<Selector::Selector> selector,
+            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager,
             const Learn::LearningParameters& params,
             RNG::RNG& rng, uint64_t maxNbThreads = std::thread::hardware_concurrency());
         /**
@@ -205,7 +211,7 @@ namespace Algorithm {
          *   - `0` and `1`: Do not use parallelism.
          *   - `n > 1`: Set the number of threads explicitly.
          */
-        virtual std::vector<std::shared_ptr<const Agent>> mutateSubAgents(std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, uint64_t maxNbThreads);
+        virtual void mutateSubAgents(std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, uint64_t maxNbThreads) = 0;
     };
 }; // namespace Mutator
 

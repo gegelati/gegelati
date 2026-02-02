@@ -31,11 +31,6 @@ namespace Algorithm::Maple {
              * \brief Method that return if the agent is valid for execution.
              */
             virtual bool isValid() const override;
-
-            /**
-             * \brief Method that return if the agent's vertex is currently root.
-             */
-            virtual bool isRoot() const override;
         };
   
 }; // namespace Algorithm::MAPLE

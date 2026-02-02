@@ -36,17 +36,6 @@ void Algorithm::Agent::setAgentID(uint64_t newID)
     }
 }
 
-
-std::shared_ptr<const EvoGraph::Element> Algorithm::Agent::getElement() const
-{
-    return this->element;
-}
-
-void Algorithm::Agent::setElement(std::shared_ptr<const EvoGraph::Element> newElement)
-{
-    this->element = newElement;
-}
-
 bool Algorithm::operator<(const Algorithm::Agent& a, const Algorithm::Agent& b)
 {
     return a.getAgentID() < b.getAgentID();

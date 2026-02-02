@@ -20,10 +20,10 @@ const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::Maple::Map
 
 
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::Maple::MapleManager::createAgent(std::shared_ptr<const EvoGraph::Element> element)
+std::shared_ptr<const Algorithm::Agent> Algorithm::Maple::MapleManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
 {
-    std::shared_ptr<const EvoGraph::Team> vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(element);
-    if(vertex == nullptr){
+    std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
+    if(team == nullptr){
         throw std::runtime_error("MapleManager::createAgent: trying to create an agent on an element from the graph that is not a team.");
     }
 
@@ -44,7 +44,7 @@ void Algorithm::Maple::MapleManager::deleteAgent(std::shared_ptr<const Agent> ag
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::Maple::MapleManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const
 {
-    auto engine = std::make_unique<Maple::MapleExecutionEngine>(this->outputs, this->algorithmName, this->archive, isTraining);
+    auto engine = std::make_unique<Maple::MapleExecutionEngine>(this->outputs, this->algorithmName, isTraining);
 
 
     engine->setProgramExecutionEngine(std::move(this->cGetSubManager(this->programAlgorithmName)

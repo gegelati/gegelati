@@ -46,6 +46,7 @@
 #include "algorithm/tpg/tpgAlgorithm.h"
 #include "algorithm/lgp/lgpAlgorithm.h"
 #include "algorithm/maple/mapleAlgorithm.h"
+#include "algorithm/atpg/atpgAlgorithm.h"
 
 #include "evoGraph/instrumented/actionInstrumented.h"
 #include "evoGraph/instrumented/edgeInstrumented.h"
@@ -340,7 +341,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     auto tpg = la.getAlgorithmAt(0);
-    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), tpg->getSelector(), params, la.getRNG());
+    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), params, la.getRNG());
 
     size_t initialNbVertex = la.getGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
@@ -659,7 +660,6 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
 // Similar to previous test, but with continuous actions and no action programs
 TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
 {
-    return;
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
@@ -672,9 +672,15 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.mutation.tpg.pMutateActionProgram = 0.9;
+    params.mutation.tpg.pProgramMutation = 0.6;
     params.nbThreads = 3;
 
-    Learn::LearningAgent la(cle, tpg, params);
+    
+    auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
+    auto actionMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, actionLgp);
+    tpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, lgp, actionMaple);
+    Learn::ParallelLearningAgent la(cle, tpg, params);// -> recursive jobs to do
 
     la.init();
     bool alt = false;
@@ -684,6 +690,16 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     EvoGraph::Graph& tpg = *la.getGraph();
+
+    // Useful when determinism is changed
+    std::cout << tpg.getNbVertices() << " "
+             <<tpg.getNbRootVertices()<<" "
+             <<tpg.getEdges().size()<<" "
+             <<EvoGraph::Vertex::getVertexIDCounter()<<" "
+             <<EvoGraph::Edge::getEdgeIDCounter()<<" "
+             <<Algorithm::Agent::getAgentIDCounter()<<" "
+
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;
     ASSERT_EQ(tpg.getNbVertices(), 67)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
@@ -985,7 +1001,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
 
-    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), tpg->getSelector(), params, la.getRNG());
+    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), params, la.getRNG());
     size_t initialNbVertex = la.getGraph()->getNbVertices();
 
     // Seed selected so that an action becomes a root during next generation
@@ -1324,7 +1340,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
     auto tpg = pla.getAlgorithmAt(0);
-    tpg->getMutator()->mutatePopulation(pla.getGraph(), tpg->getManager(), tpg->getSelector(), params, pla.getRNG());
+    tpg->getMutator()->mutatePopulation(pla.getGraph(), tpg->getManager(), params, pla.getRNG());
     size_t initialNbVertex = pla.getGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
@@ -1357,7 +1373,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
 
     pla.init();
     // Do the populate call to keep know the number of initial vertex
-    tpg->getMutator()->mutatePopulation(pla.getGraph(), tpg->getManager(), tpg->getSelector(), params, pla.getRNG());
+    tpg->getMutator()->mutatePopulation(pla.getGraph(), tpg->getManager(), params, pla.getRNG());
     
     size_t initialNbVertex = pla.getGraph()->getNbVertices();
     // Seed selected so that an action becomes a root during next generation

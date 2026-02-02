@@ -5,11 +5,11 @@
 
 void Algorithm::TPG::TPGExecutionEngine::setArchive(Archive& archive)
 {
-    this->archive = archive;
+    this->archive = &archive;
 }
 Archive& Algorithm::TPG::TPGExecutionEngine::getArchive()
 {
-    return archive;
+    return *archive;
 }
 
 void Algorithm::TPG::TPGExecutionEngine::setProgramExecutionEngine(std::unique_ptr<ExecutionEngine> programExecutionEngine){
@@ -44,8 +44,8 @@ double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& ed
                                   : result;
 
     // Put the result in the archive before returning it.
-    if (this->isTraining) {
-        this->archive.get().addRecording(*edge.getProgram(), this->programExecutionEngine->getDataSources(),
+    if (this->isTraining && this->archive != nullptr) {
+        this->archive->addRecording(*edge.getProgram(), this->programExecutionEngine->getDataSources(),
                                     result);
     }
     return result;

@@ -128,7 +128,7 @@ namespace Selector {
             /**
              * \brief Specialization of updateContext for MapElites purposes
              */
-            virtual const SelectionContext& updateContext() override;
+            virtual std::unique_ptr<SelectionContext> updateContext() const override;
         };
     }; // namespace MapElites
 

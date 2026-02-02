@@ -9,7 +9,6 @@
 #include "algorithm/tpg/tpgAlgorithm.h"
 #include "algorithm/atpg/atpgManager.h"
 #include "algorithm/atpg/atpgMutator.h"
-#include "algorithm/atpg/atpgAgent.h"
 
 #include "learn/learningEnvironment.h"
 
@@ -59,10 +58,28 @@ namespace Algorithm::ATPG {
              */
             void setActionProgramAlgorithm(std::shared_ptr<Algorithm> programAlgorithm);
 
+
             /**
-             * \brief Initialize the algorithm.
+             * \brief Initialize the managerof the algorithm
+             * 
+             * \param[in] outputs outputs needed for the algorithm.
              */
-            virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;            
+            virtual void initManager(std::shared_ptr<const Output::OutputHandler> outputs) override;
+
+            /**
+             * \brief Initialize the mutator of the algorithm
+             */
+            virtual void initMutator() override;
+
+            /**
+             * \brief Initialize the sub-algorithms of the algorithm
+             * 
+             * \param[in] rng deterministic random generator
+             * \param[in] outputs outputs needed for the algorithm.
+             * \param[in] dataSource input sources of the algorithm.
+             * \param[in] graph the EvoGraph::Graph used by the algorithm.
+             */
+            virtual void initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
     };
 }; // namespace ATPG_Algorithm
 

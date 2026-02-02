@@ -1,32 +1,28 @@
 
 #include "algorithm/atpg/atpgManager.h"
 
-std::shared_ptr<Algorithm::ATPG::ATPGAgent> Algorithm::ATPG::ATPGManager::getATPGAgentFromCst(std::shared_ptr<const Agent> agent)
-{
-    auto iterator = this->agents.find(agent);
-    if(iterator == this->agents.end() || *iterator != agent){
-        throw std::invalid_argument("ATPGManager::getATPGAgentFromCst: the given agent is not managed by this manager.");
-    }
-
-    return std::dynamic_pointer_cast<ATPGAgent>(*iterator);
-}
-
-std::shared_ptr<const Algorithm::Agent> Algorithm::ATPG::ATPGManager::createAgent(std::shared_ptr<const EvoGraph::Element> element)
-{
-    std::shared_ptr<const EvoGraph::Team> vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(element);
-    if(vertex == nullptr){
-        throw std::runtime_error("ATPGManager::createAgent: trying to create an agent on an element from the graph that is not a team.");
-    }
-
-    this->agents.insert(std::make_shared<ATPGAgent>(vertex, this->getAlgorithmName()));
-    return *this->agents.rbegin();
-}
-
 
 void Algorithm::ATPG::ATPGManager::deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) 
 {
-    // Remove the action vertex from the graph
-    graph->removeVertex(*this->getATPGAgentFromCst(agent)->getVertex());
+    std::vector<std::shared_ptr<const EvoGraph::Vertex>> verticesToDelete;
+    // get vertex of agent to delete;
+    auto vertex = this->getTPGAgentFromCst(agent)->getVertex();
+
+    for(auto edge: vertex->getOutgoingEdges()){
+        if(edge->getDestination()->getProgram() != nullptr &&
+           edge->getDestination()->getProgram()->getAlgorithmName() == this->actionProgramAlgorithmName && 
+           edge->getDestination()->getIncomingEdges().size() == 1) {
+            // Remove action vertex from the graph because it is only used by this team and it contains an action program.
+            verticesToDelete.push_back(edge->getDestination());
+        }
+    }
+    // Then remove the vertex of the agent itself10
+    verticesToDelete.push_back(vertex);
+
+    // Remove the action vertices from the graph
+    for(auto vertex: verticesToDelete){
+        graph->removeVertex(*vertex);
+    }
 
     auto iterator = this->agents.find(agent);
     this->agents.erase(iterator);   
@@ -34,7 +30,7 @@ void Algorithm::ATPG::ATPGManager::deleteAgent(std::shared_ptr<const Agent> agen
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::ATPG::ATPGManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const
 {
-    auto engine = std::make_unique<ATPG::ATPGExecutionEngine>(this->outputs, this->algorithmName, this->archive, isTraining);
+    auto engine = std::make_unique<ATPG::ATPGExecutionEngine>(this->outputs, this->algorithmName, isTraining);
 
     engine->setProgramExecutionEngine(
         std::move(this->cGetSubManager(this->programAlgorithmName)->createExecutionEngine(dataSources, isTraining))

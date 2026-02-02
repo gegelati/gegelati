@@ -23,6 +23,7 @@ class LgpMutatorTest : public ::testing::Test
     Learn::LearningParameters params;
     std::shared_ptr<EvoGraph::Graph> graph;
     Output::OutputHandler* lgpOutput;
+    Selector::Selector* selector;
     std::shared_ptr<Algorithm::LGP::LGPManager> lgpManager;
     std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent;
     std::shared_ptr<Algorithm::LGP::LGPMutator> lgpMutator;
@@ -60,7 +61,7 @@ class LgpMutatorTest : public ::testing::Test
         lgpManager->setAlgorithmName("fake");
 
         lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpManager->createAgent(graph));
-        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>();
+        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>(*selector);
     }
 
     virtual void TearDown()

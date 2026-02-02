@@ -70,10 +70,28 @@ namespace Algorithm::TPG {
              */
             virtual void clearUnusedAgentParts() override {};
 
+
             /**
-             * \brief Initialize the algorithm.
+             * \brief Initialize the managerof the algorithm
+             * 
+             * \param[in] outputs outputs needed for the algorithm.
              */
-            virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual void initManager(std::shared_ptr<const Output::OutputHandler> outputs) override;
+
+            /**
+             * \brief Initialize the mutator of the algorithm
+             */
+            virtual void initMutator() override;
+
+            /**
+             * \brief Initialize the sub-algorithms of the algorithm
+             * 
+             * \param[in] rng deterministic random generator
+             * \param[in] outputs outputs needed for the algorithm.
+             * \param[in] dataSource input sources of the algorithm.
+             * \param[in] graph the EvoGraph::Graph used by the algorithm.
+             */
+            virtual void initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
 
             /**
              * \brief Takes a given Agent and creates a job containing it.

@@ -36,35 +36,26 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(
     return this->createAgent(vertex);
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<const EvoGraph::Element> element)
+std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
 {
-    std::shared_ptr<const EvoGraph::Team> vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(element);
-    if(vertex == nullptr){
-        throw std::runtime_error("TPGManager::createAgent: trying to create an agent on an element from the graph that is not a team.");
-    }
-
     this->agents.insert(std::make_shared<TPGAgent>(vertex, this->getAlgorithmName()));
     return *this->agents.rbegin();
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element)
+std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
     if(!this->containsAgent(agent)) {
         throw std::runtime_error("TPGManager::copyAgent: trying to copy an agent that is not managed by this manager.");
     }
 
-    // If element is a null pointer, dupplicate original agent's vertex.
-    if(element == nullptr){
-        element = graph->cloneVertex(*std::dynamic_pointer_cast<const EvoGraph::Team>(agent->getElement()));
-    }
-
-    return this->createAgent(element);
+    auto newVertex = graph->cloneVertex(*std::dynamic_pointer_cast<const EvoGraph::Team>(this->getTPGAgentFromCst(agent)->getVertex()));
+    return this->createAgent(newVertex);
 }
 
 void Algorithm::TPG::TPGManager::deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Do not remove action agents from the graph
-    if(auto vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(agent->getElement())){
+    if(auto vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(this->getTPGAgentFromCst(agent)->getVertex())){
         graph->removeVertex(*vertex);
     }
 
@@ -72,21 +63,21 @@ void Algorithm::TPG::TPGManager::deleteAgent(std::shared_ptr<const Agent> agent,
     this->agents.erase(iterator);   
 }
 
-void Algorithm::TPG::TPGManager::setElement(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Element> element)
+void Algorithm::TPG::TPGManager::setVertex(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex)
 {
-    std::shared_ptr<const EvoGraph::Team> vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(element);
-    if(vertex == nullptr){
-        throw std::runtime_error("TPGManager::setElement: trying to set an agent on an element from the graph that is not a team.");
+    std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
+    if(team == nullptr){
+        throw std::runtime_error("TPGManager::setVertex: trying to set an agent on a vertex from the graph that is not a team.");
     }
 
     // Set the element
-    AgentManager::setElement(agent, graph, element);
+    this->getTPGAgentFromCst(agent)->setVertex(team);
 }
 
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::TPG::TPGManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const
 {
-    auto engine = std::make_unique<TPG::TPGExecutionEngine>(this->outputs, this->algorithmName, this->archive, isTraining);
+    auto engine = std::make_unique<TPG::TPGExecutionEngine>(this->outputs, this->algorithmName, isTraining);
 
     engine->setProgramExecutionEngine(
         std::move(this->cGetSubManager(this->programAlgorithmName)->createExecutionEngine(dataSources, isTraining))
