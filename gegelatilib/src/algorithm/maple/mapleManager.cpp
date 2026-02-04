@@ -4,12 +4,7 @@
 
 std::shared_ptr<Algorithm::Maple::MapleAgent> Algorithm::Maple::MapleManager::getMapleAgentFromCst(std::shared_ptr<const Agent> agent)
 {
-    auto iterator = this->agents.find(agent);
-    if(iterator == this->agents.end() || *iterator != agent){
-        throw std::invalid_argument("MapleManager::getMapleAgentFromCst: the given agent is not managed by this manager.");
-    }
-
-    return std::dynamic_pointer_cast<MapleAgent>(*iterator);
+    return std::dynamic_pointer_cast<MapleAgent>(this->getAgentFromCst(agent));
 }
 
 const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::Maple::MapleManager::getAgents() const

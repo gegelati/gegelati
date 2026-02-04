@@ -1,13 +1,17 @@
 
 #include "algorithm/tpg/tpgAlgorithm.h"
 
+std::unique_ptr<Algorithm::Algorithm> Algorithm::TPG::TPGAlgorithm::copy() const
+{
+    return std::make_unique<TPGAlgorithm>(this->params, this->cGetSubAlgorithm(this->programAlgorithmName), this->algorithmName + "_copy");
+}
 
-void Algorithm::TPG::TPGAlgorithm::setProgramAlgorithm(std::shared_ptr<Algorithm> programAlgorithm)
+void Algorithm::TPG::TPGAlgorithm::setProgramAlgorithm(const Algorithm& programAlgorithm)
 {
     Algorithm::Algorithm::addSubAlgorithm(programAlgorithm);
 
     // Set program algorithm name
-    this->programAlgorithmName = programAlgorithm->getAlgorithmName();
+    this->programAlgorithmName = this->subAlgorithms.back()->getAlgorithmName();
 }
 
 
@@ -31,7 +35,7 @@ void Algorithm::TPG::TPGAlgorithm::initMutator()
 void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Initialize program algorithm.
-    std::shared_ptr<Algorithm> programAlgo = this->getSubAlgorithm(this->programAlgorithmName);
+    Algorithm& programAlgo = this->getSubAlgorithm(this->programAlgorithmName);
 
     // Program output is only size 1, except for continuous outputs where we create more outputs (one per continuous output of the TPG)
     auto programOutput = std::make_shared<Output::OutputHandler>(Output::Output());
@@ -40,14 +44,14 @@ void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_
     }
 
     // Init program algorithm
-    programAlgo->initAlgorithm(rng, programOutput, dataSource, graph);
+    programAlgo.initAlgorithm(rng, programOutput, dataSource, graph);
 
     // Add program manager and mutator to TPG manager and mutator
-    this->manager->addSubManager(programAlgo->getManager());
+    this->manager->addSubManager(programAlgo.getManager());
     std::shared_ptr<TPG::TPGManager> tpgManager = std::dynamic_pointer_cast<TPG::TPGManager>(this->manager);
     tpgManager->setProgramAlgorithmName(this->programAlgorithmName);
 
-    this->mutator->addSubMutator(programAlgo->getMutator());
+    this->mutator->addSubMutator(programAlgo.getMutator());
     std::shared_ptr<TPG::TPGMutator> tpgMutator = std::dynamic_pointer_cast<TPG::TPGMutator>(this->mutator);
     tpgMutator->setProgramAlgorithmName(this->programAlgorithmName);
 }

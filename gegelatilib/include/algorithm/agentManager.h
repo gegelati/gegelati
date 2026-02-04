@@ -38,6 +38,16 @@ namespace Algorithm {
         /// Number of outputs of the agents
         const Output::OutputHandler& outputs;
 
+        /// Managers of aggregated algorithms
+        std::vector<std::reference_wrapper<const AgentManager>> aggregatedManagers;
+
+        /**
+         * \brief Get the Agent from a const Agent pointer.
+         * 
+         * \param[in] agent the Agent to cast.
+         */
+        virtual std::shared_ptr<Agent> getAgentFromCst(std::shared_ptr<const Agent> agent);
+
     public:
 
         /**
@@ -65,6 +75,16 @@ namespace Algorithm {
         virtual void addSubManager(std::shared_ptr<AgentManager> subManager);
 
         /**
+         * \brief Method that add an access from this manager to another manager.
+         * 
+         * The manager need to be the same type.
+         * This access allows for the manager to dupplicate an agent from the accessed manager to its own agents.
+         * 
+         * \param[in] managerAggregated the manager to access.
+         */
+        virtual void addAggregatedManager(const AgentManager& managerAggregated);
+
+        /**
          * \brief return the subManager corresponding to the name of the algorithm given.
          * 
          * \param[in] nameAlgorithm name of the algorithm given.
@@ -76,8 +96,21 @@ namespace Algorithm {
          * 
          * \param[in] nameAlgorithm name of the algorithm given.
          */
-        virtual std::shared_ptr<AgentManager> cGetSubManager(std::string nameAlgorithm) const;
+        virtual std::shared_ptr<const AgentManager> cGetSubManager(std::string nameAlgorithm) const;
 
+        /**
+         * \brief return the aggregated manager corresponding to the name of the algorithm given.
+         * 
+         * \param[in] nameAlgorithm name of the algorithm given.
+         */
+        virtual const AgentManager& getAggregatedManager(std::string nameAlgorithm) const;
+
+        /**
+         * \brief return the aggregated managers of this manager
+         */
+        virtual const std::vector<std::reference_wrapper<const AgentManager>>& getAggregatedManagers() const;
+
+        
         /**
          * \brief Set the name of the algorithm.
          */
@@ -94,6 +127,15 @@ namespace Algorithm {
          * \param[in] agent searched agent.
          */
         virtual bool containsAgent(std::shared_ptr<const Agent> agent) const;
+
+        /**
+         * \brief method that indicate if the agent is accessible by the manager.
+         * 
+         * An agent is accessible by the manager if it is created by the manager or by one of its aggregated managers.
+         * 
+         * \param[in] agent searched agent.
+         */
+        virtual bool isAgentAccessible(std::shared_ptr<const Agent> agent) const;
 
         /**
          * \brief Create a new Agent of the type used by the current algorithm.

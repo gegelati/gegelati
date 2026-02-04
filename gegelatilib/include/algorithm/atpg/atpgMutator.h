@@ -24,7 +24,7 @@ namespace Algorithm::ATPG {
         std::string actionProgramAlgorithmName;
 
         /// Pre-existing program teams elements used for mutation operations.
-        std::vector<std::shared_ptr<const EvoGraph::Team>> preExistingProgramTeams;
+        std::vector<std::shared_ptr<const Agent>> preExistingActionProgram;
 
     public:
 

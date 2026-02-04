@@ -35,21 +35,11 @@ namespace Algorithm::TPG {
              * \brief Main Algorithm constructor.
              * 
              * \param[in] params the LearningParameters used by the Algorithm.
-             * \param[in] algorithmName name of the algorithm used.
-             */
-            TPGAlgorithm(const Learn::LearningParameters& params, std::string algorithmName = "TPG")
-                : Algorithm(params, algorithmName), archive{std::make_shared<Archive>(params.archiveSize, params.archivingProbability)}{};
-
-
-            /**
-             * \brief Main Algorithm constructor.
-             * 
-             * \param[in] params the LearningParameters used by the Algorithm.
              * \param[in] programAlgorithm the sub-algorithm used to manipulate programs.
              * \param[in] algorithmName name of the algorithm used.
              */
-            TPGAlgorithm(const Learn::LearningParameters& params, std::shared_ptr<Algorithm> programAlgorithm, std::string algorithmName = "TPG")
-                : TPGAlgorithm(params, algorithmName){
+            TPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "TPG")
+                : Algorithm(params, algorithmName), archive{std::make_shared<Archive>(params.archiveSize, params.archivingProbability)} {
                 this->setProgramAlgorithm(programAlgorithm);
             };
 
@@ -57,7 +47,7 @@ namespace Algorithm::TPG {
              * \brief Add the program sub-algorithm to the TPGAlgorithm.
              * 
              */
-            void setProgramAlgorithm(std::shared_ptr<Algorithm> programAlgorithm);
+            void setProgramAlgorithm(const Algorithm& programAlgorithm);
 
 
             /**
@@ -92,6 +82,12 @@ namespace Algorithm::TPG {
              * \param[in] graph the EvoGraph::Graph used by the algorithm.
              */
             virtual void initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+
+
+            /**
+             * Copy and return a uniqure pointer of the algorithm
+             */
+            virtual std::unique_ptr<Algorithm> copy() const override;
 
             /**
              * \brief Takes a given Agent and creates a job containing it.

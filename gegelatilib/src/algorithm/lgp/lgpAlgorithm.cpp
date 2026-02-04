@@ -3,6 +3,10 @@
 
 
 
+std::unique_ptr<Algorithm::Algorithm> Algorithm::LGP::LGPAlgorithm::copy() const
+{
+    return std::make_unique<LGPAlgorithm>(this->params, this->iSet, this->algorithmName + "_copy");
+}
 
  std::shared_ptr<const Environment> Algorithm::LGP::LGPAlgorithm::getEnvironment() const
 {

@@ -9,7 +9,9 @@ void Algorithm::ATPG::ATPGMutator::updateSpecificContext(
 {
     TPG::TPGMutator::updateSpecificContext(graph, manager, params, rng);
 
+    std::vector<std::shared_ptr<const EvoGraph::Team>> preExistingProgramTeams;
     auto& algorithmName = this->actionProgramAlgorithmName;
+    this->preExistingActionProgram.clear();
 
     // Separate teams with action programs from those without
     auto it = std::partition(
@@ -20,15 +22,31 @@ void Algorithm::ATPG::ATPGMutator::updateSpecificContext(
         }
     );
 
-    // Add the deleted teams to this->preExistingProgramTeams
-    this->preExistingProgramTeams.insert(
-        this->preExistingProgramTeams.end(),
+    // Add the deleted teams to preExistingProgramTeams
+    preExistingProgramTeams.insert(
+        preExistingProgramTeams.end(),
         it,
         this->preExistingTeams.end()
     );
 
     // Remove teams with action programs from preExistingTeams
     this->preExistingTeams.erase(it, this->preExistingTeams.end());
+
+    for(const auto& team: preExistingProgramTeams){
+        this->preExistingActionProgram.push_back(team->getProgram());
+    }
+    
+    // Add agents contains by all aggregated managers.
+    const AgentManager& actionProgramManager = *manager->cGetSubManager(this->actionProgramAlgorithmName);
+    for(auto const& accessedManager: actionProgramManager.getAggregatedManagers()){
+        const std::vector<std::shared_ptr<const Algorithm::Agent>> accessedAgents(accessedManager.get().getAgents());
+        this->preExistingActionProgram.insert(
+            this->preExistingActionProgram.end(),
+            accessedAgents.begin(),
+            accessedAgents.end()
+        );
+    }
+
 }
 
 
@@ -141,9 +159,27 @@ void Algorithm::ATPG::ATPGMutator::mutateEdgeDestination(
     // as the presence of cycle in TPGs is not possible according to the current
     // mutation process.
     if (targetAction) {
-        // Get corresponding agent program of the team
-        target = this->preExistingProgramTeams.at(
-            rng.getUnsignedInt64(0, this->preExistingProgramTeams.size() - 1));
+        
+        // Create a new team
+        // When a team is dupplicated, it is dupplicated with its corresponding edges, but not the destination team, thus we have to create a new one.
+        target = graph->addNewTeam();
+
+        std::shared_ptr<const Agent> targetAgent = this->preExistingActionProgram.at(
+            rng.getUnsignedInt64(0, this->preExistingActionProgram.size() - 1));
+
+        // Target name agent is different from algorithm
+        if(targetAgent->getAlgorithmName() != this->actionProgramAlgorithmName){
+            // Try to find an aggregated manager with this name (will throw if not found)
+            AgentManager& actionProgramManager = *manager->getSubManager(this->actionProgramAlgorithmName);
+            const AgentManager& aggregatedManager = actionProgramManager.getAggregatedManager(targetAgent->getAlgorithmName());
+
+            // Dupplication to exchange the agent from aggregatedManager to actionProgramManager.
+            std::shared_ptr<const Agent> newTargetAgent = actionProgramManager.copyAgent(targetAgent, graph);
+            targetAgent = newTargetAgent;
+        }
+
+        // Set corresponding agent to the new team
+        graph->setVertexProgram(*target, targetAgent);
     } else {
         target = this->preExistingTeams.at(
             rng.getUnsignedInt64(0, this->preExistingTeams.size() - 1));

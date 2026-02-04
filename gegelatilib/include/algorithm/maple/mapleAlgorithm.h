@@ -22,20 +22,10 @@ namespace Algorithm::Maple {
              * \brief Main Algorithm constructor.
              * 
              * \param[in] params the LearningParameters used by the Algorithm.
-             * \param[in] algorithmName name of the algorithm used.
-             */
-            MapleAlgorithm(const Learn::LearningParameters& params, std::string algorithmName = "MAPLE")
-                : TPG::TPGAlgorithm(params, algorithmName){
-            };
-
-            /**
-             * \brief Main Algorithm constructor.
-             * 
-             * \param[in] params the LearningParameters used by the Algorithm.
              * \param[in] programAlgorithm the sub-algorithm used to manipulate programs.
              * \param[in] algorithmName name of the algorithm used.
              */
-            MapleAlgorithm(const Learn::LearningParameters& params, std::shared_ptr<Algorithm> programAlgorithm, std::string algorithmName = "MAPLE")
+            MapleAlgorithm(const Learn::LearningParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "MAPLE")
                 : TPG::TPGAlgorithm(params, programAlgorithm, algorithmName){
             };
 
@@ -51,6 +41,12 @@ namespace Algorithm::Maple {
              * \brief Initialize the mutator of the algorithm
              */
             virtual void initMutator() override;
+
+            
+            /**
+             * Copy and return a uniqure pointer of the algorithm
+             */
+            virtual std::unique_ptr<Algorithm> copy() const override;
             
     };
 

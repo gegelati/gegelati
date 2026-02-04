@@ -2,34 +2,44 @@
 #include "algorithm/algorithm.h"
 
 
-std::shared_ptr<Algorithm::Algorithm> Algorithm::Algorithm::getSubAlgorithm(std::string nameAlgorithm)
+Algorithm::Algorithm& Algorithm::Algorithm::getSubAlgorithm(std::string nameAlgorithm)
 {
     for (auto& subAlgorithm : this->subAlgorithms) {
         if (subAlgorithm->getAlgorithmName() == nameAlgorithm) {
-            return subAlgorithm;
+            return *subAlgorithm;
         }
     }
     throw std::runtime_error("No sub-algorithm with name " + nameAlgorithm + " found.");
 }
-std::shared_ptr<const Algorithm::Algorithm> Algorithm::Algorithm::cGetSubAlgorithm(std::string nameAlgorithm) const
+const Algorithm::Algorithm& Algorithm::Algorithm::cGetSubAlgorithm(std::string nameAlgorithm) const
 {
     for (auto& subAlgorithm : this->subAlgorithms) {
         if (subAlgorithm->getAlgorithmName() == nameAlgorithm) {
-            return subAlgorithm;
+            return *subAlgorithm;
         }
     }
     throw std::runtime_error("No sub-algorithm with name " + nameAlgorithm + " found.");
 }
 
-void Algorithm::Algorithm::addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorithm)
+void Algorithm::Algorithm::addSubAlgorithm(const Algorithm& subAlgorithm)
 {
     // Throw if the sub-algorithm is already present
     for (auto& existingSubAlgorithm : this->subAlgorithms) {
-        if (existingSubAlgorithm->getAlgorithmName() == subAlgorithm->getAlgorithmName()) {
-            throw std::runtime_error("Algorithm::addSubAlgorithm: Sub-algorithm with name " + subAlgorithm->getAlgorithmName() + " is already present.");
+        if (existingSubAlgorithm->getAlgorithmName() == subAlgorithm.getAlgorithmName()) {
+            throw std::runtime_error("Algorithm::addSubAlgorithm: Sub-algorithm with name " + subAlgorithm.getAlgorithmName() + " is already present.");
         }
     }
-    this->subAlgorithms.push_back(subAlgorithm);
+    this->subAlgorithms.push_back(subAlgorithm.copy());
+}
+
+void Algorithm::Algorithm::addAggregatedAlgorithm(const Algorithm& aggregatedAlgorithm){
+
+    // Check that the types are the same
+    if(typeid(*this) != typeid(aggregatedAlgorithm)){
+        throw std::runtime_error("Algorithm::addAlgorithmAccess: Cannot add access to an algorithm of a different type.");
+    }
+
+    this->aggregatedAlgorithms.push_back(aggregatedAlgorithm);
 }
 
 std::shared_ptr<const EvoGraph::Graph> Algorithm::Algorithm::getGraph() const
@@ -94,9 +104,25 @@ void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Ou
 
     this->initSubAlgorithms(rng, outputs, dataSource, graph);
 
+    // Add the aggregated algorithm
+    for(const auto& aggregatedAlgorithm: this->aggregatedAlgorithms){
+        this->manager->addAggregatedManager(*aggregatedAlgorithm.get().getManagerCst());
+    }
+
     // Clear the best agent in the selector
     this->selector->forgetPreviousResults();
 
+}
+
+void Algorithm::Algorithm::clearAlgorithm()
+{
+    for(const auto& subAlgorithm: subAlgorithms){
+        subAlgorithm->clearAlgorithm();
+    }
+    this->manager->clearAgents();
+    this->mutator = nullptr;
+    this->selector = nullptr;
+    this->manager = nullptr;
 }
 
 void Algorithm::Algorithm::initPopulation(RNG::RNG& rng)

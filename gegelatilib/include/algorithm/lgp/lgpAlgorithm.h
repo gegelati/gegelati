@@ -18,9 +18,6 @@ namespace Algorithm::LGP {
     {
         protected:
 
-            /// Archive used during the training process
-            std::shared_ptr<Archive> archive;
-
             /// Environment for executing LGP 
             std::shared_ptr<Environment> env;
 
@@ -70,6 +67,11 @@ namespace Algorithm::LGP {
              * \brief Initialize the algorithm.
              */
             virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+
+            /**
+             * Copy and return a uniqure pointer of the algorithm
+             */
+            virtual std::unique_ptr<Algorithm> copy() const override;
         };
 }; // namespace LGP_Algorithm
 

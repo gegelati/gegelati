@@ -108,7 +108,7 @@ class LearningAgentTest : public ::testing::Test
         params.nbProgramConstant = 5;
 
         lgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set);
-        tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+        tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     }
 
     virtual void TearDown()
@@ -143,7 +143,7 @@ TEST_F(LearningAgentTest, Init)
 
         
     params.selection._selectionMode = "wrongSelector";
-    tpg =  std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg =  std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::LearningAgent la2(le, tpg, params);
 
     ASSERT_THROW(la2.init(), std::runtime_error)
@@ -301,7 +301,7 @@ TEST_F(LearningAgentTest, EvalAllRoots)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::LearningAgent la(le, tpg, params);
 
     la.init();
@@ -416,7 +416,7 @@ TEST_F(LearningAgentTest, TrainPortability)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.nbThreads = 3;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::LearningAgent la(le, tpg, params);
 
     la.init();
@@ -617,7 +617,7 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 1;
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
 
     Learn::LearningAgent la(cle, tpg, params);
 
@@ -676,7 +676,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
 
     
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
-    tpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, lgp, actionLgp);
+    tpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, *lgp, *actionLgp);
     Learn::LearningAgent la(cle, tpg, params);
 
     la.init();
@@ -688,13 +688,23 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     // the RNG without being identical.
     EvoGraph::Graph& tpg = *la.getGraph();
 
-    ASSERT_EQ(tpg.getNbVertices(), 51)
+    /*std::cout << tpg.getNbVertices() << " "
+             <<tpg.getNbRootVertices()<<" "
+             <<tpg.getEdges().size()<<" "
+             <<EvoGraph::Vertex::getVertexIDCounter()<<" "
+             <<EvoGraph::Edge::getEdgeIDCounter()<<" "
+             <<Algorithm::Agent::getAgentIDCounter()<<" "
+
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;
+
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
+    ASSERT_EQ(tpg.getNbVertices(), 53)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 25)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 107)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 221)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 226)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 675)
         << "Graph does not have the expected determinst characteristics.";
@@ -727,8 +737,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
 
     
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
-    auto actionMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, actionLgp);
-    tpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, lgp, actionMaple);
+    auto actionMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, *actionLgp);
+    tpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, *lgp, *actionMaple);
     Learn::LearningAgent la(cle, tpg, params);
 
     la.init();
@@ -756,7 +766,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
         << "Graph does not have the expected determinist characteristics.";
     ASSERT_EQ(tpg.getEdges().size(), 749)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 780)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 781)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1446)
         << "Graph does not have the expected determinst characteristics.";
@@ -789,14 +799,14 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
 
     
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
-    auto actionMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, actionLgp);
-    tpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, lgp, actionMaple);
+    auto actionMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, *actionLgp);
+    auto matpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, *lgp, *actionMaple);
 
     auto standaloneLGP = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGP1");
 
     auto standaloneLGPforMaple = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGP2");
-    auto standaloneMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, standaloneLGPforMaple, "Maple2");
-    std::vector<std::shared_ptr<Algorithm::Algorithm>> listAlgo = {tpg, standaloneLGP, standaloneMaple};
+    auto standaloneMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, *standaloneLGPforMaple, "Maple2");
+    std::vector<std::shared_ptr<Algorithm::Algorithm>> listAlgo = {matpg, standaloneLGP, standaloneMaple};
     Learn::LearningAgent la(cle, listAlgo, params);
 
     la.init();
@@ -809,116 +819,93 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
     EvoGraph::Graph& tpg = *la.getGraph();
 
     // Useful when determinism is changed
-    std::cout << tpg.getNbVertices() << " "
+    /*std::cout << tpg.getNbVertices() << " "
              <<tpg.getNbRootVertices()<<" "
              <<tpg.getEdges().size()<<" "
              <<EvoGraph::Vertex::getVertexIDCounter()<<" "
              <<EvoGraph::Edge::getEdgeIDCounter()<<" "
              <<Algorithm::Agent::getAgentIDCounter()<<" "
 
-             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
 
-    ASSERT_EQ(tpg.getNbVertices(), 418)
+    ASSERT_EQ(tpg.getNbVertices(), 421)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 341)
+    ASSERT_EQ(tpg.getNbRootVertices(), 356)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 749)
+    ASSERT_EQ(tpg.getEdges().size(), 777)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 780)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 906)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1446)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1790)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1120)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1628)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              10356165115002185964U)
+              4543387907155230413U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
-// Similar to previous test, but with MATPG solution and tournament (no need for
-// MAPLE because it is included in MATPG)
-TEST_F(LearningAgentTest, TrainContinuousWithMATPGTournament)
+
+// Similar to previous test, but with MATPG solution (no need for MAPLE because
+// it is included in MATPG)
+TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
 {
-    return;
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 5;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 20;
     params.mutation.tpg.nbRoots = 30;
     params.mutation.tpg.useActionProgram = true;
-    params.mutation.tpg.useMultiActionProgram = true;
-    params.mutation.tpg.teamAccessAllActions = false;
-    params.mutation.tpg.ratioTeamsOverActions = 0.3333;
-    params.selection._selectionMode = "tournament";
-    params.selection.tournament.sizeTournament = 3;
-    params.selection.tournament.ratioSavedRoots = 0.2;
-    params.mutation.tpg.nbRoots = 100;
-    params.nbThreads = 3;
     // A root may be evaluated at most for 3 generations
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.mutation.tpg.pMutateActionProgram = 0.9;
+    params.mutation.tpg.pProgramMutation = 0.6;
+    params.nbThreads = 1;
 
-    Learn::LearningAgent la(cle, tpg, params);
+    auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
+    auto actionMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, *actionLgp);
+    auto atpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, *lgp, *actionMaple);
+    atpg->addAggregatedActionProgramAlgorithm(*actionMaple);
+    std::vector<std::shared_ptr<Algorithm::Algorithm>> listAlgo = { actionMaple, atpg}; // ORDER MUST BE AUTOMATIC
+    Learn::LearningAgent la(cle, listAlgo, params);
 
     la.init();
     bool alt = false;
     la.train(alt, false);
-    EvoGraph::Graph& graph = *la.getGraph();
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    EvoGraph::Graph& tpg = *la.getGraph();
 
     // Useful when determinism is changed
-    /*std::cout<<tpg.getNbVertices()<<" "
+    /*std::cout << tpg.getNbVertices() << " "
              <<tpg.getNbRootVertices()<<" "
              <<tpg.getEdges().size()<<" "
              <<EvoGraph::Vertex::getVertexIDCounter()<<" "
              <<EvoGraph::Edge::getEdgeIDCounter()<<" "
-             <<Program::Program::getProgramIDCounter()<<" "
-             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl*/
-    ;
+             <<Algorithm::Agent::getAgentIDCounter()<<" "
 
-    // It is quite unlikely that two different TPGs after 20 generations
-    // end up with the same number of vertices, roots, edges and calls to
-    // the RNG without being identical.
-    ASSERT_EQ(graph.getNbVertices(), 88)
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
+
+    ASSERT_EQ(tpg.getNbVertices(), 396)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(graph.getNbRootVertices(), 48)
+    ASSERT_EQ(tpg.getNbRootVertices(), 337)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(graph.getEdges().size(), 249)
+    ASSERT_EQ(tpg.getEdges().size(), 719)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 2000)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 867)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 7293)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1674)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Program::Program::getProgramIDCounter(), 3911)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1404)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 3136819910087175608U)
-        << "Graph does not have the expected determinst characteristics.";
-
-    params.selection.tournament.areElitesReproductible = true;
-    Learn::LearningAgent la2(cle, tpg, params);
-
-    la2.init();
-    la2.train(alt, false);
-    EvoGraph::Graph& graph2 = *la2.getGraph();
-
-    // It is quite unlikely that two different TPGs after 20 generations
-    // end up with the same number of vertices, roots, edges and calls to
-    // the RNG without being identical.
-    ASSERT_EQ(graph2.getNbVertices(), 78)
-        << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(graph2.getNbRootVertices(), 46)
-        << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(graph2.getEdges().size(), 239)
-        << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 4011)
-        << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 14700)
-        << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Program::Program::getProgramIDCounter(), 7769)
-        << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la2.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              14919253376982807560U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              10402365984243252802U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -939,7 +926,7 @@ TEST_F(LearningAgentTest, TrainContinuousMaple)
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 1;
 
-    auto maple = std::make_shared<Algorithm::MapleAlgorithm>(params, lgp);
+    auto maple = std::make_shared<Algorithm::MapleAlgorithm>(params, *lgp);
     Learn::LearningAgent la(cle, maple, params);
 
     la.init();
@@ -1052,7 +1039,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     params.selection.truncation.ratioDeletedRoots =
         0.5; // high number to force the apparition of root action.
     params.nbThreads = 1;
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::LearningAgent la(cle, tpg, params);
 
     la.init();
@@ -1102,7 +1089,7 @@ TEST_F(ParallelLearningAgentTest, Init)
 
         
     params.selection._selectionMode = "wrongSelector";
-    tpg =  std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg =  std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent pla2(le, tpg, params);
 
     ASSERT_THROW(pla2.init(), std::runtime_error)
@@ -1166,7 +1153,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.nbThreads = 4;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent pla(le, tpg, params);
 
     pla.init();
@@ -1191,7 +1178,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     params.nbIterationsPerPolicyEvaluation = 10;
 
 
-    auto tpgLa = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    auto tpgLa = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::LearningAgent la(le, tpgLa, params);
     la.init(0); // Reset RNG to 0
     auto results = la.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
@@ -1199,7 +1186,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     Learn::LearningParameters paramsSequential = params;
     paramsSequential.nbThreads = 1;
-    auto tpgSequential = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    auto tpgSequential = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent plaSequential(le, tpgSequential, paramsSequential);
 
     plaSequential.init(0); // Reset centralized RNG to 0
@@ -1210,7 +1197,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     Learn::LearningParameters paramsParallel = params;
     paramsParallel.nbThreads = 4;
-    auto tpgParallel = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    auto tpgParallel = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent plaParallel(le, tpgParallel, paramsParallel);
 
     plaParallel.init(0); // Reset centralized RNG to 0
@@ -1304,7 +1291,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
 
-    auto tpgLa = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    auto tpgLa = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::LearningAgent la(le, tpgLa, params);
     la.init(0); // Reset centralized RNG to 0
     auto results = la.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
@@ -1313,7 +1300,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     Learn::LearningParameters paramsSequential = params;
     paramsSequential.nbThreads = 1;
     
-    auto tpgSequential = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    auto tpgSequential = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent plaSequential(le, tpgSequential, paramsSequential);
 
     plaSequential.init(0); // Reset centralized RNG to 0
@@ -1324,7 +1311,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     Learn::LearningParameters paramsParallel = params;
     paramsParallel.nbThreads = 4;
-    auto tpgParallel = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    auto tpgParallel = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent plaParallel(le, tpgParallel, paramsParallel);
 
     plaParallel.init(0); // Reset centralized RNG to 0
@@ -1426,7 +1413,7 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
         0.85; // high number to force the apparition of root action.
     params.nbThreads = 4;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent pla(le, tpg, params);
 
     pla.init();
@@ -1459,7 +1446,7 @@ TEST_F(ParallelLearningAgentTest, TrainSequential)
         params.nbIterationsPerPolicyEvaluation * 2;
     params.nbThreads = 1;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent pla(le, tpg, params);
 
     pla.init();
@@ -1553,7 +1540,7 @@ TEST_F(ParallelLearningAgentTest, TrainPortability)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.nbThreads = 3;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, lgp);
+    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent la(le, tpg, params);
 
     la.init();
@@ -1607,7 +1594,7 @@ TEST_F(ParallelLearningAgentTest, TrainContinuousMaple)
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 3;
 
-    auto maple = std::make_shared<Algorithm::MapleAlgorithm>(params, lgp);
+    auto maple = std::make_shared<Algorithm::MapleAlgorithm>(params, *lgp);
     Learn::ParallelLearningAgent la(cle, maple, params);
 
     la.init();

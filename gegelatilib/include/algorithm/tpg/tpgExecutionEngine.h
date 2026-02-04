@@ -20,7 +20,7 @@ namespace Algorithm::TPG {
     protected:
 
         /// Execution engine used to execute the program of the TPG agents
-        ExecutionEngine* programExecutionEngine;
+        ExecutionEngine* programExecutionEngine = nullptr;
 
         /// Archive used by the program agents.
         Archive* archive = nullptr;

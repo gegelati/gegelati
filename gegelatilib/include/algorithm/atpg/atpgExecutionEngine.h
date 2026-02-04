@@ -13,7 +13,7 @@ namespace Algorithm::ATPG {
     protected:
 
         /// Execution engine used to execute the action program of the ActionTPG agents
-        ExecutionEngine* actionProgramExecutionEngine;
+        ExecutionEngine* actionProgramExecutionEngine = nullptr;
 
     public:
 

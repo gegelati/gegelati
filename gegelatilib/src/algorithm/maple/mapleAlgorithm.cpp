@@ -1,6 +1,10 @@
 
 #include "algorithm/maple/mapleAlgorithm.h"
 
+std::unique_ptr<Algorithm::Algorithm> Algorithm::Maple::MapleAlgorithm::copy() const
+{
+    return std::make_unique<MapleAlgorithm>(this->params, this->cGetSubAlgorithm(this->programAlgorithmName), this->algorithmName + "_copy");
+}
 
 void Algorithm::Maple::MapleAlgorithm::initManager(std::shared_ptr<const Output::OutputHandler> outputs)
 {

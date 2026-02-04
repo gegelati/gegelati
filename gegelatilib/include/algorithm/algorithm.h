@@ -43,23 +43,27 @@ namespace Algorithm {
         std::shared_ptr<const Output::OutputHandler> outputs;
 
         /// Sub-algorithms used by the algorithm
-        std::vector<std::shared_ptr<Algorithm>> subAlgorithms;
+        std::vector<std::unique_ptr<Algorithm>> subAlgorithms;
         /// Name of the algorithm.
         std::string algorithmName;
+
+        /// aggregated algorithms
+        std::vector<std::reference_wrapper<const Algorithm>> aggregatedAlgorithms;
         
         /**
          * \brief return the subAlgorithm corresponding to the name of the algorithm given.
          * 
          * \param[in] nameAlgorithm name of the algorithm given.
          */
-        std::shared_ptr<Algorithm> getSubAlgorithm(std::string nameAlgorithm);     
+        Algorithm& getSubAlgorithm(std::string nameAlgorithm);     
 
         /**
          * \brief return the subAlgorithm corresponding to the name of the algorithm given.
          * 
          * \param[in] nameAlgorithm name of the algorithm given.
          */
-        std::shared_ptr<const Algorithm> cGetSubAlgorithm(std::string nameAlgorithm) const;     
+        const Algorithm& cGetSubAlgorithm(std::string nameAlgorithm) const;     
+
       public:
 
         /**
@@ -71,7 +75,7 @@ namespace Algorithm {
          */
         Algorithm(const Learn::LearningParameters& params, std::string algorithmName)
                : params{params}, algorithmName(algorithmName) {
-              };
+        };
 
         /**
          * \brief Return the name of the algorithm.
@@ -83,7 +87,17 @@ namespace Algorithm {
          * 
          * \param[in] subAlgorithm the sub-algorithm to add.
          */
-        void addSubAlgorithm(std::shared_ptr<Algorithm> subAlgorithm);
+        void addSubAlgorithm(const Algorithm& subAlgorithm);
+
+        /**
+         * \brief Method that aggregate another algorithm to this algorithm.
+         * 
+         * The algorithm need to be the same type.
+         * This access allows for the manager to dupplicate an agent from the aggregated algorithm to its own agents.
+         * 
+         * \param[in] aggregatedAlgorithm the algorithm to aggregate.
+         */
+        void addAggregatedAlgorithm(const Algorithm& aggregatedAlgorithm);
 
         /// Constant getter for the graph
         virtual std::shared_ptr<const EvoGraph::Graph> getGraph() const;
@@ -120,7 +134,6 @@ namespace Algorithm {
          */
         virtual bool containsAgent(std::shared_ptr<const Agent> agent) const;
 
-
         /**
          * \brief Initialize the managerof the algorithm
          * 
@@ -152,6 +165,17 @@ namespace Algorithm {
          * \param[in] graph the EvoGraph::Graph used by the algorithm.
          */
         virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph);
+        
+
+        /**
+         * \brief Clear the algorithm of all its content.
+         */
+        virtual void clearAlgorithm();
+
+        /**
+         * Copy and return a uniqure pointer of the algorithm
+         */
+        virtual std::unique_ptr<Algorithm> copy() const = 0;
 
         /**
          * Initialize the population of the algorithm

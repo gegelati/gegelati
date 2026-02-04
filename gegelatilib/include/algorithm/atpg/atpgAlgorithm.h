@@ -28,15 +28,6 @@ namespace Algorithm::ATPG {
 
         public:
 
-            /**
-             * \brief Main Algorithm constructor.
-             * 
-             * \param[in] params the LearningParameters used by the Algorithm.
-             * \param[in] algorithmName name of the algorithm used.
-             */
-            ATPGAlgorithm(const Learn::LearningParameters& params, std::string algorithmName = "ATPG")
-                : TPGAlgorithm(params, algorithmName) {};
-
 
             /**
              * \brief Main Algorithm constructor.
@@ -46,9 +37,8 @@ namespace Algorithm::ATPG {
              * \param[in] actionProgramAlgorithm the sub-algorithm used to manipulate action programs.
              * \param[in] algorithmName name of the algorithm used.
              */
-            ATPGAlgorithm(const Learn::LearningParameters& params, std::shared_ptr<Algorithm> contextProgramAlgorithm, std::shared_ptr<Algorithm> actionProgramAlgorithm, std::string algorithmName = "TPG")
-                : ATPGAlgorithm(params, algorithmName){
-                this->setProgramAlgorithm(contextProgramAlgorithm);
+            ATPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& contextProgramAlgorithm, const Algorithm& actionProgramAlgorithm, std::string algorithmName = "TPG")
+                : TPGAlgorithm(params, contextProgramAlgorithm, algorithmName){
                 this->setActionProgramAlgorithm(actionProgramAlgorithm);
             };
 
@@ -56,8 +46,14 @@ namespace Algorithm::ATPG {
              * \brief Add the action program sub-algorithm to the TPGAlgorithm.
              * 
              */
-            void setActionProgramAlgorithm(std::shared_ptr<Algorithm> programAlgorithm);
+            void setActionProgramAlgorithm(const Algorithm& programAlgorithm);
 
+            /**
+             * \brief Add an aggregated action program algorithm to the TPGAlgorithm.
+             * 
+             * \param[in] programAlgorithm the aggregated action program algorithm.
+             */
+            void addAggregatedActionProgramAlgorithm(const Algorithm& programAlgorithm);
 
             /**
              * \brief Initialize the managerof the algorithm
@@ -80,6 +76,11 @@ namespace Algorithm::ATPG {
              * \param[in] graph the EvoGraph::Graph used by the algorithm.
              */
             virtual void initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+
+            /**
+             * Copy and return a uniqure pointer of the algorithm
+             */
+            virtual std::unique_ptr<Algorithm> copy() const override;
     };
 }; // namespace ATPG_Algorithm
 

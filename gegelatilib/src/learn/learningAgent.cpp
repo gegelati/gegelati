@@ -68,6 +68,21 @@ void Learn::LearningAgent::addAlgorithm(std::shared_ptr<Algorithm::Algorithm> al
     this->algorithms.push_back(algorithm);
 }
 
+
+Algorithm::Algorithm& Learn::LearningAgent::getAlgorithm(const Algorithm::Algorithm& algorithm)
+{
+    
+    auto iterator = std::find_if(this->algorithms.begin(), this->algorithms.end(),
+        [&algorithm](const std::shared_ptr<Algorithm::Algorithm>& algoPtr){
+            return algoPtr.get() == &algorithm;
+        });
+    if(iterator == this->algorithms.end() || (*iterator)->getAlgorithmName() != algorithm.getAlgorithmName()){
+        throw std::invalid_argument("LearningAgent::getAlgorithm: the given algorithm is not managed by this learning agent.");
+    }
+
+    return **iterator;
+}
+
 std::shared_ptr<EvoGraph::Graph> Learn::LearningAgent::getGraph()
 {
     return this->graph;

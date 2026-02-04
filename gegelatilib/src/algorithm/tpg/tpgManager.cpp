@@ -1,15 +1,9 @@
 
 #include "algorithm/tpg/tpgManager.h"
 
-
 std::shared_ptr<Algorithm::TPG::TPGAgent> Algorithm::TPG::TPGManager::getTPGAgentFromCst(std::shared_ptr<const Agent> agent)
 {
-    auto iterator = this->agents.find(agent);
-    if(iterator == this->agents.end() || *iterator != agent){
-        throw std::invalid_argument("TPGManager::getTPGAgentFromCst: the given agent is not managed by this manager.");
-    }
-
-    return std::dynamic_pointer_cast<TPGAgent>(*iterator);
+    return std::dynamic_pointer_cast<TPGAgent>(this->getAgentFromCst(agent));
 }
 
 const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::TPG::TPGManager::getAgents() const
@@ -44,11 +38,25 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    if(!this->containsAgent(agent)) {
-        throw std::runtime_error("TPGManager::copyAgent: trying to copy an agent that is not managed by this manager.");
+    std::shared_ptr<const Algorithm::TPG::TPGAgent> castedAgent = std::dynamic_pointer_cast<const TPGAgent>(agent);
+    if(castedAgent == nullptr){
+        throw std::runtime_error("Algorithm::TPG::TPGManager::copyAgent: trying to copy an agent that is not a TPGAgent.");
     }
 
-    auto newVertex = graph->cloneVertex(*std::dynamic_pointer_cast<const EvoGraph::Team>(this->getTPGAgentFromCst(agent)->getVertex()));
+    std::shared_ptr<const EvoGraph::Vertex> newVertex;
+
+    if(agent->getAlgorithmName() != this->getAlgorithmName()){
+        // Since the agent dupplicated is not from the same algorithm, we also need to dupplicate the sub agents on the edge of the vertex.
+        newVertex = graph->addNewTeam();
+        for(std::shared_ptr<const EvoGraph::Edge> edge: castedAgent->getVertex()->getOutgoingEdges()){
+            std::shared_ptr<const Algorithm::Agent> newSubAgent = this->getSubManager(this->programAlgorithmName)->copyAgent(edge->getProgram(), graph);
+            graph->addNewEdge(*newVertex, *edge->getDestination(), newSubAgent);
+        }
+        
+    } else {
+        newVertex = graph->cloneVertex(*std::dynamic_pointer_cast<const EvoGraph::Team>(castedAgent->getVertex()));
+    }
+
     return this->createAgent(newVertex);
 }
 

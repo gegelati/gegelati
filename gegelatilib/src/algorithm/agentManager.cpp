@@ -2,12 +2,58 @@
 
 #include "algorithm/agentManager.h"
 
+std::shared_ptr<Algorithm::Agent> Algorithm::AgentManager::getAgentFromCst(std::shared_ptr<const Agent> agent)
+{
+    auto iterator = this->agents.find(agent);
+    if(iterator == this->agents.end() || *iterator != agent){
+        throw std::invalid_argument("AgentManager::getAgentFromCst: the given agent is not managed by this manager.");
+    }
 
+    return *iterator;
+}
 
+bool Algorithm::AgentManager::containsAgent(std::shared_ptr<const Agent> agent) const
+{
+    auto iterator = this->agents.find(agent);
+    return iterator != this->agents.end() && *iterator == agent;
+}
+
+bool Algorithm::AgentManager::isAgentAccessible(std::shared_ptr<const Agent> agent) const
+{
+    if(this->containsAgent(agent)){
+        return true;
+    }
+
+    for(const auto& manager: this->aggregatedManagers){
+        if(manager.get().containsAgent(agent)){
+            return true;
+        }
+    }
+
+    return false;
+}
 
 void Algorithm::AgentManager::addSubManager(std::shared_ptr<AgentManager> subManager)
 {
     this->subManagers.insert({subManager->getAlgorithmName(), subManager});
+}
+
+void Algorithm::AgentManager::addAggregatedManager(const AgentManager& managerAggregated)
+{
+    if(typeid(*this) != typeid(managerAggregated)){
+        throw std::runtime_error("Algorithm::AgentManager::addAlgorithmManagerAccess: Cannot add access to a manager of a different type.");
+    }
+
+    this->aggregatedManagers.push_back(managerAggregated);
+}
+
+const Algorithm::AgentManager& Algorithm::AgentManager::getAggregatedManager(std::string nameAlgorithm) const{
+    for(const auto& manager: this->aggregatedManagers){
+        if(manager.get().getAlgorithmName() == nameAlgorithm){
+            return manager;
+        }
+    }
+    throw std::runtime_error("Algorithm::AgentManager::getAggregatedManager aggregated manager not found for the specific name");
 }
 
 std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::getSubManager(std::string nameAlgorithm){
@@ -18,12 +64,17 @@ std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::getSubManager(
     return it->second;
 }
 
-std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::cGetSubManager(std::string nameAlgorithm) const{
+std::shared_ptr<const Algorithm::AgentManager> Algorithm::AgentManager::cGetSubManager(std::string nameAlgorithm) const{
     auto it = this->subManagers.find(nameAlgorithm);
     if(it == this->subManagers.end()){
         throw std::runtime_error("Algorithm::AgentManager::getSubManager subManager not found for the specific name");
     }
     return it->second;
+}
+
+const std::vector<std::reference_wrapper<const Algorithm::AgentManager>>& Algorithm::AgentManager::getAggregatedManagers() const
+{
+    return this->aggregatedManagers;
 }
 
 const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::AgentManager::getAgents() const
@@ -35,15 +86,10 @@ const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::AgentManag
 }
 
 
-bool Algorithm::AgentManager::containsAgent(std::shared_ptr<const Agent> agent) const
-{
-    auto iterator = this->agents.find(agent);
-    return iterator != this->agents.end() && *iterator == agent;
-}
 
 void Algorithm::AgentManager::clearAgents()
 {
-    for(auto agent: this->agents){
-        this->deleteAgent(agent, nullptr);
+    while(this->agents.size() > 0){
+        this->deleteAgent(*this->agents.begin(), nullptr);
     }
 }

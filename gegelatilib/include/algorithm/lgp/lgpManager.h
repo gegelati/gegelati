@@ -31,14 +31,6 @@ namespace Algorithm {
              * \param[in] agent the Agent to cast.
              */
             virtual std::shared_ptr<LGPAgent> getLGPAgentFromCst(std::shared_ptr<const Agent> agent);
-
-            /**
-             * \brief Get the LGPAgent from a const Agent pointer.
-             * 
-             * \param[in] agent the Agent to cast.
-             */
-            virtual std::shared_ptr<const LGPAgent> cGetLGPAgentFromCst(std::shared_ptr<const Agent> agent) const;
-
         public:
 
             /**

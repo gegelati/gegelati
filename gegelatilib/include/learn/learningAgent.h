@@ -92,6 +92,13 @@ namespace Learn {
         /// Currently executed algorithm during evaluation
         std::shared_ptr<Algorithm::Algorithm> currentExecutedAlgorithm;
 
+        /**
+         * \brief return the algorithm managed by the learning agent corresponding to the given algorithm.
+         * 
+         * \param[in] algorithm the algorithm to get.
+         */
+        Algorithm::Algorithm& getAlgorithm(const Algorithm::Algorithm& algorithm);
+
       public:
         /**
          * \brief Constructor for LearningAgent.
@@ -138,6 +145,7 @@ namespace Learn {
          * \param[in] algorithm the algorithm to add.
          */
         void addAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm);
+
 
         /**
          * \brief Getter for the Graph built by the LearningAgent.

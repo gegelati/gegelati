@@ -3,22 +3,7 @@
 
 std::shared_ptr<Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::getLGPAgentFromCst(std::shared_ptr<const Agent> agent)
 {
-    auto iterator = this->agents.find(agent);
-    if(iterator == this->agents.end() || *iterator != agent){
-        throw std::invalid_argument("LGPManager::getLGPAgentFromCst: the given agent is not managed by this manager.");
-    }
-
-    return std::dynamic_pointer_cast<LGPAgent>(*iterator);
-}
-
-std::shared_ptr<const Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::cGetLGPAgentFromCst(std::shared_ptr<const Agent> agent) const
-{
-    auto iterator = this->agents.find(agent);
-    if(iterator == this->agents.end() || *iterator != agent){
-        throw std::invalid_argument("LGPManager::cGetLGPAgentFromCst: the given agent is not managed by this manager.");
-    }
-
-    return std::dynamic_pointer_cast<const LGPAgent>(*iterator);
+    return std::dynamic_pointer_cast<LGPAgent>(this->getAgentFromCst(agent));
 }
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
@@ -29,7 +14,10 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(
 
 std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    auto castedAgent = this->getLGPAgentFromCst(agent);
+    std::shared_ptr<const Algorithm::LGP::LGPAgent> castedAgent = std::dynamic_pointer_cast<const LGPAgent>(agent);
+    if(castedAgent == nullptr){
+        throw std::runtime_error("Algorithm::LGP::LGPManager::copyAgent: trying to copy an agent that is not a LGPAgent.");
+    }
     auto newAgent = this->getLGPAgentFromCst(this->createAgent(graph));
 
     for(size_t idx = 0; idx < castedAgent->getNbLines(); idx++){
@@ -155,8 +143,11 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(std::shared_ptr<const Agent
 
 bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(std::shared_ptr<const Agent> agent1, std::shared_ptr<const Agent> agent2) const
 {
-    std::shared_ptr<const LGPAgent> lgpAgent1 = this->cGetLGPAgentFromCst(agent1);
-    std::shared_ptr<const LGPAgent> lgpAgent2 = this->cGetLGPAgentFromCst(agent2);
+    std::shared_ptr<const LGPAgent> lgpAgent1 = std::dynamic_pointer_cast<const LGPAgent>(agent1);
+    std::shared_ptr<const LGPAgent> lgpAgent2 = std::dynamic_pointer_cast<const LGPAgent>(agent2);
+    if(lgpAgent1 == nullptr || lgpAgent2 == nullptr){
+        throw std::runtime_error("Algorithm::LGP::LGPManager::hasIdenticalBehavior: one of the agents is not a LGPAgent");
+    }
 
     size_t thisLineIdx = 0;
     size_t otherLineIdx = 0;
