@@ -1,6 +1,6 @@
 
-#ifndef AGENT_FACTORY_H
-#define AGENT_FACTORY_H
+#ifndef AGENT_MANAGER_H
+#define AGENT_MANAGER_H
 
 #include <vector>
 #include <memory>
@@ -46,7 +46,7 @@ namespace Algorithm {
          * 
          * \param[in] agent the Agent to cast.
          */
-        virtual std::shared_ptr<Agent> getAgentFromCst(std::shared_ptr<const Agent> agent);
+        virtual std::shared_ptr<Agent> getAgentFromCst(const Agent& agent);
 
     public:
 
@@ -60,7 +60,7 @@ namespace Algorithm {
         /**
          * \brief Get the current agents used by the algorithm.
          */
-        virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const;
+        virtual const std::vector<std::weak_ptr<const Agent>> getAgents() const;
 
         /**
          * \brief Return the outputs of the agents.
@@ -126,7 +126,7 @@ namespace Algorithm {
          * 
          * \param[in] agent searched agent.
          */
-        virtual bool containsAgent(std::shared_ptr<const Agent> agent) const;
+        virtual bool containsAgent(const Agent& agent) const;
 
         /**
          * \brief method that indicate if the agent is accessible by the manager.
@@ -135,7 +135,7 @@ namespace Algorithm {
          * 
          * \param[in] agent searched agent.
          */
-        virtual bool isAgentAccessible(std::shared_ptr<const Agent> agent) const;
+        virtual bool isAgentAccessible(const Agent& agent) const;
 
         /**
          * \brief Create a new Agent of the type used by the current algorithm.
@@ -144,7 +144,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual std::weak_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Copy a new Agent of the type used by the current algorithm.
@@ -154,7 +154,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual std::weak_ptr<const Agent> copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Create a new Agent of the type used by the current algorithm.
@@ -164,12 +164,14 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual void deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Clear all agents from the manager.
+         * 
+         * \param[in] graph the Graph associated with the Agents.
          */
-        virtual void clearAgents();
+        virtual void clearAgents(std::shared_ptr<EvoGraph::Graph> graph);
 
         /**
          * \brief Create the execution engine associated with the algorithm.

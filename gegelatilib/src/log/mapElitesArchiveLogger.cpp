@@ -98,7 +98,7 @@ void Log::MapElitesArchiveLogger::logEndOfTraining()
 
     for (size_t i = 0; i < archive.size(); ++i) {
         const auto& elem = archive.getAllArchive()[i];
-        if (elem.second != nullptr) {
+        if (elem.second.lock()) {
             *this << "," << elem.first->getSelectionMetrics()->getScore();
         }
         else {

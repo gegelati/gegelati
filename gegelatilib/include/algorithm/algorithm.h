@@ -125,14 +125,14 @@ namespace Algorithm {
         /**
          * \brief Get the current agents used by the algorithm.
          */
-        virtual const std::vector<std::shared_ptr<const Agent>> getAgents () const;
+        virtual const std::vector<std::weak_ptr<const Agent>> getAgents () const;
 
         /**
          * \brief method that indicate if the algorithm contains a specific agent.
          * 
          * \param[in] agent searched agent.
          */
-        virtual bool containsAgent(std::shared_ptr<const Agent> agent) const;
+        virtual bool containsAgent(const Agent& agent) const;
 
         /**
          * \brief Initialize the managerof the algorithm
@@ -212,7 +212,7 @@ namespace Algorithm {
          *
          * \return A job representing the agent.
          */
-        virtual std::shared_ptr<Job> createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
+        virtual std::shared_ptr<Job> createJob(std::weak_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
 
         /**
          * \brief Update the algorithm after evaluation of a set of jobs.

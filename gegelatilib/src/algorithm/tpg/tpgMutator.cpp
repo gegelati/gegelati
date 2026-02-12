@@ -27,7 +27,7 @@ void Algorithm::TPG::TPGMutator::updateSpecificContext(
 
     // Initialize queue with vertices from all pre-existing agents
     for (auto agentPtr : this->currentContext->preExistingAgents) {
-        if(auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(agentPtr)) {
+        if(auto tpgAgent = dynamic_cast<const TPGAgent*>(&agentPtr.get())) {
             toVisit.push(tpgAgent->getVertex());
         } else {
             throw std::runtime_error("TPGMutator::updateSpecificContext: an agent in the current context is not a TPGAgent.");
@@ -114,7 +114,7 @@ void Algorithm::TPG::TPGMutator::addAditionnalEdges(
             std::shared_ptr<EvoGraph::Graph> graph,
             std::vector<std::shared_ptr<const EvoGraph::Vertex>> leafVertices,
             std::vector<std::shared_ptr<const EvoGraph::Vertex>> rootVertices,
-            std::vector<std::shared_ptr<const Agent>> programAgent,
+            std::vector<std::weak_ptr<const Agent>> programAgent,
             const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     
@@ -141,8 +141,8 @@ void Algorithm::TPG::TPGMutator::addAditionnalEdges(
                             rootVertex->getOutgoingEdges().begin(),
                             rootVertex->getOutgoingEdges().end(),
                             [&iter, &programAgent](std::shared_ptr<const EvoGraph::Edge> edge) {
-                                return edge->getProgram() ==
-                                       programAgent.at(*iter);
+                                return edge->getProgram().lock() ==
+                                       programAgent.at(*iter).lock();
                             }) > 0) {
                         iter = availableChoices.erase(iter);
                     }
@@ -183,7 +183,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     this->isConfigurationValid(params, outputs);
     
     // Empty agent manager
-    manager->clearAgents();
+    manager->clearAgents(graph);
 
     // Number of action vertices needed
     size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? 1 : outputs.front().getNbValues();
@@ -191,11 +191,11 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     // Create teams, programs and Actions
     std::vector<std::shared_ptr<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> teams;
-    std::vector<std::shared_ptr<const Agent>> programAgents;
+    std::vector<std::weak_ptr<const Agent>> programAgents;
 
 
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
-        teams.push_back(std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph))->getVertex());
+        teams.push_back(std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph).lock())->getVertex());
     }
 
     // Connect each team with two distinct actions, through two distinct
@@ -218,7 +218,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     this->addAditionnalEdges(graph, actionsVertex, teams, programAgents, params, rng);
 }
 
-void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     // First agent is initialized, check validity of the configuration.
     if(manager->getAgents().size() == 1){
@@ -228,7 +228,7 @@ void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(std::shared_ptr<const A
         this->initActionVertices(graph, nbActionVertices);
     }
 
-    auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph))->getVertex();
+    auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph).lock())->getVertex();
 
     auto programMutator = this->getSubMutator(this->programAlgorithmName);
     auto programManager = manager->getSubManager(this->programAlgorithmName);
@@ -243,14 +243,6 @@ void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(std::shared_ptr<const A
                             programMutator->initRandomAgent(graph, programManager, params, rng));
     }
 }
-
-void Algorithm::TPG::TPGMutator::crossoverAgents(
-    std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
-{
-    /* CROSSOVER ARE NOT USED IN TPG */
-}
-
-
 
 void Algorithm::TPG::TPGMutator::removeRandomEdge(std::shared_ptr<EvoGraph::Graph> graph,
                                                 const EvoGraph::Vertex& vertex,
@@ -334,12 +326,12 @@ void Algorithm::TPG::TPGMutator::mutateEdgeDestination(
 void Algorithm::TPG::TPGMutator::mutateOutgoingEdge(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
     std::shared_ptr<AgentManager> manager,
-    std::vector<std::shared_ptr<const Agent>>& newSubAgents,
+    std::vector<std::weak_ptr<const Agent>>& newSubAgents,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    auto originAgent = edge->getProgram();
+    const Agent& originAgent = *edge->getProgram().lock();
     // copy program
-    std::shared_ptr<const Algorithm::Agent> newAgent = manager->getSubManager(originAgent->getAlgorithmName())->copyAgent(originAgent, graph);
+    std::weak_ptr<const Algorithm::Agent> newAgent = manager->getSubManager(originAgent.getAlgorithmName())->copyAgent(originAgent, graph);
 
     // Set the mutated agent to the edge
     graph->setEdgeProgram(*edge, newAgent);
@@ -356,9 +348,9 @@ void Algorithm::TPG::TPGMutator::mutateOutgoingEdge(
 }
 
 void Algorithm::TPG::TPGMutator::mutateAgent(
-    std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::weak_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    std::shared_ptr<const EvoGraph::Vertex> vertex = std::dynamic_pointer_cast<const TPGAgent>(agent)->getVertex();
+    std::shared_ptr<const EvoGraph::Vertex> vertex = dynamic_cast<const TPGAgent&>(agent).getVertex();
     std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
 
     // 1. Remove randomly selected edges
@@ -402,20 +394,21 @@ void Algorithm::TPG::TPGMutator::mutateAgent(
 
 
 void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
-    std::shared_ptr<const Agent> programAgent, std::shared_ptr<EvoGraph::Graph> graph, 
+    std::weak_ptr<const Agent> programAgent, std::shared_ptr<EvoGraph::Graph> graph, 
     std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
     RNG::RNG& rng)
 {
-    auto subMutator = this->getSubMutator(programAgent->getAlgorithmName());
+    const Agent& refAgent = *programAgent.lock();
+    auto subMutator = this->getSubMutator(refAgent.getAlgorithmName());
 
-    std::vector<std::shared_ptr<const Agent>> newSubAgents; //TODOTODOTODO
+    std::vector<std::weak_ptr<const Agent>> newSubAgents; //TODOTODOTODO
     bool allUnique;
     // Mutate behavior until it changes (against the archive).
     do {
 
         // Mutate until something is mutated (i.e. the function returns
         // true) And until the program behavior is changed
-        subMutator->mutateAgent(programAgent, graph, manager, newSubAgents, params, rng);
+        subMutator->mutateAgent(refAgent, graph, manager, newSubAgents, params, rng);
 
         // Check for uniqueness in archive
         const auto& archivedDataHandlers = archive->getDataHandlers();
@@ -440,7 +433,7 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
 }
 
 void Algorithm::TPG::TPGMutator::mutateSubAgents(
-    std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
+    std::vector<std::weak_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
     std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
     RNG::RNG& rng, uint64_t maxNbThreads)
 {
@@ -449,7 +442,7 @@ void Algorithm::TPG::TPGMutator::mutateSubAgents(
     if (maxNbThreads <= 1) {
         // Sequential (kept for determinism check mostly)
         for (auto programAgent : agents) {
-            auto subManager = manager->getSubManager(programAgent->getAlgorithmName());
+            auto subManager = manager->getSubManager(programAgent.lock()->getAlgorithmName());
             RNG::RNG privateRNG(rng.getUnsignedInt64(0, UINT64_MAX));
             this->mutateProgramAgentAgainstArchive(programAgent, graph, subManager, params,
                                                 privateRNG);
@@ -458,7 +451,7 @@ void Algorithm::TPG::TPGMutator::mutateSubAgents(
     else {
         // Parallel
         // Create job list with Program pointers and seed
-        std::queue<std::pair<std::shared_ptr<const Agent>, uint64_t>>
+        std::queue<std::pair<std::weak_ptr<const Agent>, uint64_t>>
             programsToMutate;
         for (auto programAgent : agents) {
             programsToMutate.push(
@@ -473,7 +466,7 @@ void Algorithm::TPG::TPGMutator::mutateSubAgents(
             // While there is work to be done
             bool jobDone;
             do {
-                std::pair<std::shared_ptr<const Agent>, uint64_t> job;
+                std::pair<std::weak_ptr<const Agent>, uint64_t> job;
                 jobDone = false;
                 { // get one job critical section
                     std::lock_guard lock(mutexMutation);
@@ -487,7 +480,7 @@ void Algorithm::TPG::TPGMutator::mutateSubAgents(
                 //  Do the job (if any)
                 if (jobDone) {
                     privateRNG.setSeed(job.second);
-                    auto subManager = manager->getSubManager(job.first->getAlgorithmName());
+                    auto subManager = manager->getSubManager(job.first.lock()->getAlgorithmName());
                     this->mutateProgramAgentAgainstArchive(job.first, graph, subManager, params, privateRNG);
                 }
             } while (jobDone);

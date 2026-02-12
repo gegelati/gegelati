@@ -69,7 +69,7 @@ namespace Selector {
         virtual void doSelection(
             std::shared_ptr<EvoGraph::Graph> graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::shared_ptr<const Algorithm::Agent>>& results,
+                          std::weak_ptr<const Algorithm::Agent>>& results,
             RNG::RNG& rng) override;
     };
 }; // namespace Selector

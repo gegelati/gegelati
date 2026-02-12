@@ -125,12 +125,12 @@ namespace EvoGraph {
          * The new Team is added to the back of the vertices list.
          * The Team is created using the GraphFactory of the Graph.
          * 
-         * \param[in] programAgent shared pointer to the Agent Program associated to the newly
+         * \param[in] programAgent weak pointer to the Agent Program associated to the newly
          *                 created Team.
          *
          * \return a const reference to the newly created Team.
          */
-        std::shared_ptr<const EvoGraph::Team> addNewTeam(std::shared_ptr<const Algorithm::Agent> programAgent = nullptr);
+        std::shared_ptr<const EvoGraph::Team> addNewTeam(std::weak_ptr<const Algorithm::Agent> programAgent = std::weak_ptr<const Algorithm::Agent>());
 
         /**
          * \brief Create a new Action and add it to the vertices of the
@@ -140,12 +140,12 @@ namespace EvoGraph {
          * The Action is created using the GraphFactory of the Graph.
          *
          * \param[in] actionID the identifier to associate to the Action.
-         * \param[in] programAgent shared pointer to the Agent Program associated to the newly
+         * \param[in] programAgent weak pointer to the Agent Program associated to the newly
          *                 created Action.
          * 
          * \return a const reference to the newly created Action.
          */
-        std::shared_ptr<const EvoGraph::Action> addNewAction(uint64_t actionID, std::shared_ptr<const Algorithm::Agent> programAgent = nullptr);
+        std::shared_ptr<const EvoGraph::Action> addNewAction(uint64_t actionID, std::weak_ptr<const Algorithm::Agent> programAgent = std::weak_ptr<const Algorithm::Agent>());
 
 
         /**
@@ -296,7 +296,7 @@ namespace EvoGraph {
          *							destination is a Action.
          */
         std::shared_ptr<const EvoGraph::Edge> addNewEdge(const Vertex& src, const Vertex& dest,
-                                  const std::shared_ptr<const Algorithm::Agent> programAgent);
+                                  std::weak_ptr<const Algorithm::Agent> programAgent);
 
 
         /**
@@ -324,9 +324,9 @@ namespace EvoGraph {
          * \brief Change the program agent of a Vertex
          * 
          * \param[in] vertex a const reference to the modified Vertex.
-         * \param[in] programAgent shared pointer to the Agent Program to set to the vertex
+         * \param[in] programAgent weak pointer to the Agent Program to set to the vertex
          */
-        void setVertexProgram(const Vertex& vertex, std::shared_ptr<const Algorithm::Agent> programAgent);
+        void setVertexProgram(const Vertex& vertex, std::weak_ptr<const Algorithm::Agent> programAgent);
 
         /**
          * Duplicate a Edge from the Graph.
@@ -375,7 +375,7 @@ namespace EvoGraph {
          * \param[in] programAgent shared pointer to the Agent Program to set to the edge.
          * \return true if the given edge is part of the graph, and
          */
-        bool setEdgeProgram(const Edge& edge, std::shared_ptr<const Algorithm::Agent> programAgent);
+        bool setEdgeProgram(const Edge& edge, std::weak_ptr<const Algorithm::Agent> programAgent);
 
 
         /**

@@ -89,13 +89,13 @@ void EvoGraph::Graph::setNewVertexID(const EvoGraph::Vertex& vertex, uint64_t ne
     vertices.insert(std::move(tmp));
 }
 
-std::shared_ptr<const EvoGraph::Team> EvoGraph::Graph::addNewTeam(std::shared_ptr<const Algorithm::Agent> programAgent)
+std::shared_ptr<const EvoGraph::Team> EvoGraph::Graph::addNewTeam(std::weak_ptr<const Algorithm::Agent> programAgent)
 {
     this->vertices.insert(factory->createTeam(programAgent));
     return std::dynamic_pointer_cast<const Team>(*this->vertices.rbegin());
 }
 
-std::shared_ptr<const EvoGraph::Action> EvoGraph::Graph::addNewAction(uint64_t actionID, std::shared_ptr<const Algorithm::Agent> programAgent)
+std::shared_ptr<const EvoGraph::Action> EvoGraph::Graph::addNewAction(uint64_t actionID, std::weak_ptr<const Algorithm::Agent> programAgent)
 {
     this->vertices.insert(factory->createAction(actionID, programAgent));
     return std::dynamic_pointer_cast<const Action>(*this->vertices.rbegin());
@@ -298,7 +298,7 @@ void EvoGraph::Graph::setNewEdgeID(const EvoGraph::Edge& edge, uint64_t newID)
 
 std::shared_ptr<const EvoGraph::Edge> EvoGraph::Graph::addNewEdge(
     const Vertex& src, const Vertex& dest,
-    const std::shared_ptr<const Algorithm::Agent> prog)
+    const std::weak_ptr<const Algorithm::Agent> prog)
 {
     // Check the Vertex existence within the graph.
     auto srcVertex = this->vertices.find(&src);
@@ -363,7 +363,7 @@ void EvoGraph::Graph::removeEdge(const Edge& edge)
 }
 
 
-void EvoGraph::Graph::setVertexProgram(const Vertex& vertex, std::shared_ptr<const Algorithm::Agent> programAgent)
+void EvoGraph::Graph::setVertexProgram(const Vertex& vertex, std::weak_ptr<const Algorithm::Agent> programAgent)
 {
     // Check the Vertex existence within the graph.
     auto srcVertex = this->vertices.find(&vertex);
@@ -441,7 +441,7 @@ bool EvoGraph::Graph::setEdgeSource(const Edge& edge, const Vertex& newSrc)
     
 }
 
-bool EvoGraph::Graph::setEdgeProgram(const Edge& edge, std::shared_ptr<const Algorithm::Agent> programAgent)
+bool EvoGraph::Graph::setEdgeProgram(const Edge& edge, std::weak_ptr<const Algorithm::Agent> programAgent)
 {
     
     auto iterEdge = this->edges.find(&edge);

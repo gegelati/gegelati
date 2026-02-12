@@ -38,7 +38,7 @@ namespace Selector {
          * it. The Vertex in the set will be deleted at the end of the
          * TPGMutator::PopulateTPG method.
          */
-        std::set<std::shared_ptr<const Algorithm::Agent>> agentsToDelete;
+        std::set<std::reference_wrapper<const Algorithm::Agent>> agentsToDelete;
 
       public:
         /**
@@ -78,7 +78,7 @@ namespace Selector {
         virtual void doSelection(
             std::shared_ptr<EvoGraph::Graph> graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::shared_ptr<const Algorithm::Agent>>& results,
+                          std::weak_ptr<const Algorithm::Agent>>& results,
             RNG::RNG& rng) override;
 
         /**
@@ -86,7 +86,7 @@ namespace Selector {
          *
          * \param[in] vertex Vertex added to the vertices to remove
          */
-        void addToVerticesToDelete(std::shared_ptr<const Algorithm::Agent> vertex);
+        void addToVerticesToDelete(const Algorithm::Agent& vertex);
 
         /**
          * \brief Specialization of updateContext for tournament purposes
@@ -110,7 +110,7 @@ namespace Selector {
         /**
          * \brief getter of the verticesToDelete set.
          */
-        virtual const std::set<std::shared_ptr<const Algorithm::Agent>>& getVerticesToDelete();
+        virtual const std::set<std::reference_wrapper<const Algorithm::Agent>>& getAgentsToDelete();
     };
 }; // namespace Selector
 

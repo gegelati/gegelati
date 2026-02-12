@@ -64,13 +64,13 @@ std::vector<std::shared_ptr<const EvoGraph::Action>> Algorithm::Mutator::initAct
     return actions;
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::Mutator::initRandomAgent(
+std::weak_ptr<const Algorithm::Agent> Algorithm::Mutator::initRandomAgent(
     std::shared_ptr<EvoGraph::Graph> graph,
     std::shared_ptr<AgentManager> manager,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    auto agent = manager->createAgent(graph);
-    this->initRandomSpecificAgent(agent, graph, manager, params, rng);
+    std::weak_ptr<const Algorithm::Agent> agent = manager->createAgent(graph);
+    this->initRandomSpecificAgent(*agent.lock(), graph, manager, params, rng);
     return agent;
 }
 
@@ -87,12 +87,12 @@ void Algorithm::Mutator::mutatePopulation(
     if (this->currentContext->agentsClonable.size() <= 1) {
         throw std::runtime_error("At least two agents should survive the selection");
     } 
-    std::vector<std::shared_ptr<const Algorithm::Agent>> subAgentsClonable1(
+    std::vector<std::reference_wrapper<const Algorithm::Agent>> subAgentsClonable1(
         this->currentContext->agentsClonable);
 
     // Divide agents clonable into two subVector with half of the agents, randomly
     // selected.
-    std::vector<std::shared_ptr<const Algorithm::Agent>> subAgentsClonable2;
+    std::vector<std::reference_wrapper<const Algorithm::Agent>> subAgentsClonable2;
     for (size_t idx = 0; idx < this->currentContext->agentsClonable.size() / 2; idx++) {
         auto agent = subAgentsClonable1.at(
             rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1));
@@ -102,7 +102,7 @@ void Algorithm::Mutator::mutatePopulation(
     }
 
     // Agents newly created during the evolution that belong to another algorithm.
-    std::vector<std::shared_ptr<const Agent>>  newSubAgents;
+    std::vector<std::weak_ptr<const Agent>>  newSubAgents;
 
     
     // Create the new agents
@@ -113,9 +113,9 @@ void Algorithm::Mutator::mutatePopulation(
         uint64_t clonedRootIndex1 =
             rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1);
 
-        std::vector<std::shared_ptr<const Algorithm::Agent>> offsprings;
+        std::vector<std::reference_wrapper<const Algorithm::Agent>> offsprings;
 
-        offsprings.push_back(manager->copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph));
+        offsprings.push_back(*manager->copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph).lock());
 
         // Be sure we have agents in both sub lists, and we still have at least
         // two agents to create
@@ -126,7 +126,7 @@ void Algorithm::Mutator::mutatePopulation(
                 rng.getUnsignedInt64(0, subAgentsClonable2.size() - 1);
 
             // clone the offset
-            offsprings.push_back(manager->copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph));
+            offsprings.push_back(*manager->copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph).lock());
 
             // Do the crossover over the childs
             this->crossoverAgents(offsprings, graph, manager, newSubAgents, params, rng);
@@ -134,7 +134,7 @@ void Algorithm::Mutator::mutatePopulation(
 
         // Do the mutation over the childs
         for (auto offspring : offsprings) {
-            if (!offspring->isValid()) {
+            if (!offspring.get().isValid()) {
                 manager->deleteAgent(offspring, graph);
             }
             else {

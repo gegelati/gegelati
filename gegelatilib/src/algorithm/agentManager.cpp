@@ -2,23 +2,23 @@
 
 #include "algorithm/agentManager.h"
 
-std::shared_ptr<Algorithm::Agent> Algorithm::AgentManager::getAgentFromCst(std::shared_ptr<const Agent> agent)
+std::shared_ptr<Algorithm::Agent> Algorithm::AgentManager::getAgentFromCst(const Agent& agent)
 {
-    auto iterator = this->agents.find(agent);
-    if(iterator == this->agents.end() || *iterator != agent){
+    auto iterator = this->agents.find(&agent);
+    if(iterator == this->agents.end() || (*iterator).get() != &agent){
         throw std::invalid_argument("AgentManager::getAgentFromCst: the given agent is not managed by this manager.");
     }
 
     return *iterator;
 }
 
-bool Algorithm::AgentManager::containsAgent(std::shared_ptr<const Agent> agent) const
+bool Algorithm::AgentManager::containsAgent(const Agent& agent) const
 {
-    auto iterator = this->agents.find(agent);
-    return iterator != this->agents.end() && *iterator == agent;
+    auto iterator = this->agents.find(&agent);
+    return iterator != this->agents.end() && (*iterator).get() == &agent;
 }
 
-bool Algorithm::AgentManager::isAgentAccessible(std::shared_ptr<const Agent> agent) const
+bool Algorithm::AgentManager::isAgentAccessible(const Agent& agent) const
 {
     if(this->containsAgent(agent)){
         return true;
@@ -77,9 +77,9 @@ const std::vector<std::reference_wrapper<const Algorithm::AgentManager>>& Algori
     return this->aggregatedManagers;
 }
 
-const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::AgentManager::getAgents() const
+const std::vector<std::weak_ptr<const Algorithm::Agent>> Algorithm::AgentManager::getAgents() const
 {
-    return std::vector<std::shared_ptr<const Algorithm::Agent>>(
+    return std::vector<std::weak_ptr<const Algorithm::Agent>>(
         this->agents.begin(),
         this->agents.end()
     );
@@ -87,9 +87,9 @@ const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::AgentManag
 
 
 
-void Algorithm::AgentManager::clearAgents()
+void Algorithm::AgentManager::clearAgents(std::shared_ptr<EvoGraph::Graph> graph)
 {
     while(this->agents.size() > 0){
-        this->deleteAgent(*this->agents.begin(), nullptr);
+        this->deleteAgent(**this->agents.begin(), graph);
     }
 }

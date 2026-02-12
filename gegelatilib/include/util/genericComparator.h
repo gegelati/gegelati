@@ -95,6 +95,24 @@ struct SharedLess
     }
 
     /**
+     * \brief Compare a shared_ptr and a raw pointer by comparing the
+     * pointed-to values.
+     */
+    bool operator()(const std::shared_ptr<T>& a, T* b) const
+    {
+        return *a < *b;
+    }
+    /**
+     * \brief Compare a shared_ptr and a raw pointer by comparing the
+     * pointed-to values.
+     */
+    bool operator()(std::shared_ptr<T>& a, const T* b) const
+    {
+        return *a < *b;
+    }
+
+
+    /**
      * \brief Compare a raw pointer and a shared_ptr by comparing the
      * pointed-to values.
      */

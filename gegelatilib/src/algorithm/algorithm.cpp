@@ -77,12 +77,12 @@ size_t Algorithm::Algorithm::getNbAgents() const
     return this->manager->getAgents().size();   
 }
 
-const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::Algorithm::getAgents() const
+const std::vector<std::weak_ptr<const Algorithm::Agent>> Algorithm::Algorithm::getAgents() const
 {
     return this->manager->getAgents();
 }
 
-bool Algorithm::Algorithm::containsAgent(std::shared_ptr<const Agent> agent) const
+bool Algorithm::Algorithm::containsAgent(const Agent& agent) const
 {
     return this->manager->containsAgent(agent);
 }
@@ -119,7 +119,7 @@ void Algorithm::Algorithm::clearAlgorithm()
     for(const auto& subAlgorithm: subAlgorithms){
         subAlgorithm->clearAlgorithm();
     }
-    this->manager->clearAgents();
+    this->manager->clearAgents(this->graph);
     this->mutator = nullptr;
     this->selector = nullptr;
     this->manager = nullptr;
@@ -140,10 +140,11 @@ void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
 
 
 
-std::shared_ptr<Algorithm::Job> Algorithm::Algorithm::createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode,  RNG::RNG& rng, int idx) const
+std::shared_ptr<Algorithm::Job> Algorithm::Algorithm::createJob(std::weak_ptr<const Agent> agent, Learn::LearningMode mode,  RNG::RNG& rng, int idx) const
 {
-    if(agent == nullptr || !this->containsAgent(agent)){
-        throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with a null agent or an agent not belonging to this algorithm.");
+    auto locked = agent.lock(); // Get the shared_ptr
+    if (!locked || !this->containsAgent(*locked)) {
+        throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with an invalid agent or an agent not belonging to this algorithm.");
     }
 
     return std::make_shared<Job>(agent, idx);

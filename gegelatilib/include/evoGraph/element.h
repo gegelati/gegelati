@@ -62,18 +62,18 @@ namespace EvoGraph {
 
 
         /**
-         * \brief Get a const shared pointer of the Agent Program of the Element.
+         * \brief Get a const weak pointer of the Agent Program of the Element.
          *
-         * \return a const shared pointer of the Agent Program of the Element.
+         * \return a const weak pointer of the Agent Program of the Element.
          */
-        virtual std::shared_ptr<const Algorithm::Agent> getProgram() const;
+        virtual std::weak_ptr<const Algorithm::Agent> getProgram() const;
 
         /**
          * \brief Set a new Agent Program for the Element.
          *
-         * \param[in] agentProgram the new shared pointer to a Agent Program.
+         * \param[in] agentProgram the new weak pointer to a Agent Program.
          */
-        virtual void setProgram(std::shared_ptr<const Algorithm::Agent> agentProgram);
+        virtual void setProgram(std::weak_ptr<const Algorithm::Agent> agentProgram);
 
         /**
          * \brief return true if the element has a program agent
@@ -89,14 +89,14 @@ namespace EvoGraph {
          * \param[in] agentProgram the shared pointer to the Agent Program associated to the
          *            Element.
          */
-        Element(const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : program{agentProgram}{};
+        Element(const std::weak_ptr<const Algorithm::Agent> agentProgram = std::weak_ptr<const Algorithm::Agent>()) : program{agentProgram}{};
 
 
         /// Shared pointer to the Agent to execute when evaluating the bid
         /// of this Edge.
         /// This attribute is mutable to enable its modification during
         /// mutations.
-       std::shared_ptr<const Algorithm::Agent> program;
+       std::weak_ptr<const Algorithm::Agent> program;
     };
 }; // namespace EvoGraph
 

@@ -19,7 +19,7 @@ std::vector<double> Selector::MapElites::MapElitesArchive::getArchiveLimits()
 }
 
 const std::vector<
-    std::pair<std::shared_ptr<Learn::EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>>&
+    std::pair<std::shared_ptr<Learn::EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>>&
 Selector::MapElites::MapElitesArchive::getAllArchive() const
 {
     return archive;
@@ -61,7 +61,7 @@ std::vector<uint64_t> Selector::MapElites::MapElitesArchive::computeIndices(
 }
 
 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                std::shared_ptr<const Algorithm::Agent>>&
+                std::weak_ptr<const Algorithm::Agent>>&
 Selector::MapElites::MapElitesArchive::getArchiveFromDescriptors(
     const std::vector<double>& descriptors) const
 {
@@ -74,7 +74,7 @@ Selector::MapElites::MapElitesArchive::getArchiveFromDescriptors(
 }
 
 void Selector::MapElites::MapElitesArchive::setArchiveFromDescriptors(
-    std::shared_ptr<const Algorithm::Agent> vertex, std::shared_ptr<Learn::EvaluationResult> eval,
+    std::weak_ptr<const Algorithm::Agent> vertex, std::shared_ptr<Learn::EvaluationResult> eval,
     const std::vector<double>& descriptors)
 {
     std::vector<uint64_t> indices;
@@ -86,7 +86,7 @@ void Selector::MapElites::MapElitesArchive::setArchiveFromDescriptors(
 }
 
 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                std::shared_ptr<const Algorithm::Agent>>&
+                std::weak_ptr<const Algorithm::Agent>>&
 Selector::MapElites::MapElitesArchive::getArchiveAt(
     const std::vector<uint64_t>& indices) const
 {
@@ -94,18 +94,19 @@ Selector::MapElites::MapElitesArchive::getArchiveAt(
 }
 
 void Selector::MapElites::MapElitesArchive::setArchiveAt(
-    std::shared_ptr<const Algorithm::Agent> vertex, std::shared_ptr<Learn::EvaluationResult> eval,
+    std::weak_ptr<const Algorithm::Agent> vertex, std::shared_ptr<Learn::EvaluationResult> eval,
     const std::vector<uint64_t>& indices)
 {
     archive[computeLinearIndex(indices)] = std::make_pair(eval, vertex);
 }
 
 bool Selector::MapElites::MapElitesArchive::containsAgent(
-    std::shared_ptr<const Algorithm::Agent> agent) const
+    std::weak_ptr<const Algorithm::Agent> agent) const
 {
 
     for (const auto& pair : archive) {
-        if (pair.second == agent) {
+        auto lock = pair.second.lock();
+        if (lock && lock == agent.lock()) {
             return true;
         }
     }
@@ -113,39 +114,39 @@ bool Selector::MapElites::MapElitesArchive::containsAgent(
 }
 
 void Selector::MapElites::MapElitesArchive::removeAgentFromArchiveIfNotComplete(
-    std::shared_ptr<const Algorithm::Agent> agent, size_t maxNbEvaluation)
+    std::weak_ptr<const Algorithm::Agent> agent, size_t maxNbEvaluation)
 {
     for (auto it = archive.begin(); it != archive.end(); ++it) {
-        if (it->second == agent) {
+        if (it->second.lock() == agent.lock()) {
             if (it->first->getNbEvaluation() < maxNbEvaluation) {
                 // Remove the agent from the archive if it has been evaluated
                 // enough
                 it->first = nullptr;
-                it->second = nullptr; // Clear the vertex pointer
+                it->second = std::weak_ptr<const Algorithm::Agent>(); // Clear the vertex pointer
             }
         }
     }
 }
 
 void Selector::MapElites::MapElitesArchive::removeAgentFromArchive(
-    std::shared_ptr<const Algorithm::Agent> agent, size_t maxNbEvaluation)
+    std::weak_ptr<const Algorithm::Agent> agent, size_t maxNbEvaluation)
 {
     for (auto it = archive.begin(); it != archive.end(); ++it) {
-        if (it->second == agent) {
+        if (it->second.lock() == agent.lock()) {
             it->first = nullptr;
-            it->second = nullptr; // Clear the vertex pointer
+            it->second = std::weak_ptr<const Algorithm::Agent>(); // Clear the vertex pointer
             break;
         }
     }
 }
 
-std::set<std::shared_ptr<const Algorithm::Agent>> Selector::MapElites::MapElitesArchive::
+std::set<std::reference_wrapper<const Algorithm::Agent>> Selector::MapElites::MapElitesArchive::
     getVerticesInArchive() const
 {
-    std::set<std::shared_ptr<const Algorithm::Agent>> verticesInArchive;
+    std::set<std::reference_wrapper<const Algorithm::Agent>> verticesInArchive;
     for (const auto& pair : archive) {
-        if (pair.second != nullptr) {
-            verticesInArchive.insert(pair.second);
+        if (pair.second.lock()) {
+            verticesInArchive.insert(std::cref(*pair.second.lock()));
         }
     }
 

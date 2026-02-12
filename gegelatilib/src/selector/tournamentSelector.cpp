@@ -5,7 +5,7 @@
 void Selector::TournamentSelector::doSelection(
     std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::shared_ptr<const Algorithm::Agent>>& results,
+                  std::weak_ptr<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
     this->agentsToDelete.clear();
@@ -17,7 +17,7 @@ void Selector::TournamentSelector::doSelection(
 
     // Copy the first agents to remove (those at the bottom of the ranking)
     std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                          std::shared_ptr<const Algorithm::Agent>>>
+                          std::weak_ptr<const Algorithm::Agent>>>
         elements;
     auto it = results.begin();
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end();
@@ -43,7 +43,7 @@ void Selector::TournamentSelector::doSelection(
         auto subrangeEnd = elements.begin() + end;
 
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      std::shared_ptr<const Algorithm::Agent>>
+                      std::weak_ptr<const Algorithm::Agent>>
             subMap(subrangeBegin, subrangeEnd);
 
         // Delete everything but the best
@@ -52,25 +52,25 @@ void Selector::TournamentSelector::doSelection(
             erasedResults.push_back(itWorst->first);
 
             // Remove the vertex from the graph as well
-            this->manager->deleteAgent(itWorst->second, graph);
+            this->manager->deleteAgent(*itWorst->second.lock(), graph);
 
             subMap.erase(itWorst);
         }
 
         // This is a logical deletion, the vertex will be removed later
-        this->addToVerticesToDelete(subMap.begin()->second);
+        this->addToVerticesToDelete(*subMap.begin()->second.lock());
     }
 
     // Delete from results and resultsPerAgent
     auto itDel = results.begin();
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
-        this->resultsPerAgent.erase(itDel->second);
+        this->resultsPerAgent.erase(*itDel->second.lock());
         results.erase(itDel++);
     }
 }
 
 void Selector::TournamentSelector::addToVerticesToDelete(
-    std::shared_ptr<const Algorithm::Agent> agent)
+    const Algorithm::Agent& agent)
 {
     this->agentsToDelete.insert(agent);
 }
@@ -87,7 +87,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::update
         std::remove_if(
             context->preExistingAgents.begin(),
             context->preExistingAgents.end(),
-            [agentsToDeleteRef](const std::shared_ptr<const Algorithm::Agent> agent) -> bool {
+            [agentsToDeleteRef](const Algorithm::Agent& agent) -> bool {
                 return agentsToDeleteRef.find(agent) !=
                        agentsToDeleteRef.end();
             }),
@@ -99,7 +99,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::update
             std::remove_if(
                 context->agentsClonable.begin(),
                 context->agentsClonable.end(),
-                [agentsToDeleteRef](const std::shared_ptr<const Algorithm::Agent> agent) -> bool {
+                [agentsToDeleteRef](const Algorithm::Agent& agent) -> bool {
                     return agentsToDeleteRef.find(agent) ==
                            agentsToDeleteRef.end();
                 }),
@@ -121,11 +121,11 @@ void Selector::TournamentSelector::updateAfterPopulate(std::shared_ptr<EvoGraph:
     for (auto agent : this->agentsToDelete) {
         this->manager->deleteAgent(agent, graph);
     }
-    this->verticesToDelete.clear();
+    this->agentsToDelete.clear();
 }
 
-const std::set<std::shared_ptr<const Algorithm::Agent>>& Selector::TournamentSelector::
-    getVerticesToDelete()
+const std::set<std::reference_wrapper<const Algorithm::Agent>>& Selector::TournamentSelector::
+    getAgentsToDelete()
 {
     return this->agentsToDelete;
 }

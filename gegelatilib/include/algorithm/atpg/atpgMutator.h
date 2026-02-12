@@ -24,7 +24,7 @@ namespace Algorithm::ATPG {
         std::string actionProgramAlgorithmName;
 
         /// Pre-existing program teams elements used for mutation operations.
-        std::vector<std::shared_ptr<const Agent>> preExistingActionProgram;
+        std::vector<std::weak_ptr<const Agent>> preExistingActionProgram;
 
     public:
 
@@ -94,7 +94,7 @@ namespace Algorithm::ATPG {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
 
 
         /**
@@ -125,7 +125,7 @@ namespace Algorithm::ATPG {
         virtual void mutateEdgeDestination(std::shared_ptr<EvoGraph::Graph> graph,
                                     std::shared_ptr<const EvoGraph::Edge> edge,
                                     std::shared_ptr<AgentManager> manager,
-                                    std::vector<std::shared_ptr<const Agent>>& newSubAgents,
+                                    std::vector<std::weak_ptr<const Agent>>& newSubAgents,
                                     const Learn::LearningParameters& params,
                                     RNG::RNG& rng);
 
@@ -149,7 +149,7 @@ namespace Algorithm::ATPG {
         virtual void mutateOutgoingEdge(
             std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
             std::shared_ptr<AgentManager> manager,
-            std::vector<std::shared_ptr<const Agent>>& newSubAgents,
+            std::vector<std::weak_ptr<const Agent>>& newSubAgents,
             const Learn::LearningParameters& params, RNG::RNG& rng) override;
 
 
@@ -158,7 +158,7 @@ namespace Algorithm::ATPG {
          * \brief Specialization of mutateSubAgents method.
          */
         virtual void mutateSubAgents(
-            std::vector<std::shared_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
+            std::vector<std::weak_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
             std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
             RNG::RNG& rng, uint64_t maxNbThreads) override;
     };

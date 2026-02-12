@@ -35,7 +35,7 @@ namespace Algorithm::ATPG {
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ATPGExecutionEngine(std::shared_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, isTraining) {}
+        ATPGExecutionEngine(std::weak_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): TPGExecutionEngine(executedAgent, outputs, isTraining) {}
 
 
         /**

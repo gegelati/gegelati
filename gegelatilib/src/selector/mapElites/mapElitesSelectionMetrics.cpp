@@ -10,7 +10,7 @@ Selector::MapElites::MapElitesSelectionMetrics::getMapDescriptors() const
 }
 
 void Selector::MapElites::MapElitesSelectionMetrics::initMetrics(
-    std::shared_ptr<const Algorithm::Agent> agent,
+    const Algorithm::Agent& agent,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     for (auto& pair : mapDescriptors) {
@@ -19,7 +19,7 @@ void Selector::MapElites::MapElitesSelectionMetrics::initMetrics(
 }
 
 void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsStep(
-    std::shared_ptr<const Algorithm::Agent> agent, std::vector<double> actionValues,
+    const Algorithm::Agent& agent, std::vector<double> actionValues,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     for (auto& pair : mapDescriptors) {
@@ -29,7 +29,7 @@ void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsStep(
 }
 
 void Selector::MapElites::MapElitesSelectionMetrics::extractMetricsEpisode(
-    std::shared_ptr<const Algorithm::Agent> agent, size_t nbStepsExecuted,
+    const Algorithm::Agent& agent, size_t nbStepsExecuted,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     SelectionMetrics::extractMetricsEpisode(agent, nbStepsExecuted,

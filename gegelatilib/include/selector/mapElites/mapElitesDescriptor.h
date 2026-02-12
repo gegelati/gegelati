@@ -88,7 +88,7 @@ namespace Selector {
              * get the metrics.
              */
             virtual void extractMetricsStep(
-                std::vector<double>& metrics, std::shared_ptr<const Algorithm::Agent> agent,
+                std::vector<double>& metrics, const Algorithm::Agent& agent,
                 std::vector<double> actionValues,
                 const Learn::LearningEnvironment& learningEnvironment) const {
                 /* Empty because sub-class does not need to inherrit from it.*/
@@ -105,7 +105,7 @@ namespace Selector {
              * get the metrics.
              */
             virtual void extractMetricsEpisode(
-                std::vector<double>& metrics, std::shared_ptr<const Algorithm::Agent> agent,
+                std::vector<double>& metrics, const Algorithm::Agent& agent,
                 size_t nbStepsExecuted,
                 const Learn::LearningEnvironment& learningEnvironment) const {
                 /* Empty because sub-class does not need to inherrit from it.*/

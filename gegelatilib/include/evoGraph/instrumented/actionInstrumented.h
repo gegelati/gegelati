@@ -50,7 +50,7 @@ namespace EvoGraph {
       public:
         /// Main constructor for ActionInstrumented.
         /// see Action constructor for more details.
-        ActionInstrumented(const uint64_t id, const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : Action(id, agentProgram)
+        ActionInstrumented(const uint64_t id, const std::weak_ptr<const Algorithm::Agent> agentProgram = std::weak_ptr<const Algorithm::Agent>()) : Action(id, agentProgram)
         {
         }
     };

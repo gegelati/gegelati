@@ -101,7 +101,7 @@ void File::GraphDotExporter::printEdge(const EvoGraph::Edge& edge)
 
     uint64_t srcID = edge.getSource()->getVertexID();
 
-    std::shared_ptr<const Algorithm::Agent> agent = edge.getProgram();
+    std::shared_ptr<const Algorithm::Agent> agent;// = edge.getProgram();
     auto lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(agent);
     if(lgpAgent == nullptr){
         throw std::runtime_error("File::GraphDotExporter::printEdge agentProgram is not an lgpAgent");

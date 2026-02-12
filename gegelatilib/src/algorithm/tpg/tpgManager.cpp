@@ -1,14 +1,14 @@
 
 #include "algorithm/tpg/tpgManager.h"
 
-std::shared_ptr<Algorithm::TPG::TPGAgent> Algorithm::TPG::TPGManager::getTPGAgentFromCst(std::shared_ptr<const Agent> agent)
+std::shared_ptr<Algorithm::TPG::TPGAgent> Algorithm::TPG::TPGManager::getTPGAgentFromCst(const Agent& agent)
 {
     return std::dynamic_pointer_cast<TPGAgent>(this->getAgentFromCst(agent));
 }
 
-const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::TPG::TPGManager::getAgents() const
+const std::vector<std::weak_ptr<const Algorithm::Agent>> Algorithm::TPG::TPGManager::getAgents() const
 {
-    std::vector<std::shared_ptr<const Algorithm::Agent>> constAgents;
+    std::vector<std::weak_ptr<const Algorithm::Agent>> constAgents;
 
     // Transform each root from shared_ptr<Agent> to shared_ptr<const Agent>
     for(auto agent: this->agents){
@@ -24,32 +24,32 @@ const std::vector<std::shared_ptr<const Algorithm::Agent>> Algorithm::TPG::TPGMa
 }
 
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
+std::weak_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
     std::shared_ptr<const EvoGraph::Team> vertex = graph->addNewTeam();
     return this->createAgent(vertex);
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
+std::weak_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
 {
     this->agents.insert(std::make_shared<TPGAgent>(vertex, this->getAlgorithmName()));
     return *this->agents.rbegin();
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
+std::weak_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    std::shared_ptr<const Algorithm::TPG::TPGAgent> castedAgent = std::dynamic_pointer_cast<const TPGAgent>(agent);
+    const TPGAgent* castedAgent = dynamic_cast<const TPGAgent*>(&agent);
     if(castedAgent == nullptr){
         throw std::runtime_error("Algorithm::TPG::TPGManager::copyAgent: trying to copy an agent that is not a TPGAgent.");
     }
 
     std::shared_ptr<const EvoGraph::Vertex> newVertex;
 
-    if(agent->getAlgorithmName() != this->getAlgorithmName()){
+    if(agent.getAlgorithmName() != this->getAlgorithmName()){
         // Since the agent dupplicated is not from the same algorithm, we also need to dupplicate the sub agents on the edge of the vertex.
         newVertex = graph->addNewTeam();
         for(std::shared_ptr<const EvoGraph::Edge> edge: castedAgent->getVertex()->getOutgoingEdges()){
-            std::shared_ptr<const Algorithm::Agent> newSubAgent = this->getSubManager(this->programAlgorithmName)->copyAgent(edge->getProgram(), graph);
+            std::weak_ptr<const Algorithm::Agent> newSubAgent = this->getSubManager(this->programAlgorithmName)->copyAgent(*edge->getProgram().lock(), graph);
             graph->addNewEdge(*newVertex, *edge->getDestination(), newSubAgent);
         }
         
@@ -60,18 +60,18 @@ std::shared_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(st
     return this->createAgent(newVertex);
 }
 
-void Algorithm::TPG::TPGManager::deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::TPG::TPGManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Do not remove action agents from the graph
     if(auto vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(this->getTPGAgentFromCst(agent)->getVertex())){
         graph->removeVertex(*vertex);
     }
 
-    auto iterator = this->agents.find(agent);
+    auto iterator = this->agents.find(&agent);
     this->agents.erase(iterator);   
 }
 
-void Algorithm::TPG::TPGManager::setVertex(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex)
+void Algorithm::TPG::TPGManager::setVertex(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex)
 {
     std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
     if(team == nullptr){

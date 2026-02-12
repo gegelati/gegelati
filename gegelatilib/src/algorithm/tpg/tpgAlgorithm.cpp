@@ -56,9 +56,10 @@ void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_
     tpgMutator->setProgramAlgorithmName(this->programAlgorithmName);
 }
 
-std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(std::shared_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx) const
+std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(std::weak_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx) const
 {
-    if(agent == nullptr || !this->containsAgent(agent)){
+    auto locker = agent.lock();
+    if(!locker || !this->containsAgent(*locker)){
         throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with a null agent or an agent not belonging to this algorithm.");
     }
 

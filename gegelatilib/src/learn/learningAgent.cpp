@@ -136,14 +136,14 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     }
 
     // Get the current agent and the current algorithm
-    std::shared_ptr<const Algorithm::Agent> agent = job.getAgent();
+    const Algorithm::Agent& agent = *job.getAgent().lock();
     std::shared_ptr<const Selector::Selector> selector = this->currentExecutedAlgorithm->getSelector();
 
     // Skip the agent evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
     if (mode == LearningMode::TRAINING &&
-        selector->isAgentEvalSkipped(agent, previousEval)) {
+        selector->isAgentEvalSkipped(job.getAgent(), previousEval)) {
         return previousEval;
     }
 
@@ -216,11 +216,11 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     return evaluationResult;
 }
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>
 Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
                                        Learn::LearningMode mode)
 {
-    std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>
         results;
 
 
@@ -237,7 +237,7 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
 }
 
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>
 Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
                                        Learn::LearningMode mode)
 {
@@ -248,7 +248,7 @@ Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
         throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: The learning agent does not contain the given algorithm.");
     }
 
-    std::multimap<std::shared_ptr<EvaluationResult>, std::shared_ptr<const Algorithm::Agent>>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>
         results;
 
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
@@ -270,9 +270,9 @@ Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
 
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
     uint64_t generationNumber, Learn::LearningMode mode,
-    std::shared_ptr<const Algorithm::Agent> agent)
+    std::weak_ptr<const Algorithm::Agent> agent)
 {
-    auto algorithm = this->findCorrespondingAlgorithm(agent);
+    auto algorithm = this->findCorrespondingAlgorithm(*agent.lock());
 
     // Create the execution engine of the agent.
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
@@ -289,7 +289,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
 
 void Learn::LearningAgent::launchAlgorithmsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::shared_ptr<const Algorithm::Agent>>& results,
+                          std::weak_ptr<const Algorithm::Agent>>& results,
             RNG::RNG& rng)
 {
     if(this->algorithms.size() == 1){
@@ -300,18 +300,18 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
     } else {
 
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-            std::shared_ptr<const Algorithm::Agent>>
+            std::weak_ptr<const Algorithm::Agent>>
             resultsCopy(results);
 
         results.clear();
 
         for(auto algorithm: algorithms){
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::shared_ptr<const Algorithm::Agent>>
+                        std::weak_ptr<const Algorithm::Agent>>
                 resultsAlgo;
             
             for(const auto& result: resultsCopy){
-                if(algorithm->containsAgent(result.second)){
+                if(algorithm->containsAgent(*result.second.lock())){
                     resultsAlgo.insert(result);
                 }
             }
@@ -350,7 +350,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
     // Does a validation or not according to the parameter doValidation
     if (params.doValidation) {
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      std::shared_ptr<const Algorithm::Agent>>
+                      std::weak_ptr<const Algorithm::Agent>>
             validationResults;
 
         if (generationNumber % params.stepValidation == 0 ||
@@ -443,7 +443,7 @@ std::vector<std::shared_ptr<Algorithm::Job>> Learn::LearningAgent::makeJobs(
     return jobs;
 }
 
-std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::findCorrespondingAlgorithm(std::shared_ptr<const Algorithm::Agent> agent){
+std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::findCorrespondingAlgorithm(const Algorithm::Agent& agent){
     for(auto algorithm: this->algorithms){
         if(algorithm->containsAgent(agent)){
             return algorithm;

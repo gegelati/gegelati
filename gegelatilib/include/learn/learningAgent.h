@@ -232,7 +232,7 @@ namespace Learn {
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              std::shared_ptr<const Algorithm::Agent>>
+                              std::weak_ptr<const Algorithm::Agent>>
         evaluateAllAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
@@ -248,7 +248,7 @@ namespace Learn {
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              std::shared_ptr<const Algorithm::Agent>>
+                              std::weak_ptr<const Algorithm::Agent>>
         evaluateCurrentAlgorithmAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
@@ -267,7 +267,7 @@ namespace Learn {
          */
         virtual std::shared_ptr<EvaluationResult> evaluateOneAgent(
             uint64_t generationNumber, LearningMode mode,
-            std::shared_ptr<const Algorithm::Agent> agent);
+            std::weak_ptr<const Algorithm::Agent> agent);
 
         /**
          * \brief Train the Graph for one generation.
@@ -325,7 +325,7 @@ namespace Learn {
          * 
          * \throw std::runtime_error if no algorithm contain the agent.
          */
-        virtual std::shared_ptr<Algorithm::Algorithm> findCorrespondingAlgorithm(std::shared_ptr<const Algorithm::Agent> agent);
+        virtual std::shared_ptr<Algorithm::Algorithm> findCorrespondingAlgorithm(const Algorithm::Agent& agent);
 
         /**
          * \brief launch the selection of the different algorithms
@@ -335,7 +335,7 @@ namespace Learn {
          */
         virtual void launchAlgorithmsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::shared_ptr<const Algorithm::Agent>>& results,
+                          std::weak_ptr<const Algorithm::Agent>>& results,
             RNG::RNG& rng);
 
         /**

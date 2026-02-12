@@ -63,11 +63,11 @@ namespace EvoGraph {
          *
          * \param[in] src pointer to the source Vertex of the edge.
          * \param[in] dest pointer to the destination Vertex of the edge.
-         * \param[in] agentProgram the shared pointer to the Agent Program associated to the
+         * \param[in] agentProgram the weak pointer to the Agent Program associated to the
          *            edge.
          */
         Edge(std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
-                const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr)
+                const std::weak_ptr<const Algorithm::Agent> agentProgram = std::weak_ptr<const Algorithm::Agent>())
             : Element(agentProgram), edgeID(incrementeCounter()), source{src}, destination{dest} {};
 
         /**

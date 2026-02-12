@@ -25,7 +25,7 @@ namespace Algorithm::Maple {
          * 
          * \param[in] agent the Agent to cast.
          */
-        virtual std::shared_ptr<MapleAgent> getMapleAgentFromCst(std::shared_ptr<const Agent> agent);
+        virtual std::shared_ptr<MapleAgent> getMapleAgentFromCst(const Agent& agent);
     public:
 
         /**
@@ -39,7 +39,7 @@ namespace Algorithm::Maple {
         /**
          * \brief Get the current agents used by the algorithm.
          */
-        virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const override;
+        virtual const std::vector<std::weak_ptr<const Agent>> getAgents() const override;
 
         /**
          * \brief Create a new MapleAgent on a specific vertex.
@@ -48,7 +48,7 @@ namespace Algorithm::Maple {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex) override;
+        virtual std::weak_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex) override;
 
 
         /**
@@ -59,7 +59,7 @@ namespace Algorithm::Maple {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual void deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
 
         /**

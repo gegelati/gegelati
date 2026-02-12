@@ -12,7 +12,7 @@ double Selector::SelectionMetrics::getUtility() const
 }
 
 void Selector::SelectionMetrics::extractMetricsEpisode(
-    std::shared_ptr<const Algorithm::Agent> agent, size_t nbStepsExecuted,
+    const Algorithm::Agent& agent, size_t nbStepsExecuted,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     // Update score

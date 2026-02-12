@@ -11,7 +11,7 @@ void Algorithm::ATPG::ATPGExecutionEngine::setActionProgramExecutionEngine(std::
 
 std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
 {
-    auto tpgAgent = std::dynamic_pointer_cast<const TPG::TPGAgent>(this->executedAgent);
+    const Algorithm::TPG::TPGAgent* tpgAgent = dynamic_cast<const TPG::TPGAgent*>(this->executedAgent.lock().get());
     if(tpgAgent == nullptr){
         throw std::runtime_error("Algorithm::ATPG::ATPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
     }
@@ -19,9 +19,10 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
     std::shared_ptr<const EvoGraph::Edge> edge = nullptr;
 
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> visitedVertices;
+    std::weak_ptr<const Algorithm::Agent> currentProgram = currentVertex->getProgram();
     // Browse the TPG until vertex with an agent of the actionProgram Algorithm name is reached
-    while (currentVertex->getProgram() == nullptr || 
-           currentVertex->getProgram()->getAlgorithmName() != this->actionProgramExecutionEngine->getAlgorithmName()) {
+    while (currentProgram.expired() || 
+           currentProgram.lock()->getAlgorithmName() != this->actionProgramExecutionEngine->getAlgorithmName()) {
 
         auto teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(currentVertex);
         if(teamVertex == nullptr){

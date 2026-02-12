@@ -30,7 +30,7 @@ namespace Algorithm::TPG {
          * 
          * \param[in] agent the Agent to cast.
          */
-        virtual std::shared_ptr<TPGAgent> getTPGAgentFromCst(std::shared_ptr<const Agent> agent);
+        virtual std::shared_ptr<TPGAgent> getTPGAgentFromCst(const Agent& agent);
 
     public:
 
@@ -51,7 +51,7 @@ namespace Algorithm::TPG {
         /**
          * \brief Get the current agents used by the algorithm.
          */
-        virtual const std::vector<std::shared_ptr<const Agent>> getAgents() const override;
+        virtual const std::vector<std::weak_ptr<const Agent>> getAgents() const override;
 
         /**
          * \brief Create a new TPGAgent.
@@ -60,7 +60,7 @@ namespace Algorithm::TPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual std::weak_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
 
         /**
          * \brief Create a new TPGAgent on a specific vertex.
@@ -70,7 +70,7 @@ namespace Algorithm::TPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex);
+        virtual std::weak_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex);
 
 
         /**
@@ -83,7 +83,7 @@ namespace Algorithm::TPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::shared_ptr<const Agent> copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual std::weak_ptr<const Agent> copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
         /**
          * \brief Delete the TPGAgent.
@@ -93,7 +93,7 @@ namespace Algorithm::TPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual void deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
 
         /**
@@ -103,7 +103,7 @@ namespace Algorithm::TPG {
          * \param[in] graph the Graph associated with the Agent.
          * \param[in] vertex the vertex set to the agent.
          */
-        virtual void setVertex(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex);
+        virtual void setVertex(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex);
 
         /**
          * \brief create and return a TPG execution engine.

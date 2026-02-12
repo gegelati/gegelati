@@ -55,16 +55,16 @@ namespace EvoGraph {
         virtual std::shared_ptr<Graph> createGraph() const override;
 
         ///  Specialization of the method returning a TeamInstrumented
-        virtual std::shared_ptr<Team> createTeam(std::shared_ptr<const Algorithm::Agent> programAgent = nullptr) const override;
+        virtual std::shared_ptr<Team> createTeam(std::weak_ptr<const Algorithm::Agent> programAgent = std::weak_ptr<const Algorithm::Agent>()) const override;
 
         ///  Specialization of the method returning a ActionInstrumented
         virtual std::shared_ptr<Action> createAction(
-            const uint64_t id, std::shared_ptr<const Algorithm::Agent> programAgent = nullptr) const override;
+            const uint64_t id, std::weak_ptr<const Algorithm::Agent> programAgent = std::weak_ptr<const Algorithm::Agent>()) const override;
 
         ///  Specialization of the method returning a EdgeInstrumented
         virtual std::shared_ptr<Edge> createEdge(
             std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
-            const std::shared_ptr<const Algorithm::Agent> prog) const override;
+            std::weak_ptr<const Algorithm::Agent> prog) const override;
 
         /**
          * \brief Reset all visit and traversal counters of a Graph.

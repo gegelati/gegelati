@@ -2,15 +2,15 @@
 #include "algorithm/atpg/atpgManager.h"
 
 
-void Algorithm::ATPG::ATPGManager::deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph) 
+void Algorithm::ATPG::ATPGManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) 
 {
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> verticesToDelete;
     // get vertex of agent to delete;
     auto vertex = this->getTPGAgentFromCst(agent)->getVertex();
 
-    for(auto edge: vertex->getOutgoingEdges()){
-        if(edge->getDestination()->getProgram() != nullptr &&
-           edge->getDestination()->getProgram()->getAlgorithmName() == this->actionProgramAlgorithmName && 
+    for(auto& edge: vertex->getOutgoingEdges()){
+        std::shared_ptr<const Algorithm::Agent> locked = edge->getDestination()->getProgram().lock();
+        if(locked != nullptr && locked->getAlgorithmName() == this->actionProgramAlgorithmName && 
            edge->getDestination()->getIncomingEdges().size() == 1) {
             // Remove action vertex from the graph because it is only used by this team and it contains an action program.
             verticesToDelete.push_back(edge->getDestination());
@@ -20,11 +20,11 @@ void Algorithm::ATPG::ATPGManager::deleteAgent(std::shared_ptr<const Agent> agen
     verticesToDelete.push_back(vertex);
 
     // Remove the action vertices from the graph
-    for(auto vertex: verticesToDelete){
+    for(auto& vertex: verticesToDelete){
         graph->removeVertex(*vertex);
     }
 
-    auto iterator = this->agents.find(agent);
+    auto iterator = this->agents.find(&agent);
     this->agents.erase(iterator);   
 }
 

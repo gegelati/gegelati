@@ -78,7 +78,7 @@ namespace Algorithm::LGP {
         uint64_t programCounter;
 
         /// casted executed agent
-        std::shared_ptr<const LGPAgent> lgpExecutedAgent;
+        const LGPAgent* lgpExecutedAgent;
 
       protected:
         /**
@@ -184,7 +184,7 @@ namespace Algorithm::LGP {
          *
          * \param[in] newExecutedAgent the LGPAgent executed by the lgpEngine
          */
-        virtual void setExecutedAgent(std::shared_ptr<const Agent> newExecutedAgent) override;
+        virtual void setExecutedAgent(std::weak_ptr<const Agent> newExecutedAgent) override;
 
         /**
          * \brief Method for changing the dataSources on which the Program will

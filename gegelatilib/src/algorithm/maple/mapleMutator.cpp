@@ -22,14 +22,14 @@ void Algorithm::Maple::MapleMutator::initRandomPopulation(std::shared_ptr<EvoGra
     this->initActionVertices(graph, manager->getOutputs().size());
 
     // Empty agent manager
-    manager->clearAgents();
+    manager->clearAgents(graph);
 
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
         this->initRandomAgent(graph, manager, params, rng);
     }
 }
 
-void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     // First agent initialized, check configuration validity and create action vertices
     if(manager->getAgents().size() == 1){
@@ -37,7 +37,7 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(std::shared_ptr<con
         this->initActionVertices(graph, manager->getOutputs().size());
     }
 
-    auto vertex = std::dynamic_pointer_cast<const MapleAgent>(agent)->getVertex();
+    auto vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
     auto team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
 
     // Get program mutator and manager
@@ -73,7 +73,7 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(std::shared_ptr<con
 }
 
 void Algorithm::Maple::MapleMutator::crossoverAgents(
-    std::vector<std::shared_ptr<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    std::vector<std::reference_wrapper<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::weak_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
 
 }
@@ -170,12 +170,12 @@ void Algorithm::Maple::MapleMutator::mutateEdgeDestination(
 void Algorithm::Maple::MapleMutator::mutateOutgoingEdge(
     std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
     const std::set<size_t>& actionClasses, std::shared_ptr<AgentManager> manager,
-    std::vector<std::shared_ptr<const Agent>>& newSubAgents,
+    std::vector<std::weak_ptr<const Agent>>& newSubAgents,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    auto originAgent = edge->getProgram();
+    const Agent& originAgent = *edge->getProgram().lock();
     // copy program
-    std::shared_ptr<const Algorithm::Agent> newAgent = manager->getSubManager(originAgent->getAlgorithmName())->copyAgent(originAgent, graph);
+    std::weak_ptr<const Algorithm::Agent> newAgent = manager->getSubManager(originAgent.getAlgorithmName())->copyAgent(originAgent, graph);
 
     // Set the mutated agent to the edge
     graph->setEdgeProgram(*edge, newAgent);
@@ -193,12 +193,9 @@ void Algorithm::Maple::MapleMutator::mutateOutgoingEdge(
 }
 
 void Algorithm::Maple::MapleMutator::mutateAgent(
-    std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::shared_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::weak_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    if(std::dynamic_pointer_cast<const MapleAgent>(agent) == nullptr){
-        throw std::runtime_error("MapleMutator::mutateAgent: the agent to mutate is not a MapleAgent.");
-    }
-    std::shared_ptr<const EvoGraph::Vertex> vertex = std::dynamic_pointer_cast<const MapleAgent>(agent)->getVertex();
+    std::shared_ptr<const EvoGraph::Vertex> vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
     std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
 
     // 1. Remove randomly selected edges

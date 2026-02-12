@@ -45,7 +45,7 @@ double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& ed
 
     // Put the result in the archive before returning it.
     if (this->isTraining && this->archive != nullptr) {
-        this->archive->addRecording(*edge.getProgram(), this->programExecutionEngine->getDataSources(),
+        this->archive->addRecording(*edge.getProgram().lock(), this->programExecutionEngine->getDataSources(),
                                     result);
     }
     return result;
@@ -90,7 +90,7 @@ std::shared_ptr<const EvoGraph::Edge> Algorithm::TPG::TPGExecutionEngine::evalua
 
 std::vector<double> Algorithm::TPG::TPGExecutionEngine::execute()
 {
-    auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(this->executedAgent);
+    const Algorithm::TPG::TPGAgent* tpgAgent = dynamic_cast<const TPGAgent*>(this->executedAgent.lock().get());
     if(tpgAgent == nullptr){
         throw std::runtime_error("Algorithm::TPG::TPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
     }

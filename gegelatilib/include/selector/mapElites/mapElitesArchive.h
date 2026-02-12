@@ -42,7 +42,7 @@ namespace Selector {
             /// The archive storing evaluation results and their corresponding
             /// agent
             std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                  std::shared_ptr<const Algorithm::Agent>>>
+                                  std::weak_ptr<const Algorithm::Agent>>>
                 archive;
 
           public:
@@ -93,7 +93,7 @@ namespace Selector {
              */
             virtual const std::vector<
                 std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                          std::shared_ptr<const Algorithm::Agent>>>&
+                          std::weak_ptr<const Algorithm::Agent>>>&
             getAllArchive() const;
 
             /**
@@ -102,7 +102,7 @@ namespace Selector {
              * \param[in] indices the indices to get the archive content from
              */
             virtual const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                    std::shared_ptr<const Algorithm::Agent>>&
+                                    std::weak_ptr<const Algorithm::Agent>>&
             getArchiveAt(const std::vector<uint64_t>& indices) const;
 
             /**
@@ -112,7 +112,7 @@ namespace Selector {
              * from
              */
             virtual const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                    std::shared_ptr<const Algorithm::Agent>>&
+                                    std::weak_ptr<const Algorithm::Agent>>&
             getArchiveFromDescriptors(
                 const std::vector<double>& descriptors) const;
 
@@ -124,7 +124,7 @@ namespace Selector {
              * \param[in] indices the indices to set the archive content at
              */
             virtual void setArchiveAt(
-                std::shared_ptr<const Algorithm::Agent> agent,
+                std::weak_ptr<const Algorithm::Agent> agent,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<uint64_t>& indices);
 
@@ -137,7 +137,7 @@ namespace Selector {
              * at
              */
             virtual void setArchiveFromDescriptors(
-                std::shared_ptr<const Algorithm::Agent> agent,
+                std::weak_ptr<const Algorithm::Agent> agent,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<double>& descriptors);
 
@@ -169,7 +169,7 @@ namespace Selector {
              *
              * \param[in] agent the agent to check
              */
-            virtual bool containsAgent(std::shared_ptr<const Algorithm::Agent> agent) const;
+            virtual bool containsAgent(std::weak_ptr<const Algorithm::Agent> agent) const;
 
             /**
              * \brief Remove a agent from the archive if its number of
@@ -180,7 +180,7 @@ namespace Selector {
              * allowed
              */
             virtual void removeAgentFromArchiveIfNotComplete(
-                std::shared_ptr<const Algorithm::Agent> agent, size_t maxNbEvaluation);
+                std::weak_ptr<const Algorithm::Agent> agent, size_t maxNbEvaluation);
 
             /**
              * \brief Remove a agent from the archive
@@ -189,13 +189,13 @@ namespace Selector {
              * \param[in] maxNbEvaluation the maximum number of evaluation
              * allowed
              */
-            virtual void removeAgentFromArchive(std::shared_ptr<const Algorithm::Agent> agent,
+            virtual void removeAgentFromArchive(std::weak_ptr<const Algorithm::Agent> agent,
                                                size_t maxNbEvaluation);
 
             /**
              * \brief Return a set with the current vectors in the archive.
              */
-            virtual std::set<std::shared_ptr<const Algorithm::Agent>> getVerticesInArchive()
+            virtual std::set<std::reference_wrapper<const Algorithm::Agent>> getVerticesInArchive()
                 const;
         };
 

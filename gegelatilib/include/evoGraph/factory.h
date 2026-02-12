@@ -77,10 +77,10 @@ namespace EvoGraph {
          * \brief Create a Team for a Graph.
          *
          * This method allocates and returns a new Team.
-         * \param[in] programAgent shared pointer to the Agent Program associated to the newly
+         * \param[in] programAgent weak pointer to the Agent Program associated to the newly
          *                 created Team.
          */
-        virtual std::shared_ptr<Team> createTeam(std::shared_ptr<const Algorithm::Agent> programAgent = nullptr) const;
+        virtual std::shared_ptr<Team> createTeam(std::weak_ptr<const Algorithm::Agent> programAgent = std::weak_ptr<const Algorithm::Agent>()) const;
 
         /**
          * \brief Create a Action for a Graph.
@@ -88,11 +88,11 @@ namespace EvoGraph {
          * This method allocates and returns a new Action.
          *
          * \param[in] id integer stored as the actionID of the Action.
-         * \param[in] programAgent shared pointer to the Agent Program associated to the newly
+         * \param[in] programAgent weak pointer to the Agent Program associated to the newly
          *                 created Action.
          */
         virtual std::shared_ptr<Action> createAction(
-            const uint64_t id, std::shared_ptr<const Algorithm::Agent> programAgent = nullptr) const;
+            const uint64_t id, std::weak_ptr<const Algorithm::Agent> programAgent = std::weak_ptr<const Algorithm::Agent>()) const;
 
         /**
          * \brief Create a Edge for a Graph.
@@ -102,12 +102,12 @@ namespace EvoGraph {
          *
          * \param[in] src pointer to the source Vertex of the edge.
          * \param[in] dest pointer to the destination Vertex of the edge.
-         * \param[in] actionProgram the shared pointer to the actionProgram associated to the
+         * \param[in] actionProgram the weak pointer to the actionProgram associated to the
          *            edge.
          */
         virtual std::shared_ptr<Edge> createEdge(
             std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
-            std::shared_ptr<const Algorithm::Agent> actionProgram) const;
+            std::weak_ptr<const Algorithm::Agent> actionProgram) const;
 
 
     };

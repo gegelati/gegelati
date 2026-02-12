@@ -26,7 +26,7 @@ namespace Selector {
 
         /// Pointer to the best agent encountered during training, together with
         /// its EvaluationResult.
-        std::pair<std::shared_ptr<const Algorithm::Agent>,
+        std::pair<const Algorithm::Agent*,
                   std::shared_ptr<Learn::EvaluationResult>>
             bestAgent{nullptr, nullptr};
 
@@ -43,7 +43,7 @@ namespace Selector {
          * evaluated more than LearningParameters::maxNbEvaluationPerPolicy
          * times.
          */
-        std::map<std::shared_ptr<const Algorithm::Agent>,
+        std::map<std::reference_wrapper<const Algorithm::Agent>,
                  std::shared_ptr<Learn::EvaluationResult>>
             resultsPerAgent;
 
@@ -83,7 +83,7 @@ namespace Selector {
         virtual void doSelection(
             std::shared_ptr<EvoGraph::Graph> graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::shared_ptr<const Algorithm::Agent>>& results,
+                          std::weak_ptr<const Algorithm::Agent>>& results,
             RNG::RNG& rng);
 
         /**
@@ -126,7 +126,7 @@ namespace Selector {
          */
         virtual void updateEvaluationRecords(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::shared_ptr<const Algorithm::Agent>>& results);
+                                std::weak_ptr<const Algorithm::Agent>>& results);
 
         /**
          * \brief Update the resultsPerAgent.
@@ -135,7 +135,7 @@ namespace Selector {
          */
         virtual void updateResultsPerAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::shared_ptr<const Algorithm::Agent>>& results);
+                                std::weak_ptr<const Algorithm::Agent>>& results);
 
         /**
          * \brief Update the bestAgent attribute.
@@ -159,7 +159,7 @@ namespace Selector {
          */
         virtual void updateBestAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::shared_ptr<const Algorithm::Agent>>& results);
+                                std::weak_ptr<const Algorithm::Agent>>& results);
 
 
         /**
@@ -178,7 +178,7 @@ namespace Selector {
          * otherwise.
          */
         virtual bool isAgentEvalSkipped(
-            std::shared_ptr<const Algorithm::Agent>,
+            std::weak_ptr<const Algorithm::Agent>,
             std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
 
         /**
@@ -189,7 +189,7 @@ namespace Selector {
          *
          * \return a reference to the bestAgent attribute.
          */
-        virtual const std::pair<std::shared_ptr<const Algorithm::Agent>,
+        virtual const std::pair<const Algorithm::Agent*,
                                 std::shared_ptr<Learn::EvaluationResult>>&
         getBestAgent() const;
 
@@ -206,7 +206,7 @@ namespace Selector {
         /**
          * \brief Return the resultsPerAgent map.
          */
-        virtual const std::map<std::shared_ptr<const Algorithm::Agent>,
+        virtual const std::map<std::reference_wrapper<const Algorithm::Agent>,
                                std::shared_ptr<Learn::EvaluationResult>>&
         getResultsPerAgent() const;
 

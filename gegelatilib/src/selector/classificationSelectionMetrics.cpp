@@ -6,7 +6,7 @@
 #include "selector/classificationSelectionMetrics.h"
 
 void Selector::ClassificationSelectionMetrics::initMetrics(
-    std::shared_ptr<const Algorithm::Agent> agent,
+    const Algorithm::Agent& agent,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     this->scorePerClass.resize(
@@ -16,7 +16,7 @@ void Selector::ClassificationSelectionMetrics::initMetrics(
 }
 
 void Selector::ClassificationSelectionMetrics::extractMetricsEpisode(
-    std::shared_ptr<const Algorithm::Agent> agent, size_t nbStepsExecuted,
+    const Algorithm::Agent& agent, size_t nbStepsExecuted,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     // Update results

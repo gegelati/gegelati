@@ -158,10 +158,10 @@ namespace EvoGraph {
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.
          * 
-         * \param[in] agentProgram the shared pointer to the Agent Program associated to the
+         * \param[in] agentProgram the weak pointer to the Agent Program associated to the
          *            Vertex.
          */
-        Vertex(const std::shared_ptr<const Algorithm::Agent> agentProgram = nullptr) : Element{agentProgram}, vertexID(incrementeCounter()){};
+        Vertex(const std::weak_ptr<const Algorithm::Agent> agentProgram = std::weak_ptr<const Algorithm::Agent>()) : Element{agentProgram}, vertexID(incrementeCounter()){};
 
         /**
          * \brief Set of incoming Edge of the Vertex.

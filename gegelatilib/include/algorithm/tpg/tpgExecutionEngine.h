@@ -44,14 +44,14 @@ namespace Algorithm::TPG {
         TPGExecutionEngine(const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false): ExecutionEngine(outputs, algorithmName, isTraining) {}
 
         /**
-         * \brief TPGExecutionEngine constructor.
+         * \brief TPGExecutionEngine constructor. 
          * 
          * \param[in] executedAgent the agent to execute.
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        TPGExecutionEngine(std::shared_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining) {}
+        TPGExecutionEngine(std::weak_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining) {}
 
         /**
          * Setter for the archive

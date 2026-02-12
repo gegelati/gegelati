@@ -40,9 +40,9 @@
 #include "data/constantHandler.h"
 #include "instructions/multByConstant.h"
 
-void Algorithm::LGP::LGPEngine::setExecutedAgent(std::shared_ptr<const Agent> newExecutedAgent)
+void Algorithm::LGP::LGPEngine::setExecutedAgent(std::weak_ptr<const Agent> newExecutedAgent)
 {
-    auto lgpAgent = std::dynamic_pointer_cast<const LGPAgent>(newExecutedAgent);
+    const LGPAgent* lgpAgent = dynamic_cast<const LGPAgent*>(newExecutedAgent.lock().get());
     if(lgpAgent == nullptr){
         throw std::runtime_error("Algorithm::LGP::LGPEngine::setExecutedAgent trying to set an agent which is not a LGP agent");
     }
@@ -86,7 +86,7 @@ void Algorithm::LGP::LGPEngine::setExecutedAgent(std::shared_ptr<const Agent> ne
         }
     }
     // set the agent
-    this->executedAgent = lgpAgent;
+    this->executedAgent = newExecutedAgent;
     // Reset Registers (in case it is not done when they are constructed)
     this->registers.resetData();
 
@@ -231,5 +231,5 @@ void Algorithm::LGP::LGPEngine::setDataSources(
     }
 
     // Set program to check compatibility with new data source
-    this->setExecutedAgent(this->lgpExecutedAgent);
+    this->setExecutedAgent(this->executedAgent);
 }

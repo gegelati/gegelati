@@ -4,7 +4,7 @@
 
 std::vector<double> Algorithm::Maple::MapleExecutionEngine::execute()
 {
-    auto mapleAgent = std::dynamic_pointer_cast<const MapleAgent>(this->executedAgent);
+    const MapleAgent* mapleAgent = dynamic_cast<const MapleAgent*>(this->executedAgent.lock().get());
     if(mapleAgent == nullptr){
         throw std::runtime_error("Algorithm::Maple::MapleExecutionEngine::execute trying to execute an agent which is not a Maple agent");
     }

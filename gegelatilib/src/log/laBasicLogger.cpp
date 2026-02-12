@@ -44,7 +44,7 @@
 
 void Log::LABasicLogger::logResults(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::shared_ptr<const Algorithm::Agent>>& results)
+                  std::weak_ptr<const Algorithm::Agent>>& results)
 {
     auto logStat = [&](auto getter) {
         auto iter = results.begin();
@@ -59,7 +59,7 @@ void Log::LABasicLogger::logResults(
             results.begin(), results.end(), 0.0,
             [getter](double acc,
                      const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                     std::shared_ptr<const Algorithm::Agent>>& pair) {
+                                     std::weak_ptr<const Algorithm::Agent>>& pair) {
                 return acc +
                        (pair.first->getSelectionMetrics().get()->*getter)();
             });
@@ -160,7 +160,7 @@ void Log::LABasicLogger::logAfterPopulateTPG()
 
 void Log::LABasicLogger::logAfterEvaluate(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::shared_ptr<const Algorithm::Agent>>& results)
+                  std::weak_ptr<const Algorithm::Agent>>& results)
 {
     evalTime = getDurationFrom(*checkpoint);
 
@@ -172,7 +172,7 @@ void Log::LABasicLogger::logAfterEvaluate(
 
 void Log::LABasicLogger::logAfterValidate(
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::shared_ptr<const Algorithm::Agent>>& results)
+                  std::weak_ptr<const Algorithm::Agent>>& results)
 {
     validTime = getDurationFrom(*checkpoint);
 

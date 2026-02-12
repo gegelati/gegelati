@@ -1,39 +1,39 @@
 
 #include "algorithm/lgp/lgpManager.h"
 
-std::shared_ptr<Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::getLGPAgentFromCst(std::shared_ptr<const Agent> agent)
+std::shared_ptr<Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::getLGPAgentFromCst(const Agent& agent)
 {
     return std::dynamic_pointer_cast<LGPAgent>(this->getAgentFromCst(agent));
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
+std::weak_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
     this->agents.insert(std::make_shared<LGPAgent>(this->env, this->outputs, this->getAlgorithmName()));
     return *this->agents.rbegin();
 }
 
-std::shared_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
+std::weak_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    std::shared_ptr<const Algorithm::LGP::LGPAgent> castedAgent = std::dynamic_pointer_cast<const LGPAgent>(agent);
+    const LGPAgent* castedAgent = dynamic_cast<const LGPAgent*>(&agent);
     if(castedAgent == nullptr){
         throw std::runtime_error("Algorithm::LGP::LGPManager::copyAgent: trying to copy an agent that is not a LGPAgent.");
     }
-    auto newAgent = this->getLGPAgentFromCst(this->createAgent(graph));
+    auto newAgent = this->getLGPAgentFromCst(*this->createAgent(graph).lock());
 
     for(size_t idx = 0; idx < castedAgent->getNbLines(); idx++){
         newAgent->addNewLine(castedAgent->getLine(idx));
     }
 
     for(size_t idx = 0; idx < castedAgent->getEnvironment()->getParams().nbProgramConstant; idx++){
-        this->setConstantAt(newAgent, idx, castedAgent->getConstantAt(idx));
+        this->setConstantAt(*newAgent, idx, castedAgent->getConstantAt(idx));
     }
 
-    this->identifyIntrons(newAgent);
-    this->agents.insert(newAgent);
+    this->identifyIntrons(*newAgent);
+    ///this->agents.insert(newAgent);
     return *this->agents.rbegin();
 }
 
-void Algorithm::LGP::LGPManager::deleteAgent(std::shared_ptr<const Agent> agent, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::LGP::LGPManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
     this->agents.erase(this->getLGPAgentFromCst(agent));   
 }
@@ -43,42 +43,43 @@ const Output::OutputHandler& Algorithm::LGP::LGPManager::getOutputs() const
     return this->outputs;
 }
 
-void Algorithm::LGP::LGPManager::setConstantAt(std::shared_ptr<const Agent> agent, size_t index, const Data::Constant& value)
+void Algorithm::LGP::LGPManager::setConstantAt(const Agent& agent, size_t index, const Data::Constant& value)
 {
     this->getLGPAgentFromCst(agent)->getConstantHandler().setDataAt(typeid(Data::Constant), index, value);
 }
 
-void Algorithm::LGP::LGPManager::removeLine(std::shared_ptr<const LGPAgent> agent, size_t index)
+void Algorithm::LGP::LGPManager::removeLine(const Agent& agent, size_t index)
 {
     this->getLGPAgentFromCst(agent)->removeLine(index);
 }
 
-Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(std::shared_ptr<const LGPAgent> agent, size_t index)
+Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(const Agent& agent, size_t index)
 {
     return this->getLGPAgentFromCst(agent)->addNewLine(index);
 }
 
-Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(std::shared_ptr<const LGPAgent> agent)
+Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(const Agent& agent)
 {
-    return this->getLGPAgentFromCst(agent)->addNewLine(agent->getNbLines());
+    std::shared_ptr<Algorithm::LGP::LGPAgent> lgpAgent = this->getLGPAgentFromCst(agent);
+    return lgpAgent->addNewLine(lgpAgent->getNbLines());
 }
 
-void Algorithm::LGP::LGPManager::addNewLine(std::shared_ptr<const LGPAgent> agent, const LGPLine& newLine)
+void Algorithm::LGP::LGPManager::addNewLine(const Agent& agent, const LGPLine& newLine)
 {
     this->getLGPAgentFromCst(agent)->addNewLine(newLine);
 }
 
-void Algorithm::LGP::LGPManager::swapLines(std::shared_ptr<const LGPAgent> agent, size_t index1, size_t index2)
+void Algorithm::LGP::LGPManager::swapLines(const Agent& agent, size_t index1, size_t index2)
 {
     this->getLGPAgentFromCst(agent)->swapLines(index1, index2);
 }
 
-Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLine(std::shared_ptr<const LGPAgent> agent, size_t index)
+Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLine(const Agent& agent, size_t index)
 {
     return this->getLGPAgentFromCst(agent)->getLine(index);
 }
 
-uint64_t Algorithm::LGP::LGPManager::identifyIntrons(std::shared_ptr<const Agent> agent)
+uint64_t Algorithm::LGP::LGPManager::identifyIntrons(const Agent& agent)
 {
     std::shared_ptr<LGPAgent> lgpAgent = this->getLGPAgentFromCst(agent);
 
@@ -141,10 +142,10 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(std::shared_ptr<const Agent
     return nbIntrons;
 }
 
-bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(std::shared_ptr<const Agent> agent1, std::shared_ptr<const Agent> agent2) const
+bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(const Agent& agent1, const Agent& agent2) const
 {
-    std::shared_ptr<const LGPAgent> lgpAgent1 = std::dynamic_pointer_cast<const LGPAgent>(agent1);
-    std::shared_ptr<const LGPAgent> lgpAgent2 = std::dynamic_pointer_cast<const LGPAgent>(agent2);
+    const LGPAgent* lgpAgent1 = dynamic_cast<const LGPAgent*>(&agent1);
+    const LGPAgent* lgpAgent2 = dynamic_cast<const LGPAgent*>(&agent2);
     if(lgpAgent1 == nullptr || lgpAgent2 == nullptr){
         throw std::runtime_error("Algorithm::LGP::LGPManager::hasIdenticalBehavior: one of the agents is not a LGPAgent");
     }
@@ -152,7 +153,7 @@ bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(std::shared_ptr<const Agen
     size_t thisLineIdx = 0;
     size_t otherLineIdx = 0;
 
-    auto nextNonIntronIdx = [](std::shared_ptr<const LGPAgent> lgp, size_t& lineIdx) {
+    auto nextNonIntronIdx = [](const LGPAgent* lgp, size_t& lineIdx) {
         while (lineIdx < lgp->getNbLines() && lgp->isIntron(lineIdx)) {
             lineIdx++;
         }
