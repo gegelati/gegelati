@@ -9,8 +9,10 @@ void Selector::ClassificationSelectionMetrics::initMetrics(
     std::shared_ptr<const Algorithm::Agent> agent,
     const Learn::LearningEnvironment& learningEnvironment)
 {
-    this->scorePerClass.resize(learningEnvironment.getActions()->size(), 0.0);
-    this->nbEvalPerClass.resize(learningEnvironment.getActions()->size(), 0.0);
+    this->scorePerClass.resize(
+        learningEnvironment.getActions()->front().getNbValues(), 0.0);
+    this->nbEvalPerClass.resize(
+        learningEnvironment.getActions()->front().getNbValues(), 0.0);
 }
 
 void Selector::ClassificationSelectionMetrics::extractMetricsEpisode(

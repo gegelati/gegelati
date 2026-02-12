@@ -60,6 +60,8 @@ void Learn::LearningEnvironment::doAction(double actionID)
         throw std::runtime_error(
             "With more than one continuous action, doAction() "
             "method should not be called. Use doActions() instead.");
+    } else if (actionID < 0 || actionID >= this->actions->front().getNbValues()) {
+        throw std::runtime_error("Action ID is out of range.");
     }
 }
 
@@ -70,6 +72,11 @@ void Learn::LearningEnvironment::doActions(std::vector<double> vectActionID)
     // instead
     if (vectActionID.size() == 1) {
         this->doAction(vectActionID[0]);
+    }
+    if (vectActionID.size() != this->actions->size()) {
+        throw std::runtime_error(
+            "Vector of action ID given is not the same "
+            "size as the number of actions wanted");
     }
 }
 

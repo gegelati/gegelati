@@ -12,6 +12,7 @@ struct UniqueLess
      */
     using is_transparent = void;
 
+
     /**
      * \brief Compare two unique_ptr by comparing the pointed-to values.
      */
@@ -35,6 +36,31 @@ struct UniqueLess
      * pointed-to values.
      */
     bool operator()(const T* a, const std::unique_ptr<T>& b) const
+    {
+        return *a < *b;
+    }
+
+    /**
+     * \brief Compare two unique_ptr by comparing the pointed-to values.
+     */
+    bool operator()(const std::unique_ptr<const T>& a,
+                    const std::unique_ptr<T>& b) const
+    {
+        return *a < *b;
+    }
+    /**
+     * \brief Compare two unique_ptr by comparing the pointed-to values.
+     */
+    bool operator()(const std::unique_ptr<T>& a,
+                    const std::unique_ptr<const T>& b) const
+    {
+        return *a < *b;
+    }
+    /**
+     * \brief Compare two unique_ptr by comparing the pointed-to values.
+     */
+    bool operator()(const std::unique_ptr<const T>& a,
+                    const std::unique_ptr<const T>& b) const
     {
         return *a < *b;
     }
