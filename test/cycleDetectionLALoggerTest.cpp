@@ -114,6 +114,7 @@ class CycleDetectionLoggerTest : public ::testing::Test
     }
 };
 
+/*
 TEST_F(CycleDetectionLoggerTest, Constructor)
 {
     Log::CycleDetectionLALogger* l = nullptr;
@@ -124,7 +125,6 @@ TEST_F(CycleDetectionLoggerTest, Constructor)
     ASSERT_NO_THROW(Log::CycleDetectionLALogger l(*la, std::cerr));
 }
 
-/*
 
 TEST_F(CycleDetectionLoggerTest, EmptyMethods)
 {

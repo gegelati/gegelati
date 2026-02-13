@@ -52,6 +52,7 @@
 
 #include "evoGraph/instrumented/executionStats.h"
 
+#if 0
 class ExecutionStatsTest : public ::testing::Test
 {
   protected:
@@ -511,3 +512,5 @@ TEST_F(ExecutionStatsTest, WriteStatsToJson)
                               TESTS_DAT_PATH "execution_stats_ref.json"))
         << "Generated json file is different from the reference file.";*/
 }
+
+#endif

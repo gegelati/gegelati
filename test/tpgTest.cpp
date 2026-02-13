@@ -64,7 +64,8 @@ class TPGTest : public ::testing::Test
     Instructions::Set set;
     std::shared_ptr<const Environment> e = NULL;
     Learn::LearningParameters params;
-    std::shared_ptr<Algorithm::Agent> programAgent;
+    std::shared_ptr<Algorithm::Agent> sharedProgramAgent;
+    std::weak_ptr<Algorithm::Agent> programAgent;
 
     virtual void SetUp()
     {
@@ -81,8 +82,9 @@ class TPGTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 1;
         e = std::make_shared<Environment>(set, params, vect);
-        programAgent =
+        sharedProgramAgent =
             std::make_shared<Algorithm::LGP::LGPAgent>(e, 1, "fake");
+        programAgent = sharedProgramAgent;
     }
 
     virtual void TearDown()
@@ -187,15 +189,16 @@ TEST_F(TPGTest, EdgeGetSetProgram)
 
     std::shared_ptr<EvoGraph::Edge> constEdge = std::make_shared<EvoGraph::Edge>(team, action, programAgent);
     auto constProg = constEdge->getProgram();
-    ASSERT_EQ(constProg, programAgent)
+    ASSERT_EQ(constProg.lock(), programAgent.lock())
         << "Program accessor on const Edge returns a Program different from "
            "the one given at construction.";
 
     // program is a mutable attribute of the Edge.
     std::shared_ptr<Algorithm::Agent> programAgent2 =
             std::make_shared<Algorithm::LGP::LGPAgent>(e, 1, "fake");
+    
     constEdge->setProgram(programAgent2);
-    ASSERT_EQ(constEdge->getProgram(), programAgent2)
+    ASSERT_EQ(constEdge->getProgram().lock(), programAgent2)
         << "Program accessor on Edge returns a Program different from the "
            "one set before.";
 }
@@ -951,7 +954,8 @@ TEST_F(TPGTest, GraphEdgeID)
     ASSERT_THROW(tpg.setNewEdgeID(*edge2, 0), std::runtime_error)
         << "Setting an incorrect value for id should throw";
 
-    EvoGraph::Edge fakeEdge(NULL, NULL, nullptr);
+    std::weak_ptr<const Algorithm::Agent> fakeAgent;
+    EvoGraph::Edge fakeEdge(NULL, NULL, fakeAgent);
     ASSERT_NO_THROW(fakeEdge.setEdgeID(10))
         << "Setting a correct value for id should not throw";
     ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 11)

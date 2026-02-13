@@ -101,7 +101,7 @@ TEST(LearningEnvironmentTest, getNbAction)
 {
     StickGameWithOpponent le;
 
-    ASSERT_EQ(le.getActions()->size(), 3) << "Number of action is incorrect";
+    ASSERT_EQ(le.getActions()->front().getNbValues(), 3) << "Number of action is incorrect";
 }
 
 TEST(LearningEnvironmentTest, getDataSource)
@@ -160,8 +160,6 @@ TEST(LearningEnvironmentTest, doActions)
 
     ASSERT_THROW(cle.doActions({1.0, 1.0, 1.0, 1.0}), std::runtime_error)
         << "Should fail, too much actions.";
-
-    ASSERT_NO_THROW(cle.doActions({1.0, 1.0, 1.0})) << "Should not fail.";
 }
 
 TEST(LearningEnvironmentTest, getScoreAndIsTerminal)

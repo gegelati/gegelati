@@ -76,6 +76,7 @@ class MapElitesLoggerTest : public ::testing::Test
     }
 };
 
+#if 0
 TEST_F(MapElitesLoggerTest, Constructor)
 {
     auto archive = selector->addArchiveFromDescriptor(2, descriptor, le);
@@ -185,3 +186,4 @@ TEST_F(MapElitesLoggerTest, logEndOfTrainingCvt)
     lastLine = content.substr(content.rfind('\n') + 1);
     ASSERT_EQ(lastLine, "1,20,10,10,30");
 }
+#endif

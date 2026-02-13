@@ -75,7 +75,7 @@ class TpgMutatorTest : public ::testing::Test
     std::shared_ptr<Archive> archive;
     std::shared_ptr<Algorithm::LGP::LGPManager> lgpManager;
     std::shared_ptr<Algorithm::LGP::LGPMutator> lgpMutator;
-    std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent;
+    std::weak_ptr<const Algorithm::Agent> lgpAgent;
 
     std::shared_ptr<Algorithm::TPG::TPGManager> tpgManager;
     std::shared_ptr<Algorithm::TPG::TPGMutator> tpgMutator;
@@ -126,7 +126,7 @@ class TpgMutatorTest : public ::testing::Test
         
         lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(e, *lgpOutput);
         lgpManager->setAlgorithmName("fakeLgp");
-        lgpAgent = std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(lgpManager->createAgent(graph));
+        lgpAgent = lgpManager->createAgent(graph);
 
         tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(*actions);
         tpgManager->setAlgorithmName("fakeTpg");
@@ -214,20 +214,20 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
         << "Too many edges in the initialized TPG.";
 
     // Check number of Programs.
-    std::set<std::shared_ptr<const Algorithm::Agent>> programs;
+    std::set<std::reference_wrapper<const Algorithm::Agent>> programs;
     for (const auto& edge : graph->getEdges()) {
         auto program = edge->getProgram();
-            programs.insert(program);
+            programs.insert(*program.lock());
     }
     ASSERT_EQ(programs.size(), params.mutation.tpg.nbRoots * 2)
         << "Number of distinct program in the TPG is incorrect.";
     // Check that no team has the same program twice
     for (auto team :graph->getRootVertices()) {
-    std::set<std::shared_ptr<const Algorithm::Agent>> teamPrograms;
+    std::set<std::reference_wrapper<const Algorithm::Agent>> teamPrograms;
         std::for_each(team->getOutgoingEdges().begin(),
                       team->getOutgoingEdges().end(),
                       [&teamPrograms](std::shared_ptr<const EvoGraph::Edge> edge) {
-                          teamPrograms.insert(edge->getProgram());
+                          teamPrograms.insert(*edge->getProgram().lock());
                       });
         ASSERT_EQ(teamPrograms.size(), team->getOutgoingEdges().size())
             << "A team is connected to the same program twice.";
@@ -576,7 +576,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
     rng.setSeed(0);
 
     // Init a TPG
-    lgpMutator->initRandomSpecificAgent(lgpAgent, graph, lgpManager, params, rng);
+    lgpMutator->initRandomSpecificAgent(*lgpAgent.lock(), graph, lgpManager, params, rng);
     std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
     std::shared_ptr<const EvoGraph::Action> vertex1 = graph->addNewAction(0);
     std::shared_ptr<const EvoGraph::Edge> edge0 = graph->addNewEdge(*vertex0, *vertex1, lgpAgent);
@@ -603,7 +603,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
     params.mutation.prog.pSwap = 1.0;
     params.mutation.tpg.pEdgeDestinationChange = 1.0;
 
-    std::vector<std::shared_ptr<const Algorithm::Agent>> newPrograms;
+    std::vector<std::weak_ptr<const Algorithm::Agent>> newPrograms;
 
     tpgMutator->updateSpecificContext(graph, tpgManager, params, rng);
 
@@ -916,17 +916,17 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
     execEngine->execute();
 
 
-    std::vector<std::shared_ptr<const Algorithm::Agent>> newPrograms;
+    std::vector<std::weak_ptr<const Algorithm::Agent>> newPrograms;
 
     tpgMutator->updateSpecificContext(graph, tpgManager, params, rng);
 
-    auto newAgent = tpgManager->copyAgent(tpgManager->getAgents().at(0), graph);
+    auto newAgent = tpgManager->copyAgent(*tpgManager->getAgents().at(0).lock(), graph);
 
     // Test the function in normal conditions
     // (only edge2 can be part of "preExistingEdges" since all other edges are
     // outgoing from vertex0, which would mean they are not pre-existing in
     // the mutation process.)
-    ASSERT_NO_THROW(tpgMutator->mutateAgent(newAgent, graph, tpgManager,
+    ASSERT_NO_THROW(tpgMutator->mutateAgent(*newAgent.lock(), graph, tpgManager,
                                             newPrograms, params, rng))
         << "Mutate team should not fail in these conditions.";
 
@@ -967,7 +967,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     params.mutation.prog.pSwap = 1.0;
     params.mutation.tpg.pEdgeDestinationChange = 1.0;
 
-    std::vector<std::shared_ptr<const Algorithm::Agent>> newPrograms;
+    std::vector<std::weak_ptr<const Algorithm::Agent>> newPrograms;
 
     tpgMutator->updateSpecificContext(graph, tpgManager, params, rng);
 
@@ -1025,9 +1025,9 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     }
 
     // Create a list of Programs to mutate
-    std::vector<std::shared_ptr<const Algorithm::Agent>> newAgents;
+    std::vector<std::weak_ptr<const Algorithm::Agent>> newAgents;
     for (auto& edge :graph->getEdges()) {
-        newAgents.emplace_back(lgpManager->copyAgent(edge->getProgram(), graph));
+        newAgents.emplace_back(lgpManager->copyAgent(*edge->getProgram().lock(), graph));
     }
 
     // Mutate them sequentially
@@ -1069,9 +1069,9 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     }
 
     // Create a list of Programs to mutate
-    std::vector<std::shared_ptr<const Algorithm::Agent>> newAgents;
+    std::vector<std::weak_ptr<const Algorithm::Agent>> newAgents;
     for (auto& edge :graph->getEdges()) {
-        newAgents.emplace_back(lgpManager->copyAgent(edge->getProgram(), graph));
+        newAgents.emplace_back(lgpManager->copyAgent(*edge->getProgram().lock(), graph));
     }
 
     // Mutate them sequentially
@@ -1115,11 +1115,11 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
 
 
     // Create a list of Programs to mutate
-    std::vector<std::shared_ptr<const Algorithm::Agent>> newAgentsSequential;
-    std::vector<std::shared_ptr<const Algorithm::Agent>> newAgentsParallel;
+    std::vector<std::weak_ptr<const Algorithm::Agent>> newAgentsSequential;
+    std::vector<std::weak_ptr<const Algorithm::Agent>> newAgentsParallel;
     for (auto& edge :graph->getEdges()) {
-        newAgentsSequential.emplace_back(lgpManager->copyAgent(edge->getProgram(), graph));
-        newAgentsParallel.emplace_back(lgpManager->copyAgent(edge->getProgram(), graph));
+        newAgentsSequential.emplace_back(lgpManager->copyAgent(*edge->getProgram().lock(), graph));
+        newAgentsParallel.emplace_back(lgpManager->copyAgent(*edge->getProgram().lock(), graph));
     }
     rng.setSeed(0);
     tpgMutator->mutateSubAgents(
@@ -1132,8 +1132,8 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     // Check determinism
     // Using nb lines of programs
     for (auto i = 0; i < newAgentsSequential.size(); i++) {
-        ASSERT_EQ(std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(newAgentsSequential.at(i))->getNbLines(),
-                  std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(newAgentsParallel.at(i))->getNbLines())
+        ASSERT_EQ(std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(newAgentsSequential.at(i).lock())->getNbLines(),
+                  std::dynamic_pointer_cast<const Algorithm::LGP::LGPAgent>(newAgentsParallel.at(i).lock())->getNbLines())
             << "Different number of line in mutatedPrograms.";
     }
 
