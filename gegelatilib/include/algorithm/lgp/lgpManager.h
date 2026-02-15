@@ -61,14 +61,14 @@ namespace Algorithm {
             virtual std::weak_ptr<const Agent> copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
             /**
-             * \brief Delete the LGPAgent.
+             * \brief Empty a LGPAgent of its program.
              * 
-             * \param[in] agent the Agent to delete.
+             * \param[in] agent the Agent to empty.
              * \param[in] graph the Graph associated with the Agent.
              * 
              * \return a shared pointer to the created Agent.
              */
-            virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual void emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
             /**
              * \brief Get the number of outputs of the agents.

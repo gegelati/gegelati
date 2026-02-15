@@ -26,9 +26,9 @@ namespace Selector {
 
         /// Pointer to the best agent encountered during training, together with
         /// its EvaluationResult.
-        std::pair<const Algorithm::Agent*,
+        std::pair<std::weak_ptr<const Algorithm::Agent>,
                   std::shared_ptr<Learn::EvaluationResult>>
-            bestAgent{nullptr, nullptr};
+            bestAgent{std::weak_ptr<const Algorithm::Agent>(), nullptr};
 
         /**
          * \brief Map associating agent EvoGraph::Vertex to their EvaluationResult.
@@ -189,7 +189,7 @@ namespace Selector {
          *
          * \return a reference to the bestAgent attribute.
          */
-        virtual const std::pair<const Algorithm::Agent*,
+        virtual const std::pair<std::weak_ptr<const Algorithm::Agent>,
                                 std::shared_ptr<Learn::EvaluationResult>>&
         getBestAgent() const;
 

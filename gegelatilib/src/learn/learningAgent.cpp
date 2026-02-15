@@ -293,6 +293,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
             RNG::RNG& rng)
 {
     if(this->algorithms.size() == 1){
+        // Do the selection for this algorithm
         this->algorithms.front()->getSelector()->doSelection(this->graph, results, rng);
 
         // Update the evaluation records
@@ -311,16 +312,17 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
                 resultsAlgo;
             
             for(const auto& result: resultsCopy){
-                if(algorithm->containsAgent(*result.second.lock())){
+                if(!result.second.expired() && algorithm->containsAgent(*result.second.lock())){
                     resultsAlgo.insert(result);
                 }
             }
 
+            // Do the selection for this algorithm
             algorithm->getSelector()->doSelection(this->graph, resultsAlgo, rng);
-            results.insert(resultsAlgo.begin(), resultsAlgo.end());
-
             // Update the evaluation records
-            this->algorithms.front()->getSelector()->updateEvaluationRecords(resultsAlgo);
+            algorithm->getSelector()->updateEvaluationRecords(resultsAlgo);
+
+            results.insert(resultsAlgo.begin(), resultsAlgo.end());
         }
     }
 }
@@ -328,6 +330,21 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
                                               bool doPopulate)
 {
+
+    for(auto algo: this->algorithms){
+        auto selector = algo->getSelector();
+        for(const auto& pair: selector->getResultsPerAgent()){
+            auto agent = pair.first.get();
+            if(agent.getAlgorithmName() != algo->getManager()->getAlgorithmName()){
+                std::cout << "Expected: "
+                          << algo->getManager()->getAlgorithmName()
+                          << " - recieved: " << agent.getAlgorithmName()
+                          << std::endl;
+            }
+        }
+    }
+
+
     for (auto logger : loggers) {
         logger.get().logNewGeneration(generationNumber);
     }

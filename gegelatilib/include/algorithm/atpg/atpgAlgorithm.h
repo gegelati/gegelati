@@ -37,7 +37,7 @@ namespace Algorithm::ATPG {
              * \param[in] actionProgramAlgorithm the sub-algorithm used to manipulate action programs.
              * \param[in] algorithmName name of the algorithm used.
              */
-            ATPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& contextProgramAlgorithm, const Algorithm& actionProgramAlgorithm, std::string algorithmName = "TPG")
+            ATPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& contextProgramAlgorithm, const Algorithm& actionProgramAlgorithm, std::string algorithmName = "ATPG")
                 : TPGAlgorithm(params, contextProgramAlgorithm, algorithmName){
                 this->setActionProgramAlgorithm(actionProgramAlgorithm);
             };

@@ -95,6 +95,15 @@ namespace Algorithm::TPG {
          */
         virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
+        /**
+         * \brief Empty a TPGAgent of its program.
+         * 
+         * \param[in] agent the Agent to empty.
+         * \param[in] graph the Graph associated with the Agent.
+         * 
+         * \return a shared pointer to the created Agent.
+         */
+        virtual void emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
         /**
          * \brief Set the vertex of an agent.

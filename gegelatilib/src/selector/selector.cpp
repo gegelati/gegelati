@@ -21,14 +21,14 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::
 
 void Selector::Selector::keepBestPolicy(std::shared_ptr<EvoGraph::Graph> graph)
 {
-    auto bestAgentVertex = this->bestAgent.first;
+    auto bestAgentVertex = this->bestAgent.first.lock();
     if (bestAgentVertex && this->manager->containsAgent(*bestAgentVertex)) {
 
         // Remove all but the best agent from the graph
         while (this->manager->getAgents().size() != 1) {
             auto agents = this->manager->getAgents();
             for (auto agent : agents) {
-                if (agent.lock().get() != bestAgentVertex) {
+                if (agent.lock() != bestAgentVertex) {
                     this->manager->deleteAgent(*agent.lock(), graph);
                 }
             }
@@ -52,6 +52,12 @@ void Selector::Selector::updateResultsPerAgent(
                         std::weak_ptr<const Algorithm::Agent>>& results)
 {
     for (auto result : results) {
+        if(result.second.lock()->getAlgorithmName() != this->manager->getAlgorithmName()){
+            std::cout << "Expected: "
+                      << this->manager->getAlgorithmName()
+                      << " - recieved: " << result.second.lock()->getAlgorithmName()
+                      << std::endl;
+        }
         auto mapIterator = this->resultsPerAgent.find(*result.second.lock());
         if (mapIterator == this->resultsPerAgent.end()) {
             // First time this agent is evaluated
@@ -66,7 +72,7 @@ void Selector::Selector::updateResultsPerAgent(
             mapIterator->second = result.first;
             // If the received result is associated to the current bestAgent,
             // update it.
-            if (result.second.lock().get() == this->bestAgent.first) {
+            if (result.second.lock() == this->bestAgent.first.lock()) {
                 this->bestAgent.second = result.first;
             }
         }
@@ -82,17 +88,17 @@ void Selector::Selector::updateBestAgent(
     std::weak_ptr<const Algorithm::Agent> candidate = iterator->second;
     // Test the three replacement cases
     // from the simpler to the most complex to test
-    if (this->bestAgent.first == nullptr         // NULL case
+    if (this->bestAgent.first.expired()         // NULL case
         || *this->bestAgent.second < *evaluation // new high-score case
         ||
-        !this->manager->containsAgent(*this->bestAgent.first) // bestAgent disappearance
+        !this->manager->containsAgent(*this->bestAgent.first.lock()) // bestAgent disappearance
     ) {
         // Replace the best agent
-        this->bestAgent = {candidate.lock().get(), evaluation};
+        this->bestAgent = {candidate, evaluation};
     }
 }
 
-const std::pair<const Algorithm::Agent*,
+const std::pair<std::weak_ptr<const Algorithm::Agent>,
                 std::shared_ptr<Learn::EvaluationResult>>&
 Selector::Selector::getBestAgent() const
 {
@@ -102,7 +108,7 @@ Selector::Selector::getBestAgent() const
 void Selector::Selector::forgetPreviousResults()
 {
     this->resultsPerAgent.clear();
-    this->bestAgent.first = nullptr;
+    this->bestAgent.first = std::weak_ptr<const Algorithm::Agent>();
     this->bestAgent.second = nullptr;
 }
 

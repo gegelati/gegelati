@@ -117,7 +117,9 @@ void Algorithm::ATPG::ATPGMutator::initRandomSpecificAgent(const Agent& agent, s
         this->isConfigurationValid(params, manager->getOutputs());
     }
 
-    auto tpgAgent = std::dynamic_pointer_cast<const TPG::TPGAgent>(manager->createAgent(graph).lock())->getVertex();
+    manager->emptyAgent(agent, graph);
+
+    auto vertex = dynamic_cast<const TPG::TPGAgent&>(agent).getVertex();
 
     auto programMutator = this->getSubMutator(this->programAlgorithmName);
     auto programManager = manager->getSubManager(this->programAlgorithmName);
@@ -136,7 +138,7 @@ void Algorithm::ATPG::ATPGMutator::initRandomSpecificAgent(const Agent& agent, s
         graph->setVertexProgram(*leafVertex, actionProgram);
 
         // Add edge
-        graph->addNewEdge(*tpgAgent, *leafVertex,
+        graph->addNewEdge(*vertex, *leafVertex,
                             programMutator->initRandomAgent(graph, programManager, params, rng));
     }
 }
@@ -200,7 +202,7 @@ void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     auto agentProgramDestLock = edge->getDestination()->getProgram().lock();
-    if(!agentProgramDestLock && agentProgramDestLock->getAlgorithmName() == this->actionProgramAlgorithmName &&
+    if(agentProgramDestLock && agentProgramDestLock->getAlgorithmName() == this->actionProgramAlgorithmName &&
        rng.getDouble(0.0, 1.0) < params.mutation.tpg.pMutateActionProgram){
        
         const Agent& originAgent = *agentProgramDestLock;

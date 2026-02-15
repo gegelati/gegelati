@@ -62,6 +62,7 @@ std::weak_ptr<const Algorithm::Agent> Algorithm::TPG::TPGManager::copyAgent(cons
 
 void Algorithm::TPG::TPGManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
+    this->emptyAgent(agent, graph);
     // Do not remove action agents from the graph
     if(auto vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(this->getTPGAgentFromCst(agent)->getVertex())){
         graph->removeVertex(*vertex);
@@ -69,6 +70,15 @@ void Algorithm::TPG::TPGManager::deleteAgent(const Agent& agent, std::shared_ptr
 
     auto iterator = this->agents.find(&agent);
     this->agents.erase(iterator);   
+}
+void Algorithm::TPG::TPGManager::emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+{
+    // Do not remove action agents from the graph
+    if(auto vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(this->getTPGAgentFromCst(agent)->getVertex())){
+        while(vertex->getOutgoingEdges().size() > 0){
+            graph->removeEdge(*vertex->getOutgoingEdges().front());
+        }
+    }
 }
 
 void Algorithm::TPG::TPGManager::setVertex(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex)

@@ -45,7 +45,7 @@ void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
 void Log::LAPolicyStatsLogger::logAfterDecimate()
 {
     auto selector = this->learningAgent.getAlgorithmAt(0)->getSelector();
-    if (selector->getBestAgent().first != this->lastBestAgent ) {
+    if (selector->getBestAgent().first.lock() != this->lastBestAgent.lock() ) {
         // Update the best root befor loggin it PolicyStats
         this->lastBestAgent =
             selector->getBestAgent().first;

@@ -37,6 +37,8 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
         this->initActionVertices(graph, manager->getOutputs().size());
     }
 
+    manager->emptyAgent(agent, graph);
+    
     auto vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
     auto team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
 

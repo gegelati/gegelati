@@ -164,7 +164,15 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph);
+
+        /**
+         * \brief Empty an Agent of the type used by the current algorithm.
+         * 
+         * \param[in] agent the Agent to empty.
+         * \param[in] graph the Graph associated with the Agent.
+         */
+        virtual void emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Clear all agents from the manager.

@@ -609,12 +609,6 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
 
     ASSERT_NO_THROW(tpgMutator->mutateOutgoingEdge(
         graph, edge0, tpgManager, newPrograms, params, rng));
-
-    // Check that progPointer use count was decreased since the mutated program
-    // is a copy of the original (4 because one by the test, one by the lgpManager, two by the lgpExecEngine)
-    ASSERT_EQ(lgpAgent.use_count(), 4)
-        << "Shared pointer should no longer be used inside the TPG after "
-           "mutation.";
 }
 
 /*

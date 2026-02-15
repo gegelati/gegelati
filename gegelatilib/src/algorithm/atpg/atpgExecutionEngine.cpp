@@ -35,6 +35,7 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
         // update currentVertex and backup in visitedVertex.
         if (edge->getDestination() != nullptr) {
             currentVertex = edge->getDestination();
+            currentProgram = currentVertex->getProgram();
         }
     }
 

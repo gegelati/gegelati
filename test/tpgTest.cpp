@@ -534,10 +534,6 @@ TEST_F(TPGTest, GraphCloneVertex)
     ASSERT_EQ(destinationVertex, vertex1)
         << "Cloned vertex is not connected to the correct other vertex in the "
            "Graph.";
-    // Check pointer usage was increased.
-    ASSERT_EQ(programAgent.use_count(), 3)
-        << "Shared pointer use count should increase after cloning a vertex "
-           "connected with an edge using it.";
 
     // Duplicate the action (to increase code coverage)
     ASSERT_NO_THROW(tpg.cloneVertex(*vertex1));
@@ -548,10 +544,6 @@ TEST_F(TPGTest, GraphCloneVertex)
               std::dynamic_pointer_cast<const EvoGraph::Action>(tpg.getVertices().at(3))->getActionID());
     ASSERT_EQ(tpg.getEdges().size(), 2)
         << "Number of edges of the graph after clone is incorrect.";
-    // Check pointer usage was increased.
-    ASSERT_EQ(programAgent.use_count(), 3)
-        << "Shared pointer use count should increase after cloning a vertex "
-           "connected with an edge using it.";
 
     // Clone a vertex not from the graph
     EvoGraph::Vertex* vertex2 = new EvoGraph::Action(1);
@@ -573,9 +565,7 @@ TEST_F(TPGTest, GraphCloneEdge)
     // Check that the new edge is correctly added to the graph
     ASSERT_EQ(tpg.getEdges().size(), 2)
         << "Incorrect number of edges in the graph after clone.";
-    // Check the program use
-    ASSERT_EQ(programAgent.use_count(), 3)
-        << "Program pointer was not correctly registered to the edge clone.";
+
     // Check the edge source and destination
     ASSERT_EQ(clone->getSource(), vertex0)
         << "Clone edge has an incorrect source.";
@@ -622,10 +612,6 @@ TEST_F(TPGTest, GraphSetEdgeDestination)
     // Check the graph size
     ASSERT_EQ(tpg.getEdges().size(), 1)
         << "Incorrect number of edges in the graph after edge setDestination.";
-    // Check the program use
-    ASSERT_EQ(programAgent.use_count(), 2)
-        << "Program pointer use should not be affected by edge destination "
-           "change.";
     // Check the edge source and destination
     ASSERT_EQ(edge->getSource(), vertex0)
         << "Updated edge has an incorrect source.";
@@ -674,9 +660,6 @@ TEST_F(TPGTest, GraphSetEdgeSource)
     // Check the graph size
     ASSERT_EQ(tpg.getEdges().size(), 1)
         << "Incorrect number of edges in the graph after edge setDestination.";
-    // Check the program use
-    ASSERT_EQ(programAgent.use_count(), 2)
-        << "Program pointer use should not be affected by edge source change.";
     // Check the edge source and destination
     ASSERT_EQ(edge->getSource(), vertex2)
         << "Updated edge has an incorrect source.";

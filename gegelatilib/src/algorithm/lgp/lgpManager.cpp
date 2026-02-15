@@ -29,13 +29,15 @@ std::weak_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(cons
     }
 
     this->identifyIntrons(*newAgent);
-    ///this->agents.insert(newAgent);
     return *this->agents.rbegin();
 }
 
-void Algorithm::LGP::LGPManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::LGP::LGPManager::emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    this->agents.erase(this->getLGPAgentFromCst(agent));   
+    Algorithm::LGP::LGPAgent& lgpAgent = *this->getLGPAgentFromCst(agent);
+    while (lgpAgent.getNbLines() > 0) {
+        lgpAgent.removeLine(0);
+    }
 }
 
 const Output::OutputHandler& Algorithm::LGP::LGPManager::getOutputs() const

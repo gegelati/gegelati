@@ -125,54 +125,45 @@ void Algorithm::TPG::TPGMutator::addAditionnalEdges(
         size_t nbAdditionalEdges =
             rng.getUnsignedInt64(0, params.mutation.tpg.maxInitOutgoingEdges - 2);
 
-        // For each additional edge to add
-        for (uint64_t i = 0; i < nbAdditionalEdges; i++) {
-            // Pick 2 random programs not already used by the Team
-            int64_t randomProgIndex[2] = {-1, -1};
-            int pickedProgram = 0;
-            {
-                // Copy the list of programs
-                std::vector<int> availableChoices(programAgent.size());
-                std::iota(availableChoices.begin(), availableChoices.end(), 0);
-                // Remove already connected ones
-                auto iter = availableChoices.begin();
-                while (iter < availableChoices.end()) {
-                    if (std::count_if(
-                            rootVertex->getOutgoingEdges().begin(),
-                            rootVertex->getOutgoingEdges().end(),
-                            [&iter, &programAgent](std::shared_ptr<const EvoGraph::Edge> edge) {
-                                return edge->getProgram().lock() ==
-                                       programAgent.at(*iter).lock();
-                            }) > 0) {
-                        iter = availableChoices.erase(iter);
-                    }
-                    else {
-                        iter++;
-                    }
+        if (nbAdditionalEdges > 0) {
+            // Copy the list of programs
+            std::vector<int> availableChoices(programAgent.size());
+            std::iota(availableChoices.begin(), availableChoices.end(), 0);
+            // Remove already connected ones
+            auto iter = availableChoices.begin();
+            while (iter < availableChoices.end()) {
+                if (std::count_if(
+                        rootVertex->getOutgoingEdges().begin(),
+                        rootVertex->getOutgoingEdges().end(),
+                        [&iter, &programAgent](
+                            std::shared_ptr<const EvoGraph::Edge> edge) {
+                            return edge->getProgram().lock() ==
+                                   programAgent.at(*iter).lock();
+                        }) > 0) {
+                    iter = availableChoices.erase(iter);
                 }
-
-                // Pick two programs (if possible, maybe only one is available)
-                for (int i = 0; i < 2 && availableChoices.size() > 0; i++) {
-                    uint64_t progNr =
-                        rng.getUnsignedInt64(0, availableChoices.size() - 1);
-                    randomProgIndex[i] = availableChoices.at(progNr);
-                    availableChoices.erase(availableChoices.begin() + progNr);
-                    pickedProgram++;
+                else {
+                    iter++;
                 }
             }
-            // Select the least used program for the connection
-            uint64_t selectedProgramIndex =
-                (pickedProgram > 1 &&
-                 programAgent.at(randomProgIndex[1]).use_count() <
-                     programAgent.at(randomProgIndex[0]).use_count())
-                    ? randomProgIndex[1]
-                    : randomProgIndex[0];
 
-            // Add the connection
-            graph->addNewEdge(
-                *rootVertex,
-                *leafVertices.at(rng.getUnsignedInt64(0, leafVertices.size() - 1)),
-                programAgent.at(selectedProgramIndex));
+            // For each additional edge to add
+            for (uint64_t i = 0;
+                 i < nbAdditionalEdges && availableChoices.size() > 0; i++) {
+                // Pick nbAdditionalEdges availabe programs and add them to the
+                // team
+                uint64_t progIndex =
+                    rng.getUnsignedInt64(0, availableChoices.size() - 1);
+
+                // Add the connection
+                graph->addNewEdge(
+                    *rootVertex,
+                    *leafVertices.at(
+                        rng.getUnsignedInt64(0, leafVertices.size() - 1)),
+                    programAgent.at(availableChoices.at(progIndex)));
+
+                availableChoices.erase(availableChoices.begin() + progIndex);
+            }
         }
     }
 }
@@ -228,7 +219,8 @@ void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(const Agent& agent, std
         this->initActionVertices(graph, nbActionVertices);
     }
 
-    auto tpgAgent = std::dynamic_pointer_cast<const TPGAgent>(manager->createAgent(graph).lock())->getVertex();
+    manager->emptyAgent(agent, graph);
+    auto vertex = dynamic_cast<const TPGAgent&>(agent).getVertex();
 
     auto programMutator = this->getSubMutator(this->programAlgorithmName);
     auto programManager = manager->getSubManager(this->programAlgorithmName);
@@ -239,7 +231,7 @@ void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(const Agent& agent, std
     size_t nbEdges = rng.getUnsignedInt64(2, params.mutation.tpg.maxInitOutgoingEdges);
     for(size_t idx = 0; idx < nbEdges; idx++){
         // Add edge
-        graph->addNewEdge(*tpgAgent, *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
+        graph->addNewEdge(*vertex, *actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
                             programMutator->initRandomAgent(graph, programManager, params, rng));
     }
 }
@@ -355,10 +347,9 @@ void Algorithm::TPG::TPGMutator::mutateAgent(
 
     // 1. Remove randomly selected edges
     // Keep at least two edges (otherwise the team is useless)
-    double proba = 1.0;
+    double proba = params.mutation.tpg.pEdgeDeletion;
     while (team->getOutgoingEdges().size() > 2 &&
             proba > rng.getDouble(0.0, 1.0)) {
-
         this->removeRandomEdge(graph, *team, rng);
 
         // Decrement the proba of removing another edge
@@ -366,7 +357,7 @@ void Algorithm::TPG::TPGMutator::mutateAgent(
     }
 
     // 2. Add random duplicated edge with the team as its source
-    proba = 1.0;
+    proba = params.mutation.tpg.pEdgeAddition;
     while (team->getOutgoingEdges().size() < params.mutation.tpg.maxOutgoingEdges &&
             proba > rng.getDouble(0.0, 1.0)) {
         // Add an edge (by duplication of an existing one)

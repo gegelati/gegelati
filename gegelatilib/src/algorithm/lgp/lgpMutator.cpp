@@ -40,6 +40,8 @@ void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, std
         this->isConfigurationValid(params, manager->getOutputs());
     }
 
+    manager->emptyAgent(agent, graph);
+
     auto lgpManager = std::dynamic_pointer_cast<LGPManager>(manager);
     if(lgpManager == nullptr){
         throw std::invalid_argument("LGPMutator::initRandomAgent: the given manager is not a LGPManager.");

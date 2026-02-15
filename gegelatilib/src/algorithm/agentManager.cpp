@@ -85,7 +85,11 @@ const std::vector<std::weak_ptr<const Algorithm::Agent>> Algorithm::AgentManager
     );
 }
 
-
+void Algorithm::AgentManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+{
+    this->emptyAgent(agent, graph);
+    this->agents.erase(this->getAgentFromCst(agent));
+}
 
 void Algorithm::AgentManager::clearAgents(std::shared_ptr<EvoGraph::Graph> graph)
 {

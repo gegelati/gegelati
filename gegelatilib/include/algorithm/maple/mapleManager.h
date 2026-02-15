@@ -50,18 +50,6 @@ namespace Algorithm::Maple {
          */
         virtual std::weak_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex) override;
 
-
-        /**
-         * \brief Delete the MapleAgent.
-         * 
-         * \param[in] agent the Agent to delete.
-         * \param[in] graph the Graph associated with the Agent.
-         * 
-         * \return a shared pointer to the created Agent.
-         */
-        virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
-
-
         /**
          * \brief create and return a Maple execution engine.
          */
