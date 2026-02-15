@@ -110,6 +110,13 @@ namespace Algorithm::TPG {
              * Does the merging of the archives after evaluation.
              */
             virtual void updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode) override;
+
+            /** 
+             * \brief Inherited method to print a TPGagent.
+             * 
+             * The TPG agent prints the vertex it points to.
+             */
+            void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
             
     };
 }; // namespace TPG_Algorithm

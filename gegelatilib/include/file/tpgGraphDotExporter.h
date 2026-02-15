@@ -42,7 +42,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "algorithm/lgp/lgpAgent.h"
+#include "algorithm/algorithm.h"
 #include "evoGraph/abstractEngine.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
@@ -69,6 +69,51 @@ namespace File {
          */
         std::string offset;
 
+        /// @brief vector of algorithms used in the graph. This is used to print the content of the programs when they are mutated by the algorithm.
+        std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms;
+
+        /// @brief set of printed vertex ID. This is used to avoid printing twice the same vertex in case of multiple edges pointing toward it.
+        std::set<uint64_t> printedVertexID;
+
+        /// @brief set of printed edge ID. This is used to avoid printing twice the same edge in case of multiple edges pointing toward the same destination vertex.
+        std::set<uint64_t> printedEdgeID;
+
+        /// @brief set of printed agent ID. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent program.
+        std::set<uint64_t> printedAgentID;
+
+
+        /**
+         * \brief Print the dot content for the given Program.
+         * 
+         * This method find the corresponding algorithm to the agent program given and print it.
+         * 
+         * \param[in] agentProgram the agent program to be printed
+         */
+        void printAgent(const Algorithm::Agent& agentProgram);
+
+        /**
+         * \brief Print the dot content for the given Element.
+         * 
+         * Content is printed directly into the file opened by the class
+         * constructor, or by a call to setNewFilePath.
+         * 
+         * This method will either call printVertex or printEdge depending on the type of the element given.
+         * It will also print the potential agent program associated to the element.
+         */
+        void printElement(const EvoGraph::Element& element);
+
+
+        /**
+         * \brief Print the dot content for the given Vertex.
+         * 
+         * Content is printed directly into the file opened by the class
+         * constructor, or by a call to setNewFilePath.
+         * 
+         * This method will either call printTeam or printAction depending on the type of the vertex given.
+         * It will also print the potential agent program associated to the vertex.
+         */
+        void printVertex(const EvoGraph::Vertex& vertex);
+
         /**
          * \brief Print the dot content for the given Team.
          *
@@ -90,9 +135,8 @@ namespace File {
          * the fly, with a unique ID, when a Edge is targetting this action.
          *
          * \param[in] action the Team being printed.
-         * \return the identifier associated to this action.
          */
-        uint64_t printAction(const EvoGraph::Action& action);
+        void printAction(const EvoGraph::Action& action);
 
         /**
          * \brief Prints the dot content for the given Edge.
@@ -121,7 +165,7 @@ namespace File {
          * dest_idx = destination index
          * op       = operand
          */
-        void printLGPAgent(std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent);
+        //void printLGPAgent(std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent);
 
         /**
          * \brief Prints header content in the dot file.
@@ -147,11 +191,13 @@ namespace File {
          * will be written.
          * \param[in] graph const reference to the graph whose content will
          * be exported in dot.
+         * \param[in] algorithms vector of algorithms used in the graph. This is
+         * used to print the content of the programs when they are mutated by
          * \throws std::runtime_error in case no file could be opened at the
          * given filePath.
          */
-        GraphDotExporter(const char* filePath, const EvoGraph::Graph& graph)
-            : EvoGraph::AbstractEngine(graph), pFile{NULL}, offset{""}
+        GraphDotExporter(const char* filePath, const EvoGraph::Graph& graph, const std::vector<std::shared_ptr<Algorithm::Algorithm>>& algorithms)
+            : EvoGraph::AbstractEngine(graph), pFile{NULL}, offset{""}, algorithms{algorithms}
         {
             if ((pFile = fopen(filePath, "w")) == NULL) {
                 throw std::runtime_error("Could not open file " +
@@ -225,10 +271,9 @@ namespace File {
          * Vertex will be printed in the file, and all others will be
          * ignored.
          *
-         * \param[in] root The vertex used as a starting point to print a
-         * connected TPG.
+         * \param[in] agent The agent printed
          */
-        void printSubGraph(const EvoGraph::Vertex* root);
+        void printSubGraph(const Algorithm::Agent& agent);
     };
 }; // namespace File
 

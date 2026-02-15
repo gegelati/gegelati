@@ -137,3 +137,23 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
         }
     }
 }
+
+void Algorithm::TPG::TPGAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
+{
+    if(printedAgentID.find(agent.getAgentID()) == printedAgentID.end() && this->containsAgent(agent)){
+        printedAgentID.insert(agent.getAgentID());
+
+        // Get vertex of the TPGAgent
+        const EvoGraph::Vertex& vertex = *dynamic_cast<const TPGAgent&>(agent).getVertex();
+        elementsToPrint.push_back(vertex);
+    
+        fprintf(pFile,
+                "%sP%" PRIu64 " [fillcolor=\"rgb(160, 255, 51)\" shape=diamond margin=0.03 "
+                "width=0 height=0 label=\"%s\"]\n",
+                offset.c_str(), agent.getAgentID(), agent.getAlgorithmName().c_str());
+
+        std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(&vertex) != nullptr) ? "T" : "A";
+        fprintf(pFile, "%sP%" PRIu64 " -> %s%" PRIu64 " [style=dashed]\n",
+                offset.c_str(), agent.getAgentID(), srcLetter.c_str(), vertex.getVertexID());
+    }   
+}

@@ -72,6 +72,14 @@ namespace Algorithm::LGP {
              * Copy and return a uniqure pointer of the algorithm
              */
             virtual std::unique_ptr<Algorithm> copy() const override;
+
+            
+            /** 
+             * \brief Inherited method to print a LGPagent.
+             * 
+             * The LGP agent prints the different lines of its program.
+             */
+            void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
         };
 }; // namespace LGP_Algorithm
 

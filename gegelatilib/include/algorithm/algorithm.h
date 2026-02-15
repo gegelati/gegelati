@@ -223,6 +223,17 @@ namespace Algorithm {
          */
         virtual void updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode);
 
+        /**
+         * \brief Print the content of an agent in a file.
+         * 
+         * \param[in] agent the agent to print.
+         * \param[in] pFile the file in which the content of the agent will be printed.
+         * \param[in] offset the character chain used to control the indentation of the printed content
+         * \param[in] printedAgentID the set of already printed agent IDs to avoid printing the same agent twice in case of multiple vertices or edges using the same agent program.
+         * \param[in] elementsToPrint the list of elements to print, filled during this method.
+         */
+        virtual void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const = 0;
+
 
     };
 }; // namespace Algorithm
