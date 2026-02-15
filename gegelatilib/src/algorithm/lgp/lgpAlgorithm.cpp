@@ -41,8 +41,8 @@ void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
 
 
         fprintf(pFile,
-                "%sP%" PRIu64 " [fillcolor=\"hsl(283, 60%, 44%)\" shape=diamond margin=0.03 "
-                "width=0 height=0 label=\"%s\"]\n",
+                "%sP%" PRIu64 " [fillcolor=\"#922DB4\" shape=diamond margin=0.03 "
+                "width=0 height=0 label=\"%s\"] //",
                 offset.c_str(), lgpAgent.getAgentID(), lgpAgent.getAlgorithmName().c_str());
         // add next the content of the constant data handler in a comment (//)
         for (int i = 0; i < params.nbProgramConstant;

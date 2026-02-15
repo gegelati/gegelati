@@ -138,6 +138,21 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
     }
 }
 
+
+std::map<std::string, std::set<std::reference_wrapper<const Algorithm::Agent>>> Algorithm::TPG::TPGAlgorithm::getUsedSubAgents() const
+{
+    std::map<std::string, std::set<std::reference_wrapper<const Agent>>> usedSubAgents;
+    usedSubAgents[this->programAlgorithmName] = std::set<std::reference_wrapper<const Agent>>();
+
+    for(auto edge: this->graph->getEdges()){
+        auto locked = edge->getProgram().lock();
+        if(locked && locked->getAlgorithmName() == this->programAlgorithmName){
+            usedSubAgents[this->programAlgorithmName].insert(*locked);
+        }
+    }
+    return usedSubAgents;
+}
+
 void Algorithm::TPG::TPGAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
 {
     if(printedAgentID.find(agent.getAgentID()) == printedAgentID.end() && this->containsAgent(agent)){
@@ -148,7 +163,7 @@ void Algorithm::TPG::TPGAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
         elementsToPrint.push_back(vertex);
     
         fprintf(pFile,
-                "%sP%" PRIu64 " [fillcolor=\"rgb(160, 255, 51)\" shape=diamond margin=0.03 "
+                "%sP%" PRIu64 " [fillcolor=\"#A0FF33\" shape=diamond margin=0.03 "
                 "width=0 height=0 label=\"%s\"]\n",
                 offset.c_str(), agent.getAgentID(), agent.getAlgorithmName().c_str());
 

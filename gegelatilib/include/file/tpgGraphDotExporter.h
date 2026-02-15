@@ -69,8 +69,11 @@ namespace File {
          */
         std::string offset;
 
-        /// @brief vector of algorithms used in the graph. This is used to print the content of the programs when they are mutated by the algorithm.
-        std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms;
+        /// @brief vector of algorithms used. This is used to print the content of the programs when they are mutated by the algorithm.
+        const std::vector<std::shared_ptr<Algorithm::Algorithm>>& algorithmsRef;
+
+        /// @brief vector of algorithms used, including subAlgorithms. This is used to print the content of the programs when they are mutated by the algorithm.
+        std::vector<std::reference_wrapper<const Algorithm::Algorithm>> potentialAlgorithms;
 
         /// @brief set of printed vertex ID. This is used to avoid printing twice the same vertex in case of multiple edges pointing toward it.
         std::set<uint64_t> printedVertexID;
@@ -197,12 +200,30 @@ namespace File {
          * given filePath.
          */
         GraphDotExporter(const char* filePath, const EvoGraph::Graph& graph, const std::vector<std::shared_ptr<Algorithm::Algorithm>>& algorithms)
-            : EvoGraph::AbstractEngine(graph), pFile{NULL}, offset{""}, algorithms{algorithms}
+            : EvoGraph::AbstractEngine(graph), pFile{NULL}, offset{""}, algorithmsRef{algorithms}
         {
             if ((pFile = fopen(filePath, "w")) == NULL) {
                 throw std::runtime_error("Could not open file " +
                                          std::string(filePath));
             }
+
+            // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
+            std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithmsToAdd;
+            for(const std::shared_ptr<Algorithm::Algorithm>& algorithm : algorithms){
+                algorithmsToAdd.push_back(*algorithm);
+            }
+            while(!algorithmsToAdd.empty()){
+                const Algorithm::Algorithm& algorithm = algorithmsToAdd.back();
+                algorithmsToAdd.pop_back();
+
+                if(this->potentialAlgorithms.end() == std::find(this->potentialAlgorithms.begin(), this->potentialAlgorithms.end(), algorithm)){
+                    this->potentialAlgorithms.push_back(algorithm);
+                    for(const Algorithm::Algorithm& subAlgorithm : algorithm.getSubAlgorithms()){
+                        algorithmsToAdd.push_back(subAlgorithm);
+                    }
+                }
+            }
+            
         };
 
         /**

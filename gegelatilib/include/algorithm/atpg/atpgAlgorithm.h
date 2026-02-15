@@ -77,6 +77,14 @@ namespace Algorithm::ATPG {
              */
             virtual void initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
 
+            
+            /**
+             * \brief Inherited method to clear all the unused sub agents
+             * 
+             * The sub agents are the agents used by the program sub-algorithm and the action sub-algorithm.
+             */
+            virtual std::map<std::string, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const override;
+
             /**
              * Copy and return a uniqure pointer of the algorithm
              */

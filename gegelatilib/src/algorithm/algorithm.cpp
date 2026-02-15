@@ -72,6 +72,15 @@ std::shared_ptr<Algorithm::Mutator> Algorithm::Algorithm::getMutator()
     return this->mutator;
 }
 
+std::vector<std::reference_wrapper<const Algorithm::Algorithm>> Algorithm::Algorithm::getSubAlgorithms() const
+{
+    std::vector<std::reference_wrapper<const Algorithm>> subAlgorithmsRef;
+    for(const auto& subAlgorithm : this->subAlgorithms){
+        subAlgorithmsRef.push_back(*subAlgorithm);
+    }
+    return subAlgorithmsRef;
+}
+
 size_t Algorithm::Algorithm::getNbAgents() const
 {
     return this->manager->getAgents().size();   
@@ -136,6 +145,33 @@ void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
 {
     this->mutator->mutatePopulation(this->graph, this->manager, this->params, rng, maxNbThreads);
     this->selector->updateAfterPopulate(graph);
+
+    this->clearUnusedSubAgents();
+}
+
+std::map<std::string, std::set<std::reference_wrapper<const Algorithm::Agent>>> Algorithm::Algorithm::getUsedSubAgents() const {
+    // By default, return an empty map, meaning that no sub-agent is used by the algorithm.
+    if(this->subAlgorithms.size() > 0){
+        throw std::runtime_error("Algorithm::getUsedSubAgents: This method should be override by algorithms with sub-algorithms to return the used sub-agents.");
+    }
+    return std::map<std::string, std::set<std::reference_wrapper<const Agent>>>();
+}
+
+void Algorithm::Algorithm::clearUnusedSubAgents() {
+    std::map<std::string, std::set<std::reference_wrapper<const Agent>>> usedSubAgents = this->getUsedSubAgents();
+    
+    for(const auto& subAlgorithm: subAlgorithms){
+        subAlgorithm->clearUnusedSubAgents();
+
+        auto subAlgorithmAgents = subAlgorithm->getManager()->getAgents();
+        for(std::weak_ptr<const Agent> agent: subAlgorithmAgents){
+            if(auto locked = agent.lock()){
+                if(usedSubAgents[subAlgorithm->getAlgorithmName()].find(*locked) == usedSubAgents[subAlgorithm->getAlgorithmName()].end()){
+                    subAlgorithm->manager->deleteAgent(*locked, this->graph);
+                }
+            }
+        }
+    }
 }
 
 
@@ -155,3 +191,8 @@ void Algorithm::Algorithm::updateAfterEvaluation(const std::vector<std::shared_p
     // By default, do nothing
 }
 
+
+bool Algorithm::operator==(const Algorithm& a, const Algorithm& b)
+{
+    return a.getAlgorithmName() == b.getAlgorithmName();
+}

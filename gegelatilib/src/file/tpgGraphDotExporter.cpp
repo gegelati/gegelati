@@ -45,10 +45,10 @@
 void File::GraphDotExporter::printAgent(const Algorithm::Agent& agentProgram){
 
     // Find corresponding algorithm to the agent and print it
-    for(std::shared_ptr<Algorithm::Algorithm> algorithm : this->algorithms){
-        if(algorithm->containsAgent(agentProgram)){
+    for(const Algorithm::Algorithm& algorithm : this->potentialAlgorithms){
+        if(algorithm.containsAgent(agentProgram)){
             std::vector<std::reference_wrapper<const EvoGraph::Element>> elements;
-            algorithm->printAgent(agentProgram, this->pFile, this->offset, this->printedAgentID, elements);
+            algorithm.printAgent(agentProgram, this->pFile, this->offset, this->printedAgentID, elements);
 
             // Print the elements collected during the printAgent call
             for(auto element : elements){
@@ -117,7 +117,7 @@ void File::GraphDotExporter::printTeam(const EvoGraph::Team& team)
     // Color is different for roots
     std::string color;
     if (team.getIncomingEdges().size() == 0) {
-        color = "#1199bb";
+        color = "#2b7c91";
     }
     else {
         color = "#66ddff";
@@ -154,12 +154,12 @@ void File::GraphDotExporter::printEdge(const EvoGraph::Edge& edge)
             // Print the potential agent program associated to the edge
             this->printAgent(*locked);
 
-            fprintf(pFile, "%s%s%" PRIu64 " -> %s%" PRIu64 "\n",
-                    this->offset.c_str(), srcLetter.c_str(), srcID, destLetter.c_str(), destID);
-        }
-        else {
             fprintf(pFile, "%s%s%" PRIu64 " -> P%" PRIu64 " -> %s%" PRIu64 "\n",
                     this->offset.c_str(), srcLetter.c_str(), srcID, locked->getAgentID(), destLetter.c_str(), destID);
+        }
+        else {
+            fprintf(pFile, "%s%s%" PRIu64 " -> %s%" PRIu64 "\n",
+                    this->offset.c_str(), srcLetter.c_str(), srcID, destLetter.c_str(), destID);
         }
     }
 }
@@ -226,8 +226,8 @@ void File::GraphDotExporter::print()
     // Print each agent algorithms
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
-    for(std::shared_ptr<Algorithm::Algorithm> algorithm : this->algorithms){
-        for(std::weak_ptr<const Algorithm::Agent> agent : algorithm->getManagerCst()->getAgents()){
+    for(auto algorithm : this->potentialAlgorithms){
+        for(std::weak_ptr<const Algorithm::Agent> agent : algorithm.get().getManagerCst()->getAgents()){
             if(auto agentPtr = agent.lock()){
                 this->printAgent(*agentPtr);
             }

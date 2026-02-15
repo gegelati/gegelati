@@ -111,6 +111,13 @@ namespace Algorithm::TPG {
              */
             virtual void updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode) override;
 
+            /**
+             * \brief Inherited method to clear all the unused sub agents
+             * 
+             * The sub agents are the agents used by the program sub-algorithm.
+             */
+            virtual std::map<std::string, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const override;
+
             /** 
              * \brief Inherited method to print a TPGagent.
              * 

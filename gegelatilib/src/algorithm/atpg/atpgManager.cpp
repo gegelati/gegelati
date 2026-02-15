@@ -2,30 +2,31 @@
 #include "algorithm/atpg/atpgManager.h"
 
 
-void Algorithm::ATPG::ATPGManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) 
+
+void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) 
 {
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> verticesToDelete;
     // get vertex of agent to delete;
     auto vertex = this->getTPGAgentFromCst(agent)->getVertex();
 
     for(auto& edge: vertex->getOutgoingEdges()){
+
+        // Remove the program on the destination of the edge if it exist.
         std::shared_ptr<const Algorithm::Agent> locked = edge->getDestination()->getProgram().lock();
         if(locked != nullptr && locked->getAlgorithmName() == this->actionProgramAlgorithmName && 
            edge->getDestination()->getIncomingEdges().size() == 1) {
             // Remove action vertex from the graph because it is only used by this team and it contains an action program.
             verticesToDelete.push_back(edge->getDestination());
         }
+        // Remove the edge
+        graph->removeEdge(*vertex->getOutgoingEdges().front());
+
     }
-    // Then remove the vertex of the agent itself10
-    verticesToDelete.push_back(vertex);
 
     // Remove the action vertices from the graph
     for(auto& vertex: verticesToDelete){
         graph->removeVertex(*vertex);
     }
-
-    auto iterator = this->agents.find(&agent);
-    this->agents.erase(iterator);   
 }
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::ATPG::ATPGManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const

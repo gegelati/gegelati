@@ -42,6 +42,21 @@ void Algorithm::ATPG::ATPGAlgorithm::initMutator()
     this->mutator->setAlgorithmName(algorithmName);
 }
 
+std::map<std::string, std::set<std::reference_wrapper<const Algorithm::Agent>>> Algorithm::ATPG::ATPGAlgorithm::getUsedSubAgents() const
+{
+    std::map<std::string, std::set<std::reference_wrapper<const Agent>>> usedSubAgents = TPGAlgorithm::getUsedSubAgents();
+    usedSubAgents[this->actionProgramAlgorithmName] = std::set<std::reference_wrapper<const Agent>>();
+
+    for(auto vertex: this->graph->getVertices()){
+        auto locked = vertex->getProgram().lock();
+        if(locked && locked->getAlgorithmName() == this->actionProgramAlgorithmName){
+            usedSubAgents[this->actionProgramAlgorithmName].insert(*locked);
+        }
+    }
+
+    return usedSubAgents;
+}
+
 void Algorithm::ATPG::ATPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Init context program algo with TPG method.

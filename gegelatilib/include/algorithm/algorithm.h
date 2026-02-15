@@ -117,6 +117,9 @@ namespace Algorithm {
         /// Getter for the mutator
         virtual std::shared_ptr<Mutator> getMutator();
       
+        /// Constant getter for the mutator
+        virtual std::vector<std::reference_wrapper<const Algorithm>> getSubAlgorithms() const;
+
         /**
          * \brief Get the current number of agents used by the algorithm.
          */
@@ -196,6 +199,17 @@ namespace Algorithm {
 
 
         /**
+        * \brief Get the agents that are currently used by the algorithm.
+        * The returned map associate to each sub-algorithm name the set of agents used by this sub-algorithm.
+        */
+        virtual std::map<std::string, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const;
+
+        /**
+         * \brief Clear all the unused sub agents
+         */
+        virtual void clearUnusedSubAgents();
+
+        /**
          * \brief Clear all the parts of agents that are not used, such as introns for LGPs
          */
         virtual void clearUnusedAgentParts() = 0;
@@ -234,8 +248,13 @@ namespace Algorithm {
          */
         virtual void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const = 0;
 
-
     };
+
+    /**
+     * \brief Comparison function to enable sorting of Algorithm with
+     * STL.
+     */
+    bool operator==(const Algorithm& a, const Algorithm& b);
 }; // namespace Algorithm
 
 #endif // ALGORITHM_H
