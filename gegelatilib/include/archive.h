@@ -58,7 +58,7 @@
 typedef struct ArchiveRecording
 {
     /// Pointer to the agent Program. This pointer may point to a freed agent.
-    std::reference_wrapper<const Algorithm::Agent> const agent;
+    const Algorithm::Agent* agent;
 
     /// Hash of the set of DataHandler for this recording
     const size_t dataHash;
@@ -118,7 +118,7 @@ class Archive
      *
      * The Map is used to speed the unicity tests.
      */
-    std::map<std::reference_wrapper<const Algorithm::Agent>, std::deque<ArchiveRecording>>
+    std::map<const Algorithm::Agent*, std::deque<ArchiveRecording>>
         recordingsPerProgram;
 
     /// Recordings of the Archive

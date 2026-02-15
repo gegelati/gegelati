@@ -120,7 +120,7 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
                     reverseIterator->second->at(recordingIdx);
                 // forced Insertion
                 this->archive->addRecording(
-                    recording.agent,
+                    *recording.agent,
                     reverseIterator->second->getDataHandlers().at(
                         recording.dataHash),
                     recording.result, true);

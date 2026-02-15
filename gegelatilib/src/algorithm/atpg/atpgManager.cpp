@@ -8,12 +8,12 @@ void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, std::shared_pt
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> verticesToDelete;
     // get vertex of agent to delete;
     auto vertex = this->getTPGAgentFromCst(agent)->getVertex();
-
-    for(auto& edge: vertex->getOutgoingEdges()){
+    while(vertex->getOutgoingEdges().size() > 0){
+        auto& edge = vertex->getOutgoingEdges().front();
 
         // Remove the program on the destination of the edge if it exist.
         std::shared_ptr<const Algorithm::Agent> locked = edge->getDestination()->getProgram().lock();
-        if(locked != nullptr && locked->getAlgorithmName() == this->actionProgramAlgorithmName && 
+        if(locked && locked->getAlgorithmName() == this->actionProgramAlgorithmName && 
            edge->getDestination()->getIncomingEdges().size() == 1) {
             // Remove action vertex from the graph because it is only used by this team and it contains an action program.
             verticesToDelete.push_back(edge->getDestination());

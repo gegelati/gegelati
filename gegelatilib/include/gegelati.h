@@ -58,6 +58,11 @@
 #include <algorithm/agentManager.h>
 #include <algorithm/executionEngine.h>
 
+#include <algorithm/atpg/atpgAlgorithm.h>
+#include <algorithm/atpg/atpgManager.h>
+#include <algorithm/atpg/atpgMutator.h>
+#include <algorithm/atpg/atpgExecutionEngine.h>
+
 #include <algorithm/lgp/lgpAlgorithm.h>
 #include <algorithm/lgp/lgpAgent.h>
 #include <algorithm/lgp/lgpManager.h>

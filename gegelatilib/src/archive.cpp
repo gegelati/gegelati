@@ -96,16 +96,16 @@ void Archive::addRecording(
         }
 
         // Create and stores the recording
-        ArchiveRecording recording{agent, hash, result};
+        ArchiveRecording recording{&agent, hash, result};
         this->recordings.push_back(recording);
 
         // Update the recordings per Program
-        auto iterNbRecordings = this->recordingsPerProgram.find(agent);
+        auto iterNbRecordings = this->recordingsPerProgram.find(&agent);
         if (iterNbRecordings != this->recordingsPerProgram.end()) {
             iterNbRecordings->second.push_back(recording);
         }
         else {
-            this->recordingsPerProgram.insert({agent, {recording}});
+            this->recordingsPerProgram.insert({&agent, {recording}});
         }
 
         // Check if Archive max size was reached (or exceeded)

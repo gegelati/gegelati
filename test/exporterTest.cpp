@@ -56,7 +56,7 @@
 
 #include "goldenReferenceComparison.h"
 
-        /*
+/*
 class ExporterTest : public ::testing::Test
 {
   public:
