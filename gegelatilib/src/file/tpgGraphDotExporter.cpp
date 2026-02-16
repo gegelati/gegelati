@@ -197,12 +197,15 @@ void File::GraphDotExporter::printGraphFooter()
         this->printVertex(*rootVertex);
     }
 
-    // Rank all the roots
+    // Rank all the agents of main algoritms
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
-    // Team root ids
-    auto rootTeams = tpg.getRootTeams();
-    for (const auto rootVertex : rootTeams) {
-        fprintf(pFile, "T%" PRIu64 " ", rootVertex->getVertexID());
+    // Main agents ids
+    for(auto algorithm : this->algorithmsRef){
+        for(std::weak_ptr<const Algorithm::Agent> agent : algorithm->getManagerCst()->getAgents()){
+            if(auto agentPtr = agent.lock()){
+                fprintf(pFile, "P%" PRIu64 " ", agentPtr->getAgentID());
+            }
+        }
     }
     // Action root
     for (auto rootActionId : rootActionIDs) {
@@ -226,8 +229,8 @@ void File::GraphDotExporter::print()
     // Print each agent algorithms
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
-    for(auto algorithm : this->potentialAlgorithms){
-        for(std::weak_ptr<const Algorithm::Agent> agent : algorithm.get().getManagerCst()->getAgents()){
+    for(auto algorithm : this->algorithmsRef){
+        for(std::weak_ptr<const Algorithm::Agent> agent : algorithm->getManagerCst()->getAgents()){
             if(auto agentPtr = agent.lock()){
                 this->printAgent(*agentPtr);
             }
