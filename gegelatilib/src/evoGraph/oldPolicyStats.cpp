@@ -35,7 +35,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "evoGraph/policyStats.h"
+#include "evoGraph/oldPolicyStats.h"
 #include <algorithm>
 #include <numeric>
 

@@ -10,6 +10,7 @@
 #include "algorithm/agent.h"
 #include "algorithm/agentManager.h"
 #include "algorithm/mutator.h"
+#include "algorithm/policyStats.h"
 #include "learn/learningParameters.h"
 #include "evoGraph/graph.h"
 #include "selector/selectorFactory.h"
@@ -227,6 +228,17 @@ namespace Algorithm {
          * \return A job representing the agent.
          */
         virtual std::shared_ptr<Job> createJob(std::weak_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const;
+
+        /**
+         * \brief Create a PolicyStats object corresponding to the algorithm.
+          * 
+          * This method is used for the analysis of the policies, and the
+          * returned PolicyStats object will be filled during the analyses.
+          * The type of the returned PolicyStats object need to correspond to
+          * the type of the algorithm, for example, a TPGAlgorithm should return
+          * a TPGPolicyStats.
+         */
+        virtual std::shared_ptr<PolicyStats> createPolicyStats() const = 0;
 
         /**
          * \brief Update the algorithm after evaluation of a set of jobs.

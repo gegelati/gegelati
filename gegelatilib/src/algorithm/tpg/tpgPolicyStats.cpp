@@ -1,7 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,34 +35,38 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "learn/learningAgent.h"
+#include "algorithm/tpg/tpgPolicyStats.h"
+#include <algorithm>
+#include <numeric>
 
-#include "log/laPolicyStatsLogger.h"
 
-void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
+void Algorithm::TPG::TPGPolicyStats::analyzePolicy(const Agent& agent)
 {
-    this->generationNumber = generationNumber;
+    // Get tpgAgent if agent is one, else throw
+    const TPGAgent& tpgAgent = dynamic_cast<const TPGAgent&>(agent);
+    if (&tpgAgent == nullptr) {
+        throw std::invalid_argument("PolicyStats can only analyze TPGAgent");
+    }
+
+    auto root = tpgAgent.getVertex();
+
+    size_t depth = 0;
+    std::vector<std::reference_wrapper<const EvoGraph::Vertex>> stage[2];
+    stage[0].push_back(*root);
+    while (!stage[depth % 2].empty()) {
+        this->nbVertexPerDepthLevel[depth] = stage[depth % 2].size();
+        auto& nextStage = stage[(depth + 1) % 2];
+        nextStage.clear();
+
+        for (const EvoGraph::Vertex& vertex : stage[depth % 2]) {
+            this->analyzeVertex(vertex);
+        }
+        depth++;
+    }
+    this->maxPolicyDepth = depth - 1;
 }
 
-void Log::LAPolicyStatsLogger::logAfterDecimate()
+std::string Algorithm::TPG::TPGPolicyStats::specificInfos() const
 {
-    auto selector = this->algorithm.getSelectorCst();
-    if (selector->getBestAgent().first.lock() != this->lastBestAgent.lock() ) {
-        // Update the best root befor loggin it PolicyStats
-        this->lastBestAgent =
-            selector->getBestAgent().first;
-        *this << "Generation " << this->generationNumber << " - Score "
-              << selector->getBestAgent()
-                     .second->getSelectionMetrics()
-                     ->getScore()
-              << std::endl
-              << std::endl;
-        std::shared_ptr<Algorithm::PolicyStats> ps = algorithm.createPolicyStats();
-        ps->analyzePolicy(*this->lastBestAgent.lock()); 
-        *this << *ps << std::endl;
-        *this << std::endl
-              << std::endl
-              << "==========" << std::endl
-              << std::endl;
-    }
+    return "Program sub-algorithm: " + this->subPolicyStats.begin()->first;
 }

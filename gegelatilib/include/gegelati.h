@@ -96,7 +96,7 @@
 #include <data/untypedSharedPtr.h>
 
 
-#include <evoGraph/policyStats.h>
+#include <evoGraph/oldPolicyStats.h>
 #include <evoGraph/abstractEngine.h>
 #include <evoGraph/action.h>
 #include <evoGraph/edge.h>

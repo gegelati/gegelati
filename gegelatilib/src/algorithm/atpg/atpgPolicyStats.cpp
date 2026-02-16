@@ -1,7 +1,9 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
+ * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,34 +35,16 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "learn/learningAgent.h"
+#include "algorithm/atpg/atpgPolicyStats.h"
+#include <algorithm>
+#include <numeric>
 
-#include "log/laPolicyStatsLogger.h"
 
-void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
+std::string Algorithm::ATPG::ATPGPolicyStats::specificInfos() const
 {
-    this->generationNumber = generationNumber;
-}
-
-void Log::LAPolicyStatsLogger::logAfterDecimate()
-{
-    auto selector = this->algorithm.getSelectorCst();
-    if (selector->getBestAgent().first.lock() != this->lastBestAgent.lock() ) {
-        // Update the best root befor loggin it PolicyStats
-        this->lastBestAgent =
-            selector->getBestAgent().first;
-        *this << "Generation " << this->generationNumber << " - Score "
-              << selector->getBestAgent()
-                     .second->getSelectionMetrics()
-                     ->getScore()
-              << std::endl
-              << std::endl;
-        std::shared_ptr<Algorithm::PolicyStats> ps = algorithm.createPolicyStats();
-        ps->analyzePolicy(*this->lastBestAgent.lock()); 
-        *this << *ps << std::endl;
-        *this << std::endl
-              << std::endl
-              << "==========" << std::endl
-              << std::endl;
-    }
+    // Return string with the name of the program sub-algorithm and action program sub algorithm
+    auto it = this->subPolicyStats.begin();
+    std::string programAlgoName = it->first;
+    std::string actionProgramAlgoName = (++it)->first;
+    return "Program sub-algorithm: " + programAlgoName + "\nAction program sub-algorithm: " + actionProgramAlgoName;
 }

@@ -9,6 +9,7 @@
 #include "algorithm/lgp/lgpManager.h"
 #include "algorithm/lgp/lgpMutator.h"
 #include "algorithm/lgp/lgpAgent.h"
+#include "algorithm/lgp/lgpPolicyStats.h"
 namespace Algorithm::LGP {
 
     /**
@@ -67,6 +68,12 @@ namespace Algorithm::LGP {
              * \brief Initialize the algorithm.
              */
             virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+
+
+            /**
+             * \brief Inherited method to create the policy stats of the algorithm
+             */
+            virtual std::shared_ptr<PolicyStats> createPolicyStats() const override;
 
             /**
              * Copy and return a uniqure pointer of the algorithm

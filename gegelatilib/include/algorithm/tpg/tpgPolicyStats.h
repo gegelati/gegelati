@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2022)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -33,34 +34,40 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "learn/learningAgent.h"
+#ifndef TPG_POLICY_STATS_H
+#define TPG_POLICY_STATS_H
 
-#include "log/laPolicyStatsLogger.h"
+#include "algorithm/policyStats.h"
+#include "algorithm/tpg/tpgAgent.h"
 
-void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
-{
-    this->generationNumber = generationNumber;
-}
+namespace Algorithm::TPG {
 
-void Log::LAPolicyStatsLogger::logAfterDecimate()
-{
-    auto selector = this->algorithm.getSelectorCst();
-    if (selector->getBestAgent().first.lock() != this->lastBestAgent.lock() ) {
-        // Update the best root befor loggin it PolicyStats
-        this->lastBestAgent =
-            selector->getBestAgent().first;
-        *this << "Generation " << this->generationNumber << " - Score "
-              << selector->getBestAgent()
-                     .second->getSelectionMetrics()
-                     ->getScore()
-              << std::endl
-              << std::endl;
-        std::shared_ptr<Algorithm::PolicyStats> ps = algorithm.createPolicyStats();
-        ps->analyzePolicy(*this->lastBestAgent.lock()); 
-        *this << *ps << std::endl;
-        *this << std::endl
-              << std::endl
-              << "==========" << std::endl
-              << std::endl;
-    }
-}
+    /**
+     * Utility class for extracting statistics from a policy within a Graph.
+     */
+    class TPGPolicyStats : public PolicyStats
+    {
+      public:
+        /// Default constructor
+        TPGPolicyStats(std::string algorithmName, const std::map<std::string, std::shared_ptr<PolicyStats>>& subPolicyStats) : PolicyStats(algorithmName, subPolicyStats) {}
+
+        /**
+         * Analyze the policy starting from the given Agent.
+         *
+         * This method explores the Graph starting from the given Agent,
+         * and analyzes all Team, Action and other agents encountered along the
+         * way.
+         *
+         * The method updates the following stats:
+         */
+        virtual void analyzePolicy(const Agent& agent) override;
+
+        /**
+         * \brief TPG got no specific info to print, so we just return the name of the program sub-algorithm.
+         */
+        virtual std::string specificInfos() const override;
+    };
+
+} // namespace Algorithm::TPG
+
+#endif

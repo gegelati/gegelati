@@ -38,7 +38,7 @@
 
 #include "algorithm/agent.h"
 #include "log/laLogger.h"
-#include "evoGraph/policyStats.h"
+#include "algorithm/policyStats.h"
 
 namespace Log {
     /**
@@ -63,17 +63,21 @@ namespace Log {
         /// Number of the current generation.
         uint64_t generationNumber = 0;
 
+        /// Analyzed algorithm
+        const Algorithm::Algorithm& algorithm;
+
       public:
         /**
          * \brief Main constructor for the LAPolicyStatsLogger.
          *
          * \param[in] la LearningAgent whose information will be logged by the
          * LAPolicyStatsLogger.
+         * \param[in] algorithm algorithm whose best agent is output.
          * \param[in] out ostream where the logger will write its output.
          */
-        LAPolicyStatsLogger(Learn::LearningAgent& la,
+        LAPolicyStatsLogger(Learn::LearningAgent& la, const Algorithm::Algorithm& algorithm,
                             std::ostream& out = std::cout)
-            : LALogger(la, out){};
+            : LALogger(la, out), algorithm{algorithm} {};
 
         /// Inherited from LALogger
         void logNewGeneration(uint64_t& generationNumber) override;

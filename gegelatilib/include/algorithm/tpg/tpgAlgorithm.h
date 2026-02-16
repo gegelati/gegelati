@@ -7,6 +7,7 @@
 
 #include "archive.h"
 #include "algorithm/algorithm.h"
+#include "algorithm/tpg/tpgPolicyStats.h"
 #include "algorithm/tpg/tpgManager.h"
 #include "algorithm/tpg/tpgMutator.h"
 #include "algorithm/tpg/tpgAgent.h"
@@ -103,6 +104,12 @@ namespace Algorithm::TPG {
              */
             virtual std::shared_ptr<Job> createJob(std::weak_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const override;
 
+            /**
+             * \brief Inherited method to create the policy stats of the algorithm
+             * 
+             * This policy stats contains a program sub policy stats
+             */
+            virtual std::shared_ptr<PolicyStats> createPolicyStats() const override;
             
             /**
              * \brief Inherited method to update the algorithm after evaluation of a set of jobs.

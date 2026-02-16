@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "archive.h"
+#include "algorithm/atpg/atpgPolicyStats.h"
 #include "algorithm/tpg/tpgAlgorithm.h"
 #include "algorithm/atpg/atpgManager.h"
 #include "algorithm/atpg/atpgMutator.h"
@@ -84,6 +85,13 @@ namespace Algorithm::ATPG {
              * The sub agents are the agents used by the program sub-algorithm and the action sub-algorithm.
              */
             virtual std::map<std::string, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const override;
+
+            /**
+             * \brief Inherited method to create the policy stats of the algorithm
+             * 
+             * This policy stats contains a program sub policy stats
+             */
+            virtual std::shared_ptr<PolicyStats> createPolicyStats() const override;
 
             /**
              * Copy and return a uniqure pointer of the algorithm

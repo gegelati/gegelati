@@ -34,8 +34,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef POLICY_STATS_H
-#define POLICY_STATS_H
+#ifndef OLD_POLICY_STATS_H
+#define OLD_POLICY_STATS_H
 
 #include <iostream>
 #include <map>

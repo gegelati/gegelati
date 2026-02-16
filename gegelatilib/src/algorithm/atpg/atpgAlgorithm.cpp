@@ -57,6 +57,8 @@ std::map<std::string, std::set<std::reference_wrapper<const Algorithm::Agent>>> 
     return usedSubAgents;
 }
 
+
+
 void Algorithm::ATPG::ATPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Init context program algo with TPG method.
@@ -74,4 +76,13 @@ void Algorithm::ATPG::ATPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::share
     this->mutator->addSubMutator(actionProgramAlgo.getMutator());
     std::shared_ptr<ATPG::ATPGMutator> tpgMutator = std::dynamic_pointer_cast<ATPG::ATPGMutator>(this->mutator);
     tpgMutator->setActionProgramAlgorithmName(this->actionProgramAlgorithmName);
+}
+
+
+std::shared_ptr<Algorithm::PolicyStats> Algorithm::ATPG::ATPGAlgorithm::createPolicyStats() const
+{
+    std::map<std::string, std::shared_ptr<PolicyStats>> subPolicyStatsMap;
+    subPolicyStatsMap[this->programAlgorithmName] = this->cGetSubAlgorithm(this->programAlgorithmName).createPolicyStats();
+    subPolicyStatsMap[this->actionProgramAlgorithmName] = this->cGetSubAlgorithm(this->actionProgramAlgorithmName).createPolicyStats();
+    return std::make_shared<ATPGPolicyStats>(this->algorithmName, subPolicyStatsMap);
 }

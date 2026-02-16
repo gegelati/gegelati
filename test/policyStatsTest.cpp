@@ -42,7 +42,7 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
 
-#include "evoGraph/policyStats.h"
+#include "evoGraph/oldPolicyStats.h"
 
 #if 0
 

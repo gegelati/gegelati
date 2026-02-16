@@ -32,6 +32,14 @@ void Algorithm::LGP::LGPAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<
     Algorithm::Algorithm::initAlgorithm(rng, outputs, dataSource, graph);
 }
 
+
+
+std::shared_ptr<Algorithm::PolicyStats> Algorithm::LGP::LGPAlgorithm::createPolicyStats() const
+{
+    std::map<std::string, std::shared_ptr<PolicyStats>> subPolicyStatsMap;
+    return std::make_shared<LGPPolicyStats>(this->algorithmName, *this->env);
+}
+
 void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
 {
     if(printedAgentID.find(agent.getAgentID()) == printedAgentID.end() && this->containsAgent(agent)){
@@ -81,3 +89,4 @@ void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
                 offset.c_str(), lgpAgent.getAgentID(), lgpAgent.getAgentID());
     }
 }
+

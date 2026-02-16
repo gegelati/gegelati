@@ -74,6 +74,13 @@ std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(std::wea
     return std::make_shared<TPGJob>(agent, idx, jobArchive);
 }
 
+std::shared_ptr<Algorithm::PolicyStats> Algorithm::TPG::TPGAlgorithm::createPolicyStats() const
+{
+    std::map<std::string, std::shared_ptr<PolicyStats>> subPolicyStatsMap;
+    subPolicyStatsMap[this->programAlgorithmName] = this->cGetSubAlgorithm(this->programAlgorithmName).createPolicyStats();
+    return std::make_shared<TPGPolicyStats>(this->algorithmName, subPolicyStatsMap);
+}
+
 void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode)
 {
     // Merge the archives

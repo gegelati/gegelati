@@ -53,7 +53,7 @@
 #include "evoGraph/instrumented/factoryInstrumented.h"
 #include "evoGraph/instrumented/teamInstrumented.h"
 #include "evoGraph/instrumented/vertexInstrumented.h"
-#include "evoGraph/policyStats.h"
+#include "evoGraph/oldPolicyStats.h"
 #include "evoGraph/graph.h"
 
 #include "instructions/addPrimitiveType.h"
