@@ -394,6 +394,13 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
 
     std::vector<std::weak_ptr<const Agent>> newSubAgents; //TODOTODOTODO
     bool allUnique;
+
+    // Check for uniqueness in archive
+    const auto& archivedDataHandlers = archive->getDataHandlers();
+    std::map<size_t, double> hashesAndResults;
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = manager->createExecutionEngine();
+    execEngine->setExecutedAgent(programAgent);
+
     // Mutate behavior until it changes (against the archive).
     do {
 
@@ -401,11 +408,7 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
         // true) And until the program behavior is changed
         subMutator->mutateAgent(refAgent, graph, manager, newSubAgents, params, rng);
 
-        // Check for uniqueness in archive
-        const auto& archivedDataHandlers = archive->getDataHandlers();
-        std::map<size_t, double> hashesAndResults;
-        std::unique_ptr<Algorithm::ExecutionEngine> execEngine = manager->createExecutionEngine();
-        execEngine->setExecutedAgent(programAgent);
+        hashesAndResults.clear();
         for (std::pair<
                  size_t,
                  std::vector<std::reference_wrapper<const Data::DataHandler>>>

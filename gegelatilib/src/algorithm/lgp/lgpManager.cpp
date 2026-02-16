@@ -80,6 +80,8 @@ const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLine(const Agent& 
 {
     if(this->containsAgent(agent)){
          return dynamic_cast<const LGPAgent&>(agent).getLine(index);
+    } else {
+        throw std::runtime_error("Algorithm::LGP::LGPManager::getLine: the given agent is not in the manager.");
     }
 }
 
