@@ -330,21 +330,6 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
                                               bool doPopulate)
 {
-
-    for(auto algo: this->algorithms){
-        auto selector = algo->getSelector();
-        for(const auto& pair: selector->getResultsPerAgent()){
-            auto agent = pair.first.get();
-            if(agent.getAlgorithmName() != algo->getManager()->getAlgorithmName()){
-                std::cout << "Expected: "
-                          << algo->getManager()->getAlgorithmName()
-                          << " - recieved: " << agent.getAlgorithmName()
-                          << std::endl;
-            }
-        }
-    }
-
-
     for (auto logger : loggers) {
         logger.get().logNewGeneration(generationNumber);
     }

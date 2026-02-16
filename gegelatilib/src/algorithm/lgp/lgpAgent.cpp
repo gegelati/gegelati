@@ -14,29 +14,27 @@ const Output::OutputHandler& Algorithm::LGP::LGPAgent::getOutputs() const
     return this->outputs;
 }
 
-Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::addNewLine()
+const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::addNewLine()
 {
     return this->addNewLine(this->getNbLines());
 }
 
-Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::addNewLine(uint64_t idx)
+const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::addNewLine(uint64_t idx)
 {
     if (idx > this->getNbLines()) {
         throw std::out_of_range(
             "Attempting to insert a line beyond the program end.");
     }
-    // Allocate the zero-filled memory
-    LGPLine* newLine = new LGPLine(this->environment);
     // new line is not marked as an intron by default
-    this->lines.insert(this->lines.begin() + idx, {std::shared_ptr<LGPLine>(newLine), false});
+    this->lines.insert(this->lines.begin() + idx, {std::make_unique<LGPLine>(this->environment), false});
 
-    return *newLine;
+    return *this->lines.back().first;
 }
 
 void Algorithm::LGP::LGPAgent::addNewLine(const LGPLine& newLine)
 {
     // new line is not marked as an intron by default
-    this->lines.push_back({std::make_shared<LGPLine>(newLine), false});
+    this->lines.push_back({std::make_unique<LGPLine>(newLine), false});
 }
 
 void Algorithm::LGP::LGPAgent::clearIntrons()
@@ -83,19 +81,13 @@ size_t Algorithm::LGP::LGPAgent::getNbLines() const
     return this->lines.size();
 }
 
-std::shared_ptr<const Algorithm::LGP::LGPLine> Algorithm::LGP::LGPAgent::getLinePtr(uint64_t index) const
-{
-    return this->lines.at(index)
-                .first; // throws std::out_of_range on bad index.
-}
-
 const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::getLine(uint64_t index) const
 {
     return *this->lines.at(index)
                 .first; // throws std::out_of_range on bad index.
 }
 
-Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::getLine(uint64_t index)
+Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::getLineForMutation(uint64_t index)
 {
     return *this->lines.at(index)
                 .first; // throws std::out_of_range on bad index.

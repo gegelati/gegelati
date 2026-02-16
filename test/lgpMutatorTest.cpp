@@ -140,7 +140,7 @@ TEST_F(LgpMutatorTest, LGPMutatorSwapRandomLines)
     RNG::RNG rng;
     rng.setSeed(0);
 
-    std::vector<Algorithm::LGP::LGPLine*> lines;
+    std::vector<const Algorithm::LGP::LGPLine*> lines;
     // Nothing on empty LGP
     ASSERT_FALSE(lgpMutator->swapRandomLines(*lgpAgent, lgpManager, rng));
 
@@ -246,11 +246,14 @@ TEST_F(LgpMutatorTest, LGPMutatorMutateBehavior)
     Selector::SelectionContext context;
 
     rng.setSeed(14);
-    Algorithm::LGP::LGPLine& l = lgpManager->addNewLine(lgpAgent2);
+    lgpManager->addNewLine(lgpAgent2);
+    Algorithm::LGP::LGPLine& l = lgpManager->getLineForMutation(lgpAgent2, 0);
     lineMutator.initRandomCorrectLine(l, rng);
-    Algorithm::LGP::LGPLine& l2 = lgpManager->addNewLine(lgpAgent2);
+    lgpManager->addNewLine(lgpAgent2);
+    Algorithm::LGP::LGPLine& l2 = lgpManager->getLineForMutation(lgpAgent2, 1);
     lineMutator.initRandomCorrectLine(l2, rng);
-    Algorithm::LGP::LGPLine& l3 = lgpManager->addNewLine(lgpAgent2);
+    lgpManager->addNewLine(lgpAgent2);
+    Algorithm::LGP::LGPLine& l3 = lgpManager->getLineForMutation(lgpAgent2, 2);
     lineMutator.initRandomCorrectLine(l3, rng);
 
     params.mutation.prog.maxProgramSize = 15;

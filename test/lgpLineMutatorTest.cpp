@@ -78,7 +78,8 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
     rng.setSeed(0);
 
     // Add a pseudo-random lines to the program
-    Algorithm::LGP::LGPLine& l0 = programAgent->addNewLine();
+    programAgent->addNewLine();
+    Algorithm::LGP::LGPLine& l0 = programAgent->getLineForMutation(0);
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l0, rng))
         << "Pseudo-Random correct line initialization failed within an "
            "environment where failure should not be possible.";
@@ -102,7 +103,8 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
         << "Selected pseudo-random operand location changed with a known seed.";
 
     // Add another pseudo-random lines to the program
-    Algorithm::LGP::LGPLine& l1 = programAgent->addNewLine();
+    programAgent->addNewLine();
+    Algorithm::LGP::LGPLine& l1 = programAgent->getLineForMutation(1);
 
     // Additionally covers correct operand type from data source
     // Instruction if lambda instruction(plus)
@@ -118,9 +120,10 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
 
     // Add another pseudo-random lines to the program
     // Additionally covers nothing
-    Algorithm::LGP::LGPLine& l2 = programAgent->addNewLine();
-
-    Algorithm::LGP::LGPLine& l3 = programAgent->addNewLine();
+    programAgent->addNewLine();
+    Algorithm::LGP::LGPLine& l2 = programAgent->getLineForMutation(2);
+    programAgent->addNewLine();
+    Algorithm::LGP::LGPLine& l3 = programAgent->getLineForMutation(3);
 
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l2, rng))
         << "Pseudo-Random correct line initialization failed within an "
@@ -130,7 +133,8 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
            "environment where failure should not be possible.";
 
     // Add another pseudo-random lines to the program
-    Algorithm::LGP::LGPLine& l4 = programAgent->addNewLine();
+    programAgent->addNewLine();
+    Algorithm::LGP::LGPLine& l4 = programAgent->getLineForMutation(4);
     // Additionally covers additional uneeded operand (register)
     ASSERT_NO_THROW(lineMutator.initRandomCorrectLine(l4, rng))
         << "Pseudo-Random correct line initialization failed within an "
@@ -158,7 +162,8 @@ TEST_F(LineMutatorTest, LineMutatorAlterLine)
 
     // Add a 0 lines to the program
     // i=0, d=0, op0=(0,0), op1=(0,0)
-    Algorithm::LGP::LGPLine& l0 = programAgent->addNewLine();
+    programAgent->addNewLine();
+    Algorithm::LGP::LGPLine& l0 = programAgent->getLineForMutation(0);
 
     // Alter instruction
     // i=, d=0, op0=(0,0), op1=(0,0)
@@ -251,7 +256,8 @@ TEST_F(LineMutatorTest, LineMutatorAlterLineWithCompositeOperands)
 
     // Add a 0 line to the program
     // i=0, d=0, op0=(0,0), op1=(0,0)
-    Algorithm::LGP::LGPLine& l0 = programAgent2->addNewLine();
+    programAgent2->addNewLine();
+    Algorithm::LGP::LGPLine& l0 = programAgent2->getLineForMutation(0);
 
     // Alter instruction
     // i=2, d=0, op0=(0,0), op1=(0,0)

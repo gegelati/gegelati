@@ -473,6 +473,7 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
     Learn::LearningAgent la(le, lgp, params);
 
     la.init();
+
     bool alt = false;
     la.train(alt, false);
     EvoGraph::Graph& tpg = *la.getGraph();
@@ -502,7 +503,7 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 144)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 12539348269636698672U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 1858364085364699167U)
         << "Graph does not have the expected determinst characteristics.";
 }
 

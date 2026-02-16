@@ -55,12 +55,12 @@ void Algorithm::LGP::LGPManager::removeLine(const Agent& agent, size_t index)
     this->getLGPAgentFromCst(agent)->removeLine(index);
 }
 
-Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(const Agent& agent, size_t index)
+const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(const Agent& agent, size_t index)
 {
     return this->getLGPAgentFromCst(agent)->addNewLine(index);
 }
 
-Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(const Agent& agent)
+const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(const Agent& agent)
 {
     std::shared_ptr<Algorithm::LGP::LGPAgent> lgpAgent = this->getLGPAgentFromCst(agent);
     return lgpAgent->addNewLine(lgpAgent->getNbLines());
@@ -76,9 +76,16 @@ void Algorithm::LGP::LGPManager::swapLines(const Agent& agent, size_t index1, si
     this->getLGPAgentFromCst(agent)->swapLines(index1, index2);
 }
 
-Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLine(const Agent& agent, size_t index)
+const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLine(const Agent& agent, size_t index) const
 {
-    return this->getLGPAgentFromCst(agent)->getLine(index);
+    if(this->containsAgent(agent)){
+         return dynamic_cast<const LGPAgent&>(agent).getLine(index);
+    }
+}
+
+Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLineForMutation(const Agent& agent, size_t index)
+{
+    return this->getLGPAgentFromCst(agent)->getLineForMutation(index);
 }
 
 uint64_t Algorithm::LGP::LGPManager::identifyIntrons(const Agent& agent)
@@ -98,7 +105,7 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(const Agent& agent)
     }
     
     for(int64_t idxLine = static_cast<int64_t>(lgpAgent->getNbLines()) - 1; idxLine >= 0; idxLine--){
-        LGPLine& currentLine = lgpAgent->getLine(static_cast<size_t>(idxLine));
+        const LGPLine& currentLine = lgpAgent->getLine(static_cast<size_t>(idxLine));
 
         uint64_t destinationIndex = currentLine.getDestinationIndex();
         auto destinationRegister = usefulRegisters.find(destinationIndex);

@@ -58,7 +58,6 @@ void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, std
         c_value = {rng.getDouble(params.mutation.prog.minConstValue,
                                  params.mutation.prog.maxConstValue)};
         lgpManager->setConstantAt(agent, i, c_value);
-        //lgpAgent->getConstantHandler().setDataAt(typeid(Data::Constant), i, c_value);xo
     }
 
     // Select the number of line randomly
@@ -135,18 +134,15 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
                        (cutEnd[1 - i] - cutStart[1 - i]);
     }
 
-    // Store the lines of parents in list
-    std::array<std::vector<std::shared_ptr<const LGPLine>>, 2> lines;
+    // Store the lines of parents in list, need to copy them because it is deleted after
+    std::array<std::vector<std::reference_wrapper<const LGPLine>>, 2> lines;
     for(int i = 0; i < 2; i++){
         lines[i].reserve(lgpAgents[i].get().getNbLines());
         for (size_t j = 0; j < lgpAgents[i].get().getNbLines(); j++) {
-            lines[i].push_back(lgpAgents[i].get().getLinePtr(j));
-        }
-        for (size_t j = 0; j < lgpAgents[i].get().getNbLines(); j++) {
-            lgpManager->removeLine(lgpAgents[i].get(), j);
+            lines[i].push_back(lgpAgents[i].get().getLine(j));
         }
     }
-    // Create new programs with the cut
+    // Add the new lines
     for (int childIdx = 0; childIdx < 2; childIdx++) {
         auto& parent1 = lines[childIdx];
         auto& parent2 = lines[1 - childIdx];
@@ -156,16 +152,25 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
         for (size_t idx = 0; idx < sizeProgs[childIdx]; idx++) {
             if (idx < start1) {
 
-                lgpManager->addNewLine(lgpAgents[childIdx], *parent1[idx]);
+                lgpManager->addNewLine(lgpAgents[childIdx], parent1[idx]);
             }
             else if (idx >= start1 + (end2 - start2)) {
 
-                lgpManager->addNewLine(lgpAgents[childIdx], *parent1[idx + (end1 - start1) - (end2 - start2)]);
+                lgpManager->addNewLine(lgpAgents[childIdx], parent1[idx + (end1 - start1) - (end2 - start2)]);
             }
             else {
-                lgpManager->addNewLine(lgpAgents[childIdx], *parent2[idx - start1 + start2]);
+                lgpManager->addNewLine(lgpAgents[childIdx], parent2[idx - start1 + start2]);
             }
         }
+
+    }
+
+    // Remove the old lines and identify introns
+    for(int i = 0; i < 2; i++){
+        for (size_t j = 0; j < lines[i].size(); j++) {
+            lgpManager->removeLine(lgpAgents[i].get(), 0);
+        }
+        lgpManager->identifyIntrons(lgpAgents[i]);
     }
 }
 
@@ -240,8 +245,8 @@ bool Algorithm::LGP::LGPMutator::deleteRandomLine(const LGPAgent& agent, std::sh
 void Algorithm::LGP::LGPMutator::insertRandomLine(const LGPAgent& agent, std::shared_ptr<LGPManager> manager,  RNG::RNG& rng)
 {
     uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines());
-    LGPLine& line = manager->addNewLine(agent, lineIndex);
-    this->lineMutator.initRandomCorrectLine(line, rng);
+    manager->addNewLine(agent, lineIndex);
+    this->lineMutator.initRandomCorrectLine(manager->getLineForMutation(agent, lineIndex), rng);
 }
 
 
@@ -269,7 +274,7 @@ bool Algorithm::LGP::LGPMutator::alterRandomLine(const LGPAgent& agent, std::sha
     }
     // Select a random index.
     const uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines() - 1);
-    this->lineMutator.alterCorrectLine(manager->getLine(agent, lineIndex), rng);
+    this->lineMutator.alterCorrectLine(manager->getLineForMutation(agent, lineIndex), rng);
     return true;
 }
 

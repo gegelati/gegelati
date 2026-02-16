@@ -33,7 +33,7 @@ namespace Algorithm::LGP {
              * result, stored in the first register. Hence, skipping these lines
              * during a LGP execution can speed up the LGP execution.
              */
-            std::vector<std::pair<std::shared_ptr<LGPLine>, bool>> lines;
+            std::vector<std::pair<std::unique_ptr<LGPLine>, bool>> lines;
 
 
             /**
@@ -89,7 +89,7 @@ namespace Algorithm::LGP {
              *
              * \return a non-const reference to the newly added LGPLine.
              */
-            LGPLine& addNewLine();
+            const LGPLine& addNewLine();
 
             /**
              * \brief Add a new line to the LGP with only 0 bits.
@@ -101,7 +101,7 @@ namespace Algorithm::LGP {
              * \throw std::out_of_range if the given position is beyond the end of
              * the LGP.
              */
-            LGPLine& addNewLine(uint64_t idx);
+            const LGPLine& addNewLine(uint64_t idx);
 
             /**
              * \brief Add a new line to the LGP at the end of the LGP.
@@ -158,18 +158,6 @@ namespace Algorithm::LGP {
             size_t getNbLines() const;
 
             /**
-             * \brief Get a const pointer to a LGPLine of the LGP.
-             * 
-             * \param[in] index The integer index of the retrieved LGPLine within the
-             * LGP.
-             * \return a const pointer to the indexed LGPLine of the
-             * LGP.
-             * 
-             * \throw std::out_of_range if the index is too large.
-             */
-            std::shared_ptr<const LGPLine> getLinePtr(uint64_t index) const;
-
-            /**
              * \brief Get a const ref to a LGPLine of the LGP.
              *
              * \param[in] index The integer index of the retrieved LGPLine within the
@@ -181,15 +169,13 @@ namespace Algorithm::LGP {
             const LGPLine& getLine(uint64_t index) const;
 
             /**
-             * \brief Get a non-const ref to a LGPLine of the LGP.
-             *
+             * \brief Get a ref to a LGPLine of the LGP for mutation.
+             * 
              * \param[in] index The integer index of the retrieved LGPLine within the
-             * LGP. 
-             * \return a const reference to the indexed LGPLine of the
-             * LGP. 
-             * \throw std::out_of_range if the index is too large.
+             * LGP.              
+             * \return a reference to the indexed LGPLine of the LGP.
              */
-            LGPLine& getLine(uint64_t index);
+            LGPLine& getLineForMutation(uint64_t index);
 
             /**
              * \brief Checks whether a LGPLine at the given index is an intron.

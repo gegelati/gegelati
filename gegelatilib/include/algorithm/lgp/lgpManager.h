@@ -102,7 +102,7 @@ namespace Algorithm {
              * 
              * \return a reference to the newly added LGPLine.
              */
-            virtual LGPLine& addNewLine(const Agent& agent, size_t index);
+            virtual const LGPLine& addNewLine(const Agent& agent, size_t index);
             
             /**
              * \brief Add a new line to the given agent at the end of the agent.
@@ -111,7 +111,7 @@ namespace Algorithm {
              * 
              * \return a reference to the newly added LGPLine.
              */
-            virtual LGPLine& addNewLine(const Agent& agent);
+            virtual const LGPLine& addNewLine(const Agent& agent);
 
             /**
              * \brief Add a copy of the given line to the given agent at the end of the agent.
@@ -138,7 +138,17 @@ namespace Algorithm {
              * 
              * \return a reference to the LGPLine at the given index.
              */
-            virtual LGPLine& getLine(const Agent& agent, size_t index);
+            virtual const LGPLine& getLine(const Agent& agent, size_t index) const;
+
+            /**
+             * \brief Get a line of the given agent at the given index for mutation.
+             * 
+             * \param[in] agent the Agent to access.
+             * \param[in] index the index of the line to get.
+             * 
+             * \return a reference to the LGPLine at the given index.
+             */
+            virtual LGPLine& getLineForMutation(const Agent& agent, size_t index);
 
             /**
              * \brief Identify the introns of the given agent.
