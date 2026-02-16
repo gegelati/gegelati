@@ -48,22 +48,7 @@ void Algorithm::TPG::TPGPolicyStats::analyzePolicy(const Agent& agent)
         throw std::invalid_argument("PolicyStats can only analyze TPGAgent");
     }
 
-    auto root = tpgAgent.getVertex();
-
-    size_t depth = 0;
-    std::vector<std::reference_wrapper<const EvoGraph::Vertex>> stage[2];
-    stage[0].push_back(*root);
-    while (!stage[depth % 2].empty()) {
-        this->nbVertexPerDepthLevel[depth] = stage[depth % 2].size();
-        auto& nextStage = stage[(depth + 1) % 2];
-        nextStage.clear();
-
-        for (const EvoGraph::Vertex& vertex : stage[depth % 2]) {
-            this->analyzeVertex(vertex);
-        }
-        depth++;
-    }
-    this->maxPolicyDepth = depth - 1;
+    this->analyzeVertex(*tpgAgent.getVertex(), 0);
 }
 
 std::string Algorithm::TPG::TPGPolicyStats::specificInfos() const

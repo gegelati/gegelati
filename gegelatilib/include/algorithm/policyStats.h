@@ -101,7 +101,7 @@ namespace Algorithm {
          * A Team may appear several time in a single policy, but only its
          * "lowest" level is counted here.
          */
-        std::map<size_t, size_t> nbVertexPerDepthLevel;
+        std::map<size_t, std::set<std::reference_wrapper<const EvoGraph::Vertex>>> vertexPerDepthLevel;
 
         /// Number of distinct Teams per policy.
         size_t nbDistinctTeams = 0;
@@ -146,7 +146,7 @@ namespace Algorithm {
          * 
          * Also it analyze program of outgoing edge and program inside the vertex.
          */
-        virtual void analyzeVertex(const EvoGraph::Vertex& vertex);
+        virtual void analyzeVertex(const EvoGraph::Vertex& vertex, size_t depth);
 
         /**
          * Analyze the given Team.

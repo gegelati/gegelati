@@ -43,7 +43,7 @@ void Algorithm::PolicyStats::clear()
 {
     this->maxPolicyDepth = 0;
     this->nbDistinctTeams = 0;
-    this->nbVertexPerDepthLevel.clear();
+    this->vertexPerDepthLevel.clear();
     this->nbUsagePerActionID.clear();
     this->nbUsePerTeam.clear();
     this->nbUsePerAction.clear();
@@ -58,7 +58,7 @@ Algorithm::PolicyStats& Algorithm::PolicyStats::getSubPolicyStats(const std::str
     return *it->second;
 }
 
-void Algorithm::PolicyStats::analyzeVertex(const EvoGraph::Vertex& vertex)
+void Algorithm::PolicyStats::analyzeVertex(const EvoGraph::Vertex& vertex, size_t depth)
 {
     if (auto team = dynamic_cast<const EvoGraph::Team*>(&vertex)) {
         this->analyzeTeam(*team);
@@ -67,11 +67,22 @@ void Algorithm::PolicyStats::analyzeVertex(const EvoGraph::Vertex& vertex)
         this->analyzeAction(*action);
     }
 
+    if(this->vertexPerDepthLevel.size() == depth){
+        this->vertexPerDepthLevel.insert({depth, {}});
+    }
+    this->vertexPerDepthLevel.at(depth).insert(vertex);
+
+    if(auto lock = vertex.getProgram().lock()) {
+        // Get the corresponding sub policy stats and analyze the policy of the program.
+        this->getSubPolicyStats(lock->getAlgorithmName()).analyzePolicy(*lock);
+    }
+
     for(auto edge : vertex.getOutgoingEdges()) {
         if(auto lock = edge->getProgram().lock()) {
             // Get the corresponding sub policy stats and analyze the policy of the program.
             this->getSubPolicyStats(lock->getAlgorithmName()).analyzePolicy(*lock);
         }
+        this->analyzeVertex(*edge->getDestination(), depth + 1);
     }
 }
 
@@ -94,6 +105,7 @@ void Algorithm::PolicyStats::analyzeAction(const EvoGraph::Action& action)
 std::map<std::string, std::reference_wrapper<const Algorithm::PolicyStats>> Algorithm::PolicyStats::getAllSubPolicyStats() const
 {
     std::map<std::string, std::reference_wrapper<const PolicyStats>> allSubPolicyStats;
+    allSubPolicyStats.insert({this->algorithmName, *this});
     std::vector<std::reference_wrapper<const PolicyStats>> toVisit = {*this};
     while(!toVisit.empty()){
         const PolicyStats& current = toVisit.back();
@@ -122,8 +134,8 @@ std::ostream& Algorithm::operator<<(std::ostream& os,
 
     os << "Stages\t\t" << policyStats.maxPolicyDepth << std::endl;
     os << "Vertex/stage:\t";
-    for (auto& nbVertexPerStage : policyStats.nbVertexPerDepthLevel) {
-        os << "{" << nbVertexPerStage.first << "," << nbVertexPerStage.second
+    for (auto& vertexPerStage : policyStats.vertexPerDepthLevel) {
+        os << "{" << vertexPerStage.first << "," << vertexPerStage.second.size()
            << "} ";
     }
     os << std::endl;
