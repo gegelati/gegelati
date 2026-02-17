@@ -67,7 +67,7 @@ namespace EvoGraph {
          *            edge.
          */
         Edge(std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
-                const std::weak_ptr<const Algorithm::Agent> agentProgram = std::weak_ptr<const Algorithm::Agent>())
+                std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt)
             : Element(agentProgram), edgeID(incrementeCounter()), source{src}, destination{dest} {};
 
         /**

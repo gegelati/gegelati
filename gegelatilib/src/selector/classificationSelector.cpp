@@ -12,7 +12,7 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::ClassificationSelector::
 void Selector::ClassificationSelector::doSelection(
     std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::weak_ptr<const Algorithm::Agent>>& results,
+                  std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
     // Check that results are ClassificationSelectionMetrics is used.
@@ -46,12 +46,12 @@ void Selector::ClassificationSelector::doSelection(
     for (uint64_t classIdx = 0; classIdx < this->nbActions; classIdx++) {
         // Fill a map with the agents and the score of the specific class as
         // ID.
-        std::multimap<double, std::weak_ptr<const Algorithm::Agent>> sortedAgent;
+        std::multimap<double, std::reference_wrapper<const Algorithm::Agent>> sortedAgent;
         std::for_each(
             results.begin(), results.end(),
             [&sortedAgent, &classIdx](
                 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                                std::weak_ptr<const Algorithm::Agent>>& res) {
+                                std::reference_wrapper<const Algorithm::Agent>>& res) {
                 sortedAgent.emplace(((ClassificationSelectionMetrics*)res.first
                                         ->getSelectionMetrics()
                                         .get())
@@ -65,12 +65,12 @@ void Selector::ClassificationSelector::doSelection(
         auto iterator = sortedAgent.rbegin();
         for (auto i = 0; i < nbAgentsKeptPerClass; i++) {
             // If the agent is not already marked to be kept
-            auto lockedAgent = iterator->second.lock();
+            const Algorithm::Agent& agent = iterator->second;
             if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
-                [&lockedAgent](const std::reference_wrapper<const Algorithm::Agent>& agent) {
-                    return &agent.get() == lockedAgent.get();
+                [&agent](const std::reference_wrapper<const Algorithm::Agent>& agentToKeep) {
+                    return agent == agentToKeep.get();
                 }) == agentsToKeep.end()) {
-                agentsToKeep.push_back(*iterator->second.lock());
+                agentsToKeep.push_back(iterator->second);
             }
             // Advance the iterator no matter what.
             iterator++;
@@ -80,12 +80,12 @@ void Selector::ClassificationSelector::doSelection(
     auto iterator2 = results.rbegin();
     while (agentsToKeep.size() < nbAgentsToKeep && iterator2 != results.rend()) {
         // If the agent is not already marked to be kept
-        auto lockedAgent = iterator2->second.lock();
+        const Algorithm::Agent& lockedAgent = iterator2->second;
         if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
             [&lockedAgent](const std::reference_wrapper<const Algorithm::Agent>& agent) {
-                return &agent.get() == lockedAgent.get();
+                return agent.get() == lockedAgent;
             }) == agentsToKeep.end()) {
-            agentsToKeep.push_back(*iterator2->second.lock());
+            agentsToKeep.push_back(iterator2->second);
         }
         // Advance the iterator no matter what.
         iterator2++;
@@ -101,24 +101,23 @@ void Selector::ClassificationSelector::doSelection(
     std::for_each(
         allAgents.begin(), allAgents.end(),
         [&agentsToKeep, &graphRef, &resultsPerAgentRef, &managerRef,
-         &results](std::weak_ptr<const Algorithm::Agent> curragent) {
+         &results](std::reference_wrapper<const Algorithm::Agent> curragent) {
 
-            auto lockedAgent = curragent.lock();
             if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
-                [&lockedAgent](const std::reference_wrapper<const Algorithm::Agent>& agent) {
-                    return &agent.get() == lockedAgent.get();
+                [&curragent](const std::reference_wrapper<const Algorithm::Agent>& agent) {
+                    return agent.get() == curragent.get();
                 }) == agentsToKeep.end()) {
-                managerRef->deleteAgent(*curragent.lock(), graphRef);
+                managerRef->deleteAgent(curragent, graphRef);
 
                 // Keep only results of non-decimated agents.
-                resultsPerAgentRef.erase(*curragent.lock());
+                resultsPerAgentRef.erase(curragent);
 
                 // Update results also
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                              std::weak_ptr<const Algorithm::Agent>>::iterator iter =
+                              std::reference_wrapper<const Algorithm::Agent>>::iterator iter =
                     results.begin();
                 while (iter != results.end()) {
-                    if (iter->second.lock() == curragent.lock()) {
+                    if (iter->second == curragent) {
                         results.erase(iter);
                         break;
                     }

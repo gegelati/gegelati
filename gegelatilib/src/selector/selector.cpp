@@ -5,7 +5,7 @@
 void Selector::Selector::doSelection(
     std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::weak_ptr<const Algorithm::Agent>>& results,
+                  std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
     throw std::runtime_error(
@@ -21,15 +21,15 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::
 
 void Selector::Selector::keepBestPolicy(std::shared_ptr<EvoGraph::Graph> graph)
 {
-    auto bestAgentVertex = this->bestAgent.first.lock();
+    auto bestAgentVertex = this->bestAgent.first;
     if (bestAgentVertex && this->manager->containsAgent(*bestAgentVertex)) {
 
         // Remove all but the best agent from the graph
         while (this->manager->getAgents().size() != 1) {
             auto agents = this->manager->getAgents();
-            for (auto agent : agents) {
-                if (agent.lock() != bestAgentVertex) {
-                    this->manager->deleteAgent(*agent.lock(), graph);
+            for (const Algorithm::Agent& agent : agents) {
+                if (agent != bestAgentVertex.value()) {
+                    this->manager->deleteAgent(agent, graph);
                 }
             }
         }
@@ -38,7 +38,7 @@ void Selector::Selector::keepBestPolicy(std::shared_ptr<EvoGraph::Graph> graph)
 
 void Selector::Selector::updateEvaluationRecords(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::weak_ptr<const Algorithm::Agent>>& results)
+                        std::reference_wrapper<const Algorithm::Agent>>& results)
 {
     // Update resultsPerAgent
     this->updateResultsPerAgent(results);
@@ -49,19 +49,13 @@ void Selector::Selector::updateEvaluationRecords(
 
 void Selector::Selector::updateResultsPerAgent(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::weak_ptr<const Algorithm::Agent>>& results)
+                        std::reference_wrapper<const Algorithm::Agent>>& results)
 {
-    for (auto result : results) {
-        if(result.second.lock()->getAlgorithmName() != this->manager->getAlgorithmName()){
-            std::cout << "Expected: "
-                      << this->manager->getAlgorithmName()
-                      << " - recieved: " << result.second.lock()->getAlgorithmName()
-                      << std::endl;
-        }
-        auto mapIterator = this->resultsPerAgent.find(*result.second.lock());
+    for (const auto& result : results) {
+        auto mapIterator = this->resultsPerAgent.find(result.second);
         if (mapIterator == this->resultsPerAgent.end()) {
             // First time this agent is evaluated
-            this->resultsPerAgent.emplace(*result.second.lock().get(), result.first);
+            this->resultsPerAgent.emplace(result.second, result.first);
         }
         else if (result.first != mapIterator->second) {
             // This agent has already been evaluated.
@@ -72,7 +66,7 @@ void Selector::Selector::updateResultsPerAgent(
             mapIterator->second = result.first;
             // If the received result is associated to the current bestAgent,
             // update it.
-            if (result.second.lock() == this->bestAgent.first.lock()) {
+            if (result.second == *this->bestAgent.first) {
                 this->bestAgent.second = result.first;
             }
         }
@@ -81,24 +75,24 @@ void Selector::Selector::updateResultsPerAgent(
 
 void Selector::Selector::updateBestAgent(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                        std::weak_ptr<const Algorithm::Agent>>& results)
+                        std::reference_wrapper<const Algorithm::Agent>>& results)
 {
     auto iterator = --results.end();
     const std::shared_ptr<Learn::EvaluationResult> evaluation = iterator->first;
-    std::weak_ptr<const Algorithm::Agent> candidate = iterator->second;
+    const Algorithm::Agent& candidate = iterator->second;
     // Test the three replacement cases
     // from the simpler to the most complex to test
-    if (this->bestAgent.first.expired()         // NULL case
+    if (this->bestAgent.first         // NULL case
         || *this->bestAgent.second < *evaluation // new high-score case
         ||
-        !this->manager->containsAgent(*this->bestAgent.first.lock()) // bestAgent disappearance
+        !this->manager->containsAgent(*this->bestAgent.first) // bestAgent disappearance
     ) {
         // Replace the best agent
         this->bestAgent = {candidate, evaluation};
     }
 }
 
-const std::pair<std::weak_ptr<const Algorithm::Agent>,
+const std::pair<std::optional<std::reference_wrapper<const Algorithm::Agent>>,
                 std::shared_ptr<Learn::EvaluationResult>>&
 Selector::Selector::getBestAgent() const
 {
@@ -108,7 +102,7 @@ Selector::Selector::getBestAgent() const
 void Selector::Selector::forgetPreviousResults()
 {
     this->resultsPerAgent.clear();
-    this->bestAgent.first = std::weak_ptr<const Algorithm::Agent>();
+    this->bestAgent.first = std::nullopt;
     this->bestAgent.second = nullptr;
 }
 
@@ -125,11 +119,9 @@ std::unique_ptr<Selector::SelectionContext> Selector::Selector::updateContext() 
     // Insert all agents, but only the reference of weak pointer with lock available
     // manager->getAgents returns a vector of weak pointer, but the context should only have reference to the agent, not the weak pointer itself, to avoid confusion in the mutation process where the weak pointer can be lock and unlock several times. Hence we insert the reference of the lock of the weak pointer in the context, but we do not insert the weak pointer itself.
     
-    for (const auto& weakPtr : this->manager->getAgents()) {
-        if (auto agentPtr = weakPtr.lock()) { 
-            context->agentsClonable.push_back(*agentPtr); 
-            context->preExistingAgents.push_back(*agentPtr);
-        } 
+    for (const Algorithm::Agent& agent : this->manager->getAgents()) {
+        context->agentsClonable.push_back(agent); 
+        context->preExistingAgents.push_back(agent);
     }
     
     context->nbAgentsToCreate =
@@ -141,12 +133,12 @@ std::unique_ptr<Selector::SelectionContext> Selector::Selector::updateContext() 
 
 
 bool Selector::Selector::isAgentEvalSkipped(
-    std::weak_ptr<const Algorithm::Agent> agent,
+    const Algorithm::Agent& agent,
     std::shared_ptr<Learn::EvaluationResult>& previousResult) const
 {
     // Has the root already been evaluated more times than
     // params.maxNbEvaluationPerPolicy
-    const auto& iter = this->resultsPerAgent.find(*agent.lock());
+    const auto& iter = this->resultsPerAgent.find(agent);
     if (iter != this->resultsPerAgent.end()) {
         // The root has already been evaluated
         previousResult = iter->second;

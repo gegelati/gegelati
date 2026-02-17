@@ -74,7 +74,7 @@ void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, std
 
 void Algorithm::LGP::LGPMutator::crossoverAgents(
     std::vector<std::reference_wrapper<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, 
-    std::shared_ptr<AgentManager> manager, std::vector<std::weak_ptr<const Agent>>& newSubAgents, 
+    std::shared_ptr<AgentManager> manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, 
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     // Casted agent 1 and 2
@@ -175,7 +175,7 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
 }
 
 void Algorithm::LGP::LGPMutator::mutateAgent(
-    const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::weak_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     auto lgpManager = std::dynamic_pointer_cast<LGPManager>(manager);
     if(lgpManager == nullptr){

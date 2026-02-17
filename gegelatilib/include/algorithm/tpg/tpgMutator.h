@@ -51,7 +51,7 @@ namespace Algorithm::TPG {
             std::shared_ptr<EvoGraph::Graph> graph,
             std::vector<std::shared_ptr<const EvoGraph::Vertex>> leafVertices,
             std::vector<std::shared_ptr<const EvoGraph::Vertex>> rootVertices,
-            std::vector<std::weak_ptr<const Agent>> programAgent,
+            std::vector<std::reference_wrapper<const Agent>> programAgent,
             const Learn::LearningParameters& params, RNG::RNG& rng);
 
     public:
@@ -208,7 +208,7 @@ namespace Algorithm::TPG {
         virtual void mutateOutgoingEdge(
             std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
             std::shared_ptr<AgentManager> manager,
-            std::vector<std::weak_ptr<const Agent>>& newSubAgents,
+            std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
             const Learn::LearningParameters& params, RNG::RNG& rng);
 
         /**
@@ -222,7 +222,7 @@ namespace Algorithm::TPG {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::weak_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) override;
 
         
@@ -237,7 +237,7 @@ namespace Algorithm::TPG {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateProgramAgentAgainstArchive(
-            std::weak_ptr<const Agent> programAgent, std::shared_ptr<EvoGraph::Graph> graph, 
+            const Agent& programAgent, std::shared_ptr<EvoGraph::Graph> graph, 
             std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
             RNG::RNG& rng);
 
@@ -245,7 +245,7 @@ namespace Algorithm::TPG {
          * \brief Specialization of mutateSubAgents method.
          */
         virtual void mutateSubAgents(
-            std::vector<std::weak_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
+            std::vector<std::reference_wrapper<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
             std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
             RNG::RNG& rng, uint64_t maxNbThreads) override;
 

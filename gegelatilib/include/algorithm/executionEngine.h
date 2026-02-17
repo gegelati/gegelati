@@ -62,7 +62,7 @@ namespace Algorithm {
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(std::weak_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{*executedAgent.lock()}, outputs{outputs}, algorithmName{executedAgent.lock()->getAlgorithmName()}, isTraining{isTraining} {}
+        ExecutionEngine(const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{executedAgent}, outputs{outputs}, algorithmName{executedAgent.getAlgorithmName()}, isTraining{isTraining} {}
 
         /**
          * \brief setter for the isTraining attribute. 

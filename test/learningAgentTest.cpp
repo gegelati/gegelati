@@ -306,7 +306,7 @@ TEST_F(LearningAgentTest, EvalAllRoots)
 
     la.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::weak_ptr<const Algorithm::Agent>>
+                  std::reference_wrapper<const Algorithm::Agent>>
         result;
     ASSERT_NO_THROW(result =
                         la.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
@@ -357,7 +357,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
            "Graph.";
 
     // Check that bestRoot has been set
-    ASSERT_FALSE(tpg->getSelector()->getBestAgent().first.expired())
+    ASSERT_NE(tpg->getSelector()->getBestAgent().first, std::nullopt)
         << "Best root should be set after a trainOneGeneration iteration.";
 
     o.close();
@@ -1087,7 +1087,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::weak_ptr<const Algorithm::Agent>>
+                  std::reference_wrapper<const Algorithm::Agent>>
         result;
     ASSERT_NO_THROW(result =
                         pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
@@ -1110,7 +1110,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::weak_ptr<const Algorithm::Agent>>
+                  std::reference_wrapper<const Algorithm::Agent>>
         result;
     ASSERT_NO_THROW(result =
                         pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
@@ -1172,8 +1172,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     }
 
     // Check determinism of bestAgent score
-    ASSERT_EQ(tpgLa->getSelector()->getBestAgent().first.lock(),
-              tpgParallel->getSelector()->getBestAgent().first.lock());
+    ASSERT_EQ(tpgLa->getSelector()->getBestAgent().first,
+              tpgParallel->getSelector()->getBestAgent().first);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
@@ -1212,8 +1212,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     }
 
     // Check determinism of bestAgent score
-    ASSERT_EQ(tpgSequential->getSelector()->getBestAgent().first.lock(),
-              tpgParallel->getSelector()->getBestAgent().first.lock());
+    ASSERT_EQ(tpgSequential->getSelector()->getBestAgent().first,
+              tpgParallel->getSelector()->getBestAgent().first);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)
@@ -1352,7 +1352,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
            "Graph.";
 
     // Check that bestRoot has been set
-    ASSERT_FALSE(tpg->getSelector()->getBestAgent().first.expired())
+    ASSERT_NE(tpg->getSelector()->getBestAgent().first, std::nullopt)
         << "Best root should not be expired after training one generation.";
 }
 

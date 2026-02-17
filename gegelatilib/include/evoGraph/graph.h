@@ -130,7 +130,7 @@ namespace EvoGraph {
          *
          * \return a const reference to the newly created Team.
          */
-        std::shared_ptr<const EvoGraph::Team> addNewTeam(std::weak_ptr<const Algorithm::Agent> programAgent = std::weak_ptr<const Algorithm::Agent>());
+        std::shared_ptr<const EvoGraph::Team> addNewTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt);
 
         /**
          * \brief Create a new Action and add it to the vertices of the
@@ -145,7 +145,7 @@ namespace EvoGraph {
          * 
          * \return a const reference to the newly created Action.
          */
-        std::shared_ptr<const EvoGraph::Action> addNewAction(uint64_t actionID, std::weak_ptr<const Algorithm::Agent> programAgent = std::weak_ptr<const Algorithm::Agent>());
+        std::shared_ptr<const EvoGraph::Action> addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt);
 
 
         /**
@@ -296,7 +296,7 @@ namespace EvoGraph {
          *							destination is a Action.
          */
         std::shared_ptr<const EvoGraph::Edge> addNewEdge(const Vertex& src, const Vertex& dest,
-                                  std::weak_ptr<const Algorithm::Agent> programAgent);
+                                  const Algorithm::Agent& programAgent);
 
 
         /**
@@ -326,7 +326,7 @@ namespace EvoGraph {
          * \param[in] vertex a const reference to the modified Vertex.
          * \param[in] programAgent weak pointer to the Agent Program to set to the vertex
          */
-        void setVertexProgram(const Vertex& vertex, std::weak_ptr<const Algorithm::Agent> programAgent);
+        void setVertexProgram(const Vertex& vertex, const Algorithm::Agent& programAgent);
 
         /**
          * Duplicate a Edge from the Graph.
@@ -375,7 +375,7 @@ namespace EvoGraph {
          * \param[in] programAgent shared pointer to the Agent Program to set to the edge.
          * \return true if the given edge is part of the graph, and
          */
-        bool setEdgeProgram(const Edge& edge, std::weak_ptr<const Algorithm::Agent> programAgent);
+        bool setEdgeProgram(const Edge& edge, const Algorithm::Agent& programAgent);
 
 
         /**

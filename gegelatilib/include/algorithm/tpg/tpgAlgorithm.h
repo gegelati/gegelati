@@ -102,7 +102,7 @@ namespace Algorithm::TPG {
              *
              * \return A job representing the agent.
              */
-            virtual std::shared_ptr<Job> createJob(std::weak_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const override;
+            virtual std::shared_ptr<Job> createJob(const Agent& agent, Learn::LearningMode mode, RNG::RNG& rng, int idx = 0) const override;
 
             /**
              * \brief Inherited method to create the policy stats of the algorithm

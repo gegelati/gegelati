@@ -48,7 +48,7 @@ namespace Algorithm {
              * 
              * \return a shared pointer to the created Agent.
              */
-            virtual std::weak_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual const Agent& createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
 
             /**
              * \brief Copy a LGPAgent.
@@ -58,7 +58,7 @@ namespace Algorithm {
              * 
              * \return a shared pointer to the created Agent.
              */
-            virtual std::weak_ptr<const Agent> copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual const Agent& copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
 
             /**
              * \brief Empty a LGPAgent of its program.

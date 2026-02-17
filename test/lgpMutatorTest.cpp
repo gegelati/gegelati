@@ -25,7 +25,7 @@ class LgpMutatorTest : public ::testing::Test
     Output::OutputHandler* lgpOutput;
     Selector::Selector* selector;
     std::shared_ptr<Algorithm::LGP::LGPManager> lgpManager;
-    std::weak_ptr<const Algorithm::Agent> agent;
+    const Algorithm::Agent* agent;
     const Algorithm::LGP::LGPAgent* lgpAgent;
     std::shared_ptr<Algorithm::LGP::LGPMutator> lgpMutator;
 
@@ -61,13 +61,15 @@ class LgpMutatorTest : public ::testing::Test
         lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(e, *lgpOutput);
         lgpManager->setAlgorithmName("fake");
 
-        agent = lgpManager->createAgent(graph);
-        lgpAgent = dynamic_cast<const Algorithm::LGP::LGPAgent*>(agent.lock().get());
+        agent = &lgpManager->createAgent(graph);
+        lgpAgent = dynamic_cast<const Algorithm::LGP::LGPAgent*>(agent);
         lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>(*selector);
     }
 
     virtual void TearDown()
     {
+        delete agent;
+        delete lgpAgent;
         delete (&(vect.at(0).get()));
         delete (&(vect.at(1).get()));
         delete (&set.getInstruction(0));
@@ -205,7 +207,7 @@ TEST_F(LgpMutatorTest, LGPMutatorInitAgent)
 
     std::shared_ptr<EvoGraph::Graph> graph = std::make_shared<EvoGraph::Graph>();
 
-    ASSERT_NO_THROW(lgpAgent = dynamic_cast<const Algorithm::LGP::LGPAgent*>(lgpMutator->initRandomAgent(graph, lgpManager, params, rng).lock().get()))
+    ASSERT_NO_THROW(lgpAgent = dynamic_cast<const Algorithm::LGP::LGPAgent*>(&lgpMutator->initRandomAgent(graph, lgpManager, params, rng)))
         << "Empty LGP Random init failed";
     ASSERT_EQ(lgpAgent->getNbLines(), 15)
         << "Random number of line is not as expected (with known seed).";
@@ -240,7 +242,7 @@ TEST_F(LgpMutatorTest, LGPMutatorMutateBehavior)
         [](const double a, const double b, const double c) -> double {
             return (cos(a + b + c));
         })));
-    const Algorithm::LGP::LGPAgent& lgpAgent2 = *dynamic_cast<const Algorithm::LGP::LGPAgent*>(lgpManager->createAgent(graph).lock().get());
+    const Algorithm::LGP::LGPAgent& lgpAgent2 = *dynamic_cast<const Algorithm::LGP::LGPAgent*>(&lgpManager->createAgent(graph));
 
     Algorithm::LGP::LGPLineMutator lineMutator;
     Selector::SelectionContext context;

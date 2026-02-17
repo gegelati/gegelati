@@ -38,7 +38,7 @@ namespace Algorithm::Maple {
         /**
          * \brief Get the current agents used by the algorithm.
          */
-        virtual const std::vector<std::weak_ptr<const Agent>> getAgents() const override;
+        virtual const std::vector<std::reference_wrapper<const Agent>> getAgents() const override;
 
         /**
          * \brief Create a new MapleAgent on a specific vertex.
@@ -47,7 +47,7 @@ namespace Algorithm::Maple {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::weak_ptr<const Agent> createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex) override;
+        virtual const Agent& createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex) override;
 
         /**
          * \brief create and return a Maple execution engine.

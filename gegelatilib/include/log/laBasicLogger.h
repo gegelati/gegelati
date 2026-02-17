@@ -67,7 +67,7 @@ namespace Log {
          * (min, avg max).
          */
         void logResults(std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                      std::weak_ptr<const Algorithm::Agent>>& results);
+                                      std::reference_wrapper<const Algorithm::Agent>>& results);
 
       public:
         /**
@@ -124,7 +124,7 @@ namespace Log {
          */
         virtual void logAfterEvaluate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::weak_ptr<const Algorithm::Agent>>& results) override;
+                          std::reference_wrapper<const Algorithm::Agent>>& results) override;
 
         /**
          * Inherited via LaLogger.
@@ -145,7 +145,7 @@ namespace Log {
          */
         virtual void logAfterValidate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::weak_ptr<const Algorithm::Agent>>& results) override;
+                          std::reference_wrapper<const Algorithm::Agent>>& results) override;
 
         /**
          * Inherited via LaLogger

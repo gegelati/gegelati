@@ -56,10 +56,9 @@ void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_
     tpgMutator->setProgramAlgorithmName(this->programAlgorithmName);
 }
 
-std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(std::weak_ptr<const Agent> agent, Learn::LearningMode mode, RNG::RNG& rng, int idx) const
+std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(const Agent& agent, Learn::LearningMode mode, RNG::RNG& rng, int idx) const
 {
-    auto locker = agent.lock();
-    if(!locker || !this->containsAgent(*locker)){
+    if(!this->containsAgent(agent)){
         throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with a null agent or an agent not belonging to this algorithm.");
     }
 
@@ -152,9 +151,8 @@ std::map<std::string, std::set<std::reference_wrapper<const Algorithm::Agent>>> 
     usedSubAgents[this->programAlgorithmName] = std::set<std::reference_wrapper<const Agent>>();
 
     for(auto edge: this->graph->getEdges()){
-        auto locked = edge->getProgram().lock();
-        if(locked && locked->getAlgorithmName() == this->programAlgorithmName){
-            usedSubAgents[this->programAlgorithmName].insert(*locked);
+        if(edge->getProgram().getAlgorithmName() == this->programAlgorithmName){
+            usedSubAgents[this->programAlgorithmName].insert(edge->getProgram());
         }
     }
     return usedSubAgents;

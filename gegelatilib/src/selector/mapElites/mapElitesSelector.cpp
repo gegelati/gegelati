@@ -79,7 +79,7 @@ std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::
 void Selector::MapElites::MapElitesSelector::doSelection(
     std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::weak_ptr<const Algorithm::Agent>>& results,
+                  std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
 
@@ -101,7 +101,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
         std::shared_ptr<const MapElitesDescriptor> descriptor = pair.first;
         std::shared_ptr<MapElitesArchive> mapEliteArchive = pair.second;
 
-        std::vector<std::weak_ptr<const Algorithm::Agent>> verticesToDelete;
+        std::vector<std::reference_wrapper<const Algorithm::Agent>> verticesToDelete;
 
         size_t numberNewValues = 0;
 
@@ -114,27 +114,25 @@ void Selector::MapElites::MapElitesSelector::doSelection(
                 throw std::runtime_error("SelectionMetrics should be castable "
                                          "to MapElitesSelectionMetrics");
             }
-            std::weak_ptr<const Algorithm::Agent> agent = it->second;
+            const Algorithm::Agent& agent = it->second;
       
             std::vector<double> descriptorUsed(
                 metrics->getMapDescriptors().at(descriptor));  
 
             // Get the saved evaluation and agent
-            const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                            std::weak_ptr<const Algorithm::Agent>>& pairSaved =
+            const auto& pairSaved =
                 mapEliteArchive->getArchiveFromDescriptors(descriptorUsed);
 
             // The value saved in the archive is better than the current agent
             // There is also a verification that the agent is not the same
-            auto lockSavedAgent = pairSaved.second.lock();
-            if (!lockSavedAgent && lockSavedAgent != agent.lock() &&
+            if (!pairSaved.second && *pairSaved.second != agent &&
                 pairSaved.first->getSelectionMetrics()->getScore() >=
                     metrics->getScore()) {
                 // Nothing happened
 
             }
             // The current agent is better than the values saved
-            else if (lockSavedAgent != agent.lock()) {
+            else if (*pairSaved.second != agent) {
                 numberNewValues++;
 
                 // Saving
@@ -154,8 +152,8 @@ void Selector::MapElites::MapElitesSelector::doSelection(
         }
 
         if (!containAgent) {
-            this->resultsPerAgent.erase(*it->second.lock());
-            this->manager->deleteAgent(*it->second.lock(), graph);
+            this->resultsPerAgent.erase(it->second);
+            this->manager->deleteAgent(it->second, graph);
             it = results.erase(it); // erase returns next iterator
         }
         else {

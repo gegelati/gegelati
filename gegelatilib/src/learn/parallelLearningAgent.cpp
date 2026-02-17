@@ -49,7 +49,7 @@
 #include "learn/parallelLearningAgent.h"
 
 
-std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>
+std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
 Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
                                                Learn::LearningMode mode)
 {
@@ -62,7 +62,7 @@ Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generation
         throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: The learning agent does not contain the given algorithm.");
     }
 
-    std::multimap<std::shared_ptr<EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
         results;
 
         
@@ -146,7 +146,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
 
 void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
     std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
-    std::multimap<std::shared_ptr<EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>&
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>&
         results)
 {
     // Create Map for results
@@ -192,7 +192,7 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
 void Learn::ParallelLearningAgent::evaluateAgentsInParallelCompileResults(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Algorithm::Job>>>& resultsPerJobMap,
-    std::multimap<std::shared_ptr<EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>&
+    std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>&
         results)
 {
     // Merge the results

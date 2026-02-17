@@ -5,7 +5,7 @@
 void Selector::TruncationSelector::doSelection(
     std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::weak_ptr<const Algorithm::Agent>>& results,
+                  std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
     // Some actions may be encountered but not removed while scanning the
@@ -13,7 +13,7 @@ void Selector::TruncationSelector::doSelection(
     // method.
     // Teams and actions are not removed also if there is 1% of teams or actions
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::weak_ptr<const Algorithm::Agent>>
+                  std::reference_wrapper<const Algorithm::Agent>>
         preservedAgents;
 
     // Estimate the number of expected agents to delete
@@ -25,7 +25,7 @@ void Selector::TruncationSelector::doSelection(
     while (i < nbExpectedAgents && results.size() > 0) {
 
         // If the agent is an action, do not remove it in discrete environment!
-        const Algorithm::Agent& agent = *results.begin()->second.lock();
+        const Algorithm::Agent& agent = results.begin()->second;
 
         // Removed stored result (if any)
         this->manager->deleteAgent(agent, graph);

@@ -40,3 +40,12 @@ bool Algorithm::operator<(const Algorithm::Agent& a, const Algorithm::Agent& b)
 {
     return a.getAgentID() < b.getAgentID();
 }
+
+bool Algorithm::operator==(const Algorithm::Agent& a, const Algorithm::Agent& b)
+{
+    return a.getAgentID() == b.getAgentID();
+}
+bool Algorithm::operator!=(const Algorithm::Agent& a, const Algorithm::Agent& b)
+{
+    return a.getAgentID() != b.getAgentID();
+}

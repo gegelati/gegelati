@@ -99,7 +99,7 @@ namespace Algorithm::LGP {
          */
         template <class T>
         LGPExecutionEngine(
-            std::shared_ptr<const LGPAgent> executedAgent, 
+            const LGPAgent& executedAgent, 
             const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
             : LGPEngine(executedAgent, dataSrc, isTraining){};
 
@@ -113,7 +113,7 @@ namespace Algorithm::LGP {
          * generated.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPExecutionEngine(std::shared_ptr<const LGPAgent> executedAgent, bool isTraining = false)
+        LGPExecutionEngine(const LGPAgent& executedAgent, bool isTraining = false)
             : LGPEngine(executedAgent, isTraining){};
 
         /**

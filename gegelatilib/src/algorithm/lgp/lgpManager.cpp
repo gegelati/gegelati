@@ -6,19 +6,19 @@ std::shared_ptr<Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::getLGPAgen
     return std::dynamic_pointer_cast<LGPAgent>(this->getAgentFromCst(agent));
 }
 
-std::weak_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
+const Algorithm::Agent& Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
     this->agents.insert(std::make_shared<LGPAgent>(this->env, this->outputs, this->getAlgorithmName()));
-    return *this->agents.rbegin();
+    return **this->agents.rbegin();
 }
 
-std::weak_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+const Algorithm::Agent& Algorithm::LGP::LGPManager::copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
     const LGPAgent* castedAgent = dynamic_cast<const LGPAgent*>(&agent);
     if(castedAgent == nullptr){
         throw std::runtime_error("Algorithm::LGP::LGPManager::copyAgent: trying to copy an agent that is not a LGPAgent.");
     }
-    auto newAgent = this->getLGPAgentFromCst(*this->createAgent(graph).lock());
+    auto newAgent = this->getLGPAgentFromCst(this->createAgent(graph));
 
     for(size_t idx = 0; idx < castedAgent->getNbLines(); idx++){
         newAgent->addNewLine(castedAgent->getLine(idx));
@@ -29,7 +29,7 @@ std::weak_ptr<const Algorithm::Agent> Algorithm::LGP::LGPManager::copyAgent(cons
     }
 
     this->identifyIntrons(*newAgent);
-    return *this->agents.rbegin();
+    return **this->agents.rbegin();
 }
 
 void Algorithm::LGP::LGPManager::emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)

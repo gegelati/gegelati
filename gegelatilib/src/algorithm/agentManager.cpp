@@ -77,12 +77,13 @@ const std::vector<std::reference_wrapper<const Algorithm::AgentManager>>& Algori
     return this->aggregatedManagers;
 }
 
-const std::vector<std::weak_ptr<const Algorithm::Agent>> Algorithm::AgentManager::getAgents() const
+const std::vector<std::reference_wrapper<const Algorithm::Agent>> Algorithm::AgentManager::getAgents() const
 {
-    return std::vector<std::weak_ptr<const Algorithm::Agent>>(
-        this->agents.begin(),
-        this->agents.end()
-    );
+    std::vector<std::reference_wrapper<const Algorithm::Agent>> refs;
+    for (const auto& ptr : agents) {
+        refs.emplace_back(std::cref(*ptr));
+    }
+    return refs;
 }
 
 void Algorithm::AgentManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)

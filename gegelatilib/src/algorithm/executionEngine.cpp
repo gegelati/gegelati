@@ -18,7 +18,7 @@ void Algorithm::ExecutionEngine::setExecutedAgent(const Agent& newExecutedAgent)
 
 void Algorithm::ExecutionEngine::setupJob(const Algorithm::Job& job)
 {
-    this->setExecutedAgent(*job.getAgent().lock());
+    this->setExecutedAgent(job.getAgent());
     
 }
 

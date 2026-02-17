@@ -42,7 +42,7 @@ uint64_t Algorithm::Job::getIdx() const
 }
 
 
-std::weak_ptr<const Algorithm::Agent> Algorithm::Job::getAgent() const
+const Algorithm::Agent& Algorithm::Job::getAgent() const
 {
     return this->agent;
 }

@@ -146,7 +146,7 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
            "known seed.";
 
     Output::OutputHandler output = Output::OutputHandler(Output::Output());
-    Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(programAgent);
+    Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent);
 
 
     ASSERT_NO_THROW(lgpExecutionEngine.execute())
@@ -158,7 +158,7 @@ TEST_F(LineMutatorTest, LineMutatorInitRandomCorrectLine1)
 TEST_F(LineMutatorTest, LineMutatorAlterLine)
 {
     RNG::RNG rng;
-    Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(programAgent);
+    Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent);
 
     // Add a 0 lines to the program
     // i=0, d=0, op0=(0,0), op1=(0,0)
@@ -252,7 +252,7 @@ TEST_F(LineMutatorTest, LineMutatorAlterLineWithCompositeOperands)
     std::shared_ptr<const Environment> e2 = std::make_shared<Environment>(set, params, vect);
     std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent2 = std::make_shared<Algorithm::LGP::LGPAgent>(e2, *lgpOutput, "fake2");
 
-    Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(programAgent2);
+    Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent2);
 
     // Add a 0 line to the program
     // i=0, d=0, op0=(0,0), op1=(0,0)

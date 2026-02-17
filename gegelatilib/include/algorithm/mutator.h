@@ -133,7 +133,7 @@ namespace Algorithm {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual std::weak_ptr<const Agent> initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng);
+        virtual const Agent& initRandomAgent(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng);
 
         
         /**
@@ -180,7 +180,7 @@ namespace Algorithm {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::vector<std::reference_wrapper<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::weak_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::vector<std::reference_wrapper<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) {};
 
         /**
@@ -194,7 +194,7 @@ namespace Algorithm {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::weak_ptr<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng) = 0;
+            const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng) = 0;
 
         /**
          * \brief mutate new sub agents of sub algorithms created during the evolution process of the current algorithm
@@ -211,7 +211,7 @@ namespace Algorithm {
          *   - `0` and `1`: Do not use parallelism.
          *   - `n > 1`: Set the number of threads explicitly.
          */
-        virtual void mutateSubAgents(std::vector<std::weak_ptr<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, uint64_t maxNbThreads) {};
+        virtual void mutateSubAgents(std::vector<std::reference_wrapper<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng, uint64_t maxNbThreads) {};
     };
 }; // namespace Mutator
 

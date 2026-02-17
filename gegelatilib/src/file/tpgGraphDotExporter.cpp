@@ -94,14 +94,14 @@ void File::GraphDotExporter::printVertex(const EvoGraph::Vertex& vertex)
 
 
         // Print the link between the vertex and its program if it has one
-        if(auto locked = vertex.getProgram().lock()){
+        if(vertex.hasProgram()){
 
             // Print the potential agent program associated to the vertex
-            this->printAgent(*locked);
+            this->printAgent(vertex.getProgram());
 
             std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(&vertex) != nullptr) ? "T" : "A";
             fprintf(pFile, "%s%s%" PRIu64 " -> P%" PRIu64 " [style=dashed]\n",
-                    this->offset.c_str(), srcLetter.c_str(), vertex.getVertexID(), locked->getAgentID());
+                    this->offset.c_str(), srcLetter.c_str(), vertex.getVertexID(), vertex.getProgram().getAgentID());
         }
 
         // Print outgoing edges
@@ -150,12 +150,12 @@ void File::GraphDotExporter::printEdge(const EvoGraph::Edge& edge)
         std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(edge.getSource().get()) != nullptr) ? "T" : "A";
         std::string destLetter = (dynamic_cast<const EvoGraph::Team*>(edge.getDestination().get()) != nullptr) ? "T" : "A";
 
-        if(auto locked = edge.getProgram().lock()){
+        if(edge.hasProgram()){
             // Print the potential agent program associated to the edge
-            this->printAgent(*locked);
+            this->printAgent(edge.getProgram());
 
             fprintf(pFile, "%s%s%" PRIu64 " -> P%" PRIu64 " -> %s%" PRIu64 "\n",
-                    this->offset.c_str(), srcLetter.c_str(), srcID, locked->getAgentID(), destLetter.c_str(), destID);
+                    this->offset.c_str(), srcLetter.c_str(), srcID, edge.getProgram().getAgentID(), destLetter.c_str(), destID);
         }
         else {
             fprintf(pFile, "%s%s%" PRIu64 " -> %s%" PRIu64 "\n",
@@ -201,10 +201,8 @@ void File::GraphDotExporter::printGraphFooter()
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
     // Main agents ids
     for(auto algorithm : this->algorithmsRef){
-        for(std::weak_ptr<const Algorithm::Agent> agent : algorithm->getManagerCst()->getAgents()){
-            if(auto agentPtr = agent.lock()){
-                fprintf(pFile, "P%" PRIu64 " ", agentPtr->getAgentID());
-            }
+        for(const Algorithm::Agent& agent : algorithm->getManagerCst()->getAgents()){
+            fprintf(pFile, "P%" PRIu64 " ", agent.getAgentID());
         }
     }
     // Action root
@@ -230,10 +228,8 @@ void File::GraphDotExporter::print()
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
     for(auto algorithm : this->algorithmsRef){
-        for(std::weak_ptr<const Algorithm::Agent> agent : algorithm->getManagerCst()->getAgents()){
-            if(auto agentPtr = agent.lock()){
-                this->printAgent(*agentPtr);
-            }
+        for(const Algorithm::Agent& agent : algorithm->getManagerCst()->getAgents()){
+            this->printAgent(agent);
         }
     }
 

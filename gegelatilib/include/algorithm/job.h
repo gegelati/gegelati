@@ -57,7 +57,7 @@ namespace Algorithm {
         /**
          * The agent contained in the job.
          */
-        std::weak_ptr<const Agent> agent;
+        const Agent& agent;
         
 
         /**
@@ -76,7 +76,7 @@ namespace Algorithm {
          * @param[in] agent The agent that will be encapsulated into the job.
          * @param[in] idx The index of this job.
          */
-        Job(std::weak_ptr<const Agent> agent,
+        Job(const Agent& agent,
             uint64_t idx = 0)
             : agent(agent), idx(idx)
         {
@@ -97,7 +97,7 @@ namespace Algorithm {
          *
          * @return The agent embedded by the job.
          */
-        virtual std::weak_ptr<const Agent> getAgent() const;
+        virtual const Agent& getAgent() const;
 
     };
 } // namespace Learn

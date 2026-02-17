@@ -2,18 +2,23 @@
 #include "evoGraph/element.h"
 
 
-std::weak_ptr<const Algorithm::Agent> EvoGraph::Element::getProgram() const
+const Algorithm::Agent& EvoGraph::Element::getProgram() const
 {
-    return this->program;
+    return *this->program;
 }
 
 void EvoGraph::Element::setProgram(
-    std::weak_ptr<const Algorithm::Agent> program)
+    const Algorithm::Agent& program)
 {
     this->program = program;
 }
 
-bool EvoGraph::Element::hasProgram()
+void EvoGraph::Element::removeProgram()
 {
-    return !this->program.expired();
+    this->program = std::nullopt;
+}
+
+bool EvoGraph::Element::hasProgram() const
+{
+    return this->program != std::nullopt;
 }

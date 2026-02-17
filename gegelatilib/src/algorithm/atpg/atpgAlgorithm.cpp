@@ -48,9 +48,8 @@ std::map<std::string, std::set<std::reference_wrapper<const Algorithm::Agent>>> 
     usedSubAgents[this->actionProgramAlgorithmName] = std::set<std::reference_wrapper<const Agent>>();
 
     for(auto vertex: this->graph->getVertices()){
-        auto locked = vertex->getProgram().lock();
-        if(locked && locked->getAlgorithmName() == this->actionProgramAlgorithmName){
-            usedSubAgents[this->actionProgramAlgorithmName].insert(*locked);
+        if(vertex->hasProgram() && vertex->getProgram().getAlgorithmName() == this->actionProgramAlgorithmName){
+            usedSubAgents[this->actionProgramAlgorithmName].insert(vertex->getProgram());
         }
     }
 

@@ -12,8 +12,7 @@ void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, std::shared_pt
         auto& edge = vertex->getOutgoingEdges().front();
 
         // Remove the program on the destination of the edge if it exist.
-        std::shared_ptr<const Algorithm::Agent> locked = edge->getDestination()->getProgram().lock();
-        if(locked && locked->getAlgorithmName() == this->actionProgramAlgorithmName && 
+        if(edge->getDestination()->hasProgram() && edge->getDestination()->getProgram().getAlgorithmName() == this->actionProgramAlgorithmName && 
            edge->getDestination()->getIncomingEdges().size() == 1) {
             // Remove action vertex from the graph because it is only used by this team and it contains an action program.
             verticesToDelete.push_back(edge->getDestination());

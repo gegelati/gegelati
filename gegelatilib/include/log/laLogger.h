@@ -195,7 +195,7 @@ namespace Log {
 
         virtual void logAfterEvaluate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::weak_ptr<const Algorithm::Agent>>& results) {
+                          std::reference_wrapper<const Algorithm::Agent>>& results) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 
@@ -215,7 +215,7 @@ namespace Log {
          */
         virtual void logAfterValidate(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::weak_ptr<const Algorithm::Agent>>& results) {
+                          std::reference_wrapper<const Algorithm::Agent>>& results) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
 

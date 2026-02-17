@@ -79,10 +79,22 @@ namespace Algorithm {
     };
     
     /**
-     * \brief Comparison function to enable sorting of Vertex with
+     * \brief Comparison function to enable sorting of Agent with
      * STL.
      */
     bool operator<(const Agent& a, const Agent& b);
+
+    /**
+     * \brief Comparison function to enable sorting of Agent with
+     * STL.
+     */
+    bool operator==(const Agent& a, const Agent& b);
+
+    /**
+     * \brief Comparison function to enable sorting of Agent with
+     * STL.
+     */
+    bool operator!=(const Agent& a, const Agent& b);
 }; // namespace Algorithm
 
 #endif

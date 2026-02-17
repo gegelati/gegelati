@@ -141,7 +141,7 @@ namespace Selector {
              * \brief Get the archive content at given descriptors
              */
             const std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                            std::weak_ptr<const Algorithm::Agent>>&
+                            std::optional<std::reference_wrapper<const Algorithm::Agent>>>&
             getArchiveFromDescriptors(
                 const std::vector<double>& descriptors) const override;
 
@@ -149,7 +149,7 @@ namespace Selector {
              * \brief Set the archive content at given descriptors
              */
             void setArchiveFromDescriptors(
-                std::weak_ptr<const Algorithm::Agent> vertex,
+                const Algorithm::Agent& agent,
                 std::shared_ptr<Learn::EvaluationResult> eval,
                 const std::vector<double>& descriptors) override;
 

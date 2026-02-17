@@ -31,7 +31,7 @@ namespace Algorithm::TPG {
              * @param[in] idx The index of this job.
              * @param[in] archive The archive associated to this job.
              */
-            TPGJob(std::weak_ptr<const Agent> agent,
+            TPGJob(const Agent& agent,
                 uint64_t idx = 0, Archive* archive = nullptr)
                 : Job(agent, idx), archive(archive)
             {

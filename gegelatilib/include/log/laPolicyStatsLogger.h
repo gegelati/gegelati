@@ -58,7 +58,7 @@ namespace Log {
          * After each evaluation, the policyStats of an agent is printed in the
          * stream only if a new agent is marked as the bestAgent.
          */
-        std::weak_ptr<const Algorithm::Agent> lastBestAgent = std::weak_ptr<const Algorithm::Agent>();
+        std::optional<std::reference_wrapper<const Algorithm::Agent>> lastBestAgent = std::nullopt;
 
         /// Number of the current generation.
         uint64_t generationNumber = 0;

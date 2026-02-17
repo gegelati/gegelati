@@ -80,7 +80,7 @@ namespace Learn {
         virtual void evaluateAgentsInParallel(
             std::queue<std::shared_ptr<Algorithm::Job>>& jobsToProcess, uint64_t generationNumber, LearningMode mode,
             std::multimap<std::shared_ptr<EvaluationResult>,
-                          std::weak_ptr<const Algorithm::Agent>>& results);
+                          std::reference_wrapper<const Algorithm::Agent>>& results);
 
         /**
          * \brief Subfunction of evaluateAllAgentsInParallel which handles the
@@ -117,7 +117,7 @@ namespace Learn {
                                          std::shared_ptr<Algorithm::Job>>>&
                 resultsPerJobMap,
             std::multimap<std::shared_ptr<EvaluationResult>,
-                          std::weak_ptr<const Algorithm::Agent>>& results);
+                          std::reference_wrapper<const Algorithm::Agent>>& results);
 
         /**
          * \brief Function implementing the behavior of slave threads during
@@ -207,7 +207,7 @@ namespace Learn {
          * evaluation.
          * 
          */
-        std::multimap<std::shared_ptr<EvaluationResult>, std::weak_ptr<const Algorithm::Agent>>
+        std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
         evaluateCurrentAlgorithmAgents(uint64_t generationNumber, LearningMode mode) override;
     };
 } // namespace Learn

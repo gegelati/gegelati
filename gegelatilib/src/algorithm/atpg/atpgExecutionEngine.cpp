@@ -19,10 +19,9 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
     std::shared_ptr<const EvoGraph::Edge> edge = nullptr;
 
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> visitedVertices;
-    std::weak_ptr<const Algorithm::Agent> currentProgram = currentVertex->getProgram();
+    std::reference_wrapper<const Algorithm::Agent> currentProgram = currentVertex->getProgram();
     // Browse the TPG until vertex with an agent of the actionProgram Algorithm name is reached
-    while (currentProgram.expired() || 
-           currentProgram.lock()->getAlgorithmName() != this->actionProgramExecutionEngine->getAlgorithmName()) {
+    while (currentProgram.get().getAlgorithmName() != this->actionProgramExecutionEngine->getAlgorithmName()) {
 
         auto teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(currentVertex);
         if(teamVertex == nullptr){
@@ -40,7 +39,7 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
     }
 
     // Set the progExecutionEngine to the program
-    this->actionProgramExecutionEngine->setExecutedAgent(*currentVertex->getProgram().lock());
+    this->actionProgramExecutionEngine->setExecutedAgent(currentVertex->getProgram());
 
     // The action algorithm should already cast the action in the wanted range. 
     return this->actionProgramExecutionEngine->execute();

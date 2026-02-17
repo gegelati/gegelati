@@ -64,13 +64,13 @@ std::vector<std::shared_ptr<const EvoGraph::Action>> Algorithm::Mutator::initAct
     return actions;
 }
 
-std::weak_ptr<const Algorithm::Agent> Algorithm::Mutator::initRandomAgent(
+const Algorithm::Agent& Algorithm::Mutator::initRandomAgent(
     std::shared_ptr<EvoGraph::Graph> graph,
     std::shared_ptr<AgentManager> manager,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    std::weak_ptr<const Algorithm::Agent> agent = manager->createAgent(graph);
-    this->initRandomSpecificAgent(*agent.lock(), graph, manager, params, rng);
+    const Algorithm::Agent& agent = manager->createAgent(graph);
+    this->initRandomSpecificAgent(agent, graph, manager, params, rng);
     return agent;
 }
 
@@ -102,7 +102,7 @@ void Algorithm::Mutator::mutatePopulation(
     }
 
     // Agents newly created during the evolution that belong to another algorithm.
-    std::vector<std::weak_ptr<const Agent>>  newSubAgents;
+    std::vector<std::reference_wrapper<const Agent>>  newSubAgents;
 
     
     // Create the new agents
@@ -115,7 +115,7 @@ void Algorithm::Mutator::mutatePopulation(
 
         std::vector<std::reference_wrapper<const Algorithm::Agent>> offsprings;
 
-        offsprings.push_back(*manager->copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph).lock());
+        offsprings.push_back(manager->copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph));
 
         // Be sure we have agents in both sub lists, and we still have at least
         // two agents to create
@@ -126,7 +126,7 @@ void Algorithm::Mutator::mutatePopulation(
                 rng.getUnsignedInt64(0, subAgentsClonable2.size() - 1);
 
             // clone the offset
-            offsprings.push_back(*manager->copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph).lock());
+            offsprings.push_back(manager->copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph));
 
             // Do the crossover over the childs
             this->crossoverAgents(offsprings, graph, manager, newSubAgents, params, rng);

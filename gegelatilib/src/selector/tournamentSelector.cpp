@@ -5,7 +5,7 @@
 void Selector::TournamentSelector::doSelection(
     std::shared_ptr<EvoGraph::Graph> graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                  std::weak_ptr<const Algorithm::Agent>>& results,
+                  std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
 {
     this->agentsToDelete.clear();
@@ -17,7 +17,7 @@ void Selector::TournamentSelector::doSelection(
 
     // Copy the first agents to remove (those at the bottom of the ranking)
     std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
-                          std::weak_ptr<const Algorithm::Agent>>>
+                          std::reference_wrapper<const Algorithm::Agent>>>
         elements;
     auto it = results.begin();
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end();
@@ -42,7 +42,7 @@ void Selector::TournamentSelector::doSelection(
         auto subrangeEnd = elements.begin() + end;
 
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                      std::weak_ptr<const Algorithm::Agent>>
+                      std::reference_wrapper<const Algorithm::Agent>>
             subMap(subrangeBegin, subrangeEnd);
 
         // Delete everything but the best
@@ -50,23 +50,21 @@ void Selector::TournamentSelector::doSelection(
             auto itWorst = subMap.begin();
 
             // Remove the vertex from the graph as well
-            this->resultsPerAgent.erase(*itWorst->second.lock());
-            this->manager->deleteAgent(*itWorst->second.lock(), graph);
+            this->resultsPerAgent.erase(itWorst->second);
+            this->manager->deleteAgent(itWorst->second, graph);
             
 
             subMap.erase(itWorst);
         }
 
         // This is a logical deletion, the vertex will be removed later
-        this->addToVerticesToDelete(*subMap.begin()->second.lock());
+        this->addToVerticesToDelete(subMap.begin()->second);
     }
 
     // Delete from results and resultsPerAgent
     auto itDel = results.begin();
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
-        if (auto locked = itDel->second.lock()) {
-            this->resultsPerAgent.erase(*locked);
-        }
+        this->resultsPerAgent.erase(itDel->second);    
         results.erase(itDel++);
     }
 }

@@ -72,15 +72,15 @@ void Algorithm::PolicyStats::analyzeVertex(const EvoGraph::Vertex& vertex, size_
     }
     this->vertexPerDepthLevel.at(depth).insert(vertex);
 
-    if(auto lock = vertex.getProgram().lock()) {
+    if(vertex.hasProgram()) {
         // Get the corresponding sub policy stats and analyze the policy of the program.
-        this->getSubPolicyStats(lock->getAlgorithmName()).analyzePolicy(*lock);
+        this->getSubPolicyStats(vertex.getProgram().getAlgorithmName()).analyzePolicy(vertex.getProgram());
     }
 
     for(auto edge : vertex.getOutgoingEdges()) {
-        if(auto lock = edge->getProgram().lock()) {
+        if(edge->hasProgram()) {
             // Get the corresponding sub policy stats and analyze the policy of the program.
-            this->getSubPolicyStats(lock->getAlgorithmName()).analyzePolicy(*lock);
+            this->getSubPolicyStats(edge->getProgram().getAlgorithmName()).analyzePolicy(edge->getProgram());
         }
         this->analyzeVertex(*edge->getDestination(), depth + 1);
     }

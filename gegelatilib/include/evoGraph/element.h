@@ -37,6 +37,7 @@
 #ifndef GRAPH_ELEMENT_H
 #define GRAPH_ELEMENT_H
 
+#include <optional>
 #include <memory>
 #include <stdexcept>
 #include <cinttypes>
@@ -66,19 +67,24 @@ namespace EvoGraph {
          *
          * \return a const weak pointer of the Agent Program of the Element.
          */
-        virtual std::weak_ptr<const Algorithm::Agent> getProgram() const;
+        virtual const Algorithm::Agent& getProgram() const;
 
         /**
          * \brief Set a new Agent Program for the Element.
          *
          * \param[in] agentProgram the new weak pointer to a Agent Program.
          */
-        virtual void setProgram(std::weak_ptr<const Algorithm::Agent> agentProgram);
+        virtual void setProgram(const Algorithm::Agent& agentProgram);
+
+        /**
+         * \brief remove the program of the agent by setting nullopt.
+         */
+        virtual void removeProgram();
 
         /**
          * \brief return true if the element has a program agent
          */
-        virtual bool hasProgram();
+        virtual bool hasProgram() const;
 
 
       protected:
@@ -89,14 +95,14 @@ namespace EvoGraph {
          * \param[in] agentProgram the shared pointer to the Agent Program associated to the
          *            Element.
          */
-        Element(const std::weak_ptr<const Algorithm::Agent> agentProgram = std::weak_ptr<const Algorithm::Agent>()) : program{agentProgram}{};
+        Element(std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt) : program{agentProgram}{};
 
 
         /// Shared pointer to the Agent to execute when evaluating the bid
         /// of this Edge.
         /// This attribute is mutable to enable its modification during
         /// mutations.
-       std::weak_ptr<const Algorithm::Agent> program;
+       std::optional<std::reference_wrapper<const Algorithm::Agent>> program;
     };
 }; // namespace EvoGraph
 

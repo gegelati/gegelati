@@ -26,9 +26,9 @@ namespace Selector {
 
         /// Pointer to the best agent encountered during training, together with
         /// its EvaluationResult.
-        std::pair<std::weak_ptr<const Algorithm::Agent>,
+        std::pair<std::optional<std::reference_wrapper<const Algorithm::Agent>>,
                   std::shared_ptr<Learn::EvaluationResult>>
-            bestAgent{std::weak_ptr<const Algorithm::Agent>(), nullptr};
+            bestAgent{std::nullopt, nullptr};
 
         /**
          * \brief Map associating agent EvoGraph::Vertex to their EvaluationResult.
@@ -83,7 +83,7 @@ namespace Selector {
         virtual void doSelection(
             std::shared_ptr<EvoGraph::Graph> graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::weak_ptr<const Algorithm::Agent>>& results,
+                          std::reference_wrapper<const Algorithm::Agent>>& results,
             RNG::RNG& rng);
 
         /**
@@ -126,7 +126,7 @@ namespace Selector {
          */
         virtual void updateEvaluationRecords(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::weak_ptr<const Algorithm::Agent>>& results);
+                                std::reference_wrapper<const Algorithm::Agent>>& results);
 
         /**
          * \brief Update the resultsPerAgent.
@@ -135,7 +135,7 @@ namespace Selector {
          */
         virtual void updateResultsPerAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::weak_ptr<const Algorithm::Agent>>& results);
+                                std::reference_wrapper<const Algorithm::Agent>>& results);
 
         /**
          * \brief Update the bestAgent attribute.
@@ -159,7 +159,7 @@ namespace Selector {
          */
         virtual void updateBestAgent(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                                std::weak_ptr<const Algorithm::Agent>>& results);
+                                std::reference_wrapper<const Algorithm::Agent>>& results);
 
 
         /**
@@ -178,7 +178,7 @@ namespace Selector {
          * otherwise.
          */
         virtual bool isAgentEvalSkipped(
-            std::weak_ptr<const Algorithm::Agent>,
+            const Algorithm::Agent&,
             std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
 
         /**
@@ -189,7 +189,7 @@ namespace Selector {
          *
          * \return a reference to the bestAgent attribute.
          */
-        virtual const std::pair<std::weak_ptr<const Algorithm::Agent>,
+        virtual const std::pair<std::optional<std::reference_wrapper<const Algorithm::Agent>>,
                                 std::shared_ptr<Learn::EvaluationResult>>&
         getBestAgent() const;
 

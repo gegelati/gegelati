@@ -60,7 +60,7 @@ namespace Algorithm {
         /**
          * \brief Get the current agents used by the algorithm.
          */
-        virtual const std::vector<std::weak_ptr<const Agent>> getAgents() const;
+        virtual const std::vector<std::reference_wrapper<const Agent>> getAgents() const;
 
         /**
          * \brief Return the outputs of the agents.
@@ -144,7 +144,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::weak_ptr<const Agent> createAgent(std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual const Agent& createAgent(std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Copy a new Agent of the type used by the current algorithm.
@@ -154,7 +154,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual std::weak_ptr<const Agent> copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual const Agent& copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
 
         /**
          * \brief Create a new Agent of the type used by the current algorithm.

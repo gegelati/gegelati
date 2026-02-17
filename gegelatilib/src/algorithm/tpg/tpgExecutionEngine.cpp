@@ -27,13 +27,13 @@ void Algorithm::TPG::TPGExecutionEngine::setupJob(const Algorithm::Job& job)
     if(this->isTraining){
         this->setArchive(*tpgJob->getArchive());
     }
-    this->setExecutedAgent(*job.getAgent().lock());
+    this->setExecutedAgent(job.getAgent());
 }
 
 double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& edge)
 {
     // Set the progExecutionEngine to the program
-    this->programExecutionEngine->setExecutedAgent(*edge.getProgram().lock());
+    this->programExecutionEngine->setExecutedAgent(edge.getProgram());
 
     // Execute the program.
     this->lastValues = this->programExecutionEngine->execute();
@@ -45,7 +45,7 @@ double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& ed
 
     // Put the result in the archive before returning it.
     if (this->isTraining && this->archive != nullptr) {
-        this->archive->addRecording(*edge.getProgram().lock(), this->programExecutionEngine->getDataSources(),
+        this->archive->addRecording(edge.getProgram(), this->programExecutionEngine->getDataSources(),
                                     result);
     }
     return result;

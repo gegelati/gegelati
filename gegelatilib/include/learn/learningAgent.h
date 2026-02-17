@@ -232,7 +232,7 @@ namespace Learn {
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              std::weak_ptr<const Algorithm::Agent>>
+                              std::reference_wrapper<const Algorithm::Agent>>
         evaluateAllAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
@@ -248,7 +248,7 @@ namespace Learn {
          * evaluation.
          */
         virtual std::multimap<std::shared_ptr<EvaluationResult>,
-                              std::weak_ptr<const Algorithm::Agent>>
+                              std::reference_wrapper<const Algorithm::Agent>>
         evaluateCurrentAlgorithmAgents(uint64_t generationNumber, LearningMode mode);
 
         /**
@@ -267,7 +267,7 @@ namespace Learn {
          */
         virtual std::shared_ptr<EvaluationResult> evaluateOneAgent(
             uint64_t generationNumber, LearningMode mode,
-            std::weak_ptr<const Algorithm::Agent> agent);
+            const Algorithm::Agent& agent);
 
         /**
          * \brief Train the Graph for one generation.
@@ -335,7 +335,7 @@ namespace Learn {
          */
         virtual void launchAlgorithmsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::weak_ptr<const Algorithm::Agent>>& results,
+                          std::reference_wrapper<const Algorithm::Agent>>& results,
             RNG::RNG& rng);
 
         /**

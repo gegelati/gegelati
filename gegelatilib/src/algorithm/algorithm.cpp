@@ -86,7 +86,7 @@ size_t Algorithm::Algorithm::getNbAgents() const
     return this->manager->getAgents().size();   
 }
 
-const std::vector<std::weak_ptr<const Algorithm::Agent>> Algorithm::Algorithm::getAgents() const
+const std::vector<std::reference_wrapper<const Algorithm::Agent>> Algorithm::Algorithm::getAgents() const
 {
     return this->manager->getAgents();
 }
@@ -164,11 +164,9 @@ void Algorithm::Algorithm::clearUnusedSubAgents() {
         subAlgorithm->clearUnusedSubAgents();
 
         auto subAlgorithmAgents = subAlgorithm->getManager()->getAgents();
-        for(std::weak_ptr<const Agent> agent: subAlgorithmAgents){
-            if(auto locked = agent.lock()){
-                if(usedSubAgents[subAlgorithm->getAlgorithmName()].find(*locked) == usedSubAgents[subAlgorithm->getAlgorithmName()].end()){
-                    subAlgorithm->manager->deleteAgent(*locked, this->graph);
-                }
+        for(const Agent& agent: subAlgorithmAgents){
+            if(usedSubAgents[subAlgorithm->getAlgorithmName()].find(agent) == usedSubAgents[subAlgorithm->getAlgorithmName()].end()){
+                subAlgorithm->manager->deleteAgent(agent, this->graph);
             }
         }
     }
@@ -176,10 +174,9 @@ void Algorithm::Algorithm::clearUnusedSubAgents() {
 
 
 
-std::shared_ptr<Algorithm::Job> Algorithm::Algorithm::createJob(std::weak_ptr<const Agent> agent, Learn::LearningMode mode,  RNG::RNG& rng, int idx) const
+std::shared_ptr<Algorithm::Job> Algorithm::Algorithm::createJob(const Agent& agent, Learn::LearningMode mode,  RNG::RNG& rng, int idx) const
 {
-    auto locked = agent.lock(); // Get the shared_ptr
-    if (!locked || !this->containsAgent(*locked)) {
+    if (!this->containsAgent(agent)) {
         throw std::runtime_error("LearningAgent::makeJob: Cannot create a job with an invalid agent or an agent not belonging to this algorithm.");
     }
 
