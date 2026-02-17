@@ -11,11 +11,11 @@ void Algorithm::ATPG::ATPGExecutionEngine::setActionProgramExecutionEngine(std::
 
 std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
 {
-    const Algorithm::TPG::TPGAgent* tpgAgent = dynamic_cast<const TPG::TPGAgent*>(this->executedAgent.lock().get());
-    if(tpgAgent == nullptr){
+    const Algorithm::TPG::TPGAgent& tpgAgent = dynamic_cast<const TPG::TPGAgent&>((*this->executedAgent).get());
+    if(&tpgAgent == nullptr){
         throw std::runtime_error("Algorithm::ATPG::ATPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
     }
-    std::shared_ptr<const EvoGraph::Vertex> currentVertex = tpgAgent->getVertex();
+    std::shared_ptr<const EvoGraph::Vertex> currentVertex = tpgAgent.getVertex();
     std::shared_ptr<const EvoGraph::Edge> edge = nullptr;
 
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> visitedVertices;
@@ -40,7 +40,7 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
     }
 
     // Set the progExecutionEngine to the program
-    this->actionProgramExecutionEngine->setExecutedAgent(currentVertex->getProgram());
+    this->actionProgramExecutionEngine->setExecutedAgent(*currentVertex->getProgram().lock());
 
     // The action algorithm should already cast the action in the wanted range. 
     return this->actionProgramExecutionEngine->execute();

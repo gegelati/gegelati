@@ -1,15 +1,14 @@
 
 #include "algorithm/executionEngine.h"
 
-std::weak_ptr<const Algorithm::Agent> Algorithm::ExecutionEngine::getExecutedAgent() const
+const Algorithm::Agent& Algorithm::ExecutionEngine::getExecutedAgent() const
 {
-    return this->executedAgent;
+    return *this->executedAgent;
 }
 
-void Algorithm::ExecutionEngine::setExecutedAgent(std::weak_ptr<const Agent> newExecutedAgent)
+void Algorithm::ExecutionEngine::setExecutedAgent(const Agent& newExecutedAgent)
 {
-    auto locked = newExecutedAgent.lock();
-    if(!locked || newExecutedAgent.lock()->getAlgorithmName() != this->algorithmName){
+    if(newExecutedAgent.getAlgorithmName() != this->algorithmName){
         throw std::runtime_error("Algorithm::ExecutionEngine::setExecutedAgent trying to set an agent from a different algorithm");
     }
 
@@ -19,7 +18,7 @@ void Algorithm::ExecutionEngine::setExecutedAgent(std::weak_ptr<const Agent> new
 
 void Algorithm::ExecutionEngine::setupJob(const Algorithm::Job& job)
 {
-    this->setExecutedAgent(job.getAgent());
+    this->setExecutedAgent(*job.getAgent().lock());
     
 }
 

@@ -2,7 +2,6 @@
 #ifndef MAPLE_AGENT_MANAGER_H
 #define MAPLE_AGENT_MANAGER_H
 
-#include "algorithm/Maple/MapleManager.h"
 #include "algorithm/maple/mapleAgent.h"
 #include "algorithm/maple/mapleExecutionEngine.h"
 

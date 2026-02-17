@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <optional>
 
 #include "algorithm/agent.h"
 #include "algorithm/job.h"
@@ -21,7 +22,7 @@ namespace Algorithm {
 
     protected:
         /// Agent executed
-        std::weak_ptr<const Agent> executedAgent;
+        std::optional<std::reference_wrapper<const Agent>> executedAgent;
 
         /// Values to outputs 
         const Output::OutputHandler& outputs;
@@ -61,7 +62,7 @@ namespace Algorithm {
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(std::weak_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{executedAgent}, outputs{outputs}, algorithmName{executedAgent.lock()->getAlgorithmName()}, isTraining{isTraining} {}
+        ExecutionEngine(std::weak_ptr<const Agent> executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{*executedAgent.lock()}, outputs{outputs}, algorithmName{executedAgent.lock()->getAlgorithmName()}, isTraining{isTraining} {}
 
         /**
          * \brief setter for the isTraining attribute. 
@@ -78,14 +79,14 @@ namespace Algorithm {
         /**
          * \brief Return the current agent executed.
          */
-        virtual std::weak_ptr<const Agent> getExecutedAgent() const;
+        virtual const Agent& getExecutedAgent() const;
 
         /**
          * \brief Set a new agent executed by the execution engine.
          * 
          * \param[in] newExecutedAgent new executed agent. 
          */
-        virtual void setExecutedAgent(std::weak_ptr<const Agent> newExecutedAgent);
+        virtual void setExecutedAgent(const Agent& newExecutedAgent);
 
         /**
          * \brief Setup the execution engine with the given job.

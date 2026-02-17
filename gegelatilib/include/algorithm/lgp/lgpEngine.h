@@ -78,7 +78,7 @@ namespace Algorithm::LGP {
         uint64_t programCounter;
 
         /// casted executed agent
-        const LGPAgent* lgpExecutedAgent;
+        std::optional<std::reference_wrapper<const LGPAgent>> lgpExecutedAgent;
 
       protected:
         /**
@@ -130,10 +130,10 @@ namespace Algorithm::LGP {
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
         template <class T>
-        LGPEngine(std::shared_ptr<const LGPAgent> executedAgent, 
+        LGPEngine(std::weak_ptr<const LGPAgent> executedAgent, 
                       const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
-            : ExecutionEngine{executedAgent, executedAgent->getOutputs(), isTraining}, programCounter{0},
-              registers{executedAgent->getEnvironment()->getParams().nbRegisters}
+            : ExecutionEngine{executedAgent, executedAgent.lock()->getOutputs(), isTraining}, programCounter{0},
+              registers{executedAgent.lock()->getEnvironment()->getParams().nbRegisters}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
@@ -141,9 +141,9 @@ namespace Algorithm::LGP {
             // Setup the data sources
             this->dataScsConstsAndRegs.push_back(this->registers);
 
-            if (executedAgent->getEnvironment()->getParams().nbProgramConstant > 0) {
+            if (executedAgent.lock()->getEnvironment()->getParams().nbProgramConstant > 0) {
                 this->dataScsConstsAndRegs.push_back(
-                    executedAgent->cGetConstantHandler());
+                    executedAgent.lock()->cGetConstantHandler());
             }
 
             // Cannot use insert here because it dataSourcesAndRegisters
@@ -154,7 +154,7 @@ namespace Algorithm::LGP {
             }
 
             // Set the executedAgent
-            this->setExecutedAgent(executedAgent);
+            this->setExecutedAgent(*executedAgent.lock());
         };
 
         /**
@@ -184,7 +184,7 @@ namespace Algorithm::LGP {
          *
          * \param[in] newExecutedAgent the LGPAgent executed by the lgpEngine
          */
-        virtual void setExecutedAgent(std::weak_ptr<const Agent> newExecutedAgent) override;
+        virtual void setExecutedAgent(const Agent& newExecutedAgent) override;
 
         /**
          * \brief Method for changing the dataSources on which the Program will

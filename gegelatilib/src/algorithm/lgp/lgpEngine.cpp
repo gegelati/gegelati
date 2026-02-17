@@ -40,18 +40,18 @@
 #include "data/constantHandler.h"
 #include "instructions/multByConstant.h"
 
-void Algorithm::LGP::LGPEngine::setExecutedAgent(std::weak_ptr<const Agent> newExecutedAgent)
+void Algorithm::LGP::LGPEngine::setExecutedAgent(const Agent& newExecutedAgent)
 {
-    const LGPAgent* lgpAgent = dynamic_cast<const LGPAgent*>(newExecutedAgent.lock().get());
-    if(lgpAgent == nullptr){
+    const LGPAgent& lgpAgent = dynamic_cast<const LGPAgent&>(newExecutedAgent);
+    if(&lgpAgent == nullptr){
         throw std::runtime_error("Algorithm::LGP::LGPEngine::setExecutedAgent trying to set an agent which is not a LGP agent");
     }
 
     // are constants used here ?
     size_t offset = 1;
-    if (lgpAgent->getEnvironment()->getParams().nbProgramConstant > 0) {
+    if (lgpAgent.getEnvironment()->getParams().nbProgramConstant > 0) {
         // replace programs constants if already existing
-        dataScsConstsAndRegs.at(1) = lgpAgent->cGetConstantHandler();
+        dataScsConstsAndRegs.at(1) = lgpAgent.cGetConstantHandler();
         // increment offset for the datahandlers verification
         offset++;
     }
@@ -61,7 +61,7 @@ void Algorithm::LGP::LGPEngine::setExecutedAgent(std::weak_ptr<const Agent> newE
     // -2 because we don't count the registers that are the first datasources
     // and the constants (second datasource)
     if (this->dataScsConstsAndRegs.size() - offset !=
-        lgpAgent->getEnvironment()->getDataSources().size()) {
+        lgpAgent.getEnvironment()->getDataSources().size()) {
         throw std::runtime_error(
             "Data sources characteristics for Program Execution differ from "
             "Program reference Environment.");
@@ -70,7 +70,7 @@ void Algorithm::LGP::LGPEngine::setExecutedAgent(std::weak_ptr<const Agent> newE
         // check data source characteristics
         auto& iDataSrc =
             this->dataScsConstsAndRegs.at(i + (size_t)offset).get();
-        auto& envDataSrc = lgpAgent->getEnvironment()->getDataSources().at(i).get();
+        auto& envDataSrc = lgpAgent.getEnvironment()->getDataSources().at(i).get();
         // Assume that dataSource must be (at least) a copy of each other to
         // simplify the comparison This is characterise by the two data sources
         // having the same id
@@ -108,14 +108,14 @@ const bool Algorithm::LGP::LGPEngine::next()
     // increment the program counter.
     do {
         this->programCounter++;
-    } while (this->programCounter < this->lgpExecutedAgent->getNbLines() &&
-             this->lgpExecutedAgent->isIntron(this->programCounter));
-    return this->programCounter < this->lgpExecutedAgent->getNbLines();
+    } while (this->programCounter < this->lgpExecutedAgent->get().getNbLines() &&
+             this->lgpExecutedAgent->get().isIntron(this->programCounter));
+    return this->programCounter < this->lgpExecutedAgent->get().getNbLines();
 }
 
 const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPEngine::getCurrentLine() const
 {
-    return this->lgpExecutedAgent->getLine(this->programCounter);
+    return this->lgpExecutedAgent->get().getLine(this->programCounter);
 }
 
 const Instructions::Instruction& Algorithm::LGP::LGPEngine::getCurrentInstruction()
@@ -125,7 +125,7 @@ const Instructions::Instruction& Algorithm::LGP::LGPEngine::getCurrentInstructio
         this->getCurrentLine(); // throw std::out_of_range if the program
     // counter is too large.
     uint64_t instructionIndex = currentLine.getInstructionIndex();
-    return this->lgpExecutedAgent->getEnvironment()->getInstructionSet().getInstruction(
+    return this->lgpExecutedAgent->get().getEnvironment()->getInstructionSet().getInstruction(
         instructionIndex); // throw std::out_of_range if the index of the line
     // is too large.
 }
@@ -174,10 +174,10 @@ uint64_t Algorithm::LGP::LGPEngine::getOperandLocation(uint64_t idxOp) const
 void Algorithm::LGP::LGPEngine::iterateThroughtProgram(const bool ignoreException)
 {
     this->programCounter = 0;
-    bool hasNext = this->lgpExecutedAgent->getNbLines() > 0;
+    bool hasNext = this->lgpExecutedAgent->get().getNbLines() > 0;
 
     // Skip first lines if they are introns.
-    if (hasNext && this->lgpExecutedAgent->isIntron(0)) {
+    if (hasNext && this->lgpExecutedAgent->get().isIntron(0)) {
         hasNext = this->next();
     }
 
@@ -219,17 +219,17 @@ void Algorithm::LGP::LGPEngine::setDataSources(
     this->dataSources = dataSrc;
     // we need this offset to push the constant at the first
     size_t offset =
-        this->lgpExecutedAgent->getEnvironment()->getParams().nbProgramConstant > 0
+        this->lgpExecutedAgent->get().getEnvironment()->getParams().nbProgramConstant > 0
             ? 2
             : 1;
     if (offset == 2) {
         this->dataScsConstsAndRegs.at(1) =
-            this->lgpExecutedAgent->cGetConstantHandler();
+            this->lgpExecutedAgent->get().cGetConstantHandler();
     }
     for (size_t idx = 0; idx < this->dataSources.size(); idx++) {
         this->dataScsConstsAndRegs.at(idx + offset) = dataSrc.at(idx);
     }
 
     // Set program to check compatibility with new data source
-    this->setExecutedAgent(this->executedAgent);
+    this->setExecutedAgent(*this->executedAgent);
 }

@@ -4,11 +4,11 @@
 
 std::vector<double> Algorithm::Maple::MapleExecutionEngine::execute()
 {
-    const MapleAgent* mapleAgent = dynamic_cast<const MapleAgent*>(this->executedAgent.lock().get());
-    if(mapleAgent == nullptr){
+    const MapleAgent& mapleAgent = dynamic_cast<const MapleAgent&>((*this->executedAgent).get());
+    if(&mapleAgent == nullptr){
         throw std::runtime_error("Algorithm::Maple::MapleExecutionEngine::execute trying to execute an agent which is not a Maple agent");
     }
-    std::shared_ptr<const EvoGraph::Team> teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(mapleAgent->getVertex());
+    std::shared_ptr<const EvoGraph::Team> teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(mapleAgent.getVertex());
     if(teamVertex == nullptr){
         throw std::runtime_error("Algorithm::Maple::MapleExecutionEngine::execute trying to execute a Maple agent which does not represent a team vertex");
     }

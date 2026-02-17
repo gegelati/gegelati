@@ -27,13 +27,13 @@ void Algorithm::TPG::TPGExecutionEngine::setupJob(const Algorithm::Job& job)
     if(this->isTraining){
         this->setArchive(*tpgJob->getArchive());
     }
-    this->setExecutedAgent(job.getAgent());
+    this->setExecutedAgent(*job.getAgent().lock());
 }
 
 double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& edge)
 {
     // Set the progExecutionEngine to the program
-    this->programExecutionEngine->setExecutedAgent(edge.getProgram());
+    this->programExecutionEngine->setExecutedAgent(*edge.getProgram().lock());
 
     // Execute the program.
     this->lastValues = this->programExecutionEngine->execute();
@@ -90,11 +90,11 @@ std::shared_ptr<const EvoGraph::Edge> Algorithm::TPG::TPGExecutionEngine::evalua
 
 std::vector<double> Algorithm::TPG::TPGExecutionEngine::execute()
 {
-    const Algorithm::TPG::TPGAgent* tpgAgent = dynamic_cast<const TPGAgent*>(this->executedAgent.lock().get());
-    if(tpgAgent == nullptr){
+    const Algorithm::TPG::TPGAgent& tpgAgent = dynamic_cast<const TPGAgent&>((*this->executedAgent).get());
+    if(&tpgAgent == nullptr){
         throw std::runtime_error("Algorithm::TPG::TPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
     }
-    std::shared_ptr<const EvoGraph::Vertex> currentVertex = tpgAgent->getVertex();
+    std::shared_ptr<const EvoGraph::Vertex> currentVertex = tpgAgent.getVertex();
     std::shared_ptr<const EvoGraph::Edge> edge = nullptr;
 
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> visitedVertices;

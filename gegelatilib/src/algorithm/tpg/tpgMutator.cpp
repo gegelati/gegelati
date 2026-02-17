@@ -399,7 +399,7 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
     const auto& archivedDataHandlers = archive->getDataHandlers();
     std::map<size_t, double> hashesAndResults;
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine = manager->createExecutionEngine();
-    execEngine->setExecutedAgent(programAgent);
+    execEngine->setExecutedAgent(*programAgent.lock());
 
     // Mutate behavior until it changes (against the archive).
     do {
