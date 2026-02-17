@@ -15,7 +15,7 @@ std::vector<double> Algorithm::Maple::MapleExecutionEngine::execute()
 
     this->actionValues.clear();
     this->actionValues.resize(this->outputs.size(), 0.0);
-    for(auto edge : teamVertex->getOutgoingEdges()){
+    for(auto& edge : teamVertex->getOutgoingEdges()){
 
         // Convert destination to action
         auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(edge->getDestination());

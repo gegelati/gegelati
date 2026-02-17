@@ -30,7 +30,7 @@ namespace Algorithm::TPG {
          * 
          * \param[in] agent the Agent to cast.
          */
-        virtual std::shared_ptr<TPGAgent> getTPGAgentFromCst(const Agent& agent);
+        virtual TPGAgent& getTPGAgentFromCst(const Agent& agent);
 
     public:
 

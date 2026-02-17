@@ -1,14 +1,14 @@
 
 #include "algorithm/lgp/lgpManager.h"
 
-std::shared_ptr<Algorithm::LGP::LGPAgent> Algorithm::LGP::LGPManager::getLGPAgentFromCst(const Agent& agent)
+Algorithm::LGP::LGPAgent& Algorithm::LGP::LGPManager::getLGPAgentFromCst(const Agent& agent)
 {
-    return std::dynamic_pointer_cast<LGPAgent>(this->getAgentFromCst(agent));
+    return dynamic_cast<LGPAgent&>(**this->getAgentFromCst(agent));
 }
 
 const Algorithm::Agent& Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
 {
-    this->agents.insert(std::make_shared<LGPAgent>(this->env, this->outputs, this->getAlgorithmName()));
+    this->agents.insert(std::make_unique<LGPAgent>(this->env, this->outputs, this->getAlgorithmName()));
     return **this->agents.rbegin();
 }
 
@@ -18,23 +18,23 @@ const Algorithm::Agent& Algorithm::LGP::LGPManager::copyAgent(const Agent& agent
     if(castedAgent == nullptr){
         throw std::runtime_error("Algorithm::LGP::LGPManager::copyAgent: trying to copy an agent that is not a LGPAgent.");
     }
-    auto newAgent = this->getLGPAgentFromCst(this->createAgent(graph));
+    LGPAgent& newAgent = this->getLGPAgentFromCst(this->createAgent(graph));
 
     for(size_t idx = 0; idx < castedAgent->getNbLines(); idx++){
-        newAgent->addNewLine(castedAgent->getLine(idx));
+        newAgent.addNewLine(castedAgent->getLine(idx));
     }
 
     for(size_t idx = 0; idx < castedAgent->getEnvironment()->getParams().nbProgramConstant; idx++){
-        this->setConstantAt(*newAgent, idx, castedAgent->getConstantAt(idx));
+        this->setConstantAt(newAgent, idx, castedAgent->getConstantAt(idx));
     }
 
-    this->identifyIntrons(*newAgent);
+    this->identifyIntrons(newAgent);
     return **this->agents.rbegin();
 }
 
 void Algorithm::LGP::LGPManager::emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    Algorithm::LGP::LGPAgent& lgpAgent = *this->getLGPAgentFromCst(agent);
+    Algorithm::LGP::LGPAgent& lgpAgent = this->getLGPAgentFromCst(agent);
     while (lgpAgent.getNbLines() > 0) {
         lgpAgent.removeLine(0);
     }
@@ -47,33 +47,33 @@ const Output::OutputHandler& Algorithm::LGP::LGPManager::getOutputs() const
 
 void Algorithm::LGP::LGPManager::setConstantAt(const Agent& agent, size_t index, const Data::Constant& value)
 {
-    this->getLGPAgentFromCst(agent)->getConstantHandler().setDataAt(typeid(Data::Constant), index, value);
+    this->getLGPAgentFromCst(agent).getConstantHandler().setDataAt(typeid(Data::Constant), index, value);
 }
 
 void Algorithm::LGP::LGPManager::removeLine(const Agent& agent, size_t index)
 {
-    this->getLGPAgentFromCst(agent)->removeLine(index);
+    this->getLGPAgentFromCst(agent).removeLine(index);
 }
 
 const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(const Agent& agent, size_t index)
 {
-    return this->getLGPAgentFromCst(agent)->addNewLine(index);
+    return this->getLGPAgentFromCst(agent).addNewLine(index);
 }
 
 const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::addNewLine(const Agent& agent)
 {
-    std::shared_ptr<Algorithm::LGP::LGPAgent> lgpAgent = this->getLGPAgentFromCst(agent);
-    return lgpAgent->addNewLine(lgpAgent->getNbLines());
+    Algorithm::LGP::LGPAgent& lgpAgent = this->getLGPAgentFromCst(agent);
+    return lgpAgent.addNewLine(lgpAgent.getNbLines());
 }
 
 void Algorithm::LGP::LGPManager::addNewLine(const Agent& agent, const LGPLine& newLine)
 {
-    this->getLGPAgentFromCst(agent)->addNewLine(newLine);
+    this->getLGPAgentFromCst(agent).addNewLine(newLine);
 }
 
 void Algorithm::LGP::LGPManager::swapLines(const Agent& agent, size_t index1, size_t index2)
 {
-    this->getLGPAgentFromCst(agent)->swapLines(index1, index2);
+    this->getLGPAgentFromCst(agent).swapLines(index1, index2);
 }
 
 const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLine(const Agent& agent, size_t index) const
@@ -87,12 +87,12 @@ const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLine(const Agent& 
 
 Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLineForMutation(const Agent& agent, size_t index)
 {
-    return this->getLGPAgentFromCst(agent)->getLineForMutation(index);
+    return this->getLGPAgentFromCst(agent).getLineForMutation(index);
 }
 
 uint64_t Algorithm::LGP::LGPManager::identifyIntrons(const Agent& agent)
 {
-    std::shared_ptr<LGPAgent> lgpAgent = this->getLGPAgentFromCst(agent);
+    LGPAgent& lgpAgent = this->getLGPAgentFromCst(agent);
 
 
     // Create fake registers to identify accessed addresses.
@@ -106,14 +106,14 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(const Agent& agent)
         usefulRegisters.insert(idx);
     }
     
-    for(int64_t idxLine = static_cast<int64_t>(lgpAgent->getNbLines()) - 1; idxLine >= 0; idxLine--){
-        const LGPLine& currentLine = lgpAgent->getLine(static_cast<size_t>(idxLine));
+    for(int64_t idxLine = static_cast<int64_t>(lgpAgent.getNbLines()) - 1; idxLine >= 0; idxLine--){
+        const LGPLine& currentLine = lgpAgent.getLine(static_cast<size_t>(idxLine));
 
         uint64_t destinationIndex = currentLine.getDestinationIndex();
         auto destinationRegister = usefulRegisters.find(destinationIndex);
         if (destinationRegister != usefulRegisters.end()) {
             // The LGPLine is useful (i.e. not an introns)
-            lgpAgent->setIntronValue(static_cast<size_t>(idxLine), false);
+            lgpAgent.setIntronValue(static_cast<size_t>(idxLine), false);
             // Remove the destination register from the list of useful operands
             usefulRegisters.erase(*destinationRegister);
             // Add register operands to the list of useful registers
@@ -145,7 +145,7 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(const Agent& agent)
             // The destination of the line is not within useful registers
             // the line does not contribute to the result of the Program
             // it is an intron.
-            lgpAgent->setIntronValue(static_cast<size_t>(idxLine), true);
+            lgpAgent.setIntronValue(static_cast<size_t>(idxLine), true);
             nbIntrons++;
         }
     }

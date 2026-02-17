@@ -18,10 +18,8 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
     std::shared_ptr<const EvoGraph::Vertex> currentVertex = tpgAgent.getVertex();
     std::shared_ptr<const EvoGraph::Edge> edge = nullptr;
 
-    std::vector<std::shared_ptr<const EvoGraph::Vertex>> visitedVertices;
-    std::reference_wrapper<const Algorithm::Agent> currentProgram = currentVertex->getProgram();
     // Browse the TPG until vertex with an agent of the actionProgram Algorithm name is reached
-    while (currentProgram.get().getAlgorithmName() != this->actionProgramExecutionEngine->getAlgorithmName()) {
+    while (!currentVertex->hasProgram() || currentVertex->getProgram().getAlgorithmName() != this->actionProgramExecutionEngine->getAlgorithmName()) {
 
         auto teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(currentVertex);
         if(teamVertex == nullptr){
@@ -34,7 +32,6 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
         // update currentVertex and backup in visitedVertex.
         if (edge->getDestination() != nullptr) {
             currentVertex = edge->getDestination();
-            currentProgram = currentVertex->getProgram();
         }
     }
 

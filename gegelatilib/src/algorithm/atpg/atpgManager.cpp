@@ -7,7 +7,7 @@ void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, std::shared_pt
 {
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> verticesToDelete;
     // get vertex of agent to delete;
-    auto vertex = this->getTPGAgentFromCst(agent)->getVertex();
+    auto vertex = this->getTPGAgentFromCst(agent).getVertex();
     while(vertex->getOutgoingEdges().size() > 0){
         auto& edge = vertex->getOutgoingEdges().front();
 

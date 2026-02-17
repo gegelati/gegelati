@@ -40,11 +40,11 @@ void Selector::Selector::updateEvaluationRecords(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         std::reference_wrapper<const Algorithm::Agent>>& results)
 {
-    // Update resultsPerAgent
-    this->updateResultsPerAgent(results);
-
     // Update bestAgent
     this->updateBestAgent(results);
+
+    // Update resultsPerAgent
+    this->updateResultsPerAgent(results);
 }
 
 void Selector::Selector::updateResultsPerAgent(
@@ -82,7 +82,7 @@ void Selector::Selector::updateBestAgent(
     const Algorithm::Agent& candidate = iterator->second;
     // Test the three replacement cases
     // from the simpler to the most complex to test
-    if (this->bestAgent.first         // NULL case
+    if (!this->bestAgent.first         // NULL case
         || *this->bestAgent.second < *evaluation // new high-score case
         ||
         !this->manager->containsAgent(*this->bestAgent.first) // bestAgent disappearance

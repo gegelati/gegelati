@@ -27,7 +27,7 @@ namespace Algorithm {
     protected:
 
         /// Current agents used by the algorithm
-        std::set<std::shared_ptr<Agent>, SharedLess<Agent>> agents;
+        std::set<std::unique_ptr<Agent>, UniqueLess<Agent>> agents;
 
         /// Sub-managers for sub-algorithms
         std::map<std::string, std::shared_ptr<AgentManager>> subManagers;
@@ -46,7 +46,7 @@ namespace Algorithm {
          * 
          * \param[in] agent the Agent to cast.
          */
-        virtual std::shared_ptr<Agent> getAgentFromCst(const Agent& agent);
+        virtual std::set<std::unique_ptr<Algorithm::Agent>>::iterator getAgentFromCst(const Agent& agent);
 
     public:
 

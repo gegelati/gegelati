@@ -24,13 +24,20 @@ void Selector::TruncationSelector::doSelection(
     auto i = 0;
     while (i < nbExpectedAgents && results.size() > 0) {
 
+        auto it = results.begin();
         // If the agent is an action, do not remove it in discrete environment!
-        const Algorithm::Agent& agent = results.begin()->second;
+        const Algorithm::Agent& agent = it->second;
+        results.erase(it);
+
 
         // Removed stored result (if any)
-        this->manager->deleteAgent(agent, graph);
         this->resultsPerAgent.erase(agent);
-        results.erase(results.begin());
+        if (this->bestAgent.first && agent == *this->bestAgent.first) {
+            this->bestAgent.first = std::nullopt;
+            this->bestAgent.second = nullptr;
+        }
+
+        this->manager->deleteAgent(agent, graph);
 
         // Increment loop counter
         i++;

@@ -2,14 +2,14 @@
 
 #include "algorithm/agentManager.h"
 
-std::shared_ptr<Algorithm::Agent> Algorithm::AgentManager::getAgentFromCst(const Agent& agent)
+std::set<std::unique_ptr<Algorithm::Agent>>::iterator Algorithm::AgentManager::getAgentFromCst(const Agent& agent)
 {
     auto iterator = this->agents.find(&agent);
     if(iterator == this->agents.end() || (*iterator).get() != &agent){
         throw std::invalid_argument("AgentManager::getAgentFromCst: the given agent is not managed by this manager.");
     }
 
-    return *iterator;
+    return iterator;
 }
 
 bool Algorithm::AgentManager::containsAgent(const Agent& agent) const

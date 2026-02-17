@@ -65,6 +65,10 @@ namespace Algorithm::LGP {
                 constants.resetData(); // force all constant to 0 at first.
             };
 
+            // Disable copy semantics: LGPAgent should never be copied.
+            LGPAgent(const LGPAgent&) = delete;
+            LGPAgent& operator=(const LGPAgent&) = delete;
+
             
             /**
              * \brief Destructor for the LGPAgent class.

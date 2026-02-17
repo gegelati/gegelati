@@ -249,13 +249,15 @@ std::shared_ptr<const EvoGraph::Vertex> EvoGraph::Graph::cloneVertex(const Verte
             "The vertex to clone does not exist in the Graph.");
     }
 
+    std::optional<std::reference_wrapper<const Algorithm::Agent>> program = (vertex.hasProgram()) ? std::optional(std::cref(vertex.getProgram())) : std::nullopt;
+
     // Create a new Vertex
     // (at the end of the vertices list)
     if (std::dynamic_pointer_cast<const EvoGraph::Team>(*vertexIterator) != nullptr) {
-        this->addNewTeam((*vertexIterator)->getProgram());
+        this->addNewTeam(program);
     }
     else if (auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(*vertexIterator)) {
-        this->addNewAction(action->getActionID(), action->getProgram());
+        this->addNewAction(action->getActionID(), program);
     }
 
     // Get the new vertex

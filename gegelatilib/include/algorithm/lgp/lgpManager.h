@@ -30,7 +30,7 @@ namespace Algorithm {
              * 
              * \param[in] agent the Agent to cast.
              */
-            virtual std::shared_ptr<LGPAgent> getLGPAgentFromCst(const Agent& agent);
+            virtual LGPAgent& getLGPAgentFromCst(const Agent& agent);
         public:
 
             /**

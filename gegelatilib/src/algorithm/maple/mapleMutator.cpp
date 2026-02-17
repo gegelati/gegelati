@@ -39,12 +39,12 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
 
     manager->emptyAgent(agent, graph);
     
-    auto vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
-    auto team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
+    std::shared_ptr<const EvoGraph::Vertex> vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
+    std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
 
     // Get program mutator and manager
-    auto programMutator = this->getSubMutator(this->programAlgorithmName);
-    auto programManager = manager->getSubManager(this->programAlgorithmName);
+    std::shared_ptr<Algorithm::Mutator> programMutator = this->getSubMutator(this->programAlgorithmName);
+    std::shared_ptr<Algorithm::AgentManager> programManager = manager->getSubManager(this->programAlgorithmName);
 
     // Get available actions classes
     std::vector<uint64_t> availableActions(manager->getOutputs().size());
@@ -56,7 +56,7 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
 
     size_t remaining = availableActions.size();
     for (size_t idxAction = 0; idxAction < params.mutation.tpg.nbActionEdgeInit; idxAction++) {
-        auto programAgent = programMutator->initRandomAgent(graph, programManager, params, rng);
+        const Agent& programAgent = programMutator->initRandomAgent(graph, programManager, params, rng);
 
         // Pick uniformly from remaining values
         size_t pickIdx = rng.getUnsignedInt64(0, remaining - 1);

@@ -2,9 +2,9 @@
 #include "algorithm/maple/mapleManager.h"
 
 
-std::shared_ptr<Algorithm::Maple::MapleAgent> Algorithm::Maple::MapleManager::getMapleAgentFromCst(const Agent& agent)
+Algorithm::Maple::MapleAgent& Algorithm::Maple::MapleManager::getMapleAgentFromCst(const Agent& agent)
 {
-    return std::dynamic_pointer_cast<MapleAgent>(this->getAgentFromCst(agent));
+    return dynamic_cast<MapleAgent&>(**this->getAgentFromCst(agent));
 }
 
 const std::vector<std::reference_wrapper<const Algorithm::Agent>> Algorithm::Maple::MapleManager::getAgents() const
@@ -17,7 +17,7 @@ const std::vector<std::reference_wrapper<const Algorithm::Agent>> Algorithm::Map
 
 const Algorithm::Agent& Algorithm::Maple::MapleManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
 {
-    this->agents.insert(std::make_shared<MapleAgent>(vertex, this->getAlgorithmName()));
+    this->agents.insert(std::make_unique<MapleAgent>(vertex, this->getAlgorithmName()));
     return **this->agents.rbegin();
 }
 

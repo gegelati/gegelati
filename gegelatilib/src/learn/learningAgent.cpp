@@ -306,14 +306,17 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 
         results.clear();
 
-        for(auto algorithm: algorithms){
+        for(auto& algorithm: algorithms){
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         std::reference_wrapper<const Algorithm::Agent>>
                 resultsAlgo;
             
-            for(const auto& result: resultsCopy){
-                if(algorithm->containsAgent(result.second)){
-                    resultsAlgo.insert(result);
+            for(auto it = resultsCopy.begin(); it != resultsCopy.end(); ){
+                if(algorithm->containsAgent(it->second)){
+                    resultsAlgo.insert(*it);
+                    it = resultsCopy.erase(it);
+                } else {
+                    ++it;
                 }
             }
 

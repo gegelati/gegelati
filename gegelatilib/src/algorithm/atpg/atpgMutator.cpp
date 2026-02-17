@@ -95,7 +95,7 @@ void Algorithm::ATPG::ATPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph
         programAgents.push_back(programMutator->initRandomAgent(graph, programManager, params, rng));
 
         // Create a program agent and a new team
-        auto actionProgram = actionProgramMutator->initRandomAgent(graph, actionProgramManager, params, rng);
+        auto& actionProgram = actionProgramMutator->initRandomAgent(graph, actionProgramManager, params, rng);
         leafVertices.push_back(graph->addNewTeam());
 
         // Set the vertex program to the action program.
@@ -130,8 +130,8 @@ void Algorithm::ATPG::ATPGMutator::initRandomSpecificAgent(const Agent& agent, s
     for(size_t idx = 0; idx < nbEdges; idx++){
 
         // Create a program agent and a new team
-        auto actionProgram = actionProgramMutator->initRandomAgent(graph, actionProgramManager, params, rng);
-        auto leafVertex = graph->addNewTeam();
+        const Agent& actionProgram = actionProgramMutator->initRandomAgent(graph, actionProgramManager, params, rng);
+        std::shared_ptr<const EvoGraph::Team> leafVertex = graph->addNewTeam();
 
         // Set the vertex program to the action program.
         graph->setVertexProgram(*leafVertex, actionProgram);
@@ -199,12 +199,11 @@ void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    auto& agentProgramDestLock = edge->getDestination()->getProgram();
-    if(agentProgramDestLock.getAlgorithmName() == this->actionProgramAlgorithmName &&
+    if(edge->getDestination()->hasProgram() && edge->getDestination()->getProgram().getAlgorithmName() == this->actionProgramAlgorithmName &&
        rng.getDouble(0.0, 1.0) < params.mutation.tpg.pMutateActionProgram){
        
         // copy program
-        const Algorithm::Agent& newAgent = manager->getSubManager(agentProgramDestLock.getAlgorithmName())->copyAgent(agentProgramDestLock, graph);
+        const Algorithm::Agent& newAgent = manager->getSubManager(edge->getDestination()->getProgram().getAlgorithmName())->copyAgent(edge->getDestination()->getProgram(), graph);
 
         // Clone vertex destination
         auto newDestination = graph->cloneVertex(*std::dynamic_pointer_cast<const EvoGraph::Team>(edge->getDestination()));

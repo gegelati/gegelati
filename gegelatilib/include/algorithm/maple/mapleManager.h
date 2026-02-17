@@ -24,7 +24,7 @@ namespace Algorithm::Maple {
          * 
          * \param[in] agent the Agent to cast.
          */
-        virtual std::shared_ptr<MapleAgent> getMapleAgentFromCst(const Agent& agent);
+        virtual MapleAgent& getMapleAgentFromCst(const Agent& agent);
     public:
 
         /**
