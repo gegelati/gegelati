@@ -31,7 +31,6 @@ void Selector::TournamentSelector::doSelection(
         std::swap(elements[i], elements[j]);
     }
 
-    std::vector<std::shared_ptr<Learn::EvaluationResult>> erasedResults;
 
     // Tournament selection
     for (size_t i = 0; i < nbAgentsInTournament;
@@ -49,10 +48,11 @@ void Selector::TournamentSelector::doSelection(
         // Delete everything but the best
         while (subMap.size() > 1) {
             auto itWorst = subMap.begin();
-            erasedResults.push_back(itWorst->first);
 
             // Remove the vertex from the graph as well
+            this->resultsPerAgent.erase(*itWorst->second.lock());
             this->manager->deleteAgent(*itWorst->second.lock(), graph);
+            
 
             subMap.erase(itWorst);
         }
@@ -64,7 +64,9 @@ void Selector::TournamentSelector::doSelection(
     // Delete from results and resultsPerAgent
     auto itDel = results.begin();
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
-        this->resultsPerAgent.erase(*itDel->second.lock());
+        if (auto locked = itDel->second.lock()) {
+            this->resultsPerAgent.erase(*locked);
+        }
         results.erase(itDel++);
     }
 }
@@ -78,8 +80,6 @@ void Selector::TournamentSelector::addToVerticesToDelete(
 std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::updateContext() const 
 {
     std::unique_ptr<SelectionContext> context = std::move(Selector::updateContext());
-
-    const auto& verticesToDeleteRef = this->verticesToDelete;
 
     const auto& agentsToDeleteRef = this->agentsToDelete;
 
@@ -119,6 +119,11 @@ void Selector::TournamentSelector::updateAfterPopulate(std::shared_ptr<EvoGraph:
 {
     // Remove vertex to be deleted
     for (auto agent : this->agentsToDelete) {
+        auto mapIterator = this->resultsPerAgent.find(agent);
+        if (mapIterator != this->resultsPerAgent.end()) {
+            this->resultsPerAgent.erase(mapIterator);
+        }
+
         this->manager->deleteAgent(agent, graph);
     }
     this->agentsToDelete.clear();

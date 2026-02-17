@@ -24,13 +24,6 @@ namespace Selector {
     class TournamentSelector : public Selector
     {
       protected:
-        /**
-         * @brief set of Vertex filled during the selection process,
-         * containing the vertices that went through the tournament en survived
-         * it. The Vertex in the set will be deleted at the end of the
-         * TPGMutator::PopulateTPG method.
-         */
-        std::set<const EvoGraph::Vertex*> verticesToDelete;
 
         /**
          * @brief set of Vertex filled during the selection process,
