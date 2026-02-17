@@ -22,6 +22,10 @@ _yyyy.mm.dd_
   * The IDs for TPGVertex and TPGEdges are used to reduce the complexity of the decimateRoot method, using a set to store the TPGVertex and TPGEdges instead of a list.
   * The Ids for TPGVertex and Program are used in the CodeGen and the dot file generator to name the objects. It will also be useful to follow the history of this objects.
 * Adversarial is currently deprecated.
+* When using a `ParallelLearningAgent`, secondary threads have a global try-catch to better report exceptions happening in these threads.
+
+### Bug fix
+* Fix build error with mingw for gcc v15.2.0, missing include of `cstdint` in `dataHandler.h`.
 
 ## Release version 2.0.0 - Fragogola flavor
 _2025.08.18_
