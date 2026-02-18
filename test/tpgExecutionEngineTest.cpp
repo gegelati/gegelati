@@ -42,7 +42,6 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstant.h"
-#include "program/program.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/graph.h"

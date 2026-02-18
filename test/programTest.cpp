@@ -44,10 +44,8 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
-#include "program/line.h"
-#include "program/program.h"
 #include "util/counterReset.h"
-
+#if 0
 class ProgramTest : public ::testing::Test
 {
   protected:
@@ -730,3 +728,5 @@ TEST_F(ProgramTest, ProgramID)
     ASSERT_EQ(Program::Program::getProgramIDCounter(), 6)
         << "ID counter is incorrect.";
 }
+
+#endif

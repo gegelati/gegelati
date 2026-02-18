@@ -43,7 +43,6 @@
 #include "data/primitiveTypeArray.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/multByConstant.h"
-#include "program/program.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/graph.h"
@@ -52,7 +51,6 @@
 
 #include "evoGraph/instrumented/actionInstrumented.h"
 #include "evoGraph/instrumented/edgeInstrumented.h"
-#include "evoGraph/instrumented/executionEngineInstrumented.h"
 #include "evoGraph/instrumented/factoryInstrumented.h"
 #include "evoGraph/instrumented/teamInstrumented.h"
 

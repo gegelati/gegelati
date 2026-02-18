@@ -7,7 +7,7 @@
 #include "algorithm/tpg/tpgJob.h"
 #include "evoGraph/action.h"
 #include "evoGraph/team.h"
-#include "archive.h"
+#include "algorithm/tpg/archive.h"
 
 #include "util/activationFunctions.h"
 

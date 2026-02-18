@@ -38,7 +38,7 @@
 
 #include <stdexcept>
 
-#include "environment.h"
+#include "algorithm/lgp/environment.h"
 
 size_t Environment::computeLargestAddressSpace(
     const size_t nbRegisters, const size_t nbConstants,

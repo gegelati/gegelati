@@ -40,7 +40,7 @@
 #include "instructions/multByConstant.h"
 #include "learn/learningAgent.h"
 #include "learn/stickGameWithOpponent.h"
-
+#include "instructions/set.h"
 #include "log/cycleDetectionLALogger.h"
 
 class CycleDetectionLoggerTest : public ::testing::Test

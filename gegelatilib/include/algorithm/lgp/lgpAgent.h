@@ -6,7 +6,7 @@
 #include "algorithm/agent.h"
 #include "evoGraph/vertex.h"
 #include "algorithm/lgp/lgpLine.h"
-#include "environment.h"
+#include "algorithm/lgp/environment.h"
 #include "data/constantHandler.h"
 #include "outputInfo.h"
 

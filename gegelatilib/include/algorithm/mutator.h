@@ -8,6 +8,7 @@
 #include "algorithm/agent.h"
 #include "algorithm/agentManager.h"
 #include "mutator/rng.h"
+#include "learn/learningParameters.h"
 #include "selector/selector.h"
 #include "evoGraph/graph.h"
 

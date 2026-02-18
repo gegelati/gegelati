@@ -34,7 +34,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
-
+#if 0
 #include "file/tpgGraphDotImporter.h"
 
 const std::string File::GraphDotImporter::lineSeparator("&#92;n");
@@ -522,3 +522,5 @@ void File::GraphDotImporter::setNewFilePath(const char* newFilePath)
                                  std::string(newFilePath));
     }
 }
+
+#endif

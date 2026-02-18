@@ -41,6 +41,7 @@
 #include <memory>
 
 #include "algorithm/agent.h"
+#include "algorithm/tpg/archive.h"
 
 
 namespace Algorithm {

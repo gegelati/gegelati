@@ -40,17 +40,15 @@
 
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
-#include "environment.h"
+#include "algorithm/lgp/environment.h"
 #include "goldenReferenceComparison.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
-#include "evoGraph/instrumented/executionEngineInstrumented.h"
 #include "evoGraph/instrumented/factoryInstrumented.h"
 #include "evoGraph/graph.h"
 
-#include "evoGraph/instrumented/executionStats.h"
 
 #if 0
 class ExecutionStatsTest : public ::testing::Test

@@ -38,7 +38,7 @@
 #ifndef LGP_LINE_H
 #define LGP_LINE_H
 
-#include "environment.h"
+#include "algorithm/lgp/environment.h"
 #include <cstring>
 
 namespace Algorithm::LGP {

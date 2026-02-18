@@ -9,7 +9,6 @@
 #include "algorithm/lgp/lgpAgent.h"
 #include "algorithm/lgp/lgpManager.h"
 #include "algorithm/lgp/lgpLineMutator.h"
-#include "mutator/programMutator.h"
 
 namespace Algorithm::LGP {
 

@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "archive.h"
+#include "algorithm/tpg/archive.h"
 #include "algorithm/algorithm.h"
 #include "algorithm/tpg/tpgPolicyStats.h"
 #include "algorithm/tpg/tpgManager.h"

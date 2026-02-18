@@ -37,15 +37,12 @@
 #include <gtest/gtest.h>
 
 #include "data/dataHandler.h"
-#include "environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
-#include "program/program.h"
 
 #include "evoGraph/instrumented/actionInstrumented.h"
 #include "evoGraph/instrumented/edgeInstrumented.h"
-#include "evoGraph/instrumented/executionEngineInstrumented.h"
 #include "evoGraph/instrumented/factoryInstrumented.h"
 #include "evoGraph/instrumented/teamInstrumented.h"
 #include "evoGraph/graph.h"

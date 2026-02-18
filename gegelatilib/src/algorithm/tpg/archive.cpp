@@ -35,7 +35,7 @@
 
 #include <math.h>
 
-#include "archive.h"
+#include "algorithm/tpg/archive.h"
 
 Archive::~Archive()
 {

@@ -47,7 +47,7 @@
 #include <filesystem>
 #endif
 
-#include "environment.h"
+#include "algorithm/lgp/environment.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "evoGraph/graph.h"

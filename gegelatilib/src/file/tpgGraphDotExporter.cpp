@@ -41,6 +41,7 @@
 #include "data/constant.h"
 #include "file/tpgGraphDotExporter.h"
 #include "util/timestamp.h"
+#include "data/demangle.h"
 
 void File::GraphDotExporter::printAgent(const Algorithm::Agent& agentProgram){
 

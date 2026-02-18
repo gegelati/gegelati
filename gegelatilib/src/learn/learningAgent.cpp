@@ -43,11 +43,9 @@
 #include "data/hash.h"
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
-#include "mutator/tpgMutator.h"
 
 #include "learn/learningAgent.h"
 
-#include "archive.h"
 #include "algorithm/tpg/tpgJob.h"
 #include "algorithm/tpg/tpgAlgorithm.h"
 

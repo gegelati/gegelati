@@ -40,7 +40,7 @@
 
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
-#include "environment.h"
+#include "algorithm/lgp/environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"

@@ -41,7 +41,6 @@
 #include <map>
 #include <vector>
 
-#include "program/program.h"
 
 #include "algorithm/agent.h"
 #include "evoGraph/graph.h"

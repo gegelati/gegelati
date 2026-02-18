@@ -63,6 +63,7 @@
 #include <algorithm/atpg/atpgMutator.h>
 #include <algorithm/atpg/atpgExecutionEngine.h>
 
+#include <algorithm/lgp/environment.h>
 #include <algorithm/lgp/lgpAlgorithm.h>
 #include <algorithm/lgp/lgpAgent.h>
 #include <algorithm/lgp/lgpManager.h>
@@ -77,6 +78,7 @@
 #include <algorithm/maple/mapleManager.h>
 #include <algorithm/maple/mapleMutator.h>
 
+#include <algorithm/tpg/archive.h>
 #include <algorithm/tpg/tpgAlgorithm.h>
 #include <algorithm/tpg/tpgAgent.h>
 #include <algorithm/tpg/tpgManager.h>
@@ -96,7 +98,6 @@
 #include <data/untypedSharedPtr.h>
 
 
-#include <evoGraph/oldPolicyStats.h>
 #include <evoGraph/abstractEngine.h>
 #include <evoGraph/action.h>
 #include <evoGraph/edge.h>
@@ -106,10 +107,8 @@
 #include <evoGraph/team.h>
 #include <evoGraph/vertex.h>
 
-#include <evoGraph/instrumented/executionStats.h>
 #include <evoGraph/instrumented/actionInstrumented.h>
 #include <evoGraph/instrumented/edgeInstrumented.h>
-#include <evoGraph/instrumented/executionEngineInstrumented.h>
 #include <evoGraph/instrumented/factoryInstrumented.h>
 #include <evoGraph/instrumented/teamInstrumented.h>
 #include <evoGraph/instrumented/vertexInstrumented.h>
@@ -144,16 +143,8 @@
 #include <log/logger.h>
 #include <log/mapElitesArchiveLogger.h>
 
-#include <mutator/lineMutator.h>
 #include <mutator/mutationParameters.h>
-#include <mutator/programMutator.h>
 #include <mutator/rng.h>
-#include <mutator/tpgMutator.h>
-
-#include <program/line.h>
-#include <program/program.h>
-#include <program/programEngine.h>
-#include <program/programExecutionEngine.h>
 
 #include <selector/classificationSelectionMetrics.h>
 #include <selector/classificationSelector.h>
@@ -183,8 +174,6 @@
 #include <codeGen/tpgSwitchGenerationEngine.h>
 #endif
 
-#include <archive.h>
-#include <environment.h>
 #include <outputInfo.h>
 
 #endif

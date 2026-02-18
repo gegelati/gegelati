@@ -5,7 +5,6 @@
 #include <memory>
 #include <vector>
 
-#include "archive.h"
 #include "algorithm/atpg/atpgPolicyStats.h"
 #include "algorithm/tpg/tpgAlgorithm.h"
 #include "algorithm/atpg/atpgManager.h"

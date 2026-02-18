@@ -39,7 +39,6 @@
 
 #include <memory>
 
-#include "archive.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/team.h"

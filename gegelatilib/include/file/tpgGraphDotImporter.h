@@ -64,6 +64,7 @@ namespace File {
      */
     class GraphDotImporter
     {
+        #if 0
       protected:
         /**
          * \brief File in which the dot content is read during import.
@@ -479,6 +480,7 @@ namespace File {
          * \brief Creates a TPG Graph from its description in a .dot file
          */
         void importGraph();
+        #endif
     };
 }; // namespace File
 

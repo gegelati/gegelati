@@ -47,7 +47,7 @@
 #include "instructions/set.h"
 #include "mutator/rng.h"
 
-#include "archive.h"
+#include "algorithm/tpg/archive.h"
 
 class ArchiveTest : public ::testing::Test
 {

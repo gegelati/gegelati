@@ -36,7 +36,6 @@
 #ifndef TPG_ABSTRACT_ENGINE_H
 #define TPG_ABSTRACT_ENGINE_H
 
-#include "program/program.h"
 #include "evoGraph/graph.h"
 
 namespace EvoGraph {

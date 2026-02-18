@@ -53,12 +53,10 @@
 #include "evoGraph/instrumented/factoryInstrumented.h"
 #include "evoGraph/instrumented/teamInstrumented.h"
 #include "evoGraph/instrumented/vertexInstrumented.h"
-#include "evoGraph/oldPolicyStats.h"
 #include "evoGraph/graph.h"
 
 #include "instructions/addPrimitiveType.h"
 #include "mutator/rng.h"
-#include "mutator/tpgMutator.h"
 
 #include "learn/fakeMultiContinuousLearningEnvironment.h"
 #include "learn/learningAgent.h"

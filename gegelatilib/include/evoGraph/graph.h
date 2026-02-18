@@ -40,6 +40,7 @@
 
 #include <list>
 #include <set>
+#include <vector>
 
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"

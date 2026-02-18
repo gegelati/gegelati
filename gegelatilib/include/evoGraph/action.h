@@ -40,7 +40,6 @@
 
 #include <cstdint>
 
-#include "program/program.h"
 #include "evoGraph/vertex.h"
 
 namespace EvoGraph {

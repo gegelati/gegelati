@@ -49,7 +49,7 @@
 #include "algorithm/tpg/tpgExecutionEngine.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
-#include "environment.h"
+#include "algorithm/lgp/environment.h"
 #include "instructions/addPrimitiveType.h"
 #include "instructions/instruction.h"
 #include "instructions/lambdaInstruction.h"

@@ -4,6 +4,7 @@
 #define MAP_ELITES_SELECTION_METRICS_H
 
 #include <numeric>
+#include <map>
 
 #include "selector/mapElites/mapElitesDescriptor.h"
 #include "selector/selectionMetrics.h"

@@ -6,6 +6,7 @@
 #include "algorithm/agentManager.h"
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
+#include "learn/learningParameters.h"
 #include "selector/selectionContext.h"
 #include "selector/selectionMetrics.h"
 #include "selector/selectionParameters.h"

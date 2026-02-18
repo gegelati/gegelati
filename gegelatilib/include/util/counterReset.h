@@ -4,7 +4,7 @@
 #define COUNTER_RESET_H
 
 #include "algorithm/agent.h"
-#include "program/program.h"
+#include "algorithm/algorithm.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/vertex.h"
 
