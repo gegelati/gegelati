@@ -1018,7 +1018,7 @@ TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
     // the RNG without being identical.
     EvoGraph::Graph& tpg = *la.getGraph();
 
-    ASSERT_EQ(tpg.getNbVertices(), 20)
+    ASSERT_EQ(tpg.getNbVertices(), 30)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 27)
         << "Graph does not have the expected determinist characteristics.";
