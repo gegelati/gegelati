@@ -40,6 +40,7 @@
 #include <cmath>
 #include <memory>
 
+#include "selector/selectionMetrics.h"
 namespace Learn {
     /**
      * \brief Base class for storing all result of a policy evaluation within a
@@ -53,19 +54,10 @@ namespace Learn {
     class EvaluationResult
     {
       protected:
-        /// Double value for the result.
-        double result;
-
         /**
-         * Double value for the utility. Utility is used only if the
-         * LearningEnvironment override the specific method. The utility
-         * represent a score needed for logs but not for learning.
-         *
-         * It can be used for comparison with different results rules for
-         * example.
+         * Selection Metrics register in the evaluation results.
          */
-
-        double utility;
+        std::shared_ptr<Selector::SelectionMetrics> selectionMetrics;
 
         /// Number of evaluation leading to this result.
         size_t nbEvaluation;
@@ -84,28 +76,21 @@ namespace Learn {
         /**
          * \brief Construct a result from a simple double value.
          *
-         * \param[in] res the double value representing the result of an
-         * evaluation.
+         * \param[in] selectionMetrics metrics used for the selection.
          * \param[in] nbEval Integer value representing the number of
          * evaluation leading to the recorded score.
-         * \param[in] uti the double value representing the utility of an
-         * evaluation.
          */
-        EvaluationResult(const double& res, const size_t& nbEval,
-                         const double& uti = std::nan(""))
-            : result{res}, utility{uti}, nbEvaluation{nbEval} {};
+        EvaluationResult(
+            std::shared_ptr<Selector::SelectionMetrics> selectionMetrics,
+            const size_t& nbEval)
+            : selectionMetrics{selectionMetrics}, nbEvaluation{nbEval} {};
 
         /**
          * \brief Virtual method to get the default double equivalent of
          * the reward of the EvaluationResult.
          */
-        virtual double getResult() const;
-
-        /**
-         * \brief Virtual method to get the default double equivalent of
-         * the utility of the EvaluationResult.
-         */
-        virtual double getUtility() const;
+        virtual std::shared_ptr<Selector::SelectionMetrics>
+        getSelectionMetrics() const;
 
         /**
          * \brief Virtual method to get the default number of evaluation of

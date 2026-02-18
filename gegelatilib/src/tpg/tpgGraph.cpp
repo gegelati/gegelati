@@ -131,6 +131,30 @@ uint64_t TPG::TPGGraph::getNbRootVertices() const
                          });
 }
 
+const std::vector<const TPG::TPGAction*> TPG::TPGGraph::getRootActions() const
+{
+    std::vector<const TPG::TPGAction*> result;
+    for (auto& vertex : this->vertices) {
+        if (vertex->getIncomingEdges().empty() &&
+            dynamic_cast<const TPG::TPGAction*>(vertex.get()) != nullptr) {
+            result.push_back(dynamic_cast<const TPG::TPGAction*>(vertex.get()));
+        }
+    }
+    return result;
+}
+
+const std::vector<const TPG::TPGTeam*> TPG::TPGGraph::getRootTeams() const
+{
+    std::vector<const TPG::TPGTeam*> result;
+    for (auto& vertex : this->vertices) {
+        if (vertex->getIncomingEdges().empty() &&
+            dynamic_cast<const TPG::TPGTeam*>(vertex.get()) != nullptr) {
+            result.push_back(dynamic_cast<const TPG::TPGTeam*>(vertex.get()));
+        }
+    }
+    return result;
+}
+
 const std::vector<const TPG::TPGVertex*> TPG::TPGGraph::getRootVertices() const
 {
     std::vector<const TPG::TPGVertex*> result;
@@ -511,18 +535,6 @@ void TPG::TPGGraph::updateAllAssessedActions()
         if (dynamic_cast<TPGAction*>(vertex.get()) != nullptr) {
             this->updateAssessedActions(vertex.get());
         }
-    }
-}
-void TPG::TPGGraph::setToBeDeleted(const TPG::TPGVertex* vertex)
-{
-    auto it = this->vertices.find(vertex);
-
-    if (it != this->vertices.end() && it->get() == vertex) {
-        // Found the vertex, modify it as needed
-        (*it)->setToBeDeleted(true);
-    }
-    else {
-        throw std::runtime_error("Action to order not in the graph.");
     }
 }
 

@@ -37,14 +37,10 @@
 
 #include "learn/evaluationResult.h"
 
-double Learn::EvaluationResult::getResult() const
+std::shared_ptr<Selector::SelectionMetrics> Learn::EvaluationResult::
+    getSelectionMetrics() const
 {
-    return this->result;
-}
-
-double Learn::EvaluationResult::getUtility() const
-{
-    return this->utility;
+    return this->selectionMetrics;
 }
 
 size_t Learn::EvaluationResult::getNbEvaluation() const
@@ -64,19 +60,13 @@ Learn::EvaluationResult& Learn::EvaluationResult::operator+=(
 
     // If the added type is Learn::EvaluationResult
     if (thisType == typeid(Learn::EvaluationResult)) {
-        // Weighted addition of results
-        this->result = this->result * (double)this->nbEvaluation +
-                       other.result * (double)other.nbEvaluation;
-        this->result /= (double)this->nbEvaluation + (double)other.nbEvaluation;
 
-        // Weighted addition of utility
-        this->utility = this->utility * (double)this->nbEvaluation +
-                        other.utility * (double)other.nbEvaluation;
-        this->utility /=
-            (double)this->nbEvaluation + (double)other.nbEvaluation;
+        // Update selectionMetrics
+        this->selectionMetrics->weightedSum(
+            other.selectionMetrics, this->nbEvaluation, other.nbEvaluation);
 
-        // Addition ot nbEvaluation
-        this->nbEvaluation += other.nbEvaluation;
+        // Addition of nbEvaluation
+        this->nbEvaluation = this->nbEvaluation + other.nbEvaluation;
     }
 
     return *this;
@@ -84,5 +74,5 @@ Learn::EvaluationResult& Learn::EvaluationResult::operator+=(
 
 bool Learn::operator<(const EvaluationResult& a, const EvaluationResult& b)
 {
-    return a.getResult() < b.getResult();
+    return a.getSelectionMetrics() < b.getSelectionMetrics();
 }

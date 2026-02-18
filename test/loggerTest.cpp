@@ -38,7 +38,6 @@
 #include <gtest/gtest.h>
 
 #include "log/logger.h"
-
 TEST(loggerTest, Constructor)
 {
     ASSERT_NO_THROW(Log::Logger l);

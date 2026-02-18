@@ -83,7 +83,7 @@ class LABasicLoggerTest : public ::testing::Test
         params.archivingProbability = 0.5;
         params.maxNbActionsPerEval = 11;
         params.nbIterationsPerPolicyEvaluation = 3;
-        params.ratioDeletedRoots =
+        params.selection.truncation.ratioDeletedRoots =
             0.95; // high number to force the apparition of root action.
         params.nbThreads = 1;
         params.nbProgramConstant = 5;
@@ -91,8 +91,10 @@ class LABasicLoggerTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
 
-        auto res1 = new Learn::EvaluationResult(5, 2, 2);
-        auto res2 = new Learn::EvaluationResult(10, 2, 4);
+        auto res1 = new Learn::EvaluationResult(
+            std::make_shared<Selector::SelectionMetrics>(5, 2), 2);
+        auto res2 = new Learn::EvaluationResult(
+            std::make_shared<Selector::SelectionMetrics>(10, 4), 2);
         auto v1(new TPG::TPGAction(0));
         auto v2(new TPG::TPGAction(0));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
@@ -114,6 +116,41 @@ class LABasicLoggerTest : public ::testing::Test
         delete la;
     }
 };
+
+TEST_F(LABasicLoggerTest, ParentContructor)
+{
+    Log::LALogger* l = nullptr;
+    ASSERT_NO_THROW(l = new Log::LALogger(*la));
+    if (l != nullptr) {
+        delete l;
+    }
+    ASSERT_NO_THROW(Log::LALogger l(*la, std::cerr));
+}
+
+TEST_F(LABasicLoggerTest, ParentEmptyMethods)
+{
+    std::stringstream strStr;
+    Log::LALogger log(*la, strStr);
+
+    // Explicit calls to empty method to force code coverage.
+    // These methods are called during la.trainOneGeneration
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        emptyMap;
+    log.logHeader();
+    uint64_t gen = 0;
+    log.logNewGeneration(gen);
+    log.logAfterPopulateTPG();
+    log.logAfterEvaluate(emptyMap);
+    log.logAfterDecimate();
+    log.logEndOfTraining();
+
+    // These methods are not called otherwise
+    log.logAfterValidate(emptyMap);
+
+    ASSERT_EQ(strStr.str().size(), 0)
+        << "Empty method should not generate any log.";
+}
 
 TEST_F(LABasicLoggerTest, Constructor)
 {
@@ -155,13 +192,13 @@ TEST_F(LABasicLoggerTest, logHeader)
     ASSERT_EQ("Min", result[5]);
     ASSERT_EQ("Avg", result[6]);
     ASSERT_EQ("Max", result[7]);
-    ASSERT_EQ("T_mutat", result[8]);
-    ASSERT_EQ("T_eval", result[9]);
-    ASSERT_EQ("T_decim", result[10]);
+    ASSERT_EQ("T_eval", result[8]);
+    ASSERT_EQ("T_decim", result[9]);
+    ASSERT_EQ("T_mutat", result[10]);
     ASSERT_EQ("T_total", result[11]);
     ASSERT_EQ("Valid", result[13]);
     ASSERT_EQ("Avg", result[22]);
-    ASSERT_EQ("T_valid", result[26]);
+    ASSERT_EQ("T_valid", result[25]);
     ASSERT_EQ("U_Min", result[35]);
     ASSERT_EQ("U_Avg", result[36]);
     ASSERT_EQ("U_Max", result[37]);
@@ -176,18 +213,27 @@ TEST_F(LABasicLoggerTest, logNewGeneration)
     Log::LABasicLogger l(*la, strStr);
     uint64_t nbGen = 42;
 
+    la->init();
     l.logNewGeneration(nbGen);
 
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
     std::istringstream iss(s);
-    for (std::string s2; iss >> s2;)
+    for (std::string s2; iss >> s2;) {
         result.push_back(s2);
+    }
 
     // index 12 because we skip the header
     ASSERT_EQ("42", result[12]);
-    ASSERT_EQ(result.size(), 12 + 1);
+    // index 12 because we skip the header
+    ASSERT_EQ("18", result[13])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ("0", result[14])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ("15", result[15])
+        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ(result.size(), 12 + 4);
 }
 
 TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
@@ -203,14 +249,7 @@ TEST_F(LABasicLoggerTest, logAfterPopulateTPG)
     std::istringstream iss(s);
     for (std::string s2; iss >> s2;)
         result.push_back(s2);
-
-    // index 12 because we skip the header
-    ASSERT_EQ("18", result[12])
-        << "Unexpected number of vertices was printed in the log.";
-    ASSERT_EQ("0", result[13])
-        << "Unexpected number of vertices was printed in the log.";
-    ASSERT_EQ("15", result[14])
-        << "Unexpected number of vertices was printed in the log.";
+    ASSERT_EQ(result.size(), 12);
 }
 
 TEST_F(LABasicLoggerTest, logAfterEvaluate)

@@ -426,6 +426,36 @@ TEST_F(ImporterTest, importTrainedGraph)
 
     // assert that we can import a tpg graph from a file
     ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
+
+    // Check the imported graph characteristics
+    ASSERT_EQ(tpg_copy->getNbVertices(), 5)
+        << "the wrong number of vertices have been created.";
+    ASSERT_EQ(tpg_copy->getEdges().size(), 5)
+        << "the wrong number of edges have been created.";
+    ASSERT_EQ(tpg_copy->getRootVertices().size(), 1)
+        << "the wrong number of root teams have been created.";
+}
+
+TEST_F(ImporterTest, importTrainedGraphContinuous)
+{
+    params.nbProgramConstant = 10;
+    e = new Environment(set, params, vect, 3);
+    tpg_copy = new TPG::TPGGraph(*e);
+
+    File::TPGGraphDotImporter dotImporter(
+        TESTS_DAT_PATH "exported_trained_tpg_continuous_ref.dot", *e,
+        *tpg_copy);
+
+    // assert that we can import a tpg graph from a file
+    ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
+
+    // Check the imported graph characteristics
+    ASSERT_EQ(tpg_copy->getNbVertices(), 5)
+        << "the wrong number of vertices have been created.";
+    ASSERT_EQ(tpg_copy->getEdges().size(), 27)
+        << "the wrong number of edges have been created.";
+    ASSERT_EQ(tpg_copy->getRootVertices().size(), 1)
+        << "the wrong number of root teams have been created.";
 }
 
 TEST_F(ImporterTest, readLineFromFile)

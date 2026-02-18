@@ -48,17 +48,20 @@ void Log::LABasicLogger::logResults(
 {
     auto logStat = [&](auto getter) {
         auto iter = results.begin();
-        double min =
-            (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
+        double min = (iter != results.end())
+                         ? (iter->first->getSelectionMetrics().get()->*getter)()
+                         : 0.0;
         std::advance(iter, results.size() - 1);
-        double max =
-            (iter != results.end()) ? (iter->first.get()->*getter)() : 0.0;
+        double max = (iter != results.end())
+                         ? (iter->first->getSelectionMetrics().get()->*getter)()
+                         : 0.0;
         double avg = std::accumulate(
             results.begin(), results.end(), 0.0,
             [getter](double acc,
                      const std::pair<std::shared_ptr<Learn::EvaluationResult>,
                                      const TPG::TPGVertex*>& pair) {
-                return acc + (pair.first.get()->*getter)();
+                return acc +
+                       (pair.first->getSelectionMetrics().get()->*getter)();
             });
         avg /= (double)results.size();
         *this << std::setw(colWidth) << min << std::setw(colWidth) << avg
@@ -66,9 +69,9 @@ void Log::LABasicLogger::logResults(
     };
 
     if (useUtility) {
-        logStat(&Learn::EvaluationResult::getUtility);
+        logStat(&Selector::SelectionMetrics::getUtility);
     }
-    logStat(&Learn::EvaluationResult::getResult);
+    logStat(&Selector::SelectionMetrics::getScore);
 }
 
 void Log::LABasicLogger::logHeader()
@@ -118,25 +121,17 @@ void Log::LABasicLogger::logHeader()
         }
     }
 
-    *this << std::setw(colWidth) << "T_mutat" << std::setw(colWidth)
-          << "T_eval";
+    *this << std::setw(colWidth) << "T_eval";
     if (doValidation) {
         *this << std::setw(colWidth) << "T_valid";
     }
     *this << std::setw(colWidth) << "T_decim" << std::setw(colWidth)
-          << "T_total" << std::endl;
+          << "T_mutat" << std::setw(colWidth) << "T_total" << std::endl;
 }
 
 void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
 {
     *this << std::setw(colWidth) << generationNumber;
-    // resets checkpoint to be able to show evaluation time
-    chronoFromNow();
-}
-
-void Log::LABasicLogger::logAfterPopulateTPG()
-{
-    this->mutationTime = getDurationFrom(*checkpoint);
 
     *this << std::setw(colWidth)
           << this->learningAgent.getTPGGraph()->getNbVertices();
@@ -152,6 +147,14 @@ void Log::LABasicLogger::logAfterPopulateTPG()
 
     *this << std::setw(colWidth) << nbActionsR << std::setw(colWidth)
           << nbTeamsR;
+
+    // resets checkpoint to be able to show evaluation time
+    chronoFromNow();
+}
+
+void Log::LABasicLogger::logAfterPopulateTPG()
+{
+    this->mutationTime = getDurationFrom(*checkpoint);
 
     chronoFromNow();
 }
@@ -197,11 +200,11 @@ void Log::LABasicLogger::logAfterDecimate()
 
 void Log::LABasicLogger::logEndOfTraining()
 {
-    *this << std::setw(colWidth) << mutationTime;
     *this << std::setw(colWidth) << evalTime;
     if (doValidation) {
         *this << std::setw(colWidth) << validTime;
     }
     *this << std::setw(colWidth) << decimationTime;
+    *this << std::setw(colWidth) << mutationTime;
     *this << std::setw(colWidth) << getDurationFrom(*start) << std::endl;
 }

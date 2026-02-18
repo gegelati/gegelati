@@ -214,6 +214,13 @@ namespace Program {
         Line& addNewLine(const uint64_t idx);
 
         /**
+         * \brief Add a new line to the Program at the end of the program.
+         *
+         * \param[in] newLine new Line added to the program
+         */
+        void addNewLine(Line newLine);
+
+        /**
          * \brief Clear all intron instructions in the Program.
          *
          * All introns lines from the Program are removed by this method.
@@ -333,7 +340,7 @@ namespace Program {
          *	Although this method is not required as the data is accessible from
          *	the constantHandler, it allows a shortcut and add readability.
          *
-         *	\param[in] index the position at which we access the constant
+         * \param[in] index the position at which we access the constant
          *	\return the value of the constant at the given index
          */
         const Data::Constant getConstantAt(size_t index) const;

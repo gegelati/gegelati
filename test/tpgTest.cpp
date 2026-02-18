@@ -620,6 +620,15 @@ TEST_F(TPGTest, TPGGraphGetRootVertices)
         << "Number of roots of the TPG is incorrect.";
     ASSERT_EQ(tpg.getRootVertices().at(0), &vertex0)
         << "Vertex classified as root is incorrect.";
+
+    const TPG::TPGVertex& vertex2 = tpg.addNewTeam();
+    const TPG::TPGAction& vertex3 = tpg.addNewAction(1);
+    ASSERT_EQ(tpg.getRootVertices().size(), 3)
+        << "Number of roots of the TPG is incorrect.";
+    ASSERT_EQ(tpg.getRootTeams().size(), 2)
+        << "Number of roots teams of the TPG is incorrect.";
+    ASSERT_EQ(tpg.getRootActions().size(), 1)
+        << "Number of roots actions of the TPG is incorrect.";
 }
 
 TEST_F(TPGTest, TPGGraphCloneVertex)
@@ -1055,20 +1064,6 @@ TEST_F(TPGTest, TPGGraphUpdateAllAssessedActions)
                 action1.getAssessedActions().end());
     ASSERT_TRUE(action2.getAssessedActions().find(2) !=
                 action2.getAssessedActions().end());
-}
-
-TEST_F(TPGTest, TPGGraphSetToBeDeleted)
-{
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGTeam& team = tpg.addNewTeam();
-
-    // Should set toBeDeleted without throwing
-    ASSERT_NO_THROW(tpg.setToBeDeleted(&team));
-    ASSERT_TRUE(team.isToBeDeleted());
-
-    // Try with a vertex not in the graph (should throw)
-    TPG::TPGTeam fakeTeam;
-    ASSERT_THROW(tpg.setToBeDeleted(&fakeTeam), std::runtime_error);
 }
 
 TEST_F(TPGTest, TPGGraphOrderActionEdges)
