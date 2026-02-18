@@ -35,7 +35,7 @@ namespace Algorithm::ATPG {
          * \param[in] algorithmID id of the algorithm used.
          * \param[in] archive Archive used by this ActionTPG
          */
-        ATPGMutator(Selector::Selector& selector, uint64_t algorithmID, std::shared_ptr<const Archive> archive): TPGMutator(selector, algorithmID, archive) {};
+        ATPGMutator(Selector::Selector& selector, uint64_t algorithmID, const Archive& archive): TPGMutator(selector, algorithmID, archive) {};
 
         
         /**
@@ -47,7 +47,7 @@ namespace Algorithm::ATPG {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void updateSpecificContext(
-            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager,
+            EvoGraph::Graph& graph, AgentManager& manager,
             const Learn::LearningParameters& params,
             RNG::RNG& rng) override;
 
@@ -84,7 +84,7 @@ namespace Algorithm::ATPG {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief Initialize a random Agent.
@@ -95,7 +95,7 @@ namespace Algorithm::ATPG {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
 
 
         /**
@@ -123,9 +123,9 @@ namespace Algorithm::ATPG {
          * \param[in] rng Random Number Generator used in the mutation
          * process.
          */
-        virtual void mutateEdgeDestination(std::shared_ptr<EvoGraph::Graph> graph,
+        virtual void mutateEdgeDestination(EvoGraph::Graph& graph,
                                     std::shared_ptr<const EvoGraph::Edge> edge,
-                                    std::shared_ptr<AgentManager> manager,
+                                    AgentManager& manager,
                                     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
                                     const Learn::LearningParameters& params,
                                     RNG::RNG& rng);
@@ -148,8 +148,8 @@ namespace Algorithm::ATPG {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateOutgoingEdge(
-            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
-            std::shared_ptr<AgentManager> manager,
+            EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Edge> edge,
+            AgentManager& manager,
             std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
             const Learn::LearningParameters& params, RNG::RNG& rng) override;
 
@@ -159,8 +159,8 @@ namespace Algorithm::ATPG {
          * \brief Specialization of mutateSubAgents method.
          */
         virtual void mutateSubAgents(
-            std::vector<std::reference_wrapper<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
-            std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
+            std::vector<std::reference_wrapper<const Agent>>& agents, EvoGraph::Graph& graph, 
+            AgentManager& manager, const Learn::LearningParameters& params, 
             RNG::RNG& rng, uint64_t maxNbThreads) override;
     };
 

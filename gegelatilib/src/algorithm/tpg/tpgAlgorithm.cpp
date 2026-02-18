@@ -1,4 +1,3 @@
-
 #include "algorithm/tpg/tpgAlgorithm.h"
 
 std::unique_ptr<Algorithm::Algorithm> Algorithm::TPG::TPGAlgorithm::copy() const
@@ -15,22 +14,22 @@ void Algorithm::TPG::TPGAlgorithm::setProgramAlgorithm(const Algorithm& programA
 }
 
 
-std::shared_ptr<const Archive> Algorithm::TPG::TPGAlgorithm::getArchive() const
+const Archive& Algorithm::TPG::TPGAlgorithm::getArchive() const
 {
-    return this->archive;
+    return *this->archive;
 }
 
-void Algorithm::TPG::TPGAlgorithm::initManager(std::shared_ptr<const Output::OutputHandler> outputs)
+void Algorithm::TPG::TPGAlgorithm::initManager()
 {
-    this->manager = std::make_shared<TPG::TPGManager>(*outputs, this->algorithmID);
+    this->manager = std::make_unique<TPG::TPGManager>(*this->outputs, this->algorithmID);
 }
 
 void Algorithm::TPG::TPGAlgorithm::initMutator()
 {
-    this->mutator = std::make_shared<TPG::TPGMutator>(*this->selector, this->algorithmID, this->archive);
+    this->mutator = std::make_unique<TPG::TPGMutator>(*this->selector, this->algorithmID, *this->archive);
 }
 
-void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Initialize program algorithm.
     Algorithm& programAlgo = this->getSubAlgorithm(this->programAlgorithmID);
@@ -42,15 +41,15 @@ void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_
     }
 
     // Init program algorithm
-    programAlgo.initAlgorithm(rng, programOutput, dataSource, graph);
+    programAlgo.initAlgorithm(rng, *programOutput, dataSource, graph);
 
     // Add program manager and mutator to TPG manager and mutator
     this->manager->addSubManager(programAlgo.getManager());
-    std::shared_ptr<TPG::TPGManager> tpgManager = std::dynamic_pointer_cast<TPG::TPGManager>(this->manager);
+    TPGManager* tpgManager = dynamic_cast<TPGManager*>(this->manager.get());
     tpgManager->setProgramAlgorithmID(this->programAlgorithmID);
 
     this->mutator->addSubMutator(programAlgo.getMutator());
-    std::shared_ptr<TPG::TPGMutator> tpgMutator = std::dynamic_pointer_cast<TPG::TPGMutator>(this->mutator);
+    TPGMutator* tpgMutator = dynamic_cast<TPGMutator*>(this->mutator.get());
     tpgMutator->setProgramAlgorithmID(this->programAlgorithmID);
 }
 
@@ -62,13 +61,13 @@ std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(const Ag
 
     // Before each agent evaluation, set a new seed for the archive in
     // TRAINING Mode Else, archiving should be deactivate anyway
-    Archive* jobArchive = nullptr;
+    std::unique_ptr<Archive> jobArchive = nullptr;
     if (mode == Learn::LearningMode::TRAINING) {
         size_t archiveSeed = rng.getUnsignedInt64(0, UINT64_MAX);
-        jobArchive = new Archive (this->params.archiveSize, this->params.archivingProbability, archiveSeed);
+        jobArchive = std::make_unique<Archive>(this->params.archiveSize, this->params.archivingProbability, archiveSeed);
     }
 
-    return std::make_shared<TPGJob>(agent, idx, jobArchive);
+    return std::make_shared<TPGJob>(agent, idx, std::move(jobArchive));
 }
 
 std::shared_ptr<Algorithm::PolicyStats> Algorithm::TPG::TPGAlgorithm::createPolicyStats() const
@@ -83,13 +82,14 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
     // Merge the archives
     if (mode == Learn::LearningMode::TRAINING) {
         // Build archive map
-        std::map<uint64_t, Archive*> archiveMap;
+        std::map<uint64_t, std::reference_wrapper<Archive>> archiveMap;
         for (const auto& jobPtr : jobs) {
             std::shared_ptr<const TPGJob> tpgJob = std::dynamic_pointer_cast<const TPGJob>(jobPtr);
             if(tpgJob == nullptr){
                 throw std::runtime_error("Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation trying to update after evaluation with a job which is not a TPGJob");
             }
-            archiveMap[jobPtr->getIdx()] = tpgJob->getArchive();
+            std::reference_wrapper<Archive> archiveRef = tpgJob->getArchive();
+            archiveMap.insert({jobPtr->getIdx(), archiveRef});
         }
 
 
@@ -100,7 +100,7 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
         uint64_t nbRecordings = 0;
         while (nbRecordings < this->params.archiveSize &&
             reverseIterator != archiveMap.rend()) {
-            nbRecordings += reverseIterator->second->getNbRecordings();
+            nbRecordings += reverseIterator->second.get().getNbRecordings();
             reverseIterator++;
         }
 
@@ -118,26 +118,19 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
             }
 
             // Insert remaining recordings
-            while (recordingIdx < reverseIterator->second->getNbRecordings()) {
+            while (recordingIdx < reverseIterator->second.get().getNbRecordings()) {
                 // Access in reverse order
                 const ArchiveRecording& recording =
-                    reverseIterator->second->at(recordingIdx);
+                    reverseIterator->second.get().at(recordingIdx);
                 // forced Insertion
                 this->archive->addRecording(
                     *recording.agent,
-                    reverseIterator->second->getDataHandlers().at(
+                    reverseIterator->second.get().getDataHandlers().at(
                         recording.dataHash),
                     recording.result, true);
                 recordingIdx++;
 
             }
-        }
-
-        // delete all archives
-        reverseIterator = archiveMap.rbegin();
-        while (reverseIterator != archiveMap.rend()) {
-            delete reverseIterator->second;
-            reverseIterator++;
         }
     }
 }

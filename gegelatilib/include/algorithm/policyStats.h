@@ -114,6 +114,11 @@ namespace Algorithm {
         /// @brief map storing the sub policy stats of the sub algorithms
         std::map<uint64_t, std::shared_ptr<PolicyStats>> subPolicyStats;
 
+
+        // Disable copying to avoid accidental copies (use references or pointers instead).
+        PolicyStats(const PolicyStats&) = delete;
+        PolicyStats& operator=(const PolicyStats&) = delete;
+        
         /**
          * \brief Main constructor of the PolicyStats class.
          * 

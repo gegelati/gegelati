@@ -70,6 +70,11 @@ namespace Algorithm {
         /// Deleted default constructor.
         Job() = delete;
 
+
+        // Disable copying to avoid accidental copies (use references or pointers instead).
+        Job(const Job&) = delete;
+        Job& operator=(const Job&) = delete;
+
         /**
          * \brief Constructor enabling storing elements in the job so that the
          * Learning Agents will be able to use them later.

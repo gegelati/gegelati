@@ -22,8 +22,8 @@ namespace Selector {
      * \param[in] manager shared pointer of the manager used by the algorithm.
      * \param[in] params LearningParameters used
      */
-    std::shared_ptr<Selector> selectorFactory(
-        const std::shared_ptr<Algorithm::AgentManager> manager,
+    std::unique_ptr<Selector> selectorFactory(
+        Algorithm::AgentManager& manager,
         const Learn::LearningParameters& params);
 
 }; // namespace Selector

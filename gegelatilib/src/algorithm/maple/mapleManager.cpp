@@ -27,7 +27,7 @@ std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::Maple::MapleManager::crea
 
 
     engine->setProgramExecutionEngine(std::move(this->cGetSubManager(this->programAlgorithmID)
-                      ->createExecutionEngine(dataSources, isTraining))
+                      .createExecutionEngine(dataSources, isTraining))
     );
 
     return engine;

@@ -51,7 +51,7 @@ namespace Algorithm::LGP {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief Initialize a random Agent.
@@ -62,7 +62,7 @@ namespace Algorithm::LGP {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
         
 
 
@@ -77,7 +77,7 @@ namespace Algorithm::LGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::vector<std::reference_wrapper<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::vector<std::reference_wrapper<const Agent>> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) override;
 
         /**
@@ -91,7 +91,7 @@ namespace Algorithm::LGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) override;
 
 
@@ -104,7 +104,7 @@ namespace Algorithm::LGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual bool mutateLGPAgent(
-            const LGPAgent& agent, std::shared_ptr<LGPManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng
+            const LGPAgent& agent, LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng
         );
 
         /**
@@ -120,7 +120,7 @@ namespace Algorithm::LGP {
          * \return true if a line could be added, false otherwise.
          *
          */
-        bool deleteRandomLine(const LGPAgent& agent, std::shared_ptr<LGPManager> manager, RNG::RNG& rng);
+        bool deleteRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
 
         /**
          * \brief Insert a new Line at a randomly selected position within the
@@ -136,7 +136,7 @@ namespace Algorithm::LGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          *
          */
-        void insertRandomLine(const LGPAgent& agent, std::shared_ptr<LGPManager> manager, RNG::RNG& rng);
+        void insertRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
 
         /**
          * \brief Swap two randomly selected instructions within the given
@@ -152,7 +152,7 @@ namespace Algorithm::LGP {
          * \return true if the lines where successfully swapped, false if the
          *         Program has less than two lines.
          */
-        bool swapRandomLines(const LGPAgent& agent, std::shared_ptr<LGPManager> manager, RNG::RNG& rng);
+        bool swapRandomLines(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
 
         /**
          * \brief Alter a randomly selected Line in a given Program.
@@ -168,7 +168,7 @@ namespace Algorithm::LGP {
          * \return true if a line was successfully altered, false if the
          *         Program has less than one line.
          */
-        bool alterRandomLine(const LGPAgent& agent, std::shared_ptr<LGPManager> manager, RNG::RNG& rng);
+        bool alterRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
 
         /**
          * \brief Alter a program's constant.
@@ -184,7 +184,7 @@ namespace Algorithm::LGP {
          * \return true if a constant was successfully altered, false if the
          *         Program has less than one line.
          */
-        bool alterRandomConstant(const LGPAgent& agent, std::shared_ptr<LGPManager> manager,
+        bool alterRandomConstant(const LGPAgent& agent, LGPManager& manager,
                                  const Learn::LearningParameters& params,
                                  RNG::RNG& rng);
     };

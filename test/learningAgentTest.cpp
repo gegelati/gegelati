@@ -175,7 +175,7 @@ TEST_F(LearningAgentTest, addLogger)
     // Test a new root
     std::shared_ptr<Learn::EvaluationResult> result1;
     ASSERT_FALSE(la.isRootEvalSkipped(
-        *la.getGraph()->getRootVertices().at(0), result1))
+        la.getGraph().getRootVertices().at(0), result1))
         << "Method should return false for a root that has never been "
            "evaluated before.";
     ASSERT_EQ(result1, nullptr) << "Method should return a nullptr for a root "
@@ -184,13 +184,13 @@ TEST_F(LearningAgentTest, addLogger)
     // Add an EvaluationResult artificially
     result1 = std::make_shared<Learn::EvaluationResult>(
         std::make_shared<Selector::SelectionMetrics>(1.0), 1);
-    la.getSelector()->updateEvaluationRecords(
-        {{result1, la.getGraph()->getRootVertices().at(0)}});
+    la.getSelector().updateEvaluationRecords(
+        {{result1, la.getGraph().getRootVertices().at(0)}});
 
     // Test the root again
     std::shared_ptr<Learn::EvaluationResult> result2;
     ASSERT_FALSE(la.isRootEvalSkipped(
-        *la.getGraph()->getRootVertices().at(0), result2))
+        la.getGraph().getRootVertices().at(0), result2))
         << "Method should return false for a root that has been evaluated "
            "before.";
     ASSERT_EQ(result2, result1)
@@ -200,12 +200,12 @@ TEST_F(LearningAgentTest, addLogger)
     // Update the EvaluationResult artificially
     result2 = std::make_shared<Learn::EvaluationResult>(
         std::make_shared<Selector::SelectionMetrics>(1.0), 2);
-    la.getSelector()->updateEvaluationRecords(
-        {{result2, la.getGraph()->getRootVertices().at(0)}});
+    la.getSelector().updateEvaluationRecords(
+        {{result2, la.getGraph().getRootVertices().at(0)}});
 
     // Test the root again.
     std::shared_ptr<Learn::EvaluationResult> result3;
-    ASSERT_TRUE(la.isRootEvalSkipped(*la.getGraph()->getRootVertices().at(0),
+    ASSERT_TRUE(la.isRootEvalSkipped(la.getGraph().getRootVertices().at(0),
                                      result3))
         << "Method should return true for a root that has been evaluated "
            "before more times than maxNbEvaluationPerPolicy.";
@@ -219,11 +219,11 @@ TEST_F(LearningAgentTest, addLogger)
 {
     Learn::LearningAgent la(le, tpg, params);
     la.init();
-    auto job = *la.makeJob(la.getAlgorithmAt(0)->getAgents().at(0),
+    auto job = *la.makeJob(la.getAlgorithmAt(0).getAgents().at(0),
                            Learn::LearningMode::TRAINING);
     ASSERT_NO_THROW(job.getArchiveSeed()) << "job should have an archive seed";
     ASSERT_NO_THROW(job.getIdx()) << "job should have an idx";
-    ASSERT_EQ(la.getAlgorithmAt(0)->getAgents().at(0), job.getAgent())
+    ASSERT_EQ(la.getAlgorithmAt(0).getAgents().at(0), job.getAgent())
         << "Encapsulate the root in a job shouldn't change it";
 
     Learn::LearningAgent la2(le, tpg, params);
@@ -236,10 +236,10 @@ TEST_F(LearningAgentTest, MakeJobs)
     Learn::LearningAgent la(le, tpg, params);
     la.init();
     auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
-    ASSERT_EQ(la.getAlgorithmAt(0)->getAgents().size(), jobs.size())
+    ASSERT_EQ(la.getAlgorithmAt(0).getAgents().size(), jobs.size())
         << "There should be as many jobs as roots";
-    for (int i = 0; i < la.getGraph()->getNbRootVertices(); i++) {
-        ASSERT_EQ(la.getAlgorithmAt(0)->getAgents().at(i),
+    for (int i = 0; i < la.getGraph().getNbRootVertices(); i++) {
+        ASSERT_EQ(la.getAlgorithmAt(0).getAgents().at(i),
                   (*jobs.front()).getAgent())
             << "Encapsulate the root in a job shouldn't change it";
         jobs.pop();
@@ -258,10 +258,10 @@ TEST_F(LearningAgentTest, EvalAgent)
                // LearningAgent is used.
 
     la.init();
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager()->createExecutionEngine();
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager().createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = tpg->createJob(la.getAlgorithmAt(0)->getAgents().at(0),
+    auto job = tpg->createJob(la.getAlgorithmAt(0).getAgents().at(0),
                            Learn::LearningMode::TRAINING, la.getRNG());
     la.setCurrentAlgorithm(tpg);
     ASSERT_NO_THROW(
@@ -288,7 +288,7 @@ TEST_F(LearningAgentTest, EvaluateOneRoot)
     std::shared_ptr<Learn::EvaluationResult> result;
     ASSERT_NO_THROW(
         result = la.evaluateOneAgent(0, Learn::LearningMode::TRAINING,
-                                    la.getAlgorithmAt(0)->getAgents().at(0)))
+                                    la.getAlgorithmAt(0).getAgents().at(0)))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
@@ -311,7 +311,7 @@ TEST_F(LearningAgentTest, EvalAllRoots)
     ASSERT_NO_THROW(result =
                         la.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
-    ASSERT_EQ(result.size(), la.getGraph()->getNbRootVertices())
+    ASSERT_EQ(result.size(), la.getGraph().getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "Graph.";
 }
@@ -340,16 +340,16 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
 
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    auto tpg = la.getAlgorithmAt(0);
-    tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), params, la.getRNG());
+    Algorithm::Algorithm& tpg = la.getAlgorithmAt(0);
+    tpg.getMutator().mutatePopulation(la.getGraph(), tpg.getManager(), params, la.getRNG());
 
-    size_t initialNbVertex = la.getGraph()->getNbVertices();
+    size_t initialNbVertex = la.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(la.trainOneGeneration(4, false))
         << "Training for one generation failed.";
     // Check the number of vertex in the graph.
     // Must be initial number of vertex - number of root removed
-    ASSERT_EQ(la.getGraph()->getNbVertices(),
+    ASSERT_EQ(la.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
                         params.mutation.tpg.nbRoots))
@@ -357,7 +357,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
            "Graph.";
 
     // Check that bestRoot has been set
-    ASSERT_NE(tpg->getSelector()->getBestAgent().first, std::nullopt)
+    ASSERT_NE(tpg.getSelector().getBestAgent().first, std::nullopt)
         << "Best root should be set after a trainOneGeneration iteration.";
 
     o.close();
@@ -423,7 +423,7 @@ TEST_F(LearningAgentTest, TrainPortability)
     la.init();
     bool alt = false;
     la.train(alt, false);
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
     // Useful when determinism is changed
     /*std::cout << tpg.getNbVertices() << " "
@@ -476,7 +476,7 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
 
     bool alt = false;
     la.train(alt, false);
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
     // Useful when determinism is changed
     /*std::cout << tpg.getNbVertices() << " "
@@ -534,7 +534,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
     ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 24)
@@ -629,7 +629,7 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
     ASSERT_EQ(tpg.getNbVertices(), 26)
         << "Graph does not have the expected determinst characteristics.";
@@ -676,7 +676,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
     ASSERT_EQ(tpg.getNbVertices(), 53)
         << "Graph does not have the expected determinst characteristics.";
@@ -728,7 +728,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
     ASSERT_EQ(tpg.getNbVertices(), 158)
         << "Graph does not have the expected determinst characteristics.";
@@ -783,7 +783,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
     
     ASSERT_EQ(tpg.getNbVertices(), 211)
@@ -830,7 +830,7 @@ TEST_F(LearningAgentTest, TrainContinuousMaple)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
 
     // Useful when determinism is changed
@@ -901,7 +901,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
     ASSERT_EQ(tpg.getNbVertices(), 185)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 120)
@@ -962,7 +962,7 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLETournament)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
     ASSERT_EQ(tpg.getNbVertices(), 175)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 118)
@@ -1003,10 +1003,12 @@ TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
     Learn::LearningAgent la(cle, maple, params);
 
     la.init();
-    std::shared_ptr<Selector::MapElitesSelector> mapElitesSelector = std::dynamic_pointer_cast<Selector::MapElitesSelector>(maple->getSelector());
+    Selector::MapElitesSelector& mapElitesSelector =
+        dynamic_cast<Selector::MapElitesSelector&>(
+            maple->getSelector());
     std::shared_ptr<Selector::MapElites::MapElitesDescriptor> descriptor = std::make_shared<Selector::MapElites::DefaultDescriptors::ActionValues>();
-	descriptor->initDescriptor(*la.getGraph(), cle);
-    mapElitesSelector->addArchiveFromDescriptor(30, descriptor, cle);
+	descriptor->initDescriptor(la.getGraph(), cle);
+    mapElitesSelector.addArchiveFromDescriptor(30, descriptor, cle);
 
     bool alt = false;
     la.train(alt, false);
@@ -1014,7 +1016,7 @@ TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
     ASSERT_EQ(tpg.getNbVertices(), 30)
         << "Graph does not have the expected determinst characteristics.";
@@ -1055,14 +1057,14 @@ TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
     Learn::LearningAgent la(cle, maple, params);
 
     la.init();
-    std::shared_ptr<Selector::MapElitesSelector> mapElitesSelector =
-        std::dynamic_pointer_cast<Selector::MapElitesSelector>(
+    Selector::MapElitesSelector& mapElitesSelector =
+        dynamic_cast<Selector::MapElitesSelector&>(
             maple->getSelector());
     std::shared_ptr<Selector::MapElites::MapElitesDescriptor> descriptor =
         std::make_shared<
             Selector::MapElites::DefaultDescriptors::ActionValues>();
-    descriptor->initDescriptor(*la.getGraph(), cle);
-    mapElitesSelector->addCvtArchiveFromDescriptor(30, descriptor, cle, la.getRNG());
+    descriptor->initDescriptor(la.getGraph(), cle);
+    mapElitesSelector.addCvtArchiveFromDescriptor(30, descriptor, cle, la.getRNG());
 
     bool alt = false;
     la.train(alt, false);
@@ -1070,7 +1072,7 @@ TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
     ASSERT_EQ(tpg.getNbVertices(), 11)
         << "Graph does not have the expected determinst characteristics.";
@@ -1105,9 +1107,9 @@ TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
     la.train(alt, false);
 
 
-    EvoGraph::Graph& graph = *la.getGraph();
+    EvoGraph::Graph& graph = la.getGraph();
     
-    la.getAlgorithmAt(0)->getSelector()->keepBestPolicy(la.getGraph());
+    la.getAlgorithmAt(0).getSelector().keepBestPolicy(la.getGraph());
 
     // Get policy stats
     EvoGraph::PolicyStats psOrigin;
@@ -1128,7 +1130,7 @@ TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
         tee.executeFromRoot(*(graph.getRootVertices().at(0))).first;
 
     // Clear introns
-    la.getAlgorithmAt(0)->clearUnusedAgentParts();
+    la.getAlgorithmAt(0).clearUnusedAgentParts();
 
     // Get new policy stats
     EvoGraph::PolicyStats psNoIntrons;
@@ -1171,7 +1173,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     Archive a(0);
 
     tpg->getMutator()->mutatePopulation(la.getGraph(), tpg->getManager(), params, la.getRNG());
-    size_t initialNbVertex = la.getGraph()->getNbVertices();
+    size_t initialNbVertex = la.getGraph().getNbVertices();
 
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(la.trainOneGeneration(4))
@@ -1179,7 +1181,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     // Check the number of vertex in the graph.
     // Must be lower or equal to initial number of vertex - number of root
     // removed (since some actions vertex are removed too)
-    ASSERT_LE(la.getGraph()->getNbVertices(),
+    ASSERT_LE(la.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
                         params.mutation.tpg.nbRoots))
@@ -1235,10 +1237,10 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
                // LearningAgent is used.
 
     pla.init();
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager()->createExecutionEngine();
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager().createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = tpg->createJob(pla.getAlgorithmAt(0)->getAgents().at(0),
+    auto job = tpg->createJob(pla.getAlgorithmAt(0).getAgents().at(0),
                            Learn::LearningMode::TRAINING, pla.getRNG());
     pla.setCurrentAlgorithm(tpg);
     ASSERT_NO_THROW(
@@ -1265,7 +1267,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
     ASSERT_NO_THROW(result =
                         pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
-    ASSERT_EQ(result.size(), pla.getGraph()->getNbRootVertices())
+    ASSERT_EQ(result.size(), pla.getGraph().getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "Graph.";
 }
@@ -1288,7 +1290,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
     ASSERT_NO_THROW(result =
                         pla.evaluateAllAgents(0, Learn::LearningMode::TRAINING))
         << "Evaluation from a root failed.";
-    ASSERT_EQ(result.size(), pla.getGraph()->getNbRootVertices())
+    ASSERT_EQ(result.size(), pla.getGraph().getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "Graph.";
 }
@@ -1345,8 +1347,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     }
 
     // Check determinism of bestAgent score
-    ASSERT_EQ(tpgLa->getSelector()->getBestAgent().first,
-              tpgParallel->getSelector()->getBestAgent().first);
+    ASSERT_EQ(tpgLa->getSelector().getBestAgent().first,
+              tpgParallel->getSelector().getBestAgent().first);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextInt, nextIntSequential)
@@ -1354,18 +1356,18 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
            "sequential execution.";
 
     // Check archives
-    ASSERT_GT(tpgLa->getArchive()->getNbRecordings(), 0)
+    ASSERT_GT(tpgLa->getArchive().getNbRecordings(), 0)
         << "For the archive determinism tests to be meaningful, Archive should "
            "not be empty.";
-    ASSERT_EQ(tpgLa->getArchive()->getNbRecordings(),
-              tpgSequential->getArchive()->getNbRecordings())
+    ASSERT_EQ(tpgLa->getArchive().getNbRecordings(),
+              tpgSequential->getArchive().getNbRecordings())
         << "Archives have different sizes.";
-    for (auto i = 0; i < tpgLa->getArchive()->getNbRecordings(); i++) {
-        ASSERT_EQ(tpgLa->getArchive()->at(i).dataHash,
-                  tpgSequential->getArchive()->at(i).dataHash)
+    for (auto i = 0; i < tpgLa->getArchive().getNbRecordings(); i++) {
+        ASSERT_EQ(tpgLa->getArchive().at(i).dataHash,
+                  tpgSequential->getArchive().at(i).dataHash)
             << "Archives have different content.";
-        ASSERT_EQ(tpgLa->getArchive()->at(i).result,
-                  tpgSequential->getArchive()->at(i).result)
+        ASSERT_EQ(tpgLa->getArchive().at(i).result,
+                  tpgSequential->getArchive().at(i).result)
             << "Archives have different content.";
     }
 
@@ -1385,8 +1387,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     }
 
     // Check determinism of bestAgent score
-    ASSERT_EQ(tpgSequential->getSelector()->getBestAgent().first,
-              tpgParallel->getSelector()->getBestAgent().first);
+    ASSERT_EQ(tpgSequential->getSelector().getBestAgent().first,
+              tpgParallel->getSelector().getBestAgent().first);
 
     // Check determinism of the number of RNG calls.
     ASSERT_EQ(nextIntSequential, nextIntParallel)
@@ -1394,15 +1396,15 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
            "sequential execution.";
 
     // Check archives
-    ASSERT_EQ(tpgParallel->getArchive()->getNbRecordings(),
-              tpgSequential->getArchive()->getNbRecordings())
+    ASSERT_EQ(tpgParallel->getArchive().getNbRecordings(),
+              tpgSequential->getArchive().getNbRecordings())
         << "Archives have different sizes.";
-    for (auto i = 0; i < tpgParallel->getArchive()->getNbRecordings(); i++) {
-        ASSERT_EQ(tpgParallel->getArchive()->at(i).dataHash,
-                  tpgSequential->getArchive()->at(i).dataHash)
+    for (auto i = 0; i < tpgParallel->getArchive().getNbRecordings(); i++) {
+        ASSERT_EQ(tpgParallel->getArchive().at(i).dataHash,
+                  tpgSequential->getArchive().at(i).dataHash)
             << "Archives have different content.";
-        ASSERT_EQ(tpgParallel->getArchive()->at(i).result,
-                  tpgSequential->getArchive()->at(i).result)
+        ASSERT_EQ(tpgParallel->getArchive().at(i).result,
+                  tpgSequential->getArchive().at(i).result)
             << "Archives have different content.";
     }
 }
@@ -1464,9 +1466,9 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
            "sequential execution.";
 
     // Check archives
-    ASSERT_EQ(tpgLa->getArchive()->getNbRecordings(), 0)
+    ASSERT_EQ(tpgLa->getArchive().getNbRecordings(), 0)
         << "Archives should be empty in Validation mode.";
-    ASSERT_EQ(tpgSequential->getArchive()->getNbRecordings(), 0)
+    ASSERT_EQ(tpgSequential->getArchive().getNbRecordings(), 0)
         << "Archives should be empty in Validation mode.";
 
     // Check equality between ParallelLearningAgent in parallel and sequential
@@ -1490,7 +1492,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
            "sequential execution.";
 
     // Check archives
-    ASSERT_EQ(tpgParallel->getArchive()->getNbRecordings(), 0)
+    ASSERT_EQ(tpgParallel->getArchive().getNbRecordings(), 0)
         << "Archives should be empty in Validation mode.";
 }
 
@@ -1509,15 +1511,15 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
     pla.init();
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    auto tpg = pla.getAlgorithmAt(0);
-    tpg->getMutator()->mutatePopulation(pla.getGraph(), tpg->getManager(), params, pla.getRNG());
-    size_t initialNbVertex = pla.getGraph()->getNbVertices();
+    Algorithm::Algorithm& tpg = pla.getAlgorithmAt(0);
+    tpg.getMutator().mutatePopulation(pla.getGraph(), tpg.getManager(), params, pla.getRNG());
+    size_t initialNbVertex = pla.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
         << "Training for one generation failed.";
     // Check the number of vertex in the graph.
     // Must be initial number of vertex - number of root removed
-    ASSERT_EQ(pla.getGraph()->getNbVertices(),
+    ASSERT_EQ(pla.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
                         params.mutation.tpg.nbRoots))
@@ -1525,7 +1527,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
            "Graph.";
 
     // Check that bestRoot has been set
-    ASSERT_NE(tpg->getSelector()->getBestAgent().first, std::nullopt)
+    ASSERT_NE(tpg.getSelector().getBestAgent().first, std::nullopt)
         << "Best root should not be expired after training one generation.";
 }
 
@@ -1544,15 +1546,15 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
 
     pla.init();
     // Do the populate call to keep know the number of initial vertex
-    tpg->getMutator()->mutatePopulation(pla.getGraph(), tpg->getManager(), params, pla.getRNG());
+    tpg->getMutator().mutatePopulation(pla.getGraph(), tpg->getManager(), params, pla.getRNG());
     
-    size_t initialNbVertex = pla.getGraph()->getNbVertices();
+    size_t initialNbVertex = pla.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
     ASSERT_NO_THROW(pla.trainOneGeneration(4, false))
         << "Training for one generation failed.";
     // Check the number of vertex in the graph.
     // Must be initial number of vertex - number of root removed
-    ASSERT_EQ(pla.getGraph()->getNbVertices(),
+    ASSERT_EQ(pla.getGraph().getNbVertices(),
               initialNbVertex -
                   floor(params.selection.truncation.ratioDeletedRoots *
                         params.mutation.tpg.nbRoots))
@@ -1644,10 +1646,10 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
     // These checks guarantee determinism between sequential and parallel
     // version on a given platform. They do not guarantee portability between
     // compilers and OS
-    ASSERT_GT(la.getGraph()->getNbVertices(), 0)
+    ASSERT_GT(la.getGraph().getNbVertices(), 0)
         << "Number of vertex in the trained graph should not be 0.";
-    ASSERT_EQ(la.getGraph()->getNbVertices(),
-              pla.getGraph()->getNbVertices())
+    ASSERT_EQ(la.getGraph().getNbVertices(),
+              pla.getGraph().getNbVertices())
         << "LearningAgent and ParallelLearning agent result in different "
            "Graphs.";
 }
@@ -1672,7 +1674,7 @@ TEST_F(ParallelLearningAgentTest, TrainPortability)
     la.init();
     bool alt = false;
     la.train(alt, false);
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
     // Useful when determinism is changed
     /*std::cout << tpg.getNbVertices() << " "
@@ -1730,7 +1732,7 @@ TEST_F(ParallelLearningAgentTest, TrainContinuousMaple)
     // It is quite unlikely that two different TPGs after 20 generations
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
-    EvoGraph::Graph& tpg = *la.getGraph();
+    EvoGraph::Graph& tpg = la.getGraph();
 
 
     // Useful when determinism is changed
@@ -1776,9 +1778,9 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
     bool alt = false;
     pla.train(alt, true);
 
-    ASSERT_NO_THROW(pla.getSelector()->keepBestPolicy())
+    ASSERT_NO_THROW(pla.getSelector().keepBestPolicy())
         << "Keeping the best policy after training should not fail.";
-    ASSERT_EQ(pla.getGraph()->getNbRootVertices(), 1)
+    ASSERT_EQ(pla.getGraph().getNbRootVertices(), 1)
         << "A single root Vertex should remain in the Graph when keeping "
            "the best policy only";
 }
@@ -1804,8 +1806,8 @@ TEST_F(LearningAgentTest, EvaluateJobWithUtility)
     la.init();
 
     Archive a;
-    EvoGraph::OldExecutionEngine tee(la.getGraph()->getEnvironment(), &a);
-    auto job = *la.makeJob(la.getGraph()->getRootVertices().at(0),
+    EvoGraph::OldExecutionEngine tee(la.getGraph().getEnvironment(), &a);
+    auto job = *la.makeJob(la.getGraph().getRootVertices().at(0),
                            Learn::LearningMode::TRAINING);
 
     // Check that the job can be evaluated without throwing an exception

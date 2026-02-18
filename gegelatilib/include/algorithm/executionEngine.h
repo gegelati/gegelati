@@ -43,6 +43,10 @@ namespace Algorithm {
 
 
     public:
+    
+        // Disable copying to avoid accidental copies (use references or pointers instead).
+        ExecutionEngine(const ExecutionEngine&) = delete;
+        ExecutionEngine& operator=(const ExecutionEngine&) = delete;
 
         /**
          * \brief Main ExecutionEngine constructor.

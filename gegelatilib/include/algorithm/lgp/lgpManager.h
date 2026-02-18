@@ -49,7 +49,7 @@ namespace Algorithm {
              * 
              * \return a shared pointer to the created Agent.
              */
-            virtual const Agent& createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual const Agent& createAgent(EvoGraph::Graph& graph) override;
 
             /**
              * \brief Copy a LGPAgent.
@@ -59,7 +59,7 @@ namespace Algorithm {
              * 
              * \return a shared pointer to the created Agent.
              */
-            virtual const Agent& copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual const Agent& copyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
             /**
              * \brief Empty a LGPAgent of its program.
@@ -69,7 +69,7 @@ namespace Algorithm {
              * 
              * \return a shared pointer to the created Agent.
              */
-            virtual void emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual void emptyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
             /**
              * \brief Get the number of outputs of the agents.

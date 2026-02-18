@@ -10,7 +10,7 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::ClassificationSelector::
 }
 
 void Selector::ClassificationSelector::doSelection(
-    std::shared_ptr<EvoGraph::Graph> graph,
+    EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
@@ -26,7 +26,7 @@ void Selector::ClassificationSelector::doSelection(
     }
 
     // Compute the number of agent to keep/delete base on each criterion
-    uint64_t totalNbAgent = this->manager->getAgents().size();
+    uint64_t totalNbAgent = this->manager.getAgents().size();
     uint64_t nbAgentsToDelete = (uint64_t)floor(
         this->params.selection.truncation.ratioDeletedRoots * totalNbAgent);
     uint64_t nbAgentsToKeep = (totalNbAgent - nbAgentsToDelete);
@@ -94,7 +94,7 @@ void Selector::ClassificationSelector::doSelection(
     // Do the removal.
     // Because of potential agent actions, the preserved number of agents
     // may be higher than the given ratio.
-    auto allAgents = this->manager->getAgents();
+    auto allAgents = this->manager.getAgents();
     auto& graphRef = graph;
     auto& managerRef = this->manager;
     std::for_each(
@@ -106,7 +106,7 @@ void Selector::ClassificationSelector::doSelection(
                 [&curragent](const std::reference_wrapper<const Algorithm::Agent>& agent) {
                     return agent.get() == curragent.get();
                 }) == agentsToKeep.end()) {
-                managerRef->deleteAgent(curragent, graphRef);
+                managerRef.deleteAgent(curragent, graphRef);
 
                 // Keep only results of non-decimated agents.
                 this->removeFromSavedResults(curragent);

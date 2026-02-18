@@ -57,7 +57,7 @@ namespace Algorithm::LGP {
              * 
              * \param[in] outputs outputs needed for the algorithm.
              */
-            virtual void initManager(std::shared_ptr<const Output::OutputHandler> outputs) override;
+            virtual void initManager() override;
 
             /**
              * \brief Initialize the mutator of the algorithm
@@ -67,7 +67,7 @@ namespace Algorithm::LGP {
             /**
              * \brief Initialize the algorithm.
              */
-            virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual void initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
 
 
             /**

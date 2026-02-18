@@ -20,30 +20,30 @@ bool Algorithm::LGP::LGPMutator::isConfigurationValid(const Learn::LearningParam
     return true;
 }
 
-void Algorithm::LGP::LGPMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::LGP::LGPMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     // Check configuration is valid
-    this->isConfigurationValid(params, manager->getOutputs());
+    this->isConfigurationValid(params, manager.getOutputs());
 
     // Empty agent manager
-    manager->clearAgents(graph);
+    manager.clearAgents(graph);
 
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
         this->initRandomAgent(graph, manager, params, rng);
     }
 }
 
-void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     // If first agent, check validity
-    if(manager->getAgents().size() == 1){
-        this->isConfigurationValid(params, manager->getOutputs());
+    if(manager.getAgents().size() == 1){
+        this->isConfigurationValid(params, manager.getOutputs());
     }
 
-    manager->emptyAgent(agent, graph);
+    manager.emptyAgent(agent, graph);
 
-    auto lgpManager = std::dynamic_pointer_cast<LGPManager>(manager);
-    if(lgpManager == nullptr){
+    LGPManager& lgpManager = dynamic_cast<LGPManager&>(manager);
+    if(&lgpManager == nullptr){
         throw std::invalid_argument("LGPMutator::initRandomAgent: the given manager is not a LGPManager.");
     }
 
@@ -57,7 +57,7 @@ void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, std
     for (int i = 0; i < lgpAgent.getEnvironment().getParams().nbProgramConstant; i++) {
         c_value = {rng.getDouble(params.mutation.prog.minConstValue,
                                  params.mutation.prog.maxConstValue)};
-        lgpManager->setConstantAt(agent, i, c_value);
+        lgpManager.setConstantAt(agent, i, c_value);
     }
 
     // Select the number of line randomly
@@ -69,12 +69,12 @@ void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, std
     }
 
     // Identify Introns
-    lgpManager->identifyIntrons(agent);
+    lgpManager.identifyIntrons(agent);
 }
 
 void Algorithm::LGP::LGPMutator::crossoverAgents(
-    std::vector<std::reference_wrapper<const Agent>> agents, std::shared_ptr<EvoGraph::Graph> graph, 
-    std::shared_ptr<AgentManager> manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, 
+    std::vector<std::reference_wrapper<const Agent>> agents, EvoGraph::Graph& graph, 
+    AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, 
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     // Casted agent 1 and 2
@@ -84,8 +84,8 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
     if(&lgpAgent1 == nullptr || &lgpAgent2 == nullptr){
         throw std::invalid_argument("LGPMutator::crossoverAgents: the given agents are not LGPAgents.");
     }
-    auto lgpManager = std::dynamic_pointer_cast<LGPManager>(manager);
-    if(lgpManager == nullptr){
+    LGPManager& lgpManager = dynamic_cast<LGPManager&>(manager);
+    if(&lgpManager == nullptr){
         throw std::invalid_argument("LGPMutator::initRandomAgent: the given manager is not a LGPManager.");
     }
 
@@ -152,14 +152,14 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
         for (size_t idx = 0; idx < sizeProgs[childIdx]; idx++) {
             if (idx < start1) {
 
-                lgpManager->addNewLine(lgpAgents[childIdx], parent1[idx]);
+                lgpManager.addNewLine(lgpAgents[childIdx], parent1[idx]);
             }
             else if (idx >= start1 + (end2 - start2)) {
 
-                lgpManager->addNewLine(lgpAgents[childIdx], parent1[idx + (end1 - start1) - (end2 - start2)]);
+                lgpManager.addNewLine(lgpAgents[childIdx], parent1[idx + (end1 - start1) - (end2 - start2)]);
             }
             else {
-                lgpManager->addNewLine(lgpAgents[childIdx], parent2[idx - start1 + start2]);
+                lgpManager.addNewLine(lgpAgents[childIdx], parent2[idx - start1 + start2]);
             }
         }
 
@@ -168,17 +168,17 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
     // Remove the old lines and identify introns
     for(int i = 0; i < 2; i++){
         for (size_t j = 0; j < lines[i].size(); j++) {
-            lgpManager->removeLine(lgpAgents[i].get(), 0);
+            lgpManager.removeLine(lgpAgents[i].get(), 0);
         }
-        lgpManager->identifyIntrons(lgpAgents[i]);
+        lgpManager.identifyIntrons(lgpAgents[i]);
     }
 }
 
 void Algorithm::LGP::LGPMutator::mutateAgent(
-    const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    auto lgpManager = std::dynamic_pointer_cast<LGPManager>(manager);
-    if(lgpManager == nullptr){
+    LGPManager& lgpManager = dynamic_cast<LGPManager&>(manager);
+    if(&lgpManager == nullptr){
         throw std::invalid_argument("LGPMutator::initRandomAgent: the given manager is not a LGPManager.");
     }
 
@@ -191,7 +191,7 @@ void Algorithm::LGP::LGPMutator::mutateAgent(
     while (!this->mutateLGPAgent(lgpAgent, lgpManager, params, rng));
 }
 
-bool Algorithm::LGP::LGPMutator::mutateLGPAgent(const LGPAgent& agent, std::shared_ptr<LGPManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+bool Algorithm::LGP::LGPMutator::mutateLGPAgent(const LGPAgent& agent, LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     bool anyMutation = false;
     if (agent.getNbLines() > 1 && rng.getDouble(0.0, 1.0) < params.mutation.prog.pDelete) {
@@ -224,12 +224,12 @@ bool Algorithm::LGP::LGPMutator::mutateLGPAgent(const LGPAgent& agent, std::shar
 
     // Identify introns
     if (anyMutation) {
-        manager->identifyIntrons(agent);
+        manager.identifyIntrons(agent);
     }
     return anyMutation;
 }
 
-bool Algorithm::LGP::LGPMutator::deleteRandomLine(const LGPAgent& agent, std::shared_ptr<LGPManager> manager, 
+bool Algorithm::LGP::LGPMutator::deleteRandomLine(const LGPAgent& agent, LGPManager& manager, 
                                                RNG::RNG& rng)
 {
     // Line cannot be removed from a program with a single line.
@@ -238,19 +238,19 @@ bool Algorithm::LGP::LGPMutator::deleteRandomLine(const LGPAgent& agent, std::sh
     }
 
     uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines() - 1);
-    manager->removeLine(agent, lineIndex);
+    manager.removeLine(agent, lineIndex);
     return true;
 }
 
-void Algorithm::LGP::LGPMutator::insertRandomLine(const LGPAgent& agent, std::shared_ptr<LGPManager> manager,  RNG::RNG& rng)
+void Algorithm::LGP::LGPMutator::insertRandomLine(const LGPAgent& agent, LGPManager& manager,  RNG::RNG& rng)
 {
     uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines());
-    manager->addNewLine(agent, lineIndex);
-    this->lineMutator.initRandomCorrectLine(manager->getLineForMutation(agent, lineIndex), rng);
+    manager.addNewLine(agent, lineIndex);
+    this->lineMutator.initRandomCorrectLine(manager.getLineForMutation(agent, lineIndex), rng);
 }
 
 
-bool Algorithm::LGP::LGPMutator::swapRandomLines(const LGPAgent& agent, std::shared_ptr<LGPManager> manager, 
+bool Algorithm::LGP::LGPMutator::swapRandomLines(const LGPAgent& agent, LGPManager& manager, 
                                               RNG::RNG& rng)
 {
     if (agent.getNbLines() < 2) {
@@ -261,12 +261,12 @@ bool Algorithm::LGP::LGPMutator::swapRandomLines(const LGPAgent& agent, std::sha
     uint64_t lineIndex1 = rng.getUnsignedInt64(0, agent.getNbLines() - 2);
     lineIndex1 += (lineIndex1 >= lineIndex0) ? 1 : 0;
 
-    manager->swapLines(agent, lineIndex0, lineIndex1);
+    manager.swapLines(agent, lineIndex0, lineIndex1);
 
     return true;
 }
 
-bool Algorithm::LGP::LGPMutator::alterRandomLine(const LGPAgent& agent, std::shared_ptr<LGPManager> manager, 
+bool Algorithm::LGP::LGPMutator::alterRandomLine(const LGPAgent& agent, LGPManager& manager, 
                                               RNG::RNG& rng)
 {
     if (agent.getNbLines() < 1) {
@@ -274,12 +274,12 @@ bool Algorithm::LGP::LGPMutator::alterRandomLine(const LGPAgent& agent, std::sha
     }
     // Select a random index.
     const uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines() - 1);
-    this->lineMutator.alterCorrectLine(manager->getLineForMutation(agent, lineIndex), rng);
+    this->lineMutator.alterCorrectLine(manager.getLineForMutation(agent, lineIndex), rng);
     return true;
 }
 
 bool Algorithm::LGP::LGPMutator::alterRandomConstant(
-    const LGPAgent& agent, std::shared_ptr<LGPManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+    const LGPAgent& agent, LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     const uint64_t constant_idx = rng.getUnsignedInt64(
         0, params.nbProgramConstant - 1);
@@ -298,7 +298,7 @@ bool Algorithm::LGP::LGPMutator::alterRandomConstant(
     }
 
     Data::Constant newConstant = {newConstantValue};
-    manager->setConstantAt(agent, constant_idx, newConstant);
+    manager.setConstantAt(agent, constant_idx, newConstant);
 
     return true;
 }

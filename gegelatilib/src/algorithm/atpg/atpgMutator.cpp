@@ -3,7 +3,7 @@
 #include "algorithm/atpg/atpgMutator.h"
 
 void Algorithm::ATPG::ATPGMutator::updateSpecificContext(
-            std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager,
+            EvoGraph::Graph& graph, AgentManager& manager,
             const Learn::LearningParameters& params,
             RNG::RNG& rng)
 {
@@ -37,7 +37,7 @@ void Algorithm::ATPG::ATPGMutator::updateSpecificContext(
     }
     
     // Add agents contains by all aggregated managers.
-    const AgentManager& actionProgramManager = *manager->cGetSubManager(this->actionProgramAlgorithmID);
+    const AgentManager& actionProgramManager = manager.cGetSubManager(this->actionProgramAlgorithmID);
     for(auto const& accessedManager: actionProgramManager.getAggregatedManagers()){
         const std::vector<std::reference_wrapper<const Algorithm::Agent>> accessedAgents(accessedManager.get().getAgents());
         this->preExistingActionProgram.insert(
@@ -63,12 +63,12 @@ bool Algorithm::ATPG::ATPGMutator::isConfigurationValid(const Learn::LearningPar
     return true;
 }
 
-void Algorithm::ATPG::ATPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::ATPG::ATPGMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    this->isConfigurationValid(params, manager->getOutputs());
+    this->isConfigurationValid(params, manager.getOutputs());
     
     // Empty agent manager
-    manager->clearAgents(graph);
+    manager.clearAgents(graph);
 
     // Create teams, programs and Actions
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> leafVertices;
@@ -77,75 +77,75 @@ void Algorithm::ATPG::ATPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph
 
 
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
-        teams.push_back(dynamic_cast<const TPG::TPGAgent&>(manager->createAgent(graph)).getVertex());
+        teams.push_back(dynamic_cast<const TPG::TPGAgent&>(manager.createAgent(graph)).getVertex());
     }
 
     // Connect each team with two distinct actions, through two distinct
     // programs Association here are determinists since randomness would
     // uselessly complicate the code while bringing no real value since anyway,
     // Programs have been initialized randomly.
-    auto programMutator = this->getSubMutator(this->programAlgorithmID);
-    auto programManager = manager->getSubManager(this->programAlgorithmID);
+    Mutator& programMutator = this->getSubMutator(this->programAlgorithmID);
+    AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
 
-    auto actionProgramMutator = this->getSubMutator(this->actionProgramAlgorithmID);
-    auto actionProgramManager = manager->getSubManager(this->actionProgramAlgorithmID);
+    Mutator& actionProgramMutator = this->getSubMutator(this->actionProgramAlgorithmID);
+    AgentManager& actionProgramManager = manager.getSubManager(this->actionProgramAlgorithmID);
     for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
 
         // Create a program agent
-        programAgents.push_back(programMutator->initRandomAgent(graph, programManager, params, rng));
+        programAgents.push_back(programMutator.initRandomAgent(graph, programManager, params, rng));
 
         // Create a program agent and a new team
-        auto& actionProgram = actionProgramMutator->initRandomAgent(graph, actionProgramManager, params, rng);
-        leafVertices.push_back(graph->addNewTeam());
+        auto& actionProgram = actionProgramMutator.initRandomAgent(graph, actionProgramManager, params, rng);
+        leafVertices.push_back(graph.addNewTeam());
 
         // Set the vertex program to the action program.
-        graph->setVertexProgram(*leafVertices.back(), actionProgram);
+        graph.setVertexProgram(*leafVertices.back(), actionProgram);
 
         // Add the edge
-        graph->addNewEdge(*teams.at(i / 2), *leafVertices.back(),
+        graph.addNewEdge(*teams.at(i / 2), *leafVertices.back(),
                          programAgents.at(i));
     }
 
     this->addAditionnalEdges(graph, leafVertices, teams, programAgents, params, rng);
 }
 
-void Algorithm::ATPG::ATPGMutator::initRandomSpecificAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::ATPG::ATPGMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     // First agent is initialized, check validity of the configuration.
-    if(manager->getAgents().size() == 1){
-        this->isConfigurationValid(params, manager->getOutputs());
+    if(manager.getAgents().size() == 1){
+        this->isConfigurationValid(params, manager.getOutputs());
     }
 
-    manager->emptyAgent(agent, graph);
+    manager.emptyAgent(agent, graph);
 
     auto vertex = dynamic_cast<const TPG::TPGAgent&>(agent).getVertex();
 
-    auto programMutator = this->getSubMutator(this->programAlgorithmID);
-    auto programManager = manager->getSubManager(this->programAlgorithmID);
+    Mutator& programMutator = this->getSubMutator(this->programAlgorithmID);
+    AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
 
-    auto actionProgramMutator = this->getSubMutator(this->actionProgramAlgorithmID);
-    auto actionProgramManager = manager->getSubManager(this->actionProgramAlgorithmID);
+    Mutator& actionProgramMutator = this->getSubMutator(this->actionProgramAlgorithmID);
+    AgentManager& actionProgramManager = manager.getSubManager(this->actionProgramAlgorithmID);
 
     size_t nbEdges = rng.getUnsignedInt64(2, params.mutation.tpg.maxInitOutgoingEdges);
     for(size_t idx = 0; idx < nbEdges; idx++){
 
         // Create a program agent and a new team
-        const Agent& actionProgram = actionProgramMutator->initRandomAgent(graph, actionProgramManager, params, rng);
-        std::shared_ptr<const EvoGraph::Team> leafVertex = graph->addNewTeam();
+        const Agent& actionProgram = actionProgramMutator.initRandomAgent(graph, actionProgramManager, params, rng);
+        std::shared_ptr<const EvoGraph::Team> leafVertex = graph.addNewTeam();
 
         // Set the vertex program to the action program.
-        graph->setVertexProgram(*leafVertex, actionProgram);
+        graph.setVertexProgram(*leafVertex, actionProgram);
 
         // Add edge
-        graph->addNewEdge(*vertex, *leafVertex,
-                            programMutator->initRandomAgent(graph, programManager, params, rng));
+        graph.addNewEdge(*vertex, *leafVertex,
+                            programMutator.initRandomAgent(graph, programManager, params, rng));
     }
 }
 
 
 void Algorithm::ATPG::ATPGMutator::mutateEdgeDestination(
-    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
-    std::shared_ptr<AgentManager> manager,
+    EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Edge> edge,
+    AgentManager& manager,
     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
@@ -164,7 +164,7 @@ void Algorithm::ATPG::ATPGMutator::mutateEdgeDestination(
         
         // Create a new team
         // When a team is dupplicated, it is dupplicated with its corresponding edges, but not the destination team, thus we have to create a new one.
-        target = graph->addNewTeam();
+        target = graph.addNewTeam();
 
         std::reference_wrapper<const Agent> targetAgent = this->preExistingActionProgram.at(
             rng.getUnsignedInt64(0, this->preExistingActionProgram.size() - 1));
@@ -173,7 +173,7 @@ void Algorithm::ATPG::ATPGMutator::mutateEdgeDestination(
         // Target name agent is different from algorithm
         if(targetAgent.get().getAlgorithmID() != this->actionProgramAlgorithmID){
             // Try to find an aggregated manager with this name (will throw if not found)
-            AgentManager& actionProgramManager = *manager->getSubManager(this->actionProgramAlgorithmID);
+            AgentManager& actionProgramManager = manager.getSubManager(this->actionProgramAlgorithmID);
             const AgentManager& aggregatedManager = actionProgramManager.getAggregatedManager(targetAgent.get().getAlgorithmID());
 
             // Dupplication to exchange the agent from aggregatedManager to actionProgramManager.
@@ -182,7 +182,7 @@ void Algorithm::ATPG::ATPGMutator::mutateEdgeDestination(
         }
 
         // Set corresponding agent to the new team
-        graph->setVertexProgram(*target, targetAgent);
+        graph.setVertexProgram(*target, targetAgent);
     } else {
         target = this->preExistingTeams.at(
             rng.getUnsignedInt64(0, this->preExistingTeams.size() - 1));
@@ -190,12 +190,12 @@ void Algorithm::ATPG::ATPGMutator::mutateEdgeDestination(
 
     // Change the target
     // Changing the target should not fail.
-    graph->setEdgeDestination(*edge, *target);
+    graph.setEdgeDestination(*edge, *target);
 }
 
 void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
-    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Edge> edge,
-    std::shared_ptr<AgentManager> manager,
+    EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Edge> edge,
+    AgentManager& manager,
     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
@@ -203,16 +203,16 @@ void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
        rng.getDouble(0.0, 1.0) < params.mutation.tpg.pMutateActionProgram){
        
         // copy program
-        const Algorithm::Agent& newAgent = manager->getSubManager(edge->getDestination()->getProgram().getAlgorithmID())->copyAgent(edge->getDestination()->getProgram(), graph);
+        const Algorithm::Agent& newAgent = manager.getSubManager(edge->getDestination()->getProgram().getAlgorithmID()).copyAgent(edge->getDestination()->getProgram(), graph);
 
         // Clone vertex destination
-        auto newDestination = graph->cloneVertex(*std::dynamic_pointer_cast<const EvoGraph::Team>(edge->getDestination()));
+        auto newDestination = graph.cloneVertex(*std::dynamic_pointer_cast<const EvoGraph::Team>(edge->getDestination()));
 
         // Set the new destination
-        graph->setEdgeDestination(*edge, *newDestination);
+        graph.setEdgeDestination(*edge, *newDestination);
 
         // Set the mutated agent to the edge
-        graph->setVertexProgram(*newDestination, newAgent);
+        graph.setVertexProgram(*newDestination, newAgent);
 
         // Add it to the list of new agent to be mutated.
         newSubAgents.push_back(newAgent);
@@ -220,10 +220,10 @@ void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
     } else {
         const Agent& originAgent = edge->getProgram();
         // copy program
-        const Algorithm::Agent& newAgent = manager->getSubManager(originAgent.getAlgorithmID())->copyAgent(originAgent, graph);
+        const Algorithm::Agent& newAgent = manager.getSubManager(originAgent.getAlgorithmID()).copyAgent(originAgent, graph);
 
         // Set the mutated agent to the edge
-        graph->setEdgeProgram(*edge, newAgent);
+        graph.setEdgeProgram(*edge, newAgent);
 
         // Add it to the list of new agent to be mutated.
         newSubAgents.push_back(newAgent);
@@ -240,8 +240,8 @@ void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
 }
 
 void Algorithm::ATPG::ATPGMutator::mutateSubAgents(
-            std::vector<std::reference_wrapper<const Agent>>& agents, std::shared_ptr<EvoGraph::Graph> graph, 
-            std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
+            std::vector<std::reference_wrapper<const Agent>>& agents, EvoGraph::Graph& graph, 
+            AgentManager& manager, const Learn::LearningParameters& params, 
             RNG::RNG& rng, uint64_t maxNbThreads)
 {
     // Devide agents into program agents and action program agents
@@ -260,14 +260,14 @@ void Algorithm::ATPG::ATPGMutator::mutateSubAgents(
 
     
     // mutate action programs
-    auto actionProgramMutator = this->getSubMutator(this->actionProgramAlgorithmID);
-    auto actionProgramManager = manager->getSubManager(this->actionProgramAlgorithmID);
+    Mutator& actionProgramMutator = this->getSubMutator(this->actionProgramAlgorithmID);
+    AgentManager& actionProgramManager = manager.getSubManager(this->actionProgramAlgorithmID);
     std::vector<std::reference_wrapper<const Agent>> newSubAgents;
     for(const Algorithm::Agent& agent : actionProgramAgents){
-        actionProgramMutator->mutateAgent(
+        actionProgramMutator.mutateAgent(
             agent, graph, actionProgramManager, newSubAgents, params, rng);
     }
     // Mutate the new subAgents with actionProgramMutator.
-    actionProgramMutator->mutateSubAgents(
+    actionProgramMutator.mutateSubAgents(
         newSubAgents, graph, actionProgramManager, params, rng, maxNbThreads);
 }

@@ -30,7 +30,7 @@ namespace Algorithm {
         std::set<std::unique_ptr<Agent>, UniqueLess<Agent>> agents;
 
         /// Sub-managers for sub-algorithms
-        std::map<uint64_t, std::shared_ptr<AgentManager>> subManagers;
+        std::map<uint64_t, std::reference_wrapper<AgentManager>> subManagers;
 
         /// Id of the algorithm.
         uint64_t algorithmID;
@@ -49,6 +49,11 @@ namespace Algorithm {
         virtual std::set<std::unique_ptr<Agent>>::iterator getAgentFromCst(const Agent& agent);
 
     public:
+
+
+        // Disable copying to avoid accidental copies (use references or pointers instead).
+        AgentManager(const AgentManager&) = delete;
+        AgentManager& operator=(const AgentManager&) = delete;
 
         /**
          * Constructor for agent manager
@@ -73,7 +78,7 @@ namespace Algorithm {
          * 
          * \param[in] subManager the sub-manager to add.
          */
-        virtual void addSubManager(std::shared_ptr<AgentManager> subManager);
+        virtual void addSubManager(AgentManager& subManager);
 
         /**
          * \brief Method that add an access from this manager to another manager.
@@ -90,14 +95,14 @@ namespace Algorithm {
          * 
          * \param[in] algorithmID name of the algorithm given.
          */
-        virtual std::shared_ptr<AgentManager> getSubManager(uint64_t algorithmID);
+        virtual AgentManager& getSubManager(uint64_t algorithmID);
 
         /**
          * \brief return the subManager corresponding to the name of the algorithm given.
          * 
          * \param[in] algorithmID name of the algorithm given.
          */
-        virtual std::shared_ptr<const AgentManager> cGetSubManager(uint64_t algorithmID) const;
+        virtual const AgentManager& cGetSubManager(uint64_t algorithmID) const;
 
         /**
          * \brief return the aggregated manager corresponding to the name of the algorithm given.
@@ -139,7 +144,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual const Agent& createAgent(std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual const Agent& createAgent(EvoGraph::Graph& graph) = 0;
 
         /**
          * \brief Copy a new Agent of the type used by the current algorithm.
@@ -149,7 +154,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual const Agent& copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual const Agent& copyAgent(const Agent& agent, EvoGraph::Graph& graph) = 0;
 
         /**
          * \brief Create a new Agent of the type used by the current algorithm.
@@ -159,7 +164,7 @@ namespace Algorithm {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph);
+        virtual void deleteAgent(const Agent& agent, EvoGraph::Graph& graph);
 
         /**
          * \brief Empty an Agent of the type used by the current algorithm.
@@ -167,14 +172,14 @@ namespace Algorithm {
          * \param[in] agent the Agent to empty.
          * \param[in] graph the Graph associated with the Agent.
          */
-        virtual void emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) = 0;
+        virtual void emptyAgent(const Agent& agent, EvoGraph::Graph& graph) = 0;
 
         /**
          * \brief Clear all agents from the manager.
          * 
          * \param[in] graph the Graph associated with the Agents.
          */
-        virtual void clearAgents(std::shared_ptr<EvoGraph::Graph> graph);
+        virtual void clearAgents(EvoGraph::Graph& graph);
 
         /**
          * \brief Create the execution engine associated with the algorithm.

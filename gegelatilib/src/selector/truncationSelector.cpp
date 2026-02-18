@@ -3,7 +3,7 @@
 #include "selector/truncationSelector.h"
 
 void Selector::TruncationSelector::doSelection(
-    std::shared_ptr<EvoGraph::Graph> graph,
+    EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
@@ -31,7 +31,7 @@ void Selector::TruncationSelector::doSelection(
         // Removed stored result (if any)
         this->removeFromSavedResults(agent);
 
-        this->manager->deleteAgent(agent, graph);
+        this->manager.deleteAgent(agent, graph);
 
         // Increment loop counter
         i++;

@@ -103,7 +103,7 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
         useMainEnvironment ? &this->learningEnvironment
                            : this->learningEnvironment.clone();
 
-    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = this->currentExecutedAlgorithm->getManager()->createExecutionEngine(privateLearningEnvironment->getDataSources());
+    std::unique_ptr<Algorithm::ExecutionEngine> execEngine = this->currentExecutedAlgorithm->getManager().createExecutionEngine(privateLearningEnvironment->getDataSources());
 
     // Pop a job and process it
     while (true) {

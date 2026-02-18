@@ -21,7 +21,7 @@ namespace Selector {
          * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        TruncationSelector(std::shared_ptr<Algorithm::AgentManager> manager,
+        TruncationSelector(Algorithm::AgentManager& manager,
                            const Learn::LearningParameters& params)
             : Selector{manager, params}
         {
@@ -39,7 +39,7 @@ namespace Selector {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void doSelection(
-            std::shared_ptr<EvoGraph::Graph> graph,
+            EvoGraph::Graph& graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Algorithm::Agent>>& results,
             RNG::RNG& rng) override;

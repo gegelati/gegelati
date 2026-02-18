@@ -152,19 +152,19 @@ namespace Learn {
          *
          * \return Get a shared_pointer to the Graph.
          */
-        std::shared_ptr<EvoGraph::Graph> getGraph();
+        EvoGraph::Graph& getGraph();
 
         /**
          * \brief Getter for the vector of algorithms
          */
-        const std::vector<std::shared_ptr<Algorithm::Algorithm>>& getAlgorithms();
+        std::vector<std::reference_wrapper<Algorithm::Algorithm>> getAlgorithms();
 
         /**
          * \brief return the a pointer of the algorithm at the specified index
          * 
          * \param[in] idx specified index
          */
-        std::shared_ptr<Algorithm::Algorithm> getAlgorithmAt(size_t idx);
+        Algorithm::Algorithm& getAlgorithmAt(size_t idx);
 
         /**
          * \brief Getter for the RNG used by the LearningAgent.

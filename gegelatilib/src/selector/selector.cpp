@@ -3,7 +3,7 @@
 #include "selector/selector.h"
 
 void Selector::Selector::doSelection(
-    std::shared_ptr<EvoGraph::Graph> graph,
+    EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
@@ -19,17 +19,17 @@ std::shared_ptr<Selector::SelectionMetrics> Selector::Selector::
     return std::make_shared<SelectionMetrics>();
 }
 
-void Selector::Selector::keepBestPolicy(std::shared_ptr<EvoGraph::Graph> graph)
+void Selector::Selector::keepBestPolicy(EvoGraph::Graph& graph)
 {
     auto bestAgentVertex = this->bestAgent.first;
-    if (bestAgentVertex && this->manager->containsAgent(*bestAgentVertex)) {
+    if (bestAgentVertex && this->manager.containsAgent(*bestAgentVertex)) {
 
         // Remove all but the best agent from the graph
-        while (this->manager->getAgents().size() != 1) {
-            auto agents = this->manager->getAgents();
+        while (this->manager.getAgents().size() != 1) {
+            auto agents = this->manager.getAgents();
             for (const Algorithm::Agent& agent : agents) {
                 if (agent != bestAgentVertex.value()) {
-                    this->manager->deleteAgent(agent, graph);
+                    this->manager.deleteAgent(agent, graph);
                 }
             }
         }
@@ -99,7 +99,7 @@ void Selector::Selector::updateBestAgent(
     if (!this->bestAgent.first         // NULL case
         || *this->bestAgent.second < *evaluation // new high-score case
         ||
-        !this->manager->containsAgent(*this->bestAgent.first) // bestAgent disappearance
+        !this->manager.containsAgent(*this->bestAgent.first) // bestAgent disappearance
     ) {
         // Replace the best agent
         this->bestAgent = {candidate, evaluation};
@@ -133,7 +133,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::Selector::updateContext() 
     // Insert all agents, but only the reference of weak pointer with lock available
     // manager->getAgents returns a vector of weak pointer, but the context should only have reference to the agent, not the weak pointer itself, to avoid confusion in the mutation process where the weak pointer can be lock and unlock several times. Hence we insert the reference of the lock of the weak pointer in the context, but we do not insert the weak pointer itself.
     
-    for (const Algorithm::Agent& agent : this->manager->getAgents()) {
+    for (const Algorithm::Agent& agent : this->manager.getAgents()) {
         context->agentsClonable.push_back(agent); 
         context->preExistingAgents.push_back(agent);
     }

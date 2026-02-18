@@ -52,16 +52,22 @@ namespace Selector {
         /**
          * \brief manager of the used algorithm. The manager can delete or create agents in the algorithm population
          */
-        std::shared_ptr<Algorithm::AgentManager> manager;
+        Algorithm::AgentManager& manager;
 
       public:
+
+
+        // Disable copying to avoid accidental copies (use references or pointers instead).
+        Selector(const Selector&) = delete;
+        Selector& operator=(const Selector&) = delete;
+
         /**
          * \brief Constructor for Selector.
          *
          * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        Selector(std::shared_ptr<Algorithm::AgentManager> manager,
+        Selector(Algorithm::AgentManager& manager,
                  const Learn::LearningParameters& params)
             : manager{manager}, params{params}
         {
@@ -82,7 +88,7 @@ namespace Selector {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void doSelection(
-            std::shared_ptr<EvoGraph::Graph> graph,
+            EvoGraph::Graph& graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Algorithm::Agent>>& results,
             RNG::RNG& rng);
@@ -103,7 +109,7 @@ namespace Selector {
          * 
          * \param[in] graph the Graph on which selection is performed.
          */
-        virtual void keepBestPolicy(std::shared_ptr<EvoGraph::Graph> graph);
+        virtual void keepBestPolicy(EvoGraph::Graph& graph);
 
         /**
          * \brief Remove the agent from resultsPerAgent and BestAgent if already saved.
@@ -235,7 +241,7 @@ namespace Selector {
          * 
          * \param[in] graph the Graph on which selection is performed.
          */
-        virtual void updateAfterPopulate(std::shared_ptr<EvoGraph::Graph> graph) {
+        virtual void updateAfterPopulate(EvoGraph::Graph& graph) {
             /* Empty because sub-class does not need to inherrit from it.*/
         };
     };

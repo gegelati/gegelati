@@ -3,7 +3,7 @@
 #include "selector/tournamentSelector.h"
 
 void Selector::TournamentSelector::doSelection(
-    std::shared_ptr<EvoGraph::Graph> graph,
+    EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
@@ -51,7 +51,7 @@ void Selector::TournamentSelector::doSelection(
             auto itWorst = subMap.begin();
 
             // Remove the vertex from the graph as well
-            this->manager->deleteAgent(itWorst->second, graph);
+            this->manager.deleteAgent(itWorst->second, graph);
             
 
             subMap.erase(itWorst);
@@ -107,7 +107,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::update
     return context;
 }
 
-void Selector::TournamentSelector::updateAfterPopulate(std::shared_ptr<EvoGraph::Graph> graph)
+void Selector::TournamentSelector::updateAfterPopulate(EvoGraph::Graph& graph)
 {
     // Remove vertex to be deleted
     for (auto agent : this->agentsToDelete) {
@@ -116,7 +116,7 @@ void Selector::TournamentSelector::updateAfterPopulate(std::shared_ptr<EvoGraph:
             this->removeFromSavedResults((*mapIterator).first);
         }
 
-        this->manager->deleteAgent(agent, graph);
+        this->manager.deleteAgent(agent, graph);
     }
     this->agentsToDelete.clear();
 }

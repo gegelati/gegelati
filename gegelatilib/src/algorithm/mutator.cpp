@@ -1,14 +1,14 @@
 
 #include "algorithm/mutator.h"
 
-void Algorithm::Mutator::addSubMutator(std::shared_ptr<Mutator> subMutator)
+void Algorithm::Mutator::addSubMutator(Mutator& subMutator)
 {
-    this->subMutators.insert({subMutator->getAlgorithmID(), subMutator});
+    this->subMutators.insert({subMutator.getAlgorithmID(), subMutator});
 }
 
 
 
-std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(uint64_t algorithmID){
+Algorithm::Mutator& Algorithm::Mutator::getSubMutator(uint64_t algorithmID){
     auto it = this->subMutators.find(algorithmID);
     if(it == this->subMutators.end()){
         throw std::runtime_error("Algorithm::Mutator::getSubMutator subMutator not found for the specific name");
@@ -17,7 +17,7 @@ std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(uint64_t a
 }
 
 void Algorithm::Mutator::updateSpecificContext(
-    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager,
+    EvoGraph::Graph& graph, AgentManager& manager,
     const Learn::LearningParameters& params,
     RNG::RNG& rng)
 {
@@ -25,8 +25,8 @@ void Algorithm::Mutator::updateSpecificContext(
 
     // Update the context of the subMutators
     for(auto subMutPair: this->subMutators){
-        auto subManager = manager->getSubManager(subMutPair.first);
-        subMutPair.second->updateSpecificContext(graph, subManager, params, rng);
+        auto& subManager = manager.getSubManager(subMutPair.first);
+        subMutPair.second.get().updateSpecificContext(graph, subManager, params, rng);
     }
 }
 
@@ -36,7 +36,7 @@ const Selector::SelectionContext& Algorithm::Mutator::getContext()
 }
 
 std::vector<std::shared_ptr<const EvoGraph::Action>> Algorithm::Mutator::initActionVertices(
-    std::shared_ptr<EvoGraph::Graph> graph, size_t nbActionVertices)
+    EvoGraph::Graph& graph, size_t nbActionVertices)
 {
     // vector to store the actions
     std::vector<std::shared_ptr<const EvoGraph::Action>> actions;
@@ -45,7 +45,7 @@ std::vector<std::shared_ptr<const EvoGraph::Action>> Algorithm::Mutator::initAct
     // Create the missing actions, and add the already existing actions.
     // PS:currentActions should be ordered by actionID, but in case it doesnt is, we check all the action vertices for each index.
     
-    std::vector<std::shared_ptr<const EvoGraph::Action>> currentActions = graph->getActions();
+    std::vector<std::shared_ptr<const EvoGraph::Action>> currentActions = graph.getActions();
     for(size_t idx = 0; idx < nbActionVertices; idx++){
         // find the action if it exists.
         auto it = currentActions.begin();
@@ -55,7 +55,7 @@ std::vector<std::shared_ptr<const EvoGraph::Action>> Algorithm::Mutator::initAct
 
         // If the action is found, add it and erase it from the vector, else create the vertex.
         if(it == currentActions.end()){
-            actions.push_back(graph->addNewAction(idx));
+            actions.push_back(graph.addNewAction(idx));
         } else {
             actions.push_back((*it));
             currentActions.erase(it);
@@ -65,17 +65,17 @@ std::vector<std::shared_ptr<const EvoGraph::Action>> Algorithm::Mutator::initAct
 }
 
 const Algorithm::Agent& Algorithm::Mutator::initRandomAgent(
-    std::shared_ptr<EvoGraph::Graph> graph,
-    std::shared_ptr<AgentManager> manager,
+    EvoGraph::Graph& graph,
+    AgentManager& manager,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    const Algorithm::Agent& agent = manager->createAgent(graph);
+    const Algorithm::Agent& agent = manager.createAgent(graph);
     this->initRandomSpecificAgent(agent, graph, manager, params, rng);
     return agent;
 }
 
 void Algorithm::Mutator::mutatePopulation(
-    std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<AgentManager> manager,
+    EvoGraph::Graph& graph, AgentManager& manager,
     const Learn::LearningParameters& params,
     RNG::RNG& rng, uint64_t maxNbThreads)
 {
@@ -106,8 +106,8 @@ void Algorithm::Mutator::mutatePopulation(
 
     
     // Create the new agents
-    uint64_t nbAgentsToReach = manager->getAgents().size() + this->currentContext->nbAgentsToCreate;
-    while (manager->getAgents().size() < nbAgentsToReach) {
+    uint64_t nbAgentsToReach = manager.getAgents().size() + this->currentContext->nbAgentsToCreate;
+    while (manager.getAgents().size() < nbAgentsToReach) {
 
         // Clone one random offspring.
         uint64_t clonedRootIndex1 =
@@ -115,18 +115,18 @@ void Algorithm::Mutator::mutatePopulation(
 
         std::vector<std::reference_wrapper<const Algorithm::Agent>> offsprings;
 
-        offsprings.push_back(manager->copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph));
+        offsprings.push_back(manager.copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph));
 
         // Be sure we have agents in both sub lists, and we still have at least
         // two agents to create
         if (subAgentsClonable2.size() > 0 &&
-            manager->getAgents().size() < nbAgentsToReach - 1) {
+            manager.getAgents().size() < nbAgentsToReach - 1) {
 
             uint64_t clonedRootIndex2 =
                 rng.getUnsignedInt64(0, subAgentsClonable2.size() - 1);
 
             // clone the offset
-            offsprings.push_back(manager->copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph));
+            offsprings.push_back(manager.copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph));
 
             // Do the crossover over the childs
             this->crossoverAgents(offsprings, graph, manager, newSubAgents, params, rng);
@@ -135,7 +135,7 @@ void Algorithm::Mutator::mutatePopulation(
         // Do the mutation over the childs
         for (auto offspring : offsprings) {
             if (!offspring.get().isValid()) {
-                manager->deleteAgent(offspring, graph);
+                manager.deleteAgent(offspring, graph);
             }
             else {
                 // Apply mutations to the root and increase the number of roots

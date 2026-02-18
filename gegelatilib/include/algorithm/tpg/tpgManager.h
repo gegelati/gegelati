@@ -61,7 +61,7 @@ namespace Algorithm::TPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual const Agent& createAgent(std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual const Agent& createAgent(EvoGraph::Graph& graph) override;
 
         /**
          * \brief Create a new TPGAgent on a specific vertex.
@@ -84,7 +84,7 @@ namespace Algorithm::TPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual const Agent& copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual const Agent& copyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
         /**
          * \brief Delete the TPGAgent.
@@ -94,7 +94,7 @@ namespace Algorithm::TPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual void deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual void deleteAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
         /**
          * \brief Empty a TPGAgent of its program.
@@ -104,7 +104,7 @@ namespace Algorithm::TPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual void emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual void emptyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
         /**
          * \brief Set the vertex of an agent.
@@ -113,7 +113,7 @@ namespace Algorithm::TPG {
          * \param[in] graph the Graph associated with the Agent.
          * \param[in] vertex the vertex set to the agent.
          */
-        virtual void setVertex(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex);
+        virtual void setVertex(const Agent& agent, EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Vertex> vertex);
 
         /**
          * \brief create and return a TPG execution engine.

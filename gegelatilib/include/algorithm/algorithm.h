@@ -30,18 +30,18 @@ namespace Algorithm {
         std::shared_ptr<EvoGraph::Graph> graph;
 
         /// Graph used by the algorithm
-        std::shared_ptr<AgentManager> manager;
+        std::unique_ptr<AgentManager> manager;
 
         /// Parameters used by the algorithm
         const Learn::LearningParameters& params;
 
         /// Selector used for the selection process
-        std::shared_ptr<Selector::Selector> selector;
+        std::unique_ptr<Selector::Selector> selector;
         /// Mutator used by the algorithm
-        std::shared_ptr<Mutator> mutator;
+        std::unique_ptr<Mutator> mutator;
 
         /// Output informations
-        std::shared_ptr<const Output::OutputHandler> outputs;
+        std::unique_ptr<const Output::OutputHandler> outputs;
 
         /// Sub-algorithms used by the algorithm
         std::vector<std::unique_ptr<Algorithm>> subAlgorithms;
@@ -84,6 +84,11 @@ namespace Algorithm {
         friend struct ::CounterReset;
 
       public:
+
+
+        // Disable copying to avoid accidental copies (use references or pointers instead).
+        Algorithm(const Algorithm&) = delete;
+        Algorithm& operator=(const Algorithm&) = delete;
 
         /**
          * \brief Main Algorithm constructor.
@@ -138,22 +143,22 @@ namespace Algorithm {
         void addAggregatedAlgorithm(const Algorithm& aggregatedAlgorithm);
 
         /// Constant getter for the graph
-        virtual std::shared_ptr<const EvoGraph::Graph> getGraph() const;
+        virtual const EvoGraph::Graph& getGraph() const;
 
         /// Constant getter for the manager
-        virtual std::shared_ptr<const AgentManager> getManagerCst() const;
+        virtual const AgentManager& getManagerCst() const;
 
         /// Constant getter for the selector
-        virtual std::shared_ptr<const Selector::Selector> getSelectorCst() const;
+        virtual const Selector::Selector& getSelectorCst() const;
 
         /// Getter for the manager
-        virtual std::shared_ptr<AgentManager> getManager();
+        virtual AgentManager& getManager();
 
         /// Getter for the selector
-        virtual std::shared_ptr<Selector::Selector> getSelector();
+        virtual Selector::Selector& getSelector();
 
         /// Getter for the mutator
-        virtual std::shared_ptr<Mutator> getMutator();
+        virtual Mutator& getMutator();
       
         /// Constant getter for the mutator
         virtual std::vector<std::reference_wrapper<const Algorithm>> getSubAlgorithms() const;
@@ -177,10 +182,8 @@ namespace Algorithm {
 
         /**
          * \brief Initialize the managerof the algorithm
-         * 
-         * \param[in] outputs outputs needed for the algorithm.
          */
-        virtual void initManager(std::shared_ptr<const Output::OutputHandler> outputs) = 0;
+        virtual void initManager() = 0;
 
         /**
          * \brief Initialize the mutator of the algorithm
@@ -195,7 +198,7 @@ namespace Algorithm {
          * \param[in] dataSource input sources of the algorithm.
          * \param[in] graph the EvoGraph::Graph used by the algorithm.
          */
-        virtual void initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph);
+        virtual void initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph);
 
         /**
          * Initialize the algorithm
@@ -205,7 +208,7 @@ namespace Algorithm {
          * \param[in] dataSource input sources of the algorithm.
          * \param[in] graph the EvoGraph::Graph used by the algorithm.
          */
-        virtual void initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph);
+        virtual void initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph);
         
 
         /**

@@ -36,7 +36,7 @@ namespace Selector {
              * \param[in] params parameters used by the
              * Selector.
              */
-            MapElitesSelector(std::shared_ptr<Algorithm::AgentManager> manager,
+            MapElitesSelector(Algorithm::AgentManager& manager,
                               const Learn::LearningParameters& params)
                 : Selector{manager, params}
             {
@@ -120,7 +120,7 @@ namespace Selector {
              * process.
              */
             virtual void doSelection(
-                std::shared_ptr<EvoGraph::Graph> graph,
+                EvoGraph::Graph& graph,
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                               std::reference_wrapper<const Algorithm::Agent>>& results,
                 RNG::RNG& rng) override;

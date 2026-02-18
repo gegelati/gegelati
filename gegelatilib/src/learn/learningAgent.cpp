@@ -81,19 +81,23 @@ Algorithm::Algorithm& Learn::LearningAgent::getAlgorithm(const Algorithm::Algori
     return **iterator;
 }
 
-std::shared_ptr<EvoGraph::Graph> Learn::LearningAgent::getGraph()
+EvoGraph::Graph& Learn::LearningAgent::getGraph()
 {
-    return this->graph;
+    return *this->graph;
 }
 
-const std::vector<std::shared_ptr<Algorithm::Algorithm>>& Learn::LearningAgent::getAlgorithms()
+std::vector<std::reference_wrapper<Algorithm::Algorithm>> Learn::LearningAgent::getAlgorithms()
 {
-    return this->algorithms;
+    std::vector<std::reference_wrapper<Algorithm::Algorithm>> result;
+    for(auto& algorithm : this->algorithms) {
+        result.push_back(std::reference_wrapper<Algorithm::Algorithm>(*algorithm));
+    }
+    return result;
 }
 
-std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::getAlgorithmAt(size_t idx)
+Algorithm::Algorithm& Learn::LearningAgent::getAlgorithmAt(size_t idx)
 {
-    return this->algorithms.at(idx);
+    return *this->algorithms.at(idx);
 }
 
 RNG::RNG& Learn::LearningAgent::getRNG()
@@ -111,7 +115,7 @@ void Learn::LearningAgent::init(uint64_t seed)
     }
 
     for(auto algorithm: algorithms){
-        algorithm->initAlgorithm(this->rng, this->learningEnvironment.getActions(), this->learningEnvironment.getDataSources(), this->graph);
+        algorithm->initAlgorithm(this->rng, *this->learningEnvironment.getActions(), this->learningEnvironment.getDataSources(), this->graph);
         algorithm->initPopulation(this->rng);
     }
 }
@@ -135,13 +139,13 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
     // Get the current agent and the current algorithm
     const Algorithm::Agent& agent = job.getAgent();
-    std::shared_ptr<const Selector::Selector> selector = this->currentExecutedAlgorithm->getSelector();
+    const Selector::Selector& selector = this->currentExecutedAlgorithm->getSelector();
 
     // Skip the agent evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
     if (mode == LearningMode::TRAINING &&
-        selector->isAgentEvalSkipped(job.getAgent(), previousEval)) {
+        selector.isAgentEvalSkipped(job.getAgent(), previousEval)) {
         return previousEval;
     }
 
@@ -162,7 +166,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
     // Init global selection metric
     std::shared_ptr<Selector::SelectionMetrics> globalSelectionMetrics =
-        selector->createSelectionMetrics();
+        selector.createSelectionMetrics();
     globalSelectionMetrics->initMetrics(agent, le);
 
     // Evaluate nbIteration times
@@ -174,7 +178,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
         // Init selectionMetrics for this episode.
         std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
-            selector->createSelectionMetrics();
+            selector.createSelectionMetrics();
         selectionMetrics->initMetrics(agent, le);
 
         // Reset the learning Environment
@@ -250,7 +254,7 @@ Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
         results;
 
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
-        this->currentExecutedAlgorithm->getManager()->createExecutionEngine();
+        this->currentExecutedAlgorithm->getManager().createExecutionEngine();
 
     auto jobs = this->makeJobs(mode, this->currentExecutedAlgorithm);
     for(auto job: jobs) {
@@ -274,7 +278,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
 
     // Create the execution engine of the agent.
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
-        algorithm->getManager()->createExecutionEngine();
+        algorithm->getManager().createExecutionEngine();
 
     // Create and evaluate the job
     auto job = algorithm->createJob(agent, mode, this->rng);
@@ -292,10 +296,10 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 {
     if(this->algorithms.size() == 1){
         // Do the selection for this algorithm
-        this->algorithms.front()->getSelector()->doSelection(this->graph, results, rng);
+        this->algorithms.front()->getSelector().doSelection(*this->graph, results, rng);
 
         // Update the evaluation records
-        this->algorithms.front()->getSelector()->updateEvaluationRecords(results);
+        this->algorithms.front()->getSelector().updateEvaluationRecords(results);
     } else {
 
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -319,9 +323,9 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
             }
 
             // Do the selection for this algorithm
-            algorithm->getSelector()->doSelection(this->graph, resultsAlgo, rng);
+            algorithm->getSelector().doSelection(*this->graph, resultsAlgo, rng);
             // Update the evaluation records
-            algorithm->getSelector()->updateEvaluationRecords(resultsAlgo);
+            algorithm->getSelector().updateEvaluationRecords(resultsAlgo);
 
             results.insert(resultsAlgo.begin(), resultsAlgo.end());
         }

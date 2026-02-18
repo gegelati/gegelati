@@ -66,7 +66,7 @@ class MapElitesLoggerTest : public ::testing::Test
 */
         descriptor = std::make_shared<
             Selector::MapElites::DefaultDescriptors::ActionValues>();
-        descriptor->initDescriptor(*la->getGraph(), le);
+        descriptor->initDescriptor(la->getGraph(), le);
     }
 
     void TearDown() override

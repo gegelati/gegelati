@@ -30,14 +30,14 @@ void Algorithm::ATPG::ATPGAlgorithm::addAggregatedActionProgramAlgorithm(const A
 }
 
 
-void Algorithm::ATPG::ATPGAlgorithm::initManager(std::shared_ptr<const Output::OutputHandler> outputs)
+void Algorithm::ATPG::ATPGAlgorithm::initManager()
 {
-    this->manager = std::make_shared<ATPG::ATPGManager>(*outputs, this->algorithmID);
+    this->manager = std::make_unique<ATPG::ATPGManager>(*this->outputs, this->algorithmID);
 }
 
 void Algorithm::ATPG::ATPGAlgorithm::initMutator()
 {
-    this->mutator = std::make_shared<ATPG::ATPGMutator>(*this->selector, this->algorithmID, this->archive);
+    this->mutator = std::make_unique<ATPG::ATPGMutator>(*this->selector, this->algorithmID, *this->archive);
 }
 
 std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Algorithm::ATPG::ATPGAlgorithm::getUsedSubAgents() const
@@ -56,7 +56,7 @@ std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Alg
 
 
 
-void Algorithm::ATPG::ATPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::ATPG::ATPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Init context program algo with TPG method.
     TPG::TPGAlgorithm::initSubAlgorithms(rng, outputs, dataSource, graph);
@@ -67,12 +67,12 @@ void Algorithm::ATPG::ATPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::share
 
     // Add program manager and mutator to TPG manager and mutator
     this->manager->addSubManager(actionProgramAlgo.getManager());
-    std::shared_ptr<ATPG::ATPGManager> tpgManager = std::dynamic_pointer_cast<ATPG::ATPGManager>(this->manager);
-    tpgManager->setActionProgramAlgorithmID(this->actionProgramAlgorithmID);
+    ATPG::ATPGManager* atpgManager = dynamic_cast<ATPGManager*>(this->manager.get());
+    atpgManager->setActionProgramAlgorithmID(this->actionProgramAlgorithmID);
 
     this->mutator->addSubMutator(actionProgramAlgo.getMutator());
-    std::shared_ptr<ATPG::ATPGMutator> tpgMutator = std::dynamic_pointer_cast<ATPG::ATPGMutator>(this->mutator);
-    tpgMutator->setActionProgramAlgorithmID(this->actionProgramAlgorithmID);
+    ATPG::ATPGMutator* atpgMutator = dynamic_cast<ATPGMutator*>(this->mutator.get());
+    atpgMutator->setActionProgramAlgorithmID(this->actionProgramAlgorithmID);
 }
 
 

@@ -76,34 +76,34 @@ void Algorithm::Algorithm::addAggregatedAlgorithm(const Algorithm& aggregatedAlg
     this->aggregatedAlgorithms.push_back(aggregatedAlgorithm);
 }
 
-std::shared_ptr<const EvoGraph::Graph> Algorithm::Algorithm::getGraph() const
+const EvoGraph::Graph& Algorithm::Algorithm::getGraph() const
 {
-    return this->graph;
+    return *this->graph;
 }
 
-std::shared_ptr<const Algorithm::AgentManager> Algorithm::Algorithm::getManagerCst() const
+const Algorithm::AgentManager& Algorithm::Algorithm::getManagerCst() const
 {
-    return this->manager;
+    return *this->manager;
 }
 
-std::shared_ptr<const Selector::Selector> Algorithm::Algorithm::getSelectorCst() const
+const Selector::Selector& Algorithm::Algorithm::getSelectorCst() const
 {
-    return this->selector;
+    return *this->selector;
 }
 
-std::shared_ptr<Algorithm::AgentManager> Algorithm::Algorithm::getManager()
+Algorithm::AgentManager& Algorithm::Algorithm::getManager()
 {
-    return this->manager;
+    return *this->manager;
 }
 
-std::shared_ptr<Selector::Selector> Algorithm::Algorithm::getSelector()
+Selector::Selector& Algorithm::Algorithm::getSelector()
 {
-    return this->selector;
+    return *this->selector;
 }
 
-std::shared_ptr<Algorithm::Mutator> Algorithm::Algorithm::getMutator()
+Algorithm::Mutator& Algorithm::Algorithm::getMutator()
 {
-    return this->mutator;
+    return *this->mutator;
 }
 
 std::vector<std::reference_wrapper<const Algorithm::Algorithm>> Algorithm::Algorithm::getSubAlgorithms() const
@@ -130,18 +130,18 @@ bool Algorithm::Algorithm::containsAgent(const Agent& agent) const
     return this->manager->containsAgent(agent);
 }
 
-void Algorithm::Algorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) {
+void Algorithm::Algorithm::initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) {
     /*This method is not abstract, it is not necessary for an algorithm to have sub algorithms*/
 }
 
-void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    this->outputs = outputs;
+    this->outputs = std::make_unique<Output::OutputHandler>(outputs);
     this->graph = graph;
 
-    this->initManager(outputs);
+    this->initManager();
 
-    this->selector = Selector::selectorFactory(this->manager, this->params);
+    this->selector = std::move(Selector::selectorFactory(*this->manager, this->params));
 
     this->initMutator();
 
@@ -149,7 +149,7 @@ void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Ou
 
     // Add the aggregated algorithm
     for(const auto& aggregatedAlgorithm: this->aggregatedAlgorithms){
-        this->manager->addAggregatedManager(*aggregatedAlgorithm.get().getManagerCst());
+        this->manager->addAggregatedManager(aggregatedAlgorithm.get().getManagerCst());
     }
 
     // Clear the best agent in the selector
@@ -162,7 +162,7 @@ void Algorithm::Algorithm::clearAlgorithm()
     for(const auto& subAlgorithm: subAlgorithms){
         subAlgorithm->clearAlgorithm();
     }
-    this->manager->clearAgents(this->graph);
+    this->manager->clearAgents(*this->graph);
     this->mutator = nullptr;
     this->selector = nullptr;
     this->manager = nullptr;
@@ -171,14 +171,14 @@ void Algorithm::Algorithm::clearAlgorithm()
 void Algorithm::Algorithm::initPopulation(RNG::RNG& rng)
 {
     // Initialize a random population
-    this->mutator->initRandomPopulation(this->graph, this->manager,
+    this->mutator->initRandomPopulation(*this->graph, *this->manager,
                                         this->params, rng);
 }
 
 void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
 {
-    this->mutator->mutatePopulation(this->graph, this->manager, this->params, rng, maxNbThreads);
-    this->selector->updateAfterPopulate(graph);
+    this->mutator->mutatePopulation(*this->graph, *this->manager, this->params, rng, maxNbThreads);
+    this->selector->updateAfterPopulate(*graph);
 
     this->clearUnusedSubAgents();
 }
@@ -197,10 +197,10 @@ void Algorithm::Algorithm::clearUnusedSubAgents() {
     for(const auto& subAlgorithm: subAlgorithms){
         subAlgorithm->clearUnusedSubAgents();
 
-        auto subAlgorithmAgents = subAlgorithm->getManager()->getAgents();
+        auto subAlgorithmAgents = subAlgorithm->getManager().getAgents();
         for(const Agent& agent: subAlgorithmAgents){
             if(usedSubAgents[subAlgorithm->getAlgorithmID()].find(agent) == usedSubAgents[subAlgorithm->getAlgorithmID()].end()){
-                subAlgorithm->manager->deleteAgent(agent, this->graph);
+                subAlgorithm->manager->deleteAgent(agent, *this->graph);
             }
         }
     }

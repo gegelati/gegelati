@@ -6,12 +6,12 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::Maple::MapleAlgorithm::copy() c
     return std::make_unique<MapleAlgorithm>(this->params, this->cGetSubAlgorithm(this->programAlgorithmID), this->algorithmName);
 }
 
-void Algorithm::Maple::MapleAlgorithm::initManager(std::shared_ptr<const Output::OutputHandler> outputs)
+void Algorithm::Maple::MapleAlgorithm::initManager()
 {
-    this->manager = std::make_shared<Maple::MapleManager>(*outputs, this->algorithmID);
+    this->manager = std::make_unique<Maple::MapleManager>(*this->outputs, this->algorithmID);
 }
 
 void Algorithm::Maple::MapleAlgorithm::initMutator()
 {
-    this->mutator = std::make_shared<Maple::MapleMutator>(*this->selector, this->algorithmID, this->archive);
+    this->mutator = std::make_unique<Maple::MapleMutator>(*this->selector, this->algorithmID, *this->archive);
 }

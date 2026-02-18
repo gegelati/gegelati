@@ -25,9 +25,9 @@ const std::vector<std::reference_wrapper<const Algorithm::Agent>> Algorithm::TPG
 }
 
 
-const Algorithm::Agent& Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
+const Algorithm::Agent& Algorithm::TPG::TPGManager::createAgent(EvoGraph::Graph& graph)
 {
-    std::shared_ptr<const EvoGraph::Team> vertex = graph->addNewTeam();
+    std::shared_ptr<const EvoGraph::Team> vertex = graph.addNewTeam();
     return this->createAgent(vertex);
 }
 
@@ -37,7 +37,7 @@ const Algorithm::Agent& Algorithm::TPG::TPGManager::createAgent(std::shared_ptr<
     return **this->agents.rbegin();
 }
 
-const Algorithm::Agent& Algorithm::TPG::TPGManager::copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+const Algorithm::Agent& Algorithm::TPG::TPGManager::copyAgent(const Agent& agent, EvoGraph::Graph& graph)
 {
     const TPGAgent* castedAgent = dynamic_cast<const TPGAgent*>(&agent);
     if(castedAgent == nullptr){
@@ -48,41 +48,41 @@ const Algorithm::Agent& Algorithm::TPG::TPGManager::copyAgent(const Agent& agent
 
     if(agent.getAlgorithmID() != this->getAlgorithmID()){
         // Since the agent dupplicated is not from the same algorithm, we also need to dupplicate the sub agents on the edge of the vertex.
-        newVertex = graph->addNewTeam();
+        newVertex = graph.addNewTeam();
         for(std::shared_ptr<const EvoGraph::Edge> edge: castedAgent->getVertex()->getOutgoingEdges()){
-            const Algorithm::Agent& newSubAgent = this->getSubManager(this->programAlgorithmID)->copyAgent(edge->getProgram(), graph);
-            graph->addNewEdge(*newVertex, *edge->getDestination(), newSubAgent);
+            const Algorithm::Agent& newSubAgent = this->getSubManager(this->programAlgorithmID).copyAgent(edge->getProgram(), graph);
+            graph.addNewEdge(*newVertex, *edge->getDestination(), newSubAgent);
         }
         
     } else {
-        newVertex = graph->cloneVertex(*std::dynamic_pointer_cast<const EvoGraph::Team>(castedAgent->getVertex()));
+        newVertex = graph.cloneVertex(*std::dynamic_pointer_cast<const EvoGraph::Team>(castedAgent->getVertex()));
     }
 
     return this->createAgent(newVertex);
 }
 
-void Algorithm::TPG::TPGManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::TPG::TPGManager::deleteAgent(const Agent& agent, EvoGraph::Graph& graph)
 {
     this->emptyAgent(agent, graph);
     // Do not remove action agents from the graph
     if(auto vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(this->getTPGAgentFromCst(agent).getVertex())){
-        graph->removeVertex(*vertex);
+        graph.removeVertex(*vertex);
     }
 
     auto iterator = this->agents.find(&agent);
     this->agents.erase(iterator);   
 }
-void Algorithm::TPG::TPGManager::emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::TPG::TPGManager::emptyAgent(const Agent& agent, EvoGraph::Graph& graph)
 {
     // Do not remove action agents from the graph
     if(auto vertex = std::dynamic_pointer_cast<const EvoGraph::Team>(this->getTPGAgentFromCst(agent).getVertex())){
         while(vertex->getOutgoingEdges().size() > 0){
-            graph->removeEdge(*vertex->getOutgoingEdges().front());
+            graph.removeEdge(*vertex->getOutgoingEdges().front());
         }
     }
 }
 
-void Algorithm::TPG::TPGManager::setVertex(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph, std::shared_ptr<const EvoGraph::Vertex> vertex)
+void Algorithm::TPG::TPGManager::setVertex(const Agent& agent, EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Vertex> vertex)
 {
     std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
     if(team == nullptr){
@@ -99,7 +99,7 @@ std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::TPG::TPGManager::createEx
     auto engine = std::make_unique<TPG::TPGExecutionEngine>(this->outputs, this->algorithmID, isTraining);
 
     engine->setProgramExecutionEngine(
-        std::move(this->cGetSubManager(this->programAlgorithmID)->createExecutionEngine(dataSources, isTraining))
+        std::move(this->cGetSubManager(this->programAlgorithmID).createExecutionEngine(dataSources, isTraining))
     );
 
     return engine;

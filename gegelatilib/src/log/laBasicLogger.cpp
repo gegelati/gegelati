@@ -134,15 +134,15 @@ void Log::LABasicLogger::logNewGeneration(uint64_t& generationNumber)
     *this << std::setw(colWidth) << generationNumber;
 
     *this << std::setw(colWidth)
-          << this->learningAgent.getGraph()->getNbVertices();
+          << this->learningAgent.getGraph().getNbVertices();
 
           
     uint64_t nbAgents = 0;
-    for(auto algo : this->learningAgent.getAlgorithms()){
-        nbAgents += algo->getNbAgents();
+    for(auto& algo : this->learningAgent.getAlgorithms()){
+        nbAgents += algo.get().getNbAgents();
     }
 
-    uint64_t nbActionsR = this->learningAgent.getGraph()->getRootActions().size();
+    uint64_t nbActionsR = this->learningAgent.getGraph().getRootActions().size();
 
     *this << std::setw(colWidth) << nbActionsR << std::setw(colWidth)
           << nbAgents;

@@ -77,7 +77,7 @@ std::shared_ptr<const Selector::MapElites::MapElitesArchive> Selector::
 }
 
 void Selector::MapElites::MapElitesSelector::doSelection(
-    std::shared_ptr<EvoGraph::Graph> graph,
+    EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                   std::reference_wrapper<const Algorithm::Agent>>& results,
     RNG::RNG& rng)
@@ -147,7 +147,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
 
         if (!containAgent) {
             this->removeFromSavedResults(it->second);
-            this->manager->deleteAgent(it->second, graph);
+            this->manager.deleteAgent(it->second, graph);
             it = results.erase(it); // erase returns next iterator
         }
         else {

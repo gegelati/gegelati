@@ -33,9 +33,9 @@ bool Algorithm::AgentManager::isAgentAccessible(const Agent& agent) const
     return false;
 }
 
-void Algorithm::AgentManager::addSubManager(std::shared_ptr<AgentManager> subManager)
+void Algorithm::AgentManager::addSubManager(AgentManager& subManager)
 {
-    this->subManagers.insert({subManager->getAlgorithmID(), subManager});
+    this->subManagers.insert({subManager.getAlgorithmID(), subManager});
 }
 
 void Algorithm::AgentManager::addAggregatedManager(const AgentManager& managerAggregated)
@@ -56,7 +56,7 @@ const Algorithm::AgentManager& Algorithm::AgentManager::getAggregatedManager(uin
     throw std::runtime_error("Algorithm::AgentManager::getAggregatedManager aggregated manager not found for the specific id");
 }
 
-std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::getSubManager(uint64_t algorithmID){
+Algorithm::AgentManager& Algorithm::AgentManager::getSubManager(uint64_t algorithmID){
     auto it = this->subManagers.find(algorithmID);
     if(it == this->subManagers.end()){
         throw std::runtime_error("Algorithm::AgentManager::getSubManager subManager not found for the specific id");
@@ -64,7 +64,7 @@ std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::getSubManager(
     return it->second;
 }
 
-std::shared_ptr<const Algorithm::AgentManager> Algorithm::AgentManager::cGetSubManager(uint64_t algorithmID) const{
+const Algorithm::AgentManager& Algorithm::AgentManager::cGetSubManager(uint64_t algorithmID) const{
     auto it = this->subManagers.find(algorithmID);
     if(it == this->subManagers.end()){
         throw std::runtime_error("Algorithm::AgentManager::getSubManager subManager not found for the specific id");
@@ -86,13 +86,13 @@ const std::vector<std::reference_wrapper<const Algorithm::Agent>> Algorithm::Age
     return refs;
 }
 
-void Algorithm::AgentManager::deleteAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::AgentManager::deleteAgent(const Agent& agent, EvoGraph::Graph& graph)
 {
     this->emptyAgent(agent, graph);
     this->agents.erase(this->getAgentFromCst(agent));
 }
 
-void Algorithm::AgentManager::clearAgents(std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::AgentManager::clearAgents(EvoGraph::Graph& graph)
 {
     while(this->agents.size() > 0){
         this->deleteAgent(**this->agents.begin(), graph);

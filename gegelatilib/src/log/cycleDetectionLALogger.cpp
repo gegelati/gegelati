@@ -58,8 +58,8 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
     std::vector<const EvoGraph::Vertex*> currentPath;
 
     // Add all roots to the set of vertex to visit
-    const auto tpg = this->learningAgent.getGraph();
-    auto roots = tpg->getRootVertices();
+    const EvoGraph::Graph& tpg = this->learningAgent.getGraph();
+    auto roots = tpg.getRootVertices();
     //std::copy(roots.begin(), roots.end(), std::back_inserter(lifoToVisit)); TODO
 
     // Iterate on the stack
@@ -107,7 +107,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
     }
 
     // Check that all vertices were visited.
-    if (visitedVertices.size() != tpg->getNbVertices()) {
+    if (visitedVertices.size() != tpg.getNbVertices()) {
         // Not all vertices were visited: A connected sub-graph was not visited.
         // This happens when a connected sub-graph has no root, which indicates
         // that the subgraph has a cycle.

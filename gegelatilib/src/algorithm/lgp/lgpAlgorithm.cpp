@@ -13,18 +13,18 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::LGP::LGPAlgorithm::copy() const
     return *this->env;
 }
 
-void Algorithm::LGP::LGPAlgorithm::initManager(std::shared_ptr<const Output::OutputHandler> outputs)
+void Algorithm::LGP::LGPAlgorithm::initManager()
 {
-    this->manager = std::make_shared<LGP::LGPManager>(*this->env, *outputs, this->algorithmID);
+    this->manager = std::make_unique<LGP::LGPManager>(*this->env, *this->outputs, this->algorithmID);
 }
 
 void Algorithm::LGP::LGPAlgorithm::initMutator()
 {
-    this->mutator = std::make_shared<LGP::LGPMutator>(*this->selector, this->algorithmID);
+    this->mutator = std::make_unique<LGP::LGPMutator>(*this->selector, this->algorithmID);
 }
 
 
-void Algorithm::LGP::LGPAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::LGP::LGPAlgorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     this->env = std::make_unique<Environment>(iSet, params, dataSource);
     Algorithm::Algorithm::initAlgorithm(rng, outputs, dataSource, graph);

@@ -24,7 +24,7 @@ namespace Selector {
          * \param[in] params parameters used by the Selector.
          * \param[in] nbActions number of actions in the LearningEnvironment.
          */
-        ClassificationSelector(std::shared_ptr<Algorithm::AgentManager> manager,
+        ClassificationSelector(Algorithm::AgentManager& manager,
                                const Learn::LearningParameters& params,
                                uint64_t nbActions)
             : Selector{manager, params}, nbActions{nbActions}
@@ -67,7 +67,7 @@ namespace Selector {
          * non-decimated roots.
          */
         virtual void doSelection(
-            std::shared_ptr<EvoGraph::Graph> graph,
+            EvoGraph::Graph& graph,
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Algorithm::Agent>>& results,
             RNG::RNG& rng) override;

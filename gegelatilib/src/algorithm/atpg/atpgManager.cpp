@@ -3,7 +3,7 @@
 
 
 
-void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) 
+void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, EvoGraph::Graph& graph) 
 {
     std::vector<std::shared_ptr<const EvoGraph::Vertex>> verticesToDelete;
     // get vertex of agent to delete;
@@ -18,13 +18,13 @@ void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, std::shared_pt
             verticesToDelete.push_back(edge->getDestination());
         }
         // Remove the edge
-        graph->removeEdge(*vertex->getOutgoingEdges().front());
+        graph.removeEdge(*vertex->getOutgoingEdges().front());
 
     }
 
     // Remove the action vertices from the graph
     for(auto& vertex: verticesToDelete){
-        graph->removeVertex(*vertex);
+        graph.removeVertex(*vertex);
     }
 }
 
@@ -33,11 +33,11 @@ std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::ATPG::ATPGManager::create
     auto engine = std::make_unique<ATPG::ATPGExecutionEngine>(this->outputs, this->algorithmID, isTraining);
 
     engine->setProgramExecutionEngine(
-        std::move(this->cGetSubManager(this->programAlgorithmID)->createExecutionEngine(dataSources, isTraining))
+        std::move(this->cGetSubManager(this->programAlgorithmID).createExecutionEngine(dataSources, isTraining))
     );
 
     engine->setActionProgramExecutionEngine(
-        std::move(this->cGetSubManager(this->actionProgramAlgorithmID)->createExecutionEngine(dataSources, isTraining))
+        std::move(this->cGetSubManager(this->actionProgramAlgorithmID).createExecutionEngine(dataSources, isTraining))
     );
 
     return engine;

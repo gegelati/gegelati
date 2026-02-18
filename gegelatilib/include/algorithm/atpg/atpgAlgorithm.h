@@ -60,7 +60,7 @@ namespace Algorithm::ATPG {
              * 
              * \param[in] outputs outputs needed for the algorithm.
              */
-            virtual void initManager(std::shared_ptr<const Output::OutputHandler> outputs) override;
+            virtual void initManager() override;
 
             /**
              * \brief Initialize the mutator of the algorithm
@@ -75,7 +75,7 @@ namespace Algorithm::ATPG {
              * \param[in] dataSource input sources of the algorithm.
              * \param[in] graph the EvoGraph::Graph used by the algorithm.
              */
-            virtual void initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual void initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
 
             
             /**

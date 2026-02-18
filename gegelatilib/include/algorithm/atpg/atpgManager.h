@@ -49,7 +49,7 @@ namespace Algorithm::ATPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual void emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph) override;
+        virtual void emptyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
         /**
          * \brief create and return a TPG execution engine.

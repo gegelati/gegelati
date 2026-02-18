@@ -202,7 +202,7 @@ void File::GraphDotExporter::printGraphFooter()
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
     // Main agents ids
     for(auto algorithm : this->algorithmsRef){
-        for(const Algorithm::Agent& agent : algorithm->getManagerCst()->getAgents()){
+        for(const Algorithm::Agent& agent : algorithm->getManagerCst().getAgents()){
             fprintf(pFile, "P%" PRIu64 " ", agent.getAgentID());
         }
     }
@@ -229,7 +229,7 @@ void File::GraphDotExporter::print()
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
     for(auto algorithm : this->algorithmsRef){
-        for(const Algorithm::Agent& agent : algorithm->getManagerCst()->getAgents()){
+        for(const Algorithm::Agent& agent : algorithm->getManagerCst().getAgents()){
             this->printAgent(agent);
         }
     }

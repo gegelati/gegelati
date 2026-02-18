@@ -6,13 +6,13 @@ Algorithm::LGP::LGPAgent& Algorithm::LGP::LGPManager::getLGPAgentFromCst(const A
     return dynamic_cast<LGPAgent&>(**this->getAgentFromCst(agent));
 }
 
-const Algorithm::Agent& Algorithm::LGP::LGPManager::createAgent(std::shared_ptr<EvoGraph::Graph> graph)
+const Algorithm::Agent& Algorithm::LGP::LGPManager::createAgent(EvoGraph::Graph& graph)
 {
     this->agents.insert(std::make_unique<LGPAgent>(this->env, this->outputs, this->getAlgorithmID()));
     return **this->agents.rbegin();
 }
 
-const Algorithm::Agent& Algorithm::LGP::LGPManager::copyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+const Algorithm::Agent& Algorithm::LGP::LGPManager::copyAgent(const Agent& agent, EvoGraph::Graph& graph)
 {
     const LGPAgent* castedAgent = dynamic_cast<const LGPAgent*>(&agent);
     if(castedAgent == nullptr){
@@ -32,7 +32,7 @@ const Algorithm::Agent& Algorithm::LGP::LGPManager::copyAgent(const Agent& agent
     return **this->agents.rbegin();
 }
 
-void Algorithm::LGP::LGPManager::emptyAgent(const Agent& agent, std::shared_ptr<EvoGraph::Graph> graph)
+void Algorithm::LGP::LGPManager::emptyAgent(const Agent& agent, EvoGraph::Graph& graph)
 {
     Algorithm::LGP::LGPAgent& lgpAgent = this->getLGPAgentFromCst(agent);
     while (lgpAgent.getNbLines() > 0) {

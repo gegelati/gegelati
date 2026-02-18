@@ -35,7 +35,7 @@ namespace Algorithm::Maple {
              * 
              * \param[in] outputs outputs needed for the algorithm.
              */
-            virtual void initManager(std::shared_ptr<const Output::OutputHandler> outputs) override;
+            virtual void initManager() override;
 
             /**
              * \brief Initialize the mutator of the algorithm

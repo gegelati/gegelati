@@ -28,7 +28,7 @@ namespace Algorithm::TPG {
             uint64_t programAlgorithmID;
 
             /// Archive used during the training process
-            std::shared_ptr<Archive> archive;
+            std::unique_ptr<Archive> archive;
 
         public:
 
@@ -40,7 +40,7 @@ namespace Algorithm::TPG {
              * \param[in] algorithmName name of the algorithm used.
              */
             TPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "TPG")
-                : Algorithm(params, algorithmName), archive{std::make_shared<Archive>(params.archiveSize, params.archivingProbability)} {
+                : Algorithm(params, algorithmName), archive{std::make_unique<Archive>(params.archiveSize, params.archivingProbability)} {
                 this->setProgramAlgorithm(programAlgorithm);
             };
 
@@ -54,7 +54,7 @@ namespace Algorithm::TPG {
             /**
              * \brief Get the Archive used by the LGPAlgorithm.
              */
-            std::shared_ptr<const Archive> getArchive() const;
+            const Archive& getArchive() const;
             
             /**
              * \brief Clear all the parts of agents that are not used, such as introns for LGPs
@@ -67,7 +67,7 @@ namespace Algorithm::TPG {
              * 
              * \param[in] outputs outputs needed for the algorithm.
              */
-            virtual void initManager(std::shared_ptr<const Output::OutputHandler> outputs) override;
+            virtual void initManager() override;
 
             /**
              * \brief Initialize the mutator of the algorithm
@@ -82,7 +82,7 @@ namespace Algorithm::TPG {
              * \param[in] dataSource input sources of the algorithm.
              * \param[in] graph the EvoGraph::Graph used by the algorithm.
              */
-            virtual void initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+            virtual void initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
 
 
             /**
