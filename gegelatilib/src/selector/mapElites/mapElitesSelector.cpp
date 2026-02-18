@@ -125,19 +125,13 @@ void Selector::MapElites::MapElitesSelector::doSelection(
 
             // The value saved in the archive is better than the current agent
             // There is also a verification that the agent is not the same
-            if (!pairSaved.second && *pairSaved.second != agent &&
-                pairSaved.first->getSelectionMetrics()->getScore() >=
-                    metrics->getScore()) {
-                // Nothing happened
-
-            }
-            // The current agent is better than the values saved
-            else if (*pairSaved.second != agent) {
-                numberNewValues++;
-
+            if (!pairSaved.second || (*pairSaved.second != agent &&
+                pairSaved.first->getSelectionMetrics()->getScore() <
+                     metrics->getScore())) {
                 // Saving
                 mapEliteArchive->setArchiveFromDescriptors(agent, it->first,
                                                            descriptorUsed);
+
             }
         }
     }

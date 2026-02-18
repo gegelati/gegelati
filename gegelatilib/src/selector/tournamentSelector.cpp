@@ -19,10 +19,11 @@ void Selector::TournamentSelector::doSelection(
     std::vector<std::pair<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Algorithm::Agent>>>
         elements;
-    auto it = results.begin();
-    for (size_t i = 0; i < nbAgentsInTournament && it != results.end();
-         ++i, ++it) {
-        elements.push_back(*it);
+    
+    for (size_t i = 0; i < nbAgentsInTournament && results.size() > 0; i++) {
+        elements.push_back(*results.begin());
+        this->removeFromSavedResults(results.begin()->second);
+        results.erase(results.begin());
     }
 
     // Shuffle with custom RNG
@@ -50,7 +51,6 @@ void Selector::TournamentSelector::doSelection(
             auto itWorst = subMap.begin();
 
             // Remove the vertex from the graph as well
-            this->removeFromSavedResults(itWorst->second);
             this->manager->deleteAgent(itWorst->second, graph);
             
 
@@ -59,13 +59,7 @@ void Selector::TournamentSelector::doSelection(
 
         // This is a logical deletion, the vertex will be removed later
         this->addToVerticesToDelete(subMap.begin()->second);
-    }
 
-    // Delete from results and resultsPerAgent
-    auto itDel = results.begin();
-    for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
-        this->removeFromSavedResults(itDel->second);
-        results.erase(itDel++);
     }
 }
 

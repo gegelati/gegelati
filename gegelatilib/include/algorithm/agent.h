@@ -1,4 +1,3 @@
-
 #ifndef AGENT_H
 #define AGENT_H
 
@@ -77,6 +76,10 @@ namespace Algorithm {
          * \param[in] newID the new integer ID to set to the Agent.
          */
         virtual void setAgentID(uint64_t newID);
+
+        // Disable copying to avoid accidental copies (use references or pointers instead).
+        Agent(const Agent&) = delete;
+        Agent& operator=(const Agent&) = delete;
     };
     
     /**

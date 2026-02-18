@@ -51,7 +51,7 @@ namespace Algorithm::TPG {
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        TPGExecutionEngine(const Agent executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining) {}
+        TPGExecutionEngine(const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining) {}
 
         /**
          * Setter for the archive

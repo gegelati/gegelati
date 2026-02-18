@@ -82,7 +82,8 @@ void Selector::MapElites::MapElitesArchive::setArchiveFromDescriptors(
         indices.push_back(getIndexArchive(descriptors[i]));
     }
 
-    archive[computeLinearIndex(indices)] = std::make_pair(eval, agent);
+    std::reference_wrapper<const Algorithm::Agent> agentRef = agent;
+    archive[computeLinearIndex(indices)] = std::make_pair(eval, agentRef);
 }
 
 const std::pair<std::shared_ptr<Learn::EvaluationResult>,
@@ -97,7 +98,8 @@ void Selector::MapElites::MapElitesArchive::setArchiveAt(
     const Algorithm::Agent& agent, std::shared_ptr<Learn::EvaluationResult> eval,
     const std::vector<uint64_t>& indices)
 {
-    archive[computeLinearIndex(indices)] = std::make_pair(eval, agent);
+    std::reference_wrapper<const Algorithm::Agent> agentRef = agent;
+    archive[computeLinearIndex(indices)] = std::make_pair(eval, agentRef);
 }
 
 bool Selector::MapElites::MapElitesArchive::containsAgent(

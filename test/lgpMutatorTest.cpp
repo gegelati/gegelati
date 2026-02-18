@@ -67,7 +67,6 @@ class LgpMutatorTest : public ::testing::Test
 
     virtual void TearDown()
     {
-        delete agent;
         delete (&(vect.at(0).get()));
         delete (&(vect.at(1).get()));
         delete (&set.getInstruction(0));

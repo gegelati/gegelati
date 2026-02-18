@@ -38,10 +38,15 @@ void Selector::Selector::keepBestPolicy(std::shared_ptr<EvoGraph::Graph> graph)
 
 void Selector::Selector::removeFromSavedResults(const Algorithm::Agent& agent)
 {
-    this->resultsPerAgent.erase(agent);
-    if (this->bestAgent.first && agent == *this->bestAgent.first) {
-        this->bestAgent.first = std::nullopt;
-        this->bestAgent.second = nullptr;
+    if (&agent != nullptr) {
+        this->resultsPerAgent.erase(agent);
+        if (this->bestAgent.first && agent == *this->bestAgent.first) {
+            this->bestAgent.first = std::nullopt;
+            this->bestAgent.second = nullptr;
+        }
+    }
+    else {
+        int a = 2;
     }
 }
 

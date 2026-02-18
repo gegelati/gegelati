@@ -143,8 +143,6 @@ class TpgMutatorTest : public ::testing::Test
 
     virtual void TearDown()
     {
-        delete lgpAgent;
-        delete lgpOutput;
         delete (&(vect.at(0).get()));
         delete (&(vect.at(1).get()));
         delete (&set.getInstruction(0));
@@ -912,7 +910,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
 
     tpgMutator->updateSpecificContext(graph, tpgManager, params, rng);
 
-    auto newAgent = tpgManager->copyAgent(tpgManager->getAgents().at(0), graph);
+    auto& newAgent = tpgManager->copyAgent(tpgManager->getAgents().at(0), graph);
 
     // Test the function in normal conditions
     // (only edge2 can be part of "preExistingEdges" since all other edges are

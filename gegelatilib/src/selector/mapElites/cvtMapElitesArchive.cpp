@@ -137,7 +137,8 @@ void Selector::MapElites::CvtMapElitesArchive::setArchiveFromDescriptors(
     const std::vector<double>& descriptors)
 {
     size_t idx = getIndexForDescriptor(descriptors);
-    archive[idx] = std::make_pair(eval, agent);
+    std::reference_wrapper<const Algorithm::Agent> agentRef = agent;
+    archive[idx] = std::make_pair(eval, agentRef);
 }
 
 size_t Selector::MapElites::CvtMapElitesArchive::getIndexForDescriptor(
