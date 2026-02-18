@@ -22,10 +22,10 @@ namespace Algorithm::Maple {
              * \brief Main constructor of the TPGAgent.
              *
              * \param[in] vertex the Vertex that the TPGAgent will represent. This vertex must be an action vertex.
-             * \param[in] algorithmName name of the algorithm used.
+             * \param[in] algorithmID id of the algorithm used.
              */
-            MapleAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, std::string algorithmName) 
-            : TPGAgent(vertex, algorithmName) {};
+            MapleAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, uint64_t algorithmID) 
+            : TPGAgent(vertex, algorithmID) {};
 
             /**
              * \brief Method that return if the agent is valid for execution.

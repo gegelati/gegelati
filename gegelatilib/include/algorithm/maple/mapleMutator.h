@@ -23,9 +23,10 @@ namespace Algorithm::Maple {
          * \brief Constructor for MapleMutator
          * 
          * \param[in] selector Reference to the current selector used by the algorithm.
+         * \param[in] algorithmID id of the algorithm used.
          * \param[in] archive Archive used by this algorithm
          */
-        MapleMutator(Selector::Selector& selector, std::shared_ptr<const Archive> archive): TPGMutator(selector, archive){};
+        MapleMutator(const Selector::Selector& selector, uint64_t algorithmID, std::shared_ptr<const Archive> archive): TPGMutator(selector, algorithmID, archive){};
 
 
         /**

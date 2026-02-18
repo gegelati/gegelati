@@ -30,10 +30,10 @@ namespace Algorithm {
         std::set<std::unique_ptr<Agent>, UniqueLess<Agent>> agents;
 
         /// Sub-managers for sub-algorithms
-        std::map<std::string, std::shared_ptr<AgentManager>> subManagers;
+        std::map<uint64_t, std::shared_ptr<AgentManager>> subManagers;
 
-        /// Name of the algorithm.
-        std::string algorithmName;
+        /// Id of the algorithm.
+        uint64_t algorithmID;
 
         /// Number of outputs of the agents
         const Output::OutputHandler& outputs;
@@ -46,7 +46,7 @@ namespace Algorithm {
          * 
          * \param[in] agent the Agent to cast.
          */
-        virtual std::set<std::unique_ptr<Algorithm::Agent>>::iterator getAgentFromCst(const Agent& agent);
+        virtual std::set<std::unique_ptr<Agent>>::iterator getAgentFromCst(const Agent& agent);
 
     public:
 
@@ -54,8 +54,9 @@ namespace Algorithm {
          * Constructor for agent manager
          * 
          * \param[in] outputs outputs of the agents
+         * \param[in] algorithmID id of the algorithm used.
          */
-        AgentManager(const Output::OutputHandler& outputs) : outputs{outputs} {}
+        AgentManager(const Output::OutputHandler& outputs, uint64_t algorithmID) : outputs{outputs}, algorithmID{algorithmID} {}
 
         /**
          * \brief Get the current agents used by the algorithm.
@@ -87,39 +88,33 @@ namespace Algorithm {
         /**
          * \brief return the subManager corresponding to the name of the algorithm given.
          * 
-         * \param[in] nameAlgorithm name of the algorithm given.
+         * \param[in] algorithmID name of the algorithm given.
          */
-        virtual std::shared_ptr<AgentManager> getSubManager(std::string nameAlgorithm);
+        virtual std::shared_ptr<AgentManager> getSubManager(uint64_t algorithmID);
 
         /**
          * \brief return the subManager corresponding to the name of the algorithm given.
          * 
-         * \param[in] nameAlgorithm name of the algorithm given.
+         * \param[in] algorithmID name of the algorithm given.
          */
-        virtual std::shared_ptr<const AgentManager> cGetSubManager(std::string nameAlgorithm) const;
+        virtual std::shared_ptr<const AgentManager> cGetSubManager(uint64_t algorithmID) const;
 
         /**
          * \brief return the aggregated manager corresponding to the name of the algorithm given.
          * 
-         * \param[in] nameAlgorithm name of the algorithm given.
+         * \param[in] algorithmID name of the algorithm given.
          */
-        virtual const AgentManager& getAggregatedManager(std::string nameAlgorithm) const;
+        virtual const AgentManager& getAggregatedManager(uint64_t algorithmID) const;
 
         /**
          * \brief return the aggregated managers of this manager
          */
         virtual const std::vector<std::reference_wrapper<const AgentManager>>& getAggregatedManagers() const;
 
-        
         /**
-         * \brief Set the name of the algorithm.
+         * \brief Return the id of the algorithm.
          */
-        void setAlgorithmName(std::string name) { this->algorithmName = name; }
-
-        /**
-         * \brief Return the name of the algorithm.
-         */
-        std::string getAlgorithmName() const { return this->algorithmName; }
+        uint64_t getAlgorithmID() const { return this->algorithmID; }
 
         /**
          * \brief method that indicate if the manager contains a specific agent.

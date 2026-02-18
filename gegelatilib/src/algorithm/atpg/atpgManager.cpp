@@ -12,7 +12,7 @@ void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, std::shared_pt
         auto& edge = vertex->getOutgoingEdges().front();
 
         // Remove the program on the destination of the edge if it exist.
-        if(edge->getDestination()->hasProgram() && edge->getDestination()->getProgram().getAlgorithmName() == this->actionProgramAlgorithmName && 
+        if(edge->getDestination()->hasProgram() && edge->getDestination()->getProgram().getAlgorithmID() == this->actionProgramAlgorithmID && 
            edge->getDestination()->getIncomingEdges().size() == 1) {
             // Remove action vertex from the graph because it is only used by this team and it contains an action program.
             verticesToDelete.push_back(edge->getDestination());
@@ -30,14 +30,14 @@ void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, std::shared_pt
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::ATPG::ATPGManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const
 {
-    auto engine = std::make_unique<ATPG::ATPGExecutionEngine>(this->outputs, this->algorithmName, isTraining);
+    auto engine = std::make_unique<ATPG::ATPGExecutionEngine>(this->outputs, this->algorithmID, isTraining);
 
     engine->setProgramExecutionEngine(
-        std::move(this->cGetSubManager(this->programAlgorithmName)->createExecutionEngine(dataSources, isTraining))
+        std::move(this->cGetSubManager(this->programAlgorithmID)->createExecutionEngine(dataSources, isTraining))
     );
 
     engine->setActionProgramExecutionEngine(
-        std::move(this->cGetSubManager(this->actionProgramAlgorithmName)->createExecutionEngine(dataSources, isTraining))
+        std::move(this->cGetSubManager(this->actionProgramAlgorithmID)->createExecutionEngine(dataSources, isTraining))
     );
 
     return engine;

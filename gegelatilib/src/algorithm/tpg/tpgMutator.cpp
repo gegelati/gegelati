@@ -193,8 +193,8 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(std::shared_ptr<EvoGraph::
     // programs Association here are determinists since randomness would
     // uselessly complicate the code while bringing no real value since anyway,
     // Programs have been initialized randomly.
-    auto programMutator = this->getSubMutator(this->programAlgorithmName);
-    auto programManager = manager->getSubManager(this->programAlgorithmName);
+    auto programMutator = this->getSubMutator(this->programAlgorithmID);
+    auto programManager = manager->getSubManager(this->programAlgorithmID);
     for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
 
         // Create a program agent
@@ -222,8 +222,8 @@ void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(const Agent& agent, std
     manager->emptyAgent(agent, graph);
     auto vertex = dynamic_cast<const TPGAgent&>(agent).getVertex();
 
-    auto programMutator = this->getSubMutator(this->programAlgorithmName);
-    auto programManager = manager->getSubManager(this->programAlgorithmName);
+    auto programMutator = this->getSubMutator(this->programAlgorithmID);
+    auto programManager = manager->getSubManager(this->programAlgorithmID);
 
     // Get the actions vertices.
     auto actions = graph->getActions();
@@ -323,7 +323,7 @@ void Algorithm::TPG::TPGMutator::mutateOutgoingEdge(
 {
     const Agent& originAgent = edge->getProgram();
     // copy program
-    const Algorithm::Agent& newAgent = manager->getSubManager(originAgent.getAlgorithmName())->copyAgent(originAgent, graph);
+    const Algorithm::Agent& newAgent = manager->getSubManager(originAgent.getAlgorithmID())->copyAgent(originAgent, graph);
 
     // Set the mutated agent to the edge
     graph->setEdgeProgram(*edge, newAgent);
@@ -389,7 +389,7 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
     std::shared_ptr<AgentManager> manager, const Learn::LearningParameters& params, 
     RNG::RNG& rng)
 {
-    auto subMutator = this->getSubMutator(programAgent.getAlgorithmName());
+    auto subMutator = this->getSubMutator(programAgent.getAlgorithmID());
 
     std::vector<std::reference_wrapper<const Agent>> newSubAgents; //TODOTODOTODO
     bool allUnique;
@@ -435,7 +435,7 @@ void Algorithm::TPG::TPGMutator::mutateSubAgents(
     if (maxNbThreads <= 1) {
         // Sequential (kept for determinism check mostly)
         for (const Algorithm::Agent& programAgent : agents) {
-            auto subManager = manager->getSubManager(programAgent.getAlgorithmName());
+            auto subManager = manager->getSubManager(programAgent.getAlgorithmID());
             RNG::RNG privateRNG(rng.getUnsignedInt64(0, UINT64_MAX));
             this->mutateProgramAgentAgainstArchive(programAgent, graph, subManager, params,
                                                 privateRNG);
@@ -473,7 +473,7 @@ void Algorithm::TPG::TPGMutator::mutateSubAgents(
                 //  Do the job (if any)
                 if (jobDone) {
                     privateRNG.setSeed(job.second);
-                    auto subManager = manager->getSubManager(job.first.value().get().getAlgorithmName());
+                    auto subManager = manager->getSubManager(job.first.value().get().getAlgorithmID());
                     this->mutateProgramAgentAgainstArchive(*job.first, graph, subManager, params, privateRNG);
                 }
             } while (jobDone);

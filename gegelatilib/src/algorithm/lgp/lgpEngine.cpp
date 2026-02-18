@@ -49,7 +49,7 @@ void Algorithm::LGP::LGPEngine::setExecutedAgent(const Agent& newExecutedAgent)
 
     // are constants used here ?
     size_t offset = 1;
-    if (lgpAgent.getEnvironment()->getParams().nbProgramConstant > 0) {
+    if (lgpAgent.getEnvironment().getParams().nbProgramConstant > 0) {
         // replace programs constants if already existing
         dataScsConstsAndRegs.at(1) = lgpAgent.cGetConstantHandler();
         // increment offset for the datahandlers verification
@@ -61,7 +61,7 @@ void Algorithm::LGP::LGPEngine::setExecutedAgent(const Agent& newExecutedAgent)
     // -2 because we don't count the registers that are the first datasources
     // and the constants (second datasource)
     if (this->dataScsConstsAndRegs.size() - offset !=
-        lgpAgent.getEnvironment()->getDataSources().size()) {
+        lgpAgent.getEnvironment().getDataSources().size()) {
         throw std::runtime_error(
             "Data sources characteristics for Program Execution differ from "
             "Program reference Environment.");
@@ -70,7 +70,7 @@ void Algorithm::LGP::LGPEngine::setExecutedAgent(const Agent& newExecutedAgent)
         // check data source characteristics
         auto& iDataSrc =
             this->dataScsConstsAndRegs.at(i + (size_t)offset).get();
-        auto& envDataSrc = lgpAgent.getEnvironment()->getDataSources().at(i).get();
+        auto& envDataSrc = lgpAgent.getEnvironment().getDataSources().at(i).get();
         // Assume that dataSource must be (at least) a copy of each other to
         // simplify the comparison This is characterise by the two data sources
         // having the same id
@@ -125,7 +125,7 @@ const Instructions::Instruction& Algorithm::LGP::LGPEngine::getCurrentInstructio
         this->getCurrentLine(); // throw std::out_of_range if the program
     // counter is too large.
     uint64_t instructionIndex = currentLine.getInstructionIndex();
-    return this->lgpExecutedAgent->get().getEnvironment()->getInstructionSet().getInstruction(
+    return this->lgpExecutedAgent->get().getEnvironment().getInstructionSet().getInstruction(
         instructionIndex); // throw std::out_of_range if the index of the line
     // is too large.
 }
@@ -219,7 +219,7 @@ void Algorithm::LGP::LGPEngine::setDataSources(
     this->dataSources = dataSrc;
     // we need this offset to push the constant at the first
     size_t offset =
-        this->lgpExecutedAgent->get().getEnvironment()->getParams().nbProgramConstant > 0
+        this->lgpExecutedAgent->get().getEnvironment().getParams().nbProgramConstant > 0
             ? 2
             : 1;
     if (offset == 2) {

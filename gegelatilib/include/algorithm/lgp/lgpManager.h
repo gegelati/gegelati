@@ -22,7 +22,7 @@ namespace Algorithm {
         protected:
             
             /// Environment for executing LGP 
-            std::shared_ptr<const Environment> env;
+            const Environment& env;
 
 
             /**
@@ -38,8 +38,9 @@ namespace Algorithm {
              * 
              * \param[in] env the Environment for executing LGP
              * \param[in] outputs outputs of the agents.
+             * \param[in] algorithmID id of the algorithm used.
              */
-            LGPManager(std::shared_ptr<const Environment> env, const Output::OutputHandler& outputs): AgentManager(outputs), env(env){};
+            LGPManager(const Environment& env, const Output::OutputHandler& outputs, uint64_t algorithmID): AgentManager(outputs, algorithmID), env(env){};
 
             /**
              * \brief Create a new LGPAgent.

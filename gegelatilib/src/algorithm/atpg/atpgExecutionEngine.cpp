@@ -4,9 +4,9 @@
 
 
 void Algorithm::ATPG::ATPGExecutionEngine::setActionProgramExecutionEngine(std::unique_ptr<ExecutionEngine> actionProgramExecutionEngine){
-    std::string algorithmName = actionProgramExecutionEngine->getAlgorithmName();
-    this->subExecutionEngines.insert({algorithmName, std::move(actionProgramExecutionEngine)});
-    this->actionProgramExecutionEngine = this->subExecutionEngines.at(algorithmName).get();
+    uint64_t algorithmID = actionProgramExecutionEngine->getAlgorithmID();
+    this->subExecutionEngines.insert({algorithmID, std::move(actionProgramExecutionEngine)});
+    this->actionProgramExecutionEngine = this->subExecutionEngines.at(algorithmID).get();
 }
 
 std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
@@ -19,7 +19,7 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
     std::shared_ptr<const EvoGraph::Edge> edge = nullptr;
 
     // Browse the TPG until vertex with an agent of the actionProgram Algorithm name is reached
-    while (!currentVertex->hasProgram() || currentVertex->getProgram().getAlgorithmName() != this->actionProgramExecutionEngine->getAlgorithmName()) {
+    while (!currentVertex->hasProgram() || currentVertex->getProgram().getAlgorithmID() != this->actionProgramExecutionEngine->getAlgorithmID()) {
 
         auto teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(currentVertex);
         if(teamVertex == nullptr){
@@ -29,10 +29,8 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
         // Get the next edge
         edge = this->evaluateTeam(*teamVertex);
 
-        // update currentVertex and backup in visitedVertex.
-        if (edge->getDestination() != nullptr) {
-            currentVertex = edge->getDestination();
-        }
+        currentVertex = edge->getDestination();
+        
     }
 
     // Set the progExecutionEngine to the program

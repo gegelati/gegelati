@@ -35,7 +35,7 @@ bool Algorithm::AgentManager::isAgentAccessible(const Agent& agent) const
 
 void Algorithm::AgentManager::addSubManager(std::shared_ptr<AgentManager> subManager)
 {
-    this->subManagers.insert({subManager->getAlgorithmName(), subManager});
+    this->subManagers.insert({subManager->getAlgorithmID(), subManager});
 }
 
 void Algorithm::AgentManager::addAggregatedManager(const AgentManager& managerAggregated)
@@ -47,27 +47,27 @@ void Algorithm::AgentManager::addAggregatedManager(const AgentManager& managerAg
     this->aggregatedManagers.push_back(managerAggregated);
 }
 
-const Algorithm::AgentManager& Algorithm::AgentManager::getAggregatedManager(std::string nameAlgorithm) const{
+const Algorithm::AgentManager& Algorithm::AgentManager::getAggregatedManager(uint64_t algorithmID) const{
     for(const auto& manager: this->aggregatedManagers){
-        if(manager.get().getAlgorithmName() == nameAlgorithm){
+        if(manager.get().getAlgorithmID() == algorithmID){
             return manager;
         }
     }
-    throw std::runtime_error("Algorithm::AgentManager::getAggregatedManager aggregated manager not found for the specific name");
+    throw std::runtime_error("Algorithm::AgentManager::getAggregatedManager aggregated manager not found for the specific id");
 }
 
-std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::getSubManager(std::string nameAlgorithm){
-    auto it = this->subManagers.find(nameAlgorithm);
+std::shared_ptr<Algorithm::AgentManager> Algorithm::AgentManager::getSubManager(uint64_t algorithmID){
+    auto it = this->subManagers.find(algorithmID);
     if(it == this->subManagers.end()){
-        throw std::runtime_error("Algorithm::AgentManager::getSubManager subManager not found for the specific name");
+        throw std::runtime_error("Algorithm::AgentManager::getSubManager subManager not found for the specific id");
     }
     return it->second;
 }
 
-std::shared_ptr<const Algorithm::AgentManager> Algorithm::AgentManager::cGetSubManager(std::string nameAlgorithm) const{
-    auto it = this->subManagers.find(nameAlgorithm);
+std::shared_ptr<const Algorithm::AgentManager> Algorithm::AgentManager::cGetSubManager(uint64_t algorithmID) const{
+    auto it = this->subManagers.find(algorithmID);
     if(it == this->subManagers.end()){
-        throw std::runtime_error("Algorithm::AgentManager::getSubManager subManager not found for the specific name");
+        throw std::runtime_error("Algorithm::AgentManager::getSubManager subManager not found for the specific id");
     }
     return it->second;
 }

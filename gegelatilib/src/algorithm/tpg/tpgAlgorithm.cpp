@@ -3,7 +3,7 @@
 
 std::unique_ptr<Algorithm::Algorithm> Algorithm::TPG::TPGAlgorithm::copy() const
 {
-    return std::make_unique<TPGAlgorithm>(this->params, this->cGetSubAlgorithm(this->programAlgorithmName), this->algorithmName + "_copy");
+    return std::make_unique<TPGAlgorithm>(this->params, this->cGetSubAlgorithm(this->programAlgorithmID), this->algorithmName);
 }
 
 void Algorithm::TPG::TPGAlgorithm::setProgramAlgorithm(const Algorithm& programAlgorithm)
@@ -11,7 +11,7 @@ void Algorithm::TPG::TPGAlgorithm::setProgramAlgorithm(const Algorithm& programA
     Algorithm::Algorithm::addSubAlgorithm(programAlgorithm);
 
     // Set program algorithm name
-    this->programAlgorithmName = this->subAlgorithms.back()->getAlgorithmName();
+    this->programAlgorithmID = this->subAlgorithms.back()->getAlgorithmID();
 }
 
 
@@ -22,20 +22,18 @@ std::shared_ptr<const Archive> Algorithm::TPG::TPGAlgorithm::getArchive() const
 
 void Algorithm::TPG::TPGAlgorithm::initManager(std::shared_ptr<const Output::OutputHandler> outputs)
 {
-    this->manager = std::make_shared<TPG::TPGManager>(*outputs);
-    this->manager->setAlgorithmName(algorithmName);
+    this->manager = std::make_shared<TPG::TPGManager>(*outputs, this->algorithmID);
 }
 
 void Algorithm::TPG::TPGAlgorithm::initMutator()
 {
-    this->mutator = std::make_shared<TPG::TPGMutator>(*this->selector, this->archive);
-    this->mutator->setAlgorithmName(algorithmName);
+    this->mutator = std::make_shared<TPG::TPGMutator>(*this->selector, this->algorithmID, this->archive);
 }
 
 void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Initialize program algorithm.
-    Algorithm& programAlgo = this->getSubAlgorithm(this->programAlgorithmName);
+    Algorithm& programAlgo = this->getSubAlgorithm(this->programAlgorithmID);
 
     // Program output is only size 1, except for continuous outputs where we create more outputs (one per continuous output of the TPG)
     auto programOutput = std::make_shared<Output::OutputHandler>(Output::Output());
@@ -49,11 +47,11 @@ void Algorithm::TPG::TPGAlgorithm::initSubAlgorithms(RNG::RNG& rng, std::shared_
     // Add program manager and mutator to TPG manager and mutator
     this->manager->addSubManager(programAlgo.getManager());
     std::shared_ptr<TPG::TPGManager> tpgManager = std::dynamic_pointer_cast<TPG::TPGManager>(this->manager);
-    tpgManager->setProgramAlgorithmName(this->programAlgorithmName);
+    tpgManager->setProgramAlgorithmID(this->programAlgorithmID);
 
     this->mutator->addSubMutator(programAlgo.getMutator());
     std::shared_ptr<TPG::TPGMutator> tpgMutator = std::dynamic_pointer_cast<TPG::TPGMutator>(this->mutator);
-    tpgMutator->setProgramAlgorithmName(this->programAlgorithmName);
+    tpgMutator->setProgramAlgorithmID(this->programAlgorithmID);
 }
 
 std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(const Agent& agent, Learn::LearningMode mode, RNG::RNG& rng, int idx) const
@@ -75,9 +73,9 @@ std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(const Ag
 
 std::shared_ptr<Algorithm::PolicyStats> Algorithm::TPG::TPGAlgorithm::createPolicyStats() const
 {
-    std::map<std::string, std::shared_ptr<PolicyStats>> subPolicyStatsMap;
-    subPolicyStatsMap[this->programAlgorithmName] = this->cGetSubAlgorithm(this->programAlgorithmName).createPolicyStats();
-    return std::make_shared<TPGPolicyStats>(this->algorithmName, subPolicyStatsMap);
+    std::map<uint64_t, std::shared_ptr<PolicyStats>> subPolicyStatsMap;
+    subPolicyStatsMap[this->programAlgorithmID] = this->cGetSubAlgorithm(this->programAlgorithmID).createPolicyStats();
+    return std::make_shared<TPGPolicyStats>(this->algorithmName, this->algorithmID, subPolicyStatsMap);
 }
 
 void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode)
@@ -145,14 +143,14 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
 }
 
 
-std::map<std::string, std::set<std::reference_wrapper<const Algorithm::Agent>>> Algorithm::TPG::TPGAlgorithm::getUsedSubAgents() const
+std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Algorithm::TPG::TPGAlgorithm::getUsedSubAgents() const
 {
-    std::map<std::string, std::set<std::reference_wrapper<const Agent>>> usedSubAgents;
-    usedSubAgents[this->programAlgorithmName] = std::set<std::reference_wrapper<const Agent>>();
+    std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> usedSubAgents;
+    usedSubAgents[this->programAlgorithmID] = std::set<std::reference_wrapper<const Agent>>();
 
     for(auto edge: this->graph->getEdges()){
-        if(edge->getProgram().getAlgorithmName() == this->programAlgorithmName){
-            usedSubAgents[this->programAlgorithmName].insert(edge->getProgram());
+        if(edge->getProgram().getAlgorithmID() == this->programAlgorithmID){
+            usedSubAgents[this->programAlgorithmID].insert(edge->getProgram());
         }
     }
     return usedSubAgents;
@@ -169,8 +167,8 @@ void Algorithm::TPG::TPGAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
     
         fprintf(pFile,
                 "%sP%" PRIu64 " [fillcolor=\"#A0FF33\" shape=diamond margin=0.03 "
-                "width=0 height=0 label=\"%s\"]\n",
-                offset.c_str(), agent.getAgentID(), agent.getAlgorithmName().c_str());
+                "width=0 height=0 label=\"%s.%" PRIu64 "\"]\n",
+                offset.c_str(), agent.getAgentID(), this->algorithmName.c_str(), this->algorithmID);
 
         std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(&vertex) != nullptr) ? "T" : "A";
         fprintf(pFile, "%sP%" PRIu64 " -> %s%" PRIu64 " [style=dashed]\n",

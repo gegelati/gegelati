@@ -49,7 +49,7 @@ namespace Algorithm::TPG {
     {
       public:
         /// Default constructor
-        TPGPolicyStats(std::string algorithmName, const std::map<std::string, std::shared_ptr<PolicyStats>>& subPolicyStats) : PolicyStats(algorithmName, subPolicyStats) {}
+        TPGPolicyStats(std::string algorithmName, uint64_t algorithmID, const std::map<uint64_t, std::shared_ptr<PolicyStats>>& subPolicyStats) : PolicyStats(algorithmName, algorithmID, subPolicyStats) {}
 
         /**
          * Analyze the policy starting from the given Agent.

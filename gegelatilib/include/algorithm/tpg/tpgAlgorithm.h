@@ -24,8 +24,8 @@ namespace Algorithm::TPG {
     {
         protected:
 
-            /// Name of the program algorithm associated with the TPG agents.
-            std::string programAlgorithmName;
+            /// ID of the program algorithm associated with the TPG agents.
+            uint64_t programAlgorithmID;
 
             /// Archive used during the training process
             std::shared_ptr<Archive> archive;
@@ -123,7 +123,7 @@ namespace Algorithm::TPG {
              * 
              * The sub agents are the agents used by the program sub-algorithm.
              */
-            virtual std::map<std::string, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const override;
+            virtual std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const override;
 
             /** 
              * \brief Inherited method to print a TPGagent.

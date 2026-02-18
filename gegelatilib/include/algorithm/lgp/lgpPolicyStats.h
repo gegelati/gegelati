@@ -89,7 +89,7 @@ namespace Algorithm::LGP {
 
 
         /// Default constructor
-        LGPPolicyStats(std::string algorithmName, const Environment& env) : PolicyStats(algorithmName), environment{env} {
+        LGPPolicyStats(std::string algorithmName, uint64_t algorithmID, const Environment& env) : PolicyStats(algorithmName, algorithmID), environment{env} {
           this->dataSourcesAndRegisters.insert(
               dataSourcesAndRegisters.begin(),
               environment.getFakeDataSources().begin(),

@@ -124,31 +124,26 @@ class TpgMutatorTest : public ::testing::Test
         graph = std::make_shared<EvoGraph::Graph>();
 
         
-        lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(e, *lgpOutput);
-        lgpManager->setAlgorithmName("fakeLgp");
+        lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(*e, *lgpOutput, (uint64_t)0);
         lgpAgent = &lgpManager->createAgent(graph);
 
-        tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(*actions);
-        tpgManager->setAlgorithmName("fakeTpg");
+        tpgManager = std::make_shared<Algorithm::TPG::TPGManager>(*actions, (uint64_t)1);
         tpgManager->addSubManager(lgpManager);
-        tpgManager->setProgramAlgorithmName("fakeLgp");
+        tpgManager->setProgramAlgorithmID((uint64_t)0);
 
         selector = std::make_shared<Selector::TruncationSelector>(tpgManager, params);
 
-        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>(*selector);
-        lgpMutator->setAlgorithmName("fakeLgp");
+        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>(*selector, (uint64_t)0);
 
-        tpgMutator = std::make_shared<Algorithm::TPG::TPGMutator>(*selector, archive);
+        tpgMutator = std::make_shared<Algorithm::TPG::TPGMutator>(*selector, (uint64_t)1, archive);
         tpgMutator->addSubMutator(lgpMutator);
-        tpgMutator->setAlgorithmName("fakeTpg");
-        tpgMutator->setProgramAlgorithmName("fakeLgp");
+        tpgMutator->setProgramAlgorithmID((uint64_t)0);
 
     }
 
     virtual void TearDown()
     {
         delete lgpAgent;
-        delete actions;
         delete lgpOutput;
         delete (&(vect.at(0).get()));
         delete (&(vect.at(1).get()));
@@ -1179,8 +1174,7 @@ TEST_F(TpgMutatorTest, TPGMutatorPopulate)
 
     // Increase coverage with a TPG that has no root team
     std::shared_ptr<EvoGraph::Graph> graph2 = std::make_shared<EvoGraph::Graph>();
-    auto tpgManager2 = std::make_shared<Algorithm::TPG::TPGManager>(nbActions);
-    tpgManager2->setAlgorithmName("fakeTpg");
+    auto tpgManager2 = std::make_shared<Algorithm::TPG::TPGManager>(nbActions, 1);
     tpgManager2->addSubManager(lgpManager);
     ASSERT_NO_THROW(tpgMutator->mutatePopulation(
         graph2, tpgManager2, params, rng, 0))

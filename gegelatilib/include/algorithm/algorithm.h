@@ -54,16 +54,34 @@ namespace Algorithm {
         /**
          * \brief return the subAlgorithm corresponding to the name of the algorithm given.
          * 
-         * \param[in] nameAlgorithm name of the algorithm given.
+         * \param[in] algorithmID id of the sub algorithm given.
          */
-        Algorithm& getSubAlgorithm(std::string nameAlgorithm);     
+        Algorithm& getSubAlgorithm(uint64_t algorithmID);     
 
         /**
          * \brief return the subAlgorithm corresponding to the name of the algorithm given.
          * 
-         * \param[in] nameAlgorithm name of the algorithm given.
+         * \param[in] algorithmID id of the sub algorithm given.
          */
-        const Algorithm& cGetSubAlgorithm(std::string nameAlgorithm) const;     
+        const Algorithm& cGetSubAlgorithm(uint64_t algorithmID) const;    
+        
+        
+        /// Unique ID of the algorithm.
+        uint64_t algorithmID;
+
+        /**
+         * \brief Incremente the algorithm ID counter and return the new value.
+         */
+        static uint64_t incrementeCounter();
+
+        /**
+         * \brief Reset the algorithm ID counter.
+         *
+         * This method set the ID counter to a new value.
+         * It can quickly lead to segmentation fault if not used carefully.
+         */
+        static void resetAlgorithmIDCounter();
+        friend struct ::CounterReset;
 
       public:
 
@@ -75,13 +93,32 @@ namespace Algorithm {
          * 
          */
         Algorithm(const Learn::LearningParameters& params, std::string algorithmName)
-               : params{params}, algorithmName(algorithmName) {
+               : params{params}, algorithmName(algorithmName), algorithmID(incrementeCounter()) {
         };
 
         /**
          * \brief Return the name of the algorithm.
          */
         std::string getAlgorithmName() const { return this->algorithmName; }
+
+        /**
+         * \brief return the ID of the agent.
+         */
+        static uint64_t getAlgorithmIDCounter();
+
+        /**
+         * \brief Get the unique identifier of the Agent.
+         *
+         * \return the integer ID of the Agent.
+         */
+        virtual uint64_t getAlgorithmID() const;
+
+        /**
+         * \brief Set a new unique identifier to the Agent.
+         *
+         * \param[in] newID the new integer ID to set to the Agent.
+         */
+        virtual void setAlgorithmID(uint64_t newID);
 
         /**
          * \brief Add a sub-algorithm to the current algorithm.
@@ -203,7 +240,7 @@ namespace Algorithm {
         * \brief Get the agents that are currently used by the algorithm.
         * The returned map associate to each sub-algorithm name the set of agents used by this sub-algorithm.
         */
-        virtual std::map<std::string, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const;
+        virtual std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const;
 
         /**
          * \brief Clear all the unused sub agents
@@ -261,12 +298,23 @@ namespace Algorithm {
         virtual void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const = 0;
 
     };
+    /**
+     * \brief Comparison function to enable sorting of Algorithm with
+     * STL.
+     */
+    bool operator<(const Algorithm& a, const Algorithm& b);
 
     /**
      * \brief Comparison function to enable sorting of Algorithm with
      * STL.
      */
     bool operator==(const Algorithm& a, const Algorithm& b);
+
+    /**
+     * \brief Comparison function to enable sorting of Algorithm with
+     * STL.
+     */
+    bool operator!=(const Algorithm& a, const Algorithm& b);
 }; // namespace Algorithm
 
 #endif // ALGORITHM_H

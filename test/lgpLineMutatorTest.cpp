@@ -57,7 +57,7 @@ class LineMutatorTest : public ::testing::Test
         params.nbProgramConstant = 5;
         e = std::make_shared<Environment>(set, params, vect);
         programAgent =
-            std::make_shared<Algorithm::LGP::LGPAgent>(e, *lgpOutput, "fake");
+            std::make_shared<Algorithm::LGP::LGPAgent>(*e, *lgpOutput, 0);
     }
 
     virtual void TearDown()
@@ -250,7 +250,7 @@ TEST_F(LineMutatorTest, LineMutatorAlterLineWithCompositeOperands)
                 return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
             })));
     std::shared_ptr<const Environment> e2 = std::make_shared<Environment>(set, params, vect);
-    std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent2 = std::make_shared<Algorithm::LGP::LGPAgent>(e2, *lgpOutput, "fake2");
+    std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent2 = std::make_shared<Algorithm::LGP::LGPAgent>(*e2, *lgpOutput, 1);
 
     Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent2);
 

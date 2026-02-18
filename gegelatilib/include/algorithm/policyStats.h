@@ -109,30 +109,35 @@ namespace Algorithm {
         /// Algorithm name
         std::string algorithmName;
 
+        /// Algorithm name
+        uint64_t algorithmID;
+
         /// @brief map storing the sub policy stats of the sub algorithms
-        std::map<std::string, std::shared_ptr<PolicyStats>> subPolicyStats;
+        std::map<uint64_t, std::shared_ptr<PolicyStats>> subPolicyStats;
 
         /**
          * \brief Main constructor of the PolicyStats class.
          * 
          * \param[in] algorithmName the name of the algorithm for which the stats are stored.
+         * \param[in] algorithmID the id of the algorithm for which the stats are stored.
          */
-        PolicyStats(std::string algorithmName) : algorithmName{algorithmName} {}
+        PolicyStats(std::string algorithmName, uint64_t algorithmID) : algorithmName{algorithmName}, algorithmID{algorithmID} {}
 
         /**
          * \brief Main constructor of the PolicyStats class.
          * 
          * \param[in] algorithmName the name of the algorithm for which the stats are stored.
+         * \param[in] algorithmID the id of the algorithm for which the stats are stored.
          * \param[in] subPolicyStatsMap the map associating the name of the sub algorithms to their policy stats, used for the analysis of sub policies.
          */
-        PolicyStats(std::string algorithmName, const std::map<std::string, std::shared_ptr<PolicyStats>>& subPolicyStatsMap) : algorithmName{algorithmName}, subPolicyStats{subPolicyStatsMap} {}
+        PolicyStats(std::string algorithmName, uint64_t algorithmID, const std::map<uint64_t, std::shared_ptr<PolicyStats>>& subPolicyStatsMap) : algorithmName{algorithmName}, algorithmID{algorithmID}, subPolicyStats{subPolicyStatsMap} {}
 
         /**
          * \brief get the sub policy stats of a sub algorithm.
          * 
-         * \param[in] subAlgorithmName the name of the sub algorithm to get the stats of.
+         * \param[in] subAlgorithmID the id of the sub algorithm to get the stats of.
          */
-        PolicyStats& getSubPolicyStats(const std::string& subAlgorithmName) const;
+        PolicyStats& getSubPolicyStats(uint64_t subAlgorithmID) const;
 
         /**
          * Clear all stats stored in the class attributes.
@@ -192,7 +197,7 @@ namespace Algorithm {
         /**
          * \brief Get all the sub policy stats of the sub algorithms.
          */
-        std::map<std::string, std::reference_wrapper<const PolicyStats>> getAllSubPolicyStats() const;
+        std::map<uint64_t, std::reference_wrapper<const PolicyStats>> getAllSubPolicyStats() const;
 
         friend std::ostream& operator<<(std::ostream& os,
                                         const PolicyStats& policyStats);

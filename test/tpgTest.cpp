@@ -82,7 +82,7 @@ class TPGTest : public ::testing::Test
         params.nbProgramConstant = 1;
         e = std::make_shared<Environment>(set, params, vect);
         sharedProgramAgent =
-            std::make_shared<Algorithm::LGP::LGPAgent>(e, 1, "fake");
+            std::make_shared<Algorithm::LGP::LGPAgent>(*e, Output::OutputHandler(1), (uint64_t)0);
     }
 
     virtual void TearDown()
@@ -193,7 +193,7 @@ TEST_F(TPGTest, EdgeGetSetProgram)
 
     // program is a mutable attribute of the Edge.
     std::shared_ptr<Algorithm::Agent> programAgent2 =
-            std::make_shared<Algorithm::LGP::LGPAgent>(e, 1, "fake");
+            std::make_shared<Algorithm::LGP::LGPAgent>(*e, Output::OutputHandler(1), 0);
     
     constEdge->setProgram(*programAgent2);
     ASSERT_EQ(constEdge->getProgram(), *programAgent2)

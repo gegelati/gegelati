@@ -50,7 +50,7 @@ namespace Algorithm::LGP {
 
       protected:
         /// Environment within which the Program will be executed.
-        const std::shared_ptr<const Environment>& environment;
+        const Environment& environment;
 
         /// index of the Instruction of the Set of the Environment.
         uint64_t instructionIndex;
@@ -75,10 +75,10 @@ namespace Algorithm::LGP {
          * \param[in] env the const reference to the Environment for this
          * Program::LGPLine.
          */
-        LGPLine(const std::shared_ptr<const Environment>& env)
+        LGPLine(const Environment& env)
             : environment{env}, instructionIndex{0}, destinationIndex{0},
               operands{(std::pair<uint64_t, uint64_t>*)calloc(
-                  env->getMaxNbOperands(),
+                  env.getMaxNbOperands(),
                   sizeof(std::pair<uint64_t, uint64_t>))} {};
 
         /**
@@ -94,13 +94,13 @@ namespace Algorithm::LGP {
               instructionIndex{other.instructionIndex},
               destinationIndex{other.destinationIndex},
               operands{(std::pair<uint64_t, uint64_t>*)calloc(
-                  other.environment->getMaxNbOperands(),
+                  other.environment.getMaxNbOperands(),
                   sizeof(std::pair<uint64_t, uint64_t>))}
         {
             // Check needed to avoid compilation warnings
             if (this->operands != NULL) {
                 // Copy operand values
-                for (auto idx = 0; idx < this->environment->getMaxNbOperands();
+                for (auto idx = 0; idx < this->environment.getMaxNbOperands();
                      idx++) {
                     this->operands[idx] = other.operands[idx];
                 }
@@ -130,7 +130,7 @@ namespace Algorithm::LGP {
          *
          * \return a const reference to the Environment of the LGPLine.
          */
-        const std::shared_ptr<const Environment>& getEnvironment() const;
+        const Environment& getEnvironment() const;
 
         /**
          * \brief Getter for the destinationIndex of this LGPLine.

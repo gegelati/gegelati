@@ -76,7 +76,7 @@ Algorithm::Algorithm& Learn::LearningAgent::getAlgorithm(const Algorithm::Algori
         [&algorithm](const std::shared_ptr<Algorithm::Algorithm>& algoPtr){
             return algoPtr.get() == &algorithm;
         });
-    if(iterator == this->algorithms.end() || (*iterator)->getAlgorithmName() != algorithm.getAlgorithmName()){
+    if(iterator == this->algorithms.end() || (*iterator)->getAlgorithmID() != algorithm.getAlgorithmID()){
         throw std::invalid_argument("LearningAgent::getAlgorithm: the given algorithm is not managed by this learning agent.");
     }
 

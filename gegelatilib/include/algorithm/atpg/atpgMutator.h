@@ -21,7 +21,7 @@ namespace Algorithm::ATPG {
     protected:
 
         /// Name of the action program algorithm associated with the TPG agents.
-        std::string actionProgramAlgorithmName;
+        uint64_t actionProgramAlgorithmID;
 
         /// Pre-existing program teams elements used for mutation operations.
         std::vector<std::reference_wrapper<const Agent>> preExistingActionProgram;
@@ -32,9 +32,10 @@ namespace Algorithm::ATPG {
          * \brief Constructor for ATPGMutator
          * 
          * \param[in] selector Reference to the current selector used by the algorithm.
+         * \param[in] algorithmID id of the algorithm used.
          * \param[in] archive Archive used by this ActionTPG
          */
-        ATPGMutator(Selector::Selector& selector, std::shared_ptr<const Archive> archive): TPGMutator(selector, archive) {};
+        ATPGMutator(Selector::Selector& selector, uint64_t algorithmID, std::shared_ptr<const Archive> archive): TPGMutator(selector, algorithmID, archive) {};
 
         
         /**
@@ -51,18 +52,18 @@ namespace Algorithm::ATPG {
             RNG::RNG& rng) override;
 
         /**
-         * \brief Set the name of the action program algorithm associated with the TPG agents.
+         * \brief Set the id of the action program algorithm associated with the TPG agents.
          * 
-         * \param[in] name the name of the action program algorithm.
+         * \param[in] id the id of the action program algorithm.
          */
-        void setActionProgramAlgorithmName(const std::string& name) { this->actionProgramAlgorithmName = name; }
+        void setActionProgramAlgorithmID(uint64_t id) { this->actionProgramAlgorithmID = id; }
 
         /**
-         * \brief Get the name of the action program algorithm associated with the TPG agents.
+         * \brief Get the id of the action program algorithm associated with the TPG agents.
          * 
-         * \return the name of the action program algorithm.
+         * \return the id of the action program algorithm.
          */
-        std::string getActionProgramAlgorithmName() const { return this->actionProgramAlgorithmName; }
+        uint64_t getActionProgramAlgorithmID() const { return this->actionProgramAlgorithmID; }
 
 
         /**

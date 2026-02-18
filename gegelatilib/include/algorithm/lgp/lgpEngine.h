@@ -90,11 +90,11 @@ namespace Algorithm::LGP {
          * \param[in] env The Environment in which the Program will be executed.
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
-         * \param[in] algorithmName name of the algorithm used.
+         * \param[in] algorithmID id of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPEngine(const Environment& env, const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false)
-            : ExecutionEngine{outputs, algorithmName, isTraining}, programCounter{0}, registers{env.getParams().nbRegisters}
+        LGPEngine(const Environment& env, const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false)
+            : ExecutionEngine{outputs, algorithmID, isTraining}, programCounter{0}, registers{env.getParams().nbRegisters}
         {
             dataSources = env.getDataSources();
             // Setup the data sources
@@ -133,7 +133,7 @@ namespace Algorithm::LGP {
         LGPEngine(const LGPAgent& executedAgent, 
                       const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
             : ExecutionEngine{executedAgent, executedAgent.getOutputs(), isTraining}, programCounter{0},
-              registers{executedAgent.getEnvironment()->getParams().nbRegisters}
+              registers{executedAgent.getEnvironment().getParams().nbRegisters}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
@@ -141,7 +141,7 @@ namespace Algorithm::LGP {
             // Setup the data sources
             this->dataScsConstsAndRegs.push_back(this->registers);
 
-            if (executedAgent.getEnvironment()->getParams().nbProgramConstant > 0) {
+            if (executedAgent.getEnvironment().getParams().nbProgramConstant > 0) {
                 this->dataScsConstsAndRegs.push_back(
                     executedAgent.cGetConstantHandler());
             }
@@ -168,7 +168,7 @@ namespace Algorithm::LGP {
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
         LGPEngine(const LGPAgent& executedAgent,  bool isTraining = false)
-            : LGPEngine(executedAgent, executedAgent.getEnvironment()->getDataSources(), isTraining){};
+            : LGPEngine(executedAgent, executedAgent.getEnvironment().getDataSources(), isTraining){};
 
         /**
          * \brief operator parenthesis used when iterating through the program

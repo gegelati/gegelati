@@ -21,8 +21,8 @@ namespace Algorithm::TPG {
     protected:
     
 
-        /// Name of the program algorithm associated with the TPG agents.
-        std::string programAlgorithmName;
+        /// id of the program algorithm associated with the TPG agents.
+        uint64_t programAlgorithmID;
 
 
         /**
@@ -38,15 +38,16 @@ namespace Algorithm::TPG {
          * \brief Main TPGManager constructor.
          * 
          * \param[in] outputs outputs of the agents.
+         * \param[in] algorithmID id of the algorithm used.
          */
-        TPGManager(const Output::OutputHandler& outputs) : AgentManager(outputs) {};
+        TPGManager(const Output::OutputHandler& outputs, uint64_t algorithmID) : AgentManager(outputs, algorithmID) {};
 
         /**
-         * \brief Set the name of the program algorithm associated with the TPG agents.
+         * \brief Set the id of the program algorithm associated with the TPG agents.
          * 
-         * \param[in] name the name of the program algorithm.
+         * \param[in] id the id of the program algorithm.
          */
-        void setProgramAlgorithmName(const std::string& name) { this->programAlgorithmName = name; }
+        void setProgramAlgorithmID(uint64_t id) { this->programAlgorithmID = id; }
 
         /**
          * \brief Get the current agents used by the algorithm.

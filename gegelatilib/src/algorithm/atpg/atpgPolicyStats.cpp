@@ -44,7 +44,11 @@ std::string Algorithm::ATPG::ATPGPolicyStats::specificInfos() const
 {
     // Return string with the name of the program sub-algorithm and action program sub algorithm
     auto it = this->subPolicyStats.begin();
-    std::string programAlgoName = it->first;
-    std::string actionProgramAlgoName = (++it)->first;
-    return "Program sub-algorithm: " + programAlgoName + "\nAction program sub-algorithm: " + actionProgramAlgoName;
+    std::string programAlgoName = it->second->algorithmName;
+    uint64_t programAlgoID = it->first;
+    std::string actionProgramAlgoName = (++it)->second->algorithmName;
+    uint64_t actionProgramAlgoID = it->first;
+    return 
+        "Program sub-algorithm: " + programAlgoName + ":" + std::to_string(programAlgoID) + 
+        "\nAction program sub-algorithm: " + actionProgramAlgoName + ":" + std::to_string(actionProgramAlgoID);
 }

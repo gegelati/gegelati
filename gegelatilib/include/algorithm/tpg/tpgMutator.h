@@ -21,8 +21,8 @@ namespace Algorithm::TPG {
     {
     protected:
 
-        /// Name of the program algorithm associated with the TPG agents.
-        std::string programAlgorithmName;
+        /// ID of the program algorithm associated with the TPG agents.
+        uint64_t programAlgorithmID;
 
         /// Pre-existing teams elements used for mutation operations.
         std::vector<std::shared_ptr<const EvoGraph::Team>> preExistingTeams;
@@ -60,9 +60,10 @@ namespace Algorithm::TPG {
          * \brief Constructor for TPGMutator
          * 
          * \param[in] selector Reference to the current selector used by the algorithm.
+         * \param[in] algorithmID id of the algorithm used.
          * \param[in] archive Archive used by this TPG
          */
-        TPGMutator(Selector::Selector& selector, std::shared_ptr<const Archive> archive): Mutator(selector), archive{archive} {};
+        TPGMutator(const Selector::Selector& selector, uint64_t algorithmID, std::shared_ptr<const Archive> archive): Mutator(selector, algorithmID), archive{archive} {};
 
         /**
          * \brief Update the context used by the TPGMutator to populate the Graph.
@@ -79,18 +80,18 @@ namespace Algorithm::TPG {
 
 
         /**
-         * \brief Set the name of the program algorithm associated with the TPG agents.
+         * \brief Set the id of the program algorithm associated with the TPG agents.
          * 
-         * \param[in] name the name of the program algorithm.
+         * \param[in] id the id of the program algorithm.
          */
-        void setProgramAlgorithmName(const std::string& name) { this->programAlgorithmName = name; }
+        void setProgramAlgorithmID(uint64_t id) { this->programAlgorithmID = id; }
 
         /**
          * \brief Get the name of the program algorithm associated with the TPG agents.
          * 
          * \return the name of the program algorithm.
          */
-        std::string getProgramAlgorithmName() const { return this->programAlgorithmName; }
+        uint64_t getProgramAlgorithmID() const { return this->programAlgorithmID; }
 
         /**
          * \brief Check if the configuration of the mutator is valid according to the given parameters.

@@ -22,10 +22,10 @@ namespace Algorithm::ATPG {
          * 
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
-         * \param[in] algorithmName name of the algorithm used.
+         * \param[in] algorithmID id of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ATPGExecutionEngine(const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false): TPGExecutionEngine(outputs, algorithmName, isTraining) {}
+        ATPGExecutionEngine(const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false): TPGExecutionEngine(outputs, algorithmID, isTraining) {}
 
         /**
          * \brief TPGExecutionEngine constructor.

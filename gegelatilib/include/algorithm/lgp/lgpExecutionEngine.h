@@ -76,10 +76,10 @@ namespace Algorithm::LGP {
          * \param[in] env The Environment in which the Program will be executed.
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
-         * \param[in] algorithmName name of the algorithm used.
+         * \param[in] algorithmID id of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPExecutionEngine(const Environment& env, const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false) : LGPEngine(env, outputs, algorithmName, isTraining){};
+        LGPExecutionEngine(const Environment& env, const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false) : LGPEngine(env, outputs, algorithmID, isTraining){};
 
         /**
          * \brief Constructor of the class.

@@ -24,8 +24,8 @@ namespace Algorithm::ATPG {
     {
         protected:
 
-            /// Name of the program algorithm associated with the TPG agents.
-            std::string actionProgramAlgorithmName;
+            /// ID of the program algorithm associated with the TPG agents.
+            uint64_t actionProgramAlgorithmID;
 
         public:
 
@@ -84,7 +84,7 @@ namespace Algorithm::ATPG {
              * 
              * The sub agents are the agents used by the program sub-algorithm and the action sub-algorithm.
              */
-            virtual std::map<std::string, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const override;
+            virtual std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const override;
 
             /**
              * \brief Inherited method to create the policy stats of the algorithm

@@ -18,8 +18,8 @@ namespace Algorithm {
     {
     protected:
         
-        /// Name of the algorithm.
-        std::string algorithmName;
+        /// ID of the algorithm.
+        uint64_t algorithmID;
 
         /// Unique ID of the agent.
         uint64_t agentID;
@@ -45,14 +45,14 @@ namespace Algorithm {
         /**
          * \brief Constructor for the Agent.
          * 
-         * \param[in] algorithmName name of the algorithm used by the Agent.
+         * \param[in] algorithmID id of the algorithm used by the Agent.
          */
-        Agent(std::string algorithmName) : algorithmName(algorithmName), agentID(incrementeCounter()) {};
+        Agent(uint64_t algorithmID) : algorithmID(algorithmID), agentID(incrementeCounter()) {};
 
         /**
-         * \brief Return the name of the algorithm.
+         * \brief Return the id of the algorithm.
          */
-        std::string getAlgorithmName() const { return this->algorithmName; }
+        uint64_t getAlgorithmID() const { return this->algorithmID; }
 
         /**
          * \brief return the ID of the agent.

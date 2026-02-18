@@ -20,7 +20,7 @@ namespace Algorithm::LGP {
         protected:
 
             /// Environment for executing LGP 
-            std::shared_ptr<Environment> env;
+            std::unique_ptr<Environment> env;
 
             /// Instruction Set used by the LGPAlgorithm
             const Instructions::Set& iSet;
@@ -41,7 +41,7 @@ namespace Algorithm::LGP {
             /**
              * \brief Get the Environment used by the LGPAlgorithm.
              */
-            std::shared_ptr<const Environment> getEnvironment() const;
+            const Environment& getEnvironment() const;
 
 
             

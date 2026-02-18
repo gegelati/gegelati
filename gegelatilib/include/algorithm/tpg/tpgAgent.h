@@ -27,9 +27,9 @@ namespace Algorithm::TPG {
              * \brief Main constructor of the TPGAgent.
              *
              * \param[in] vertex the Vertex that the TPGAgent will represent.
-             * \param[in] algorithmName name of the algorithm used.
+             * \param[in] algorithmID id of the algorithm used.
              */
-            TPGAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, std::string algorithmName) : vertex{vertex}, Agent(algorithmName) {};
+            TPGAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, uint64_t algorithmID) : vertex{vertex}, Agent(algorithmID) {};
 
 
             /**

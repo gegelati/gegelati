@@ -5,30 +5,28 @@
 
 std::unique_ptr<Algorithm::Algorithm> Algorithm::LGP::LGPAlgorithm::copy() const
 {
-    return std::make_unique<LGPAlgorithm>(this->params, this->iSet, this->algorithmName + "_copy");
+    return std::make_unique<LGPAlgorithm>(this->params, this->iSet, this->algorithmName);
 }
 
- std::shared_ptr<const Environment> Algorithm::LGP::LGPAlgorithm::getEnvironment() const
+ const Environment& Algorithm::LGP::LGPAlgorithm::getEnvironment() const
 {
-    return this->env;
+    return *this->env;
 }
 
 void Algorithm::LGP::LGPAlgorithm::initManager(std::shared_ptr<const Output::OutputHandler> outputs)
 {
-    this->manager = std::make_shared<LGP::LGPManager>(this->env, *outputs);
-    this->manager->setAlgorithmName(algorithmName);
+    this->manager = std::make_shared<LGP::LGPManager>(*this->env, *outputs, this->algorithmID);
 }
 
 void Algorithm::LGP::LGPAlgorithm::initMutator()
 {
-    this->mutator = std::make_shared<LGP::LGPMutator>(*this->selector);
-    this->mutator->setAlgorithmName(algorithmName);
+    this->mutator = std::make_shared<LGP::LGPMutator>(*this->selector, this->algorithmID);
 }
 
 
 void Algorithm::LGP::LGPAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<const Output::OutputHandler> outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    this->env = std::make_shared<Environment>(iSet, params, dataSource);
+    this->env = std::make_unique<Environment>(iSet, params, dataSource);
     Algorithm::Algorithm::initAlgorithm(rng, outputs, dataSource, graph);
 }
 
@@ -37,7 +35,7 @@ void Algorithm::LGP::LGPAlgorithm::initAlgorithm(RNG::RNG& rng, std::shared_ptr<
 std::shared_ptr<Algorithm::PolicyStats> Algorithm::LGP::LGPAlgorithm::createPolicyStats() const
 {
     std::map<std::string, std::shared_ptr<PolicyStats>> subPolicyStatsMap;
-    return std::make_shared<LGPPolicyStats>(this->algorithmName, *this->env);
+    return std::make_shared<LGPPolicyStats>(this->algorithmName, this->algorithmID, *this->env);
 }
 
 void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
@@ -50,8 +48,8 @@ void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
 
         fprintf(pFile,
                 "%sP%" PRIu64 " [fillcolor=\"#922DB4\" shape=diamond margin=0.03 "
-                "width=0 height=0 label=\"%s\"] //",
-                offset.c_str(), lgpAgent.getAgentID(), lgpAgent.getAlgorithmName().c_str());
+                "width=0 height=0 label=\"%s.%" PRIu64 "\"] //",
+                offset.c_str(), lgpAgent.getAgentID(), this->algorithmName.c_str(), this->algorithmID);
         // add next the content of the constant data handler in a comment (//)
         for (int i = 0; i < params.nbProgramConstant;
             i++) {
@@ -70,7 +68,7 @@ void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
             programContent += std::to_string(l.getDestinationIndex());
             programContent += "&";
             // instruction operands
-            for (int j = 0; j < l.getEnvironment()->getMaxNbOperands(); j++) {
+            for (int j = 0; j < l.getEnvironment().getMaxNbOperands(); j++) {
                 std::pair<uint64_t, uint64_t> p = l.getOperand(j);
                 if (j != 0)
                     programContent += "#";

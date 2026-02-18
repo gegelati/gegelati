@@ -8,7 +8,7 @@ const Algorithm::Agent& Algorithm::ExecutionEngine::getExecutedAgent() const
 
 void Algorithm::ExecutionEngine::setExecutedAgent(const Agent& newExecutedAgent)
 {
-    if(newExecutedAgent.getAlgorithmName() != this->algorithmName){
+    if(newExecutedAgent.getAlgorithmID() != this->algorithmID){
         throw std::runtime_error("Algorithm::ExecutionEngine::setExecutedAgent trying to set an agent from a different algorithm");
     }
 

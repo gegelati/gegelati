@@ -1,32 +1,66 @@
 
 #include "algorithm/algorithm.h"
 
+// Declaration of static agent ID Counter in local here because it creates
+// error in the .h file for MSVC compiler See:
+// https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
+static uint64_t ALGORITHM_COUNTER_ID = 0;
 
-Algorithm::Algorithm& Algorithm::Algorithm::getSubAlgorithm(std::string nameAlgorithm)
+uint64_t Algorithm::Algorithm::incrementeCounter()
 {
-    for (auto& subAlgorithm : this->subAlgorithms) {
-        if (subAlgorithm->getAlgorithmName() == nameAlgorithm) {
-            return *subAlgorithm;
-        }
-    }
-    throw std::runtime_error("No sub-algorithm with name " + nameAlgorithm + " found.");
+    return ALGORITHM_COUNTER_ID++;
 }
-const Algorithm::Algorithm& Algorithm::Algorithm::cGetSubAlgorithm(std::string nameAlgorithm) const
+
+uint64_t Algorithm::Algorithm::getAlgorithmIDCounter()
+{
+    return ALGORITHM_COUNTER_ID;
+}
+
+void Algorithm::Algorithm::resetAlgorithmIDCounter()
+{
+    ALGORITHM_COUNTER_ID = 0;
+}
+
+uint64_t Algorithm::Algorithm::getAlgorithmID() const
+{
+    return this->algorithmID;
+}
+
+void Algorithm::Algorithm::setAlgorithmID(uint64_t newID)
+{
+    this->algorithmID = newID;
+
+    // Update the ID counter if needed
+    if (newID >= ALGORITHM_COUNTER_ID) {
+        ALGORITHM_COUNTER_ID = newID + 1;
+    }
+}
+
+Algorithm::Algorithm& Algorithm::Algorithm::getSubAlgorithm(uint64_t algorithmID)
 {
     for (auto& subAlgorithm : this->subAlgorithms) {
-        if (subAlgorithm->getAlgorithmName() == nameAlgorithm) {
+        if (subAlgorithm->getAlgorithmID() == algorithmID) {
             return *subAlgorithm;
         }
     }
-    throw std::runtime_error("No sub-algorithm with name " + nameAlgorithm + " found.");
+    throw std::runtime_error("No sub-algorithm with id " + std::to_string(algorithmID) + " found.");
+}
+const Algorithm::Algorithm& Algorithm::Algorithm::cGetSubAlgorithm(uint64_t algorithmID) const
+{
+    for (auto& subAlgorithm : this->subAlgorithms) {
+        if (subAlgorithm->getAlgorithmID() == algorithmID) {
+            return *subAlgorithm;
+        }
+    }
+    throw std::runtime_error("No sub-algorithm with id " + std::to_string(algorithmID) + " found.");
 }
 
 void Algorithm::Algorithm::addSubAlgorithm(const Algorithm& subAlgorithm)
 {
     // Throw if the sub-algorithm is already present
     for (auto& existingSubAlgorithm : this->subAlgorithms) {
-        if (existingSubAlgorithm->getAlgorithmName() == subAlgorithm.getAlgorithmName()) {
-            throw std::runtime_error("Algorithm::addSubAlgorithm: Sub-algorithm with name " + subAlgorithm.getAlgorithmName() + " is already present.");
+        if (existingSubAlgorithm->getAlgorithmID() == subAlgorithm.getAlgorithmID()) {
+            throw std::runtime_error("Algorithm::addSubAlgorithm: Sub-algorithm with name " + std::to_string(subAlgorithm.getAlgorithmID()) + " is already present.");
         }
     }
     this->subAlgorithms.push_back(subAlgorithm.copy());
@@ -149,23 +183,23 @@ void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
     this->clearUnusedSubAgents();
 }
 
-std::map<std::string, std::set<std::reference_wrapper<const Algorithm::Agent>>> Algorithm::Algorithm::getUsedSubAgents() const {
+std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Algorithm::Algorithm::getUsedSubAgents() const {
     // By default, return an empty map, meaning that no sub-agent is used by the algorithm.
     if(this->subAlgorithms.size() > 0){
         throw std::runtime_error("Algorithm::getUsedSubAgents: This method should be override by algorithms with sub-algorithms to return the used sub-agents.");
     }
-    return std::map<std::string, std::set<std::reference_wrapper<const Agent>>>();
+    return std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>();
 }
 
 void Algorithm::Algorithm::clearUnusedSubAgents() {
-    std::map<std::string, std::set<std::reference_wrapper<const Agent>>> usedSubAgents = this->getUsedSubAgents();
+    std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> usedSubAgents = this->getUsedSubAgents();
     
     for(const auto& subAlgorithm: subAlgorithms){
         subAlgorithm->clearUnusedSubAgents();
 
         auto subAlgorithmAgents = subAlgorithm->getManager()->getAgents();
         for(const Agent& agent: subAlgorithmAgents){
-            if(usedSubAgents[subAlgorithm->getAlgorithmName()].find(agent) == usedSubAgents[subAlgorithm->getAlgorithmName()].end()){
+            if(usedSubAgents[subAlgorithm->getAlgorithmID()].find(agent) == usedSubAgents[subAlgorithm->getAlgorithmID()].end()){
                 subAlgorithm->manager->deleteAgent(agent, this->graph);
             }
         }
@@ -189,7 +223,15 @@ void Algorithm::Algorithm::updateAfterEvaluation(const std::vector<std::shared_p
 }
 
 
+bool Algorithm::operator<(const Algorithm& a, const Algorithm& b)
+{
+    return a.getAlgorithmID() < b.getAlgorithmID();
+}
 bool Algorithm::operator==(const Algorithm& a, const Algorithm& b)
 {
-    return a.getAlgorithmName() == b.getAlgorithmName();
+    return a.getAlgorithmID() == b.getAlgorithmID();
+}
+bool Algorithm::operator!=(const Algorithm& a, const Algorithm& b)
+{
+    return a.getAlgorithmID() != b.getAlgorithmID();
 }

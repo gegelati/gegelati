@@ -49,11 +49,11 @@ void Algorithm::PolicyStats::clear()
     this->nbUsePerAction.clear();
 }
 
-Algorithm::PolicyStats& Algorithm::PolicyStats::getSubPolicyStats(const std::string& subAlgorithmName) const
+Algorithm::PolicyStats& Algorithm::PolicyStats::getSubPolicyStats(uint64_t subAlgorithmID) const
 {
-    auto it = this->subPolicyStats.find(subAlgorithmName);
+    auto it = this->subPolicyStats.find(subAlgorithmID);
     if (it == this->subPolicyStats.end()) {
-        throw std::invalid_argument("No sub policy stats found for algorithm " + subAlgorithmName);
+        throw std::invalid_argument("No sub policy stats found for algorithm " + subAlgorithmID);
     }
     return *it->second;
 }
@@ -74,13 +74,13 @@ void Algorithm::PolicyStats::analyzeVertex(const EvoGraph::Vertex& vertex, size_
 
     if(vertex.hasProgram()) {
         // Get the corresponding sub policy stats and analyze the policy of the program.
-        this->getSubPolicyStats(vertex.getProgram().getAlgorithmName()).analyzePolicy(vertex.getProgram());
+        this->getSubPolicyStats(vertex.getProgram().getAlgorithmID()).analyzePolicy(vertex.getProgram());
     }
 
     for(auto edge : vertex.getOutgoingEdges()) {
         if(edge->hasProgram()) {
             // Get the corresponding sub policy stats and analyze the policy of the program.
-            this->getSubPolicyStats(edge->getProgram().getAlgorithmName()).analyzePolicy(edge->getProgram());
+            this->getSubPolicyStats(edge->getProgram().getAlgorithmID()).analyzePolicy(edge->getProgram());
         }
         this->analyzeVertex(*edge->getDestination(), depth + 1);
     }
@@ -102,10 +102,10 @@ void Algorithm::PolicyStats::analyzeAction(const EvoGraph::Action& action)
     this->nbUsagePerActionID[action.getActionID()]++;
 }
 
-std::map<std::string, std::reference_wrapper<const Algorithm::PolicyStats>> Algorithm::PolicyStats::getAllSubPolicyStats() const
+std::map<uint64_t, std::reference_wrapper<const Algorithm::PolicyStats>> Algorithm::PolicyStats::getAllSubPolicyStats() const
 {
-    std::map<std::string, std::reference_wrapper<const PolicyStats>> allSubPolicyStats;
-    allSubPolicyStats.insert({this->algorithmName, *this});
+    std::map<uint64_t, std::reference_wrapper<const PolicyStats>> allSubPolicyStats;
+    allSubPolicyStats.insert({this->algorithmID, *this});
     std::vector<std::reference_wrapper<const PolicyStats>> toVisit = {*this};
     while(!toVisit.empty()){
         const PolicyStats& current = toVisit.back();
@@ -159,7 +159,7 @@ std::ostream& Algorithm::operator<<(std::ostream& os,
     auto allSubPolicyStats = policyStats.getAllSubPolicyStats();
     // Print specific policy stats
     for(const auto& pair: allSubPolicyStats){
-        os << "## " << pair.first << " Info"<<std::endl;
+        os << "## " << pair.second.get().algorithmName << ":" << pair.first << " Info"<<std::endl;
         os << pair.second.get().specificInfos();
         os <<"\n\n"<< std::endl;
     }

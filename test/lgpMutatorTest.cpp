@@ -58,18 +58,16 @@ class LgpMutatorTest : public ::testing::Test
         params.nbProgramConstant = 5;
         e = std::make_shared<Environment>(set, params, vect);
         lgpOutput = new Output::OutputHandler(Output::Output());
-        lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(e, *lgpOutput);
-        lgpManager->setAlgorithmName("fake");
+        lgpManager = std::make_shared<Algorithm::LGP::LGPManager>(*e, *lgpOutput, (uint64_t)1);
 
         agent = &lgpManager->createAgent(graph);
         lgpAgent = dynamic_cast<const Algorithm::LGP::LGPAgent*>(agent);
-        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>(*selector);
+        lgpMutator = std::make_shared<Algorithm::LGP::LGPMutator>(*selector, (uint64_t)1);
     }
 
     virtual void TearDown()
     {
         delete agent;
-        delete lgpAgent;
         delete (&(vect.at(0).get()));
         delete (&(vect.at(1).get()));
         delete (&set.getInstruction(0));

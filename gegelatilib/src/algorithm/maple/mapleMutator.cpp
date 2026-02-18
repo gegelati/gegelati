@@ -43,8 +43,8 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
     std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
 
     // Get program mutator and manager
-    std::shared_ptr<Algorithm::Mutator> programMutator = this->getSubMutator(this->programAlgorithmName);
-    std::shared_ptr<Algorithm::AgentManager> programManager = manager->getSubManager(this->programAlgorithmName);
+    std::shared_ptr<Algorithm::Mutator> programMutator = this->getSubMutator(this->programAlgorithmID);
+    std::shared_ptr<Algorithm::AgentManager> programManager = manager->getSubManager(this->programAlgorithmID);
 
     // Get available actions classes
     std::vector<uint64_t> availableActions(manager->getOutputs().size());
@@ -177,7 +177,7 @@ void Algorithm::Maple::MapleMutator::mutateOutgoingEdge(
 {
     const Agent& originAgent = edge->getProgram();
     // copy program
-    const Algorithm::Agent& newAgent = manager->getSubManager(originAgent.getAlgorithmName())->copyAgent(originAgent, graph);
+    const Algorithm::Agent& newAgent = manager->getSubManager(originAgent.getAlgorithmID())->copyAgent(originAgent, graph);
 
     // Set the mutated agent to the edge
     graph->setEdgeProgram(*edge, newAgent);

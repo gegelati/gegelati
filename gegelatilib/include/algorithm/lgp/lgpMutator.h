@@ -29,8 +29,9 @@ namespace Algorithm::LGP {
          * \brief Main LGPMutator constructor.
          * 
          * \param[in] selector Reference to the current selector used by the algorithm.
+         * \param[in] algorithmID id of the algorithm used.
          */
-        LGPMutator(Selector::Selector& selector): Mutator(selector), lineMutator() {};
+        LGPMutator(const Selector::Selector& selector, uint64_t algorithmID): Mutator(selector, algorithmID), lineMutator() {};
 
 
         /**

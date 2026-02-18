@@ -49,7 +49,7 @@ namespace Algorithm::ATPG {
       public:
 
         /// Default constructor
-        ATPGPolicyStats(std::string algorithmName, const std::map<std::string, std::shared_ptr<PolicyStats>>& subPolicyStats) : TPGPolicyStats(algorithmName, subPolicyStats) {}
+        ATPGPolicyStats(std::string algorithmName, uint64_t algorithmID, const std::map<uint64_t, std::shared_ptr<PolicyStats>>& subPolicyStats) : TPGPolicyStats(algorithmName, algorithmID, subPolicyStats) {}
 
         /**
          * \brief ATPG got no specific info to print, so we just return the name of the program sub-algorithm and action program sub algorithm.

@@ -27,11 +27,11 @@ namespace Algorithm {
         /// Values to outputs 
         const Output::OutputHandler& outputs;
 
-        /// Name of the algorithm.
-        std::string algorithmName;
+        /// Id of the algorithm.
+        uint64_t algorithmID;
 
         /// Sub-executionEngine for sub-algorithms
-        std::map<std::string, std::unique_ptr<ExecutionEngine>> subExecutionEngines;
+        std::map<uint64_t, std::unique_ptr<ExecutionEngine>> subExecutionEngines;
 
         /// Boolean indicating if this executionEngine will be executed for training or testing purpose.
         bool isTraining = false;
@@ -49,10 +49,10 @@ namespace Algorithm {
          * 
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
-         * \param[in] algorithmName name of the algorithm used.
+         * \param[in] algorithmID id of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(const Output::OutputHandler& outputs, std::string algorithmName, bool isTraining = false): algorithmName{algorithmName}, outputs{outputs}, isTraining{isTraining} {}
+        ExecutionEngine(const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false): algorithmID{algorithmID}, outputs{outputs}, isTraining{isTraining} {}
 
         /**
          * \brief Main ExecutionEngine constructor.
@@ -62,7 +62,7 @@ namespace Algorithm {
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        ExecutionEngine(const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{executedAgent}, outputs{outputs}, algorithmName{executedAgent.getAlgorithmName()}, isTraining{isTraining} {}
+        ExecutionEngine(const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): executedAgent{executedAgent}, outputs{outputs}, algorithmID{executedAgent.getAlgorithmID()}, isTraining{isTraining} {}
 
         /**
          * \brief setter for the isTraining attribute. 
@@ -72,9 +72,9 @@ namespace Algorithm {
         void setExecutionMode(bool isTraining);
 
         /**
-         * \brief Return the name of the algorithm.
+         * \brief Return the id of the algorithm.
          */
-        std::string getAlgorithmName() const { return this->algorithmName; }
+        uint64_t getAlgorithmID() const { return this->algorithmID; }
 
         /**
          * \brief Return the current agent executed.

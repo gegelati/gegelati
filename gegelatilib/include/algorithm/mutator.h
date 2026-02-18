@@ -23,10 +23,10 @@ namespace Algorithm {
 
 
         /// Name of the algorithm.
-        std::string algorithmName;
+        uint64_t algorithmID;
 
         /// Sub-mutators for sub-algorithms
-        std::map<std::string, std::shared_ptr<Mutator>> subMutators;
+        std::map<uint64_t, std::shared_ptr<Mutator>> subMutators;
 
         /// Pointer to the current context used by the mutator to populate the Graph.
         std::unique_ptr<Selector::SelectionContext> currentContext;
@@ -40,8 +40,9 @@ namespace Algorithm {
          * \brief Main Mutator constructor.
          * 
          * \param[in] selector Reference to the current selector used by the algorithm.
+         * \param[in] algorithmID id of the algorithm used.
          */
-        Mutator(const Selector::Selector& selector) : selector(selector) {};
+        Mutator(const Selector::Selector& selector, uint64_t algorithmID) : selector(selector), algorithmID{algorithmID} {};
 
         /**
          * \brief Update the context used by the TPGMutator to populate the Graph.
@@ -61,16 +62,10 @@ namespace Algorithm {
          */
         virtual const Selector::SelectionContext& getContext();
 
-
         /**
-         * \brief Set the name of the algorithm.
+         * \brief Return the id of the algorithm.
          */
-        void setAlgorithmName(std::string name) { this->algorithmName = name; }
-
-        /**
-         * \brief Return the name of the algorithm.
-         */
-        std::string getAlgorithmName() const { return this->algorithmName; }
+        uint64_t getAlgorithmID() const { return this->algorithmID; }
 
         
         /**
@@ -84,9 +79,9 @@ namespace Algorithm {
         /**
          * \brief return the subMutator corresponding to the name of the algorithm given.
          * 
-         * \param[in] nameAlgorithm name of the algorithm given.
+         * \param[in] algorithmID id of the algorithm given.
          */
-        virtual std::shared_ptr<Mutator> getSubMutator(std::string nameAlgorithm);
+        virtual std::shared_ptr<Mutator> getSubMutator(uint64_t algorithmID);
 
 
         /**

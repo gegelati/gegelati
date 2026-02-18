@@ -21,7 +21,7 @@ namespace Algorithm::ATPG {
     
 
         /// Name of the action program algorithm associated with the ATPG agents.
-        std::string actionProgramAlgorithmName;
+        uint64_t actionProgramAlgorithmID;
 
     public:
 
@@ -29,15 +29,16 @@ namespace Algorithm::ATPG {
          * \brief Main ATPGManager constructor.
          * 
          * \param[in] outputs outputs of the agents.
+         * \param[in] algorithmID id of the algorithm used.
          */
-        ATPGManager(const Output::OutputHandler& outputs) : TPGManager(outputs) {};
+        ATPGManager(const Output::OutputHandler& outputs, uint64_t algorithmID) : TPGManager(outputs, algorithmID) {};
 
         /**
-         * \brief Set the name of the action program algorithm associated with the TPG agents.
+         * \brief Set the id of the action program algorithm associated with the TPG agents.
          * 
-         * \param[in] name the name of the action program algorithm.
+         * \param[in] id the id of the action program algorithm.
          */
-        void setActionProgramAlgorithmName(const std::string& name) { this->actionProgramAlgorithmName = name; }
+        void setActionProgramAlgorithmID(uint64_t id) { this->actionProgramAlgorithmID = id; }
 
 
         /**

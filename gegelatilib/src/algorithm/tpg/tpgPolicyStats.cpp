@@ -53,5 +53,5 @@ void Algorithm::TPG::TPGPolicyStats::analyzePolicy(const Agent& agent)
 
 std::string Algorithm::TPG::TPGPolicyStats::specificInfos() const
 {
-    return "Program sub-algorithm: " + this->subPolicyStats.begin()->first;
+    return "Program sub-algorithm: " + this->subPolicyStats.begin()->second->algorithmName + ":" + std::to_string(this->subPolicyStats.begin()->first);
 }

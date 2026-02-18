@@ -75,7 +75,7 @@ class ArchiveTest : public ::testing::Test
         params.nbRegisters = 8;
         params.nbProgramConstant = 5;
         e = std::make_shared<Environment>(set, params, vect);
-        lgpAgent = std::make_shared<const Algorithm::LGP::LGPAgent>(e, 1, "fakeLGP");
+        lgpAgent = std::make_shared<const Algorithm::LGP::LGPAgent>(*e, 1, 0);
     }
 
     virtual void TearDown()
@@ -127,7 +127,7 @@ TEST_F(ArchiveTest, AddRecordingTests)
         << "Number or dataHandlers copied in the archive is incorrect.";
 
     // Add other recordings with the same DataHandlers
-    auto lgpAgent2 = std::make_shared<const Algorithm::LGP::LGPAgent>(e, 1, "fakeLGP");
+    auto lgpAgent2 = std::make_shared<const Algorithm::LGP::LGPAgent>(*e, 1, 0);
     ASSERT_NO_THROW(archive.addRecording(*lgpAgent2, vect, 0.3))
         << "Adding a recording to the non-empty archive failed.";
     ASSERT_EQ(archive.getNbRecordings(), 2)
@@ -157,7 +157,7 @@ TEST_F(ArchiveTest, AddRecordingTests)
         << "Number or dataHandlers copied in the archive is incorrect.";
 
     // Evict a recording again, and its DataHandler copy.
-    auto lgpAgent3 = std::make_shared<const Algorithm::LGP::LGPAgent>(e, 1, "fakeLGP");
+    auto lgpAgent3 = std::make_shared<const Algorithm::LGP::LGPAgent>(*e, 1, 0);
     ASSERT_NO_THROW(archive.addRecording(*lgpAgent3, vect, 1.5))
         << "Adding a recording to the full archive failed.";
     ASSERT_EQ(archive.getNbRecordings(), 3)
@@ -253,7 +253,7 @@ TEST_F(ArchiveTest, areProgramResultsUnique)
     archive.addRecording(*lgpAgent, vect, 1.5);
 
     // Add a few fictive recordings with p2
-    auto lgpAgent2 = std::make_shared<const Algorithm::LGP::LGPAgent>(e, 1, "fakeLGP");
+    auto lgpAgent2 = std::make_shared<const Algorithm::LGP::LGPAgent>(*e, 1, 0);
     archive.addRecording(*lgpAgent2, vect, 2.0);
     d.setDataAt(typeid(int), 2, 42);
     size_t hash3 = archive.getCombinedHash(vect);

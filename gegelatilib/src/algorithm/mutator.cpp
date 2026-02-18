@@ -3,13 +3,13 @@
 
 void Algorithm::Mutator::addSubMutator(std::shared_ptr<Mutator> subMutator)
 {
-    this->subMutators.insert({subMutator->getAlgorithmName(), subMutator});
+    this->subMutators.insert({subMutator->getAlgorithmID(), subMutator});
 }
 
 
 
-std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(std::string nameAlgorithm){
-    auto it = this->subMutators.find(nameAlgorithm);
+std::shared_ptr<Algorithm::Mutator> Algorithm::Mutator::getSubMutator(uint64_t algorithmID){
+    auto it = this->subMutators.find(algorithmID);
     if(it == this->subMutators.end()){
         throw std::runtime_error("Algorithm::Mutator::getSubMutator subMutator not found for the specific name");
     }

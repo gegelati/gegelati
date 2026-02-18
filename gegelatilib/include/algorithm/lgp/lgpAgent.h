@@ -20,7 +20,7 @@ namespace Algorithm::LGP {
         protected:
 
             /// Environment within which the LGP will be executed.
-            const std::shared_ptr<const Environment>& environment;
+            const Environment& environment;
             
             /**
              * \brief Lines of the LGP and intron property.
@@ -57,10 +57,10 @@ namespace Algorithm::LGP {
              * \param[in] e the reference to the Environment that will be referenced
              * by the LGPAgent.
              * \param[in] outputs outputs of the LGP.
-             * \param[in] algorithmName name of the algorithm used.
+             * \param[in] algorithmID id of the algorithm used.
              */
-            LGPAgent(const std::shared_ptr<const Environment>& e, const Output::OutputHandler& outputs, std::string algorithmName)
-                : Agent(algorithmName), environment{e}, constants{e->getParams().nbProgramConstant}, outputs{outputs}
+            LGPAgent(const Environment& e, const Output::OutputHandler& outputs, uint64_t algorithmID)
+                : Agent(algorithmID), environment{e}, constants{e.getParams().nbProgramConstant}, outputs{outputs}
             {
                 constants.resetData(); // force all constant to 0 at first.
             };
@@ -152,7 +152,7 @@ namespace Algorithm::LGP {
              * \return a const reference to the Environment of the LGP and all
              * its LGPLine.
              */
-            const std::shared_ptr<const Environment>& getEnvironment() const;
+            const Environment& getEnvironment() const;
 
             /**
              * \brief Get the number of lines in the LGP.

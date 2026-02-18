@@ -71,7 +71,7 @@ void Algorithm::LGP::LGPAgent::swapLines(const uint64_t idx0, const uint64_t idx
     std::iter_swap(this->lines.begin() + idx0, this->lines.begin() + idx1);
 }
 
-const std::shared_ptr<const Environment>& Algorithm::LGP::LGPAgent::getEnvironment() const
+const Environment& Algorithm::LGP::LGPAgent::getEnvironment() const
 {
     return this->environment;
 }

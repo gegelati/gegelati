@@ -31,8 +31,9 @@ namespace Algorithm::Maple {
          * \brief Main MapleManager constructor.
          * 
          * \param[in] outputs outputs of the agents.
+         * \param[in] algorithmID id of the algorithm used.
          */
-        MapleManager(const Output::OutputHandler& outputs) : TPGManager(outputs) {};
+        MapleManager(const Output::OutputHandler& outputs, uint64_t algorithmID) : TPGManager(outputs, algorithmID) {};
 
 
         /**
