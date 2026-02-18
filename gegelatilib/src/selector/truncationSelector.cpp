@@ -25,17 +25,11 @@ void Selector::TruncationSelector::doSelection(
     while (i < nbExpectedAgents && results.size() > 0) {
 
         auto it = results.begin();
-        // If the agent is an action, do not remove it in discrete environment!
         const Algorithm::Agent& agent = it->second;
         results.erase(it);
 
-
         // Removed stored result (if any)
-        this->resultsPerAgent.erase(agent);
-        if (this->bestAgent.first && agent == *this->bestAgent.first) {
-            this->bestAgent.first = std::nullopt;
-            this->bestAgent.second = nullptr;
-        }
+        this->removeFromSavedResults(agent);
 
         this->manager->deleteAgent(agent, graph);
 

@@ -50,7 +50,7 @@ void Selector::TournamentSelector::doSelection(
             auto itWorst = subMap.begin();
 
             // Remove the vertex from the graph as well
-            this->resultsPerAgent.erase(itWorst->second);
+            this->removeFromSavedResults(itWorst->second);
             this->manager->deleteAgent(itWorst->second, graph);
             
 
@@ -64,7 +64,7 @@ void Selector::TournamentSelector::doSelection(
     // Delete from results and resultsPerAgent
     auto itDel = results.begin();
     for (size_t i = 0; i < nbAgentsInTournament && it != results.end(); ++i) {
-        this->resultsPerAgent.erase(itDel->second);    
+        this->removeFromSavedResults(itDel->second);
         results.erase(itDel++);
     }
 }
@@ -119,7 +119,7 @@ void Selector::TournamentSelector::updateAfterPopulate(std::shared_ptr<EvoGraph:
     for (auto agent : this->agentsToDelete) {
         auto mapIterator = this->resultsPerAgent.find(agent);
         if (mapIterator != this->resultsPerAgent.end()) {
-            this->resultsPerAgent.erase(mapIterator);
+            this->removeFromSavedResults((*mapIterator).first);
         }
 
         this->manager->deleteAgent(agent, graph);

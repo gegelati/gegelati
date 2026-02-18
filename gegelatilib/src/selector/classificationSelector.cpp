@@ -97,10 +97,9 @@ void Selector::ClassificationSelector::doSelection(
     auto allAgents = this->manager->getAgents();
     auto& graphRef = graph;
     auto& managerRef = this->manager;
-    auto& resultsPerAgentRef = this->resultsPerAgent;
     std::for_each(
         allAgents.begin(), allAgents.end(),
-        [&agentsToKeep, &graphRef, &resultsPerAgentRef, &managerRef,
+        [&agentsToKeep, &graphRef, this, &managerRef,
          &results](std::reference_wrapper<const Algorithm::Agent> curragent) {
 
             if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
@@ -110,7 +109,7 @@ void Selector::ClassificationSelector::doSelection(
                 managerRef->deleteAgent(curragent, graphRef);
 
                 // Keep only results of non-decimated agents.
-                resultsPerAgentRef.erase(curragent);
+                this->removeFromSavedResults(curragent);
 
                 // Update results also
                 std::multimap<std::shared_ptr<Learn::EvaluationResult>,

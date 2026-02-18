@@ -105,6 +105,13 @@ namespace Selector {
         virtual void keepBestPolicy(std::shared_ptr<EvoGraph::Graph> graph);
 
         /**
+         * \brief Remove the agent from resultsPerAgent and BestAgent if already saved.
+         * 
+         * \param[in] agent Agent removed from the data.
+         */
+        virtual void removeFromSavedResults(const Algorithm::Agent& agent);
+
+        /**
          * \brief Update the bestAgent and resultsPerAgent attributes.
          *
          * This method updates the value of the bestAgent attribute with the

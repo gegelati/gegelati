@@ -152,7 +152,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
         }
 
         if (!containAgent) {
-            this->resultsPerAgent.erase(it->second);
+            this->removeFromSavedResults(it->second);
             this->manager->deleteAgent(it->second, graph);
             it = results.erase(it); // erase returns next iterator
         }
