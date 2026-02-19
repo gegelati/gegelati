@@ -729,21 +729,19 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     EvoGraph::Graph& tpg = la.getGraph();
-
-    ASSERT_EQ(tpg.getNbVertices(), 158)
+    ASSERT_EQ(tpg.getNbVertices(), 165)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 93)
+    ASSERT_EQ(tpg.getNbRootVertices(), 98)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 249)
+    ASSERT_EQ(tpg.getEdges().size(), 265)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 732)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 718)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1216)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1220)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1032)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 994)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              13222576028468492395U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 3010485883259191913U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -784,22 +782,20 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     EvoGraph::Graph& tpg = la.getGraph();
-
     
-    ASSERT_EQ(tpg.getNbVertices(), 211)
+    ASSERT_EQ(tpg.getNbVertices(), 190)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 133)
+    ASSERT_EQ(tpg.getNbRootVertices(), 124)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 365)
+    ASSERT_EQ(tpg.getEdges().size(), 324)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 855)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 837)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1586)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1505)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1395)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1367)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              10066102062589512298U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 4927368516611082142U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -896,20 +892,20 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     EvoGraph::Graph& tpg = la.getGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 185)
+    ASSERT_EQ(tpg.getNbVertices(), 188)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 120)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 324)
+    ASSERT_EQ(tpg.getEdges().size(), 337)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 841)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 831)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1610)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1547)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1525)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1524)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              11047690922848056836U)
+              17076773739657998196U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -957,20 +953,19 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLETournament)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     EvoGraph::Graph& tpg = la.getGraph();
-    ASSERT_EQ(tpg.getNbVertices(), 175)
+    ASSERT_EQ(tpg.getNbVertices(), 169)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(tpg.getNbRootVertices(), 118)
+    ASSERT_EQ(tpg.getNbRootVertices(), 115)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 322)
+    ASSERT_EQ(tpg.getEdges().size(), 315)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 1862)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 1874)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 3902)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 3899)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 3440)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 3462)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
-              12725504559815301293U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 9781555923471662128U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -1016,15 +1011,16 @@ TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 27)
         << "Graph does not have the expected determinist characteristics.";
-    ASSERT_EQ(tpg.getEdges().size(), 70)
+    ASSERT_EQ(tpg.getEdges().size(), 74)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 1049)
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 1040)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 3205)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 3264)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 2097)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 2079)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 3039887116743322593U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              14535866509460905239U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -1067,7 +1063,6 @@ TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
     // end up with the same number of vertices, roots, edges and calls to
     // the RNG without being identical.
     EvoGraph::Graph& tpg = la.getGraph();
-
     ASSERT_EQ(tpg.getNbVertices(), 11)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(tpg.getNbRootVertices(), 8)
@@ -1076,11 +1071,12 @@ TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
         << "Graph does not have the expected determinst characteristics.";
     ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 751)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 1993)
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 2142)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1503)
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 1498)
         << "Graph does not have the expected determinst characteristics.";
-    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 9669832954032726414U)
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              18018124626153784306U)
         << "Graph does not have the expected determinst characteristics.";
 }
 
@@ -1730,16 +1726,6 @@ TEST_F(ParallelLearningAgentTest, TrainContinuousMaple)
     // the RNG without being identical.
     EvoGraph::Graph& tpg = la.getGraph();
 
-
-    // Useful when determinism is changed
-    /*std::cout << tpg.getNbVertices() << " "
-             <<tpg.getNbRootVertices()<<" "
-             <<tpg.getEdges().size()<<" "
-             <<EvoGraph::Vertex::getVertexIDCounter()<<" "
-             <<EvoGraph::Edge::getEdgeIDCounter()<<" "
-             <<Algorithm::Agent::getAgentIDCounter()<<" "
-
-             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
 
     ASSERT_EQ(tpg.getNbVertices(), 27)
         << "Graph does not have the expected determinst characteristics.";

@@ -361,23 +361,27 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
 
     bool anyMutationDone = false;
     do {
-        std::vector<uint64_t> indexUsed;
-        uint64_t index;
+        
+        // Get available actions classes
+        std::vector<uint64_t> availableEdges(team.getOutgoingEdges().size());
+        std::iota(availableEdges.begin(), availableEdges.end(), uint64_t{0});
+        size_t remaining = availableEdges.size();
+
         // 4. mutate randomly selected program on action Edge.
         double proba = params.mutation.tpg.pMutateActionProgram;
-        while (indexUsed.size() < team.getOutgoingEdges().size() &&
+        while (remaining > 0 &&
                proba > rng.getDouble(0.0, 1.0)) {
 
-            // Pick a random edge not already used
-            do {
-                index = rng.getUnsignedInt64(
-                    0, team.getOutgoingEdges().size() - 1);
-            } while (std::find(indexUsed.begin(), indexUsed.end(), index) !=
-                     indexUsed.end());
-            indexUsed.push_back(index);
+            // Pick uniformly from remaining values
+            size_t pickIdx = rng.getUnsignedInt64(0, remaining - 1);
+
+            // Remove picked element (swap with last)
+            // By swapping, the order of availableActions is changed.
+            std::swap(availableEdges[pickIdx], availableEdges[remaining - 1]);
+            --remaining;
 
             auto iter = team.getOutgoingEdges().begin();
-            std::advance(iter, index);
+            std::advance(iter, pickIdx);
 
             this->mutateOutgoingEdge(graph, *iter, team.getAssessedActions(), manager, newSubAgents, params, rng);
             graph.updateAssessedActions(team);
