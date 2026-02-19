@@ -45,46 +45,85 @@ void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
 
         const LGPAgent& lgpAgent = dynamic_cast<const LGPAgent&>(agent);
 
+        std::string constantInfo;
+        std::string instructionInfo;
 
-        fprintf(pFile,
-                "%sP%" PRIu64 " [fillcolor=\"#922DB4\" shape=diamond margin=0.03 "
-                "width=0 height=0 label=\"%s.%" PRIu64 "\"] //",
-                offset.c_str(), lgpAgent.getAgentID(), this->algorithmName.c_str(), this->algorithmID);
         // add next the content of the constant data handler in a comment (//)
         for (int i = 0; i < params.nbProgramConstant;
             i++) {
-            fprintf(pFile, "%f|", static_cast<double>(lgpAgent.getConstantAt(i)));
+            constantInfo += std::to_string(static_cast<double>(lgpAgent.getConstantAt(i))) + "|";
         }
-        fprintf(pFile, "\n");
 
         // print the program instructions:
-        std::string programContent = "";
         for (int i = 0; i < lgpAgent.getNbLines(); i++) {
             const LGPLine& l = lgpAgent.getLine(i);
             // instruction index
-            programContent += std::to_string(l.getInstructionIndex());
-            programContent += "|";
+            instructionInfo += std::to_string(l.getInstructionIndex());
+            instructionInfo += "|";
             // instruction destination index
-            programContent += std::to_string(l.getDestinationIndex());
-            programContent += "&";
+            instructionInfo += std::to_string(l.getDestinationIndex());
+            instructionInfo += "&";
             // instruction operands
             for (int j = 0; j < l.getEnvironment().getMaxNbOperands(); j++) {
                 std::pair<uint64_t, uint64_t> p = l.getOperand(j);
                 if (j != 0)
-                    programContent += "#";
-                programContent += std::to_string(p.first);
-                programContent += "|";
-                programContent += std::to_string(p.second);
+                    instructionInfo += "#";
+                instructionInfo += std::to_string(p.first);
+                instructionInfo += "|";
+                instructionInfo += std::to_string(p.second);
             }
 
-            programContent += "&#92;n";
+            instructionInfo += "&#92;n";
         }
-        fprintf(pFile, "%sI%" PRIu64 " [shape=box style=invis label=\"%s\"] \n",
-                offset.c_str(), lgpAgent.getAgentID(),
-                programContent.c_str());
-
-        fprintf(pFile, "%sP%" PRIu64 " -> I%" PRIu64 "[style=invis]\n",
-                offset.c_str(), lgpAgent.getAgentID(), lgpAgent.getAgentID());
+        fprintf(pFile,
+                "%sP%" PRIu64 " [fillcolor=\"#922DB4\" shape=diamond margin=0.03 "
+                "width=0 height=0 label=\"%s.%" PRIu64 "\" constant=\"%s\" instruction=\"%s\"]\n",
+                offset.c_str(), lgpAgent.getAgentID(), this->algorithmName.c_str(), this->algorithmID, constantInfo.c_str(), instructionInfo.c_str());
     }
 }
 
+
+
+
+const std::string Algorithm::LGP::LGPAlgorithm::lgpAgentRegex(
+    "P([0-9]+)\\x20\\x5B.*label=\"(.*)\".*constant=\"(.*)\".*instruction=\"(.*)\"\\x5D");
+
+const Algorithm::Agent& Algorithm::LGP::LGPAlgorithm::readAgent(std::smatch& matches)
+{   
+    std::regex testLgpAgentRegex(this->lgpAgentRegex);
+    std::smatch newMatches;
+    std::string line = matches[0];
+    if(!std::regex_search(line, newMatches, testLgpAgentRegex)){
+        throw std::runtime_error("LGPAlgorithm::readAgent: regex search should succeed.");
+    }
+
+    const Agent& agent = this->manager->createAgent(*graph);
+    LGPManager& lgpManager = dynamic_cast<LGPManager&>(*this->manager);
+
+    std::string constantStr = newMatches[3];
+    // read constants
+    std::vector<Data::Constant> v_constant;
+    std::string::size_type pos = 0;
+    std::string::size_type pos1 = constantStr.find("|", pos);
+
+
+    for (;;) {
+        if (pos1 != std::string::npos) {
+            v_constant.push_back(
+                {std::stod(constantStr.substr(pos, pos1 - pos))});
+        }
+        else {
+            break;
+        }
+        pos = pos1 + 1;
+        pos1 = constantStr.find("|", pos);
+
+    }
+    // Set the constant.
+    for (int i = 0; i < v_constant.size(); i++) {
+        lgpManager.setConstantAt(agent, i, v_constant[i]);
+    }
+
+    lgpManager.readLines(newMatches[4], agent);
+    return agent;
+}

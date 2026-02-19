@@ -39,7 +39,7 @@
 #include <inttypes.h>
 
 #include "data/constant.h"
-#include "file/tpgGraphDotExporter.h"
+#include "file/graphDotExporter.h"
 #include "util/timestamp.h"
 #include "data/demangle.h"
 
@@ -52,8 +52,15 @@ void File::GraphDotExporter::printAgent(const Algorithm::Agent& agentProgram){
             algorithm.printAgent(agentProgram, this->pFile, this->offset, this->printedAgentID, elements);
 
             // Print the elements collected during the printAgent call
-            for(auto element : elements){
+            for(const EvoGraph::Element& element : elements){
                 this->printElement(element);
+
+                
+                if(auto vertex = dynamic_cast<const EvoGraph::Vertex*>(&element)){
+                    std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(vertex) != nullptr) ? "T" : "A";
+                    fprintf(pFile, "%sP%" PRIu64 " -> %s%" PRIu64 " [style=dashed]\n",
+                            offset.c_str(), agentProgram.getAgentID(), srcLetter.c_str(), vertex->getVertexID());
+                }
             }
             return;
         }
@@ -201,8 +208,8 @@ void File::GraphDotExporter::printGraphFooter()
     // Rank all the agents of main algoritms
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
     // Main agents ids
-    for(auto algorithm : this->algorithmsRef){
-        for(const Algorithm::Agent& agent : algorithm->getManagerCst().getAgents()){
+    for(const Algorithm::Algorithm& algorithm : this->algorithms){
+        for(const Algorithm::Agent& agent : algorithm.getManagerCst().getAgents()){
             fprintf(pFile, "P%" PRIu64 " ", agent.getAgentID());
         }
     }
@@ -228,8 +235,10 @@ void File::GraphDotExporter::print()
     // Print each agent algorithms
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
-    for(auto algorithm : this->algorithmsRef){
-        for(const Algorithm::Agent& agent : algorithm->getManagerCst().getAgents()){
+    for(const Algorithm::Algorithm& algorithm : this->algorithms){
+    algorithm.getManagerCst();
+    algorithm.getManagerCst().getAgents();
+        for(const Algorithm::Agent& agent : algorithm.getManagerCst().getAgents()){
             this->printAgent(agent);
         }
     }

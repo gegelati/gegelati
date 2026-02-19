@@ -13,24 +13,39 @@ void Algorithm::TPG::TPGAgent::setVertex(const EvoGraph::Vertex& newVertex)
 
 bool Algorithm::TPG::TPGAgent::isValid() const
 {
-    if(auto vertex = dynamic_cast<const EvoGraph::Team*>(&this->vertex.get())){
+    if(!this->hasVertex()){
+        return false;
+    } else if(auto vertex = dynamic_cast<const EvoGraph::Team*>(&this->vertex->get())){
         return vertex->getOutgoingEdges().size() > 1;
     } else {
         return true;
     }
 }
 
+bool Algorithm::TPG::TPGAgent::hasVertex() const
+{
+    return this->vertex != std::nullopt;
+}
+
+void Algorithm::TPG::TPGAgent::removeVertex()
+{
+    this->vertex == std::nullopt;
+}
+
 
 bool Algorithm::TPG::TPGAgent::isRoot() const
 {
-    return this->vertex.get().getIncomingEdges().size() == 0;
+    return this->vertex->get().getIncomingEdges().size() == 0;
 }
 
 const EvoGraph::Vertex& Algorithm::TPG::TPGAgent::getVertex() const
 {
-    const EvoGraph::Team* vertex = dynamic_cast<const EvoGraph::Team*>(&this->vertex.get());
+    if(!this->vertex){
+        throw std::runtime_error("TPGAgent::getVertex no vertex set");
+    }
+    const EvoGraph::Team* vertex = dynamic_cast<const EvoGraph::Team*>(&this->vertex->get());
     if(vertex == nullptr){
-        throw std::runtime_error("TPGAgent::getVertex element is not a Team");
+        throw std::runtime_error("TPGAgent::getVertex vertex is not a Team");
     }
     
     return *vertex;

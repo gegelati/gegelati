@@ -48,7 +48,7 @@
 
 #include "codeGen/tpgGenerationEngineFactory.h"
 #include "algorithm/lgp/environment.h"
-#include "file/tpgGraphDotImporter.h"
+#include "file/graphDotImporter.h"
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "evoGraph/graph.h"

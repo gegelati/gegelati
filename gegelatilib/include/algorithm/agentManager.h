@@ -190,6 +190,17 @@ namespace Algorithm {
          * \return a shared pointer to the created execution engine.
          */
         virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources = {}, bool isTraining = false) const = 0;
+
+        /**
+         * \brief Set a new ID to an agent
+         *
+         * An error is thrown if the agent does not belong to the manager
+         * An error is thrown if the newID is already used
+         *
+         * \param[in] agent the agent to change ID
+         * \param[in] newID the new ID to set
+         */
+        virtual void setNewAgentID(const Agent& agent, uint64_t newID);
     };
 }; // namespace Algorithm
 

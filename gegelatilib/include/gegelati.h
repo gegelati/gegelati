@@ -114,8 +114,8 @@
 #include <evoGraph/instrumented/vertexInstrumented.h>
 
 #include <file/parametersParser.h>
-#include <file/tpgGraphDotExporter.h>
-#include <file/tpgGraphDotImporter.h>
+#include <file/graphDotExporter.h>
+#include <file/graphDotImporter.h>
 
 #include <instructions/addPrimitiveType.h>
 #include <instructions/instruction.h>

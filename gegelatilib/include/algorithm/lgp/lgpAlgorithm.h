@@ -25,6 +25,9 @@ namespace Algorithm::LGP {
             /// Instruction Set used by the LGPAlgorithm
             const Instructions::Set& iSet;
 
+            /// @brief regex use to read an lgpAgent from a .dot file.
+            static const std::string lgpAgentRegex;
+
         public:
 
             /**
@@ -69,7 +72,6 @@ namespace Algorithm::LGP {
              */
             virtual void initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
 
-
             /**
              * \brief Inherited method to create the policy stats of the algorithm
              */
@@ -80,13 +82,21 @@ namespace Algorithm::LGP {
              */
             virtual std::unique_ptr<Algorithm> copy() const override;
 
-            
             /** 
              * \brief Inherited method to print a LGPagent.
              * 
              * The LGP agent prints the different lines of its program.
              */
             void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
+            
+
+            /**
+             * \brief Inherited method to read a LGPAgent.
+             * 
+             * This method will use the current line to get the constant of the agent.
+             * Then it will get the next line to read the instruction
+             */
+            virtual const Agent& readAgent(std::smatch& matches) override;
         };
 }; // namespace LGP_Algorithm
 

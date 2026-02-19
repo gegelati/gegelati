@@ -24,7 +24,7 @@ namespace Algorithm::Maple {
              * \param[in] vertex the Vertex that the TPGAgent will represent. This vertex must be an action vertex.
              * \param[in] algorithmID id of the algorithm used.
              */
-            MapleAgent(const EvoGraph::Vertex& vertex, uint64_t algorithmID) 
+            MapleAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex, uint64_t algorithmID) 
             : TPGAgent(vertex, algorithmID) {};
 
             /**

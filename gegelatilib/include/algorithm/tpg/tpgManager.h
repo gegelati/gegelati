@@ -59,7 +59,7 @@ namespace Algorithm::TPG {
          * 
          * \param[in] graph the Graph associated with the Agent.
          * 
-         * \return a shared pointer to the created Agent.
+         * \return the created Agent.
          */
         virtual const Agent& createAgent(EvoGraph::Graph& graph) override;
 
@@ -69,10 +69,17 @@ namespace Algorithm::TPG {
          * 
          * \param[in] vertex the vertex associated with the Agent.
          * 
-         * \return a shared pointer to the created Agent.
+         * \return the created Agent.
          */
-        virtual const Agent& createAgent(const EvoGraph::Vertex& vertex);
+        virtual const Agent& createAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex);
 
+        /**
+         * \brief Create a new TPGAgent with no vertex. 
+         * This method is made only for readAgent during loading a .dot file.
+         * 
+         * \return the created Agent.
+         */
+        virtual const Agent& createEmptyAgent();
 
         /**
          * \brief Copy a TPGAgent.
@@ -82,7 +89,7 @@ namespace Algorithm::TPG {
          * \param[in] agent the Agent to copy.
          * \param[in] graph the Graph associated with the Agent.
          * 
-         * \return a shared pointer to the created Agent.
+         * \return the created Agent.
          */
         virtual const Agent& copyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
@@ -91,8 +98,6 @@ namespace Algorithm::TPG {
          * 
          * \param[in] agent the Agent to delete.
          * \param[in] graph the Graph associated with the Agent.
-         * 
-         * \return a shared pointer to the created Agent.
          */
         virtual void deleteAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
@@ -101,8 +106,6 @@ namespace Algorithm::TPG {
          * 
          * \param[in] agent the Agent to empty.
          * \param[in] graph the Graph associated with the Agent.
-         * 
-         * \return a shared pointer to the created Agent.
          */
         virtual void emptyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
@@ -110,10 +113,9 @@ namespace Algorithm::TPG {
          * \brief Set the vertex of an agent.
          * 
          * \param[in] agent the Agent to delete.
-         * \param[in] graph the Graph associated with the Agent.
          * \param[in] vertex the vertex set to the agent.
          */
-        virtual void setVertex(const Agent& agent, EvoGraph::Graph& graph, const EvoGraph::Vertex& vertex);
+        virtual void setVertex(const Agent& agent, const EvoGraph::Vertex& vertex);
 
         /**
          * \brief create and return a TPG execution engine.

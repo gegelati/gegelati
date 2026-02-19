@@ -7,7 +7,7 @@
  * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
- * artificial intelligence based on Tangled Program Graphs (TPGs).
+ * artificial intelligence based on Tangled Agent Graphs (TPGs).
  *
  * This software is governed by the CeCILL-C license under French law and
  * abiding by the rules of distribution of free software. You can use,
@@ -36,8 +36,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TPG_GRAPH_DOT_IMPORTER_H
-#define TPG_GRAPH_DOT_IMPORTER_H
+#ifndef GRAPH_DOT_IMPORTER_H
+#define GRAPH_DOT_IMPORTER_H
 
 #include <cstdio>
 #include <fstream>
@@ -59,13 +59,22 @@
 
 namespace File {
     /**
-     * \brief Class used to import a TPG graph from a dot file.
+     * \brief Class used to import a graph from a dot file.
      * It should be able to import a whole Learning agent object.
      */
     class GraphDotImporter
     {
-        #if 0
       protected:
+
+        /**
+         * Get an algorithm from the algorithm ID
+         */
+        Algorithm::Algorithm& getAlgorithm(uint64_t algorithmID);
+        /**
+         * \brief set the potential algorithms used in the attribute vector
+         */
+        void setPotentialAlgorithm();
+
         /**
          * \brief File in which the dot content is read during import.
          */
@@ -79,53 +88,29 @@ namespace File {
         std::string lastLine;
 
         /**
-         * \brief The environment in which the TPGGRAPH will be built
-         */
-        Environment env;
-
-        /**
          * \brief Graph imported from dot file.
          */
-        EvoGraph::Graph& tpg;
+        EvoGraph::Graph& graph;
 
-        /**
-         * \brief Map associating pointers to Vertex to an integer ID.
-         *
-         * This map is used to associate an unique id to a tpg vertex and to
-         * keep track of the pointers while restoring the Graph described in
-         * a dot file
-         */
-        std::map<uint64_t, const EvoGraph::Vertex*> vertexID;
+        /// @brief algorithm containing the agents.
+        std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms;
 
-        /**
-         * \brief Map associating pointers to Action to a vector of integer
-         * action class.
-         */
-        std::map<const EvoGraph::Action*, std::vector<uint64_t>> actionClasses;
+        /// @brief vector of algorithms used, including subAlgorithms. This is used to read the content of the programs of sub algorithms.
+        std::vector<std::reference_wrapper<Algorithm::Algorithm>> potentialAlgorithms;
 
-        /**
-         * \brief Map associating pointers to Program to an integer ID.
-         *
-         * This map is used to associate an unique id to a tpg program and to
-         * keep track of the pointers while restoring the Graph described in
-         * a dot file
-         */
-        std::map<uint64_t, std::shared_ptr<Program::Program>> programID;
+        
+        /// @brief map of printed vertex. This is used to avoid printing twice the same vertex in case of multiple edges pointing toward it.
+        std::map<uint64_t, std::reference_wrapper<const EvoGraph::Vertex>> readVertexID;
 
-        /**
-         * \brief Map associating pointers to Vertex representing actions
-         * to the corresponding action
-         *
-         * This map is used to ensure that identical actions are not created
-         * more than once.
-         */
-        std::map<uint64_t, const EvoGraph::Action*> actionID;
+        /// @brief map of printed edge. This is used to avoid printing twice the same edge in case of multiple edges pointing toward the same destination vertex.
+        std::map<uint64_t, std::reference_wrapper<const EvoGraph::Edge>> readEdgeID;
 
-        /**
-         * \brief string used to spot the end of a line in the program
-         * description.
-         */
-        static const std::string lineSeparator;
+        /// @brief map of printed agent. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent agent.
+        std::map<uint64_t, std::reference_wrapper<const Algorithm::Agent>> readAgentID;
+
+
+
+
 
         /**
          * \brief Contains the regex to identify a team declaration
@@ -149,7 +134,7 @@ namespace File {
         static const std::string teamRegex;
 
         /**
-         * \brief Contains the regex to identify a program declaration
+         * \brief Contains the regex to identify a agent declaration
          *
          * this regex values "P([0-9]+)\\x20\\x5B.*\\x5D"
          *
@@ -167,29 +152,7 @@ namespace File {
          * P0 [fillcolor="#22cccc" shape=point]	Should pass
          * T10 [fillcolor="#1199bb"]				Should not pass
          */
-        static const std::string programRegex;
-
-        /**
-         * \brief contains the regex to identify an instruction declaration
-         *
-         * this regex values "I([0-9]+)\\x20\\x5B.*label=\"(.*)\"\\x5D"
-         *
-         * Explanation :
-         *
-         * I([0-9]+)     looks for a I followed by a number. the number will be
-         * stored in a group
-         * \\x20\\x5B    looks for a succession of a whitespace and an opening
-         * bracket ('[')
-         * .*			the following can be any sequence of character
-         * label=\"	    looks for the label declaration sequence.
-         * (.*)\"\\x5D	stores the content of the label in a group and  look for
-         * the ending sequence : "]
-         *
-         * Example:
-         * I0 [shape=box style=invis]			Should pass
-         * P0 [fillcolor="#22cccc" shape=point]	Should not pass
-         */
-        static const std::string instructionRegex;
+        static const std::string agentRegex;
 
         /**
          * \brief contains the regex to identify an action declaration
@@ -214,29 +177,7 @@ namespace File {
         static const std::string actionRegex;
 
         /**
-         * \brief contains the regex to identify a Program -> Instruction Link
-         *
-         * this regex values "P([0-9]+)\\x20->\\x20I([0-9]+).*"
-         *
-         * Explanation :
-         *
-         * P[0-9]+       looks for a P followed by a number. the number will be
-         * stored in a group
-         * \\x20	        looks for a whitespace
-         * ->			looxs for the sequence '->'
-         * \\x20 	    looks for a whitespace
-         * I[0-9]+       looks for a I followed by a number. the number will be
-         * stored in a group
-         * .*			the following can be any sequence of character
-         *
-         * Example:
-         * P22 -> I22[style=invis]			Should pass
-         * T0 -> P22 -> A11					Should not pass
-         */
-        static const std::string linkProgramInstructionRegex;
-
-        /**
-         * \brief contains the regex to identify a Team -> Program -> Action
+         * \brief contains the regex to identify a Team -> Agent -> Action
          * Link
          *
          * this regex values
@@ -262,10 +203,10 @@ namespace File {
          * P22 -> I22[style=invis]			Should not pass
          * T0 -> P22 -> A11					Should pass
          */
-        static const std::string linkProgramActionRegex;
+        static const std::string linkTeamAgentActionRegex;
 
         /**
-         * \brief contains the regex to identify a Team -> Program -> Team Link
+         * \brief contains the regex to identify a Team -> Agent -> Team Link
          *
          * this regex values
          * "T([0-9]+)\\x20->\\x20P([0-9]+)\\x20->\\x20T([0-9]+).*"
@@ -290,73 +231,19 @@ namespace File {
          * P22 -> I22[style=invis]			Should not pass
          * T0 -> P22 -> T11					Should pass
          */
-        static const std::string linkProgramTeamRegex;
+        static const std::string linkTeamAgentTeamRegex;
 
         /**
-         * \brief contains the regex to identify a Team -> Program -> Action
+         * \brief contains the regex to identify a Team -> Agent
          * Link
-         *
-         * this regex values
-         * "A([0-9]+)\\x20->\\x20P([0-9]+).*"
-         *
-         * Explanation :
-         *
-         * A[0-9]+       looks for a A followed by a number. the number will be
-         * stored in a group
-         * \\x20	        looks for a whitespace
-         * ->			looks for the sequence '->'
-         * \\x20	        looks for a whitespace
-         * P[0-9]+       looks for a P followed by a number. the number will be
-         * stored in a group
-         * .*			the following can be any sequence of character
-         *
-         * Example:
-         * A22 -> I22[style=invis]			Should not pass
-         * A0 -> P22					Should pass
          */
-        static const std::string linkActionProgramRegex;
+        static const std::string linkTeamAgentRegex;
 
         /**
-         * \brief contains the regex to identify a Team -> Program Link
-         * the outgoing program vertex must already have been linked
-         *
-         * this regex values "T([0-9]+)\\x20->\\x20P([0-9]+)"
-         *
-         * Explanation :
-         *
-         * T[0-9]+       looks for a T followed by a number. the number will be
-         * stored in a group
-         * \\x20	        looks for a whitespace
-         * ->			looxs for the sequence '->'
-         * \\x20	        looks for a whitespace
-         * P[0-9]+       looks for a P followed by a number. the number will be
-         * stored in a group
-         *
-         * Example:
-         * P22 -> I22[style=invis]			Should not pass
-         * T0 -> P22 -> T11					Should pass
+         * \brief contains the regex to identify a Team -> Agent Link
          */
-        static const std::string addLinkProgramRegex;
+        static const std::string linkAgentTeamRegex;
 
-        /**
-         * \brief Reads the content of the operands and puts it in the line
-         * passed in parameter
-         *
-         * \param[in] str the string to parse
-         * \param[in] line the line to fill with the parsed informations
-         */
-        void readOperands(std::string& str, Program::Line& line);
-
-        /**
-         * \brief Reads the content of a line and puts it in the line
-         * passed in parameter
-         */
-        void readLine(std::smatch& matches);
-
-        /**
-         * \brief Create a program from its dot content and import its constants
-         */
-        void readProgram(std::smatch& matches);
 
         /**
          * \brief reads the version of the dot file and returns it in the
@@ -387,26 +274,32 @@ namespace File {
          */
         void readAction(std::smatch& matches);
 
+
+        /**
+         * \brief read and create an agent.
+         */
+        void readAgent(std::smatch& matches);
+
         /**
          * \brief reads a link declaration and creates a team to action edge
          */
-        void readLinkTeamProgramAction(std::smatch& matches);
-
-        /**
-         * \brief reads a link declaration and creates a action edge
-         */
-        void readLinkActionProgram(std::smatch& matches);
+        void readLinkTeamAgentAction(std::smatch& matches);
 
         /**
          * \brief reads a link declaration and creates a team to team edge
          */
-        void readLinkTeamProgramTeam(std::smatch& matches);
+        void readLinkTeamAgentTeam(std::smatch& matches);
 
         /**
-         * \brief reads a link declaration and creates a team to program's
-         * destination edge.
+         * \brief reads a link declaration and add the agent to the team's agent
          */
-        void readLinkTeamProgram(std::smatch& matches);
+        void readLinkTeamAgent(std::smatch& matches);
+        /**
+         * \brief reads a link declaration and add the team to the agent's team. 
+         * 
+         * Will throw if the algorithm doesn't handle it.
+         */
+        void readLinkAgentTeam(std::smatch& matches);
 
         /**
          *	\brief reads a single line of the file
@@ -429,22 +322,22 @@ namespace File {
          *
          * \param[in] filePath initial path to the file where the dot content
          * will be written.
-         * \param[in] environment the environment in which the tpg Graph should
-         * be built
-         * \param[in] tpgref a Reference to the Graph to build from
+         * \param[in] graphRef a Reference to the Graph to build from
          * the .dot file
+         * \param[in] algorithms algorithm containing the agents.
          * \throws std::runtime_error in case no file could be
          * opened at the given filePath.
          */
-        GraphDotImporter(const char* filePath, Environment environment,
-                            EvoGraph::Graph& tpgref)
-            : env{environment}, tpg{tpgref}
+        GraphDotImporter(const char* filePath, EvoGraph::Graph& graphRef, std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms)
+            : graph{graphRef}, algorithms{algorithms}
         {
+            std::cout<<filePath<<std::endl;
             pFile.open(filePath);
             if (!pFile.is_open()) {
                 throw std::runtime_error("Could not open file " +
                                          std::string(filePath));
             }
+            setPotentialAlgorithm();
             importGraph();
         };
 
@@ -477,11 +370,11 @@ namespace File {
         void setNewFilePath(const char* newFilePath);
 
         /**
-         * \brief Creates a TPG Graph from its description in a .dot file
+         * \brief Creates a Graph from its description in a .dot file
          */
         void importGraph();
-        #endif
     };
 }; // namespace File
+
 
 #endif

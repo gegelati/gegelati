@@ -51,7 +51,7 @@
 #include "evoGraph/vertex.h"
 #include "util/counterReset.h"
 
-#include "file/tpgGraphDotExporter.h"
+#include "file/graphDotExporter.h"
 
 #include "goldenReferenceComparison.h"
 

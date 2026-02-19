@@ -19,7 +19,7 @@ namespace Algorithm::TPG {
 
             /// Element of the evolution graph that the agent represent.
             /// This element can stay a nullptr if it is not required by the agent.
-            std::reference_wrapper<const EvoGraph::Vertex> vertex;
+            std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex;
 
         public:
 
@@ -29,13 +29,23 @@ namespace Algorithm::TPG {
              * \param[in] vertex the Vertex that the TPGAgent will represent.
              * \param[in] algorithmID id of the algorithm used.
              */
-            TPGAgent(const EvoGraph::Vertex& vertex, uint64_t algorithmID) : vertex{vertex}, Agent(algorithmID) {};
+            TPGAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex, uint64_t algorithmID) : vertex{vertex}, Agent(algorithmID) {};
 
 
             /**
              * \brief Method that return if the agent is valid for execution.
              */
             virtual bool isValid() const;
+
+            /**
+             * \brief return if the tpgAgent has a vertex set or not.
+             */
+            virtual bool hasVertex() const;
+
+            /**
+             * \brief remove the vertex set to the agent.
+             */
+            virtual void removeVertex();
 
             /**
              * \brief Setter for the vertex that the agent represent

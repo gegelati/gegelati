@@ -228,3 +228,96 @@ std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::LGP::LGPManager::createEx
                                             dataSources, this->env.getNbContinuousActions());
     return std::make_unique<LGPExecutionEngine>(*privateEnv, this->outputs, this->algorithmID, isTraining);
 }
+
+
+const std::string Algorithm::LGP::LGPManager::lineSeparator("&#92;n");
+void Algorithm::LGP::LGPManager::readOperands(std::string& str, LGPLine& line)
+{
+    std::string::size_type pos = 0;
+    std::string::size_type pos2;
+    std::string::size_type pos3;
+
+    uint64_t o_idx = 0;
+    uint64_t dataIndex = 0;
+    uint64_t location = 0;
+
+    // operands are stored in str with the following format :
+    // op1_param1|op1_param2#...|param_N
+
+    for (int i = 0; i < this->env.getMaxNbOperands(); ++i) {
+        pos2 = str.find("|");
+        dataIndex = std::stoi(str.substr(pos, pos2));
+        pos2++; // skip the '|'
+        pos3 = str.find("#");
+        location = std::stoi(str.substr(pos2, pos3 - pos2));
+        str = str.substr(pos3 + 1,
+                         str.size() -
+                             pos3); // store the rest of the string and iterate
+
+        line.setOperand(o_idx, dataIndex, location, true);
+        o_idx++;
+    }
+}
+
+void Algorithm::LGP::LGPManager::readLines(std::string instructionsStr, const Agent& agent)
+{
+    LGPAgent& lgpAgent = this->getLGPAgentFromCst(agent);
+    // a line is stored in the .dot file with the following format
+    // inst_idx|dest_idx&op1_param1|op1_param2#...#opN_param1|opN_param2
+
+    // stores the whole agent
+    std::string instruction;
+
+    // used to seek delimiters in the variable "instruction"
+    std::string::size_type pos;
+    std::string::size_type pos1;
+    std::string::size_type pos2;
+
+    // instruction index of a line
+    uint64_t instructionIdx;
+    // destination index of a line
+    uint64_t destinationIdx;
+    // store operands in a new string
+    std::string operands;
+
+    // as long as there are lines in the agent, parse those lines
+    bool cont = true;
+    while (cont) {
+
+        // Create a line and get the line created.
+        lgpAgent.addNewLine();
+        LGPLine& line = lgpAgent.getLineForMutation(lgpAgent.getNbLines() - 1);
+
+        pos = instructionsStr.find(this->lineSeparator);
+        instruction = instructionsStr.substr(0, pos);
+        instructionsStr = instructionsStr.substr(pos + this->lineSeparator.size(),
+                                instructionsStr.size());
+
+        // extract everything before pos (ie |)
+        // corresponds to instruction index
+        pos1 = instruction.find("|");
+        instructionIdx = std::stoi(instruction.substr(0, pos1));
+
+        // extract destination index;
+        pos2 = instruction.find("&");
+        pos1++; // skip the '|'
+        destinationIdx = std::stoi(instruction.substr(
+            pos1, pos2 - pos1)); // extract and convert to int
+
+        // extract operands as a string
+        pos2++; // skip the '$'
+        operands = instruction.substr(pos2, instruction.size());
+
+        // add indexes to line
+        line.setInstructionIndex(instructionIdx);
+        line.setDestinationIndex(destinationIdx);
+
+        // parse operands
+        readOperands(operands, line);
+        if (instructionsStr.size() <= 3) {
+            
+            cont = false;
+        }
+    }
+    this->identifyIntrons(agent);
+}

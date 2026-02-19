@@ -86,6 +86,15 @@ EvoGraph::Graph& Learn::LearningAgent::getGraph()
     return *this->graph;
 }
 
+std::vector<std::reference_wrapper<const Algorithm::Algorithm>> Learn::LearningAgent::cGetAlgorithms() const
+{
+    std::vector<std::reference_wrapper<const Algorithm::Algorithm>> result;
+    for(auto& algorithm : this->algorithms) {
+        result.push_back(std::reference_wrapper<const Algorithm::Algorithm>(*algorithm));
+    }
+    return result;
+}
+
 std::vector<std::reference_wrapper<Algorithm::Algorithm>> Learn::LearningAgent::getAlgorithms()
 {
     std::vector<std::reference_wrapper<Algorithm::Algorithm>> result;

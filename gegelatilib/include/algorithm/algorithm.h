@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <regex>
 
 #include "algorithm/job.h"
 #include "algorithm/agent.h"
@@ -160,8 +161,11 @@ namespace Algorithm {
         /// Getter for the mutator
         virtual Mutator& getMutator();
       
-        /// Constant getter for the mutator
-        virtual std::vector<std::reference_wrapper<const Algorithm>> getSubAlgorithms() const;
+        /// Constant getter for the sub algorithms
+        virtual std::vector<std::reference_wrapper<const Algorithm>> cGetSubAlgorithms() const;
+      
+        /// Getter for the sub algorithms
+        virtual std::vector<std::reference_wrapper<Algorithm>> getSubAlgorithms();
 
         /**
          * \brief Get the current number of agents used by the algorithm.
@@ -299,6 +303,28 @@ namespace Algorithm {
          * \param[in] elementsToPrint the list of elements to print, filled during this method.
          */
         virtual void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const = 0;
+
+        /**
+         * \brief Read and create an agent.
+         * 
+         * The pFile can be use to read the next lines that could be used by an algorithm.
+         * 
+         * If the agent normally uses a Team, it should be created empty.
+         * The Team will be added in "linkAgentTeam" method.
+         * 
+         * \param[in] matches the match of the regex line.
+         */
+        virtual const Agent& readAgent(std::smatch& matches) = 0;
+
+        /**
+         * \brief Link an agent to a corresponding vertex
+         * 
+         * This method should be override if it is intended to be used, the basic implementation throw.
+         * 
+         * \param[in] agent the agent linked to the vertex.
+         * \param[in] vertex the vertex linked to the agent.
+         */
+        virtual void linkAgentVertex(const Agent& agent, const EvoGraph::Vertex& vertex);
 
     };
     /**

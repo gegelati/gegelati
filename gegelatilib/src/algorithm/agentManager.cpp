@@ -97,4 +97,29 @@ void Algorithm::AgentManager::clearAgents(EvoGraph::Graph& graph)
     while(this->agents.size() > 0){
         this->deleteAgent(**this->agents.begin(), graph);
     }
+
+    // Also clear sub managers;
+    for(const auto& pair : this->subManagers) {
+        pair.second.get().clearAgents(graph);
+    }
+}
+
+
+void Algorithm::AgentManager::setNewAgentID(const Agent& agent, uint64_t newID)
+{
+    // Check that the agent to modify exists in the manager
+    auto itAgent = this->getAgentFromCst(agent);
+
+    // Check that no other vertex has the same ID
+    for (const auto& vptr : this->agents) {
+        if (vptr.get() != itAgent->get() && vptr->getAgentID() == newID) {
+            throw std::runtime_error("Another agent with the same ID already "
+                                     "exists in the manager.");
+        }
+    }
+
+    // Modify the ID, but removed and add again the agent for that.
+    auto tmp = this->agents.extract(itAgent);
+    tmp.value()->setAgentID(newID);
+    this->agents.insert(std::move(tmp));
 }

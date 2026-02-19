@@ -162,9 +162,15 @@ void Algorithm::TPG::TPGAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
                 "%sP%" PRIu64 " [fillcolor=\"#A0FF33\" shape=diamond margin=0.03 "
                 "width=0 height=0 label=\"%s.%" PRIu64 "\"]\n",
                 offset.c_str(), agent.getAgentID(), this->algorithmName.c_str(), this->algorithmID);
-
-        std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(&vertex) != nullptr) ? "T" : "A";
-        fprintf(pFile, "%sP%" PRIu64 " -> %s%" PRIu64 " [style=dashed]\n",
-                offset.c_str(), agent.getAgentID(), srcLetter.c_str(), vertex.getVertexID());
     }   
+}
+
+const Algorithm::Agent& Algorithm::TPG::TPGAlgorithm::readAgent(std::smatch& matches)
+{
+    return dynamic_cast<TPGManager&>(*this->manager).createEmptyAgent();
+}
+
+void Algorithm::TPG::TPGAlgorithm::linkAgentVertex(const Agent& agent, const EvoGraph::Vertex& vertex)
+{
+    dynamic_cast<TPGManager&>(*this->manager).setVertex(agent, vertex);
 }

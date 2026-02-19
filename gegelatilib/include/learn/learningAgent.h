@@ -157,6 +157,11 @@ namespace Learn {
         /**
          * \brief Getter for the vector of algorithms
          */
+        std::vector<std::reference_wrapper<const Algorithm::Algorithm>> cGetAlgorithms() const;
+
+        /**
+         * \brief Getter for the vector of algorithms
+         */
         std::vector<std::reference_wrapper<Algorithm::Algorithm>> getAlgorithms();
 
         /**

@@ -35,8 +35,8 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef TPG_GRAPH_DOT_EXPORTER_H
-#define TPG_GRAPH_DOT_EXPORTER_H
+#ifndef GRAPH_DOT_EXPORTER_H
+#define GRAPH_DOT_EXPORTER_H
 
 #include <map>
 #include <stdexcept>
@@ -70,7 +70,7 @@ namespace File {
         std::string offset;
 
         /// @brief vector of algorithms used. This is used to print the content of the programs when they are mutated by the algorithm.
-        const std::vector<std::shared_ptr<Algorithm::Algorithm>>& algorithmsRef;
+        std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithms;
 
         /// @brief vector of algorithms used, including subAlgorithms. This is used to print the content of the programs when they are mutated by the algorithm.
         std::vector<std::reference_wrapper<const Algorithm::Algorithm>> potentialAlgorithms;
@@ -199,8 +199,8 @@ namespace File {
          * \throws std::runtime_error in case no file could be opened at the
          * given filePath.
          */
-        GraphDotExporter(const char* filePath, const EvoGraph::Graph& graph, const std::vector<std::shared_ptr<Algorithm::Algorithm>>& algorithms)
-            : EvoGraph::AbstractEngine(graph), pFile{NULL}, offset{""}, algorithmsRef{algorithms}
+        GraphDotExporter(const char* filePath, const EvoGraph::Graph& graph, std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithms)
+            : EvoGraph::AbstractEngine(graph), pFile{NULL}, offset{""}, algorithms{algorithms}
         {
             if ((pFile = fopen(filePath, "w")) == NULL) {
                 throw std::runtime_error("Could not open file " +
@@ -209,8 +209,8 @@ namespace File {
 
             // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
             std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithmsToAdd;
-            for(const std::shared_ptr<Algorithm::Algorithm>& algorithm : algorithms){
-                algorithmsToAdd.push_back(*algorithm);
+            for(const Algorithm::Algorithm& algorithm : algorithms){
+                algorithmsToAdd.push_back(algorithm);
             }
             while(!algorithmsToAdd.empty()){
                 const Algorithm::Algorithm& algorithm = algorithmsToAdd.back();
@@ -218,7 +218,7 @@ namespace File {
 
                 if(this->potentialAlgorithms.end() == std::find(this->potentialAlgorithms.begin(), this->potentialAlgorithms.end(), algorithm)){
                     this->potentialAlgorithms.push_back(algorithm);
-                    for(const Algorithm::Algorithm& subAlgorithm : algorithm.getSubAlgorithms()){
+                    for(const Algorithm::Algorithm& subAlgorithm : algorithm.cGetSubAlgorithms()){
                         algorithmsToAdd.push_back(subAlgorithm);
                     }
                 }
@@ -286,8 +286,8 @@ namespace File {
          * \brief Print a sub-tree of the Graph given when constructing the
          * GraphDotExporter into a dot file.
          *
-         * Contrary to the print() method, which prints the whole TPG, this
-         * method only prints the TPG stemming from the EvoGraph::Vertex passed as
+         * Contrary to the print() method, this
+         * method only prints the agent stemming from the EvoGraph::Vertex passed as
          * a parameter. Hence, only vertices and programs connected to this
          * Vertex will be printed in the file, and all others will be
          * ignored.

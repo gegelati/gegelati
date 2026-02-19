@@ -30,10 +30,16 @@ const Algorithm::Agent& Algorithm::TPG::TPGManager::createAgent(EvoGraph::Graph&
     return this->createAgent(graph.addNewTeam());
 }
 
-const Algorithm::Agent& Algorithm::TPG::TPGManager::createAgent(const EvoGraph::Vertex& vertex)
+const Algorithm::Agent& Algorithm::TPG::TPGManager::createAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex)
 {
     this->agents.insert(std::make_unique<TPGAgent>(vertex, this->getAlgorithmID()));
     return **this->agents.rbegin();
+}
+
+const Algorithm::Agent& Algorithm::TPG::TPGManager::createEmptyAgent()
+{
+    std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex = std::nullopt;
+    return this->createAgent(vertex);
 }
 
 const Algorithm::Agent& Algorithm::TPG::TPGManager::copyAgent(const Agent& agent, EvoGraph::Graph& graph)
@@ -82,7 +88,7 @@ void Algorithm::TPG::TPGManager::emptyAgent(const Agent& agent, EvoGraph::Graph&
     }
 }
 
-void Algorithm::TPG::TPGManager::setVertex(const Agent& agent, EvoGraph::Graph& graph, const EvoGraph::Vertex& vertex)
+void Algorithm::TPG::TPGManager::setVertex(const Agent& agent, const EvoGraph::Vertex& vertex)
 {
     const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
     if(&team == nullptr){

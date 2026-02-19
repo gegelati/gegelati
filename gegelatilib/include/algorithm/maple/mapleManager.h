@@ -48,7 +48,7 @@ namespace Algorithm::Maple {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual const Agent& createAgent(const EvoGraph::Vertex& vertex) override;
+        virtual const Agent& createAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex) override;
 
         /**
          * \brief create and return a Maple execution engine.

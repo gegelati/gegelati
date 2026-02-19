@@ -53,8 +53,8 @@
 
 #include "util/counterReset.h"
 
-#include "file/tpgGraphDotExporter.h"
-#include "file/tpgGraphDotImporter.h"
+#include "file/graphDotExporter.h"
+#include "file/graphDotImporter.h"
 
 /*
 class ImporterTest : public ::testing::Test

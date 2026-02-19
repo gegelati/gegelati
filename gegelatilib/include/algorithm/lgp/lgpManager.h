@@ -21,6 +21,12 @@ namespace Algorithm {
         {
         protected:
             
+            /**
+             * \brief string used to spot the end of a line in the agent
+             * description.
+             */
+            static const std::string lineSeparator;
+
             /// Environment for executing LGP 
             const Environment& env;
 
@@ -174,6 +180,22 @@ namespace Algorithm {
              * \brief Create a new ExecutionEngine for this Algorithm.
              */
             virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources = {}, bool isTraining = false) const override;
+
+            
+
+            /**
+             * \brief Reads the content of the operands and puts it in the line
+             * passed in parameter
+             *
+             * \param[in] str the string to parse
+             * \param[in] line the line to fill with the parsed informations
+             */
+            virtual void readOperands(std::string& str, LGPLine& line);
+
+            /**
+             * \brief Reads the content of a line
+             */
+            virtual void readLines(std::string instructionsStr, const Agent& agent);
 
         };
     } // namespace LGP

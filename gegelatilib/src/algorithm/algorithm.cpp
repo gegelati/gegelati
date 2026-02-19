@@ -106,10 +106,19 @@ Algorithm::Mutator& Algorithm::Algorithm::getMutator()
     return *this->mutator;
 }
 
-std::vector<std::reference_wrapper<const Algorithm::Algorithm>> Algorithm::Algorithm::getSubAlgorithms() const
+std::vector<std::reference_wrapper<const Algorithm::Algorithm>> Algorithm::Algorithm::cGetSubAlgorithms() const
 {
     std::vector<std::reference_wrapper<const Algorithm>> subAlgorithmsRef;
     for(const auto& subAlgorithm : this->subAlgorithms){
+        subAlgorithmsRef.push_back(*subAlgorithm);
+    }
+    return subAlgorithmsRef;
+}
+
+std::vector<std::reference_wrapper<Algorithm::Algorithm>> Algorithm::Algorithm::getSubAlgorithms()
+{
+    std::vector<std::reference_wrapper<Algorithm>> subAlgorithmsRef;
+    for(auto& subAlgorithm : this->subAlgorithms){
         subAlgorithmsRef.push_back(*subAlgorithm);
     }
     return subAlgorithmsRef;
@@ -220,6 +229,11 @@ std::shared_ptr<Algorithm::Job> Algorithm::Algorithm::createJob(const Agent& age
 void Algorithm::Algorithm::updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode)
 {
     // By default, do nothing
+}
+
+void Algorithm::Algorithm::linkAgentVertex(const Agent& agent, const EvoGraph::Vertex& vertex)
+{
+    throw std::runtime_error("Algorithm::linkAgentVertex: This method should not be called without being override by the specific algorithm.");
 }
 
 
