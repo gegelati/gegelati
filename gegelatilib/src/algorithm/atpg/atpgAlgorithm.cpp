@@ -45,9 +45,9 @@ std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Alg
     std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> usedSubAgents = TPGAlgorithm::getUsedSubAgents();
     usedSubAgents[this->actionProgramAlgorithmID] = std::set<std::reference_wrapper<const Agent>>();
 
-    for(auto vertex: this->graph->getVertices()){
-        if(vertex->hasProgram() && vertex->getProgram().getAlgorithmID() == this->actionProgramAlgorithmID){
-            usedSubAgents[this->actionProgramAlgorithmID].insert(vertex->getProgram());
+    for(const EvoGraph::Vertex& vertex: this->graph->getVertices()){
+        if(vertex.hasProgram() && vertex.getProgram().getAlgorithmID() == this->actionProgramAlgorithmID){
+            usedSubAgents[this->actionProgramAlgorithmID].insert(vertex.getProgram());
         }
     }
 

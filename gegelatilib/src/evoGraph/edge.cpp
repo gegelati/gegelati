@@ -65,22 +65,22 @@ void EvoGraph::Edge::setEdgeID(uint64_t newID)
     }
 }
 
-std::shared_ptr<const EvoGraph::Vertex> EvoGraph::Edge::getSource() const
+const EvoGraph::Vertex& EvoGraph::Edge::getSource() const
 {
     return this->source;
 }
 
-void EvoGraph::Edge::setSource(std::shared_ptr<const EvoGraph::Vertex> newSource)
+void EvoGraph::Edge::setSource(const Vertex& newSource)
 {
     this->source = newSource;
 }
 
-std::shared_ptr<const EvoGraph::Vertex> EvoGraph::Edge::getDestination() const
+const EvoGraph::Vertex& EvoGraph::Edge::getDestination() const
 {
     return this->destination;
 }
 
-void EvoGraph::Edge::setDestination(std::shared_ptr<const EvoGraph::Vertex> newDestination)
+void EvoGraph::Edge::setDestination(const Vertex& newDestination)
 {
     this->destination = newDestination;
 }
@@ -90,7 +90,15 @@ uint64_t EvoGraph::Edge::getEdgeID() const
     return edgeID;
 }
 
-bool EvoGraph::operator<(const EvoGraph::Edge& a, const EvoGraph::Edge& b)
+bool EvoGraph::operator<(const Edge& a, const Edge& b)
 {
     return a.getEdgeID() < b.getEdgeID();
+}
+bool EvoGraph::operator==(const Edge& a, const Edge& b)
+{
+    return a.getEdgeID() == b.getEdgeID();
+}
+bool EvoGraph::operator!=(const Edge& a, const Edge& b)
+{
+    return a.getEdgeID() != b.getEdgeID();
 }

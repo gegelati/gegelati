@@ -122,7 +122,7 @@ namespace Algorithm::TPG {
          * \throw std::runtime_error in case the Team has no outgoing edge.
          * This should not happen in a correctly constructed Graph.
          */
-        virtual std::shared_ptr<const EvoGraph::Edge> evaluateTeam(const EvoGraph::Team& team);
+        virtual const EvoGraph::Edge& evaluateTeam(const EvoGraph::Team& team);
 
         /**
          * \brief Execute the Graph starting from the vertex pointed by the given agent.

@@ -15,26 +15,25 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
     if(&tpgAgent == nullptr){
         throw std::runtime_error("Algorithm::ATPG::ATPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
     }
-    std::shared_ptr<const EvoGraph::Vertex> currentVertex = tpgAgent.getVertex();
-    std::shared_ptr<const EvoGraph::Edge> edge = nullptr;
+    std::reference_wrapper<const EvoGraph::Vertex> currentVertex = tpgAgent.getVertex();
 
     // Browse the TPG until vertex with an agent of the actionProgram Algorithm name is reached
-    while (!currentVertex->hasProgram() || currentVertex->getProgram().getAlgorithmID() != this->actionProgramExecutionEngine->getAlgorithmID()) {
+    while (!currentVertex.get().hasProgram() || currentVertex.get().getProgram().getAlgorithmID() != this->actionProgramExecutionEngine->getAlgorithmID()) {
 
-        auto teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(currentVertex);
-        if(teamVertex == nullptr){
+        const EvoGraph::Team& teamVertex = dynamic_cast<const EvoGraph::Team&>(currentVertex.get());
+        if(&teamVertex == nullptr){
             throw std::runtime_error("ATPGExecutionEngine:execute currentVertex to evaluate is not a team");
         }
 
         // Get the next edge
-        edge = this->evaluateTeam(*teamVertex);
+        const EvoGraph::Edge& edge = this->evaluateTeam(teamVertex);
 
-        currentVertex = edge->getDestination();
+        currentVertex = edge.getDestination();
         
     }
 
     // Set the progExecutionEngine to the program
-    this->actionProgramExecutionEngine->setExecutedAgent(currentVertex->getProgram());
+    this->actionProgramExecutionEngine->setExecutedAgent(currentVertex.get().getProgram());
 
     // The action algorithm should already cast the action in the wanted range. 
     return this->actionProgramExecutionEngine->execute();

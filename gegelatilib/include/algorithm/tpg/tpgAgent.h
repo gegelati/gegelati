@@ -19,7 +19,7 @@ namespace Algorithm::TPG {
 
             /// Element of the evolution graph that the agent represent.
             /// This element can stay a nullptr if it is not required by the agent.
-            std::shared_ptr<const EvoGraph::Vertex> vertex;
+            std::reference_wrapper<const EvoGraph::Vertex> vertex;
 
         public:
 
@@ -29,7 +29,7 @@ namespace Algorithm::TPG {
              * \param[in] vertex the Vertex that the TPGAgent will represent.
              * \param[in] algorithmID id of the algorithm used.
              */
-            TPGAgent(std::shared_ptr<const EvoGraph::Vertex> vertex, uint64_t algorithmID) : vertex{vertex}, Agent(algorithmID) {};
+            TPGAgent(const EvoGraph::Vertex& vertex, uint64_t algorithmID) : vertex{vertex}, Agent(algorithmID) {};
 
 
             /**
@@ -43,13 +43,13 @@ namespace Algorithm::TPG {
              * 
              * \param[in] newVertex the new vertex to set.
              */
-            virtual void setVertex(std::shared_ptr<const EvoGraph::Vertex> newVertex);
+            virtual void setVertex(const EvoGraph::Vertex& newVertex);
 
             
             /**
              * \brief Getter for the vertex that the agent represent
              */
-            virtual std::shared_ptr<const EvoGraph::Vertex> getVertex() const;
+            virtual const EvoGraph::Vertex& getVertex() const;
 
             /**
              * \brief Method that return if the agent's vertex is currently root.

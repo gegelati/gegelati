@@ -77,12 +77,12 @@ void Algorithm::PolicyStats::analyzeVertex(const EvoGraph::Vertex& vertex, size_
         this->getSubPolicyStats(vertex.getProgram().getAlgorithmID()).analyzePolicy(vertex.getProgram());
     }
 
-    for(auto edge : vertex.getOutgoingEdges()) {
-        if(edge->hasProgram()) {
+    for(const EvoGraph::Edge& edge : vertex.getOutgoingEdges()) {
+        if(edge.hasProgram()) {
             // Get the corresponding sub policy stats and analyze the policy of the program.
-            this->getSubPolicyStats(edge->getProgram().getAlgorithmID()).analyzePolicy(edge->getProgram());
+            this->getSubPolicyStats(edge.getProgram().getAlgorithmID()).analyzePolicy(edge.getProgram());
         }
-        this->analyzeVertex(*edge->getDestination(), depth + 1);
+        this->analyzeVertex(edge.getDestination(), depth + 1);
     }
 }
 

@@ -58,49 +58,57 @@ void EvoGraph::Vertex::resetVertexIDCounter()
     COUNT_VERTEX_ID = 0;
 }
 
-const std::list<std::shared_ptr<const EvoGraph::Edge>>& EvoGraph::Vertex::getIncomingEdges() const
+const std::list<std::reference_wrapper<const EvoGraph::Edge>>& EvoGraph::Vertex::getIncomingEdges() const
 {
     return this->incomingEdges;
 }
 
-const std::list<std::shared_ptr<const EvoGraph::Edge>>& EvoGraph::Vertex::getOutgoingEdges() const
+const std::list<std::reference_wrapper<const EvoGraph::Edge>>& EvoGraph::Vertex::getOutgoingEdges() const
 {
     return this->outgoingEdges;
 }
 
-void EvoGraph::Vertex::addIncomingEdge(std::shared_ptr<const Edge> edge)
+void EvoGraph::Vertex::addIncomingEdge(const Edge& edge)
 {
-    // Do nothing on NULL pointer
-    if (edge != NULL) {
-        // Add only if not already there
-        if (std::find(this->incomingEdges.begin(), this->incomingEdges.end(),
-                      edge) == this->incomingEdges.end()) {
-            this->incomingEdges.push_back(edge);
-        }
+    // Add only if not already there
+    if (std::find_if(this->incomingEdges.begin(), this->incomingEdges.end(),
+                        [&edge](const std::reference_wrapper<const Edge>& e) {
+                            return &e.get() == &edge;
+                        }) == this->incomingEdges.end()) {
+        this->incomingEdges.push_back(edge);
     }
 }
 
-void EvoGraph::Vertex::removeIncomingEdge(std::shared_ptr<const Edge> edge)
+void EvoGraph::Vertex::removeIncomingEdge(const Edge& edge)
 {
     // No need to do special checks on the given pointer.
     // at worse, nothing happens.
-    this->incomingEdges.remove(edge);
+    this->incomingEdges.erase(
+        std::remove_if(this->incomingEdges.begin(), this->incomingEdges.end(),
+                       [&edge](const std::reference_wrapper<const Edge>& e) {
+                           return &e.get() == &edge;
+                       }),
+        this->incomingEdges.end());
 }
 
-void EvoGraph::Vertex::addOutgoingEdge(std::shared_ptr<const Edge> edge)
+void EvoGraph::Vertex::addOutgoingEdge(const Edge& edge)
 {
-    // Do nothing on NULL pointer
-    if (edge != NULL) {
-        if (std::find(this->outgoingEdges.begin(), this->outgoingEdges.end(),
-                      edge) == this->outgoingEdges.end()) {
-            this->outgoingEdges.push_back(edge);
-        }
+    if (std::find_if(this->outgoingEdges.begin(), this->outgoingEdges.end(),
+                        [&edge](const std::reference_wrapper<const Edge>& e) {
+                            return &e.get() == &edge;
+                        }) == this->outgoingEdges.end()) {
+        this->outgoingEdges.push_back(edge);
     }
 }
 
-void EvoGraph::Vertex::removeOutgoingEdge(std::shared_ptr<const Edge> edge)
+void EvoGraph::Vertex::removeOutgoingEdge(const Edge& edge)
 {
-    this->outgoingEdges.remove(edge);
+    this->outgoingEdges.erase(
+        std::remove_if(this->outgoingEdges.begin(), this->outgoingEdges.end(),
+                       [&edge](const std::reference_wrapper<const Edge>& e) {
+                           return &e.get() == &edge;
+                       }),
+        this->outgoingEdges.end());
 }
 
 const std::set<uint64_t>& EvoGraph::Vertex::getAssessedActions() const
@@ -143,4 +151,12 @@ void EvoGraph::Vertex::setVertexID(uint64_t newID)
 bool EvoGraph::operator<(const EvoGraph::Vertex& a, const EvoGraph::Vertex& b)
 {
     return a.getVertexID() < b.getVertexID();
+}
+bool EvoGraph::operator==(const EvoGraph::Vertex& a, const EvoGraph::Vertex& b)
+{
+    return a.getVertexID() == b.getVertexID();
+}
+bool EvoGraph::operator!=(const EvoGraph::Vertex& a, const EvoGraph::Vertex& b)
+{
+    return a.getVertexID() != b.getVertexID();
 }

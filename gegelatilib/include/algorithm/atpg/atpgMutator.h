@@ -124,7 +124,7 @@ namespace Algorithm::ATPG {
          * process.
          */
         virtual void mutateEdgeDestination(EvoGraph::Graph& graph,
-                                    std::shared_ptr<const EvoGraph::Edge> edge,
+                                    const EvoGraph::Edge& edge,
                                     AgentManager& manager,
                                     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
                                     const Learn::LearningParameters& params,
@@ -148,7 +148,7 @@ namespace Algorithm::ATPG {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateOutgoingEdge(
-            EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Edge> edge,
+            EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
             AgentManager& manager,
             std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
             const Learn::LearningParameters& params, RNG::RNG& rng) override;

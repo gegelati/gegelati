@@ -44,22 +44,22 @@ std::shared_ptr<EvoGraph::Graph> EvoGraph::TPGInstrumentedFactory::createGraph()
         std::make_unique<TPGInstrumentedFactory>());
 }
 
-std::shared_ptr<EvoGraph::Team> EvoGraph::TPGInstrumentedFactory::createTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent) const
+std::unique_ptr<EvoGraph::Team> EvoGraph::TPGInstrumentedFactory::createTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent) const
 {
-    return std::make_shared<TeamInstrumented>(programAgent);
+    return std::make_unique<TeamInstrumented>(programAgent);
 }
 
-std::shared_ptr<EvoGraph::Action> EvoGraph::TPGInstrumentedFactory::createAction(
+std::unique_ptr<EvoGraph::Action> EvoGraph::TPGInstrumentedFactory::createAction(
     const uint64_t id, std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent) const
 {
-    return std::make_shared<ActionInstrumented>(id, programAgent);
+    return std::make_unique<ActionInstrumented>(id, programAgent);
 }
 
-std::shared_ptr<EvoGraph::Edge> EvoGraph::TPGInstrumentedFactory::createEdge(
-            std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
+std::unique_ptr<EvoGraph::Edge> EvoGraph::TPGInstrumentedFactory::createEdge(
+            const Vertex& src, const Vertex& dest,
             std::optional<std::reference_wrapper<const Algorithm::Agent>> prog) const
 {
-    auto ptr = std::make_shared<EvoGraph::EdgeInstrumented>(src, dest, prog);
+    auto ptr = std::make_unique<EvoGraph::EdgeInstrumented>(src, dest, prog);
     return ptr;
 }
 
@@ -68,20 +68,20 @@ void EvoGraph::TPGInstrumentedFactory::resetGraphCounters(
     const EvoGraph::Graph& graph) const
 {
     // Reset all vertices
-    for (std::shared_ptr<const EvoGraph::Vertex> vertex : graph.getVertices()) {
-        std::shared_ptr<const EvoGraph::VertexInstrumentation> vertexI =
-            std::dynamic_pointer_cast<const EvoGraph::VertexInstrumentation>(vertex);
-        if (vertexI != nullptr) {
-            vertexI->reset();
+    for (const EvoGraph::Vertex& vertex : graph.getVertices()) {
+        const EvoGraph::VertexInstrumentation& vertexI =
+            dynamic_cast<const EvoGraph::VertexInstrumentation&>(vertex);
+        if (&vertexI != nullptr) {
+            vertexI.reset();
         }
     }
 
     // Reset all edges
-    for (const auto& edge : graph.getEdges()) {
-        const EvoGraph::EdgeInstrumented* edgeI =
-            dynamic_cast<const EvoGraph::EdgeInstrumented*>(edge.get());
-        if (edgeI != nullptr) {
-            edgeI->reset();
+    for (const EvoGraph::Edge& edge : graph.getEdges()) {
+        const EvoGraph::EdgeInstrumented& edgeI =
+            dynamic_cast<const EvoGraph::EdgeInstrumented&>(edge);
+        if (&edgeI != nullptr) {
+            edgeI.reset();
         }
     }
 }
@@ -93,29 +93,29 @@ void EvoGraph::TPGInstrumentedFactory::clearUnusedGraphElements(
     // (this will remove a few edges as a side-effect)
     // Work on a copy of vertex list as the graph is modified during the for
     // loop.
-    std::vector<std::shared_ptr<const EvoGraph::Vertex>> vertices(graph.getVertices());
-    for (std::shared_ptr<const EvoGraph::Vertex> vertex : vertices) {
-        std::shared_ptr<const EvoGraph::VertexInstrumentation> vertexI =
-            std::dynamic_pointer_cast<const EvoGraph::VertexInstrumentation>(vertex);
+    std::vector<std::reference_wrapper<const EvoGraph::Vertex>> vertices(graph.getVertices());
+    for (const EvoGraph::Vertex& vertex : vertices) {
+        const EvoGraph::VertexInstrumentation& vertexI =
+            dynamic_cast<const EvoGraph::VertexInstrumentation&>(vertex);
         // If the vertex is instrumented AND was never visited
-        if (vertexI != nullptr && vertexI->getNbVisits() == 0) {
+        if (&vertexI != nullptr && vertexI.getNbVisits() == 0) {
             // remove it
-            graph.removeVertex(*vertex);
+            graph.removeVertex(vertex);
         }
     }
 
     // Remove un-traversed edges
-    std::vector<const EvoGraph::Edge*> edges;
+    std::vector<std::reference_wrapper<const EvoGraph::Edge>> edges;
     // Copy the edge list before iteration
-    for (auto& edge : graph.getEdges()) {
-        edges.push_back(edge.get());
+    for (const EvoGraph::Edge& edge : graph.getEdges()) {
+        edges.push_back(edge);
     }
     // Iterate on the edge list
-    for (auto edge : edges) {
-        const EvoGraph::EdgeInstrumented* edgeI =
-            dynamic_cast<const EvoGraph::EdgeInstrumented*>(edge);
-        if (edgeI != nullptr && edgeI->getNbTraversal() == 0) {
-            graph.removeEdge(*edge);
+    for (const EvoGraph::Edge& edge : edges) {
+        const EvoGraph::EdgeInstrumented& edgeI =
+            dynamic_cast<const EvoGraph::EdgeInstrumented&>(edge);
+        if (&edgeI != nullptr && edgeI.getNbTraversal() == 0) {
+            graph.removeEdge(edge);
         }
     }
 }

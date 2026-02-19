@@ -131,7 +131,7 @@ namespace EvoGraph {
          *
          * \return a const reference to the newly created Team.
          */
-        std::shared_ptr<const EvoGraph::Team> addNewTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt);
+        const EvoGraph::Team& addNewTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt);
 
         /**
          * \brief Create a new Action and add it to the vertices of the
@@ -146,7 +146,7 @@ namespace EvoGraph {
          * 
          * \return a const reference to the newly created Action.
          */
-        std::shared_ptr<const EvoGraph::Action> addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt);
+        const EvoGraph::Action& addNewAction(uint64_t actionID, std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt);
 
 
         /**
@@ -165,7 +165,7 @@ namespace EvoGraph {
          *
          * \return a vector containing pointers to the vertices of the graph.
          */
-        const std::vector<std::shared_ptr<const Vertex>> getVertices() const;
+        const std::vector<std::reference_wrapper<const Vertex>> getVertices() const;
 
         /**
          * \brief Get the number of rootVertices of the Graph.
@@ -185,13 +185,13 @@ namespace EvoGraph {
          * \return a vector containing pointers to the root actions of the
          * graph.
          */
-        const std::vector<std::shared_ptr<const Action>> getRootActions() const;
+        const std::vector<std::reference_wrapper<const Action>> getRootActions() const;
 
         /**
          * \brief Get vector of const pointer to the actions of the
          * Graph.
          */
-        const std::vector<std::shared_ptr<const Action>> getActions() const;
+        const std::vector<std::reference_wrapper<const Action>> getActions() const;
 
         /**
          * \brief Get vector of const pointer to the root teams of the
@@ -204,7 +204,7 @@ namespace EvoGraph {
          * \return a vector containing pointers to the root teams of the
          * graph.
          */
-        const std::vector<std::shared_ptr<const Team>> getRootTeams() const;
+        const std::vector<std::reference_wrapper<const Team>> getRootTeams() const;
 
         /**
          * \brief Get vector of const pointer to the root vertices of the
@@ -217,7 +217,7 @@ namespace EvoGraph {
          * \return a vector containing pointers to the root vertices of the
          * graph.
          */
-        const std::vector<std::shared_ptr<const Vertex>> getRootVertices() const;
+        const std::vector<std::reference_wrapper<const Vertex>> getRootVertices() const;
 
         /**
          * \brief Check whether a given vertex exists in the Graph.
@@ -265,7 +265,7 @@ namespace EvoGraph {
          * \throw std::runtime_error if the given element does not belong to the
          * Graph.
          */
-        std::shared_ptr<const EvoGraph::Element> cloneElement(const Element& element);
+        const EvoGraph::Element& cloneElement(const Element& element);
 
         /**
          * \brief Clone a Vertex of the graph and all its outgoing Edge.
@@ -275,7 +275,7 @@ namespace EvoGraph {
          * \throw std::runtime_error if the given vertex does not belong to the
          * Graph.
          */
-        std::shared_ptr<const EvoGraph::Vertex> cloneVertex(const Vertex& vertex);
+        const EvoGraph::Vertex& cloneVertex(const Vertex& vertex);
 
         /**
          * \brief Add a new Edge to the Graph.
@@ -296,7 +296,7 @@ namespace EvoGraph {
          *                           exist in the Graph, or if the
          *							destination is a Action.
          */
-        std::shared_ptr<const EvoGraph::Edge> addNewEdge(const Vertex& src, const Vertex& dest,
+        const EvoGraph::Edge& addNewEdge(const Vertex& src, const Vertex& dest,
                                   const Algorithm::Agent& programAgent);
 
 
@@ -305,7 +305,7 @@ namespace EvoGraph {
          *
          * \return a const reference to the edges attribute.
          */
-        const std::vector<std::shared_ptr<const EvoGraph::Edge>>
+        const std::vector<std::reference_wrapper<const EvoGraph::Edge>>
         getEdges() const;
 
         /**
@@ -341,7 +341,7 @@ namespace EvoGraph {
          * \throw std::runtime_error if the given Edge does not belong to
          * the Graph.
          */
-        std::shared_ptr<const EvoGraph::Edge> cloneEdge(const Edge& edge);
+        const EvoGraph::Edge& cloneEdge(const Edge& edge);
 
         /**
          * \brief Change the destination of the Edge to the given target.
@@ -391,7 +391,7 @@ namespace EvoGraph {
          *
          * \param[in] vertex Vertex to order
          */
-        void updateAssessedActions(std::shared_ptr<const Vertex> vertex);
+        void updateAssessedActions(const Vertex& vertex);
 
         /**
          * Update the assessed actions of the all graph.
@@ -409,7 +409,7 @@ namespace EvoGraph {
          *
          * \param[in] team Team to order
          */
-        void orderActionEdges(std::shared_ptr<const Team> team);
+        void orderActionEdges(const Team& team);
 
         /**
          * \brief Set a new ID to a vertex
@@ -441,12 +441,12 @@ namespace EvoGraph {
         /**
          * \brief Set of all edges currently used in the graph.
          */
-        std::set<std::shared_ptr<Edge>, SharedLess<Edge>> edges;
+        std::set<std::unique_ptr<Edge>, UniqueLess<Edge>> edges;
 
         /**
          * \brief Set of all vertices currently used in the graph.
          */
-        std::set<std::shared_ptr<Vertex>, SharedLess<Vertex>> vertices;
+        std::set<std::unique_ptr<Vertex>, UniqueLess<Vertex>> vertices;
     };
 } // namespace EvoGraph
 

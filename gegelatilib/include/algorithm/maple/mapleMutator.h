@@ -127,7 +127,7 @@ namespace Algorithm::Maple {
          * Generator used in the mutation process.
          */
         virtual void mutateEdgeDestination(EvoGraph::Graph& graph,
-                                    std::shared_ptr<const EvoGraph::Edge> edge,
+                                    const EvoGraph::Edge& edge,
                                     const std::set<size_t>& actionClasses,
                                     const Learn::LearningParameters& params,
                                     RNG::RNG& rng);
@@ -153,7 +153,7 @@ namespace Algorithm::Maple {
          * Generator used in the mutation process.
          */
         void mutateOutgoingEdge(
-            EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Edge> edge,
+            EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
             const std::set<size_t>& actionClasses, AgentManager& manager,
             std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
             const Learn::LearningParameters& params, RNG::RNG& rng);

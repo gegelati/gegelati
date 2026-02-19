@@ -141,9 +141,9 @@ std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Alg
     std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> usedSubAgents;
     usedSubAgents[this->programAlgorithmID] = std::set<std::reference_wrapper<const Agent>>();
 
-    for(auto edge: this->graph->getEdges()){
-        if(edge->getProgram().getAlgorithmID() == this->programAlgorithmID){
-            usedSubAgents[this->programAlgorithmID].insert(edge->getProgram());
+    for(const EvoGraph::Edge& edge: this->graph->getEdges()){
+        if(edge.getProgram().getAlgorithmID() == this->programAlgorithmID){
+            usedSubAgents[this->programAlgorithmID].insert(edge.getProgram());
         }
     }
     return usedSubAgents;
@@ -155,7 +155,7 @@ void Algorithm::TPG::TPGAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
         printedAgentID.insert(agent.getAgentID());
 
         // Get vertex of the TPGAgent
-        const EvoGraph::Vertex& vertex = *dynamic_cast<const TPGAgent&>(agent).getVertex();
+        const EvoGraph::Vertex& vertex = dynamic_cast<const TPGAgent&>(agent).getVertex();
         elementsToPrint.push_back(vertex);
     
         fprintf(pFile,

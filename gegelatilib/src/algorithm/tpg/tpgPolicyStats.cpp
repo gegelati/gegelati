@@ -48,7 +48,7 @@ void Algorithm::TPG::TPGPolicyStats::analyzePolicy(const Agent& agent)
         throw std::invalid_argument("PolicyStats can only analyze TPGAgent");
     }
 
-    this->analyzeVertex(*tpgAgent.getVertex(), 0);
+    this->analyzeVertex(tpgAgent.getVertex(), 0);
 }
 
 std::string Algorithm::TPG::TPGPolicyStats::specificInfos() const

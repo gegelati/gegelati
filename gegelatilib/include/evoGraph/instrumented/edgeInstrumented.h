@@ -51,7 +51,7 @@ namespace EvoGraph {
     {
       public:
         /// Default constructor
-        EdgeInstrumented(std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
+        EdgeInstrumented(const Vertex& src, const Vertex& dest,
                             std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt)
             : Edge(src, dest, agentProgram), nbVisits{0}, nbTraversal{0}
         {

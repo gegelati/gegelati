@@ -39,8 +39,8 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
 
     manager.emptyAgent(agent, graph);
     
-    std::shared_ptr<const EvoGraph::Vertex> vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
-    std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
+    const EvoGraph::Vertex& vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
+    const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
 
     // Get program mutator and manager
     Mutator& programMutator = this->getSubMutator(this->programAlgorithmID);
@@ -68,7 +68,7 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
         --remaining;
 
         // Create the action edge
-        graph.addNewEdge(*team, *actionVertices.at(actionClass), programAgent);
+        graph.addNewEdge(team, actionVertices.at(actionClass), programAgent);
     }
 
     graph.orderActionEdges(team);
@@ -90,11 +90,11 @@ void Algorithm::Maple::MapleMutator::addRandomEdge(
     // cf erase-remove idiom
     pickableEdges.erase(
         std::remove_if(pickableEdges.begin(), pickableEdges.end(),
-                       [&team](std::shared_ptr<const EvoGraph::Edge> edge) -> bool {
+                       [&team](const EvoGraph::Edge& edge) -> bool {
                             // Rewritte this condition but in a friendly way for the reader
-                            if (edge == nullptr || edge->getSource().get() == &team) {
+                            if (&edge == nullptr || edge.getSource() == team) {
                                 return true;
-                            } else if (auto action = std::dynamic_pointer_cast<const EvoGraph::Action>(edge->getDestination())) {
+                            } else if (auto action = dynamic_cast<const EvoGraph::Action*>(&edge.getDestination())) {
                                 return team.getAssessedActions().find(action->getActionID()) != team.getAssessedActions().end();
                             }
                             return false;
@@ -111,12 +111,12 @@ void Algorithm::Maple::MapleMutator::addRandomEdge(
     // initialize an entirely new program and pick a random target.)
     auto iter = pickableEdges.begin();
     std::advance(iter, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
-    std::shared_ptr<const EvoGraph::Edge> pickedEdge = *iter;
+    const EvoGraph::Edge& pickedEdge = *iter;
 
     // Create new edge from action and with the same ProgramSharedPointer
     // But with the action as its source
     // throw std::runtime_error if the edge is not from the graph;
-    graph.setEdgeSource(*graph.cloneEdge(*pickedEdge), team);
+    graph.setEdgeSource(graph.cloneEdge(pickedEdge), team);
 }
 
 void Algorithm::Maple::MapleMutator::swapEdges(EvoGraph::Graph& graph,
@@ -140,47 +140,47 @@ void Algorithm::Maple::MapleMutator::swapEdges(EvoGraph::Graph& graph,
     std::advance(it2, index2);
 
     // Extract and swap action vertices
-    auto actionVertex1 = std::dynamic_pointer_cast<const EvoGraph::Action>((*it1)->getDestination());
-    auto actionVertex2 = std::dynamic_pointer_cast<const EvoGraph::Action>((*it2)->getDestination());
+    const EvoGraph::Vertex& actionVertex1 = (*it1).get().getDestination();
+    const EvoGraph::Vertex& actionVertex2 = (*it2).get().getDestination();
 
     // Set the swapped action classes
-    graph.setEdgeDestination(*(*it1), *actionVertex2);
-    graph.setEdgeDestination(*(*it2), *actionVertex1);
+    graph.setEdgeDestination((*it1), actionVertex2);
+    graph.setEdgeDestination((*it2), actionVertex1);
 }
 
 
 void Algorithm::Maple::MapleMutator::mutateEdgeDestination(
-    EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Edge> edge,
+    EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     const std::set<size_t>& actionClasses,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    std::vector<std::shared_ptr<const EvoGraph::Action>> actionVertices(graph.getActions());
+    std::vector<std::reference_wrapper<const EvoGraph::Action>> actionVertices(graph.getActions());
     actionVertices.erase(
         std::remove_if(
             actionVertices.begin(), actionVertices.end(),
-            [&actionClasses](const auto& actionVertex) {
-                return actionClasses.find(actionVertex->getActionID()) != actionClasses.end();
+            [&actionClasses](const EvoGraph::Action& actionVertex) {
+                return actionClasses.find(actionVertex.getActionID()) != actionClasses.end();
             }
         ),
         actionVertices.end()
     );
 
     auto newAction = actionVertices[rng.getUnsignedInt64(0, actionVertices.size() - 1)];
-    graph.setEdgeDestination(*edge, *newAction);
+    graph.setEdgeDestination(edge, newAction);
 }
 
 void Algorithm::Maple::MapleMutator::mutateOutgoingEdge(
-    EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Edge> edge,
+    EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     const std::set<size_t>& actionClasses, AgentManager& manager,
     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    const Agent& originAgent = edge->getProgram();
+    const Agent& originAgent = edge.getProgram();
     // copy program
     const Algorithm::Agent& newAgent = manager.getSubManager(originAgent.getAlgorithmID()).copyAgent(originAgent, graph);
 
     // Set the mutated agent to the edge
-    graph.setEdgeProgram(*edge, newAgent);
+    graph.setEdgeProgram(edge, newAgent);
 
     // Add it to the list of new agent to be mutated.
     newSubAgents.push_back(newAgent);
@@ -197,15 +197,15 @@ void Algorithm::Maple::MapleMutator::mutateOutgoingEdge(
 void Algorithm::Maple::MapleMutator::mutateAgent(
     const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    std::shared_ptr<const EvoGraph::Vertex> vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
-    std::shared_ptr<const EvoGraph::Team> team = std::dynamic_pointer_cast<const EvoGraph::Team>(vertex);
+    const EvoGraph::Vertex& vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
+    const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
 
     // 1. Remove randomly selected edges
     // Keep at least two edges (otherwise the team is useless)
     double proba = params.mutation.tpg.pActionEdgeDeletion;
-    while (team->getOutgoingEdges().size() > 1 &&
+    while (team.getOutgoingEdges().size() > 1 &&
             proba > rng.getDouble(0.0, 1.0)) {
-        this->removeRandomEdge(graph, *team, rng);
+        this->removeRandomEdge(graph, team, rng);
 
         // Decrement the proba of removing another edge
         proba *= params.mutation.tpg.pActionEdgeDeletion;
@@ -216,11 +216,11 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
 
     // 2. Add random duplicated edge with the team as its source
     proba = params.mutation.tpg.pActionEdgeAddition;
-    while (team->getOutgoingEdges().size() <
+    while (team.getOutgoingEdges().size() <
                 manager.getOutputs().size() &&
             proba > rng.getDouble(0.0, 1.0)) {
         // Add an edge (by duplication of an existing one)
-        this->addRandomEdge(graph, *team, rng);
+        this->addRandomEdge(graph, team, rng);
 
         // Decrement the proba of adding another edge
         proba *= params.mutation.tpg.pActionEdgeAddition;
@@ -233,9 +233,9 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
     // 3. swap randomly selected edges
     // With at least two edges
     proba = params.mutation.tpg.pSwapActionProgram;
-    while (team->getOutgoingEdges().size() > 2 &&
+    while (team.getOutgoingEdges().size() > 2 &&
             proba > rng.getDouble(0.0, 1.0)) {
-        this->swapEdges(graph, *team, rng);
+        this->swapEdges(graph, team, rng);
 
         // Decrement the proba of swapping two edges
         proba *= params.mutation.tpg.pSwapActionProgram;
@@ -247,21 +247,21 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
         uint64_t index;
         // 4. mutate randomly selected program on action Edge.
         double proba = params.mutation.tpg.pMutateActionProgram;
-        while (indexUsed.size() < team->getOutgoingEdges().size() &&
+        while (indexUsed.size() < team.getOutgoingEdges().size() &&
                proba > rng.getDouble(0.0, 1.0)) {
 
             // Pick a random edge not already used
             do {
                 index = rng.getUnsignedInt64(
-                    0, team->getOutgoingEdges().size() - 1);
+                    0, team.getOutgoingEdges().size() - 1);
             } while (std::find(indexUsed.begin(), indexUsed.end(), index) !=
                      indexUsed.end());
             indexUsed.push_back(index);
 
-            auto iter = team->getOutgoingEdges().begin();
+            auto iter = team.getOutgoingEdges().begin();
             std::advance(iter, index);
 
-            this->mutateOutgoingEdge(graph, *iter, team->getAssessedActions(), manager, newSubAgents, params, rng);
+            this->mutateOutgoingEdge(graph, *iter, team.getAssessedActions(), manager, newSubAgents, params, rng);
             graph.updateAssessedActions(team);
 
             proba *= params.mutation.tpg.pMutateActionProgram;

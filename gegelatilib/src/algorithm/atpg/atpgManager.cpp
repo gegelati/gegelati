@@ -5,26 +5,26 @@
 
 void Algorithm::ATPG::ATPGManager::emptyAgent(const Agent& agent, EvoGraph::Graph& graph) 
 {
-    std::vector<std::shared_ptr<const EvoGraph::Vertex>> verticesToDelete;
+    std::vector<std::reference_wrapper<const EvoGraph::Vertex>> verticesToDelete;
     // get vertex of agent to delete;
-    auto vertex = this->getTPGAgentFromCst(agent).getVertex();
-    while(vertex->getOutgoingEdges().size() > 0){
-        auto& edge = vertex->getOutgoingEdges().front();
+    const EvoGraph::Vertex& vertex = this->getTPGAgentFromCst(agent).getVertex();
+    while(vertex.getOutgoingEdges().size() > 0){
+        const EvoGraph::Edge& edge = vertex.getOutgoingEdges().front();
 
         // Remove the program on the destination of the edge if it exist.
-        if(edge->getDestination()->hasProgram() && edge->getDestination()->getProgram().getAlgorithmID() == this->actionProgramAlgorithmID && 
-           edge->getDestination()->getIncomingEdges().size() == 1) {
+        if(edge.getDestination().hasProgram() && edge.getDestination().getProgram().getAlgorithmID() == this->actionProgramAlgorithmID && 
+           edge.getDestination().getIncomingEdges().size() == 1) {
             // Remove action vertex from the graph because it is only used by this team and it contains an action program.
-            verticesToDelete.push_back(edge->getDestination());
+            verticesToDelete.push_back(edge.getDestination());
         }
         // Remove the edge
-        graph.removeEdge(*vertex->getOutgoingEdges().front());
+        graph.removeEdge(vertex.getOutgoingEdges().front());
 
     }
 
     // Remove the action vertices from the graph
-    for(auto& vertex: verticesToDelete){
-        graph.removeVertex(*vertex);
+    for(const EvoGraph::Vertex& vertex: verticesToDelete){
+        graph.removeVertex(vertex);
     }
 }
 

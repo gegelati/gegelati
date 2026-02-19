@@ -71,7 +71,7 @@ namespace Algorithm::TPG {
          * 
          * \return a shared pointer to the created Agent.
          */
-        virtual const Agent& createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex);
+        virtual const Agent& createAgent(const EvoGraph::Vertex& vertex);
 
 
         /**
@@ -113,7 +113,7 @@ namespace Algorithm::TPG {
          * \param[in] graph the Graph associated with the Agent.
          * \param[in] vertex the vertex set to the agent.
          */
-        virtual void setVertex(const Agent& agent, EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Vertex> vertex);
+        virtual void setVertex(const Agent& agent, EvoGraph::Graph& graph, const EvoGraph::Vertex& vertex);
 
         /**
          * \brief create and return a TPG execution engine.

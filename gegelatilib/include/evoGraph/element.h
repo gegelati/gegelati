@@ -88,6 +88,11 @@ namespace EvoGraph {
 
 
       protected:
+
+        // Disable copying to avoid accidental copies (use references or pointers instead).
+        Element(const Element&) = delete;
+        Element& operator=(const Element&) = delete;
+
         /**
          * \brief Protected default constructor to forbid the instanciation of
          * object of this abstract class.

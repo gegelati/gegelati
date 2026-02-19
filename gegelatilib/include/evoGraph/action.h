@@ -78,7 +78,7 @@ namespace EvoGraph {
          * Since the Action is intented to be a leaf Vertex, no outgoing
          * Edge can be added to it.
          */
-        virtual void addOutgoingEdge(std::shared_ptr<const Edge> edge) override;
+        virtual void addOutgoingEdge(const Edge& edge) override;
 
         /**
          * \brief Get the action ID associated to the Action.

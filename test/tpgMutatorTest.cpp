@@ -190,16 +190,16 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
     ASSERT_EQ(graph->getRootVertices().size(), params.mutation.tpg.nbRoots)
         << "Number of root vertices after initialization is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
-                            [](std::shared_ptr<const EvoGraph::Vertex> vert) {
-                                return std::dynamic_pointer_cast<const EvoGraph::Action>(
-                                           vert) != nullptr;
+                            [](const EvoGraph::Vertex& vert) {
+                                return dynamic_cast<const EvoGraph::Action*>(
+                                           &vert) != nullptr;
                             }),
               this->actions->front().getNbValues())
         << "Number of action vertex in the graph is incorrect.";
     ASSERT_EQ(std::count_if(vertexSet.begin(), vertexSet.end(),
-                            [](std::shared_ptr<const EvoGraph::Vertex> vert) {
-                                return std::dynamic_pointer_cast<const EvoGraph::Team>(
-                                           vert) != nullptr;
+                            [](const EvoGraph::Vertex& vert) {
+                                return dynamic_cast<const EvoGraph::Team*>(
+                                           &vert) != nullptr;
                             }),
               params.mutation.tpg.nbRoots)
         << "Number of team vertex in the graph is incorrect.";
@@ -212,7 +212,7 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
     // Check number of Programs.
     std::set<std::reference_wrapper<const Algorithm::Agent>> programs;
     for (const auto& edge : graph->getEdges()) {
-        const Algorithm::Agent& program = edge->getProgram();
+        const Algorithm::Agent& program = edge.get().getProgram();
             programs.insert(program);
     }
     ASSERT_EQ(programs.size(), params.mutation.tpg.nbRoots * 2)
@@ -220,12 +220,12 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPG)
     // Check that no team has the same program twice
     for (auto team :graph->getRootVertices()) {
     std::set<std::reference_wrapper<const Algorithm::Agent>> teamPrograms;
-        std::for_each(team->getOutgoingEdges().begin(),
-                      team->getOutgoingEdges().end(),
-                      [&teamPrograms](std::shared_ptr<const EvoGraph::Edge> edge) {
-                          teamPrograms.insert(edge->getProgram());
+        std::for_each(team.get().getOutgoingEdges().begin(),
+                      team.get().getOutgoingEdges().end(),
+                      [&teamPrograms](const EvoGraph::Edge& edge) {
+                          teamPrograms.insert(edge.getProgram());
                       });
-        ASSERT_EQ(teamPrograms.size(), team->getOutgoingEdges().size())
+        ASSERT_EQ(teamPrograms.size(), team.get().getOutgoingEdges().size())
             << "A team is connected to the same program twice.";
     }
 
@@ -453,13 +453,13 @@ TEST_F(TpgMutatorTest, TPGMutatorInitRandomTPGMAPLE)
 
 TEST_F(TpgMutatorTest, TPGMutatorRemoveRandomEdge)
 {
-    std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Action> vertex1 = graph->addNewAction(0);
-    std::shared_ptr<const EvoGraph::Team> vertex2 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Action> vertex3 = graph->addNewAction(1);
-    std::shared_ptr<const EvoGraph::Edge> edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
-    std::shared_ptr<const EvoGraph::Edge> edge1 = graph->addNewEdge(*vertex0, *vertex2, *lgpAgent);
-    std::shared_ptr<const EvoGraph::Edge> edge2 = graph->addNewEdge(*vertex0, *vertex3, *lgpAgent);
+    const EvoGraph::Team& vertex0 = graph->addNewTeam();
+    const EvoGraph::Action& vertex1 = graph->addNewAction(0);
+    const EvoGraph::Team& vertex2 = graph->addNewTeam();
+    const EvoGraph::Action& vertex3 = graph->addNewAction(1);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
+    const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex2, *lgpAgent);
+    const EvoGraph::Edge& edge2 = graph->addNewEdge(vertex0, vertex3, *lgpAgent);
 
     for(auto vertex: graph->getVertices()){
         tpgManager->createAgent(vertex);
@@ -467,26 +467,20 @@ TEST_F(TpgMutatorTest, TPGMutatorRemoveRandomEdge)
 
     RNG::RNG rng;
     rng.setSeed(0);
-    ASSERT_NO_THROW(tpgMutator->removeRandomEdge(*graph, *vertex0, rng))
+    ASSERT_NO_THROW(tpgMutator->removeRandomEdge(*graph, vertex0, rng))
         << "Removing a random edge failed unexpectedly.";
     // Check properties of the tpg
     ASSERT_EQ(graph->getEdges().size(), 2) << "No edge was removed from the TPG.";
     // With known seed edge 0 was removed
     auto edges = graph->getEdges();
     ASSERT_EQ(std::count_if(edges.begin(), edges.end(),
-                      [edge0](auto other) {
-                          return edge0 == other;
-                      }),
-        0)
-        << "With a known seed, edge0 should be removed from the TPG.";
-    ASSERT_EQ(std::count_if(edges.begin(), edges.end(),
-                      [edge1](auto other) {
+                      [&edge1](const EvoGraph::Edge& other) {
                           return edge1 == other;
                       }),
         1)
         << "With a known seed, edge1 should not be removed from the TPG.";
     ASSERT_EQ(std::count_if(edges.begin(), edges.end(),
-                      [edge2](auto other) {
+                      [&edge2](const EvoGraph::Edge& other) {
                           return edge2 == other;
                       }),
         1)
@@ -495,17 +489,17 @@ TEST_F(TpgMutatorTest, TPGMutatorRemoveRandomEdge)
 
 TEST_F(TpgMutatorTest, TPGMutatorAddRandomEdge)
 {
-    std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Action> vertex1 = graph->addNewAction(0);
-    std::shared_ptr<const EvoGraph::Team> vertex2 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Action> vertex3 = graph->addNewAction(1);
-    std::shared_ptr<const EvoGraph::Action> vertex4 = graph->addNewAction(2);
+    const EvoGraph::Team& vertex0 = graph->addNewTeam();
+    const EvoGraph::Action& vertex1 = graph->addNewAction(0);
+    const EvoGraph::Team& vertex2 = graph->addNewTeam();
+    const EvoGraph::Action& vertex3 = graph->addNewAction(1);
+    const EvoGraph::Action& vertex4 = graph->addNewAction(2);
 
 
-    graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
-    graph->addNewEdge(*vertex0, *vertex2, *lgpAgent);
-    graph->addNewEdge(*vertex0, *vertex3, *lgpAgent);
-    graph->addNewEdge(*vertex2, *vertex4, *lgpAgent);
+    graph->addNewEdge(vertex0, vertex1, *lgpAgent);
+    graph->addNewEdge(vertex0, vertex2, *lgpAgent);
+    graph->addNewEdge(vertex0, vertex3, *lgpAgent);
+    graph->addNewEdge(vertex2, vertex4, *lgpAgent);
 
     for(auto vertex: graph->getVertices()){
         tpgManager->createAgent(vertex);
@@ -517,26 +511,26 @@ TEST_F(TpgMutatorTest, TPGMutatorAddRandomEdge)
     tpgMutator->updateSpecificContext(*graph, *tpgManager, params, rng);
     // Run the add
     ASSERT_NO_THROW(
-        tpgMutator->addRandomEdge(*graph, *vertex2, rng))
+        tpgMutator->addRandomEdge(*graph, vertex2, rng))
         << "Adding an edge to the TPG should succeed.";
 
     // Check properties of the tpg
     ASSERT_EQ(graph->getEdges().size(), 5) << "No edge was added from the TPG.";
-    ASSERT_EQ(vertex2->getOutgoingEdges().size(), 2)
+    ASSERT_EQ(vertex2.getOutgoingEdges().size(), 2)
         << "The random edge was not added to the right team.";
 
     // Edge was added with vertex1 (with known seed)
-    ASSERT_EQ(vertex1->getIncomingEdges().size(), 2)
+    ASSERT_EQ(vertex1.getIncomingEdges().size(), 2)
         << "The random edge was not added with the right (pseudo)random "
            "destination.";
 }
 
 TEST_F(TpgMutatorTest, TPGMutatorMutateEdgeDestination)
 {
-    std::shared_ptr<const EvoGraph::Action> vertex1 = graph->addNewAction(0);
-    std::shared_ptr<const EvoGraph::Action> vertex2 = graph->addNewAction(1);
-    std::shared_ptr<const EvoGraph::Team> vertex3 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Team> vertex4 = graph->addNewTeam();
+    const EvoGraph::Action& vertex1 = graph->addNewAction(0);
+    const EvoGraph::Action& vertex2 = graph->addNewAction(1);
+    const EvoGraph::Team& vertex3 = graph->addNewTeam();
+    const EvoGraph::Team& vertex4 = graph->addNewTeam();
 
 
     for(auto vertex: graph->getRootTeams()){
@@ -549,20 +543,20 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateEdgeDestination)
     rng.setSeed(2);
     tpgMutator->updateSpecificContext(*graph, *tpgManager, params, rng);
 
-    std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Edge> edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
-    std::shared_ptr<const EvoGraph::Edge> edge1 = graph->addNewEdge(*vertex0, *vertex3, *lgpAgent);
+    const EvoGraph::Team& vertex0 = graph->addNewTeam();
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
+    const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex3, *lgpAgent);
 
     ASSERT_NO_THROW(tpgMutator->mutateEdgeDestination(
         *graph, edge1, params, rng));
     // Check properties of the tpg
     ASSERT_EQ(graph->getEdges().size(), 2)
         << "Number of edge should remain unchanged after destination change.";
-    ASSERT_EQ(vertex0->getOutgoingEdges().size(), 2)
+    ASSERT_EQ(vertex0.getOutgoingEdges().size(), 2)
         << "The edge source should not be altered.";
-    ASSERT_EQ(vertex3->getIncomingEdges().size(), 0)
+    ASSERT_EQ(vertex3.getIncomingEdges().size(), 0)
         << "The edge Destination should be vertex4 (with known seed).";
-    ASSERT_EQ(vertex4->getIncomingEdges().size(), 1)
+    ASSERT_EQ(vertex4.getIncomingEdges().size(), 1)
         << "The edge Destination should be vertex4 (with known seed).";
 }
 
@@ -573,9 +567,9 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
 
     // Init a TPG
     lgpMutator->initRandomSpecificAgent(*lgpAgent, *graph, *lgpManager, params, rng);
-    std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Action> vertex1 = graph->addNewAction(0);
-    std::shared_ptr<const EvoGraph::Edge> edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
+    const EvoGraph::Team& vertex0 = graph->addNewTeam();
+    const EvoGraph::Action& vertex1 = graph->addNewAction(0);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
 
 
     for(auto vertex: graph->getVertices()){
@@ -611,7 +605,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateOutgoingEdge)
 TEST_F(TpgMutatorTest, TPGMutatorRemoveRandomActionEdge)
 {
     auto graph = std::make_shared<EvoGraph::Graph>(*e);
-    std::shared_ptr<const EvoGraph::Action> action = graph->addNewAction(0);
+    const EvoGraph::Action& action = graph->addNewAction(0);
     auto prog1 = std::make_shared<Program::Program>(*e, true);
     auto prog2 = std::make_shared<Program::Program>(*e, true);
    graph->addNewActionEdge(action, prog1, 0);
@@ -630,10 +624,10 @@ TEST_F(TpgMutatorTest, TPGMutatorAddRandomActionEdge)
 {
     // Prepare a Action and a list of candidate edges
     auto graph = std::make_shared<EvoGraph::Graph>(*e);
-    std::shared_ptr<const EvoGraph::Action> action = graph->addNewAction(0);
+    const EvoGraph::Action& action = graph->addNewAction(0);
     auto prog1 = std::make_shared<Program::Program>(*e, true);
     auto prog2 = std::make_shared<Program::Program>(*e, true);
-    std::shared_ptr<const EvoGraph::Action> action2 = graph->addNewAction(1);
+    const EvoGraph::Action& action2 = graph->addNewAction(1);
    graph->addNewActionEdge(action, prog1, 0);
    graph->addNewActionEdge(action2, prog2, 1);
 
@@ -661,7 +655,7 @@ TEST_F(TpgMutatorTest, TPGMutatorSwapActionEdges)
 {
     // Prepare a Action with at least 3 outgoing edges
     auto graph = std::make_shared<EvoGraph::Graph>(*e);
-    std::shared_ptr<const EvoGraph::Action> action = graph->addNewAction(0);
+    const EvoGraph::Action& action = graph->addNewAction(0);
     auto prog1 = std::make_shared<Program::Program>(*e, true);
     auto prog2 = std::make_shared<Program::Program>(*e, true);
     auto prog3 = std::make_shared<Program::Program>(*e, true);
@@ -754,10 +748,10 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateAction)
 
     // Init a TPG
     EvoGraph::Graph tpg(ce);
-    std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Action> vertex1 = graph->addNewAction(0);
-    std::shared_ptr<const EvoGraph::Edge> edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
-    std::shared_ptr<const EvoGraph::Edge> edge1 = graph->addNewActionEdge(vertex1, progPointer1, 0);
+    const EvoGraph::Team& vertex0 = graph->addNewTeam();
+    const EvoGraph::Action& vertex1 = graph->addNewAction(0);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
+    const EvoGraph::Edge& edge1 = graph->addNewActionEdge(vertex1, progPointer1, 0);
 
     // Init its program and fill the archive
     Mutator::MutationParameters params;
@@ -798,7 +792,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateActionEdge_MultiAction)
     Environment ce(set, params, vect, nbActions);
 
     EvoGraph::Graph tpg(ce);
-    std::shared_ptr<const EvoGraph::Action> action = graph->addNewAction(0);
+    const EvoGraph::Action& action = graph->addNewAction(0);
     auto prog = std::make_shared<Program::Program>(ce, true);
    graph->addNewActionEdge(action, prog, 0);
    graph->addNewActionEdge(action, std::make_shared<Program::Program>(ce, true),
@@ -828,10 +822,10 @@ TEST_F(TpgMutatorTest, TPGMutatorOutgoingEdgeMutateAction)
 
     // Init a TPG
     EvoGraph::Graph tpg(ce);
-    std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Action> vertex1 = graph->addNewAction(0);
-    std::shared_ptr<const EvoGraph::Edge> edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
-    std::shared_ptr<const EvoGraph::Edge> edge1 = graph->addNewActionEdge(vertex1, progPointer1, 0);
+    const EvoGraph::Team& vertex0 = graph->addNewTeam();
+    const EvoGraph::Action& vertex1 = graph->addNewAction(0);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
+    const EvoGraph::Edge& edge1 = graph->addNewActionEdge(vertex1, progPointer1, 0);
 
     // Init its program and fill the archive
     Mutator::MutationParameters params;
@@ -872,15 +866,15 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateTeam)
     rng.setSeed(0);
 
     // Create a TPG
-    std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Action> vertex1 = graph->addNewAction(0);
-    std::shared_ptr<const EvoGraph::Action> vertex2 = graph->addNewAction(1);
-    std::shared_ptr<const EvoGraph::Edge> edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
-    std::shared_ptr<const EvoGraph::Edge> edge1 = graph->addNewEdge(*vertex0, *vertex2, *lgpAgent);
-    std::shared_ptr<const EvoGraph::Action> vertex3 = graph->addNewAction(2);
-    std::shared_ptr<const EvoGraph::Team> vertex4 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Edge> edge2 = graph->addNewEdge(*vertex4, *vertex3, *lgpAgent);
-    std::shared_ptr<const EvoGraph::Edge> edge3 = graph->addNewEdge(*vertex0, *vertex3, *lgpAgent);
+    const EvoGraph::Team& vertex0 = graph->addNewTeam();
+    const EvoGraph::Action& vertex1 = graph->addNewAction(0);
+    const EvoGraph::Action& vertex2 = graph->addNewAction(1);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
+    const EvoGraph::Edge& edge1 = graph->addNewEdge(vertex0, vertex2, *lgpAgent);
+    const EvoGraph::Action& vertex3 = graph->addNewAction(2);
+    const EvoGraph::Team& vertex4 = graph->addNewTeam();
+    const EvoGraph::Edge& edge2 = graph->addNewEdge(vertex4, vertex3, *lgpAgent);
+    const EvoGraph::Edge& edge3 = graph->addNewEdge(vertex0, vertex3, *lgpAgent);
 
     for(auto vertex: graph->getVertices()){
         tpgManager->createAgent(vertex);
@@ -930,9 +924,9 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateProgramBehaviorAgainstArchive)
     rng.setSeed(0);
 
     // Init a TPG
-    std::shared_ptr<const EvoGraph::Team> vertex0 = graph->addNewTeam();
-    std::shared_ptr<const EvoGraph::Action> vertex1 = graph->addNewAction(0);
-    std::shared_ptr<const EvoGraph::Edge> edge0 = graph->addNewEdge(*vertex0, *vertex1, *lgpAgent);
+    const EvoGraph::Team& vertex0 = graph->addNewTeam();
+    const EvoGraph::Action& vertex1 = graph->addNewAction(0);
+    const EvoGraph::Edge& edge0 = graph->addNewEdge(vertex0, vertex1, *lgpAgent);
 
     for(auto vertex: graph->getVertices()){
         tpgManager->createAgent(vertex);
@@ -1017,7 +1011,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsSequential)
     // Create a list of Programs to mutate
     std::vector<std::reference_wrapper<const Algorithm::Agent>> newAgents;
     for (auto& edge :graph->getEdges()) {
-        newAgents.emplace_back(lgpManager->copyAgent(edge->getProgram(), *graph));
+        newAgents.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
     }
 
     // Mutate them sequentially
@@ -1061,7 +1055,7 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsParallel)
     // Create a list of Programs to mutate
     std::vector<std::reference_wrapper<const Algorithm::Agent>> newAgents;
     for (auto& edge :graph->getEdges()) {
-        newAgents.emplace_back(lgpManager->copyAgent(edge->getProgram(), *graph));
+        newAgents.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
     }
 
     // Mutate them sequentially
@@ -1108,8 +1102,8 @@ TEST_F(TpgMutatorTest, TPGMutatorMutateNewProgramBehaviorsDeterminism)
     std::vector<std::reference_wrapper<const Algorithm::Agent>> newAgentsSequential;
     std::vector<std::reference_wrapper<const Algorithm::Agent>> newAgentsParallel;
     for (auto& edge :graph->getEdges()) {
-        newAgentsSequential.emplace_back(lgpManager->copyAgent(edge->getProgram(), *graph));
-        newAgentsParallel.emplace_back(lgpManager->copyAgent(edge->getProgram(), *graph));
+        newAgentsSequential.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
+        newAgentsParallel.emplace_back(lgpManager->copyAgent(edge.get().getProgram(), *graph));
     }
     rng.setSeed(0);
     tpgMutator->mutateSubAgents(

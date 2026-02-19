@@ -44,21 +44,21 @@
 void EvoGraph::Team::orderActionEdges()
 {
     // Take all the edges of the team, put the edges pointing towards team first, in the same order, then edges pointing towards action vertex, in order of actionID.
-    this->outgoingEdges.sort([](std::shared_ptr<const EvoGraph::Edge> edge1, std::shared_ptr<const EvoGraph::Edge> edge2) {
-        auto dest1 = edge1->getDestination();
-        auto dest2 = edge2->getDestination();
+    this->outgoingEdges.sort([](std::reference_wrapper<const EvoGraph::Edge> edge1, std::reference_wrapper<const EvoGraph::Edge> edge2) {
+        const EvoGraph::Vertex& dest1 = edge1.get().getDestination();
+        const EvoGraph::Vertex& dest2 = edge2.get().getDestination();
 
-        if(std::dynamic_pointer_cast<const EvoGraph::Team>(dest1) != nullptr &&
-           std::dynamic_pointer_cast<const EvoGraph::Action>(dest2) != nullptr) {
+        if(dynamic_cast<const EvoGraph::Team*>(&dest1) != nullptr &&
+           dynamic_cast<const EvoGraph::Action*>(&dest2) != nullptr) {
             return true;
         }
-        else if(std::dynamic_pointer_cast<const EvoGraph::Action>(dest1) != nullptr &&
-                std::dynamic_pointer_cast<const EvoGraph::Team>(dest2) != nullptr) {
+        else if(dynamic_cast<const EvoGraph::Action*>(&dest1) != nullptr &&
+                dynamic_cast<const EvoGraph::Team*>(&dest2) != nullptr) {
             return false;
         }
-        else if(auto action1 = std::dynamic_pointer_cast<const EvoGraph::Action>(dest1)){
+        else if(auto action1 = dynamic_cast<const EvoGraph::Action*>(&dest1)){
 
-            if(auto action2 = std::dynamic_pointer_cast<const EvoGraph::Action>(dest2)){
+            if(auto action2 = dynamic_cast<const EvoGraph::Action*>(&dest2)){
                 return action1->getActionID() < action2->getActionID();
             }
         }
@@ -70,10 +70,10 @@ void EvoGraph::Team::orderActionEdges()
 void EvoGraph::Team::updateAssessedActions()
 {
     assessedActions.clear();
-    for (std::shared_ptr<const Edge> edge : this->outgoingEdges) {
+    for (const Edge& edge : this->outgoingEdges) {
         // Otherwise, insert all assessed actions from the destination
         const auto& destinationActions =
-            edge->getDestination()->getAssessedActions();
+            edge.getDestination().getAssessedActions();
         assessedActions.insert(destinationActions.begin(),
                                 destinationActions.end());
     }

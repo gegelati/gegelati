@@ -92,7 +92,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
             for (auto edge : team->getOutgoingEdges()) {
                 // Check if the destination is in the path
                 if (std::find(currentPath.begin(), currentPath.end(),
-                              edge->getDestination().get()) != currentPath.end()) {
+                              &edge.get().getDestination()) != currentPath.end()) {
                     // A cycle was detected !
                     *this << "A cycle was detected in the TPG.";
 
@@ -101,7 +101,7 @@ void Log::CycleDetectionLALogger::logAfterPopulateTPG()
                 }
 
                 // Put the destination on the lifo
-                lifoToVisit.push_back(edge->getDestination().get());
+                lifoToVisit.push_back(&edge.get().getDestination());
             }
         }
     }

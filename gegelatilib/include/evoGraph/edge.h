@@ -66,7 +66,7 @@ namespace EvoGraph {
          * \param[in] agentProgram the weak pointer to the Agent Program associated to the
          *            edge.
          */
-        Edge(std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
+        Edge(const Vertex& src, const Vertex& dest,
                 std::optional<std::reference_wrapper<const Algorithm::Agent>> agentProgram = std::nullopt)
             : Element(agentProgram), edgeID(incrementeCounter()), source{src}, destination{dest} {};
 
@@ -75,21 +75,21 @@ namespace EvoGraph {
          *
          * \return a const pointer to the source Vertex.
          */
-        std::shared_ptr<const Vertex> getSource() const;
+        const Vertex& getSource() const;
 
         /**
          * \brief Set a new source Vertex to the Edge.
          *
          * \param[in] newSource the new Vertex  to register as the source.
          */
-        void setSource(std::shared_ptr<const Vertex> newSource);
+        void setSource(const Vertex& newSource);
 
         /**
          * \brief Get the destination Vertex of the Edge.
          *
          * \return a const pointer to the destination Vertex.
          */
-        virtual std::shared_ptr<const Vertex> getDestination() const;
+        virtual const Vertex& getDestination() const;
 
         /**
          * \brief Set a new destination Vertex to the Edge.
@@ -97,7 +97,7 @@ namespace EvoGraph {
          * \param[in] newDestination the new Vertex to register as the
          * destination.
          */
-        virtual void setDestination(std::shared_ptr<const Vertex> newDestination);
+        virtual void setDestination(const Vertex& newDestination);
 
         /**
          * \brief Get the unique identifier of the Edge.
@@ -125,10 +125,10 @@ namespace EvoGraph {
 
       protected:
         /// Pointer to the source Vertex of this Edge
-        std::shared_ptr<const Vertex> source;
+        std::reference_wrapper<const Vertex> source;
 
         /// Pointer to the destination Vertex of this Edge
-        std::shared_ptr<const Vertex> destination;
+        std::reference_wrapper<const Vertex> destination;
 
         /**
          * \brief Unique identifier of the Edge.
@@ -158,6 +158,16 @@ namespace EvoGraph {
      * STL.
      */
     bool operator<(const Edge& a, const Edge& b);
+    /**
+     * \brief Comparison function to enable sorting of Vertex with
+     * STL.
+     */
+    bool operator==(const Edge& a, const Edge& b);
+    /**
+     * \brief Comparison function to enable sorting of Vertex with
+     * STL.
+     */
+    bool operator!=(const Edge& a, const Edge& b);
 
 }; // namespace EvoGraph
 

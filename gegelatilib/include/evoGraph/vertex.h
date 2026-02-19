@@ -57,12 +57,12 @@ namespace EvoGraph {
         /**
          * \brief Get a const reference to incoming edges of this Vertex.
          */
-        const std::list<std::shared_ptr<const Edge>>& getIncomingEdges() const;
+        const std::list<std::reference_wrapper<const Edge>>& getIncomingEdges() const;
 
         /**
          * \brief Get a const reference to outgoing edges of this Vertex.
          */
-        const std::list<std::shared_ptr<const Edge>>& getOutgoingEdges() const;
+        const std::list<std::reference_wrapper<const Edge>>& getOutgoingEdges() const;
 
         /**
          * \brief Method to add an incoming Edge to the Vertex.
@@ -75,7 +75,7 @@ namespace EvoGraph {
          * \param[in] edge the Edge pointer to be added to the incomingEdges
          *                 Set.
          */
-        virtual void addIncomingEdge(std::shared_ptr<const Edge> edge);
+        virtual void addIncomingEdge(const Edge& edge);
 
         /**
          * \brief Removes the given incoming edge from the Vertex.
@@ -86,7 +86,7 @@ namespace EvoGraph {
          *
          * \param[in] edge the Edge to remove.
          */
-        virtual void removeIncomingEdge(std::shared_ptr<const Edge> edge);
+        virtual void removeIncomingEdge(const Edge& edge);
 
         /**
          * \brief Method to add an outgoing Edge to the Vertex.
@@ -99,7 +99,7 @@ namespace EvoGraph {
          * \param[in] edge the Edge pointer to be added to the outgoingEdges
          *                 Set.
          */
-        virtual void addOutgoingEdge(std::shared_ptr<const Edge> edge);
+        virtual void addOutgoingEdge(const Edge& edge);
 
         /**
          * \brief Removes the given outgoing edge from the Vertex.
@@ -110,7 +110,7 @@ namespace EvoGraph {
          *
          * \param[in] edge the Edge to remove.
          */
-        virtual void removeOutgoingEdge(std::shared_ptr<const Edge> edge);
+        virtual void removeOutgoingEdge(const Edge& edge);
 
         /**
          * \brief return assessed actions
@@ -166,12 +166,12 @@ namespace EvoGraph {
         /**
          * \brief Set of incoming Edge of the Vertex.
          */
-        std::list<std::shared_ptr<const EvoGraph::Edge>> incomingEdges;
+        std::list<std::reference_wrapper<const EvoGraph::Edge>> incomingEdges;
 
         /**
          * \brief Set of outgoing Edge of the Vertex.
          */
-        std::list<std::shared_ptr<const EvoGraph::Edge>> outgoingEdges;
+        std::list<std::reference_wrapper<const EvoGraph::Edge>> outgoingEdges;
 
         /**
          * \brief Set of assessed actions by the team
@@ -203,6 +203,16 @@ namespace EvoGraph {
      * STL.
      */
     bool operator<(const Vertex& a, const Vertex& b);
+    /**
+     * \brief Comparison function to enable sorting of Vertex with
+     * STL.
+     */
+    bool operator==(const Vertex& a, const Vertex& b);
+    /**
+     * \brief Comparison function to enable sorting of Vertex with
+     * STL.
+     */
+    bool operator!=(const Vertex& a, const Vertex& b);
 
 }; // namespace EvoGraph
 

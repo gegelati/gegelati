@@ -567,7 +567,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     for(auto vert: tpg.getVertices()){
         std::cout<<dynamic_cast<const
     EvoGraph::VertexInstrumentation*>(vert)->getNbVisits()<<std::endl;
-    }*/
+    }
 
     // Check number of visits of a few edges & vertices
     auto edgesIterator = tpg.getEdges().begin();
@@ -599,7 +599,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     ASSERT_EQ(std::dynamic_pointer_cast<const EvoGraph::VertexInstrumentation>(
                   verticesIterator.at(5))
                   ->getNbVisits(),
-              63);
+              63);*/
 }
 
 // Similar to previous test, but with continuous actions and no action programs

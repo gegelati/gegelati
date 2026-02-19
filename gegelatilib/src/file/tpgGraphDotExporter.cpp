@@ -107,7 +107,7 @@ void File::GraphDotExporter::printVertex(const EvoGraph::Vertex& vertex)
 
         // Print outgoing edges
         for(auto edge : vertex.getOutgoingEdges()){
-            this->printEdge(*edge);
+            this->printEdge(edge);
         }
     }
 
@@ -143,13 +143,13 @@ void File::GraphDotExporter::printEdge(const EvoGraph::Edge& edge)
 
 
         // Print destination
-        this->printVertex(*edge.getDestination());
+        this->printVertex(edge.getDestination());
 
 
-        uint64_t srcID = edge.getSource()->getVertexID();
-        uint64_t destID = edge.getDestination()->getVertexID();
-        std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(edge.getSource().get()) != nullptr) ? "T" : "A";
-        std::string destLetter = (dynamic_cast<const EvoGraph::Team*>(edge.getDestination().get()) != nullptr) ? "T" : "A";
+        uint64_t srcID = edge.getSource().getVertexID();
+        uint64_t destID = edge.getDestination().getVertexID();
+        std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(&edge.getSource()) != nullptr) ? "T" : "A";
+        std::string destLetter = (dynamic_cast<const EvoGraph::Team*>(&edge.getDestination()) != nullptr) ? "T" : "A";
 
         if(edge.hasProgram()){
             // Print the potential agent program associated to the edge
@@ -194,8 +194,8 @@ void File::GraphDotExporter::printGraphFooter()
     // Print root actions (and keep the ids)
     auto rootActions = tpg.getRootActions();
     std::vector<uint64_t> rootActionIDs;
-    for (const auto rootVertex : rootActions) {
-        this->printVertex(*rootVertex);
+    for (const EvoGraph::Action& rootVertex : rootActions) {
+        this->printVertex(rootVertex);
     }
 
     // Rank all the agents of main algoritms

@@ -15,7 +15,7 @@ const std::vector<std::reference_wrapper<const Algorithm::Agent>> Algorithm::Map
 
 
 
-const Algorithm::Agent& Algorithm::Maple::MapleManager::createAgent(std::shared_ptr<const EvoGraph::Vertex> vertex)
+const Algorithm::Agent& Algorithm::Maple::MapleManager::createAgent(const EvoGraph::Vertex&vertex)
 {
     this->agents.insert(std::make_unique<MapleAgent>(vertex, this->getAlgorithmID()));
     return **this->agents.rbegin();

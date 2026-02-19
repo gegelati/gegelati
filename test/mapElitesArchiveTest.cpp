@@ -4,6 +4,7 @@
 #include "algorithm/lgp/environment.h"
 #include <gtest/gtest.h>
 
+/*
 class MapElitesArchiveTest : public ::testing::Test
 {
   protected:
@@ -57,7 +58,6 @@ class MapElitesArchiveTest : public ::testing::Test
         delete archive;
     }
 };
-/*
 
 TEST_F(MapElitesArchiveTest, SizeAndDimensions)
 {

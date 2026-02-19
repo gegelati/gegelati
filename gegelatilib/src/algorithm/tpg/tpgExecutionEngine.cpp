@@ -59,22 +59,22 @@ void Algorithm::TPG::TPGExecutionEngine::setContinuousActionValues()
     }
 }
 
-std::shared_ptr<const EvoGraph::Edge> Algorithm::TPG::TPGExecutionEngine::evaluateTeam(const EvoGraph::Team& team)
+const EvoGraph::Edge& Algorithm::TPG::TPGExecutionEngine::evaluateTeam(const EvoGraph::Team& team)
 {
     // Copy outgoing edge list
     const auto& outgoingEdges = team.getOutgoingEdges();
 
     // Evaluate all Edge
     // First
-    std::shared_ptr<const EvoGraph::Edge> bestEdge = *outgoingEdges.begin();
-    double bestBid = this->evaluateEdge(*bestEdge);
+    std::reference_wrapper<const EvoGraph::Edge> bestEdge = *outgoingEdges.begin();
+    double bestBid = this->evaluateEdge(bestEdge);
     this->setContinuousActionValues();
 
     // Others
     for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
          iter++) {
-        std::shared_ptr<const EvoGraph::Edge> edge = *iter;
-        double bid = this->evaluateEdge(*edge);
+        const EvoGraph::Edge& edge = *iter;
+        double bid = this->evaluateEdge(edge);
         if (bid >= bestBid) {
             bestEdge = edge;
             bestBid = bid;
@@ -94,25 +94,19 @@ std::vector<double> Algorithm::TPG::TPGExecutionEngine::execute()
     if(&tpgAgent == nullptr){
         throw std::runtime_error("Algorithm::TPG::TPGExecutionEngine::execute trying to execute an agent which is not a TPG agent");
     }
-    std::shared_ptr<const EvoGraph::Vertex> currentVertex = tpgAgent.getVertex();
-    std::shared_ptr<const EvoGraph::Edge> edge = nullptr;
+    std::reference_wrapper<const EvoGraph::Vertex> currentVertex = tpgAgent.getVertex();
 
-    std::vector<std::shared_ptr<const EvoGraph::Vertex>> visitedVertices;
-    visitedVertices.push_back(currentVertex);
     // Browse the TPG until a Action is reached.
-    while (auto teamVertex = std::dynamic_pointer_cast<const EvoGraph::Team>(currentVertex)) {
+    while (auto teamVertex = dynamic_cast<const EvoGraph::Team*>(&currentVertex.get())) {
         // Get the next edge
-        edge = this->evaluateTeam(*teamVertex);
+        const EvoGraph::Edge& edge = this->evaluateTeam(*teamVertex);
 
         // update currentVertex and backup in visitedVertex.
-        if (edge->getDestination() != nullptr) {
-            currentVertex = edge->getDestination();
-        }
-        visitedVertices.push_back(currentVertex);
+        currentVertex = edge.getDestination();
     }
 
     if(this->outputs.sizeContinuous() == 0){
-        return {(double)std::dynamic_pointer_cast<const EvoGraph::Action>(currentVertex)->getActionID()};
+        return {(double)dynamic_cast<const EvoGraph::Action*>(&currentVertex.get())->getActionID()};
     } else {
         /// TODO SET ACTIVATION FUNCTION
         return Utils::ActivationFunctions::scaleOutputValues(actionValues, this->outputs, Utils::ActivationFunction::TANH);

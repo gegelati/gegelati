@@ -35,21 +35,21 @@ const Selector::SelectionContext& Algorithm::Mutator::getContext()
     return *this->currentContext;
 }
 
-std::vector<std::shared_ptr<const EvoGraph::Action>> Algorithm::Mutator::initActionVertices(
+std::vector<std::reference_wrapper<const EvoGraph::Action>> Algorithm::Mutator::initActionVertices(
     EvoGraph::Graph& graph, size_t nbActionVertices)
 {
     // vector to store the actions
-    std::vector<std::shared_ptr<const EvoGraph::Action>> actions;
+    std::vector<std::reference_wrapper<const EvoGraph::Action>> actions;
 
     // We want to fill actions with all thetd::vector<std::shared necessary actions.
     // Create the missing actions, and add the already existing actions.
     // PS:currentActions should be ordered by actionID, but in case it doesnt is, we check all the action vertices for each index.
     
-    std::vector<std::shared_ptr<const EvoGraph::Action>> currentActions = graph.getActions();
+    std::vector<std::reference_wrapper<const EvoGraph::Action>> currentActions = graph.getActions();
     for(size_t idx = 0; idx < nbActionVertices; idx++){
         // find the action if it exists.
         auto it = currentActions.begin();
-        while(it != currentActions.end() && (*it)->getActionID() != idx){
+        while(it != currentActions.end() && (*it).get().getActionID() != idx){
             it++;
         }
 

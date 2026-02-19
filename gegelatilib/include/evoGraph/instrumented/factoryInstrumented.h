@@ -55,15 +55,15 @@ namespace EvoGraph {
         virtual std::shared_ptr<Graph> createGraph() const override;
 
         ///  Specialization of the method returning a TeamInstrumented
-        virtual std::shared_ptr<Team> createTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt) const override;
+        virtual std::unique_ptr<Team> createTeam(std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt) const override;
 
         ///  Specialization of the method returning a ActionInstrumented
-        virtual std::shared_ptr<Action> createAction(
+        virtual std::unique_ptr<Action> createAction(
             const uint64_t id, std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt) const override;
 
         ///  Specialization of the method returning a EdgeInstrumented
-        virtual std::shared_ptr<Edge> createEdge(
-            std::shared_ptr<const Vertex> src, std::shared_ptr<const Vertex> dest,
+        virtual std::unique_ptr<Edge> createEdge(
+            const Vertex& src, const Vertex& dest,
             std::optional<std::reference_wrapper<const Algorithm::Agent>> prog) const override;
 
         /**

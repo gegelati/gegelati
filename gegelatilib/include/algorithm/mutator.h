@@ -114,7 +114,7 @@ namespace Algorithm {
          * \param[in,out] graph the initialized Graph.
          * \param[in] nbActionVertices number of agents to create.
          */
-        virtual std::vector<std::shared_ptr<const EvoGraph::Action>> initActionVertices(EvoGraph::Graph& graph, size_t nbActionVertices);
+        virtual std::vector<std::reference_wrapper<const EvoGraph::Action>> initActionVertices(EvoGraph::Graph& graph, size_t nbActionVertices);
 
         /**
          * \brief Initialize a random population.

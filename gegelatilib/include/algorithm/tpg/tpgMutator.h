@@ -25,13 +25,13 @@ namespace Algorithm::TPG {
         uint64_t programAlgorithmID;
 
         /// Pre-existing teams elements used for mutation operations.
-        std::vector<std::shared_ptr<const EvoGraph::Team>> preExistingTeams;
+        std::vector<std::reference_wrapper<const EvoGraph::Vertex>> preExistingTeams;
 
         /// Pre-existing actions elements used for mutation operations.
-        std::vector<std::shared_ptr<const EvoGraph::Action>> preExistingActions;
+        std::vector<std::reference_wrapper<const EvoGraph::Vertex>> preExistingActions;
 
         /// Pre-existing edges used for mutation operations.
-        std::vector<std::shared_ptr<const EvoGraph::Edge>> preExistingEdges;
+        std::vector<std::reference_wrapper<const EvoGraph::Edge>> preExistingEdges;
 
         /// Archive used by this TPG
         std::reference_wrapper<const Archive> archive;
@@ -49,8 +49,8 @@ namespace Algorithm::TPG {
          */
         virtual void addAditionnalEdges(
             EvoGraph::Graph& graph,
-            std::vector<std::shared_ptr<const EvoGraph::Vertex>> leafVertices,
-            std::vector<std::shared_ptr<const EvoGraph::Vertex>> rootVertices,
+            std::vector<std::reference_wrapper<const EvoGraph::Vertex>> leafVertices,
+            std::vector<std::reference_wrapper<const EvoGraph::Vertex>> rootVertices,
             std::vector<std::reference_wrapper<const Agent>> programAgent,
             const Learn::LearningParameters& params, RNG::RNG& rng);
 
@@ -183,7 +183,7 @@ namespace Algorithm::TPG {
          * process.
          */
         virtual void mutateEdgeDestination(EvoGraph::Graph& graph,
-                                    std::shared_ptr<const EvoGraph::Edge> edge,
+                                    const EvoGraph::Edge& edge,
                                     const Learn::LearningParameters& params,
                                     RNG::RNG& rng);
 
@@ -207,7 +207,7 @@ namespace Algorithm::TPG {
          * Generator used in the mutation process.
          */
         virtual void mutateOutgoingEdge(
-            EvoGraph::Graph& graph, std::shared_ptr<const EvoGraph::Edge> edge,
+            EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
             AgentManager& manager,
             std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
             const Learn::LearningParameters& params, RNG::RNG& rng);

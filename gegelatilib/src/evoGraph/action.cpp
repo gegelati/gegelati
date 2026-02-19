@@ -38,7 +38,7 @@
 #include "evoGraph/action.h"
 #include <stdexcept>
 
-void EvoGraph::Action::addOutgoingEdge(std::shared_ptr<const Edge> edge)
+void EvoGraph::Action::addOutgoingEdge(const Edge& edge)
 {
     throw std::runtime_error(
             "Cannot add an outgoing edge to an Action vertex.");
