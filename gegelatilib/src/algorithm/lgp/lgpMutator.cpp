@@ -73,7 +73,7 @@ void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
 }
 
 void Algorithm::LGP::LGPMutator::crossoverAgents(
-    std::vector<std::reference_wrapper<const Agent>> agents, EvoGraph::Graph& graph, 
+    std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, 
     AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, 
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {

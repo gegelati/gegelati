@@ -113,7 +113,7 @@ void Algorithm::Mutator::mutatePopulation(
         uint64_t clonedRootIndex1 =
             rng.getUnsignedInt64(0, subAgentsClonable1.size() - 1);
 
-        std::vector<std::reference_wrapper<const Algorithm::Agent>> offsprings;
+        std::vector<std::reference_wrapper<const Agent>> offsprings;
 
         offsprings.push_back(manager.copyAgent(subAgentsClonable1.at(clonedRootIndex1), graph));
 
@@ -129,12 +129,12 @@ void Algorithm::Mutator::mutatePopulation(
             offsprings.push_back(manager.copyAgent(subAgentsClonable2.at(clonedRootIndex2), graph));
 
             // Do the crossover over the childs
-            this->crossoverAgents(offsprings, graph, manager, newSubAgents, params, rng);
+            this->crossoverAgents({offsprings.at(0), offsprings.at(1)}, graph, manager, newSubAgents, params, rng);
         }
 
         // Do the mutation over the childs
-        for (auto offspring : offsprings) {
-            if (!offspring.get().isValid()) {
+        for (const Algorithm::Agent& offspring : offsprings) {
+            if (!offspring.isValid()) {
                 manager.deleteAgent(offspring, graph);
             }
             else {

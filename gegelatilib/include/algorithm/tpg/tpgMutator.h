@@ -6,6 +6,7 @@
 #include <numeric>
 #include <queue>
 #include <mutex>
+#include <array>
 
 
 #include "algorithm/mutator.h"

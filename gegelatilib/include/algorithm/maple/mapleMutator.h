@@ -60,9 +60,38 @@ namespace Algorithm::Maple {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        
+        /**
+         * \brief Cross the two teams' program at the specific index of program given
+         * 
+         * \param[in,out] teams the Team to crossover.
+         * \param[in] indexCross the index at which the programs are crossed
+         * \param[in,out] graph the graph to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] newSubAgents vector of new agents of sub algorithm created while crossing over the agents
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void crossoverPrograms(
+            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng);
+
 
         /**
-         * \brief mutate a specific agent of an algorithm within a population
+         * \brief Cross the two teams' edges at the specific index of edges given
+         * 
+         * \param[in,out] teams the Team to crossover.
+         * \param[in] indexCross the index at which the edges are crossed
+         * \param[in,out] graph the graph to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] newSubAgents vector of new agents of sub algorithm created while crossing over the agents
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual void crossoverEdges(
+            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng);
+
+        /**
+         * \brief Do a crossover over two maple agents, by either crossover the program on edges, or crossover the edges. Calling either crossoverPrograms or crossoverEdges methods
          * 
          * \param[in,out] agents the Agent to crossover.
          * \param[in,out] graph the graph to mutate.
@@ -72,7 +101,7 @@ namespace Algorithm::Maple {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::vector<std::reference_wrapper<const Agent>> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
         ) override;
 
 

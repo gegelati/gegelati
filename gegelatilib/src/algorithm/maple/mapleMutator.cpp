@@ -1,4 +1,4 @@
-
+#include <array>
 
 #include "algorithm/maple/mapleMutator.h"
 
@@ -74,9 +74,127 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
     graph.orderActionEdges(team);
 }
 
-void Algorithm::Maple::MapleMutator::crossoverAgents(
-    std::vector<std::reference_wrapper<const Agent>> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::Maple::MapleMutator::crossoverPrograms(
+    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
+    // Get program to cross for the teams. It should exist.
+    std::vector<std::reference_wrapper<const Agent>> swapPrograms;
+    for (size_t i = 0; i < teams.size(); ++i) {
+        const EvoGraph::Team& team = teams[i];
+        for (const EvoGraph::Edge& edge : team.getOutgoingEdges()) {
+            if (auto action = dynamic_cast<const EvoGraph::Action*>(
+                    &edge.getDestination())) {
+                if (action->getActionID() == indexCross &&
+                    edge.getProgram().getAlgorithmID() ==
+                        this->programAlgorithmID) {
+                    swapPrograms.push_back(edge.getProgram());
+                    break;
+                }
+            }
+        }
+    }
+    if(swapPrograms.size() != 2){
+        throw std::runtime_error("MapleMutator::crossoverPrograms Program not found, while it should exist");
+    }
+
+
+    std::array<std::reference_wrapper<const Agent>, 2> programs{swapPrograms[0], swapPrograms[1]};
+    // Do the crossover
+    AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
+    this->getSubMutator(swapPrograms.front().get().getAlgorithmID()).crossoverAgents(programs, graph, programManager, newSubAgents, params, rng);
+}
+
+void Algorithm::Maple::MapleMutator::crossoverEdges(
+    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+{
+    // Get edge to swap for the teams if it exist
+    std::array<const EvoGraph::Edge*, 2> swapEdges{nullptr, nullptr};
+    for (size_t i = 0; i < teams.size(); ++i) {
+        const EvoGraph::Team& team = teams[i];
+        if (team.getAssessedActions().count(indexCross)) {
+            for (const EvoGraph::Edge& edge : team.getOutgoingEdges()) {
+                if (auto action = dynamic_cast<const EvoGraph::Action*>(&edge.getDestination())) {
+                    if (action->getActionID() == indexCross) {
+                        swapEdges[i] = (&edge);
+                    }
+                }
+            }
+        }
+    }
+
+    // If both edges exist, switch the programs
+    if(swapEdges.at(0) != nullptr && swapEdges.at(1) != nullptr) {
+        const Agent& program0 = swapEdges.at(0)->getProgram();
+        const Agent& program1 = swapEdges.at(1)->getProgram();
+        graph.setEdgeProgram(*swapEdges.at(0), program1);
+        graph.setEdgeProgram(*swapEdges.at(1), program0);
+
+    // Else change the source of the edge.
+    } else if (swapEdges.at(0) != nullptr) {
+        graph.setEdgeSource(*swapEdges.at(0), teams.at(1));
+    } else if (swapEdges.at(1) != nullptr) {
+        graph.setEdgeSource(*swapEdges.at(1), teams.at(0));
+    }
+}
+
+
+void Algorithm::Maple::MapleMutator::crossoverAgents(
+    std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+{
+    // No crossover
+    if (params.mutation.tpg.pCrossAgents == 0) {
+        return;
+    }
+    // Initialize available actions
+    std::vector<uint64_t> availableActions(manager.getOutputs().size());
+    std::iota(availableActions.begin(), availableActions.end(), uint64_t{0});
+
+    uint64_t indexAction;
+
+    
+    const EvoGraph::Vertex& vertex0 = dynamic_cast<const MapleAgent&>(agents.at(0).get()).getVertex();
+    const EvoGraph::Team& team0 = dynamic_cast<const EvoGraph::Team&>(vertex0);
+
+    const EvoGraph::Vertex& vertex1 = dynamic_cast<const MapleAgent&>(agents.at(1).get()).getVertex();
+    const EvoGraph::Team& team1 = dynamic_cast<const EvoGraph::Team&>(vertex1);
+
+    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teamsArray = {team0, team1};
+
+    // Always do at least one crossover
+    // (mearning we don't want any crossover)
+    double proba = 1;
+    size_t remaining = availableActions.size();
+    while (remaining > 0 &&
+           proba > rng.getDouble(0.0, 1.0)) {
+
+        // Pick uniformly from remaining values
+        size_t pickIdx = rng.getUnsignedInt64(0, remaining - 1);
+        indexAction = availableActions[pickIdx];
+
+        // Remove picked element (swap with last)
+        std::swap(availableActions[pickIdx], availableActions[remaining - 1]);
+        --remaining;
+
+        // A crossover at program level can be done only the both parents
+        // assessed the action concerned
+        if (team0.getAssessedActions().count(indexAction) > 0 &&
+            team1.getAssessedActions().count(indexAction) > 0 &&
+            params.mutation.tpg.pCrossPrograms > rng.getDouble(0, 1)) {
+
+            this->crossoverPrograms(teamsArray, indexAction, graph, manager, newSubAgents, params, rng);
+        }
+        else {
+            this->crossoverEdges(teamsArray, indexAction, graph, manager, newSubAgents, params, rng);
+
+        }
+
+        graph.updateAssessedActions(team0);
+        graph.updateAssessedActions(team1);
+        
+        graph.orderActionEdges(team0);
+        graph.orderActionEdges(team1);
+        proba *= params.mutation.tpg.pCrossAgents;
+    }
 
 }
 
