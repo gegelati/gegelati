@@ -76,9 +76,9 @@ void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
             instructionInfo += "&#92;n";
         }
         fprintf(pFile,
-                "%sP%" PRIu64 " [fillcolor=\"#922DB4\" shape=diamond margin=0.03 "
+                "%sP%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
                 "width=0 height=0 label=\"%s.%" PRIu64 "\" constant=\"%s\" instruction=\"%s\"]\n",
-                offset.c_str(), lgpAgent.getAgentID(), this->algorithmName.c_str(), this->algorithmID, constantInfo.c_str(), instructionInfo.c_str());
+                offset.c_str(), lgpAgent.getAgentID(), this->algorithmColor.c_str(), this->algorithmName.c_str(), this->algorithmID, constantInfo.c_str(), instructionInfo.c_str());
     }
 }
 

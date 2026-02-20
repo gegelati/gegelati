@@ -66,7 +66,7 @@ namespace Learn {
         LearningEnvironment& learningEnvironment;
 
         /// Vector of shared pointer of algorithms learned by the learning agent.
-        std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms;
+        std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms;
 
         /// Parameters for the learning process
         LearningParameters params;
@@ -90,7 +90,7 @@ namespace Learn {
         std::vector<std::reference_wrapper<Log::LALogger>> loggers;
 
         /// Currently executed algorithm during evaluation
-        std::shared_ptr<Algorithm::Algorithm> currentExecutedAlgorithm;
+        Algorithm::Algorithm* currentExecutedAlgorithm;
 
         /**
          * \brief return the algorithm managed by the learning agent corresponding to the given algorithm.
@@ -109,7 +109,7 @@ namespace Learn {
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
-        LearningAgent(LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms,
+        LearningAgent(LearningEnvironment& le, std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms,
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le}, algorithms{algorithms},
@@ -124,10 +124,10 @@ namespace Learn {
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
-        LearningAgent(LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm,
+        LearningAgent(LearningEnvironment& le, Algorithm::Algorithm& algorithm,
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : LearningAgent(le, std::vector<std::shared_ptr<Algorithm::Algorithm>>{algorithm}, p, factory) {};
+            : LearningAgent(le, std::vector<std::reference_wrapper<Algorithm::Algorithm>>{algorithm}, p, factory) {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;
@@ -137,14 +137,14 @@ namespace Learn {
          * 
          * \param[in] algorithm the algorithm to set as current executed algorithm
          */
-        void setCurrentAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm);
+        void setCurrentAlgorithm(Algorithm::Algorithm* algorithm);
 
         /**
          * \brief Add an algorithm to the learning agent.
          * 
          * \param[in] algorithm the algorithm to add.
          */
-        void addAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm);
+        void addAlgorithm(Algorithm::Algorithm& algorithm);
 
 
         /**
@@ -316,12 +316,11 @@ namespace Learn {
          *
          * \param[in] mode the mode of the training, determining for example
          * if we generate values that we only need for training.
-         * \param[in] algorithm the algorithm containing the agents to make jobs from
          *
          * @return A vector containing pointers of the newly created jobs.
          */
         virtual std::vector<std::shared_ptr<Algorithm::Job>> makeJobs(
-            Learn::LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm = nullptr);
+            Learn::LearningMode mode);
 
         /**
          * \brief find the algorithm corresponding to the given agent.
@@ -330,7 +329,7 @@ namespace Learn {
          * 
          * \throw std::runtime_error if no algorithm contain the agent.
          */
-        virtual std::shared_ptr<Algorithm::Algorithm> findCorrespondingAlgorithm(const Algorithm::Agent& agent);
+        virtual Algorithm::Algorithm& findCorrespondingAlgorithm(const Algorithm::Agent& agent);
 
         /**
          * \brief launch the selection of the different algorithms
@@ -359,7 +358,7 @@ namespace Learn {
          * 
          * \param[in] algorithm the algorithm to search.
          */
-        virtual bool containsAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm);
+        virtual bool containsAlgorithm(Algorithm::Algorithm& algorithm);
     };
 }; // namespace Learn
 

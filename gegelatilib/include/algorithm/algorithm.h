@@ -48,23 +48,21 @@ namespace Algorithm {
         std::vector<std::unique_ptr<Algorithm>> subAlgorithms;
         /// Name of the algorithm.
         std::string algorithmName;
+        /// Color of the algorithm.
+        std::string algorithmColor;
 
         /// aggregated algorithms
         std::vector<std::reference_wrapper<const Algorithm>> aggregatedAlgorithms;
         
+        /// Boolean to indicate if the algorithm has been initialize
+        bool init = false;
+
         /**
-         * \brief return the subAlgorithm corresponding to the name of the algorithm given.
+         * \brief return the subAlgorithm corresponding to the id of the algorithm given.
          * 
          * \param[in] algorithmID id of the sub algorithm given.
          */
         Algorithm& getSubAlgorithm(uint64_t algorithmID);     
-
-        /**
-         * \brief return the subAlgorithm corresponding to the name of the algorithm given.
-         * 
-         * \param[in] algorithmID id of the sub algorithm given.
-         */
-        const Algorithm& cGetSubAlgorithm(uint64_t algorithmID) const;    
         
         
         /// Unique ID of the algorithm.
@@ -96,16 +94,20 @@ namespace Algorithm {
          * 
          * \param[in] params the LearningParameters used by the Algorithm.
          * \param[in] algorithmName name of the algorithm used.
-         * 
+         * \param[in] algorithmColor color of the algorithm used (during .dot files).
          */
-        Algorithm(const Learn::LearningParameters& params, std::string algorithmName)
-               : params{params}, algorithmName(algorithmName), algorithmID(incrementeCounter()) {
+        Algorithm(const Learn::LearningParameters& params, std::string algorithmName, std::string algorithmColor)
+               : params{params}, algorithmName(algorithmName), algorithmColor(algorithmColor), algorithmID(incrementeCounter()) {
         };
 
         /**
          * \brief Return the name of the algorithm.
          */
         std::string getAlgorithmName() const { return this->algorithmName; }
+        /**
+         * \brief Return the color of the algorithm.
+         */
+        std::string getAlgorithmColor() const { return this->algorithmColor; }
 
         /**
          * \brief return the ID of the agent.
@@ -134,6 +136,11 @@ namespace Algorithm {
         void addSubAlgorithm(const Algorithm& subAlgorithm);
 
         /**
+         * Getter for init status.
+         */
+        bool isInit() const;
+
+        /**
          * \brief Method that aggregate another algorithm to this algorithm.
          * 
          * The algorithm need to be the same type.
@@ -142,6 +149,25 @@ namespace Algorithm {
          * \param[in] aggregatedAlgorithm the algorithm to aggregate.
          */
         void addAggregatedAlgorithm(const Algorithm& aggregatedAlgorithm);
+
+        /**
+         * \brief return the aggregated algorithms
+         */
+        const std::vector<std::reference_wrapper<const Algorithm>>& getAggregatedAlgorithms() const;
+
+        /**
+         * \brief return the subAlgorithm corresponding to the id of the algorithm given.
+         * 
+         * \param[in] algorithmID id of the sub algorithm given.
+         */
+        const Algorithm& cGetSubAlgorithm(uint64_t algorithmID) const;    
+
+        /**
+         * \brief return the specified aggregated algorithm
+         * 
+         * \param[in] algorithmID ID of the aggregated algorithm
+         */
+        const Algorithm& getAggregatedAlgorithm(uint64_t algorithmID) const;
 
         /// Constant getter for the graph
         virtual const EvoGraph::Graph& getGraph() const;
@@ -245,7 +271,7 @@ namespace Algorithm {
 
         /**
         * \brief Get the agents that are currently used by the algorithm.
-        * The returned map associate to each sub-algorithm name the set of agents used by this sub-algorithm.
+        * The returned map associate to each sub-algorithm id the set of agents used by this sub-algorithm.
         */
         virtual std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const;
 

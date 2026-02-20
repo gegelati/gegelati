@@ -57,7 +57,7 @@ Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generation
     if(this->currentExecutedAlgorithm == nullptr){
         throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: currentExecutedAlgorithm is not set.");
     }
-    if(!this->containsAlgorithm(this->currentExecutedAlgorithm)){
+    if(!this->containsAlgorithm(*this->currentExecutedAlgorithm)){
         throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: The learning agent does not contain the given algorithm.");
     }
 
@@ -70,7 +70,7 @@ Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generation
     }
     else {
         // Create jobs to process
-        std::vector<std::shared_ptr<Algorithm::Job>> jobsToProcess = makeJobs(mode, this->currentExecutedAlgorithm);
+        std::vector<std::shared_ptr<Algorithm::Job>> jobsToProcess = makeJobs(mode);
 
         // Create a copy of jobsToProcess in a queue structure
         std::queue<std::shared_ptr<Algorithm::Job>> jobsQueue;

@@ -24,9 +24,10 @@ namespace Algorithm::Maple {
              * \param[in] params the LearningParameters used by the Algorithm.
              * \param[in] programAlgorithm the sub-algorithm used to manipulate programs.
              * \param[in] algorithmName name of the algorithm used.
+             * \param[in] algorithmColor name of the algorithm used.
              */
-            MapleAlgorithm(const Learn::LearningParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "MAPLE")
-                : TPG::TPGAlgorithm(params, programAlgorithm, algorithmName){
+            MapleAlgorithm(const Learn::LearningParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "MAPLE", std::string algorithmColor = "#ffd900")
+                : TPG::TPGAlgorithm(params, programAlgorithm, algorithmName, algorithmColor){
             };
 
             

@@ -159,9 +159,9 @@ void Algorithm::TPG::TPGAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
         elementsToPrint.push_back(vertex);
     
         fprintf(pFile,
-                "%sP%" PRIu64 " [fillcolor=\"#A0FF33\" shape=diamond margin=0.03 "
+                "%sP%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
                 "width=0 height=0 label=\"%s.%" PRIu64 "\"]\n",
-                offset.c_str(), agent.getAgentID(), this->algorithmName.c_str(), this->algorithmID);
+                offset.c_str(), agent.getAgentID(), this->algorithmColor.c_str(), this->algorithmName.c_str(), this->algorithmID);
     }   
 }
 

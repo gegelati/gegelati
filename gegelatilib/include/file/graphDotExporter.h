@@ -73,7 +73,7 @@ namespace File {
         std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithms;
 
         /// @brief vector of algorithms used, including subAlgorithms. This is used to print the content of the programs when they are mutated by the algorithm.
-        std::vector<std::reference_wrapper<const Algorithm::Algorithm>> potentialAlgorithms;
+        std::map<uint64_t, std::reference_wrapper<const Algorithm::Algorithm>> mapAlgorithms;
 
         /// @brief set of printed vertex ID. This is used to avoid printing twice the same vertex in case of multiple edges pointing toward it.
         std::set<uint64_t> printedVertexID;
@@ -83,6 +83,9 @@ namespace File {
 
         /// @brief set of printed agent ID. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent program.
         std::set<uint64_t> printedAgentID;
+
+        /// @brief set of printed agent ID. This is used to avoid printing twice the same agent in case of multiple vertices or edges using the same agent program.
+        std::set<uint64_t> printedAlgorithmsID;
 
 
         /**
@@ -179,6 +182,16 @@ namespace File {
         void printGraphHeader();
 
         /**
+         * \brief print a specific algorithm node, an also print the potential sub and aggregated algorithm.
+         */    
+        void printAlgorithm(const Algorithm::Algorithm& printAlgorithm);
+
+        /**
+         * \brief Prints algorithms node, showing what are the relations between the different algorithms.
+         */
+        void printAlgorithmsSubGraph(const std::vector<std::reference_wrapper<const Algorithm::Algorithm>>& printAlgorithms);
+
+        /**
          * \brief Prints footer content in the dot file.
          *
          * This method prints finalization content that must be printed into the
@@ -206,24 +219,6 @@ namespace File {
                 throw std::runtime_error("Could not open file " +
                                          std::string(filePath));
             }
-
-            // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
-            std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithmsToAdd;
-            for(const Algorithm::Algorithm& algorithm : algorithms){
-                algorithmsToAdd.push_back(algorithm);
-            }
-            while(!algorithmsToAdd.empty()){
-                const Algorithm::Algorithm& algorithm = algorithmsToAdd.back();
-                algorithmsToAdd.pop_back();
-
-                if(this->potentialAlgorithms.end() == std::find(this->potentialAlgorithms.begin(), this->potentialAlgorithms.end(), algorithm)){
-                    this->potentialAlgorithms.push_back(algorithm);
-                    for(const Algorithm::Algorithm& subAlgorithm : algorithm.cGetSubAlgorithms()){
-                        algorithmsToAdd.push_back(subAlgorithm);
-                    }
-                }
-            }
-            
         };
 
         /**

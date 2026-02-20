@@ -36,9 +36,10 @@ namespace Algorithm::ATPG {
              * \param[in] contextProgramAlgorithm the sub-algorithm used to manipulate context programs.
              * \param[in] actionProgramAlgorithm the sub-algorithm used to manipulate action programs.
              * \param[in] algorithmName name of the algorithm used.
+             * \param[in] algorithmColor name of the algorithm used.
              */
-            ATPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& contextProgramAlgorithm, const Algorithm& actionProgramAlgorithm, std::string algorithmName = "ATPG")
-                : TPGAlgorithm(params, contextProgramAlgorithm, algorithmName){
+            ATPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& contextProgramAlgorithm, const Algorithm& actionProgramAlgorithm, std::string algorithmName = "ATPG", std::string algorithmColor = "#335ce2")
+                : TPGAlgorithm(params, contextProgramAlgorithm, algorithmName, algorithmColor){
                 this->setActionProgramAlgorithm(actionProgramAlgorithm);
             };
 

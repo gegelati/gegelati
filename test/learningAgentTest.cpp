@@ -78,8 +78,8 @@ class LearningAgentTest : public ::testing::Test
     StickGameWithOpponent le;
     FakeMultiContinuousLearningEnvironment cle;
     Learn::LearningParameters params;
-    std::shared_ptr<Algorithm::LGPAlgorithm> lgp;
-    std::shared_ptr<Algorithm::TPGAlgorithm> tpg;
+    Algorithm::LGPAlgorithm* lgp;
+    Algorithm::TPGAlgorithm* tpg;
 
     virtual void SetUp()
     {
@@ -107,8 +107,8 @@ class LearningAgentTest : public ::testing::Test
         params.mutation.prog.maxConstValue = 1;
         params.nbProgramConstant = 5;
 
-        lgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set);
-        tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
+        lgp = new Algorithm::LGPAlgorithm(params, set);
+        tpg = new Algorithm::TPGAlgorithm(params, *lgp);
     }
 
     virtual void TearDown()
@@ -126,7 +126,7 @@ TEST_F(LearningAgentTest, Constructor)
 {
     Learn::LearningAgent* la;
 
-    ASSERT_NO_THROW(la = new Learn::LearningAgent(le, tpg, params))
+    ASSERT_NO_THROW(la = new Learn::LearningAgent(le, *tpg, params))
         << "Construction of the learningAgent failed.";
 
     ASSERT_NO_THROW(delete la) << "Destruction of the LearningAgent failed.";
@@ -136,15 +136,15 @@ TEST_F(LearningAgentTest, Init)
 {
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
 
     ASSERT_NO_THROW(la.init())
         << "Initialization of the LearningAgent should not fail.";
 
         
     params.selection._selectionMode = "wrongSelector";
-    tpg =  std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::LearningAgent la2(le, tpg, params);
+    tpg =  new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::LearningAgent la2(le, *tpg, params);
 
     ASSERT_THROW(la2.init(), std::runtime_error)
         << "Initialization of the learningAgent with wrong selector should fail.";
@@ -154,7 +154,7 @@ TEST_F(LearningAgentTest, addLogger)
 {
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
 
     Log::LALogger* l = nullptr;
     ASSERT_NO_THROW(
@@ -169,7 +169,7 @@ TEST_F(LearningAgentTest, addLogger)
 {
     params.maxNbEvaluationPerPolicy = 2;
 
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
     la.init();
 
     // Test a new root
@@ -217,7 +217,7 @@ TEST_F(LearningAgentTest, addLogger)
 
 /*TEST_F(LearningAgentTest, MakeJob)
 {
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
     la.init();
     auto job = *la.makeJob(la.getAlgorithmAt(0).getAgents().at(0),
                            Learn::LearningMode::TRAINING);
@@ -226,14 +226,14 @@ TEST_F(LearningAgentTest, addLogger)
     ASSERT_EQ(la.getAlgorithmAt(0).getAgents().at(0), job.getAgent())
         << "Encapsulate the root in a job shouldn't change it";
 
-    Learn::LearningAgent la2(le, tpg, params);
+    Learn::LearningAgent la2(le, *tpg, params);
     ASSERT_THROW(la2.makeJob(nullptr, Learn::LearningMode::TRAINING), std::runtime_error)
         << "Create a job when the learning agent is not initialized should throw an error";
 }
 
 TEST_F(LearningAgentTest, MakeJobs)
 {
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
     la.init();
     auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
     ASSERT_EQ(la.getAlgorithmAt(0).getAgents().size(), jobs.size())
@@ -253,7 +253,7 @@ TEST_F(LearningAgentTest, EvalAgent)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
 
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
     Archive a; // For testing purposes, notmally, the archive from the
                // LearningAgent is used.
 
@@ -278,7 +278,7 @@ TEST_F(LearningAgentTest, EvaluateOneRoot)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
 
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
     Archive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
@@ -301,8 +301,8 @@ TEST_F(LearningAgentTest, EvalAllRoots)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::LearningAgent la(le, tpg, params);
+    tpg = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::LearningAgent la(le, *tpg, params);
 
     la.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -330,7 +330,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     // we will validate in order to cover validation log
     params.doValidation = true;
 
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
 
     la.init();
 
@@ -380,7 +380,7 @@ TEST_F(LearningAgentTest, Train)
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 3;
 
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
 
     la.init();
     bool alt = false;
@@ -394,7 +394,7 @@ TEST_F(LearningAgentTest, Train)
     // For coverage
     params.doValidation = true;
     params.stepValidation = 2;
-    Learn::LearningAgent la2(le, tpg, params);
+    Learn::LearningAgent la2(le, *tpg, params);
     alt = false;
     la2.init();
     ASSERT_NO_THROW(la2.train(alt, true))
@@ -417,8 +417,8 @@ TEST_F(LearningAgentTest, TrainPortability)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.nbThreads = 3;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::LearningAgent la(le, tpg, params);
+    tpg = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::LearningAgent la(le, *tpg, params);
 
     la.init();
     bool alt = false;
@@ -469,8 +469,8 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.nbThreads = 3;
 
-    auto lgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set);
-    Learn::LearningAgent la(le, lgp, params);
+    auto lgp = new Algorithm::LGPAlgorithm(params, set);
+    Learn::LearningAgent la(le, *lgp, params);
 
     la.init();
 
@@ -525,7 +525,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 3;
 
-    Learn::LearningAgent la(le, tpg, params, EvoGraph::TPGInstrumentedFactory());
+    Learn::LearningAgent la(le, *tpg, params, EvoGraph::TPGInstrumentedFactory());
 
     la.init();
     bool alt = false;
@@ -618,9 +618,9 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 1;
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
+    tpg = new Algorithm::TPGAlgorithm(params, *lgp);
 
-    Learn::LearningAgent la(cle, tpg, params);
+    Learn::LearningAgent la(cle, *tpg, params);
 
     la.init();
     bool alt = false;
@@ -666,8 +666,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
 
     
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
-    tpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, *lgp, *actionLgp);
-    Learn::LearningAgent la(cle, tpg, params);
+    tpg = new Algorithm::ATPGAlgorithm(params, *lgp, *actionLgp);
+    Learn::LearningAgent la(cle, *tpg, params);
 
     la.init();
     bool alt = false;
@@ -717,9 +717,9 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
 
     
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
-    auto actionMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, *actionLgp);
-    tpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, *lgp, *actionMaple);
-    Learn::LearningAgent la(cle, tpg, params);
+    auto actionMaple = new Algorithm::MapleAlgorithm(params, *actionLgp);
+    tpg = new Algorithm::ATPGAlgorithm(params, *lgp, *actionMaple);
+    Learn::LearningAgent la(cle, *tpg, params);
 
     la.init();
     bool alt = false;
@@ -768,10 +768,10 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
     params.nbThreads = 1;
 
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
-    auto actionMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, *actionLgp);
-    auto atpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, *lgp, *actionMaple);
+    auto actionMaple = new Algorithm::MapleAlgorithm(params, *actionLgp);
+    auto atpg = new Algorithm::ATPGAlgorithm(params, *lgp, *actionMaple);
     atpg->addAggregatedActionProgramAlgorithm(*actionMaple);
-    std::vector<std::shared_ptr<Algorithm::Algorithm>> listAlgo = { actionMaple, atpg}; // ORDER MUST BE AUTOMATIC
+    std::vector<std::reference_wrapper<Algorithm::Algorithm>> listAlgo = { *actionMaple, *atpg}; // ORDER MUST BE AUTOMATIC
     Learn::LearningAgent la(cle, listAlgo, params);
 
     la.init();
@@ -818,8 +818,8 @@ TEST_F(LearningAgentTest, TrainContinuousMaple)
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 1;
 
-    auto maple = std::make_shared<Algorithm::MapleAlgorithm>(params, *lgp);
-    Learn::LearningAgent la(cle, maple, params);
+    auto maple = new Algorithm::MapleAlgorithm(params, *lgp);
+    Learn::LearningAgent la(cle, *maple, params);
 
     la.init();
     bool alt = false;
@@ -873,15 +873,15 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
     
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
     auto actionMaple =
-        std::make_shared<Algorithm::MapleAlgorithm>(params, *actionLgp, "MAPLEAction");
-    auto matpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, *lgp,
+        new Algorithm::MapleAlgorithm(params, *actionLgp, "MAPLEAction");
+    auto matpg = new Algorithm::ATPGAlgorithm(params, *lgp,
                                                             *actionMaple, "MATPG");
 
     auto standaloneLGP = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGP1");
 
     auto standaloneLGPforMaple = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGP2");
-    auto standaloneMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, *standaloneLGPforMaple, "Maple2");
-    std::vector<std::shared_ptr<Algorithm::Algorithm>> listAlgo = {matpg, standaloneLGP, standaloneMaple};
+    auto standaloneMaple = new Algorithm::MapleAlgorithm(params, *standaloneLGPforMaple, "Maple2");
+    std::vector<std::reference_wrapper<Algorithm::Algorithm>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
     Learn::LearningAgent la(cle, listAlgo, params);
 
     la.init();
@@ -934,15 +934,15 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLETournament)
     
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGPAction");
     auto actionMaple =
-        std::make_shared<Algorithm::MapleAlgorithm>(params, *actionLgp, "MAPLEAction");
-    auto matpg = std::make_shared<Algorithm::ATPGAlgorithm>(params, *lgp,
+        new Algorithm::MapleAlgorithm(params, *actionLgp, "MAPLEAction");
+    auto matpg = new Algorithm::ATPGAlgorithm(params, *lgp,
                                                             *actionMaple, "MATPG");
 
     auto standaloneLGP = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGP1");
 
     auto standaloneLGPforMaple = std::make_shared<Algorithm::LGPAlgorithm>(params, set, "LGP2");
-    auto standaloneMaple = std::make_shared<Algorithm::MapleAlgorithm>(params, *standaloneLGPforMaple, "Maple2");
-    std::vector<std::shared_ptr<Algorithm::Algorithm>> listAlgo = {matpg, standaloneLGP, standaloneMaple};
+    auto standaloneMaple = new Algorithm::MapleAlgorithm(params, *standaloneLGPforMaple, "Maple2");
+    std::vector<std::reference_wrapper<Algorithm::Algorithm>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
     Learn::LearningAgent la(cle, listAlgo, params);
 
     la.init();
@@ -988,8 +988,8 @@ TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
     params.nbThreads = 1;
     params.selection._selectionMode = "mapElites";
 
-    auto maple = std::make_shared<Algorithm::MapleAlgorithm>(params, *lgp);
-    Learn::LearningAgent la(cle, maple, params);
+    auto maple = new Algorithm::MapleAlgorithm(params, *lgp);
+    Learn::LearningAgent la(cle, *maple, params);
 
     la.init();
     Selector::MapElitesSelector& mapElitesSelector =
@@ -1043,8 +1043,8 @@ TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
     params.nbThreads = 1;
     params.selection._selectionMode = "mapElites";
 
-    auto maple = std::make_shared<Algorithm::MapleAlgorithm>(params, *lgp);
-    Learn::LearningAgent la(cle, maple, params);
+    auto maple = new Algorithm::MapleAlgorithm(params, *lgp);
+    Learn::LearningAgent la(cle, *maple, params);
 
     la.init();
     Selector::MapElitesSelector& mapElitesSelector =
@@ -1091,7 +1091,7 @@ TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.nbGenerations = 5;
 
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
     la.init();
     bool alt = false;
     la.train(alt, false);
@@ -1155,8 +1155,8 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
     params.selection.truncation.ratioDeletedRoots =
         0.5; // high number to force the apparition of root action.
     params.nbThreads = 1;
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::LearningAgent la(cle, tpg, params);
+    tpg = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::LearningAgent la(cle, *tpg, params);
 
     la.init();
     // Do the populate call to keep know the number of initial vertex
@@ -1189,7 +1189,7 @@ TEST_F(ParallelLearningAgentTest, Constructor)
 {
     Learn::ParallelLearningAgent* pla;
 
-    ASSERT_NO_THROW(pla = new Learn::ParallelLearningAgent(le, tpg, params))
+    ASSERT_NO_THROW(pla = new Learn::ParallelLearningAgent(le, *tpg, params))
         << "Construction of the learningAgent failed.";
 
     ASSERT_NO_THROW(delete pla) << "Destruction of the LearningAgent failed.";
@@ -1199,15 +1199,15 @@ TEST_F(ParallelLearningAgentTest, Init)
 {
     params.archiveSize = 50;
     params.archivingProbability = 0.5;
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
 
     ASSERT_NO_THROW(pla.init())
         << "Initialization of the LearningAgent should not fail.";
 
         
     params.selection._selectionMode = "wrongSelector";
-    tpg =  std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent pla2(le, tpg, params);
+    tpg =  new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent pla2(le, *tpg, params);
 
     ASSERT_THROW(pla2.init(), std::runtime_error)
         << "Initialization of the learningAgent with wrong selector should fail.";
@@ -1222,7 +1222,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.nbThreads = 1;
 
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
     Archive a; // For testing purposes, notmally, the archive from the
                // LearningAgent is used.
 
@@ -1248,7 +1248,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.nbThreads = 1;
 
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -1270,8 +1270,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
     params.nbIterationsPerPolicyEvaluation = 10;
     params.nbThreads = 4;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    tpg = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -1295,16 +1295,16 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     params.nbIterationsPerPolicyEvaluation = 10;
 
 
-    auto tpgLa = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::LearningAgent la(le, tpgLa, params);
+    auto tpgLa = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::LearningAgent la(le, *tpgLa, params);
     la.init(0); // Reset RNG to 0
     auto results = la.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
     auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
 
     Learn::LearningParameters paramsSequential = params;
     paramsSequential.nbThreads = 1;
-    auto tpgSequential = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent plaSequential(le, tpgSequential, paramsSequential);
+    auto tpgSequential = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, paramsSequential);
 
     plaSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
@@ -1314,8 +1314,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
     Learn::LearningParameters paramsParallel = params;
     paramsParallel.nbThreads = 4;
-    auto tpgParallel = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent plaParallel(le, tpgParallel, paramsParallel);
+    auto tpgParallel = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, paramsParallel);
 
     plaParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
@@ -1408,8 +1408,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
 
-    auto tpgLa = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::LearningAgent la(le, tpgLa, params);
+    auto tpgLa = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::LearningAgent la(le, *tpgLa, params);
     la.init(0); // Reset centralized RNG to 0
     auto results = la.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
     auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
@@ -1417,8 +1417,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     Learn::LearningParameters paramsSequential = params;
     paramsSequential.nbThreads = 1;
     
-    auto tpgSequential = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent plaSequential(le, tpgSequential, paramsSequential);
+    auto tpgSequential = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, paramsSequential);
 
     plaSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
@@ -1428,8 +1428,8 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
 
     Learn::LearningParameters paramsParallel = params;
     paramsParallel.nbThreads = 4;
-    auto tpgParallel = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent plaParallel(le, tpgParallel, paramsParallel);
+    auto tpgParallel = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, paramsParallel);
 
     plaParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
@@ -1496,7 +1496,7 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
         0.85; // high number to force the apparition of root action.
     params.nbThreads = 1;
 
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
 
     pla.init();
     // Do the populate call to keep know the number of initial vertex
@@ -1531,8 +1531,8 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
         0.85; // high number to force the apparition of root action.
     params.nbThreads = 4;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    tpg = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
 
     pla.init();
     // Do the populate call to keep know the number of initial vertex
@@ -1564,8 +1564,8 @@ TEST_F(ParallelLearningAgentTest, TrainSequential)
         params.nbIterationsPerPolicyEvaluation * 2;
     params.nbThreads = 1;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    tpg = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
 
     pla.init();
     bool alt = false;
@@ -1589,7 +1589,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallel)
         params.nbIterationsPerPolicyEvaluation * 2;
     params.nbThreads = std::thread::hardware_concurrency();
 
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
 
     pla.init();
     bool alt = false;
@@ -1615,7 +1615,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 5;
 
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
 
     la.init();
 
@@ -1624,7 +1624,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
     la.train(alt, false);
 
     params.nbThreads = 4;
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
 
     pla.init();
 
@@ -1658,8 +1658,8 @@ TEST_F(ParallelLearningAgentTest, TrainPortability)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.nbThreads = 3;
 
-    tpg = std::make_shared<Algorithm::TPGAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent la(le, tpg, params);
+    tpg = new Algorithm::TPGAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent la(le, *tpg, params);
 
     la.init();
     bool alt = false;
@@ -1714,8 +1714,8 @@ TEST_F(ParallelLearningAgentTest, TrainContinuousMaple)
     params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.nbThreads = 3;
 
-    auto maple = std::make_shared<Algorithm::MapleAlgorithm>(params, *lgp);
-    Learn::ParallelLearningAgent la(cle, maple, params);
+    auto maple = new Algorithm::MapleAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent la(cle, *maple, params);
 
     la.init();
     bool alt = false;
@@ -1756,7 +1756,7 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 2;
 
-    Learn::ParallelLearningAgent pla(le, tpg, params);
+    Learn::ParallelLearningAgent pla(le, *tpg, params);
     pla.init();
     bool alt = false;
     pla.train(alt, true);
@@ -1803,7 +1803,7 @@ TEST_F(LearningAgentTest, EvaluateJobWithUtility)
 
 TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
 {
-    Learn::LearningAgent la(le, tpg, params);
+    Learn::LearningAgent la(le, *tpg, params);
     la.init();
     EvoGraph::Team fakeTeam;
     ASSERT_THROW(

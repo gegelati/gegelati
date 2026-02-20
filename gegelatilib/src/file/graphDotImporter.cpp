@@ -36,6 +36,15 @@
  */
 #include "file/graphDotImporter.h"
 
+const std::string File::GraphDotImporter::algorithmRegex(
+    "ALGO([0-9]+)\\x20\\x5B.*label=\"([^\\.]+)\\.([0-9]+)\".*");
+const std::string File::GraphDotImporter::aggregatedAlgorithmLinkRegex(
+    "ALGO([0-9]+)\\x20->\\x20ALGO([0-9]+)\\x20\\[style=dashed.*");
+const std::string File::GraphDotImporter::subAlgorithmLinkRegex(
+    "ALGO([0-9]+)\\x20->\\x20ALGO([0-9]+)");
+const std::string File::GraphDotImporter::endAlgorithmSubGraph(R"(^\s*\}\s*$)");
+
+
 const std::string File::GraphDotImporter::teamRegex(
     "T([0-9]+)\\x20\\x5B.*fillcolor.*\\x5D");
 const std::string File::GraphDotImporter::agentRegex(
@@ -53,38 +62,13 @@ const std::string File::GraphDotImporter::linkAgentTeamRegex(
 
 Algorithm::Algorithm& File::GraphDotImporter::getAlgorithm(uint64_t algorithmID)
 {
-    std::optional<std::reference_wrapper<Algorithm::Algorithm>> algorithmOpt;
-    for(Algorithm::Algorithm& algorithm: this->potentialAlgorithms){
-        if(algorithm.getAlgorithmID() == algorithmID) {
-            algorithmOpt = algorithm;
-            break;
-        }
-    }
-    if(algorithmOpt == std::nullopt){
+    auto it = this->mapAlgorithms.find(algorithmID);
+    if(it == this->mapAlgorithms.end()){
         throw std::runtime_error("GraphDotImporter::getAlgorithm Algorithm not found"); 
-    }  
-    return *algorithmOpt;
+    }
+    return it->second;
 }
 
-void File::GraphDotImporter::setPotentialAlgorithm()
-{
-    // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
-    std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithmsToAdd;
-    for(Algorithm::Algorithm& algorithm : algorithms){
-        algorithmsToAdd.push_back(algorithm);
-    }
-    while(!algorithmsToAdd.empty()){
-        Algorithm::Algorithm& algorithm = algorithmsToAdd.back();
-        algorithmsToAdd.pop_back();
-
-        if(this->potentialAlgorithms.end() == std::find(this->potentialAlgorithms.begin(), this->potentialAlgorithms.end(), algorithm)){
-            this->potentialAlgorithms.push_back(algorithm);
-            for(Algorithm::Algorithm& subAlgorithm : algorithm.getSubAlgorithms()){
-                algorithmsToAdd.push_back(subAlgorithm);
-            }
-        }
-    }
-}
 
 
 bool File::GraphDotImporter::getExportedVersion(int& major, int& minor,
@@ -122,6 +106,122 @@ void File::GraphDotImporter::dumpGraphHeader()
     // while loop)
     for (int i = 0; i < 2; i++) {
         pFile.getline(buffer, MAX_READ_SIZE);
+    }
+}
+
+void File::GraphDotImporter::readAlgorithm(std::smatch matches)
+{
+    std::string name = matches[2];
+    uint64_t id = std::stoi(matches[3]);
+    
+    auto it = this->mapAlgorithms.find(id);
+    if(it == this->mapAlgorithms.end() || it->second.get().getAlgorithmName() != name){
+        throw std::runtime_error("GraphDotImporter::readAlgorithm: Algorithm doesnt correspond"); 
+    }
+}
+
+void File::GraphDotImporter::readAggregatedAlgorithmLink(std::smatch matches)
+{
+    uint64_t id_src = std::stoi(matches[1]);
+    uint64_t id_dest = std::stoi(matches[2]);
+
+    auto it_src = this->mapAlgorithms.find(id_src);
+    if(it_src == this->mapAlgorithms.end()){
+        throw std::runtime_error("GraphDotImporter::readAggregatedAlgorithmLink: source algorithm not found"); 
+    }
+
+    auto it_dest = this->mapAlgorithms.find(id_dest);
+    if(it_dest == this->mapAlgorithms.end()){
+        throw std::runtime_error("GraphDotImporter::readAggregatedAlgorithmLink: destination algorithm not found"); 
+    }
+
+    // Will throw if nothing is found
+    it_src->second.get().getAggregatedAlgorithm(id_dest);
+}
+
+void File::GraphDotImporter::readSubAlgorithmLink(std::smatch matches)
+{
+    uint64_t id_src = std::stoi(matches[1]);
+    uint64_t id_dest = std::stoi(matches[2]);
+
+    auto it_src = this->mapAlgorithms.find(id_src);
+    if(it_src == this->mapAlgorithms.end()){
+        throw std::runtime_error("GraphDotImporter::readSubAlgorithmLink: source algorithm not found"); 
+    }
+
+    auto it_dest = this->mapAlgorithms.find(id_dest);
+    if(it_dest == this->mapAlgorithms.end()){
+        throw std::runtime_error("GraphDotImporter::readSubAlgorithmLink: destination algorithm not found"); 
+    }
+
+    // Will throw if nothing is found
+    it_src->second.get().cGetSubAlgorithm(id_dest);
+}
+
+void File::GraphDotImporter::readAlgorithmGraphSubGraph()
+{
+    char buffer[MAX_READ_SIZE];
+    // Skip subGraph header (should be 5 lines)
+    for (int i = 0; i < 5; i++) {
+        pFile.getline(buffer, MAX_READ_SIZE);
+    }
+
+    this->setMapAlgorithm();
+
+    std::regex testAlgorithmRegex(this->algorithmRegex);
+    std::regex testAggregatedAlgorithmLinkRegex(this->aggregatedAlgorithmLinkRegex);
+    std::regex testSubAlgorithmLinkRegex(this->subAlgorithmLinkRegex);
+    std::regex testEndAlgorithmSubGraph(this->endAlgorithmSubGraph);
+
+
+    std::smatch matches;
+    
+    bool read = true;
+    while (read) {    
+        if (!pFile.getline(buffer, MAX_READ_SIZE))
+            throw std::ifstream::failure("Couldn't read in the given file");
+        else {
+            this->lastLine = buffer;
+        }
+
+        // check the line shape and parse it
+        if (std::regex_search(this->lastLine, matches, testAlgorithmRegex)) {
+            std::cout<<"algo: "<< this->lastLine<<std::endl;
+            this->readAlgorithm(matches);
+        } else if (std::regex_search(this->lastLine, matches, testAggregatedAlgorithmLinkRegex)) {
+            this->readAggregatedAlgorithmLink(matches);
+            std::cout<<"link aggr: "<< this->lastLine<<std::endl;
+        } else if (std::regex_search(this->lastLine, matches, testSubAlgorithmLinkRegex)) {
+            std::cout<<"link sub: "<< this->lastLine<<std::endl;
+            this->readSubAlgorithmLink(matches);
+        } else if (std::regex_search(this->lastLine, matches, testEndAlgorithmSubGraph)) {
+            std::cout<<"end: "<< this->lastLine<<std::endl;
+            read = false;
+        } else {
+            std::cout<<"none: "<< this->lastLine<<std::endl;
+        }
+    }
+}
+
+
+void File::GraphDotImporter::setMapAlgorithm()
+{
+    this->mapAlgorithms.clear();
+    // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
+    std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithmsToAdd;
+    for(Algorithm::Algorithm& algorithm : algorithms){
+        algorithmsToAdd.push_back(algorithm);
+    }
+    while(!algorithmsToAdd.empty()){
+        Algorithm::Algorithm& algorithm = algorithmsToAdd.back();
+        algorithmsToAdd.pop_back();
+
+        if(this->mapAlgorithms.find(algorithm.getAlgorithmID()) == this->mapAlgorithms.end()){
+            this->mapAlgorithms.insert({algorithm.getAlgorithmID(), algorithm});
+            for(Algorithm::Algorithm& subAlgorithm : algorithm.getSubAlgorithms()){
+                algorithmsToAdd.push_back(subAlgorithm);
+            }
+        }
     }
 }
 
@@ -303,6 +403,8 @@ void File::GraphDotImporter::importGraph()
 
     // Skip header
     this->dumpGraphHeader();
+    // Read algorithm subGraph
+    this->readAlgorithmGraphSubGraph();
     bool read = true;
     while (read) {
         read = this->readLineFromFile();
@@ -328,6 +430,7 @@ bool File::GraphDotImporter::readLineFromFile()
     else {
         this->lastLine = buffer;
     }
+
 
     // check the line shape and parse it
     if (std::regex_search(this->lastLine, matches, testTeamDeclare)) {

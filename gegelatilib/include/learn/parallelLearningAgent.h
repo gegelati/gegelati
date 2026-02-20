@@ -163,7 +163,7 @@ namespace Learn {
          * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
-            LearningEnvironment& le, std::vector<std::shared_ptr<Algorithm::Algorithm>> algorithms,
+            LearningEnvironment& le, std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms,
             const LearningParameters& p,
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : LearningAgent(le, algorithms, p, factory)
@@ -184,7 +184,7 @@ namespace Learn {
          * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
-            LearningEnvironment& le, std::shared_ptr<Algorithm::Algorithm> algorithm,
+            LearningEnvironment& le, Algorithm::Algorithm& algorithm,
             const LearningParameters& p,
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : LearningAgent(le, algorithm, p, factory)

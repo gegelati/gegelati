@@ -46,7 +46,9 @@
 void File::GraphDotExporter::printAgent(const Algorithm::Agent& agentProgram){
 
     // Find corresponding algorithm to the agent and print it
-    for(const Algorithm::Algorithm& algorithm : this->potentialAlgorithms){
+    auto it = this->mapAlgorithms.find(agentProgram.getAlgorithmID());
+    if(it != this->mapAlgorithms.end()){
+        const Algorithm::Algorithm& algorithm = it->second;
         if(algorithm.containsAgent(agentProgram)){
             std::vector<std::reference_wrapper<const EvoGraph::Element>> elements;
             algorithm.printAgent(agentProgram, this->pFile, this->offset, this->printedAgentID, elements);
@@ -54,18 +56,18 @@ void File::GraphDotExporter::printAgent(const Algorithm::Agent& agentProgram){
             // Print the elements collected during the printAgent call
             for(const EvoGraph::Element& element : elements){
                 this->printElement(element);
-
-                
                 if(auto vertex = dynamic_cast<const EvoGraph::Vertex*>(&element)){
                     std::string srcLetter = (dynamic_cast<const EvoGraph::Team*>(vertex) != nullptr) ? "T" : "A";
                     fprintf(pFile, "%sP%" PRIu64 " -> %s%" PRIu64 " [style=dashed]\n",
                             offset.c_str(), agentProgram.getAgentID(), srcLetter.c_str(), vertex->getVertexID());
                 }
             }
-            return;
+        } else {
+            throw std::runtime_error("File::GraphDotExporter::printAgent agent not in the algorithm");
         }
+    } else {
+        throw std::runtime_error("File::GraphDotExporter::printAgent unknown algorithm");
     }
-    throw std::runtime_error("File::GraphDotExporter::printAgent unknown agent program");
 }
 
 void File::GraphDotExporter::printElement(const EvoGraph::Element& element)
@@ -195,8 +197,54 @@ void File::GraphDotExporter::printGraphHeader()
     this->offset = "\t\t";
 }
 
+void File::GraphDotExporter::printAlgorithm(const Algorithm::Algorithm& printAlgorithm)
+{
+    this->mapAlgorithms.insert({printAlgorithm.getAlgorithmID(), printAlgorithm});
+
+    fprintf(pFile,
+            "%sALGO%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
+            "label=\"%s.%" PRIu64 "\"]\n",
+            this->offset.c_str(), printAlgorithm.getAlgorithmID(), printAlgorithm.getAlgorithmColor().c_str(), printAlgorithm.getAlgorithmName().c_str(), printAlgorithm.getAlgorithmID());
+
+    for(const Algorithm::Algorithm& subAlgorithm: printAlgorithm.cGetSubAlgorithms()){
+        this->printAlgorithm(subAlgorithm);
+
+        fprintf(pFile, "%sALGO%" PRIu64 " -> ALGO%" PRIu64 "\n",
+                offset.c_str(), printAlgorithm.getAlgorithmID(), subAlgorithm.getAlgorithmID());
+    }
+
+    for(const Algorithm::Algorithm& aggregatedAlgorithm: printAlgorithm.getAggregatedAlgorithms()){
+        fprintf(pFile, "%sALGO%" PRIu64 " -> ALGO%" PRIu64 " [style=dashed, color=\"#2a1699\"]\n",
+                offset.c_str(), printAlgorithm.getAlgorithmID(), aggregatedAlgorithm.getAlgorithmID());
+        fprintf(pFile, "%s{ rank= same ALGO%" PRIu64 " ALGO%" PRIu64 "}\n", this->offset.c_str(), printAlgorithm.getAlgorithmID(), aggregatedAlgorithm.getAlgorithmID());
+    }
+}
+
+void File::GraphDotExporter::printAlgorithmsSubGraph(const std::vector<std::reference_wrapper<const Algorithm::Algorithm>>& printAlgorithms)
+{   
+    this->mapAlgorithms.clear();
+
+    fprintf(pFile, "%ssubgraph cluster_algo {\n", offset.c_str());
+	
+    this->offset = "\t\t\t";
+    
+    fprintf(pFile, "%slabel = \"Algorithms\"\n", offset.c_str());
+    fprintf(pFile, "%sbgcolor = \"#f0f0f0\"\n", offset.c_str());
+    fprintf(pFile, "%sstyle = \"rounded,filled\"\n", offset.c_str());
+    fprintf(pFile, "%scolor = \"#888888\"\n", offset.c_str());
+
+    // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
+    for(const Algorithm::Algorithm& algorithm : printAlgorithms){
+        this->printAlgorithm(algorithm);
+    }
+    this->offset = "\t\t";
+    
+    fprintf(pFile, "%s}\n", offset.c_str());
+}
+
 void File::GraphDotExporter::printGraphFooter()
 {
+
 
     // Print root actions (and keep the ids)
     auto rootActions = tpg.getRootActions();
@@ -231,13 +279,15 @@ void File::GraphDotExporter::print()
     this->printedVertexID.clear();
     this->printedEdgeID.clear();
     this->printedAgentID.clear();
+    this->printedAlgorithmsID.clear();
+
+    // Print the algorithms header
+    this->printAlgorithmsSubGraph(this->algorithms);
 
     // Print each agent algorithms
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
     for(const Algorithm::Algorithm& algorithm : this->algorithms){
-    algorithm.getManagerCst();
-    algorithm.getManagerCst().getAgents();
         for(const Algorithm::Agent& agent : algorithm.getManagerCst().getAgents()){
             this->printAgent(agent);
         }
@@ -259,6 +309,14 @@ void File::GraphDotExporter::printSubGraph(const Algorithm::Agent& agent)
     this->printedVertexID.clear();
     this->printedEdgeID.clear();
     this->printedAgentID.clear();
+    this->printedAlgorithmsID.clear();
+
+    for(const Algorithm::Algorithm& algorithm: this->algorithms){
+        if(algorithm.containsAgent(agent)){
+            std::vector<std::reference_wrapper<const Algorithm::Algorithm>> vect{algorithm};
+            this->printAlgorithmsSubGraph(vect);
+        }
+    }
 
     // Print the agent given as parameter, its vertices and edges, and the potential agent programs associated to these vertices and edges.
     this->printAgent(agent);

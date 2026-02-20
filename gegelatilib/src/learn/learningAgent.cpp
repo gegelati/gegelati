@@ -49,19 +49,19 @@
 #include "algorithm/tpg/tpgJob.h"
 #include "algorithm/tpg/tpgAlgorithm.h"
 
-void Learn::LearningAgent::setCurrentAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm)
+void Learn::LearningAgent::setCurrentAlgorithm(Algorithm::Algorithm* algorithm)
 {
     if(algorithm == nullptr){
         throw std::runtime_error("LearningAgent::setCurrentAlgorithm: given algorithm is a null pointer.");
     }
-    if(std::find(this->algorithms.begin(), this->algorithms.end(), algorithm) == this->algorithms.end()){
+    if(std::find(this->algorithms.begin(), this->algorithms.end(), *algorithm) == this->algorithms.end()){
         throw std::runtime_error("LearningAgent::setCurrentAlgorithm: given algorithm is not part of the learning agent algorithms.");
     }
 
     this->currentExecutedAlgorithm = algorithm;
 }
 
-void Learn::LearningAgent::addAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm)
+void Learn::LearningAgent::addAlgorithm(Algorithm::Algorithm& algorithm)
 {
     this->algorithms.push_back(algorithm);
 }
@@ -71,14 +71,14 @@ Algorithm::Algorithm& Learn::LearningAgent::getAlgorithm(const Algorithm::Algori
 {
     
     auto iterator = std::find_if(this->algorithms.begin(), this->algorithms.end(),
-        [&algorithm](const std::shared_ptr<Algorithm::Algorithm>& algoPtr){
-            return algoPtr.get() == &algorithm;
+        [&algorithm](Algorithm::Algorithm& algo){
+            return algo == algorithm;
         });
-    if(iterator == this->algorithms.end() || (*iterator)->getAlgorithmID() != algorithm.getAlgorithmID()){
+    if(iterator == this->algorithms.end() || (*iterator).get().getAlgorithmID() != algorithm.getAlgorithmID()){
         throw std::invalid_argument("LearningAgent::getAlgorithm: the given algorithm is not managed by this learning agent.");
     }
 
-    return **iterator;
+    return *iterator;
 }
 
 EvoGraph::Graph& Learn::LearningAgent::getGraph()
@@ -89,24 +89,21 @@ EvoGraph::Graph& Learn::LearningAgent::getGraph()
 std::vector<std::reference_wrapper<const Algorithm::Algorithm>> Learn::LearningAgent::cGetAlgorithms() const
 {
     std::vector<std::reference_wrapper<const Algorithm::Algorithm>> result;
-    for(auto& algorithm : this->algorithms) {
-        result.push_back(std::reference_wrapper<const Algorithm::Algorithm>(*algorithm));
+    for(const Algorithm::Algorithm& algorithm : this->algorithms) {
+        result.push_back(algorithm);
     }
     return result;
 }
 
 std::vector<std::reference_wrapper<Algorithm::Algorithm>> Learn::LearningAgent::getAlgorithms()
 {
-    std::vector<std::reference_wrapper<Algorithm::Algorithm>> result;
-    for(auto& algorithm : this->algorithms) {
-        result.push_back(std::reference_wrapper<Algorithm::Algorithm>(*algorithm));
-    }
+    std::vector<std::reference_wrapper<Algorithm::Algorithm>> result(this->algorithms);
     return result;
 }
 
 Algorithm::Algorithm& Learn::LearningAgent::getAlgorithmAt(size_t idx)
 {
-    return *this->algorithms.at(idx);
+    return this->algorithms.at(idx);
 }
 
 RNG::RNG& Learn::LearningAgent::getRNG()
@@ -123,9 +120,9 @@ void Learn::LearningAgent::init(uint64_t seed)
         throw std::runtime_error("LearningAgent::init: No algorithm to init.");
     }
 
-    for(auto algorithm: algorithms){
-        algorithm->initAlgorithm(this->rng, *this->learningEnvironment.getActions(), this->learningEnvironment.getDataSources(), this->graph);
-        algorithm->initPopulation(this->rng);
+    for(Algorithm::Algorithm& algorithm: algorithms){
+        algorithm.initAlgorithm(this->rng, *this->learningEnvironment.getActions(), this->learningEnvironment.getDataSources(), this->graph);
+        algorithm.initPopulation(this->rng);
     }
 }
 
@@ -235,9 +232,9 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
         results;
 
 
-    for(auto algorithm: this->algorithms){
+    for(Algorithm::Algorithm& algorithm: this->algorithms){
         // set current executed algorithm
-        this->setCurrentAlgorithm(algorithm);
+        this->setCurrentAlgorithm(&algorithm);
 
         // Evaluate the algorithm agents and insert the results
         auto algoResults = this->evaluateCurrentAlgorithmAgents(generationNumber, mode);
@@ -255,7 +252,7 @@ Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
     if(this->currentExecutedAlgorithm == nullptr){
         throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: currentExecutedAlgorithm is not set.");
     }
-    if(!this->containsAlgorithm(this->currentExecutedAlgorithm)){
+    if(!this->containsAlgorithm(*this->currentExecutedAlgorithm)){
         throw std::runtime_error("LearningAgent::evaluateOneAlgorithmAgents: The learning agent does not contain the given algorithm.");
     }
 
@@ -265,7 +262,7 @@ Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
         this->currentExecutedAlgorithm->getManager().createExecutionEngine();
 
-    auto jobs = this->makeJobs(mode, this->currentExecutedAlgorithm);
+    auto jobs = this->makeJobs(mode);
     for(auto job: jobs) {
         std::shared_ptr<EvaluationResult> result = this->evaluateJob(
             *execEngine, *job, generationNumber, mode, this->learningEnvironment);
@@ -283,14 +280,14 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
     uint64_t generationNumber, Learn::LearningMode mode,
     const Algorithm::Agent& agent)
 {
-    auto algorithm = this->findCorrespondingAlgorithm(agent);
+    const Algorithm::Algorithm& algorithm = this->findCorrespondingAlgorithm(agent);
 
     // Create the execution engine of the agent.
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine =
-        algorithm->getManager().createExecutionEngine();
+        algorithm.getManagerCst().createExecutionEngine();
 
     // Create and evaluate the job
-    auto job = algorithm->createJob(agent, mode, this->rng);
+    auto job = algorithm.createJob(agent, mode, this->rng);
     std::shared_ptr<EvaluationResult> avgScore = this->evaluateJob(
         *execEngine, *job, generationNumber, mode, this->learningEnvironment);
 
@@ -305,10 +302,10 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 {
     if(this->algorithms.size() == 1){
         // Do the selection for this algorithm
-        this->algorithms.front()->getSelector().doSelection(*this->graph, results, rng);
+        this->algorithms.front().get().getSelector().doSelection(*this->graph, results, rng);
 
         // Update the evaluation records
-        this->algorithms.front()->getSelector().updateEvaluationRecords(results);
+        this->algorithms.front().get().getSelector().updateEvaluationRecords(results);
     } else {
 
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -317,13 +314,13 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 
         results.clear();
 
-        for(auto& algorithm: algorithms){
+        for(Algorithm::Algorithm& algorithm: algorithms){
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         std::reference_wrapper<const Algorithm::Agent>>
                 resultsAlgo;
             
             for(auto it = resultsCopy.begin(); it != resultsCopy.end(); ){
-                if(algorithm->containsAgent(it->second)){
+                if(algorithm.containsAgent(it->second)){
                     resultsAlgo.insert(*it);
                     it = resultsCopy.erase(it);
                 } else {
@@ -332,9 +329,9 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
             }
 
             // Do the selection for this algorithm
-            algorithm->getSelector().doSelection(*this->graph, resultsAlgo, rng);
+            algorithm.getSelector().doSelection(*this->graph, resultsAlgo, rng);
             // Update the evaluation records
-            algorithm->getSelector().updateEvaluationRecords(resultsAlgo);
+            algorithm.getSelector().updateEvaluationRecords(resultsAlgo);
 
             results.insert(resultsAlgo.begin(), resultsAlgo.end());
         }
@@ -381,8 +378,8 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
 
     if (doPopulate) {
         // Populate Sequentially
-        for(auto algorithm: algorithms){
-            algorithm->populate(this->rng, this->maxNbThreads);
+        for(Algorithm::Algorithm& algorithm: algorithms){
+            algorithm.populate(this->rng, this->maxNbThreads);
         }
     }
 
@@ -441,27 +438,25 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
 }
 
 std::vector<std::shared_ptr<Algorithm::Job>> Learn::LearningAgent::makeJobs(
-    Learn::LearningMode mode, std::shared_ptr<Algorithm::Algorithm> algorithm)
+    Learn::LearningMode mode)
 {
-    if(algorithm == nullptr && this->algorithms.size() == 1){
-        algorithm = this->algorithms.front();
-    } else if(algorithm == nullptr && this->algorithms.size() > 1){
-        throw std::runtime_error("LearningAgent::makeJobs: Multiple algorithms present in the learning agent, please specify one.");
+    if(this->currentExecutedAlgorithm == nullptr){
+        throw std::runtime_error("LearningAgent::makeJobs: Current executed algorithm is nullptr.");
     }
 
     std::vector<std::shared_ptr<Algorithm::Job>> jobs;
     size_t idx = 0;
-    for(auto agent: algorithm->getAgents()){
-        auto job = algorithm->createJob(agent, mode, rng, idx);
+    for(auto agent: this->currentExecutedAlgorithm->getAgents()){
+        auto job = this->currentExecutedAlgorithm->createJob(agent, mode, rng, idx);
         jobs.push_back(job);
         idx++;
     }
     return jobs;
 }
 
-std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::findCorrespondingAlgorithm(const Algorithm::Agent& agent){
-    for(auto algorithm: this->algorithms){
-        if(algorithm->containsAgent(agent)){
+Algorithm::Algorithm& Learn::LearningAgent::findCorrespondingAlgorithm(const Algorithm::Agent& agent){
+    for(Algorithm::Algorithm& algorithm: this->algorithms){
+        if(algorithm.containsAgent(agent)){
             return algorithm;
         }
     }
@@ -469,8 +464,8 @@ std::shared_ptr<Algorithm::Algorithm> Learn::LearningAgent::findCorrespondingAlg
     throw std::runtime_error("Agent not found in any algorithm");
 }
 
-bool Learn::LearningAgent::containsAlgorithm(std::shared_ptr<Algorithm::Algorithm> algorithm){
-    for(auto algo: this->algorithms){
+bool Learn::LearningAgent::containsAlgorithm(Algorithm::Algorithm& algorithm){
+    for(Algorithm::Algorithm& algo: this->algorithms){
         if(algo == algorithm){
             return true;
         }

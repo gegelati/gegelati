@@ -71,9 +71,9 @@ namespace File {
          */
         Algorithm::Algorithm& getAlgorithm(uint64_t algorithmID);
         /**
-         * \brief set the potential algorithms used in the attribute vector
+         * \brief set the map algorithms used in the attribute vector
          */
-        void setPotentialAlgorithm();
+        void setMapAlgorithm();
 
         /**
          * \brief File in which the dot content is read during import.
@@ -96,7 +96,7 @@ namespace File {
         std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms;
 
         /// @brief vector of algorithms used, including subAlgorithms. This is used to read the content of the programs of sub algorithms.
-        std::vector<std::reference_wrapper<Algorithm::Algorithm>> potentialAlgorithms;
+        std::map<uint64_t, std::reference_wrapper<Algorithm::Algorithm>> mapAlgorithms;
 
         
         /// @brief map of printed vertex. This is used to avoid printing twice the same vertex in case of multiple edges pointing toward it.
@@ -109,6 +109,35 @@ namespace File {
         std::map<uint64_t, std::reference_wrapper<const Algorithm::Agent>> readAgentID;
 
 
+        
+        /**
+         * \brief Contains the regex to identify an algorithm declaration
+         * 
+         * Should work with ALGO10 [.... label="Name.ID"]
+         */
+        static const std::string algorithmRegex;
+
+        /**
+         * \brief Contains the regex to identify an aggregated algorithm link declaration
+         * 
+         * Should work with ALGO10 -> ALGO12 [style=dashed]
+         */
+        static const std::string aggregatedAlgorithmLinkRegex;
+
+        /**
+         * \brief Contains the regex to identify a sub algorithm link declaration
+         * 
+         * Should work with ALGO10 -> ALGO12
+         */
+        static const std::string subAlgorithmLinkRegex;
+
+
+        /**
+         * \brief Contains the regex to identify the end of the sub graph of algorithms
+         * 
+         * should only work with "}"
+         */
+        static const std::string endAlgorithmSubGraph;
 
 
 
@@ -265,6 +294,26 @@ namespace File {
         void dumpGraphHeader();
 
         /**
+         * \brief reads an algorithm and control its validity
+         */
+        void readAlgorithm(std::smatch matches);
+
+        /**
+         * \brief control that aggregated algorithm link exist
+         */
+        void readAggregatedAlgorithmLink(std::smatch matches);
+
+        /**
+         * \brief control that sub algorithm link exist
+         */
+        void readSubAlgorithmLink(std::smatch matches);
+
+        /**
+         * \brief read the algorithm subGraph
+         */
+        void readAlgorithmGraphSubGraph();
+
+        /**
          * \brief reads and creates a Team.
          */
         void readTeam(std::smatch& matches);
@@ -301,6 +350,7 @@ namespace File {
          */
         void readLinkAgentTeam(std::smatch& matches);
 
+
         /**
          *	\brief reads a single line of the file
          *
@@ -308,6 +358,7 @@ namespace File {
          *characteristics specified as regexs.
          */
         bool readLineFromFile();
+
 
       public:
         /// \brief The major version supported by the importer.
@@ -337,7 +388,6 @@ namespace File {
                 throw std::runtime_error("Could not open file " +
                                          std::string(filePath));
             }
-            setPotentialAlgorithm();
             importGraph();
         };
 

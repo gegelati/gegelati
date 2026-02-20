@@ -38,9 +38,10 @@ namespace Algorithm::TPG {
              * \param[in] params the LearningParameters used by the Algorithm.
              * \param[in] programAlgorithm the sub-algorithm used to manipulate programs.
              * \param[in] algorithmName name of the algorithm used.
+             * \param[in] algorithmColor name of the algorithm used.
              */
-            TPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "TPG")
-                : Algorithm(params, algorithmName), archive{std::make_unique<Archive>(params.archiveSize, params.archivingProbability)} {
+            TPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "TPG", std::string algorithmColor = "#A0FF33")
+                : Algorithm(params, algorithmName, algorithmColor), archive{std::make_unique<Archive>(params.archiveSize, params.archivingProbability)} {
                 this->setProgramAlgorithm(programAlgorithm);
             };
 

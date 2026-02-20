@@ -124,6 +124,22 @@ std::vector<std::reference_wrapper<Algorithm::Algorithm>> Algorithm::Algorithm::
     return subAlgorithmsRef;
 }
 
+const std::vector<std::reference_wrapper<const Algorithm::Algorithm>>& Algorithm::Algorithm::getAggregatedAlgorithms() const
+{
+    return this->aggregatedAlgorithms;
+}
+
+
+const Algorithm::Algorithm& Algorithm::Algorithm::getAggregatedAlgorithm(uint64_t algorithmID) const
+{
+    for (const Algorithm& aggrAlgorithm : this->aggregatedAlgorithms) {
+        if (aggrAlgorithm.getAlgorithmID() == algorithmID) {
+            return aggrAlgorithm;
+        }
+    }
+    throw std::runtime_error("No aggregated-algorithm with id " + std::to_string(algorithmID) + " found.");
+}
+
 size_t Algorithm::Algorithm::getNbAgents() const
 {
     return this->manager->getAgents().size();   
@@ -157,13 +173,21 @@ void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHand
     this->initSubAlgorithms(rng, outputs, dataSource, graph);
 
     // Add the aggregated algorithm
-    for(const auto& aggregatedAlgorithm: this->aggregatedAlgorithms){
-        this->manager->addAggregatedManager(aggregatedAlgorithm.get().getManagerCst());
+    for(const Algorithm& aggregatedAlgorithm: this->aggregatedAlgorithms){
+        if(!aggregatedAlgorithm.isInit()) {
+            throw std::runtime_error("Aggregated algorithm is not initialize yet. It should be.");
+        }
+        this->manager->addAggregatedManager(aggregatedAlgorithm.getManagerCst());
     }
 
     // Clear the best agent in the selector
     this->selector->forgetPreviousResults();
 
+    this->init = true;
+}
+
+bool Algorithm::Algorithm::isInit() const{
+    return init;
 }
 
 void Algorithm::Algorithm::clearAlgorithm()
@@ -175,6 +199,7 @@ void Algorithm::Algorithm::clearAlgorithm()
     this->mutator = nullptr;
     this->selector = nullptr;
     this->manager = nullptr;
+    this->init = false;
 }
 
 void Algorithm::Algorithm::initPopulation(RNG::RNG& rng)
