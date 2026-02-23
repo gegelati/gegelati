@@ -52,13 +52,13 @@ namespace Log {
     {
       private:
         /**
-         * \brief Last best agent whose policyStats was printed in
+         * \brief ID of the Last best agent whose policyStats was printed in
          * the log.
          *
          * After each evaluation, the policyStats of an agent is printed in the
          * stream only if a new agent is marked as the bestAgent.
          */
-        std::optional<std::reference_wrapper<const Algorithm::Agent>> lastBestAgent = std::nullopt;
+        int64_t lastBestAgentID = -1;
 
         /// Number of the current generation.
         uint64_t generationNumber = 0;
