@@ -87,6 +87,14 @@ void Algorithm::Maple::MapleMutator::crossoverPrograms(
                 if (action->getActionID() == indexCross &&
                     edge.getProgram().getAlgorithmID() ==
                         this->programAlgorithmID) {
+
+                    const Agent& originAgent = edge.getProgram();
+                    // copy program
+                    const Algorithm::Agent& newAgent = manager.getSubManager(originAgent.getAlgorithmID()).copyAgent(originAgent, graph);
+
+                    // Set the mutated agent to the edge
+                    graph.setEdgeProgram(edge, newAgent);
+
                     swapPrograms.push_back(edge.getProgram());
                     break;
                 }
