@@ -1803,6 +1803,62 @@ TEST_F(ParallelLearningAgentTest, TrainContinuousMaple)
         << "Graph does not have the expected determinst characteristics.";
 }
 
+// Similar to previous test, but with continuous actions and no action programs
+TEST_F(ParallelLearningAgentTest, TrainContinuousSpecies)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    params.mutation.tpg.pCrossAgents = 0.7;
+    params.mutation.tpg.pCrossPrograms = 0.5;
+    params.mutation.tpg.useActionProgram = false;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.mutation.tpg.forceProgramBehaviorChangeOnMutation = true;
+    params.nbThreads = 3;
+
+    auto species = new Algorithm::SpeciesAlgorithm(params, *lgp);
+    Learn::ParallelLearningAgent la(cle, *species, params);
+
+    la.init();
+    bool alt = false;
+    la.train(alt, false);
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    EvoGraph::Graph& tpg = la.getGraph();
+
+    std::cout << tpg.getNbVertices() << " " << tpg.getNbRootVertices() << " "
+              << tpg.getEdges().size() << " "
+              << EvoGraph::Vertex::getVertexIDCounter() << " "
+              << EvoGraph::Edge::getEdgeIDCounter() << " "
+              << Algorithm::Agent::getAgentIDCounter() << " "
+
+              << la.getRNG().getUnsignedInt64(0, UINT64_MAX) << std::endl;
+
+    ASSERT_EQ(tpg.getNbVertices(), 27)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 24)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 72)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 151)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 379)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 336)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX),
+              11466624659474942238U)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
 /*
 TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
 {

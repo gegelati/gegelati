@@ -78,6 +78,12 @@
 #include <algorithm/maple/mapleManager.h>
 #include <algorithm/maple/mapleMutator.h>
 
+#include <algorithm/species/speciesAlgorithm.h>
+#include <algorithm/species/speciesAgent.h>
+#include <algorithm/species/speciesManager.h>
+#include <algorithm/species/speciesMutator.h>
+#include <algorithm/species/speciesExecutionEngine.h>
+
 #include <algorithm/tpg/archive.h>
 #include <algorithm/tpg/tpgAlgorithm.h>
 #include <algorithm/tpg/tpgAgent.h>

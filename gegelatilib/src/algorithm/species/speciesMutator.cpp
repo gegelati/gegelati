@@ -19,12 +19,14 @@ const EvoGraph::Team& Algorithm::Species::SpeciesMutator::initSpeciesGraphStruct
     this->isConfigurationValid(params, outputs);
 
     // Number of action vertices needed, created the action vertices
-    size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? 1 : outputs.front().getNbValues();
+    size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? outputs.sizeContinuous() : outputs.front().getNbValues();
     std::vector<std::reference_wrapper<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
 
     const EvoGraph::Team& team = graph.addNewTeam();
-    const EvoGraph::Action& action = actions.at(rng.getUnsignedInt64(0, nbActionVertices - 1));
-    graph.addNewEdge(team, action);
+    for(const EvoGraph::Action& action: actions){
+        graph.addNewEdge(team, action);
+    }
+    //const EvoGraph::Action& action = actions.at(rng.getUnsignedInt64(0, nbActionVertices - 1));
     return team;
 }
 
