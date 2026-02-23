@@ -6,7 +6,7 @@
 #include "algorithm/species/speciesAgent.h"
 #include "algorithm/species/speciesJob.h"
 #include "evoGraph/action.h"
-#include "evoGraph/team.h"
+#include "evoGraph/vertex.h"
 #include "algorithm/tpg/archive.h"
 
 #include "util/activationFunctions.h"
@@ -31,27 +31,32 @@ namespace Algorithm::Species {
         /// Last values outputted by the program
         std::vector<double> lastValues;
 
+        /// Root vertex of the species
+        const EvoGraph::Vertex& rootVertex;
+
     public:
 
         /**
          * \brief SpeciesExecutionEngine constructor.
          * 
+         * \param[in] rootVertex Root vertex of the species
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] algorithmID id of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        SpeciesExecutionEngine(const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false): ExecutionEngine(outputs, algorithmID, isTraining) {}
+        SpeciesExecutionEngine(const EvoGraph::Vertex& rootVertex, const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false): ExecutionEngine(outputs, algorithmID, isTraining), rootVertex{rootVertex} {}
 
         /**
          * \brief SpeciesExecutionEngine constructor. 
          * 
+         * \param[in] rootVertex Root vertex of the species
          * \param[in] executedAgent the agent to execute.
          * \param[in] outputs outputs that will be usable for
          * interacting with this LearningEnviromnent.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        SpeciesExecutionEngine(const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining) {}
+        SpeciesExecutionEngine(const EvoGraph::Vertex& rootVertex, const Agent& executedAgent, const Output::OutputHandler& outputs, bool isTraining = false): ExecutionEngine(executedAgent, outputs, isTraining), rootVertex{rootVertex} {}
 
         /**
          * Setter for the archive
@@ -92,8 +97,7 @@ namespace Algorithm::Species {
         virtual void setContinuousActionValues();
 
         /**
-         * \brief Execute the Program associated to an Edge and returns the
-         * obtained double.
+         * \brief Execute the Program and returns the obtained double.
          *
          * If an Archive is associated to the ExecutionEngine, the Program
          * result is recorded in it.
@@ -101,42 +105,26 @@ namespace Algorithm::Species {
          * If the value returned by the Program is NaN, then it is replaced with
          * a -inf value.
          *
-         * \param[in] edge the const ref to the Edge whose Program will be
-         * evaluated.
+         * \param[in] program Program evaluated.
          * \return the double value returned by the Program of the Edge.
          */
-        virtual double evaluateEdge(const EvoGraph::Edge& edge);
+        virtual double evaluateProgram(const Agent& program);
 
         /**
-         * \brief Evaluate all the Program of the outgoing Edge of the
-         *        Team.
+         * \brief Evaluate recursively all the vertexs of the species
          *
-         * This method evaluates the Programs of all outgoing Edge of the
-         * Team, and returns the reference to the Edge providing the
-         * largest evaluation.
-         *
-         * \param[in] team the Team whose outgoing Edge are evaluated.
-         * \return the reference to the Edge evaluated with the the highest
-         *         double value (and not excluded).
-         *
-         * \throw std::runtime_error in case the Team has no outgoing edge.
-         * This should not happen in a correctly constructed Graph.
+         * \param[in] vertex the vertex whose outgoing Edge are evaluated, should be castable to vertex.
+         * \param[in] depth the actual depth in the graph
+         * \param[in] mapEdgeProgram the map linking the edges to the programs
          */
-        virtual const EvoGraph::Edge& evaluateTeam(const EvoGraph::Team& team);
+        virtual void evaluateTeam(const EvoGraph::Vertex& vertex, size_t depth, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>>& mapEdgeProgram);
 
         /**
-         * \brief Execute the Graph starting from the vertex pointed by the given agent.
-         *
-         * This method browse the graph by successively evaluating Teams and
-         * following the Edge proposing the best bids.
-         * 
-         * \return a vector containing all the Vertex traversed during the
-         *         evaluation of the Graph. The Action resulting from the
-         *         Graph execution is at the end of the returned vector.
+         * \brief Execute the Graph starting from the vertex pointed by the species, with the program of the agent.
          */
         virtual std::vector<double> execute() override; 
 
-        
+
         /**
          * \brief Inherrited from ExecutionEngine
          */

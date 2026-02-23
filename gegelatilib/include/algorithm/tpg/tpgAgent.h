@@ -35,7 +35,7 @@ namespace Algorithm::TPG {
             /**
              * \brief Method that return if the agent is valid for execution.
              */
-            virtual bool isValid() const;
+            virtual bool isValid() const override;
 
             /**
              * \brief return if the tpgAgent has a vertex set or not.

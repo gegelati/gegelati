@@ -45,12 +45,22 @@ void Algorithm::Species::SpeciesAlgorithm::initSubAlgorithms(RNG::RNG& rng, cons
 
     // Add program manager and mutator to Species manager and mutator
     this->manager->addSubManager(programAlgo.getManager());
-    SpeciesManager* speciesManager = dynamic_cast<SpeciesManager*>(this->manager.get());
-    speciesManager->setProgramAlgorithmID(this->programAlgorithmID);
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(*this->manager);
+    speciesManager.setProgramAlgorithmID(this->programAlgorithmID);
 
     this->mutator->addSubMutator(programAlgo.getMutator());
-    SpeciesMutator* speciesMutator = dynamic_cast<SpeciesMutator*>(this->mutator.get());
-    speciesMutator->setProgramAlgorithmID(this->programAlgorithmID);
+    SpeciesMutator& speciesMutator = dynamic_cast<SpeciesMutator&>(*this->mutator);
+    speciesMutator.setProgramAlgorithmID(this->programAlgorithmID);
+}
+
+void Algorithm::Species::SpeciesAlgorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
+{
+    Algorithm::initAlgorithm(rng, outputs, dataSource, graph);
+
+    // Init the species and set the root vertex.
+    SpeciesMutator& speciesMutator = dynamic_cast<SpeciesMutator&>(*this->mutator);
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(*this->manager);
+    speciesManager.setSpeciesGraphStructure(speciesMutator.initSpeciesGraphStructure(*graph, speciesManager, params, rng));
 }
 
 std::shared_ptr<Algorithm::Job> Algorithm::Species::SpeciesAlgorithm::createJob(const Agent& agent, Learn::LearningMode mode, RNG::RNG& rng, int idx) const
@@ -141,9 +151,10 @@ std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Alg
     std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> usedSubAgents;
     usedSubAgents[this->programAlgorithmID] = std::set<std::reference_wrapper<const Agent>>();
 
-    for(const EvoGraph::Edge& edge: this->graph->getEdges()){
-        if(edge.getProgram().getAlgorithmID() == this->programAlgorithmID){
-            usedSubAgents[this->programAlgorithmID].insert(edge.getProgram());
+    for(const Agent& agent: this->manager->getAgents()) {
+        const SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
+        for(const auto& pair: speciesAgent.getPrograms()) {
+            usedSubAgents[this->programAlgorithmID].insert(*pair.second);
         }
     }
     return usedSubAgents;
@@ -153,24 +164,15 @@ void Algorithm::Species::SpeciesAlgorithm::printAgent(const Agent& agent, FILE* 
 {
     if(printedAgentID.find(agent.getAgentID()) == printedAgentID.end() && this->containsAgent(agent)){
         printedAgentID.insert(agent.getAgentID());
-
-        // Get vertex of the SpeciesAgent
-        const EvoGraph::Vertex& vertex = dynamic_cast<const SpeciesAgent&>(agent).getVertex();
-        elementsToPrint.push_back(vertex);
     
         fprintf(pFile,
                 "%sP%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
                 "width=0 height=0 label=\"%s.%" PRIu64 "\"]\n",
                 offset.c_str(), agent.getAgentID(), this->algorithmColor.c_str(), this->algorithmName.c_str(), this->algorithmID);
-    }   
+    }  
 }
 
 const Algorithm::Agent& Algorithm::Species::SpeciesAlgorithm::readAgent(std::smatch& matches)
 {
-    return dynamic_cast<SpeciesManager&>(*this->manager).createEmptyAgent();
-}
-
-void Algorithm::Species::SpeciesAlgorithm::linkAgentVertex(const Agent& agent, const EvoGraph::Vertex& vertex)
-{
-    dynamic_cast<SpeciesManager&>(*this->manager).setVertex(agent, vertex);
+    return dynamic_cast<SpeciesManager&>(*this->manager).createAgent(*this->graph);
 }

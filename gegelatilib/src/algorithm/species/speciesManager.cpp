@@ -6,40 +6,102 @@ Algorithm::Species::SpeciesAgent& Algorithm::Species::SpeciesManager::getSpecies
     return dynamic_cast<SpeciesAgent&>(**this->getAgentFromCst(agent));
 }
 
-const std::vector<std::reference_wrapper<const Algorithm::Agent>> Algorithm::Species::SpeciesManager::getAgents() const
+
+const std::set<std::reference_wrapper<const EvoGraph::Edge>>& Algorithm::Species::SpeciesManager::getEdges() const
 {
-    std::vector<std::reference_wrapper<const Algorithm::Agent>> constAgents;
-
-    // Transform each root from shared_ptr<Agent> to shared_ptr<const Agent>
-    for(auto it = this->agents.begin(); it != this->agents.end(); ){
-        const SpeciesAgent* speciesAgent = dynamic_cast<const SpeciesAgent*>((*it).get());
-        if(speciesAgent == nullptr){
-            throw std::runtime_error("SpeciesManager::getAgents: an agent managed by the SpeciesManager is not a SpeciesAgent.");
-        } else if (speciesAgent->isRoot()){
-            constAgents.push_back(**it);
-        }
-        it++;
-    }
-
-    return constAgents;
+    return this->edges;
 }
 
+const std::set<std::reference_wrapper<const EvoGraph::Edge>>& Algorithm::Species::SpeciesManager::getContextEdges() const
+{
+    return this->contextEdges;
+}
+
+const std::set<std::reference_wrapper<const EvoGraph::Edge>>& Algorithm::Species::SpeciesManager::getActionEdges() const
+{
+    return this->actionEdges;
+}
+
+const std::set<std::reference_wrapper<const EvoGraph::Team>>& Algorithm::Species::SpeciesManager::getTeams() const
+{
+    return this->teams;
+}
+
+const std::set<std::reference_wrapper<const EvoGraph::Action>>& Algorithm::Species::SpeciesManager::getActions() const
+{
+    return this->actions;
+}
+
+void Algorithm::Species::SpeciesManager::setVertexStructure(const EvoGraph::Vertex& vertex, size_t depth) {
+    // Add the vertex to either the teams or the actions
+    if(auto team = dynamic_cast<const EvoGraph::Team*>(&vertex)) {
+        this->teams.insert(*team);
+    } else if (auto action = dynamic_cast<const EvoGraph::Action*>(&vertex)) {
+        this->actions.insert(*action);
+    } else {
+        throw std::runtime_error("SpeciesManager::setSpeciesGraphStructure vertex should be either a team or an action.");
+    }
+
+    for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) { 
+        // When depth is odd, destination should all be teams. All edge are context edges.
+        if(depth % 2 == 1) {
+            if(auto destinationTeam = dynamic_cast<const EvoGraph::Team*>(&edge.getDestination())) {
+                this->edges.insert(edge);
+                this->contextEdges.insert(edge);
+            } else {
+                throw std::runtime_error("SpeciesManager::setSpeciesGraphStructure When depth is odd, destination should always be a team.");
+            }
+        } else {
+            if(auto destinationAction = dynamic_cast<const EvoGraph::Action*>(&edge.getDestination())) {
+                // When depth is even, edge pointing to an action is an action edge.
+                // Edge pointing to a team are simple connexion edges without programs
+                this->edges.insert(edge);
+                this->actionEdges.insert(edge);
+            }
+        }
+        this->setVertexStructure(edge.getDestination(), depth + 1);
+    }
+}
+
+void Algorithm::Species::SpeciesManager::setSpeciesGraphStructure(const EvoGraph::Vertex& rootVertex)
+{
+    this->rootVertex = rootVertex;
+    this->setVertexStructure(rootVertex, 0);
+
+    std::set<std::reference_wrapper<const EvoGraph::Vertex>> visitedTeams{rootVertex};
+    while(visitedTeams.size() > 0) {
+        const EvoGraph::Vertex& currentVertex = *visitedTeams.begin();
+        visitedTeams.erase(visitedTeams.begin());
+
+        // Add the vertex to either the teams or the actions
+        if(auto team = dynamic_cast<const EvoGraph::Team*>(&currentVertex)) {
+            this->teams.insert(*team);
+        } else if (auto action = dynamic_cast<const EvoGraph::Action*>(&currentVertex)) {
+            this->actions.insert(*action);
+        } else {
+            throw std::runtime_error("SpeciesManager::setSpeciesGraphStructure vertex should be either a team or an action.");
+        }
+        
+        // Add the edge to the edges if it contains a program, and to either the action or context edges, and its destination is respectively an action or a team.
+        for(const EvoGraph::Edge& edge: currentVertex.getOutgoingEdges()) {
+            visitedTeams.insert(edge.getDestination());
+
+            if(edge.hasProgram()) {
+                this->edges.insert(edge);
+                if(dynamic_cast<const EvoGraph::Action*>(&edge.getDestination()) != nullptr) {
+                    this->actionEdges.insert(edge);
+                } else {
+                    this->contextEdges.insert(edge);
+                }
+            }
+        }
+    }
+}
 
 const Algorithm::Agent& Algorithm::Species::SpeciesManager::createAgent(EvoGraph::Graph& graph)
 {
-    return this->createAgent(graph.addNewTeam());
-}
-
-const Algorithm::Agent& Algorithm::Species::SpeciesManager::createAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex)
-{
-    this->agents.insert(std::make_unique<SpeciesAgent>(vertex, this->getAlgorithmID()));
+    this->agents.insert(std::make_unique<SpeciesAgent>(this->getAlgorithmID(), this->edges));
     return **this->agents.rbegin();
-}
-
-const Algorithm::Agent& Algorithm::Species::SpeciesManager::createEmptyAgent()
-{
-    std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex = std::nullopt;
-    return this->createAgent(vertex);
 }
 
 const Algorithm::Agent& Algorithm::Species::SpeciesManager::copyAgent(const Agent& agent, EvoGraph::Graph& graph)
@@ -49,60 +111,39 @@ const Algorithm::Agent& Algorithm::Species::SpeciesManager::copyAgent(const Agen
         throw std::runtime_error("Algorithm::Species::SpeciesManager::copyAgent: trying to copy an agent that is not a SpeciesAgent.");
     }
 
-    // Set to castedAgent to avoid unset references
-    std::reference_wrapper<const EvoGraph::Vertex> newVertex = castedAgent.getVertex();
+    SpeciesAgent& newAgent = this->getSpeciesAgentFromCst((this->createAgent(graph)));
 
     if(agent.getAlgorithmID() != this->getAlgorithmID()){
-        // Since the agent dupplicated is not from the same algorithm, we also need to dupplicate the sub agents on the edge of the vertex.
-        newVertex = graph.addNewTeam();
-        for(const EvoGraph::Edge& edge: castedAgent.getVertex().getOutgoingEdges()){
-            const Algorithm::Agent& newSubAgent = this->getSubManager(this->programAlgorithmID).copyAgent(edge.getProgram(), graph);
-            graph.addNewEdge(newVertex, edge.getDestination(), newSubAgent);
-        }
-        
+        throw std::runtime_error("Algorithm::Species::SpeciesManager::copyAgent: impossible with different algorithm");
     } else {
-        newVertex = graph.cloneVertex(castedAgent.getVertex());
+        for(const auto& pair: castedAgent.getPrograms()){
+            newAgent.setEdgeProgram(pair.first, *pair.second);
+        }
     }
 
-    return this->createAgent(newVertex);
+    return newAgent;
 }
 
-void Algorithm::Species::SpeciesManager::deleteAgent(const Agent& agent, EvoGraph::Graph& graph)
-{
-    this->emptyAgent(agent, graph);
-    // Do not remove action agents from the graph
-    if(auto vertex = dynamic_cast<const EvoGraph::Team*>(&this->getSpeciesAgentFromCst(agent).getVertex())){
-        graph.removeVertex(*vertex);
-    }
-
-    auto iterator = this->agents.find(&agent);
-    this->agents.erase(iterator);   
-}
 void Algorithm::Species::SpeciesManager::emptyAgent(const Agent& agent, EvoGraph::Graph& graph)
 {
-    // Do not remove action agents from the graph
-    if(auto vertex = dynamic_cast<const EvoGraph::Team*>(&this->getSpeciesAgentFromCst(agent).getVertex())){
-        while(vertex->getOutgoingEdges().size() > 0){
-            graph.removeEdge(vertex->getOutgoingEdges().front());
-        }
+    SpeciesAgent& speciesAgent = this->getSpeciesAgentFromCst(agent);
+    for(const auto& pair: speciesAgent.getPrograms()){
+        speciesAgent.removeEdgeProgram(pair.first);
     }
 }
 
-void Algorithm::Species::SpeciesManager::setVertex(const Agent& agent, const EvoGraph::Vertex& vertex)
+void Algorithm::Species::SpeciesManager::setProgram(const Agent& agent, const EvoGraph::Edge& edge, const Agent& program)
 {
-    const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
-    if(&team == nullptr){
-        throw std::runtime_error("SpeciesManager::setVertex: trying to set an agent on a vertex from the graph that is not a team.");
+    if(program.getAlgorithmID() != this->programAlgorithmID) {
+        throw std::runtime_error("SpeciesManager::setProgram: ID of progrma is not the ID of the program Algorithm.");
     }
 
-    // Set the element
-    this->getSpeciesAgentFromCst(agent).setVertex(vertex);
+    this->getSpeciesAgentFromCst(agent).setEdgeProgram(edge, program);
 }
-
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::Species::SpeciesManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const
 {
-    auto engine = std::make_unique<Species::SpeciesExecutionEngine>(this->outputs, this->algorithmID, isTraining);
+    auto engine = std::make_unique<Species::SpeciesExecutionEngine>(*this->rootVertex, this->outputs, this->algorithmID, isTraining);
 
     engine->setProgramExecutionEngine(
         std::move(this->cGetSubManager(this->programAlgorithmID).createExecutionEngine(dataSources, isTraining))

@@ -297,7 +297,7 @@ namespace EvoGraph {
          *							destination is a Action.
          */
         const EvoGraph::Edge& addNewEdge(const Vertex& src, const Vertex& dest,
-                                  const Algorithm::Agent& programAgent);
+                                  std::optional<std::reference_wrapper<const Algorithm::Agent>> programAgent = std::nullopt);
 
 
         /**

@@ -29,6 +29,7 @@ namespace Algorithm::Species {
             /// Archive used during the training process
             std::unique_ptr<Archive> archive;
 
+
         public:
 
             /**
@@ -73,6 +74,13 @@ namespace Algorithm::Species {
              * \brief Initialize the mutator of the algorithm
              */
             virtual void initMutator() override;
+
+            /**
+             * Override of the initial method.
+             * Will call the Algorithm::initAlgorithm method, and then create the species structure.
+             * If the root is not already set, it will be a single team link to a single action.
+             */
+            virtual void initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
 
             /**
              * \brief Initialize the sub-algorithms of the algorithm
@@ -136,14 +144,6 @@ namespace Algorithm::Species {
              * \brief Inherited method to read a SpeciesAgent.
              */
             virtual const Agent& readAgent(std::smatch& matches) override;
-
-            /**
-             * \brief Link an agent to a corresponding vertex
-             * 
-             * \param[in] agent the agent linked to the vertex.
-             * \param[in] vertex the vertex linked to the agent.
-             */
-            virtual void linkAgentVertex(const Agent& agent, const EvoGraph::Vertex& vertex) override;
             
     };
 }; // namespace SPECIES_Algorithm

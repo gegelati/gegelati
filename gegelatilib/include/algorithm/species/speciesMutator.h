@@ -37,24 +37,6 @@ namespace Algorithm::Species {
         /// Archive used by this Species
         std::reference_wrapper<const Archive> archive;
 
-        /**
-         * \brief Method called during initRandomPopulation
-         * This methods add additionnal edges between the root vertices and the leaf vertices created.
-         * 
-         * \param[in,out] graph the initialized Graph.
-         * \param[in] leafVertices the leaf vertices to connect.
-         * \param[in] rootVertices the root vertices to connect.
-         * \param[in] programAgent the program agents available in the graph.
-         * \param[in] params the Parameters for the mutation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         */
-        virtual void addAditionnalEdges(
-            EvoGraph::Graph& graph,
-            std::vector<std::reference_wrapper<const EvoGraph::Vertex>> leafVertices,
-            std::vector<std::reference_wrapper<const EvoGraph::Vertex>> rootVertices,
-            std::vector<std::reference_wrapper<const Agent>> programAgent,
-            const Learn::LearningParameters& params, RNG::RNG& rng);
-
     public:
 
         /**
@@ -65,19 +47,6 @@ namespace Algorithm::Species {
          * \param[in] archive Archive used by this Species
          */
         SpeciesMutator(const Selector::Selector& selector, uint64_t algorithmID, const Archive& archive): Mutator(selector, algorithmID), archive{archive} {};
-
-        /**
-         * \brief Update the context used by the SpeciesMutator to populate the Graph.
-         * 
-         * \param[in] graph the Graph.
-         * \param[in] manager the manager to change the agents.
-         * \param[in] params the Parameters for the mutation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         */
-        virtual void updateSpecificContext(
-            EvoGraph::Graph& graph, AgentManager& manager, 
-            const Learn::LearningParameters& params,
-            RNG::RNG& rng) override;
 
 
         /**
@@ -105,6 +74,18 @@ namespace Algorithm::Species {
         virtual bool isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const override;
 
         /**
+         * \brief Init the graph structure of the species.
+         * 
+         * return the root of the structure.
+         * 
+         * \param[in,out] graph the initialized Graph.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual const EvoGraph::Team& initSpeciesGraphStructure(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng);
+
+        /**
          * \brief Initialize Species Population.
          *
          * \param[in,out] graph the initialized Graph.
@@ -126,67 +107,49 @@ namespace Algorithm::Species {
          */
         virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
 
-
+        
         /**
-         * \brief Select a random outgoingEdge of the given Vertex and removes
-         * it from the Graph.
-         *
-         * \param[in,out] graph the Graph within which the team is stored.
-         * \param[in] vertex the Vertex whose outgoingEdges will be altered.
+         * \brief Cross the two program at the specific edge
+         * 
+         * \param[in,out] agents the Agent to crossover.
+         * \param[in] edge the edge specified
+         * \param[in,out] graph the graph to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] newSubAgents vector of new agents of sub algorithm created while crossing over the agents
+         * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void removeRandomEdge(EvoGraph::Graph& graph, const EvoGraph::Vertex& vertex,
-                                RNG::RNG& rng);
+        virtual void crossoverPrograms(
+            std::array<std::reference_wrapper<const Agent>, 2> agents, const EvoGraph::Edge& edge, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng);
+
 
         /**
-         * \brief Add a new outgoing Edge to the Team within the Graph.
-         *
-         * This function adds a new outgoing Edge to the Team by cloning
-         * a preExisting Edge of the Graph. Since the graph may contain
-         * Edge from previous mutations, the function receives a list of
-         * preExisting Edge from which the Edge to copy should be chosen
-         * randomly. Any Edge already connected to the Team is also
-         * excluded from the candidates. If there is no valid Edge candidate
-         * this function will throw an exception (check code for more details).
-         * The new Edge will have the same destination Vertex and Program
-         * as the cloned one, but its source will be the give Team.
-         *
-         * \param[in,out] graph the Graph within which the team is stored.
-         * \param[in] team the Team whose outgoingEdges will be altered.
-         * for mutations.
-         * \param[in] rng Random Number Generator used in the
-         * mutation process.
+         * \brief Cross the two program at the specific edges
+         * 
+         * \param[in,out] agents the Agent to crossover.
+         * \param[in] edge the edge specified
+         * \param[in] manager the manager to change the agents.
+         * \param[in] newSubAgents vector of new agents of sub algorithm created while crossing over the agents
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void addRandomEdge(EvoGraph::Graph& graph, const EvoGraph::Team& team,
-                            RNG::RNG& rng);
+        virtual void crossoverEdges(
+            std::array<std::reference_wrapper<const Agent>, 2> agents, const EvoGraph::Edge& edge, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng);
+
 
         /**
-         * \brief Change the destination of a Edge to an randomly chosen
-         * target.
-         *
-         * This function selects a random Vertex among given pre-existing
-         * vector of Team and Action.
-         * The function randomly choses between a Action and a Team, with
-         * the probabilities within the given MutationParameters. No
-         * verification is made on the content of pre-existing Vertex list.
-         * If one of this list contains the team itself, a self-loop may be
-         * created. A Vertex not belonging to the graph in these lists will
-         * cause an exception within the Graph class though. If the current
-         * destination of the edge is among the candidates, the new destination
-         * may be the same as the old.
-         *
-         * \param[in,out] graph the Graph within which the team and edge are
-         *                stored.
-         * \param[in] edge the Edge whose destination will be altered.
-         * \param[in] params Probability parameters for the
-         * mutation.
-         * \param[in] rng Random Number Generator used in the mutation
-         * process.
+         * \brief Do a crossover over two maple agents, by either crossover the program on edges, or crossover the edges. Calling either crossoverPrograms or crossoverEdges methods
+         * 
+         * \param[in,out] agents the Agent to crossover.
+         * \param[in,out] graph the graph to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] newSubAgents vector of new agents of sub algorithm created while crossing over the agents
+         * \param[in] params Probability parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void mutateEdgeDestination(EvoGraph::Graph& graph,
-                                    const EvoGraph::Edge& edge,
-                                    const Learn::LearningParameters& params,
-                                    RNG::RNG& rng);
+        virtual void crossoverAgents(
+            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+        ) override;
 
         /**
          * \brief Prepares the mutation of a Edge.
@@ -197,6 +160,7 @@ namespace Algorithm::Species {
          * program are referenced in the newProgram list, and their behavior
          * must be mutated after this function to complete the mutation process.
          *
+         * \param[in,out] agent the Agent to mutate.
          * \param[in,out] graph the Graph within which the team and edge are
          *                stored.
          * \param[in] edge the Edge whose destination will be altered.
@@ -208,7 +172,7 @@ namespace Algorithm::Species {
          * Generator used in the mutation process.
          */
         virtual void mutateOutgoingEdge(
-            EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
+            const Agent& agent, EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
             AgentManager& manager,
             std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
             const Learn::LearningParameters& params, RNG::RNG& rng);

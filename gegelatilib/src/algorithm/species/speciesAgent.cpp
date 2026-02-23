@@ -1,52 +1,58 @@
 
 #include "algorithm/species/speciesAgent.h"
 
-void Algorithm::Species::SpeciesAgent::setVertex(const EvoGraph::Vertex& newVertex)
+std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Algorithm::Agent>>>::iterator Algorithm::Species::SpeciesAgent::getIteratorEdge(const EvoGraph::Edge& edge)
 {
-    auto teamVertex = dynamic_cast<const EvoGraph::Team*>(&newVertex);
-    if(teamVertex == nullptr){
-        throw std::runtime_error("SpeciesAgent::setVertex vertex to set is not a Team");
+    auto it = this->programs.find(edge);
+    if(it == this->programs.end()){
+        throw std::runtime_error("SpeciesAgent::getIteratorEdge: edge not found in the map of edge/program");
     }
+    return it;
+}
 
-    this->vertex = newVertex;
+bool Algorithm::Species::SpeciesAgent::hasEdge(const EvoGraph::Edge& edge) const
+{
+    auto it = this->programs.find(edge);
+    return it != this->programs.end();
+}
+
+bool Algorithm::Species::SpeciesAgent::hasProgram(const EvoGraph::Edge& edge) const
+{
+    if(!this->hasEdge(edge)){
+        throw std::runtime_error("SpeciesAgent::hasProgram: cannot check the program on an non existing edge");
+    }
+    return this->programs.at(edge) != std::nullopt;
+}
+
+void Algorithm::Species::SpeciesAgent::setEdgeProgram(const EvoGraph::Edge& edge, const Agent& program)
+{
+    this->getIteratorEdge(edge)->second = program;
+}
+
+void Algorithm::Species::SpeciesAgent::removeEdgeProgram(const EvoGraph::Edge& edge)
+{
+    this->getIteratorEdge(edge)->second = std::nullopt;
+}
+
+const Algorithm::Agent& Algorithm::Species::SpeciesAgent::getProgram(const EvoGraph::Edge& edge) const
+{
+    if(!hasProgram(edge)) {
+        throw std::runtime_error("SpeciesAgent::getProgram: program is not set");
+    }
+    return *this->programs.at(edge);
+}
+
+const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Algorithm::Agent>>>& Algorithm::Species::SpeciesAgent::getPrograms() const
+{
+    return this->programs;
 }
 
 bool Algorithm::Species::SpeciesAgent::isValid() const
 {
-    if(!this->hasVertex()){
-        return false;
-    } else if(auto vertex = dynamic_cast<const EvoGraph::Team*>(&this->vertex->get())){
-        return vertex->getOutgoingEdges().size() > 1;
-    } else {
-        return true;
+    for(const auto& pair: this->programs){
+        if(!this->hasProgram(pair.first)){
+            return false;
+        }
     }
-}
-
-bool Algorithm::Species::SpeciesAgent::hasVertex() const
-{
-    return this->vertex != std::nullopt;
-}
-
-void Algorithm::Species::SpeciesAgent::removeVertex()
-{
-    this->vertex == std::nullopt;
-}
-
-
-bool Algorithm::Species::SpeciesAgent::isRoot() const
-{
-    return this->vertex->get().getIncomingEdges().size() == 0;
-}
-
-const EvoGraph::Vertex& Algorithm::Species::SpeciesAgent::getVertex() const
-{
-    if(!this->vertex){
-        throw std::runtime_error("SpeciesAgent::getVertex no vertex set");
-    }
-    const EvoGraph::Team* vertex = dynamic_cast<const EvoGraph::Team*>(&this->vertex->get());
-    if(vertex == nullptr){
-        throw std::runtime_error("SpeciesAgent::getVertex vertex is not a Team");
-    }
-    
-    return *vertex;
+    return true;
 }

@@ -24,7 +24,26 @@ namespace Algorithm::Species {
         /// id of the program algorithm associated with the Species agents.
         uint64_t programAlgorithmID;
 
+        /// Vertex from which the species algorithm starts.
+        std::optional<std::reference_wrapper<const EvoGraph::Vertex>> rootVertex;
 
+        /// All edges contained in the species
+        std::set<std::reference_wrapper<const EvoGraph::Edge>> edges;
+
+        /// All edges contained in the species, containing an agent used for context decisions
+        std::set<std::reference_wrapper<const EvoGraph::Edge>> contextEdges;
+
+        /// All edges contained in the species, containing an agent used for action decisions
+        std::set<std::reference_wrapper<const EvoGraph::Edge>> actionEdges;
+
+        /// All teams contained in the species.
+        std::set<std::reference_wrapper<const EvoGraph::Team>> teams;
+
+        /// All actions contained in the species.
+        std::set<std::reference_wrapper<const EvoGraph::Action>> actions;
+
+
+        
         /**
          * \brief Get the SpeciesAgent from a const Agent pointer.
          * 
@@ -50,9 +69,36 @@ namespace Algorithm::Species {
         void setProgramAlgorithmID(uint64_t id) { this->programAlgorithmID = id; }
 
         /**
-         * \brief Get the current agents used by the algorithm.
+         * \brief Recursive method called during setSpeciesGraphStructure to explore the structure of a team.
+         * 
+         * \param[in] vertex vertex analyzed
+         * \param[in] depth current depth in the graph
          */
-        virtual const std::vector<std::reference_wrapper<const Agent>> getAgents() const override;
+        void setVertexStructure(const EvoGraph::Vertex& vertex, size_t depth);
+
+        /**
+         * \brief Set the graph structure of the species.
+         * The root vertex is used to explore the graph structure and fill the edges and vertices set.
+         * 
+         * \param[in] rootVertex the root vertex to start the exploration of the graph structure
+         */
+        virtual void setSpeciesGraphStructure(const EvoGraph::Vertex& rootVertex);
+
+
+        /// @brief getter for the edges 
+        const std::set<std::reference_wrapper<const EvoGraph::Edge>>& getEdges() const;
+
+        /// @brief getter for the context edges 
+        const std::set<std::reference_wrapper<const EvoGraph::Edge>>& getContextEdges() const;
+
+        /// @brief getter for the action edges 
+        const std::set<std::reference_wrapper<const EvoGraph::Edge>>& getActionEdges() const;
+
+        /// @brief getter for the teams
+        const std::set<std::reference_wrapper<const EvoGraph::Team>>& getTeams() const;
+
+        /// @brief getter for the actions 
+        const std::set<std::reference_wrapper<const EvoGraph::Action>>& getActions() const;
 
         /**
          * \brief Create a new SpeciesAgent.
@@ -62,24 +108,6 @@ namespace Algorithm::Species {
          * \return the created Agent.
          */
         virtual const Agent& createAgent(EvoGraph::Graph& graph) override;
-
-        /**
-         * \brief Create a new SpeciesAgent on a specific vertex.
-         * The vertex used can only be a EvoGraph::Team
-         * 
-         * \param[in] vertex the vertex associated with the Agent.
-         * 
-         * \return the created Agent.
-         */
-        virtual const Agent& createAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex);
-
-        /**
-         * \brief Create a new SpeciesAgent with no vertex. 
-         * This method is made only for readAgent during loading a .dot file.
-         * 
-         * \return the created Agent.
-         */
-        virtual const Agent& createEmptyAgent();
 
         /**
          * \brief Copy a SpeciesAgent.
@@ -94,14 +122,6 @@ namespace Algorithm::Species {
         virtual const Agent& copyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
         /**
-         * \brief Delete the SpeciesAgent.
-         * 
-         * \param[in] agent the Agent to delete.
-         * \param[in] graph the Graph associated with the Agent.
-         */
-        virtual void deleteAgent(const Agent& agent, EvoGraph::Graph& graph) override;
-
-        /**
          * \brief Empty a SpeciesAgent of its program.
          * 
          * \param[in] agent the Agent to empty.
@@ -110,12 +130,13 @@ namespace Algorithm::Species {
         virtual void emptyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
         /**
-         * \brief Set the vertex of an agent.
+         * \brief Set a specific program to the edge of an agent.
          * 
-         * \param[in] agent the Agent to delete.
-         * \param[in] vertex the vertex set to the agent.
+         * \param[in] agent the speciesAgent on which the program is set
+         * \param[in] edge the edge link to the program set
+         * \param[in] program the program set.
          */
-        virtual void setVertex(const Agent& agent, const EvoGraph::Vertex& vertex);
+        virtual void setProgram(const Agent& agent, const EvoGraph::Edge& edge, const Agent& program);
 
         /**
          * \brief create and return a Species execution engine.

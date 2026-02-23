@@ -304,7 +304,7 @@ void EvoGraph::Graph::setNewEdgeID(const EvoGraph::Edge& edge, uint64_t newID)
 
 const EvoGraph::Edge& EvoGraph::Graph::addNewEdge(
     const Vertex& src, const Vertex& dest,
-    const Algorithm::Agent& prog)
+    std::optional<std::reference_wrapper<const Algorithm::Agent>> prog)
 {
     // Check the Vertex existence within the graph.
     auto srcVertex = this->vertices.find(&src);
@@ -392,9 +392,14 @@ const EvoGraph::Edge& EvoGraph::Graph::cloneEdge(const Edge& edge)
         throw std::runtime_error(
             "Cannot duplicate an Edge not belonging to the graph.");
     }
-    return this->addNewEdge((*iterEdge)->getSource(),
-                            (*iterEdge)->getDestination(),
-                            (*iterEdge)->getProgram());
+    if((*iterEdge)->hasProgram()){
+        return this->addNewEdge((*iterEdge)->getSource(),
+                                (*iterEdge)->getDestination(),
+                                (*iterEdge)->getProgram());
+    } else {
+        return this->addNewEdge((*iterEdge)->getSource(),
+                                (*iterEdge)->getDestination());
+    }
     
 }
 

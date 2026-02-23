@@ -30,10 +30,10 @@ void Algorithm::Species::SpeciesExecutionEngine::setupJob(const Algorithm::Job& 
     this->setExecutedAgent(job.getAgent());
 }
 
-double Algorithm::Species::SpeciesExecutionEngine::evaluateEdge(const EvoGraph::Edge& edge)
+double Algorithm::Species::SpeciesExecutionEngine::evaluateProgram(const Agent& program)
 {
     // Set the progExecutionEngine to the program
-    this->programExecutionEngine->setExecutedAgent(edge.getProgram());
+    this->programExecutionEngine->setExecutedAgent(program);
 
     // Execute the program.
     this->lastValues = this->programExecutionEngine->execute();
@@ -45,7 +45,7 @@ double Algorithm::Species::SpeciesExecutionEngine::evaluateEdge(const EvoGraph::
 
     // Put the result in the archive before returning it.
     if (this->isTraining && this->archive != nullptr) {
-        this->archive->addRecording(edge.getProgram(), this->programExecutionEngine->getDataSources(),
+        this->archive->addRecording(program, this->programExecutionEngine->getDataSources(),
                                     result);
     }
     return result;
@@ -59,57 +59,78 @@ void Algorithm::Species::SpeciesExecutionEngine::setContinuousActionValues()
     }
 }
 
-const EvoGraph::Edge& Algorithm::Species::SpeciesExecutionEngine::evaluateTeam(const EvoGraph::Team& team)
+void Algorithm::Species::SpeciesExecutionEngine::evaluateTeam(const EvoGraph::Vertex& vertex, size_t depth, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Algorithm::Agent>>> & mapEdgeProgram)
 {
-    // Copy outgoing edge list
-    const auto& outgoingEdges = team.getOutgoingEdges();
-
-    // Evaluate all Edge
-    // First
-    std::reference_wrapper<const EvoGraph::Edge> bestEdge = *outgoingEdges.begin();
-    double bestBid = this->evaluateEdge(bestEdge);
-    this->setContinuousActionValues();
-
-    // Others
-    for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
-         iter++) {
-        const EvoGraph::Edge& edge = *iter;
-        double bid = this->evaluateEdge(edge);
-        if (bid >= bestBid) {
-            bestEdge = edge;
-            bestBid = bid;
-            this->setContinuousActionValues();
-        }
-        else {
-        }
+    // Execute the team of the destination of the best edge.
+    if (dynamic_cast<const EvoGraph::Team*>(&vertex) == nullptr) {
+        throw std::runtime_error("SpeciesExecutionEngine::evaluateTeam: Evaluated vertex should be a team!");
     }
 
-    return bestEdge;
+    // Copy outgoing edge list
+    const auto& outgoingEdges = vertex.getOutgoingEdges();
+
+
+    // Depth is odd, meaning we are on the "bid selection path"
+    if(depth % 2 == 1) {
+        // Evaluate all Edge
+        // First
+        std::reference_wrapper<const EvoGraph::Edge> bestEdge = *outgoingEdges.begin();
+        double bestBid = this->evaluateProgram(*mapEdgeProgram.at(bestEdge));
+
+        // Others
+        for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
+            iter++) {
+            const EvoGraph::Edge& edge = *iter;
+            double bid = this->evaluateProgram(*mapEdgeProgram.at(bestEdge));
+            if (bid >= bestBid) {
+                bestEdge = edge;
+                bestBid = bid;
+            }
+        }
+        this->evaluateTeam(bestEdge.get().getDestination(), depth + 1, mapEdgeProgram);
+
+
+    // Depth is even, meaning we are on the "activation selection path"
+    } else {
+        for (const EvoGraph::Edge& edge: outgoingEdges) {
+            // Edge is not in the map linking edge to program, it means its a connection edge without program between two teams. 
+            if(mapEdgeProgram.find(edge) == mapEdgeProgram.end()) {
+                // Execute the team of the destination of the best edge.
+                this->evaluateTeam(edge.getDestination(), depth + 1, mapEdgeProgram);
+            } else if (const EvoGraph::Action* action = dynamic_cast<const EvoGraph::Action*>(&edge.getDestination())) {
+                // Set action value for the action class
+                this->actionValues[action->getActionID()] = this->evaluateProgram(*mapEdgeProgram.at(edge));
+            } else {
+                throw std::runtime_error("SpeciesExecutionEngine::evaluateTeam: in even depth, edge should point to an action if it contains a program.");
+            }
+        }
+        
+    }
 }
 
 
 std::vector<double> Algorithm::Species::SpeciesExecutionEngine::execute()
 {
-    const Algorithm::Species::SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>((*this->executedAgent).get());
-    if(&speciesAgent == nullptr){
+    // At this point, the agent should be valid, and its edge should correspond to the species.
+    const Algorithm::Species::SpeciesAgent* speciesAgent = dynamic_cast<const SpeciesAgent*>(&(*this->executedAgent).get());
+    if(speciesAgent == nullptr){
         throw std::runtime_error("Algorithm::Species::SpeciesExecutionEngine::execute trying to execute an agent which is not a Species agent");
     }
-    std::reference_wrapper<const EvoGraph::Vertex> currentVertex = speciesAgent.getVertex();
 
-    // Browse the Species until a Action is reached.
-    while (auto teamVertex = dynamic_cast<const EvoGraph::Team*>(&currentVertex.get())) {
-        // Get the next edge
-        const EvoGraph::Edge& edge = this->evaluateTeam(*teamVertex);
 
-        // update currentVertex and backup in visitedVertex.
-        currentVertex = edge.getDestination();
-    }
+    this->actionValues.clear();
+    this->actionValues.resize(this->outputs.size(), 0.0);
 
+    size_t currentMode = 0;
+    this->evaluateTeam(this->rootVertex, 0, speciesAgent->getPrograms());
+
+    
     if(this->outputs.sizeContinuous() == 0){
-        return {(double)dynamic_cast<const EvoGraph::Action*>(&currentVertex.get())->getActionID()};
+        Output::convertContinuousToDiscreteOutputs(this->actionValues, this->outputs);
+        return this->actionValues;
     } else {
         /// TODO SET ACTIVATION FUNCTION
-        return Utils::ActivationFunctions::scaleOutputValues(actionValues, this->outputs, Utils::ActivationFunction::TANH);
+        return Utils::ActivationFunctions::scaleOutputValues(this->actionValues, this->outputs, Utils::ActivationFunction::TANH);
     }
 }
 

@@ -2,10 +2,11 @@
 #ifndef SPECIES_AGENT_H
 #define SPECIES_AGENT_H
 
+#include <map>
+
 #include <cstdint>
 #include "algorithm/agent.h"
-#include "evoGraph/team.h"
-#include "evoGraph/vertex.h"
+#include "evoGraph/edge.h"
 
 namespace Algorithm::Species {
       
@@ -16,55 +17,76 @@ namespace Algorithm::Species {
         {
         protected:
             
+            /// Program representing the agent. Eech program is associated to a specific edge
+            std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>> programs;
 
-            /// Element of the evolution graph that the agent represent.
-            /// This element can stay a nullptr if it is not required by the agent.
-            std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex;
+            /**
+             * \brief return the itertaor in the map of edge and program at the position of the specified edge.
+             */
+            std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>>::iterator getIteratorEdge(const EvoGraph::Edge& edge);
+
+            // TODO -> DIVIDE CONTEXT AND EDGE PROGRAMS
+            // TODO -> CHANGE ACTION VALUE OF THE VERTICES
 
         public:
 
             /**
              * \brief Main constructor of the SpeciesAgent.
              *
-             * \param[in] vertex the Vertex that the SpeciesAgent will represent.
              * \param[in] algorithmID id of the algorithm used.
+             * \param[in] edges the edges on which programs will be set
              */
-            SpeciesAgent(std::optional<std::reference_wrapper<const EvoGraph::Vertex>> vertex, uint64_t algorithmID) : vertex{vertex}, Agent(algorithmID) {};
-
-
-            /**
-             * \brief Method that return if the agent is valid for execution.
-             */
-            virtual bool isValid() const;
-
-            /**
-             * \brief return if the speciesAgent has a vertex set or not.
-             */
-            virtual bool hasVertex() const;
-
-            /**
-             * \brief remove the vertex set to the agent.
-             */
-            virtual void removeVertex();
-
-            /**
-             * \brief Setter for the vertex that the agent represent
-             * This vertex should be a Team
-             * 
-             * \param[in] newVertex the new vertex to set.
-             */
-            virtual void setVertex(const EvoGraph::Vertex& newVertex);
-
+            SpeciesAgent(uint64_t algorithmID, const std::set<std::reference_wrapper<const EvoGraph::Edge>>& edges) : Agent(algorithmID) {
+                for(const EvoGraph::Edge& edge: edges){
+                    programs.insert({edge, std::nullopt});
+                }
+            };
             
             /**
-             * \brief Getter for the vertex that the agent represent
+             * @brief Control if agent has the searched edge
+             * 
+             * \param[in] edge the edge searched
              */
-            virtual const EvoGraph::Vertex& getVertex() const;
+            bool hasEdge(const EvoGraph::Edge& edge) const;
 
             /**
-             * \brief Method that return if the agent's vertex is currently root.
+             * @brief Control if agent has a program on the specified edge
+             * 
+             * \param[in] edge the edge specified
              */
-            virtual bool isRoot() const;
+            bool hasProgram(const EvoGraph::Edge& edge) const;
+
+            /**
+             * @brief Remove the program on the specified edge
+             * 
+             * \param[in] edge the edge specified
+             */
+            virtual void removeEdgeProgram(const EvoGraph::Edge& edge);
+
+            /**
+             * @brief Set the program on the specified edge
+             * 
+             * \param[in] edge the edge specified
+             * \param[in] program the set program
+             */
+            virtual void setEdgeProgram(const EvoGraph::Edge& edge, const Agent& program);
+
+            /**
+             * @brief get the program on the specified edge
+             * 
+             * \param[in] edge the edge specified
+             */
+            virtual const Agent& getProgram(const EvoGraph::Edge& edge) const;
+
+            /**
+             * @brief get the map of edge and programs
+             */
+            virtual const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>>& getPrograms() const;
+
+            /**
+             * @brief indicate if the agent is valid, by checking if each edge has a program set
+             */
+            virtual bool isValid() const override;
         };
   
 }; // namespace Algorithm::Species

@@ -8,205 +8,41 @@ void Algorithm::Species::SpeciesMutator::setArchive(const Archive& archive)
     this->archive = archive;
 }
 
-void Algorithm::Species::SpeciesMutator::updateSpecificContext(
-    EvoGraph::Graph& graph, AgentManager& manager,
-    const Learn::LearningParameters& params,
-    RNG::RNG& rng)
-{
-    // Call parent method to update currentContext
-    Algorithm::Mutator::updateSpecificContext(graph, manager, params, rng);
-
-    // Update pre-existing elements
-    this->preExistingTeams.clear();
-    this->preExistingActions.clear();
-    this->preExistingEdges.clear();
-
-    std::set<std::reference_wrapper<const EvoGraph::Edge>> usableEdges;
-    std::set<std::reference_wrapper<const EvoGraph::Vertex>> usableVertices;
-    std::queue<std::reference_wrapper<const EvoGraph::Vertex>> toVisit;
-
-    // Initialize queue with vertices from all pre-existing agents
-    for (const Algorithm::Agent& agentPtr : this->currentContext->preExistingAgents) {
-        if(auto speciesAgent = dynamic_cast<const SpeciesAgent*>(&agentPtr)) {
-            toVisit.push(speciesAgent->getVertex());
-        } else {
-            throw std::runtime_error("SpeciesMutator::updateSpecificContext: an agent in the current context is not a SpeciesAgent.");
-
-        }
-
-    }
-
-    // BFS to collect all vertices reachable from pre-existing agents
-    while (!toVisit.empty()) {
-        const EvoGraph::Vertex& vertex = toVisit.front();
-        toVisit.pop();
-
-        // Skip if already visited
-        if (usableVertices.find(vertex) != usableVertices.end()) {
-            continue;
-        }
-        usableVertices.insert(vertex);
-
-        // Add all connected vertices to the queue
-        // Outgoing edges: vertices that this vertex points to
-        for (const EvoGraph::Edge& edge : vertex.getOutgoingEdges()) {
-            const EvoGraph::Vertex& destination = edge.getDestination();
-            if (usableVertices.find(destination) == usableVertices.end()) {
-                toVisit.push(destination);
-            }
-        }
-    }
-
-    for(const EvoGraph::Vertex& vertex: usableVertices){
-        if(dynamic_cast<const EvoGraph::Team*>(&vertex) != nullptr){
-            this->preExistingTeams.push_back(vertex);
-        } else if (dynamic_cast<const EvoGraph::Action*>(&vertex) != nullptr){
-            this->preExistingActions.push_back(vertex);
-        } else {
-            throw std::runtime_error("SpeciesMutator::updateSpecificContext: a vertex should be either a team or an action.");
-        }
-
-        usableEdges.insert(vertex.getOutgoingEdges().begin(), vertex.getOutgoingEdges().end());
-    }
-
-    this->preExistingEdges.insert(this->preExistingEdges.end(), usableEdges.begin(), usableEdges.end());
-}
-
 bool Algorithm::Species::SpeciesMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
 {
-    if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
-        throw std::runtime_error("SpeciesMutator::initRandomPopulation: Species does not support mixed discrete and continuous outputs.");
-    } else if (outputs.sizeContinuous() != 0){
-
-        if(outputs.size() > params.nbRegisters + 1){
-            throw std::runtime_error("SpeciesMutator::initRandomPopulation: Number of continuous outputs exceeds the number of registers plus one.");
-        }
-
-    } else if (outputs.sizeDiscrete() != 0){
-        
-        if (params.mutation.tpg.maxInitOutgoingEdges > outputs.front().getNbValues()) {
-            throw std::runtime_error("Maximum initial number of outgoing edges "
-                                        "cannot exceed the number of outputs");
-        }
-
-        if (outputs.front().getNbValues() < 2) {
-            throw std::runtime_error(
-                "A Species with a single output makes no sense.");
-        }
-
-        if (outputs.size() != 1) {
-            throw std::runtime_error(
-                "Species for discrete actions only supports one action"
-            );
-        }
-    } else {
-        throw std::runtime_error("SpeciesMutator::initRandomPopulation: No outputs defined.");
-    }
-    
-    if (params.mutation.tpg.maxInitOutgoingEdges < 2) {
-        throw std::runtime_error(
-            "A team should have at least two edges at initialisation.");
-    }
     return true;
 }
 
-void Algorithm::Species::SpeciesMutator::addAditionnalEdges(
-            EvoGraph::Graph& graph,
-            std::vector<std::reference_wrapper<const EvoGraph::Vertex>> leafVertices,
-            std::vector<std::reference_wrapper<const EvoGraph::Vertex>> rootVertices,
-            std::vector<std::reference_wrapper<const Agent>> programAgent,
-            const Learn::LearningParameters& params, RNG::RNG& rng)
+const EvoGraph::Team& Algorithm::Species::SpeciesMutator::initSpeciesGraphStructure(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    
-    // Add additional connections to Species
-    // Team-by-Team
-    for (const EvoGraph::Vertex& rootVertex : rootVertices) {
-        // Pick a number of additional outedge
-        size_t nbAdditionalEdges =
-            rng.getUnsignedInt64(0, params.mutation.tpg.maxInitOutgoingEdges - 2);
+    const auto& outputs = manager.getOutputs();
+    this->isConfigurationValid(params, outputs);
 
-        if (nbAdditionalEdges > 0) {
-            // Copy the list of programs
-            std::vector<int> availableChoices(programAgent.size());
-            std::iota(availableChoices.begin(), availableChoices.end(), 0);
-            // Remove already connected ones
-            auto iter = availableChoices.begin();
-            while (iter < availableChoices.end()) {
-                if (std::count_if(
-                        rootVertex.getOutgoingEdges().begin(),
-                        rootVertex.getOutgoingEdges().end(),
-                        [&iter, &programAgent](
-                            const EvoGraph::Edge& edge) {
-                            return edge.getProgram() ==
-                                   programAgent.at(*iter).get();
-                        }) > 0) {
-                    iter = availableChoices.erase(iter);
-                }
-                else {
-                    iter++;
-                }
-            }
+    // Number of action vertices needed, created the action vertices
+    size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? 1 : outputs.front().getNbValues();
+    std::vector<std::reference_wrapper<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
 
-            // For each additional edge to add
-            for (uint64_t i = 0;
-                 i < nbAdditionalEdges && availableChoices.size() > 0; i++) {
-                // Pick nbAdditionalEdges availabe programs and add them to the
-                // team
-                uint64_t progIndex =
-                    rng.getUnsignedInt64(0, availableChoices.size() - 1);
-
-                // Add the connection
-                graph.addNewEdge(
-                    rootVertex,
-                    leafVertices.at(
-                        rng.getUnsignedInt64(0, leafVertices.size() - 1)),
-                    programAgent.at(availableChoices.at(progIndex)));
-
-                availableChoices.erase(availableChoices.begin() + progIndex);
-            }
-        }
-    }
+    const EvoGraph::Team& team = graph.addNewTeam();
+    const EvoGraph::Action& action = actions.at(rng.getUnsignedInt64(0, nbActionVertices - 1));
+    graph.addNewEdge(team, action);
+    return team;
 }
 
 void Algorithm::Species::SpeciesMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    auto outputs = manager.getOutputs();
+    const auto& outputs = manager.getOutputs();
     this->isConfigurationValid(params, outputs);
+    this->initActionVertices(graph, manager.getOutputs().size());
     
     // Empty agent manager
     manager.clearAgents(graph);
-
-    // Number of action vertices needed
-    size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? 1 : outputs.front().getNbValues();
-
-    // Create teams, programs and Actions
-    std::vector<std::reference_wrapper<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
-    std::vector<std::reference_wrapper<const EvoGraph::Vertex>> teams;
-    std::vector<std::reference_wrapper<const Agent>> programAgents;
-
-
+    
     for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
-        teams.push_back(dynamic_cast<const SpeciesAgent&>(manager.createAgent(graph)).getVertex());
+        const Agent& agent = this->initRandomAgent(graph, manager, params, rng);
+        if(!agent.isValid()) {
+            throw std::runtime_error("SpeciesMutator::initRandomPopulation: agent should be valid after initialization");
+        }
     }
-
-    // Connect each team with two distinct actions, through two distinct
-    // programs Association here are determinists since randomness would
-    // uselessly complicate the code while bringing no real value since anyway,
-    // Programs have been initialized randomly.
-    Mutator& programMutator = this->getSubMutator(this->programAlgorithmID);
-    AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
-    for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
-
-        // Create a program agent
-        programAgents.push_back(programMutator.initRandomAgent(graph, programManager, params, rng));
-
-        // Add the edge
-        graph.addNewEdge(teams.at(i / 2), actions.at(i % actions.size()),
-                         programAgents.at(i));
-    }
-
-    std::vector<std::reference_wrapper<const EvoGraph::Vertex>> actionsVertex(actions.begin(), actions.end());
-    this->addAditionnalEdges(graph, actionsVertex, teams, programAgents, params, rng);
 }
 
 void Algorithm::Species::SpeciesMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
@@ -214,166 +50,149 @@ void Algorithm::Species::SpeciesMutator::initRandomSpecificAgent(const Agent& ag
     // First agent is initialized, check validity of the configuration.
     if(manager.getAgents().size() == 1){
         this->isConfigurationValid(params, manager.getOutputs());
-        // Number of action vertices needed
-        size_t nbActionVertices = (manager.getOutputs().sizeDiscrete() == 0) ? 1 : manager.getOutputs().front().getNbValues();
-        this->initActionVertices(graph, nbActionVertices);
+        this->initActionVertices(graph, manager.getOutputs().size());
     }
 
     manager.emptyAgent(agent, graph);
-    const EvoGraph::Vertex& vertex = dynamic_cast<const SpeciesAgent&>(agent).getVertex();
 
+    // Get program mutator and manager
     Mutator& programMutator = this->getSubMutator(this->programAlgorithmID);
     AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
 
-    // Get the actions vertices.
-    auto actions = graph.getActions();
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+    for(const EvoGraph::Edge& edge: speciesManager.getEdges()) {
+        
+        // Initialize a program
+        const Agent& programAgent = programMutator.initRandomAgent(graph, programManager, params, rng);
 
-    size_t nbEdges = rng.getUnsignedInt64(2, params.mutation.tpg.maxInitOutgoingEdges);
-    for(size_t idx = 0; idx < nbEdges; idx++){
-        // Add edge
-        graph.addNewEdge(vertex, actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
-                            programMutator.initRandomAgent(graph, programManager, params, rng));
+        speciesManager.setProgram(agent, edge, programAgent);
     }
 }
 
-void Algorithm::Species::SpeciesMutator::removeRandomEdge(EvoGraph::Graph& graph,
-                                                const EvoGraph::Vertex& vertex,
-                                                RNG::RNG& rng)
+
+void Algorithm::Species::SpeciesMutator::crossoverPrograms(
+    std::array<std::reference_wrapper<const Agent>, 2> agents, const EvoGraph::Edge& edge, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    // Pick an outgoing edge randomly,
-    auto pickableEdges = vertex.getOutgoingEdges();
+    const Agent& program0 = dynamic_cast<const SpeciesAgent&>(agents.at(0).get()).getProgram(edge);
+    const Agent& program1 = dynamic_cast<const SpeciesAgent&>(agents.at(1).get()).getProgram(edge);
 
-    // Note: No need to take special care of Actions. Since cycles can not
-    // appear in Species with the current mutation process, there is no need to
-    // maintain an action within each team.
+    // copy programs
+    const Algorithm::Agent& newProgram0 = manager.getSubManager(program0.getAlgorithmID()).copyAgent(program0, graph);
+    const Algorithm::Agent& newProgram1 = manager.getSubManager(program1.getAlgorithmID()).copyAgent(program1, graph);
+    std::array<std::reference_wrapper<const Agent>, 2> newPrograms{newProgram0, newProgram1};
 
-    // Pick a random edge
-    auto iterSet = pickableEdges.begin();
-    std::advance(iterSet, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
-    const EvoGraph::Edge& removedEdge = *iterSet;
-    graph.removeEdge(removedEdge);
+    // Do the crossover
+    AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
+    this->getSubMutator(newPrograms.front().get().getAlgorithmID()).crossoverAgents(newPrograms, graph, programManager, newSubAgents, params, rng);
+
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+    speciesManager.setProgram(agents.at(0), edge, newProgram0);
+    speciesManager.setProgram(agents.at(1), edge, newProgram1);
 }
 
-
-
-void Algorithm::Species::SpeciesMutator::addRandomEdge(
-    EvoGraph::Graph& graph, const EvoGraph::Team& team,
-    RNG::RNG& rng)
+void Algorithm::Species::SpeciesMutator::crossoverEdges(
+    std::array<std::reference_wrapper<const Agent>, 2> agents, const EvoGraph::Edge& edge, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    // Pick an edge (excluding ones from the team, edges with the team as a
-    // destination and the edges that are action edges)
-    auto pickableEdges(this->preExistingEdges);
-    // cf erase-remove idiom
-    pickableEdges.erase(
-        std::remove_if(pickableEdges.begin(), pickableEdges.end(),
-                       [&team](const EvoGraph::Edge& edge) -> bool {
-                           return &edge == nullptr ||
-                                  edge.getSource() == team ||
-                                  edge.getDestination() == team;
-                       }),
-        pickableEdges.end());
+    const Agent& program0 = dynamic_cast<const SpeciesAgent&>(agents.at(0).get()).getProgram(edge);
+    const Agent& program1 = dynamic_cast<const SpeciesAgent&>(agents.at(1).get()).getProgram(edge);
 
-    // Pick a pickable Edge
-    // (This code assumes that the set of pickable edge is never empty..
-    // otherwise it will throw an exception. Possible solution if needed
-    // initialize an entirely new program and pick a random target.)
-    auto iter = pickableEdges.begin();
-    std::advance(iter, rng.getUnsignedInt64(0, pickableEdges.size() - 1));
-    const EvoGraph::Edge& pickedEdge = *iter;
-
-    // Create new edge from team and with the same ProgramSharedPointer
-    // But with the team as its source
-    // throw std::runtime_error if the edge is not from the graph;
-    graph.setEdgeSource(graph.cloneEdge(pickedEdge), team);
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+    speciesManager.setProgram(agents.at(0), edge, program1);
+    speciesManager.setProgram(agents.at(1), edge, program0);
 }
 
-void Algorithm::Species::SpeciesMutator::mutateEdgeDestination(
-    EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::Species::SpeciesMutator::crossoverAgents(
+    std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    // Should the new target be an action or a team
-    bool targetAction =
-        rng.getDouble(0, 1) < params.mutation.tpg.pEdgeDestinationIsAction;
+    // No crossover
+    if (params.mutation.tpg.pCrossAgents == 0) {
+        return;
+    }
 
-    // Pick any target
-    // Note: Having an action in all teams is no longer enforced,
-    // as the presence of cycle in Speciess is not possible according to the current
-    // mutation process.
-    auto& list = (targetAction) ? this->preExistingActions : this->preExistingTeams;
-    const EvoGraph::Vertex& target = list.at(rng.getUnsignedInt64(0, list.size() - 1));
+    // Get available edges
+    const SpeciesManager& speciesManager = dynamic_cast<const SpeciesManager&>(manager);
+    std::vector<std::reference_wrapper<const EvoGraph::Edge>> availableEdges(speciesManager.getEdges().begin(), speciesManager.getEdges().end());
+    size_t remaining = availableEdges.size();
 
+    // Always do at least one crossover
+    // (mearning we don't want any crossover)
+    double proba = 1;
+    while (remaining > 0 &&
+           proba > rng.getDouble(0.0, 1.0)) {
 
-    // Change the target
-    // Changing the target should not fail.
-    graph.setEdgeDestination(edge, target);
+        // Pick uniformly from remaining values
+        size_t pickIdx = rng.getUnsignedInt64(0, remaining - 1);
+        const EvoGraph::Edge& pickEdge = availableEdges[pickIdx];
+
+        // Remove picked element (swap with last)
+        std::swap(availableEdges[pickIdx], availableEdges[remaining - 1]);
+        --remaining;
+
+        // A crossover at program level can be done only the both parents
+        // assessed the action concerned
+        if (params.mutation.tpg.pCrossPrograms > rng.getDouble(0, 1)) {
+            this->crossoverPrograms(agents, pickEdge, graph, manager, newSubAgents, params, rng);
+        }
+        else {
+            this->crossoverEdges(agents, pickEdge, manager, newSubAgents, params, rng);
+        }
+        proba *= params.mutation.tpg.pCrossAgents;
+    }
+
 }
+
 
 void Algorithm::Species::SpeciesMutator::mutateOutgoingEdge(
-    EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
+    const Agent& agent, EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     AgentManager& manager,
     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
     const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    const Agent& originAgent = edge.getProgram();
+    // Get the origin program
+    const Agent& originProgram = dynamic_cast<const SpeciesAgent&>(agent).getProgram(edge);
+
     // copy program
-    const Algorithm::Agent& newAgent = manager.getSubManager(originAgent.getAlgorithmID()).copyAgent(originAgent, graph);
+    const Algorithm::Agent& newProgram = manager.getSubManager(originProgram.getAlgorithmID()).copyAgent(originProgram, graph);
 
     // Set the mutated agent to the edge
-    graph.setEdgeProgram(edge, newAgent);
+    dynamic_cast<SpeciesManager&>(manager).setProgram(agent, edge, newProgram);
 
     // Add it to the list of new agent to be mutated.
-    newSubAgents.push_back(newAgent);
-
-    // Edge target modification
-    // As it Stephen kelly's work, Edge target modification is conditionned
-    // to the modification of the prealable Edge.Program behavior.
-    if (rng.getDouble(0.0, 1.0) < params.mutation.tpg.pEdgeDestinationChange) {
-        mutateEdgeDestination(graph, edge, params, rng);
-    }
+    newSubAgents.push_back(newProgram);
 }
 
 void Algorithm::Species::SpeciesMutator::mutateAgent(
     const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    const EvoGraph::Vertex& vertex = dynamic_cast<const SpeciesAgent&>(agent).getVertex();
-    const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
+    const SpeciesManager& speciesManager = dynamic_cast<const SpeciesManager&>(manager);
 
-    // 1. Remove randomly selected edges
-    // Keep at least two edges (otherwise the team is useless)
-    double proba = params.mutation.tpg.pEdgeDeletion;
-    while (team.getOutgoingEdges().size() > 2 &&
-            proba > rng.getDouble(0.0, 1.0)) {
-        this->removeRandomEdge(graph, team, rng);
-
-        // Decrement the proba of removing another edge
-        proba *= params.mutation.tpg.pEdgeDeletion;
-    }
-
-    // 2. Add random duplicated edge with the team as its source
-    proba = params.mutation.tpg.pEdgeAddition;
-    while (team.getOutgoingEdges().size() < params.mutation.tpg.maxOutgoingEdges &&
-            proba > rng.getDouble(0.0, 1.0)) {
-        // Add an edge (by duplication of an existing one)
-        this->addRandomEdge(graph, team, rng);
-        // Decrement the proba of adding another edge
-        proba *= params.mutation.tpg.pEdgeAddition;
-    }
-
-    // 3. Mutate edges of the team
     bool anyMutationDone = false;
     do {
-        // Process edge-by-edge
-        // And possibly modify their target
-        for (const EvoGraph::Edge& edge : team.getOutgoingEdges()) {
-            // Edge->Program bid modification
-            if (rng.getDouble(0.0, 1.0) < params.mutation.tpg.pProgramMutation) {
-                // Mutate the edge
-                this->mutateOutgoingEdge(graph, edge, manager, newSubAgents,
-                                    params, rng);
-                anyMutationDone = true;
-            }
+        
+        // Get available actions classes
+        std::vector<std::reference_wrapper<const EvoGraph::Edge>> availableEdges(speciesManager.getEdges().begin(), speciesManager.getEdges().end());
+        size_t remaining = availableEdges.size();
+
+        // 4. mutate randomly selected program on action Edge.
+        double proba = params.mutation.tpg.pMutateActionProgram;
+        while (remaining > 0 &&
+               proba > rng.getDouble(0.0, 1.0)) {
+
+            // Pick uniformly from remaining values
+            size_t pickIdx = rng.getUnsignedInt64(0, remaining - 1);
+            const EvoGraph::Edge& pickEdge = availableEdges[pickIdx];
+
+            // Remove picked element (swap with last)
+            // By swapping, the order of availableActions is changed.
+            std::swap(availableEdges[pickIdx], availableEdges[remaining - 1]);
+            --remaining;
+
+            this->mutateOutgoingEdge(agent, graph, pickEdge, manager, newSubAgents, params, rng);
+
+            proba *= params.mutation.tpg.pMutateActionProgram;
+            anyMutationDone = true;
         }
-    } while (!anyMutationDone && params.mutation.tpg.pProgramMutation > 0);
+    } while (!anyMutationDone && params.mutation.tpg.pMutateActionProgram != 0.0);
 }
 
 
