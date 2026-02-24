@@ -270,8 +270,12 @@ const EvoGraph::Vertex& EvoGraph::Graph::cloneVertex(const Vertex& vertex)
     // Copy the outgoing edges (if any).
     for (const EvoGraph::Edge& edge : vertex.getOutgoingEdges()) {
 
-        this->addNewEdge(newVertex, edge.getDestination(),
-                            edge.getProgram());
+        if(edge.hasProgram()) {
+            this->addNewEdge(newVertex, edge.getDestination(),
+                                edge.getProgram());
+        } else {
+            this->addNewEdge(newVertex, edge.getDestination());
+        }
     }
 
     newVertex.updateAssessedActions();

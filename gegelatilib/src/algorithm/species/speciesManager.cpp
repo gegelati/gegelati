@@ -6,6 +6,20 @@ Algorithm::Species::SpeciesAgent& Algorithm::Species::SpeciesManager::getSpecies
     return dynamic_cast<SpeciesAgent&>(**this->getAgentFromCst(agent));
 }
 
+bool Algorithm::Species::SpeciesManager::hasRootVertex() const
+{
+    return this->rootVertex != std::nullopt;
+}
+
+const EvoGraph::Vertex& Algorithm::Species::SpeciesManager::getRootVertex() const
+{
+    return *this->rootVertex;
+}
+
+void Algorithm::Species::SpeciesManager::setRootVertex(const EvoGraph::Vertex& newRootVertex)
+{
+    this->rootVertex = newRootVertex;
+}
 
 const std::set<std::reference_wrapper<const EvoGraph::Edge>>& Algorithm::Species::SpeciesManager::getEdges() const
 {
@@ -39,7 +53,7 @@ void Algorithm::Species::SpeciesManager::setVertexStructure(const EvoGraph::Vert
     } else if (auto action = dynamic_cast<const EvoGraph::Action*>(&vertex)) {
         this->actions.insert(*action);
     } else {
-        throw std::runtime_error("SpeciesManager::setSpeciesGraphStructure vertex should be either a team or an action.");
+        throw std::runtime_error("SpeciesManager::setVertexStructure vertex should be either a team or an action.");
     }
 
     for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) { 
@@ -49,7 +63,7 @@ void Algorithm::Species::SpeciesManager::setVertexStructure(const EvoGraph::Vert
                 this->edges.insert(edge);
                 this->contextEdges.insert(edge);
             } else {
-                throw std::runtime_error("SpeciesManager::setSpeciesGraphStructure When depth is odd, destination should always be a team.");
+                throw std::runtime_error("SpeciesManager::setVertexStructure When depth is odd, destination should always be a team.");
             }
         } else {
             if(auto destinationAction = dynamic_cast<const EvoGraph::Action*>(&edge.getDestination())) {
@@ -63,39 +77,12 @@ void Algorithm::Species::SpeciesManager::setVertexStructure(const EvoGraph::Vert
     }
 }
 
-void Algorithm::Species::SpeciesManager::setSpeciesGraphStructure(const EvoGraph::Vertex& rootVertex)
+void Algorithm::Species::SpeciesManager::setSpeciesGraphStructure()
 {
-    this->rootVertex = rootVertex;
-    this->setVertexStructure(rootVertex, 0);
-
-    std::set<std::reference_wrapper<const EvoGraph::Vertex>> visitedTeams{rootVertex};
-    while(visitedTeams.size() > 0) {
-        const EvoGraph::Vertex& currentVertex = *visitedTeams.begin();
-        visitedTeams.erase(visitedTeams.begin());
-
-        // Add the vertex to either the teams or the actions
-        if(auto team = dynamic_cast<const EvoGraph::Team*>(&currentVertex)) {
-            this->teams.insert(*team);
-        } else if (auto action = dynamic_cast<const EvoGraph::Action*>(&currentVertex)) {
-            this->actions.insert(*action);
-        } else {
-            throw std::runtime_error("SpeciesManager::setSpeciesGraphStructure vertex should be either a team or an action.");
-        }
-        
-        // Add the edge to the edges if it contains a program, and to either the action or context edges, and its destination is respectively an action or a team.
-        for(const EvoGraph::Edge& edge: currentVertex.getOutgoingEdges()) {
-            visitedTeams.insert(edge.getDestination());
-
-            if(edge.hasProgram()) {
-                this->edges.insert(edge);
-                if(dynamic_cast<const EvoGraph::Action*>(&edge.getDestination()) != nullptr) {
-                    this->actionEdges.insert(edge);
-                } else {
-                    this->contextEdges.insert(edge);
-                }
-            }
-        }
+    if(!this->hasRootVertex()){
+        throw std::runtime_error("SpeciesManager::setSpeciesGraphStructure no root vertex set.");
     }
+    this->setVertexStructure(*this->rootVertex, 0);
 }
 
 const Algorithm::Agent& Algorithm::Species::SpeciesManager::createAgent(EvoGraph::Graph& graph)

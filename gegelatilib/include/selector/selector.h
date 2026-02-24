@@ -54,6 +54,9 @@ namespace Selector {
          */
         Algorithm::AgentManager& manager;
 
+        /// @brief Score of the algorithm, set before do selection method
+        double algorithmScore = 0;
+
       public:
 
 
@@ -72,6 +75,19 @@ namespace Selector {
             : manager{manager}, params{params}
         {
         }
+
+        /// getter for the score algorithm
+        virtual double getScoreAlgorithm() const;
+
+        /**
+         * \brief compute the score of the algorithm
+         * 
+         * \param[in,out] results a multimap containing agent
+         * associated to their score during an evaluation.
+         */
+        virtual void computeScoreAlgorithm(
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          std::reference_wrapper<const Algorithm::Agent>>& results);
 
         /**
          * \brief Removes from the Graph the agent Vertex.

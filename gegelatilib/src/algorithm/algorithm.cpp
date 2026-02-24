@@ -163,6 +163,7 @@ void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHand
 {
     this->outputs = std::make_unique<Output::OutputHandler>(outputs);
     this->graph = graph;
+    this->dataSources = dataSource;
 
     this->initManager();
 

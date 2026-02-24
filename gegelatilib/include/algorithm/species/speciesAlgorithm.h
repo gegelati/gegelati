@@ -29,6 +29,9 @@ namespace Algorithm::Species {
             /// Archive used during the training process
             std::unique_ptr<Archive> archive;
 
+            /// Vertex from which the species algorithm starts.
+            std::optional<std::reference_wrapper<const EvoGraph::Vertex>> rootVertex;
+
 
         public:
 
@@ -44,6 +47,25 @@ namespace Algorithm::Species {
                 : Algorithm(params, algorithmName, algorithmColor), archive{std::make_unique<Archive>(params.archiveSize, params.archivingProbability)} {
                 this->setProgramAlgorithm(programAlgorithm);
             };
+
+
+            /**
+             * \brief init a new species from this current species.
+             */
+            std::unique_ptr<Algorithm> initNewSpecies(RNG::RNG& rng);
+
+            /// Indicate if manager contains a root vertex
+            bool hasRootVertex() const;
+
+            /// @brief Getter for the root vertex 
+            const EvoGraph::Vertex& getRootVertex() const;
+
+            /**
+             * \brief setter for the root vertex
+             * 
+             * \param[in] newRootVertex
+             */
+            void setRootVertex(const EvoGraph::Vertex& newRootVertex);
 
             /**
              * \brief Add the program sub-algorithm to the SpeciesAlgorithm.
@@ -133,12 +155,17 @@ namespace Algorithm::Species {
              */
             virtual std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> getUsedSubAgents() const override;
 
+            /**
+             * Print the species structure.
+             */
+            virtual void initialPrint(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
+
             /** 
              * \brief Inherited method to print a Speciesagent.
              * 
              * The Species agent prints the vertex it points to.
              */
-            void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
+            void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint, std::vector<std::reference_wrapper<const Agent>>& agentsToPrint) const override;
 
             /**
              * \brief Inherited method to read a SpeciesAgent.

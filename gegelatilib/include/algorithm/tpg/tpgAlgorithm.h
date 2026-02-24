@@ -131,7 +131,7 @@ namespace Algorithm::TPG {
              * 
              * The TPG agent prints the vertex it points to.
              */
-            void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
+            void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint, std::vector<std::reference_wrapper<const Agent>>& agentsToPrint) const override;
 
             /**
              * \brief Inherited method to read a TPGAgent.

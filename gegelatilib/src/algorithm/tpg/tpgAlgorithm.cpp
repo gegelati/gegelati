@@ -149,7 +149,7 @@ std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Alg
     return usedSubAgents;
 }
 
-void Algorithm::TPG::TPGAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
+void Algorithm::TPG::TPGAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint, std::vector<std::reference_wrapper<const Agent>>& agentsToPrint) const
 {
     if(printedAgentID.find(agent.getAgentID()) == printedAgentID.end() && this->containsAgent(agent)){
         printedAgentID.insert(agent.getAgentID());

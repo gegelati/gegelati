@@ -68,6 +68,9 @@ namespace Learn {
         /// Vector of shared pointer of algorithms learned by the learning agent.
         std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms;
 
+        /// Created species algorithms
+        std::vector<std::unique_ptr<Algorithm::Algorithm>> createdSpeciesAlgorithms;
+
         /// Parameters for the learning process
         LearningParameters params;
 

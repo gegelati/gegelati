@@ -53,6 +53,9 @@ namespace Algorithm {
 
         /// aggregated algorithms
         std::vector<std::reference_wrapper<const Algorithm>> aggregatedAlgorithms;
+
+        /// Data sources
+        std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources;
         
         /// Boolean to indicate if the algorithm has been initialize
         bool init = false;
@@ -320,6 +323,16 @@ namespace Algorithm {
         virtual void updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode);
 
         /**
+         * \brief Print the initialization of an algorithm
+         * 
+         * \param[in] pFile the file in which the content of the agent will be printed.
+         * \param[in] offset the character chain used to control the indentation of the printed content
+         * \param[in] elementsToPrint the set of already printed agent IDs to avoid printing the same agent twice in case of multiple vertices or edges using the same agent program.
+         */
+        virtual void initialPrint(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const {};
+
+
+        /**
          * \brief Print the content of an agent in a file.
          * 
          * \param[in] agent the agent to print.
@@ -327,8 +340,9 @@ namespace Algorithm {
          * \param[in] offset the character chain used to control the indentation of the printed content
          * \param[in] printedAgentID the set of already printed agent IDs to avoid printing the same agent twice in case of multiple vertices or edges using the same agent program.
          * \param[in] elementsToPrint the list of elements to print, filled during this method.
+         * \param[in] agentsToPrint the list of agents to print, filled during this method.
          */
-        virtual void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const = 0;
+        virtual void printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint, std::vector<std::reference_wrapper<const Agent>>& agentsToPrint) const = 0;
 
         /**
          * \brief Read and create an agent.

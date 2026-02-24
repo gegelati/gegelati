@@ -79,11 +79,21 @@ namespace Algorithm::Species {
         /**
          * \brief Set the graph structure of the species.
          * The root vertex is used to explore the graph structure and fill the edges and vertices set.
-         * 
-         * \param[in] rootVertex the root vertex to start the exploration of the graph structure
          */
-        virtual void setSpeciesGraphStructure(const EvoGraph::Vertex& rootVertex);
+        virtual void setSpeciesGraphStructure();
 
+        /// Indicate if manager contains a root vertex
+        bool hasRootVertex() const;
+
+        /// @brief Getter for the root vertex 
+        const EvoGraph::Vertex& getRootVertex() const;
+
+        /**
+         * \brief setter for the root vertex
+         * 
+         * \param[in] newRootVertex
+         */
+        void setRootVertex(const EvoGraph::Vertex& newRootVertex);
 
         /// @brief getter for the edges 
         const std::set<std::reference_wrapper<const EvoGraph::Edge>>& getEdges() const;

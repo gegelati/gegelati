@@ -38,7 +38,7 @@ std::shared_ptr<Algorithm::PolicyStats> Algorithm::LGP::LGPAlgorithm::createPoli
     return std::make_shared<LGPPolicyStats>(this->algorithmName, this->algorithmID, *this->env);
 }
 
-void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
+void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint, std::vector<std::reference_wrapper<const Agent>>& agentsToPrint) const
 {
     if(printedAgentID.find(agent.getAgentID()) == printedAgentID.end() && this->containsAgent(agent)){
         printedAgentID.insert(agent.getAgentID());

@@ -22,12 +22,104 @@ const EvoGraph::Team& Algorithm::Species::SpeciesMutator::initSpeciesGraphStruct
     size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? outputs.sizeContinuous() : outputs.front().getNbValues();
     std::vector<std::reference_wrapper<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
 
+    // Connexion
+    /*const EvoGraph::Team& team = graph.addNewTeam();
+    const EvoGraph::Team& team0 = graph.addNewTeam();
+    const EvoGraph::Team& team1 = graph.addNewTeam();
+    graph.addNewEdge(team, team0);
+    graph.addNewEdge(team, team1);
+    
+    // Context
+    const EvoGraph::Team& team2 = graph.addNewTeam();
+    const EvoGraph::Team& team3 = graph.addNewTeam();
+    graph.addNewEdge(team0, team2);
+    graph.addNewEdge(team0, team3);
+
+    const EvoGraph::Team& team4 = graph.addNewTeam();
+    const EvoGraph::Team& team5 = graph.addNewTeam();
+    graph.addNewEdge(team1, team4);
+    graph.addNewEdge(team1, team5);
+
+    // Action
+    for(uint64_t idx = 0; idx < 3; idx++){
+        graph.addNewEdge(team2, actions.at(idx));
+        graph.addNewEdge(team3, actions.at(idx));
+
+        graph.addNewEdge(team4, actions.at(idx + 3));
+        graph.addNewEdge(team5, actions.at(idx + 3));
+    }*/
+
+    // Connexion
     const EvoGraph::Team& team = graph.addNewTeam();
-    for(const EvoGraph::Action& action: actions){
-        graph.addNewEdge(team, action);
-    }
-    //const EvoGraph::Action& action = actions.at(rng.getUnsignedInt64(0, nbActionVertices - 1));
+    const EvoGraph::Action& action = actions.at(rng.getUnsignedInt64(0, nbActionVertices - 1));
+    graph.addNewEdge(team, action);
+    graph.updateAllAssessedActions();
     return team;
+}
+
+const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+{
+    double probaAdd = 0.5;
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+    if(speciesManager.getRootVertex().getAssessedActions().size() == manager.getOutputs().size()) {
+        probaAdd == 0;
+    } else if (speciesManager.getRootVertex().getAssessedActions().size() == 1) {
+        probaAdd = 1;
+    }
+
+
+    const EvoGraph::Vertex& newRoot = this->copyGraphSpecies(manager, graph);
+    if(probaAdd > rng.getDouble(0, 1)) {
+        std::cout<<"  ADD      ";
+        // Add an action edge
+        const auto& set = newRoot.getAssessedActions();
+        std::vector<std::reference_wrapper<const EvoGraph::Action>> availableActions(graph.getActions());
+        
+        availableActions.erase(
+            std::remove_if(
+                availableActions.begin(),
+                availableActions.end(),
+                [&set](const EvoGraph::Action& action) {
+                    return set.find(action.getActionID()) != set.end();
+                }
+            ),
+            availableActions.end()
+        );
+        
+        graph.addNewEdge(newRoot, availableActions.at(rng.getUnsignedInt64(0, availableActions.size() - 1)));
+    } else {
+        std::cout<<"  DEL    ";
+        // Delete an action edge
+        size_t pickedEdgeID = rng.getUnsignedInt64(0, newRoot.getOutgoingEdges().size() - 1);
+        auto it = newRoot.getOutgoingEdges().begin();
+        std::advance(it, pickedEdgeID);
+        graph.removeEdge(*it);
+    }
+
+    graph.updateAllAssessedActions();
+    return newRoot;
+}
+
+const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::copyGraphSpecies(AgentManager& manager, EvoGraph::Graph& graph)
+{
+    std::map<std::reference_wrapper<const EvoGraph::Vertex>, std::reference_wrapper<const EvoGraph::Vertex>> teamMap;
+
+    const auto& originTeams = dynamic_cast<SpeciesManager&>(manager).getTeams();
+
+    for(const EvoGraph::Team& team: originTeams) {
+        teamMap.insert({team, graph.cloneVertex(team)});
+    }
+
+    for(const auto& pair: teamMap) {
+        for(const EvoGraph::Edge& edge: pair.second.get().getOutgoingEdges()) {
+            if(auto team = dynamic_cast<const EvoGraph::Team*>(&edge.getDestination())) {
+                graph.setEdgeDestination(edge, teamMap.at(*team));
+            }
+        }
+    }
+
+    graph.updateAllAssessedActions();
+    return teamMap.at(dynamic_cast<SpeciesManager&>(manager).getRootVertex()).get();
 }
 
 void Algorithm::Species::SpeciesMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)

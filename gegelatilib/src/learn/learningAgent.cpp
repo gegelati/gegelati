@@ -47,7 +47,7 @@
 #include "learn/learningAgent.h"
 
 #include "algorithm/tpg/tpgJob.h"
-#include "algorithm/tpg/tpgAlgorithm.h"
+#include "algorithm/species/speciesAlgorithm.h"
 
 void Learn::LearningAgent::setCurrentAlgorithm(Algorithm::Algorithm* algorithm)
 {
@@ -300,7 +300,77 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
                           std::reference_wrapper<const Algorithm::Agent>>& results,
             RNG::RNG& rng)
 {
-    if(this->algorithms.size() == 1){
+    bool speciesAlgorithmTest = true;
+    if(speciesAlgorithmTest) {
+        std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+            std::reference_wrapper<const Algorithm::Agent>>
+            resultsCopy(results);
+
+        results.clear();
+
+
+        std::map<double, std::reference_wrapper<Algorithm::Algorithm>> scoreAlgorithm;
+        for(Algorithm::Algorithm& algorithm: algorithms){
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                        std::reference_wrapper<const Algorithm::Agent>>
+                resultsAlgo;
+            
+            for(auto it = resultsCopy.begin(); it != resultsCopy.end(); ){
+                if(algorithm.containsAgent(it->second)){
+                    resultsAlgo.insert(*it);
+                    it = resultsCopy.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+
+            algorithm.getSelector().computeScoreAlgorithm(resultsAlgo);
+            scoreAlgorithm.insert({algorithm.getSelector().getScoreAlgorithm(), algorithm});
+            // Do the selection for this algorithm
+            algorithm.getSelector().doSelection(*this->graph, resultsAlgo, rng);
+            // Update the evaluation records
+            algorithm.getSelector().updateEvaluationRecords(resultsAlgo);
+
+            results.insert(resultsAlgo.begin(), resultsAlgo.end());
+        }
+
+        double probaAdd = 0.5;
+        double probaDel = 0.2;
+        if(probaAdd > rng.getDouble(0, 1) && this->algorithms.size() < 5) {
+            std::cout<<"CREATE ALGOOOOO";
+            // Dupplicate algorithm ->
+            Algorithm::SpeciesAlgorithm& algoToDupplicate = dynamic_cast<Algorithm::SpeciesAlgorithm&>(scoreAlgorithm.rbegin()->second.get());
+
+            this->createdSpeciesAlgorithms.push_back(std::move(algoToDupplicate.initNewSpecies(this->rng)));
+            Algorithm::Algorithm& newAlgorithm = **this->createdSpeciesAlgorithms.rbegin();
+            newAlgorithm.initPopulation(this->rng);
+            this->algorithms.push_back(newAlgorithm);
+        }
+
+        else if(probaDel > rng.getDouble(0, 1) && this->algorithms.size() > 3) {
+            std::cout<<"DESTROY ALGOOOOO";
+            auto& algoRef = scoreAlgorithm.begin()->second.get();
+            auto it = std::find(this->algorithms.begin(), this->algorithms.end(), algoRef);
+            this->algorithms.erase(it);
+
+            auto it2 = std::find_if(
+                this->createdSpeciesAlgorithms.begin(),
+                this->createdSpeciesAlgorithms.end(),
+                [&algoRef](const std::unique_ptr<Algorithm::Algorithm>& ptr) {
+                    return ptr.get() == &algoRef; // Compare raw pointers
+                }
+            );
+
+            if (it2 != this->createdSpeciesAlgorithms.end()) {
+                this->createdSpeciesAlgorithms.erase(it2);
+            }
+        }
+
+        
+
+
+
+    } else if(this->algorithms.size() == 1){
         // Do the selection for this algorithm
         this->algorithms.front().get().getSelector().doSelection(*this->graph, results, rng);
 

@@ -51,7 +51,8 @@ void File::GraphDotExporter::printAgent(const Algorithm::Agent& agentProgram){
         const Algorithm::Algorithm& algorithm = it->second;
         if(algorithm.containsAgent(agentProgram)){
             std::vector<std::reference_wrapper<const EvoGraph::Element>> elements;
-            algorithm.printAgent(agentProgram, this->pFile, this->offset, this->printedAgentID, elements);
+            std::vector<std::reference_wrapper<const Algorithm::Agent>> agentsToPrint;
+            algorithm.printAgent(agentProgram, this->pFile, this->offset, this->printedAgentID, elements, agentsToPrint);
 
             // Print the elements collected during the printAgent call
             for(const EvoGraph::Element& element : elements){
@@ -62,10 +63,15 @@ void File::GraphDotExporter::printAgent(const Algorithm::Agent& agentProgram){
                             offset.c_str(), agentProgram.getAgentID(), srcLetter.c_str(), vertex->getVertexID());
                 }
             }
+
+            for(const Algorithm::Agent& agentToPrint: agentsToPrint) {
+                this->printAgent(agentToPrint);
+            }
         } else {
             throw std::runtime_error("File::GraphDotExporter::printAgent agent not in the algorithm");
         }
     } else {
+        std::cout<<"eee "<<agentProgram.getAlgorithmID()<<std::endl;
         throw std::runtime_error("File::GraphDotExporter::printAgent unknown algorithm");
     }
 }
@@ -288,6 +294,14 @@ void File::GraphDotExporter::print()
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
     for(const Algorithm::Algorithm& algorithm : this->algorithms){
+        std::vector<std::reference_wrapper<const EvoGraph::Element>> elements;
+        algorithm.initialPrint(this->pFile, this->offset, elements);
+
+        // Print the elements collected during the printAgent call
+        for(const EvoGraph::Element& element : elements){
+            this->printElement(element);
+        }
+
         for(const Algorithm::Agent& agent : algorithm.getManagerCst().getAgents()){
             this->printAgent(agent);
         }
@@ -315,6 +329,15 @@ void File::GraphDotExporter::printSubGraph(const Algorithm::Agent& agent)
         if(algorithm.containsAgent(agent)){
             std::vector<std::reference_wrapper<const Algorithm::Algorithm>> vect{algorithm};
             this->printAlgorithmsSubGraph(vect);
+
+            
+            std::vector<std::reference_wrapper<const EvoGraph::Element>> elements;
+            algorithm.initialPrint(this->pFile, this->offset, elements);
+
+            // Print the elements collected during the printAgent call
+            for(const EvoGraph::Element& element : elements){
+                this->printElement(element);
+            }
         }
     }
 

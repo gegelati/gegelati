@@ -54,7 +54,7 @@ class FakeMultiContinuousLearningEnvironment : public Learn::LearningEnvironment
 
   public:
     FakeMultiContinuousLearningEnvironment()
-        : LearningEnvironment(Output::OutputHandler(std::vector<Output::Output>(3, Output::Output{-1.0, 1.0}))),
+        : LearningEnvironment(Output::OutputHandler(std::vector<Output::Output>(6, Output::Output{-1.0, 1.0}))),
         data(3), 
         nbTurns(0)
     {

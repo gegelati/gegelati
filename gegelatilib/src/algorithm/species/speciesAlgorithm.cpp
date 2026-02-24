@@ -1,5 +1,44 @@
 #include "algorithm/species/speciesAlgorithm.h"
 
+
+
+std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::initNewSpecies(RNG::RNG& rng)
+{
+    std::unique_ptr<Algorithm> copyAlgo = this->copy();
+
+    
+    SpeciesMutator& speciesMutator = dynamic_cast<SpeciesMutator&>(*this->mutator);
+    const EvoGraph::Vertex& newRootVertex = speciesMutator.mutateSpeciesGraph(*this->graph, *this->manager, this->params, rng);
+    dynamic_cast<SpeciesAlgorithm*>(copyAlgo.get())->setRootVertex(newRootVertex);
+    copyAlgo->initAlgorithm(rng, *this->outputs, this->dataSources, this->graph);
+    return copyAlgo;
+}
+
+
+
+
+bool Algorithm::Species::SpeciesAlgorithm::hasRootVertex() const
+{
+    return this->rootVertex != std::nullopt;
+}
+
+const EvoGraph::Vertex& Algorithm::Species::SpeciesAlgorithm::getRootVertex() const
+{
+    return *this->rootVertex;
+}
+
+void Algorithm::Species::SpeciesAlgorithm::setRootVertex(const EvoGraph::Vertex& newRootVertex)
+{
+    this->rootVertex = newRootVertex;
+    if(this->init){
+        dynamic_cast<SpeciesManager*>(this->manager.get())->setRootVertex(newRootVertex);
+    }
+}
+
+
+
+
+
 std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::copy() const
 {
     return std::make_unique<SpeciesAlgorithm>(this->params, this->cGetSubAlgorithm(this->programAlgorithmID), this->algorithmName);
@@ -60,7 +99,12 @@ void Algorithm::Species::SpeciesAlgorithm::initAlgorithm(RNG::RNG& rng, const Ou
     // Init the species and set the root vertex.
     SpeciesMutator& speciesMutator = dynamic_cast<SpeciesMutator&>(*this->mutator);
     SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(*this->manager);
-    speciesManager.setSpeciesGraphStructure(speciesMutator.initSpeciesGraphStructure(*graph, speciesManager, params, rng));
+    if(!this->hasRootVertex()){
+        this->setRootVertex(speciesMutator.initSpeciesGraphStructure(*graph, speciesManager, params, rng));
+    } else {
+        speciesManager.setRootVertex(*this->rootVertex);
+    }
+    speciesManager.setSpeciesGraphStructure();
 }
 
 std::shared_ptr<Algorithm::Job> Algorithm::Species::SpeciesAlgorithm::createJob(const Agent& agent, Learn::LearningMode mode, RNG::RNG& rng, int idx) const
@@ -160,15 +204,45 @@ std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Alg
     return usedSubAgents;
 }
 
-void Algorithm::Species::SpeciesAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
+void Algorithm::Species::SpeciesAlgorithm::initialPrint(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
+{
+    
+    elementsToPrint.push_back(dynamic_cast<SpeciesManager*>(this->manager.get())->getRootVertex());
+
+    
+    fprintf(pFile, "%sALGO%" PRIu64 " -> T%" PRIu64 " [style=dashed]\n",
+            offset.c_str(), this->algorithmID, dynamic_cast<SpeciesManager*>(this->manager.get())->getRootVertex().getVertexID());
+}
+
+void Algorithm::Species::SpeciesAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint, std::vector<std::reference_wrapper<const Agent>>& agentsToPrint) const
 {
     if(printedAgentID.find(agent.getAgentID()) == printedAgentID.end() && this->containsAgent(agent)){
         printedAgentID.insert(agent.getAgentID());
+
+        std::string edgeInfo = "";
+
+        const SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
+        for(const auto& pair: speciesAgent.getPrograms()) {
+            agentsToPrint.push_back(*pair.second);
+            
+            fprintf(pFile, "%sP%" PRIu64 " -> P%" PRIu64 " [style=dashed]\n",
+                    offset.c_str(), agent.getAgentID(), pair.second->get().getAgentID());
+
+            edgeInfo += std::to_string(pair.second->get().getAgentID()) + ";" + std::to_string(pair.first.get().getEdgeID()) + "|";
+        }
     
         fprintf(pFile,
                 "%sP%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
-                "width=0 height=0 label=\"%s.%" PRIu64 "\"]\n",
-                offset.c_str(), agent.getAgentID(), this->algorithmColor.c_str(), this->algorithmName.c_str(), this->algorithmID);
+                "width=0 height=0 label=\"%s.%" PRIu64 "\" edgeInfo=\"%s\"]\n",
+                offset.c_str(), agent.getAgentID(), this->algorithmColor.c_str(), this->algorithmName.c_str(), this->algorithmID, edgeInfo.c_str());
+
+                
+
+
+        /// TODO
+        /*for(const auto& pair: speciesAgent.getPrograms()) {
+            this->graph->removeEdgeProgram(pair.first);
+        }*/
     }  
 }
 

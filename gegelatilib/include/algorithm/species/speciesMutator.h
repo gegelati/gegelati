@@ -7,6 +7,7 @@
 #include <queue>
 #include <mutex>
 #include <array>
+#include <map>
 
 
 #include "algorithm/mutator.h"
@@ -84,6 +85,25 @@ namespace Algorithm::Species {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual const EvoGraph::Team& initSpeciesGraphStructure(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng);
+
+        /**
+         * Mutate the graph of a species to create a new species. 
+         * This method first calls copyGraphSpecies(), and then do a random mutation on the graph.
+         * 
+         * \param[in,out] graph the Graph.
+         * \param[in] manager the manager to copy the graph.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         */
+        virtual const EvoGraph::Vertex& mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng);
+
+        /**
+         * \brief Dupplicate the graph from a specific root
+         * 
+         * \param[in] manager the manager to copy the graph.
+         * \param[in,out] graph the initialized Graph.
+         */
+        virtual const EvoGraph::Vertex& copyGraphSpecies(AgentManager& manager, EvoGraph::Graph& graph);
 
         /**
          * \brief Initialize Species Population.
