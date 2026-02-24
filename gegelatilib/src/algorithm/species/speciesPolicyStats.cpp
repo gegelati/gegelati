@@ -43,12 +43,16 @@
 void Algorithm::Species::SpeciesPolicyStats::analyzePolicy(const Agent& agent)
 {
     // Get speciesAgent if agent is one, else throw
-    const SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
-    if (&speciesAgent == nullptr) {
+    const SpeciesAgent* speciesAgent = dynamic_cast<const SpeciesAgent*>(&agent);
+    if (speciesAgent == nullptr) {
         throw std::invalid_argument("PolicyStats can only analyze SpeciesAgent");
     }
 
     this->analyzeVertex(rootVertex, 0);
+
+    for(const auto& pair: speciesAgent->getPrograms()) {
+        this->subPolicyStats.find(pair.second->get().getAlgorithmID())->second->analyzePolicy(pair.second->get());
+    }
 }
 
 std::string Algorithm::Species::SpeciesPolicyStats::specificInfos() const
