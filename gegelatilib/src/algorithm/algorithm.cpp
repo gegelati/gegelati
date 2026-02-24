@@ -166,6 +166,7 @@ void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHand
     this->dataSources = dataSource;
 
     this->initManager();
+    this->manager->setExpectedNbAgents(params.mutation.tpg.nbRoots);
 
     this->selector = std::move(Selector::selectorFactory(*this->manager, this->params));
 

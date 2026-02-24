@@ -226,7 +226,7 @@ void File::GraphDotExporter::printAlgorithm(const Algorithm::Algorithm& printAlg
     }
 }
 
-void File::GraphDotExporter::printAlgorithmsSubGraph(const std::vector<std::reference_wrapper<const Algorithm::Algorithm>>& printAlgorithms)
+void File::GraphDotExporter::printAlgorithmsSubGraph(const std::vector<std::reference_wrapper<Algorithm::Algorithm>>& printAlgorithms)
 {   
     this->mapAlgorithms.clear();
 
@@ -325,9 +325,9 @@ void File::GraphDotExporter::printSubGraph(const Algorithm::Agent& agent)
     this->printedAgentID.clear();
     this->printedAlgorithmsID.clear();
 
-    for(const Algorithm::Algorithm& algorithm: this->algorithms){
+    for(Algorithm::Algorithm& algorithm: this->algorithms){
         if(algorithm.containsAgent(agent)){
-            std::vector<std::reference_wrapper<const Algorithm::Algorithm>> vect{algorithm};
+            std::vector<std::reference_wrapper<Algorithm::Algorithm>> vect{algorithm};
             this->printAlgorithmsSubGraph(vect);
 
             

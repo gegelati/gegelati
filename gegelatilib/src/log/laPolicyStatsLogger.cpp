@@ -44,7 +44,7 @@ void Log::LAPolicyStatsLogger::logNewGeneration(uint64_t& generationNumber)
 
 void Log::LAPolicyStatsLogger::logAfterDecimate()
 {
-    const Selector::Selector& selector = this->algorithm.getSelectorCst();
+    const Selector::Selector& selector = this->learningAgent.getBestAlgorithm().getSelectorCst();
     if(selector.getBestAgent().first == std::nullopt) {
         return;
     }
@@ -58,7 +58,7 @@ void Log::LAPolicyStatsLogger::logAfterDecimate()
                      ->getScore()
               << std::endl
               << std::endl;
-        std::shared_ptr<Algorithm::PolicyStats> ps = algorithm.createPolicyStats();
+        std::shared_ptr<Algorithm::PolicyStats> ps = this->learningAgent.getBestAlgorithm().createPolicyStats();
         ps->analyzePolicy(bestAgent); 
         *this << *ps << std::endl;
         *this << std::endl

@@ -185,7 +185,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& graph, Ag
     std::vector<std::reference_wrapper<const Agent>> programAgents;
 
 
-    for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
+    for (size_t idx = 0; idx < manager.getExpectedNbAgents(); idx++) {
         teams.push_back(dynamic_cast<const TPGAgent&>(manager.createAgent(graph)).getVertex());
     }
 
@@ -195,7 +195,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& graph, Ag
     // Programs have been initialized randomly.
     Mutator& programMutator = this->getSubMutator(this->programAlgorithmID);
     AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
-    for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
+    for (size_t i = 0; i < 2 * manager.getExpectedNbAgents(); i++) {
 
         // Create a program agent
         programAgents.push_back(programMutator.initRandomAgent(graph, programManager, params, rng));

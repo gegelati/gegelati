@@ -95,6 +95,9 @@ namespace Learn {
         /// Currently executed algorithm during evaluation
         Algorithm::Algorithm* currentExecutedAlgorithm;
 
+        /// Currently best algorithm during evaluation
+        Algorithm::Algorithm* currentBestAlgorithm;
+
         /**
          * \brief return the algorithm managed by the learning agent corresponding to the given algorithm.
          * 
@@ -143,6 +146,11 @@ namespace Learn {
         void setCurrentAlgorithm(Algorithm::Algorithm* algorithm);
 
         /**
+         * \brief Return the current best algorithm
+         */
+        const Algorithm::Algorithm& getBestAlgorithm();
+
+        /**
          * \brief Add an algorithm to the learning agent.
          * 
          * \param[in] algorithm the algorithm to add.
@@ -165,7 +173,7 @@ namespace Learn {
         /**
          * \brief Getter for the vector of algorithms
          */
-        std::vector<std::reference_wrapper<Algorithm::Algorithm>> getAlgorithms();
+        const std::vector<std::reference_wrapper<Algorithm::Algorithm>>& getAlgorithms();
 
         /**
          * \brief return the a pointer of the algorithm at the specified index

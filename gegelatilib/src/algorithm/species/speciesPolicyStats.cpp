@@ -47,6 +47,8 @@ void Algorithm::Species::SpeciesPolicyStats::analyzePolicy(const Agent& agent)
     if (&speciesAgent == nullptr) {
         throw std::invalid_argument("PolicyStats can only analyze SpeciesAgent");
     }
+
+    this->analyzeVertex(rootVertex, 0);
 }
 
 std::string Algorithm::Species::SpeciesPolicyStats::specificInfos() const

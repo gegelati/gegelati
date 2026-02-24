@@ -24,7 +24,7 @@ void Algorithm::Maple::MapleMutator::initRandomPopulation(EvoGraph::Graph& graph
     // Empty agent manager
     manager.clearAgents(graph);
 
-    for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
+    for (size_t idx = 0; idx < manager.getExpectedNbAgents(); idx++) {
         this->initRandomAgent(graph, manager, params, rng);
     }
 }

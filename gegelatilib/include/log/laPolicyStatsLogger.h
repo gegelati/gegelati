@@ -63,21 +63,17 @@ namespace Log {
         /// Number of the current generation.
         uint64_t generationNumber = 0;
 
-        /// Analyzed algorithm
-        const Algorithm::Algorithm& algorithm;
-
       public:
         /**
          * \brief Main constructor for the LAPolicyStatsLogger.
          *
          * \param[in] la LearningAgent whose information will be logged by the
          * LAPolicyStatsLogger.
-         * \param[in] algorithm algorithm whose best agent is output.
          * \param[in] out ostream where the logger will write its output.
          */
-        LAPolicyStatsLogger(Learn::LearningAgent& la, const Algorithm::Algorithm& algorithm,
+        LAPolicyStatsLogger(Learn::LearningAgent& la,
                             std::ostream& out = std::cout)
-            : LALogger(la, out), algorithm{algorithm} {};
+            : LALogger(la, out) {};
 
         /// Inherited from LALogger
         void logNewGeneration(uint64_t& generationNumber) override;

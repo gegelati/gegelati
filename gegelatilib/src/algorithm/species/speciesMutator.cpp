@@ -62,7 +62,7 @@ const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(E
     double probaAdd = 0.5;
     SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
     if(speciesManager.getRootVertex().getAssessedActions().size() == manager.getOutputs().size()) {
-        probaAdd == 0;
+        probaAdd = 0;
     } else if (speciesManager.getRootVertex().getAssessedActions().size() == 1) {
         probaAdd = 1;
     }
@@ -164,7 +164,7 @@ void Algorithm::Species::SpeciesMutator::initRandomPopulation(EvoGraph::Graph& g
     // Empty agent manager
     manager.clearAgents(graph);
     
-    for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
+    for (size_t idx = 0; idx < manager.getExpectedNbAgents(); idx++) {
         const Agent& agent = this->initRandomAgent(graph, manager, params, rng);
         if(!agent.isValid()) {
             throw std::runtime_error("SpeciesMutator::initRandomPopulation: agent should be valid after initialization");

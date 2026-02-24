@@ -70,7 +70,7 @@ namespace File {
         std::string offset;
 
         /// @brief vector of algorithms used. This is used to print the content of the programs when they are mutated by the algorithm.
-        std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithms;
+        const std::vector<std::reference_wrapper<Algorithm::Algorithm>>& algorithms;
 
         /// @brief vector of algorithms used, including subAlgorithms. This is used to print the content of the programs when they are mutated by the algorithm.
         std::map<uint64_t, std::reference_wrapper<const Algorithm::Algorithm>> mapAlgorithms;
@@ -189,7 +189,7 @@ namespace File {
         /**
          * \brief Prints algorithms node, showing what are the relations between the different algorithms.
          */
-        void printAlgorithmsSubGraph(const std::vector<std::reference_wrapper<const Algorithm::Algorithm>>& printAlgorithms);
+        void printAlgorithmsSubGraph(const std::vector<std::reference_wrapper<Algorithm::Algorithm>>& printAlgorithms);
 
         /**
          * \brief Prints footer content in the dot file.
@@ -212,7 +212,7 @@ namespace File {
          * \throws std::runtime_error in case no file could be opened at the
          * given filePath.
          */
-        GraphDotExporter(const char* filePath, const EvoGraph::Graph& graph, std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithms)
+        GraphDotExporter(const char* filePath, const EvoGraph::Graph& graph, const std::vector<std::reference_wrapper<Algorithm::Algorithm>>& algorithms)
             : EvoGraph::AbstractEngine(graph), pFile{NULL}, offset{""}, algorithms{algorithms}
         {
             if ((pFile = fopen(filePath, "w")) == NULL) {

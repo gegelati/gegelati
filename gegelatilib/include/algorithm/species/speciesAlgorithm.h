@@ -68,6 +68,11 @@ namespace Algorithm::Species {
             void setRootVertex(const EvoGraph::Vertex& newRootVertex);
 
             /**
+             * \brief calculate the porportion allowed to the algorithm
+             */
+            double calculateProportion(int position, int totalAlgos);
+            
+            /**
              * \brief Add the program sub-algorithm to the SpeciesAlgorithm.
              * 
              */

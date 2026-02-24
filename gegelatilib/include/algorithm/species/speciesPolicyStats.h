@@ -47,9 +47,13 @@ namespace Algorithm::Species {
      */
     class SpeciesPolicyStats : public PolicyStats
     {
+      protected:
+        /// Root vertex of the species
+        const EvoGraph::Vertex& rootVertex;
+
       public:
         /// Default constructor
-        SpeciesPolicyStats(std::string algorithmName, uint64_t algorithmID, const std::map<uint64_t, std::shared_ptr<PolicyStats>>& subPolicyStats) : PolicyStats(algorithmName, algorithmID, subPolicyStats) {}
+        SpeciesPolicyStats(std::string algorithmName, uint64_t algorithmID, const std::map<uint64_t, std::shared_ptr<PolicyStats>>& subPolicyStats, const EvoGraph::Vertex& rootVertex) : PolicyStats(algorithmName, algorithmID, subPolicyStats), rootVertex{rootVertex} {}
 
         /**
          * Analyze the policy starting from the given Agent.

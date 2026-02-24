@@ -11,6 +11,7 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::init
 
     SpeciesMutator& speciesMutator = dynamic_cast<SpeciesMutator&>(*this->mutator);
     const EvoGraph::Vertex& newRootVertex = speciesMutator.mutateSpeciesGraph(*this->graph, *this->manager, this->params, rng, edgeMap);
+
     copySpeciesAlgo.setRootVertex(newRootVertex);
     copyAlgo->initAlgorithm(rng, *this->outputs, this->dataSources, this->graph);
 
@@ -58,6 +59,16 @@ void Algorithm::Species::SpeciesAlgorithm::setRootVertex(const EvoGraph::Vertex&
     }
 }
 
+double Algorithm::Species::SpeciesAlgorithm::calculateProportion(int position, int totalAlgos) {
+    if (totalAlgos == 1) {
+        return 1.0;
+    }
+    if (position == 1) {
+        return static_cast<double>(2) / (totalAlgos + 1);
+    }
+    double remaining = 1.0 - calculateProportion(1, totalAlgos);
+    return calculateProportion(position - 1, totalAlgos - 1) * remaining;
+}
 
 
 
@@ -151,7 +162,7 @@ std::shared_ptr<Algorithm::PolicyStats> Algorithm::Species::SpeciesAlgorithm::cr
 {
     std::map<uint64_t, std::shared_ptr<PolicyStats>> subPolicyStatsMap;
     subPolicyStatsMap[this->programAlgorithmID] = this->cGetSubAlgorithm(this->programAlgorithmID).createPolicyStats();
-    return std::make_shared<SpeciesPolicyStats>(this->algorithmName, this->algorithmID, subPolicyStatsMap);
+    return std::make_shared<SpeciesPolicyStats>(this->algorithmName, this->algorithmID, subPolicyStatsMap, *this->rootVertex);
 }
 
 void Algorithm::Species::SpeciesAlgorithm::updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode)

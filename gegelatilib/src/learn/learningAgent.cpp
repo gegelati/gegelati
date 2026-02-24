@@ -95,10 +95,9 @@ std::vector<std::reference_wrapper<const Algorithm::Algorithm>> Learn::LearningA
     return result;
 }
 
-std::vector<std::reference_wrapper<Algorithm::Algorithm>> Learn::LearningAgent::getAlgorithms()
+const std::vector<std::reference_wrapper<Algorithm::Algorithm>>& Learn::LearningAgent::getAlgorithms()
 {
-    std::vector<std::reference_wrapper<Algorithm::Algorithm>> result(this->algorithms);
-    return result;
+    return this->algorithms;
 }
 
 Algorithm::Algorithm& Learn::LearningAgent::getAlgorithmAt(size_t idx)
@@ -295,6 +294,11 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateOneAgent(
     return avgScore;
 }
 
+const Algorithm::Algorithm& Learn::LearningAgent::getBestAlgorithm()
+{
+    return *this->currentBestAlgorithm;
+}
+
 void Learn::LearningAgent::launchAlgorithmsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Algorithm::Agent>>& results,
@@ -324,17 +328,26 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
                 }
             }
 
-            algorithm.getSelector().computeScoreAlgorithm(resultsAlgo);
             scoreAlgorithm.insert({algorithm.getSelector().getScoreAlgorithm(), algorithm});
             // Do the selection for this algorithm
             algorithm.getSelector().doSelection(*this->graph, resultsAlgo, rng);
             // Update the evaluation records
             algorithm.getSelector().updateEvaluationRecords(resultsAlgo);
+            algorithm.getSelector().computeScoreAlgorithm(resultsAlgo);
 
             results.insert(resultsAlgo.begin(), resultsAlgo.end());
         }
 
-        double probaAdd = 0.5;
+        int position = 1;
+        for (auto it = scoreAlgorithm.rbegin(); it != scoreAlgorithm.rend(); ++it, ++position) {
+            double prop = dynamic_cast<Algorithm::SpeciesAlgorithm&>(it->second.get()).calculateProportion(position, scoreAlgorithm.size());
+            it->second.get().getManager().setExpectedNbAgents(prop * this->params.mutation.tpg.nbRoots);
+        }
+
+        this->currentBestAlgorithm = &scoreAlgorithm.rbegin()->second.get();
+
+
+        double probaAdd = 0.8;
         double probaDel = 0.2;
         if(probaAdd > rng.getDouble(0, 1) && this->algorithms.size() < 5) {
             std::cout<<"CREATE ALGOOOOO";
@@ -343,6 +356,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 
             this->createdSpeciesAlgorithms.push_back(std::move(algoToDupplicate.initNewSpecies(this->rng)));
             Algorithm::Algorithm& newAlgorithm = **this->createdSpeciesAlgorithms.rbegin();
+            newAlgorithm.getManager().setExpectedNbAgents(0.5 * this->params.mutation.tpg.nbRoots);
             //newAlgorithm.initPopulation(this->rng);
             this->algorithms.push_back(newAlgorithm);
         }

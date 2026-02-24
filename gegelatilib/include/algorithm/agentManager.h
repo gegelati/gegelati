@@ -41,6 +41,9 @@ namespace Algorithm {
         /// Managers of aggregated algorithms
         std::vector<std::reference_wrapper<const AgentManager>> aggregatedManagers;
 
+        /// @brief number of agents wanted in the population.
+        size_t expectedNumberAgent;
+
         /**
          * \brief Get the Agent from a const Agent pointer.
          * 
@@ -62,6 +65,13 @@ namespace Algorithm {
          * \param[in] algorithmID id of the algorithm used.
          */
         AgentManager(const Output::OutputHandler& outputs, uint64_t algorithmID) : outputs{outputs}, algorithmID{algorithmID} {}
+
+        /// @brief Set a new number of expected agents
+        /// @param newNumber the number of expected agents
+        void setExpectedNbAgents(size_t newNumber) {this->expectedNumberAgent = newNumber;}
+
+        /// @brief getter for the expected number of agents 
+        size_t getExpectedNbAgents() const {return this->expectedNumberAgent;}
 
         /**
          * \brief Get the current agents used by the algorithm.

@@ -151,7 +151,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::Selector::updateContext() 
     }
     
     context->nbAgentsToCreate =
-        (uint64_t)(params.mutation.tpg.nbRoots) -
+        (uint64_t)(manager.getExpectedNbAgents()) -
         context->preExistingAgents.size();
 
     return context;

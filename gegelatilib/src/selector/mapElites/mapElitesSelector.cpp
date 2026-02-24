@@ -171,7 +171,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::MapElites::MapElitesSelect
     }
 
     if(agentsInAllArchives.size() != 0){
-        context->nbAgentsToCreate = (uint64_t)(params.mutation.tpg.nbRoots) + agentsInAllArchives.size();
+        context->nbAgentsToCreate = (uint64_t)(manager.getExpectedNbAgents()) + agentsInAllArchives.size();
     }
 
     return context;
