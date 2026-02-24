@@ -347,8 +347,8 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
         this->currentBestAlgorithm = &scoreAlgorithm.rbegin()->second.get();
 
 
-        double probaAdd = 0.8;
-        double probaDel = 0.2;
+        double probaAdd = params.mutation.tpg.pEdgeAddition;
+        double probaDel = params.mutation.tpg.pEdgeDeletion;
         if(probaAdd > rng.getDouble(0, 1) && this->algorithms.size() < 5) {
             std::cout<<"CREATE ALGOOOOO";
             // Dupplicate algorithm ->
