@@ -269,6 +269,34 @@ void Algorithm::Species::SpeciesMutator::crossoverAgents(
 }
 
 
+void Algorithm::Species::SpeciesMutator::swapPrograms(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng)
+{
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+
+    // Randomly select two edges
+    size_t index1 =
+        rng.getUnsignedInt64(0, speciesManager.getEdges().size() - 1);
+    size_t index2 =
+        rng.getUnsignedInt64(0, speciesManager.getEdges().size() - 2);
+    if (index2 == index1) {
+        index2++;
+    }
+
+    // Get iterators to the selected edges
+    auto it1 = speciesManager.getEdges().begin();
+    std::advance(it1, index1);
+    auto it2 = speciesManager.getEdges().begin();
+    std::advance(it2, index2);
+
+    // Extract and swap programs
+    const Agent& actionProgram1 = agent.getProgram(*it1);
+    const Agent& actionProgram2 = agent.getProgram(*it2);
+
+    // Set the swapped action classes
+    speciesManager.setProgram(agent, (*it1), actionProgram2);
+    speciesManager.setProgram(agent, (*it2), actionProgram1);
+}
+
 void Algorithm::Species::SpeciesMutator::mutateOutgoingEdge(
     const Agent& agent, EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     AgentManager& manager,
@@ -291,7 +319,21 @@ void Algorithm::Species::SpeciesMutator::mutateOutgoingEdge(
 void Algorithm::Species::SpeciesMutator::mutateAgent(
     const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
-    const SpeciesManager& speciesManager = dynamic_cast<const SpeciesManager&>(manager);
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+    const SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
+
+
+    // 3. swap randomly selected edges
+    // With at least two edges
+    double proba = params.mutation.tpg.pSwapActionProgram;
+    while (speciesManager.getEdges().size() > 2 &&
+            proba > rng.getDouble(0.0, 1.0)) {
+        this->swapPrograms(speciesAgent, manager, rng);
+
+        // Decrement the proba of swapping two edges
+        proba *= params.mutation.tpg.pSwapActionProgram;
+    }
+
 
     bool anyMutationDone = false;
     do {

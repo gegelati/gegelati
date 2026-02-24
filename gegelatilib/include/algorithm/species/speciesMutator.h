@@ -188,6 +188,16 @@ namespace Algorithm::Species {
         ) override;
 
         /**
+         * \brief swap two program position of an agent
+         * 
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] rng Random Number
+         * Generator used in the mutation process.
+         */
+        void swapPrograms(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng);
+
+        /**
          * \brief Prepares the mutation of a Edge.
          *
          * This function creates a copy of the program associated to the Edge
