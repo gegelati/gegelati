@@ -94,16 +94,32 @@ namespace Algorithm::Species {
          * \param[in] manager the manager to copy the graph.
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in,out] edgeMap map linking old to new edges
          */
-        virtual const EvoGraph::Vertex& mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng);
+        virtual const EvoGraph::Vertex& mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
 
         /**
          * \brief Dupplicate the graph from a specific root
          * 
          * \param[in] manager the manager to copy the graph.
          * \param[in,out] graph the initialized Graph.
+         * \param[in,out] edgeMap map linking new to old edges
          */
-        virtual const EvoGraph::Vertex& copyGraphSpecies(AgentManager& manager, EvoGraph::Graph& graph);
+        virtual const EvoGraph::Vertex& copyGraphSpecies(AgentManager& manager, EvoGraph::Graph& graph, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+
+        /**
+         * \brief Initialize an agent from another agent of a different species.
+         * 
+         * The new agent will make copy of each program corresponding to the same edges
+         *
+         * \param[in] agent the agent initialized.
+         * \param[in,out] graph the Graph.
+         * \param[in] manager the manager to init the agents.
+         * \param[in] params the Parameters for the mutation.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in,out] edgeMap map linking new to old edges
+         */
+        virtual void initAgentFromSpecies(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
 
         /**
          * \brief Initialize Species Population.

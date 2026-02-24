@@ -121,6 +121,14 @@ void Selector::TournamentSelector::updateAfterPopulate(EvoGraph::Graph& graph)
     this->agentsToDelete.clear();
 }
 
+void Selector::TournamentSelector::removeFromSavedResults(const Algorithm::Agent& agent)
+{
+    if(this->agentsToDelete.find(agent) != this->agentsToDelete.end()) {
+        this->agentsToDelete.erase(agent);
+    }
+    Selector::Selector::removeFromSavedResults(agent);
+}
+
 const std::set<std::reference_wrapper<const Algorithm::Agent>>& Selector::TournamentSelector::
     getAgentsToDelete()
 {

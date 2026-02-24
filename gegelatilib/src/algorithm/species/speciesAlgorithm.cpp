@@ -5,12 +5,35 @@
 std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::initNewSpecies(RNG::RNG& rng)
 {
     std::unique_ptr<Algorithm> copyAlgo = this->copy();
+    SpeciesAlgorithm& copySpeciesAlgo = dynamic_cast<SpeciesAlgorithm&>(*copyAlgo);
 
-    
+    std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>> edgeMap;
+
     SpeciesMutator& speciesMutator = dynamic_cast<SpeciesMutator&>(*this->mutator);
-    const EvoGraph::Vertex& newRootVertex = speciesMutator.mutateSpeciesGraph(*this->graph, *this->manager, this->params, rng);
-    dynamic_cast<SpeciesAlgorithm*>(copyAlgo.get())->setRootVertex(newRootVertex);
+    const EvoGraph::Vertex& newRootVertex = speciesMutator.mutateSpeciesGraph(*this->graph, *this->manager, this->params, rng, edgeMap);
+    copySpeciesAlgo.setRootVertex(newRootVertex);
     copyAlgo->initAlgorithm(rng, *this->outputs, this->dataSources, this->graph);
+
+    double prop = 0.2;
+    std::vector<std::reference_wrapper<const Agent>> originAgents(this->getAgents());
+    std::vector<std::reference_wrapper<const Agent>> exchangedAgents;
+
+    size_t nbAgentsExchanged = (size_t)(prop * originAgents.size());
+    for(size_t idx = 0; idx < nbAgentsExchanged; idx++) {
+        auto it = originAgents.begin();
+        std::advance(it, rng.getUnsignedInt64(0, originAgents.size() - 1));
+        const Agent& selectedAgent = *it;
+
+        originAgents.erase(it);
+
+        // Add the agent to the new algorithm.
+        dynamic_cast<SpeciesMutator&>(copySpeciesAlgo.getMutator()).initAgentFromSpecies(selectedAgent, *this->graph, copyAlgo->getManager(), this->params, rng, edgeMap);
+
+        // Delete it from the current algorithm
+        this->selector->removeFromSavedResults(selectedAgent);
+        this->manager->deleteAgent(selectedAgent, *this->graph);
+    }
+    
     return copyAlgo;
 }
 

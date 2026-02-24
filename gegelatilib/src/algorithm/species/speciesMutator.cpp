@@ -57,7 +57,7 @@ const EvoGraph::Team& Algorithm::Species::SpeciesMutator::initSpeciesGraphStruct
     return team;
 }
 
-const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
 {
     double probaAdd = 0.5;
     SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
@@ -68,7 +68,7 @@ const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(E
     }
 
 
-    const EvoGraph::Vertex& newRoot = this->copyGraphSpecies(manager, graph);
+    const EvoGraph::Vertex& newRoot = this->copyGraphSpecies(manager, graph, edgeMap);
     if(probaAdd > rng.getDouble(0, 1)) {
         std::cout<<"  ADD      ";
         // Add an action edge
@@ -93,6 +93,11 @@ const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(E
         size_t pickedEdgeID = rng.getUnsignedInt64(0, newRoot.getOutgoingEdges().size() - 1);
         auto it = newRoot.getOutgoingEdges().begin();
         std::advance(it, pickedEdgeID);
+
+        // Remove the edge from the edge map
+        edgeMap.erase(*it);
+
+        // Remove the edge from the graph
         graph.removeEdge(*it);
     }
 
@@ -100,26 +105,54 @@ const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(E
     return newRoot;
 }
 
-const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::copyGraphSpecies(AgentManager& manager, EvoGraph::Graph& graph)
+const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::copyGraphSpecies(AgentManager& manager, EvoGraph::Graph& graph, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
 {
-    std::map<std::reference_wrapper<const EvoGraph::Vertex>, std::reference_wrapper<const EvoGraph::Vertex>> teamMap;
+    std::map<std::reference_wrapper<const EvoGraph::Vertex>, std::reference_wrapper<const EvoGraph::Vertex>> vertexMap;
+    edgeMap.clear();
 
     const auto& originTeams = dynamic_cast<SpeciesManager&>(manager).getTeams();
+    const auto& originActions = dynamic_cast<SpeciesManager&>(manager).getActions();
 
     for(const EvoGraph::Team& team: originTeams) {
-        teamMap.insert({team, graph.cloneVertex(team)});
+        vertexMap.insert({team, graph.addNewTeam()});
+    }
+    for(const EvoGraph::Action& action: originActions) {
+        vertexMap.insert({action, action});
     }
 
-    for(const auto& pair: teamMap) {
-        for(const EvoGraph::Edge& edge: pair.second.get().getOutgoingEdges()) {
-            if(auto team = dynamic_cast<const EvoGraph::Team*>(&edge.getDestination())) {
-                graph.setEdgeDestination(edge, teamMap.at(*team));
-            }
+    for(const auto& pair: vertexMap) {
+        for(const EvoGraph::Edge& edge: pair.first.get().getOutgoingEdges()) {
+            edgeMap.insert({graph.addNewEdge(vertexMap.at(pair.first), vertexMap.at(edge.getDestination())), edge});
         }
     }
 
     graph.updateAllAssessedActions();
-    return teamMap.at(dynamic_cast<SpeciesManager&>(manager).getRootVertex()).get();
+    return vertexMap.at(dynamic_cast<SpeciesManager&>(manager).getRootVertex()).get();
+}
+
+void Algorithm::Species::SpeciesMutator::initAgentFromSpecies(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng,std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+{
+    const SpeciesAgent& oldSpeciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
+
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+    const Agent& newAgent = speciesManager.createAgent(graph);
+
+    // Get program mutator and manager
+    Mutator& programMutator = this->getSubMutator(this->programAlgorithmID);
+    AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
+    for(const EvoGraph::Edge& edge: speciesManager.getEdges()) {
+        
+        // Edge is not found in the list of edges, meaning it is a new edge.
+        // Instantiate a new program
+        if(edgeMap.find(edge) == edgeMap.end()) {
+            const Agent& programAgent = programMutator.initRandomAgent(graph, programManager, params, rng);
+            speciesManager.setProgram(newAgent, edge, programAgent);
+        } else {
+            // Getting the program should not fail.
+            const Agent& programAgent = programManager.copyAgent(oldSpeciesAgent.getProgram(edgeMap.at(edge)), graph);
+            speciesManager.setProgram(newAgent, edge, programAgent);
+        }
+    }
 }
 
 void Algorithm::Species::SpeciesMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)

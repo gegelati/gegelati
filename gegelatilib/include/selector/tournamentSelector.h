@@ -101,6 +101,11 @@ namespace Selector {
         virtual void updateAfterPopulate(EvoGraph::Graph& graph) override;
 
         /**
+         * \brief Inherrit from selector method, to remove also vertex from  "agentsToDelete" list
+         */
+        virtual void removeFromSavedResults(const Algorithm::Agent& agent);
+
+        /**
          * \brief getter of the verticesToDelete set.
          */
         virtual const std::set<std::reference_wrapper<const Algorithm::Agent>>& getAgentsToDelete();
