@@ -203,6 +203,7 @@ jobs:
       - name: Trigger apps
         run: |
           curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/develop"}'
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps-2/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/develop"}'
         shell: bash
   Deploy-Releases:
     runs-on: ubuntu-latest
@@ -233,6 +234,7 @@ jobs:
       - name: Trigger apps
         run: |
           curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/master"}'
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps-2/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/main"}'
         shell: bash
   Analyze-Code_Style:
     runs-on: ubuntu-latest
