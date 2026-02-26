@@ -87,6 +87,50 @@ namespace Algorithm::Species {
         virtual const EvoGraph::Team& initSpeciesGraphStructure(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng);
 
         /**
+         * \brief add an activationedge to the new species.
+         * 
+         * \param[in] newRoot The new root vertex of the species
+         * \param[in] manager the manager to copy the graph.
+         * \param[in,out] graph the Graph.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in,out] edgeMap map linking old to new edges
+         */
+        bool addActivationEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+
+        /**
+         * \brief add an context edge to the new species.
+         * 
+         * \param[in] newRoot The new root vertex of the species
+         * \param[in] manager the manager to copy the graph.
+         * \param[in,out] graph the Graph.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in,out] edgeMap map linking old to new edges
+         */
+        bool addContextEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+
+        /**
+         * \brief add an edge to the new species.
+         * 
+         * \param[in] newRoot The new root vertex of the species
+         * \param[in] manager the manager to copy the graph.
+         * \param[in,out] graph the Graph.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in,out] edgeMap map linking old to new edges
+         */
+        virtual bool addEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+
+        /**
+         * \brief remove an edge to the new species.
+         * 
+         * \param[in] newRoot The new root vertex of the species
+         * \param[in] manager the manager to copy the graph.
+         * \param[in,out] graph the Graph.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in,out] edgeMap map linking old to new edges
+         */
+        virtual bool removeEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+
+        /**
          * Mutate the graph of a species to create a new species. 
          * This method first calls copyGraphSpecies(), and then do a random mutation on the graph.
          * 

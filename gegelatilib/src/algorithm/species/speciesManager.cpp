@@ -40,6 +40,14 @@ const std::set<std::reference_wrapper<const EvoGraph::Team>>& Algorithm::Species
 {
     return this->teams;
 }
+const std::set<std::reference_wrapper<const EvoGraph::Team>>& Algorithm::Species::SpeciesManager::getContextTeams() const
+{
+    return this->contextTeams;
+}
+const std::set<std::reference_wrapper<const EvoGraph::Team>>& Algorithm::Species::SpeciesManager::getActivationTeams() const
+{
+    return this->activationTeams;
+}
 
 const std::set<std::reference_wrapper<const EvoGraph::Action>>& Algorithm::Species::SpeciesManager::getActions() const
 {
@@ -50,12 +58,16 @@ void Algorithm::Species::SpeciesManager::setVertexStructure(const EvoGraph::Vert
     // Add the vertex to either the teams or the actions
     if(auto team = dynamic_cast<const EvoGraph::Team*>(&vertex)) {
         this->teams.insert(*team);
+        if(depth % 2 == 1) {
+            this->contextTeams.insert(*team);
+        } else {
+            this->activationTeams.insert(*team);
+        }
     } else if (auto action = dynamic_cast<const EvoGraph::Action*>(&vertex)) {
         this->actions.insert(*action);
     } else {
         throw std::runtime_error("SpeciesManager::setVertexStructure vertex should be either a team or an action.");
     }
-
     for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) { 
         // When depth is odd, destination should all be teams. All edge are context edges.
         if(depth % 2 == 1) {

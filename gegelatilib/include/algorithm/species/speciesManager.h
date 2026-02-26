@@ -38,6 +38,10 @@ namespace Algorithm::Species {
 
         /// All teams contained in the species.
         std::set<std::reference_wrapper<const EvoGraph::Team>> teams;
+        /// All context teams contained in the species.
+        std::set<std::reference_wrapper<const EvoGraph::Team>> contextTeams;
+        /// All activation teams contained in the species.
+        std::set<std::reference_wrapper<const EvoGraph::Team>> activationTeams;
 
         /// All actions contained in the species.
         std::set<std::reference_wrapper<const EvoGraph::Action>> actions;
@@ -106,6 +110,10 @@ namespace Algorithm::Species {
 
         /// @brief getter for the teams
         const std::set<std::reference_wrapper<const EvoGraph::Team>>& getTeams() const;
+        /// @brief getter for the context teams
+        const std::set<std::reference_wrapper<const EvoGraph::Team>>& getContextTeams() const;
+        /// @brief getter for the activation teams
+        const std::set<std::reference_wrapper<const EvoGraph::Team>>& getActivationTeams() const;
 
         /// @brief getter for the actions 
         const std::set<std::reference_wrapper<const EvoGraph::Action>>& getActions() const;

@@ -350,7 +350,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
         double probaAdd = params.mutation.tpg.pEdgeAddition;
         double probaDel = params.mutation.tpg.pEdgeDeletion;
         if(probaAdd > rng.getDouble(0, 1) && this->algorithms.size() < 5) {
-            std::cout<<"CREATE ALGOOOOO";
+            std::cout<<"CREATE ALGOOOOO"<<std::endl;;
             // Dupplicate algorithm ->
             Algorithm::SpeciesAlgorithm& algoToDupplicate = dynamic_cast<Algorithm::SpeciesAlgorithm&>(scoreAlgorithm.rbegin()->second.get());
 
@@ -362,9 +362,11 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
         }
 
         else if(probaDel > rng.getDouble(0, 1) && this->algorithms.size() > 3) {
-            std::cout<<"DESTROY ALGOOOOO";
+            std::cout<<"DESTROY ALGOOOOO"<<std::endl;
             auto& algoRef = scoreAlgorithm.begin()->second.get();
             auto it = std::find(this->algorithms.begin(), this->algorithms.end(), algoRef);
+            
+            algoRef.clearAlgorithm();
             this->algorithms.erase(it);
 
             auto it2 = std::find_if(

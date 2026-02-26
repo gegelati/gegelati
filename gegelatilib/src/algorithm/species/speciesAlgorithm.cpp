@@ -1,7 +1,13 @@
 #include "algorithm/species/speciesAlgorithm.h"
 
 
-
+void Algorithm::Species::SpeciesAlgorithm::clearAlgorithm()
+{   
+    for(const EvoGraph::Vertex& vertex: dynamic_cast<SpeciesManager&>(*this->manager).getTeams()) {
+        this->graph->removeVertex(vertex);
+    }
+    Algorithm::clearAlgorithm();
+}
 std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::initNewSpecies(RNG::RNG& rng)
 {
     std::unique_ptr<Algorithm> copyAlgo = this->copy();

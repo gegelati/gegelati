@@ -78,6 +78,11 @@ namespace Algorithm::Species {
              */
             void setProgramAlgorithm(const Algorithm& programAlgorithm);
 
+            
+            /**
+             * \brief Clear the algorithm of all its content.
+             */
+            virtual void clearAlgorithm() override;
 
             /**
              * \brief Get the Archive used by the LGPAlgorithm.

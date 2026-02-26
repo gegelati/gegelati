@@ -22,32 +22,6 @@ const EvoGraph::Team& Algorithm::Species::SpeciesMutator::initSpeciesGraphStruct
     size_t nbActionVertices = (outputs.sizeDiscrete() == 0) ? outputs.sizeContinuous() : outputs.front().getNbValues();
     std::vector<std::reference_wrapper<const EvoGraph::Action>> actions(this->initActionVertices(graph, nbActionVertices));
 
-    // Connexion
-    /*const EvoGraph::Team& team = graph.addNewTeam();
-    const EvoGraph::Team& team0 = graph.addNewTeam();
-    const EvoGraph::Team& team1 = graph.addNewTeam();
-    graph.addNewEdge(team, team0);
-    graph.addNewEdge(team, team1);
-    
-    // Context
-    const EvoGraph::Team& team2 = graph.addNewTeam();
-    const EvoGraph::Team& team3 = graph.addNewTeam();
-    graph.addNewEdge(team0, team2);
-    graph.addNewEdge(team0, team3);
-
-    const EvoGraph::Team& team4 = graph.addNewTeam();
-    const EvoGraph::Team& team5 = graph.addNewTeam();
-    graph.addNewEdge(team1, team4);
-    graph.addNewEdge(team1, team5);
-
-    // Action
-    for(uint64_t idx = 0; idx < 3; idx++){
-        graph.addNewEdge(team2, actions.at(idx));
-        graph.addNewEdge(team3, actions.at(idx));
-
-        graph.addNewEdge(team4, actions.at(idx + 3));
-        graph.addNewEdge(team5, actions.at(idx + 3));
-    }*/
 
     // Connexion
     const EvoGraph::Team& team = graph.addNewTeam();
@@ -57,49 +31,191 @@ const EvoGraph::Team& Algorithm::Species::SpeciesMutator::initSpeciesGraphStruct
     return team;
 }
 
+
+bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+{
+    std::set<std::reference_wrapper<const EvoGraph::Team>> contextTeams(dynamic_cast<SpeciesManager&>(manager).getContextTeams());
+    if(contextTeams.size() == 0) {
+        return false;
+    }
+
+    auto it = contextTeams.begin();
+    std::advance(it, rng.getUnsignedInt64(0, contextTeams.size() - 1));
+
+    auto itEdges = it->get().getOutgoingEdges().begin();
+    std::advance(it, rng.getUnsignedInt64(0, it->get().getOutgoingEdges().size() - 1));
+
+
+    const EvoGraph::Edge* copyEdge;
+    for(const auto& pair: edgeMap) {
+        if(pair.second == *itEdges) {
+            copyEdge = &pair.first.get();
+        }
+    }
+
+    graph.cloneEdge(*copyEdge);
+    return true;
+}
+
+bool Algorithm::Species::SpeciesMutator::addActivationEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+{    
+    std::vector<std::reference_wrapper<const EvoGraph::Action>> availableActions(graph.getActions());
+    std::set<std::reference_wrapper<const EvoGraph::Team>> activationTeams(dynamic_cast<SpeciesManager&>(manager).getActivationTeams());
+
+    // Get all the vertex with available actions, take a vector for keeping track of the order
+    std::vector<std::pair<std::reference_wrapper<const EvoGraph::Team>, std::set<uint64_t>>> availableActionsAllVertices;
+    for(const EvoGraph::Team& vertex: activationTeams){
+    
+        std::set<uint64_t> availableActionOfVertex;
+        const EvoGraph::Team& currentVertex = vertex;
+        std::set<uint64_t> currentVertexAssessedActions = currentVertex.getAssessedActions();
+
+        if(vertex.getIncomingEdges().size() == 0) {
+            
+            for(const EvoGraph::Action& action: availableActions){
+                if(currentVertexAssessedActions.find(action.getActionID()) == currentVertexAssessedActions.end()) {
+                    availableActionOfVertex.insert(action.getActionID());
+                }
+            }
+            
+        } else {
+            // Get the assessed actions of all the vertex pointing to this vertex.
+            for(const EvoGraph::Edge& edge: currentVertex.getIncomingEdges()) {
+                const EvoGraph::Vertex& srcVertex = edge.getSource();
+                std::set<uint64_t> srcAssessedActions = srcVertex.getAssessedActions();
+                availableActionOfVertex.insert(srcAssessedActions.begin(), srcAssessedActions.end());
+            }
+        }
+
+        // Add the set difference in the available action set.
+        std::set_difference(
+            availableActionOfVertex.begin(), availableActionOfVertex.end(),
+            currentVertexAssessedActions.begin(), currentVertexAssessedActions.end(),
+            std::inserter(availableActionOfVertex, availableActionOfVertex.begin())
+        );
+    
+        if(availableActionOfVertex.size() > 0){
+            availableActionsAllVertices.push_back({vertex, availableActionOfVertex});
+        }
+    }
+
+    if(availableActionsAllVertices.size() == 0){
+        return false;
+    }
+
+    // Choose randomly an available team.
+    const auto& pairPicked = availableActionsAllVertices.at(rng.getUnsignedInt64(0, availableActionsAllVertices.size() - 1));
+    const auto& set = pairPicked.second;
+
+    availableActions.erase(
+        std::remove_if(
+            availableActions.begin(),
+            availableActions.end(),
+            [&set](const EvoGraph::Action& action) {
+                return set.find(action.getActionID()) == set.end();
+            }
+        ),
+        availableActions.end()
+    );
+
+    // Weird way of getting equivalent of this vertex in the copy, but working.
+    // Get the first outgoing edge of the search vertex. 
+    // Find it's copy in the edge map
+    // Get its source.
+    const EvoGraph::Vertex* copyVertex;
+    for(const auto& pair: edgeMap) {
+        if(pair.second == pairPicked.first.get().getOutgoingEdges().front()) {
+            copyVertex = &pair.first.get().getSource();
+        }
+    }
+
+    graph.addNewEdge(*copyVertex, availableActions.at(rng.getUnsignedInt64(0, availableActions.size() - 1)));
+    return true;
+}
+
+bool Algorithm::Species::SpeciesMutator::addEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+{
+    double proba = 0.5;
+    if(proba > rng.getDouble(0, 1)) {
+        return this->addContextEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
+    } else {
+        return this->addActivationEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
+    }
+}
+
+
+bool Algorithm::Species::SpeciesMutator::removeEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+{
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+    auto edgeMapCopy(edgeMap);
+    const std::set<std::reference_wrapper<const EvoGraph::Team>>& activationTeams(speciesManager.getActivationTeams());
+
+    // Build a new set with only the edges that should NOT be removed
+    std::set<std::reference_wrapper<const EvoGraph::Edge>> edges;
+    for (const auto& pair : edgeMapCopy) {
+        bool isValid;
+        if (activationTeams.find((const EvoGraph::Team&)(pair.second.get().getSource())) == activationTeams.end()) {
+            isValid = pair.second.get().getSource().getOutgoingEdges().size() >= 3;
+        } else {
+            isValid = pair.second.get().getSource().getOutgoingEdges().size() >= 2;
+        }
+        if (isValid) {
+            edges.insert(pair.first);
+        }
+    }
+
+    if(edges.size() == 0) {
+        return false;
+    }
+
+    // Delete an action edge
+    size_t pickedEdgeID = rng.getUnsignedInt64(0, edges.size() - 1);
+    auto it = edges.begin();
+    std::advance(it, pickedEdgeID);
+
+    std::set<std::reference_wrapper<const EvoGraph::Edge>> removedEdges{*it};
+    std::set<std::reference_wrapper<const EvoGraph::Vertex>> removedVertices;
+    while(removedEdges.size() > 0) {
+        const EvoGraph::Edge& removeEdge = *removedEdges.begin();
+        removedEdges.erase(removedEdges.begin());
+
+        // This vertex is gonna be removed too.
+        const EvoGraph::Vertex& destination = removeEdge.getDestination();
+        if(destination.getIncomingEdges().size() == 1 && dynamic_cast<const EvoGraph::Action*>(&destination) != nullptr) {
+            const auto& destRemovedEdges = removeEdge.getDestination().getOutgoingEdges();
+            removedEdges.insert(destRemovedEdges.begin(), destRemovedEdges.end());
+            removedVertices.insert(destination);
+        }
+
+        // Remove the edge from the edge map
+        edgeMap.erase(removeEdge);
+
+        // Remove the edge from the graph
+        graph.removeEdge(removeEdge);
+    }
+
+    for(const EvoGraph::Vertex& removedVertex: removedVertices) {
+        graph.removeVertex(removedVertex);
+    }
+    return true;
+}
+
 const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
 {
     double probaAdd = 0.5;
-    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
-    if(speciesManager.getRootVertex().getAssessedActions().size() == manager.getOutputs().size()) {
-        probaAdd = 0;
-    } else if (speciesManager.getRootVertex().getAssessedActions().size() == 1) {
-        probaAdd = 1;
-    }
 
 
     const EvoGraph::Vertex& newRoot = this->copyGraphSpecies(manager, graph, edgeMap);
-    if(probaAdd > rng.getDouble(0, 1)) {
-        std::cout<<"  ADD      ";
-        // Add an action edge
-        const auto& set = newRoot.getAssessedActions();
-        std::vector<std::reference_wrapper<const EvoGraph::Action>> availableActions(graph.getActions());
-        
-        availableActions.erase(
-            std::remove_if(
-                availableActions.begin(),
-                availableActions.end(),
-                [&set](const EvoGraph::Action& action) {
-                    return set.find(action.getActionID()) != set.end();
-                }
-            ),
-            availableActions.end()
-        );
-        
-        graph.addNewEdge(newRoot, availableActions.at(rng.getUnsignedInt64(0, availableActions.size() - 1)));
-    } else {
-        std::cout<<"  DEL    ";
-        // Delete an action edge
-        size_t pickedEdgeID = rng.getUnsignedInt64(0, newRoot.getOutgoingEdges().size() - 1);
-        auto it = newRoot.getOutgoingEdges().begin();
-        std::advance(it, pickedEdgeID);
-
-        // Remove the edge from the edge map
-        edgeMap.erase(*it);
-
-        // Remove the edge from the graph
-        graph.removeEdge(*it);
-    }
+    bool mutationHappened = false;
+    do {
+        if(probaAdd > rng.getDouble(0, 1)) {
+            std::cout<<"  ADD      "<<std::endl;
+            mutationHappened = this->addEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
+        } else {
+            std::cout<<"  DEL    "<<std::endl;
+            mutationHappened = this->removeEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
+        }
+    } while (!mutationHappened);
 
     graph.updateAllAssessedActions();
     return newRoot;
