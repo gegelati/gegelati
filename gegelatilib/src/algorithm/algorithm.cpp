@@ -194,10 +194,10 @@ bool Algorithm::Algorithm::isInit() const{
 
 void Algorithm::Algorithm::clearAlgorithm()
 {
+    this->manager->clearAgents(*this->graph);
     for(const auto& subAlgorithm: subAlgorithms){
         subAlgorithm->clearAlgorithm();
     }
-    this->manager->clearAgents(*this->graph);
     this->mutator = nullptr;
     this->selector = nullptr;
     this->manager = nullptr;

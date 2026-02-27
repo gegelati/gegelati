@@ -284,20 +284,20 @@ bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& n
 
 const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
 {
-    double probaAdd = 0.0;
-
+    double probaAdd = 0.3;
 
     const EvoGraph::Vertex& newRoot = this->copyGraphSpecies(manager, graph, edgeMap);
     bool mutationHappened = false;
     do {
-        if(probaAdd > rng.getDouble(0, 1)) {
+        double randomValue = rng.getDouble(0, 1.5);
+        if(randomValue > 1) {
             std::cout<<"  ADD      ";
             mutationHappened = this->addEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
-        } else if (probaAdd > rng.getDouble(0, 1)){
+        } else if (randomValue > 0.5){
             std::cout<<"  DEL    ";
             mutationHappened = this->removeEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
         }  else {
-            std::cout<<"    EXTEND      ";
+            std::cout<<"  EXTEND      ";
             mutationHappened = this->extendSpecies(newRoot, manager, graph, rng, edgeMap);
         }
     } while (!mutationHappened);

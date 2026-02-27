@@ -3,10 +3,13 @@
 
 void Algorithm::Species::SpeciesAlgorithm::clearAlgorithm()
 {   
-    for(const EvoGraph::Vertex& vertex: dynamic_cast<SpeciesManager&>(*this->manager).getTeams()) {
+    std::set<std::reference_wrapper<const EvoGraph::Team>> teams(dynamic_cast<SpeciesManager&>(*this->manager).getTeams());
+
+    Algorithm::clearAlgorithm();
+    
+    for(const EvoGraph::Vertex& vertex: teams) {
         this->graph->removeVertex(vertex);
     }
-    Algorithm::clearAlgorithm();
 }
 std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::initNewSpecies(RNG::RNG& rng)
 {
