@@ -53,7 +53,11 @@ bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(const EvoGraph::V
         }
     }
 
-    graph.cloneEdge(*copyEdge);
+    const EvoGraph::Edge& newEdge = graph.cloneEdge(*copyEdge);
+
+    // Add the new edge at in the edgeMap, link to the same old edge
+    // By doing so, the same program will be dupplicating for the copyEdge and newEdge, leading to small initial changes.
+    edgeMap.insert({newEdge, *itEdges});
     return true;
 }
 
@@ -200,20 +204,101 @@ bool Algorithm::Species::SpeciesMutator::removeEdgeSpecies(const EvoGraph::Verte
     return true;
 }
 
+bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+{
+    // Get the activation vertex
+    const auto& activationVertices = dynamic_cast<SpeciesManager&>(manager).getActivationTeams();
+
+    // Do a weighted list of the vertices, to push the mutation to select a team with a lot of edges leading to actions.
+    std::vector<std::reference_wrapper<const EvoGraph::Team>> weightedVertices;
+    for(const EvoGraph::Team& team: activationVertices) {
+        size_t nbActionEdge = 0;
+        for(const EvoGraph::Edge& edge: team.getOutgoingEdges()) {
+            if(auto action = dynamic_cast<const EvoGraph::Action*>(&edge.getDestination())) {
+                nbActionEdge++;
+            }
+        }
+        weightedVertices.insert(weightedVertices.end(), std::pow(nbActionEdge, 2), team);
+    }
+
+    // Randomly select a vertex
+    const EvoGraph::Team& choosenVertex = weightedVertices.at(rng.getUnsignedInt64(0, weightedVertices.size() - 1));
+
+
+    // Weird way of getting equivalent of this vertex in the copy, but working.
+    // Get the first outgoing edge of the search vertex. 
+    // Find it's copy in the edge map
+    // Get its source.
+    const EvoGraph::Vertex* copyVertexChoose;
+    for(const auto& pair: edgeMap) {
+        if(pair.second == choosenVertex.getOutgoingEdges().front()) {
+            copyVertexChoose = &pair.first.get().getSource();
+        }
+    }
+
+    // Create the new vertices
+    const EvoGraph::Team& decisionTeam = graph.addNewTeam();
+    const EvoGraph::Team& newActivationTeam0 = graph.addNewTeam();
+    const EvoGraph::Team& newActivationTeam1 = graph.addNewTeam();
+
+    // Add the new edges
+    graph.addNewEdge(*copyVertexChoose, decisionTeam);
+    graph.addNewEdge(decisionTeam, newActivationTeam0);
+    graph.addNewEdge(decisionTeam, newActivationTeam1);
+
+    std::set<std::reference_wrapper<const EvoGraph::Edge>> actionEdges;
+    for(const EvoGraph::Edge& edge: copyVertexChoose->getOutgoingEdges()) {
+        if(auto action = dynamic_cast<const EvoGraph::Action*>(&edge.getDestination())) {
+            actionEdges.insert(edge);
+        }
+    }
+
+    double probaExtensionEdge = 0.8;
+    double proba = 1;
+    while(actionEdges.size() > 0 && proba > rng.getDouble(0, 1)){
+        
+        // Get a random edge.
+        auto itEdges = actionEdges.begin();
+        std::advance(itEdges, rng.getUnsignedInt64(0, actionEdges.size()-1));
+        
+        // add the new edge, copiing the destination of the random choosen edge
+        const EvoGraph::Edge& newEdge0 = graph.addNewEdge(newActivationTeam0, itEdges->get().getDestination());
+        const EvoGraph::Edge& newEdge1 = graph.addNewEdge(newActivationTeam1, itEdges->get().getDestination());
+        
+        // Add the new edges in the edge map, link to the copied edge, so that the new programs will be dupplicated on this edge.
+        edgeMap.insert({newEdge0, edgeMap.at(*itEdges)});
+        edgeMap.insert({newEdge1, edgeMap.at(*itEdges)});
+
+        edgeMap.erase(*itEdges);
+
+        // Remove the edge from the graph
+        graph.removeEdge(*itEdges);
+
+        // Erase the edge and increase probability
+        actionEdges.erase(itEdges);
+        proba *= probaExtensionEdge;
+    }
+
+    return true;
+}
+
 const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
 {
-    double probaAdd = 0.5;
+    double probaAdd = 0.0;
 
 
     const EvoGraph::Vertex& newRoot = this->copyGraphSpecies(manager, graph, edgeMap);
     bool mutationHappened = false;
     do {
         if(probaAdd > rng.getDouble(0, 1)) {
-            std::cout<<"  ADD      "<<std::endl;
+            std::cout<<"  ADD      ";
             mutationHappened = this->addEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
-        } else {
-            std::cout<<"  DEL    "<<std::endl;
+        } else if (probaAdd > rng.getDouble(0, 1)){
+            std::cout<<"  DEL    ";
             mutationHappened = this->removeEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
+        }  else {
+            std::cout<<"    EXTEND      ";
+            mutationHappened = this->extendSpecies(newRoot, manager, graph, rng, edgeMap);
         }
     } while (!mutationHappened);
 
@@ -256,8 +341,10 @@ void Algorithm::Species::SpeciesMutator::initAgentFromSpecies(const Agent& agent
     // Get program mutator and manager
     Mutator& programMutator = this->getSubMutator(this->programAlgorithmID);
     AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
+
     for(const EvoGraph::Edge& edge: speciesManager.getEdges()) {
         
+
         // Edge is not found in the list of edges, meaning it is a new edge.
         // Instantiate a new program
         if(edgeMap.find(edge) == edgeMap.end()) {

@@ -130,6 +130,22 @@ namespace Algorithm::Species {
          */
         virtual bool removeEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
 
+        
+        /**
+         * \brief Extend the species.
+         * Extension select a random activation vertex A, and add a decision vertex to it, with two context edge leading to new activation vertex A' and A''. 
+         * Some random activation edges of A are moved from A to A' and A''.
+         * 
+         * This mecanism adds emergency, while keeping the sub-task division at action level, and while ensuring that each action is always activated at max one time.
+         * 
+         * \param[in] newRoot The new root vertex of the species
+         * \param[in] manager the manager to copy the graph.
+         * \param[in,out] graph the Graph.
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \param[in,out] edgeMap map linking old to new edges
+         */
+        virtual bool extendSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+
         /**
          * Mutate the graph of a species to create a new species. 
          * This method first calls copyGraphSpecies(), and then do a random mutation on the graph.
