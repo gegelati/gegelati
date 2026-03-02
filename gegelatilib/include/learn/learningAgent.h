@@ -65,8 +65,8 @@ namespace Learn {
         /// LearningEnvironment with which the LearningAgent will interact.
         LearningEnvironment& learningEnvironment;
 
-        /// Vector of shared pointer of algorithms learned by the learning agent.
-        std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms;
+        /// Map of reference of algorithms learned by the learning agent.
+        std::map<uint64_t, std::reference_wrapper<Algorithm::Algorithm>> algorithms;
 
         /// Parameters for the learning process
         LearningParameters params;
@@ -92,6 +92,9 @@ namespace Learn {
         /// Currently executed algorithm during evaluation
         Algorithm::Algorithm* currentExecutedAlgorithm;
 
+        /// Currently best algorithm during evaluation
+        Algorithm::Algorithm* currentBestAlgorithm;
+
         /**
          * \brief return the algorithm managed by the learning agent corresponding to the given algorithm.
          * 
@@ -112,8 +115,12 @@ namespace Learn {
         LearningAgent(LearningEnvironment& le, std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms,
                       const LearningParameters& p,
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : learningEnvironment{le}, algorithms{algorithms},
-              params{p}, graph(factory.createGraph()) {};
+            : learningEnvironment{le},
+              params{p}, graph(factory.createGraph()) {
+                for(Algorithm::Algorithm& algorithm: algorithms){
+                    this->algorithms.insert({algorithm.getAlgorithmID(), algorithm});
+                }
+              };
 
         /**
          * \brief Constructor for LearningAgent.
@@ -167,9 +174,9 @@ namespace Learn {
         /**
          * \brief return the a pointer of the algorithm at the specified index
          * 
-         * \param[in] idx specified index
+         * \param[in] id specified index
          */
-        Algorithm::Algorithm& getAlgorithmAt(size_t idx);
+        Algorithm::Algorithm& getAlgorithmAt(size_t id);
 
         /**
          * \brief Getter for the RNG used by the LearningAgent.
@@ -322,14 +329,6 @@ namespace Learn {
         virtual std::vector<std::shared_ptr<Algorithm::Job>> makeJobs(
             Learn::LearningMode mode);
 
-        /**
-         * \brief find the algorithm corresponding to the given agent.
-         * 
-         * \param[in] agent agent from which the algorithm is found
-         * 
-         * \throw std::runtime_error if no algorithm contain the agent.
-         */
-        virtual Algorithm::Algorithm& findCorrespondingAlgorithm(const Algorithm::Agent& agent);
 
         /**
          * \brief launch the selection of the different algorithms
@@ -352,6 +351,12 @@ namespace Learn {
          * \param[in] seed the seed given to the TPGMutator.
          */
         virtual void init(uint64_t seed = 0);
+
+
+        /**
+         * \brief Return the current best algorithm
+         */
+        const Algorithm::Algorithm& getBestAlgorithm();
 
         /**
          * \brief Method that indicate if the learning agent contains a specific algorithm.

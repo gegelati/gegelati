@@ -261,7 +261,7 @@ TEST_F(LearningAgentTest, EvalAgent)
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine = tpg->getManager().createExecutionEngine();
 
     std::shared_ptr<Learn::EvaluationResult> result;
-    auto job = tpg->createJob(la.getAlgorithmAt(0).getAgents().at(0),
+    auto job = tpg->createJob(la.getAlgorithmAt(tpg->getAlgorithmID()).getAgents().at(0),
                            Learn::LearningMode::TRAINING, la.getRNG());
     la.setCurrentAlgorithm(tpg);
     ASSERT_NO_THROW(
@@ -288,7 +288,7 @@ TEST_F(LearningAgentTest, EvaluateOneRoot)
     std::shared_ptr<Learn::EvaluationResult> result;
     ASSERT_NO_THROW(
         result = la.evaluateOneAgent(0, Learn::LearningMode::TRAINING,
-                                    la.getAlgorithmAt(0).getAgents().at(0)))
+                                    la.getAlgorithmAt(tpg->getAlgorithmID()).getAgents().at(0)))
         << "Evaluation from a root failed.";
     ASSERT_LE(result->getSelectionMetrics()->getScore(), 1.0)
         << "Average score should not exceed the score of a perfect player.";
@@ -340,8 +340,8 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
 
     // Do the populate call to keep know the number of initial vertex
     Archive a(0);
-    Algorithm::Algorithm& tpg = la.getAlgorithmAt(0);
-    tpg.getMutator().mutatePopulation(la.getGraph(), tpg.getManager(), params, la.getRNG());
+    Algorithm::Algorithm& tpgRef = la.getAlgorithmAt(tpg->getAlgorithmID());
+    tpgRef.getMutator().mutatePopulation(la.getGraph(), tpgRef.getManager(), params, la.getRNG());
 
     size_t initialNbVertex = la.getGraph().getNbVertices();
     // Seed selected so that an action becomes a root during next generation
@@ -357,7 +357,7 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
            "Graph.";
 
     // Check that bestRoot has been set
-    ASSERT_NE(tpg.getSelector().getBestAgent().first, std::nullopt)
+    ASSERT_NE(tpgRef.getSelector().getBestAgent().first, std::nullopt)
         << "Best root should be set after a trainOneGeneration iteration.";
 
     o.close();
