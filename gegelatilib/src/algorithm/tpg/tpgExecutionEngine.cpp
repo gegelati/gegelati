@@ -5,17 +5,17 @@
 
 void Algorithm::TPG::TPGExecutionEngine::setArchive(Archive& archive)
 {
-    this->archive = &archive;
+    this->archive = archive;
 }
-Archive& Algorithm::TPG::TPGExecutionEngine::getArchive()
+std::optional<std::reference_wrapper<Archive>> Algorithm::TPG::TPGExecutionEngine::getArchive()
 {
-    return *archive;
+    return archive;
 }
 
 void Algorithm::TPG::TPGExecutionEngine::setProgramExecutionEngine(std::unique_ptr<ExecutionEngine> programExecutionEngine){
     uint64_t algorithmID = programExecutionEngine->getAlgorithmID();
     this->subExecutionEngines.insert({algorithmID, std::move(programExecutionEngine)});
-    this->programExecutionEngine = this->subExecutionEngines.at(algorithmID).get();
+    this->programExecutionEngineID = algorithmID;
 }
 
 void Algorithm::TPG::TPGExecutionEngine::setupJob(const Algorithm::Job& job)
@@ -33,10 +33,10 @@ void Algorithm::TPG::TPGExecutionEngine::setupJob(const Algorithm::Job& job)
 double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& edge)
 {
     // Set the progExecutionEngine to the program
-    this->programExecutionEngine->setExecutedAgent(edge.getProgram());
+    this->getProgramExecutionEngine().setExecutedAgent(edge.getProgram());
 
     // Execute the program.
-    this->lastValues = this->programExecutionEngine->execute();
+    this->lastValues = this->getProgramExecutionEngine().execute();
     double result = lastValues.front();
 
     // Filter NaN results: replace with -inf
@@ -44,8 +44,8 @@ double Algorithm::TPG::TPGExecutionEngine::evaluateEdge(const EvoGraph::Edge& ed
                                   : result;
 
     // Put the result in the archive before returning it.
-    if (this->isTraining && this->archive != nullptr) {
-        this->archive->addRecording(edge.getProgram(), this->programExecutionEngine->getDataSources(),
+    if (this->isTraining && this->archive) {
+        this->archive->get().addRecording(edge.getProgram(), this->getProgramExecutionEngine().getDataSources(),
                                     result);
     }
     return result;

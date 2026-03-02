@@ -20,10 +20,10 @@ namespace Algorithm::TPG {
     protected:
 
         /// Execution engine used to execute the program of the TPG agents
-        ExecutionEngine* programExecutionEngine = nullptr;
+        uint64_t programExecutionEngineID;
 
         /// Archive used by the program agents.
-        Archive* archive = nullptr;
+        std::optional<std::reference_wrapper<Archive>> archive = std::nullopt;
 
         /// Action values selected
         std::vector<double> actionValues;
@@ -32,6 +32,7 @@ namespace Algorithm::TPG {
         std::vector<double> lastValues;
 
     public:
+
 
         /**
          * \brief TPGExecutionEngine constructor.
@@ -63,7 +64,7 @@ namespace Algorithm::TPG {
         /**
          * \brief getter for the archive.
          */
-        Archive& getArchive();
+        std::optional<std::reference_wrapper<Archive>> getArchive();
 
         /**
          * \brief Setup the execution engine with the given job.
@@ -84,7 +85,7 @@ namespace Algorithm::TPG {
          * 
          * \return the program execution engine.
          */
-        ExecutionEngine& getProgramExecutionEngine() const { return *this->programExecutionEngine; }
+        ExecutionEngine& getProgramExecutionEngine() const { return *this->subExecutionEngines.at(this->programExecutionEngineID); }
 
         /**
          * \brief set the continuous action values based on last values outputted.
