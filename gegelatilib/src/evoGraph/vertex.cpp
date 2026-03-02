@@ -111,7 +111,7 @@ void EvoGraph::Vertex::removeOutgoingEdge(const Edge& edge)
         this->outgoingEdges.end());
 }
 
-const std::set<uint64_t>& EvoGraph::Vertex::getAssessedActions() const
+const std::set<size_t>& EvoGraph::Vertex::getAssessedActions() const
 {
     return this->assessedActions;
 }

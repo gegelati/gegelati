@@ -115,7 +115,7 @@ namespace EvoGraph {
         /**
          * \brief return assessed actions
          */
-        virtual const std::set<uint64_t>& getAssessedActions() const;
+        virtual const std::set<size_t>& getAssessedActions() const;
 
         /**
          * \brief Update the assessed actions
@@ -176,7 +176,7 @@ namespace EvoGraph {
         /**
          * \brief Set of assessed actions by the team
          */
-        std::set<uint64_t> assessedActions;
+        std::set<size_t> assessedActions;
 
         /**
          * \brief Unique identifier of the Vertex.
