@@ -73,10 +73,10 @@ namespace Mutator {
             "// Maximum number of Edge connected to each Team of the "
             "Graph when\n"
             "// initialized.\n"
-            "// \"maxInitOutgoingEdges\" : 3, // Default value";
+            "// \"maxInitOutgoingEdges\" : 2, // Default value";
         /// Maximum number of Edge connected to each Team of the Graph
         /// when initialized.
-        size_t maxInitOutgoingEdges = 3;
+        size_t maxInitOutgoingEdges = 2;
 
         /// JSon comment
         inline static const std::string pChangeActionClassComment =

@@ -46,9 +46,6 @@
 
 #include "learn/learningAgent.h"
 
-#include "algorithm/tpg/tpgJob.h"
-#include "algorithm/tpg/tpgAlgorithm.h"
-
 
 const Algorithm::Algorithm& Learn::LearningAgent::getBestAlgorithm()
 {
