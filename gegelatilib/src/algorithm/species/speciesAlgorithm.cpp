@@ -234,7 +234,10 @@ std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Alg
 
     for(const Agent& agent: this->manager->getAgents()) {
         const SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
-        for(const auto& pair: speciesAgent.getPrograms()) {
+        for(const auto& pair: speciesAgent.getActionPrograms()) {
+            usedSubAgents[this->programAlgorithmID].insert(*pair.second);
+        }
+        for(const auto& pair: speciesAgent.getContextPrograms()) {
             usedSubAgents[this->programAlgorithmID].insert(*pair.second);
         }
     }
@@ -259,7 +262,15 @@ void Algorithm::Species::SpeciesAlgorithm::printAgent(const Agent& agent, FILE* 
         std::string edgeInfo = "";
 
         const SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
-        for(const auto& pair: speciesAgent.getPrograms()) {
+        for(const auto& pair: speciesAgent.getActionPrograms()) {
+            agentsToPrint.push_back(*pair.second);
+            
+            fprintf(pFile, "%sP%" PRIu64 " -> P%" PRIu64 " [style=dashed]\n",
+                    offset.c_str(), agent.getAgentID(), pair.second->get().getAgentID());
+
+            edgeInfo += std::to_string(pair.second->get().getAgentID()) + ";" + std::to_string(pair.first.get().getEdgeID()) + "|";
+        }
+        for(const auto& pair: speciesAgent.getContextPrograms()) {
             agentsToPrint.push_back(*pair.second);
             
             fprintf(pFile, "%sP%" PRIu64 " -> P%" PRIu64 " [style=dashed]\n",

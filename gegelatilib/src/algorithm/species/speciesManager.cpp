@@ -99,7 +99,7 @@ void Algorithm::Species::SpeciesManager::setSpeciesGraphStructure()
 
 const Algorithm::Agent& Algorithm::Species::SpeciesManager::createAgent(EvoGraph::Graph& graph)
 {
-    this->agents.insert(std::make_unique<SpeciesAgent>(this->getAlgorithmID(), this->edges));
+    this->agents.insert(std::make_unique<SpeciesAgent>(this->getAlgorithmID(), this->actionEdges, this->contextEdges));
     return **this->agents.rbegin();
 }
 
@@ -115,8 +115,11 @@ const Algorithm::Agent& Algorithm::Species::SpeciesManager::copyAgent(const Agen
     if(agent.getAlgorithmID() != this->getAlgorithmID()){
         throw std::runtime_error("Algorithm::Species::SpeciesManager::copyAgent: impossible with different algorithm");
     } else {
-        for(const auto& pair: castedAgent.getPrograms()){
-            newAgent.setEdgeProgram(pair.first, *pair.second);
+        for(const auto& pair: castedAgent.getActionPrograms()){
+            newAgent.setActionEdgeProgram(pair.first, *pair.second);
+        }
+        for(const auto& pair: castedAgent.getContextPrograms()){
+            newAgent.setContextEdgeProgram(pair.first, *pair.second);
         }
     }
 
@@ -126,18 +129,25 @@ const Algorithm::Agent& Algorithm::Species::SpeciesManager::copyAgent(const Agen
 void Algorithm::Species::SpeciesManager::emptyAgent(const Agent& agent, EvoGraph::Graph& graph)
 {
     SpeciesAgent& speciesAgent = this->getSpeciesAgentFromCst(agent);
-    for(const auto& pair: speciesAgent.getPrograms()){
-        speciesAgent.removeEdgeProgram(pair.first);
+    for(const auto& pair: speciesAgent.getActionPrograms()){
+        speciesAgent.removeActionEdgeProgram(pair.first);
+    }
+    for(const auto& pair: speciesAgent.getContextPrograms()){
+        speciesAgent.removeContextEdgeProgram(pair.first);
     }
 }
 
 void Algorithm::Species::SpeciesManager::setProgram(const Agent& agent, const EvoGraph::Edge& edge, const Agent& program)
 {
     if(program.getAlgorithmID() != this->programAlgorithmID) {
-        throw std::runtime_error("SpeciesManager::setProgram: ID of progrma is not the ID of the program Algorithm.");
+        throw std::runtime_error("SpeciesManager::setProgram: ID of program is not the ID of the program Algorithm.");
     }
 
-    this->getSpeciesAgentFromCst(agent).setEdgeProgram(edge, program);
+    if(this->actionEdges.find(edge) != this->actionEdges.end()) {
+        this->getSpeciesAgentFromCst(agent).setActionEdgeProgram(edge, program);
+    } else {
+        this->getSpeciesAgentFromCst(agent).setContextEdgeProgram(edge, program);
+    }
 }
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::Species::SpeciesManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const

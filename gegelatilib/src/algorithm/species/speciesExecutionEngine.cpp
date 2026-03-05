@@ -59,7 +59,7 @@ void Algorithm::Species::SpeciesExecutionEngine::setContinuousActionValues()
     }
 }
 
-void Algorithm::Species::SpeciesExecutionEngine::evaluateTeam(const EvoGraph::Vertex& vertex, size_t depth, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Algorithm::Agent>>> & mapEdgeProgram)
+void Algorithm::Species::SpeciesExecutionEngine::evaluateTeam(const EvoGraph::Vertex& vertex, size_t depth, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Algorithm::Agent>>> & mapActionEdgeProgram, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Algorithm::Agent>>> & mapContextEdgeProgram)
 {
     // Execute the team of the destination of the best edge.
     if (dynamic_cast<const EvoGraph::Team*>(&vertex) == nullptr) {
@@ -75,31 +75,31 @@ void Algorithm::Species::SpeciesExecutionEngine::evaluateTeam(const EvoGraph::Ve
         // Evaluate all Edge
         // First
         std::reference_wrapper<const EvoGraph::Edge> bestEdge = *outgoingEdges.begin();
-        double bestBid = this->evaluateProgram(*mapEdgeProgram.at(bestEdge));
+        double bestBid = this->evaluateProgram(*mapContextEdgeProgram.at(bestEdge));
 
         // Others
         for (auto iter = ++outgoingEdges.begin(); iter != outgoingEdges.end();
             iter++) {
             const EvoGraph::Edge& edge = *iter;
-            double bid = this->evaluateProgram(*mapEdgeProgram.at(bestEdge));
+            double bid = this->evaluateProgram(*mapContextEdgeProgram.at(bestEdge));
             if (bid >= bestBid) {
                 bestEdge = edge;
                 bestBid = bid;
             }
         }
-        this->evaluateTeam(bestEdge.get().getDestination(), depth + 1, mapEdgeProgram);
+        this->evaluateTeam(bestEdge.get().getDestination(), depth + 1, mapActionEdgeProgram, mapContextEdgeProgram);
 
 
     // Depth is even, meaning we are on the "activation selection path"
     } else {
         for (const EvoGraph::Edge& edge: outgoingEdges) {
             // Edge is not in the map linking edge to program, it means its a connection edge without program between two teams. 
-            if(mapEdgeProgram.find(edge) == mapEdgeProgram.end()) {
+            if(mapActionEdgeProgram.find(edge) == mapActionEdgeProgram.end()) {
                 // Execute the team of the destination of the best edge.
-                this->evaluateTeam(edge.getDestination(), depth + 1, mapEdgeProgram);
+                this->evaluateTeam(edge.getDestination(), depth + 1, mapActionEdgeProgram, mapContextEdgeProgram);
             } else if (const EvoGraph::Action* action = dynamic_cast<const EvoGraph::Action*>(&edge.getDestination())) {
                 // Set action value for the action class
-                this->actionValues[action->getActionID()] = this->evaluateProgram(*mapEdgeProgram.at(edge));
+                this->actionValues[action->getActionID()] = this->evaluateProgram(*mapActionEdgeProgram.at(edge));
             } else {
                 throw std::runtime_error("SpeciesExecutionEngine::evaluateTeam: in even depth, edge should point to an action if it contains a program.");
             }
@@ -117,12 +117,11 @@ std::vector<double> Algorithm::Species::SpeciesExecutionEngine::execute()
         throw std::runtime_error("Algorithm::Species::SpeciesExecutionEngine::execute trying to execute an agent which is not a Species agent");
     }
 
-
     this->actionValues.clear();
     this->actionValues.resize(this->outputs.size(), 0.0);
 
     size_t currentMode = 0;
-    this->evaluateTeam(this->rootVertex, 0, speciesAgent->getPrograms());
+    this->evaluateTeam(this->rootVertex, 0, speciesAgent->getActionPrograms(), speciesAgent->getContextPrograms());
 
     
     if(this->outputs.sizeContinuous() == 0){

@@ -115,9 +115,10 @@ namespace Algorithm::Species {
          *
          * \param[in] vertex the vertex whose outgoing Edge are evaluated, should be castable to vertex.
          * \param[in] depth the actual depth in the graph
-         * \param[in] mapEdgeProgram the map linking the edges to the programs
+         * \param[in] mapActionEdgeProgram the map linking the edges to the programs
+         * \param[in] mapContextEdgeProgram the map linking the edges to the programs
          */
-        virtual void evaluateTeam(const EvoGraph::Vertex& vertex, size_t depth, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>>& mapEdgeProgram);
+        virtual void evaluateTeam(const EvoGraph::Vertex& vertex, size_t depth, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>> & mapActionEdgeProgram, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>> & mapContextEdgeProgram);
 
         /**
          * \brief Execute the Graph starting from the vertex pointed by the species, with the program of the agent.

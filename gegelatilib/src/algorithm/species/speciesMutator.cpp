@@ -475,20 +475,32 @@ void Algorithm::Species::SpeciesMutator::crossoverAgents(
 void Algorithm::Species::SpeciesMutator::swapPrograms(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng)
 {
     SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+    double probaSwapContext = 0.5;
+
+    // By default, if thre is less than two action edges, to a context swap, if there is less than two context edges, do a action swap
+    bool doSwapActionEdges = true;
+    if(speciesManager.getActionEdges().size() < 2) {
+        doSwapActionEdges = false;
+    } else if(speciesManager.getContextEdges().size() > 1 && probaSwapContext > rng.getDouble(0.0, 1.0)) {
+        doSwapActionEdges = false;
+    }
+
+    // Get the corresponding edges
+    const auto& edges = (doSwapActionEdges) ? speciesManager.getActionEdges() : speciesManager.getContextEdges();
 
     // Randomly select two edges
     size_t index1 =
-        rng.getUnsignedInt64(0, speciesManager.getEdges().size() - 1);
+        rng.getUnsignedInt64(0, edges.size() - 1);
     size_t index2 =
-        rng.getUnsignedInt64(0, speciesManager.getEdges().size() - 2);
+        rng.getUnsignedInt64(0, edges.size() - 2);
     if (index2 == index1) {
         index2++;
     }
 
     // Get iterators to the selected edges
-    auto it1 = speciesManager.getEdges().begin();
+    auto it1 = edges.begin();
     std::advance(it1, index1);
-    auto it2 = speciesManager.getEdges().begin();
+    auto it2 = edges.begin();
     std::advance(it2, index2);
 
     // Extract and swap programs

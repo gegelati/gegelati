@@ -50,7 +50,10 @@ void Algorithm::Species::SpeciesPolicyStats::analyzePolicy(const Agent& agent)
 
     this->analyzeVertex(rootVertex, 0);
 
-    for(const auto& pair: speciesAgent->getPrograms()) {
+    for(const auto& pair: speciesAgent->getActionPrograms()) {
+        this->subPolicyStats.find(pair.second->get().getAlgorithmID())->second->analyzePolicy(pair.second->get());
+    }
+    for(const auto& pair: speciesAgent->getContextPrograms()) {
         this->subPolicyStats.find(pair.second->get().getAlgorithmID())->second->analyzePolicy(pair.second->get());
     }
 }
