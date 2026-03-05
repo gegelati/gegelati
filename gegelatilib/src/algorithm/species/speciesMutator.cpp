@@ -471,6 +471,34 @@ void Algorithm::Species::SpeciesMutator::crossoverAgents(
 
 }
 
+void Algorithm::Species::SpeciesMutator::swapActionValues(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng)
+{
+    SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
+    const SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
+    
+    // Randomly select two actions
+    size_t index1 =
+        rng.getUnsignedInt64(0, agent.getActionLinks().size() - 1);
+    size_t index2 =
+        rng.getUnsignedInt64(0, agent.getActionLinks().size() - 2);
+    if (index2 == index1) {
+        index2++;
+    }
+
+    // Get iterators to the selected edges
+    auto it1 = agent.getActionLinks().begin();
+    std::advance(it1, index1);
+    auto it2 = agent.getActionLinks().begin();
+    std::advance(it2, index2);
+
+    // Extract and swap programs
+    size_t actionValue1 = it1->second;
+    size_t actionValue2 = it2->second;
+
+    // Set the swapped action classes
+    speciesManager.setActionValue(agent, it1->first, actionValue2);
+    speciesManager.setActionValue(agent, it2->first, actionValue1);
+}
 
 void Algorithm::Species::SpeciesMutator::swapPrograms(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng)
 {
@@ -537,10 +565,19 @@ void Algorithm::Species::SpeciesMutator::mutateAgent(
     SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
     const SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
 
+    // Swap randomly action values
+    double probaSwapActionValues = 0.5;
+    double proba = probaSwapActionValues;
+    while(speciesAgent.getActionLinks().size() > 1 &&
+            proba > rng.getDouble(0.0, 1.0)) {
+        this->swapActionValues(speciesAgent, manager, rng);
+
+        proba *= probaSwapActionValues;
+    } 
 
     // 3. swap randomly selected edges
     // With at least two edges
-    double proba = params.mutation.tpg.pSwapActionProgram;
+    proba = params.mutation.tpg.pSwapActionProgram;
     while (speciesManager.getEdges().size() > 2 &&
             proba > rng.getDouble(0.0, 1.0)) {
         this->swapPrograms(speciesAgent, manager, rng);

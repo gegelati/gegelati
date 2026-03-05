@@ -22,6 +22,10 @@ namespace Algorithm::Species {
 
             /// context Programs representing the agent. Each context program is associated to a specific edge
             std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>> contextPrograms;
+            
+            /// Map specific to the agent, linking the action vertices to the action used by the agent.
+            /// All action in both keys and values should appear once.
+            std::map<size_t, size_t> actionLinks;
 
             /**
              * \brief return the itertaor in the map of edge and program at the position of the specified edge.
@@ -32,18 +36,21 @@ namespace Algorithm::Species {
              */
             std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>>::iterator getIteratorContextEdge(const EvoGraph::Edge& edge);
 
-            // TODO -> CHANGE ACTION VALUE OF THE VERTICES
-
         public:
 
             /**
              * \brief Main constructor of the SpeciesAgent.
              *
              * \param[in] algorithmID id of the algorithm used.
+             * \param[in] nbActions number of actions used by the agent
              * \param[in] actionEdges the action edges on which programs will be set
              * \param[in] contextEdges the context edges on which programs will be set
              */
-            SpeciesAgent(uint64_t algorithmID, const std::set<std::reference_wrapper<const EvoGraph::Edge>>& actionEdges, const std::set<std::reference_wrapper<const EvoGraph::Edge>>& contextEdges) : Agent(algorithmID) {
+            SpeciesAgent(uint64_t algorithmID, size_t nbActions, const std::set<std::reference_wrapper<const EvoGraph::Edge>>& actionEdges, const std::set<std::reference_wrapper<const EvoGraph::Edge>>& contextEdges) : Agent(algorithmID) {
+                // Initialize with : action <=> action.
+                for(size_t idx = 0; idx < nbActions; idx++) {
+                    actionLinks.insert({idx, idx});
+                }
                 for(const EvoGraph::Edge& edge: actionEdges){
                     actionPrograms.insert({edge, std::nullopt});
                 }                
@@ -51,6 +58,26 @@ namespace Algorithm::Species {
                     contextPrograms.insert({edge, std::nullopt});
                 }
             };
+
+            /**
+             * \brief set an action link between an action vertex ID an action
+             * 
+             * \param[in] actionID action vertex ID
+             * \param[in] actionValue action value searched
+             */
+            void setActionLink(size_t actionID, size_t actionValue);
+
+            /**
+             * \brief getter for an action vertex ID
+             * 
+             * \param[in] actionID action vertex ID
+             */
+            size_t getActionLink(size_t actionID) const;
+
+            /**
+             * \brief Getter for the map of action links
+             */
+            const std::map<size_t, size_t>& getActionLinks() const;
             
             /**
              * @brief Control if agent has the searched edge

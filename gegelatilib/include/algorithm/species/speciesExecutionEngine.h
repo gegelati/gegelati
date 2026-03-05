@@ -117,8 +117,13 @@ namespace Algorithm::Species {
          * \param[in] depth the actual depth in the graph
          * \param[in] mapActionEdgeProgram the map linking the edges to the programs
          * \param[in] mapContextEdgeProgram the map linking the edges to the programs
+         * \param[in] actionLinks the map linking the actionId to the action values
          */
-        virtual void evaluateTeam(const EvoGraph::Vertex& vertex, size_t depth, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>> & mapActionEdgeProgram, const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>> & mapContextEdgeProgram);
+        virtual void evaluateTeam(
+            const EvoGraph::Vertex& vertex, size_t depth, 
+            const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>> & mapActionEdgeProgram, 
+            const std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::reference_wrapper<const Agent>>> & mapContextEdgeProgram, 
+            const std::map<size_t, size_t>& actionLinks);
 
         /**
          * \brief Execute the Graph starting from the vertex pointed by the species, with the program of the agent.

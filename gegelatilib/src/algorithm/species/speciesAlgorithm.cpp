@@ -278,11 +278,16 @@ void Algorithm::Species::SpeciesAlgorithm::printAgent(const Agent& agent, FILE* 
 
             edgeInfo += std::to_string(pair.second->get().getAgentID()) + ";" + std::to_string(pair.first.get().getEdgeID()) + "|";
         }
+
+        std::string actionInfo = "";
+        for(const auto& pair: speciesAgent.getActionLinks()) {
+            actionInfo += std::to_string(pair.first) + "," + std::to_string(pair.second) + "|";
+        }
     
         fprintf(pFile,
                 "%sP%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
-                "width=0 height=0 label=\"%s.%" PRIu64 "\" edgeInfo=\"%s\"]\n",
-                offset.c_str(), agent.getAgentID(), this->algorithmColor.c_str(), this->algorithmName.c_str(), this->algorithmID, edgeInfo.c_str());
+                "width=0 height=0 label=\"%s.%" PRIu64 "\" edgeInfo=\"%s\" actionInfo=\"%s\"]\n",
+                offset.c_str(), agent.getAgentID(), this->algorithmColor.c_str(), this->algorithmName.c_str(), this->algorithmID, edgeInfo.c_str(), actionInfo.c_str());
 
                 
 

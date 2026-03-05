@@ -99,7 +99,7 @@ void Algorithm::Species::SpeciesManager::setSpeciesGraphStructure()
 
 const Algorithm::Agent& Algorithm::Species::SpeciesManager::createAgent(EvoGraph::Graph& graph)
 {
-    this->agents.insert(std::make_unique<SpeciesAgent>(this->getAlgorithmID(), this->actionEdges, this->contextEdges));
+    this->agents.insert(std::make_unique<SpeciesAgent>(this->getAlgorithmID(), this->outputs.size(), this->actionEdges, this->contextEdges));
     return **this->agents.rbegin();
 }
 
@@ -148,6 +148,11 @@ void Algorithm::Species::SpeciesManager::setProgram(const Agent& agent, const Ev
     } else {
         this->getSpeciesAgentFromCst(agent).setContextEdgeProgram(edge, program);
     }
+}
+
+void Algorithm::Species::SpeciesManager::setActionValue(const Agent& agent, size_t actionID, size_t actionValue)
+{
+    this->getSpeciesAgentFromCst(agent).setActionLink(actionID, actionValue);
 }
 
 std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::Species::SpeciesManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const

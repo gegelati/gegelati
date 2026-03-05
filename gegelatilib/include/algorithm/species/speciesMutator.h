@@ -237,6 +237,16 @@ namespace Algorithm::Species {
         ) override;
 
         /**
+         * \brief swap two action values of an agent
+         * 
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] rng Random Number
+         * Generator used in the mutation process.
+         */
+        void swapActionValues(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng);
+
+        /**
          * \brief swap two program position of an agent
          * 
          * \param[in,out] agent the Agent to mutate.

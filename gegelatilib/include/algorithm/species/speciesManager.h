@@ -155,6 +155,14 @@ namespace Algorithm::Species {
          * \param[in] program the program set.
          */
         virtual void setProgram(const Agent& agent, const EvoGraph::Edge& edge, const Agent& program);
+        /**
+         * \brief Set a specific actionValue to an actionID
+         * 
+         * \param[in] agent the speciesAgent on which the program is set
+         * \param[in] actionID the id of the action set
+         * \param[in] actionValue the value set
+         */
+        virtual void setActionValue(const Agent& agent, size_t actionID, size_t actionValue);
 
         /**
          * \brief create and return a Species execution engine.

@@ -18,6 +18,31 @@ std::map<std::reference_wrapper<const EvoGraph::Edge>, std::optional<std::refere
     return it;
 }
 
+
+
+void Algorithm::Species::SpeciesAgent::setActionLink(size_t actionID, size_t actionValue)
+{
+    if(actionID >= this->actionLinks.size() || actionValue >= this->actionLinks.size()) {
+        throw std::runtime_error("SpeciesAgent::setActionLink: ActionID or actionValue above the limit of action availables.");
+    }
+    this->actionLinks.at(actionID) = actionValue;
+}
+
+size_t Algorithm::Species::SpeciesAgent::getActionLink(size_t actionID) const
+{
+    if(actionID >= this->actionLinks.size()) {
+        throw std::runtime_error("SpeciesAgent::getActionLink: ActionID or actionValue above the limit of action availables.");
+    }
+    return this->actionLinks.at(actionID);
+}
+
+const std::map<size_t, size_t>& Algorithm::Species::SpeciesAgent::getActionLinks() const
+{
+    return this->actionLinks;
+}
+            
+
+
 bool Algorithm::Species::SpeciesAgent::hasActionEdge(const EvoGraph::Edge& edge) const
 {
     auto it = this->actionPrograms.find(edge);
@@ -116,5 +141,12 @@ bool Algorithm::Species::SpeciesAgent::isValid() const
             return false;
         }
     }
-    return true;
+    std::set<size_t> actionID;
+    std::set<size_t> actionValues;
+    for (const auto& pair: this->actionLinks) {
+        actionID.insert(pair.first);
+        actionValues.insert(pair.second);
+    }
+    // Action ID and Values should be equal set, meaning they used the same action (example {0:1, 1:2, 2:0} is valid but {0:1, 1:0, 2:0} is invalid)
+    return actionID == actionValues;
 }
