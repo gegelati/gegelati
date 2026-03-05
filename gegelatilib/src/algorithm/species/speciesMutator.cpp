@@ -55,9 +55,39 @@ bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(const EvoGraph::V
 
     const EvoGraph::Edge& newEdge = graph.cloneEdge(*copyEdge);
 
+
+
+    // Dupplicate the destination vertex, and its edges
+    double probaDupplicateNextVertex = 0.5;
+    if(probaDupplicateNextVertex > rng.getDouble(0, 1)) {
+        // Dupplicate vertex
+        const EvoGraph::Vertex& originVertex = newEdge.getDestination();
+        const EvoGraph::Vertex& newVertex = graph.cloneVertex(originVertex);
+        graph.setEdgeDestination(newEdge, newVertex);
+
+        // Get origin action edges of the dupplicated vertex
+        std::map<size_t, std::reference_wrapper<const EvoGraph::Edge>> originActionEdge;
+        for(const EvoGraph::Edge& outgoingEdge: originVertex.getOutgoingEdges()) {
+            if(auto action = dynamic_cast<const EvoGraph::Action*>(&outgoingEdge.getDestination())) {
+                originActionEdge.insert({action->getActionID(), outgoingEdge});
+            }
+        }
+
+        for(const EvoGraph::Edge& outgoingEdge: newVertex.getOutgoingEdges()) {
+            if(auto action = dynamic_cast<const EvoGraph::Action*>(&outgoingEdge.getDestination())) {
+                // We get the origin action edge of the origin vertex associated with the same action. 
+                // We then get the old edge associated to the origin action edge
+                // Then the new outgoing edge is associated to the old edge in the edgeMap
+                // This way, the new outgoingedge's program will be dupplicated with the same edge as the origin action edge
+                edgeMap.insert({outgoingEdge, edgeMap.at(originActionEdge.at(action->getActionID()))});
+            }
+        }
+    }
+
     // Add the new edge at in the edgeMap, link to the same old edge
     // By doing so, the same program will be dupplicating for the copyEdge and newEdge, leading to small initial changes.
     edgeMap.insert({newEdge, *itEdges});
+
     return true;
 }
 
