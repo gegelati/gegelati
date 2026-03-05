@@ -299,6 +299,32 @@ const Algorithm::Algorithm& Learn::LearningAgent::getBestAlgorithm()
     return *this->currentBestAlgorithm;
 }
 
+
+std::map<double, std::reference_wrapper<Algorithm::Algorithm>> Learn::LearningAgent::getOrderAlgorithms(
+            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                          std::reference_wrapper<const Algorithm::Agent>>& results)
+{
+    // Compute the score of each algorithm based on the squared rank of each agent.
+    std::map<size_t, double> scoreAlgorithms;
+    size_t rank = 0;
+    for(const auto& pair: results) {
+        if(scoreAlgorithms.find(pair.second.get().getAlgorithmID()) == scoreAlgorithms.end()) {
+            scoreAlgorithms[pair.second.get().getAlgorithmID()] = 0;
+        }
+        scoreAlgorithms[pair.second.get().getAlgorithmID()] += std::pow(rank, 2);
+        rank++;
+    }
+
+
+    std::map<double, std::reference_wrapper<Algorithm::Algorithm>> orderAlgorithmScores;
+    for(const auto& pair: scoreAlgorithms) {
+        Algorithm::Algorithm& algo = this->findCorrespondingAlgorithm(pair.first);
+        double averageScore = pair.second / algo.getManager().getExpectedNbAgents();
+        orderAlgorithmScores.insert({averageScore,  algo});
+    }
+    return orderAlgorithmScores;
+}
+
 void Learn::LearningAgent::launchAlgorithmsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Algorithm::Agent>>& results,
@@ -310,10 +336,18 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
             std::reference_wrapper<const Algorithm::Agent>>
             resultsCopy(results);
 
+        std::map<double, std::reference_wrapper<Algorithm::Algorithm>> orderAlgorithms = this->getOrderAlgorithms(results);
         results.clear();
 
+        size_t position = 1;
+        for (auto it = orderAlgorithms.rbegin(); it != orderAlgorithms.rend(); ++it, ++position) {
+            Algorithm::SpeciesAlgorithm& speciesAlgo = dynamic_cast<Algorithm::SpeciesAlgorithm&>(it->second.get());
+            speciesAlgo.increaseAge();
+            double prop = speciesAlgo.calculateProportion(position, orderAlgorithms.size());
+            it->second.get().getManager().setExpectedNbAgents(prop * this->params.mutation.tpg.nbRoots);
+        }
 
-        std::map<double, std::reference_wrapper<Algorithm::Algorithm>> scoreAlgorithm;
+        
         for(Algorithm::Algorithm& algorithm: algorithms){
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                         std::reference_wrapper<const Algorithm::Agent>>
@@ -328,31 +362,23 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
                 }
             }
 
-            scoreAlgorithm.insert({algorithm.getSelector().getScoreAlgorithm(), algorithm});
             // Do the selection for this algorithm
             algorithm.getSelector().doSelection(*this->graph, resultsAlgo, rng);
             // Update the evaluation records
             algorithm.getSelector().updateEvaluationRecords(resultsAlgo);
-            algorithm.getSelector().computeScoreAlgorithm(resultsAlgo);
 
             results.insert(resultsAlgo.begin(), resultsAlgo.end());
         }
 
-        int position = 1;
-        for (auto it = scoreAlgorithm.rbegin(); it != scoreAlgorithm.rend(); ++it, ++position) {
-            double prop = dynamic_cast<Algorithm::SpeciesAlgorithm&>(it->second.get()).calculateProportion(position, scoreAlgorithm.size());
-            it->second.get().getManager().setExpectedNbAgents(prop * this->params.mutation.tpg.nbRoots);
-        }
-
-        this->currentBestAlgorithm = &scoreAlgorithm.rbegin()->second.get();
+        this->currentBestAlgorithm = &orderAlgorithms.begin()->second.get();
 
 
         double probaAdd = params.mutation.tpg.pEdgeAddition;
         double probaDel = params.mutation.tpg.pEdgeDeletion;
         if(probaAdd > rng.getDouble(0, 1) && this->algorithms.size() < 5) {
-            std::cout<<"  CREATE ALGOOOOO";;
+            std::cout<<"  CREATE ALGOOOOO";
             // Dupplicate algorithm ->
-            Algorithm::SpeciesAlgorithm& algoToDupplicate = dynamic_cast<Algorithm::SpeciesAlgorithm&>(scoreAlgorithm.rbegin()->second.get());
+            Algorithm::SpeciesAlgorithm& algoToDupplicate = dynamic_cast<Algorithm::SpeciesAlgorithm&>(orderAlgorithms.begin()->second.get());
 
             this->createdSpeciesAlgorithms.push_back(std::move(algoToDupplicate.initNewSpecies(this->rng)));
             Algorithm::Algorithm& newAlgorithm = **this->createdSpeciesAlgorithms.rbegin();
@@ -363,7 +389,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 
         else if(probaDel > rng.getDouble(0, 1) && this->algorithms.size() > 3) {
             std::cout<<"  DESTROY ALGOOOOO";
-            auto& algoRef = scoreAlgorithm.begin()->second.get();
+            auto& algoRef = orderAlgorithms.rbegin()->second.get();
             auto it = std::find(this->algorithms.begin(), this->algorithms.end(), algoRef);
             
             algoRef.clearAlgorithm();
@@ -381,10 +407,6 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
                 this->createdSpeciesAlgorithms.erase(it2);
             }
         }
-
-        
-
-
 
     } else if(this->algorithms.size() == 1){
         // Do the selection for this algorithm
@@ -542,7 +564,7 @@ std::vector<std::shared_ptr<Algorithm::Job>> Learn::LearningAgent::makeJobs(
 
 Algorithm::Algorithm& Learn::LearningAgent::findCorrespondingAlgorithm(const Algorithm::Agent& agent){
     for(Algorithm::Algorithm& algorithm: this->algorithms){
-        if(algorithm.containsAgent(agent)){
+        if(algorithm.getAlgorithmID() == agent.getAlgorithmID()){
             return algorithm;
         }
     }

@@ -91,15 +91,18 @@ bool Algorithm::Species::SpeciesMutator::addActivationEdgeSpecies(const EvoGraph
             }
         }
 
+        
+
         // Add the set difference in the available action set.
+        std::set<uint64_t> difference;
         std::set_difference(
             availableActionOfVertex.begin(), availableActionOfVertex.end(),
             currentVertexAssessedActions.begin(), currentVertexAssessedActions.end(),
-            std::inserter(availableActionOfVertex, availableActionOfVertex.begin())
+            std::inserter(difference, difference.begin())
         );
-    
-        if(availableActionOfVertex.size() > 0){
-            availableActionsAllVertices.push_back({vertex, availableActionOfVertex});
+
+        if(difference.size() > 0){
+            availableActionsAllVertices.push_back({vertex, difference});
         }
     }
 
@@ -137,15 +140,6 @@ bool Algorithm::Species::SpeciesMutator::addActivationEdgeSpecies(const EvoGraph
     return true;
 }
 
-bool Algorithm::Species::SpeciesMutator::addEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
-{
-    double proba = 0.5;
-    if(proba > rng.getDouble(0, 1)) {
-        return this->addContextEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
-    } else {
-        return this->addActivationEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
-    }
-}
 
 
 bool Algorithm::Species::SpeciesMutator::removeEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
@@ -284,16 +278,22 @@ bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& n
 
 const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
 {
-    double probaAdd = 0.3;
+    double probaAddContext = params.mutation.tpg.pProgramMutation;
+    double probaAddActivation = params.mutation.tpg.pEdgeDestinationIsAction;
+    double probaDelete = params.mutation.tpg.probaContextOverActionProgram;
+    double probaExtension = params.mutation.tpg.ratioTeamsOverActions;
 
     const EvoGraph::Vertex& newRoot = this->copyGraphSpecies(manager, graph, edgeMap);
     bool mutationHappened = false;
     do {
-        double randomValue = rng.getDouble(0, 1.5);
-        if(randomValue > 1) {
-            std::cout<<"  ADD      ";
-            mutationHappened = this->addEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
-        } else if (randomValue > 0.5){
+        double randomValue = rng.getDouble(0, probaAddActivation + probaAddContext + probaDelete + probaExtension);
+        if(randomValue > probaAddActivation + probaDelete + probaExtension) {
+            std::cout<<"  ADDCONTEXT   ";
+            mutationHappened = this->addContextEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
+        } else if (randomValue > probaDelete + probaExtension){
+            std::cout<<"  ADDACTIVATION    ";
+            mutationHappened = this->addActivationEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
+        } else if (randomValue > probaExtension){
             std::cout<<"  DEL    ";
             mutationHappened = this->removeEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
         }  else {

@@ -15,6 +15,7 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::init
 {
     std::unique_ptr<Algorithm> copyAlgo = this->copy();
     SpeciesAlgorithm& copySpeciesAlgo = dynamic_cast<SpeciesAlgorithm&>(*copyAlgo);
+    copySpeciesAlgo.setParentID(this->algorithmID);
 
     std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>> edgeMap;
 
@@ -24,7 +25,7 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::init
     copySpeciesAlgo.setRootVertex(newRootVertex);
     copyAlgo->initAlgorithm(rng, *this->outputs, this->dataSources, this->graph);
 
-    double prop = 0.2;
+    double prop = 1.0;
     std::vector<std::reference_wrapper<const Agent>> originAgents(this->getAgents());
     std::vector<std::reference_wrapper<const Agent>> exchangedAgents;
 
@@ -39,9 +40,6 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::init
         // Add the agent to the new algorithm.
         dynamic_cast<SpeciesMutator&>(copySpeciesAlgo.getMutator()).initAgentFromSpecies(selectedAgent, *this->graph, copyAlgo->getManager(), this->params, rng, edgeMap);
 
-        // Delete it from the current algorithm
-        this->selector->removeFromSavedResults(selectedAgent);
-        this->manager->deleteAgent(selectedAgent, *this->graph);
     }
     
     return copyAlgo;
@@ -118,10 +116,6 @@ void Algorithm::Species::SpeciesAlgorithm::initSubAlgorithms(RNG::RNG& rng, cons
 
     // Program output is only size 1, except for continuous outputs where we create more outputs (one per continuous output of the Species)
     auto programOutput = std::make_shared<Output::OutputHandler>(Output::Output());
-    for(size_t idx = 0; idx < this->outputs->sizeContinuous(); idx++){
-        programOutput->addOutput(Output::Output());
-    }
-
     // Init program algorithm
     programAlgo.initAlgorithm(rng, *programOutput, dataSource, graph);
 

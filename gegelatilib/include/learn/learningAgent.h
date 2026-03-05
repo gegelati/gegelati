@@ -343,6 +343,18 @@ namespace Learn {
         virtual Algorithm::Algorithm& findCorrespondingAlgorithm(const Algorithm::Agent& agent);
 
         /**
+         * \brief Return the order of the algorithms, based one the scores of the agents.
+         * 
+         * This method will attribute a score equal to "results.size() - rank(agent)" to each agent.
+         * The score of the algorithm is then the Mean Square Sum of its respective agent scores
+         * 
+         * \param[in] results results of the evaluation
+         */
+        std::map<double, std::reference_wrapper<Algorithm::Algorithm>> getOrderAlgorithms(
+                    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                                std::reference_wrapper<const Algorithm::Agent>>& results);
+
+        /**
          * \brief launch the selection of the different algorithms
          * 
          * \param[in] results results of the evaluation

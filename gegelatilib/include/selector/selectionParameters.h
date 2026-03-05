@@ -81,7 +81,7 @@ namespace Selector {
             "// \"ratioSavedRoots\" : 0.05, // Default value";
         /// Percentage of root Vertex saved from the tournament at each
         /// generation.
-        double ratioSavedRoots = 0.5;
+        double ratioSavedRoots = 0.05;
 
         /// JSon comment
         inline static const std::string areElitesReproductibleComment =

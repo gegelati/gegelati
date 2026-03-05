@@ -32,6 +32,12 @@ namespace Algorithm::Species {
             /// Vertex from which the species algorithm starts.
             std::optional<std::reference_wrapper<const EvoGraph::Vertex>> rootVertex;
 
+            /// parent's id of the species.
+            size_t parentID = 0;
+
+            /// Age of the species.
+            size_t age = 0;
+
 
         public:
 
@@ -48,6 +54,25 @@ namespace Algorithm::Species {
                 this->setProgramAlgorithm(programAlgorithm);
             };
 
+            /**
+             * \brief Set a new ParentID to the algorithm
+             */
+            void setParentID(size_t newID) {this->parentID = newID;}
+
+            /**
+             * \brief getter for the parent ID
+             */
+            size_t getParentID() {return this->parentID;}
+
+            /**
+             * \brief getter for the age
+             */
+            size_t getAge() {return this->age;}
+
+            /**
+             * \brief increase the age
+             */
+            void increaseAge() {this->age++;}
 
             /**
              * \brief init a new species from this current species.

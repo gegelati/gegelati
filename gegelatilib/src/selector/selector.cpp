@@ -2,23 +2,6 @@
 
 #include "selector/selector.h"
 
-double Selector::Selector::getScoreAlgorithm() const
-{
-    return this->algorithmScore;
-}
-
-void Selector::Selector::computeScoreAlgorithm(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          std::reference_wrapper<const Algorithm::Agent>>& results)
-{
-    // Algorithm score is the average of the results. -> Need bibliography on this
-    this->algorithmScore = 0;
-    for(const auto& pair: results) {
-        this->algorithmScore += pair.first->getSelectionMetrics()->getScore();
-    }
-    this->algorithmScore /= results.size();
-}
-
 void Selector::Selector::doSelection(
     EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
