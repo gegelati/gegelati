@@ -103,10 +103,11 @@ namespace Algorithm::Species {
          * \param[in] newRoot The new root vertex of the species
          * \param[in] manager the manager to copy the graph.
          * \param[in,out] graph the Graph.
+         * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in,out] edgeMap map linking old to new edges
          */
-        bool addContextEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+        bool addContextEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
 
         /**
          * \brief remove an edge to the new species.
@@ -130,10 +131,11 @@ namespace Algorithm::Species {
          * \param[in] newRoot The new root vertex of the species
          * \param[in] manager the manager to copy the graph.
          * \param[in,out] graph the Graph.
+         * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in,out] edgeMap map linking old to new edges
          */
-        virtual bool extendSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+        virtual bool extendSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
 
         /**
          * Mutate the graph of a species to create a new species. 
@@ -252,9 +254,10 @@ namespace Algorithm::Species {
          * \param[in,out] agent the Agent to mutate.
          * \param[in] manager the manager to change the agents.
          * \param[in] rng Random Number
+         * \param[in] params Probability parameters for the mutation.
          * Generator used in the mutation process.
          */
-        void swapPrograms(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng);
+        void swapPrograms(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng, const Learn::LearningParameters& params);
 
         /**
          * \brief Prepares the mutation of a Edge.

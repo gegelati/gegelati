@@ -269,6 +269,74 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
 
+    if (param == "nbBestAgents") {
+        params.mutation.tpg.nbBestAgents = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "nbLastGenPlateau") {
+        params.mutation.tpg.nbLastGenPlateau = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "alphaEMALinearFactor") {
+        params.mutation.tpg.alphaEMALinearFactor = (double)value.asDouble();
+        return;
+    }
+    if (param == "epsilonPlateauThreshold") {
+        params.mutation.tpg.epsilonPlateauThreshold = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaDupplicateNextVertex") {
+        params.mutation.tpg.speciesProbaDupplicateNextVertex = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaExtensionEdge") {
+        params.mutation.tpg.speciesProbaExtensionEdge = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaAddContext") {
+        params.mutation.tpg.speciesProbaAddContext = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaAddActivation") {
+        params.mutation.tpg.speciesProbaAddActivation = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaDelete") {
+        params.mutation.tpg.speciesProbaDelete = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaExtension") {
+        params.mutation.tpg.speciesProbaExtension = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaCrossProgram") {
+        params.mutation.tpg.speciesProbaCrossProgram = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaCrossAgent") {
+        params.mutation.tpg.speciesProbaCrossAgent = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaSwapContext") {
+        params.mutation.tpg.speciesProbaSwapContext = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaSwapActionValues") {
+        params.mutation.tpg.speciesProbaSwapActionValues = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaSwapPrograms") {
+        params.mutation.tpg.speciesProbaSwapPrograms = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesProbaMutateProgram") {
+        params.mutation.tpg.speciesProbaMutateProgram = (double)value.asDouble();
+        return;
+    }
+
+
+
+
     if (param == "maxProgramSize") {
         params.mutation.prog.maxProgramSize = (size_t)value.asUInt();
         return;
@@ -537,6 +605,71 @@ void File::ParametersParser::writeParametersToJson(
         params.mutation.tpg.pCrossPrograms;
     root["mutation"]["tpg"]["pCrossPrograms"].setComment(
         Mutator::TPGParameters::pCrossProgramsComment, Json::commentBefore);
+
+
+    root["mutation"]["tpg"]["nbBestAgents"] = params.mutation.tpg.nbBestAgents;
+    root["mutation"]["tpg"]["nbBestAgents"].setComment(
+        Mutator::TPGParameters::nbBestAgentsComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["nbLastGenPlateau"] = params.mutation.tpg.nbLastGenPlateau;
+    root["mutation"]["tpg"]["nbLastGenPlateau"].setComment(
+        Mutator::TPGParameters::nbLastGenPlateauComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["alphaEMALinearFactor"] = params.mutation.tpg.alphaEMALinearFactor;
+    root["mutation"]["tpg"]["alphaEMALinearFactor"].setComment(
+        Mutator::TPGParameters::alphaEMALinearFactorComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["epsilonPlateauThreshold"] = params.mutation.tpg.epsilonPlateauThreshold;
+    root["mutation"]["tpg"]["epsilonPlateauThreshold"].setComment(
+        Mutator::TPGParameters::epsilonPlateauThresholdComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaDupplicateNextVertex"] = params.mutation.tpg.speciesProbaDupplicateNextVertex;
+    root["mutation"]["tpg"]["speciesProbaDupplicateNextVertex"].setComment(
+        Mutator::TPGParameters::speciesProbaDupplicateNextVertexComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaExtensionEdge"] = params.mutation.tpg.speciesProbaExtensionEdge;
+    root["mutation"]["tpg"]["speciesProbaExtensionEdge"].setComment(
+        Mutator::TPGParameters::speciesProbaExtensionEdgeComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaAddContext"] = params.mutation.tpg.speciesProbaAddContext;
+    root["mutation"]["tpg"]["speciesProbaAddContext"].setComment(
+        Mutator::TPGParameters::speciesProbaAddContextComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaAddActivation"] = params.mutation.tpg.speciesProbaAddActivation;
+    root["mutation"]["tpg"]["speciesProbaAddActivation"].setComment(
+        Mutator::TPGParameters::speciesProbaAddActivationComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaDelete"] = params.mutation.tpg.speciesProbaDelete;
+    root["mutation"]["tpg"]["speciesProbaDelete"].setComment(
+        Mutator::TPGParameters::speciesProbaDeleteComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaExtension"] = params.mutation.tpg.speciesProbaExtension;
+    root["mutation"]["tpg"]["speciesProbaExtension"].setComment(
+        Mutator::TPGParameters::speciesProbaExtensionComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaCrossProgram"] = params.mutation.tpg.speciesProbaCrossProgram;
+    root["mutation"]["tpg"]["speciesProbaCrossProgram"].setComment(
+        Mutator::TPGParameters::speciesProbaCrossProgramComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaCrossAgent"] = params.mutation.tpg.speciesProbaCrossAgent;
+    root["mutation"]["tpg"]["speciesProbaCrossAgent"].setComment(
+        Mutator::TPGParameters::speciesProbaCrossAgentComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaSwapContext"] = params.mutation.tpg.speciesProbaSwapContext;
+    root["mutation"]["tpg"]["speciesProbaSwapContext"].setComment(
+        Mutator::TPGParameters::speciesProbaSwapContextComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaSwapActionValues"] = params.mutation.tpg.speciesProbaSwapActionValues;
+    root["mutation"]["tpg"]["speciesProbaSwapActionValues"].setComment(
+        Mutator::TPGParameters::speciesProbaSwapActionValuesComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaSwapPrograms"] = params.mutation.tpg.speciesProbaSwapPrograms;
+    root["mutation"]["tpg"]["speciesProbaSwapPrograms"].setComment(
+        Mutator::TPGParameters::speciesProbaSwapProgramsComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesProbaMutateProgram"] = params.mutation.tpg.speciesProbaMutateProgram;
+    root["mutation"]["tpg"]["speciesProbaMutateProgram"].setComment(
+        Mutator::TPGParameters::speciesProbaMutateProgramComment, Json::commentBefore);
 
     // Mutation.program parameters
     root["mutation"]["prog"]["maxConstValue"] =

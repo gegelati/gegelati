@@ -49,6 +49,74 @@ namespace Mutator {
     typedef struct TPGParameters
     {
 
+        
+        /// JSon comment
+        inline static const std::string nbBestAgentsComment = "// TODO";
+        /// TODO
+        size_t nbBestAgents = 5;
+        /// JSon comment
+        inline static const std::string nbLastGenPlateauComment = "// TODO";
+        /// TODO
+        size_t nbLastGenPlateau = 50;
+        /// JSon comment
+        inline static const std::string alphaEMALinearFactorComment = "// TODO";
+        /// TODO
+        double alphaEMALinearFactor = 0.2;
+        /// JSon comment
+        inline static const std::string epsilonPlateauThresholdComment = "// TODO";
+        /// TODO
+        double epsilonPlateauThreshold = 0.05;
+
+        /// JSon comment
+        inline static const std::string speciesProbaDupplicateNextVertexComment = "// TODO";
+        /// TODO
+        double speciesProbaDupplicateNextVertex = 0.5;
+        /// JSon comment
+        inline static const std::string speciesProbaExtensionEdgeComment = "// TODO";
+        /// TODO
+        double speciesProbaExtensionEdge = 0.8;
+        /// JSon comment
+        inline static const std::string speciesProbaAddContextComment = "// TODO";
+        /// TODO
+        double speciesProbaAddContext = 0.5;
+        /// JSon comment
+        inline static const std::string speciesProbaAddActivationComment = "// TODO";
+        /// TODO
+        double speciesProbaAddActivation = 0.0;
+        /// JSon comment
+        inline static const std::string speciesProbaDeleteComment = "// TODO";
+        /// TODO
+        double speciesProbaDelete = 0.0;
+        /// JSon comment
+        inline static const std::string speciesProbaExtensionComment = "// TODO";
+        /// TODO
+        double speciesProbaExtension = 0.5;
+        /// JSon comment
+        inline static const std::string speciesProbaCrossProgramComment = "// TODO";
+        /// TODO
+        double speciesProbaCrossProgram = 0.5;
+        /// JSon comment
+        inline static const std::string speciesProbaCrossAgentComment = "// TODO";
+        /// TODO
+        double speciesProbaCrossAgent = 0.7;
+        /// JSon comment
+        inline static const std::string speciesProbaSwapContextComment = "// TODO";
+        /// TODO
+        double speciesProbaSwapContext = 0.5;
+        /// JSon comment
+        inline static const std::string speciesProbaSwapActionValuesComment = "// TODO";
+        /// TODO
+        double speciesProbaSwapActionValues = 0.7;
+        /// JSon comment
+        inline static const std::string speciesProbaSwapProgramsComment = "// TODO";
+        /// TODO
+        double speciesProbaSwapPrograms = 0.7;
+        /// JSon comment
+        inline static const std::string speciesProbaMutateProgramComment = "// TODO";
+        /// TODO
+        double speciesProbaMutateProgram = 0.7;
+
+
         /// JSon comment
         inline static const std::string nbRootsComment =
             "// Number of root Teams to maintain when populating the "

@@ -32,7 +32,7 @@ const EvoGraph::Team& Algorithm::Species::SpeciesMutator::initSpeciesGraphStruct
 }
 
 
-bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
 {
     std::set<std::reference_wrapper<const EvoGraph::Team>> contextTeams(dynamic_cast<SpeciesManager&>(manager).getContextTeams());
     if(contextTeams.size() == 0) {
@@ -58,7 +58,7 @@ bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(const EvoGraph::V
 
 
     // Dupplicate the destination vertex, and its edges
-    double probaDupplicateNextVertex = 0.5;
+    double probaDupplicateNextVertex = params.mutation.tpg.speciesProbaDupplicateNextVertex;
     if(probaDupplicateNextVertex > rng.getDouble(0, 1)) {
         // Dupplicate vertex
         const EvoGraph::Vertex& originVertex = newEdge.getDestination();
@@ -228,7 +228,7 @@ bool Algorithm::Species::SpeciesMutator::removeEdgeSpecies(const EvoGraph::Verte
     return true;
 }
 
-bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
 {
     // Get the activation vertex
     const auto& activationVertices = dynamic_cast<SpeciesManager&>(manager).getActivationTeams();
@@ -277,7 +277,7 @@ bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& n
         }
     }
 
-    double probaExtensionEdge = 0.8;
+    double probaExtensionEdge = params.mutation.tpg.speciesProbaExtensionEdge;
     double proba = 1;
     while(actionEdges.size() > 0 && proba > rng.getDouble(0, 1)){
         
@@ -308,10 +308,10 @@ bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& n
 
 const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
 {
-    double probaAddContext = params.mutation.tpg.pProgramMutation;
-    double probaAddActivation = params.mutation.tpg.pEdgeDestinationIsAction;
-    double probaDelete = params.mutation.tpg.probaContextOverActionProgram;
-    double probaExtension = params.mutation.tpg.ratioTeamsOverActions;
+    double probaAddContext = params.mutation.tpg.speciesProbaAddContext;
+    double probaAddActivation = params.mutation.tpg.speciesProbaAddActivation;
+    double probaDelete = params.mutation.tpg.speciesProbaDelete;
+    double probaExtension = params.mutation.tpg.speciesProbaExtension;
 
     const EvoGraph::Vertex& newRoot = this->copyGraphSpecies(manager, graph, edgeMap);
     bool mutationHappened = false;
@@ -319,7 +319,7 @@ const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(E
         double randomValue = rng.getDouble(0, probaAddActivation + probaAddContext + probaDelete + probaExtension);
         if(randomValue > probaAddActivation + probaDelete + probaExtension) {
             std::cout<<"  ADDCONTEXT   ";
-            mutationHappened = this->addContextEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
+            mutationHappened = this->addContextEdgeSpecies(newRoot, manager, graph, params, rng, edgeMap);
         } else if (randomValue > probaDelete + probaExtension){
             std::cout<<"  ADDACTIVATION    ";
             mutationHappened = this->addActivationEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
@@ -328,7 +328,7 @@ const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(E
             mutationHappened = this->removeEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
         }  else {
             std::cout<<"  EXTEND      ";
-            mutationHappened = this->extendSpecies(newRoot, manager, graph, rng, edgeMap);
+            mutationHappened = this->extendSpecies(newRoot, manager, graph, params, rng, edgeMap);
         }
     } while (!mutationHappened);
 
@@ -465,7 +465,7 @@ void Algorithm::Species::SpeciesMutator::crossoverAgents(
     std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     // No crossover
-    if (params.mutation.tpg.pCrossAgents == 0) {
+    if (params.mutation.tpg.speciesProbaCrossAgent == 0) {
         return;
     }
 
@@ -490,13 +490,13 @@ void Algorithm::Species::SpeciesMutator::crossoverAgents(
 
         // A crossover at program level can be done only the both parents
         // assessed the action concerned
-        if (params.mutation.tpg.pCrossPrograms > rng.getDouble(0, 1)) {
+        if (params.mutation.tpg.speciesProbaCrossProgram > rng.getDouble(0, 1)) {
             this->crossoverPrograms(agents, pickEdge, graph, manager, newSubAgents, params, rng);
         }
         else {
             this->crossoverEdges(agents, pickEdge, manager, newSubAgents, params, rng);
         }
-        proba *= params.mutation.tpg.pCrossAgents;
+        proba *= params.mutation.tpg.speciesProbaCrossAgent;
     }
 
 }
@@ -530,10 +530,10 @@ void Algorithm::Species::SpeciesMutator::swapActionValues(const SpeciesAgent& ag
     speciesManager.setActionValue(agent, it2->first, actionValue1);
 }
 
-void Algorithm::Species::SpeciesMutator::swapPrograms(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng)
+void Algorithm::Species::SpeciesMutator::swapPrograms(const SpeciesAgent& agent, AgentManager& manager, RNG::RNG& rng, const Learn::LearningParameters& params)
 {
     SpeciesManager& speciesManager = dynamic_cast<SpeciesManager&>(manager);
-    double probaSwapContext = 0.5;
+    double probaSwapContext = params.mutation.tpg.speciesProbaSwapContext;
 
     // By default, if thre is less than two action edges, to a context swap, if there is less than two context edges, do a action swap
     bool doSwapActionEdges = true;
@@ -596,7 +596,7 @@ void Algorithm::Species::SpeciesMutator::mutateAgent(
     const SpeciesAgent& speciesAgent = dynamic_cast<const SpeciesAgent&>(agent);
 
     // Swap randomly action values
-    double probaSwapActionValues = 0.5;
+    double probaSwapActionValues = params.mutation.tpg.speciesProbaSwapActionValues;
     double proba = probaSwapActionValues;
     while(speciesAgent.getActionLinks().size() > 1 &&
             proba > rng.getDouble(0.0, 1.0)) {
@@ -607,13 +607,13 @@ void Algorithm::Species::SpeciesMutator::mutateAgent(
 
     // 3. swap randomly selected edges
     // With at least two edges
-    proba = params.mutation.tpg.pSwapActionProgram;
+    proba = params.mutation.tpg.speciesProbaSwapPrograms;
     while (speciesManager.getEdges().size() > 2 &&
             proba > rng.getDouble(0.0, 1.0)) {
-        this->swapPrograms(speciesAgent, manager, rng);
+        this->swapPrograms(speciesAgent, manager, rng, params);
 
         // Decrement the proba of swapping two edges
-        proba *= params.mutation.tpg.pSwapActionProgram;
+        proba *= params.mutation.tpg.speciesProbaSwapPrograms;
     }
 
 
@@ -625,7 +625,7 @@ void Algorithm::Species::SpeciesMutator::mutateAgent(
         size_t remaining = availableEdges.size();
 
         // 4. mutate randomly selected program on action Edge.
-        double proba = params.mutation.tpg.pMutateActionProgram;
+        double proba = params.mutation.tpg.speciesProbaMutateProgram;
         while (remaining > 0 &&
                proba > rng.getDouble(0.0, 1.0)) {
 
@@ -640,10 +640,10 @@ void Algorithm::Species::SpeciesMutator::mutateAgent(
 
             this->mutateOutgoingEdge(agent, graph, pickEdge, manager, newSubAgents, params, rng);
 
-            proba *= params.mutation.tpg.pMutateActionProgram;
+            proba *= params.mutation.tpg.speciesProbaMutateProgram;
             anyMutationDone = true;
         }
-    } while (!anyMutationDone && params.mutation.tpg.pMutateActionProgram != 0.0);
+    } while (!anyMutationDone && params.mutation.tpg.speciesProbaMutateProgram != 0.0);
 }
 
 
