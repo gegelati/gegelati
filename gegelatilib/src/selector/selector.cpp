@@ -54,6 +54,9 @@ void Selector::Selector::updateEvaluationRecords(
 
     // Update resultsPerAgent
     this->updateResultsPerAgent(results);
+
+    // Update historic of scores
+    this->updateHistoricOfScores(results);
 }
 
 void Selector::Selector::updateResultsPerAgent(
@@ -79,6 +82,56 @@ void Selector::Selector::updateResultsPerAgent(
                 this->bestAgent.second = result.first;
             }
         }
+    }
+}
+
+
+void Selector::Selector::updateHistoricOfScores(
+    const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                        std::reference_wrapper<const Algorithm::Agent>>& results)
+{
+    // Get best K agents's scores
+    double averageScore = 0.0;
+    auto it = results.rbegin();
+    for(size_t idx = 0; idx < params.mutation.tpg.nbBestAgents; idx++) {
+        averageScore += it->first->getSelectionMetrics()->getScore();
+        it++;
+    } averageScore /= params.mutation.tpg.nbBestAgents;
+
+    this->historicOfScores.push_back(averageScore);
+
+    // Compute ema score.
+    if(this->historicEMAScores.size() == 0) {
+        this->historicEMAScores.push_back(averageScore);
+    } else {
+        double alpha = this->params.mutation.tpg.alphaEMALinearFactor;
+        double emaScore = alpha * averageScore + (1.0 - alpha) * this->historicEMAScores.back();
+        this->historicEMAScores.push_back(emaScore);
+    }
+
+    // If more than nbLastGenPlateau score are registered, compute the coefficient of slope.
+    size_t W = this->params.mutation.tpg.nbLastGenPlateau;
+    if(this->historicEMAScores.size() > W) {
+        double sumScores = 0.0;
+        double squareSumGens = 0.0;
+        double averageLastEMAScores = 0.0;
+        auto itEMA = this->historicEMAScores.rbegin();
+        for(size_t idx = 0; idx < W; idx++) {
+            averageLastEMAScores += *itEMA;
+            itEMA++;
+        } averageLastEMAScores /= W;
+
+
+        double averageGeneration = ((double)W + 1.0) / 2;
+        itEMA = this->historicEMAScores.rbegin();
+        for(size_t idx = W; idx > 0; idx--) {
+            sumScores += (idx - averageGeneration) * (*itEMA - averageLastEMAScores);
+            squareSumGens += std::pow((W - averageGeneration), 2);
+            itEMA++;
+        }
+
+        this->currentSlopeEstimator = sumScores / squareSumGens;
+        this->plateauReached = this->currentSlopeEstimator < params.mutation.tpg.epsilonPlateauThreshold;
     }
 }
 

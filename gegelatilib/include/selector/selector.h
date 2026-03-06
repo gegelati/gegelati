@@ -54,6 +54,20 @@ namespace Selector {
          */
         Algorithm::AgentManager& manager;
 
+        
+
+        /// vector storing the average of the K best agents at each evaluated generations.
+        std::vector<double> historicOfScores;
+
+        /// vector storing the EMA scores at each generations based on the historicOfScores.
+        std::vector<double> historicEMAScores;
+
+        /// Slope estimator computed with the last W values in the historicEMAScores.
+        double currentSlopeEstimator;
+
+        /// Value set to true if the currentSlopeEstimator is below the plateau threshold.
+        bool plateauReached = false;
+
       public:
 
 
@@ -148,6 +162,15 @@ namespace Selector {
          * \param[in] results Map from the evaluateAllAgents method.
          */
         virtual void updateResultsPerAgent(
+            const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                                std::reference_wrapper<const Algorithm::Agent>>& results);
+
+        /**
+         * \brief Update the historic of scores.
+         *
+         * \param[in] results Map from the evaluateAllAgents method.
+         */
+        virtual void updateHistoricOfScores(
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                                 std::reference_wrapper<const Algorithm::Agent>>& results);
 
