@@ -131,9 +131,28 @@ void Selector::Selector::updateHistoricOfScores(
         }
 
         this->currentSlopeEstimator = sumScores / squareSumGens;
-        this->plateauReached = this->currentSlopeEstimator < params.mutation.tpg.epsilonPlateauThreshold;
+        this->plateauReached = this->currentSlopeEstimator < params.mutation.tpg.epsilonPlateauThreshold * this->historicEMAScores.back();
+        std::cout<<"  L: "<<this->historicEMAScores.back()<<" N: "<<this->historicEMAScores.size()<<" A: "<<this->currentSlopeEstimator<<" T: "<<params.mutation.tpg.epsilonPlateauThreshold * this->historicEMAScores.back()<<"  ";
+    } else {
+        std::cout<<"  L: "<<this->historicEMAScores.back()<<" N: "<<this->historicEMAScores.size()<<"            ";
     }
 }
+
+double Selector::Selector::getLastEMAScore()
+{
+    if(this->historicEMAScores.size() > 0){
+        return this->historicEMAScores.back();
+    } else {
+        return 0;
+    }
+}
+
+
+bool Selector::Selector::isPlateauReached()
+{
+    return this->plateauReached;
+}
+
 
 void Selector::Selector::updateBestAgent(
     const std::multimap<std::shared_ptr<Learn::EvaluationResult>,

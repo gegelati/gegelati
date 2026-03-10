@@ -203,17 +203,14 @@ void File::GraphDotExporter::printGraphHeader()
     this->offset = "\t\t";
 }
 
-void File::GraphDotExporter::printAlgorithm(const Algorithm::Algorithm& printAlgorithm)
+void File::GraphDotExporter::printAlgorithm(const Algorithm::Algorithm& printAlgorithm, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elements)
 {
     this->mapAlgorithms.insert({printAlgorithm.getAlgorithmID(), printAlgorithm});
 
-    fprintf(pFile,
-            "%sALGO%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
-            "label=\"%s.%" PRIu64 "\"]\n",
-            this->offset.c_str(), printAlgorithm.getAlgorithmID(), printAlgorithm.getAlgorithmColor().c_str(), printAlgorithm.getAlgorithmName().c_str(), printAlgorithm.getAlgorithmID());
+    printAlgorithm.printAlgorithm(pFile, offset, elements);
 
     for(const Algorithm::Algorithm& subAlgorithm: printAlgorithm.cGetSubAlgorithms()){
-        this->printAlgorithm(subAlgorithm);
+        this->printAlgorithm(subAlgorithm, elements);
 
         fprintf(pFile, "%sALGO%" PRIu64 " -> ALGO%" PRIu64 "\n",
                 offset.c_str(), printAlgorithm.getAlgorithmID(), subAlgorithm.getAlgorithmID());
@@ -222,7 +219,7 @@ void File::GraphDotExporter::printAlgorithm(const Algorithm::Algorithm& printAlg
     for(const Algorithm::Algorithm& aggregatedAlgorithm: printAlgorithm.getAggregatedAlgorithms()){
         fprintf(pFile, "%sALGO%" PRIu64 " -> ALGO%" PRIu64 " [style=dashed, color=\"#2a1699\"]\n",
                 offset.c_str(), printAlgorithm.getAlgorithmID(), aggregatedAlgorithm.getAlgorithmID());
-        fprintf(pFile, "%s{ rank= same ALGO%" PRIu64 " ALGO%" PRIu64 "}\n", this->offset.c_str(), printAlgorithm.getAlgorithmID(), aggregatedAlgorithm.getAlgorithmID());
+        //fprintf(pFile, "%s{ rank= same ALGO%" PRIu64 " ALGO%" PRIu64 "}\n", this->offset.c_str(), printAlgorithm.getAlgorithmID(), aggregatedAlgorithm.getAlgorithmID());
     }
 }
 
@@ -240,9 +237,20 @@ void File::GraphDotExporter::printAlgorithmsSubGraph(const std::vector<std::refe
     fprintf(pFile, "%scolor = \"#888888\"\n", offset.c_str());
 
     // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
+    std::vector<std::reference_wrapper<const EvoGraph::Element>> elements;
     for(const Algorithm::Algorithm& algorithm : printAlgorithms){
-        this->printAlgorithm(algorithm);
+        this->printAlgorithm(algorithm, elements);
     }
+    
+    // Print the elements collected during the printAlgorithm call
+    for(const EvoGraph::Element& element : elements){
+        this->printElement(element);
+    }
+    fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
+    for(const Algorithm::Algorithm& algorithm : printAlgorithms){
+            fprintf(pFile, "ALGO%" PRIu64 " ", algorithm.getAlgorithmID());
+    }
+    fprintf(pFile, "}\n");
     this->offset = "\t\t";
     
     fprintf(pFile, "%s}\n", offset.c_str());
@@ -294,14 +302,6 @@ void File::GraphDotExporter::print()
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
     for(const Algorithm::Algorithm& algorithm : this->algorithms){
-        std::vector<std::reference_wrapper<const EvoGraph::Element>> elements;
-        algorithm.initialPrint(this->pFile, this->offset, elements);
-
-        // Print the elements collected during the printAgent call
-        for(const EvoGraph::Element& element : elements){
-            this->printElement(element);
-        }
-
         for(const Algorithm::Agent& agent : algorithm.getManagerCst().getAgents()){
             this->printAgent(agent);
         }
@@ -329,15 +329,6 @@ void File::GraphDotExporter::printSubGraph(const Algorithm::Agent& agent)
         if(algorithm.containsAgent(agent)){
             std::vector<std::reference_wrapper<Algorithm::Algorithm>> vect{algorithm};
             this->printAlgorithmsSubGraph(vect);
-
-            
-            std::vector<std::reference_wrapper<const EvoGraph::Element>> elements;
-            algorithm.initialPrint(this->pFile, this->offset, elements);
-
-            // Print the elements collected during the printAgent call
-            for(const EvoGraph::Element& element : elements){
-                this->printElement(element);
-            }
         }
     }
 

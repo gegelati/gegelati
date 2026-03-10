@@ -98,6 +98,9 @@ namespace Learn {
         /// Currently best algorithm during evaluation
         Algorithm::Algorithm* currentBestAlgorithm;
 
+        /// Finished algorithms
+        std::map<uint64_t, std::reference_wrapper<Algorithm::Algorithm>> finishedAlgorithms;
+
         /**
          * \brief return the algorithm managed by the learning agent corresponding to the given algorithm.
          * 
@@ -144,6 +147,16 @@ namespace Learn {
          * \param[in] algorithm the algorithm to set as current executed algorithm
          */
         void setCurrentAlgorithm(Algorithm::Algorithm* algorithm);
+
+        /**
+         * \brief return the finished algorithms
+         */
+        const std::map<uint64_t, std::reference_wrapper<Algorithm::Algorithm>>& getFinishedAlgorithms() const {return this->finishedAlgorithms;}
+
+        /**
+         * \brief return the created species algroithms;
+         */
+        const std::vector<std::unique_ptr<Algorithm::Algorithm>>& getCreatedSpeciesAlgorithms() const{return this->createdSpeciesAlgorithms;}
 
         /**
          * \brief Return the current best algorithm
@@ -355,15 +368,24 @@ namespace Learn {
                                 std::reference_wrapper<const Algorithm::Agent>>& results);
 
         /**
+         * \brief Create a new species sampled from the finished species algorithm map.
+         * 
+         * \param[in] rng Random Number Generator for this Learning Agent.
+         * \param[in] generation current generation number.
+         */
+        void createNewSpecies(RNG::RNG& rng, uint64_t generation);
+
+        /**
          * \brief launch the selection of the different algorithms
          * 
          * \param[in] results results of the evaluation
          * \param[in] rng Random Number Generator for this Learning Agent.
+         * \param[in] generation current generation number.
          */
         virtual void launchAlgorithmsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Algorithm::Agent>>& results,
-            RNG::RNG& rng);
+            RNG::RNG& rng, uint64_t generation);
 
         /**
          * \brief Initialize the LearningAgent.

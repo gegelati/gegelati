@@ -38,6 +38,12 @@ namespace Algorithm::Species {
             /// Age of the species.
             size_t age = 0;
 
+            /// Number of time this species have been reproduced.   
+            size_t nbTimesReproduced = 0;
+
+            /// Starting generation of the algorithm
+            size_t startingGeneration = 0;
+
 
         public:
 
@@ -65,6 +71,16 @@ namespace Algorithm::Species {
             size_t getParentID() {return this->parentID;}
 
             /**
+             * \brief Set a new startingGeneration to the algorithm
+             */
+            void setStartingGeneration(size_t startingGeneration) {this->startingGeneration = startingGeneration;}
+
+            /**
+             * \brief getter for the startingGeneration
+             */
+            size_t getStartingGeneration() {return this->startingGeneration;}
+
+            /**
              * \brief getter for the age
              */
             size_t getAge() {return this->age;}
@@ -73,6 +89,16 @@ namespace Algorithm::Species {
              * \brief increase the age
              */
             void increaseAge() {this->age++;}
+
+            /**
+             * \brief getter for the nbTimesReproduced
+             */
+            size_t getNbTimesReproduced() {return this->nbTimesReproduced;}
+
+            /**
+             * \brief increase the nbTimesReproduced
+             */
+            void increaseNbTimesReproduced() {this->nbTimesReproduced++;}
 
             /**
              * \brief init a new species from this current species.
@@ -193,7 +219,7 @@ namespace Algorithm::Species {
             /**
              * Print the species structure.
              */
-            virtual void initialPrint(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
+            virtual void printAlgorithm(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const override;
 
             /** 
              * \brief Inherited method to print a Speciesagent.

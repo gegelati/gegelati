@@ -230,8 +230,17 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
     std::multimap<std::shared_ptr<EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
         results;
 
+    std::vector<std::reference_wrapper<Algorithm::Algorithm>> runnedAlgorithms;
+    if(mode == LearningMode::TRAINING) {
+        runnedAlgorithms = this->algorithms;
+    } else {
+        runnedAlgorithms = this->algorithms;
+        for(const auto& pair: this->finishedAlgorithms) {
+            runnedAlgorithms.push_back(pair.second);
+        }
+    }
 
-    for(Algorithm::Algorithm& algorithm: this->algorithms){
+    for(Algorithm::Algorithm& algorithm: runnedAlgorithms){
         // set current executed algorithm
         this->setCurrentAlgorithm(&algorithm);
 
@@ -325,13 +334,61 @@ std::map<double, std::reference_wrapper<Algorithm::Algorithm>> Learn::LearningAg
     return orderAlgorithmScores;
 }
 
+void Learn::LearningAgent::createNewSpecies(RNG::RNG& rng, uint64_t generation) {
+
+
+    std::map<double, std::reference_wrapper<Algorithm::Algorithm>> mapScoreAlgo;
+    for (const auto& pair : finishedAlgorithms) {
+        mapScoreAlgo.insert({pair.second.get().getSelector().getLastEMAScore(), pair.second});
+    }
+    std::vector<std::reference_wrapper<Algorithm::SpeciesAlgorithm>> algorithms;
+    std::vector<double> weights;
+    size_t idx = 1;
+    for (const auto& pair : mapScoreAlgo) {
+        Algorithm::SpeciesAlgorithm& speciesAlgo = dynamic_cast<Algorithm::SpeciesAlgorithm&>(pair.second.get());
+        algorithms.push_back(speciesAlgo);
+        //double weight = 1.0 / (speciesAlgo.getNbTimesReproduced() + 1.0);
+        double weight = std::pow(idx, 2);
+        idx++;
+        weights.push_back(weight);
+    }
+
+    // Norm weights
+    std::vector<double> cumulative_weights;
+    double sum = 0.0;
+    for (double w : weights) {
+        sum += w;
+        cumulative_weights.push_back(sum);
+    }
+
+    // Select algorithm
+    double random_value = rng.getDouble(0, sum);
+    Algorithm::SpeciesAlgorithm* selected_algorithm = nullptr;
+    for (size_t i = 0; i < cumulative_weights.size(); ++i) {
+        if (random_value <= cumulative_weights[i]) {
+            selected_algorithm = &algorithms[i].get();
+            break;
+        }
+    }
+
+    selected_algorithm->increaseNbTimesReproduced();
+
+    this->createdSpeciesAlgorithms.push_back(std::move(selected_algorithm->initNewSpecies(this->rng)));
+    Algorithm::Algorithm& newAlgorithm = **this->createdSpeciesAlgorithms.rbegin();
+    newAlgorithm.getManager().setExpectedNbAgents(this->params.mutation.tpg.nbRoots);
+    dynamic_cast<Algorithm::SpeciesAlgorithm&>(newAlgorithm).setStartingGeneration(generation);
+    //newAlgorithm.initPopulation(this->rng);
+    this->algorithms.push_back(newAlgorithm);
+}
+
 void Learn::LearningAgent::launchAlgorithmsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Algorithm::Agent>>& results,
-            RNG::RNG& rng)
+            RNG::RNG& rng, uint64_t generation)
 {
-    bool speciesAlgorithmTest = true;
-    if(speciesAlgorithmTest) {
+    bool speciesAlgorithmTest1 = false;
+    bool speciesAlgorithmTest2 = true;
+    if(speciesAlgorithmTest1) {
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
             std::reference_wrapper<const Algorithm::Agent>>
             resultsCopy(results);
@@ -408,6 +465,60 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
             }
         }
 
+    }  else if(speciesAlgorithmTest2) {
+        
+        Algorithm::SpeciesAlgorithm& currentAlgo = dynamic_cast<Algorithm::SpeciesAlgorithm&>(this->algorithms.front().get());
+        Selector::Selector& currentSelector = currentAlgo.getSelector();
+        currentAlgo.increaseAge();
+
+        // Do the selection for this algorithm
+        currentSelector.doSelection(*this->graph, results, rng);
+
+        // Update the evaluation records
+        currentSelector.updateEvaluationRecords(results);
+
+        this->currentBestAlgorithm = &currentAlgo;
+
+
+        // Plateau is reached.
+        if(currentSelector.isPlateauReached()) {
+
+            // Get algo iterator out from list of algorithms
+            auto it = std::find(this->algorithms.begin(), this->algorithms.end(), currentAlgo);
+            this->algorithms.erase(it);
+
+            // No finished algorithm yet, register this one.
+            if(this->finishedAlgorithms.size() == 0) {
+                std::cout<<"\nCreating new algo size 1"<<std::endl;
+                this->finishedAlgorithms.insert({currentAlgo.getAlgorithmID(), currentAlgo});
+            } else {
+                // Add only if the score is above the parent of the algorithm.
+                auto parentIt = this->finishedAlgorithms.find(currentAlgo.getParentID());
+                if(parentIt == this->finishedAlgorithms.end()) {
+                    throw std::runtime_error("Parent algorithm should be in the map");
+                }
+                
+                double parentScore = parentIt->second.get().getSelector().getLastEMAScore();
+                double offSpringScore = currentSelector.getLastEMAScore();
+
+                // If offspring algorithm is better than the parent, save it and create a new species.
+                if(offSpringScore > parentScore * 1.01) {
+                    std::cout<<"\nCreating new algo size >1"<<std::endl;
+                    this->finishedAlgorithms.insert({currentAlgo.getAlgorithmID(), currentAlgo});
+                // Else destroy the algorithm (do not really destroy it, but keep only the best agent for .dot size issues)
+                } else {
+                    std::cout<<"\nDeleting new algo size >1"<<std::endl;
+
+                    currentSelector.keepBestPolicy(*this->graph);
+                }
+            }
+
+            this->createNewSpecies(rng, generation);
+        }
+
+
+
+
     } else if(this->algorithms.size() == 1){
         // Do the selection for this algorithm
         this->algorithms.front().get().getSelector().doSelection(*this->graph, results, rng);
@@ -462,7 +573,7 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
     }
 
     // Remove worst performing roots
-    this->launchAlgorithmsSelection(results, rng);
+    this->launchAlgorithmsSelection(results, rng, generationNumber);
 
     for (auto logger : loggers) {
         logger.get().logAfterDecimate();

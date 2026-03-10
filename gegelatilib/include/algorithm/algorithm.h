@@ -322,6 +322,7 @@ namespace Algorithm {
          */
         virtual void updateAfterEvaluation(const std::vector<std::shared_ptr<Job>>& jobs, Learn::LearningMode mode);
 
+
         /**
          * \brief Print the initialization of an algorithm
          * 
@@ -329,7 +330,7 @@ namespace Algorithm {
          * \param[in] offset the character chain used to control the indentation of the printed content
          * \param[in] elementsToPrint the set of already printed agent IDs to avoid printing the same agent twice in case of multiple vertices or edges using the same agent program.
          */
-        virtual void initialPrint(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const {};
+        virtual void printAlgorithm(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const;
 
 
         /**

@@ -244,14 +244,24 @@ std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>> Alg
     return usedSubAgents;
 }
 
-void Algorithm::Species::SpeciesAlgorithm::initialPrint(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
+void Algorithm::Species::SpeciesAlgorithm::printAlgorithm(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
 {
+    double finalScore = selector->getLastEMAScore();
     
+    fprintf(pFile,
+            "%sALGO%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
+            "label=\"%s.%" PRIu64 "\" parentID=\"%" PRIu64 "\" age=\"%" PRIu64 "\" nbTimeReproduced=\"%" PRIu64 "\" finalScore=\"%f\", startingGeneration=\"%" PRIu64 "\"]\n",
+            offset.c_str(), this->algorithmID, this->algorithmColor.c_str(), this->algorithmName.c_str(), this->algorithmID, this->parentID, this->age, this->nbTimesReproduced, finalScore, this->startingGeneration);
+
+
+
     elementsToPrint.push_back(dynamic_cast<SpeciesManager*>(this->manager.get())->getRootVertex());
 
     
     fprintf(pFile, "%sALGO%" PRIu64 " -> T%" PRIu64 " [style=dashed]\n",
-            offset.c_str(), this->algorithmID, dynamic_cast<SpeciesManager*>(this->manager.get())->getRootVertex().getVertexID());
+            offset.c_str(), 
+            this->algorithmID, 
+            dynamic_cast<SpeciesManager*>(this->manager.get())->getRootVertex().getVertexID());
 }
 
 void Algorithm::Species::SpeciesAlgorithm::printAgent(const Agent& agent, FILE* pFile, std::string offset, std::set<uint64_t>& printedAgentID, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint, std::vector<std::reference_wrapper<const Agent>>& agentsToPrint) const

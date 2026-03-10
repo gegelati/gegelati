@@ -264,6 +264,15 @@ void Algorithm::Algorithm::linkAgentVertex(const Agent& agent, const EvoGraph::V
 }
 
 
+void Algorithm::Algorithm::printAlgorithm(FILE* pFile, std::string offset, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elementsToPrint) const
+{
+    fprintf(pFile,
+            "%sALGO%" PRIu64 " [fillcolor=\"%s\" shape=diamond margin=0.03 "
+            "label=\"%s.%" PRIu64 "\"]\n",
+            offset.c_str(), this->algorithmID, this->algorithmColor.c_str(), this->algorithmName.c_str(), this->algorithmID);
+}
+
+
 bool Algorithm::operator<(const Algorithm& a, const Algorithm& b)
 {
     return a.getAlgorithmID() < b.getAlgorithmID();

@@ -184,7 +184,7 @@ namespace File {
         /**
          * \brief print a specific algorithm node, an also print the potential sub and aggregated algorithm.
          */    
-        void printAlgorithm(const Algorithm::Algorithm& printAlgorithm);
+        void printAlgorithm(const Algorithm::Algorithm& printAlgorithm, std::vector<std::reference_wrapper<const EvoGraph::Element>>& elements);
 
         /**
          * \brief Prints algorithms node, showing what are the relations between the different algorithms.

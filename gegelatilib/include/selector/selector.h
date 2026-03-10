@@ -175,6 +175,16 @@ namespace Selector {
                                 std::reference_wrapper<const Algorithm::Agent>>& results);
 
         /**
+         * \brief return the last EMA score.
+         */
+        virtual double getLastEMAScore();
+
+        /**
+         * \brief return if the plateau has been reached or no.
+         */
+        virtual bool isPlateauReached();
+
+        /**
          * \brief Update the bestAgent attribute.
          *
          * This method updates the value of the bestAgent attribute with the
