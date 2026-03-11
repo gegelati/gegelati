@@ -163,6 +163,13 @@ namespace Learn {
         size_t nbThreads = std::thread::hardware_concurrency();
 
         /// JSon comment
+        inline static const std::string detailedTimingComment =
+            "// Boolean used to activate detailed timing during learning.\n"
+            "// \"detailedTiming\" : false, // Default value";
+        /// @brief enable detailed timing during learning
+        bool detailedTiming = false;
+
+        /// JSon comment
         inline static const std::string activationFunctionComment =
             "// string that indicate the activation function used for "
             "continuous actions \n"

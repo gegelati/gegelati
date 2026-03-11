@@ -62,6 +62,8 @@
 #include "learn/parallelLearningAgent.h"
 #include "learn/stickGameWithOpponent.h"
 
+#include "selector/timingSelectionMetrics.h"
+
 #include "util/counterReset.h"
 class LearningAgentTest : public ::testing::Test
 {
@@ -296,6 +298,45 @@ TEST_F(LearningAgentTest, EvalAllRoots)
     ASSERT_EQ(result.size(), la.getTPGGraph()->getNbRootVertices())
         << "Number of evaluated roots is under the number of roots from the "
            "TPGGraph.";
+}
+
+TEST_F(LearningAgentTest, TimedEvaluation)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 10;
+
+    Learn::LearningAgent la(le, set, params);
+
+    la.init();
+    std::multimap<std::shared_ptr<Learn::EvaluationResult>,
+                  const TPG::TPGVertex*>
+        result;
+    ASSERT_NO_THROW(result =
+                        la.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
+        << "Evaluation from a root failed.";
+    auto selectionMetrics = result.begin()->first->getSelectionMetrics().get();
+    ASSERT_FALSE(
+        dynamic_cast<Selector::TimingSelectionMetrics*>(selectionMetrics))
+        << "Should not be a TimingSelectionMetrics as it is disabled by "
+           "default";
+
+    params.detailedTiming = true;
+
+    Learn::LearningAgent latimed(le, set, params);
+    latimed.init();
+
+    ASSERT_NO_THROW(
+        result = latimed.evaluateAllRoots(0, Learn::LearningMode::TRAINING))
+        << "Evaluation from a root failed.";
+    selectionMetrics = result.begin()->first->getSelectionMetrics().get();
+    ASSERT_TRUE(
+        dynamic_cast<Selector::TimingSelectionMetrics*>(selectionMetrics))
+        << "Should be a TimingSelectionMetrics as it is enabled";
+    Selector::TimingSelectionMetrics* timedSelectionMetrics =
+        static_cast<Selector::TimingSelectionMetrics*>(selectionMetrics);
+    ASSERT_GT(timedSelectionMetrics->getAgentTime(), 0) << "Agent execution time should be non null after training";
 }
 
 TEST_F(LearningAgentTest, GetArchive)

@@ -6,6 +6,7 @@
 #include "learn/classificationLearningEnvironment.h"
 #include "selector/classificationSelectionMetrics.h"
 #include "selector/selectionMetrics.h"
+#include "selector/timingSelectionMetrics.h"
 
 #include <memory>
 
@@ -130,15 +131,24 @@ TEST(SelectionMetricsTest, WeightedSumAndTypeMismatch)
     // score = (1*2 + 3*3) / 5 = 11/5 = 2.2
     ASSERT_EQ(m1->getScore(), 2.2);
     // utility computed by implementation (note: uses updated score in formula)
-    // utility = (score * 2 + other.utility * 3) / 5 = (2.2*2 + 5*3)/5 = 19.4/5
-    // = 3.88
-    ASSERT_EQ(m1->getUtility(), 3.88);
+    // utility = (utility * 2 + other.utility * 3) / 5 = (2*2 + 5*3)/5 = 19/5
+    // = 3.8
+    ASSERT_EQ(m1->getUtility(), 3.8);
 
     // Type mismatch should throw
     auto classMetrics =
         std::make_shared<Selector::ClassificationSelectionMetrics>(
             std::vector<double>{1.0}, std::vector<size_t>{1});
     ASSERT_THROW(m1->weightedSum(classMetrics, 1, 1), std::runtime_error);
+}
+
+TEST(SelectionMetricsTest, Comparison)
+{
+    auto m1 = std::make_shared<Selector::SelectionMetrics>(3.0, 2.0);
+    auto m2 = std::make_shared<Selector::SelectionMetrics>(1.0, 5.0);
+
+    ASSERT_FALSE(m1 < m2);
+    ASSERT_TRUE(m2 < m1);
 }
 
 TEST(ClassificationSelectionMetricsTest, Constructor)
@@ -237,4 +247,90 @@ TEST(ClassificationSelectionMetricsTest, InitAndExtractEpisode)
 
     ASSERT_EQ(metrics.getNbEvalPerClassPerClass().at(0), 3);
     ASSERT_EQ(metrics.getNbEvalPerClassPerClass().at(1), 3);
+}
+
+TEST(TimingSelectionMetricsTest, DefaultAndParamConstructor)
+{
+    // Default constructor
+    auto defaultMetrics = std::make_shared<Selector::SelectionMetrics>();
+    auto defaultTimingMetrics =
+        std::make_shared<Selector::TimingSelectionMetrics>(defaultMetrics);
+
+    ASSERT_DOUBLE_EQ(defaultTimingMetrics->getScore(), 0.0);
+    ASSERT_DOUBLE_EQ(defaultTimingMetrics->getUtility(), 0.0);
+    ASSERT_DOUBLE_EQ(defaultTimingMetrics->getAgentTime(), 0.0);
+    ASSERT_DOUBLE_EQ(defaultTimingMetrics->getLeTime(), 0.0);
+    ASSERT_EQ(defaultTimingMetrics->getNbActions(), 0);
+
+    // Param constructor
+    auto paramMetrics = std::make_shared<Selector::SelectionMetrics>(1.5, 2.5);
+    auto paramTimingMetrics =
+        std::make_shared<Selector::TimingSelectionMetrics>(paramMetrics);
+
+    ASSERT_DOUBLE_EQ(paramTimingMetrics->getScore(), 1.5);
+    ASSERT_DOUBLE_EQ(paramTimingMetrics->getUtility(), 2.5);
+}
+
+TEST(TimingSelectionMetricsTest, ExtractMetricsEpisodeAddsScoreAndUtility)
+{
+    auto metrics = std::make_shared<Selector::SelectionMetrics>(1.5, 2.5);
+    auto timingMetrics =
+        std::make_shared<Selector::TimingSelectionMetrics>(metrics);
+    FakedLearningEnvironment env(3.0, 1.0);
+
+    // Call extraction
+    timingMetrics->extractMetricsEpisode(nullptr, 5, env, 12.2, 11.1);
+
+    // score and utility should be incremented
+    ASSERT_DOUBLE_EQ(timingMetrics->getScore(), 4.5);
+    ASSERT_DOUBLE_EQ(timingMetrics->getUtility(), 3.5);
+    ASSERT_DOUBLE_EQ(timingMetrics->getAgentTime(), 12.2);
+    ASSERT_DOUBLE_EQ(timingMetrics->getLeTime(), 11.1);
+    ASSERT_EQ(timingMetrics->getNbActions(), 5);
+}
+
+TEST(TimingSelectionMetricsTest, WeightedSumAndTypeMismatch)
+{
+    auto m1 = std::make_shared<Selector::SelectionMetrics>();
+    auto m2 = std::make_shared<Selector::SelectionMetrics>();
+    auto tm1 = std::make_shared<Selector::TimingSelectionMetrics>(m1);
+    auto tm2 = std::make_shared<Selector::TimingSelectionMetrics>(m2);
+    FakedLearningEnvironment env1(1.0, 3.0);
+    FakedLearningEnvironment env2(3.0, 7.0);
+
+    // Call extraction
+    tm1->extractMetricsEpisode(nullptr, 5, env1, 10, 20);
+    tm2->extractMetricsEpisode(nullptr, 15, env2, 29, 10);
+
+    // weighted sum
+    ASSERT_NO_THROW(
+        tm1->weightedSum(tm2, tm1->getNbActions(), tm2->getNbActions()));
+    // score = (1.0*5 + 3*15) / (5+15) = 50/20 = 2.5
+    ASSERT_DOUBLE_EQ(tm1->getScore(), 2.5);
+    // utility = (3.0*5 + 7.0*15) / (5+15) = 120/20 = 6
+    ASSERT_DOUBLE_EQ(tm1->getUtility(), 6);
+    // agentTime = (10*5 + 29*15) / (5+15) = 485/20 = 24.25
+    ASSERT_DOUBLE_EQ(tm1->getAgentTime(), 24.25);
+    // leTime = (20*5 + 8*15) / (5+15) = 220/20 = 11
+    ASSERT_DOUBLE_EQ(tm1->getLeTime(), 12.5);
+    // nbActions (5*5+15*15) / (5+15) = 250/20 = 12
+    ASSERT_EQ(tm1->getNbActions(), 12);
+
+    // Type mismatch should throw
+    ASSERT_THROW(tm1->weightedSum(m1, 1, 1), std::runtime_error);
+}
+
+TEST(TimingSelectionMetricsTest, Comparison)
+{
+    auto m1 = std::make_shared<Selector::SelectionMetrics>(3.0, 2.0);
+    auto m2 = std::make_shared<Selector::SelectionMetrics>(1.0, 5.0);
+    auto tm1 = std::make_shared<Selector::TimingSelectionMetrics>(m1);
+    auto tm2 = std::make_shared<Selector::TimingSelectionMetrics>(m2);
+
+    ASSERT_TRUE(tm2 < tm1);
+    ASSERT_FALSE(tm1 < tm2);
+    ASSERT_TRUE(m2 < tm1);
+    ASSERT_FALSE(tm1 < m2);
+    ASSERT_TRUE(tm2 < m1);
+    ASSERT_FALSE(m1 < tm2);
 }

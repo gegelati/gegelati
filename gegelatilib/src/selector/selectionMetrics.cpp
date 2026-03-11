@@ -32,17 +32,13 @@ void Selector::SelectionMetrics::weightedSum(
         throw std::runtime_error("Type mismatch between SelectionMetrics.");
     }
 
-    this->score = this->score * (double)nbEvaluation +
-                  other->score * (double)nbEvaluationOther;
-    this->score /= (double)(nbEvaluation + nbEvaluationOther);
-
-    this->utility = this->score * (double)nbEvaluation +
-                    other->utility * (double)nbEvaluationOther;
-    this->utility /= (double)(nbEvaluation + nbEvaluationOther);
+    score = weightedSum(score, other->score, nbEvaluation, nbEvaluationOther);
+    utility =
+        weightedSum(utility, other->utility, nbEvaluation, nbEvaluationOther);
 }
 
 bool Selector::operator<(std::shared_ptr<SelectionMetrics> a,
                          std::shared_ptr<SelectionMetrics> b)
 {
-    return a->getScore() < b->getScore();
+    return *a < *b;
 }

@@ -44,6 +44,7 @@
 #include "learn/evaluationResult.h"
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
+#include "selector/timingSelectionMetrics.h"
 #include "tpg/tpgExecutionEngine.h"
 
 #include "learn/learningAgent.h"
@@ -99,6 +100,7 @@ void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 {
     logger.doValidation = this->params.doValidation;
     logger.useUtility = this->learningEnvironment.isUsingUtility();
+    logger.detailedTiming = this->params.detailedTiming;
     // logs for example the headers of the columns the logger will print
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
 }
@@ -151,6 +153,11 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // Init global selection metric
     std::shared_ptr<Selector::SelectionMetrics> globalSelectionMetrics =
         this->selector->createSelectionMetrics();
+    if (params.detailedTiming) {
+        globalSelectionMetrics =
+            std::shared_ptr<Selector::TimingSelectionMetrics>(
+                new Selector::TimingSelectionMetrics(globalSelectionMetrics));
+    }
     globalSelectionMetrics->initMetrics(root, le);
 
     // Evaluate nbIteration times
@@ -163,29 +170,69 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         // Init selectionMetrics for this episode.
         std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
             this->selector->createSelectionMetrics();
+        if (params.detailedTiming) {
+            selectionMetrics =
+                std::shared_ptr<Selector::TimingSelectionMetrics>(
+                    new Selector::TimingSelectionMetrics(selectionMetrics));
+        }
         selectionMetrics->initMetrics(root, le);
 
         // Reset the learning Environment
         le.reset(hash, mode, iterationNumber, generationNumber);
 
-        uint64_t nbActions = 0;
-        while (!le.isTerminal() &&
-               nbActions < this->params.maxNbActionsPerEval) {
-            // Get the actions
-            std::vector<double> actionsID =
-                tee.executeFromRoot(*root, le.getInitActions()).second;
-            // Do it
-            le.doActions(actionsID);
-            // Count actions
-            nbActions++;
+        if (params.detailedTiming) {
+            uint64_t nbActions = 0;
+            double agentTime = 0;
+            double leTime = 0;
+            while (!le.isTerminal() &&
+                   nbActions < this->params.maxNbActionsPerEval) {
+                // Get the actions
+                auto startTime = std::chrono::system_clock::now();
+                std::vector<double> actionsID =
+                    tee.executeFromRoot(*root, le.getInitActions()).second;
+                auto endTime = std::chrono::system_clock::now();
+                agentTime +=
+                    ((std::chrono::duration<double>)(endTime - startTime))
+                        .count();
+                // Do it
+                startTime = endTime;
+                le.doActions(actionsID);
+                endTime = std::chrono::system_clock::now();
+                leTime += ((std::chrono::duration<double>)(endTime - startTime))
+                              .count();
+                // Count actions
+                nbActions++;
+
+                // Extract the metrics.
+                selectionMetrics->extractMetricsStep(root, actionsID, le);
+            }
 
             // Extract the metrics.
-            selectionMetrics->extractMetricsStep(root, actionsID, le);
+            auto timedSectionMetrics =
+                std::static_pointer_cast<Selector::TimingSelectionMetrics>(
+                    selectionMetrics);
+            timedSectionMetrics->extractMetricsEpisode(root, nbActions, le,
+                                                       agentTime, leTime);
         }
+        else {
+            uint64_t nbActions = 0;
+            while (!le.isTerminal() &&
+                   nbActions < this->params.maxNbActionsPerEval) {
+                // Get the actions
+                std::vector<double> actionsID =
+                    tee.executeFromRoot(*root, le.getInitActions()).second;
+                // Do it
+                le.doActions(actionsID);
+                // Count actions
+                nbActions++;
 
-        // Extract the metrics.
-        selectionMetrics->extractMetricsEpisode(root, nbActions, le);
+                // Extract the metrics.
+                selectionMetrics->extractMetricsStep(root, actionsID, le);
+            }
 
+            // Extract the metrics.
+            selectionMetrics->extractMetricsEpisode(root, nbActions, le);
+        }
         // Add the extracted metrics to the total.
         globalSelectionMetrics->weightedSum(selectionMetrics, iterationNumber,
                                             1);
