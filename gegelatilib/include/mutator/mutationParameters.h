@@ -72,10 +72,6 @@ namespace Mutator {
         /// TODO
         double speciesProbaDupplicateNextVertex = 0.5;
         /// JSon comment
-        inline static const std::string speciesProbaExtensionEdgeComment = "// TODO";
-        /// TODO
-        double speciesProbaExtensionEdge = 0.8;
-        /// JSon comment
         inline static const std::string speciesProbaAddContextComment = "// TODO";
         /// TODO
         double speciesProbaAddContext = 0.5;
@@ -115,6 +111,10 @@ namespace Mutator {
         inline static const std::string speciesProbaMutateProgramComment = "// TODO";
         /// TODO
         double speciesProbaMutateProgram = 0.7;
+        /// JSon comment
+        inline static const std::string speciesMutateSpecificFirstComment = "// TODO";
+        /// TODO
+        bool speciesMutateSpecificFirst = false;
 
 
         /// JSon comment

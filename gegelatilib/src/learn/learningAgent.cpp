@@ -481,7 +481,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 
 
         // Plateau is reached.
-        if(currentSelector.isPlateauReached()) {
+        if(currentSelector.isPlateauReached() || (currentAlgo.getAlgorithmID() == 1 && generation > 5)) {
 
             // Get algo iterator out from list of algorithms
             auto it = std::find(this->algorithms.begin(), this->algorithms.end(), currentAlgo);
@@ -514,6 +514,12 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
             }
 
             this->createNewSpecies(rng, generation);
+        // If algorithm has not reached a plateau yet, but has been evaluated enough to reach a plateau and it's score is above the parent, allow him to mutate all edges.
+        } else if (dynamic_cast<Algorithm::Species::SpeciesMutator&>(currentAlgo.getMutator()).isDoingSpecificEdgesToMutate() && 
+                   currentAlgo.getAge() > params.mutation.tpg.nbLastGenPlateau && 
+                   currentSelector.getLastEMAScore() > this->finishedAlgorithms.find(currentAlgo.getParentID())->second.get().getSelector().getLastEMAScore() * 0.01) {
+            std::cout<<"\nAlgorithm can now mutate everything!!!"<<std::endl;
+            dynamic_cast<Algorithm::Species::SpeciesMutator&>(currentAlgo.getMutator()).setSpecificEdgesToMutate(false);
         }
 
 

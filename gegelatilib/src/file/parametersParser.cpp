@@ -289,8 +289,8 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.speciesProbaDupplicateNextVertex = (double)value.asDouble();
         return;
     }
-    if (param == "speciesProbaExtensionEdge") {
-        params.mutation.tpg.speciesProbaExtensionEdge = (double)value.asDouble();
+    if (param == "speciesMutateSpecificFirst") {
+        params.mutation.tpg.speciesMutateSpecificFirst = value.asBool();
         return;
     }
     if (param == "speciesProbaAddContext") {
@@ -627,9 +627,9 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["speciesProbaDupplicateNextVertex"].setComment(
         Mutator::TPGParameters::speciesProbaDupplicateNextVertexComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["speciesProbaExtensionEdge"] = params.mutation.tpg.speciesProbaExtensionEdge;
-    root["mutation"]["tpg"]["speciesProbaExtensionEdge"].setComment(
-        Mutator::TPGParameters::speciesProbaExtensionEdgeComment, Json::commentBefore);
+    root["mutation"]["tpg"]["speciesMutateSpecificFirst"] = params.mutation.tpg.speciesMutateSpecificFirst;
+    root["mutation"]["tpg"]["speciesMutateSpecificFirst"].setComment(
+        Mutator::TPGParameters::speciesMutateSpecificFirstComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["speciesProbaAddContext"] = params.mutation.tpg.speciesProbaAddContext;
     root["mutation"]["tpg"]["speciesProbaAddContext"].setComment(

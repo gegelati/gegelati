@@ -18,12 +18,16 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::init
     copySpeciesAlgo.setParentID(this->algorithmID);
 
     std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>> edgeMap;
+    std::set<std::reference_wrapper<const EvoGraph::Edge>> newEdges;
 
     SpeciesMutator& speciesMutator = dynamic_cast<SpeciesMutator&>(*this->mutator);
-    const EvoGraph::Vertex& newRootVertex = speciesMutator.mutateSpeciesGraph(*this->graph, *this->manager, this->params, rng, edgeMap);
+    const EvoGraph::Vertex& newRootVertex = speciesMutator.mutateSpeciesGraph(*this->graph, *this->manager, this->params, rng, edgeMap, newEdges);
 
     copySpeciesAlgo.setRootVertex(newRootVertex);
     copyAlgo->initAlgorithm(rng, *this->outputs, this->dataSources, this->graph);
+    SpeciesMutator& newMutator = dynamic_cast<SpeciesMutator&>(copySpeciesAlgo.getMutator());
+    newMutator.setNewEdges(newEdges);
+    newMutator.setSpecificEdgesToMutate(params.mutation.tpg.speciesMutateSpecificFirst);
 
     double prop = 1.0;
     std::vector<std::reference_wrapper<const Agent>> originAgents(this->getAgents());
@@ -38,7 +42,7 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::Species::SpeciesAlgorithm::init
         originAgents.erase(it);
 
         // Add the agent to the new algorithm.
-        dynamic_cast<SpeciesMutator&>(copySpeciesAlgo.getMutator()).initAgentFromSpecies(selectedAgent, *this->graph, copyAlgo->getManager(), this->params, rng, edgeMap);
+        newMutator.initAgentFromSpecies(selectedAgent, *this->graph, copyAlgo->getManager(), this->params, rng, edgeMap);
 
     }
     

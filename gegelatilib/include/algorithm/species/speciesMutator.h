@@ -38,6 +38,13 @@ namespace Algorithm::Species {
         /// Archive used by this Species
         std::reference_wrapper<const Archive> archive;
 
+
+        /// Set containing the new edges created specifically for this species.
+        std::set<std::reference_wrapper<const EvoGraph::Edge>> newEdges;
+
+        /// boolean to indicate if only the new edges created specifically for the species or not should be mutated
+        bool doSpecificEdgesToMutate = false;
+
     public:
 
         /**
@@ -49,6 +56,20 @@ namespace Algorithm::Species {
          */
         SpeciesMutator(const Selector::Selector& selector, uint64_t algorithmID, const Archive& archive): Mutator(selector, algorithmID), archive{archive} {};
 
+        /**
+         * \brief set the set of new edges created specifically for this species.
+         */
+        void setNewEdges(const std::set<std::reference_wrapper<const EvoGraph::Edge>>& newEdges) {this->newEdges = newEdges;}
+
+        /**
+         * \brief Set doSpecificEdgesToMutate attribute
+         */
+        void setSpecificEdgesToMutate(bool doSpecificEdgesToMutate) {this->doSpecificEdgesToMutate = doSpecificEdgesToMutate;}
+
+        /**
+         * \brief return if the mutator has doSpecificEdgesToMutate set to true
+         */
+        bool isDoingSpecificEdgesToMutate() {return this->doSpecificEdgesToMutate;}
 
         /**
          * \brief Set the id of the program algorithm associated with the Species agents.
@@ -106,8 +127,9 @@ namespace Algorithm::Species {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in,out] edgeMap map linking old to new edges
+         * \param[in,out] newEdges set of new edges created by the speceis
          */
-        bool addContextEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+        bool addContextEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap, std::set<std::reference_wrapper<const EvoGraph::Edge>>& newEdges);
 
         /**
          * \brief remove an edge to the new species.
@@ -134,8 +156,9 @@ namespace Algorithm::Species {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in,out] edgeMap map linking old to new edges
+         * \param[in,out] newEdges set of new edges created by the speceis
          */
-        virtual bool extendSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+        virtual bool extendSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap, std::set<std::reference_wrapper<const EvoGraph::Edge>>& newEdges);
 
         /**
          * Mutate the graph of a species to create a new species. 
@@ -146,8 +169,9 @@ namespace Algorithm::Species {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \param[in,out] edgeMap map linking old to new edges
+         * \param[in,out] newEdges set of new edges created by the speceis
          */
-        virtual const EvoGraph::Vertex& mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap);
+        virtual const EvoGraph::Vertex& mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap, std::set<std::reference_wrapper<const EvoGraph::Edge>>& newEdges);
 
         /**
          * \brief Dupplicate the graph from a specific root

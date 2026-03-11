@@ -32,7 +32,10 @@ const EvoGraph::Team& Algorithm::Species::SpeciesMutator::initSpeciesGraphStruct
 }
 
 
-bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(
+    const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, 
+    RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap,
+    std::set<std::reference_wrapper<const EvoGraph::Edge>>& newEdges)
 {
     std::set<std::reference_wrapper<const EvoGraph::Team>> contextTeams(dynamic_cast<SpeciesManager&>(manager).getContextTeams());
     if(contextTeams.size() == 0) {
@@ -80,6 +83,7 @@ bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(const EvoGraph::V
                 // Then the new outgoing edge is associated to the old edge in the edgeMap
                 // This way, the new outgoingedge's program will be dupplicated with the same edge as the origin action edge
                 edgeMap.insert({outgoingEdge, edgeMap.at(originActionEdge.at(action->getActionID()))});
+                newEdges.insert(outgoingEdge);
             }
         }
     }
@@ -87,6 +91,7 @@ bool Algorithm::Species::SpeciesMutator::addContextEdgeSpecies(const EvoGraph::V
     // Add the new edge at in the edgeMap, link to the same old edge
     // By doing so, the same program will be dupplicating for the copyEdge and newEdge, leading to small initial changes.
     edgeMap.insert({newEdge, *itEdges});
+    newEdges.insert(newEdge);
 
     return true;
 }
@@ -228,7 +233,11 @@ bool Algorithm::Species::SpeciesMutator::removeEdgeSpecies(const EvoGraph::Verte
     return true;
 }
 
-bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+bool Algorithm::Species::SpeciesMutator::extendSpecies(
+    const EvoGraph::Vertex& newRoot, AgentManager& manager, EvoGraph::Graph& graph, 
+    const Learn::LearningParameters& params, RNG::RNG& rng, 
+    std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap,
+    std::set<std::reference_wrapper<const EvoGraph::Edge>>& newEdges)
 {
     // Get the activation vertex
     const auto& activationVertices = dynamic_cast<SpeciesManager&>(manager).getActivationTeams();
@@ -265,10 +274,10 @@ bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& n
     const EvoGraph::Team& newActivationTeam0 = graph.addNewTeam();
     const EvoGraph::Team& newActivationTeam1 = graph.addNewTeam();
 
-    // Add the new edges
+    // Add the new edges, the edge between decisionTeam and newActivationTeams are edded 
     graph.addNewEdge(*copyVertexChoose, decisionTeam);
-    graph.addNewEdge(decisionTeam, newActivationTeam0);
-    graph.addNewEdge(decisionTeam, newActivationTeam1);
+    newEdges.insert(graph.addNewEdge(decisionTeam, newActivationTeam0));
+    newEdges.insert(graph.addNewEdge(decisionTeam, newActivationTeam1));
 
     std::set<std::reference_wrapper<const EvoGraph::Edge>> actionEdges;
     for(const EvoGraph::Edge& edge: copyVertexChoose->getOutgoingEdges()) {
@@ -277,36 +286,41 @@ bool Algorithm::Species::SpeciesMutator::extendSpecies(const EvoGraph::Vertex& n
         }
     }
 
-    double probaExtensionEdge = params.mutation.tpg.speciesProbaExtensionEdge;
-    double proba = 1;
-    while(actionEdges.size() > 0 && proba > rng.getDouble(0, 1)){
-        
+    // Sample a random number of edges to extend
+    size_t numEdgesToExtend = rng.getUnsignedInt64(1, actionEdges.size());
+
+    for (size_t i = 0; i < numEdgesToExtend && !actionEdges.empty(); ++i) {
         // Get a random edge.
         auto itEdges = actionEdges.begin();
-        std::advance(itEdges, rng.getUnsignedInt64(0, actionEdges.size()-1));
-        
-        // add the new edge, copiing the destination of the random choosen edge
+        std::advance(itEdges, rng.getUnsignedInt64(0, actionEdges.size() - 1));
+
+        // Add the new edge, copying the destination of the randomly chosen edge
         const EvoGraph::Edge& newEdge0 = graph.addNewEdge(newActivationTeam0, itEdges->get().getDestination());
         const EvoGraph::Edge& newEdge1 = graph.addNewEdge(newActivationTeam1, itEdges->get().getDestination());
-        
-        // Add the new edges in the edge map, link to the copied edge, so that the new programs will be dupplicated on this edge.
+
+        // Add the new edges in the edge map, linked to the copied edge
         edgeMap.insert({newEdge0, edgeMap.at(*itEdges)});
         edgeMap.insert({newEdge1, edgeMap.at(*itEdges)});
+
+        // Add the second edge only to the new edges
+        newEdges.insert(newEdge1);
 
         edgeMap.erase(*itEdges);
 
         // Remove the edge from the graph
         graph.removeEdge(*itEdges);
 
-        // Erase the edge and increase probability
+        // Erase the edge
         actionEdges.erase(itEdges);
-        proba *= probaExtensionEdge;
     }
 
     return true;
 }
 
-const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap)
+const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(
+    EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, 
+    RNG::RNG& rng, std::map<std::reference_wrapper<const EvoGraph::Edge>, std::reference_wrapper<const EvoGraph::Edge>>& edgeMap,
+    std::set<std::reference_wrapper<const EvoGraph::Edge>>& newEdges)
 {
     double probaAddContext = params.mutation.tpg.speciesProbaAddContext;
     double probaAddActivation = params.mutation.tpg.speciesProbaAddActivation;
@@ -319,7 +333,7 @@ const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(E
         double randomValue = rng.getDouble(0, probaAddActivation + probaAddContext + probaDelete + probaExtension);
         if(randomValue > probaAddActivation + probaDelete + probaExtension) {
             std::cout<<"  ADDCONTEXT   ";
-            mutationHappened = this->addContextEdgeSpecies(newRoot, manager, graph, params, rng, edgeMap);
+            mutationHappened = this->addContextEdgeSpecies(newRoot, manager, graph, params, rng, edgeMap, newEdges);
         } else if (randomValue > probaDelete + probaExtension){
             std::cout<<"  ADDACTIVATION    ";
             mutationHappened = this->addActivationEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
@@ -328,7 +342,7 @@ const EvoGraph::Vertex& Algorithm::Species::SpeciesMutator::mutateSpeciesGraph(E
             mutationHappened = this->removeEdgeSpecies(newRoot, manager, graph, rng, edgeMap);
         }  else {
             std::cout<<"  EXTEND      ";
-            mutationHappened = this->extendSpecies(newRoot, manager, graph, params, rng, edgeMap);
+            mutationHappened = this->extendSpecies(newRoot, manager, graph, params, rng, edgeMap, newEdges);
         }
     } while (!mutationHappened);
 
@@ -471,7 +485,8 @@ void Algorithm::Species::SpeciesMutator::crossoverAgents(
 
     // Get available edges
     const SpeciesManager& speciesManager = dynamic_cast<const SpeciesManager&>(manager);
-    std::vector<std::reference_wrapper<const EvoGraph::Edge>> availableEdges(speciesManager.getEdges().begin(), speciesManager.getEdges().end());
+    const auto& edges = (this->doSpecificEdgesToMutate) ? this->newEdges : speciesManager.getEdges();
+    std::vector<std::reference_wrapper<const EvoGraph::Edge>> availableEdges(edges.begin(), edges.end());
     size_t remaining = availableEdges.size();
 
     // Always do at least one crossover
@@ -608,7 +623,8 @@ void Algorithm::Species::SpeciesMutator::mutateAgent(
     // 3. swap randomly selected edges
     // With at least two edges
     proba = params.mutation.tpg.speciesProbaSwapPrograms;
-    while (speciesManager.getEdges().size() > 2 &&
+    while (speciesManager.getEdges().size() > 2 && 
+            !this->doSpecificEdgesToMutate &&
             proba > rng.getDouble(0.0, 1.0)) {
         this->swapPrograms(speciesAgent, manager, rng, params);
 
@@ -620,8 +636,10 @@ void Algorithm::Species::SpeciesMutator::mutateAgent(
     bool anyMutationDone = false;
     do {
         
+        const auto& edges = (this->doSpecificEdgesToMutate) ? this->newEdges : speciesManager.getEdges();
+
         // Get available actions classes
-        std::vector<std::reference_wrapper<const EvoGraph::Edge>> availableEdges(speciesManager.getEdges().begin(), speciesManager.getEdges().end());
+        std::vector<std::reference_wrapper<const EvoGraph::Edge>> availableEdges(edges.begin(), edges.end());
         size_t remaining = availableEdges.size();
 
         // 4. mutate randomly selected program on action Edge.
@@ -644,6 +662,8 @@ void Algorithm::Species::SpeciesMutator::mutateAgent(
             anyMutationDone = true;
         }
     } while (!anyMutationDone && params.mutation.tpg.speciesProbaMutateProgram != 0.0);
+
+        const auto& edges = (this->doSpecificEdgesToMutate) ? this->newEdges : speciesManager.getEdges();
 }
 
 
