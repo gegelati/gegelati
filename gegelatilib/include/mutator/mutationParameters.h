@@ -59,6 +59,10 @@ namespace Mutator {
         /// TODO
         size_t nbLastGenPlateau = 50;
         /// JSon comment
+        inline static const std::string nbFinishedAlgorithmComment = "// TODO";
+        /// TODO
+        size_t nbFinishedAlgorithm = 5;
+        /// JSon comment
         inline static const std::string alphaEMALinearFactorComment = "// TODO";
         /// TODO
         double alphaEMALinearFactor = 0.2;

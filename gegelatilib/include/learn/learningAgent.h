@@ -387,6 +387,16 @@ namespace Learn {
                           std::reference_wrapper<const Algorithm::Agent>>& results,
             RNG::RNG& rng, uint64_t generation);
 
+
+        /**
+         * \brief add a finished algorithm
+         * 
+         * If the number of finished algorithm is above parmas.mutation.tpg.speciesNbAlgoFinished, remove the worse one from the list.
+         * 
+         * \param[in] algo finished algorithm added
+         */
+        void addFinishedAlgorithm(Algorithm::Algorithm& algo);
+
         /**
          * \brief Initialize the LearningAgent.
          *

@@ -54,7 +54,7 @@ void Learn::LearningAgent::setCurrentAlgorithm(Algorithm::Algorithm* algorithm)
     if(algorithm == nullptr){
         throw std::runtime_error("LearningAgent::setCurrentAlgorithm: given algorithm is a null pointer.");
     }
-    if(std::find(this->algorithms.begin(), this->algorithms.end(), *algorithm) == this->algorithms.end()){
+    if(std::find(this->algorithms.begin(), this->algorithms.end(), *algorithm) == this->algorithms.end() && this->finishedAlgorithms.find(algorithm->getAlgorithmID()) == this->finishedAlgorithms.end()){
         throw std::runtime_error("LearningAgent::setCurrentAlgorithm: given algorithm is not part of the learning agent algorithms.");
     }
 
@@ -234,9 +234,21 @@ Learn::LearningAgent::evaluateAllAgents(uint64_t generationNumber,
     if(mode == LearningMode::TRAINING) {
         runnedAlgorithms = this->algorithms;
     } else {
-        runnedAlgorithms = this->algorithms;
-        for(const auto& pair: this->finishedAlgorithms) {
-            runnedAlgorithms.push_back(pair.second);
+        // Do the validation only on the best algorithm
+        if(this->finishedAlgorithms.size() == 0) {
+            runnedAlgorithms = this->algorithms;
+        } else {
+
+            std::map<double, std::reference_wrapper<Algorithm::Algorithm>> mapScoreAlgo;
+            for (const auto& pair : finishedAlgorithms) {
+                mapScoreAlgo.insert({pair.second.get().getSelector().getLastEMAScore(), pair.second});
+            }
+            // Current algorithm is better than the best algorithm so we validate with it, else with the best finished algorithm
+            if(this->algorithms.front().get().getSelector().getLastEMAScore() > mapScoreAlgo.rbegin()->first) {
+                runnedAlgorithms = this->algorithms;
+            } else {
+                runnedAlgorithms.push_back(mapScoreAlgo.rbegin()->second);
+            }
         }
     }
 
@@ -381,6 +393,25 @@ void Learn::LearningAgent::createNewSpecies(RNG::RNG& rng, uint64_t generation) 
     this->algorithms.push_back(newAlgorithm);
 }
 
+void Learn::LearningAgent::addFinishedAlgorithm(Algorithm::Algorithm& algo) {
+    this->finishedAlgorithms.insert({algo.getAlgorithmID(), algo});
+
+    std::cout<<"now containing "<<this->finishedAlgorithms.size()<<" Finished algorithm!    ";
+
+    // If too much finished algorithms, delete the worse ones (and keep the best policy for memory issues)
+    while(this->finishedAlgorithms.size() > this->params.mutation.tpg.nbFinishedAlgorithm) {
+    std::cout<<"Too much !!!, scores are: ";
+        std::map<double, std::reference_wrapper<Algorithm::Algorithm>> mapScoreAlgo;
+        for (const auto& pair : finishedAlgorithms) {
+            mapScoreAlgo.insert({pair.second.get().getSelector().getLastEMAScore(), pair.second});
+            std::cout<<pair.second.get().getSelector().getLastEMAScore()<<" - "<<pair.second.get().getAlgorithmID()<<" | ";
+        }
+        std::cout<<"   Deleting "<<mapScoreAlgo.begin()->second.get().getAlgorithmID()<<std::endl;
+        mapScoreAlgo.begin()->second.get().getSelector().keepBestPolicy(*this->graph);
+        this->finishedAlgorithms.erase(mapScoreAlgo.begin()->second.get().getAlgorithmID());
+    }
+}
+
 void Learn::LearningAgent::launchAlgorithmsSelection(
             std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                           std::reference_wrapper<const Algorithm::Agent>>& results,
@@ -481,7 +512,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
 
 
         // Plateau is reached.
-        if(currentSelector.isPlateauReached() || (currentAlgo.getAlgorithmID() == 1 && generation > 5)) {
+        if(currentSelector.isPlateauReached()) {
 
             // Get algo iterator out from list of algorithms
             auto it = std::find(this->algorithms.begin(), this->algorithms.end(), currentAlgo);
@@ -490,7 +521,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
             // No finished algorithm yet, register this one.
             if(this->finishedAlgorithms.size() == 0) {
                 std::cout<<"\nCreating new algo size 1"<<std::endl;
-                this->finishedAlgorithms.insert({currentAlgo.getAlgorithmID(), currentAlgo});
+                this->addFinishedAlgorithm(currentAlgo);
             } else {
                 // Add only if the score is above the parent of the algorithm.
                 auto parentIt = this->finishedAlgorithms.find(currentAlgo.getParentID());
@@ -504,7 +535,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
                 // If offspring algorithm is better than the parent, save it and create a new species.
                 if(offSpringScore > parentScore * 1.01) {
                     std::cout<<"\nCreating new algo size >1"<<std::endl;
-                    this->finishedAlgorithms.insert({currentAlgo.getAlgorithmID(), currentAlgo});
+                    this->addFinishedAlgorithm(currentAlgo);
                 // Else destroy the algorithm (do not really destroy it, but keep only the best agent for .dot size issues)
                 } else {
                     std::cout<<"\nDeleting new algo size >1"<<std::endl;
@@ -517,7 +548,7 @@ void Learn::LearningAgent::launchAlgorithmsSelection(
         // If algorithm has not reached a plateau yet, but has been evaluated enough to reach a plateau and it's score is above the parent, allow him to mutate all edges.
         } else if (dynamic_cast<Algorithm::Species::SpeciesMutator&>(currentAlgo.getMutator()).isDoingSpecificEdgesToMutate() && 
                    currentAlgo.getAge() > params.mutation.tpg.nbLastGenPlateau && 
-                   currentSelector.getLastEMAScore() > this->finishedAlgorithms.find(currentAlgo.getParentID())->second.get().getSelector().getLastEMAScore() * 0.01) {
+                   currentSelector.getLastEMAScore() > this->finishedAlgorithms.find(currentAlgo.getParentID())->second.get().getSelector().getLastEMAScore() * 1.01) {
             std::cout<<"\nAlgorithm can now mutate everything!!!"<<std::endl;
             dynamic_cast<Algorithm::Species::SpeciesMutator&>(currentAlgo.getMutator()).setSpecificEdgesToMutate(false);
         }
@@ -692,6 +723,11 @@ Algorithm::Algorithm& Learn::LearningAgent::findCorrespondingAlgorithm(const Alg
 bool Learn::LearningAgent::containsAlgorithm(Algorithm::Algorithm& algorithm){
     for(Algorithm::Algorithm& algo: this->algorithms){
         if(algo == algorithm){
+            return true;
+        }
+    }
+    for(const auto& pair: this->finishedAlgorithms){
+        if(pair.second == algorithm){
             return true;
         }
     }

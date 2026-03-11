@@ -277,6 +277,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.nbLastGenPlateau = (size_t)value.asUInt();
         return;
     }
+    if (param == "nbFinishedAlgorithm") {
+        params.mutation.tpg.nbFinishedAlgorithm = (size_t)value.asUInt();
+        return;
+    }
     if (param == "alphaEMALinearFactor") {
         params.mutation.tpg.alphaEMALinearFactor = (double)value.asDouble();
         return;
@@ -614,6 +618,10 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["nbLastGenPlateau"] = params.mutation.tpg.nbLastGenPlateau;
     root["mutation"]["tpg"]["nbLastGenPlateau"].setComment(
         Mutator::TPGParameters::nbLastGenPlateauComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["nbFinishedAlgorithm"] = params.mutation.tpg.nbFinishedAlgorithm;
+    root["mutation"]["tpg"]["nbFinishedAlgorithm"].setComment(
+        Mutator::TPGParameters::nbFinishedAlgorithmComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["alphaEMALinearFactor"] = params.mutation.tpg.alphaEMALinearFactor;
     root["mutation"]["tpg"]["alphaEMALinearFactor"].setComment(
