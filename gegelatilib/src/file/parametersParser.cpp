@@ -337,6 +337,14 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.speciesProbaMutateProgram = (double)value.asDouble();
         return;
     }
+    if (param == "speciesCoefScoreOverDupplication") {
+        params.mutation.tpg.speciesCoefScoreOverDupplication = (double)value.asDouble();
+        return;
+    }
+    if (param == "speciesSquareWeights") {
+        params.mutation.tpg.speciesSquareWeights = value.asBool();
+        return;
+    }
 
 
 
@@ -678,6 +686,14 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["speciesProbaMutateProgram"] = params.mutation.tpg.speciesProbaMutateProgram;
     root["mutation"]["tpg"]["speciesProbaMutateProgram"].setComment(
         Mutator::TPGParameters::speciesProbaMutateProgramComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesCoefScoreOverDupplication"] = params.mutation.tpg.speciesCoefScoreOverDupplication;
+    root["mutation"]["tpg"]["speciesCoefScoreOverDupplication"].setComment(
+        Mutator::TPGParameters::speciesCoefScoreOverDupplicationComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["speciesSquareWeights"] = params.mutation.tpg.speciesSquareWeights;
+    root["mutation"]["tpg"]["speciesSquareWeights"].setComment(
+        Mutator::TPGParameters::speciesSquareWeightsComment, Json::commentBefore);
 
     // Mutation.program parameters
     root["mutation"]["prog"]["maxConstValue"] =

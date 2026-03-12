@@ -353,15 +353,44 @@ void Learn::LearningAgent::createNewSpecies(RNG::RNG& rng, uint64_t generation) 
     for (const auto& pair : finishedAlgorithms) {
         mapScoreAlgo.insert({pair.second.get().getSelector().getLastEMAScore(), pair.second});
     }
+
+    
+    std::vector<std::reference_wrapper<Algorithm::SpeciesAlgorithm>> vectorNbDupplicationAlgo;
+    for (const auto& pair : finishedAlgorithms) {
+        vectorNbDupplicationAlgo.push_back(dynamic_cast<Algorithm::SpeciesAlgorithm&>(pair.second.get()));
+    }
+    // Order with biggest first
+    std::sort(
+        vectorNbDupplicationAlgo.begin(),
+        vectorNbDupplicationAlgo.end(),
+        [](const std::reference_wrapper<Algorithm::SpeciesAlgorithm>& a,
+        const std::reference_wrapper<Algorithm::SpeciesAlgorithm>& b) {
+            return a.get().getNbTimesReproduced() > b.get().getNbTimesReproduced();
+        }
+    );
+
     std::vector<std::reference_wrapper<Algorithm::SpeciesAlgorithm>> algorithms;
     std::vector<double> weights;
-    size_t idx = 1;
+    size_t idxScore = 1;
     for (const auto& pair : mapScoreAlgo) {
         Algorithm::SpeciesAlgorithm& speciesAlgo = dynamic_cast<Algorithm::SpeciesAlgorithm&>(pair.second.get());
         algorithms.push_back(speciesAlgo);
-        //double weight = 1.0 / (speciesAlgo.getNbTimesReproduced() + 1.0);
-        double weight = std::pow(idx, 2);
-        idx++;
+
+        auto it = vectorNbDupplicationAlgo.begin();
+        // One with the highest number of time reproduced has the lowed idx.
+        size_t idxDupplication = 1;
+        while(*it != pair.second) {
+            idxDupplication++;
+            it++;
+        }
+
+        double coefficient = params.mutation.tpg.speciesCoefScoreOverDupplication;
+        double weight = coefficient * (double)idxScore + (1.0 - coefficient) * (double)idxDupplication;
+
+        if(params.mutation.tpg.speciesSquareWeights) {
+            weight = std::pow(weight, 2);
+        }
+        idxScore++;
         weights.push_back(weight);
     }
 

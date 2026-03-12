@@ -119,6 +119,14 @@ namespace Mutator {
         inline static const std::string speciesMutateSpecificFirstComment = "// TODO";
         /// TODO
         bool speciesMutateSpecificFirst = false;
+        /// JSon comment
+        inline static const std::string speciesCoefScoreOverDupplicationComment = "// TODO";
+        /// TODO
+        double speciesCoefScoreOverDupplication = 1.0;
+        /// JSon comment
+        inline static const std::string speciesSquareWeightsComment = "// TODO";
+        /// TODO
+        bool speciesSquareWeights = false;
 
 
         /// JSon comment
