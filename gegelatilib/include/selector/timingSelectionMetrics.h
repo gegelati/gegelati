@@ -74,8 +74,8 @@ namespace Selector {
         /// the episode
         /// \param[in] learningEnvironment the learning environment in which the
         /// agent is evaluated.
-        /// @param[in] agentTime execution time of learning agent.
-        /// @param[in] leTime execution time of learning environment.
+        /// @param[in] agentTimeEpisode execution time of learning agent.
+        /// @param[in] leTimeEpisode execution time of learning environment.
         void extractMetricsEpisodeWithTiming(
             const TPG::TPGVertex* agent, size_t nbStepsExecuted,
             const Learn::LearningEnvironment& learningEnvironment,
