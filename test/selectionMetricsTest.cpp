@@ -279,7 +279,7 @@ TEST(TimingSelectionMetricsTest, ExtractMetricsEpisodeAddsScoreAndUtility)
     FakedLearningEnvironment env(3.0, 1.0);
 
     // Call extraction
-    timingMetrics->extractMetricsEpisode(nullptr, 5, env, 12.2, 11.1);
+    timingMetrics->extractMetricsEpisodeWithTiming(nullptr, 5, env, 12.2, 11.1);
 
     // score and utility should be incremented
     ASSERT_DOUBLE_EQ(timingMetrics->getScore(), 4.5);
@@ -299,8 +299,8 @@ TEST(TimingSelectionMetricsTest, WeightedSumAndTypeMismatch)
     FakedLearningEnvironment env2(3.0, 7.0);
 
     // Call extraction
-    tm1->extractMetricsEpisode(nullptr, 5, env1, 10, 20);
-    tm2->extractMetricsEpisode(nullptr, 15, env2, 29, 10);
+    tm1->extractMetricsEpisodeWithTiming(nullptr, 5, env1, 10, 20);
+    tm2->extractMetricsEpisodeWithTiming(nullptr, 15, env2, 29, 10);
 
     // weighted sum
     ASSERT_NO_THROW(

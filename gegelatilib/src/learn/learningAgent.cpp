@@ -155,8 +155,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         this->selector->createSelectionMetrics();
     if (params.detailedTiming) {
         globalSelectionMetrics =
-            std::shared_ptr<Selector::TimingSelectionMetrics>(
-                new Selector::TimingSelectionMetrics(globalSelectionMetrics));
+            std::make_shared<Selector::TimingSelectionMetrics>(
+                Selector::TimingSelectionMetrics(globalSelectionMetrics));
     }
     globalSelectionMetrics->initMetrics(root, le);
 
@@ -172,8 +172,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
             this->selector->createSelectionMetrics();
         if (params.detailedTiming) {
             selectionMetrics =
-                std::shared_ptr<Selector::TimingSelectionMetrics>(
-                    new Selector::TimingSelectionMetrics(selectionMetrics));
+                std::make_shared<Selector::TimingSelectionMetrics>(
+                    Selector::TimingSelectionMetrics(selectionMetrics));
         }
         selectionMetrics->initMetrics(root, le);
 
@@ -211,8 +211,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
             auto timedSectionMetrics =
                 std::static_pointer_cast<Selector::TimingSelectionMetrics>(
                     selectionMetrics);
-            timedSectionMetrics->extractMetricsEpisode(root, nbActions, le,
-                                                       agentTime, leTime);
+            timedSectionMetrics->extractMetricsEpisodeWithTiming(
+                root, nbActions, le, agentTime, leTime);
         }
         else {
             uint64_t nbActions = 0;

@@ -135,7 +135,7 @@ namespace Selector {
          * valueOther.
          */
         template <class T>
-        static double weightedSum(T value, T valueOther, size_t nbEvaluation,
+        static T weightedSum(T value, T valueOther, size_t nbEvaluation,
                                   size_t nbEvaluationOther)
         {
             value = value * (T)nbEvaluation + valueOther * (T)nbEvaluationOther;

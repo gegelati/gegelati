@@ -94,11 +94,11 @@ class LABasicLoggerTest : public ::testing::Test
 
         auto tsm1 = std::make_shared<Selector::TimingSelectionMetrics>(
             std::make_shared<Selector::SelectionMetrics>(5, 2));
-        tsm1->extractMetricsEpisode(nullptr, 2, le, 5, 3);
+        tsm1->extractMetricsEpisodeWithTiming(nullptr, 2, le, 5, 3);
         auto res1 = new Learn::EvaluationResult(tsm1, 2);
         auto tsm2 = std::make_shared<Selector::TimingSelectionMetrics>(
             std::make_shared<Selector::SelectionMetrics>(10, 4));
-        tsm2->extractMetricsEpisode(nullptr, 7, le, 8, 1);
+        tsm2->extractMetricsEpisodeWithTiming(nullptr, 7, le, 8, 1);
         auto res2 = new Learn::EvaluationResult(tsm2, 2);
         auto v1(new TPG::TPGAction(0));
         auto v2(new TPG::TPGAction(0));

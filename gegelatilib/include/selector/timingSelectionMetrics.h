@@ -45,7 +45,7 @@ namespace Selector {
         /**
          * Return the score of the agent.
          */
-        virtual double getScore() const override
+        double getScore() const override
         {
             return wrapped->getScore();
         };
@@ -53,18 +53,18 @@ namespace Selector {
         /**
          * Return the utility of the agent.
          */
-        virtual double getUtility() const override
+        double getUtility() const override
         {
             return wrapped->getUtility();
         };
 
         /// @brief Constructor for the SelectionMetrics with timing.
         /// @param obj SelectionMetrics being timed.
-        TimingSelectionMetrics(std::shared_ptr<SelectionMetrics> obj)
+        explicit TimingSelectionMetrics(std::shared_ptr<SelectionMetrics> obj)
             : wrapped(obj) {};
 
         /// @brief Forward to wrapped method
-        virtual void extractMetricsStep(
+        void extractMetricsStep(
             const TPG::TPGVertex* agent, std::vector<double> actionValues,
             const Learn::LearningEnvironment& learningEnvironment) override;
 
@@ -76,15 +76,15 @@ namespace Selector {
         /// agent is evaluated.
         /// @param[in] agentTime execution time of learning agent.
         /// @param[in] leTime execution time of learning environment.
-        void extractMetricsEpisode(
+        void extractMetricsEpisodeWithTiming(
             const TPG::TPGVertex* agent, size_t nbStepsExecuted,
             const Learn::LearningEnvironment& learningEnvironment,
-            double agentTime, double leTime);
+            double agentTimeEpisode, double leTimeEpisode);
 
         /// @brief Specialization of weightedSum to add timings and nbActions.
-        virtual void weightedSum(std::shared_ptr<SelectionMetrics> other,
-                                 size_t nbEvaluation,
-                                 size_t nbEvaluationOther) override;
+        void weightedSum(std::shared_ptr<SelectionMetrics> other,
+                         size_t nbEvaluation,
+                         size_t nbEvaluationOther) override;
     };
 
     /// @brief Comparison function to enable sorting of SelectionMetrics with STL.

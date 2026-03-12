@@ -7,16 +7,16 @@ void Selector::TimingSelectionMetrics::extractMetricsStep(
     wrapped->extractMetricsStep(agent, actionValues, learningEnvironment);
 };
 
-void Selector::TimingSelectionMetrics::extractMetricsEpisode(
+void Selector::TimingSelectionMetrics::extractMetricsEpisodeWithTiming(
     const TPG::TPGVertex* agent, size_t nbStepsExecuted,
-    const Learn::LearningEnvironment& learningEnvironment, double agentTime,
-    double leTime)
+    const Learn::LearningEnvironment& learningEnvironment, double agentTimeEpisode,
+    double leTimeEpisode)
 {
     wrapped->extractMetricsEpisode(agent, nbStepsExecuted, learningEnvironment);
 
     nbActions += nbStepsExecuted;
-    this->agentTime += agentTime;
-    this->leTime += leTime;
+    agentTime += agentTimeEpisode;
+    leTime += leTimeEpisode;
 }
 
 void Selector::TimingSelectionMetrics::weightedSum(
