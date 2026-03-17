@@ -336,7 +336,8 @@ TEST_F(LearningAgentTest, TimedEvaluation)
         << "Should be a TimingSelectionMetrics as it is enabled";
     Selector::TimingSelectionMetrics* timedSelectionMetrics =
         static_cast<Selector::TimingSelectionMetrics*>(selectionMetrics);
-    ASSERT_GT(timedSelectionMetrics->getAgentTime(), 0) << "Agent execution time should be non null after training";
+    ASSERT_GT(timedSelectionMetrics->getAgentTime(), 0)
+        << "Agent execution time should be non null after training";
 }
 
 TEST_F(LearningAgentTest, GetArchive)

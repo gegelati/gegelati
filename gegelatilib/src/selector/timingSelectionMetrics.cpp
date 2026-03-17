@@ -9,8 +9,8 @@ void Selector::TimingSelectionMetrics::extractMetricsStep(
 
 void Selector::TimingSelectionMetrics::extractMetricsEpisodeWithTiming(
     const TPG::TPGVertex* agent, size_t nbStepsExecuted,
-    const Learn::LearningEnvironment& learningEnvironment, double agentTimeEpisode,
-    double leTimeEpisode)
+    const Learn::LearningEnvironment& learningEnvironment,
+    double agentTimeEpisode, double leTimeEpisode)
 {
     wrapped->extractMetricsEpisode(agent, nbStepsExecuted, learningEnvironment);
 

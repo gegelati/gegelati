@@ -61,7 +61,7 @@ namespace Selector {
         /// @brief Constructor for the SelectionMetrics with timing.
         /// @param obj SelectionMetrics being timed.
         explicit TimingSelectionMetrics(std::shared_ptr<SelectionMetrics> obj)
-            : wrapped(obj) {};
+            : wrapped(obj){};
 
         /// @brief Forward to wrapped method
         void extractMetricsStep(
@@ -87,15 +87,18 @@ namespace Selector {
                          size_t nbEvaluationOther) override;
     };
 
-    /// @brief Comparison function to enable sorting of SelectionMetrics with STL.
+    /// @brief Comparison function to enable sorting of SelectionMetrics with
+    /// STL.
     bool operator<(std::shared_ptr<TimingSelectionMetrics> a,
                    std::shared_ptr<TimingSelectionMetrics> b);
 
-    /// @brief Comparison function to enable sorting of SelectionMetrics with STL.
+    /// @brief Comparison function to enable sorting of SelectionMetrics with
+    /// STL.
     bool operator<(std::shared_ptr<SelectionMetrics> a,
                    std::shared_ptr<TimingSelectionMetrics> b);
 
-    /// @brief Comparison function to enable sorting of SelectionMetrics with STL.
+    /// @brief Comparison function to enable sorting of SelectionMetrics with
+    /// STL.
     bool operator<(std::shared_ptr<TimingSelectionMetrics> a,
                    std::shared_ptr<SelectionMetrics> b);
 }; // namespace Selector
