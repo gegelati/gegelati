@@ -50,6 +50,9 @@ namespace Algorithm {
 
     public:
 
+    
+        /// Default polymorphic destructor
+        virtual ~AgentManager() = default;
 
         // Disable copying to avoid accidental copies (use references or pointers instead).
         AgentManager(const AgentManager&) = delete;

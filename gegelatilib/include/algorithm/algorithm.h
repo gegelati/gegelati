@@ -84,6 +84,9 @@ namespace Algorithm {
 
       public:
 
+      
+        /// Default polymorphic destructor
+        virtual ~Algorithm() = default;
 
         // Disable copying to avoid accidental copies (use references or pointers instead).
         Algorithm(const Algorithm&) = delete;

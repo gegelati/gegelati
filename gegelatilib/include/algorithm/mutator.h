@@ -38,6 +38,8 @@ namespace Algorithm {
 
     public:
 
+        /// Default polymorphic destructor
+        virtual ~Mutator() = default;
 
         // Disable copying to avoid accidental copies (use references or pointers instead).
         Mutator(const Mutator&) = delete;

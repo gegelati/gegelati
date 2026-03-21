@@ -44,6 +44,9 @@ namespace Algorithm {
 
     public:
     
+        /// Default polymorphic destructor
+        virtual ~ExecutionEngine() = default;
+
         // Disable copying to avoid accidental copies (use references or pointers instead).
         ExecutionEngine(const ExecutionEngine&) = delete;
         ExecutionEngine& operator=(const ExecutionEngine&) = delete;

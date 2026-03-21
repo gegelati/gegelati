@@ -39,6 +39,8 @@ namespace Algorithm {
 
     public:
 
+        /// Default polymorphic destructor
+        virtual ~Agent() = default;
 
 
         /**

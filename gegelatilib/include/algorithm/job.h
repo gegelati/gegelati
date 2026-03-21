@@ -67,6 +67,10 @@ namespace Algorithm {
         const uint64_t idx;
 
       public:
+
+        /// Default polymorphic destructor
+        virtual ~Job() = default;
+
         /// Deleted default constructor.
         Job() = delete;
 
