@@ -39,6 +39,7 @@
 #include <inttypes.h>
 
 #include "data/constant.h"
+#include "algorithm/algorithm.h"
 #include "file/graphDotExporter.h"
 #include "util/timestamp.h"
 #include "data/demangle.h"
@@ -220,7 +221,7 @@ void File::GraphDotExporter::printAlgorithm(const Algorithm::Algorithm& printAlg
     }
 }
 
-void File::GraphDotExporter::printAlgorithmsSubGraph(const std::vector<std::reference_wrapper<const Algorithm::Algorithm>>& printAlgorithms)
+void File::GraphDotExporter::printAlgorithmsSubGraph(const Algorithm::Algorithm& algorithm)
 {   
     this->mapAlgorithms.clear();
 
@@ -233,21 +234,20 @@ void File::GraphDotExporter::printAlgorithmsSubGraph(const std::vector<std::refe
     fprintf(pFile, "%sstyle = \"rounded,filled\"\n", offset.c_str());
     fprintf(pFile, "%scolor = \"#888888\"\n", offset.c_str());
 
-    // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
-    for(const Algorithm::Algorithm& algorithm : printAlgorithms){
-        this->printAlgorithm(algorithm);
-    }
+    // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.    
+    this->printAlgorithm(algorithm);
+    
     this->offset = "\t\t";
     
     fprintf(pFile, "%s}\n", offset.c_str());
 }
 
-void File::GraphDotExporter::printGraphFooter()
+void File::GraphDotExporter::printGraphFooter(const Algorithm::Algorithm& algorithm)
 {
 
 
     // Print root actions (and keep the ids)
-    auto rootActions = tpg.getRootActions();
+    auto rootActions = algorithm.getGraph().getRootActions();
     std::vector<uint64_t> rootActionIDs;
     for (const EvoGraph::Action& rootVertex : rootActions) {
         this->printVertex(rootVertex);
@@ -256,10 +256,8 @@ void File::GraphDotExporter::printGraphFooter()
     // Rank all the agents of main algoritms
     fprintf(pFile, "%s{ rank= same ", this->offset.c_str());
     // Main agents ids
-    for(const Algorithm::Algorithm& algorithm : this->algorithms){
-        for(const Algorithm::Agent& agent : algorithm.getManagerCst().getAgents()){
-            fprintf(pFile, "P%" PRIu64 " ", agent.getAgentID());
-        }
+    for(const Algorithm::Agent& agent : algorithm.getManagerCst().getAgents()){
+        fprintf(pFile, "P%" PRIu64 " ", agent.getAgentID());
     }
     // Action root
     for (auto rootActionId : rootActionIDs) {
@@ -270,9 +268,13 @@ void File::GraphDotExporter::printGraphFooter()
     fprintf(pFile, "%s}\n", this->offset.c_str());
 }
 
-void File::GraphDotExporter::print()
+void File::GraphDotExporter::print(const char* filePath, const Algorithm::Algorithm& algorithm)
 {
 
+    if ((pFile = fopen(filePath, "w")) == NULL) {
+        throw std::runtime_error("Could not open file " +
+                                    std::string(filePath));
+    }
     // Print the graph header
     this->printGraphHeader();
 
@@ -282,26 +284,27 @@ void File::GraphDotExporter::print()
     this->printedAlgorithmsID.clear();
 
     // Print the algorithms header
-    this->printAlgorithmsSubGraph(this->algorithms);
+    this->printAlgorithmsSubGraph(algorithm);
 
     // Print each agent algorithms
     // If agent uses some vertices or edges, it will print them
     // Then if vertices and/or edges uses program agents it will print them, and so on...
-    for(const Algorithm::Algorithm& algorithm : this->algorithms){
-        for(const Algorithm::Agent& agent : algorithm.getManagerCst().getAgents()){
-            this->printAgent(agent);
-        }
+    for(const Algorithm::Agent& agent : algorithm.getManagerCst().getAgents()){
+        this->printAgent(agent);
     }
 
 
     // Print footer
-    this->printGraphFooter();
+    this->printGraphFooter(algorithm);
 
     // flush file
     fflush(pFile);
+
+    //  Close file
+    fclose(pFile);
 }
 
-void File::GraphDotExporter::printSubGraph(const Algorithm::Agent& agent)
+void File::GraphDotExporter::printSubGraph(const char* filePath, const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm)
 {
     // Print the graph header
     this->printGraphHeader();
@@ -311,11 +314,10 @@ void File::GraphDotExporter::printSubGraph(const Algorithm::Agent& agent)
     this->printedAgentID.clear();
     this->printedAlgorithmsID.clear();
 
-    for(const Algorithm::Algorithm& algorithm: this->algorithms){
-        if(algorithm.containsAgent(agent)){
-            std::vector<std::reference_wrapper<const Algorithm::Algorithm>> vect{algorithm};
-            this->printAlgorithmsSubGraph(vect);
-        }
+    if(algorithm.containsAgent(agent)){
+        this->printAlgorithmsSubGraph(algorithm);
+    } else {
+        throw std::runtime_error("File::GraphDotExporter::printSubGraph: Agent should belong to the specified algorithm");
     }
 
     // Print the agent given as parameter, its vertices and edges, and the potential agent programs associated to these vertices and edges.

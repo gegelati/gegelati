@@ -42,13 +42,16 @@
 #include <stdexcept>
 #include <string>
 
-#include "algorithm/algorithm.h"
 #include "evoGraph/abstractEngine.h"
 #include "evoGraph/action.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/graph.h"
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
+
+namespace Algorithm{
+    class Algorithm;
+}
 
 namespace File {
     /**
@@ -68,9 +71,6 @@ namespace File {
          * exported file.
          */
         std::string offset;
-
-        /// @brief vector of algorithms used. This is used to print the content of the programs when they are mutated by the algorithm.
-        std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithms;
 
         /// @brief vector of algorithms used, including subAlgorithms. This is used to print the content of the programs when they are mutated by the algorithm.
         std::map<uint64_t, std::reference_wrapper<const Algorithm::Algorithm>> mapAlgorithms;
@@ -189,7 +189,7 @@ namespace File {
         /**
          * \brief Prints algorithms node, showing what are the relations between the different algorithms.
          */
-        void printAlgorithmsSubGraph(const std::vector<std::reference_wrapper<const Algorithm::Algorithm>>& printAlgorithms);
+        void printAlgorithmsSubGraph(const Algorithm::Algorithm& algorithm);
 
         /**
          * \brief Prints footer content in the dot file.
@@ -197,7 +197,7 @@ namespace File {
          * This method prints finalization content that must be printed into the
          * dot file after all vertices and edges.
          */
-        void printGraphFooter();
+        void printGraphFooter(const Algorithm::Algorithm& algorithm);
 
       public:
         /**
@@ -205,21 +205,11 @@ namespace File {
          *
          * \param[in] filePath initial path to the file where the dot content
          * will be written.
-         * \param[in] graph const reference to the graph whose content will
-         * be exported in dot.
-         * \param[in] algorithms vector of algorithms used in the graph. This is
-         * used to print the content of the programs when they are mutated by
          * \throws std::runtime_error in case no file could be opened at the
          * given filePath.
          */
-        GraphDotExporter(const char* filePath, const EvoGraph::Graph& graph, std::vector<std::reference_wrapper<const Algorithm::Algorithm>> algorithms)
-            : EvoGraph::AbstractEngine(graph), pFile{NULL}, offset{""}, algorithms{algorithms}
-        {
-            if ((pFile = fopen(filePath, "w")) == NULL) {
-                throw std::runtime_error("Could not open file " +
-                                         std::string(filePath));
-            }
-        };
+        GraphDotExporter()
+            : EvoGraph::AbstractEngine(), pFile{NULL}, offset{""} {};
 
         /**
          * Disable copy construction.
@@ -239,57 +229,24 @@ namespace File {
             delete;
 
         /**
-         * Destructor for the exporter.
-         *
-         * Closes the file.
-         */
-        ~GraphDotExporter()
-        {
-            if (pFile != NULL) {
-                fclose(pFile);
-            }
-        }
-
-        /**
-         * \brief Set a new file for the exporter.
-         *
-         * \param[in] newFilePath new path to the file where the dot content
+         * \brief Print the content of an algorithm given when constructing the
+         * dotExporter into a dot file.
+         * \param[in] filePath initial path to the file where the dot content
          * will be written.
-         * \throws std::runtime_error in case no file could be opened at the
-         * given newFilePath.
+         * \param[in] algorithm the printed algorithm
          */
-        void setNewFilePath(const char* newFilePath)
-        {
-            //  Close previous file
-            fclose(pFile);
-
-            // open new one;
-            if ((pFile = fopen(newFilePath, "w")) == NULL) {
-                pFile = NULL;
-                throw std::runtime_error("Could not open file " +
-                                         std::string(newFilePath));
-            }
-        }
-
-        /**
-         * \brief Print the Graph given when constructing the
-         * GraphDotExporter into a dot file.
-         */
-        void print();
+        void print(const char* filePath, const Algorithm::Algorithm& algorithm);
 
         /**
          * \brief Print a sub-tree of the Graph given when constructing the
          * GraphDotExporter into a dot file.
          *
-         * Contrary to the print() method, this
-         * method only prints the agent stemming from the EvoGraph::Vertex passed as
-         * a parameter. Hence, only vertices and programs connected to this
-         * Vertex will be printed in the file, and all others will be
-         * ignored.
-         *
+         * \param[in] filePath initial path to the file where the dot content
+         * will be written.
          * \param[in] agent The agent printed
+         * \param[in] algorithm the algorithm the agent belongs too
          */
-        void printSubGraph(const Algorithm::Agent& agent);
+        void printSubGraph(const char* filePath, const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm);
     };
 }; // namespace File
 

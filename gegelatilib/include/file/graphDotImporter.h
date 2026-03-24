@@ -93,7 +93,7 @@ namespace File {
         EvoGraph::Graph& graph;
 
         /// @brief algorithm containing the agents.
-        std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms;
+        Algorithm::Algorithm& algorithm;
 
         /// @brief vector of algorithms used, including subAlgorithms. This is used to read the content of the programs of sub algorithms.
         std::map<uint64_t, std::reference_wrapper<Algorithm::Algorithm>> mapAlgorithms;
@@ -371,25 +371,15 @@ namespace File {
         /**
          * \brief Constructor for the importer.
          *
-         * \param[in] filePath initial path to the file where the dot content
-         * will be written.
          * \param[in] graphRef a Reference to the Graph to build from
          * the .dot file
-         * \param[in] algorithms algorithm containing the agents.
+         * \param[in] algorithm algorithm containing the agents.
          * \throws std::runtime_error in case no file could be
          * opened at the given filePath.
          */
-        GraphDotImporter(const char* filePath, EvoGraph::Graph& graphRef, std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms)
-            : graph{graphRef}, algorithms{algorithms}
-        {
-            std::cout<<filePath<<std::endl;
-            pFile.open(filePath);
-            if (!pFile.is_open()) {
-                throw std::runtime_error("Could not open file " +
-                                         std::string(filePath));
-            }
-            importGraph();
-        };
+        GraphDotImporter(EvoGraph::Graph& graphRef, Algorithm::Algorithm& algorithm)
+            : graph{graphRef}, algorithm{algorithm}
+        {};
 
         /**
          * \brief Maximum number of characters that can be read in a single
@@ -410,19 +400,11 @@ namespace File {
         }
 
         /**
-         * \brief Set a new file for the importer.
-         *
-         * \param[in] newFilePath new path to the file where the dot content
-         * will be written.
-         * \throws std::runtime_error in case no file could be opened at the
-         * given newFilePath.
-         */
-        void setNewFilePath(const char* newFilePath);
-
-        /**
          * \brief Creates a Graph from its description in a .dot file
+         * \param[in] filePath initial path to the file where the dot content
+         * will be written.
          */
-        void importGraph();
+        void importGraph(const char* filePath);
     };
 }; // namespace File
 

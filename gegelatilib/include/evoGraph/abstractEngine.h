@@ -48,11 +48,6 @@ namespace EvoGraph {
     {
 
       protected:
-        /**
-         * \brief Reference to the Graph whose content will be used to fill
-         * the maps.
-         */
-        const EvoGraph::Graph& tpg;
 
         /**
          * \brief Set of all program ID.
@@ -70,12 +65,9 @@ namespace EvoGraph {
 
         /**
          * \brief Constructor for the abstract engine.
-         *
-         * \param[in] tpg const reference to the graph whose content will be
-         * used to fill the maps of IDs  (vertex and program).
          */
 
-        AbstractEngine(const EvoGraph::Graph& tpg) : tpg{tpg}, nbActions{0} {};
+        AbstractEngine() : nbActions{0} {};
 
       public:
         /**

@@ -209,9 +209,7 @@ void File::GraphDotImporter::setMapAlgorithm()
     this->mapAlgorithms.clear();
     // Add all algorithms to the set, and recursively all their sub-algorithms, to be able to print the content of the programs when they are mutated by the algorithm.
     std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithmsToAdd;
-    for(Algorithm::Algorithm& algorithm : algorithms){
-        algorithmsToAdd.push_back(algorithm);
-    }
+    algorithmsToAdd.push_back(algorithm);
     while(!algorithmsToAdd.empty()){
         Algorithm::Algorithm& algorithm = algorithmsToAdd.back();
         algorithmsToAdd.pop_back();
@@ -356,13 +354,16 @@ void File::GraphDotImporter::readLinkAgentTeam(std::smatch& matches)
     }
 }
 
-void File::GraphDotImporter::importGraph()
+void File::GraphDotImporter::importGraph(const char* filePath)
 {
-    // clear every storing objects
-    for(Algorithm::Algorithm& algorithm: this->algorithms) {
-        algorithm.getManager().clearAgents(graph);
+    pFile.open(filePath);
+    if (!pFile.is_open()) {
+        throw std::runtime_error("Could not open file " +
+                                    std::string(filePath));
     }
-    this->graph.clear();
+
+    // clear every storing objects
+    algorithm.clearAlgorithm();
     this->readVertexID.clear();
     this->readEdgeID.clear();
     this->readAgentID.clear();
@@ -458,16 +459,4 @@ bool File::GraphDotImporter::readLineFromFile()
         return false;
     }
     return true;
-}
-
-void File::GraphDotImporter::setNewFilePath(const char* newFilePath)
-{
-    //  Close previous file
-    pFile.close();
-    // open new one;
-    pFile.open(newFilePath);
-    if (!pFile.is_open()) {
-        throw std::runtime_error("Could not open file " +
-                                 std::string(newFilePath));
-    }
 }

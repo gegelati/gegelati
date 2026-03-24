@@ -15,6 +15,7 @@
 #include "learn/learningParameters.h"
 #include "evoGraph/graph.h"
 #include "selector/selectorFactory.h"
+#include "file/graphDotExporter.h"
 
 #include "outputInfo.h"
 namespace Algorithm {
@@ -354,6 +355,38 @@ namespace Algorithm {
          * \param[in] vertex the vertex linked to the agent.
          */
         virtual void linkAgentVertex(const Agent& agent, const EvoGraph::Vertex& vertex);
+
+        /**
+         * \brief Export the corresponding C code of the algorithm.
+         *
+         * param[in] filename : filename of the file holding the main function
+         *                of the generated program.
+         *
+         * param[in] path to the folder in which the file are generated. If the
+         * folder does not exist.
+         */
+        // virtual void exportCodeGen(const std::string& filename,
+        //                    const std::string& path = "./");
+
+        /**
+         * \brief Export the corresponding dot file of the algorithm, and its sub algorithms
+         */
+        virtual void exportDotFile(const char* filePath);
+
+        /**
+         * \brief Export the corresponding dot file of the algorithm, and its sub algorithms
+         */
+        virtual void exportBestAgentDotFile(const char* filePath);
+
+        /**
+         * \brief Export the corresponding dot file of the algorithm, and its sub algorithms
+         */
+        virtual void exportSpecificAgentDotFile(const Agent& agent, const char* filePath);
+
+        /**
+         * \brief Import the corresponding file
+         */
+        virtual void importDotFile(const char* filePath);
 
     };
     /**

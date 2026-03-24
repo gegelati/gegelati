@@ -92,9 +92,6 @@ namespace Algorithm {
         {
         }
 
-        /// Default virtual destructor
-        virtual ~Job() = default;
-
         /**
          * \brief Getter of index.
          *

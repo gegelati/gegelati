@@ -261,6 +261,40 @@ void Algorithm::Algorithm::linkAgentVertex(const Agent& agent, const EvoGraph::V
     throw std::runtime_error("Algorithm::linkAgentVertex: This method should not be called without being override by the specific algorithm.");
 }
 
+void Algorithm::Algorithm::exportDotFile(const char* filePath)
+{
+    File::GraphDotExporter exporter;
+    exporter.print(filePath, *this);
+}
+
+void Algorithm::Algorithm::exportBestAgentDotFile(const char* filePath)
+{
+    const auto& pair = selector->getBestAgent();
+    if(pair.first) {
+        File::GraphDotExporter exporter;
+        exporter.printSubGraph(filePath, *pair.first, *this);
+    } else {
+        throw std::runtime_error("Algorithm::exportBestAgentDotFile: no best agent set.");
+    }
+}
+
+void Algorithm::Algorithm::exportSpecificAgentDotFile(const Agent& agent, const char* filePath)
+{
+    
+    if(this->containsAgent(agent)) {
+        File::GraphDotExporter exporter;
+        exporter.printSubGraph(filePath, agent, *this);
+    } else {
+        throw std::runtime_error("Algorithm::exportSpecificAgentDotFile: unknown agent.");
+    }
+}
+
+                            
+void Algorithm::Algorithm::importDotFile(const char* filePath)
+{
+    
+}
+
 
 bool Algorithm::operator<(const Algorithm& a, const Algorithm& b)
 {
