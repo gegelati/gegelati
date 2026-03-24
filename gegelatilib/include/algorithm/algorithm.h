@@ -15,7 +15,6 @@
 #include "learn/learningParameters.h"
 #include "evoGraph/graph.h"
 #include "selector/selectorFactory.h"
-#include "file/graphDotExporter.h"
 
 #include "outputInfo.h"
 namespace Algorithm {

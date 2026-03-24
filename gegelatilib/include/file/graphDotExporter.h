@@ -49,9 +49,7 @@
 #include "evoGraph/team.h"
 #include "evoGraph/vertex.h"
 
-namespace Algorithm{
-    class Algorithm;
-}
+#include "algorithm/algorithm.h"
 
 namespace File {
     /**

@@ -38,8 +38,6 @@
 
 const std::string File::GraphDotImporter::algorithmRegex(
     "ALGO([0-9]+)\\x20\\x5B.*label=\"([^\\.]+)\\.([0-9]+)\".*");
-const std::string File::GraphDotImporter::aggregatedAlgorithmLinkRegex(
-    "ALGO([0-9]+)\\x20->\\x20ALGO([0-9]+)\\x20\\[style=dashed.*");
 const std::string File::GraphDotImporter::subAlgorithmLinkRegex(
     "ALGO([0-9]+)\\x20->\\x20ALGO([0-9]+)");
 const std::string File::GraphDotImporter::endAlgorithmSubGraph(R"(^\s*\}\s*$)");
@@ -120,25 +118,6 @@ void File::GraphDotImporter::readAlgorithm(std::smatch matches)
     }
 }
 
-void File::GraphDotImporter::readAggregatedAlgorithmLink(std::smatch matches)
-{
-    uint64_t id_src = std::stoi(matches[1]);
-    uint64_t id_dest = std::stoi(matches[2]);
-
-    auto it_src = this->mapAlgorithms.find(id_src);
-    if(it_src == this->mapAlgorithms.end()){
-        throw std::runtime_error("GraphDotImporter::readAggregatedAlgorithmLink: source algorithm not found"); 
-    }
-
-    auto it_dest = this->mapAlgorithms.find(id_dest);
-    if(it_dest == this->mapAlgorithms.end()){
-        throw std::runtime_error("GraphDotImporter::readAggregatedAlgorithmLink: destination algorithm not found"); 
-    }
-
-    // Will throw if nothing is found
-    it_src->second.get().getAggregatedAlgorithm(id_dest);
-}
-
 void File::GraphDotImporter::readSubAlgorithmLink(std::smatch matches)
 {
     uint64_t id_src = std::stoi(matches[1]);
@@ -169,7 +148,6 @@ void File::GraphDotImporter::readAlgorithmGraphSubGraph()
     this->setMapAlgorithm();
 
     std::regex testAlgorithmRegex(this->algorithmRegex);
-    std::regex testAggregatedAlgorithmLinkRegex(this->aggregatedAlgorithmLinkRegex);
     std::regex testSubAlgorithmLinkRegex(this->subAlgorithmLinkRegex);
     std::regex testEndAlgorithmSubGraph(this->endAlgorithmSubGraph);
 
@@ -186,19 +164,12 @@ void File::GraphDotImporter::readAlgorithmGraphSubGraph()
 
         // check the line shape and parse it
         if (std::regex_search(this->lastLine, matches, testAlgorithmRegex)) {
-            std::cout<<"algo: "<< this->lastLine<<std::endl;
             this->readAlgorithm(matches);
-        } else if (std::regex_search(this->lastLine, matches, testAggregatedAlgorithmLinkRegex)) {
-            this->readAggregatedAlgorithmLink(matches);
-            std::cout<<"link aggr: "<< this->lastLine<<std::endl;
         } else if (std::regex_search(this->lastLine, matches, testSubAlgorithmLinkRegex)) {
-            std::cout<<"link sub: "<< this->lastLine<<std::endl;
             this->readSubAlgorithmLink(matches);
         } else if (std::regex_search(this->lastLine, matches, testEndAlgorithmSubGraph)) {
-            std::cout<<"end: "<< this->lastLine<<std::endl;
             read = false;
         } else {
-            std::cout<<"none: "<< this->lastLine<<std::endl;
         }
     }
 }
@@ -363,11 +334,10 @@ void File::GraphDotImporter::importGraph(const char* filePath)
     }
 
     // clear every storing objects
-    algorithm.clearAlgorithm();
+    algorithm.getManager().clearAgents(this->graph);
     this->readVertexID.clear();
     this->readEdgeID.clear();
     this->readAgentID.clear();
-
     // skip header
     int majorVersion = 0;
     int minorVersion = 0;
@@ -398,10 +368,8 @@ void File::GraphDotImporter::importGraph(const char* filePath)
                "Assuming it is compatible with the current importer version."
             << std::endl;
     }
-
     // force seek at the beginning of file.
     pFile.seekg(0);
-
     // Skip header
     this->dumpGraphHeader();
     // Read algorithm subGraph

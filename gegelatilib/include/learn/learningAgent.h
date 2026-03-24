@@ -349,8 +349,9 @@ namespace Learn {
          * Clears the Archive.
          *
          * \param[in] seed the seed given to the TPGMutator.
+         * \param[in] doGeneratePopulation boolean to indicate if population of the algorithms should be generated here.
          */
-        virtual void init(uint64_t seed = 0);
+        virtual void init(uint64_t seed = 0, bool doGeneratePopulation = true);
 
 
         /**

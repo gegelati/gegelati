@@ -112,7 +112,7 @@ RNG::RNG& Learn::LearningAgent::getRNG()
     return this->rng;
 }
 
-void Learn::LearningAgent::init(uint64_t seed)
+void Learn::LearningAgent::init(uint64_t seed, bool doGeneratePopulation)
 {
     // Initialize Randomness
     this->rng.setSeed(seed);
@@ -123,7 +123,9 @@ void Learn::LearningAgent::init(uint64_t seed)
 
     for(const auto& pair: algorithms){
         pair.second.get().initAlgorithm(this->rng, *this->learningEnvironment.getActions(), this->learningEnvironment.getDataSources(), this->graph);
-        pair.second.get().initPopulation(this->rng);
+        if(doGeneratePopulation) {
+            pair.second.get().initPopulation(this->rng);
+        }
     }
 }
 

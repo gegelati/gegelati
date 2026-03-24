@@ -39,7 +39,6 @@
 #include <inttypes.h>
 
 #include "data/constant.h"
-#include "algorithm/algorithm.h"
 #include "file/graphDotExporter.h"
 #include "util/timestamp.h"
 #include "data/demangle.h"
@@ -306,6 +305,10 @@ void File::GraphDotExporter::print(const char* filePath, const Algorithm::Algori
 
 void File::GraphDotExporter::printSubGraph(const char* filePath, const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm)
 {
+    if ((pFile = fopen(filePath, "w")) == NULL) {
+        throw std::runtime_error("Could not open file " +
+                                    std::string(filePath));
+    }
     // Print the graph header
     this->printGraphHeader();
 

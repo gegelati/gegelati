@@ -1,5 +1,7 @@
 
 #include "algorithm/algorithm.h"
+#include "file/graphDotExporter.h"
+#include "file/graphDotImporter.h"
 
 // Declaration of static agent ID Counter in local here because it creates
 // error in the .h file for MSVC compiler See:
@@ -195,7 +197,9 @@ void Algorithm::Algorithm::clearAlgorithm()
     for(const auto& subAlgorithm: subAlgorithms){
         subAlgorithm->clearAlgorithm();
     }
-    this->manager->clearAgents(*this->graph);
+    if(this->manager != nullptr) {
+        this->manager->clearAgents(*this->graph);
+    }
     this->mutator = nullptr;
     this->selector = nullptr;
     this->manager = nullptr;
@@ -272,7 +276,7 @@ void Algorithm::Algorithm::exportBestAgentDotFile(const char* filePath)
     const auto& pair = selector->getBestAgent();
     if(pair.first) {
         File::GraphDotExporter exporter;
-        exporter.printSubGraph(filePath, *pair.first, *this);
+        this->exportSpecificAgentDotFile(*pair.first, filePath);
     } else {
         throw std::runtime_error("Algorithm::exportBestAgentDotFile: no best agent set.");
     }
@@ -280,7 +284,6 @@ void Algorithm::Algorithm::exportBestAgentDotFile(const char* filePath)
 
 void Algorithm::Algorithm::exportSpecificAgentDotFile(const Agent& agent, const char* filePath)
 {
-    
     if(this->containsAgent(agent)) {
         File::GraphDotExporter exporter;
         exporter.printSubGraph(filePath, agent, *this);
@@ -292,7 +295,11 @@ void Algorithm::Algorithm::exportSpecificAgentDotFile(const Agent& agent, const 
                             
 void Algorithm::Algorithm::importDotFile(const char* filePath)
 {
-    
+    if(!this->init) {
+        throw std::runtime_error("Algorithm::importDotFile: Importing should be done only after initialisation is done. TODO CHANGE");
+    }
+    File::GraphDotImporter importer(*this->graph, *this);
+    importer.importGraph(filePath);
 }
 
 

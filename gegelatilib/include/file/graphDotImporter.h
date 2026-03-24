@@ -118,13 +118,6 @@ namespace File {
         static const std::string algorithmRegex;
 
         /**
-         * \brief Contains the regex to identify an aggregated algorithm link declaration
-         * 
-         * Should work with ALGO10 -> ALGO12 [style=dashed]
-         */
-        static const std::string aggregatedAlgorithmLinkRegex;
-
-        /**
          * \brief Contains the regex to identify a sub algorithm link declaration
          * 
          * Should work with ALGO10 -> ALGO12
@@ -297,11 +290,6 @@ namespace File {
          * \brief reads an algorithm and control its validity
          */
         void readAlgorithm(std::smatch matches);
-
-        /**
-         * \brief control that aggregated algorithm link exist
-         */
-        void readAggregatedAlgorithmLink(std::smatch matches);
 
         /**
          * \brief control that sub algorithm link exist
