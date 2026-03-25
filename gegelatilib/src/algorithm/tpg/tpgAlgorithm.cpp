@@ -249,7 +249,15 @@ void Algorithm::TPG::TPGAlgorithm::printCodeGenAgents(std::ofstream& fileMain, s
 
     if(this->outputs->sizeContinuous() > 0) {
         fileMain
-            << "\tdouble* programOutputs = (double*)malloc("<<this->outputs->sizeContinuous() + 1<<" * sizeof(double));\n";
+            << "\tdouble programOutputs["<<this->outputs->sizeContinuous()+1<<"] = {";
+        for(size_t idx = 0; idx < this->outputs->sizeContinuous() > 0; idx++) {
+            fileMain << "0";
+            if(idx < this->outputs->sizeContinuous() - 1) {
+                fileMain << ", ";
+            }
+        }
+        fileMain
+            << "};\n";
     }
     fileMain
         << "\t while(1) {\n"
@@ -271,29 +279,23 @@ void Algorithm::TPG::TPGAlgorithm::printCodeGenAgents(std::ofstream& fileMain, s
             }
             fileMain << "};\n";
 
-            fileMain << "\t\t\t\t" << programAlgo.getAlgorithmName() << programAlgo.getAlgorithmID() <<"_Program programs[" << nbEdge << "] = {"; 
-            for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
-                fileMain << programAlgo.getAlgorithmName() << programAlgo.getAlgorithmID() << "_" << edge.getProgram().getAgentID() << ", ";
-            }
 
             fileMain 
-                << "};\n"
                 << "\t\t\t\tdouble T" << vertex.getVertexID() << "Scores[" << nbEdge << "];\n"
-                << "\n"
-                << "\t\t\t\tfor(int idx = 0; idx < " << nbEdge << "; idx++) {\n";
-            // If continuous environment
-            if(this->outputs->sizeContinuous() == 0) {
-                fileMain 
-                    << "\t\t\t\t\tprograms[idx](&T" << vertex.getVertexID() << "Scores[idx]);\n"
-                    << "\t\t\t\t}\n"
-                    << "\n";
-            } else {
-                fileMain 
-                    << "\t\t\t\t\tprograms[idx](programOutputs);\n"
-                    << "\t\t\t\t\tT" << vertex.getVertexID() << "Scores[idx] = programOutputs[0];\n"
-                    << "\t\t\t\t}\n"
-                    << "\n";
+                << "\n";
 
+            size_t idx = 0;
+            for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
+                if(this->outputs->sizeContinuous() == 0) {
+                    fileMain 
+                        << "\t\t\t\t"<<programAlgo.getAlgorithmName() << programAlgo.getAlgorithmID() << "_" << edge.getProgram().getAgentID()<< "(&T" << vertex.getVertexID() << "Scores["<<idx<<"]);\n";
+                } else {
+
+                    fileMain 
+                        << "\t\t\t\t"<<programAlgo.getAlgorithmName() << programAlgo.getAlgorithmID() << "_" << edge.getProgram().getAgentID()<< "(&programOutputs);\n"
+                        << "\t\t\t\tT" << vertex.getVertexID() << "Scores["<<idx<<"] = programOutputs[0];\n";
+                }
+                idx ++;
             }
 
             fileMain
@@ -301,13 +303,26 @@ void Algorithm::TPG::TPGAlgorithm::printCodeGenAgents(std::ofstream& fileMain, s
                 << "\t\t\t\tcurrentVertex = next[best];\n\n";
 
             if(this->outputs->sizeContinuous() > 1) {
+
+                
+
                 fileMain    
-                    << "\t\t\t\tif(currentVertex == A0) {\n"
-                    << "\t\t\t\t\tprograms[best](programOutputs);\n"
-                    << "\t\t\t\t\tfor(int idx = 0; idx < " <<this->outputs->sizeContinuous() <<"; idx++) {\n"
-                    << "\t\t\t\t\t\toutputs[idx] = programOutputs[idx + 1];\n"
-                    << "\t\t\t\t\t}\n"
-                    << "\t\t\t\t\tfree(programOutputs);\n"
+                    << "\t\t\t\tif(currentVertex == A0) {\n" 
+                    << "\t\t\t\t\t" << programAlgo.getAlgorithmName() << programAlgo.getAlgorithmID() <<"_Program programs[" << nbEdge << "] = {"; 
+                for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
+                    fileMain << programAlgo.getAlgorithmName() << programAlgo.getAlgorithmID() << "_" << edge.getProgram().getAgentID() << ", ";
+                }
+                fileMain
+                    << "};\n"
+                    << "\t\t\t\t\tprograms[best](programOutputs);\n";
+                    
+
+
+                for(int idxAction = 0; idxAction < this->outputs->sizeContinuous(); idxAction++ ) {
+                    fileMain << "\t\t\t\t\toutputs["<<idxAction<<"] = programOutputs["<<idxAction + 1<<"];\n";
+                }
+                    
+                fileMain
                     << "\t\t\t\t\treturn;\n"
                     << "\t\t\t\t}\n";
             }

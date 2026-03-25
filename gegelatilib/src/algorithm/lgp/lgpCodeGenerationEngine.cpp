@@ -104,15 +104,11 @@ void Algorithm::LGP::LGPCodeGenerationEngine::generateProgram(
     fileMain << "#endif" << std::endl;
 #endif
 
-    if(this->outputs.size() == 1) {
-        fileMain << "\toutputs[0] = reg[0];\n}" << std::endl;
-    } else {
-        fileMain 
-            << "\tfor(int idx = 0; idx < " << this->outputs.size() << "; idx++) {\n"
-            << "\t\toutputs[idx] = reg[idx];\n"
-            << "\t}\n"
-            << "}"<<std::endl;
+    for(size_t idx = 0; idx < this->outputs.size(); idx ++ ){
+        fileMain << "\toutputs["<<idx<<"] = reg["<<idx<<"];\n";
     }
+    fileMain 
+        << "}"<<std::endl;
 }
 
 std::string Algorithm::LGP::LGPCodeGenerationEngine::completeFormat(

@@ -70,6 +70,7 @@
 #include <algorithm/lgp/lgpMutator.h>
 #include <algorithm/lgp/lgpLine.h>
 #include <algorithm/lgp/lgpLineMutator.h>
+#include <algorithm/lgp/lgpCodeGenerationEngine.h>
 #include <algorithm/lgp/lgpExecutionEngine.h>
 
 #include <algorithm/maple/mapleAgent.h>

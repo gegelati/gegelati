@@ -69,5 +69,4 @@ void Algorithm::Maple::MapleAlgorithm::printCodeGenAgents(std::ofstream& fileMai
             throw std::runtime_error("MapleAlgorithm::printCodeGenAgents: agent should be a maple agent");
         }
     }
-
 }
