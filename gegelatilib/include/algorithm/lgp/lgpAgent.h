@@ -47,6 +47,9 @@ namespace Algorithm::LGP {
             /// Number of outputs of the LGP
             const Output::OutputHandler& outputs;
 
+            /// Output indices
+            std::vector<size_t> outputIndices;
+
             /// Delete the default constructor.
             LGPAgent() = delete;
 
@@ -63,6 +66,9 @@ namespace Algorithm::LGP {
                 : Agent(algorithmID), environment{e}, constants{e.getParams().nbProgramConstant}, outputs{outputs}
             {
                 constants.resetData(); // force all constant to 0 at first.
+                for (size_t idx = 0; idx < outputs.size(); idx++ ){
+                    outputIndices.push_back(idx);
+                }
             };
 
             // Disable copy semantics: LGPAgent should never be copied.
@@ -199,6 +205,20 @@ namespace Algorithm::LGP {
              * \param[in] isIntron boolean to set the intron value of the line.
              */
             void setIntronValue(uint64_t index, bool isIntron);
+
+
+            /**
+             * \brief getter for outputIndices
+             */
+            const std::vector<size_t>& getOutputIndices() const;
+
+            /**
+             * \brief set a new output index at a specific location.
+             * 
+             * \param[in] newOutputIndex new output index set
+             * \param[in] location location of input at which the new index is set
+             */
+            void setOutputIndex(size_t newOutputIndex, size_t location);
 
             /**
              *  \brief get the constantHandler object of the LGP

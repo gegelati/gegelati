@@ -222,6 +222,14 @@ bool Algorithm::LGP::LGPMutator::mutateLGPAgent(const LGPAgent& agent, LGPManage
         alterRandomConstant(agent, manager, params, rng);
     }
 
+    if(false) {
+        for(size_t idx = 0; idx < manager.getOutputs().size(); idx++) {
+            if(rng.getDouble(0.0, 1.0) < 0) {//params.mutation.prog.pMutateOutputs) {
+                alterRandomOutputs(agent, manager, idx, rng);
+            }
+        }
+    }
+
     // Identify introns
     if (anyMutation) {
         manager.identifyIntrons(agent);
@@ -300,5 +308,12 @@ bool Algorithm::LGP::LGPMutator::alterRandomConstant(
     Data::Constant newConstant = {newConstantValue};
     manager.setConstantAt(agent, constant_idx, newConstant);
 
+    return true;
+}
+
+bool Algorithm::LGP::LGPMutator::alterRandomOutputs(const LGPAgent& agent, LGPManager& manager, size_t location,
+                                              RNG::RNG& rng)
+{
+    manager.setOutputIndex(agent, rng.getUnsignedInt64(0, agent.getEnvironment().getParams().nbRegisters - 1), location);
     return true;
 }

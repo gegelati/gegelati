@@ -35,33 +35,17 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "algorithm/lgp/lgpExecutionEngine.h"
+#include "algorithm/cgp/cgpExecutionEngine.h"
 
-void Algorithm::LGP::LGPExecutionEngine::executeCurrentLine()
-{
-    std::vector<Data::UntypedSharedPtr> operands;
-
-    // Get everything needed (may throw)
-    const LGPLine& line = this->getCurrentLine();
-    const Instructions::Instruction& instruction =
-        this->getCurrentInstruction();
-    this->fetchCurrentOperands(operands);
-
-    double result = instruction.execute(operands);
-
-    this->registers.setDataAt(typeid(double), line.getDestinationIndex(),
-                              result);
-}
-
-std::vector<double> Algorithm::LGP::LGPExecutionEngine::execute()
+std::vector<double> Algorithm::CGP::CGPExecutionEngine::execute()
 {
     // Reset registers and programCounter
     this->registers.resetData();
 
-
     iterateThroughtProgram(this->ignoreException);
 
-    const std::vector<size_t>& outputIndices = dynamic_cast<const LGPAgent&>(this->executedAgent->get()).getOutputIndices();
+    // Get the output of the corresponding output index
+    const std::vector<size_t>& outputIndices = dynamic_cast<const CGPAgent&>(this->executedAgent->get()).getOutputIndices();
     std::vector<double> result;
     for(size_t idx = 0; idx < this->outputs.size(); idx++){
         // cast to primitiveType<double> to enable cast to double.
@@ -77,9 +61,4 @@ std::vector<double> Algorithm::LGP::LGPExecutionEngine::execute()
         // TODO ACTIVATION FUNCTIONS
         return Utils::ActivationFunctions::scaleOutputValues(result, this->outputs, Utils::ActivationFunction::TANH);
     }
-}
-
-void Algorithm::LGP::LGPExecutionEngine::processLine()
-{
-    this->executeCurrentLine();
 }

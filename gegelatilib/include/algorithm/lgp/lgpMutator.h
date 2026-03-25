@@ -187,6 +187,18 @@ namespace Algorithm::LGP {
         bool alterRandomConstant(const LGPAgent& agent, LGPManager& manager,
                                  const Learn::LearningParameters& params,
                                  RNG::RNG& rng);
+
+        /**
+         * \brief change a random output
+         *
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] manager the manager to change the agents.
+         * \param[in] location location is the index of the output changed
+         * \param[in] rng Random Number Generator used in the mutation process.
+         * \return true if the lines where successfully swapped, false if the
+         *         Program has less than two lines.
+         */
+        bool alterRandomOutputs(const LGPAgent& agent, LGPManager& manager, size_t location, RNG::RNG& rng);
     };
 
 

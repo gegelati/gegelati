@@ -183,6 +183,17 @@ namespace Algorithm {
 
             
 
+
+            /**
+             * \brief Set a specific output index to an agent.
+             * 
+             * 
+             * \param[in] agent the Agent to empty.
+             * \param[in] newOutputIndex new output index set
+             * \param[in] location location of input at which the new index is set
+             */
+            void setOutputIndex(const LGPAgent& agent, size_t newOutputIndex, size_t location);
+
             /**
              * \brief Reads the content of the operands and puts it in the line
              * passed in parameter

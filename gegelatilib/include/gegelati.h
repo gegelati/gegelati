@@ -63,6 +63,12 @@
 #include <algorithm/atpg/atpgMutator.h>
 #include <algorithm/atpg/atpgExecutionEngine.h>
 
+#include <algorithm/cgp/cgpAlgorithm.h>
+#include <algorithm/cgp/cgpAgent.h>
+#include <algorithm/cgp/cgpManager.h>
+#include <algorithm/cgp/cgpMutator.h>
+#include <algorithm/cgp/cgpExecutionEngine.h>
+
 #include <algorithm/lgp/environment.h>
 #include <algorithm/lgp/lgpAlgorithm.h>
 #include <algorithm/lgp/lgpAgent.h>

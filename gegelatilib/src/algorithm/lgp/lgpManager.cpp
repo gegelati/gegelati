@@ -85,6 +85,12 @@ const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLine(const Agent& 
     }
 }
 
+
+void Algorithm::LGP::LGPManager::setOutputIndex(const LGPAgent& agent, size_t newOutputIndex, size_t location)
+{
+    this->getLGPAgentFromCst(agent).setOutputIndex(newOutputIndex, location);
+}
+
 Algorithm::LGP::LGPLine& Algorithm::LGP::LGPManager::getLineForMutation(const Agent& agent, size_t index)
 {
     return this->getLGPAgentFromCst(agent).getLineForMutation(index);
@@ -102,8 +108,8 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(const Agent& agent)
     uint64_t nbIntrons = 0;
     // Set of useful register
     std::set<uint64_t> usefulRegisters;
-    for(size_t idx = 0; idx < this->outputs.size(); idx++) {
-        usefulRegisters.insert(idx);
+    for(size_t index: lgpAgent.getOutputIndices()) {
+        usefulRegisters.insert(index);
     }
     
     for(int64_t idxLine = static_cast<int64_t>(lgpAgent.getNbLines()) - 1; idxLine >= 0; idxLine--){

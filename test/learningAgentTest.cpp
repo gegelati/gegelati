@@ -45,6 +45,7 @@
 
 #include "algorithm/tpg/tpgAlgorithm.h"
 #include "algorithm/lgp/lgpAlgorithm.h"
+#include "algorithm/cgp/cgpAlgorithm.h"
 #include "algorithm/maple/mapleAlgorithm.h"
 #include "algorithm/atpg/atpgAlgorithm.h"
 
@@ -471,6 +472,60 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
 
     auto lgp = new Algorithm::LGPAlgorithm(params, set);
     Learn::LearningAgent la(le, *lgp, params);
+
+    la.init();
+
+    bool alt = false;
+    la.train(alt, false);
+    EvoGraph::Graph& tpg = la.getGraph();
+
+    // Useful when determinism is changed
+    /*std::cout << tpg.getNbVertices() << " "
+             <<tpg.getNbRootVertices()<<" "
+             <<tpg.getEdges().size()<<" "
+             <<EvoGraph::Vertex::getVertexIDCounter()<<" "
+             <<EvoGraph::Edge::getEdgeIDCounter()<<" "
+             <<Algorithm::Agent::getAgentIDCounter()<<" "
+
+             <<la.getRNG().getUnsignedInt64(0, UINT64_MAX)<<std::endl;*/
+
+    // It is quite unlikely that two different TPGs after 20 generations
+    // end up with the same number of vertices, roots, edges and calls to
+    // the RNG without being identical.
+    ASSERT_EQ(tpg.getNbVertices(), 0)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(tpg.getNbRootVertices(), 0)
+        << "Graph does not have the expected determinist characteristics.";
+    ASSERT_EQ(tpg.getEdges().size(), 0)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(EvoGraph::Vertex::getVertexIDCounter(), 0)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(EvoGraph::Edge::getEdgeIDCounter(), 0)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(Algorithm::Agent::getAgentIDCounter(), 144)
+        << "Graph does not have the expected determinst characteristics.";
+    ASSERT_EQ(la.getRNG().getUnsignedInt64(0, UINT64_MAX), 1858364085364699167U)
+        << "Graph does not have the expected determinst characteristics.";
+}
+
+// Similar to previous test, but verifications of graphs properties are here to
+// ensure the result of the training is identical on all OSes and Compilers.
+TEST_F(LearningAgentTest, TrainCGPPortability)
+{
+    params.archiveSize = 50;
+    params.archivingProbability = 0.5;
+    params.maxNbActionsPerEval = 11;
+    params.nbIterationsPerPolicyEvaluation = 5;
+    params.selection.truncation.ratioDeletedRoots = 0.2;
+    params.nbGenerations = 20;
+    params.mutation.tpg.nbRoots = 30;
+    // A root may be evaluated at most for 3 generations
+    params.maxNbEvaluationPerPolicy =
+        params.nbIterationsPerPolicyEvaluation * 3;
+    params.nbThreads = 3;
+
+    auto cgp = new Algorithm::CGPAlgorithm(params, set);
+    Learn::LearningAgent la(le, *cgp, params);
 
     la.init();
 

@@ -122,3 +122,15 @@ const Data::Constant Algorithm::LGP::LGPAgent::getConstantAt(size_t index) const
             .getSharedPointer<const Data::Constant>();
     return *value;
 }
+
+const std::vector<size_t>& Algorithm::LGP::LGPAgent::getOutputIndices() const
+{
+    return this->outputIndices;
+}
+void Algorithm::LGP::LGPAgent::setOutputIndex(size_t newOutputIndex, size_t location)
+{
+    if(newOutputIndex >= this->environment.getParams().nbRegisters || location > this->outputIndices.size()) {
+        throw std::runtime_error("LGPAgent::setOutputIndex: invalid index range or location range");
+    }
+    this->outputIndices[location] = newOutputIndex;
+}

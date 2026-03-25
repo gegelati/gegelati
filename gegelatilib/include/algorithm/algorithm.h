@@ -34,7 +34,7 @@ namespace Algorithm {
         std::unique_ptr<AgentManager> manager;
 
         /// Parameters used by the algorithm
-        const Learn::LearningParameters& params;
+        Learn::LearningParameters params;
 
         /// Selector used for the selection process
         std::unique_ptr<Selector::Selector> selector;

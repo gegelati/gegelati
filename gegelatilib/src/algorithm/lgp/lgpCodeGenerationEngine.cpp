@@ -104,8 +104,10 @@ void Algorithm::LGP::LGPCodeGenerationEngine::generateProgram(
     fileMain << "#endif" << std::endl;
 #endif
 
+    
+    const std::vector<size_t>& outputIndices = dynamic_cast<const LGPAgent&>(this->executedAgent->get()).getOutputIndices();
     for(size_t idx = 0; idx < this->outputs.size(); idx ++ ){
-        fileMain << "\toutputs["<<idx<<"] = reg["<<idx<<"];\n";
+        fileMain << "\toutputs["<<idx<<"] = reg["<<outputIndices[idx]<<"];\n";
     }
     fileMain 
         << "}"<<std::endl;

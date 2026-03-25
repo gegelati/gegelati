@@ -250,9 +250,9 @@ void Algorithm::TPG::TPGAlgorithm::printCodeGenAgents(std::ofstream& fileMain, s
     if(this->outputs->sizeContinuous() > 0) {
         fileMain
             << "\tdouble programOutputs["<<this->outputs->sizeContinuous()+1<<"] = {";
-        for(size_t idx = 0; idx < this->outputs->sizeContinuous() > 0; idx++) {
+        for(size_t idx = 0; idx < this->outputs->sizeContinuous() + 1; idx++) {
             fileMain << "0";
-            if(idx < this->outputs->sizeContinuous() - 1) {
+            if(idx < this->outputs->sizeContinuous()) {
                 fileMain << ", ";
             }
         }
