@@ -267,7 +267,7 @@ void File::GraphDotExporter::printGraphFooter(const Algorithm::Algorithm& algori
     fprintf(pFile, "%s}\n", this->offset.c_str());
 }
 
-void File::GraphDotExporter::print(const char* filePath, const Algorithm::Algorithm& algorithm)
+void File::GraphDotExporter::exportAlgorithm(const char* filePath, const Algorithm::Algorithm& algorithm)
 {
 
     if ((pFile = fopen(filePath, "w")) == NULL) {
@@ -303,7 +303,7 @@ void File::GraphDotExporter::print(const char* filePath, const Algorithm::Algori
     fclose(pFile);
 }
 
-void File::GraphDotExporter::printSubGraph(const char* filePath, const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm)
+void File::GraphDotExporter::exportAgent(const char* filePath, const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm)
 {
     if ((pFile = fopen(filePath, "w")) == NULL) {
         throw std::runtime_error("Could not open file " +

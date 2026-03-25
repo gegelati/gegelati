@@ -2,6 +2,7 @@
 #include "algorithm/algorithm.h"
 #include "file/graphDotExporter.h"
 #include "file/graphDotImporter.h"
+#include "codeGen/codeGenerationExporter.h"
 
 // Declaration of static agent ID Counter in local here because it creates
 // error in the .h file for MSVC compiler See:
@@ -192,6 +193,16 @@ bool Algorithm::Algorithm::isInit() const{
     return init;
 }
 
+const Output::OutputHandler& Algorithm::Algorithm::getOutputs() const
+{
+    return *this->outputs;
+}
+
+const Learn::LearningParameters& Algorithm::Algorithm::getParams() const
+{
+    return this->params;
+}
+
 void Algorithm::Algorithm::clearAlgorithm()
 {
     for(const auto& subAlgorithm: subAlgorithms){
@@ -265,17 +276,78 @@ void Algorithm::Algorithm::linkAgentVertex(const Agent& agent, const EvoGraph::V
     throw std::runtime_error("Algorithm::linkAgentVertex: This method should not be called without being override by the specific algorithm.");
 }
 
+void Algorithm::Algorithm::exportBestAgentCodeGen(const std::string& filename, const std::string& path)
+{
+    const auto& pair = selector->getBestAgent();
+    if(pair.first) {
+        this->exportSpecificAgentCodeGen(*pair.first, filename, path);
+    } else {
+        throw std::runtime_error("Algorithm::exportBestAgentCodeGen: no best agent set.");
+    }
+}
+
+void Algorithm::Algorithm::exportSpecificAgentCodeGen(const Agent& agent, const std::string& filename, const std::string& path)
+{
+    if(this->containsAgent(agent)) {
+        std::string isDash = (filename == "") ? "_" : "";
+        std::string filenameAlgo = filename + isDash + this->algorithmName + std::to_string(this->algorithmID);
+
+        std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> subAgents;
+        std::vector<std::string> subAlgoNames;
+        for(const auto& subAlgo: this->subAlgorithms) {
+            subAgents.insert({subAlgo->getAlgorithmID(), {}});
+            subAlgoNames.push_back(filename + isDash + subAlgo->getAlgorithmName() + std::to_string(subAlgo->getAlgorithmID()));
+        }
+
+        CodeGen::CodeGenerationExporter codeGen(filenameAlgo, subAlgoNames, path);
+        codeGen.exportMainAgent(agent, *this, subAgents);
+
+        for (const auto& subAlgo : this->subAlgorithms) {
+            subAlgo->exportSpecificAgentsCodeGen(subAgents.at(subAlgo->getAlgorithmID()), filename, path);
+        }
+
+    } else {
+        throw std::runtime_error("Algorithm::exportSpecificAgentCodeGen: unknown agent.");
+    }
+}
+
+void Algorithm::Algorithm::exportSpecificAgentsCodeGen(std::set<std::reference_wrapper<const Agent>> agents,const std::string& filename, const std::string& path)
+{
+    for(const Agent& agent: agents) {
+        if(!this->containsAgent(agent)) {
+            throw std::runtime_error("Algorithm::exportSpecificAgentsCodeGen: unknown agent.");
+        }
+    }
+    std::string isDash = (filename == "") ? "_" : "";
+    std::string filenameAlgo = filename + isDash + this->algorithmName + std::to_string(this->algorithmID);
+
+    std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>> subAgents;
+    std::vector<std::string> subAlgoNames;
+    for(const auto& subAlgo: this->subAlgorithms) {
+        subAgents.insert({subAlgo->getAlgorithmID(), {}});
+            subAlgoNames.push_back(filename + isDash + subAlgo->getAlgorithmName() + std::to_string(subAlgo->getAlgorithmID()));
+    }
+
+    CodeGen::CodeGenerationExporter codeGen(filenameAlgo, subAlgoNames, path);
+    codeGen.exportAgents(agents, *this, subAgents);
+
+    for (const auto& subAlgo : this->subAlgorithms) {
+        subAlgo->exportSpecificAgentsCodeGen(subAgents.at(subAlgo->getAlgorithmID()), filename, path);
+    }
+}
+
+
+
 void Algorithm::Algorithm::exportDotFile(const char* filePath)
 {
     File::GraphDotExporter exporter;
-    exporter.print(filePath, *this);
+    exporter.exportAlgorithm(filePath, *this);
 }
 
 void Algorithm::Algorithm::exportBestAgentDotFile(const char* filePath)
 {
     const auto& pair = selector->getBestAgent();
     if(pair.first) {
-        File::GraphDotExporter exporter;
         this->exportSpecificAgentDotFile(*pair.first, filePath);
     } else {
         throw std::runtime_error("Algorithm::exportBestAgentDotFile: no best agent set.");
@@ -286,7 +358,7 @@ void Algorithm::Algorithm::exportSpecificAgentDotFile(const Agent& agent, const 
 {
     if(this->containsAgent(agent)) {
         File::GraphDotExporter exporter;
-        exporter.printSubGraph(filePath, agent, *this);
+        exporter.exportAgent(filePath, agent, *this);
     } else {
         throw std::runtime_error("Algorithm::exportSpecificAgentDotFile: unknown agent.");
     }

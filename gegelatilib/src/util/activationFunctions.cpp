@@ -64,7 +64,11 @@ std::vector<double> Utils::ActivationFunctions::scaleOutputValues(const std::vec
         if(function == ActivationFunction::SIGMOID){
             double sig = sigmoid(scaledValues[idx]);
             // Scale sigmoid output [0, 1] to [rangeMin, rangeMax]
-            scaledValues[idx] = sig * (rangeMax - rangeMin) + rangeMin;
+            if(rangeMin == 0) {
+                scaledValues[idx] = sig * rangeMax;
+            } else {
+                scaledValues[idx] = sig * (rangeMax - rangeMin) + rangeMin;
+            }
             
         } else if (function == ActivationFunction::TANH) {
             double t = tanh(scaledValues[idx]);

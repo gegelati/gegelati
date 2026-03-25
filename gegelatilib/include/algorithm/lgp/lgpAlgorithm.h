@@ -10,6 +10,7 @@
 #include "algorithm/lgp/lgpMutator.h"
 #include "algorithm/lgp/lgpAgent.h"
 #include "algorithm/lgp/lgpPolicyStats.h"
+#include "algorithm/lgp/lgpCodeGenerationEngine.h"
 namespace Algorithm::LGP {
 
     /**
@@ -98,6 +99,11 @@ namespace Algorithm::LGP {
              * Then it will get the next line to read the instruction
              */
             virtual const Agent& readAgent(std::smatch& matches) override;
+
+            /**
+             * \brief inherrit from algorithm class
+             */
+            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const;
         };
 }; // namespace LGP_Algorithm
 

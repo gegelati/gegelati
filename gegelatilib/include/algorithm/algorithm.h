@@ -245,6 +245,16 @@ namespace Algorithm {
         
 
         /**
+         * \brief get the outputs
+         */
+        virtual const Output::OutputHandler& getOutputs() const;
+
+        /**
+         * \brief get the params
+         */
+        virtual const Learn::LearningParameters& getParams() const;
+
+        /**
          * \brief Clear the algorithm of all its content.
          */
         virtual void clearAlgorithm();
@@ -357,15 +367,21 @@ namespace Algorithm {
 
         /**
          * \brief Export the corresponding C code of the algorithm.
-         *
-         * param[in] filename : filename of the file holding the main function
-         *                of the generated program.
-         *
-         * param[in] path to the folder in which the file are generated. If the
-         * folder does not exist.
          */
-        // virtual void exportCodeGen(const std::string& filename,
-        //                    const std::string& path = "./");
+        virtual void exportBestAgentCodeGen(const std::string& filename = "",
+                           const std::string& path = "./");
+
+        /**
+         * \brief Export the corresponding C code of the algorithm.
+         */
+        virtual void exportSpecificAgentCodeGen(const Agent& agent, const std::string& filename = "",
+                           const std::string& path = "./");
+
+        /**
+         * \brief Export the corresponding C code of the algorithm.
+         */
+        virtual void exportSpecificAgentsCodeGen(std::set<std::reference_wrapper<const Agent>> agents, const std::string& filename = "",
+                           const std::string& path = "./");
 
         /**
          * \brief Export the corresponding dot file of the algorithm, and its sub algorithms
@@ -381,6 +397,12 @@ namespace Algorithm {
          * \brief Export the corresponding dot file of the algorithm, and its sub algorithms
          */
         virtual void exportSpecificAgentDotFile(const Agent& agent, const char* filePath);
+
+
+        /**
+         * \brief specific exporting of an agent for the code generation
+         */
+        virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const = 0;
 
         /**
          * \brief Import the corresponding file

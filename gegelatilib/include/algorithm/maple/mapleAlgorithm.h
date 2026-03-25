@@ -45,9 +45,25 @@ namespace Algorithm::Maple {
 
             
             /**
+             * \brief Initialize the sub-algorithms of the algorithm
+             * 
+             * \param[in] rng deterministic random generator
+             * \param[in] outputs outputs needed for the algorithm.
+             * \param[in] dataSource input sources of the algorithm.
+             * \param[in] graph the EvoGraph::Graph used by the algorithm.
+             */
+            virtual void initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+            
+            /**
              * Copy and return a uniqure pointer of the algorithm
              */
             virtual std::unique_ptr<Algorithm> copy() const override;
+
+            
+            /**
+             * \brief inherrit from algorithm class
+             */
+            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const;
             
     };
 

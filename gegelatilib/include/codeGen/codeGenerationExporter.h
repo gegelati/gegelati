@@ -35,19 +35,20 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifdef CODE_GENERATION
+//#ifdef CODE_GENERATION
 
-#ifndef TPG_GENERATION_ENGINE_H
-#define TPG_GENERATION_ENGINE_H
+#ifndef CODE_GENERATION_ENGINE_H
+#define CODE_GENERATION_ENGINE_H
 #include <ios>
 #include <iostream>
 #include <string>
 
-#include "codeGen/programGenerationEngine.h"
 #include "evoGraph/abstractEngine.h"
 #include "evoGraph/edge.h"
 #include "evoGraph/graph.h"
 #include "evoGraph/team.h"
+#include "algorithm/agent.h"
+#include "algorithm/algorithm.h"
 
 namespace CodeGen {
     /**
@@ -66,45 +67,23 @@ namespace CodeGen {
      * The repo gegelati apps give some example of the template code completed
      * for TicTacToe, Pendulum and StickGame.
      */
-    class TPGGenerationEngine : public EvoGraph::AbstractEngine
+    class CodeGenerationExporter : public EvoGraph::AbstractEngine
     {
       protected:
-        /**
-         * String added at the end of the parameter filename to create the
-         * filename of the file with the programs of the Graph.
-         */
-        inline static const std::string filenameProg = "program";
 
-        /// File holding the functions in charge of iterating through the TPG.
+        /// File holding the functions in charge of iterating through the agent.
         std::ofstream fileMain;
-        /// header file for the function that iterates through the TPG.
+        /// File holding the header functions.
         std::ofstream fileMainH;
 
-        /**
-         * \brief ProgramGenerationEngine for generating Programs of edges.
-         *
-         * Keeping this ProgramGenerationEngine as an attribute avoids wasting
-         * time rebuilding a new one for each edge.
-         */
-        CodeGen::ProgramGenerationEngine progGenerationEngine;
 
         /**
-         * \brief function printing generic code in the main file.
+         * \brief function printing activation function code in the C files.
          *
-         * This function prints generic code to execute the TPG and manage the
-         * stack of visited edges.
+         * This function print the activation function in the param file of the
+         * Environment instance.
          */
-        virtual void initTpgFile() = 0;
-
-        /**
-         * \brief function printing generic code declaration in the main file
-         * header.
-         *
-         * This function print the the struct required to represent the TPG and
-         * the prototypes of the function to execute the TPG and manage the
-         * stack of visited edges.
-         */
-        virtual void initHeaderFile() = 0;
+        virtual void initActivationFunction(const Algorithm::Algorithm& algorithm);
 
       public:
         /**
@@ -113,14 +92,11 @@ namespace CodeGen {
          * \param[in] filename : filename of the file holding the main function
          *                of the generated program.
          *
-         * \param[in] tpg Environment in which the Program of the Graph will
-         *                be executed.
-         *
+         * \param[in] subAlgoNames names of the sub algorithms
          * \param[in] path to the folder in which the file are generated. If the
          * folder does not exist.
          */
-        TPGGenerationEngine(const std::string& filename,
-                            const EvoGraph::Graph& tpg,
+        CodeGenerationExporter(const std::string& filename, std::vector<std::string> subAlgoNames,
                             const std::string& path = "./");
 
         /**
@@ -128,59 +104,37 @@ namespace CodeGen {
          *
          * add endif at the end of the header and close both file.
          */
-        virtual ~TPGGenerationEngine();
+        virtual ~CodeGenerationExporter();
 
         /**
-         * \brief function that creates the C files required to execute the TPG
+         * \brief function that creates the C files required to execute the Agent
          * without gegelati.
          *
          * This function iterates trough the Graph and create the required C
          * code to represent each element of the Graph.
+         * 
+         * \param[in] agent the agent generated
+         * \param[in] algorithm the algorithm corresponding to the agent
+         * \param[in] subAgents map of the sub agents plot during the exporting of the agent
          */
-        virtual void generateGraph() = 0;
+        virtual void exportMainAgent(const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm, std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>>& subAgents);
 
-      protected:
+        
         /**
-         * \brief Method for generating the code for an edge of the graph.
+         * \brief function that creates the C files required to execute the Agent
+         * without gegelati.
          *
-         * This function generates the code that represents an edge.
-         * An edge of a team is represented by a struct with:
-         *  an integer,
-         *  a function pointer of type : double (*ptr_prog)() for the program of
-         * the edge
-         *  a a function pointer of type : void* (*ptr_vertex)(int*) to
-         * represent the destination of the edge
-         *
-         * \param[in] edge that must be generated.
+         * This function iterates trough the Graph and create the required C
+         * code to represent each element of the Graph.
+         * 
+         * \param[in] agents the agents generated
+         * \param[in] algorithm the algorithm corresponding to the agent
+         * \param[in] subAgents map of the sub agents plot during the exporting of the agent
          */
-        virtual void generateEdge(const EvoGraph::Edge& edge) = 0;
-
-        /**
-         * \brief Method for generating the code for a team of the graph.
-         *
-         * This method generates the C function that represents a team.
-         * Each function representing a team contains a static array of Edge
-         * and calls the function executeTeam(Edge*, int).
-         *
-         * \param[in] team const reference of the Team that must be
-         * generated.
-         */
-        virtual void generateTeam(const EvoGraph::Team& team) = 0;
-
-        /**
-         * \brief Method for generating a action of the graph.
-         *
-         * This method generates the C function that represents an action.
-         * The generated function return a NULL pointer and write the action in
-         * the pointer given as parameter.
-         *
-         * \param[in] action const reference of the Action that must be
-         * generated.
-         */
-        virtual void generateAction(const EvoGraph::Action& action) = 0;
+        virtual void exportAgents(std::set<std::reference_wrapper<const Algorithm::Agent>> agents, const Algorithm::Algorithm& algorithm, std::map<uint64_t, std::set<std::reference_wrapper<const Algorithm::Agent>>>& subAgents);
     };
 } // namespace CodeGen
 
 #endif // TPGGENERATIONENGINE_H
 
-#endif // CODE_GENERATION
+//#endif // CODE_GENERATION

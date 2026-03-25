@@ -139,6 +139,11 @@ namespace Algorithm::TPG {
             virtual const Agent& readAgent(std::smatch& matches) override;
 
             /**
+             * \brief inherrit from algorithm class
+             */
+            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const;
+
+            /**
              * \brief Link an agent to a corresponding vertex
              * 
              * \param[in] agent the agent linked to the vertex.

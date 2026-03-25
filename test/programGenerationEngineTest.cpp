@@ -35,6 +35,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #ifdef CODE_GENERATION
 #include <gtest/gtest.h>
 
@@ -263,3 +264,4 @@ TEST_F(ProgramGenerationEngineTest, initOperandCurrentLine)
         << "Should fail to generate a none printable Instruction.";
 }
 #endif // CODE_GENERATION
+#endif

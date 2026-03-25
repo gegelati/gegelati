@@ -9,6 +9,7 @@
 #include "algorithm/tpg/tpgAlgorithm.h"
 #include "algorithm/atpg/atpgManager.h"
 #include "algorithm/atpg/atpgMutator.h"
+#include "algorithm/tpg/tpgAgent.h"
 
 #include "learn/learningEnvironment.h"
 
@@ -92,6 +93,12 @@ namespace Algorithm::ATPG {
              * This policy stats contains a program sub policy stats
              */
             virtual std::shared_ptr<PolicyStats> createPolicyStats() const override;
+
+
+            /**
+             * \brief inherrit from algorithm class
+             */
+            virtual void printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const;
 
             /**
              * Copy and return a uniqure pointer of the algorithm

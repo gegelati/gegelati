@@ -35,24 +35,23 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifdef CODE_GENERATION
+//#ifdef CODE_GENERATION
 
-#ifndef PROGRAM_GENERATION_ENGINE_H
-#define PROGRAM_GENERATION_ENGINE_H
+#ifndef LGP_CODE_GENERATION_ENGINE_H
+#define LGP_CODE_GENERATION_ENGINE_H
 #include <fstream>
 
 #include "data/dataHandlerPrinter.h"
 #include "data/primitiveTypeArray.h"
 #include "instructions/instruction.h"
-#include "program/programEngine.h"
+#include "algorithm/lgp/lgpEngine.h"
 
-namespace CodeGen {
+namespace Algorithm::LGP {
     /**
-     * \brief Class in charge of generating inference C code for all the Program
-     * of a TPG.
+     * \brief Class in charge of generating inference C code for all some LGPs
      *
-     * This class generates header and C source code files that implements the
-     * Program of a TPG. Code can be generated only if all instructions of the
+     * This class generates header and C source code files that implements the LGP.
+     * Code can be generated only if all instructions of the
      * Program are printable, that is, if they inherits from
      * PrintableInstruction.
      *
@@ -60,9 +59,14 @@ namespace CodeGen {
      * necessary headers (like math.h) to compile the generated code without
      * modifying it.
      */
-    class ProgramGenerationEngine : public Program::ProgramEngine
+    class LGPCodeGenerationEngine : public LGP::LGPEngine
     {
       protected:
+        /// @brief main file c
+        std::ofstream& fileMain;
+        /// @brief main file h
+        std::ofstream& fileMainH;
+
         /// regex used to identify operand in the printTemplate of an
         /// Instruction.
         static const std::regex operand_regex;
@@ -89,13 +93,14 @@ namespace CodeGen {
         /// name of the temporary operand used in the TPG's programs.
         static const std::string nameOperandVariable;
 
-        /// The file in which programs will be added.
-        std::ofstream fileC;
-        /// The file in which prototypes of programs will be added.
-        std::ofstream fileH;
-
         ///  Utility class used to print data accesses in generated code.
         Data::DataHandlerPrinter dataPrinter;
+
+        /// Environment 
+        const Environment& env;
+
+        /// @brief  Algorithm name
+        std::string algorithmName;
 
       public:
         /// inherited from Program::ProgramEngine
@@ -108,64 +113,9 @@ namespace CodeGen {
          * (ProgramEngine) and the file "filename" is opened with the flag
          * std::ofstream::out to generate the program in the file and replace
          * any previous content.
-         *
-         * \param[in] filename a const reference used to generate the filename
-         * of the file that holds the programs of the TPG graph. The filename
-         * holding the programs of the TPG is : 'filename'_program.c
-         *
-         * \param[in] env a const reference to the Environment of the Graph
-         *
-         * \param[in] path a const reference to the path in which the file must
-         * be generated. By default, the file is generated in the current
-         * directory.
          */
-        ProgramGenerationEngine(const std::string& filename,
-                                const Environment& env,
-                                const std::string& path = "./")
-            : ProgramEngine(env), dataPrinter()
-        {
-            openFile(filename, path, env.getParams().nbProgramConstant);
-        }
-
-        /**
-         * \brief Constructor of the class
-         *
-         * The constructor initializes the member of the parent class
-         * (ProgramEngine) and the file "filename" is open with the flag
-         * std::ofstream::out to generate the program in the file.
-         *
-         * This constructor is useful to create a ProgramGeneration engine
-         *
-         * \param[in] filename a const reference used to generate the filename
-         * of the file that holds the programs of the TPG graph. The filename
-         * holding the programs of the TPG is : 'filename'_program.c
-         *
-         * \param[in] p const reference to a Program
-         *
-         * \param[in] path const reference to the path in which the file is
-         * generated
-         */
-        ProgramGenerationEngine(const std::string& filename,
-                                const Program::Program& p,
-                                const std::string& path = "./")
-            : ProgramEngine(p), dataPrinter()
-        {
-            openFile(filename, path,
-                     p.getEnvironment().getParams().nbProgramConstant);
-            setProgram(p);
-        }
-
-        /**
-         * \brief Destructor of the class
-         *
-         * Close both files and add endif at the end of the generated header.
-         */
-        ~ProgramGenerationEngine()
-        {
-            fileH << "#endif" << std::endl;
-            fileC.close();
-            fileH.close();
-        }
+        LGPCodeGenerationEngine(std::ofstream& fileMain, std::ofstream& fileMainH, const Environment& env, const Output::OutputHandler& outputs, uint64_t algorithmID, std::string algorithmName)
+            : LGPEngine(env, outputs, algorithmID), dataPrinter(), fileMain{fileMain}, fileMainH{fileMainH}, env{env}, algorithmName{algorithmName} {}
 
         /**
          * \brief Generate the current line of the program.
@@ -185,8 +135,6 @@ namespace CodeGen {
          * declaration of function of the program with ID=1 is double P1(int*
          * action)
          *
-         * \param[in] progID : unique identifier of the program used to generate
-         *            the name of the function in the C file.
          * \param[in] ignoreException When true, all exceptions thrown when
          *            fetching current instructions, operands are
          *            caught and the current program Line is simply ignored.
@@ -195,10 +143,7 @@ namespace CodeGen {
          *            for higher-level handling, thus stopping the program.
          *            Exception thrown by getCurrentLine are never ignored.
          */
-        void generateProgram(uint64_t progID,
-                             const bool ignoreException = false);
-
-      protected:
+        void generateProgram(const bool ignoreException = false);
         /**
          * \brief Set global variables in the file holding the programs.
          *
@@ -206,11 +151,10 @@ namespace CodeGen {
          * to access the data from the LearningEnvironment. This methot sets the
          * type of the global variable accordingly to the type of the data
          * sources of the Environment of the printed Program.
-         *
-         * \param[in] nbConstant size_t of the number of Data::Constant
-         * available for a Program.
          */
-        void initGlobalVar(size_t nbConstant);
+        void initGlobalVar();
+
+      protected:
 
         /**
          * \brief Generates the line of C code that implements the instruction
@@ -227,21 +171,6 @@ namespace CodeGen {
          */
         std::string completeFormat(
             const Instructions::Instruction& instruction) const;
-
-        /**
-         * \brief Function used to open the file that is generated.
-         *
-         * This is function is called in both constructor of the class. It open
-         * the source file and the header file. It also adds the include guards
-         * in the header.
-         *
-         * \param[in] filename const reference to the name of the file.
-         * \param[in] path const reference to the path of the file.
-         * \param[in] nbConstant number of constant used in the program of the
-         * TPG.
-         */
-        void openFile(const std::string& filename, const std::string& path,
-                      size_t nbConstant);
 
         /**
          * \brief Function called to generate the initialization of all operands
@@ -262,10 +191,13 @@ namespace CodeGen {
          * the generated program
          */
         std::string getNameSourceData(const uint64_t& idx);
+
+        /// @brief do nothing 
+        virtual std::vector<double> execute() { return {};}
     };
 
 } // namespace CodeGen
 
 #endif // PROGRAMGENERATIONENGINE_H
 
-#endif // CODE_GENERATION
+//#endif // CODE_GENERATION

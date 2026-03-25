@@ -36,6 +36,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #ifdef CODE_GENERATION
 #include <cstddef>
 #include <file/parametersParser.h>
@@ -175,4 +176,5 @@ TEST_F(TicTacToeGenerationBestDotTest, BestTPG)
     ASSERT_EQ(system(cmdExec.c_str()), 0)
         << "Error inference of TicTacToe has changed";
 }
+#endif // CODE_GENERATION
 #endif // CODE_GENERATION

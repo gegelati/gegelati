@@ -34,7 +34,13 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
 
     // Set the progExecutionEngine to the program
     this->actionProgramExecutionEngine->setExecutedAgent(currentVertex.get().getProgram());
+    this->actionValues = this->actionProgramExecutionEngine->execute();
 
-    // The action algorithm should already cast the action in the wanted range. 
-    return this->actionProgramExecutionEngine->execute();
+    if(this->outputs.sizeContinuous() == 0){
+        Output::convertContinuousToDiscreteOutputs(this->actionValues, this->outputs);
+        return this->actionValues;
+    } else {
+        /// TODO SET ACTIVATION FUNCTION
+        return Utils::ActivationFunctions::scaleOutputValues(this->actionValues, this->outputs, Utils::ActivationFunction::TANH);
+    }
 }

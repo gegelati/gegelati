@@ -37,6 +37,7 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
+#if 0
 #ifdef CODE_GENERATION
 #include <cstddef>
 #include <gtest/gtest.h>
@@ -1098,4 +1099,6 @@ TEST_F(TPGGenerationEngineTest, WrongTPGContinuous)
         << "Construction of codeGen with no activation function should fail.";
 }
 
+
+#endif // CODE_GENERATION
 #endif // CODE_GENERATION

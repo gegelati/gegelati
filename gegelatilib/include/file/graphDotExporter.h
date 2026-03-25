@@ -233,7 +233,7 @@ namespace File {
          * will be written.
          * \param[in] algorithm the printed algorithm
          */
-        void print(const char* filePath, const Algorithm::Algorithm& algorithm);
+        void exportAlgorithm(const char* filePath, const Algorithm::Algorithm& algorithm);
 
         /**
          * \brief Print a sub-tree of the Graph given when constructing the
@@ -244,7 +244,7 @@ namespace File {
          * \param[in] agent The agent printed
          * \param[in] algorithm the algorithm the agent belongs too
          */
-        void printSubGraph(const char* filePath, const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm);
+        void exportAgent(const char* filePath, const Algorithm::Agent& agent, const Algorithm::Algorithm& algorithm);
     };
 }; // namespace File
 

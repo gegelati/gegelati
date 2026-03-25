@@ -174,3 +174,161 @@ void Algorithm::TPG::TPGAlgorithm::linkAgentVertex(const Agent& agent, const Evo
 {
     dynamic_cast<TPGManager&>(*this->manager).setVertex(agent, vertex);
 }
+
+void Algorithm::TPG::TPGAlgorithm::printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const
+{
+    fileMain
+        << "int bestProgram_"<<this->algorithmName <<this->algorithmID <<"(double *results, int nb) {\n"
+        << "\tint bestProgram = 0;\n"
+        << "\tdouble bestScore = (isnan(results[0]))? -INFINITY : results[0];\n"
+        << "\tfor (int i = 1; i < nb; i++) {\n"
+        << "\t\tdouble challengerScore = (isnan(results[i]))? -INFINITY : "
+           "results[i];\n"
+        << "\t\tif (challengerScore >= bestScore) {\n"
+        << "\t\t\tbestProgram = i;\n"
+        << "\t\t\tbestScore = challengerScore;\n"
+        << "\t\t}\n"
+        << "\t}\n"
+        << "\treturn bestProgram;\n"
+        << "}\n"
+        << std::endl;
+
+    // set of all used vertex by the list of agents
+    std::set<std::reference_wrapper<const EvoGraph::Vertex>> printedVertices;
+    std::vector<std::reference_wrapper<const EvoGraph::Vertex>> verticesToVisit;
+    for(const Agent& agent: agents) {
+        if(auto tpgAgent = dynamic_cast<const TPGAgent*>(&agent)) {
+            printedVertices.insert(tpgAgent->getVertex());
+            verticesToVisit.push_back(tpgAgent->getVertex());
+        } else {
+            throw std::runtime_error("TPGAlgorithm::printCodeGenAgents: agent should be a tpg agent");
+        }
+    }
+
+    while(verticesToVisit.size() > 0) {
+        const EvoGraph::Vertex& vertex = verticesToVisit.front();
+        verticesToVisit.erase(verticesToVisit.begin());
+
+        for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
+            if(printedVertices.find(edge.getDestination()) == printedVertices.end()) {
+                printedVertices.insert(edge.getDestination());
+                verticesToVisit.push_back(edge.getDestination());
+            }
+            subAgents.at(this->programAlgorithmID).insert(edge.getProgram());
+        }
+    }
+
+    fileMain << "enum vertices {";
+    for(const EvoGraph::Vertex& vertex: printedVertices) {
+        if(dynamic_cast<const EvoGraph::Team*>(&vertex)) {
+            fileMain << "T";
+        } else {
+            fileMain << "A";
+        }
+        fileMain << vertex.getVertexID() <<", ";
+    }
+    fileMain << "};"<<std::endl;
+
+    const Algorithm& programAlgo = this->cGetSubAlgorithm(this->programAlgorithmID);
+    fileMainH << "typedef void (* "<< programAlgo.getAlgorithmName() << programAlgo.getAlgorithmID() <<"_Program)(double*);\n";
+
+
+    for(const Agent& agent: agents) {
+        const TPGAgent& tpgAgent = dynamic_cast<const TPGAgent&>(agent);
+        fileMain 
+            << "void " << this->algorithmName << this->algorithmID << "_" << agent.getAgentID() << "(double* outputs) {\n"
+            << "\tswitch_"<< this->algorithmName << this->algorithmID <<"(T" << tpgAgent.getVertex().getVertexID()<<", outputs);\n"
+            << "}\n"
+            << std::endl;
+    }
+
+
+
+    fileMain 
+        << "\nvoid switch_"<< this->algorithmName << this->algorithmID << "(enum vertices currentVertex, double* outputs) {\n";
+
+    if(this->outputs->sizeContinuous() > 0) {
+        fileMain
+            << "\tdouble* programOutputs = (double*)malloc("<<this->outputs->sizeContinuous() + 1<<" * sizeof(double));\n";
+    }
+    fileMain
+        << "\t while(1) {\n"
+        << "\t\tswitch (currentVertex) {\n";
+        
+    for(const EvoGraph::Vertex& vertex: printedVertices) {
+        if(dynamic_cast<const EvoGraph::Team*>(&vertex)) {
+
+            size_t nbEdge = vertex.getOutgoingEdges().size();
+
+            fileMain << "\t\t\tcase T" << vertex.getVertexID() <<": {\n";
+            fileMain << "\t\t\t\tconst enum vertices next[" << nbEdge << "] = {";
+            for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
+                if(dynamic_cast<const EvoGraph::Team*>(&edge.getDestination())) {
+                    fileMain <<"T"<<edge.getDestination().getVertexID() <<", ";
+                } else {
+                    fileMain <<"A"<<edge.getDestination().getVertexID() <<", ";
+                }
+            }
+            fileMain << "};\n";
+
+            fileMain << "\t\t\t\t" << programAlgo.getAlgorithmName() << programAlgo.getAlgorithmID() <<"_Program programs[" << nbEdge << "] = {"; 
+            for(const EvoGraph::Edge& edge: vertex.getOutgoingEdges()) {
+                fileMain << programAlgo.getAlgorithmName() << programAlgo.getAlgorithmID() << "_" << edge.getProgram().getAgentID() << ", ";
+            }
+
+            fileMain 
+                << "};\n"
+                << "\t\t\t\tdouble T" << vertex.getVertexID() << "Scores[" << nbEdge << "];\n"
+                << "\n"
+                << "\t\t\t\tfor(int idx = 0; idx < " << nbEdge << "; idx++) {\n";
+            // If continuous environment
+            if(this->outputs->sizeContinuous() == 0) {
+                fileMain 
+                    << "\t\t\t\t\tprograms[idx](&T" << vertex.getVertexID() << "Scores[idx]);\n"
+                    << "\t\t\t\t}\n"
+                    << "\n";
+            } else {
+                fileMain 
+                    << "\t\t\t\t\tprograms[idx](programOutputs);\n"
+                    << "\t\t\t\t\tT" << vertex.getVertexID() << "Scores[idx] = programOutputs[0];\n"
+                    << "\t\t\t\t}\n"
+                    << "\n";
+
+            }
+
+            fileMain
+                << "\t\t\t\tint best = bestProgram_" << this->algorithmName <<this->algorithmID << "(T" << vertex.getVertexID() << "Scores, " << nbEdge <<");\n"
+                << "\t\t\t\tcurrentVertex = next[best];\n\n";
+
+            if(this->outputs->sizeContinuous() > 1) {
+                fileMain    
+                    << "\t\t\t\tif(currentVertex == A0) {\n"
+                    << "\t\t\t\t\tprograms[best](programOutputs);\n"
+                    << "\t\t\t\t\tfor(int idx = 0; idx < " <<this->outputs->sizeContinuous() <<"; idx++) {\n"
+                    << "\t\t\t\t\t\toutputs[idx] = programOutputs[idx + 1];\n"
+                    << "\t\t\t\t\t}\n"
+                    << "\t\t\t\t\tfree(programOutputs);\n"
+                    << "\t\t\t\t\treturn;\n"
+                    << "\t\t\t\t}\n";
+            }
+
+            fileMain
+                << "\t\t\t\tbreak;\n"
+                << "\t\t\t}\n";
+
+        // If discrete environment
+        } else if(this->outputs->sizeDiscrete() > 0) {
+
+            fileMain 
+                << "\t\t\tcase A" << vertex.getVertexID() <<": {\n"
+                << "\t\t\t\toutputs[0] = " << dynamic_cast<const EvoGraph::Action&>(vertex).getActionID() << ";\n"
+                << "\t\t\t\treturn;\n"
+                << "\t\t\t}\n";
+        }
+    }
+
+    fileMain 
+        << "\t\t}\n"
+        << "\t}\n"
+        << "}"<<std::endl;
+}

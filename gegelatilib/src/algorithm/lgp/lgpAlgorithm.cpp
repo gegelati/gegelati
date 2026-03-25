@@ -127,3 +127,15 @@ const Algorithm::Agent& Algorithm::LGP::LGPAlgorithm::readAgent(std::smatch& mat
     lgpManager.readLines(newMatches[4], agent);
     return agent;
 }
+
+void Algorithm::LGP::LGPAlgorithm::printCodeGenAgents(std::ofstream& fileMain, std::ofstream& fileMainH, const std::set<std::reference_wrapper<const Agent>>& agents, std::map<uint64_t, std::set<std::reference_wrapper<const Agent>>>& subAgents) const
+{
+    LGPCodeGenerationEngine engine(fileMain, fileMainH, *this->env, *this->outputs, this->algorithmID, this->algorithmName);
+
+    engine.initGlobalVar();
+
+    for(const Agent& agent: agents) {
+        engine.setExecutedAgent(agent);
+        engine.generateProgram();
+    }
+}
