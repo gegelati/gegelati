@@ -136,7 +136,7 @@ namespace Algorithm::LGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          *
          */
-        void insertRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
+        virtual void insertRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
 
         /**
          * \brief Swap two randomly selected instructions within the given

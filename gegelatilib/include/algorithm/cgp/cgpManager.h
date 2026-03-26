@@ -4,7 +4,6 @@
 
 #include "algorithm/lgp/lgpManager.h"
 #include "algorithm/cgp/cgpAgent.h"
-#include "algorithm/cgp/cgpExecutionEngine.h"
 
 
 namespace Algorithm {
@@ -66,11 +65,6 @@ namespace Algorithm {
              * \return a shared pointer to the created Agent.
              */
             virtual void emptyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
-
-            /**
-             * \brief Create a new ExecutionEngine for this Algorithm.
-             */
-            virtual std::unique_ptr<ExecutionEngine> createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources = {}, bool isTraining = false) const override;
 
         };
     } // namespace CGP

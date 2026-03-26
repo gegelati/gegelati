@@ -7,9 +7,8 @@ bool Algorithm::CGP::CGPMutator::isConfigurationValid(const Learn::LearningParam
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("CGPMutator::initRandomPopulation: CGP does not support mixed discrete and continuous outputs.");
     } else if (outputs.sizeContinuous() != 0){
-        if(outputs.size() > params.nbRegisters){
-            throw std::runtime_error("CGPMutator::initRandomPopulation: Number of continuous outputs exceeds the number of registers.");
-        }
+
+        
     } else if (outputs.sizeDiscrete() != 0){
         if(outputs.size() > params.nbRegisters){
             throw std::runtime_error("CGPMutator::initRandomPopulation: Number of discrete outputs exceeds the number of registers.");
@@ -48,8 +47,7 @@ void Algorithm::CGP::CGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
     }
 
     // Select the number of line randomly
-    const uint64_t nbLine = rng.getUnsignedInt64(
-        params.mutation.prog.initMinProgramSize, params.mutation.prog.initMaxProgramSize);
+    const uint64_t nbLine = this->sizeLayer * this->nbLayer;
     // Insert them
     while (cgpAgent.getNbLines() < nbLine) {
         this->insertRandomLine(cgpAgent, cgpManager, rng);
@@ -57,6 +55,16 @@ void Algorithm::CGP::CGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
 
     // Identify Introns
     cgpManager.identifyIntrons(agent);
+}
+
+
+void Algorithm::CGP::CGPMutator::insertRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager,  RNG::RNG& rng)
+{
+    uint64_t lineIndex = agent.getNbLines();
+    manager.addNewLine(agent, lineIndex);
+    
+    size_t maxIndex = sizeLayer * (lineIndex / sizeLayer);
+    this->cgpLineMutator.initRandomCorrectLine(manager.getLineForMutation(agent, lineIndex), lineIndex, maxIndex, rng);
 }
 
 void Algorithm::CGP::CGPMutator::crossoverAgents(
@@ -120,6 +128,8 @@ bool Algorithm::CGP::CGPMutator::alterRandomLine(const CGPAgent& agent, CGPManag
     }
     // Select a random index.
     const uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines() - 1);
-    this->lineMutator.alterCorrectLine(manager.getLineForMutation(agent, lineIndex), rng); // specified accessible registers
+    
+    size_t maxIndex = sizeLayer * (lineIndex / sizeLayer);
+    this->cgpLineMutator.alterCorrectLine(manager.getLineForMutation(agent, lineIndex), maxIndex, rng); // specified accessible registers
     return true;
 }

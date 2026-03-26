@@ -41,14 +41,3 @@ void Algorithm::CGP::CGPManager::emptyAgent(const Agent& agent, EvoGraph::Graph&
         cgpAgent.removeLine(0);
     }
 }
-
-std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::CGP::CGPManager::createExecutionEngine(std::vector<std::reference_wrapper<const Data::DataHandler>> dataSources, bool isTraining) const
-{
-    if(dataSources.empty()) {
-        dataSources = this->env.getDataSources();
-    }
-    std::unique_ptr<const Environment> privateEnv =
-        std::make_unique<const Environment>(this->env.getInstructionSet(), this->env.getParams(),
-                                            dataSources, this->env.getNbContinuousActions());
-    return std::make_unique<CGPExecutionEngine>(*privateEnv, this->outputs, this->algorithmID, isTraining);
-}

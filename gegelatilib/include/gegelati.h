@@ -67,7 +67,6 @@
 #include <algorithm/cgp/cgpAgent.h>
 #include <algorithm/cgp/cgpManager.h>
 #include <algorithm/cgp/cgpMutator.h>
-#include <algorithm/cgp/cgpExecutionEngine.h>
 
 #include <algorithm/lgp/environment.h>
 #include <algorithm/lgp/lgpAlgorithm.h>

@@ -8,6 +8,7 @@
 #include "algorithm/lgp/lgpMutator.h"
 #include "algorithm/cgp/cgpAgent.h"
 #include "algorithm/cgp/cgpManager.h"
+#include "algorithm/cgp/cgpLineMutator.h"
 
 namespace Algorithm::CGP {
 
@@ -18,6 +19,16 @@ namespace Algorithm::CGP {
     {
     protected:
 
+        
+        /// CGPLineMutator used for mutating lines.
+        CGPLineMutator cgpLineMutator;
+
+        /// @brief Szie of a layer of ndoes
+        size_t sizeLayer = 5;
+
+        /// @brief number of layers
+        size_t nbLayer = 3;
+
     public:
 
         /**
@@ -26,7 +37,7 @@ namespace Algorithm::CGP {
          * \param[in] selector Reference to the current selector used by the algorithm.
          * \param[in] algorithmID id of the algorithm used.
          */
-        CGPMutator(const Selector::Selector& selector, uint64_t algorithmID): LGPMutator(selector, algorithmID) {};
+        CGPMutator(const Selector::Selector& selector, uint64_t algorithmID): LGPMutator(selector, algorithmID), cgpLineMutator() {};
 
 
         /**
@@ -50,6 +61,12 @@ namespace Algorithm::CGP {
          */
         virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
         
+
+        /**
+         * \brief Inherrit from LGP mutator
+         */
+        virtual void insertRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, RNG::RNG& rng);
+
         /**
          * \brief mutate a specific agent of an algorithm within a population
          * 
