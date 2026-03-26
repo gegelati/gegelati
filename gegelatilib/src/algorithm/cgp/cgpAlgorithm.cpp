@@ -7,12 +7,6 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::CGP::CGPAlgorithm::copy() const
 {
     return std::make_unique<CGPAlgorithm>(this->params, this->iSet, this->algorithmName);
 }
-
-void Algorithm::CGP::CGPAlgorithm::initManager()
-{
-    this->manager = std::make_unique<CGP::CGPManager>(*this->env, *this->outputs, this->algorithmID);
-}
-
 void Algorithm::CGP::CGPAlgorithm::initMutator()
 {
     this->mutator = std::make_unique<CGP::CGPMutator>(*this->selector, this->algorithmID);

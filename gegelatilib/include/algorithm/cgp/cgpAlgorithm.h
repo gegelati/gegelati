@@ -8,9 +8,7 @@
 #include "algorithm/lgp/environment.h"
 
 #include "algorithm/lgp/lgpAlgorithm.h"
-#include "algorithm/cgp/cgpManager.h"
 #include "algorithm/cgp/cgpMutator.h"
-#include "algorithm/cgp/cgpAgent.h"
 //#include "algorithm/cgp/lgpPolicyStats.h"
 //#include "algorithm/cgp/lgpCodeGenerationEngine.h"
 namespace Algorithm::CGP {
@@ -32,13 +30,6 @@ namespace Algorithm::CGP {
              */
             CGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet, std::string algorithmName = "CGP", std::string algorithmColor = "#98a02c")
                 : LGP::LGPAlgorithm(params, iSet, algorithmName, algorithmColor) {};
-
-            /**
-             * \brief Initialize the managerof the algorithm
-             * 
-             * \param[in] outputs outputs needed for the algorithm.
-             */
-            virtual void initManager() override;
 
             /**
              * \brief Initialize the mutator of the algorithm

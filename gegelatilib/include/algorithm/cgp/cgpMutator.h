@@ -6,8 +6,6 @@
 #include <numeric>
 
 #include "algorithm/lgp/lgpMutator.h"
-#include "algorithm/cgp/cgpAgent.h"
-#include "algorithm/cgp/cgpManager.h"
 #include "algorithm/cgp/cgpLineMutator.h"
 
 namespace Algorithm::CGP {
@@ -65,7 +63,7 @@ namespace Algorithm::CGP {
         /**
          * \brief Inherrit from LGP mutator
          */
-        virtual void insertRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, RNG::RNG& rng);
+        virtual void insertRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, RNG::RNG& rng) override;
 
         /**
          * \brief mutate a specific agent of an algorithm within a population
@@ -82,20 +80,6 @@ namespace Algorithm::CGP {
         ) override;
 
         /**
-         * \brief mutate a specific agent of an algorithm within a population
-         * 
-         * \param[in,out] agent the Agent to mutate.
-         * \param[in,out] graph the graph to mutate.
-         * \param[in] manager the manager to change the agents.
-         * \param[in] newSubAgents vector of new agents of sub algorithm created while mutating the agent
-         * \param[in] params Probability parameters for the mutation.
-         * \param[in] rng Random Number Generator used in the mutation process.
-         */
-        virtual void mutateAgent(
-            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
-        ) override;
-
-        /**
          * \brief mutate a specific CGPagent of an algorithm within a population
          * 
          * \param[in,out] agent the Agent to mutate.
@@ -103,9 +87,8 @@ namespace Algorithm::CGP {
          * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual bool mutateCGPAgent(
-            const CGPAgent& agent, CGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng
-        );
+        virtual bool mutateLGPAgent(
+            const LGP::LGPAgent& agent, LGP::LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief Alter a randomly selected Line in a given Program.
@@ -121,7 +104,7 @@ namespace Algorithm::CGP {
          * \return true if a line was successfully altered, false if the
          *         Program has less than one line.
          */
-        bool alterRandomLine(const CGPAgent& agent, CGPManager& manager, RNG::RNG& rng);
+        virtual bool alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, RNG::RNG& rng) override;
 
     };
 

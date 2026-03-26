@@ -120,7 +120,7 @@ namespace Algorithm::LGP {
          * \return true if a line could be added, false otherwise.
          *
          */
-        bool deleteRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
+        virtual bool deleteRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
 
         /**
          * \brief Insert a new Line at a randomly selected position within the
@@ -152,7 +152,7 @@ namespace Algorithm::LGP {
          * \return true if the lines where successfully swapped, false if the
          *         Program has less than two lines.
          */
-        bool swapRandomLines(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
+        virtual bool swapRandomLines(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
 
         /**
          * \brief Alter a randomly selected Line in a given Program.
@@ -168,7 +168,7 @@ namespace Algorithm::LGP {
          * \return true if a line was successfully altered, false if the
          *         Program has less than one line.
          */
-        bool alterRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
+        virtual bool alterRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
 
         /**
          * \brief Alter a program's constant.
@@ -184,7 +184,7 @@ namespace Algorithm::LGP {
          * \return true if a constant was successfully altered, false if the
          *         Program has less than one line.
          */
-        bool alterRandomConstant(const LGPAgent& agent, LGPManager& manager,
+        virtual bool alterRandomConstant(const LGPAgent& agent, LGPManager& manager,
                                  const Learn::LearningParameters& params,
                                  RNG::RNG& rng);
 
@@ -198,7 +198,7 @@ namespace Algorithm::LGP {
          * \return true if the lines where successfully swapped, false if the
          *         Program has less than two lines.
          */
-        bool alterRandomOutputs(const LGPAgent& agent, LGPManager& manager, size_t location, RNG::RNG& rng);
+        virtual bool alterRandomOutputs(const LGPAgent& agent, LGPManager& manager, size_t location, RNG::RNG& rng);
     };
 
 

@@ -28,35 +28,34 @@ void Algorithm::CGP::CGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
 
     manager.emptyAgent(agent, graph);
 
-    CGPManager& cgpManager = dynamic_cast<CGPManager&>(manager);
-    if(&cgpManager == nullptr){
-        throw std::invalid_argument("CGPMutator::initRandomAgent: the given manager is not a CGPManager.");
+    LGP::LGPManager& lgpManager = dynamic_cast<LGP::LGPManager&>(manager);
+    if(&lgpManager == nullptr){
+        throw std::invalid_argument("CGPMutator::initRandomAgent: the given manager is not a LGPManager.");
     }
 
-    const CGPAgent& cgpAgent = dynamic_cast<const CGPAgent&>(agent);
-    if(&cgpAgent == nullptr){
+    const LGP::LGPAgent& lgpAgent = dynamic_cast<const LGP::LGPAgent&>(agent);
+    if(&lgpAgent == nullptr){
         throw std::invalid_argument("CGPMutator::initRandomAgent: the created agent is not a CGPAgent.");
     }
 
     // insert random constants in the program
     Data::Constant c_value;
-    for (int i = 0; i < cgpAgent.getEnvironment().getParams().nbProgramConstant; i++) {
+    for (int i = 0; i < lgpAgent.getEnvironment().getParams().nbProgramConstant; i++) {
         c_value = {rng.getDouble(params.mutation.prog.minConstValue,
                                  params.mutation.prog.maxConstValue)};
-        cgpManager.setConstantAt(agent, i, c_value);
+        lgpManager.setConstantAt(agent, i, c_value);
     }
 
     // Select the number of line randomly
     const uint64_t nbLine = this->sizeLayer * this->nbLayer;
     // Insert them
-    while (cgpAgent.getNbLines() < nbLine) {
-        this->insertRandomLine(cgpAgent, cgpManager, rng);
+    while (lgpAgent.getNbLines() < nbLine) {
+        this->insertRandomLine(lgpAgent, lgpManager, rng);
     }
 
     // Identify Introns
-    cgpManager.identifyIntrons(agent);
+    lgpManager.identifyIntrons(agent);
 }
-
 
 void Algorithm::CGP::CGPMutator::insertRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager,  RNG::RNG& rng)
 {
@@ -75,24 +74,7 @@ void Algorithm::CGP::CGPMutator::crossoverAgents(
     /// No crossover with CGP
 }
 
-void Algorithm::CGP::CGPMutator::mutateAgent(
-    const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
-{
-    CGPManager& cgpManager = dynamic_cast<CGPManager&>(manager);
-    if(&cgpManager == nullptr){
-        throw std::invalid_argument("CGPMutator::initRandomAgent: the given manager is not a CGPManager.");
-    }
-
-    const CGPAgent& cgpAgent = dynamic_cast<const CGPAgent&>(agent);
-    if(&cgpAgent == nullptr){
-        throw std::invalid_argument("CGPMutator::initRandomAgent: the created agent is not a CGPAgent.");
-    }
-
-    // Mutate until a mutation happen
-    while (!this->mutateCGPAgent(cgpAgent, cgpManager, params, rng));
-}
-
-bool Algorithm::CGP::CGPMutator::mutateCGPAgent(const CGPAgent& agent, CGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+bool Algorithm::CGP::CGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
 {
     bool anyMutation = false;
     if (rng.getDouble(0.0, 1.0) < params.mutation.prog.pMutate) {
@@ -120,7 +102,7 @@ bool Algorithm::CGP::CGPMutator::mutateCGPAgent(const CGPAgent& agent, CGPManage
     return anyMutation;
 }
 
-bool Algorithm::CGP::CGPMutator::alterRandomLine(const CGPAgent& agent, CGPManager& manager, 
+bool Algorithm::CGP::CGPMutator::alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, 
                                               RNG::RNG& rng)
 {
     if (agent.getNbLines() < 1) {
