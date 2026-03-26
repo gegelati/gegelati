@@ -151,7 +151,7 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(const Agent& agent)
             // The destination of the line is not within useful registers
             // the line does not contribute to the result of the Program
             // it is an intron.
-            lgpAgent.setIntronValue(static_cast<size_t>(idxLine), true);
+            lgpAgent.setIntronValue(static_cast<size_t>(idxLine), false);
             nbIntrons++;
         }
     }

@@ -38,11 +38,11 @@
 #include <set>
 #include <stdexcept>
 
-#include "algorithm/cgp/cgpLineMutator.h"
+#include "algorithm/tgp/tgpLineMutator.h"
 
 
-bool Algorithm::CGP::CGPLineMutator::initRandomCorrectLineOperand(
-    const Instructions::Instruction& instruction, LGP::LGPLine& line, size_t nbAvailableRegister,
+bool Algorithm::TGP::TGPLineMutator::initRandomCorrectLineOperand(
+    const Instructions::Instruction& instruction, LGP::LGPLine& line, bool maxDepthReached,
     const uint64_t& operandIdx, const bool initOperandDataSource,
     const bool initOperandLocation, const bool forceChange, RNG::RNG& rng)
 {
@@ -65,7 +65,7 @@ bool Algorithm::CGP::CGPLineMutator::initRandomCorrectLineOperand(
 
         size_t nbDataSources = env.getNbDataSources();
         // Registers unavailable
-        if(nbAvailableRegister == 0) {
+        if(maxDepthReached) {
             operandDataSourceIndexes.insert(0);
             nbDataSources - 1;
         } 
@@ -98,7 +98,7 @@ bool Algorithm::CGP::CGPLineMutator::initRandomCorrectLineOperand(
         operandFound = true;
         
         // Select a location
-        operandDataSourceIndex = rng.getUnsignedInt64(((nbAvailableRegister > 0) ? 0 : 1), env.getNbDataSources() - 1);
+        operandDataSourceIndex = rng.getUnsignedInt64(((!maxDepthReached) ? 0 : 1), env.getNbDataSources() - 1);
     }
 
     // The data source can provide the required data type
@@ -109,24 +109,18 @@ bool Algorithm::CGP::CGPLineMutator::initRandomCorrectLineOperand(
             operandLocation = rng.getUnsignedInt64(
                 0, env.getLargestAddressSpace() - 1 - ((forceChange) ? 1 : 0));
 
+            if (forceChange &&
+                operandLocation >= line.getOperand(operandIdx).second) {
+                operandLocation += 1;
+            }
         // Register case
         } else {
             // Select a location
-            operandLocation = rng.getUnsignedInt64(
-                0, nbAvailableRegister - ((forceChange) ? 1 : 0));
+            operandLocation = 2 * line.getDestinationIndex() + 1 + operandIdx;
         }
-        if (forceChange &&
-            operandLocation >= line.getOperand(operandIdx).second) {
-            operandLocation += 1;
-        }
-    } else if (operandFound && operandDataSourceIndex == 0) {    
-        // Select a location
-        operandLocation = rng.getUnsignedInt64(
-            0, nbAvailableRegister - ((forceChange) ? 1 : 0));
-        if (forceChange &&
-            operandLocation >= line.getOperand(operandIdx).second) {
-            operandLocation += 1;
-        }
+    } else if (operandFound && operandDataSourceIndex == 0) {
+            // Select a location
+            operandLocation = 2 * line.getDestinationIndex() + 1 + operandIdx;
     }
 
     // set line operand info
@@ -137,7 +131,7 @@ bool Algorithm::CGP::CGPLineMutator::initRandomCorrectLineOperand(
     return operandFound;
 }
 
-void Algorithm::CGP::CGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, size_t idxRegister, size_t nbAvailableRegister, RNG::RNG& rng)
+void Algorithm::TGP::TGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, size_t idxRegister, bool maxDepthReached, RNG::RNG& rng)
 {
     const Environment& env = line.getEnvironment();
 
@@ -163,7 +157,7 @@ void Algorithm::CGP::CGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, s
     for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
 
         // Check if all operands were tested (and none were valid)
-        initRandomCorrectLineOperand(instruction, line, nbAvailableRegister, operandIdx, true, true,
+        initRandomCorrectLineOperand(instruction, line, maxDepthReached, operandIdx, true, true,
                                      false, rng);
 
         // This operation can (no longer) fail since commit abd7cd since
@@ -171,12 +165,12 @@ void Algorithm::CGP::CGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, s
     }
 }
 
-void Algorithm::CGP::CGPLineMutator::alterCorrectLine(LGP::LGPLine& line, size_t nbAvailableRegister, RNG::RNG& rng)
+void Algorithm::TGP::TGPLineMutator::alterCorrectLine(LGP::LGPLine& line, bool maxDepthReached, RNG::RNG& rng)
 {
     // Generate a random int to select the modified part of the line
     const LineSize lineSize = line.getEnvironment().getLineSize();
 
-    // Ignore size destination that cannot be mutated for CGP
+    // Ignore size destination that cannot be mutated for TGP
     uint64_t selectedBit = rng.getUnsignedInt64(0, lineSize - lineSize.nbDestinationBits - 1);
 
     // Find the selected part
@@ -214,7 +208,7 @@ void Algorithm::CGP::CGPLineMutator::alterCorrectLine(LGP::LGPLine& line, size_t
                 // is a check for Instructions viability during the Environment
                 // Construction. Hence, eithed isValid is true, OR a valid
                 // dataSource will be found among other data sources.
-                initRandomCorrectLineOperand(instruction, line, nbAvailableRegister, i, true, false,
+                initRandomCorrectLineOperand(instruction, line, maxDepthReached, i, true, false,
                                              true, rng);
             }
         }
@@ -247,12 +241,12 @@ void Algorithm::CGP::CGPLineMutator::alterCorrectLine(LGP::LGPLine& line, size_t
               lineSize.nbOperandLocationBits)) <
             lineSize.nbOperandDataSourceIndexBits) {
             // Operand data source index
-            initRandomCorrectLineOperand(instruction, line, nbAvailableRegister, operandIndex, true,
+            initRandomCorrectLineOperand(instruction, line, maxDepthReached, operandIndex, true,
                                          false, true, rng);
         }
         else {
             // Location (no fail thanks to scaling)
-            initRandomCorrectLineOperand(instruction, line, nbAvailableRegister, operandIndex, false,
+            initRandomCorrectLineOperand(instruction, line, maxDepthReached, operandIndex, false,
                                          true, true, rng);
         }
     }

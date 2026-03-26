@@ -83,6 +83,10 @@
 #include <algorithm/maple/mapleManager.h>
 #include <algorithm/maple/mapleMutator.h>
 
+#include <algorithm/tgp/tgpAlgorithm.h>
+#include <algorithm/tgp/tgpLineMutator.h>
+#include <algorithm/tgp/tgpMutator.h>
+
 #include <algorithm/tpg/archive.h>
 #include <algorithm/tpg/tpgAlgorithm.h>
 #include <algorithm/tpg/tpgAgent.h>
