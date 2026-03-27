@@ -62,7 +62,6 @@ void Algorithm::TGP::TGPMutator::insertRandomSubTree(const LGP::LGPAgent& agent,
     while(lineDestinationIndexToInsert.size() > 0) {
         destinationIndexLine = lineDestinationIndexToInsert.front();
         lineDestinationIndexToInsert.erase(lineDestinationIndexToInsert.begin());
-
         // Always add a line at index 0, because lines are inserted in the opposite order as the distribution
         size_t lineIndex = 0;        
         const LGP::LGPLine& line = manager.addNewLine(agent, 0);
@@ -192,20 +191,23 @@ bool Algorithm::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
         alterRandomConstant(agent, manager, params, rng);
     }
 
-    for(size_t idx = 0; idx < manager.getOutputs().size(); idx++) {
-
-        size_t nbZeroRegUsed = std::count_if(
-            agent.getOutputIndices().begin(), agent.getOutputIndices().end(), []
-            (size_t outputIdx) {return outputIdx == 0;});
-
-        if(nbZeroRegUsed == 0) {
-            throw std::runtime_error("TGPMutator::mutateLGPAgent: zero output index should always be used at least once.");
+    if(manager.getOutputs().size() > 1) {
+        for(size_t idx = 0; idx < manager.getOutputs().size(); idx++) {
+    
+            size_t nbZeroRegUsed = std::count_if(
+                agent.getOutputIndices().begin(), agent.getOutputIndices().end(), []
+                (size_t outputIdx) {return outputIdx == 0;});
+    
+            if(nbZeroRegUsed == 0) {
+                throw std::runtime_error("TGPMutator::mutateLGPAgent: zero output index should always be used at least once.");
+            }
+    
+            // One of the output must always be zero, so mutation is allowed if zero is used multiple time, or if current idx is not using zero (meaning it is used elsewhere)
+            if((nbZeroRegUsed > 1 || agent.getOutputIndices().at(idx) != 0) && rng.getDouble(0.0, 1.0) < 1) {//params.mutation.prog.pMutateOutputs) {
+                alterRandomOutputs(agent, manager, idx, rng);
+            }
         }
 
-        // One of the output must always be zero, so mutation is allowed if zero is used multiple time, or if current idx is not using zero (meaning it is used elsewhere)
-        if((nbZeroRegUsed > 1 || agent.getOutputIndices().at(idx) != 0) && rng.getDouble(0.0, 1.0) < 1) {//params.mutation.prog.pMutateOutputs) {
-            alterRandomOutputs(agent, manager, idx, rng);
-        }
     }
 
     // Identify introns
@@ -213,6 +215,22 @@ bool Algorithm::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
         manager.identifyIntrons(agent);
     }
     return anyMutation;
+}
+
+
+bool Algorithm::TGP::TGPMutator::alterRandomOutputs(const LGP::LGPAgent& agent, LGP::LGPManager& manager, size_t location,
+                                              RNG::RNG& rng)
+{
+
+    std::set<size_t> availableRegisters;
+    for(size_t idx = 0; idx < agent.getNbLines(); idx++) {
+        availableRegisters.insert(agent.getLine(idx).getDestinationIndex());
+    }
+
+    auto it = availableRegisters.begin();
+    std::advance(it, rng.getUnsignedInt64(0, availableRegisters.size() - 1));
+    manager.setOutputIndex(agent, *it, location);
+    return true;
 }
 
 std::array<bool, 2> Algorithm::TGP::TGPMutator::hasSubTree(const LGP::LGPAgent& agent, size_t idx) {

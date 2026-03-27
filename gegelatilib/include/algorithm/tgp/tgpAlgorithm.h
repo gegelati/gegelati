@@ -9,12 +9,12 @@
 
 #include "algorithm/lgp/lgpAlgorithm.h"
 #include "algorithm/tgp/tgpMutator.h"
-//#include "algorithm/tgp/lgpPolicyStats.h"
-//#include "algorithm/tgp/lgpCodeGenerationEngine.h"
 namespace Algorithm::TGP {
 
     /**
-     * \brief Class representing a TGPAlgorithm
+     * \brief Class representing a TreeBased GPAlgorithm
+     * 
+     * For now, this class does not support instruction with types different from the environment (ex env with int data and instrunctions with double inputs)
      */
     class   TGPAlgorithm : public LGP::LGPAlgorithm
     {

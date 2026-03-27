@@ -9,12 +9,12 @@
 
 #include "algorithm/lgp/lgpAlgorithm.h"
 #include "algorithm/cgp/cgpMutator.h"
-//#include "algorithm/cgp/lgpPolicyStats.h"
-//#include "algorithm/cgp/lgpCodeGenerationEngine.h"
 namespace Algorithm::CGP {
 
     /**
      * \brief Class representing a CGPAlgorithm
+     * 
+     * For now, this class does not support instruction with types different from the environment (ex env with int data and instrunctions with double inputs)
      */
     class   CGPAlgorithm : public LGP::LGPAlgorithm
     {

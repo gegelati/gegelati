@@ -50,6 +50,7 @@ bool Algorithm::TGP::TGPLineMutator::initRandomCorrectLineOperand(
     uint64_t operandDataSourceIndex = line.getOperand(operandIdx).first;
     bool operandFound = !initOperandDataSource;
 
+
     // Is the operand constrained in type?
     if (initOperandDataSource && operandIdx < instruction.getNbOperands()) {
         // Select an operand
@@ -83,6 +84,7 @@ bool Algorithm::TGP::TGPLineMutator::initRandomCorrectLineOperand(
                               if (index <= operandDataSourceIndex)
                                   operandDataSourceIndex++;
                           });
+
             // Add the index to the set
             operandDataSourceIndexes.insert(operandDataSourceIndex);
             // check if the selected dataSource can provide the type requested
@@ -91,6 +93,7 @@ bool Algorithm::TGP::TGPLineMutator::initRandomCorrectLineOperand(
                                .at(operandDataSourceIndex)
                                .get()
                                .canHandle(operandType);
+
         }
     }
     else if (initOperandDataSource) {
@@ -103,6 +106,7 @@ bool Algorithm::TGP::TGPLineMutator::initRandomCorrectLineOperand(
 
     // The data source can provide the required data type
     uint64_t operandLocation = line.getOperand(operandIdx).second;
+        
     if (operandFound && initOperandLocation) {
         if(operandDataSourceIndex != 0) {
             // Select a location
@@ -141,28 +145,57 @@ void Algorithm::TGP::TGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, s
         destinationIndex); // Should never throw.. but I did not deactivate the
                            // check anyway.
 
-    // Select an instruction.
-    uint64_t instructionIndex =
-        rng.getUnsignedInt64(0, (env.getNbInstructions() - 1));
-    // Get the instruction
-    const Instructions::Instruction& instruction =
-        env.getInstructionSet().getInstruction(instructionIndex);
-    // Set the instructionIndex
-    line.setInstructionIndex(
-        instructionIndex); // Should never throw.. but I did not deactivate the
-                           // check anyway.
+    bool success = false;
+    while(!success) {
+        success = true;
+        // Select an instruction.
+        uint64_t instructionIndex =
+            rng.getUnsignedInt64(0, (env.getNbInstructions() - 1));
+        // Get the instruction
+        const Instructions::Instruction& instruction =
+            env.getInstructionSet().getInstruction(instructionIndex);
+        // Set the instructionIndex
+        line.setInstructionIndex(
+            instructionIndex); // Should never throw.. but I did not deactivate the
+                            // check anyway.
 
-    // Select operands needed by the instruction
-    uint64_t operandIdx = 0;
-    for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
+        // Select operands needed by the instruction
+        uint64_t operandIdx = 0;
+        for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
 
-        // Check if all operands were tested (and none were valid)
-        initRandomCorrectLineOperand(instruction, line, maxDepthReached, operandIdx, true, true,
-                                     false, rng);
+            // Check if all operands were tested (and none were valid)
+            if(!initRandomCorrectLineOperand(instruction, line, maxDepthReached, operandIdx, true, true,
+                                        false, rng)){
+                success = false;
+            }
 
-        // This operation can (no longer) fail since commit abd7cd since
-        // all Instruction are vetted when building the Environment
+            // This operation can (no longer) fail since commit abd7cd since
+            // all Instruction are vetted when building the Environment
+
+            // THis can fail again if registers are not available
+        }
     }
+
+
+    if(!this->isLineCorrect(line, maxDepthReached)) {
+        throw std::runtime_error("TGPLineMutator::initRandomCorrectLine: line is not correct for TreeBased GP after intialisation");
+    }
+}
+
+bool Algorithm::TGP::TGPLineMutator::isLineCorrect(LGP::LGPLine& line, bool maxDepthReached)
+{
+    if(line.getEnvironment().getMaxNbOperands() > 2) {
+        return false;
+    }
+    for(size_t idx = 0; idx < line.getEnvironment().getMaxNbOperands(); idx ++) {
+        if(maxDepthReached && line.getOperand(idx).first == 0) {
+            return false;
+        }
+        if(line.getOperand(idx).first == 0 && line.getOperand(idx).second != 2 * line.getDestinationIndex() + 1 + idx) {
+            return false;
+        } 
+    }
+    return true;
 }
 
 void Algorithm::TGP::TGPLineMutator::alterCorrectLine(LGP::LGPLine& line, bool maxDepthReached, RNG::RNG& rng)
@@ -249,5 +282,8 @@ void Algorithm::TGP::TGPLineMutator::alterCorrectLine(LGP::LGPLine& line, bool m
             initRandomCorrectLineOperand(instruction, line, maxDepthReached, operandIndex, false,
                                          true, true, rng);
         }
+    }
+    if(!this->isLineCorrect(line, maxDepthReached)) {
+        throw std::runtime_error("TGPLineMutator::alterCorrectLine: line is not correct for TreeBased GP after mutation");
     }
 }

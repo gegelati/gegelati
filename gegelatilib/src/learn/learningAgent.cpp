@@ -267,6 +267,9 @@ Learn::LearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
 
     auto jobs = this->makeJobs(mode);
     for(auto job: jobs) {
+        if (job.get()->getIdx() == 28) {
+            int a = 0;
+        }
         std::shared_ptr<EvaluationResult> result = this->evaluateJob(
             *execEngine, *job, generationNumber, mode, this->learningEnvironment);
         results.emplace(result, (*job).getAgent());

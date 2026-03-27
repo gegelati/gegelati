@@ -77,6 +77,11 @@ namespace Algorithm::CGP {
             const bool initOperandLocation, const bool forceChange, RNG::RNG& rng);
 
         /**
+         * \brief control if the line is correct
+         */
+        bool isLineCorrect(LGP::LGPLine& line, size_t nbAvailableRegister);
+
+        /**
          * \brief Randomly initializes a LGPLine.
          *
          * Using the RNG::RNG functions, this function initializes all

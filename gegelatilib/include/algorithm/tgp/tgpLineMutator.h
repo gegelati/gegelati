@@ -77,6 +77,11 @@ namespace Algorithm::TGP {
             const bool initOperandLocation, const bool forceChange, RNG::RNG& rng);
 
         /**
+         * \brief control if the line is correct
+         */
+        bool isLineCorrect(LGP::LGPLine& line, bool maxDepthReached);
+
+        /**
          * \brief Randomly initializes a LGPLine.
          *
          * Using the RNG::RNG functions, this function initializes all

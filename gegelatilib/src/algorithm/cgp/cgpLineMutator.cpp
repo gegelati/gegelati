@@ -113,7 +113,7 @@ bool Algorithm::CGP::CGPLineMutator::initRandomCorrectLineOperand(
         } else {
             // Select a location
             operandLocation = rng.getUnsignedInt64(
-                0, nbAvailableRegister - ((forceChange) ? 1 : 0));
+                0, nbAvailableRegister - ((forceChange) ? 1 : 0) - 1) ;
         }
         if (forceChange &&
             operandLocation >= line.getOperand(operandIdx).second) {
@@ -122,7 +122,7 @@ bool Algorithm::CGP::CGPLineMutator::initRandomCorrectLineOperand(
     } else if (operandFound && operandDataSourceIndex == 0) {    
         // Select a location
         operandLocation = rng.getUnsignedInt64(
-            0, nbAvailableRegister - ((forceChange) ? 1 : 0));
+            0, nbAvailableRegister - ((forceChange) ? 1 : 0) - 1);
         if (forceChange &&
             operandLocation >= line.getOperand(operandIdx).second) {
             operandLocation += 1;
@@ -135,6 +135,19 @@ bool Algorithm::CGP::CGPLineMutator::initRandomCorrectLineOperand(
     }
 
     return operandFound;
+}
+
+bool Algorithm::CGP::CGPLineMutator::isLineCorrect(LGP::LGPLine& line, size_t nbAvailableRegister)
+{
+    for(size_t idx = 0; idx < line.getEnvironment().getMaxNbOperands(); idx ++) {
+        if(nbAvailableRegister == 0 && line.getOperand(idx).first == 0) {
+            return false;
+        }
+        if(line.getOperand(idx).first == 0 && line.getOperand(idx).second >= nbAvailableRegister) {
+            return false;
+        } 
+    }
+    return true;
 }
 
 void Algorithm::CGP::CGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, size_t idxRegister, size_t nbAvailableRegister, RNG::RNG& rng)
@@ -168,6 +181,9 @@ void Algorithm::CGP::CGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, s
 
         // This operation can (no longer) fail since commit abd7cd since
         // all Instruction are vetted when building the Environment
+    }
+    if(!this->isLineCorrect(line, nbAvailableRegister)) {
+        throw std::runtime_error("CGPLineMutator::initRandomCorrectLine: line is not correct for CGP after intialisation");
     }
 }
 
@@ -255,5 +271,8 @@ void Algorithm::CGP::CGPLineMutator::alterCorrectLine(LGP::LGPLine& line, size_t
             initRandomCorrectLineOperand(instruction, line, nbAvailableRegister, operandIndex, false,
                                          true, true, rng);
         }
+    }
+    if(!this->isLineCorrect(line, nbAvailableRegister)) {
+        throw std::runtime_error("CGPLineMutator::alterCorrectLine: line is not correct for CGP after mutation");
     }
 }
