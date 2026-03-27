@@ -67,7 +67,7 @@ namespace Algorithm::LGP {
             {
                 constants.resetData(); // force all constant to 0 at first.
                 for (size_t idx = 0; idx < outputs.size(); idx++ ){
-                    outputIndices.push_back(idx);
+                    outputIndices.push_back(idx % e.getParams().nbRegisters);
                 }
             };
 
@@ -112,6 +112,14 @@ namespace Algorithm::LGP {
              * the LGP.
              */
             const LGPLine& addNewLine(uint64_t idx);
+
+            /**
+             * \brief Add a new line to the LGP at the end of the LGP.
+             *
+             * \param[in] newLine new LGPLine copied to the LGP
+             * \param[in] idx the position at which the line should be inserted.
+             */
+            void addNewLine(const LGPLine& newLine, uint64_t idx);
 
             /**
              * \brief Add a new line to the LGP at the end of the LGP.

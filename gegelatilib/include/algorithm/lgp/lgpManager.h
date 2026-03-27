@@ -125,6 +125,15 @@ namespace Algorithm {
              * 
              * \param[in] agent the Agent to modify.
              * \param[in] newLine the line to copy.
+             * \param[in] index the index at which the new line should be added.
+             */
+            virtual void addNewLine(const Agent& agent, const LGPLine& newLine, size_t index);
+
+            /**
+             * \brief Add a copy of the given line to the given agent at the end of the agent.
+             * 
+             * \param[in] agent the Agent to modify.
+             * \param[in] newLine the line to copy.
              */
             virtual void addNewLine(const Agent& agent, const LGPLine& newLine);
 

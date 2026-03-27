@@ -71,6 +71,11 @@ void Algorithm::LGP::LGPManager::addNewLine(const Agent& agent, const LGPLine& n
     this->getLGPAgentFromCst(agent).addNewLine(newLine);
 }
 
+void Algorithm::LGP::LGPManager::addNewLine(const Agent& agent, const LGPLine& newLine, size_t index)
+{
+    this->getLGPAgentFromCst(agent).addNewLine(newLine, index);
+}
+
 void Algorithm::LGP::LGPManager::swapLines(const Agent& agent, size_t index1, size_t index2)
 {
     this->getLGPAgentFromCst(agent).swapLines(index1, index2);
@@ -151,7 +156,7 @@ uint64_t Algorithm::LGP::LGPManager::identifyIntrons(const Agent& agent)
             // The destination of the line is not within useful registers
             // the line does not contribute to the result of the Program
             // it is an intron.
-            lgpAgent.setIntronValue(static_cast<size_t>(idxLine), false);
+            lgpAgent.setIntronValue(static_cast<size_t>(idxLine), true);
             nbIntrons++;
         }
     }

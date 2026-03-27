@@ -64,11 +64,12 @@ namespace Algorithm::TGP {
          * 
          * \param[in,out] agent the Agent to mutate.
          * \param[in] destinationIndexLine destination index of the line that should be inserted
+         * \param[in] maxDepthTree maximum depth of the sub tree added
          * \param[in] manager the manager to change the agents.
          * \param[in] rng Random Number Generator used in the mutation process.
          *
          */
-        virtual void insertRandomSubTree(const LGP::LGPAgent& agent, size_t destinationIndexLine, LGP::LGPManager& manager, RNG::RNG& rng);
+        virtual void insertRandomSubTree(const LGP::LGPAgent& agent, size_t destinationIndexLine, size_t maxDepthTree, LGP::LGPManager& manager, RNG::RNG& rng);
 
         /**
          * \brief mutate a specific agent of an algorithm within a population
@@ -110,6 +111,44 @@ namespace Algorithm::TGP {
          *         Program has less than one line.
          */
         virtual bool alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, RNG::RNG& rng) override;
+
+        /**
+         * \brief destroy the subtree of the corresponding index
+         * 
+         * \param[in,out] agent the Agent to mutate.
+         * \param[in] idxSubTree index of the subtree destroyed
+         * \param[in] manager the manager to change the agents.
+         */
+        virtual void destroySubTree(const LGP::LGPAgent& agent, size_t idxSubTree, LGP::LGPManager& manager);
+
+        /**
+         * \brief method returning if the node at the corresponding index is pointing to some sub trees.
+         */
+        std::array<bool, 2> hasSubTree(const LGP::LGPAgent& agent, size_t idx);
+
+        /**
+         * \brief Method returning the index of the line in the agent corresponding to the destination index indicated
+         */
+        size_t getIndexLineFromDest(const LGP::LGPAgent& agent, size_t destIdx);
+
+        /**
+         * \brief return the depth of the destination index
+         */
+        size_t getNodeDepth(size_t destIndex);
+
+        /**
+         * \brief return the real depth of the destination index, meaning the number of actual nodes below this nodes
+         */
+        size_t getRealNodeDepth(const LGP::LGPAgent& agent, size_t destIndex);
+
+
+        /**
+         * \brief change the index of a node.
+         * This method will change the index of the node by the depth index
+         * 
+         * It will also control if the node(line) as some subtree, and if yes, will change the index too.
+         */
+        void changeNodeIndex(const LGP::LGPAgent& agent, LGP::LGPManager& manager, size_t lineIndex, size_t destIndex);
 
     };
 

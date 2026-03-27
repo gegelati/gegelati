@@ -26,15 +26,30 @@ const Algorithm::LGP::LGPLine& Algorithm::LGP::LGPAgent::addNewLine(uint64_t idx
             "Attempting to insert a line beyond the program end.");
     }
     // new line is not marked as an intron by default
+    
     this->lines.insert(this->lines.begin() + idx, {std::make_unique<LGPLine>(this->environment), false});
 
-    return *this->lines.back().first;
+    auto itLines = this->lines.begin();
+    std::advance(itLines, idx);
+    return *itLines->first;
+}
+
+void Algorithm::LGP::LGPAgent::addNewLine(const LGPLine& newLine, uint64_t idx)
+{
+    // new line is not marked as an intron by default
+    if (idx > this->getNbLines()) {
+        throw std::out_of_range(
+            "Attempting to insert a line beyond the program end.");
+    }
+    // new line is not marked as an intron by default
+    
+    this->lines.insert(this->lines.begin() + idx, {std::make_unique<LGPLine>(newLine), false});
 }
 
 void Algorithm::LGP::LGPAgent::addNewLine(const LGPLine& newLine)
 {
     // new line is not marked as an intron by default
-    this->lines.push_back({std::make_unique<LGPLine>(newLine), false});
+    this->addNewLine(newLine, this->getNbLines());
 }
 
 void Algorithm::LGP::LGPAgent::clearIntrons()
