@@ -37,12 +37,10 @@ namespace Selector {
         /**
          * \brief Constructor for Selector.
          *
-         * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        TournamentSelector(Algorithm::AgentManager& manager, 
-                           const Learn::LearningParameters& params)
-            : Selector{manager, params}
+        TournamentSelector(const Learn::LearningParameters& params)
+            : Selector{params}
         {
         }
         /**

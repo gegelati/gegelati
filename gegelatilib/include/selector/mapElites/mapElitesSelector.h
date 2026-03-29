@@ -32,13 +32,11 @@ namespace Selector {
             /**
              * \brief Constructor for Selector.
              *
-             * \param[in] manager Manager used by the algorithm
              * \param[in] params parameters used by the
              * Selector.
              */
-            MapElitesSelector(Algorithm::AgentManager& manager,
-                              const Learn::LearningParameters& params)
-                : Selector{manager, params}
+            MapElitesSelector(const Learn::LearningParameters& params)
+                : Selector{params}
             {
             }
 

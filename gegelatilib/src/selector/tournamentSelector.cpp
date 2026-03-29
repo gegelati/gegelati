@@ -51,7 +51,7 @@ void Selector::TournamentSelector::doSelection(
             auto itWorst = subMap.begin();
 
             // Remove the vertex from the graph as well
-            this->manager.deleteAgent(itWorst->second, graph);
+            this->getManager().deleteAgent(itWorst->second, graph);
             
 
             subMap.erase(itWorst);
@@ -116,7 +116,7 @@ void Selector::TournamentSelector::updateAfterPopulate(EvoGraph::Graph& graph)
             this->removeFromSavedResults((*mapIterator).first);
         }
 
-        this->manager.deleteAgent(agent, graph);
+        this->getManager().deleteAgent(agent, graph);
     }
     this->agentsToDelete.clear();
 }

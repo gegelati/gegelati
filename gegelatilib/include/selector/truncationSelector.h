@@ -18,12 +18,10 @@ namespace Selector {
          * \brief Constructor for Selector.
          *
          * is done.
-         * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        TruncationSelector(Algorithm::AgentManager& manager,
-                           const Learn::LearningParameters& params)
-            : Selector{manager, params}
+        TruncationSelector(const Learn::LearningParameters& params)
+            : Selector{params}
         {
         }
 

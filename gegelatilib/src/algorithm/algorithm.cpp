@@ -91,6 +91,9 @@ const Algorithm::AgentManager& Algorithm::Algorithm::getManagerCst() const
 
 const Selector::Selector& Algorithm::Algorithm::getSelectorCst() const
 {
+    if(!this->hasSelector()) {
+        throw std::runtime_error("Algorithm::getSelector: Selector is not set");
+    }
     return *this->selector;
 }
 
@@ -99,8 +102,22 @@ Algorithm::AgentManager& Algorithm::Algorithm::getManager()
     return *this->manager;
 }
 
+
+bool Algorithm::Algorithm::hasSelector() const
+{
+    return this->selector.has_value();
+}
+
+void Algorithm::Algorithm::setSelector(Selector::Selector& selector)
+{
+    this->selector = selector;
+}
+
 Selector::Selector& Algorithm::Algorithm::getSelector()
 {
+    if(!this->hasSelector()) {
+        throw std::runtime_error("Algorithm::getSelector: Selector is not set");
+    }
     return *this->selector;
 }
 
@@ -158,6 +175,15 @@ bool Algorithm::Algorithm::containsAgent(const Agent& agent) const
     return this->manager->containsAgent(agent);
 }
 
+void Algorithm::Algorithm::initSelector()
+{
+    if(!this->hasSelector()) {
+        this->savedDefaultSelector = std::move(Selector::selectorFactory(this->params));
+        this->setSelector(*this->savedDefaultSelector);
+    }
+    this->getSelector().setManager(*this->manager);
+}
+
 void Algorithm::Algorithm::initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) {
     /*This method is not abstract, it is not necessary for an algorithm to have sub algorithms*/
 }
@@ -169,7 +195,7 @@ void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHand
 
     this->initManager();
 
-    this->selector = std::move(Selector::selectorFactory(*this->manager, this->params));
+    this->initSelector();
 
     this->initMutator();
 
@@ -184,7 +210,7 @@ void Algorithm::Algorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHand
     }
 
     // Clear the best agent in the selector
-    this->selector->forgetPreviousResults();
+    this->getSelector().forgetPreviousResults();
 
     this->init = true;
 }
@@ -212,7 +238,8 @@ void Algorithm::Algorithm::clearAlgorithm()
         this->manager->clearAgents(*this->graph);
     }
     this->mutator = nullptr;
-    this->selector = nullptr;
+    this->selector = std::nullopt;
+    this->savedDefaultSelector = nullptr;
     this->manager = nullptr;
     this->init = false;
 }
@@ -227,7 +254,7 @@ void Algorithm::Algorithm::initPopulation(RNG::RNG& rng)
 void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
 {
     this->mutator->mutatePopulation(*this->graph, *this->manager, this->params, rng, maxNbThreads);
-    this->selector->updateAfterPopulate(*graph);
+    this->getSelector().updateAfterPopulate(*graph);
 
     this->clearUnusedSubAgents();
 }
@@ -278,7 +305,7 @@ void Algorithm::Algorithm::linkAgentVertex(const Agent& agent, const EvoGraph::V
 
 void Algorithm::Algorithm::exportBestAgentCodeGen(const std::string& filename, const std::string& path)
 {
-    const auto& pair = selector->getBestAgent();
+    const auto& pair = this->getSelector().getBestAgent();
     if(pair.first) {
         this->exportSpecificAgentCodeGen(*pair.first, filename, path);
     } else {
@@ -346,7 +373,7 @@ void Algorithm::Algorithm::exportDotFile(const char* filePath)
 
 void Algorithm::Algorithm::exportBestAgentDotFile(const char* filePath)
 {
-    const auto& pair = selector->getBestAgent();
+    const auto& pair = this->getSelector().getBestAgent();
     if(pair.first) {
         this->exportSpecificAgentDotFile(*pair.first, filePath);
     } else {

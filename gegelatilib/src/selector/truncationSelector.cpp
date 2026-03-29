@@ -31,7 +31,7 @@ void Selector::TruncationSelector::doSelection(
         // Removed stored result (if any)
         this->removeFromSavedResults(agent);
 
-        this->manager.deleteAgent(agent, graph);
+        this->getManager().deleteAgent(agent, graph);
 
         // Increment loop counter
         i++;

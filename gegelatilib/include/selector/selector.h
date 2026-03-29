@@ -52,7 +52,21 @@ namespace Selector {
         /**
          * \brief manager of the used algorithm. The manager can delete or create agents in the algorithm population
          */
-        Algorithm::AgentManager& manager;
+        std::optional<std::reference_wrapper<Algorithm::AgentManager>> manager;
+
+        /**
+         * \brief get the manager
+         * 
+         * Throw if manager is not set (in optional type)
+         */
+        Algorithm::AgentManager& getManager();
+
+        /**
+         * \brief get the manager
+         * 
+         * Throw if manager is not set (in optional type)
+         */
+        const Algorithm::AgentManager& cGetManager() const;
 
       public:
 
@@ -64,14 +78,24 @@ namespace Selector {
         /**
          * \brief Constructor for Selector.
          *
-         * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          */
-        Selector(Algorithm::AgentManager& manager,
-                 const Learn::LearningParameters& params)
-            : manager{manager}, params{params}
+        Selector(const Learn::LearningParameters& params)
+            : params{params}
         {
         }
+
+        /**
+         * \brief set the manager of the selector
+         * 
+         * \param[in] manager set to the selector
+         */
+        void setManager(Algorithm::AgentManager& manager);
+
+        /**
+         * \brief return true if the manager is set
+         */
+        bool hasManager() const;
 
         /**
          * \brief Removes from the Graph the agent Vertex.

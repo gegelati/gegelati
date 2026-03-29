@@ -36,8 +36,12 @@ namespace Algorithm {
         /// Parameters used by the algorithm
         Learn::LearningParameters params;
 
+        /// Pointer pointing to the default selector created if the algorithm is created without a defined selector
+        std::unique_ptr<Selector::Selector> savedDefaultSelector;
+
         /// Selector used for the selection process
-        std::unique_ptr<Selector::Selector> selector;
+        std::optional<std::reference_wrapper<Selector::Selector>> selector;
+
         /// Mutator used by the algorithm
         std::unique_ptr<Mutator> mutator;
 
@@ -99,9 +103,8 @@ namespace Algorithm {
          * \param[in] algorithmName name of the algorithm used.
          * \param[in] algorithmColor color of the algorithm used (during .dot files).
          */
-        Algorithm(const Learn::LearningParameters& params, std::string algorithmName, std::string algorithmColor)
-               : params{params}, algorithmName(algorithmName), algorithmColor(algorithmColor), algorithmID(incrementeCounter()) {
-        };
+        Algorithm(const Learn::LearningParameters& params, std::string algorithmName = "Algorithm", std::string algorithmColor = "#000000")
+               : params{params}, algorithmName(algorithmName), algorithmColor(algorithmColor), algorithmID(incrementeCounter()) {};
 
         /**
          * \brief Return the name of the algorithm.
@@ -184,6 +187,16 @@ namespace Algorithm {
         /// Getter for the manager
         virtual AgentManager& getManager();
 
+        /// Indicate if the algorithm possess a selector 
+        virtual bool hasSelector() const;
+
+        /**
+         * \brief set a selector to the algorithm
+         * 
+         * \param[in] selector selector set
+         */
+        virtual void setSelector(Selector::Selector& selector);
+
         /// Getter for the selector
         virtual Selector::Selector& getSelector();
 
@@ -217,6 +230,12 @@ namespace Algorithm {
          * \brief Initialize the managerof the algorithm
          */
         virtual void initManager() = 0;
+
+        
+        /**
+         * \brief Initialize the selector of the algorithm
+         */
+        virtual void initSelector();
 
         /**
          * \brief Initialize the mutator of the algorithm

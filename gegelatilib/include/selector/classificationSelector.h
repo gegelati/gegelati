@@ -20,14 +20,12 @@ namespace Selector {
         /**
          * \brief Constructor for ClassificationSelector.
          *
-         * \param[in] manager Manager used by the algorithm
          * \param[in] params parameters used by the Selector.
          * \param[in] nbActions number of actions in the LearningEnvironment.
          */
-        ClassificationSelector(Algorithm::AgentManager& manager,
-                               const Learn::LearningParameters& params,
+        ClassificationSelector(const Learn::LearningParameters& params,
                                uint64_t nbActions)
-            : Selector{manager, params}, nbActions{nbActions}
+            : Selector{params}, nbActions{nbActions}
         {
         }
 

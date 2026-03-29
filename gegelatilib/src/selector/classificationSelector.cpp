@@ -25,8 +25,10 @@ void Selector::ClassificationSelector::doSelection(
                                  "ClassificationSelectionMetrics.");
     }
 
+    Algorithm::AgentManager& manager = this->getManager();
+
     // Compute the number of agent to keep/delete base on each criterion
-    uint64_t totalNbAgent = this->manager.getAgents().size();
+    uint64_t totalNbAgent = manager.getAgents().size();
     uint64_t nbAgentsToDelete = (uint64_t)floor(
         this->params.selection.truncation.ratioDeletedRoots * totalNbAgent);
     uint64_t nbAgentsToKeep = (totalNbAgent - nbAgentsToDelete);
@@ -94,19 +96,18 @@ void Selector::ClassificationSelector::doSelection(
     // Do the removal.
     // Because of potential agent actions, the preserved number of agents
     // may be higher than the given ratio.
-    auto allAgents = this->manager.getAgents();
+    auto allAgents = manager.getAgents();
     auto& graphRef = graph;
-    auto& managerRef = this->manager;
     std::for_each(
         allAgents.begin(), allAgents.end(),
-        [&agentsToKeep, &graphRef, this, &managerRef,
+        [&agentsToKeep, &graphRef, this, &manager,
          &results](std::reference_wrapper<const Algorithm::Agent> curragent) {
 
             if (std::find_if(agentsToKeep.begin(), agentsToKeep.end(), 
                 [&curragent](const std::reference_wrapper<const Algorithm::Agent>& agent) {
                     return agent.get() == curragent.get();
                 }) == agentsToKeep.end()) {
-                managerRef.deleteAgent(curragent, graphRef);
+                manager.deleteAgent(curragent, graphRef);
 
                 // Keep only results of non-decimated agents.
                 this->removeFromSavedResults(curragent);
