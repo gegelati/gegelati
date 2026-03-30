@@ -69,10 +69,10 @@ void Log::LABasicLogger::logResults(
               << std::setw(colWidth) << max;
     };
 
-    auto logTimingStat = [&]<class T>(T val, auto getter) {
+    auto logTimingStat = [&](auto val, auto getter) {
         val = std::accumulate(
             results.begin(), results.end(), 0.0,
-            [getter](T acc,
+            [getter](auto acc,
                      const std::pair<std::shared_ptr<Learn::EvaluationResult>,
                                      const TPG::TPGVertex*>& pair) {
                 return acc + (std::static_pointer_cast<
