@@ -15,7 +15,7 @@ void Algorithm::CGP::CGPAlgorithm::initMutator()
 
 void Algorithm::CGP::CGPAlgorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    params.lgp.nbRegisters = 3 * 5;
+    params.lgp.nbRegisters = params.cgp.nbLayers * params.cgp.nbNodesPerLayer;
     this->env = std::make_unique<LGP::LGPEnvironment>(iSet, params.lgp.nbRegisters, params.lgp.nbProgramConstant, dataSource);
     Algorithm::Algorithm::initAlgorithm(rng, outputs, dataSource, graph);
 }

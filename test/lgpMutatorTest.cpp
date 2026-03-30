@@ -108,28 +108,28 @@ TEST_F(LgpMutatorTest, LGPMutatorInsertRandomLine)
     rng.setSeed(0);
 
     // Insert in empty LGP
-    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, rng));
+    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
     ASSERT_EQ(lgpAgent->getNbLines(), 1)
         << "Line insertion in an empty LGP failed.";
 
     // Insert in non empty LGP
     // in first position (with known seed)
     rng.setSeed(0);
-    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, rng));
+    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
     ASSERT_EQ(lgpAgent->getNbLines(), 2)
         << "Line insertion in a non-empty LGP failed.";
 
     // Insert in non empty LGP
     // After last position (with known seed)
     rng.setSeed(1);
-    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, rng));
+    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
     ASSERT_EQ(lgpAgent->getNbLines(), 3)
         << "Line insertion in a non-empty LGP failed.";
 
     // Insert in non empty LGP
     // In the middle position (with known seed)
     rng.setSeed(5);
-    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, rng));
+    ASSERT_NO_THROW(lgpMutator->insertRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
     ASSERT_EQ(lgpAgent->getNbLines(), 4)
         << "Line insertion in a non-empty LGP failed.";
 }
@@ -182,14 +182,14 @@ TEST_F(LgpMutatorTest, LGPMutatorAlterRandomLine)
     rng.setSeed(0);
 
     // Nothing on empty LGP
-    ASSERT_FALSE(lgpMutator->alterRandomLine(*lgpAgent, *lgpManager, rng));
+    ASSERT_FALSE(lgpMutator->alterRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
     // Add 10 lines
     for (auto i = 0; i < 10; i++) {
         lgpManager->addNewLine(*lgpAgent);
     }
     // Alter a randomly selected line (with a known seed)
     // Parameter of Line 4 is altered.
-    ASSERT_TRUE(lgpMutator->alterRandomLine(*lgpAgent, *lgpManager, rng));
+    ASSERT_TRUE(lgpMutator->alterRandomLine(*lgpAgent, *lgpManager, params.algorithm, rng));
 }
 
 TEST_F(LgpMutatorTest, LGPMutatorInitAgent)

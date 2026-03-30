@@ -141,6 +141,13 @@ namespace Algorithm::LGP {
             "// \"maxConstValue\" : 1.0, // Default value";
         /// Maximum constant value possible
         double maxConstValue = 1.0;
+        
+        /// JSon comment
+        inline static const std::string pMutateOutputComment =
+            "// Probability of mutating an output index.\n"
+            "// \"pMutateOutput\" : 0.0, // Default value";
+        /// Probability of mutating an output index.
+        double pMutateOutput = 0.0;
 
     } LGPParameters;
 } // namespace Algorithm

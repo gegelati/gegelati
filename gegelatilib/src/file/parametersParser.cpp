@@ -276,6 +276,41 @@ void File::ParametersParser::setParameterFromString(
         params.algorithm.lgp.maxConstValue = value.asDouble();
         return;
     }
+    if (param == "pMutateOutput") {
+        params.algorithm.lgp.pMutateOutput = value.asDouble();
+        return;
+    }
+
+
+    if (param == "nbLayers") {
+        params.algorithm.cgp.nbLayers = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "nbNodesPerLayer") {
+        params.algorithm.cgp.nbNodesPerLayer = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "pMutateNode") {
+        params.algorithm.cgp.pMutateNode = value.asDouble();
+        return;
+    }
+
+
+    if (param == "maxDepth") {
+        params.algorithm.tgp.maxDepth = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "maxInitDepth") {
+        params.algorithm.tgp.maxInitDepth = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "maxNbEdgePerNode") {
+        params.algorithm.tgp.maxNbEdgePerNode= (size_t)value.asUInt();
+        return;
+    }
+
+
+
 
     if (param == "_selectionMode") {
         params.selection._selectionMode = value.asString();
@@ -417,7 +452,6 @@ void File::ParametersParser::writeParametersToJson(
     root["algorithm"]["tpg"]["pEdgeDestinationIsAction"].setComment(
         Algorithm::TPG::TPGParameters::pEdgeDestinationIsActionComment,
         Json::commentBefore);
-
     root["algorithm"]["tpg"]["pProgramMutation"] =
         params.algorithm.tpg.pProgramMutation;
     root["algorithm"]["tpg"]["pProgramMutation"].setComment(
@@ -437,24 +471,20 @@ void File::ParametersParser::writeParametersToJson(
         params.algorithm.maple.nbActionEdgeInit;
     root["algorithm"]["maple"]["nbActionEdgeInit"].setComment(
         Algorithm::Maple::MapleParameters::nbActionEdgeInitComment, Json::commentBefore);
-
     root["algorithm"]["maple"]["pChangeActionClass"] =
         params.algorithm.maple.pChangeActionClass;
     root["algorithm"]["maple"]["pChangeActionClass"].setComment(
         Algorithm::Maple::MapleParameters::pChangeActionClassComment, Json::commentBefore);
-
     root["algorithm"]["maple"]["pActionEdgeAddition"] =
         params.algorithm.maple.pActionEdgeAddition;
     root["algorithm"]["maple"]["pActionEdgeAddition"].setComment(
         Algorithm::Maple::MapleParameters::pActionEdgeAdditionComment,
         Json::commentBefore);
-
     root["algorithm"]["maple"]["pActionEdgeDeletion"] =
         params.algorithm.maple.pActionEdgeDeletion;
     root["algorithm"]["maple"]["pActionEdgeDeletion"].setComment(
         Algorithm::Maple::MapleParameters::pActionEdgeDeletionComment,
         Json::commentBefore);
-
     root["algorithm"]["maple"]["pMutateActionProgram"] =
         params.algorithm.maple.pMutateActionProgram;
     root["algorithm"]["maple"]["pMutateActionProgram"].setComment(
@@ -464,11 +494,9 @@ void File::ParametersParser::writeParametersToJson(
         params.algorithm.maple.pSwapActionProgram;
     root["algorithm"]["maple"]["pSwapActionProgram"].setComment(
         Algorithm::Maple::MapleParameters::pSwapActionProgramComment, Json::commentBefore);
-
     root["algorithm"]["maple"]["pCrossAgents"] = params.algorithm.maple.pCrossAgents;
     root["algorithm"]["maple"]["pCrossAgents"].setComment(
         Algorithm::Maple::MapleParameters::pCrossAgentsComment, Json::commentBefore);
-
     root["algorithm"]["maple"]["pCrossPrograms"] =
         params.algorithm.maple.pCrossPrograms;
     root["algorithm"]["maple"]["pCrossPrograms"].setComment(
@@ -476,70 +504,83 @@ void File::ParametersParser::writeParametersToJson(
 
 
 
-
-
-
+    // Mutation.program parameters
     root["algorithm"]["lgp"]["nbProgramConstant"] = params.algorithm.lgp.nbProgramConstant;
     root["algorithm"]["lgp"]["nbProgramConstant"].setComment(
         Algorithm::LGP::LGPParameters::nbProgramConstantComment,
         Json::commentBefore);
-
     root["algorithm"]["lgp"]["nbRegisters"] = params.algorithm.lgp.nbRegisters;
     root["algorithm"]["lgp"]["nbRegisters"].setComment(
         Algorithm::LGP::LGPParameters::nbRegistersComment, Json::commentBefore);
-    // Mutation.program parameters
     root["algorithm"]["lgp"]["maxConstValue"] =
         params.algorithm.lgp.maxConstValue;
     root["algorithm"]["lgp"]["maxConstValue"].setComment(
         Algorithm::LGP::LGPParameters::maxConstValueComment, Json::commentBefore);
-
     root["algorithm"]["lgp"]["maxProgramSize"] =
         params.algorithm.lgp.maxProgramSize;
     root["algorithm"]["lgp"]["maxProgramSize"].setComment(
         Algorithm::LGP::LGPParameters::maxProgramSizeComment, Json::commentBefore);
-
     root["algorithm"]["lgp"]["initMinProgramSize"] =
         params.algorithm.lgp.initMinProgramSize;
     root["algorithm"]["lgp"]["initMinProgramSize"].setComment(
         Algorithm::LGP::LGPParameters::initMinProgramSizeComment,
         Json::commentBefore);
-
     root["algorithm"]["lgp"]["initMaxProgramSize"] =
         params.algorithm.lgp.initMaxProgramSize;
     root["algorithm"]["lgp"]["initMaxProgramSize"].setComment(
         Algorithm::LGP::LGPParameters::initMaxProgramSizeComment,
         Json::commentBefore);
-
     root["algorithm"]["lgp"]["minConstValue"] =
         params.algorithm.lgp.minConstValue;
     root["algorithm"]["lgp"]["minConstValue"].setComment(
         Algorithm::LGP::LGPParameters::minConstValueComment, Json::commentBefore);
-
     root["algorithm"]["lgp"]["pAdd"] = params.algorithm.lgp.pAdd;
     root["algorithm"]["lgp"]["pAdd"].setComment(
         Algorithm::LGP::LGPParameters::pAddComment, Json::commentBefore);
-
     root["algorithm"]["lgp"]["pConstantMutation"] =
         params.algorithm.lgp.pConstantMutation;
     root["algorithm"]["lgp"]["pConstantMutation"].setComment(
         Algorithm::LGP::LGPParameters::pConstantMutationComment,
         Json::commentBefore);
-
     root["algorithm"]["lgp"]["pNewProgram"] = params.algorithm.lgp.pNewProgram;
     root["algorithm"]["lgp"]["pNewProgram"].setComment(
         Algorithm::LGP::LGPParameters::pNewProgramComment, Json::commentBefore);
-
     root["algorithm"]["lgp"]["pDelete"] = params.algorithm.lgp.pDelete;
     root["algorithm"]["lgp"]["pDelete"].setComment(
         Algorithm::LGP::LGPParameters::pDeleteComment, Json::commentBefore);
-
     root["algorithm"]["lgp"]["pMutate"] = params.algorithm.lgp.pMutate;
     root["algorithm"]["lgp"]["pMutate"].setComment(
         Algorithm::LGP::LGPParameters::pMutateComment, Json::commentBefore);
-
     root["algorithm"]["lgp"]["pSwap"] = params.algorithm.lgp.pSwap;
     root["algorithm"]["lgp"]["pSwap"].setComment(
         Algorithm::LGP::LGPParameters::pSwapComment, Json::commentBefore);
+    root["algorithm"]["lgp"]["pMutateOutput"] = params.algorithm.lgp.pMutateOutput;
+    root["algorithm"]["lgp"]["pMutateOutput"].setComment(
+        Algorithm::LGP::LGPParameters::pMutateOutputComment, Json::commentBefore);
+
+
+    root["algorithm"]["cgp"]["nbLayers"] = params.algorithm.cgp.nbLayers;
+    root["algorithm"]["cgp"]["nbLayers"].setComment(
+        Algorithm::CGP::CGPParameters::nbLayersComment, Json::commentBefore);
+    root["algorithm"]["cgp"]["nbNodesPerLayer"] = params.algorithm.cgp.nbNodesPerLayer;
+    root["algorithm"]["cgp"]["nbNodesPerLayer"].setComment(
+        Algorithm::CGP::CGPParameters::nbNodesPerLayerComment, Json::commentBefore);
+    root["algorithm"]["cgp"]["pMutateNode"] = params.algorithm.cgp.pMutateNode;
+    root["algorithm"]["cgp"]["pMutateNode"].setComment(
+        Algorithm::CGP::CGPParameters::pMutateNodeComment, Json::commentBefore);
+    
+
+    root["algorithm"]["tgp"]["nbLayers"] = params.algorithm.tgp.maxDepth;
+    root["algorithm"]["tgp"]["nbLayers"].setComment(
+        Algorithm::TGP::TGPParameters::maxDepthComment, Json::commentBefore);
+    root["algorithm"]["tgp"]["nbNodesPerLayer"] = params.algorithm.tgp.maxInitDepth;
+    root["algorithm"]["tgp"]["nbNodesPerLayer"].setComment(
+        Algorithm::TGP::TGPParameters::maxInitDepthComment, Json::commentBefore);
+    root["algorithm"]["tgp"]["pMutateNode"] = params.algorithm.tgp.maxNbEdgePerNode;
+    root["algorithm"]["tgp"]["pMutateNode"].setComment(
+        Algorithm::TGP::TGPParameters::maxNbEdgePerNodeComment, Json::commentBefore);
+    
+
 
     root["selection"]["_selectionMode"] = params.selection._selectionMode;
     root["selection"]["_selectionMode"].setComment(

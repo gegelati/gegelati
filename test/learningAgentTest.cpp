@@ -481,10 +481,11 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
         params.nbIterationsPerPolicyEvaluation * 3;
     params.nbThreads = 3;
 
-    auto lgp = new Algorithm::LGPAlgorithm(params.algorithm, set);
+
+    auto lgp1 = new Algorithm::LGPAlgorithm(params.algorithm, set);
+    Learn::LearningAgent la(le, *lgp1, params);
     selector = new Selector::TruncationSelector(params.selection);
-    lgp->setSelector(*selector);
-    Learn::LearningAgent la(le, *lgp, params);
+    la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
 
@@ -536,6 +537,10 @@ TEST_F(LearningAgentTest, TrainCGPPortability)
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.nbThreads = 3;
+    params.algorithm.lgp.pMutateOutput = 1;
+    params.algorithm.cgp.nbLayers = 3;
+    params.algorithm.cgp.nbNodesPerLayer = 5;
+    params.algorithm.cgp.pMutateNode = params.algorithm.lgp.pMutate;
 
     Instructions::Set set2;
     set2.add(*(new Instructions::LambdaInstruction<int, int>([](int a, int b) -> double { return a - b; })));
@@ -584,6 +589,9 @@ TEST_F(LearningAgentTest, TrainTGPPortability)
     params.maxNbEvaluationPerPolicy =
         params.nbIterationsPerPolicyEvaluation * 3;
     params.nbThreads = 3;
+    params.algorithm.tgp.maxDepth = 4;
+    params.algorithm.tgp.maxInitDepth = 2;
+    params.algorithm.tgp.maxNbEdgePerNode = 2;
 
     
     Instructions::Set set2;

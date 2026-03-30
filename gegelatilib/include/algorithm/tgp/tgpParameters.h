@@ -35,61 +35,42 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef ALGORITHM_PARAMETERS_H
-#define ALGORITHM_PARAMETERS_H
+#ifndef TGP_PARAMETERS_H
+#define TGP_PARAMETERS_H
 
 #include <cstddef>
 #include <cstdint>
 #include <string>
 
-#include "algorithm/tpg/tpgParameters.h"
-#include "algorithm/atpg/atpgParameters.h"
-#include "algorithm/maple/mapleParameters.h"
-#include "algorithm/lgp/lgpParameters.h"
-#include "algorithm/cgp/cgpParameters.h"
-#include "algorithm/tgp/tgpParameters.h"
-
-namespace Algorithm {
-
+namespace Algorithm::TGP {
     /**
-     * \brief Structure holding all parameters affecting selection.
+     * \brief Structure holding all parameters affecting mutations of TGP.
      */
-    typedef struct AlgorithmParameters
+    typedef struct TGPParameters
     {
-        /// JSon comment
-        inline static const std::string nbAgentsComment =
-            "// Number of agent for the evolution of the population"
-            "// \"nbAgents\" : 100, // Default value";
-        /// Number of agent for the evolution of the population
-        size_t nbAgents = 100;
 
         /// JSon comment
-        inline static const std::string activationFunctionComment =
-            "// string that indicate the activation function used for "
-            "continuous actions \n"
-            "// \"activationFunction\" : 'none', // Default value";
-        /// string that indicate the activation function used for continuous
-        /// actions
-        std::string activationFunction = "none";
+        inline static const std::string maxDepthComment =
+            "// Maximum depth that the graph can reach.\n"
+            "// \"maxDepth\" : 5, // Default value";
+        /// Maximum depth that the graph can reach.
+        size_t maxDepth = 5;
 
-        /// Parameters for TPG
-        TPG::TPGParameters tpg;
+        /// JSon comment
+        inline static const std::string maxInitDepthComment =
+            "// Maximum depth that the graph can reach at initialisation.\n"
+            "// \"maxInitDepth\" : 3, // Default value";
+        /// Maximum depth that the graph can reach.
+        size_t maxInitDepth = 3;
 
-        /// Parameters for LGPMutator
-        LGP::LGPParameters lgp;
+        /// JSon comment
+        inline static const std::string maxNbEdgePerNodeComment =
+            "// Maximum number of edges per node, we strongly advice to let it at 2 to avoid complexity explosion.\n"
+            "// \"maxNbEdgePerNode\" : 2, // Default value";
+        /// Maximum number of edges per node, we strongly advice to let it at 2 to avoid complexity explosion.
+        size_t maxNbEdgePerNode = 2;
 
-        /// Parameters for CGPMutator
-        CGP::CGPParameters cgp;
-
-        /// Parameters for TGPMutator
-        TGP::TGPParameters tgp;
-
-        /// Parameters for LGPMutator
-        Maple::MapleParameters maple;
-
-        /// Parameters for LGPMutator
-        ATPG::ATPGParameters atpg;
-    } AlgorithmParameters;
+    } TGPParameters;
 } // namespace Algorithm
 
 #endif

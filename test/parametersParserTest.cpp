@@ -139,6 +139,14 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(-10, params.algorithm.lgp.minConstValue);
     ASSERT_EQ(10, params.algorithm.lgp.maxConstValue);
 
+    ASSERT_EQ(0, params.algorithm.cgp.nbLayers);
+    ASSERT_EQ(0, params.algorithm.cgp.nbNodesPerLayer);
+    ASSERT_EQ(0, params.algorithm.cgp.pMutateNode);
+
+    ASSERT_EQ(0, params.algorithm.tgp.maxDepth);
+    ASSERT_EQ(0, params.algorithm.tgp.maxInitDepth);
+    ASSERT_EQ(0, params.algorithm.tgp.maxNbEdgePerNode);
+
     ASSERT_EQ("tournament", params.selection._selectionMode);
     ASSERT_EQ(0.85, params.selection.truncation.ratioDeletedRoots);
     ASSERT_EQ(0.15, params.selection.tournament.ratioSavedRoots);
@@ -219,6 +227,15 @@ TEST(LearningParametersTest, writeParametersToJson)
     ASSERT_EQ(params.algorithm.lgp.pDelete, params2.algorithm.lgp.pDelete);
     ASSERT_EQ(params.algorithm.lgp.pMutate, params2.algorithm.lgp.pMutate);
     ASSERT_EQ(params.algorithm.lgp.pSwap, params2.algorithm.lgp.pSwap);
+
+    ASSERT_EQ(params.algorithm.cgp.nbLayers, params2.algorithm.cgp.nbLayers);
+    ASSERT_EQ(params.algorithm.cgp.nbNodesPerLayer, params2.algorithm.cgp.nbNodesPerLayer);
+    ASSERT_EQ(params.algorithm.cgp.pMutateNode, params2.algorithm.cgp.pMutateNode);
+    
+    ASSERT_EQ(params.algorithm.tgp.maxDepth, params2.algorithm.tgp.maxDepth);
+    ASSERT_EQ(params.algorithm.tgp.maxInitDepth, params2.algorithm.tgp.maxInitDepth);
+    ASSERT_EQ(params.algorithm.tgp.maxNbEdgePerNode, params2.algorithm.tgp.maxNbEdgePerNode);
+    
 
     // Mutation parameters tpg
     ASSERT_EQ(params.algorithm.activationFunction, params2.algorithm.activationFunction);

@@ -21,12 +21,6 @@ namespace Algorithm::CGP {
         /// CGPLineMutator used for mutating lines.
         CGPLineMutator cgpLineMutator;
 
-        /// @brief Szie of a layer of ndoes
-        size_t sizeLayer = 5;
-
-        /// @brief number of layers
-        size_t nbLayer = 3;
-
     public:
 
         /**
@@ -63,7 +57,7 @@ namespace Algorithm::CGP {
         /**
          * \brief Inherrit from LGP mutator
          */
-        virtual void insertRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, RNG::RNG& rng) override;
+        virtual void insertRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief mutate a specific agent of an algorithm within a population
@@ -100,11 +94,12 @@ namespace Algorithm::CGP {
          *
          * \param[in,out] agent the Agent to mutate.
          * \param[in] manager the manager to change the agents.
+         * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if a line was successfully altered, false if the
          *         Program has less than one line.
          */
-        virtual bool alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, RNG::RNG& rng) override;
+        virtual bool alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
     };
 

@@ -1,63 +1,86 @@
 {
-  "activationFunction": "none",
-  "archiveSize": 50,
-  "archivingProbability": 0.5,
-  "nbIterationsPerPolicyEvaluation": 50,
-  "nbIterationsPerPolicyValidation": 50,
-  "stepValidation": 4,
-  "maxNbActionsPerEval": 5,
-  "maxNbEvaluationPerPolicy": 100,
-  "nbRegisters": 3,
-  "nbThreads": 2,
-  "nbGenerations": 200,
-  "doValidation": true,
-  "nbProgramConstant": 5,
-  "mutation": {
-    "tpg": {
-      "nbRoots": 100,
-      "maxInitOutgoingEdges": 3,
-      "maxOutgoingEdges": 60,
-      "pEdgeDeletion": 0.8,
-      "pEdgeAddition": 0.8,
-      "pProgramMutation": 0.8,
-      "forceProgramBehaviorChangeOnMutation": true,
-      "pEdgeDestinationChange": 0.3,
-      "pEdgeDestinationIsAction": 0.6,
-      "probaContextOverActionProgram": 0.5,
-      "useActionProgram": false,
-      "ratioTeamsOverActions": 0.2,
-      "pChangeActionClass": 0.3,
-      "pActionEdgeDeletion": 0.3,
-      "pActionEdgeAddition": 0.4,
-      "pMutateActionProgram": 0.5,
-      "pSwapActionProgram": 0.9,
-      "nbActionEdgeInit": 3,
-      "pCrossAgents": 0.2,
-      "pCrossPrograms": 0.5,
-      "useMultiActionProgram": true,
-      "teamAccessAllActions": false
+    "algorithm" :
+    {
+        "activationFunction" : "tanh",
+        "atpg" :
+        {
+            "probaContextOverActionProgram" : 0.5
+        },
+        "cgp" :
+        {
+            "nbLayers" : 1,
+            "nbNodesPerLayer" : 5,
+            "pMutateNode" : 0.1
+        },
+        "lgp" :
+        {
+            "initMaxProgramSize" : 5,
+            "initMinProgramSize" : 1,
+            "maxConstValue" : 1.0,
+            "maxProgramSize" : 5,
+            "minConstValue" : -1.0,
+            "nbProgramConstant" : 10,
+            "nbRegisters" : 12,
+            "pAdd" : 0.5,
+            "pConstantMutation" : 0.5,
+            "pDelete" : 0.5,
+            "pMutate" : 1.0,
+            "pMutateOutput" : 0.0,
+            "pNewProgram" : 0.0,
+            "pSwap" : 1.0
+        },
+        "maple" :
+        {
+            "nbActionEdgeInit" : 6,
+            "pActionEdgeAddition" : 0.0,
+            "pActionEdgeDeletion" : 0.0,
+            "pChangeActionClass" : 0.1,
+            "pCrossAgents" : 0.7,
+            "pCrossPrograms" : 0.5,
+            "pMutateActionProgram" : 0.7,
+            "pSwapActionProgram" : 0.5
+        },
+        "nbAgents" : 100,
+        "tgp" :
+        {
+            "nbLayers" : 5,
+            "nbNodesPerLayer" : 3,
+            "pMutateNode" : 2
+        },
+        "tpg" :
+        {
+            "archiveSize" : 50,
+            "archivingProbability" : 0.0005,
+            "forceProgramBehaviorChangeOnMutation" : false,
+            "maxInitOutgoingEdges" : 2,
+            "maxOutgoingEdges" : 5,
+            "pEdgeAddition" : 0.5,
+            "pEdgeDeletion" : 0.2,
+            "pEdgeDestinationChange" : 0.1,
+            "pEdgeDestinationIsAction" : 0.5,
+            "pProgramMutation" : 0.2
+        }
     },
-    "prog": {
-      "maxProgramSize": 40,
-      "pNewProgram": 0.0,
-      "pDelete": 0.7,
-      "pAdd": 0.7,
-      "pMutate": 1.0,
-      "pSwap": 1.0,
-      "pConstantMutation": 0.5,
-      "minConstValue": -10,
-      "maxConstValue": 10,
+    "doValidation" : true,
+    "maxNbActionsPerEval" : 300,
+    "maxNbEvaluationPerPolicy" : 20,
+    "nbGenerations" : 10,
+    "nbIterationsPerPolicyEvaluation" : 3,
+    "nbIterationsPerPolicyValidation" : 20,
+    "nbThreads" : 20,
+    "selection" :
+    {
+        "_selectionMode" : "tournament",
+        "tournament" :
+        {
+            "areElitesReproductible" : true,
+            "ratioSavedRoots" : 0.05,
+            "sizeTournament" : 3
+        },
+        "truncation" :
+        {
+            "ratioDeletedRoots" : 0.5
+        }
     },
-  },
-  "selection":{
-    "tournament":{
-      "ratioSavedRoots": 0.15,
-      "sizeTournament": 3,
-      "areElitesReproductible": true,
-    },
-    "truncation":{
-      "ratioDeletedRoots": 0.85,
-    },
-    "_selectionMode": "tournament",
-  },
+    "stepValidation" : 50
 }

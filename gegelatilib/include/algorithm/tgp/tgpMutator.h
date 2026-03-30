@@ -21,11 +21,6 @@ namespace Algorithm::TGP {
         /// TGPLineMutator used for mutating lines.
         TGPLineMutator tgpLineMutator;
 
-        /// @brief max depth of the tgp
-        size_t maxDepth = 4;
-        /// @brief max depth of the tgp
-        size_t maxInitDepth = 4;
-
     public:
 
         /**
@@ -66,10 +61,11 @@ namespace Algorithm::TGP {
          * \param[in] destinationIndexLine destination index of the line that should be inserted
          * \param[in] maxDepthTree maximum depth of the sub tree added
          * \param[in] manager the manager to change the agents.
+         * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          *
          */
-        virtual void insertRandomSubTree(const LGP::LGPAgent& agent, size_t destinationIndexLine, size_t maxDepthTree, LGP::LGPManager& manager, RNG::RNG& rng);
+        virtual void insertRandomSubTree(const LGP::LGPAgent& agent, size_t destinationIndexLine, size_t maxDepthTree, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng);
 
         /**
          * \brief mutate a specific agent of an algorithm within a population
@@ -106,11 +102,12 @@ namespace Algorithm::TGP {
          *
          * \param[in,out] agent the Agent to mutate.
          * \param[in] manager the manager to change the agents.
+         * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if a line was successfully altered, false if the
          *         Program has less than one line.
          */
-        virtual bool alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, RNG::RNG& rng) override;
+        virtual bool alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief destroy the subtree of the corresponding index
@@ -124,7 +121,7 @@ namespace Algorithm::TGP {
         /**
          * \brief method returning if the node at the corresponding index is pointing to some sub trees.
          */
-        std::array<bool, 2> hasSubTree(const LGP::LGPAgent& agent, size_t idx);
+        std::vector<bool> hasSubTree(const LGP::LGPAgent& agent, size_t idx);
 
         /**
          * \brief Method returning the index of the line in the agent corresponding to the destination index indicated

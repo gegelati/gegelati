@@ -120,11 +120,11 @@ bool Algorithm::TGP::TGPLineMutator::initRandomCorrectLineOperand(
         // Register case
         } else {
             // Select a location
-            operandLocation = 2 * line.getDestinationIndex() + 1 + operandIdx;
+            operandLocation = env.getMaxNbOperands() * line.getDestinationIndex() + 1 + operandIdx;
         }
     } else if (operandFound && operandDataSourceIndex == 0) {
             // Select a location
-            operandLocation = 2 * line.getDestinationIndex() + 1 + operandIdx;
+            operandLocation = env.getMaxNbOperands() * line.getDestinationIndex() + 1 + operandIdx;
     }
 
     // set line operand info

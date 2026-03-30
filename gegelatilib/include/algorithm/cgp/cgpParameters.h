@@ -35,61 +35,43 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#ifndef ALGORITHM_PARAMETERS_H
-#define ALGORITHM_PARAMETERS_H
+#ifndef CGP_PARAMETERS_H
+#define CGP_PARAMETERS_H
 
 #include <cstddef>
 #include <cstdint>
 #include <string>
 
-#include "algorithm/tpg/tpgParameters.h"
-#include "algorithm/atpg/atpgParameters.h"
-#include "algorithm/maple/mapleParameters.h"
-#include "algorithm/lgp/lgpParameters.h"
-#include "algorithm/cgp/cgpParameters.h"
-#include "algorithm/tgp/tgpParameters.h"
-
-namespace Algorithm {
-
+namespace Algorithm::CGP {
     /**
-     * \brief Structure holding all parameters affecting selection.
+     * \brief Structure holding all parameters affecting mutations of CGP.
      */
-    typedef struct AlgorithmParameters
+    typedef struct CGPParameters
     {
-        /// JSon comment
-        inline static const std::string nbAgentsComment =
-            "// Number of agent for the evolution of the population"
-            "// \"nbAgents\" : 100, // Default value";
-        /// Number of agent for the evolution of the population
-        size_t nbAgents = 100;
 
         /// JSon comment
-        inline static const std::string activationFunctionComment =
-            "// string that indicate the activation function used for "
-            "continuous actions \n"
-            "// \"activationFunction\" : 'none', // Default value";
-        /// string that indicate the activation function used for continuous
-        /// actions
-        std::string activationFunction = "none";
+        inline static const std::string nbLayersComment =
+            "// Number of layer in the CGP.\n"
+            "// \"nbLayers\" : 1, // Default value";
+        /// Number of layer in the CGP.
+        size_t nbLayers = 1;
 
-        /// Parameters for TPG
-        TPG::TPGParameters tpg;
+        /// JSon comment
+        inline static const std::string nbNodesPerLayerComment =
+            "// Number of nodes per layer of the CGP.\n"
+            "// \"nbNodesPerLayer\" : 5, // Default value";
+        /// Number of nodes per layer of the CGP.
+        size_t nbNodesPerLayer = 5;
 
-        /// Parameters for LGPMutator
-        LGP::LGPParameters lgp;
+        /// JSon comment
+        inline static const std::string pMutateNodeComment =
+            "// Probability of altering a Node of the CGP.\n"
+            "// \"pMutateNode\" : 0.1, // Default value";
+        /// Probability of altering a Node of the CGP.
+        double pMutateNode = 0.1;
 
-        /// Parameters for CGPMutator
-        CGP::CGPParameters cgp;
 
-        /// Parameters for TGPMutator
-        TGP::TGPParameters tgp;
-
-        /// Parameters for LGPMutator
-        Maple::MapleParameters maple;
-
-        /// Parameters for LGPMutator
-        ATPG::ATPGParameters atpg;
-    } AlgorithmParameters;
+    } CGPParameters;
 } // namespace Algorithm
 
 #endif

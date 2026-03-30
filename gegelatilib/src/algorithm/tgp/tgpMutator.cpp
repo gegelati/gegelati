@@ -48,13 +48,13 @@ void Algorithm::TGP::TGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
     }
 
     // Insert line, TGP will recursively call this method to create a whole TGP graph.
-    this->insertRandomSubTree(lgpAgent, 0, this->maxInitDepth, lgpManager, rng);
+    this->insertRandomSubTree(lgpAgent, 0, params.tgp.maxInitDepth, lgpManager, params, rng);
 
     // Identify Introns
     lgpManager.identifyIntrons(agent);
 }
 
-void Algorithm::TGP::TGPMutator::insertRandomSubTree(const LGP::LGPAgent& agent, size_t destinationIndexLine, size_t maxDepthTree, LGP::LGPManager& manager,  RNG::RNG& rng)
+void Algorithm::TGP::TGPMutator::insertRandomSubTree(const LGP::LGPAgent& agent, size_t destinationIndexLine, size_t maxDepthTree, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     std::vector<size_t> lineDestinationIndexToInsert;
     lineDestinationIndexToInsert.push_back(destinationIndexLine);
@@ -72,7 +72,7 @@ void Algorithm::TGP::TGPMutator::insertRandomSubTree(const LGP::LGPAgent& agent,
 
         this->tgpLineMutator.initRandomCorrectLine(manager.getLineForMutation(agent, lineIndex), destinationIndexLine, maxDepthReached, rng);
 
-        for(size_t idx = 0; idx < 2; idx++) {
+        for(size_t idx = 0; idx < params.tgp.maxNbEdgePerNode; idx++) {
             // Operand is a register
             if(line.getOperand(idx).first == 0) {
                 lineDestinationIndexToInsert.push_back(line.getOperand(idx).second);
@@ -106,7 +106,7 @@ void Algorithm::TGP::TGPMutator::crossoverAgents(
     /// get node with tree size below or equal too maxDepth / 2
     std::array<size_t, 2> chosenIndexNodes;
 
-    size_t maxDepthCross = this->maxDepth;
+    size_t maxDepthCross = params.tgp.maxDepth / 2;
 
     std::array<std::map<size_t, std::reference_wrapper<const LGP::LGPLine>>, 2> linesToCross;
     std::array<std::set<size_t>, 2> removedIdxLines;
@@ -116,7 +116,7 @@ void Algorithm::TGP::TGPMutator::crossoverAgents(
         size_t nbLines = curAgent.getNbLines();
         for(size_t idx = 0; idx < nbLines; idx++) {
             size_t destIndex = curAgent.getLine(idx).getDestinationIndex();
-            if(this->getRealNodeDepth(curAgent, destIndex) < maxDepthCross && this->getNodeDepth(destIndex) + maxDepthCross <= maxDepth && destIndex != 0) {
+            if(this->getRealNodeDepth(curAgent, destIndex) < maxDepthCross && this->getNodeDepth(destIndex) + maxDepthCross <= params.tgp.maxDepth && destIndex != 0) {
                 possibleNodes.push_back(destIndex);
             }
         }
@@ -140,8 +140,8 @@ void Algorithm::TGP::TGPMutator::crossoverAgents(
             linesToCross.at(idxAgent).insert({destIndex, lineCrossed});
             removedIdxLines.at(idxAgent).insert(idxLine);
 
-            std::array<bool, 2> subTree = this->hasSubTree(curAgent, idxLine);
-            for(size_t idxOp = 0; idxOp < 2; idxOp ++ ) {
+            std::vector<bool> subTree = this->hasSubTree(curAgent, idxLine);
+            for(size_t idxOp = 0; idxOp < params.tgp.maxNbEdgePerNode; idxOp ++ ) {
                 if(subTree.at(idxOp)) {
                     destinationIndexToInclude.push_back(lineCrossed.getOperand(idxOp).second);
                 }
@@ -181,7 +181,7 @@ bool Algorithm::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
     bool anyMutation = false;
     if (rng.getDouble(0.0, 1.0) < params.lgp.pMutate) {
         anyMutation = true;
-        alterRandomLine(agent, manager, rng);
+        alterRandomLine(agent, manager, params, rng);
     }
 
     // mutate the programs constants if they exists
@@ -203,7 +203,7 @@ bool Algorithm::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
             }
     
             // One of the output must always be zero, so mutation is allowed if zero is used multiple time, or if current idx is not using zero (meaning it is used elsewhere)
-            if((nbZeroRegUsed > 1 || agent.getOutputIndices().at(idx) != 0) && rng.getDouble(0.0, 1.0) < 1) {//params.lgp.pMutateOutputs) {
+            if((nbZeroRegUsed > 1 || agent.getOutputIndices().at(idx) != 0) && rng.getDouble(0.0, 1.0) < params.lgp.pMutateOutput) {
                 alterRandomOutputs(agent, manager, idx, params, rng);
             }
         }
@@ -233,13 +233,13 @@ bool Algorithm::TGP::TGPMutator::alterRandomOutputs(const LGP::LGPAgent& agent, 
     return true;
 }
 
-std::array<bool, 2> Algorithm::TGP::TGPMutator::hasSubTree(const LGP::LGPAgent& agent, size_t idx) {
-    std::array<bool, 2> result = {false, false};
+std::vector<bool> Algorithm::TGP::TGPMutator::hasSubTree(const LGP::LGPAgent& agent, size_t idx) {
+    std::vector<bool> result;
 
     const LGP::LGPLine& line = agent.getLine(idx);
-    for(size_t idxOp = 0; idxOp < 2; idxOp++) {
+    for(size_t idxOp = 0; idxOp < line.getEnvironment().getMaxNbOperands(); idxOp++) {
         // Operand is a register
-        result.at(idxOp) = (line.getOperand(idxOp).first == 0);
+        result.push_back(line.getOperand(idxOp).first == 0);
     }
     return result;
 }
@@ -275,8 +275,8 @@ size_t Algorithm::TGP::TGPMutator::getRealNodeDepth(const LGP::LGPAgent& agent, 
 
         const LGP::LGPLine& line = agent.getLine(this->getIndexLineFromDest(agent, destIndex));
 
-        std::array<bool, 2> subTree = this->hasSubTree(agent, this->getIndexLineFromDest(agent, destIndex));
-        for(size_t idxOp = 0; idxOp < 2; idxOp ++ ) {
+        std::vector<bool> subTree = this->hasSubTree(agent, this->getIndexLineFromDest(agent, destIndex));
+        for(size_t idxOp = 0; idxOp < subTree.size(); idxOp ++ ) {
             if(subTree.at(idxOp)) {
                 destinationIndexToInclude.push_back(line.getOperand(idxOp).second);
             }
@@ -298,8 +298,8 @@ void Algorithm::TGP::TGPMutator::destroySubTree(const LGP::LGPAgent& agent, size
         size_t idxLine = this->getIndexLineFromDest(agent, destinationIdx);
 
         const LGP::LGPLine& destroyedLine = agent.getLine(idxLine);
-        std::array<bool, 2> result = this->hasSubTree(agent, idxLine);
-        for(size_t idx = 0; idx < 2; idx++) {
+        std::vector<bool> result = this->hasSubTree(agent, idxLine);
+        for(size_t idx = 0; idx < result.size(); idx++) {
             // Operand is a register
             if(result.at(idx)) {
                 destinationIdxToDestroy.push_back(destroyedLine.getOperand(idx).second);
@@ -310,7 +310,7 @@ void Algorithm::TGP::TGPMutator::destroySubTree(const LGP::LGPAgent& agent, size
 }
 
 bool Algorithm::TGP::TGPMutator::alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, 
-                                              RNG::RNG& rng)
+                                              const AlgorithmParameters& params, RNG::RNG& rng)
 {
     if (agent.getNbLines() < 1) {
         return false;
@@ -319,22 +319,22 @@ bool Algorithm::TGP::TGPMutator::alterRandomLine(const LGP::LGPAgent& agent, LGP
     const uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines() - 1);
     const LGP::LGPLine& line = agent.getLine(lineIndex);
     
-    std::array<bool, 2> oldSubTree = this->hasSubTree(agent, lineIndex);
+    std::vector<bool> oldSubTree = this->hasSubTree(agent, lineIndex);
 
     // If current index is at max depth, don't allows the line to select registers.
-    bool maxDepthReached = (this->getNodeDepth(line.getDestinationIndex()) == this->maxDepth - 1);
+    bool maxDepthReached = (this->getNodeDepth(line.getDestinationIndex()) == params.tgp.maxDepth - 1);
     this->tgpLineMutator.alterCorrectLine(manager.getLineForMutation(agent, lineIndex), maxDepthReached, rng); // specified accessible registers
 
     if(!maxDepthReached) {
-        std::array<bool, 2> newSubTree = this->hasSubTree(agent, lineIndex);
-        for(size_t idx = 0; idx < 2; idx++) {
-            size_t idxSubTree = 2 * line.getDestinationIndex() + 1 + idx;
+        std::vector<bool> newSubTree = this->hasSubTree(agent, lineIndex);
+        for(size_t idx = 0; idx < newSubTree.size(); idx++) {
+            size_t idxSubTree = params.tgp.maxNbEdgePerNode * line.getDestinationIndex() + 1 + idx;
             if(oldSubTree[idx] && !newSubTree[idx]) {
                 // Destroy old sub tree
                 this->destroySubTree(agent, idxSubTree, manager);
             } else if(!oldSubTree[idx] && newSubTree[idx]) {
                 // Create new sub tree
-                this->insertRandomSubTree(agent, idxSubTree, this->maxDepth, manager, rng);
+                this->insertRandomSubTree(agent, idxSubTree, params.tgp.maxDepth, manager,  params, rng);
             }
         }
     }
@@ -346,11 +346,11 @@ void Algorithm::TGP::TGPMutator::changeNodeIndex(const LGP::LGPAgent& agent, LGP
     const LGP::LGPLine& line = agent.getLine(lineIndex);
     if(line.getDestinationIndex() != destIndex) {
 
-        std::array<bool, 2> subTree = this->hasSubTree(agent, lineIndex);
-        for(size_t idx = 0; idx < 2; idx++) {
+        std::vector<bool> subTree = this->hasSubTree(agent, lineIndex);
+        for(size_t idx = 0; idx < subTree.size(); idx++) {
             if(subTree.at(idx)) {
-                this->changeNodeIndex(agent, manager, this->getIndexLineFromDest(agent, agent.getLine(lineIndex).getOperand(idx).second), 2 * destIndex + 1 + idx);
-                bool success = manager.getLineForMutation(agent, lineIndex).setOperand(idx, 0, 2 * destIndex + 1 + idx);
+                this->changeNodeIndex(agent, manager, this->getIndexLineFromDest(agent, agent.getLine(lineIndex).getOperand(idx).second), subTree.size() * destIndex + 1 + idx);
+                bool success = manager.getLineForMutation(agent, lineIndex).setOperand(idx, 0, subTree.size() * destIndex + 1 + idx);
                 if(!success) {
                     throw std::runtime_error("TGPMutator::changeNodeIndex: operand of sub tree modification did not success.");
                 }

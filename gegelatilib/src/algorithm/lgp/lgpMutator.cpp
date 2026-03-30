@@ -65,7 +65,7 @@ void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
         params.lgp.initMinProgramSize, params.lgp.initMaxProgramSize);
     // Insert them
     while (lgpAgent.getNbLines() < nbLine) {
-        this->insertRandomLine(lgpAgent, lgpManager, rng);
+        this->insertRandomLine(lgpAgent, lgpManager, params, rng);
     }
 
     // Identify Introns
@@ -202,12 +202,12 @@ bool Algorithm::LGP::LGPMutator::mutateLGPAgent(const LGPAgent& agent, LGPManage
     if (agent.getNbLines() < params.lgp.maxProgramSize &&
         rng.getDouble(0.0, 1.0) < params.lgp.pAdd) {
         anyMutation = true;
-        insertRandomLine(agent, manager, rng);
+        insertRandomLine(agent, manager, params, rng);
     }
 
     if (rng.getDouble(0.0, 1.0) < params.lgp.pMutate) {
         anyMutation = true;
-        alterRandomLine(agent, manager, rng);
+        alterRandomLine(agent, manager, params, rng);
     }
 
     if (rng.getDouble(0.0, 1.0) < params.lgp.pSwap) {
@@ -250,7 +250,7 @@ bool Algorithm::LGP::LGPMutator::deleteRandomLine(const LGPAgent& agent, LGPMana
     return true;
 }
 
-void Algorithm::LGP::LGPMutator::insertRandomLine(const LGPAgent& agent, LGPManager& manager,  RNG::RNG& rng)
+void Algorithm::LGP::LGPMutator::insertRandomLine(const LGPAgent& agent, LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines());
     manager.addNewLine(agent, lineIndex);
@@ -275,7 +275,7 @@ bool Algorithm::LGP::LGPMutator::swapRandomLines(const LGPAgent& agent, LGPManag
 }
 
 bool Algorithm::LGP::LGPMutator::alterRandomLine(const LGPAgent& agent, LGPManager& manager, 
-                                              RNG::RNG& rng)
+                                              const AlgorithmParameters& params, RNG::RNG& rng)
 {
     if (agent.getNbLines() < 1) {
         return false;

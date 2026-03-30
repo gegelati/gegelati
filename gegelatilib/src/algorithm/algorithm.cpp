@@ -178,7 +178,6 @@ bool Algorithm::Algorithm::containsAgent(const Agent& agent) const
 void Algorithm::Algorithm::initSelector()
 {
     if(!this->hasSelector()) {
-        std::cout<<"init selector"<<std::endl;
         this->savedDefaultSelector = std::move(Selector::selectorFactory());
         this->setSelector(*this->savedDefaultSelector);
     }

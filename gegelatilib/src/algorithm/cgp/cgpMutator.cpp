@@ -46,23 +46,23 @@ void Algorithm::CGP::CGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
         lgpManager.setConstantAt(agent, i, c_value);
     }
 
-    // Select the number of line randomly
-    const uint64_t nbLine = this->sizeLayer * this->nbLayer;
+    // Compute the number of nodes
+    const uint64_t nbLine = params.cgp.nbNodesPerLayer * params.cgp.nbLayers;
     // Insert them
     while (lgpAgent.getNbLines() < nbLine) {
-        this->insertRandomLine(lgpAgent, lgpManager, rng);
+        this->insertRandomLine(lgpAgent, lgpManager, params, rng);
     }
 
     // Identify Introns
     lgpManager.identifyIntrons(agent);
 }
 
-void Algorithm::CGP::CGPMutator::insertRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager,  RNG::RNG& rng)
+void Algorithm::CGP::CGPMutator::insertRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     uint64_t lineIndex = agent.getNbLines();
     manager.addNewLine(agent, lineIndex);
     
-    size_t maxIndex = sizeLayer * (lineIndex / sizeLayer);
+    size_t maxIndex = params.cgp.nbNodesPerLayer * (lineIndex / params.cgp.nbNodesPerLayer);
     this->cgpLineMutator.initRandomCorrectLine(manager.getLineForMutation(agent, lineIndex), lineIndex, maxIndex, rng);
 }
 
@@ -77,9 +77,9 @@ void Algorithm::CGP::CGPMutator::crossoverAgents(
 bool Algorithm::CGP::CGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     bool anyMutation = false;
-    if (rng.getDouble(0.0, 1.0) < params.lgp.pMutate) {
+    if (rng.getDouble(0.0, 1.0) < params.cgp.pMutateNode) {
         anyMutation = true;
-        alterRandomLine(agent, manager, rng);
+        alterRandomLine(agent, manager, params, rng);
     }
 
     // mutate the programs constants if they exists
@@ -90,7 +90,7 @@ bool Algorithm::CGP::CGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
     }
 
     for(size_t idx = 0; idx < manager.getOutputs().size(); idx++) {
-        if(rng.getDouble(0.0, 1.0) < 1) {//params.lgp.pMutateOutputs) {
+        if(rng.getDouble(0.0, 1.0) < params.lgp.pMutateOutput) {
             alterRandomOutputs(agent, manager, idx, params, rng);
         }
     }
@@ -102,8 +102,8 @@ bool Algorithm::CGP::CGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
     return anyMutation;
 }
 
-bool Algorithm::CGP::CGPMutator::alterRandomLine(const LGP::LGPAgent& agent, LGP::LGPManager& manager, 
-                                              RNG::RNG& rng)
+bool Algorithm::CGP::CGPMutator::alterRandomLine(
+    const LGP::LGPAgent& agent, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     if (agent.getNbLines() < 1) {
         return false;
@@ -111,7 +111,7 @@ bool Algorithm::CGP::CGPMutator::alterRandomLine(const LGP::LGPAgent& agent, LGP
     // Select a random index.
     const uint64_t lineIndex = rng.getUnsignedInt64(0, agent.getNbLines() - 1);
     
-    size_t maxIndex = sizeLayer * (lineIndex / sizeLayer);
+    size_t maxIndex = params.cgp.nbNodesPerLayer * (lineIndex / params.cgp.nbNodesPerLayer);
     this->cgpLineMutator.alterCorrectLine(manager.getLineForMutation(agent, lineIndex), maxIndex, rng); // specified accessible registers
     return true;
 }

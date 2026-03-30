@@ -133,10 +133,11 @@ namespace Algorithm::LGP {
          *
          * \param[in,out] agent the Agent to mutate.
          * \param[in] manager the manager to change the agents.
+         * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          *
          */
-        virtual void insertRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
+        virtual void insertRandomLine(const LGPAgent& agent, LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng);
 
         /**
          * \brief Swap two randomly selected instructions within the given
@@ -164,11 +165,12 @@ namespace Algorithm::LGP {
          *
          * \param[in,out] agent the Agent to mutate.
          * \param[in] manager the manager to change the agents.
+         * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if a line was successfully altered, false if the
          *         Program has less than one line.
          */
-        virtual bool alterRandomLine(const LGPAgent& agent, LGPManager& manager, RNG::RNG& rng);
+        virtual bool alterRandomLine(const LGPAgent& agent, LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng);
 
         /**
          * \brief Alter a program's constant.
