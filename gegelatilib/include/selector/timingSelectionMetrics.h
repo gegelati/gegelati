@@ -21,6 +21,9 @@ namespace Selector {
         size_t nbActions = 0;
 
       public:
+        /// @brief Default destructor
+        virtual ~TimingSelectionMetrics() = default;
+
         /// @brief Return the execution time of learning agent.
         /// @return Execution time of learning agent.
         double getAgentTime() const
@@ -61,11 +64,11 @@ namespace Selector {
         /// @brief Constructor for the SelectionMetrics with timing.
         /// @param obj SelectionMetrics being timed.
         explicit TimingSelectionMetrics(std::shared_ptr<SelectionMetrics> obj)
-            : wrapped(obj){};
+            : wrapped(obj) {};
 
         /// @brief Forward to wrapped method
         void extractMetricsStep(
-            const TPG::TPGVertex* agent, std::vector<double> actionValues,
+            const TPG::TPGVertex* agent, const std::vector<double> actionValues,
             const Learn::LearningEnvironment& learningEnvironment) override;
 
         /// @brief Specialization of extractMetricsEpisode to add timings.

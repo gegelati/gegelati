@@ -156,7 +156,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     if (params.detailedTiming) {
         globalSelectionMetrics =
             std::make_shared<Selector::TimingSelectionMetrics>(
-                Selector::TimingSelectionMetrics(globalSelectionMetrics));
+                globalSelectionMetrics);
     }
     globalSelectionMetrics->initMetrics(root, le);
 
@@ -173,7 +173,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
         if (params.detailedTiming) {
             selectionMetrics =
                 std::make_shared<Selector::TimingSelectionMetrics>(
-                    Selector::TimingSelectionMetrics(selectionMetrics));
+                    selectionMetrics);
         }
         selectionMetrics->initMetrics(root, le);
 

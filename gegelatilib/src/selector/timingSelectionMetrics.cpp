@@ -1,7 +1,7 @@
 #include "selector/timingSelectionMetrics.h"
 
 void Selector::TimingSelectionMetrics::extractMetricsStep(
-    const TPG::TPGVertex* agent, std::vector<double> actionValues,
+    const TPG::TPGVertex* agent, const std::vector<double> actionValues,
     const Learn::LearningEnvironment& learningEnvironment)
 {
     wrapped->extractMetricsStep(agent, actionValues, learningEnvironment);

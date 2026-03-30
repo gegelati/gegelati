@@ -38,6 +38,9 @@ namespace Selector {
          */
         SelectionMetrics() = default;
 
+        /// @brief Default destructor
+        virtual ~SelectionMetrics() = default;
+
         /**
          * \brief Constructor with score and utility initialization.
          *
