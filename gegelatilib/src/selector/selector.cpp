@@ -29,6 +29,16 @@ bool Selector::Selector::hasManager() const
     return this->manager.has_value();
 }
 
+void Selector::Selector::setNbAgents(size_t nbAgents)
+{
+    this->nbAgents = nbAgents;
+}
+
+size_t Selector::Selector::getNbAgents()
+{
+    return this->nbAgents;
+}
+
 void Selector::Selector::doSelection(
     EvoGraph::Graph& graph,
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -167,28 +177,37 @@ std::unique_ptr<Selector::SelectionContext> Selector::Selector::updateContext() 
     }
     
     context->nbAgentsToCreate =
-        (uint64_t)(params.mutation.tpg.nbRoots) -
-        context->preExistingAgents.size();
+        this->nbAgents - context->preExistingAgents.size();
 
     return context;
 }
 
 
-bool Selector::Selector::isAgentEvalSkipped(
-    const Algorithm::Agent& agent,
-    std::shared_ptr<Learn::EvaluationResult>& previousResult) const
+std::shared_ptr<Learn::EvaluationResult> Selector::Selector::getResultsOf(
+    const Algorithm::Agent& agent) const
 {
     // Has the root already been evaluated more times than
     // params.maxNbEvaluationPerPolicy
     const auto& iter = this->resultsPerAgent.find(agent);
     if (iter != this->resultsPerAgent.end()) {
         // The root has already been evaluated
-        previousResult = iter->second;
-        return iter->second->getNbEvaluation() >=
-               this->params.maxNbEvaluationPerPolicy;
+        return iter->second;;
+    } else {
+        return nullptr;
+    }
+}
+
+size_t Selector::Selector::getNbEvaluation(
+    const Algorithm::Agent& agent) const
+{
+    // Has the root already been evaluated more times than
+    // params.maxNbEvaluationPerPolicy
+    const auto& iter = this->resultsPerAgent.find(agent);
+    if (iter != this->resultsPerAgent.end()) {
+        // The root has already been evaluated
+        return iter->second->getNbEvaluation();
     }
     else {
-        previousResult = nullptr;
-        return false;
+        return 0;
     }
 }

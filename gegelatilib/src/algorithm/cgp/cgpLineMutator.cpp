@@ -46,7 +46,7 @@ bool Algorithm::CGP::CGPLineMutator::initRandomCorrectLineOperand(
     const uint64_t& operandIdx, const bool initOperandDataSource,
     const bool initOperandLocation, const bool forceChange, RNG::RNG& rng)
 {
-    const Environment& env = line.getEnvironment();
+    const LGP::LGPEnvironment& env = line.getEnvironment();
     uint64_t operandDataSourceIndex = line.getOperand(operandIdx).first;
     bool operandFound = !initOperandDataSource;
 
@@ -152,7 +152,7 @@ bool Algorithm::CGP::CGPLineMutator::isLineCorrect(LGP::LGPLine& line, size_t nb
 
 void Algorithm::CGP::CGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, size_t idxRegister, size_t nbAvailableRegister, RNG::RNG& rng)
 {
-    const Environment& env = line.getEnvironment();
+    const LGP::LGPEnvironment& env = line.getEnvironment();
 
     // Select and set a destinationIndex. (can not fail)
     uint64_t destinationIndex = idxRegister;
@@ -190,7 +190,7 @@ void Algorithm::CGP::CGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, s
 void Algorithm::CGP::CGPLineMutator::alterCorrectLine(LGP::LGPLine& line, size_t nbAvailableRegister, RNG::RNG& rng)
 {
     // Generate a random int to select the modified part of the line
-    const LineSize lineSize = line.getEnvironment().getLineSize();
+    const LGP::LGPLineSize lineSize = line.getEnvironment().getLineSize();
 
     // Ignore size destination that cannot be mutated for CGP
     uint64_t selectedBit = rng.getUnsignedInt64(0, lineSize - lineSize.nbDestinationBits - 1);

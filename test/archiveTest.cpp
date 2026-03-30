@@ -56,7 +56,7 @@ class ArchiveTest : public ::testing::Test
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    std::shared_ptr<const Environment> e;
+    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
     std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent;
     Learn::LearningParameters params;
 
@@ -72,9 +72,9 @@ class ArchiveTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 5;
-        e = std::make_shared<Environment>(set, params, vect);
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 5;
+        e = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
         lgpAgent = std::make_shared<const Algorithm::LGP::LGPAgent>(*e, 1, 0);
     }
 
@@ -89,18 +89,18 @@ class ArchiveTest : public ::testing::Test
 
 TEST_F(ArchiveTest, ConstructorDestructor)
 {
-    Archive* a;
-    ASSERT_NO_THROW(a = new Archive();)
-        << "Default construction of an Archive failed";
+    Algorithm::TPG::TPGArchive* a;
+    ASSERT_NO_THROW(a = new Algorithm::TPG::TPGArchive();)
+        << "Default construction of an Algorithm::TPG::TPGArchive failed";
 
-    ASSERT_NO_THROW(delete a;) << "Destruction of an empty Archive failed.";
+    ASSERT_NO_THROW(delete a;) << "Destruction of an empty Algorithm::TPG::TPGArchive failed.";
 }
 
 TEST_F(ArchiveTest, CombineHash)
 {
     size_t hash;
 
-    ASSERT_NO_THROW(hash = Archive::getCombinedHash(vect))
+    ASSERT_NO_THROW(hash = Algorithm::TPG::TPGArchive::getCombinedHash(vect))
         << "Combination of several DataHandler hash failed.";
 
     // change data in one dataHandler
@@ -109,13 +109,13 @@ TEST_F(ArchiveTest, CombineHash)
     d.setDataAt(typeid(int), 2, 1337);
 
     // Compare hashes.
-    ASSERT_NE(Archive::getCombinedHash(vect), hash);
+    ASSERT_NE(Algorithm::TPG::TPGArchive::getCombinedHash(vect), hash);
 }
 
 TEST_F(ArchiveTest, AddRecordingTests)
 {
     // For these test, force archivingProbability to 1
-    Archive archive(3, 1.0);
+    Algorithm::TPG::TPGArchive archive(3, 1.0);
 
     // Add a fictive recording
     ASSERT_NO_THROW(archive.addRecording(*lgpAgent, vect, 1.3))
@@ -170,7 +170,7 @@ TEST_F(ArchiveTest, AddRecordingWithProbabilityTests)
 {
     // For these test, force archivingProbability to 0.5
     // Use a known seed
-    Archive archive(10, 0.5, 0);
+    Algorithm::TPG::TPGArchive archive(10, 0.5, 0);
 
     // Add a few fictive recording
     for (int i = 0; i < 10; i++) {
@@ -190,7 +190,7 @@ TEST_F(ArchiveTest, At)
 {
     // For these test, force archivingProbability to 0.5
     // Use a known seed
-    Archive archive(10, 1.0);
+    Algorithm::TPG::TPGArchive archive(10, 1.0);
 
     // Add a few fictive recording
     for (int i = 0; i < 5; i++) {
@@ -216,7 +216,7 @@ TEST_F(ArchiveTest, SetSeed)
 {
     // For these test, force archivingProbability to 0.5
     // Use a known seed
-    Archive archive(10, 0.5);
+    Algorithm::TPG::TPGArchive archive(10, 0.5);
 
     ASSERT_NO_THROW(archive.setRandomSeed(1))
         << "Setting a new seed failed unexpectedly.";
@@ -239,7 +239,7 @@ TEST_F(ArchiveTest, SetSeed)
 
 TEST_F(ArchiveTest, areProgramResultsUnique)
 {
-    Archive archive(4);
+    Algorithm::TPG::TPGArchive archive(4);
     size_t hash1 = archive.getCombinedHash(vect);
     Data::PrimitiveTypeArray<int>& d =
         const_cast<Data::PrimitiveTypeArray<int>&>(
@@ -275,7 +275,7 @@ TEST_F(ArchiveTest, areProgramResultsUnique)
 
 TEST_F(ArchiveTest, DataHandlersAccessors)
 {
-    Archive archive(4);
+    Algorithm::TPG::TPGArchive archive(4);
 
     // Add a few fictive recordings
     archive.addRecording(*lgpAgent, vect, 1.0);
@@ -299,7 +299,7 @@ TEST_F(ArchiveTest, DataHandlersAccessors)
 
 TEST_F(ArchiveTest, Clear)
 {
-    Archive archive(4);
+    Algorithm::TPG::TPGArchive archive(4);
 
     ASSERT_NO_THROW(archive.clear())
         << "Clearing an empty archive should not fail.";

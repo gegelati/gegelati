@@ -97,7 +97,7 @@ namespace Algorithm::LGP {
         Data::DataHandlerPrinter dataPrinter;
 
         /// Environment 
-        const Environment& env;
+        const LGPEnvironment& env;
 
         /// @brief  Algorithm name
         std::string algorithmName;
@@ -114,7 +114,7 @@ namespace Algorithm::LGP {
          * std::ofstream::out to generate the program in the file and replace
          * any previous content.
          */
-        LGPCodeGenerationEngine(std::ofstream& fileMain, std::ofstream& fileMainH, const Environment& env, const Output::OutputHandler& outputs, uint64_t algorithmID, std::string algorithmName)
+        LGPCodeGenerationEngine(std::ofstream& fileMain, std::ofstream& fileMainH, const LGPEnvironment& env, const Output::OutputHandler& outputs, uint64_t algorithmID, std::string algorithmName)
             : LGPEngine(env, outputs, algorithmID), dataPrinter(), fileMain{fileMain}, fileMainH{fileMainH}, env{env}, algorithmName{algorithmName} {}
 
         /**

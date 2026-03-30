@@ -50,7 +50,7 @@ namespace Algorithm::LGP {
 
       protected:
         /// Environment within which the Program will be executed.
-        const Environment& environment;
+        const LGPEnvironment& environment;
 
         /// index of the Instruction of the Set of the Environment.
         uint64_t instructionIndex;
@@ -75,7 +75,7 @@ namespace Algorithm::LGP {
          * \param[in] env the const reference to the Environment for this
          * Program::LGPLine.
          */
-        LGPLine(const Environment& env)
+        LGPLine(const LGPEnvironment& env)
             : environment{env}, instructionIndex{0}, destinationIndex{0},
               operands{(std::pair<uint64_t, uint64_t>*)calloc(
                   env.getMaxNbOperands(),
@@ -130,7 +130,7 @@ namespace Algorithm::LGP {
          *
          * \return a const reference to the Environment of the LGPLine.
          */
-        const Environment& getEnvironment() const;
+        const LGPEnvironment& getEnvironment() const;
 
         /**
          * \brief Getter for the destinationIndex of this LGPLine.

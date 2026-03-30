@@ -39,7 +39,7 @@ namespace Algorithm::ATPG {
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            ATPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& contextProgramAlgorithm, const Algorithm& actionProgramAlgorithm, std::string algorithmName = "ATPG", std::string algorithmColor = "#335ce2")
+            ATPGAlgorithm(const AlgorithmParameters& params, const Algorithm& contextProgramAlgorithm, const Algorithm& actionProgramAlgorithm, std::string algorithmName = "ATPG", std::string algorithmColor = "#335ce2")
                 : TPGAlgorithm(params, contextProgramAlgorithm, algorithmName, algorithmColor){
                 this->setActionProgramAlgorithm(actionProgramAlgorithm);
             };

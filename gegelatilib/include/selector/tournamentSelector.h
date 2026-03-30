@@ -39,7 +39,7 @@ namespace Selector {
          *
          * \param[in] params parameters used by the Selector.
          */
-        TournamentSelector(const Learn::LearningParameters& params)
+        TournamentSelector(const SelectionParameters& params)
             : Selector{params}
         {
         }

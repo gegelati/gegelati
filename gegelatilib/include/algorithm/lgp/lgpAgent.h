@@ -20,7 +20,7 @@ namespace Algorithm::LGP {
         protected:
 
             /// Environment within which the LGP will be executed.
-            const Environment& environment;
+            const LGPEnvironment& environment;
             
             /**
              * \brief Lines of the LGP and intron property.
@@ -62,12 +62,12 @@ namespace Algorithm::LGP {
              * \param[in] outputs outputs of the LGP.
              * \param[in] algorithmID id of the algorithm used.
              */
-            LGPAgent(const Environment& e, const Output::OutputHandler& outputs, uint64_t algorithmID)
-                : Agent(algorithmID), environment{e}, constants{e.getParams().nbProgramConstant}, outputs{outputs}
+            LGPAgent(const LGPEnvironment& e, const Output::OutputHandler& outputs, uint64_t algorithmID)
+                : Agent(algorithmID), environment{e}, constants{e.getNbConstants()}, outputs{outputs}
             {
                 constants.resetData(); // force all constant to 0 at first.
                 for (size_t idx = 0; idx < outputs.size(); idx++ ){
-                    outputIndices.push_back(idx % e.getParams().nbRegisters);
+                    outputIndices.push_back(idx % e.getNbRegisters());
                 }
             };
 
@@ -166,7 +166,7 @@ namespace Algorithm::LGP {
              * \return a const reference to the Environment of the LGP and all
              * its LGPLine.
              */
-            const Environment& getEnvironment() const;
+            const LGPEnvironment& getEnvironment() const;
 
             /**
              * \brief Get the number of lines in the LGP.

@@ -79,8 +79,8 @@ class PolicyStatsTest : public ::testing::Test
             *(new Data::PrimitiveTypeArray<double>((unsigned int)25)));
 
         // Environment
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 5;
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 5;
         e = new Environment(set, params, vect);
 
         // Create 8 context programs and 3 action programs

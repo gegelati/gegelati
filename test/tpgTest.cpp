@@ -62,7 +62,7 @@ class TPGTest : public ::testing::Test
     const size_t size2{32};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    std::shared_ptr<const Environment> e = NULL;
+    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e = NULL;
     Learn::LearningParameters params;
     std::shared_ptr<Algorithm::Agent> sharedProgramAgent;
 
@@ -78,9 +78,9 @@ class TPGTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 1;
-        e = std::make_shared<Environment>(set, params, vect);
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 1;
+        e = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
         sharedProgramAgent =
             std::make_shared<Algorithm::LGP::LGPAgent>(*e, Output::OutputHandler(1), (uint64_t)0);
     }

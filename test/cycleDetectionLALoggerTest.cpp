@@ -59,31 +59,31 @@ class CycleDetectionLoggerTest : public ::testing::Test
     void SetUp() override
     {
         // Proba as in Kelly's paper
-        params.mutation.tpg.maxInitOutgoingEdges = 3;
-        params.mutation.prog.maxProgramSize = 96;
-        params.mutation.tpg.nbRoots = 15;
-        params.mutation.tpg.pEdgeDeletion = 0.7;
-        params.mutation.tpg.pEdgeAddition = 0.7;
-        params.mutation.tpg.pProgramMutation = 0.2;
-        params.mutation.tpg.pEdgeDestinationChange = 0.1;
-        params.mutation.tpg.pEdgeDestinationIsAction = 0.5;
-        params.mutation.tpg.maxOutgoingEdges = 4;
-        params.mutation.prog.pAdd = 0.5;
-        params.mutation.prog.pDelete = 0.5;
-        params.mutation.prog.pMutate = 1.0;
-        params.mutation.prog.pSwap = 1.0;
-        params.mutation.prog.minConstValue = 0;
-        params.mutation.prog.maxConstValue = 3;
-        params.nbProgramConstant = 0;
+        params.algorithm.tpg.maxInitOutgoingEdges = 3;
+        params.algorithm.lgp.maxProgramSize = 96;
+        params.algorithm.nbAgents = 15;
+        params.algorithm.tpg.pEdgeDeletion = 0.7;
+        params.algorithm.tpg.pEdgeAddition = 0.7;
+        params.algorithm.tpg.pProgramMutation = 0.2;
+        params.algorithm.tpg.pEdgeDestinationChange = 0.1;
+        params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
+        params.algorithm.tpg.maxOutgoingEdges = 4;
+        params.algorithm.lgp.pAdd = 0.5;
+        params.algorithm.lgp.pDelete = 0.5;
+        params.algorithm.lgp.pMutate = 1.0;
+        params.algorithm.lgp.pSwap = 1.0;
+        params.algorithm.lgp.minConstValue = 0;
+        params.algorithm.lgp.maxConstValue = 3;
+        params.algorithm.lgp.nbProgramConstant = 0;
 
-        params.archiveSize = 50;
-        params.archivingProbability = 0.5;
+        params.algorithm.tpg.archiveSize = 50;
+        params.algorithm.tpg.archivingProbability = 0.5;
         params.maxNbActionsPerEval = 11;
         params.nbIterationsPerPolicyEvaluation = 3;
         params.selection.truncation.ratioDeletedRoots =
             0.95; // high number to force the apparition of root action.
         params.nbThreads = 1;
-        params.nbProgramConstant = 5;
+        params.algorithm.lgp.nbProgramConstant = 5;
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));

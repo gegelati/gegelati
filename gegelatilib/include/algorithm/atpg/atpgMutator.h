@@ -35,7 +35,7 @@ namespace Algorithm::ATPG {
          * \param[in] algorithmID id of the algorithm used.
          * \param[in] archive Archive used by this ActionTPG
          */
-        ATPGMutator(Selector::Selector& selector, uint64_t algorithmID, const Archive& archive): TPGMutator(selector, algorithmID, archive) {};
+        ATPGMutator(Selector::Selector& selector, uint64_t algorithmID, const TPG::TPGArchive& archive): TPGMutator(selector, algorithmID, archive) {};
 
         
         /**
@@ -48,7 +48,7 @@ namespace Algorithm::ATPG {
          */
         virtual void updateSpecificContext(
             EvoGraph::Graph& graph, AgentManager& manager,
-            const Learn::LearningParameters& params,
+            const AlgorithmParameters& params,
             RNG::RNG& rng) override;
 
         /**
@@ -74,7 +74,7 @@ namespace Algorithm::ATPG {
          * \param[in] params the Parameters for the mutation.
          * \param[in] outputs the OutputHandler of the manager.
          */
-        virtual bool isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const override;
+        virtual bool isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const override;
 
         /**
          * \brief Initialize TPG Population.
@@ -84,7 +84,7 @@ namespace Algorithm::ATPG {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief Initialize a random Agent.
@@ -95,7 +95,7 @@ namespace Algorithm::ATPG {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
 
         /**
@@ -127,7 +127,7 @@ namespace Algorithm::ATPG {
                                     const EvoGraph::Edge& edge,
                                     AgentManager& manager,
                                     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
-                                    const Learn::LearningParameters& params,
+                                    const AlgorithmParameters& params,
                                     RNG::RNG& rng);
 
         /**
@@ -151,7 +151,7 @@ namespace Algorithm::ATPG {
             EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
             AgentManager& manager,
             std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
-            const Learn::LearningParameters& params, RNG::RNG& rng) override;
+            const AlgorithmParameters& params, RNG::RNG& rng) override;
 
 
             
@@ -160,7 +160,7 @@ namespace Algorithm::ATPG {
          */
         virtual void mutateSubAgents(
             std::vector<std::reference_wrapper<const Agent>>& agents, EvoGraph::Graph& graph, 
-            AgentManager& manager, const Learn::LearningParameters& params, 
+            AgentManager& manager, const AlgorithmParameters& params, 
             RNG::RNG& rng, uint64_t maxNbThreads) override;
     };
 

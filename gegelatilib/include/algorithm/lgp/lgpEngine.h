@@ -93,14 +93,14 @@ namespace Algorithm::LGP {
          * \param[in] algorithmID id of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPEngine(const Environment& env, const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false)
-            : ExecutionEngine{outputs, algorithmID, isTraining}, programCounter{0}, registers{env.getParams().nbRegisters}
+        LGPEngine(const LGPEnvironment& env, const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false)
+            : ExecutionEngine{outputs, algorithmID, isTraining}, programCounter{0}, registers{env.getNbRegisters()}
         {
             dataSources = env.getDataSources();
             // Setup the data sources
             dataScsConstsAndRegs.push_back(this->registers);
 
-            if (env.getParams().nbProgramConstant > 0) {
+            if (env.getNbConstants() > 0) {
                 dataScsConstsAndRegs.push_back(env.getFakeDataSources().at(1));
             }
 
@@ -133,7 +133,7 @@ namespace Algorithm::LGP {
         LGPEngine(const LGPAgent& executedAgent, 
                       const std::vector<std::reference_wrapper<T>>& dataSrc, bool isTraining = false)
             : ExecutionEngine{executedAgent, executedAgent.getOutputs(), isTraining}, programCounter{0},
-              registers{executedAgent.getEnvironment().getParams().nbRegisters}
+              registers{executedAgent.getEnvironment().getNbRegisters()}
         {
             // Check that T is either convertible to a const DataHandler
             static_assert(
@@ -141,7 +141,7 @@ namespace Algorithm::LGP {
             // Setup the data sources
             this->dataScsConstsAndRegs.push_back(this->registers);
 
-            if (executedAgent.getEnvironment().getParams().nbProgramConstant > 0) {
+            if (executedAgent.getEnvironment().getNbConstants() > 0) {
                 this->dataScsConstsAndRegs.push_back(
                     executedAgent.cGetConstantHandler());
             }

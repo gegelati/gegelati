@@ -45,7 +45,7 @@ namespace Algorithm::TGP {
          * \param[in] params the Parameters for the mutation.
          * \param[in] outputs the OutputHandler of the manager.
          */
-        virtual bool isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const override;
+        virtual bool isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const override;
 
         /**
          * \brief Initialize a random Agent.
@@ -56,7 +56,7 @@ namespace Algorithm::TGP {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
         
 
         /**
@@ -82,7 +82,7 @@ namespace Algorithm::TGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng
         ) override;
 
         /**
@@ -94,7 +94,7 @@ namespace Algorithm::TGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual bool mutateLGPAgent(
-            const LGP::LGPAgent& agent, LGP::LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+            const LGP::LGPAgent& agent, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief Alter a randomly selected Line in a given Program.
@@ -147,11 +147,12 @@ namespace Algorithm::TGP {
          * \param[in,out] agent the Agent to mutate.
          * \param[in] manager the manager to change the agents.
          * \param[in] location location is the index of the output changed
+         * \param[in] params Probability parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if the lines where successfully swapped, false if the
          *         Program has less than two lines.
          */
-        virtual bool alterRandomOutputs(const LGP::LGPAgent& agent, LGP::LGPManager& manager, size_t location, RNG::RNG& rng) override;
+        virtual bool alterRandomOutputs(const LGP::LGPAgent& agent, LGP::LGPManager& manager, size_t location, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief change the index of a node.

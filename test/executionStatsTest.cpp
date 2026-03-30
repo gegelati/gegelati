@@ -93,8 +93,8 @@ class ExecutionStatsTest : public ::testing::Test
 
         // Environment
         Learn::LearningParameters params;
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 5;
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 5;
         e = new Environment(set, params, vect);
 
         // Setup execution engine

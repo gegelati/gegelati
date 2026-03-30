@@ -34,8 +34,8 @@ class MapElitesSelectorTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 1;
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 1;
         e = new Environment(set, params, vect, 3);
         graph = std::make_shared<EvoGraph::Graph>(*e);
         selector = new Selector::MapElites::MapElitesSelector(graph, params);
@@ -309,9 +309,9 @@ TEST_F(MapElitesSelectorTest, DoSelectionReplaces)
 TEST_F(MapElitesSelectorTest, TwoArchives)
 {
     FakeMultiContinuousLearningEnvironment le;
-    params.mutation.tpg.useActionProgram = true;
-    params.mutation.tpg.useMultiActionProgram = true;
-    params.mutation.tpg.ratioTeamsOverActions = 0.0;
+    params.algorithm.tpg.useActionProgram = true;
+    params.algorithm.tpg.useMultiActionProgram = true;
+    params.algorithm.tpg.ratioTeamsOverActions = 0.0;
 
     // We need a second descriptor instance for the second archive
     auto descriptorB = std::make_shared<

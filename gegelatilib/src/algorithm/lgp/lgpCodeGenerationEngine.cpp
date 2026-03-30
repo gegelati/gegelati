@@ -74,17 +74,17 @@ void Algorithm::LGP::LGPCodeGenerationEngine::generateProgram(
 
     // instantiate register
     fileMain << "\tdouble " << nameRegVariable << "["
-          << env.getParams().nbRegisters << "] = {";
-    for (int i = 0; i < env.getParams().nbRegisters;
+          << env.getNbRegisters() << "] = {";
+    for (int i = 0; i < env.getNbRegisters();
          ++i) {
         fileMain << "0";
-        if (i < env.getParams().nbRegisters - 1) {
+        if (i < env.getNbRegisters() - 1) {
             fileMain << ", ";
         }
     }
     fileMain << "};" << std::endl;
-    if (env.getParams().nbProgramConstant > 0) {
-        size_t nbCst = env.getParams().nbProgramConstant;
+    if (env.getNbConstants() > 0) {
+        size_t nbCst = env.getNbConstants();
         fileMain << "\tdouble " << nameConstantVariable << "[" << nbCst
               << "] = {";
         for (int i = 0; i < nbCst; ++i) {
@@ -146,7 +146,7 @@ std::string Algorithm::LGP::LGPCodeGenerationEngine::completeFormat(
 void Algorithm::LGP::LGPCodeGenerationEngine::initGlobalVar()
 {
     int i;
-    if (env.getParams().nbProgramConstant > 0) {
+    if (env.getNbConstants() > 0) {
         i = 2;
     }
     else {
@@ -191,14 +191,14 @@ std::string Algorithm::LGP::LGPCodeGenerationEngine::getNameSourceData(
     if (idx == 0) {
         nameDataSource = nameRegVariable;
     }
-    else if (this->env.getParams().nbProgramConstant >
+    else if (this->env.getNbConstants() >
                  0 &&
              idx == 1) {
         nameDataSource = nameConstantVariable;
     }
     else {
         uint64_t varNumber = idx;
-        if (this->env.getParams().nbProgramConstant > 0) {
+        if (this->env.getNbConstants() > 0) {
             varNumber--;
         }
         nameDataSource = nameDataVariable + std::to_string(varNumber);

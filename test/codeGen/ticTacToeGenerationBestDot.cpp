@@ -114,7 +114,7 @@ class TicTacToeGenerationBestDotTest : public ::testing::Test
             cond, "$0 = ($1) < ($2) ? -1*($1) : ($1);")));
 
         data.push_back(currentState);
-        params.nbRegisters = 8;
+        params.algorithm.lgp.nbRegisters = 8;
         e = new Environment(set, params, data);
         tpg = new EvoGraph::Graph(*e);
 

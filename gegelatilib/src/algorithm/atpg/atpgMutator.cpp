@@ -4,7 +4,7 @@
 
 void Algorithm::ATPG::ATPGMutator::updateSpecificContext(
             EvoGraph::Graph& graph, AgentManager& manager,
-            const Learn::LearningParameters& params,
+            const AlgorithmParameters& params,
             RNG::RNG& rng)
 {
     TPG::TPGMutator::updateSpecificContext(graph, manager, params, rng);
@@ -50,20 +50,20 @@ void Algorithm::ATPG::ATPGMutator::updateSpecificContext(
 }
 
 
-bool Algorithm::ATPG::ATPGMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
+bool Algorithm::ATPG::ATPGMutator::isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const
 {
     if(outputs.sizeContinuous() == 0 && outputs.sizeDiscrete() == 0){
         throw std::runtime_error("ATPGMutator::initRandomPopulation: No outputs defined.");
     }
     
-    if (params.mutation.tpg.maxInitOutgoingEdges < 2) {
+    if (params.tpg.maxInitOutgoingEdges < 2) {
         throw std::runtime_error(
             "A team should have at least two edges at initialisation.");
     }
     return true;
 }
 
-void Algorithm::ATPG::ATPGMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::ATPG::ATPGMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     this->isConfigurationValid(params, manager.getOutputs());
     
@@ -76,7 +76,7 @@ void Algorithm::ATPG::ATPGMutator::initRandomPopulation(EvoGraph::Graph& graph, 
     std::vector<std::reference_wrapper<const Agent>> programAgents;
 
 
-    for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
+    for (size_t idx = 0; idx < params.nbAgents; idx++) {
         teams.push_back(dynamic_cast<const TPG::TPGAgent&>(manager.createAgent(graph)).getVertex());
     }
 
@@ -89,7 +89,7 @@ void Algorithm::ATPG::ATPGMutator::initRandomPopulation(EvoGraph::Graph& graph, 
 
     Mutator& actionProgramMutator = this->getSubMutator(this->actionProgramAlgorithmID);
     AgentManager& actionProgramManager = manager.getSubManager(this->actionProgramAlgorithmID);
-    for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
+    for (size_t i = 0; i < 2 * params.nbAgents; i++) {
 
         // Create a program agent
         programAgents.push_back(programMutator.initRandomAgent(graph, programManager, params, rng));
@@ -109,7 +109,7 @@ void Algorithm::ATPG::ATPGMutator::initRandomPopulation(EvoGraph::Graph& graph, 
     this->addAditionnalEdges(graph, leafVertices, teams, programAgents, params, rng);
 }
 
-void Algorithm::ATPG::ATPGMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::ATPG::ATPGMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // First agent is initialized, check validity of the configuration.
     if(manager.getAgents().size() == 1){
@@ -126,7 +126,7 @@ void Algorithm::ATPG::ATPGMutator::initRandomSpecificAgent(const Agent& agent, E
     Mutator& actionProgramMutator = this->getSubMutator(this->actionProgramAlgorithmID);
     AgentManager& actionProgramManager = manager.getSubManager(this->actionProgramAlgorithmID);
 
-    size_t nbEdges = rng.getUnsignedInt64(2, params.mutation.tpg.maxInitOutgoingEdges);
+    size_t nbEdges = rng.getUnsignedInt64(2, params.tpg.maxInitOutgoingEdges);
     for(size_t idx = 0; idx < nbEdges; idx++){
 
         // Create a program agent and a new team
@@ -147,11 +147,11 @@ void Algorithm::ATPG::ATPGMutator::mutateEdgeDestination(
     EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     AgentManager& manager,
     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // Should the new target be an action or a team
     bool targetAction =
-        rng.getDouble(0, 1) < params.mutation.tpg.pEdgeDestinationIsAction;
+        rng.getDouble(0, 1) < params.tpg.pEdgeDestinationIsAction;
 
     // Pick any target
     // Note: Having an action in all teams is no longer enforced,
@@ -192,17 +192,16 @@ void Algorithm::ATPG::ATPGMutator::mutateEdgeDestination(
         // Changing the target should not fail.
         graph.setEdgeDestination(edge, target);
     }
-
 }
 
 void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
     EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     AgentManager& manager,
     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 {
     if(edge.getDestination().hasProgram() && edge.getDestination().getProgram().getAlgorithmID() == this->actionProgramAlgorithmID &&
-       rng.getDouble(0.0, 1.0) < params.mutation.tpg.pMutateActionProgram){
+       rng.getDouble(0.0, 1.0) < params.atpg.probaContextOverActionProgram){
        
         // copy program
         const Algorithm::Agent& newAgent = manager.getSubManager(edge.getDestination().getProgram().getAlgorithmID()).copyAgent(edge.getDestination().getProgram(), graph);
@@ -233,7 +232,7 @@ void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
         // Edge target modification
         // As it Stephen kelly's work, Edge target modification is conditionned
         // to the modification of the prealable Edge.Program behavior.
-        if (rng.getDouble(0.0, 1.0) < params.mutation.tpg.pEdgeDestinationChange) {
+        if (rng.getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationChange) {
             mutateEdgeDestination(graph, edge, manager, newSubAgents, params, rng);
         }
     }
@@ -243,7 +242,7 @@ void Algorithm::ATPG::ATPGMutator::mutateOutgoingEdge(
 
 void Algorithm::ATPG::ATPGMutator::mutateSubAgents(
             std::vector<std::reference_wrapper<const Agent>>& agents, EvoGraph::Graph& graph, 
-            AgentManager& manager, const Learn::LearningParameters& params, 
+            AgentManager& manager, const AlgorithmParameters& params, 
             RNG::RNG& rng, uint64_t maxNbThreads)
 {
     // Devide agents into program agents and action program agents

@@ -20,7 +20,7 @@ namespace Selector {
          * is done.
          * \param[in] params parameters used by the Selector.
          */
-        TruncationSelector(const Learn::LearningParameters& params)
+        TruncationSelector(const SelectionParameters& params)
             : Selector{params}
         {
         }

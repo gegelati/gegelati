@@ -41,7 +41,7 @@ namespace Algorithm::LGP {
          * \param[in] params the Parameters for the mutation.
          * \param[in] outputs the OutputHandler of the manager.
          */
-        virtual bool isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const override;
+        virtual bool isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const override;
 
         /**
          * \brief Initialize LGP Population.
@@ -51,7 +51,7 @@ namespace Algorithm::LGP {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
         /**
          * \brief Initialize a random Agent.
@@ -62,7 +62,7 @@ namespace Algorithm::LGP {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
         
 
 
@@ -77,7 +77,7 @@ namespace Algorithm::LGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng
         ) override;
 
         /**
@@ -91,7 +91,7 @@ namespace Algorithm::LGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng
         ) override;
 
 
@@ -104,7 +104,7 @@ namespace Algorithm::LGP {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual bool mutateLGPAgent(
-            const LGPAgent& agent, LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng
+            const LGPAgent& agent, LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng
         );
 
         /**
@@ -185,7 +185,7 @@ namespace Algorithm::LGP {
          *         Program has less than one line.
          */
         virtual bool alterRandomConstant(const LGPAgent& agent, LGPManager& manager,
-                                 const Learn::LearningParameters& params,
+                                 const AlgorithmParameters& params,
                                  RNG::RNG& rng);
 
         /**
@@ -194,11 +194,12 @@ namespace Algorithm::LGP {
          * \param[in,out] agent the Agent to mutate.
          * \param[in] manager the manager to change the agents.
          * \param[in] location location is the index of the output changed
+         * \param[in] params the mutation parameters
          * \param[in] rng Random Number Generator used in the mutation process.
          * \return true if the lines where successfully swapped, false if the
          *         Program has less than two lines.
          */
-        virtual bool alterRandomOutputs(const LGPAgent& agent, LGPManager& manager, size_t location, RNG::RNG& rng);
+        virtual bool alterRandomOutputs(const LGPAgent& agent, LGPManager& manager, size_t location, const AlgorithmParameters& params, RNG::RNG& rng);
     };
 
 

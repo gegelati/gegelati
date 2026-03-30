@@ -28,15 +28,19 @@ namespace Selector {
                      std::shared_ptr<MapElitesArchive>>
                 mapEliteArchives;
 
+            /// max number of evaluation for an agent.            
+            size_t maxNbEvaluation;
+
           public:
             /**
              * \brief Constructor for Selector.
              *
              * \param[in] params parameters used by the
              * Selector.
+             * \param[in] maxNbEvaluation max number of evaluation for an agent.
              */
-            MapElitesSelector(const Learn::LearningParameters& params)
-                : Selector{params}
+            MapElitesSelector(const SelectionParameters& params, size_t maxNbEvaluation)
+                : Selector{params}, maxNbEvaluation{maxNbEvaluation}
             {
             }
 

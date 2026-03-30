@@ -23,7 +23,7 @@ namespace Selector {
          * \param[in] params parameters used by the Selector.
          * \param[in] nbActions number of actions in the LearningEnvironment.
          */
-        ClassificationSelector(const Learn::LearningParameters& params,
+        ClassificationSelector(const SelectionParameters& params,
                                uint64_t nbActions)
             : Selector{params}, nbActions{nbActions}
         {

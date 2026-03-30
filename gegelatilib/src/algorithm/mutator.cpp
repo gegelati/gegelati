@@ -18,7 +18,7 @@ Algorithm::Mutator& Algorithm::Mutator::getSubMutator(uint64_t algorithmID){
 
 void Algorithm::Mutator::updateSpecificContext(
     EvoGraph::Graph& graph, AgentManager& manager,
-    const Learn::LearningParameters& params,
+    const AlgorithmParameters& params,
     RNG::RNG& rng)
 {
     this->currentContext = std::move(this->selector.get().updateContext());
@@ -67,7 +67,7 @@ std::vector<std::reference_wrapper<const EvoGraph::Action>> Algorithm::Mutator::
 const Algorithm::Agent& Algorithm::Mutator::initRandomAgent(
     EvoGraph::Graph& graph,
     AgentManager& manager,
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 {
     const Algorithm::Agent& agent = manager.createAgent(graph);
     this->initRandomSpecificAgent(agent, graph, manager, params, rng);
@@ -76,7 +76,7 @@ const Algorithm::Agent& Algorithm::Mutator::initRandomAgent(
 
 void Algorithm::Mutator::mutatePopulation(
     EvoGraph::Graph& graph, AgentManager& manager,
-    const Learn::LearningParameters& params,
+    const AlgorithmParameters& params,
     RNG::RNG& rng, uint64_t maxNbThreads)
 {
 

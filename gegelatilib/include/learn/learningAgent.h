@@ -197,6 +197,7 @@ namespace Learn {
          */
         void addLogger(Log::LALogger& logger);
 
+
         /**
          * \brief Evaluates policy starting from the given root.
          *

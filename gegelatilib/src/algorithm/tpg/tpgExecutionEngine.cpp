@@ -3,11 +3,11 @@
 #include "algorithm/tpg/tpgExecutionEngine.h"
 
 
-void Algorithm::TPG::TPGExecutionEngine::setArchive(Archive& archive)
+void Algorithm::TPG::TPGExecutionEngine::setArchive(TPGArchive& archive)
 {
     this->archive = archive;
 }
-std::optional<std::reference_wrapper<Archive>> Algorithm::TPG::TPGExecutionEngine::getArchive()
+std::optional<std::reference_wrapper<Algorithm::TPG::TPGArchive>> Algorithm::TPG::TPGExecutionEngine::getArchive()
 {
     return archive;
 }

@@ -14,7 +14,7 @@ void Algorithm::TPG::TPGAlgorithm::setProgramAlgorithm(const Algorithm& programA
 }
 
 
-const Archive& Algorithm::TPG::TPGAlgorithm::getArchive() const
+const Algorithm::TPG::TPGArchive& Algorithm::TPG::TPGAlgorithm::getArchive() const
 {
     return *this->archive;
 }
@@ -61,10 +61,10 @@ std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(const Ag
 
     // Before each agent evaluation, set a new seed for the archive in
     // TRAINING Mode Else, archiving should be deactivate anyway
-    std::unique_ptr<Archive> jobArchive = nullptr;
+    std::unique_ptr<TPGArchive> jobArchive = nullptr;
     if (mode == Learn::LearningMode::TRAINING) {
         size_t archiveSeed = rng.getUnsignedInt64(0, UINT64_MAX);
-        jobArchive = std::make_unique<Archive>(this->params.archiveSize, this->params.archivingProbability, archiveSeed);
+        jobArchive = std::make_unique<TPGArchive>(this->params.tpg.archiveSize, this->params.tpg.archivingProbability, archiveSeed);
     }
 
     return std::make_shared<TPGJob>(agent, idx, std::move(jobArchive));
@@ -82,23 +82,23 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
     // Merge the archives
     if (mode == Learn::LearningMode::TRAINING) {
         // Build archive map
-        std::map<uint64_t, std::reference_wrapper<Archive>> archiveMap;
+        std::map<uint64_t, std::reference_wrapper<TPGArchive>> archiveMap;
         for (const auto& jobPtr : jobs) {
             std::shared_ptr<const TPGJob> tpgJob = std::dynamic_pointer_cast<const TPGJob>(jobPtr);
             if(tpgJob == nullptr){
                 throw std::runtime_error("Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation trying to update after evaluation with a job which is not a TPGJob");
             }
-            std::reference_wrapper<Archive> archiveRef = tpgJob->getArchive();
+            std::reference_wrapper<TPGArchive> archiveRef = tpgJob->getArchive();
             archiveMap.insert({jobPtr->getIdx(), archiveRef});
         }
 
 
         // Scan the archives backward, starting from the last to identify the
-        // last params.archiveSize recordings to keep (or less).
+        // last params.algorithm.tpg.archiveSize recordings to keep (or less).
         auto reverseIterator = archiveMap.rbegin();
 
         uint64_t nbRecordings = 0;
-        while (nbRecordings < this->params.archiveSize &&
+        while (nbRecordings < this->params.tpg.archiveSize &&
             reverseIterator != archiveMap.rend()) {
             nbRecordings += reverseIterator->second.get().getNbRecordings();
             reverseIterator++;
@@ -112,7 +112,7 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
 
             // Skip recordings in the first archive if needed
             uint64_t recordingIdx = 0;
-            while (nbRecordings > this->params.archiveSize) {
+            while (nbRecordings > this->params.tpg.archiveSize) {
                 recordingIdx++;
                 nbRecordings--;
             }

@@ -30,7 +30,7 @@ void Selector::ClassificationSelector::doSelection(
     // Compute the number of agent to keep/delete base on each criterion
     uint64_t totalNbAgent = manager.getAgents().size();
     uint64_t nbAgentsToDelete = (uint64_t)floor(
-        this->params.selection.truncation.ratioDeletedRoots * totalNbAgent);
+        this->params.truncation.ratioDeletedRoots * totalNbAgent);
     uint64_t nbAgentsToKeep = (totalNbAgent - nbAgentsToDelete);
 
     // Keep ~half+ of the agents based on their general score on

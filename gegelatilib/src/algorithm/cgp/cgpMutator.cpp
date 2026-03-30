@@ -2,7 +2,7 @@
 #include <array>
 #include "algorithm/cgp/cgpMutator.h"
 
-bool Algorithm::CGP::CGPMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
+bool Algorithm::CGP::CGPMutator::isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const
 {
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("CGPMutator::initRandomPopulation: CGP does not support mixed discrete and continuous outputs.");
@@ -10,7 +10,7 @@ bool Algorithm::CGP::CGPMutator::isConfigurationValid(const Learn::LearningParam
 
         
     } else if (outputs.sizeDiscrete() != 0){
-        if(outputs.size() > params.nbRegisters){
+        if(outputs.size() > params.lgp.nbRegisters){
             throw std::runtime_error("CGPMutator::initRandomPopulation: Number of discrete outputs exceeds the number of registers.");
         }
     } else {
@@ -19,7 +19,7 @@ bool Algorithm::CGP::CGPMutator::isConfigurationValid(const Learn::LearningParam
     return true;
 }
 
-void Algorithm::CGP::CGPMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::CGP::CGPMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // If first agent, check validity
     if(manager.getAgents().size() == 1){
@@ -40,9 +40,9 @@ void Algorithm::CGP::CGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
 
     // insert random constants in the program
     Data::Constant c_value;
-    for (int i = 0; i < lgpAgent.getEnvironment().getParams().nbProgramConstant; i++) {
-        c_value = {rng.getDouble(params.mutation.prog.minConstValue,
-                                 params.mutation.prog.maxConstValue)};
+    for (int i = 0; i < params.lgp.nbProgramConstant; i++) {
+        c_value = {rng.getDouble(params.lgp.minConstValue,
+                                 params.lgp.maxConstValue)};
         lgpManager.setConstantAt(agent, i, c_value);
     }
 
@@ -69,29 +69,29 @@ void Algorithm::CGP::CGPMutator::insertRandomLine(const LGP::LGPAgent& agent, LG
 void Algorithm::CGP::CGPMutator::crossoverAgents(
     std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, 
     AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, 
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 { 
     /// No crossover with CGP
 }
 
-bool Algorithm::CGP::CGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+bool Algorithm::CGP::CGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     bool anyMutation = false;
-    if (rng.getDouble(0.0, 1.0) < params.mutation.prog.pMutate) {
+    if (rng.getDouble(0.0, 1.0) < params.lgp.pMutate) {
         anyMutation = true;
         alterRandomLine(agent, manager, rng);
     }
 
     // mutate the programs constants if they exists
-    if (agent.getEnvironment().getParams().nbProgramConstant > 0 &&
-        rng.getDouble(0.0, 1.0) < params.mutation.prog.pConstantMutation) {
+    if (params.lgp.nbProgramConstant > 0 &&
+        rng.getDouble(0.0, 1.0) < params.lgp.pConstantMutation) {
         anyMutation = true;
         alterRandomConstant(agent, manager, params, rng);
     }
 
     for(size_t idx = 0; idx < manager.getOutputs().size(); idx++) {
-        if(rng.getDouble(0.0, 1.0) < 1) {//params.mutation.prog.pMutateOutputs) {
-            alterRandomOutputs(agent, manager, idx, rng);
+        if(rng.getDouble(0.0, 1.0) < 1) {//params.lgp.pMutateOutputs) {
+            alterRandomOutputs(agent, manager, idx, params, rng);
         }
     }
 

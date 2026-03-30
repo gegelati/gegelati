@@ -46,7 +46,7 @@ bool Algorithm::LGP::LGPLineMutator::initRandomCorrectLineOperand(
     const uint64_t& operandIdx, const bool initOperandDataSource,
     const bool initOperandLocation, const bool forceChange, RNG::RNG& rng)
 {
-    const Environment& env = line.getEnvironment();
+    const LGPEnvironment& env = line.getEnvironment();
     uint64_t operandDataSourceIndex = line.getOperand(operandIdx).first;
     bool operandFound = !initOperandDataSource;
 
@@ -121,11 +121,11 @@ bool Algorithm::LGP::LGPLineMutator::initRandomCorrectLineOperand(
 
 void Algorithm::LGP::LGPLineMutator::initRandomCorrectLine(LGPLine& line, RNG::RNG& rng)
 {
-    const Environment& env = line.getEnvironment();
+    const LGPEnvironment& env = line.getEnvironment();
 
     // Select and set a destinationIndex. (can not fail)
     uint64_t destinationIndex =
-        rng.getUnsignedInt64(0, env.getParams().nbRegisters - 1);
+        rng.getUnsignedInt64(0, env.getNbRegisters() - 1);
     line.setDestinationIndex(
         destinationIndex); // Should never throw.. but I did not deactivate the
                            // check anyway.
@@ -157,7 +157,7 @@ void Algorithm::LGP::LGPLineMutator::initRandomCorrectLine(LGPLine& line, RNG::R
 void Algorithm::LGP::LGPLineMutator::alterCorrectLine(LGPLine& line, RNG::RNG& rng)
 {
     // Generate a random int to select the modified part of the line
-    const LineSize lineSize = line.getEnvironment().getLineSize();
+    const LGPLineSize lineSize = line.getEnvironment().getLineSize();
     uint64_t selectedBit = rng.getUnsignedInt64(0, lineSize - 1);
 
     // Find the selected part
@@ -206,7 +206,7 @@ void Algorithm::LGP::LGPLineMutator::alterCorrectLine(LGPLine& line, RNG::RNG& r
         // Select a random destination (different from the current one)
         const uint64_t currentDestinationIndex = line.getDestinationIndex();
         uint64_t newDestinationIndex = rng.getUnsignedInt64(
-            0, line.getEnvironment().getParams().nbRegisters - 2);
+            0, line.getEnvironment().getNbRegisters() - 2);
         newDestinationIndex +=
             (newDestinationIndex >= currentDestinationIndex) ? 1 : 0;
         line.setDestinationIndex(newDestinationIndex);

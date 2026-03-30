@@ -79,7 +79,7 @@ namespace Algorithm::LGP {
          * \param[in] algorithmID id of the algorithm used.
          * \param[in] isTraining Boolean indicating if this executionEngine will be executed for training or testing purpose.
          */
-        LGPExecutionEngine(const Environment& env, const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false) : LGPEngine(env, outputs, algorithmID, isTraining){};
+        LGPExecutionEngine(const LGPEnvironment& env, const Output::OutputHandler& outputs, uint64_t algorithmID, bool isTraining = false) : LGPEngine(env, outputs, algorithmID, isTraining){};
 
         /**
          * \brief Constructor of the class.

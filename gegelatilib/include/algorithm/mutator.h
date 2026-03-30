@@ -9,7 +9,7 @@
 #include "algorithm/agent.h"
 #include "algorithm/agentManager.h"
 #include "mutator/rng.h"
-#include "learn/learningParameters.h"
+#include "algorithm/algorithmParameters.h"
 #include "selector/selector.h"
 #include "evoGraph/graph.h"
 
@@ -63,7 +63,7 @@ namespace Algorithm {
          */
         virtual void updateSpecificContext(
             EvoGraph::Graph& graph, AgentManager& manager,
-            const Learn::LearningParameters& params,
+            const AlgorithmParameters& params,
             RNG::RNG& rng);
 
         /**
@@ -101,7 +101,7 @@ namespace Algorithm {
          * \param[in] params the Parameters for the mutation.
          * \param[in] outputs the OutputHandler of the manager.
          */
-        virtual bool isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const = 0;
+        virtual bool isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const = 0;
 
         /**
          * \brief Initialize a the action vertices.
@@ -127,7 +127,7 @@ namespace Algorithm {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) = 0;
+        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) = 0;
 
         /**
          * \brief Initialize a random Agent.
@@ -137,7 +137,7 @@ namespace Algorithm {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual const Agent& initRandomAgent(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng);
+        virtual const Agent& initRandomAgent(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng);
 
         
         /**
@@ -153,7 +153,7 @@ namespace Algorithm {
             const Agent& agent,
             EvoGraph::Graph& graph,
             AgentManager& manager,
-            const Learn::LearningParameters& params, RNG::RNG& rng) = 0;
+            const AlgorithmParameters& params, RNG::RNG& rng) = 0;
 
         /**
          * \brief mutate the whole population, by dupplicating and adding new agents from the current algorithm.
@@ -171,7 +171,7 @@ namespace Algorithm {
          */
         virtual void mutatePopulation(
             EvoGraph::Graph& graph, AgentManager& manager,
-            const Learn::LearningParameters& params,
+            const AlgorithmParameters& params,
             RNG::RNG& rng, uint64_t maxNbThreads = std::thread::hardware_concurrency());
         /**
          * \brief mutate a specific agent of an algorithm within a population
@@ -184,7 +184,7 @@ namespace Algorithm {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng
         ) {};
 
         /**
@@ -198,7 +198,7 @@ namespace Algorithm {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng) = 0;
+            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng) = 0;
 
         /**
          * \brief mutate new sub agents of sub algorithms created during the evolution process of the current algorithm
@@ -215,7 +215,7 @@ namespace Algorithm {
          *   - `0` and `1`: Do not use parallelism.
          *   - `n > 1`: Set the number of threads explicitly.
          */
-        virtual void mutateSubAgents(std::vector<std::reference_wrapper<const Agent>>& agents, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng, uint64_t maxNbThreads) {};
+        virtual void mutateSubAgents(std::vector<std::reference_wrapper<const Agent>>& agents, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng, uint64_t maxNbThreads) {};
     };
 }; // namespace Mutator
 

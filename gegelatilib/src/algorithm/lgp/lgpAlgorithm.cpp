@@ -8,7 +8,7 @@ std::unique_ptr<Algorithm::Algorithm> Algorithm::LGP::LGPAlgorithm::copy() const
     return std::make_unique<LGPAlgorithm>(this->params, this->iSet, this->algorithmName);
 }
 
- const Environment& Algorithm::LGP::LGPAlgorithm::getEnvironment() const
+ const Algorithm::LGP::LGPEnvironment& Algorithm::LGP::LGPAlgorithm::getEnvironment() const
 {
     return *this->env;
 }
@@ -26,7 +26,7 @@ void Algorithm::LGP::LGPAlgorithm::initMutator()
 
 void Algorithm::LGP::LGPAlgorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
-    this->env = std::make_unique<Environment>(iSet, params, dataSource);
+    this->env = std::make_unique<LGPEnvironment>(iSet, params.lgp.nbRegisters, params.lgp.nbProgramConstant, dataSource);
     Algorithm::Algorithm::initAlgorithm(rng, outputs, dataSource, graph);
 }
 
@@ -49,7 +49,7 @@ void Algorithm::LGP::LGPAlgorithm::printAgent(const Agent& agent, FILE* pFile, s
         std::string instructionInfo;
 
         // add next the content of the constant data handler in a comment (//)
-        for (int i = 0; i < params.nbProgramConstant;
+        for (int i = 0; i < params.lgp.nbProgramConstant;
             i++) {
             constantInfo += std::to_string(static_cast<double>(lgpAgent.getConstantAt(i))) + "|";
         }

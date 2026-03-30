@@ -49,7 +49,7 @@ namespace Algorithm::LGP {
     {
       private:
         /// Environment used during analyses
-        const Environment& environment;
+        const LGPEnvironment& environment;
 
         /// Data sources (including registers) used in the Program.
         std::vector<std::reference_wrapper<const Data::DataHandler>>
@@ -89,7 +89,7 @@ namespace Algorithm::LGP {
 
 
         /// Default constructor
-        LGPPolicyStats(std::string algorithmName, uint64_t algorithmID, const Environment& env) : PolicyStats(algorithmName, algorithmID), environment{env} {
+        LGPPolicyStats(std::string algorithmName, uint64_t algorithmID, const LGPEnvironment& env) : PolicyStats(algorithmName, algorithmID), environment{env} {
           this->dataSourcesAndRegisters.insert(
               dataSourcesAndRegisters.begin(),
               environment.getFakeDataSources().begin(),

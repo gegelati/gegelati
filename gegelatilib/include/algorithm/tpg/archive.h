@@ -47,227 +47,230 @@
 #include "algorithm/agent.h"
 #include "mutator/rng.h"
 
-/**
- * \brief Class used to store one recording of an Archive.
- *
- * A recording in the archive is a tuple consisting of:
- * - A Program pointer (that may not exist anymore)
- * - A set of DataHandler copies with all their data.
- * - A double resulting from the execution of the Program on the DataHandler.
- */
-typedef struct ArchiveRecording
-{
-    /// Pointer to the agent Program. This pointer may point to a freed agent.
-    const Algorithm::Agent* agent;
-
-    /// Hash of the set of DataHandler for this recording
-    const size_t dataHash;
-
-    /// Value returned by the Program for the DataHandler with the specified
-    /// hash.
-    const double result;
-} ArchiveRecording;
-
-/**
- * Class use to manage the Archive associating input DataHandler and Program to
- * the results they produced during execution.
- *
- * This Archive is used when mutating a Program to perform the neutrality test
- * which requires a Mutated program to produce an original result compared to
- * any Program still in the Archive.
- *
- */
-class Archive
-{
-  protected:
-    /// Maximum number of recordings held in the Archive.
-    const size_t maxSize;
+namespace Algorithm::TPG {
 
     /**
-     * \brief Randomness engine for archiving.
+     * \brief Class used to store one recording of an Archive.
      *
-     * This randomness engine is used to ensure determinism of the archiving
-     * process even in parallel execution context.
-     * The randomness engine should be reset with a new seed before entering a
-     * parallelizable part of the computations (even if these computations are
-     * done sequentially). As a more concrete example, if each policy starting
-     * from a root Vertex in a Graph is evaluated in parallel, the
-     * randomEngine should be reset before each root.
+     * A recording in the archive is a tuple consisting of:
+     * - A Program pointer (that may not exist anymore)
+     * - A set of DataHandler copies with all their data.
+     * - A double resulting from the execution of the Program on the DataHandler.
      */
-    RNG::RNG rng;
+    typedef struct ArchiveRecording
+    {
+        /// Pointer to the agent Program. This pointer may point to a freed agent.
+        const Agent* agent;
+
+        /// Hash of the set of DataHandler for this recording
+        const size_t dataHash;
+
+        /// Value returned by the Program for the DataHandler with the specified
+        /// hash.
+        const double result;
+    } ArchiveRecording;
 
     /**
-     * \brief Storage for DataHandler copies used in recordings.
+     * Class use to manage the Archive associating input DataHandler and Program to
+     * the results they produced during execution.
      *
-     * This map associates a hash values with the corresonding copy of the set
-     * of DataHandler that produced this value. The hash value is used in
-     * recordings to associate each recording to the right copy of the
-     * DataHandler.
+     * This Archive is used when mutating a Program to perform the neutrality test
+     * which requires a Mutated program to produce an original result compared to
+     * any Program still in the Archive.
+     *
      */
-    std::map<size_t,
-             std::vector<std::reference_wrapper<const Data::DataHandler>>>
-        dataHandlers;
+    class TPGArchive
+    {
+    protected:
+        /// Maximum number of recordings held in the Archive.
+        const size_t maxSize;
 
-    /**
-     * \brief Map storing the Program pointers referenced in recordings the
-     * associated recording.
-     *
-     * The Map is filled in the addRecording method, and elements are removed
-     * whenever the las ArchiveRecording referencing a Program is removed from
-     * the Archive.
-     *
-     * The Map is used to speed the unicity tests.
-     */
-    std::map<const Algorithm::Agent*, std::deque<ArchiveRecording>>
-        recordingsPerProgram;
+        /**
+         * \brief Randomness engine for archiving.
+         *
+         * This randomness engine is used to ensure determinism of the archiving
+         * process even in parallel execution context.
+         * The randomness engine should be reset with a new seed before entering a
+         * parallelizable part of the computations (even if these computations are
+         * done sequentially). As a more concrete example, if each policy starting
+         * from a root Vertex in a Graph is evaluated in parallel, the
+         * randomEngine should be reset before each root.
+         */
+        RNG::RNG rng;
 
-    /// Recordings of the Archive
-    std::deque<ArchiveRecording> recordings;
+        /**
+         * \brief Storage for DataHandler copies used in recordings.
+         *
+         * This map associates a hash values with the corresonding copy of the set
+         * of DataHandler that produced this value. The hash value is used in
+         * recordings to associate each recording to the right copy of the
+         * DataHandler.
+         */
+        std::map<size_t,
+                std::vector<std::reference_wrapper<const Data::DataHandler>>>
+            dataHandlers;
 
-    /**
-     * \brief Probability of adding any program execution to the archive.
-     */
-    const double archivingProbability;
+        /**
+         * \brief Map storing the Program pointers referenced in recordings the
+         * associated recording.
+         *
+         * The Map is filled in the addRecording method, and elements are removed
+         * whenever the las ArchiveRecording referencing a Program is removed from
+         * the Archive.
+         *
+         * The Map is used to speed the unicity tests.
+         */
+        std::map<const Agent*, std::deque<ArchiveRecording>>
+            recordingsPerProgram;
 
-  public:
-    /**
-     * \brief Main constructor for Archive.
-     *
-     * \param[in] size maximum number of recordings kept in the Archive.
-     * \param[in] archivingProbability probability for each call to
-     * addRecording to actually lead to a new recodring in the Archive.
-     * \param[in] initialSeed Seed value for the randomEngine.
-     */
-    Archive(size_t size = 50, double archivingProbability = 1.0,
-            size_t initialSeed = 0)
-        : maxSize{size}, rng(initialSeed), dataHandlers{}, recordingsPerProgram{},
-          recordings{}, archivingProbability{archivingProbability} {}
+        /// Recordings of the Archive
+        std::deque<ArchiveRecording> recordings;
 
-    /**
-     * Disable Archive copy construction.
-     *
-     * Until we see the need for it, there is no reason to enable
-     * copy-construction of Archive.
-     */
-    Archive(const Archive& other) = delete;
+        /**
+         * \brief Probability of adding any program execution to the archive.
+         */
+        const double archivingProbability;
 
-    /**
-     * \brief Destructor of the class.
-     *
-     * In addition to default behavior, free all the memory associated to the
-     * referenced DataHandler in the dataHandlers attribute.
-     */
-    ~Archive();
+    public:
+        /**
+         * \brief Main constructor for Archive.
+         *
+         * \param[in] size maximum number of recordings kept in the Archive.
+         * \param[in] archivingProbability probability for each call to
+         * addRecording to actually lead to a new recodring in the Archive.
+         * \param[in] initialSeed Seed value for the randomEngine.
+         */
+        TPGArchive(size_t size = 50, double archivingProbability = 1.0,
+                size_t initialSeed = 0)
+            : maxSize{size}, rng(initialSeed), dataHandlers{}, recordingsPerProgram{},
+            recordings{}, archivingProbability{archivingProbability} {}
 
-    /**
-     * \brief Combien the hash of a set of dataHandlers into a single one.
-     *
-     * Hashes of each DataHandler is accessed with the
-     * DataHandler::getHash() method.
-     *
-     * \return the hash resulting from the combination.
-     */
-    static size_t getCombinedHash(
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandler);
+        /**
+         * Disable Archive copy construction.
+         *
+         * Until we see the need for it, there is no reason to enable
+         * copy-construction of Archive.
+         */
+        TPGArchive(const TPGArchive& other) = delete;
 
-    /**
-     * \brief Access the nth ArchiveRecording within the Archive.
-     *
-     * \param[in] n The index of the retrieved ArchiveRecording.
-     * \return a const reference to the indexed ArchiveRecording.
-     * \throws std::out_of_range if the given index is out of bounds.
-     */
-    const ArchiveRecording& at(uint64_t n) const;
+        /**
+         * \brief Destructor of the class.
+         *
+         * In addition to default behavior, free all the memory associated to the
+         * referenced DataHandler in the dataHandlers attribute.
+         */
+        ~TPGArchive();
 
-    /**
-     * \brief Set a new seed for the randomEngine.
-     *
-     * \param[in] newSeed Set a new seed for the random engine.
-     */
-    void setRandomSeed(size_t newSeed);
+        /**
+         * \brief Combien the hash of a set of dataHandlers into a single one.
+         *
+         * Hashes of each DataHandler is accessed with the
+         * DataHandler::getHash() method.
+         *
+         * \return the hash resulting from the combination.
+         */
+        static size_t getCombinedHash(
+            const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+                dHandler);
 
-    /**
-     * \brief Add a new recording to the Archive.
-     *
-     * A call to this function adds an ArchiveRecording to the archive with the
-     * probability specified by the archivingProbability attribute unless it is
-     * forced, in which case the recording is added without randomness.
-     * If the maximum number of recordings held in the archive is reached, the
-     * oldest recording will be removed.
-     * If this is the first time this set of DataHandler is stored in the
-     * Archive according to its DataHandler::getHash() method, a copy of the
-     * dataHandler will be created.
-     * If an identical recording is already in the Archive (same hash, same
-     * Program), the recording is not added.
-     *
-     * \param[in] agent the agent Program associated to this recording.
-     * \param[in] dHandler the set of dataHandler the Program worked on to
-     *                     generate the associated result.
-     * \param[in] result double value produced by the Program.
-     * \param[in] forced Boolean for bypassing the stochastic process during
-     *                   insertion.
-     */
-    virtual void addRecording(
-        const Algorithm::Agent& agent,
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandler,
-        double result, bool forced = false);
+        /**
+         * \brief Access the nth ArchiveRecording within the Archive.
+         *
+         * \param[in] n The index of the retrieved ArchiveRecording.
+         * \return a const reference to the indexed ArchiveRecording.
+         * \throws std::out_of_range if the given index is out of bounds.
+         */
+        const ArchiveRecording& at(uint64_t n) const;
 
-    /**
-     * \brief Check whether the given hash is already in the archive.
-     *
-     * \param[in] hash the DataHandler hash whose presence will be tested.
-     * \return true if the given hash is already in the
-     *         Archive, false otherwise.
-     */
-    bool hasDataHandlers(const size_t& hash) const;
+        /**
+         * \brief Set a new seed for the randomEngine.
+         *
+         * \param[in] newSeed Set a new seed for the random engine.
+         */
+        void setRandomSeed(size_t newSeed);
 
-    /**
-     * Check if the given hash-results pairs are unique compared to Program in
-     * the Archive.
-     *
-     * This method will return false is there exist any Program in the Archive
-     * for which all recordings with hashes contained in the given map, are
-     * associated to results equal to those of the given map (within tau
-     * margin).
-     */
-    virtual bool areProgramResultsUnique(
-        const std::map<size_t, double>& hashesAndResults,
-        double tau = 1e-4) const;
+        /**
+         * \brief Add a new recording to the Archive.
+         *
+         * A call to this function adds an ArchiveRecording to the archive with the
+         * probability specified by the archivingProbability attribute unless it is
+         * forced, in which case the recording is added without randomness.
+         * If the maximum number of recordings held in the archive is reached, the
+         * oldest recording will be removed.
+         * If this is the first time this set of DataHandler is stored in the
+         * Archive according to its DataHandler::getHash() method, a copy of the
+         * dataHandler will be created.
+         * If an identical recording is already in the Archive (same hash, same
+         * Program), the recording is not added.
+         *
+         * \param[in] agent the agent Program associated to this recording.
+         * \param[in] dHandler the set of dataHandler the Program worked on to
+         *                     generate the associated result.
+         * \param[in] result double value produced by the Program.
+         * \param[in] forced Boolean for bypassing the stochastic process during
+         *                   insertion.
+         */
+        virtual void addRecording(
+            const Agent& agent,
+            const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+                dHandler,
+            double result, bool forced = false);
 
-    /**
-     * \brief Get the number of recordings currently held in the Archive.
-     *
-     * \return the size of the recordings attribute.
-     */
-    size_t getNbRecordings() const;
+        /**
+         * \brief Check whether the given hash is already in the archive.
+         *
+         * \param[in] hash the DataHandler hash whose presence will be tested.
+         * \return true if the given hash is already in the
+         *         Archive, false otherwise.
+         */
+        bool hasDataHandlers(const size_t& hash) const;
 
-    /**
-     * \brief Get the number of different vector of DataHandler associated to
-     * recordings.
-     *
-     * \return the size of the dataHandlers attribute.
-     */
-    size_t getNbDataHandlers() const;
+        /**
+         * Check if the given hash-results pairs are unique compared to Program in
+         * the Archive.
+         *
+         * This method will return false is there exist any Program in the Archive
+         * for which all recordings with hashes contained in the given map, are
+         * associated to results equal to those of the given map (within tau
+         * margin).
+         */
+        virtual bool areProgramResultsUnique(
+            const std::map<size_t, double>& hashesAndResults,
+            double tau = 1e-4) const;
 
-    /**
-     * \brief Const accessor to the dataHandlers attribute.
-     *
-     * In order to test the unicity of a Program value, this Program must be
-     * executed on all DataHandlers contained in an Archive to assess the
-     * uniqueness of the results it produces.
-     *
-     * \return a const reference to the dataHandlers attribute.
-     */
-    const std::map<
-        size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>>&
-    getDataHandlers() const;
+        /**
+         * \brief Get the number of recordings currently held in the Archive.
+         *
+         * \return the size of the recordings attribute.
+         */
+        size_t getNbRecordings() const;
 
-    /**
-     * \brief Clear all content from the Archive.
-     */
-    void clear();
-};
+        /**
+         * \brief Get the number of different vector of DataHandler associated to
+         * recordings.
+         *
+         * \return the size of the dataHandlers attribute.
+         */
+        size_t getNbDataHandlers() const;
+
+        /**
+         * \brief Const accessor to the dataHandlers attribute.
+         *
+         * In order to test the unicity of a Program value, this Program must be
+         * executed on all DataHandlers contained in an Archive to assess the
+         * uniqueness of the results it produces.
+         *
+         * \return a const reference to the dataHandlers attribute.
+         */
+        const std::map<
+            size_t, std::vector<std::reference_wrapper<const Data::DataHandler>>>&
+        getDataHandlers() const;
+
+        /**
+         * \brief Clear all content from the Archive.
+         */
+        void clear();
+    };
+}
 
 #endif

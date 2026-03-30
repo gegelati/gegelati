@@ -41,6 +41,7 @@
 #include <cmath>
 #include <iostream>
 
+#include "algorithm/lgp/lgpParameters.h"
 #include "data/constantHandler.h"
 #include "data/dataHandler.h"
 #include "data/primitiveTypeArray.h"
@@ -48,270 +49,265 @@
 #include "instructions/set.h"
 #include "learn/learningParameters.h"
 
-/// LineSize structure to be used within the Environment.
-typedef struct LineSize
-{
-    /// Number of bits used to encode the instructionIndex
-    size_t nbInstructionBits;
-    /// Number of bits used to encode the destinationIndex
-    size_t nbDestinationBits;
-    /// Total number of bits used to encode the operands info
-    size_t nbOperandsBits;
-    /// Number of bits used for each operand pair, to encode dataSourceIndex
-    size_t nbOperandDataSourceIndexBits;
-    /// Number of bits used for each operand pair, to encode location
-    size_t nbOperandLocationBits;
-    /// Total number of bits to encode a program line.
-    size_t totalNbBits;
 
-    /// Default cast to uint64_t returns the total number of bits.
-    operator size_t() const
+namespace Algorithm::LGP {
+        
+    /// LGPLineSize structure to be used within the LGPEnvironment.
+    typedef struct LGPLineSize
     {
-        return totalNbBits;
-    }
-} LineSize;
+        /// Number of bits used to encode the instructionIndex
+        size_t nbInstructionBits;
+        /// Number of bits used to encode the destinationIndex
+        size_t nbDestinationBits;
+        /// Total number of bits used to encode the operands info
+        size_t nbOperandsBits;
+        /// Number of bits used for each operand pair, to encode dataSourceIndex
+        size_t nbOperandDataSourceIndexBits;
+        /// Number of bits used for each operand pair, to encode location
+        size_t nbOperandLocationBits;
+        /// Total number of bits to encode a program line.
+        size_t totalNbBits;
 
-/**
- * \brief The Environment class contains all information needed to execute a
- * Program.
- *
- * To execute a Program, and size adequately its ProgramLine, a fixed
- * Instruction Set, a list of available input DataHandler, and the number of
- * available registers is needed.
- *
- * To ensure viability of Program based on a given Environment, all attributes
- * of an Environment are copied in const attributes at construction time.
- */
-class Environment
-{
-  protected:
-    /// Set of Instruction used by Program running within this Environment.
-    const Instructions::Set instructionSet;
-
-    /// Parameters for the learning process
-    const Learn::LearningParameters params;
-
-    /// List of DataHandler that can be accessed within this Environment.
-    const std::vector<std::reference_wrapper<const Data::DataHandler>>
-        dataSources;
-
-    /// Number of registers
-    const size_t nbRegisters;
-
-    /// Number of constants
-    const size_t nbConstants;
-
-    /// Vector of DataHandlers containing the environment's dataSources
-    std::vector<std::reference_wrapper<const Data::DataHandler>>
-        fakeDataSources;
-
-    /// DataHandler whost type corresponds to registers.
-    const Data::PrimitiveTypeArray<double> fakeRegisters;
-
-    /// DataHandler whost type corresponds to the programs constants.
-    const Data::ConstantHandler fakeConstants;
-
-    /// Number of continuous actions
-    const size_t nbContinuousActions;
-
-    /// Number of Instruction in the Instructions::Set.
-    const size_t nbInstructions;
-
-    /// Maxmimum number of operands of the Instructions::Set.
-    const size_t maxNbOperands;
-
-    /// Number of DataHandler from which data can be accessed.
-    const size_t nbDataSources;
-
-    /// Size of the largestAddressSpace of DataHandlers
-    const size_t largestAddressSpace;
-
-    /// Size of lines within this Environment
-    const LineSize lineSize;
-
-    /**
-     * \brief Static method used when constructing a new Environment to compute
-     * the largest AddressSpace of a set of DataHandler.
-     *
-     * \param[in] nbRegisters the number of registers of the environment.
-     * \param[in] nbConstants the number of program's constants.
-     * \param[in] dHandlers reference to the set of DataHandler whose largest
-     * largestAddressSpace is searched. \return the found value, or 0 default
-     * value if the given std::vector was empty.
-     */
-    static size_t computeLargestAddressSpace(
-        const size_t nbRegisters, const size_t nbConstants,
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandlers);
-
-    /**
-     * \brief Static method used to compute the size of Program lines based on
-     * information from the Enviroment.
-     *
-     * The Program line size, expressed in bits, is computed with the following
-     * formula: $ ceil(log2(i)) + ceil(log2(n))+
-     * m*(ceil(log2(nb_{src}))+ceil(log2(largestAddressSpace)) + p*32$ With bits
-     * organised (theoretically) in the same order as in the equation |
-     * Instruction | destination | operands See
-     * PROJECT/doc/instructions.md for more details.
-     *
-     * \param[in] env The Environment whose information is used.
-     * \return the computed line size.
-     * \throw std::domain_error in cases where the given Environment is
-     * parameterized with no registers, contains no Instruction, Instruction
-     * with no operands, no DataHandler or DataHandler with no addressable
-     * Space.
-     */
-    static const LineSize computeLineSize(const Environment& env);
-
-    /**
-     * \brief Filter an InstructionSet to keep only Instruction with operand
-     * types provided by the given DataHandler.
-     *
-     * \param[in] iSet the Instructions::Set to filter.
-     * \param[in] nbRegisters Number of registers
-     * \param[in] nbConstants Number of constants of the program
-     * \param[in] dataSources a set of DataHandler providing data.
-     * \return a new Instructions:Set where only Instruction whose operands
-     * can be provided by at least one DataHandler are kept.
-     */
-    static Instructions::Set filterInstructionSet(
-        const Instructions::Set& iSet, const size_t nbRegisters,
-        const size_t nbConstants,
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dataSources);
-
-  private:
-    /// Default constructor deleted for its uselessness.
-    Environment() = delete;
-
-  public:
-    /**
-     * \brief Constructor with initialization of all attributes.
-     *
-     * To ensure viability of Program based on a given Environment, all
-     * attributes of an Environment are copied in const attributes at
-     * construction time.
-     *
-     * \param[in] iSet the Instructions::Set whose Instruction will be used in
-     * this Environment.
-     * \param[in] p the LearningParameter used, storing all metaparameters.
-     * \param[in] dHandlers the list of DataHandler that will
-     * be used in this Environment.
-     * \param[in] nbContinuousAct number of continuous actions in the
-     * LearningEnvironment, default value is 0.
-     */
-    Environment(
-        const Instructions::Set& iSet, const Learn::LearningParameters& p,
-        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-            dHandlers,
-        size_t nbContinuousAct = 0)
-        : instructionSet{filterInstructionSet(iSet, p.nbRegisters,
-                                              p.nbProgramConstant, dHandlers)},
-          params{p}, dataSources{dHandlers}, nbRegisters{p.nbRegisters},
-          nbConstants{p.nbProgramConstant}, fakeRegisters(p.nbRegisters),
-          fakeConstants(p.nbProgramConstant),
-          nbInstructions{instructionSet.getNbInstructions()},
-          maxNbOperands{instructionSet.getMaxNbOperands()},
-          nbContinuousActions{nbContinuousAct},
-          nbDataSources{
-              dHandlers.size() +
-              (p.nbProgramConstant > 0
-                   ? 2
-                   : 1)}, // if Constants are used, we need an extra
-                          // datasource to store them in the environment
-          largestAddressSpace{computeLargestAddressSpace(
-              p.nbRegisters, p.nbProgramConstant, dHandlers)},
-          lineSize{computeLineSize(*this)}
-    {
-        this->fakeDataSources.push_back(
-            (std::reference_wrapper<const Data::DataHandler>)this
-                ->fakeRegisters);
-
-        if (p.nbProgramConstant > 0) {
-            this->fakeDataSources.push_back(this->fakeConstants);
+        /// Default cast to uint64_t returns the total number of bits.
+        operator size_t() const
+        {
+            return totalNbBits;
         }
+    } LGPLineSize;
 
-        for (auto& elem : this->dataSources)
-            this->fakeDataSources.push_back(elem);
+
+    /**
+     * \brief The LGPEnvironment class contains all information needed to execute a
+     * Program.
+     *
+     * To execute a Program, and size adequately its ProgramLine, a fixed
+     * Instruction Set, a list of available input DataHandler, and the number of
+     * available registers is needed.
+     *
+     * To ensure viability of Program based on a given LGPEnvironment, all attributes
+     * of an LGPEnvironment are copied in const attributes at construction time.
+     */
+    class LGPEnvironment
+    {
+    protected:
+        /// Set of Instruction used by Program running within this LGPEnvironment.
+        const Instructions::Set instructionSet;
+
+        /// List of DataHandler that can be accessed within this LGPEnvironment.
+        const std::vector<std::reference_wrapper<const Data::DataHandler>>
+            dataSources;
+
+        /// Number of registers
+        const size_t nbRegisters;
+
+        /// Number of constants
+        const size_t nbConstants;
+
+        /// Vector of DataHandlers containing the environment's dataSources
+        std::vector<std::reference_wrapper<const Data::DataHandler>>
+            fakeDataSources;
+
+        /// DataHandler whost type corresponds to registers.
+        const Data::PrimitiveTypeArray<double> fakeRegisters;
+
+        /// DataHandler whost type corresponds to the programs constants.
+        const Data::ConstantHandler fakeConstants;
+
+        /// Number of Instruction in the Instructions::Set.
+        const size_t nbInstructions;
+
+        /// Maxmimum number of operands of the Instructions::Set.
+        const size_t maxNbOperands;
+
+        /// Number of DataHandler from which data can be accessed.
+        const size_t nbDataSources;
+
+        /// Size of the largestAddressSpace of DataHandlers
+        const size_t largestAddressSpace;
+
+        /// Size of lines within this LGPEnvironment
+        const LGPLineSize lineSize;
+
+        /**
+         * \brief Static method used when constructing a new LGPEnvironment to compute
+         * the largest AddressSpace of a set of DataHandler.
+         *
+         * \param[in] nbRegisters the number of registers of the environment.
+         * \param[in] nbConstants the number of program's constants.
+         * \param[in] dHandlers reference to the set of DataHandler whose largest
+         * largestAddressSpace is searched. \return the found value, or 0 default
+         * value if the given std::vector was empty.
+         */
+        static size_t computeLargestAddressSpace(
+            const size_t nbRegisters, const size_t nbConstants,
+            const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+                dHandlers);
+
+        /**
+         * \brief Static method used to compute the size of Program lines based on
+         * information from the Enviroment.
+         *
+         * The Program line size, expressed in bits, is computed with the following
+         * formula: $ ceil(log2(i)) + ceil(log2(n))+
+         * m*(ceil(log2(nb_{src}))+ceil(log2(largestAddressSpace)) + p*32$ With bits
+         * organised (theoretically) in the same order as in the equation |
+         * Instruction | destination | operands See
+         * PROJECT/doc/instructions.md for more details.
+         *
+         * \param[in] env The LGPEnvironment whose information is used.
+         * \return the computed line size.
+         * \throw std::domain_error in cases where the given LGPEnvironment is
+         * parameterized with no registers, contains no Instruction, Instruction
+         * with no operands, no DataHandler or DataHandler with no addressable
+         * Space.
+         */
+        static const LGPLineSize computeLineSize(const LGPEnvironment& env);
+
+        /**
+         * \brief Filter an InstructionSet to keep only Instruction with operand
+         * types provided by the given DataHandler.
+         *
+         * \param[in] iSet the Instructions::Set to filter.
+         * \param[in] nbRegisters Number of registers
+         * \param[in] nbConstants Number of constants of the program
+         * \param[in] dataSources a set of DataHandler providing data.
+         * \return a new Instructions:Set where only Instruction whose operands
+         * can be provided by at least one DataHandler are kept.
+         */
+        static Instructions::Set filterInstructionSet(
+            const Instructions::Set& iSet, const size_t nbRegisters,
+            const size_t nbConstants,
+            const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+                dataSources);
+
+    private:
+        /// Default constructor deleted for its uselessness.
+        LGPEnvironment() = delete;
+
+    public:
+        /**
+         * \brief Constructor with initialization of all attributes.
+         *
+         * To ensure viability of Program based on a given LGPEnvironment, all
+         * attributes of an LGPEnvironment are copied in const attributes at
+         * construction time.
+         *
+         * \param[in] iSet the Instructions::Set whose Instruction will be used in
+         * this LGPEnvironment.
+         * \param[in] nbRegisters number of registers
+         * \param[in] nbConstants number of constants
+         * \param[in] dHandlers the list of DataHandler that will
+         * be used in this LGPEnvironment.
+         */
+        LGPEnvironment(
+            const Instructions::Set& iSet, size_t nbRegisters, size_t nbConstants,
+            const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+                dHandlers)
+            : instructionSet{filterInstructionSet(iSet, nbRegisters,
+                                                nbConstants, dHandlers)},
+            dataSources{dHandlers}, nbRegisters{nbRegisters},
+            nbConstants{nbConstants}, fakeRegisters(nbRegisters),
+            fakeConstants(nbConstants),
+            nbInstructions{instructionSet.getNbInstructions()},
+            maxNbOperands{instructionSet.getMaxNbOperands()},
+            nbDataSources{
+                dHandlers.size() +
+                (nbConstants > 0
+                    ? 2
+                    : 1)}, // if Constants are used, we need an extra
+                            // datasource to store them in the environment
+            largestAddressSpace{computeLargestAddressSpace(
+                nbRegisters, nbConstants, dHandlers)},
+            lineSize{computeLineSize(*this)}
+        {
+            this->fakeDataSources.push_back(
+                (std::reference_wrapper<const Data::DataHandler>)this
+                    ->fakeRegisters);
+
+            if (nbConstants > 0) {
+                this->fakeDataSources.push_back(this->fakeConstants);
+            }
+
+            for (auto& elem : this->dataSources)
+                this->fakeDataSources.push_back(elem);
+        };
+
+        /**
+         * \brief Get the number of constant
+         */
+        size_t getNbConstants() const;
+
+        /**
+         * \brief Get the number of registers
+         */
+        size_t getNbRegisters() const;
+
+        /**
+         * \brief Get the size of the number of Instruction within the
+         * Instructions::Set.
+         *
+         * \return the value of the nbInstructions attribute.
+         */
+        size_t getNbInstructions() const;
+
+        /**
+         * \brief Get the size of the maximum number of operands of
+         * Instructions::Set.
+         *
+         * \return the value of the maxNbOperands attribute.
+         */
+        size_t getMaxNbOperands() const;
+
+        /**
+         * \brief Get the size of the number of DataHandlers.
+         *
+         * \return the value of the nbDataSources attribute.
+         */
+        size_t getNbDataSources() const;
+
+        /**
+         * \brief Get the size of the largestAddressSpace of DataHandlers.
+         *
+         * \return the value of the LargestAddressSpace attribute.
+         */
+        size_t getLargestAddressSpace() const;
+
+        /**
+         * \brief Get the size of the line for this environment (in bits).
+         *
+         * \return the value of the lineSize attribute.
+         */
+        const LGPLineSize& getLineSize() const;
+
+        /**
+         * \brief Get the DataHandler of the LGPEnvironment.
+         *
+         * \return a const reference to the dataSources attribute of this
+         * LGPEnvironment.
+         */
+        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+        getDataSources() const;
+
+        /**
+         * Get the datasource identical to the one used by programs
+         *
+         * Getting the data sources identical to the one used by programs
+         * when executing a Program can be useful, notably when
+         * mutating a Program::Line and assessing whether a data type can be
+         * provided by the registers.
+         */
+        const std::vector<std::reference_wrapper<const Data::DataHandler>>&
+        getFakeDataSources() const;
+
+        /**
+         * \brief Get the Instruction Set of the LGPEnvironment.
+         *
+         * \return a const reference to the instructionSet attribute of this
+         * LGPEnvironment.
+         */
+        const Instructions::Set& getInstructionSet() const;
     };
 
-    /**
-     * \brief Get the instance of parameters used
-     */
-    const Learn::LearningParameters& getParams() const;
-
-    /**
-     * \brief Get the number of continuous actions.
-     *
-     * \return the value of the nbContinuousActions attribute.
-     */
-    size_t getNbContinuousActions() const;
-
-    /**
-     * \brief Get the size of the number of Instruction within the
-     * Instructions::Set.
-     *
-     * \return the value of the nbInstructions attribute.
-     */
-    size_t getNbInstructions() const;
-
-    /**
-     * \brief Get the size of the maximum number of operands of
-     * Instructions::Set.
-     *
-     * \return the value of the maxNbOperands attribute.
-     */
-    size_t getMaxNbOperands() const;
-
-    /**
-     * \brief Get the size of the number of DataHandlers.
-     *
-     * \return the value of the nbDataSources attribute.
-     */
-    size_t getNbDataSources() const;
-
-    /**
-     * \brief Get the size of the largestAddressSpace of DataHandlers.
-     *
-     * \return the value of the LargestAddressSpace attribute.
-     */
-    size_t getLargestAddressSpace() const;
-
-    /**
-     * \brief Get the size of the line for this environment (in bits).
-     *
-     * \return the value of the lineSize attribute.
-     */
-    const LineSize& getLineSize() const;
-
-    /**
-     * \brief Get the DataHandler of the Environment.
-     *
-     * \return a const reference to the dataSources attribute of this
-     * Environment.
-     */
-    const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-    getDataSources() const;
-
-    /**
-     * Get the datasource identical to the one used by programs
-     *
-     * Getting the data sources identical to the one used by programs
-     * when executing a Program can be useful, notably when
-     * mutating a Program::Line and assessing whether a data type can be
-     * provided by the registers.
-     */
-    const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-    getFakeDataSources() const;
-
-    /**
-     * \brief Get the Instruction Set of the Environment.
-     *
-     * \return a const reference to the instructionSet attribute of this
-     * Environment.
-     */
-    const Instructions::Set& getInstructionSet() const;
-};
+}
 
 #endif

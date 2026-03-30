@@ -65,21 +65,21 @@ class ClassificationTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
         // Proba as in Kelly's paper
-        params.mutation.tpg.maxInitOutgoingEdges = 3;
-        params.mutation.prog.maxProgramSize = 96;
-        params.mutation.tpg.nbRoots = 15;
-        params.mutation.tpg.pEdgeDeletion = 0.7;
-        params.mutation.tpg.pEdgeAddition = 0.7;
-        params.mutation.tpg.pProgramMutation = 0.2;
-        params.mutation.tpg.pEdgeDestinationChange = 0.1;
-        params.mutation.tpg.pEdgeDestinationIsAction = 0.5;
-        params.mutation.prog.pAdd = 0.5;
-        params.mutation.prog.pDelete = 0.5;
-        params.mutation.prog.pMutate = 1.0;
-        params.mutation.prog.pSwap = 1.0;
-        params.mutation.prog.pConstantMutation = 0.5;
-        params.mutation.prog.minConstValue = 0;
-        params.mutation.prog.maxConstValue = 1;
+        params.algorithm.tpg.maxInitOutgoingEdges = 3;
+        params.algorithm.lgp.maxProgramSize = 96;
+        params.algorithm.nbAgents = 15;
+        params.algorithm.tpg.pEdgeDeletion = 0.7;
+        params.algorithm.tpg.pEdgeAddition = 0.7;
+        params.algorithm.tpg.pProgramMutation = 0.2;
+        params.algorithm.tpg.pEdgeDestinationChange = 0.1;
+        params.algorithm.tpg.pEdgeDestinationIsAction = 0.5;
+        params.algorithm.lgp.pAdd = 0.5;
+        params.algorithm.lgp.pDelete = 0.5;
+        params.algorithm.lgp.pMutate = 1.0;
+        params.algorithm.lgp.pSwap = 1.0;
+        params.algorithm.lgp.pConstantMutation = 0.5;
+        params.algorithm.lgp.minConstValue = 0;
+        params.algorithm.lgp.maxConstValue = 1;
     }
 
     virtual void TearDown()
@@ -107,8 +107,8 @@ TEST_F(ClassificationTest, Constructor)
 
 TEST_F(ClassificationTest, EvaluateRoot)
 {
-    params.archiveSize = 50;
-    params.archivingProbability = 1.0;
+    params.algorithm.tpg.archiveSize = 50;
+    params.algorithm.tpg.archivingProbability = 1.0;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 10;
     // Only 2 evaluations of each root should be done (one to create a result,
@@ -166,13 +166,13 @@ TEST_F(ClassificationTest, EvaluateRoot)
 
 TEST_F(ClassificationTest, DoSelection)
 {
-    params.archiveSize = 50;
-    params.archivingProbability = 0.5;
+    params.algorithm.tpg.archiveSize = 50;
+    params.algorithm.tpg.archivingProbability = 0.5;
     params.maxNbActionsPerEval = 11;
     params.nbIterationsPerPolicyEvaluation = 3;
-    params.mutation.tpg.maxInitOutgoingEdges = 2;
+    params.algorithm.tpg.maxInitOutgoingEdges = 2;
     params.selection.truncation.ratioDeletedRoots = 0.50;
-    params.mutation.tpg.nbRoots = 50; // Param used in decimation
+    params.algorithm.nbAgents = 50; // Param used in decimation
     params.nbThreads = 4;
 
     Learn::LearningAgent la(fle, set, params);
@@ -295,7 +295,7 @@ TEST_F(ClassificationTest, DoSelection)
     ASSERT_EQ(
         la.getGraph()->getNbVertices(),
         originalNbVertices -
-            std::ceil(params.mutation.tpg.nbRoots *
+            std::ceil(params.algorithm.nbAgents *
                       (1.0 - params.selection.truncation.ratioDeletedRoots)));
 
     // Check the presence of savedRoots among remaining roots.

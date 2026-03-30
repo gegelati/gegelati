@@ -28,7 +28,7 @@ namespace Algorithm::CGP {
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            CGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet, std::string algorithmName = "CGP", std::string algorithmColor = "#98a02c")
+            CGPAlgorithm(const AlgorithmParameters& params, const Instructions::Set& iSet, std::string algorithmName = "CGP", std::string algorithmColor = "#98a02c")
                 : LGP::LGPAlgorithm(params, iSet, algorithmName, algorithmColor) {};
 
             /**

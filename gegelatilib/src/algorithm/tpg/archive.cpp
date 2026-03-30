@@ -37,7 +37,7 @@
 
 #include "algorithm/tpg/archive.h"
 
-Archive::~Archive()
+Algorithm::TPG::TPGArchive::~TPGArchive()
 {
     for (auto dHandlerAndHash : this->dataHandlers) {
         for (auto dHandler : dHandlerAndHash.second) {
@@ -47,7 +47,7 @@ Archive::~Archive()
     }
 }
 
-size_t Archive::getCombinedHash(
+size_t Algorithm::TPG::TPGArchive::getCombinedHash(
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dHandlers)
 {
@@ -59,17 +59,17 @@ size_t Archive::getCombinedHash(
     return hash;
 }
 
-const ArchiveRecording& Archive::at(uint64_t n) const
+const Algorithm::TPG::ArchiveRecording& Algorithm::TPG::TPGArchive::at(uint64_t n) const
 {
     return this->recordings.at(n);
 }
 
-void Archive::setRandomSeed(size_t newSeed)
+void Algorithm::TPG::TPGArchive::setRandomSeed(size_t newSeed)
 {
     this->rng.setSeed(newSeed);
 }
 
-void Archive::addRecording(
+void Algorithm::TPG::TPGArchive::addRecording(
     const Algorithm::Agent& agent,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dHandler,
@@ -147,12 +147,12 @@ void Archive::addRecording(
     }
 }
 
-bool Archive::hasDataHandlers(const size_t& hash) const
+bool Algorithm::TPG::TPGArchive::hasDataHandlers(const size_t& hash) const
 {
     return this->dataHandlers.count(hash) != 0;
 }
 
-bool Archive::areProgramResultsUnique(
+bool Algorithm::TPG::TPGArchive::areProgramResultsUnique(
     const std::map<size_t, double>& hashesAndResults, double tau) const
 {
     // Check programs until one is equivalent or until all have been checked.
@@ -196,24 +196,24 @@ bool Archive::areProgramResultsUnique(
     return true;
 }
 
-size_t Archive::getNbRecordings() const
+size_t Algorithm::TPG::TPGArchive::getNbRecordings() const
 {
     return this->recordings.size();
 }
 
-size_t Archive::getNbDataHandlers() const
+size_t Algorithm::TPG::TPGArchive::getNbDataHandlers() const
 {
     return this->dataHandlers.size();
 }
 
 const std::map<size_t,
                std::vector<std::reference_wrapper<const Data::DataHandler>>>&
-Archive::getDataHandlers() const
+Algorithm::TPG::TPGArchive::getDataHandlers() const
 {
     return this->dataHandlers;
 }
 
-void Archive::clear()
+void Algorithm::TPG::TPGArchive::clear()
 {
     for (auto dHandlerAndHash : this->dataHandlers) {
         for (auto dHandler : dHandlerAndHash.second) {

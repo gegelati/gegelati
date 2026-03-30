@@ -81,11 +81,11 @@ class ProgramGenerationEngineTest : public ::testing::Test
             sub, "$0 = $1 - $2;")));
         set.add(*(new Instructions::AddPrimitiveType<double>()));
 
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 0;
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 0;
         e = new Environment(set, params, vect);
 
-        params.nbProgramConstant = 5;
+        params.algorithm.lgp.nbProgramConstant = 5;
         envWithConstant = new Environment(set, params, vect);
         p = new Program::Program(*e, false);
         p2 = new Program::Program(*e, false);

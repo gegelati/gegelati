@@ -12,7 +12,7 @@
 #include "algorithm/agentManager.h"
 #include "algorithm/mutator.h"
 #include "algorithm/policyStats.h"
-#include "learn/learningParameters.h"
+#include "algorithm/algorithmParameters.h"
 #include "evoGraph/graph.h"
 #include "selector/selectorFactory.h"
 
@@ -34,7 +34,7 @@ namespace Algorithm {
         std::unique_ptr<AgentManager> manager;
 
         /// Parameters used by the algorithm
-        Learn::LearningParameters params;
+        AlgorithmParameters params;
 
         /// Pointer pointing to the default selector created if the algorithm is created without a defined selector
         std::unique_ptr<Selector::Selector> savedDefaultSelector;
@@ -103,7 +103,7 @@ namespace Algorithm {
          * \param[in] algorithmName name of the algorithm used.
          * \param[in] algorithmColor color of the algorithm used (during .dot files).
          */
-        Algorithm(const Learn::LearningParameters& params, std::string algorithmName = "Algorithm", std::string algorithmColor = "#000000")
+        Algorithm(const AlgorithmParameters& params, std::string algorithmName = "Algorithm", std::string algorithmColor = "#000000")
                : params{params}, algorithmName(algorithmName), algorithmColor(algorithmColor), algorithmID(incrementeCounter()) {};
 
         /**
@@ -271,7 +271,7 @@ namespace Algorithm {
         /**
          * \brief get the params
          */
-        virtual const Learn::LearningParameters& getParams() const;
+        virtual const AlgorithmParameters& getParams() const;
 
         /**
          * \brief Clear the algorithm of all its content.

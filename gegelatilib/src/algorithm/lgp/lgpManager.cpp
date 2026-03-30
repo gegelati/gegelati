@@ -24,7 +24,7 @@ const Algorithm::Agent& Algorithm::LGP::LGPManager::copyAgent(const Agent& agent
         newAgent.addNewLine(castedAgent->getLine(idx));
     }
 
-    for(size_t idx = 0; idx < castedAgent->getEnvironment().getParams().nbProgramConstant; idx++){
+    for(size_t idx = 0; idx < castedAgent->getEnvironment().getNbConstants(); idx++){
         this->setConstantAt(newAgent, idx, castedAgent->getConstantAt(idx));
     }
 
@@ -216,7 +216,7 @@ bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(const Agent& agent1, const
     }
 
     // Check constant values
-    for (size_t idx = 0; idx < this->env.getParams().nbProgramConstant; idx++) {
+    for (size_t idx = 0; idx < this->env.getNbConstants(); idx++) {
         Data::Constant cst1 = lgpAgent1->getConstantAt(idx);
         Data::Constant cst2 = lgpAgent2->getConstantAt(idx);
         if (cst1 != cst2) {
@@ -234,9 +234,8 @@ std::unique_ptr<Algorithm::ExecutionEngine> Algorithm::LGP::LGPManager::createEx
     if(dataSources.empty()) {
         dataSources = this->env.getDataSources();
     }
-    std::unique_ptr<const Environment> privateEnv =
-        std::make_unique<const Environment>(this->env.getInstructionSet(), this->env.getParams(),
-                                            dataSources, this->env.getNbContinuousActions());
+    std::unique_ptr<const LGPEnvironment> privateEnv =
+        std::make_unique<const LGPEnvironment>(this->env.getInstructionSet(), this->env.getNbRegisters(), this->env.getNbConstants(), dataSources);
     return std::make_unique<LGPExecutionEngine>(*privateEnv, this->outputs, this->algorithmID, isTraining);
 }
 

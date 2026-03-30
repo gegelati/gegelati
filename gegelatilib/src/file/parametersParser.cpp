@@ -66,60 +66,26 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
                                               Learn::LearningParameters& params)
 {
     for (std::string const& key : root.getMemberNames()) {
-        if (key == "mutation") {
-            // we have a subtree of mutation : parameters like mutation.xxx.xxx
+        if (root[key].size() == 0) {
+            // we have a parameter without subtree (as a leaf)
+            Json::Value value = root[key];
+            setParameterFromString(params, key, value);
+        } else {
             for (std::string const& key2 : root[key].getMemberNames()) {
-                if (key2 == "tpg") {
-                    // we're on a mutation.tpg.xxx parameter
-                    for (std::string const& key3 :
-                         root[key][key2].getMemberNames()) {
-                        Json::Value value = root[key][key2][key3];
-                        setParameterFromString(params, key3, value);
-                    }
-                }
-                else {
-                    if (key2 == "prog") {
-                        // we're on a mutation.prog.xxx parameter
-                        for (std::string const& key3 :
-                             root[key][key2].getMemberNames()) {
+                if (root[key][key2].size() == 0) {
+                    // we have a parameter without subtree (as a leaf)
+                    Json::Value value = root[key][key2];
+                    setParameterFromString(params, key2, value);
+                } else {
+                    for (std::string const& key3 : root[key][key2].getMemberNames()) {
+                        if (root[key][key2][key3].size() == 0) {
+                            // we have a parameter without subtree (as a leaf)
                             Json::Value value = root[key][key2][key3];
                             setParameterFromString(params, key3, value);
                         }
                     }
                 }
             }
-        }
-        else if (key == "selection") {
-            // we have a subtree of selection : parameters like
-            // selection.xxx.xxx
-            for (std::string const& key2 : root[key].getMemberNames()) {
-                if (key2 == "truncation") {
-                    // we're on a selection.truncation.xxx parameter
-                    for (std::string const& key3 :
-                         root[key][key2].getMemberNames()) {
-                        Json::Value value = root[key][key2][key3];
-                        setParameterFromString(params, key3, value);
-                    }
-                }
-                else if (key2 == "tournament") {
-                    // we're on a selection.tournament.xxx parameter
-                    for (std::string const& key3 :
-                         root[key][key2].getMemberNames()) {
-                        Json::Value value = root[key][key2][key3];
-                        setParameterFromString(params, key3, value);
-                    }
-                }
-                if (root[key][key2].size() == 0) {
-                    // we're on a selection.xxx paramter.
-                    Json::Value value = root[key][key2];
-                    setParameterFromString(params, key2, value);
-                }
-            }
-        }
-        if (root[key].size() == 0) {
-            // we have a parameter without subtree (as a leaf)
-            Json::Value value = root[key];
-            setParameterFromString(params, key, value);
         }
     }
 }
@@ -129,18 +95,6 @@ void File::ParametersParser::setParameterFromString(
     Json::Value const& value)
 {
 
-    if (param == "activationFunction") {
-        params.activationFunction = value.asString();
-        return;
-    }
-    if (param == "archiveSize") {
-        params.archiveSize = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "archivingProbability") {
-        params.archivingProbability = value.asDouble();
-        return;
-    }
     if (param == "doValidation") {
         params.doValidation = value.asBool();
         return;
@@ -151,10 +105,6 @@ void File::ParametersParser::setParameterFromString(
     }
     if (param == "nbIterationsPerPolicyValidation") {
         params.nbIterationsPerPolicyValidation = value.asUInt64();
-        return;
-    }
-    if (param == "nbRegisters") {
-        params.nbRegisters = (size_t)value.asUInt();
         return;
     }
     if (param == "nbThreads") {
@@ -178,143 +128,152 @@ void File::ParametersParser::setParameterFromString(
         return;
     }
 
-    if (param == "nbRoots") {
-        params.mutation.tpg.nbRoots = (size_t)value.asUInt();
+    if (param == "nbAgents") {
+        params.algorithm.nbAgents = (size_t)value.asUInt();
         return;
     }
-    if (param == "ratioTeamsOverActions") {
-        params.mutation.tpg.ratioTeamsOverActions = (double)value.asDouble();
+    if (param == "activationFunction") {
+        params.algorithm.activationFunction = value.asString();
+        return;
+    }
+
+
+    if (param == "archiveSize") {
+        params.algorithm.tpg.archiveSize = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "archivingProbability") {
+        params.algorithm.tpg.archivingProbability = value.asDouble();
         return;
     }
     if (param == "maxInitOutgoingEdges") {
-        params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "nbActionEdgeInit") {
-        params.mutation.tpg.nbActionEdgeInit = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "useMultiActionProgram") {
-        params.mutation.tpg.useMultiActionProgram = value.asBool();
-        return;
-    }
-    if (param == "teamAccessAllActions") {
-        params.mutation.tpg.teamAccessAllActions = value.asBool();
-        return;
-    }
-    if (param == "pChangeActionClass") {
-        params.mutation.tpg.pChangeActionClass = (double)value.asDouble();
-        return;
-    }
-    if (param == "pActionEdgeDeletion") {
-        params.mutation.tpg.pActionEdgeDeletion = value.asDouble();
-        return;
-    }
-    if (param == "pActionEdgeAddition") {
-        params.mutation.tpg.pActionEdgeAddition = value.asDouble();
-        return;
-    }
-    if (param == "pMutateActionProgram") {
-        params.mutation.tpg.pMutateActionProgram = value.asDouble();
-        return;
-    }
-    if (param == "pSwapActionProgram") {
-        params.mutation.tpg.pSwapActionProgram = value.asDouble();
+        params.algorithm.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;
     }
     if (param == "maxOutgoingEdges") {
-        params.mutation.tpg.maxOutgoingEdges = (size_t)value.asUInt();
+        params.algorithm.tpg.maxOutgoingEdges = (size_t)value.asUInt();
         return;
     }
     if (param == "pEdgeDeletion") {
-        params.mutation.tpg.pEdgeDeletion = value.asDouble();
+        params.algorithm.tpg.pEdgeDeletion = value.asDouble();
         return;
     }
     if (param == "pEdgeAddition") {
-        params.mutation.tpg.pEdgeAddition = value.asDouble();
+        params.algorithm.tpg.pEdgeAddition = value.asDouble();
         return;
     }
     if (param == "pProgramMutation") {
-        params.mutation.tpg.pProgramMutation = value.asDouble();
+        params.algorithm.tpg.pProgramMutation = value.asDouble();
         return;
     }
     if (param == "forceProgramBehaviorChangeOnMutation") {
-        params.mutation.tpg.forceProgramBehaviorChangeOnMutation =
+        params.algorithm.tpg.forceProgramBehaviorChangeOnMutation =
             value.asBool();
         return;
     }
     if (param == "pEdgeDestinationChange") {
-        params.mutation.tpg.pEdgeDestinationChange = value.asDouble();
+        params.algorithm.tpg.pEdgeDestinationChange = value.asDouble();
         return;
     }
     if (param == "pEdgeDestinationIsAction") {
-        params.mutation.tpg.pEdgeDestinationIsAction = value.asDouble();
-        return;
-    }
-    if (param == "useActionProgram") {
-        params.mutation.tpg.useActionProgram = value.asBool();
-        return;
-    }
-    if (param == "probaContextOverActionProgram") {
-        params.mutation.tpg.probaContextOverActionProgram =
-            (double)value.asDouble();
-        return;
-    }
-    if (param == "pCrossAgents") {
-        params.mutation.tpg.pCrossAgents = (double)value.asDouble();
-        return;
-    }
-    if (param == "pCrossPrograms") {
-        params.mutation.tpg.pCrossPrograms = (double)value.asDouble();
+        params.algorithm.tpg.pEdgeDestinationIsAction = value.asDouble();
         return;
     }
 
+
+    if (param == "probaContextOverActionProgram") {
+        params.algorithm.atpg.probaContextOverActionProgram =
+            (double)value.asDouble();
+        return;
+    }
+
+
+    
+    if (param == "nbActionEdgeInit") {
+        params.algorithm.maple.nbActionEdgeInit = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "pChangeActionClass") {
+        params.algorithm.maple.pChangeActionClass = (double)value.asDouble();
+        return;
+    }
+    if (param == "pActionEdgeDeletion") {
+        params.algorithm.maple.pActionEdgeDeletion = value.asDouble();
+        return;
+    }
+    if (param == "pActionEdgeAddition") {
+        params.algorithm.maple.pActionEdgeAddition = value.asDouble();
+        return;
+    }
+    if (param == "pMutateActionProgram") {
+        params.algorithm.maple.pMutateActionProgram = value.asDouble();
+        return;
+    }
+    if (param == "pSwapActionProgram") {
+        params.algorithm.maple.pSwapActionProgram = value.asDouble();
+        return;
+    }
+    if (param == "pCrossAgents") {
+        params.algorithm.maple.pCrossAgents = (double)value.asDouble();
+        return;
+    }
+    if (param == "pCrossPrograms") {
+        params.algorithm.maple.pCrossPrograms = (double)value.asDouble();
+        return;
+    }
+
+
+
+    if (param == "nbRegisters") {
+        params.algorithm.lgp.nbRegisters = (size_t)value.asUInt();
+        return;
+    }
     if (param == "maxProgramSize") {
-        params.mutation.prog.maxProgramSize = (size_t)value.asUInt();
+        params.algorithm.lgp.maxProgramSize = (size_t)value.asUInt();
         return;
     }
     if (param == "initMinProgramSize") {
-        params.mutation.prog.initMinProgramSize = (size_t)value.asUInt();
+        params.algorithm.lgp.initMinProgramSize = (size_t)value.asUInt();
         return;
     }
     if (param == "initMaxProgramSize") {
-        params.mutation.prog.initMaxProgramSize = (size_t)value.asUInt();
+        params.algorithm.lgp.initMaxProgramSize = (size_t)value.asUInt();
         return;
     }
     if (param == "pDelete") {
-        params.mutation.prog.pDelete = value.asDouble();
+        params.algorithm.lgp.pDelete = value.asDouble();
         return;
     }
     if (param == "pAdd") {
-        params.mutation.prog.pAdd = value.asDouble();
+        params.algorithm.lgp.pAdd = value.asDouble();
         return;
     }
     if (param == "pMutate") {
-        params.mutation.prog.pMutate = value.asDouble();
+        params.algorithm.lgp.pMutate = value.asDouble();
         return;
     }
     if (param == "pSwap") {
-        params.mutation.prog.pSwap = value.asDouble();
+        params.algorithm.lgp.pSwap = value.asDouble();
         return;
     }
     if (param == "nbProgramConstant") {
-        params.nbProgramConstant = (size_t)value.asUInt();
+        params.algorithm.lgp.nbProgramConstant = (size_t)value.asUInt();
         return;
     }
     if (param == "pConstantMutation") {
-        params.mutation.prog.pConstantMutation = value.asDouble();
+        params.algorithm.lgp.pConstantMutation = value.asDouble();
         return;
     }
     if (param == "pNewProgram") {
-        params.mutation.prog.pNewProgram = value.asDouble();
+        params.algorithm.lgp.pNewProgram = value.asDouble();
         return;
     }
     if (param == "minConstValue") {
-        params.mutation.prog.minConstValue = value.asDouble();
+        params.algorithm.lgp.minConstValue = value.asDouble();
         return;
     }
     if (param == "maxConstValue") {
-        params.mutation.prog.maxConstValue = value.asDouble();
+        params.algorithm.lgp.maxConstValue = value.asDouble();
         return;
     }
 
@@ -361,23 +320,10 @@ void File::ParametersParser::writeParametersToJson(
 
     // Fill it
     // base parameters
-    root["archiveSize"] = params.archiveSize;
-    root["archiveSize"].setComment(
-        Learn::LearningParameters::archiveSizeComment, Json::commentBefore);
-
-    root["archivingProbability"] = params.archivingProbability;
-    root["archivingProbability"].setComment(
-        Learn::LearningParameters::archivingProbabilityComment,
-        Json::commentBefore);
 
     root["doValidation"] = params.doValidation;
     root["doValidation"].setComment(
         Learn::LearningParameters::doValidationComment, Json::commentBefore);
-
-    root["activationFunction"] = params.activationFunction;
-    root["activationFunction"].setComment(
-        Learn::LearningParameters::activationFunctionComment,
-        Json::commentBefore);
 
     root["maxNbActionsPerEval"] = params.maxNbActionsPerEval;
     root["maxNbActionsPerEval"].setComment(
@@ -407,190 +353,193 @@ void File::ParametersParser::writeParametersToJson(
     root["stepValidation"].setComment(
         Learn::LearningParameters::stepValidationComment, Json::commentBefore);
 
-    root["nbProgramConstant"] = params.nbProgramConstant;
-    root["nbProgramConstant"].setComment(
-        Learn::LearningParameters::nbProgramConstantComment,
-        Json::commentBefore);
-
-    root["nbRegisters"] = params.nbRegisters;
-    root["nbRegisters"].setComment(
-        Learn::LearningParameters::nbRegistersComment, Json::commentBefore);
-
     root["nbThreads"] = params.nbThreads;
     root["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,
                                  Json::commentBefore);
 
-    // Mutation.tpg parameters
-    root["mutation"]["tpg"]["forceProgramBehaviorChangeOnMutation"] =
-        params.mutation.tpg.forceProgramBehaviorChangeOnMutation;
-    root["mutation"]["tpg"]["forceProgramBehaviorChangeOnMutation"].setComment(
-        Mutator::TPGParameters::forceProgramBehaviorChangeOnMutationComment,
+
+
+
+    root["algorithm"]["nbAgents"] = params.algorithm.nbAgents;
+    root["algorithm"]["nbAgents"].setComment(
+        Algorithm::AlgorithmParameters::nbAgentsComment, Json::commentBefore);
+
+    root["algorithm"]["activationFunction"] = params.algorithm.activationFunction;
+    root["algorithm"]["activationFunction"].setComment(
+        Algorithm::AlgorithmParameters::activationFunctionComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["maxInitOutgoingEdges"] =
-        params.mutation.tpg.maxInitOutgoingEdges;
-    root["mutation"]["tpg"]["maxInitOutgoingEdges"].setComment(
-        Mutator::TPGParameters::maxInitOutgoingEdgesComment,
+    root["algorithm"]["tpg"]["archiveSize"] = params.algorithm.tpg.archiveSize;
+    root["algorithm"]["tpg"]["archiveSize"].setComment(
+        Algorithm::TPG::TPGParameters::archiveSizeComment, Json::commentBefore);
+
+    root["algorithm"]["tpg"]["archivingProbability"] = params.algorithm.tpg.archivingProbability;
+    root["algorithm"]["tpg"]["archivingProbability"].setComment(
+        Algorithm::TPG::TPGParameters::archivingProbabilityComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["nbActionEdgeInit"] =
-        params.mutation.tpg.nbActionEdgeInit;
-    root["mutation"]["tpg"]["nbActionEdgeInit"].setComment(
-        Mutator::TPGParameters::nbActionEdgeInitComment, Json::commentBefore);
-
-    root["mutation"]["tpg"]["useMultiActionProgram"] =
-        params.mutation.tpg.useMultiActionProgram;
-    root["mutation"]["tpg"]["useMultiActionProgram"].setComment(
-        Mutator::TPGParameters::useMultiActionProgramComment,
-        Json::commentBefore);
-    root["mutation"]["tpg"]["teamAccessAllActions"] =
-        params.mutation.tpg.teamAccessAllActions;
-    root["mutation"]["tpg"]["teamAccessAllActions"].setComment(
-        Mutator::TPGParameters::teamAccessAllActionsComment,
+    // algorithm.tpg parameters
+    root["algorithm"]["tpg"]["forceProgramBehaviorChangeOnMutation"] =
+        params.algorithm.tpg.forceProgramBehaviorChangeOnMutation;
+    root["algorithm"]["tpg"]["forceProgramBehaviorChangeOnMutation"].setComment(
+        Algorithm::TPG::TPGParameters::forceProgramBehaviorChangeOnMutationComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["pChangeActionClass"] =
-        params.mutation.tpg.pChangeActionClass;
-    root["mutation"]["tpg"]["pChangeActionClass"].setComment(
-        Mutator::TPGParameters::pChangeActionClassComment, Json::commentBefore);
-
-    root["mutation"]["tpg"]["pActionEdgeAddition"] =
-        params.mutation.tpg.pActionEdgeAddition;
-    root["mutation"]["tpg"]["pActionEdgeAddition"].setComment(
-        Mutator::TPGParameters::pActionEdgeAdditionComment,
+    root["algorithm"]["tpg"]["maxInitOutgoingEdges"] =
+        params.algorithm.tpg.maxInitOutgoingEdges;
+    root["algorithm"]["tpg"]["maxInitOutgoingEdges"].setComment(
+        Algorithm::TPG::TPGParameters::maxInitOutgoingEdgesComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["pActionEdgeDeletion"] =
-        params.mutation.tpg.pActionEdgeDeletion;
-    root["mutation"]["tpg"]["pActionEdgeDeletion"].setComment(
-        Mutator::TPGParameters::pActionEdgeDeletionComment,
+    root["algorithm"]["tpg"]["maxOutgoingEdges"] =
+        params.algorithm.tpg.maxOutgoingEdges;
+    root["algorithm"]["tpg"]["maxOutgoingEdges"].setComment(
+        Algorithm::TPG::TPGParameters::maxOutgoingEdgesComment, Json::commentBefore);
+
+    root["algorithm"]["tpg"]["pEdgeAddition"] =
+        params.algorithm.tpg.pEdgeAddition;
+    root["algorithm"]["tpg"]["pEdgeAddition"].setComment(
+        Algorithm::TPG::TPGParameters::pEdgeAdditionComment, Json::commentBefore);
+
+    root["algorithm"]["tpg"]["pEdgeDeletion"] =
+        params.algorithm.tpg.pEdgeDeletion;
+    root["algorithm"]["tpg"]["pEdgeDeletion"].setComment(
+        Algorithm::TPG::TPGParameters::pEdgeDeletionComment, Json::commentBefore);
+
+    root["algorithm"]["tpg"]["pEdgeDestinationChange"] =
+        params.algorithm.tpg.pEdgeDestinationChange;
+    root["algorithm"]["tpg"]["pEdgeDestinationChange"].setComment(
+        Algorithm::TPG::TPGParameters::pEdgeDestinationChangeComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["pMutateActionProgram"] =
-        params.mutation.tpg.pMutateActionProgram;
-    root["mutation"]["tpg"]["pMutateActionProgram"].setComment(
-        Mutator::TPGParameters::pMutateActionProgramComment,
-        Json::commentBefore);
-    root["mutation"]["tpg"]["pSwapActionProgram"] =
-        params.mutation.tpg.pSwapActionProgram;
-    root["mutation"]["tpg"]["pSwapActionProgram"].setComment(
-        Mutator::TPGParameters::pSwapActionProgramComment, Json::commentBefore);
-
-    root["mutation"]["tpg"]["maxOutgoingEdges"] =
-        params.mutation.tpg.maxOutgoingEdges;
-    root["mutation"]["tpg"]["maxOutgoingEdges"].setComment(
-        Mutator::TPGParameters::maxOutgoingEdgesComment, Json::commentBefore);
-
-    root["mutation"]["tpg"]["nbRoots"] = params.mutation.tpg.nbRoots;
-    root["mutation"]["tpg"]["nbRoots"].setComment(
-        Mutator::TPGParameters::nbRootsComment, Json::commentBefore);
-
-    root["mutation"]["tpg"]["ratioTeamsOverActions"] =
-        params.mutation.tpg.ratioTeamsOverActions;
-    root["mutation"]["tpg"]["ratioTeamsOverActions"].setComment(
-        Mutator::TPGParameters::ratioTeamsOverActionsComment,
+    root["algorithm"]["tpg"]["pEdgeDestinationIsAction"] =
+        params.algorithm.tpg.pEdgeDestinationIsAction;
+    root["algorithm"]["tpg"]["pEdgeDestinationIsAction"].setComment(
+        Algorithm::TPG::TPGParameters::pEdgeDestinationIsActionComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["pEdgeAddition"] =
-        params.mutation.tpg.pEdgeAddition;
-    root["mutation"]["tpg"]["pEdgeAddition"].setComment(
-        Mutator::TPGParameters::pEdgeAdditionComment, Json::commentBefore);
+    root["algorithm"]["tpg"]["pProgramMutation"] =
+        params.algorithm.tpg.pProgramMutation;
+    root["algorithm"]["tpg"]["pProgramMutation"].setComment(
+        Algorithm::TPG::TPGParameters::pProgramMutationComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["pEdgeDeletion"] =
-        params.mutation.tpg.pEdgeDeletion;
-    root["mutation"]["tpg"]["pEdgeDeletion"].setComment(
-        Mutator::TPGParameters::pEdgeDeletionComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["pEdgeDestinationChange"] =
-        params.mutation.tpg.pEdgeDestinationChange;
-    root["mutation"]["tpg"]["pEdgeDestinationChange"].setComment(
-        Mutator::TPGParameters::pEdgeDestinationChangeComment,
+
+    root["algorithm"]["atpg"]["probaContextOverActionProgram"] =
+        params.algorithm.atpg.probaContextOverActionProgram;
+    root["algorithm"]["atpg"]["probaContextOverActionProgram"].setComment(
+        Algorithm::ATPG::ATPGParameters::probaContextOverActionProgramComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["pEdgeDestinationIsAction"] =
-        params.mutation.tpg.pEdgeDestinationIsAction;
-    root["mutation"]["tpg"]["pEdgeDestinationIsAction"].setComment(
-        Mutator::TPGParameters::pEdgeDestinationIsActionComment,
+
+
+    root["algorithm"]["maple"]["nbActionEdgeInit"] =
+        params.algorithm.maple.nbActionEdgeInit;
+    root["algorithm"]["maple"]["nbActionEdgeInit"].setComment(
+        Algorithm::Maple::MapleParameters::nbActionEdgeInitComment, Json::commentBefore);
+
+    root["algorithm"]["maple"]["pChangeActionClass"] =
+        params.algorithm.maple.pChangeActionClass;
+    root["algorithm"]["maple"]["pChangeActionClass"].setComment(
+        Algorithm::Maple::MapleParameters::pChangeActionClassComment, Json::commentBefore);
+
+    root["algorithm"]["maple"]["pActionEdgeAddition"] =
+        params.algorithm.maple.pActionEdgeAddition;
+    root["algorithm"]["maple"]["pActionEdgeAddition"].setComment(
+        Algorithm::Maple::MapleParameters::pActionEdgeAdditionComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["pProgramMutation"] =
-        params.mutation.tpg.pProgramMutation;
-    root["mutation"]["tpg"]["pProgramMutation"].setComment(
-        Mutator::TPGParameters::pProgramMutationComment, Json::commentBefore);
-
-    root["mutation"]["tpg"]["useActionProgram"] =
-        params.mutation.tpg.useActionProgram;
-    root["mutation"]["tpg"]["useActionProgram"].setComment(
-        Mutator::TPGParameters::useActionProgramComment, Json::commentBefore);
-
-    root["mutation"]["tpg"]["probaContextOverActionProgram"] =
-        params.mutation.tpg.probaContextOverActionProgram;
-    root["mutation"]["tpg"]["probaContextOverActionProgram"].setComment(
-        Mutator::TPGParameters::probaContextOverActionProgramComment,
+    root["algorithm"]["maple"]["pActionEdgeDeletion"] =
+        params.algorithm.maple.pActionEdgeDeletion;
+    root["algorithm"]["maple"]["pActionEdgeDeletion"].setComment(
+        Algorithm::Maple::MapleParameters::pActionEdgeDeletionComment,
         Json::commentBefore);
 
-    root["mutation"]["tpg"]["pCrossAgents"] = params.mutation.tpg.pCrossAgents;
-    root["mutation"]["tpg"]["pCrossAgents"].setComment(
-        Mutator::TPGParameters::pCrossAgentsComment, Json::commentBefore);
+    root["algorithm"]["maple"]["pMutateActionProgram"] =
+        params.algorithm.maple.pMutateActionProgram;
+    root["algorithm"]["maple"]["pMutateActionProgram"].setComment(
+        Algorithm::Maple::MapleParameters::pMutateActionProgramComment,
+        Json::commentBefore);
+    root["algorithm"]["maple"]["pSwapActionProgram"] =
+        params.algorithm.maple.pSwapActionProgram;
+    root["algorithm"]["maple"]["pSwapActionProgram"].setComment(
+        Algorithm::Maple::MapleParameters::pSwapActionProgramComment, Json::commentBefore);
 
-    root["mutation"]["tpg"]["pCrossPrograms"] =
-        params.mutation.tpg.pCrossPrograms;
-    root["mutation"]["tpg"]["pCrossPrograms"].setComment(
-        Mutator::TPGParameters::pCrossProgramsComment, Json::commentBefore);
+    root["algorithm"]["maple"]["pCrossAgents"] = params.algorithm.maple.pCrossAgents;
+    root["algorithm"]["maple"]["pCrossAgents"].setComment(
+        Algorithm::Maple::MapleParameters::pCrossAgentsComment, Json::commentBefore);
 
+    root["algorithm"]["maple"]["pCrossPrograms"] =
+        params.algorithm.maple.pCrossPrograms;
+    root["algorithm"]["maple"]["pCrossPrograms"].setComment(
+        Algorithm::Maple::MapleParameters::pCrossProgramsComment, Json::commentBefore);
+
+
+
+
+
+
+    root["algorithm"]["lgp"]["nbProgramConstant"] = params.algorithm.lgp.nbProgramConstant;
+    root["algorithm"]["lgp"]["nbProgramConstant"].setComment(
+        Algorithm::LGP::LGPParameters::nbProgramConstantComment,
+        Json::commentBefore);
+
+    root["algorithm"]["lgp"]["nbRegisters"] = params.algorithm.lgp.nbRegisters;
+    root["algorithm"]["lgp"]["nbRegisters"].setComment(
+        Algorithm::LGP::LGPParameters::nbRegistersComment, Json::commentBefore);
     // Mutation.program parameters
-    root["mutation"]["prog"]["maxConstValue"] =
-        params.mutation.prog.maxConstValue;
-    root["mutation"]["prog"]["maxConstValue"].setComment(
-        Mutator::ProgramParameters::maxConstValueComment, Json::commentBefore);
+    root["algorithm"]["lgp"]["maxConstValue"] =
+        params.algorithm.lgp.maxConstValue;
+    root["algorithm"]["lgp"]["maxConstValue"].setComment(
+        Algorithm::LGP::LGPParameters::maxConstValueComment, Json::commentBefore);
 
-    root["mutation"]["prog"]["maxProgramSize"] =
-        params.mutation.prog.maxProgramSize;
-    root["mutation"]["prog"]["maxProgramSize"].setComment(
-        Mutator::ProgramParameters::maxProgramSizeComment, Json::commentBefore);
+    root["algorithm"]["lgp"]["maxProgramSize"] =
+        params.algorithm.lgp.maxProgramSize;
+    root["algorithm"]["lgp"]["maxProgramSize"].setComment(
+        Algorithm::LGP::LGPParameters::maxProgramSizeComment, Json::commentBefore);
 
-    root["mutation"]["prog"]["initMinProgramSize"] =
-        params.mutation.prog.initMinProgramSize;
-    root["mutation"]["prog"]["initMinProgramSize"].setComment(
-        Mutator::ProgramParameters::initMinProgramSizeComment,
+    root["algorithm"]["lgp"]["initMinProgramSize"] =
+        params.algorithm.lgp.initMinProgramSize;
+    root["algorithm"]["lgp"]["initMinProgramSize"].setComment(
+        Algorithm::LGP::LGPParameters::initMinProgramSizeComment,
         Json::commentBefore);
 
-    root["mutation"]["prog"]["initMaxProgramSize"] =
-        params.mutation.prog.initMaxProgramSize;
-    root["mutation"]["prog"]["initMaxProgramSize"].setComment(
-        Mutator::ProgramParameters::initMaxProgramSizeComment,
+    root["algorithm"]["lgp"]["initMaxProgramSize"] =
+        params.algorithm.lgp.initMaxProgramSize;
+    root["algorithm"]["lgp"]["initMaxProgramSize"].setComment(
+        Algorithm::LGP::LGPParameters::initMaxProgramSizeComment,
         Json::commentBefore);
 
-    root["mutation"]["prog"]["minConstValue"] =
-        params.mutation.prog.minConstValue;
-    root["mutation"]["prog"]["minConstValue"].setComment(
-        Mutator::ProgramParameters::minConstValueComment, Json::commentBefore);
+    root["algorithm"]["lgp"]["minConstValue"] =
+        params.algorithm.lgp.minConstValue;
+    root["algorithm"]["lgp"]["minConstValue"].setComment(
+        Algorithm::LGP::LGPParameters::minConstValueComment, Json::commentBefore);
 
-    root["mutation"]["prog"]["pAdd"] = params.mutation.prog.pAdd;
-    root["mutation"]["prog"]["pAdd"].setComment(
-        Mutator::ProgramParameters::pAddComment, Json::commentBefore);
+    root["algorithm"]["lgp"]["pAdd"] = params.algorithm.lgp.pAdd;
+    root["algorithm"]["lgp"]["pAdd"].setComment(
+        Algorithm::LGP::LGPParameters::pAddComment, Json::commentBefore);
 
-    root["mutation"]["prog"]["pConstantMutation"] =
-        params.mutation.prog.pConstantMutation;
-    root["mutation"]["prog"]["pConstantMutation"].setComment(
-        Mutator::ProgramParameters::pConstantMutationComment,
+    root["algorithm"]["lgp"]["pConstantMutation"] =
+        params.algorithm.lgp.pConstantMutation;
+    root["algorithm"]["lgp"]["pConstantMutation"].setComment(
+        Algorithm::LGP::LGPParameters::pConstantMutationComment,
         Json::commentBefore);
 
-    root["mutation"]["prog"]["pNewProgram"] = params.mutation.prog.pNewProgram;
-    root["mutation"]["prog"]["pNewProgram"].setComment(
-        Mutator::ProgramParameters::pNewProgramComment, Json::commentBefore);
+    root["algorithm"]["lgp"]["pNewProgram"] = params.algorithm.lgp.pNewProgram;
+    root["algorithm"]["lgp"]["pNewProgram"].setComment(
+        Algorithm::LGP::LGPParameters::pNewProgramComment, Json::commentBefore);
 
-    root["mutation"]["prog"]["pDelete"] = params.mutation.prog.pDelete;
-    root["mutation"]["prog"]["pDelete"].setComment(
-        Mutator::ProgramParameters::pDeleteComment, Json::commentBefore);
+    root["algorithm"]["lgp"]["pDelete"] = params.algorithm.lgp.pDelete;
+    root["algorithm"]["lgp"]["pDelete"].setComment(
+        Algorithm::LGP::LGPParameters::pDeleteComment, Json::commentBefore);
 
-    root["mutation"]["prog"]["pMutate"] = params.mutation.prog.pMutate;
-    root["mutation"]["prog"]["pMutate"].setComment(
-        Mutator::ProgramParameters::pMutateComment, Json::commentBefore);
+    root["algorithm"]["lgp"]["pMutate"] = params.algorithm.lgp.pMutate;
+    root["algorithm"]["lgp"]["pMutate"].setComment(
+        Algorithm::LGP::LGPParameters::pMutateComment, Json::commentBefore);
 
-    root["mutation"]["prog"]["pSwap"] = params.mutation.prog.pSwap;
-    root["mutation"]["prog"]["pSwap"].setComment(
-        Mutator::ProgramParameters::pSwapComment, Json::commentBefore);
+    root["algorithm"]["lgp"]["pSwap"] = params.algorithm.lgp.pSwap;
+    root["algorithm"]["lgp"]["pSwap"].setComment(
+        Algorithm::LGP::LGPParameters::pSwapComment, Json::commentBefore);
 
     root["selection"]["_selectionMode"] = params.selection._selectionMode;
     root["selection"]["_selectionMode"].setComment(

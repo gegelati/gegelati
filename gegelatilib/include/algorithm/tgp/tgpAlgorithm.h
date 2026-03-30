@@ -28,7 +28,7 @@ namespace Algorithm::TGP {
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            TGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet, std::string algorithmName = "TGP", std::string algorithmColor = "#d37217")
+            TGPAlgorithm(const AlgorithmParameters& params, const Instructions::Set& iSet, std::string algorithmName = "TGP", std::string algorithmColor = "#d37217")
                 : LGP::LGPAlgorithm(params, iSet, algorithmName, algorithmColor) {};
 
             /**

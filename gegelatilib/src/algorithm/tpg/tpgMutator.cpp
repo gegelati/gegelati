@@ -3,14 +3,14 @@
 #include "algorithm/tpg/tpgMutator.h"
 
 
-void Algorithm::TPG::TPGMutator::setArchive(const Archive& archive)
+void Algorithm::TPG::TPGMutator::setArchive(const TPGArchive& archive)
 {
     this->archive = archive;
 }
 
 void Algorithm::TPG::TPGMutator::updateSpecificContext(
     EvoGraph::Graph& graph, AgentManager& manager,
-    const Learn::LearningParameters& params,
+    const AlgorithmParameters& params,
     RNG::RNG& rng)
 {
     // Call parent method to update currentContext
@@ -72,19 +72,17 @@ void Algorithm::TPG::TPGMutator::updateSpecificContext(
     this->preExistingEdges.insert(this->preExistingEdges.end(), usableEdges.begin(), usableEdges.end());
 }
 
-bool Algorithm::TPG::TPGMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
+bool Algorithm::TPG::TPGMutator::isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const
 {
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("TPGMutator::initRandomPopulation: TPG does not support mixed discrete and continuous outputs.");
     } else if (outputs.sizeContinuous() != 0){
 
-        if(outputs.size() > params.nbRegisters + 1){
-            throw std::runtime_error("TPGMutator::initRandomPopulation: Number of continuous outputs exceeds the number of registers plus one.");
-        }
+        // Everything good :)
 
     } else if (outputs.sizeDiscrete() != 0){
         
-        if (params.mutation.tpg.maxInitOutgoingEdges > outputs.front().getNbValues()) {
+        if (params.tpg.maxInitOutgoingEdges > outputs.front().getNbValues()) {
             throw std::runtime_error("Maximum initial number of outgoing edges "
                                         "cannot exceed the number of outputs");
         }
@@ -103,7 +101,7 @@ bool Algorithm::TPG::TPGMutator::isConfigurationValid(const Learn::LearningParam
         throw std::runtime_error("TPGMutator::initRandomPopulation: No outputs defined.");
     }
     
-    if (params.mutation.tpg.maxInitOutgoingEdges < 2) {
+    if (params.tpg.maxInitOutgoingEdges < 2) {
         throw std::runtime_error(
             "A team should have at least two edges at initialisation.");
     }
@@ -115,7 +113,7 @@ void Algorithm::TPG::TPGMutator::addAditionnalEdges(
             std::vector<std::reference_wrapper<const EvoGraph::Vertex>> leafVertices,
             std::vector<std::reference_wrapper<const EvoGraph::Vertex>> rootVertices,
             std::vector<std::reference_wrapper<const Agent>> programAgent,
-            const Learn::LearningParameters& params, RNG::RNG& rng)
+            const AlgorithmParameters& params, RNG::RNG& rng)
 {
     
     // Add additional connections to TPG
@@ -123,7 +121,7 @@ void Algorithm::TPG::TPGMutator::addAditionnalEdges(
     for (const EvoGraph::Vertex& rootVertex : rootVertices) {
         // Pick a number of additional outedge
         size_t nbAdditionalEdges =
-            rng.getUnsignedInt64(0, params.mutation.tpg.maxInitOutgoingEdges - 2);
+            rng.getUnsignedInt64(0, params.tpg.maxInitOutgoingEdges - 2);
 
         if (nbAdditionalEdges > 0) {
             // Copy the list of programs
@@ -168,7 +166,7 @@ void Algorithm::TPG::TPGMutator::addAditionnalEdges(
     }
 }
 
-void Algorithm::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     auto outputs = manager.getOutputs();
     this->isConfigurationValid(params, outputs);
@@ -185,7 +183,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& graph, Ag
     std::vector<std::reference_wrapper<const Agent>> programAgents;
 
 
-    for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
+    for (size_t idx = 0; idx < params.nbAgents; idx++) {
         teams.push_back(dynamic_cast<const TPGAgent&>(manager.createAgent(graph)).getVertex());
     }
 
@@ -195,7 +193,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& graph, Ag
     // Programs have been initialized randomly.
     Mutator& programMutator = this->getSubMutator(this->programAlgorithmID);
     AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
-    for (size_t i = 0; i < 2 * params.mutation.tpg.nbRoots; i++) {
+    for (size_t i = 0; i < 2 * params.nbAgents; i++) {
 
         // Create a program agent
         programAgents.push_back(programMutator.initRandomAgent(graph, programManager, params, rng));
@@ -209,7 +207,7 @@ void Algorithm::TPG::TPGMutator::initRandomPopulation(EvoGraph::Graph& graph, Ag
     this->addAditionnalEdges(graph, actionsVertex, teams, programAgents, params, rng);
 }
 
-void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // First agent is initialized, check validity of the configuration.
     if(manager.getAgents().size() == 1){
@@ -228,7 +226,7 @@ void Algorithm::TPG::TPGMutator::initRandomSpecificAgent(const Agent& agent, Evo
     // Get the actions vertices.
     auto actions = graph.getActions();
 
-    size_t nbEdges = rng.getUnsignedInt64(2, params.mutation.tpg.maxInitOutgoingEdges);
+    size_t nbEdges = rng.getUnsignedInt64(2, params.tpg.maxInitOutgoingEdges);
     for(size_t idx = 0; idx < nbEdges; idx++){
         // Add edge
         graph.addNewEdge(vertex, actions.at(rng.getUnsignedInt64(0, actions.size() - 1)),
@@ -289,11 +287,11 @@ void Algorithm::TPG::TPGMutator::addRandomEdge(
 
 void Algorithm::TPG::TPGMutator::mutateEdgeDestination(
     EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // Should the new target be an action or a team
     bool targetAction =
-        rng.getDouble(0, 1) < params.mutation.tpg.pEdgeDestinationIsAction;
+        rng.getDouble(0, 1) < params.tpg.pEdgeDestinationIsAction;
 
     // Pick any target
     // Note: Having an action in all teams is no longer enforced,
@@ -312,7 +310,7 @@ void Algorithm::TPG::TPGMutator::mutateOutgoingEdge(
     EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     AgentManager& manager,
     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 {
     const Agent& originAgent = edge.getProgram();
     // copy program
@@ -327,36 +325,36 @@ void Algorithm::TPG::TPGMutator::mutateOutgoingEdge(
     // Edge target modification
     // As it Stephen kelly's work, Edge target modification is conditionned
     // to the modification of the prealable Edge.Program behavior.
-    if (rng.getDouble(0.0, 1.0) < params.mutation.tpg.pEdgeDestinationChange) {
+    if (rng.getDouble(0.0, 1.0) < params.tpg.pEdgeDestinationChange) {
         mutateEdgeDestination(graph, edge, params, rng);
     }
 }
 
 void Algorithm::TPG::TPGMutator::mutateAgent(
-    const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     const EvoGraph::Vertex& vertex = dynamic_cast<const TPGAgent&>(agent).getVertex();
     const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
 
     // 1. Remove randomly selected edges
     // Keep at least two edges (otherwise the team is useless)
-    double proba = params.mutation.tpg.pEdgeDeletion;
+    double proba = params.tpg.pEdgeDeletion;
     while (team.getOutgoingEdges().size() > 2 &&
             proba > rng.getDouble(0.0, 1.0)) {
         this->removeRandomEdge(graph, team, rng);
 
         // Decrement the proba of removing another edge
-        proba *= params.mutation.tpg.pEdgeDeletion;
+        proba *= params.tpg.pEdgeDeletion;
     }
 
     // 2. Add random duplicated edge with the team as its source
-    proba = params.mutation.tpg.pEdgeAddition;
-    while (team.getOutgoingEdges().size() < params.mutation.tpg.maxOutgoingEdges &&
+    proba = params.tpg.pEdgeAddition;
+    while (team.getOutgoingEdges().size() < params.tpg.maxOutgoingEdges &&
             proba > rng.getDouble(0.0, 1.0)) {
         // Add an edge (by duplication of an existing one)
         this->addRandomEdge(graph, team, rng);
         // Decrement the proba of adding another edge
-        proba *= params.mutation.tpg.pEdgeAddition;
+        proba *= params.tpg.pEdgeAddition;
     }
 
     // 3. Mutate edges of the team
@@ -366,20 +364,20 @@ void Algorithm::TPG::TPGMutator::mutateAgent(
         // And possibly modify their target
         for (const EvoGraph::Edge& edge : team.getOutgoingEdges()) {
             // Edge->Program bid modification
-            if (rng.getDouble(0.0, 1.0) < params.mutation.tpg.pProgramMutation) {
+            if (rng.getDouble(0.0, 1.0) < params.tpg.pProgramMutation) {
                 // Mutate the edge
                 this->mutateOutgoingEdge(graph, edge, manager, newSubAgents,
                                     params, rng);
                 anyMutationDone = true;
             }
         }
-    } while (!anyMutationDone && params.mutation.tpg.pProgramMutation > 0);
+    } while (!anyMutationDone && params.tpg.pProgramMutation > 0);
 }
 
 
 void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
     const Agent& programAgent, EvoGraph::Graph& graph, 
-    AgentManager& manager, const Learn::LearningParameters& params, 
+    AgentManager& manager, const AlgorithmParameters& params, 
     RNG::RNG& rng)
 {
     Mutator& subMutator = this->getSubMutator(programAgent.getAlgorithmID());
@@ -414,13 +412,13 @@ void Algorithm::TPG::TPGMutator::mutateProgramAgentAgainstArchive(
         // If the result is not unique, do another mutation.
         allUnique = archive.get().areProgramResultsUnique(hashesAndResults);
 
-        // Archive
+        // TPGArchive
     } while (!allUnique);
 }
 
 void Algorithm::TPG::TPGMutator::mutateSubAgents(
     std::vector<std::reference_wrapper<const Agent>>& agents, EvoGraph::Graph& graph, 
-    AgentManager& manager, const Learn::LearningParameters& params, 
+    AgentManager& manager, const AlgorithmParameters& params, 
     RNG::RNG& rng, uint64_t maxNbThreads)
 {
     // This is a computing intensive part of the mutation process

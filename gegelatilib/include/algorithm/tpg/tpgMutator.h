@@ -34,8 +34,8 @@ namespace Algorithm::TPG {
         /// Pre-existing edges used for mutation operations.
         std::vector<std::reference_wrapper<const EvoGraph::Edge>> preExistingEdges;
 
-        /// Archive used by this TPG
-        std::reference_wrapper<const Archive> archive;
+        /// TPGArchive used by this TPG
+        std::reference_wrapper<const TPGArchive> archive;
 
         /**
          * \brief Method called during initRandomPopulation
@@ -53,7 +53,7 @@ namespace Algorithm::TPG {
             std::vector<std::reference_wrapper<const EvoGraph::Vertex>> leafVertices,
             std::vector<std::reference_wrapper<const EvoGraph::Vertex>> rootVertices,
             std::vector<std::reference_wrapper<const Agent>> programAgent,
-            const Learn::LearningParameters& params, RNG::RNG& rng);
+            const AlgorithmParameters& params, RNG::RNG& rng);
 
     public:
 
@@ -62,9 +62,9 @@ namespace Algorithm::TPG {
          * 
          * \param[in] selector Reference to the current selector used by the algorithm.
          * \param[in] algorithmID id of the algorithm used.
-         * \param[in] archive Archive used by this TPG
+         * \param[in] archive TPGArchive used by this TPG
          */
-        TPGMutator(const Selector::Selector& selector, uint64_t algorithmID, const Archive& archive): Mutator(selector, algorithmID), archive{archive} {};
+        TPGMutator(const Selector::Selector& selector, uint64_t algorithmID, const TPGArchive& archive): Mutator(selector, algorithmID), archive{archive} {};
 
         /**
          * \brief Update the context used by the TPGMutator to populate the Graph.
@@ -76,7 +76,7 @@ namespace Algorithm::TPG {
          */
         virtual void updateSpecificContext(
             EvoGraph::Graph& graph, AgentManager& manager, 
-            const Learn::LearningParameters& params,
+            const AlgorithmParameters& params,
             RNG::RNG& rng) override;
 
 
@@ -102,7 +102,7 @@ namespace Algorithm::TPG {
          * \param[in] params the Parameters for the mutation.
          * \param[in] outputs the OutputHandler of the manager.
          */
-        virtual bool isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const override;
+        virtual bool isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const override;
 
         /**
          * \brief Initialize TPG Population.
@@ -112,7 +112,7 @@ namespace Algorithm::TPG {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
 
         /**
@@ -124,7 +124,7 @@ namespace Algorithm::TPG {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
 
         /**
@@ -185,7 +185,7 @@ namespace Algorithm::TPG {
          */
         virtual void mutateEdgeDestination(EvoGraph::Graph& graph,
                                     const EvoGraph::Edge& edge,
-                                    const Learn::LearningParameters& params,
+                                    const AlgorithmParameters& params,
                                     RNG::RNG& rng);
 
         /**
@@ -211,7 +211,7 @@ namespace Algorithm::TPG {
             EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
             AgentManager& manager,
             std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
-            const Learn::LearningParameters& params, RNG::RNG& rng);
+            const AlgorithmParameters& params, RNG::RNG& rng);
 
         /**
          * \brief mutate a specific agent of an algorithm within a population
@@ -224,13 +224,13 @@ namespace Algorithm::TPG {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng
         ) override;
 
         
         /**
          * \brief Mutate the behavior of a Program and ensure its unicity
-         * against the given Archive.
+         * against the given TPGArchive.
          *
          * \param[in] programAgent program agents of sub algorithm created while mutating the agent
          * \param[in,out] graph the graph to mutate.
@@ -240,7 +240,7 @@ namespace Algorithm::TPG {
          */
         virtual void mutateProgramAgentAgainstArchive(
             const Agent& programAgent, EvoGraph::Graph& graph, 
-            AgentManager& manager, const Learn::LearningParameters& params, 
+            AgentManager& manager, const AlgorithmParameters& params, 
             RNG::RNG& rng);
 
         /**
@@ -248,16 +248,16 @@ namespace Algorithm::TPG {
          */
         virtual void mutateSubAgents(
             std::vector<std::reference_wrapper<const Agent>>& agents, EvoGraph::Graph& graph, 
-            AgentManager& manager, const Learn::LearningParameters& params, 
+            AgentManager& manager, const AlgorithmParameters& params, 
             RNG::RNG& rng, uint64_t maxNbThreads) override;
 
         
         /**
          * Setter for the archive
          * 
-         * \param[in] archive Archive used by the program agents.
+         * \param[in] archive TPGArchive used by the program agents.
          */
-        void setArchive(const Archive& archive);
+        void setArchive(const TPGArchive& archive);
     };
 
 

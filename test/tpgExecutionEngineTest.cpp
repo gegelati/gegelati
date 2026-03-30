@@ -103,8 +103,8 @@ class ExecutionEngineTest : public ::testing::Test
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 3;
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 3;
         e = new Environment(set, params, vect);
         tpg = new EvoGraph::Graph(*e);
 
@@ -276,7 +276,7 @@ TEST_F(ExecutionEngineTest, EvaluateFromRootContinuousNoActionProg)
 TEST_F(ExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
 {
     // Add an action edge to action A3
-    params.mutation.tpg.useActionProgram = true;
+    params.algorithm.tpg.useActionProgram = true;
     Environment continuousEnv(set, params, vect, 2);
     std::shared_ptr<Program::Program> p =
         std::make_shared<Program::Program>(continuousEnv, true);
@@ -311,8 +311,8 @@ TEST_F(ExecutionEngineTest, EvaluateFromRootContinuousWithSingleActionProg)
 
 TEST_F(ExecutionEngineTest, EvaluateFromRootContinuousWithMultiActionProg)
 {
-    params.mutation.tpg.useMultiActionProgram = true;
-    params.mutation.tpg.useActionProgram = true;
+    params.algorithm.tpg.useMultiActionProgram = true;
+    params.algorithm.tpg.useActionProgram = true;
 
     // Add an action edge to action A3
     Environment continuousEnv(set, params, vect, 2);

@@ -32,8 +32,8 @@ class MapElitesDescriptorsTest : public ::testing::Test
         auto minus = [](double a, double b) -> double { return a - b; };
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 1;
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 1;
         e = new Environment(set, params, vect, 3);
         graph = std::make_shared<EvoGraph::Graph>(*e);
         dummyAgent = &graph->addNewTeam();

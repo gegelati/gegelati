@@ -22,8 +22,11 @@ namespace Selector {
     {
       protected:
 
+        /// @brief number of agents controlled by the selector
+        size_t nbAgents;
+
         /// Parameters for the selection
-        const Learn::LearningParameters& params;
+        SelectionParameters params;
 
         /// Pointer to the best agent encountered during training, together with
         /// its EvaluationResult.
@@ -80,10 +83,17 @@ namespace Selector {
          *
          * \param[in] params parameters used by the Selector.
          */
-        Selector(const Learn::LearningParameters& params)
+        Selector(const SelectionParameters& params)
             : params{params}
         {
         }
+
+        /// @brief setter for the number of agents
+        /// @param nbAgents number of agents set
+        void setNbAgents(size_t nbAgents);
+
+        /// @brief Getter for the number of agents. 
+        size_t getNbAgents();
 
         /**
          * \brief set the manager of the selector
@@ -199,25 +209,28 @@ namespace Selector {
             const std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                                 std::reference_wrapper<const Algorithm::Agent>>& results);
 
-
+                                
         /**
-         * \brief Method detecting whether an agent should be evaluated again.
-         *
-         * Using the resultsPerAgent map and the
-         * params.maxNbEvaluationPerPolicy, this method checks whether an agent
-         * should be evaluated again, or if sufficient evaluations were already
-         * performed.
+         * \brief Getter for a specific result of an agent.
          *
          * \param[in] agent The agent whose number of evaluation is
          * checked.
-         * \param[out] previousResult the std::shared_ptr to the
-         * EvaluationResult of the agent from the resultsPerAgent if any.
          * \return true if the agent has been evaluated enough times, false
          * otherwise.
          */
-        virtual bool isAgentEvalSkipped(
-            const Algorithm::Agent&,
-            std::shared_ptr<Learn::EvaluationResult>& previousResult) const;
+        virtual std::shared_ptr<Learn::EvaluationResult> getResultsOf(
+            const Algorithm::Agent& agent) const;
+
+        /**
+         * \brief Getter for the number of evaluation of a specific agent
+         *
+         * \param[in] agent The agent whose number of evaluation is
+         * checked.
+         * \return true if the agent has been evaluated enough times, false
+         * otherwise.
+         */
+        virtual size_t getNbEvaluation(
+            const Algorithm::Agent& agent) const;
 
         /**
          * \brief Get the best agent EvoGraph::Vertex encountered since the last init.

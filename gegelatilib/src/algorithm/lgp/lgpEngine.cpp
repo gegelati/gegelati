@@ -49,7 +49,7 @@ void Algorithm::LGP::LGPEngine::setExecutedAgent(const Agent& newExecutedAgent)
 
     // are constants used here ?
     size_t offset = 1;
-    if (lgpAgent.getEnvironment().getParams().nbProgramConstant > 0) {
+    if (lgpAgent.getEnvironment().getNbConstants() > 0) {
         // replace programs constants if already existing
         dataScsConstsAndRegs.at(1) = lgpAgent.cGetConstantHandler();
         // increment offset for the datahandlers verification
@@ -219,7 +219,7 @@ void Algorithm::LGP::LGPEngine::setDataSources(
     this->dataSources = dataSrc;
     // we need this offset to push the constant at the first
     size_t offset =
-        this->lgpExecutedAgent->get().getEnvironment().getParams().nbProgramConstant > 0
+        this->lgpExecutedAgent->get().getEnvironment().getNbConstants() > 0
             ? 2
             : 1;
     if (offset == 2) {

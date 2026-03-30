@@ -39,7 +39,7 @@
 #ifndef LEARNING_PARAMETERS_H
 #define LEARNING_PARAMETERS_H
 
-#include "mutator/mutationParameters.h"
+#include "algorithm/algorithmParameters.h"
 #include "selector/selectionParameters.h"
 #include <thread>
 
@@ -53,28 +53,12 @@ namespace Learn {
      */
     typedef struct LearningParameters
     {
-        /// MutationParameters for controlling stochastic aspects of the
-        /// learning process.
-        Mutator::MutationParameters mutation;
+        /// AlgorithmParameters for controlling paramters of any algorithm.
+        Algorithm::AlgorithmParameters algorithm;
 
         /// SelectionParameters for controlling selection aspects of the
         /// learning process.
         Selector::SelectionParameters selection;
-
-        /// JSon comment
-        inline static const std::string archiveSizeComment =
-            "// Number of recordings held in the Archive.\n"
-            "// \"archiveSize\" : 50, // Default value";
-        /// Number of recordings held in the Archive.
-        size_t archiveSize = 50;
-
-        /// JSon comment
-        inline static const std::string archivingProbabilityComment =
-            "// Probability of archiving the result of each Program "
-            "execution.\n"
-            "// \"archivingProbability\" : 0.05, // Default value";
-        /// Probability of archiving the result of each Program execution.
-        double archivingProbability = 0.05;
 
         /// JSon comment
         inline static const std::string nbIterationsPerPolicyEvaluationComment =
@@ -129,20 +113,6 @@ namespace Learn {
         size_t maxNbEvaluationPerPolicy = 1000;
 
         /// JSon comment
-        inline static const std::string nbRegistersComment =
-            "// Number of registers for the Program execution.\n"
-            "// \"nbRegisters\" : 8, // Default value";
-        /// Number of registers for the Program execution
-        size_t nbRegisters = 8;
-
-        /// JSon comment
-        inline static const std::string nbProgramConstantComment =
-            "// Number of Constant available in each Program.\n"
-            "// \"nbProgramConstant\" : 0, // Default value";
-        /// Number of Constants available in a program.
-        size_t nbProgramConstant = 0;
-
-        /// JSon comment
         inline static const std::string nbThreadsComment =
             "// [Only used in ParallelLearningAgent and child classes.]\n"
             "// Number of threads used for the training process.\n"
@@ -161,15 +131,6 @@ namespace Learn {
          *   - `n > 1`: Set the number of threads explicitly.
          */
         size_t nbThreads = std::thread::hardware_concurrency();
-
-        /// JSon comment
-        inline static const std::string activationFunctionComment =
-            "// string that indicate the activation function used for "
-            "continuous actions \n"
-            "// \"activationFunction\" : 'none', // Default value";
-        /// string that indicate the activation function used for continuous
-        /// actions
-        std::string activationFunction = "none";
 
         /// JSon comment
         inline static const std::string doValidationComment =

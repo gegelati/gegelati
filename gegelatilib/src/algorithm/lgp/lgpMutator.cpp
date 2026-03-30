@@ -2,16 +2,16 @@
 #include <array>
 #include "algorithm/lgp/lgpMutator.h"
 
-bool Algorithm::LGP::LGPMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
+bool Algorithm::LGP::LGPMutator::isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const
 {
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("LGPMutator::initRandomPopulation: LGP does not support mixed discrete and continuous outputs.");
     } else if (outputs.sizeContinuous() != 0){
-        if(outputs.size() > params.nbRegisters){
+        if(outputs.size() > params.lgp.nbRegisters){
             throw std::runtime_error("LGPMutator::initRandomPopulation: Number of continuous outputs exceeds the number of registers.");
         }
     } else if (outputs.sizeDiscrete() != 0){
-        if(outputs.size() > params.nbRegisters){
+        if(outputs.size() > params.lgp.nbRegisters){
             throw std::runtime_error("LGPMutator::initRandomPopulation: Number of discrete outputs exceeds the number of registers.");
         }
     } else {
@@ -20,7 +20,7 @@ bool Algorithm::LGP::LGPMutator::isConfigurationValid(const Learn::LearningParam
     return true;
 }
 
-void Algorithm::LGP::LGPMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::LGP::LGPMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // Check configuration is valid
     this->isConfigurationValid(params, manager.getOutputs());
@@ -28,12 +28,12 @@ void Algorithm::LGP::LGPMutator::initRandomPopulation(EvoGraph::Graph& graph, Ag
     // Empty agent manager
     manager.clearAgents(graph);
 
-    for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
+    for (size_t idx = 0; idx < params.nbAgents; idx++) {
         this->initRandomAgent(graph, manager, params, rng);
     }
 }
 
-void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // If first agent, check validity
     if(manager.getAgents().size() == 1){
@@ -54,15 +54,15 @@ void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
 
     // insert random constants in the program
     Data::Constant c_value;
-    for (int i = 0; i < lgpAgent.getEnvironment().getParams().nbProgramConstant; i++) {
-        c_value = {rng.getDouble(params.mutation.prog.minConstValue,
-                                 params.mutation.prog.maxConstValue)};
+    for (int i = 0; i < params.lgp.nbProgramConstant; i++) {
+        c_value = {rng.getDouble(params.lgp.minConstValue,
+                                 params.lgp.maxConstValue)};
         lgpManager.setConstantAt(agent, i, c_value);
     }
 
     // Select the number of line randomly
     const uint64_t nbLine = rng.getUnsignedInt64(
-        params.mutation.prog.initMinProgramSize, params.mutation.prog.initMaxProgramSize);
+        params.lgp.initMinProgramSize, params.lgp.initMaxProgramSize);
     // Insert them
     while (lgpAgent.getNbLines() < nbLine) {
         this->insertRandomLine(lgpAgent, lgpManager, rng);
@@ -75,7 +75,7 @@ void Algorithm::LGP::LGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
 void Algorithm::LGP::LGPMutator::crossoverAgents(
     std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, 
     AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, 
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // Casted agent 1 and 2
     const LGPAgent& lgpAgent1 = dynamic_cast<const LGPAgent&>(agents[0].get());
@@ -101,7 +101,7 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
     // the cross lines is the same for both program.
     bool specialCase =
         lgpAgent1.getNbLines() + lgpAgent2.getNbLines() >=
-        params.mutation.prog.maxProgramSize;
+        params.lgp.maxProgramSize;
 
     // Select random index for the crossover, normal case
     for (int i = 0; i < 2; i++) {
@@ -175,7 +175,7 @@ void Algorithm::LGP::LGPMutator::crossoverAgents(
 }
 
 void Algorithm::LGP::LGPMutator::mutateAgent(
-    const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     LGPManager& lgpManager = dynamic_cast<LGPManager&>(manager);
     if(&lgpManager == nullptr){
@@ -191,41 +191,41 @@ void Algorithm::LGP::LGPMutator::mutateAgent(
     while (!this->mutateLGPAgent(lgpAgent, lgpManager, params, rng));
 }
 
-bool Algorithm::LGP::LGPMutator::mutateLGPAgent(const LGPAgent& agent, LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+bool Algorithm::LGP::LGPMutator::mutateLGPAgent(const LGPAgent& agent, LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     bool anyMutation = false;
-    if (agent.getNbLines() > 1 && rng.getDouble(0.0, 1.0) < params.mutation.prog.pDelete) {
+    if (agent.getNbLines() > 1 && rng.getDouble(0.0, 1.0) < params.lgp.pDelete) {
         anyMutation = true;
         deleteRandomLine(agent, manager, rng);
     }
 
-    if (agent.getNbLines() < params.mutation.prog.maxProgramSize &&
-        rng.getDouble(0.0, 1.0) < params.mutation.prog.pAdd) {
+    if (agent.getNbLines() < params.lgp.maxProgramSize &&
+        rng.getDouble(0.0, 1.0) < params.lgp.pAdd) {
         anyMutation = true;
         insertRandomLine(agent, manager, rng);
     }
 
-    if (rng.getDouble(0.0, 1.0) < params.mutation.prog.pMutate) {
+    if (rng.getDouble(0.0, 1.0) < params.lgp.pMutate) {
         anyMutation = true;
         alterRandomLine(agent, manager, rng);
     }
 
-    if (rng.getDouble(0.0, 1.0) < params.mutation.prog.pSwap) {
+    if (rng.getDouble(0.0, 1.0) < params.lgp.pSwap) {
         anyMutation = true;
         swapRandomLines(agent, manager, rng);
     }
 
     // mutate the programs constants if they exists
-    if (agent.getEnvironment().getParams().nbProgramConstant > 0 &&
-        rng.getDouble(0.0, 1.0) < params.mutation.prog.pConstantMutation) {
+    if (params.lgp.nbProgramConstant > 0 &&
+        rng.getDouble(0.0, 1.0) < params.lgp.pConstantMutation) {
         anyMutation = true;
         alterRandomConstant(agent, manager, params, rng);
     }
 
     if(false) {
         for(size_t idx = 0; idx < manager.getOutputs().size(); idx++) {
-            if(rng.getDouble(0.0, 1.0) < 0) {//params.mutation.prog.pMutateOutputs) {
-                alterRandomOutputs(agent, manager, idx, rng);
+            if(rng.getDouble(0.0, 1.0) < 0) {//params.lgp.pMutateOutputs) {
+                alterRandomOutputs(agent, manager, idx, params, rng);
             }
         }
     }
@@ -287,10 +287,10 @@ bool Algorithm::LGP::LGPMutator::alterRandomLine(const LGPAgent& agent, LGPManag
 }
 
 bool Algorithm::LGP::LGPMutator::alterRandomConstant(
-    const LGPAgent& agent, LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+    const LGPAgent& agent, LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     const uint64_t constant_idx = rng.getUnsignedInt64(
-        0, params.nbProgramConstant - 1);
+        0, params.lgp.nbProgramConstant - 1);
 
     // Sample the new value
     double delta = rng.getDouble(0.5, 1.5);
@@ -311,9 +311,9 @@ bool Algorithm::LGP::LGPMutator::alterRandomConstant(
     return true;
 }
 
-bool Algorithm::LGP::LGPMutator::alterRandomOutputs(const LGPAgent& agent, LGPManager& manager, size_t location,
-                                              RNG::RNG& rng)
+bool Algorithm::LGP::LGPMutator::alterRandomOutputs(const LGPAgent& agent, LGPManager& manager, size_t location, 
+                                             const AlgorithmParameters& params, RNG::RNG& rng)
 {
-    manager.setOutputIndex(agent, rng.getUnsignedInt64(0, agent.getEnvironment().getParams().nbRegisters - 1), location);
+    manager.setOutputIndex(agent, rng.getUnsignedInt64(0, params.lgp.nbRegisters - 1), location);
     return true;
 }

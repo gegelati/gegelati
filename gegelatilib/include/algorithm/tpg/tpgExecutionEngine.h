@@ -22,8 +22,8 @@ namespace Algorithm::TPG {
         /// Execution engine used to execute the program of the TPG agents
         uint64_t programExecutionEngineID;
 
-        /// Archive used by the program agents.
-        std::optional<std::reference_wrapper<Archive>> archive = std::nullopt;
+        /// TPGArchive used by the program agents.
+        std::optional<std::reference_wrapper<TPGArchive>> archive = std::nullopt;
 
         /// Action values selected
         std::vector<double> actionValues;
@@ -57,14 +57,14 @@ namespace Algorithm::TPG {
         /**
          * Setter for the archive
          * 
-         * \param[in] archive Archive used by the program agents.
+         * \param[in] archive TPGArchive used by the program agents.
          */
-        void setArchive(Archive& archive);
+        void setArchive(TPGArchive& archive);
 
         /**
          * \brief getter for the archive.
          */
-        std::optional<std::reference_wrapper<Archive>> getArchive();
+        std::optional<std::reference_wrapper<TPGArchive>> getArchive();
 
         /**
          * \brief Setup the execution engine with the given job.
@@ -96,7 +96,7 @@ namespace Algorithm::TPG {
          * \brief Execute the Program associated to an Edge and returns the
          * obtained double.
          *
-         * If an Archive is associated to the ExecutionEngine, the Program
+         * If an TPGArchive is associated to the ExecutionEngine, the Program
          * result is recorded in it.
          *
          * If the value returned by the Program is NaN, then it is replaced with

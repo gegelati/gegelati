@@ -179,18 +179,8 @@ namespace Selector {
              * \param[in] maxNbEvaluation the maximum number of evaluation
              * allowed
              */
-            virtual void removeAgentFromArchiveIfNotComplete(
+            virtual void removeAgentFromArchive(
                 const Algorithm::Agent& agent, size_t maxNbEvaluation);
-
-            /**
-             * \brief Remove a agent from the archive
-             *
-             * \param[in] agent the agent to remove
-             * \param[in] maxNbEvaluation the maximum number of evaluation
-             * allowed
-             */
-            virtual void removeAgentFromArchive(const Algorithm::Agent& agent,
-                                               size_t maxNbEvaluation);
 
             /**
              * \brief Return a set with the current vectors in the archive.

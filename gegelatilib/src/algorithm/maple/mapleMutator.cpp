@@ -2,12 +2,12 @@
 
 #include "algorithm/maple/mapleMutator.h"
 
-bool Algorithm::Maple::MapleMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
+bool Algorithm::Maple::MapleMutator::isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const
 {
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("MapleMutator::initRandomPopulation: Maple does not support mixed discrete and continuous outputs.");
     } else if (outputs.sizeDiscrete() != 0 || outputs.sizeContinuous() != 0){
-        if(params.mutation.tpg.nbActionEdgeInit > outputs.size()){
+        if(params.maple.nbActionEdgeInit > outputs.size()){
             throw std::runtime_error("MapleMutator::initRandomPopulation: Number of discrete outputs cannot be lower than the number of initial edges.");
         }        
     } else if (outputs.size() == 0){
@@ -16,7 +16,7 @@ bool Algorithm::Maple::MapleMutator::isConfigurationValid(const Learn::LearningP
     return true;
 }
 
-void Algorithm::Maple::MapleMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::Maple::MapleMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     this->isConfigurationValid(params, manager.getOutputs());
     this->initActionVertices(graph, manager.getOutputs().size());
@@ -24,12 +24,12 @@ void Algorithm::Maple::MapleMutator::initRandomPopulation(EvoGraph::Graph& graph
     // Empty agent manager
     manager.clearAgents(graph);
 
-    for (size_t idx = 0; idx < params.mutation.tpg.nbRoots; idx++) {
+    for (size_t idx = 0; idx < params.nbAgents; idx++) {
         this->initRandomAgent(graph, manager, params, rng);
     }
 }
 
-void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // First agent initialized, check configuration validity and create action vertices
     if(manager.getAgents().size() == 1){
@@ -55,7 +55,7 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
     auto actionVertices = graph.getActions();
 
     size_t remaining = availableActions.size();
-    for (size_t idxAction = 0; idxAction < params.mutation.tpg.nbActionEdgeInit; idxAction++) {
+    for (size_t idxAction = 0; idxAction < params.maple.nbActionEdgeInit; idxAction++) {
         const Agent& programAgent = programMutator.initRandomAgent(graph, programManager, params, rng);
 
         // Pick uniformly from remaining values
@@ -75,7 +75,7 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
 }
 
 void Algorithm::Maple::MapleMutator::crossoverPrograms(
-    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // Get program to cross for the teams. It should exist.
     std::vector<std::reference_wrapper<const Agent>> swapPrograms;
@@ -113,7 +113,7 @@ void Algorithm::Maple::MapleMutator::crossoverPrograms(
 }
 
 void Algorithm::Maple::MapleMutator::crossoverEdges(
-    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // Get edge to swap for the teams if it exist
     std::array<const EvoGraph::Edge*, 2> swapEdges{nullptr, nullptr};
@@ -147,10 +147,10 @@ void Algorithm::Maple::MapleMutator::crossoverEdges(
 
 
 void Algorithm::Maple::MapleMutator::crossoverAgents(
-    std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // No crossover
-    if (params.mutation.tpg.pCrossAgents == 0) {
+    if (params.maple.pCrossAgents == 0) {
         return;
     }
     // Initialize available actions
@@ -187,7 +187,7 @@ void Algorithm::Maple::MapleMutator::crossoverAgents(
         // assessed the action concerned
         if (team0.getAssessedActions().count(indexAction) > 0 &&
             team1.getAssessedActions().count(indexAction) > 0 &&
-            params.mutation.tpg.pCrossPrograms > rng.getDouble(0, 1)) {
+            params.maple.pCrossPrograms > rng.getDouble(0, 1)) {
 
             this->crossoverPrograms(teamsArray, indexAction, graph, manager, newSubAgents, params, rng);
         }
@@ -201,7 +201,7 @@ void Algorithm::Maple::MapleMutator::crossoverAgents(
         
         graph.orderActionEdges(team0);
         graph.orderActionEdges(team1);
-        proba *= params.mutation.tpg.pCrossAgents;
+        proba *= params.maple.pCrossAgents;
     }
 
 }
@@ -278,7 +278,7 @@ void Algorithm::Maple::MapleMutator::swapEdges(EvoGraph::Graph& graph,
 void Algorithm::Maple::MapleMutator::mutateEdgeDestination(
     EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     const std::set<size_t>& actionClasses,
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 {
     std::vector<std::reference_wrapper<const EvoGraph::Action>> actionVertices(graph.getActions());
     actionVertices.erase(
@@ -299,7 +299,7 @@ void Algorithm::Maple::MapleMutator::mutateOutgoingEdge(
     EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
     const std::set<size_t>& actionClasses, AgentManager& manager,
     std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 {
     const Agent& originAgent = edge.getProgram();
     // copy program
@@ -314,34 +314,34 @@ void Algorithm::Maple::MapleMutator::mutateOutgoingEdge(
     size_t nbActions = manager.getOutputs().size();
     // Change action ID randomly if the action do not contain all actions.
     if (actionClasses.size() < nbActions &&
-        params.mutation.tpg.pChangeActionClass > rng.getDouble(0.0, 1.0)) {
+        params.maple.pChangeActionClass > rng.getDouble(0.0, 1.0)) {
         
         this->mutateEdgeDestination(graph, edge, actionClasses, params, rng);
     }
 }
 
 void Algorithm::Maple::MapleMutator::mutateAgent(
-    const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng)
+    const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     const EvoGraph::Vertex& vertex = dynamic_cast<const MapleAgent&>(agent).getVertex();
     const EvoGraph::Team& team = dynamic_cast<const EvoGraph::Team&>(vertex);
 
     // 1. Remove randomly selected edges
     // Keep at least two edges (otherwise the team is useless)
-    double proba = params.mutation.tpg.pActionEdgeDeletion;
+    double proba = params.maple.pActionEdgeDeletion;
     while (team.getOutgoingEdges().size() > 1 &&
             proba > rng.getDouble(0.0, 1.0)) {
         this->removeRandomEdge(graph, team, rng);
 
         // Decrement the proba of removing another edge
-        proba *= params.mutation.tpg.pActionEdgeDeletion;
+        proba *= params.maple.pActionEdgeDeletion;
 
         // Update assessed actions
         graph.updateAssessedActions(team);
     }
 
     // 2. Add random duplicated edge with the team as its source
-    proba = params.mutation.tpg.pActionEdgeAddition;
+    proba = params.maple.pActionEdgeAddition;
     while (team.getOutgoingEdges().size() <
                 manager.getOutputs().size() &&
             proba > rng.getDouble(0.0, 1.0)) {
@@ -349,7 +349,7 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
         this->addRandomEdge(graph, team, rng);
 
         // Decrement the proba of adding another edge
-        proba *= params.mutation.tpg.pActionEdgeAddition;
+        proba *= params.maple.pActionEdgeAddition;
 
         // Update assessed actions
         graph.updateAssessedActions(team);
@@ -358,13 +358,13 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
 
     // 3. swap randomly selected edges
     // With at least two edges
-    proba = params.mutation.tpg.pSwapActionProgram;
+    proba = params.maple.pSwapActionProgram;
     while (team.getOutgoingEdges().size() > 2 &&
             proba > rng.getDouble(0.0, 1.0)) {
         this->swapEdges(graph, team, rng);
 
         // Decrement the proba of swapping two edges
-        proba *= params.mutation.tpg.pSwapActionProgram;
+        proba *= params.maple.pSwapActionProgram;
     }
 
     bool anyMutationDone = false;
@@ -376,7 +376,7 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
         size_t remaining = availableEdges.size();
 
         // 4. mutate randomly selected program on action Edge.
-        double proba = params.mutation.tpg.pMutateActionProgram;
+        double proba = params.maple.pMutateActionProgram;
         while (remaining > 0 &&
                proba > rng.getDouble(0.0, 1.0)) {
 
@@ -394,10 +394,10 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
             this->mutateOutgoingEdge(graph, *iter, team.getAssessedActions(), manager, newSubAgents, params, rng);
             graph.updateAssessedActions(team);
 
-            proba *= params.mutation.tpg.pMutateActionProgram;
+            proba *= params.maple.pMutateActionProgram;
             anyMutationDone = true;
         }
-    } while (!anyMutationDone && params.mutation.tpg.pMutateActionProgram != 0.0);
+    } while (!anyMutationDone && params.maple.pMutateActionProgram != 0.0);
     graph.orderActionEdges(team);
 }
 

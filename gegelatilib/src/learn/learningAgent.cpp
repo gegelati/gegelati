@@ -137,7 +137,6 @@ void Learn::LearningAgent::addLogger(Log::LALogger& logger)
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
 }
 
-
 std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     Algorithm::ExecutionEngine& execEngine, const Algorithm::Job& job, uint64_t generationNumber,
     Learn::LearningMode mode, LearningEnvironment& le) const
@@ -153,9 +152,12 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // Skip the agent evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
-    if (mode == LearningMode::TRAINING &&
-        selector.isAgentEvalSkipped(job.getAgent(), previousEval)) {
-        return previousEval;
+    size_t nbEvaluationAgent = selector.getNbEvaluation(job.getAgent());
+    if (mode == LearningMode::TRAINING && nbEvaluationAgent > 0) {
+        previousEval = selector.getResultsOf(job.getAgent());
+        if(nbEvaluationAgent > params.maxNbEvaluationPerPolicy) {
+            return previousEval;
+        }
     }
 
     // Set the job to execute

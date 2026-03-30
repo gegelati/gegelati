@@ -12,7 +12,7 @@ void Selector::TournamentSelector::doSelection(
 
 
     size_t nbToKeep =
-        (size_t)(results.size() * params.selection.tournament.ratioSavedRoots);
+        (size_t)(results.size() * params.tournament.ratioSavedRoots);
     size_t nbAgentsInTournament = results.size() - nbToKeep;
 
     // Copy the first agents to remove (those at the bottom of the ranking)
@@ -35,9 +35,9 @@ void Selector::TournamentSelector::doSelection(
 
     // Tournament selection
     for (size_t i = 0; i < nbAgentsInTournament;
-         i += params.selection.tournament.sizeTournament) {
+         i += params.tournament.sizeTournament) {
         size_t end = std::min(
-            static_cast<size_t>(i + params.selection.tournament.sizeTournament),
+            static_cast<size_t>(i + params.tournament.sizeTournament),
             nbAgentsInTournament);
         auto subrangeBegin = elements.begin() + i;
         auto subrangeEnd = elements.begin() + end;
@@ -85,7 +85,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::TournamentSelector::update
             }),
         context->preExistingAgents.end());
 
-    if (!params.selection.tournament.areElitesReproductible) {
+    if (!params.tournament.areElitesReproductible) {
         // The agent not set to be deleted are not used during evolution
         context->agentsClonable.erase(
             std::remove_if(

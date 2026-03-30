@@ -2,7 +2,7 @@
 #include <array>
 #include "algorithm/tgp/tgpMutator.h"
 
-bool Algorithm::TGP::TGPMutator::isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const
+bool Algorithm::TGP::TGPMutator::isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const
 {
 
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
@@ -11,7 +11,7 @@ bool Algorithm::TGP::TGPMutator::isConfigurationValid(const Learn::LearningParam
 
         
     } else if (outputs.sizeDiscrete() != 0){
-        if(outputs.size() > params.nbRegisters){
+        if(outputs.size() > params.lgp.nbRegisters){
             throw std::runtime_error("TGPMutator::initRandomPopulation: Number of discrete outputs exceeds the number of registers.");
         }
     } else {
@@ -20,7 +20,7 @@ bool Algorithm::TGP::TGPMutator::isConfigurationValid(const Learn::LearningParam
     return true;
 }
 
-void Algorithm::TGP::TGPMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+void Algorithm::TGP::TGPMutator::initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     // If first agent, check validity
     if(manager.getAgents().size() == 1){
@@ -41,9 +41,9 @@ void Algorithm::TGP::TGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
 
     // insert random constants in the program
     Data::Constant c_value;
-    for (int i = 0; i < lgpAgent.getEnvironment().getParams().nbProgramConstant; i++) {
-        c_value = {rng.getDouble(params.mutation.prog.minConstValue,
-                                 params.mutation.prog.maxConstValue)};
+    for (int i = 0; i < params.lgp.nbProgramConstant; i++) {
+        c_value = {rng.getDouble(params.lgp.minConstValue,
+                                 params.lgp.maxConstValue)};
         lgpManager.setConstantAt(agent, i, c_value);
     }
 
@@ -84,7 +84,7 @@ void Algorithm::TGP::TGPMutator::insertRandomSubTree(const LGP::LGPAgent& agent,
 void Algorithm::TGP::TGPMutator::crossoverAgents(
     std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, 
     AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, 
-    const Learn::LearningParameters& params, RNG::RNG& rng)
+    const AlgorithmParameters& params, RNG::RNG& rng)
 { 
 
     // Casted agent 1 and 2
@@ -176,17 +176,17 @@ void Algorithm::TGP::TGPMutator::crossoverAgents(
     }
 }
 
-bool Algorithm::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng)
+bool Algorithm::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP::LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     bool anyMutation = false;
-    if (rng.getDouble(0.0, 1.0) < params.mutation.prog.pMutate) {
+    if (rng.getDouble(0.0, 1.0) < params.lgp.pMutate) {
         anyMutation = true;
         alterRandomLine(agent, manager, rng);
     }
 
     // mutate the programs constants if they exists
-    if (agent.getEnvironment().getParams().nbProgramConstant > 0 &&
-        rng.getDouble(0.0, 1.0) < params.mutation.prog.pConstantMutation) {
+    if (params.lgp.nbProgramConstant > 0 &&
+        rng.getDouble(0.0, 1.0) < params.lgp.pConstantMutation) {
         anyMutation = true;
         alterRandomConstant(agent, manager, params, rng);
     }
@@ -203,8 +203,8 @@ bool Algorithm::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
             }
     
             // One of the output must always be zero, so mutation is allowed if zero is used multiple time, or if current idx is not using zero (meaning it is used elsewhere)
-            if((nbZeroRegUsed > 1 || agent.getOutputIndices().at(idx) != 0) && rng.getDouble(0.0, 1.0) < 1) {//params.mutation.prog.pMutateOutputs) {
-                alterRandomOutputs(agent, manager, idx, rng);
+            if((nbZeroRegUsed > 1 || agent.getOutputIndices().at(idx) != 0) && rng.getDouble(0.0, 1.0) < 1) {//params.lgp.pMutateOutputs) {
+                alterRandomOutputs(agent, manager, idx, params, rng);
             }
         }
 
@@ -219,7 +219,7 @@ bool Algorithm::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
 
 
 bool Algorithm::TGP::TGPMutator::alterRandomOutputs(const LGP::LGPAgent& agent, LGP::LGPManager& manager, size_t location,
-                                              RNG::RNG& rng)
+                                              const AlgorithmParameters& params, RNG::RNG& rng)
 {
 
     std::set<size_t> availableRegisters;

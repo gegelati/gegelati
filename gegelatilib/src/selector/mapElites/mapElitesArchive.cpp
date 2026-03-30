@@ -114,7 +114,7 @@ bool Selector::MapElites::MapElitesArchive::containsAgent(
     return false;
 }
 
-void Selector::MapElites::MapElitesArchive::removeAgentFromArchiveIfNotComplete(
+void Selector::MapElites::MapElitesArchive::removeAgentFromArchive(
     const Algorithm::Agent& agent, size_t maxNbEvaluation)
 {
     for (auto it = archive.begin(); it != archive.end(); ++it) {
@@ -129,17 +129,6 @@ void Selector::MapElites::MapElitesArchive::removeAgentFromArchiveIfNotComplete(
     }
 }
 
-void Selector::MapElites::MapElitesArchive::removeAgentFromArchive(
-    const Algorithm::Agent& agent, size_t maxNbEvaluation)
-{
-    for (auto it = archive.begin(); it != archive.end(); ++it) {
-        if (it->second == agent) {
-            it->first = nullptr;
-            it->second = std::nullopt; // Clear the vertex pointer
-            break;
-        }
-    }
-}
 
 std::set<std::reference_wrapper<const Algorithm::Agent>> Selector::MapElites::MapElitesArchive::
     getVerticesInArchive() const

@@ -40,7 +40,7 @@
 
 #include "algorithm/lgp/environment.h"
 
-size_t Environment::computeLargestAddressSpace(
+size_t Algorithm::LGP::LGPEnvironment::computeLargestAddressSpace(
     const size_t nbRegisters, const size_t nbConstants,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
         dHandlers)
@@ -53,7 +53,7 @@ size_t Environment::computeLargestAddressSpace(
     return res;
 }
 
-Instructions::Set Environment::filterInstructionSet(
+Instructions::Set Algorithm::LGP::LGPEnvironment::filterInstructionSet(
     const Instructions::Set& iSet, const size_t nbRegisters,
     const size_t nbConstants,
     const std::vector<std::reference_wrapper<const Data::DataHandler>>&
@@ -103,7 +103,7 @@ Instructions::Set Environment::filterInstructionSet(
             if (!isHandled) {
                 std::cout
                     << "An instruction with an operand of type " << type.name()
-                    << " is ignored when building the Environment because"
+                    << " is ignored when building the Algorithm::LGP::LGPEnvironment because"
                     << " no dataSource can provide data for this operand type."
                     << std::endl;
 
@@ -122,11 +122,11 @@ Instructions::Set Environment::filterInstructionSet(
     return filteredSet;
 }
 
-const LineSize Environment::computeLineSize(const Environment& env)
+const Algorithm::LGP::LGPLineSize Algorithm::LGP::LGPEnvironment::computeLineSize(const Algorithm::LGP::LGPEnvironment& env)
 {
     // $ ceil(log2(i))+ ceil(log2(n)) + m * (ceil(log2(nb_{ src })) +
     // ceil(log2(largestAddressSpace)) + p * sizeof(Param)_{inByte} * 8$
-    const size_t n = env.getParams().nbRegisters;
+    const size_t n = env.nbRegisters;
 
     const size_t i = env.getNbInstructions();
 
@@ -143,14 +143,14 @@ const LineSize Environment::computeLineSize(const Environment& env)
     // the line mutators).
     if (n == 0 || i <= 1 || m == 0 || nbSrc <= 1 || largestAddressSpace == 0) {
         throw std::domain_error(
-            "Environment given to the computeLineSize is invalid for building "
+            "Algorithm::LGP::LGPEnvironment given to the computeLineSize is invalid for building "
             "a program."
             "It is parameterized with no or only registers, contains no "
             "Instruction, Instruction"
             " with no operands, no DataHandler or DataHandler with no "
             "addressable Space.");
     }
-    LineSize result;
+    LGPLineSize result;
     result.nbInstructionBits = (size_t)(ceill(log2l((long double)n)));
     result.nbDestinationBits = (size_t)ceill(log2l((long double)i));
     result.nbOperandDataSourceIndexBits =
@@ -165,54 +165,55 @@ const LineSize Environment::computeLineSize(const Environment& env)
     return result;
 }
 
-const Learn::LearningParameters& Environment::getParams() const
+
+size_t Algorithm::LGP::LGPEnvironment::getNbConstants() const
 {
-    return params;
+    return this->nbConstants;
 }
 
-size_t Environment::getNbContinuousActions() const
+size_t Algorithm::LGP::LGPEnvironment::getNbRegisters() const
 {
-    return nbContinuousActions;
+    return this->nbRegisters;
 }
 
-size_t Environment::getNbInstructions() const
+size_t Algorithm::LGP::LGPEnvironment::getNbInstructions() const
 {
     return this->nbInstructions;
 }
 
-size_t Environment::getMaxNbOperands() const
+size_t Algorithm::LGP::LGPEnvironment::getMaxNbOperands() const
 {
     return this->maxNbOperands;
 }
 
-size_t Environment::getNbDataSources() const
+size_t Algorithm::LGP::LGPEnvironment::getNbDataSources() const
 {
     return this->nbDataSources;
 }
 
-size_t Environment::getLargestAddressSpace() const
+size_t Algorithm::LGP::LGPEnvironment::getLargestAddressSpace() const
 {
     return this->largestAddressSpace;
 }
 
-const LineSize& Environment::getLineSize() const
+const Algorithm::LGP::LGPLineSize& Algorithm::LGP::LGPEnvironment::getLineSize() const
 {
     return this->lineSize;
 }
 
 const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-Environment::getDataSources() const
+Algorithm::LGP::LGPEnvironment::getDataSources() const
 {
     return this->dataSources;
 }
 
 const std::vector<std::reference_wrapper<const Data::DataHandler>>&
-Environment::getFakeDataSources() const
+Algorithm::LGP::LGPEnvironment::getFakeDataSources() const
 {
     return this->fakeDataSources;
 }
 
-const Instructions::Set& Environment::getInstructionSet() const
+const Instructions::Set& Algorithm::LGP::LGPEnvironment::getInstructionSet() const
 {
     return this->instructionSet;
 }

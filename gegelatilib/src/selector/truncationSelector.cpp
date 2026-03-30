@@ -18,7 +18,7 @@ void Selector::TruncationSelector::doSelection(
 
     // Estimate the number of expected agents to delete
     size_t nbExpectedAgents =
-        (size_t)floor(this->params.selection.truncation.ratioDeletedRoots *
+        (size_t)floor(this->params.truncation.ratioDeletedRoots *
                       (double)results.size());
 
     auto i = 0;

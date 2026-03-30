@@ -11,6 +11,7 @@
 #include "algorithm/lgp/lgpAgent.h"
 #include "algorithm/lgp/lgpPolicyStats.h"
 #include "algorithm/lgp/lgpCodeGenerationEngine.h"
+#include "algorithm/lgp/environment.h"
 namespace Algorithm::LGP {
 
     /**
@@ -21,7 +22,7 @@ namespace Algorithm::LGP {
         protected:
 
             /// Environment for executing LGP 
-            std::unique_ptr<Environment> env;
+            std::unique_ptr<LGPEnvironment> env;
 
             /// Instruction Set used by the LGPAlgorithm
             const Instructions::Set& iSet;
@@ -39,14 +40,14 @@ namespace Algorithm::LGP {
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            LGPAlgorithm(const Learn::LearningParameters& params, const Instructions::Set& iSet, std::string algorithmName = "LGP", std::string algorithmColor = "#922DB4")
+            LGPAlgorithm(const AlgorithmParameters& params, const Instructions::Set& iSet, std::string algorithmName = "LGP", std::string algorithmColor = "#922DB4")
                 : Algorithm(params, algorithmName, algorithmColor), iSet{iSet} {};
 
 
             /**
              * \brief Get the Environment used by the LGPAlgorithm.
              */
-            const Environment& getEnvironment() const;
+            const LGPEnvironment& getEnvironment() const;
 
 
             

@@ -86,7 +86,7 @@ void Algorithm::LGP::LGPAgent::swapLines(const uint64_t idx0, const uint64_t idx
     std::iter_swap(this->lines.begin() + idx0, this->lines.begin() + idx1);
 }
 
-const Environment& Algorithm::LGP::LGPAgent::getEnvironment() const
+const Algorithm::LGP::LGPEnvironment& Algorithm::LGP::LGPAgent::getEnvironment() const
 {
     return this->environment;
 }
@@ -144,7 +144,7 @@ const std::vector<size_t>& Algorithm::LGP::LGPAgent::getOutputIndices() const
 }
 void Algorithm::LGP::LGPAgent::setOutputIndex(size_t newOutputIndex, size_t location)
 {
-    if(newOutputIndex >= this->environment.getParams().nbRegisters || location > this->outputIndices.size()) {
+    if(newOutputIndex >= this->environment.getNbRegisters() || location > this->outputIndices.size()) {
         throw std::runtime_error("LGPAgent::setOutputIndex: invalid index range or location range");
     }
     this->outputIndices[location] = newOutputIndex;

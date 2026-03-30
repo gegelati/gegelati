@@ -27,8 +27,8 @@ namespace Algorithm::TPG {
             /// ID of the program algorithm associated with the TPG agents.
             uint64_t programAlgorithmID;
 
-            /// Archive used during the training process
-            std::unique_ptr<Archive> archive;
+            /// TPGArchive used during the training process
+            std::unique_ptr<TPGArchive> archive;
 
         public:
 
@@ -40,8 +40,8 @@ namespace Algorithm::TPG {
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            TPGAlgorithm(const Learn::LearningParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "TPG", std::string algorithmColor = "#A0FF33")
-                : Algorithm(params, algorithmName, algorithmColor), archive{std::make_unique<Archive>(params.archiveSize, params.archivingProbability)} {
+            TPGAlgorithm(const AlgorithmParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "TPG", std::string algorithmColor = "#A0FF33")
+                : Algorithm(params, algorithmName, algorithmColor), archive{std::make_unique<TPGArchive>(params.tpg.archiveSize, params.tpg.archivingProbability)} {
                 this->setProgramAlgorithm(programAlgorithm);
             };
 
@@ -53,9 +53,9 @@ namespace Algorithm::TPG {
 
 
             /**
-             * \brief Get the Archive used by the LGPAlgorithm.
+             * \brief Get the TPGArchive used by the LGPAlgorithm.
              */
-            const Archive& getArchive() const;
+            const TPGArchive& getArchive() const;
             
             /**
              * \brief Clear all the parts of agents that are not used, such as introns for LGPs
@@ -84,7 +84,6 @@ namespace Algorithm::TPG {
              * \param[in] graph the EvoGraph::Graph used by the algorithm.
              */
             virtual void initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
-
 
             /**
              * Copy and return a uniqure pointer of the algorithm

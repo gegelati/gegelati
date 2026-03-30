@@ -178,10 +178,12 @@ bool Algorithm::Algorithm::containsAgent(const Agent& agent) const
 void Algorithm::Algorithm::initSelector()
 {
     if(!this->hasSelector()) {
-        this->savedDefaultSelector = std::move(Selector::selectorFactory(this->params));
+        std::cout<<"init selector"<<std::endl;
+        this->savedDefaultSelector = std::move(Selector::selectorFactory());
         this->setSelector(*this->savedDefaultSelector);
     }
     this->getSelector().setManager(*this->manager);
+    this->getSelector().setNbAgents(this->params.nbAgents);
 }
 
 void Algorithm::Algorithm::initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) {
@@ -224,7 +226,7 @@ const Output::OutputHandler& Algorithm::Algorithm::getOutputs() const
     return *this->outputs;
 }
 
-const Learn::LearningParameters& Algorithm::Algorithm::getParams() const
+const Algorithm::AlgorithmParameters& Algorithm::Algorithm::getParams() const
 {
     return this->params;
 }

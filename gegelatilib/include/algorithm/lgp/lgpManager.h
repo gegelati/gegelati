@@ -28,7 +28,7 @@ namespace Algorithm {
             static const std::string lineSeparator;
 
             /// Environment for executing LGP 
-            const Environment& env;
+            const LGPEnvironment& env;
 
 
             /**
@@ -46,7 +46,7 @@ namespace Algorithm {
              * \param[in] outputs outputs of the agents.
              * \param[in] algorithmID id of the algorithm used.
              */
-            LGPManager(const Environment& env, const Output::OutputHandler& outputs, uint64_t algorithmID): AgentManager(outputs, algorithmID), env(env){};
+            LGPManager(const LGPEnvironment& env, const Output::OutputHandler& outputs, uint64_t algorithmID): AgentManager(outputs, algorithmID), env(env){};
 
             /**
              * \brief Create a new LGPAgent.

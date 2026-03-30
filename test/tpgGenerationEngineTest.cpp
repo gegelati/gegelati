@@ -93,8 +93,8 @@ class TPGGenerationEngineTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double>(
             sub, "$0 = $1 - $2;")));
 
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 0;
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 0;
         e = new Environment(set, params, data);
         tpg = new EvoGraph::Graph(*e);
 
@@ -807,7 +807,7 @@ TEST_F(TPGGenerationEngineTest,
         CodeGen::TPGGenerationEngineFactory::generationEngineMode::switchMode);
 
     params.activationFunction = "tanh";
-    params.mutation.tpg.useActionProgram = true;
+    params.algorithm.tpg.useActionProgram = true;
     Environment ce(set, params, data, 3);
     EvoGraph::Graph ctpg = (ce);
 
@@ -900,8 +900,8 @@ TEST_F(TPGGenerationEngineTest,
         CodeGen::TPGGenerationEngineFactory::generationEngineMode::switchMode);
 
     params.activationFunction = "sigmoid";
-    params.mutation.tpg.useActionProgram = true;
-    params.mutation.tpg.useMultiActionProgram = true;
+    params.algorithm.tpg.useActionProgram = true;
+    params.algorithm.tpg.useMultiActionProgram = true;
     Environment ce(set, params, data, 3);
     EvoGraph::Graph ctpg = (ce);
 
@@ -991,8 +991,8 @@ TEST_F(TPGGenerationEngineTest,
         CodeGen::TPGGenerationEngineFactory::generationEngineMode::switchMode);
 
     params.activationFunction = "none";
-    params.mutation.tpg.useActionProgram = true;
-    params.mutation.tpg.useMultiActionProgram = true;
+    params.algorithm.tpg.useActionProgram = true;
+    params.algorithm.tpg.useMultiActionProgram = true;
     Environment ce(set, params, data, 3);
     EvoGraph::Graph ctpg = (ce);
 
@@ -1080,8 +1080,8 @@ TEST_F(TPGGenerationEngineTest, WrongTPGContinuous)
     CodeGen::TPGGenerationEngineFactory factory(
         CodeGen::TPGGenerationEngineFactory::generationEngineMode::switchMode);
 
-    params.mutation.tpg.useActionProgram = false;
-    params.mutation.tpg.useMultiActionProgram = false;
+    params.algorithm.tpg.useActionProgram = false;
+    params.algorithm.tpg.useMultiActionProgram = false;
     Environment ce(set, params, data, 3);
     EvoGraph::Graph ctpg = (ce);
     ASSERT_THROW(tpgGen = factory.create("wrong", ctpg, "./src/"),
@@ -1089,7 +1089,7 @@ TEST_F(TPGGenerationEngineTest, WrongTPGContinuous)
         << "Construction of codeGen with continuous action but no action "
            "program should fail.";
 
-    params.mutation.tpg.useActionProgram = true;
+    params.algorithm.tpg.useActionProgram = true;
     params.activationFunction = "missed";
     Environment ce2(set, params, data, 3);
     EvoGraph::Graph ctpg2 = (ce2);

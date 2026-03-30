@@ -91,8 +91,7 @@ void Selector::MapElites::MapElitesSelector::doSelection(
             if (mapEliteArchive->containsAgent(it->second)) {
                 // The agent has been reevaluated, delete it from the archive if
                 // it has not been evaluated enough times
-                mapEliteArchive->removeAgentFromArchiveIfNotComplete(
-                    it->second, params.maxNbEvaluationPerPolicy);
+                mapEliteArchive->removeAgentFromArchive(it->second, this->maxNbEvaluation);
             }
         }
     }
@@ -171,7 +170,7 @@ std::unique_ptr<Selector::SelectionContext> Selector::MapElites::MapElitesSelect
     }
 
     if(agentsInAllArchives.size() != 0){
-        context->nbAgentsToCreate = (uint64_t)(params.mutation.tpg.nbRoots) + agentsInAllArchives.size();
+        context->nbAgentsToCreate = this->nbAgents + agentsInAllArchives.size();
     }
 
     return context;

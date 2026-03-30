@@ -18,7 +18,7 @@ namespace Algorithm::TPG {
             /**
              * Seed that will be used to randomize archive.
              */
-            std::unique_ptr<Archive> archive;
+            std::unique_ptr<TPGArchive> archive;
 
 
         public:
@@ -32,7 +32,7 @@ namespace Algorithm::TPG {
              * @param[in] archive The archive associated to this job.
              */
             TPGJob(const Agent& agent,
-                uint64_t idx = 0, std::unique_ptr<Archive> archive = nullptr)
+                uint64_t idx = 0, std::unique_ptr<TPGArchive> archive = nullptr)
                 : Job(agent, idx), archive(std::move(archive))
             {
             }
@@ -42,7 +42,7 @@ namespace Algorithm::TPG {
              *
              * @return The archive of the job.
              */
-            Archive& getArchive() const;
+            TPGArchive& getArchive() const;
 
     };
 };

@@ -7,6 +7,8 @@
 #include "learn/learningEnvironment.h"
 #include "evoGraph/graph.h"
 
+#include "selector/selectionParameters.h"
+
 #include "selector/classificationSelector.h"
 #include "selector/mapElites/mapElitesSelector.h"
 #include "selector/selector.h"
@@ -18,10 +20,10 @@ namespace Selector {
     /**
      * \brief Factory method to create the appropriate Selector
      *
-     * \param[in] params LearningParameters used
+     * \param[in] params SelectionParameters used
      */
     std::unique_ptr<Selector> selectorFactory(
-        const Learn::LearningParameters& params);
+        SelectionParameters params = SelectionParameters());
 
 }; // namespace Selector
 

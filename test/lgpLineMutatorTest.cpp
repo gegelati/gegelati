@@ -20,7 +20,7 @@ class LineMutatorTest : public ::testing::Test
     const float value1{4.2f};
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
-    std::shared_ptr<const Environment> e;
+    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
     Learn::LearningParameters params;
     Algorithm::LGP::LGPLineMutator lineMutator;
     std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent;
@@ -53,9 +53,9 @@ class LineMutatorTest : public ::testing::Test
         set.add(*(new Instructions::LambdaInstruction<double, double>(add)));
 
         // the environment and the programs have 5 Constant parameters
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 5;
-        e = std::make_shared<Environment>(set, params, vect);
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 5;
+        e = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
         programAgent =
             std::make_shared<Algorithm::LGP::LGPAgent>(*e, *lgpOutput, 0);
     }
@@ -249,7 +249,7 @@ TEST_F(LineMutatorTest, LineMutatorAlterLineWithCompositeOperands)
             [](const double* a, const double* b) -> double {
                 return (a[0] - b[0] + a[1] - b[1] + a[2] - b[2]) / 3.0;
             })));
-    std::shared_ptr<const Environment> e2 = std::make_shared<Environment>(set, params, vect);
+    std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e2 = std::make_shared<Algorithm::LGP::LGPEnvironment>(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
     std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent2 = std::make_shared<Algorithm::LGP::LGPAgent>(*e2, *lgpOutput, 1);
 
     Algorithm::LGP::LGPExecutionEngine lgpExecutionEngine(*programAgent2);

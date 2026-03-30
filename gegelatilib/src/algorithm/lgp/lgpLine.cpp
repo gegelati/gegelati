@@ -40,7 +40,7 @@
 
 #include "algorithm/lgp/lgpLine.h"
 
-const Environment& Algorithm::LGP::LGPLine::getEnvironment() const
+const Algorithm::LGP::LGPEnvironment& Algorithm::LGP::LGPLine::getEnvironment() const
 {
     return this->environment;
 }
@@ -52,7 +52,7 @@ uint64_t Algorithm::LGP::LGPLine::getDestinationIndex() const
 
 bool Algorithm::LGP::LGPLine::setDestinationIndex(uint64_t dest, bool check)
 {
-    if (check && dest >= this->environment.getParams().nbRegisters) {
+    if (check && dest >= this->environment.getNbRegisters()) {
         return false;
     }
     this->destinationIndex = dest;

@@ -26,7 +26,7 @@ namespace Algorithm::Maple {
          * \param[in] algorithmID id of the algorithm used.
          * \param[in] archive Archive used by this algorithm
          */
-        MapleMutator(const Selector::Selector& selector, uint64_t algorithmID, const Archive& archive): TPGMutator(selector, algorithmID, archive){};
+        MapleMutator(const Selector::Selector& selector, uint64_t algorithmID, const TPG::TPGArchive& archive): TPGMutator(selector, algorithmID, archive){};
 
 
         /**
@@ -37,7 +37,7 @@ namespace Algorithm::Maple {
          * \param[in] params the Parameters for the mutation.
          * \param[in] outputs the OutputHandler of the manager.
          */
-        virtual bool isConfigurationValid(const Learn::LearningParameters& params, const Output::OutputHandler& outputs) const override;
+        virtual bool isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const override;
 
         /**
          * \brief Initialize TPG Population.
@@ -47,7 +47,7 @@ namespace Algorithm::Maple {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
 
 
         /**
@@ -59,7 +59,7 @@ namespace Algorithm::Maple {
          * \param[in] params the Parameters for the mutation.
          * \param[in] rng Random Number Generator used in the mutation process.
          */
-        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const Learn::LearningParameters& params, RNG::RNG& rng) override;
+        virtual void initRandomSpecificAgent(const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng) override;
         
         /**
          * \brief Cross the two teams' program at the specific index of program given
@@ -73,7 +73,7 @@ namespace Algorithm::Maple {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverPrograms(
-            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng);
+            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng);
 
 
         /**
@@ -88,7 +88,7 @@ namespace Algorithm::Maple {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverEdges(
-            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng);
+            std::array<std::reference_wrapper<const EvoGraph::Team>, 2> teams, uint64_t indexCross, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng);
 
         /**
          * \brief Do a crossover over two maple agents, by either crossover the program on edges, or crossover the edges. Calling either crossoverPrograms or crossoverEdges methods
@@ -101,7 +101,7 @@ namespace Algorithm::Maple {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void crossoverAgents(
-            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            std::array<std::reference_wrapper<const Agent>, 2> agents, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng
         ) override;
 
 
@@ -158,7 +158,7 @@ namespace Algorithm::Maple {
         virtual void mutateEdgeDestination(EvoGraph::Graph& graph,
                                     const EvoGraph::Edge& edge,
                                     const std::set<size_t>& actionClasses,
-                                    const Learn::LearningParameters& params,
+                                    const AlgorithmParameters& params,
                                     RNG::RNG& rng);
 
         /**
@@ -185,7 +185,7 @@ namespace Algorithm::Maple {
             EvoGraph::Graph& graph, const EvoGraph::Edge& edge,
             const std::set<size_t>& actionClasses, AgentManager& manager,
             std::vector<std::reference_wrapper<const Agent>>& newSubAgents,
-            const Learn::LearningParameters& params, RNG::RNG& rng);
+            const AlgorithmParameters& params, RNG::RNG& rng);
 
         /**
          * \brief mutate a specific agent of an algorithm within a population
@@ -198,7 +198,7 @@ namespace Algorithm::Maple {
          * \param[in] rng Random Number Generator used in the mutation process.
          */
         virtual void mutateAgent(
-            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const Learn::LearningParameters& params, RNG::RNG& rng
+            const Agent& agent, EvoGraph::Graph& graph, AgentManager& manager, std::vector<std::reference_wrapper<const Agent>>& newSubAgents, const AlgorithmParameters& params, RNG::RNG& rng
         ) override;
     };
 

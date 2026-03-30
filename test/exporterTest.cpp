@@ -91,8 +91,8 @@ class ExporterTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-        params.nbRegisters = 8;
-        params.nbProgramConstant = 5;
+        params.algorithm.lgp.nbRegisters = 8;
+        params.algorithm.lgp.nbProgramConstant = 5;
         e = new Environment(set, params, vect, 3);
         tpg = new EvoGraph::Graph(*e);
 
