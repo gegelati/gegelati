@@ -51,12 +51,13 @@
 #include "selector/classificationSelectionMetrics.h"
 
 #include "learn/fakeClassificationLearningEnvironment.h"
+#include "parameters.h"
 
 class ClassificationTest : public ::testing::Test
 {
   protected:
     Instructions::Set set;
-    Learn::LearningParameters params;
+    Parameters params;
     FakeClassificationLearningEnvironment fle;
 
     virtual void SetUp()

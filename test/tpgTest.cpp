@@ -54,6 +54,7 @@
 #include "evoGraph/factory.h"
 
 #include "util/counterReset.h"
+#include "parameters.h"
 
 class TPGTest : public ::testing::Test
 {
@@ -63,7 +64,7 @@ class TPGTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e = NULL;
-    Learn::LearningParameters params;
+    Parameters params;
     std::shared_ptr<Algorithm::Agent> sharedProgramAgent;
 
     virtual void SetUp()

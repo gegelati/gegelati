@@ -78,13 +78,6 @@ namespace Algorithm {
             virtual void emptyAgent(const Agent& agent, EvoGraph::Graph& graph) override;
 
             /**
-             * \brief Get the number of outputs of the agents.
-             * 
-             * \return the number of outputs.
-             */
-            virtual const Output::OutputHandler& getOutputs() const;
-
-            /**
              * \brief Set the constant at the given index for the given agent.
              * 
              * \param[in] agent the Agent to modify.

@@ -45,6 +45,7 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/multByConstant.h"
 #include "instructions/set.h"
+#include "parameters.h"
 
 TEST(EnvironmentTest, Constructor)
 {
@@ -63,7 +64,7 @@ TEST(EnvironmentTest, Constructor)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Learn::LearningParameters params;
+    Parameters params;
     params.algorithm.lgp.nbRegisters = 8;
     params.algorithm.lgp.nbProgramConstant = 5;
     ASSERT_NO_THROW({ Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect); });
@@ -95,7 +96,7 @@ TEST(EnvironmentTest, ConstructorWithInvalidInstruction)
     // Add an invalid instruction to the set to test the filtering mechanism
     set.add(*(new Instructions::AddPrimitiveType<bool>()));
 
-    Learn::LearningParameters params;
+    Parameters params;
     params.algorithm.lgp.nbRegisters = 8;
     params.algorithm.lgp.nbProgramConstant = 5;
     Algorithm::LGP::LGPEnvironment* e3 = NULL;
@@ -150,7 +151,7 @@ TEST(EnvironmentTest, computeLineSize)
     auto minus = [](double a, double b) -> double { return a - b; };
     set.add(*(new Instructions::LambdaInstruction<double, double>(minus)));
 
-    Learn::LearningParameters params;
+    Parameters params;
     params.algorithm.lgp.nbRegisters = 8;
     params.algorithm.lgp.nbProgramConstant = 5;
     e = new Algorithm::LGP::LGPEnvironment(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
@@ -190,7 +191,7 @@ TEST(EnvironmentTest, Size_tAttributeAccessors)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Learn::LearningParameters params;
+    Parameters params;
     params.algorithm.lgp.nbRegisters = 8;
     params.algorithm.lgp.nbProgramConstant = 5;
     Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
@@ -234,7 +235,7 @@ TEST(EnvironmentTest, GetFakeRegisters)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Learn::LearningParameters params;
+    Parameters params;
     params.algorithm.lgp.nbRegisters = 8;
     params.algorithm.lgp.nbProgramConstant = 5;
     Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
@@ -269,7 +270,7 @@ TEST(EnvironmentTest, InstructionSetAccessor)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Learn::LearningParameters params;
+    Parameters params;
     params.algorithm.lgp.nbRegisters = 8;
     params.algorithm.lgp.nbProgramConstant = 5;
     Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);
@@ -307,7 +308,7 @@ TEST(EnvironmentTest, DataSourceAccessor)
     vect.push_back(d1);
     vect.push_back(d2);
 
-    Learn::LearningParameters params;
+    Parameters params;
     params.algorithm.lgp.nbRegisters = 8;
     params.algorithm.lgp.nbProgramConstant = 5;
     Algorithm::LGP::LGPEnvironment e(set, params.algorithm.lgp.nbRegisters, params.algorithm.lgp.nbProgramConstant, vect);

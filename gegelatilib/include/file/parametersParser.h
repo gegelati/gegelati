@@ -39,7 +39,7 @@
 
 #include <string>
 
-#include "learn/learningParameters.h"
+#include "parameters.h"
 
 /** Used to avoid importing the JsonCpp lib now,
  * so it tells the compiler Json::Value exists.
@@ -67,14 +67,14 @@ namespace File {
          * \param[out] params the LearningParameters being updated.
          */
         void loadParametersFromJson(const char* path,
-                                    Learn::LearningParameters& params);
+                                    Parameters& params);
 
         /**
          * \brief Write the LearningParameters given as arguments into the file
          * at the given path, using the JSON format.
          */
         void writeParametersToJson(const char* path,
-                                   const Learn::LearningParameters& params);
+                                   const Parameters& params);
 
         /**
          * \brief Given a parameter name, sets its value in given
@@ -92,7 +92,7 @@ namespace File {
          * \param[in] param the name of the LearningParameters being updated.
          * \param[in] value the value we want to set the parameter to.
          */
-        void setParameterFromString(Learn::LearningParameters& params,
+        void setParameterFromString(Parameters& params,
                                     const std::string& param,
                                     Json::Value const& value);
 
@@ -108,11 +108,11 @@ namespace File {
          * \param[out] params the LearningParameters being updated.
          */
         void setAllParamsFrom(const Json::Value& root,
-                              Learn::LearningParameters& params);
+                              Parameters& params);
 
         /**
          * \brief Reads a given json file and puts the derivative tree in root.
-         *
+         *a
          * Opens the file and calls the parseFromStream() method from JsonCpp
          * which handles all the parsing of the JSON file. It eventually returns
          * errors in a parameter, e.g. if the file does not respect JSON format.

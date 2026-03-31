@@ -177,6 +177,7 @@
 
 #include <codeGen/codeGenerationExporter.h>
 
+#include <parameters.h>
 #include <outputInfo.h>
 
 #endif

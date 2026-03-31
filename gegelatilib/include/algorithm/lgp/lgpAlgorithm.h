@@ -35,13 +35,13 @@ namespace Algorithm::LGP {
             /**
              * \brief Main Algorithm constructor.
              * 
-             * \param[in] params the LearningParameters used by the Algorithm.
              * \param[in] iSet the Instruction Set used by the LGPAlgorithm.
+             * \param[in] parameters the LearningParameters used by the Algorithm.
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            LGPAlgorithm(const AlgorithmParameters& params, const Instructions::Set& iSet, std::string algorithmName = "LGP", std::string algorithmColor = "#922DB4")
-                : Algorithm(params, algorithmName, algorithmColor), iSet{iSet} {};
+            LGPAlgorithm(const Instructions::Set& iSet, std::unique_ptr<AlgorithmParameters> parameters = std::make_unique<AlgorithmParameters>(), std::string algorithmName = "LGP", std::string algorithmColor = "#922DB4")
+                : Algorithm(std::move(parameters), algorithmName, algorithmColor), iSet{iSet} {};
 
 
             /**

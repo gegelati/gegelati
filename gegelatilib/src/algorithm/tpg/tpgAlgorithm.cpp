@@ -2,7 +2,7 @@
 
 std::unique_ptr<Algorithm::Algorithm> Algorithm::TPG::TPGAlgorithm::copy() const
 {
-    return std::make_unique<TPGAlgorithm>(this->params, this->cGetSubAlgorithm(this->programAlgorithmID), this->algorithmName);
+    return std::make_unique<TPGAlgorithm>(this->cGetSubAlgorithm(this->programAlgorithmID), std::make_unique<AlgorithmParameters>(*this->params), this->algorithmName, this->algorithmColor);
 }
 
 void Algorithm::TPG::TPGAlgorithm::setProgramAlgorithm(const Algorithm& programAlgorithm)
@@ -64,7 +64,7 @@ std::shared_ptr<Algorithm::Job> Algorithm::TPG::TPGAlgorithm::createJob(const Ag
     std::unique_ptr<TPGArchive> jobArchive = nullptr;
     if (mode == Learn::LearningMode::TRAINING) {
         size_t archiveSeed = rng.getUnsignedInt64(0, UINT64_MAX);
-        jobArchive = std::make_unique<TPGArchive>(this->params.tpg.archiveSize, this->params.tpg.archivingProbability, archiveSeed);
+        jobArchive = std::make_unique<TPGArchive>(this->params->tpg.archiveSize, this->params->tpg.archivingProbability, archiveSeed);
     }
 
     return std::make_shared<TPGJob>(agent, idx, std::move(jobArchive));
@@ -94,11 +94,11 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
 
 
         // Scan the archives backward, starting from the last to identify the
-        // last params.algorithm.tpg.archiveSize recordings to keep (or less).
+        // last params->algorithm.tpg.archiveSize recordings to keep (or less).
         auto reverseIterator = archiveMap.rbegin();
 
         uint64_t nbRecordings = 0;
-        while (nbRecordings < this->params.tpg.archiveSize &&
+        while (nbRecordings < this->params->tpg.archiveSize &&
             reverseIterator != archiveMap.rend()) {
             nbRecordings += reverseIterator->second.get().getNbRecordings();
             reverseIterator++;
@@ -112,7 +112,7 @@ void Algorithm::TPG::TPGAlgorithm::updateAfterEvaluation(const std::vector<std::
 
             // Skip recordings in the first archive if needed
             uint64_t recordingIdx = 0;
-            while (nbRecordings > this->params.tpg.archiveSize) {
+            while (nbRecordings > this->params->tpg.archiveSize) {
                 recordingIdx++;
                 nbRecordings--;
             }

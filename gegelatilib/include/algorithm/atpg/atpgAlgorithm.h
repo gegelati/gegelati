@@ -33,14 +33,14 @@ namespace Algorithm::ATPG {
             /**
              * \brief Main Algorithm constructor.
              * 
-             * \param[in] params the LearningParameters used by the Algorithm.
              * \param[in] contextProgramAlgorithm the sub-algorithm used to manipulate context programs.
              * \param[in] actionProgramAlgorithm the sub-algorithm used to manipulate action programs.
+             * \param[in] parameters the LearningParameters used by the Algorithm.
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            ATPGAlgorithm(const AlgorithmParameters& params, const Algorithm& contextProgramAlgorithm, const Algorithm& actionProgramAlgorithm, std::string algorithmName = "ATPG", std::string algorithmColor = "#335ce2")
-                : TPGAlgorithm(params, contextProgramAlgorithm, algorithmName, algorithmColor){
+            ATPGAlgorithm(const Algorithm& contextProgramAlgorithm, const Algorithm& actionProgramAlgorithm, std::unique_ptr<AlgorithmParameters> parameters = std::make_unique<AlgorithmParameters>(), std::string algorithmName = "ATPG", std::string algorithmColor = "#335ce2")
+                : TPGAlgorithm(contextProgramAlgorithm, std::move(parameters), algorithmName, algorithmColor){
                 this->setActionProgramAlgorithm(actionProgramAlgorithm);
             };
 

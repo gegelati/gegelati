@@ -60,6 +60,8 @@
 #include "evoGraph/graph.h"
 #include "util/counterReset.h"
 
+#include "parameters.h"
+
 class TpgMutatorTest : public ::testing::Test
 {
   protected:
@@ -70,7 +72,7 @@ class TpgMutatorTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
-    Learn::LearningParameters params;
+    Parameters params;
     std::shared_ptr<EvoGraph::Graph> graph;
     std::shared_ptr<Algorithm::TPG::TPGArchive> archive;
     std::shared_ptr<Algorithm::LGP::LGPManager> lgpManager;

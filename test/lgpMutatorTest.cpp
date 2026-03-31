@@ -8,6 +8,7 @@
 #include "algorithm/lgp/lgpLine.h"
 #include "algorithm/lgp/lgpExecutionEngine.h"
 #include "util/counterReset.h"
+#include "parameters.h"
 
 
 class LgpMutatorTest : public ::testing::Test
@@ -20,7 +21,7 @@ class LgpMutatorTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
-    Learn::LearningParameters params;
+    Parameters params;
     std::shared_ptr<EvoGraph::Graph> graph;
     Output::OutputHandler* lgpOutput;
     Selector::Selector* selector;

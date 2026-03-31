@@ -42,6 +42,7 @@
 #include "learn/stickGameWithOpponent.h"
 #include "instructions/set.h"
 #include "log/cycleDetectionLALogger.h"
+#include "parameters.h"
 
 class CycleDetectionLoggerTest : public ::testing::Test
 {
@@ -53,7 +54,7 @@ class CycleDetectionLoggerTest : public ::testing::Test
         results;
 
     StickGameWithOpponent le;
-    Learn::LearningParameters params;
+    Parameters params;
     Learn::LearningAgent* la;
 
     void SetUp() override
@@ -78,11 +79,11 @@ class CycleDetectionLoggerTest : public ::testing::Test
 
         params.algorithm.tpg.archiveSize = 50;
         params.algorithm.tpg.archivingProbability = 0.5;
-        params.maxNbActionsPerEval = 11;
-        params.nbIterationsPerPolicyEvaluation = 3;
+        params.evaluation.maxNbActionsPerEval = 11;
+        params.evaluation.nbIterationsPerPolicyEvaluation = 3;
         params.selection.truncation.ratioDeletedRoots =
             0.95; // high number to force the apparition of root action.
-        params.nbThreads = 1;
+        params.evaluation.nbThreads = 1;
         params.algorithm.lgp.nbProgramConstant = 5;
 
         set.add(*(new Instructions::AddPrimitiveType<double>()));

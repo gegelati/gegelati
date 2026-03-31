@@ -40,11 +40,6 @@ void Algorithm::LGP::LGPManager::emptyAgent(const Agent& agent, EvoGraph::Graph&
     }
 }
 
-const Output::OutputHandler& Algorithm::LGP::LGPManager::getOutputs() const
-{
-    return this->outputs;
-}
-
 void Algorithm::LGP::LGPManager::setConstantAt(const Agent& agent, size_t index, const Data::Constant& value)
 {
     this->getLGPAgentFromCst(agent).getConstantHandler().setDataAt(typeid(Data::Constant), index, value);

@@ -3,7 +3,8 @@
 
 std::unique_ptr<Algorithm::Algorithm> Algorithm::Maple::MapleAlgorithm::copy() const
 {
-    return std::make_unique<MapleAlgorithm>(this->params, this->cGetSubAlgorithm(this->programAlgorithmID), this->algorithmName);
+    return std::make_unique<MapleAlgorithm>(this->cGetSubAlgorithm(this->programAlgorithmID), 
+        std::make_unique<AlgorithmParameters>(*this->params), this->algorithmName, this->algorithmColor);
 }
 
 void Algorithm::Maple::MapleAlgorithm::initManager()

@@ -46,6 +46,7 @@
 #include "instructions/lambdaInstruction.h"
 #include "instructions/set.h"
 #include "mutator/rng.h"
+#include "parameters.h"
 
 #include "algorithm/tpg/archive.h"
 
@@ -58,7 +59,7 @@ class ArchiveTest : public ::testing::Test
     Instructions::Set set;
     std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
     std::shared_ptr<const Algorithm::LGP::LGPAgent> lgpAgent;
-    Learn::LearningParameters params;
+    Parameters params;
 
     virtual void SetUp()
     {

@@ -21,13 +21,13 @@ namespace Algorithm::Maple {
             /**
              * \brief Main Algorithm constructor.
              * 
-             * \param[in] params the LearningParameters used by the Algorithm.
              * \param[in] programAlgorithm the sub-algorithm used to manipulate programs.
+             * \param[in] parameters the LearningParameters used by the Algorithm.
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            MapleAlgorithm(const AlgorithmParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "MAPLE", std::string algorithmColor = "#ffd900")
-                : TPG::TPGAlgorithm(params, programAlgorithm, algorithmName, algorithmColor){
+            MapleAlgorithm(const Algorithm& programAlgorithm, std::unique_ptr<AlgorithmParameters> parameters = std::make_unique<AlgorithmParameters>(), std::string algorithmName = "MAPLE", std::string algorithmColor = "#ffd900")
+                : TPG::TPGAlgorithm(programAlgorithm, std::move(parameters), algorithmName, algorithmColor){
             };
 
             

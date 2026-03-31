@@ -40,6 +40,7 @@
 
 #include "../lib/JsonCpp/json.h"
 #include "file/parametersParser.h"
+#include "parameters.h"
 
 TEST(LearningParametersTest, readConfigFile)
 {
@@ -77,7 +78,7 @@ TEST(LearningParametersTest, readConfigFile)
 
 TEST(LearningParametersTest, setParameterFromString)
 {
-    Learn::LearningParameters params;
+    Parameters params;
     ASSERT_EQ(params.algorithm.lgp.nbRegisters, 8);
     std::string key = "nbRegisters";
     Json::Value v(5);
@@ -87,20 +88,20 @@ TEST(LearningParametersTest, setParameterFromString)
 
 TEST(LearningParametersTest, setAllParamsFrom)
 {
-    Learn::LearningParameters params;
+    Parameters params;
     Json::Value root;
 
     File::ParametersParser::readConfigFile(TESTS_DAT_PATH "params.json", root);
     ASSERT_NO_THROW(File::ParametersParser::setAllParamsFrom(root, params));
 
-    ASSERT_EQ(50, params.nbIterationsPerPolicyEvaluation);
-    ASSERT_EQ(50, params.nbIterationsPerPolicyValidation);
-    ASSERT_EQ(4, params.stepValidation);
-    ASSERT_EQ(5, params.maxNbActionsPerEval);
-    ASSERT_EQ(100, params.maxNbEvaluationPerPolicy);
-    ASSERT_EQ(2.0, params.nbThreads);
-    ASSERT_EQ(200, params.nbGenerations);
-    ASSERT_EQ(true, params.doValidation);
+    ASSERT_EQ(50, params.evaluation.nbIterationsPerPolicyEvaluation);
+    ASSERT_EQ(50, params.evaluation.nbIterationsPerPolicyValidation);
+    ASSERT_EQ(4, params.evaluation.stepValidation);
+    ASSERT_EQ(5, params.evaluation.maxNbActionsPerEval);
+    ASSERT_EQ(100, params.evaluation.maxNbEvaluationPerPolicy);
+    ASSERT_EQ(2.0, params.evaluation.nbThreads);
+    ASSERT_EQ(200, params.evaluation.nbGenerations);
+    ASSERT_EQ(true, params.evaluation.doValidation);
 
     ASSERT_EQ("none", params.algorithm.activationFunction);
     ASSERT_EQ(100, params.algorithm.nbAgents);
@@ -154,7 +155,7 @@ TEST(LearningParametersTest, setAllParamsFrom)
     ASSERT_EQ(true, params.selection.tournament.areElitesReproductible);
 
     // check default parameters
-    Learn::LearningParameters params2;
+    Parameters params2;
 
     File::ParametersParser::readConfigFile(
         TESTS_DAT_PATH "paramsWithWrongOne.json", root);
@@ -164,16 +165,16 @@ TEST(LearningParametersTest, setAllParamsFrom)
         TESTS_DAT_PATH "paramsWithWrongOne.json", root);
     File::ParametersParser::setAllParamsFrom(root, params2);
 
-    ASSERT_TRUE(params2.nbThreads > 0)
+    ASSERT_TRUE(params2.evaluation.nbThreads > 0)
         << "A default nbThreads value should be set when no one is specified";
-    ASSERT_EQ(params2.doValidation, false)
+    ASSERT_EQ(params2.evaluation.doValidation, false)
         << "Default validation should be false";
     ASSERT_EQ(params2.algorithm.lgp.nbRegisters, 8) << "Bad parameter should be ignored";
 }
 
 TEST(LearningParametersTest, loadParametersFromJson)
 {
-    Learn::LearningParameters params;
+    Parameters params;
     ASSERT_NO_THROW(File::ParametersParser::loadParametersFromJson(
         TESTS_DAT_PATH "params.json", params));
     // only testing 1 parameter as readConfigFile was already tested
@@ -183,7 +184,7 @@ TEST(LearningParametersTest, loadParametersFromJson)
 
 TEST(LearningParametersTest, writeParametersToJson)
 {
-    Learn::LearningParameters params;
+    Parameters params;
     // Load from file
     File::ParametersParser::loadParametersFromJson(TESTS_DAT_PATH "params.json",
                                                    params);
@@ -194,23 +195,23 @@ TEST(LearningParametersTest, writeParametersToJson)
         << "Failure while writing parameters to the file.";
 
     // Re-parse the written file
-    Learn::LearningParameters params2;
+    Parameters params2;
     File::ParametersParser::loadParametersFromJson("current_params.json",
                                                    params2);
 
     // Check equality
     // Base parameters
-    ASSERT_EQ(params.doValidation, params2.doValidation);
-    ASSERT_EQ(params.maxNbActionsPerEval, params2.maxNbActionsPerEval);
-    ASSERT_EQ(params.maxNbEvaluationPerPolicy,
-              params2.maxNbEvaluationPerPolicy);
-    ASSERT_EQ(params.nbGenerations, params2.nbGenerations);
-    ASSERT_EQ(params.nbIterationsPerPolicyEvaluation,
-              params2.nbIterationsPerPolicyEvaluation);
-    ASSERT_EQ(params.nbIterationsPerPolicyValidation,
-              params2.nbIterationsPerPolicyValidation);
-    ASSERT_EQ(params.stepValidation, params2.stepValidation);
-    ASSERT_EQ(params.nbThreads, params2.nbThreads);
+    ASSERT_EQ(params.evaluation.doValidation, params2.evaluation.doValidation);
+    ASSERT_EQ(params.evaluation.maxNbActionsPerEval, params2.evaluation.maxNbActionsPerEval);
+    ASSERT_EQ(params.evaluation.maxNbEvaluationPerPolicy,
+              params2.evaluation.maxNbEvaluationPerPolicy);
+    ASSERT_EQ(params.evaluation.nbGenerations, params2.evaluation.nbGenerations);
+    ASSERT_EQ(params.evaluation.nbIterationsPerPolicyEvaluation,
+              params2.evaluation.nbIterationsPerPolicyEvaluation);
+    ASSERT_EQ(params.evaluation.nbIterationsPerPolicyValidation,
+              params2.evaluation.nbIterationsPerPolicyValidation);
+    ASSERT_EQ(params.evaluation.stepValidation, params2.evaluation.stepValidation);
+    ASSERT_EQ(params.evaluation.nbThreads, params2.evaluation.nbThreads);
 
     // Mutation lgp parameters
     ASSERT_EQ(params.algorithm.lgp.nbProgramConstant, params2.algorithm.lgp.nbProgramConstant);

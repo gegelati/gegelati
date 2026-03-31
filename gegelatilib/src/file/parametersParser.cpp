@@ -63,7 +63,7 @@ void File::ParametersParser::readConfigFile(const char* path, Json::Value& root)
 }
 
 void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
-                                              Learn::LearningParameters& params)
+                                              Parameters& params)
 {
     for (std::string const& key : root.getMemberNames()) {
         if (root[key].size() == 0) {
@@ -91,40 +91,40 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
 }
 
 void File::ParametersParser::setParameterFromString(
-    Learn::LearningParameters& params, const std::string& param,
+    Parameters& params, const std::string& param,
     Json::Value const& value)
 {
 
     if (param == "doValidation") {
-        params.doValidation = value.asBool();
+        params.evaluation.doValidation = value.asBool();
         return;
     }
     if (param == "nbIterationsPerPolicyEvaluation") {
-        params.nbIterationsPerPolicyEvaluation = value.asUInt64();
+        params.evaluation.nbIterationsPerPolicyEvaluation = value.asUInt64();
         return;
     }
     if (param == "nbIterationsPerPolicyValidation") {
-        params.nbIterationsPerPolicyValidation = value.asUInt64();
+        params.evaluation.nbIterationsPerPolicyValidation = value.asUInt64();
         return;
     }
     if (param == "nbThreads") {
-        params.nbThreads = (size_t)value.asUInt();
+        params.evaluation.nbThreads = (size_t)value.asUInt();
         return;
     }
     if (param == "nbGenerations") {
-        params.nbGenerations = value.asUInt64();
+        params.evaluation.nbGenerations = value.asUInt64();
         return;
     }
     if (param == "maxNbActionsPerEval") {
-        params.maxNbActionsPerEval = value.asUInt64();
+        params.evaluation.maxNbActionsPerEval = value.asUInt64();
         return;
     }
     if (param == "maxNbEvaluationPerPolicy") {
-        params.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
+        params.evaluation.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
         return;
     }
     if (param == "stepValidation") {
-        params.stepValidation = (size_t)value.asUInt();
+        params.evaluation.stepValidation = (size_t)value.asUInt();
         return;
     }
 
@@ -338,7 +338,7 @@ void File::ParametersParser::setParameterFromString(
 }
 
 void File::ParametersParser::loadParametersFromJson(
-    const char* path, Learn::LearningParameters& params)
+    const char* path, Parameters& params)
 {
     Json::Value root;
     readConfigFile(path, root);
@@ -347,48 +347,48 @@ void File::ParametersParser::loadParametersFromJson(
 }
 
 void File::ParametersParser::writeParametersToJson(
-    const char* path, const Learn::LearningParameters& params)
+    const char* path, const Parameters& params)
 {
-    Learn::LearningParameters defaultParams;
+    Parameters defaultParams;
     // Create the JSON Structure
     Json::Value root;
 
     // Fill it
     // base parameters
 
-    root["doValidation"] = params.doValidation;
+    root["doValidation"] = params.evaluation.doValidation;
     root["doValidation"].setComment(
         Learn::LearningParameters::doValidationComment, Json::commentBefore);
 
-    root["maxNbActionsPerEval"] = params.maxNbActionsPerEval;
+    root["maxNbActionsPerEval"] = params.evaluation.maxNbActionsPerEval;
     root["maxNbActionsPerEval"].setComment(
         Learn::LearningParameters::maxNbActionsPerEvalComment,
         Json::commentBefore);
 
-    root["maxNbEvaluationPerPolicy"] = params.maxNbEvaluationPerPolicy;
+    root["maxNbEvaluationPerPolicy"] = params.evaluation.maxNbEvaluationPerPolicy;
     root["maxNbEvaluationPerPolicy"].setComment(
         Learn::LearningParameters::maxNbEvaluationPerPolicyComment,
         Json::commentBefore);
 
-    root["nbGenerations"] = params.nbGenerations;
+    root["nbGenerations"] = params.evaluation.nbGenerations;
     root["nbGenerations"].setComment(
         Learn::LearningParameters::nbGenerationsComment, Json::commentBefore);
 
     root["nbIterationsPerPolicyEvaluation"] =
-        params.nbIterationsPerPolicyEvaluation;
+        params.evaluation.nbIterationsPerPolicyEvaluation;
     root["nbIterationsPerPolicyEvaluation"].setComment(
         Learn::LearningParameters::nbIterationsPerPolicyEvaluationComment,
         Json::commentBefore);
     root["nbIterationsPerPolicyValidation"] =
-        params.nbIterationsPerPolicyValidation;
+        params.evaluation.nbIterationsPerPolicyValidation;
     root["nbIterationsPerPolicyValidation"].setComment(
         Learn::LearningParameters::nbIterationsPerPolicyValidationComment,
         Json::commentBefore);
-    root["stepValidation"] = params.stepValidation;
+    root["stepValidation"] = params.evaluation.stepValidation;
     root["stepValidation"].setComment(
         Learn::LearningParameters::stepValidationComment, Json::commentBefore);
 
-    root["nbThreads"] = params.nbThreads;
+    root["nbThreads"] = params.evaluation.nbThreads;
     root["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,
                                  Json::commentBefore);
 

@@ -23,13 +23,13 @@ namespace Algorithm::TGP {
             /**
              * \brief Main Algorithm constructor.
              * 
-             * \param[in] params the LearningParameters used by the Algorithm.
              * \param[in] iSet the Instruction Set used by the LGPAlgorithm.
+             * \param[in] parameters the LearningParameters used by the Algorithm.
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            TGPAlgorithm(const AlgorithmParameters& params, const Instructions::Set& iSet, std::string algorithmName = "TGP", std::string algorithmColor = "#d37217")
-                : LGP::LGPAlgorithm(params, iSet, algorithmName, algorithmColor) {};
+            TGPAlgorithm(const Instructions::Set& iSet, std::unique_ptr<AlgorithmParameters> parameters = std::make_unique<AlgorithmParameters>(), std::string algorithmName = "TGP", std::string algorithmColor = "#d37217")
+                : LGP::LGPAlgorithm(iSet, std::move(parameters), algorithmName, algorithmColor) {};
 
             /**
              * \brief Initialize the mutator of the algorithm

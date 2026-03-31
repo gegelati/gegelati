@@ -35,13 +35,14 @@ namespace Algorithm::TPG {
             /**
              * \brief Main Algorithm constructor.
              * 
-             * \param[in] params the LearningParameters used by the Algorithm.
              * \param[in] programAlgorithm the sub-algorithm used to manipulate programs.
+             * \param[in] parameters the LearningParameters used by the Algorithm.
              * \param[in] algorithmName name of the algorithm used.
              * \param[in] algorithmColor name of the algorithm used.
              */
-            TPGAlgorithm(const AlgorithmParameters& params, const Algorithm& programAlgorithm, std::string algorithmName = "TPG", std::string algorithmColor = "#A0FF33")
-                : Algorithm(params, algorithmName, algorithmColor), archive{std::make_unique<TPGArchive>(params.tpg.archiveSize, params.tpg.archivingProbability)} {
+            TPGAlgorithm(const Algorithm& programAlgorithm, std::unique_ptr<AlgorithmParameters> parameters = std::make_unique<AlgorithmParameters>(), std::string algorithmName = "TPG", std::string algorithmColor = "#A0FF33")
+                : Algorithm(std::move(parameters), algorithmName, algorithmColor) {
+                archive = std::make_unique<TPGArchive>(this->params->tpg.archiveSize, this->params->tpg.archivingProbability);
                 this->setProgramAlgorithm(programAlgorithm);
             };
 

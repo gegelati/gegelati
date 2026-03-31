@@ -34,7 +34,7 @@ namespace Algorithm {
         std::unique_ptr<AgentManager> manager;
 
         /// Parameters used by the algorithm
-        AlgorithmParameters params;
+        std::unique_ptr<AlgorithmParameters> params;
 
         /// Pointer pointing to the default selector created if the algorithm is created without a defined selector
         std::unique_ptr<Selector::Selector> savedDefaultSelector;
@@ -99,12 +99,12 @@ namespace Algorithm {
         /**
          * \brief Main Algorithm constructor.
          * 
-         * \param[in] params the LearningParameters used by the Algorithm.
+         * \param[in] parameters the LearningParameters used by the Algorithm.
          * \param[in] algorithmName name of the algorithm used.
          * \param[in] algorithmColor color of the algorithm used (during .dot files).
          */
-        Algorithm(const AlgorithmParameters& params, std::string algorithmName = "Algorithm", std::string algorithmColor = "#000000")
-               : params{params}, algorithmName(algorithmName), algorithmColor(algorithmColor), algorithmID(incrementeCounter()) {};
+        Algorithm(std::unique_ptr<AlgorithmParameters> parameters = std::make_unique<AlgorithmParameters>(), std::string algorithmName = "Algorithm", std::string algorithmColor = "#000000")
+               : params{std::make_unique<AlgorithmParameters>(*parameters)}, algorithmName(algorithmName), algorithmColor(algorithmColor), algorithmID(incrementeCounter()) {};
 
         /**
          * \brief Return the name of the algorithm.

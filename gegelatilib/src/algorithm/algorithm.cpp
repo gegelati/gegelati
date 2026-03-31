@@ -182,7 +182,7 @@ void Algorithm::Algorithm::initSelector()
         this->setSelector(*this->savedDefaultSelector);
     }
     this->getSelector().setManager(*this->manager);
-    this->getSelector().setNbAgents(this->params.nbAgents);
+    this->getSelector().setNbAgents(this->params->nbAgents);
 }
 
 void Algorithm::Algorithm::initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) {
@@ -227,7 +227,7 @@ const Output::OutputHandler& Algorithm::Algorithm::getOutputs() const
 
 const Algorithm::AlgorithmParameters& Algorithm::Algorithm::getParams() const
 {
-    return this->params;
+    return *this->params;
 }
 
 void Algorithm::Algorithm::clearAlgorithm()
@@ -249,12 +249,12 @@ void Algorithm::Algorithm::initPopulation(RNG::RNG& rng)
 {
     // Initialize a random population
     this->mutator->initRandomPopulation(*this->graph, *this->manager,
-                                        this->params, rng);
+                                        *this->params, rng);
 }
 
 void Algorithm::Algorithm::populate(RNG::RNG& rng, size_t maxNbThreads)
 {
-    this->mutator->mutatePopulation(*this->graph, *this->manager, this->params, rng, maxNbThreads);
+    this->mutator->mutatePopulation(*this->graph, *this->manager, *this->params, rng, maxNbThreads);
     this->getSelector().updateAfterPopulate(*graph);
 
     this->clearUnusedSubAgents();

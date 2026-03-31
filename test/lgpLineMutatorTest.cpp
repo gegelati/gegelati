@@ -10,6 +10,7 @@
 #include "algorithm/lgp/lgpLine.h"
 #include "algorithm/lgp/lgpExecutionEngine.h"
 #include "util/counterReset.h"
+#include "parameters.h"
 
 class LineMutatorTest : public ::testing::Test
 {
@@ -21,7 +22,7 @@ class LineMutatorTest : public ::testing::Test
     std::vector<std::reference_wrapper<const Data::DataHandler>> vect;
     Instructions::Set set;
     std::shared_ptr<const Algorithm::LGP::LGPEnvironment> e;
-    Learn::LearningParameters params;
+    Parameters params;
     Algorithm::LGP::LGPLineMutator lineMutator;
     std::shared_ptr<Algorithm::LGP::LGPAgent> programAgent;
     Output::OutputHandler* lgpOutput;

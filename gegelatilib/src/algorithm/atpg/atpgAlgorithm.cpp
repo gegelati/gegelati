@@ -4,11 +4,11 @@
 
 std::unique_ptr<Algorithm::Algorithm> Algorithm::ATPG::ATPGAlgorithm::copy() const
 {
-    return std::make_unique<ATPGAlgorithm>(
-        this->params, 
+    return std::make_unique<ATPGAlgorithm>( 
         this->cGetSubAlgorithm(this->programAlgorithmID), 
         this->cGetSubAlgorithm(this->actionProgramAlgorithmID), 
-        this->algorithmName
+        std::make_unique<AlgorithmParameters>(*this->params),
+        this->algorithmName, this->algorithmColor
     );
 }
 

@@ -53,13 +53,6 @@ namespace Learn {
      */
     typedef struct LearningParameters
     {
-        /// AlgorithmParameters for controlling paramters of any algorithm.
-        Algorithm::AlgorithmParameters algorithm;
-
-        /// SelectionParameters for controlling selection aspects of the
-        /// learning process.
-        Selector::SelectionParameters selection;
-
         /// JSon comment
         inline static const std::string nbIterationsPerPolicyEvaluationComment =
             "// Number of evaluation of each root per generation.\n"
