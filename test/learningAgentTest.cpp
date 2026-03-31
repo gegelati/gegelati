@@ -130,7 +130,6 @@ class ParallelLearningAgentTest : public LearningAgentTest
 
 TEST_F(LearningAgentTest, Constructor)
 {
-    std::cout<<"here" <<std::endl;
     Learn::LearningAgent* la;
 
     ASSERT_NO_THROW(la = new Learn::LearningAgent(le, *tpg, params.evaluation))

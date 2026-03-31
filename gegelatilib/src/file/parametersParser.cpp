@@ -356,40 +356,40 @@ void File::ParametersParser::writeParametersToJson(
     // Fill it
     // base parameters
 
-    root["doValidation"] = params.evaluation.doValidation;
-    root["doValidation"].setComment(
+    root["evaluation"]["doValidation"] = params.evaluation.doValidation;
+    root["evaluation"]["doValidation"].setComment(
         Learn::LearningParameters::doValidationComment, Json::commentBefore);
 
-    root["maxNbActionsPerEval"] = params.evaluation.maxNbActionsPerEval;
-    root["maxNbActionsPerEval"].setComment(
+    root["evaluation"]["maxNbActionsPerEval"] = params.evaluation.maxNbActionsPerEval;
+    root["evaluation"]["maxNbActionsPerEval"].setComment(
         Learn::LearningParameters::maxNbActionsPerEvalComment,
         Json::commentBefore);
 
-    root["maxNbEvaluationPerPolicy"] = params.evaluation.maxNbEvaluationPerPolicy;
-    root["maxNbEvaluationPerPolicy"].setComment(
+    root["evaluation"]["maxNbEvaluationPerPolicy"] = params.evaluation.maxNbEvaluationPerPolicy;
+    root["evaluation"]["maxNbEvaluationPerPolicy"].setComment(
         Learn::LearningParameters::maxNbEvaluationPerPolicyComment,
         Json::commentBefore);
 
-    root["nbGenerations"] = params.evaluation.nbGenerations;
-    root["nbGenerations"].setComment(
+    root["evaluation"]["nbGenerations"] = params.evaluation.nbGenerations;
+    root["evaluation"]["nbGenerations"].setComment(
         Learn::LearningParameters::nbGenerationsComment, Json::commentBefore);
 
-    root["nbIterationsPerPolicyEvaluation"] =
+    root["evaluation"]["nbIterationsPerPolicyEvaluation"] =
         params.evaluation.nbIterationsPerPolicyEvaluation;
-    root["nbIterationsPerPolicyEvaluation"].setComment(
+    root["evaluation"]["nbIterationsPerPolicyEvaluation"].setComment(
         Learn::LearningParameters::nbIterationsPerPolicyEvaluationComment,
         Json::commentBefore);
-    root["nbIterationsPerPolicyValidation"] =
+    root["evaluation"]["nbIterationsPerPolicyValidation"] =
         params.evaluation.nbIterationsPerPolicyValidation;
-    root["nbIterationsPerPolicyValidation"].setComment(
+    root["evaluation"]["nbIterationsPerPolicyValidation"].setComment(
         Learn::LearningParameters::nbIterationsPerPolicyValidationComment,
         Json::commentBefore);
-    root["stepValidation"] = params.evaluation.stepValidation;
-    root["stepValidation"].setComment(
+    root["evaluation"]["stepValidation"] = params.evaluation.stepValidation;
+    root["evaluation"]["stepValidation"].setComment(
         Learn::LearningParameters::stepValidationComment, Json::commentBefore);
 
-    root["nbThreads"] = params.evaluation.nbThreads;
-    root["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,
+    root["evaluation"]["nbThreads"] = params.evaluation.nbThreads;
+    root["evaluation"]["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,
                                  Json::commentBefore);
 
 
