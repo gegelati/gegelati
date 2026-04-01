@@ -38,7 +38,7 @@
 
 //#ifdef CODE_GENERATION
 
-#include "codeGen/CodeGenerationExporter.h"
+#include "codeGen/codeGenerationExporter.h"
 #include "data/demangle.h"
 #include "util/timestamp.h"
 
