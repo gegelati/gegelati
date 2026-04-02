@@ -60,7 +60,6 @@ namespace Selector {
                   nbDescriptors{nbDescriptors}, minValue{minValue},
                   maxValue{maxValue}
             {
-
                 if (nbBinPerDescriptor > 0 && nbDescriptors > 0) {
                     archive.resize(std::pow(nbBinPerDescriptor, nbDescriptors));
                 }

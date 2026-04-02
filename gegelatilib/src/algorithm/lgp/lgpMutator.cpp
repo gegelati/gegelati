@@ -6,15 +6,7 @@ bool Algorithm::LGP::LGPMutator::isConfigurationValid(const AlgorithmParameters&
 {
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("LGPMutator::initRandomPopulation: LGP does not support mixed discrete and continuous outputs.");
-    } else if (outputs.sizeContinuous() != 0){
-        if(outputs.size() > params.lgp.nbRegisters){
-            throw std::runtime_error("LGPMutator::initRandomPopulation: Number of continuous outputs exceeds the number of registers.");
-        }
-    } else if (outputs.sizeDiscrete() != 0){
-        if(outputs.size() > params.lgp.nbRegisters){
-            throw std::runtime_error("LGPMutator::initRandomPopulation: Number of discrete outputs exceeds the number of registers.");
-        }
-    } else {
+    } else if (outputs.sizeContinuous() == 0 && outputs.sizeDiscrete() == 0) {
         throw std::runtime_error("LGPMutator::initRandomPopulation: No outputs defined.");
     }
     return true;

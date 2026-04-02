@@ -570,14 +570,14 @@ void File::ParametersParser::writeParametersToJson(
         Algorithm::CGP::CGPParameters::pMutateNodeComment, Json::commentBefore);
     
 
-    root["algorithm"]["tgp"]["nbLayers"] = params.algorithm.tgp.maxDepth;
-    root["algorithm"]["tgp"]["nbLayers"].setComment(
+    root["algorithm"]["tgp"]["maxDepth"] = params.algorithm.tgp.maxDepth;
+    root["algorithm"]["tgp"]["maxDepth"].setComment(
         Algorithm::TGP::TGPParameters::maxDepthComment, Json::commentBefore);
-    root["algorithm"]["tgp"]["nbNodesPerLayer"] = params.algorithm.tgp.maxInitDepth;
-    root["algorithm"]["tgp"]["nbNodesPerLayer"].setComment(
+    root["algorithm"]["tgp"]["maxInitDepth"] = params.algorithm.tgp.maxInitDepth;
+    root["algorithm"]["tgp"]["maxInitDepth"].setComment(
         Algorithm::TGP::TGPParameters::maxInitDepthComment, Json::commentBefore);
-    root["algorithm"]["tgp"]["pMutateNode"] = params.algorithm.tgp.maxNbEdgePerNode;
-    root["algorithm"]["tgp"]["pMutateNode"].setComment(
+    root["algorithm"]["tgp"]["maxNbEdgePerNode"] = params.algorithm.tgp.maxNbEdgePerNode;
+    root["algorithm"]["tgp"]["maxNbEdgePerNode"].setComment(
         Algorithm::TGP::TGPParameters::maxNbEdgePerNodeComment, Json::commentBefore);
     
 
