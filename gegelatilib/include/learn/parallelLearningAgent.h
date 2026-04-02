@@ -61,6 +61,12 @@ namespace Learn {
     class ParallelLearningAgent : public LearningAgent
     {
       protected:
+
+        /**
+         * Vector containing the environment cloned specifically for the parallelism
+         */
+        std::vector<LearningEnvironment*> allCloneLearningEnvironments;
+
         /**
          * \brief Method for evaluating agents with parallelism.
          *
@@ -137,8 +143,7 @@ namespace Learn {
          * resulting score of evaluated agents.
          * \param[in] resultsPerAgentMapMutex
          * Mutex protecting the results.
-         * \param[in] useMainEnvironment Boolean that is true if we use the
-         * declared LearningEnvironment, otherwise the method will clone it.
+         * \param[in] indexEnvironment Index of the environment.
          */
         void slaveEvalJobThread(
             uint64_t generationNumber, LearningMode mode,
@@ -148,9 +153,12 @@ namespace Learn {
                                          std::shared_ptr<Algorithm::Job>>>&
                 resultsPerAgentMap,
             std::mutex& resultsPerAgentMapMutex,
-            bool useMainEnvironment);
+            size_t indexEnvironment);
 
       public:
+        /// @brief Destructor need to delete the copied environments
+        virtual ~ParallelLearningAgent();
+
         /**
          * \brief Constructor for ParallelLearningAgent.
          *
@@ -187,11 +195,7 @@ namespace Learn {
             LearningEnvironment& le, Algorithm::Algorithm& algorithm,
             const LearningParameters& p,
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : LearningAgent(le, algorithm, p, factory)
-        {
-            // overriding the maxNbThreads that basic LA defined to 1
-            maxNbThreads = p.nbThreads;
-        };
+            : ParallelLearningAgent(le, std::vector<std::reference_wrapper<Algorithm::Algorithm>>{algorithm}, p, factory) {};
 
         /**
          * \brief Evaluate all agent of an algorithm.

@@ -47,6 +47,14 @@
 #include "learn/evaluationResult.h"
 #include "learn/parallelLearningAgent.h"
 
+Learn::ParallelLearningAgent::~ParallelLearningAgent()   
+{
+    while(this->allCloneLearningEnvironments.size() > 1) {
+        LearningEnvironment* env = this->allCloneLearningEnvironments.back();
+        this->allCloneLearningEnvironments.pop_back();
+        delete env;
+    }
+}
 
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
 Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
@@ -95,13 +103,11 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
     std::map<uint64_t, std::pair<std::shared_ptr<EvaluationResult>,
                                  std::shared_ptr<Algorithm::Job>>>& resultsPerAgentMap,
     std::mutex& resultsPerAgentMapMutex,
-    bool useMainEnvironment)
+    size_t indexEnvironment)
 {
 
     // Clone learningEnvironment
-    LearningEnvironment* privateLearningEnvironment =
-        useMainEnvironment ? &this->learningEnvironment
-                           : this->learningEnvironment.clone();
+    LearningEnvironment* privateLearningEnvironment = this->allCloneLearningEnvironments.at(indexEnvironment);
 
     std::unique_ptr<Algorithm::ExecutionEngine> execEngine = this->currentExecutedAlgorithm->getManager().createExecutionEngine(privateLearningEnvironment->getDataSources());
 
@@ -136,11 +142,6 @@ void Learn::ParallelLearningAgent::slaveEvalJobThread(
                 std::make_pair(avgScore, jobToProcess));
         }
     }
-
-    // Clean up
-    if (!useMainEnvironment) {
-        delete privateLearningEnvironment;
-    }
 }
 
 void Learn::ParallelLearningAgent::evaluateAgentsInParallel(
@@ -166,6 +167,13 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
     // Create mutexes
     std::mutex agentsToProcessMutex;
     std::mutex resultsPerAgentMutex;
+    
+    if(this->allCloneLearningEnvironments.size() == 0) {
+        this->allCloneLearningEnvironments.push_back(&this->learningEnvironment);
+        for(size_t idx = 0; idx < maxNbThreads - 1; idx++) {
+            this->allCloneLearningEnvironments.push_back(this->learningEnvironment.clone());
+        }
+    }
 
     // Create the threads
     std::vector<std::thread> threads;
@@ -174,13 +182,13 @@ void Learn::ParallelLearningAgent::evaluateAgentsInParallelExecute(
             &ParallelLearningAgent::slaveEvalJobThread, this, generationNumber,
             mode, std::ref(jobsToProcess), std::ref(agentsToProcessMutex),
             std::ref(resultsPerJobMap), std::ref(resultsPerAgentMutex),
-            false));
+            i+1));
     }
 
     // Work in the main thread also, using the main environment
     this->slaveEvalJobThread(generationNumber, mode, jobsToProcess,
                              agentsToProcessMutex, resultsPerJobMap,
-                             resultsPerAgentMutex, true);
+                             resultsPerAgentMutex, 0);
 
     // Join the threads
     for (auto& thread : threads) {
