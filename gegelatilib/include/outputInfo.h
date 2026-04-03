@@ -52,8 +52,12 @@ namespace Output
                 if (rangeMin >= rangeMax) {
                     throw std::runtime_error("Output::Output: rangeMin must be less than rangeMax.");
                 }
-                if (defaultValue <= rangeMin || defaultValue >= rangeMax) {
-                    throw std::runtime_error("Output::Output: defaultValue out of bounds");
+                if (defaultValue < rangeMin || defaultValue > rangeMax) {
+                    if(defaultValue == 0) {
+                        defaultValue = rangeMin;
+                    } else {
+                        throw std::runtime_error("Output::Output: defaultValue out of bounds");
+                    }
                 }
             }
 
