@@ -175,10 +175,7 @@ namespace Learn {
             std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : LearningAgent(le, algorithms, std::move(parameters), factory)
-        {
-            // overriding the maxNbThreads that basic LA defined to 1
-            maxNbThreads = this->params->nbThreads;
-        };
+        {};
 
         /**
          * \brief Constructor for ParallelLearningAgent.
@@ -196,6 +193,15 @@ namespace Learn {
             std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : ParallelLearningAgent(le, std::vector<std::reference_wrapper<Algorithm::Algorithm>>{algorithm}, std::move(parameters), factory) {};
+
+
+        /**
+         * \brief Inherrit from LearningAgent, set the maxNbThreads value.
+         * 
+         * \param[in] seed the seed given to the TPGMutator.
+         * \param[in] doGeneratePopulation boolean to indicate if population of the algorithms should be generated here.
+         */
+        virtual void init(uint64_t seed = 0, bool doGeneratePopulation = true) override;
 
         /**
          * \brief Evaluate all agent of an algorithm.

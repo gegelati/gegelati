@@ -56,6 +56,12 @@ Learn::ParallelLearningAgent::~ParallelLearningAgent()
     }
 }
 
+void Learn::ParallelLearningAgent::init(uint64_t seed = 0, bool doGeneratePopulation = true)
+{
+    this->maxNbThreads = this->params->nbThreads;
+    Learn::LearningAgent::init(seed, doGeneratePopulation);
+}
+
 std::multimap<std::shared_ptr<Learn::EvaluationResult>, std::reference_wrapper<const Algorithm::Agent>>
 Learn::ParallelLearningAgent::evaluateCurrentAlgorithmAgents(uint64_t generationNumber,
                                                Learn::LearningMode mode)
