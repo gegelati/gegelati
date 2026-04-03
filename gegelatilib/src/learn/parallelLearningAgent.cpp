@@ -56,7 +56,7 @@ Learn::ParallelLearningAgent::~ParallelLearningAgent()
     }
 }
 
-void Learn::ParallelLearningAgent::init(uint64_t seed = 0, bool doGeneratePopulation = true)
+void Learn::ParallelLearningAgent::init(uint64_t seed, bool doGeneratePopulation)
 {
     this->maxNbThreads = this->params->nbThreads;
     Learn::LearningAgent::init(seed, doGeneratePopulation);
