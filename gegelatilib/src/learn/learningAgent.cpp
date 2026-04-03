@@ -131,7 +131,7 @@ void Learn::LearningAgent::init(uint64_t seed, bool doGeneratePopulation)
 
 void Learn::LearningAgent::addLogger(Log::LALogger& logger)
 {
-    logger.doValidation = this->params.doValidation;
+    logger.doValidation = this->params->doValidation;
     logger.useUtility = this->learningEnvironment.isUsingUtility();
     // logs for example the headers of the columns the logger will print
     loggers.push_back(std::reference_wrapper<Log::LALogger>(logger));
@@ -155,7 +155,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     size_t nbEvaluationAgent = selector.getNbEvaluation(job.getAgent());
     if (mode == LearningMode::TRAINING && nbEvaluationAgent > 0) {
         previousEval = selector.getResultsOf(job.getAgent());
-        if(nbEvaluationAgent > params.maxNbEvaluationPerPolicy) {
+        if(nbEvaluationAgent > params->maxNbEvaluationPerPolicy) {
             return previousEval;
         }
     }
@@ -172,8 +172,8 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
     // Number of evaluations
     uint64_t nbEvaluation = (mode == LearningMode::TRAINING)
-                                ? this->params.nbIterationsPerPolicyEvaluation
-                                : this->params.nbIterationsPerPolicyValidation;
+                                ? this->params->nbIterationsPerPolicyEvaluation
+                                : this->params->nbIterationsPerPolicyValidation;
 
     // Init global selection metric
     std::shared_ptr<Selector::SelectionMetrics> globalSelectionMetrics =
@@ -197,7 +197,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
         uint64_t nbActions = 0;
         while (!le.isTerminal() &&
-               nbActions < this->params.maxNbActionsPerEval) {
+               nbActions < this->params->maxNbActionsPerEval) {
             // Get the actions
             std::vector<double> actionsID =
                 execEngine.execute();
@@ -374,13 +374,13 @@ void Learn::LearningAgent::trainOneGeneration(uint64_t generationNumber,
     }
 
     // Does a validation or not according to the parameter doValidation
-    if (params.doValidation) {
+    if (params->doValidation) {
         std::multimap<std::shared_ptr<Learn::EvaluationResult>,
                       std::reference_wrapper<const Algorithm::Agent>>
             validationResults;
 
-        if (generationNumber % params.stepValidation == 0 ||
-            generationNumber == params.nbGenerations - 1) {
+        if (generationNumber % params->stepValidation == 0 ||
+            generationNumber == params->nbGenerations - 1) {
             validationResults = evaluateAllAgents(
                 generationNumber, Learn::LearningMode::VALIDATION);
         }
@@ -411,10 +411,10 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
     const int barLength = 50;
     uint64_t generationNumber = 0;
 
-    while (!altTraining && generationNumber < this->params.nbGenerations) {
+    while (!altTraining && generationNumber < this->params->nbGenerations) {
         // Train one generation
         trainOneGeneration(generationNumber,
-                           generationNumber != this->params.nbGenerations - 1);
+                           generationNumber != this->params->nbGenerations - 1);
         generationNumber++;
 
         // Print progressBar (homemade, probably not ideal)
@@ -422,7 +422,7 @@ uint64_t Learn::LearningAgent::train(volatile bool& altTraining,
             printf("\rTraining ["); // back
             // filling ratio
             double ratio =
-                (double)generationNumber / (double)this->params.nbGenerations;
+                (double)generationNumber / (double)this->params->nbGenerations;
             int filledPart = (int)((double)ratio * (double)barLength);
             // filled part
             for (int i = 0; i < filledPart; i++) {

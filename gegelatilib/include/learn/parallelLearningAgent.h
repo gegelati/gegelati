@@ -166,18 +166,18 @@ namespace Learn {
          *
          * \param[in] le The LearningEnvironment for the TPG.
          * \param[in] algorithms vector of algorithm learned by the learning agent
-         * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
             LearningEnvironment& le, std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms,
-            const LearningParameters& p,
+            std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : LearningAgent(le, algorithms, p, factory)
+            : LearningAgent(le, algorithms, std::move(parameters), factory)
         {
             // overriding the maxNbThreads that basic LA defined to 1
-            maxNbThreads = p.nbThreads;
+            maxNbThreads = this->params->nbThreads;
         };
 
         /**
@@ -187,15 +187,15 @@ namespace Learn {
          *
          * \param[in] le The LearningEnvironment for the TPG.
          * \param[in] algorithm vector of algorithm learned by the learning agent
-         * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
         ParallelLearningAgent(
             LearningEnvironment& le, Algorithm::Algorithm& algorithm,
-            const LearningParameters& p,
+            std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
             const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : ParallelLearningAgent(le, std::vector<std::reference_wrapper<Algorithm::Algorithm>>{algorithm}, p, factory) {};
+            : ParallelLearningAgent(le, std::vector<std::reference_wrapper<Algorithm::Algorithm>>{algorithm}, std::move(parameters), factory) {};
 
         /**
          * \brief Evaluate all agent of an algorithm.

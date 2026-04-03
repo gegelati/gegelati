@@ -20,12 +20,12 @@ namespace Selector {
         /**
          * \brief Constructor for ClassificationSelector.
          *
-         * \param[in] params parameters used by the Selector.
+         * \param[in] parameters parameters used by the Selector.
          * \param[in] nbActions number of actions in the LearningEnvironment.
          */
-        ClassificationSelector(const SelectionParameters& params,
-                               uint64_t nbActions)
-            : Selector{params}, nbActions{nbActions}
+        ClassificationSelector(std::unique_ptr<SelectionParameters> parameters = std::make_unique<SelectionParameters>(),
+                               uint64_t nbActions = 0)
+            : Selector{std::move(parameters)}, nbActions{nbActions}
         {
         }
 

@@ -133,7 +133,7 @@ class TpgMutatorTest : public ::testing::Test
         tpgManager->addSubManager(*lgpManager);
         tpgManager->setProgramAlgorithmID((uint64_t)0);
 
-        selector = std::make_shared<Selector::TruncationSelector>(params.selection);
+        selector = std::make_shared<Selector::TruncationSelector>(std::make_unique<Selector::SelectionParameters>(params.selection));
         selector->setManager(*tpgManager);
         selector->setNbAgents(params.algorithm.nbAgents);
 

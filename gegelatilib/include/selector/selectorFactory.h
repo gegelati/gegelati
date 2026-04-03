@@ -23,7 +23,7 @@ namespace Selector {
      * \param[in] params SelectionParameters used
      */
     std::unique_ptr<Selector> selectorFactory(
-        SelectionParameters params = SelectionParameters());
+        std::unique_ptr<SelectionParameters> params = std::make_unique<SelectionParameters>());
 
 }; // namespace Selector
 

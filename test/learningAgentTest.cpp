@@ -113,7 +113,7 @@ class LearningAgentTest : public ::testing::Test
         lgp = new Algorithm::LGPAlgorithm(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
         tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
 
-        selector = new Selector::TruncationSelector(params.selection);
+        selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
         tpg->setSelector(*selector);
     }
 
@@ -132,7 +132,7 @@ TEST_F(LearningAgentTest, Constructor)
 {
     Learn::LearningAgent* la;
 
-    ASSERT_NO_THROW(la = new Learn::LearningAgent(le, *tpg, params.evaluation))
+    ASSERT_NO_THROW(la = new Learn::LearningAgent(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation)))
         << "Construction of the learningAgent failed.";
 
     ASSERT_NO_THROW(delete la) << "Destruction of the LearningAgent failed.";
@@ -142,7 +142,7 @@ TEST_F(LearningAgentTest, Init)
 {
     params.algorithm.tpg.archiveSize = 50;
     params.algorithm.tpg.archivingProbability = 0.5;
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     ASSERT_NO_THROW(la.init())
         << "Initialization of the LearningAgent should not fail.";
@@ -152,7 +152,7 @@ TEST_F(LearningAgentTest, addLogger)
 {
     params.algorithm.tpg.archiveSize = 50;
     params.algorithm.tpg.archivingProbability = 0.5;
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     Log::LALogger* l = nullptr;
     ASSERT_NO_THROW(
@@ -167,7 +167,7 @@ TEST_F(LearningAgentTest, addLogger)
 {
     params.evaluation.maxNbEvaluationPerPolicy = 2;
 
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
 
     // Test a new root
@@ -215,7 +215,7 @@ TEST_F(LearningAgentTest, addLogger)
 
 /*TEST_F(LearningAgentTest, MakeJob)
 {
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
     auto job = *la.makeJob(la.getAlgorithmAt(0).getAgents().at(0),
                            Learn::LearningMode::TRAINING);
@@ -224,14 +224,14 @@ TEST_F(LearningAgentTest, addLogger)
     ASSERT_EQ(la.getAlgorithmAt(0).getAgents().at(0), job.getAgent())
         << "Encapsulate the root in a job shouldn't change it";
 
-    Learn::LearningAgent la2(le, *tpg, params.evaluation);
+    Learn::LearningAgent la2(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     ASSERT_THROW(la2.makeJob(nullptr, Learn::LearningMode::TRAINING), std::runtime_error)
         << "Create a job when the learning agent is not initialized should throw an error";
 }
 
 TEST_F(LearningAgentTest, MakeJobs)
 {
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
     auto jobs = la.makeJobs(Learn::LearningMode::TRAINING);
     ASSERT_EQ(la.getAlgorithmAt(0).getAgents().size(), jobs.size())
@@ -251,7 +251,7 @@ TEST_F(LearningAgentTest, EvalAgent)
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     Algorithm::TPG::TPGArchive a; // For testing purposes, notmally, the archive from the
                // LearningAgent is used.
 
@@ -276,7 +276,7 @@ TEST_F(LearningAgentTest, EvaluateOneRoot)
     params.evaluation.maxNbActionsPerEval = 11;
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     Algorithm::TPG::TPGArchive a; // For testing purposes, normally, the archive from the
                // LearningAgent is used.
 
@@ -300,7 +300,7 @@ TEST_F(LearningAgentTest, EvalAllRoots)
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     la.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -329,8 +329,8 @@ TEST_F(LearningAgentTest, TrainOnegeneration)
     params.evaluation.doValidation = true;
 
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -382,8 +382,8 @@ TEST_F(LearningAgentTest, Train)
     params.evaluation.nbGenerations = 3;
 
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -399,8 +399,8 @@ TEST_F(LearningAgentTest, Train)
     params.evaluation.doValidation = true;
     params.evaluation.stepValidation = 2;
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la2(le, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la2(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
     alt = false;
     la2.init();
@@ -426,9 +426,9 @@ TEST_F(LearningAgentTest, TrainPortability)
 
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
     
-    selector = new Selector::TruncationSelector(params.selection);
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     tpg->setSelector(*selector);
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     
 
     la.init();
@@ -482,8 +482,8 @@ TEST_F(LearningAgentTest, TrainLGPPortability)
 
 
     auto lgp1 = new Algorithm::LGPAlgorithm(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(le, *lgp1, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(le, *lgp1, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -545,9 +545,9 @@ TEST_F(LearningAgentTest, TrainCGPPortability)
     set2.add(*(new Instructions::LambdaInstruction<int, int>([](int a, int b) -> double { return a - b; })));
     set2.add(*(new Instructions::LambdaInstruction<int, int>([](int a, int b) -> double { return a + b; })));
     auto cgp = new Algorithm::CGPAlgorithm(set2, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    selector = new Selector::TruncationSelector(params.selection);
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     cgp->setSelector(*selector);
-    Learn::LearningAgent la(le, *cgp, params.evaluation);
+    Learn::LearningAgent la(le, *cgp, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     la.init();
 
@@ -598,8 +598,8 @@ TEST_F(LearningAgentTest, TrainTGPPortability)
     set2.add(*(new Instructions::LambdaInstruction<int, int>([](int a, int b) -> double { return a + b; })));
     
     auto tgp = new Algorithm::TGPAlgorithm(set2, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(le, *tgp, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(le, *tgp, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -645,7 +645,7 @@ TEST_F(LearningAgentTest, TrainInstrumented)
     params.algorithm.tpg.forceProgramBehaviorChangeOnMutation = true;
     params.evaluation.nbThreads = 3;
 
-    Learn::LearningAgent la(le, *tpg, params.evaluation, EvoGraph::TPGInstrumentedFactory());
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation), EvoGraph::TPGInstrumentedFactory());
 
     la.init();
     bool alt = false;
@@ -739,8 +739,8 @@ TEST_F(LearningAgentTest, TrainContinuousNoActionPrograms)
     params.evaluation.nbThreads = 1;
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
 
-    Learn::LearningAgent la(cle, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -788,8 +788,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithSingleActionPrograms)
     
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGPAction");
     tpg = new Algorithm::ATPGAlgorithm(*lgp, *actionLgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(cle, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -842,8 +842,8 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG)
     auto actionLgp = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGPAction");
     auto actionMaple = new Algorithm::MapleAlgorithm(*actionLgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
     tpg = new Algorithm::ATPGAlgorithm(*lgp, *actionMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(cle, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -897,10 +897,10 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPG_MapleInde)
     auto atpg = new Algorithm::ATPGAlgorithm(*lgp, *actionMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
     atpg->addAggregatedActionProgramAlgorithm(*actionMaple);
     std::vector<std::reference_wrapper<Algorithm::Algorithm>> listAlgo = { *actionMaple, *atpg}; // ORDER MUST BE AUTOMATIC
-    Learn::LearningAgent la(cle, listAlgo, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(cle, listAlgo, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     actionMaple->setSelector(*selector);
-    selector = new Selector::TruncationSelector(params.selection);
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     atpg->setSelector(*selector);
 
     la.init();
@@ -947,8 +947,8 @@ TEST_F(LearningAgentTest, TrainContinuousMaple)
     params.evaluation.nbThreads = 1;
 
     auto maple = new Algorithm::MapleAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(cle, *maple, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(cle, *maple, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -1011,13 +1011,13 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLE)
     auto standaloneLGPforMaple = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGP2");
     auto standaloneMaple = new Algorithm::MapleAlgorithm(*standaloneLGPforMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "Maple2");
     std::vector<std::reference_wrapper<Algorithm::Algorithm>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
-    Learn::LearningAgent la(cle, listAlgo, params.evaluation);
+    Learn::LearningAgent la(cle, listAlgo, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
-    selector = new Selector::TruncationSelector(params.selection);
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     standaloneLGP->setSelector(*selector);
-    selector = new Selector::TruncationSelector(params.selection);
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     matpg->setSelector(*selector);
-    selector = new Selector::TruncationSelector(params.selection);
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     standaloneMaple->setSelector(*selector);
 
     la.init();
@@ -1078,12 +1078,12 @@ TEST_F(LearningAgentTest, TrainContinuousWithMATPGandLGPandMAPLETournament)
     auto standaloneLGPforMaple = std::make_shared<Algorithm::LGPAlgorithm>(set, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "LGP2");
     auto standaloneMaple = new Algorithm::MapleAlgorithm(*standaloneLGPforMaple, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm), "Maple2");
     std::vector<std::reference_wrapper<Algorithm::Algorithm>> listAlgo = {*matpg, *standaloneLGP, *standaloneMaple};
-    Learn::LearningAgent la(cle, listAlgo, params.evaluation);
-    selector = new Selector::TournamentSelector(params.selection);
+    Learn::LearningAgent la(cle, listAlgo, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TournamentSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     standaloneLGP->setSelector(*selector);
-    selector = new Selector::TournamentSelector(params.selection);
+    selector = new Selector::TournamentSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     matpg->setSelector(*selector);
-    selector = new Selector::TournamentSelector(params.selection);
+    selector = new Selector::TournamentSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     standaloneMaple->setSelector(*selector);
 
     la.init();
@@ -1129,8 +1129,8 @@ TEST_F(LearningAgentTest, TrainContinuousMapleMAPElites)
     params.selection._selectionMode = "mapElites";
 
     auto maple = new Algorithm::MapleAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(cle, *maple, params.evaluation);
-    selector = new Selector::MapElitesSelector(params.selection, params.evaluation.maxNbEvaluationPerPolicy);
+    Learn::LearningAgent la(cle, *maple, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::MapElitesSelector(std::make_unique<Selector::SelectionParameters>(params.selection), params.evaluation.maxNbEvaluationPerPolicy);
     maple->setSelector(*selector);
 
     la.init();
@@ -1185,8 +1185,8 @@ TEST_F(LearningAgentTest, TrainContinuousMapleCvtMAPElites)
     params.selection._selectionMode = "mapElites";
 
     auto maple = new Algorithm::MapleAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(cle, *maple, params.evaluation);
-    selector = new Selector::MapElitesSelector(params.selection, params.evaluation.maxNbEvaluationPerPolicy);
+    Learn::LearningAgent la(cle, *maple, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::MapElitesSelector(std::make_unique<Selector::SelectionParameters>(params.selection), params.evaluation.maxNbEvaluationPerPolicy);
     maple->setSelector(*selector);
 
     la.init();
@@ -1234,7 +1234,7 @@ TEST_F(LearningAgentTest, GraphCleanProgramIntrons)
     params.selection.truncation.ratioDeletedRoots = 0.2;
     params.evaluation.nbGenerations = 5;
 
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
     bool alt = false;
     la.train(alt, false);
@@ -1299,7 +1299,7 @@ TEST_F(LearningAgentTest, TrainOnegenerationContinuousNoActionProg)
         0.5; // high number to force the apparition of root action.
     params.evaluation.nbThreads = 1;
     tpg = new Algorithm::TPGAlgorithm(params, *lgp);
-    Learn::LearningAgent la(cle, *tpg, params.evaluation);
+    Learn::LearningAgent la(cle, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     la.init();
     // Do the populate call to keep know the number of initial vertex
@@ -1332,7 +1332,7 @@ TEST_F(ParallelLearningAgentTest, Constructor)
 {
     Learn::ParallelLearningAgent* pla;
 
-    ASSERT_NO_THROW(pla = new Learn::ParallelLearningAgent(le, *tpg, params.evaluation))
+    ASSERT_NO_THROW(pla = new Learn::ParallelLearningAgent(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation)))
         << "Construction of the learningAgent failed.";
 
     ASSERT_NO_THROW(delete pla) << "Destruction of the LearningAgent failed.";
@@ -1342,7 +1342,7 @@ TEST_F(ParallelLearningAgentTest, Init)
 {
     params.algorithm.tpg.archiveSize = 50;
     params.algorithm.tpg.archivingProbability = 0.5;
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     ASSERT_NO_THROW(pla.init())
         << "Initialization of the LearningAgent should not fail.";
@@ -1358,7 +1358,7 @@ TEST_F(ParallelLearningAgentTest, EvalRootSequential)
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
     params.evaluation.nbThreads = 1;
 
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     Algorithm::TPG::TPGArchive a; // For testing purposes, notmally, the archive from the
                // LearningAgent is used.
 
@@ -1384,7 +1384,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsSequential)
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
     params.evaluation.nbThreads = 1;
 
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -1407,7 +1407,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallel)
     params.evaluation.nbThreads = 4;
 
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     pla.init();
     std::multimap<std::shared_ptr<Learn::EvaluationResult>,
@@ -1432,7 +1432,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
 
 
     auto tpgLa = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(le, *tpgLa, params.evaluation);
+    Learn::LearningAgent la(le, *tpgLa, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init(0); // Reset RNG to 0
     auto results = la.evaluateAllAgents(0, Learn::LearningMode::TRAINING);
     auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
@@ -1440,7 +1440,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     Learn::LearningParameters paramsSequential = params.evaluation;
     paramsSequential.nbThreads = 1;
     auto tpgSequential = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, paramsSequential);
+    Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, std::make_unique<Learn::LearningParameters>(paramsSequential));
 
     plaSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
@@ -1451,7 +1451,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelTrainingDeterminism)
     Learn::LearningParameters paramsParallel = params.evaluation;
     paramsParallel.nbThreads = 4;
     auto tpgParallel = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, paramsParallel);
+    Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, std::make_unique<Learn::LearningParameters>(paramsParallel));
 
     plaParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
@@ -1545,7 +1545,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     params.evaluation.nbIterationsPerPolicyEvaluation = 10;
 
     auto tpgLa = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::LearningAgent la(le, *tpgLa, params.evaluation);
+    Learn::LearningAgent la(le, *tpgLa, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init(0); // Reset centralized RNG to 0
     auto results = la.evaluateAllAgents(0, Learn::LearningMode::VALIDATION);
     auto nextInt = la.getRNG().getUnsignedInt64(0, UINT64_MAX);
@@ -1554,7 +1554,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     paramsSequential.nbThreads = 1;
     
     auto tpgSequential = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, paramsSequential);
+    Learn::ParallelLearningAgent plaSequential(le, *tpgSequential, std::make_unique<Learn::LearningParameters>(paramsSequential));
 
     plaSequential.init(0); // Reset centralized RNG to 0
     auto resultsSequential =
@@ -1565,7 +1565,7 @@ TEST_F(ParallelLearningAgentTest, EvalAllRootsParallelValidationDeterminism)
     Learn::LearningParameters paramsParallel = params.evaluation;
     paramsParallel.nbThreads = 4;
     auto tpgParallel = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, paramsParallel);
+    Learn::ParallelLearningAgent plaParallel(le, *tpgParallel, std::make_unique<Learn::LearningParameters>(paramsParallel));
 
     plaParallel.init(0); // Reset centralized RNG to 0
     auto resultsParallel =
@@ -1632,8 +1632,8 @@ TEST_F(ParallelLearningAgentTest, TrainOnegenerationSequential)
         0.85; // high number to force the apparition of root action.
     params.evaluation.nbThreads = 1;
 
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     pla.getAlgorithms().front().get().setSelector(*selector);
 
     pla.init();
@@ -1670,8 +1670,8 @@ TEST_F(ParallelLearningAgentTest, TrainOneGenerationParallel)
     params.evaluation.nbThreads = 4;
 
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     pla.getAlgorithms().front().get().setSelector(*selector);
 
     pla.init();
@@ -1705,8 +1705,8 @@ TEST_F(ParallelLearningAgentTest, TrainSequential)
     params.evaluation.nbThreads = 1;
 
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     pla.getAlgorithms().front().get().setSelector(*selector);
 
     pla.init();
@@ -1731,7 +1731,7 @@ TEST_F(ParallelLearningAgentTest, TrainParallel)
         params.evaluation.nbIterationsPerPolicyEvaluation * 2;
     params.evaluation.nbThreads = std::thread::hardware_concurrency();
 
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
 
     pla.init();
     bool alt = false;
@@ -1757,8 +1757,8 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 5;
 
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -1768,8 +1768,8 @@ TEST_F(ParallelLearningAgentTest, TrainParallelDeterminism)
     la.train(alt, false);
 
     params.evaluation.nbThreads = 4;
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     pla.getAlgorithms().front().get().setSelector(*selector);
 
     pla.init();
@@ -1805,8 +1805,8 @@ TEST_F(ParallelLearningAgentTest, TrainPortability)
     params.evaluation.nbThreads = 3;
 
     tpg = new Algorithm::TPGAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::ParallelLearningAgent la(le, *tpg, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::ParallelLearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -1862,8 +1862,8 @@ TEST_F(ParallelLearningAgentTest, TrainContinuousMaple)
     params.evaluation.nbThreads = 3;
 
     auto maple = new Algorithm::MapleAlgorithm(*lgp, std::make_unique<Algorithm::AlgorithmParameters>(params.algorithm));
-    Learn::ParallelLearningAgent la(cle, *maple, params.evaluation);
-    selector = new Selector::TruncationSelector(params.selection);
+    Learn::ParallelLearningAgent la(cle, *maple, std::make_unique<Learn::LearningParameters>(params.evaluation));
+    selector = new Selector::TruncationSelector(std::make_unique<Selector::SelectionParameters>(params.selection));
     la.getAlgorithms().front().get().setSelector(*selector);
 
     la.init();
@@ -1904,7 +1904,7 @@ TEST_F(ParallelLearningAgentTest, KeepBestPolicy)
     params.evaluation.maxNbEvaluationPerPolicy =
         params.evaluation.nbIterationsPerPolicyEvaluation * 2;
 
-    Learn::ParallelLearningAgent pla(le, *tpg, params.evaluation);
+    Learn::ParallelLearningAgent pla(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     pla.init();
     bool alt = false;
     pla.train(alt, true);
@@ -1933,7 +1933,7 @@ TEST_F(LearningAgentTest, EvaluateJobWithUtility)
     } utilityEnv;
 
     params.evaluation.nbIterationsPerPolicyEvaluation = 2;
-    Learn::LearningAgent la(utilityEnv, set, params.evaluation);
+    Learn::LearningAgent la(utilityEnv, set, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
 
     Algorithm::TPG::TPGArchive a;
@@ -1951,7 +1951,7 @@ TEST_F(LearningAgentTest, EvaluateJobWithUtility)
 
 TEST_F(LearningAgentTest, EvaluateOneRootThrowsIfNotInGraph)
 {
-    Learn::LearningAgent la(le, *tpg, params.evaluation);
+    Learn::LearningAgent la(le, *tpg, std::make_unique<Learn::LearningParameters>(params.evaluation));
     la.init();
     EvoGraph::Team fakeTeam;
     ASSERT_THROW(

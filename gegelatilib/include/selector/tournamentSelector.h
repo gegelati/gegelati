@@ -37,10 +37,10 @@ namespace Selector {
         /**
          * \brief Constructor for Selector.
          *
-         * \param[in] params parameters used by the Selector.
+         * \param[in] parameters parameters used by the Selector.
          */
-        TournamentSelector(const SelectionParameters& params)
-            : Selector{params}
+        TournamentSelector(std::unique_ptr<SelectionParameters> parameters = std::make_unique<SelectionParameters>())
+            : Selector{std::move(parameters)}
         {
         }
         /**

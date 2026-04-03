@@ -69,7 +69,7 @@ namespace Learn {
         std::map<uint64_t, std::reference_wrapper<Algorithm::Algorithm>> algorithms;
 
         /// Parameters for the learning process
-        LearningParameters params;
+        std::unique_ptr<LearningParameters> params;
 
         /// Graph built during the learning process.
         std::shared_ptr<EvoGraph::Graph> graph;
@@ -108,15 +108,15 @@ namespace Learn {
          *
          * \param[in] le The LearningEnvironment for the TPG.
          * \param[in] algorithms vector of algorithms learned by the learning agent
-         * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
         LearningAgent(LearningEnvironment& le, std::vector<std::reference_wrapper<Algorithm::Algorithm>> algorithms,
-                      const LearningParameters& p,
+                      std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
             : learningEnvironment{le},
-              params{p}, graph(factory.createGraph()) {
+              params{std::make_unique<LearningParameters>(*parameters)}, graph(factory.createGraph()) {
                 for(Algorithm::Algorithm& algorithm: algorithms){
                     this->algorithms.insert({algorithm.getAlgorithmID(), algorithm});
                 }
@@ -127,14 +127,14 @@ namespace Learn {
          *
          * \param[in] le The LearningEnvironment for the TPG.
          * \param[in] algorithm algorithm learned by the learning agent
-         * \param[in] p The LearningParameters for the LearningAgent.
+         * \param[in] parameters The LearningParameters for the LearningAgent.
          * \param[in] factory The GraphFactory used to create the Graph. A
          * default GraphFactory is used if none is provided.
          */
         LearningAgent(LearningEnvironment& le, Algorithm::Algorithm& algorithm,
-                      const LearningParameters& p,
+                      std::unique_ptr<LearningParameters> parameters = std::make_unique<LearningParameters>(),
                       const EvoGraph::GraphFactory& factory = EvoGraph::GraphFactory())
-            : LearningAgent(le, std::vector<std::reference_wrapper<Algorithm::Algorithm>>{algorithm}, p, factory) {};
+            : LearningAgent(le, std::vector<std::reference_wrapper<Algorithm::Algorithm>>{algorithm}, std::move(parameters), factory) {};
 
         /// Default destructor for polymorphism
         virtual ~LearningAgent() = default;

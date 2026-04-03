@@ -26,7 +26,7 @@ namespace Selector {
         size_t nbAgents;
 
         /// Parameters for the selection
-        SelectionParameters params;
+        std::unique_ptr<SelectionParameters> params;
 
         /// Pointer to the best agent encountered during training, together with
         /// its EvaluationResult.
@@ -81,10 +81,10 @@ namespace Selector {
         /**
          * \brief Constructor for Selector.
          *
-         * \param[in] params parameters used by the Selector.
+         * \param[in] parameters parameters used by the Selector.
          */
-        Selector(const SelectionParameters& params)
-            : params{params}
+        Selector(std::unique_ptr<SelectionParameters> parameters = std::make_unique<SelectionParameters>())
+            : params{std::make_unique<SelectionParameters>(*parameters)}
         {
         }
 

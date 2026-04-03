@@ -18,10 +18,10 @@ namespace Selector {
          * \brief Constructor for Selector.
          *
          * is done.
-         * \param[in] params parameters used by the Selector.
+         * \param[in] parameters parameters used by the Selector.
          */
-        TruncationSelector(const SelectionParameters& params)
-            : Selector{params}
+        TruncationSelector(std::unique_ptr<SelectionParameters> parameters = std::make_unique<SelectionParameters>())
+            : Selector{std::move(parameters)}
         {
         }
 

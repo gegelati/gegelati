@@ -35,12 +35,12 @@ namespace Selector {
             /**
              * \brief Constructor for Selector.
              *
-             * \param[in] params parameters used by the
+             * \param[in] parameters parameters used by the
              * Selector.
              * \param[in] maxNbEvaluation max number of evaluation for an agent.
              */
-            MapElitesSelector(const SelectionParameters& params, size_t maxNbEvaluation)
-                : Selector{params}, maxNbEvaluation{maxNbEvaluation}
+            MapElitesSelector(std::unique_ptr<SelectionParameters> parameters = std::make_unique<SelectionParameters>(), size_t maxNbEvaluation = 0)
+                : Selector{std::move(parameters)}, maxNbEvaluation{maxNbEvaluation}
             {
             }
 
