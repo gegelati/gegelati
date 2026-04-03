@@ -45,6 +45,11 @@ namespace Algorithm::Maple {
 
             
             /**
+             * \brief Initialize the algorithm.
+             */
+            virtual void initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph) override;
+
+            /**
              * \brief Initialize the sub-algorithms of the algorithm
              * 
              * \param[in] rng deterministic random generator

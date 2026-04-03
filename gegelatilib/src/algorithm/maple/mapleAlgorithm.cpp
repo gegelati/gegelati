@@ -17,6 +17,16 @@ void Algorithm::Maple::MapleAlgorithm::initMutator()
     this->mutator = std::make_unique<Maple::MapleMutator>(*this->selector, this->algorithmID, *this->archive);
 }
 
+
+void Algorithm::Maple::MapleAlgorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
+{
+    if(this->params->maple.nbActionEdgeInit == 0) {
+        this->params->maple.nbActionEdgeInit = outputs.size();
+    }
+    Algorithm::Algorithm::initAlgorithm(rng, outputs, dataSource, graph);
+}
+
+
 void Algorithm::Maple::MapleAlgorithm::initSubAlgorithms(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     // Initialize program algorithm.
