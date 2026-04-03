@@ -32,6 +32,21 @@ const Algorithm::Agent& Algorithm::LGP::LGPManager::copyAgent(const Agent& agent
     return **this->agents.rbegin();
 }
 
+void Algorithm::LGP::LGPManager::clearAgentsIntrons()
+{
+    for(const auto& agent: this->agents) {
+        this->clearAgentIntrons(*agent);
+    }
+}
+
+void Algorithm::LGP::LGPManager::clearAgentIntrons(const Agent& agent)
+{
+    Algorithm::LGP::LGPAgent& lgpAgent = this->getLGPAgentFromCst(agent);
+    this->identifyIntrons(agent);
+
+    lgpAgent.clearIntrons();
+}
+
 void Algorithm::LGP::LGPManager::emptyAgent(const Agent& agent, EvoGraph::Graph& graph)
 {
     Algorithm::LGP::LGPAgent& lgpAgent = this->getLGPAgentFromCst(agent);

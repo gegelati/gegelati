@@ -165,6 +165,18 @@ namespace Algorithm {
              * \param[in] agent the Agent to analyze.
              */
             virtual uint64_t identifyIntrons(const Agent& agent);
+
+            /**
+             * \brief Clear the introns of all the agents
+             */
+            virtual void clearAgentsIntrons();        
+
+            /**
+             * \brief Clear the introns of the agent
+             * 
+             * \param[in] agent the Agent to clear.
+             */
+            virtual void clearAgentIntrons(const Agent& agent);
             
             /**
              * \brief Check if two LGP have the same behavior.

@@ -31,6 +31,12 @@ void Algorithm::LGP::LGPAlgorithm::initAlgorithm(RNG::RNG& rng, const Output::Ou
     Algorithm::Algorithm::initAlgorithm(rng, outputs, dataSource, graph);
 }
 
+void Algorithm::LGP::LGPAlgorithm::clearUnusedAgentParts() 
+{
+    LGPManager& lgpManager = dynamic_cast<LGPManager&>(*this->manager);
+    lgpManager.clearAgentsIntrons();
+}
+
 
 
 std::shared_ptr<Algorithm::PolicyStats> Algorithm::LGP::LGPAlgorithm::createPolicyStats() const

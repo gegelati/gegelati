@@ -140,6 +140,13 @@ namespace Learn {
         virtual ~LearningAgent() = default;
 
         /**
+         * \brief set a new number of generation (mainly used for validation purpose)
+         * 
+         * \param[in] gen new number of generation
+         */
+        void setNbGen(size_t gen);
+
+        /**
          * \brief Set the current executed algorithm during evaluation
          * 
          * \param[in] algorithm the algorithm to set as current executed algorithm

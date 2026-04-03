@@ -46,6 +46,10 @@
 
 #include "learn/learningAgent.h"
 
+void Learn::LearningAgent::setNbGen(size_t gen)
+{
+    this->params->nbGenerations = gen;
+}
 
 const Algorithm::Algorithm& Learn::LearningAgent::getBestAlgorithm()
 {

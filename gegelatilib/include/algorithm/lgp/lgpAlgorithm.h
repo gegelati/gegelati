@@ -54,7 +54,7 @@ namespace Algorithm::LGP {
             /**
              * \brief Clear all the parts of agents that are not used, such as introns for LGPs
              */
-            virtual void clearUnusedAgentParts() override {};
+            virtual void clearUnusedAgentParts() override;
 
 
             
