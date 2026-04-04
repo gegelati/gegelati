@@ -69,7 +69,7 @@ void Output::convertContinuousToDiscreteOutputs(std::vector<double>& continuousV
         // clamp the value between 0 and nbValues -1, then round it to get the discrete value
         const Output& output = discreteOutputs.at(idx);
         double value = continuousValues.at(idx);
-        if(value < 0){
+        if(std::isnan(value) || value < 0){
             value = 0;
         } else if (value > (double)(output.getNbValues() - 1)){
             value = (double)(output.getNbValues() - 1);
