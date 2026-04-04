@@ -189,7 +189,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
          iterationNumber++) {
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
-        uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber);
+        uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber) ^ hasher(static_cast<int>(mode));
 
         // Init selectionMetrics for this episode.
         std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
