@@ -82,8 +82,9 @@ bool Algorithm::CGP::CGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
         alterRandomConstant(agent, manager, params, rng);
     }
 
-    for(size_t idx = 0; idx < manager.getOutputs().size(); idx++) {
+    for(size_t idx = 0; idx < agent.getUsedNbOutputs(manager.getOutputs()); idx++) {
         if(rng.getDouble(0.0, 1.0) < params.lgp.pMutateOutput) {
+            anyMutation = true;
             alterRandomOutputs(agent, manager, idx, params, rng);
         }
     }

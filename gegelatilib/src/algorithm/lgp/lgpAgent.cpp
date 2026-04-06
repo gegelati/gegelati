@@ -9,6 +9,15 @@ Algorithm::LGP::LGPAgent::~LGPAgent()
     }
 }
 
+size_t Algorithm::LGP::LGPAgent::getUsedNbOutputs(const Output::OutputHandler& outputs) const
+{
+    size_t nbOutputs = outputs.size();
+    if(outputs.size() == 1 && outputs.sizeDiscrete() == 1) {
+        nbOutputs = outputs.front().getNbValues();
+    }
+    return nbOutputs;
+}
+
 const Output::OutputHandler& Algorithm::LGP::LGPAgent::getOutputs() const
 {
     return this->outputs;

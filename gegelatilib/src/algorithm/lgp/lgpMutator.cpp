@@ -215,7 +215,7 @@ bool Algorithm::LGP::LGPMutator::mutateLGPAgent(const LGPAgent& agent, LGPManage
     }
 
     if(false) {
-        for(size_t idx = 0; idx < manager.getOutputs().size(); idx++) {
+        for(size_t idx = 0; idx < agent.getUsedNbOutputs(manager.getOutputs()); idx++) {
             if(rng.getDouble(0.0, 1.0) < 0) {//params.lgp.pMutateOutputs) {
                 alterRandomOutputs(agent, manager, idx, params, rng);
             }

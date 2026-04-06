@@ -70,8 +70,21 @@ std::vector<double> Algorithm::LGP::LGPExecutionEngine::execute()
     }
 
     if(this->outputs.sizeContinuous() == 0){
-        Output::convertContinuousToDiscreteOutputs(result, this->outputs);
-        return result;
+        if(this->outputs.sizeDiscrete() > 1){
+            Output::convertContinuousToDiscreteOutputs(result, this->outputs);
+            return result;
+        } else {
+            size_t max_index = 0;
+            double max_value = result[0];
+
+            for (size_t i = 1; i < result.size(); ++i) {
+                if (result[i] > max_value) {
+                    max_value = result[i];
+                    max_index = i;
+                }
+            }
+            return {(double)max_index};
+        }
     } else {
         // Returns the register values
         // TODO ACTIVATION FUNCTIONS

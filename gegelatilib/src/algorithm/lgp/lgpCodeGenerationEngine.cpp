@@ -106,9 +106,11 @@ void Algorithm::LGP::LGPCodeGenerationEngine::generateProgram(
 
     
     const std::vector<size_t>& outputIndices = dynamic_cast<const LGPAgent&>(this->executedAgent->get()).getOutputIndices();
-    for(size_t idx = 0; idx < this->outputs.size(); idx ++ ){
+    for(size_t idx = 0; idx < outputIndices.size(); idx ++ ){
         fileMain << "\toutputs["<<idx<<"] = reg["<<outputIndices[idx]<<"];\n";
     }
+    // TODO ARGMAX TO ADD FOR DISCRETE OUTPUTS
+
     fileMain 
         << "}"<<std::endl;
 }

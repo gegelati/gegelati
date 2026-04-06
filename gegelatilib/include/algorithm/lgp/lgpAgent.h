@@ -66,10 +66,16 @@ namespace Algorithm::LGP {
                 : Agent(algorithmID), environment{e}, constants{e.getNbConstants()}, outputs{outputs}
             {
                 constants.resetData(); // force all constant to 0 at first.
-                for (size_t idx = 0; idx < outputs.size(); idx++ ){
+                size_t nbOutputs = this->getUsedNbOutputs(outputs);
+                for (size_t idx = 0; idx < nbOutputs; idx++ ){
                     outputIndices.push_back(idx % e.getNbRegisters());
                 }
             };
+
+            /**
+             * \brief get real number of outputs
+             */
+            size_t getUsedNbOutputs(const Output::OutputHandler& outputs) const;
 
             // Disable copy semantics: LGPAgent should never be copied.
             LGPAgent(const LGPAgent&) = delete;

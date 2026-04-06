@@ -138,7 +138,7 @@ namespace Algorithm::LGP {
 
         /**
          * \brief Execute the program completely and returns the content of
-         * register 0 to lgpAgent->nbOutputs.
+         * register 0 to lgpAgent->nbOutputs
          */
         virtual std::vector<double> execute() override;
 

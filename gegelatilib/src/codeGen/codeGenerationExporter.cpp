@@ -161,6 +161,9 @@ void CodeGen::CodeGenerationExporter::exportMainAgent(const Algorithm::Agent& ag
             fileMain 
                 << "}\n" << std::endl;
         }
+    } else {
+        fileMain 
+            << "}\n" << std::endl;
     }
 
     fileMainH

@@ -184,8 +184,8 @@ bool Algorithm::TGP::TGPMutator::mutateLGPAgent(const LGP::LGPAgent& agent, LGP:
         alterRandomConstant(agent, manager, params, rng);
     }
 
-    if(manager.getOutputs().size() > 1) {
-        for(size_t idx = 0; idx < manager.getOutputs().size(); idx++) {
+    if(agent.getUsedNbOutputs(manager.getOutputs()) > 1) {
+        for(size_t idx = 0; idx < agent.getUsedNbOutputs(manager.getOutputs()); idx++) {
     
             size_t nbZeroRegUsed = std::count_if(
                 agent.getOutputIndices().begin(), agent.getOutputIndices().end(), []
