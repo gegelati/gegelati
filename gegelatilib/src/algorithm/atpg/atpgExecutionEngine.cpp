@@ -37,7 +37,6 @@ std::vector<double> Algorithm::ATPG::ATPGExecutionEngine::execute()
     this->actionValues = this->actionProgramExecutionEngine->execute();
 
     if(this->outputs.sizeContinuous() == 0){
-        Output::convertContinuousToDiscreteOutputs(this->actionValues, this->outputs);
         return this->actionValues;
     } else {
         /// TODO SET ACTIVATION FUNCTION

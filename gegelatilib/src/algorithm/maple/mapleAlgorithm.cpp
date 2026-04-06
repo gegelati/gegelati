@@ -21,7 +21,8 @@ void Algorithm::Maple::MapleAlgorithm::initMutator()
 void Algorithm::Maple::MapleAlgorithm::initAlgorithm(RNG::RNG& rng, const Output::OutputHandler& outputs, const std::vector<std::reference_wrapper<const Data::DataHandler>>& dataSource, std::shared_ptr<EvoGraph::Graph> graph)
 {
     if(this->params->maple.nbActionEdgeInit == 0) {
-        this->params->maple.nbActionEdgeInit = outputs.size();
+        size_t nbOutputs = (outputs.sizeDiscrete() == 1) ? outputs.front().getNbValues() : outputs.size();
+        this->params->maple.nbActionEdgeInit = nbOutputs;
     }
     Algorithm::Algorithm::initAlgorithm(rng, outputs, dataSource, graph);
 }

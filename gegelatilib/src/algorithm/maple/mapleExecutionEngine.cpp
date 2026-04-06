@@ -29,8 +29,21 @@ std::vector<double> Algorithm::Maple::MapleExecutionEngine::execute()
 
 
     if(this->outputs.sizeContinuous() == 0){
-        Output::convertContinuousToDiscreteOutputs(this->actionValues, this->outputs);
-        return this->actionValues;
+        if(this->outputs.sizeDiscrete() > 1){
+            Output::convertContinuousToDiscreteOutputs(this->actionValues, this->outputs);
+            return this->actionValues;
+        } else {
+            size_t max_index = 0;
+            double max_value = this->actionValues[0];
+
+            for (size_t i = 1; i < this->outputs.front().getNbValues(); ++i) {
+                if (this->actionValues[i] > max_value) {
+                    max_value = this->actionValues[i];
+                    max_index = i;
+                }
+            }
+            return {(double)max_index};
+        }
     } else {
         /// TODO SET ACTIVATION FUNCTION
         return Utils::ActivationFunctions::scaleOutputValues(this->actionValues, this->outputs, Utils::ActivationFunction::TANH);

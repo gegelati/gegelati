@@ -4,10 +4,11 @@
 
 bool Algorithm::Maple::MapleMutator::isConfigurationValid(const AlgorithmParameters& params, const Output::OutputHandler& outputs) const
 {
+    size_t nbOutputs = (outputs.sizeDiscrete() == 1) ? outputs.front().getNbValues() : outputs.size();
     if(outputs.sizeContinuous() != 0 && outputs.sizeDiscrete() != 0){
         throw std::runtime_error("MapleMutator::initRandomPopulation: Maple does not support mixed discrete and continuous outputs.");
     } else if (outputs.sizeDiscrete() != 0 || outputs.sizeContinuous() != 0){
-        if(params.maple.nbActionEdgeInit > outputs.size()){
+        if(params.maple.nbActionEdgeInit > nbOutputs){
             throw std::runtime_error("MapleMutator::initRandomPopulation: Number of discrete outputs cannot be lower than the number of initial edges.");
         }        
     } else if (outputs.size() == 0){
@@ -19,7 +20,8 @@ bool Algorithm::Maple::MapleMutator::isConfigurationValid(const AlgorithmParamet
 void Algorithm::Maple::MapleMutator::initRandomPopulation(EvoGraph::Graph& graph, AgentManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)
 {
     this->isConfigurationValid(params, manager.getOutputs());
-    this->initActionVertices(graph, manager.getOutputs().size());
+    size_t nbOutputs = (manager.getOutputs().sizeDiscrete() == 1) ? manager.getOutputs().front().getNbValues() : manager.getOutputs().size();
+    this->initActionVertices(graph, nbOutputs);
 
     // Empty agent manager
     manager.clearAgents(graph);
@@ -34,7 +36,8 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
     // First agent initialized, check configuration validity and create action vertices
     if(manager.getAgents().size() == 1){
         this->isConfigurationValid(params, manager.getOutputs());
-        this->initActionVertices(graph, manager.getOutputs().size());
+        size_t nbOutputs = (manager.getOutputs().sizeDiscrete() == 1) ? manager.getOutputs().front().getNbValues() : manager.getOutputs().size();
+        this->initActionVertices(graph, nbOutputs);
     }
 
     manager.emptyAgent(agent, graph);
@@ -47,7 +50,9 @@ void Algorithm::Maple::MapleMutator::initRandomSpecificAgent(const Agent& agent,
     AgentManager& programManager = manager.getSubManager(this->programAlgorithmID);
 
     // Get available actions classes
-    std::vector<uint64_t> availableActions(manager.getOutputs().size());
+    
+    size_t nbOutputs = (manager.getOutputs().sizeDiscrete() == 1) ? manager.getOutputs().front().getNbValues() : manager.getOutputs().size();
+    std::vector<uint64_t> availableActions(nbOutputs);
     std::iota(availableActions.begin(), availableActions.end(), uint64_t{0});
 
 
@@ -154,7 +159,8 @@ void Algorithm::Maple::MapleMutator::crossoverAgents(
         return;
     }
     // Initialize available actions
-    std::vector<uint64_t> availableActions(manager.getOutputs().size());
+    size_t nbOutputs = (manager.getOutputs().sizeDiscrete() == 1) ? manager.getOutputs().front().getNbValues() : manager.getOutputs().size();
+    std::vector<uint64_t> availableActions(nbOutputs);
     std::iota(availableActions.begin(), availableActions.end(), uint64_t{0});
 
     uint64_t indexAction;
@@ -311,7 +317,7 @@ void Algorithm::Maple::MapleMutator::mutateOutgoingEdge(
     // Add it to the list of new agent to be mutated.
     newSubAgents.push_back(newAgent);
 
-    size_t nbActions = manager.getOutputs().size();
+    size_t nbActions = (manager.getOutputs().sizeDiscrete() == 1) ? manager.getOutputs().front().getNbValues() : manager.getOutputs().size();
     // Change action ID randomly if the action do not contain all actions.
     if (actionClasses.size() < nbActions &&
         params.maple.pChangeActionClass > rng.getDouble(0.0, 1.0)) {
@@ -342,8 +348,9 @@ void Algorithm::Maple::MapleMutator::mutateAgent(
 
     // 2. Add random duplicated edge with the team as its source
     proba = params.maple.pActionEdgeAddition;
+    size_t nbOutputs = (manager.getOutputs().sizeDiscrete() == 1) ? manager.getOutputs().front().getNbValues() : manager.getOutputs().size();
     while (team.getOutgoingEdges().size() <
-                manager.getOutputs().size() &&
+                nbOutputs &&
             proba > rng.getDouble(0.0, 1.0)) {
         // Add an edge (by duplication of an existing one)
         this->addRandomEdge(graph, team, rng);
