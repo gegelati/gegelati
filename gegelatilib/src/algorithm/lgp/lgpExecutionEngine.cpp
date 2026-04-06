@@ -77,7 +77,7 @@ std::vector<double> Algorithm::LGP::LGPExecutionEngine::execute()
             size_t max_index = 0;
             double max_value = result[0];
 
-            for (size_t i = 1; i < result.size(); ++i) {
+            for (size_t i = 1; i < this->outputs.front().getNbValues(); ++i) {
                 if (result[i] > max_value) {
                     max_value = result[i];
                     max_index = i;
