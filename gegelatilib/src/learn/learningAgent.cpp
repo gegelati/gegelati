@@ -153,16 +153,30 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     const Algorithm::Agent& agent = job.getAgent();
     const Selector::Selector& selector = this->currentExecutedAlgorithm->getSelector();
 
+
+
     // Skip the agent evaluation process if enough evaluations were already
     // performed. In the evaluation mode only.
     std::shared_ptr<Learn::EvaluationResult> previousEval;
+    size_t nbEvaluationToDo = 0;
     size_t nbEvaluationAgent = selector.getNbEvaluation(job.getAgent());
-    if (mode == LearningMode::TRAINING && nbEvaluationAgent > 0) {
-        previousEval = selector.getResultsOf(job.getAgent());
-        if(nbEvaluationAgent > params->maxNbEvaluationPerPolicy) {
-            return previousEval;
+    if (mode == LearningMode::TRAINING) {
+        nbEvaluationToDo = this->params->nbIterationsPerPolicyEvaluation;
+        
+        if(nbEvaluationAgent > 0) {
+            previousEval = selector.getResultsOf(job.getAgent());
+
+            if(nbEvaluationAgent == params->maxNbEvaluationPerPolicy) {
+                return previousEval;
+            } else if (nbEvaluationAgent + nbEvaluationToDo > params->maxNbEvaluationPerPolicy) {
+                nbEvaluationToDo = params->maxNbEvaluationPerPolicy - nbEvaluationAgent;
+            }
+            
         }
+    } else {
+        nbEvaluationToDo = this->params->nbIterationsPerPolicyValidation;
     }
+
 
     // Set the job to execute
     execEngine.setExecutionMode(mode == LearningMode::TRAINING);
@@ -174,22 +188,24 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
     // Init utility
     double utility = 0.0;
 
-    // Number of evaluations
-    uint64_t nbEvaluation = (mode == LearningMode::TRAINING)
-                                ? this->params->nbIterationsPerPolicyEvaluation
-                                : this->params->nbIterationsPerPolicyValidation;
 
     // Init global selection metric
     std::shared_ptr<Selector::SelectionMetrics> globalSelectionMetrics =
         selector.createSelectionMetrics();
     globalSelectionMetrics->initMetrics(agent, le);
 
+
     // Evaluate nbIteration times
-    for (auto iterationNumber = 0; iterationNumber < nbEvaluation;
+    for (auto iterationNumber = 0; iterationNumber < nbEvaluationToDo;
          iterationNumber++) {
         // Compute a Hash
         Data::Hash<uint64_t> hasher;
-        uint64_t hash = hasher(generationNumber) ^ hasher(iterationNumber) ^ hasher(static_cast<int>(mode));
+        uint64_t hash;
+        if(mode == Learn::LearningMode::TRAINING) {
+            hash = hasher(generationNumber) ^ hasher(iterationNumber) ^ hasher(static_cast<int>(mode));
+        } else {
+            hash = hasher(iterationNumber) ^ hasher(static_cast<int>(mode));
+        }
 
         // Init selectionMetrics for this episode.
         std::shared_ptr<Selector::SelectionMetrics> selectionMetrics =
@@ -224,7 +240,7 @@ std::shared_ptr<Learn::EvaluationResult> Learn::LearningAgent::evaluateJob(
 
     // Create the EvaluationResult
     auto evaluationResult = std::shared_ptr<EvaluationResult>(
-        new EvaluationResult(globalSelectionMetrics, nbEvaluation));
+        new EvaluationResult(globalSelectionMetrics, nbEvaluationToDo));
 
     // Combine it with previous one if any
     if (previousEval != nullptr) {
