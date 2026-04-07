@@ -46,6 +46,10 @@ void Algorithm::CGP::CGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
         this->insertRandomLine(lgpAgent, lgpManager, params, rng);
     }
 
+    for(size_t idx = 0; idx < lgpAgent.getOutputIndices().size(); idx++) {
+        lgpManager.setOutputIndex(lgpAgent, nbLine - 1, idx);
+    }
+
     // Identify Introns
     lgpManager.identifyIntrons(agent);
 }
