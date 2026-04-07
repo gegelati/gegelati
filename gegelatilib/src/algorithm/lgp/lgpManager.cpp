@@ -28,6 +28,10 @@ const Algorithm::Agent& Algorithm::LGP::LGPManager::copyAgent(const Agent& agent
         this->setConstantAt(newAgent, idx, castedAgent->getConstantAt(idx));
     }
 
+    for(size_t idx = 0; idx < castedAgent->getOutputIndices().size(); idx++) {
+        this->setOutputIndex(newAgent, castedAgent->getOutputIndices().at(idx), idx);
+    }
+
     this->identifyIntrons(newAgent);
     return **this->agents.rbegin();
 }
