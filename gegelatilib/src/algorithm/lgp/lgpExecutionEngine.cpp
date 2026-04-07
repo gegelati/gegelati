@@ -63,7 +63,7 @@ std::vector<double> Algorithm::LGP::LGPExecutionEngine::execute()
 
     const std::vector<size_t>& outputIndices = dynamic_cast<const LGPAgent&>(this->executedAgent->get()).getOutputIndices();
     std::vector<double> result;
-    for(size_t idx = 0; idx < this->outputs.size(); idx++){
+    for(size_t idx = 0; idx < outputIndices.size(); idx++){
         // cast to primitiveType<double> to enable cast to double.
         result.push_back(*(this->registers.getDataAt(typeid(double), outputIndices[idx])
                  .getSharedPointer<const double>()));
