@@ -47,7 +47,7 @@ void Algorithm::CGP::CGPMutator::initRandomSpecificAgent(const Agent& agent, Evo
     }
 
     for(size_t idx = 0; idx < lgpAgent.getOutputIndices().size(); idx++) {
-        lgpManager.setOutputIndex(lgpAgent, nbLine - 1, idx);
+        lgpManager.setOutputIndex(lgpAgent, nbLine - 1 - idx, idx);
     }
 
     // Identify Introns

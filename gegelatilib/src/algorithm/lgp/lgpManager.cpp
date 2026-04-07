@@ -238,6 +238,14 @@ bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(const Agent& agent1, const
         }
     }
 
+    for (size_t idx = 0; idx < lgpAgent1->getOutputIndices().size(); idx++) {
+        if(lgpAgent1->getOutputIndices().at(idx) != lgpAgent2->getOutputIndices().at(idx)) {
+            return false;
+        }
+    }
+
+    std::cout<<"was the same bro"<<std::endl;
+
     // Everything was identical, return true
     return true;
 }

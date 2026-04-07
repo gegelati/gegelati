@@ -103,19 +103,6 @@ namespace Algorithm::TPG {
         double pProgramMutation = 0.2;
 
         /// JSon comment
-        inline static const std::string
-            forceProgramBehaviorChangeOnMutationComment =
-                "// When a Program is mutated, makes sure its behavior is no "
-                "longer the same.\n"
-                "// \"forceProgramBehaviorChangeOnMutation\" : false, // "
-                "Default value";
-        /// When a Program is mutated, makes sure its behavior is no longer the
-        /// same. (This possibility does not exists in Kelly's work, where only
-        /// the archive is used for this purpose, which is far from 100%
-        /// accurate.)
-        bool forceProgramBehaviorChangeOnMutation = false;
-
-        /// JSon comment
         inline static const std::string pEdgeDestinationChangeComment =
             "// Probability of changing the destination of an Edge.\n"
             "// \"pEdgeDestinationChange\" : 0.1, // Default value";

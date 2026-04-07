@@ -160,27 +160,35 @@ void Algorithm::CGP::CGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, s
         destinationIndex); // Should never throw.. but I did not deactivate the
                            // check anyway.
 
-    // Select an instruction.
-    uint64_t instructionIndex =
-        rng.getUnsignedInt64(0, (env.getNbInstructions() - 1));
-    // Get the instruction
-    const Instructions::Instruction& instruction =
-        env.getInstructionSet().getInstruction(instructionIndex);
-    // Set the instructionIndex
-    line.setInstructionIndex(
-        instructionIndex); // Should never throw.. but I did not deactivate the
-                           // check anyway.
+    bool success = false;
+    while(!success) {
+        success = true;
+        // Select an instruction.
+        uint64_t instructionIndex =
+            rng.getUnsignedInt64(0, (env.getNbInstructions() - 1));
+        // Get the instruction
+        const Instructions::Instruction& instruction =
+            env.getInstructionSet().getInstruction(instructionIndex);
+        // Set the instructionIndex
+        line.setInstructionIndex(
+            instructionIndex); // Should never throw.. but I did not deactivate the
+                            // check anyway.
 
-    // Select operands needed by the instruction
-    uint64_t operandIdx = 0;
-    for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
+        // Select operands needed by the instruction
+        uint64_t operandIdx = 0;
+        for (; operandIdx < env.getMaxNbOperands(); operandIdx++) {
 
-        // Check if all operands were tested (and none were valid)
-        initRandomCorrectLineOperand(instruction, line, nbAvailableRegister, operandIdx, true, true,
-                                     false, rng);
+            // Check if all operands were tested (and none were valid)
+            if(!initRandomCorrectLineOperand(instruction, line, nbAvailableRegister, operandIdx, true, true,
+                                        false, rng)){
+                success = false;
+            }
 
-        // This operation can (no longer) fail since commit abd7cd since
-        // all Instruction are vetted when building the Environment
+            // This operation can (no longer) fail since commit abd7cd since
+            // all Instruction are vetted when building the Environment
+
+            // THis can fail again if registers are not available
+        }
     }
     if(!this->isLineCorrect(line, nbAvailableRegister)) {
         throw std::runtime_error("CGPLineMutator::initRandomCorrectLine: line is not correct for CGP after intialisation");

@@ -49,6 +49,18 @@ namespace Algorithm::LGP {
     typedef struct LGPParameters
     {
 
+
+        /// JSon comment
+        inline static const std::string
+            forceProgramBehaviorChangeOnMutationComment =
+                "// When a Program is mutated, makes sure its behavior is no "
+                "longer the same.\n"
+                "// \"forceProgramBehaviorChangeOnMutation\" : false, // "
+                "Default value";
+        /// When a Program is mutated, makes sure its behavior is no longer the
+        /// same.
+        bool forceProgramBehaviorChangeOnMutation = false;
+
         /// JSon comment
         inline static const std::string nbRegistersComment =
             "// Number of registers for the Program execution.\n"

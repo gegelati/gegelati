@@ -179,8 +179,17 @@ void Algorithm::LGP::LGPMutator::mutateAgent(
         throw std::invalid_argument("LGPMutator::initRandomAgent: the created agent is not a LGPAgent.");
     }
 
-    // Mutate until a mutation happen
-    while (!this->mutateLGPAgent(lgpAgent, lgpManager, params, rng));
+    if (params.lgp.forceProgramBehaviorChangeOnMutation) {
+        // Copy the program to check that its behavior is changed before
+        // verifying its unicity against the archive
+        const Agent& newProgCopy = lgpManager.copyAgent(agent, graph);
+        while (!this->mutateLGPAgent(lgpAgent, lgpManager, params, rng) &&
+                !lgpManager.hasIdenticalBehavior(agent, newProgCopy));
+        lgpManager.deleteAgent(newProgCopy, graph);
+    } else {
+        // Mutate until a mutation happen
+        while (!this->mutateLGPAgent(lgpAgent, lgpManager, params, rng));
+    }
 }
 
 bool Algorithm::LGP::LGPMutator::mutateLGPAgent(const LGPAgent& agent, LGPManager& manager, const AlgorithmParameters& params, RNG::RNG& rng)

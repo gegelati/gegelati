@@ -166,11 +166,6 @@ void File::ParametersParser::setParameterFromString(
         params.algorithm.tpg.pProgramMutation = value.asDouble();
         return;
     }
-    if (param == "forceProgramBehaviorChangeOnMutation") {
-        params.algorithm.tpg.forceProgramBehaviorChangeOnMutation =
-            value.asBool();
-        return;
-    }
     if (param == "pEdgeDestinationChange") {
         params.algorithm.tpg.pEdgeDestinationChange = value.asDouble();
         return;
@@ -224,6 +219,11 @@ void File::ParametersParser::setParameterFromString(
 
 
 
+    if (param == "forceProgramBehaviorChangeOnMutation") {
+        params.algorithm.lgp.forceProgramBehaviorChangeOnMutation =
+            value.asBool();
+        return;
+    }
     if (param == "nbRegisters") {
         params.algorithm.lgp.nbRegisters = (size_t)value.asUInt();
         return;
@@ -413,13 +413,6 @@ void File::ParametersParser::writeParametersToJson(
         Algorithm::TPG::TPGParameters::archivingProbabilityComment,
         Json::commentBefore);
 
-    // algorithm.tpg parameters
-    root["algorithm"]["tpg"]["forceProgramBehaviorChangeOnMutation"] =
-        params.algorithm.tpg.forceProgramBehaviorChangeOnMutation;
-    root["algorithm"]["tpg"]["forceProgramBehaviorChangeOnMutation"].setComment(
-        Algorithm::TPG::TPGParameters::forceProgramBehaviorChangeOnMutationComment,
-        Json::commentBefore);
-
     root["algorithm"]["tpg"]["maxInitOutgoingEdges"] =
         params.algorithm.tpg.maxInitOutgoingEdges;
     root["algorithm"]["tpg"]["maxInitOutgoingEdges"].setComment(
@@ -505,6 +498,12 @@ void File::ParametersParser::writeParametersToJson(
 
 
     // Mutation.program parameters
+
+    root["algorithm"]["lgp"]["forceProgramBehaviorChangeOnMutation"] =
+        params.algorithm.lgp.forceProgramBehaviorChangeOnMutation;
+    root["algorithm"]["lgp"]["forceProgramBehaviorChangeOnMutation"].setComment(
+        Algorithm::LGP::LGPParameters::forceProgramBehaviorChangeOnMutationComment,
+        Json::commentBefore);
     root["algorithm"]["lgp"]["nbProgramConstant"] = params.algorithm.lgp.nbProgramConstant;
     root["algorithm"]["lgp"]["nbProgramConstant"].setComment(
         Algorithm::LGP::LGPParameters::nbProgramConstantComment,

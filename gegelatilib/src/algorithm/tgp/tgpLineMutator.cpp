@@ -135,6 +135,23 @@ bool Algorithm::TGP::TGPLineMutator::initRandomCorrectLineOperand(
     return operandFound;
 }
 
+
+bool Algorithm::TGP::TGPLineMutator::isLineCorrect(LGP::LGPLine& line, bool maxDepthReached)
+{
+    if(line.getEnvironment().getMaxNbOperands() > 2) {
+        return false;
+    }
+    for(size_t idx = 0; idx < line.getEnvironment().getMaxNbOperands(); idx ++) {
+        if(maxDepthReached && line.getOperand(idx).first == 0) {
+            return false;
+        }
+        if(line.getOperand(idx).first == 0 && line.getOperand(idx).second != 2 * line.getDestinationIndex() + 1 + idx) {
+            return false;
+        } 
+    }
+    return true;
+}
+
 void Algorithm::TGP::TGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, size_t idxRegister, bool maxDepthReached, RNG::RNG& rng)
 {
     const LGP::LGPEnvironment& env = line.getEnvironment();
@@ -180,22 +197,6 @@ void Algorithm::TGP::TGPLineMutator::initRandomCorrectLine(LGP::LGPLine& line, s
     if(!this->isLineCorrect(line, maxDepthReached)) {
         throw std::runtime_error("TGPLineMutator::initRandomCorrectLine: line is not correct for TreeBased GP after intialisation");
     }
-}
-
-bool Algorithm::TGP::TGPLineMutator::isLineCorrect(LGP::LGPLine& line, bool maxDepthReached)
-{
-    if(line.getEnvironment().getMaxNbOperands() > 2) {
-        return false;
-    }
-    for(size_t idx = 0; idx < line.getEnvironment().getMaxNbOperands(); idx ++) {
-        if(maxDepthReached && line.getOperand(idx).first == 0) {
-            return false;
-        }
-        if(line.getOperand(idx).first == 0 && line.getOperand(idx).second != 2 * line.getDestinationIndex() + 1 + idx) {
-            return false;
-        } 
-    }
-    return true;
 }
 
 void Algorithm::TGP::TGPLineMutator::alterCorrectLine(LGP::LGPLine& line, bool maxDepthReached, RNG::RNG& rng)
