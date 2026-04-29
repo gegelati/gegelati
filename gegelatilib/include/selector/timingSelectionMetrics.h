@@ -64,7 +64,7 @@ namespace Selector {
         /// @brief Constructor for the SelectionMetrics with timing.
         /// @param obj SelectionMetrics being timed.
         explicit TimingSelectionMetrics(std::shared_ptr<SelectionMetrics> obj)
-            : wrapped(obj) {};
+            : wrapped(obj){};
 
         /// @brief Forward to wrapped method
         void extractMetricsStep(
