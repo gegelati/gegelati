@@ -39,6 +39,7 @@
 #include <numeric>
 
 #include "learn/learningAgent.h"
+#include "selector/timingSelectionMetrics.h"
 
 #include "log/laBasicLogger.h"
 
@@ -68,10 +69,30 @@ void Log::LABasicLogger::logResults(
               << std::setw(colWidth) << max;
     };
 
+    auto logTimingStat = [&](auto val, auto getter) {
+        val = std::accumulate(
+            results.begin(), results.end(), 0.0,
+            [getter](auto acc,
+                     const std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                                     const TPG::TPGVertex*>& pair) {
+                return acc + (std::static_pointer_cast<
+                                  Selector::TimingSelectionMetrics>(
+                                  pair.first->getSelectionMetrics())
+                                  .get()
+                                  ->*getter)();
+            });
+        *this << std::setw(colWidth) << val;
+    };
+
     if (useUtility) {
         logStat(&Selector::SelectionMetrics::getUtility);
     }
     logStat(&Selector::SelectionMetrics::getScore);
+    if (detailedTiming) {
+        logTimingStat(0.0, &Selector::TimingSelectionMetrics::getAgentTime);
+        logTimingStat(0.0, &Selector::TimingSelectionMetrics::getLeTime);
+        logTimingStat(0, &Selector::TimingSelectionMetrics::getNbActions);
+    }
 }
 
 void Log::LABasicLogger::logHeader()
@@ -80,11 +101,15 @@ void Log::LABasicLogger::logHeader()
     //*this << std::left;
 
     *this << std::setw(5 * colWidth) << " ";
+    if (detailedTiming)
+        *this << std::setw(2 * colWidth) << " ";
     if (useUtility)
         *this << std::setw((int)(1.5 * colWidth)) << " ";
     *this << std::setw(colWidth) << "Train";
     if (doValidation) {
         *this << std::setw((int)(2.5 * colWidth)) << " ";
+        if (detailedTiming)
+            *this << std::setw(3 * colWidth) << " ";
         if (useUtility)
             *this << std::setw((int)(3 * colWidth)) << "  ";
         *this << "Valid";
@@ -107,6 +132,10 @@ void Log::LABasicLogger::logHeader()
         *this << std::setw(colWidth) << "Min" << std::setw(colWidth) << "Avg"
               << std::setw(colWidth) << "Max";
     }
+    if (detailedTiming) {
+        *this << std::setw(colWidth) << "T_agent" << std::setw(colWidth)
+              << "T_le" << std::setw(colWidth) << "nb_act";
+    }
 
     if (doValidation) {
         if (useUtility) {
@@ -118,6 +147,10 @@ void Log::LABasicLogger::logHeader()
         else {
             *this << std::setw(colWidth) << "Min" << std::setw(colWidth)
                   << "Avg" << std::setw(colWidth) << "Max";
+        }
+        if (detailedTiming) {
+            *this << std::setw(colWidth) << "T_agent" << std::setw(colWidth)
+                  << "T_le" << std::setw(colWidth) << "nb_act";
         }
     }
 
@@ -183,10 +216,10 @@ void Log::LABasicLogger::logAfterValidate(
         logResults(results);
     }
     else {
-        size_t multiplier = 3;
-        if (useUtility)
-            multiplier *= 2;
-        *this << std::setw(multiplier * colWidth) << " ";
+        int rows = 3;
+        rows += useUtility ? 3 : 0;
+        rows += detailedTiming ? 3 : 0;
+        *this << std::setw(rows * colWidth) << " ";
     }
 }
 

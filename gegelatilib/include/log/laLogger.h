@@ -138,6 +138,10 @@ namespace Log {
          */
         bool useUtility = false;
 
+        /// @brief Boolean telling the logger if the training has additional
+        /// timers.
+        bool detailedTiming = false;
+
         /**
          * \brief Constructor defining a given output and setting start and
          * checkpoint as now. Default output is cout.

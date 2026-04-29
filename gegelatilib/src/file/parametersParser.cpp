@@ -161,6 +161,10 @@ void File::ParametersParser::setParameterFromString(
         params.nbThreads = (size_t)value.asUInt();
         return;
     }
+    if (param == "detailedTiming") {
+        params.detailedTiming = value.asBool();
+        return;
+    }
     if (param == "nbGenerations") {
         params.nbGenerations = value.asUInt64();
         return;
@@ -419,6 +423,10 @@ void File::ParametersParser::writeParametersToJson(
     root["nbThreads"] = params.nbThreads;
     root["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,
                                  Json::commentBefore);
+
+    root["detailedTiming"] = params.detailedTiming;
+    root["detailedTiming"].setComment(
+        Learn::LearningParameters::detailedTimingComment, Json::commentBefore);
 
     // Mutation.tpg parameters
     root["mutation"]["tpg"]["forceProgramBehaviorChangeOnMutation"] =

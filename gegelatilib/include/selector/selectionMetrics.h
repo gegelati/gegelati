@@ -38,6 +38,9 @@ namespace Selector {
          */
         SelectionMetrics() = default;
 
+        /// @brief Default destructor
+        virtual ~SelectionMetrics() = default;
+
         /**
          * \brief Constructor with score and utility initialization.
          *
@@ -116,6 +119,32 @@ namespace Selector {
          */
         virtual void weightedSum(std::shared_ptr<SelectionMetrics> other,
                                  size_t nbEvaluation, size_t nbEvaluationOther);
+
+        /// @brief Comparison function to enable sorting of SelectionMetrics
+        /// with STL.
+        friend bool operator<(const SelectionMetrics& lhs,
+                              const SelectionMetrics& rhs)
+        {
+            return lhs.getScore() < rhs.getScore();
+        }
+
+        /**
+         * \brief Perform a weighted sum between 2 values.
+         *
+         * \param[in] value the value to combine.
+         * \param[in] valueOther the other value to combine.
+         * \param[in] nbEvaluation the number of evaluations to obtain value.
+         * \param[in] nbEvaluationOther the number of evaluations to obtain
+         * valueOther.
+         */
+        template <class T>
+        static T weightedSum(T value, T valueOther, size_t nbEvaluation,
+                             size_t nbEvaluationOther)
+        {
+            value = value * (T)nbEvaluation + valueOther * (T)nbEvaluationOther;
+            value /= (T)(nbEvaluation + nbEvaluationOther);
+            return value;
+        }
     };
 
     /**

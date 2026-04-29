@@ -16,6 +16,7 @@ _yyyy.mm.dd_
     * Implementation of the MapElites algorithm, with an archive storing the best agents respectively to the different descriptors used for the archive. The archive can be either a classic table or a table generated through a Centroid Voronoï Tesselation computation (CVT). The implementation of the MapElitesSelector allows to create N archives for a single population. A default Descrirptor is implemented, for continuous environment, extracting the action values
   * ClassificationSelector:
     * Selector based on the former doSelection method in ClassificationLearningAgent. The classification selector allows to delete the ClassificationLearningAgent class, in order to improve the modularisation of the componenent of Gegelati.
+* Optional timers for environment and agent runtimes have been added.
 
 ### Changes 
 * Add unique IDs for TPGVertex, TPGEdges and Program.

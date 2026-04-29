@@ -43,6 +43,7 @@
 #include "instructions/multByConstant.h"
 #include "learn/learningAgent.h"
 #include "learn/stickGameWithOpponent.h"
+#include "selector/timingSelectionMetrics.h"
 
 #include "log/laBasicLogger.h"
 
@@ -91,10 +92,14 @@ class LABasicLoggerTest : public ::testing::Test
         set.add(*(new Instructions::AddPrimitiveType<double>()));
         set.add(*(new Instructions::MultByConstant<double>()));
 
-        auto res1 = new Learn::EvaluationResult(
-            std::make_shared<Selector::SelectionMetrics>(5, 2), 2);
-        auto res2 = new Learn::EvaluationResult(
-            std::make_shared<Selector::SelectionMetrics>(10, 4), 2);
+        auto tsm1 = std::make_shared<Selector::TimingSelectionMetrics>(
+            std::make_shared<Selector::SelectionMetrics>(5, 2));
+        tsm1->extractMetricsEpisodeWithTiming(nullptr, 2, le, 5, 3);
+        auto res1 = new Learn::EvaluationResult(tsm1, 2);
+        auto tsm2 = std::make_shared<Selector::TimingSelectionMetrics>(
+            std::make_shared<Selector::SelectionMetrics>(10, 4));
+        tsm2->extractMetricsEpisodeWithTiming(nullptr, 7, le, 8, 1);
+        auto res2 = new Learn::EvaluationResult(tsm2, 2);
         auto v1(new TPG::TPGAction(0));
         auto v2(new TPG::TPGAction(0));
         results.insert(std::pair<std::shared_ptr<Learn::EvaluationResult>,
@@ -172,8 +177,12 @@ TEST_F(LABasicLoggerTest, logHeader)
     l.doValidation = true;
     l.logHeader();
 
-    // we log a third header with validation column
+    // we log a third header with utility column
     l.useUtility = true;
+    l.logHeader();
+
+    // we log a fourth header with detailed timing column
+    l.detailedTiming = true;
     l.logHeader();
 
     // now we will check the header logged correctly
@@ -205,6 +214,12 @@ TEST_F(LABasicLoggerTest, logHeader)
     ASSERT_EQ("R_Min", result[38]);
     ASSERT_EQ("R_Avg", result[39]);
     ASSERT_EQ("R_Max", result[40]);
+    ASSERT_EQ("T_agent", result[64]);
+    ASSERT_EQ("T_le", result[65]);
+    ASSERT_EQ("nb_act", result[66]);
+    ASSERT_EQ("T_agent", result[73]);
+    ASSERT_EQ("T_le", result[74]);
+    ASSERT_EQ("nb_act", result[75]);
 }
 
 TEST_F(LABasicLoggerTest, logNewGeneration)
@@ -261,6 +276,10 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
 
     l.useUtility = true;
     l.logAfterEvaluate(results);
+
+    l.detailedTiming = true;
+    l.logAfterEvaluate(results);
+
     std::string s = strStr.str();
     // putting each element seperated by blanks in a tab
     std::vector<std::string> result;
@@ -280,6 +299,17 @@ TEST_F(LABasicLoggerTest, logAfterEvaluate)
     ASSERT_DOUBLE_EQ(5.00, std::stod(result[18]));
     ASSERT_DOUBLE_EQ(7.50, std::stod(result[19]));
     ASSERT_DOUBLE_EQ(10.00, std::stod(result[20]));
+
+    // Detailed timing
+    ASSERT_DOUBLE_EQ(2.00, std::stod(result[21]));
+    ASSERT_DOUBLE_EQ(3.00, std::stod(result[22]));
+    ASSERT_DOUBLE_EQ(4.00, std::stod(result[23]));
+    ASSERT_DOUBLE_EQ(5.00, std::stod(result[24]));
+    ASSERT_DOUBLE_EQ(7.50, std::stod(result[25]));
+    ASSERT_DOUBLE_EQ(10.00, std::stod(result[26]));
+    ASSERT_DOUBLE_EQ(13.00, std::stod(result[27]));
+    ASSERT_DOUBLE_EQ(4.00, std::stod(result[28]));
+    ASSERT_DOUBLE_EQ(9, std::stod(result[29]));
 }
 
 TEST_F(LABasicLoggerTest, logAfterValidate)
