@@ -244,8 +244,6 @@ bool Algorithm::LGP::LGPManager::hasIdenticalBehavior(const Agent& agent1, const
         }
     }
 
-    std::cout<<"was the same bro"<<std::endl;
-
     // Everything was identical, return true
     return true;
 }
