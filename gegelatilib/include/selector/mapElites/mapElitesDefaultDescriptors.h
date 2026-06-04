@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifndef MAP_ELITES_DEFAULT_DESCRIPTORS_H
 #define MAP_ELITES_DEFAULT_DESCRIPTORS_H
 

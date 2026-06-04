@@ -33,8 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
-
 #ifndef CLASSIFICATION_SELECTOR_H
 #define CLASSIFICATION_SELECTOR_H
 

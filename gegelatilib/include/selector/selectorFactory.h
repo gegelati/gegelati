@@ -33,8 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
-
 #ifndef SELECTOR_FACTORY_H
 #define SELECTOR_FACTORY_H
 

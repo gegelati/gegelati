@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #include "selector/mapElites/mapElitesArchive.h"
 
 uint64_t Selector::MapElites::MapElitesArchive::size() const

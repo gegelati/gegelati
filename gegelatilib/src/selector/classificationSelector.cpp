@@ -33,8 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
-
 #include "selector/classificationSelector.h"
 #include "selector/classificationSelectionMetrics.h"
 

@@ -33,8 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
-
 #include "selector/mapElites/mapElitesSelectionMetrics.h"
 
 const std::map<std::shared_ptr<const Selector::MapElites::MapElitesDescriptor>,

@@ -33,8 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
-
 #ifndef TOURNAMENT_SELECTOR_H
 #define TOURNAMENT_SELECTOR_H
 

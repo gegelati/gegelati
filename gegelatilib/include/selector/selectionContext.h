@@ -33,8 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
-
 #ifndef SELECTION_CONTEXT_H
 #define SELECTION_CONTEXT_H
 

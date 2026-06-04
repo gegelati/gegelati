@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #include "selector/mapElites/mapElitesSelector.h"
 #include "selector/mapElites/cvtMapElitesArchive.h"
 

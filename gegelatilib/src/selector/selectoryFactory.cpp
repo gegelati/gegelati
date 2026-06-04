@@ -33,8 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
-
 #include "selector/selectorFactory.h"
 
 std::shared_ptr<Selector::Selector> Selector::selectorFactory(

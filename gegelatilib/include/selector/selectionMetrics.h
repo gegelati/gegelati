@@ -34,8 +34,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
-
 #ifndef SELECTION_METRICS_H
 #define SELECTION_METRICS_H
 

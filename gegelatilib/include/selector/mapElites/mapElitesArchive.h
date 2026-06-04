@@ -33,8 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
-
 #ifndef MAP_ELITES_ARCHIVE_H
 #define MAP_ELITES_ARCHIVE_H
 

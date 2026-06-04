@@ -33,7 +33,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #ifndef GENERIC_COMPARATOR_H
 #define GENERIC_COMPARATOR_H
 

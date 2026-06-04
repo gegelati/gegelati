@@ -34,7 +34,6 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-
 #include "selector/selectionMetrics.h"
 
 double Selector::SelectionMetrics::getScore() const
