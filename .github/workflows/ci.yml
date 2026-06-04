@@ -200,9 +200,10 @@ jobs:
           folder: ./neutral_builds
           token: ${{ secrets.BOT_DEPLOY_TOKEN }}
           single-commit: true
-      - name: Trigger apps
+      - name: Trigger apps & tuto
         run: |
           curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/develop"}'
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-tutorial/actions/workflows/test-tuto.yml/dispatches -d '{"ref":"refs/heads/develop"}'
         shell: bash
   Deploy-Releases:
     runs-on: ubuntu-latest
@@ -230,9 +231,10 @@ jobs:
           token: ${{ secrets.BOT_DEPLOY_TOKEN }}
           files: ./neutral_builds/*.zip
           draft: true
-      - name: Trigger apps
+      - name: Trigger apps & tuto
         run: |
           curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/main"}'
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-tutorial/actions/workflows/test-tuto.yml/dispatches -d '{"ref":"refs/heads/master"}'
         shell: bash
   Analyze-Code_Style:
     runs-on: ubuntu-latest
