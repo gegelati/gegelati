@@ -22,11 +22,7 @@ GEGELATI _\[dʒedʒelati\]_ is a fresh open-source reinforcement learning framew
 | master  |  [![CI](https://github.com/gegelati/gegelati/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/gegelati/gegelati/actions/workflows/ci.yml)  | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=master&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=master)|
 | develop  | [![CI](https://github.com/gegelati/gegelati/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/gegelati/gegelati/actions/workflows/ci.yml) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=alert_status)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop) [![Coverage](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=gegelati_gegelati&metric=coverage)](https://sonarcloud.io/dashboard?id=gegelati_gegelati&branch=develop)|
 
-Environments currently covered by the continuous integration are:
-- `ubuntu-latest`: Linux (Ubuntu 20.04) with GCC 9.3 and Clang 11.
-- `windows-latest`: Windows Server 2019 (10.0.17763) with Microsoft Visual Studio 2019.
-- `macos-latest`: Mac OS X (10.15.7 ) with Clang 12.0.0
-
+Environments currently covered by the continuous integration are: `ubuntu-latest`, `windows-latest` `macos-latest`.
 For more (and updated) information on CI environment, please refer to [GitHub doc](https://github.com/actions/virtual-environments).
 
 ## :framed_picture: Application Gallery
@@ -34,7 +30,9 @@ You can try GEGELATI with our (growing) set of open-source applications.
 
 | [Atari Games](https://github.com/gegelati/ale-wrapper) | [Inverted Pendulum](https://github.com/gegelati/gegelati-apps) | [MNIST](https://github.com/gegelati/gegelati-apps) | [Tic Tac Toe](https://github.com/gegelati/gegelati-apps) |
 |:-:|:-:|:-:|:-:|
-|<img src="./doc/img/frostbite.gif" width="150" />|<img src="./doc/img/pendulum_g6_200x200.gif" width="150" />|<img src="./doc/img/mnist.png" width="150" />|<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Jogo_da_velha_-_tic_tac_toe.png/284px-Jogo_da_velha_-_tic_tac_toe.png" width="150"/>|
+|<img src="./doc/img/frostbite.gif" width="150" />|<img src="./doc/img/pendulum_g6_200x200.gif" width="150" />|<img src="./doc/img/mnist.png" width="150" />|<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Tic_tac_toe.svg/500px-Tic_tac_toe.svg.png" width="150"/>|
+| **[Robotic Arm](https://github.com/gegelati/armlearn-wrapper)** | 
+| <img src="https://www.roboticgizmos.com/wp-content/uploads/2015/09/14/widowx.jpg" width=150/> | 
 
 Checkout the [gegelati-apps repository](https://github.com/gegelati/gegelati-apps) for more. If you have developed your own open-source learning environment and think it deserves to be listed here, don't hesitate to send us an e-mail.
 

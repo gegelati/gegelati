@@ -1,7 +1,7 @@
 # GEGELATI Changelog
 
-## Release version x.y.z
-_yyyy.mm.dd_
+## Release version 2.1.0 - Gegelso flavor
+_2026.06.03_
 
 ### New features
 * Crossovers can now be applied to MAPLE agents, two types of crossover are possible.

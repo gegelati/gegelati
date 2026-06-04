@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2025) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2026) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2026)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
