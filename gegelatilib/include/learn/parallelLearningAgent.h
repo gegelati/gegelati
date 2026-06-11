@@ -1,9 +1,10 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -73,8 +74,10 @@ namespace Learn {
          * evaluateAllRootsInParallelCompileResults.
          *
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
-         * evaluation. \param[in] results Map to store the resulting score of
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * \param[in] results Map to store the resulting score of
          * evaluated roots.
          */
         virtual void evaluateAllRootsInParallel(
@@ -131,18 +134,23 @@ namespace Learn {
          * parallel evaluation of roots.
          *
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
-         * evaluation. \param[in,out] jobsToProcess Ordered list of jobs of
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
+         * evaluation.
+         * \param[in,out] jobsToProcess Ordered list of jobs of
          * TPGVertex to process, stored as a pair with an id filling the
          * archiveMap. The jobs are groups of roots that shall be agents in the
          * same simulation, there is only 1 root if there is no adversarial
          * (e.g. if the environmnent is not multiplayer).
          * \param[in] rootsToProcessMutex Mutex protecting the
-         * rootsToProcess \param[in] resultsPerRootMap Map to store the
-         * resulting score of evaluated roots. \param[in] resultsPerRootMapMutex
-         * Mutex protecting the results. \param[in,out] archiveMap Map
-         * storing the exhaustiveArchive to be merged. \param[in]
-         * archiveMapMutex Mutex protecting the archiveMap.
+         * rootsToProcess
+         * \param[in] resultsPerRootMap Map to store the
+         * resulting score of evaluated roots.
+         * \param[in] resultsPerRootMapMutex
+         * Mutex protecting the results.
+         * \param[in,out] archiveMap Map
+         * storing the exhaustiveArchive to be merged.
+         * \param[in] archiveMapMutex Mutex protecting the archiveMap.
          * \param[in] useMainEnvironment Boolean that is true if we use the
          * declared LearningEnvironment, otherwise the method will clone it.
          */
@@ -207,7 +215,8 @@ namespace Learn {
          * root vertex to its average score, in ascending order or score.
          *
          * \param[in] generationNumber the integer number of the current
-         * generation. \param[in] mode the LearningMode to use during the policy
+         * generation.
+         * \param[in] mode the LearningMode to use during the policy
          * evaluation.
          */
         std::multimap<std::shared_ptr<EvaluationResult>, const TPG::TPGVertex*>

@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2025) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2026) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2021)
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2026)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  * Quentin Vacher <qvacher@insa-rennes.fr> (2024 - 2025)
@@ -88,7 +89,33 @@ void File::ParametersParser::setAllParamsFrom(const Json::Value& root,
                     }
                 }
             }
-            continue;
+        }
+        else if (key == "selection") {
+            // we have a subtree of selection : parameters like
+            // selection.xxx.xxx
+            for (std::string const& key2 : root[key].getMemberNames()) {
+                if (key2 == "truncation") {
+                    // we're on a selection.truncation.xxx parameter
+                    for (std::string const& key3 :
+                         root[key][key2].getMemberNames()) {
+                        Json::Value value = root[key][key2][key3];
+                        setParameterFromString(params, key3, value);
+                    }
+                }
+                else if (key2 == "tournament") {
+                    // we're on a selection.tournament.xxx parameter
+                    for (std::string const& key3 :
+                         root[key][key2].getMemberNames()) {
+                        Json::Value value = root[key][key2][key3];
+                        setParameterFromString(params, key3, value);
+                    }
+                }
+                if (root[key][key2].size() == 0) {
+                    // we're on a selection.xxx paramter.
+                    Json::Value value = root[key][key2];
+                    setParameterFromString(params, key2, value);
+                }
+            }
         }
         if (root[key].size() == 0) {
             // we have a parameter without subtree (as a leaf)
@@ -102,6 +129,60 @@ void File::ParametersParser::setParameterFromString(
     Learn::LearningParameters& params, const std::string& param,
     Json::Value const& value)
 {
+
+    if (param == "activationFunction") {
+        params.activationFunction = value.asString();
+        return;
+    }
+    if (param == "archiveSize") {
+        params.archiveSize = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "archivingProbability") {
+        params.archivingProbability = value.asDouble();
+        return;
+    }
+    if (param == "doValidation") {
+        params.doValidation = value.asBool();
+        return;
+    }
+    if (param == "nbIterationsPerPolicyEvaluation") {
+        params.nbIterationsPerPolicyEvaluation = value.asUInt64();
+        return;
+    }
+    if (param == "nbIterationsPerPolicyValidation") {
+        params.nbIterationsPerPolicyValidation = value.asUInt64();
+        return;
+    }
+    if (param == "nbRegisters") {
+        params.nbRegisters = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "nbThreads") {
+        params.nbThreads = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "detailedTiming") {
+        params.detailedTiming = value.asBool();
+        return;
+    }
+    if (param == "nbGenerations") {
+        params.nbGenerations = value.asUInt64();
+        return;
+    }
+    if (param == "maxNbActionsPerEval") {
+        params.maxNbActionsPerEval = value.asUInt64();
+        return;
+    }
+    if (param == "maxNbEvaluationPerPolicy") {
+        params.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
+        return;
+    }
+    if (param == "stepValidation") {
+        params.stepValidation = (size_t)value.asUInt();
+        return;
+    }
+
     if (param == "nbRoots") {
         params.mutation.tpg.nbRoots = (size_t)value.asUInt();
         return;
@@ -114,12 +195,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;
     }
-
     if (param == "nbActionEdgeInit") {
         params.mutation.tpg.nbActionEdgeInit = (size_t)value.asUInt();
         return;
     }
-
     if (param == "useMultiActionProgram") {
         params.mutation.tpg.useMultiActionProgram = value.asBool();
         return;
@@ -128,7 +207,6 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.teamAccessAllActions = value.asBool();
         return;
     }
-
     if (param == "pChangeActionClass") {
         params.mutation.tpg.pChangeActionClass = (double)value.asDouble();
         return;
@@ -149,7 +227,6 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.pSwapActionProgram = value.asDouble();
         return;
     }
-
     if (param == "maxOutgoingEdges") {
         params.mutation.tpg.maxOutgoingEdges = (size_t)value.asUInt();
         return;
@@ -186,6 +263,14 @@ void File::ParametersParser::setParameterFromString(
     if (param == "probaContextOverActionProgram") {
         params.mutation.tpg.probaContextOverActionProgram =
             (double)value.asDouble();
+        return;
+    }
+    if (param == "pCrossAgents") {
+        params.mutation.tpg.pCrossAgents = (double)value.asDouble();
+        return;
+    }
+    if (param == "pCrossPrograms") {
+        params.mutation.tpg.pCrossPrograms = (double)value.asDouble();
         return;
     }
 
@@ -237,74 +322,28 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.prog.maxConstValue = value.asDouble();
         return;
     }
-    if (param == "archiveSize") {
-        params.archiveSize = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "archivingProbability") {
-        params.archivingProbability = value.asDouble();
-        return;
-    }
-    if (param == "nbIterationsPerPolicyEvaluation") {
-        params.nbIterationsPerPolicyEvaluation = value.asUInt64();
-        return;
-    }
-    if (param == "nbIterationsPerPolicyValidation") {
-        params.nbIterationsPerPolicyValidation = value.asUInt64();
-        return;
-    }
 
-    if (param == "stepValidation") {
-        params.stepValidation = (size_t)value.asUInt();
-        return;
-    }
-
-    if (param == "maxNbActionsPerEval") {
-        params.maxNbActionsPerEval = value.asUInt64();
+    if (param == "_selectionMode") {
+        params.selection._selectionMode = value.asString();
         return;
     }
     if (param == "ratioDeletedRoots") {
-        params.ratioDeletedRoots = value.asDouble();
+        params.selection.truncation.ratioDeletedRoots = value.asDouble();
         return;
     }
-    if (param == "useTournamentSelection") {
-        params.useTournamentSelection = value.asBool();
+    if (param == "ratioSavedRoots") {
+        params.selection.tournament.ratioSavedRoots = value.asDouble();
         return;
     }
     if (param == "sizeTournament") {
-        params.sizeTournament = value.asUInt64();
+        params.selection.tournament.sizeTournament = value.asUInt64();
+        return;
+    }
+    if (param == "areElitesReproductible") {
+        params.selection.tournament.areElitesReproductible = value.asBool();
         return;
     }
 
-    if (param == "nbGenerations") {
-        params.nbGenerations = value.asUInt64();
-        return;
-    }
-    if (param == "nbIterationsPerJob") {
-        params.nbIterationsPerJob = value.asUInt64();
-        return;
-    }
-    if (param == "maxNbEvaluationPerPolicy") {
-        params.maxNbEvaluationPerPolicy = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "nbRegisters") {
-        params.nbRegisters = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "nbThreads") {
-        params.nbThreads = (size_t)value.asUInt();
-        return;
-    }
-    if (param == "doValidation") {
-        params.doValidation = value.asBool();
-        return;
-    }
-
-    if (param == "activationFunction") {
-        params.activationFunction = value.asString();
-        return;
-    }
     // we didn't recognize the symbol
     std::cerr << "Ignoring unknown parameter " << param << std::endl;
 }
@@ -359,11 +398,6 @@ void File::ParametersParser::writeParametersToJson(
     root["nbGenerations"].setComment(
         Learn::LearningParameters::nbGenerationsComment, Json::commentBefore);
 
-    root["nbIterationsPerJob"] = params.nbIterationsPerJob;
-    root["nbIterationsPerJob"].setComment(
-        Learn::LearningParameters::nbIterationsPerJobComment,
-        Json::commentBefore);
-
     root["nbIterationsPerPolicyEvaluation"] =
         params.nbIterationsPerPolicyEvaluation;
     root["nbIterationsPerPolicyEvaluation"].setComment(
@@ -391,18 +425,9 @@ void File::ParametersParser::writeParametersToJson(
     root["nbThreads"].setComment(Learn::LearningParameters::nbThreadsComment,
                                  Json::commentBefore);
 
-    root["ratioDeletedRoots"] = params.ratioDeletedRoots;
-    root["ratioDeletedRoots"].setComment(
-        Learn::LearningParameters::ratioDeletedRootsComment,
-        Json::commentBefore);
-
-    root["useTournamentSelection"] = params.useTournamentSelection;
-    root["useTournamentSelection"].setComment(
-        Learn::LearningParameters::useTournamentSelectionComment,
-        Json::commentBefore);
-    root["sizeTournament"] = params.sizeTournament;
-    root["sizeTournament"].setComment(
-        Learn::LearningParameters::sizeTournamentComment, Json::commentBefore);
+    root["detailedTiming"] = params.detailedTiming;
+    root["detailedTiming"].setComment(
+        Learn::LearningParameters::detailedTimingComment, Json::commentBefore);
 
     // Mutation.tpg parameters
     root["mutation"]["tpg"]["forceProgramBehaviorChangeOnMutation"] =
@@ -513,6 +538,15 @@ void File::ParametersParser::writeParametersToJson(
         Mutator::TPGParameters::probaContextOverActionProgramComment,
         Json::commentBefore);
 
+    root["mutation"]["tpg"]["pCrossAgents"] = params.mutation.tpg.pCrossAgents;
+    root["mutation"]["tpg"]["pCrossAgents"].setComment(
+        Mutator::TPGParameters::pCrossAgentsComment, Json::commentBefore);
+
+    root["mutation"]["tpg"]["pCrossPrograms"] =
+        params.mutation.tpg.pCrossPrograms;
+    root["mutation"]["tpg"]["pCrossPrograms"].setComment(
+        Mutator::TPGParameters::pCrossProgramsComment, Json::commentBefore);
+
     // Mutation.program parameters
     root["mutation"]["prog"]["maxConstValue"] =
         params.mutation.prog.maxConstValue;
@@ -566,6 +600,31 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["prog"]["pSwap"] = params.mutation.prog.pSwap;
     root["mutation"]["prog"]["pSwap"].setComment(
         Mutator::ProgramParameters::pSwapComment, Json::commentBefore);
+
+    root["selection"]["_selectionMode"] = params.selection._selectionMode;
+    root["selection"]["_selectionMode"].setComment(
+        Selector::SelectionParameters::selectionModeComment,
+        Json::commentBefore);
+    root["selection"]["truncation"]["ratioDeletedRoots"] =
+        params.selection.truncation.ratioDeletedRoots;
+    root["selection"]["truncation"]["ratioDeletedRoots"].setComment(
+        Selector::TruncationParameters::ratioDeletedRootsComment,
+        Json::commentBefore);
+    root["selection"]["tournament"]["ratioSavedRoots"] =
+        params.selection.tournament.ratioSavedRoots;
+    root["selection"]["tournament"]["ratioSavedRoots"].setComment(
+        Selector::TournamentParameters::ratioSavedRootsComment,
+        Json::commentBefore);
+    root["selection"]["tournament"]["sizeTournament"] =
+        params.selection.tournament.sizeTournament;
+    root["selection"]["tournament"]["sizeTournament"].setComment(
+        Selector::TournamentParameters::sizeTournamentComment,
+        Json::commentBefore);
+    root["selection"]["tournament"]["areElitesReproductible"] =
+        params.selection.tournament.areElitesReproductible;
+    root["selection"]["tournament"]["areElitesReproductible"].setComment(
+        Selector::TournamentParameters::areElitesReproductibleComment,
+        Json::commentBefore);
 
     // Write to the output stream
     std::ofstream writtenFile(path);

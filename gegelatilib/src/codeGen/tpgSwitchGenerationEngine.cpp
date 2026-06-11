@@ -43,14 +43,13 @@
 void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
 {
     const Program::Program& p = edge.getProgram();
-    uint64_t progID;
 
     progGenerationEngine.setProgram(p);
 
     bool isDestinationAnAction = false;
 
-    if (findProgramID(p, progID)) {
-        progGenerationEngine.generateProgram(progID, false);
+    if (programIDIsNew(p.getProgramID())) {
+        progGenerationEngine.generateProgram(p.getProgramID(), false);
     }
 
     if (this->tpg.getEnvironment().getNbContinuousActions() > 0 &&
@@ -58,10 +57,10 @@ void CodeGen::TPGSwitchGenerationEngine::generateEdge(const TPG::TPGEdge& edge)
         !this->tpg.getEnvironment()
              .getParams()
              .mutation.tpg.useMultiActionProgram) {
-        fileMain << "P" << progID << "(actions)";
+        fileMain << "P" << p.getProgramID() << "(actions)";
     }
     else {
-        fileMain << "P" << progID << "()";
+        fileMain << "P" << p.getProgramID() << "()";
     }
 }
 
@@ -261,7 +260,7 @@ std::string CodeGen::TPGSwitchGenerationEngine::vertexName(
     else {
         vertexName << "A";
     }
-    vertexName << findVertexID(v);
+    vertexName << v.getVertexID();
     return vertexName.str();
 }
 

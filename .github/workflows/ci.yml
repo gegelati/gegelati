@@ -41,7 +41,7 @@ jobs:
       GENERATOR: 'Unix Makefile'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install
         run: |
           sudo apt install doxygen
@@ -76,7 +76,7 @@ jobs:
       GENERATOR: ${{ matrix.compiler == 'msvc' && 'Visual Studio 17 2022' || 'MinGW Makefiles'}}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install
         uses: nick-fields/retry@v3
         with:
@@ -147,7 +147,7 @@ jobs:
       GENERATOR: 'Unix Makefile'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install
         run: brew install doxygen
       - name: Setup ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.modular }} build cache # Only trigger on feature branch
@@ -177,7 +177,7 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Download msvc
@@ -193,16 +193,20 @@ jobs:
       - name: Prepare neutral build page
         run: python ./scripts/prepare_neutral_build_page.py
       - name: Upload pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          repository-name: gegelati/neutral-builds
-          branch: gh-pages
-          folder: ./neutral_builds
-          token: ${{ secrets.BOT_DEPLOY_TOKEN }}
-          single-commit: true
-      - name: Trigger apps
+        run: |
+          cd ./neutral_builds
+          git init
+          git config user.name "vaader-bot"
+          git config user.email "vaader-bot@users.noreply.github.com"
+          git checkout -b gh-pages
+          git add .
+          git commit -m "Update neutral builds"
+          git push --force "https://vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}@github.com/gegelati/neutral-builds.git" gh-pages
+        shell: bash
+      - name: Trigger apps & tuto
         run: |
           curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/develop"}'
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-tutorial/actions/workflows/test-tuto.yml/dispatches -d '{"ref":"refs/heads/develop"}'
         shell: bash
   Deploy-Releases:
     runs-on: ubuntu-latest
@@ -210,7 +214,7 @@ jobs:
     if: contains(github.ref, '/tags/v')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download msvc
         uses: actions/download-artifact@v4
         with:
@@ -230,16 +234,17 @@ jobs:
           token: ${{ secrets.BOT_DEPLOY_TOKEN }}
           files: ./neutral_builds/*.zip
           draft: true
-      - name: Trigger apps
+      - name: Trigger apps & tuto
         run: |
-          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/master"}'
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-apps/actions/workflows/ci.yml/dispatches -d '{"ref":"refs/heads/main"}'
+          curl -XPOST -u "vaader-bot:${{ secrets.BOT_DEPLOY_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/gegelati/gegelati-tutorial/actions/workflows/test-tuto.yml/dispatches -d '{"ref":"refs/heads/master"}'
         shell: bash
   Analyze-Code_Style:
     runs-on: ubuntu-latest
     needs: [Build-Ubuntu, Build-MacOS, Build-Windows]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Run script
         continue-on-error: ${{ !(endsWith(github.ref, 'develop') || endsWith(github.ref, 'master') || contains(github.ref, '/tags/v')  || endsWith(github.base_ref, 'develop') || endsWith(github.base_ref, 'master')) }}
         run: |
@@ -254,17 +259,17 @@ jobs:
       BUILD_WRAPPER_OUT_DIR: bw-output # Directory where build-wrapper output will be placed
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: 17
       - name: Cache SonarCloud packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar

@@ -1,7 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2025)
  * Quentin Vacher <qvacher@insa-rennes.fr> (2024 - 2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
@@ -50,6 +50,11 @@ Learn::LearningEnvironment* StickGameWithOpponent::clone() const
 void StickGameWithOpponent::doAction(double actionID)
 {
     LearningEnvironment::doAction(actionID);
+
+    // Throw exception for tests
+    if (this->throwExceptionForTests) {
+        throw std::runtime_error("Exception for tests");
+    }
 
     // if the game is not over
     if (!this->isTerminal()) {
@@ -126,4 +131,9 @@ bool StickGameWithOpponent::isTerminal() const
 {
     return (int)*((this->remainingSticks.getDataAt(typeid(int), 0))
                       .getSharedPointer<const int>()) == 0;
+}
+
+void StickGameWithOpponent::setThrowExceptionForTests(bool val)
+{
+    this->throwExceptionForTests = val;
 }

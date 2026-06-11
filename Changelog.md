@@ -1,5 +1,33 @@
 # GEGELATI Changelog
 
+## Release version 2.1.0 - Gegelso flavor
+_2026.06.03_
+
+### New features
+* Crossovers can now be applied to MAPLE agents, two types of crossover are possible.
+  * "Edge Crossover" which switch the edges of two MAPLE agents, but only edges with the same actionID.
+  * "Program Crossover", instead of switching the edges, new programs are created with a One-Point LGP crossover.
+* A selector module has been added, responsible of all the selection characterisitics. Selector module possess a main abstract class: The selector. Four different selection algorithm, inherritting from the selector class are implemented.
+  * TruncationSelector:
+    * Initial selector of the TPGs, removing the X% worst agents
+  * TournamentSelector:
+    * Implementation of the tournament selection algorithm.
+  * MapElitesSelector:
+    * Implementation of the MapElites algorithm, with an archive storing the best agents respectively to the different descriptors used for the archive. The archive can be either a classic table or a table generated through a Centroid Voronoï Tesselation computation (CVT). The implementation of the MapElitesSelector allows to create N archives for a single population. A default Descrirptor is implemented, for continuous environment, extracting the action values
+  * ClassificationSelector:
+    * Selector based on the former doSelection method in ClassificationLearningAgent. The classification selector allows to delete the ClassificationLearningAgent class, in order to improve the modularisation of the componenent of Gegelati.
+* Optional timers for environment and agent runtimes have been added.
+
+### Changes 
+* Add unique IDs for TPGVertex, TPGEdges and Program.
+  * The IDs for TPGVertex and TPGEdges are used to reduce the complexity of the decimateRoot method, using a set to store the TPGVertex and TPGEdges instead of a list.
+  * The Ids for TPGVertex and Program are used in the CodeGen and the dot file generator to name the objects. It will also be useful to follow the history of this objects.
+* Adversarial is currently deprecated.
+* When using a `ParallelLearningAgent`, secondary threads have a global try-catch to better report exceptions happening in these threads.
+
+### Bug fix
+* Fix build error with mingw for gcc v15.2.0, missing include of `cstdint` in `dataHandler.h`.
+
 ## Release version 2.0.0 - Fragogola flavor
 _2025.08.18_
 

@@ -47,6 +47,8 @@
 #ifndef GEGELATI_H
 #define GEGELATI_H
 
+#include <util/counterReset.h>
+#include <util/genericComparator.h>
 #include <util/timestamp.h>
 
 #include <data/array2DWrapper.h>
@@ -77,13 +79,12 @@
 #include <learn/learningParameters.h>
 #include <learn/parallelLearningAgent.h>
 
-#include <learn/adversarialEvaluationResult.h>
-#include <learn/adversarialJob.h>
-#include <learn/adversarialLearningAgent.h>
-#include <learn/adversarialLearningEnvironment.h>
+// Adversarial is deprecated
+// #include <learn/adversarialEvaluationResult.h>
+// #include <learn/adversarialJob.h>
+// #include <learn/adversarialLearningAgent.h>
+// #include <learn/adversarialLearningEnvironment.h>
 
-#include <learn/classificationEvaluationResult.h>
-#include <learn/classificationLearningAgent.h>
 #include <learn/classificationLearningEnvironment.h>
 
 #include <log/cycleDetectionLALogger.h>
@@ -91,6 +92,7 @@
 #include <log/laLogger.h>
 #include <log/laPolicyStatsLogger.h>
 #include <log/logger.h>
+#include <log/mapElitesArchiveLogger.h>
 
 #include <mutator/lineMutator.h>
 #include <mutator/mutationParameters.h>
@@ -102,6 +104,21 @@
 #include <program/program.h>
 #include <program/programEngine.h>
 #include <program/programExecutionEngine.h>
+
+#include <selector/classificationSelectionMetrics.h>
+#include <selector/classificationSelector.h>
+#include <selector/mapElites/cvtMapElitesArchive.h>
+#include <selector/mapElites/mapElitesArchive.h>
+#include <selector/mapElites/mapElitesDefaultDescriptors.h>
+#include <selector/mapElites/mapElitesDescriptor.h>
+#include <selector/mapElites/mapElitesSelectionMetrics.h>
+#include <selector/mapElites/mapElitesSelector.h>
+#include <selector/selectionContext.h>
+#include <selector/selectionMetrics.h>
+#include <selector/selector.h>
+#include <selector/selectorFactory.h>
+#include <selector/tournamentSelector.h>
+#include <selector/truncationSelector.h>
 
 #include <tpg/policyStats.h>
 #include <tpg/tpgAbstractEngine.h>

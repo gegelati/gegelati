@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2020 - 2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2020)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2020 - 2025)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -79,36 +80,7 @@ namespace Log {
         void logNewGeneration(uint64_t& generationNumber) override;
 
         /// Inherited from LALogger
-        void logHeader() override {
-            // nothing to log
-        };
-
-        /// Inherited from LALogger
-        void logAfterPopulateTPG() override {
-            // nothing to log
-        };
-
-        /// Inherited from LALogger
         void logAfterDecimate() override;
-
-        /// Inherited from LALogger
-        void logAfterValidate(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) override {
-            // nothing to log
-        };
-
-        /// Inherited from LALogger
-        void logEndOfTraining() override {
-            // nothing to log
-        };
-
-        /// Inherited from LALogger
-        void logAfterEvaluate(
-            std::multimap<std::shared_ptr<Learn::EvaluationResult>,
-                          const TPG::TPGVertex*>& results) override {
-            // nothing to log
-        };
     };
 }; // namespace Log
 

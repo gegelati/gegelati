@@ -53,6 +53,8 @@
 
 #include "tpg/tpgFactory.h"
 
+#include "util/counterReset.h"
+
 class TPGTest : public ::testing::Test
 {
   protected:
@@ -67,6 +69,7 @@ class TPGTest : public ::testing::Test
 
     virtual void SetUp()
     {
+        CounterReset::counterReset();
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
         vect.push_back(
@@ -203,7 +206,7 @@ TEST_F(TPGTest, TPGEdgeGetSetProgram)
 TEST_F(TPGTest, TPGEdgeGetSetSourceAndDestination)
 {
     TPG::TPGTeam team0, team1;
-    TPG::TPGAction action0(0), action1(1);
+    TPG::TPGAction action0(1), action1(0);
 
     TPG::TPGEdge edge(&team0, &action0, progPointer);
 
@@ -245,8 +248,8 @@ TEST_F(TPGTest, TPGFactory)
 {
     TPG::TPGFactory factory;
 
-    TPG::TPGAction* action;
-    TPG::TPGTeam* team;
+    std::unique_ptr<TPG::TPGAction> action;
+    std::unique_ptr<TPG::TPGTeam> team;
     std::unique_ptr<TPG::TPGEdge> edge;
     std::unique_ptr<TPG::TPGEdge> actionEdge;
     std::unique_ptr<TPG::TPGExecutionEngine> tee;
@@ -259,12 +262,13 @@ TEST_F(TPGTest, TPGFactory)
         << "TPGGraphELementFactory could not build a TPGTeam.";
     ASSERT_NE(team, nullptr) << "Created TPGTeam should not be null.";
 
-    ASSERT_NO_THROW(edge = factory.createTPGEdge(team, action, progPointer))
+    ASSERT_NO_THROW(
+        edge = factory.createTPGEdge(team.get(), action.get(), progPointer))
         << "TPGGraphELementFactory could not build a TPGEdge.";
     ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
 
-    ASSERT_NO_THROW(actionEdge =
-                        factory.createTPGActionEdge(action, progPointer, 0))
+    ASSERT_NO_THROW(
+        actionEdge = factory.createTPGActionEdge(action.get(), progPointer, 0))
         << "TPGGraphELementFactory could not build a TPGActionEdge.";
     ASSERT_NE(actionEdge.get(), nullptr)
         << "Created TPGActionEdge should not be null.";
@@ -273,9 +277,6 @@ TEST_F(TPGTest, TPGFactory)
         << "TPGGraphELementFactory could not build a TPGExecutionEngine.";
     ASSERT_NE(tee.get(), nullptr)
         << "Created TPGExecutionEngine should not be null.";
-
-    delete team;
-    delete action;
 }
 
 TEST_F(TPGTest, TPGGraphAddTPGVertex)
@@ -361,7 +362,7 @@ TEST_F(TPGTest, TPGGraphAddEdge)
                  std::runtime_error)
         << "Adding an edge from an Action should have failed.";
 
-    TPG::TPGVertex* vertex3 = tpg.getFactory().createTPGTeam();
+    std::unique_ptr<TPG::TPGTeam> vertex3 = tpg.getFactory().createTPGTeam();
     std::unique_ptr<TPG::TPGEdge> edge =
         tpg.getFactory().createTPGActionEdge(&vertex1, progPointer, 0);
     ASSERT_THROW(vertex3->addOutgoingEdge(edge.get()), std::runtime_error)
@@ -619,6 +620,15 @@ TEST_F(TPGTest, TPGGraphGetRootVertices)
         << "Number of roots of the TPG is incorrect.";
     ASSERT_EQ(tpg.getRootVertices().at(0), &vertex0)
         << "Vertex classified as root is incorrect.";
+
+    const TPG::TPGVertex& vertex2 = tpg.addNewTeam();
+    const TPG::TPGAction& vertex3 = tpg.addNewAction(1);
+    ASSERT_EQ(tpg.getRootVertices().size(), 3)
+        << "Number of roots of the TPG is incorrect.";
+    ASSERT_EQ(tpg.getRootTeams().size(), 2)
+        << "Number of roots teams of the TPG is incorrect.";
+    ASSERT_EQ(tpg.getRootActions().size(), 1)
+        << "Number of roots actions of the TPG is incorrect.";
 }
 
 TEST_F(TPGTest, TPGGraphCloneVertex)
@@ -1056,20 +1066,6 @@ TEST_F(TPGTest, TPGGraphUpdateAllAssessedActions)
                 action2.getAssessedActions().end());
 }
 
-TEST_F(TPGTest, TPGGraphSetToBeDeleted)
-{
-    TPG::TPGGraph tpg(*e);
-    const TPG::TPGTeam& team = tpg.addNewTeam();
-
-    // Should set toBeDeleted without throwing
-    ASSERT_NO_THROW(tpg.setToBeDeleted(&team));
-    ASSERT_TRUE(team.isToBeDeleted());
-
-    // Try with a vertex not in the graph (should throw)
-    TPG::TPGTeam fakeTeam;
-    ASSERT_THROW(tpg.setToBeDeleted(&fakeTeam), std::runtime_error);
-}
-
 TEST_F(TPGTest, TPGGraphOrderActionEdges)
 {
     TPG::TPGGraph tpg(*e);
@@ -1095,4 +1091,80 @@ TEST_F(TPGTest, TPGGraphOrderActionEdges)
     // Try with an action not in the graph (should throw)
     TPG::TPGAction fakeAction(42);
     ASSERT_THROW(tpg.orderActionEdges(&fakeAction), std::runtime_error);
+}
+
+TEST_F(TPGTest, TPGGraphVertexID)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGTeam& team0 = tpg.addNewTeam();
+    const TPG::TPGTeam& team1 = tpg.addNewTeam();
+    const TPG::TPGAction& action0 = tpg.addNewAction(0);
+
+    ASSERT_EQ(team0.getVertexID(), 0) << "ID of vertex is incorrect.";
+    ASSERT_EQ(team1.getVertexID(), 1) << "ID of vertex is incorrect.";
+    ASSERT_EQ(action0.getVertexID(), 2) << "ID of vertex is incorrect.";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 3)
+        << "ID counter is incorrect.";
+
+    CounterReset::counterReset();
+
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 0)
+        << "ID counter is incorrect.";
+
+    ASSERT_NO_THROW(tpg.setNewVertexID(action0, 5))
+        << "Setting a correct value for id should not throw";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 6)
+        << "ID counter is incorrect.";
+
+    ASSERT_THROW(tpg.setNewVertexID(action0, 0), std::runtime_error)
+        << "Setting an incorrect value for id should throw";
+
+    TPG::TPGTeam fakeTeam;
+    ASSERT_NO_THROW(fakeTeam.setVertexID(10))
+        << "Setting a correct value for id should not throw";
+    ASSERT_EQ(TPG::TPGVertex::getVertexIDCounter(), 11)
+        << "ID counter is incorrect.";
+
+    ASSERT_THROW(tpg.setNewVertexID(fakeTeam, 12), std::runtime_error)
+        << "Setting a new ID for an inexisting vertex should throw";
+}
+
+TEST_F(TPGTest, TPGGraphEdgeID)
+{
+    TPG::TPGGraph tpg(*e);
+    const TPG::TPGTeam& team0 = tpg.addNewTeam();
+    const TPG::TPGTeam& team1 = tpg.addNewTeam();
+    const TPG::TPGAction& action0 = tpg.addNewAction(0);
+
+    const TPG::TPGEdge& edge0 = tpg.addNewEdge(team0, team1, progPointer);
+    const TPG::TPGEdge& edge1 = tpg.addNewEdge(team1, action0, progPointer);
+    const TPG::TPGEdge& edge2 = tpg.addNewActionEdge(action0, progPointer, 0);
+
+    ASSERT_EQ(edge0.getEdgeID(), 0) << "ID of edge is incorrect.";
+    ASSERT_EQ(edge1.getEdgeID(), 1) << "ID of edge is incorrect.";
+    ASSERT_EQ(edge2.getEdgeID(), 2) << "ID of edge is incorrect.";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 3)
+        << "ID counter is incorrect.";
+
+    CounterReset::counterReset();
+
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 0)
+        << "ID counter is incorrect.";
+
+    ASSERT_NO_THROW(tpg.setNewEdgeID(edge1, 5))
+        << "Setting a correct value for id should not throw";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 6)
+        << "ID counter is incorrect.";
+
+    ASSERT_THROW(tpg.setNewEdgeID(edge2, 0), std::runtime_error)
+        << "Setting an incorrect value for id should throw";
+
+    TPG::TPGEdge fakeEdge(NULL, NULL, nullptr);
+    ASSERT_NO_THROW(fakeEdge.setEdgeID(10))
+        << "Setting a correct value for id should not throw";
+    ASSERT_EQ(TPG::TPGEdge::getEdgeIDCounter(), 11)
+        << "ID counter is incorrect.";
+
+    ASSERT_THROW(tpg.setNewEdgeID(fakeEdge, 12), std::runtime_error)
+        << "Setting a new ID for an inexisting vertex should throw";
 }

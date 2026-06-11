@@ -1,8 +1,7 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2020) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2020)
- * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,33 +33,11 @@
  * knowledge of the CeCILL-C license and that you accept its terms.
  */
 
-#include "learn/adversarialJob.h"
+#include "util/counterReset.h"
 
-void Learn::AdversarialJob::addRoot(const TPG::TPGVertex* root)
+void CounterReset::counterReset()
 {
-    roots.emplace_back(root);
-}
-
-size_t Learn::AdversarialJob::getSize() const
-{
-    return roots.size();
-}
-std::vector<const TPG::TPGVertex*> Learn::AdversarialJob::getRoots() const
-{
-    return roots;
-}
-
-const TPG::TPGVertex* Learn::AdversarialJob::getRoot() const
-{
-    return roots[0];
-}
-
-const TPG::TPGVertex* Learn::AdversarialJob::operator[](int i) const
-{
-    return roots[i];
-}
-
-const int16_t Learn::AdversarialJob::getPosOfStudiedRoot() const
-{
-    return posOfStudiedRoot;
+    TPG::TPGVertex::resetVertexIDCounter();
+    TPG::TPGEdge::resetEdgeIDCounter();
+    Program::Program::resetProgramIDCounter();
 }

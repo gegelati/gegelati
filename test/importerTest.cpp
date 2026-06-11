@@ -1,7 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2022)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2025)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2019 - 2020)
  * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  * Thomas Bourgoin <tbourgoi@insa-rennes.fr> (2021)
@@ -53,6 +53,8 @@
 #include "tpg/tpgTeam.h"
 #include "tpg/tpgVertex.h"
 
+#include "util/counterReset.h"
+
 #include "file/tpgGraphDotExporter.h"
 #include "file/tpgGraphDotImporter.h"
 
@@ -79,6 +81,8 @@ class ImporterTest : public ::testing::Test
 
     virtual void SetUp()
     {
+
+        CounterReset::counterReset();
         // Setup environment
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
@@ -356,7 +360,7 @@ TEST_F(ImporterTest, importGraph)
 
     // check that the imported program is the same as the one written in the
     // file.
-    Program::Program& p = tpg_copy->getEdges().front().get()->getProgram();
+    Program::Program& p = tpg_copy->getEdges().begin()->get()->getProgram();
     ASSERT_EQ(p.getNbLines(), 3)
         << "The number of lines of the copied program dismatch";
     // checking the first line
@@ -413,6 +417,45 @@ TEST_F(ImporterTest, importOldGraph)
 
     // Check if "deprecating" appears in the output
     ASSERT_NE(output.find("Deprecating"), std::string::npos);
+}
+
+TEST_F(ImporterTest, importTrainedGraph)
+{
+    File::TPGGraphDotImporter dotImporter(
+        TESTS_DAT_PATH "exported_trained_tpg_ref.dot", *e, *tpg_copy);
+
+    // assert that we can import a tpg graph from a file
+    ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
+
+    // Check the imported graph characteristics
+    ASSERT_EQ(tpg_copy->getNbVertices(), 5)
+        << "the wrong number of vertices have been created.";
+    ASSERT_EQ(tpg_copy->getEdges().size(), 5)
+        << "the wrong number of edges have been created.";
+    ASSERT_EQ(tpg_copy->getRootVertices().size(), 1)
+        << "the wrong number of root teams have been created.";
+}
+
+TEST_F(ImporterTest, importTrainedGraphContinuous)
+{
+    params.nbProgramConstant = 10;
+    e = new Environment(set, params, vect, 3);
+    tpg_copy = new TPG::TPGGraph(*e);
+
+    File::TPGGraphDotImporter dotImporter(
+        TESTS_DAT_PATH "exported_trained_tpg_continuous_ref.dot", *e,
+        *tpg_copy);
+
+    // assert that we can import a tpg graph from a file
+    ASSERT_NO_THROW(dotImporter.importGraph()) << "The Graph import failed.";
+
+    // Check the imported graph characteristics
+    ASSERT_EQ(tpg_copy->getNbVertices(), 5)
+        << "the wrong number of vertices have been created.";
+    ASSERT_EQ(tpg_copy->getEdges().size(), 27)
+        << "the wrong number of edges have been created.";
+    ASSERT_EQ(tpg_copy->getRootVertices().size(), 1)
+        << "the wrong number of root teams have been created.";
 }
 
 TEST_F(ImporterTest, readLineFromFile)

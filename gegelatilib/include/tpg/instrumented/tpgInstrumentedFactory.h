@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2022) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2022 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2022)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -56,10 +57,11 @@ namespace TPG {
             const Environment& env) const override;
 
         ///  Specialization of the method returning a TPGTeamInstrumented
-        virtual TPGTeam* createTPGTeam() const override;
+        virtual std::unique_ptr<TPGTeam> createTPGTeam() const override;
 
         ///  Specialization of the method returning a TPGActionInstrumented
-        virtual TPGAction* createTPGAction(const uint64_t id) const override;
+        virtual std::unique_ptr<TPGAction> createTPGAction(
+            const uint64_t id) const override;
 
         ///  Specialization of the method returning a TPGEdgeInstrumented
         virtual std::unique_ptr<TPGEdge> createTPGEdge(

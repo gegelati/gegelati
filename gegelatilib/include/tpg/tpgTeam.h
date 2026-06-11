@@ -49,6 +49,11 @@ namespace TPG {
     {
       public:
         /**
+         * \brief Main constructor of a TPGTeam.
+         */
+        TPGTeam() : TPGVertex(){};
+
+        /**
          * \brief Specialization throwing an std::runtime_exception if a
          * TPGActionEdge is added to a TPGTeam.
          *

@@ -1,0 +1,200 @@
+/**
+ * Copyright or © or Copr. IETR/INSA - Rennes (2025) :
+ *
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
+ *
+ * GEGELATI is an open-source reinforcement learning framework for training
+ * artificial intelligence based on Tangled Program Graphs (TPGs).
+ *
+ * This software is governed by the CeCILL-C license under French law and
+ * abiding by the rules of distribution of free software. You can use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-C
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty and the software's author, the holder of the
+ * economic rights, and the successive licensors have only limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading, using, modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean that it is complicated to manipulate, and that also
+ * therefore means that it is reserved for developers and experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and, more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-C license and that you accept its terms.
+ */
+
+#ifndef CVT_MAP_ELITES_ARCHIVE_H
+#define CVT_MAP_ELITES_ARCHIVE_H
+
+#include "mapElitesArchive.h"
+#include <gegelati.h>
+
+namespace Selector {
+    namespace MapElites {
+
+        /**
+         * \brief CVT Map Elites Archive class
+         *
+         * This class implements a CVT (Centroidal Voronoi Tessellation) based
+         * Map Elites Archive It inherits from the MapElitesArchive class.
+         */
+        class CvtMapElitesArchive : public MapElitesArchive
+        {
+          protected:
+            /// Number of centroids
+            size_t nbCentroids;
+
+            /// Number of iterations for initialization
+            size_t nbIterationInit;
+
+            /// Number of dots for initialization
+            size_t nbDotsInit;
+
+            /// CVT parameters
+            double a1;
+
+            /// CVT parameters
+            double b1;
+
+            /// CVT parameters
+            double a2;
+
+            /// CVT parameters
+            double b2;
+
+            /// Centroids of the CVT
+            std::vector<std::vector<double>> centroids;
+
+          public:
+            /**
+             * \brief Constructor of the CVT Map Elites Archive
+             *
+             * \param[in] rng Random number generator
+             * \param[in] nbCentroids Number of centroids
+             * \param[in] nbDescriptors Number of descriptors
+             * \param[in] minValue Minimum value for the descriptors
+             * \param[in] maxValue Maximum value for the descriptors
+             * \param[in] nbIterationInit Number of iterations for
+             * initialization
+             * \param[in] nbDotsInit Number of dots for initialization
+             * \param[in] a1 CVT parameter
+             * \param[in] b1 CVT parameter
+             * \param[in] a2 CVT parameter
+             * \param[in] b2 CVT parameter
+             */
+            CvtMapElitesArchive(Mutator::RNG& rng, size_t nbCentroids,
+                                size_t nbDescriptors, double minValue,
+                                double maxValue, size_t nbIterationInit,
+                                size_t nbDotsInit, double a1, double b1,
+                                double a2, double b2)
+                : MapElitesArchive(0, nbDescriptors, minValue, maxValue),
+                  nbCentroids{nbCentroids}, nbIterationInit{nbIterationInit},
+                  nbDotsInit{nbDotsInit}, a1{a1}, b1{b1}, a2{a2}, b2{b2}
+            {
+                centroids.resize(nbCentroids);
+                archive.resize(nbCentroids);
+                initialize_cvt(rng);
+            }
+
+            /**
+             * \brief Calculate squared Euclidean distance between two points
+             *
+             * \param[in] a First point
+             * \param[in] b Second point
+             */
+            double dist_squared(const std::vector<double>& a,
+                                const std::vector<double>& b);
+
+            /**
+             * \brief Vector addition
+             *
+             * \param[in] a First vector
+             * \param[in] b Second vector
+             */
+            std::vector<double> add(const std::vector<double>& a,
+                                    const std::vector<double>& b);
+
+            /**
+             * \brief Scalar multiplication
+             *
+             * \param[in] a Vector
+             * \param[in] s Scalar
+             */
+            std::vector<double> scalar_mult(const std::vector<double>& a,
+                                            double s);
+
+            /**
+             * \brief Compute the average of a set of points
+             *
+             * \param[in] points Set of points
+             */
+            std::vector<double> average(
+                const std::vector<std::vector<double>>& points);
+
+            /**
+             * \brief Generate a random point within the descriptor bounds
+             *
+             * \param[in] rng Random number generator
+             */
+            std::vector<double> random_point(Mutator::RNG& rng);
+
+            /**
+             * \brief Find the nearest centroid to a given point
+             *
+             * \param[in] point The point to find the nearest centroid for
+             * \param[in] centroids The list of centroids
+             */
+            size_t nearest(const std::vector<double>& point,
+                           const std::vector<std::vector<double>>& centroids);
+
+            /**
+             * \brief Initialize the CVT centroids using Lloyd's algorithm
+             *
+             * \param[in] rng Random number generator
+             */
+            void initialize_cvt(Mutator::RNG& rng);
+
+            /**
+             * \brief Get the index for given descriptors
+             *
+             * \param[in] descriptors The descriptors to get the index for
+             */
+            size_t getIndexForDescriptor(
+                const std::vector<double>& descriptors) const;
+
+            /**
+             * \brief Get the archive content at given descriptors
+             */
+            const std::pair<std::shared_ptr<Learn::EvaluationResult>,
+                            const TPG::TPGVertex*>&
+            getArchiveFromDescriptors(
+                const std::vector<double>& descriptors) const override;
+
+            /**
+             * \brief Set the archive content at given descriptors
+             */
+            void setArchiveFromDescriptors(
+                const TPG::TPGVertex* vertex,
+                std::shared_ptr<Learn::EvaluationResult> eval,
+                const std::vector<double>& descriptors) override;
+
+            /**
+             * \brief Return the centroids used by the CVT.
+             */
+            virtual const std::vector<std::vector<double>>& getCentroids()
+                const;
+        };
+    }; // namespace MapElites
+}; // namespace Selector
+
+#endif

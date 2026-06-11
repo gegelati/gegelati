@@ -1,7 +1,7 @@
 /**
  * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
- * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2025)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
@@ -36,6 +36,7 @@
  */
 
 #include <algorithm>
+#include <atomic>
 #include <new>
 #include <set>
 #include <stdexcept>
@@ -44,6 +45,11 @@
 #include "data/primitiveTypeArray.h"
 
 #include "program/program.h"
+
+// Declaration of static program ID Counter in local here because it creates
+// error in the .h file for MSVC compiler See:
+// https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
+std::atomic_uint64_t COUNT_PROGRAM_ID = 0;
 
 Program::Program::~Program()
 {
@@ -71,6 +77,15 @@ Program::Line& Program::Program::addNewLine(const uint64_t idx)
     this->lines.insert(lines.begin() + idx, {newLine, false});
 
     return *newLine;
+}
+
+void Program::Program::addNewLine(Line newLine)
+{
+    // this->addNewLine(this->getNbLines());
+
+    Line* newLinePtr = new Line(newLine);
+    // new line is not marked as an intron by default
+    this->lines.push_back({newLinePtr, false});
 }
 
 void Program::Program::clearIntrons()
@@ -312,4 +327,32 @@ bool Program::Program::hasIdenticalBehavior(const Program& other) const
 
     // Everything was identical, return true
     return true;
+}
+
+uint64_t Program::Program::getProgramID() const
+{
+    return this->programID;
+}
+
+void Program::Program::setProgramID(uint64_t newID)
+{
+    this->programID = newID;
+    if (newID >= COUNT_PROGRAM_ID) {
+        COUNT_PROGRAM_ID = newID + 1;
+    }
+}
+
+uint64_t Program::Program::incrementeCounter()
+{
+    return COUNT_PROGRAM_ID++;
+}
+
+uint64_t Program::Program::getProgramIDCounter()
+{
+    return COUNT_PROGRAM_ID;
+}
+
+void Program::Program::resetProgramIDCounter()
+{
+    COUNT_PROGRAM_ID = 0;
 }

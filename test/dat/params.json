@@ -3,9 +3,9 @@
   "archiveSize": 50,
   "archivingProbability": 0.5,
   "nbIterationsPerPolicyEvaluation": 50,
+  "nbIterationsPerPolicyValidation": 50,
+  "stepValidation": 4,
   "maxNbActionsPerEval": 5,
-  "ratioDeletedRoots": 0.85,
-  "nbIterationsPerJob": 31,
   "maxNbEvaluationPerPolicy": 100,
   "nbRegisters": 3,
   "nbThreads": 2,
@@ -15,8 +15,6 @@
   "mutation": {
     "tpg": {
       "nbRoots": 100,
-      "initNbActions": 3,
-      "initNbTeams": 5,
       "maxInitOutgoingEdges": 3,
       "maxOutgoingEdges": 60,
       "pEdgeDeletion": 0.8,
@@ -26,7 +24,18 @@
       "pEdgeDestinationChange": 0.3,
       "pEdgeDestinationIsAction": 0.6,
       "probaContextOverActionProgram": 0.5,
-      "useActionProgram": false
+      "useActionProgram": false,
+      "ratioTeamsOverActions": 0.2,
+      "pChangeActionClass": 0.3,
+      "pActionEdgeDeletion": 0.3,
+      "pActionEdgeAddition": 0.4,
+      "pMutateActionProgram": 0.5,
+      "pSwapActionProgram": 0.9,
+      "nbActionEdgeInit": 3,
+      "pCrossAgents": 0.2,
+      "pCrossPrograms": 0.5,
+      "useMultiActionProgram": true,
+      "teamAccessAllActions": false
     },
     "prog": {
       "maxProgramSize": 40,
@@ -38,6 +47,17 @@
       "pConstantMutation": 0.5,
       "minConstValue": -10,
       "maxConstValue": 10,
-    }
-  }
+    },
+  },
+  "selection":{
+    "tournament":{
+      "ratioSavedRoots": 0.15,
+      "sizeTournament": 3,
+      "areElitesReproductible": true,
+    },
+    "truncation":{
+      "ratioDeletedRoots": 0.85,
+    },
+    "_selectionMode": "tournament",
+  },
 }

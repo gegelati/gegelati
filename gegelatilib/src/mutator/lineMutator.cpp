@@ -52,9 +52,12 @@
  * \param[in,out] line the Program::Line to initialize.
  * \param[in] operandIdx the index of the operand of the Line to initialize.
  * \param[in] initOperandDataSource should the operand data source be
- * (re-)initialized? \param[in] initOperandLocation should the operand location
- * be (re)initialized? \param[in] forceChange should the value be mandatorily
- * new? \param[in] rng Random Number Generator used in the mutation process.
+ * (re-)initialized?
+ * \param[in] initOperandLocation should the operand location
+ * be (re)initialized?
+ * \param[in] forceChange should the value be mandatorily
+ * new?
+ * \param[in] rng Random Number Generator used in the mutation process.
  * \return true if the operand was successfully initialized, false if no valid
  * data source could be found for this Instruction and operandIdx couple.
  */

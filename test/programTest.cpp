@@ -46,6 +46,7 @@
 #include "instructions/set.h"
 #include "program/line.h"
 #include "program/program.h"
+#include "util/counterReset.h"
 
 class ProgramTest : public ::testing::Test
 {
@@ -59,6 +60,7 @@ class ProgramTest : public ::testing::Test
 
     virtual void SetUp()
     {
+        CounterReset::counterReset();
         vect.push_back(
             *(new Data::PrimitiveTypeArray<double>((unsigned int)size1)));
         vect.push_back(
@@ -704,4 +706,27 @@ TEST_F(ProgramTest, isActionProgram)
         << "Program should not be action program.";
     ASSERT_EQ(p3.isActionProgram(), false)
         << "Program should be action program.";
+}
+
+TEST_F(ProgramTest, ProgramID)
+{
+    Program::Program p0(*e, false);
+    Program::Program p1(*e, true);
+    Program::Program p2(*e, true);
+
+    ASSERT_EQ(p0.getProgramID(), 0) << "ID of program is incorrect.";
+    ASSERT_EQ(p1.getProgramID(), 1) << "ID of program is incorrect.";
+    ASSERT_EQ(p2.getProgramID(), 2) << "ID of program is incorrect.";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 3)
+        << "ID counter is incorrect.";
+
+    CounterReset::counterReset();
+
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 0)
+        << "ID counter is incorrect.";
+
+    ASSERT_NO_THROW(p1.setProgramID(5))
+        << "Setting a correct value for id should not throw";
+    ASSERT_EQ(Program::Program::getProgramIDCounter(), 6)
+        << "ID counter is incorrect.";
 }

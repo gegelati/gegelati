@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2026) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019 - 2021)
+ * Mickaël Dardaillon <mdardail@insa-rennes.fr> (2026)
  * Nicolas Sourbier <nsourbie@insa-rennes.fr> (2020)
  * Pierre-Yves Le Rolland-Raumer <plerolla@insa-rennes.fr> (2020)
  * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
@@ -40,6 +41,7 @@
 #define LEARNING_PARAMETERS_H
 
 #include "mutator/mutationParameters.h"
+#include "selector/selectionParameters.h"
 #include <thread>
 
 namespace Learn {
@@ -55,6 +57,10 @@ namespace Learn {
         /// MutationParameters for controlling stochastic aspects of the
         /// learning process.
         Mutator::MutationParameters mutation;
+
+        /// SelectionParameters for controlling selection aspects of the
+        /// learning process.
+        Selector::SelectionParameters selection;
 
         /// JSon comment
         inline static const std::string archiveSizeComment =
@@ -81,11 +87,6 @@ namespace Learn {
          * In LearningAgent and ParallelLearningAgent it is just the number of
          * times the evaluations are repeated (that can produce a more
          * representative result in non-deterministic environments).
-         * In adversarial mode, that represents the minimum number of evaluation
-         * of each root. Each root will be evaluated in several jobs, each job
-         * can be evaluated several times, but the total number of times a root
-         * appears in an evaluation will be nbIterationsPerPolicyEvaluation or
-         * a bit higher.
          */
         uint64_t nbIterationsPerPolicyEvaluation = 5;
 
@@ -110,29 +111,6 @@ namespace Learn {
         uint64_t maxNbActionsPerEval = 1000;
 
         /// JSon comment
-        inline static const std::string ratioDeletedRootsComment =
-            "// Percentage of deleted (and regenerated) root TPGVertex at each "
-            "generation.\n"
-            "// \"ratioDeletedRoots\" : 0.5, // Default value";
-        /// Percentage of deleted (and regenerated) root TPGVertex at each
-        /// generation.
-        double ratioDeletedRoots = 0.5;
-
-        /// JSon comment
-        inline static const std::string useTournamentSelectionComment =
-            "// If tournament of simple selection is used.\n"
-            "// \"useTournamentSelection\" : false, // Default value";
-        /// If tournament of simple selection is used.
-        bool useTournamentSelection = false;
-
-        /// JSon comment
-        inline static const std::string sizeTournamentComment =
-            "// Size of tournament if tournament selection is used.\n"
-            "// \"sizeTournament\" : 5, // Default value";
-        /// Size of tournament if tournament selection is used.
-        uint64_t sizeTournament = 5;
-
-        /// JSon comment
         inline static const std::string nbGenerationsComment =
             "// Number of generations of the training.\n"
             "// \"nbGenerations\" : 500, // Default value";
@@ -150,34 +128,6 @@ namespace Learn {
         /// Maximum number of times a given policy (i.e. a root TPGVertex) is
         /// evaluated.
         size_t maxNbEvaluationPerPolicy = 1000;
-
-        /// JSon comment
-        inline static const std::string nbIterationsPerJobComment =
-            "// [Only used in AdversarialLearningAgent.]\n"
-            "// Number of times each job is evaluated in the learning "
-            "process.\n"
-            "// Each root may belong to several jobs, hence this parameter "
-            "should be lower\n"
-            "// than the nbIterationsPerPolicyEvaluation parameter.\n"
-            "// \"nbIterationsPerJob\" : 1, // Default value";
-        /**
-         * \brief Number of evaluations done for each job.
-         *
-         * In some situations where the environments is not determinist,
-         * i.e. if the agent does exactly the same thing at the same moment
-         * but he can still make different scores in different runs, then it
-         * can be a good thing to evaluate several times a single job. It will
-         * statistically be more representative of the job.
-         *
-         * Note than in LearningAgent and ParallelLearningAgent it is currently
-         * unused as the number of eval per job will simply be
-         * nbIterationsPerPolicyEvaluation.
-         *
-         * The default value is to 1, that means a given job will be evaluated
-         * a single time and there will be as many jobs as
-         * nbIterationsPerPolicyEvaluation.
-         */
-        size_t nbIterationsPerJob = 1;
 
         /// JSon comment
         inline static const std::string nbRegistersComment =
@@ -212,6 +162,13 @@ namespace Learn {
          *   - `n > 1`: Set the number of threads explicitly.
          */
         size_t nbThreads = std::thread::hardware_concurrency();
+
+        /// JSon comment
+        inline static const std::string detailedTimingComment =
+            "// Boolean used to activate detailed timing during learning.\n"
+            "// \"detailedTiming\" : false, // Default value";
+        /// @brief enable detailed timing during learning
+        bool detailedTiming = false;
 
         /// JSon comment
         inline static const std::string activationFunctionComment =

@@ -1,7 +1,8 @@
 /**
- * Copyright or © or Copr. IETR/INSA - Rennes (2019) :
+ * Copyright or © or Copr. IETR/INSA - Rennes (2019 - 2025) :
  *
  * Karol Desnos <kdesnos@insa-rennes.fr> (2019)
+ * Quentin Vacher <qvacher@insa-rennes.fr> (2025)
  *
  * GEGELATI is an open-source reinforcement learning framework for training
  * artificial intelligence based on Tangled Program Graphs (TPGs).
@@ -34,6 +35,36 @@
  */
 
 #include "tpg/tpgEdge.h"
+
+// Declaration of static edge ID Counter in local here because it creates error
+// in the .h file for MSVC compiler See:
+// https://discourse.cmake.org/t/exporting-a-static-data-member-of-a-class-for-dll-using-msvc/5892
+uint64_t COUNT_EDGE_ID = 0;
+
+uint64_t TPG::TPGEdge::incrementeCounter()
+{
+    return COUNT_EDGE_ID++;
+}
+
+uint64_t TPG::TPGEdge::getEdgeIDCounter()
+{
+    return COUNT_EDGE_ID;
+}
+
+void TPG::TPGEdge::resetEdgeIDCounter()
+{
+    COUNT_EDGE_ID = 0;
+}
+
+void TPG::TPGEdge::setEdgeID(uint64_t newID)
+{
+    this->edgeID = newID;
+
+    // Update the ID counter if needed
+    if (newID >= COUNT_EDGE_ID) {
+        COUNT_EDGE_ID = newID + 1;
+    }
+}
 
 Program::Program& TPG::TPGEdge::getProgram() const
 {
@@ -69,4 +100,14 @@ const TPG::TPGVertex* TPG::TPGEdge::getDestination() const
 void TPG::TPGEdge::setDestination(TPGVertex* newDestination)
 {
     this->destination = newDestination;
+}
+
+uint64_t TPG::TPGEdge::getEdgeID() const
+{
+    return edgeID;
+}
+
+bool TPG::operator<(const TPG::TPGEdge& a, const TPG::TPGEdge& b)
+{
+    return a.getEdgeID() < b.getEdgeID();
 }
