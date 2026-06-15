@@ -73,7 +73,7 @@ jobs:
       matrix: ${{fromJson(needs.Configure-Workflow.outputs.matrix-windows)}}
     name: Windows-${{matrix.compiler}}-${{ matrix.modular }}
     env:
-      GENERATOR: ${{ matrix.compiler == 'msvc' && 'Visual Studio 17 2022' || 'MinGW Makefiles'}}
+      GENERATOR: ${{ matrix.compiler == 'msvc' && 'Visual Studio 18 2026' || 'MinGW Makefiles'}}
     steps:
       - name: Checkout
         uses: actions/checkout@v6

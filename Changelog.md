@@ -1,5 +1,15 @@
 # GEGELATI Changelog
 
+## Release version x.y.z
+_yyyy.mm.dd_
+
+### New features
+
+### Changes
+
+### Bug fixes
+* CI: Fix windows build, now with Visual Studio 18 2026.
+
 ## Release version 2.1.0 - Gegelso flavor
 _2026.06.03_
 
