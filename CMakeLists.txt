@@ -206,3 +206,8 @@ if(NOT SKIP_DOXYGEN_BUILD)
     # Add targets related to doxygen documention generation
     add_subdirectory(doc)
 endif()
+
+if(SANDBOX_PROJECT)
+    # Add the sandbox project, which is a small example of how to use the library.
+    add_subdirectory(sandbox)
+endif()
