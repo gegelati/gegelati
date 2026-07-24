@@ -139,6 +139,12 @@
 #include <tpg/instrumented/tpgTeamInstrumented.h>
 #include <tpg/instrumented/tpgVertexInstrumentation.h>
 
+#include <tpg/keyed/tpgEdgeKeyed.h>
+#include <tpg/keyed/tpgExecutionEngineKeyed.h>
+#include <tpg/keyed/tpgGraphKeyed.h>
+#include <tpg/keyed/tpgKeyedFactory.h>
+#include <tpg/keyed/tpgTeamKeyed.h>
+
 #ifdef CODE_GENERATION
 #include <codeGen/programGenerationEngine.h>
 #include <codeGen/tpgGenerationEngine.h>
