@@ -191,6 +191,10 @@ void File::ParametersParser::setParameterFromString(
         params.mutation.tpg.ratioTeamsOverActions = (double)value.asDouble();
         return;
     }
+    if (param == "ratioLeavesToGrow") {
+        params.mutation.tpg.ratioLeavesToGrow = (double)value.asDouble();
+        return;
+    }
     if (param == "maxInitOutgoingEdges") {
         params.mutation.tpg.maxInitOutgoingEdges = (size_t)value.asUInt();
         return;
@@ -499,6 +503,11 @@ void File::ParametersParser::writeParametersToJson(
     root["mutation"]["tpg"]["ratioTeamsOverActions"].setComment(
         Mutator::TPGParameters::ratioTeamsOverActionsComment,
         Json::commentBefore);
+
+    root["mutation"]["tpg"]["ratioLeavesToGrow"] =
+        params.mutation.tpg.ratioLeavesToGrow;
+    root["mutation"]["tpg"]["ratioLeavesToGrow"].setComment(
+        Mutator::TPGParameters::ratioLeavesToGrowComment, Json::commentBefore);
 
     root["mutation"]["tpg"]["pEdgeAddition"] =
         params.mutation.tpg.pEdgeAddition;
