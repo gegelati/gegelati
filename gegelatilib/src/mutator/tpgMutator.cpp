@@ -56,6 +56,7 @@
 #include "mutator/programMutator.h"
 #include "mutator/rng.h"
 #include "mutator/tpgMutator.h"
+#include "tpg/keyed/tpgGraphKeyed.h"
 
 const TPG::TPGAction* Mutator::TPGMutator::initActionVertex(
     TPG::TPGGraph& graph, const Mutator::MutationParameters& params,
@@ -973,6 +974,15 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // Create the new teams root
     uint64_t nbExpectedRoots =
         graph.getNbRootVertices() + context->nbTeamsToCreate;
+
+    // If the TPG is a TPGGraphKeyed, also a ratio of agent will grow from
+    // their leaves, and not from the roots.
+    if (typeid(graph) == typeid(TPG::TPGGraphKeyed)) {
+        uint64_t nbRootsToGrow =
+            std::ceil(nbExpectedRoots * params.tpg.ratioLeavesToGrow);
+        nbExpectedRoots -= nbRootsToGrow;
+    }
+
     while (graph.getNbRootVertices() < nbExpectedRoots) {
 
         // Select a random existing root
