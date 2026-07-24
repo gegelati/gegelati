@@ -70,7 +70,6 @@ namespace TPG {
          */
         const std::set<uint64_t> getCollectedKeys() const;
 
-      private:
         /**
          * \brief Clear the set of keys collected during the execution of the
          * TPGGraph.

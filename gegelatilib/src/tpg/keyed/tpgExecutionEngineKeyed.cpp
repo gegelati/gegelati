@@ -17,7 +17,10 @@ const TPG::TPGEdge& TPG::TPGExecutionEngineKeyed::evaluateTeam(
     }
 
     // Add the team's key to collectedKeys
-    collectedKeys.insert(keyedTeam->getKey());
+    uint64_t key = keyedTeam->getKey();
+    if (key != 1) {
+        collectedKeys.insert(key);
+    }
 
     // Copy outgoing edge list
     std::list<TPG::TPGEdge*> outgoingEdges;
@@ -41,12 +44,19 @@ const TPG::TPGEdge& TPG::TPGExecutionEngineKeyed::evaluateTeam(
 
         uint64_t edgeLock = keyedEdge->getLock();
         for (const auto& key : collectedKeys) {
-            if (edgeLock % key == 0) {
+            if (edgeLock == 1 || edgeLock % key == 0) {
                 return false; // Keep this edge
             }
         }
         return true; // Exclude this edge
     });
+
+    // Throw an error if no edges are left after filtering
+    if (outgoingEdges.empty()) {
+        throw std::runtime_error(
+            "No outgoing edges available for evaluation after filtering "
+            "by collected keys.");
+    }
 
     // Evaluate all TPGEdge
     // First
