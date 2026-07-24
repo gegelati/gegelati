@@ -2,12 +2,13 @@
 #include "tpg/keyed/tpgEdgeKeyed.h"
 #include "tpg/keyed/tpgTeamKeyed.h"
 #include <tpg/keyed/tpgExecutionEngineKeyed.h>
+#include <tpg/keyed/tpgGraphKeyed.h>
 
 std::shared_ptr<TPG::TPGGraph> TPG::TPGKeyedFactory::createTPGGraph(
     const Environment& env) const
 {
-    return std::make_shared<TPG::TPGGraph>(env,
-                                           std::make_unique<TPGKeyedFactory>());
+    return std::make_shared<TPG::TPGGraphKeyed>(
+        env, std::make_unique<TPGKeyedFactory>());
 }
 
 std::unique_ptr<TPG::TPGTeam> TPG::TPGKeyedFactory::createTPGTeam() const

@@ -11,7 +11,7 @@ namespace TPG {
     class TPGKeyedFactory : public TPGFactory
     {
       public:
-        /// Specialization of the method returing the TPGGraph with a
+        /// Specialization of the method returing the TPGGraphKeyed with a
         /// TPGKeyedFactory as an attribute.
         virtual std::shared_ptr<TPGGraph> createTPGGraph(
             const Environment& env) const override;
