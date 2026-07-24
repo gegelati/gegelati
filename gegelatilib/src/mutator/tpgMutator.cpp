@@ -979,8 +979,36 @@ void Mutator::TPGMutator::populateTPG(TPG::TPGGraph& graph,
     // their leaves, and not from the roots.
     if (typeid(graph) == typeid(TPG::TPGGraphKeyed)) {
         uint64_t nbRootsToGrow =
-            std::ceil(nbExpectedRoots * params.tpg.ratioLeavesToGrow);
+            std::ceil(context->nbTeamsToCreate * params.tpg.ratioLeavesToGrow);
         nbExpectedRoots -= nbRootsToGrow;
+
+        for (uint32_t i = 0; i < nbRootsToGrow; i++) {
+            // Select a random existing root
+
+            // Clone it (the vertex and all its outgoing edges)
+
+            // Add a new key for this root
+            // - ? Delete a key from the root /!\ this may create teams
+            //   without action..)
+            // - ? Replace a key to "mutate" program behavior in the graph for
+            //   edge with this replaced key, without affecting original root
+
+            // Find all teams in the tree of the cloned root.
+            // (Service to be added to TPGGraphKeyed)
+
+            // Select a random team in the tree of the cloned root.
+
+            // Add new outgoing edge(s) to the selected team, with the new key
+            // as lock value. Link the new edge to
+            // - ? An existing/clone_mutated/new program
+            // - ? An existing/cloned team or an action /!\ cycle creation to
+            // avoid? Root should stay roots?
+
+            // Maintain a map of key to edge. If a key disappears, all
+            // associated edges should be removed. ?
+            // Keys may be duplicated when cloning a team. Will be hard to keep
+            // track without some kind of shared ptr.
+        }
     }
 
     while (graph.getNbRootVertices() < nbExpectedRoots) {
