@@ -9,12 +9,13 @@
 
 #include "tpg/keyed/tpgEdgeKeyed.h"
 #include "tpg/keyed/tpgExecutionEngineKeyed.h"
+#include "tpg/keyed/tpgGraphKeyed.h"
 #include "tpg/keyed/tpgKeyedFactory.h"
 #include "tpg/keyed/tpgTeamKeyed.h"
 #include "tpg/tpgGraph.h"
 #include "util/counterReset.h"
 
-class TPGKeyedTest : public ::testing::Test
+class TPGGraphKeyedTest : public ::testing::Test
 {
   protected:
     const size_t size1{24};
@@ -54,7 +55,7 @@ class TPGKeyedTest : public ::testing::Test
     }
 };
 
-TEST_F(TPGKeyedTest, TPGTeamKeyedConstructorsDestructors)
+TEST_F(TPGGraphKeyedTest, TPGTeamKeyedConstructorsDestructors)
 {
     TPG::TPGVertex* team;
 
@@ -65,7 +66,7 @@ TEST_F(TPGKeyedTest, TPGTeamKeyedConstructorsDestructors)
         << "Destruction of TPGTeamKeyed should not fail.";
 }
 
-TEST_F(TPGKeyedTest, TPGTeamKeyedSettersAndGetters)
+TEST_F(TPGGraphKeyedTest, TPGTeamKeyedSettersAndGetters)
 {
     TPG::TPGTeamKeyed team;
 
@@ -88,7 +89,7 @@ TEST_F(TPGKeyedTest, TPGTeamKeyedSettersAndGetters)
         << "Key of TPGTeamKeyed should be 3 after setKey(3).";
 }
 
-TEST_F(TPGKeyedTest, TPGEdgeKeyedConstructorsDestructors)
+TEST_F(TPGGraphKeyedTest, TPGEdgeKeyedConstructorsDestructors)
 {
     TPG::TPGTeam team;
     TPG::TPGAction action(1);
@@ -101,7 +102,7 @@ TEST_F(TPGKeyedTest, TPGEdgeKeyedConstructorsDestructors)
         << "Destruction of TPGEdgeKeyed should not fail.";
 }
 
-TEST_F(TPGKeyedTest, TPGEdgeKeyedSettersAndGetters)
+TEST_F(TPGGraphKeyedTest, TPGEdgeKeyedSettersAndGetters)
 {
     TPG::TPGTeam team;
     TPG::TPGAction action(1);
@@ -119,8 +120,7 @@ TEST_F(TPGKeyedTest, TPGEdgeKeyedSettersAndGetters)
         << "Lock of TPGEdgeKeyed should be 6 after setLock(6).";
 }
 
-
-TEST_F(TPGKeyedTest, TPGKeyedFactoryConstructorsDestructors)
+TEST_F(TPGGraphKeyedTest, TPGKeyedFactoryConstructorsDestructors)
 {
     TPG::TPGKeyedFactory* factory;
 
@@ -131,7 +131,7 @@ TEST_F(TPGKeyedTest, TPGKeyedFactoryConstructorsDestructors)
         << "Destruction of TPGKeyedFactory should not fail.";
 }
 
-TEST_F(TPGKeyedTest, TPGKeyedFactoryCreateTeam)
+TEST_F(TPGGraphKeyedTest, TPGKeyedFactoryCreateTeam)
 {
     TPG::TPGKeyedFactory factory;
 
@@ -144,7 +144,7 @@ TEST_F(TPGKeyedTest, TPGKeyedFactoryCreateTeam)
         << "Team built by the TPGKeyedFactory has an incorrect type.";
 }
 
-TEST_F(TPGKeyedTest, TPGKeyedFactoryCreateEdge)
+TEST_F(TPGGraphKeyedTest, TPGKeyedFactoryCreateEdge)
 {
     TPG::TPGKeyedFactory factory;
 
@@ -155,15 +155,15 @@ TEST_F(TPGKeyedTest, TPGKeyedFactoryCreateEdge)
     ASSERT_NO_THROW(team = factory.createTPGTeam());
     ASSERT_NO_THROW(action = factory.createTPGAction(0));
 
-    ASSERT_NO_THROW(edge = factory.createTPGEdge(team.get(), action.get(),
-                                                   progPointer))
+    ASSERT_NO_THROW(
+        edge = factory.createTPGEdge(team.get(), action.get(), progPointer))
         << "TPGKeyedFactory could not build a TPGEdge.";
     ASSERT_NE(edge.get(), nullptr) << "Created TPGEdge should not be null.";
     ASSERT_EQ(typeid(*edge), typeid(TPG::TPGEdgeKeyed))
         << "Edge built by the TPGKeyedFactory has an incorrect type.";
 }
 
-TEST_F(TPGKeyedTest, TPGKeyedFactoryCreateExecutionEngine)
+TEST_F(TPGGraphKeyedTest, TPGKeyedFactoryCreateExecutionEngine)
 {
     TPG::TPGKeyedFactory factory;
 
@@ -178,7 +178,7 @@ TEST_F(TPGKeyedTest, TPGKeyedFactoryCreateExecutionEngine)
            "type.";
 }
 
-TEST_F(TPGKeyedTest, TPGKeyedFactoryCreateTPGGraph)
+TEST_F(TPGGraphKeyedTest, TPGKeyedFactoryCreateTPGGraph)
 {
     TPG::TPGKeyedFactory factory;
 
@@ -189,7 +189,7 @@ TEST_F(TPGKeyedTest, TPGKeyedFactoryCreateTPGGraph)
     ASSERT_NE(tpg, nullptr) << "Created TPGGraph should not be null.";
 }
 
-TEST_F(TPGKeyedTest, TPGGraphAddTPGKeyedVertexAndEdge)
+TEST_F(TPGGraphKeyedTest, TPGGraphAddTPGKeyedVertexAndEdge)
 {
     TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGKeyedFactory>());
     const TPG::TPGTeam* t;
@@ -209,7 +209,7 @@ TEST_F(TPGKeyedTest, TPGGraphAddTPGKeyedVertexAndEdge)
         << "Edge built by the TPGKeyedFactory has an incorrect type.";
 }
 
-TEST_F(TPGKeyedTest, TPGKeyedFactoryIntegration)
+TEST_F(TPGGraphKeyedTest, TPGKeyedFactoryIntegration)
 {
     // Create a graph with keyed factory
     TPG::TPGGraph tpg(*e, std::make_unique<TPG::TPGKeyedFactory>());
@@ -227,10 +227,10 @@ TEST_F(TPGKeyedTest, TPGKeyedFactoryIntegration)
     ASSERT_NE(a, nullptr);
 
     // Add edges
-    const TPG::TPGEdgeKeyed* e1 =
-        dynamic_cast<const TPG::TPGEdgeKeyed*>(&tpg.addNewEdge(*t1, *t2, progPointer));
-    const TPG::TPGEdgeKeyed* e2 =
-        dynamic_cast<const TPG::TPGEdgeKeyed*>(&tpg.addNewEdge(*t2, *a, progPointer));
+    const TPG::TPGEdgeKeyed* e1 = dynamic_cast<const TPG::TPGEdgeKeyed*>(
+        &tpg.addNewEdge(*t1, *t2, progPointer));
+    const TPG::TPGEdgeKeyed* e2 = dynamic_cast<const TPG::TPGEdgeKeyed*>(
+        &tpg.addNewEdge(*t2, *a, progPointer));
 
     ASSERT_NE(e1, nullptr);
     ASSERT_NE(e2, nullptr);
@@ -246,6 +246,78 @@ TEST_F(TPGKeyedTest, TPGKeyedFactoryIntegration)
     // Verify graph structure
     ASSERT_EQ(tpg.getNbVertices(), 3)
         << "Graph should have 3 vertices (2 teams + 1 action).";
-    ASSERT_EQ(tpg.getEdges().size(), 2)
-        << "Graph should have 2 edges.";
+    ASSERT_EQ(tpg.getEdges().size(), 2) << "Graph should have 2 edges.";
+}
+
+TEST_F(TPGGraphKeyedTest, TPGGraphKeyedConstructor)
+{
+    TPG::TPGGraphKeyed* graphKeyed;
+
+    ASSERT_NO_THROW(graphKeyed = new TPG::TPGGraphKeyed(*e))
+        << "Construction of TPGGraphKeyed with default factory should not "
+           "fail.";
+
+    // Check used factory type
+    ASSERT_EQ(typeid(graphKeyed->getFactory()), typeid(TPG::TPGKeyedFactory))
+        << "TPGGraph Keyed should use TPGKeyedFactory by default.";
+
+    ASSERT_NO_THROW(delete graphKeyed)
+        << "Destruction of TPGGraphKeyed should not fail.";
+}
+
+TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNewTeamKey)
+{
+    TPG::TPGGraphKeyed graphKeyed(*e);
+
+    // Add a team
+    const TPG::TPGTeamKeyed* team =
+        dynamic_cast<const TPG::TPGTeamKeyed*>(&graphKeyed.addNewTeam());
+
+    ASSERT_NE(team, nullptr) << "Added team should be TPGTeamKeyed.";
+    ASSERT_EQ(team->getKey(), 1) << "Default key should be 1.";
+
+    // Test setting a new key
+    ASSERT_NO_THROW(graphKeyed.setNewTeamKey(*team, 2))
+        << "Setting team key to 2 should not fail.";
+
+    ASSERT_EQ(team->getKey(), 2)
+        << "Team key should be 2 after setNewTeamKey(team, 2).";
+
+    // Test setting key on a non-existent team (should throw)
+    TPG::TPGTeamKeyed fakeTeam;
+    ASSERT_THROW(graphKeyed.setNewTeamKey(fakeTeam, 3), std::runtime_error)
+        << "Setting key on a non-existent team should throw an exception.";
+}
+
+TEST_F(TPGGraphKeyedTest, TPGGraphKeyedSetNewEdgeLock)
+{
+    TPG::TPGGraphKeyed graphKeyed(*e);
+
+    // Add vertices
+    const TPG::TPGTeamKeyed* team =
+        dynamic_cast<const TPG::TPGTeamKeyed*>(&graphKeyed.addNewTeam());
+    const TPG::TPGAction* action =
+        dynamic_cast<const TPG::TPGAction*>(&graphKeyed.addNewAction(0));
+
+    ASSERT_NE(team, nullptr);
+    ASSERT_NE(action, nullptr);
+
+    // Add an edge
+    const TPG::TPGEdgeKeyed* edge = dynamic_cast<const TPG::TPGEdgeKeyed*>(
+        &graphKeyed.addNewEdge(*team, *action, progPointer));
+
+    ASSERT_NE(edge, nullptr) << "Added edge should be TPGEdgeKeyed.";
+    ASSERT_EQ(edge->getLock(), 1) << "Default lock should be 1.";
+
+    // Test setting a new lock
+    ASSERT_NO_THROW(graphKeyed.setNewEdgeLock(*edge, 3))
+        << "Setting edge lock to 3 should not fail.";
+
+    ASSERT_EQ(edge->getLock(), 3)
+        << "Edge lock should be 3 after setNewEdgeLock(edge, 3).";
+
+    // Test setting lock on a non-existent edge (should throw)
+    TPG::TPGEdgeKeyed fakeEdge(team, action, progPointer);
+    ASSERT_THROW(graphKeyed.setNewEdgeLock(fakeEdge, 4), std::runtime_error)
+        << "Setting lock on a non-existent edge should throw an exception.";
 }

@@ -1,0 +1,56 @@
+#ifndef TPG_GRAPH_KEYED_H
+#define TPG_GRAPH_KEYED_H
+
+#include "tpg/keyed/tpgEdgeKeyed.h"
+#include "tpg/keyed/tpgKeyedFactory.h"
+#include "tpg/keyed/tpgTeamKeyed.h"
+#include "tpg/tpgGraph.h"
+
+namespace TPG {
+
+    /**
+     * \brief Specialization of TPGGraph for managing keyed TPG elements.
+     *
+     * TPGGraphKeyed extends TPGGraph to provide convenient methods for
+     * creating TPGTeamKeyed and TPGEdgeKeyed with specified key and lock
+     * values respectively. This class overloads addNewTeam() and
+     * addNewEdge() methods to allow direct specification of these parameters
+     * during element creation.
+     */
+    class TPGGraphKeyed : public TPGGraph
+    {
+      public:
+        /**
+         * \brief Constructor for TPGGraphKeyed.
+         *
+         * \param[in] e the Environment for the TPGGraph.
+         * \param[in] f the TPGFactory used to create the graph elements.
+         *              Should be a TPGKeyedFactory or derivative.
+         */
+        TPGGraphKeyed(const Environment& e,
+                      std::unique_ptr<TPGFactory> f =
+                          std::make_unique<TPG::TPGKeyedFactory>())
+            : TPGGraph(e, std::move(f))
+        {
+        }
+
+        /**
+         * \brief Set a new key to a TPGTeamKeyed.
+         *
+         * \param[in] team the TPGTeamKeyed to change key.
+         * \param[in] newKey the new key to set.
+         */
+        void setNewTeamKey(const TPG::TPGTeamKeyed& team, uint64_t newKey);
+
+        /**
+         * \brief Set a new lock to a TPGEdgeKeyed.
+         *
+         * \param[in] edge the TPGEdgeKeyed to change lock.
+         * \param[in] newLock the new lock to set.
+         */
+        void setNewEdgeLock(const TPG::TPGEdgeKeyed& edge, uint64_t newLock);
+    };
+
+} // namespace TPG
+
+#endif // TPG_GRAPH_KEYED_H
