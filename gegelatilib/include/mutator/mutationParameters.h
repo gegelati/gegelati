@@ -238,6 +238,18 @@ namespace Mutator {
         /// false, it can only change destination toward a root action.
         bool teamAccessAllActions = true;
 
+        /// JSon comment
+        inline static const std::string ratioLeavesToGrowComment =
+            "// When using a TPGGraphKeyed, some newly created roots won't be "
+            "mutated,\n"
+            "// but instead, the graph will stemming from this root will grow "
+            "on the leaves side.\n"
+            "// \"ratioLeavesToGrow\" : 0.0, // Default value";
+        /// When using a TPGGraphKeyed, some newly created roots won't be
+        /// mutated, but instead, the graph will stemming from this root will
+        /// grow on the leaves side.
+        double ratioLeavesToGrow = 0.0;
+
     } TPGParameters;
 
     /**
