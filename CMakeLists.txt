@@ -85,6 +85,8 @@ if(MSVC)
 	# installation directories.
     set(CMAKE_DEBUG_POSTFIX "d")
 	add_definitions( -D_CRT_SECURE_NO_WARNINGS )
+	# Enable parallel compilation
+	add_compile_options(/MP)
 	# Install in dedicated subfolder
 	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/${LIB_SOURCE_DIRECTORY}-${PROJECT_VERSION})
 elseif(MINGW)
